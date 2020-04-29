@@ -670,19 +670,19 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 
 #define H5PB__UPDATE_STATS_FOR_ACCESS(pb_ptr, type, size) \
 {                                                         \
-    int i;                                                \
+    int ii;                                               \
                                                           \
     HDassert(pb_ptr);                                     \
     HDassert((pb_ptr)->magic == H5PB__H5PB_T_MAGIC);      \
                                                           \
     if ( H5FD_MEM_DRAW == (type) ) {                      \
-        i = H5PB__STATS_RD;                               \
+        ii = H5PB__STATS_RD;                              \
     } else if ( (size) > (pb_ptr)->page_size ) {          \
-        i = H5PB__STATS_MPMDE;                            \
+        ii = H5PB__STATS_MPMDE;                           \
     } else {                                              \
-        i = H5PB__STATS_MD;                               \
+        ii = H5PB__STATS_MD;                              \
     }                                                     \
-    ((pb_ptr)->accesses[i])++;                            \
+    ((pb_ptr)->accesses[ii])++;                           \
 } /* H5PB__UPDATE_STATS_FOR_ACCESS */
 
 
@@ -812,6 +812,20 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
     ((pb_ptr)->loads[i])++;                                   \
 } /* H5PB__UPDATE_STATS_FOR_LOAD */
 
+#define H5PB__UPDATE_STATS_FOR_READ_SPLIT(pb_ptr)             \
+{                                                             \
+    HDassert(pb_ptr);                                         \
+    HDassert((pb_ptr)->magic == H5PB__H5PB_T_MAGIC);          \
+    (pb_ptr->md_read_splits)++;                               \
+} /* H5PB__UPDATE_STATS_FOR_READ_SPLIT */
+
+#define H5PB__UPDATE_STATS_FOR_WRITE_SPLIT(pb_ptr)            \
+{                                                             \
+    HDassert(pb_ptr);                                         \
+    HDassert((pb_ptr)->magic == H5PB__H5PB_T_MAGIC);          \
+    (pb_ptr->md_write_splits)++;                              \
+} /* H5PB__UPDATE_STATS_FOR_READ_SPLIT */
+
 #else /* H5PB__COLLECT_PAGE_BUFFER_STATS */
 
 #define H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, hit, is_metadata, is_mpmde) 
@@ -834,6 +848,8 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 #define H5PB__UPDATE_STATS_FOR_CLEAR(pb_ptr, entry_ptr)
 #define H5PB__UPDATE_STATS_FOR_INSERTION(pb_ptr, entry_ptr)
 #define H5PB__UPDATE_STATS_FOR_LOAD(pb_ptr, entry_ptr)
+#define H5PB__UPDATE_STATS_FOR_READ_SPLIT(pb_ptr)
+#define H5PB__UPDATE_STATS_FOR_WRITE_SPLIT(pb_ptr)
 
 #endif /* H5PB__COLLECT_PAGE_BUFFER_STATS */
 

@@ -1018,6 +1018,19 @@ H5C__collective_write(H5F_t *f)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set MPI-I/O properties")
 
         /* Write data */
+        /*
+         * At present the page buffer is disabled in the parallel case, and 
+         * thus VFD SWMR can't be used either.  Thus, for now, there is 
+         * no point in setting the page buffer hints.
+         *
+         * More to the point, since we are actually writing a derived type
+         * containing multiple metadata cache entries, we couldn't set it 
+         * to a meaningful value.
+         *
+         * When we enable the page buffer in parallel, we will have to 
+         * revisit this.
+         *                                 JRM -- 3/30/20
+         */
         if(H5F_block_write(f, H5FD_MEM_DEFAULT, (haddr_t)0, (size_t)1, base_buf) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to write entries collectively")
 

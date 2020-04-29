@@ -249,6 +249,9 @@ typedef struct H5PB_entry_t H5PB_entry_t;
  *
  * FIELDS SUPPORTING VFD SWMR:
  *
+ * If the file is opened in VFD SWMR mode (i.e. vfd_swmr == TRUE), all 
+ * raw data I/O must be passed through to the HDF5 file
+ *
  * If the file is opened as a VFD SWMR writer (i.e. vfd_swmr_writer == TRUE),
  * the page buffer must retain the data necessary to update the metadata 
  * file at the end of each tick, and also delay writes as necessary so as 
@@ -285,8 +288,12 @@ typedef struct H5PB_entry_t H5PB_entry_t;
  * The remainder of this sections contains discussions of the fields and 
  * data structures used to support the above operations.
  *
+ * vfd_swmr:    Boolean flag that is set to TRUE IFF the file is opened
+ *              in VFD SWMR mode -- either reader or writer.  This field
+ *              is used to exclude raw data from the page buffer.
+ *
  * vfd_swmr_writer: Boolean flag that is set to TRUE iff the file is 
- *              the file is opened in VFD SWMR mode.  The remaining 
+ *              is opened in VFD SWMR writer mode.  The remaining 
  *              VFD SWMR fields are defined iff vfd_swmr_writer is TRUE.
  *
  * mpmde_count: int64_t containing the number of multi-page metadata 
@@ -528,6 +535,16 @@ typedef struct H5PB_entry_t H5PB_entry_t;
  * total_dwl_ins_depth: int64_t containing the total insertion depth 
  *              required to maintain the odering invarient on the 
  *              delayed write list.
+ *
+ * md_read_splits:  int64_t containing the number of metadata reads that 
+ *              are split into two or three sub-reads to manage the 
+ *              case in which a group of metadata cache clients 
+ *              sub-allocate entries from a single file space allocationn.
+ *
+ * md_write_splits:  int64_t containing the number of metadata writes that 
+ *              are split into two or three sub-writes to manage the 
+ *              case in which a group of metadata cache clients 
+ *              sub-allocate entries from a single file space allocationn.
  *    
  ******************************************************************************/
 
@@ -578,6 +595,7 @@ typedef struct H5PB_t {
 
     /* Fields for VFD SWMR operations: */
 
+    hbool_t vfd_swmr;
     hbool_t vfd_swmr_writer;
     int64_t mpmde_count;
     uint64_t cur_tick;
@@ -645,6 +663,8 @@ typedef struct H5PB_t {
     int64_t max_dwl_len;
     int64_t max_dwl_size;
     int64_t total_dwl_ins_depth;
+    int64_t md_read_splits;
+    int64_t md_write_splits;
 
 } H5PB_t;
 
@@ -670,6 +690,7 @@ H5_DLL herr_t H5PB_add_new_page(H5F_shared_t *, H5FD_mem_t, haddr_t);
 H5_DLL herr_t H5PB_update_entry(H5PB_t *, haddr_t, size_t, const void *);
 
 H5_DLL herr_t H5PB_remove_entry(H5F_shared_t *, haddr_t);
+
 H5_DLL herr_t H5PB_remove_entries(H5F_shared_t *, haddr_t, hsize_t);
 
 H5_DLL herr_t H5PB_read(H5F_shared_t *, H5FD_mem_t, haddr_t,

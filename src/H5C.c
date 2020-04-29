@@ -477,6 +477,10 @@ H5C_create(size_t		      max_cache_size,
     cache_ptr->rdfsm_settled		= FALSE;
     cache_ptr->mdfsm_settled		= FALSE;
 
+    /* fields supporting page buffer hints */
+    cache_ptr->curr_io_type             = NULL;
+    cache_ptr->curr_read_speculative    = FALSE;
+
     if(H5C_reset_cache_hit_rate_stats(cache_ptr) < 0)
         /* this should be impossible... */
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "H5C_reset_cache_hit_rate_stats failed")
@@ -487,6 +491,7 @@ H5C_create(size_t		      max_cache_size,
 
 #ifndef NDEBUG
     cache_ptr->get_entry_ptr_from_addr_counter  = 0;
+    cache_ptr->curr_io_type                     = NULL;
 #endif /* NDEBUG */
 
     /* Set return value */
@@ -974,10 +979,13 @@ done:
  *
  * Programmer:  John Mainzer -- 12/16/18
  *		
- * Changes:     None.
+ * Changes:     Added macro calls to maintain the page buffer hints.
+ *              
+ *                                           JRM -- 3/20/20
  *
  *-------------------------------------------------------------------------
  */
+
 herr_t
 H5C_evict_or_refresh_all_entries_in_page(H5F_t * f, uint64_t page, 
     uint32_t length, uint64_t tick)
@@ -994,7 +1002,7 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t * f, uint64_t page,
     H5C_cache_entry_t * entry_ptr;
     H5C_cache_entry_t * follow_ptr = NULL;
     herr_t ret_value = SUCCEED;      /* Return value */
-    bool found = false;
+    hbool_t found = FALSE;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1036,7 +1044,7 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t * f, uint64_t page,
                      page * cache_ptr->page_size + length <=
                      entry_ptr->addr + entry_ptr->size);
 
-            found = true;
+            found = TRUE;
 
             /* since end of tick occurs only on API call entry in 
              * the VFD SWMR reader case, the entry must not be protected.
@@ -1134,12 +1142,17 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t * f, uint64_t page,
                              H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
                     
+                    H5C__SET_PB_READ_HINTS(cache_ptr, entry_ptr->type, TRUE)
+
                     if ( H5F_block_read(f, entry_ptr->type->mem_type, 
                                         entry_ptr->addr, 
-                                        image_len, image_ptr) < 0 )
+                                        image_len, image_ptr) < 0 ) {
 
+                        H5C__RESET_PB_READ_HINTS(cache_ptr)
                         HGOTO_ERROR(H5E_CACHE, H5E_READERROR, FAIL, \
                                     "Can't read image (1)")
+                    }
+                    H5C__RESET_PB_READ_HINTS(cache_ptr)
 
                     /* 3) Call the refresh callback.  If it doesn't 
                      *    request a different image size, goto 6)
@@ -1171,12 +1184,18 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t * f, uint64_t page,
                                  H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
                     
+                        H5C__SET_PB_READ_HINTS(cache_ptr, entry_ptr->type, TRUE)
+
                         if ( H5F_block_read(f, entry_ptr->type->mem_type, 
                                             entry_ptr->addr, 
-                                            image_len, image_ptr) < 0 )
+                                            image_len, image_ptr) < 0 ) {
+
+                            H5C__RESET_PB_READ_HINTS(cache_ptr)
 
                             HGOTO_ERROR(H5E_CACHE, H5E_READERROR, FAIL, \
                                         "Can't read image (2)")
+                        }
+                        H5C__RESET_PB_READ_HINTS(cache_ptr)
 
                         /* 5) Call the refresh callback again.  Requesting
                          *    a different buffer size again is an error.
@@ -6494,6 +6513,14 @@ done:
  *
  * Programmer:  John Mainzer, 5/5/04
  *
+ * Changes:     Please maintain the changes list, and do not delete it
+ *              unless you have merged it into the header comment 
+ *              proper.
+ *
+ *              Added macro calls to maintain page buffer hints.
+ *              
+ *                                           JRM -- 3/20/20
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6679,8 +6706,18 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
                 else
                     mem_type = entry_ptr->type->mem_type;
 
-                if(H5F_block_write(f, mem_type, entry_ptr->addr, entry_ptr->size, entry_ptr->image_ptr) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't write image to file")
+                H5C__SET_PB_WRITE_HINTS(cache_ptr, entry_ptr->type)
+
+                if ( H5F_block_write(f, mem_type, entry_ptr->addr, 
+                                     entry_ptr->size, 
+                                     entry_ptr->image_ptr) < 0 ) {
+
+                    H5C__RESET_PB_WRITE_HINTS(cache_ptr)
+
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
+                                "Can't write image to file")
+                }
+                H5C__RESET_PB_WRITE_HINTS(cache_ptr)
 #ifdef H5_HAVE_PARALLEL
             }
 #endif /* H5_HAVE_PARALLEL */
@@ -7082,6 +7119,10 @@ done:
  *              small.  
  *                                           JRM -- 3/25/20
  *
+ *              Added macro calls to maintain the page buffer read hints.
+ *              
+ *                                           JRM -- 3/20/20
+ *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -7233,10 +7274,18 @@ H5C_load_entry(H5F_t *              f,
             if ( !coll_access || 0 == mpi_rank ) {
 #endif /* H5_HAVE_PARALLEL */
 
-                if ( H5F_block_read(f, type->mem_type, addr, len, image) < 0 )
+                H5C__SET_PB_READ_HINTS(f->shared->cache, type, TRUE)
+
+                if ( H5F_block_read(f, type->mem_type, addr, len, image) < 0 ) {
+
+                    H5C__RESET_PB_READ_HINTS(f->shared->cache)
 
                     HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL, \
                                 "Can't read image*")
+                }
+
+                H5C__RESET_PB_READ_HINTS(f->shared->cache)
+
 #ifdef H5_HAVE_PARALLEL
             } /* end if */
             /* if the collective metadata read optimization is turned on,
@@ -7345,11 +7394,19 @@ H5C_load_entry(H5F_t *              f,
                              * 
                              *                          JRM -- 3/24/20
                              */
+
+                            H5C__SET_PB_READ_HINTS(f->shared->cache, type, \
+                                                   FALSE);
+
                             if ( H5F_block_read(f, type->mem_type, addr, 
-                                                actual_len, image) < 0)
+                                                actual_len, image) < 0 ) {
+
+                                H5C__RESET_PB_READ_HINTS(f->shared->cache)
 
                                 HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, \
                                             "can't read image")
+                            }
+                            H5C__RESET_PB_READ_HINTS(f->shared->cache)
 #endif /* JRM */
 #ifdef H5_HAVE_PARALLEL
                         }

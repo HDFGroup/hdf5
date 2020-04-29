@@ -3480,6 +3480,102 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 } /* H5C__MOVE_TO_TOP_IN_COLL_LIST */
 #endif /* H5_HAVE_PARALLEL */
 
+
+/***************************************/
+/* page buffer hint maintenance macros */
+/***************************************/
+
+/*-------------------------------------------------------------------------
+ *
+ * Macro:	H5C__SET/RESET_PB_READ_HINTS
+ *
+ * Purpose:     Set or reset the fields needed to provide hints to the 
+ *              page buffer so that it can disambuate between speculative
+ *              reads that cross page boundaries and read of metadata 
+ *              entries that cross page boundaries without starting on 
+ *              a page boundary.  This latter behaviour shouldn't happen,
+ *              and the hints allow the page buffer to detect this 
+ *              behaviour by un-expected cache client.  
+ *
+ *              See the discussion of the PB hint fields in the header
+ *              comment for H5C_t for further details.
+ *
+ * Return:      N/A
+ *
+ * Programmer:  John Mainzer, 3/30/20
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#define H5C__SET_PB_READ_HINTS(cache_ptr, type, may_be_speculative)            \
+{                                                                              \
+    HDassert(cache_ptr);                                                       \
+    HDassert((cache_ptr)->magic == H5C__H5C_T_MAGIC);                          \
+    HDassert((cache_ptr)->curr_io_type == NULL);                               \
+    HDassert(type);                                                            \
+    (cache_ptr)->curr_io_type = (type);                                        \
+    (cache_ptr)->curr_read_speculative = (may_be_speculative) &&               \
+       ((cache_ptr)->curr_io_type->flags & H5AC__CLASS_SPECULATIVE_LOAD_FLAG); \
+                                                                               \
+} /* H5C__SET_PB_READ_HINTS() */
+
+#define H5C__RESET_PB_READ_HINTS(cache_ptr)             \
+{                                                      \
+    HDassert(cache_ptr);                               \
+    HDassert((cache_ptr)->magic == H5C__H5C_T_MAGIC);  \
+    HDassert((cache_ptr)->curr_io_type);               \
+    (cache_ptr)->curr_io_type = NULL;                  \
+    (cache_ptr)->curr_read_speculative = FALSE;        \
+                                                       \
+} /* H5C__SET_PB_READ_HINTS() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Macro:	H5C__SET/RESET_PB_WRITE_HINTS
+ *
+ * Purpose:     Set or reset the fields needed to provide hints to the 
+ *              page buffer so that it can detect un-expected writes of
+ *              metadata entries that cross page boundaries and do not 
+ *              start on page boundaries.
+ *
+ *              See the discussion of the PB hint fields in the header
+ *              comment for H5C_t for further details.
+ *
+ * Return:      N/A
+ *
+ * Programmer:  John Mainzer, 3/30/20
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#define H5C__SET_PB_WRITE_HINTS(cache_ptr, type)       \
+{                                                      \
+    HDassert(cache_ptr);                               \
+    HDassert((cache_ptr)->magic == H5C__H5C_T_MAGIC);  \
+    HDassert((cache_ptr)->curr_io_type == NULL);       \
+    HDassert(type);                                    \
+    (cache_ptr)->curr_io_type = (type);                \
+                                                       \
+} /* H5C__SET_PB_WRITE_HINTS() */
+
+#define H5C__RESET_PB_WRITE_HINTS(cache_ptr)           \
+{                                                      \
+    HDassert(cache_ptr);                               \
+    HDassert((cache_ptr)->magic == H5C__H5C_T_MAGIC);  \
+    HDassert((cache_ptr)->curr_io_type);               \
+    (cache_ptr)->curr_io_type = NULL;                  \
+                                                       \
+} /* H5C__SET_PB_WRITE_HINTS() */
+
 
 /****************************/
 /* Package Private Typedefs */
@@ -4413,6 +4509,47 @@ typedef struct H5C_tag_info_t {
  *		managers that are involved in allocating space for free
  *		space managers.
  *
+ * Page Buffer Related Fields:
+ *
+ * Due to the irregular behavior of some of the cache clients, the 
+ * page buffer occasionally need hints to manage metadta I/O requests
+ * from the metadata cache -- particularly in the context of VFD SWMR.
+ * The following fields exist to support this.
+ *
+ *
+ * curr_io_type:  Pointer to the instance of H5C_class_t associated with
+ *              the current I/O operation.  This pointer should be set
+ *              just before any I/O operation by the metadata cache, and 
+ *              re-set to NULL immediately thereafter. 
+ *
+ *              This field exists because the fixed and variable length 
+ *              array cache clients allocate numerous entries in a single
+ *              block, and sub-allocate metadata cache entries out of this
+ *              block.  The effect of this is to break the invarient,
+ *              normally maintained by the free space managers in paged
+ *              allocation mode, that no entry of less than a page in
+ *              size crosses page boundaries, and that entries of page 
+ *              size or greater are page aligned.  This in turn causes 
+ *              problems for the page buffer -- particularly in VFD SWMR
+ *              mode.
+ *
+ *              The correct solution is to modify the fixed and variable 
+ *              length array cache client to repair this.  However, in 
+ *              the interrim, this field exists to detect similar 
+ *              behaviour elsewhere.
+ *
+ *              To complicate matters, speculative reads for metadata 
+ *              cache entries which must determine their lengths via 
+ *              inspection of the on disk image of the entry, may mimic 
+ *              the behaviour of the fixed and extensible arrays.  Thus
+ *              the curr_io_type is also needed to dis-ambiguate reads.
+ *              
+ * curr_read_speculative: Boolean flag indicating whether the current
+ *              read request is guaranteed to be of the correct length.
+ *              Field is used to distinguish between the initial and final 
+ *              read attempts
+ * 
+ *
  *
  * Statistics collection fields:
  *
@@ -4744,6 +4881,28 @@ typedef struct H5C_tag_info_t {
  *              called successfully.  This field is only defined when
  *              NDEBUG is not #defined.
  *
+ * curr_io_type:  Pointer to the instance of H5C_class_t associated with
+ *              the current I/O operation.  This pointer should be set
+ *              just before any I/O operation by the metadata cache, and 
+ *              re-set to NULL immediately thereafter.  This field is 
+ *              only defined when NDEBUG is not #defined.
+ *
+ *              This field exists because the fixed and variable length 
+ *              array cache clients allocate numerous entries in a single
+ *              block, and sub-allocate metadata cache entries out of this
+ *              block.  The effect of this is to break the invarient,
+ *              normally maintained by the free space managers in paged
+ *              allocation mode, that no entry of less than a page in
+ *              size crosses page boundaries, and that entries of page 
+ *              size or greater are page aligned.  This in turn causes 
+ *              problems for the page buffer -- particularly in VFD SWMR
+ *              mode.
+ *
+ *              The correct solution is to modify the fixed and variable 
+ *              length array cache client to repair this.  However, in 
+ *              the interrim, this field exists to detect similar 
+ *              behaviour elsewhere.
+ *
  ****************************************************************************/
 struct H5C_t {
     uint32_t			magic;
@@ -4892,6 +5051,10 @@ struct H5C_t {
     hbool_t 			rdfsm_settled;
     hbool_t			mdfsm_settled;
 
+    /* Fields supporting page buffer hints */
+    const H5C_class_t *         curr_io_type;
+    hbool_t                     curr_read_speculative;
+
 #if H5C_COLLECT_CACHE_STATS
     /* stats fields */
     int64_t                     hits[H5C__MAX_NUM_TYPE_IDS + 1];
@@ -5025,6 +5188,8 @@ H5_DLL herr_t H5C__untag_entry(H5C_t *cache, H5C_cache_entry_t *entry);
 /* Testing functions */
 #ifdef H5C_TESTING
 H5_DLL herr_t H5C__verify_cork_tag_test(hid_t fid, H5O_token_t tag_token, hbool_t status);
+H5_DLL void H5C_set_curr_io_type_splitable(H5C_t * cache_ptr, 
+    hbool_t set_splitable);
 #endif /* H5C_TESTING */
 
 #endif /* _H5Cpkg_H */

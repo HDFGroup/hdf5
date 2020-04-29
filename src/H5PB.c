@@ -52,9 +52,12 @@
 /****************/
 
 /* Round _x down to nearest _size. */
+/* not used at present */
+/*
 #ifndef rounddown
 #define rounddown(_x, _size) (((_x) / (_size)) * (_size))
 #endif
+*/
 
 /* Round _x up to nearest _size. */
 #ifndef roundup
@@ -113,14 +116,6 @@ static herr_t H5PB__write_meta(H5F_shared_t *, H5FD_mem_t, haddr_t,
 static herr_t H5PB__write_raw(H5F_shared_t *, H5FD_mem_t, haddr_t, 
     size_t, const void *);
 
-static void metadata_section_split(size_t, haddr_t, size_t, const void *,
-    metadata_section_t *);
-
-static herr_t metadata_multipart_read(H5F_shared_t *, H5FD_mem_t, haddr_t,
-    size_t, void *);
-
-static herr_t metadata_multipart_write(H5F_shared_t *, H5FD_mem_t, haddr_t,
-    size_t, const void *);
 
 /*********************/
 /* Package Variables */
@@ -222,6 +217,8 @@ H5PB_reset_stats(H5PB_t *pb_ptr)
     pb_ptr->max_dwl_len                      = 0;
     pb_ptr->max_dwl_size                     = 0;
     pb_ptr->total_dwl_ins_depth              = 0;
+    pb_ptr->md_read_splits                   = 0;
+    pb_ptr->md_write_splits                  = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 
@@ -252,7 +249,13 @@ H5PB_reset_stats(H5PB_t *pb_ptr)
  *              --bypasses: the number of metadata and raw data accesses 
  *                          that bypass the page buffer layer
  *
- * Return:	    Non-negative on success/Negative on failure
+ *              TODO: The available stats have changed considerably
+ *                    since Mohamad wrote this routine.  Update 
+ *                    the function once things settle down.
+ *
+ *                                              JRM -- 4/13/20
+ *
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Mohamad Chaarawi
  *
@@ -297,7 +300,9 @@ H5PB_get_stats(const H5PB_t *pb_ptr, unsigned accesses[2], unsigned hits[2],
  *
  * Programmer:	John Mainzer -- 10/12/18
  *
- * Changes:     None.
+ * Changes:     Added support for md_read_splits and md_write_splits.
+ *
+ *                                            JRM -- 4/11/20
  *
  *-------------------------------------------------------------------------
  */
@@ -404,9 +409,13 @@ H5PB_print_stats(const H5PB_t *pb_ptr)
         ave_delayed_write_ins_depth = (double)(pb_ptr->total_dwl_ins_depth) /
                                       (double)(pb_ptr->delayed_writes);
     }
+
     HDfprintf(stdout, 
         "delayed writes / ave delay / ave ins depth = %lld / %llf / %llf\n",
         pb_ptr->delayed_writes, ave_delayed_write, ave_delayed_write_ins_depth);
+
+    HDfprintf(stdout, "metadata read / write splits = %lld / %lld.\n",
+              pb_ptr->md_read_splits, pb_ptr->md_write_splits);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 
@@ -444,7 +453,10 @@ H5PB_print_stats(const H5PB_t *pb_ptr)
  *
  * Programmer:	John Mainzer -- 10/12/18
  *
- * Changes:     None.
+ * Changes:     Modified function to function to prevent the insertion 
+ *              of raw data pages when operating in VFD SWMR mode.
+ *
+ *                                          JRM -- 3/25/20
  *
  *-------------------------------------------------------------------------
  */
@@ -468,7 +480,8 @@ H5PB_add_new_page(H5F_shared_t *shared, H5FD_mem_t type, haddr_t page_addr)
 
     if ( H5FD_MEM_DRAW == type ) { /* raw data page insertion */
 
-        if ( pb_ptr->min_md_pages == pb_ptr->max_pages ) {
+        if ( ( pb_ptr->min_md_pages == pb_ptr->max_pages ) ||
+             ( pb_ptr->vfd_swmr ) ) {
 
             can_insert = FALSE;
 
@@ -514,7 +527,12 @@ done:
  *
  * Programmer:	John Mainzer -- 10/11/18
  *
- * Changes:     None.
+ * Changes:     Added initialization for the vfd_swmr field.  Also 
+ *              added code to force min_rd_pages to 0 if vfd_swrm is
+ *              TRUE.  Do this since we now exclude raw data from the 
+ *              page buffer when operating in VFD SWMR mode.
+ *
+ *                                               JRM -- 3/28/20
  *
  *-------------------------------------------------------------------------
  */
@@ -522,6 +540,7 @@ herr_t
 H5PB_create(H5F_shared_t *shared, size_t size, unsigned page_buf_min_meta_perc, 
             unsigned page_buf_min_raw_perc)
 {
+    hbool_t vfd_swmr = FALSE;
     hbool_t vfd_swmr_writer = FALSE;
     int i;
     int32_t min_md_pages;
@@ -572,11 +591,21 @@ H5PB_create(H5F_shared_t *shared, size_t size, unsigned page_buf_min_meta_perc,
              (int32_t)(size / shared->fs_page_size));
 
 
-    /* compute vfd_swmr_writer */
-    if ( ( H5F_SHARED_VFD_SWMR_CONFIG(shared) ) && ( H5F_SHARED_INTENT(shared) & H5F_ACC_RDWR ) ) {
+    /* compute vfd_swrm and vfd_swmr_writer */
+    if ( H5F_SHARED_VFD_SWMR_CONFIG(shared) ) {
 
-        HDassert(shared->vfd_swmr_config.writer);
-        vfd_swmr_writer = TRUE;
+        vfd_swmr = TRUE;
+
+        /* force min_rd_pages to zero since raw data is exclued from
+         * the page buffer in VFD SWMR mode.
+         */
+        min_rd_pages = 0;
+
+        if ( H5F_SHARED_INTENT(shared) & H5F_ACC_RDWR ) {
+
+            HDassert(shared->vfd_swmr_config.writer);
+            vfd_swmr_writer = TRUE;
+        }
     }
 
 
@@ -626,6 +655,7 @@ H5PB_create(H5F_shared_t *shared, size_t size, unsigned page_buf_min_meta_perc,
     /* VFD SWMR specific fields.  
      * The following fields are defined iff vfd_swmr_writer is TRUE. 
      */
+    pb_ptr->vfd_swmr         = vfd_swmr;
     pb_ptr->vfd_swmr_writer  = vfd_swmr_writer;
     pb_ptr->mpmde_count      = 0;
     pb_ptr->cur_tick         = 0;
@@ -925,9 +955,11 @@ done:
  *
  *              2) If the read is for raw data, and the page buffer is 
  *                 configured for metadata only (i.e. min_md_pages == 
- *                 max_pages), simply read from the HDF5 file and return.
+ *                 max_pages), or if we are operating in VFD SWMR mode
+ *                 (i.e. vfd_swmr == TRUE), simply read from the HDF5 
+ *                 file and return.
  *
- *              3) If the read is for raw data, and it of page size or 
+ *              3) If the read is for raw data, and is of page size or 
  *                 larger, read it directly from the HDF5 file.  
  *
  *                 It is possible that the page buffer contains dirty pages 
@@ -957,17 +989,41 @@ done:
  *              between small and multi-page metadata entries so that 
  *              pages containing the former will be buffered and the 
  *              latter be read directly from file.
- *  
- *              Unfortunately, the metadata cache does not always know the 
+ *
+ *              Unfortunately, there are several flies in the ointment.
+ *
+ *              First, the fixed and extensible array on disk data 
+ *              structures allocate multiple metadata cache entries in 
+ *              a single block, and use this fact to make the addresses
+ *              of all but the first entry in the block computable.  While
+ *              this simplifies the fixed and extensible array on disk data
+ *              structures, if complicates the metadata cache and the page
+ *              buffer.  Needless to say, the correct solution to this 
+ *              problem is to remove the complexity at its source.  However, 
+ *              for now, we must code around the problem.
+ *
+ *              Thus, this function must examine each read request
+ *              to determine if it crosses page boundaries and is not for 
+ *              two or more complete pages.  If it does, and it is one of
+ *              the fixed or extensible array entries that is sub-allocated
+ *              from a larger space allocation, the read request must be 
+ *              split into the minimal set of read requests that either 
+ *              don't cross page boundaries, or are page aligned and 
+ *              consist of an integral number of pages.
+ *
+ *
+ *              Second, the metadata cache does not always know the 
  *              size of metadata entries when it tries to read them.  In 
  *              such cases, it issues speculative reads that may be either 
  *              smaller or larger than the actual size of the piece of 
  *              metadata that is finally read.
  *
  *              Since we are guaranteed that all metadata allocations larger
- *              that one page are page aligned, we can safely clip at the 
- *              page boundary any non page aligned metadata read that crosses
- *              page boundaries.
+ *              that one page are page aligned (with the exception of those
+ *              sub-allocated from larger allocations -- which we deal with
+ *              by splitting I/O requests as discussed above), we can safely 
+ *              clip at the page boundary any non page aligned metadata 
+ *              read that crosses page boundaries. 
  *
  *              However, page aligned reads could wind up being either
  *              small or multi-page.  This results in two scenarios that
@@ -1008,15 +1064,13 @@ done:
  *
  *              8) If the read is for metadata, is page aligned, is larger 
  *                 than one page, and there is a regular entry at the target
- *                 page address, test to see if the last read was for the 
- *                 same address.
+ *                 page address, test to see if the read is speculative.
  *
- *                 If was, evict the page, and satisfy the read from file.
- *                 Flag an error if the page was dirty.
+ *                 If it is not, evict the page, and satisfy the read from 
+ *                 file.  Flag an error if the page was dirty.
  *
- *                 If the last read was for a different page, clip the read 
- *                 to one page, and satisfy the read from the existing 
- *                 regular entry.
+ *                 If it is, clip the read to one page, and satisfy the 
+ *                 read from the existing regular entry.
  *
  *              9) If the read is for metadata, is page aligned, is larger
  *                 than one page, and there is a multi-page metadata entry
@@ -1051,60 +1105,334 @@ done:
  *
  * Programmer:	John Mainzer -- 10/11/18
  *
- * Changes:     None.
+ * Changes:     Updated for discovery of the fact that the fixed and 
+ *              extensible array data structures allocate multiple 
+ *              metadata cache entries in a single block, and thus 
+ *              violate that invarient that metadata entries either 
+ *              do not cross page boundaries, or are page aligned.
+ *
+ *                                               JRM -- 3/28/20
  *
  *-------------------------------------------------------------------------
  */
-/* TBD Add optional raw-data bypass here and at H5PB_write when we
- * are operating in parallel mode.
- */
+ 
 herr_t
 H5PB_read(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size, 
           void *buf/*out*/)
 {
-    H5PB_t *pb_ptr;                    /* Page buffer for this file */
+    H5PB_t *pb_ptr;                     /* Page buffer for this file */
+    hbool_t bypass_pb = FALSE;          /* Whether to bypass page buffering */
+    hbool_t split_read = FALSE;         /* whether the read must be split */
     herr_t ret_value = SUCCEED;         /* Return value */
 
+    /* the following six fields are defined iff split_read is TRUE */
+    haddr_t prefix_addr = HADDR_UNDEF;  /* addr of prefix -- if defined */
+    haddr_t body_addr = HADDR_UNDEF;    /* addr of body -- if defined */
+    haddr_t suffix_addr = HADDR_UNDEF;  /* addr of suffix -- if defined */
+    size_t prefix_size = 0;             /* size of prefix */
+    size_t body_size = 0;               /* size of body */
+    size_t suffix_size = 0;             /* size of suffix */
+    
+
     FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(shared);
 
     hlog_fast(pbrd, "%s %p type %d %" PRIuHADDR " size %zu",
         __func__, (void *)shared, type, addr, size);
 
+
     pb_ptr = shared->pb_ptr;
 
-    HDassert(pb_ptr == NULL || pb_ptr->magic == H5PB__H5PB_T_MAGIC);
+    if ( pb_ptr == NULL ) {
 
-    /* Bypass the page buffer in case
-     * 1) page buffer is disabled
-     * _) MPI I/O is enabled
-     * 2) page buffer configured for metadata only, and it's a raw-data access
-     * 5) page buffer configured for raw data only, and it's a metadata access
-     */
-    if (pb_ptr == NULL || H5F_SHARED_HAS_FEATURE(shared, H5FD_FEAT_HAS_MPI) ||
-        (H5FD_MEM_DRAW == type && pb_ptr->min_md_pages == pb_ptr->max_pages) ||
-        (H5FD_MEM_DRAW != type && pb_ptr->min_rd_pages == pb_ptr->max_pages)) {
+        bypass_pb = TRUE; /* case 1) -- page buffer is disabled */
 
-        if (H5FD_read(shared->lf, type, addr, size, buf) < 0) {
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL,
-                        "read through lower VFD failed");
+    } else {
+
+        HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
+
+        if ( H5FD_MEM_DRAW == type ) { /* raw data read */
+
+            if ( ( pb_ptr->min_md_pages == pb_ptr->max_pages ) ||
+                 ( pb_ptr->vfd_swmr ) ) {
+
+                /* case 2) -- page buffer configured for metadata only 
+                 *            or vfd swmr.
+                 */
+                bypass_pb = TRUE;
+
+            }
+        } else { /* metadata read */
+
+            if ( pb_ptr->min_rd_pages == pb_ptr->max_pages ) {
+
+                /* case 5) -- page buffer configured for raw data only */
+                bypass_pb = TRUE;
+
+            } else {
+                /* determine whether the read request must be split,
+                 * and if so, compute the start points and sizes of 
+                 * of the sections.
+                 *
+                 * Note: The following code is almost identical to the 
+                 *       similar code in H5PB_write().  Thus, on the surface, 
+                 *       it is an obvious candidate for refactoring into a 
+                 *       function 0r macro.
+                 *
+                 *       However, there are subtle differences between 
+                 *       the two pieces of code which are driven by the 
+                 *       possibility of speculative reads.  
+                 *
+                 *       More to the point, further changes may be necessary.  
+                 *       Thus we should wait on refactoring until this code has 
+                 *       been in daily use for some time, and it is clear 
+                 *       that further changes are unlikely.
+                 */
+                int mdc_client_id = -1;  /* id of mdc client, or -1 if undef */
+                uint64_t start_page;     /* page index of first page in read */
+                uint64_t second_page;    /* page index of second page in read */
+                uint64_t end_page;       /* page index of last page in read */
+                uint64_t body_page;      /* page index of start of body */
+                haddr_t start_page_addr; /* addr of first page in read */
+                haddr_t second_page_addr;/* addr of second page in read */
+                haddr_t end_page_addr;   /* addr of last page in read */
+                haddr_t end_addr;        /* addr of last byte in read */
+                
+                /* Calculate the aligned address of the first page */
+                start_page = (addr / pb_ptr->page_size);
+                start_page_addr = start_page * pb_ptr->page_size;
+
+                /* Calculate the aligned address of the last page */
+                end_addr = addr + (haddr_t)(size - 1);
+                end_page = end_addr / (haddr_t)(pb_ptr->page_size);
+                end_page_addr = end_page * pb_ptr->page_size;
+
+                HDassert(start_page_addr <= addr);
+                HDassert(addr < start_page_addr + (haddr_t)(pb_ptr->page_size));
+
+                HDassert(start_page <= end_page);
+                HDassert(end_page_addr <= ((addr + (haddr_t)size - 1))); 
+                HDassert((addr + (haddr_t)size - 1) < 
+                         (end_page_addr + pb_ptr->page_size)); 
+
+                /* test to see if the read crosses a page boundary, and 
+                 * does not start on a page boundary, and is not of an 
+                 * integral number of pages.
+                 */
+                if ( ( start_page < end_page ) &&
+                     ( ! ( ( addr == start_page_addr ) && 
+                           ( end_page_addr + (haddr_t)(pb_ptr->page_size) == 
+                             end_addr + 1 ) ) ) ) {
+
+                    /* the read crosses a page boundary and is not 
+                     * page aligned and of length some multiple of page size.
+                     *
+                     * Test to see if the read is for a metadata entry that 
+                     * is sub-allocated from a larger space allocation.
+                     *
+                     * Note that the following test may have to be
+                     * adjusted.
+                     */
+                    mdc_client_id = H5C_get_curr_io_client_type(shared->cache);
+                
+                    if ( ( mdc_client_id == (int)H5AC_EARRAY_DBLK_PAGE_ID ) || \
+                         ( mdc_client_id == (int)H5AC_FARRAY_DBLK_PAGE_ID ) ) {
+
+                        split_read = TRUE;
+                    }
+                }
+
+                if ( split_read ) {
+
+                    /* compute the base addresses and length of the prefix,
+                     * body, and suffix of the read, where these terms are 
+                     * defined as follows:
+                     *
+                     * prefix: All bytes from addr to the first page address
+                     *         at or after addr.  If addr == start_page_addr,
+                     *         the prefix is empty.
+                     *
+                     * body:   All bytes from the first page address covered
+                     *         by the read up to but not including the last 
+                     *         page address in the read.  Note that the 
+                     *         length of the body must be a multiple of the 
+                     *         page size.  If only one page address is 
+                     *         included in the read, the body is empty.
+                     *
+                     * suffix: All bytes from the last page address in the
+                     *         read until the end of the read.  If the 
+                     *         read ends on a page boundary, the suffix is
+                     *         empty.
+                     *
+                     * Since we know that the read crosses at least one 
+                     * page boundary, and we have aleady filtered out the 
+                     * body only case, at least two of the above must be 
+                     * non-empty.
+                     */
+
+                    second_page = start_page + 1;
+                    second_page_addr =
+                        (haddr_t)(second_page * pb_ptr->page_size);
+
+                    if ( addr > start_page_addr ) { /* prefix exists */
+
+                        prefix_addr = addr;
+                        prefix_size = (size_t)(second_page_addr - addr);
+
+                        HDassert(prefix_addr > start_page_addr);
+                        HDassert(prefix_size < pb_ptr->page_size);
+                        HDassert(((size_t)(addr - start_page_addr) + \
+                                 prefix_size) == pb_ptr->page_size);
+                    }
+
+                    if ( size - prefix_size >= pb_ptr->page_size ) {
+                    
+                        /* body exists */
+
+                        if ( addr == start_page_addr ) {
+
+                            body_page = start_page;
+                            body_addr = start_page_addr;
+
+                        } else {
+
+                            body_page = second_page;
+                            body_addr = second_page_addr;
+                        }
+
+                        if ( end_addr < end_page_addr +
+                                        (haddr_t)(pb_ptr->page_size - 1) ) {
+
+                            /* suffix exists */
+                            body_size = (size_t)(end_page - body_page) *
+                                        pb_ptr->page_size;
+
+                        } else {
+
+                            /* suffix is empty */
+                            body_size = (size_t)(end_page - body_page + 1) *
+                                        pb_ptr->page_size;
+                        }
+
+                        HDassert((body_page == start_page) || \
+                                 (body_page == start_page + 1));
+
+                        HDassert(body_addr == \
+                                 (haddr_t)(body_page * pb_ptr->page_size));
+
+                        HDassert(body_size < size);
+                        HDassert(body_size >= pb_ptr->page_size);
+
+
+                        HDassert(body_addr == \
+                                 addr + (haddr_t)prefix_size);
+                        HDassert((body_addr + (haddr_t)body_size) \
+                                  <= (end_addr + 1));
+                    }
+
+                    if ( end_addr < end_page_addr +
+                                    (haddr_t)(pb_ptr->page_size - 1) ) {
+
+                        suffix_addr = end_page_addr;
+                        suffix_size = (end_addr + 1) - end_page_addr;
+
+                        HDassert(suffix_addr == \
+                                 addr + (haddr_t)(prefix_size + body_size));
+                    }
+
+                    HDassert(size == prefix_size + body_size + suffix_size);
+                }
+            }
         }
-
-        if (pb_ptr != NULL)
-            H5PB__UPDATE_STATS_FOR_BYPASS(pb_ptr, type, size);
-        HGOTO_DONE(SUCCEED);
     }
 
-    if (H5FD_MEM_DRAW == type) { /* cases 3 and 4 */
-        if (H5PB__read_raw(shared, type, addr, size, buf) < 0)
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, "raw read failed");
-    } else if (metadata_multipart_read(shared, type, addr, size, buf) < 0)
-        HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, "meta read failed");
+#ifdef H5_HAVE_PARALLEL
+    /* at present, the page buffer must be disabled in the parallel case.
+     * However, just in case ...
+     */
+    if ( H5F_SHARED_HAS_FEATURE(shared, H5FD_FEAT_HAS_MPI) ) {
 
-    H5PB__UPDATE_STATS_FOR_ACCESS(pb_ptr, type, size);
+        bypass_pb = TRUE;
+
+    } /* end if */
+#endif /* H5_HAVE_PARALLEL */
+
+
+    if ( bypass_pb ) { /* cases 1, 2. and 5 */
+
+        if ( H5FD_read(shared->lf, type, addr, size, buf) < 0 )
+
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
+                        "read through  failed")
+
+        /* Update statistics */
+        if ( pb_ptr ) {
+
+            H5PB__UPDATE_STATS_FOR_BYPASS(pb_ptr, type, size);
+        }
+    } else {
+
+        if ( H5FD_MEM_DRAW == type ) { /* cases 3 and 4 */
+
+            if ( H5PB__read_raw(shared, type, addr, size, buf) < 0 )
+
+                HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
+                            "H5PB_read_raw() failed")
+
+        } else if ( split_read ) {
+
+            /* handle the sub-allocated entry case */
+
+            /* read prefix if it exists */
+            if ( prefix_size > 0 ) {
+                
+                if ( H5PB__read_meta(shared, type, prefix_addr, 
+                                     prefix_size, buf) < 0 )
+
+                    HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
+                                "H5PB_read_meta() failed on prefix")
+            }
+
+            /* read body -- if it exists. */
+            if ( body_size > 0 ) {
+
+                if ( H5PB__read_meta(shared, type, body_addr, body_size, 
+                                     (void *)((uint8_t *)buf + 
+                                               prefix_size)) < 0 )
+
+                    HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
+                                "H5PB_read_meta() failed on body")
+            }
+
+            /* read suffix -- if it exists. */
+            if ( suffix_size > 0 ) {
+
+                if ( H5PB__read_meta(shared, type, suffix_addr, suffix_size, 
+                                     (void *)((uint8_t *)buf + prefix_size + 
+                                                 body_size)) < 0 )
+
+                    HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
+                                "H5PB_read_meta() failed on suffix")
+            }
+
+            H5PB__UPDATE_STATS_FOR_READ_SPLIT(pb_ptr)
+
+        } else { /* pass to H5PB_read_meta() -- cases 6, 7, 8, 9, & 10 */
+                
+            if ( H5PB__read_meta(shared, type, addr, size, buf) < 0 )
+
+                    HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
+                                "H5PB_read_meta() failed")
+        }
+    }
 
 done:
+
     FUNC_LEAVE_NOAPI(ret_value)
-}
+
+} /* H5PB_read() */
 
 /* Remove the entry corresponding to lower-file page number `page`.
  * Return 0 if there was no such entry or if the entry was removed
@@ -1198,11 +1526,15 @@ herr_t
 H5PB_remove_entry(H5F_shared_t *shared, haddr_t addr)
 {
     uint64_t page;
-    H5PB_t *pb_ptr;
+    H5PB_t *pb_ptr = NULL;
     H5PB_entry_t *entry_ptr = NULL;
-    herr_t ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;             /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(shared);
+    HDassert(shared->pb_ptr);
 
     pb_ptr = shared->pb_ptr;
 
@@ -1263,50 +1595,169 @@ done:
 
 } /* H5PB_remove_entry */
 
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5PB_remove_entries
+ *
+ * Purpose:     Remove entries in the page buffer associated with a 
+ *              newly freed multi-page block of file space.  
+ *
+ *              There are several possible situations here.
+ *
+ *              In the context of metadata, there are two possible cases.
+ *
+ *              1) The block of file space is associated with a metadata 
+ *                 entry.
+ *
+ *                 In regular operating mode, this entry will not be 
+ *                 cached in the page buffer, so there should be nothing
+ *                 to do.
+ *
+ *                 In VFD SWMR mode, the entry may be cached in a single
+ *                 multi-page entry.
+ *
+ *              2) The block of file space has been sub-allocated 
+ *                 into multiple metadata entries (i.e. fixed and extensible
+ *                 array).  In this case, the individual entries may cross
+ *                 boundaries without being page aligned -- however, for 
+ *                 purposes of the page buffer, I/O requests on these 
+ *                 entries will have been broken up into requests that 
+ *                 either do not cross page boundaries or are page aligned.
+ *
+ *              In the context of raw data, the page buffer may or may 
+ *              not contain regular entries scattered over the space 
+ *              touched by the newly freed file space.
+ *
+ *              In all contexts, there is no guarantee that the page buffer
+ *              will contain any of the possible entries.
+ *
+ *              Space allocations larger than one page must be page alligned.
+ *              Further, any space between the end of a multi-page allocation 
+ *              and the next page boundary will remain un-allocated until after
+ *              the original allocation is freed.  This implies that:
+ *
+ *              1) The address passed into this call must be page aligned.
+ *
+ *              2) The page buffer may safely discard any page that 
+ *                 intersects with the newly freed file space allocation.
+ *
+ *              The bottom line here is that we must scan the page buffer
+ *              index, and discard all entries that intersect the supplied
+ *              address and length.  As a sanity check, we must verify that
+ *              any such entries don't overlap.  
+ *
+ *              Also, in the context of the VFD SWMR write, it is possible
+ *              that the discarded pages will reside in the tick list or 
+ *              the delayed write list -- if so, they must be removed 
+ *              prior to eviction.
+ *
+ *              Note: 
+ *
+ *              This function scans the page buffer hash table to 
+ *              find entries to remove.  While this is normally 
+ *              pretty in-expensive, a very large (i.e. GB) file 
+ *              space free may impose significant cost.
+ *
+ *              As best I understand it, such frees are rare, so 
+ *              the current solution should be good enough for now.
+ *              However, if we determine that the current solution 
+ *              is too expensive, two alternate solutions come to mine.
+ *
+ *              a) Scan the index list instead of the hash table
+ *                 if the free is sufficiently large.  Also, skip 
+ *                 entirely if the page buffer doesn't contain any
+ *                 pages of the appropriate type.
+ *
+ *              b) Whenever writing a large metadata entry, scan for 
+ *                 intersecting entries and delete them.  (potential 
+ *                 issues with fixed and variable array entries are 
+ *                 dealt with via the splitting mechanism.)  In this 
+ *                 case we would also have to simply ignore writes 
+ *                 beyond EOA on flush or close.
+ *
+ *                 Note that we already scan for intersecting entries
+ *                 on large raw data writes -- with possible performance
+ *                 issues for large writes.
+ *
+ *                                            JRM -- 4/25/20
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer 4/25/20
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
 herr_t
 H5PB_remove_entries(H5F_shared_t *shared, haddr_t addr, hsize_t size)
 {
-    H5PB_t *pb_ptr;
-    H5PB_entry_t *entry_ptr;
-    herr_t ret_value = SUCCEED;
-    metadata_section_t section[3] = {{0, 0, NULL}, {0, 0, NULL}, {0, 0, NULL}};
-    int i;
+    uint64_t i;
+    uint64_t start_page;
+    uint64_t end_page;
+    int64_t entry_pages = 0;
+    hsize_t entry_size;
+    H5PB_t *pb_ptr = NULL;
+    H5PB_entry_t *entry_ptr = NULL;
+    herr_t ret_value = SUCCEED;             /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Sanity checks */
+    HDassert(shared);
+    HDassert(shared->pb_ptr);
+
     pb_ptr = shared->pb_ptr;
 
-    HDassert(addr % pb_ptr->page_size == 0);
+    /* Calculate the start_page offset */
+    start_page = (addr / pb_ptr->page_size);
 
-    if (size > pb_ptr->page_size) {
-        hlog_fast(pbrm,
-            "removing multipage region [%" PRIuHADDR ", %" PRIuHADDR ")",
-            addr, addr + size);
-    }
+    HDassert(addr == start_page * pb_ptr->page_size);
 
-    metadata_section_split(pb_ptr->page_size, addr, size, NULL, section);
+    /* Calculate the end_page offset */
+    end_page = ((addr + (haddr_t)(size - 1)) / pb_ptr->page_size);
 
-    for (i = 0; i < 3; i++) {
-        metadata_section_t *iter = &section[i];
+    HDassert(start_page <= end_page);
+    HDassert(((end_page - start_page) * pb_ptr->page_size) <= size);
+    HDassert(size <= ((end_page - start_page + 1) * pb_ptr->page_size));
+    
+    for ( i = start_page; i <= end_page; i++ )
+    {
+        /* test to see if page i exists */
+        H5PB__SEARCH_INDEX(pb_ptr, i, entry_ptr, FAIL)
 
-        if (iter->len == 0)
-            continue;
+        if ( entry_ptr ) {
 
-        if (iter->len < size) {
-            hlog_fast(pbrm, "removing entry [%" PRIuHADDR ", %" PRIuHADDR ") "
-                "for split region [%" PRIuHADDR ", %" PRIuHADDR ")",
-                iter->addr, iter->addr + iter->len, addr, addr + size);
+            /* verify that this entry doesn't overlap with a previously
+             * visited entry.
+             */
+            HDassert(entry_pages <= 0);
+
+            entry_size = entry_ptr->size;
+            entry_pages = (int64_t)(entry_size / pb_ptr->page_size);
+
+            if ( (uint64_t)entry_pages * pb_ptr->page_size < entry_size ) {
+
+                entry_pages++;
+            }
+
+            /* remove the entry */
+            if ( H5PB_remove_entry(shared, entry_ptr->addr) < 0 )
+
+                HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                            "H5PB_remove_entry() failed")
+
         }
-
-        assert(iter->addr % pb_ptr->page_size == 0);
-
-        if (H5PB_remove_entry(shared, iter->addr) < 0)
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, "forced eviction failed")
+        entry_pages--;
     }
 
 done:
+
     FUNC_LEAVE_NOAPI(ret_value)
-}
+
+} /* H5PB_remove_entries() */
 
 
 /*-------------------------------------------------------------------------
@@ -1706,9 +2157,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
-H5PB_vfd_swmr__update_index(H5F_t *f, 
-                            uint32_t * idx_ent_added_ptr, 
+herr_t
+H5PB_vfd_swmr__update_index(H5F_t *f,
+                            uint32_t * idx_ent_added_ptr,
                             uint32_t * idx_ent_modified_ptr,
                             uint32_t * idx_ent_not_in_tl_ptr,
                             uint32_t * idx_ent_not_in_tl_flushed_ptr)
@@ -1734,7 +2185,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
     idx = shared->mdf_idx;
 
     HDassert(idx);
-    
+
     pb_ptr = shared->pb_ptr;
 
     HDassert(pb_ptr);
@@ -1763,7 +2214,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
         if ( ie_ptr == NULL ) { /* alloc new entry in the metadata file index*/
             uint32_t new_index_entry_index;
 
-            new_index_entry_index = shared->mdf_idx_entries_used + 
+            new_index_entry_index = shared->mdf_idx_entries_used +
                                     idx_ent_added++;
 
             if (new_index_entry_index >= shared->mdf_idx_len &&
@@ -1816,7 +2267,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
         ie_ptr->tick_of_last_flush = 0;
     }
 
-    /* scan the metadata file index for entries that don't appear in the 
+    /* scan the metadata file index for entries that don't appear in the
      * tick list.  If the index entry is dirty, and either doesn't appear
      * in the page buffer, or is clean in the page buffer, mark the index
      * entry clean and as having been flushed in the current tick.
@@ -1848,7 +2299,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
         }
     }
 
-    HDassert(idx_ent_modified + idx_ent_not_in_tl == 
+    HDassert(idx_ent_modified + idx_ent_not_in_tl ==
              shared->mdf_idx_entries_used);
 
     HDassert(idx_ent_modified + idx_ent_not_in_tl + idx_ent_added <=
@@ -1860,8 +2311,10 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
     *idx_ent_not_in_tl_flushed_ptr = idx_ent_not_in_tl_flushed;
 
 done:
+
     FUNC_LEAVE_NOAPI(ret_value)
-}
+
+} /* H5PB_vfd_swmr__update_index() */
 
 
 /*-------------------------------------------------------------------------
@@ -1876,9 +2329,10 @@ done:
  *
  *              2) If the write is raw data, and the page buffer is 
  *                 configured for metadata only (i.e. min_md_pages == 
- *                 max_pages), simply write to the HDF5 file and return.
+ *                 max_pages), or if the page buffer is operating in 
+ *                 vfd_swmr mode, simply write to the HDF5 file and return.
  *
- *              3) If the write is raw data, and it of page size or 
+ *              3) If the write is raw data, and is of page size or 
  *                 larger, write directly from the HDF5 file.  
  *
  *                 It is possible that the write intersects one or more 
@@ -1898,12 +2352,67 @@ done:
  *                 configured for raw data only (i.e. min_rd_pages == 
  *                 max_pages), simply write to the HDF5 file and return.
  *
+ *              The free space manager guarantees that allocations larger
+ *              than one page will be page alligned, and that allocations
+ *              of size less than or equal to page size will not cross page
+ *              boundaries.  Further, unlike raw data, metadata is always
+ *              written and read atomically.
+ *
+ *              In principle, this should make it easy to discriminate
+ *              between small and multi-page metadata entries so that
+ *              pages containing the former will be buffered and the
+ *              latter be written directly to file.
+ *
+ *              Unfortunately, there is a fly in the ointment.
+ *
+ *              The fixed and extensible array on disk data
+ *              structures allocate multiple metadata cache entries in
+ *              a single block, and use this fact to make the addresses
+ *              of all but the first entry in the block computable.  While
+ *              this simplifies the fixed and extensible array on disk data
+ *              structures, it complicates the metadata cache and the page
+ *              buffer.
+ *
+ *              From the page buffer perspective, it breaks the invarient
+ *              that metadata entries of less than page size don't cross
+ *              page boundaries, and those of size greater than or equal
+ *              to page size start on page boundaries -- which is important
+ *              for VFD SWMR as it allows efficient management of multi-page
+ *              metadata entries.
+ *
+ *              While it is tempting to repair the fixed and extensible
+ *              array data structures so as to remove this irregularity,
+ *              and remove the resulting complexity from both the metadata
+ *              cache and the page buffer, this is a ticklish task, as there
+ *              are already files in the wild that use the existing versions
+ *              of these data structures.  Thus, due to resource constraints,
+ *              we have to program around the issue for now.
+ *
+ *              Fortunately, for purposes of the page buffer, this is
+ *              relatively easy -- when we encounter a metadata write 
+ *              that crosses one or more page boundaries, and is not 
+ *              both page aligned and an integral number of pages, we 
+ *              query the metadata cache to determine the type of the 
+ *              client whose data is being writtne.  If it is one of the
+ *              mis-behaving types, we split it into two or three writes
+ *              such that each write either doesn't cross page boundaries,
+ *              or is page aligned and an integral number of pages.
+ *
+ *              This is done in this function, and is not reflected in 
+ *              the case analysis in the rest of this comment.
+ *
  *              6) If the write is of metadata, the write is larger than
- *                 one page, and vfd_swmr_writer is FALSE, simply read 
- *                 from the HDF5 file.  There is no need to check the 
+ *                 one page, and vfd_swmr_writer is FALSE, simply write 
+ *                 to the HDF5 file.  There is no need to check the 
  *                 page buffer, as metadata is always read atomically, 
  *                 and entries of this size are not buffered in the page 
  *                 buffer.
+ *
+ *                 Observe that this write must be page aligned.  This 
+ *                 should be enforced by the free space manager, but
+ *                 for now it is enforced by the above mentioned practice
+ *                 of splitting writes from cache client that don't 
+ *                 allocate each entry separately.
  *
  *              7) If the write is of metadata, the write is larger than
  *                 one page, and vfd_swmr_writer is TRUE, the write must
@@ -1937,7 +2446,17 @@ done:
  *
  * Programmer:	John Mainzer -- 10/11/18
  *
- * Changes:     None.
+ * Changes:     Updated to support splitting of metadata writes that 
+ *              are not page aligned and cross page boundaries into 
+ *              2 or 3 writes that are either page aligned or do not
+ *              cross page boundaries.  Full details in the header 
+ *              comment above, that has been updated to document 
+ *              this change.
+ *
+ *              Also updated case 2 to bypass the page buffer for raw
+ *              data writes in vfd swmr mode.
+ *
+ *                                      JRM -- 4/5/20
  *
  *-------------------------------------------------------------------------
  */
@@ -1945,9 +2464,18 @@ herr_t
 H5PB_write(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size, 
            const void *buf)
 {
-    H5PB_t *pb_ptr;                    /* Page buffer for this file */
+    H5PB_t *pb_ptr;                     /* Page buffer for this file */
     hbool_t bypass_pb = FALSE;          /* Whether to bypass page buffering */
+    hbool_t split_write = FALSE;        /* whether md write must be split */
     herr_t ret_value = SUCCEED;         /* Return value */
+
+    /* the following six fields are defined iff split_write is TRUE */
+    haddr_t prefix_addr = HADDR_UNDEF;  /* addr of prefix -- if defined */
+    haddr_t body_addr = HADDR_UNDEF;    /* addr of body -- if defined */
+    haddr_t suffix_addr = HADDR_UNDEF;  /* addr of suffix -- if defined */
+    size_t prefix_size = 0;             /* size of prefix */
+    size_t body_size = 0;               /* size of body */
+    size_t suffix_size = 0;             /* size of suffix */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1966,7 +2494,8 @@ H5PB_write(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
 
         if ( H5FD_MEM_DRAW == type ) { /* raw data write */
 
-            if ( pb_ptr->min_md_pages == pb_ptr->max_pages ) {
+            if ( ( pb_ptr->min_md_pages == pb_ptr->max_pages ) ||
+                 ( pb_ptr->vfd_swmr ) ) {
 
                 /* case 2) -- page buffer configured for metadata only */
                 bypass_pb = TRUE;
@@ -1979,13 +2508,207 @@ H5PB_write(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
                 /* case 5) -- page buffer configured for raw data only */
                 bypass_pb = TRUE;
 
-            } else if ( ( size >= pb_ptr->page_size ) && 
-                        ( ! ( pb_ptr->vfd_swmr_writer ) ) ) {
+            } else {
 
-                /* case 6) -- md read larger than one page and 
-                 *            pb_ptr->vfd_swmr_writer is FALSE.
+                /* determine whether the write request must be split,
+                 * and if so, compute the start points and sizes of
+                 * of the sections.
+                 *
+                 * Note: The following code is almost identical to the 
+                 *       similar code in H5PB_read().  Thus, on the surface, 
+                 *       it is an obvious candidate for refactoring into a 
+                 *       function or macro.
+                 *
+                 *       However, there are subtle differences between 
+                 *       the two pieces of code which are driven by the 
+                 *       possibility of speculative reads.  
+                 *
+                 *       More to the point, further changes may be necessary.  
+                 *       Thus we should wait on refactoring until this code has 
+                 *       been in daily use for some time, and it is clear 
+                 *       that further changes are unlikely.
                  */
-                bypass_pb = TRUE;
+                int mdc_client_id = -1;  /* id of mdc client, or -1 if undef */
+                uint64_t start_page;     /* page index of first page in read */
+                uint64_t second_page;    /* page index of second page in read */
+                uint64_t end_page;       /* page index of last page in read */
+                uint64_t body_page;      /* page index of start of body */
+                haddr_t start_page_addr; /* addr of first page in read */
+                haddr_t second_page_addr;/* addr of second page in read */
+                haddr_t end_page_addr;   /* addr of last page in read */
+                haddr_t end_addr;        /* addr of last byte in read */
+
+                /* Calculate the aligned address of the first page */
+                start_page = (addr / pb_ptr->page_size);
+                start_page_addr = start_page * pb_ptr->page_size;
+
+                /* Calculate the aligned address of the last page */
+                end_addr = addr + (haddr_t)(size - 1);
+                end_page = end_addr / (haddr_t)(pb_ptr->page_size);
+                end_page_addr = end_page * pb_ptr->page_size;
+
+                HDassert(start_page_addr <= addr);
+                HDassert(addr < start_page_addr + (haddr_t)(pb_ptr->page_size));
+
+                HDassert(start_page <= end_page);
+                HDassert(end_page_addr <= ((addr + (haddr_t)size - 1)));
+                HDassert((addr + (haddr_t)size - 1) <
+                         (end_page_addr + pb_ptr->page_size));
+
+                /* test to see if the write crosses a page boundary, and
+                 * does not start on a page boundary, and is not of an
+                 * integral number of pages.
+                 */
+                if ( ( start_page < end_page ) &&
+                     ( ! ( ( addr == start_page_addr ) &&
+                           ( end_page_addr + (haddr_t)(pb_ptr->page_size) == 
+                             end_addr + 1 ) ) ) ) {
+
+                    /* the read crosses a page boundary and is not
+                     * page aligned and of length some multiple of page size.
+                     *
+                     * Test to see if the read is for a metadata entry that
+                     * is sub-allocated from a larger space allocation.
+                     *
+                     * Note that the following test may have to be
+                     * adjusted.
+                     */
+                    mdc_client_id = H5C_get_curr_io_client_type(shared->cache);
+
+                    if ( ( mdc_client_id == (int)H5AC_EARRAY_DBLK_PAGE_ID ) || \
+                         ( mdc_client_id == (int)H5AC_FARRAY_DBLK_PAGE_ID ) ) {
+
+                        split_write = TRUE;
+
+                    } else {
+
+                        HDassert(addr == start_page_addr);
+                        HDassert(size > pb_ptr->page_size);
+
+                        if ( ! pb_ptr->vfd_swmr_writer ) {
+
+                            /* case 6) -- multi-page entry with fixed /
+                             * extensible array filtered out, and no
+                             * no VFD swmr.
+                             */
+                            bypass_pb = TRUE;
+                        }
+                    }
+                } else if ( ( size > pb_ptr->page_size ) &&
+                            ( ! pb_ptr->vfd_swmr_writer ) ) {
+
+                    /* write is larger than page size and we are not
+                     * in VFD SWMR mode -- bypass the page buffer.
+                     * This is also case 6.  We catch it here as
+                     * the code to determine whether to split only
+                     * looks at I/O requests that cross page bundaries
+                     * and are not both page aligned and an integral 
+                     * number of pages in length.
+                     */
+                    HDassert(start_page_addr == addr);
+                    bypass_pb = TRUE;
+                }
+
+                if ( split_write ) {
+
+                    /* compute the base addresses and length of the prefix,
+                     * body, and suffix of the write, where these terms are
+                     * defined as follows:
+                     *
+                     * prefix: All bytes from addr to the first page address
+                     *         at or after addr.  If addr == start_page_addr,
+                     *         the prefix is empty.
+                     *
+                     * body:   All bytes from the first page address covered
+                     *         by the write up to but not including the last
+                     *         page address in the write.  Note that the
+                     *         length of the body must be a multiple of the
+                     *         page size.  If only one page address is
+                     *         included in the write, the body is empty.
+                     *
+                     * suffix: All bytes from the last page address in the
+                     *         write until the end of the write.  If the
+                     *         write ends on a page boundary, the suffix is
+                     *         empty.
+                     *
+                     * Since we know that the write crosses at least one
+                     * page boundary, and we have aleady filtered out the
+                     * body only case, at least two of the above must be
+                     * non-empty.
+                     */
+
+                    second_page = start_page + 1;
+                    second_page_addr =
+                        (haddr_t)(second_page * pb_ptr->page_size);
+
+                    if ( addr > start_page_addr ) { /* prefix exists */
+
+                        prefix_addr = addr;
+                        prefix_size = (size_t)(second_page_addr - addr);
+
+                        HDassert(prefix_addr > start_page_addr);
+                        HDassert(prefix_size < pb_ptr->page_size);
+                        HDassert(((size_t)(addr - start_page_addr) + \
+                                 prefix_size) == pb_ptr->page_size);
+                    }
+
+                    if ( size - prefix_size >= pb_ptr->page_size ) {
+
+                        /* body exists */
+
+                        if ( addr == start_page_addr ) {
+
+                            body_page = start_page;
+                            body_addr = start_page_addr;
+
+                        } else {
+
+                            body_page = second_page;
+                            body_addr = second_page_addr;
+                        }
+
+                        if ( end_addr < end_page_addr + 
+                                        (haddr_t)(pb_ptr->page_size - 1) ) {
+
+                            /* suffix exists */
+                            body_size = (size_t)(end_page - body_page) *
+                                        pb_ptr->page_size;
+
+                        } else {
+
+                            /* suffix is empty */
+                            body_size = (size_t)(end_page - body_page + 1) *
+                                        pb_ptr->page_size;
+                        }
+
+                        HDassert((body_page == start_page) || \
+                                 (body_page == start_page + 1));
+
+                        HDassert(body_addr == \
+                                 (haddr_t)(body_page * pb_ptr->page_size));
+
+                        HDassert(body_size < size);
+                        HDassert(body_size >= pb_ptr->page_size);
+
+
+                        HDassert(body_addr == \
+                                 addr + (haddr_t)prefix_size);
+                        HDassert((body_addr + (haddr_t)body_size) \
+                                  <= (end_addr + 1));
+                    }
+
+                    if ( end_addr < end_page_addr + 
+                                    (haddr_t)(pb_ptr->page_size - 1) ) {
+
+                        suffix_addr = end_page_addr;
+                        suffix_size = (end_addr + 1) - end_page_addr;
+
+                        HDassert(suffix_addr == \
+                                 addr + (haddr_t)(prefix_size + body_size));
+                    }
+
+                    HDassert(size == prefix_size + body_size + suffix_size);
+                }
             }
         }
     }
@@ -2000,6 +2723,7 @@ H5PB_write(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
 
     } /* end if */
 #endif /* H5_HAVE_PARALLEL */
+
 
     if ( bypass_pb ) { /* cases 1, 2. 5, and 6 */
 
@@ -2022,15 +2746,84 @@ H5PB_write(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                             "H5PB_read_raw() failed")
 
+        } else if ( split_write ) {
+
+            /* handle the sub-allocated entry case */
+
+            /* write prefix if it exists */
+            if ( prefix_size > 0 ) {
+
+                if ( H5PB__write_meta(shared, type, addr, 
+                                      prefix_size, buf) < 0 )
+
+                    HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
+                                "H5PB__write_meta() failed on prefix")
+            }
+
+            /* write the body if it exists */
+            if ( body_size > 0 ) {
+
+                /* The "body_size == pb_ptr->page_size" clause in the 
+                 * following if is required since in normal operating
+                 * mode, the page buffer buffers metadata I/O 
+                 * requests of page size or less.
+                 *
+                 * Thus this clause ensures that a single page body
+                 * does not bypass the page buffer, setting the potential
+                 * for an older version to shadow the most recent version.
+                 *
+                 * Note: The page buffer really shouldn't buffer page 
+                 *       aligned single page metadata I/O requests, as it 
+                 *       creates extra overhead to no purpose.  However,
+                 *       fixing this is a bit tricky, and the case doesn't 
+                 *       appear to be common.  Thus, while it should be 
+                 *       fixed,  I don't think it is urgent.
+                 *       
+                 *                           JRM 4/19/20
+                 */
+                if ( ( pb_ptr->vfd_swmr ) ||
+                     ( body_size == pb_ptr->page_size ) ) {
+
+                    if ( H5PB__write_meta(shared, type, body_addr, body_size, 
+                                          (const void *)((const uint8_t *)buf +
+                                                    prefix_size)) < 0 )
+
+                    HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
+                                "H5PB__write_meta() failed on body")
+
+                } else {
+
+                    if ( H5FD_write(shared->lf, type, body_addr, body_size, 
+                                    (const void *)((const uint8_t *)buf +
+                                                         prefix_size)) < 0 )
+
+                        HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
+                                     "write through of body failed")
+
+                    H5PB__UPDATE_STATS_FOR_BYPASS(pb_ptr, type, size);
+                }
+            }
+
+            /* write the suffix if it exists */
+            if ( suffix_size > 0 ) {
+
+                if ( H5PB__write_meta(shared, type, suffix_addr, suffix_size,
+                                      (const void *)((const uint8_t *)buf + 
+                                       prefix_size + body_size)) < 0 )
+
+                    HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
+                                "H5PB_write_meta() failed on suffix")
+            }
+
+            H5PB__UPDATE_STATS_FOR_WRITE_SPLIT(pb_ptr)
+
         } else { /* cases 7, and 8 */
 
-            if ( metadata_multipart_write(shared, type, addr, size, buf) < 0 )
+            if ( H5PB__write_meta(shared, type, addr, size, buf) < 0 )
 
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
-                            "H5PB_read_meta() failed")
+                            "H5PB_write_meta() failed")
         }
-
-        H5PB__UPDATE_STATS_FOR_ACCESS(pb_ptr, type, size);
     }
 
 done:
@@ -3024,118 +3817,6 @@ done:
 
 } /* H5PB__mark_entry_dirty() */
 
-static void
-metadata_section_split(size_t pgsz, haddr_t addr, size_t len, const void *_buf,
-    metadata_section_t *section)
-{
-    int i;
-    size_t totlen = 0;
-    haddr_t whole_pgaddr, tail_pgaddr;
-    const char *buf = _buf;
-    metadata_section_t *head = &section[0], *middle = &section[1],
-        *tail = &section[2];
-
-    /* Try to find the address of the first whole page, and the address of
-     * the page after the last whole page.
-     */
-    whole_pgaddr = roundup(addr, pgsz);
-    tail_pgaddr = rounddown(addr + len, pgsz);
-
-    /* In the degenerate case where the first whole page is "after" the last,
-     * actually the entire access lands between page boundaries.
-     */
-    if (whole_pgaddr > tail_pgaddr) {
-        assert(len < pgsz);
-        head->addr = addr;
-        head->len = len;
-        head->buf = buf;
-        return;
-    }
-
-    /* `head` spans any range beginning before the first page boundary. */
-    if (addr < whole_pgaddr) {
-        head->buf = buf;
-        head->len = pgsz - addr % pgsz;
-        head->addr = addr;
-    }
-
-    /* `middle` spans one or more whole pages in between the end of
-     * `head` and before the beginning of `tail`.
-     */
-    if (whole_pgaddr < tail_pgaddr) {
-        middle->buf = (buf == NULL) ? NULL : &buf[whole_pgaddr - addr];
-        middle->len = tail_pgaddr - whole_pgaddr;
-        middle->addr = whole_pgaddr;
-    }
-
-    /* `tail` spans residual bytes that follow the last page boundary. */
-    if (tail_pgaddr < addr + len) {
-        tail->len = (addr + len) - tail_pgaddr;
-        tail->buf = (buf == NULL) ? NULL : &buf[tail_pgaddr - addr];
-        tail->addr = tail_pgaddr;
-    }
-
-    for (i = 0; i < 3; i++) {
-        metadata_section_t *iter = &section[i];
-        if (iter->len == 0)
-            continue;
-        assert(iter->addr == addr + totlen);
-        assert(iter->buf == ((buf == NULL) ? NULL : &buf[totlen]));
-//      assert(i == 0 || iter[-1].buf + iter[-1].len == iter->buf);
-        totlen += iter->len;
-    }
-
-    assert(totlen == len);
-}
-
-static herr_t
-metadata_multipart_read(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr,
-    size_t len, void *_buf/*out*/)
-{
-    herr_t rc;
-    int i;
-    const size_t pgsz = shared->pb_ptr->page_size;
-    metadata_section_t section[3] = {{0, 0, NULL}, {0, 0, NULL}, {0, 0, NULL}};
-
-    metadata_section_split(pgsz, addr, len, _buf, section);
-
-    for (i = 0; i < 3; i++) {
-        metadata_section_t *iter = &section[i];
-        if (iter->buf == NULL)
-            continue;
-        rc = H5PB__read_meta(shared, type, iter->addr, iter->len,
-            (void *)(uintptr_t)iter->buf);
-        if (rc < 0)
-            return rc;
-    }
-
-    return SUCCEED;
-}
-
-static herr_t
-metadata_multipart_write(H5F_shared_t *shared, H5FD_mem_t type,
-    haddr_t addr, size_t len, const void *_buf/*out*/)
-{
-    herr_t rc;
-    int i;
-    const size_t pgsz = shared->pb_ptr->page_size;
-    metadata_section_t section[3] = {{0, 0, NULL}, {0, 0, NULL}, {0, 0, NULL}};
-
-    metadata_section_split(pgsz, addr, len, _buf, section);
-
-    for (i = 0; i < 3; i++) {
-        metadata_section_t *iter = &section[i];
-
-        if (iter->buf == NULL)
-            continue;
-        rc = H5PB__write_meta(shared, type, iter->addr, iter->len, iter->buf);
-        if (rc < 0)
-            return rc;
-    }
-
-    return SUCCEED;
-}
-
 
 /*-------------------------------------------------------------------------
  *
@@ -3151,21 +3832,25 @@ metadata_multipart_write(H5F_shared_t *shared, H5FD_mem_t type,
  *                 existing page, it must not be a multi-page metadata 
  *                 entry.  It it is, flag an error.
  *
+ *                 Recall that by the time we get to this function,
+ *                 un-aligned page reads from the fixed and variable 
+ *                 length array structures that cross page boundaries
+ *                 have already been split into two or three reads 
+ *                 that conform to the usual pattern of metadata reads.
+ *
  *              7) If the read is for metadata, is page aligned, is larger 
  *                 than one page, and there is no entry in the page buffer,
  *                 satisfy the read from the file
  *
  *              8) If the read is for metadata, is page aligned, is larger 
  *                 than one page, and there is a regular entry at the target
- *                 page address, test to see if the last read was for the 
- *                 same address.
+ *                 page address, test to see if the read is speculative.
  *
- *                 If was, evict the page, and satisfy the read from file.
- *                 Flag an error if the page was dirty.
+ *                 If it is not, evict the page, and satisfy the read from 
+ *                 file.  Flag an error if the page was dirty.
  *
- *                 If the last read was for a different page, clip the read 
- *                 to one page, and satisfy the read from the existing 
- *                 regular entry.
+ *                 If it is, clip the read to one page, and satisfy the 
+ *                 read from the existing regular entry.
  *
  *              9) If the read is for metadata, is page aligned, is larger
  *                 than one page, and there is a multi-page metadata entry
@@ -3197,7 +3882,7 @@ metadata_multipart_write(H5F_shared_t *shared, H5FD_mem_t type,
  *
  *                P/A       == page aligned
  *                size > PL == size > page length
- *                PA        == previous address
+ *                Spec      == speculative read
  *                A         == current address
  *
  *              In the entry exists column:
@@ -3207,7 +3892,7 @@ metadata_multipart_write(H5F_shared_t *shared, H5FD_mem_t type,
  *                MPMDE     == multi-page metadata entry
  *
  *       | size | entry  | VFD  |         |
- *  P/A: | > PL | exists | SWMR | PA == A | Comments:
+ *  P/A: | > PL | exists | SWMR |  Spec   | Comments:
  * ------+------+--------+------+---------+-------------------------------------
  *   N   |  X   | N || R |  X   |    X    | Clip read to page boundary if 
  *       |      |        |      |         | necessary
@@ -3220,10 +3905,10 @@ metadata_multipart_write(H5F_shared_t *shared, H5FD_mem_t type,
  * ------+------+--------+------+---------+-------------------------------------
  *   Y   |  Y   |   N    |  X   |    X    | Satisfy read from file (case 7)
  * ------+------+--------+------+---------+-------------------------------------
- *   Y   |  Y   |   R    |  X   |    N    | Clip read to page boundary
+ *   Y   |  Y   |   R    |  X   |    Y    | Clip read to page boundary
  *       |      |        |      |         | Satisfy read from entry  (case 8)
  * ------+------+--------+------+---------+-------------------------------------
- *   Y   |  Y   |   R    |  X   |    Y    | Evict entry 
+ *   Y   |  Y   |   R    |  X   |    N    | Evict entry 
  *       |      |        |      |         | (must be clean -- flag error if not)
  *       |      |        |      |         | Satisfy read from file (case 8)
  * ------+------+--------+------+---------+-------------------------------------
@@ -3261,20 +3946,25 @@ metadata_multipart_write(H5F_shared_t *shared, H5FD_mem_t type,
  *
  * Programmer:	John Mainzer -- 10/11/18
  *
- * Changes:     None.
+ * Changes:     Updated to use the speculative read hint from the 
+ *              metadata cache, and remove the static variable 
+ *              containing the base address of the last read.
+ *
+ *                                             JRM -- 4/5/20
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5PB__read_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size, 
-                void *buf/*out*/)
+H5PB__read_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, 
+                size_t size, void *buf/*out*/)
 {
+    hbool_t bypass = FALSE;                 /* flag indicating PB bypassed */
+    hbool_t speculative = FALSE;            /* speculative read hint from mdc */
     H5PB_t *pb_ptr;                         /* Page buffer for this file */
     H5PB_entry_t *entry_ptr;                /* Pointer to page buffer entry */
     H5FD_t *file;                           /* File driver pointer */
     uint64_t page;		            /* page offset of addr */
     haddr_t page_addr;                      /* page containing addr */
-    static haddr_t prev_addr = HADDR_UNDEF; /* addr of last call */
     size_t offset;                          /* offset of read in page */
     size_t clipped_size;                    /* possibley clipped size */
     herr_t ret_value = SUCCEED;             /* Return value */
@@ -3333,7 +4023,8 @@ H5PB__read_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size
                                        TRUE, FALSE)
 
         if ( ( NULL == entry_ptr ) &&
-             ( H5PB__load_page(shared, pb_ptr, page_addr, type, &entry_ptr) < 0 ) )
+             ( H5PB__load_page(shared, pb_ptr, page_addr, 
+                               type, &entry_ptr) < 0 ) )
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
                         "page buffer page load request failed (1)")
@@ -3358,7 +4049,7 @@ H5PB__read_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size
 
         HDassert( page_addr == addr );
 
-        if ( size >= pb_ptr->page_size ) {
+        if ( size > pb_ptr->page_size ) {
 
             /* search the page buffer for an entry at page */
             H5PB__SEARCH_INDEX(pb_ptr, page, entry_ptr, FAIL)
@@ -3367,10 +4058,11 @@ H5PB__read_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size
             if ( entry_ptr == NULL ) { /* case 7 */
 
                 /* update hit rate stats */
-                H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, FALSE, TRUE, size > pb_ptr->page_size)
+                H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, FALSE, \
+                                               TRUE, size > pb_ptr->page_size)
 
-                /* If the read is for metadata, is page aligned, is larger 
-                 * than one page, and there is no entry in the page buffer,
+                /* If the read is for metadata, is page aligned, is larger
+                 * than page size, and there is no entry in the page buffer,
                  * satisfy the read from the file
                  */
                 if ( H5FD_read(file, type, addr, size, buf) < 0)
@@ -3378,7 +4070,10 @@ H5PB__read_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size
                     HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
                                 "driver read request failed (1)")
 
+                bypass = TRUE;
+
                 H5PB__UPDATE_STATS_FOR_BYPASS(pb_ptr, type, size);
+
             } else {
 
                 HDassert( entry_ptr );
@@ -3389,28 +4084,29 @@ H5PB__read_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size
 
                     /* If the read is for metadata, is page aligned, is larger 
                      * than one page, and there is a regular entry at the target
-                     * page address, test to see if the last read was for the 
-                     * same address.
+                     * page address, test to see if the read is speculative.
                      *
-                     * If it was, evict the page, and satisfy the read from
+                     * If it is not, evict the page, and satisfy the read from
                      * file.  Flag an error if the page was dirty.
                      *
-                     * If the last read was for a different page, clip the read 
-                     * to one page, and satisfy the read from the existing 
-                     * regular entry.
+                     * If it is, clip the read to one page, and satisfy 
+                     * the read from the existing regular entry.
                      */
 
                     HDassert( entry_ptr->size == pb_ptr->page_size );
 
-                    if ( addr == prev_addr ) {
+                    speculative = H5C_get_curr_read_speculative(shared->cache);
 
-                        /* since this is a second try, don't update 
+                    if ( ! speculative ) {
+
+                        /* since this is likely a second try, don't update 
                          * hit rate stats.
                          */
 
                         HDassert( ! ( entry_ptr->is_dirty ) );
 
-                        if (H5PB__evict_entry(shared, entry_ptr, TRUE, false) < 0)
+                        if ( H5PB__evict_entry(shared, entry_ptr, 
+                                               TRUE, false) < 0 )
 
                             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                         "forced eviction failed (1)")
@@ -3419,7 +4115,9 @@ H5PB__read_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size
                             HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
                                         "driver read request failed (2)")
 
+                        bypass = TRUE;
                         H5PB__UPDATE_STATS_FOR_BYPASS(pb_ptr, type, size);
+
                     } else {
 
                         HDassert( entry_ptr->image_ptr );
@@ -3439,7 +4137,8 @@ H5PB__read_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size
                         }
 
                         /* update hit rate stats */
-                        H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, TRUE, TRUE, FALSE)
+                        H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, TRUE, \
+                                                       TRUE, FALSE)
                     }
                 } else { /* case 9 */
 
@@ -3509,7 +4208,8 @@ H5PB__read_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size
                                            TRUE, FALSE)
 
             if ( ( NULL == entry_ptr ) &&
-                 ( H5PB__load_page(shared, pb_ptr, page_addr, type, &entry_ptr) < 0))
+                 ( H5PB__load_page(shared, pb_ptr, page_addr, 
+                                   type, &entry_ptr) < 0))
 
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
                             "page buffer page load request failed (2)")
@@ -3532,7 +4232,8 @@ H5PB__read_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size
         }
     }
 
-    prev_addr = addr;
+    if ( ! bypass )
+        H5PB__UPDATE_STATS_FOR_ACCESS(pb_ptr, type, size);
 
 done:
 
@@ -3830,6 +4531,8 @@ H5PB__read_raw(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
         }
     } /* end else */
 
+    H5PB__UPDATE_STATS_FOR_ACCESS(pb_ptr, type, size);
+
 done:
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4073,6 +4776,8 @@ H5PB__write_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr,
         H5PB__INSERT_IN_TL(pb_ptr, entry_ptr, FAIL)
     }
 
+    H5PB__UPDATE_STATS_FOR_ACCESS(pb_ptr, type, size);
+
 done:
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4121,8 +4826,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5PB__write_raw(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size, 
-                const void *buf/*out*/)
+H5PB__write_raw(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, 
+                size_t size, const void *buf/*out*/)
 {
     H5PB_t *pb_ptr;                    /* Page buffer for this file */
     H5PB_entry_t *entry_ptr;           /* Pointer to page buffer entry */
@@ -4371,6 +5076,8 @@ H5PB__write_raw(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size
                             "mark entry dirty failed (3)")
         }
     }
+
+    H5PB__UPDATE_STATS_FOR_ACCESS(pb_ptr, type, size);
 
 done:
 
