@@ -5645,7 +5645,6 @@ smoke_check_3(int metadata_write_strategy)
     H5F_t * file_ptr = NULL;
     H5C_t * cache_ptr = NULL;
     struct mssg_t mssg;
-    verbose = FALSE;
 
     switch ( metadata_write_strategy ) {
 
@@ -6326,7 +6325,6 @@ smoke_check_5(int metadata_write_strategy)
     H5F_t * file_ptr = NULL;
     H5C_t * cache_ptr = NULL;
     struct mssg_t mssg;
-    verbose = FALSE;
 
     switch ( metadata_write_strategy ) {
 
