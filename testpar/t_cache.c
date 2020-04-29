@@ -5634,7 +5634,6 @@ smoke_check_3(int metadata_write_strategy)
 {
     const char * fcn_name = "smoke_check_3()";
     hbool_t success = TRUE;
-    hbool_t verbose = FALSE;
     int cp = 0;
     int i;
     int max_nerrors;
@@ -6319,7 +6318,6 @@ smoke_check_5(int metadata_write_strategy)
 {
     const char * fcn_name = "smoke_check_5()";
     hbool_t success = TRUE;
-    hbool_t verbose = FALSE;
     int cp = 0;
     int i;
     int max_nerrors;

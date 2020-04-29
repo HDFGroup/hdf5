@@ -388,8 +388,6 @@ H5S_mpio_permute_type(const H5S_t *space, size_t elmt_size, hsize_t **permute,
     /* Loop, while elements left in selection */
     u = 0;
     while(max_elem > 0) {
-        hsize_t off[H5D_IO_VECTOR_SIZE];        /* Array to store sequence offsets */
-        size_t len[H5D_IO_VECTOR_SIZE];         /* Array to store sequence lengths */
         size_t nelem;               /* Number of elements used in sequences */
         size_t nseq;                /* Number of sequences generated */
         size_t curr_seq;            /* Current sequence being worked on */

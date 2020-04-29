@@ -32,7 +32,13 @@
 
  */
 
+#define H5S_PACKAGE             /*suppress error about including H5Spkg   */
+
+/* Define this macro to indicate that the testing APIs should be available */
+#define H5S_TESTING
+
 #include "H5private.h"
+#include "H5Spkg.h"
 #include "testphdf5.h"
 
 

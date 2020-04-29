@@ -3744,9 +3744,9 @@ done:
  PURPOSE
     Internal routine to quickly retrieve the value of a property in a property list.
  USAGE
-    int H5P_peek_unsigned(plist, name)
-        H5P_genplist_t *plist;  IN: Property list to check
-        const char *name;       IN: Name of property to query
+    unsigned H5P_peek_unsigned(plist, name)
+             H5P_genplist_t *plist;  IN: Property list to check
+             const char *name;       IN: Name of property to query
  RETURNS
     Directly returns the value of the property in the list
  DESCRIPTION
