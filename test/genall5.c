@@ -2676,6 +2676,31 @@ create_or_validate_selection(hid_t fid, const char *full_path,
     return true;
 }
 
+/* Sleep for no more than `max_pause_msecs` milliseconds. */
+static void
+random_pause(unsigned int max_pause_msecs)
+{
+    struct timespec delay;
+    const uint64_t nsecs_per_sec = 1000 * 1000 * 1000;
+    uint64_t nsecs_per_msec, nsecs;
+
+    if (max_pause_msecs == 0)
+        return;
+
+    nsecs_per_msec = 1 + (uint64_t)random() % (1000 * 1000);
+    nsecs = max_pause_msecs * nsecs_per_msec;
+
+    delay.tv_sec = (time_t)(nsecs / nsecs_per_sec);
+    delay.tv_nsec = (long)(nsecs % nsecs_per_sec);
+    for (;;) {
+        if (nanosleep(&delay, &delay) == 0)
+            break;
+        if (errno == EINTR)
+            continue;
+        errx(EXIT_FAILURE, "%s: nanosleep", __func__);
+    }
+}
+
 /* Create and validate objects or, if `only_validate` is true, only
  * validate objects in file `fid` under group `base_path`. `config.proc_num`
  * tells the processor number the test runs on.  If `config.skip_varlen` is
@@ -2688,7 +2713,6 @@ static bool
 tend_zoo(hid_t fid, const char *base_path, zoo_config_t config,
     const phase_t *phase, size_t nphases)
 {
-    struct timespec delay = {.tv_sec = 0, .tv_nsec = 50 * 1000 * 1000};
     char full_path[1024];
     int i, nwritten;
     size_t j;
@@ -2716,8 +2740,8 @@ tend_zoo(hid_t fid, const char *base_path, zoo_config_t config,
             if (phase[j] == PHASE_CREATE || phase[j] == PHASE_DELETE)
                 zoo_create_hook(fid);
         }
+        random_pause(config.max_pause_msecs);
     }
-    nanosleep(&delay, NULL);
 out:
     if (!ok)
         warnx("%s: %s", __func__, failure_mssg);

@@ -20,6 +20,7 @@ typedef struct _zoo_config {
     bool continue_on_failure;
     bool skip_compact;
     bool skip_varlen;
+    unsigned max_pause_msecs;
 } zoo_config_t;
 
 bool create_zoo(hid_t, const char *, zoo_config_t);

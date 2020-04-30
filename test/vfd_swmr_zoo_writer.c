@@ -33,6 +33,10 @@
 #include "genall5.h"
 #include "vfd_swmr_common.h"
 
+#ifndef _arraycount
+#define _arraycount(_a) (sizeof(_a)/sizeof(_a[0]))
+#endif
+
 typedef struct _shared_ticks {
     uint64_t reader_tick;
 } shared_ticks_t;
@@ -79,14 +83,15 @@ zoo_create_hook(hid_t fid)
 static void
 usage(const char *progname)
 {
-    fprintf(stderr, "usage: %s [-C] [-S] [-W] [-a] [-e] [-n] [-q] [-v]\n",
+    fprintf(stderr, "usage: %s [-C] [-S] [-W] [-a] [-e] [-m] [-q] [-v]\n",
         progname);
     fprintf(stderr, "\n  -C: skip compact dataset tests\n");
     fprintf(stderr,   "  -S: do not use VFD SWMR\n");
     fprintf(stderr,   "  -W: do not wait for SIGINT or SIGUSR1\n");
     fprintf(stderr,   "  -a: run all tests, including variable-length data\n");
     fprintf(stderr,   "  -e: print error stacks\n");
-    fprintf(stderr,   "  -n: number of test steps to perform\n");
+    fprintf(stderr,   "  -m ms: maximum `ms` milliseconds pause between\n");
+    fprintf(stderr,   "         each create/delete step\n");
     fprintf(stderr,   "  -q: be quiet: few/no progress messages\n");
     fprintf(stderr,   "  -v: be verbose: most progress messages\n");
     exit(EXIT_FAILURE);
@@ -215,9 +220,16 @@ main(int argc, char **argv)
     zoo_config_t config = {
           .proc_num = 0
         , .skip_compact = false
-        , .skip_varlen = true};
+        , .skip_varlen = true
+        , .max_pause_msecs = 0
+    };
     bool wait_for_signal;
     int ch;
+    char vector[8];
+    unsigned seed = 1;
+    unsigned long tmpl;
+    char *end, *ostate;
+    const char *seedvar = "H5_ZOO_STEP_SEED";
     bool use_vfd_swmr = true;
     bool print_estack = false;
     const char *progname = basename(argv[0]);
@@ -233,7 +245,10 @@ main(int argc, char **argv)
              "unknown personality, expected vfd_swmr_zoo_{reader,writer}");
     }
 
-    while ((ch = getopt(argc, argv, "CSWaen:qv")) != -1) {
+    if (writer)
+        config.max_pause_msecs = 50;
+
+    while ((ch = getopt(argc, argv, "CSWaem:qv")) != -1) {
         switch(ch) {
         case 'C':
             config.skip_compact = true;
@@ -249,6 +264,17 @@ main(int argc, char **argv)
             break;
         case 'e':
             print_estack = true;
+            break;
+        case 'm':
+            errno = 0;
+            tmpl = strtoul(optarg, &end, 0);
+            if (end == optarg || *end != '\0')
+                errx(EXIT_FAILURE, "couldn't parse `-m` argument `%s`", optarg);
+            else if (errno != 0)
+                err(EXIT_FAILURE, "couldn't parse `-m` argument `%s`", optarg);
+            else if (tmpl > UINT_MAX)
+                errx(EXIT_FAILURE, "`-m` argument `%lu` too large", tmpl);
+            config.max_pause_msecs = (unsigned)tmpl;
             break;
         case 'q':
             verbosity = 1;
@@ -309,6 +335,22 @@ main(int argc, char **argv)
 
         dbgf(2, "Writing zoo...\n");
 
+        /* get seed from environment or else from time(3) */
+        switch (fetch_env_ulong(seedvar, UINT_MAX, &tmpl)) {
+        case -1:
+            errx(EXIT_FAILURE, "%s: fetch_env_ulong", __func__);
+        case 0:
+            seed = (unsigned int)time(NULL);
+            break;
+        default:
+            seed = (unsigned int)tmpl;
+            break;
+        }
+
+        dbgf(1, "To reproduce, set seed (%s) to %u.\n", seedvar, seed);
+
+        ostate = initstate(seed, vector, _arraycount(vector));
+
         if (!create_zoo(fid, ".", config))
             errx(EXIT_FAILURE, "create_zoo didn't pass self-check");
 
@@ -326,6 +368,7 @@ main(int argc, char **argv)
 
         if (!delete_zoo(fid, ".", config))
             errx(EXIT_FAILURE, "delete_zoo failed");
+        (void)setstate(ostate);
     } else {
         dbgf(2, "Reading zoo...\n");
 
