@@ -685,6 +685,7 @@ CLEARFILEBUF
 INSTRUMENT_LIBRARY
 TRACE_API
 DEBUG_PKG
+DEV_WARNINGS
 HAVE_PTHREAD
 BUILD_SHARED_SZIP_CONDITIONAL_FALSE
 BUILD_SHARED_SZIP_CONDITIONAL_TRUE
@@ -810,6 +811,7 @@ AM_CXXFLAGS
 AM_FCFLAGS
 AM_CFLAGS
 H5_LDFLAGS
+H5_ECXXFLAGS
 H5_CXXFLAGS
 H5_FCFLAGS
 H5_CPPFLAGS
@@ -922,6 +924,7 @@ with_zlib
 with_szlib
 enable_threadsafe
 with_pthread
+enable_developer_warnings
 enable_debug
 enable_codestack
 enable_metadata_trace_file
@@ -1608,6 +1611,11 @@ Optional Features:
   --enable-threadsafe     Enable thread-safe capability. Not compatible with
                           the high-level library, Fortran, or C++ wrappers.
                           [default=no]
+  --enable-developer-warnings
+                          Determines whether developer warnings will be
+                          emitted. These are usually performance suggestions
+                          (e.g. -Wsuggest-attribute) and do not flag poor code
+                          quality. [default=no]
   --enable-debug=all      Turn on debugging in all packages. One may also
                           specify a comma-separated list of package names
                           without the leading H5 or the word no. The default
@@ -3856,8 +3864,9 @@ case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 ## H5_CFLAGS (and company) are for CFLAGS that should be used on HDF5, but
 ## not exported to h5cc (or h5fc, etc.)
 ##
-## H5_ECFLAGS is for warnings that should be treated as errors.
+## H5_ECFLAGS and H5_ECXXFLAGS are for warnings that should be treated as errors.
 ##
+
 
 
 
@@ -6509,12 +6518,9 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
   HAVE_SIZEOF_FORTRAN="no"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler supports intrinsic SIZEOF" >&5
 $as_echo_n "checking if Fortran compiler supports intrinsic SIZEOF... " >&6; }
+  TEST_SRC="`sed -n '/PROGRAM PROG_FC_SIZEOF/,/END PROGRAM PROG_FC_SIZEOF/p' $srcdir/m4/aclocal_fc.f90`"
   cat > conftest.$ac_ext <<_ACEOF
-
-   PROGRAM main
-     i = sizeof(x)
-   END PROGRAM
-
+$TEST_SRC
 _ACEOF
 if ac_fn_fc_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
@@ -6533,15 +6539,9 @@ rm -f core conftest.err conftest.$ac_objext \
   HAVE_C_SIZEOF_FORTRAN="no"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler supports intrinsic C_SIZEOF" >&5
 $as_echo_n "checking if Fortran compiler supports intrinsic C_SIZEOF... " >&6; }
+  TEST_SRC="`sed -n '/PROGRAM PROG_FC_C_SIZEOF/,/END PROGRAM PROG_FC_C_SIZEOF/p' $srcdir/m4/aclocal_fc.f90`"
   cat > conftest.$ac_ext <<_ACEOF
-
-   PROGRAM main
-     USE ISO_C_BINDING
-     INTEGER(C_INT) :: a
-     INTEGER(C_SIZE_T) :: result
-     result = C_SIZEOF(a)
-   END PROGRAM
-
+$TEST_SRC
 _ACEOF
 if ac_fn_fc_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
@@ -6560,14 +6560,9 @@ rm -f core conftest.err conftest.$ac_objext \
   HAVE_STORAGE_SIZE_FORTRAN="no"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler supports intrinsic STORAGE_SIZE" >&5
 $as_echo_n "checking if Fortran compiler supports intrinsic STORAGE_SIZE... " >&6; }
+  TEST_SRC="`sed -ne '/PROGRAM PROG_FC_STORAGE_SIZE/,/END PROGRAM PROG_FC_STORAGE_SIZE/p' $srcdir/m4/aclocal_fc.f90`"
   cat > conftest.$ac_ext <<_ACEOF
-
-   PROGRAM main
-     INTEGER :: a
-     INTEGER :: result
-     result = STORAGE_SIZE(a)
-   END PROGRAM
-
+$TEST_SRC
 _ACEOF
 if ac_fn_fc_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
@@ -6584,80 +6579,29 @@ rm -f core conftest.err conftest.$ac_objext \
 
   ## Check to see if -r8 was specified to determine if we need to
   ## compile the DOUBLE PRECISION interfaces.
-
-  FORTRAN_DEFAULT_REALisDBLE="no"
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran default REAL is DOUBLE PRECISION" >&5
-$as_echo_n "checking if Fortran default REAL is DOUBLE PRECISION... " >&6; }
-
-  cat > conftest.$ac_ext <<_ACEOF
-
-     MODULE type_mod
-       INTERFACE h5t
-         MODULE PROCEDURE h5t_real
-         MODULE PROCEDURE h5t_dble
-       END INTERFACE
-     CONTAINS
-       SUBROUTINE h5t_real(r)
-         REAL :: r
-       END SUBROUTINE h5t_real
-       SUBROUTINE h5t_dble(d)
-         DOUBLE PRECISION :: d
-       END SUBROUTINE h5t_dble
-     END MODULE type_mod
-     PROGRAM main
-       USE type_mod
-       REAL :: r
-       DOUBLE PRECISION :: d
-       CALL h5t(r)
-       CALL h5t(d)
-     END PROGRAM main
-
-_ACEOF
-if ac_fn_fc_try_compile "$LINENO"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-            FORTRAN_DEFAULT_REALisDBLE="yes"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-
+  PAC_PROG_FC_DEFAULT_REALisDBLE
 
   if test "X$HDF_FORTRAN2003" = "Xyes"; then
 
     ## Checking if the compiler supports the required Fortran 2003 features and
     ## disable Fortran 2003 if it does not.
 
+   HAVE_F2003_REQUIREMENTS="no"
    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler version compatible with Fortran 2003 HDF" >&5
 $as_echo_n "checking if Fortran compiler version compatible with Fortran 2003 HDF... " >&6; }
-    HAVE_FORTRAN_2003="no"
-    HAVE_F2003_REQUIREMENTS="no"
-    cat > conftest.$ac_ext <<_ACEOF
-      program main
-
-
-        USE iso_c_binding
-        IMPLICIT NONE
-        TYPE(C_PTR) :: ptr
-        TYPE(C_FUNPTR) :: funptr
-        CHARACTER(LEN=80, KIND=c_char), TARGET :: ichr
-
-        ptr = C_LOC(ichr(1:1))
-
-
-      end
+   TEST_SRC="`sed -n '/PROG_FC_HAVE_F2003_REQUIREMENTS/,/END PROGRAM PROG_FC_HAVE_F2003_REQUIREMENTS/p' $srcdir/m4/aclocal_fc.f90`"
+   cat > conftest.$ac_ext <<_ACEOF
+$TEST_SRC
 _ACEOF
-if ac_fn_fc_try_link "$LINENO"; then :
+if ac_fn_fc_try_compile "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-        HAVE_F2003_REQUIREMENTS=yes
+            HAVE_F2003_REQUIREMENTS="yes"
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
 
     if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
@@ -7305,13 +7249,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX needs old style header files in includes" >&5
 $as_echo_n "checking if $CXX needs old style header files in includes... " >&6; }
+  TEST_SRC="`(echo \"#define OLD_HEADER_FILENAME 1\"; cat $srcdir/config/cmake_ext_mod/HDFCXXTests.cpp)`"
+
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-
-#include <iostream>
-
-int main(void) { return 0; }
-
+$TEST_SRC
 _ACEOF
 if ac_fn_cxx_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
@@ -7330,19 +7272,11 @@ rm -f core conftest.err conftest.$ac_objext \
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX can handle namespaces" >&5
 $as_echo_n "checking if $CXX can handle namespaces... " >&6; }
+  TEST_SRC="`(echo \"#define HDF_NO_NAMESPACE 1\"; cat $srcdir/config/cmake_ext_mod/HDFCXXTests.cpp)`"
+
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-
-namespace H5 {
-int fnord;
-}
-
-int main(void) {
-   using namespace H5;
-   fnord = 37;
-   return 0;
-}
-
+$TEST_SRC
 _ACEOF
 if ac_fn_cxx_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
@@ -7350,8 +7284,8 @@ $as_echo "yes" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-     CXXFLAGS="${CXXFLAGS} -DH5_NO_NAMESPACE"
-     AM_CXXFLAGS="${AM_CXXFLAGS} -DH5_NO_NAMESPACE"
+     CXXFLAGS="${CXXFLAGS} -DHDF_NO_NAMESPACE"
+     AM_CXXFLAGS="${AM_CXXFLAGS} -DHDF_NO_NAMESPACE"
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
@@ -7361,17 +7295,11 @@ rm -f core conftest.err conftest.$ac_objext \
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX can handle static cast" >&5
 $as_echo_n "checking if $CXX can handle static cast... " >&6; }
+  TEST_SRC="`(echo \"#define NO_STATIC_CAST 1\"; cat $srcdir/config/cmake_ext_mod/HDFCXXTests.cpp)`"
+
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-
-int main(void) {
-   float test_float;
-   int test_int;
-   test_float = 37.0;
-   test_int = static_cast <int> (test_float);
-   return 0;
-}
-
+$TEST_SRC
 _ACEOF
 if ac_fn_cxx_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
@@ -7392,38 +7320,11 @@ rm -f core conftest.err conftest.$ac_objext \
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX has offsetof extension" >&5
 $as_echo_n "checking if $CXX has offsetof extension... " >&6; }
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+  TEST_SRC="`(echo \"#define CXX_HAVE_OFFSETOF 1\"; cat $srcdir/config/cmake_ext_mod/HDFCXXTests.cpp)`"
+
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-
-  #include <stdio.h>
-  #include <stddef.h>
-
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-
-    struct index_st
-    {
-      unsigned char type;
-      unsigned char num;
-      unsigned int len;
-    };
-    typedef struct index_st index_t;
-    int x,y;
-    x = offsetof(struct index_st, len);
-    y = offsetof(index_t, num)
-
-  ;
-  return 0;
-}
+$TEST_SRC
 _ACEOF
 if ac_fn_cxx_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
@@ -27143,6 +27044,47 @@ $as_echo "no" >&6; }
 fi
 
 ## ----------------------------------------------------------------------
+## Check if developer warnings should be turned on
+## These are warnings that provide suggestions like gcc's -Wsuggest-attribute.
+## They do not indicate code problems.
+##
+## Note that developers don't need to build with these regularly. They
+## are just handy to check once in a while (before releases, etc.).
+##
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking enable developer warnings" >&5
+$as_echo_n "checking enable developer warnings... " >&6; }
+# Check whether --enable-developer-warnings was given.
+if test "${enable_developer_warnings+set}" = set; then :
+  enableval=$enable_developer_warnings; DEV_WARNINGS=$enableval
+fi
+
+
+## Set default
+if test "X-$DEV_WARNINGS" = X- ; then
+  DEV_WARNINGS=no
+fi
+
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
+
+
+case "X-$DEV_WARNINGS" in
+  X-yes)
+    H5_CFLAGS="$H5_CFLAGS $DEVELOPER_WARNING_CFLAGS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    ;;
+  X-no)
+    H5_CFLAGS="$H5_CFLAGS $NO_DEVELOPER_WARNING_CFLAGS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    ;;
+  *)
+    as_fn_error $? "Unrecognized value: $DEV_WARNINGS" "$LINENO" 5
+    ;;
+esac
+
+## ----------------------------------------------------------------------
 ## Turn on debugging by setting compiler flags
 ## This must come after the enable-production since it depends on production.
 ##
@@ -27566,17 +27508,11 @@ ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
-
+      TEST_SRC="`sed -n '/PROGRAM FC_MPI_CHECK/,/END PROGRAM FC_MPI_CHECK/p' $srcdir/m4/aclocal_fc.f90`"
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether a simple MPI-IO Fortran program can be linked" >&5
 $as_echo_n "checking whether a simple MPI-IO Fortran program can be linked... " >&6; }
       cat > conftest.$ac_ext <<_ACEOF
-
-          PROGRAM main
-          USE mpi
-          INTEGER :: comm, amode, info, fh, ierror
-          CHARACTER(LEN=1) :: filename
-          CALL MPI_File_open( comm, filename, amode, info, fh, ierror)
-          END
+$TEST_SRC
 _ACEOF
 if ac_fn_fc_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
