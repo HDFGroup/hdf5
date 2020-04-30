@@ -222,9 +222,7 @@ main(int argc, char **argv)
     bool print_estack = false;
     const char *progname = basename(argv[0]);
     estack_state_t es;
-#if 1
-    char step[2] = "ab";
-#endif
+    char step = 'b';
 
     if (strcmp(progname, "vfd_swmr_zoo_writer") == 0)
         writer = wait_for_signal = true;
@@ -314,11 +312,17 @@ main(int argc, char **argv)
         if (!create_zoo(fid, ".", config))
             errx(EXIT_FAILURE, "create_zoo didn't pass self-check");
 
-        if (read(STDIN_FILENO, &step[1], sizeof(step[1])) == -1)
+        /* Avoid deadlock: flush the file before waiting for the reader's
+         * message.
+         */
+        if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
+            errx(EXIT_FAILURE, "%s: H5Fflush failed", __func__);
+
+        if (read(STDIN_FILENO, &step, sizeof(step)) == -1)
             err(EXIT_FAILURE, "read");
 
-        if (step[1] != 'b')
-            errx(EXIT_FAILURE, "expected 'b' read '%c'", step[1]);
+        if (step != 'b')
+            errx(EXIT_FAILURE, "expected 'b' read '%c'", step);
 
         if (!delete_zoo(fid, ".", config))
             errx(EXIT_FAILURE, "delete_zoo failed");
@@ -328,7 +332,7 @@ main(int argc, char **argv)
         while (!validate_zoo(fid, ".", config))
             ;
 
-        if (write(STDOUT_FILENO, &step[1], sizeof(step[1])) == -1)
+        if (write(STDOUT_FILENO, &step, sizeof(step)) == -1)
             err(EXIT_FAILURE, "write");
         while (!validate_deleted_zoo(fid, ".", config))
             ;
