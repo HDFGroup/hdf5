@@ -122,6 +122,12 @@ await_signal(hid_t fid)
             __func__, __LINE__);
     }
 
+    /* Avoid deadlock: flush the file before waiting for the reader's
+     * message.
+     */
+    if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
+        errx(EXIT_FAILURE, "%s: H5Fflush failed", __func__);
+
     for (;;) {
         const int rc = sigtimedwait(&sleepset, NULL, &tick);
 
