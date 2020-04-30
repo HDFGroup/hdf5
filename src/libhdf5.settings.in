@@ -6,7 +6,7 @@ General Information:
                    HDF5 Version: @H5_VERSION@
                   Configured on: @CONFIG_DATE@
                   Configured by: @CONFIG_USER@
-                  Configure mode: @CONFIG_MODE@
+                 Configure mode: @CONFIG_MODE@
                     Host system: @host_cpu@-@host_vendor@-@host_os@
               Uname information: @UNAME_INFO@
                        Byte sex: @BYTESEX@
@@ -14,36 +14,25 @@ General Information:
 
 Compiling Options:
 ------------------
-                     Build Mode: @BUILD_MODE@
-              Debugging Symbols: @SYMBOLS@
-                        Asserts: @ASSERTS@
-                      Profiling: @PROFILING@
-             Optimization Level: @OPTIMIZATION@
-
-Linking Options:
-----------------
-                      Libraries: @STATIC_SHARED@
-  Statically Linked Executables: @LT_STATIC_EXEC@
+               Compilation Mode: @CONFIG_MODE@
+                     C Compiler: @CC_VERSION@
+                        C Flags: @CFLAGS@
+                     H5 C Flags: @H5_CFLAGS@ @H5_ECFLAGS@
+                     AM C Flags: @AM_CFLAGS@
+                       CPPFLAGS: @CPPFLAGS@
+                    H5_CPPFLAGS: @H5_CPPFLAGS@
+                    AM_CPPFLAGS: @AM_CPPFLAGS@
+               Shared C Library: @enable_shared@
+               Static C Library: @enable_static@
+  Statically Linked Executables: @STATIC_EXEC@
                         LDFLAGS: @LDFLAGS@
                      H5_LDFLAGS: @H5_LDFLAGS@
                      AM_LDFLAGS: @AM_LDFLAGS@
                 Extra libraries: @LIBS@
                        Archiver: @AR@
-                       AR_FLAGS: @AR_FLAGS@
                          Ranlib: @RANLIB@
-
-Languages:
-----------
-                              C: yes
-                     C Compiler: @CC_VERSION@
-                       CPPFLAGS: @CPPFLAGS@
-                    H5_CPPFLAGS: @H5_CPPFLAGS@
-                    AM_CPPFLAGS: @AM_CPPFLAGS@
-                        C Flags: @CFLAGS@
-                     H5 C Flags: @H5_CFLAGS@ @H5_ECFLAGS@
-                     AM C Flags: @AM_CFLAGS@
-               Shared C Library: @enable_shared@
-               Static C Library: @enable_static@
+              Debugged Packages: @DEBUG_PKG@
+                    API Tracing: @TRACE_API@
 
 Languages:
 ----------

@@ -100,13 +100,14 @@ AC_SUBST([CPPFLAGS])
 ## H5_CFLAGS (and company) are for CFLAGS that should be used on HDF5, but
 ## not exported to h5cc (or h5fc, etc.)
 ##
-## H5_ECFLAGS is for warnings that should be treated as errors.
+## H5_ECFLAGS and H5_ECXXFLAGS are for warnings that should be treated as errors.
 ##
 AC_SUBST([H5_CFLAGS])
 AC_SUBST([H5_ECFLAGS])
 AC_SUBST([H5_CPPFLAGS])
 AC_SUBST([H5_FCFLAGS])
 AC_SUBST([H5_CXXFLAGS])
+AC_SUBST([H5_ECXXFLAGS])
 AC_SUBST([H5_LDFLAGS])
 
 ## AM_CFLAGS (and company) are for CFLAGS that should be used on HDF5,
@@ -1775,6 +1776,48 @@ if test ${hdf5_cv_system_scope_threads} = "yes"; then
 else
   AC_MSG_RESULT([no])
 fi
+
+## ----------------------------------------------------------------------
+## Check if developer warnings should be turned on
+## These are warnings that provide suggestions like gcc's -Wsuggest-attribute.
+## They do not indicate code problems.
+##
+## Note that developers don't need to build with these regularly. They
+## are just handy to check once in a while (before releases, etc.).
+##
+AC_MSG_CHECKING([enable developer warnings])
+AC_ARG_ENABLE([developer-warnings],
+              [AS_HELP_STRING([--enable-developer-warnings],
+                              [Determines whether developer warnings will be
+                               emitted. These are usually performance suggestions
+                               (e.g. -Wsuggest-attribute) and do not flag poor code
+                               quality.
+                               [default=no]
+                               ])],
+              [DEV_WARNINGS=$enableval])
+
+## Set default
+if test "X-$DEV_WARNINGS" = X- ; then
+  DEV_WARNINGS=no
+fi
+
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
+AC_SUBST([DEV_WARNINGS])
+
+case "X-$DEV_WARNINGS" in
+  X-yes)
+    H5_CFLAGS="$H5_CFLAGS $DEVELOPER_WARNING_CFLAGS"
+    AC_MSG_RESULT([yes])
+    ;;
+  X-no)
+    H5_CFLAGS="$H5_CFLAGS $NO_DEVELOPER_WARNING_CFLAGS"
+    AC_MSG_RESULT([no])
+    ;;
+  *)
+    AC_MSG_ERROR([Unrecognized value: $DEV_WARNINGS])
+    ;;
+esac
 
 ## ----------------------------------------------------------------------
 ## Turn on debugging by setting compiler flags
