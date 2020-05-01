@@ -559,10 +559,12 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
     } /* end if */
 
     /* Create layout message */
-    /* (Don't make layout message constant unless allocation time is early and non-filtered, since space may not be allocated) */
+    /* (Don't make layout message constant unless allocation time is early and
+     *  non-filtered and has >0 elements, since space may not be allocated -QAK) */
     /* (Note: this is relying on H5D__alloc_storage not calling H5O_msg_write during dataset creation) */
     if(fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY && H5D_COMPACT != layout->type
-            && !dset->shared->dcpl_cache.pline.nused)
+            && !dset->shared->dcpl_cache.pline.nused
+            && (0 != H5S_GET_EXTENT_NPOINTS(dset->shared->space)))
         layout_mesg_flags = H5O_MSG_FLAG_CONSTANT;
     else
         layout_mesg_flags =  0;
