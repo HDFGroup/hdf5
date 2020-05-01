@@ -83,6 +83,7 @@ const char *FILENAME[] = {
     "dls_01_strings",   /* 23 */
     "power2up",         /* 24 */
     "version_bounds",   /* 25 */
+    "alloc_0sized",     /* 26 */
     NULL
 };
 
@@ -3114,7 +3115,7 @@ test_nbit_float(hid_t file)
      */
     for(i = 0; i < (size_t)size[0]; i++) {
         for(j = 0; j < (size_t)size[1]; j++) {
-            if(!(orig_data[i][j] == orig_data[i][j]))
+            if(HDisnan(orig_data[i][j]))
                 continue;  /* skip if value is NaN */
             if(!H5_FLT_ABS_EQUAL(new_data[i][j], orig_data[i][j])) {
                 H5_FAILED();
@@ -3168,18 +3169,18 @@ test_nbit_double(hid_t file)
      */
     double              orig_data[2][5] = {
         {
-            1.6081706885101836e+60,
-            -255.32099170994480,
-            1.2677579992621376e-61,
-            64568.289448797700,
-            -1.0619721778839084e-75
+            (double)1.6081706885101836e+60L,
+            -255.32099170994480f,
+            (double)1.2677579992621376e-61L,
+            64568.289448797700f,
+            (double)-1.0619721778839084e-75L
         },
         {
-            2.1499497833454840e+56,
-            6.6562295504670740e-3,
-            -1.5747263393432150,
-            1.0711093225222612,
-            -9.8971679387636870e-1
+            (double)2.1499497833454840e+56L,
+            6.6562295504670740e-3f,
+            -1.5747263393432150f,
+            1.0711093225222612f,
+            -9.8971679387636870e-1f
         }};
     double              new_data[2][5];
     size_t              precision, offset;
@@ -3246,7 +3247,7 @@ test_nbit_double(hid_t file)
      */
     for(i = 0; i < (size_t)size[0]; i++) {
         for(j = 0; j < (size_t)size[1]; j++) {
-            if(!(orig_data[i][j] == orig_data[i][j]))
+            if(HDisnan(orig_data[i][j]))
                 continue;  /* skip if value is NaN */
             if(!H5_DBL_ABS_EQUAL(new_data[i][j], orig_data[i][j])) {
                 H5_FAILED();
@@ -3581,7 +3582,7 @@ test_nbit_compound(hid_t file)
             if(((unsigned)new_data[i][j].i & i_mask) != ((unsigned)orig_data[i][j].i & i_mask) ||
                 ((unsigned)new_data[i][j].c & c_mask) != ((unsigned)orig_data[i][j].c & c_mask) ||
                 ((unsigned)new_data[i][j].s & s_mask) != ((unsigned)orig_data[i][j].s & s_mask) ||
-                (orig_data[i][j].f == orig_data[i][j].f && !H5_FLT_ABS_EQUAL(new_data[i][j].f, orig_data[i][j].f)))
+                (!HDisnan(orig_data[i][j].f) && !H5_FLT_ABS_EQUAL(new_data[i][j].f, orig_data[i][j].f)))
             {
                 H5_FAILED();
                 HDprintf("    Read different values than written.\n");
@@ -3903,7 +3904,7 @@ test_nbit_compound_2(hid_t file)
                     if(((unsigned)new_data[i][j].d[m][n].i & i_mask) != ((unsigned)orig_data[i][j].d[m][n].i & i_mask)||
                             ((unsigned)new_data[i][j].d[m][n].c & c_mask) != ((unsigned)orig_data[i][j].d[m][n].c & c_mask)||
                             ((unsigned)new_data[i][j].d[m][n].s & s_mask) != ((unsigned)orig_data[i][j].d[m][n].s & s_mask)||
-                            (new_data[i][j].d[m][n].f == new_data[i][j].d[m][n].f && !H5_FLT_ABS_EQUAL(new_data[i][j].d[m][n].f, new_data[i][j].d[m][n].f))) {
+                            (!HDisnan(new_data[i][j].d[m][n].f) && !H5_FLT_ABS_EQUAL(new_data[i][j].d[m][n].f, new_data[i][j].d[m][n].f))) {
                         d_failed = 1;
                         goto out;
                     }
@@ -3912,7 +3913,7 @@ out:
             if(((unsigned)new_data[i][j].a.i & i_mask) != ((unsigned)orig_data[i][j].a.i & i_mask)||
                     ((unsigned)new_data[i][j].a.c & c_mask) != ((unsigned)orig_data[i][j].a.c & c_mask)||
                     ((unsigned)new_data[i][j].a.s & s_mask) != ((unsigned)orig_data[i][j].a.s & s_mask)||
-                    (new_data[i][j].a.f == new_data[i][j].a.f && !H5_FLT_ABS_EQUAL(new_data[i][j].a.f, new_data[i][j].a.f)) ||
+                    (!HDisnan(new_data[i][j].a.f) && !H5_FLT_ABS_EQUAL(new_data[i][j].a.f, new_data[i][j].a.f)) ||
                     new_data[i][j].v != orig_data[i][j].v || b_failed || d_failed) {
                 H5_FAILED();
                 HDprintf("    Read different values than written.\n");
@@ -7138,12 +7139,12 @@ error:
  *
  * If either argument is zero, then the result is undefined.
  */
-static long
-gcd(const long l0, const long r0)
+static H5_ATTR_CONST long
+gcd(long l0, long r0)
 {
     long magnitude, remainder;
     bool negative = ((l0 < 0) != (r0 < 0));
-    long l = labs(l0), r = labs(r0);
+    long l = HDlabs(l0), r = HDlabs(r0);
 
     do {
         if (l < r) {
@@ -13484,6 +13485,197 @@ error:
 } /* end test_object_header_minimization_dcpl() */
 
 
+/*-----------------------------------------------------------------------------
+ * Function:   test_0sized_dset_metadata_alloc
+ *
+ * Purpose:    Tests the metadata allocation for 0-sized datasets.
+ *
+ * Return:     Success/pass:   0
+ *             Failure/error: -1
+ *
+ * Programmer: Quincey Koziol
+ *             2020 April 30
+ *
+ *-----------------------------------------------------------------------------
+ */
+static herr_t
+test_0sized_dset_metadata_alloc(hid_t fapl_id)
+{
+    char    filename[FILENAME_BUF_SIZE] = "";
+    hid_t   file_id  = H5I_INVALID_HID;
+    hid_t   fapl_id_copy = H5I_INVALID_HID;
+    hid_t   dset_id  = H5I_INVALID_HID;
+    hid_t   dcpl_id  = H5I_INVALID_HID;
+    hid_t   dcpl_id_copy = H5I_INVALID_HID;
+    hid_t   dset_space_id = H5I_INVALID_HID;
+    hid_t   buf_space_id = H5I_INVALID_HID;
+    unsigned new_format;                /* Whether to use latest file format */
+
+    TESTING("allocation of metadata for 0-sized datasets");
+
+    /*********/
+    /* SETUP */
+    /*********/
+
+    if(NULL == h5_fixname(FILENAME[26], fapl_id, filename, sizeof(filename)))
+        FAIL_STACK_ERROR
+
+    /* Create DCPL for the dataset */
+    if((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR
+
+
+    /*************/
+    /* RUN TESTS */
+    /*************/
+
+    /* Iterate over file format versions */
+    for(new_format = FALSE; new_format <= TRUE; new_format++) {
+        H5D_layout_t layout;            /* Dataset layout type */
+        H5D_alloc_time_t alloc_time;    /* Storage allocation time */
+
+        /* Copy the file access property list */
+        if((fapl_id_copy = H5Pcopy(fapl_id)) < 0)
+            FAIL_STACK_ERROR
+
+        /* Set the "use the latest version of the format" bounds for creating objects in the file */
+        if(new_format)
+            if(H5Pset_libver_bounds(fapl_id_copy, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+                FAIL_STACK_ERROR
+
+        /* Create test file */
+        if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id_copy)) < 0)
+            FAIL_STACK_ERROR
+
+        /* Close the copy of the FAPL */
+        if(H5Pclose(fapl_id_copy) < 0)
+            FAIL_STACK_ERROR
+
+        /* Iterate over combinations of testing parameters */
+        for(layout = H5D_COMPACT; layout <= H5D_CHUNKED; layout++) {
+            for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
+                const hsize_t dims[1] = {0};        /* Dataset dimensions */
+                const hsize_t max_dims[1] = {H5S_UNLIMITED}; /* Maximum dataset dimensions */
+                const hsize_t chunk_dims[1] = {100}; /* Chunk dimensions */
+                char dset_name[32];                 /* Dataset name */
+                H5O_native_info_t nat_info;         /* Information about the dataset */
+
+                /* Compact storage must have early allocation */
+                if(H5D_COMPACT == layout && H5D_ALLOC_TIME_EARLY != alloc_time)
+                    continue;
+
+                /* Compose dataset name */
+                HDsnprintf(dset_name, sizeof(dset_name), "/Dataset-%u-%u", (unsigned)alloc_time, (unsigned)layout);
+
+                /* Set up DCPL */
+                if((dcpl_id_copy = H5Pcopy(dcpl_id)) < 0)
+                    FAIL_STACK_ERROR
+                if(H5Pset_alloc_time(dcpl_id_copy, alloc_time) < 0)
+                    FAIL_STACK_ERROR
+                if(H5Pset_layout(dcpl_id_copy, layout) < 0)
+                    FAIL_STACK_ERROR
+                if(H5D_CHUNKED == layout)
+                    if(H5Pset_chunk(dcpl_id_copy, 1, chunk_dims) < 0)
+                        FAIL_STACK_ERROR
+
+                /* Create the dataspace for the dataset */
+                if((dset_space_id = H5Screate_simple(1, dims, (H5D_CHUNKED == layout ? max_dims : NULL))) < 0)
+                    FAIL_STACK_ERROR
+
+                /* Create the dataset with the appropriate parameters */
+                if((dset_id = H5Dcreate2(file_id, dset_name, H5T_NATIVE_INT, dset_space_id, H5P_DEFAULT, dcpl_id_copy, H5P_DEFAULT)) < 0)
+                    FAIL_STACK_ERROR
+
+                /* Close objects used to create dataset */
+                if(H5Pclose(dcpl_id_copy) < 0)
+                    FAIL_STACK_ERROR
+                if(H5Sclose(dset_space_id) < 0)
+                    FAIL_STACK_ERROR
+
+                /* Retrieve & verify the dataset's index info */
+                HDmemset(&nat_info, 0, sizeof(nat_info));
+                if(H5Oget_native_info(dset_id, &nat_info, H5O_NATIVE_INFO_META_SIZE) < 0)
+                    FAIL_STACK_ERROR
+                if(0 != nat_info.meta_size.obj.index_size)
+                    FAIL_PUTS_ERROR("dataset index allocation size is non-zero")
+
+                /* If chunked, try extending and verify that the index is allocated */
+                if(H5D_CHUNKED == layout) {
+                    const hsize_t new_dims[1] = {1500}; /* New dataset dimensions */
+                    const hsize_t mem_dims[1] = {1}; /* Memory buffer dataset dimensions */
+                    const hsize_t coord = 0;    /* Dataset selection coordinate */
+                    int val = 0;                /* Data value */
+
+                    /* Extend dataset */
+                    if(H5Dset_extent(dset_id, new_dims) < 0)
+                        FAIL_STACK_ERROR
+
+                    /* Get the dataspace for the dataset & set single point selection */
+                    if((dset_space_id = H5Dget_space(dset_id)) < 0)
+                        FAIL_STACK_ERROR
+                    if(H5Sselect_elements(dset_space_id, H5S_SELECT_SET, (size_t)1, (const hsize_t *)&coord) < 0)
+                        FAIL_STACK_ERROR
+
+                    /* Create memory dataspace, with only one element */
+                    if((buf_space_id = H5Screate_simple(1, mem_dims, NULL)) < 0)
+                        FAIL_STACK_ERROR
+
+                    /* Write the data to the dataset */
+                    if(H5Dwrite(dset_id, H5T_NATIVE_INT, buf_space_id, dset_space_id, H5P_DEFAULT, &val) < 0)
+                        FAIL_STACK_ERROR
+
+                    /* Close objects used to perform I/O */
+                    if(H5Sclose(dset_space_id) < 0)
+                        FAIL_STACK_ERROR
+                    if(H5Sclose(buf_space_id) < 0)
+                        FAIL_STACK_ERROR
+
+                    /* Retrieve & verify the dataset's index info */
+                    HDmemset(&nat_info, 0, sizeof(nat_info));
+                    if(H5Oget_native_info(dset_id, &nat_info, H5O_NATIVE_INFO_META_SIZE) < 0)
+                        FAIL_STACK_ERROR
+                    if(0 == nat_info.meta_size.obj.index_size)
+                        FAIL_PUTS_ERROR("dataset index allocation size is zero")
+                } /* end if */
+
+                /* Close dataset */
+                if(H5Dclose(dset_id) < 0)
+                    FAIL_STACK_ERROR
+            } /* end for */
+        } /* end for */
+
+        /* Close test file */
+        if(H5Fclose(file_id) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+
+
+    /************/
+    /* TEARDOWN */
+    /************/
+
+    if(H5Pclose(dcpl_id) < 0)
+        FAIL_STACK_ERROR
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dset_space_id);
+        H5Pclose(buf_space_id);
+        H5Pclose(fapl_id_copy);
+        H5Pclose(dcpl_id_copy);
+        H5Pclose(dcpl_id);
+        H5Dclose(dset_id);
+        H5Fclose(file_id);
+    } H5E_END_TRY;
+
+    return FAIL;
+} /* end test_0sized_dset_metadata_alloc() */
+
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -13729,7 +13921,8 @@ main(void)
     nerrors += (test_object_header_minimization_dcpl() < 0 ? 1 : 0);
 
     /* Run misc tests */
-    nerrors += dls_01_main();
+    nerrors += (dls_01_main() < 0                           ? 1 : 0);
+    nerrors += (test_0sized_dset_metadata_alloc(fapl) < 0   ? 1 : 0);
 
     /* Verify symbol table messages are cached */
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
