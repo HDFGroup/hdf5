@@ -89,23 +89,11 @@ if test "X-gfortran" = "X-$f9x_vendor"; then
 
     H5_FCFLAGS="$H5_FCFLAGS $arch"
 
-    ################
-    # Optimization #
-    ################
-
-    if test $f9x_vers_major -le 4; then
-        HIGH_OPT_FCFLAGS="-O3"
-        DEBUG_OPT_FCFLAGS=
-    else
-        HIGH_OPT_FCFLAGS="-O3"
-        DEBUG_OPT_FCFLAGS="-Og"
-    fi
-
     ##############
     # Production #
     ##############
 
-    PROD_FCFLAGS=$HIGH_OPT_FCFLAGS
+    PROD_FCFLAGS=
 
     #########
     # Debug #
@@ -129,6 +117,19 @@ if test "X-gfortran" = "X-$f9x_vendor"; then
     #############
 
     PROFILE_FCFLAGS="-pg"
+
+    ################
+    # Optimization #
+    ################
+
+    if test $f9x_vers_major -le 4; then
+        HIGH_OPT_FCFLAGS="-O3"
+        DEBUG_OPT_FCFLAGS=
+    else
+        HIGH_OPT_FCFLAGS="-O3"
+        DEBUG_OPT_FCFLAGS="-Og"
+    fi
+    NO_OPT_FCFLAGS="-O0"
 
     ############
     # Warnings #
