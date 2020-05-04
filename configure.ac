@@ -1778,6 +1778,55 @@ else
 fi
 
 ## ----------------------------------------------------------------------
+## Check if the compiler should include symbols
+##
+AC_MSG_CHECKING([enable debugging symbols])
+AC_ARG_ENABLE([symbols],
+              [AS_HELP_STRING([--enable-symbols=(yes|no|<custom>)],
+                              [Add debug symbols to the library (e.g.: build with -g).
+                               This is independent of the build mode and optimization
+                               level. The custom string allows special settings like
+                               -ggdb, etc. to be used.
+                               [default=yes if debug build, otherwise no]
+                               ])],
+              [SYMBOLS=$enableval])
+
+## Set default
+if test "X-$SYMBOLS" = X- ; then
+  if test "X-$CONFIG_MODE" = "X-development" ; then
+    SYMBOLS=yes
+  else
+    SYMBOLS=no
+  fi
+fi
+
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
+AC_SUBST([SYMBOLS])
+
+case "X-$SYMBOLS" in
+  X-yes)
+    H5_CFLAGS="$H5_CFLAGS $SYMBOLS_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $SYMBOLS_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $SYMBOLS_FCFLAGS"
+    AC_MSG_RESULT([yes])
+    ;;
+  X-no)
+    H5_CFLAGS="$H5_CFLAGS $NO_SYMBOLS_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $NO_SYMBOLS_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $NO_SYMBOLS_FCFLAGS"
+    AC_MSG_RESULT([no])
+    ;;
+  *)
+    H5_CFLAGS="$H5_CFLAGS $SYMBOLS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $SYMBOLS"
+    H5_FCFLAGS="$H5_FCFLAGS $SYMBOLS"
+    SYMBOLS="custom ($SYMBOLS)"
+    AC_MSG_RESULT([$SYMBOLS])
+    ;;
+esac
+
+## ----------------------------------------------------------------------
 ## Check if developer warnings should be turned on
 ## These are warnings that provide suggestions like gcc's -Wsuggest-attribute.
 ## They do not indicate code problems.
@@ -1816,6 +1865,119 @@ case "X-$DEV_WARNINGS" in
     ;;
   *)
     AC_MSG_ERROR([Unrecognized value: $DEV_WARNINGS])
+    ;;
+esac
+
+## ----------------------------------------------------------------------
+## Check if the compiler should use profiling flags/settings
+##
+AC_MSG_CHECKING([profiling])
+AC_ARG_ENABLE([profiling],
+              [AS_HELP_STRING([--enable-profiling=(yes|no|<custom>)],
+                              [Enable profiling flags (e.g.: -pg).
+                               This can be set independently from the build mode.
+                               The custom setting can be used to pass alternative
+                               profiling flags (e.g.: -P for using Prof with gcc).
+                               [default=no]
+                               ])],
+              [PROFILING=$enableval])
+
+## Default is no profiling
+if test "X-$PROFILING" = X- ; then
+    PROFILING=no
+fi
+
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
+AC_SUBST([PROFILING])
+
+case "X-$PROFILING" in
+  X-yes)
+    H5_CFLAGS="$H5_CFLAGS $PROFILE_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $PROFILE_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $PROFILE_FCFLAGS"
+    AC_MSG_RESULT([yes])
+    ;;
+  X-no)
+    AC_MSG_RESULT([no])
+    ;;
+  *)
+    H5_CFLAGS="$H5_CFLAGS $PROFILING"
+    H5_CXXFLAGS="$H5_CXXFLAGS $PROFILING"
+    H5_FCFLAGS="$H5_FCFLAGS $PROFILING"
+    PROFILING="custom ($PROFILING)"
+    AC_MSG_RESULT([$PROFILING])
+    ;;
+esac
+
+## ----------------------------------------------------------------------
+## Check if the compiler should use a particular optimization setting
+##
+AC_MSG_CHECKING([optimization level])
+AC_ARG_ENABLE([optimization],
+              [AS_HELP_STRING([--enable-optimization=(high|debug|none|<custom>)],
+                              [Enable optimization flags/settings (e.g.: -O3).
+                               This can be set independently from the build mode.
+                               Optimizations for a given compiler can be specified
+                               at several levels: High, with aggressive optimizations
+                               turned on; debug, with optimizations that are
+                               unlikely to interfere with debugging or profiling;
+                               and none, with no optimizations at all.
+                               See the compiler-specific config/*-flags file for more
+                               details.
+                               Alternatively, optimization options can
+                               be specified directly by specifying them as a
+                               string value. These custom optimzation flags will
+                               completely replace all other optimization flags.
+                               [default depends on build mode: debug=debug,
+                                production=high, clean=none]
+                               ])],
+              [OPTIMIZATION=$enableval])
+
+## Set the default optimization level. This depends on the compiler mode.
+if test "X-$OPTIMIZATION" = X- ; then
+  case "X-$CONFIG_MODE" in
+  X-debug)
+    OPTIMIZATION=debug
+    ;;
+  X-production)
+    OPTIMIZATION=high
+    ;;
+  X-clean)
+    OPTIMIZATION=none
+    ;;
+  esac
+fi
+
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
+AC_SUBST([OPTIMIZATION])
+
+case "X-$OPTIMIZATION" in
+  X-high)
+    H5_CFLAGS="$H5_CFLAGS $HIGH_OPT_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $HIGH_OPT_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $HIGH_OPT_FCFLAGS"
+    AC_MSG_RESULT([high])
+    ;;
+  X-debug)
+    H5_CFLAGS="$H5_CFLAGS $DEBUG_OPT_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $DEBUG_OPT_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $DEBUG_OPT_FCFLAGS"
+    AC_MSG_RESULT([debug])
+    ;;
+  X-none)
+    H5_CFLAGS="$H5_CFLAGS $NO_OPT_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $NO_OPT_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $NO_OPT_FCFLAGS"
+    AC_MSG_RESULT([none])
+    ;;
+  *)
+    H5_CFLAGS="$H5_CFLAGS $OPTIMIZATION"
+    H5_CXXFLAGS="$H5_CXXFLAGS $OPTIMIZATION"
+    H5_FCFLAGS="$H5_FCFLAGS $OPTIMIZATION"
+    OPTIMIZATION="custom ($OPTIMIZATION)"
+    AC_MSG_RESULT([$OPTIMIZATION])
     ;;
 esac
 

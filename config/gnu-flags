@@ -131,27 +131,15 @@ if test "X-gcc" = "X-$cc_vendor"; then
 
     H5_CFLAGS="$H5_CFLAGS $arch"
 
-    ################
-    # Optimization #
-    ################
-
-    if test $cc_vers_major -le 4; then
-        HIGH_OPT_CFLAGS="-O3"
-        DEBUG_OPT_CFLAGS=
-    else
-        HIGH_OPT_CFLAGS="-O3"
-        DEBUG_OPT_CFLAGS="-Og"
-    fi
-
     ##############
     # Production #
     ##############
 
     # NDEBUG is handled explicitly by the configure script
     if test $cc_vers_major -le 4; then
-        PROD_CFLAGS=$HIGH_OPT_CFLAGS
+        PROD_CFLAGS=
     else
-        PROD_CFLAGS=$HIGH_OPT_CFLAGS "-fstdarg-opt"
+        PROD_CFLAGS="-fstdarg-opt"
     fi
 
     #########
@@ -161,9 +149,9 @@ if test "X-gcc" = "X-$cc_vendor"; then
     # NDEBUG is handled explicitly by the configure script
     # -g is handled by the symbols flags
     if test $cc_vers_major -le 4; then
-        DEBUG_CFLAGS=$DEBUG_OPT_CFLAGS
+        DEBUG_CFLAGS=
     else
-        DEBUG_CFLAGS=$DEBUG_OPT_CFLAGS "-ftrapv -fno-common"
+        DEBUG_CFLAGS="-ftrapv -fno-common"
     fi
 
     ###########
@@ -178,6 +166,19 @@ if test "X-gcc" = "X-$cc_vendor"; then
     #############
 
     PROFILE_CFLAGS="-pg"
+
+    ################
+    # Optimization #
+    ################
+
+    if test $cc_vers_major -le 4; then
+        HIGH_OPT_CFLAGS="-O3"
+        DEBUG_OPT_CFLAGS=
+    else
+        HIGH_OPT_CFLAGS="-O3"
+        DEBUG_OPT_CFLAGS="-Og"
+    fi
+    NO_OPT_CFLAGS="-O0"
 
     ############
     # Warnings #

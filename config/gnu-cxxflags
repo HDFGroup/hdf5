@@ -121,27 +121,15 @@ if test "X-g++" = "X-$cxx_vendor"; then
     # C++-specific
     H5_CXXFLAGS="$H5_CXXFLAGS $arch"
 
-    ################
-    # Optimization #
-    ################
-
-    if test $cxx_vers_major -le 4; then
-        HIGH_OPT_CXXFLAGS="-O3"
-        DEBUG_OPT_CXXFLAGS=
-    else
-        HIGH_OPT_CXXFLAGS="-O3"
-        DEBUG_OPT_CXXFLAGS="-Og"
-    fi
-
     ##############
     # Production #
     ##############
 
     # NDEBUG is handled explicitly by the configure script
     if test $cxx_vers_major -le 4; then
-        PROD_CXXFLAGS=$HIGH_OPT_CXXFLAGS
+        PROD_CXXFLAGS=
     else
-        PROD_CXXFLAGS=$HIGH_OPT_CXXFLAGS "-fstdarg-opt"
+        PROD_CXXFLAGS="-fstdarg-opt"
     fi
 
     #########
@@ -151,9 +139,9 @@ if test "X-g++" = "X-$cxx_vendor"; then
     # NDEBUG is handled explicitly by the configure script
     # -g is handled by the symbols flags
     if test $cxx_vers_major -le 4; then
-        DEBUG_CXXFLAGS=$DEBUG_OPT_CXXFLAGS
+        DEBUG_CXXFLAGS=
     else
-        DEBUG_CXXFLAGS=$DEBUG_OPT_CXXFLAGS "-ftrapv -fno-common"
+        DEBUG_CXXFLAGS="-ftrapv -fno-common"
     fi
 
     ###########
@@ -168,6 +156,19 @@ if test "X-g++" = "X-$cxx_vendor"; then
     #############
 
     PROFILE_CXXFLAGS="-pg"
+
+    ################
+    # Optimization #
+    ################
+
+    if test $cxx_vers_major -le 4; then
+        HIGH_OPT_CXXFLAGS="-O3"
+        DEBUG_OPT_CXXFLAGS=
+    else
+        HIGH_OPT_CXXFLAGS="-O3"
+        DEBUG_OPT_CXXFLAGS="-Og"
+    fi
+    NO_OPT_CXXFLAGS="-O0"
 
     ############
     # Warnings #

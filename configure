@@ -685,7 +685,10 @@ CLEARFILEBUF
 INSTRUMENT_LIBRARY
 TRACE_API
 DEBUG_PKG
+OPTIMIZATION
+PROFILING
 DEV_WARNINGS
+SYMBOLS
 HAVE_PTHREAD
 BUILD_SHARED_SZIP_CONDITIONAL_FALSE
 BUILD_SHARED_SZIP_CONDITIONAL_TRUE
@@ -924,7 +927,10 @@ with_zlib
 with_szlib
 enable_threadsafe
 with_pthread
+enable_symbols
 enable_developer_warnings
+enable_profiling
+enable_optimization
 enable_debug
 enable_codestack
 enable_metadata_trace_file
@@ -1611,11 +1617,38 @@ Optional Features:
   --enable-threadsafe     Enable thread-safe capability. Not compatible with
                           the high-level library, Fortran, or C++ wrappers.
                           [default=no]
+  --enable-symbols=(yes|no|<custom>)
+                          Add debug symbols to the library (e.g.: build with
+                          -g). This is independent of the build mode and
+                          optimization level. The custom string allows special
+                          settings like -ggdb, etc. to be used. [default=yes
+                          if debug build, otherwise no]
   --enable-developer-warnings
                           Determines whether developer warnings will be
                           emitted. These are usually performance suggestions
                           (e.g. -Wsuggest-attribute) and do not flag poor code
                           quality. [default=no]
+  --enable-profiling=(yes|no|<custom>)
+                          Enable profiling flags (e.g.: -pg). This can be set
+                          independently from the build mode. The custom
+                          setting can be used to pass alternative profiling
+                          flags (e.g.: -P for using Prof with gcc).
+                          [default=no]
+  --enable-optimization=(high|debug|none|<custom>)
+                          Enable optimization flags/settings (e.g.: -O3). This
+                          can be set independently from the build mode.
+                          Optimizations for a given compiler can be specified
+                          at several levels: High, with aggressive
+                          optimizations turned on; debug, with optimizations
+                          that are unlikely to interfere with debugging or
+                          profiling; and none, with no optimizations at all.
+                          See the compiler-specific config/*-flags file for
+                          more details. Alternatively, optimization options
+                          can be specified directly by specifying them as a
+                          string value. These custom optimzation flags will
+                          completely replace all other optimization flags.
+                          [default depends on build mode: debug=debug,
+                          production=high, clean=none]
   --enable-debug=all      Turn on debugging in all packages. One may also
                           specify a comma-separated list of package names
                           without the leading H5 or the word no. The default
@@ -6579,7 +6612,45 @@ rm -f core conftest.err conftest.$ac_objext \
 
   ## Check to see if -r8 was specified to determine if we need to
   ## compile the DOUBLE PRECISION interfaces.
-  PAC_PROG_FC_DEFAULT_REALisDBLE
+
+  FORTRAN_DEFAULT_REALisDBLE="no"
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran default REAL is DOUBLE PRECISION" >&5
+$as_echo_n "checking if Fortran default REAL is DOUBLE PRECISION... " >&6; }
+
+  cat > conftest.$ac_ext <<_ACEOF
+
+     MODULE type_mod
+       INTERFACE h5t
+         MODULE PROCEDURE h5t_real
+         MODULE PROCEDURE h5t_dble
+       END INTERFACE
+     CONTAINS
+       SUBROUTINE h5t_real(r)
+         REAL :: r
+       END SUBROUTINE h5t_real
+       SUBROUTINE h5t_dble(d)
+         DOUBLE PRECISION :: d
+       END SUBROUTINE h5t_dble
+     END MODULE type_mod
+     PROGRAM main
+       USE type_mod
+       REAL :: r
+       DOUBLE PRECISION :: d
+       CALL h5t(r)
+       CALL h5t(d)
+     END PROGRAM main
+
+_ACEOF
+if ac_fn_fc_try_compile "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+            FORTRAN_DEFAULT_REALisDBLE="yes"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
 
   if test "X$HDF_FORTRAN2003" = "Xyes"; then
 
@@ -27044,6 +27115,55 @@ $as_echo "no" >&6; }
 fi
 
 ## ----------------------------------------------------------------------
+## Check if the compiler should include symbols
+##
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking enable debugging symbols" >&5
+$as_echo_n "checking enable debugging symbols... " >&6; }
+# Check whether --enable-symbols was given.
+if test "${enable_symbols+set}" = set; then :
+  enableval=$enable_symbols; SYMBOLS=$enableval
+fi
+
+
+## Set default
+if test "X-$SYMBOLS" = X- ; then
+  if test "X-$CONFIG_MODE" = "X-development" ; then
+    SYMBOLS=yes
+  else
+    SYMBOLS=no
+  fi
+fi
+
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
+
+
+case "X-$SYMBOLS" in
+  X-yes)
+    H5_CFLAGS="$H5_CFLAGS $SYMBOLS_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $SYMBOLS_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $SYMBOLS_FCFLAGS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    ;;
+  X-no)
+    H5_CFLAGS="$H5_CFLAGS $NO_SYMBOLS_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $NO_SYMBOLS_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $NO_SYMBOLS_FCFLAGS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    ;;
+  *)
+    H5_CFLAGS="$H5_CFLAGS $SYMBOLS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $SYMBOLS"
+    H5_FCFLAGS="$H5_FCFLAGS $SYMBOLS"
+    SYMBOLS="custom ($SYMBOLS)"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $SYMBOLS" >&5
+$as_echo "$SYMBOLS" >&6; }
+    ;;
+esac
+
+## ----------------------------------------------------------------------
 ## Check if developer warnings should be turned on
 ## These are warnings that provide suggestions like gcc's -Wsuggest-attribute.
 ## They do not indicate code problems.
@@ -27081,6 +27201,110 @@ $as_echo "no" >&6; }
     ;;
   *)
     as_fn_error $? "Unrecognized value: $DEV_WARNINGS" "$LINENO" 5
+    ;;
+esac
+
+## ----------------------------------------------------------------------
+## Check if the compiler should use profiling flags/settings
+##
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking profiling" >&5
+$as_echo_n "checking profiling... " >&6; }
+# Check whether --enable-profiling was given.
+if test "${enable_profiling+set}" = set; then :
+  enableval=$enable_profiling; PROFILING=$enableval
+fi
+
+
+## Default is no profiling
+if test "X-$PROFILING" = X- ; then
+    PROFILING=no
+fi
+
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
+
+
+case "X-$PROFILING" in
+  X-yes)
+    H5_CFLAGS="$H5_CFLAGS $PROFILE_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $PROFILE_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $PROFILE_FCFLAGS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    ;;
+  X-no)
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    ;;
+  *)
+    H5_CFLAGS="$H5_CFLAGS $PROFILING"
+    H5_CXXFLAGS="$H5_CXXFLAGS $PROFILING"
+    H5_FCFLAGS="$H5_FCFLAGS $PROFILING"
+    PROFILING="custom ($PROFILING)"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PROFILING" >&5
+$as_echo "$PROFILING" >&6; }
+    ;;
+esac
+
+## ----------------------------------------------------------------------
+## Check if the compiler should use a particular optimization setting
+##
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking optimization level" >&5
+$as_echo_n "checking optimization level... " >&6; }
+# Check whether --enable-optimization was given.
+if test "${enable_optimization+set}" = set; then :
+  enableval=$enable_optimization; OPTIMIZATION=$enableval
+fi
+
+
+## Set the default optimization level. This depends on the compiler mode.
+if test "X-$OPTIMIZATION" = X- ; then
+  case "X-$CONFIG_MODE" in
+  X-debug)
+    OPTIMIZATION=debug
+    ;;
+  X-production)
+    OPTIMIZATION=high
+    ;;
+  X-clean)
+    OPTIMIZATION=none
+    ;;
+  esac
+fi
+
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
+
+
+case "X-$OPTIMIZATION" in
+  X-high)
+    H5_CFLAGS="$H5_CFLAGS $HIGH_OPT_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $HIGH_OPT_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $HIGH_OPT_FCFLAGS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: high" >&5
+$as_echo "high" >&6; }
+    ;;
+  X-debug)
+    H5_CFLAGS="$H5_CFLAGS $DEBUG_OPT_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $DEBUG_OPT_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $DEBUG_OPT_FCFLAGS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: debug" >&5
+$as_echo "debug" >&6; }
+    ;;
+  X-none)
+    H5_CFLAGS="$H5_CFLAGS $NO_OPT_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $NO_OPT_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $NO_OPT_FCFLAGS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: none" >&5
+$as_echo "none" >&6; }
+    ;;
+  *)
+    H5_CFLAGS="$H5_CFLAGS $OPTIMIZATION"
+    H5_CXXFLAGS="$H5_CXXFLAGS $OPTIMIZATION"
+    H5_FCFLAGS="$H5_FCFLAGS $OPTIMIZATION"
+    OPTIMIZATION="custom ($OPTIMIZATION)"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $OPTIMIZATION" >&5
+$as_echo "$OPTIMIZATION" >&6; }
     ;;
 esac
 
