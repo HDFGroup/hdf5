@@ -41,9 +41,11 @@
 /* Predefined file drivers */
 #include "H5FDcore.h"		/* Files stored entirely in memory	*/
 #include "H5FDfamily.h"		/* File families 			*/
+#include "H5FDhdfs.h"           /* Hadoop HDFS                              */
 #include "H5FDlog.h"        	/* sec2 driver with I/O logging (for debugging) */
 #include "H5FDmpi.h"            /* MPI-based file drivers		*/
 #include "H5FDmulti.h"		/* Usage-partitioned file family	*/
+#include "H5FDros3.h"           /* R/O S3 "file" I/O                        */
 #include "H5FDsec2.h"		/* POSIX unbuffered file I/O		*/
 #include "H5FDstdio.h"		/* Standard C buffered I/O		*/
 #ifdef H5_HAVE_WINDOWS
