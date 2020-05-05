@@ -74,12 +74,12 @@
 
 /* Sanity check on chunk index types: commonly used by a lot of routines in this file */
 #define H5D_CHUNK_STORAGE_INDEX_CHK(storage)                                                    \
-    HDassert((H5D_CHUNK_IDX_EARRAY == storage->idx_type && H5D_COPS_EARRAY == storage->ops) ||  \
-             (H5D_CHUNK_IDX_FARRAY == storage->idx_type && H5D_COPS_FARRAY == storage->ops) ||  \
-             (H5D_CHUNK_IDX_BT2 == storage->idx_type && H5D_COPS_BT2 == storage->ops) ||        \
-             (H5D_CHUNK_IDX_BTREE == storage->idx_type && H5D_COPS_BTREE == storage->ops) ||    \
-             (H5D_CHUNK_IDX_SINGLE == storage->idx_type && H5D_COPS_SINGLE == storage->ops) ||  \
-             (H5D_CHUNK_IDX_NONE == storage->idx_type && H5D_COPS_NONE == storage->ops));
+    HDassert((H5D_CHUNK_IDX_EARRAY == (storage)->idx_type && H5D_COPS_EARRAY == (storage)->ops) ||  \
+             (H5D_CHUNK_IDX_FARRAY == (storage)->idx_type && H5D_COPS_FARRAY == (storage)->ops) ||  \
+             (H5D_CHUNK_IDX_BT2 == (storage)->idx_type && H5D_COPS_BT2 == (storage)->ops) ||        \
+             (H5D_CHUNK_IDX_BTREE == (storage)->idx_type && H5D_COPS_BTREE == (storage)->ops) ||    \
+             (H5D_CHUNK_IDX_SINGLE == (storage)->idx_type && H5D_COPS_SINGLE == (storage)->ops) ||  \
+             (H5D_CHUNK_IDX_NONE == (storage)->idx_type && H5D_COPS_NONE == (storage)->ops));
 
 /*
  * Feature: If this constant is defined then every cache preemption and load
@@ -925,7 +925,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__chunk_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
+H5D__chunk_init(H5F_t *f, const H5D_t * const dset, hid_t dapl_id)
 {
     H5D_chk_idx_info_t idx_info;        /* Chunked index info */
     H5D_rdcc_t    *rdcc = &(dset->shared->cache.chunk);   /* Convenience pointer to dataset's chunk cache */
@@ -1001,11 +1001,11 @@ H5D__chunk_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
     idx_info.f = f;
     idx_info.pline = &dset->shared->dcpl_cache.pline;
     idx_info.layout = &dset->shared->layout.u.chunk;
-    idx_info.storage = &dset->shared->layout.storage.u.chunk;
+    idx_info.storage = sc;
 
     /* Allocate any indexing structures */
-    if(dset->shared->layout.storage.u.chunk.ops->init && (dset->shared->layout.storage.u.chunk.ops->init)(&idx_info, dset->shared->space, dset->oloc.addr) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize indexing information")
+    if(sc->ops->init && (sc->ops->init)(&idx_info, dset->shared->space, dset->oloc.addr) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize indexing information")
 
     /* Set the number of chunks in dataset, etc. */
     if(H5D__chunk_set_info(dset) < 0)
@@ -1041,7 +1041,7 @@ H5D__chunk_is_space_alloc(const H5O_storage_t *storage)
     H5D_CHUNK_STORAGE_INDEX_CHK(sc);
 
     /* Query index layer */
-    ret_value = (storage->u.chunk.ops->is_space_alloc)(&storage->u.chunk);
+    ret_value = (sc->ops->is_space_alloc)(sc);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_is_space_alloc() */
@@ -2632,12 +2632,11 @@ H5D__chunk_dest(H5D_t *dset)
     idx_info.f = dset->oloc.file;
     idx_info.pline = &dset->shared->dcpl_cache.pline;
     idx_info.layout = &dset->shared->layout.u.chunk;
-    idx_info.storage = &dset->shared->layout.storage.u.chunk;
+    idx_info.storage = sc;
 
     /* Free any index structures */
-    if(dset->shared->layout.storage.u.chunk.ops->dest &&
-            (dset->shared->layout.storage.u.chunk.ops->dest)(&idx_info) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to release chunk index info")
+    if(sc->ops->dest && (sc->ops->dest)(&idx_info) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to release chunk index info")
 
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
@@ -2833,11 +2832,11 @@ H5D__chunk_create(const H5D_t *dset /*in,out*/)
     idx_info.f = dset->oloc.file;
     idx_info.pline = &dset->shared->dcpl_cache.pline;
     idx_info.layout = &dset->shared->layout.u.chunk;
-    idx_info.storage = &dset->shared->layout.storage.u.chunk;
+    idx_info.storage = sc;
 
     /* Create the index for the chunks */
-    if((dset->shared->layout.storage.u.chunk.ops->create)(&idx_info) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create chunk index")
+    if((sc->ops->create)(&idx_info) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create chunk index")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2920,7 +2919,7 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled,
 
     /* Initialize the query information about the chunk we are looking for */
     udata->common.layout = &(dset->shared->layout.u.chunk);
-    udata->common.storage = &(dset->shared->layout.storage.u.chunk);
+    udata->common.storage = sc;
     udata->common.scaled = scaled;
 
     /* Reset information about the chunk we are looking for */
@@ -2970,7 +2969,7 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled,
             idx_info.f = dset->oloc.file;
             idx_info.pline = &dset->shared->dcpl_cache.pline;
             idx_info.layout = &dset->shared->layout.u.chunk;
-            idx_info.storage = &dset->shared->layout.storage.u.chunk;
+            idx_info.storage = sc;
 
 #ifdef H5_HAVE_PARALLEL
             /* Disable collective metadata read for chunk indexes as it is
@@ -2982,7 +2981,7 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled,
 #endif /* H5_HAVE_PARALLEL */
 
             /* Go get the chunk information */
-            if((dset->shared->layout.storage.u.chunk.ops->get_addr)(&idx_info, udata) < 0)
+            if((sc->ops->get_addr)(&idx_info, udata) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query chunk address")
 
             /*
@@ -3068,7 +3067,7 @@ H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t reset)
 
         /* Set up user data for index callbacks */
         udata.common.layout = &dset->shared->layout.u.chunk;
-        udata.common.storage = &dset->shared->layout.storage.u.chunk;
+        udata.common.storage = sc;
         udata.common.scaled = ent->scaled;
         udata.chunk_block.offset = ent->chunk_block.offset;
         udata.chunk_block.length = dset->shared->layout.u.chunk.size;
@@ -3153,7 +3152,7 @@ H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t reset)
             idx_info.f = dset->oloc.file;
             idx_info.pline = &dset->shared->dcpl_cache.pline;
             idx_info.layout = &dset->shared->layout.u.chunk;
-            idx_info.storage = &dset->shared->layout.storage.u.chunk;
+            idx_info.storage = sc;
 
             /* Create the chunk it if it doesn't exist, or reallocate the chunk
              *  if its size changed.
@@ -3173,8 +3172,8 @@ H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t reset)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
 
         /* Insert the chunk record into the index */
-        if(need_insert && dset->shared->layout.storage.u.chunk.ops->insert)
-            if((dset->shared->layout.storage.u.chunk.ops->insert)(&idx_info, &udata, dset) < 0)
+        if(need_insert && sc->ops->insert)
+            if((sc->ops->insert)(&idx_info, &udata, dset) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert chunk addr into index")
 
         /* Cache the chunk's info, in case it's accessed again shortly */
@@ -3984,10 +3983,10 @@ H5D__chunk_allocated(const H5D_t *dset, hsize_t *nbytes)
     idx_info.f = dset->oloc.file;
     idx_info.pline = &dset->shared->dcpl_cache.pline;
     idx_info.layout = &dset->shared->layout.u.chunk;
-    idx_info.storage = &dset->shared->layout.storage.u.chunk;
+    idx_info.storage = sc;
 
     /* Iterate over the chunks */
-    if((dset->shared->layout.storage.u.chunk.ops->iterate)(&idx_info, H5D__chunk_allocated_cb, &chunk_bytes) < 0)
+    if((sc->ops->iterate)(&idx_info, H5D__chunk_allocated_cb, &chunk_bytes) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve allocated chunk information from index")
 
     /* Set number of bytes for caller */
@@ -4186,7 +4185,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
     idx_info.f = dset->oloc.file;
     idx_info.pline = &dset->shared->dcpl_cache.pline;
     idx_info.layout = &dset->shared->layout.u.chunk;
-    idx_info.storage = &dset->shared->layout.storage.u.chunk;
+    idx_info.storage = sc;
 
     /* Loop over all chunks */
     /* The algorithm is:
@@ -4257,8 +4256,9 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
 #ifndef NDEBUG
             /* None of the chunks should be allocated */
-        if(H5D_CHUNK_IDX_NONE != layout->storage.u.chunk.idx_type)
-        HDassert(!H5F_addr_defined(udata.chunk_block.offset));
+            if(H5D_CHUNK_IDX_NONE != sc->idx_type) {
+                HDassert(!H5F_addr_defined(udata.chunk_block.offset));
+            }
 
             /* Make sure the chunk is really in the dataset and outside the
              * original dimensions */
@@ -4330,7 +4330,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
 
             /* Initialize the chunk information */
             udata.common.layout = &layout->u.chunk;
-            udata.common.storage = &layout->storage.u.chunk;
+            udata.common.storage = sc;
             udata.common.scaled = scaled;
             udata.chunk_block.offset = HADDR_UNDEF;
             H5_CHECKED_ASSIGN(udata.chunk_block.length, uint32_t, chunk_size, size_t);
@@ -4480,7 +4480,6 @@ H5D__chunk_update_old_edge_chunks(H5D_t *dset, hsize_t old_dim[])
     hsize_t     max_edge_chunk_sc[H5O_LAYOUT_NDIMS]; /* largest offset of chunks that might need to be modified in each dimension */
     hbool_t     new_full_dim[H5O_LAYOUT_NDIMS]; /* Whether the plane of chunks in this dimension needs to be modified */
     const H5O_layout_t *layout = &(dset->shared->layout); /* Dataset layout */
-    const H5O_pline_t *pline = &(dset->shared->dcpl_cache.pline); /* I/O pipeline info */
     hsize_t     chunk_sc[H5O_LAYOUT_NDIMS]; /* Offset of current chunk */
     const uint32_t *chunk_dim = layout->u.chunk.dim; /* Convenience pointer to chunk dimensions */
     unsigned    space_ndims;            /* Dataset's space rank */
@@ -4491,7 +4490,6 @@ H5D__chunk_update_old_edge_chunks(H5D_t *dset, hsize_t old_dim[])
     H5D_storage_t chk_store;            /* Chunk storage information */
     void        *chunk;                 /* The file chunk  */
     hbool_t     carry;                  /* Flag to indicate that chunk increment carrys to higher dimension (sorta) */
-    const H5O_storage_chunk_t *sc = &(layout->storage.u.chunk);
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -4499,8 +4497,8 @@ H5D__chunk_update_old_edge_chunks(H5D_t *dset, hsize_t old_dim[])
     /* Check args */
     HDassert(dset && H5D_CHUNKED == layout->type);
     HDassert(layout->u.chunk.ndims > 0 && layout->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
-    H5D_CHUNK_STORAGE_INDEX_CHK(sc);
-    HDassert(pline->nused > 0);
+    H5D_CHUNK_STORAGE_INDEX_CHK(&layout->storage.u.chunk);
+    HDassert(dset->shared->dcpl_cache.pline.nused > 0);
     HDassert(layout->u.chunk.flags
             & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS);
 
@@ -5142,7 +5140,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, const hsize_t *old_dim)
     /* Initialize the user data for the iteration */
     HDmemset(&udata, 0, sizeof udata);
     udata.common.layout = &layout->u.chunk;
-    udata.common.storage = &layout->storage.u.chunk;
+    udata.common.storage = sc;
     udata.common.scaled = scaled;
     udata.io_info = &chk_io_info;
     udata.idx_info = &idx_info;
@@ -5155,7 +5153,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, const hsize_t *old_dim)
 
     /* Initialize user data for removal */
     idx_udata.layout = &layout->u.chunk;
-    idx_udata.storage = &layout->storage.u.chunk;
+    idx_udata.storage = sc;
 
     /* Determine if partial edge chunk filters are disabled */
     disable_edge_filters = (layout->u.chunk.flags
@@ -5312,7 +5310,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, const hsize_t *old_dim)
             idx_udata.scaled = udata.common.scaled;
 
                     /* Remove the chunk from disk */
-                    if((layout->storage.u.chunk.ops->remove)(&idx_info, &idx_udata) < 0)
+                    if((sc->ops->remove)(&idx_info, &idx_udata) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to remove chunk entry from index")
                 } /* end if */
             } /* end else */
@@ -5443,17 +5441,17 @@ H5D__chunk_addrmap(const H5D_io_info_t *io_info, haddr_t chunk_addr[])
     /* Set up user data for B-tree callback */
     HDmemset(&udata, 0, sizeof(udata));
     udata.common.layout = &dset->shared->layout.u.chunk;
-    udata.common.storage = &dset->shared->layout.storage.u.chunk;
+    udata.common.storage = sc;
     udata.chunk_addr = chunk_addr;
 
     /* Compose chunked index info struct */
     idx_info.f = dset->oloc.file;
     idx_info.pline = &dset->shared->dcpl_cache.pline;
     idx_info.layout = &dset->shared->layout.u.chunk;
-    idx_info.storage = &dset->shared->layout.storage.u.chunk;
+    idx_info.storage = sc;
 
     /* Iterate over chunks to build mapping of chunk addresses */
-    if((dset->shared->layout.storage.u.chunk.ops->iterate)(&idx_info, H5D__chunk_addrmap_cb, &udata) < 0)
+    if((sc->ops->iterate)(&idx_info, H5D__chunk_addrmap_cb, &udata) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to iterate over chunk index to build address map")
 
 done:
@@ -5484,7 +5482,6 @@ H5D__chunk_delete(H5F_t *f, H5O_t *oh, H5O_storage_t *storage)
     H5O_pline_t pline;                  /* I/O pipeline message */
     hbool_t pline_read = FALSE;         /* Whether the I/O pipeline message was read from the file */
     htri_t    exists;                 /* Flag if header message of interest exists */
-    H5O_storage_chunk_t *sc = &(storage->u.chunk);
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -5493,7 +5490,7 @@ H5D__chunk_delete(H5F_t *f, H5O_t *oh, H5O_storage_t *storage)
     HDassert(f);
     HDassert(oh);
     HDassert(storage);
-    H5D_CHUNK_STORAGE_INDEX_CHK(sc);
+    H5D_CHUNK_STORAGE_INDEX_CHK(&storage->u.chunk);
 
     /* Check for I/O pipeline message */
     if((exists = H5O_msg_exists_oh(oh, H5O_PLINE_ID)) < 0)
@@ -6229,26 +6226,25 @@ H5D__chunk_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5O_layout_t *layout,
     idx_info.f = loc->file;
     idx_info.pline = &pline;
     idx_info.layout = &layout->u.chunk;
-    idx_info.storage = &layout->storage.u.chunk;
+    idx_info.storage = sc;
 
     /* Get the dataspace for the dataset */
     if(NULL == (space = H5S_read(loc)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to load dataspace info from dataset header")
 
     /* Allocate any indexing structures */
-    if(layout->storage.u.chunk.ops->init && (layout->storage.u.chunk.ops->init)(&idx_info, space, loc->addr) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize indexing information")
+    if(sc->ops->init && (sc->ops->init)(&idx_info, space, loc->addr) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize indexing information")
     idx_info_init = TRUE;
 
     /* Get size of index structure */
-    if(layout->storage.u.chunk.ops->size && (layout->storage.u.chunk.ops->size)(&idx_info, index_size) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve chunk index info")
+    if(sc->ops->size && (sc->ops->size)(&idx_info, index_size) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve chunk index info")
 
 done:
     /* Free resources, if they've been initialized */
-    if(idx_info_init && layout->storage.u.chunk.ops->dest &&
-            (layout->storage.u.chunk.ops->dest)(&idx_info) < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to release chunk index info")
+    if(idx_info_init && sc->ops->dest && (sc->ops->dest)(&idx_info) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to release chunk index info")
     if(pline_read && H5O_msg_reset(H5O_PLINE_ID, &pline) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset I/O pipeline message")
     if(space && H5S_close(space) < 0)
@@ -6335,14 +6331,14 @@ H5D__chunk_dump_index(H5D_t *dset, FILE *stream)
         H5D_chunk_it_ud4_t udata;       /* User data for callback */
 
         /* Display info for index */
-        if((dset->shared->layout.storage.u.chunk.ops->dump)(&dset->shared->layout.storage.u.chunk, stream) < 0)
+        if((sc->ops->dump)(sc, stream) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to dump chunk index info")
 
         /* Compose chunked index info struct */
         idx_info.f = dset->oloc.file;
         idx_info.pline = &dset->shared->dcpl_cache.pline;
         idx_info.layout = &dset->shared->layout.u.chunk;
-        idx_info.storage = &dset->shared->layout.storage.u.chunk;
+        idx_info.storage = sc;
 
         /* Set up user data for callback */
         udata.stream = stream;
@@ -6351,7 +6347,7 @@ H5D__chunk_dump_index(H5D_t *dset, FILE *stream)
         udata.chunk_dim = dset->shared->layout.u.chunk.dim;
 
         /* Iterate over index and dump chunk info */
-        if((dset->shared->layout.storage.u.chunk.ops->iterate)(&idx_info, H5D__chunk_dump_index_cb, &udata) < 0)
+        if((sc->ops->iterate)(&idx_info, H5D__chunk_dump_index_cb, &udata) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to iterate over chunk index to dump chunk info")
     } /* end if */
 
