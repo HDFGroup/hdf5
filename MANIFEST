@@ -40,6 +40,8 @@
 ./configure
 ./configure.ac
 
+./github/workflows/main.yml  _DO_NOT_DISTRIBUTE_
+
 ./bin/COPYING
 ./bin/bbrelease       _DO_NOT_DISTRIBUTE_
 ./bin/buildhdf5
