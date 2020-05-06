@@ -74,7 +74,7 @@ public class H5O_hdr_info_t implements Serializable {
         if (this.mesg_present != info.mesg_present)
         	return false;
         if (this.mesg_shared != info.mesg_shared)
-        	return false;        
+        	return false;
 
         return true;
     }
