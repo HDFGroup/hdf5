@@ -64,7 +64,7 @@ jobs:
     - name: Get Sources
       uses: actions/checkout@v2
 
-    - name: Setup CMake
+    - name: Configure
       run: |
         mkdir "${{ runner.workspace }}/build"
         cd "${{ runner.workspace }}/build"
