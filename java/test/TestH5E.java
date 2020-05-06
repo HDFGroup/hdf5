@@ -81,6 +81,7 @@ public class TestH5E {
             long errnum = hdferr.getMajorErrorNumber();
             int[] error_msg_type = { HDF5Constants.H5E_MAJOR };
             String msg = null;
+
             try {
                 msg = H5.H5Eget_msg(errnum, error_msg_type);
             }
@@ -91,15 +92,15 @@ public class TestH5E {
             assertNotNull("H5.H5Eget_msg: " + msg, msg);
             assertEquals("H5.H5Eget_msg: ", HDF5Constants.H5E_MAJOR, error_msg_type[0]);
 
-    		/*
-    		 * If HDF5_VOL_CONNECTOR is set, this might not be the
-    		 * native connector and the error string might be different.
-    		 * Only check for the specific error message if the native
-    		 * connector is being used.
-    		 */
-    		String connector = System.getenv("HDF5_VOL_CONNECTOR");
-    		if (connector == null)
-    			assertEquals("H5.H5Eget_msg: ", "File accessibility", msg);
+            /*
+            * If HDF5_VOL_CONNECTOR is set, this might not be the
+            * native connector and the error string might be different.
+            * Only check for the specific error message if the native
+            * connector is being used.
+            */
+            String connector = System.getenv("HDF5_VOL_CONNECTOR");
+            if (connector == null)
+                assertTrue("H5.H5Eget_msg: ", msg.contains("File accessibility"));
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -116,6 +117,7 @@ public class TestH5E {
             long errnum = hdferr.getMinorErrorNumber();
             int[] error_msg_type = { HDF5Constants.H5E_MINOR };
             String msg = null;
+
             try {
                 msg = H5.H5Eget_msg(errnum, error_msg_type);
             }
@@ -126,15 +128,15 @@ public class TestH5E {
             assertNotNull("H5.H5Eget_msg: " + msg, msg);
             assertEquals("H5.H5Eget_msg: ", HDF5Constants.H5E_MINOR, error_msg_type[0]);
 
-    		/*
-    		 * If HDF5_VOL_CONNECTOR is set, this might not be the
-    		 * native connector and the error string might be different.
-    		 * Only check for the specific error message if the native
-    		 * connector is being used.
-    		 */
-    		String connector = System.getenv("HDF5_VOL_CONNECTOR");
-    		if (connector == null)
-    			assertEquals("H5.H5Eget_msg: ", "Unable to open file", msg);
+            /*
+            * If HDF5_VOL_CONNECTOR is set, this might not be the
+            * native connector and the error string might be different.
+            * Only check for the specific error message if the native
+            * connector is being used.
+            */
+            String connector = System.getenv("HDF5_VOL_CONNECTOR");
+            if (connector == null)
+                assertTrue("H5.H5Eget_msg: ", msg.contains("Unable to open file"));
         }
         catch (Throwable err) {
             err.printStackTrace();
