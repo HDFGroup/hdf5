@@ -85,6 +85,7 @@ public class TestH5E {
             long errnum = hdferr.getMajorErrorNumber();
             int[] error_msg_type = { HDF5Constants.H5E_MAJOR };
             String msg = null;
+
             try {
                 msg = H5.H5Eget_msg(errnum, error_msg_type);
             }
@@ -111,6 +112,7 @@ public class TestH5E {
             long errnum = hdferr.getMinorErrorNumber();
             int[] error_msg_type = { HDF5Constants.H5E_MINOR };
             String msg = null;
+
             try {
                 msg = H5.H5Eget_msg(errnum, error_msg_type);
             }
@@ -144,7 +146,7 @@ public class TestH5E {
         catch (Throwable err) {
         }
 
-        // save current stack contents
+        // Save current stack contents
         try {
             current_stackid = H5.H5Eget_current_stack();
         }
