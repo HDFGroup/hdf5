@@ -109,7 +109,10 @@ Bug Fixes since HDF5-1.12.0 release
 ==================================
     Library
     -------
- 
+    - Don't allocate an empty (0-dimensioned) chunked dataset's chunk
+        index, until the dataset's dimensions are increased.
+
+      (QAK - 2020/05/07)
 
     Tools:
     ------
