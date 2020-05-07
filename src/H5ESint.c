@@ -58,7 +58,7 @@
 
 /* Typedef for event nodes */
 struct H5ES_event_t {
-    void *request;                      /* Request token for event */
+    H5VL_object_t *request;             /* Request token for event */
     struct H5ES_event_t *prev, *next;   /* Previous and next event nodes */
 };
 
@@ -246,7 +246,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES_insert(H5ES_t *es, void *request)
+H5ES_insert(H5ES_t *es, H5VL_object_t *request)
 {
     H5ES_event_t *ev;                   /* Event for request */
     herr_t ret_value = SUCCEED;         /* Return value */

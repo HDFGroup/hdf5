@@ -628,6 +628,7 @@ H5D__read_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     H5VL_object_t *vol_obj = NULL;      /* Dataset VOL object */
     H5ES_t *es = NULL;                  /* Event set for the operation */
     void *token = NULL, **token_ptr;    /* Request token for async operation */
+    H5VL_object_t *token_obj = NULL;    /* Async token VOL object */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -670,12 +671,24 @@ H5D__read_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
     /* If there's an event set and a token was created, add the token to it */
-    if(H5ES_NONE != es_id && NULL != token)
+    if(H5ES_NONE != es_id && NULL != token) {
+        /* Create vol object for token */
+        if(NULL == (token_obj = H5VL_create_object_generic(token, vol_obj->connector))) {
+            if(H5VL_request_free(token) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't free request")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create vol object for request token")
+        } /* end if */
+
         /* Add token to event set */
-        if(H5ES_insert(es, token) < 0)
+        if(H5ES_insert(es, token_obj) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTAPPEND, FAIL, "can't append token to event set")
+    } /* end if */
 
 done:
+    if(ret_value < 0 && token_obj)
+        if(H5VL_free_object(token_obj) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't free request token")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__read_api_common() */
 
@@ -827,6 +840,7 @@ H5D__write_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     H5VL_object_t *vol_obj = NULL;      /* Dataset VOL object */
     H5ES_t *es = NULL;                  /* Event set for the operation */
     void *token = NULL, **token_ptr;    /* Request token for async operation */
+    H5VL_object_t *token_obj = NULL;    /* Async token VOL object */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -869,12 +883,24 @@ H5D__write_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
     /* If there's an event set and a token was created, add the token to it */
-    if(H5ES_NONE != es_id && NULL != token)
+    if(H5ES_NONE != es_id && NULL != token) {
+        /* Create vol object for token */
+        if(NULL == (token_obj = H5VL_create_object_generic(token, vol_obj->connector))) {
+            if(H5VL_request_free(token) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't free request")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create vol object for request token")
+        } /* end if */
+
         /* Add token to event set */
-        if(H5ES_insert(es, token) < 0)
+        if(H5ES_insert(es, token_obj) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTAPPEND, FAIL, "can't append token to event set")
+    } /* end if */
 
 done:
+    if(ret_value < 0 && token_obj)
+        if(H5VL_free_object(token_obj) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't free request token")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__write_api_common() */
 

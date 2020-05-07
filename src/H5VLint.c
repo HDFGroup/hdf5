@@ -98,8 +98,6 @@ static herr_t H5VL__set_def_conn(void);
 static void *H5VL__wrap_obj(void *obj, H5I_type_t obj_type);
 static H5VL_object_t *H5VL__new_vol_obj(H5I_type_t type, void *object,
     H5VL_t *vol_connector, hbool_t wrap_obj);
-static int64_t H5VL__conn_inc_rc(H5VL_t *connector);
-static int64_t H5VL__conn_dec_rc(H5VL_t *connector);
 static void *H5VL__object(hid_t id, H5I_type_t obj_type);
 static herr_t H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx);
 
@@ -588,7 +586,7 @@ H5VL__new_vol_obj(H5I_type_t type, void *object, H5VL_t *vol_connector, hbool_t 
         new_vol_obj->data = object;
 
     /* Bump the reference count on the VOL connector */
-    H5VL__conn_inc_rc(vol_connector);
+    H5VL_conn_inc_rc(vol_connector);
     conn_rc_incr = TRUE;
 
     /* If this is a datatype, we have to hide the VOL object under the H5T_t pointer */
@@ -602,7 +600,7 @@ H5VL__new_vol_obj(H5I_type_t type, void *object, H5VL_t *vol_connector, hbool_t 
 done:
     /* Cleanup on error */
     if(NULL == ret_value) {
-        if(conn_rc_incr && H5VL__conn_dec_rc(vol_connector) < 0)
+        if(conn_rc_incr && H5VL_conn_dec_rc(vol_connector) < 0)
             HDONE_ERROR(H5E_VOL, H5E_CANTDEC, NULL, "unable to decrement ref count on VOL connector")
     } /* end if */
 
@@ -834,6 +832,45 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_create_object_generic
+ *
+ * Purpose:     Creates a new VOL object for the provided generic object
+ *              using the provided vol connector.  Does not associatae
+ *              with an ID, should only be used for internal objects
+ *              returned from the connector such as requests.
+ *
+ * Return:      Success:    A valid VOL object
+ *              Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+H5VL_object_t *
+H5VL_create_object_generic(void *object, H5VL_t *vol_connector)
+{
+    H5VL_object_t *ret_value = NULL; /* Return value */
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    /* Check arguments */
+    HDassert(object);
+    HDassert(vol_connector);
+
+    /* Set up VOL object for the passed-in data */
+    /* (Does not wrap object, since it's from a VOL callback) */
+    if(NULL == (ret_value = H5FL_CALLOC(H5VL_object_t)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, NULL, "can't allocate memory for VOL object")
+    ret_value->connector = vol_connector;
+    ret_value->data = object;
+
+    /* Bump the reference count on the VOL connector */
+    H5VL_conn_inc_rc(vol_connector);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_create_object_generic() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_create_object_using_vol_id
  *
  * Purpose:     Similar to H5VL_register_using_vol_id but does not create
@@ -890,7 +927,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL__conn_inc_rc
+ * Function:    H5VL_conn_inc_rc
  *
  * Purpose:     Wrapper to increment the ref. count on a connector.
  *
@@ -901,10 +938,12 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static int64_t
-H5VL__conn_inc_rc(H5VL_t *connector)
+int64_t
+H5VL_conn_inc_rc(H5VL_t *connector)
 {
-    FUNC_ENTER_STATIC_NOERR
+    int64_t ret_value = -1;
+
+    FUNC_ENTER_NOAPI(-1)
 
     /* Check arguments */
     HDassert(connector);
@@ -912,12 +951,15 @@ H5VL__conn_inc_rc(H5VL_t *connector)
     /* Increment refcount for connector */
     connector->nrefs++;
 
-    FUNC_LEAVE_NOAPI(connector->nrefs)
-} /* end H5VL__conn_inc_rc() */
+    ret_value = connector->nrefs;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_conn_inc_rc() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL__conn_dec_rc
+ * Function:    H5VL_conn_dec_rc
  *
  * Purpose:     Wrapper to decrement the ref. count on a connector.
  *
@@ -928,12 +970,12 @@ H5VL__conn_inc_rc(H5VL_t *connector)
  *
  *-------------------------------------------------------------------------
  */
-static int64_t
-H5VL__conn_dec_rc(H5VL_t *connector)
+int64_t
+H5VL_conn_dec_rc(H5VL_t *connector)
 {
     int64_t ret_value = -1;     /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_NOAPI(-1)
 
     /* Check arguments */
     HDassert(connector);
@@ -956,7 +998,7 @@ H5VL__conn_dec_rc(H5VL_t *connector)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL__conn_dec_rc() */
+} /* end H5VL_conn_dec_rc() */
 
 
 /*-------------------------------------------------------------------------
@@ -980,7 +1022,7 @@ H5VL_free_object(H5VL_object_t *vol_obj)
     HDassert(vol_obj);
 
     /* Decrement refcount on connector */
-    if(H5VL__conn_dec_rc(vol_obj->connector) < 0)
+    if(H5VL_conn_dec_rc(vol_obj->connector) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector")
 
     vol_obj = H5FL_FREE(H5VL_object_t, vol_obj);
@@ -2139,7 +2181,7 @@ H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx)
             HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to release connector's object wrapping context")
 
     /* Decrement refcount on connector */
-    if(H5VL__conn_dec_rc(vol_wrap_ctx->connector) < 0)
+    if(H5VL_conn_dec_rc(vol_wrap_ctx->connector) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector")
 
     /* Release object wrapping context */
@@ -2197,7 +2239,7 @@ H5VL_set_vol_wrapper(const H5VL_object_t *vol_obj)
             HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate VOL wrap context")
 
         /* Increment the outstanding objects that are using the connector */
-        H5VL__conn_inc_rc(vol_obj->connector);
+        H5VL_conn_inc_rc(vol_obj->connector);
 
         /* Set up VOL object wrapper context */
         vol_wrap_ctx->rc = 1;

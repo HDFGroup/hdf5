@@ -743,6 +743,7 @@ H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, hid_t 
     H5VL_connector_prop_t connector_prop; /* Property for VOL connector ID & info     */
     H5ES_t *es = NULL;                  /* Event set for the operation              */
     void *token = NULL, **token_ptr;    /* Request token for async operation        */
+    H5VL_object_t *token_obj = NULL;    /* Async token VOL object */
     H5VL_object_t *vol_obj = NULL;      /* VOL object for file                      */
     hbool_t supported;                  /* Whether 'post open' operation is supported by VOL connector */
     hid_t ret_value = H5I_INVALID_HID;  /* Return value                             */
@@ -802,10 +803,19 @@ H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, hid_t 
         HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
     /* If there's an event set and a token was created, add the token to it */
-    if(H5ES_NONE != es_id && NULL != token)
+    if(H5ES_NONE != es_id && NULL != token) {
+        /* Create vol object for token */
+        if(NULL == (token_obj = H5VL_create_object_generic(token, vol_obj->connector))) {
+            if(H5VL_request_free(token) < 0)
+                HDONE_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free request")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't create vol object for request token")
+        } /* end if */
+
         /* Add token to event set */
         if(H5ES_insert(es, token) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTAPPEND, FAIL, "can't append token to event set")
+        token_obj = NULL;
+    } /* end if */
 
     /* Get the file object */
     if(NULL == (vol_obj = H5VL_vol_object(ret_value)))
@@ -826,13 +836,25 @@ H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, hid_t 
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to make file 'post open' callback")
 
         /* If there's an event set and a token was created, add the token to it */
-        if(H5ES_NONE != es_id && NULL != token)
+        if(H5ES_NONE != es_id && NULL != token) {
+            /* Create vol object for token */
+            if(NULL == (token_obj = H5VL_create_object_generic(token, vol_obj->connector))) {
+                if(H5VL_request_free(token) < 0)
+                    HDONE_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free request")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't create vol object for request token")
+            } /* end if */
+
             /* Add token to event set */
             if(H5ES_insert(es, token) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTAPPEND, FAIL, "can't append token to event set")
+        } /* end if */
     } /* end if */
 
 done:
+    if(ret_value < 0 && token_obj)
+        if(H5VL_free_object(token_obj) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free request token")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__open_api_common() */
 
@@ -957,6 +979,8 @@ H5F__close_api_common(hid_t file_id, hid_t es_id)
 {
     H5ES_t *es = NULL;                  /* Event set for the operation */
     void *token = NULL, **token_ptr;    /* Request token for async operation */
+    H5VL_object_t *token_obj = NULL;    /* Async token VOL object */
+    H5VL_t *connector = NULL;           /* VOL connector */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -967,9 +991,18 @@ H5F__close_api_common(hid_t file_id, hid_t es_id)
 
     /* Get the event set and set up request token pointer for operation */
     if(H5ES_NONE != es_id) {
+        H5VL_object_t *vol_obj = NULL;
+
         /* Get event set */
         if(NULL == (es = (H5ES_t *)H5I_object_verify(es_id, H5I_EVENTSET)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an event set")
+
+        /* Get file object's connector and increate its rc, so it doesn't get
+         * closed when we close the file */
+        if(NULL == (vol_obj = H5VL_vol_object(file_id)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get VOL object for file")
+        connector = vol_obj->connector;
+        H5VL_conn_inc_rc(connector);
 
         /* Point at token for operation to set up */
         token_ptr = &token;
@@ -985,12 +1018,33 @@ H5F__close_api_common(hid_t file_id, hid_t es_id)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
 
     /* If there's an event set and a token was created, add the token to it */
-    if(H5ES_NONE != es_id && NULL != token)
+    if(H5ES_NONE != es_id && NULL != token) {
+        /* Create vol object for token */
+        if(NULL == (token_obj = H5VL_create_object_generic(token, connector))) {
+            if(H5VL_request_free(token) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't free request")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't create vol object for request token")
+        } /* end if */
+
         /* Add token to event set */
         if(H5ES_insert(es, token) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTAPPEND, FAIL, "can't append token to event set")
 
+        if(H5VL_conn_dec_rc(connector) < 0) {
+            connector = NULL;
+            HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
+        } /* end if */
+        connector = NULL;
+    } /* end if */
+
 done:
+    if(ret_value < 0) {
+        if(connector && H5VL_conn_dec_rc(connector) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
+        if(H5VL_free_object(token_obj) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free request token")
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__close_api_common() */
 
