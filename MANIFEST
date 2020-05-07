@@ -33,7 +33,7 @@
 ./autogen.sh
 ./configure.ac
 
-./github/workflows/main.yml  _DO_NOT_DISTRIBUTE_
+./.github/workflows/main.yml  _DO_NOT_DISTRIBUTE_
 
 ./m4/aclocal_cxx.m4
 ./m4/aclocal_fc.m4
