@@ -284,15 +284,17 @@ open_extensible_dset(state_t *s, unsigned int which)
 
     if (s->two_dee) {
         if (maxdims[0] != two_dee_max_dims[0] ||
-            maxdims[1] != two_dee_max_dims[1]) {
+            maxdims[1] != two_dee_max_dims[1] ||
+            maxdims[0] != maxdims[1]) {
                 errx(EXIT_FAILURE, "Unexpected maximum dimensions %"
-                    PRIuHSIZE " x %" PRIuHSIZE, dims[0], dims[1]);
+                    PRIuHSIZE " x %" PRIuHSIZE, maxdims[0], maxdims[1]);
         }
     } else if (maxdims[0] != one_dee_max_dims[0] ||
                maxdims[1] != one_dee_max_dims[1] ||
-               dims[0] != original_dims[0]) {
+               dims[1] != original_dims[1]) {
         errx(EXIT_FAILURE, "Unexpected maximum dimensions %"
-            PRIuHSIZE " x %" PRIuHSIZE, dims[0], dims[1]);
+            PRIuHSIZE " x %" PRIuHSIZE " or columns %" PRIuHSIZE,
+            maxdims[0], maxdims[1], dims[1]);
     }
 
     if (H5Sclose(filespace) < 0)
