@@ -126,7 +126,7 @@ macro (EXTERNAL_SZIP_LIBRARY compress_type encoding)
   endif ()
   externalproject_get_property (SZIP BINARY_DIR SOURCE_DIR)
 
-##include (${BINARY_DIR}/${SZIP_PACKAGE_NAME}${HDF_PACKAGE_EXT}-targets.cmake)
+##include (${BINARY_DIR}/${SZ_PACKAGE_NAME}${HDF_PACKAGE_EXT}-targets.cmake)
 # Create imported target szip-static
   if (USE_LIBAEC)
     add_library(${HDF_PACKAGE_NAMESPACE}szip-static STATIC IMPORTED)
