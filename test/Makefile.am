@@ -63,7 +63,7 @@ TEST_PROG= testhdf5 \
            flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
            enc_dec_plist_cross_platform getname vfd ros3 s3comms hdfs ntypes \
            dangle dtransform reserved cross_read freespace mf vds file_image \
-           unregister cache_logging cork swmr vol
+           unregister cache_logging cork swmr thread_id vol
 
 # List programs to be built when testing here.
 # error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
@@ -179,14 +179,15 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     chunk_fixed.h5 copy_dcpl_newfile.h5 partial_chunks.h5 layout_extend.h5 \
     zero_chunk.h5 chunk_single.h5 swmr_non_latest.h5 \
     earray_hdr_fd.h5 farray_hdr_fd.h5 bt2_hdr_fd.h5 \
-    storage_size.h5 dls_01_strings.h5 \
+    storage_size.h5 dls_01_strings.h5 power2up.h5 version_bounds.h5 \
+    alloc_0sized.h5 \
     extend.h5 istore.h5 extlinks*.h5 frspace.h5 links*.h5 \
     sys_file1 tfile[1-7].h5 th5s[1-4].h5 lheap.h5 fheap.h5 ohdr.h5 \
     stab.h5 extern_[1-5].h5 extern_[1-4][rw].raw gheap[0-4].h5 \
-    ohdr_min_a.h5 ohdr_min_b.h5 min_dset_ohdr_testfile.h5\
+    ohdr_min_a.h5 ohdr_min_b.h5 min_dset_ohdr_testfile.h5 \
     dt_arith[1-2] links.h5 links[0-6]*.h5 extlinks[0-15].h5 \
-    tmp tmp_links tmp2_links tmp_links_env tmp_vds_env \
-    big.data big[0-9][0-9][0-9][0-9][0-9].h5  \
+    tmp tmp_links tmp2_links tmp_links_env tmp_vds tmp_vds_env \
+    big.data big[0-9][0-9][0-9][0-9][0-9].h5 \
     stdio.h5 sec2.h5 dtypes[0-9].h5 dtypes1[0].h5 dt_arith[1-2].h5 tattr.h5 \
     tselect.h5 mtime.h5 unlink.h5 unicode.h5 coord.h5 \
     fillval_[0-9].h5 fillval.raw mount_[0-9].h5 testmeta.h5 ttime.h5 \
@@ -201,19 +202,21 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     new_move_[ab].h5 ntypes.h5 dangle.h5 error_test.h5 err_compat.h5 \
     dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
     unlink_chunked.h5 btree2.h5 btree2_tmp.h5 objcopy_src.h5 objcopy_dst.h5 \
-    objcopy_ext.dat trefer1.h5 trefer2.h5 app_ref.h5 farray.h5 farray_tmp.h5 \
+    objcopy_ext.dat app_ref.h5 farray.h5 farray_tmp.h5 \
     earray.h5 earray_tmp.h5 efc[0-5].h5 log_vfd_out.log log_ros3_out.log    \
     log_s3comms_out.log new_multi_file_v16-r.h5 new_multi_file_v16-s.h5     \
     split_get_file_image_test-m.h5 split_get_file_image_test-r.h5    \
     file_image_core_test.h5.copy unregister_filter_1.h5 unregister_filter_2.h5 \
     vds_virt.h5 vds_dapl.h5 vds_src_[0-1].h5 \
-    swmr_data.h5 use_use_append_chunk.h5 use_append_mchunks.h5 use_disable_mdc_flushes.h5     \
-    flushrefresh.h5 flushrefresh_VERIFICATION_START                  \
+    swmr_data.h5 use_use_append_chunk.h5 use_append_mchunks.h5 \
+    use_disable_mdc_flushes.h5 flushrefresh.h5 flushrefresh_VERIFICATION_START \
     flushrefresh_VERIFICATION_CHECKPOINT1 flushrefresh_VERIFICATION_CHECKPOINT2 \
-    flushrefresh_VERIFICATION_DONE atomic_data accum_swmr_big.h5 ohdr_swmr.h5 \
+    flushrefresh_VERIFICATION_DONE filenotclosed.h5 del_many_dense_attrs.h5 \
+    atomic_data accum_swmr_big.h5 ohdr_swmr.h5 \
     test_swmr*.h5 cache_logging.h5 cache_logging.out vds_swmr.h5 vds_swmr_src_*.h5 \
     swmr[0-2].h5 swmr_writer.out swmr_writer.log.* swmr_reader.out.* swmr_reader.log.* \
-    tbogus.h5.copy cache_image_test.h5 direct_chunk.h5 native_vol_test.h5
+    tbogus.h5.copy cache_image_test.h5 direct_chunk.h5 native_vol_test.h5 \
+    splitter*.h5 splitter.log mirror_rw mirror_ro
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
