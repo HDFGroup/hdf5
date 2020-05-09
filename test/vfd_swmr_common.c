@@ -200,8 +200,8 @@ vfd_swmr_create_fapl(bool writer, bool only_meta_pages, bool use_vfd_swmr)
     memset(&config, 0, sizeof(config));
 
     config.version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
-    config.tick_len = 1;
-    config.max_lag = 5;
+    config.tick_len = 4;
+    config.max_lag = 7;
     config.writer = writer;
     config.md_pages_reserved = 128;
     HDstrcpy(config.md_file_path, "./my_md_file");
