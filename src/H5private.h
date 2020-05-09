@@ -2106,20 +2106,33 @@ H5_DLL herr_t H5CX_pop(void);
 #include "H5FDvfd_swmr_private.h"
 #include "H5time_private.h" /* for timespeccmp */
 
-#define VFD_SWMR_TEST_FOR_END_OF_TICK(entering, err)                          \
+#define VFD_SWMR_ENTER(err)                                                   \
     do {                                                                      \
         /* TBD assert that the API lock is held.  The API lock */             \
         /* synchronizes access to `vfd_swmr_api_entries_g`     */             \
-        if (!entering && --vfd_swmr_api_entries_g > 0) {                      \
-            ;   /* Do nothing: we are still in an API call. */                \
-        } else if (entering && vfd_swmr_api_entries_g++ > 0) {                \
+        if (vfd_swmr_api_entries_g++ > 0)                                     \
             ;   /* Do nothing: we are *re-*entering the API. */               \
-        } else if(err_occurred) {                                             \
+        else if (TAILQ_EMPTY(&eot_queue_g))                                   \
+            ;   /* Nothing to do. */                                          \
+        else if (H5F_vfd_swmr_process_eot_queue(true) < 0) {                  \
+            HDONE_ERROR(H5E_FUNC, H5E_CANTSET, err,                           \
+                        "error processing EOT queue")                         \
+        }                                                                     \
+    } while (0)
+
+#define VFD_SWMR_LEAVE(err)                                                   \
+    do {                                                                      \
+        /* TBD assert that the API lock is held.  The API lock */             \
+        /* synchronizes access to `vfd_swmr_api_entries_g`     */             \
+        if (--vfd_swmr_api_entries_g > 0)                                     \
+            ;   /* Do nothing: we are still in an API call. */                \
+        else if (err_occurred)                                                \
             ;   /* Do nothing: an error occurred. */                          \
-        } else if(TAILQ_FIRST(&eot_queue_g) != NULL) {                        \
-            if (H5F_vfd_swmr_process_eot_queue(entering) < 0)                 \
-                HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err,                       \
-                            "error processing EOT queue")                     \
+        else if (TAILQ_EMPTY(&eot_queue_g))                                   \
+            ;   /* Nothing to do. */                                          \
+        else if (H5F_vfd_swmr_process_eot_queue(false) < 0) {                 \
+            HDONE_ERROR(H5E_FUNC, H5E_CANTSET, err,                           \
+                        "error processing EOT queue")                         \
         }                                                                     \
     } while (0)
 
@@ -2127,7 +2140,7 @@ H5_DLL herr_t H5CX_pop(void);
 #define FUNC_ENTER_API(err) {{                                                \
     FUNC_ENTER_API_COMMON                                                     \
     FUNC_ENTER_API_INIT(err);                                                 \
-    VFD_SWMR_TEST_FOR_END_OF_TICK(true, err);                                 \
+    VFD_SWMR_ENTER(err);                                                      \
     /* Clear thread error stack entering public functions */                  \
     H5E_clear_stack(NULL);                                                    \
     {
@@ -2139,7 +2152,7 @@ H5_DLL herr_t H5CX_pop(void);
 #define FUNC_ENTER_API_NOCLEAR(err) {{                                        \
     FUNC_ENTER_API_COMMON                                                     \
     FUNC_ENTER_API_INIT(err);                                                 \
-    VFD_SWMR_TEST_FOR_END_OF_TICK(true, err);                                 \
+    VFD_SWMR_ENTER(err);                                                      \
     {
 
 /*
@@ -2332,7 +2345,7 @@ H5_DLL herr_t H5CX_pop(void);
     H5TRACE_RETURN(ret_value);
 
 #define FUNC_LEAVE_API(ret_value)                                             \
-    VFD_SWMR_TEST_FOR_END_OF_TICK(false, ret_value);                          \
+    VFD_SWMR_LEAVE(ret_value);                                                \
     FUNC_LEAVE_API_COMMON(ret_value);                                         \
     (void)H5CX_pop();                                                         \
     H5_POP_FUNC                                                               \
