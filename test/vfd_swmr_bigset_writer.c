@@ -414,6 +414,9 @@ verify_extensible_dset(state_t *s, unsigned int which, uint32_t mat[ROWS][COLS],
 
     filespace = H5Dget_space(ds);
 
+    if (filespace == badhid)
+        errx(EXIT_FAILURE, "H5Dget_space failed");
+
     if (H5Sget_simple_extent_dims(filespace, size, NULL) < 0)
         errx(EXIT_FAILURE, "H5Sget_simple_extent_dims failed");
 
