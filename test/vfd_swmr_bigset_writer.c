@@ -495,7 +495,6 @@ write_extensible_dset(state_t *s, unsigned int which, unsigned int step,
         last.col = 0;
     }
 
-
     dbgf(1, "new size %" PRIuHSIZE ", %" PRIuHSIZE "\n", size[0], size[1]);
 
     if (H5Dset_extent(ds, size) < 0)
