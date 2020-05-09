@@ -237,6 +237,9 @@ create_extensible_dset(state_t *s, unsigned int which)
     ds = H5Dcreate2(s->file, dname, H5T_STD_U32BE, filespace,
         H5P_DEFAULT, dcpl, H5P_DEFAULT);
 
+    if (H5Pclose(dcpl) < 0)
+        errx(EXIT_FAILURE, "H5Pclose(dcpl)");
+
     if (H5Sclose(filespace) < 0)
         errx(EXIT_FAILURE, "H5Sclose failed");
 
@@ -282,6 +285,11 @@ open_extensible_dset(state_t *s, unsigned int which)
     if (H5Sget_simple_extent_dims(filespace, dims, maxdims) < 0)
         errx(EXIT_FAILURE, "H5Sget_simple_extent_dims failed");
 
+    if (H5Sclose(filespace) < 0)
+        errx(EXIT_FAILURE, "H5Sclose failed");
+
+    filespace = badhid;
+
     if (s->two_dee) {
         if (maxdims[0] != two_dee_max_dims[0] ||
             maxdims[1] != two_dee_max_dims[1] ||
@@ -296,11 +304,6 @@ open_extensible_dset(state_t *s, unsigned int which)
             PRIuHSIZE " x %" PRIuHSIZE " or columns %" PRIuHSIZE,
             maxdims[0], maxdims[1], dims[1]);
     }
-
-    if (H5Sclose(filespace) < 0)
-        errx(EXIT_FAILURE, "H5Sclose failed");
-
-    filespace = badhid;
 
     s->dataset[which] = ds;
 }
@@ -416,7 +419,7 @@ verify_extensible_dset(state_t *s, unsigned int which, uint32_t mat[ROWS][COLS],
 
     nrows = (unsigned)(size[0] / original_dims[0]);
     if (nrows < 2)
-        return;
+        goto out;
 
     last_step = nrows - 2;
 
@@ -457,10 +460,11 @@ verify_extensible_dset(state_t *s, unsigned int which, uint32_t mat[ROWS][COLS],
         }
     }
 
+    *stepp = last_step;
+
+out:
     if (H5Sclose(filespace) < 0)
         errx(EXIT_FAILURE, "H5Sclose failed");
-
-    *stepp = last_step;
 }
 
 static void
