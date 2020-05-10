@@ -1030,9 +1030,12 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDgetrusage
     #define HDgetrusage(X,S)  getrusage(X,S)
 #endif /* HDgetrusage */
-#ifndef HDgets
-    #define HDgets(S)    gets(S)
+
+/* Don't define HDgets - gets() was deprecated in C99 and removed in C11 */
+#ifdef HDgets
+    #undef HDgets
 #endif /* HDgets */
+
 #ifndef HDgettimeofday
     #define HDgettimeofday(S,P)  gettimeofday(S,P)
 #endif /* HDgettimeofday */
