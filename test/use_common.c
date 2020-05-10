@@ -70,7 +70,7 @@ parse_option(int argc, char * const argv[], options_t * opts)
             exit(EXIT_SUCCESS);
             break;
         case 'f':     /* usecase data file name */
-            opts->filename = optarg;
+            opts->filename = HDstrdup(optarg);
             break;
         case 'i':     /* iterations */
             if ((opts->iterations = HDatoi(optarg)) <= 0) {
