@@ -1218,7 +1218,7 @@ done:
 }
 
 static herr_t
-H5MF__xfree_impl(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
+H5MF__xfree_inner_impl(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
 {
     H5F_mem_page_t  fs_type;            /* Free space type (mapped from allocation type) */
     H5MF_free_section_t *node = NULL;   /* Free space section pointer */
@@ -1350,24 +1350,6 @@ H5MF__xfree_impl(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
             node = NULL;
     }
 
-    /* Multi-page and VFD SWMR writer: remove from PB if exists there.
-     *
-     * It's ok to remove the page from the PB without flushing to
-     * the shadow file or to the underlying HDF5 file because any
-     * writes to the page in this tick have not yet become visible
-     * to the reader, and any writes to the page in previous ticks are
-     * recorded in the shadow file.
-     */
-    if(size > f->shared->fs_page_size && f->shared->vfd_swmr_writer) {
-
-        HDassert(f->shared->pb_ptr != NULL);
-        HDassert(H5F_USE_VFD_SWMR(f));
-        HDassert(H5F_SHARED_PAGED_AGGR(f->shared));
-
-        if (H5PB_remove_entries(f->shared, addr, size) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't remove the page from page buffer")
-    }
-
 done:
     /* Reset the ring in the API context */
     if(orig_ring != H5AC_RING_INV)
@@ -1385,7 +1367,58 @@ done:
 H5MF__sects_dump(f, stderr);
 #endif /* H5MF_ALLOC_DEBUG_DUMP */
     FUNC_LEAVE_NOAPI_TAG(ret_value)
-} /* end H5MF_xfree() */
+}
+
+static herr_t
+H5MF__xfree_impl(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC_TAG(H5AC__FREESPACE_TAG)
+
+    ret_value = H5MF__xfree_inner_impl(f, alloc_type, addr, size);
+
+    /* If the page buffer is enabled, notify it so that it can remove any 
+     * pages that lie in the freed region.  
+     *
+     * This is necessary in normal (AKA non VFD SWMR mode) as if single large
+     * metadata entry is allocated out of the freed space, writes to the
+     * entry will by-pass the page buffer.  If a dirty intersecting 
+     * entry is left in the page buffer, it could introduce corruption 
+     * if it is flushed after the large metadata entry is written.
+     *
+     * Further, in the VFD SWMR case, the large metadata entry will typically
+     * be buffered in the page buffer.  If an intersecting entry is left
+     * in the page buffer, in addition to causing potential corruption in 
+     * the HDF5 file, it may also result in overlaping entries in the page
+     * buffer and metadata file index.
+     *
+     * It's ok to remove the page from the PB without flushing to
+     * the shadow file or to the underlying HDF5 file because any
+     * writes to the page in this tick have not yet become visible
+     * to the reader, and any writes to the page in previous ticks are
+     * recorded in the shadow file.
+     *
+     * Note: This is not the correct place for this call, as it is 
+     *       sometimes bypassed by a HGOTO_DONE earlier in the function.
+     *       This causes the assertion failure in fheap when run at 
+     *       express test level 0.  Discuss with Vailin.
+     *
+     *                                    JRM -- 4/28/20
+     */
+    if (ret_value == SUCCEED && f->shared->pb_ptr &&
+        size >= f->shared->fs_page_size) {
+
+        HDassert(H5F_SHARED_PAGED_AGGR(f->shared));
+
+        if (H5PB_remove_entries(f->shared, addr, size) < 0) {
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL,
+                "can't remove entries from page buffer")
+        }
+    }
+done:
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
+}
 
 
 /*-------------------------------------------------------------------------
