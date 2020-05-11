@@ -47,7 +47,7 @@ typedef struct options_t {
     hbool_t use_swmr;           /* use swmr open (1) or not             */
     int iterations;             /* iterations, default 1                */
     hid_t fapl_id;              /* instance-specific FAPL ID            */
-    char *progname;             /* Program name (used in usage and dset name) */
+    const char *progname;       /* Program name (used in usage and dset name) */
 } options_t;
 
 /* prototype declarations */
