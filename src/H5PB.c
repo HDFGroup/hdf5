@@ -3982,11 +3982,21 @@ H5PB__write_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr,
                             "couldn't extend entry");
             }
             H5PB__UPDATE_RP_FOR_REMOVE(pb_ptr, entry_ptr, FAIL)
+
+            /* To keep statistics for the index and the tick-list up-to-date,
+             * it's expedient to remove and re-insert entries there.
+             */
             H5PB__DELETE_FROM_INDEX(pb_ptr, entry_ptr, FAIL)
+            if (entry_ptr->modified_this_tick)
+                H5PB__REMOVE_FROM_TL(pb_ptr, entry_ptr, FAIL)
+
             entry_ptr->image_ptr = H5MM_xfree(entry_ptr->image_ptr);
             entry_ptr->image_ptr = new_image;
             entry_ptr->is_mpmde = true;
             entry_ptr->size = size;
+
+            if (entry_ptr->modified_this_tick)
+                H5PB__INSERT_IN_TL(pb_ptr, entry_ptr, FAIL)
             H5PB__INSERT_IN_INDEX(pb_ptr, entry_ptr, FAIL)
         }
 
