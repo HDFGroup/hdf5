@@ -226,7 +226,7 @@ main(int argc, char **argv)
     bool wait_for_signal;
     int ch;
     char vector[8];
-    unsigned seed = 1;
+    unsigned seed;
     unsigned long tmpl;
     char *end, *ostate;
     const char *seedvar = "H5_ZOO_STEP_SEED";
