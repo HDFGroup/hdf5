@@ -233,12 +233,14 @@ main(int argc, char **argv)
     bool use_vfd_swmr = true;
     bool print_estack = false;
     const char *progname = basename(argv[0]);
+    const char *personality = strstr(progname, "vfd_swmr_zoo_");
     estack_state_t es;
     char step = 'b';
 
-    if (strcmp(progname, "vfd_swmr_zoo_writer") == 0)
+    if (personality != NULL && strcmp(personality, "vfd_swmr_zoo_writer") == 0)
         writer = wait_for_signal = true;
-    else if (strcmp(progname, "vfd_swmr_zoo_reader") == 0)
+    else if (personality != NULL &&
+            strcmp(personality, "vfd_swmr_zoo_reader") == 0)
         writer = false;
     else {
         errx(EXIT_FAILURE,
