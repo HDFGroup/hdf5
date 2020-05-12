@@ -313,10 +313,17 @@ H5ES__close(H5ES_t *es)
         /* Get pointer to next node, so we can free this one */
         tmp = ev->next;
 
-        /* Wait on the event */
-        /* (Releases the request) */
+        /* Wait on the request */
         if(H5VL_request_wait(ev->request, H5ES_WAIT_FOREVER, &status) < 0)
             HGOTO_ERROR(H5E_EVENTSET, H5E_CANTWAIT, FAIL, "unable to wait for operation")
+
+        /* Free the request */
+        if(H5VL_request_free(ev->request) < 0)
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTFREE, FAIL, "unable to free request")
+
+        /* Free request VOL object */
+        if(H5VL_free_object(ev->request) < 0)
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTFREE, FAIL, "unable to free VOL object")
 
         /* Free the event node */
         H5FL_FREE(H5ES_event_t, ev);
