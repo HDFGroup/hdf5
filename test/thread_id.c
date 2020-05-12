@@ -18,7 +18,6 @@
  * 3 No two threads share an ID during their lifetimes.
  * 4 A thread's ID is available for reuse as soon as it is joined.
  */
-#include <err.h>
 
 /*
  * Include required headers.  This file tests internal library functions,
@@ -26,12 +25,173 @@
  */
 #include "testhdf5.h"
 
-#define threads_failure(_call, _result) do {                \
-    errx(EXIT_FAILURE, "%s.%d: " #_call ": %s", __func__,   \
-        __LINE__, strerror(_result));                       \
-} while (false)
+static void my_errx(int, const char *, ...) H5_ATTR_FORMAT(printf, 2, 3);
+
+static void
+my_errx(int code, const char *fmt, ...)
+{
+    va_list ap;
+
+    (void)HDfprintf(stderr, "thread_id: ");
+    HDva_start(ap, fmt);
+    (void)HDvfprintf(stderr, fmt, ap);
+    HDva_end(ap);
+    (void)HDfputc('\n', stderr);
+    HDexit(code);
+}
 
 #if defined(H5_HAVE_THREADSAFE) && !defined(H5_HAVE_WIN_THREADS)
+
+#if defined(H5_HAVE_DARWIN)
+
+typedef struct _pthread_barrierattr {
+    uint8_t unused;
+} pthread_barrierattr_t;
+
+typedef struct _pthread_barrier {
+    uint32_t magic;
+    unsigned int count;
+    uint64_t nentered;
+    pthread_cond_t cv;
+    pthread_mutex_t mtx;
+} pthread_barrier_t;
+
+int pthread_barrier_init(pthread_barrier_t *, const pthread_barrierattr_t *,
+    unsigned int);
+int pthread_barrier_wait(pthread_barrier_t *);
+int pthread_barrier_destroy(pthread_barrier_t *);
+
+static const uint32_t barrier_magic = 0xf00dd00f;
+
+int
+pthread_barrier_init(pthread_barrier_t *barrier,
+    const pthread_barrierattr_t *attr, unsigned int count)
+{
+    int rc;
+
+    if (count == 0)
+        return EINVAL;
+
+    if (attr != NULL)
+        return EINVAL;
+
+    memset(barrier, 0, sizeof(*barrier));
+
+    barrier->count = count;
+
+    if ((rc = pthread_cond_init(&barrier->cv, NULL)) != 0)
+        return rc;
+
+    if ((rc = pthread_mutex_init(&barrier->mtx, NULL)) != 0) {
+        (void)pthread_cond_destroy(&barrier->cv);
+        return rc;
+    }
+
+    barrier->magic = barrier_magic;
+
+    return 0;
+}
+
+static void
+barrier_lock(pthread_barrier_t *barrier)
+{
+    int rc;
+
+    if ((rc = pthread_mutex_lock(&barrier->mtx)) != 0) {
+        my_errx(EXIT_FAILURE, "%s: pthread_mutex_lock: %s", __func__,
+            strerror(rc));
+    }
+}
+
+static void
+barrier_unlock(pthread_barrier_t *barrier)
+{
+    int rc;
+
+    if ((rc = pthread_mutex_unlock(&barrier->mtx)) != 0) {
+        my_errx(EXIT_FAILURE, "%s: pthread_mutex_unlock: %s", __func__,
+            strerror(rc));
+    }
+}
+
+int
+pthread_barrier_destroy(pthread_barrier_t *barrier)
+{
+    int rc;
+
+    barrier_lock(barrier);
+    if (barrier->magic != barrier_magic)
+        rc = EINVAL;
+    else if (barrier->nentered % barrier->count != 0)
+        rc = EBUSY;
+    else {
+        rc = 0;
+        barrier->magic = ~barrier->magic;
+    }
+    barrier_unlock(barrier);
+
+    if (rc != 0)
+        return rc;
+
+    (void)pthread_cond_destroy(&barrier->cv);
+    (void)pthread_mutex_destroy(&barrier->mtx);
+
+    return 0;
+}
+
+int
+pthread_barrier_wait(pthread_barrier_t *barrier)
+{
+    int rc;
+    uint64_t threshold;
+
+    if (barrier == NULL)
+        return EINVAL;
+
+    barrier_lock(barrier);
+    if (barrier->magic != barrier_magic) {
+        rc = EINVAL;
+        goto out;
+    }
+    /* Compute the release `threshold`.  All threads entering with count = 5
+     * and `nentered` in [0, 4] should be released once `nentered` reaches 5:
+     * call 5 the release `threshold`.  All threads entering with count = 5
+     * and `nentered` in [5, 9] should be released once `nentered` reaches 10.
+     */
+    threshold = (barrier->nentered / barrier->count + 1) * barrier->count;
+    barrier->nentered++;
+    while (barrier->nentered < threshold) {
+        if ((rc = pthread_cond_wait(&barrier->cv, &barrier->mtx)) != 0)
+            goto out;
+    }
+    rc = pthread_cond_broadcast(&barrier->cv);
+out:
+    barrier_unlock(barrier);
+    return rc;
+}
+
+#endif  /* H5_HAVE_DARWIN */
+
+static void my_err(int, const char *, ...) H5_ATTR_FORMAT(printf, 2, 3);
+
+static void
+my_err(int code, const char *fmt, ...)
+{
+    va_list ap;
+    int errno_copy = errno;
+
+    (void)HDfprintf(stderr, "thread_id: ");
+    HDva_start(ap, fmt);
+    (void)HDvfprintf(stderr, fmt, ap);
+    HDva_end(ap);
+    (void)HDfprintf(stderr, ": %s\n", HDstrerror(errno_copy));
+    HDexit(code);
+}
+
+#define threads_failure(_call, _result) do {                \
+    my_errx(EXIT_FAILURE, "%s.%d: " #_call ": %s", __func__,   \
+        __LINE__, HDstrerror(_result));                       \
+} while (false)
 
 #define NTHREADS 5
 
@@ -52,13 +212,13 @@ atomic_printf(const char *fmt, ...)
     va_end(ap);
 
     if (nprinted == -1)
-        err(EXIT_FAILURE, "%s.%d: vsnprintf", __func__, __LINE__);
+        my_err(EXIT_FAILURE, "%s.%d: vsnprintf", __func__, __LINE__);
     else if (nprinted >= (ssize_t)sizeof(buf))
-        errx(EXIT_FAILURE, "%s.%d: vsnprintf overflowed", __func__, __LINE__);
+        my_errx(EXIT_FAILURE, "%s.%d: vsnprintf overflowed", __func__, __LINE__);
 
     nwritten = write(STDOUT_FILENO, buf, (size_t)nprinted);
     if (nwritten < nprinted) {
-        errx(EXIT_FAILURE, "%s.%d: write error or short write",
+        my_errx(EXIT_FAILURE, "%s.%d: write error or short write",
             __func__, __LINE__);
     }
 }
@@ -66,7 +226,15 @@ atomic_printf(const char *fmt, ...)
 /* Each thread runs this routine.  The routine fetches the current
  * thread's ID, makes sure that it is in the expected range, makes
  * sure that in this round of testing, no two threads shared the
- * same ID, 
+ * same ID, and checks that each thread's ID is constant over its lifetime.
+ *
+ * main() checks that every ID in [1, NTHREADS] is used in each round
+ * of testing.  All NTHREADS threads synchronize on a barrier after each
+ * has fetched its ID.  The barrier guarantees that all threads' lifetimes
+ * overlap at least momentarily, so the IDs will be unique, and there
+ * will be NTHREADS of them.  Further, since thread IDs are assigned
+ * starting with 1, and the number of threads with IDs alive never exceeds
+ * NTHREADS, the least ID has to be 1 and the greatest, NTHREADS.
  */
 static void *
 thread_main(void H5_ATTR_UNUSED *arg)
@@ -114,7 +282,7 @@ main(void)
      * mutex, etc.
      */
     if (H5open() != SUCCEED)
-        errx(EXIT_FAILURE, "%s.%d: H5open failed", __func__, __LINE__);
+        my_errx(EXIT_FAILURE, "%s.%d: H5open failed", __func__, __LINE__);
 
     if ((rc = pthread_mutex_init(&used_lock, NULL)) == -1)
         threads_failure(pthread_mutex_init, rc);
@@ -144,7 +312,7 @@ main(void)
 
         for (i = 0; i < NTHREADS; i++) {
             if (!used[i]) // access synchronized by thread create/join
-                errx(EXIT_FAILURE, "thread ID %d did not run.", i + 1);
+                my_errx(EXIT_FAILURE, "thread ID %d did not run.", i + 1);
         }
     }
     if ((rc = pthread_barrier_destroy(&barrier)) != 0)
@@ -156,8 +324,7 @@ main(void)
 int
 main(void)
 {
-    errx(EXIT_FAILURE, "not implemented in this configuration.");
+    HDfprintf(stderr, "not implemented in this configuration.\n");
+    return EXIT_SUCCESS;
 }
-
 #endif /*H5_HAVE_THREADSAFE && !H5_HAVE_WIN_THREADS*/
-

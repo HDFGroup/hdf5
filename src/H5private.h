@@ -1567,10 +1567,6 @@ extern char *strdup(const char *s);
     #define HDstrdup(S)     strdup(S)
 #endif /* HDstrdup */
 
-#ifndef HDpthread_self
-    #define HDpthread_self()    pthread_self()
-#endif /* HDpthread_self */
-
 /* Macro for "stringizing" an integer in the C preprocessor (use H5_TOSTRING) */
 /* (use H5_TOSTRING, H5_STRINGIZE is just part of the implementation) */
 #define H5_STRINGIZE(x) #x
@@ -1919,11 +1915,13 @@ H5_DLL double H5_trace(const double *calltime, const char *func, const char *typ
 /* global library version information string */
 extern char  H5_lib_vers_info_g[];
 
+/* Include required thread-safety header, always, for the H5TS_thread_id()
+ * definition.
+ */
+#include "H5TSprivate.h"
+
 /* Lock headers */
 #ifdef H5_HAVE_THREADSAFE
-
-/* Include required thread-safety header */
-#include "H5TSprivate.h"
 
 /* replacement structure for original global variable */
 typedef struct H5_api_struct {
