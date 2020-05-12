@@ -45,7 +45,7 @@
     |
     |
    dim[1]
- 
+
  */
 
 #define UC_2_N_SOURCES      5
@@ -98,7 +98,7 @@ static char UC_2_FILE_NAMES[UC_2_N_SOURCES][NAME_LEN] = {
 
 /* VDS file name */
 #define UC_2_VDS_FILE_NAME    "2_vds.h5"
-    
+
 /* Dataset names */
 #define UC_2_SOURCE_DSET_NAME   "source_dset"
 #define UC_2_SOURCE_DSET_PATH   "/source_dset"

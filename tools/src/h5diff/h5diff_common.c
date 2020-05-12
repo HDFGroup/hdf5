@@ -27,20 +27,20 @@ static int check_d_input(const char*);
  */
 static const char *s_opts = "hVrv:qn:d:p:NcelxE:S";
 static struct long_options l_opts[] = {
-    { "help", no_arg, 'h' },
-    { "version", no_arg, 'V' },
-    { "report", no_arg, 'r' },
-    { "verbose", optional_arg, 'v' },
-    { "quiet", no_arg, 'q' },
-    { "count", require_arg, 'n' },
-    { "delta", require_arg, 'd' },
-    { "relative", require_arg, 'p' },
-    { "nan", no_arg, 'N' },
-    { "compare", no_arg, 'c' },
+    { "help",               no_arg, 'h' },
+    { "version",            no_arg, 'V' },
+    { "report",             no_arg, 'r' },
+    { "verbose",            optional_arg, 'v' },
+    { "quiet",              no_arg, 'q' },
+    { "count",              require_arg, 'n' },
+    { "delta",              require_arg, 'd' },
+    { "relative",           require_arg, 'p' },
+    { "nan",                no_arg, 'N' },
+    { "compare",            no_arg, 'c' },
     { "use-system-epsilon", no_arg, 'e' },
-    { "follow-symlinks", no_arg, 'l' },
-    { "no-dangling-links", no_arg, 'x' },
-    { "exclude-path", require_arg, 'E' },
+    { "follow-symlinks",    no_arg, 'l' },
+    { "no-dangling-links",  no_arg, 'x' },
+    { "exclude-path",       require_arg, 'E' },
     { "enable-error-stack", no_arg, 'S' },
     { NULL, 0, '\0' }
 };
@@ -78,13 +78,7 @@ static void check_options(diff_opt_t* opts)
  *-------------------------------------------------------------------------
  */
 
-void parse_command_line(int argc,
-                        const char* argv[],
-                        const char** fname1,
-                        const char** fname2,
-                        const char** objname1,
-                        const char** objname2,
-                        diff_opt_t* opts)
+void parse_command_line(int argc, const char* argv[], const char** fname1, const char** fname2, const char** objname1, const char** objname2, diff_opt_t* opts)
 {
     int i;
     int opt;
@@ -201,7 +195,7 @@ void parse_command_line(int argc,
             }
             else {
                 while(NULL != exclude_prev->next)
-                    exclude_prev=exclude_prev->next;
+                    exclude_prev = exclude_prev->next;
 
                 exclude_node->next = NULL;
                 exclude_prev->next = exclude_node;
@@ -209,7 +203,7 @@ void parse_command_line(int argc,
             break;
 
         case 'd':
-            opts->d=1;
+            opts->d = 1;
 
             if (check_d_input(opt_arg) == - 1) {
                 HDprintf("<-d %s> is not a valid option\n", opt_arg);
@@ -224,7 +218,7 @@ void parse_command_line(int argc,
             break;
 
         case 'p':
-            opts->p=1;
+            opts->p = 1;
             if (check_p_input(opt_arg) == -1) {
                 HDprintf("<-p %s> is not a valid option\n", opt_arg);
                 usage();
@@ -238,7 +232,7 @@ void parse_command_line(int argc,
             break;
 
         case 'n':
-            opts->n=1;
+            opts->n = 1;
             if ( check_n_input(opt_arg) == -1) {
                 HDprintf("<-n %s> is not a valid option\n", opt_arg);
                 usage();
