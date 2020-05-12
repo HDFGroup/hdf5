@@ -36,7 +36,7 @@ check_PROGRAMS=$(TEST_PROG)
 
 LIBOBJS=$(top_builddir)/fortran/test/tf_gen.o
 
-LDADD=$(LIBOBJS) $(LIBH5F_HL) $(LIBH5F) $(LIBH5_HL)  $(LIBHDF5) 
+LDADD=$(LIBOBJS) $(LIBH5F_HL) $(LIBH5F) $(LIBH5_HL)  $(LIBHDF5)
 
 # Source files for the programs
 tstds_SOURCES=tstds.F90
