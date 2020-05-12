@@ -1041,7 +1041,7 @@ done:
     if(ret_value < 0) {
         if(connector && H5VL_conn_dec_rc(connector) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
-        if(H5VL_free_object(token_obj) < 0)
+        if(token_obj && H5VL_free_object(token_obj) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free request token")
     } /* end if */
 
