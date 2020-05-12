@@ -41,7 +41,7 @@ int main() {
    dataspace_id = H5Screate_simple(1, &dims, NULL);
 
    /* Create a dataset attribute. */
-   attribute_id = H5Acreate2 (dataset_id, "Units", H5T_STD_I32BE, dataspace_id, 
+   attribute_id = H5Acreate2 (dataset_id, "Units", H5T_STD_I32BE, dataspace_id,
                              H5P_DEFAULT, H5P_DEFAULT);
 
    /* Write the attribute data. */
