@@ -486,11 +486,11 @@ h5fget_obj_count_c ( hid_t_f *file_id , int_f *obj_type, size_t_f * obj_count)
  *  Changed type of max_obj to size_t_f; added parameter for the
  *  number of open objects
  *  Thursday, September 25, 2008 EIP
- *	
+ *
  * SOURCE
 */
 int_f
-h5fget_obj_ids_c ( hid_t_f *file_id , int_f *obj_type, size_t_f *max_objs, 
+h5fget_obj_ids_c ( hid_t_f *file_id , int_f *obj_type, size_t_f *max_objs,
     hid_t_f *obj_ids, size_t_f *num_objs)
 /******/
 {
@@ -693,7 +693,7 @@ h5fget_file_image_c(hid_t_f *file_id, void *buf_ptr, size_t_f *buf_len, size_t_f
     /*
      * Call h5fget_file_image function
      */
-    
+
     if ( (c_buf_req = H5Fget_file_image((hid_t)*file_id, buf_ptr, (size_t)*buf_len)) < 0)
          HGOTO_DONE(FAIL);
 
