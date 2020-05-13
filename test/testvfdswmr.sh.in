@@ -645,7 +645,7 @@ cd ..
 $DPRINT nerrors $nerrors nsofterrors $nsofterrors
 if test $nerrors -eq 0 ; then
     echo "VFD SWMR tests passed."
-    if test $nsofterrors -eq 0 ; then
+    if test $nsofterrors -ne 0 ; then
 	echo
         echo "${nsofterrors} soft errors occurred.  That's safe to ignore."
     fi
