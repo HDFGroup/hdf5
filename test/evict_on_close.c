@@ -744,7 +744,7 @@ check_dset_scheme(hid_t fid, const char *dset_name)
         TEST_ERROR;
 
     /* Record the number of cache entries */
-    during = file_ptr->shared->cache->index_len; 
+    during = file_ptr->shared->cache->index_len;
 
 #ifdef EOC_MANUAL_INSPECTION
     HDprintf("\nCACHE AFTER DATA READ (WHILE OPEN):\n");

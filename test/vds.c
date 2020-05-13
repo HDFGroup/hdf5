@@ -618,7 +618,7 @@ test_api(test_api_config_t config, hid_t fapl, H5F_libver_t low)
         TEST_ERROR
 
     /* Get examination DCPL */
-    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename, 
+    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename,
                             (low >= H5F_LIBVER_V112)?(hsize_t)99:(low >= H5F_LIBVER_V110?174:213)) < 0)
         TEST_ERROR
 
@@ -1026,7 +1026,7 @@ test_api(test_api_config_t config, hid_t fapl, H5F_libver_t low)
     }
 
     /* Get examination DCPL */
-    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename, 
+    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename,
                             (low >= H5F_LIBVER_V112)?(hsize_t)607:(hsize_t)697) < 0)
         TEST_ERROR
 
@@ -12136,9 +12136,9 @@ test_dapl_values(hid_t fapl_id)
  *
  * Purpose:     Tests datasets with virtual layout
  *
- * Note: 
+ * Note:
  *  Tests are modified to test with the low/high bounds combination
- *  set in fapl.  
+ *  set in fapl.
  *  Please see RFC for "H5Sencode/H5Sdecode Format Change".
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
@@ -12188,7 +12188,7 @@ main(void)
             high_string = h5_get_version_string(high);
             HDsprintf(msg, "Testing virtual dataset with file version bounds: (%s, %s):", low_string, high_string);
             HDputs(msg);
-    
+
             for(test_api_config = (int)TEST_API_BASIC; test_api_config < (int)TEST_API_NTESTS; test_api_config++)
                 nerrors += test_api((test_api_config_t)test_api_config, my_fapl, low);
             for(bit_config = 0; bit_config < TEST_IO_NTESTS; bit_config++) {

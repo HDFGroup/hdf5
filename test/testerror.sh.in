@@ -11,7 +11,7 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-# Tests for test_error and err_compat 
+# Tests for test_error and err_compat
 
 srcdir=@srcdir@
 
@@ -62,7 +62,7 @@ TEST() {
    TESTING $TEST_ERR
    (
       # Skip the plugin for testing missing filter.
-      $ENVCMD $RUNSERIAL $TEST_ERR_BIN 
+      $ENVCMD $RUNSERIAL $TEST_ERR_BIN
    ) >$actual 2>$actual_err
    # Extract file name, line number, version and thread IDs because they may be different
    sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
@@ -73,7 +73,7 @@ TEST() {
         -e 's/H5Eset_auto[1-2]*/H5Eset_auto(1 or 2)/' \
 	$actual_err > $actual_ext
    cat $actual_ext >> $actual
-    
+
    if $CMP $expect1 $actual; then
       echo " PASSED"
    elif $CMP $expect2 $actual; then
@@ -96,7 +96,7 @@ SKIP() {
     TESTING $@
     echo  " -SKIP-"
 }
-  
+
 ##############################################################################
 ##############################################################################
 ###			  T H E   T E S T S                                ###

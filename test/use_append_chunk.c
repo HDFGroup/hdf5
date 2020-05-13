@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Use Case 1.7	Appending a single chunk
+ * Use Case 1.7 Appending a single chunk
  * Description:
  *     Appending a single chunk of raw data to a dataset along an unlimited
  *     dimension within a pre-created file and reading the new data back.
@@ -24,35 +24,36 @@
  * Level:
  *     User Level
  * Guarantees:
- *     o	Readers will see the modified dimension sizes after the Writer
- * 	finishes HDF5 metadata updates and issues H5Fflush or H5Oflush calls.
- *     o	Readers will see newly appended data after the Writer finishes
- * 	the flush operation.
- * 
+ *     o Readers will see the modified dimension sizes after the Writer
+ *       finishes HDF5 metadata updates and issues H5Fflush or H5Oflush calls.
+ *     o Readers will see newly appended data after the Writer finishes
+ *       the flush operation.
+ *
  * Preconditions:
- *     o	Readers are not allowed to modify the file.  o	 All datasets
- * 	that are modified by the Writer exist when the Writer opens the file.
- *     o	All datasets that are modified by the Writer exist when a Reader
- * 	opens the file.  o	 Data is written by a hyperslab contained in
- * 	one chunk.
- * 
+ *     o Readers are not allowed to modify the file.
+ *     o All datasets that are modified by the Writer exist when the Writer
+ *       opens the file.
+ *     o All datasets that are modified by the Writer exist when a Reader
+ *       opens the file.
+ *     o Data is written by a hyperslab contained in one chunk.
+ *
  * Main Success Scenario:
- *     1.	An application creates a file with required objects (groups,
- * 	datasets, and attributes).
- *     2.	The Writer application opens the file and datasets in the file
- * 	and starts adding data along the unlimited dimension using a hyperslab
- * 	selection that corresponds to an HDF5 chunk.
- *     3.	A Reader opens the file and a dataset in a file, and queries
- * 	the sizes of the dataset; if the extent of the dataset has changed,
- * 	reads the appended data back.
- * 
+ *     1. An application creates a file with required objects (groups,
+ *        datasets, and attributes).
+ *     2. The Writer application opens the file and datasets in the file
+ *        and starts adding data along the unlimited dimension using a hyperslab
+ *        selection that corresponds to an HDF5 chunk.
+ *     3. A Reader opens the file and a dataset in a file, and queries
+ *        the sizes of the dataset; if the extent of the dataset has changed,
+ *        reads the appended data back.
+ *
  * Discussion points:
- *     1.	Since the new data is written to the file, and metadata update
- * 	operation of adding pointer to the newly written chunk is atomic and
- * 	happens after the chunk is on the disk, only two things may happen
- * 	to the Reader:
- * 	    o	The Reader will not see new data.
- * 	    o	The Reader will see all new data written by Writer.
+ *     1. Since the new data is written to the file, and metadata update
+ *        operation of adding pointer to the newly written chunk is atomic and
+ *        happens after the chunk is on the disk, only two things may happen
+ *        to the Reader:
+ *         o The Reader will not see new data.
+ *         o The Reader will see all new data written by Writer.
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Created: Albert Cheng, 2013/5/28 */
@@ -107,7 +108,7 @@ int setup_parameters(int argc, char * const argv[])
 }
 
 
-/* Overall Algorithm: 
+/* Overall Algorithm:
  * Parse options from user;
  * Generate/pre-created test files needed and close it;
  * fork: child process becomes the reader process;
@@ -119,7 +120,7 @@ main(int argc, char *argv[])
 {
     pid_t childpid=0;
     pid_t mypid, tmppid;
-    int	child_status;
+    int child_status;
     int child_wait_option=0;
     int ret_value = 0;
     int child_ret_value;
@@ -134,7 +135,7 @@ main(int argc, char *argv[])
     }
 
     /* Determine the need to send/wait message file*/
-    if(UC_opts.launch == UC_READWRITE) {
+    if (UC_opts.launch == UC_READWRITE) {
         HDunlink(WRITER_MESSAGE);
         send_wait = TRUE;
     }
@@ -144,15 +145,15 @@ main(int argc, char *argv[])
     /* UC_WRITER:    create datafile, skip reader, launch writer.    */
     /* UC_READER:    skip create, launch reader, exit.               */
     /* ==============================================================*/
-    /* ============*/
+    /* =========== */
     /* Create file */
-    /* ============*/
-    if (UC_opts.launch != UC_READER){
+    /* =========== */
+    if (UC_opts.launch != UC_READER) {
         HDprintf("Creating skeleton data file for test...\n");
         if (create_uc_file() < 0){
             HDfprintf(stderr, "***encounter error\n");
             Hgoto_error(1);
-        }else
+        } else
             HDprintf("File created.\n");
     }
 
@@ -234,17 +235,17 @@ main(int argc, char *argv[])
                         mypid, child_ret_value);
                 Hgoto_error(2);
             }
-         } else {
-                HDprintf("%d: child process terminated abnormally\n", mypid);
-                Hgoto_error(2);
-         }
+        } else {
+            HDprintf("%d: child process terminated abnormally\n", mypid);
+            Hgoto_error(2);
+        }
     }
-    
+
 done:
     /* Print result and exit */
     if (ret_value != 0){
         HDprintf("Error(s) encountered\n");
-    }else{
+    } else {
         HDprintf("All passed\n");
     }
 

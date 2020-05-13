@@ -2375,7 +2375,7 @@ test_main(hid_t file_id, hid_t fapl)
     } H5E_END_TRY;
 
     if(H5Tcommit_anon(file2_id, dtype, H5P_DEFAULT, H5P_DEFAULT)) TEST_ERROR
-    
+
     /* Test H5Iget_name with anonymously created datatype, should pass because committed */
     if((size = H5Iget_name(dtype, NULL, 0)) != 0) TEST_ERROR
 
@@ -2585,7 +2585,7 @@ test_obj_ref(hid_t fapl)
     /* Make sure size parameter is ignored */
     namelen = H5Rget_name(dataset, H5R_OBJECT, &wbuf[0], NULL, 200);
     if(namelen != 9) TEST_ERROR
-    
+
     namelen = H5Rget_name(dataset, H5R_OBJECT, &wbuf[0], (char*)buf, sizeof(buf));
     if(!((HDstrcmp(buf, "/Dataset3") == 0) &&(namelen == 9))) TEST_ERROR
     PASSED()

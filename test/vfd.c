@@ -860,7 +860,7 @@ test_family(void)
     hid_t       driver_id = -1;             /* ID for this VFD              */
     unsigned long driver_flags = 0;         /* VFD feature flags            */
     char        filename[1024];
-    char        dname[]="dataset";
+    char        dname[] = "dataset";
     unsigned int i, j;
     int         *fhandle=NULL, *fhandle2=NULL;
     int         buf[FAMILY_NUMBER][FAMILY_SIZE];
@@ -892,7 +892,7 @@ test_family(void)
                         | H5FD_FEAT_AGGREGATE_SMALLDATA))
         TEST_ERROR
 
-    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
 
     if(H5Fclose(file) < 0)
@@ -907,7 +907,7 @@ test_family(void)
     if(H5Pset_fapl_family(fapl, (hsize_t)H5F_FAMILY_DEFAULT, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR;
 
     /* Check file size API */
@@ -919,7 +919,7 @@ test_family(void)
         TEST_ERROR;
 
     /* Create and write dataset */
-    if((space=H5Screate_simple(2, dims, NULL)) < 0)
+    if((space = H5Screate_simple(2, dims, NULL)) < 0)
         TEST_ERROR;
 
     /* Retrieve the access property list... */
@@ -934,7 +934,7 @@ test_family(void)
     if (H5Pclose(access_fapl) < 0)
         TEST_ERROR;
 
-    if((dset=H5Dcreate2(file, dname, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if((dset = H5Dcreate2(file, dname, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     for(i = 0; i < FAMILY_NUMBER; i++)
@@ -1148,11 +1148,11 @@ H5_GCC_DIAG_ON(format-nonliteral)
 static herr_t
 test_family_member_fapl(void)
 {
-    hid_t    file         = H5I_INVALID_HID;
-    hid_t    fapl_id      = H5I_INVALID_HID;
-    hid_t    memb_fapl_id = H5I_INVALID_HID;
-    hid_t    space        = H5I_INVALID_HID;
-    hid_t    dset         = H5I_INVALID_HID;
+    hid_t    file           = H5I_INVALID_HID;
+    hid_t    fapl_id        = H5I_INVALID_HID;
+    hid_t    memb_fapl_id   = H5I_INVALID_HID;
+    hid_t    space          = H5I_INVALID_HID;
+    hid_t    dset           = H5I_INVALID_HID;
     char     filename[1024];
     char     dname[]      = "dataset";
     unsigned i            = 0;
@@ -1263,7 +1263,7 @@ error:
     return -1;
 } /* end test_family_member_fapl() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_multi_opens
  *

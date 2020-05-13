@@ -29,14 +29,14 @@
  *     finishes HDF5 metadata updates and issues H5Fflush or H5Oflush calls.
  *   o Readers will see newly appended data after the Writer finishes
  *     the flush operation.
- * 
+ *
  * Preconditions:
  *   o Readers are not allowed to modify the file.
  *   o All datasets that are modified by the Writer exist when the
  *     Writer opens the file.
  *   o All datasets that are modified by the Writer exist when a Reader
  *     opens the file.
- * 
+ *
  * Main Success Scenario:
  *  1. An application creates a file with required objects (groups,
  *     datasets, and attributes).
@@ -45,7 +45,7 @@
  *     spans several chunks.
  *  3. A Reader opens the file and a dataset in a file; if the size of
  *     the unlimited dimension has changed, reads the appended data back.
- * 
+ *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Created: Albert Cheng, 2013/6/1 */
@@ -100,7 +100,7 @@ int setup_parameters(int argc, char * const argv[])
 }
 
 
-/* Overall Algorithm: 
+/* Overall Algorithm:
  * Parse options from user;
  * Generate/pre-created test files needed and close it;
  * fork: child process becomes the reader process;
@@ -112,7 +112,7 @@ main(int argc, char *argv[])
 {
     pid_t childpid=0;
     pid_t mypid, tmppid;
-    int	child_status;
+    int child_status;
     int child_wait_option=0;
     int ret_value = 0;
     int child_ret_value;
@@ -127,7 +127,7 @@ main(int argc, char *argv[])
     }
 
     /* Determine the need to send/wait message file*/
-    if(UC_opts.launch == UC_READWRITE) {
+    if (UC_opts.launch == UC_READWRITE) {
         HDunlink(WRITER_MESSAGE);
         send_wait = 1;
     }
@@ -161,9 +161,9 @@ main(int argc, char *argv[])
     /* ============= */
     /* launch reader */
     /* ============= */
-    if (UC_opts.launch != UC_WRITER){
+    if (UC_opts.launch != UC_WRITER) {
         /* child process launch the reader */
-        if(0 == childpid) {
+        if (0 == childpid) {
             HDprintf("%d: launch reader process\n", mypid);
             if (read_uc_file(send_wait) < 0){
                 HDfprintf(stderr, "read_uc_file encountered error\n");
@@ -204,8 +204,8 @@ main(int argc, char *argv[])
     /* ================================================ */
     /* If readwrite, collect exit code of child process */
     /* ================================================ */
-    if (UC_opts.launch == UC_READWRITE){
-        if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0){
+    if (UC_opts.launch == UC_READWRITE) {
+        if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0) {
             perror("waitpid");
             Hgoto_error(1);
         }
@@ -233,12 +233,11 @@ main(int argc, char *argv[])
             Hgoto_error(2);
         }
     }
-    
+
 done:
-    /* Print result and exit */
-    if (ret_value != 0){
+    if (ret_value != 0) {
         HDprintf("Error(s) encountered\n");
-    }else{
+    } else {
         HDprintf("All passed\n");
     }
 

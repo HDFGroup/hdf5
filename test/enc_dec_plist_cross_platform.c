@@ -157,7 +157,7 @@ error:
 }
 
 static int
-test_plists(const char *filename_prefix) 
+test_plists(const char *filename_prefix)
 {
     unsigned config_1, config_2;
     int fd_1, fd_2;

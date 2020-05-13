@@ -82,7 +82,7 @@
 
 /* The number of settings for testing: page buffering, file space strategy and persisting free-space */
 #define NUM_PB_FS                   6
-#define PAGE_BUFFER_PAGE_SIZE       4096 
+#define PAGE_BUFFER_PAGE_SIZE       4096
 
 const char *FILENAME[] = {
     "fheap",
