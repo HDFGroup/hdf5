@@ -57,7 +57,6 @@ typedef struct _tick_stats {
 static H5F_vfd_swmr_config_t swmr_config;
 static tick_stats_t *tick_stats = NULL;
 static const hid_t badhid = H5I_INVALID_HID;
-static bool caught_out_of_bounds = false;
 static bool writer;
 
 static void
@@ -95,16 +94,6 @@ usage(const char *progname)
     fprintf(stderr,   "  -q: be quiet: few/no progress messages\n");
     fprintf(stderr,   "  -v: be verbose: most progress messages\n");
     exit(EXIT_FAILURE);
-}
-
-bool
-H5HG_trap(const char *reason)
-{
-    if (strcmp(reason, "out of bounds") == 0) {
-        caught_out_of_bounds = true;
-        return false;
-    }
-    return true;
 }
 
 bool
