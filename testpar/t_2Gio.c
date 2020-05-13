@@ -506,17 +506,17 @@ dataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[]
  *        with 2 MPI ranks and with $HDF5TestExpress == 0
  *        i.e. Exhaustive test run is allowed.  Otherwise
  *        the test is skipped.
- * 
+ *
  * Thanks to l.ferraro@cineca.it for the following test::
  *
- * This is a simple test case to reproduce a problem 
- * occurring on LUSTRE filesystem with the creation 
- * of a 4GB dataset using chunking with parallel HDF5. 
- * The test works correctly if disabling chunking or 
- * when the bytes assigned to each process is less 
- * that 4GB. if equal or more, either hangs or results 
- * in a PMPI_Waitall error. 
- * 
+ * This is a simple test case to reproduce a problem
+ * occurring on LUSTRE filesystem with the creation
+ * of a 4GB dataset using chunking with parallel HDF5.
+ * The test works correctly if disabling chunking or
+ * when the bytes assigned to each process is less
+ * that 4GB. if equal or more, either hangs or results
+ * in a PMPI_Waitall error.
+ *
  * $> mpirun -genv I_MPI_EXTRA_FILESYSTEM on
  *           -genv I_MPI_EXTRA_FILESYSTEM_LIST gpfs
  *           -n 1 ./h5_mpi_big_dataset.x 1024 1024 1024
@@ -572,7 +572,7 @@ static int MpioTest2G( MPI_Comm comm, int mpi_rank )
      */
     file_id = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, plist_id);
     VRFY((file_id >= 0), "H5Fcreate succeeded");
-    
+
     H5Pclose(plist_id);
 
     /*
@@ -4918,7 +4918,7 @@ main(int argc, char **argv)
 	/* Display testing information */
 	if (MAINPROCESS)
 	    TestInfo(argv[0]);
-	
+
 	/* setup file access property list */
 	fapl = H5Pcreate (H5P_FILE_ACCESS);
 	H5Pset_fapl_mpio(fapl, test_comm, MPI_INFO_NULL);

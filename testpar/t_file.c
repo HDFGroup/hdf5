@@ -736,7 +736,7 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy,
 }
 
 /*
- * NOTE:  See HDFFV-10894 and add tests later to verify MPI-specific properties in the 
+ * NOTE:  See HDFFV-10894 and add tests later to verify MPI-specific properties in the
  *        incoming fapl that could conflict with the existing values in H5F_shared_t on
  *        multiple opens of the same file.
  */
