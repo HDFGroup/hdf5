@@ -70,20 +70,20 @@ echo ""
 
 # Positive tests for h52gif
 echo "**validate the h52gif tool processes input correctly..."
-TESTING "./h52gif h52giftst.h5 image1.gif -i image" 
+TESTING "./h52gif h52giftst.h5 image1.gif -i image"
 TOOLTEST ./h52gif $TESTFILE1 image1.gif -i image
 echo ""
 
 # Negative tests.
 echo "**verify that the h52gif tool handles error conditions correctly..."
 # nonexisting dataset name
-TESTING "./h52gif h52giftst.h5 image.gif -i nosuch_image" 
-TOOLTESTFAIL "./h52gif $TESTFILE1 image.gif -i nosuch_image" 
+TESTING "./h52gif h52giftst.h5 image.gif -i nosuch_image"
+TOOLTESTFAIL "./h52gif $TESTFILE1 image.gif -i nosuch_image"
 # this test should have failed but it did not. Comment it out for now.
-#TESTING "./h52gif h52giftst.h5 image.gif -i palette" 
-#TOOLTESTFAIL "./h52gif $TESTFILE1 image.gif -i palette" 
-TESTING "./h52gif h52giftst.h5 image24.gif -i image24bitpixel" 
-TOOLTESTFAIL "./h52gif $TESTFILE3 image24.gif -i image24bitpixel" 
+#TESTING "./h52gif h52giftst.h5 image.gif -i palette"
+#TOOLTESTFAIL "./h52gif $TESTFILE1 image.gif -i palette"
+TESTING "./h52gif h52giftst.h5 image24.gif -i image24bitpixel"
+TOOLTESTFAIL "./h52gif $TESTFILE3 image24.gif -i image24bitpixel"
 echo ""
 
 # all done. summarize results.

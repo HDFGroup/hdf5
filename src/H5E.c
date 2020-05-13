@@ -364,7 +364,7 @@ H5E__get_stack(void)
         /* No associated value with current thread - create one */
 #ifdef H5_HAVE_WIN_THREADS
         /* Win32 has to use LocalAlloc to match the LocalFree in DllMain */
-        estack = (H5E_t *)LocalAlloc(LPTR, sizeof(H5E_t)); 
+        estack = (H5E_t *)LocalAlloc(LPTR, sizeof(H5E_t));
 #else
         /* Use HDmalloc here since this has to match the HDfree in the
          * destructor and we want to avoid the codestack there.
@@ -1045,7 +1045,7 @@ done:
  *
  * Programmer:	Raymond Lu
  *              Friday, July 15, 2003
- * 
+ *
  *-------------------------------------------------------------------------
  */
 herr_t

@@ -476,7 +476,7 @@ static void test_reference_group()
         // Check getting file name given the group dereferenced via constructor
         H5std_string fname = refgroup.getFileName();
         verify_val(fname, FILE1, "H5Group::getFileName",__LINE__,__FILE__);
-    
+
         // Check getting file name given the group dereferenced by ::reference
         fname = group.getFileName();
         verify_val(fname, FILE1, "H5Group::getFileName",__LINE__,__FILE__);

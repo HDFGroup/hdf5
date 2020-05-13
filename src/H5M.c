@@ -475,7 +475,7 @@ H5Mclose(hid_t map_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a map ID")
 
     /* Decrement the counter on the map.  It will be freed if the count
-     * reaches zero.  
+     * reaches zero.
      */
     if(H5I_dec_app_ref_always_close(map_id) < 0)
         HGOTO_ERROR(H5E_MAP, H5E_CANTDEC, FAIL, "can't decrement count on map ID")
@@ -848,7 +848,7 @@ done:
  *              restart iteration at the same location on a subsequent
  *              call to H5Miterate, IDX should be the same value as
  *              returned by the previous call.
- * 
+ *
  *              H5M_iterate_t is defined as:
  *              herr_t (*H5M_iterate_t)(hid_t map_id, const void *key,
  *                      void *ctx)

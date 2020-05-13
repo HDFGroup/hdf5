@@ -49,7 +49,7 @@ H5VL__native_attr_create(void *obj, const H5VL_loc_params_t *loc_params, const c
 {
     H5G_loc_t       loc;                /* Object location */
     H5G_loc_t       obj_loc;            /* Location used to open group */
-    hbool_t         loc_found = FALSE;  
+    hbool_t         loc_found = FALSE;
     H5T_t           *type, *dt;         /* Datatype to use for attribute */
     H5S_t           *space;             /* Dataspace to use for attribute */
     H5A_t           *attr = NULL;
@@ -89,7 +89,7 @@ H5VL__native_attr_create(void *obj, const H5VL_loc_params_t *loc_params, const c
 done:
     /* Release resources */
     if(loc_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, NULL, "can't free location") 
+        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, NULL, "can't free location")
 
    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__native_attr_create() */
@@ -106,7 +106,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL__native_attr_open(void *obj, const H5VL_loc_params_t *loc_params, const char *attr_name, 
+H5VL__native_attr_open(void *obj, const H5VL_loc_params_t *loc_params, const char *attr_name,
     hid_t H5_ATTR_UNUSED aapl_id, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
     H5G_loc_t    loc;             /* Object location */
@@ -134,9 +134,9 @@ H5VL__native_attr_open(void *obj, const H5VL_loc_params_t *loc_params, const cha
     else if(loc_params->type == H5VL_OBJECT_BY_IDX) {
         /* H5Aopen_by_idx */
         /* Open the attribute in the object header */
-        if(NULL == (attr = H5A__open_by_idx(&loc, loc_params->loc_data.loc_by_idx.name, 
-                                           loc_params->loc_data.loc_by_idx.idx_type, 
-                                           loc_params->loc_data.loc_by_idx.order, 
+        if(NULL == (attr = H5A__open_by_idx(&loc, loc_params->loc_data.loc_by_idx.name,
+                                           loc_params->loc_data.loc_by_idx.idx_type,
+                                           loc_params->loc_data.loc_by_idx.order,
                                            loc_params->loc_data.loc_by_idx.n)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to open attribute")
     } /* end else-if */
@@ -279,15 +279,15 @@ H5VL__native_attr_get(void *obj, H5VL_attr_get_t get_type,
                 }
                 else if(H5VL_OBJECT_BY_IDX == loc_params->type) {
                     H5G_loc_t loc;
-                    
+
                     /* check arguments */
                     if(H5G_loc_real(obj, loc_params->obj_type, &loc) < 0)
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                     /* Open the attribute on the object header */
-                    if(NULL == (attr = H5A__open_by_idx(&loc, loc_params->loc_data.loc_by_idx.name, 
-                                                       loc_params->loc_data.loc_by_idx.idx_type, 
-                                                       loc_params->loc_data.loc_by_idx.order, 
+                    if(NULL == (attr = H5A__open_by_idx(&loc, loc_params->loc_data.loc_by_idx.name,
+                                                       loc_params->loc_data.loc_by_idx.idx_type,
+                                                       loc_params->loc_data.loc_by_idx.order,
                                                        loc_params->loc_data.loc_by_idx.n)))
                         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute")
 
@@ -326,7 +326,7 @@ H5VL__native_attr_get(void *obj, H5VL_attr_get_t get_type,
                 else if(H5VL_OBJECT_BY_NAME == loc_params->type) {
                     char *attr_name = HDva_arg(arguments, char *);
                     H5G_loc_t loc;
-                    
+
                     /* check arguments */
                     if(H5G_loc_real(obj, loc_params->obj_type, &loc) < 0)
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
@@ -345,15 +345,15 @@ H5VL__native_attr_get(void *obj, H5VL_attr_get_t get_type,
                 }
                 else if(H5VL_OBJECT_BY_IDX == loc_params->type) {
                     H5G_loc_t loc;
-                    
+
                     /* check arguments */
                     if(H5G_loc_real(obj, loc_params->obj_type, &loc) < 0)
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                     /* Open the attribute on the object header */
-                    if(NULL == (attr = H5A__open_by_idx(&loc, loc_params->loc_data.loc_by_idx.name, 
-                                                       loc_params->loc_data.loc_by_idx.idx_type, 
-                                                       loc_params->loc_data.loc_by_idx.order, 
+                    if(NULL == (attr = H5A__open_by_idx(&loc, loc_params->loc_data.loc_by_idx.name,
+                                                       loc_params->loc_data.loc_by_idx.idx_type,
+                                                       loc_params->loc_data.loc_by_idx.order,
                                                        loc_params->loc_data.loc_by_idx.n)))
                         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute")
 
@@ -400,7 +400,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_attr_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_attr_specific_t specific_type, 
+H5VL__native_attr_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_attr_specific_t specific_type,
     hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
     H5G_loc_t   loc;

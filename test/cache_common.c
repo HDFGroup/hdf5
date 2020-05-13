@@ -724,7 +724,7 @@ variable_get_final_load_size(const void *image, size_t image_len,
  */
 
 static htri_t
-verify_chksum(const void H5_ATTR_UNUSED *image, size_t H5_ATTR_UNUSED len, void *udata, 
+verify_chksum(const void H5_ATTR_UNUSED *image, size_t H5_ATTR_UNUSED len, void *udata,
     int32_t H5_ATTR_NDEBUG_UNUSED entry_type)
 {
     test_entry_t *entry;

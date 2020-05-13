@@ -16,28 +16,28 @@
 #include "h5test.h"
 
 /* Macro definitions */
-#define Hgoto_error(val)	{ret_value=val; goto done;}
-#define Hgoto_done		{goto done;}
-#define Chunksize_DFT		256	/* chunksize default */
-#define ErrorReportMax		10	/* max number of errors reported */
+#define Hgoto_error(val)        {ret_value=val; goto done;}
+#define Hgoto_done              {goto done;}
+#define Chunksize_DFT           256     /* chunksize default */
+#define ErrorReportMax          10      /* max number of errors reported */
 /* these two definitions must match each other */
-#define UC_DATATYPE		H5T_NATIVE_SHORT    /* use case HDF5 data type */
-#define UC_CTYPE		short		    /* use case C data type */
-#define UC_RANK			3		    /* use case dataset rank */
+#define UC_DATATYPE             H5T_NATIVE_SHORT  /* use case HDF5 data type */
+#define UC_CTYPE                short   /* use case C data type */
+#define UC_RANK                 3       /* use case dataset rank */
 
 /* Name of message file that is sent by the writer */
 #define WRITER_MESSAGE          "USE_WRITER_MESSAGE"
 
 /* type declarations */
 typedef enum part_t {
-    UC_READWRITE	=0,	/* both writer and reader */
-    UC_WRITER,			/* writer only */
-    UC_READER			/* reader only */
+    UC_READWRITE = 0,           /* both writer and reader */
+    UC_WRITER,                  /* writer only */
+    UC_READER                   /* reader only */
 } part_t;
 
 typedef struct options_t {
-    hsize_t chunksize;		/* chunks are chunksize^2 planes	*/
-    hsize_t chunkplanes;	/* number of planes per chunk, default 1 */
+    hsize_t chunksize;          /* chunks are chunksize^2 planes         */
+    hsize_t chunkplanes;        /* number of planes per chunk, default 1 */
     hsize_t chunkdims[UC_RANK]; /* chunk dims is (chunkplan, chunksize, chunksize) */
     hsize_t dims[UC_RANK];      /* dataset initial dims */
     hsize_t max_dims[UC_RANK];  /* dataset max dims */

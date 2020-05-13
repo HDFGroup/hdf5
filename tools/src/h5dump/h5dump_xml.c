@@ -732,7 +732,7 @@ xml_escape_the_name(const char *str)
  * Programmer:  REMcG
  *-------------------------------------------------------------------------
  */
-static char                   *
+static char *
 xml_escape_the_string(const char *str, int slen)
 {
     size_t      extra;

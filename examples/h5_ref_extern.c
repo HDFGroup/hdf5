@@ -14,7 +14,7 @@
   * The example below illustrates the use of the new API with files that are
   * opened read-only. Created references to the objects in that file are
   * stored into a separate file, and accessed from that file, without the user
-  * explicitly opening the original file that was referenced. 
+  * explicitly opening the original file that was referenced.
   */
 
 #include <stdlib.h>

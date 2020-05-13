@@ -496,9 +496,9 @@ H5G_close(H5G_t *grp)
 
         /* Evict group metadata if evicting on close */
         if(!file_closed && H5F_SHARED(grp->oloc.file) && H5F_EVICT_ON_CLOSE(grp->oloc.file)) {
-            if(H5AC_flush_tagged_metadata(grp->oloc.file, grp->oloc.addr) < 0) 
+            if(H5AC_flush_tagged_metadata(grp->oloc.file, grp->oloc.addr) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
-            if(H5AC_evict_tagged_metadata(grp->oloc.file, grp->oloc.addr, FALSE) < 0) 
+            if(H5AC_evict_tagged_metadata(grp->oloc.file, grp->oloc.addr, FALSE) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to evict tagged metadata")
         } /* end if */
 

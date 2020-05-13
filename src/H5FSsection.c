@@ -307,9 +307,9 @@ HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu, fspace->sect_size = %Hu\n"
  * Purpose:     Release the section info, either giving ownership back to
  *              the cache or letting the free space header keep it.
  *
- *              Add the fix in this routine to resolve the potential infinite loop 
- *              problem when allocating file space for the meta data of the 
- *              self-referential free-space managers at file closing. 
+ *              Add the fix in this routine to resolve the potential infinite loop
+ *              problem when allocating file space for the meta data of the
+ *              self-referential free-space managers at file closing.
  *
  *              On file close or flushing, when the section info is modified
  *              and protected/unprotected, does not allow the section info size
@@ -317,8 +317,8 @@ HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu, fspace->sect_size = %Hu\n"
  *              --if the current allocated section info size in fspace->sect_size is
  *                larger than the previous section info size in fpsace->alloc_sect_size,
  *                 release the section info
- *              --Otherwise, set the fspace->sect_size to be the same as 
- *                fpsace->alloc_sect_size.  This means fspace->sect_size may be larger 
+ *              --Otherwise, set the fspace->sect_size to be the same as
+ *                fpsace->alloc_sect_size.  This means fspace->sect_size may be larger
  *                than what is actually needed.
  *
  * Return:      SUCCEED/FAIL
@@ -439,7 +439,7 @@ HDfprintf(stderr, "%s: Relinquishing section info ownership\n", FUNC);
                 /* Check if we need to release section info in the file */
                 if(H5F_addr_defined(fspace->sect_addr)) {
                     /* Set flag to release section info space in file */
-                    /* On file close or flushing, only need to release section info with size 
+                    /* On file close or flushing, only need to release section info with size
                        bigger than previous section */
                     if(f->shared->closing || flush_in_progress) {
                         if(fspace->sect_size > fspace->alloc_sect_size)
@@ -1248,7 +1248,7 @@ H5FS__sect_merge(H5FS_t *fspace, H5FS_section_info_t **sect, void *op_data)
 
                         /* Retarget section pointer to 'less than' node that was merged into */
                         *sect = tmp_sect;
-			if(*sect == NULL) 
+			if(*sect == NULL)
 			    HGOTO_DONE(ret_value);
 
                         /* Indicate successful merge occurred */
@@ -1293,7 +1293,7 @@ H5FS__sect_merge(H5FS_t *fspace, H5FS_section_info_t **sect, void *op_data)
                             HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, FAIL, "can't merge two sections")
 
                         /* It's possible that the merge caused the section to be deleted (particularly in the paged allocation case) */
-                        if(*sect == NULL) 
+                        if(*sect == NULL)
                             HGOTO_DONE(ret_value);
 
                         /* Indicate successful merge occurred */
@@ -2457,22 +2457,22 @@ done:
  *              The previous hack in this routine to avoid the potential infinite
  *              loops by allocating file space directly from the end of the file
  *              is removed.  The allocation can now be done via the usual
- *              file space allocation call H5MF_alloc().  
+ *              file space allocation call H5MF_alloc().
  *
- *              The design flaw is addressed by not allowing the size 
- *              of section info to shrink.  This means, when trying to allocate 
- *              section info size X via H5MF_alloc() and the section info size 
+ *              The design flaw is addressed by not allowing the size
+ *              of section info to shrink.  This means, when trying to allocate
+ *              section info size X via H5MF_alloc() and the section info size
  *              after H5MF_alloc() changes to Y:
- *              --if Y is larger than X, free the just allocated file space X 
+ *              --if Y is larger than X, free the just allocated file space X
  *                via H5MF_xfree() and set fspace->sect_size to Y.
- *                This routine will be called again later from 
- *                H5MF_settle_meta_data_fsm() to allocate section info with the 
+ *                This routine will be called again later from
+ *                H5MF_settle_meta_data_fsm() to allocate section info with the
  *                larger fpsace->sect_size Y.
- *              --if Y is smaller than X, no further allocation is needed and 
+ *              --if Y is smaller than X, no further allocation is needed and
  *                fspace->sect_size and fspace->alloc_sect_size are set to X.
  *                This means fspace->sect_size may be larger than what is
  *                actually needed.
- *                
+ *
  *              This routine also re-inserts the header and section info in the
  *              metadata cache with this allocation.
  *
@@ -2510,7 +2510,7 @@ H5FS_vfd_alloc_hdr_and_section_info_if_needed(H5F_t *f, H5FS_t *fspace,
     HDassert(f->shared->fs_persist);
 
     /* At present, all free space strategies enable the free space managers.
-     * This will probably change -- at which point this assertion should 
+     * This will probably change -- at which point this assertion should
      * be revisited.
      */
     /* Updated: Only the following two strategies enable the free-space managers */

@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Check that a thread ID returned by H5TS_thread_id() possesses the
- * following properties: 
+ * following properties:
  *
  * 1 ID >= 1.
  * 2 The ID is constant over the thread's lifetime.

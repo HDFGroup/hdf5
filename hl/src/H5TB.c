@@ -102,7 +102,7 @@ herr_t H5TBmake_table(const char *table_title,
     if (field_names == NULL) {
       goto out;
     }
-    
+
     dims[0]       = nrecords;
     dims_chunk[0] = chunk_size;
 
@@ -300,7 +300,7 @@ herr_t H5TBappend_records(hid_t loc_id,
     herr_t   ret_val = -1;
 
     /* check the arguments */
-    if (dset_name == NULL) 
+    if (dset_name == NULL)
         goto out;
 
     /* get the original number of records and fields  */
@@ -374,7 +374,7 @@ herr_t H5TBwrite_records(hid_t loc_id,
     herr_t   ret_val = -1;
 
     /* check the arguments */
-    if (dset_name == NULL) 
+    if (dset_name == NULL)
         goto out;
 
     /* open the dataset. */
@@ -477,9 +477,9 @@ herr_t H5TBwrite_fields_name(hid_t loc_id,
     herr_t   ret_val = -1;
 
     /* check the arguments */
-    if (dset_name == NULL) 
+    if (dset_name == NULL)
         goto out;
-    if (field_names == NULL) 
+    if (field_names == NULL)
         goto out;
 
     /* create xfer properties to preserve initialized data */
@@ -640,7 +640,7 @@ herr_t H5TBwrite_fields_index(hid_t loc_id,
     herr_t   ret_val = -1;
 
     /* check the arguments */
-    if (dset_name == NULL) 
+    if (dset_name == NULL)
         goto out;
 
     /* create xfer properties to preserve initialized data */
@@ -801,7 +801,7 @@ herr_t H5TBread_table(hid_t loc_id,
     herr_t   ret_val = -1;
 
     /* check the arguments */
-    if (dset_name == NULL) 
+    if (dset_name == NULL)
         goto out;
 
     /* open the dataset. */
@@ -878,7 +878,7 @@ herr_t H5TBread_records(hid_t loc_id,
     herr_t   ret_val = -1;
 
     /* check the arguments */
-    if (dset_name == NULL) 
+    if (dset_name == NULL)
         goto out;
 
     /* get the number of records and fields  */
@@ -959,9 +959,9 @@ herr_t H5TBread_fields_name(hid_t loc_id,
 
 
     /* check the arguments */
-    if (dset_name == NULL) 
+    if (dset_name == NULL)
         goto out;
-    if (field_names == NULL) 
+    if (field_names == NULL)
         goto out;
 
     /* open the dataset */
@@ -1029,7 +1029,7 @@ herr_t H5TBread_fields_name(hid_t loc_id,
     /* check to make sure field was found, no reason to continue if it does not exist */
     if(j == 0)
       goto out;
-    
+
     /* get the dataspace handle */
     if((sid = H5Dget_space(did)) < 0)
         goto out;
@@ -1121,7 +1121,7 @@ herr_t H5TBread_fields_index(hid_t loc_id,
     herr_t   ret_val = -1;
 
     /* check the arguments */
-    if (dset_name == NULL) 
+    if (dset_name == NULL)
         goto out;
 
     /* open the dataset. */
@@ -1281,9 +1281,9 @@ herr_t H5TBdelete_record(hid_t loc_id,
     unsigned char *tmp_buf = NULL;
     herr_t   ret_val = -1;
 
-    
+
     /* check the arguments */
-    if (dset_name == NULL) 
+    if (dset_name == NULL)
         goto out;
 
     /*-------------------------------------------------------------------------
@@ -1446,7 +1446,7 @@ herr_t H5TBinsert_record(hid_t loc_id,
     herr_t   ret_val = -1;
 
     /* check the arguments */
-    if (dset_name == NULL) 
+    if (dset_name == NULL)
         goto out;
 
     /*-------------------------------------------------------------------------
@@ -1601,9 +1601,9 @@ herr_t H5TBadd_records_from(hid_t loc_id,
     herr_t   ret_val = -1;
 
     /* check the arguments */
-    if (dset_name1 == NULL) 
+    if (dset_name1 == NULL)
       goto out;
-    if (dset_name2 == NULL) 
+    if (dset_name2 == NULL)
       goto out;
 
     /*-------------------------------------------------------------------------
@@ -1754,11 +1754,11 @@ herr_t H5TBcombine_tables(hid_t loc_id1,
     herr_t   ret_val = -1;
 
     /* check the arguments */
-    if (dset_name1 == NULL) 
+    if (dset_name1 == NULL)
       goto out;
-    if (dset_name2 == NULL) 
+    if (dset_name2 == NULL)
       goto out;
-    if (dset_name3 == NULL) 
+    if (dset_name3 == NULL)
       goto out;
 
     /*-------------------------------------------------------------------------
@@ -2117,9 +2117,9 @@ herr_t H5TBinsert_field(hid_t loc_id,
     herr_t   ret_val = -1;
 
     /* check the arguments */
-    if (dset_name == NULL) 
+    if (dset_name == NULL)
         goto out;
-    if (field_name == NULL) 
+    if (field_name == NULL)
         goto out;
 
     /* get the number of records and fields  */
@@ -2532,9 +2532,9 @@ herr_t H5TBdelete_field(hid_t loc_id,
 
 
     /* check the arguments */
-    if (dset_name == NULL) 
+    if (dset_name == NULL)
         goto out;
-    if (field_name == NULL) 
+    if (field_name == NULL)
         goto out;
 
     /* get the number of records and fields  */
@@ -2982,7 +2982,7 @@ htri_t H5TBAget_fill(hid_t loc_id,
     htri_t   ret_val = -1;
 
     /* check the arguments */
-    if (dset_name == NULL) 
+    if (dset_name == NULL)
         goto out;
 
     /* get the number of records and fields  */
@@ -3014,7 +3014,7 @@ htri_t H5TBAget_fill(hid_t loc_id,
 out:
     if(src_offset)
         HDfree(src_offset);
-    
+
     return ret_val;
 } /* end H5TBAget_fill() */
 
@@ -3054,7 +3054,7 @@ herr_t H5TBget_table_info(hid_t loc_id,
     herr_t     ret_val = -1;
 
     /* check the arguments */
-    if (dset_name == NULL) 
+    if (dset_name == NULL)
         goto out;
 
     /* open the dataset. */
@@ -3145,7 +3145,7 @@ herr_t H5TBget_field_info(hid_t loc_id,
     herr_t      ret_val = -1;
 
     /* check the arguments */
-    if (dset_name == NULL) 
+    if (dset_name == NULL)
         goto out;
 
     /* open the dataset. */
@@ -3253,9 +3253,9 @@ hbool_t H5TB_find_field(const char *field, const char *field_list)
     const char *end;
 
     /* check the arguments */
-    if (field == NULL) 
+    if (field == NULL)
       return FALSE;
-    if (field_list == NULL) 
+    if (field_list == NULL)
       return FALSE;
 
     while((end = HDstrstr(start, ",")) != 0) {

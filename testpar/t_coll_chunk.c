@@ -16,7 +16,7 @@
 
 #define HYPER 1
 #define POINT 2
-#define ALL 3 
+#define ALL 3
 
 /* some commonly used routines for collective chunk IO tests*/
 

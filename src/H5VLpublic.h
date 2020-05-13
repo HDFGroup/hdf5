@@ -21,7 +21,6 @@
 #include "H5public.h"           /* Generic Functions                    */
 #include "H5Ipublic.h"          /* IDs                                  */
 
-
 /*****************/
 /* Public Macros */
 /*****************/
@@ -71,7 +70,6 @@ H5_DLL hid_t H5VLget_connector_id_by_value(H5VL_class_value_t connector_value);
 H5_DLL ssize_t H5VLget_connector_name(hid_t id, char *name/*out*/, size_t size);
 H5_DLL herr_t H5VLclose(hid_t connector_id);
 H5_DLL herr_t H5VLunregister_connector(hid_t connector_id);
-
 
 #ifdef __cplusplus
 }

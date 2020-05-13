@@ -67,7 +67,7 @@ int main() {
    dataspace_id = H5Screate_simple(2, dims, NULL);
 
    /* Create the second dataset in group "Group_A". */
-   dataset_id = H5Dcreate2(group_id, "dset2", H5T_STD_I32BE, dataspace_id, 
+   dataset_id = H5Dcreate2(group_id, "dset2", H5T_STD_I32BE, dataspace_id,
                           H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
    /* Write the second dataset. */

@@ -50,7 +50,7 @@ main(int argc, char **argv)
     /*
      * "Forget" to call H5Rdestroy on reference objects. If H5Rdestroy
      * is called at least once on either reference object, or both
-     * objects, the infinite loop goes away. If H5Rdestroy is never 
+     * objects, the infinite loop goes away. If H5Rdestroy is never
      * called, the infinite loop will appear.
      */
 #if 0

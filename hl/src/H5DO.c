@@ -90,7 +90,7 @@ H5DOread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *fi
  * 	This routine is copied from the fast forward feature branch: features/hdf5_ff
  *	src/H5FF.c:H5DOappend() with the following modifications:
  * 	1) Remove and replace macro calls such as
- *		FUNC_ENTER_API, H5TRACE, HGOTO_ERROR 
+ *		FUNC_ENTER_API, H5TRACE, HGOTO_ERROR
  * 	   accordingly because hl does not have these macros
  *	2) Replace H5I_get_type() by H5Iget_type()
  *	3) Replace H5P_isa_class() by H5Pisa_class()
@@ -103,7 +103,7 @@ H5DOread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *fi
  *-------------------------------------------------------------------------
  */
 herr_t
-H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension, 
+H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
            hid_t memtype, const void *buf)
 {
     hbool_t created_dxpl = FALSE;       /* Whether we created a DXPL */
@@ -161,7 +161,7 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
     if(H5Sget_simple_extent_dims(space_id, size, NULL) < 0)
         goto done;
 
-    /* Adjust the dimension size of the requested dimension, 
+    /* Adjust the dimension size of the requested dimension,
      * but first record the old dimension size
      */
     old_size = size[axis];

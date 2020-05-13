@@ -542,7 +542,7 @@ test_reference_obj(void)
 **      Tests references to various kinds of objects
 **
 **  Note: The libver_low/libver_high parameters are added to create the file
-**        with the low and high bounds setting in fapl.  
+**        with the low and high bounds setting in fapl.
 **        Please see the RFC for "H5Sencode/H5Sdecode Format Change".
 **
 ****************************************************************/
@@ -634,7 +634,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     H5E_BEGIN_TRY {
         dset1 = H5Dcreate2(fid1, "Dataset1", H5T_STD_REF, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
-    
+
     if(dset1 < 0) {
         VERIFY(libver_high <= H5F_LIBVER_V110, TRUE, "H5Dcreate2");
 
@@ -840,7 +840,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
         VERIFY(ret, 1, "H5Sget_select_hyper_nblocks");
 
         /* allocate space for the hyperslab blocks */
-        coords = (hsize_t *)HDmalloc((size_t)ret * SPACE2_RANK * sizeof(hsize_t) * 2); 
+        coords = (hsize_t *)HDmalloc((size_t)ret * SPACE2_RANK * sizeof(hsize_t) * 2);
 
         ret = H5Sget_select_hyper_blocklist(sid2, (hsize_t)0, (hsize_t)ret, coords);
         CHECK(ret, FAIL, "H5Sget_select_hyper_blocklist");
@@ -871,7 +871,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
         VERIFY(ret, SPACE2_DIM2, "H5Sget_select_elem_npoints");
 
         /* allocate space for the element points */
-        coords = (hsize_t *)HDmalloc((size_t)ret * SPACE2_RANK * sizeof(hsize_t)); 
+        coords = (hsize_t *)HDmalloc((size_t)ret * SPACE2_RANK * sizeof(hsize_t));
 
         ret = H5Sget_select_elem_pointlist(sid2, (hsize_t)0, (hsize_t)ret, coords);
         CHECK(ret, FAIL, "H5Sget_select_elem_pointlist");
@@ -1196,7 +1196,7 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
         VERIFY(ret, 15, "H5Sget_select_hyper_nblocks");
 
         /* allocate space for the hyperslab blocks */
-        coords = (hsize_t *)HDmalloc((size_t)ret * SPACE3_RANK * sizeof(hsize_t) * 2); 
+        coords = (hsize_t *)HDmalloc((size_t)ret * SPACE3_RANK * sizeof(hsize_t) * 2);
 
         ret = H5Sget_select_hyper_blocklist(sid3, (hsize_t)0, (hsize_t)ret, coords);
         CHECK(ret, FAIL, "H5Sget_select_hyper_blocklist");
@@ -1251,7 +1251,7 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
         VERIFY(ret, 10, "H5Sget_select_elem_npoints");
 
         /* allocate space for the element points */
-        coords = (hsize_t *)HDmalloc((size_t)ret * SPACE3_RANK * sizeof(hsize_t)); 
+        coords = (hsize_t *)HDmalloc((size_t)ret * SPACE3_RANK * sizeof(hsize_t));
 
         ret = H5Sget_select_elem_pointlist(sid3, (hsize_t)0, (hsize_t)ret, coords);
         CHECK(ret, FAIL, "H5Sget_select_elem_pointlist");

@@ -14,8 +14,8 @@
 /* Programmer: 	Vailin Choi <vchoi@hdfgroup.org>
  *	       	Thursday, April 30, 2009
  *
- * Purpose:	Fixed array indexed (chunked) I/O functions.  
- *		The chunk coordinate is mapped as an index into an array of 
+ * Purpose:	Fixed array indexed (chunked) I/O functions.
+ *		The chunk coordinate is mapped as an index into an array of
  *		disk addresses for the chunks.
  *
  */
@@ -910,7 +910,7 @@ H5D__farray_idx_create(const H5D_chk_idx_info_t *idx_info)
     /* Set up the user data */
     udata.f = idx_info->f;
     udata.chunk_size = idx_info->layout->size;
-    
+
     /* Create the fixed array for the chunk index */
     if(NULL == (idx_info->storage->u.farray.fa = H5FA_create(idx_info->f, &cparam, &udata)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create fixed array")
@@ -961,7 +961,7 @@ H5D__farray_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Vailin Choi; 5 May 2014
- *              
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1224,7 +1224,7 @@ H5D__farray_idx_iterate(const H5D_chk_idx_info_t *idx_info,
         } /* end if */
 	udata.cb = chunk_cb;
 	udata.udata = chunk_udata;
-	
+
         /* Iterate over the fixed array elements */
 	if((ret_value = H5FA_iterate(fa, H5D__farray_idx_iterate_cb, &udata)) < 0)
 	    HERROR(H5E_DATASET, H5E_BADITER, "unable to iterate over fixed array chunk index");

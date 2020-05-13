@@ -819,7 +819,7 @@ done:
  *
  * Purpose:     Registers an OBJECT in a TYPE with the supplied ID for it.
  *              This routine will check to ensure the supplied ID is not already
- *              in use, and ensure that it is a valid ID for the given type, 
+ *              in use, and ensure that it is a valid ID for the given type,
  *              but will NOT check to ensure the OBJECT is not already
  *              registered (thus, it is possible to register one object under
  *              multiple IDs).
@@ -1360,10 +1360,10 @@ H5I_dec_ref(hid_t id)
      * reference count without calling the free method.
      *
      * Beware: the free method may call other H5I functions.
-     * 
-     * If an object is closing, we can remove the ID even though the free 
+     *
+     * If an object is closing, we can remove the ID even though the free
      * method might fail.  This can happen when a mandatory filter fails to
-     * write when a dataset is closed and the chunk cache is flushed to the 
+     * write when a dataset is closed and the chunk cache is flushed to the
      * file.  We have to close the dataset anyway. (SLU - 2010/9/7)
      */
     if(1 == id_ptr->count) {
@@ -1467,9 +1467,9 @@ H5I_dec_app_ref_always_close(hid_t id)
     /* Check for failure */
     if (ret_value < 0) {
         /*
-         * If an object is closing, we can remove the ID even though the free 
+         * If an object is closing, we can remove the ID even though the free
          * method might fail.  This can happen when a mandatory filter fails to
-         * write when a dataset is closed and the chunk cache is flushed to the 
+         * write when a dataset is closed and the chunk cache is flushed to the
          * file.  We have to close the dataset anyway. (SLU - 2010/9/7)
          */
         H5I_remove(id);
@@ -1948,7 +1948,7 @@ H5Isearch(H5I_type_t type, H5I_search_func_t func, void *key)
     udata.app_key = key;
     udata.ret_obj = NULL;
 
-    /* Note that H5I_iterate returns an error code.  We ignore it 
+    /* Note that H5I_iterate returns an error code.  We ignore it
      * here, as we can't do anything with it without revising the API.
      */
     (void)H5I_iterate(type, H5I__search_cb, &udata, TRUE);
@@ -2099,22 +2099,22 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 /*-------------------------------------------------------------------------
  * Function:	H5I_iterate
  *
- * Purpose:     Apply function FUNC to each member of type TYPE (with 
- *              non-zero application reference count if app_ref is TRUE).  
- *              Stop if FUNC returns a non zero value (i.e. anything 
- *              other than H5_ITER_CONT).  
+ * Purpose:     Apply function FUNC to each member of type TYPE (with
+ *              non-zero application reference count if app_ref is TRUE).
+ *              Stop if FUNC returns a non zero value (i.e. anything
+ *              other than H5_ITER_CONT).
  *
- *              If FUNC returns a positive value (i.e. H5_ITER_STOP), 
+ *              If FUNC returns a positive value (i.e. H5_ITER_STOP),
  *              return SUCCEED.
  *
- *              If FUNC returns a negative value (i.e. H5_ITER_ERROR), 
+ *              If FUNC returns a negative value (i.e. H5_ITER_ERROR),
  *              return FAIL.
- *		
- *              The FUNC should take a pointer to the object and the 
- *              udata as arguments and return non-zero to terminate 
+ *
+ *              The FUNC should take a pointer to the object and the
+ *              udata as arguments and return non-zero to terminate
  *              siteration, and zero to continue.
  *
- * Limitation:  Currently there is no way to start the iteration from 
+ * Limitation:  Currently there is no way to start the iteration from
  *              where a previous iteration left off.
  *
  * Return:      SUCCEED/FAIL

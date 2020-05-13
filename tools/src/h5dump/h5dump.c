@@ -861,14 +861,14 @@ parse_command_line(int argc, const char *argv[])
     int                 opt;
     int                 last_was_dset = FALSE;
 
-     /* no arguments */
+    /* no arguments */
     if (argc == 1) {
         usage(h5tools_getprogname());
         goto error;
     }
 
     /* this will be plenty big enough to hold the info */
-    if((hand = (struct handler_t *)HDcalloc((size_t)argc, sizeof(struct handler_t)))==NULL) {
+    if((hand = (struct handler_t *)HDcalloc((size_t)argc, sizeof(struct handler_t))) == NULL) {
         goto error;
     }
 

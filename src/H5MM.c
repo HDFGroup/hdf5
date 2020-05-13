@@ -254,7 +254,7 @@ H5MM_final_sanity_check(void)
  *              difficult to check as a return value. This is still
  *              considered an error condition since allocations of zero
  *              bytes usually indicate problems.
- *  
+ *
  * Return:      Success:    Pointer to new memory
  *              Failure:    NULL
  *

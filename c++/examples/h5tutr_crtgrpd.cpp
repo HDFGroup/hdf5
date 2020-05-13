@@ -45,12 +45,12 @@ int main(void)
         // handle the errors appropriately
         Exception::dontPrint();
 
-        // Initialize the first dataset. 
+        // Initialize the first dataset.
         for (i = 0; i < D1DIM1; i++)
             for (j = 0; j < D1DIM2; j++)
                dset1_data[i][j] = j + 1;
 
-        //  Initialize the second dataset. 
+        //  Initialize the second dataset.
         for (i = 0; i < D2DIM1; i++)
           for (j = 0; j < D2DIM2; j++)
               dset2_data[i][j] = j + 1;
@@ -69,7 +69,7 @@ int main(void)
 
         // Create the dataset in group "MyGroup".  Same note as for the
         // dataspace above.
-        DataSet *dataset = new DataSet (file.createDataSet(DATASET_NAME1, 
+        DataSet *dataset = new DataSet (file.createDataSet(DATASET_NAME1,
                                          PredType::STD_I32BE, *dataspace));
 
         // Write the data to the dataset using default memory space, file
@@ -89,7 +89,7 @@ int main(void)
         Group group(file.openGroup("/MyGroup/Group_A"));
 
         // Create the second dataset in group "Group_A".
-        dataset = new DataSet (group.createDataSet(DATASET_NAME2, 
+        dataset = new DataSet (group.createDataSet(DATASET_NAME2,
                                          PredType::STD_I32BE, *dataspace));
 
         // Write the data to the dataset using default memory space, file
@@ -100,7 +100,7 @@ int main(void)
         delete dataspace;
         delete dataset;
         group.close();
-    
+
     } // end of try block
 
     // catch failure caused by the H5File operations
@@ -129,6 +129,6 @@ int main(void)
         error.printErrorStack();
         return -1;
     }
- 
+
      return 0;
 }

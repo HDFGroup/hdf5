@@ -433,7 +433,7 @@ H5_DLL herr_t H5B2__remove_internal(H5B2_hdr_t *hdr, hbool_t *depth_decreased,
 H5_DLL herr_t H5B2__remove_leaf(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr,
     H5B2_nodepos_t curr_pos, void *parent, void *udata, H5B2_remove_t op,
     void *op_data);
-H5_DLL herr_t H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, 
+H5_DLL herr_t H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr,
     hbool_t *depth_decreased, void *swap_loc, void *swap_parent, uint16_t depth,
     H5AC_info_t *parent_cache_info, unsigned *parent_cache_info_flags_ptr,
     H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_t curr_pos, hsize_t n,

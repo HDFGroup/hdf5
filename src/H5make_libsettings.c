@@ -35,13 +35,14 @@ static const char *FileHeader = "\n\
 #include <stdio.h>
 #include <time.h>
 #include "H5private.h"
+
 /* Do NOT use HDfprintf in this file as it is not linked with the library,
  * which contains the H5system.c file in which the function is defined.
  */
 
 #define LIBSETTINGSFNAME "libhdf5.settings"
 
-FILE       *rawoutstream = NULL;
+FILE *rawoutstream = NULL;
 
 
 /*-------------------------------------------------------------------------
@@ -216,6 +217,7 @@ information about the library build configuration\n";
         HDfputc('\n', rawoutstream);
     } /* end if */
     fprintf(rawoutstream, " *\n * Purpose:\t\t");
+
     for(s = purpose; *s; s++) {
         HDfputc(*s, rawoutstream);
         if('\n' == *s && s[1])

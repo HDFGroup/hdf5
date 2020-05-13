@@ -1210,7 +1210,7 @@ test_h5s_encode(H5F_libver_t low, H5F_libver_t high)
      * Test encoding and decoding of simple dataspace and hyperslab selection.
      *-------------------------------------------------------------------------
      */
-    
+
     /* Create the file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
@@ -1569,7 +1569,7 @@ test_h5s_encode1(void)
 
 /****************************************************************
 **
-**  test_h5s_check_encoding(): 
+**  test_h5s_check_encoding():
 **      This is the helper routine to verify that H5Sencode2()
 **      works as specified in the RFC for the library format setting
 **      in the file access property list.
@@ -1582,7 +1582,7 @@ test_h5s_encode1(void)
 **
 ****************************************************************/
 static herr_t
-test_h5s_check_encoding(hid_t in_fapl, hid_t in_sid, 
+test_h5s_check_encoding(hid_t in_fapl, hid_t in_sid,
     uint32_t expected_version, uint8_t expected_enc_size, hbool_t expected_to_fail)
 {
     char *buf = NULL;       /* Pointer to the encoded buffer */
@@ -1633,7 +1633,7 @@ test_h5s_check_encoding(hid_t in_fapl, hid_t in_sid,
         VERIFY(in_low_bounds[0], d_low_bounds[0], "Compare selection low bounds");
         VERIFY(in_high_bounds[0], d_high_bounds[0], "Compare selection high bounds");
 
-        /* 
+        /*
          * See "RFC: H5Sencode/H5Sdeocde Format Change" for the verification of:
          *   H5S_SEL_POINTS:
          *      --the expected version for point selection info
@@ -1644,7 +1644,7 @@ test_h5s_check_encoding(hid_t in_fapl, hid_t in_sid,
          */
 
         if(H5Sget_select_type(in_sid) == H5S_SEL_POINTS) {
-        
+
             /* Verify the version */
             VERIFY((uint32_t)buf[35], expected_version, "Version for point selection");
 
@@ -1666,7 +1666,7 @@ test_h5s_check_encoding(hid_t in_fapl, hid_t in_sid,
 
         ret = H5Sclose(d_sid);
         CHECK(ret, FAIL, "H5Sclose");
-        if(buf) 
+        if(buf)
             HDfree(buf);
 
     }
@@ -1723,15 +1723,15 @@ test_h5s_encode_regular_hyper(H5F_libver_t low, H5F_libver_t high)
             start = 0;
             count = unlim? H5S_UNLIMITED : 2;
 
-            if((high <= H5F_LIBVER_V18) && 
+            if((high <= H5F_LIBVER_V18) &&
                (unlim || config == CONFIG_32))
                 expected_to_fail = TRUE;
 
-            if(low >= H5F_LIBVER_V112) 
+            if(low >= H5F_LIBVER_V112)
                 expected_version = 3;
             else if(config == CONFIG_16 && !unlim)
                 expected_version = 1;
-            else 
+            else
                 expected_version = 2;
 
             /* test 1 */
@@ -1745,7 +1745,7 @@ test_h5s_encode_regular_hyper(H5F_libver_t low, H5F_libver_t high)
                     stride = POWER32 - 1;
                     block = 4;
                     expected_enc_size = (uint8_t)(expected_version == 3 ? 4 : 8);
-                    
+
                     break;
                 default:
                     HDassert(0);
@@ -1873,7 +1873,7 @@ test_h5s_encode_regular_hyper(H5F_libver_t low, H5F_libver_t high)
 
 /****************************************************************
 **
-**  test_h5s_encode_irregular_hyper(): 
+**  test_h5s_encode_irregular_hyper():
 **      This test verifies that H5Sencode2() works as specified in
 **      the RFC for irregular hyperslabs.
 **      See "RFC: H5Sencode/H5Sdeocde Format Change".
@@ -1961,7 +1961,7 @@ test_h5s_encode_irregular_hyper(H5F_libver_t low, H5F_libver_t high)
                 break;
 
             case CONFIG_16:
-                stride = POWER16;    
+                stride = POWER16;
                 expected_enc_size = 4;
                 break;
 
@@ -2092,11 +2092,11 @@ test_h5s_encode_points(H5F_libver_t low, H5F_libver_t high)
 
 /****************************************************************
 **
-**  test_h5s_encode_length(): 
+**  test_h5s_encode_length():
 **      Test to verify HDFFV-10271 is fixed.
 **      Verify that version 2 hyperslab encoding length is correct.
 **
-**  See "RFC: H5Sencode/H5Sdecode Format Change" for the 
+**  See "RFC: H5Sencode/H5Sdecode Format Change" for the
 **  description of the encoding format.
 **
 ****************************************************************/

@@ -63,7 +63,7 @@ write_data(const char *msg, hid_t file, const char *name, hid_t cparms, hid_t me
 
     /* Write the data */
     for(i = 0; i < 5; i++)
-	for(j = 0; j < 5; j++) {
+        for(j = 0; j < 5; j++) {
 
 	    /* Extend the dataset */
 	    offset[0] = (hsize_t)(i * NX);
@@ -78,20 +78,20 @@ write_data(const char *msg, hid_t file, const char *name, hid_t cparms, hid_t me
                 if(H5Dset_extent(dataset, max_size) < 0) TEST_ERROR;
             } /* end if */
 
-	    /* Select a hyperslab */
+            /* Select a hyperslab */
             if((file_space = H5Dget_space(dataset)) < 0) TEST_ERROR;
-	    if(H5Sselect_hyperslab(file_space, H5S_SELECT_SET, offset, NULL, dims, NULL) < 0) TEST_ERROR;
+            if(H5Sselect_hyperslab(file_space, H5S_SELECT_SET, offset, NULL, dims, NULL) < 0) TEST_ERROR;
 
 	    /* Write to the hyperslab */
 	    if(H5Dwrite(dataset, H5T_NATIVE_INT, mem_space, file_space, H5P_DEFAULT, buf1) < 0) TEST_ERROR;
             if(H5Sclose(file_space) < 0) TEST_ERROR;
-	} /* end for */
+        } /* end for */
 
     /* Read the data */
     if((half_space = H5Screate_simple(2, half_dims, NULL)) < 0) TEST_ERROR;
     if((file_space = H5Dget_space(dataset)) < 0) TEST_ERROR;
     for(i = 0; i < 10; i++) {
-	for(j = 0; j < 10; j++) {
+        for(j = 0; j < 10; j++) {
 
 	    /* Select a hyperslab */
 	    offset[0] = (hsize_t)(i * (NX / 2));
@@ -112,7 +112,6 @@ write_data(const char *msg, hid_t file, const char *name, hid_t cparms, hid_t me
 		    } /* end if */
 	} /* end for */
     } /* end for */
-
 
     /* Cleanup */
     if(H5Dclose(dataset) < 0) TEST_ERROR;
@@ -159,7 +158,7 @@ write_data_deprec(const char *msg, hid_t file, const char *name, hid_t cparms, h
 
     /* Write the data */
     for(i = 0; i < 5; i++)
-	for(j = 0; j < 5; j++) {
+        for(j = 0; j < 5; j++) {
 
 	    /* Extend the dataset */
 	    offset[0] = (hsize_t)(i * NX);
@@ -168,20 +167,20 @@ write_data_deprec(const char *msg, hid_t file, const char *name, hid_t cparms, h
 	    size[1] = offset[1] + NY;
 	    if(H5Dextend(dataset, size) < 0) TEST_ERROR;
 
-	    /* Select a hyperslab */
+            /* Select a hyperslab */
             if((file_space = H5Dget_space(dataset)) < 0) TEST_ERROR;
-	    if(H5Sselect_hyperslab(file_space, H5S_SELECT_SET, offset, NULL, dims, NULL) < 0) TEST_ERROR;
+            if(H5Sselect_hyperslab(file_space, H5S_SELECT_SET, offset, NULL, dims, NULL) < 0) TEST_ERROR;
 
 	    /* Write to the hyperslab */
 	    if(H5Dwrite(dataset, H5T_NATIVE_INT, mem_space, file_space, H5P_DEFAULT, buf1) < 0) TEST_ERROR;
             if(H5Sclose(file_space) < 0) TEST_ERROR;
-	} /* end for */
+        } /* end for */
 
     /* Read the data */
     if((half_space = H5Screate_simple(2, half_dims, NULL)) < 0) TEST_ERROR;
     if((file_space = H5Dget_space(dataset)) < 0) TEST_ERROR;
     for(i = 0; i < 10; i++) {
-	for(j = 0; j < 10; j++) {
+        for(j = 0; j < 10; j++) {
 
 	    /* Select a hyperslab */
 	    offset[0] = (hsize_t)(i * (NX / 2));

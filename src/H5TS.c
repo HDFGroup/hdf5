@@ -179,7 +179,7 @@ H5TS_thread_id(void)
 
     /* An ID is *not* already assigned: reuse an ID that's on the
      * free list, or else generate a new ID.
-     * 
+     *
      * Allocating memory while holding a mutex is bad form, so
      * point `tid` at `proto_tid` if we need to allocate some
      * memory.
@@ -292,7 +292,7 @@ herr_t
 H5TS_mutex_lock(H5TS_mutex_t *mutex)
 {
 #ifdef  H5_HAVE_WIN_THREADS
-    EnterCriticalSection( &mutex->CriticalSection); 
+    EnterCriticalSection( &mutex->CriticalSection);
     return 0;
 #else /* H5_HAVE_WIN_THREADS */
     herr_t ret_value = pthread_mutex_lock(&mutex->atomic_lock);
@@ -313,7 +313,7 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
         mutex->lock_count = 1;
     }
 
-    return pthread_mutex_unlock(&mutex->atomic_lock); 
+    return pthread_mutex_unlock(&mutex->atomic_lock);
 #endif /* H5_HAVE_WIN_THREADS */
 }
 
@@ -344,7 +344,7 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
 #ifdef  H5_HAVE_WIN_THREADS
     /* Releases ownership of the specified critical section object. */
     LeaveCriticalSection(&mutex->CriticalSection);
-    return 0; 
+    return 0;
 #else  /* H5_HAVE_WIN_THREADS */
     herr_t ret_value = pthread_mutex_lock(&mutex->atomic_lock);
 
@@ -363,7 +363,7 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
             ret_value = err;
     } /* end if */
 
-    return ret_value; 
+    return ret_value;
 #endif /* H5_HAVE_WIN_THREADS */
 } /* H5TS_mutex_unlock */
 
@@ -400,15 +400,15 @@ H5TS_cancel_count_inc(void)
     return SUCCEED;
 #else /* H5_HAVE_WIN_THREADS */
     H5TS_cancel_t *cancel_counter;
-    herr_t ret_value = SUCCEED; 
+    herr_t ret_value = SUCCEED;
 
-    cancel_counter = (H5TS_cancel_t *)H5TS_get_thread_local_value(H5TS_cancel_key_g); 
+    cancel_counter = (H5TS_cancel_t *)H5TS_get_thread_local_value(H5TS_cancel_key_g);
 
     if (!cancel_counter) {
         /*
          * First time thread calls library - create new counter and associate
          * with key.
-         * 
+         *
          * Don't use H5MM calls here since the destructor has to use HDfree in
          * order to avoid codestack calls.
          */
@@ -429,7 +429,7 @@ H5TS_cancel_count_inc(void)
 
     ++cancel_counter->cancel_count;
 
-    return ret_value; 
+    return ret_value;
 #endif /* H5_HAVE_WIN_THREADS */
 }
 
@@ -459,19 +459,19 @@ H5TS_cancel_count_inc(void)
 herr_t
 H5TS_cancel_count_dec(void)
 {
-#ifdef  H5_HAVE_WIN_THREADS 
+#ifdef  H5_HAVE_WIN_THREADS
     /* unsupported; will just return 0 */
     return SUCCEED;
 #else /* H5_HAVE_WIN_THREADS */
-    register H5TS_cancel_t *cancel_counter; 
+    register H5TS_cancel_t *cancel_counter;
     herr_t ret_value = SUCCEED;
 
-    cancel_counter = (H5TS_cancel_t *)H5TS_get_thread_local_value(H5TS_cancel_key_g); 
+    cancel_counter = (H5TS_cancel_t *)H5TS_get_thread_local_value(H5TS_cancel_key_g);
 
     if (cancel_counter->cancel_count == 1)
         ret_value = pthread_setcancelstate(cancel_counter->previous_state, NULL);
 
-    --cancel_counter->cancel_count; 
+    --cancel_counter->cancel_count;
 
     return ret_value;
 #endif /* H5_HAVE_WIN_THREADS */
@@ -491,7 +491,7 @@ H5TS_cancel_count_dec(void)
  *
  *--------------------------------------------------------------------------
  */
-H5_DLL BOOL CALLBACK 
+H5_DLL BOOL CALLBACK
 H5TS_win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex)
 {
     BOOL ret_value = TRUE;
@@ -653,7 +653,7 @@ H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr, void *udata)
 {
     H5TS_thread_t ret_value;
 
-#ifdef  H5_HAVE_WIN_THREADS 
+#ifdef  H5_HAVE_WIN_THREADS
 
     /* When calling C runtime functions, you should use _beginthread or
      * _beginthreadex instead of CreateThread.  Threads created with
