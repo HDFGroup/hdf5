@@ -65,7 +65,7 @@ H5VL__native_group_create(void *obj, const H5VL_loc_params_t *loc_params, const 
 
         /* Create the new group & get its ID */
         if(NULL == (grp = H5G__create(loc.oloc->file, &gcrt_info)))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create group")            
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create group")
     } /* end if */
     /* otherwise it's from H5Gcreate */
     else {
@@ -107,7 +107,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL__native_group_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name, 
+H5VL__native_group_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
     hid_t H5_ATTR_UNUSED gapl_id, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
     H5G_loc_t       loc;                /* Location to open group   */
@@ -216,7 +216,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_group_specific(void *obj, H5VL_group_specific_t specific_type, 
+H5VL__native_group_specific(void *obj, H5VL_group_specific_t specific_type,
                              hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
     H5G_t       *grp = (H5G_t *)obj;

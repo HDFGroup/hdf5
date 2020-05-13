@@ -238,7 +238,7 @@ H5HF_man_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
     HDassert(hdr);
     HDassert(id);
     HDassert(obj_len_p);
-    
+
     /* Skip over the flag byte */
     id++;
 
@@ -276,7 +276,7 @@ H5HF__man_get_obj_off(const H5HF_hdr_t *hdr, const uint8_t *id, hsize_t *obj_off
     HDassert(hdr);
     HDassert(id);
     HDassert(obj_off_p);
-    
+
     /* Skip over the flag byte */
     id++;
 
@@ -307,8 +307,8 @@ H5HF__man_op_real(H5HF_hdr_t *hdr, const uint8_t *id,
 {
     H5HF_direct_t *dblock = NULL;       /* Pointer to direct block to query */
     unsigned dblock_access_flags;       /* Access method for direct block */
-                                        /* must equal either 
-                                         * H5AC__NO_FLAGS_SET or 
+                                        /* must equal either
+                                         * H5AC__NO_FLAGS_SET or
                                          * H5AC__READ_ONLY_FLAG
                                          */
     haddr_t dblock_addr;                /* Direct block address */

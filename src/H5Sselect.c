@@ -3036,7 +3036,7 @@ done:
     Retrieve a list of offset / length pairs (a list of "sequences") matching
     the selected elements for an iterator, according to the iteration order for
     the iterator.  The lengths returned are in _bytes_, not elements.
-    
+
     Note that the iteration order for "all" and "hyperslab" selections is
     row-major (i.e. "C-ordered"), but the iteration order for "point"
     selections is "in order selected", unless the H5S_SEL_ITER_GET_SEQ_LIST_SORTED

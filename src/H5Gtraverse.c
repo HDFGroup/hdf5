@@ -843,9 +843,9 @@ H5G_traverse(const H5G_loc_t *loc, const char *name, unsigned target, H5G_traver
 
     /* Set up invalid tag. This is a precautionary step only. Setting an invalid
      * tag here will ensure that no metadata accessed while doing the traversal
-     * is given an improper tag, unless another one is specifically set up 
-     * first. This will ensure we're not accidentally tagging something we 
-     * shouldn't be during the traversal. Note that for best tagging assertion 
+     * is given an improper tag, unless another one is specifically set up
+     * first. This will ensure we're not accidentally tagging something we
+     * shouldn't be during the traversal. Note that for best tagging assertion
      * coverage, setting H5C_DO_TAGGING_SANITY_CHECKS is advised.
      */
     H5_BEGIN_TAG(H5AC__INVALID_TAG);

@@ -216,7 +216,7 @@ H5_DLL herr_t H5G_iterate(H5G_loc_t *loc, const char *group_name,
 H5_DLL herr_t H5G_visit(H5G_loc_t *loc, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, H5L_iterate2_t op, void *op_data);
 
-/* 
+/*
  * Functions that understand links in groups
  */
 H5_DLL herr_t H5G_link_to_info(const struct H5O_loc_t *link_loc, const struct H5O_link_t *lnk, H5L_info2_t *linfo);

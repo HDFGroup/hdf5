@@ -830,7 +830,7 @@ H5O__attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
             HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, H5_ITER_ERROR, "unable to load object header chunk")
 
         /* Because the attribute structure is shared now. The only situation that requires
-         * copying the data is when the metadata cache evicts and reloads this attribute. 
+         * copying the data is when the metadata cache evicts and reloads this attribute.
          * The shared attribute structure will be different in that situation. SLU-2010/7/29 */
         if(((H5A_t *)mesg->native)->shared != udata->attr->shared) {
             /* Sanity check */

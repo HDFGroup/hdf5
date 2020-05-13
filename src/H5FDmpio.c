@@ -1283,7 +1283,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type,
 #endif
             HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
     } /* end if */
- 
+
     /* If the rank0-bcast feature was used, broadcast the # of bytes read to
      * other ranks, which didn't perform any I/O.
      */
@@ -1582,14 +1582,14 @@ done:
  *
  * Purpose:     Make certain the file's size matches it's allocated size
  *
- *              This is a little sticky in the mpio case, as it is not 
+ *              This is a little sticky in the mpio case, as it is not
  *              easy for us to track the current EOF by extracting it from
- *              write calls. 
+ *              write calls.
  *
  *              Instead, we first check to see if the eoa has changed since
- *              the last call to this function.  If it has, we call 
- *              MPI_File_get_size() to determine the current EOF, and 
- *              only call MPI_File_set_size() if this value disagrees 
+ *              the last call to this function.  If it has, we call
+ *              MPI_File_get_size() to determine the current EOF, and
+ *              only call MPI_File_set_size() if this value disagrees
  *              with the current eoa.
  *
  * Return:      SUCCEED/FAIL
@@ -1621,13 +1621,13 @@ H5FD__mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
         MPI_Offset      size;
         MPI_Offset      needed_eof;
 
-        /* In principle, it is possible for the size returned by the 
-         * call to MPI_File_get_size() to depend on whether writes from 
+        /* In principle, it is possible for the size returned by the
+         * call to MPI_File_get_size() to depend on whether writes from
          * all proceeses have completed at the time process 0 makes the
-         * call.  
+         * call.
          *
          * In practice, most (all?) truncate calls will come after a barrier
-         * and with no interviening writes to the file (with the possible 
+         * and with no interviening writes to the file (with the possible
          * exception of sueprblock / superblock extension message updates).
          *
          * Check the "MPI file closing" flag in the API context to determine
@@ -1658,13 +1658,13 @@ H5FD__mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
             if(MPI_SUCCESS != (mpi_code = MPI_File_set_size(file->f, needed_eof)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_File_set_size failed", mpi_code)
 
-            /* In general, we must wait until all processes have finished 
-             * the truncate before any process can continue, since it is 
-             * possible that a process would write at the end of the 
+            /* In general, we must wait until all processes have finished
+             * the truncate before any process can continue, since it is
+             * possible that a process would write at the end of the
              * file, and this write would be discarded by the truncate.
              *
-             * While this is an issue for a user initiated flush, it may 
-             * not be an issue at file close.  If so, we may be able to 
+             * While this is an issue for a user initiated flush, it may
+             * not be an issue at file close.  If so, we may be able to
              * optimize out the following barrier in that case.
              */
             if(MPI_SUCCESS != (mpi_code = MPI_Barrier(file->comm)))

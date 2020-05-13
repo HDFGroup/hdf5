@@ -189,11 +189,11 @@ HDfprintf(stderr, "%s: type = %u, size = %Hu\n", FUNC, (unsigned)type, size);
      * The line in #ifdef REPLACE triggers the following problem:
      *   test/objcopy.c: test_copy_group_deep() test fails with the family driver
      *
-     * When closing the destination file after H5Ocopy, the library flushes the fractal 
+     * When closing the destination file after H5Ocopy, the library flushes the fractal
      * heap direct block via H5HF__cache_dblock_pre_serialize().  While doing so,
      * the cache eventually adjusts/evicts ageout entries and ends up flushing out the
      * same entry that is being serialized (flush_in_progress).
-     */ 
+     */
     if((f->shared->feature_flags & aggr->feature_flag) && f->shared->fs_strategy != H5F_FSPACE_STRATEGY_NONE && (!f->shared->closing || !f->shared->fs_persist)) {
 #ifdef REPLACE
     if((f->shared->feature_flags & aggr->feature_flag) && f->shared->fs_strategy != H5F_FSPACE_STRATEGY_NONE && !f->shared->closing) {
@@ -405,7 +405,7 @@ HDfprintf(stderr, "%s: ret_value = %a\n", FUNC, ret_value);
  *-------------------------------------------------------------------------
  */
 htri_t
-H5MF__aggr_try_extend(H5F_t *f, H5F_blk_aggr_t *aggr, 
+H5MF__aggr_try_extend(H5F_t *f, H5F_blk_aggr_t *aggr,
     H5FD_mem_t type, haddr_t blk_end, hsize_t extra_requested)
 {
     htri_t ret_value = FALSE;           /* Return value */
@@ -419,7 +419,7 @@ H5MF__aggr_try_extend(H5F_t *f, H5F_blk_aggr_t *aggr,
 
     /* Check if this aggregator is active */
     if(f->shared->feature_flags & aggr->feature_flag) {
-        /* 
+        /*
          * If the block being tested adjoins the beginning of the aggregator
          *      block, check if the aggregator can accommodate the extension.
          */
@@ -443,7 +443,7 @@ H5MF__aggr_try_extend(H5F_t *f, H5F_blk_aggr_t *aggr,
                 /*
                  * If extra_requested is above percentage threshold:
                  * 1) "bubble" up the aggregator by aggr->alloc_size or extra_requested
-                 * 2) extend the block into the aggregator 
+                 * 2) extend the block into the aggregator
                  */
                 else {
                     hsize_t extra = (extra_requested < aggr->alloc_size) ? aggr->alloc_size : extra_requested;

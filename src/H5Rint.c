@@ -157,7 +157,7 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 /* Flag indicating "top" of interface has been initialized */
 static hbool_t H5R_top_package_initialize_s = FALSE;
 
-
+
 /*--------------------------------------------------------------------------
 NAME
    H5R__init_package -- Initialize interface-specific information
@@ -184,7 +184,7 @@ H5R__init_package(void)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5R__init_package() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5R_top_term_package
@@ -206,7 +206,7 @@ H5R__init_package(void)
 int
 H5R_top_term_package(void)
 {
-    int	n = 0;
+    int    n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -218,7 +218,7 @@ H5R_top_term_package(void)
     FUNC_LEAVE_NOAPI(n)
 } /* end H5R_top_term_package() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5R_term_package
@@ -242,7 +242,7 @@ H5R_top_term_package(void)
 int
 H5R_term_package(void)
 {
-    int	n = 0;
+    int    n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -258,7 +258,7 @@ H5R_term_package(void)
     FUNC_LEAVE_NOAPI(n)
 } /* end H5R_term_package() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__create_object
  *
@@ -299,7 +299,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__create_object() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__create_region
  *
@@ -350,7 +350,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5R__create_region */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__create_attr
  *
@@ -404,7 +404,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5R__create_attr */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__destroy
  *
@@ -469,7 +469,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__destroy() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__set_loc_id
  *
@@ -514,7 +514,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__set_loc_id() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__get_loc_id
  *
@@ -538,7 +538,7 @@ H5R__get_loc_id(const H5R_ref_priv_t *ref)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__get_loc_id() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__reopen_file
  *
@@ -607,7 +607,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__reopen_file() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__get_type
  *
@@ -631,7 +631,7 @@ H5R__get_type(const H5R_ref_priv_t *ref)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__get_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__equal
  *
@@ -696,7 +696,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__equal() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__copy
  *
@@ -762,7 +762,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__copy() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__get_obj_token
  *
@@ -795,7 +795,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__get_obj_token() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__set_obj_token
  *
@@ -825,7 +825,7 @@ H5R__set_obj_token(H5R_ref_priv_t *ref, const H5O_token_t *obj_token,
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__set_obj_token() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__get_region
  *
@@ -856,7 +856,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__get_region() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__get_file_name
  *
@@ -898,7 +898,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__get_file_name() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__get_attr_name
  *
@@ -936,7 +936,7 @@ H5R__get_attr_name(const H5R_ref_priv_t *ref, char *buf, size_t size)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__get_attr_name() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__encode
  *
@@ -1034,7 +1034,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__encode() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__decode
  *
@@ -1127,7 +1127,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__decode() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__encode_obj_token
  *
@@ -1162,7 +1162,7 @@ H5R__encode_obj_token(const H5O_token_t *obj_token, size_t token_size,
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__encode_obj_token() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__decode_obj_token
  *
@@ -1207,7 +1207,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__decode_obj_token() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__encode_region
  *
@@ -1256,7 +1256,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__encode_region() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__decode_region
  *
@@ -1312,7 +1312,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__decode_region() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__encode_string
  *
@@ -1354,7 +1354,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__encode_string() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__decode_string
  *
@@ -1401,7 +1401,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__decode_string() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__encode_heap
  *
@@ -1442,7 +1442,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__encode_heap() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__decode_heap
  *
@@ -1489,7 +1489,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__decode_heap() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__free_heap
  *
@@ -1534,7 +1534,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__free_heap() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__decode_token_compat
  *
@@ -1606,7 +1606,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__decode_token_compat() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__encode_token_obj_compat
  *
@@ -1637,7 +1637,7 @@ H5R__encode_token_obj_compat(const H5O_token_t *obj_token, size_t token_size,
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__encode_token_obj_compat() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__decode_token_obj_compat
  *
@@ -1672,7 +1672,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5R__decode_token_obj_compat() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__encode_token_region_compat
  *
@@ -1748,7 +1748,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5R__encode_token_region_compat() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5R__decode_token_region_compat
  *

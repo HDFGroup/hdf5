@@ -268,7 +268,7 @@ H5F__drvrinfo_prefix_decode(H5O_drvinfo_t *drvrinfo, char *drv_name,
     UINT32DECODE(image, drvrinfo->len);
 
     /* Driver name and/or version */
-    if(drv_name) { 
+    if(drv_name) {
         H5MM_memcpy(drv_name, (const char *)image, (size_t)8);
         drv_name[8] = '\0';
         image += 8; /* advance past name/version */
@@ -369,7 +369,7 @@ H5F__cache_superblock_get_final_load_size(const void *_image, size_t H5_ATTR_NDE
     udata->super_vers = sblock.super_vers;
 
     /* Set the final size for the cache image */
-    *actual_len = H5F_SUPERBLOCK_FIXED_SIZE + 
+    *actual_len = H5F_SUPERBLOCK_FIXED_SIZE +
             (size_t)H5F_SUPERBLOCK_VARLEN_SIZE(sblock.super_vers, sblock.sizeof_addr, sblock.sizeof_size);
 
 done:
@@ -380,7 +380,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5F__cache_superblock_verify_chksum
  *
- * Purpose:	Verify the computed checksum of the data structure is the 
+ * Purpose:	Verify the computed checksum of the data structure is the
  *		same as the stored chksum.
  *
  * Return:      Success:        TRUE/FALSE
@@ -584,14 +584,14 @@ H5F__cache_superblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUS
 	H5F_addr_decode(udata->f, (const uint8_t **)&image, &udata->stored_eof/*out*/);
 	H5F_addr_decode(udata->f, (const uint8_t **)&image, &sblock->root_addr/*out*/);
 
-	/* checksum verification already done in verify_chksum cb */		
+	/* checksum verification already done in verify_chksum cb */
 
 	/* Decode checksum */
 	UINT32DECODE(image, read_chksum);
 
 	/* The Driver Information Block may not appear with the version
-	 * 2 super block.  Thus we set the driver_addr field of the in 
-         * core representation of the super block HADDR_UNDEF to prevent 
+	 * 2 super block.  Thus we set the driver_addr field of the in
+         * core representation of the super block HADDR_UNDEF to prevent
          * any attempt to load the Driver Information Block.
 	 */
 	sblock->driver_addr = HADDR_UNDEF;
@@ -675,11 +675,11 @@ H5F__cache_superblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNU
     HDassert(image);
     HDassert(sblock);
 
-    /* Assert that the superblock is marked as being flushed last (and 
+    /* Assert that the superblock is marked as being flushed last (and
        collectively in parallel) */
     /* (We'll rely on the cache to make sure it actually *is* flushed
        last (and collectively in parallel), but this check doesn't hurt) */
-    HDassert(sblock->cache_info.flush_me_last);    
+    HDassert(sblock->cache_info.flush_me_last);
 
     /* Encode the common portion of the file superblock for all versions */
     H5MM_memcpy(image, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN);

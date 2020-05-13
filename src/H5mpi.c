@@ -124,7 +124,7 @@ H5_mpi_comm_dup(MPI_Comm comm, MPI_Comm *comm_new)
          */
         if (MPI_SUCCESS != (mpi_code = MPI_Comm_set_errhandler(comm_dup, MPI_ERRORS_RETURN)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Errhandler_set failed", mpi_code)
- 
+
     }
 
     /* Copy the new communicator to the return argument */
@@ -138,7 +138,7 @@ done:
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5_mpi_comm_dup() */ 
+} /* end H5_mpi_comm_dup() */
 
 
 /*-------------------------------------------------------------------------
@@ -191,7 +191,7 @@ done:
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5_mpi_info_dup() */ 
+} /* end H5_mpi_info_dup() */
 
 
 /*-------------------------------------------------------------------------
