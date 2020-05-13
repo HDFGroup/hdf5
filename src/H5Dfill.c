@@ -565,7 +565,7 @@ done:
  */
 herr_t
 H5D__fill_refill_vl(H5D_fill_buf_info_t *fb_info, size_t nelmts)
-{    
+{
     herr_t	ret_value = SUCCEED;	/* Return value */
     void * buf = NULL;              /* Temporary fill buffer */
 

@@ -364,13 +364,13 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
 
     /* Check to see if the process is reading the entire dataset */
     if(H5S_GET_SELECT_TYPE(file_space) != H5S_SEL_ALL)
-        local_cause[1] |= H5D_MPIO_RANK0_NOT_H5S_ALL; 
+        local_cause[1] |= H5D_MPIO_RANK0_NOT_H5S_ALL;
     /* Only perform this optimization for contigous datasets, currently */
     else if(H5D_CONTIGUOUS != io_info->dset->shared->layout.type)
-        /* Flag to do a MPI_Bcast of the data from one proc instead of 
+        /* Flag to do a MPI_Bcast of the data from one proc instead of
          * having all the processes involved in the collective I/O.
          */
-        local_cause[1] |= H5D_MPIO_RANK0_NOT_CONTIGUOUS; 
+        local_cause[1] |= H5D_MPIO_RANK0_NOT_CONTIGUOUS;
     else if((is_vl_storage = H5T_is_vl_storage(type_info->dset_type)) < 0)
         local_cause[0] |= H5D_MPIO_ERROR_WHILE_CHECKING_COLLECTIVE_POSSIBLE;
     else if(is_vl_storage)
@@ -394,7 +394,7 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
                 dset_size = ((hsize_t)snelmts) * type_size;
 
                /* If the size of the dataset is less than 2GB then do an MPI_Bcast
-                * of the data from one process instead of having all the processes 
+                * of the data from one process instead of having all the processes
                 * involved in the collective I/O.
                 */
                 if(dset_size > ((hsize_t)(2.0F * H5_GB) - 1))
@@ -402,7 +402,7 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
             } /* end else */
         } /* end else */
     } /* end else */
-    
+
     /* Check for independent I/O */
     if(local_cause[0] & H5D_MPIO_SET_INDEPENDENT)
         global_cause[0] = local_cause[0];
@@ -812,7 +812,7 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
         io_option = H5D_ONE_LINK_CHUNK_IO;      /*no opt*/
     /* direct request to multi-chunk-io */
     else if(H5FD_MPIO_CHUNK_MULTI_IO == chunk_opt_mode)
-        io_option = H5D_MULTI_CHUNK_IO;         
+        io_option = H5D_MULTI_CHUNK_IO;
     /* via default path. branch by num threshold */
     else {
         unsigned one_link_chunk_io_threshold;   /* Threshold to use single collective I/O for all chunks */
@@ -1123,9 +1123,9 @@ if(H5DEBUG(D))
 
             /* Obtain MPI derived datatype from all individual chunks */
             for(u = 0; u < num_chunk; u++) {
-                hsize_t *permute_map = NULL; /* array that holds the mapping from the old, 
-                                                out-of-order displacements to the in-order 
-                                                displacements of the MPI datatypes of the 
+                hsize_t *permute_map = NULL; /* array that holds the mapping from the old,
+                                                out-of-order displacements to the in-order
+                                                displacements of the MPI datatypes of the
                                                 point selection of the file space */
                 hbool_t is_permuted = FALSE;
 
@@ -1135,8 +1135,8 @@ if(H5DEBUG(D))
                  *              where it will be freed.
                  */
                 if(H5S_mpio_space_type(chunk_addr_info_array[u].chunk_info.fspace,
-                                       type_info->src_type_size, 
-                                       &chunk_ftype[u], /* OUT: datatype created */ 
+                                       type_info->src_type_size,
+                                       &chunk_ftype[u], /* OUT: datatype created */
                                        &chunk_mpi_file_counts[u], /* OUT */
                                        &(chunk_mft_is_derived_array[u]), /* OUT */
                                        TRUE, /* this is a file space,
@@ -1154,9 +1154,9 @@ if(H5DEBUG(D))
                 if(is_permuted)
                     HDassert(permute_map);
                 if(H5S_mpio_space_type(chunk_addr_info_array[u].chunk_info.mspace,
-                                       type_info->dst_type_size, &chunk_mtype[u], 
-                                       &chunk_mpi_mem_counts[u], 
-                                       &(chunk_mbt_is_derived_array[u]), 
+                                       type_info->dst_type_size, &chunk_mtype[u],
+                                       &chunk_mpi_mem_counts[u],
+                                       &(chunk_mbt_is_derived_array[u]),
                                        FALSE, /* this is a memory
                                                  space, so if the file
                                                  space is not
@@ -2016,9 +2016,9 @@ H5D__inter_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
 
     if((file_space != NULL) && (mem_space != NULL)) {
         int  mpi_file_count;         /* Number of file "objects" to transfer */
-        hsize_t *permute_map = NULL; /* array that holds the mapping from the old, 
-                                        out-of-order displacements to the in-order 
-                                        displacements of the MPI datatypes of the 
+        hsize_t *permute_map = NULL; /* array that holds the mapping from the old,
+                                        out-of-order displacements to the in-order
+                                        displacements of the MPI datatypes of the
                                         point selection of the file space */
         hbool_t is_permuted = FALSE;
 
@@ -2027,8 +2027,8 @@ H5D__inter_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
          *              and will be fed into the next call to H5S_mpio_space_type
          *              where it will be freed.
          */
-        if(H5S_mpio_space_type(file_space, type_info->src_type_size, 
-                               &mpi_file_type, &mpi_file_count, &mft_is_derived, /* OUT: datatype created */  
+        if(H5S_mpio_space_type(file_space, type_info->src_type_size,
+                               &mpi_file_type, &mpi_file_count, &mft_is_derived, /* OUT: datatype created */
                                TRUE, /* this is a file space, so
                                         permute the datatype if the
                                         point selection is out of
@@ -2037,13 +2037,13 @@ H5D__inter_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
                                                 the permutation of
                                                 points selected in
                                                 case they are out of
-                                                order */ 
+                                                order */
                                &is_permuted /* OUT */) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create MPI file type")
         /* Sanity check */
         if(is_permuted)
             HDassert(permute_map);
-        if(H5S_mpio_space_type(mem_space, type_info->src_type_size, 
+        if(H5S_mpio_space_type(mem_space, type_info->src_type_size,
                                &mpi_buf_type, &mpi_buf_count, &mbt_is_derived, /* OUT: datatype created */
                                FALSE, /* this is a memory space, so if
                                          the file space is not
@@ -2055,7 +2055,7 @@ H5D__inter_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
                                                generated by the
                                                file_space selection
                                                and applied to the
-                                               memory selection */, 
+                                               memory selection */,
                                &is_permuted /* IN */) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create MPI buffer type")
         /* Sanity check */
@@ -2627,7 +2627,7 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
             local_info_array[i].num_writers = 0;
             local_info_array[i].owners.original_owner = local_info_array[i].owners.new_owner = mpi_rank;
             local_info_array[i].buf = NULL;
-            
+
             local_info_array[i].async_info.num_receive_requests = 0;
             local_info_array[i].async_info.receive_buffer_array = NULL;
             local_info_array[i].async_info.receive_requests_array = NULL;

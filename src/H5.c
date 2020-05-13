@@ -138,8 +138,8 @@ H5_init_library(void)
         if (mpi_initialized && !mpi_finalized) {
             int key_val;
 
-            if(MPI_SUCCESS != (mpi_code = MPI_Comm_create_keyval(MPI_COMM_NULL_COPY_FN, 
-                                                                 (MPI_Comm_delete_attr_function *)H5_mpi_delete_cb, 
+            if(MPI_SUCCESS != (mpi_code = MPI_Comm_create_keyval(MPI_COMM_NULL_COPY_FN,
+                                                                 (MPI_Comm_delete_attr_function *)H5_mpi_delete_cb,
                                                                  &key_val, NULL)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Comm_create_keyval failed", mpi_code)
 
@@ -209,7 +209,7 @@ H5_init_library(void)
      * The link interface needs to be initialized so that link property lists
      * have their properties registered.
      * The FS module needs to be initialized as a result of the fix for HDFFV-10160:
-     *   It might not be initialized during normal file open. 
+     *   It might not be initialized during normal file open.
      *   When the application does not close the file, routines in the module might
      *   be called via H5_term_library() when shutting down the file.
      */
@@ -743,7 +743,7 @@ H5_debug_mask(const char *s)
 /*-------------------------------------------------------------------------
  * Function:	H5_mpi_delete_cb
  *
- * Purpose:	Callback attribute on MPI_COMM_SELF to terminate the HDF5 
+ * Purpose:	Callback attribute on MPI_COMM_SELF to terminate the HDF5
  *              library when the communicator is destroyed, i.e. on MPI_Finalize.
  *
  * Return:	MPI_SUCCESS
@@ -989,7 +989,7 @@ H5close(void)
  * Return:
  *
  *      Success:    A pointer to the allocated buffer.
- *  
+ *
  *      Failure:    NULL
  *
  *-------------------------------------------------------------------------
@@ -1030,7 +1030,7 @@ H5allocate_memory(size_t size, hbool_t clear)
  * Return:
  *
  *      Success:    A pointer to the resized buffer.
- *  
+ *
  *      Failure:    NULL (the input buffer will be unchanged)
  *
  *-------------------------------------------------------------------------
@@ -1091,7 +1091,7 @@ H5is_library_threadsafe(hbool_t *is_ts)
     H5TRACE1("e", "*b", is_ts);
 
     HDassert(is_ts);
- 
+
     /* At this time, it is impossible for this to fail. */
 #ifdef H5_HAVE_THREADSAFE
     *is_ts = TRUE;

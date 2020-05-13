@@ -14,7 +14,7 @@
 /* Programmer: 	Vailin Choi <vchoi@hdfgroup.org>
  *	       	May 2011; updated 10/2015
  *
- * Purpose:	Single Chunk I/O functions.  
+ * Purpose:	Single Chunk I/O functions.
  *		This is used when the dataset has only 1 chunk (with or without filter):
  *			cur_dims[] is equal to max_dims[] is equal to the chunk dims[]
  *		non-filter chunk record: [address of the chunk]
@@ -150,8 +150,8 @@ H5D__single_idx_init(const H5D_chk_idx_info_t *idx_info,
  * Function:	H5D__single_idx_create
  *
  * Purpose:	Set up Single Chunk Index: filtered or non-filtered
- *		
- * Return:	Non-negative on success 
+ *
+ * Return:	Non-negative on success
  *		Negative on failure.
  *
  * Programmer:	Vailin Choi; July 2011
