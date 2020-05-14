@@ -1698,7 +1698,7 @@ H5L__link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t H5_ATT
              * copy and wipe out grp_loc)
              */
             H5G_name_reset(&temp_path);
-            if(H5O_loc_copy(&temp_oloc, grp_loc->oloc, H5_COPY_DEEP) < 0)
+            if(H5O_loc_copy_deep(&temp_oloc, grp_loc->oloc) < 0)
                 HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to copy object location")
 
             temp_loc.oloc = &temp_oloc;
@@ -2485,7 +2485,7 @@ H5L__move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
              * copy and wipe out grp_loc)
              */
             H5G_name_reset(&temp_path);
-            if(H5O_loc_copy(&temp_oloc, grp_loc->oloc, H5_COPY_DEEP) < 0)
+            if(H5O_loc_copy_deep(&temp_oloc, grp_loc->oloc) < 0)
                 HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to copy object location")
 
             temp_loc.oloc = &temp_oloc;
