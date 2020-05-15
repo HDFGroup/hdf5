@@ -656,7 +656,7 @@ main(int argc, char **argv)
 #else /* H5_HAVE_MIRROR_VFD */
 
 int
-main(int argc, char **argv)
+main(void)
 {
     HDprintf("Mirror VFD was not built -- cannot launch server.\n");
     HDexit(EXIT_FAILURE);
