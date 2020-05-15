@@ -207,7 +207,7 @@ state_init(state_t *s, int argc, char **argv)
                 s->ndatasets = (unsigned)tmp;
             break;
         case 'q':
-            verbosity = 1;
+            verbosity = 0;
             break;
         case 'u':
             errno = 0;
