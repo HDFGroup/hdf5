@@ -601,15 +601,22 @@ main(int argc, char **argv)
     unsigned step, which;
     bool writer;
     state_t s;
+    const char *personality;
 
     state_init(&s, argc, argv);
 
-    if (strcmp(s.progname, "vfd_swmr_bigset_writer") == 0)
+    personality = strstr(s.progname, "vfd_swmr_bigset_");
+
+    if (personality != NULL &&
+        strcmp(personality, "vfd_swmr_bigset_writer") == 0)
         writer = true;
-    else if (strcmp(s.progname, "vfd_swmr_bigset_reader") == 0)
+    else if (personality != NULL &&
+             strcmp(personality, "vfd_swmr_bigset_reader") == 0)
         writer = false;
-    else
-        errx(EXIT_FAILURE, "no program personality matches '%s'", s.progname);
+    else {
+        errx(EXIT_FAILURE,
+             "unknown personality, expected vfd_swmr_bigset_{reader,writer}");
+    }
 
     if ((mat = newmat(s.rows, s.cols)) == NULL)
         err(EXIT_FAILURE, "%s: could not allocate matrix", __func__);
