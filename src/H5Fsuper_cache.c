@@ -270,7 +270,7 @@ H5F__drvrinfo_prefix_decode(H5O_drvinfo_t *drvrinfo, char *drv_name,
 
     /* Driver name and/or version */
     if(drv_name) { 
-        HDmemcpy(drv_name, (const char *)image, (size_t)8);
+        H5MM_memcpy(drv_name, (const char *)image, (size_t)8);
         drv_name[8] = '\0';
         image += 8; /* advance past name/version */
     } /* end if */
@@ -683,7 +683,7 @@ H5F__cache_superblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNU
     HDassert(sblock->cache_info.flush_me_last);    
 
     /* Encode the common portion of the file superblock for all versions */
-    HDmemcpy(image, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN);
+    H5MM_memcpy(image, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN);
     image += H5F_SIGNATURE_LEN;
     *image++ = (uint8_t)sblock->super_vers;
 

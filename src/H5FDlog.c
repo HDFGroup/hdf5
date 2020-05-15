@@ -403,7 +403,7 @@ H5FD_log_fapl_copy(const void *_old_fa)
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "unable to allocate log file FAPL")
 
     /* Copy the general information */
-    HDmemcpy(new_fa, old_fa, sizeof(H5FD_log_fapl_t));
+    H5MM_memcpy(new_fa, old_fa, sizeof(H5FD_log_fapl_t));
 
     /* Deep copy the log file name */
     if(old_fa->logfile != NULL)

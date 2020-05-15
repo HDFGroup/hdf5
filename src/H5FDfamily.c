@@ -414,7 +414,7 @@ H5FD_family_fapl_copy(const void *_old_fa)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy the fields of the structure */
-    HDmemcpy(new_fa, old_fa, sizeof(H5FD_family_fapl_t));
+    H5MM_memcpy(new_fa, old_fa, sizeof(H5FD_family_fapl_t));
 
     /* Deep copy the property list objects in the structure */
     if(old_fa->memb_fapl_id==H5P_FILE_ACCESS_DEFAULT) {

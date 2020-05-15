@@ -441,7 +441,7 @@ H5D__new(hid_t dcpl_id, hid_t dapl_id, hbool_t creating, hbool_t vl_type)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy the default dataset information */
-    HDmemcpy(new_dset, &H5D_def_dset, sizeof(H5D_shared_t));
+    H5MM_memcpy(new_dset, &H5D_def_dset, sizeof(H5D_shared_t));
 
     /* If we are using the default dataset creation property list, during creation
      * don't bother to copy it, just increment the reference count
@@ -760,7 +760,7 @@ H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr)
 
         /* Shallow copy the fill value property */
         /* guards against shared component modification */
-        HDmemcpy(&old_fill_prop, fill_prop, sizeof(old_fill_prop));
+        H5MM_memcpy(&old_fill_prop, fill_prop, sizeof(old_fill_prop));
 
         if (H5O_msg_reset_share(H5O_FILL_ID, &old_fill_prop) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't reset the copied fill property")
@@ -986,7 +986,7 @@ H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id)
 
         /* Shallow copy the fill value property */
         /* (we only want to make certain that the shared component isn't modified) */
-        HDmemcpy(&old_fill_prop, fill_prop, sizeof(old_fill_prop));
+        H5MM_memcpy(&old_fill_prop, fill_prop, sizeof(old_fill_prop));
 
         /* Reset shared component info */
         H5O_msg_reset_share(H5O_FILL_ID, &old_fill_prop);
@@ -1640,7 +1640,7 @@ H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id)
                 dset->shared->append_flush.ndims = info.ndims;
                 dset->shared->append_flush.func = info.func;
                 dset->shared->append_flush.udata = info.udata;
-                HDmemcpy(dset->shared->append_flush.boundary, info.boundary, sizeof(info.boundary));
+                H5MM_memcpy(dset->shared->append_flush.boundary, info.boundary, sizeof(info.boundary));
             } /* end if */
         } /* end if */
     } /* end if */
@@ -2797,7 +2797,7 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
 
     /* Keep the current dataspace dimensions for later */
     HDcompile_assert(sizeof(curr_dims) == sizeof(dset->shared->curr_dims));
-    HDmemcpy(curr_dims, dset->shared->curr_dims, H5S_MAX_RANK * sizeof(curr_dims[0]));
+    H5MM_memcpy(curr_dims, dset->shared->curr_dims, H5S_MAX_RANK * sizeof(curr_dims[0]));
 
     /* Modify the size of the dataspace */
     if((changed = H5S_set_extent(dset->shared->space, size)) < 0)
@@ -3082,7 +3082,7 @@ H5D__format_convert(H5D_t *dataset)
             idx_info.storage = &dataset->shared->layout.storage.u.chunk;
 
             /* Copy the current layout info to the new layout */
-            HDmemcpy(newlayout, &dataset->shared->layout, sizeof(H5O_layout_t));
+            H5MM_memcpy(newlayout, &dataset->shared->layout, sizeof(H5O_layout_t));
 
             /* Set up info for version 1 B-tree in the new layout */
             newlayout->version = H5O_LAYOUT_VERSION_3;
@@ -3133,7 +3133,7 @@ H5D__format_convert(H5D_t *dataset)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to release chunk index info")
 
             /* Copy the new layout to the dataset's layout */
-            HDmemcpy(&dataset->shared->layout, newlayout, sizeof(H5O_layout_t));
+            H5MM_memcpy(&dataset->shared->layout, newlayout, sizeof(H5O_layout_t));
 
             break;
 

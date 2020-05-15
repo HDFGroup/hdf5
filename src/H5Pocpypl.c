@@ -384,7 +384,7 @@ H5P__ocpy_merge_comm_dt_list_enc(const void *value, void **_pp, size_t *size)
 
         /* Encode merge committed dtype list */
         if(*pp) {
-            HDmemcpy(*(char **)pp, dt_list->path, len);
+            H5MM_memcpy(*(char **)pp, dt_list->path, len);
             *pp += len;
         } /* end if */
 

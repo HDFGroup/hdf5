@@ -3337,7 +3337,7 @@ H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt, H5T_shared_t *reopened_fo
                         if(NULL == (new_dt->shared->u.compnd.memb = H5MM_malloc(new_dt->shared->u.compnd.nalloc * sizeof(H5T_cmemb_t))))
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed")
 
-                        HDmemcpy(new_dt->shared->u.compnd.memb, old_dt->shared->u.compnd.memb,
+                        H5MM_memcpy(new_dt->shared->u.compnd.memb, old_dt->shared->u.compnd.memb,
                                 new_dt->shared->u.compnd.nmembs * sizeof(H5T_cmemb_t));
                     } /* end if */
 
@@ -3403,7 +3403,7 @@ H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt, H5T_shared_t *reopened_fo
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "enam name array memory allocation failed")
                 if(NULL == (new_dt->shared->u.enumer.value = H5MM_malloc(new_dt->shared->u.enumer.nalloc * new_dt->shared->size)))
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "enam value array memory allocation failed")
-                HDmemcpy(new_dt->shared->u.enumer.value, old_dt->shared->u.enumer.value,
+                H5MM_memcpy(new_dt->shared->u.enumer.value, old_dt->shared->u.enumer.value,
                         new_dt->shared->u.enumer.nmembs * new_dt->shared->size);
                 for(i = 0; i < new_dt->shared->u.enumer.nmembs; i++) {
                     if(NULL == (s = H5MM_xstrdup(old_dt->shared->u.enumer.name[i])))

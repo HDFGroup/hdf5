@@ -949,7 +949,7 @@ H5O__alloc_chunk(H5F_t *f, H5O_t *oh, size_t size, size_t found_null,
      *  # at the beginning of the chunk image.
      */
     if(oh->version > H5O_VERSION_1) {
-        HDmemcpy(p, H5O_CHK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+        H5MM_memcpy(p, H5O_CHK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
         p += H5_SIZEOF_MAGIC;
     } /* end if */
 
@@ -988,7 +988,7 @@ H5O__alloc_chunk(H5F_t *f, H5O_t *oh, size_t size, size_t found_null,
                         HDassert(curr_msg->type->id != H5O_CONT_ID);
 
                         /* Copy the raw data */
-                        HDmemcpy(p, curr_msg->raw - (size_t)H5O_SIZEOF_MSGHDR_OH(oh),
+                        H5MM_memcpy(p, curr_msg->raw - (size_t)H5O_SIZEOF_MSGHDR_OH(oh),
                             curr_msg->raw_size + (size_t)H5O_SIZEOF_MSGHDR_OH(oh));
 
                         /* Update the message info */
@@ -1044,7 +1044,7 @@ H5O__alloc_chunk(H5F_t *f, H5O_t *oh, size_t size, size_t found_null,
             null_msg->chunkno = oh->mesg[found_msg->msgno].chunkno;
 
             /* Copy the message to move (& its prefix) to its new location */
-            HDmemcpy(p, oh->mesg[found_msg->msgno].raw - H5O_SIZEOF_MSGHDR_OH(oh),
+            H5MM_memcpy(p, oh->mesg[found_msg->msgno].raw - H5O_SIZEOF_MSGHDR_OH(oh),
                      oh->mesg[found_msg->msgno].raw_size + (size_t)H5O_SIZEOF_MSGHDR_OH(oh));
 
             /* Switch moved message to point to new location */
@@ -1519,7 +1519,7 @@ H5O_move_cont(H5F_t *f, H5O_t *oh, unsigned cont_u)
                         move_size = curr_msg->raw_size + (size_t)H5O_SIZEOF_MSGHDR_OH(oh);
 
                         /* Move message out of deleted chunk */
-                        HDmemcpy(move_start, curr_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh), move_size);
+                        H5MM_memcpy(move_start, curr_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh), move_size);
                         curr_msg->raw = move_start + H5O_SIZEOF_MSGHDR_OH(oh);
                         curr_msg->chunkno = cont_chunkno;
                         chk_dirtied = TRUE;
@@ -1791,7 +1791,7 @@ H5O_move_msgs_forward(H5F_t *f, H5O_t *oh)
                         } /* end if */
 
                         /* Copy raw data for non-null message to new chunk */
-                        HDmemcpy(null_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh), curr_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh), curr_msg->raw_size + (size_t)H5O_SIZEOF_MSGHDR_OH(oh));
+                        H5MM_memcpy(null_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh), curr_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh), curr_msg->raw_size + (size_t)H5O_SIZEOF_MSGHDR_OH(oh));
 
                         /* Point non-null message at null message's space */
                         curr_msg->chunkno = null_msg->chunkno;

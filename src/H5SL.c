@@ -240,7 +240,7 @@
         /* Allocate space for new forward pointers */                          \
         if(NULL == (_tmp = (H5SL_node_t **)H5FL_FAC_MALLOC(H5SL_fac_g[X->log_nalloc]))) \
             HGOTO_ERROR(H5E_SLIST, H5E_CANTALLOC, ERR, "memory allocation failed") \
-        HDmemcpy((void *)_tmp, (const void *)X->forward, (LVL + 1) * sizeof(H5SL_node_t *)); \
+        H5MM_memcpy((void *)_tmp, (const void *)X->forward, (LVL + 1) * sizeof(H5SL_node_t *)); \
         X->forward = (H5SL_node_t **)H5FL_FAC_FREE(H5SL_fac_g[X->log_nalloc-1], (void *)X->forward);  \
         X->forward = _tmp;                                                     \
     } /* end if */                                                             \
@@ -262,7 +262,7 @@
         /* Allocate space for new forward pointers */                          \
         if(NULL == (_tmp = (H5SL_node_t **)H5FL_FAC_MALLOC(H5SL_fac_g[X->log_nalloc]))) \
             HGOTO_ERROR(H5E_SLIST, H5E_NOSPACE, NULL, "memory allocation failed") \
-        HDmemcpy((void *)_tmp, (const void *)X->forward, (LVL) * sizeof(H5SL_node_t *)); \
+        H5MM_memcpy((void *)_tmp, (const void *)X->forward, (LVL) * sizeof(H5SL_node_t *)); \
         X->forward = (H5SL_node_t **)H5FL_FAC_FREE(H5SL_fac_g[X->log_nalloc+1], (void *)X->forward);  \
         X->forward = _tmp;                                                     \
     } /* end if */                                                             \

@@ -241,17 +241,17 @@ H5B2__split1(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
     mid_record = (uint16_t)(old_node_nrec / 2);
 
     /* Copy "upper half" of records to new child */
-    HDmemcpy(H5B2_NAT_NREC(right_native, hdr, 0),
+    H5MM_memcpy(H5B2_NAT_NREC(right_native, hdr, 0),
             H5B2_NAT_NREC(left_native, hdr, mid_record + (unsigned)1),
             hdr->cls->nrec_size * (old_node_nrec - (mid_record + (unsigned)1)));
 
     /* Copy "upper half" of node pointers, if the node is an internal node */
     if(depth > 1)
-        HDmemcpy(&(right_node_ptrs[0]), &(left_node_ptrs[mid_record + (unsigned)1]),
+        H5MM_memcpy(&(right_node_ptrs[0]), &(left_node_ptrs[mid_record + (unsigned)1]),
                 sizeof(H5B2_node_ptr_t) * (size_t)(old_node_nrec - mid_record));
 
     /* Copy "middle" record to internal node */
-    HDmemcpy(H5B2_INT_NREC(internal, hdr, idx), H5B2_NAT_NREC(left_native, hdr, mid_record), hdr->cls->nrec_size);
+    H5MM_memcpy(H5B2_INT_NREC(internal, hdr, idx), H5B2_NAT_NREC(left_native, hdr, mid_record), hdr->cls->nrec_size);
 
     /* Mark nodes as dirty */
     left_child_flags |= H5AC__DIRTIED_FLAG;
@@ -510,14 +510,14 @@ H5B2__redistribute2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal,
         uint16_t move_nrec = (uint16_t)(*right_nrec - new_right_nrec);           /* Number of records to move from right node to left */
 
         /* Copy record from parent node down into left child */
-        HDmemcpy(H5B2_NAT_NREC(left_native, hdr, *left_nrec), H5B2_INT_NREC(internal, hdr, idx), hdr->cls->nrec_size);
+        H5MM_memcpy(H5B2_NAT_NREC(left_native, hdr, *left_nrec), H5B2_INT_NREC(internal, hdr, idx), hdr->cls->nrec_size);
 
         /* See if we need to move records from right node */
         if(move_nrec > 1)
-            HDmemcpy(H5B2_NAT_NREC(left_native, hdr, (*left_nrec + 1)), H5B2_NAT_NREC(right_native, hdr, 0), hdr->cls->nrec_size * (size_t)(move_nrec - 1));
+            H5MM_memcpy(H5B2_NAT_NREC(left_native, hdr, (*left_nrec + 1)), H5B2_NAT_NREC(right_native, hdr, 0), hdr->cls->nrec_size * (size_t)(move_nrec - 1));
 
         /* Move record from right node into parent node */
-        HDmemcpy(H5B2_INT_NREC(internal, hdr, idx), H5B2_NAT_NREC(right_native, hdr, (move_nrec - 1)), hdr->cls->nrec_size);
+        H5MM_memcpy(H5B2_INT_NREC(internal, hdr, idx), H5B2_NAT_NREC(right_native, hdr, (move_nrec - 1)), hdr->cls->nrec_size);
 
         /* Slide records in right node down */
         HDmemmove(H5B2_NAT_NREC(right_native, hdr, 0), H5B2_NAT_NREC(right_native, hdr, move_nrec), hdr->cls->nrec_size * new_right_nrec);
@@ -534,7 +534,7 @@ H5B2__redistribute2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal,
             right_moved_nrec -= (hssize_t)moved_nrec;
 
             /* Copy node pointers from right node to left */
-            HDmemcpy(&(left_node_ptrs[*left_nrec + 1]), &(right_node_ptrs[0]), sizeof(H5B2_node_ptr_t) * move_nrec);
+            H5MM_memcpy(&(left_node_ptrs[*left_nrec + 1]), &(right_node_ptrs[0]), sizeof(H5B2_node_ptr_t) * move_nrec);
 
             /* Slide node pointers in right node down */
             HDmemmove(&(right_node_ptrs[0]), &(right_node_ptrs[move_nrec]), sizeof(H5B2_node_ptr_t) * (new_right_nrec + (unsigned)1));
@@ -569,14 +569,14 @@ H5B2__redistribute2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal,
                 hdr->cls->nrec_size * (*right_nrec));
 
         /* Copy record from parent node down into right child */
-        HDmemcpy(H5B2_NAT_NREC(right_native, hdr, (move_nrec - 1)), H5B2_INT_NREC(internal, hdr, idx), hdr->cls->nrec_size);
+        H5MM_memcpy(H5B2_NAT_NREC(right_native, hdr, (move_nrec - 1)), H5B2_INT_NREC(internal, hdr, idx), hdr->cls->nrec_size);
 
         /* See if we need to move records from left node */
         if(move_nrec > 1)
-            HDmemcpy(H5B2_NAT_NREC(right_native, hdr, 0), H5B2_NAT_NREC(left_native, hdr, ((*left_nrec - move_nrec) + 1)), hdr->cls->nrec_size * (size_t)(move_nrec - 1));
+            H5MM_memcpy(H5B2_NAT_NREC(right_native, hdr, 0), H5B2_NAT_NREC(left_native, hdr, ((*left_nrec - move_nrec) + 1)), hdr->cls->nrec_size * (size_t)(move_nrec - 1));
 
         /* Move record from left node into parent node */
-        HDmemcpy(H5B2_INT_NREC(internal, hdr, idx), H5B2_NAT_NREC(left_native, hdr, (*left_nrec - move_nrec)), hdr->cls->nrec_size);
+        H5MM_memcpy(H5B2_INT_NREC(internal, hdr, idx), H5B2_NAT_NREC(left_native, hdr, (*left_nrec - move_nrec)), hdr->cls->nrec_size);
 
         /* Handle node pointers, if we have an internal node */
         if(depth > 1) {
@@ -587,7 +587,7 @@ H5B2__redistribute2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal,
             HDmemmove(&(right_node_ptrs[move_nrec]), &(right_node_ptrs[0]), sizeof(H5B2_node_ptr_t) * (size_t)(*right_nrec + 1));
 
             /* Copy node pointers from left node to right */
-            HDmemcpy(&(right_node_ptrs[0]), &(left_node_ptrs[new_left_nrec + 1]), sizeof(H5B2_node_ptr_t) * move_nrec);
+            H5MM_memcpy(&(right_node_ptrs[0]), &(left_node_ptrs[new_left_nrec + 1]), sizeof(H5B2_node_ptr_t) * move_nrec);
 
             /* Count the number of records being moved */
             for(u = 0; u < move_nrec; u++)
@@ -775,16 +775,16 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal,
             uint16_t moved_middle_nrec = 0;      /* Number of records moved into left node */
 
             /* Move left parent record down to left node */
-            HDmemcpy(H5B2_NAT_NREC(left_native, hdr, *left_nrec), H5B2_INT_NREC(internal, hdr, idx - 1), hdr->cls->nrec_size);
+            H5MM_memcpy(H5B2_NAT_NREC(left_native, hdr, *left_nrec), H5B2_INT_NREC(internal, hdr, idx - 1), hdr->cls->nrec_size);
 
             /* Move records from middle node into left node */
             if((new_left_nrec - 1) > *left_nrec) {
                 moved_middle_nrec = (uint16_t)(new_left_nrec - (*left_nrec + 1));
-                HDmemcpy(H5B2_NAT_NREC(left_native, hdr, *left_nrec + 1), H5B2_NAT_NREC(middle_native, hdr, 0), hdr->cls->nrec_size * moved_middle_nrec);
+                H5MM_memcpy(H5B2_NAT_NREC(left_native, hdr, *left_nrec + 1), H5B2_NAT_NREC(middle_native, hdr, 0), hdr->cls->nrec_size * moved_middle_nrec);
             } /* end if */
 
             /* Move record from middle node up to parent node */
-            HDmemcpy(H5B2_INT_NREC(internal, hdr, idx - 1), H5B2_NAT_NREC(middle_native, hdr, moved_middle_nrec), hdr->cls->nrec_size);
+            H5MM_memcpy(H5B2_INT_NREC(internal, hdr, idx - 1), H5B2_NAT_NREC(middle_native, hdr, moved_middle_nrec), hdr->cls->nrec_size);
             moved_middle_nrec++;
 
             /* Slide records in middle node down */
@@ -798,7 +798,7 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal,
 
                 /* Move middle node pointers into left node */
                 move_nptrs = (unsigned)(new_left_nrec - *left_nrec);
-                HDmemcpy(&(left_node_ptrs[*left_nrec + 1]), &(middle_node_ptrs[0]), sizeof(H5B2_node_ptr_t)*move_nptrs);
+                H5MM_memcpy(&(left_node_ptrs[*left_nrec + 1]), &(middle_node_ptrs[0]), sizeof(H5B2_node_ptr_t)*move_nptrs);
 
                 /* Count the number of records being moved into the left node */
                 for(u = 0, moved_nrec = 0; u < move_nptrs; u++)
@@ -832,14 +832,14 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal,
             HDmemmove(H5B2_NAT_NREC(right_native, hdr, right_nrec_move), H5B2_NAT_NREC(right_native, hdr, 0), hdr->cls->nrec_size * (*right_nrec));
 
             /* Move right parent record down to right node */
-            HDmemcpy(H5B2_NAT_NREC(right_native, hdr, right_nrec_move - 1), H5B2_INT_NREC(internal, hdr, idx), hdr->cls->nrec_size);
+            H5MM_memcpy(H5B2_NAT_NREC(right_native, hdr, right_nrec_move - 1), H5B2_INT_NREC(internal, hdr, idx), hdr->cls->nrec_size);
 
             /* Move records from middle node into right node */
             if(right_nrec_move > 1)
-                HDmemcpy(H5B2_NAT_NREC(right_native, hdr, 0), H5B2_NAT_NREC(middle_native, hdr, ((curr_middle_nrec - right_nrec_move) + 1)), hdr->cls->nrec_size * (right_nrec_move - 1));
+                H5MM_memcpy(H5B2_NAT_NREC(right_native, hdr, 0), H5B2_NAT_NREC(middle_native, hdr, ((curr_middle_nrec - right_nrec_move) + 1)), hdr->cls->nrec_size * (right_nrec_move - 1));
 
             /* Move record from middle node up to parent node */
-            HDmemcpy(H5B2_INT_NREC(internal, hdr, idx), H5B2_NAT_NREC(middle_native, hdr, (curr_middle_nrec - right_nrec_move)), hdr->cls->nrec_size);
+            H5MM_memcpy(H5B2_INT_NREC(internal, hdr, idx), H5B2_NAT_NREC(middle_native, hdr, (curr_middle_nrec - right_nrec_move)), hdr->cls->nrec_size);
 
             /* Move node pointers also if this is an internal node */
             if(depth > 1) {
@@ -850,7 +850,7 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal,
                 HDmemmove(&(right_node_ptrs[right_nrec_move]), &(right_node_ptrs[0]), sizeof(H5B2_node_ptr_t) * (size_t)(*right_nrec + 1));
 
                 /* Move middle node pointers into right node */
-                HDmemcpy(&(right_node_ptrs[0]), &(middle_node_ptrs[(curr_middle_nrec - right_nrec_move) + 1]), sizeof(H5B2_node_ptr_t) * right_nrec_move);
+                H5MM_memcpy(&(right_node_ptrs[0]), &(middle_node_ptrs[(curr_middle_nrec - right_nrec_move) + 1]), sizeof(H5B2_node_ptr_t) * right_nrec_move);
 
                 /* Count the number of records being moved into the right node */
                 for(u = 0, moved_nrec = 0; u < right_nrec_move; u++)
@@ -881,14 +881,14 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal,
             HDmemmove(H5B2_NAT_NREC(middle_native, hdr, left_nrec_move), H5B2_NAT_NREC(middle_native, hdr, 0), hdr->cls->nrec_size * curr_middle_nrec);
 
             /* Move left parent record down to middle node */
-            HDmemcpy(H5B2_NAT_NREC(middle_native, hdr, left_nrec_move - 1), H5B2_INT_NREC(internal, hdr, idx - 1), hdr->cls->nrec_size);
+            H5MM_memcpy(H5B2_NAT_NREC(middle_native, hdr, left_nrec_move - 1), H5B2_INT_NREC(internal, hdr, idx - 1), hdr->cls->nrec_size);
 
             /* Move left records to middle node */
             if(left_nrec_move > 1)
                 HDmemmove(H5B2_NAT_NREC(middle_native, hdr, 0), H5B2_NAT_NREC(left_native, hdr, new_left_nrec + 1), hdr->cls->nrec_size * (left_nrec_move - 1));
 
             /* Move left parent record up from left node */
-            HDmemcpy(H5B2_INT_NREC(internal, hdr, idx - 1), H5B2_NAT_NREC(left_native, hdr, new_left_nrec), hdr->cls->nrec_size);
+            H5MM_memcpy(H5B2_INT_NREC(internal, hdr, idx - 1), H5B2_NAT_NREC(left_native, hdr, new_left_nrec), hdr->cls->nrec_size);
 
             /* Move node pointers also if this is an internal node */
             if(depth > 1) {
@@ -899,7 +899,7 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal,
                 HDmemmove(&(middle_node_ptrs[left_nrec_move]), &(middle_node_ptrs[0]), sizeof(H5B2_node_ptr_t) * (size_t)(curr_middle_nrec + 1));
 
                 /* Move left node pointers into middle node */
-                HDmemcpy(&(middle_node_ptrs[0]), &(left_node_ptrs[new_left_nrec + 1]), sizeof(H5B2_node_ptr_t) * left_nrec_move);
+                H5MM_memcpy(&(middle_node_ptrs[0]), &(left_node_ptrs[new_left_nrec + 1]), sizeof(H5B2_node_ptr_t) * left_nrec_move);
 
                 /* Count the number of records being moved into the left node */
                 for(u = 0, moved_nrec = 0; u < left_nrec_move; u++)
@@ -927,13 +927,13 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal,
             unsigned right_nrec_move = (unsigned)(*right_nrec - new_right_nrec); /* Number of records to move out of right node */
 
             /* Move right parent record down to middle node */
-            HDmemcpy(H5B2_NAT_NREC(middle_native, hdr, curr_middle_nrec), H5B2_INT_NREC(internal, hdr, idx), hdr->cls->nrec_size);
+            H5MM_memcpy(H5B2_NAT_NREC(middle_native, hdr, curr_middle_nrec), H5B2_INT_NREC(internal, hdr, idx), hdr->cls->nrec_size);
 
             /* Move right records to middle node */
             HDmemmove(H5B2_NAT_NREC(middle_native, hdr, (curr_middle_nrec + 1)), H5B2_NAT_NREC(right_native, hdr, 0), hdr->cls->nrec_size * (right_nrec_move - 1));
 
             /* Move right parent record up from right node */
-            HDmemcpy(H5B2_INT_NREC(internal, hdr, idx), H5B2_NAT_NREC(right_native, hdr, right_nrec_move - 1), hdr->cls->nrec_size);
+            H5MM_memcpy(H5B2_INT_NREC(internal, hdr, idx), H5B2_NAT_NREC(right_native, hdr, right_nrec_move - 1), hdr->cls->nrec_size);
 
             /* Slide right records down */
             HDmemmove(H5B2_NAT_NREC(right_native, hdr, 0), H5B2_NAT_NREC(right_native, hdr, right_nrec_move), hdr->cls->nrec_size * new_right_nrec);
@@ -944,7 +944,7 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal,
                 unsigned u;             /* Local index variable */
 
                 /* Move right node pointers into middle node */
-                HDmemcpy(&(middle_node_ptrs[curr_middle_nrec + 1]), &(right_node_ptrs[0]), sizeof(H5B2_node_ptr_t) * right_nrec_move);
+                H5MM_memcpy(&(middle_node_ptrs[curr_middle_nrec + 1]), &(right_node_ptrs[0]), sizeof(H5B2_node_ptr_t) * right_nrec_move);
 
                 /* Count the number of records being moved into the right node */
                 for(u = 0, moved_nrec = 0; u < right_nrec_move; u++)
@@ -1113,14 +1113,14 @@ H5B2__merge2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
     /* Redistribute records into left node */
     {
         /* Copy record from parent node to proper location */
-        HDmemcpy(H5B2_NAT_NREC(left_native, hdr, *left_nrec), H5B2_INT_NREC(internal, hdr, idx), hdr->cls->nrec_size);
+        H5MM_memcpy(H5B2_NAT_NREC(left_native, hdr, *left_nrec), H5B2_INT_NREC(internal, hdr, idx), hdr->cls->nrec_size);
 
         /* Copy records from right node to left node */
-        HDmemcpy(H5B2_NAT_NREC(left_native, hdr, *left_nrec + 1), H5B2_NAT_NREC(right_native, hdr, 0), hdr->cls->nrec_size * (*right_nrec));
+        H5MM_memcpy(H5B2_NAT_NREC(left_native, hdr, *left_nrec + 1), H5B2_NAT_NREC(right_native, hdr, 0), hdr->cls->nrec_size * (*right_nrec));
 
         /* Copy node pointers from right node into left node */
         if(depth > 1)
-            HDmemcpy(&(left_node_ptrs[*left_nrec + 1]), &(right_node_ptrs[0]), sizeof(H5B2_node_ptr_t) * (size_t)(*right_nrec + 1));
+            H5MM_memcpy(&(left_node_ptrs[*left_nrec + 1]), &(right_node_ptrs[0]), sizeof(H5B2_node_ptr_t) * (size_t)(*right_nrec + 1));
 
         /* Update flush dependencies for grandchildren, if using SWMR */
         if(hdr->swmr_write && depth > 1)
@@ -1304,13 +1304,13 @@ H5B2__merge3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
         middle_moved_nrec = middle_nrec_move;
 
         /* Copy record from parent node to proper location in left node */
-        HDmemcpy(H5B2_NAT_NREC(left_native, hdr, *left_nrec), H5B2_INT_NREC(internal, hdr, idx - 1), hdr->cls->nrec_size);
+        H5MM_memcpy(H5B2_NAT_NREC(left_native, hdr, *left_nrec), H5B2_INT_NREC(internal, hdr, idx - 1), hdr->cls->nrec_size);
 
         /* Copy records from middle node to left node */
-        HDmemcpy(H5B2_NAT_NREC(left_native, hdr, *left_nrec + 1), H5B2_NAT_NREC(middle_native, hdr, 0), hdr->cls->nrec_size * (middle_nrec_move - 1));
+        H5MM_memcpy(H5B2_NAT_NREC(left_native, hdr, *left_nrec + 1), H5B2_NAT_NREC(middle_native, hdr, 0), hdr->cls->nrec_size * (middle_nrec_move - 1));
 
         /* Copy record from middle node to proper location in parent node */
-        HDmemcpy(H5B2_INT_NREC(internal, hdr, idx - 1), H5B2_NAT_NREC(middle_native, hdr, (middle_nrec_move - 1)), hdr->cls->nrec_size);
+        H5MM_memcpy(H5B2_INT_NREC(internal, hdr, idx - 1), H5B2_NAT_NREC(middle_native, hdr, (middle_nrec_move - 1)), hdr->cls->nrec_size);
 
         /* Slide records in middle node down */
         HDmemmove(H5B2_NAT_NREC(middle_native, hdr, 0), H5B2_NAT_NREC(middle_native, hdr, middle_nrec_move), hdr->cls->nrec_size * (*middle_nrec - middle_nrec_move));
@@ -1320,7 +1320,7 @@ H5B2__merge3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
             unsigned u;         /* Local index variable */
 
             /* Copy node pointers from middle node into left node */
-            HDmemcpy(&(left_node_ptrs[*left_nrec + 1]), &(middle_node_ptrs[0]), sizeof(H5B2_node_ptr_t) * middle_nrec_move);
+            H5MM_memcpy(&(left_node_ptrs[*left_nrec + 1]), &(middle_node_ptrs[0]), sizeof(H5B2_node_ptr_t) * middle_nrec_move);
 
             /* Count the number of records being moved into the left node */
             for(u = 0; u < middle_nrec_move; u++)
@@ -1348,15 +1348,15 @@ H5B2__merge3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
     /* Redistribute records into middle node */
     {
         /* Copy record from parent node to proper location in middle node */
-        HDmemcpy(H5B2_NAT_NREC(middle_native, hdr, *middle_nrec), H5B2_INT_NREC(internal, hdr, idx), hdr->cls->nrec_size);
+        H5MM_memcpy(H5B2_NAT_NREC(middle_native, hdr, *middle_nrec), H5B2_INT_NREC(internal, hdr, idx), hdr->cls->nrec_size);
 
         /* Copy records from right node to middle node */
-        HDmemcpy(H5B2_NAT_NREC(middle_native, hdr, *middle_nrec + 1), H5B2_NAT_NREC(right_native, hdr, 0), hdr->cls->nrec_size * (*right_nrec));
+        H5MM_memcpy(H5B2_NAT_NREC(middle_native, hdr, *middle_nrec + 1), H5B2_NAT_NREC(right_native, hdr, 0), hdr->cls->nrec_size * (*right_nrec));
 
         /* Move node pointers also if this is an internal node */
         if(depth > 1)
             /* Copy node pointers from right node into middle node */
-            HDmemcpy(&(middle_node_ptrs[*middle_nrec + 1]), &(right_node_ptrs[0]), sizeof(H5B2_node_ptr_t) * (size_t)(*right_nrec + 1));
+            H5MM_memcpy(&(middle_node_ptrs[*middle_nrec + 1]), &(right_node_ptrs[0]), sizeof(H5B2_node_ptr_t) * (size_t)(*right_nrec + 1));
 
         /* Update flush dependencies for grandchildren, if using SWMR */
         if(hdr->swmr_write && depth > 1)
@@ -1539,7 +1539,7 @@ H5B2__iterate_node(H5B2_hdr_t *hdr, uint16_t depth, const H5B2_node_ptr_t *curr_
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree internal node pointers")
 
         /* Copy the node pointers */
-        HDmemcpy(node_ptrs, internal->node_ptrs, (sizeof(H5B2_node_ptr_t) * (size_t)(curr_node->node_nrec + 1)));
+        H5MM_memcpy(node_ptrs, internal->node_ptrs, (sizeof(H5B2_node_ptr_t) * (size_t)(curr_node->node_nrec + 1)));
     } /* end if */
     else {
         H5B2_leaf_t *leaf;             /* Pointer to leaf node */
@@ -1559,7 +1559,7 @@ H5B2__iterate_node(H5B2_hdr_t *hdr, uint16_t depth, const H5B2_node_ptr_t *curr_
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree internal native keys")
 
     /* Copy the native keys */
-    HDmemcpy(native, node_native, (hdr->cls->nrec_size * curr_node->node_nrec));
+    H5MM_memcpy(native, node_native, (hdr->cls->nrec_size * curr_node->node_nrec));
 
     /* Unlock the node */
     if(H5AC_unprotect(hdr->f, curr_node_class, curr_node->addr, node, (unsigned)(hdr->swmr_write ? H5AC__PIN_ENTRY_FLAG : H5AC__NO_FLAGS_SET)) < 0)

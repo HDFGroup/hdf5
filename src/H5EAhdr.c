@@ -407,7 +407,7 @@ H5EA__hdr_create(H5F_t *f, const H5EA_create_t *cparam, void *ctx_udata))
     hdr->idx_blk_addr = HADDR_UNDEF;
 
     /* Set the creation parameters for the array */
-    HDmemcpy(&hdr->cparam, cparam, sizeof(hdr->cparam));
+    H5MM_memcpy(&hdr->cparam, cparam, sizeof(hdr->cparam));
 
     /* Finish initializing extensible array header */
     if(H5EA__hdr_init(hdr, ctx_udata) < 0)

@@ -341,7 +341,7 @@ H5P__dapl_vds_file_pref_enc(const void *value, void **_pp, size_t *size)
 
         /* encode the prefix */
         if(NULL != vds_file_pref) {
-            HDmemcpy(*(char **)pp, vds_file_pref, len);
+            H5MM_memcpy(*(char **)pp, vds_file_pref, len);
             *pp += len;
         } /* end if */
     } /* end if */
@@ -589,7 +589,7 @@ H5P__dapl_efile_pref_enc(const void *value, void **_pp, size_t *size)
 
         /* encode the prefix */
         if(NULL != efile_pref) {
-            HDmemcpy(*(char **)pp, efile_pref, len);
+            H5MM_memcpy(*(char **)pp, efile_pref, len);
             *pp += len;
         } /* end if */
     } /* end if */

@@ -78,7 +78,7 @@ H5S_select_offset(H5S_t *space, const hssize_t *offset)
     HDassert(offset);
 
     /* Copy the offset over */
-    HDmemcpy(space->select.offset, offset, sizeof(hssize_t)*space->extent.rank);
+    H5MM_memcpy(space->select.offset, offset, sizeof(hssize_t)*space->extent.rank);
 
     /* Indicate that the offset was changed */
     space->select.offset_changed = TRUE;
@@ -1354,7 +1354,7 @@ H5S_select_iterate(void *buf, const H5T_t *type, const H5S_t *space,
     if(ndims > 0) {
 	/* Copy the size of the space */
 	HDassert(space->extent.size);
-	HDmemcpy(space_size, space->extent.size, ndims * sizeof(hsize_t));
+	H5MM_memcpy(space_size, space->extent.size, ndims * sizeof(hsize_t));
     } /* end if */
     space_size[ndims] = elmt_size;
 
@@ -2009,16 +2009,16 @@ H5S_select_construct_projection(const H5S_t *base_space, H5S_t **new_space_ptr,
             rank_diff = new_space_rank - base_space_rank;
             H5VM_array_fill(new_space_dims, &tmp_dim_size, sizeof(tmp_dim_size), rank_diff);
             H5VM_array_fill(new_space_maxdims, &tmp_dim_size, sizeof(tmp_dim_size), rank_diff);
-            HDmemcpy(&new_space_dims[rank_diff], base_space_dims, sizeof(new_space_dims[0]) * base_space_rank);
-            HDmemcpy(&new_space_maxdims[rank_diff], base_space_maxdims, sizeof(new_space_maxdims[0]) * base_space_rank);
+            H5MM_memcpy(&new_space_dims[rank_diff], base_space_dims, sizeof(new_space_dims[0]) * base_space_rank);
+            H5MM_memcpy(&new_space_maxdims[rank_diff], base_space_maxdims, sizeof(new_space_maxdims[0]) * base_space_rank);
         } /* end if */
         else { /* new_space_rank < base_space_rank */
             /* we must copy the fastest changing dimension of the 
              * base space into the dimensions of the new space.
              */
             rank_diff = base_space_rank - new_space_rank;
-            HDmemcpy(new_space_dims, &base_space_dims[rank_diff], sizeof(new_space_dims[0]) * new_space_rank);
-            HDmemcpy(new_space_maxdims, &base_space_maxdims[rank_diff], sizeof(new_space_maxdims[0]) * new_space_rank);
+            H5MM_memcpy(new_space_dims, &base_space_dims[rank_diff], sizeof(new_space_dims[0]) * new_space_rank);
+            H5MM_memcpy(new_space_maxdims, &base_space_maxdims[rank_diff], sizeof(new_space_maxdims[0]) * new_space_rank);
         } /* end else */
 
         /* now have the new space rank and dimensions set up -- 
@@ -2049,10 +2049,10 @@ H5S_select_construct_projection(const H5S_t *base_space, H5S_t **new_space_ptr,
         if(H5S_GET_EXTENT_TYPE(base_space) == H5S_SIMPLE && base_space->select.offset_changed) {
             if(new_space_rank > base_space_rank) {
                 HDmemset(new_space->select.offset, 0, sizeof(new_space->select.offset[0]) * rank_diff);
-                HDmemcpy(&new_space->select.offset[rank_diff], base_space->select.offset, sizeof(new_space->select.offset[0]) * base_space_rank);
+                H5MM_memcpy(&new_space->select.offset[rank_diff], base_space->select.offset, sizeof(new_space->select.offset[0]) * base_space_rank);
             } /* end if */
             else
-                HDmemcpy(new_space->select.offset, &base_space->select.offset[rank_diff], sizeof(new_space->select.offset[0]) * new_space_rank);
+                H5MM_memcpy(new_space->select.offset, &base_space->select.offset[rank_diff], sizeof(new_space->select.offset[0]) * new_space_rank);
 
             /* Propagate the offset changed flag into the new dataspace. */
             new_space->select.offset_changed = TRUE;

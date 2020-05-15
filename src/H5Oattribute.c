@@ -852,7 +852,7 @@ H5O_attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
 
             /* (Needs to occur before updating the shared message, or the hash
              *      value on the old & new messages will be the same) */
-            HDmemcpy(((H5A_t *)mesg->native)->shared->data, udata->attr->shared->data, udata->attr->shared->data_size);
+            H5MM_memcpy(((H5A_t *)mesg->native)->shared->data, udata->attr->shared->data, udata->attr->shared->data_size);
         } /* end if */
 
         /* Mark the message as modified */

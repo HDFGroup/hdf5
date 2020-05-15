@@ -351,10 +351,10 @@ H5T__sort_value(const H5T_t *dt, int *map)
 			dt->shared->u.enumer.name[j + 1] = tmp;
 
 			/* Swap values */
-			HDmemcpy(tbuf, dt->shared->u.enumer.value + (j * size), size);
-			HDmemcpy(dt->shared->u.enumer.value + (j * size),
+			H5MM_memcpy(tbuf, dt->shared->u.enumer.value + (j * size), size);
+			H5MM_memcpy(dt->shared->u.enumer.value + (j * size),
 				 dt->shared->u.enumer.value + ((j + 1) * size), size);
-			HDmemcpy(dt->shared->u.enumer.value + ((j + 1) * size), tbuf, size);
+			H5MM_memcpy(dt->shared->u.enumer.value + ((j + 1) * size), tbuf, size);
 
 			/* Swap map */
 			if(map) {
@@ -457,10 +457,10 @@ H5T__sort_name(const H5T_t *dt, int *map)
 			dt->shared->u.enumer.name[j+1] = tmp;
 
 			/* Swap values */
-			HDmemcpy(tbuf, dt->shared->u.enumer.value+j*size, size);
-			HDmemcpy(dt->shared->u.enumer.value+j*size,
+			H5MM_memcpy(tbuf, dt->shared->u.enumer.value+j*size, size);
+			H5MM_memcpy(dt->shared->u.enumer.value+j*size,
 				 dt->shared->u.enumer.value+(j+1)*size, size);
-			HDmemcpy(dt->shared->u.enumer.value+(j+1)*size, tbuf, size);
+			H5MM_memcpy(dt->shared->u.enumer.value+(j+1)*size, tbuf, size);
 
 			/* Swap map */
 			if (map) {

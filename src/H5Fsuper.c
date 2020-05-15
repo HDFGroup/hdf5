@@ -565,7 +565,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
         /* Set the B-tree internal node values, etc */
         if(H5P_set(c_plist, H5F_CRT_BTREE_RANK_NAME, udata.btree_k) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to set rank for btree internal nodes")
-        HDmemcpy(sblock->btree_k, udata.btree_k, sizeof(unsigned) * (size_t)H5B_NUM_BTREE_ID);
+        H5MM_memcpy(sblock->btree_k, udata.btree_k, sizeof(unsigned) * (size_t)H5B_NUM_BTREE_ID);
     } /* end if */
     else {
         /* Get the (default) B-tree internal node values, etc */

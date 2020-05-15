@@ -848,7 +848,7 @@ H5D__btree_shared_create(const H5F_t *f, H5O_storage_chunk_t *store,
     /* Set up the "local" information for this dataset's chunks */
     if(NULL == (my_layout = H5FL_MALLOC(H5O_layout_chunk_t)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate chunk layout")
-    HDmemcpy(my_layout, layout, sizeof(H5O_layout_chunk_t));
+    H5MM_memcpy(my_layout, layout, sizeof(H5O_layout_chunk_t));
     shared->udata = my_layout;
 
     /* Make shared B-tree info reference counted */
@@ -1088,7 +1088,7 @@ H5D__btree_idx_iterate_cb(H5F_t H5_ATTR_UNUSED *f, const void *_lt_key,
     HDcompile_assert(sizeof(chunk_rec.filter_mask) == sizeof(lt_key->filter_mask));
 
     /* Compose generic chunk record for callback */
-    HDmemcpy(&chunk_rec, lt_key, sizeof(*lt_key));
+    H5MM_memcpy(&chunk_rec, lt_key, sizeof(*lt_key));
     chunk_rec.chunk_addr = addr;
 
     /* Make "generic chunk" callback */

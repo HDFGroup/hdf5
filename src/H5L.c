@@ -1458,7 +1458,7 @@ H5L_register(const H5L_class_t *cls)
     } /* end if */
 
     /* Copy link class info into table */
-    HDmemcpy(H5L_table_g + i, cls, sizeof(H5L_class_t));
+    H5MM_memcpy(H5L_table_g + i, cls, sizeof(H5L_class_t));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2000,7 +2000,7 @@ H5L__create_ud(const H5G_loc_t *link_loc, const char *link_name,
     /* Fill in UD link-specific information in the link struct*/
     if(ud_data_size > 0) {
         lnk.u.ud.udata = H5MM_malloc((size_t)ud_data_size);
-        HDmemcpy(lnk.u.ud.udata, ud_data, (size_t) ud_data_size);
+        H5MM_memcpy(lnk.u.ud.udata, ud_data, (size_t) ud_data_size);
     } /* end if */
     else
         lnk.u.ud.udata = NULL;

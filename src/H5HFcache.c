@@ -772,7 +772,7 @@ H5HF__cache_hdr_serialize(const H5F_t *f, void *_image, size_t len,
     hdr->f = f;
 
     /* Magic number */
-    HDmemcpy(image, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    H5MM_memcpy(image, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC);
     image += H5_SIZEOF_MAGIC;
 
     /* Version # */
@@ -1362,7 +1362,7 @@ H5HF__cache_iblock_serialize(const H5F_t *f, void *_image, size_t len,
     hdr->f = f;
 
     /* Magic number */
-    HDmemcpy(image, H5HF_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    H5MM_memcpy(image, H5HF_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
     image += H5_SIZEOF_MAGIC;
 
     /* Version # */
@@ -1677,7 +1677,7 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
         /* Set up parameters for filter pipeline */
         nbytes = len;
         filter_mask = udata->filter_mask;
-        HDmemcpy(read_buf, image, len);
+        H5MM_memcpy(read_buf, image, len);
 
         /* Push direct block data through I/O filter pipeline */
         if(H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC, filter_cb, &nbytes, &len, &read_buf) < 0)
@@ -1724,7 +1724,7 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
 	/* Copy un-filtered data into block's buffer */
-	HDmemcpy(udata->dblk, read_buf, len);
+	H5MM_memcpy(udata->dblk, read_buf, len);
     } /* end if */
 
 done:
@@ -1829,7 +1829,7 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata,
                 HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, NULL, "memory allocation failed for pipeline buffer")
 
             /* Copy compressed image into buffer */
-            HDmemcpy(read_buf, image, len);
+            H5MM_memcpy(read_buf, image, len);
 
             /* Push direct block data through I/O filter pipeline */
             nbytes = len;
@@ -1841,7 +1841,7 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata,
             HDassert(nbytes == dblock->size);
 
             /* Copy un-filtered data into block's buffer */
-            HDmemcpy(dblock->blk, read_buf, dblock->size);
+            H5MM_memcpy(dblock->blk, read_buf, dblock->size);
         } /* end if */
     } /* end if */
     else {
@@ -1856,7 +1856,7 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata,
 
         /* Copy image to dblock->blk */
         HDassert(dblock->size == len);
-        HDmemcpy(dblock->blk, image, dblock->size);
+        H5MM_memcpy(dblock->blk, image, dblock->size);
     } /* end else */
 
     /* Start decoding direct block */
@@ -2146,7 +2146,7 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing,
     image = dblock->blk;
 
     /* Magic number */
-    HDmemcpy(image, H5HF_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    H5MM_memcpy(image, H5HF_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
     image += H5_SIZEOF_MAGIC;
 
     /* Version # */
@@ -2201,7 +2201,7 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing,
             HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "memory allocation failed for pipeline buffer")
 
         /* Copy the direct block's image into the buffer to compress */
-        HDmemcpy(write_buf, dblock->blk, write_size);
+        H5MM_memcpy(write_buf, dblock->blk, write_size);
 
         /* Push direct block data through I/O filter pipeline */
         nbytes = write_size;
@@ -2460,7 +2460,7 @@ H5HF__cache_dblock_serialize(const H5F_t *f, void *image, size_t len,
     HDassert(dblock->write_size == len);
 
     /* Copy the image from *(dblock->write_buf) to *image */
-    HDmemcpy(image, dblock->write_buf, dblock->write_size);
+    H5MM_memcpy(image, dblock->write_buf, dblock->write_size);
 
     /* Free *(dblock->write_buf) if it was allocated by the 
      * pre-serialize function 

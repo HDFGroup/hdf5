@@ -1710,11 +1710,11 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
             new_chunk_info->mspace_shared = FALSE;
 
             /* Copy the chunk's scaled coordinates */
-        HDmemcpy(new_chunk_info->scaled, scaled, sizeof(hsize_t) * fm->f_ndims);
+        H5MM_memcpy(new_chunk_info->scaled, scaled, sizeof(hsize_t) * fm->f_ndims);
             new_chunk_info->scaled[fm->f_ndims] = 0;
 
             /* Copy the chunk's scaled coordinates */
-        HDmemcpy(new_chunk_info->scaled, scaled, sizeof(hsize_t) * fm->f_ndims);
+        H5MM_memcpy(new_chunk_info->scaled, scaled, sizeof(hsize_t) * fm->f_ndims);
 
             /* Insert the new chunk into the skip list */
             if(H5SL_insert(fm->sel_chunks, new_chunk_info, &new_chunk_info->index) < 0) {
@@ -1971,9 +1971,9 @@ H5D__chunk_file_cb(void H5_ATTR_UNUSED *elem, const H5T_t H5_ATTR_UNUSED *type, 
             chunk_info->chunk_points = 0;
 
             /* Set the chunk's scaled coordinates */
-            HDmemcpy(chunk_info->scaled, scaled, sizeof(hsize_t) * fm->f_ndims);
+            H5MM_memcpy(chunk_info->scaled, scaled, sizeof(hsize_t) * fm->f_ndims);
             chunk_info->scaled[fm->f_ndims] = 0;
-            HDmemcpy(chunk_info->scaled, scaled, sizeof(hsize_t) * fm->f_ndims);
+            H5MM_memcpy(chunk_info->scaled, scaled, sizeof(hsize_t) * fm->f_ndims);
 
             /* Insert the new chunk into the skip list */
             if(H5SL_insert(fm->sel_chunks,chunk_info,&chunk_info->index) < 0) {
@@ -2215,11 +2215,11 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     HDassert(fm);
 
     /* Set up "nonexistent" I/O info object */
-    HDmemcpy(&nonexistent_io_info, io_info, sizeof(nonexistent_io_info));
+    H5MM_memcpy(&nonexistent_io_info, io_info, sizeof(nonexistent_io_info));
     nonexistent_io_info.layout_ops = *H5D_LOPS_NONEXISTENT;
 
     /* Set up contiguous I/O info object */
-    HDmemcpy(&ctg_io_info, io_info, sizeof(ctg_io_info));
+    H5MM_memcpy(&ctg_io_info, io_info, sizeof(ctg_io_info));
     ctg_io_info.store = &ctg_store;
     ctg_io_info.layout_ops = *H5D_LOPS_CONTIG;
 
@@ -2227,7 +2227,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     H5_CHECKED_ASSIGN(ctg_store.contig.dset_size, hsize_t, io_info->dset->shared->layout.u.chunk.size, uint32_t);
 
     /* Set up compact I/O info object */
-    HDmemcpy(&cpt_io_info, io_info, sizeof(cpt_io_info));
+    H5MM_memcpy(&cpt_io_info, io_info, sizeof(cpt_io_info));
     cpt_io_info.store = &cpt_store;
     cpt_io_info.layout_ops = *H5D_LOPS_COMPACT;
 
@@ -2365,7 +2365,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     HDassert(fm);
 
     /* Set up contiguous I/O info object */
-    HDmemcpy(&ctg_io_info, io_info, sizeof(ctg_io_info));
+    H5MM_memcpy(&ctg_io_info, io_info, sizeof(ctg_io_info));
     ctg_io_info.store = &ctg_store;
     ctg_io_info.layout_ops = *H5D_LOPS_CONTIG;
 
@@ -2373,7 +2373,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     H5_CHECKED_ASSIGN(ctg_store.contig.dset_size, hsize_t, io_info->dset->shared->layout.u.chunk.size, uint32_t);
 
     /* Set up compact I/O info object */
-    HDmemcpy(&cpt_io_info, io_info, sizeof(cpt_io_info));
+    H5MM_memcpy(&cpt_io_info, io_info, sizeof(cpt_io_info));
     cpt_io_info.store = &cpt_store;
     cpt_io_info.layout_ops = *H5D_LOPS_COMPACT;
 
@@ -2727,7 +2727,7 @@ H5D__chunk_cinfo_cache_update(H5D_chunk_cached_t *last, const H5D_chunk_ud_t *ud
     HDassert(udata->common.scaled);
 
     /* Stored the information to cache */
-    HDmemcpy(last->scaled, udata->common.scaled, sizeof(hsize_t) * udata->common.layout->ndims);
+    H5MM_memcpy(last->scaled, udata->common.scaled, sizeof(hsize_t) * udata->common.layout->ndims);
     last->addr = udata->chunk_block.offset;
     H5_CHECKED_ASSIGN(last->nbytes, uint32_t, udata->chunk_block.length, hsize_t);
     last->chunk_idx = udata->chunk_idx;
@@ -3096,7 +3096,7 @@ H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t reset)
                  */
                 if(NULL == (buf = H5MM_malloc(alloc)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for pipeline")
-                HDmemcpy(buf, ent->chunk, alloc);
+                H5MM_memcpy(buf, ent->chunk, alloc);
             } /* end if */
             else {
                 /*
@@ -3510,7 +3510,7 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
                  */
                 if(NULL == (chunk = H5D__chunk_mem_alloc(chunk_size, pline)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk")
-                HDmemcpy(chunk, ent->chunk, chunk_size);
+                H5MM_memcpy(chunk, ent->chunk, chunk_size);
                 ent->chunk = (uint8_t *)H5D__chunk_mem_xfree(ent->chunk, old_pline);
                 ent->chunk = (uint8_t *)chunk;
                 chunk = NULL;
@@ -3536,7 +3536,7 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
                  */
                 if(NULL == (chunk = H5D__chunk_mem_alloc(chunk_size, pline)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk")
-                HDmemcpy(chunk, ent->chunk, chunk_size);
+                H5MM_memcpy(chunk, ent->chunk, chunk_size);
 
                 ent->chunk = (uint8_t *)H5D__chunk_mem_xfree(ent->chunk, old_pline);
                 ent->chunk = (uint8_t *)chunk;
@@ -3665,7 +3665,7 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
                             (void)H5D__chunk_mem_xfree(tmp_chunk, old_pline);
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk")
                         } /* end if */
-                        HDmemcpy(chunk, tmp_chunk, chunk_size);
+                        H5MM_memcpy(chunk, tmp_chunk, chunk_size);
                         (void)H5D__chunk_mem_xfree(tmp_chunk, old_pline);
                     } /* end if */
                 } /* end if */
@@ -3746,7 +3746,7 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
                 ent->chunk_block.offset = chunk_addr;
                 ent->chunk_block.length = chunk_alloc;
                 ent->chunk_idx = udata->chunk_idx;
-                HDmemcpy(ent->scaled, udata->common.scaled, sizeof(hsize_t) * layout->u.chunk.ndims);
+                H5MM_memcpy(ent->scaled, udata->common.scaled, sizeof(hsize_t) * layout->u.chunk.ndims);
                 H5_CHECKED_ASSIGN(ent->rd_count, uint32_t, chunk_size, size_t);
                 H5_CHECKED_ASSIGN(ent->wr_count, uint32_t, chunk_size, size_t);
                 ent->chunk = (uint8_t *)chunk;
@@ -3874,7 +3874,7 @@ H5D__chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
                 fake_ent.edge_chunk_state = H5D_RDCC_DISABLE_FILTERS;
             if(udata->new_unfilt_chunk)
                 fake_ent.edge_chunk_state |= H5D_RDCC_NEWLY_DISABLED_FILTERS;
-        HDmemcpy(fake_ent.scaled, udata->common.scaled, sizeof(hsize_t) * layout->u.chunk.ndims);
+        H5MM_memcpy(fake_ent.scaled, udata->common.scaled, sizeof(hsize_t) * layout->u.chunk.ndims);
             HDassert(layout->u.chunk.size > 0);
         fake_ent.chunk_idx = udata->chunk_idx;
             fake_ent.chunk_block.offset = udata->chunk_block.offset;
@@ -4161,7 +4161,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
             if(has_unfilt_edge_chunks) {
                 if(NULL == (unfilt_fill_buf = H5D__chunk_mem_alloc(orig_chunk_size, &def_pline)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk")
-                HDmemcpy(unfilt_fill_buf, fb_info.fill_buf, orig_chunk_size);
+                H5MM_memcpy(unfilt_fill_buf, fb_info.fill_buf, orig_chunk_size);
             } /* end if */
 
             /* Retrieve filter settings from API context */
@@ -5737,7 +5737,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
     if(udata->chunk_in_cache && udata->chunk) {
         HDassert(!H5F_addr_defined(chunk_rec->chunk_addr));
-        HDmemcpy(buf, udata->chunk, nbytes);
+        H5MM_memcpy(buf, udata->chunk, nbytes);
         udata->chunk = NULL;
     }
     else {
@@ -5771,7 +5771,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
             HDassert(H5F_addr_defined(ent->chunk_block.offset));
 
             H5_CHECKED_ASSIGN(nbytes, size_t, shared_fo->layout.u.chunk.size, uint32_t);
-            HDmemcpy(buf, ent->chunk, nbytes);
+            H5MM_memcpy(buf, ent->chunk, nbytes);
         }
         else {
             /* read chunk data from the source file */
@@ -5805,7 +5805,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5_ITER_ERROR, "datatype conversion failed")
 
         /* Copy into another buffer, to reclaim memory later */
-        HDmemcpy(reclaim_buf, buf, reclaim_buf_size);
+        H5MM_memcpy(reclaim_buf, buf, reclaim_buf_size);
 
         /* Set background buffer to all zeros */
         HDmemset(bkg, 0, buf_size);
@@ -5836,7 +5836,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         } /* end if */
 
         /* After fix ref, copy the new reference elements to the buffer to write out */
-        HDmemcpy(buf, bkg, buf_size);
+        H5MM_memcpy(buf, bkg, buf_size);
     } /* end if */
 
     /* Set up destination chunk callback information for insertion */
@@ -6136,7 +6136,7 @@ H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src,
 
         for(ent = shared_fo->cache.chunk.head; ent; ent = next) {
             if(!H5F_addr_defined(ent->chunk_block.offset)) {
-                HDmemcpy(chunk_rec.scaled, ent->scaled, sizeof(chunk_rec.scaled));
+                H5MM_memcpy(chunk_rec.scaled, ent->scaled, sizeof(chunk_rec.scaled));
                 udata.chunk = ent->chunk;
                 udata.chunk_in_cache = TRUE;
                 if(H5D__chunk_copy_cb(&chunk_rec, &udata) < 0)

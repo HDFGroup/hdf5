@@ -715,7 +715,7 @@ H5P__lacc_elink_pref_enc(const void *value, void **_pp, size_t *size)
 
         /* encode the prefix */
         if(NULL != elink_pref) {
-            HDmemcpy(*(char **)pp, elink_pref, len);
+            H5MM_memcpy(*(char **)pp, elink_pref, len);
             *pp += len;
         } /* end if */
     } /* end if */

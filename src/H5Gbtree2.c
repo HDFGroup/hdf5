@@ -206,7 +206,7 @@ H5G_dense_btree2_name_store(void *_nrecord, const void *_udata)
 
     /* Copy user information info native record */
     nrecord->hash = udata->common.name_hash;
-    HDmemcpy(nrecord->id, udata->id, (size_t)H5G_DENSE_FHEAP_ID_LEN);
+    H5MM_memcpy(nrecord->id, udata->id, (size_t)H5G_DENSE_FHEAP_ID_LEN);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5G_dense_btree2_name_store() */
@@ -305,7 +305,7 @@ H5G_dense_btree2_name_encode(uint8_t *raw, const void *_nrecord, void H5_ATTR_UN
 
     /* Encode the record's fields */
     UINT32ENCODE(raw, nrecord->hash)
-    HDmemcpy(raw, nrecord->id, (size_t)H5G_DENSE_FHEAP_ID_LEN);
+    H5MM_memcpy(raw, nrecord->id, (size_t)H5G_DENSE_FHEAP_ID_LEN);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5G_dense_btree2_name_encode() */
@@ -333,7 +333,7 @@ H5G_dense_btree2_name_decode(const uint8_t *raw, void *_nrecord, void H5_ATTR_UN
 
     /* Decode the record's fields */
     UINT32DECODE(raw, nrecord->hash)
-    HDmemcpy(nrecord->id, raw, (size_t)H5G_DENSE_FHEAP_ID_LEN);
+    H5MM_memcpy(nrecord->id, raw, (size_t)H5G_DENSE_FHEAP_ID_LEN);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5G_dense_btree2_name_decode() */
@@ -393,7 +393,7 @@ H5G_dense_btree2_corder_store(void *_nrecord, const void *_udata)
 
     /* Copy user information info native record */
     nrecord->corder = udata->common.corder;
-    HDmemcpy(nrecord->id, udata->id, (size_t)H5G_DENSE_FHEAP_ID_LEN);
+    H5MM_memcpy(nrecord->id, udata->id, (size_t)H5G_DENSE_FHEAP_ID_LEN);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5G_dense_btree2_corder_store() */
@@ -469,7 +469,7 @@ H5G_dense_btree2_corder_encode(uint8_t *raw, const void *_nrecord, void H5_ATTR_
 
     /* Encode the record's fields */
     INT64ENCODE(raw, nrecord->corder)
-    HDmemcpy(raw, nrecord->id, (size_t)H5G_DENSE_FHEAP_ID_LEN);
+    H5MM_memcpy(raw, nrecord->id, (size_t)H5G_DENSE_FHEAP_ID_LEN);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5G_dense_btree2_corder_encode() */
@@ -497,7 +497,7 @@ H5G_dense_btree2_corder_decode(const uint8_t *raw, void *_nrecord, void H5_ATTR_
 
     /* Decode the record's fields */
     INT64DECODE(raw, nrecord->corder)
-    HDmemcpy(nrecord->id, raw, (size_t)H5G_DENSE_FHEAP_ID_LEN);
+    H5MM_memcpy(nrecord->id, raw, (size_t)H5G_DENSE_FHEAP_ID_LEN);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5G_dense_btree2_corder_decode() */

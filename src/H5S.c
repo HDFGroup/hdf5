@@ -1435,7 +1435,7 @@ H5S_set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims,
          * same as the dimension */
         space->extent.max = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)rank);
         if(max != NULL) {
-            HDmemcpy(space->extent.max, max, sizeof(hsize_t) * rank);
+            H5MM_memcpy(space->extent.max, max, sizeof(hsize_t) * rank);
         } else {
             for(u = 0; u < space->extent.rank; u++)
                 space->extent.max[u] = dims[u];

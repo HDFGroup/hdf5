@@ -693,7 +693,7 @@ H5EA_set(const H5EA_t *ea, hsize_t idx, const void *elmt))
     HDassert(thing_unprot_func);
 
     /* Set element in thing's element buffer */
-    HDmemcpy(thing_elmt_buf + (hdr->cparam.cls->nat_elmt_size * thing_elmt_idx), elmt, hdr->cparam.cls->nat_elmt_size);
+    H5MM_memcpy(thing_elmt_buf + (hdr->cparam.cls->nat_elmt_size * thing_elmt_idx), elmt, hdr->cparam.cls->nat_elmt_size);
     thing_cache_flags |= H5AC__DIRTIED_FLAG;
 
     /* Update max. element set in array, if appropriate */
@@ -765,7 +765,7 @@ H5EA_get(const H5EA_t *ea, hsize_t idx, void *elmt))
         } /* end if */
         else
             /* Get element from thing's element buffer */
-            HDmemcpy(elmt, thing_elmt_buf + (hdr->cparam.cls->nat_elmt_size * thing_elmt_idx), hdr->cparam.cls->nat_elmt_size);
+            H5MM_memcpy(elmt, thing_elmt_buf + (hdr->cparam.cls->nat_elmt_size * thing_elmt_idx), hdr->cparam.cls->nat_elmt_size);
     } /* end else */
 
 CATCH

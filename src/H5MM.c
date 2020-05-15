@@ -108,8 +108,8 @@ static H5MM_block_t H5MM_block_head_s;
 
 /* Statistics about block allocations */
 static unsigned long long H5MM_total_alloc_bytes_s = 0;
-static unsigned long long H5MM_curr_alloc_bytes_s = 0;
-static unsigned long long H5MM_peak_alloc_bytes_s = 0;
+static size_t H5MM_curr_alloc_bytes_s = 0;
+static size_t H5MM_peak_alloc_bytes_s = 0;
 static size_t H5MM_max_block_size_s = 0;
 static size_t H5MM_total_alloc_blocks_count_s = 0;
 static size_t H5MM_curr_alloc_blocks_count_s = 0;
@@ -254,7 +254,7 @@ H5MM_final_sanity_check(void)
  *              difficult to check as a return value. This is still
  *              considered an error condition since allocations of zero
  *              bytes usually indicate problems.
- *  
+ *
  * Return:      Success:    Pointer to new memory
  *              Failure:    NULL
  *
@@ -274,7 +274,7 @@ H5MM_malloc(size_t size)
 #if defined H5_MEMORY_ALLOC_SANITY_CHECK
     /* Initialize block list head singleton */
     if(!H5MM_init_s) {
-        HDmemcpy(H5MM_block_head_s.sig, H5MM_block_signature_s, H5MM_SIG_SIZE);
+        H5MM_memcpy(H5MM_block_head_s.sig, H5MM_block_signature_s, H5MM_SIG_SIZE);
         H5MM_block_head_s.next = &H5MM_block_head_s;
         H5MM_block_head_s.prev = &H5MM_block_head_s;
         H5MM_block_head_s.u.info.size = SIZET_MAX;
@@ -291,15 +291,15 @@ H5MM_malloc(size_t size)
 
         if(NULL != (block = (H5MM_block_t *)HDmalloc(alloc_size))) {
             /* Set up block */
-            HDmemcpy(block->sig, H5MM_block_signature_s, H5MM_SIG_SIZE);
+            H5MM_memcpy(block->sig, H5MM_block_signature_s, H5MM_SIG_SIZE);
             block->next = H5MM_block_head_s.next;
             H5MM_block_head_s.next = block;
             block->next->prev = block;
             block->prev = &H5MM_block_head_s;
             block->u.info.size = size;
             block->u.info.in_use = TRUE;
-            HDmemcpy(block->b, H5MM_block_head_guard_s, H5MM_HEAD_GUARD_SIZE);
-            HDmemcpy(block->b + H5MM_HEAD_GUARD_SIZE + size, H5MM_block_tail_guard_s, H5MM_TAIL_GUARD_SIZE);
+            H5MM_memcpy(block->b, H5MM_block_head_guard_s, H5MM_HEAD_GUARD_SIZE);
+            H5MM_memcpy(block->b + H5MM_HEAD_GUARD_SIZE + size, H5MM_block_tail_guard_s, H5MM_TAIL_GUARD_SIZE);
 
             /* Update statistics */
             H5MM_total_alloc_bytes_s += size;
@@ -417,7 +417,7 @@ H5MM_realloc(void *mem, size_t size)
                     H5MM__sanity_check(mem);
 
                     ret_value = H5MM_malloc(size);
-                    HDmemcpy(ret_value, mem, MIN(size, old_size));
+                    H5MM_memcpy(ret_value, mem, MIN(size, old_size));
                     H5MM_xfree(mem);
                 } /* end if */
                 else
@@ -563,4 +563,66 @@ H5MM_xfree(void *mem)
 
     FUNC_LEAVE_NOAPI(NULL)
 } /* end H5MM_xfree() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MM_xfree_const
+ *
+ * Purpose:     H5MM_xfree() wrapper that handles const pointers without
+ *              warnings. Used for freeing buffers that should be regarded
+ *              as const in use but need to be freed when no longer needed.
+ *
+ * Return:      Success:    NULL
+ *              Failure:    never fails
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5MM_xfree_const(const void *mem)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Cast through uintptr_t to de-const memory */
+    H5MM_xfree((void *)(uintptr_t)mem);
+
+    FUNC_LEAVE_NOAPI(NULL)
+} /* end H5MM_xfree_const() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MM_memcpy
+ *
+ * Purpose:     Like memcpy(3) but with sanity checks on the parameters,
+ *              particularly buffer overlap.
+ *
+ * Return:      Success:    pointer to dest
+ *              Failure:    NULL
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5MM_memcpy(void *dest, const void *src, size_t n)
+{
+    void *ret = NULL;
+
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(dest);
+    HDassert(src);
+
+    /* Check for buffer overlap */
+    HDassert((char *)dest >= (const char *)src + n || (const char *)src >= (char *)dest + n);
+
+    /* Copy */
+    ret = HDmemcpy(dest, src, n);
+
+    FUNC_LEAVE_NOAPI(ret)
+
+} /* end H5MM_memcpy() */
+
 

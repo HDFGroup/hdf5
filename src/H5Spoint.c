@@ -170,7 +170,7 @@ H5S_point_iter_coords (const H5S_sel_iter_t *iter, hsize_t *coords)
     HDassert(coords);
 
     /* Copy the offset of the current point */
-    HDmemcpy(coords,iter->u.pnt.curr->pnt,sizeof(hsize_t)*iter->rank);
+    H5MM_memcpy(coords,iter->u.pnt.curr->pnt,sizeof(hsize_t)*iter->rank);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }   /* H5S_point_iter_coords() */
@@ -202,8 +202,8 @@ H5S_point_iter_block (const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
     HDassert(end);
 
     /* Copy the current point as a block */
-    HDmemcpy(start,iter->u.pnt.curr->pnt,sizeof(hsize_t)*iter->rank);
-    HDmemcpy(end,iter->u.pnt.curr->pnt,sizeof(hsize_t)*iter->rank);
+    H5MM_memcpy(start,iter->u.pnt.curr->pnt,sizeof(hsize_t)*iter->rank);
+    H5MM_memcpy(end,iter->u.pnt.curr->pnt,sizeof(hsize_t)*iter->rank);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }   /* H5S_point_iter_block() */
@@ -413,7 +413,7 @@ H5S_point_add(H5S_t *space, H5S_seloper_t op, hsize_t num_elem, const hsize_t *c
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate coordinate information")
 
         /* Copy over the coordinates */
-        HDmemcpy(new_node->pnt, coord + (u * space->extent.rank), (space->extent.rank * sizeof(hsize_t)));
+        H5MM_memcpy(new_node->pnt, coord + (u * space->extent.rank), (space->extent.rank * sizeof(hsize_t)));
 
         /* Link into list */
         if(top == NULL)
@@ -632,7 +632,7 @@ H5S_point_copy(H5S_t *dst, const H5S_t *src, hbool_t H5_ATTR_UNUSED share_select
         } /* end if */
 
         /* Copy over the point's coordinates */
-        HDmemcpy(new_node->pnt, curr->pnt, (src->extent.rank * sizeof(hsize_t)));
+        H5MM_memcpy(new_node->pnt, curr->pnt, (src->extent.rank * sizeof(hsize_t)));
 
         /* Keep the order the same when copying */
         if(NULL == new_tail)
@@ -1128,7 +1128,7 @@ H5S_get_select_elem_pointlist(H5S_t *space, hsize_t startpoint, hsize_t numpoint
 
     /* Iterate through the node, copying each point's information */
     while(node != NULL && numpoints > 0) {
-        HDmemcpy(buf, node->pnt, sizeof(hsize_t) * rank);
+        H5MM_memcpy(buf, node->pnt, sizeof(hsize_t) * rank);
         buf += rank;
         numpoints--;
         node = node->next;
@@ -1612,7 +1612,7 @@ H5S_point_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *off
 
         /* Calculate offset of selection in projected buffer */
         HDmemset(block, 0, sizeof(block));
-        HDmemcpy(block, base_space->select.sel_info.pnt_lst->head->pnt, sizeof(hsize_t) * rank_diff);
+        H5MM_memcpy(block, base_space->select.sel_info.pnt_lst->head->pnt, sizeof(hsize_t) * rank_diff);
         *offset = H5VM_array_offset(base_space->extent.rank, base_space->extent.size, block); 
 
         /* Iterate through base space's point nodes, copying the point information */
@@ -1629,7 +1629,7 @@ H5S_point_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *off
             } /* end if */
 
             /* Copy over the point's coordinates */
-            HDmemcpy(new_node->pnt, &base_node->pnt[rank_diff], (new_space->extent.rank * sizeof(hsize_t)));
+            H5MM_memcpy(new_node->pnt, &base_node->pnt[rank_diff], (new_space->extent.rank * sizeof(hsize_t)));
 
             /* Keep the order the same when copying */
             if(NULL == prev_node)
@@ -1667,7 +1667,7 @@ H5S_point_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *off
 
             /* Copy over the point's coordinates */
             HDmemset(new_node->pnt, 0, sizeof(hsize_t) * rank_diff);
-            HDmemcpy(&new_node->pnt[rank_diff], base_node->pnt, (new_space->extent.rank * sizeof(hsize_t)));
+            H5MM_memcpy(&new_node->pnt[rank_diff], base_node->pnt, (new_space->extent.rank * sizeof(hsize_t)));
 
             /* Keep the order the same when copying */
             if(NULL == prev_node)

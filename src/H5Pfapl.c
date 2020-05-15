@@ -1057,7 +1057,7 @@ H5P__file_driver_copy(void *value)
                 else if(driver->fapl_size > 0) {
                     if(NULL == (new_pl = H5MM_malloc(driver->fapl_size)))
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "driver info allocation failed")
-                    HDmemcpy(new_pl, info->driver_info, driver->fapl_size);
+                    H5MM_memcpy(new_pl, info->driver_info, driver->fapl_size);
                 } /* end else-if */
                 else
                     HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "no way to copy driver info")
@@ -2590,7 +2590,7 @@ H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCOPY, FAIL, "image_memcpy callback failed")
         } /* end if */
     else
-            HDmemcpy(image_info.buffer, buf_ptr, buf_len);
+            H5MM_memcpy(image_info.buffer, buf_ptr, buf_len);
     } /* end if */
     else
         image_info.buffer = NULL;
@@ -2684,7 +2684,7 @@ H5Pget_file_image(hid_t fapl_id, void **buf_ptr_ptr, size_t *buf_len_ptr)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCOPY, FAIL, "image_memcpy callback failed")
             } /* end if */
         else
-                HDmemcpy(copy_ptr, image_info.buffer, image_info.size);
+                H5MM_memcpy(copy_ptr, image_info.buffer, image_info.size);
         } /* end if */
 
         *buf_ptr_ptr = copy_ptr;
@@ -2887,7 +2887,7 @@ H5P__file_image_info_copy(void *value)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "image_memcpy callback failed")
             } /* end if */
         else
-                HDmemcpy(info->buffer, old_buffer, info->size);
+                H5MM_memcpy(info->buffer, old_buffer, info->size);
         } /* end if */
 
         /* Copy udata if it exists */
@@ -3082,7 +3082,7 @@ H5P__facc_cache_image_config_dec(const void **_pp, void *_value)
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
     /* Set property to default value */
-    HDmemcpy(config, &H5F_def_mdc_initCacheImageCfg_g, sizeof(H5AC_cache_image_config_t));
+    H5MM_memcpy(config, &H5F_def_mdc_initCacheImageCfg_g, sizeof(H5AC_cache_image_config_t));
 
     /* Decode type sizes */
     enc_size = *(*pp)++;
@@ -3473,7 +3473,7 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
 
         H5_ENCODE_UNSIGNED(*pp, config->close_trace_file);
 
-        HDmemcpy(*pp, (const uint8_t *)(config->trace_file_name), (size_t)(H5AC__MAX_TRACE_FILE_NAME_LEN + 1));
+        H5MM_memcpy(*pp, (const uint8_t *)(config->trace_file_name), (size_t)(H5AC__MAX_TRACE_FILE_NAME_LEN + 1));
         *pp += H5AC__MAX_TRACE_FILE_NAME_LEN + 1;
 
         H5_ENCODE_UNSIGNED(*pp, config->evictions_enabled);
@@ -3608,7 +3608,7 @@ H5P__facc_cache_config_dec(const void **_pp, void *_value)
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
     /* Set property to default value */
-    HDmemcpy(config, &H5F_def_mdc_initCacheCfg_g, sizeof(H5AC_cache_config_t));
+    H5MM_memcpy(config, &H5F_def_mdc_initCacheCfg_g, sizeof(H5AC_cache_config_t));
 
     /* Decode type sizes */
     enc_size = *(*pp)++;
@@ -4271,7 +4271,7 @@ H5Pget_mdc_log_options(hid_t plist_id, hbool_t *is_enabled, char *location,
 
     /* Copy log location to output buffer */
     if(location_ptr && location)
-        HDmemcpy(location, location_ptr, *location_size);
+        H5MM_memcpy(location, location_ptr, *location_size);
 
     /* Get location size, including terminating NULL */
     if(location_size) {
@@ -4326,7 +4326,7 @@ H5P_facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size)
 
         /* encode the prefix */
         if(NULL != log_location) {
-            HDmemcpy(*(char **)pp, log_location, len);
+            H5MM_memcpy(*(char **)pp, log_location, len);
             *pp += len;
         } /* end if */
     } /* end if */
@@ -4612,7 +4612,7 @@ H5P__encode_coll_md_read_flag_t(const void *value, void **_pp, size_t *size)
 
     if(NULL != *pp) {
         /* Encode the value */
-        HDmemcpy(*pp, coll_md_read_flag, sizeof(H5P_coll_md_read_flag_t));
+        H5MM_memcpy(*pp, coll_md_read_flag, sizeof(H5P_coll_md_read_flag_t));
         *pp += sizeof(H5P_coll_md_read_flag_t);
     } /* end if */
 

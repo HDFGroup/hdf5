@@ -301,7 +301,7 @@ H5T_vlen_seq_mem_getlen(const void *_vl)
     FUNC_LEAVE_NOAPI((ssize_t)vl->len)
 #else
     HDassert(_vl);
-    HDmemcpy(&vl, _vl, sizeof(hvl_t));
+    H5MM_memcpy(&vl, _vl, sizeof(hvl_t));
 
     FUNC_LEAVE_NOAPI((ssize_t)vl.len)
 #endif
@@ -338,7 +338,7 @@ H5T_vlen_seq_mem_getptr(void *_vl)
     FUNC_LEAVE_NOAPI(vl->p)
 #else
     HDassert(_vl);
-    HDmemcpy(&vl, _vl, sizeof(hvl_t));
+    H5MM_memcpy(&vl, _vl, sizeof(hvl_t));
 
     FUNC_LEAVE_NOAPI(vl.p)
 #endif
@@ -375,7 +375,7 @@ H5T_vlen_seq_mem_isnull(const H5F_t H5_ATTR_UNUSED *f, void *_vl)
     FUNC_LEAVE_NOAPI((vl->len==0 || vl->p==NULL) ? TRUE : FALSE)
 #else
     HDassert(_vl);
-    HDmemcpy(&vl, _vl, sizeof(hvl_t));
+    H5MM_memcpy(&vl, _vl, sizeof(hvl_t));
 
     FUNC_LEAVE_NOAPI((vl.len==0 || vl.p==NULL) ? TRUE : FALSE)
 #endif
@@ -410,13 +410,13 @@ H5T_vlen_seq_mem_read(H5F_t H5_ATTR_UNUSED *f, void *_vl, void *buf, size_t len)
 #ifdef H5_NO_ALIGNMENT_RESTRICTIONS
     HDassert(vl && vl->p);
 
-    HDmemcpy(buf,vl->p,len);
+    H5MM_memcpy(buf,vl->p,len);
 #else
     HDassert(_vl);
-    HDmemcpy(&vl, _vl, sizeof(hvl_t));
+    H5MM_memcpy(&vl, _vl, sizeof(hvl_t));
     HDassert(vl.p);
 
-    HDmemcpy(buf,vl.p,len);
+    H5MM_memcpy(buf,vl.p,len);
 #endif
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -462,7 +462,7 @@ H5T_vlen_seq_mem_write(H5F_t H5_ATTR_UNUSED *f, const H5T_vlen_alloc_info_t *vl_
           } /* end else */
 
         /* Copy the data into the newly allocated buffer */
-        HDmemcpy(vl.p,buf,len);
+        H5MM_memcpy(vl.p,buf,len);
 
     } /* end if */
     else
@@ -472,7 +472,7 @@ H5T_vlen_seq_mem_write(H5F_t H5_ATTR_UNUSED *f, const H5T_vlen_alloc_info_t *vl_
     vl.len=seq_len;
 
     /* Set pointer in user's buffer with memcpy, to avoid alignment issues */
-    HDmemcpy(_vl,&vl,sizeof(hvl_t));
+    H5MM_memcpy(_vl,&vl,sizeof(hvl_t));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -506,7 +506,7 @@ H5T_vlen_seq_mem_setnull(H5F_t H5_ATTR_UNUSED *f, void *_vl, void H5_ATTR_UNUSED
     vl.p=NULL;
 
     /* Set pointer in user's buffer with memcpy, to avoid alignment issues */
-    HDmemcpy(_vl,&vl,sizeof(hvl_t));
+    H5MM_memcpy(_vl,&vl,sizeof(hvl_t));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }   /* end H5T_vlen_seq_mem_setnull() */
@@ -540,7 +540,7 @@ H5T_vlen_str_mem_getlen(const void *_vl)
     HDassert(s);
 #else
     HDassert(_vl);
-    HDmemcpy(&s, _vl, sizeof(char *));
+    H5MM_memcpy(&s, _vl, sizeof(char *));
 #endif
 
     FUNC_LEAVE_NOAPI((ssize_t)HDstrlen(s))
@@ -575,7 +575,7 @@ H5T_vlen_str_mem_getptr(void *_vl)
     HDassert(s);
 #else
     HDassert(_vl);
-    HDmemcpy(&s, _vl, sizeof(char *));
+    H5MM_memcpy(&s, _vl, sizeof(char *));
 #endif
 
     FUNC_LEAVE_NOAPI(s)
@@ -606,7 +606,7 @@ H5T_vlen_str_mem_isnull(const H5F_t H5_ATTR_UNUSED *f, void *_vl)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #ifndef H5_NO_ALIGNMENT_RESTRICTIONS
-    HDmemcpy(&s, _vl, sizeof(char *));
+    H5MM_memcpy(&s, _vl, sizeof(char *));
 #endif
 
     FUNC_LEAVE_NOAPI(s==NULL ? TRUE : FALSE)
@@ -643,10 +643,10 @@ H5T_vlen_str_mem_read(H5F_t H5_ATTR_UNUSED *f, void *_vl, void *buf, size_t len)
         HDassert(s);
 #else
         HDassert(_vl);
-        HDmemcpy(&s, _vl, sizeof(char *));
+        H5MM_memcpy(&s, _vl, sizeof(char *));
 #endif
 
-        HDmemcpy(buf,s,len);
+        H5MM_memcpy(buf,s,len);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -690,11 +690,11 @@ H5T_vlen_str_mem_write(H5F_t H5_ATTR_UNUSED *f, const H5T_vlen_alloc_info_t *vl_
       } /* end else */
 
     len=(seq_len*base_size);
-    HDmemcpy(t,buf,len);
+    H5MM_memcpy(t,buf,len);
     t[len]='\0';
 
     /* Set pointer in user's buffer with memcpy, to avoid alignment issues */
-    HDmemcpy(_vl,&t,sizeof(char *));
+    H5MM_memcpy(_vl,&t,sizeof(char *));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value) /*lint !e429 The pointer in 't' has been copied */
@@ -721,7 +721,7 @@ H5T_vlen_str_mem_setnull(H5F_t H5_ATTR_UNUSED *f, void *_vl, void H5_ATTR_UNUSED
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Set pointer in user's buffer with memcpy, to avoid alignment issues */
-    HDmemcpy(_vl,&t,sizeof(char *));
+    H5MM_memcpy(_vl,&t,sizeof(char *));
 
     FUNC_LEAVE_NOAPI(SUCCEED) /*lint !e429 The pointer in 't' has been copied */
 }   /* end H5T_vlen_str_mem_setnull() */

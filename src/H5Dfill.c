@@ -300,7 +300,7 @@ H5D__fill(const void *fill, const H5T_t *fill_type, void *buf,
                     HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't get actual buffer")
 
                 /* Copy the user's data into the buffer for conversion */
-                HDmemcpy(elem_ptr, fill, src_type_size);
+                H5MM_memcpy(elem_ptr, fill, src_type_size);
 
                 /* If there's no VL type of data, do conversion first then fill the data into
                  * the memory buffer. */
@@ -577,7 +577,7 @@ H5D__fill_refill_vl(H5D_fill_buf_info_t *fb_info, size_t nelmts)
     HDassert(fb_info->fill_buf);
 
     /* Make a copy of the (disk-based) fill value into the buffer */
-    HDmemcpy(fb_info->fill_buf, fb_info->fill->buf, fb_info->file_elmt_size);
+    H5MM_memcpy(fb_info->fill_buf, fb_info->fill->buf, fb_info->file_elmt_size);
 
     /* Reset first element of background buffer, if necessary */
     if(H5T_path_bkg(fb_info->fill_to_mem_tpath))
@@ -603,7 +603,7 @@ H5D__fill_refill_vl(H5D_fill_buf_info_t *fb_info, size_t nelmts)
     if(!buf)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "memory allocation failed for temporary fill buffer")
 
-    HDmemcpy(buf, fb_info->fill_buf, fb_info->fill_buf_size);
+    H5MM_memcpy(buf, fb_info->fill_buf, fb_info->fill_buf_size);
 
     /* Type convert the dataset buffer, to copy any VL components */
     if(H5T_convert(fb_info->mem_to_dset_tpath, fb_info->mem_tid, fb_info->file_tid, nelmts, (size_t)0, (size_t)0, fb_info->fill_buf, fb_info->bkg_buf) < 0)
