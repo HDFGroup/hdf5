@@ -96,6 +96,7 @@
 ./bin/switch_maint_mode      _DO_NOT_DISTRIBUTE_
 ./bin/timekeeper      _DO_NOT_DISTRIBUTE_
 ./bin/trace
+./bin/warnhist      _DO_NOT_DISTRIBUTE_
 ./bin/yodconfigure
 ./bin/batch/ctestP.lsf.in.cmake
 ./bin/batch/ctestP.sl.in.cmake

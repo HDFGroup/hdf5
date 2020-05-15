@@ -44,7 +44,7 @@ herr_t H5IMmake_image_8bit( hid_t loc_id,
     hsize_t  dims[IMAGE8_RANK];
 
     /* check the arguments */
-    if (dset_name == NULL) 
+    if (dset_name == NULL)
         return -1;
 
     /* Initialize the image dimensions */
@@ -104,9 +104,9 @@ herr_t H5IMmake_image_24bit( hid_t loc_id,
     hsize_t  dims[IMAGE24_RANK];
 
     /* check the arguments */
-    if (interlace == NULL) 
+    if (interlace == NULL)
         return -1;
-    if (dset_name == NULL) 
+    if (dset_name == NULL)
         return -1;
 
 
@@ -180,7 +180,7 @@ static herr_t find_palette(hid_t loc_id,
     int ret = H5_ITER_CONT;
 
     /* check the arguments */
-    if (name == NULL) 
+    if (name == NULL)
         return -1;
 
     /* Shut compiler up */
@@ -261,9 +261,9 @@ herr_t H5IMget_image_info( hid_t loc_id,
     int         has_attr;
 
     /* check the arguments */
-    if (dset_name == NULL) 
+    if (dset_name == NULL)
       return -1;
-    if (interlace == NULL) 
+    if (interlace == NULL)
       return -1;
 
     /*assume initially we have no palettes attached*/
@@ -430,7 +430,7 @@ herr_t H5IMread_image( hid_t loc_id,
     hid_t   did;
 
     /* check the arguments */
-    if (dset_name == NULL) 
+    if (dset_name == NULL)
       return -1;
 
     /* Open the dataset. */
@@ -483,7 +483,7 @@ herr_t H5IMmake_palette( hid_t loc_id,
     int has_pal;
 
     /* check the arguments */
-    if (pal_name == NULL) 
+    if (pal_name == NULL)
       return -1;
 
     /* Check if the dataset already exists */
@@ -548,11 +548,11 @@ herr_t H5IMlink_palette( hid_t loc_id,
     hsize_t     dim_ref;
     int         ok_pal;
 
-    
+
     /* check the arguments */
-    if (image_name == NULL) 
+    if (image_name == NULL)
       return -1;
-    if (pal_name == NULL) 
+    if (pal_name == NULL)
       return -1;
 
     /* The image dataset may or may not have the attribute "PALETTE"
@@ -717,9 +717,9 @@ herr_t H5IMunlink_palette( hid_t loc_id,
     int         ok_pal, has_pal;
 
     /* check the arguments */
-    if(image_name == NULL) 
+    if(image_name == NULL)
       return -1;
-    if(pal_name == NULL) 
+    if(pal_name == NULL)
       return -1;
 
     /* Try to find the palette dataset */
@@ -818,7 +818,7 @@ herr_t H5IMget_npalettes( hid_t loc_id,
     int         has_pal;
 
     /* check the arguments */
-    if(image_name == NULL) 
+    if(image_name == NULL)
       return -1;
 
     /*assume initially we have no palettes attached*/
@@ -916,7 +916,7 @@ herr_t H5IMget_palette_info( hid_t loc_id,
     hsize_t    pal_maxdims[2];
 
     /* check the arguments */
-    if (image_name == NULL) 
+    if (image_name == NULL)
       return -1;
 
     /* Open the dataset. */
@@ -1030,9 +1030,9 @@ herr_t H5IMget_palette( hid_t loc_id,
     hid_t      pal_id;
 
     /* check the arguments */
-    if (image_name == NULL) 
+    if (image_name == NULL)
       return -1;
-    if (pal_data == NULL) 
+    if (pal_data == NULL)
       return -1;
 
 
@@ -1133,7 +1133,7 @@ herr_t H5IMis_image( hid_t loc_id,
     herr_t     ret;
 
     /* check the arguments */
-    if (dset_name == NULL) 
+    if (dset_name == NULL)
       return -1;
 
     /* Assume initially fail condition */
@@ -1237,7 +1237,7 @@ herr_t H5IMis_palette( hid_t loc_id,
     herr_t     ret;
 
     /* check the arguments */
-    if (dset_name == NULL) 
+    if (dset_name == NULL)
       return -1;
 
     /* Assume initially fail condition */
