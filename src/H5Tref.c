@@ -800,7 +800,7 @@ H5T__ref_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t H5_ATTR_
     HDassert(dst_size);
 
     /* Copy header manually */
-    HDmemcpy(q, p, H5R_ENCODE_HEADER_SIZE);
+    H5MM_memcpy(q, p, H5R_ENCODE_HEADER_SIZE);
     p += H5R_ENCODE_HEADER_SIZE;
     q += H5R_ENCODE_HEADER_SIZE;
     blob_size -= H5R_ENCODE_HEADER_SIZE;
@@ -860,7 +860,7 @@ H5T__ref_disk_write(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
     } /* end if */
 
     /* Copy header manually so that it does not get encoded into the blob */
-    HDmemcpy(q, p, H5R_ENCODE_HEADER_SIZE);
+    H5MM_memcpy(q, p, H5R_ENCODE_HEADER_SIZE);
     p += H5R_ENCODE_HEADER_SIZE;
     q += H5R_ENCODE_HEADER_SIZE;
     src_size -= H5R_ENCODE_HEADER_SIZE;
