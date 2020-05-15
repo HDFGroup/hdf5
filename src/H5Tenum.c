@@ -225,7 +225,7 @@ H5T__enum_insert(const H5T_t *dt, const char *name, const void *value)
     dt->shared->u.enumer.sorted = H5T_SORT_NONE;
     i = dt->shared->u.enumer.nmembs++;
     dt->shared->u.enumer.name[i] = H5MM_xstrdup(name);
-    HDmemcpy(dt->shared->u.enumer.value+i*dt->shared->size, value, dt->shared->size);
+    H5MM_memcpy(dt->shared->u.enumer.value+i*dt->shared->size, value, dt->shared->size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -300,7 +300,7 @@ H5T__get_member_value(const H5T_t *dt, unsigned membno, void *value/*out*/)
     HDassert(dt);
     HDassert(value);
 
-    HDmemcpy(value, dt->shared->u.enumer.value + membno*dt->shared->size, dt->shared->size);
+    H5MM_memcpy(value, dt->shared->u.enumer.value + membno*dt->shared->size, dt->shared->size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
@@ -571,7 +571,7 @@ H5T_enum_valueof(const H5T_t *dt, const char *name, void *value/*out*/)
     if (cmp!=0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "string doesn't exist in the enumeration type")
 
-    HDmemcpy(value, copied_dt->shared->u.enumer.value+md*copied_dt->shared->size, copied_dt->shared->size);
+    H5MM_memcpy(value, copied_dt->shared->u.enumer.value+md*copied_dt->shared->size, copied_dt->shared->size);
 
 done:
     if(copied_dt)

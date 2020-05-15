@@ -250,7 +250,7 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
             HDassert(0 == (z & 0x7)); /*must be aligned*/
             if(NULL == (dt->shared->u.opaque.tag = (char *)H5MM_malloc(z + 1)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-            HDmemcpy(dt->shared->u.opaque.tag, *pp, z);
+            H5MM_memcpy(dt->shared->u.opaque.tag, *pp, z);
             dt->shared->u.opaque.tag[z] = '\0';
             *pp += z;
             break;
@@ -483,7 +483,7 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
             } /* end for */
 
             /* Values */
-            HDmemcpy(dt->shared->u.enumer.value, *pp,
+            H5MM_memcpy(dt->shared->u.enumer.value, *pp,
                      dt->shared->u.enumer.nmembs * dt->shared->parent->shared->size);
             *pp += dt->shared->u.enumer.nmembs * dt->shared->parent->shared->size;
             break;
@@ -882,7 +882,7 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
                 z = HDstrlen(dt->shared->u.opaque.tag);
                 aligned = (z + 7) & (H5T_OPAQUE_TAG_MAX - 8);
                 flags = (unsigned)(flags | aligned);
-                HDmemcpy(*pp, dt->shared->u.opaque.tag, MIN(z,aligned));
+                H5MM_memcpy(*pp, dt->shared->u.opaque.tag, MIN(z,aligned));
                 for(n = MIN(z, aligned); n < aligned; n++)
                     (*pp)[n] = 0;
                 *pp += aligned;
@@ -997,7 +997,7 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
             } /* end for */
 
             /* Values */
-            HDmemcpy(*pp, dt->shared->u.enumer.value, dt->shared->u.enumer.nmembs * dt->shared->parent->shared->size);
+            H5MM_memcpy(*pp, dt->shared->u.enumer.value, dt->shared->u.enumer.nmembs * dt->shared->parent->shared->size);
             *pp += dt->shared->u.enumer.nmembs * dt->shared->parent->shared->size;
             break;
 

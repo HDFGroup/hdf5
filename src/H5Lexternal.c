@@ -298,7 +298,7 @@ H5L__extern_query(const char H5_ATTR_UNUSED * link_name, const void *_udata, siz
             buf_size = udata_size;
 
         /* Copy the udata verbatim up to buf_size */
-        HDmemcpy(buf, udata, buf_size);
+        H5MM_memcpy(buf, udata, buf_size);
     } /* end if */
 
     /* Set return value */

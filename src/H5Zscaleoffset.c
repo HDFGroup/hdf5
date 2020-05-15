@@ -141,7 +141,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
             } /* end if */                                                       \
                                                                                  \
             /* Copy the value */                                                 \
-            HDmemcpy(&_cd_value, _fv_p, _copy_size);                             \
+            H5MM_memcpy(&_cd_value, _fv_p, _copy_size);                             \
             (cd_values)[_i] = (unsigned)_cd_value;                               \
                                                                                  \
             /* Next field */                                                     \
@@ -158,7 +158,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
         _fv_p = ((char *)&(fill_val)) + sizeof(type) - MIN(4, _size_rem);        \
         while(_size_rem >= 4) {                                                  \
             /* Copy the value */                                                 \
-            HDmemcpy(&_cd_value, _fv_p, _copy_size);                             \
+            H5MM_memcpy(&_cd_value, _fv_p, _copy_size);                             \
             (cd_values)[_i] = (unsigned)_cd_value;                               \
                                                                                  \
             /* Next field */                                                     \
@@ -176,7 +176,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
              * _cd_value as it will not be fully overwritten and copy to the end \
              * of _cd value as it is BE. */                                      \
             _cd_value = (uint32_t)0;                                             \
-            HDmemcpy((char *)&_cd_value + 4 - _size_rem, _fv_p, _size_rem);      \
+            H5MM_memcpy((char *)&_cd_value + 4 - _size_rem, _fv_p, _size_rem);      \
             (cd_values)[_i] = (unsigned)_cd_value;                               \
         } /* end if */                                                           \
     } /* end else */                                                             \
@@ -269,7 +269,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
                                                                                  \
             /* Copy the value */                                                 \
             _cd_value = (uint32_t)(cd_values)[_i];                               \
-            HDmemcpy(_fv_p, &_cd_value, _copy_size);                             \
+            H5MM_memcpy(_fv_p, &_cd_value, _copy_size);                             \
                                                                                  \
             /* Next field */                                                     \
             _i++;                                                                \
@@ -286,7 +286,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
         while(_size_rem >= 4) {                                                  \
             /* Copy the value */                                                 \
             _cd_value = (uint32_t)(cd_values)[_i];                               \
-            HDmemcpy(_fv_p, &_cd_value, _copy_size);                             \
+            H5MM_memcpy(_fv_p, &_cd_value, _copy_size);                             \
                                                                                  \
             /* Next field */                                                     \
             _i++;                                                                \
@@ -303,7 +303,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
              * _cd_value as it will not be fully overwritten and copy to the end \
              * of _cd value as it is BE. */                                      \
             _cd_value = (uint32_t)(cd_values)[_i];                               \
-            HDmemcpy(_fv_p, (char *)&_cd_value + 4 - _size_rem, _size_rem);      \
+            H5MM_memcpy(_fv_p, (char *)&_cd_value + 4 - _size_rem, _size_rem);      \
         } /* end if */                                                           \
     } /* end else */                                                             \
 }
@@ -529,10 +529,10 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
          * account for offset in BE if sizes differ                                   \
          */                                                                           \
         if(H5T_native_order_g == H5T_ORDER_LE)                                        \
-            HDmemcpy(minval, &min, sizeof(type));                                     \
+            H5MM_memcpy(minval, &min, sizeof(type));                                     \
         else {                                                                        \
             HDassert(H5T_native_order_g == H5T_ORDER_BE);                             \
-            HDmemcpy(((char *)minval) + (sizeof(long long) - sizeof(type)),           \
+            H5MM_memcpy(((char *)minval) + (sizeof(long long) - sizeof(type)),           \
                     &min, sizeof(type));                                              \
         } /* end else */                                                              \
     else                                                                              \
@@ -604,10 +604,10 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
          * account for offset in BE if sizes differ                                \
          */                                                                        \
         if(H5T_native_order_g == H5T_ORDER_LE)                                     \
-            HDmemcpy(&min, &minval, sizeof(type));                                 \
+            H5MM_memcpy(&min, &minval, sizeof(type));                                 \
         else {                                                                     \
             HDassert(H5T_native_order_g == H5T_ORDER_BE);                          \
-            HDmemcpy(&min, ((char *)&minval) + (sizeof(long long)                  \
+            H5MM_memcpy(&min, ((char *)&minval) + (sizeof(long long)                  \
                     - sizeof(type)), sizeof(type));                                \
         } /* end else */                                                           \
     else                                                                           \
@@ -1173,7 +1173,7 @@ H5Z_filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_value
 
         /* special case: minbits equal to full precision */
         if(minbits == p.size * 8) {
-            HDmemcpy(outbuf, (unsigned char*)(*buf)+buf_offset, size_out);
+            H5MM_memcpy(outbuf, (unsigned char*)(*buf)+buf_offset, size_out);
             /* free the original buffer */
             H5MM_xfree(*buf);
 
@@ -1273,7 +1273,7 @@ H5Z_filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_value
 
         /* special case: minbits equal to full precision */
         if(minbits == p.size * 8) {
-            HDmemcpy(outbuf + buf_offset, *buf, nbytes);
+            H5MM_memcpy(outbuf + buf_offset, *buf, nbytes);
             /* free the original buffer */
             H5MM_xfree(*buf);
 

@@ -183,7 +183,7 @@ H5HF__man_insert(H5HF_hdr_t *hdr, size_t obj_size, const void *obj, void *_id)
         p = dblock->blk + blk_off;
 
         /* Copy the object's data into the heap */
-        HDmemcpy(p, obj, obj_size);
+        H5MM_memcpy(p, obj, obj_size);
         p += obj_size;
 
         /* Sanity check */

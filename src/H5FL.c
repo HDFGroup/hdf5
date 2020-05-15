@@ -1142,7 +1142,7 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size H5FL_TRACK_
             if((ret_value=H5FL_blk_malloc(head,new_size H5FL_TRACK_INFO_INT))==NULL)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for block")
             blk_size=MIN(new_size,temp->size);
-            HDmemcpy(ret_value,block,blk_size);
+            H5MM_memcpy(ret_value,block,blk_size);
             H5FL_blk_free(head,block);
         } /* end if */
         else {
@@ -1630,7 +1630,7 @@ H5FL_arr_realloc(H5FL_arr_head_t *head, void * obj, size_t new_elem)
 
             /* Copy the appropriate amount of elements */
             blk_size = head->list_arr[MIN(temp->nelem, new_elem)].size;
-            HDmemcpy(ret_value, obj, blk_size);
+            H5MM_memcpy(ret_value, obj, blk_size);
 
             /* Free the old block */
             H5FL_arr_free(head, obj);

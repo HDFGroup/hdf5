@@ -742,7 +742,7 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                         HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, NULL, "image_memcpy callback failed")
                 } /* end if */
                 else
-                    HDmemcpy(file->mem, file_image_info.buffer, size);
+                    H5MM_memcpy(file->mem, file_image_info.buffer, size);
             } /* end if */
             /* Read in existing data from the file if there is no image */
             else {
@@ -1202,7 +1202,7 @@ H5FD__core_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         nbytes = MIN(size,(size_t)(file->eof-addr));
 #endif /* NDEBUG */
 
-        HDmemcpy(buf, file->mem + addr, nbytes);
+        H5MM_memcpy(buf, file->mem + addr, nbytes);
         size -= nbytes;
         addr += nbytes;
         buf = (char *)buf + nbytes;
@@ -1288,7 +1288,7 @@ H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
     }
 
     /* Write from BUF to memory */
-    HDmemcpy(file->mem + addr, buf, size);
+    H5MM_memcpy(file->mem + addr, buf, size);
 
     /* Mark memory buffer as modified */
     file->dirty = TRUE;

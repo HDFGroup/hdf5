@@ -108,7 +108,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     HDassert(stats);
 
     /* Copy extensible array statistics */
-    HDmemcpy(stats, &ea->hdr->stats, sizeof(ea->hdr->stats));
+    H5MM_memcpy(stats, &ea->hdr->stats, sizeof(ea->hdr->stats));
 
 END_FUNC(PRIV)  /* end H5EA_get_stats() */
 

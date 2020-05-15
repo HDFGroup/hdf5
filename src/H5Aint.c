@@ -646,21 +646,21 @@ H5A__read(const H5A_t *attr, const H5T_t *mem_type, void *buf)
                     HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "memory allocation failed")
 
                 /* Copy the attribute data into the buffer for conversion */
-                HDmemcpy(tconv_buf, attr->shared->data, (src_type_size * nelmts));
+                H5MM_memcpy(tconv_buf, attr->shared->data, (src_type_size * nelmts));
 
                 /* Perform datatype conversion.  */
                 if(H5T_convert(tpath, src_id, dst_id, nelmts, (size_t)0, (size_t)0, tconv_buf, bkg_buf) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "datatype conversion failed")
 
                 /* Copy the converted data into the user's buffer */
-                HDmemcpy(buf, tconv_buf, (dst_type_size * nelmts));
+                H5MM_memcpy(buf, tconv_buf, (dst_type_size * nelmts));
             } /* end if */
             /* No type conversion necessary */
             else {
                 HDassert(dst_type_size == src_type_size);
 
                 /* Copy the attribute data into the user's buffer */
-                HDmemcpy(buf, attr->shared->data, (dst_type_size * nelmts));
+                H5MM_memcpy(buf, attr->shared->data, (dst_type_size * nelmts));
             } /* end else */
         } /* end else */
     } /* end if */
@@ -747,7 +747,7 @@ H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, FAIL, "memory allocation failed")
 
             /* Copy the user's data into the buffer for conversion */
-            HDmemcpy(tconv_buf, buf, (src_type_size * nelmts));
+            H5MM_memcpy(tconv_buf, buf, (src_type_size * nelmts));
 
             /* Perform datatype conversion */
             if(H5T_convert(tpath, src_id, dst_id, nelmts, (size_t)0, (size_t)0, tconv_buf, bkg_buf) < 0)
@@ -771,7 +771,7 @@ H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
             /* Copy the attribute data into the user's buffer */
-            HDmemcpy(attr->shared->data, buf, (dst_type_size * nelmts));
+            H5MM_memcpy(attr->shared->data, buf, (dst_type_size * nelmts));
         } /* end else */
 
         /* Modify the attribute in the object header */
@@ -827,7 +827,7 @@ H5A__get_name(H5A_t *attr, size_t buf_size, char *buf)
 
     /* Copy all/some of the name */
     if(buf && copy_len > 0) {
-        HDmemcpy(buf, attr->shared->name, copy_len);
+        H5MM_memcpy(buf, attr->shared->name, copy_len);
 
         /* Terminate the string */
         buf[copy_len]='\0';
@@ -2241,7 +2241,7 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_s
             if(NULL == (buf = H5FL_BLK_MALLOC(attr_buf, buf_size)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation NULLed for raw data chunk")
 
-            HDmemcpy(buf, attr_src->shared->data, attr_src->shared->data_size);
+            H5MM_memcpy(buf, attr_src->shared->data, attr_src->shared->data_size);
 
 	    /* Allocate background memory */
 	    if(H5T_path_bkg(tpath_src_mem) || H5T_path_bkg(tpath_mem_dst))
@@ -2252,7 +2252,7 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_s
             if(H5T_convert(tpath_src_mem, tid_src, tid_mem, nelmts, (size_t)0, (size_t)0, buf, bkg_buf) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "datatype conversion NULLed")
 
-            HDmemcpy(reclaim_buf, buf, buf_size);
+            H5MM_memcpy(reclaim_buf, buf, buf_size);
 
 	    /* Set background buffer to all zeros */
 	    if(bkg_buf)
@@ -2262,14 +2262,14 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_s
             if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, bkg_buf) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "datatype conversion NULLed")
 
-            HDmemcpy(attr_dst->shared->data, buf, attr_dst->shared->data_size);
+            H5MM_memcpy(attr_dst->shared->data, buf, attr_dst->shared->data_size);
 
             if(H5D_vlen_reclaim(tid_mem, buf_space, reclaim_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_BADITER, NULL, "unable to reclaim variable-length data")
         }  /* end if */
         else {
             HDassert(attr_dst->shared->data_size == attr_src->shared->data_size);
-            HDmemcpy(attr_dst->shared->data, attr_src->shared->data, attr_src->shared->data_size);
+            H5MM_memcpy(attr_dst->shared->data, attr_src->shared->data, attr_src->shared->data_size);
         } /* end else */
     } /* end if(attr_src->shared->data) */
 

@@ -3214,7 +3214,7 @@ H5F__get_metadata_read_retry_info(H5F_t *file, H5F_retry_info_t *info)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
                     /* Copy the information */
-                    HDmemcpy(info->retries[j], file->shared->retries[i], tot_size);
+                    H5MM_memcpy(info->retries[j], file->shared->retries[i], tot_size);
                 }
 
                 /* Increment location in info->retries[] array */

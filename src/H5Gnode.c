@@ -672,7 +672,7 @@ H5G__node_insert(H5F_t *f, haddr_t addr, void H5_ATTR_UNUSED *_lt_key,
         if(NULL == (snrt = (H5G_node_t *)H5AC_protect(f, H5AC_SNODE, *new_node_p, f, H5AC__NO_FLAGS_SET)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR, "unable to split symbol table node")
 
-        HDmemcpy(snrt->entry, sn->entry + H5F_SYM_LEAF_K(f),
+        H5MM_memcpy(snrt->entry, sn->entry + H5F_SYM_LEAF_K(f),
             H5F_SYM_LEAF_K(f) * sizeof(H5G_entry_t));
         snrt->nsyms = H5F_SYM_LEAF_K(f);
         snrt_flags |= H5AC__DIRTIED_FLAG;
@@ -1262,7 +1262,7 @@ H5G__node_copy(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr,
             char *link_name;            /* Pointer to value of soft link */
 
             /* Make a temporary copy, so that it will not change the info in the cache */
-            HDmemcpy(&tmp_src_ent, src_ent, sizeof(H5G_entry_t));
+            H5MM_memcpy(&tmp_src_ent, src_ent, sizeof(H5G_entry_t));
 
             /* Set up group location for soft link to start in */
             H5G_name_reset(&grp_path);

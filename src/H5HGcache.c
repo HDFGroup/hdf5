@@ -271,7 +271,7 @@ H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata,
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy the image buffer into the newly allocate chunk */
-    HDmemcpy(heap->chunk, _image, len);
+    H5MM_memcpy(heap->chunk, _image, len);
 
     /* Deserialize the heap's header */
     if(H5HG__hdr_deserialize(heap, (const uint8_t *)heap->chunk, f) < 0)
@@ -448,7 +448,7 @@ H5HG__cache_heap_serialize(const H5F_t *f, void *image, size_t len,
     HDassert(heap->chunk);
 
     /* copy the image into the buffer */
-    HDmemcpy(image, heap->chunk, len);
+    H5MM_memcpy(image, heap->chunk, len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HG__cache_heap_serialize() */

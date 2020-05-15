@@ -501,7 +501,7 @@ H5O__apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t ini
 
     /* Put magic # for object header in first chunk */
     if(oh->version > H5O_VERSION_1)
-        HDmemcpy(oh->chunk[0].image, H5O_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+        H5MM_memcpy(oh->chunk[0].image, H5O_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC);
 
     /* Create the message list */
     oh->nmesgs = 1;
@@ -1952,7 +1952,7 @@ H5O_loc_copy_shallow(H5O_loc_t *dst, H5O_loc_t *src)
     HDassert(dst);
 
     /* Copy the top level information */
-    HDmemcpy(dst, src, sizeof(H5O_loc_t));
+    H5MM_memcpy(dst, src, sizeof(H5O_loc_t));
 
     /* Reset the source location, as the destination 'owns' it now */
     H5O_loc_reset(src);
@@ -1986,7 +1986,7 @@ H5O_loc_copy_deep(H5O_loc_t *dst, const H5O_loc_t *src)
     HDassert(dst);
 
     /* Copy the top level information */
-    HDmemcpy(dst, src, sizeof(H5O_loc_t));
+    H5MM_memcpy(dst, src, sizeof(H5O_loc_t));
 
     /* If the original entry was holding open the file, this one should
      * hold it open, too.

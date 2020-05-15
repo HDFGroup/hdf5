@@ -189,7 +189,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
             if(mesg->storage.u.compact.size > 0) {
                 if(NULL == (mesg->storage.u.compact.buf = H5MM_malloc(mesg->storage.u.compact.size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for compact data buffer")
-                HDmemcpy(mesg->storage.u.compact.buf, p, mesg->storage.u.compact.size);
+                H5MM_memcpy(mesg->storage.u.compact.buf, p, mesg->storage.u.compact.size);
                 p += mesg->storage.u.compact.size;
             } /* end if */
         } /* end if */
@@ -210,7 +210,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "memory allocation failed for compact data buffer")
 
                     /* Compact data */
-                    HDmemcpy(mesg->storage.u.compact.buf, p, mesg->storage.u.compact.size);
+                    H5MM_memcpy(mesg->storage.u.compact.buf, p, mesg->storage.u.compact.size);
                     p += mesg->storage.u.compact.size;
                 } /* end if */
 
@@ -425,14 +425,14 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
                         tmp_size = HDstrlen((const char *)heap_block_p) + 1;
                         if(NULL == (mesg->storage.u.virt.list[i].source_file_name = (char *)H5MM_malloc(tmp_size)))
                             HGOTO_ERROR(H5E_OHDR, H5E_RESOURCE, NULL, "unable to allocate memory for source file name")
-                        (void)HDmemcpy(mesg->storage.u.virt.list[i].source_file_name, heap_block_p, tmp_size);
+                        H5MM_memcpy(mesg->storage.u.virt.list[i].source_file_name, heap_block_p, tmp_size);
                         heap_block_p += tmp_size;
 
                         /* Source dataset name */
                         tmp_size = HDstrlen((const char *)heap_block_p) + 1;
                         if(NULL == (mesg->storage.u.virt.list[i].source_dset_name = (char *)H5MM_malloc(tmp_size)))
                             HGOTO_ERROR(H5E_OHDR, H5E_RESOURCE, NULL, "unable to allocate memory for source dataset name")
-                        (void)HDmemcpy(mesg->storage.u.virt.list[i].source_dset_name, heap_block_p, tmp_size);
+                        H5MM_memcpy(mesg->storage.u.virt.list[i].source_dset_name, heap_block_p, tmp_size);
                         heap_block_p += tmp_size;
 
                         /* Source selection */
@@ -583,7 +583,7 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
             /* Raw data */
             if(mesg->storage.u.compact.size > 0) {
                 if(mesg->storage.u.compact.buf)
-                    HDmemcpy(p, mesg->storage.u.compact.buf, mesg->storage.u.compact.size);
+                    H5MM_memcpy(p, mesg->storage.u.compact.buf, mesg->storage.u.compact.size);
                 else
                     HDmemset(p, 0, mesg->storage.u.compact.size);
                 p += mesg->storage.u.compact.size;
@@ -748,7 +748,7 @@ H5O__layout_copy(const void *_mesg, void *_dest)
                     HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset")
 
                 /* Copy over the raw data */
-                HDmemcpy(dest->storage.u.compact.buf, mesg->storage.u.compact.buf, dest->storage.u.compact.size);
+                H5MM_memcpy(dest->storage.u.compact.buf, mesg->storage.u.compact.buf, dest->storage.u.compact.size);
             } /* end if */
             else
                 HDassert(dest->storage.u.compact.buf == NULL);

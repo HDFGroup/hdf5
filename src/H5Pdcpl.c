@@ -421,13 +421,13 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
             for(u = 0; u < layout->storage.u.virt.list_nused; u++) {
                 /* Source file name */
                 tmp_size = HDstrlen(layout->storage.u.virt.list[u].source_file_name) + (size_t)1;
-                (void)HDmemcpy(*pp, layout->storage.u.virt.list[u].source_file_name, tmp_size);
+                H5MM_memcpy(*pp, layout->storage.u.virt.list[u].source_file_name, tmp_size);
                 *pp += tmp_size;
                 *size += tmp_size;
 
                 /* Source dataset name */
                 tmp_size = HDstrlen(layout->storage.u.virt.list[u].source_dset_name) + (size_t)1;
-                (void)HDmemcpy(*pp, layout->storage.u.virt.list[u].source_dset_name, tmp_size);
+                H5MM_memcpy(*pp, layout->storage.u.virt.list[u].source_dset_name, tmp_size);
                 *pp += tmp_size;
                 *size += tmp_size;
 
@@ -597,14 +597,14 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
                         tmp_size = HDstrlen((const char *)*pp) + 1;
                         if(NULL == (tmp_layout.storage.u.virt.list[u].source_file_name = (char *)H5MM_malloc(tmp_size)))
                             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "unable to allocate memory for source file name")
-                        (void)HDmemcpy(tmp_layout.storage.u.virt.list[u].source_file_name, *pp, tmp_size);
+                        H5MM_memcpy(tmp_layout.storage.u.virt.list[u].source_file_name, *pp, tmp_size);
                         *pp += tmp_size;
 
                         /* Source dataset name */
                         tmp_size = HDstrlen((const char *)*pp) + 1;
                         if(NULL == (tmp_layout.storage.u.virt.list[u].source_dset_name = (char *)H5MM_malloc(tmp_size)))
                             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "unable to allocate memory for source dataset name")
-                        (void)HDmemcpy(tmp_layout.storage.u.virt.list[u].source_dset_name, *pp, tmp_size);
+                        H5MM_memcpy(tmp_layout.storage.u.virt.list[u].source_dset_name, *pp, tmp_size);
                         *pp += tmp_size;
 
                         /* Source selection */
@@ -669,7 +669,7 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
     } /* end switch */
 
     /* Set the value */
-    HDmemcpy(value, layout, sizeof(H5O_layout_t));
+    H5MM_memcpy(value, layout, sizeof(H5O_layout_t));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1018,7 +1018,7 @@ H5P__dcrt_fill_value_enc(const void *value, void **_pp, size_t *size)
         /* Encode the fill value & datatype */
         if(fill->size > 0) {
             /* Encode the fill value itself */
-            HDmemcpy(*pp, (uint8_t *)fill->buf, (size_t)fill->size);
+            H5MM_memcpy(*pp, (uint8_t *)fill->buf, (size_t)fill->size);
             *pp += fill->size;
 
             /* Encode fill value datatype */
@@ -1115,7 +1115,7 @@ H5P__dcrt_fill_value_dec(const void **_pp, void *_value)
         /* Allocate fill buffer and copy the contents in it */
         if(NULL == (fill->buf = H5MM_malloc((size_t)fill->size)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for fill value buffer")
-        HDmemcpy((uint8_t *)fill->buf, *pp, (size_t)fill->size);
+        H5MM_memcpy((uint8_t *)fill->buf, *pp, (size_t)fill->size);
         *pp += fill->size;
 
         enc_size = *(*pp)++;
@@ -1430,7 +1430,7 @@ H5P__dcrt_ext_file_list_enc(const void *value, void **_pp, size_t *size)
             UINT64ENCODE_VAR(*pp, enc_value, enc_size);
 
             /* Encode name */
-            HDmemcpy(*pp, (uint8_t *)(efl->slot[u].name), len);
+            H5MM_memcpy(*pp, (uint8_t *)(efl->slot[u].name), len);
             *pp += len;
 
             /* Encode offset */
@@ -2017,7 +2017,7 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
 #endif /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
 
     /* Verify & initialize property's chunk dims */
-    HDmemcpy(&chunk_layout, &H5D_def_layout_chunk_g, sizeof(H5D_def_layout_chunk_g));
+    H5MM_memcpy(&chunk_layout, &H5D_def_layout_chunk_g, sizeof(H5D_def_layout_chunk_g));
     HDmemset(&chunk_layout.u.chunk.dim, 0, sizeof(chunk_layout.u.chunk.dim));
     chunk_nelmts = 1;
     for(u = 0; u < (unsigned)ndims; u++) {
@@ -2186,7 +2186,7 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
             HGOTO_ERROR(H5E_PLIST, H5E_CANTRESET, FAIL, "can't release layout message")
 
         /* Copy the default virtual layout */
-        HDmemcpy(&virtual_layout, &H5D_def_layout_virtual_g, sizeof(H5D_def_layout_virtual_g));
+        H5MM_memcpy(&virtual_layout, &H5D_def_layout_virtual_g, sizeof(H5D_def_layout_virtual_g));
 
         /* Sanity check */
         HDassert(virtual_layout.storage.u.virt.list_nalloc == 0);
@@ -3225,7 +3225,7 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
         fill.size = (ssize_t)H5T_get_size(type);
         if(NULL == (fill.buf = H5MM_malloc((size_t)fill.size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "memory allocation failed for fill value")
-        HDmemcpy(fill.buf, value, (size_t)fill.size);
+        H5MM_memcpy(fill.buf, value, (size_t)fill.size);
 
         /* Set up type conversion function */
         if(NULL == (tpath = H5T_path_find(type, type)))
@@ -3333,7 +3333,7 @@ H5P_get_fill_value(H5P_genplist_t *plist, const H5T_t *type, void *value/*out*/)
         if(H5T_path_bkg(tpath) && NULL == (bkg = H5MM_malloc(H5T_get_size(fill.type))))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for type conversion")
     } /* end else */
-    HDmemcpy(buf, fill.buf, H5T_get_size(fill.type));
+    H5MM_memcpy(buf, fill.buf, H5T_get_size(fill.type));
 
     /* Do the conversion */
     if((dst_id = H5I_register(H5I_DATATYPE, H5T_copy(type, H5T_COPY_TRANSIENT), FALSE)) < 0)
@@ -3341,7 +3341,7 @@ H5P_get_fill_value(H5P_genplist_t *plist, const H5T_t *type, void *value/*out*/)
     if(H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, buf, bkg) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "datatype conversion failed")
     if(buf != value)
-        HDmemcpy(value, buf, H5T_get_size(type));
+        H5MM_memcpy(value, buf, H5T_get_size(type));
 
 done:
     if(buf != value)

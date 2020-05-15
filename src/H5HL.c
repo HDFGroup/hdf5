@@ -725,7 +725,7 @@ H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf))
     } /* end if */
 
     /* Copy the data into the heap */
-    HDmemcpy(heap->dblk_image + offset, buf, buf_size);
+    H5MM_memcpy(heap->dblk_image + offset, buf, buf_size);
 
     /* Set return value */
     ret_value = offset;

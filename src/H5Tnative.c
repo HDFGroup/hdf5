@@ -369,7 +369,7 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get member name")
                     if(H5T__get_member_value(dtype, u, tmp_memb_value) < 0)
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get member value")
-                    HDmemcpy(memb_value, tmp_memb_value, H5T_get_size(super_type));
+                    H5MM_memcpy(memb_value, tmp_memb_value, H5T_get_size(super_type));
 
                     if(H5T_convert(tpath, super_type_id, nat_super_type_id, (size_t)1, (size_t)0, (size_t)0, memb_value, NULL) < 0)
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get member value")

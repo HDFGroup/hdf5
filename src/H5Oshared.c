@@ -354,7 +354,7 @@ H5O_shared_decode(H5F_t *f, H5O_t *open_oh, unsigned *ioflags, const uint8_t *bu
          */
         if(sh_mesg.type == H5O_SHARE_TYPE_SOHM) {
             HDassert(version >= H5O_SHARED_VERSION_3);
-            HDmemcpy(&sh_mesg.u.heap_id, buf, sizeof(sh_mesg.u.heap_id));
+            H5MM_memcpy(&sh_mesg.u.heap_id, buf, sizeof(sh_mesg.u.heap_id));
         } /* end if */
         else {
             /* The H5O_COMMITTED_FLAG should be set if this message
@@ -422,7 +422,7 @@ H5O_shared_encode(const H5F_t *f, uint8_t *buf/*out*/, const H5O_shared_t *sh_me
      * object header that holds it.
      */
     if(sh_mesg->type == H5O_SHARE_TYPE_SOHM)
-        HDmemcpy(buf, &(sh_mesg->u.heap_id), sizeof(sh_mesg->u.heap_id));
+        H5MM_memcpy(buf, &(sh_mesg->u.heap_id), sizeof(sh_mesg->u.heap_id));
     else
         H5F_addr_encode(f, &buf, sh_mesg->u.loc.oh_addr);
 

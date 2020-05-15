@@ -609,7 +609,7 @@ H5PB_update_entry(H5PB_t *page_buf, haddr_t addr, size_t size, const void *buf)
 
         HDassert(addr + size <= page_addr + page_buf->page_size);
         offset = addr - page_addr;
-        HDmemcpy((uint8_t *)page_entry->page_buf_ptr + offset, buf, size);
+        H5MM_memcpy((uint8_t *)page_entry->page_buf_ptr + offset, buf, size);
 
         /* move to top of LRU list */
         H5PB__MOVE_TO_TOP_LRU(page_buf, page_entry)
@@ -818,7 +818,7 @@ H5PB_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, void *buf/*out*/
                         offset = addr - first_page_addr;
                         HDassert(page_buf->page_size > offset);
 
-                        HDmemcpy(buf, (uint8_t *)page_entry->page_buf_ptr + offset,
+                        H5MM_memcpy(buf, (uint8_t *)page_entry->page_buf_ptr + offset,
                                  page_buf->page_size - (size_t)offset);
 
                         /* move to top of LRU list */
@@ -829,7 +829,7 @@ H5PB_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, void *buf/*out*/
                         offset = (num_touched_pages-2)*page_buf->page_size +
                             (page_buf->page_size - (addr - first_page_addr));
 
-                        HDmemcpy((uint8_t *)buf + offset, page_entry->page_buf_ptr,
+                        H5MM_memcpy((uint8_t *)buf + offset, page_entry->page_buf_ptr,
                                  (size_t)((addr + size) - last_page_addr));
 
                         /* move to top of LRU list */
@@ -839,7 +839,7 @@ H5PB_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, void *buf/*out*/
                     else {
                         offset = i*page_buf->page_size;
 
-                        HDmemcpy((uint8_t *)buf+(i*page_buf->page_size) , page_entry->page_buf_ptr,
+                        H5MM_memcpy((uint8_t *)buf+(i*page_buf->page_size) , page_entry->page_buf_ptr,
                              page_buf->page_size);
                     } /* end else */
                 } /* end if */
@@ -872,7 +872,7 @@ H5PB_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, void *buf/*out*/
                 buf_offset = (0 == i ? 0 : size - access_size);
 
                 /* copy the requested data from the page into the input buffer */
-                HDmemcpy((uint8_t *)buf + buf_offset, (uint8_t *)page_entry->page_buf_ptr + offset, access_size);
+                H5MM_memcpy((uint8_t *)buf + buf_offset, (uint8_t *)page_entry->page_buf_ptr + offset, access_size);
 
                 /* Update LRU */
                 H5PB__MOVE_TO_TOP_LRU(page_buf, page_entry)
@@ -937,7 +937,7 @@ H5PB_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, void *buf/*out*/
                 /* Copy the requested data from the page into the input buffer */
                 offset = (0 == i ? addr - search_addr : 0);
                 buf_offset = (0 == i ? 0 : size - access_size);
-                HDmemcpy((uint8_t *)buf + buf_offset, (uint8_t *)new_page_buf + offset, access_size);
+                H5MM_memcpy((uint8_t *)buf + buf_offset, (uint8_t *)new_page_buf + offset, access_size);
 
                 /* Create the new PB entry */
                 if(NULL == (page_entry = H5FL_CALLOC(H5PB_entry_t)))
@@ -1102,7 +1102,7 @@ H5PB_write(H5F_t *f, H5FD_mem_t type, haddr_t addr,
                     HDassert(page_buf->page_size > offset);
 
                     /* Update page's data */
-                    HDmemcpy((uint8_t *)page_entry->page_buf_ptr + offset, buf, page_buf->page_size - (size_t)offset);
+                    H5MM_memcpy((uint8_t *)page_entry->page_buf_ptr + offset, buf, page_buf->page_size - (size_t)offset);
 
                     /* Mark page dirty and push to top of LRU */
                     page_entry->is_dirty = TRUE;
@@ -1121,7 +1121,7 @@ H5PB_write(H5F_t *f, H5FD_mem_t type, haddr_t addr,
                         (page_buf->page_size - (addr - first_page_addr));
 
                     /* Update page's data */
-                    HDmemcpy(page_entry->page_buf_ptr, (const uint8_t *)buf + offset,
+                    H5MM_memcpy(page_entry->page_buf_ptr, (const uint8_t *)buf + offset,
                              (size_t)((addr + size) - last_page_addr));
 
                     /* Mark page dirty and push to top of LRU */
@@ -1173,7 +1173,7 @@ H5PB_write(H5F_t *f, H5FD_mem_t type, haddr_t addr,
                 buf_offset = (0 == i ? 0 : size - access_size);
 
                 /* Copy the requested data from the input buffer into the page */
-                HDmemcpy((uint8_t *)page_entry->page_buf_ptr + offset, (const uint8_t *)buf + buf_offset, access_size);
+                H5MM_memcpy((uint8_t *)page_entry->page_buf_ptr + offset, (const uint8_t *)buf + buf_offset, access_size);
 
                 /* Mark page dirty and push to top of LRU */
                 page_entry->is_dirty = TRUE;
@@ -1289,7 +1289,7 @@ H5PB_write(H5F_t *f, H5FD_mem_t type, haddr_t addr,
                 } /* end else */
 
                 /* Copy the requested data from the page into the input buffer */
-                HDmemcpy((uint8_t *)new_page_buf + offset, (const uint8_t *)buf+buf_offset, access_size);
+                H5MM_memcpy((uint8_t *)new_page_buf + offset, (const uint8_t *)buf+buf_offset, access_size);
 
                 /* Page is dirty now */
                 page_entry->is_dirty = TRUE;

@@ -3082,7 +3082,7 @@ H5HF__sect_indirect_reduce_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect,
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "allocation failed for row section pointer array")
 
             /* Transfer row sections between current & peer sections */
-            HDmemcpy(&peer_sect->u.indirect.dir_rows[0],
+            H5MM_memcpy(&peer_sect->u.indirect.dir_rows[0],
                 &sect->u.indirect.dir_rows[0],
                 (sizeof(H5HF_free_section_t *) * peer_dir_nrows));
             HDmemmove(&sect->u.indirect.dir_rows[0],
@@ -3321,7 +3321,7 @@ H5HF__sect_indirect_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect,
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "allocation failed for indirect section pointer array")
 
             /* Transfer child indirect sections between current & peer sections */
-            HDmemcpy(&peer_sect->u.indirect.indir_ents[0],
+            H5MM_memcpy(&peer_sect->u.indirect.indir_ents[0],
                 &sect->u.indirect.indir_ents[sect->u.indirect.indir_nents - peer_nentries],
                 (sizeof(H5HF_free_section_t *) * peer_nentries));
             sect->u.indirect.indir_nents -= (peer_nentries + 1); /* Transferred blocks, plus child entry */
@@ -3636,7 +3636,7 @@ H5HF__sect_indirect_merge_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect1,
             sect1->u.indirect.dir_rows = new_dir_rows;
 
             /* Transfer the second section's rows to first section */
-            HDmemcpy(&sect1->u.indirect.dir_rows[sect1->u.indirect.dir_nrows],
+            H5MM_memcpy(&sect1->u.indirect.dir_rows[sect1->u.indirect.dir_nrows],
                 &sect2->u.indirect.dir_rows[src_row2],
                 (sizeof(H5HF_free_section_t *) * nrows_moved2));
 
@@ -3682,7 +3682,7 @@ H5HF__sect_indirect_merge_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect1,
             sect1->u.indirect.indir_ents = new_indir_ents;
 
             /* Transfer the second section's entries to first section */
-            HDmemcpy(&sect1->u.indirect.indir_ents[sect1->u.indirect.indir_nents],
+            H5MM_memcpy(&sect1->u.indirect.indir_ents[sect1->u.indirect.indir_nents],
                 &sect2->u.indirect.indir_ents[0],
                 (sizeof(H5HF_free_section_t *) * sect2->u.indirect.indir_nents));
         } /* end else */

@@ -117,7 +117,7 @@ H5D__scatter_file(const H5D_io_info_t *_io_info,
     HDassert(_buf);
 
     /* Set up temporary I/O info object */
-    HDmemcpy(&tmp_io_info, _io_info, sizeof(*_io_info));
+    H5MM_memcpy(&tmp_io_info, _io_info, sizeof(*_io_info));
     tmp_io_info.op_type = H5D_IO_OP_WRITE;
     tmp_io_info.u.wbuf = _buf;
 
@@ -220,7 +220,7 @@ H5D__gather_file(const H5D_io_info_t *_io_info,
     HDassert(_buf);
 
     /* Set up temporary I/O info object */
-    HDmemcpy(&tmp_io_info, _io_info, sizeof(*_io_info));
+    H5MM_memcpy(&tmp_io_info, _io_info, sizeof(*_io_info));
     tmp_io_info.op_type = H5D_IO_OP_READ;
     tmp_io_info.u.rbuf = _buf;
 
@@ -337,7 +337,7 @@ H5D__scatter_mem (const void *_tscat_buf, const H5S_t *space,
             /* Get the number of bytes in sequence */
             curr_len = len[curr_seq];
 
-            HDmemcpy(buf + off[curr_seq], tscat_buf, curr_len);
+            H5MM_memcpy(buf + off[curr_seq], tscat_buf, curr_len);
 
             /* Advance offset in destination buffer */
             tscat_buf += curr_len;
@@ -425,7 +425,7 @@ H5D__gather_mem(const void *_buf, const H5S_t *space,
             /* Get the number of bytes in sequence */
             curr_len = len[curr_seq];
 
-            HDmemcpy(tgath_buf, buf + off[curr_seq], curr_len);
+            H5MM_memcpy(tgath_buf, buf + off[curr_seq], curr_len);
 
             /* Advance offset in gather buffer */
             tgath_buf += curr_len;

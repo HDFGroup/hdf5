@@ -732,7 +732,7 @@ H5VM_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *size,
 
             /* Copy an element */
             H5_CHECK_OVERFLOW(elmt_size,hsize_t,size_t);
-            HDmemcpy(dst, src, (size_t)elmt_size); /*lint !e671 The elmt_size will be OK */
+            H5MM_memcpy(dst, src, (size_t)elmt_size); /*lint !e671 The elmt_size will be OK */
 
             /* Decrement indices and advance pointers */
             for (j=(int)(n-1), carry=TRUE; j>=0 && carry; --j) {
@@ -749,7 +749,7 @@ H5VM_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *size,
         }
     } else {
         H5_CHECK_OVERFLOW(elmt_size,hsize_t,size_t);
-        HDmemcpy (dst, src, (size_t)elmt_size); /*lint !e671 The elmt_size will be OK */
+        H5MM_memcpy (dst, src, (size_t)elmt_size); /*lint !e671 The elmt_size will be OK */
     }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -801,7 +801,7 @@ H5VM_stride_copy_s(unsigned n, hsize_t elmt_size, const hsize_t *size,
 
             /* Copy an element */
             H5_CHECK_OVERFLOW(elmt_size,hsize_t,size_t);
-            HDmemcpy(dst, src, (size_t)elmt_size); /*lint !e671 The elmt_size will be OK */
+            H5MM_memcpy(dst, src, (size_t)elmt_size); /*lint !e671 The elmt_size will be OK */
 
             /* Decrement indices and advance pointers */
             for (j=(int)(n-1), carry=TRUE; j>=0 && carry; --j) {
@@ -818,7 +818,7 @@ H5VM_stride_copy_s(unsigned n, hsize_t elmt_size, const hsize_t *size,
         }
     } else {
         H5_CHECK_OVERFLOW(elmt_size,hsize_t,size_t);
-        HDmemcpy (dst, src, (size_t)elmt_size); /*lint !e671 The elmt_size will be OK */
+        H5MM_memcpy (dst, src, (size_t)elmt_size); /*lint !e671 The elmt_size will be OK */
     }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -877,7 +877,7 @@ H5VM_stride_copy2(hsize_t nelmts, hsize_t elmt_size,
 
 	/* Copy an element */
         H5_CHECK_OVERFLOW(elmt_size,hsize_t,size_t);
-	HDmemcpy(dst, src, (size_t)elmt_size); /*lint !e671 The elmt_size will be OK */
+	H5MM_memcpy(dst, src, (size_t)elmt_size); /*lint !e671 The elmt_size will be OK */
 
 	/* Decrement indices and advance pointers */
 	for (j=(int)(dst_n-1), carry=TRUE; j>=0 && carry; --j) {
@@ -936,7 +936,7 @@ H5VM_array_fill(void *_dst, const void *src, size_t size, size_t count)
     HDassert(size < SIZET_MAX && size > 0);
     HDassert(count < SIZET_MAX && count > 0);
 
-    HDmemcpy(dst, src, size);   /* copy first item */
+    H5MM_memcpy(dst, src, size);   /* copy first item */
 
     /* Initialize counters, etc. while compensating for first element copied */
     copy_size = size;
@@ -947,7 +947,7 @@ H5VM_array_fill(void *_dst, const void *src, size_t size, size_t count)
     /* copy until we've copied at least half of the items */
     while (items_left >= copy_items)
     {
-        HDmemcpy(dst, _dst, copy_size);   /* copy the current chunk */
+        H5MM_memcpy(dst, _dst, copy_size);   /* copy the current chunk */
         dst += copy_size;     /* move the offset for the next chunk */
         items_left -= copy_items;   /* decrement the number of items left */
 
@@ -955,7 +955,7 @@ H5VM_array_fill(void *_dst, const void *src, size_t size, size_t count)
         copy_items *= 2;    /* increase the count of items we are copying */
     }   /* end while */
     if (items_left > 0)   /* if there are any items left to copy */
-        HDmemcpy(dst, _dst, items_left * size);
+        H5MM_memcpy(dst, _dst, items_left * size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }   /* H5VM_array_fill() */
@@ -1623,7 +1623,7 @@ src_smaller:
         acc_len = 0;
         do {
             /* Copy data */
-            HDmemcpy(dst, src, tmp_src_len);
+            H5MM_memcpy(dst, src, tmp_src_len);
 
             /* Accumulate number of bytes copied */
             acc_len += tmp_src_len;
@@ -1666,7 +1666,7 @@ dst_smaller:
         acc_len = 0;
         do {
             /* Copy data */
-            HDmemcpy(dst, src, tmp_dst_len);
+            H5MM_memcpy(dst, src, tmp_dst_len);
 
             /* Accumulate number of bytes copied */
             acc_len += tmp_dst_len;
@@ -1709,7 +1709,7 @@ equal:
         acc_len = 0;
         do {
             /* Copy data */
-            HDmemcpy(dst, src, tmp_dst_len);
+            H5MM_memcpy(dst, src, tmp_dst_len);
 
             /* Accumulate number of bytes copied */
             acc_len += tmp_dst_len;

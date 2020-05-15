@@ -619,7 +619,7 @@ H5P__do_prop_cb1(H5SL_t *slist, H5P_genprop_t *prop, H5P_prp_cb1_t cb)
     /* Allocate space for a temporary copy of the property value */
     if(NULL == (tmp_value = H5MM_malloc(prop->size)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for temporary property value")
-    HDmemcpy(tmp_value, prop->value, prop->size);
+    H5MM_memcpy(tmp_value, prop->value, prop->size);
 
     /* Call "type 1" callback ('create', 'copy' or 'close') */
     if(cb(prop->name, prop->size, tmp_value) < 0)
@@ -630,7 +630,7 @@ H5P__do_prop_cb1(H5SL_t *slist, H5P_genprop_t *prop, H5P_prp_cb1_t cb)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "Can't copy property")
 
     /* Copy the changed value into the new property */
-    HDmemcpy(pcopy->value, tmp_value, prop->size);
+    H5MM_memcpy(pcopy->value, tmp_value, prop->size);
 
     /* Insert the changed property into the property list */
     if(H5P_add_prop(slist, pcopy) < 0)
@@ -978,7 +978,7 @@ H5P_dup_prop(H5P_genprop_t *oprop, H5P_prop_within_t type)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy basic property information */
-    HDmemcpy(prop, oprop, sizeof(H5P_genprop_t));
+    H5MM_memcpy(prop, oprop, sizeof(H5P_genprop_t));
 
     /* Check if we should duplicate the name or share it */
 
@@ -1018,7 +1018,7 @@ H5P_dup_prop(H5P_genprop_t *oprop, H5P_prop_within_t type)
         HDassert(prop->size > 0);
         if(NULL == (prop->value = H5MM_malloc(prop->size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-        HDmemcpy(prop->value, oprop->value, prop->size);
+        H5MM_memcpy(prop->value, oprop->value, prop->size);
     } /* end if */
 
     /* Set return value */
@@ -1105,7 +1105,7 @@ H5P_create_prop(const char *name, size_t size, H5P_prop_within_t type,
     if(value != NULL) {
         if(NULL == (prop->value = H5MM_malloc (prop->size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-        HDmemcpy(prop->value, value, prop->size);
+        H5MM_memcpy(prop->value, value, prop->size);
     } /* end if */
     else
         prop->value = NULL;
@@ -2715,7 +2715,7 @@ H5P__poke_plist_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "property has zero size")
 
     /* Overwrite value in property */
-    HDmemcpy(prop->value, udata->value, prop->size);
+    H5MM_memcpy(prop->value, udata->value, prop->size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2767,7 +2767,7 @@ H5P__poke_pclass_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop
     if(NULL == (pcopy = H5P_dup_prop(prop, H5P_PROP_WITHIN_LIST)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "Can't copy property")
 
-    HDmemcpy(pcopy->value, udata->value, pcopy->size);
+    H5MM_memcpy(pcopy->value, udata->value, pcopy->size);
 
     /* Insert the changed property into the property list */
     if(H5P_add_prop(plist->props, pcopy) < 0)
@@ -2876,7 +2876,7 @@ H5P__set_plist_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
         /* Make a copy of the current value, in case the callback fails */
         if(NULL == (tmp_value = H5MM_malloc(prop->size)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed temporary property value")
-        HDmemcpy(tmp_value, udata->value, prop->size);
+        H5MM_memcpy(tmp_value, udata->value, prop->size);
 
         /* Call user's callback */
         if((*(prop->set))(plist->plist_id, name, prop->size, tmp_value) < 0)
@@ -2897,7 +2897,7 @@ H5P__set_plist_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
     } /* end if */
 
     /* Copy new [possibly unchanged] value into property value */
-    HDmemcpy(prop->value, prp_value, prop->size);
+    H5MM_memcpy(prop->value, prp_value, prop->size);
 
 done:
     /* Free the temporary value buffer */
@@ -2956,7 +2956,7 @@ H5P__set_pclass_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
         /* Make a copy of the current value, in case the callback fails */
         if(NULL == (tmp_value = H5MM_malloc(prop->size)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed temporary property value")
-        HDmemcpy(tmp_value, udata->value, prop->size);
+        H5MM_memcpy(tmp_value, udata->value, prop->size);
 
         /* Call user's callback */
         if((*(prop->set))(plist->plist_id, name, prop->size, tmp_value) < 0)
@@ -2973,7 +2973,7 @@ H5P__set_pclass_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
     if(NULL == (pcopy = H5P_dup_prop(prop, H5P_PROP_WITHIN_LIST)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "Can't copy property")
 
-    HDmemcpy(pcopy->value, prp_value, pcopy->size);
+    H5MM_memcpy(pcopy->value, prp_value, pcopy->size);
 
     /* Insert the changed property into the property list */
     if(H5P_add_prop(plist->props, pcopy) < 0)
@@ -4222,7 +4222,7 @@ H5P__peek_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "property has zero size")
 
     /* Make a (shallow) copy of the value */
-    HDmemcpy(udata->value, prop->value, prop->size);
+    H5MM_memcpy(udata->value, prop->value, prop->size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4322,18 +4322,18 @@ H5P__get_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
         /* Make a copy of the current value, in case the callback fails */
         if(NULL == (tmp_value = H5MM_malloc(prop->size)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed temporary property value")
-        HDmemcpy(tmp_value, prop->value, prop->size);
+        H5MM_memcpy(tmp_value, prop->value, prop->size);
 
         /* Call user's callback */
         if((*(prop->get))(plist->plist_id, name, prop->size, tmp_value) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set property value")
 
         /* Copy new [possibly unchanged] value into return value */
-        HDmemcpy(udata->value, tmp_value, prop->size);
+        H5MM_memcpy(udata->value, tmp_value, prop->size);
     } /* end if */
     /* No 'get' callback, just copy value */
     else
-        HDmemcpy(udata->value, prop->value, prop->size);
+        H5MM_memcpy(udata->value, prop->value, prop->size);
 
 done:
     /* Free the temporary value buffer */
@@ -4506,7 +4506,7 @@ H5P__del_pclass_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
         /* Allocate space for a temporary copy of the property value */
         if(NULL == (tmp_value = H5MM_malloc(prop->size)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for temporary property value")
-        HDmemcpy(tmp_value, prop->value, prop->size);
+        H5MM_memcpy(tmp_value, prop->value, prop->size);
 
         /* Call user's callback */
         if((*(prop->del))(plist->plist_id, name, prop->size, tmp_value) < 0)
@@ -4955,7 +4955,7 @@ H5P_close(void *_plist)
                         /* Allocate space for a temporary copy of the property value */
                         if(NULL==(tmp_value=H5MM_malloc(tmp->size)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for temporary property value")
-                        HDmemcpy(tmp_value,tmp->value,tmp->size);
+                        H5MM_memcpy(tmp_value,tmp->value,tmp->size);
 
                         /* Call the 'close' callback */
                         (tmp->close)(tmp->name,tmp->size,tmp_value);

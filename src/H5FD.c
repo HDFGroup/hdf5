@@ -294,7 +294,7 @@ H5FD_register(const void *_cls, size_t size, hbool_t app_ref)
     /* Copy the class structure so the caller can reuse or free it */
     if(NULL == (saved = (H5FD_class_t *)H5MM_malloc(size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for file driver class struct")
-    HDmemcpy(saved, cls, size);
+    H5MM_memcpy(saved, cls, size);
 
     /* Create the new class ID */
     if((ret_value = H5I_register(H5I_VFL, saved, app_ref)) < 0)
@@ -574,8 +574,7 @@ H5FD_fapl_close(hid_t driver_id, const void *driver_info)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check args */
-    if(driver_id > 0) {
+    if(driver_id > 0 && driver_info) {
         H5FD_class_t	*driver;
 
         /* Retrieve the driver for the ID */
@@ -583,15 +582,15 @@ H5FD_fapl_close(hid_t driver_id, const void *driver_info)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID")
 
         /* Allow driver to free info or do it ourselves */
-        if(driver_info) {
-            if(driver->fapl_free) {
-                if((driver->fapl_free)((void *)driver_info) < 0)        /* Casting away const OK -QAK */
-                    HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "driver free request failed")
-            } /* end if */
-            else
-                H5MM_xfree((void *)driver_info);        /* Casting away const OK -QAK */
-        } /* end if */
-    } /* end if */
+        if(driver->fapl_free) {
+            /* Free the const pointer */
+            /* Cast through uintptr_t to de-const memory */
+            if((driver->fapl_free)((void *)(uintptr_t)driver_info) < 0)
+                HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "driver free request failed")
+        }
+        else
+            driver_info = H5MM_xfree_const(driver_info);
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1339,7 +1338,7 @@ H5FD_get_fs_type_map(const H5FD_t *file, H5FD_mem_t *type_map)
     } /* end if */
     else
         /* Copy class's default free space type mapping */
-        HDmemcpy(type_map, file->cls->fl_map, sizeof(file->cls->fl_map));
+        H5MM_memcpy(type_map, file->cls->fl_map, sizeof(file->cls->fl_map));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

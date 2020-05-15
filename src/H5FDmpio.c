@@ -736,7 +736,7 @@ HDfprintf(stderr, "enter H5FD_mpio_fapl_copy\n");
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy the general information */
-    HDmemcpy(new_fa, old_fa, sizeof(H5FD_mpio_fapl_t));
+    H5MM_memcpy(new_fa, old_fa, sizeof(H5FD_mpio_fapl_t));
 
     /* Duplicate communicator and Info object. */
     if(FAIL == H5FD_mpi_comm_info_dup(old_fa->comm, old_fa->info, &new_fa->comm, &new_fa->info))

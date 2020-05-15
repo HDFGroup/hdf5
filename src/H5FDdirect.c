@@ -424,7 +424,7 @@ H5FD_direct_fapl_copy(const void *_old_fa)
     HDassert(new_fa);
 
     /* Copy the general information */
-    HDmemcpy(new_fa, old_fa, sizeof(H5FD_direct_fapl_t));
+    H5MM_memcpy(new_fa, old_fa, sizeof(H5FD_direct_fapl_t));
 
     FUNC_LEAVE_NOAPI(new_fa)
 } /* end H5FD_direct_fapl_copy() */
@@ -978,12 +978,12 @@ H5FD_direct_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
                  * next section of data. */
         p2 = (unsigned char*)copy_buf + copy_offset;
         if((copy_size + copy_offset) <= alloc_size) {
-            HDmemcpy(buf, p2, copy_size);
+            H5MM_memcpy(buf, p2, copy_size);
             buf = (unsigned char *)buf + copy_size;
             copy_size = 0;
                 } /* end if */
                 else {
-                    HDmemcpy(buf, p2, alloc_size - copy_offset);
+                    H5MM_memcpy(buf, p2, alloc_size - copy_offset);
                     buf = (unsigned char*)buf + alloc_size - copy_offset;
                     copy_size -= alloc_size - copy_offset;
                     copy_offset = 0;
@@ -1191,11 +1191,11 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_U
          */
         p1 = (unsigned char *)copy_buf + copy_offset;
         if((copy_size + copy_offset) <= alloc_size) {
-                    HDmemcpy(p1, p3, copy_size);
+                    H5MM_memcpy(p1, p3, copy_size);
                     copy_size = 0;
                 } /* end if */
                 else {
-                    HDmemcpy(p1, p3, alloc_size - copy_offset);
+                    H5MM_memcpy(p1, p3, alloc_size - copy_offset);
                     p3 = (const unsigned char *)p3 + (alloc_size - copy_offset);
                     copy_size -= alloc_size - copy_offset;
                     copy_offset = 0;

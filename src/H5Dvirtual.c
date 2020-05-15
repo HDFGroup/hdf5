@@ -497,11 +497,11 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
         /* Encode each entry */
         for(i = 0; i < layout->storage.u.virt.list_nused; i++) {
             /* Source file name */
-            HDmemcpy((char *)heap_block_p, layout->storage.u.virt.list[i].source_file_name, str_size[2 * i]);
+            H5MM_memcpy((char *)heap_block_p, layout->storage.u.virt.list[i].source_file_name, str_size[2 * i]);
             heap_block_p += str_size[2 * i];
 
             /* Source dataset name */
-            HDmemcpy((char *)heap_block_p, layout->storage.u.virt.list[i].source_dset_name, str_size[(2 * i) + 1]);
+            H5MM_memcpy((char *)heap_block_p, layout->storage.u.virt.list[i].source_dset_name, str_size[(2 * i) + 1]);
             heap_block_p += str_size[(2 * i) + 1];
 
             /* Source selection */
@@ -1114,7 +1114,7 @@ H5D__virtual_str_append(const char *src, size_t src_len, char **p, char **buf,
 
     /* Copy string to *p.  Note that since src in not NULL terminated, we must
      * use memcpy */
-    (void)HDmemcpy(*p, src, src_len);
+    H5MM_memcpy(*p, src, src_len);
 
     /* Advance *p */
     *p += src_len;
