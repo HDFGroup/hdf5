@@ -467,7 +467,7 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
             FAIL_PUTS_ERROR("H5Dclose() failed");
     } /* end for */
 
-    PASSED()
+    PASSED();
 
     HL_TESTING2("close file images");
 

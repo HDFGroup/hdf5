@@ -143,7 +143,7 @@ herr_t H5DSattach_scale(hid_t did,
     H5O_info_t oi1, oi2;
     H5I_type_t it1, it2;
     int        i;
-    size_t len;
+    size_t     len;
     int        found_ds=0;
     htri_t     is_scale;
 
@@ -156,7 +156,7 @@ herr_t H5DSattach_scale(hid_t did,
         return FAIL;
 
     /* the dataset cannot be a DS dataset */
-    if ( is_scale == 1)
+    if (is_scale == 1)
         return FAIL;
 
     /* get info for the dataset in the parameter list */
@@ -177,7 +177,7 @@ herr_t H5DSattach_scale(hid_t did,
     if ((it2 = H5Iget_type(dsid)) < 0)
         return FAIL;
 
-    if (H5I_DATASET!=it1 || H5I_DATASET!=it2)
+    if (H5I_DATASET != it1 || H5I_DATASET != it2)
         return FAIL;
 
     /* the DS dataset cannot have dimension scales */
@@ -202,19 +202,19 @@ herr_t H5DSattach_scale(hid_t did,
         return FAIL;
 
     /* get rank */
-    if ((rank=H5Sget_simple_extent_ndims(sid)) < 0)
+    if ((rank = H5Sget_simple_extent_ndims(sid)) < 0)
         goto out;
 
     /* scalar rank */
-    if (rank==0)
-        rank=1;
+    if (rank == 0)
+        rank = 1;
 
     /* close dataset space */
     if (H5Sclose(sid) < 0)
         return FAIL;
 
     /* parameter range checking */
-    if (idx>(unsigned)rank-1)
+    if (idx > (unsigned)rank-1)
         return FAIL;
 
     /*-------------------------------------------------------------------------
@@ -508,7 +508,7 @@ herr_t H5DSattach_scale(hid_t did,
     *-------------------------------------------------------------------------
     */
 
-    if((is_ds=H5DSis_scale(dsid)) < 0)
+    if((is_ds = H5DSis_scale(dsid)) < 0)
         return FAIL;
 
     if(is_ds == 0) {
@@ -598,7 +598,7 @@ herr_t H5DSdetach_scale(hid_t did,
 
     /* check for valid types of identifiers */
 
-    if(H5I_DATASET!=H5Iget_type(did) || H5I_DATASET!=H5Iget_type(dsid))
+    if(H5I_DATASET != H5Iget_type(did) || H5I_DATASET != H5Iget_type(dsid))
         return FAIL;
 
     if((is_scale = H5DSis_scale(did)) < 0)
@@ -626,7 +626,7 @@ herr_t H5DSdetach_scale(hid_t did,
     *-------------------------------------------------------------------------
     */
     /* try to find the attribute "DIMENSION_LIST" on the >>data<< dataset */
-    if ((has_dimlist = H5LT_find_attribute(did,DIMENSION_LIST)) < 0)
+    if ((has_dimlist = H5LT_find_attribute(did, DIMENSION_LIST)) < 0)
         return FAIL;
 
     if (has_dimlist == 0)
@@ -637,7 +637,7 @@ herr_t H5DSdetach_scale(hid_t did,
         return FAIL;
 
     /* get rank */
-    if ((rank=H5Sget_simple_extent_ndims(sid)) < 0)
+    if ((rank = H5Sget_simple_extent_ndims(sid)) < 0)
         goto out;
 
     /* close dataset space */
@@ -645,7 +645,7 @@ herr_t H5DSdetach_scale(hid_t did,
         return FAIL;
 
     /* parameter range checking */
-    if (idx>(unsigned)rank-1)
+    if (idx > (unsigned)rank-1)
         return FAIL;
 
     /*-------------------------------------------------------------------------
@@ -704,8 +704,7 @@ herr_t H5DSdetach_scale(hid_t did,
                 goto out;
 
             /* same object, reset */
-            if(dsid_oi.fileno == tmp_oi.fileno && dsid_oi.addr == tmp_oi.addr)
-            {
+            if(dsid_oi.fileno == tmp_oi.fileno && dsid_oi.addr == tmp_oi.addr) {
                 /* If there are more than one reference in the VL element
                    and the reference we found is not the last one,
                    copy the last one to replace the found one since the order
@@ -727,7 +726,7 @@ herr_t H5DSdetach_scale(hid_t did,
                    we do not need to continue the search if it is found */
                 found_ds = 1;
                 break;
-            }
+            } /* end if */
         } /* j */
     } /* if */
 
@@ -795,7 +794,7 @@ herr_t H5DSdetach_scale(hid_t did,
     if(H5Aread(aid, ntid, dsbuf) < 0)
         goto out;
 
-    for(ii=0; ii<nelmts; ii++) {
+    for(ii = 0; ii < nelmts; ii++) {
         /* First check if we have the same dimension index */
       if(idx == dsbuf[ii].dim_idx) {
             /* get the reference to the dataset */
@@ -820,7 +819,7 @@ herr_t H5DSdetach_scale(hid_t did,
                 nelmts--;
                 found_dset=1;
                 break;
-            } /* if */
+            } /* end if */
         } /* if we have the same dimension index */
     } /* ii */
 
@@ -990,7 +989,7 @@ htri_t H5DSis_attached(hid_t did,
     if ((it2 = H5Iget_type(dsid)) < 0)
         return FAIL;
 
-    if (H5I_DATASET!=it1 || H5I_DATASET!=it2)
+    if (H5I_DATASET != it1 || H5I_DATASET != it2)
         return FAIL;
 
     /*-------------------------------------------------------------------------
@@ -1040,7 +1039,7 @@ htri_t H5DSis_attached(hid_t did,
             goto out;
 
         /* read */
-        if (H5Aread(aid,tid,buf) < 0)
+        if (H5Aread(aid, tid, buf) < 0)
             goto out;
 
         /* iterate all the REFs in this dimension IDX */
@@ -1050,7 +1049,7 @@ htri_t H5DSis_attached(hid_t did,
             ref = ((hobj_ref_t *)buf[idx].p)[i];
 
             /* get the scale id for this REF */
-            if ((dsid_j = H5Rdereference2(did,H5P_DEFAULT,H5R_OBJECT,&ref)) < 0)
+            if ((dsid_j = H5Rdereference2(did, H5P_DEFAULT, H5R_OBJECT, &ref)) < 0)
                 goto out;
 
             /* get info for DS in the parameter list */
@@ -1073,7 +1072,7 @@ htri_t H5DSis_attached(hid_t did,
 
 
         /* close */
-        if (H5Dvlen_reclaim(tid,sid,H5P_DEFAULT,buf) < 0)
+        if (H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0)
             goto out;
         if (H5Sclose(sid) < 0)
             goto out;
@@ -1123,7 +1122,7 @@ htri_t H5DSis_attached(hid_t did,
         if (dsbuf == NULL)
             goto out;
 
-        if (H5Aread(aid,ntid,dsbuf) < 0)
+        if (H5Aread(aid, ntid, dsbuf) < 0)
             goto out;
 
         /*-------------------------------------------------------------------------
@@ -1131,7 +1130,7 @@ htri_t H5DSis_attached(hid_t did,
         *-------------------------------------------------------------------------
         */
 
-        for(i=0; i<nelmts; i++)
+        for(i = 0; i < nelmts; i++)
         {
             /* get the reference */
             ref = dsbuf[i].ref;
