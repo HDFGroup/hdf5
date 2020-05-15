@@ -400,7 +400,7 @@ H5T__commit(H5F_t *file, H5T_t *type, hid_t tcpl_id)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to update type header message")
 
     /* Copy the new object header's location into the datatype, taking ownership of it */
-    if(H5O_loc_copy(&(type->oloc), &temp_oloc, H5_COPY_SHALLOW) < 0)
+    if(H5O_loc_copy_shallow(&(type->oloc), &temp_oloc) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy datatype location")
     if(H5G_name_copy(&(type->path), &temp_path, H5_COPY_SHALLOW) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy datatype location")
@@ -904,7 +904,7 @@ H5T_open(const H5G_loc_t *loc)
 #endif /* H5_USING_MEMCHECKER */
 
         /* Shallow copy (take ownership) of the object location object */
-        if(H5O_loc_copy(&dt->oloc, loc->oloc, H5_COPY_SHALLOW) < 0)
+        if(H5O_loc_copy_shallow(&dt->oloc, loc->oloc) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy object location")
 
         /* Shallow copy (take ownership) of the group hier. path */
@@ -994,7 +994,7 @@ H5T__open_oid(const H5G_loc_t *loc)
     dt->shared->state = H5T_STATE_OPEN;
 
     /* Shallow copy (take ownership) of the object location object */
-    if(H5O_loc_copy(&dt->oloc, loc->oloc, H5_COPY_SHALLOW) < 0)
+    if(H5O_loc_copy_shallow(&dt->oloc, loc->oloc) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy object location")
 
     /* Shallow copy (take ownership) of the group hier. path */

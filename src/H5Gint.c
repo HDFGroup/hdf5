@@ -335,7 +335,7 @@ H5G_open(const H5G_loc_t *loc)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate space for group")
 
     /* Shallow copy (take ownership) of the group location object */
-    if(H5O_loc_copy(&(grp->oloc), loc->oloc, H5_COPY_SHALLOW) < 0)
+    if(H5O_loc_copy_shallow(&(grp->oloc), loc->oloc) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "can't copy object location")
     if(H5G_name_copy(&(grp->path), loc->path, H5_COPY_SHALLOW) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "can't copy path")
