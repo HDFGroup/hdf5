@@ -222,7 +222,7 @@ state_init(state_t *s, int argc, char **argv)
             s->update_interval.tv_sec = millis / 1000UL;
             s->update_interval.tv_nsec =
                 (long)((millis * 1000000UL) % 1000000000UL);
-            dbgf(1, "%lu milliseconds between updates", millis);
+            dbgf(1, "%lu milliseconds between updates\n", millis);
             break;
         case '?':
         default:
