@@ -55,7 +55,7 @@
         H5FO.c
 
         H5Tcommit.c
-	H5Tcompound.c
+        H5Tcompound.c
 
         H5Tcset.c
         H5Tenum.c
