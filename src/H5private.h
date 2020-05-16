@@ -301,17 +301,38 @@
  * file). Be sure to update that file if the #ifdefs change here.
  */
 #ifdef __cplusplus
-#   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
-#   define H5_ATTR_UNUSED         /*void*/
-#   define H5_ATTR_NDEBUG_UNUSED  /*void*/
-#   define H5_ATTR_NORETURN       /*void*/
-#   define H5_ATTR_CONST          /*void*/
-#   define H5_ATTR_PURE           /*void*/
-#   define H5_ATTR_FALLTHROUGH    /*void*/
+#   define H5_ATTR_FORMAT(X,Y,Z)                /*void*/
+#   define H5_ATTR_UNUSED                       /*void*/
+#   define H5_ATTR_DEPRECATED_USED              /*void*/
+#   define H5_ATTR_NDEBUG_UNUSED                /*void*/
+#   define H5_ATTR_DEBUG_API_USED               /*void*/
+#   define H5_ATTR_PARALLEL_UNUSED              /*void*/
+#   define H5_ATTR_PARALLEL_USED                /*void*/
+#   define H5_ATTR_NORETURN                     /*void*/
+#   define H5_ATTR_CONST                        /*void*/
+#   define H5_ATTR_PURE                         /*void*/
+#   define H5_ATTR_FALLTHROUGH                  /*void*/
 #else /* __cplusplus */
 #if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
 #   define H5_ATTR_FORMAT(X,Y,Z)  __attribute__((format(X, Y, Z)))
 #   define H5_ATTR_UNUSED       __attribute__((unused))
+#ifdef H5_HAVE_PARALLEL
+#   define H5_ATTR_PARALLEL_UNUSED       __attribute__((unused))
+#   define H5_ATTR_PARALLEL_USED         /*void*/
+#else
+#   define H5_ATTR_PARALLEL_UNUSED       /*void*/
+#   define H5_ATTR_PARALLEL_USED         __attribute__((unused))
+#endif
+#ifdef H5_NO_DEPRECATED_SYMBOLS
+#define H5_ATTR_DEPRECATED_USED    H5_ATTR_UNUSED
+#else /* H5_NO_DEPRECATED_SYMBOLS */
+#define H5_ATTR_DEPRECATED_USED    /*void*/
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+#ifdef H5_DEBUG_API
+#define H5_ATTR_DEBUG_API_USED    /*void*/
+#else /* H5_DEBUG_API */
+#define H5_ATTR_DEBUG_API_USED    H5_ATTR_UNUSED
+#endif /* H5_DEBUG_API */
 #ifndef NDEBUG
 #define H5_ATTR_NDEBUG_UNUSED     /*void*/
 #else /* NDEBUG */
@@ -326,13 +347,17 @@
 #   define H5_ATTR_FALLTHROUGH  /*void*/
 #endif
 #else
-#   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
-#   define H5_ATTR_UNUSED         /*void*/
-#   define H5_ATTR_NDEBUG_UNUSED  /*void*/
-#   define H5_ATTR_NORETURN       /*void*/
-#   define H5_ATTR_CONST          /*void*/
-#   define H5_ATTR_PURE           /*void*/
-#   define H5_ATTR_FALLTHROUGH    /*void*/
+#   define H5_ATTR_FORMAT(X,Y,Z)    /*void*/
+#   define H5_ATTR_UNUSED           /*void*/
+#   define H5_ATTR_NDEBUG_UNUSED    /*void*/
+#   define H5_ATTR_DEBUG_API_USED   /*void*/
+#   define H5_ATTR_DEPRECATED_USED  /*void*/
+#   define H5_ATTR_PARALLEL_UNUSED  /*void*/
+#   define H5_ATTR_PARALLEL_USED    /*void*/
+#   define H5_ATTR_NORETURN         /*void*/
+#   define H5_ATTR_CONST            /*void*/
+#   define H5_ATTR_PURE             /*void*/
+#   define H5_ATTR_FALLTHROUGH      /*void*/
 #endif
 #endif /* __cplusplus */
 
@@ -996,9 +1021,12 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDgetrusage
     #define HDgetrusage(X,S)  getrusage(X,S)
 #endif /* HDgetrusage */
-#ifndef HDgets
-    #define HDgets(S)    gets(S)
+
+/* Don't define HDgets - gets() was deprecated in C99 and removed in C11 */
+#ifdef HDgets
+    #undef HDgets
 #endif /* HDgets */
+
 #ifndef HDgettimeofday
     #define HDgettimeofday(S,P)  gettimeofday(S,P)
 #endif /* HDgettimeofday */
@@ -1120,10 +1148,7 @@ typedef off_t               h5_stat_size_t;
     #define HDmemcmp(X,Y,Z)    memcmp(X,Y,Z)
 #endif /* HDmemcmp */
 #ifndef HDmemcpy
-    /* Casts to char pointers are necessary for some compilers (e.g. clang)
-     * and platforms, possibly due to alignment issues.
-     */
-    #define HDmemcpy(X,Y,Z)    memcpy((char*)(X),(const char*)(Y),Z)
+    #define HDmemcpy(X,Y,Z)    memcpy(X,Y,Z)
 #endif /* HDmemcpy */
 #ifndef HDmemmove
     #define HDmemmove(X,Y,Z)  memmove((char*)(X),(const char*)(Y),Z)
@@ -2124,7 +2149,7 @@ H5_DLL herr_t H5CX_pop(void);
  *      are: H5allocate_memory, H5is_library_threadsafe, etc.
  *
  */
-#define FUNC_ENTER_API_NOINIT {{                                              \
+#define FUNC_ENTER_API_NOINIT {{{                                             \
     FUNC_ENTER_API_COMMON                                                     \
     H5_PUSH_FUNC                                                              \
     BEGIN_MPE_LOG                                                             \
@@ -2137,7 +2162,7 @@ H5_DLL herr_t H5CX_pop(void);
  *      are: H5close, H5check_version, etc.
  *
  */
-#define FUNC_ENTER_API_NOINIT_NOERR_NOFS {{                                   \
+#define FUNC_ENTER_API_NOINIT_NOERR_NOFS {{{{                                 \
     FUNC_ENTER_API_VARS                                                       \
     FUNC_ENTER_COMMON_NOERR(H5_IS_API(FUNC));                                 \
     FUNC_ENTER_API_THREADSAFE;                                                \
@@ -2324,14 +2349,14 @@ H5_DLL herr_t H5CX_pop(void);
        (void)H5E_dump_api_stack(TRUE);                                        \
     FUNC_LEAVE_API_THREADSAFE                                                 \
     return(ret_value);                                                        \
-}} /*end scope from beginning of FUNC_ENTER*/
+}}} /*end scope from beginning of FUNC_ENTER*/
 
 /* Use this macro to match the FUNC_ENTER_API_NOINIT_NOERR_NOFS macro */
 #define FUNC_LEAVE_API_NOFS(ret_value)                                        \
     FUNC_LEAVE_API_COMMON(ret_value);                                         \
     FUNC_LEAVE_API_THREADSAFE                                                 \
     return(ret_value);                                                        \
-}} /*end scope from beginning of FUNC_ENTER*/
+}}}} /*end scope from beginning of FUNC_ENTER*/
 
 #define FUNC_LEAVE_NOAPI(ret_value)                                           \
         ;                                                                     \

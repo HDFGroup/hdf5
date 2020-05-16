@@ -349,5 +349,5 @@ H5_DLL void *H5resize_memory(void *mem, size_t size);
 }
 #endif
 #endif /* _H5public_H */
- 
+
 

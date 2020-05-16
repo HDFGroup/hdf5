@@ -136,14 +136,14 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5vers
         H5Apublic.h H5ACpublic.h \
         H5Cpublic.h H5Dpublic.h \
         H5Epubgen.h H5Epublic.h H5Fpublic.h \
-        H5FDpublic.h H5FDcore.h H5FDdirect.h \
-        H5FDfamily.h H5FDhdfs.h H5FDlog.h H5FDmpi.h H5FDmpio.h \
-        H5FDmulti.h H5FDros3.h H5FDsec2.h H5FDstdio.h H5FDwindows.h \
+        H5FDpublic.h H5FDcore.h H5FDdirect.h H5FDfamily.h H5FDhdfs.h \
+        H5FDlog.h H5FDmpi.h H5FDmpio.h H5FDmulti.h H5FDros3.h \
+        H5FDsec2.h H5FDstdio.h H5FDwindows.h \
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
         H5MMpublic.h H5Opublic.h H5Ppublic.h \
         H5PLextern.h H5PLpublic.h \
-        H5Rpublic.h H5Spublic.h \
-        H5Tpublic.h H5Zpublic.h
+        H5Rpublic.h H5Spublic.h H5Tpublic.h \
+        H5Zpublic.h
 
 # install libhdf5.settings in lib directory
 settingsdir=$(libdir)

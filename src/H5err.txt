@@ -46,7 +46,7 @@
 MAJOR, H5E_ARGS, Invalid arguments to routine
 MAJOR, H5E_RESOURCE, Resource unavailable
 MAJOR, H5E_INTERNAL, Internal error (too specific to document in detail)
-MAJOR, H5E_FILE, File accessibilty
+MAJOR, H5E_FILE, File accessibility
 MAJOR, H5E_IO, Low-level I/O
 MAJOR, H5E_FUNC, Function entry/exit
 MAJOR, H5E_ATOM, Object atom
@@ -82,7 +82,7 @@ MAJOR, H5E_NONE_MAJOR, No error
 # Sections (for grouping minor errors)
 SECTION, ARGS, Argument errors
 SECTION, RESOURCE, Resource errors
-SECTION, FILEACC, File accessibilty errors
+SECTION, FILEACC, File accessibility errors
 SECTION, FILE, Generic low-level file I/O errors
 SECTION, FUNC, Function entry/exit interface errors
 SECTION, ATOM, Object atom related errors
@@ -123,7 +123,7 @@ MINOR, RESOURCE, H5E_CANTGC, Unable to garbage collect
 MINOR, RESOURCE, H5E_CANTGETSIZE, Unable to compute size
 MINOR, RESOURCE, H5E_OBJOPEN, Object is already open
 
-# File accessibilty errors
+# File accessibility errors
 MINOR, FILEACC, H5E_FILEEXISTS, File already exists
 MINOR, FILEACC, H5E_FILEOPEN, File already open
 MINOR, FILEACC, H5E_CANTCREATE, Unable to create file
