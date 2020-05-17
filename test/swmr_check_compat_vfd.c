@@ -13,7 +13,7 @@
 
 /* Purpose:     This is a small program that checks if the HDF5_DRIVER
  *              environment variable is set to a value that supports SWMR.
- *              
+ *
  *              It is intended for use in shell scripts.
  */
 

@@ -358,7 +358,7 @@ int main(int argc, const char *argv[])
         HDfprintf(stderr, "\tcompression level = %d\n", comp_level);
         HDfprintf(stderr, "\tindex type = %s\n", index_type);
     } /* end if */
-    
+
     /* Set the random seed */
     if(!use_seed) {
         struct timeval t;

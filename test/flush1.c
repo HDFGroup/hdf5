@@ -99,7 +99,7 @@ create_file(const char *filename, hid_t fapl_id, hbool_t swmr)
 
     if(H5Gclose(top_gid) < 0)
         STACK_ERROR
-    
+
     return fid;
 
 error:
@@ -185,7 +185,7 @@ error:
  *              a variety of situations.
  *
  *              Part 1 of a two-part H5Fflush() test.
- *   
+ *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:	Robb Matzke

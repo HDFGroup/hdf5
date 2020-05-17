@@ -546,7 +546,7 @@ test_fs_create(hid_t fapl)
     if(file_size != empty_size)
         TEST_ERROR
 
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -673,7 +673,7 @@ test_fs_sect_add(hid_t fapl)
     if (tmp_file_size <= (file_size+fr_meta_size))
         TEST_ERROR
 
-    PASSED()
+    PASSED();
 
     TESTING("adding a section via H5FS_sect_add() to free-space with H5FS_CLS_GHOST_OBJ: test 2");
 
@@ -735,7 +735,7 @@ test_fs_sect_add(hid_t fapl)
     if (tmp_file_size != (file_size+fr_meta_size))
         TEST_ERROR
 
-    PASSED()
+    PASSED();
 
     TESTING("adding a section via H5FS_sect_add() to free-space: test 3");
 
@@ -804,7 +804,7 @@ test_fs_sect_add(hid_t fapl)
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
-    PASSED()
+    PASSED();
 
     TESTING("adding a section via H5FS_sect_add() to free-space: test 4");
 
@@ -883,7 +883,7 @@ test_fs_sect_add(hid_t fapl)
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -981,7 +981,7 @@ test_fs_sect_find(hid_t fapl)
         FAIL_STACK_ERROR
     frsp = NULL;
 
-    PASSED()
+    PASSED();
 
     TESTING("H5FS_sect_find() a section equal to requested-size from free-space");
 
@@ -1109,7 +1109,7 @@ test_fs_sect_find(hid_t fapl)
         FAIL_STACK_ERROR
     frsp = NULL;
 
-    PASSED()
+    PASSED();
 
     TESTING("H5FS_sect_find() a section greater than requested-size from free-space");
 
@@ -1189,7 +1189,7 @@ test_fs_sect_find(hid_t fapl)
         FAIL_STACK_ERROR
     frsp = NULL;
 
-    PASSED()
+    PASSED();
 
     TESTING("H5FS_sect_find(): cannot find a section with requested-size from free-space");
 
@@ -1252,7 +1252,7 @@ test_fs_sect_find(hid_t fapl)
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -1452,7 +1452,7 @@ test_fs_sect_merge(hid_t fapl)
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
-    PASSED()
+    PASSED();
 
     /*
      * TEST 2
@@ -1554,7 +1554,7 @@ test_fs_sect_merge(hid_t fapl)
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
-    PASSED()
+    PASSED();
 
     /*
      * TEST 3
@@ -1722,7 +1722,7 @@ test_fs_sect_merge(hid_t fapl)
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -1893,7 +1893,7 @@ test_fs_sect_shrink(hid_t fapl)
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
-    PASSED()
+    PASSED();
 
 
     TESTING("shrinking of sections when H5FS_sect_add() to free-space: test 2");
@@ -1995,7 +1995,7 @@ test_fs_sect_shrink(hid_t fapl)
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
-    PASSED()
+    PASSED();
 
     TESTING("shrinking of sections when H5FS_sect_add() to free-space: test 3");
 
@@ -2086,7 +2086,7 @@ test_fs_sect_shrink(hid_t fapl)
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -2239,7 +2239,7 @@ test_fs_sect_change_class(hid_t fapl)
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
-    PASSED()
+    PASSED();
 
     /*
      * TEST 2
@@ -2361,7 +2361,7 @@ test_fs_sect_change_class(hid_t fapl)
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -2514,7 +2514,7 @@ test_fs_sect_extend(hid_t fapl)
 	FAIL_STACK_ERROR
     fs_addr = HADDR_UNDEF;
 
-    PASSED()
+    PASSED();
 
     /*
      * TEST 2
@@ -2587,7 +2587,7 @@ test_fs_sect_extend(hid_t fapl)
 	FAIL_STACK_ERROR
     fs_addr = HADDR_UNDEF;
 
-    PASSED()
+    PASSED();
 
     /*
      * Test 3
@@ -2661,7 +2661,7 @@ test_fs_sect_extend(hid_t fapl)
 	FAIL_STACK_ERROR
     fs_addr = HADDR_UNDEF;
 
-    PASSED()
+    PASSED();
 
     /*
      * TEST 4
@@ -2734,7 +2734,7 @@ test_fs_sect_extend(hid_t fapl)
 	FAIL_STACK_ERROR
     fs_addr = HADDR_UNDEF;
 
-    PASSED()
+    PASSED();
 
     /* Close the file */
     if(H5Fclose(file) < 0)
@@ -2842,7 +2842,7 @@ test_fs_sect_iterate(hid_t fapl)
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -2861,13 +2861,7 @@ main(void)
 {
     hid_t           fapl = -1;              /* File access property list for data files */
     unsigned        nerrors = 0;            /* Cumulative error count */
-    const char     *env_h5_drvr = NULL;     /* File Driver value from environment */
     hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
-
-    /* Get the VFD to use */
-    env_h5_drvr = HDgetenv("HDF5_DRIVER");
-    if(env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
 
     h5_reset();
 
