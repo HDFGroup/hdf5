@@ -33,7 +33,7 @@
 #include "H5ACprivate.h"        /* Metadata cache                           */
 #include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Dprivate.h"         /* Datasets                                 */
-#include "H5Eprivate.h"            /* Error handling                           */
+#include "H5Eprivate.h"         /* Error handling                           */
 #include "H5FLprivate.h"        /* Free Lists                               */
 #include "H5Gprivate.h"         /* Groups                                   */
 #include "H5Ipkg.h"             /* IDs                                      */
@@ -1910,13 +1910,13 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 herr_t
 H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_ref)
 {
-    H5I_id_type_t *type_ptr;            /* Pointer to the type  */
-    herr_t       ret_value = SUCCEED;     /* Return value         */
+    H5I_id_type_t  *type_ptr;               /* Pointer to the type  */
+    herr_t          ret_value = SUCCEED;    /* Return value         */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
-    if (type <= H5I_BADID || type >= H5I_next_type)
+    if (type <= H5I_BADID || (int)type >= H5I_next_type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
     type_ptr = H5I_id_type_list_g[type];
 
@@ -1939,7 +1939,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_iterate() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__find_id
  *
@@ -1963,7 +1963,7 @@ H5I__find_id(hid_t id)
 
     /* Check arguments */
     type = H5I_TYPE(id);
-    if (type <= H5I_BADID || type >= H5I_next_type)
+    if (type <= H5I_BADID || (int)type >= H5I_next_type)
         HGOTO_DONE(NULL)
 
     type_ptr = H5I_id_type_list_g[type];
@@ -1977,7 +1977,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__find_id() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iget_name
  *
@@ -2020,7 +2020,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iget_name() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iget_file_id
  *
@@ -2046,8 +2046,8 @@ H5Iget_file_id(hid_t obj_id)
     type = H5I_TYPE(obj_id);
 
     /* Call internal function */
-    if (H5I_FILE == type || H5I_DATATYPE == type || H5I_GROUP == type || H5I_DATASET == type || H5I_ATTR == type) {
-        if ((ret_value = H5I_get_file_id(obj_id, type)) < 0)
+    if(H5I_FILE == type || H5I_DATATYPE == type || H5I_GROUP == type || H5I_DATASET == type || H5I_ATTR == type) {
+        if((ret_value = H5I_get_file_id(obj_id, type)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, H5I_INVALID_HID, "can't retrieve file ID")
     }
     else
@@ -2101,7 +2101,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_get_file_id() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__id_dump_cb
  *
@@ -2125,7 +2125,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     HDfprintf(stderr, "         obj   = 0x%08lx\n", (unsigned long)(item->obj_ptr));
 
     /* Get the group location, so we get get the name */
-    switch(type) {
+    switch (type) {
         case H5I_GROUP:
         {
             path = H5G_nameof((H5G_t*)item->obj_ptr);
@@ -2156,9 +2156,9 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
         case H5I_NTYPES:
         default:
             break;   /* Other types of IDs are not stored in files */
-    } /* end switch */
+    }
 
-    if(path) {
+    if (path) {
         if (path->user_path_r)
             HDfprintf(stderr, "                user_path = %s\n", H5RS_get_str(path->user_path_r));
         if (path->full_path_r)
@@ -2168,7 +2168,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     FUNC_LEAVE_NOAPI(H5_ITER_CONT)
 } /* end H5I__id_dump_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_dump_ids_for_type
  *
@@ -2191,14 +2191,14 @@ H5I_dump_ids_for_type(H5I_type_t type)
     if(type_ptr) {
 
         /* Header */
-        HDfprintf(stderr, "     init_count = %u\n", type_ptr->init_count);
-        HDfprintf(stderr, "     reserved   = %u\n", type_ptr->cls->reserved);
-        HDfprintf(stderr, "     id_count   = %llu\n", (unsigned long long)type_ptr->id_count);
-        HDfprintf(stderr, "     nextid        = %llu\n", (unsigned long long)type_ptr->nextid);
+        HDfprintf(stderr, "	 init_count = %u\n", type_ptr->init_count);
+        HDfprintf(stderr, "	 reserved   = %u\n", type_ptr->cls->reserved);
+        HDfprintf(stderr, "	 id_count   = %llu\n", (unsigned long long)type_ptr->id_count);
+        HDfprintf(stderr, "	 nextid	    = %llu\n", (unsigned long long)type_ptr->nextid);
 
         /* List */
         if(type_ptr->id_count > 0) {
-            HDfprintf(stderr, "     List:\n");
+            HDfprintf(stderr, "	 List:\n");
             H5SL_iterate(type_ptr->ids, H5I__id_dump_cb, &type);
         }
     }

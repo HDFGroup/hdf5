@@ -1,5 +1,6 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 require 5.003;
+use warnings;
 
 #
 # Copyright by The HDF Group.
@@ -13,101 +14,165 @@ require 5.003;
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-# Robb Matzke, matzke@llnl.gov
-# 30 Aug 1997
+# Dana Robinson
+# Spring 2019
+# (Original by Robb Matzke)
 #
-# Purpose: Given the names of C source files this script will print the
-#	   file name, line number, and function name of any function that
-#	   doesn't begin with the letter `h' or `H' as stipulated by the
-#	   HDF5 programming style guide.
+# Purpose:  Given the names of C source files this script will print the
+#           file name, line number, and function name of any function that
+#           doesn't begin with the letter 'h' or 'H' as stipulated by the
+#           HDF5 programming style guide.
 #
-#	   Emacs users can run this script as the compile command and
-#	   use `next-error' (usually bound to M-`) to find each name
-#	   violation.
+#           Emacs users can run this script as the compile command and
+#           use 'next-error' (usually bound to M-`) to find each name
+#           violation.
 
-if(<>) {
-    if($ARGV =~ /\//) {
-        ($filename) = ($ARGV =~ /^.*\/([A-Za-z0-9_]*)\.c$/);
-    } else {
-        ($filename) = ($ARGV =~ /([A-Za-z0-9_]*)\.c$/);
+use File::Basename;
+
+# Loop over all files passed to the function
+foreach $arg (@ARGV) {
+
+    # Get the filename from the path
+    $filename = fileparse($arg);
+
+    # Skip files that don't include H5private.h
+    # H5system. has to be inspected by hand since it wraps POSIX files
+    #
+    # H5detect and H5make_libsettings are created before the library exists
+    # so calls that link to function replacements won't work. We'll ignore
+    # it here.
+    #
+    # If a user specifies one file, process it no matter what so people
+    # can inspect files we normally skip (like H5system.c).
+    if($#ARGV gt 0 and $filename =~ /H5FDmulti|H5FDstdio|H5VLpassthru|H5system|H5detect|H5make_libsettings/) {
+        print "$filename is exempt from using Standard library macro wrappers\n";
+        next;
     }
 
-    if($filename =~ /H5FDmulti|H5FDstdio/) {
-        print "$ARGV is exempt from using Standard library macro wrappers\n";
-    } else {
-        while (<>) {
+    # Open the file
+    open(my $fh, "<", $arg) or do {
+        warn "NOTE: Unable to open $arg: !$\n";
+        next;
+    };
 
-           # Get rid of comments by removing the inside part.
-           s|/\*.*?\*/||g;
-           if ($in_comment) {
-              if (/\*\//) {
-                 s|.*?\*/||;
-                 $in_comment = 0;
-              } else {
-                 $_="\n";
-              }
-           } elsif (m|/\*|) {
-              s|/\*.*||;
-              $in_comment = 1;
-           }
+    # Loop over all lines in the file to find undecorated functions
+    while (<$fh>) {
 
-           # Get rid of string constants if they begin and end on this line.
-           s/([\'\"])([^\1]|\\\1)*?\1/$1$1/g;
-
-           # Get rid of preprocessor directives
-           s/^\#.*//;
-
-           # Skip callbacks invoked as methods in a struct
-           next if $_ =~ /\b(\)?->|\.)\(?([a-z_A-Z]\w*)\s*\(/;
-
-           # Now find all function calls on this line which don't start with 'H'
-           while (($name)=/\b([a-z_A-GI-Z]\w*)\s*\(/) {
-              $_ = $';
-              
-              # Ignore C statements that look sort of like function
-              # calls.
-              next if $name =~ /^(if|for|offsetof|return|sizeof|switch|while|void)$/;
-
-              # Ignore things that get misdetected because of the simplified
-              # parsing that takes place here.
-              next if $name =~ /^(int|herr_t|_term_interface)$/;
-
-              # These are really HDF5 functions/macros even though they don't
-              # start with `h' or `H'.
-              next if $name =~ /^FUNC_(ENTER|LEAVE)(_(NO)?API|_PACKAGE|_STATIC)?(_NOFS|_NOCLEAR|_NOINIT)?(_NOFUNC|_TAG)?$/;
-              next if $name =~ /^(BEGIN|END)_FUNC$/;
-              next if $name =~ /^U?INT(8|16|32|64)(ENCODE|DECODE)(_VAR)?$/;
-              next if $name =~ /^CI_(PRINT_STATS|INC_SRC|INC_DST)$/;
-              next if $name =~ /^(ABS|ADDR_OVERFLOW|ALL_MEMBERS|BOUND|CONSTR|DETECT_[I|F|M]|DOWN)$/;
-              next if $name =~ /^(MIN3?|MAX3?|NELMTS|POWER_OF_TWO|REGION_OVERFLOW)$/;
-              next if $name =~ /^(UNIQUE_MEMBERS)$/;
-              next if $name =~ /^addr_defined$/;
-
-              # These functions/macros are exempt.
-              next if $name =~ /^(main|[fs]?printf|va_(start|arg|end))$/;
-
-              # These are Windows system calls. Ignore them.
-              next if $name =~ /^(_get_osfhandle|GetFileInformationByHandle|SetFilePointer|GetLastError|SetEndOfFile)$/;
-              next if $name =~ /^(FindNextFile|FindClose|_tzset|Wgettimeofday|GetSystemTimeAsFileTime|Wgetlogin|GetUserName)$/;
-
-              # These are MPI function calls. Ignore them.
-              next if $name =~ /^(MPI_|MPE_)/;
-
-              # These are POSIX threads function calls. Ignore them.
-              next if $name =~ /^pthread_/;
-
-              # These are Windows threads function calls. Ignore them.
-              next if $name =~ /^(_beginthread|(Initialize|Enter|Leave)CriticalSection|TlsAlloc)$/;
-
-              # These are zlib & szlib function calls. Ignore them.
-              next if $name =~ /^(inflate|SZ_)/;
-              next if $name =~ /^compress2$/;
-
-              print "$ARGV:$.: $name\n";
-           }
-
-        } continue {
-           close ARGV if eof;       # reset line number
+        # Get rid of comments by removing the inside part.
+        s|/\*.*?\*/||g;
+        if ($in_comment) {
+            if (/\*\//) {
+                s|.*?\*/||;
+                $in_comment = 0;
+            } else {
+                $_="\n";
+            }
+        } elsif (m|/\*|) {
+            s|/\*.*||;
+            $in_comment = 1;
         }
+
+        # Get rid of string constants if they begin and end on this line.
+        s/([\'\"])([^\1]|\\\1)*?\1/$1$1/g;
+
+        # Get rid of preprocessor directives
+        s/^\#.*//;
+
+        # Skip callbacks invoked as methods in a struct
+        next if $_ =~ /\b(\)?]?->|\.)\(?([a-z_A-Z]\w*)\s*\(/;
+
+        # Now find all function calls on this line which don't start with 'H'
+        while (($name)=/\b([a-z_A-GI-Z]\w*)\s*\(/) {
+            $_ = $';
+              
+            # Ignore C statements that look sort of like function
+            # calls.
+            next if $name =~ /^(if|for|offsetof|return|sizeof|switch|while|void)$/;
+
+            # Ignore things that get misdetected because of the simplified
+            # parsing that takes place here.
+            next if $name =~ /^(int|herr_t|_term_interface|_term_package)$/;
+
+            # These are really HDF5 functions/macros even though they don't
+            # start with `h' or `H'.
+            next if $name =~ /^FUNC_(ENTER|LEAVE)(_(NO)?API|_PACKAGE|_STATIC)?(_NOFS|_NOCLEAR|_NOINIT)?(_NOFUNC|_TAG)?$/;
+            next if $name =~ /^(BEGIN|END)_FUNC$/;
+            next if $name =~ /^U?INT(8|16|32|64)(ENCODE|DECODE)(_VAR)?$/;
+            next if $name =~ /^CI_(PRINT_STATS|INC_SRC|INC_DST)$/;
+            next if $name =~ /^(ABS|ADDR_OVERFLOW|ALL_MEMBERS|BOUND|CONSTR|DETECT_[I|F|M]|DOWN)$/;
+            next if $name =~ /^(MIN3?|MAX3?|NELMTS|POWER_OF_TWO|REGION_OVERFLOW)$/;
+            next if $name =~ /^(UNIQUE_MEMBERS|S_ISDIR)$/;
+            next if $name =~ /^addr_defined$/;
+
+            # These functions/macros are exempt.
+            # op, cb, and OP are often spuriously flagged so ignore them.
+            next if $name =~ /^(main|op|cb|OP)$/;
+
+            # This often appears in preprocessor lines that span multiple lines
+            next if $name =~ /^(defined)$/;
+
+            # These are Windows system calls. Ignore them.
+            next if $name =~ /^(_get_osfhandle|GetFileInformationByHandle|SetFilePointer|GetLastError|SetEndOfFile)$/;
+            next if $name =~ /^(FindNextFile|FindClose|_tzset|Wgettimeofday|GetSystemTimeAsFileTime|Wgetlogin|GetUserName)$/;
+            next if $name =~ /^(DeleteCriticalSection|TlsFree|TlsGetValue|CreateThread)$/;
+            next if $name =~ /^(ExpandEnvironmentStringsA|LockFileEx|UnlockFileEx)$/;
+            next if $name =~ /^(DllMain|LocalAlloc|LocalFree)$/;
+            next if $name =~ /^(FindFirstFileA|FindNextFileA)$/;
+            next if $name =~ /^(_beginthread|(Initialize|Enter|Leave)CriticalSection|TlsAlloc)$/;
+
+            # These are MPI function calls. Ignore them.
+            next if $name =~ /^(MPI_|MPE_)/;
+
+            # These are POSIX threads function calls. Ignore them.
+            next if $name =~ /^pthread_/;
+
+            # These are zlib & szlib function calls. Ignore them.
+            next if $name =~ /^(inflate|SZ_)/;
+            next if $name =~ /^compress2$/;
+
+            # These is an H5Dfill function. Ignore it in this file.
+            if($filename =~ /H5Dfill/) {
+                next if $name =~ /^(alloc_func)$/;
+            }
+
+            # These are H5Zscaleoffset functions. Ignore them in this file.
+            if($filename =~ /H5Zscaleoffset/) {
+                next if $name =~ /^(pow_fun|round_fun|abs_fun|lround_fun|llround_fun)$/;
+            }
+
+            # TESTING (not comprehensive - just noise reduction)
+            
+            # Test macros and functions (testhdf5.h)
+            next if $name =~ /^(AddTest|TestErrPrintf|TestSummary|TestCleanup|TestShutdown)$/;
+            next if $name =~ /^(CHECK|CHECK_PTR|CHECK_PTR_NULL|CHECK_PTR_EQ|CHECK_I)$/;
+            next if $name =~ /^(VERIFY|VERIFY_STR|VERIFY|TYPE|MESSAGE|ERROR)$/;
+
+            # Test macros and functions (h5test.h)
+            next if $name =~ /^(TESTING|PASSED|SKIPPED|FAIL_PUTS_ERROR|FAIL_STACK_ERROR|TEST_ERROR)$/;
+            next if $name =~ /^(GetTestExpress)$/;
+
+            # Ignore functions that start with test_ or check_
+            next if $name =~ /^test_/;
+            next if $name =~ /^check_/;
+
+            # Ignore functions that start with h5_
+            next if $name =~ /^h5_/;
+
+            # Ignore usage functions
+            next if $name =~ /^usage$/;
+
+            print "$filename:$.: $name\n";
+        }
+
     }
+
+    # Close the file
+    close($fh);
+}
+
+if($#ARGV gt 0) {
+    print "\n";
+    print "NOTE:\n";
+    print "If any files were skipped due to being exempt, you can inspect them manually\n";
+    print "by using this script on them one at a time, which will always process the file.\n";
 }

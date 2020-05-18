@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 ##
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
@@ -12,6 +12,7 @@
 # help@hdfgroup.org.
 ##
 require 5.003;
+use warnings;
 $Source = "";
 
 ##############################################################################
@@ -192,6 +193,11 @@ sub argstring ($$$) {
   # certain type qualifiers, and indirection.
   $atype =~ s/^\bconst\b//;
   $atype =~ s/\bH5_ATTR_UNUSED\b//g;
+  $atype =~ s/\bH5_ATTR_DEPRECATED_USED\b//g;
+  $atype =~ s/\bH5_ATTR_NDEBUG_UNUSED\b//g;
+  $atype =~ s/\bH5_ATTR_DEBUG_API_USED\b//g;
+  $atype =~ s/\bH5_ATTR_PARALLEL_UNUSED\b//g;
+  $atype =~ s/\bH5_ATTR_PARALLEL_USED\b//g;
   $atype =~ s/\s+/ /g;
   $ptr = length $1 if  $atype =~ s/(\*+)//;
   $atype =~ s/^\s+//;
@@ -297,7 +303,7 @@ sub rewrite_func ($$$$$) {
     # Ignored due to NO TRACE comment.
   } elsif ($body =~ s/((\n[ \t]*)H5TRACE\d+\s*\(.*?\);)\n/"$2$trace"/es) {
     # Replaced an H5TRACE macro.
-  } elsif ($body=~s/((\n[ \t]*)FUNC_ENTER\w*\s*(\(.*?\))?;??)\n/"$1$2$trace"/es) {
+  } elsif ($body=~s/((\n[ \t]*)FUNC_ENTER\w*[ \t]*(\(.*?\))?;??)\n/"$1$2$trace"/es) {
     # Added an H5TRACE macro after a FUNC_ENTER macro.
   } else {
     errmesg $file, $name, "unable to insert tracing information";
