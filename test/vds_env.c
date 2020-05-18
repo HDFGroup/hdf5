@@ -299,24 +299,56 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
 int
 main(void)
 {
-    hid_t fapl;
-    int test_api_config;
+    hid_t fapl, my_fapl;
     unsigned bit_config;
     H5F_libver_t low, high;     /* Low and high bounds */
-    unsigned latest = FALSE;    /* Using the latest library version bound */
     int nerrors = 0;
 
     /* Testing setup */
     h5_reset();
     fapl = h5_fileaccess();
 
-    for(bit_config = 0; bit_config < TEST_IO_NTESTS; bit_config++) {
-        HDprintf("Config: %s%s%s\n", bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "", bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file", bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "");
-        nerrors += test_vds_prefix_second(bit_config, fapl);
-    }
+    /* Set to use the latest file format */
+    if((my_fapl = H5Pcopy(fapl)) < 0) TEST_ERROR
 
-    /* Verify symbol table messages are cached */
-    nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
+     /* Loop through all the combinations of low/high version bounds */
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+            char msg[80];       /* Message for file version bounds */
+            const char *low_string;   /* The low bound string */
+            const char *high_string;  /* The high bound string */
+
+            /* Invalid combinations, just continue */
+            if(high == H5F_LIBVER_EARLIEST || high < low)
+                continue;
+
+            /* Test virtual dataset only for V110 and above */
+            if(high < H5F_LIBVER_V110)
+                continue;
+
+            /* Set the low/high version bounds */
+            if(H5Pset_libver_bounds(my_fapl, low, high) < 0)
+                TEST_ERROR
+
+            /* Display testing info */
+            low_string = h5_get_version_string(low);
+            high_string = h5_get_version_string(high);
+            HDsprintf(msg, "Testing virtual dataset with file version bounds: (%s, %s):", low_string, high_string);
+            HDputs(msg);
+
+            for(bit_config = 0; bit_config < TEST_IO_NTESTS; bit_config++) {
+                HDprintf("Config: %s%s%s\n", bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "", bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file", bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "");
+                nerrors += test_vds_prefix_second(bit_config, fapl);
+            }
+
+            /* Verify symbol table messages are cached */
+            nerrors += (h5_verify_cached_stabs(FILENAME, my_fapl) < 0 ? 1 : 0);
+
+       } /* end for high */
+    } /* end for low */
+
+    if(H5Pclose(my_fapl) < 0)
+        TEST_ERROR
 
     if(nerrors)
         goto error;

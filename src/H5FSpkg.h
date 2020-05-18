@@ -240,8 +240,8 @@ H5_DLL void H5FS__sect_assert(const H5FS_t *fspace);
 
 /* Testing routines */
 #ifdef H5FS_TESTING
-H5_DLL herr_t H5FS_get_cparam_test(const H5FS_t *fh, H5FS_create_t *cparam);
-H5_DLL int H5FS_cmp_cparam_test(const H5FS_create_t *cparam1, const H5FS_create_t *cparam2);
+H5_DLL herr_t H5FS__get_cparam_test(const H5FS_t *fh, H5FS_create_t *cparam);
+H5_DLL int H5FS__cmp_cparam_test(const H5FS_create_t *cparam1, const H5FS_create_t *cparam2);
 #endif /* H5FS_TESTING */
 
 #endif /* _H5FSpkg_H */

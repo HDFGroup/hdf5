@@ -2679,8 +2679,8 @@ test_cached_stab_info(void)
     CHECK(file_id, FAIL, "H5Fopen");
 
     /* Verify the cached symbol table information */
-    ret = H5F_check_cached_stab_test(file_id);
-    CHECK(ret, FAIL, "H5F_check_cached_stab_test");
+    ret = H5F__check_cached_stab_test(file_id);
+    CHECK(ret, FAIL, "H5F__check_cached_stab_test");
 
     /* Close file */
     ret = H5Fclose(file_id);

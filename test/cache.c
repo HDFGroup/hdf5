@@ -13932,7 +13932,7 @@ check_move_entry(unsigned paged)
         takedown_cache(file_ptr, FALSE, FALSE);
 
     if(pass)
-        PASSED()
+        PASSED();
     else
         H5_FAILED()
 
@@ -17061,7 +17061,7 @@ check_move_entry_errs(unsigned paged)
         takedown_cache(file_ptr, FALSE, FALSE);
 
     if(pass)
-        PASSED()
+        PASSED();
     else {
         H5_FAILED()
 
@@ -19914,7 +19914,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
         /* NOTE: upper_hr_threshold MUST be type double (not float)
          * or the cache test will fail on 64-bit systems.
          */
-        auto_size_ctl.upper_hr_threshold     = H5_DOUBLE(0.999); /* for ease of testing */
+        auto_size_ctl.upper_hr_threshold     = 0.999; /* for ease of testing */
 
         auto_size_ctl.decrement              = 0.5f;
 
@@ -30716,7 +30716,7 @@ done:
         takedown_cache(file_ptr, FALSE, FALSE);
 
     if(pass)
-        PASSED()
+        PASSED();
     else {
         H5_FAILED();
         HDfprintf(stdout, "%s.\n", failure_mssg);
@@ -30939,7 +30939,7 @@ done:
         takedown_cache(file_ptr, FALSE, FALSE);
 
     if(pass)
-        PASSED()
+        PASSED();
     else {
         H5_FAILED();
         HDfprintf(stdout, "%s.\n", failure_mssg);
@@ -33511,7 +33511,7 @@ done:
         takedown_cache(file_ptr, FALSE, FALSE);
 
     if(pass)
-        PASSED()
+        PASSED();
     else {
         H5_FAILED();
         HDfprintf(stdout, "%s.\n", failure_mssg);
@@ -33714,7 +33714,7 @@ done:
     takedown_cache(file_ptr, FALSE, FALSE);
 
     if(pass)
-        PASSED()
+        PASSED();
     else {
         H5_FAILED();
         HDfprintf(stdout, "%s.\n", failure_mssg);
@@ -36894,7 +36894,6 @@ takedown_cache(H5F_t * file_ptr,
     return;
 
 } /* takedown_cache() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    main
