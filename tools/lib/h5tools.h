@@ -568,6 +568,9 @@ typedef struct h5tools_vfd_info_t {
 
     /* Name of the VFD */
     const char *name;
+
+    /* Name of the file to open with the VFD */
+    const char *fname;
 } h5tools_vfd_info_t;
 
 H5TOOLS_DLLVAR const char *volnames[];
@@ -595,6 +598,7 @@ typedef enum {
     MPIO_VFD_IDX,
     ROS3_VFD_IDX,
     HDFS_VFD_IDX,
+    SWMR_VFD_IDX,
 } driver_idx;
 
 /* The following include, h5tools_str.h, must be after the

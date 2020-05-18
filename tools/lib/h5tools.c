@@ -74,7 +74,7 @@ const char *volnames[] = {
  * somehow otherwise not enabled.
  *
  */
-const char *drivernames[] = {
+const char *drivernames[]={
     [SEC2_VFD_IDX] = "sec2",
     [DIRECT_VFD_IDX] = "direct",
     [LOG_VFD_IDX] = "log",
@@ -498,9 +498,9 @@ h5tools_set_fapl_vfd(hid_t fapl_id, h5tools_vfd_info_t *vfd_info)
     herr_t ret_value = SUCCEED;
 
     /* Determine which driver the user wants to open the file with */
-    if (!HDstrcmp(fapl_info->u.name, drivernames[SWMR_VFD_IDX])) {
+    if (!HDstrcmp(vfd_info->name, drivernames[SWMR_VFD_IDX])) {
         /* SWMR driver */
-        if (swmr_fapl_augment(fapl, vfd_info->fname) < 0)
+        if (swmr_fapl_augment(fapl_id, vfd_info->fname) < 0)
             H5TOOLS_GOTO_ERROR(FAIL, "swmr_fapl_augment failed");
     } else if (!HDstrcmp(vfd_info->name, drivernames[SEC2_VFD_IDX])) {
         /* SEC2 Driver */
@@ -967,6 +967,7 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl_id, hbool_t use_spec
                     continue;
 
                 vfd_info.info           = NULL;
+                vfd_info.fname          = fname;
                 vfd_info.name           = drivernames[drivernum];
 
                 /* Get a fapl reflecting the selected VOL connector and VFD */
