@@ -673,7 +673,7 @@ H5D__read_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     /* If there's an event set and a token was created, add the token to it */
     if(H5ES_NONE != es_id && NULL != token) {
         /* Create vol object for token */
-        if(NULL == (token_obj = H5VL_create_object_generic(token, vol_obj->connector))) {
+        if(NULL == (token_obj = H5VL_create_object(token, vol_obj->connector))) {
             if(H5VL_request_free(token) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't free request")
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create vol object for request token")
@@ -885,7 +885,7 @@ H5D__write_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     /* If there's an event set and a token was created, add the token to it */
     if(H5ES_NONE != es_id && NULL != token) {
         /* Create vol object for token */
-        if(NULL == (token_obj = H5VL_create_object_generic(token, vol_obj->connector))) {
+        if(NULL == (token_obj = H5VL_create_object(token, vol_obj->connector))) {
             if(H5VL_request_free(token) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't free request")
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create vol object for request token")

@@ -805,14 +805,14 @@ H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, hid_t 
     /* If there's an event set and a token was created, add the token to it */
     if(H5ES_NONE != es_id && NULL != token) {
         /* Create vol object for token */
-        if(NULL == (token_obj = H5VL_create_object_generic(token, vol_obj->connector))) {
+        if(NULL == (token_obj = H5VL_create_object(token, vol_obj->connector))) {
             if(H5VL_request_free(token) < 0)
                 HDONE_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free request")
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't create vol object for request token")
         } /* end if */
 
         /* Add token to event set */
-        if(H5ES_insert(es, token) < 0)
+        if(H5ES_insert(es, token_obj) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTAPPEND, FAIL, "can't append token to event set")
         token_obj = NULL;
     } /* end if */
@@ -838,14 +838,14 @@ H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, hid_t 
         /* If there's an event set and a token was created, add the token to it */
         if(H5ES_NONE != es_id && NULL != token) {
             /* Create vol object for token */
-            if(NULL == (token_obj = H5VL_create_object_generic(token, vol_obj->connector))) {
+            if(NULL == (token_obj = H5VL_create_object(token, vol_obj->connector))) {
                 if(H5VL_request_free(token) < 0)
                     HDONE_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free request")
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't create vol object for request token")
             } /* end if */
 
             /* Add token to event set */
-            if(H5ES_insert(es, token) < 0)
+            if(H5ES_insert(es, token_obj) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTAPPEND, FAIL, "can't append token to event set")
         } /* end if */
     } /* end if */
@@ -1020,14 +1020,14 @@ H5F__close_api_common(hid_t file_id, hid_t es_id)
     /* If there's an event set and a token was created, add the token to it */
     if(H5ES_NONE != es_id && NULL != token) {
         /* Create vol object for token */
-        if(NULL == (token_obj = H5VL_create_object_generic(token, connector))) {
+        if(NULL == (token_obj = H5VL_create_object(token, connector))) {
             if(H5VL_request_free(token) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't free request")
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't create vol object for request token")
         } /* end if */
 
         /* Add token to event set */
-        if(H5ES_insert(es, token) < 0)
+        if(H5ES_insert(es, token_obj) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTAPPEND, FAIL, "can't append token to event set")
 
         if(H5VL_conn_dec_rc(connector) < 0) {

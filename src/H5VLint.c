@@ -832,12 +832,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_create_object_generic
+ * Function:    H5VL_create_object
  *
- * Purpose:     Creates a new VOL object for the provided generic object
- *              using the provided vol connector.  Does not associatae
- *              with an ID, should only be used for internal objects
- *              returned from the connector such as requests.
+ * Purpose:     Similar to H5VL_register but does not create an ID.
+ *              Creates a new VOL object for the provided generic object
+ *              using the provided vol connector.  Should only be used for
+ *              internal objects returned from the connector such as
+ *              requests.
  *
  * Return:      Success:    A valid VOL object
  *              Failure:    NULL
@@ -845,7 +846,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5VL_object_t *
-H5VL_create_object_generic(void *object, H5VL_t *vol_connector)
+H5VL_create_object(void *object, H5VL_t *vol_connector)
 {
     H5VL_object_t *ret_value = NULL; /* Return value */
 
@@ -867,7 +868,7 @@ H5VL_create_object_generic(void *object, H5VL_t *vol_connector)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_create_object_generic() */
+} /* end H5VL_create_object() */
 
 
 /*-------------------------------------------------------------------------
