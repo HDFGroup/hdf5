@@ -1,4 +1,4 @@
-#!/usr/bin/perl -p
+#!/usr/bin/env perl -p
 #
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
