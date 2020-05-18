@@ -80,17 +80,17 @@
         + 1) /* superblock version */
 
 /* The H5F_SUPERBLOCK_MINIMAL_VARLEN_SIZE is the minimal amount of super block
- * variable length data guarnateed to load the sizeof offsets and the sizeof 
+ * variable length data guarnateed to load the sizeof offsets and the sizeof
  * lengths fields in all versions of the superblock.
  *
- * This is necessary in the V3 cache, as on the initial load, we need to 
+ * This is necessary in the V3 cache, as on the initial load, we need to
  * get enough of the superblock to determine its version and size so that
- * the metadata cache can load the correct amount of data from file to 
+ * the metadata cache can load the correct amount of data from file to
  * allow the second deserialization attempt to succeed.
  *
- * The value selected will have to be revisited for each new version 
+ * The value selected will have to be revisited for each new version
  * of the super block.  Note that the current value is one byte larger
- * than it needs to be. 
+ * than it needs to be.
  */
 #define H5F_SUPERBLOCK_MINIMAL_VARLEN_SIZE	7
 
@@ -137,14 +137,14 @@
 
 /* For superblock version 0 & 1:
    Offset to the file consistency flags (status_flags) in the superblock (excluding H5F_SUPERBLOCK_FIXED_SIZE) */
-#define H5F_SUPER_STATUS_OFF_V01                                                \
-        (2  /* freespace, and root group versions */                    \
-        + 1 /* reserved */                                              \
-        + 3 /* shared header vers, size of address, size of lengths */  \
-        + 1 /* reserved */                                              \
-        + 4) /* group leaf k, group internal k */
+#define H5F_SUPER_STATUS_OFF_V01                                        \
+        (unsigned)(2  /* freespace, and root group versions */          \
+                  + 1 /* reserved */                                    \
+                  + 3 /* shared header vers, size of address, size of lengths */ \
+                  + 1 /* reserved */                                    \
+                  + 4) /* group leaf k, group internal k */
 
-#define H5F_SUPER_STATUS_OFF(v)   (v >= 2 ? 2 : H5F_SUPER_STATUS_OFF_V01)
+#define H5F_SUPER_STATUS_OFF(v)   (v >= 2 ? (unsigned)2 : H5F_SUPER_STATUS_OFF_V01)
 
 /* Offset to the file consistency flags (status_flags) in the superblock */
 #define H5F_SUPER_STATUS_FLAGS_OFF(v) (H5F_SUPERBLOCK_FIXED_SIZE + H5F_SUPER_STATUS_OFF(v))
@@ -242,16 +242,16 @@ typedef struct H5F_super_t {
 struct H5F_file_t {
     H5FD_t	*lf; 		/* Lower level file handle for I/O	*/
     H5F_super_t *sblock;        /* Pointer to (pinned) superblock for file */
-    H5O_drvinfo_t *drvinfo;	/* Pointer to the (pinned) driver info 
+    H5O_drvinfo_t *drvinfo;	/* Pointer to the (pinned) driver info
                                  * cache entry.  This field is only defined
                                  * for older versions of the super block,
                                  * and then only when a driver information
                                  * block is present.  At all other times
                                  * it should be NULL.
                                  */
-    hbool_t drvinfo_sb_msg_exists;  /* Convenience field used to track 
-                                     * whether the driver info superblock 
-                                     * extension message has been created 
+    hbool_t drvinfo_sb_msg_exists;  /* Convenience field used to track
+                                     * whether the driver info superblock
+                                     * extension message has been created
                                      * yet. This field should be TRUE iff the
                                      * superblock extension exists and contains
                                      * a driver info message.  Under all other
@@ -278,7 +278,7 @@ struct H5F_file_t {
                                 /* metadata cache.  This structure is   */
                                 /* fixed at creation time and should    */
                                 /* not change thereafter.               */
-    H5AC_cache_image_config_t 
+    H5AC_cache_image_config_t
 		mdc_initCacheImageCfg;  /* initial configuration for the */
                                         /* generate metadata cache image on     */
                                         /* close option.  This structure is     */
@@ -289,7 +289,7 @@ struct H5F_file_t {
                                 /* begin on file access/create          */
     char        *mdc_log_location; /* location of mdc log               */
     hid_t       fcpl_id;	/* File creation property list ID 	*/
-    H5F_close_degree_t fc_degree;   /* File close behavior degree	*/
+    H5F_close_degree_t fc_degree; /* File close behavior degree	*/
     hbool_t evict_on_close; /* If the file's objects should be evicted from the metadata cache on close */
     size_t	rdcc_nslots;	/* Size of raw data chunk cache (slots)	*/
     size_t	rdcc_nbytes;	/* Size of raw data chunk cache	(bytes)	*/
@@ -363,11 +363,11 @@ struct H5F_file_t {
  * to shared H5F_file_t structs.
  */
 struct H5F_t {
-    char		       *open_name;      /* Name used to open file                                       */
-    char		       *actual_name;    /* Actual name of the file, after resolving symlinks, etc.      */
+    char	       *open_name;      /* Name used to open file                                       */
+    char	       *actual_name;    /* Actual name of the file, after resolving symlinks, etc.      */
     char               *extpath;        /* Path for searching target external link file                 */
-    H5F_file_t		   *shared;         /* The shared file info                                         */
-    unsigned		    nopen_objs;     /* Number of open object headers                                */
+    H5F_file_t         *shared;         /* The shared file info                                         */
+    unsigned	        nopen_objs;     /* Number of open object headers                                */
     H5FO_t             *obj_count;      /* # of time each object is opened through top file structure   */
     hid_t               file_id;        /* ID of this file                                              */
     hbool_t             closing;        /* File is in the process of being closed                       */
@@ -378,7 +378,6 @@ struct H5F_t {
     hbool_t             coll_md_write;  /* Do all metadata writes collectively */
 #endif /* H5_HAVE_PARALLEL */
 };
-
 
 /*****************************/
 /* Package Private Variables */
@@ -464,10 +463,10 @@ H5_DLL herr_t H5F__evict_cache_entries(H5F_t *f);
 
 /* Testing functions */
 #ifdef H5F_TESTING
-H5_DLL herr_t H5F_get_sohm_mesg_count_test(hid_t fid, unsigned type_id, size_t *mesg_count);
-H5_DLL herr_t H5F_check_cached_stab_test(hid_t file_id);
-H5_DLL herr_t H5F_get_maxaddr_test(hid_t file_id, haddr_t *maxaddr);
-H5_DLL herr_t H5F_get_sbe_addr_test(hid_t file_id, haddr_t *sbe_addr);
+H5_DLL herr_t H5F__get_sohm_mesg_count_test(hid_t fid, unsigned type_id, size_t *mesg_count);
+H5_DLL herr_t H5F__check_cached_stab_test(hid_t file_id);
+H5_DLL herr_t H5F__get_maxaddr_test(hid_t file_id, haddr_t *maxaddr);
+H5_DLL herr_t H5F__get_sbe_addr_test(hid_t file_id, haddr_t *sbe_addr);
 #endif /* H5F_TESTING */
 
 #endif /* _H5Fpkg_H */

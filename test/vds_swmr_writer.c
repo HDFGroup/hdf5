@@ -43,7 +43,7 @@ main(int argc, char *argv[])
      ******************************/
 
     /* The file number is passed on the command line.
-     * This is an integer index into the FILE_NAMES array. 
+     * This is an integer index into the FILE_NAMES array.
      */
     if(argc != 2) {
         HDfprintf(stderr, "ERROR: Must pass the source file number on the command line.\n");

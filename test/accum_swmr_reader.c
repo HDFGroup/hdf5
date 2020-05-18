@@ -27,15 +27,15 @@
 
 /*-------------------------------------------------------------------------
  * Function:    main
- * 
- * Purpose:     This is the reader forked/execved by "test_swmr_write_big()" 
+ *
+ * Purpose:     This is the reader forked/execved by "test_swmr_write_big()"
  *		        test in accum.c.  The reader reads at address 1024 from the file
  *		        and verifies that the metadata in the accumulator at address
  * 		        1024 does get written to disk.
- * 
+ *
  * Return:      Success: EXIT_SUCCESS
  *              Failure: EXIT_FAILURE
- * 
+ *
  * Programmer:  Vailin Choi; June 2013
  *
  *-------------------------------------------------------------------------
@@ -56,7 +56,7 @@ main(void)
      * by the environment variable.
      */
     driver = HDgetenv("HDF5_DRIVER");
-    if(!H5FD_supports_swmr_test(driver))
+    if(!H5FD__supports_swmr_test(driver))
         return EXIT_SUCCESS;
 
     /* Initialize buffers */
@@ -77,7 +77,7 @@ main(void)
     api_ctx_pushed = TRUE;
 
     /* Get H5F_t * to internal file structure */
-    if(NULL == (f = (H5F_t *)H5I_object(fid))) 
+    if(NULL == (f = (H5F_t *)H5I_object(fid)))
         FAIL_STACK_ERROR
 
     /* Should read in [1024, 2024] with buf data */
@@ -85,7 +85,7 @@ main(void)
         FAIL_STACK_ERROR;
 
     /* Verify the data read is correct */
-    if(HDmemcmp(buf, rbuf, (size_t)1024) != 0) 
+    if(HDmemcmp(buf, rbuf, (size_t)1024) != 0)
         TEST_ERROR;
 
     /* CLose the file */

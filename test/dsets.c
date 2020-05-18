@@ -8335,7 +8335,7 @@ test_chunk_fast(const char *env_h5_driver, hid_t fapl)
         /* Skip this iteration if SWMR I/O is not supported for the VFD specified
          * by the environment variable.
          */
-        if(swmr && !H5FD_supports_swmr_test(env_h5_driver))
+        if(swmr && !H5FD__supports_swmr_test(env_h5_driver))
             continue;
 
 #ifdef H5_HAVE_FILTER_DEFLATE
@@ -10438,7 +10438,7 @@ test_swmr_non_latest(const char *env_h5_driver, hid_t fapl)
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    if(!H5FD_supports_swmr_test(env_h5_driver)) {
+    if(!H5FD__supports_swmr_test(env_h5_driver)) {
         SKIPPED();
         HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
         return SUCCEED;
@@ -10688,7 +10688,7 @@ test_earray_hdr_fd(const char *env_h5_driver, hid_t fapl)
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    if(!H5FD_supports_swmr_test(env_h5_driver)) {
+    if(!H5FD__supports_swmr_test(env_h5_driver)) {
         SKIPPED();
         HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
         return SUCCEED;
@@ -10808,7 +10808,7 @@ test_farray_hdr_fd(const char *env_h5_driver, hid_t fapl)
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    if(!H5FD_supports_swmr_test(env_h5_driver)) {
+    if(!H5FD__supports_swmr_test(env_h5_driver)) {
         SKIPPED();
         HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
         return SUCCEED;
@@ -10928,7 +10928,7 @@ test_bt2_hdr_fd(const char *env_h5_driver, hid_t fapl)
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    if(!H5FD_supports_swmr_test(env_h5_driver)) {
+    if(!H5FD__supports_swmr_test(env_h5_driver)) {
         SKIPPED();
         HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
         return SUCCEED;
@@ -12694,20 +12694,23 @@ error:
 } /* end dls_01_write_data() */
 
 static herr_t
-dls_01_read_stuff( hid_t fid )
+dls_01_read_stuff(hid_t fid)
 {
     int status = 0;
     hid_t did = 0;
     H5O_info_t info;
 
-    did = H5Dopen2( fid, DLS_01_DATASET, H5P_DEFAULT );
-    if ( did <= 0 ) TEST_ERROR
+    did = H5Dopen2(fid, DLS_01_DATASET, H5P_DEFAULT);
+    if(did <= 0)
+        TEST_ERROR
 
-    status = H5Oget_info2( did, &info, H5O_INFO_BASIC );
-    if ( status != 0 ) TEST_ERROR
+    status = H5Oget_info2(did, &info, H5O_INFO_BASIC);
+    if(status != 0)
+        TEST_ERROR
 
-    status = H5Dclose( did );
-    if ( status != 0 ) TEST_ERROR
+    status = H5Dclose(did);
+    if(status != 0)
+        TEST_ERROR
 
     return SUCCEED;
 

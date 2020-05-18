@@ -265,7 +265,7 @@ test_fill(size_t nx, size_t ny, size_t nz,
         } /* end for */
     } /* end for */
 
-    PASSED()
+    PASSED();
 
     HDfree(dst);
 
@@ -545,7 +545,7 @@ test_copy(int mode,
         } /* end for */
     } /* end for */
 
-    PASSED()
+    PASSED();
 
     HDfree(src);
     HDfree(dst);
@@ -666,7 +666,7 @@ test_multifill(size_t nx)
         } /* end if */
     } /* end for */
 
-    PASSED()
+    PASSED();
 
     HDfree(src);
     HDfree(dst);
@@ -753,7 +753,7 @@ test_endian(size_t nx)
         } /* end for */
     } /* end for */
 
-    PASSED()
+    PASSED();
 
     HDfree(src);
     HDfree(dst);
@@ -819,12 +819,8 @@ test_transpose(size_t nx, size_t ny)
     dst_stride[1] = (hsize_t)(nx * sizeof(*src));
 
     /* Copy and transpose */
-    if(nx == ny)
-        H5VM_stride_copy(2, (hsize_t)sizeof(*src), size, dst_stride, dst,
-                src_stride, src);
-    else
-        H5VM_stride_copy(2, (hsize_t)sizeof(*src), size, dst_stride, dst,
-                src_stride, src);
+    H5VM_stride_copy(2, (hsize_t)sizeof(*src), size, dst_stride, dst,
+            src_stride, src);
 
     /* Check */
     for(i = 0; i < nx; i++) {
@@ -854,7 +850,7 @@ test_transpose(size_t nx, size_t ny)
         } /* end for */
     } /* end for */
 
-    PASSED()
+    PASSED();
 
     HDfree(src);
     HDfree(dst);
@@ -947,7 +943,7 @@ test_sub_super(size_t nx, size_t ny)
             } /* end if */
         } /* end for */
     } /* end for */
-    PASSED()
+    PASSED();
 
     /*
      * Test replicating pixels to produce an image twice as large in each
@@ -1011,7 +1007,7 @@ test_sub_super(size_t nx, size_t ny)
         } /* end for */
     } /* end for */
 
-    PASSED()
+    PASSED();
 
     HDfree(full);
     HDfree(half);
