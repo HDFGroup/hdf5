@@ -1149,6 +1149,10 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
            f->shared->tick_num + f->shared->vfd_swmr_config.max_lag);
 
     if ( tmp_tick_num != f->shared->tick_num ) {
+        const H5FD_vfd_swmr_idx_entry_t *new_mdf_idx;
+        const H5FD_vfd_swmr_idx_entry_t *old_mdf_idx;
+        uint32_t new_mdf_idx_entries_used;
+        uint32_t old_mdf_idx_entries_used;
 
         /* swap the old and new metadata file indexes */
 
@@ -1196,12 +1200,10 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
             f->shared->mdf_idx_entries_used, f->shared->mdf_idx_len);
 #endif /* JRM */
 
-        const H5FD_vfd_swmr_idx_entry_t * const new_mdf_idx =
-            f->shared->mdf_idx;
-        const H5FD_vfd_swmr_idx_entry_t * const old_mdf_idx =
-            f->shared->old_mdf_idx;
-        const uint32_t new_mdf_idx_entries_used = f->shared->mdf_idx_entries_used;
-        const uint32_t old_mdf_idx_entries_used = f->shared->old_mdf_idx_entries_used;
+        new_mdf_idx = f->shared->mdf_idx;
+        old_mdf_idx = f->shared->old_mdf_idx;
+        new_mdf_idx_entries_used = f->shared->mdf_idx_entries_used;
+        old_mdf_idx_entries_used = f->shared->old_mdf_idx_entries_used;
 
         change = malloc(sizeof(change[0]) *
             (old_mdf_idx_entries_used + new_mdf_idx_entries_used));
