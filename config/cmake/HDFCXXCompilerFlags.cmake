@@ -86,9 +86,8 @@ if (NOT MSVC)
       endif()
     elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
       if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_LOADED 
-          AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2)
-        # autotools adds the C flags with the CXX flags for g++ compiler 
-        # versions 4.2 and above.
+          AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
+        # add the general CXX flags for g++ compiler versions 4.8 and above.
         ADD_H5_FLAGS (HDF5_CMAKE_CXX_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/cxx-general")
         ADD_H5_FLAGS (H5_CXXFLAGS0 "${HDF5_SOURCE_DIR}/config/gnu-warnings/cxx-error-general")
       endif ()
@@ -127,71 +126,9 @@ if (NOT MSVC)
   if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # Technically, variable-length arrays are part of the C99 standard, but
     #   we should approach them a bit cautiously... Only needed for gcc 4.X
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0 AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.2)
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0 AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
       # autotools always add the C flags with the CXX flags
-      ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.2-4.last")
-    endif ()
-    # Append warning flags that only gcc 4.3+ knows about
-    # autotools always add the C flags with the CXX flags
-    if (CMAKE_C_COMPILER_VERSION VERSION_LESS 4.3 AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.2)
-      ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.3")
-    endif()
-
-    # Append more extra warning flags that only gcc 4.4+ know about
-    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.4)
-      # autotools always add the C flags with the CXX flags
-      ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.4")
-    endif ()
-
-    # Append more extra warning flags that only gcc 4.5+ know about
-    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.5)
-      # autotools always add the C flags with the CXX flags
-      ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.5")
-      if (HDF5_ENABLE_DEV_WARNINGS)
-        # autotools always add the C flags with the CXX flags
-        #ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/developer-4.5")
-      else ()
-        # autotools always add the C flags with the CXX flags
-        #ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/no-developer-4.5")
-      endif ()
-    endif ()
-
-    # Append more extra warning flags that only gcc 4.6 and less know about
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7 AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.2)
-      # autotools always add the C flags with the CXX flags
-      ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.2-4.6")
-    endif ()
-
-    # Append more extra warning flags that only gcc 4.5-4.6 know about
-    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.5 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.7)
-      # autotools always add the C flags with the CXX flags
-      ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.5-4.6")
-    endif ()
-
-    # Append more extra warning flags that only gcc 4.6+ know about
-    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.6)
-      # autotools always add the C flags with the CXX flags
-      ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.6")
-      if (HDF5_ENABLE_DEV_WARNINGS)
-        # autotools always add the C flags with the CXX flags
-        ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/developer-4.6")
-      else ()
-        # autotools always add the C flags with the CXX flags
-        ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/no-developer-4.6")
-      endif ()
-    endif ()
-
-    # Append more extra warning flags that only gcc 4.7+ know about
-    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
-      # autotools always add the C flags with the CXX flags
-      ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.7")
-      if (HDF5_ENABLE_DEV_WARNINGS)
-        # autotools always add the C flags with the CXX flags
-        ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/developer-4.7")
-      else ()
-        # autotools always add the C flags with the CXX flags
-        ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/no-developer-4.7")
-      endif ()
+      ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.8-4.last")
     endif ()
 
     # Append more extra warning flags that only gcc 4.8+ know about
