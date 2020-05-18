@@ -521,11 +521,11 @@ verify_cparam(const H5EA_t *ea, const H5EA_create_t *cparam)
 
     /* Retrieve creation parameters */
     HDmemset(&test_cparam, 0, sizeof(H5EA_create_t));
-    if(H5EA_get_cparam_test(ea, &test_cparam) < 0)
+    if(H5EA__get_cparam_test(ea, &test_cparam) < 0)
         FAIL_STACK_ERROR
 
     /* Verify creation parameters */
-    if(H5EA_cmp_cparam_test(cparam, &test_cparam))
+    if(H5EA__cmp_cparam_test(cparam, &test_cparam))
         TEST_ERROR
 
     /* Success */

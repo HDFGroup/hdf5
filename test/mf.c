@@ -903,7 +903,7 @@ test_mf_tmp(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
             FAIL_STACK_ERROR
 
         /* Retrieve the file's maxaddr */
-        if(H5F_get_maxaddr_test(file, &maxaddr) < 0)
+        if(H5F__get_maxaddr_test(file, &maxaddr) < 0)
             FAIL_STACK_ERROR
 
         /* Allocate some temporary address space */

@@ -127,7 +127,7 @@ main (int argc, char **argv)
 
     if(MAINPROCESS) {
         if(0 == nerrors)
-            PASSED()
+            PASSED();
         else
 	    H5_FAILED()
     }

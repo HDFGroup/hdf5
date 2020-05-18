@@ -3015,7 +3015,7 @@ test_start_swmr_write_stress_ohdr(hid_t in_fapl)
 
     /* Retrieve the chunk # for the dataspace message */
     chunk_num = UINT_MAX;
-    if(H5O_msg_get_chunkno_test(did, H5O_SDSPACE_ID, &chunk_num) < 0)
+    if(H5O__msg_get_chunkno_test(did, H5O_SDSPACE_ID, &chunk_num) < 0)
         FAIL_STACK_ERROR;
     /* Should be in chunk #0 for now */
     if(0 != chunk_num)
@@ -3072,7 +3072,7 @@ test_start_swmr_write_stress_ohdr(hid_t in_fapl)
 
     /* Retrieve the chunk # for the dataspace message */
     chunk_num = UINT_MAX;
-    if(H5O_msg_get_chunkno_test(did, H5O_SDSPACE_ID, &chunk_num) < 0)
+    if(H5O__msg_get_chunkno_test(did, H5O_SDSPACE_ID, &chunk_num) < 0)
         FAIL_STACK_ERROR;
     /* Should be in chunk #0 for now */
     if(1 != chunk_num)
@@ -7040,7 +7040,7 @@ main(void)
      * by the environment variable.
      */
     driver = HDgetenv("HDF5_DRIVER");
-    if(!H5FD_supports_swmr_test(driver)) {
+    if(!H5FD__supports_swmr_test(driver)) {
         HDprintf("This VFD does not support SWMR I/O\n");
         return EXIT_SUCCESS;
     } /* end if */

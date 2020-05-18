@@ -504,9 +504,9 @@ test_fs_create(hid_t fapl)
         TEST_ERROR
 
     HDmemset(&test_cparam, 0, sizeof(H5FS_create_t));
-    if(H5FS_get_cparam_test(frsp, &test_cparam) < 0)
+    if(H5FS__get_cparam_test(frsp, &test_cparam) < 0)
         FAIL_STACK_ERROR
-    if (H5FS_cmp_cparam_test(&cparam, &test_cparam))
+    if(H5FS__cmp_cparam_test(&cparam, &test_cparam))
         FAIL_STACK_ERROR
 
     /* Close the free space manager */

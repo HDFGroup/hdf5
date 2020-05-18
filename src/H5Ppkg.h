@@ -200,8 +200,8 @@ H5_DLL herr_t H5P_get_filter(const struct H5Z_filter_info_t *filter,
 
 /* Testing functions */
 #ifdef H5P_TESTING
-H5_DLL char *H5P_get_class_path_test(hid_t pclass_id);
-H5_DLL hid_t H5P_open_class_path_test(const char *path);
+H5_DLL char *H5P__get_class_path_test(hid_t pclass_id);
+H5_DLL hid_t H5P__open_class_path_test(const char *path);
 #endif /* H5P_TESTING */
 
 #endif /* _H5Ppkg_H */

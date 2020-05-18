@@ -3777,7 +3777,7 @@ external_set_elink_acc_flags(const char *env_h5_drvr, hid_t fapl, hbool_t new_fo
     if(H5Fclose(file1) < 0) TEST_ERROR
 
     /* Only run this part with VFDs that support SWMR */
-    if(H5FD_supports_swmr_test(env_h5_drvr)) {
+    if(H5FD__supports_swmr_test(env_h5_drvr)) {
 
         /* Reopen file1, with read-write and SWMR-write access */
         /* Only supported under the latest file format */

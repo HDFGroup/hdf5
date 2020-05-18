@@ -127,7 +127,7 @@ test_cont(char *filename, hid_t fapl)
         FAIL_STACK_ERROR
     if(H5AC_flush(f) < 0)
         FAIL_STACK_ERROR
-    if(H5O_expunge_chunks_test(&oh_locA) < 0)
+    if(H5O__expunge_chunks_test(&oh_locA) < 0)
         FAIL_STACK_ERROR
 
     if(H5O_get_hdr_info(&oh_locA, &hdr_info) < 0)
@@ -228,7 +228,7 @@ test_ohdr_cache(char *filename, hid_t fapl)
 
     /* Query object header information */
     rc = 0;
-    if(H5O_get_rc(&oh_loc, &rc) < 0)
+    if(H5O__get_rc_test(&oh_loc, &rc) < 0)
         FAIL_STACK_ERROR
     if(0 != rc)
         TEST_ERROR
@@ -269,7 +269,7 @@ test_ohdr_cache(char *filename, hid_t fapl)
      *  a non-invasive way -QAK)
      */
     rc = 0;
-    if(H5O_get_rc(&oh_loc, &rc) < 0)
+    if(H5O__get_rc_test(&oh_loc, &rc) < 0)
         FAIL_STACK_ERROR
     if(0 != rc)
         TEST_ERROR
@@ -585,7 +585,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Check that the "unknown" message was _NOT_ marked */
-    if(H5O_check_msg_marked_test(did, FALSE) < 0)
+    if(H5O__check_msg_marked_test(did, FALSE) < 0)
         FAIL_STACK_ERROR
 
     /* Close the dataset */
@@ -665,7 +665,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Check that the "unknown" message was marked */
-    if(H5O_check_msg_marked_test(did, TRUE) < 0)
+    if(H5O__check_msg_marked_test(did, TRUE) < 0)
         FAIL_STACK_ERROR
 
     /* Close the dataset */

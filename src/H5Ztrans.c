@@ -105,10 +105,10 @@ static void H5Z_XFORM_DEBUG(H5Z_node *tree);
 static void H5Z_print(H5Z_node *tree, FILE *stream);
 #endif  /* H5Z_XFORM_DEBUG */
 
-/* PGCC (11.8-0) has trouble with the command *p++ = *p OP tree_val. It increments P first before 
+/* PGCC (11.8-0) has trouble with the command *p++ = *p OP tree_val. It increments P first before
  * doing the operation.  So I break down the command into two lines:
  *     *p = *p OP tree_val; p++;
- * Actually, the behavior of *p++ = *p OP tree_val is undefined. (SLU - 2012/3/19) 
+ * Actually, the behavior of *p++ = *p OP tree_val is undefined. (SLU - 2012/3/19)
  */
 #define H5Z_XFORM_DO_OP1(RESL,RESR,TYPE,OP,SIZE)                            \
 {   								  	    \
@@ -324,13 +324,13 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
 
 #define H5Z_XFORM_DO_OP5(TYPE, SIZE)                                                               \
 {                                                                                                  \
-    TYPE val = (TYPE)((tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val); \
+    TYPE val = ((tree->type == H5Z_XFORM_INTEGER) ? (TYPE)tree->value.int_val : (TYPE)tree->value.float_val); \
     H5VM_array_fill(array, &val, sizeof(TYPE), (SIZE));                                             \
 }
 
-/* The difference of this macro from H5Z_XFORM_DO_OP3 is that it handles the operations when the left operand is empty, like -x or +x.  
- * The reason that it's separated from H5Z_XFORM_DO_OP3 is because compilers don't accept operations like *x or /x.  So in H5Z_do_op, 
- * these two macros are called in different ways. (SLU 2012/3/20) 
+/* The difference of this macro from H5Z_XFORM_DO_OP3 is that it handles the operations when the left operand is empty, like -x or +x.
+ * The reason that it's separated from H5Z_XFORM_DO_OP3 is because compilers don't accept operations like *x or /x.  So in H5Z_do_op,
+ * these two macros are called in different ways. (SLU 2012/3/20)
  */
 #define H5Z_XFORM_DO_OP6(OP)                                                                                                                    \
 {                                                                                                                                               \
@@ -1229,15 +1229,15 @@ H5Z_xform_find_type(const H5T_t* type)
     HDassert(type);
 
     /* Check for SHORT type */
-    if((tmp = (H5T_t *)H5I_object(H5T_NATIVE_SHORT)) 
+    if((tmp = (H5T_t *)H5I_object(H5T_NATIVE_SHORT))
             && 0 == H5T_cmp(type, tmp, FALSE))
 	HGOTO_DONE(H5T_NATIVE_SHORT)
     /* Check for INT type */
-    else if((tmp = (H5T_t *)H5I_object(H5T_NATIVE_INT)) 
+    else if((tmp = (H5T_t *)H5I_object(H5T_NATIVE_INT))
             && 0 == H5T_cmp(type, tmp, FALSE))
         HGOTO_DONE(H5T_NATIVE_INT)
     /* Check for LONG type */
-    else if((tmp = (H5T_t *)H5I_object(H5T_NATIVE_LONG)) 
+    else if((tmp = (H5T_t *)H5I_object(H5T_NATIVE_LONG))
             && 0 == H5T_cmp(type, tmp, FALSE))
 	HGOTO_DONE(H5T_NATIVE_LONG)
     /* Check for LONGLONG type */
@@ -1370,7 +1370,7 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:    H5Z_op_is_numbs
- * Purpose:     Internal function to facilitate the condition check in 
+ * Purpose:     Internal function to facilitate the condition check in
  *              H5Z_xform_reduce_tree to reduce the bulkiness of the code.
  * Return:      TRUE or FALSE
  * Programmer:  Raymond Lu
@@ -1397,7 +1397,7 @@ H5Z_op_is_numbs(H5Z_node* _tree)
 
 /*-------------------------------------------------------------------------
  * Function:    H5Z_op_is_numbs2
- * Purpose:     Internal function to facilitate the condition check in 
+ * Purpose:     Internal function to facilitate the condition check in
  *              H5Z_xform_reduce_tree to reduce the bulkiness of the code.
  *              The difference from H5Z_op_is_numbs is that the left child
  *              can be empty, like -x or +x.

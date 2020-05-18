@@ -365,11 +365,11 @@ verify_cparam(const H5FA_t *fa, const H5FA_create_t *cparam)
 
     /* Retrieve creation parameters */
     HDmemset(&test_cparam, 0, sizeof(H5FA_create_t));
-    if (H5FA_get_cparam_test(fa, &test_cparam) < 0)
+    if (H5FA__get_cparam_test(fa, &test_cparam) < 0)
         FAIL_STACK_ERROR
 
     /* Verify creation parameters */
-    if (H5FA_cmp_cparam_test(cparam, &test_cparam))
+    if (H5FA__cmp_cparam_test(cparam, &test_cparam))
         TEST_ERROR
 
     /* Success */
