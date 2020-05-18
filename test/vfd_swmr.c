@@ -914,7 +914,7 @@ test_writer_md(void)
             FAIL_STACK_ERROR
 
         /* Get dataset object header address */
-        if(H5Oget_info2(did, &oinfo, H5O_INFO_BASIC) < 0)
+        if(H5Oget_info(did, &oinfo, H5O_INFO_BASIC) < 0)
             FAIL_STACK_ERROR
 
         /* Close the dataset */
@@ -949,7 +949,7 @@ test_writer_md(void)
             FAIL_STACK_ERROR
 
         /* Get dataset object info */
-        if(H5Oget_info2(did, &oinfo, H5O_INFO_BASIC) < 0)
+        if(H5Oget_info(did, &oinfo, H5O_INFO_BASIC) < 0)
             FAIL_STACK_ERROR
 
         /* Close the dataset */
@@ -981,7 +981,7 @@ test_writer_md(void)
             FAIL_STACK_ERROR
 
         /* Get dataset object info */
-        if(H5Oget_info2(did, &oinfo, H5O_INFO_BASIC) < 0)
+        if(H5Oget_info(did, &oinfo, H5O_INFO_BASIC) < 0)
             FAIL_STACK_ERROR
 
         /* Close the dataset */
@@ -1477,7 +1477,7 @@ test_reader_md_concur(void)
             FAIL_STACK_ERROR
 
         /* Get dataset object header address */
-        if(H5Oget_info2(did, &oinfo, H5O_INFO_BASIC) < 0)
+        if(H5Oget_info(did, &oinfo, H5O_INFO_BASIC) < 0)
             FAIL_STACK_ERROR
 
         /* Close the dataset */
