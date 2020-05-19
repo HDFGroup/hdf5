@@ -93,11 +93,9 @@ if (NOT MSVC)
         list (APPEND H5_CFLAGS0 "-Wsign-compare -Wtrigraphs -Wwrite-strings")
       endif()
     elseif (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-      # Add general CFlags for GCC versions 4.2 and above
-      if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2)
-        ADD_H5_FLAGS (HDF5_CMAKE_C_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/general")
-      endif ()
+      # Add general CFlags for GCC versions 4.8 and above
       if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
+        ADD_H5_FLAGS (HDF5_CMAKE_C_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/general")
         ADD_H5_FLAGS (H5_CFLAGS0 "${HDF5_SOURCE_DIR}/config/gnu-warnings/error-general")
       endif ()
       # gcc automatically inlines based on the optimization level
@@ -121,13 +119,13 @@ if (NOT MSVC)
     message (STATUS "....HDF5 developer group warnings are enabled")
     if (CMAKE_C_COMPILER_ID STREQUAL "Intel")
       list (APPEND H5_CFLAGS0 "-Winline -Wreorder -Wport -Wstrict-aliasing")
-    elseif (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    elseif (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
       ADD_H5_FLAGS (H5_CFLAGS0 "${HDF5_SOURCE_DIR}/config/gnu-warnings/developer-general")
     elseif (CMAKE_C_COMPILER_ID STREQUAL "Clang")
       ADD_H5_FLAGS (H5_CFLAGS0 "${HDF5_SOURCE_DIR}/config/clang-warnings/developer-general")
     endif ()
   else ()
-    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
       ADD_H5_FLAGS (H5_CFLAGS0 "${HDF5_SOURCE_DIR}/config/gnu-warnings/no-developer-general")
     elseif (CMAKE_C_COMPILER_ID STREQUAL "Clang")
       ADD_H5_FLAGS (H5_CFLAGS0 "${HDF5_SOURCE_DIR}/config/clang-warnings/no-developer-general")
@@ -138,68 +136,8 @@ if (NOT MSVC)
   if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     # Technically, variable-length arrays are part of the C99 standard, but
     #   we should approach them a bit cautiously... Only needed for gcc 4.X
-    if (CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0 AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2)
-      ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.2-4.last")
-    endif ()
-
-    # Append warning flags for gcc 4.2-4.3
-    if (CMAKE_C_COMPILER_VERSION VERSION_LESS_EQUAL 4.3 AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2)
-      ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.2-4.3")
-    endif ()
-
-    # Append warning flags for gcc 4.2-4.4
-    if (CMAKE_C_COMPILER_VERSION VERSION_LESS_EQUAL 4.4 AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2)
-      ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.2-4.4")
-    endif ()
-
-    # Append warning flags that only gcc 4.3+ knows about
-    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.3)
-      ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.3")
-    endif ()
-
-    # Append more extra warning flags that only gcc 4.4+ know about
-    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.4)
-      ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.4")
-    endif ()
-
-    # Append more extra warning flags that only gcc 4.5+ know about
-    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.5)
-      ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.5")
-      if (HDF5_ENABLE_DEV_WARNINGS)
-        ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/developer-4.5")
-      else ()
-        ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/no-developer-4.5")
-      endif ()
-    endif ()
-
-    # Append more extra warning flags that only gcc 4.6 and less know about
-    if (CMAKE_C_COMPILER_VERSION VERSION_LESS 4.7 AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2)
-      ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.2-4.6")
-    endif ()
-
-    # Append more extra warning flags that only gcc 4.5-4.6 know about
-    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.5 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.7)
-      ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.5-4.6")
-    endif ()
-
-    # Append more extra warning flags that only gcc 4.6+ know about
-    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.6)
-      ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.6")
-      if (HDF5_ENABLE_DEV_WARNINGS)
-        ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/developer-4.6")
-      else ()
-        ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/no-developer-4.6")
-      endif ()
-    endif ()
-
-    # Append more extra warning flags that only gcc 4.7+ know about
-    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.7)
-      ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.7")
-      if (HDF5_ENABLE_DEV_WARNINGS)
-        ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/developer-4.7")
-      else ()
-        ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/no-developer-4.7")
-      endif ()
+    if (CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0 AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
+      ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.8-4.last")
     endif ()
 
     # Append more extra warning flags that only gcc 4.8+ know about
