@@ -1706,13 +1706,9 @@ H5C_insert_entry(H5F_t *             f,
 
     if(test_entry_ptr != NULL) {
         if(test_entry_ptr == entry_ptr)
-
             HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "entry already in cache")
-
         else
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
-                        "duplicate entry in cache")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "duplicate entry in cache")
     } /* end if */
 
     entry_ptr->magic = H5C__H5C_CACHE_ENTRY_T_MAGIC;
