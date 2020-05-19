@@ -278,8 +278,8 @@ build_match_list (const char *objname1, trav_info_t *info1, const char *objname2
     /* init */
     trav_table_init(info1->fid, &table);
     if (table == NULL) {
-        H5TOOLS_INFO(H5E_tools_min_id_g, "Cannot create traverse table");
-        goto done;
+        H5TOOLS_INFO("Cannot create traverse table");
+        H5TOOLS_GOTO_DONE_NO_RET();
     }
 
     /*
