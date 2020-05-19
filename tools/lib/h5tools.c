@@ -87,7 +87,7 @@ const char *drivernames[]={
     [MPIO_VFD_IDX] = "mpio",
     [ROS3_VFD_IDX] = "ros3",
     [HDFS_VFD_IDX] = "hdfs",
-    [SWMR_IDX] = "swmr",
+    [SWMR_VFD_IDX] = "swmr",
 };
 
 #define NUM_VOLS    (sizeof(volnames) / sizeof(volnames[0]))
@@ -964,6 +964,13 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl_id, hbool_t use_spec
                  * and is fundamentally SEC2 anyway.
                  */
                 if (drivernum == LOG_VFD_IDX)
+                    continue;
+
+                /* Skip the SWMR VFD, since it will start to wait to
+                 * rendezvous with a writer, and that's not usually
+                 * desired.
+                 */
+                if (drivernum == SWMR_VFD_IDX)
                     continue;
 
                 vfd_info.info           = NULL;
