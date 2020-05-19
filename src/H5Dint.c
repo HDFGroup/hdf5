@@ -89,7 +89,7 @@ static herr_t H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overw
         hsize_t old_dim[]);
 static herr_t H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id);
 static herr_t H5D__close_cb(H5VL_object_t *dset_vol_obj);
-static herr_t H5D__use_minimized_dset_headers(H5F_t *file, H5D_t *dset, hbool_t *minimize);
+static herr_t H5D__use_minimized_dset_headers(H5F_t *file, hbool_t *minimize);
 static herr_t H5D__prepare_minimized_oh(H5F_t *file, H5D_t *dset, H5O_loc_t *oloc);
 static size_t H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr);
 static void *H5D__vlen_get_buf_size_alloc(size_t size, void *info);
@@ -739,14 +739,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__use_minimized_dset_headers(H5F_t *file, H5D_t H5_ATTR_SANITY_CHECK *dset, hbool_t *minimize)
+H5D__use_minimized_dset_headers(H5F_t *file, hbool_t *minimize)
 {
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT;
 
     HDassert(file);
-    HDassert(dset);
     HDassert(minimize);
 
     /* Get the dataset object header minimize flag for this call */
@@ -1017,7 +1016,7 @@ H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set fill value info")
     } /* end if */
 
-    if(H5D__use_minimized_dset_headers(file, dset, &minimize_header) == FAIL)
+    if(H5D__use_minimized_dset_headers(file, &minimize_header) == FAIL)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get minimize settings")
 
     if(TRUE == minimize_header) {

@@ -784,7 +784,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T__ref_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t H5_ATTR_SANITY_CHECK src_size,
+H5T__ref_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t H5_ATTR_NDEBUG_UNUSED src_size,
     H5VL_object_t H5_ATTR_UNUSED *dst_file, void *dst_buf, size_t dst_size)
 {
     const uint8_t *p = (const uint8_t *)src_buf;

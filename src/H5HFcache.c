@@ -1474,8 +1474,8 @@ H5HF__cache_iblock_notify(H5AC_notify_action_t action, void *_thing)
     else {
         /* if this is a child iblock, verify that the pointers are */
         /* either uninitialized or set up correctly.               */
-        H5HF_indirect_t H5_ATTR_SANITY_CHECK *par_iblock = iblock->parent;
-        unsigned H5_ATTR_SANITY_CHECK indir_idx;  /* Index in parent's child iblock pointer array */
+        H5HF_indirect_t H5_ATTR_NDEBUG_UNUSED *par_iblock = iblock->parent;
+        unsigned H5_ATTR_NDEBUG_UNUSED indir_idx;  /* Index in parent's child iblock pointer array */
 
         /* Sanity check */
         HDassert(par_iblock->child_iblocks);

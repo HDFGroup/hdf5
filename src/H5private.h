@@ -337,9 +337,9 @@
 #define H5_ATTR_DEBUG_API_USED    H5_ATTR_UNUSED
 #endif /* H5_DEBUG_API */
 #ifndef NDEBUG
-#define H5_ATTR_SANITY_CHECK       /*void*/
+#define H5_ATTR_NDEBUG_UNUSED     /*void*/
 #else /* NDEBUG */
-#define H5_ATTR_SANITY_CHECK       H5_ATTR_UNUSED
+#define H5_ATTR_NDEBUG_UNUSED     H5_ATTR_UNUSED
 #endif /* NDEBUG */
 #   define H5_ATTR_NORETURN     __attribute__((noreturn))
 #   define H5_ATTR_CONST        __attribute__((const))
@@ -2113,7 +2113,7 @@ H5_DLL herr_t H5CX_pop(void);
 
 
 #define FUNC_ENTER_COMMON(asrt)                                               \
-    hbool_t H5_ATTR_SANITY_CHECK err_occurred = FALSE;                        \
+    hbool_t err_occurred = FALSE;                                             \
                                                                               \
     FUNC_ENTER_CHECK_NAME(asrt);
 
