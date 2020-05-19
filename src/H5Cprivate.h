@@ -268,7 +268,7 @@
 /* Typedef for the main structure for the cache (defined in H5Cpkg.h) */
 typedef struct H5C_t H5C_t;
 
-/***************************************************************************
+/*
  *
  * Struct H5C_class_t
  *
