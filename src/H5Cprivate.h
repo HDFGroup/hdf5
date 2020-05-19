@@ -2428,7 +2428,7 @@ H5_DLL herr_t H5C_mark_entry_dirty(void *thing);
 H5_DLL herr_t H5C_mark_entry_clean(void *thing);
 H5_DLL herr_t H5C_mark_entry_unserialized(void *thing);
 H5_DLL herr_t H5C_mark_entry_serialized(void *thing);
-H5_DLL herr_t H5C_move_entry(H5F_t *f, const H5C_class_t *type,
+H5_DLL herr_t H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type,
     haddr_t old_addr, haddr_t new_addr);
 H5_DLL herr_t H5C_pin_protected_entry(void *thing);
 H5_DLL herr_t H5C_prep_for_file_close(H5F_t *f);

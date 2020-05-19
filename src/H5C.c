@@ -2297,23 +2297,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_move_entry(H5F_t *             f,
-               const H5C_class_t * type,
-               haddr_t             old_addr,
-	       haddr_t             new_addr)
+H5C_move_entry(H5C_t *	     cache_ptr,
+                 const H5C_class_t * type,
+                 haddr_t 	     old_addr,
+	         haddr_t 	     new_addr)
 {
-    H5C_t             * cache_ptr = NULL;
     H5C_cache_entry_t *	entry_ptr = NULL;
     H5C_cache_entry_t *	test_entry_ptr = NULL;
     herr_t              ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
-
-    /* sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-
-    cache_ptr = f->shared->cache;
 
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);

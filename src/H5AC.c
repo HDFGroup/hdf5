@@ -1125,7 +1125,7 @@ H5AC_move_entry(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t ne
             HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "can't log moved entry")
 #endif /* H5_HAVE_PARALLEL */
 
-    if(H5C_move_entry(f, type, old_addr, new_addr) < 0)
+    if(H5C_move_entry(f->shared->cache, type, old_addr, new_addr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTMOVE, FAIL, "H5C_move_entry() failed")
 
 #ifdef H5_HAVE_PARALLEL

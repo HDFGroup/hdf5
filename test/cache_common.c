@@ -2007,7 +2007,7 @@ execute_flush_op(H5F_t * file_ptr,
                     } /* end else */
         } /* end if */
                 else
-            move_entry(file_ptr, op_ptr->type, op_ptr->idx, op_ptr->flag);
+            move_entry(cache_ptr, op_ptr->type, op_ptr->idx, op_ptr->flag);
         break;
 
         case FLUSH_OP__ORDER:
@@ -3449,10 +3449,10 @@ mark_entry_dirty(int32_t type,
  */
 
 void
-move_entry(H5F_t * file_ptr,
-           int32_t type,
-           int32_t idx,
-           hbool_t main_addr)
+move_entry(H5C_t * cache_ptr,
+             int32_t type,
+             int32_t idx,
+             hbool_t main_addr)
 {
     herr_t         result;
     hbool_t       done = TRUE; /* will set to FALSE if we have work to do */
@@ -3463,7 +3463,7 @@ move_entry(H5F_t * file_ptr,
 
     if ( pass ) {
 
-        HDassert( file_ptr );
+        HDassert( cache_ptr );
         HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
         HDassert( ( 0 <= idx ) && ( idx <= max_indices[type] ) );
 
@@ -3473,7 +3473,7 @@ move_entry(H5F_t * file_ptr,
         HDassert( entry_ptr->index == idx );
         HDassert( entry_ptr->type == type );
         HDassert( entry_ptr == entry_ptr->self );
-        HDassert( entry_ptr->cache_ptr == file_ptr->shared->cache );
+        HDassert( entry_ptr->cache_ptr == cache_ptr );
         HDassert( !entry_ptr->is_read_only );
         HDassert( !entry_ptr->header.is_read_only );
 
@@ -3508,7 +3508,7 @@ move_entry(H5F_t * file_ptr,
                 mark_flush_dep_dirty(entry_ptr);
 
             entry_ptr->action = TEST_ENTRY_ACTION_MOVE;
-            result = H5C_move_entry(file_ptr, types[type], old_addr, new_addr);
+            result = H5C_move_entry(cache_ptr, types[type], old_addr, new_addr);
             entry_ptr->action = TEST_ENTRY_ACTION_NUL;
         }
 
@@ -4065,8 +4065,8 @@ row_major_scan_forward(H5F_t * file_ptr,
                 if(verbose)
                     HDfprintf(stdout, "4(r, %d, %d, %d) ", type, tmp_idx, (int)move_to_main_addr);
 
-                move_entry(file_ptr, type, tmp_idx, move_to_main_addr);
-                HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
+                move_entry(cache_ptr, type, tmp_idx, move_to_main_addr);
+        HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
             } /* end if */
 
             tmp_idx--;
@@ -4485,7 +4485,7 @@ row_major_scan_backward(H5F_t * file_ptr,
                     HDfprintf(stdout, "(r, %d, %d, %d) ",
                 type, tmp_idx, (int)move_to_main_addr);
 
-                move_entry(file_ptr, type, tmp_idx, move_to_main_addr);
+                move_entry(cache_ptr, type, tmp_idx, move_to_main_addr);
             }
 
             tmp_idx++;
