@@ -7614,7 +7614,7 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
         if((fapl_new = H5Pcopy(fapl)) < 0) TEST_ERROR
 
         if(multi || split)
-            if(set_multi_split(fapl_new, 4096, multi, split) <  0)
+            if(set_multi_split(fapl_new, 4096, split) <  0)
                 TEST_ERROR;
 
         /* Test with TRUE or FALSE for persisting free-space */
