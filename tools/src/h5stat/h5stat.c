@@ -1812,11 +1812,14 @@ main(int argc, const char *argv[])
     if(parse_command_line(argc, argv, &hand) < 0)
         goto done;
 
+    fname = argv[opt_ind];
+
     if (drivername) {
         h5tools_vfd_info_t vfd_info;
 
         vfd_info.info       = NULL;
         vfd_info.name       = drivername;
+        vfd_info.fname      = fname;
 
         if (!HDstrcmp(drivername, drivernames[ROS3_VFD_IDX])) {
 #ifdef H5_HAVE_ROS3_VFD
@@ -1840,8 +1843,6 @@ main(int argc, const char *argv[])
             goto done;
         }
     }
-
-    fname = argv[opt_ind];
 
     if(enable_error_stack > 0) {
         H5Eset_auto2(H5E_DEFAULT, func, edata);
