@@ -1173,6 +1173,7 @@ test_set_configured_fapl(void)
         /* test */
         vfd_info.info = C.conf_fa;
         vfd_info.name = C.vfdname;
+        vfd_info.fname = "ignore";
         result = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info);
         if (C.expected == 0)
             JSVERIFY( result, H5I_INVALID_HID, C.message)
