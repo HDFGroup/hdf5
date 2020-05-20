@@ -2270,7 +2270,7 @@ H5D__alloc_storage(const H5D_io_info_t *io_info, H5D_time_alloc_t time_alloc,
      * We assume that external storage is already
      * allocated by the caller, or at least will be before I/O is performed.
      */
-    if(!(H5S_NULL == H5S_GET_EXTENT_TYPE(dset->shared->space) || dset->shared->dcpl_cache.efl.nused > 0)) {
+    if(!(0 == H5S_GET_EXTENT_NPOINTS(dset->shared->space) || dset->shared->dcpl_cache.efl.nused > 0)) {
         /* Get a pointer to the dataset's layout information */
         layout = &(dset->shared->layout);
 

@@ -120,7 +120,7 @@ typedef struct H5O_mesg_t H5O_mesg_t;
 /* If the module using this macro is allowed access to the private variables, access them directly */
 #ifdef H5O_MODULE
 #define H5O_OH_GET_ADDR(O)    ((O)->chunk[0].addr)
-#define H5O_OH_GET_VERSION ((O)->version)
+#define H5O_OH_GET_VERSION(O) ((O)->version)
 #define H5O_OH_GET_FLAGS(O)   ((O)->flags)
 #define H5O_OH_GET_MTIME(O)   ((O)->mtime)
 #else /* H5O_MODULE */
@@ -222,7 +222,7 @@ typedef struct H5O_copy_t {
 #define H5O_MDCI_MSG_ID 0x0018		/* Metadata Cache Image Message */
 #define H5O_UNKNOWN_ID  0x0019          /* Placeholder message ID for unknown message.  */
                                         /* (this should never exist in a file) */
-/* 
+/*
  * Note: Must increment H5O_MSG_TYPES in H5Opkg.h and update H5O_msg_class_g
  *      in H5O.c when creating a new message type.  Also bump the value of
  *      H5O_BOGUS_INVALID_ID, below, to be one greater than the value of
@@ -481,7 +481,7 @@ typedef struct H5O_storage_chunk_t {
     const struct H5D_chunk_ops_t *ops;  /* Pointer to chunked storage operations */
     union {
         H5O_storage_chunk_btree_t btree;   /* Information for v1 B-tree index   */
-        H5O_storage_chunk_bt2_t btree2;    /* Information for v2 B-tree index */	
+        H5O_storage_chunk_bt2_t btree2;    /* Information for v2 B-tree index */
         H5O_storage_chunk_earray_t earray; /* Information for extensible array index   */
         H5O_storage_chunk_farray_t farray; /* Information for fixed array index   */
         H5O_storage_chunk_single_filt_t single; /* Information for single chunk w/ filters index */
@@ -582,8 +582,8 @@ typedef struct H5O_storage_t {
 typedef struct H5O_layout_chunk_farray_t {
     /* Creation parameters for fixed array data structure */
     struct {
-        uint8_t max_dblk_page_nelmts_bits;  /* Log2(Max. # of elements in a data block page) - 
-                                               i.e. # of bits needed to store max. # of elements 
+        uint8_t max_dblk_page_nelmts_bits;  /* Log2(Max. # of elements in a data block page) -
+                                               i.e. # of bits needed to store max. # of elements
                                                in a data block page */
     } cparam;
 } H5O_layout_chunk_farray_t;
@@ -869,13 +869,13 @@ typedef struct {
     } u;
 } H5O_mesg_operator_t;
 
-
 /* Typedef for abstract object creation */
 typedef struct {
     H5O_type_t obj_type;        /* Type of object to create */
     void *crt_info;             /* Information for object creation callback */
     void *new_obj;              /* Pointer to new object created */
 } H5O_obj_create_t;
+
 
 /* Forward declarations for prototype arguments */
 struct H5P_genplist_t;
