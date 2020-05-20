@@ -11,6 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "H5private.h"  /* H5_ATTR_UNUSED */
+#include "H5Fpublic.h"
 #include "H5FDvfd_swmr.h"
 
 bool
