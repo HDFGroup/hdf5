@@ -30,11 +30,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5Lprivate.h"		/* Links        		  	*/
-#include "H5Ppkg.h"		/* Property lists		  	*/
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5Lprivate.h"         /* Links                                    */
+#include "H5Ppkg.h"             /* Property lists                           */
 
 
 /****************/
@@ -47,6 +47,7 @@
 #define H5L_CRT_INTERMEDIATE_GROUP_DEF          0
 #define H5L_CRT_INTERMEDIATE_GROUP_ENC          H5P__encode_unsigned
 #define H5L_CRT_INTERMEDIATE_GROUP_DEC          H5P__decode_unsigned
+
 
 /******************/
 /* Local Typedefs */
@@ -123,7 +124,7 @@ H5P_lcrt_reg_prop(H5P_genclass_t *pclass)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Register create intermediate groups property */
-    if(H5P_register_real(pclass, H5L_CRT_INTERMEDIATE_GROUP_NAME, H5L_CRT_INTERMEDIATE_GROUP_SIZE, &H5L_def_intmd_group_g, 
+    if(H5P__register_real(pclass, H5L_CRT_INTERMEDIATE_GROUP_NAME, H5L_CRT_INTERMEDIATE_GROUP_SIZE, &H5L_def_intmd_group_g,
             NULL, NULL, NULL, H5L_CRT_INTERMEDIATE_GROUP_ENC, H5L_CRT_INTERMEDIATE_GROUP_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")

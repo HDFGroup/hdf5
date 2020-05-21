@@ -68,7 +68,7 @@ H5P__get_class_path_test(hid_t pclass_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property class");
 
     /* Get the property list class path */
-    if(NULL == (ret_value = H5P_get_class_path(pclass)))
+    if(NULL == (ret_value = H5P__get_class_path(pclass)))
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, NULL, "unable to query full path of class")
 
 done:
@@ -109,7 +109,7 @@ H5P__open_class_path_test(const char *path)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid class path");
 
     /* Open the property list class */
-    if (NULL == (pclass = H5P_open_class_path(path)))
+    if (NULL == (pclass = H5P__open_class_path(path)))
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, H5I_INVALID_HID, "unable to find class with full path");
 
     /* Get an atom for the class */
@@ -118,7 +118,7 @@ H5P__open_class_path_test(const char *path)
 
 done:
     if (H5I_INVALID_HID == ret_value && pclass)
-        H5P_close_class(pclass);
+        H5P__close_class(pclass);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5P__open_class_path_test() */
