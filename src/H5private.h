@@ -999,7 +999,7 @@ typedef off_t               h5_stat_size_t;
 #endif /* HDgetgroups */
 #ifndef HDgethostname
     #define HDgethostname(N,L)    gethostname(N,L)
-#endif /* HDgetlogin */
+#endif /* HDgethostname */
 #ifndef HDgetlogin
     #define HDgetlogin()    getlogin()
 #endif /* HDgetlogin */
