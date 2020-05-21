@@ -78,8 +78,6 @@ static unsigned md_entry_splitting_smoke_check(hid_t orig_fapl,
     const char *env_h5_drvr, bool);
 static unsigned md_entry_splitting_boundary_test(hid_t orig_fapl, 
     const char *env_h5_drvr, bool);
-static unsigned verify_page_buffering_disabled(hid_t orig_fapl, 
-    const char *env_h5_drvr);
 #endif /* H5_HAVE_PARALLEL */
 
 #define FILENAME "filepaged"
@@ -2538,7 +2536,6 @@ error:
             HDfree(data);
     } H5E_END_TRY;
     return 1;
-
 } /* test_min_threshold */
 
 
