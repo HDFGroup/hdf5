@@ -34,6 +34,8 @@
 #define COLS 512
 #define RANK 2
 
+static const unsigned int hang_back = 3;
+
 typedef struct _base {
     hsize_t row, col;
 } base_t;
@@ -47,13 +49,15 @@ typedef struct {
 	/* main-loop statistics */
 	uint64_t max_elapsed_ns, min_elapsed_ns, total_elapsed_ns;
 	uint64_t total_loops;
-	hid_t *dataset, memspace, file;
+	hid_t *dataset;
+        hid_t memspace, file, one_by_one_sid;
         unsigned ndatasets;
 	char filename[PATH_MAX];
 	char progname[PATH_MAX];
 	struct timespec update_interval;
 	bool fuzz;
 	unsigned int cols, rows;
+	unsigned int asteps;
 	unsigned int nsteps;
         bool two_dee;
         bool wait_for_signal;
@@ -69,9 +73,11 @@ typedef struct {
 	, .max_elapsed_ns = 0						\
 	, .memspace = H5I_INVALID_HID					\
 	, .file = H5I_INVALID_HID					\
+	, .one_by_one_sid = H5I_INVALID_HID				\
 	, .rows = ROWS						        \
 	, .cols = COLS						        \
         , .ndatasets = 5                                                \
+	, .asteps = 10							\
 	, .nsteps = 100							\
 	, .filename = ""						\
         , .two_dee = false                                              \
@@ -124,16 +130,19 @@ newmat(unsigned rows, unsigned cols)
 static void
 usage(const char *progname)
 {
-	fprintf(stderr, "usage: %s [-c] [-d] [-u milliseconds]\n"
+	fprintf(stderr, "usage: %s [-S] [-W] [-a steps] [-c cols] [-d dims]\n"
+                "    [-n iterations] [-r rows] [-s datasets]\n"
+                "    [-u milliseconds]\n"
 		"\n"
 		"-S:	               do not use VFD SWMR\n"
 		"-W:	               do not wait for a signal before\n"
                 "                      exiting\n"
+		"-a steps:	       `steps` between adding attributes\n"
 		"-c cols:	       `cols` columns per chunk\n"
-		"-r rows:	       `rows` rows per chunk\n"
 		"-d 1|one|2|two|both:  select dataset expansion in one or\n"
                 "                      both dimensions\n"
 		"-n iterations:        how many times to expand each dataset\n"
+		"-r rows:	       `rows` rows per chunk\n"
 		"-s datasets:          number of datasets to create\n"
 		"-u ms:                milliseconds interval between updates\n"
                 "                      to %s.h5\n"
@@ -148,6 +157,7 @@ state_init(state_t *s, int argc, char **argv)
     unsigned long tmp;
     int ch;
     unsigned i;
+    const hsize_t dims = 1;
     char tfile[PATH_MAX];
     char *end;
     unsigned long millis;
@@ -156,7 +166,7 @@ state_init(state_t *s, int argc, char **argv)
     esnprintf(tfile, sizeof(tfile), "%s", argv[0]);
     esnprintf(s->progname, sizeof(s->progname), "%s", basename(tfile));
 
-    while ((ch = getopt(argc, argv, "SWc:d:n:r:s:qu:")) != -1) {
+    while ((ch = getopt(argc, argv, "SWa:c:d:n:r:s:qu:")) != -1) {
         switch (ch) {
         case 'S':
             s->use_vfd_swmr = false;
@@ -177,6 +187,7 @@ state_init(state_t *s, int argc, char **argv)
                         "bad -d argument \"%s\"", optarg);
             }
             break;
+        case 'a':
         case 'c':
         case 'n':
         case 'r':
@@ -197,7 +208,9 @@ state_init(state_t *s, int argc, char **argv)
                     tmp);
             }
 
-            if (ch == 'c')
+            if (ch == 'a')
+                s->asteps = (unsigned)tmp;
+            else if (ch == 'c')
                 s->cols = (unsigned)tmp;
             else if (ch == 'n')
                 s->nsteps = (unsigned)tmp;
@@ -219,7 +232,7 @@ state_init(state_t *s, int argc, char **argv)
                     errx(EXIT_FAILURE,
                         "garbage after -p argument \"%s\"", optarg);
             }
-            s->update_interval.tv_sec = millis / 1000UL;
+            s->update_interval.tv_sec = (time_t)(millis / 1000UL);
             s->update_interval.tv_nsec =
                 (long)((millis * 1000000UL) % 1000000000UL);
             dbgf(1, "%lu milliseconds between updates\n", millis);
@@ -240,6 +253,10 @@ state_init(state_t *s, int argc, char **argv)
     s->chunk_dims[1] = s->cols;
     s->one_dee_max_dims[0] = H5S_UNLIMITED;
     s->one_dee_max_dims[1] = s->cols;
+
+    /* space for attributes */
+    if ((s->one_by_one_sid = H5Screate_simple(1, &dims, &dims)) < 0)
+        errx(EXIT_FAILURE, "H5Screate_simple failed");
 
     s->dataset = malloc(sizeof(*s->dataset) * s->ndatasets);
     if (s->dataset == NULL)
@@ -412,6 +429,9 @@ verify_chunk(state_t *s, hid_t filespace,
 
     assert(which < s->ndatasets);
 
+    dbgf(1, "verifying chunk %" PRIuHSIZE ", %" PRIuHSIZE "\n",
+        base.row, base.col);
+
     ds = s->dataset[which];
 
     status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset,
@@ -457,6 +477,31 @@ init_and_write_chunk(state_t *s, hid_t filespace,
 }
 
 static void
+verify_dset_attribute(hid_t ds, unsigned int which, unsigned int step)
+{
+    unsigned int read_step;
+    hid_t aid;
+    char name[sizeof("attr-9999999999")];
+
+    esnprintf(name, sizeof(name), "attr-%u", step);
+
+    dbgf(1, "verifying attribute %s on dataset %u equals %u\n", name, which,
+        step);
+
+    if ((aid = H5Aopen(ds, name, H5P_DEFAULT)) < 0)
+        errx(EXIT_FAILURE, "H5Acreate2 failed");
+
+    if (H5Aread(aid, H5T_NATIVE_UINT, &read_step) < 0)
+        errx(EXIT_FAILURE, "H5Aread failed");
+
+    if (H5Aclose(aid) < 0)
+        errx(EXIT_FAILURE, "H5Aclose failed");
+
+    if (read_step != step)
+        errx(EXIT_FAILURE, "expected %u read %u", step, read_step);
+}
+
+static void
 verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat,
     unsigned *stepp)
 {
@@ -481,10 +526,10 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat,
         errx(EXIT_FAILURE, "H5Sget_simple_extent_dims failed");
 
     nrows = (unsigned)(size[0] / s->chunk_dims[0]);
-    if (nrows < 2)
+    if (nrows < hang_back)
         goto out;
 
-    last_step = nrows - 2;
+    last_step = nrows - hang_back;
 
     for (step = *stepp; step <= last_step; step++) {
         dbgf(1, "%s: which %u step %u\n", __func__, which, step);
@@ -503,26 +548,27 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat,
         dbgf(1, "new size %" PRIuHSIZE ", %" PRIuHSIZE "\n", size[0], size[1]);
 
         if (s->two_dee) {
+
+            /* Down the right side, intersecting the bottom row. */
             base.col = last.col;
             for (base.row = 0; base.row <= last.row;
                  base.row += s->chunk_dims[0]) {
-                dbgf(1, "verifying chunk %" PRIuHSIZE ", %" PRIuHSIZE "\n",
-                    base.row, base.col);
                 verify_chunk(s, filespace, mat, which, base);
             }
 
+            /* Across the bottom, stopping before the last column to
+             * avoid re-writing the bottom-right chunk.
+             */
             base.row = last.row;
             for (base.col = 0; base.col < last.col;
                  base.col += s->chunk_dims[1]) {
-                dbgf(1, "verifying chunk %" PRIuHSIZE ", %" PRIuHSIZE "\n",
-                    base.row, base.col);
                 verify_chunk(s, filespace, mat, which, base);
             }
         } else {
-            dbgf(1, "verifying chunk %" PRIuHSIZE ", %" PRIuHSIZE "\n",
-                last.row, last.col);
             verify_chunk(s, filespace, mat, which, last);
         }
+        if (s->asteps != 0 && step % s->asteps == 0)
+            verify_dset_attribute(ds, which, step);
     }
 
     *stepp = last_step;
@@ -530,6 +576,26 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat,
 out:
     if (H5Sclose(filespace) < 0)
         errx(EXIT_FAILURE, "H5Sclose failed");
+}
+
+static void
+add_dset_attribute(hid_t ds, hid_t sid, unsigned int which, unsigned int step)
+{
+    hid_t aid;
+    char name[sizeof("attr-9999999999")];
+
+    esnprintf(name, sizeof(name), "attr-%u", step);
+
+    dbgf(1, "setting attribute %s on dataset %u to %u\n", name, which, step);
+
+    if ((aid = H5Acreate2(ds, name, H5T_STD_U32BE, sid, H5P_DEFAULT,
+            H5P_DEFAULT)) < 0)
+        errx(EXIT_FAILURE, "H5Acreate2 failed");
+
+    if (H5Awrite(aid, H5T_NATIVE_UINT, &step) < 0)
+        errx(EXIT_FAILURE, "H5Awrite failed");
+    if (H5Aclose(aid) < 0)
+        errx(EXIT_FAILURE, "H5Aclose failed");
 }
 
 static void
@@ -545,6 +611,9 @@ write_extensible_dset(state_t *s, unsigned int which, unsigned int step,
     assert(which < s->ndatasets);
 
     ds = s->dataset[which];
+
+    if (s->asteps != 0 && step % s->asteps == 0)
+        add_dset_attribute(ds, s->one_by_one_sid, which, step);
 
     size[0] = s->chunk_dims[0] * (1 + step);
     last.row = s->chunk_dims[0] * step;
@@ -661,8 +730,8 @@ main(int argc, char **argv)
         for (which = 0; which < s.ndatasets; which++)
             open_extensible_dset(&s, which);
 
-        for (step = 0; 2 + step < s.nsteps;) {
-            for (which = 0; which < s.ndatasets; which++) {
+        for (step = 0; hang_back + step < s.nsteps;) {
+            for (which = s.ndatasets; which-- > 0; ) {
                 dbgf(2, "step %d which %d\n", step, which);
                 verify_extensible_dset(&s, which, mat, &step);
                 if (s.ndatasets <= s.nsteps)
