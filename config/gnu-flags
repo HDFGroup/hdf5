@@ -20,7 +20,7 @@
 #
 # For now, do not promote any warnings to errors.
 #
-PROMOTE_ERRORS_DFLT=no
+PROMOTE_ERRORS_DFLT=yes
 
 #
 # This filter rewrites -Werror= as -W, in that way demoting warnings
