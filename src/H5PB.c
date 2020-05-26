@@ -2005,8 +2005,8 @@ H5PB_write(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
 
         if ( H5FD_write(shared->lf, type, addr, size, buf) < 0 )
 
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
-                        "write through metadata accumulator failed")
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL,
+                        "write through lower VFD failed")
 
         /* Update statistics */
         if ( pb_ptr ) {
