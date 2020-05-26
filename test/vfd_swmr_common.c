@@ -45,7 +45,7 @@ esnprintf(char *buf, size_t bufsz, const char *fmt, ...)
 
     if (rc < 0)
         err(EXIT_FAILURE, "%s: vsnprintf", __func__);
-    else if (rc >= bufsz)
+    else if ((size_t)rc >= bufsz)
         errx(EXIT_FAILURE, "%s: buffer too small", __func__);
 }
 
