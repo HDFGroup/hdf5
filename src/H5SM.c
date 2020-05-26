@@ -57,7 +57,7 @@ static herr_t H5SM__create_index(H5F_t *f, H5SM_index_header_t *header);
 static herr_t H5SM__delete_index(H5F_t *f, H5SM_index_header_t *header,
     hbool_t delete_heap);
 static haddr_t H5SM__create_list(H5F_t *f, H5SM_index_header_t *header);
-static herr_t H5SM__find_in_list(const H5SM_list_t *list, const H5SM_mesg_key_t *key, 
+static herr_t H5SM__find_in_list(const H5SM_list_t *list, const H5SM_mesg_key_t *key,
     size_t *empty_pos, size_t *list_pos);
 static herr_t H5SM__convert_list_to_btree(H5F_t * f, H5SM_index_header_t * header,
     H5SM_list_t **_list, H5HF_t *fheap, H5O_t *open_oh);

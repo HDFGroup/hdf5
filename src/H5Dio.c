@@ -343,7 +343,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Dwrite_chunk
  *
- * Purpose:     Writes an entire chunk to the file directly.	
+ * Purpose:     Writes an entire chunk to the file directly.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -353,14 +353,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *offset, 
+H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *offset,
          size_t data_size, const void *buf)
 {
     H5D_t      *dset = NULL;
     hsize_t     offset_copy[H5O_LAYOUT_NDIMS];  /* Internal copy of chunk offset */
     uint32_t    data_size_32;                   /* Chunk data size (limited to 32-bits currently) */
     herr_t      ret_value = SUCCEED;            /* Return value */
-    
+
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iiIu*hz*x", dset_id, dxpl_id, filters, offset, data_size, buf);
 
@@ -506,16 +506,16 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "memory dataspace does not have extent set")
 
     /* H5S_select_shape_same() has been modified to accept topologically identical
-     * selections with different rank as having the same shape (if the most 
-     * rapidly changing coordinates match up), but the I/O code still has 
+     * selections with different rank as having the same shape (if the most
+     * rapidly changing coordinates match up), but the I/O code still has
      * difficulties with the notion.
      *
-     * To solve this, we check to see if H5S_select_shape_same() returns true, 
-     * and if the ranks of the mem and file spaces are different.  If the are, 
-     * construct a new mem space that is equivalent to the old mem space, and 
+     * To solve this, we check to see if H5S_select_shape_same() returns true,
+     * and if the ranks of the mem and file spaces are different.  If the are,
+     * construct a new mem space that is equivalent to the old mem space, and
      * use that instead.
      *
-     * Note that in general, this requires us to touch up the memory buffer as 
+     * Note that in general, this requires us to touch up the memory buffer as
      * well.
      */
     if(TRUE == H5S_select_shape_same(mem_space, file_space) &&
@@ -740,17 +740,17 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     if(!(H5S_has_extent(mem_space)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "memory dataspace does not have extent set")
 
-    /* H5S_select_shape_same() has been modified to accept topologically 
-     * identical selections with different rank as having the same shape 
-     * (if the most rapidly changing coordinates match up), but the I/O 
+    /* H5S_select_shape_same() has been modified to accept topologically
+     * identical selections with different rank as having the same shape
+     * (if the most rapidly changing coordinates match up), but the I/O
      * code still has difficulties with the notion.
      *
-     * To solve this, we check to see if H5S_select_shape_same() returns 
-     * true, and if the ranks of the mem and file spaces are different.  
-     * If the are, construct a new mem space that is equivalent to the 
+     * To solve this, we check to see if H5S_select_shape_same() returns
+     * true, and if the ranks of the mem and file spaces are different.
+     * If the are, construct a new mem space that is equivalent to the
      * old mem space, and use that instead.
      *
-     * Note that in general, this requires us to touch up the memory buffer 
+     * Note that in general, this requires us to touch up the memory buffer
      * as well.
      */
     if(TRUE == H5S_select_shape_same(mem_space, file_space) &&

@@ -263,11 +263,11 @@ H5HF_tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op,
     HDassert(hdr);
     HDassert(id);
     HDassert(op);
-    
+
     /* Get the object's encoded length */
     /* H5HF_tiny_obj_len can't fail */
     ret_value = H5HF_tiny_get_obj_len(hdr, id, &enc_obj_size);
-    
+
     /* Advance past flag byte(s) */
     if(!hdr->tiny_len_extended)
         id++;

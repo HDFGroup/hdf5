@@ -388,7 +388,7 @@ H5B2__insert_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
         size_t      split_nrec; /* Number of records to split node at */
 
         /* Locate node pointer for child */
-        if(H5B2__locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, 
+        if(H5B2__locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native,
                                udata, &idx, &cmp) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
         if(cmp == 0)
@@ -444,7 +444,7 @@ H5B2__insert_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
 
             /* Locate node pointer for child (after split/redistribute) */
             /* Actually, this can be easily updated (for 2-node redistrib.) and shouldn't require re-searching */
-            if(H5B2__locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, 
+            if(H5B2__locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native,
                                    udata, &idx, &cmp) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
             if(cmp == 0)

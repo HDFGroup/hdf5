@@ -538,7 +538,7 @@ H5G_node_found(H5F_t *f, haddr_t addr, const void H5_ATTR_UNUSED *_lt_key,
     rt = sn->nsyms;
     while(lt < rt && cmp) {
         idx = (lt + rt) / 2;
-        
+
         if((s = (const char *)H5HL_offset_into(udata->common.heap, sn->entry[idx].name_off)) == NULL)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get symbol table name")
         cmp = HDstrcmp(udata->common.name, s);
@@ -1451,7 +1451,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__node_iterate_size(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, 
+H5G__node_iterate_size(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key,
     haddr_t H5_ATTR_UNUSED addr, const void H5_ATTR_UNUSED *_rt_key, void *_udata)
 {
     hsize_t     *stab_size = (hsize_t *)_udata;         /* User data */

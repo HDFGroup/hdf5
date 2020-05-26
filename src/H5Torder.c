@@ -86,7 +86,7 @@ static herr_t H5T_set_order(H5T_t *dtype, H5T_order_t order);
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
- * 
+ *
  *-------------------------------------------------------------------------
  */
 H5T_order_t
@@ -159,7 +159,7 @@ H5T_get_order(const H5T_t *dtype)
                 if(memb_order != H5T_ORDER_NONE && ret_value == H5T_ORDER_NONE)
                     ret_value = memb_order;
 
-                /* If the orders are mixed, stop the loop and report it.  
+                /* If the orders are mixed, stop the loop and report it.
                  * (H5T_ORDER_NONE is ignored)
                  */
                 if(memb_order != H5T_ORDER_NONE && ret_value != H5T_ORDER_NONE
@@ -186,7 +186,7 @@ done:
  *		2. H5T_ORDER_NONE only works for reference and fixed-length
  *			string.
  *		3. For opaque type, the order will be ignored.
- *		4. For compound type, all restrictions above apply to the 
+ *		4. For compound type, all restrictions above apply to the
  *			members.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -244,12 +244,12 @@ H5T_set_order(H5T_t *dtype, H5T_order_t order)
     if(H5T_ENUM == dtype->shared->type && dtype->shared->u.enumer.nmembs > 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "operation not allowed after enum members are defined")
 
-    /* For derived data type, defer to parent */ 
+    /* For derived data type, defer to parent */
     while(dtype->shared->parent)
         dtype = dtype->shared->parent;
 
     /* Check for setting order on inappropriate datatype */
-    if(order == H5T_ORDER_NONE && !(H5T_REFERENCE == dtype->shared->type || 
+    if(order == H5T_ORDER_NONE && !(H5T_REFERENCE == dtype->shared->type ||
             H5T_OPAQUE == dtype->shared->type || H5T_IS_FIXED_STRING(dtype->shared)))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "illegal byte order for type")
 

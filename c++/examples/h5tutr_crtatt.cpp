@@ -31,7 +31,7 @@ int main (void)
 {
    int attr_data[2] = { 100, 200};
    hsize_t dims[1] = { DIM1 };
-   
+
 
    // Try block to detect exceptions raised by any of the calls inside it
    try
@@ -47,11 +47,11 @@ int main (void)
         // Create the data space for the attribute.
         DataSpace attr_dataspace = DataSpace (1, dims );
 
-        // Create a dataset attribute. 
-        Attribute attribute = dataset.createAttribute( ATTR_NAME, PredType::STD_I32BE, 
+        // Create a dataset attribute.
+        Attribute attribute = dataset.createAttribute( ATTR_NAME, PredType::STD_I32BE,
                                                   attr_dataspace);
-     
-        // Write the attribute data. 
+
+        // Write the attribute data.
         attribute.write( PredType::NATIVE_INT, attr_data);
 
    }  // end of try block

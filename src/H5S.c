@@ -240,7 +240,7 @@ H5S_get_validated_dataspace(hid_t space_id, const H5S_t **space)
 
     if (space_id < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid space_id (ID cannot be a negative number)")
- 
+
     if (H5S_ALL == space_id) {
         /* No special dataspace struct for H5S_ALL */
         *space = NULL;
@@ -1431,7 +1431,7 @@ H5S_set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims,
         } /* end for */
         space->extent.nelem = nelem;
 
-        /* Copy the maximum dimensions if specified. Otherwise, the maximal dimensions are the 
+        /* Copy the maximum dimensions if specified. Otherwise, the maximal dimensions are the
          * same as the dimension */
         space->extent.max = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)rank);
         if(max != NULL) {
@@ -1479,7 +1479,7 @@ done:
  *
  * Modification:
  *              Raymond Lu 03/30/2011
- *              We allow 0-dimension for non-unlimited dimension starting 
+ *              We allow 0-dimension for non-unlimited dimension starting
  *              from 1.8.7 release.
  *
  *-------------------------------------------------------------------------

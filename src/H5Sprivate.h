@@ -315,7 +315,7 @@ H5_DLL herr_t H5S_mpio_space_type(const H5S_t *space, size_t elmt_size,
     /* out: */  MPI_Datatype *new_type,
                 int *count,
                 hbool_t *is_derived_type,
-                hbool_t do_permute, 
+                hbool_t do_permute,
                 hsize_t **permute_map,
                 hbool_t * is_permuted);
 #endif /* H5_HAVE_PARALLEL */

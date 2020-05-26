@@ -46,19 +46,19 @@ int main (void)
         Exception::dontPrint();
 
         // ---------------------------------------------------
-        // Create a new file using the default property lists. 
-        // Then create a dataset and write data to it. 
+        // Create a new file using the default property lists.
+        // Then create a dataset and write data to it.
         // Close the file and dataset.
         // ---------------------------------------------------
-      
+
         H5File file(FILE_NAME, H5F_ACC_TRUNC);
 
-        hsize_t dims[2];              
+        hsize_t dims[2];
         dims[0] = DIM0;
         dims[1] = DIM1;
         DataSpace dataspace = DataSpace (RANK, dims);
 
-        DataSet dataset(file.createDataSet( DATASET_NAME, 
+        DataSet dataset(file.createDataSet( DATASET_NAME,
                                          PredType::STD_I32BE, dataspace) );
 
 
@@ -94,7 +94,7 @@ int main (void)
         file.openFile(FILE_NAME, H5F_ACC_RDWR);
         dataset = file.openDataSet(DATASET_NAME);
 
-        // Specify size and shape of subset to write. 
+        // Specify size and shape of subset to write.
 
         offset[0] = 1;
         offset[1] = 2;
@@ -107,7 +107,7 @@ int main (void)
 
         block[0] = 1;
         block[1] = 1;
-  
+
         // Define Memory Dataspace. Get file dataspace and select
         // a subset from the file dataspace.
 
@@ -117,7 +117,7 @@ int main (void)
         DataSpace memspace(RANK, dimsm, NULL);
 
         dataspace = dataset.getSpace();
-        dataspace.selectHyperslab(H5S_SELECT_SET, count, offset, stride, block); 
+        dataspace.selectHyperslab(H5S_SELECT_SET, count, offset, stride, block);
 
         // Write a subset of data to the dataset, then read the
         // entire dataset back from the file.
@@ -127,15 +127,15 @@ int main (void)
         for (j = 0; j < DIM0_SUB; j++) {
             for (i = 0; i < DIM1_SUB; i++)
                sdata[j][i] = 5;
-        } 
-        
+        }
+
         dataset.write(sdata, PredType::NATIVE_INT, memspace, dataspace);
         dataset.read(rdata, PredType::NATIVE_INT);
 
- 
+
         cout << endl << "Data in File after Subset is Written:" << endl;
         for (i = 0; i < DIM0; i++) {
-            for (j = 0; j < DIM1; j++) 
+            for (j = 0; j < DIM1; j++)
                cout << " " <<  rdata[i][j];
             cout << endl;
         }

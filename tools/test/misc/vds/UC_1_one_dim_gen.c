@@ -44,7 +44,7 @@ static char UC_1_VDS_FILE_NAME[NAME_LEN] = "1_vds.h5";
 /* Dataset names */
 static char UC_1_SOURCE_DSET_NAME[NAME_LEN] = "source_dset";
 static char UC_1_VDS_DSET_NAME[NAME_LEN]    = "vds_dset";
-    
+
 /* Fill values */
 static int UC_1_FILL_VALUES[UC_1_N_SOURCES] = {
     -1,
@@ -162,7 +162,7 @@ main(void)
 
             value = ((i + 1) * 10) + j;
             for(k = 0; k < count; k++)
-               buffer[k] = value; 
+               buffer[k] = value;
 
             start[0] = (hsize_t)j;
             start[1] = 0;

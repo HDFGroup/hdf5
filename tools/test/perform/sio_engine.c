@@ -1322,7 +1322,7 @@ do_cleanupfile(iotype iot, char *filename)
             }
             H5Pclose(fapl);
             break;
-                            
+
         default:
             /* unknown request */
             HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);

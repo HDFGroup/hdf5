@@ -183,7 +183,7 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size,
         HGOTO_DONE(SUCCEED)
 #endif /* H5_HAVE_PARALLEL */
 
-    /* 
+    /*
      * If the file is open for SWMR read access, allow access to data past
      * the end of the allocated space (the 'eoa').  This is done because the
      * eoa stored in the file's superblock might be out of sync with the
@@ -250,7 +250,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size,
     if(HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
     if((addr + file->base_addr + size) > eoa)
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size=%llu, eoa=%llu", 
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size=%llu, eoa=%llu",
                     (unsigned long long)(addr+ file->base_addr), (unsigned long long)size, (unsigned long long)eoa)
 
     /* Dispatch to driver */
@@ -412,7 +412,7 @@ H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags/*out*/)
     /* Check for the driver to query and then query it */
     if(driver->query)
         ret_value = (driver->query)(NULL, flags);
-    else 
+    else
         *flags = 0;
 
     FUNC_LEAVE_NOAPI(ret_value)

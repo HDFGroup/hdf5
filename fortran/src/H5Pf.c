@@ -1826,7 +1826,7 @@ DONE:
  *  Wednesday, February 23, 2000
  * HISTORY
  *  Changed type of 'offset' from int_f to off_t_f -- MSB January 9, 2012
- *  
+ *
  * SOURCE
 */
 int_f
@@ -3148,7 +3148,7 @@ h5pget_class_name_c(hid_t_f *cls, _fcd name, int_f *name_len)
      char *c_name;
 
      /*
-      * Call H5Pget_class_name function. c_name is allocated by the library, 
+      * Call H5Pget_class_name function. c_name is allocated by the library,
       * has to be freed by application.
       */
      if(NULL == (c_name = H5Pget_class_name((hid_t)*cls)))
@@ -3211,7 +3211,7 @@ DONE:
  *  plist   - property list class identifier
  *  name     - name of the new property
  *  name_len - length of the "name" buffer
- *  Output:  
+ *  Output:
  *  value - property value
  * RETURNS
  *  0 on success, -1 on failure
@@ -5212,7 +5212,7 @@ h5pget_chunk_cache_c(hid_t_f *dapl_id, size_t_f *rdcc_nslots, size_t_f *rdcc_nby
  *
  *  Inputs:
  *  fapl_id - File access property list identifier
- *  buf_ptr - Pointer to the initial file image, 
+ *  buf_ptr - Pointer to the initial file image,
  *  or NULL if no initial file image is desired
  *  buf_len - Size of the supplied buffer, or 0 (zero) if no initial image is desired
  *
@@ -5242,7 +5242,7 @@ h5pset_file_image_c(hid_t_f *fapl_id, void *buf_ptr, size_t_f *buf_len)
  *  Inputs:
  *  fapl_id - File access property list identifier
  *  Outputs:
- *  buf_ptr - Pointer to the initial file image, 
+ *  buf_ptr - Pointer to the initial file image,
  *  or NULL if no initial file image is desired
  *  buf_len - Size of the supplied buffer, or 0 (zero) if no initial image is desired
  *

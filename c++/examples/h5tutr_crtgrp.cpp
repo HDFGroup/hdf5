@@ -37,12 +37,12 @@ int main(void)
 
         // Create a new file using default property lists.
         H5File file(FILE_NAME, H5F_ACC_TRUNC);
-        
+
         // Create a group named "/MygGroup" in the file
         Group group(file.createGroup("/MyGroup"));
 
         // File and group will be closed as their instances go out of scope.
-   
+
     } // end of try block
 
     // catch failure caused by the H5File operations
@@ -57,6 +57,6 @@ int main(void)
         error.printErrorStack();
         return -1;
     }
- 
+
     return 0;
 }

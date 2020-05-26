@@ -41,12 +41,12 @@ static herr_t H5S_mpio_all_type(const H5S_t *space, size_t elmt_size,
     MPI_Datatype *new_type, int *count, hbool_t *is_derived_type);
 static herr_t H5S_mpio_none_type(MPI_Datatype *new_type, int *count,
     hbool_t *is_derived_type);
-static herr_t H5S_mpio_create_point_datatype(size_t elmt_size, hsize_t num_points, 
+static herr_t H5S_mpio_create_point_datatype(size_t elmt_size, hsize_t num_points,
     MPI_Aint *disp, MPI_Datatype *new_type);
 static herr_t H5S_mpio_point_type(const H5S_t *space, size_t elmt_size,
     MPI_Datatype *new_type, int *count, hbool_t *is_derived_type,
     hbool_t do_permute, hsize_t **permute_map, hbool_t *is_permuted);
-static herr_t H5S_mpio_permute_type(const H5S_t *space, size_t elmt_size, 
+static herr_t H5S_mpio_permute_type(const H5S_t *space, size_t elmt_size,
     hsize_t **permute_map, MPI_Datatype *new_type, int *count,
     hbool_t *is_derived_type);
 static herr_t H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size,
@@ -198,9 +198,9 @@ H5S_mpio_none_type(MPI_Datatype *new_type, int *count, hbool_t *is_derived_type)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t 
+static herr_t
 H5S_mpio_create_point_datatype (size_t elmt_size, hsize_t num_points,
-    MPI_Aint *disp, MPI_Datatype *new_type) 
+    MPI_Aint *disp, MPI_Datatype *new_type)
 {
     MPI_Datatype   elmt_type;           /* MPI datatype for individual element */
     hbool_t        elmt_type_created = FALSE;   /* Whether the element MPI datatype was created */
@@ -239,7 +239,7 @@ H5S_mpio_create_point_datatype (size_t elmt_size, hsize_t num_points,
       if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(new_type)))
           HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
     }
-    else { 
+    else {
       /* use LARGE_DATATYPE::
        * We'll create an hindexed_block type for every 2G point count and then combine
        * those and any remaining points into a single large datatype.
@@ -373,7 +373,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S_mpio_point_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type, 
+H5S_mpio_point_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
     int *count, hbool_t *is_derived_type, hbool_t do_permute, hsize_t **permute,
     hbool_t *is_permuted)
 {
@@ -410,19 +410,19 @@ H5S_mpio_point_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type
         disp[u] = H5VM_array_offset(space->extent.rank, space->extent.size, curr->pnt);
         disp[u] *= elmt_size;
 
-        /* This is a File Space used to set the file view, so adjust the displacements 
+        /* This is a File Space used to set the file view, so adjust the displacements
          * to have them monotonically non-decreasing.
-         * Generate the permutation array by indicating at each point being selected, 
-         * the position it will shifted in the new displacement. Example: 
-         * Suppose 4 points with corresponding are selected 
-         * Pt 1: disp=6 ; Pt 2: disp=3 ; Pt 3: disp=0 ; Pt 4: disp=4 
+         * Generate the permutation array by indicating at each point being selected,
+         * the position it will shifted in the new displacement. Example:
+         * Suppose 4 points with corresponding are selected
+         * Pt 1: disp=6 ; Pt 2: disp=3 ; Pt 3: disp=0 ; Pt 4: disp=4
          * The permute map to sort the displacements in order will be:
          * point 1: map[0] = L, indicating that this point is not moved (1st point selected)
-         * point 2: map[1] = 0, indicating that this point is moved to the first position, 
+         * point 2: map[1] = 0, indicating that this point is moved to the first position,
          *                      since disp_pt1(6) > disp_pt2(3)
-         * point 3: map[2] = 0, move to position 0, bec it has the lowest disp between 
+         * point 3: map[2] = 0, move to position 0, bec it has the lowest disp between
          *                      the points selected so far.
-         * point 4: map[3] = 2, move the 2nd position since point 1 has a higher disp, 
+         * point 4: map[3] = 2, move the 2nd position since point 1 has a higher disp,
          *                      but points 2 and 3 have lower displacements.
          */
         if(do_permute) {
@@ -447,7 +447,7 @@ H5S_mpio_point_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type
                     HDmemmove(disp + m + 1, disp + m, (u - m) * sizeof(MPI_Aint));
                     disp[m] = temp;
                 } /* end if */
-                (*permute)[u] = m;                
+                (*permute)[u] = m;
             } /* end if */
             else
                 (*permute)[u] = num_points;
@@ -508,7 +508,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S_mpio_permute_type(const H5S_t *space, size_t elmt_size, hsize_t **permute, 
+H5S_mpio_permute_type(const H5S_t *space, size_t elmt_size, hsize_t **permute,
     MPI_Datatype *new_type, int *count, hbool_t *is_derived_type)
 {
     MPI_Aint *disp = NULL;      /* Datatype displacement for each point*/
@@ -571,12 +571,12 @@ H5S_mpio_permute_type(const H5S_t *space, size_t elmt_size, hsize_t **permute,
                 /* Set the displacement of the current point */
                 disp[u] = curr_off;
 
-                /* This is a memory displacement, so for each point selected, 
+                /* This is a memory displacement, so for each point selected,
                  * apply the map that was generated by the file selection */
                 if((*permute)[u] != num_points) {
                     MPI_Aint temp = disp[u];
 
-                    HDmemmove(disp + (*permute)[u] + 1, disp + (*permute)[u], 
+                    HDmemmove(disp + (*permute)[u] + 1, disp + (*permute)[u],
                              (u - (*permute)[u]) * sizeof(MPI_Aint));
                     disp[(*permute)[u]] = temp;
                 } /* end if */
@@ -795,7 +795,7 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size,
 #endif
 
     /* LARGE_DATATYPE::
-     * Check if the number of elements to form the inner type fits into a 32 bit integer. 
+     * Check if the number of elements to form the inner type fits into a 32 bit integer.
      * If yes then just create the innertype with MPI_Type_contiguous.
      * Otherwise create a compound datatype by iterating as many times as needed
      * for the innertype to be created.
@@ -848,8 +848,8 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size,
               HMPI_GOTO_ERROR(FAIL, "couldn't create MPI vector type", mpi_code)
        }
        else {
-         /* Things get a bit more complicated and require LARGE_DATATYPE processing 
-          * There are two MPI datatypes that need to be created: 
+         /* Things get a bit more complicated and require LARGE_DATATYPE processing
+          * There are two MPI datatypes that need to be created:
           *   1) an internal contiguous block; and
           *   2) a collection of elements where an element is a contiguous block(1).
           * Remember that the input arguments to the MPI-IO functions use integer
@@ -863,18 +863,18 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size,
             MPI_Datatype block_type;
 
             /* create a contiguous datatype inner_type x number of BLOCKS.
-             * Again we need to check that the number of BLOCKS can fit into 
+             * Again we need to check that the number of BLOCKS can fit into
              * a 32 bit integer */
             if (bigio_count < d[i].block) {
-                if (H5S_mpio_create_large_type(d[i].block, 0, inner_type, 
+                if (H5S_mpio_create_large_type(d[i].block, 0, inner_type,
                                                &block_type) < 0) {
                     HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,
                                 "couldn't ccreate a large block datatype in hyper selection")
                 }
             }
             else {
-                if(MPI_SUCCESS != (mpi_code = MPI_Type_contiguous((int)d[i].block, 
-                                                                  inner_type, 
+                if(MPI_SUCCESS != (mpi_code = MPI_Type_contiguous((int)d[i].block,
+                                                                  inner_type,
                                                                   &block_type)))
                     HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
             }
@@ -997,7 +997,7 @@ done:
  *
  * Modifications:
  *              Mohamad Chaarawi
- *              Adding support for large datatypes (beyond the limit of a 
+ *              Adding support for large datatypes (beyond the limit of a
  *              32 bit integer.
  *-------------------------------------------------------------------------
  */
@@ -1156,8 +1156,8 @@ H5S_obtain_datatype(const hsize_t *down, H5S_hyper_span_t *span,
                     }
                 }
                 else {
-                    if(MPI_SUCCESS != (mpi_code = MPI_Type_contiguous((int)blocklen[i], 
-                                                                      *elmt_type, 
+                    if(MPI_SUCCESS != (mpi_code = MPI_Type_contiguous((int)blocklen[i],
+                                                                      *elmt_type,
                                                                       &temp_type)))
                         HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
                 }
@@ -1181,11 +1181,11 @@ H5S_obtain_datatype(const hsize_t *down, H5S_hyper_span_t *span,
 		    *span_type = outer_type;
                 }
 
-		if (outer_type != MPI_DATATYPE_NULL) 
+		if (outer_type != MPI_DATATYPE_NULL)
 		  MPI_Type_free(&outer_type);
 		/* temp_type shouldn't be freed here...
 		 * Note that we have simply copied it above (not MPI_Type_dup)
-		 * into the 'span_type' argument of the caller. 
+		 * into the 'span_type' argument of the caller.
 		 * The caller needs to deal with it there!
 		 */
             }
@@ -1312,7 +1312,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_mpio_space_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type, 
+H5S_mpio_space_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
     int *count, hbool_t *is_derived_type, hbool_t do_permute, hsize_t **permute_map,
     hbool_t *is_permuted)
 {
@@ -1333,7 +1333,7 @@ H5S_mpio_space_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type
              * out-of-order point selection, then permute this selection which
              * should be a memory selection to match the file space permutation.
              */
-            if(TRUE == *is_permuted) { 
+            if(TRUE == *is_permuted) {
                 switch(H5S_GET_SELECT_TYPE(space)) {
                     case H5S_SEL_NONE:
                         if(H5S_mpio_none_type(new_type, count, is_derived_type) < 0)
@@ -1409,7 +1409,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5S_mpio_create_large_type
  *
- * Purpose:     Create a large datatype of size larger than what a 32 bit integer 
+ * Purpose:     Create a large datatype of size larger than what a 32 bit integer
  *              can hold.
  *
  * Return:      non-negative on success, negative on failure.

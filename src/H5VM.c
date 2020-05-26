@@ -1226,7 +1226,7 @@ H5VM_chunk_index(unsigned ndims, const hsize_t *coord, const uint32_t *chunk,
 
     /* Defer to H5VM_chunk_index_scaled */
     chunk_idx = H5VM_chunk_index_scaled(ndims, coord, chunk, down_nchunks, scaled_coord);
-    
+
     FUNC_LEAVE_NOAPI(chunk_idx)
 } /* end H5VM_chunk_index() */
 

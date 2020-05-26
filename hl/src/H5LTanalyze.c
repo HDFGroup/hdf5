@@ -1,25 +1,25 @@
-#if defined __GNUC__ && 402 <= __GNUC__ * 100 + __GNUC_MINOR__    
-#pragma GCC diagnostic ignored "-Wconversion"                     
-#pragma GCC diagnostic ignored "-Wimplicit-function-declaration"  
-#pragma GCC diagnostic ignored "-Wlarger-than="                   
-#pragma GCC diagnostic ignored "-Wmissing-prototypes"             
-#pragma GCC diagnostic ignored "-Wnested-externs"                 
-#pragma GCC diagnostic ignored "-Wold-style-definition"           
-#pragma GCC diagnostic ignored "-Wredundant-decls"                
-#pragma GCC diagnostic ignored "-Wsign-compare"                   
-#pragma GCC diagnostic ignored "-Wsign-conversion"                
-#pragma GCC diagnostic ignored "-Wstrict-overflow"                
-#pragma GCC diagnostic ignored "-Wstrict-prototypes"              
-#pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"         
-#pragma GCC diagnostic ignored "-Wswitch-default"                 
-#pragma GCC diagnostic ignored "-Wunused-function"                
-#pragma GCC diagnostic ignored "-Wunused-macros"                  
-#pragma GCC diagnostic ignored "-Wunused-parameter"               
-#elif defined __SUNPRO_CC                                         
-#pragma disable_warn                                              
-#elif defined _MSC_VER                                            
-#pragma warning(push, 1)                                          
-#endif                                                            
+#if defined __GNUC__ && 402 <= __GNUC__ * 100 + __GNUC_MINOR__
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
+#pragma GCC diagnostic ignored "-Wlarger-than="
+#pragma GCC diagnostic ignored "-Wmissing-prototypes"
+#pragma GCC diagnostic ignored "-Wnested-externs"
+#pragma GCC diagnostic ignored "-Wold-style-definition"
+#pragma GCC diagnostic ignored "-Wredundant-decls"
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wstrict-overflow"
+#pragma GCC diagnostic ignored "-Wstrict-prototypes"
+#pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"
+#pragma GCC diagnostic ignored "-Wswitch-default"
+#pragma GCC diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic ignored "-Wunused-macros"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#elif defined __SUNPRO_CC
+#pragma disable_warn
+#elif defined _MSC_VER
+#pragma warning(push, 1)
+#endif
 #line 2 "hl/src/H5LTanalyze.c"
 
 #line 4 "hl/src/H5LTanalyze.c"
@@ -75,7 +75,7 @@
 #if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 
 /* C99 says to define __STDC_LIMIT_MACROS before including stdint.h,
- * if you want the limit (max/min) macros for int types. 
+ * if you want the limit (max/min) macros for int types.
  */
 #ifndef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS 1
@@ -92,7 +92,7 @@ typedef uint32_t flex_uint32_t;
 typedef signed char flex_int8_t;
 typedef short int flex_int16_t;
 typedef int flex_int32_t;
-typedef unsigned char flex_uint8_t; 
+typedef unsigned char flex_uint8_t;
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
 
@@ -209,7 +209,7 @@ extern FILE *H5LTyyin, *H5LTyyout;
 #define EOB_ACT_LAST_MATCH 2
 
     #define YY_LESS_LINENO(n)
-    
+
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
 	do \
@@ -266,7 +266,7 @@ struct yy_buffer_state
 
     int yy_bs_lineno; /**< The line count. */
     int yy_bs_column; /**< The column count. */
-    
+
 	/* Whether to try to fill the input buffer when we reach the
 	 * end of it.
 	 */
@@ -894,7 +894,7 @@ char *H5LTyytext;
 #if defined __GNUC__ && 402 <= __GNUC__ * 100 + __GNUC_MINOR__
 #pragma GCC diagnostic ignored "-Wsuggest-attribute=const"
 #pragma GCC diagnostic ignored "-Wsuggest-attribute=malloc"
-#endif 
+#endif
 
 int my_yyinput(char *, int);
 #undef YY_INPUT
@@ -997,7 +997,7 @@ extern int H5LTyywrap (void );
 #endif
 
     static void yyunput (int c,char *buf_ptr  );
-    
+
 #ifndef yytext_ptr
 static void yy_flex_strncpy (char *,yyconst char *,int );
 #endif
@@ -1118,7 +1118,7 @@ YY_DECL
 	register yy_state_type yy_current_state;
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
-    
+
 #line 83 "hl/src/H5LTanalyze.l"
 
 
@@ -1412,17 +1412,17 @@ YY_RULE_SETUP
 case 40:
 YY_RULE_SETUP
 #line 128 "hl/src/H5LTanalyze.l"
-{return token(H5T_STR_NULLTERM_TOKEN);} 
+{return token(H5T_STR_NULLTERM_TOKEN);}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
 #line 129 "hl/src/H5LTanalyze.l"
-{return token(H5T_STR_NULLPAD_TOKEN);} 
+{return token(H5T_STR_NULLPAD_TOKEN);}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
 #line 130 "hl/src/H5LTanalyze.l"
-{return token(H5T_STR_SPACEPAD_TOKEN);} 
+{return token(H5T_STR_SPACEPAD_TOKEN);}
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
@@ -1487,12 +1487,12 @@ YY_RULE_SETUP
 case 55:
 YY_RULE_SETUP
 #line 146 "hl/src/H5LTanalyze.l"
-{    
-                        if( is_str_size || (is_enum && is_enum_memb) || 
+{
+                        if( is_str_size || (is_enum && is_enum_memb) ||
                             is_opq_size || (asindex>-1 && arr_stack[asindex].is_dim) ||
                             (csindex>-1 && cmpd_stack[csindex].is_field) ) {
                             H5LTyylval.ival = atoi(H5LTyytext);
-                            return NUMBER; 
+                            return NUMBER;
                         } else
                             REJECT;
                  }
@@ -1502,7 +1502,7 @@ YY_RULE_SETUP
 #line 156 "hl/src/H5LTanalyze.l"
 {
                     /*if it's first quote, and is a compound field name or an enum symbol*/
-                    if((is_opq_tag || is_enum || (csindex>-1 && cmpd_stack[csindex].is_field)) 
+                    if((is_opq_tag || is_enum || (csindex>-1 && cmpd_stack[csindex].is_field))
                         && first_quote) {
                         first_quote = 0;
                         BEGIN TAG_STRING;
@@ -1822,7 +1822,7 @@ static int yy_get_next_buffer (void)
 {
 	register yy_state_type yy_current_state;
 	register char *yy_cp;
-    
+
 	yy_current_state = (yy_start);
 
 	(yy_state_ptr) = (yy_state_buf);
@@ -1852,7 +1852,7 @@ static int yy_get_next_buffer (void)
     static yy_state_type yy_try_NUL_trans  (yy_state_type yy_current_state )
 {
 	register int yy_is_jam;
-    
+
 	register YY_CHAR yy_c = 1;
 	while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 		{
@@ -1871,7 +1871,7 @@ static int yy_get_next_buffer (void)
     static void yyunput (int c, register char * yy_bp )
 {
 	register char *yy_cp;
-    
+
     yy_cp = (yy_c_buf_p);
 
 	/* undo effects of setting up H5LTyytext */
@@ -1914,7 +1914,7 @@ static int yy_get_next_buffer (void)
 
 {
 	int c;
-    
+
 	*(yy_c_buf_p) = (yy_hold_char);
 
 	if ( *(yy_c_buf_p) == YY_END_OF_BUFFER_CHAR )
@@ -1981,12 +1981,12 @@ static int yy_get_next_buffer (void)
 
 /** Immediately switch to a different input stream.
  * @param input_file A readable stream.
- * 
+ *
  * @note This function does not reset the start condition to @c INITIAL .
  */
     void H5LTyyrestart  (FILE * input_file )
 {
-    
+
 	if ( ! YY_CURRENT_BUFFER ){
         H5LTyyensure_buffer_stack ();
 		YY_CURRENT_BUFFER_LVALUE =
@@ -1999,11 +1999,11 @@ static int yy_get_next_buffer (void)
 
 /** Switch to a different input buffer.
  * @param new_buffer The new input buffer.
- * 
+ *
  */
     void H5LTyy_switch_to_buffer  (YY_BUFFER_STATE  new_buffer )
 {
-    
+
 	/* TODO. We should be able to replace this entire function body
 	 * with
 	 *		H5LTyypop_buffer_state();
@@ -2043,13 +2043,13 @@ static void H5LTyy_load_buffer_state  (void)
 /** Allocate and initialize an input buffer state.
  * @param file A readable stream.
  * @param size The character buffer size in bytes. When in doubt, use @c YY_BUF_SIZE.
- * 
+ *
  * @return the allocated buffer state.
  */
     YY_BUFFER_STATE H5LTyy_create_buffer  (FILE * file, int  size )
 {
 	YY_BUFFER_STATE b;
-    
+
 	b = (YY_BUFFER_STATE) H5LTyyalloc(sizeof( struct yy_buffer_state )  );
 	if ( ! b )
 		YY_FATAL_ERROR( "out of dynamic memory in H5LTyy_create_buffer()" );
@@ -2072,11 +2072,11 @@ static void H5LTyy_load_buffer_state  (void)
 
 /** Destroy the buffer.
  * @param b a buffer created with H5LTyy_create_buffer()
- * 
+ *
  */
     void H5LTyy_delete_buffer (YY_BUFFER_STATE  b )
 {
-    
+
 	if ( ! b )
 		return;
 
@@ -2097,7 +2097,7 @@ static void H5LTyy_load_buffer_state  (void)
 
 {
 	int oerrno = errno;
-    
+
 	H5LTyy_flush_buffer(b );
 
 	b->yy_input_file = file;
@@ -2113,13 +2113,13 @@ static void H5LTyy_load_buffer_state  (void)
     }
 
         b->yy_is_interactive = file ? (isatty( fileno(file) ) > 0) : 0;
-    
+
 	errno = oerrno;
 }
 
 /** Discard all buffered characters. On the next scan, YY_INPUT will be called.
  * @param b the buffer state to be flushed, usually @c YY_CURRENT_BUFFER.
- * 
+ *
  */
     void H5LTyy_flush_buffer (YY_BUFFER_STATE  b )
 {
@@ -2148,7 +2148,7 @@ static void H5LTyy_load_buffer_state  (void)
  *  the current state. This function will allocate the stack
  *  if necessary.
  *  @param new_buffer The new state.
- *  
+ *
  */
 void H5LTyypush_buffer_state (YY_BUFFER_STATE new_buffer )
 {
@@ -2178,7 +2178,7 @@ void H5LTyypush_buffer_state (YY_BUFFER_STATE new_buffer )
 
 /** Removes and deletes the top of the stack, if present.
  *  The next element becomes the new top.
- *  
+ *
  */
 void H5LTyypop_buffer_state (void)
 {
@@ -2202,7 +2202,7 @@ void H5LTyypop_buffer_state (void)
 static void H5LTyyensure_buffer_stack (void)
 {
 	yy_size_t num_to_alloc;
-    
+
 	if (!(yy_buffer_stack)) {
 
 		/* First allocation is just for 2 elements, since we don't know if this
@@ -2215,9 +2215,9 @@ static void H5LTyyensure_buffer_stack (void)
 								);
 		if ( ! (yy_buffer_stack) )
 			YY_FATAL_ERROR( "out of dynamic memory in H5LTyyensure_buffer_stack()" );
-								  
+
 		memset((yy_buffer_stack), 0, num_to_alloc * sizeof(struct yy_buffer_state*));
-				
+
 		(yy_buffer_stack_max) = num_to_alloc;
 		(yy_buffer_stack_top) = 0;
 		return;
@@ -2245,13 +2245,13 @@ static void H5LTyyensure_buffer_stack (void)
 /** Setup the input buffer state to scan directly from a user-specified character buffer.
  * @param base the character buffer
  * @param size the size in bytes of the character buffer
- * 
- * @return the newly allocated buffer state object. 
+ *
+ * @return the newly allocated buffer state object.
  */
 YY_BUFFER_STATE H5LTyy_scan_buffer  (char * base, yy_size_t  size )
 {
 	YY_BUFFER_STATE b;
-    
+
 	if ( size < 2 ||
 	     base[size-2] != YY_END_OF_BUFFER_CHAR ||
 	     base[size-1] != YY_END_OF_BUFFER_CHAR )
@@ -2280,14 +2280,14 @@ YY_BUFFER_STATE H5LTyy_scan_buffer  (char * base, yy_size_t  size )
 /** Setup the input buffer state to scan a string. The next call to H5LTyylex() will
  * scan from a @e copy of @a str.
  * @param yystr a NUL-terminated string to scan
- * 
+ *
  * @return the newly allocated buffer state object.
  * @note If you want to scan bytes that may contain NUL values, then use
  *       H5LTyy_scan_bytes() instead.
  */
 YY_BUFFER_STATE H5LTyy_scan_string (yyconst char * yystr )
 {
-    
+
 	return H5LTyy_scan_bytes(yystr,strlen(yystr) );
 }
 
@@ -2295,7 +2295,7 @@ YY_BUFFER_STATE H5LTyy_scan_string (yyconst char * yystr )
  * scan from a @e copy of @a bytes.
  * @param yybytes the byte buffer to scan
  * @param _yybytes_len the number of bytes in the buffer pointed to by @a bytes.
- * 
+ *
  * @return the newly allocated buffer state object.
  */
 YY_BUFFER_STATE H5LTyy_scan_bytes  (yyconst char * yybytes, yy_size_t  _yybytes_len )
@@ -2304,7 +2304,7 @@ YY_BUFFER_STATE H5LTyy_scan_bytes  (yyconst char * yybytes, yy_size_t  _yybytes_
 	char *buf;
 	yy_size_t n;
 	int i;
-    
+
 	/* Get memory for full buffer, including space for trailing EOB's. */
 	n = _yybytes_len + 2;
 	buf = (char *) H5LTyyalloc(n  );
@@ -2358,16 +2358,16 @@ static void yy_fatal_error (yyconst char* msg )
 /* Accessor  methods (get/set functions) to struct members. */
 
 /** Get the current line number.
- * 
+ *
  */
 int H5LTyyget_lineno  (void)
 {
-        
+
     return H5LTyylineno;
 }
 
 /** Get the input stream.
- * 
+ *
  */
 FILE *H5LTyyget_in  (void)
 {
@@ -2375,7 +2375,7 @@ FILE *H5LTyyget_in  (void)
 }
 
 /** Get the output stream.
- * 
+ *
  */
 FILE *H5LTyyget_out  (void)
 {
@@ -2383,7 +2383,7 @@ FILE *H5LTyyget_out  (void)
 }
 
 /** Get the length of the current token.
- * 
+ *
  */
 yy_size_t H5LTyyget_leng  (void)
 {
@@ -2391,7 +2391,7 @@ yy_size_t H5LTyyget_leng  (void)
 }
 
 /** Get the current token.
- * 
+ *
  */
 
 char *H5LTyyget_text  (void)
@@ -2401,18 +2401,18 @@ char *H5LTyyget_text  (void)
 
 /** Set the current line number.
  * @param line_number
- * 
+ *
  */
 void H5LTyyset_lineno (int  line_number )
 {
-    
+
     H5LTyylineno = line_number;
 }
 
 /** Set the input stream. This does not discard the current
  * input buffer.
  * @param in_str A readable stream.
- * 
+ *
  * @see H5LTyy_switch_to_buffer
  */
 void H5LTyyset_in (FILE *  in_str )
@@ -2471,7 +2471,7 @@ static int yy_init_globals (void)
 /* H5LTyylex_destroy is for both reentrant and non-reentrant scanners. */
 int H5LTyylex_destroy  (void)
 {
-    
+
     /* Pop the buffer stack, destroying each element. */
 	while(YY_CURRENT_BUFFER){
 		H5LTyy_delete_buffer(YY_CURRENT_BUFFER  );
@@ -2547,8 +2547,8 @@ void H5LTyyfree (void * ptr )
 int my_yyinput(char *buf, int max_size)
 {
    int ret;
-    
-   memcpy(buf, myinput, input_len); 
+
+   memcpy(buf, myinput, input_len);
    ret = (int)input_len;
    return ret;
 }

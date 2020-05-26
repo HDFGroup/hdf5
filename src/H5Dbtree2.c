@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* 
+/*
  *
  * Purpose: v2 B-tree indexing for chunked datasets with > 1 unlimited dimensions.
  *   Each dataset chunk in the b-tree is identified by its dimensional offset.
@@ -105,7 +105,7 @@ static int H5D__bt2_idx_iterate_cb(const void *_record, void *_udata);
 /* Callback for H5B2_find() which is called in H5D__bt2_idx_get_addr() */
 static herr_t H5D__bt2_found_cb(const void *nrecord, void *op_data);
 
-/*  
+/*
  * Callback for H5B2_remove() and H5B2_delete() which is called
  * in H5D__bt2_idx_remove() and H5D__bt2_idx_delete().
  */
@@ -251,7 +251,7 @@ H5D__bt2_crt_context(void *_udata)
     H5MM_memcpy(my_dim, udata->dim, H5O_LAYOUT_NDIMS * sizeof(uint32_t));
     ctx->dim = my_dim;
 
-    /* 
+    /*
      * Compute the size required for encoding the size of a chunk,
      * allowing for an extra byte, in case the filter makes the chunk larger.
      */
@@ -291,7 +291,7 @@ H5D__bt2_dst_context(void *_ctx)
 
     /* Free array for chunk dimension sizes */
     if(ctx->dim)
-	(void)H5FL_BLK_FREE(chunk_dim, ctx->dim); 
+	(void)H5FL_BLK_FREE(chunk_dim, ctx->dim);
     /* Release callback context */
     ctx = H5FL_FREE(H5D_bt2_ctx_t, ctx);
 
@@ -568,7 +568,7 @@ H5D__bt2_filt_debug(FILE *stream, int indent, int fwidth,
     const H5D_chunk_rec_t *record = (const H5D_chunk_rec_t *)_record;   /* The native record */
     const H5D_bt2_ctx_t *ctx = (const H5D_bt2_ctx_t *)_ctx; 	/* Callback context */
     unsigned u;		/* Local index variable */
- 
+
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
@@ -734,9 +734,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__bt2_idx_create 
+ * Function:	H5D__bt2_idx_create
  *
- * Purpose:	Create the v2 B-tree for tracking dataset chunks 
+ * Purpose:	Create the v2 B-tree for tracking dataset chunks
  *
  * Return:      SUCCEED/FAIL
  *
@@ -768,7 +768,7 @@ H5D__bt2_idx_create(const H5D_chk_idx_info_t *idx_info)
     if(idx_info->pline->nused > 0) {
 	unsigned chunk_size_len;        /* Size of encoded chunk size */
 
-        /* 
+        /*
 	 * Compute the size required for encoding the size of a chunk,
          * allowing for an extra byte, in case the filter makes the chunk larger.
          */
@@ -836,7 +836,7 @@ H5D__bt2_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
  * Function:	H5D__bt2_mod_cb
  *
  * Purpose:	Modify record for dataset chunk when it is found in a v2 B-tree.
- * 		This is the callback for H5B2_modify() which is called in 
+ * 		This is the callback for H5B2_modify() which is called in
  *		H5D__bt2_idx_insert().
  *
  * Return:	Success:	non-negative
@@ -878,7 +878,7 @@ H5D__bt2_mod_cb(void *_record, void *_op_data, hbool_t *changed)
  * Function:	H5D__bt2_idx_insert
  *
  * Purpose:	Insert chunk address into the indexing structure.
- *		A non-filtered chunk: 
+ *		A non-filtered chunk:
  *		  Should not exist
  *		  Allocate the chunk and pass chunk address back up
  *		A filtered chunk:
@@ -953,7 +953,7 @@ done:
  * Function:	H5D__bt2_found_cb
  *
  * Purpose:	Retrieve record for dataset chunk when it is found in a v2 B-tree.
- * 		This is the callback for H5B2_find() which is called in 
+ * 		This is the callback for H5B2_find() which is called in
  *		H5D__bt2_idx_get_addr() and H5D__bt2_idx_insert().
  *
  * Return:	Success:	non-negative
@@ -1072,7 +1072,7 @@ done:
  * Purpose:	Translate the B-tree specific chunk record into a generic
  *              form and make the callback to the generic chunk callback
  *              routine.
- * 		This is the callback for H5B2_iterate() which is called in 
+ * 		This is the callback for H5B2_iterate() which is called in
  *		H5D__bt2_idx_iterate().
  *
  * Return:	Success:	Non-negative
@@ -1162,7 +1162,7 @@ done:
  *
  * Purpose:	Free space for 'dataset chunk' object as v2 B-tree
  *             	is being deleted or v2 B-tree node is removed.
- * 		This is the callback for H5B2_remove() and H5B2_delete() which 
+ * 		This is the callback for H5B2_remove() and H5B2_delete() which
  *		which are called in H5D__bt2_idx_remove() and H5D__bt2_idx_delete().
  *
  * Return:	Success:	non-negative

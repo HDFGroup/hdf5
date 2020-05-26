@@ -2540,12 +2540,12 @@ test_versionbounds(void)
 
 /****************************************************************
 **
-**  test_h5s_encode_regular_exceed32(): 
+**  test_h5s_encode_regular_exceed32():
 **      Test to verify HDFFV-9947 is fixed.
 **      Verify that selection encoding that exceeds (2^32 - 1)
 **      (32 bit integer limit) is correctly encoded.
 **
-**  Note: See encoding changes for 1.10 in 
+**  Note: See encoding changes for 1.10 in
 **        "RFC: H5Sencode/H5Sdecode Format Change".
 **
 ****************************************************************/
@@ -2621,11 +2621,11 @@ test_h5s_encode_regular_exceed32(void)
 
 /****************************************************************
 **
-**  test_h5s_encode_irregular_exceed32(): 
+**  test_h5s_encode_irregular_exceed32():
 **      This test verifies that 1.10 H5Sencode() will fail for
 **      irregular hyperslab selection that exceeds 32 bits.
 **
-**  Note: See encoding changes for 1.10 in 
+**  Note: See encoding changes for 1.10 in
 **        "RFC: H5Sencode/H5Sdecode Format Change".
 **
 ****************************************************************/
@@ -2682,7 +2682,7 @@ test_h5s_encode_irregular_exceed32(void)
 **      This test verifies that 1.10 H5Sencode() will fail for
 **      point selection that exceeds 32 bits.
 **
-**  Note: See encoding changes for 1.10 in 
+**  Note: See encoding changes for 1.10 in
 **        "RFC: H5Sencode/H5Sdecode Format Change".
 **
 ****************************************************************/
@@ -2722,11 +2722,11 @@ test_h5s_encode_points_exceed32(void)
 
 /****************************************************************
 **
-**  test_h5s_encode_length(): 
+**  test_h5s_encode_length():
 **      Test to verify HDFFV-10271 is fixed.
 **      Verify that version 2 hyperslab encoding length is correct.
 **
-**  See "RFC: H5Sencode/H5Sdecode Format Change" for the 
+**  See "RFC: H5Sencode/H5Sdecode Format Change" for the
 **  description of the encoding format.
 **
 ****************************************************************/

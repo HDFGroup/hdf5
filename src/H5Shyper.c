@@ -1962,7 +1962,7 @@ done:
         const H5S_t *space:             IN: The dataspace
         hsize_t block_count:            IN: The number of blocks in the selection
         uint32_t *version:              OUT: The version to use for encoding
-        uint8_t *enc_size:              OUT: The encoded size to use 
+        uint8_t *enc_size:              OUT: The encoded size to use
 
  RETURNS
     The version and the size to encode hyperslab selection info
@@ -2020,12 +2020,12 @@ H5S_hyper_get_version_enc_size(const H5S_t *space, hsize_t block_count, uint32_t
         /* If exceed (2^32 -1) */
         if(count_up_version || bound_up_version)
             tmp_version = H5S_HYPER_VERSION_2;
-        else 
+        else
             /* block_count < 4: version 1 */
             /* block_count >= 4: determined by low bound */
             tmp_version = (block_count < 4) ? H5S_HYPER_VERSION_1 : H5O_sds_hyper_ver_bounds[low_bound];
 
-    } else { 
+    } else {
         /* Fail for irregular hyperslab if exceeds 32 bits */
         if(count_up_version)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "The number of blocks in hyperslab selection exceeds 2^32")
@@ -2037,7 +2037,7 @@ H5S_hyper_get_version_enc_size(const H5S_t *space, hsize_t block_count, uint32_t
     /* Version bounds check */
     if(tmp_version > H5O_sds_hyper_ver_bounds[high_bound])
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "Dataspace hyperslab selection version out of bounds")
-    
+
     *version = tmp_version;
 
     /* Determine the encoded size based on version */
@@ -4699,22 +4699,22 @@ H5S__hyper_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *of
 
         /* Copy the diminfo */
         while(base_space_dim < base_space->extent.rank) {
-            new_space->select.sel_info.hslab->app_diminfo[new_space_dim].start = 
+            new_space->select.sel_info.hslab->app_diminfo[new_space_dim].start =
                     base_space->select.sel_info.hslab->app_diminfo[base_space_dim].start;
-            new_space->select.sel_info.hslab->app_diminfo[new_space_dim].stride = 
+            new_space->select.sel_info.hslab->app_diminfo[new_space_dim].stride =
                     base_space->select.sel_info.hslab->app_diminfo[base_space_dim].stride;
-            new_space->select.sel_info.hslab->app_diminfo[new_space_dim].count = 
+            new_space->select.sel_info.hslab->app_diminfo[new_space_dim].count =
                     base_space->select.sel_info.hslab->app_diminfo[base_space_dim].count;
-            new_space->select.sel_info.hslab->app_diminfo[new_space_dim].block = 
+            new_space->select.sel_info.hslab->app_diminfo[new_space_dim].block =
                     base_space->select.sel_info.hslab->app_diminfo[base_space_dim].block;
 
-            new_space->select.sel_info.hslab->opt_diminfo[new_space_dim].start = 
+            new_space->select.sel_info.hslab->opt_diminfo[new_space_dim].start =
                     base_space->select.sel_info.hslab->opt_diminfo[base_space_dim].start;
             new_space->select.sel_info.hslab->opt_diminfo[new_space_dim].stride =
                     base_space->select.sel_info.hslab->opt_diminfo[base_space_dim].stride;
-            new_space->select.sel_info.hslab->opt_diminfo[new_space_dim].count = 
+            new_space->select.sel_info.hslab->opt_diminfo[new_space_dim].count =
                     base_space->select.sel_info.hslab->opt_diminfo[base_space_dim].count;
-            new_space->select.sel_info.hslab->opt_diminfo[new_space_dim].block = 
+            new_space->select.sel_info.hslab->opt_diminfo[new_space_dim].block =
                     base_space->select.sel_info.hslab->opt_diminfo[base_space_dim].block;
 
             /* Advance to next dimensions */
@@ -7401,7 +7401,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     /* Check for unlimited dimension */
     for(u = 0; u<space->extent.rank; u++)
         if((count[u] == H5S_UNLIMITED) || (block[u] == H5S_UNLIMITED)) {
-            if(unlim_dim >= 0) 
+            if(unlim_dim >= 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "cannot have more than one unlimited dimension in selection")
             else {
                 if(count[u] == block[u] /* == H5S_UNLIMITED */)
@@ -9491,7 +9491,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     HDassert(dst_space);
     HDassert(src_intersect_space);
     HDassert(proj_space);
-        
+
     /* Assert that src_space and src_intersect_space have same extent and there
      * are no point selections */
     HDassert(H5S_GET_EXTENT_NDIMS(src_space)
@@ -9660,7 +9660,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
              * selection and advance any sequences we complete */
             if(ss_off[ss_i] >= sis_off[sis_i])
                 int_sel_off = ss_sel_off;
-            else 
+            else
                 int_sel_off = sis_off[sis_i] - ss_off[ss_i] + ss_sel_off;
             if((ss_off[ss_i] + (hsize_t)ss_len[ss_i]) <= (sis_off[sis_i]
                     + (hsize_t)sis_len[sis_i])) {

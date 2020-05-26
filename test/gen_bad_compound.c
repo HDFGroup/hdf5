@@ -61,7 +61,7 @@ int main()
     aid = H5Acreate(gid, "attr", cmpd_dt, sid, H5P_DEFAULT);
     assert(aid > 0);
 
-    /* Commit the datatype */ 
+    /* Commit the datatype */
     ret = H5Tcommit(file, "cmpnd", cmpd_dt);
     assert(ret >= 0);
 

@@ -867,7 +867,7 @@ H5F__efc_try_close(H5F_t *f)
         HGOTO_DONE(SUCCEED)
 
     /* If the file EFC were locked, that should always mean that there exists
-     * a reference to this file that is not in an EFC (it may have just been 
+     * a reference to this file that is not in an EFC (it may have just been
      * removed from an EFC), and should have been caught by the above check */
     /* If we get here then we must be beginning a new run.  Make sure that the
      * temporary variables in f->shared->efc are at the default value */

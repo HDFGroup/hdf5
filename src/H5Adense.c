@@ -313,17 +313,17 @@ H5A__dense_fnd_cb(const H5A_t *attr, hbool_t *took_ownership, void *_user_attr)
     HDassert(user_attr);
     HDassert(took_ownership);
     /*
-     *  If there is an attribute already stored in "user_attr", 
-     *  we need to free the dynamially allocated spaces for the 
-     *  attribute, otherwise we got infinite loop closing library due to 
+     *  If there is an attribute already stored in "user_attr",
+     *  we need to free the dynamially allocated spaces for the
+     *  attribute, otherwise we got infinite loop closing library due to
      *  outstanding allocation. (HDFFV-10659)
      *
      *  This callback is used by H5A__dense_remove() to close/free the
      *  attribute stored in "user_attr" (via H5O__msg_free_real()) after
      *  the attribute node is deleted from the name index v2 B-tree.
-     *  The issue is: 
-     *      When deleting the attribute node from the B-tree, 
-     *      if the attribute is found in the intermediate B-tree nodes, 
+     *  The issue is:
+     *      When deleting the attribute node from the B-tree,
+     *      if the attribute is found in the intermediate B-tree nodes,
      *      which may be merged/redistributed, we need to free the dynamically
      *      allocated spaces for the intermediate decoded attribute.
      */
