@@ -7416,7 +7416,7 @@ H5C_load_entry(H5F_t *              f,
             H5FD_vfd_swmr_dump_status(f->shared->lf, page);
 #endif /* JRM */
             HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL, \
-                      "incorrect metadatda checksum after all read attempts")
+                      "incorrect metadata checksum after all read attempts addr %" PRIuHADDR " size %zu", addr, len);
         }
 
         /* Calculate and track the # of retries */
