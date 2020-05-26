@@ -40,7 +40,7 @@ const char *FILENAMES[] = {
  * Move these files to 1.8 branch for compatibility testing:
  * test_filespace_compatible() in test/tfile.c will use these files.
  *
- * Copy these files from the 1.8 branch back to the trunk for 
+ * Copy these files from the 1.8 branch back to the trunk for
  * compatibility testing via test_filespace_round_compatible() in test/tfile.c.
  *
  */

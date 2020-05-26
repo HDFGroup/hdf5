@@ -21,9 +21,9 @@ dnl -------------------------------------------------------------------------
 dnl _AC_SYS_LARGEFILE_MACRO_VALUE
 dnl
 dnl The following macro overrides the autoconf macro of the same name
-dnl with this custom definition. This macro performs the same checks as 
+dnl with this custom definition. This macro performs the same checks as
 dnl autoconf's native _AC_SYS_LARGEFILE_MACRO_VALUE, but will also set
-dnl AM_CPPFLAGS with the appropriate -D defines so additional configure 
+dnl AM_CPPFLAGS with the appropriate -D defines so additional configure
 dnl sizeof checks do not fail.
 dnl
 # _AC_SYS_LARGEFILE_MACRO_VALUE(C-MACRO, VALUE,

@@ -668,7 +668,7 @@ H5FA__cache_dblock_deserialize(const void *_image, size_t len,
     if(NULL == (dblock = H5FA__dblock_alloc(udata->hdr)))
         H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array data block")
 
-    HDassert(((!dblock->npages) && (len == (size_t)H5FA_DBLOCK_SIZE(dblock))) 
+    HDassert(((!dblock->npages) && (len == (size_t)H5FA_DBLOCK_SIZE(dblock)))
              || (len == (size_t)H5FA_DBLOCK_PREFIX_SIZE(dblock)));
 
     /* Set the fixed array data block's information */
@@ -953,21 +953,21 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblock_free_icr() */
  *		to free when a dblock entry is destroyed with the free
  *		file space block set.
  *
- *		This function is needed when the data block is paged, as 
+ *		This function is needed when the data block is paged, as
  *		the datablock header and all its pages are allocted as a
- *		single contiguous chunk of file space, and must be 
+ *		single contiguous chunk of file space, and must be
  *		deallocated the same way.
  *
  *		The size of the chunk of memory in which the dblock
  *		header and all its pages is stored in the size field,
  *		so we simply pass that value back to the cache.
  *
- *		If the datablock is not paged, then the size field of 
+ *		If the datablock is not paged, then the size field of
  *		the cache_info contains the correct size.  However this
  *		value will be the same as the size field, so we return
  *		the contents of the size field to the cache in this case
  *		as well.
- *		
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	John Mainzer
@@ -1157,7 +1157,7 @@ H5FA__cache_dblk_page_image_len(const void *_thing, size_t *image_len))
     HDassert(image_len);
 
     /* Set the image length size */
-    *image_len = dblk_page->size; 
+    *image_len = dblk_page->size;
 
 END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_image_len() */
 

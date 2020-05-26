@@ -18,7 +18,7 @@
 
 /*
  * We include the private header file so we can get to the uniform
- * programming environment it declares.  
+ * programming environment it declares.
  * HDF5 API functions (except for H5G_basename())
  */
 #include "H5private.h"
@@ -73,7 +73,7 @@ static struct long_options l_opts[] = {
  *
  *-------------------------------------------------------------------------
  */
-static void usage(const char *prog) 
+static void usage(const char *prog)
 {
     HDfprintf(stdout, "usage: %s [OPTIONS] file_name\n", prog);
     HDfprintf(stdout, "  OPTIONS\n");
@@ -113,7 +113,7 @@ static void usage(const char *prog)
  *-------------------------------------------------------------------------
  */
 static int
-parse_command_line(int argc, const char **argv) 
+parse_command_line(int argc, const char **argv)
 {
     int opt;
 
@@ -327,7 +327,7 @@ done:
     }
     else if(verbose_g)
         HDfprintf(stdout, "Close the dataset\n");
-    
+
     /* Close the dataset creation property list */
     if(H5Pclose(dcpl) < 0) {
         error_msg("unable to close dataset creation property list\n");
@@ -470,7 +470,7 @@ done:
 	HDfree(fname_g);
     if(dname_g)
 	HDfree(dname_g);
-    
+
     H5Eset_auto2(H5E_DEFAULT, func, edata);
     leave(h5tools_getstatus());
 

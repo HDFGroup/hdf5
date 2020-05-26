@@ -1212,7 +1212,7 @@ H5FS_sect_merge(H5FS_t *fspace, H5FS_section_info_t **sect, void *op_data)
 
                         /* Retarget section pointer to 'less than' node that was merged into */
                         *sect = tmp_sect;
-			if(*sect == NULL) 
+			if(*sect == NULL)
 			    HGOTO_DONE(ret_value);
 
                         /* Indicate successful merge occurred */
@@ -1257,7 +1257,7 @@ H5FS_sect_merge(H5FS_t *fspace, H5FS_section_info_t **sect, void *op_data)
                             HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, FAIL, "can't merge two sections")
 
                         /* It's possible that the merge caused the section to be deleted (particularly in the paged allocation case) */
-                        if(*sect == NULL) 
+                        if(*sect == NULL)
                             HGOTO_DONE(ret_value);
 
                         /* Indicate successful merge occurred */
@@ -2462,9 +2462,9 @@ done:
  *              also re-inserts the header and section info in the metadata
  *              cache with this allocation.
  *
- *		When paged allocation is not enabled, allocation of space 
- *		for the free space manager header and section info is 
- *		straight forward -- we simply allocate the space directly 
+ *		When paged allocation is not enabled, allocation of space
+ *		for the free space manager header and section info is
+ *		straight forward -- we simply allocate the space directly
  *		from file driver.
  *
  *              Note that if f->shared->alignment > 1, and EOA is not a
@@ -2475,23 +2475,23 @@ done:
  *		it will usually be reclaimed later.
  *
  *		When page allocation is enabled, things are more difficult,
- *		as there is the possibility that page buffering will be 
+ *		as there is the possibility that page buffering will be
  *		enabled when the free space managers are read.  To allow
- *		for this, we must ensure that space allocated for the 
+ *		for this, we must ensure that space allocated for the
  *		free space manager header and section info is either larger
  *		than a page, or resides completely within a page.
  *
- *		Do this by allocating space for the free space header and 
- *		section info starting at page boundaries, and extending 
+ *		Do this by allocating space for the free space header and
+ *		section info starting at page boundaries, and extending
  *		allocation to the next page boundary.  This of course wastes
  *		space, but see below.
  *
- *              On the first free space allocation / deallocation after the 
- *		next file open, we will read the self referential free space 
- *		managers, float them and reduce the EOA to its value prior 
- *		to allocation of file space for the self referential free 
- *              space managers on the preceeding file close.  This EOA value 
- *		is stored in the free space manager superblock extension 
+ *              On the first free space allocation / deallocation after the
+ *		next file open, we will read the self referential free space
+ *		managers, float them and reduce the EOA to its value prior
+ *		to allocation of file space for the self referential free
+ *              space managers on the preceeding file close.  This EOA value
+ *		is stored in the free space manager superblock extension
  *		message.
  *
  * Return:      Success:        non-negative
@@ -2536,7 +2536,7 @@ H5FS_vfd_alloc_hdr_and_section_info_if_needed(H5F_t *f, H5FS_t *fspace,
     HDassert(f->shared->fs_persist);
 
     /* At present, all free space strategies enable the free space managers.
-     * This will probably change -- at which point this assertion should 
+     * This will probably change -- at which point this assertion should
      * be revisited.
      */
     /* Updated: Only the following two strategies enable the free-space managers */
@@ -2559,7 +2559,7 @@ H5FS_vfd_alloc_hdr_and_section_info_if_needed(H5F_t *f, H5FS_t *fspace,
 
 	hdr_alloc_size = H5FS_HEADER_SIZE(f);
 
-	/* if page allocation is enabled, extend the hdr_alloc_size to the 
+	/* if page allocation is enabled, extend the hdr_alloc_size to the
 	 * next page boundary.
          */
         if(H5F_PAGED_AGGR(f)) {
@@ -2599,7 +2599,7 @@ H5FS_vfd_alloc_hdr_and_section_info_if_needed(H5F_t *f, H5FS_t *fspace,
 
         sinfo_alloc_size = fspace->sect_size;
 
-	/* if paged allocation is enabled, extend the sinfo_alloc_size to the 
+	/* if paged allocation is enabled, extend the sinfo_alloc_size to the
 	 * next page boundary.
          */
         if(H5F_PAGED_AGGR(f)) {

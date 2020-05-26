@@ -172,7 +172,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5F_flush_tagged_metadata
  *
- * Purpose:     Flushes metadata with specified tag in the metadata cache 
+ * Purpose:     Flushes metadata with specified tag in the metadata cache
  *              to disk.
  *
  * Return:      Non-negative on success/Negative on failure

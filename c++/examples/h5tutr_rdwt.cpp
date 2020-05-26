@@ -28,9 +28,9 @@ const int       DIM1 = 6;
 
 int main (void)
 {
-    
+
     // Data initialization.
-     
+
     int i, j;
     int data[DIM0][DIM1];           // buffer for data to write
 

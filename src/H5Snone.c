@@ -556,7 +556,7 @@ H5S_none_deserialize(H5S_t **space, const uint8_t **p)
     UINT32DECODE(*p, version);
 
     if(version < H5S_NONE_VERSION_1 || version > H5S_NONE_VERSION_LATEST)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "bad version number for none selection") 
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "bad version number for none selection")
 
     /* Skip over the remainder of the header */
     *p += 8;

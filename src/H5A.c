@@ -1129,7 +1129,7 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
     /* Avoid thrashing things if the names are the same */
     if(HDstrcmp(old_name, new_name)) {
         H5G_loc_t loc;                /* Object location */
-  
+
         if(H5G_loc(loc_id, &loc) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 

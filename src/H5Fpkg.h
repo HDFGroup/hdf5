@@ -166,8 +166,8 @@ typedef struct H5F_superblock_cache_ud_t {
     unsigned btree_k[H5B_NUM_BTREE_ID]; /* B-tree key values for each type */
     haddr_t stored_eof;     /* End-of-file in file */
     hbool_t drvrinfo_removed; /* Indicate if the driver info was removed */
-    unsigned    super_vers;   /* Superblock version obtained in get_load_size callback. 
-			       * It will be used later in verify_chksum callback 
+    unsigned    super_vers;   /* Superblock version obtained in get_load_size callback.
+			       * It will be used later in verify_chksum callback
 			       */
 } H5F_superblock_cache_ud_t;
 
@@ -312,7 +312,7 @@ struct H5F_shared_t {
     hsize_t     fs_threshold;	/* Free space section threshold 	*/
     hbool_t     fs_persist;     /* Free-space persist or not */
     unsigned    fs_version;     /* Free-space version: */
-                                /* It is used to update fsinfo message in the superblock 
+                                /* It is used to update fsinfo message in the superblock
                                    extension when closing down the free-space managers */
     hbool_t     use_tmp_space;  /* Whether temp. file space allocation is allowed */
     haddr_t	tmp_addr;       /* Next address to use for temp. space in the file */

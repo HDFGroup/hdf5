@@ -49,7 +49,7 @@
  * in strictly non-decreasing order of chunk address. For version 1 and 2 B-trees,
  * this caused the non-participating ranks to issue a collective MPI_Bcast() call
  * which the other ranks did not issue, thus causing a hang.
- * 
+ *
  * However, since these ranks are not actually reading/writing anything, this call
  * can simply be removed and the address used for the read/write can be set to an
  * arbitrary number (0 was chosen).

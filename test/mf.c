@@ -6821,13 +6821,13 @@ test_mf_fs_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         if(!H5F_addr_defined(f->shared->fs_addr[tt]))
             TEST_ERROR
 
-        /* Since we are about to open a self referential free space 
+        /* Since we are about to open a self referential free space
          * manager prior to the first file space allocation / deallocation
          * call H5MF_tidy_self_referential_fsm_hack() first so as to avoid
          * assertion failures on the first file space alloc / dealloc.
          */
         if((f->shared->first_alloc_dealloc) &&
-           (SUCCEED != 
+           (SUCCEED !=
             H5MF_tidy_self_referential_fsm_hack(f)))
             FAIL_STACK_ERROR
 
@@ -7021,7 +7021,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         if(!H5F_addr_defined(f->shared->fs_addr[fs_type]))
             TEST_ERROR
 
-        /* Since we are about to open a self referential free space 
+        /* Since we are about to open a self referential free space
          * manager prior to the first file space allocation / deallocation
          * call H5MF_tidy_self_referential_fsm_hack() first so as to avoid
          * assertion failures on the first file space alloc / dealloc.
@@ -7041,7 +7041,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         if(H5FS_stat_info(f, f->shared->fs_man[fs_type], &fs_stat) < 0)
             FAIL_STACK_ERROR
 
-        /* if we ran H5MF_tidy_self_referential_fsm_hack(), the 
+        /* if we ran H5MF_tidy_self_referential_fsm_hack(), the
          * H5FD_MEM_SUPER free space manager must be floating.
          * Thus fs_stat.addr must be undefined.
          */

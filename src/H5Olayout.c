@@ -373,7 +373,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
                 /* Check version */
                 if(mesg->version < H5O_LAYOUT_VERSION_4)
                     HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "invalid layout version with virtual layout")
-                
+
                 /* Heap information */
                 H5F_addr_decode(f, &p, &(mesg->storage.u.virt.serial_list_hobjid.addr));
                 UINT32DECODE(p, mesg->storage.u.virt.serial_list_hobjid.idx);

@@ -37,7 +37,7 @@ int main (void)
         // handle the errors appropriately
         Exception::dontPrint();
 
-        // Create a new file using the default property lists. 
+        // Create a new file using the default property lists.
         H5File file(FILE_NAME, H5F_ACC_TRUNC);
 
         // Create the data space for the dataset.
@@ -46,7 +46,7 @@ int main (void)
         dims[1] = NY;
         DataSpace dataspace(RANK, dims);
 
-        // Create the dataset.      
+        // Create the dataset.
         DataSet dataset = file.createDataSet(DATASET_NAME, PredType::STD_I32BE, dataspace);
 
     }  // end of try block

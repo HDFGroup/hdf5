@@ -6,7 +6,7 @@
 ! FUNCTION
 !  This is the first half of a two-part test that makes sure
 !  that a file can be read after an application crashes as long
-!  as the file was flushed first.  We simulate by exit the 
+!  as the file was flushed first.  We simulate by exit the
 !  the program using stop statement
 !
 ! COPYRIGHT

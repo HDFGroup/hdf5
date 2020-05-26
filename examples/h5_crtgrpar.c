@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- *  This example illustrates the creation of groups using absolute and 
+ *  This example illustrates the creation of groups using absolute and
  *  relative names.  It is used in the HDF5 Tutorial.
  */
 

@@ -5,7 +5,7 @@
 !
 ! FUNCTION
 !  Test FORTRAN HDF5 H5E APIs which are dependent on FORTRAN 2003
-!  features. 
+!  features.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -168,10 +168,10 @@ SUBROUTINE test_error(total_error)
 !!$#ifdef H5_USE_16_API
 !!$    if (old_func != (H5E_auto_t)H5Eprint)
 !!$	TEST_ERROR;
-!!$#else  H5_USE_16_API 
+!!$#else  H5_USE_16_API
 !!$    if (old_func != (H5E_auto2_t)H5Eprint2)
 !!$	TEST_ERROR;
-!!$#endif  H5_USE_16_API 
+!!$#endif  H5_USE_16_API
 
 
   ! set the customized error handling routine

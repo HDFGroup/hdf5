@@ -108,7 +108,7 @@ typedef struct H5FD_log_t {
     DWORD           nFileIndexLow;
     DWORD           nFileIndexHigh;
     DWORD           dwVolumeSerialNumber;
-    
+
     HANDLE          hFile;      /* Native windows file handle */
 #endif  /* H5_HAVE_WIN32_API */
 
@@ -329,8 +329,8 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned long long flags, si
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
-    /* This shallow copy is correct! The string will be properly 
-     * copied deep down in the H5P code. 
+    /* This shallow copy is correct! The string will be properly
+     * copied deep down in the H5P code.
      */
     fa.logfile = (char *)logfile;
 
@@ -1247,7 +1247,7 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hadd
     while(size > 0) {
 
         h5_posix_io_t       bytes_in        = 0;    /* # of bytes to read       */
-        h5_posix_io_ret_t   bytes_read      = -1;   /* # of bytes actually read */ 
+        h5_posix_io_ret_t   bytes_read      = -1;   /* # of bytes actually read */
 
         /* Trying to read more bytes than the return type can handle is
          * undefined behavior in POSIX.
@@ -1287,7 +1287,7 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hadd
 
         HDassert(bytes_read >= 0);
         HDassert((size_t)bytes_read <= size);
-        
+
         size -= (size_t)bytes_read;
         addr += (haddr_t)bytes_read;
         buf = (char *)buf + bytes_read;
@@ -1464,7 +1464,7 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
     while(size > 0) {
 
         h5_posix_io_t       bytes_in        = 0;    /* # of bytes to write  */
-        h5_posix_io_ret_t   bytes_wrote     = -1;   /* # of bytes written   */ 
+        h5_posix_io_ret_t   bytes_wrote     = -1;   /* # of bytes written   */
 
         /* Trying to write more bytes than the return type can handle is
          * undefined behavior in POSIX.

@@ -5,7 +5,7 @@
 !
 ! FUNCTION
 !  Test FORTRAN HDF5 H5O APIs which are dependent on FORTRAN 2003
-!  features. 
+!  features.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -28,9 +28,9 @@
 ! *****************************************
 MODULE visit_cb
 
-  USE HDF5 
+  USE HDF5
   USE, INTRINSIC :: ISO_C_BINDING
-  
+
   IMPLICIT NONE
 
   INTEGER, PARAMETER :: info_size = 9
@@ -63,21 +63,21 @@ MODULE visit_cb
 
 CONTAINS
 
-! Compares the field values of a C h5O_info_t and a Fortran H5O_info_t. 
+! Compares the field values of a C h5O_info_t and a Fortran H5O_info_t.
 
   INTEGER FUNCTION compare_h5o_info_t( oinfo_f, oinfo_c, field, full_f_field ) RESULT(status)
-    
+
     IMPLICIT NONE
     TYPE(h5o_info_t)   :: oinfo_f
     TYPE(c_h5o_info_t) :: oinfo_c
     INTEGER :: field
-    LOGICAL :: full_f_field ! All the fields of Fortran H5O_info_t where filled 
+    LOGICAL :: full_f_field ! All the fields of Fortran H5O_info_t where filled
 !   local
     INTEGER(C_INT), DIMENSION(1:8) :: atime, btime, ctime, mtime
     INTEGER :: i
 
     status = 0
-    
+
     IF( (field .EQ. H5O_INFO_BASIC_F).OR.(field .EQ. H5O_INFO_ALL_F) )THEN
        IF( (oinfo_f%fileno.LE.0) .OR. (oinfo_c%fileno .NE. oinfo_f%fileno) )THEN
           status = -1
@@ -158,7 +158,7 @@ CONTAINS
           RETURN
        ENDIF
        status = 0 ! reset
-       
+
     ENDIF
 
     IF((field).EQ.H5O_INFO_HDR_F.OR.(field .EQ. H5O_INFO_ALL_F))THEN
@@ -295,13 +295,13 @@ CONTAINS
     IF(op_data%field .EQ. H5O_INFO_ALL_F)THEN
 
        idx = op_data%idx
-     
+
        DO i = 1, len
           IF(op_data%info(idx)%path(i)(1:1) .NE. name(i)(1:1))THEN
              visit_obj_cb = -1
              RETURN
           ENDIF
-          
+
           IF(op_data%info(idx)%type_obj .NE. oinfo_c%type)THEN
              visit_obj_cb = -1
              RETURN
@@ -353,7 +353,7 @@ CONTAINS
 
 SUBROUTINE test_h5o_refcount(total_error)
 
-  USE HDF5 
+  USE HDF5
   USE TH5_MISC
   USE ISO_C_BINDING
   IMPLICIT NONE
@@ -371,7 +371,7 @@ SUBROUTINE test_h5o_refcount(total_error)
 
   ! Create a new HDF5 file
   CALL h5fcreate_f(FILENAME,H5F_ACC_TRUNC_F,fid,error)
-  CALL check("h5fcreate_f", error, total_error) 
+  CALL check("h5fcreate_f", error, total_error)
 
   ! Create a group, dataset, and committed datatype within the file
   ! Create the group
@@ -644,7 +644,7 @@ SUBROUTINE obj_visit(total_error)
   IF(ret_val.LT.0)THEN
      CALL check("h5ovisit_by_name_f", -1, total_error)
   ENDIF
-  
+
   CALL h5fclose_f(fid, error)
   CALL check("h5fclose_f",error, total_error)
 
@@ -665,13 +665,13 @@ SUBROUTINE obj_info(total_error)
 
   INTEGER, INTENT(INOUT) :: total_error
 
-  INTEGER(hid_t) :: fid = -1             ! File ID 
-  INTEGER(hid_t) :: gid = -1, gid2 = -1  ! Group IDs 
-  INTEGER(hid_t) :: did                  ! Dataset ID 
-  INTEGER(hid_t) :: sid                  ! Dataspace ID 
-  TYPE(hobj_ref_t_f), TARGET :: wref     ! Reference to write 
+  INTEGER(hid_t) :: fid = -1             ! File ID
+  INTEGER(hid_t) :: gid = -1, gid2 = -1  ! Group IDs
+  INTEGER(hid_t) :: did                  ! Dataset ID
+  INTEGER(hid_t) :: sid                  ! Dataspace ID
+  TYPE(hobj_ref_t_f), TARGET :: wref     ! Reference to write
   TYPE(hobj_ref_t_f), TARGET :: rref     ! Reference to read
-  TYPE(H5O_info_t) :: oinfo              ! Object info struct 
+  TYPE(H5O_info_t) :: oinfo              ! Object info struct
   INTEGER :: error
   TYPE(C_PTR) :: f_ptr
 
@@ -693,7 +693,7 @@ SUBROUTINE obj_info(total_error)
   CALL h5gcreate_f(fid,  GROUPNAME, gid, error)
   CALL check("h5gcreate_f",error,total_error)
 
-  ! Create nested groups 
+  ! Create nested groups
   CALL h5gcreate_f(gid,  GROUPNAME2, gid2, error)
   CALL check("h5gcreate_f",error,total_error)
   CALL h5gclose_f(gid2, error)
@@ -728,7 +728,7 @@ SUBROUTINE obj_info(total_error)
   CALL h5dwrite_f(did, H5T_STD_REF_OBJ, f_ptr, error)
   CALL check("h5dwrite_f",error, total_error)
 
-  ! Close objects 
+  ! Close objects
   CALL h5dclose_f(did, error)
   CALL check("h5dclose_f", error, total_error)
   CALL h5sclose_f(sid, error)
@@ -816,7 +816,7 @@ SUBROUTINE build_visit_file(fid)
   USE TH5_MISC
   IMPLICIT NONE
 
-  INTEGER(hid_t) :: fid                   ! File ID 
+  INTEGER(hid_t) :: fid                   ! File ID
   INTEGER(hid_t) :: gid = -1, gid2 = -1   ! Group IDs
   INTEGER(hid_t) :: sid = -1              ! Dataspace ID
   INTEGER(hid_t) :: did = -1              ! Dataset ID
@@ -824,7 +824,7 @@ SUBROUTINE build_visit_file(fid)
   INTEGER(hid_t) :: aid = -1, aid2 = -1, aid3 = -1 ! Attribute ID
   CHARACTER(LEN=20) :: filename = 'visit.h5'
   INTEGER :: error
-  
+
   ! Create file for visiting
   CALL H5Fcreate_f(filename, H5F_ACC_TRUNC_F, fid, error)
 

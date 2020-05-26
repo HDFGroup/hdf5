@@ -694,7 +694,7 @@ H5CX__get_context(void)
         /* No associated value with current thread - create one */
 #ifdef H5_HAVE_WIN_THREADS
         /* Win32 has to use LocalAlloc to match the LocalFree in DllMain */
-        ctx = (H5CX_node_t **)LocalAlloc(LPTR, sizeof(H5CX_node_t *)); 
+        ctx = (H5CX_node_t **)LocalAlloc(LPTR, sizeof(H5CX_node_t *));
 #else
         /* Use HDmalloc here since this has to match the HDfree in the
          * destructor and we want to avoid the codestack there.
@@ -1375,7 +1375,7 @@ H5CX_get_mpi_file_flushing(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5CX_get_mpio_rank0_bcast 
+ * Function:    H5CX_get_mpio_rank0_bcast
  *
  * Purpose:     Retrieves if the dataset meets read-with-rank0-and-bcast requirements for the current API call context.
  *
@@ -2711,7 +2711,7 @@ H5CX_set_mpio_actual_chunk_opt(H5D_mpio_actual_chunk_opt_mode_t mpio_actual_chun
 
     /* Sanity checks */
     HDassert(head && *head);
-    HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT || 
+    HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT ||
             (*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT));
 
     /* Cache the value for later, marking it to set in DXPL when context popped */
@@ -2743,7 +2743,7 @@ H5CX_set_mpio_actual_io_mode(H5D_mpio_actual_io_mode_t mpio_actual_io_mode)
 
     /* Sanity checks */
     HDassert(head && *head);
-    HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT || 
+    HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT ||
             (*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT));
 
     /* Cache the value for later, marking it to set in DXPL when context popped */
@@ -2847,7 +2847,7 @@ H5CX_test_set_mpio_coll_chunk_link_hard(int mpio_coll_chunk_link_hard)
 
     /* Sanity checks */
     HDassert(head && *head);
-    HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT || 
+    HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT ||
             (*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT));
 
     H5CX_TEST_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_HARD_NAME, mpio_coll_chunk_link_hard)
@@ -2881,7 +2881,7 @@ H5CX_test_set_mpio_coll_chunk_multi_hard(int mpio_coll_chunk_multi_hard)
 
     /* Sanity checks */
     HDassert(head && *head);
-    HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT || 
+    HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT ||
             (*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT));
 
     H5CX_TEST_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME, mpio_coll_chunk_multi_hard)
@@ -2915,7 +2915,7 @@ H5CX_test_set_mpio_coll_chunk_link_num_true(int mpio_coll_chunk_link_num_true)
 
     /* Sanity checks */
     HDassert(head && *head);
-    HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT || 
+    HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT ||
             (*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT));
 
     H5CX_TEST_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME, mpio_coll_chunk_link_num_true)
@@ -2949,7 +2949,7 @@ H5CX_test_set_mpio_coll_chunk_link_num_false(int mpio_coll_chunk_link_num_false)
 
     /* Sanity checks */
     HDassert(head && *head);
-    HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT || 
+    HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT ||
             (*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT));
 
     H5CX_TEST_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME, mpio_coll_chunk_link_num_false)
@@ -2983,7 +2983,7 @@ H5CX_test_set_mpio_coll_chunk_multi_ratio_coll(int mpio_coll_chunk_multi_ratio_c
 
     /* Sanity checks */
     HDassert(head && *head);
-    HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT || 
+    HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT ||
             (*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT));
 
     H5CX_TEST_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME, mpio_coll_chunk_multi_ratio_coll)
@@ -3017,7 +3017,7 @@ H5CX_test_set_mpio_coll_chunk_multi_ratio_ind(int mpio_coll_chunk_multi_ratio_in
 
     /* Sanity checks */
     HDassert(head && *head);
-    HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT || 
+    HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT ||
             (*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT));
 
     H5CX_TEST_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME, mpio_coll_chunk_multi_ratio_ind)
@@ -3051,7 +3051,7 @@ H5CX_test_set_mpio_coll_rank0_bcast(hbool_t mpio_coll_rank0_bcast)
 
     /* Sanity checks */
     HDassert(head && *head);
-    HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT || 
+    HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT ||
             (*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT));
 
     H5CX_TEST_SET_PROP(H5D_XFER_COLL_RANK0_BCAST_NAME, mpio_coll_rank0_bcast)

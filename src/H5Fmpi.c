@@ -290,8 +290,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5F_mpi_retrieve_comm
  *
- * Purpose:	Retrieves an MPI communicator from the file the location ID 
- *              is in. If the loc_id is invalid, the fapl_id is used to 
+ * Purpose:	Retrieves an MPI communicator from the file the location ID
+ *              is in. If the loc_id is invalid, the fapl_id is used to
  *              retrieve the communicator.
  *
  * Return:	Success:	Non-negative

@@ -290,7 +290,7 @@ test_get_chunk_info_highest18(hid_t fapl)
     out_offset[0] = out_offset[1] = 0;
     ret = H5Dget_chunk_info(dset, dspace, index, out_offset, &read_flt_msk, &addr, &size);
     if(ret < 0) TEST_ERROR
- 
+
     if(read_flt_msk != filter_mask) TEST_ERROR
     if(size != CHUNK_SIZE) TEST_ERROR
     if(out_offset[0] != 6 || out_offset[1] != 8) TEST_ERROR
@@ -505,7 +505,7 @@ test_chunk_info_single_chunk(char *filename, hid_t fapl)
     /* Open the file for reading/writing */
     if((chunkfile = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR
- 
+
     /* Create dataspace */
     if((dspace = H5Screate_simple(RANK, dims, NULL)) < 0)
         TEST_ERROR
@@ -588,7 +588,7 @@ error:
     H5_FAILED();
     return FAIL;
 } /* test_chunk_info_single_chunk() */
-        
+
 /*-------------------------------------------------------------------------
  * Function:	test_chunk_info_implicit
  *
@@ -636,7 +636,7 @@ test_chunk_info_implicit(char *filename, hid_t fapl)
     /* Open the file for reading/writing */
     if((chunkfile = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR
- 
+
     /* Create dataspace */
     if((dspace = H5Screate_simple(RANK, dims, NULL)) < 0)
         TEST_ERROR
@@ -728,7 +728,7 @@ test_chunk_info_implicit(char *filename, hid_t fapl)
     out_offset[0] = out_offset[1] = 0;
     if(H5Dget_chunk_info(dset, dspace, index, out_offset, &read_flt_msk, &addr, &size) < 0)
         TEST_ERROR
- 
+
     if(read_flt_msk != filter_mask) TEST_ERROR
     if(size != CHUNK_SIZE) TEST_ERROR
     if(out_offset[0] != 0 || out_offset[1] != 8) TEST_ERROR
@@ -811,7 +811,7 @@ error:
     H5_FAILED();
     return FAIL;
 } /* test_chunk_info_implicit() */
-        
+
 /*-------------------------------------------------------------------------
  * Function:	test_chunk_info_fixed_array
  *
@@ -859,7 +859,7 @@ test_chunk_info_fixed_array(char *filename, hid_t fapl)
     /* Open the file for reading/writing */
     if((chunkfile = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR
- 
+
     /* Create dataspace */
     if((dspace = H5Screate_simple(RANK, dims, NULL)) < 0)
         TEST_ERROR
@@ -1020,7 +1020,7 @@ error:
     H5_FAILED();
     return FAIL;
 } /* test_chunk_info_fixed_array() */
-        
+
 /*-------------------------------------------------------------------------
  * Function:	test_chunk_info_extensible_array
  *
@@ -1069,7 +1069,7 @@ test_chunk_info_extensible_array(char *filename, hid_t fapl)
     /* Open the file for reading/writing */
     if((chunkfile = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR
- 
+
     /* Create dataspace */
     if((dspace = H5Screate_simple(RANK, dims, maxdims)) < 0)
         TEST_ERROR
@@ -1150,7 +1150,7 @@ test_chunk_info_extensible_array(char *filename, hid_t fapl)
     out_offset[0] = out_offset[1] = 0;
     if(H5Dget_chunk_info(dset, dspace, index, out_offset, &read_flt_msk, &addr, &size) < 0)
         TEST_ERROR
- 
+
     if(read_flt_msk != filter_mask) TEST_ERROR
     if(size != CHUNK_SIZE) TEST_ERROR
     if(out_offset[0] != 6 || out_offset[1] != 8) TEST_ERROR
@@ -1276,7 +1276,7 @@ test_chunk_info_version2_btrees(char *filename, hid_t fapl)
     /* Open the file for reading/writing */
     if((chunkfile = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR
- 
+
     /* Create dataspace */
     if((dspace = H5Screate_simple(RANK, dims, maxdims)) < 0)
         TEST_ERROR
@@ -1357,7 +1357,7 @@ test_chunk_info_version2_btrees(char *filename, hid_t fapl)
     out_offset[0] = out_offset[1] = 0;
     if(H5Dget_chunk_info(dset, dspace, index, out_offset, &read_flt_msk, &addr, &size) < 0)
         TEST_ERROR
- 
+
     if(read_flt_msk != filter_mask) TEST_ERROR
     if(size != CHUNK_SIZE) TEST_ERROR
     if(out_offset[0] != 6 || out_offset[1] != 8) TEST_ERROR

@@ -490,7 +490,7 @@ test_reference_obj(void)
 **  test_reference_region(): Test basic H5R (reference) object reference code.
 **      Tests references to various kinds of objects
 **
-**      Add test to verify that dataspace selection exceeding 
+**      Add test to verify that dataspace selection exceeding
 **      32 bits is correctly encoded and referenced.
 **
 **  Note: The "new_format" parameter is added to create the file with
@@ -814,7 +814,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
         CHECK(sid3, FAIL, "H5Dget_space");
         ret_particles = H5Sget_select_npoints(sid3);
         VERIFY(ret_particles, total_particles, "H5Sget_select_npoints");
-    
+
         /* Close the dataspace and dataset */
         ret = H5Sclose(sid3);
         CHECK(ret, FAIL, "H5Sclose");
@@ -1545,10 +1545,10 @@ test_reference_group(void)
 
 /****************************************************************
 **
-**  test_reference_sel_none(): 
+**  test_reference_sel_none():
 **      Verify the jira issue HDFFV-11067 is fixed:
 **      -- It was reported that an incorrect number of selected elements
-**         was returned when dereferenced a region reference which has 
+**         was returned when dereferenced a region reference which has
 **         H5Sselect_none() set on the dataspace.
 **
 ****************************************************************/
@@ -1568,7 +1568,7 @@ test_reference_sel_none(void)
 
     /* Iniitialize buffer */
     for (i = 0; i < SPACE1_DIM1; i++)
-       buf[i] = i; 
+       buf[i] = i;
 
     /* Create the test file */
     fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);

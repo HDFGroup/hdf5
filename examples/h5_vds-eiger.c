@@ -12,7 +12,7 @@
 /************************************************************
 
   This example illustrates the concept of the virtual dataset.
-  Eiger use case. Every 5 frames 10x10 are in the source 
+  Eiger use case. Every 5 frames 10x10 are in the source
   dataset "/A" in file with the name f-<#>.h5
   This file is intended for use with HDF5 Library version 1.10
 
@@ -25,13 +25,13 @@
 
 #define FILE         "vds-eiger.h5"
 #define DATASET      "VDS-Eiger"
-#define VDSDIM0       5 
-#define VDSDIM1       10 
-#define VDSDIM2       10 
-#define DIM0          5 
-#define DIM1          10 
-#define DIM2          10 
-#define RANK          3 
+#define VDSDIM0       5
+#define VDSDIM1       10
+#define VDSDIM2       10
+#define DIM0          5
+#define DIM1          10
+#define DIM2          10
+#define RANK          3
 
 int
 main (void)
@@ -69,7 +69,7 @@ main (void)
 
     /* Create VDS creation property */
     dcpl = H5Pcreate (H5P_DATASET_CREATE);
-     
+
     /* Initialize hyperslab values */
 
     start[0] = 0;
@@ -85,13 +85,13 @@ main (void)
     block[1] = DIM1;
     block[2] = DIM2;
 
-   /* 
-    * Build the mappings 
+   /*
+    * Build the mappings
     *
     */
       status = H5Sselect_hyperslab (vspace, H5S_SELECT_SET, start, stride, count, block);
       status = H5Pset_virtual (dcpl, vspace, "f-%b.h5", "/A", src_space);
-   
+
 
 
    /* Create a virtual dataset */
@@ -100,8 +100,8 @@ main (void)
       status = H5Sclose (vspace);
       status = H5Sclose (src_space);
       status = H5Dclose (dset);
-      status = H5Fclose (file);    
-     
+      status = H5Fclose (file);
+
 
     /*
      * Now we begin the read section of this example.
@@ -123,7 +123,7 @@ main (void)
      */
     layout = H5Pget_layout (dcpl);
 
-    if (H5D_VIRTUAL == layout) 
+    if (H5D_VIRTUAL == layout)
         printf(" Dataset has a virtual layout \n");
     else
         printf(" Wrong layout found \n");
@@ -134,15 +134,15 @@ main (void)
      status = H5Pget_virtual_count (dcpl, &num_map);
      printf(" Number of mappings is %d\n", (int)num_map);
 
-     /* 
+     /*
       * Get mapping parameters for each mapping.
       */
-      for (i = 0; i < (int)num_map; i++) {   
+      for (i = 0; i < (int)num_map; i++) {
       printf(" Mapping %d \n", i);
       printf("         Selection in the virtual dataset \n");
       /* Get selection in the virttual  dataset */
           vspace = H5Pget_virtual_vspace (dcpl, (size_t)i);
-          if (H5Sget_select_type(vspace) == H5S_SEL_HYPERSLABS) { 
+          if (H5Sget_select_type(vspace) == H5S_SEL_HYPERSLABS) {
               if (H5Sis_regular_hyperslab(vspace)) {
                    status = H5Sget_regular_hyperslab (vspace, start_out, stride_out, count_out, block_out);
                    printf("         start  = [%llu, %llu, %llu] \n", (unsigned long long)start_out[0], (unsigned long long)start_out[1], (unsigned long long)start_out[2]);

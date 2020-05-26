@@ -85,7 +85,7 @@ if (NOT MSVC)
         list (APPEND H5_CXXFLAGS0 "-Wsign-compare -Wtrigraphs -Wwrite-strings")
       endif()
     elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-      if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_LOADED 
+      if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_LOADED
           AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
         # add the general CXX flags for g++ compiler versions 4.8 and above.
         ADD_H5_FLAGS (HDF5_CMAKE_CXX_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/cxx-general")

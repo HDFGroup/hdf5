@@ -1158,7 +1158,7 @@ done:
  * Function:	H5T_vlen_reclaim_elmt
  *
  * Purpose: Alternative method to reclaim any VL data for a buffer element.
- * 
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Mike McGreevy

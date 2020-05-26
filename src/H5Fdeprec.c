@@ -153,10 +153,10 @@ done:
  *              bounds.
  *
  *              Before release 1.10.2, the library supports only two
- *              combinations of low/high bounds: 
+ *              combinations of low/high bounds:
  *                  (earliest, latest)
  *                  (latest, latest)
- *              Thus, this public routine does the job in switching 
+ *              Thus, this public routine does the job in switching
  *              between the two combinations listed above.
  *
  *              Starting release 1.10.2, we add v18 to the enumerated
@@ -174,7 +174,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Vailin Choi; December 2017
- *             
+ *
  *-------------------------------------------------------------------------
  */
 herr_t

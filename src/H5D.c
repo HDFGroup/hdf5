@@ -338,7 +338,7 @@ H5Dclose(hid_t dset_id)
 
     /*
      * Decrement the counter on the dataset.  It will be freed if the count
-     * reaches zero.  
+     * reaches zero.
      */
     if(H5I_dec_app_ref_always_close(dset_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't decrement count on dataset ID")
@@ -936,7 +936,7 @@ H5Dflush(hid_t dset_id)
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", dset_id);
-    
+
     /* Check args */
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
@@ -971,7 +971,7 @@ H5Drefresh(hid_t dset_id)
 {
     H5D_t *dset;                   /* Dataset to refresh */
     herr_t ret_value = SUCCEED;    /* return value */
-    
+
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", dset_id);
 
@@ -995,9 +995,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Dformat_convert (Internal)
  *
- * Purpose:     For chunked: 
+ * Purpose:     For chunked:
  *		  Convert the chunk indexing type to version 1 B-tree if not
- *		For compact/contiguous: 
+ *		For compact/contiguous:
  *		  Downgrade layout version to 3 if greater than 3
  *		For virtual: no conversion
  *
@@ -1013,7 +1013,7 @@ H5Dformat_convert(hid_t dset_id)
 {
     H5D_t *dset;                /* Dataset to refresh */
     herr_t ret_value = SUCCEED; /* return value */
-    
+
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", dset_id);
 
@@ -1049,7 +1049,7 @@ H5Dformat_convert(hid_t dset_id)
         case H5D_NLAYOUTS:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset layout type")
 
-	default: 
+	default:
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown dataset layout type")
     } /* end switch */
 
@@ -1075,7 +1075,7 @@ H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type)
 {
     H5D_t *dset;                /* Dataset to refresh */
     herr_t ret_value = SUCCEED; /* return value */
-    
+
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Dk", did, idx_type);
 
@@ -1186,7 +1186,7 @@ H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks)
 done:
     FUNC_LEAVE_API(ret_value);
 } /* H5Dget_num_chunks() */
- 
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5Dget_chunk_info

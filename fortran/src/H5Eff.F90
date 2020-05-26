@@ -254,7 +254,7 @@ CONTAINS
 !  estack_id   - Error stack identifier.
 !  func        - Function to be called upon an error condition.
 !  client_data - Data passed to the error function
-!  
+!
 ! Outputs:
 !  hdferr      - Returns 0 if successful and -1 if fails
 !

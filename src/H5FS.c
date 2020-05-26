@@ -1171,7 +1171,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FS_sinfo_dest() */
 
-herr_t 
+herr_t
 H5FS_get_sect_count(const H5FS_t *frsp, hsize_t *tot_sect_count)
 {
     herr_t ret_value = SUCCEED; /* Return value */

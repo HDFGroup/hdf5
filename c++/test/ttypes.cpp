@@ -54,7 +54,7 @@ using namespace H5;
     H5T_NATIVE_##TYPE##_ALIGN_g=MAX(H5T_NATIVE_##TYPE##_ALIGN_g, VAL)
 #endif
  /* #include "H5Tpkg.h"
- */ 
+ */
 
 const char *FILENAME[] = {
     "dtypes1.h5",
@@ -392,7 +392,7 @@ static void test_vltype()
     try
     {
         VarLenType vltype(PredType::NATIVE_INT);
-        
+
         bool in_class = vltype.detectClass(H5T_VLEN);
         verify_val(in_class, true, "VarLenType::detectClass() with H5T_VLEN", __LINE__, __FILE__);
         in_class = vltype.detectClass(H5T_INTEGER);

@@ -100,9 +100,9 @@ main (void)
 
     printf("HDF5 C Sample program ran successfully. File %s generated.\n", H5FILE_NAME);
     remove(H5FILE_NAME);
- 
+
     return 0;
-}     
+}
 EOF
 
 # generate prog1
@@ -143,7 +143,7 @@ main (void)
     remove(H5FILE_NAME);
 
     return 0;
-}     
+}
 EOF
 
 # Generate HDF5 v1.6 Main Program:

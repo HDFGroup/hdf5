@@ -25,8 +25,8 @@
 !
 !*****
 MODULE TH5I
- 
-  USE HDF5 ! This module contains all necessary modules 
+
+  USE HDF5 ! This module contains all necessary modules
   USE TH5_MISC
   USE TH5_MISC_GEN
 
@@ -87,21 +87,21 @@ CONTAINS
      ! check that the ID is not valid
      dtype = -1
      CALL H5Iis_valid_f(dtype, tri_ret, error)
-     CALL check("H5Iis_valid_f", error, total_error) 
+     CALL check("H5Iis_valid_f", error, total_error)
      CALL verify("H5Iis_valid_f", tri_ret, .FALSE., total_error)
-     
+
      ! Create a datatype id
      CALL H5Tcopy_f(H5T_NATIVE_INTEGER,dtype,error)
-     CALL check("H5Tcopy_f", error, total_error) 
-     
+     CALL check("H5Tcopy_f", error, total_error)
+
      ! Check that the ID is valid
      CALL H5Iis_valid_f(dtype, tri_ret, error)
-     CALL check("H5Iis_valid_f", error, total_error) 
+     CALL check("H5Iis_valid_f", error, total_error)
      CALL verify("H5Tequal_f", tri_ret, .TRUE., total_error)
-     
+
      CALL H5Tclose_f(dtype, error)
-     CALL check("H5Tclose_f", error, total_error) 
-  
+     CALL check("H5Tclose_f", error, total_error)
+
      !
      ! Create a new file using default properties.
      !

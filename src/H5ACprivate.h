@@ -88,18 +88,18 @@ typedef enum {
  *
  * Hence the following, somewhat odd set of #defines.
  *
- * NOTE: test/cache plays games with the f->shared->cache, and thus 
- *       setting H5AC_DUMP_STATS_ON_CLOSE will generate constant, 
- *	 irrelevant data when run with that test program.  See 
+ * NOTE: test/cache plays games with the f->shared->cache, and thus
+ *       setting H5AC_DUMP_STATS_ON_CLOSE will generate constant,
+ *	 irrelevant data when run with that test program.  See
  * 	 comments on setup_cache() / takedown_cache() in test/cache_common.c.
  *       for details.
  *
  *	 If you need to dump stats at file close in test/cache.c,
- *	 use the dump_stats parameter to takedown_cache(), or call 
+ *	 use the dump_stats parameter to takedown_cache(), or call
  *	 H5C_stats() directly.
  *					JRM -- 4/12/15
  *
- * Added the H5AC_DUMP_IMAGE_STATS_ON_CLOSE #define, which works much 
+ * Added the H5AC_DUMP_IMAGE_STATS_ON_CLOSE #define, which works much
  * the same way as H5AC_DUMP_STATS_ON_CLOSE.  However, the set of stats
  * displayed is much smaller, and directed purely at the cache image feature.
  *
@@ -418,7 +418,7 @@ H5_DLL herr_t H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr,
 H5_DLL herr_t H5AC_validate_config(H5AC_cache_config_t *config_ptr);
 
 /* Cache image routines */
-H5_DLL herr_t H5AC_load_cache_image_on_next_protect(H5F_t *f, haddr_t addr, 
+H5_DLL herr_t H5AC_load_cache_image_on_next_protect(H5F_t *f, haddr_t addr,
     hsize_t len, hbool_t rw);
 H5_DLL herr_t H5AC_validate_cache_image_config(H5AC_cache_image_config_t *config_ptr);
 H5_DLL hbool_t H5AC_cache_image_pending(const H5F_t *f);

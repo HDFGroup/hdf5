@@ -12870,9 +12870,9 @@ test_select_bounds(void)
     /* Get bounds for 'none' selection */
     H5E_BEGIN_TRY {
         ret = H5Sget_select_bounds(sid, low_bounds, high_bounds);
-    } H5E_END_TRY;                                  
-    VERIFY(ret, FAIL, "H5Sget_select_bo unds");     
-                                                    
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Sget_select_bo unds");
+
     /* Set point selection */
     coord[0][0] =  3; coord[0][1] =  3;
     coord[1][0] =  3; coord[1][1] = 96;
@@ -13049,14 +13049,14 @@ test_hyper_regular(void)
     /* Query if 'all' selection is regular hyperslab (should fail) */
     H5E_BEGIN_TRY {
         is_regular = H5Sis_regular_hyperslab(sid);
-    } H5E_END_TRY;                                  
-    VERIFY(is_regular, FAIL, "H5Sis_regular_hyperslab");     
+    } H5E_END_TRY;
+    VERIFY(is_regular, FAIL, "H5Sis_regular_hyperslab");
 
     /* Query regular hyperslab selection info (should fail) */
     H5E_BEGIN_TRY {
         ret = H5Sget_regular_hyperslab(sid, q_start, q_stride, q_count, q_block);
-    } H5E_END_TRY;                                  
-    VERIFY(ret, FAIL, "H5Sget_regular_hyperslab");     
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Sget_regular_hyperslab");
 
     /* Set 'none' selection */
     ret = H5Sselect_none(sid);
@@ -13065,14 +13065,14 @@ test_hyper_regular(void)
     /* Query if 'none' selection is regular hyperslab (should fail) */
     H5E_BEGIN_TRY {
         is_regular = H5Sis_regular_hyperslab(sid);
-    } H5E_END_TRY;                                  
-    VERIFY(is_regular, FAIL, "H5Sis_regular_hyperslab");     
+    } H5E_END_TRY;
+    VERIFY(is_regular, FAIL, "H5Sis_regular_hyperslab");
 
     /* Query regular hyperslab selection info (should fail) */
     H5E_BEGIN_TRY {
         ret = H5Sget_regular_hyperslab(sid, q_start, q_stride, q_count, q_block);
-    } H5E_END_TRY;                                  
-    VERIFY(ret, FAIL, "H5Sget_regular_hyperslab");     
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Sget_regular_hyperslab");
 
     /* Set point selection */
     coord[0][0] =  3; coord[0][1] =  3; coord[0][2] = 3;
@@ -13085,14 +13085,14 @@ test_hyper_regular(void)
     /* Query if 'point' selection is regular hyperslab (should fail) */
     H5E_BEGIN_TRY {
         is_regular = H5Sis_regular_hyperslab(sid);
-    } H5E_END_TRY;                                  
-    VERIFY(is_regular, FAIL, "H5Sis_regular_hyperslab");     
+    } H5E_END_TRY;
+    VERIFY(is_regular, FAIL, "H5Sis_regular_hyperslab");
 
     /* Query regular hyperslab selection info (should fail) */
     H5E_BEGIN_TRY {
         ret = H5Sget_regular_hyperslab(sid, q_start, q_stride, q_count, q_block);
-    } H5E_END_TRY;                                  
-    VERIFY(ret, FAIL, "H5Sget_regular_hyperslab");     
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Sget_regular_hyperslab");
 
     /* Set "regular" hyperslab selection */
     start[0]  = 2; start[1]  = 2; start[2]  = 2;
@@ -13104,7 +13104,7 @@ test_hyper_regular(void)
 
     /* Query if 'hyperslab' selection is regular hyperslab (should be TRUE) */
     is_regular = H5Sis_regular_hyperslab(sid);
-    VERIFY(is_regular, TRUE, "H5Sis_regular_hyperslab");     
+    VERIFY(is_regular, TRUE, "H5Sis_regular_hyperslab");
 
     /* Retrieve the hyperslab parameters */
     ret = H5Sget_regular_hyperslab(sid, q_start, q_stride, q_count, q_block);
@@ -13130,13 +13130,13 @@ test_hyper_regular(void)
 
     /* Query if 'hyperslab' selection is regular hyperslab (should be FALSE) */
     is_regular = H5Sis_regular_hyperslab(sid);
-    VERIFY(is_regular, FALSE, "H5Sis_regular_hyperslab");     
+    VERIFY(is_regular, FALSE, "H5Sis_regular_hyperslab");
 
     /* Query regular hyperslab selection info (should fail) */
     H5E_BEGIN_TRY {
         ret = H5Sget_regular_hyperslab(sid, q_start, q_stride, q_count, q_block);
-    } H5E_END_TRY;                                  
-    VERIFY(ret, FAIL, "H5Sget_regular_hyperslab");     
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Sget_regular_hyperslab");
 
     /* 'XOR' in the point again, to remove it, which should make it regular again */
     t_start[0]  = 0; t_start[1]  = 0; t_start[2]  = 0;
@@ -13146,7 +13146,7 @@ test_hyper_regular(void)
 
     /* Query if 'hyperslab' selection is regular hyperslab (should be TRUE) */
     is_regular = H5Sis_regular_hyperslab(sid);
-    VERIFY(is_regular, TRUE, "H5Sis_regular_hyperslab");     
+    VERIFY(is_regular, TRUE, "H5Sis_regular_hyperslab");
 
     /* Retrieve the hyperslab parameters */
     ret = H5Sget_regular_hyperslab(sid, q_start, q_stride, q_count, q_block);

@@ -1458,7 +1458,7 @@ done:
  * Function:    H5Fset_libver_bounds
  *
  * Purpose:     Set to a different low and high bounds while a file is open.
- *              This public routine is introduced in place of 
+ *              This public routine is introduced in place of
  *              H5Fset_latest_format() starting release 1.10.2.
  *              See explanation for H5Fset_latest_format() in H5Fdeprec.c.
  *

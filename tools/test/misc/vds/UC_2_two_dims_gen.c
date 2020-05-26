@@ -168,7 +168,7 @@ main(void)
 
             value = ((i + 1) * 10) + j;
             for(k = 0; k < count; k++)
-               buffer[k] = value; 
+               buffer[k] = value;
 
             start[0] = (hsize_t)j;
             start[1] = 0;

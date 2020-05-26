@@ -476,13 +476,13 @@ Bug Fixes since HDF5-1.10.5 release
 
     Fortran
     --------
-    - Corrected INTERFACE INTENT(IN) to INTENT(OUT) for buf_size in h5fget_file_image_f.  
-    
-      (MSB - 2020/2/18, HDFFV-11029) 
+    - Corrected INTERFACE INTENT(IN) to INTENT(OUT) for buf_size in h5fget_file_image_f.
+
+      (MSB - 2020/2/18, HDFFV-11029)
 
     - Fixed configure issue when building HDF5 with NAG Fortran 7.0.
 
-      HDF5 now accounts for the addition of half-precision floating-point 
+      HDF5 now accounts for the addition of half-precision floating-point
       in NAG 7.0 with a KIND=16.
 
       (MSB - 2020/02/28, HDFFV-11033)

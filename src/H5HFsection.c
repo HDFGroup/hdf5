@@ -156,7 +156,7 @@ static hbool_t H5HF_sect_indirect_is_first(H5HF_free_section_t *sect);
 static H5HF_indirect_t * H5HF_sect_indirect_get_iblock(H5HF_free_section_t *sect);
 static hsize_t H5HF_sect_indirect_iblock_off(const H5HF_free_section_t *sect);
 static H5HF_free_section_t * H5HF_sect_indirect_top(H5HF_free_section_t *sect);
-static herr_t H5HF__sect_indirect_merge_row(H5HF_hdr_t *hdr, 
+static herr_t H5HF__sect_indirect_merge_row(H5HF_hdr_t *hdr,
     H5HF_free_section_t *sect1, H5HF_free_section_t *sect2);
 static herr_t H5HF__sect_indirect_build_parent(H5HF_hdr_t *hdr, H5HF_free_section_t *sect);
 static herr_t H5HF__sect_indirect_shrink(H5HF_hdr_t *hdr,
