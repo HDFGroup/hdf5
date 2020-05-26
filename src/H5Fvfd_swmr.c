@@ -1309,6 +1309,15 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
 
         entries_added += new_mdf_idx_entries_used - j;
 
+        for (; j < new_mdf_idx_entries_used; j++) {
+            hlog_fast(shadow_index_update,
+                "writer added shadow index slot %" PRIu32
+                " for page %" PRIu64, j, new_mdf_idx[j].hdf5_page_offset);
+            change[nchanges].pgno = new_mdf_idx[j].hdf5_page_offset;
+            change[nchanges].length = new_mdf_idx[j].length;
+            nchanges++;
+        }
+
         /* cleanup any left overs in the old index */
         for (; i < old_mdf_idx_entries_used; i++) {
 
