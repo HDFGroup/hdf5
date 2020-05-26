@@ -117,7 +117,7 @@ typedef struct H5HG_obj_t {
 } H5HG_obj_t;
 
 /* Forward declarations for fields */
-struct H5F_file_t;
+struct H5F_shared_t;
 
 struct H5HG_heap_t {
     H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
@@ -130,7 +130,7 @@ struct H5HG_heap_t {
                                         /* If this value is >65535 then all indices */
                                         /* have been used at some time and the */
                                         /* correct new index should be searched for */
-    struct H5F_file_t   *shared;        /* shared file */
+    struct H5F_shared_t   *shared;        /* shared file */
     H5HG_obj_t	*obj;		/*array of object descriptions	*/
 };
 

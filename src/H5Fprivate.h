@@ -653,7 +653,7 @@ struct H5P_genplist_t;
 /* Forward declarations for anonymous H5F objects */
 
 /* Main file structures */
-typedef struct H5F_file_t H5F_file_t;
+typedef struct H5F_shared_t H5F_shared_t;
 
 /* Block aggregation structure */
 typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
@@ -729,7 +729,7 @@ H5_DLL unsigned H5F_get_intent(const H5F_t *f);
 H5_DLL char *H5F_get_open_name(const H5F_t *f);
 H5_DLL char *H5F_get_actual_name(const H5F_t *f);
 H5_DLL char *H5F_get_extpath(const H5F_t *f);
-H5_DLL H5F_file_t *H5F_get_shared(const H5F_t *f);
+H5_DLL H5F_shared_t *H5F_get_shared(const H5F_t *f);
 H5_DLL hbool_t H5F_same_shared(const H5F_t *f1, const H5F_t *f2);
 H5_DLL unsigned H5F_get_nopen_objs(const H5F_t *f);
 H5_DLL unsigned H5F_incr_nopen_objs(H5F_t *f);
@@ -856,7 +856,7 @@ H5_DLL H5F_t *H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix
 H5_DLL herr_t H5F_cwfs_add(H5F_t *f, struct H5HG_heap_t *heap);
 H5_DLL herr_t H5F_cwfs_find_free_heap(H5F_t *f, size_t need, haddr_t *addr);
 H5_DLL herr_t H5F_cwfs_advance_heap(H5F_t *f, struct H5HG_heap_t *heap, hbool_t add_heap);
-H5_DLL herr_t H5F_cwfs_remove_heap(H5F_file_t *shared, struct H5HG_heap_t *heap);
+H5_DLL herr_t H5F_cwfs_remove_heap(H5F_shared_t *shared, struct H5HG_heap_t *heap);
 
 /* Debugging functions */
 H5_DLL herr_t H5F_debug(H5F_t *f, FILE * stream, int indent, int fwidth);

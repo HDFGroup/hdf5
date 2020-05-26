@@ -214,7 +214,7 @@ typedef struct H5F_mtab_t {
 } H5F_mtab_t;
 
 /* Structure specifically to store superblock. This was originally
- * maintained entirely within H5F_file_t, but is now extracted
+ * maintained entirely within H5F_shared_t, but is now extracted
  * here because the superblock is now handled by the cache */
 typedef struct H5F_super_t {
     H5AC_info_t cache_info;     /* Cache entry information structure          */
@@ -235,11 +235,11 @@ typedef struct H5F_super_t {
 /*
  * Define the structure to store the file information for HDF5 files. One of
  * these structures is allocated per file, not per H5Fopen(). That is, set of
- * H5F_t structs can all point to the same H5F_file_t struct. The `nrefs'
+ * H5F_t structs can all point to the same H5F_shared_t struct. The `nrefs'
  * count in this struct indicates the number of H5F_t structs which are
  * pointing to this struct.
  */
-struct H5F_file_t {
+struct H5F_shared_t {
     H5FD_t	*lf; 		/* Lower level file handle for I/O	*/
     H5F_super_t *sblock;        /* Pointer to (pinned) superblock for file */
     H5O_drvinfo_t *drvinfo;	/* Pointer to the (pinned) driver info
@@ -360,13 +360,13 @@ struct H5F_file_t {
 /*
  * This is the top-level file descriptor.  One of these structures is
  * allocated every time H5Fopen() is called although they may contain pointers
- * to shared H5F_file_t structs.
+ * to shared H5F_shared_t structs.
  */
 struct H5F_t {
     char	       *open_name;      /* Name used to open file                                       */
     char	       *actual_name;    /* Actual name of the file, after resolving symlinks, etc.      */
     char               *extpath;        /* Path for searching target external link file                 */
-    H5F_file_t         *shared;         /* The shared file info                                         */
+    H5F_shared_t         *shared;         /* The shared file info                                         */
     unsigned	        nopen_objs;     /* Number of open object headers                                */
     H5FO_t             *obj_count;      /* # of time each object is opened through top file structure   */
     hid_t               file_id;        /* ID of this file                                              */
@@ -386,8 +386,8 @@ struct H5F_t {
 /* Declare a free list to manage the H5F_t struct */
 H5FL_EXTERN(H5F_t);
 
-/* Declare a free list to manage the H5F_file_t struct */
-H5FL_EXTERN(H5F_file_t);
+/* Declare a free list to manage the H5F_shared_t struct */
+H5FL_EXTERN(H5F_shared_t);
 
 
 /******************************/
@@ -395,7 +395,7 @@ H5FL_EXTERN(H5F_file_t);
 /******************************/
 
 /* General routines */
-H5_DLL H5F_t *H5F__new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf);
+H5_DLL H5F_t *H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf);
 H5_DLL herr_t H5F__dest(H5F_t *f, hbool_t flush);
 H5_DLL herr_t H5F__flush(H5F_t *f);
 H5_DLL htri_t H5F__is_hdf5(const char *name);
@@ -435,9 +435,9 @@ H5_DLL herr_t H5F__accum_flush(H5F_t *f);
 H5_DLL herr_t H5F__accum_reset(H5F_t *f, hbool_t flush);
 
 /* Shared file list related routines */
-H5_DLL herr_t H5F_sfile_add(H5F_file_t *shared);
-H5_DLL H5F_file_t * H5F_sfile_search(H5FD_t *lf);
-H5_DLL herr_t H5F_sfile_remove(H5F_file_t *shared);
+H5_DLL herr_t H5F_sfile_add(H5F_shared_t *shared);
+H5_DLL H5F_shared_t * H5F_sfile_search(H5FD_t *lf);
+H5_DLL herr_t H5F_sfile_remove(H5F_shared_t *shared);
 
 /* External file cache routines */
 H5_DLL H5F_efc_t *H5F__efc_create(unsigned max_nfiles);

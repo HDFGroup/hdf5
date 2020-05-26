@@ -221,7 +221,7 @@ H5F_get_extpath(const H5F_t *f)
  * Return:   'shared' on success/abort on failure (shouldn't fail)
  *-------------------------------------------------------------------------
  */
-H5F_file_t *
+H5F_shared_t *
 H5F_get_shared(const H5F_t *f)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
