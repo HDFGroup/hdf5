@@ -638,16 +638,14 @@ write_extensible_dset(state_t *s, unsigned int which, unsigned int step,
 
     if (s->two_dee) {
         base.col = last.col;
-        for (base.row = 0; base.row <= last.row;
-             base.row += s->chunk_dims[0]) {
+        for (base.row = 0; base.row <= last.row; base.row += s->chunk_dims[0]) {
             dbgf(1, "writing chunk %" PRIuHSIZE ", %" PRIuHSIZE "\n",
                 base.row, base.col);
             init_and_write_chunk(s, filespace, mat, which, base);
         }
 
         base.row = last.row;
-        for (base.col = 0; base.col < last.col;
-            base.col += s->chunk_dims[1]) {
+        for (base.col = 0; base.col < last.col; base.col += s->chunk_dims[1]) {
             dbgf(1, "writing chunk %" PRIuHSIZE ", %" PRIuHSIZE "\n",
                 base.row, base.col);
             init_and_write_chunk(s, filespace, mat, which, base);
