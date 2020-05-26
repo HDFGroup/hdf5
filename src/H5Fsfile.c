@@ -24,7 +24,7 @@
 
 /* Struct for tracking "shared" file structs */
 typedef struct H5F_sfile_node_t {
-    H5F_file_t *shared;                 /* Pointer to "shared" file struct */
+    H5F_shared_t *shared;                 /* Pointer to "shared" file struct */
     struct H5F_sfile_node_t *next;      /* Pointer to next node */
 } H5F_sfile_node_t;
 
@@ -96,7 +96,7 @@ H5F_sfile_assert_num(unsigned n)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_sfile_add(H5F_file_t *shared)
+H5F_sfile_add(H5F_shared_t *shared)
 {
     H5F_sfile_node_t *new_shared;       /* New shared file node */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -135,11 +135,11 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5F_file_t *
+H5F_shared_t *
 H5F_sfile_search(H5FD_t *lf)
 {
     H5F_sfile_node_t *curr;             /* Current shared file node */
-    H5F_file_t *ret_value = NULL;       /* Return value */
+    H5F_shared_t *ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -175,7 +175,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_sfile_remove(H5F_file_t *shared)
+H5F_sfile_remove(H5F_shared_t *shared)
 {
     H5F_sfile_node_t *curr;             /* Current shared file node */
     H5F_sfile_node_t *last;             /* Last shared file node */
