@@ -670,19 +670,19 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 
 #define H5PB__UPDATE_STATS_FOR_ACCESS(pb_ptr, type, size) \
 {                                                         \
-    int i;                                                \
+    int _i;                                               \
                                                           \
     HDassert(pb_ptr);                                     \
     HDassert((pb_ptr)->magic == H5PB__H5PB_T_MAGIC);      \
                                                           \
     if ( H5FD_MEM_DRAW == (type) ) {                      \
-        i = H5PB__STATS_RD;                               \
+        _i = H5PB__STATS_RD;                              \
     } else if ( (size) > (pb_ptr)->page_size ) {          \
-        i = H5PB__STATS_MPMDE;                            \
+        _i = H5PB__STATS_MPMDE;                           \
     } else {                                              \
-        i = H5PB__STATS_MD;                               \
+        _i = H5PB__STATS_MD;                              \
     }                                                     \
-    ((pb_ptr)->accesses[i])++;                            \
+    ((pb_ptr)->accesses[_i])++;                           \
 } /* H5PB__UPDATE_STATS_FOR_ACCESS */
 
 
