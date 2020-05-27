@@ -50,6 +50,7 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
     vfd_swmr_addrem_writer$(EXEEXT) vfd_swmr_sparse_reader$(EXEEXT) \
     vfd_swmr_sparse_writer$(EXEEXT) \
     vfd_swmr_bigset_reader$(EXEEXT) vfd_swmr_bigset_writer$(EXEEXT) \
+    vfd_swmr_group_reader$(EXEEXT) vfd_swmr_group_writer$(EXEEXT) \
     vfd_swmr_vlstr_reader$(EXEEXT) vfd_swmr_vlstr_writer$(EXEEXT) \
     vfd_swmr_zoo_reader$(EXEEXT) vfd_swmr_zoo_writer$(EXEEXT) \
     vds_env$(EXEEXT) \
@@ -103,6 +104,7 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     vfd_swmr_remove_reader vfd_swmr_remove_writer vfd_swmr_addrem_writer \
     vfd_swmr_sparse_reader vfd_swmr_sparse_writer \
     vfd_swmr_bigset_reader vfd_swmr_bigset_writer \
+    vfd_swmr_group_reader vfd_swmr_group_writer \
     vfd_swmr_vlstr_reader vfd_swmr_vlstr_writer \
     vfd_swmr_zoo_reader vfd_swmr_zoo_writer \
     swmr_check_compat_vfd vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer \
@@ -169,6 +171,7 @@ vfd_swmr_zoo_writer_SOURCES=vfd_swmr_zoo_writer.c genall5.c
 vfd_swmr_zoo_reader_SOURCES=vfd_swmr_zoo_writer.c genall5.c
 
 vfd_swmr_bigset_reader_SOURCES=vfd_swmr_bigset_writer.c
+vfd_swmr_group_reader_SOURCES=vfd_swmr_group_writer.c
 
 VFD_LIST = sec2 stdio core core_paged split multi family
 if DIRECT_VFD_CONDITIONAL
