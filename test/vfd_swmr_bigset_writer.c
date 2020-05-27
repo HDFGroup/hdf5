@@ -46,16 +46,12 @@ typedef struct _mat {
 } mat_t;
 
 typedef struct {
-	/* main-loop statistics */
-	uint64_t max_elapsed_ns, min_elapsed_ns, total_elapsed_ns;
-	uint64_t total_loops;
 	hid_t *dataset;
         hid_t memspace, file, one_by_one_sid;
         unsigned ndatasets;
 	char filename[PATH_MAX];
 	char progname[PATH_MAX];
 	struct timespec update_interval;
-	bool fuzz;
 	unsigned int cols, rows;
 	unsigned int asteps;
 	unsigned int nsteps;
@@ -67,11 +63,7 @@ typedef struct {
 } state_t;
 
 #define ALL_HID_INITIALIZER (state_t){					\
-	  .total_elapsed_ns = 0						\
-	, .total_loops = 0						\
-	, .min_elapsed_ns = UINT64_MAX					\
-	, .max_elapsed_ns = 0						\
-	, .memspace = H5I_INVALID_HID					\
+	  .memspace = H5I_INVALID_HID					\
 	, .file = H5I_INVALID_HID					\
 	, .one_by_one_sid = H5I_INVALID_HID				\
 	, .rows = ROWS						        \
