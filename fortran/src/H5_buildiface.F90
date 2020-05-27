@@ -13,8 +13,8 @@
 !  depending on which of the KIND values are found.
 !
 ! NOTES
-!  This program uses the Fortran 2008 intrinsic function STORAGE_SIZE or SIZEOF 
-!  depending on availablity.It generates code that makes use of 
+!  This program uses the Fortran 2008 intrinsic function STORAGE_SIZE or SIZEOF
+!  depending on availablity.It generates code that makes use of
 !  STORAGE_SIZE/SIZEOF in H5_gen.F90. STORAGE_SIZE is standard
 !  compliant and should always be chosen over SIZEOF.
 !
@@ -98,7 +98,7 @@ PROGRAM H5_buildiface
 !
 ! DEVELOPER'S NOTES:
 !
-! Only interfaces with arrays of rank 7 and less are provided. Even-though, the F2008 
+! Only interfaces with arrays of rank 7 and less are provided. Even-though, the F2008
 ! standard extended the maximum rank to 15, it was decided that user's should use the
 ! new APIs to handle those use cases. Handling rank 7 and less is for backward compatibility
 ! with the Fortran 90/95 APIs codes which could never handle ranks greater than 7.
@@ -195,7 +195,7 @@ PROGRAM H5_buildiface
      DO k = 1, 8
         WRITE(11,'(2X,A)') "PRIVATE h5dwrite_ikind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
      ENDDO
-  END DO 
+  END DO
   DO k = 2, 8
      WRITE(11,'(2X,A)') "PRIVATE h5dwrite_ckind_rank"//chr_rank(k)
   END DO
@@ -211,7 +211,7 @@ PROGRAM H5_buildiface
      WRITE(chr2,'(I2)') j
      DO k = 1, 8
         WRITE(11,'(2X,A)') "PRIVATE h5dread_ikind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
-     ENDDO 
+     ENDDO
   END DO
   DO k = 2, 8
      WRITE(11,'(2X,A)') "PRIVATE h5dread_ckind_rank"//chr_rank(k)
@@ -313,7 +313,7 @@ PROGRAM H5_buildiface
      DO k = 1, 8
         WRITE(11,'(5X,A)') "MODULE PROCEDURE h5dwrite_ikind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
      ENDDO
-  END DO 
+  END DO
   DO k = 2, 8
      WRITE(11,'(5X,A)') "MODULE PROCEDURE h5dwrite_ckind_rank"//chr_rank(k)
   END DO
@@ -333,7 +333,7 @@ PROGRAM H5_buildiface
      WRITE(chr2,'(I2)') j
      DO k = 1, 8
         WRITE(11,'(5X,A)') "MODULE PROCEDURE h5dread_ikind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
-     ENDDO 
+     ENDDO
   END DO
   DO k = 2, 8
      WRITE(11,'(5X,A)') "MODULE PROCEDURE h5dread_ckind_rank"//chr_rank(k)
@@ -448,7 +448,7 @@ PROGRAM H5_buildiface
 !  up to 7 dimensions.
 !
 ! Fortran90 Interface:
-!!  SUBROUTINE H5Awrite_f(attr_id, memtype_id, buf, dims, hdferr) 
+!!  SUBROUTINE H5Awrite_f(attr_id, memtype_id, buf, dims, hdferr)
 !!    INTEGER(HID_T)  , INTENT(IN)               :: attr_id
 !!    INTEGER(HID_T)  , INTENT(IN)               :: memtype_id
 !!    TYPE            , INTENT(IN)               :: buf
@@ -476,7 +476,7 @@ PROGRAM H5_buildiface
         WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(IN)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
         WRITE(11,'(A)') '    INTEGER           , INTENT(OUT) :: hdferr'
         WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
-        
+
         WRITE(11,'(A)') f_ptr_line(j)
         WRITE(11,'(A)') '    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)'
         WRITE(11,'(A)') '  END SUBROUTINE h5awrite_rkind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
@@ -502,7 +502,7 @@ PROGRAM H5_buildiface
         WRITE(11,'(A)') '    INTEGER(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(IN)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
         WRITE(11,'(A)') '    INTEGER           , INTENT(OUT) :: hdferr'
         WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
-        
+
         WRITE(11,'(A)') f_ptr_line(j)
         WRITE(11,'(A)') '    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)'
         WRITE(11,'(A)') '  END SUBROUTINE h5awrite_ikind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
@@ -524,7 +524,7 @@ PROGRAM H5_buildiface
      WRITE(11,'(A)') '    CHARACTER(LEN=*)  , INTENT(IN)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
      WRITE(11,'(A)') '    INTEGER           , INTENT(OUT) :: hdferr'
      WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
-     
+
      WRITE(11,'(A)') fchr_ptr_line(j)
      WRITE(11,'(A)') '    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)'
      WRITE(11,'(A)') '  END SUBROUTINE h5awrite_ckind_rank'//chr_rank(j)
@@ -574,7 +574,7 @@ PROGRAM H5_buildiface
 !  REAL, REAL(KIND=C_DOUBLE) and CHARACTER buffers
 !  up to 7 dimensions.
 ! Fortran90 Interface:
-!!  SUBROUTINE H5Aread_f(attr_id, memtype_id, buf, dims, hdferr) 
+!!  SUBROUTINE H5Aread_f(attr_id, memtype_id, buf, dims, hdferr)
 !!    INTEGER(HID_T)  , INTENT(IN)               :: attr_id
 !!    INTEGER(HID_T)  , INTENT(IN)               :: memtype_id
 !!    TYPE            , INTENT(INOUT)            :: buf
@@ -599,7 +599,7 @@ PROGRAM H5_buildiface
         WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(INOUT)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
         WRITE(11,'(A)') '    INTEGER           , INTENT(OUT) :: hdferr'
         WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
-        
+
         WRITE(11,'(A)') f_ptr_line(j)
         WRITE(11,'(A)') '    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)'
         WRITE(11,'(A)') '  END SUBROUTINE h5aread_rkind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
@@ -623,7 +623,7 @@ PROGRAM H5_buildiface
         WRITE(11,'(A)') '    INTEGER(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(INOUT)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
         WRITE(11,'(A)') '    INTEGER           , INTENT(OUT) :: hdferr'
         WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
-        
+
         WRITE(11,'(A)') f_ptr_line(j)
         WRITE(11,'(A)') '    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)'
         WRITE(11,'(A)') '  END SUBROUTINE h5aread_ikind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
@@ -643,7 +643,7 @@ PROGRAM H5_buildiface
      WRITE(11,'(A)') '    CHARACTER(LEN=*), INTENT(IN)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
      WRITE(11,'(A)') '    INTEGER           , INTENT(OUT) :: hdferr'
      WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
-     
+
      WRITE(11,'(A)') fchr_ptr_line(j)
      WRITE(11,'(A)') '    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)'
      WRITE(11,'(A)') '  END SUBROUTINE h5aread_ckind_rank'//chr_rank(j)
@@ -656,7 +656,7 @@ PROGRAM H5_buildiface
 ! h5dread_f
 
 !
-! NAME		
+! NAME
 !  h5dread_f
 !
 ! PURPOSE
@@ -683,7 +683,7 @@ PROGRAM H5_buildiface
 !  Elena Pourmal
 !  August 12, 1999
 !
-! HISTORY 	
+! HISTORY
 !  Explicit Fortran interfaces were added for
 !  called C functions (it is needed for Windows
 !  port).  February 28, 2001
@@ -693,7 +693,7 @@ PROGRAM H5_buildiface
 !  the h5dwrite_reference_obj and h5dwrite_reference_dsetreg
 !  functions.  April 2, 2001
 !
-! NOTES	
+! NOTES
 !  This function is overloaded to read INTEGER,
 !  REAL, DOUBLE PRECISION and CHARACTER buffers
 !  up to 7 dimensions, and one dimensional buffers
@@ -886,7 +886,7 @@ PROGRAM H5_buildiface
         WRITE(11,'(A)') '         file_space_id_default, xfer_prp_default, f_ptr)'
         WRITE(11,'(A)') '  END SUBROUTINE h5dwrite_ikind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
      ENDDO
-  ENDDO  
+  ENDDO
   DO j = 2, 8
 ! DLL definitions for windows
      WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_DLL)'
@@ -938,7 +938,7 @@ PROGRAM H5_buildiface
      WRITE(11,'(A)') '    IMPLICIT NONE'
      WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: prp_id'
      WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: type_id'
-     WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'), INTENT(IN), TARGET :: fillvalue' 
+     WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'), INTENT(IN), TARGET :: fillvalue'
      WRITE(11,'(A)') '    INTEGER, INTENT(OUT) :: hdferr '
      WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr '
      WRITE(11,'(A)') '    f_ptr = C_LOC(fillvalue)'
@@ -989,7 +989,7 @@ PROGRAM H5_buildiface
      WRITE(11,'(A)') '    f_ptr = C_LOC(value)'
      WRITE(11,'(A)') '    name_len = LEN(name)'
      WRITE(11,'(A)') '    hdferr = h5pget_c(prp_id, name, name_len, f_ptr)'
-     
+
      WRITE(11,'(A)') '  END SUBROUTINE h5pset_kind_'//TRIM(ADJUSTL(chr2))
   ENDDO
 
