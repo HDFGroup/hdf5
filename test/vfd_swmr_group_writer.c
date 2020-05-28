@@ -167,12 +167,15 @@ verify_group(state_t *s, unsigned int which)
 {
     char name[sizeof("/group-9999999999")];
     hid_t g;
+    estack_state_t es;
 
     assert(which < s->nsteps);
 
     esnprintf(name, sizeof(name), "/group-%d", which);
 
+    es = disable_estack();
     g = H5Gopen(s->file, name, H5P_DEFAULT);
+    restore_estack(es);
 
     if (g < 0)
         return false;
