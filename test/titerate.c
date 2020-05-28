@@ -939,7 +939,7 @@ static void test_links(hid_t fapl)
  *-------------------------------------------------------------------------
  */
 static int
-find_err_msg_cb(unsigned n, const H5E_error2_t *err_desc, void *_client_data)
+find_err_msg_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *_client_data)
 {
     int status = H5_ITER_CONT;
     searched_err_t *searched_err = (searched_err_t *)_client_data;
