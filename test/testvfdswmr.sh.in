@@ -569,7 +569,7 @@ if [ ${do_zoo:-no} = yes ]; then
 	# Collect exit code of the reader
 	if [ $(cat vfd_swmr_zoo_reader.rc) -ne 0 ]; then
 		echo reader had error
-		nsofterrors=$((nsofterrors + 1))
+		nerrors=$((nerrors + 1))
 	fi
 
 	# Collect exit code of the writer
