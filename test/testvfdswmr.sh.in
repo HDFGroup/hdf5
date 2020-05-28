@@ -118,7 +118,8 @@ if [ $rc -ne 0 ] ; then
     exit 0
 fi
 
-all_tests="generator expand shrink expand_shrink sparse vlstr_null vlstr_oob zoo"
+all_tests="generator expand shrink expand_shrink sparse vlstr_null vlstr_oob zoo groups"
+#all_tests="${all_tests} few_big many_small"
 tests=${all_tests}
 
 if [ $# -gt 0 ]; then
@@ -584,6 +585,142 @@ if [ ${do_zoo:-no} = yes ]; then
 	rm -f vfd_swmr_zoo_reader.*.{out,rc}
 fi
 
+#
+# Make sure that we can create 10000 groups while a reader waits
+# for each to appear.
+#
+if [ ${do_groups:-no} = yes ]; then
+	echo launch vfd_swmr_group_writer
+	catch_out_err_and_rc vfd_swmr_group_writer \
+	    ../vfd_swmr_group_writer -q -u 10 -n 10000 &
+	pid_writer=$!
+
+	catch_out_err_and_rc vfd_swmr_group_reader \
+	    ../vfd_swmr_group_reader -q -u 10 -n 10000 -W &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signalling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	kill -USR1 $(cat vfd_swmr_group_writer.pid)
+	wait $pid_writer
+
+	# Collect exit code of the reader
+	if [ $(cat vfd_swmr_group_reader.rc) -ne 0 ]; then
+		echo reader had error
+		nerrors=$((nerrors + 1))
+	fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_group_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_group_writer.{out,rc}
+	rm -f vfd_swmr_group_reader.*.{out,rc}
+fi
+
+#
+# Test many small datasets of one and two dimensions.
+#
+# Perform 50 iterations on 1000 extensible datasets configured with 16x16
+# chunks of 32-bit unsigned integer elements,
+# expanding each dataset by a chunk in one dimension (up to 50x1 16x16 chunks)
+# on each iteration.
+#
+# Perform the test again, extending each dataset
+# in *two* dimensions (up to 50x50 16x16 chunks).
+#
+for dims in 1 2; do
+	if [ ${do_many_small:-no} = no ]; then
+		continue
+	fi
+	echo launch vfd_swmr_bigset_writer many small, $dims dimensions
+	catch_out_err_and_rc vfd_swmr_bigset_writer \
+	    ../vfd_swmr_bigset_writer -n 50 -d $dims -s 1000 -r 16 -c 16 -q &
+	pid_writer=$!
+
+	catch_out_err_and_rc vfd_swmr_bigset_reader \
+	    ../vfd_swmr_bigset_reader -n 50 -d $dims -s 1000 -r 16 -c 16 -q -W &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signalling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	kill -USR1 $(cat vfd_swmr_bigset_writer.pid)
+	wait $pid_writer
+
+	# Collect exit code of the reader
+	if [ $(cat vfd_swmr_bigset_reader.rc) -ne 0 ]; then
+		echo reader had error
+		nerrors=$((nerrors + 1))
+	fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_bigset_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_bigset_writer.{out,rc}
+	rm -f vfd_swmr_bigset_reader.*.{out,rc}
+done
+
+#
+# Test a few big datasets of one and two dimensions.
+#
+# Perform 50 iterations on 5 extensible datasets configured with 256x256
+# chunks of 32-bit unsigned integer elements,
+# expanding each dataset by a chunk in one dimension (up to 50x1 256x256 chunks)
+# on each iteration.
+#
+# Perform the test again, extending each dataset
+# in *two* dimensions (up to 50x50 256x256 chunks).
+#
+for dims in 1 2; do
+	if [ ${do_few_big:-no} = no ]; then
+		continue
+	fi
+	echo launch vfd_swmr_bigset_writer few big, $dims dimensions
+	catch_out_err_and_rc vfd_swmr_bigset_writer \
+	    ../vfd_swmr_bigset_writer -n 50 -d $dims -s 5 -r 256 -c 256 -q &
+	pid_writer=$!
+
+	catch_out_err_and_rc vfd_swmr_bigset_reader \
+	    ../vfd_swmr_bigset_reader -n 50 -d $dims -s 5 -r 256 -c 256 -q -W &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signalling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	kill -USR1 $(cat vfd_swmr_bigset_writer.pid)
+	wait $pid_writer
+
+	# Collect exit code of the reader
+	if [ $(cat vfd_swmr_bigset_reader.rc) -ne 0 ]; then
+		echo reader had error
+		nerrors=$((nerrors + 1))
+	fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_bigset_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_bigset_writer.{out,rc}
+	rm -f vfd_swmr_bigset_reader.*.{out,rc}
+done
 
 ###############################################################################
 ## Report and exit
