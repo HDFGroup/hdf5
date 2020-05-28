@@ -578,13 +578,6 @@ if [ ${do_zoo:-no} = yes ]; then
 	    nerrors=$((nerrors + 1))
 	fi
 
-	# Check for error and exit if one occured
-	if test $nerrors -ne 0 ; then
-	    echo "VFD SWMR tests failed with $nerrors errors."
-	    echo "(Writer and reader output preserved)"
-	    exit 1
-	fi
-
 	# Clean up output files
 	rm -f ./fifo
 	rm -f vfd_swmr_zoo_writer.{out,rc}
