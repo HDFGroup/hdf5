@@ -247,9 +247,9 @@ test_reference_params(void)
 
     /* Test parameters to H5Ropen_object */
     dset2 = H5Ropen_object(&rbuf[0], H5I_INVALID_HID, H5I_INVALID_HID);
-    VERIFY(dset2, FAIL, "H5Ropen_object oapl_id");
+    VERIFY(dset2, H5I_INVALID_HID, "H5Ropen_object oapl_id");
     dset2 = H5Ropen_object(NULL, H5P_DEFAULT, dapl_id);
-    VERIFY(dset2, FAIL, "H5Ropen_object ref");
+    VERIFY(dset2, H5I_INVALID_HID, "H5Ropen_object ref");
 
     /* Test parameters to H5Ropen_region */
     ret_id = H5Ropen_region(NULL, H5I_INVALID_HID, H5I_INVALID_HID);
@@ -2258,7 +2258,7 @@ test_reference_compat_conv(void)
 
     /* Create a dataset with region reference datatype */
     dataset = H5Dcreate2(fid1, "Dataset4", H5T_STD_REF_DSETREG, sid3, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate2");
+    CHECK(dataset, H5I_INVALID_HID, "H5Dcreate2");
 
     /* Select 6x6 hyperslab for first reference */
     start[0]  = 2;
@@ -2316,11 +2316,11 @@ test_reference_compat_conv(void)
 
     /* Re-open the file */
     fid1 = H5Fopen(FILE_REF_COMPAT, H5F_ACC_RDWR, H5P_DEFAULT);
-    CHECK(fid1, FAIL, "H5Fopen");
+    CHECK(fid1, H5I_INVALID_HID, "H5Fopen");
 
     /* Open the object reference dataset */
     dataset = H5Dopen2(fid1, "/Dataset3", H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dopen2");
+    CHECK(dataset, H5I_INVALID_HID, "H5Dopen2");
 
     /* Read selection from disk */
     ret = H5Dread(dataset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf_obj);
@@ -2376,7 +2376,7 @@ test_reference_compat_conv(void)
 
     /* Open the dataset region reference dataset */
     dataset = H5Dopen2(fid1, "/Dataset4", H5P_DEFAULT);
-    CHECK(ret, H5I_INVALID_HID, "H5Dopen2");
+    CHECK(dataset, H5I_INVALID_HID, "H5Dopen2");
 
     /* Read selection from disk */
     ret = H5Dread(dataset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf_reg);
