@@ -190,13 +190,6 @@ do
 		    echo generator had error
 		    nerrors=`expr $nerrors + 1`
 		fi
-
-		# Check for error and exit if one occured
-		$DPRINT nerrors=$nerrors
-		if test $nerrors -ne 0 ; then
-		    echo "VFD SWMR tests failed with $nerrors errors."
-		    exit 1
-		fi
 	fi
 
 	if [ ${do_expand:-no} = yes ]; then
@@ -266,14 +259,6 @@ do
 		    nerrors=$((nerrors + 1))
 		fi
 
-		# Check for error and exit if one occured
-		$DPRINT nerrors=$nerrors
-		if test $nerrors -ne 0 ; then
-		    echo "VFD SWMR tests failed with $nerrors errors."
-		    echo "(Writer and reader output preserved)"
-		    exit 1
-		fi
-
 		# Clean up output files
 		rm -f vfd_swmr_writer.{out,rc}
 		rm -f vfd_swmr_reader.*.{out,rc}
@@ -339,14 +324,6 @@ do
 		if [ $(cat vfd_swmr_writer.rc) -ne 0 ]; then
 		    echo writer had error
 		    nerrors=$((nerrors + 1))
-		fi
-
-		# Check for error and exit if one occured
-		$DPRINT nerrors=$nerrors
-		if test $nerrors -ne 0 ; then
-		    echo "VFD SWMR tests failed with $nerrors errors."
-		    echo "(Writer and reader output preserved)"
-		    exit 1
 		fi
 
 		# Clean up output files
@@ -431,14 +408,6 @@ do
 		    nerrors=$((nerrors + 1))
 		fi
 
-		# Check for error and exit if one occured
-		$DPRINT nerrors=$nerrors
-		if test $nerrors -ne 0 ; then
-		    echo "VFD SWMR tests failed with $nerrors errors."
-		    echo "(Writer and reader output preserved)"
-		    exit 1
-		fi
-
 		# Clean up output files
 		rm -f vfd_swmr_writer.{out,rc}
 		rm -f vfd_swmr_reader.*.{out,rc}
@@ -514,14 +483,6 @@ do
 		    nerrors=$((nerrors + 1))
 		fi
 
-		# Check for error and exit if one occured
-		$DPRINT nerrors=$nerrors
-		if test $nerrors -ne 0 ; then
-		    echo "VFD SWMR tests failed with $nerrors errors."
-		    echo "(Writer and reader output preserved)"
-		    exit 1
-		fi
-
 		# Clean up output files
 		rm -f vfd_swmr_writer.{out,rc}
 		rm -f vfd_swmr_reader.*.{out,rc}
@@ -573,13 +534,6 @@ for ty in null oob; do
 	if [ $(cat vfd_swmr_vlstr_writer.rc) -ne 0 ]; then
 	    echo writer had error
 	    nerrors=$((nerrors + 1))
-	fi
-
-	# Check for error and exit if one occured
-	if test $nerrors -ne 0 ; then
-	    echo "VFD SWMR tests failed with $nerrors errors."
-	    echo "(Writer and reader output preserved)"
-	    exit 1
 	fi
 
 	# Clean up output files
