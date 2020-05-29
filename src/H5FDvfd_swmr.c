@@ -678,9 +678,6 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type,
     HDassert(file && file->pub.cls);
     HDassert(buf);
 
-    hlog_fast(swmr_read, "%s: enter type %d addr %" PRIuHADDR " size %zu",
-        __func__, type, addr, size);
-
     index        = file->md_index.entries;
     num_entries  = file->md_index.num_entries;
     fs_page_size = file->md_header.fs_page_size;
@@ -690,6 +687,10 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type,
 
     entry = vfd_swmr_pageno_to_mdf_idx_entry(index, num_entries, target_page,
         false);
+
+    hlog_fast(swmr_read, "%s: enter type %d addr %" PRIuHADDR " size %zu "
+        "file %s", __func__, type, addr, size,
+        (entry == NULL) ? "lower" : "shadow");
 
     if (entry == NULL) {
          /* Cannot find addr in index, read from the underlying hdf5 file */
