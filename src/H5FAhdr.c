@@ -39,6 +39,7 @@
 #include "H5Eprivate.h"     /* Error handling                               */
 #include "H5FApkg.h"        /* Fixed Arrays                                 */
 #include "H5MFprivate.h"    /* File memory management                       */
+#include "H5MMprivate.h"    /* Memory management                            */
 
 
 /****************/
