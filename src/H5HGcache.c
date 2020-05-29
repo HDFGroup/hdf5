@@ -202,7 +202,7 @@ H5HG__cache_heap_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *imag
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HG__cache_heap_get_final_load_size(const void *image, size_t image_len,
+H5HG__cache_heap_get_final_load_size(const void *image, size_t H5_ATTR_NDEBUG_UNUSED image_len,
     void *udata, size_t *actual_len)
 {
     H5HG_heap_t heap;                   /* Global heap */
@@ -432,7 +432,7 @@ H5HG__cache_heap_image_len(const void *_thing, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HG__cache_heap_serialize(const H5F_t *f, void *image, size_t len,
+H5HG__cache_heap_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *image, size_t len,
     void *_thing)
 {
     H5HG_heap_t *heap = (H5HG_heap_t *)_thing;

@@ -36,6 +36,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5MFprivate.h"	/* File memory management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
@@ -200,7 +201,7 @@ H5O__cache_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__cache_get_final_load_size(const void *image, size_t image_len,
+H5O__cache_get_final_load_size(const void *image, size_t H5_ATTR_NDEBUG_UNUSED image_len,
     void *_udata, size_t *actual_len)
 {
     H5O_cache_ud_t *udata = (H5O_cache_ud_t *)_udata;   /* User data for callback */
@@ -305,7 +306,7 @@ H5O__cache_verify_chksum(const void *_image, size_t len, void *_udata)
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__cache_deserialize(const void *image, size_t len, void *_udata,
+H5O__cache_deserialize(const void *image, size_t H5_ATTR_NDEBUG_UNUSED len, void *_udata,
     hbool_t *dirty)
 {
     H5O_t          *oh = NULL;          /* Object header read in */
@@ -762,7 +763,7 @@ H5O__cache_chk_verify_chksum(const void *_image, size_t len, void *_udata)
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__cache_chk_deserialize(const void *image, size_t len, void *_udata,
+H5O__cache_chk_deserialize(const void *image, size_t H5_ATTR_NDEBUG_UNUSED len, void *_udata,
     hbool_t *dirty)
 {
     H5O_chunk_proxy_t  *chk_proxy = NULL;       /* Chunk proxy object */
@@ -1430,9 +1431,9 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
 
         /* Check for combining two adjacent 'null' messages */
         if((udata->file_intent & H5F_ACC_RDWR) &&
-            H5O_NULL_ID == id && oh->nmesgs > 0 &&
-            H5O_NULL_ID == oh->mesg[oh->nmesgs - 1].type->id &&
-            oh->mesg[oh->nmesgs - 1].chunkno == chunkno) {
+                H5O_NULL_ID == id && oh->nmesgs > 0 &&
+                H5O_NULL_ID == oh->mesg[oh->nmesgs - 1].type->id &&
+                oh->mesg[oh->nmesgs - 1].chunkno == chunkno) {
 
             size_t mesgno;          /* Current message to operate on */
 
@@ -1470,9 +1471,9 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
             /* (Usually from future versions of the library) */
             if(id >= H5O_UNKNOWN_ID ||
 #ifdef H5O_ENABLE_BOGUS
-               id == H5O_BOGUS_VALID_ID ||
+                    id == H5O_BOGUS_VALID_ID ||
 #endif
-               NULL == H5O_msg_class_g[id]) {
+                    NULL == H5O_msg_class_g[id]) {
 
                 H5O_unknown_t *unknown;     /* Pointer to "unknown" message info */
 
@@ -1491,9 +1492,9 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
 
                 /* Check for "fail if unknown" message flags */
                 if(((udata->file_intent & H5F_ACC_RDWR) &&
-                    (flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN_AND_OPEN_FOR_WRITE))
-                    || (flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS))
-                        HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unknown message with 'fail if unknown' flag found")
+                        (flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN_AND_OPEN_FOR_WRITE))
+                        || (flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS))
+                    HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unknown message with 'fail if unknown' flag found")
                 /* Check for "mark if unknown" message flag, etc. */
                 else if((flags & H5O_MSG_FLAG_MARK_IF_UNKNOWN) &&
                         !(flags & H5O_MSG_FLAG_WAS_UNKNOWN) &&

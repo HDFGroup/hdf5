@@ -41,6 +41,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FApkg.h"		/* Fixed Arrays				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5VMprivate.h"         /* Vector functions			*/
 
 
@@ -690,11 +691,6 @@ END_FUNC(PRIV)  /* end H5FA_delete() */
  * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
- * Modification:
- *              Prototype changed (HDFFV-10661)
- *              - herr_t to int
- *              - SUCCEED/FAIL to H5_ITER_CONT/H5_ITER_ERROR
- *              December 24, 2018 -BMR
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(PRIV, ERR,

@@ -38,6 +38,7 @@
 #include "H5Fprivate.h"		/* File          			*/
 #include "H5FSpkg.h"		/* File free space			*/
 #include "H5MFprivate.h"	/* File memory management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5VMprivate.h"	/* Vectors and arrays 			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
@@ -240,7 +241,7 @@ H5FS__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
  *-------------------------------------------------------------------------
  */
 static void *
-H5FS__cache_hdr_deserialize(const void *_image, size_t len, void *_udata,
+H5FS__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len, void *_udata,
     hbool_t H5_ATTR_UNUSED *dirty)
 {
     H5FS_t		*fspace = NULL; /* Free space header info */
@@ -403,8 +404,8 @@ H5FS__cache_hdr_image_len(const void *_thing, size_t *image_len)
  */
 static herr_t
 H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing,
-    haddr_t addr, size_t H5_ATTR_UNUSED len, haddr_t *new_addr, size_t *new_len,
-    unsigned *flags)
+    haddr_t addr, size_t H5_ATTR_UNUSED len, haddr_t H5_ATTR_NDEBUG_UNUSED *new_addr,
+    size_t H5_ATTR_NDEBUG_UNUSED *new_len, unsigned *flags)
 {
     H5FS_t 	*fspace = (H5FS_t *)_thing;     /* Pointer to the object */
     H5AC_ring_t orig_ring = H5AC_RING_INV;      /* Original ring value */
@@ -672,7 +673,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS__cache_hdr_serialize(const H5F_t *f, void *_image, size_t len,
+H5FS__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UNUSED len,
     void *_thing)
 {
     H5FS_t     *fspace = (H5FS_t *)_thing;      /* Pointer to the object */
@@ -926,7 +927,7 @@ H5FS__cache_sinfo_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNU
     uint32_t computed_chksum;   /* Computed metadata checksum value */
     htri_t ret_value = TRUE;	/* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(image);
@@ -958,8 +959,8 @@ H5FS__cache_sinfo_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNU
  *-------------------------------------------------------------------------
  */
 static void *
-H5FS__cache_sinfo_deserialize(const void *_image, size_t len, void *_udata,
-    hbool_t *dirty)
+H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len, void *_udata,
+    hbool_t H5_ATTR_NDEBUG_UNUSED *dirty)
 {
     H5FS_sinfo_cache_ud_t  *udata = (H5FS_sinfo_cache_ud_t *)_udata;    /* User data for callback */
     H5FS_t                 *fspace;         /* free space manager */
@@ -1151,7 +1152,8 @@ H5FS__cache_sinfo_image_len(const void *_thing, size_t *image_len)
  */
 static herr_t
 H5FS__cache_sinfo_pre_serialize(H5F_t *f, void *_thing, haddr_t addr,
-    size_t len, haddr_t *new_addr, size_t *new_len, unsigned *flags)
+    size_t H5_ATTR_NDEBUG_UNUSED len, haddr_t *new_addr, size_t H5_ATTR_NDEBUG_UNUSED *new_len,
+    unsigned *flags)
 {
     H5FS_sinfo_t 	*sinfo = (H5FS_sinfo_t *)_thing;        /* Pointer to the object */
     H5FS_t 		*fspace;                /* Free space header */
@@ -1321,7 +1323,7 @@ H5FS__cache_sinfo_notify(H5AC_notify_action_t action, void *_thing)
     H5FS_sinfo_t *sinfo = (H5FS_sinfo_t *)_thing;
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(sinfo);
@@ -1512,3 +1514,4 @@ H5FS__sinfo_serialize_node_cb(void *_item, void H5_ATTR_UNUSED *key, void *_udat
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS__sinfo_serialize_node_cb() */
+
