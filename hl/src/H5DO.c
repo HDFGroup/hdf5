@@ -268,3 +268,100 @@ done:
     return ret_value;
 } /* H5DOappend() */
 
+herr_t
+H5DOsequence(hid_t dset_id, hid_t dxpl_id, unsigned axis, hsize_t start_off, 
+             size_t sequence, hid_t memtype, void *buf)
+{
+    hsize_t  size[H5S_MAX_RANK];
+    hsize_t  start[H5S_MAX_RANK];
+    hsize_t  count[H5S_MAX_RANK];
+    hsize_t  stride[H5S_MAX_RANK];
+    hsize_t  block[H5S_MAX_RANK];
+    int      ndims, i; /* number of dimensions in dataspace */
+    hid_t    space_id = FAIL; /* old File space */
+    hid_t    mem_space_id = FAIL; /* memory space for data buffer */
+    hsize_t nelmts; /* number of elements in selection */
+    herr_t   ret_value = SUCCEED;
+
+    //FUNC_ENTER_API(FAIL)//fail to compile
+    //H5TRACE7("e", "iiIuhzi*x", dset_id, dxpl_id, axis, start_off, sequence, memtype, buf);
+
+    /* check arguments */
+    if(!dset_id){
+		printf("Error: not a dataset:  %s: %d\n", __func__, __LINE__);
+        goto done;
+		//HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+	}
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id= H5P_DATASET_XFER_DEFAULT;
+    else
+        if(TRUE != H5Pisa_class(dxpl_id, H5P_DATASET_XFER)){//H5P_isa_class -> H5Pisa_class
+			printf("Error: not xfer parms: %s: %d\n", __func__, __LINE__);
+			goto done;
+            //HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
+		}
+    /* get the dataspace of the dataset */
+    if(FAIL == (space_id = H5Dget_space(dset_id))){
+		printf("Error: unable to get dataspace: %s: %d\n", __func__, __LINE__);
+        //HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace");
+	}
+    /* get the rank of this dataspace */
+    if((ndims = H5Sget_simple_extent_ndims(space_id)) < 0){
+		printf("Error:unable to get dataspace dimesnsion:  %s: %d\n", __func__, __LINE__);
+        //HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace dimesnsion");
+	}
+
+    if((int)axis >= ndims){
+		printf("Error: Invalid axis: %s: %d\n", __func__, __LINE__);
+        //HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Invalid axis");
+	}
+    /* get the dimensions sizes of the dataspace */
+    if(H5Sget_simple_extent_dims(space_id, size, NULL) < 0){
+		printf("Error: unable to get dataspace dimesnsion sizes: %s: %d\n", __func__, __LINE__);
+        //HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace dimesnsion sizes");
+	}
+    /* select a hyperslab corresponding to the append operation */
+    for(i=0 ; i<ndims ; i++) {
+        start[i] = 0;
+        stride[i] = 1;
+        count[i] = size[i];
+        block[i] = 1;
+        if(i == (int)axis) {
+            count[i] = sequence;
+            start[i] = start_off;
+        }
+    }
+    if(FAIL == H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start, stride, count, block)){
+		printf("Error: unable to set selection in dataspace: %s: %d\n", __func__, __LINE__);
+        goto done;
+        //HGOTO_ERROR(H5E_INTERNAL, H5E_CANTSET, FAIL, "unable to set selection in dataspace");
+	}
+
+    nelmts = H5Sget_select_npoints(space_id);
+
+    /* create a memory space */
+    mem_space_id = H5Screate_simple(1, &nelmts, NULL);
+
+    /* Read the data */
+    if(H5Dread(dset_id, memtype, mem_space_id, space_id, dxpl_id, buf) < 0){
+        printf("Error: can't write data: %s: %d\n", __func__, __LINE__);
+		goto done;
+		//HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data");
+	}
+
+done:
+
+    /* close old dataspace */
+    if(space_id != FAIL && H5Sclose(space_id) < 0){
+		printf("Error: unable to close dataspace: %s: %d\n", __func__, __LINE__);
+        //H5GOTO_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace");//HDONE_ERROR->HGOTO_ERROR
+	}
+    /* close memory dataspace */
+    if(mem_space_id != FAIL && H5Sclose(mem_space_id) < 0){
+		printf("Error: unable to close dataspace: %s: %d\n", __func__, __LINE__);
+        //H5GOTO_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace");
+	}
+
+    return ret_value;
+}/* end H5DOsequence */
