@@ -2490,7 +2490,7 @@ driver_is_splitter_compatible(hid_t fapl_id)
 {
     H5FD_splitter_vfd_config_t  vfd_config;
     hid_t split_fapl_id = H5I_INVALID_HID;
-    herr_t ret;
+    herr_t ret = SUCCEED;
     int ret_value = 0;
 
     split_fapl_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -2503,6 +2503,7 @@ driver_is_splitter_compatible(hid_t fapl_id)
     vfd_config.rw_fapl_id = H5P_DEFAULT;
     vfd_config.wo_fapl_id = fapl_id;
     HDstrncpy(vfd_config.wo_path, "nonesuch", H5FD_SPLITTER_PATH_MAX);
+    *vfd_config.log_file_path = '\0';
 
     H5E_BEGIN_TRY {
         ret = H5Pset_fapl_splitter(split_fapl_id, &vfd_config);
