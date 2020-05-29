@@ -96,6 +96,17 @@
 ./bin/timekeeper                    _DO_NOT_DISTRIBUTE_
 ./bin/trace
 ./bin/yodconfigure
+./bin/batch/ctestP.lsf.in.cmake
+./bin/batch/ctestP.sl.in.cmake
+./bin/batch/ctestS.lsf.in.cmake
+./bin/batch/ctestS.sl.in.cmake
+./bin/batch/knl_ctestP.sl.in.cmake
+./bin/batch/knl_ctestS.sl.in.cmake
+./bin/batch/knl_H5detect.sl.in.cmake
+./bin/batch/ctest.qsub.in.cmake
+./bin/batch/ray_ctestP.lsf.in.cmake
+./bin/batch/ray_ctestS.lsf.in.cmake
+./bin/batch/raybsub
 
 ./config/COPYING
 ./config/BlankForm
