@@ -198,7 +198,7 @@ H5_DLL herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
 #define H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME        "direct_chunk_read_flag"
 #define H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME      "direct_chunk_read_offset"
 #define H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME     "direct_chunk_read_filters"
- 
+
 /* Typedefs */
 
 

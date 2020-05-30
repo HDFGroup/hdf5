@@ -115,7 +115,7 @@ static H5P_genprop_t *H5P__create_prop(const char *name, size_t size, H5P_prop_w
 static H5P_genprop_t *H5P__dup_prop(H5P_genprop_t *oprop, H5P_prop_within_t type);
 static herr_t H5P__free_prop(H5P_genprop_t *prop);
 static int H5P__cmp_prop(const H5P_genprop_t *prop1, const H5P_genprop_t *prop2);
-static herr_t H5P__do_prop(H5P_genplist_t *plist, const char *name, H5P_do_plist_op_t plist_op, 
+static herr_t H5P__do_prop(H5P_genplist_t *plist, const char *name, H5P_do_plist_op_t plist_op,
     H5P_do_pclass_op_t pclass_op, void *udata);
 static int H5P__open_class_path_cb(void *_obj, hid_t H5_ATTR_UNUSED id, void *_key);
 static H5P_genprop_t *H5P__find_prop_pclass(H5P_genclass_t *pclass, const char *name);
@@ -2015,7 +2015,7 @@ done:
  PURPOSE
     Internal routine to register a new property in a property list class.
  USAGE
-    herr_t H5P__register_real(class, name, size, default, prp_create, prp_set, 
+    herr_t H5P__register_real(class, name, size, default, prp_create, prp_set,
                              prp_get, prp_close, prp_encode, prp_decode)
         H5P_genclass_t *class;  IN: Property list class to modify
         const char *name;       IN: Name of property to register
@@ -2149,7 +2149,7 @@ done:
 
         The 'encode' callback is called when a property list with this
     property is being encoded.  H5P_prp_encode_func_t is defined as:
-        typedef herr_t (*H5P_prp_encode_func_t)(void *f, size_t *size, 
+        typedef herr_t (*H5P_prp_encode_func_t)(void *f, size_t *size,
         void *value, void *plist, uint8_t **buf);
     where the parameters to the callback function are:
         void *f;            IN: A fake file structure used to encode.
@@ -2158,12 +2158,12 @@ done:
         void *plist;        IN: The property list structure.
         uint8_t **buf;      OUT: The buffer that holds the encoded property;
     The 'encode' routine returns the size needed to encode the property value
-    if the buffer passed in is NULL or the size is zero. Otherwise it encodes 
+    if the buffer passed in is NULL or the size is zero. Otherwise it encodes
     the property value into binary in buf.
 
         The 'decode' callback is called when a property list with this
     property is being decoded.  H5P_prp_encode_func_t is defined as:
-        typedef herr_t (*H5P_prp_encode_func_t)(void *f, size_t *size, 
+        typedef herr_t (*H5P_prp_encode_func_t)(void *f, size_t *size,
         void *value, void *plist, uint8_t **buf);
     where the parameters to the callback function are:
         void *f;            IN: A fake file structure used to decode.
@@ -2218,7 +2218,7 @@ H5P__register_real(H5P_genclass_t *pclass, const char *name, size_t size,
         HGOTO_ERROR(H5E_PLIST, H5E_EXISTS, FAIL, "property already exists")
 
     /* Create property object from parameters */
-    if(NULL == (new_prop = H5P__create_prop(name, size, H5P_PROP_WITHIN_CLASS, 
+    if(NULL == (new_prop = H5P__create_prop(name, size, H5P_PROP_WITHIN_CLASS,
             def_value, prp_create, prp_set, prp_get, prp_encode, prp_decode,
             prp_delete, prp_copy, prp_cmp, prp_close)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL,"Can't create property")
@@ -2327,7 +2327,7 @@ done:
 
         The 'encode' callback is called when a property list with this
     property is being encoded.  H5P_prp_encode_func_t is defined as:
-        typedef herr_t (*H5P_prp_encode_func_t)(void *f, size_t *size, 
+        typedef herr_t (*H5P_prp_encode_func_t)(void *f, size_t *size,
         void *value, void *plist, uint8_t **buf);
     where the parameters to the callback function are:
         void *f;            IN: A fake file structure used to encode.
@@ -2336,12 +2336,12 @@ done:
         void *plist;        IN: The property list structure.
         uint8_t **buf;      OUT: The buffer that holds the encoded property;
     The 'encode' routine returns the size needed to encode the property value
-    if the buffer passed in is NULL or the size is zero. Otherwise it encodes 
+    if the buffer passed in is NULL or the size is zero. Otherwise it encodes
     the property value into binary in buf.
 
         The 'decode' callback is called when a property list with this
     property is being decoded.  H5P_prp_encode_func_t is defined as:
-        typedef herr_t (*H5P_prp_encode_func_t)(void *f, size_t *size, 
+        typedef herr_t (*H5P_prp_encode_func_t)(void *f, size_t *size,
         void *value, void *plist, uint8_t **buf);
     where the parameters to the callback function are:
         void *f;            IN: A fake file structure used to decode.
@@ -2484,7 +2484,7 @@ H5P__register(H5P_genclass_t **ppclass, const char *name, size_t size,
     } /* end if */
 
     /* Really register the property in the class */
-    if(H5P__register_real(pclass, name, size, def_value, prp_create, prp_set, prp_get, 
+    if(H5P__register_real(pclass, name, size, def_value, prp_create, prp_set, prp_get,
             prp_encode, prp_decode, prp_delete, prp_copy, prp_cmp, prp_close) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "can't register property")
 
@@ -2507,7 +2507,7 @@ done:
  PURPOSE
     Internal routine to insert a new property in a property list.
  USAGE
-    herr_t H5P_insert(plist, name, size, value, prp_set, prp_get, prp_close, 
+    herr_t H5P_insert(plist, name, size, value, prp_set, prp_get, prp_close,
                       prp_encode, prp_decode)
         H5P_genplist_t *plist;  IN: Property list to add property to
         const char *name;       IN: Name of property to add
@@ -2568,7 +2568,7 @@ done:
 
         The 'encode' callback is called when a property list with this
     property is being encoded.  H5P_prp_encode_func_t is defined as:
-        typedef herr_t (*H5P_prp_encode_func_t)(void *f, size_t *size, 
+        typedef herr_t (*H5P_prp_encode_func_t)(void *f, size_t *size,
         void *value, void *plist, uint8_t **buf);
     where the parameters to the callback function are:
         void *f;            IN: A fake file structure used to encode.
@@ -2577,12 +2577,12 @@ done:
         void *plist;        IN: The property list structure.
         uint8_t **buf;      OUT: The buffer that holds the encoded property;
     The 'encode' routine returns the size needed to encode the property value
-    if the buffer passed in is NULL or the size is zero. Otherwise it encodes 
+    if the buffer passed in is NULL or the size is zero. Otherwise it encodes
     the property value into binary in buf.
 
         The 'decode' callback is called when a property list with this
     property is being decoded.  H5P_prp_encode_func_t is defined as:
-        typedef herr_t (*H5P_prp_encode_func_t)(void *f, size_t *size, 
+        typedef herr_t (*H5P_prp_encode_func_t)(void *f, size_t *size,
         void *value, void *plist, uint8_t **buf);
     where the parameters to the callback function are:
         void *f;            IN: A fake file structure used to decode.
@@ -2721,8 +2721,8 @@ H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
     /* Ok to add to property list */
 
     /* Create property object from parameters */
-    if(NULL == (new_prop = H5P__create_prop(name, size, H5P_PROP_WITHIN_LIST, value, NULL, 
-            prp_set, prp_get, prp_encode, prp_decode, prp_delete, prp_copy, 
+    if(NULL == (new_prop = H5P__create_prop(name, size, H5P_PROP_WITHIN_LIST, value, NULL,
+            prp_set, prp_get, prp_encode, prp_decode, prp_delete, prp_copy,
             prp_cmp, prp_close)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "Can't create property")
 
@@ -2766,7 +2766,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5P__do_prop(H5P_genplist_t *plist, const char *name, H5P_do_plist_op_t plist_op, 
+H5P__do_prop(H5P_genplist_t *plist, const char *name, H5P_do_plist_op_t plist_op,
     H5P_do_pclass_op_t pclass_op, void *udata)
 {
     H5P_genclass_t *tclass;     /* Temporary class pointer */
@@ -2848,7 +2848,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5P__poke_plist_cb(H5P_genplist_t H5_ATTR_NDEBUG_UNUSED *plist, const char H5_ATTR_NDEBUG_UNUSED *name, 
+H5P__poke_plist_cb(H5P_genplist_t H5_ATTR_NDEBUG_UNUSED *plist, const char H5_ATTR_NDEBUG_UNUSED *name,
     H5P_genprop_t *prop, void *_udata)
 {
     H5P_prop_set_ud_t *udata = (H5P_prop_set_ud_t *)_udata;    /* User data for callback */
@@ -3217,7 +3217,7 @@ done:
  COMMENTS, BUGS, ASSUMPTIONS
         The 'get' callback routine registered for this property will _NOT_ be
     called, this routine is designed for internal library use only!
-    
+
         This routine may not be called for zero-sized properties and will
     return an error in that case.
  EXAMPLES
@@ -3271,7 +3271,7 @@ done:
  COMMENTS, BUGS, ASSUMPTIONS
         The 'set' callback routine registered for this property will _NOT_ be
     called, this routine is designed for internal library use only!
-    
+
         This routine may not be called for zero-sized properties and will
     return an error in that case.
 
@@ -4464,7 +4464,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5P__peek_cb(H5P_genplist_t H5_ATTR_NDEBUG_UNUSED *plist, const char H5_ATTR_NDEBUG_UNUSED *name, 
+H5P__peek_cb(H5P_genplist_t H5_ATTR_NDEBUG_UNUSED *plist, const char H5_ATTR_NDEBUG_UNUSED *name,
     H5P_genprop_t *prop, void *_udata)
 {
     H5P_prop_get_ud_t *udata = (H5P_prop_get_ud_t *)_udata;    /* User data for callback */

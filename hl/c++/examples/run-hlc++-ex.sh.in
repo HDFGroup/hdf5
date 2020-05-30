@@ -98,5 +98,5 @@ rm *.o
 rm *.h5
 echo
 
-exit $EXIT_VALUE 
+exit $EXIT_VALUE
 

@@ -7,7 +7,7 @@ This file contains development history of the HDF5 1.10 branch
 05.      Release Information for hdf5-1.10.3
 04.      Release Information for hdf5-1.10.2
 03.      Release Information for hdf5-1.10.1
-02.      Release Information for hdf5-1.10.0-patch1 
+02.      Release Information for hdf5-1.10.0-patch1
 01.      Release Information for hdf5-1.10.0
 
 [Search on the string '%%%%' for section breaks of each release.]
@@ -134,7 +134,7 @@ Bug Fixes since HDF5-1.10.3 release
     Java Library:
     ----------------
     - JNI native library dependencies
-    
+
       The build for the hdf5_java native library used the wrong
       hdf5 target library for CMake builds. Correcting the hdf5_java
       library to build with the shared hdf5 library required testing
@@ -291,7 +291,7 @@ The following platforms are not supported but have been tested for this release.
     #1 SMP x86_64 GNU/Linux          Version 4.8.5 20150623 (Red Hat 4.8.5-4)
     (jelly)                       with NAG Fortran Compiler Release 6.1(Tozai)
                                   GCC Version 7.1.0
-                                  OpenMPI 3.0.0-GCC-7.2.0-2.29, 
+                                  OpenMPI 3.0.0-GCC-7.2.0-2.29,
                                      3.1.0-GCC-7.2.0-2.29
                                   Intel(R) C (icc) and C++ (icpc) compilers
                                      Version 17.0.0.098 Build 20160721
@@ -3204,7 +3204,7 @@ This release supports the following features:
 
     - Version 3 Metadata Cache
 
-      The version 3 metadata cache moves management of metadata I/O from 
+      The version 3 metadata cache moves management of metadata I/O from
       the clients to the metadata cache proper.  This change is essential for
       SWMR and other features that have yet to be released.
 
@@ -3265,7 +3265,7 @@ This release supports the following features:
     - New Public Functions: H5PTget_dataset and H5PTget_type
 
       Two accessor functions have been added. H5PTget_dataset returns
-      the identifier of the dataset associated with the packet table, 
+      the identifier of the dataset associated with the packet table,
       and H5PTget_type returns the identifier of the datatype used by
       the packet table.
 
@@ -3391,28 +3391,28 @@ Issues Addressed in this Release Since 1.10.0
 
      - Configure fails to detect valid real KINDs on FreeBSD 9.3 (i386) with Fortran enabled.
 
-       Fixed. Added the exponential option to SELECTED_REAL_KIND to distinguish 
+       Fixed. Added the exponential option to SELECTED_REAL_KIND to distinguish
        KINDs of same precision
        (MSB - 2016/05/14,HDFFV-9912)
 
 
      - Corrected the f90 H5AWRITE_F integer interface's buf to be INTENT(IN).
-       (MSB - 2016/05/14) 
+       (MSB - 2016/05/14)
 
      - Configure fails in sed command on FreeBSD 9.3 (i386) with Fortran enabled.
-  
+
        Fixed.
        (MSB - 2016/05/14,HDFFV-9912)
 
      - Compile time error in H5f90global.F90 with IBM XL Fortran 14.1.0.13 on BG/Q with Fortran
        enabled.
-    
+
        Fixed.
        (MSB - 2016/05/16,HDFFV-9917)
 
      - A cmake build with Fortran enabled does not install module h5fortkit
 
-       Fixed. 
+       Fixed.
        (MSB - 2016/05/23,HDFFV-9923)
 
 
@@ -3916,7 +3916,7 @@ This release supports the following features:
 
     - Version 3 Metadata Cache
 
-      The version 3 metadata cache moves management of metadata I/O from 
+      The version 3 metadata cache moves management of metadata I/O from
       the clients to the metadata cache proper.  This change is essential for
       SWMR and other features that have yet to be released.
 
@@ -3977,7 +3977,7 @@ This release supports the following features:
     - New Public Functions: H5PTget_dataset and H5PTget_type
 
       Two accessor functions have been added. H5PTget_dataset returns
-      the identifier of the dataset associated with the packet table, 
+      the identifier of the dataset associated with the packet table,
       and H5PTget_type returns the identifier of the datatype used by
       the packet table.
 
@@ -4378,16 +4378,16 @@ known issues if it is a new issue.
  - When building HDF5 with Java using CMake and specifying Debug for CMAKE_BUILD_TYPE,
    there is a missing command argument for the tests of the examples.
 
-   This error can be avoided by not building Java with Debug, HDF5_BUILD_JAVA:BOOL=OFF, 
+   This error can be avoided by not building Java with Debug, HDF5_BUILD_JAVA:BOOL=OFF,
    or not building Examples, HDF5_BUILD_EXAMPLES:BOOL=OFF.
-   (LRK - 2016/03/30, HDFFV-9743) 
+   (LRK - 2016/03/30, HDFFV-9743)
 
- - The H5Lexists API changed behavior in HDF5-1.10 when used with a file handle 
+ - The H5Lexists API changed behavior in HDF5-1.10 when used with a file handle
    and root group name ("/"):
 
    H5Lexists(fileid, "/")
 
-   In HDF5-1.8 it returns false (0) and in HDF5-1.10 it returns true (1). 
+   In HDF5-1.8 it returns false (0) and in HDF5-1.10 it returns true (1).
    The documentation will be updated with information regarding this change.
    (LRK - 2016/03/30, HDFFV-8746)
 

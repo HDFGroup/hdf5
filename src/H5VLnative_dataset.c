@@ -108,7 +108,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL__native_dataset_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name, 
+H5VL__native_dataset_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
     hid_t dapl_id, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
     H5D_t       *dset = NULL;
@@ -316,7 +316,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_dataset_specific(void *obj, H5VL_dataset_specific_t specific_type, 
+H5VL__native_dataset_specific(void *obj, H5VL_dataset_specific_t specific_type,
     hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
     H5D_t       *dset = (H5D_t *)obj;

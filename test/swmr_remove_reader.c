@@ -371,7 +371,7 @@ usage(void)
     HDprintf("and will generate a random seed (no -r given).\n");
     HDprintf("\n");
     HDexit(EXIT_FAILURE);
-} 
+}
 
 int main(int argc, const char *argv[])
 {

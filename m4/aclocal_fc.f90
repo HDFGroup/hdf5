@@ -11,12 +11,12 @@
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-! This file contains all the configure test programs 
+! This file contains all the configure test programs
 ! used by autotools and cmake. This avoids having to
 ! duplicate code for both cmake and autotool tests.
 ! For autotools, a program below is chosen via a
 ! sed command in aclocal_fc.m4. For cmake, a program
-! below is chosen via the macro READ_SOURCE in 
+! below is chosen via the macro READ_SOURCE in
 ! HDF5UseFortran.cmake
 !
 
@@ -88,7 +88,7 @@ PROGRAM FC_AVAIL_KINDS
       INTEGER, DIMENSION(1:10) :: list_ikinds = -1
       INTEGER, DIMENSION(1:10) :: list_rkinds = -1
       LOGICAL :: new_kind
-  
+
       OPEN(8, FILE='pac_fconftest.out', FORM='formatted')
 
       ! Find integer KINDs
@@ -157,6 +157,6 @@ END PROGRAM FC_AVAIL_KINDS
 PROGRAM FC_MPI_CHECK
   INCLUDE 'mpif.h'
   INTEGER :: comm, amode, info, fh, ierror
-  CHARACTER(LEN=1) :: filename 
+  CHARACTER(LEN=1) :: filename
   CALL MPI_File_open( comm, filename, amode, info, fh, ierror)
 END PROGRAM FC_MPI_CHECK

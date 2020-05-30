@@ -37,12 +37,12 @@
 #ifdef H5O_ENABLE_BOGUS
 
 /*
- * Create datasets in the location (in "/" or "/group") with 
+ * Create datasets in the location (in "/" or "/group") with
  *   message id: (a) H5O_BOGUS_VALID_ID or (b)H5O_BOGUS_INVALID_ID
  *   and various unknown message flags
  */
 static int
-generate_datasets(hid_t loc_id, unsigned bogus_id) 
+generate_datasets(hid_t loc_id, unsigned bogus_id)
 {
     hid_t sid = -1;             /* Dataspace ID */
     hid_t dcpl = -1;            /* Dataset creation property list ID */

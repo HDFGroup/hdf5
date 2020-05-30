@@ -217,9 +217,9 @@ test(fill_t fill_style, const double splits[],
         fspace, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) goto error;
     if ((fd=HDopen(FILE_NAME_1, O_RDONLY, 0666)) < 0) goto error;
 
-    if(FILL_RANDOM==fill_style) 
+    if(FILL_RANDOM==fill_style)
         had = (int *)calloc((size_t)cur_size[0], sizeof(int));
-    
+
     for (i=1; i<=cur_size[0]; i++) {
 
         /* Decide which chunk to write to */
@@ -391,7 +391,7 @@ main(int argc, char *argv[])
         nerrors += test(FILL_INWARD,  splits, FALSE, use_cache);
         nerrors += test(FILL_OUTWARD, splits, FALSE, use_cache);
         nerrors += test(FILL_RANDOM,  splits, FALSE, use_cache);
-    } 
+    }
     else {
         if (use_cache) usage(argv[0]);
         nerrors += test(fill_style,   splits, TRUE, FALSE);

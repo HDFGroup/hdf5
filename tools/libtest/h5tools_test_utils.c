@@ -1148,7 +1148,7 @@ test_set_configured_fapl(void)
     TESTING("programmatic fapl set");
 
     for (i = 0; i < n_cases; i++) {
-        h5tools_fapl_info_t fapl_info;
+        h5tools_vfd_info_t vfd_info;
         hid_t result;
         testcase C = cases[i];
 
@@ -1171,10 +1171,9 @@ test_set_configured_fapl(void)
 #endif /* UTIL_TEST_DEBUG */
 
         /* test */
-        fapl_info.type = VFD_BY_NAME;
-        fapl_info.info = C.conf_fa;
-        fapl_info.u.name = C.vfdname;
-        result = h5tools_get_fapl(H5P_DEFAULT, &fapl_info);
+        vfd_info.info = C.conf_fa;
+        vfd_info.name = C.vfdname;
+        result = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info);
         if (C.expected == 0)
             JSVERIFY( result, H5I_INVALID_HID, C.message)
         else

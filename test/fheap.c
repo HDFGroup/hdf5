@@ -82,7 +82,7 @@
 
 /* The number of settings for testing: page buffering, file space strategy and persisting free-space */
 #define NUM_PB_FS                   6
-#define PAGE_BUFFER_PAGE_SIZE       4096 
+#define PAGE_BUFFER_PAGE_SIZE       4096
 
 const char *FILENAME[] = {
     "fheap",
@@ -7665,7 +7665,7 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
         FAIL_STACK_ERROR
 
     /*
-     * Test incremental insert and removal 
+     * Test incremental insert and removal
      */
     TESTING("incremental object insertion and removal")
 
@@ -7691,7 +7691,7 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
         if(H5HF_insert(fh, (sizeof(obj1)), &obj1, heap_id[i]) < 0)
             FAIL_STACK_ERROR
     } /* end for */
-     
+
     /* Close the fractal heap */
     if(H5HF_close(fh) < 0)
         TEST_ERROR
@@ -16350,7 +16350,7 @@ main(void)
     def_fapl = h5_fileaccess();
     ExpressMode = GetTestExpress();
 
-    /* 
+    /*
      * Caution when turning on ExpressMode 0:
      *  It will activate testing with different combinations of
      *       page buffering and file space strategy and the
@@ -16400,12 +16400,12 @@ main(void)
     for(v = 0; v < num_pb_fs; v++) {
         /* Skip test when:
            a) multi/split drivers and
-           b) persisting free-space or using paged aggregation strategy 
+           b) persisting free-space or using paged aggregation strategy
            because the library will fail file creation (temporary) for the above conditions */
         if(!contig_addr_vfd && v)
             break;
 
-        if((fcpl = H5Pcopy(def_fcpl)) < 0) 
+        if((fcpl = H5Pcopy(def_fcpl)) < 0)
             TEST_ERROR
 
         switch(v) {
@@ -16419,14 +16419,14 @@ main(void)
                     TEST_ERROR
                 fapl = def_fapl;
                 /* This is a fix for the daily test failure from the checkin for libver bounds. */
-                /* 
+                /*
                  * Many tests failed the file size check when comparing (a) and (b) as below:
                  * --Create a file and close the file.  Got the initial file size (a).
                  * --Reopen the file, perform fractal heap operations, and close the file.
                  *   Got the file size (b).
                  * The cause for the file size differences:
-                 *   When the file is initially created with persisting free-space and with 
-                 *   (earliest, latest) libver bounds, the file will have version 2 superblock 
+                 *   When the file is initially created with persisting free-space and with
+                 *   (earliest, latest) libver bounds, the file will have version 2 superblock
                  *   due to non-default free-space handling.  As the low bound is earliest,
                  *   the library uses version 1 object header when creating the superblock
                  *   extension message.
@@ -16440,7 +16440,7 @@ main(void)
                  *  The fix:
                  *    Set libver bounds in fapl to (v18, latest) so that the file created in the
                  *    test routines will have low bound set to v18.  This will cause the
-                 *    library to use version 2 object header for the superblock extension 
+                 *    library to use version 2 object header for the superblock extension
                  *    message.
                  */
                 if(H5Pset_libver_bounds(fapl, H5F_LIBVER_V18, H5F_LIBVER_LATEST) < 0)

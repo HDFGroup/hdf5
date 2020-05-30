@@ -60,7 +60,7 @@ typedef struct {
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5G__compact_build_table_cb(const void *_mesg, unsigned idx, void *_udata);
-static herr_t H5G__compact_build_table(const H5O_loc_t *oloc, 
+static herr_t H5G__compact_build_table(const H5O_loc_t *oloc,
     const H5O_linfo_t *linfo, H5_index_t idx_type, H5_iter_order_t order,
     H5G_link_table_t *ltable);
 static herr_t H5G__compact_lookup_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_udata);

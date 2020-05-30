@@ -1344,7 +1344,7 @@ H5FD_direct_lock(H5FD_t *_file, hbool_t rw)
 
     /* Determine the type of lock */
     int lock = rw ? LOCK_EX : LOCK_SH;
-    
+
     /* Place the lock with non-blocking */
     if(HDflock(file->fd, lock | LOCK_NB) < 0)
         HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to flock file")

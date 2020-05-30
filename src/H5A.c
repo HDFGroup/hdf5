@@ -270,7 +270,7 @@ H5Aopen(hid_t loc_id, const char *attr_name, hid_t aapl_id)
 {
     void *attr = NULL;                    /* attr object from VOL connector */
     H5VL_object_t *vol_obj = NULL;        /* object of loc_id */
-    H5VL_loc_params_t loc_params; 
+    H5VL_loc_params_t loc_params;
     hid_t ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_API(H5I_INVALID_HID)

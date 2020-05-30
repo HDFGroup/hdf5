@@ -507,7 +507,7 @@ H5B2_find(H5B2_t *bt2, void *udata, H5B2_found_t op, void *op_data)
         if((hdr->cls->compare)(udata, hdr->min_native_rec, &cmp) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
         if(cmp < 0)
-            HGOTO_DONE(FALSE) 	/* Less than the least record--not found */ 
+            HGOTO_DONE(FALSE) 	/* Less than the least record--not found */
 	else if(cmp == 0) { /* Record is found */
 	    if(op && (op)(hdr->min_native_rec, op_data) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "'found' callback failed for B-tree find operation")
@@ -518,7 +518,7 @@ H5B2_find(H5B2_t *bt2, void *udata, H5B2_found_t op, void *op_data)
 	if((hdr->cls->compare)(udata, hdr->max_native_rec, &cmp) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
         if(cmp > 0)
-            HGOTO_DONE(FALSE) 	/* Less than the least record--not found */ 
+            HGOTO_DONE(FALSE) 	/* Less than the least record--not found */
 	else if(cmp == 0) { /* Record is found */
 	    if(op && (op)(hdr->max_native_rec, op_data) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "'found' callback failed for B-tree find operation")
@@ -1601,7 +1601,7 @@ done:
  * Function:    H5B2_patch_file
  *
  * Purpose:     Patch the top-level file pointer contained in bt2
- *              to point to idx_info->f if they are different.  
+ *              to point to idx_info->f if they are different.
  *		This is possible because the file pointer in bt2 can be
  *		closed out if bt2 remains open.
  *

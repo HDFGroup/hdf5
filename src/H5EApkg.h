@@ -219,10 +219,10 @@ typedef struct H5EA_hdr_t {
                                          * of the extensible array header.
  					 *
  					 * The field is used to avoid duplicate
-					 * setups of the flush dependency 
-					 * relationship, and to allow the 
+					 * setups of the flush dependency
+					 * relationship, and to allow the
 					 * extensible array header to destroy
-					 * the flush dependency on receipt of 
+					 * the flush dependency on receipt of
 					 * an eviction notification from the
 					 * metadata cache.
 					 */
@@ -448,7 +448,7 @@ H5_DLL herr_t H5EA__dblock_dest(H5EA_dblock_t *dblock);
 H5_DLL H5EA_dblk_page_t *H5EA__dblk_page_alloc(H5EA_hdr_t *hdr, H5EA_sblock_t *parent);
 H5_DLL herr_t H5EA__dblk_page_create(H5EA_hdr_t *hdr, H5EA_sblock_t *parent,
     haddr_t addr);
-H5_DLL H5EA_dblk_page_t *H5EA__dblk_page_protect(H5EA_hdr_t *hdr, 
+H5_DLL H5EA_dblk_page_t *H5EA__dblk_page_protect(H5EA_hdr_t *hdr,
     H5EA_sblock_t *parent, haddr_t dblk_page_addr, unsigned flags);
 H5_DLL herr_t H5EA__dblk_page_unprotect(H5EA_dblk_page_t *dblk_page,
     unsigned cache_flags);

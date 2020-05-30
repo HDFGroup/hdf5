@@ -235,7 +235,7 @@ H5TS_thread_id(void)
 
     /* An ID is *not* already assigned: reuse an ID that's on the
      * free list, or else generate a new ID.
-     * 
+     *
      * Allocating memory while holding a mutex is bad form, so
      * point `tid` at `proto_tid` if we need to allocate some
      * memory.
@@ -464,7 +464,7 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
         HGOTO_DONE(ret_value);
 
     /* Check if this thread already owns the lock */
-    if(mutex->lock_count && pthread_equal(pthread_self(), mutex->owner_thread))
+    if(mutex->lock_count && HDpthread_equal(HDpthread_self(), mutex->owner_thread))
         /* already owned by self - increment count */
         mutex->lock_count++;
     else {
@@ -473,7 +473,7 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
             HDpthread_cond_wait(&mutex->cond_var, &mutex->atomic_lock);
 
         /* After we've received the signal, take ownership of the mutex */
-        mutex->owner_thread = pthread_self();
+        mutex->owner_thread = HDpthread_self();
         mutex->lock_count = 1;
     } /* end else */
 
@@ -535,9 +535,6 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
         if(err != 0)
             ret_value = err;
     } /* end if */
-    if(ret_value)
-        HGOTO_DONE(ret_value);
-#endif /* H5_HAVE_WIN_THREADS */
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)

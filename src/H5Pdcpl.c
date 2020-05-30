@@ -251,25 +251,25 @@ H5P__dcrt_reg_prop(H5P_genclass_t *pclass)
     FUNC_ENTER_STATIC
 
     /* Register the storage layout property */
-    if(H5P__register_real(pclass, H5D_CRT_LAYOUT_NAME, H5D_CRT_LAYOUT_SIZE, &H5D_def_layout_g, 
+    if(H5P__register_real(pclass, H5D_CRT_LAYOUT_NAME, H5D_CRT_LAYOUT_SIZE, &H5D_def_layout_g,
             NULL, H5D_CRT_LAYOUT_SET, H5D_CRT_LAYOUT_GET, H5D_CRT_LAYOUT_ENC, H5D_CRT_LAYOUT_DEC,
             H5D_CRT_LAYOUT_DEL, H5D_CRT_LAYOUT_COPY, H5D_CRT_LAYOUT_CMP, H5D_CRT_LAYOUT_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the fill value property */
-    if(H5P__register_real(pclass, H5D_CRT_FILL_VALUE_NAME, H5D_CRT_FILL_VALUE_SIZE, &H5D_def_fill_g, 
+    if(H5P__register_real(pclass, H5D_CRT_FILL_VALUE_NAME, H5D_CRT_FILL_VALUE_SIZE, &H5D_def_fill_g,
             NULL, H5D_CRT_FILL_VALUE_SET, H5D_CRT_FILL_VALUE_GET, H5D_CRT_FILL_VALUE_ENC, H5D_CRT_FILL_VALUE_DEC,
             H5D_CRT_FILL_VALUE_DEL, H5D_CRT_FILL_VALUE_COPY, H5D_CRT_FILL_VALUE_CMP, H5D_CRT_FILL_VALUE_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the space allocation time state property */
-    if(H5P__register_real(pclass, H5D_CRT_ALLOC_TIME_STATE_NAME, H5D_CRT_ALLOC_TIME_STATE_SIZE, &H5D_def_alloc_time_state_g, 
+    if(H5P__register_real(pclass, H5D_CRT_ALLOC_TIME_STATE_NAME, H5D_CRT_ALLOC_TIME_STATE_SIZE, &H5D_def_alloc_time_state_g,
             NULL, NULL, NULL, H5D_CRT_ALLOC_TIME_STATE_ENC, H5D_CRT_ALLOC_TIME_STATE_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the external file list property */
-    if(H5P__register_real(pclass, H5D_CRT_EXT_FILE_LIST_NAME, H5D_CRT_EXT_FILE_LIST_SIZE, &H5D_def_efl_g, 
+    if(H5P__register_real(pclass, H5D_CRT_EXT_FILE_LIST_NAME, H5D_CRT_EXT_FILE_LIST_SIZE, &H5D_def_efl_g,
             NULL, H5D_CRT_EXT_FILE_LIST_SET, H5D_CRT_EXT_FILE_LIST_GET, H5D_CRT_EXT_FILE_LIST_ENC, H5D_CRT_EXT_FILE_LIST_DEC,
             H5D_CRT_EXT_FILE_LIST_DEL, H5D_CRT_EXT_FILE_LIST_COPY, H5D_CRT_EXT_FILE_LIST_CMP, H5D_CRT_EXT_FILE_LIST_CLOSE) < 0)
        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
@@ -1512,7 +1512,7 @@ H5P__dcrt_ext_file_list_dec(const void **_pp, void *_value)
         size_t len;
         if(efl->nused >= efl->nalloc) {
             size_t na = efl->nalloc + H5O_EFL_ALLOC;
-            H5O_efl_entry_t *x = (H5O_efl_entry_t *)H5MM_realloc(efl->slot, 
+            H5O_efl_entry_t *x = (H5O_efl_entry_t *)H5MM_realloc(efl->slot,
                                                                  na * sizeof(H5O_efl_entry_t));
             if(!x)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed")
@@ -2222,7 +2222,7 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
     if((ent->psfn_nsubs == 0) && (ent->psdn_nsubs == 0)) {
         if(ent->parsed_source_file_name)
             ent->source_dset.file_name = ent->parsed_source_file_name->name_segment;
-        else 
+        else
             ent->source_dset.file_name = ent->source_file_name;
         if(ent->parsed_source_dset_name)
             ent->source_dset.dset_name = ent->parsed_source_dset_name->name_segment;
@@ -2342,7 +2342,7 @@ done:
  * Purpose:     Takes the dataset creation property list for the virtual
  *              dataset, dcpl_id, and the mapping index, index, and
  *              returns a dataspace identifier for the selection within
- *              the virtual dataset used in the mapping. 
+ *              the virtual dataset used in the mapping.
  *
  * Return:      Returns a dataspace identifier if successful; otherwise
  *              returns a negative value.
@@ -2400,7 +2400,7 @@ done:
  * Purpose:     Takes the dataset creation property list for the virtual
  *              dataset, dcpl_id, and the mapping index, index, and
  *              returns a dataspace identifier for the selection within
- *              the source dataset used in the mapping. 
+ *              the source dataset used in the mapping.
  *
  * Return:      Returns a dataspace identifier if successful; otherwise
  *              returns a negative value.
@@ -2504,7 +2504,7 @@ done:
  *              be the size in bytes of the filename.  That value, plus 1
  *              for a NULL terminator, is then assigned to size for a
  *              second H5Pget_virtual_filename call, which will retrieve
- *              the actual filename. 
+ *              the actual filename.
  *
  * Return:      Returns the length of the name if successful, otherwise
  *              returns a negative value.
@@ -2567,7 +2567,7 @@ done:
  *              be the size in bytes of the dataset name.  That value, plus 1
  *              for a NULL terminator, is then assigned to size for a
  *              second H5Pget_virtual_dsetname call, which will retrieve
- *              the actual dataset name. 
+ *              the actual dataset name.
  *
  * Return:      Returns the length of the name if successful, otherwise
  *              returns a negative value.

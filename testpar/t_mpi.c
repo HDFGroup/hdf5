@@ -302,7 +302,7 @@ static int test_mpio_gb_file(char *filename) {
                             "proc %d: write to mpi_off=%016llx, %lld\n",
                             mpi_rank, mpi_off, mpi_off);
                 /* set data to some trivial pattern for easy verification */
-                for (j = 0; j < MB; j++) 
+                for (j = 0; j < MB; j++)
                     *(buf + j) = (int8_t)(i * mpi_size + mpi_rank);
                 if (VERBOSE_MED)
                     HDfprintf(stdout,

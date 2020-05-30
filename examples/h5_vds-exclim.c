@@ -25,16 +25,16 @@
 
 #define FILE         "vds-exclim.h5"
 #define DATASET      "VDS-Excaliburlim"
-#define VDSDIM0         3 
-#define VDSDIM1         15 
-#define VDSDIM2         6 
-#define KDIM0           3 
-#define KDIM1           2 
-#define KDIM2           6 
-#define NDIM0           3 
-#define NDIM1           3 
-#define NDIM2           6 
-#define RANK            3 
+#define VDSDIM0         3
+#define VDSDIM1         15
+#define VDSDIM2         6
+#define KDIM0           3
+#define KDIM1           2
+#define KDIM2           6
+#define NDIM0           3
+#define NDIM1           3
+#define NDIM2           6
+#define RANK            3
 
 const char *SRC_FILE[] = {
     "a.h5",
@@ -94,7 +94,7 @@ main (void)
 
     /* Create VDS creation property */
     dcpl = H5Pcreate (H5P_DATASET_CREATE);
-     
+
     /* Initialize hyperslab values */
 
     start[0] = 0;
@@ -107,7 +107,7 @@ main (void)
     block[1] = k;
     block[2] = VDSDIM2;
 
-   /* 
+   /*
     * Build the mappings for A, C and E source datasets.
     *
     */
@@ -121,7 +121,7 @@ main (void)
    /* Reinitialize start[0] and block[1] */
    start[0] = 0;
    block[1] = n;
-   /* 
+   /*
     * Build the mappings for B, D and F source datasets.
     *
     */
@@ -139,8 +139,8 @@ main (void)
       status = H5Sclose (nsrc_space);
       status = H5Sclose (ksrc_space);
       status = H5Dclose (dset);
-      status = H5Fclose (file);    
-     
+      status = H5Fclose (file);
+
 
     /*
      * Now we begin the read section of this example.
@@ -162,7 +162,7 @@ main (void)
      */
     layout = H5Pget_layout (dcpl);
 
-    if (H5D_VIRTUAL == layout) 
+    if (H5D_VIRTUAL == layout)
         printf(" Dataset has a virtual layout \n");
     else
         printf("Wrong layout found \n");
@@ -173,15 +173,15 @@ main (void)
      status = H5Pget_virtual_count (dcpl, &num_map);
      printf(" Number of mappings is %lu\n", (unsigned long)num_map);
 
-     /* 
+     /*
       * Get mapping parameters for each mapping.
       */
-      for (i = 0; i < (int)num_map; i++) {   
+      for (i = 0; i < (int)num_map; i++) {
       printf(" Mapping %d \n", i);
       printf("         Selection in the virtual dataset \n");
       /* Get selection in the virttual  dataset */
           vspace = H5Pget_virtual_vspace (dcpl, (size_t)i);
-          if (H5Sget_select_type(vspace) == H5S_SEL_HYPERSLABS) { 
+          if (H5Sget_select_type(vspace) == H5S_SEL_HYPERSLABS) {
               if (H5Sis_regular_hyperslab(vspace)) {
                    status = H5Sget_regular_hyperslab (vspace, start_out, stride_out, count_out, block_out);
                    printf("         start  = [%llu, %llu, %llu] \n", (unsigned long long)start_out[0], (unsigned long long)start_out[1], (unsigned long long)start_out[2]);

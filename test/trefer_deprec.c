@@ -491,7 +491,7 @@ test_reference_obj(void)
 **      Tests references to various kinds of objects
 **
 **  Note: The libver_low/libver_high parameters are added to create the file
-**        with the low and high bounds setting in fapl.  
+**        with the low and high bounds setting in fapl.
 **        Please see the RFC for "H5Sencode/H5Sdecode Format Change".
 **
 ****************************************************************/

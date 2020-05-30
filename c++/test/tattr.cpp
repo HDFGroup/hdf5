@@ -282,7 +282,7 @@ static void test_attr_getname()
         if (attr_exists == false)
             throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
 
-        // Open attribute 
+        // Open attribute
         Attribute fattr1(fid1.openAttribute(FATTR1_NAME));
 
         // A. Get attribute name with
@@ -1221,7 +1221,7 @@ static void test_attr_delete()
         attr_name = fattr.getName();
         verify_val(attr_name, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
         fattr.close();
-        
+
         // Test deleting non-existing attribute
 
         // Open the dataset

@@ -53,7 +53,7 @@ fi
 )
 
 # Where the tool is installed.
-# default is relative path to installed location of the tools 
+# default is relative path to installed location of the tools
 prefix="${prefix:-../${prefix_relto_examplesdir}}"
 PARALLEL=@PARALLEL@             # Am I in parallel mode?
 AR="@AR@"
@@ -179,5 +179,5 @@ rm *.h5
 rm -rf red blue u2w
 echo
 
-exit $EXIT_VALUE 
+exit $EXIT_VALUE
 

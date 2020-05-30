@@ -3780,9 +3780,9 @@ void gent_multi(void)
     char *sv_data = NULL;
     haddr_t memb_addr[H5FD_MEM_NTYPES];
 
-    sv_data = (char *)HDcalloc(H5FD_MEM_NTYPES * 1024, sizeof(char));                          
-    sv = (char **)HDcalloc(H5FD_MEM_NTYPES, sizeof(sv_data));                            
-    for (i = 0; i < H5FD_MEM_NTYPES; i++)                                                     
+    sv_data = (char *)HDcalloc(H5FD_MEM_NTYPES * 1024, sizeof(char));
+    sv = (char **)HDcalloc(H5FD_MEM_NTYPES, sizeof(sv_data));
+    for (i = 0; i < H5FD_MEM_NTYPES; i++)
         sv[i] = sv_data + (i * 1024);
 
     fapl = H5Pcreate(H5P_FILE_ACCESS);
