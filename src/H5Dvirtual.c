@@ -509,7 +509,7 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to serialize source selection")
 
             /* Virtual selection */
-		  if(H5S_SELECT_SERIALIZE(layout->storage.u.virt.list[i].source_dset.virtual_select, &heap_block_p) < 0)
+            if(H5S_SELECT_SERIALIZE(layout->storage.u.virt.list[i].source_dset.virtual_select, &heap_block_p) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to serialize virtual selection")
         } /* end for */
 
@@ -525,7 +525,6 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
 done:
     heap_block = (uint8_t *)H5MM_xfree(heap_block);
     str_size = (size_t *)H5MM_xfree(str_size);
-
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_store_layout() */
@@ -3016,8 +3015,8 @@ done:
 static herr_t
 H5D__virtual_refresh_source_dset(H5D_t **dset)
 {
-    hid_t       dset_id;                /* Temporary dataset identifier */
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    hid_t           temp_id = H5I_INVALID_HID;          /* Temporary dataset identifier */
+    herr_t          ret_value = SUCCEED;                /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -3025,20 +3024,20 @@ H5D__virtual_refresh_source_dset(H5D_t **dset)
     HDassert(dset && *dset);
 
     /* Get a temporary identifier for this source dataset */
-    if((dset_id = H5I_register(H5I_DATASET, *dset, FALSE)) < 0)
+    if((temp_id = H5I_register(H5I_DATASET, *dset, FALSE)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "can't register source dataset ID")
 
     /* Refresh source dataset */
-    if(H5D__refresh(dset_id, *dset) < 0)
+    if(H5D__refresh(temp_id, *dset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to refresh source dataset")
 
     /* Discard the identifier & replace the dataset */
-    if(NULL == (*dset = (H5D_t *)H5I_remove(dset_id)))
+    if(NULL == (*dset = (H5D_t *)H5I_remove(temp_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "can't unregister source dataset ID")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__virtual_refresh_source_dsets() */
+} /* end H5D__virtual_refresh_source_dset() */
 
 
 /*-------------------------------------------------------------------------

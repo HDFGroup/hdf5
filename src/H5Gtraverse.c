@@ -324,7 +324,7 @@ H5G__traverse_slink(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
 
     /* Traverse the link */
     if(H5G__traverse_real(&tmp_grp_loc, lnk->u.soft.name, target, H5G__traverse_slink_cb, &udata) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to follow symbolic link")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to follow symbolic link")
 
     /* Pass back information about whether the object exists */
     *obj_exists = udata.exists;
@@ -830,20 +830,21 @@ H5G_traverse(const H5G_loc_t *loc, const char *name, unsigned target, H5G_traver
     if(!op)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "no operation provided")
 
-    /* Retrieve the original # of soft / UD links that are able to be traversed */
-    /* (So that multiple calls to H5G_traverse don't incorrectly look
-     *  like they've traversed too many.  Nested calls, like in H5L__move(),
+    /* Retrieve the original # of soft / UD links that are able to be traversed
+     * (So that multiple calls to H5G_traverse don't incorrectly look
+     *  like they've traversed too many.  Nested calls, like in H5L_move(),
      *  may need their own mechanism to set & reset the # of links to traverse)
      */
     if(H5CX_get_nlinks(&orig_nlinks) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to retrieve # of soft / UD links to traverse")
 
     /* Set up invalid tag. This is a precautionary step only. Setting an invalid
-       tag here will ensure that no metadata accessed while doing the traversal
-       is given an improper tag, unless another one is specifically set up
-       first. This will ensure we're not accidentally tagging something we
-       shouldn't be during the traversal. Note that for best tagging assertion
-       coverage, setting H5C_DO_TAGGING_SANITY_CHECKS is advised. */
+     * tag here will ensure that no metadata accessed while doing the traversal
+     * is given an improper tag, unless another one is specifically set up
+     * first. This will ensure we're not accidentally tagging something we
+     * shouldn't be during the traversal. Note that for best tagging assertion
+     * coverage, setting H5C_DO_TAGGING_SANITY_CHECKS is advised.
+     */
     H5_BEGIN_TAG(H5AC__INVALID_TAG);
 
     /* Go perform "real" traversal */

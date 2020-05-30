@@ -1286,7 +1286,7 @@ H5C_insert_entry(H5F_t *             f,
     insert_pinned      = ( (flags & H5C__PIN_ENTRY_FLAG) != 0 );
     flush_last         = ( (flags & H5C__FLUSH_LAST_FLAG) != 0 );
 
-    /* Get the ring type from the DXPL */
+    /* Get the ring type from the API context */
     ring = H5CX_get_ring();
 
     entry_ptr = (H5C_cache_entry_t *)thing;
@@ -2314,10 +2314,10 @@ H5C_protect(H5F_t *		f,
             haddr_t tag;              /* Tag value */
 
             /* The entry is already in the cache, but make sure that the tag value
-               is still legal. This will ensure that had
-               the entry NOT been in the cache, tagging was still set up correctly
-               and it would have received a legal tag value after getting loaded
-               from disk. */
+             * is still legal. This will ensure that had the entry NOT been in the
+             * cache, tagging was still set up correctly and it would have received
+             * a legal tag value after getting loaded from disk.
+             */
 
             /* Get the tag */
             tag = H5CX_get_tag();
@@ -2372,10 +2372,10 @@ H5C_protect(H5F_t *		f,
         else
            empty_space = cache_ptr->max_cache_size - cache_ptr->index_size;
 
-	/* try to free up if necceary and if evictions are permitted.  Note
-	 * that if evictions are enabled, we will call H5C__make_space_in_cache()
-	 * regardless if the min_free_space requirement is not met.
-	 */
+        /* try to free up if necceary and if evictions are permitted.  Note
+         * that if evictions are enabled, we will call H5C__make_space_in_cache()
+         * regardless if the min_free_space requirement is not met.
+         */
         if ( ( cache_ptr->evictions_enabled ) &&
              ( ( (cache_ptr->index_size + entry_ptr->size) >
 	         cache_ptr->max_cache_size)
@@ -2421,10 +2421,10 @@ H5C_protect(H5F_t *		f,
              *
              * Second, when writes are not permitted it is also possible
              * for the cache to grow without bound.
-	     *
-	     * Third, the user may choose to disable evictions -- causing
-	     * the cache to grow without bound until evictions are
-	     * re-enabled.
+             *
+             * Third, the user may choose to disable evictions -- causing
+             * the cache to grow without bound until evictions are
+             * re-enabled.
              *
              * Finally, we usually don't check to see if the cache is
              * oversized at the end of an unprotect.  As a result, it is
@@ -4260,11 +4260,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C__autoadjust__ageout(H5F_t * f,
-                        double hit_rate,
-                        enum H5C_resize_status * status_ptr,
-                        size_t * new_max_cache_size_ptr,
-                        hbool_t write_permitted)
+H5C__autoadjust__ageout(H5F_t * f, double hit_rate, enum H5C_resize_status * status_ptr,
+    size_t * new_max_cache_size_ptr, hbool_t write_permitted)
 {
     H5C_t *     cache_ptr = f->shared->cache;
     size_t	test_size;

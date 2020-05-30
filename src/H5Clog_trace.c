@@ -41,7 +41,7 @@
 /****************/
 
 /* Max log message size */
-#define H5C_MAX_TRACE_LOG_MSG_SIZE 2048
+#define H5C_MAX_TRACE_LOG_MSG_SIZE 4096
 
 
 /******************/

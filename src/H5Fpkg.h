@@ -422,7 +422,7 @@ H5_DLL herr_t H5F__super_size(H5F_t *f, hsize_t *super_size, hsize_t *super_ext_
 H5_DLL herr_t H5F__super_free(H5F_super_t *sblock);
 
 /* Superblock extension related routines */
-H5_DLL herr_t H5F_super_ext_open(H5F_t *f, haddr_t ext_addr, H5O_loc_t *ext_ptr);
+H5_DLL herr_t H5F__super_ext_open(H5F_t *f, haddr_t ext_addr, H5O_loc_t *ext_ptr);
 H5_DLL herr_t H5F__super_ext_write_msg(H5F_t *f, unsigned id, void *mesg, hbool_t may_create, unsigned mesg_flags);
 H5_DLL herr_t H5F__super_ext_remove_msg(H5F_t *f, unsigned id);
 H5_DLL herr_t H5F__super_ext_close(H5F_t *f, H5O_loc_t *ext_ptr, hbool_t was_created);

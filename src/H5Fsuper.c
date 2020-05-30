@@ -144,7 +144,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_super_ext_open
+ * Function:    H5F__super_ext_open
  *
  * Purpose:     Open an existing superblock extension
  *
@@ -156,11 +156,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_super_ext_open(H5F_t *f, haddr_t ext_addr, H5O_loc_t *ext_ptr)
+H5F__super_ext_open(H5F_t *f, haddr_t ext_addr, H5O_loc_t *ext_ptr)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -178,7 +178,7 @@ H5F_super_ext_open(H5F_t *f, haddr_t ext_addr, H5O_loc_t *ext_ptr)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F_super_ext_open() */
+} /* H5F__super_ext_open() */
 
 
 /*-------------------------------------------------------------------------
@@ -408,7 +408,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
             HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_result)
     } /* end if */
     else {
-    /* Locate the signature as per per the serial library */
+        /* Locate the signature as per per the serial library */
 #endif /* H5_HAVE_PARALLEL */
 
         if(H5FD_locate_signature(file, &super_addr) < 0)
@@ -522,7 +522,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
 #endif /* H5_HAVE_PARALLEL */
 
     /* Check if superblock address is different from base address and adjust
-     * base address and "end of address" address if so.
+     * base address and "end of file" address if so.
      */
     if(!H5F_addr_eq(super_addr, sblock->base_addr)) {
         /* Check if the superblock moved earlier in the file */
@@ -715,7 +715,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
         } /* end if */
 
         /* Open the superblock extension */
-        if(H5F_super_ext_open(f, sblock->ext_addr, &ext_loc) < 0)
+        if(H5F__super_ext_open(f, sblock->ext_addr, &ext_loc) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, FAIL, "unable to open file's superblock extension")
 
         /* Check for the extension having a 'driver info' message */
@@ -793,15 +793,14 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
                 if(NULL == H5O_msg_read(&ext_loc, H5O_FSINFO_ID, &fsinfo))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get free-space manager info message")
 
-                /* Update changed values */
-
                 /* Version bounds check */
                 if(H5O_fsinfo_ver_bounds[H5F_HIGH_BOUND(f)] == H5O_INVALID_VERSION ||
                    fsinfo.version > H5O_fsinfo_ver_bounds[H5F_HIGH_BOUND(f)])
                     HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, FAIL, "File space info message's version out of bounds")
+
+                /* Update changed values */
                 if(f->shared->fs_version != fsinfo.version)
                     f->shared->fs_version = fsinfo.version;
-
                 if(f->shared->fs_strategy != fsinfo.strategy) {
                     f->shared->fs_strategy = fsinfo.strategy;
 
@@ -900,14 +899,14 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
                     if(null_fsm_addr) {
                         if(H5F__super_ext_write_msg(f, H5O_FSINFO_ID, &fsinfo, FALSE, H5O_MSG_FLAG_MARK_IF_UNKNOWN) < 0)
                             HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error in writing fsinfo message to superblock extension")
-                    } /* end if */
+                    }
                     else {
                         if(H5F__super_ext_remove_msg(f, H5O_FSINFO_ID) < 0)
                             HGOTO_ERROR(H5E_FILE, H5E_CANTDELETE, FAIL,  "error in removing message from superblock extension")
 
                         if(H5F__super_ext_write_msg(f, H5O_FSINFO_ID, &fsinfo, TRUE, H5O_MSG_FLAG_MARK_IF_UNKNOWN) < 0)
                             HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error in writing fsinfo message to superblock extension")
-                    } /* end else */
+                    }
 #if 1 /* bug fix test code -- tidy this up if all goes well */ /* JRM */
                     f->shared->sblock = NULL;
 #endif /* JRM */
@@ -980,20 +979,20 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
                 /* Write driver info information to the superblock extension */
 
 #if 1 /* bug fix test code -- tidy this up if all goes well */ /* JRM */
-        /* KLUGE ALERT!!
-        *
-        * H5F__super_ext_write_msg() expects f->shared->sblock to
-        * be set -- verify that it is NULL, and then set it.
-        * Set it back to NULL when we are done.
-        */
-        HDassert(f->shared->sblock == NULL);
-        f->shared->sblock = sblock;
+                /* KLUGE ALERT!!
+                 *
+                 * H5F__super_ext_write_msg() expects f->shared->sblock to
+                 * be set -- verify that it is NULL, and then set it.
+                 * Set it back to NULL when we are done.
+                 */
+                HDassert(f->shared->sblock == NULL);
+                f->shared->sblock = sblock;
 #endif /* JRM */
-        if(H5F__super_ext_write_msg(f, H5O_DRVINFO_ID, &drvinfo, FALSE, H5O_MSG_NO_FLAGS_SET) < 0)
+                if(H5F__super_ext_write_msg(f, H5O_DRVINFO_ID, &drvinfo, FALSE, H5O_MSG_NO_FLAGS_SET) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error in writing message to superblock extension")
 
 #if 1 /* bug fix test code -- tidy this up if all goes well */ /* JRM */
-        f->shared->sblock = NULL;
+                f->shared->sblock = NULL;
 #endif /* JRM */
 
             } /* end if */
@@ -1338,10 +1337,11 @@ H5F__super_init(H5F_t *f)
         /* Create the Shared Object Header Message table and register it with
          *      the metadata cache, if this file supports shared messages.
          */
-        if(f->shared->sohm_nindexes > 0)
+        if(f->shared->sohm_nindexes > 0) {
             /* Initialize the shared message code & write the SOHM message to the extension */
             if(H5SM_init(f, plist, &ext_loc) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to create SOHM table")
+        }
 
         /* Check for non-default v1 B-tree 'K' values to store */
         if(sblock->btree_k[H5B_SNODE_ID] != HDF5_BTREE_SNODE_IK_DEF ||
@@ -1526,9 +1526,10 @@ H5F_eoa_dirty(H5F_t *f)
             HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark drvinfo as dirty")
     } /* end if */
     /* If the driver info is stored as a message, update that instead */
-    else if(f->shared->drvinfo_sb_msg_exists)
+    else if(f->shared->drvinfo_sb_msg_exists) {
         if(H5F__update_super_ext_driver_msg(f) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark drvinfo message as dirty")
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1699,13 +1700,13 @@ H5F__super_ext_write_msg(H5F_t *f, unsigned id, void *mesg,
 
     /* Open/create the superblock extension object header */
     if(H5F_addr_defined(f->shared->sblock->ext_addr)) {
-        if(H5F_super_ext_open(f, f->shared->sblock->ext_addr, &ext_loc) < 0)
+        if(H5F__super_ext_open(f, f->shared->sblock->ext_addr, &ext_loc) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, FAIL, "unable to open file's superblock extension")
     } /* end if */
     else {
         HDassert(may_create);
-    if(H5F__super_ext_create(f, &ext_loc) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "unable to create file's superblock extension")
+        if(H5F__super_ext_create(f, &ext_loc) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "unable to create file's superblock extension")
         ext_created = TRUE;
     } /* end else */
     HDassert(H5F_addr_defined(ext_loc.addr));
@@ -1713,24 +1714,24 @@ H5F__super_ext_write_msg(H5F_t *f, unsigned id, void *mesg,
 
     /* Check if message with ID does not exist in the object header */
     if((status = H5O_msg_exists(&ext_loc, id)) < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check object header for message or message exists")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check object header for message or message exists")
 
     /* Check for creating vs. writing */
     if(may_create) {
         if(status)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "Message should not exist")
 
-    /* Create the message with ID in the superblock extension */
-    if(H5O_msg_create(&ext_loc, id, (mesg_flags | H5O_MSG_FLAG_DONTSHARE), H5O_UPDATE_TIME, mesg) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to create the message in object header")
+        /* Create the message with ID in the superblock extension */
+        if(H5O_msg_create(&ext_loc, id, (mesg_flags | H5O_MSG_FLAG_DONTSHARE), H5O_UPDATE_TIME, mesg) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to create the message in object header")
     } /* end if */
     else {
         if(!status)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "Message should exist")
 
-    /* Update the message with ID in the superblock extension */
-    if(H5O_msg_write(&ext_loc, id, (mesg_flags | H5O_MSG_FLAG_DONTSHARE), H5O_UPDATE_TIME, mesg) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to write the message in object header")
+        /* Update the message with ID in the superblock extension */
+        if(H5O_msg_write(&ext_loc, id, (mesg_flags | H5O_MSG_FLAG_DONTSHARE), H5O_UPDATE_TIME, mesg) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to write the message in object header")
     } /* end else */
 
 done:
@@ -1780,35 +1781,36 @@ H5F__super_ext_remove_msg(H5F_t *f, unsigned id)
     H5AC_set_ring(H5AC_RING_SBE, &orig_ring);
 
     /* Open superblock extension object header */
-    if(H5F_super_ext_open(f, f->shared->sblock->ext_addr, &ext_loc) < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "error in starting file's superblock extension")
+    if(H5F__super_ext_open(f, f->shared->sblock->ext_addr, &ext_loc) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "error in starting file's superblock extension")
     ext_opened = TRUE;
 
     /* Check if message with ID exists in the object header */
     if((status = H5O_msg_exists(&ext_loc, id)) < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to check object header for message")
-    else if(status) { /* message exists */
-    H5O_hdr_info_t     hdr_info;       /* Object header info for superblock extension */
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to check object header for message")
+    else if(status) {
+        /* message exists */
+        H5O_hdr_info_t     hdr_info;       /* Object header info for superblock extension */
 
-    /* Remove the message */
-    if(H5O_msg_remove(&ext_loc, id, H5O_ALL, TRUE) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete free-space manager info message")
+        /* Remove the message */
+        if(H5O_msg_remove(&ext_loc, id, H5O_ALL, TRUE) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete free-space manager info message")
 
-    /* Get info for the superblock extension's object header */
-    if(H5O_get_hdr_info(&ext_loc, &hdr_info) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to retrieve superblock extension info")
+        /* Get info for the superblock extension's object header */
+        if(H5O_get_hdr_info(&ext_loc, &hdr_info) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to retrieve superblock extension info")
 
-    /* If the object header is an empty base chunk, remove superblock extension */
-    if(hdr_info.nchunks == 1) {
-        if((null_count = H5O_msg_count(&ext_loc, H5O_NULL_ID)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "unable to count messages")
-        else if((unsigned)null_count == hdr_info.nmesgs) {
-        HDassert(H5F_addr_defined(ext_loc.addr));
-        if(H5O_delete(f, ext_loc.addr) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "unable to count messages")
-        f->shared->sblock->ext_addr = HADDR_UNDEF;
+        /* If the object header is an empty base chunk, remove superblock extension */
+        if(hdr_info.nchunks == 1) {
+            if((null_count = H5O_msg_count(&ext_loc, H5O_NULL_ID)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "unable to count messages")
+            else if((unsigned)null_count == hdr_info.nmesgs) {
+                HDassert(H5F_addr_defined(ext_loc.addr));
+                if(H5O_delete(f, ext_loc.addr) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "unable to count messages")
+                f->shared->sblock->ext_addr = HADDR_UNDEF;
+            } /* end else-if */
         } /* end if */
-    } /* end if */
     } /* end if */
 
 done:

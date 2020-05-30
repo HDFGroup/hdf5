@@ -42,6 +42,8 @@
 #include "H5FOprivate.h"        /* File objects                         */
 #include "H5HFpkg.h"		/* Fractal heaps			*/
 #include "H5MFprivate.h"	/* File memory management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
+
 
 /****************/
 /* Local Macros */
@@ -167,7 +169,7 @@ H5HF_create(H5F_t *f, const H5HF_create_t *cparam)
 
     /* Create shared fractal heap header */
     if(HADDR_UNDEF == (fh_addr = H5HF_hdr_create(f, cparam)))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't create fractal heap header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't create fractal heap header")
 
     /* Allocate fractal heap wrapper */
     if(NULL == (fh = H5FL_MALLOC(H5HF_t)))

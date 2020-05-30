@@ -498,7 +498,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5AC__construct_candidate_list(H5AC_t *cache_ptr, H5AC_aux_t *aux_ptr,
+H5AC__construct_candidate_list(H5AC_t *cache_ptr, H5AC_aux_t H5_ATTR_NDEBUG_UNUSED *aux_ptr,
     int sync_point_op)
 {
     herr_t ret_value = SUCCEED;    /* Return value */
@@ -821,9 +821,8 @@ H5AC__log_cleaned_entry(const H5AC_info_t *entry_ptr)
 {
     H5AC_t             * cache_ptr;
     H5AC_aux_t         * aux_ptr;
-    herr_t               ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(entry_ptr);
@@ -853,8 +852,7 @@ H5AC__log_cleaned_entry(const H5AC_info_t *entry_ptr)
     /* Decrement the dirty byte count */
     aux_ptr->dirty_bytes -= entry_ptr->size;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5AC__log_cleaned_entry() */
 
 

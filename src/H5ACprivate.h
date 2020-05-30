@@ -429,7 +429,7 @@ H5_DLL herr_t H5AC_get_mdc_image_info(H5AC_t *cache_ptr, haddr_t *image_addr,
 /* Tag & Ring routines */
 H5_DLL void H5AC_tag(haddr_t metadata_tag, haddr_t *prev_tag);
 H5_DLL herr_t H5AC_flush_tagged_metadata(H5F_t *f, haddr_t metadata_tag);
-H5_DLL herr_t H5AC_evict_tagged_metadata(H5F_t * f, haddr_t metadata_tag, hbool_t match_global);
+H5_DLL herr_t H5AC_evict_tagged_metadata(H5F_t *f, haddr_t metadata_tag, hbool_t match_global);
 H5_DLL herr_t H5AC_retag_copied_metadata(const H5F_t *f, haddr_t metadata_tag);
 H5_DLL herr_t H5AC_ignore_tags(const H5F_t *f);
 H5_DLL herr_t H5AC_cork(H5F_t *f, haddr_t obj_addr, unsigned action, hbool_t *corked);

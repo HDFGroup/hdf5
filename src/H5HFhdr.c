@@ -36,6 +36,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5HFpkg.h"		/* Fractal heaps			*/
 #include "H5MFprivate.h"	/* File memory management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5VMprivate.h"		/* Vectors and arrays 			*/
 
 /****************/
@@ -484,7 +485,7 @@ H5HF_hdr_create(H5F_t *f, const H5HF_create_t *cparam)
     /* Second phase of header final initialization */
     /* (needs ID and filter lengths set up) */
     if(H5HF_hdr_finish_init_phase2(hdr) < 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "can't finish phase #2 of header final initialization")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "can't finish phase #2 of header final initialization")
 
     /* Extra checking for possible gap between max. direct block size minus
      * overhead and "huge" object size */
@@ -494,11 +495,11 @@ H5HF_hdr_create(H5F_t *f, const H5HF_create_t *cparam)
 
     /* Allocate space for the header on disk */
     if(HADDR_UNDEF == (hdr->heap_addr = H5MF_alloc(f, H5FD_MEM_FHEAP_HDR, (hsize_t)hdr->heap_size)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed for fractal heap header")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed for fractal heap header")
 
     /* Cache the new fractal heap header */
     if(H5AC_insert_entry(f, H5AC_FHEAP_HDR, hdr->heap_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, HADDR_UNDEF, "can't add fractal heap header to cache")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, HADDR_UNDEF, "can't add fractal heap header to cache")
 
     /* Set address of heap header to return */
     ret_value = hdr->heap_addr;
