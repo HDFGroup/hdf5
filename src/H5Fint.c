@@ -1855,7 +1855,7 @@ H5F__post_open(H5F_t *f)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F__flush() */
+} /* end H5F__post_open() */
 
 
 /*-------------------------------------------------------------------------

@@ -6144,9 +6144,6 @@ done:
  *
  * Purpose:     Waits on an asychronous request through the VOL
  *
- * Note:	Releases the request if the operation has completed and the
- *		connector callback succeeds
- *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
@@ -6182,9 +6179,6 @@ done:
  * Function:    H5VL_request_wait
  *
  * Purpose:     Waits on an asychronous request through the VOL
- *
- * Note:	Releases the request if the operation has completed and the
- *		connector callback succeeds
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -6226,9 +6220,6 @@ done:
  *
  * Purpose:     Waits on a request
  *
- * Note:	Releases the request if the operation has completed and the
- *		connector callback succeeds
- *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
@@ -6261,8 +6252,6 @@ done:
  *
  * Purpose:     Registers a user callback to be invoked when an asynchronous
  *		operation completes
- *
- * Note:	Releases the request, if connector callback succeeds
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -6299,8 +6288,6 @@ done:
  *
  * Purpose:     Registers a user callback to be invoked when an asynchronous
  *		operation completes
- *
- * Note:	Releases the request, if connector callback succeeds
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -6343,8 +6330,6 @@ done:
  * Purpose:     Registers a user callback to be invoked when an asynchronous
  *		operation completes
  *
- * Note:	Releases the request, if connector callback succeeds
- *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
@@ -6377,8 +6362,6 @@ done:
  * Function:    H5VL__request_cancel
  *
  * Purpose:     Cancels an asynchronous request through the VOL
- *
- * Note:	Releases the request, if connector callback succeeds
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -6413,8 +6396,6 @@ done:
  * Function:    H5VL_request_cancel
  *
  * Purpose:     Cancels an asynchronous request through the VOL
- *
- * Note:	Releases the request, if connector callback succeeds
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -6454,8 +6435,6 @@ done:
  * Function:    H5VLrequest_cancel
  *
  * Purpose:     Cancels a request
- *
- * Note:	Releases the request, if connector callback succeeds
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
