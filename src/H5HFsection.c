@@ -1185,9 +1185,9 @@ H5HF__sect_single_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls, const H5
             H5HF_indirect_t *iblock;    /* Indirect block that section's direct block resides in */
             haddr_t dblock_addr;        /* Direct block address */
             size_t dblock_size;         /* Direct block size */
-            size_t dblock_overhead;     /* Direct block's overhead */
             unsigned dblock_status = 0; /* Direct block's status in the metadata cache */
-            herr_t status;              /* Generic status value */
+            size_t H5_ATTR_NDEBUG_UNUSED dblock_overhead;     /* Direct block's overhead */
+            herr_t H5_ATTR_NDEBUG_UNUSED status;              /* Generic status value */
 
             /* Sanity check settings for section's direct block's parent */
             iblock = sect->u.single.parent;
@@ -2038,7 +2038,7 @@ H5HF__sect_row_valid(const H5FS_section_class_t *cls, const H5FS_section_info_t 
     const H5HF_hdr_t *hdr;      /* Fractal heap header */
     const H5HF_free_section_t *sect = (const H5HF_free_section_t *)_sect;   /* Pointer to section to check */
     const H5HF_free_section_t *indir_sect;   /* Pointer to underlying indirect section */
-    unsigned indir_idx;         /* Index of row in underlying indirect section's row array */
+    unsigned H5_ATTR_NDEBUG_UNUSED indir_idx; /* Index of row in underlying indirect section's row array */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -4125,7 +4125,7 @@ H5HF_sect_indirect_valid(const H5HF_hdr_t *hdr, const H5HF_free_section_t *sect)
         dir_nrows = (max_dir_row - start_row) + 1;
         HDassert(dir_nrows == sect->u.indirect.dir_nrows);
         for(u = 0; u < dir_nrows; u++) {
-            const H5HF_free_section_t *tmp_row_sect;    /* Pointer to row section */
+            const H5HF_free_section_t H5_ATTR_NDEBUG_UNUSED *tmp_row_sect;    /* Pointer to row section */
 
             tmp_row_sect = sect->u.indirect.dir_rows[u];
             HDassert(tmp_row_sect->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW
@@ -4133,7 +4133,7 @@ H5HF_sect_indirect_valid(const H5HF_hdr_t *hdr, const H5HF_free_section_t *sect)
             HDassert(tmp_row_sect->u.row.under == sect);
             HDassert(tmp_row_sect->u.row.row == (start_row + u));
             if(u > 0) {
-                const H5HF_free_section_t *tmp_row_sect2;    /* Pointer to row section */
+                const H5HF_free_section_t H5_ATTR_NDEBUG_UNUSED *tmp_row_sect2;    /* Pointer to row section */
 
                 tmp_row_sect2 = sect->u.indirect.dir_rows[u - 1];
                 HDassert(tmp_row_sect2->u.row.row < tmp_row_sect->u.row.row);
@@ -4160,7 +4160,7 @@ H5HF_sect_indirect_valid(const H5HF_hdr_t *hdr, const H5HF_free_section_t *sect)
             HDassert(tmp_child_sect->sect_info.type == H5HF_FSPACE_SECT_INDIRECT);
             HDassert(tmp_child_sect->u.indirect.parent == sect);
             if(u > 0) {
-                const H5HF_free_section_t *tmp_child_sect2;    /* Pointer to child indirect section */
+                const H5HF_free_section_t H5_ATTR_NDEBUG_UNUSED *tmp_child_sect2;    /* Pointer to child indirect section */
 
                 tmp_child_sect2 = sect->u.indirect.indir_ents[u - 1];
                 HDassert(H5F_addr_lt(tmp_child_sect2->sect_info.addr, tmp_child_sect->sect_info.addr));

@@ -18,8 +18,6 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
-#include "H5Iprivate.h"        /* IDs */
-#include "H5Pprivate.h"        /* Property lists */
 
 /* PRIVATE PROTOTYPES */
 
@@ -61,6 +59,7 @@ H5F_fake_alloc(uint8_t sizeof_size)
     else
         f->shared->sizeof_size = sizeof_size;
 
+    /* Set return value */
     ret_value = f;
 
 done:

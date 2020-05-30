@@ -374,7 +374,7 @@ H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata,
 
 done:
     if(!ret_value && heap)
-        if(H5HG_free(heap) < 0)
+        if(H5HG__free(heap) < 0)
             HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy global heap collection")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -485,7 +485,7 @@ H5HG__cache_heap_free_icr(void *_thing)
     HDassert(heap->cache_info.type == H5AC_GHEAP);
 
     /* Destroy global heap collection */
-    if(H5HG_free(heap) < 0)
+    if(H5HG__free(heap) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy global heap collection")
 
 done:

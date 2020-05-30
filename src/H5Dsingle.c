@@ -244,10 +244,10 @@ H5D__single_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
     } /* end if */
 
     if(dset)
-	if(dset->shared->dcpl_cache.fill.alloc_time != H5D_ALLOC_TIME_EARLY || idx_info->pline->nused > 0)
-	    /* Mark the layout dirty so that the address of the single chunk will be flushed later */
-	    if(H5D__mark(dset, H5D_MARK_LAYOUT) < 0)
-		HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to mark layout as dirty")
+        if(dset->shared->dcpl_cache.fill.alloc_time != H5D_ALLOC_TIME_EARLY || idx_info->pline->nused > 0)
+            /* Mark the layout dirty so that the address of the single chunk will be flushed later */
+            if(H5D__mark(dset, H5D_MARK_LAYOUT) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to mark layout as dirty")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -437,7 +437,7 @@ H5D__single_idx_delete(const H5D_chk_idx_info_t *idx_info)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__single_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
+H5D__single_idx_copy_setup(const H5D_chk_idx_info_t H5_ATTR_NDEBUG_UNUSED *idx_info_src,
     const H5D_chk_idx_info_t *idx_info_dst)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */

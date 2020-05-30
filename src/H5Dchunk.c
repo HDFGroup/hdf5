@@ -269,7 +269,6 @@ static int H5D__get_num_chunks_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata
 static int H5D__get_chunk_info_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
 static int H5D__get_chunk_info_by_coord_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
 
-
 /* "Nonexistent" layout operation callback */
 static ssize_t
 H5D__nonexistent_readvv(const H5D_io_info_t *io_info,
@@ -421,10 +420,11 @@ H5D__chunk_direct_write(const H5D_t *dset, uint32_t filters, hsize_t *offset,
     io_info.dset = dset;
 
     /* Allocate dataspace and initialize it if it hasn't been. */
-    if(!H5D__chunk_is_space_alloc(&layout->storage))
+    if(!H5D__chunk_is_space_alloc(&layout->storage)) {
         /* Allocate storage */
         if(H5D__alloc_storage(&io_info, H5D_ALLOC_WRITE, FALSE, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
+    }
 
     /* Calculate the index of this chunk */
     H5VM_chunk_scaled(dset->shared->ndims, offset, layout->u.chunk.dim, scaled);
@@ -580,7 +580,7 @@ H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t* filters,
         /* Get the new file address / chunk size after flushing */
         if(H5D__chunk_lookup(dset, scaled, &udata) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
-    } /* end if */
+    }
 
     /* Make sure the address of the chunk is returned. */
     if(!H5F_addr_defined(udata.chunk_block.offset))
@@ -677,8 +677,8 @@ H5D__get_chunk_storage_size(H5D_t *dset, const hsize_t *offset, hsize_t *storage
                 /* Get the new file address / chunk size after flushing */
                 if(H5D__chunk_lookup(dset, scaled, &udata) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
-            } /* end if */
-        } /* end if */
+            }
+        }
 
         /* Make sure the address of the chunk is returned. */
         if(!H5F_addr_defined(udata.chunk_block.offset))
@@ -4251,9 +4251,9 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
         while(!carry) {
             hbool_t need_insert = FALSE;    /* Whether the chunk needs to be inserted into the index */
 
-        /* Look up this chunk */
-        if(H5D__chunk_lookup(dset, scaled, &udata) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
+            /* Look up this chunk */
+            if(H5D__chunk_lookup(dset, scaled, &udata) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
 #ifndef NDEBUG
             /* None of the chunks should be allocated */
             if(H5D_CHUNK_IDX_NONE != sc->idx_type) {
@@ -4286,7 +4286,8 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
 
                 /* Check to make sure the buffer is large enough.  It is
                  * possible (though ill-advised) for the filter to shrink the
-                 * buffer. */
+                 * buffer.
+                 */
                 if(fb_info.fill_buf_size < orig_chunk_size) {
                     if(NULL == (fb_info.fill_buf = H5D__chunk_mem_realloc(fb_info.fill_buf, orig_chunk_size, pline)))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory reallocation failed for raw data chunk")
@@ -4518,10 +4519,6 @@ H5D__chunk_update_old_edge_chunks(H5D_t *dset, hsize_t old_dim[])
             HGOTO_DONE(SUCCEED)
         } /* end if */
 
-    /*
-     * Initialize structures needed to lock chunks into cache
-     */
-
     /* Set up chunked I/O info object, for operations on chunks (in callback).
      * Note that we only need to set chunk_offset once, as the array's address
      * will never change. */
@@ -4684,12 +4681,12 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
     /* Distribute evenly the number of blocks between processes. */
     if(mpi_size == 0)
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Resulted in division by zero")
-    num_blocks = chunk_info->num_io / mpi_size; /* value should be the same on all procs */
+    num_blocks = (size_t)(chunk_info->num_io / (size_t)mpi_size); /* value should be the same on all procs */
 
     /* after evenly distributing the blocks between processes, are
        there any leftover blocks for each individual process
        (round-robin) */
-    leftover_blocks = chunk_info->num_io % mpi_size;
+    leftover_blocks = (size_t)(chunk_info->num_io % (size_t)mpi_size);
 
     /* Cast values to types needed by MPI */
     H5_CHECKED_ASSIGN(blocks, int, num_blocks, size_t);
@@ -4698,9 +4695,9 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
 
     /* Allocate buffers */
     /* (MSC - should not need block_lens if MPI_type_create_hindexed_block is working) */
-    if(NULL == (block_lens = (int *)H5MM_malloc((blocks + 1) * sizeof(int))))
+    if(NULL == (block_lens = (int *)H5MM_malloc((size_t)(blocks + 1) * sizeof(int))))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk lengths buffer")
-    if(NULL == (chunk_disp_array = (MPI_Aint *)H5MM_malloc((blocks + 1) * sizeof(MPI_Aint))))
+    if(NULL == (chunk_disp_array = (MPI_Aint *)H5MM_malloc((size_t)(blocks + 1) * sizeof(MPI_Aint))))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk file displacement buffer")
 
     for(i = 0 ; i < blocks ; i++) {
@@ -4735,8 +4732,7 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
     if(need_addr_sort)
         HDqsort(chunk_disp_array, blocks, sizeof(MPI_Aint), H5D__chunk_cmp_addr);
 
-    /* MSC
-     * should use this if MPI_type_create_hindexed block is working
+    /* MSC - should use this if MPI_type_create_hindexed block is working:
      * mpi_code = MPI_Type_create_hindexed_block(blocks, block_len, chunk_disp_array, MPI_BYTE, &file_type);
      */
     mpi_code = MPI_Type_create_hindexed(blocks, block_lens, chunk_disp_array, MPI_BYTE, &file_type);
@@ -4791,7 +4787,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_collective_fill() */
 
-
 
 static int
 H5D__chunk_cmp_addr(const void *addr1, const void *addr2)
@@ -4821,7 +4816,6 @@ H5D__chunk_cmp_addr(const void *addr1, const void *addr2)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_cmp_addr() */
-
 #endif /* H5_HAVE_PARALLEL */
 
 
@@ -5404,7 +5398,6 @@ H5D__chunk_addrmap_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     /* Set it in the userdata to return */
     udata->chunk_addr[chunk_index] = chunk_rec->chunk_addr;
 
-done:
     FUNC_LEAVE_NOAPI(H5_ITER_CONT)
 } /* H5D__chunk_addrmap_cb() */
 
@@ -6393,7 +6386,8 @@ H5D__chunk_stats(const H5D_t *dset, hbool_t headers)
     }
 
 #ifdef H5AC_DEBUG
-    if (H5DEBUG(AC)) headers = TRUE;
+    if (H5DEBUG(AC))
+        headers = TRUE;
 #endif
 
     if (headers) {
@@ -6621,31 +6615,31 @@ H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old
                 HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk size can't be encoded")
         } /* end block */
 
-    if(old_chunk && H5F_addr_defined(old_chunk->offset)) {
-        /* Sanity check */
+        if(old_chunk && H5F_addr_defined(old_chunk->offset)) {
+            /* Sanity check */
             HDassert(!H5F_addr_defined(new_chunk->offset) || H5F_addr_eq(new_chunk->offset, old_chunk->offset));
 
             /* Check for chunk being same size */
-        if(new_chunk->length != old_chunk->length) {
-        /* Release previous chunk */
-        /* Only free the old location if not doing SWMR writes - otherwise
+            if(new_chunk->length != old_chunk->length) {
+                /* Release previous chunk */
+                /* Only free the old location if not doing SWMR writes - otherwise
                  * we must keep the old chunk around in case a reader has an
                  * outdated version of the B-tree node
                  */
-        if(!(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE))
-            if(H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, old_chunk->offset, old_chunk->length) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk")
-        alloc_chunk = TRUE;
-        } /* end if */
+                if(!(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE))
+                    if(H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, old_chunk->offset, old_chunk->length) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk")
+                alloc_chunk = TRUE;
+            } /* end if */
             else {
-        /* Don't need to reallocate chunk, but send its address back up */
+                /* Don't need to reallocate chunk, but send its address back up */
                 if(!H5F_addr_defined(new_chunk->offset))
                     new_chunk->offset = old_chunk->offset;
-        } /* end else */
-    } /* end if */
+            } /* end else */
+        } /* end if */
         else {
             HDassert(!H5F_addr_defined(new_chunk->offset));
-        alloc_chunk = TRUE;
+            alloc_chunk = TRUE;
         } /* end else */
     } /* end if */
     else {
@@ -6750,7 +6744,7 @@ H5D__chunk_format_convert_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "memory allocation failed for raw data chunk")
 
         /* Read the non-filtered edge chunk */
-        if(H5F_block_read(new_idx_info->f, H5FD_MEM_DRAW, chunk_addr, read_size, buf) < 0)
+        if (H5F_block_read(new_idx_info->f, H5FD_MEM_DRAW, chunk_addr, read_size, buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, H5_ITER_ERROR, "unable to read raw data chunk")
 
         /* Pass the chunk through the pipeline */
@@ -6871,8 +6865,8 @@ H5D__get_num_chunks_cb(const H5D_chunk_rec_t H5_ATTR_UNUSED *chunk_rec, void *_u
  * Note:        Currently, this function only gets the number of all written
  *              chunks, regardless the dataspace.
  *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *
  * Programmer:  Binh-Minh Ribler
  *              September 2018 (HDFFV-10615)
@@ -7081,9 +7075,9 @@ done:
 static int
 H5D__get_chunk_info_by_coord_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 {
-    hsize_t ii;
     H5D_chunk_info_iter_ud_t *chunk_info = (H5D_chunk_info_iter_ud_t *)_udata;
     hbool_t different = FALSE;      /* TRUE when a scaled value pair mismatch */
+    hsize_t ii;                     /* Local index value */
     int ret_value = H5_ITER_CONT;   /* Callback return value */
 
     FUNC_ENTER_STATIC_NOERR

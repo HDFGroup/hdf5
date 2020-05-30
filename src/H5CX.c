@@ -175,7 +175,7 @@
  *      corresponding property in the property list to be set when the API
  *      context is popped, when returning from the API routine.  Note that the
  *      naming of these fields, <foo> and <foo>_set, is important for the
-*       H5CX_TEST_SET_PROP and H5CX_SET_PROP macros to work properly.
+ *      H5CX_TEST_SET_PROP and H5CX_SET_PROP macros to work properly.
  */
 typedef struct H5CX_t {
     /* DXPL */
@@ -300,9 +300,9 @@ typedef struct H5CX_t {
     hbool_t ohdr_flags_valid;  /* Whether the object headers flags are valid */
 
     /* Cached DAPL properties */
-    char *extfile_prefix;               /* Prefix for external file                      */
+    const char *extfile_prefix;         /* Prefix for external file                      */
     hbool_t extfile_prefix_valid;       /* Whether the prefix for external file is valid */
-    char *vds_prefix;                   /* Prefix for VDS                                */
+    const char *vds_prefix;             /* Prefix for VDS                                */
     hbool_t vds_prefix_valid;           /* Whether the prefix for VDS is valid           */
 
     /* Cached FAPL properties */
@@ -376,8 +376,8 @@ typedef struct H5CX_dcpl_cache_t {
 /* Typedef for cached default dataset access property list information */
 /* (Same as the cached DXPL struct, above, except for the default DXPL) */
 typedef struct H5CX_dapl_cache_t {
-    char *extfile_prefix;       /* Prefix for external file */
-    char *vds_prefix;           /* Prefix for VDS           */
+    const char *extfile_prefix; /* Prefix for external file */
+    const char *vds_prefix;     /* Prefix for VDS           */
 } H5CX_dapl_cache_t;
 
 /* Typedef for cached default file access property list information */
@@ -386,7 +386,6 @@ typedef struct H5CX_fapl_cache_t {
     H5F_libver_t low_bound;     /* low_bound property for H5Pset_libver_bounds() */
     H5F_libver_t high_bound;    /* high_bound property for H5Pset_libver_bounds */
 } H5CX_fapl_cache_t;
-
 
 /********************/
 /* Local Prototypes */
@@ -575,7 +574,7 @@ H5CX__init_package(void)
 
     /* Get the default DCPL cache information */
 
-    /* Get the default link access property list */
+    /* Get the default dataset creation property list */
     if(NULL == (dc_plist = (H5P_genplist_t *)H5I_object(H5P_DATASET_CREATE_DEFAULT)))
         HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "not a dataset create property list")
 
@@ -743,9 +742,9 @@ H5CX__push_common(H5CX_node_t *cnode)
 
     /* Set non-zero context info */
     cnode->ctx.dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    cnode->ctx.dapl_id = H5P_DATASET_ACCESS_DEFAULT;
     cnode->ctx.lcpl_id = H5P_LINK_CREATE_DEFAULT;
     cnode->ctx.lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    cnode->ctx.dapl_id = H5P_DATASET_ACCESS_DEFAULT;
     cnode->ctx.fapl_id = H5P_FILE_ACCESS_DEFAULT;
     cnode->ctx.tag = H5AC__INVALID_TAG;
     cnode->ctx.ring = H5AC_RING_USER;
@@ -951,7 +950,7 @@ done:
  * Return:      <none>
  *
  * Programmer:  Chris Hogan
- *              November 27, 2019
+ *              October 28, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -1128,7 +1127,7 @@ done:
  *
  * Purpose:     Sanity checks and sets up collective operations.
  *
- * Note:	Should be called for all API routines that modify file
+ * Note:        Should be called for all API routines that modify file
  *              file metadata but don't pass in an access property list.
  *
  * Return:      Non-negative on success / Negative on failure
@@ -2258,6 +2257,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_get_libver_bounds() */
 
+
 /*-------------------------------------------------------------------------
  * Function:    H5CX_get_ext_file_prefix
  *
