@@ -24,7 +24,7 @@
 
 /* Struct for tracking "shared" file structs */
 typedef struct H5F_sfile_node_t {
-    H5F_shared_t *shared;                 /* Pointer to "shared" file struct */
+    H5F_shared_t *shared;               /* Pointer to "shared" file struct */
     struct H5F_sfile_node_t *next;      /* Pointer to next node */
 } H5F_sfile_node_t;
 
@@ -84,7 +84,7 @@ H5F_sfile_assert_num(unsigned n)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_sfile_add
+ * Function:    H5F_sfile_add
  *
  * Purpose:     Add a "shared" file struct to the list of open files
  *
@@ -123,7 +123,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_sfile_search
+ * Function:    H5F_sfile_search
  *
  * Purpose:     Search for a "shared" file with low-level file info that
  *              matches
@@ -163,7 +163,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_sfile_remove
+ * Function:    H5F_sfile_remove
  *
  * Purpose:     Remove a "shared" file struct from the list of open files
  *
