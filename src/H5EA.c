@@ -991,11 +991,6 @@ END_FUNC(PRIV)  /* end H5EA_delete() */
  *
  * Programmer:  Vailin Choi; Feb 2015
  *
- * Modification:
- *              Prototype changed (HDFFV-10661)
- *              - herr_t to int
- *              - SUCCEED/FAIL to H5_ITER_CONT/H5_ITER_ERROR
- *              June 6, 2019 -BMR
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(PRIV, ERR,
@@ -1007,9 +1002,7 @@ H5EA_iterate(H5EA_t *ea, H5EA_operator_t op, void *udata))
     hsize_t     u;
     int         cb_ret = H5_ITER_CONT;     /* Return value from callback */
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments */
     HDassert(ea);
     HDassert(op);
     HDassert(udata);
