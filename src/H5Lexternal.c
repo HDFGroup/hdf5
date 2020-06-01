@@ -125,7 +125,7 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group,
     size_t      fname_len;              /* Length of external link file name */
     unsigned    intent;                 /* File access permissions */
     H5L_elink_cb_t cb_info;             /* Callback info struct */
-    hid_t       fapl_id = -1;           /* File access property list for external link's file */
+    hid_t       fapl_id = H5I_INVALID_HID;           /* File access property list for external link's file */
     void       *ext_obj = NULL;         /* External link's object */
     hid_t       ext_obj_id = H5I_INVALID_HID;   /* ID for external link's object */
     H5I_type_t  opened_type;            /* ID type of external link's object */
