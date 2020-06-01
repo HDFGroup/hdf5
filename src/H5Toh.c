@@ -180,7 +180,7 @@ H5O__dtype_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc)
 
     /* Commit the type to the file */
     if(H5T__commit(f, crt_info->dt, crt_info->tcpl_id) < 0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to commit datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to commit datatype")
 
     /* Set up the new named datatype's location */
     if(NULL == (obj_loc->oloc = H5T_oloc(crt_info->dt)))

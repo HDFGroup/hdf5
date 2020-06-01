@@ -652,7 +652,7 @@ int H5SL_term_package(void)
         /* Terminate all the factories */
         if(H5SL_fac_nused_g > 0) {
             size_t  i;
-            herr_t  ret;
+            herr_t  H5_ATTR_NDEBUG_UNUSED ret;
 
             for(i = 0; i < H5SL_fac_nused_g; i++) {
                 ret = H5FL_fac_term(H5SL_fac_g[i]);
