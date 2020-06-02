@@ -33,11 +33,11 @@
 /***********/
 #include "H5private.h"          /* Generic Functions                    */
 #include "H5CXprivate.h"        /* API Contexts                         */
-#include "H5Dprivate.h"		/* Datasets				*/
+#include "H5Dprivate.h"         /* Datasets                             */
 #include "H5Eprivate.h"         /* Error handling                       */
 #include "H5FLprivate.h"        /* Free Lists                           */
 #include "H5Iprivate.h"         /* IDs                                  */
-#include "H5Lprivate.h"		/* Links		  		*/
+#include "H5Lprivate.h"         /* Links                                */
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Pprivate.h"         /* Property lists                       */
 
@@ -53,7 +53,7 @@
  * each thread individually. The association of contexts to threads will
  * be handled by the pthread library.
  *
- * In order for this macro to work, H5E_get_my_stack() must be preceeded
+ * In order for this macro to work, H5CX_get_my_context() must be preceeded
  * by "H5CX_node_t *ctx =".
  */
 #define H5CX_get_my_context()  H5CX__get_context()
@@ -64,17 +64,22 @@
 #define H5CX_get_my_context() (&H5CX_head_g)
 #endif /* H5_HAVE_THREADSAFE */
 
+/* Common macro for the retrieving the pointer to a property list */
+#define H5CX_RETRIEVE_PLIST(PL, FAILVAL)                                      \
+    /* Check if the property list is already available */                     \
+    if(NULL == (*head)->ctx.PL)                                               \
+        /* Get the property list pointer */                                   \
+        if(NULL == ((*head)->ctx.PL = (H5P_genplist_t *)H5I_object((*head)->ctx.H5_GLUE(PL,_id)))) \
+            HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, (FAILVAL), "can't get property list")
+
 /* Common macro for the duplicated code to retrieve properties from a property list */
 #define H5CX_RETRIEVE_PROP_COMMON(PL, DEF_PL, PROP_NAME, PROP_FIELD)          \
     /* Check for default property list */                                     \
     if((*head)->ctx.H5_GLUE(PL,_id) == (DEF_PL))                              \
         H5MM_memcpy(&(*head)->ctx.PROP_FIELD, &H5_GLUE3(H5CX_def_,PL,_cache).PROP_FIELD, sizeof(H5_GLUE3(H5CX_def_,PL,_cache).PROP_FIELD)); \
     else {                                                                    \
-        /* Check if the property list is already available */                 \
-        if(NULL == (*head)->ctx.PL)                                           \
-            /* Get the dataset transfer property list pointer */              \
-            if(NULL == ((*head)->ctx.PL = (H5P_genplist_t *)H5I_object((*head)->ctx.H5_GLUE(PL,_id)))) \
-                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list") \
+        /* Retrieve the property list */                                      \
+        H5CX_RETRIEVE_PLIST(PL, FAIL)                                         \
                                                                               \
         /* Get the property */                                                \
         if(H5P_get((*head)->ctx.PL, (PROP_NAME), &(*head)->ctx.PROP_FIELD) < 0) \
@@ -100,7 +105,7 @@
     } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
-#ifdef H5_HAVE_PARALLEL
+#if defined(H5_HAVE_PARALLEL) && defined(H5_HAVE_INSTRUMENTED_LIBRARY)
 /* Macro for the duplicated code to test and set properties for a property list */
 #define H5CX_TEST_SET_PROP(PROP_NAME, PROP_FIELD)                             \
 {                                                                             \
@@ -108,11 +113,8 @@
                                                                               \
     /* Check if property exists in DXPL */                                    \
     if(!(*head)->ctx.H5_GLUE(PROP_FIELD,_set)) {                              \
-        /* Check if the property list is already available */                 \
-        if(NULL == (*head)->ctx.dxpl)                                         \
-            /* Get the dataset transfer property list pointer */              \
-            if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id))) \
-                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list") \
+        /* Retrieve the dataset transfer property list */                     \
+        H5CX_RETRIEVE_PLIST(dxpl, FAIL)                                       \
                                                                               \
         if((check_prop = H5P_exist_plist((*head)->ctx.dxpl, PROP_NAME)) < 0)  \
             HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "error checking for property") \
@@ -125,21 +127,20 @@
         (*head)->ctx.H5_GLUE(PROP_FIELD,_set) = TRUE;                         \
     } /* end if */                                                            \
 }
-#endif /* H5_HAVE_PARALLEL */
+#endif /* defined(H5_HAVE_PARALLEL) && defined(H5_HAVE_INSTRUMENTED_LIBRARY) */
 
+#ifdef H5_HAVE_PARALLEL
 /* Macro for the duplicated code to test and set properties for a property list */
 #define H5CX_SET_PROP(PROP_NAME, PROP_FIELD)                                  \
     if((*head)->ctx.H5_GLUE(PROP_FIELD,_set)) {                               \
-        /* Check if the property list is already available */                 \
-        if(NULL == (*head)->ctx.dxpl)                                         \
-            /* Get the dataset transfer property list pointer */              \
-            if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id))) \
-                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, NULL, "can't get default dataset transfer property list") \
+        /* Retrieve the dataset transfer property list */                     \
+        H5CX_RETRIEVE_PLIST(dxpl, NULL)                                       \
                                                                               \
-        /* Set the chunk filter mask property */                              \
+        /* Set the property */                              		      \
         if(H5P_set((*head)->ctx.dxpl, PROP_NAME, &(*head)->ctx.PROP_FIELD) < 0) \
-            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, NULL, "error setting filter mask xfer property") \
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, NULL, "error setting data xfer property") \
     } /* end if */
+#endif /* H5_HAVE_PARALLEL */
 
 
 /******************/
@@ -390,7 +391,9 @@ typedef struct H5CX_fapl_cache_t {
 /********************/
 /* Local Prototypes */
 /********************/
+#ifdef H5_HAVE_THREADSAFE
 static H5CX_node_t **H5CX__get_context(void);
+#endif /* H5_HAVE_THREADSAFE */
 static void H5CX__push_common(H5CX_node_t *cnode);
 static H5CX_node_t *H5CX__pop_common(void);
 
@@ -742,6 +745,7 @@ H5CX__push_common(H5CX_node_t *cnode)
 
     /* Set non-zero context info */
     cnode->ctx.dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    cnode->ctx.dcpl_id = H5P_DATASET_CREATE_DEFAULT;
     cnode->ctx.dapl_id = H5P_DATASET_ACCESS_DEFAULT;
     cnode->ctx.lcpl_id = H5P_LINK_CREATE_DEFAULT;
     cnode->ctx.lapl_id = H5P_LINK_ACCESS_DEFAULT;
@@ -1144,6 +1148,7 @@ H5CX_set_loc(hid_t
 #endif /* H5_HAVE_PARALLEL */
    loc_id)
 {
+#ifdef H5_HAVE_PARALLEL
     H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1152,7 +1157,6 @@ H5CX_set_loc(hid_t
     /* Sanity check */
     HDassert(head && *head);
 
-#ifdef H5_HAVE_PARALLEL
     /* Set collective metadata read flag */
     (*head)->ctx.coll_metadata_read = TRUE;
 
@@ -1173,10 +1177,14 @@ H5CX_set_loc(hid_t
         if(mpi_comm != MPI_COMM_NULL)
             MPI_Barrier(mpi_comm);
     } /* end if */
-#endif /* H5_HAVE_PARALLEL */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
+#else /* H5_HAVE_PARALLEL */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+#endif /* H5_HAVE_PARALLEL */
 } /* end H5CX_set_loc() */
 
 
@@ -2271,7 +2279,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5CX_get_ext_file_prefix(char **extfile_prefix)
+H5CX_get_ext_file_prefix(const char **extfile_prefix)
 {
     H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -2328,7 +2336,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5CX_get_vds_prefix(char **vds_prefix)
+H5CX_get_vds_prefix(const char **vds_prefix)
 {
     H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -3116,7 +3124,11 @@ H5CX__pop_common(void)
     H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
     H5CX_node_t *ret_value = NULL;      /* Return value */
 
+#ifdef H5_HAVE_PARALLEL
     FUNC_ENTER_STATIC
+#else
+    FUNC_ENTER_STATIC_NOERR
+#endif
 
     /* Sanity check */
     HDassert(head && *head);
@@ -3142,7 +3154,9 @@ H5CX__pop_common(void)
     ret_value = (*head);
     (*head) = (*head)->next;
 
+#ifdef H5_HAVE_PARALLEL
 done:
+#endif /* H5_HAVE_PARALLEL */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX__pop_common() */
 
