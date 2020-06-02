@@ -880,7 +880,7 @@ test_fs_sect_add(hid_t fapl)
         FAIL_STACK_ERROR
     fs_addr = HADDR_UNDEF;
 
-    /* Close the file and dxpl */
+    /* Close the file */
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
@@ -1249,7 +1249,7 @@ test_fs_sect_find(hid_t fapl)
         FAIL_STACK_ERROR
     fs_addr = HADDR_UNDEF;
 
-    /* Close the file and dxpl */
+    /* Close the file */
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
@@ -2737,7 +2737,7 @@ test_fs_sect_extend(hid_t fapl)
 
     PASSED();
 
-    /* Close the file and dxpl */
+    /* Close the file */
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
@@ -2839,7 +2839,7 @@ test_fs_sect_iterate(hid_t fapl)
 	FAIL_STACK_ERROR
     fs_addr = HADDR_UNDEF;
 
-    /* Close the file and dxpl */
+    /* Close the file */
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 

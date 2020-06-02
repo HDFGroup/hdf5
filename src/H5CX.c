@@ -33,11 +33,11 @@
 /***********/
 #include "H5private.h"          /* Generic Functions                    */
 #include "H5CXprivate.h"        /* API Contexts                         */
-#include "H5Dprivate.h"		/* Datasets				*/
+#include "H5Dprivate.h"         /* Datasets                             */
 #include "H5Eprivate.h"         /* Error handling                       */
 #include "H5FLprivate.h"        /* Free Lists                           */
 #include "H5Iprivate.h"         /* IDs                                  */
-#include "H5Lprivate.h"		/* Links		  		*/
+#include "H5Lprivate.h"         /* Links                                */
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Pprivate.h"         /* Property lists                       */
 
