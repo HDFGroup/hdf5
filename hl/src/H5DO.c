@@ -137,9 +137,9 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
 
     /* If the user passed in a default DXPL, create one to pass to H5Dwrite() */
     if(H5P_DEFAULT == dxpl_id) {
-        if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
-            goto done;
-        created_dxpl = TRUE;
+        //if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        //    goto done;
+        //created_dxpl = TRUE;
     } /* end if */
     else if(TRUE != H5Pisa_class(dxpl_id, H5P_DATASET_XFER))
         goto done;
@@ -199,7 +199,7 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
     /* create a memory space */
     if(FAIL == (mem_space_id = H5Screate_simple(1, &nelmts, NULL)))
         goto done;
-
+#if 0
     /* Write the data */
     if(H5Dwrite(dset_id, memtype, mem_space_id, new_space_id, dxpl_id, buf) < 0)
         goto done;
@@ -235,7 +235,7 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
                 goto done;
         } /* end if */
     } /* end if */
-
+#endif
     /* Indicate success */
     ret_value = SUCCEED;
 
