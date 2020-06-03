@@ -130,7 +130,6 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
     hsize_t k;				/* Local index variable */
     unsigned u; 		        /* Local index variable */
     herr_t ret_value = FAIL;		/* Return value */
-
     /* check arguments */
     if(H5I_DATASET != H5Iget_type(dset_id))
         goto done;
@@ -199,11 +198,12 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
     /* create a memory space */
     if(FAIL == (mem_space_id = H5Screate_simple(1, &nelmts, NULL)))
         goto done;
-#if 0
+
     /* Write the data */
     if(H5Dwrite(dset_id, memtype, mem_space_id, new_space_id, dxpl_id, buf) < 0)
         goto done;
-
+    
+#if 0
     /* Obtain the dataset's access property list */
     if((dapl = H5Dget_access_plist(dset_id)) < 0)
         goto done;
