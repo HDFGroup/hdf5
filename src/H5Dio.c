@@ -1029,7 +1029,7 @@ H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write,
          */
         if(NULL == (type_info->tconv_buf = (uint8_t *)tconv_buf)) {
             /* Allocate temporary buffer */
-            if(NULL == (type_info->tconv_buf = H5FL_BLK_CALLOC(type_conv, target_size)))
+            if(NULL == (type_info->tconv_buf = H5FL_BLK_MALLOC(type_conv, target_size)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
             type_info->tconv_buf_allocated = TRUE;
         } /* end if */
