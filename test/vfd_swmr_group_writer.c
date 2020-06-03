@@ -30,14 +30,11 @@
 #include "testhdf5.h"
 #include "vfd_swmr_common.h"
 
-static const unsigned int hang_back = 3;
-
 typedef struct {
         hid_t file;
 	char filename[PATH_MAX];
 	char progname[PATH_MAX];
 	struct timespec update_interval;
-	unsigned int asteps;
 	unsigned int nsteps;
         bool wait_for_signal;
         bool use_vfd_swmr;
@@ -79,7 +76,6 @@ state_init(state_t *s, int argc, char **argv)
 {
     unsigned long tmp;
     int ch;
-    const hsize_t dims = 1;
     char tfile[PATH_MAX];
     char *end;
     unsigned long millis;

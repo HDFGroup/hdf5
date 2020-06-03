@@ -1241,9 +1241,11 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
                     assert(old_mdf_idx[i].length == new_mdf_idx[j].length);
 
                     hlog_fast(shadow_index_update,
-                        "writer moved shadow at slot %" PRIu32
-                        " for page %" PRIu64, i,
-                        old_mdf_idx[i].hdf5_page_offset);
+                        "shadow page for slot %" PRIu32 " lower page %" PRIu64
+                        " moved, %" PRIu64 " -> %" PRIu64, i,
+                        old_mdf_idx[i].hdf5_page_offset,
+                        old_mdf_idx[i].md_file_page_offset,
+                        new_mdf_idx[j].md_file_page_offset);
 
                     /* the page has been altered -- evict it and 
                      * any contained metadata cache entries.

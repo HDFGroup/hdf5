@@ -2171,7 +2171,7 @@ H5_DLL herr_t H5CX_pop(void);
         else if (TAILQ_EMPTY(&eot_queue_g))                                   \
             ;   /* Nothing to do. */                                          \
         else if (H5F_vfd_swmr_process_eot_queue(true) < 0) {                  \
-            HDONE_ERROR(H5E_FUNC, H5E_CANTSET, err,                           \
+            HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err,                           \
                         "error processing EOT queue")                         \
         }                                                                     \
     } while (0)
