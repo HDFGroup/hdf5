@@ -84,9 +84,9 @@ test_fapl(void)
     TESTING("Configure VFD SWMR with fapl");
 
     /* Allocate memory for the configuration structure */
-    if((my_config = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+    if((my_config = HDmalloc(sizeof(*my_config))) == NULL)
         FAIL_STACK_ERROR;
-    HDmemset(my_config, 0, sizeof(H5F_vfd_swmr_config_t));
+    HDmemset(my_config, 0, sizeof(*my_config));
 
     /* Get a copy of the file access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -932,7 +932,7 @@ test_writer_md(void)
         TEST_ERROR
 
     /* Allocate memory for the read/write buffer */
-    if((rwbuf = (int *)HDmalloc(sizeof(int) * (50 * 20))) == NULL)
+    if((rwbuf = HDmalloc(sizeof(*rwbuf) * (50 * 20))) == NULL)
         FAIL_STACK_ERROR;
     for(i = 0; i < (50 * 20); i++)
         rwbuf[i] = (int)i;
@@ -1114,8 +1114,7 @@ test_reader_md_concur(void)
     TESTING("Verify the metadata file for VFD SWMR reader");
 
     /* Allocate memory for the configuration structure */
-    if((config_writer = (H5F_vfd_swmr_config_t *)
-                        HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+    if((config_writer = HDmalloc(sizeof(*config_writer))) == NULL)
         FAIL_STACK_ERROR;
 
     HDmemset(config_writer, 0, sizeof(H5F_vfd_swmr_config_t));
@@ -1202,8 +1201,7 @@ test_reader_md_concur(void)
         }
 
         /* Allocate memory for the configuration structure */
-        if((config_reader = (H5F_vfd_swmr_config_t *)
-                            HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+        if((config_reader = HDmalloc(sizeof(*config_reader))) == NULL)
             HDexit(EXIT_FAILURE);
 
         HDmemset(config_reader, 0, sizeof(H5F_vfd_swmr_config_t));
@@ -1539,7 +1537,7 @@ test_reader_md_concur(void)
     }
 
     /* Allocate memory for the read/write buffer */
-    if((rwbuf = (int *)HDmalloc(sizeof(int) * (50 * 20))) == NULL)
+    if((rwbuf = HDmalloc(sizeof(*rwbuf) * (50 * 20))) == NULL)
         FAIL_STACK_ERROR;
     for(i = 0; i < (50 * 20); i++)
         rwbuf[i] = (int)i;
@@ -1769,9 +1767,9 @@ test_multiple_file_opens(void)
     TESTING("EOT queue entries when opening files with/without VFD SWMR");
 
     /* Allocate memory for the configuration structure */
-    if((config1 = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+    if((config1 = HDmalloc(sizeof(*config1))) == NULL)
         FAIL_STACK_ERROR;
-    if((config2 = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+    if((config2 = HDmalloc(sizeof(*config2))) == NULL)
         FAIL_STACK_ERROR;
     HDmemset(config1, 0, sizeof(H5F_vfd_swmr_config_t));
     HDmemset(config2, 0, sizeof(H5F_vfd_swmr_config_t));
@@ -2033,8 +2031,7 @@ test_multiple_concur_file_opens(void)
         }
 
         /* Allocate memory for VFD SMWR configuration */
-        if((config_writer = (H5F_vfd_swmr_config_t *)
-                            HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+        if((config_writer = HDmalloc(sizeof(*config_writer))) == NULL)
             HDexit(EXIT_FAILURE);
 
         HDmemset(config_writer, 0, sizeof(H5F_vfd_swmr_config_t));
@@ -2114,7 +2111,7 @@ test_multiple_concur_file_opens(void)
      */
 
     /* Allocate memory for VFD SWMR configuration */
-    if((config1 = (H5F_vfd_swmr_config_t *) HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+    if((config1 = HDmalloc(sizeof(*config1))) == NULL)
         FAIL_STACK_ERROR
 
     HDmemset(config1, 0, sizeof(H5F_vfd_swmr_config_t));
@@ -2170,7 +2167,7 @@ test_multiple_concur_file_opens(void)
     /* Open file B as VFD SWMR reader */
 
     /* Allocate memory for VFD SWMR configuration */
-    if((config2 = (H5F_vfd_swmr_config_t *) HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+    if((config2 = HDmalloc(sizeof(*config2))) == NULL)
         FAIL_STACK_ERROR
 
     HDmemset(config2, 0, sizeof(H5F_vfd_swmr_config_t));
@@ -2335,9 +2332,9 @@ test_same_file_opens(void)
         FAIL_STACK_ERROR;
 
     /* Allocate memory for the configuration structure */
-    if((config1 = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+    if((config1 = HDmalloc(sizeof(*config1))) == NULL)
         FAIL_STACK_ERROR;
-    if((config2 = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+    if((config2 = HDmalloc(sizeof(*config2))) == NULL)
         FAIL_STACK_ERROR;
     HDmemset(config1, 0, sizeof(H5F_vfd_swmr_config_t));
     HDmemset(config2, 0, sizeof(H5F_vfd_swmr_config_t));
