@@ -1277,7 +1277,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
 
         /* Shutdown the page buffer cache */
-        if(H5PB_dest(f) < 0)
+        if(H5PB_dest(f->shared) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing page buffer cache")
 
@@ -1298,7 +1298,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
         } /* end if */
 
         /* Destroy other components of the file */
-        if(H5F__accum_reset(f, TRUE) < 0)
+        if(H5F__accum_reset(f->shared, TRUE) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
         if(H5FO_dest(f) < 0)
@@ -1631,7 +1631,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
         /* Create the page buffer before initializing the superblock */
         if(page_buf_size)
-            if(H5PB_create(file, page_buf_size, page_buf_min_meta_perc, page_buf_min_raw_perc) < 0)
+            if(H5PB_create(shared, page_buf_size, page_buf_min_meta_perc, page_buf_min_raw_perc) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create page buffer")
 
         /* Initialize information about the superblock and allocate space for it */
@@ -1653,7 +1653,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
         /* Create the page buffer before initializing the superblock */
         if(page_buf_size)
-            if(H5PB_create(file, page_buf_size, page_buf_min_meta_perc, page_buf_min_raw_perc) < 0)
+            if(H5PB_create(shared, page_buf_size, page_buf_min_meta_perc, page_buf_min_raw_perc) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create page buffer")
 
         /* Open the root group */
@@ -1669,16 +1669,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
      */
     if(H5P_get(a_plist, H5F_ACS_CLOSE_DEGREE_NAME, &fc_degree) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file close degree")
-
-    /* This is a private property to clear the status_flags in the super block */
-    /* Use by h5clear and a routine in test/flush2.c to clear the test file's status_flags */
-    if(H5P_exist_plist(a_plist, H5F_ACS_CLEAR_STATUS_FLAGS_NAME) > 0) {
-        if(H5P_get(a_plist, H5F_ACS_CLEAR_STATUS_FLAGS_NAME, &clear) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get clearance for status_flags")
-        else if(clear)
-            file->shared->sblock->status_flags = 0;
-    } /* end if */
-
     if(shared->nrefs == 1) {
         if(fc_degree == H5F_CLOSE_DEFAULT)
             shared->fc_degree = lf->cls->fc_degree;
@@ -1690,6 +1680,15 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file close degree doesn't match")
         if(fc_degree != H5F_CLOSE_DEFAULT && fc_degree != shared->fc_degree)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file close degree doesn't match")
+    } /* end if */
+
+    /* This is a private property to clear the status_flags in the super block */
+    /* Use by h5clear and a routine in test/flush2.c to clear the test file's status_flags */
+    if(H5P_exist_plist(a_plist, H5F_ACS_CLEAR_STATUS_FLAGS_NAME) > 0) {
+        if(H5P_get(a_plist, H5F_ACS_CLEAR_STATUS_FLAGS_NAME, &clear) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get clearance for status_flags")
+        else if(clear)
+            file->shared->sblock->status_flags = 0;
     } /* end if */
 
     /* Record the evict-on-close MDC behavior.  If it's the first time opening
@@ -1862,12 +1861,12 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
 #endif /* H5_HAVE_PARALLEL */
 
     /* Flush out the metadata accumulator */
-    if(H5F__accum_flush(f) < 0)
+    if(H5F__accum_flush(f->shared) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush metadata accumulator")
 
     /* Flush the page buffer */
-    if(H5PB_flush(f) < 0)
+    if(H5PB_flush(f->shared) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "page buffer flush failed")
 
@@ -3366,7 +3365,7 @@ H5F__start_swmr_write(H5F_t *f)
     } /* end if */
 
     /* Flush and reset the accumulator */
-    if(H5F__accum_reset(f, TRUE) < 0)
+    if(H5F__accum_reset(f->shared, TRUE) < 0)
         HGOTO_ERROR(H5E_IO, H5E_CANTRESET, FAIL, "can't reset accumulator")
 
     /* Turn on SWMR write in shared file open flags */
@@ -3412,7 +3411,6 @@ H5F__start_swmr_write(H5F_t *f)
 
 done:
     if(ret_value < 0 && setup) {
-        HDassert(f);
 
         /* Re-enable accumulator */
         f->shared->feature_flags |= (unsigned)H5FD_FEAT_ACCUMULATE_METADATA;
@@ -3485,30 +3483,31 @@ H5F__format_convert(H5F_t *f)
         f->shared->fs_persist == H5F_FREE_SPACE_PERSIST_DEF &&
         f->shared->fs_threshold == H5F_FREE_SPACE_THRESHOLD_DEF &&
         f->shared->fs_page_size == H5F_FILE_SPACE_PAGE_SIZE_DEF)) {
-    /* Check to remove free-space manager info message from superblock extension */
-    if(H5F_addr_defined(f->shared->sblock->ext_addr))
-        if(H5F__super_ext_remove_msg(f, H5O_FSINFO_ID) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "error in removing message from superblock extension")
 
-    /* Close freespace manager */
-    if(H5MF_try_close(f) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to free free-space address")
+        /* Check to remove free-space manager info message from superblock extension */
+        if(H5F_addr_defined(f->shared->sblock->ext_addr))
+            if(H5F__super_ext_remove_msg(f, H5O_FSINFO_ID) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "error in removing message from superblock extension")
 
-    /* Set non-persistent freespace manager */
-    f->shared->fs_strategy = H5F_FILE_SPACE_STRATEGY_DEF;
-    f->shared->fs_persist = H5F_FREE_SPACE_PERSIST_DEF;
-    f->shared->fs_threshold = H5F_FREE_SPACE_THRESHOLD_DEF;
-    f->shared->fs_page_size = H5F_FILE_SPACE_PAGE_SIZE_DEF;
+        /* Close freespace manager */
+        if(H5MF_try_close(f) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to free free-space address")
 
-    /* Indicate that the superblock should be marked dirty */
-    mark_dirty = TRUE;
+        /* Set non-persistent freespace manager */
+        f->shared->fs_strategy = H5F_FILE_SPACE_STRATEGY_DEF;
+        f->shared->fs_persist = H5F_FREE_SPACE_PERSIST_DEF;
+        f->shared->fs_threshold = H5F_FREE_SPACE_THRESHOLD_DEF;
+        f->shared->fs_page_size = H5F_FILE_SPACE_PAGE_SIZE_DEF;
+
+        /* Indicate that the superblock should be marked dirty */
+        mark_dirty = TRUE;
     } /* end if */
 
     /* Check if we should mark the superblock dirty */
     if(mark_dirty)
-    /* Mark superblock as dirty */
-    if(H5F_super_dirty(f) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
+        /* Mark superblock as dirty */
+        if(H5F_super_dirty(f) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

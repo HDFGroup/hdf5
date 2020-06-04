@@ -428,11 +428,11 @@ H5_DLL herr_t H5F__super_ext_remove_msg(H5F_t *f, unsigned id);
 H5_DLL herr_t H5F__super_ext_close(H5F_t *f, H5O_loc_t *ext_ptr, hbool_t was_created);
 
 /* Metadata accumulator routines */
-H5_DLL herr_t H5F__accum_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, void *buf);
-H5_DLL herr_t H5F__accum_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, const void *buf);
-H5_DLL herr_t H5F__accum_free(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size);
-H5_DLL herr_t H5F__accum_flush(H5F_t *f);
-H5_DLL herr_t H5F__accum_reset(H5F_t *f, hbool_t flush);
+H5_DLL herr_t H5F__accum_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *buf);
+H5_DLL herr_t H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const void *buf);
+H5_DLL herr_t H5F__accum_free(H5F_shared_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size);
+H5_DLL herr_t H5F__accum_flush(H5F_shared_t *f_sh);
+H5_DLL herr_t H5F__accum_reset(H5F_shared_t *f_sh, hbool_t flush);
 
 /* Shared file list related routines */
 H5_DLL herr_t H5F__sfile_add(H5F_shared_t *shared);

@@ -75,6 +75,28 @@
 
 
 /*-------------------------------------------------------------------------
+ * Function: H5F_shared_get_intent
+ *
+ * Purpose:  Quick and dirty routine to retrieve the file's 'intent' flags
+ *           (Mainly added to stop non-file routines from poking about in the
+ *           H5F_shared_t data structure)
+ *
+ * Return:   'intent' on success/abort on failure (shouldn't fail)
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5F_shared_get_intent(const H5F_shared_t *f_sh)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f_sh);
+
+    FUNC_LEAVE_NOAPI(f_sh->flags)
+} /* end H5F_shared_get_intent() */
+
+
+/*-------------------------------------------------------------------------
  * Function: H5F_get_intent
  *
  * Purpose:  Quick and dirty routine to retrieve the file's 'intent' flags
@@ -827,6 +849,27 @@ H5F_store_msg_crt_idx(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
+ * Function: H5F_shared_has_feature
+ *
+ * Purpose:  Check if a file has a particular feature enabled
+ *
+ * Return:   Success:    Non-negative - TRUE or FALSE
+ *           Failure:    Negative (should not happen)
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_shared_has_feature(const H5F_shared_t *f_sh, unsigned feature)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f_sh);
+
+    FUNC_LEAVE_NOAPI((hbool_t)(f_sh->lf->feature_flags & feature))
+} /* end H5F_shared_has_feature() */
+
+
+/*-------------------------------------------------------------------------
  * Function: H5F_has_feature
  *
  * Purpose:  Check if a file has a particular feature enabled
@@ -901,6 +944,32 @@ H5F_get_fileno(const H5F_t *f, unsigned long *filenum)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_fileno() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5F_shared_get_eoa
+ *
+ * Purpose:  Quick and dirty routine to retrieve the file's 'eoa' value
+ *
+ * Return:   Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+haddr_t
+H5F_shared_get_eoa(const H5F_shared_t *f_sh, H5FD_mem_t type)
+{
+    haddr_t    ret_value = HADDR_UNDEF;        /* Return value */
+
+    FUNC_ENTER_NOAPI(HADDR_UNDEF)
+
+    HDassert(f_sh);
+
+    /* Dispatch to driver */
+    if(HADDR_UNDEF == (ret_value = H5FD_get_eoa(f_sh->lf, type)))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_shared_get_eoa() */
 
 
 /*-------------------------------------------------------------------------
