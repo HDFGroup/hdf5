@@ -1259,6 +1259,7 @@ H5F_get_point_of_no_return(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->point_of_no_return)
 } /* end H5F_get_point_of_no_return() */
 
+
 /*-------------------------------------------------------------------------
  * Function: H5F_get_null_fsm_addr
  *

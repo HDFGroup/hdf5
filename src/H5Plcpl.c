@@ -119,7 +119,7 @@ static const unsigned H5L_def_intmd_group_g = H5L_CRT_INTERMEDIATE_GROUP_DEF;   
 herr_t
 H5P_lcrt_reg_prop(H5P_genclass_t *pclass)
 {
-    herr_t              ret_value   = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

@@ -344,7 +344,7 @@ H5P__lacc_elink_fapl_enc(const void *value, void **_pp, size_t *size)
     uint8_t **pp = (uint8_t **)_pp;
     H5P_genplist_t *fapl_plist;         /* Pointer to property list */
     hbool_t non_default_fapl = FALSE;   /* Whether the FAPL is non-default */
-    size_t fapl_size = 0;                /* FAPL's encoded size */
+    size_t fapl_size = 0;               /* FAPL's encoded size */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -595,7 +595,7 @@ static herr_t
 H5P__lacc_elink_fapl_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
     hid_t           l_fapl_id;
-    herr_t     	    ret_value = SUCCEED;
+    herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 

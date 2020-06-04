@@ -216,6 +216,7 @@ typedef struct H5D_chunk_readvv_ud_t {
     const H5D_t *dset;          /* Dataset to operate on */
 } H5D_chunk_readvv_ud_t;
 
+/* Typedef for chunk info iterator callback */
 typedef struct H5D_chunk_info_iter_ud_t {
     hsize_t  scaled[H5O_LAYOUT_NDIMS];    /* Logical offset of the chunk */
     hsize_t  ndims;             /* Number of dimensions in the dataset */
@@ -433,7 +434,7 @@ H5D__chunk_direct_write(const H5D_t *dset, uint32_t filters, hsize_t *offset,
         /* Allocate storage */
         if(H5D__alloc_storage(&io_info, H5D_ALLOC_WRITE, FALSE, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
-    } /* end if */
+    }
 
     /* Calculate the index of this chunk */
     H5VM_chunk_scaled(dset->shared->ndims, offset, layout->u.chunk.dim, scaled);
@@ -4852,7 +4853,7 @@ H5D__chunk_update_old_edge_chunks(H5D_t *dset, hsize_t old_dim[])
 
         /* Check if the dataspace expanded enough to cause the old edge chunks
          * in this dimension to become full */
-    if((space_dim[op_dim]/chunk_dim[op_dim]) >= (old_edge_chunk_sc[op_dim] + 1))
+        if((space_dim[op_dim]/chunk_dim[op_dim]) >= (old_edge_chunk_sc[op_dim] + 1))
             new_full_dim[op_dim] = TRUE;
     } /* end for */
 
@@ -7306,9 +7307,9 @@ H5D__get_chunk_info(const H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space, hsize_
     idx_info.storage = &dset->shared->layout.storage.u.chunk;
 
     /* Set addr & size for when dset is not written or queried chunk is not found */
-    if(addr)
+    if (addr)
         *addr = HADDR_UNDEF;
-    if(size)
+    if (size)
         *size = 0;
 
     /* If the chunk is written, get its info, otherwise, return without error */
@@ -7374,12 +7375,12 @@ H5D__get_chunk_info_by_coord_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     HDassert(chunk_info);
 
     /* Going through the scaled, stop when a mismatch is found */
-    for(ii = 0; ii < chunk_info->ndims && !different; ii++)
-        if(chunk_info->scaled[ii] != chunk_rec->scaled[ii])
+    for (ii = 0; ii < chunk_info->ndims && !different; ii++)
+        if (chunk_info->scaled[ii] != chunk_rec->scaled[ii])
             different = TRUE;
 
     /* Same scaled coords means the chunk is found, copy the chunk info */
-    if(!different) {
+    if (!different) {
         chunk_info->nbytes = chunk_rec->nbytes;
         chunk_info->filter_mask = chunk_rec->filter_mask;
         chunk_info->chunk_addr = chunk_rec->chunk_addr;
@@ -7387,7 +7388,7 @@ H5D__get_chunk_info_by_coord_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
         /* Stop iterating */
         ret_value = H5_ITER_STOP;
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__get_chunk_info_by_coord_cb() */
