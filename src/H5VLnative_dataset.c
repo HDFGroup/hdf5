@@ -581,18 +581,6 @@ H5VL__native_dataset_optional(void *obj, H5VL_dataset_optional_t optional_type,
                 break;
             }
 
-        case H5VL_NATIVE_DATASET_APPEND:
-            {
-                unsigned axis = HDva_arg(arguments, unsigned);
-                size_t extension = HDva_arg(arguments, size_t);
-                hid_t memtype = HDva_arg(arguments, hid_t);
-                const void *buf = HDva_arg(arguments, const void*);
-                if(H5D__append(dset, axis, extension, memtype, buf) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "H5D__dataset_append() failed ")
-
-                break;
-		    }
-
         case H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE:
             {   /* H5Dvlen_get_buf_size */
                 hid_t type_id = HDva_arg(arguments, hid_t);
@@ -613,6 +601,20 @@ H5VL__native_dataset_optional(void *obj, H5VL_dataset_optional_t optional_type,
                 *ret = H5D__get_offset(dset);
                 if(!H5F_addr_defined(*ret))
                     *ret = HADDR_UNDEF;
+                break;
+            }
+
+        /* H5Dappend */
+        case H5VL_NATIVE_DATASET_APPEND:
+            {
+                unsigned axis = HDva_arg(arguments, unsigned);
+                size_t extension = HDva_arg(arguments, size_t);
+                hid_t memtype = HDva_arg(arguments, hid_t);
+                const void *buf = HDva_arg(arguments, const void*);
+
+                /* Append the record/row/slice */
+                if(H5D__append(dset, axis, extension, memtype, buf) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't append to dataset")
                 break;
             }
 

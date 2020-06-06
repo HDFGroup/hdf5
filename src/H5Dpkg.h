@@ -573,6 +573,9 @@ H5_DLL herr_t H5D__flush_real(H5D_t *dataset);
 H5_DLL herr_t H5D__flush(H5D_t *dset, hid_t dset_id);
 H5_DLL herr_t H5D__mark(const H5D_t *dataset, unsigned flags);
 H5_DLL herr_t H5D__refresh(hid_t dset_id, H5D_t *dataset);
+H5_DLL herr_t H5D__append(H5D_t *dset, unsigned axis, size_t extension,
+    hid_t memtype, const void *buf);
+
 
 /* To convert a dataset's chunk indexing type to v1 B-tree */
 H5_DLL herr_t H5D__format_convert(H5D_t *dataset);
@@ -668,10 +671,6 @@ H5_DLL herr_t H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset,
 #ifdef H5D_CHUNK_DEBUG
 H5_DLL herr_t H5D__chunk_stats(const H5D_t *dset, hbool_t headers);
 #endif /* H5D_CHUNK_DEBUG */
-
-/* Implemented in src/H5Dio.c, moved from hl/src/H5DO.c */
-H5_DLL herr_t H5D__append(const H5D_t *dset, unsigned axis, size_t extension,
-           hid_t memtype, const void *buf);
 
 /* format convert */
 H5_DLL herr_t H5D__chunk_format_convert(H5D_t *dset, H5D_chk_idx_info_t *idx_info, H5D_chk_idx_info_t *new_idx_info);

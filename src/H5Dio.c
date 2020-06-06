@@ -374,132 +374,153 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dwrite_chunk() */
 
-herr_t 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dappend
+ *
+ * Purpose:     Append elements to a dataset.
+ *
+ *      axis:       the dataset dimension (zero-based) for the append
+ *      extension:  the # of elements to append for the axis-th dimension
+ *      memtype:    the datatype
+ *      buf:        buffer with data for the append
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
 H5Dappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
-           hid_t memtype, const void *buf){
-    H5VL_object_t  *vol_obj = NULL;
-    herr_t ret_value = SUCCEED;            /* Return value */
+    hid_t memtype, const void *buf)
+{
+    H5VL_object_t  *vol_obj = NULL;     /* Object for dset_id */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "iiIuzi*x", dset_id, dxpl_id, axis, extension, memtype, buf);
 
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-        return -1;
+    /* Get dataset pointer */
+    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id is not a dataset ID")
 
     /* If the user passed in a default DXPL, sanity check it */
-    if(H5P_DEFAULT != dxpl_id)
-        if(TRUE != H5Pisa_class(dxpl_id, H5P_DATASET_XFER))
-            return -1;
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
 
-    if(!buf)
-        return -1;
+    /* Sanity check the extension */
+    if(0 == extension)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid extension value of 0")
+
+    /* Make certain we have a valid buffer */
+    if(NULL == buf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL pointer for buffer parameter")
 
     /* Set DXPL for operation */
     H5CX_set_dxpl(dxpl_id);
 
+    /* Append the record/row/slice */
     if(H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_APPEND, dxpl_id, H5_REQUEST_NULL,
             axis, extension, memtype, buf) < 0)
-        return -1;
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't append data")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Dappend() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__append
+ *
+ * Purpose:     Internal routine to append a record/row/slice/etc to a dataset.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
-H5D__append(const H5D_t *dset, unsigned axis, size_t extension,
-           hid_t memtype, const void *buf){
-    hsize_t dims[H5S_MAX_RANK];     /* The new size (after extension */
-    hsize_t max_dims[H5S_MAX_RANK];
-    hsize_t old_size = 0;       /* The size of the dimension to be extended */
-    int sndims;             /* Number of dimensions in dataspace (signed) */
+H5D__append(H5D_t *dset, unsigned axis, size_t extension, hid_t memtype,
+    const void *buf)
+{
+    H5S_t *tmp_space = NULL;    /* Temporary dataset dataspace */
+    H5S_t *mem_space = NULL;    /* Memory dataspace */
+    hsize_t start[H5S_MAX_RANK]; /* H5Sselect_Hyperslab: starting offset */
+    hsize_t count[H5S_MAX_RANK]; /* H5Sselect_hyperslab: # of blocks to select */
+    hsize_t dims[H5S_MAX_RANK]; /* The dataset's dimension sizes */
+    hsize_t old_size;           /* The size of the dimension to be extended */
+    int sndims;                 /* Number of dimensions in dataspace (signed) */
     unsigned ndims;             /* Number of dimensions in dataspace */
-    hid_t space_id = FAIL;      /* Old file space */
-    hid_t new_space_id = FAIL;      /* New file space (after extension) */
-    hid_t mem_space_id = FAIL;      /* Memory space for data buffer */
-    hssize_t snelmts;           /* Number of elements in selection (signed) */
     hsize_t nelmts;             /* Number of elements in selection */
-    hid_t dapl = FAIL;          /* Dataset access property list */
-
-    hsize_t start[H5S_MAX_RANK];    /* H5Sselect_Hyperslab: starting offset */
-    hsize_t count[H5S_MAX_RANK];    /* H5Sselect_hyperslab: # of blocks to select */
-    hsize_t stride[H5S_MAX_RANK];   /* H5Sselect_hyperslab: # of elements to move when selecting */
-    hsize_t block[H5S_MAX_RANK];    /* H5Sselect_hyperslab: # of elements in a block */
-
-    hsize_t *boundary = NULL;       /* Boundary set in append flush property */
-    H5D_append_cb_t append_cb;      /* Callback function set in append flush property */
-    void *udata;            /* User data set in append flush property */
-    hbool_t hit = FALSE;        /* Boundary is hit or not */
-    hsize_t k;              /* Local index variable */
     unsigned u;                 /* Local index variable */
-    herr_t ret_value = FAIL;        /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
+    FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
 
     /* Get the rank of this dataspace */
-    if((sndims = H5S_get_simple_extent_dims(dset->shared->space, dims, max_dims)) < 0)
-        goto done;
+    if((sndims = H5S_get_simple_extent_dims(dset->shared->space, dims, NULL)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace dimensions")
     ndims = (unsigned)sndims;
 
-    /* Verify correct axis */
+    /* Verify valid axis */
     if(axis >= ndims)
-        goto done;
+        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "axis value too large for dataset")
 
     /* Adjust the dimension size of the requested dimension,
      * but first record the old dimension size
      */
     old_size = dims[axis];
     dims[axis] += extension;
-    if(dims[axis] < old_size)
-        goto done;
 
-    /* Set the extent of the dataset to the new dimension */
-    if(H5D__set_extent(dset, dims) < 0)//H5D__set_extent()
-        goto done;
+    /* Check for overflow */
+    if(dims[axis] < old_size)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "extended dimension overflowed (bad extension value?)")
+
+    /* Extend the dataset in the requested dimension */
+    if(H5D__set_extent(dset, dims) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't extend dataset dimensions")
 
     /* Select a hyperslab corresponding to the append operation */
     for(u = 0 ; u < ndims ; u++) {
         start[u] = 0;
-        stride[u] = 1;
         count[u] = dims[u];
-        block[u] = 1;
         if(u == axis) {
             count[u] = extension;
             start[u] = old_size;
         } /* end if */
     } /* end for */
 
-    H5S_t * tmp_space;
-    if((tmp_space = H5S_copy(dset->shared->space, TRUE, FALSE)) == NULL)
-        return -1;
+    /* Make a copy of the dataset's dataspace */
+    if(NULL == (tmp_space = H5S_copy(dset->shared->space, TRUE, FALSE)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy dataset's dataspace")
 
-    if(H5S_select_hyperslab(tmp_space, H5S_SELECT_SET, start, stride, count, block) < 0)
-        goto done;
+    /* Select hyperslab that covers newly extended region */
+    if(H5S_select_hyperslab(tmp_space, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSELECT, FAIL, "can't select hyperslab to cover extended region")
 
+    /* The # of elements in the new extended dataspace */
+    if(0 == (nelmts = H5S_GET_SELECT_NPOINTS(tmp_space)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get selected # of elements")
 
-    if((snelmts = H5S_GET_SELECT_NPOINTS(tmp_space)) < 0)
-        goto done;
-    /* The # of elemnts in the new extended dataspace */
+    /* Create a memory space, for the buffer */
+    if(NULL == (mem_space = H5S_create_simple(1, &nelmts, NULL)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create memory space for buffer")
 
-    nelmts = (hsize_t)snelmts;
-
-    /* create a memory space */
-    H5S_t* mem_space;
-    if(FAIL == (mem_space = H5S_create_simple(1, &nelmts, NULL)))
-        goto done;
-
-    /* Write the data */
+    /* Write the data to the newly extended area of the dataset */
     if(H5D__write(dset, memtype, mem_space, tmp_space, buf) < 0)
-        goto done;
-
-    /* Indicate success */
-    ret_value = SUCCEED;
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write to newly extended area of dataset")
 
 done:
-    if(H5S_close(tmp_space) < 0)
-        ret_value = FAIL;
-    if(H5S_close(mem_space) < 0)
-        ret_value = FAIL;
+    /* Release temporary objects */
+    if(tmp_space && H5S_close(tmp_space) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary dataspace")
+    if(mem_space && H5S_close(mem_space) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close memory dataspace")
 
-    return ret_value;
-}
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
+} /* end H5D__append() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5D__read
