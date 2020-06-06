@@ -381,50 +381,34 @@ H5Dappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
     herr_t ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    //H5TRACE6("e", "iiIu*hz*x", dset_id, dxpl_id, axis, extension, memtype, buf);
 
-    //check dset_id, get vol_obj
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-    {
-        printf("%s():%d failed\n", __func__, __LINE__);
         return -1;
-    }
-        //HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset ID")
 
-    //check axis
+    /* If the user passed in a default DXPL, sanity check it */
+    if(H5P_DEFAULT != dxpl_id)
+        if(TRUE != H5Pisa_class(dxpl_id, H5P_DATASET_XFER))
+            return -1;
 
-    //check extension
-
-    //check memtype
-
-    //check buf
-    if(!buf)    {
-        printf("%s():%d failed\n", __func__, __LINE__);
+    if(!buf)
         return -1;
-    }
-        //HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf cannot be NULL")
-
 
     /* Set DXPL for operation */
     H5CX_set_dxpl(dxpl_id);
 
     if(H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_APPEND, dxpl_id, H5_REQUEST_NULL,
-            dset_id, axis, extension, memtype, buf) < 0)    {
-        printf("%s():%d failed\n", __func__, __LINE__);
+            axis, extension, memtype, buf) < 0)
         return -1;
-    }
-        //HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't append data")
-
 
 done:
     FUNC_LEAVE_API(ret_value)
-    //return ret_value;
 }
 
 herr_t
-H5D__dataset_append(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
+H5D__append(const H5D_t *dset, unsigned axis, size_t extension,
            hid_t memtype, const void *buf){
-    hsize_t size[H5S_MAX_RANK];     /* The new size (after extension */
+    hsize_t dims[H5S_MAX_RANK];     /* The new size (after extension */
+    hsize_t max_dims[H5S_MAX_RANK];
     hsize_t old_size = 0;       /* The size of the dimension to be extended */
     int sndims;             /* Number of dimensions in dataspace (signed) */
     unsigned ndims;             /* Number of dimensions in dataspace */
@@ -448,21 +432,9 @@ H5D__dataset_append(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extensio
     unsigned u;                 /* Local index variable */
     herr_t ret_value = FAIL;        /* Return value */
 
-	    /* check arguments */
-    if(H5I_DATASET != H5Iget_type(dset_id))
-        goto done;
-
-    /* If the user passed in a default DXPL, sanity check it */
-    if(H5P_DEFAULT != dxpl_id)
-        if(TRUE != H5Pisa_class(dxpl_id, H5P_DATASET_XFER))
-            goto done;
-
-    /* Get the dataspace of the dataset */
-    if(FAIL == (space_id = H5Dget_space(dset_id)))
-        goto done;
 
     /* Get the rank of this dataspace */
-    if((sndims = H5Sget_simple_extent_ndims(space_id)) < 0)
+    if((sndims = H5S_get_simple_extent_dims(dset->shared->space, dims, max_dims)) < 0)
         goto done;
     ndims = (unsigned)sndims;
 
@@ -470,31 +442,23 @@ H5D__dataset_append(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extensio
     if(axis >= ndims)
         goto done;
 
-    /* Get the dimensions sizes of the dataspace */
-    if(H5Sget_simple_extent_dims(space_id, size, NULL) < 0)
-        goto done;
-
     /* Adjust the dimension size of the requested dimension,
      * but first record the old dimension size
      */
-    old_size = size[axis];
-    size[axis] += extension;
-    if(size[axis] < old_size)
+    old_size = dims[axis];
+    dims[axis] += extension;
+    if(dims[axis] < old_size)
         goto done;
 
     /* Set the extent of the dataset to the new dimension */
-    if(H5Dset_extent(dset_id, size) < 0)
-        goto done;
-
-    /* Get the new dataspace of the dataset */
-    if(FAIL == (new_space_id = H5Dget_space(dset_id)))
+    if(H5D__set_extent(dset, dims) < 0)//H5D__set_extent()
         goto done;
 
     /* Select a hyperslab corresponding to the append operation */
     for(u = 0 ; u < ndims ; u++) {
         start[u] = 0;
         stride[u] = 1;
-        count[u] = size[u];
+        count[u] = dims[u];
         block[u] = 1;
         if(u == axis) {
             count[u] = extension;
@@ -502,44 +466,37 @@ H5D__dataset_append(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extensio
         } /* end if */
     } /* end for */
 
-    if(FAIL == H5Sselect_hyperslab(new_space_id, H5S_SELECT_SET, start, stride, count, block))
+    H5S_t * tmp_space;
+    if((tmp_space = H5S_copy(dset->shared->space, TRUE, FALSE)) == NULL)
+        return -1;
+
+    if(H5S_select_hyperslab(tmp_space, H5S_SELECT_SET, start, stride, count, block) < 0)
         goto done;
 
-    /* The # of elemnts in the new extended dataspace */
-    if((snelmts = H5Sget_select_npoints(new_space_id)) < 0)
+
+    if((snelmts = H5S_GET_SELECT_NPOINTS(tmp_space)) < 0)
         goto done;
+    /* The # of elemnts in the new extended dataspace */
+
     nelmts = (hsize_t)snelmts;
 
     /* create a memory space */
-    if(FAIL == (mem_space_id = H5Screate_simple(1, &nelmts, NULL)))
+    H5S_t* mem_space;
+    if(FAIL == (mem_space = H5S_create_simple(1, &nelmts, NULL)))
         goto done;
 
     /* Write the data */
-    if(H5Dwrite(dset_id, memtype, mem_space_id, new_space_id, dxpl_id, buf) < 0)
+    if(H5D__write(dset, memtype, mem_space, tmp_space, buf) < 0)
         goto done;
 
     /* Indicate success */
     ret_value = SUCCEED;
 
 done:
-    /* Close old dataspace */
-    if(space_id != FAIL && H5Sclose(space_id) < 0)
+    if(H5S_close(tmp_space) < 0)
         ret_value = FAIL;
-
-    /* Close new dataspace */
-    if(new_space_id != FAIL && H5Sclose(new_space_id) < 0)
+    if(H5S_close(mem_space) < 0)
         ret_value = FAIL;
-
-    /* Close memory dataspace */
-    if(mem_space_id != FAIL && H5Sclose(mem_space_id) < 0)
-        ret_value = FAIL;
-
-    /* Close the dataset access property list */
-    if(dapl != FAIL && H5Pclose(dapl) < 0)
-        ret_value = FAIL;
-
-    if(boundary)
-        HDfree(boundary);
 
     return ret_value;
 }

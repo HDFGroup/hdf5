@@ -670,7 +670,7 @@ H5_DLL herr_t H5D__chunk_stats(const H5D_t *dset, hbool_t headers);
 #endif /* H5D_CHUNK_DEBUG */
 
 /* Implemented in src/H5Dio.c, moved from hl/src/H5DO.c */
-H5_DLL herr_t H5D__dataset_append(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
+H5_DLL herr_t H5D__append(const H5D_t *dset, unsigned axis, size_t extension,
            hid_t memtype, const void *buf);
 
 /* format convert */

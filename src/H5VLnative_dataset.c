@@ -583,12 +583,11 @@ H5VL__native_dataset_optional(void *obj, H5VL_dataset_optional_t optional_type,
 
         case H5VL_NATIVE_DATASET_APPEND:
             {
-                hid_t dset_id = HDva_arg(arguments, hid_t);
                 unsigned axis = HDva_arg(arguments, unsigned);
                 size_t extension = HDva_arg(arguments, size_t);
                 hid_t memtype = HDva_arg(arguments, hid_t);
                 const void *buf = HDva_arg(arguments, const void*);
-                if(H5D__dataset_append(dset_id, dxpl_id, axis, extension, memtype, buf) < 0)
+                if(H5D__append(dset, axis, extension, memtype, buf) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "H5D__dataset_append() failed ")
 
                 break;
