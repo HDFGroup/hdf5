@@ -128,6 +128,12 @@ Bug Fixes since HDF5-1.12.0 release
 
     (MSB - 2020/02/28, HDFFV-11033)
 
+    High-Level Library
+    ------------------
+    - Eliminated unnecessary code in H5DOappend(), improving its performance.
+
+      (QAK - 2020/06/05)
+
 
 
 Supported Platforms
