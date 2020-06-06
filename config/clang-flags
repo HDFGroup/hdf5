@@ -183,12 +183,8 @@ if test "X-clang" = "X-$cc_vendor" -o "X-Apple LLVM" = "X-$cc_vendor"; then
     # General #
     ###########
 
-    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2 -o $cc_vers_major -gt 4; then
-        H5_CFLAGS="$H5_CFLAGS $(load_clang_arguments general)"
-    fi
-#    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 8 -o $cc_vers_major -gt 4; then
-#        H5_ECFLAGS="$H5_ECFLAGS $(load_clang_arguments error-general)"
-#    fi
+    H5_CFLAGS="$H5_CFLAGS $(load_clang_arguments general)"
+    H5_ECFLAGS="$H5_ECFLAGS $(load_clang_arguments error-general)"
 
 echo "H5_CFLAGS:  $H5_CFLAGS"
 

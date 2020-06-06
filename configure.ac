@@ -311,16 +311,8 @@ fi
 if test "X$CC_BASENAME" = "Xclang"; then
   AC_SUBST([CLANG_SANITIZE_CHECKS])
 
-  ## These are all the packages that use H5*_DEBUG.
-  ## There is no harm in specifying a package not in this list;
-  ## you'll just get an unused H5<pkg>_DEBUG symbol.
-  ##
-  ## Some packages that define debug checks or output are
-  ## too specialized or have huge performance hits. These
-  ## are not listed in the "all" packages list.
-  ##
-  ##all_packages="Address"
-  
+  # There are several sanitizer tools.  At present we are testing 
+  # and describing only -fsanitizer=address with autotools.
   case "X-$CLANG_SANITIZE_CHECKS" in
     X-no|X-none)
       CLANG_SANITIZE_CHECKS=none
@@ -332,8 +324,18 @@ if test "X$CC_BASENAME" = "Xclang"; then
   esac
   AC_MSG_RESULT([$CLANG_SANITIZE_CHECKS])
 
-  ## Define H5*_DEBUG symbols that control package output
-  ## NOTE: No sanity checking done here!
+  # Other tools can be added to the list of checks
+  # The clang compiler doesn't support some of them; they should be
+  # checked before adding them to the list in the help message.
+  # The sanitizers/sanitizers.cmake file lists these options:
+  # address, memory, memoryWithOrigins, undefined, thread, leak, 
+  # 'address;undefined'.  Which and which combinations of these are 
+  #  supported varies by compiler version, but unsupported options
+  # or combinations will result in configure errors reported in config.log.
+  # Comma separated lists of sanitize options wil be entered intact in
+  # one -fsanitize=<list> flag.  Space separated lists will be entered in
+  # separate -fsanitize=<item> flags.
+  # NOTE: No sanity checking done here!
   if test -n "$CLANG_SANITIZE_LIST"; then
     H5_CFLAGS="$H5_CFLAGS -fno-omit-frame-pointer"
     for sanitizer in `echo $CLANG_SANITIZE_LIST`; do
