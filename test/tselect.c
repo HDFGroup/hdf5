@@ -9388,15 +9388,15 @@ test_shape_same_dr__smoke_check_1(void)
 **    a "checker board" hyperslab as follows:
 **
 **        * * - - * * - - * *
-**              * * - - * * - - * *
-**              - - * * - - * * - -
-**              - - * * - - * * - -
 **        * * - - * * - - * *
-**              * * - - * * - - * *
-**              - - * * - - * * - -
-**              - - * * - - * * - -
+**        - - * * - - * * - -
+**        - - * * - - * * - -
 **        * * - - * * - - * *
-**              * * - - * * - - * *
+**        * * - - * * - - * *
+**        - - * * - - * * - -
+**        - - * * - - * * - -
+**        * * - - * * - - * *
+**        * * - - * * - - * *
 **
 **    where asterisks indicate selected elements, and dashes
 **    indicate unselected elements.
