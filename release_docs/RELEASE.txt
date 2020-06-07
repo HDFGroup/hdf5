@@ -109,6 +109,11 @@ Bug Fixes since HDF5-1.12.0 release
 ==================================
     Library
     -------
+    - Better detect selections with the same shape, improving performance for
+        some uses of H5DOappend (and other situations).
+
+      (QAK - 2020/06/07)
+
     - Don't allocate an empty (0-dimensioned) chunked dataset's chunk
         index, until the dataset's dimensions are increased.
 
