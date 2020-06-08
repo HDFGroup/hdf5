@@ -508,7 +508,7 @@ H5D__append(H5D_t *dset, unsigned axis, size_t extension, hid_t memtype,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create memory space for buffer")
 
     /* Write the data to the newly extended area of the dataset */
-    if(H5D__write(dset, memtype, mem_space, tmp_space, buf) < 0)
+    if(H5D__write(dset, memtype, mem_space, tmp_space, buf, TRUE) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write to newly extended area of dataset")
 
 done:
@@ -748,7 +748,7 @@ done:
  */
 herr_t
 H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
-    const H5S_t *file_space, const void *buf)
+    const H5S_t *file_space, const void *buf, hbool_t do_append)
 {
     H5D_chunk_map_t *fm = NULL;         /* Chunk file<->memory mapping */
     H5D_io_info_t io_info;              /* Dataset I/O info     */
@@ -791,7 +791,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     /* Set up datatype info for operation */
-    if(H5D__typeinfo_init(dataset, mem_type_id, TRUE, FALSE, &type_info) < 0)
+    if(H5D__typeinfo_init(dataset, mem_type_id, TRUE, do_append, &type_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
     type_info_init = TRUE;
 

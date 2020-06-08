@@ -203,7 +203,7 @@ H5VL__native_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not get a validated dataspace from file_space_id")
 
     /* Write the data */
-    if(H5D__write(dset, mem_type_id, mem_space, file_space, buf) < 0)
+    if(H5D__write(dset, mem_type_id, mem_space, file_space, buf, FALSE) < 0)//FALSE for do_append
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 done:
