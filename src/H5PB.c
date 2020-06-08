@@ -1254,7 +1254,7 @@ H5PB_remove_entry(H5F_shared_t *shared, haddr_t addr)
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, "forced eviction failed")
 
-        assert(vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx, shared->mdf_idx_entries_used, page, false) == NULL);
+        assert(!shared->vfd_swmr_writer || vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx, shared->mdf_idx_entries_used, page, false) == NULL);
     }
 
 done:
@@ -2434,7 +2434,8 @@ H5PB__evict_entry(H5F_shared_t *shared, H5PB_entry_t *entry_ptr, bool force,
      * the image will be bigger.  So the shadow file will never see the
      * entire image written, just the first page of the image.
      */
-    if (shadow_idx_entry_remove(shared, entry_ptr->page, only_mark) == -1) {
+    if (shared->vfd_swmr_writer &&
+        shadow_idx_entry_remove(shared, entry_ptr->page, only_mark) == -1) {
         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL,
             "failed to remove shadow index entry")
     }
