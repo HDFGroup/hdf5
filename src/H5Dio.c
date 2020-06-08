@@ -51,7 +51,7 @@
 static herr_t H5D__ioinfo_init(H5D_t *dset, const H5D_type_info_t *type_info,
     H5D_storage_t *store, H5D_io_info_t *io_info);
 static herr_t H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id,
-    hbool_t do_write, H5D_type_info_t *type_info);
+    hbool_t do_write,hbool_t do_append, H5D_type_info_t *type_info);
 #ifdef H5_HAVE_PARALLEL
 static herr_t H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
     const H5S_t *file_space, const H5S_t *mem_space, const H5D_type_info_t *type_info);
@@ -456,7 +456,7 @@ H5D__append(H5D_t *dset, unsigned axis, size_t extension, hid_t memtype,
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
+    FUNC_ENTER_PACKAGE //_TAG(dset->oloc.addr)
 
     /* Get the rank of this dataspace */
     if((sndims = H5S_get_simple_extent_dims(dset->shared->space, dims, NULL)) < 0)
@@ -518,7 +518,7 @@ done:
     if(mem_space && H5S_close(mem_space) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close memory dataspace")
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value) //_TAG(ret_value)
 } /* end H5D__append() */
 
 
@@ -574,7 +574,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     nelmts = H5S_GET_SELECT_NPOINTS(mem_space);
 
     /* Set up datatype info for operation */
-    if(H5D__typeinfo_init(dataset, mem_type_id, FALSE, &type_info) < 0)
+    if(H5D__typeinfo_init(dataset, mem_type_id, FALSE, FALSE, &type_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
     type_info_init = TRUE;
 
@@ -791,7 +791,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     /* Set up datatype info for operation */
-    if(H5D__typeinfo_init(dataset, mem_type_id, TRUE, &type_info) < 0)
+    if(H5D__typeinfo_init(dataset, mem_type_id, TRUE, FALSE, &type_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
     type_info_init = TRUE;
 
@@ -1043,7 +1043,7 @@ H5D__ioinfo_init(H5D_t *dset, const H5D_type_info_t *type_info,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write,
+H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write,  hbool_t do_append,
     H5D_type_info_t *type_info)
 {
     const H5T_t	*src_type;              /* Source datatype */
@@ -1178,6 +1178,8 @@ H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write,
             /* Allocate temporary buffer */
             if(NULL == (type_info->tconv_buf = H5FL_BLK_MALLOC(type_conv, target_size)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
+			if(!do_append)
+				HDmemset(type_info->tconv_buf, 0, target_size);
             type_info->tconv_buf_allocated = TRUE;
         } /* end if */
         if(type_info->need_bkg && NULL == (type_info->bkg_buf = (uint8_t *)bkgr_buf)) {
