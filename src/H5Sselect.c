@@ -1885,6 +1885,15 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
 
                 space_a_dim--;
             } /* end while */
+
+            /* Check for a single block in each selection */
+            if(H5S_SELECT_IS_SINGLE(space_a) && H5S_SELECT_IS_SINGLE(space_b)) {
+                /* If both selections are a single block and their bounds are
+                 * the same, then the selections are the same, even if the
+                 * selection types are different.
+                 */
+                HGOTO_DONE(TRUE)
+            } /* end if */
         } /* end if */
 
         /* If the dataspaces have the same selection type, use the selection's
