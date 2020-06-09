@@ -67,6 +67,7 @@ typedef struct {
     unsigned	init_count;	/* # of times this type has been initialized*/
     uint64_t	id_count;	/* Current number of IDs held		    */
     uint64_t	nextid;		/* ID to use for the next atom		    */
+    H5I_id_info_t *last_info;   /* Info for most recent ID looked up        */
     H5SL_t      *ids;           /* Pointer to skip list that stores IDs     */
 } H5I_id_type_t;
 
@@ -317,6 +318,7 @@ H5I_register_type(const H5I_class_t *cls)
         type_ptr->cls = cls;
         type_ptr->id_count = 0;
         type_ptr->nextid = cls->reserved;
+        type_ptr->last_info = NULL;
         if(NULL == (type_ptr->ids = H5SL_create(H5SL_TYPE_HID, NULL)))
             HGOTO_ERROR(H5E_ATOM, H5E_CANTCREATE, FAIL, "skip list creation failed")
     } /* end if */
@@ -806,6 +808,9 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
     /* Sanity check for the 'nextid' getting too large and wrapping around */
     HDassert(type_ptr->nextid <= ID_MASK);
 
+    /* Set the most recent ID to this object */
+    type_ptr->last_info = id_ptr;
+
     /* Set return value */
     ret_value = new_id;
 
@@ -876,6 +881,9 @@ H5I_register_using_existing_id(H5I_type_t type, void *object, hbool_t app_ref, h
     if(H5SL_insert(type_ptr->ids, id_ptr, &id_ptr->id) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINSERT, FAIL, "can't insert ID node into skip list")
     type_ptr->id_count++;
+
+    /* Set the most recent ID to this object */
+    type_ptr->last_info = id_ptr;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1234,6 +1242,10 @@ H5I__remove_common(H5I_id_type_t *type_ptr, hid_t id)
     /* Get the ID node for the ID */
     if(NULL == (curr_id = (H5I_id_info_t *)H5SL_remove(type_ptr->ids, &id)))
         HGOTO_ERROR(H5E_ATOM, H5E_CANTDELETE, NULL, "can't remove ID node from skip list")
+
+    /* Check if this ID was the last one accessed */
+    if(type_ptr->last_info == curr_id)
+        type_ptr->last_info = NULL;
 
     ret_value = (void *)curr_id->obj_ptr;       /* (Casting away const OK -QAK) */
     curr_id = H5FL_FREE(H5I_id_info_t, curr_id);
@@ -2184,8 +2196,16 @@ H5I__find_id(hid_t id)
     if(!type_ptr || type_ptr->init_count <= 0)
         HGOTO_DONE(NULL)
 
-    /* Locate the ID node for the ID */
-    ret_value = (H5I_id_info_t *)H5SL_search(type_ptr->ids, &id);
+    /* Check for same ID as we have looked up last time */
+    if(type_ptr->last_info && type_ptr->last_info->id == id)
+        ret_value = type_ptr->last_info;
+    else {
+        /* Locate the ID node for the ID */
+        ret_value = (H5I_id_info_t *)H5SL_search(type_ptr->ids, &id);
+
+        /* Remember this ID */
+        type_ptr->last_info = ret_value;
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
