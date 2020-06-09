@@ -861,7 +861,10 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
      * Note that in general, this requires us to touch up the memory buffer
      * as well.
      */
-    if(TRUE == H5S_SELECT_SHAPE_SAME(mem_space, file_space) &&
+        if(!do_append){
+
+        }
+    if((do_append || TRUE == H5S_SELECT_SHAPE_SAME(mem_space, file_space)) &&
             H5S_GET_EXTENT_NDIMS(mem_space) != H5S_GET_EXTENT_NDIMS(file_space)) {
         const void *adj_buf = NULL;   /* Pointer to the location in buf corresponding  */
                                 /* to the beginning of the projected mem space.  */
