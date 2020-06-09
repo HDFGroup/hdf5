@@ -3351,7 +3351,7 @@ H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t reset)
     H5O_storage_chunk_t *sc = &(dset->shared->layout.storage.u.chunk);
     herr_t    ret_value = SUCCEED;    /* Return value            */
 
-    FUNC_ENTER_STATIC_TAG(dset->oloc.addr)
+    FUNC_ENTER_STATIC
 
     HDassert(dset);
     HDassert(dset->shared);
@@ -3515,7 +3515,7 @@ done:
                     ((ent->edge_chunk_state & H5D_RDCC_DISABLE_FILTERS) ? NULL
                     : &(dset->shared->dcpl_cache.pline)));
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_flush_entry() */
 
 
