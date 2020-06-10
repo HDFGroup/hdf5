@@ -338,8 +338,10 @@ if test "X$CC_BASENAME" = "Xclang"; then
   # NOTE: No sanity checking done here!
   if test -n "$CLANG_SANITIZE_LIST"; then
     H5_CFLAGS="$H5_CFLAGS -fno-omit-frame-pointer"
+    H5_CXXFLAGS="$H5_CXXFLAGS -fno-omit-frame-pointer"
     for sanitizer in `echo $CLANG_SANITIZE_LIST`; do
       H5_CFLAGS="$H5_CFLAGS -fsanitize=${sanitizer}"
+      H5_CXXFLAGS="$H5_CXXFLAGS -fsanitize=${sanitizer}"
     done
   fi
 fi
