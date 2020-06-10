@@ -143,7 +143,7 @@ if test "X-clang" = "X-$cxx_vendor" -o "X-Apple LLVM" = "X-$cxx_vendor"; then
     if test $cxx_vers_major -le 4; then
         DEBUG_CXXFLAGS=
     else
-        DEBUG_CXXFLAGS="-ftrapv -fno-common -fsanitize=address"
+        DEBUG_CXXFLAGS="-ftrapv -fno-common"
     fi
 
     ###########
