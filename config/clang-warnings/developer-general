@@ -1,3 +1,4 @@
 -Wformat-nonliteral
 -Wmissing-noreturn
+-Wsometimes-uninitialized
 -Wswitch-enum

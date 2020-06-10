@@ -64,10 +64,11 @@ if test "X-" = "X-$cc_flags_set"; then
     else
         cc_version="`$CC $CFLAGS $H5_CFLAGS -v 2>&1 |\
             grep 'Apple LLVM version' | sed 's/.*Apple LLVM version \([-a-z0-9\.]*\).*/\1/'`"
-        cc_vendor="Apple LLVM"
+        if test -n "$cc_version"; then
+            cc_vendor="Apple LLVM"
+        fi
     fi
     if test "X-" != "X-$cc_version"; then
-        echo "compiler '$CC' is $cc_vendor-$cc_version"
 
         # Get the compiler version numbers
         cc_vers_major=`echo $cc_version | cut -f1 -d.`
@@ -131,11 +132,7 @@ if test "X-clang" = "X-$cc_vendor" -o "X-Apple LLVM" = "X-$cc_vendor"; then
     ##############
 
     # NDEBUG is handled explicitly by the configure script
-    if test $cc_vers_major -le 4; then
-        PROD_CFLAGS=
-    else
-        PROD_CFLAGS="-fstdarg-opt"
-    fi
+    PROD_CFLAGS=
 
     #########
     # Debug #
@@ -153,7 +150,7 @@ if test "X-clang" = "X-$cc_vendor" -o "X-Apple LLVM" = "X-$cc_vendor"; then
     # Symbols #
     ###########
 
-    NO_SYMBOLS_CFLAGS="-s"
+    NO_SYMBOLS_CFLAGS=
     SYMBOLS_CFLAGS="-g"
 
     #############
