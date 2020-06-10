@@ -4,20 +4,16 @@
 #
 -Werror=bad-function-cast
 -Werror=implicit-function-declaration
-#-Werror=incompatible-pointer-types
+-Werror=incompatible-pointer-types
 -Werror=missing-declarations
 -Werror=packed
 -Werror=shadow
-#-Werror=sometimes-uninitialized
 -Werror=switch
 #
-#-Werror=discarded-qualifiers
+# NOTE: Following files are not compatible with incompatible-pointer-types as errors
+#     src/H5Dchunk.c,src/H5Dint.c,src/H5Gint.c,src/H5HFcache.c,src/H5I.c,src/H5T.c
+-Wno-error=incompatible-pointer-types-discards-qualifiers
 #
-# Note:  For macos 10.12, etc
-#   H5Dint.c,H5Dchunk.c,H5Gint.c
-#   -Wincompatible-pointer-types-discards-qualifiers
-#   #   H5Dvirtual.c,H5SL.c
-#   -Wsometimes-uninitialized
 #
 # NOTE: File Driver files are not compatible with these warnings as errors
 #     H5FDdirect.c,H5FDmpio.c,H5FDros3.c,
