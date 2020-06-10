@@ -388,12 +388,17 @@ TOOLTEST -E $appmain $prog1 $prog2
 
 # Group5: Version compatibility tests.
 echo "***"Version compatibility tests.
-# Test these two cases now. More later.
+# 20200610 Updated for versions 1.10 - 1.14.
 # If H5_NO_DEPRECATED_SYMBOLS;
-# then only v18main works.
+# then versions v18main, v110main, and v112main work.
+# -DH5_USE_<N>_API_DEFAULT flags cannot be used with H5_NO_DEPRECATED_SYMBOLS;
 # else if H5_USE_16_API_DEFAULT;
 #      then v16main works.
 # else v18main works and -DH5_USE_16_API_DEFAULT v16main also works.
+# as new versions with versioned functions are added, they will work with and 
+# should be added to H5_NO_DEPRECATED_SYMBOLS and to the else section, with and 
+# without the -DH5_USE_<N>_API_DEFAULT flag. A new H5_USE_<N>_API_DEFAULT section 
+# should also be added.
 #
 if [ -n "$H5_USE_16_API_DEFAULT" ]; then
     echo "H5_USE_16_API_DEFAULT is defined."
@@ -416,6 +421,9 @@ fi
 if [ -n "$H5_NO_DEPRECATED_SYMBOLS" ]; then
     echo "Skipping $v16main test"
     TOOLTEST $v18main
+    TOOLTEST $v18main
+    TOOLTEST $v110main
+    TOOLTEST $v112main
 elif [ -n "$H5_USE_16_API_DEFAULT" ]; then
     echo "Testing HDF5  with 16_API_DEFAULT"
     TOOLTEST $v16main
@@ -440,6 +448,9 @@ else
     TOOLTEST -DH5_USE_18_API_DEFAULT $v18main
     TOOLTEST -DH5_USE_110_API_DEFAULT $v110main
     TOOLTEST -DH5_USE_112_API_DEFAULT $v112main
+    TOOLTEST $v18main
+    TOOLTEST $v110main
+    TOOLTEST $v112main
 fi
 
 ##############################################################################
