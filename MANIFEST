@@ -147,6 +147,8 @@
 ./config/solaris
 
 #warnings files for both autotools and CMake
+./config/clang-cxxflags
+./config/clang-flags
 ./config/clang-warnings/developer-general
 ./config/clang-warnings/error-general
 ./config/clang-warnings/general
