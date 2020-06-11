@@ -524,26 +524,30 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat,
     last_step = nrows - hang_back;
 
     for (step = *stepp; step <= last_step; step++) {
+        const unsigned ofs = step % 2;
+
         dbgf(1, "%s: which %u step %u\n", __func__, which, step);
 
         size[0] = s->chunk_dims[0] * (1 + step);
-        last.row = s->chunk_dims[0] * step;
+        last.row = s->chunk_dims[0] * step + ofs;
 
         if (s->two_dee) {
             size[1] = s->chunk_dims[1] * (1 + step);
-            last.col = s->chunk_dims[1] * step;
+            last.col = s->chunk_dims[1] * step + ofs;
         } else {
             size[1] = s->chunk_dims[1];
             last.col = 0;
         }
 
         dbgf(1, "new size %" PRIuHSIZE ", %" PRIuHSIZE "\n", size[0], size[1]);
+        dbgf(1, "last row %" PRIuHSIZE " col %" PRIuHSIZE "\n", last.row,
+            last.col);
 
         if (s->two_dee) {
 
             /* Down the right side, intersecting the bottom row. */
             base.col = last.col;
-            for (base.row = 0; base.row <= last.row;
+            for (base.row = ofs; base.row <= last.row;
                  base.row += s->chunk_dims[0]) {
                 verify_chunk(s, filespace, mat, which, base);
             }
@@ -552,7 +556,7 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat,
              * avoid re-writing the bottom-right chunk.
              */
             base.row = last.row;
-            for (base.col = 0; base.col < last.col;
+            for (base.col = ofs; base.col < last.col;
                  base.col += s->chunk_dims[1]) {
                 verify_chunk(s, filespace, mat, which, base);
             }
@@ -691,6 +695,9 @@ main(int argc, char **argv)
     ret = H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, 1);
     if (ret < 0)
         errx(EXIT_FAILURE, "H5Pset_file_space_strategy");
+
+    if (H5Pset_cache(fapl, 0, 1, 1024, 1.0) < 0)
+        errx(EXIT_FAILURE, "H5Pset_cache");
 
     if (writer)
         s.file = H5Fcreate(s.filename, H5F_ACC_TRUNC, fcpl, fapl);

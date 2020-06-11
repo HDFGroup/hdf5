@@ -1089,9 +1089,10 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t * f, uint64_t page,
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, \
                                     "can't evict pinned and tagged entries")
 
-                    /* *entry_ptr should be evicted -- set entry_ptr to NULL */
-                    entry_ptr = NULL;
-
+                    /* Both follow_ptr and entry_ptr may have been removed.
+                     * Set both to NULL to force the scan to restart.
+                     */
+                    follow_ptr = entry_ptr = NULL;
                 } else if ( entry_ptr->type->refresh ) {
 #if 0 /* JRM */
                     HDfprintf(stderr, "refreshing addr/page/tag == %lld/%lld\n",

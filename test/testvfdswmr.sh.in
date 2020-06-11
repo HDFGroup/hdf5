@@ -119,7 +119,7 @@ if [ $rc -ne 0 ] ; then
 fi
 
 all_tests="generator expand shrink expand_shrink sparse vlstr_null vlstr_oob zoo groups"
-#all_tests="${all_tests} few_big many_small"
+all_tests="${all_tests} few_big many_small"
 tests=${all_tests}
 
 if [ $# -gt 0 ]; then
