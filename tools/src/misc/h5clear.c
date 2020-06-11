@@ -101,8 +101,13 @@ static void usage(const char *prog)
     HDfprintf(stdout, "   -s, --status              Clear the status_flags field in the file's superblock\n");
     HDfprintf(stdout, "   -m, --image               Remove the metadata cache image from the file\n");
     HDfprintf(stdout, "   --filesize                Print the file's EOA and EOF\n");
-    HDfprintf(stdout, "   --increment=C             Set the file's EOA to the maximum of (EOA, EOF) + C for the file <file_name>\n");
-    HDfprintf(stdout, "                             C is >= 0; C is optional and will default to 1M when not set");
+    HDfprintf(stdout, "   --increment=C             Set the file's EOA to the maximum of (EOA, EOF) + C for\n");
+    HDfprintf(stdout, "                             the file <file_name>.\n");
+    HDfprintf(stdout, "                             C is >= 0; C is optional and will default to 1M when not set.\n");
+    HDfprintf(stdout, "                             This option helps to repair a crashed file where the stored EOA\n");
+    HDfprintf(stdout, "                             in the superblock is different from the actual EOF.\n");
+    HDfprintf(stdout, "                             The file’s EOA and EOF will be the same after applying\n");
+    HDfprintf(stdout, "                             this option to the file.\n");
     HDfprintf(stdout, "\n");
     HDfprintf(stdout, "Examples of use:\n");
     HDfprintf(stdout, "\n");
