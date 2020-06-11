@@ -132,9 +132,8 @@ await_signal(hid_t fid)
     sigset_t sleepset;
     struct timespec tick = {.tv_sec = 0, .tv_nsec = 1000000000 / 100};
 
-    if (sigemptyset(&sleepset) == -1 ||
-        sigfillset(&sleepset) == -1) {
-        err(EXIT_FAILURE, "%s.%d: could not initialize signal masks",
+    if (sigfillset(&sleepset) == -1) {
+        err(EXIT_FAILURE, "%s.%d: could not initialize signal mask",
             __func__, __LINE__);
     }
 
