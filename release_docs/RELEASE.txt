@@ -109,8 +109,14 @@ Bug Fixes since HDF5-1.12.0 release
 ==================================
     Library
     -------
+    - Streamline I/O to a single element, improving performance for record
+        appends to chunked datasets.
+
+      (QAK - 2020/06/11)
+
     - Remove redundant tagging of metadata cache entries for some chunked
-        dataset operations.
+        dataset operations, slightly improving performance for chunked
+        datasets.
 
       (QAK - 2020/06/10)
 
