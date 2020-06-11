@@ -1138,7 +1138,7 @@ done:
                     HDONE_ERROR(H5E_FILE, H5E_CANTDEC, NULL, "can't close property list")
 
             f->shared = H5FL_FREE(H5F_shared_t, f->shared);
-        } /* end if */
+        }
 
         /* Free VOL object */
         if(f->vol_obj)
@@ -1146,7 +1146,7 @@ done:
                 HDONE_ERROR(H5E_FILE, H5E_CANTDEC, NULL, "unable to free VOL object")
 
         f = H5FL_FREE(H5F_t, f);
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__new() */

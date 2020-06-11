@@ -314,7 +314,7 @@ H5PB_create(H5F_shared_t *f_sh, size_t size, unsigned page_buf_min_meta_perc, un
 
     /* Allocate the new page buffering structure */
     if(NULL == (page_buf = H5FL_CALLOC(H5PB_t)))
-	HGOTO_ERROR(H5E_PAGEBUF, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_PAGEBUF, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     page_buf->max_size = size;
     H5_CHECKED_ASSIGN(page_buf->page_size, size_t, f_sh->fs_page_size, hsize_t);
