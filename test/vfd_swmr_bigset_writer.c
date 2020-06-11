@@ -696,6 +696,9 @@ main(int argc, char **argv)
     if (ret < 0)
         errx(EXIT_FAILURE, "H5Pset_file_space_strategy");
 
+    if (H5Pset_cache(fapl, 0, 1, 1024, 1.0) < 0)
+        errx(EXIT_FAILURE, "H5Pset_cache");
+
     if (writer)
         s.file = H5Fcreate(s.filename, H5F_ACC_TRUNC, fcpl, fapl);
     else
