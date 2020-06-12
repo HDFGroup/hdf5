@@ -266,7 +266,7 @@ static herr_t H5D__chunk_flush(H5D_t *dset);
 static herr_t H5D__chunk_io_term(const H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_dest(H5D_t *dset);
 
-static herr_t H5D__chunk_index_close(H5D_t *);
+static herr_t H5D__chunk_index_close(const H5D_t *, bool);
 
 /* Chunk query operation callbacks */
 static int H5D__get_num_chunks_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
@@ -2627,7 +2627,16 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
         chunk_node = H5D_CHUNK_GET_NEXT_NODE(fm, chunk_node);
     } /* end while */
 
-    if(H5D__chunk_index_close(io_info->dset) < 0)
+    /* Stopgap fix for VFD SWMR: close the chunk index so that
+     * pinned/tagged entries in the metadata cache (MDC) are released.
+     *
+     * Extensible chunked datasets use extensible arrays or btrees as
+     * chunk indices.  Open chunk indices leave pinned/tagged entries
+     * in the MDC, and VFD SWMR cannot (yet) evict or refresh those
+     * entries.  After we write refresh routines for those entries, this
+     * stopgap fix can go away.
+     */
+    if(H5D__chunk_index_close(io_info->dset, false) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL,
             "unable to close chunk index")
 
@@ -2888,31 +2897,37 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_io_term() */
 
-/* Close the given dataset's chunk index.
+/* Close the given dataset's chunk index, or destroy it if `destroy`
+ * is true.  A closed index merely releases holds on metadata cache
+ * entries; the index can be reopened.  Once a dataset's index is
+ * destroyed, however, the dataset must not try to use the index, again.
  *
  * A useful side-effect of closing the chunk index is the release
  * pinned/tagged metadata cache entries connected with the index.
  */
 static herr_t
-H5D__chunk_index_close(H5D_t *dset)
+H5D__chunk_index_close(const H5D_t *dset, bool destroy)
 {
     H5D_chk_idx_info_t idx_info;
     H5O_storage_chunk_t *sc = &(dset->shared->layout.storage.u.chunk);
     herr_t      ret_value = SUCCEED;       /* Return value */
+    H5D_chunk_close_func_t fn;
 
     FUNC_ENTER_STATIC
 
     H5D_CHUNK_STORAGE_INDEX_CHK(sc);
 
-    /* Compose chunked index info struct */
     idx_info.f = dset->oloc.file;
     idx_info.pline = &dset->shared->dcpl_cache.pline;
     idx_info.layout = &dset->shared->layout.u.chunk;
     idx_info.storage = sc;
 
-    /* Free any index structures */
-    if(sc->ops->dest && (sc->ops->dest)(&idx_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to release chunk index info")
+    fn = destroy ? sc->ops->dest : sc->ops->close;
+
+    if (fn != NULL && (*fn)(&idx_info) < 0) {
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL,
+            "unable to release chunk index info")
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2960,16 +2975,7 @@ H5D__chunk_dest(H5D_t *dset)
         rdcc->slot = H5FL_SEQ_FREE(H5D_rdcc_ent_ptr_t, rdcc->slot);
     HDmemset(rdcc, 0, sizeof(H5D_rdcc_t));
 
-    /* Stopgap fix for VFD SWMR: close the chunk index so that
-     * pinned/tagged entries in the metadata cache (MDC) are released.
-     *
-     * Extensible chunked datasets use extensible arrays or btrees as
-     * chunk indices.  Open chunk indices leave pinned/tagged entries
-     * in the MDC, and VFD SWMR cannot (yet) evict or refresh those
-     * entries.  After we write refresh routines for those entries, this
-     * stopgap fix can go away.
-     */
-    if (H5D__chunk_index_close(dset) < 0) {
+    if (H5D__chunk_index_close(dset, true) < 0) {
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL,
             "unable to close chunk index")
     }
