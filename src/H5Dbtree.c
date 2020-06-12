@@ -166,7 +166,8 @@ const H5D_chunk_ops_t H5D_COPS_BTREE[1] = {{
     H5D__btree_idx_size,                /* size */
     H5D__btree_idx_reset,               /* reset */
     H5D__btree_idx_dump,                /* dump */
-    H5D__btree_idx_dest                 /* destroy */
+    H5D__btree_idx_dest,                /* destroy */
+    NULL                                /* close */
 }};
 
 
@@ -1234,8 +1235,8 @@ H5D__btree_idx_delete(const H5D_chk_idx_info_t *idx_info)
 
         /* Release the shared B-tree page */
         if(NULL == tmp_storage.u.btree.shared)
-            ;   /* do nothing */
-        else if(H5UC_DEC(tmp_storage.u.btree.shared) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "ref-counted page nil")
+        if(H5UC_DEC(tmp_storage.u.btree.shared) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page")
     } /* end if */
 
@@ -1454,11 +1455,9 @@ H5D__btree_idx_dest(const H5D_chk_idx_info_t *idx_info)
 
     /* Free the raw B-tree node buffer */
     if(NULL == idx_info->storage->u.btree.shared)
-        HGOTO_DONE(SUCCEED);
+        HGOTO_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "ref-counted page nil")
     if(H5UC_DEC(idx_info->storage->u.btree.shared) < 0)
 	HGOTO_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page")
-
-    idx_info->storage->u.btree.shared = NULL;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1519,8 +1518,9 @@ done:
         /* Free the raw B-tree node buffer */
         if(NULL == storage.u.btree.shared)
             HDONE_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "ref-counted shared info nil")
-        else if(H5UC_DEC(storage.u.btree.shared) < 0)
-            HDONE_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted shared info")
+        else
+            if(H5UC_DEC(storage.u.btree.shared) < 0)
+                HDONE_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted shared info")
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
