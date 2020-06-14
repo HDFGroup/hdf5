@@ -140,11 +140,7 @@ if test "X-clang" = "X-$cc_vendor" -o "X-Apple LLVM" = "X-$cc_vendor"; then
 
     # NDEBUG is handled explicitly by the configure script
     # -g is handled by the symbols flags
-    if test $cc_vers_major -le 4; then
-        DEBUG_CFLAGS=
-    else
-        DEBUG_CFLAGS="-ftrapv -fno-common"
-    fi
+    DEBUG_CFLAGS="-ftrapv -fno-common"
 
     ###########
     # Symbols #
@@ -163,13 +159,8 @@ if test "X-clang" = "X-$cc_vendor" -o "X-Apple LLVM" = "X-$cc_vendor"; then
     # Optimization #
     ################
 
-    if test $cc_vers_major -le 4; then
-        HIGH_OPT_CFLAGS="-O3"
-        DEBUG_OPT_CFLAGS=
-    else
-        HIGH_OPT_CFLAGS="-O3"
-        DEBUG_OPT_CFLAGS="-g"
-    fi
+    HIGH_OPT_CFLAGS="-O3"
+    DEBUG_OPT_CFLAGS="-g"
     NO_OPT_CFLAGS="-O0"
 
     ############
@@ -182,8 +173,6 @@ if test "X-clang" = "X-$cc_vendor" -o "X-Apple LLVM" = "X-$cc_vendor"; then
 
     H5_CFLAGS="$H5_CFLAGS $(load_clang_arguments general)"
     H5_ECFLAGS="$H5_ECFLAGS $(load_clang_arguments error-general)"
-
-echo "H5_CFLAGS:  $H5_CFLAGS"
 
     ######################
     # Developer warnings #
