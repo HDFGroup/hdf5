@@ -65,7 +65,7 @@ static herr_t H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t in
 static herr_t H5F__vfd_swmr_construct_write_md_hdr(H5F_t *f, uint32_t num_entries);
 static herr_t H5F__vfd_swmr_construct_write_md_idx(H5F_t *f, uint32_t num_entries, struct H5FD_vfd_swmr_idx_entry_t index[]);
 static herr_t H5F__idx_entry_cmp(const void *_entry1, const void *_entry2);
-static herr_t H5F__vfd_swmr_writer__create_index(H5F_t * f);
+static herr_t H5F__vfd_swmr_create_index(H5F_t * f);
 static herr_t H5F__vfd_swmr_writer__wait_a_tick(H5F_t *f);
 
 /*********************/
@@ -231,11 +231,9 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
         HDassert(f->shared->mdf_idx == NULL);
 
         /* allocate an index to save the initial index */
-        if ( H5F__vfd_swmr_writer__create_index(f) < 0 )
-
-           HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, \
-                       "unable to allocate metadata file index")
-
+        if (H5F__vfd_swmr_create_index(f) < 0)
+           HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL,
+               "unable to allocate metadata file index");
 
         /* Set tick_num to the current tick read from the metadata file */
         f->shared->mdf_idx_entries_used = f->shared->mdf_idx_len;
@@ -908,7 +906,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, bool wait_for_reader)
      *    in memory version of the metadata file index.
      */
     if ( ( f->shared->tick_num == 1 ) &&
-         ( H5F__vfd_swmr_writer__create_index(f) < 0 ) )
+         ( H5F__vfd_swmr_create_index(f) < 0 ) )
 
        HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, \
                    "unable to allocate metadata file index")
@@ -1109,15 +1107,14 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
     } *change = NULL;
     herr_t ret_value = SUCCEED;
     uint32_t i, j, nchanges;
+    H5FD_t *file = f->shared->lf;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(f);
-    HDassert(f->shared);
     HDassert(f->shared->pb_ptr);
     HDassert(f->shared->vfd_swmr);
     HDassert(!f->shared->vfd_swmr_writer);
-    HDassert(f->shared->lf);
+    HDassert(file);
 
     hlog_fast(eot, "%s enter index len %" PRIu32 " used %" PRIu32,
         __func__, f->shared->mdf_idx_len, f->shared->mdf_idx_entries_used);
@@ -1128,7 +1125,7 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
      *    If the tick reported has not increased since the last
      *    call, do nothing and exit.
      */
-    if ( H5FD_vfd_swmr_get_tick_and_idx(f->shared->lf, TRUE, &tmp_tick_num, 
+    if ( H5FD_vfd_swmr_get_tick_and_idx(file, TRUE, &tmp_tick_num, 
                                         NULL, NULL) < 0 )
 
         HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, \
@@ -1165,12 +1162,9 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
         f->shared->mdf_idx_entries_used = tmp_mdf_idx_entries_used;
 
         /* if f->shared->mdf_idx is NULL, allocate an index */
-        if ( ( f->shared->mdf_idx == NULL ) &&
-             ( H5F__vfd_swmr_writer__create_index(f) < 0 ) )
-
-           HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, \
-                       "unable to allocate metadata file index")
-
+        if (f->shared->mdf_idx == NULL && H5F__vfd_swmr_create_index(f) < 0)
+           HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL,
+                       "unable to allocate metadata file index");
 
         mdf_idx_entries_used = f->shared->mdf_idx_len;
 
@@ -1179,12 +1173,11 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
                   mdf_idx_entries_used);
 #endif /* JRM */
 
-        if ( H5FD_vfd_swmr_get_tick_and_idx(f->shared->lf, FALSE, NULL,
-                                            &mdf_idx_entries_used, 
-                                            f->shared->mdf_idx) < 0 )
-
-            HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, \
-                        "error in retrieving tick_num from driver")
+        if (H5FD_vfd_swmr_get_tick_and_idx(file, FALSE, NULL,
+                                           &mdf_idx_entries_used, 
+                                           f->shared->mdf_idx) < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL,
+                        "error in retrieving tick_num from driver");
 
         HDassert(mdf_idx_entries_used <= f->shared->mdf_idx_len);
 
@@ -1817,10 +1810,8 @@ done:
 static herr_t
 H5F__idx_entry_cmp(const void *_entry1, const void *_entry2)
 {
-    const H5FD_vfd_swmr_idx_entry_t *entry1 =
-        (const H5FD_vfd_swmr_idx_entry_t *)_entry1;
-    const H5FD_vfd_swmr_idx_entry_t *entry2 =
-        (const H5FD_vfd_swmr_idx_entry_t *)_entry2;
+    const H5FD_vfd_swmr_idx_entry_t *entry1 = _entry1;
+    const H5FD_vfd_swmr_idx_entry_t *entry2 = _entry2;
 
     int ret_value = 0;          /* Return value */
 
@@ -1841,17 +1832,10 @@ H5F__idx_entry_cmp(const void *_entry1, const void *_entry2)
 
 /*-------------------------------------------------------------------------
  *
- * Function: H5F__vfd_swmr_writer__create_index
+ * Function: H5F__vfd_swmr_create_index
  *
  * Purpose:  Allocate and initialize the index for the VFD SWMR metadata 
  *           file.
- *
- *           In the first cut at VFD SWMR, the index is of fixed size,
- *           as specified by the md_pages_reserved field of the VFD 
- *           SWMR configuration.  If we exceed this size we will simply
- *           abort.  Needless to say, this will have to change in the
- *           production version, but it is good enough for the working
- *           prototype.
  *
  * Return:   SUCCEED/FAIL
  *
@@ -1862,17 +1846,15 @@ H5F__idx_entry_cmp(const void *_entry1, const void *_entry2)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F__vfd_swmr_writer__create_index(H5F_t * f)
+H5F__vfd_swmr_create_index(H5F_t * f)
 {
     size_t bytes_available;
     size_t entries_in_index;
-    H5FD_vfd_swmr_idx_entry_t * index = NULL;
-    herr_t ret_value = SUCCEED;              /* Return value */
+    H5FD_vfd_swmr_idx_entry_t * index;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
-    HDassert(f);
-    HDassert(f->shared);
     HDassert(f->shared->vfd_swmr);
     HDassert(f->shared->mdf_idx == NULL);
     HDassert(f->shared->mdf_idx_len == 0);
@@ -1901,12 +1883,9 @@ H5F__vfd_swmr_writer__create_index(H5F_t * f)
     f->shared->mdf_idx              = index;
     f->shared->mdf_idx_len          = (uint32_t)entries_in_index;
     f->shared->mdf_idx_entries_used = 0;
-
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
-} /* end H5F__vfd_swmr_writer__create_index() */
+}
 
 H5FD_vfd_swmr_idx_entry_t *
 vfd_swmr_enlarge_shadow_index(H5F_t *f)
