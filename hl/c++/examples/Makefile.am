@@ -33,8 +33,8 @@ CXX_API=yes
 
 # Where to install examples
 # Note: no '/' after DESTDIR.  Explanation in commence.am
-EXAMPLEDIR=$(examplesdir)/hl/c++
-EXAMPLETOPDIR=$(examplesdir)/hl
+EXAMPLEDIR=${DESTDIR}$(examplesdir)/hl/c++
+EXAMPLETOPDIR=${DESTDIR}$(examplesdir)/hl
 
 # How to build programs using h5c++
 $(EXTRA_PROG): $(H5CPP)
