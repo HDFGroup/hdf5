@@ -77,13 +77,18 @@ static hbool_t H5_ntzset = FALSE;
  * unavailable.
  */
 int
-HDvasprintf(char **bufp, const char *fmt, va_list ap)
+HDvasprintf(char **bufp, const char *fmt, va_list _ap)
 {
     char *buf;  /* buffer to receive formatted string */
     size_t bufsz; /* size of buffer to allocate */
 
     for (bufsz = 32; (buf = HDmalloc(bufsz)) != NULL; ) {
-        const int ret = HDvsnprintf(buf, bufsz, fmt, ap);
+        int ret;
+        va_list ap;
+
+        va_copy(ap, _ap);
+        ret = HDvsnprintf(buf, bufsz, fmt, ap);
+        va_end(ap);
         if (ret >= 0 && (size_t)ret < bufsz) {
             *bufp = buf;
             return ret;
