@@ -277,25 +277,25 @@ H5FD_vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id,
                     "not a file access property list")
 
     /* Allocate buffer for reading the VFD SWMR configuration */
-    if(NULL == (vfd_swmr_config = (H5F_vfd_swmr_config_t *)
-                                  H5MM_malloc(sizeof(H5F_vfd_swmr_config_t))))
-
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, \
-                    "memory allocation failed for H5F_vfd_swmr_config_t")
+    if(NULL == (vfd_swmr_config = H5MM_malloc(sizeof(H5F_vfd_swmr_config_t)))) {
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL,
+                    "memory allocation failed for H5F_vfd_swmr_config_t");
+    }
 
     /* Get VFD SWMR configuration */
-    if(H5P_get(plist, H5F_ACS_VFD_SWMR_CONFIG_NAME, vfd_swmr_config) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, \
-                    "can't get VFD SWMR config info")
+    if(H5P_get(plist, H5F_ACS_VFD_SWMR_CONFIG_NAME, vfd_swmr_config) < 0) {
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL,
+                    "can't get VFD SWMR config info");
+    }
 
     /* Ensure that this is the reader */
     HDassert(!vfd_swmr_config->writer);
 
     /* Create the new driver struct */
-    if(NULL == (file = H5FL_CALLOC(H5FD_vfd_swmr_t)))
-
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, \
-                    "unable to allocate file struct")
+    if(NULL == (file = H5FL_CALLOC(H5FD_vfd_swmr_t))) {
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+                    "unable to allocate file struct");
+    }
 
     file->hdf5_file_lf = NULL;
     file->md_pages_reserved = vfd_swmr_config->md_pages_reserved;
@@ -321,22 +321,20 @@ H5FD_vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id,
 
     /* Exhaust all retries for opening the md file */
     if(!do_try)
-        HGOTO_ERROR(H5E_VFL, H5E_OPENERROR, NULL, \
-                   "unable to open the metadata file after all retry attempts")
+        HGOTO_ERROR(H5E_VFL, H5E_OPENERROR, NULL,
+                   "unable to open the metadata file after all retry attempts");
 
     /* Retry on loading and decoding the header and index in the
      *  metadata file 
      */
     if(H5FD__vfd_swmr_load_hdr_and_idx((H5FD_t *)file, TRUE) < 0)
-
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, \
-                    "unable to load/decode the md file header/index")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL,
+                    "unable to load/decode the md file header/index");
 
     /* Hard-wired to open the underlying HDF5 file with SEC2 */
     if((file->hdf5_file_lf = H5FD_open(name, flags, H5P_FILE_ACCESS_DEFAULT, 
                                        maxaddr)) == NULL)
-
-        HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "can't set driver info")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "can't set driver info");
 
     /* set pb_configured to FALSE.  This field should not exist, but 
      * until we modify the file open procedure to create the page buffer

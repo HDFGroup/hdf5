@@ -167,7 +167,6 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
         f->shared->tick_num = 1;
 
         if ( H5PB_vfd_swmr__set_tick(f->shared) < 0 )
-
             HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, \
                         "Can't update page buffer current tick")
 
@@ -185,7 +184,7 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
         assert(f->shared->fs_page_size >= H5FD_MD_HEADER_SIZE);
 
         /* Allocate an entire page from the shadow file for the header. */
-        if((hdr_addr = H5MV_alloc(f, f->shared->fs_page_size)) == HADDR_UNDEF) {
+        if ((hdr_addr = H5MV_alloc(f, f->shared->fs_page_size)) == HADDR_UNDEF){
             HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
                 "error allocating shadow-file header");
         }
@@ -203,9 +202,8 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
 
         /* Set the metadata file size to md_pages_reserved */
         if ( -1 == HDftruncate(f->shared->vfd_swmr_md_fd, (HDoff_t)md_size) )
-
-            HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, \
-                        "truncate fail for the metadata file")
+            HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
+                        "truncate fail for the metadata file");
 
         /* Set eof for metadata file to md_pages_reserved */
         f->shared->vfd_swmr_md_eoa = (haddr_t)md_size;
@@ -213,17 +211,15 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
         /* When opening an existing HDF5 file, create header and empty 
          * index in the metadata file 
          */
-        if ( !file_create ) {
+        if (!file_create) {
 
             if ( H5F__vfd_swmr_construct_write_md_idx(f, 0, NULL) < 0 )
-
-                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, \
-                            "fail to create index in md")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL,
+                            "fail to create index in md");
 
             if ( H5F__vfd_swmr_construct_write_md_hdr(f, 0) < 0 )
-
-                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, \
-                            "fail to create header in md")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL,
+                            "fail to create header in md");
         }
 
     } else { /* VFD SWMR reader  */
@@ -243,13 +239,12 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
 
         /* Set tick_num to the current tick read from the metadata file */
         f->shared->mdf_idx_entries_used = f->shared->mdf_idx_len;
-        if ( H5FD_vfd_swmr_get_tick_and_idx(f->shared->lf, FALSE, 
+        if (H5FD_vfd_swmr_get_tick_and_idx(f->shared->lf, FALSE, 
                                             &f->shared->tick_num, 
                                             &(f->shared->mdf_idx_entries_used),
-                                            f->shared->mdf_idx) < 0 )
-
-            HGOTO_ERROR(H5E_FILE, H5E_CANTLOAD, FAIL, \
-                        "unable to load/decode metadata file")
+                                            f->shared->mdf_idx) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTLOAD, FAIL,
+                        "unable to load/decode metadata file");
 
         assert(f->shared->tick_num != 0);
         vfd_swmr_reader_did_increase_tick_to(f->shared->tick_num);
@@ -266,9 +261,10 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
     }
 
     /* Update end_of_tick */
-    if ( H5F__vfd_swmr_update_end_of_tick_and_tick_num(f, FALSE) < 0 )
-
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to update end of tick")
+    if (H5F__vfd_swmr_update_end_of_tick_and_tick_num(f, FALSE) < 0) {
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL,
+            "unable to update end of tick");
+    }
 
 done:
 
