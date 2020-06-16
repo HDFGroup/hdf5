@@ -818,6 +818,9 @@ done:
             if (file_ptr->wo_file) {
                 H5FD_close(file_ptr->wo_file);
             }
+            if (file_ptr->logfp) {
+                HDfclose(file_ptr->logfp);
+            }
             H5FL_FREE(H5FD_splitter_t, file_ptr);
         }
     } /* end if error */
