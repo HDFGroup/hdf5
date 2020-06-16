@@ -313,6 +313,24 @@ create_extensible_dset(state_t *s, unsigned int which)
 }
 
 static void
+close_extensible_dset(state_t *s, unsigned int which)
+{
+    char dname[sizeof("/dataset-9999999999")];
+    hid_t ds;
+
+    assert(which < s->ndatasets);
+
+    esnprintf(dname, sizeof(dname), "/dataset-%d", which);
+
+    ds = s->dataset[which];
+
+    if (H5Dclose(ds) < 0)
+        errx(EXIT_FAILURE, "H5Dclose failed for \"%s\"", dname);
+
+    s->dataset[which] = badhid;
+}
+
+static void
 open_extensible_dset(state_t *s, unsigned int which)
 {
     hsize_t dims[RANK], maxdims[RANK];
@@ -738,6 +756,9 @@ main(int argc, char **argv)
                 nanosleep(&s.update_interval, NULL);
         }
     }
+
+    for (which = 0; which < s.ndatasets; which++)
+        close_extensible_dset(&s, which);
 
     if (s.use_vfd_swmr && s.wait_for_signal)
         await_signal(s.file);
