@@ -42,6 +42,9 @@ fi
 # Figure out Intel C compiler flags
 . $srcdir/config/intel-flags
 
+# Figure out Clang C compiler flags
+. $srcdir/config/clang-flags
+
 # Use default Fortran 90 compiler according to what C compiler is used.
 if test "X-" = "X-$FC"; then
     case $CC_BASENAME in
@@ -60,6 +63,11 @@ if test "X-" = "X-$FC"; then
         mpicc*)
             FC=mpif90
             FC_BASENAME=mpif90
+            ;;
+        clang*)
+            # clang has no fortran compiler. Use gfortran.
+            FC=gfortran
+            FC_BASENAME=gfortran
             ;;
     esac
 else
@@ -194,6 +202,9 @@ fi
 # Figure out GNU CXX compiler flags
 . $srcdir/config/gnu-cxxflags
 
+# Figure out Clang CXX compiler flags
+. $srcdir/config/clang-cxxflags
+
 # compiler version strings
 
 # check if the compiler_version_info is already set
@@ -221,6 +232,11 @@ case $CC in
     *icc*)
         cc_version_info=`$CC $CCFLAGS $H5_CCFLAGS -V 2>&1 | grep 'Version' |\
             sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
+        ;;
+
+    *clang*)
+        cc_version_info="`$CC $CFLAGS $H5_CFLAGS --version 2>&1 |\
+            grep 'clang version' | sed 's/.*clang version \([-a-z0-9\.]*\).*/\1/'`"
         ;;
 
     *)
@@ -316,6 +332,11 @@ case $CXX in
             sed 's/^\([a-z]* \)/ built with \1/1'`
         cxx_version_info=`echo $cxx_version_info`
         ;; 
+
+    *clang++*)
+        cxx_version_info="`$CXX $CXXFLAGS $H5_CXXFLAGS --version 2>&1 |\
+            grep 'clang version' | sed 's/.*clang version \([-a-z0-9\.]*\).*/\1/'`"
+        ;;
 
     *)
         echo "No match to get cxx_version_info for $CXX"

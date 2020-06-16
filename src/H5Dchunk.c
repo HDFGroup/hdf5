@@ -4350,7 +4350,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
     const H5O_storage_chunk_t *sc = &(layout->storage.u.chunk);
     herr_t    ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(dset && H5D_CHUNKED == layout->type);
@@ -4754,7 +4754,7 @@ done:
         H5MM_free(chunk_info.addr);
 #endif
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_allocate() */
 
 
