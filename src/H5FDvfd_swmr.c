@@ -50,6 +50,10 @@ typedef struct H5FD_vfd_swmr_t {
     H5FD_vfd_swmr_md_header md_header;          /* Metadata file header       */
     H5FD_vfd_swmr_md_index md_index;            /* Metadata file index        */
 
+    uint32_t api_elapsed_nslots;
+    uint64_t *api_elapsed_ticks;            /* Histogram of ticks elapsed
+                                             * inside the API (reader only). 
+                                             */
     hbool_t pb_configured;                      /* boolean flag set to TRUE   */
                                                 /* when the page buffer is    */
                                                 /* and to FALSE otherwise.    */
@@ -88,6 +92,7 @@ static htri_t H5FD__vfd_swmr_index_deserialize(const H5FD_t *_file,
 static herr_t H5FD__vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open);
 
 HLOG_OUTLET_SHORT_DEFN(index_motion, swmr);
+HLOG_OUTLET_SHORT_DEFN(swmr_stats, swmr);
 HLOG_OUTLET_SHORT_DEFN(swmr_read, swmr);
 HLOG_OUTLET_SHORT_DEFN(swmr_read_exception, swmr_read);
 HLOG_OUTLET_MEDIUM_DEFN(swmr_read_err, swmr_read_exception, HLOG_OUTLET_S_ON);
@@ -309,6 +314,16 @@ H5FD_vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id,
               sizeof(file->md_file_path));
     file->md_file_path[sizeof(file->md_file_path) - 1] = '\0';
 
+    file->api_elapsed_nslots = vfd_swmr_config->max_lag + 1;
+
+    file->api_elapsed_ticks =
+        calloc(file->api_elapsed_nslots, sizeof(*file->api_elapsed_ticks));
+
+    if (file->api_elapsed_ticks == NULL) {
+        HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL,
+            "could not allocate API elapsed ticks");
+    }
+
     /* Retry on opening the metadata file */
     for (do_try = h5_retry_init(&retry, H5FD_VFD_SWMR_MD_FILE_RETRY_MAX,
                                  H5_RETRY_DEFAULT_MINIVAL,
@@ -393,6 +408,16 @@ H5FD_vfd_swmr_close(H5FD_t *_file)
     HDassert(file);
 
     vfd_swmr_reader_did_increase_tick_to(0);
+
+    if (file->api_elapsed_ticks != NULL) {
+        uint32_t i;
+        for (i = 0; i < file->api_elapsed_nslots; i++) {
+            hlog_fast(swmr_stats,
+                "%s: %" PRIu32 " ticks elapsed in API %" PRIu64 " times",
+                __func__, i, file->api_elapsed_ticks[i]);
+        }
+        free(file->api_elapsed_ticks);
+    }
 
     /* Close the underlying file */
     if(file->hdf5_file_lf && H5FD_close(file->hdf5_file_lf) < 0)
@@ -1541,6 +1566,12 @@ H5FD_vfd_swmr_set_pb_configured(H5FD_t *_file)
 
 }  /* H5FD_vfd_swmr_set_pb_configured() */
 
+void
+H5FD_vfd_swmr_record_elapsed_ticks(H5FD_t *_file, uint64_t elapsed)
+{
+    H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file;
 
+    uint32_t elapsed_idx = MIN(elapsed, file->api_elapsed_nslots);
 
-
+    file->api_elapsed_ticks[elapsed_idx]++;
+}

@@ -1141,6 +1141,11 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
     assert(entering_api || tmp_tick_num <
            f->shared->tick_num + f->shared->vfd_swmr_config.max_lag);
 
+    if (!entering_api) {
+        H5FD_vfd_swmr_record_elapsed_ticks(f->shared->lf,
+            tmp_tick_num - f->shared->tick_num);
+    }
+
     if ( tmp_tick_num != f->shared->tick_num ) {
         const H5FD_vfd_swmr_idx_entry_t *new_mdf_idx;
         const H5FD_vfd_swmr_idx_entry_t *old_mdf_idx;
