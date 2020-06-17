@@ -357,6 +357,7 @@ H5_DLL hbool_t H5FD_is_vfd_swmr_driver(H5FD_t *_file);
 H5_DLL H5FD_t *H5FD_vfd_swmr_get_underlying_vfd(H5FD_t *_file);
 H5_DLL void H5FD_vfd_swmr_dump_status(H5FD_t *, uint64_t);
 H5_DLL void H5FD_vfd_swmr_set_pb_configured(H5FD_t *_file);
+H5_DLL void H5FD_vfd_swmr_record_elapsed_ticks(H5FD_t *, uint64_t);
 
 /* Function prototypes for MPI based VFDs*/
 #ifdef H5_HAVE_PARALLEL
