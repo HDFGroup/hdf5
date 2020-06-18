@@ -40,7 +40,7 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1version
     (JNIEnv *env, jclass clss, jlong plist, jintArray version_info)
 {
-#ifdef H5_NO_DEPRECATED_SYMBOLS
+#ifndef H5_NO_DEPRECATED_SYMBOLS
     jboolean  isCopy;
     jsize     arrLen;
     jint     *theArray = NULL;
@@ -72,7 +72,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1version
 #endif
 
 done:
-#ifdef H5_NO_DEPRECATED_SYMBOLS
+#ifndef H5_NO_DEPRECATED_SYMBOLS
     if (theArray)
         UNPIN_INT_ARRAY(ENVONLY, version_info, theArray, (status < 0) ? JNI_ABORT : 0);
 #endif
