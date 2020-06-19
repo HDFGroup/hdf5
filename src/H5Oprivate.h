@@ -275,6 +275,14 @@ typedef struct H5O_shared_t {
     } u;
 } H5O_shared_t;
 
+/* Storage for non-persistent (i.e., not stored in the HDF5 file) information
+ * that has to be preserved when an object is closed & reopened by
+ * H5O_refresh_metadata().
+ */
+typedef union _H5O_refresh_state {
+    hid_t dapl_id;                  // dataset refresh: access plist
+    H5O_shared_t shared_ohdr_info;  // datatype refresh
+} H5O_refresh_state_t;
 
 /*
  * Link Info Message.
@@ -972,7 +980,8 @@ H5_DLL herr_t H5O_msg_get_flags(const H5O_loc_t *loc, unsigned type_id, uint8_t 
 H5_DLL herr_t H5O_flush(H5O_loc_t *oloc, hid_t obj_id);
 H5_DLL herr_t H5O_flush_common(H5O_loc_t *oloc, hid_t obj_id);
 H5_DLL herr_t H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc);
-H5_DLL herr_t H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, H5VL_t *vol_driver, hbool_t start_swmr);
+H5_DLL herr_t H5O_refresh_metadata_reopen(hid_t, H5G_loc_t *,
+    const H5O_refresh_state_t *, H5VL_t *, hbool_t);
 
 /* Cache corking functions */
 H5_DLL herr_t H5O_disable_mdc_flushes(H5O_loc_t *oloc);

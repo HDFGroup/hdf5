@@ -47,7 +47,7 @@ typedef struct _mat {
 
 typedef struct {
 	hid_t *dataset;
-        hid_t memspace, file, one_by_one_sid;
+        hid_t dapl, memspace, file, one_by_one_sid;
         unsigned ndatasets;
 	char filename[PATH_MAX];
 	char progname[PATH_MAX];
@@ -64,6 +64,7 @@ typedef struct {
 
 #define ALL_HID_INITIALIZER (state_t){					\
 	  .memspace = H5I_INVALID_HID					\
+	, .dapl = H5I_INVALID_HID					\
 	, .file = H5I_INVALID_HID					\
 	, .one_by_one_sid = H5I_INVALID_HID				\
 	, .rows = ROWS						        \
@@ -296,7 +297,7 @@ create_extensible_dset(state_t *s, unsigned int which)
         errx(EXIT_FAILURE, "H5Pset_chunk failed");
 
     ds = H5Dcreate2(s->file, dname, H5T_STD_U32BE, filespace,
-        H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        H5P_DEFAULT, dcpl, s->dapl);
 
     if (H5Pclose(dcpl) < 0)
         errx(EXIT_FAILURE, "H5Pclose(dcpl)");
@@ -343,7 +344,7 @@ open_extensible_dset(state_t *s, unsigned int which)
 
     assert(s->dataset[which] == badhid);
 
-    ds = H5Dopen(s->file, dname, H5P_DEFAULT);
+    ds = H5Dopen(s->file, dname, s->dapl);
 
     if (ds < 0)
         errx(EXIT_FAILURE, "H5Dopen(, \"%s\", ) failed", dname);
@@ -714,8 +715,12 @@ main(int argc, char **argv)
     if (ret < 0)
         errx(EXIT_FAILURE, "H5Pset_file_space_strategy");
 
-    if (H5Pset_cache(fapl, 0, 1, 1024, 1.0) < 0)
-        errx(EXIT_FAILURE, "H5Pset_cache");
+    if ((s.dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
+        errx(EXIT_FAILURE, "%s.%d: H5Pcreate failed", __func__, __LINE__);
+
+    if (H5Pset_chunk_cache(s.dapl, 0, 0,
+                        H5D_CHUNK_CACHE_W0_DEFAULT) < 0)
+        errx(EXIT_FAILURE, "H5Pset_chunk_cache failed");
 
     if (writer)
         s.file = H5Fcreate(s.filename, H5F_ACC_TRUNC, fcpl, fapl);
@@ -764,6 +769,9 @@ main(int argc, char **argv)
         await_signal(s.file);
 
     restore_signals(&oldsigs);
+
+    if (H5Pclose(s.dapl) < 0)
+        errx(EXIT_FAILURE, "H5Pclose(fapl)");
 
     if (H5Pclose(fapl) < 0)
         errx(EXIT_FAILURE, "H5Pclose(fapl)");
