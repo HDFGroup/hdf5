@@ -1220,40 +1220,46 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
         for (i = j = nchanges = 0;
              i < old_mdf_idx_entries_used &&
              j < new_mdf_idx_entries_used; ) {
+            const H5FD_vfd_swmr_idx_entry_t *oent = &old_mdf_idx[i],
+                                            *nent = &new_mdf_idx[j];
 
-            if ( old_mdf_idx[i].hdf5_page_offset == 
-                 new_mdf_idx[j].hdf5_page_offset ) {
+            /* Verify that the old and new indices are sorted as expected. */
+            HDassert(i == 0 ||
+                oent[-1].hdf5_page_offset < oent[0].hdf5_page_offset);
 
-                if ( old_mdf_idx[i].md_file_page_offset !=
-                     new_mdf_idx[j].md_file_page_offset ) {
+            HDassert(j == 0 ||
+                nent[-1].hdf5_page_offset < nent[0].hdf5_page_offset);
+
+            if (oent->hdf5_page_offset == nent->hdf5_page_offset) {
+
+                if (oent->md_file_page_offset != nent->md_file_page_offset) {
 
                     /* It's ok if the length changes, I think, but I need
                      * to think about how to perform MDC invalidation in the
                      * case where the new entry is *longer*, because the
                      * extension could overlap with a second entry.
                      */
-                    assert(old_mdf_idx[i].length == new_mdf_idx[j].length);
+                    assert(oent->length == nent->length);
 
                     hlog_fast(shadow_index_update,
                         "shadow page for slot %" PRIu32 " lower page %" PRIu64
                         " moved, %" PRIu64 " -> %" PRIu64, i,
-                        old_mdf_idx[i].hdf5_page_offset,
-                        old_mdf_idx[i].md_file_page_offset,
-                        new_mdf_idx[j].md_file_page_offset);
+                        oent->hdf5_page_offset,
+                        oent->md_file_page_offset,
+                        nent->md_file_page_offset);
 
                     /* the page has been altered -- evict it and 
                      * any contained metadata cache entries.
                      */
-                    change[nchanges].pgno = new_mdf_idx[j].hdf5_page_offset;
-                    change[nchanges].length = old_mdf_idx[i].length;
+                    change[nchanges].pgno = oent->hdf5_page_offset;
+                    change[nchanges].length = oent->length;
                     nchanges++;
                     entries_moved++;
                 }
                 i++;
                 j++;
 
-            } else if ( old_mdf_idx[i].hdf5_page_offset < 
-                        new_mdf_idx[j].hdf5_page_offset ) {
+            } else if (oent->hdf5_page_offset < nent->hdf5_page_offset) {
                /* the page has been removed from the new version 
                 * of the index.  Evict it and any contained metadata
                 * cache entries.  
@@ -1265,57 +1271,45 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
                 */
                 hlog_fast(shadow_index_update,
                     "writer removed shadow index slot %" PRIu32
-                    " for page %" PRIu64, i, old_mdf_idx[i].hdf5_page_offset);
+                    " for page %" PRIu64, i, oent->hdf5_page_offset);
 
-                change[nchanges].pgno = old_mdf_idx[i].hdf5_page_offset;
-                change[nchanges].length = old_mdf_idx[i].length;
+                change[nchanges].pgno = oent->hdf5_page_offset;
+                change[nchanges].length = oent->length;
                 nchanges++;
                 entries_removed++;
                 i++;
 
-            } else { /* old_mdf_idx[i].hdf5_page_offset >
-                      * new_mdf_idx[j].hdf5_page_offset
+            } else { /* oent->hdf5_page_offset >
+                      * nent->hdf5_page_offset
                       */
 
                 hlog_fast(shadow_index_update,
                     "writer added shadow index slot %" PRIu32
-                    " for page %" PRIu64, j, new_mdf_idx[j].hdf5_page_offset);
+                    " for page %" PRIu64, j, nent->hdf5_page_offset);
 
                 /* The page has been added to the index. */
-                change[nchanges].pgno = new_mdf_idx[j].hdf5_page_offset;
-                change[nchanges].length = new_mdf_idx[j].length;
+                change[nchanges].pgno = nent->hdf5_page_offset;
+                change[nchanges].length = nent->length;
                 nchanges++;
                 entries_added++;
                 j++;
             }
-
-            /* Verify that the old and new indices are sorted as expected.
-             */
-            HDassert( ( i == 0 ) ||
-                      ( i >= old_mdf_idx_entries_used ) ||
-                      ( old_mdf_idx[i - 1].hdf5_page_offset <
-                        old_mdf_idx[i].hdf5_page_offset ) );
-
-            HDassert( ( j == 0 ) ||
-                      ( j >= new_mdf_idx_entries_used ) ||
-                      ( new_mdf_idx[j - 1].hdf5_page_offset <
-                        new_mdf_idx[j].hdf5_page_offset ) );
-
         }
 
-        entries_added += new_mdf_idx_entries_used - j;
-
         for (; j < new_mdf_idx_entries_used; j++) {
+            const H5FD_vfd_swmr_idx_entry_t *nent = &new_mdf_idx[j];
             hlog_fast(shadow_index_update,
                 "writer added shadow index slot %" PRIu32
-                " for page %" PRIu64, j, new_mdf_idx[j].hdf5_page_offset);
-            change[nchanges].pgno = new_mdf_idx[j].hdf5_page_offset;
-            change[nchanges].length = new_mdf_idx[j].length;
+                " for page %" PRIu64, j, nent->hdf5_page_offset);
+            change[nchanges].pgno = nent->hdf5_page_offset;
+            change[nchanges].length = nent->length;
             nchanges++;
+            entries_added++;
         }
 
         /* cleanup any left overs in the old index */
         for (; i < old_mdf_idx_entries_used; i++) {
+            const H5FD_vfd_swmr_idx_entry_t *oent = &old_mdf_idx[i];
 
             /* the page has been removed from the new version of the 
              * index.  Evict it from the page buffer and also evict any 
@@ -1324,12 +1318,11 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
 
             hlog_fast(shadow_index_update,
                 "writer removed shadow index slot %" PRIu32
-                " for page %" PRIu64, i, old_mdf_idx[i].hdf5_page_offset);
+                " for page %" PRIu64, i, oent->hdf5_page_offset);
 
-            change[nchanges].pgno = old_mdf_idx[i].hdf5_page_offset;
-            change[nchanges].length = old_mdf_idx[i].length;
+            change[nchanges].pgno = oent->hdf5_page_offset;
+            change[nchanges].length = oent->length;
             nchanges++;
-
             entries_removed++;
         }
         for (i = 0; i < nchanges; i++) {
@@ -1386,16 +1379,17 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
             "unable to insert entry into the EOT queue")
     }
 
+done:
+
     hlog_fast(eot, "%s exit tick %" PRIu64
         " len %" PRIu32 " -> %" PRIu32
         " used %" PRIu32 " -> %" PRIu32
-        " added %" PRIu32 " removed %" PRIu32 " moved %" PRIu32,
+        " added %" PRIu32 " removed %" PRIu32 " moved %" PRIu32 " %s",
         __func__, f->shared->tick_num,
         f->shared->old_mdf_idx_len, f->shared->mdf_idx_len,
         f->shared->old_mdf_idx_entries_used, f->shared->mdf_idx_entries_used,
-        entries_added, entries_removed, entries_moved);
-
-done:
+        entries_added, entries_removed, entries_moved,
+        (ret_value == SUCCEED) ? "success" : "failure");
 
     if (change != NULL)
         free(change);
