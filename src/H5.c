@@ -936,11 +936,13 @@ H5open(void)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_API_NOCLEAR(FAIL)
-    H5TRACE0("e","");
+    FUNC_ENTER_API_NOPUSH(FAIL)
+    /*NO TRACE*/
+
     /* all work is done by FUNC_ENTER() */
+
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_NOPUSH(ret_value)
 } /* end H5open() */
 
 
