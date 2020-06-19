@@ -3598,7 +3598,16 @@ H5F__start_swmr_write(H5F_t *f)
 
     /* Refresh (reopen) the objects (groups & datasets) in the file */
     for(u = 0; u < grp_dset_count; u++)
-        if(H5O_refresh_metadata_reopen(obj_ids[u], &obj_glocs[u], vol_connector, TRUE) < 0)
+        /* XXX This routine probably should prepare legitimate
+         * H5O_refresh_state_t's, above, and pass those instead of NULL, so
+         * that non-persistent object properties---e.g., dataset access
+         * properties---are copied from old objects to reopened objects.
+         *
+         * Passing NULL here shouldn't introduce any bugs in Legacy SWMR,
+         * however, and it lets VFD SWMR development proceed, so I'm not
+         * going to sweat it, now.
+         */
+        if(H5O_refresh_metadata_reopen(obj_ids[u], &obj_glocs[u], NULL, vol_connector, TRUE) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't refresh-close object")
 
     /* Unlock the file */
