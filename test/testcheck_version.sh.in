@@ -216,9 +216,9 @@ h5libsettings=../src/libhdf5.settings
 PURPOSE
 
 # Figure out library version numbers from the header file.
-h5versmajor=`grep '#define H5_VERS_MAJOR' $srcdir/../src/H5public.h | cut -f2` 
-h5versminor=`grep '#define H5_VERS_MINOR' $srcdir/../src/H5public.h | cut -f2` 
-h5versrelease=`grep '#define H5_VERS_RELEASE' $srcdir/../src/H5public.h | cut -f2` 
+h5versmajor=`grep '#define H5_VERS_MAJOR' $srcdir/../src/H5public.h | awk '{print $3}'`
+h5versminor=`grep '#define H5_VERS_MINOR' $srcdir/../src/H5public.h | awk '{print $3}'`
+h5versrelease=`grep '#define H5_VERS_RELEASE' $srcdir/../src/H5public.h | awk '{print $3}'`
 DEBUGPRINT $h5versmajor.$h5versminor.$h5versrelease
 case "$h5versmajor$h5versminor$h5versrelease" in
     [0-9]*)     # good. noop.
