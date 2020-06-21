@@ -8,10 +8,11 @@
 -Werror=missing-declarations
 -Werror=packed
 -Werror=shadow
--Werror=sometimes-uninitialized
 -Werror=switch
 #
-#-Werror=discarded-qualifiers
+# NOTE: Following files are not compatible with incompatible-pointer-types as errors
+#     src/H5Dchunk.c,src/H5Dint.c,src/H5Gint.c,src/H5HFcache.c,src/H5I.c,src/H5T.c
+-Wno-error=incompatible-pointer-types-discards-qualifiers
 #
 #
 # NOTE: File Driver files are not compatible with these warnings as errors
