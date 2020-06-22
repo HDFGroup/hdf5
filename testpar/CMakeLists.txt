@@ -75,6 +75,7 @@ set (H5P_TESTS
     t_shapesame
     t_filters_parallel
     t_2Gio
+	t_subfile_openclose
 )
 
 foreach (h5_testp ${H5P_TESTS})
