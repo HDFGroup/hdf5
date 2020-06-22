@@ -50,9 +50,9 @@ Java_hdf_hdf5lib_H5_H5Pget_1version
     UNUSED(clss);
 
 #ifdef H5_NO_DEPRECATED_SYMBOLS
-    UNUSED(loc_id);
-    UNUSED(name);
-    H5_UNIMPLEMENTED(ENVONLY, "H5Aopen_name: not implemented");
+    UNUSED(plist);
+    UNUSED(version_info);
+    H5_UNIMPLEMENTED(ENVONLY, "H5Pget_version: not implemented");
 #else
     if (NULL == version_info)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pget_version: version_info input array is NULL");
