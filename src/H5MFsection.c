@@ -776,7 +776,7 @@ H5MF__sect_small_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2
         /* Note: Large metadata page bypasses the PB cache */
         /* Note: Update of raw data page (large or small sized) is handled by the PB cache */
         if(udata->f->shared->page_buf != NULL && udata->alloc_type != H5FD_MEM_DRAW)
-            if(H5PB_remove_entry(udata->f, (*sect1)->sect_info.addr) < 0)
+            if(H5PB_remove_entry(udata->f->shared, (*sect1)->sect_info.addr) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't free merged section")
 
         if(H5MF__sect_free((H5FS_section_info_t *)(*sect1)) < 0)

@@ -21,20 +21,20 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"          /* Generic Functions                    */
-#include "H5Aprivate.h"         /* Attributes                           */
-#include "H5ACprivate.h"        /* Metadata cache                       */
-#include "H5CXprivate.h"        /* API Contexts                         */
-#include "H5Dprivate.h"         /* Datasets                             */
-#include "H5Eprivate.h"         /* Error handling                       */
-#include "H5Fpkg.h"             /* File access                          */
-#include "H5FDprivate.h"        /* File drivers                         */
-#include "H5Gprivate.h"         /* Groups                               */
-#include "H5Iprivate.h"         /* IDs                                  */
-#include "H5MFprivate.h"        /* File memory management               */
-#include "H5MMprivate.h"        /* Memory management                    */
-#include "H5Pprivate.h"         /* Property lists                       */
-#include "H5Tprivate.h"         /* Datatypes                            */
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Aprivate.h"         /* Attributes                               */
+#include "H5ACprivate.h"        /* Metadata cache                           */
+#include "H5CXprivate.h"        /* API Contexts                             */
+#include "H5Dprivate.h"         /* Datasets                                 */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Fpkg.h"             /* File access                              */
+#include "H5FDprivate.h"        /* File drivers                             */
+#include "H5Gprivate.h"         /* Groups                                   */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5MFprivate.h"        /* File memory management                   */
+#include "H5MMprivate.h"        /* Memory management                        */
+#include "H5Pprivate.h"         /* Property lists                           */
+#include "H5Tprivate.h"         /* Datatypes                                */
 
 
 /****************/
@@ -76,10 +76,10 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /* File ID class */
 static const H5I_class_t H5I_FILE_CLS[1] = {{
-    H5I_FILE,            /* ID class value */
-    0,                   /* Class flags */
-    0,                   /* # of reserved IDs for class */
-    (H5I_free_t)H5F__close_cb  /* Callback routine for closing objects of this class */
+    H5I_FILE,                   /* ID class value */
+    0,                          /* Class flags */
+    0,                          /* # of reserved IDs for class */
+    (H5I_free_t)H5F__close_cb   /* Callback routine for closing objects of this class */
 }};
 
 
@@ -1492,38 +1492,39 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5Fformat_convert
+ * Function:    H5Fformat_convert (Internal)
  *
- * Purpose:  Downgrade the superblock version to v2 and
- *           downgrade persistent file space to non-persistent
- *           for 1.8 library.
+ * Purpose:     Downgrade the superblock version to v2 and
+ *              downgrade persistent file space to non-persistent
+ *              for 1.8 library.
  *
- * Return:   Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fformat_convert(hid_t fid)
+H5Fformat_convert(hid_t file_id)
 {
     H5F_t    *f;                     /* File to flush */
-    herr_t    ret_value = SUCCEED;    /* Return value */
+    herr_t          ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", fid);
+    H5TRACE1("e", "i", file_id);
 
-    if(H5I_FILE != H5I_get_type(fid))
+    /* Check args */
+    if(H5I_FILE != H5I_get_type(file_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
     /* Get file object */
-    if(NULL == (f = (H5F_t *)H5I_object(fid)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    if(NULL == (f = (H5F_t *)H5I_object(file_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "file_id parameter is not a valid file identifier")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(fid) < 0)
+    if(H5CX_set_loc(file_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
-    /* Call the internal routine */
+    /* Convert the format */
     if(H5F__format_convert(f) < 0)
-	HGOTO_ERROR(H5E_FILE, H5E_CANTCONVERT, FAIL, "unable to convert file format")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCONVERT, FAIL, "can't convert file format")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1556,7 +1557,7 @@ H5Freset_page_buffering_stats(hid_t file_id)
 
     /* Reset the statistics */
     if(H5PB_reset_stats(file->shared->page_buf) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't reset stats for page buffering")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't reset stats for page buffering")
 
 done:
     FUNC_LEAVE_API(ret_value)
