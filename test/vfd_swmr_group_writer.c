@@ -16,12 +16,10 @@
 #include <time.h> /* nanosleep(2) */
 #include <unistd.h> /* getopt(3) */
 
-#define H5C_FRIEND              /*suppress error about including H5Cpkg   */
 #define H5F_FRIEND              /*suppress error about including H5Fpkg   */
 
 #include "hdf5.h"
 
-#include "H5Cpkg.h"
 #include "H5Fpkg.h"
 // #include "H5Iprivate.h"
 #include "H5HGprivate.h"
@@ -31,10 +29,11 @@
 #include "vfd_swmr_common.h"
 
 typedef struct {
-        hid_t file;
+        hid_t file, one_by_one_sid;
 	char filename[PATH_MAX];
 	char progname[PATH_MAX];
 	struct timespec update_interval;
+	unsigned int asteps;
 	unsigned int nsteps;
         bool wait_for_signal;
         bool use_vfd_swmr;
@@ -42,7 +41,10 @@ typedef struct {
 
 #define ALL_HID_INITIALIZER (state_t){					\
 	  .file = H5I_INVALID_HID					\
+	, .one_by_one_sid = H5I_INVALID_HID				\
 	, .filename = ""						\
+	, .asteps = 10							\
+	, .nsteps = 100							\
         , .wait_for_signal = true                                       \
         , .use_vfd_swmr = true                                          \
 	, .update_interval = (struct timespec){				\
@@ -76,6 +78,7 @@ state_init(state_t *s, int argc, char **argv)
 {
     unsigned long tmp;
     int ch;
+    const hsize_t dims = 1;
     char tfile[PATH_MAX];
     char *end;
     unsigned long millis;
@@ -84,7 +87,7 @@ state_init(state_t *s, int argc, char **argv)
     esnprintf(tfile, sizeof(tfile), "%s", argv[0]);
     esnprintf(s->progname, sizeof(s->progname), "%s", basename(tfile));
 
-    while ((ch = getopt(argc, argv, "SWn:qu:")) != -1) {
+    while ((ch = getopt(argc, argv, "SWa:n:qu:")) != -1) {
         switch (ch) {
         case 'S':
             s->use_vfd_swmr = false;
@@ -92,6 +95,7 @@ state_init(state_t *s, int argc, char **argv)
         case 'W':
             s->wait_for_signal = false;
             break;
+        case 'a':
         case 'n':
             errno = 0;
             tmp = strtoul(optarg, &end, 0);
@@ -104,7 +108,10 @@ state_init(state_t *s, int argc, char **argv)
             } else if (tmp > UINT_MAX)
                 errx(EXIT_FAILURE, "`-%c` argument `%lu` too large", ch, tmp);
 
-            s->nsteps = (unsigned)tmp;
+            if (ch == 'a')
+                s->asteps = (unsigned)tmp;
+            else
+                s->nsteps = (unsigned)tmp;
             break;
         case 'q':
             verbosity = 0;
@@ -133,11 +140,36 @@ state_init(state_t *s, int argc, char **argv)
     argc -= optind;
     argv += optind;
 
+    /* space for attributes */
+    if ((s->one_by_one_sid = H5Screate_simple(1, &dims, &dims)) < 0)
+        errx(EXIT_FAILURE, "H5Screate_simple failed");
+
     if (argc > 0)
         errx(EXIT_FAILURE, "unexpected command-line arguments");
 
     esnprintf(s->filename, sizeof(s->filename), "vfd_swmr_group.h5");
 }
+
+static void
+add_group_attribute(hid_t g, hid_t sid, unsigned int which)
+{
+    hid_t aid;
+    char name[sizeof("attr-9999999999")];
+
+    esnprintf(name, sizeof(name), "attr-%u", which);
+
+    dbgf(1, "setting attribute %s on group %u to %u\n", name, which, which);
+
+    if ((aid = H5Acreate2(g, name, H5T_STD_U32BE, sid, H5P_DEFAULT,
+            H5P_DEFAULT)) < 0)
+        errx(EXIT_FAILURE, "H5Acreate2 failed");
+
+    if (H5Awrite(aid, H5T_NATIVE_UINT, &which) < 0)
+        errx(EXIT_FAILURE, "H5Awrite failed");
+    if (H5Aclose(aid) < 0)
+        errx(EXIT_FAILURE, "H5Aclose failed");
+}
+
 
 static void
 write_group(state_t *s, unsigned int which)
@@ -154,8 +186,36 @@ write_group(state_t *s, unsigned int which)
     if (g < 0)
         errx(EXIT_FAILURE, "H5Gcreate(, \"%s\", ) failed", name);
 
+    if (s->asteps != 0 && which % s->asteps == 0)
+        add_group_attribute(g, s->one_by_one_sid, which);
+
     if (H5Gclose(g) < 0)
         errx(EXIT_FAILURE, "H5Gclose failed");
+}
+
+static void
+verify_group_attribute(hid_t g, unsigned int which)
+{
+    unsigned int read_which;
+    hid_t aid;
+    char name[sizeof("attr-9999999999")];
+
+    esnprintf(name, sizeof(name), "attr-%u", which);
+
+    dbgf(1, "verifying attribute %s on group %u equals %u\n", name, which,
+        which);
+
+    if ((aid = H5Aopen(g, name, H5P_DEFAULT)) < 0)
+        errx(EXIT_FAILURE, "H5Acreate2 failed");
+
+    if (H5Aread(aid, H5T_NATIVE_UINT, &read_which) < 0)
+        errx(EXIT_FAILURE, "H5Aread failed");
+
+    if (H5Aclose(aid) < 0)
+        errx(EXIT_FAILURE, "H5Aclose failed");
+
+    if (read_which != which)
+        errx(EXIT_FAILURE, "expected %u read %u", which, read_which);
 }
 
 static bool
@@ -175,6 +235,9 @@ verify_group(state_t *s, unsigned int which)
 
     if (g < 0)
         return false;
+
+    if (s->asteps != 0 && which % s->asteps == 0)
+        verify_group_attribute(g, which);
 
     if (H5Gclose(g) < 0)
         errx(EXIT_FAILURE, "H5Gclose failed");
