@@ -326,7 +326,7 @@ struct H5F_shared_t {
                                             /* been used accessed for either  */
                                             /* allocation or deallocation     */
                                             /* since file open.               */
-    haddr_t eoa_pre_fsm_fsalloc;	    /* eoa pre file space allocation  */
+    haddr_t eoa_pre_fsm_fsalloc;	        /* eoa pre file space allocation  */
                                             /* for self referential FSMs      */
     haddr_t eoa_post_fsm_fsalloc;           /* eoa post file space allocation */
                                             /* for self referential FSMs      */
@@ -354,7 +354,7 @@ struct H5F_shared_t {
 
     /* Object flush info */
     H5F_object_flush_t 	object_flush;	    /* Information for object flush callback */
-    hbool_t crt_dset_min_ohdr_flag; /* flag to create minimized dataset object headers */
+    hbool_t crt_dset_min_ohdr_flag; /* flag to minimize created dataset object header */
 };
 
 /*
@@ -366,7 +366,7 @@ struct H5F_t {
     char	       *open_name;      /* Name used to open file                                       */
     char	       *actual_name;    /* Actual name of the file, after resolving symlinks, etc.      */
     char               *extpath;        /* Path for searching target external link file                 */
-    H5F_shared_t         *shared;         /* The shared file info                                         */
+    H5F_shared_t       *shared;         /* The shared file info                                         */
     unsigned	        nopen_objs;     /* Number of open object headers                                */
     H5FO_t             *obj_count;      /* # of time each object is opened through top file structure   */
     hid_t               file_id;        /* ID of this file                                              */
@@ -428,16 +428,16 @@ H5_DLL herr_t H5F__super_ext_remove_msg(H5F_t *f, unsigned id);
 H5_DLL herr_t H5F__super_ext_close(H5F_t *f, H5O_loc_t *ext_ptr, hbool_t was_created);
 
 /* Metadata accumulator routines */
-H5_DLL herr_t H5F__accum_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, void *buf);
-H5_DLL herr_t H5F__accum_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, const void *buf);
-H5_DLL herr_t H5F__accum_free(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size);
-H5_DLL herr_t H5F__accum_flush(H5F_t *f);
-H5_DLL herr_t H5F__accum_reset(H5F_t *f, hbool_t flush);
+H5_DLL herr_t H5F__accum_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *buf);
+H5_DLL herr_t H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const void *buf);
+H5_DLL herr_t H5F__accum_free(H5F_shared_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size);
+H5_DLL herr_t H5F__accum_flush(H5F_shared_t *f_sh);
+H5_DLL herr_t H5F__accum_reset(H5F_shared_t *f_sh, hbool_t flush);
 
 /* Shared file list related routines */
-H5_DLL herr_t H5F_sfile_add(H5F_shared_t *shared);
-H5_DLL H5F_shared_t * H5F_sfile_search(H5FD_t *lf);
-H5_DLL herr_t H5F_sfile_remove(H5F_shared_t *shared);
+H5_DLL herr_t H5F__sfile_add(H5F_shared_t *shared);
+H5_DLL H5F_shared_t *H5F__sfile_search(H5FD_t *lf);
+H5_DLL herr_t H5F__sfile_remove(H5F_shared_t *shared);
 
 /* External file cache routines */
 H5_DLL H5F_efc_t *H5F__efc_create(unsigned max_nfiles);

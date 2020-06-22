@@ -909,12 +909,12 @@ HDfprintf(stderr, "%s: alloc_type = %u, size = %Hu\n", FUNC, (unsigned)alloc_typ
     H5MF__alloc_to_fs_type(f, alloc_type, size, &ptype);
 
     switch(ptype) {
-	    case H5F_MEM_PAGE_GENERIC:
-	    case H5F_MEM_PAGE_LARGE_BTREE:
-	    case H5F_MEM_PAGE_LARGE_DRAW:
-	    case H5F_MEM_PAGE_LARGE_GHEAP:
-	    case H5F_MEM_PAGE_LARGE_LHEAP:
-	    case H5F_MEM_PAGE_LARGE_OHDR:
+        case H5F_MEM_PAGE_GENERIC:
+        case H5F_MEM_PAGE_LARGE_BTREE:
+        case H5F_MEM_PAGE_LARGE_DRAW:
+        case H5F_MEM_PAGE_LARGE_GHEAP:
+        case H5F_MEM_PAGE_LARGE_LHEAP:
+        case H5F_MEM_PAGE_LARGE_OHDR:
         {
             haddr_t eoa;            /* EOA for the file */
             hsize_t frag_size = 0;  /* Fragment size */
@@ -981,7 +981,7 @@ HDfprintf(stderr, "%s: alloc_type = %u, size = %Hu\n", FUNC, (unsigned)alloc_typ
 
             /* Insert the new page into the Page Buffer list of new pages so
                we don't read an empty page from disk */
-            if(f->shared->page_buf != NULL && H5PB_add_new_page(f, alloc_type, new_page) < 0)
+            if(f->shared->page_buf != NULL && H5PB_add_new_page(f->shared, alloc_type, new_page) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, HADDR_UNDEF, "can't add new page to Page Buffer new page list")
 
             ret_value = new_page;
@@ -1140,7 +1140,7 @@ HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUN
      */
     if(H5FD_MEM_DRAW != alloc_type) {
         /* Check if the space to free intersects with the file's metadata accumulator */
-        if(H5F__accum_free(f, alloc_type, addr, size) < 0)
+        if(H5F__accum_free(f->shared, alloc_type, addr, size) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't check free space intersection w/metadata accumulator")
     } /* end if */
 
