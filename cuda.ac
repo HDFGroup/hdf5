@@ -1,0 +1,59 @@
+#
+########################################################
+
+# Allow setting CUDA compute capability at `configure`-time.
+AC_ARG_WITH([cuda-level],
+	[AS_HELP_STRING(
+		[--with-cuda-level=LEVEL],
+		[use CUDA compute capability LEVEL])],
+	[CUDA_LEVEL=$withval],
+	[CUDA_LEVEL=35])
+
+AC_ARG_WITH([cuda],
+	[AS_HELP_STRING([--with-cuda@<:@=PATH@:>@],
+		[use CUDA (installed in PATH) @<:@no@:>@])],
+	[CUDA_DIR=$withval],
+	[CUDA_DIR="no"])
+
+# We also support using the argument "auto" to mean "yes"
+case x$CUDA_DIR in
+             xno) ENABLE_CUDA=no ;;
+    x|xauto|xyes) ENABLE_CUDA=yes ;;
+               *) ENABLE_CUDA=yes ;;
+esac
+
+if test x$ENABLE_CUDA = xyes; then
+	AC_PATH_PROG([NVCC_PATH],nvcc,[],[$CUDA_DIR/bin])
+	if test -z "$NVCC_PATH" ; then
+		AC_MSG_ERROR(['bin/nvcc' not found in $CUDA_DIR/bin])
+	fi
+	
+	AC_CONFIG_FILES([cuda.mk])
+fi
+
+# Some CUDA installs only use the runtime library, so test for the presence of each
+if test x$ENABLE_CUDA = xyes; then
+	if test -e $CUDA_DIR/lib64/libcuda.so; then
+		CUDA_LIBS=-lcuda
+	else
+		if test -e $CUDA_DIR/lib64/libcudart.so; then
+			CUDA_LIBS=-lcudart
+		else
+			>&2 echo Could not find libcuda[rt].so
+			exit 1
+		fi
+	fi
+fi
+
+# Deprecate using the SDK
+AC_ARG_WITH([cuda-sdk],
+	[AS_HELP_STRING([--with-cuda-sdk=PATH], [DEPRECATED. Do not use.])],
+	[CUDA_SDK_DIR=$withval],
+	[CUDA_SDK_DIR=""]
+)
+
+AC_SUBST([ENABLE_CUDA])
+AC_SUBST([CUDA_LEVEL])
+AC_SUBST([CUDA_DIR])
+AC_SUBST([NVCC_PATH])
+AC_SUBST([CUDA_LIBS])

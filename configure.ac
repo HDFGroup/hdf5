@@ -1361,6 +1361,20 @@ AC_ARG_WITH([fnord],
                          include/ and lib/ subdirectories
   ])
 
+####################### CUDA #######################
+m4_include([cuda.ac])
+##################### END CUDA #####################
+
+if test x$ENABLE_CUDA = xyes; then
+  echo
+  echo " CUDA Options"
+  echo " ------------------------------"
+  echo "    "Toolkit directory" " $CUDA_DIR
+  echo "    "nvcc path "        " $NVCC_PATH
+  echo "    "Link libraries "   " $CUDA_LIBS
+  echo "    "Compute level "    " $CUDA_LEVEL
+fi
+
 ## ----------------------------------------------------------------------
 ## Is dmalloc (debug malloc library) requested? It has a header file
 ## `dmalloc.h' and a library `-ldmalloc' and their locations might be

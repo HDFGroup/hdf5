@@ -36,6 +36,11 @@
 #include "H5MMprivate.h"    /* Memory management        */
 #include "H5Pprivate.h"     /* Property lists           */
 
+//#include <cuda.h>
+#include <cuda_runtime.h>
+#include <cufile.h>
+#include "cufile_sample_utils.h"
+
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_SEC2_g = 0;
 

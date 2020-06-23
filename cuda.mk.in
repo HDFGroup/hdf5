@@ -1,0 +1,84 @@
+# optional CUDA flags: 
+# memory:
+# -DHAPI_USE_CUDAMALLOCHOST
+# -DHAPI_MEMPOOL
+#
+# verbosity, debugging:
+# -DCUDA_PRINT_TRANSFERRED_INTERACTIONS
+# -DCUDA_PRINT_TRANSFER_BACK_PARTICLES
+# -DCUDA_NOTIFY_DATA_TRANSFER_DONE
+# -DCUDA_VERBOSE_KERNEL_ENQUEUE
+# -DCUDA_NO_KERNELS
+# -DCUDA_NO_ACC_UPDATES
+# -DCUDA_UNIT_TEST
+#
+# print errors returned by CUDA calls:
+# -DCUDA_PRINT_ERRORS
+#
+# for performance monitoring via projections/stats
+# -DCUDA_STATS
+# -DHAPI_TRACE
+# -DHAPI_INSTRUMENT_WRS: to instrument time taken for each phase of a request. 
+#                        prints average transfer, kernel and cleanup times for
+#                        various kinds of request.
+###############################################################################
+
+# Turn on if outer variable is set. Otherwise, allow user to set explicitly.
+CUDA_DEBUG   = $(DEBUG)
+CUDA_VERBOSE = $(VERBOSE)
+
+cuda_defines += -DCUDA -DSPCUDA
+cuda_defines += -DHAPI_MEMPOOL -DHAPI_USE_CUDAMALLOCHOST
+
+ifeq (1,$(CUDA_DEBUG))
+	cuda_defines += -DCUDA_VERBOSE_KERNEL_ENQUEUE
+endif
+
+ifeq (yes,@PROJECTIONS@)
+	cuda_defines += -DHAPI_TRACE
+endif
+
+cuda_includes := -I@CUDA_DIR@/include
+#cuda_srcs     := $(source_dir)/HostCUDA.cu
+cuda_libs     := @CUDA_LIBS@
+cuda_ldflags  += -L@CUDA_DIR@/lib64
+cuda_objs     := $(patsubst %.cu,%.o,$(subst $(source_dir),$(build_dir),$(cuda_srcs)))
+
+# For more details on the architectures, see
+# http://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#virtual-architecture-feature-list
+nvcc_flags += -arch=compute_@CUDA_LEVEL@ -code=sm_@CUDA_LEVEL@
+
+# nvcc includes are broken when the host compiler is gcc >= 5.0
+nvcc_flags += -D_FORCE_INLINES
+
+ifeq (1,$(CUDA_VERBOSE))
+	nvcc_flags += --ptxas-options=-v
+endif
+
+ifeq (1,$(CUDA_DEBUG))
+	nvcc_flags += --device-debug
+else
+	nvcc_flags += -use_fast_math
+endif
+
+.PHONY: show-config
+show-config: cuda-show-config
+
+.PHONY: cuda-show-config
+cuda-show-config:
+	@ echo NVCC_FLAGS = $(nvcc_flags)"\n"
+	@ echo CUDA_DEFINES = $(cuda_defines)"\n"
+	@ echo CUDA_INCLUDES = $(cuda_includes)"\n"
+	@ echo CUDA_LDFLAGS = $(cuda_ldflags)"\n"
+	@ echo CUDA_LIBS = $(cuda_libs)"\n"
+
+.PHONY: dist-clean
+dist-clean: cuda-dist-clean
+
+.PHONY: cuda-dist-clean
+cuda-dist-clean:
+	@ $(RM) cuda.mk
+
+$(build_dir)/%.o: $(source_dir)/%.cu
+	@ echo Compiling $<...
+	$(quiet) @NVCC_PATH@ -std=$(cxx_std) -Xcompiler "$(cxx_flags) $(depend_flags) $(depend_dir)/$*$(depend_suffix)" $(nvcc_flags) -c $< -o $@
