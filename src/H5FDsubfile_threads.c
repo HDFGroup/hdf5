@@ -59,7 +59,7 @@ err_exit:
 }
 
 
-void __attribute__((destructor)) finalize_ioc_threads()
+void __attribute__((destructor)) finalize_ioc_threads(void)
 {
 	if (ioc_thread_pool != NULL) {
 		hg_thread_pool_destroy(ioc_thread_pool);

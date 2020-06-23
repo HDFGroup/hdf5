@@ -177,7 +177,10 @@ H5_DLL int decrement_file_ref_counts( int subfile_rank, int source, MPI_Comm com
 H5_DLL int sf_open_subfiles(hid_t context_id, char *prefix, int flags);
 H5_DLL int sf_close_subfiles(hid_t context_id);
 H5_DLL int sf_write_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size, int subfile_rank);
+H5_DLL int sf_read_independent(hid_t context_id, int64_t offset, int64_t elements, int dtype_extent, void *data);
+H5_DLL int sf_write_independent(hid_t context_id, int64_t offset, int64_t elements, int dtype_extent, void *data);
 H5_DLL int sf_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size, int subfile_rank);
 H5_DLL void delete_subfiling_context(hid_t context_id);
+H5_DLL void finalize_ioc_threads(void);
 
 #endif

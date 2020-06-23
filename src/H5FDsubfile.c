@@ -191,8 +191,9 @@ H5FDsubfiling_init(void)
 	int world_rank, world_size;
 	sf_topology_t *thisApp = NULL;
 	subfiling_context_t *newContext = NULL;
-
 	
+	FUNC_ENTER_API(FAIL)
+    H5TRACE0("e","");
 
 	if (MPI_Comm_size(MPI_COMM_WORLD, &world_size) != MPI_SUCCESS) {
 		puts("MPI_Comm_size returned an error");
@@ -224,6 +225,8 @@ H5FDsubfiling_init(void)
 	}
 	
 done:
+    FUNC_LEAVE_API(ret_value)
+
 	return ret_value;
 }
 
@@ -231,6 +234,9 @@ herr_t
 H5FDsubfiling_finalize(void)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
+
+	FUNC_ENTER_API(FAIL)
+    H5TRACE0("e","");
 	
 	/* Shutdown the IO Concentrator threads */
 	sf_shutdown_flag = 1;
@@ -238,11 +244,13 @@ H5FDsubfiling_finalize(void)
 	MPI_Barrier(MPI_COMM_WORLD);
 	delete_subfiling_context(context_id);
 
+    FUNC_LEAVE_API(ret_value)
+done:
 	return ret_value;
 }
 
 hid_t
-get_subfiling_context()
+get_subfiling_context(void)
 {
 	return context_id;
 }

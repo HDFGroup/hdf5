@@ -118,7 +118,8 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5lib_settings.c H5system.c \
 
 # Only compile parallel sources if necessary
 if BUILD_PARALLEL_CONDITIONAL
-    libhdf5_la_SOURCES += H5mpi.c H5ACmpio.c H5Cmpio.c H5Dmpio.c H5Fmpi.c H5FDmpi.c H5FDmpio.c H5Smpio.c
+    libhdf5_la_SOURCES += H5mpi.c H5ACmpio.c H5Cmpio.c H5Dmpio.c H5Fmpi.c H5FDmpi.c H5FDmpio.c H5Smpio.c \
+        H5FDsubfile.c H5FDsubfile_threads.c H5FDsubfile_mpi.c
 endif
 
 # Only compile the direct VFD if necessary
@@ -150,7 +151,8 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5vers
         H5Rpublic.h H5Spublic.h H5Tpublic.h \
         H5VLconnector.h H5VLconnector_passthru.h \
         H5VLnative.h H5VLpassthru.h H5VLpublic.h \
-        H5Zpublic.h
+        H5Zpublic.h H5FDsubfile_public.h H5FDsubfile_private.h \
+        mercury/mercury_thread.h mercury/mercury_thread_mutex.h mercury/mercury_log.h
 
 # install libhdf5.settings in lib directory
 settingsdir=$(libdir)
