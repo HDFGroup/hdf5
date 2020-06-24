@@ -2201,6 +2201,14 @@ H5_DLL herr_t H5CX_pop(void);
     H5E_clear_stack(NULL);                                                    \
     {
 
+/* Use this macro when VFD SWMR EOT is not used on entering an API function */
+#define FUNC_ENTER_API_NO_EOT(err) {{                                         \
+    FUNC_ENTER_API_COMMON                                                     \
+    FUNC_ENTER_API_INIT(err);                                                 \
+    /* Clear thread error stack entering public functions */                  \
+    H5E_clear_stack(NULL);                                                    \
+    {
+
 /*
  * Use this macro for API functions that shouldn't clear the error stack
  *      like H5Eprint and H5Ewalk.
@@ -2402,6 +2410,17 @@ H5_DLL herr_t H5CX_pop(void);
 
 #define FUNC_LEAVE_API(ret_value)                                             \
     VFD_SWMR_LEAVE(ret_value);                                                \
+    FUNC_LEAVE_API_COMMON(ret_value);                                         \
+    (void)H5CX_pop();                                                         \
+    H5_POP_FUNC                                                               \
+    if(err_occurred)                                                          \
+       (void)H5E_dump_api_stack(TRUE);                                        \
+    FUNC_LEAVE_API_THREADSAFE                                                 \
+    return(ret_value);                                                        \
+}} /*end scope from beginning of FUNC_ENTER*/
+
+/* Use this macro when VFD SWMR EOT is not used on leaving an API function */
+#define FUNC_LEAVE_API_NO_EOT(ret_value)                                      \
     FUNC_LEAVE_API_COMMON(ret_value);                                         \
     (void)H5CX_pop();                                                         \
     H5_POP_FUNC                                                               \

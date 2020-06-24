@@ -412,6 +412,7 @@ struct H5F_shared_t {
                                              */
     uint64_t tick_num;                      /* Number of the current tick */
     struct timespec end_of_tick;            /* End time of the current tick */
+
     lower_defree_queue_t lower_defrees;    /* For use by VFD SWMR writers. */
     /* VFD SWMR metadata file index */
     H5FD_vfd_swmr_idx_entry_t * mdf_idx;    /* pointer to an array of instance
@@ -526,6 +527,9 @@ H5_DLL herr_t H5F__start_swmr_write(H5F_t *f);
 H5_DLL herr_t H5F__close(H5F_t *f);
 H5_DLL herr_t H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high);
 H5_DLL herr_t H5F__get_cont_info(const H5F_t *f, H5VL_file_cont_info_t *info);
+H5_DLL herr_t H5F__vfd_swmr_end_tick(H5F_t *f);
+H5_DLL herr_t H5F__vfd_swmr_disable_end_of_tick(H5F_t *f);
+H5_DLL herr_t H5F__vfd_swmr_enable_end_of_tick(H5F_t *f);
 
 /* File mount related routines */
 H5_DLL herr_t H5F__mount(H5G_loc_t *loc, const char *name, H5F_t *child, hid_t plist_id);
