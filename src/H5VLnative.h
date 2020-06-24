@@ -80,6 +80,9 @@
 #define H5VL_NATIVE_FILE_GET_MPI_ATOMICITY             26  /* H5Fget_mpi_atomicity                 */
 #define H5VL_NATIVE_FILE_SET_MPI_ATOMICITY             27  /* H5Fset_mpi_atomicity                 */
 #define H5VL_NATIVE_FILE_POST_OPEN                     28  /* Adjust file after open, with wrapping context */
+#define H5VL_NATIVE_FILE_VFD_SWMR_DISABLE_EOT          29  
+#define H5VL_NATIVE_FILE_VFD_SWMR_ENABLE_EOT           30  
+#define H5VL_NATIVE_FILE_VFD_SWMR_END_TICK             31  
 
 /* Values for native VOL connector group optional VOL operations */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
