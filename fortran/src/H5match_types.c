@@ -143,17 +143,19 @@ void writeToFilesChr(const char* c_typedef, const char* fortran_type, const char
 int main(void)
 {
   int i;
-  char chrA[32],chrB[32];
+  char chrA[64],chrB[64];
 
   int IntKinds[] = H5_FORTRAN_INTEGER_KINDS;
   int IntKinds_SizeOf[] = H5_FORTRAN_INTEGER_KINDS_SIZEOF;
   int RealKinds[] = H5_FORTRAN_REAL_KINDS;
   int RealKinds_SizeOf[] = H5_FORTRAN_REAL_KINDS_SIZEOF;
   char Real_C_TYPES[10][32];
-  
+
   int FORTRAN_NUM_INTEGER_KINDS=H5_FORTRAN_NUM_INTEGER_KINDS;
   int H5_FORTRAN_NUM_REAL_KINDS;
+#if H5_FORTRAN_HAVE_C_LONG_DOUBLE!=0
   int found_long_double = 0;
+#endif
 
   /* Open target files */
   c_header = fopen(CFILE, "w");
@@ -191,6 +193,8 @@ int main(void)
       }
     if(sizeof(size_t) == IntKinds_SizeOf[i])
       writeTypedef("size_t", "size_t", IntKinds[i]);
+    if(sizeof(time_t) == IntKinds_SizeOf[i])
+      writeTypedef("time_t", "time_t", IntKinds[i]);
     if(sizeof(hsize_t) == IntKinds_SizeOf[i])
       writeTypedef("hsize_t", "hsize_t", IntKinds[i]);
   }
@@ -204,13 +208,13 @@ int main(void)
     }
     else if(sizeof(double) == RealKinds_SizeOf[i]) {
       writeTypedef("float", "double", RealKinds[i]);
-      strcpy(Real_C_TYPES[i], "C_DOUBLE"); 
+      strcpy(Real_C_TYPES[i], "C_DOUBLE");
     }
 #if H5_FORTRAN_HAVE_C_LONG_DOUBLE!=0
     else if(sizeof(long double) == RealKinds_SizeOf[i] && found_long_double == 0) {
       writeTypedef("float", "long double", RealKinds[i]);
       strcpy(Real_C_TYPES[i], "C_LONG_DOUBLE");
-      found_long_double = 1; 
+      found_long_double = 1;
     }
 #  ifdef H5_HAVE_FLOAT128
     /* Don't select a higher precision than Fortran can support */
@@ -306,6 +310,17 @@ int main(void)
       return -1;
   }
 
+  /* time_t */
+  for(i=0;i< FORTRAN_NUM_INTEGER_KINDS;i++) {
+    if(IntKinds_SizeOf[i] == H5_SIZEOF_TIME_T) {
+      writeToFiles("time_t","TIME_T", "time_t_f", IntKinds[i]);
+      break;
+    }
+    if(i == (FORTRAN_NUM_INTEGER_KINDS-1) )
+      /* Error: couldn't find a size for time_t */
+      return -1;
+  }
+
   /* int */
   writeToFiles("int","Fortran_INTEGER", "int_f", H5_FORTRAN_NATIVE_INTEGER_KIND);
 
@@ -314,7 +329,7 @@ int main(void)
 /* Defined different KINDs of integers */
 
   fprintf(fort_header,"        INTEGER, DIMENSION(1:%d), PARAMETER :: Fortran_INTEGER_AVAIL_KINDS = (/", FORTRAN_NUM_INTEGER_KINDS);
-  
+
   for(i=0;i<FORTRAN_NUM_INTEGER_KINDS;i++) {
     fprintf(fort_header,"%d",(int)IntKinds[i]);
     if(i==FORTRAN_NUM_INTEGER_KINDS-1) {
@@ -322,7 +337,7 @@ int main(void)
     } else {
       fprintf(fort_header,",");
     }
-    
+
   }
 
   /* real_4, real_8, real_16 */
@@ -334,8 +349,8 @@ int main(void)
 
   for(i=0;i<H5_FORTRAN_NUM_REAL_KINDS;i++) {
     if (RealKinds[i] > 0) {
-      sprintf(chrA, "Fortran_REAL_%s", Real_C_TYPES[i]);
-      sprintf(chrB, "real_%s_f", Real_C_TYPES[i]);
+      snprintf(chrA, sizeof(chrA), "Fortran_REAL_%s", Real_C_TYPES[i]);
+      snprintf(chrB, sizeof(chrB), "real_%s_f", Real_C_TYPES[i]);
       writeToFiles("float",chrA, chrB, RealKinds[i]);
     }
   }
@@ -401,12 +416,18 @@ int main(void)
     return -1;
   }
 
-  /* Need the buffer size for the fortran derive type 'hdset_reg_ref_t_f03'
+  /* Need the buffer size for the fortran derived type 'hdset_reg_ref_t_f03'
    * in order to be interoperable with C's structure, the C buffer size
    * H5R_DSET_REG_REF_BUF_SIZE is (sizeof(haddr_t)+4)
    */
-    
+
     fprintf(fort_header, "        INTEGER, PARAMETER :: H5R_DSET_REG_REF_BUF_SIZE_F = %u\n", H5_SIZEOF_HADDR_T + 4 );
+
+  /* Need the buffer size for the fortran derived type 'h5o_token_t'
+   * in order to be interoperable with C's structure.
+   */
+
+    fprintf(fort_header, "        INTEGER, PARAMETER :: H5O_MAX_TOKEN_SIZE_F = %u\n", H5O_MAX_TOKEN_SIZE);
 
   /* Close files */
   endCfile();

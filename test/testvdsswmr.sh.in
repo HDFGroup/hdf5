@@ -117,7 +117,9 @@ for FILE in vds_swmr*; do
     case "$FILE" in
         *.o) continue ;;    ## don't copy the .o files
     esac
-    cp $FILE vds_swmr_test
+    if test -f "$FILE" ; then
+        cp $FILE vds_swmr_test
+    fi
 done
 
 # With the --disable-shared option, swmr program files are built in the test
@@ -126,7 +128,14 @@ done
 # always be copied, swmr files in .libs should be copied only if they exists.
 if [ -f .libs/vds_swmr_writer ]; then
     mkdir vds_swmr_test/.libs
-    cp .libs/vds_swmr* vds_swmr_test/.libs
+    for FILE in .libs/vds_swmr*; do
+        case "$FILE" in
+            *.o) continue ;;    ## don't copy the .o files
+        esac
+        if test -f "$FILE" ; then
+            cp $FILE vds_swmr_test/.libs
+        fi
+    done
 fi
 
 cd vds_swmr_test

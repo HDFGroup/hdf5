@@ -15,10 +15,10 @@
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Friday, October 23, 1998
  *
- * Purpose:	This is the second half of a two-part test that makes sure
- *		that a file can be read after an application crashes as long
- *		as the file was flushed first.  This half tries to read the
- *		file created by the first half.
+ * Purpose:  This is the second half of a two-part test that makes sure
+ *    that a file can be read after an application crashes as long
+ *    as the file was flushed first.  This half tries to read the
+ *    file created by the first half.
  */
 #include "h5test.h"
 
@@ -135,7 +135,7 @@ file_ok(const char *filename, hid_t fapl_id, hbool_t check_second_dset)
     hid_t   fid = -1;               /* file ID                          */
     hid_t   top_gid = -1;           /* containing group ID              */
     hid_t   gid = -1;               /* subgroup ID                      */
-    char    group_name[16];         /* group name                       */
+    char    group_name[32];         /* group name                       */
     int     i;                      /* iterator                         */
 
     /* open file */
@@ -258,7 +258,7 @@ main(void)
 
     /* Check if the current VFD supports SWMR */
     driver = HDgetenv("HDF5_DRIVER");
-    vfd_supports_swmr = H5FD_supports_swmr_test(driver);
+    vfd_supports_swmr = H5FD__supports_swmr_test(driver);
 
     /* TEST 1 */
     /* Check the case where the file was flushed */
@@ -266,7 +266,7 @@ main(void)
     h5_fixname(FILENAME[0], fapl_id, filename, sizeof(filename));
     check_second_dset = FALSE;
     if(file_ok(filename, fapl_id, check_second_dset))
-        PASSED()
+        PASSED();
     else
         TEST_ERROR
 
@@ -279,7 +279,7 @@ main(void)
         if(clear_status_flags(filename, fapl_id) < 0)
             TEST_ERROR
         if(file_ok(filename, fapl_id, check_second_dset))
-            PASSED()
+            PASSED();
         else
             TEST_ERROR
     } /* end if */
@@ -305,7 +305,7 @@ main(void)
 #endif
     } /* end if */
     else
-        PASSED()
+        PASSED();
     /* Turn the error stack back on */
     if(H5Eset_auto2(H5E_DEFAULT, func, NULL) < 0)
         FAIL_STACK_ERROR
@@ -332,7 +332,7 @@ main(void)
 #endif
         } /* end if */
         else
-            PASSED()
+            PASSED();
         /* Turn the error stack back on */
         if(H5Eset_auto2(H5E_DEFAULT, func, NULL) < 0)
             FAIL_STACK_ERROR
@@ -348,13 +348,13 @@ main(void)
     check_second_dset = TRUE;
     h5_fixname(FILENAME[4], fapl_id, filename, sizeof(filename));
     if(file_ok(filename, fapl_id, check_second_dset))
-        PASSED()
+        PASSED();
     else
         TEST_ERROR
 
     /* TEST 6 */
     /* Check the case where the file was flushed, but more data was
-     * added afterward and then flushed (w/SWMR) 
+     * added afterward and then flushed (w/SWMR)
      */
     TESTING("H5Fflush (part2 with flush and later addition and another flush + SWMR)");
     if(vfd_supports_swmr) {
@@ -363,7 +363,7 @@ main(void)
         if(clear_status_flags(filename, fapl_id) < 0)
             TEST_ERROR
         if(file_ok(filename, fapl_id, check_second_dset))
-            PASSED()
+            PASSED();
         else
             TEST_ERROR
     } /* end if */
@@ -391,7 +391,7 @@ main(void)
 #endif
     } /* end if */
     else
-        PASSED()
+        PASSED();
     /* Turn the error stack back on */
     if(H5Eset_auto2(H5E_DEFAULT, func, NULL) < 0)
         FAIL_STACK_ERROR

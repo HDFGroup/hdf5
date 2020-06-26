@@ -18,6 +18,9 @@
 
 #include "pio_perf.h"
 
+#ifdef STANDALONE
+MPI_Info    h5_io_info_g=MPI_INFO_NULL;/* MPI INFO object for IO */
+#endif
 
 /** From h5tools_utils.c **/
 
@@ -162,26 +165,33 @@ print_version(const char *progname)
            H5_VERS_SUBRELEASE[0] ? "-" : "", H5_VERS_SUBRELEASE);
 }
 
-
-
-/** From h5test.c **/
-
-#ifdef H5_HAVE_PARALLEL
-MPI_Info    h5_io_info_g=MPI_INFO_NULL;/* MPI INFO object for IO */
-#endif
-
+#ifdef STANDALONE
+/*
+ * Function:    h5_set_info_object
+ * Purpose:     Process environment variables setting to set up MPI Info
+ *              object.
+ * Return:      0 if all is fine; otherwise non-zero.
+ * Programmer:  Albert Cheng, 2002/05/21.
+ * Modifications:
+ *          Bill Wendling, 2002/05/31
+ *          Modified so that the HDF5_MPI_INFO environment variable can
+ *          be a semicolon separated list of "key=value" pairings. Most
+ *          of the code is to remove any whitespaces which might be
+ *          surrounding the "key=value" pairs.
+ */
 int
 h5_set_info_object(void)
 {
-    char	*envp;			/* environment pointer */
-    int		ret_value=0;
+    char  *envp;      /* environment pointer */
+    int    ret_value=0;
 
     /* handle any MPI INFO hints via $HDF5_MPI_INFO */
-    if ((envp = getenv("HDF5_MPI_INFO")) != NULL){
+    if ((envp = HDgetenv("HDF5_MPI_INFO")) != NULL){
         char *next, *valp;
 
-
         valp = envp = next = HDstrdup(envp);
+
+        if (!valp) return 0;
 
         /* create an INFO object if not created yet */
         if (h5_io_info_g == MPI_INFO_NULL)
@@ -197,7 +207,7 @@ h5_set_info_object(void)
             /* copy key/value pair into temporary buffer */
             len = strcspn(valp, ";");
             next = &valp[len];
-            key_val = calloc(1, len + 1);
+            key_val = (char *)HDcalloc(1, len + 1);
 
             /* increment the next pointer past the terminating semicolon */
             if (*next == ';')
@@ -209,14 +219,15 @@ h5_set_info_object(void)
             while (*namep && (*namep == ' ' || *namep == '\t'))
                 namep++;
 
+            if (!*namep) continue; /* was all white space, so move to next k/v pair */
+
             /* eat up any ending white spaces */
-            endp = &namep[strlen(namep) - 1];
+            endp = &namep[HDstrlen(namep) - 1];
 
             while (endp && (*endp == ' ' || *endp == '\t'))
                 *endp-- = '\0';
 
             /* find the '=' */
-
             valp = HDstrchr(namep, '=');
 
             if (valp != NULL) {     /* it's a valid key/value pairing */
@@ -237,7 +248,7 @@ h5_set_info_object(void)
 
                 /* actually set the darned thing */
                 if (MPI_SUCCESS != MPI_Info_set(h5_io_info_g, namep, valp)) {
-                    printf("MPI_Info_set failed\n");
+                    HDprintf("MPI_Info_set failed\n");
                     ret_value = -1;
                 }
             }
@@ -253,27 +264,35 @@ h5_set_info_object(void)
 }
 
 
+/*
+ * Function:    h5_dump_info_object
+ * Purpose:     Display content of an MPI Info object
+ * Return:      void
+ * Programmer:  Albert Cheng 2002/05/21
+ * Modifications:
+ */
 void
 h5_dump_info_object(MPI_Info info)
 {
-    char	key[MPI_MAX_INFO_KEY+1];
-    char	value[MPI_MAX_INFO_VAL+1];
-    int  	flag;
-    int		i, nkeys;
+    char  key[MPI_MAX_INFO_KEY+1];
+    char  value[MPI_MAX_INFO_VAL+1];
+    int    flag;
+    int    i, nkeys;
 
-    printf("Dumping MPI Info Object(%d) (up to %d bytes per item):\n", (int)info,
-	MPI_MAX_INFO_VAL);
+    HDprintf("Dumping MPI Info Object (up to %d bytes per item):\n", MPI_MAX_INFO_VAL);
     if (info==MPI_INFO_NULL){
-	printf("object is MPI_INFO_NULL\n");
+  HDprintf("object is MPI_INFO_NULL\n");
     }
     else {
-	MPI_Info_get_nkeys(info, &nkeys);
-	printf("object has %d items\n", nkeys);
-	for (i=0; i<nkeys; i++){
-	    MPI_Info_get_nthkey(info, i, key);
-	    MPI_Info_get(info, key, MPI_MAX_INFO_VAL, value, &flag);
-	    printf("%s=%s\n", key, value);
-	}
+  MPI_Info_get_nkeys(info, &nkeys);
+  HDprintf("object has %d items\n", nkeys);
+  for (i=0; i<nkeys; i++){
+      MPI_Info_get_nthkey(info, i, key);
+      MPI_Info_get(info, key, MPI_MAX_INFO_VAL, value, &flag);
+      HDprintf("%s=%s\n", key, value);
+  }
 
     }
 }
+#endif  /* STANDALONE */
+

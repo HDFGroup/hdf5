@@ -108,7 +108,7 @@ typedef struct H5FD_log_t {
     DWORD           nFileIndexLow;
     DWORD           nFileIndexHigh;
     DWORD           dwVolumeSerialNumber;
-    
+
     HANDLE          hFile;      /* Native windows file handle */
 #endif  /* H5_HAVE_WIN32_API */
 
@@ -117,7 +117,7 @@ typedef struct H5FD_log_t {
      * Whether to eliminate the family driver info and convert this file to
      * a single file
      */
-    hbool_t     fam_to_sec2;
+    hbool_t     fam_to_single;
 
     /* Fields for tracking I/O operations */
     unsigned char       *nread;                 /* Number of reads from a file location             */
@@ -252,8 +252,8 @@ done:
  * Purpose:     Initialize this driver by registering the driver with the
  *              library.
  *
- * Return:      Success:    The driver ID for the log driver.
- *              Failure:    Negative.
+ * Return:      Success:    The driver ID for the log driver
+ *              Failure:    H5I_INVALID_HID
  *
  * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
@@ -265,7 +265,7 @@ H5FD_log_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     if(H5I_VFL != H5I_get_type(H5FD_LOG_g))
         H5FD_LOG_g = H5FD_register(&H5FD_log_g, sizeof(H5FD_class_t), FALSE);
@@ -329,16 +329,24 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned long long flags, si
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
-    /* This shallow copy is correct! The string will be properly 
-     * copied deep down in the H5P code. 
+    HDmemset(&fa, 0, sizeof(H5FD_log_fapl_t));
+
+    /* Duplicate the log file string
+     * A little wasteful, since this string will just be copied later, but
+     * passing it in as a pointer sets off a chain of impossible-to-resolve
+     * const cast warnings.
      */
-    fa.logfile = (char *)logfile;
+    if(logfile != NULL && NULL == (fa.logfile = H5MM_xstrdup(logfile)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to copy log file name")
 
     fa.flags = flags;
     fa.buf_size = buf_size;
     ret_value = H5P_set_driver(plist, H5FD_LOG, &fa);
 
 done:
+    if(fa.logfile)
+        H5MM_free(fa.logfile);
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_fapl_log() */
 
@@ -403,7 +411,7 @@ H5FD_log_fapl_copy(const void *_old_fa)
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "unable to allocate log file FAPL")
 
     /* Copy the general information */
-    HDmemcpy(new_fa, old_fa, sizeof(H5FD_log_fapl_t));
+    H5MM_memcpy(new_fa, old_fa, sizeof(H5FD_log_fapl_t));
 
     /* Deep copy the log file name */
     if(old_fa->logfile != NULL)
@@ -620,13 +628,13 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     /* Check for non-default FAPL */
     if(H5P_FILE_ACCESS_DEFAULT != fapl_id) {
         /* This step is for h5repart tool only. If user wants to change file driver from
-         * family to sec2 while using h5repart, this private property should be set so that
-         * in the later step, the library can ignore the family driver information saved
-         * in the superblock.
+         * family to one that uses single files (sec2, etc.) while using h5repart, this
+         * private property should be set so that in the later step, the library can ignore
+         * the family driver information saved in the superblock.
          */
-        if(H5P_exist_plist(plist, H5F_ACS_FAMILY_TO_SEC2_NAME) > 0)
-            if(H5P_get(plist, H5F_ACS_FAMILY_TO_SEC2_NAME, &file->fam_to_sec2) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get property of changing family to sec2")
+        if(H5P_exist_plist(plist, H5F_ACS_FAMILY_TO_SINGLE_NAME) > 0)
+            if(H5P_get(plist, H5F_ACS_FAMILY_TO_SINGLE_NAME, &file->fam_to_single) < 0)
+                HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get property of changing family to single")
     } /* end if */
 
     /* Set return value */
@@ -877,7 +885,7 @@ H5FD_log_query(const H5FD_t *_file, unsigned long *flags /* out */)
         *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE; /* VFD creates a file which can be opened with the default VFD      */
 
         /* Check for flags that are set by h5repart */
-        if(file && file->fam_to_sec2)
+        if(file && file->fam_to_single)
             *flags |= H5FD_FEAT_IGNORE_DRVRINFO; /* Ignore the driver info when file is opened (which eliminates it) */
     } /* end if */
 
@@ -1141,6 +1149,7 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hadd
     H5_timer_t          seek_timer;             /* Timer for seek operation */
     H5_timevals_t       read_times;             /* Elapsed time for read operation */
     H5_timevals_t       seek_times;             /* Elapsed time for seek operation */
+    HDoff_t             offset = (HDoff_t)addr;
     herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1167,7 +1176,8 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hadd
         } /* end if */
     } /* end if */
 
-    /* Seek to the correct location */
+#ifndef H5_HAVE_PREADWRITE
+    /* Seek to the correct location (if we don't have pread) */
     if(addr != file->pos || OP_READ != file->op) {
         /* Start timer for seek() call */
         if(file->fa.flags & H5FD_LOG_TIME_SEEK) {
@@ -1206,6 +1216,7 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hadd
                  HDfprintf(file->logfp, "\n");
         } /* end if */
     } /* end if */
+#endif /* H5_HAVE_PREADWRITE */
 
     /* Start timer for read operation */
     if(file->fa.flags & H5FD_LOG_TIME_READ) {
@@ -1219,7 +1230,7 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hadd
      */
     while(size > 0) {
         h5_posix_io_t       bytes_in        = 0;    /* # of bytes to read       */
-        h5_posix_io_ret_t   bytes_read      = -1;   /* # of bytes actually read */ 
+        h5_posix_io_ret_t   bytes_read      = -1;   /* # of bytes actually read */
 
         /* Trying to read more bytes than the return type can handle is
          * undefined behavior in POSIX.
@@ -1230,18 +1241,25 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hadd
             bytes_in = (h5_posix_io_t)size;
 
         do {
+#ifdef H5_HAVE_PREADWRITE
+            bytes_read = HDpread(file->fd, buf, bytes_in, offset);
+            if(bytes_read > 0)
+                offset += bytes_read;
+#else
             bytes_read = HDread(file->fd, buf, bytes_in);
+#endif /* H5_HAVE_PREADWRITE */
         } while(-1 == bytes_read && EINTR == errno);
 
         if(-1 == bytes_read) { /* error */
             int myerrno = errno;
             time_t mytime = HDtime(NULL);
-            HDoff_t myoffset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
+
+            offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
 
             if(file->fa.flags & H5FD_LOG_LOC_READ)
                 HDfprintf(file->logfp, "Error! Reading: %10a-%10a (%10Zu bytes)\n", orig_addr, (orig_addr + orig_size) - 1, orig_size);
 
-            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', buf = %p, total read size = %llu, bytes this sub-read = %llu, bytes actually read = %llu, offset = %llu", HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_read, (unsigned long long)myoffset);
+            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', buf = %p, total read size = %llu, bytes this sub-read = %llu, bytes actually read = %llu, offset = %llu", HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_read, (unsigned long long)offset);
         } /* end if */
 
         if(0 == bytes_read) {
@@ -1252,7 +1270,7 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hadd
 
         HDassert(bytes_read >= 0);
         HDassert((size_t)bytes_read <= size);
-        
+
         size -= (size_t)bytes_read;
         addr += (haddr_t)bytes_read;
         buf = (char *)buf + bytes_read;
@@ -1333,6 +1351,7 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
     H5_timer_t          seek_timer;             /* Timer for seek operation */
     H5_timevals_t       write_times;            /* Elapsed time for write operation */
     H5_timevals_t       seek_times;             /* Elapsed time for seek operation */
+    HDoff_t             offset = (HDoff_t)addr;
     herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1364,7 +1383,8 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
             file->nwrite[tmp_addr++]++;
     } /* end if */
 
-    /* Seek to the correct location */
+#ifndef H5_HAVE_PREADWRITE
+    /* Seek to the correct location (if we don't have pwrite) */
     if(addr != file->pos || OP_WRITE != file->op) {
         /* Start timer for seek() call */
         if(file->fa.flags & H5FD_LOG_TIME_SEEK) {
@@ -1403,6 +1423,7 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
                  HDfprintf(file->logfp, "\n");
         } /* end if */
     } /* end if */
+#endif /* H5_HAVE_PREADWRITE */
 
     /* Start timer for write operation */
     if(file->fa.flags&H5FD_LOG_TIME_WRITE) {
@@ -1416,7 +1437,7 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
      */
     while(size > 0) {
         h5_posix_io_t       bytes_in        = 0;    /* # of bytes to write  */
-        h5_posix_io_ret_t   bytes_wrote     = -1;   /* # of bytes written   */ 
+        h5_posix_io_ret_t   bytes_wrote     = -1;   /* # of bytes written   */
 
         /* Trying to write more bytes than the return type can handle is
          * undefined behavior in POSIX.
@@ -1427,18 +1448,25 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
             bytes_in = (h5_posix_io_t)size;
 
         do {
+#ifdef H5_HAVE_PREADWRITE
+            bytes_wrote = HDpwrite(file->fd, buf, bytes_in, offset);
+            if(bytes_wrote > 0)
+                offset += bytes_wrote;
+#else
             bytes_wrote = HDwrite(file->fd, buf, bytes_in);
+#endif /* H5_HAVE_PREADWRITE */
         } while(-1 == bytes_wrote && EINTR == errno);
 
         if(-1 == bytes_wrote) { /* error */
             int myerrno = errno;
             time_t mytime = HDtime(NULL);
-            HDoff_t myoffset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
+
+            offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
 
             if(file->fa.flags & H5FD_LOG_LOC_WRITE)
                 HDfprintf(file->logfp, "Error! Writing: %10a-%10a (%10Zu bytes)\n", orig_addr, (orig_addr + orig_size) - 1, orig_size);
 
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', buf = %p, total write size = %llu, bytes this sub-write = %llu, bytes actually written = %llu, offset = %llu", HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_wrote, (unsigned long long)myoffset);
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', buf = %p, total write size = %llu, bytes this sub-write = %llu, bytes actually written = %llu, offset = %llu", HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_wrote, (unsigned long long)offset);
         } /* end if */
 
         HDassert(bytes_wrote > 0);

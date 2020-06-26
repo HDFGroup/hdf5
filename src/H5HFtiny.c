@@ -35,6 +35,7 @@
 #include "H5private.h"      /* Generic Functions        */
 #include "H5Eprivate.h"     /* Error handling           */
 #include "H5HFpkg.h"        /* Fractal heaps            */
+#include "H5MMprivate.h"	/* Memory management			*/
 
 
 /****************/
@@ -109,7 +110,7 @@ H5HF_tiny_init(H5HF_hdr_t *hdr)
     /* Check if tiny objects need an extra byte for their length */
     /* (account for boundary condition when length of an object would need an
      *  extra byte, but using that byte means that the extra length byte is
-     *  unneccessary)
+     *  unnecessary)
      */
     if((hdr->id_len - 1) <= H5HF_TINY_LEN_SHORT) {
         hdr->tiny_max_len = hdr->id_len - 1;
@@ -176,7 +177,7 @@ HDfprintf(stderr, "%s: obj_size = %Zu\n", FUNC, obj_size);
         *id++ = enc_obj_size & H5HF_TINY_MASK_EXT_2;
     } /* end else */
 
-    HDmemcpy(id, obj, obj_size);
+    H5MM_memcpy(id, obj, obj_size);
     HDmemset(id + obj_size, 0, (hdr->id_len - ((size_t)1 + (size_t)hdr->tiny_len_extended + obj_size)));
 
     /* Update statistics about heap */
@@ -263,11 +264,11 @@ H5HF_tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op,
     HDassert(hdr);
     HDassert(id);
     HDassert(op);
-    
+
     /* Get the object's encoded length */
     /* H5HF_tiny_obj_len can't fail */
     ret_value = H5HF_tiny_get_obj_len(hdr, id, &enc_obj_size);
-    
+
     /* Advance past flag byte(s) */
     if(!hdr->tiny_len_extended)
         id++;

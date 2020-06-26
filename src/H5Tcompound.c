@@ -27,6 +27,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/*generic functions			  */
+#include "H5CXprivate.h"        /*API Contexts                            */
 #include "H5Eprivate.h"		/*error handling			  */
 #include "H5Iprivate.h"		/*ID functions		   		  */
 #include "H5MMprivate.h"	/*memory management			  */
@@ -50,8 +51,9 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5T_pack(const H5T_t *dt);
-static htri_t H5T_is_packed(const H5T_t *dt);
+static herr_t H5T__pack(const H5T_t *dt);
+static htri_t H5T__is_packed(const H5T_t *dt);
+static H5T_t *H5T__reopen_member_type(const H5T_t *dt, unsigned membno);
 
 
 /*********************/
@@ -201,7 +203,7 @@ done:
  *				modifying the returned datatype does not
  *				modify the member type.
  *
- *		Failure:	Negative
+ *		Failure:	H5I_INVALID_HID
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -215,23 +217,27 @@ H5Tget_member_type(hid_t type_id, unsigned membno)
     H5T_t	*memb_dt = NULL;        /* Member datatype */
     hid_t	ret_value;              /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE2("i", "iIu", type_id, membno);
 
     /* Check args */
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)) || H5T_COMPOUND != dt->shared->type)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a compound datatype")
     if(membno >= dt->shared->u.compnd.nmembs)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid member number")
-    if(NULL == (memb_dt = H5T_get_member_type(dt, membno, H5T_COPY_REOPEN)))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to retrieve member type")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid member number")
+
+    /* Retrieve the datatype for the member */
+    if(NULL == (memb_dt = H5T__reopen_member_type(dt, membno)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5I_INVALID_HID, "unable to retrieve member type")
+
+    /* Get an ID for the datatype */
     if((ret_value = H5I_register(H5I_DATATYPE, memb_dt, TRUE)) < 0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable register datatype atom")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable register datatype atom")
 
 done:
     if(ret_value < 0)
         if(memb_dt && H5T_close(memb_dt) < 0)
-            HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "can't close datatype")
+            HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, H5I_INVALID_HID, "can't close datatype")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tget_member_type() */
@@ -240,8 +246,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_get_member_type
  *
- * Purpose:	Private function for H5Tget_member_type.  Returns the data
- *              type of the specified member.
+ * Purpose:	Returns a copy of the data type of the specified member.
  *
  * Return:	Success:	A copy of the member datatype;
  *				modifying the returned datatype does not
@@ -255,22 +260,60 @@ done:
  *-------------------------------------------------------------------------
  */
 H5T_t *
-H5T_get_member_type(const H5T_t *dt, unsigned membno, H5T_copy_t method)
+H5T_get_member_type(const H5T_t *dt, unsigned membno)
 {
     H5T_t	*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
+    /* Sanity checks */
     HDassert(dt);
     HDassert(membno < dt->shared->u.compnd.nmembs);
 
-    /* Copy datatype into an atom */
-    if(NULL == (ret_value = H5T_copy(dt->shared->u.compnd.memb[membno].type, method)))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy member datatype")
+    /* Copy datatype */
+    if(NULL == (ret_value = H5T_copy(dt->shared->u.compnd.memb[membno].type, H5T_COPY_TRANSIENT)))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "unable to copy member datatype")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_get_member_type() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T__reopen_member_type
+ *
+ * Purpose:	Private function for H5Tget_member_type.  Returns a re-opened
+ *              copy of the data type of the specified member.
+ *
+ * Return:	Success:	A copy of the member datatype;
+ *				modifying the returned datatype does not
+ *				modify the member type.
+ *
+ *		Failure:        NULL
+ *
+ * Programmer:	David Young
+ *	        January 18, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5T_t *
+H5T__reopen_member_type(const H5T_t *dt, unsigned membno)
+{
+    H5T_t	*ret_value = NULL;      /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(dt);
+    HDassert(membno < dt->shared->u.compnd.nmembs);
+
+    /* Copy datatype, possibly re-opening it */
+    if(NULL == (ret_value = H5T_copy_reopen(dt->shared->u.compnd.memb[membno].type)))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "unable to reopen member datatype")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T__reopen_member_type() */
 
 
 /*-------------------------------------------------------------------------
@@ -382,7 +425,7 @@ H5Tpack(hid_t type_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound datatype")
 
     /* Pack */
-    if(H5T_pack(dt) < 0)
+    if(H5T__pack(dt) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to pack compound datatype")
 
 done:
@@ -488,7 +531,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_pack
+ * Function:	H5T__pack
  *
  * Purpose:	Recursively packs a compound datatype by removing padding
  *		bytes. This is done in place (that is, destructively).
@@ -501,17 +544,17 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_pack(const H5T_t *dt)
+H5T__pack(const H5T_t *dt)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(dt);
 
     if(H5T_detect_class(dt, H5T_COMPOUND, FALSE) > 0) {
         /* If datatype has been packed, skip packing it and indicate success */
-        if(TRUE == H5T_is_packed(dt))
+        if(TRUE == H5T__is_packed(dt))
             HGOTO_DONE(SUCCEED)
 
         /* Check for packing unmodifiable datatype */
@@ -519,7 +562,7 @@ H5T_pack(const H5T_t *dt)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "datatype is read-only")
 
         if(dt->shared->parent) {
-            if (H5T_pack(dt->shared->parent) < 0)
+            if(H5T__pack(dt->shared->parent) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to pack parent of datatype")
 
             /* Adjust size of datatype appropriately */
@@ -534,7 +577,7 @@ H5T_pack(const H5T_t *dt)
 
             /* Recursively pack the members */
             for(i = 0; i < dt->shared->u.compnd.nmembs; i++) {
-                if(H5T_pack(dt->shared->u.compnd.memb[i].type) < 0)
+                if(H5T__pack(dt->shared->u.compnd.memb[i].type) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to pack part of a compound datatype")
 
                 /* Update the member size */
@@ -547,7 +590,7 @@ H5T_pack(const H5T_t *dt)
             for(i = 0, offset = 0; i < dt->shared->u.compnd.nmembs; i++) {
                 dt->shared->u.compnd.memb[i].offset = offset;
                 offset += dt->shared->u.compnd.memb[i].size;
-            }
+            } /* end for */
 
             /* Change total size */
             dt->shared->size = MAX(1, offset);
@@ -559,11 +602,11 @@ H5T_pack(const H5T_t *dt)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_pack() */
+} /* end H5T__pack() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_is_packed
+ * Function:	H5T__is_packed
  *
  * Purpose:	Checks whether a datatype which is compound (or has compound
  *              components) is packed.
@@ -578,11 +621,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5T_is_packed(const H5T_t *dt)
+H5T__is_packed(const H5T_t *dt)
 {
     htri_t      ret_value = TRUE;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(dt);
 
@@ -591,12 +634,11 @@ H5T_is_packed(const H5T_t *dt)
         dt = dt->shared->parent;
 
     /* If this is a compound datatype, check if it is packed */
-    if(dt->shared->type == H5T_COMPOUND) {
+    if(dt->shared->type == H5T_COMPOUND)
         ret_value = (htri_t)(dt->shared->u.compnd.packed);
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_is_packed() */
+} /* end H5T__is_packed() */
 
 
 /*-------------------------------------------------------------------------
@@ -633,7 +675,7 @@ H5T__update_packed(const H5T_t *dt)
 
         /* Now check if all members are packed */
         for(i = 0; i < dt->shared->u.compnd.nmembs; i++)
-            if(!H5T_is_packed(dt->shared->u.compnd.memb[i].type)) {
+            if(!H5T__is_packed(dt->shared->u.compnd.memb[i].type)) {
                 dt->shared->u.compnd.packed = FALSE;
                 break;
             } /* end if */

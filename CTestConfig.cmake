@@ -19,25 +19,34 @@ set (CTEST_PROJECT_NAME "HDF5")
 set (CTEST_NIGHTLY_START_TIME "18:00:00 CST")
 
 set (CTEST_DROP_METHOD "http")
-if (CDASH_LOCAL)
-  set (CTEST_DROP_SITE "cdash-internal.hdfgroup.org")
-  set (CTEST_DROP_LOCATION "/submit.php?project=HDF5Trunk")
+if (CTEST_DROP_SITE_INIT)
+  set (CTEST_DROP_SITE "${CTEST_DROP_SITE_INIT}")
 else ()
-  set (CTEST_DROP_SITE "cdash.hdfgroup.org")
-  set (CTEST_DROP_LOCATION "/submit.php?project=HDF5+Trunk")
+  if (CDASH_LOCAL)
+    set (CTEST_DROP_SITE "cdash-internal.hdfgroup.org")
+  else ()
+    set (CTEST_DROP_SITE "cdash.hdfgroup.org")
+  endif ()
+endif ()
+if (CTEST_DROP_LOCATION_INIT)
+  set (CTEST_DROP_LOCATION "${CTEST_DROP_LOCATION_INIT}")
+else ()
+  if (CDASH_LOCAL)
+    set (CTEST_DROP_LOCATION "/submit.php?project=HDF5Trunk")
+  else ()
+    set (CTEST_DROP_LOCATION "/submit.php?project=HDF5")
+  endif ()
 endif ()
 set (CTEST_DROP_SITE_CDASH TRUE)
 
 set (UPDATE_TYPE git)
 set (VALGRIND_COMMAND "/usr/bin/valgrind")
 set (VALGRIND_COMMAND_OPTIONS "-v --tool=memcheck --leak-check=full --track-fds=yes --num-callers=50 --show-reachable=yes --track-origins=yes --malloc-fill=0xff --free-fill=0xfe")
-set (CTEST_MEMORYCHECK_COMMAND "/usr/bin/valgrind")
-set (CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v --tool=memcheck --leak-check=full --track-fds=yes --num-callers=50 --show-reachable=yes --track-origins=yes --malloc-fill=0xff --free-fill=0xfe")
 
-set (CTEST_TEST_TIMEOUT 600 CACHE STRING
+set (CTEST_TEST_TIMEOUT 1200 CACHE STRING
     "Maximum time allowed before CTest will kill the test.")
-set (DART_TESTING_TIMEOUT 600 CACHE STRING
+set (DART_TESTING_TIMEOUT 1200 CACHE STRING
     "Maximum time allowed before CTest will kill the test." FORCE)
 
-SET(CTEST_SUBMIT_RETRY_DELAY 20 CACHE STRING
+set (CTEST_SUBMIT_RETRY_DELAY 20 CACHE STRING
     "How long to wait between timed-out CTest submissions.")

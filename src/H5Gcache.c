@@ -36,6 +36,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5MFprivate.h"	/* File memory management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
 
@@ -113,7 +114,7 @@ H5FL_SEQ_EXTERN(H5G_entry_t);
 /*-------------------------------------------------------------------------
  * Function:    H5G__cache_node_get_initial_load_size()
  *
- * Purpose:	Determine the size of the on-disk image of the node, and 
+ * Purpose:	Determine the size of the on-disk image of the node, and
  *		return this value in *image_len.
  *
  * Return:      Success:        SUCCEED
@@ -149,10 +150,10 @@ H5G__cache_node_get_initial_load_size(void *_udata, size_t *image_len)
  *		node, allocate an instance of H5G_node_t, load the contence of the
  *		image into it, and return a pointer to the instance.
  *
- *		Note that deserializing the image requires access to the file 
- *		pointer, which is not included in the parameter list for this 
- *		callback.  Finesse this issue by passing in the file pointer 
- *		twice to the H5AC_protect() call -- once as the file pointer 
+ *		Note that deserializing the image requires access to the file
+ *		pointer, which is not included in the parameter list for this
+ *		callback.  Finesse this issue by passing in the file pointer
+ *		twice to the H5AC_protect() call -- once as the file pointer
  *		proper, and again as the user data
  *
  * Return:      Success:        Pointer to in core representation
@@ -170,6 +171,7 @@ H5G__cache_node_deserialize(const void *_image, size_t len, void *_udata,
     H5F_t                  *f = (H5F_t *)_udata;        /* User data for callback */
     H5G_node_t             *sym = NULL; /* Symbol table node created */
     const uint8_t          *image = (const uint8_t *)_image;    /* Pointer to image to deserialize */
+    const uint8_t          *image_end = image + len - 1;        /* Pointer to end of image buffer */
     void                   *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_STATIC
@@ -203,7 +205,7 @@ H5G__cache_node_deserialize(const void *_image, size_t len, void *_udata,
     UINT16DECODE(image, sym->nsyms);
 
     /* entries */
-    if(H5G__ent_decode_vec(f, &image, sym->entry, sym->nsyms) < 0)
+    if(H5G__ent_decode_vec(f, &image, image_end, sym->entry, sym->nsyms) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, NULL, "unable to decode symbol table entries")
 
     /* Set return value */
@@ -286,7 +288,7 @@ H5G__cache_node_serialize(const H5F_t *f, void *_image, size_t len,
     HDassert(len == sym->node_size);
 
     /* magic number */
-    HDmemcpy(image, H5G_NODE_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    H5MM_memcpy(image, H5G_NODE_MAGIC, (size_t)H5_SIZEOF_MAGIC);
     image += H5_SIZEOF_MAGIC;
 
     /* version number */

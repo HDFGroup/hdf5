@@ -1,0 +1,442 @@
+#! /bin/sh
+#
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
+
+top_builddir=@top_builddir@
+top_srcdir=@top_srcdir@
+srcdir=@srcdir@
+
+TESTNAME=EX_Datatypes
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
+
+# Set up default variable values if not supplied by the user.
+RM='rm -rf'
+CMP='cmp'
+DIFF='diff -c'
+CP='cp'
+DIRNAME='dirname'
+LS='ls'
+AWK='awk'
+
+nerrors=0
+
+# where the libs exist
+HDFLIB_HOME="$top_srcdir/java/lib"
+BLDLIBDIR="$top_builddir/hdf5/lib"
+BLDDIR="."
+HDFTEST_HOME="$top_srcdir/java/examples/datatypes"
+JARFILE=jar@PACKAGE_TARNAME@-@PACKAGE_VERSION@.jar
+TESTJARFILE=jar@PACKAGE_TARNAME@datatypes.jar
+test -d $BLDLIBDIR || mkdir -p $BLDLIBDIR
+
+######################################################################
+# library files
+# --------------------------------------------------------------------
+# All the library files copy from source directory to test directory
+# NOTE: Keep this framework to add/remove test files.
+#       This list are also used for checking exist.
+#       Comment '#' without space can be used.
+# --------------------------------------------------------------------
+LIST_LIBRARY_FILES="
+$top_builddir/src/.libs/libhdf5.*
+$top_builddir/java/src/jni/.libs/libhdf5_java.*
+$top_builddir/java/src/$JARFILE
+"
+LIST_JAR_TESTFILES="
+$HDFLIB_HOME/slf4j-api-1.7.25.jar
+$HDFLIB_HOME/ext/slf4j-simple-1.7.25.jar
+"
+LIST_DATA_FILES="
+$HDFTEST_HOME/../testfiles/examples.datatypes.H5Ex_T_Array.txt
+$HDFTEST_HOME/../testfiles/examples.datatypes.H5Ex_T_ArrayAttribute.txt
+$HDFTEST_HOME/../testfiles/examples.datatypes.H5Ex_T_Bit.txt
+$HDFTEST_HOME/../testfiles/examples.datatypes.H5Ex_T_BitAttribute.txt
+$HDFTEST_HOME/../testfiles/examples.datatypes.H5Ex_T_Commit.txt
+$HDFTEST_HOME/../testfiles/examples.datatypes.H5Ex_T_Compound.txt
+$HDFTEST_HOME/../testfiles/examples.datatypes.H5Ex_T_CompoundAttribute.txt
+$HDFTEST_HOME/../testfiles/examples.datatypes.H5Ex_T_Float.txt
+$HDFTEST_HOME/../testfiles/examples.datatypes.H5Ex_T_FloatAttribute.txt
+$HDFTEST_HOME/../testfiles/examples.datatypes.H5Ex_T_Integer.txt
+$HDFTEST_HOME/../testfiles/examples.datatypes.H5Ex_T_IntegerAttribute.txt
+$HDFTEST_HOME/../testfiles/examples.datatypes.H5Ex_T_ObjectReference.txt
+$HDFTEST_HOME/../testfiles/examples.datatypes.H5Ex_T_ObjectReferenceAttribute.txt
+$HDFTEST_HOME/../testfiles/examples.datatypes.H5Ex_T_Opaque.txt
+$HDFTEST_HOME/../testfiles/examples.datatypes.H5Ex_T_OpaqueAttribute.txt
+$HDFTEST_HOME/../testfiles/examples.datatypes.H5Ex_T_String.txt
+$HDFTEST_HOME/../testfiles/examples.datatypes.H5Ex_T_StringAttribute.txt
+$HDFTEST_HOME/../testfiles/examples.datatypes.H5Ex_T_VLString.txt
+"
+
+#
+# copy files from source dirs to test dir
+#
+COPY_LIBFILES="$LIST_LIBRARY_FILES"
+COPY_JARTESTFILES="$LIST_JAR_TESTFILES"
+
+COPY_LIBFILES_TO_BLDLIBDIR()
+{
+    # copy test files. Used -f to make sure get a new copy
+    for tstfile in $COPY_LIBFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+                $CP -f $tstfile $BLDLIBDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
+            fi
+        fi
+    done
+    # copy jar files. Used -f to make sure get a new copy
+    for tstfile in $COPY_JARTESTFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+                $CP -f $tstfile $BLDLIBDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
+            fi
+        fi
+    done
+}
+
+CLEAN_LIBFILES_AND_BLDLIBDIR()
+{
+    # skip rm if srcdir is same as destdir
+    # this occurs when build/test performed in source dir and
+    # make cp fail
+    SDIR=$HDFLIB_HOME
+    INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+    INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
+    if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+        for tstfile in $COPY_JARTESTFILES
+        do
+            $RM $BLDLIBDIR/tstfile
+        done
+    fi
+}
+
+COPY_DATAFILES="$LIST_DATA_FILES"
+
+COPY_DATAFILES_TO_BLDDIR()
+{
+    # copy test files. Used -f to make sure get a new copy
+    for tstfile in $COPY_DATAFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $BLDDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+                $CP -f $tstfile $BLDDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
+            fi
+        fi
+    done
+}
+
+CLEAN_DATAFILES_AND_BLDDIR()
+{
+        $RM $BLDDIR/examples.datatypes.H5Ex_T_*.txt
+        $RM $BLDDIR/H5Ex_T_*.out
+        $RM $BLDDIR/H5Ex_T_*.h5
+}
+
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Testing".
+#
+TESTING() {
+   SPACES="                                                               "
+   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+# where Java is installed (requires jdk1.7.x)
+JAVAEXE=@JAVA@
+JAVAEXEFLAGS=@H5_JAVAFLAGS@
+
+###############################################################################
+#            DO NOT MODIFY BELOW THIS LINE
+###############################################################################
+
+# prepare for test
+COPY_LIBFILES_TO_BLDLIBDIR
+COPY_DATAFILES_TO_BLDDIR
+
+CPATH=".:"$BLDLIBDIR"/"$JARFILE":"$BLDLIBDIR"/slf4j-api-1.7.25.jar:"$BLDLIBDIR"/slf4j-simple-1.7.25.jar:"$TESTJARFILE""
+
+TEST=/usr/bin/test
+if [ ! -x /usr/bin/test ]
+then
+TEST=`which test`
+fi
+
+if $TEST -z "$CLASSPATH"; then
+        CLASSPATH=""
+fi
+CLASSPATH=$CPATH":"$CLASSPATH
+export CLASSPATH
+
+if $TEST -n "$JAVAPATH" ; then
+        PATH=$JAVAPATH":"$PATH
+        export PATH
+fi
+
+if $TEST -e /bin/uname; then
+   os_name=`/bin/uname -s`
+elif $TEST -e /usr/bin/uname; then
+   os_name=`/usr/bin/uname -s`
+else
+   os_name=unknown
+fi
+
+if $TEST -z "$LD_LIBRARY_PATH" ; then
+        LD_LIBRARY_PATH=""
+fi
+
+case  $os_name in
+    *)
+    LD_LIBRARY_PATH=$BLDLIBDIR:$LD_LIBRARY_PATH
+    ;;
+esac
+
+export LD_LIBRARY_PATH
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Array"
+TESTING examples.datatypes.H5Ex_T_Array
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Array > H5Ex_T_Array.out)
+if diff H5Ex_T_Array.out examples.datatypes.H5Ex_T_Array.txt > /dev/null; then
+    echo "  PASSED      datatypes.H5Ex_T_Array"
+else
+    echo "**FAILED**    datatypes.H5Ex_T_Array"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_ArrayAttribute"
+TESTING examples.datatypes.H5Ex_T_ArrayAttribute
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_ArrayAttribute > H5Ex_T_ArrayAttribute.out)
+if diff H5Ex_T_ArrayAttribute.out examples.datatypes.H5Ex_T_ArrayAttribute.txt > /dev/null; then
+    echo "  PASSED      datatypes.H5Ex_T_ArrayAttribute"
+else
+    echo "**FAILED**    datatypes.H5Ex_T_ArrayAttribute"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Bit"
+TESTING examples.datatypes.H5Ex_T_Bit
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Bit > H5Ex_T_Bit.out)
+if diff H5Ex_T_Bit.out examples.datatypes.H5Ex_T_Bit.txt > /dev/null; then
+    echo "  PASSED      datatypes.H5Ex_T_Bit"
+else
+    echo "**FAILED**    datatypes.H5Ex_T_Bit"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_BitAttribute"
+TESTING examples.datatypes.H5Ex_T_BitAttribute
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_BitAttribute > H5Ex_T_BitAttribute.out)
+if diff H5Ex_T_BitAttribute.out examples.datatypes.H5Ex_T_BitAttribute.txt > /dev/null; then
+    echo "  PASSED      datatypes.H5Ex_T_BitAttribute"
+else
+    echo "**FAILED**    datatypes.H5Ex_T_BitAttribute"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Commit"
+TESTING examples.datasets.H5Ex_T_Commit
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Commit > H5Ex_T_Commit.out)
+if diff H5Ex_T_Commit.out examples.datatypes.H5Ex_T_Commit.txt > /dev/null; then
+    echo "  PASSED      datatypes.H5Ex_T_Commit"
+else
+    echo "**FAILED**    datatypes.H5Ex_T_Commit"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Compound"
+TESTING examples.datatypes.H5Ex_T_Compound
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Compound > H5Ex_T_Compound.out)
+if diff H5Ex_T_Compound.out examples.datatypes.H5Ex_T_Compound.txt > /dev/null; then
+    echo "  PASSED      datatypes.H5Ex_T_Compound"
+else
+    echo "**FAILED**    datatypes.H5Ex_T_Compound"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_CompoundAttribute"
+TESTING examples.datatypes.H5Ex_T_CompoundAttribute
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_CompoundAttribute > H5Ex_T_CompoundAttribute.out)
+if diff H5Ex_T_CompoundAttribute.out examples.datatypes.H5Ex_T_CompoundAttribute.txt > /dev/null; then
+    echo "  PASSED      datatypes.H5Ex_T_CompoundAttribute"
+else
+    echo "**FAILED**    datatypes.H5Ex_T_CompoundAttribute"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Float"
+TESTING examples.datatypes.H5Ex_T_Float
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Float > H5Ex_T_Float.out)
+if diff H5Ex_T_Float.out examples.datatypes.H5Ex_T_Float.txt > /dev/null; then
+    echo "  PASSED      datatypes.H5Ex_T_Float"
+else
+    echo "**FAILED**    datatypes.H5Ex_T_Float"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_FloatAttribute"
+TESTING examples.datatypes.H5Ex_T_FloatAttribute
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_FloatAttribute > H5Ex_T_FloatAttribute.out)
+if diff H5Ex_T_FloatAttribute.out examples.datatypes.H5Ex_T_FloatAttribute.txt > /dev/null; then
+    echo "  PASSED      datatypes.H5Ex_T_FloatAttribute"
+else
+    echo "**FAILED**    datatypes.H5Ex_T_FloatAttribute"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Integer"
+TESTING examples.datatypes.H5Ex_T_Integer
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Integer > H5Ex_T_Integer.out)
+if diff H5Ex_T_Integer.out examples.datatypes.H5Ex_T_Integer.txt > /dev/null; then
+    echo "  PASSED      datatypes.H5Ex_T_Integer"
+else
+    echo "**FAILED**    datatypes.H5Ex_T_Integer"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_IntegerAttribute"
+TESTING examples.datatypes.H5Ex_T_IntegerAttribute
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_IntegerAttribute > H5Ex_T_IntegerAttribute.out)
+if diff H5Ex_T_IntegerAttribute.out examples.datatypes.H5Ex_T_IntegerAttribute.txt > /dev/null; then
+    echo "  PASSED      datatypes.H5Ex_T_IntegerAttribute"
+else
+    echo "**FAILED**    datatypes.H5Ex_T_IntegerAttribute"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_ObjectReference"
+TESTING examples.datatypes.H5Ex_T_ObjectReference
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_ObjectReference > H5Ex_T_ObjectReference.out)
+if diff H5Ex_T_ObjectReference.out examples.datatypes.H5Ex_T_ObjectReference.txt > /dev/null; then
+    echo "  PASSED      datatypes.H5Ex_T_ObjectReference"
+else
+    echo "**FAILED**    datatypes.H5Ex_T_ObjectReference"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_ObjectReferenceAttribute"
+TESTING examples.datatypes.H5Ex_T_ObjectReferenceAttribute
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_ObjectReferenceAttribute > H5Ex_T_ObjectReferenceAttribute.out)
+if diff H5Ex_T_ObjectReferenceAttribute.out examples.datatypes.H5Ex_T_ObjectReferenceAttribute.txt > /dev/null; then
+    echo "  PASSED      datatypes.H5Ex_T_ObjectReferenceAttribute"
+else
+    echo "**FAILED**    datatypes.H5Ex_T_ObjectReferenceAttribute"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Opaque"
+TESTING examples.datatypes.H5Ex_T_Opaque
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Opaque > H5Ex_T_Opaque.out)
+if diff H5Ex_T_Opaque.out examples.datatypes.H5Ex_T_Opaque.txt > /dev/null; then
+    echo "  PASSED      datatypes.H5Ex_T_Opaque"
+else
+    echo "**FAILED**    datatypes.H5Ex_T_Opaque"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_OpaqueAttribute"
+TESTING examples.datatypes.H5Ex_T_OpaqueAttribute
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_OpaqueAttribute > H5Ex_T_OpaqueAttribute.out)
+if diff H5Ex_T_OpaqueAttribute.out examples.datatypes.H5Ex_T_OpaqueAttribute.txt > /dev/null; then
+    echo "  PASSED      datatypes.H5Ex_T_OpaqueAttribute"
+else
+    echo "**FAILED**    datatypes.H5Ex_T_OpaqueAttribute"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_String"
+TESTING examples.datatypes.H5Ex_T_String
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_String > H5Ex_T_String.out)
+if diff H5Ex_T_String.out examples.datatypes.H5Ex_T_String.txt > /dev/null; then
+    echo "  PASSED      datatypes.H5Ex_T_String"
+else
+    echo "**FAILED**    datatypes.H5Ex_T_String"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_StringAttribute"
+TESTING examples.datatypes.H5Ex_T_StringAttribute
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_StringAttribute > H5Ex_T_StringAttribute.out)
+if diff H5Ex_T_StringAttribute.out examples.datatypes.H5Ex_T_StringAttribute.txt > /dev/null; then
+    echo "  PASSED      datatypes.H5Ex_T_StringAttribute"
+else
+    echo "**FAILED**    datatypes.H5Ex_T_StringAttribute"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_VLString"
+TESTING examples.datatypes.H5Ex_T_VLString
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_VLString > H5Ex_T_VLString.out)
+if diff H5Ex_T_VLString.out examples.datatypes.H5Ex_T_VLString.txt > /dev/null; then
+    echo "  PASSED      datatypes.H5Ex_T_VLString"
+else
+    echo "**FAILED**    datatypes.H5Ex_T_VLString"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+# Clean up temporary files/directories
+CLEAN_LIBFILES_AND_BLDLIBDIR
+CLEAN_DATAFILES_AND_BLDDIR
+
+# Report test results and exit
+if test $nerrors -eq 0 ; then
+    echo "All $TESTNAME tests passed."
+    exit $EXIT_SUCCESS
+else
+    echo "$TESTNAME tests failed with $nerrors errors."
+    exit $EXIT_FAILURE
+fi

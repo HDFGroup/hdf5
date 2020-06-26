@@ -24,7 +24,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.11.0], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.13.0], [help@hdfgroup.org])
 
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADERS([src/H5config.h])
@@ -48,7 +48,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])]) # use silent rules where a
 ##
 ## By default, it is enabled. Users can configure with
 ## --disable-maintainer-mode to prevent running the autotools.
-AM_MAINTAINER_MODE([enable])
+AM_MAINTAINER_MODE([disable])
 
 ## ----------------------------------------------------------------------
 ## Set prefix default (install directory) to a directory in the build area.
@@ -99,13 +99,19 @@ AC_CONFIG_COMMANDS([pubconf], [
 AC_CANONICAL_HOST
 AC_SUBST([CPPFLAGS])
 AC_SUBST([JNIFLAGS])
+AC_SUBST([AR_FLAGS])
 
 ## H5_CFLAGS (and company) are for CFLAGS that should be used on HDF5, but
 ## not exported to h5cc (or h5fc, etc.)
+##
+## H5_ECFLAGS (and company) are for warnings that should be treated as errors.
+##
 AC_SUBST([H5_CFLAGS])
+AC_SUBST([H5_ECFLAGS])
 AC_SUBST([H5_CPPFLAGS])
 AC_SUBST([H5_FCFLAGS])
 AC_SUBST([H5_CXXFLAGS])
+AC_SUBST([H5_ECXXFLAGS])
 AC_SUBST([H5_JNIFLAGS])
 AC_SUBST([H5_JAVACFLAGS])
 AC_SUBST([H5_JAVAFLAGS])
@@ -139,6 +145,7 @@ JNIFLAGS="${JNIFLAGS}"
 JAVACFLAGS="${JAVACFLAGS}"
 JAVAFLAGS="${JAVAFLAGS}"
 LDFLAGS="${LDFLAGS}"
+AR_FLAGS="${AR_FLAGS}"
 
 ## Configure may need to alter any of the *FLAGS variables in order for
 ## various checks to work correctly. Save the user's value here so it
@@ -230,6 +237,9 @@ case $host_os in
   freebsd*)
     host_os_novers=freebsd
     ;;
+  netbsd*)
+    host_os_novers=netbsd
+    ;;
   solaris*)
     host_os_novers=solaris
     ;;
@@ -279,6 +289,62 @@ while test -n "$hname"; do
   test "$hname_tmp" = "$hname" && break
 done
 
+##
+## Enable/disable sanitizer checks for clang compilers, initially address sanitizer
+##
+AC_MSG_CHECKING([for clang sanitizer checks])
+AC_ARG_ENABLE([sanitize-checks],
+              [AS_HELP_STRING([--enable-sanitize-checks=address],
+                              [(clang/clang++ compilers only) Enable sanitize checks.
+                               Address is useful for detecting issues dealing with 
+                               memory. See AddressSanitizer in config/sanitizer/README.md
+                               for more information.
+                               [default=none]
+                               ])],
+              [CLANG_SANITIZE_CHECKS=$enableval])
+
+# Set default
+if test "X-$CLANG_SANITIZE_CHECKS" = X- ; then
+  CLANG_SANITIZE_CHECKS=none
+fi
+
+if test "X$CC_BASENAME" = "Xclang"; then
+  AC_SUBST([CLANG_SANITIZE_CHECKS])
+
+  # There are several sanitizer tools.  At present we are testing 
+  # and describing only -fsanitizer=address with autotools.
+  case "X-$CLANG_SANITIZE_CHECKS" in
+    X-no|X-none)
+      CLANG_SANITIZE_CHECKS=none
+      CLANG_SANITIZE_LIST=
+      ;;
+    *)
+      CLANG_SANITIZE_LIST=$CLANG_SANITIZE_CHECKS
+      ;;
+  esac
+  AC_MSG_RESULT([$CLANG_SANITIZE_CHECKS])
+
+  # Other tools can be added to the list of checks
+  # The clang compiler doesn't support some of them; they should be
+  # checked before adding them to the list in the help message.
+  # The sanitizers/sanitizers.cmake file lists these options:
+  # address, memory, memoryWithOrigins, undefined, thread, leak, 
+  # 'address;undefined'.  Which and which combinations of these are 
+  #  supported varies by compiler version, but unsupported options
+  # or combinations will result in configure errors reported in config.log.
+  # Comma separated lists of sanitize options wil be entered intact in
+  # one -fsanitize=<list> flag.  Space separated lists will be entered in
+  # separate -fsanitize=<item> flags.
+  # NOTE: No sanity checking done here!
+  if test -n "$CLANG_SANITIZE_LIST"; then
+    H5_CFLAGS="$H5_CFLAGS -fno-omit-frame-pointer"
+    H5_CXXFLAGS="$H5_CXXFLAGS -fno-omit-frame-pointer"
+    for sanitizer in `echo $CLANG_SANITIZE_LIST`; do
+      H5_CFLAGS="$H5_CFLAGS -fsanitize=${sanitizer}"
+      H5_CXXFLAGS="$H5_CXXFLAGS -fsanitize=${sanitizer}"
+    done
+  fi
+fi
 
 ## ----------------------------------------------------------------------
 ## Determine build mode (debug, production, clean).
@@ -409,7 +475,7 @@ AC_CHECK_SIZEOF([double])
 AC_CHECK_SIZEOF([long double])
 
 ## ----------------------------------------------------------------------
-## Check for non-standard extenstion __FLOAT128
+## Check for non-standard extension __FLOAT128
 ##
 HAVE_FLOAT128=0
 HAVE_QUADMATH=0
@@ -562,7 +628,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_SUBST([HAVE_Fortran_INTEGER_SIZEOF_16])
   AC_SUBST([FORTRAN_HAVE_C_LONG_DOUBLE])
   AC_SUBST([FORTRAN_C_LONG_DOUBLE_IS_UNIQUE])
-  AC_SUBST([FORTRAN_SIZEOF_LONG_DOUBLE])
   AC_SUBST([H5CONFIG_F_NUM_RKIND])
   AC_SUBST([H5CONFIG_F_RKIND])
   AC_SUBST([H5CONFIG_F_RKIND_SIZEOF])
@@ -757,11 +822,16 @@ fi
 ## Check which archiving tool to use. This needs to be done before
 ## the AM_PROG_LIBTOOL macro.
 ##
-
 if test -z "$AR"; then
   AC_CHECK_PROGS([AR], [ar xar], [:], [$PATH])
 fi
 AC_SUBST([AR])
+
+# Set the default ar flags to cr
+# The Automake default is to use cru and the 'u' causes ar
+# to emit warnings on some platforms.
+AR_FLAGS=cr
+
 
 ## Export the AR macro so that it will be placed in the libtool file
 ## correctly.
@@ -841,19 +911,6 @@ AC_SUBST([RUNPARALLEL])
 AC_SUBST([TESTPARALLEL])
 
 ## ----------------------------------------------------------------------
-## Disable shared libraries on CYGWIN. (LK - 04/16/15)
-## A number of tests run by "make check" fail on CYGWIN, so for HDF5 v1.8.15
-## we will change the default for shared libraries to disabled.
-
-
-case "`uname`" in
-  CYGWIN*)
-    enable_shared="no"
-    CHECK_WARN="Shared libraries are not currently supported on CYGWIN."
-    ;;
-esac
-
-## ----------------------------------------------------------------------
 ## Check if they would like the Java native interface (JNI) compiled
 ##
 
@@ -918,8 +975,8 @@ H5_FORTRAN_SHARED="no"
 if test "X${HDF_FORTRAN}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
   AC_MSG_CHECKING([if shared Fortran libraries are supported])
   H5_FORTRAN_SHARED="yes"
-  ## tell libtool to do the right thing with COMMON symbols, this fixes 
-  ## corrupt values with COMMON and EQUIVALENCE when building shared 
+  ## tell libtool to do the right thing with COMMON symbols, this fixes
+  ## corrupt values with COMMON and EQUIVALENCE when building shared
   ## Fortran libraries on OSX with gnu and Intel compilers (HDFFV-2772).
   case "`uname`" in
     Darwin*)
@@ -948,6 +1005,48 @@ if test "X${HDF_FORTRAN}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
 fi
 
 AM_CONDITIONAL([FORTRAN_SHARED_CONDITIONAL], [test "X$H5_FORTRAN_SHARED" = "Xyes"])
+
+## ----------------------------------------------------------------------
+## Check if they would like to disable building tests
+##
+
+## This needs to be exposed for the library info file.
+AC_SUBST([HDF5_TESTS])
+
+## Default is to build tests
+HDF5_TESTS=yes
+
+AC_MSG_CHECKING([if building tests is disabled])
+
+AC_ARG_ENABLE([tests],
+              [AS_HELP_STRING([--enable-tests],
+                              [Compile the HDF5 tests [default=yes]])],
+              [HDF5_TESTS=$enableval])
+
+if test "X$HDF5_TESTS" = "Xno"; then
+  echo "Building HDF5 tests is disabled"
+fi
+
+## ----------------------------------------------------------------------
+## Check if they would like to disable building tools
+##
+
+## This needs to be exposed for the library info file.
+AC_SUBST([HDF5_TOOLS])
+
+## Default is to build tests and tools
+HDF5_TOOLS=yes
+
+AC_MSG_CHECKING([if building tools is disabled])
+
+AC_ARG_ENABLE([tools],
+              [AS_HELP_STRING([--enable-tools],
+                              [Compile the HDF5 tools [default=yes]])],
+              [HDF5_TOOLS=$enableval])
+
+if test "X$HDF5_TOOLS" = "Xno"; then
+  echo "Building HDF5 tools is disabled"
+fi
 
 ## ----------------------------------------------------------------------
 ## Create libtool.  If shared/static libraries are going to be enabled
@@ -1048,6 +1147,7 @@ AC_CHECK_HEADERS([stddef.h setjmp.h features.h])
 AC_CHECK_HEADERS([dirent.h])
 AC_CHECK_HEADERS([stdint.h], [C9x=yes])
 AC_CHECK_HEADERS([stdbool.h])
+AC_CHECK_HEADERS([netdb.h netinet/in.h arpa/inet.h])
 
 ## Darwin
 case $host_os in
@@ -1060,6 +1160,7 @@ esac
 case "`uname`" in
   CYGWIN*)
     AC_CHECK_HEADERS([io.h sys/timeb.h])
+    UNAME_CYGWIN="yes"
     ;;
   MINGW*)
     AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
@@ -1134,11 +1235,12 @@ case "$host_cpu-$host_vendor-$host_os" in
     ## functionality so clock_gettime and CLOCK_MONOTONIC are defined
     ## correctly. This was later updated to 200112L so that
     ## posix_memalign() is visible for the direct VFD code on Linux
-    ## systems.
+    ## systems. Even later, this was changed to 200809L to support
+    ## pread/pwrite in VFDs.
     ##
     ## POSIX feature information can be found in the gcc manual at:
     ## http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
-    H5_CPPFLAGS="-D_POSIX_C_SOURCE=200112L $H5_CPPFLAGS"
+    H5_CPPFLAGS="-D_POSIX_C_SOURCE=200809L $H5_CPPFLAGS"
 
     ## Need to add this so that O_DIRECT is visible for the direct
     ## VFD on Linux systems.
@@ -1214,6 +1316,15 @@ EOF
 AC_CHECK_SIZEOF([bool])
 fi
 
+AC_CHECK_SIZEOF(time_t, [], [
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+])
+
 ## Checkpoint the cache
 AC_CACHE_SAVE
 
@@ -1249,9 +1360,9 @@ AC_ARG_WITH([fnord],
   ])
 
 ## ----------------------------------------------------------------------
-## Is dmalloc (debug malloc library) requested? It has a header file 
+## Is dmalloc (debug malloc library) requested? It has a header file
 ## `dmalloc.h' and a library `-ldmalloc' and their locations might be
-## specified with the `--with-dmalloc' command-line switch. The value 
+## specified with the `--with-dmalloc' command-line switch. The value
 ## is an include path and/or a library path. If the library path is
 ## specified then it must be preceded by a comma.
 ##
@@ -1265,8 +1376,8 @@ AC_ARG_WITH([dmalloc],
                             [Use dmalloc memory debugging aid [default=no]])],,
             [withval=no])
 
-case $withval in
-  yes)
+case "X-$withval" in
+  X-yes)
     HAVE_DMALLOC="yes"
     AC_CHECK_HEADERS([dmalloc.h],, [unset HAVE_DMALLOC])
     if test "x$HAVE_DMALLOC" = "xyes"; then
@@ -1276,7 +1387,7 @@ case $withval in
       AC_MSG_ERROR([couldn't find dmalloc library])
     fi
     ;;
-  no)
+  X-|X-no|X-none)
     HAVE_DMALLOC="no"
     AC_MSG_CHECKING([for dmalloc library])
     AC_MSG_RESULT([suppressed])
@@ -1344,8 +1455,8 @@ AC_ARG_WITH([zlib],
                              filter [default=yes]])],,
             [withval=yes])
 
-case $withval in
-  yes)
+case "X-$withval" in
+  X-yes)
     HAVE_ZLIB="yes"
     AC_CHECK_HEADERS([zlib.h], [HAVE_ZLIB_H="yes"], [unset HAVE_ZLIB])
     if test "x$HAVE_ZLIB" = "xyes" -a "x$HAVE_ZLIB_H" = "xyes"; then
@@ -1359,7 +1470,7 @@ case $withval in
       AC_CHECK_FUNC([compress2], [HAVE_COMPRESS2="yes"])
     fi
     ;;
-  no)
+  X-|X-no|X-none)
     HAVE_ZLIB="no"
     AC_MSG_CHECKING([for zlib])
     AC_MSG_RESULT([suppressed])
@@ -1438,8 +1549,8 @@ AC_ARG_WITH([szlib],
                              filter [default=no]])],,
             [withval=no])
 
-case $withval in
-  yes)
+case "X-$withval" in
+  X-yes)
     HAVE_SZLIB="yes"
     AC_CHECK_HEADERS([szlib.h], [HAVE_SZLIB_H="yes"], [unset HAVE_SZLIB])
     if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
@@ -1449,7 +1560,7 @@ case $withval in
       AC_MSG_ERROR([couldn't find szlib library])
     fi
     ;;
-  no)
+  X-|X-no|X-none)
     HAVE_SZLIB="no"
     AC_MSG_CHECKING([for szlib])
     AC_MSG_RESULT([suppressed])
@@ -1944,12 +2055,12 @@ AC_DEFINE_UNQUOTED([PRINTF_LL_WIDTH], ["$hdf5_cv_printf_ll"],
 ## around to help people migrate to 1.10.x and newer versions.
 ##
 AC_ARG_ENABLE([debug],
-              [AS_HELP_STRING([--enable-debug], [DEPRECATED: use --enable-build-mode=debug])],
-              [AC_MSG_ERROR([--enable-debug is deprecated, use --enable-build-mode=debug instead.])])
+              [AS_HELP_STRING([--enable-debug], [OPTION CHANGE: use --enable-build-mode=debug])],
+              [AC_MSG_ERROR([--enable-debug is no longer supported, use --enable-build-mode=debug instead.])])
 
 AC_ARG_ENABLE([production],
-              [AS_HELP_STRING([--enable-production], [DEPRECATED: use --enable-build-mode=production])],
-              [AC_MSG_ERROR([--enable-production is deprecated, use --enable-build-mode=production instead.])])
+              [AS_HELP_STRING([--enable-production], [OPTION CHANGE: use --enable-build-mode=production])],
+              [AC_MSG_ERROR([--enable-production is no longer supported, use --enable-build-mode=production instead.])])
 
 
 ## ----------------------------------------------------------------------
@@ -2233,7 +2344,7 @@ AC_SUBST([INTERNAL_DEBUG_OUTPUT])
 ## are not listed in the "all" packages list.
 ##
 ## all_packages="AC,B,B2,D,F,FA,FL,FS,HL,I,O,S,ST,T,Z"
-all_packages="AC,B2,D,F,HL,I,O,S,ST,T,Z"
+all_packages="AC,B2,CX,D,F,HL,I,O,S,ST,T,Z"
 
 case "X-$INTERNAL_DEBUG_OUTPUT" in
   X-yes|X-all)
@@ -2289,40 +2400,6 @@ case "X-$CODESTACK" in
     ;;
   *)
       AC_MSG_ERROR([Unrecognized value: $CODESTACK])
-    ;;
-esac
-
-## ----------------------------------------------------------------------
-## Check if they would like the metadata trace file code compiled in
-##
-AC_MSG_CHECKING([whether metadata trace file code is enabled])
-AC_ARG_ENABLE([metadata-trace-file],
-              [AS_HELP_STRING([--enable-metadata-trace-file],
-                              [Enable metadata trace file collection.
-                               [default=no]
-                              ])],
-              [METADATATRACEFILE=$enableval])
-
-## Set the default level.
-if test "X-$METADATATRACEFILE" = X- ; then
-  METADATATRACEFILE=no
-fi
-
-## Allow this variable to be substituted in
-## other files (src/libhdf5.settings.in, etc.)
-AC_SUBST([METADATATRACEFILE])
-
-case "X-$METADATATRACEFILE" in
-  X-yes)
-      AC_MSG_RESULT([yes])
-      AC_DEFINE([METADATA_TRACE_FILE], [1],
-                [Define if the metadata trace file code is to be compiled in])
-    ;;
-  X-no)
-      AC_MSG_RESULT([no])
-    ;;
-  *)
-      AC_MSG_ERROR([Unrecognized value: $METADATATRACEFILE])
     ;;
 esac
 
@@ -2535,10 +2612,14 @@ esac
 AC_SUBST([ADD_PARALLEL_FILES]) ADD_PARALLEL_FILES="no"
 AC_SUBST([MPE]) MPE=no
 AC_SUBST([INSTRUMENT_LIBRARY]) INSTRUMENT_LIBRARY=no
+AC_SUBST([PARALLEL_FILTERED_WRITES])
+AC_SUBST([LARGE_PARALLEL_IO])
 
 if test -n "$PARALLEL"; then
-  ## The 'testpar' directory should participate in the build
-  TESTPARALLEL=testpar
+  if test "X$HDF5_TESTS" = "Xyes"; then
+    ## The 'testpar' directory should participate in the build
+    TESTPARALLEL=testpar
+  fi
 
   ## We are building a parallel library
   AC_DEFINE([HAVE_PARALLEL], [1], [Define if we have parallel support])
@@ -2690,6 +2771,87 @@ if test -n "$PARALLEL"; then
   if test "X-$MPE" = "X-yes"; then
     AC_DEFINE([HAVE_MPE], [1], [Define if we have MPE support])
   fi
+
+  ## ----------------------------------------------------------------------
+  ## Check for the MPI-3 functions necessary for the Parallel Compression
+  ## feature. If these are not present, issue a warning that Parallel
+  ## Compression will be disabled.
+  ##
+  AC_MSG_CHECKING([for MPI_Mprobe and MPI_Imrecv functions])
+
+  AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM(
+          [[
+              #include <mpi.h>
+          ]],
+          [[
+              MPI_Message message;
+              MPI_Init(0, (void *) 0);
+              MPI_Mprobe(0, 0, 0, &message, (void *) 0);
+              MPI_Imrecv((void *) 0, 0, 0, (void *) 0, (void *) 0);
+          ]]
+      )],
+      [AC_MSG_RESULT([yes])
+       PARALLEL_FILTERED_WRITES=yes],
+      [AC_MSG_RESULT([no])
+       AC_MSG_WARN([A simple MPI program using the MPI_Mprobe and MPI_Imrecv functions could not be compiled and linked.
+                    Parallel writes of filtered data will be disabled.])
+       PARALLEL_FILTERED_WRITES=no]
+  )
+
+  ## ----------------------------------------------------------------------
+  ## Check for the MPI-3 functions necessary for the big I/O feature.
+  ## If these are not present, issue a warning that the big I/O feature
+  ## will be disabled.
+  ##
+  AC_MSG_CHECKING([for MPI_Get_elements_x and MPI_Type_size_x functions])
+
+  AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM(
+          [[
+              #include <mpi.h>
+          ]],
+          [[
+              MPI_Count count;
+              MPI_Init(0, (void *) 0);
+              MPI_Get_elements_x(0, 0, &count);
+              MPI_Type_size_x(0, &count);
+          ]]
+      )],
+      [AC_MSG_RESULT([yes])
+       LARGE_PARALLEL_IO=yes],
+      [AC_MSG_RESULT([no])
+       AC_MSG_WARN([A simple MPI program using the MPI_Get_elements_x and MPI_Type_size_x functions could not be compiled and linked.
+                    Reading/Writing >2GB of data in a single parallel I/O operation will be disabled.])
+       LARGE_PARALLEL_IO=no]
+  )
+
+fi
+
+## ----------------------------------------------------------------------
+## Check if the map API is enabled by --enable-map-api
+##
+AC_SUBST([MAP_API])
+
+## Default is no map API
+MAP_API=no
+
+AC_MSG_CHECKING([if the map API (H5M) is enabled])
+
+AC_ARG_ENABLE([map-api],
+              [AS_HELP_STRING([--enable-map-api],
+                              [Build the map API (H5M).
+                               This is not yet supported in the native file format
+                               and requires a VOL connector that supports it.
+                               [default=no]])],
+              [MAP_API=$enableval], [MAP_API=no])
+
+if test "X$MAP_API" = "Xyes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE([HAVE_MAP_API], [1],
+            [Define if the map API (H5M) should be compiled])
+else
+    AC_MSG_RESULT([no])
 fi
 
 ## ----------------------------------------------------------------------
@@ -2734,6 +2896,201 @@ fi
 
 ## Direct VFD files are not built if not required.
 AM_CONDITIONAL([DIRECT_VFD_CONDITIONAL], [test "X$DIRECT_VFD" = "Xyes"])
+
+## ----------------------------------------------------------------------
+## Check whether the Mirror VFD can be built.
+## Auto-enabled if the required libraries are present.
+##
+AC_SUBST([MIRROR_VFD])
+
+## Default is no Mirror VFD
+MIRROR_VFD=no
+
+AC_ARG_ENABLE([mirror-vfd],
+              [AS_HELP_STRING([--enable-mirror-vfd],
+                              [Build the socket-based Mirror virtual file driver (VFD).
+                               [default=no]])],
+              [MIRROR_VFD=$enableval], [MIRROR_VFD=no])
+
+if test "X$MIRROR_VFD" = "Xyes"; then
+
+    AC_CHECK_HEADERS([arpa/inet.h],, [unset MIRROR_VFD])
+    AC_CHECK_HEADERS([netinet/in.h],, [unset MIRROR_VFD])
+    AC_CHECK_HEADERS([netdb.h],, [unset MIRROR_VFD])
+    AC_CHECK_HEADERS([sys/socket.h],, [unset MIRROR_VFD])
+    AC_CHECK_FUNC([fork], [], [unset MIRROR_VFD])
+
+    AC_MSG_CHECKING([if the Mirror virtual file driver (VFD) can be built])
+    if test "X$MIRROR_VFD" = "Xyes"; then
+        AC_DEFINE([HAVE_MIRROR_VFD], [1],
+                [Define whether the Mirror virtual file driver (VFD) will be compiled])
+        AC_MSG_RESULT([yes])
+    else
+        AC_MSG_RESULT([no])
+        MIRROR_VFD=no
+        AC_MSG_ERROR([The Mirror VFD cannot be built.
+                      Missing one or more of: arpa/inet.h, netinet/in.h,
+                      netdb.h, sys/socket.h, fork().])
+    fi
+else
+    AC_MSG_CHECKING([if the Mirror virtual file driver (VFD) is enabled])
+    AC_MSG_RESULT([no])
+    MIRROR_VFD=no
+fi
+
+## Mirror VFD files built only if able.
+AM_CONDITIONAL([MIRROR_VFD_CONDITIONAL], [test "X$MIRROR_VFD" = "Xyes"])
+
+## ----------------------------------------------------------------------
+## Check if Read-Only S3 virtual file driver is enabled by --enable-ros3-vfd
+##
+AC_SUBST([ROS3_VFD])
+
+## Default is no Read-Only S3 VFD
+ROS3_VFD=no
+
+AC_ARG_ENABLE([ros3-vfd],
+              [AS_HELP_STRING([--enable-ros3-vfd],
+                              [Build the Read-Only S3 virtual file driver (VFD).
+                               [default=no]])],
+              [ROS3_VFD=$enableval], [ROS3_VFD=no])
+
+if test "X$ROS3_VFD" = "Xyes"; then
+    AC_CHECK_HEADERS([curl/curl.h],, [unset ROS3_VFD])
+    AC_CHECK_HEADERS([openssl/evp.h],, [unset ROS3_VFD])
+    AC_CHECK_HEADERS([openssl/hmac.h],, [unset ROS3_VFD])
+    AC_CHECK_HEADERS([openssl/sha.h],, [unset ROS3_VFD])
+    if test "X$ROS3_VFD" = "Xyes"; then
+        AC_CHECK_LIB([curl], [curl_global_init],, [unset ROS3_VFD])
+        AC_CHECK_LIB([crypto], [EVP_sha256],, [unset ROS3_VFD])
+    fi
+
+    AC_MSG_CHECKING([if the Read-Only S3 virtual file driver (VFD) is enabled])
+    if test "X$ROS3_VFD" = "Xyes"; then
+        AC_DEFINE([HAVE_ROS3_VFD], [1],
+                [Define whether the Read-Only S3 virtual file driver (VFD) should be compiled])
+        AC_MSG_RESULT([yes])
+    else
+        AC_MSG_RESULT([no])
+        ROS3_VFD=no
+        AC_MSG_ERROR([The Read-Only S3 VFD was requested but cannot be built.
+                      Please check that openssl and cURL are available on your
+                      system, and/or re-configure without option
+                      --enable-ros3-vfd.])
+    fi
+else
+    AC_MSG_CHECKING([if the Read-Only S3 virtual file driver (VFD) is enabled])
+    AC_MSG_RESULT([no])
+    ROS3_VFD=no
+
+fi
+
+## Read-only S3 files are not built if not required.
+AM_CONDITIONAL([ROS3_VFD_CONDITIONAL], [test "X$ROS3_VFD" = "Xyes"])
+
+
+## ----------------------------------------------------------------------
+## Is libhdfs (Hadoop Distributed File System) present?
+## It might be specified with the `--with-libhdfs' command-line switch.
+## If found, enables the HDFS VFD.
+##
+AC_SUBST([HAVE_LIBHDFS])
+AC_ARG_WITH([libhdfs],
+            [AS_HELP_STRING([--with-libhdfs=DIR],
+                            [Provide libhdfs library to enable HDFS virtual file driver (VFD) [default=no]])],,
+            [withval=no])
+
+case $withval in
+  no)
+    HAVE_LIBHDFS="no"
+    AC_MSG_CHECKING([for libhdfs])
+    AC_MSG_RESULT([suppressed])
+    ;;
+  *)
+    HAVE_LIBHDFS="yes"
+    case "$withval" in
+      *,*)
+        libhdfs_inc="`echo $withval |cut -f1 -d,`"
+        libhdfs_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      yes)
+        libhdfs_inc="$HADOOP_HOME/include"
+        libhdfs_lib="$HADOOP_HOME/lib"
+        ;;
+      *)
+        if test -n "$withval"; then
+          libhdfs_inc="$withval/include"
+          libhdfs_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    if test -n "$libhdfs_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$libhdfs_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$libhdfs_inc"
+    fi
+    AC_CHECK_HEADERS([hdfs.h],,
+                     [unset HAVE_LIBHDFS])
+
+    if test "x$HAVE_LIBHDFS" = "xyes"; then
+      dnl Check for '-ljvm' needed by libhdfs
+      JNI_LDFLAGS=""
+      if test $JAVA_HOME != ""
+      then
+        JNI_LDFLAGS="-L$JAVA_HOME/jre/lib/$OS_ARCH -L$JAVA_HOME/jre/lib/$OS_ARCH/server"
+      fi
+      ldflags_bak=$LDFLAGS
+      LDFLAGS="$LDFLAGS $JNI_LDFLAGS"
+      AC_CHECK_LIB([jvm], [JNI_GetCreatedJavaVMs])
+      LDFLAGS=$ldflags_bak
+      AC_SUBST([JNI_LDFLAGS])
+      if test -n "$libhdfs_lib"; then
+        ## Hadoop distribution hides libraries down one level in 'lib/native'
+        libhdfs_lib="$libhdfs_lib/native"
+        LDFLAGS="$LDFLAGS -L$libhdfs_lib $JNI_LDFLAGS"
+        AM_LDFLAGS="$AM_LDFLAGS -L$libhdfs_lib $JNI_LDFLAGS"
+      fi
+      AC_CHECK_LIB([hdfs], [hdfsConnect],,
+                   [unset HAVE_LIBHDFS])
+    fi
+
+    if test -z "$HAVE_LIBHDFS"; then
+      AC_MSG_ERROR([Set to use libhdfs library, but could not find or use
+                    libhdfs. Please verify that the path to HADOOP_HOME is
+                    valid, and/or reconfigure without --with-libhdfs.])
+    fi
+    ;;
+esac
+
+if test "x$HAVE_LIBHDFS" = "xyes"; then
+  AC_DEFINE([HAVE_LIBHDFS], [1],
+            [Proceed to build with libhdfs])
+fi
+
+## Checkpoint the cache
+AC_CACHE_SAVE
+
+## ----------------------------------------------------------------------
+## Use custom examples path.
+##
+AC_MSG_CHECKING([for custom examples path definition])
+AC_ARG_WITH([examplesdir],
+            [AS_HELP_STRING([--with-examplesdir=location],
+                            [Specify path for examples
+                            [default="DATAROOTDIR/hdf5_examples"]])],,
+            withval="${datarootdir}/hdf5_examples")
+
+if test "X$withval" = "X"; then
+    AC_MSG_RESULT([default])
+    examplesdir="${datarootdir}/hdf5_examples"
+else
+    AC_MSG_RESULT([$withval])
+    examplesdir=$withval
+fi
+
+AC_SUBST([examplesdir])
+AC_DEFINE_UNQUOTED([EXAMPLESDIR], ["$examplesdir"],
+            [Define the examples directory])
 
 ## ----------------------------------------------------------------------
 ## Enable custom plugin default path for library.  It requires SHARED support.
@@ -2941,6 +3298,30 @@ else
 fi
 
 ## ----------------------------------------------------------------------
+## Set the flag to indicate that the machine is IBM ppc64le and cannot
+## accurately convert some long double values.
+##
+AC_MSG_CHECKING([if the system is IBM ppc64le and cannot correctly convert some long double values])
+
+TEST_SRC="`(echo \"#define H5_DISABLE_SOME_LDOUBLE_CONV_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
+
+if test ${ac_cv_sizeof_long_double} = 0; then
+   hdf5_cv_disable_some_ldouble_conv=${hdf5_cv_disable_some_ldouble_conv=no}
+else
+   AC_CACHE_VAL([hdf5_cv_disable_some_ldouble_conv],
+        [AC_RUN_IFELSE([AC_LANG_SOURCE([$TEST_SRC])],
+        [hdf5_cv_disable_some_ldouble_conv=yes], [hdf5_cv_disable_some_ldouble_conv=no],[])])
+fi
+
+if test ${hdf5_cv_disable_some_ldouble_conv} = "yes"; then
+  AC_DEFINE([DISABLE_SOME_LDOUBLE_CONV], [1],
+            [Define if your system is IBM ppc64le and cannot convert some long double values correctly.])
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+
+## ----------------------------------------------------------------------
 ## Set some variables for general configuration information to be saved
 ## and installed with the libraries (used to generate libhdf5.settings).
 ##
@@ -2979,6 +3360,12 @@ AC_SUBST([WORDS_BIGENDIAN])
 
 ## Parallel support? (set above except empty if none)
 PARALLEL=${PARALLEL:-no}
+
+## Parallel writes to filtered datasets support?
+PARALLEL_FILTERED_WRITES=${PARALLEL_FILTERED_WRITES:-no}
+
+## >2GB writes in parallel support?
+LARGE_PARALLEL_IO=${LARGE_PARALLEL_IO:-no}
 
 ## Compiler with version information. This consists of the full path
 ## name of the compiler and the reported version number.
@@ -3132,10 +3519,10 @@ esac
 AC_SUBST([DEFAULT_API_VERSION])
 AC_MSG_CHECKING([which version of public symbols to use by default])
 AC_ARG_WITH([default-api-version],
-            [AS_HELP_STRING([--with-default-api-version=(v16|v18|v110)],
+            [AS_HELP_STRING([--with-default-api-version=(v16|v18|v110|v112|v114)],
                             [Specify default release version of public symbols
-                             [default=v110]])],,
-            [withval=v110])
+                             [default=v114]])],,
+            [withval=v114])
 
 if test "X$withval" = "Xv16"; then
     AC_MSG_RESULT([v16])
@@ -3150,6 +3537,18 @@ elif test "X$withval" = "Xv18"; then
 elif test "X$withval" = "Xv110"; then
     AC_MSG_RESULT([v110])
     DEFAULT_API_VERSION=v110
+    AC_DEFINE([USE_110_API_DEFAULT], [1],
+              [Define using v1.10 public API symbols by default])
+elif test "X$withval" = "Xv112"; then
+    AC_MSG_RESULT([v112])
+    DEFAULT_API_VERSION=v112
+    AC_DEFINE([USE_112_API_DEFAULT], [1],
+              [Define using v1.12 public API symbols by default])
+elif test "X$withval" = "Xv114"; then
+    AC_MSG_RESULT([v114])
+    DEFAULT_API_VERSION=v114
+    AC_DEFINE([USE_114_API_DEFAULT], [1],
+              [Define using v1.14 public API symbols by default])
 else
     AC_MSG_ERROR([invalid version of public symbols given])
 fi
@@ -3159,7 +3558,7 @@ fi
 ## if the user insists on doing this via the --enable-unsupported configure
 ## flag, we'll let them.
 if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
-  if test "X${DEFAULT_API_VERSION}" != "Xv110" -a "X${DEPRECATED_SYMBOLS}" = "Xno" ; then
+  if test "X${DEFAULT_API_VERSION}" != "Xv114" -a "X${DEPRECATED_SYMBOLS}" = "Xno" ; then
     AC_MSG_ERROR([Removing old public API symbols not allowed when using them as default public API symbols. Use --enable-unsupported to override this error.])
   fi
 fi
@@ -3196,6 +3595,47 @@ case "X-$STRICT_FORMAT_CHECKS" in
     ;;
   *)
     AC_MSG_ERROR([Unrecognized value: $STRICT_FORMAT_CHECKS])
+    ;;
+esac
+
+
+## ----------------------------------------------------------------------
+## Enable use of pread/pwrite instead of read/write in certain VFDs.
+##
+AC_SUBST([PREADWRITE])
+
+## Check these first to avoid interspersed output in the AC_ARG_ENABLE line
+## below. (Probably overkill to check for both, but we'll be extra careful)
+PREADWRITE_HAVE_BOTH=yes
+AC_CHECK_FUNC([pread], [], [PREADWRITE_HAVE_BOTH=no])
+AC_CHECK_FUNC([pwrite], [], [PREADWRITE_HAVE_BOTH=no])
+
+AC_MSG_CHECKING([whether to use pread/pwrite instead of read/write in certain VFDs])
+AC_ARG_ENABLE([preadwrite],
+              [AS_HELP_STRING([--enable-preadwrite],
+                              [Enable using pread/pwrite instead of read/write in sec2/log/core VFDs.
+                              [default=yes if pread/pwrite are present]])],
+              [PREADWRITE=$enableval])
+
+## Set the default level.
+if test "X-$PREADWRITE" = X- ; then
+  PREADWRITE=yes
+fi
+
+case "X-$PREADWRITE" in
+  X-yes)
+      if test "X-$PREADWRITE_HAVE_BOTH" = "X-yes"; then
+        AC_DEFINE([HAVE_PREADWRITE], [1], [Define if both pread and pwrite exist.])
+        AC_MSG_RESULT([yes])
+      else
+        AC_MSG_RESULT([no])
+      fi
+    ;;
+  X-no)
+      AC_MSG_RESULT([no])
+    ;;
+  *)
+      AC_MSG_ERROR([Unrecognized value: $PREADWRITE])
     ;;
 esac
 
@@ -3254,11 +3694,13 @@ LDFLAGS="$saved_user_LDFLAGS"
 ## need to be compiled
 
 AM_CONDITIONAL([BUILD_CXX_CONDITIONAL], [test "X$HDF_CXX" = "Xyes"])
-AM_CONDITIONAL([BUILD_PARALLEL_CONDITIONAL], [test -n "$TESTPARALLEL"])
+AM_CONDITIONAL([BUILD_PARALLEL_CONDITIONAL], [test "X$PARALLEL" = "Xyes"])
 AM_CONDITIONAL([BUILD_FORTRAN_CONDITIONAL], [test "X$HDF_FORTRAN" = "Xyes"])
 AM_CONDITIONAL([BUILD_JAVA_CONDITIONAL], [test "X$HDF_JAVA" = "Xyes"])
 AM_CONDITIONAL([BUILD_HDF5_HL_CONDITIONAL], [test "X$HDF5_HL" = "Xyes"])
-
+AM_CONDITIONAL([BUILD_TESTS_CONDITIONAL], [test "X$HDF5_TESTS" = "Xyes"])
+AM_CONDITIONAL([BUILD_TESTS_PARALLEL_CONDITIONAL], [test -n "$TESTPARALLEL"])
+AM_CONDITIONAL([BUILD_TOOLS_CONDITIONAL], [test "X$HDF5_TOOLS" = "Xyes"])
 
 ## ----------------------------------------------------------------------
 ## Build the Makefiles.
@@ -3338,7 +3780,7 @@ fi
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
 
-  ### libtool does not pass the correct argument linking (-Wl,-Wl,,) for the NAG Fortran compiler 
+  ### libtool does not pass the correct argument linking (-Wl,-Wl,,) for the NAG Fortran compiler
   ### on Linux (other OSs have not been tested).
   ### Therefore, detect if we are using the NAG Fortran compiler, and replace the wl="-Wl," for Fortran to
   ### wl="-Wl,-Wl,," in the libtool file. (HDFFV-10037)
@@ -3366,20 +3808,28 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  Makefile
                  src/Makefile
                  test/Makefile
+                 test/H5srcdir_str.h
+                 test/testabort_fail.sh
                  test/testcheck_version.sh
                  test/testerror.sh
+                 test/testexternal_env.sh
                  test/testflushrefresh.sh
-                 test/H5srcdir_str.h
                  test/testlibinfo.sh
                  test/testlinks_env.sh
-                 test/test_filenotclosed.sh
                  test/testswmr.sh
-                 test/test_plugin.sh
-                 test/test_usecases.sh
+                 test/testvds_env.sh
                  test/testvdsswmr.sh
+                 test/test_filter_plugin.sh
+                 test/test_mirror.sh
+                 test/test_usecases.sh
+                 test/test_vol_plugin.sh
                  testpar/Makefile
+                 testpar/testpflush.sh
+                 utils/Makefile
+                 utils/mirror_vfd/Makefile
                  tools/Makefile
                  tools/lib/Makefile
+                 tools/libtest/Makefile
                  tools/src/Makefile
                  tools/src/h5dump/Makefile
                  tools/src/h5import/Makefile
@@ -3389,7 +3839,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/src/h5ls/Makefile
                  tools/src/h5copy/Makefile
                  tools/src/misc/Makefile
-                 tools/src/misc/h5cc
                  tools/src/h5stat/Makefile
                  tools/test/Makefile
                  tools/test/h5dump/Makefile
@@ -3429,6 +3878,8 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  examples/Makefile
                  examples/run-c-ex.sh
                  examples/testh5cc.sh
+                 bin/h5cc
+                 bin/Makefile
                  c++/Makefile
                  c++/src/Makefile
                  c++/src/h5c++
@@ -3453,13 +3904,13 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  java/test/junit.sh
                  java/examples/Makefile
                  java/examples/intro/Makefile
-                 java/examples/intro/runExample.sh
+                 java/examples/intro/JavaIntroExample.sh
                  java/examples/datasets/Makefile
-                 java/examples/datasets/runExample.sh
+                 java/examples/datasets/JavaDatasetExample.sh
                  java/examples/datatypes/Makefile
-                 java/examples/datatypes/runExample.sh
+                 java/examples/datatypes/JavaDatatypeExample.sh
                  java/examples/groups/Makefile
-                 java/examples/groups/runExample.sh
+                 java/examples/groups/JavaGroupExample.sh
                  hl/Makefile
                  hl/src/Makefile
                  hl/test/Makefile
@@ -3491,7 +3942,7 @@ AC_CONFIG_COMMANDS([.classes], [], [$MKDIR_P java/src/.classes;
 
 AC_OUTPUT
 
-chmod 755 tools/src/misc/h5cc
+chmod 755 bin/h5cc
 if test "X$HDF_CXX" = "Xyes"; then
   chmod 755 c++/src/h5c++
 fi
@@ -3499,8 +3950,8 @@ fi
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
   chmod 755 fortran/src/h5fc
-  ## libtool does not pass the correct argument linker (wl=) for the Intel Fortran compiler 
-  ## on OS X, which is needed when building shared libraries on OS X.  This script 
+  ## libtool does not pass the correct argument linker (wl=) for the Intel Fortran compiler
+  ## on OS X, which is needed when building shared libraries on OS X.  This script
   ## replaces the 3rd occurrence, which is for Fortran, of wl="" with wl="-Wl," (HDFFV-2772)
   case "`uname`" in
     Darwin*)
@@ -3508,14 +3959,14 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
       ;;
   esac
 
-  ### libtool does not pass the correct argument linking (-Wl,-Wl,,) for the NAG Fortran compiler 
+  ### libtool does not pass the correct argument linking (-Wl,-Wl,,) for the NAG Fortran compiler
   ### on Linux (other OSs have not been tested).
   ### Therefore, detect if we are using the NAG Fortran compiler, and replace the wl="-Wl," for Fortran to
   ### wl="-Wl,-Wl,," in the libtool file. (HDFFV-10037)
   case "`uname`" in
     Linux*)
       if test "X$FC_BASENAME" = "Xnagfor"; then
-         cat libtool | awk '/NAG_Fortran/{flag=1}flag&&/wl=/{$NF="wl=\"-Wl,Wl,,\"";flag=0}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
+         cat libtool | awk '/BEGIN LIBTOOL TAG CONFIG: FC/{flag=1}flag&&/wl=/{$NF="wl=\"-Wl,-Wl,,\"";flag=0}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
       fi
       ;;
   esac

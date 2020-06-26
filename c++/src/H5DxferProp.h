@@ -20,9 +20,8 @@ namespace H5 {
 /*! \class DSetMemXferPropList
     \brief Class DSetCreatPropList inherits from PropList and provides
     wrappers for the HDF5 dataset memory and transfer property list.
-
-    Inheritance: ObjCreatPropList -> PropList -> IdComponent
 */
+//  Inheritance: PropList -> IdComponent
 class H5_DLLCPP DSetMemXferPropList : public PropList {
    public:
         ///\brief Default dataset memory and transfer property list.
@@ -67,7 +66,7 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
         void getTypeConvCB(H5T_conv_except_func_t *op, void **user_data) const;
 
         // Sets the memory manager for variable-length datatype
-        // allocation in H5Dread and H5Dvlen_reclaim.
+        // allocation in H5Dread and H5Treclaim.
         void setVlenMemManager(H5MM_allocate_t alloc, void* alloc_info,
                                H5MM_free_t free, void* free_info) const;
 
@@ -76,7 +75,7 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
         void setVlenMemManager() const;
 
         // Gets the memory manager for variable-length datatype
-        // allocation in H5Dread and H5Tvlen_reclaim.
+        // allocation in H5Dread and H5Treclaim.
         void getVlenMemManager(H5MM_allocate_t& alloc, void** alloc_info,
                                H5MM_free_t& free, void** free_info) const;
 
@@ -103,7 +102,7 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
         ///\brief Returns this class name.
         virtual H5std_string fromClass () const { return("DSetMemXferPropList"); }
 
-        // Copy constructor: makes a copy of a DSetMemXferPropList object.
+        // Copy constructor - same as the original DSetMemXferPropList.
         DSetMemXferPropList(const DSetMemXferPropList& orig);
 
         // Creates a copy of an existing dataset memory and transfer

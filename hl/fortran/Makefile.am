@@ -10,7 +10,7 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-# 
+#
 # This makefile mostly just reinvokes make in the various subdirectories
 # but does so in the correct order.  You can alternatively invoke make from
 # each subdirectory manually.
@@ -23,7 +23,13 @@
 
 include $(top_srcdir)/config/commence.am
 
-SUBDIRS=src test
+if BUILD_TESTS_CONDITIONAL
+   TESTSERIAL_DIR =test
+else
+   TESTSERIAL_DIR=
+endif
+
+SUBDIRS=src $(TESTSERIAL_DIR)
 DIST_SUBDIRS=src test examples
 
 # Install examples

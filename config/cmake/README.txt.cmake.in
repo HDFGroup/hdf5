@@ -9,7 +9,7 @@ It was built with the following options:
     -- @LIB_TYPE@ C/C++/Fortran libraries
     -- SZIP (encoder enabled) and ZLIB
     -- @LIB_TYPE@ HDF5 tools
-    -- Java
+    -- Java @Java_VERSION@
 
 The contents of this directory are:
 
@@ -28,15 +28,16 @@ After Installation
 The examples folder, HDF5Examples, located in the
 HDF5 install folder, can be built and tested with CMake and the supplied
 HDF5_Examples.cmake file. The HDF5_Examples.cmake expects HDF5 to have
-been installed in the default location with above compilers. Also, the CMake
+been installed in the default location with above compilers (see the
+libhdf5.settings file in the lib install folder). Also, the CMake
 utility should be installed.
 
 To test the installation with the examples;
     Create a directory to run the examples.
     Copy HDF5Examples folder to this directory.
+    Copy CTestScript.cmake to this directory.
     Copy HDF5_Examples.cmake to this directory.
     Copy HDF5_Examples_options.cmake to this directory.
-    Copy CTestScript.cmake to this directory.
     The default source folder is defined as "HDF5Examples". It can be changed
         with the CTEST_SOURCE_NAME script option.
     The default installation folder is defined as "@CMAKE_INSTALL_PREFIX@".
@@ -62,9 +63,6 @@ For more information see USING_CMake_Examples.txt in the install folder.
 ===========================================================================
 
 Documentation for this release can be found at the following URL:
-    http://www.hdfgroup.org/HDF5/doc/.
-
-See the HDF5 home page for further details:
-    http://hdfgroup.org/HDF5/
+    https://portal.hdfgroup.org/display/support
 
 Bugs should be reported to help@hdfgroup.org.

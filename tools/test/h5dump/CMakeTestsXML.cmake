@@ -161,12 +161,13 @@
 ##############################################################################
 
   macro (ADD_XML_SKIP_H5_TEST skipresultfile skipresultcode testtype)
-    if (${testtype} STREQUAL "SKIP")
+    if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
-            NAME H5DUMP-XML-${skipresultfile}-SKIPPED
+            NAME H5DUMP_XML-${skipresultfile}
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${skipresultfile}.xml --xml ${ARGN}"
         )
+        set_property(TEST H5DUMP_XML-${skipresultfile} PROPERTY DISABLED)
       endif ()
     else ()
       ADD_XML_H5_TEST (${skipresultfile} ${skipresultcode} ${ARGN})
@@ -175,19 +176,20 @@
 
   macro (ADD_XML_H5_TEST resultfile resultcode)
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP-XML-${resultfile} COMMAND $<TARGET_FILE:h5dump> --xml ${ARGN})
-      set_tests_properties (H5DUMP-XML-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml")
-      if (NOT ${resultcode} STREQUAL "0")
-        set_tests_properties (H5DUMP-XML-${resultfile} PROPERTIES WILL_FAIL "true")
+      add_test (NAME H5DUMP_XML-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> --xml ${ARGN})
+      set_tests_properties (H5DUMP_XML-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml")
+      if (${resultcode})
+        set_tests_properties (H5DUMP_XML-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-      if (NOT "${last_xml_test}" STREQUAL "")
-        set_tests_properties (H5DUMP-XML-${resultfile} PROPERTIES DEPENDS ${last_xml_test})
+      if (last_xml_test)
+        set_tests_properties (H5DUMP_XML-${resultfile} PROPERTIES DEPENDS ${last_xml_test})
       endif ()
     else ()
       add_test (
-          NAME H5DUMP-XML-${resultfile}
+          NAME H5DUMP_XML-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
               -D "TEST_ARGS:STRING=--xml;${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/xml"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -203,154 +205,6 @@
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 ##############################################################################
-
-  if (HDF5_ENABLE_USING_MEMCHECKER)
-    # Remove any output file left over from previous test run
-    add_test (
-      NAME H5DUMP-XML-clearall-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove
-          tall.h5.out
-          tall.h5.out.err
-          tall-2A.h5.out
-          tall-2A.h5.out.err
-          tarray1.h5.out
-          tarray1.h5.out.err
-          tarray2.h5.out
-          tarray2.h5.out.err
-          tarray3.h5.out
-          tarray3.h5.out.err
-          tarray6.h5.out
-          tarray6.h5.out.err
-          tarray7.h5.out
-          tarray7.h5.out.err
-          tattr.h5.out
-          tattr.h5.out.err
-          tbitfields_be.h5.out
-          tbitfields_be.h5.out.err
-          tbitfields_le.h5.out
-          tbitfields_le.h5.out.err
-          tcompound.h5.out
-          tcompound.h5.out.err
-          tcompound2.h5.out
-          tcompound2.h5.out.err
-          tcompound_complex.h5.out
-          tcompound_complex.h5.out.err
-          tdatareg.h5.out
-          tdatareg.h5.out.err
-          tdset.h5.out
-          tdset.h5.out.err
-          tdset2.h5.out
-          tdset2.h5.out.err
-          tempty-dtd-2.h5.out
-          tempty-dtd-2.h5.out.err
-          tempty-dtd-uri.h5.out
-          tempty-dtd-uri.h5.out.err
-          tempty-dtd.h5.out
-          tempty-dtd.h5.out.err
-          tempty-nons-2.h5.out
-          tempty-nons-2.h5.out.err
-          tempty-nons-uri.h5.out
-          tempty-nons-uri.h5.out.err
-          tempty-nons.h5.out
-          tempty-nons.h5.out.err
-          tempty-ns-2.h5.out
-          tempty-ns-2.h5.out.err
-          tempty-ns.h5.out
-          tempty-ns.h5.out.err
-          tempty.h5.out
-          tempty.h5.out.err
-          tenum.h5.out
-          tenum.h5.out.err
-          test35.nc.out
-          test35.nc.out.err
-          textlink.h5.out
-          textlink.h5.out.err
-          tfpformat.h5.out
-          tfpformat.h5.out.err
-          tgroup.h5.out
-          tgroup.h5.out.err
-          thlink.h5.out
-          thlink.h5.out.err
-          tloop.h5.out
-          tloop.h5.out.err
-          tloop2.h5.out
-          tloop2.h5.out.err
-          tmany.h5.out
-          tmany.h5.out.err
-          tname-amp.h5.out
-          tname-amp.h5.out.err
-          tname-apos.h5.out
-          tname-apos.h5.out.err
-          tname-gt.h5.out
-          tname-gt.h5.out.err
-          tname-lt.h5.out
-          tname-lt.h5.out.err
-          tname-quot.h5.out
-          tname-quot.h5.out.err
-          tname-sp.h5.out
-          tname-sp.h5.out.err
-          tnamed_dtype_attr.h5.out
-          tnamed_dtype_attr.h5.out.err
-          tnestedcomp.h5.out
-          tnestedcomp.h5.out.err
-          tnodata.h5.out
-          tnodata.h5.out.err
-          tnoname.h5.out
-          tnoname.h5.out.err
-          tnullspace.h5.out
-          tnullspace.h5.out.err
-          tobjref.h5.out
-          tobjref.h5.out.err
-          topaque.h5.out
-          topaque.h5.out.err
-          torderattr1.h5.out
-          torderattr1.h5.out.err
-          torderattr2.h5.out
-          torderattr2.h5.out.err
-          torderattr3.h5.out
-          torderattr3.h5.out.err
-          torderattr4.h5.out
-          torderattr4.h5.out.err
-          tref-escapes-at.h5.out
-          tref-escapes-at.h5.out.err
-          tref-escapes.h5.out
-          tref-escapes.h5.out.err
-          tref.h5.out
-          tref.h5.out.err
-          tsaf.h5.out
-          tsaf.h5.out.err
-          tslink.h5.out
-          tslink.h5.out.err
-          tstr.h5.out
-          tstr.h5.out.err
-          tstr2.h5.out
-          tstr2.h5.out.err
-          tstring.h5.out
-          tstring.h5.out.err
-          tstring-at.h5.out
-          tstring-at.h5.out.err
-          tudlink.h5.out
-          tudlink.h5.out.err
-          tvldtypes1.h5.out
-          tvldtypes1.h5.out.err
-          tvldtypes2.h5.out
-          tvldtypes2.h5.out.err
-          tvldtypes3.h5.out
-          tvldtypes3.h5.out.err
-          tvldtypes4.h5.out
-          tvldtypes4.h5.out.err
-          tvldtypes5.h5.out
-          tvldtypes5.h5.out.err
-          tvlstr.h5.out
-          tvlstr.h5.out.err
-    )
-    set_tests_properties (H5DUMP-XML-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml")
-    if (NOT "${last_xml_test}" STREQUAL "")
-      set_tests_properties (H5DUMP-XML-clearall-objects PROPERTIES DEPENDS ${last_xml_test})
-    endif ()
-    set (last_test "H5DUMP-XML-clearall-objects")
-  endif ()
 
   ########## test XML
   ADD_XML_H5_TEST (tall.h5 0 tall.h5)

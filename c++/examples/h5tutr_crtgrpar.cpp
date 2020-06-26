@@ -1,8 +1,8 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright by The HDF Group.						     *
- * Copyright by the Board of Trustees of the University of Illinois.	     *
- * All rights reserved.							     *
- *	                                                                     *
+ * Copyright by The HDF Group.                                               *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
@@ -32,51 +32,51 @@ int main(void)
     // Try block to detect exceptions raised by any of the calls inside it
     try
     {
-      
-	// Turn off the auto-printing when failure occurs so that we can
-	// handle the errors appropriately.
 
-	Exception::dontPrint();
+        // Turn off the auto-printing when failure occurs so that we can
+        // handle the errors appropriately.
 
-	// Create a new file using default properties.
+        Exception::dontPrint();
 
-	H5File file(FILE_NAME, H5F_ACC_TRUNC);
+        // Create a new file using default properties.
 
-	// Create group "MyGroup" in the root group using an absolute name.
-	 
-	Group group1(file.createGroup( "/MyGroup"));
- 
-	// Create group "Group_A" in group "MyGroup" using an
-	// absolute name.
+        H5File file(FILE_NAME, H5F_ACC_TRUNC);
 
-	Group group2(file.createGroup("/MyGroup/Group_A"));   
+        // Create group "MyGroup" in the root group using an absolute name.
 
-	// Create group "Group_B" in group "MyGroup" using a
-	// relative name.
-  
-	Group group3(group1.createGroup ("Group_B"));
- 
-	// Close the groups and file.
+        Group group1(file.createGroup( "/MyGroup"));
 
-	group1.close();
-	group2.close();
-	group3.close();
-	file.close();
-    
+        // Create group "Group_A" in group "MyGroup" using an
+        // absolute name.
+
+        Group group2(file.createGroup("/MyGroup/Group_A"));
+
+        // Create group "Group_B" in group "MyGroup" using a
+        // relative name.
+
+        Group group3(group1.createGroup ("Group_B"));
+
+        // Close the groups and file.
+
+        group1.close();
+        group2.close();
+        group3.close();
+        file.close();
+
     } // end of try block
 
     // catch failure caused by the File operations
     catch(FileIException error)
     {
-	error.printError();
-	return -1;
+        error.printErrorStack();
+        return -1;
     }
 
     // catch failure caused by the Group operations
     catch(GroupIException error)
     {
-	error.printError();
-	return -1;
+        error.printErrorStack();
+        return -1;
     }
 
     return 0;

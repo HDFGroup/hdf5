@@ -96,10 +96,9 @@ H5FS_init(void)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
     /* FUNC_ENTER() does all the work */
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FS_init() */
 
@@ -122,7 +121,7 @@ H5FS__create_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
-    
+
     /* Sanity check */
     HDassert(parent_entry);
     HDassert(child_entry);
@@ -154,7 +153,7 @@ H5FS__destroy_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
-    
+
     /* Sanity check */
     HDassert(parent_entry);
     HDassert(child_entry);
@@ -162,7 +161,7 @@ H5FS__destroy_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry)
     /* Destroy a flush dependency between parent and child entry */
     if(H5AC_destroy_flush_dependency(parent_entry, child_entry) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
-        
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5FS__destroy_flush_depend() */

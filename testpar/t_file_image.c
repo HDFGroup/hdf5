@@ -21,11 +21,11 @@
  *
  * Process zero:
  *
- *	1) Creates a core file with an integer vector data set of 
- * 	   length n (= mpi_size), 
+ *	1) Creates a core file with an integer vector data set of
+ * 	   length n (= mpi_size),
  *
- *	2) Initializes the vector to zero in * location 0, and to -1 
- *         everywhere else.  
+ *	2) Initializes the vector to zero in * location 0, and to -1
+ *         everywhere else.
  *
  *	3) Flushes the core file, and gets an image of it.  Closes
  *	   the core file.
@@ -35,7 +35,7 @@
  *	5) Awaits receipt on a file image from process n-1.
  *
  *	6) opens the image received from process n-1, verifies that
- *	   it contains a vector of length equal to mpi_size, and 
+ *	   it contains a vector of length equal to mpi_size, and
  *	   that the vector contains (0, 1, 2, ... n-1)
  *
  *	7) closes the core file and exits.
@@ -45,7 +45,7 @@
  *	1) Await receipt of file image from process (i - 1).
  *
  *	2) Open the image with the core file driver, verify that i
- *	   contains a vector v of length, and that v[j] = j for 
+ *	   contains a vector v of length, and that v[j] = j for
  *	   0 <= j < i, and that v[j] == -1 for i <= j < n
  *
  *	3) Set v[i] = i in the core file.
@@ -87,13 +87,13 @@ file_image_daisy_chain_test(void)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     /* setup file name */
-    HDsnprintf(file_name, 1024, "file_image_daisy_chain_test_%05d.h5", 
+    HDsnprintf(file_name, 1024, "file_image_daisy_chain_test_%05d.h5",
                (int)mpi_rank);
 
     if(mpi_rank == 0) {
- 
-	/* 1) Creates a core file with an integer vector data set 
-         *    of length mpi_size, 
+
+	/* 1) Creates a core file with an integer vector data set
+         *    of length mpi_size,
          */
 	fapl_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((fapl_id >= 0), "creating fapl");
@@ -111,10 +111,10 @@ file_image_daisy_chain_test(void)
         dset_id = H5Dcreate2(file_id, "v", H5T_NATIVE_INT, space_id,
                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         VRFY((dset_id >= 0), "created data set");
- 
 
-	/* 2) Initialize the vector to zero in location 0, and 
-         *    to -1 everywhere else.  
+
+	/* 2) Initialize the vector to zero in location 0, and
+         *    to -1 everywhere else.
          */
 
 	vector_ptr = (int *)HDmalloc((size_t)(mpi_size) * sizeof(int));
@@ -131,7 +131,7 @@ file_image_daisy_chain_test(void)
         HDfree(vector_ptr);
         vector_ptr = NULL;
 
- 
+
         /* 3) Flush the core file, and get an image of it.  Close
          *    the core file.
          */
@@ -159,14 +159,14 @@ file_image_daisy_chain_test(void)
 	err = H5Pclose(fapl_id);
 	VRFY((err >= 0), "closed fapl(1).");
 
- 
+
         /* 4) Send the image to process 1. */
 
-        mpi_result = MPI_Ssend((void *)(&image_len), (int)sizeof(ssize_t), 
+        mpi_result = MPI_Ssend((void *)(&image_len), (int)sizeof(ssize_t),
 			       MPI_BYTE, 1, 0, MPI_COMM_WORLD);
 	VRFY((mpi_result == MPI_SUCCESS), "sent image size to process 1");
 
-        mpi_result = MPI_Ssend((void *)image_ptr, (int)image_len, 
+        mpi_result = MPI_Ssend((void *)image_ptr, (int)image_len,
 			       MPI_BYTE, 1, 0, MPI_COMM_WORLD);
 	VRFY((mpi_result == MPI_SUCCESS), "sent image to process 1");
 
@@ -190,9 +190,9 @@ file_image_daisy_chain_test(void)
                               &rcvstat);
 	VRFY((mpi_result == MPI_SUCCESS), \
              "received file image from process n-1");
- 
+
 	/* 6) open the image received from process n-1, verify that
-         *    it contains a vector of length equal to mpi_size, and 
+         *    it contains a vector of length equal to mpi_size, and
 	 *    that the vector contains (0, 1, 2, ... n-1).
          */
 	fapl_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -229,7 +229,7 @@ file_image_daisy_chain_test(void)
 	vector_ptr = (int *)HDmalloc((size_t)(mpi_size) * sizeof(int));
         VRFY((vector_ptr != NULL), "allocated in memory rep of vector");
 
-	err = H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, 
+	err = H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
                       H5P_DEFAULT, (void *)vector_ptr);
         VRFY((err >= 0), "read received vector.");
 
@@ -238,7 +238,7 @@ file_image_daisy_chain_test(void)
             if(vector_ptr[i] != i)
                 vector_ok = FALSE;
         VRFY((vector_ok), "verified received vector.");
- 
+
         HDfree(vector_ptr);
         vector_ptr = NULL;
 
@@ -276,9 +276,9 @@ file_image_daisy_chain_test(void)
                               &rcvstat);
 	VRFY((mpi_result == MPI_SUCCESS), \
              "received file image from process mpi_rank-1");
- 
+
 	/* 2) Open the image with the core file driver, verify that it
-	 *    contains a vector v of length, and that v[j] = j for 
+	 *    contains a vector v of length, and that v[j] = j for
 	 *    0 <= j < i, and that v[j] == -1 for i <= j < n
 	 */
 	fapl_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -316,7 +316,7 @@ file_image_daisy_chain_test(void)
 	vector_ptr = (int *)HDmalloc((size_t)(mpi_size) * sizeof(int));
         VRFY((vector_ptr != NULL), "allocated in memory rep of vector");
 
-	err = H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, 
+	err = H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
                        H5P_DEFAULT, (void *)vector_ptr);
         VRFY((err >= 0), "read received vector.");
 
@@ -331,7 +331,7 @@ file_image_daisy_chain_test(void)
 	    }
         }
         VRFY((vector_ok), "verified received vector.");
- 
+
 
 	/* 3) Set v[i] = i in the core file. */
 
@@ -344,7 +344,7 @@ file_image_daisy_chain_test(void)
         HDfree(vector_ptr);
         vector_ptr = NULL;
 
- 
+
 	/* 4) Flush the core file and send it to process (mpi_rank + 1) % n. */
 
 	err = H5Fflush(file_id, H5F_SCOPE_GLOBAL);
@@ -359,14 +359,14 @@ file_image_daisy_chain_test(void)
         bytes_read = H5Fget_file_image(file_id, image_ptr, (size_t)image_len);
         VRFY(bytes_read == image_len, "wrote file into image buffer");
 
-        mpi_result = MPI_Ssend((void *)(&image_len), (int)sizeof(ssize_t), 
-			       MPI_BYTE, (mpi_rank + 1) % mpi_size, 0, 
+        mpi_result = MPI_Ssend((void *)(&image_len), (int)sizeof(ssize_t),
+			       MPI_BYTE, (mpi_rank + 1) % mpi_size, 0,
                                MPI_COMM_WORLD);
 	VRFY((mpi_result == MPI_SUCCESS), \
              "sent image size to process (mpi_rank + 1) % mpi_size");
 
-        mpi_result = MPI_Ssend((void *)image_ptr, (int)image_len, 
-			       MPI_BYTE, (mpi_rank + 1) % mpi_size, 0, 
+        mpi_result = MPI_Ssend((void *)image_ptr, (int)image_len,
+			       MPI_BYTE, (mpi_rank + 1) % mpi_size, 0,
                                MPI_COMM_WORLD);
 	VRFY((mpi_result == MPI_SUCCESS), \
               "sent image to process (mpi_rank + 1) % mpi_size");
@@ -374,7 +374,7 @@ file_image_daisy_chain_test(void)
         HDfree(image_ptr);
         image_ptr = NULL;
         image_len = 0;
- 
+
 	/* 5) close the core file and exit. */
 
         err = H5Sclose(space_id);

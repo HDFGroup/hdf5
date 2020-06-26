@@ -19,7 +19,9 @@
 #include "H5PropList.h"
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
+#include "H5DaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
 #include "H5DataType.h"
@@ -45,7 +47,7 @@ ArrayType::ArrayType(const hid_t existing_id) : DataType(existing_id) {}
 
 //--------------------------------------------------------------------------
 // Function:    ArrayType copy constructor
-///\brief       Copy constructor: makes a copy of the original ArrayType object.
+///\brief       Copy constructor: same HDF5 object as \a original
 // Programmer   Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
 ArrayType::ArrayType(const ArrayType& original) : DataType(original) {}
@@ -119,7 +121,6 @@ ArrayType::ArrayType(const H5Location& loc, const H5std_string& dtype_name) : Da
 //              Closes the id on the lhs object first with setId, then copies
 //              each data member from the rhs object. (Issue HDFFV-9562)
 // Programmer   Binh-Minh Ribler - Mar 2016
-// Modification
 //--------------------------------------------------------------------------
 ArrayType& ArrayType::operator=(const ArrayType& rhs)
 {
@@ -139,14 +140,33 @@ ArrayType& ArrayType::operator=(const ArrayType& rhs)
 }
 
 //--------------------------------------------------------------------------
+// Function:    ArrayType::decode
+///\brief       Returns an ArrayType object via DataType* by decoding the
+///             binary object description of this type.
+///
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Aug 2017
+//--------------------------------------------------------------------------
+DataType* ArrayType::decode() const
+{
+    hid_t encoded_arrtype_id = H5I_INVALID_HID;
+    try {
+        encoded_arrtype_id = p_decode();
+    }
+    catch (DataTypeIException &err) {
+        throw;
+    }
+    ArrayType *encoded_arrtype = new ArrayType;
+    encoded_arrtype->p_setId(encoded_arrtype_id);
+    return(encoded_arrtype);
+}
+
+//--------------------------------------------------------------------------
 // Function:    ArrayType::getArrayNDims
 ///\brief       Returns the number of dimensions for an array datatype.
 ///\return      Number of dimensions
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - May 2004
-// Modification
-//      Apr, 2016
-//              Became const.
 //--------------------------------------------------------------------------
 int ArrayType::getArrayNDims() const
 {
@@ -167,9 +187,6 @@ int ArrayType::getArrayNDims() const
 ///\return      Number of dimensions
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - May 2004
-// Modification
-//      Apr, 2016
-//              Became const.
 //--------------------------------------------------------------------------
 int ArrayType::getArrayDims(hsize_t* dims) const
 {

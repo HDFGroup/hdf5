@@ -38,7 +38,7 @@
 !
 !*****
 
-MODULE H5R 
+MODULE H5R
   USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR, C_SIGNED_CHAR
   USE H5GLOBAL
 
@@ -56,13 +56,19 @@ MODULE H5R
   !        END TYPE
   !
 
+  PRIVATE h5rget_object_type_obj_f
+  PRIVATE h5rget_region_region_f, h5rget_region_ptr_f
+  PRIVATE h5rcreate_object_f, h5rcreate_region_f, h5rcreate_ptr_f
+  PRIVATE h5rdereference_object_f, h5rdereference_region_f, h5rdereference_ptr_f
+  PRIVATE h5rget_name_object_f, h5rget_name_region_f, h5rget_name_ptr_f
+
   INTERFACE h5rget_object_type_f
 
      MODULE PROCEDURE h5rget_object_type_obj_f
 
   END INTERFACE
 
-  TYPE :: hdset_reg_ref_t_f03 
+  TYPE :: hdset_reg_ref_t_f03
      INTEGER(C_SIGNED_CHAR), DIMENSION(1:H5R_DSET_REG_REF_BUF_SIZE_F) :: ref
   END TYPE hdset_reg_ref_t_f03
 
@@ -165,16 +171,16 @@ CONTAINS
 !  Retrieves the type of object that an object reference points to.
 !
 ! INPUTS
-!  dset_id 	 - identifier of the dataset containing
+!  dset_id      - identifier of the dataset containing
 !                  reference to the objects
-!  ref 	         - reference to open
+!  ref              - reference to open
 ! OUTPUTS
-!  obj_type 	 - object_type, possible values:
+!  obj_type      - object_type, possible values:
 !                    H5G_UNKNOWN_F
-!                    H5G_GROUP_F 
+!                    H5G_GROUP_F
 !                    H5G_DATASET_F
 !                    H5G_TYPE_F
-!  hdferr 	 - Returns 0 if successful and -1 if fails
+!  hdferr      - Returns 0 if successful and -1 if fails
 !
 ! AUTHOR
 !  Elena Pourmal
@@ -227,17 +233,17 @@ CONTAINS
 !  Retrieves a dataspace with the specified region selected
 !
 ! INPUTS
-!  dset_id 	 - identifier of the dataset containing
+!  dset_id      - identifier of the dataset containing
 !                  reference to the regions
-!  ref 	         - reference to open
+!  ref              - reference to open
 ! OUTPUTS
-!  space_id 	 - dataspace identifier
-!  hdferr 	 - Returns 0 if successful and -1 if fails
+!  space_id      - dataspace identifier
+!  hdferr      - Returns 0 if successful and -1 if fails
 ! AUTHOR
 !  Elena Pourmal
 !  August 12, 1999
 !
-! HISTORY 	
+! HISTORY
 !  Explicit Fortran interfaces were added for
 !  called C functions (it is needed for Windows
 !  port).  February 28, 2001
@@ -276,16 +282,16 @@ CONTAINS
 !  h5rget_region_ptr_f
 !
 ! PURPOSE
-!  Retrieves a dataspace with the specified region 
+!  Retrieves a dataspace with the specified region
 !  selected using pointer
 !
 ! INPUTS
-!  dset_id 	 - identifier of the dataset containing
+!  dset_id      - identifier of the dataset containing
 !                  reference to the regions
-!  ref 	         - reference to open
+!  ref              - reference to open
 ! OUTPUTS
-!  space_id 	 - dataspace identifier
-!  hdferr 	 - Returns 0 if successful and -1 if fails
+!  space_id      - dataspace identifier
+!  hdferr      - Returns 0 if successful and -1 if fails
 ! AUTHOR
 !  M. Scot Breitenfeld
 !  August 4, 2012
@@ -319,7 +325,7 @@ CONTAINS
 !  loc_id    - location identifier
 !  name      - name of the object at the specified location
 ! Outputs:
-!  ref 	     - reference to the specified object
+!  ref          - reference to the specified object
 !  hdferr    - returns 0 if successful and -1 if fails
 ! AUTHOR
 !  Elena Pourmal
@@ -335,7 +341,7 @@ CONTAINS
 !
 ! Signature:
   SUBROUTINE h5rcreate_object_f(loc_id, name, ref, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id   ! Location identifier
     CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the object at location specified
@@ -363,11 +369,11 @@ CONTAINS
 !  Creates reference to the dataset region
 !
 ! INPUTS
-!  loc_id 	 - location identifier
-!  name 	 - name of the dataset at the specified location
-!  space_id 	 - dataspace identifier that describes selected region
+!  loc_id      - location identifier
+!  name      - name of the dataset at the specified location
+!  space_id      - dataspace identifier that describes selected region
 ! OUTPUTS
-!  ref 	         - reference to the dataset region
+!  ref              - reference to the dataset region
 !  hdferr        - returns 0 if successful and -1 if fails
 ! AUTHOR
 !  Elena Pourmal
@@ -424,12 +430,12 @@ CONTAINS
 !
 ! Inputs:
 !  loc_id     - location identifier
-!  name	      - name of the dataset at the specified location
+!  name          - name of the dataset at the specified location
 !  ref_type   - type of reference:
 !                H5R_OBJECT
 !                H5T_STD_REF_DSETREG
 ! Outputs:
-!  ref	      - reference created by the function call.
+!  ref          - reference created by the function call.
 !  hdferr     - returns 0 if successful and -1 if fails.
 ! OPTIONAL
 !  space_id   - dataspace identifier that describes selected region
@@ -444,7 +450,7 @@ CONTAINS
 !
 ! Signature:
   SUBROUTINE h5rcreate_ptr_f(loc_id, name, ref_type, ref, hdferr, space_id)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id     ! Location identifier
     CHARACTER(LEN=*), INTENT(IN) :: name     ! Name of the dataset at location specified
@@ -474,7 +480,7 @@ CONTAINS
 ! Inputs:
 !  dset_id  - identifier of the dataset containing
 !             reference
-!  ref 	    - reference to open
+!  ref         - reference to open
 ! Outputs:
 !  obj_id   - object_identifier
 !  hdferr   - returns 0 if successful and -1 if fails
@@ -492,7 +498,7 @@ CONTAINS
 !
 ! Signature:
   SUBROUTINE h5rdereference_object_f(obj_id, ref, ref_obj_id, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id          ! Dataset identifier
     TYPE(hobj_ref_t_f), INTENT(IN), TARGET :: ref ! Object reference
@@ -515,8 +521,8 @@ CONTAINS
 !
 ! Inputs:
 !  dset_id  - identifier of the dataset containing
-!             reference to teh regions
-!  ref 	    - reference to open
+!             reference to the regions
+!  ref         - reference to open
 ! Outputs:
 !  obj_id   - dataspace identifier
 !  hdferr   - returns 0 if successful and -1 if fails
@@ -535,7 +541,7 @@ CONTAINS
 !
 ! Signature:
   SUBROUTINE h5rdereference_region_f(obj_id, ref, ref_obj_id, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id   ! Dataset identifier
     TYPE(hdset_reg_ref_t_f), INTENT(IN), TARGET :: ref   ! Object reference
@@ -576,7 +582,7 @@ CONTAINS
 !
 ! Signature:
   SUBROUTINE h5rdereference_ptr_f(obj_id, ref_type, ref, ref_obj_id, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id  ! Valid identifier for the file containing the
                                           !  referenced object or any object in that file.
@@ -585,7 +591,7 @@ CONTAINS
     INTEGER(HID_T), INTENT(OUT) :: ref_obj_id
                                           ! Identifier of referenced object
     INTEGER, INTENT(OUT) :: hdferr        ! Error code
-!***** 
+!*****
     hdferr = h5rdereference_ptr_c(obj_id, ref_type, ref, ref_obj_id)
 
   END SUBROUTINE h5rdereference_ptr_f
@@ -600,14 +606,14 @@ CONTAINS
 !
 ! Inputs:
 !  loc_id    - Identifier for the file containing the reference or for any object in that file.
-!  ref 	     - An object or dataset region reference.
+!  ref          - An object or dataset region reference.
 !
 ! Outputs:
 !  name      - A name associated with the referenced object or dataset region.
 !  hdferr    - Returns 0 if successful and -1 if fails.
 !
 ! Optional parameters:
-!  size     - The size of the name buffer, returning 0 (zero) if no name is associated 
+!  size     - The size of the name buffer, returning 0 (zero) if no name is associated
 !             with the identifier.
 !
 ! AUTHOR
@@ -616,7 +622,7 @@ CONTAINS
 !
 ! Signature:
   SUBROUTINE h5rget_name_object_f(loc_id,  ref, name, hdferr, size)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
     TYPE(hobj_ref_t_f), INTENT(IN), TARGET :: ref
@@ -648,7 +654,7 @@ CONTAINS
 !
 ! Inputs:
 !  loc_id  - Identifier for the file containing the reference or for any object in that file.
-!  ref 	   - An object or dataset region reference.
+!  ref        - An object or dataset region reference.
 !
 ! Outputs:
 !  name    - A name associated with the referenced object or dataset region.
@@ -663,7 +669,7 @@ CONTAINS
 !
 ! Signature:
   SUBROUTINE h5rget_name_region_f(loc_id, ref, name, hdferr, size)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
     TYPE(hdset_reg_ref_t_f), INTENT(IN), TARGET :: ref
@@ -712,7 +718,7 @@ CONTAINS
   !
   ! Signature:
   SUBROUTINE h5rget_name_ptr_f(loc_id, ref_type, ref, name, hdferr, size)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
     INTEGER, INTENT(IN) :: ref_type
@@ -747,12 +753,12 @@ CONTAINS
   !  ref      - Reference to query.
   !
   ! Outputs:
-  !  obj_type - Type of referenced object. 
+  !  obj_type - Type of referenced object.
   !               H5G_UNKNOWN_F
   !               H5G_GROUP_F
   !               H5G_DATASET_F
   !               H5G_TYPE_F
-  !              
+  !
   !  hdferr   - Returns 0 if successful and -1 if fails.
   !
   ! AUTHOR
@@ -761,7 +767,7 @@ CONTAINS
   !
   ! Signature:
   SUBROUTINE h5rget_obj_type_f(loc_id, ref_type, ref, obj_type, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
     INTEGER, INTENT(IN) :: ref_type

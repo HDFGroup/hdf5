@@ -38,7 +38,7 @@ int_f
 h5tbmake_table_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *namelen, _fcd name,
 		 hsize_t_f *nfields, hsize_t_f *nrecords, size_t_f *type_size, size_t_f *field_offset,
 		 hid_t_f *field_types, hsize_t_f *chunk_size, int_f *compress,
-		 size_t_f *char_len_field_names, /* field_names lenghts */
+		 size_t_f *char_len_field_names, /* field_names lengths */
 		 size_t_f *max_char_size_field_names, /* char len of fields */
 		 char *field_names)            /* field_names */
 {
@@ -142,8 +142,8 @@ int_f
 h5tbmake_table_ptr_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *namelen,
 		     _fcd name, hsize_t_f *nfields, hsize_t_f *nrecords, size_t_f *type_size,
 		     size_t_f *field_offset, hid_t_f *field_types, hsize_t_f *chunk_size,
-		     void *fill_data, int_f *compress, 
-		     size_t_f *char_len_field_names, /* field_names lenghts */
+		     void *fill_data, int_f *compress,
+		     size_t_f *char_len_field_names, /* field_names lengths */
 		     size_t_f *max_char_size_field_names, /* char len of fields */
 		     char *field_names,
 		     void *data)            /* field_names */
@@ -233,7 +233,7 @@ done:
 /*-------------------------------------------------------------------------
 * Function: h5tbread_table_c
 *
-* Purpose: Call H5TBread_table using F2003 features 
+* Purpose: Call H5TBread_table using F2003 features
 *
 * Return: Success: 0, Failure: -1
 *
@@ -261,7 +261,7 @@ h5tbread_table_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, hsize_t_f *nfiel
      */
     if(NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
         HGOTO_DONE(FAIL)
-	  
+
     if(NULL == (c_dst_offset = (size_t *)HDmalloc(sizeof(size_t) * (size_t)c_nfields)))
         HGOTO_DONE(FAIL)
     if(NULL == (c_dst_sizes = (size_t *)HDmalloc(sizeof(size_t) * (size_t)c_nfields)))
@@ -270,7 +270,7 @@ h5tbread_table_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, hsize_t_f *nfiel
     for(i = 0; i < c_nfields; i++) {
       c_dst_offset[i] = (size_t)dst_offset[i];
       c_dst_sizes[i] = (size_t)dst_sizes[i];
-    } /* end for */	  
+    } /* end for */
 
     /*
      * call H5TBread_table function.
@@ -514,7 +514,7 @@ h5tbinsert_field_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_f *name
      * call H5TBinsert_field function.
      */
 
-    if(H5TBinsert_field((hid_t)*loc_id, c_name, c_name1, (hid_t)*field_type, 
+    if(H5TBinsert_field((hid_t)*loc_id, c_name, c_name1, (hid_t)*field_type,
             (hsize_t)*position, NULL, buf) < 0)
         HGOTO_DONE(FAIL)
 
@@ -638,7 +638,7 @@ done:
 int_f
 h5tbget_field_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *nfields,
 		     size_t_f *field_sizes, size_t_f *field_offsets, size_t_f *type_size,
-		     size_t_f *namelen2,       /* field_names lenghts */
+		     size_t_f *namelen2,       /* field_names lengths */
 		     size_t_f *lenmax,         /* character len max */
 		     _fcd field_names,      /* field_names */
 		     size_t_f *maxlen_out)
@@ -683,7 +683,7 @@ h5tbget_field_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *n
     if(H5TBget_field_info((hid_t)*loc_id, c_name, c_field_names, c_field_sizes,
             c_field_offsets, &c_type_size) < 0)
         HGOTO_DONE(FAIL)
-   
+
     /* return values */
 
     /* names array */
@@ -709,7 +709,7 @@ h5tbget_field_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *n
         field_offsets[i] = (size_t_f)c_field_offsets[i];
     } /* end for */
 
-    *maxlen_out = (size_t_f)length; 
+    *maxlen_out = (size_t_f)length;
 
 done:
     if(c_name)

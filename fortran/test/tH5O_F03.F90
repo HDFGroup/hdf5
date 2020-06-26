@@ -5,7 +5,7 @@
 !
 ! FUNCTION
 !  Test FORTRAN HDF5 H5O APIs which are dependent on FORTRAN 2003
-!  features. 
+!  features.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -28,9 +28,9 @@
 ! *****************************************
 MODULE visit_cb
 
-  USE HDF5 
+  USE HDF5
   USE, INTRINSIC :: ISO_C_BINDING
-  
+
   IMPLICIT NONE
 
   INTEGER, PARAMETER :: info_size = 9
@@ -58,21 +58,151 @@ MODULE visit_cb
   TYPE, bind(c) :: ovisit_ud_t
      INTEGER :: idx              ! Index in object visit structure
      TYPE(obj_visit_t), DIMENSION(1:info_size) :: info   ! Pointer to the object visit structure to use
+     INTEGER :: field
   END TYPE ovisit_ud_t
 
 CONTAINS
 
-  INTEGER FUNCTION visit_obj_cb( group_id, name, oinfo, op_data) bind(C)
+! Compares the field values of a C H5O_info_t and a Fortran H5O_info_t.
+
+  INTEGER FUNCTION compare_h5o_info_t( loc_id, oinfo_f, oinfo_c, field, full_f_field ) RESULT(status)
+
+    IMPLICIT NONE
+    INTEGER(HID_T)     :: loc_id
+    TYPE(h5o_info_t)   :: oinfo_f
+    TYPE(c_h5o_info_t) :: oinfo_c
+    TYPE(H5O_TOKEN_T_F) :: token_c
+    INTEGER :: field
+    LOGICAL :: full_f_field ! All the fields of Fortran H5O_info_t where filled
+!   local
+    INTEGER(C_INT), DIMENSION(1:8) :: atime, btime, ctime, mtime
+    INTEGER :: cmp_value
+    INTEGER :: i
+    INTEGER :: ierr
+
+    status = 0
+
+    IF( (field .EQ. H5O_INFO_BASIC_F).OR.(field .EQ. H5O_INFO_ALL_F) )THEN
+       IF( (oinfo_f%fileno.LE.0) .OR. (oinfo_c%fileno .NE. oinfo_f%fileno) )THEN
+          status = -1
+          RETURN
+       ENDIF
+       token_c%token = oinfo_c%token%token
+       CALL H5Otoken_cmp_f(loc_id, oinfo_f%token, token_c, cmp_value, ierr);
+       IF( (ierr .EQ. -1) .OR. (cmp_value .NE. 0) ) THEN
+          status = -1
+          RETURN
+       ENDIF
+       IF( (oinfo_f%type.LT.0) .OR. (oinfo_c%type .NE. oinfo_f%type) )THEN
+          status = -1
+          RETURN
+       ENDIF
+       IF( (oinfo_f%rc.LT.0) .OR. (oinfo_c%rc .NE. oinfo_f%rc) )THEN
+          status = -1
+          RETURN
+       ENDIF
+
+    ENDIF
+
+    IF((field .EQ. H5O_INFO_TIME_F).OR.(field .EQ. H5O_INFO_ALL_F))THEN
+
+       atime(1:8) = h5gmtime(oinfo_c%atime)
+       btime(1:8) = h5gmtime(oinfo_c%btime)
+       ctime(1:8) = h5gmtime(oinfo_c%ctime)
+       mtime(1:8) = h5gmtime(oinfo_c%mtime)
+
+       DO i = 1, 8
+          IF( (atime(i) .NE. oinfo_f%atime(i)) )THEN
+             status = -1
+             RETURN
+          ENDIF
+
+          IF( (btime(i) .NE. oinfo_f%btime(i)) )THEN
+             status = -1
+             RETURN
+          ENDIF
+
+          IF( (ctime(i) .NE. oinfo_f%ctime(i)) )THEN
+             status = -1
+             RETURN
+          ENDIF
+
+          IF( (mtime(i) .NE. oinfo_f%mtime(i)) )THEN
+             status = -1
+             RETURN
+          ENDIF
+       ENDDO
+
+    ELSE IF(field .EQ. H5O_INFO_TIME_F.AND. full_f_field)THEN
+       ! check other field values are not filled (using only a small subset to check)
+       status = 0
+       IF( oinfo_c%fileno .NE. oinfo_f%fileno) status = status + 1
+       token_c%token = oinfo_c%token%token
+       CALL H5Otoken_cmp_f(loc_id, oinfo_f%token, token_c, cmp_value, ierr);
+       IF( (ierr .EQ. -1) .OR. (cmp_value .NE. 0) ) THEN
+          status = -1
+          RETURN
+       ENDIF
+       IF( oinfo_c%type .NE. oinfo_f%type) status = status + 1
+       IF( oinfo_c%rc .NE. oinfo_f%rc) status = status + 1
+       IF(status.EQ.0) THEN ! There was no difference found, which is only possible if the field was filled.
+          status = -1
+          RETURN
+       ENDIF
+       status = 0 ! reset
+    ENDIF
+
+    IF((field .EQ. H5O_INFO_NUM_ATTRS_F).OR.(field .EQ. H5O_INFO_ALL_F))THEN
+       IF( (oinfo_f%num_attrs.LT.0) .OR. (oinfo_c%num_attrs .NE. oinfo_f%num_attrs) )THEN
+          status = -1
+          RETURN
+       ENDIF
+    ELSE IF( field .EQ. H5O_INFO_ALL_F.AND.full_f_field)THEN
+       ! check other field values are not filled (using only a small subset to check)
+       status = 0
+       IF( oinfo_c%fileno .NE. oinfo_f%fileno) status = status + 1
+       token_c%token = oinfo_c%token%token
+       CALL H5Otoken_cmp_f(loc_id, oinfo_f%token, token_c, cmp_value, ierr);
+       IF( (ierr .EQ. -1) .OR. (cmp_value .NE. 0) ) THEN
+          status = -1
+          RETURN
+       ENDIF
+       IF( oinfo_c%type .NE. oinfo_f%type) status = status + 1
+       IF( oinfo_c%rc .NE. oinfo_f%rc) status = status + 1
+       IF(status.EQ.0) THEN ! There was no difference found, which is only possible if the field was filled.
+          status = -1
+          RETURN
+       ENDIF
+       status = 0 ! reset
+    ENDIF
+
+  END FUNCTION compare_h5o_info_t
+
+  INTEGER FUNCTION visit_obj_cb( group_id, name, oinfo_c, op_data) bind(C)
 
     IMPLICIT NONE
 
     INTEGER(HID_T), VALUE :: group_id
     CHARACTER(LEN=1), DIMENSION(1:180) :: name
-    TYPE(h5o_info_t) :: oinfo
+    CHARACTER(LEN=180) :: name2
+    TYPE(c_h5o_info_t) :: oinfo_c
     TYPE(ovisit_ud_t) :: op_data
-
+    TYPE(h5o_info_t) ::  oinfo_f
+!
+!   MEMBER      | TYPE | MEANING                 | RANGE
+! A(1) = tm_sec	  int   seconds after the minute   0-61*
+! A(2) = tm_min	  int   minutes after the hour     0-59
+! A(3) = tm_hour  int   hours since midnight       0-23
+! A(4) = tm_mday  int   day of the month           1-31
+! A(5) = tm_mon	  int   months since January       0-11
+! A(6) = tm_year  int   years since 1900
+! A(7) = tm_wday  int   days since Sunday          0-6
+! A(8) = tm_yday  int   days since January 1       0-365
+! A(9) = tm_isdst int   Daylight Saving Time flag
+!
     INTEGER :: len, i
     INTEGER :: idx
+    INTEGER :: ierr
 
     visit_obj_cb = 0
 
@@ -87,21 +217,53 @@ CONTAINS
     len = len - 1
 
     ! Check for correct object information
-
-    idx = op_data%idx
-
+    name2(1:180) = ""
     DO i = 1, len
-       IF(op_data%info(idx)%path(i)(1:1) .NE. name(i)(1:1))THEN
-          visit_obj_cb = -1
-          RETURN
-       ENDIF
-       
-       IF(op_data%info(idx)%type_obj .NE. oinfo%type)THEN
-          visit_obj_cb = -1
-          RETURN
-       ENDIF
-
+       name2(i:i) = name(i)(1:1)
     ENDDO
+
+    IF(op_data%field .EQ. H5O_INFO_ALL_F)THEN
+
+       idx = op_data%idx
+
+       DO i = 1, len
+          IF(op_data%info(idx)%path(i)(1:1) .NE. name(i)(1:1))THEN
+             visit_obj_cb = -1
+             RETURN
+          ENDIF
+
+          IF(op_data%info(idx)%type_obj .NE. oinfo_c%type)THEN
+             visit_obj_cb = -1
+             RETURN
+          ENDIF
+       ENDDO
+
+    ENDIF
+
+    ! Check H5Oget_info_by_name_f; if partial field values were filled correctly
+    CALL H5Oget_info_by_name_f(group_id, name2, oinfo_f, ierr);
+    visit_obj_cb =  compare_h5o_info_t( group_id, oinfo_f, oinfo_c, op_data%field, .TRUE. )
+    IF(visit_obj_cb.EQ.-1) RETURN
+
+    ! Check H5Oget_info_by_name_f, only check field values
+    CALL H5Oget_info_by_name_f(group_id, name2, oinfo_f, ierr, fields = op_data%field);
+    visit_obj_cb =  compare_h5o_info_t(group_id, oinfo_f, oinfo_c, op_data%field, .FALSE. )
+    IF(visit_obj_cb.EQ.-1) RETURN
+
+
+    IF(op_data%idx.EQ.1)THEN
+
+       ! Check H5Oget_info_f, only check field values
+       CALL H5Oget_info_f(group_id, oinfo_f, ierr, fields = op_data%field);
+       visit_obj_cb =  compare_h5o_info_t(group_id, oinfo_f, oinfo_c, op_data%field, .FALSE.  )
+       IF(visit_obj_cb.EQ.-1) RETURN
+
+       ! Check H5Oget_info_f; if partial field values where filled correctly
+       CALL H5Oget_info_f(group_id, oinfo_f, ierr);
+       visit_obj_cb =  compare_h5o_info_t(group_id, oinfo_f, oinfo_c, op_data%field, .TRUE.  )
+       IF(visit_obj_cb.EQ.-1) RETURN
+
+    ENDIF
 
     ! Advance to next location in expected output
     op_data%idx = op_data%idx + 1
@@ -109,7 +271,6 @@ CONTAINS
   END FUNCTION visit_obj_cb
 
 END MODULE visit_cb
-
 
 MODULE TH5O_F03
 
@@ -122,7 +283,7 @@ CONTAINS
 
 SUBROUTINE test_h5o_refcount(total_error)
 
-  USE HDF5 
+  USE HDF5
   USE TH5_MISC
   USE ISO_C_BINDING
   IMPLICIT NONE
@@ -140,7 +301,7 @@ SUBROUTINE test_h5o_refcount(total_error)
 
   ! Create a new HDF5 file
   CALL h5fcreate_f(FILENAME,H5F_ACC_TRUNC_F,fid,error)
-  CALL check("h5fcreate_f", error, total_error) 
+  CALL check("h5fcreate_f", error, total_error)
 
   ! Create a group, dataset, and committed datatype within the file
   ! Create the group
@@ -255,11 +416,11 @@ END SUBROUTINE test_h5o_refcount
 
 !****************************************************************
 !**
-!**  test_h5o_refcount(): Test H5O visit functions.
+!**  test_obj_visit(): Test H5O visit functions.
 !**
 !****************************************************************
 
-SUBROUTINE obj_visit(total_error)
+SUBROUTINE test_obj_visit(total_error)
 
   USE HDF5
   USE TH5_MISC
@@ -310,24 +471,77 @@ SUBROUTINE obj_visit(total_error)
   udata%info(9)%type_obj = H5O_TYPE_NAMED_DATATYPE_F
 
   ! Visit all the objects reachable from the root group (with file ID)
-  udata%idx = 1
 
   fun_ptr = C_FUNLOC(visit_obj_cb)
   f_ptr = C_LOC(udata)
 
   ! Test h5ovisit_f
+  udata%field = H5O_INFO_ALL_F
+  udata%idx = 1
   CALL h5ovisit_f(fid, H5_INDEX_NAME_F, H5_ITER_INC_F, fun_ptr, f_ptr, ret_val, error)
   CALL check("h5ovisit_f", error, total_error)
   IF(ret_val.LT.0)THEN
      CALL check("h5ovisit_f", -1, total_error)
   ENDIF
 
-  ! Test h5ovisit_by_name_f
+  ! Test fields option
+  udata%field = H5O_INFO_ALL_F
+  udata%idx = 1
+  CALL h5ovisit_f(fid, H5_INDEX_NAME_F, H5_ITER_INC_F, fun_ptr, f_ptr, ret_val, error, fields=udata%field)
+  CALL check("h5ovisit_f", error, total_error)
+  IF(ret_val.LT.0)THEN
+     CALL check("h5ovisit_f", -1, total_error)
+  ENDIF
+  udata%field = H5O_INFO_BASIC_F
+  udata%idx = 1
+  CALL h5ovisit_f(fid, H5_INDEX_NAME_F, H5_ITER_INC_F, fun_ptr, f_ptr, ret_val, error, fields=udata%field)
+  CALL check("h5ovisit_f", error, total_error)
+  IF(ret_val.LT.0)THEN
+     CALL check("h5ovisit_f", -1, total_error)
+  ENDIF
+  udata%field = H5O_INFO_TIME_F
+  udata%idx = 1
+  CALL h5ovisit_f(fid, H5_INDEX_NAME_F, H5_ITER_INC_F, fun_ptr, f_ptr, ret_val, error, fields=udata%field)
+  CALL check("h5ovisit_f", error, total_error)
+  IF(ret_val.LT.0)THEN
+     CALL check("h5ovisit_f", -1, total_error)
+  ENDIF
+  udata%field = H5O_INFO_NUM_ATTRS_F
+  udata%idx = 1
+  CALL h5ovisit_f(fid, H5_INDEX_NAME_F, H5_ITER_INC_F, fun_ptr, f_ptr, ret_val, error, fields=udata%field)
+  CALL check("h5ovisit_f", error, total_error)
+  IF(ret_val.LT.0)THEN
+     CALL check("h5ovisit_f", -1, total_error)
+  ENDIF
 
+  ! Test h5ovisit_by_name_f
   object_name = "/"
   udata%idx = 1
+  udata%field = H5O_INFO_ALL_F
+  CALL h5ovisit_by_name_f(fid, object_name, H5_INDEX_NAME_F, H5_ITER_INC_F, fun_ptr, f_ptr, ret_val, error, fields=udata%field)
+  CALL check("h5ovisit_by_name_f", error, total_error)
+  IF(ret_val.LT.0)THEN
+     CALL check("h5ovisit_by_name_f", -1, total_error)
+  ENDIF
 
-  CALL h5ovisit_by_name_f(fid, object_name, H5_INDEX_NAME_F, H5_ITER_INC_F, fun_ptr, f_ptr, ret_val, error)
+  ! Test fields option
+  udata%idx = 1
+  udata%field = H5O_INFO_BASIC_F
+  CALL h5ovisit_by_name_f(fid, object_name, H5_INDEX_NAME_F, H5_ITER_INC_F, fun_ptr, f_ptr, ret_val, error, fields=udata%field)
+  CALL check("h5ovisit_by_name_f", error, total_error)
+  IF(ret_val.LT.0)THEN
+     CALL check("h5ovisit_by_name_f", -1, total_error)
+  ENDIF
+  udata%idx = 1
+  udata%field = H5O_INFO_TIME_F
+  CALL h5ovisit_by_name_f(fid, object_name, H5_INDEX_NAME_F, H5_ITER_INC_F, fun_ptr, f_ptr, ret_val, error, fields=udata%field)
+  CALL check("h5ovisit_by_name_f", error, total_error)
+  IF(ret_val.LT.0)THEN
+     CALL check("h5ovisit_by_name_f", -1, total_error)
+  ENDIF
+  udata%idx = 1
+  udata%field =  H5O_INFO_NUM_ATTRS_F
+  CALL h5ovisit_by_name_f(fid, object_name, H5_INDEX_NAME_F, H5_ITER_INC_F, fun_ptr, f_ptr, ret_val, error, fields=udata%field)
   CALL check("h5ovisit_by_name_f", error, total_error)
   IF(ret_val.LT.0)THEN
      CALL check("h5ovisit_by_name_f", -1, total_error)
@@ -336,15 +550,15 @@ SUBROUTINE obj_visit(total_error)
   CALL h5fclose_f(fid, error)
   CALL check("h5fclose_f",error, total_error)
 
-END SUBROUTINE obj_visit
+END SUBROUTINE test_obj_visit
 
 !****************************************************************
 !**
-!**  test_h5o_refcount(): Test H5O info functions.
+!**  test_obj_info(): Test H5O info functions.
 !**
 !****************************************************************
 
-SUBROUTINE obj_info(total_error)
+SUBROUTINE test_obj_info(total_error)
 
   USE HDF5
   USE TH5_MISC
@@ -353,13 +567,13 @@ SUBROUTINE obj_info(total_error)
 
   INTEGER, INTENT(INOUT) :: total_error
 
-  INTEGER(hid_t) :: fid = -1             ! File ID 
-  INTEGER(hid_t) :: gid = -1, gid2 = -1  ! Group IDs 
-  INTEGER(hid_t) :: did                  ! Dataset ID 
-  INTEGER(hid_t) :: sid                  ! Dataspace ID 
-  TYPE(hobj_ref_t_f), TARGET :: wref     ! Reference to write 
+  INTEGER(hid_t) :: fid = -1             ! File ID
+  INTEGER(hid_t) :: gid = -1, gid2 = -1  ! Group IDs
+  INTEGER(hid_t) :: did                  ! Dataset ID
+  INTEGER(hid_t) :: sid                  ! Dataspace ID
+  TYPE(hobj_ref_t_f), TARGET :: wref     ! Reference to write
   TYPE(hobj_ref_t_f), TARGET :: rref     ! Reference to read
-  TYPE(H5O_info_t) :: oinfo              ! Object info struct 
+  TYPE(H5O_info_t) :: oinfo              ! Object info struct
   INTEGER :: error
   TYPE(C_PTR) :: f_ptr
 
@@ -381,7 +595,7 @@ SUBROUTINE obj_info(total_error)
   CALL h5gcreate_f(fid,  GROUPNAME, gid, error)
   CALL check("h5gcreate_f",error,total_error)
 
-  ! Create nested groups 
+  ! Create nested groups
   CALL h5gcreate_f(gid,  GROUPNAME2, gid2, error)
   CALL check("h5gcreate_f",error,total_error)
   CALL h5gclose_f(gid2, error)
@@ -416,7 +630,7 @@ SUBROUTINE obj_info(total_error)
   CALL h5dwrite_f(did, H5T_STD_REF_OBJ, f_ptr, error)
   CALL check("h5dwrite_f",error, total_error)
 
-  ! Close objects 
+  ! Close objects
   CALL h5dclose_f(did, error)
   CALL check("h5dclose_f", error, total_error)
   CALL h5sclose_f(sid, error)
@@ -450,10 +664,31 @@ SUBROUTINE obj_info(total_error)
   IF(oinfo%rc.NE.1)THEN
      CALL check("h5oget_info_by_idx_f", -1, total_error)
   ENDIF
-
   IF(oinfo%type.NE.H5O_TYPE_DATASET_F)THEN
      CALL check("h5oget_info_by_idx_f", -1, total_error)
   ENDIF
+
+  ! Check partial fields
+  CALL h5oget_info_by_idx_f(gid, ".", H5_INDEX_NAME_F, H5_ITER_INC_F, 0_hsize_t, oinfo, error, fields=H5O_INFO_BASIC_F )
+  CALL check("h5oget_info_by_idx_f", error, total_error)
+
+  IF(oinfo%rc.NE.1)THEN
+     CALL check("h5oget_info_by_idx_f", -1, total_error)
+  ENDIF
+  IF(oinfo%type.NE.H5O_TYPE_DATASET_F)THEN
+     CALL check("h5oget_info_by_idx_f", -1, total_error)
+  ENDIF
+
+  CALL h5oget_info_by_idx_f(gid, ".", H5_INDEX_NAME_F, H5_ITER_INC_F, 0_hsize_t, oinfo, error, fields=H5O_INFO_TIME_F )
+  CALL check("h5oget_info_by_idx_f", error, total_error)
+  ! These field values should not be filled
+  IF(oinfo%rc.EQ.1)THEN
+     CALL check("h5oget_info_by_idx_f", -1, total_error)
+  ENDIF
+  IF(oinfo%type.EQ.H5O_TYPE_DATASET_F)THEN
+     CALL check("h5oget_info_by_idx_f", -1, total_error)
+  ENDIF
+
 
   ! Close objects
   CALL h5dclose_f(did, error)
@@ -463,7 +698,7 @@ SUBROUTINE obj_info(total_error)
   CALL h5fclose_f(fid, error)
   CALL check("h5fclose_f", error, total_error)
 
-END SUBROUTINE obj_info
+END SUBROUTINE test_obj_info
 
 !-------------------------------------------------------------------------
 ! Function:    build_visit_file
@@ -483,14 +718,15 @@ SUBROUTINE build_visit_file(fid)
   USE TH5_MISC
   IMPLICIT NONE
 
-  INTEGER(hid_t) :: fid                  ! File ID 
-  INTEGER(hid_t) :: gid = -1, gid2 = -1     ! Group IDs
+  INTEGER(hid_t) :: fid                   ! File ID
+  INTEGER(hid_t) :: gid = -1, gid2 = -1   ! Group IDs
   INTEGER(hid_t) :: sid = -1              ! Dataspace ID
   INTEGER(hid_t) :: did = -1              ! Dataset ID
   INTEGER(hid_t) :: tid = -1              ! Datatype ID
+  INTEGER(hid_t) :: aid = -1, aid2 = -1, aid3 = -1 ! Attribute ID
   CHARACTER(LEN=20) :: filename = 'visit.h5'
   INTEGER :: error
-  
+
   ! Create file for visiting
   CALL H5Fcreate_f(filename, H5F_ACC_TRUNC_F, fid, error)
 
@@ -499,6 +735,15 @@ SUBROUTINE build_visit_file(fid)
 
   ! Create nested group
   CALL H5Gcreate_f(gid, "Group2", gid2, error)
+
+  CALL H5Screate_f(H5S_SCALAR_F, sid, error)
+  CALL H5Acreate_f(gid2, "Attr1", H5T_NATIVE_INTEGER, sid, aid, error)
+  CALL H5Acreate_f(gid2, "Attr2", H5T_NATIVE_INTEGER, sid, aid2, error)
+  CALL H5Acreate_f(gid2, "Attr3", H5T_NATIVE_INTEGER, sid, aid3, error)
+  CALL H5Aclose_f(aid,error)
+  CALL H5Aclose_f(aid2,error)
+  CALL H5Aclose_f(aid3,error)
+  CALL H5Sclose_f(sid,error)
 
   ! Close groups
   CALL h5gclose_f(gid2, error)

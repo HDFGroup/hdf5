@@ -163,8 +163,8 @@ void test_strpad(hid_t H5_ATTR_UNUSED fid, const char *string)
 
     /* Fill the buffer with two copies of the UTF-8 string, each with a
      * terminating NULL.  It will look like "abcdefg\0abcdefg\0". */
-    strncpy(buf, new_string, big_len);
-    strncpy(&buf[big_len], new_string, big_len);
+    HDstrncpy(buf, new_string, big_len);
+    HDstrncpy(&buf[big_len], new_string, big_len);
 
     ret = H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Tconvert");
@@ -226,8 +226,8 @@ void test_strpad(hid_t H5_ATTR_UNUSED fid, const char *string)
 
     /* Fill the buffer with two copies of the UTF-8 string.
      * It will look like "abcdefghabcdefgh". */
-    strncpy(buf, new_string, big_len);
-    strncpy(&buf[big_len], new_string, big_len);
+    HDstrncpy(buf, new_string, big_len);
+    HDstrncpy(&buf[big_len], new_string, big_len);
 
     ret = H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Tconvert");
@@ -352,8 +352,8 @@ void test_vl_string(hid_t fid, const char *string)
   VERIFY(HDstrcmp(string, read_buf[0]), 0, "strcmp");
 
   /* Reclaim the read VL data */
-  ret = H5Dvlen_reclaim(type_id, space_id, H5P_DEFAULT, read_buf);
-  CHECK(ret, FAIL, "H5Dvlen_reclaim");
+  ret = H5Treclaim(type_id, space_id, H5P_DEFAULT, read_buf);
+  CHECK(ret, FAIL, "H5Treclaim");
 
   /* Close all */
   ret = H5Dclose(dset_id);
@@ -774,15 +774,15 @@ void dump_string(const char * string)
   size_t length;
   size_t x;
 
-  printf("The string was:\n %s", string);
-  printf("Or in hex:\n");
+  HDprintf("The string was:\n %s", string);
+  HDprintf("Or in hex:\n");
 
   length = HDstrlen(string);
 
   for(x=0; x<length; x++)
-    printf("%x ", string[x] & (0x000000FF));
+    HDprintf("%x ", string[x] & (0x000000FF));
 
-  printf("\n");
+  HDprintf("\n");
 }
 
 /* Main test.
@@ -854,7 +854,7 @@ void test_unicode(void)
  */
 void cleanup_unicode(void)
 {
-    remove(FILENAME);
+    HDremove(FILENAME);
 }
 
 

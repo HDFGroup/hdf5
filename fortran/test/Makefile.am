@@ -35,7 +35,7 @@ else
 endif
 
 # Our main targets, the tests themselves
-TEST_PROG=fortranlib_test fflush1 fflush2 fortranlib_test_1_8 fortranlib_test_F03
+TEST_PROG=fortranlib_test fflush1 fflush2 fortranlib_test_1_8 fortranlib_test_F03 vol_connector
 
 check_PROGRAMS=$(TEST_PROG)
 
@@ -50,6 +50,7 @@ fortranlib_test_1_8_SOURCES = tH5O.F90 tH5A_1_8.F90 tH5G_1_8.F90 tH5MISC_1_8.F90
 fortranlib_test_F03_SOURCES = tH5E_F03.F90 tH5F_F03.F90 tH5L_F03.F90 \
         tH5O_F03.F90 tH5P_F03.F90 tH5T_F03.F90 tHDF5_F03.F90 fortranlib_test_F03.F90
 
+vol_connector_SOURCES=vol_connector.F90
 
 fflush1_SOURCES=fflush1.F90
 fflush2_SOURCES=fflush2.F90
@@ -90,7 +91,7 @@ tf_gen.F90: H5_test_buildiface$(EXEEXT)
 
 H5_test_buildiface_SOURCES = H5_test_buildiface.F90
 
-# The build of the H5_test_buildiface does not depend on any libraries, so set it 
+# The build of the H5_test_buildiface does not depend on any libraries, so set it
 # to nothing.
 
 H5_test_buildiface_LDADD =

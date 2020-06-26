@@ -1,0 +1,372 @@
+#! /bin/sh
+#
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
+
+top_builddir=@top_builddir@
+top_srcdir=@top_srcdir@
+srcdir=@srcdir@
+
+TESTNAME=EX_Groups
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
+
+# Set up default variable values if not supplied by the user.
+RM='rm -rf'
+CMP='cmp'
+DIFF='diff -c'
+CP='cp'
+DIRNAME='dirname'
+LS='ls'
+AWK='awk'
+
+nerrors=0
+
+# where the libs exist
+HDFLIB_HOME="$top_srcdir/java/lib"
+BLDLIBDIR="$top_builddir/hdf5/lib"
+BLDITERDIR="./groups"
+BLDDIR="."
+HDFTEST_HOME="$top_srcdir/java/examples/groups"
+JARFILE=jar@PACKAGE_TARNAME@-@PACKAGE_VERSION@.jar
+TESTJARFILE=jar@PACKAGE_TARNAME@groups.jar
+test -d $BLDLIBDIR || mkdir -p $BLDLIBDIR
+test -d $BLDITERDIR || mkdir -p $BLDITERDIR
+
+######################################################################
+# library files
+# --------------------------------------------------------------------
+# All the library files copy from source directory to test directory
+# NOTE: Keep this framework to add/remove test files.
+#       This list are also used for checking exist.
+#       Comment '#' without space can be used.
+# --------------------------------------------------------------------
+LIST_LIBRARY_FILES="
+$top_builddir/src/.libs/libhdf5.*
+$top_builddir/java/src/jni/.libs/libhdf5_java.*
+$top_builddir/java/src/$JARFILE
+"
+LIST_JAR_TESTFILES="
+$HDFLIB_HOME/slf4j-api-1.7.25.jar
+$HDFLIB_HOME/ext/slf4j-simple-1.7.25.jar
+"
+LIST_ITER_FILES="
+$HDFTEST_HOME/h5ex_g_iterate.h5
+$HDFTEST_HOME/h5ex_g_visit.h5
+"
+LIST_DATA_FILES="
+$HDFTEST_HOME/../testfiles/examples.groups.H5Ex_G_Create.txt
+$HDFTEST_HOME/../testfiles/examples.groups.H5Ex_G_Iterate.txt
+$HDFTEST_HOME/../testfiles/examples.groups.H5Ex_G_Compact.txt
+$HDFTEST_HOME/../testfiles/examples.groups.H5Ex_G_Corder.txt
+$HDFTEST_HOME/../testfiles/examples.groups.H5Ex_G_Intermediate.txt
+$HDFTEST_HOME/../testfiles/examples.groups.H5Ex_G_Phase.txt
+$HDFTEST_HOME/../testfiles/examples.groups.H5Ex_G_Visit.txt
+"
+
+#
+# copy files from source dirs to test dir
+#
+COPY_LIBFILES="$LIST_LIBRARY_FILES"
+COPY_JARTESTFILES="$LIST_JAR_TESTFILES"
+
+COPY_LIBFILES_TO_BLDLIBDIR()
+{
+    # copy test files. Used -f to make sure get a new copy
+    for tstfile in $COPY_LIBFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+                $CP -f $tstfile $BLDLIBDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
+            fi
+        fi
+    done
+    # copy jar files. Used -f to make sure get a new copy
+    for tstfile in $COPY_JARTESTFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+                $CP -f $tstfile $BLDLIBDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
+            fi
+        fi
+    done
+}
+
+CLEAN_LIBFILES_AND_BLDLIBDIR()
+{
+    # skip rm if srcdir is same as destdir
+    # this occurs when build/test performed in source dir and
+    # make cp fail
+    SDIR=$HDFLIB_HOME
+    INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+    INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
+    if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+        for tstfile in $COPY_JARTESTFILES
+        do
+            $RM $BLDLIBDIR/tstfile
+        done
+    fi
+}
+
+COPY_DATAFILES="$LIST_DATA_FILES"
+
+COPY_DATAFILES_TO_BLDDIR()
+{
+    # copy test files. Used -f to make sure get a new copy
+    for tstfile in $COPY_DATAFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $BLDDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+                $CP -f $tstfile $BLDDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
+            fi
+        fi
+    done
+}
+
+CLEAN_DATAFILES_AND_BLDDIR()
+{
+    $RM $BLDDIR/examples.groups.H5Ex_G_*.txt
+    $RM $BLDDIR/H5Ex_G_*.out
+    $RM $BLDDIR/H5Ex_G_*.h5
+}
+
+COPY_ITERFILES="$LIST_ITER_FILES"
+
+COPY_ITERFILES_TO_BLDITERDIR()
+{
+    # copy test files. Used -f to make sure get a new copy
+    for tstfile in $COPY_ITERFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $BLDITERDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+                $CP -f $tstfile $BLDITERDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
+            fi
+        fi
+    done
+}
+
+CLEAN_ITERFILES_AND_BLDITERDIR()
+{
+    # skip rm if srcdir is same as destdir
+    # this occurs when build/test performed in source dir and
+    # make cp fail
+    SDIR=`$DIRNAME $HDFTEST_HOME/h5ex_g_iterate.h5`
+    INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+    INODE_DDIR=`$LS -i -d $BLDITERDIR | $AWK -F' ' '{print $1}'`
+    if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+        $RM $BLDITERDIR
+    fi
+}
+
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Testing".
+#
+TESTING() {
+   SPACES="                                                               "
+   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+# where Java is installed (requires jdk1.7.x)
+JAVAEXE=@JAVA@
+JAVAEXEFLAGS=@H5_JAVAFLAGS@
+
+###############################################################################
+#            DO NOT MODIFY BELOW THIS LINE
+###############################################################################
+
+# prepare for test
+COPY_LIBFILES_TO_BLDLIBDIR
+COPY_DATAFILES_TO_BLDDIR
+COPY_ITERFILES_TO_BLDITERDIR
+
+CPATH=".:"$BLDLIBDIR"/"$JARFILE":"$BLDLIBDIR"/slf4j-api-1.7.25.jar:"$BLDLIBDIR"/slf4j-simple-1.7.25.jar:"$TESTJARFILE""
+
+TEST=/usr/bin/test
+if [ ! -x /usr/bin/test ]
+then
+TEST=`which test`
+fi
+
+if $TEST -z "$CLASSPATH"; then
+        CLASSPATH=""
+fi
+CLASSPATH=$CPATH":"$CLASSPATH
+export CLASSPATH
+
+if $TEST -n "$JAVAPATH" ; then
+        PATH=$JAVAPATH":"$PATH
+        export PATH
+fi
+
+if $TEST -e /bin/uname; then
+   os_name=`/bin/uname -s`
+elif $TEST -e /usr/bin/uname; then
+   os_name=`/usr/bin/uname -s`
+else
+   os_name=unknown
+fi
+
+if $TEST -z "$LD_LIBRARY_PATH" ; then
+        LD_LIBRARY_PATH=""
+fi
+
+case  $os_name in
+    *)
+    LD_LIBRARY_PATH=$BLDLIBDIR:$LD_LIBRARY_PATH
+    ;;
+esac
+
+export LD_LIBRARY_PATH
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Create"
+TESTING examples.groups.H5Ex_G_Create
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Create > H5Ex_G_Create.out)
+if diff H5Ex_G_Create.out examples.groups.H5Ex_G_Create.txt > /dev/null; then
+    echo "  PASSED      groups.H5Ex_G_Create"
+else
+    echo "**FAILED**    groups.H5Ex_G_Create"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Iterate"
+TESTING examples.groups.H5Ex_G_Iterate
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Iterate > H5Ex_G_Iterate.out)
+if diff H5Ex_G_Iterate.out examples.groups.H5Ex_G_Iterate.txt > /dev/null; then
+    echo "  PASSED      groups.H5Ex_G_Iterate"
+else
+    echo "**FAILED**    groups.H5Ex_G_Iterate"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Compact"
+TESTING examples.groups.H5Ex_G_Compact
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Compact > H5Ex_G_Compact.out)
+if diff H5Ex_G_Compact.out examples.groups.H5Ex_G_Compact.txt > /dev/null; then
+    echo "  PASSED      groups.H5Ex_G_Compact"
+else
+    echo "**FAILED**    groups.H5Ex_G_Compact"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Corder"
+TESTING examples.groups.H5Ex_G_Corder
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Corder > H5Ex_G_Corder.out)
+if diff H5Ex_G_Corder.out examples.groups.H5Ex_G_Corder.txt > /dev/null; then
+    echo "  PASSED      groups.H5Ex_G_Corder"
+else
+    echo "**FAILED**    groups.H5Ex_G_Corder"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Intermediate"
+TESTING examples.groups.H5Ex_G_Intermediate
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Intermediate > H5Ex_G_Intermediate.out)
+if diff H5Ex_G_Intermediate.out examples.groups.H5Ex_G_Intermediate.txt > /dev/null; then
+    echo "  PASSED      groups.H5Ex_G_Intermediate"
+else
+    echo "**FAILED**    groups.H5Ex_G_Intermediate"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Phase"
+TESTING examples.groups.H5Ex_G_Phase
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Phase > H5Ex_G_Phase.out)
+if diff H5Ex_G_Phase.out examples.groups.H5Ex_G_Phase.txt > /dev/null; then
+    echo "  PASSED      groups.H5Ex_G_Phase"
+else
+    echo "**FAILED**    groups.H5Ex_G_Phase"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Visit"
+TESTING examples.groups.H5Ex_G_Visit
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Visit > H5Ex_G_Visit.out)
+if diff H5Ex_G_Visit.out examples.groups.H5Ex_G_Visit.txt > /dev/null; then
+    echo "  PASSED      groups.H5Ex_G_Visit"
+else
+    echo "**FAILED**    groups.H5Ex_G_Visit"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+# Clean up temporary files/directories
+CLEAN_ITERFILES_AND_BLDITERDIR
+CLEAN_LIBFILES_AND_BLDLIBDIR
+CLEAN_DATAFILES_AND_BLDDIR
+
+# Report test results and exit
+if test $nerrors -eq 0 ; then
+    echo "All $TESTNAME tests passed."
+    exit $EXIT_SUCCESS
+else
+    echo "$TESTNAME tests failed with $nerrors errors."
+    exit $EXIT_FAILURE
+fi

@@ -10,7 +10,7 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-# 
+#
 # This makefile mostly just reinvokes make in the various subdirectories
 # but does so in the correct order.  You can alternatively invoke make from
 # each subdirectory manually.
@@ -23,13 +23,26 @@
 
 include $(top_srcdir)/config/commence.am
 
+if BUILD_TESTS_CONDITIONAL
+   TESTSERIAL_DIR =test
+   TESTEXAMPLES_DIR =examples
+else
+   TESTSERIAL_DIR=
+   TESTEXAMPLES_DIR=
+endif
+
 ## Only recurse into subdirectories if the Java (JNI) interface is enabled.
 if BUILD_JAVA_CONDITIONAL
 
 # Mark this directory as part of the JNI API
 JAVA_API=yes
 
-SUBDIRS=src test examples
+SUBDIRS=src $(TESTSERIAL_DIR) $(TESTEXAMPLES_DIR)
+
+# Test with just the native connector, with a single pass-through connector
+# and with a doubly-stacked pass-through.
+VOL_LIST = native "pass_through under_vol=0;under_info={}" \
+           "pass_through under_vol=505;under_info={under_vol=0;under_info={}}"
 
 endif
 

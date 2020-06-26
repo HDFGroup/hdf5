@@ -26,12 +26,13 @@
 const char *FILENAME[] = {
     "fst_family%05d.h5",
     "scd_family%05d.h5",
+    "family_to_single.h5",
     "family_to_sec2.h5",
     NULL
 };
 
 herr_t test_family_h5repart_opens(void);
-herr_t test_sec2_h5repart_opens(void);
+herr_t test_single_h5repart_opens(void);
 
 
 /*-------------------------------------------------------------------------
@@ -46,8 +47,8 @@ herr_t test_sec2_h5repart_opens(void);
 herr_t
 test_family_h5repart_opens(void)
 {
-    hid_t       fid = -1;
-    hid_t       fapl_id = -1;
+    hid_t       fid = H5I_INVALID_HID;
+    hid_t       fapl_id = H5I_INVALID_HID;
 
     /* open 1st file(single member file) with correct family size(20000 byte) */
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -90,23 +91,28 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:    test_sec2_h5repart_opens
+ * Function:    test_single_h5repart_opens
  *
- * Purpose:     Tries to reopen a sec2 file.
+ * Purpose:     Tries to reopen a single file.
  *
  * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-test_sec2_h5repart_opens(void)
+test_single_h5repart_opens(void)
 {
-    hid_t       fid = -1;
+    hid_t       fid = H5I_INVALID_HID;
 
-    /* open the sec2 file */
+    /* open the single file */
     if ((fid = H5Fopen(FILENAME[2], H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
         goto error;
+    if (H5Fclose(fid) < 0)
+        goto error;
 
+    /* open the single file (created using the old argument) */
+    if ((fid = H5Fopen(FILENAME[3], H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        goto error;
     if (H5Fclose(fid) < 0)
         goto error;
 
@@ -119,7 +125,7 @@ error:
 
     return FAIL;
 
-} /* end test_sec2_h5repart_opens() */
+} /* end test_single_h5repart_opens() */
 
 
 /*-------------------------------------------------------------------------
@@ -137,7 +143,7 @@ main(void)
     int     nerrors = 0;
 
     nerrors += test_family_h5repart_opens() < 0     ? 1 : 0;
-    nerrors += test_sec2_h5repart_opens() < 0       ? 1 : 0;
+    nerrors += test_single_h5repart_opens() < 0     ? 1 : 0;
 
     if (nerrors)
         goto error;
@@ -150,3 +156,4 @@ error:
             nerrors, 1 == nerrors ? "" : "S");
     HDexit(EXIT_FAILURE);
 } /* end main() */
+

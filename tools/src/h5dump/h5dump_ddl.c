@@ -31,7 +31,7 @@ typedef struct {
 } trav_attr_udata_t;
 
 /* callback function used by H5Literate() */
-static herr_t   dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void *op_data);
+static herr_t   dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void *op_data);
 static int      dump_extlink(hid_t group, const char *linkname, const char *objname);
 
 /*-------------------------------------------------------------------------
@@ -41,11 +41,6 @@ static int      dump_extlink(hid_t group, const char *linkname, const char *objn
  *              atomic datatype or committed/transient datatype.
  *
  * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -70,11 +65,6 @@ dump_datatype(hid_t type)
  *              array, or others.
  *
  * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -97,14 +87,7 @@ dump_dataspace(hid_t space)
  * Purpose:     attribute function callback called by H5Aiterate2, displays the attribute
  *
  * Return:      Success:        SUCCEED
- *
  *              Failure:        FAIL
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications: Pedro Vicente, October 4, 2007
- *  Added H5A_info_t parameter to conform with H5Aiterate2
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -120,6 +103,8 @@ dump_attr_cb(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *
     HDmemset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
+    ctx.display_index = display_ai;
+    ctx.display_char = display_char;
 
     attr_id = H5Aopen(oid, attr_name, H5P_DEFAULT);
     oid_output = display_oid;
@@ -144,7 +129,7 @@ dump_attr_cb(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *
     outputformat = &string_dataformat;
 
     h5dump_type_table = type_table;
-    h5tools_dump_attribute(rawoutstream, outputformat, &ctx, attr_name, attr_id, display_ai, display_char);
+    h5tools_dump_attribute(rawoutstream, outputformat, &ctx, attr_name, attr_id);
     h5dump_type_table = NULL;
 
     if(attr_id < 0) {
@@ -155,7 +140,7 @@ dump_attr_cb(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *
     return ret;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    dump_all_cb
  *
@@ -163,32 +148,21 @@ dump_attr_cb(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *
  *                displays everything in the specified object
  *
  * Return:      Success:        SUCCEED
- *
  *              Failure:        FAIL
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *  RMcG, November 2000
- *   Added XML support. Also, optionally checks the op_data argument
- *
- * PVN, May 2008
- *   Dump external links
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR_UNUSED *op_data)
+dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5_ATTR_UNUSED *op_data)
 {
     hid_t       obj;
     hid_t       dapl_id = H5P_DEFAULT;  /* dataset access property list ID */
     herr_t      ret = SUCCEED;
-    char       *obj_path = NULL;    /* Full path of object */
-    h5tools_str_t buffer;          /* string into which to render   */
-    h5tools_context_t ctx;            /* print context  */
+    char       *obj_path = NULL;        /* Full path of object */
+    h5tools_str_t     buffer;           /* string into which to render   */
+    h5tools_context_t ctx;              /* print context  */
     h5tool_format_t  *outputformat = &h5tools_dataformat;
     h5tool_format_t   string_dataformat;
-    hsize_t     curr_pos = 0;        /* total data element position   */
+    hsize_t           curr_pos = 0;     /* total data element position   */
 
     /* setup */
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -226,10 +200,10 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
     HDstrcat(obj_path, name);
 
     if(linfo->type == H5L_TYPE_HARD) {
-        H5O_info_t  oinfo;
+        H5O_info2_t  oinfo;
 
         /* Stat the object */
-        if(H5Oget_info_by_name(group, name, &oinfo, H5P_DEFAULT) < 0) {
+        if(H5Oget_info_by_name3(group, name, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0) {
             error_msg("unable to get object information for \"%s\"\n", name);
             h5tools_setstatus(EXIT_FAILURE);
             ret = FAIL;
@@ -285,13 +259,12 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
                 if(oinfo.rc > 1 || hit_elink) {
                     obj_t  *found_obj;    /* Found object */
 
-                    found_obj = search_obj(dset_table, oinfo.addr);
+                    found_obj = search_obj(dset_table, &oinfo.token);
 
                     if(found_obj == NULL) {
                         ctx.indent_level++;
 
                         ctx.need_prefix = TRUE;
-                        h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
                         /* Render the element */
                         h5tools_str_reset(&buffer);
@@ -303,7 +276,6 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
                         error_msg("internal error (file %s:line %d)\n", __FILE__, __LINE__);
 
                         ctx.need_prefix = TRUE;
-                        h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
                         /* Render the element */
                         h5tools_str_reset(&buffer);
@@ -327,7 +299,6 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
                     }
                     else if(found_obj->displayed) {
                         ctx.need_prefix = TRUE;
-                        h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
                         /* Render the element */
                         h5tools_str_reset(&buffer);
@@ -348,7 +319,6 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
                         ctx.indent_level--;
 
                         ctx.need_prefix = TRUE;
-                        h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
                         /* Render the element */
                         h5tools_str_reset(&buffer);
@@ -397,6 +367,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
             }
             break;
 
+        case H5O_TYPE_MAP:
         case H5O_TYPE_UNKNOWN:
         case H5O_TYPE_NTYPES:
         default:
@@ -436,7 +407,6 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
                     /* print the value of a soft link */
                     /* Standard DDL: no modification */
                     ctx.need_prefix = TRUE;
-                    h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
                     /* Render the element */
                     h5tools_str_reset(&buffer);
@@ -447,7 +417,6 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
                 ctx.indent_level--;
 
                 ctx.need_prefix = TRUE;
-                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
                 /* Render the element */
                 h5tools_str_reset(&buffer);
@@ -472,7 +441,6 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
             }
             else {
                 ctx.need_prefix = TRUE;
-                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
                 /* Render the element */
                 h5tools_str_reset(&buffer);
@@ -501,7 +469,6 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
                         ctx.indent_level++;
 
                         ctx.need_prefix = TRUE;
-                        h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
                         /* Render the element */
                         h5tools_str_reset(&buffer);
@@ -509,7 +476,6 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
                         h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
                         ctx.need_prefix = TRUE;
-                        h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
                         /* Render the element */
                         h5tools_str_reset(&buffer);
@@ -522,7 +488,6 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
                     } /* end else */
                 } /* end else */
                 ctx.need_prefix = TRUE;
-                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
                 /* Render the element */
                 h5tools_str_reset(&buffer);
@@ -544,7 +509,6 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
         case H5L_TYPE_HARD:
         default:
             ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
             /* Render the element */
             h5tools_str_reset(&buffer);
@@ -556,7 +520,6 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
             ctx.indent_level++;
 
             ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
             /* Render the element */
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, "LINKCLASS %d", linfo->type);
@@ -565,7 +528,6 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
             ctx.indent_level--;
 
             ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
             /* Render the element */
             h5tools_str_reset(&buffer);
             if(HDstrlen(h5tools_dump_header_format->udlinkblockend)) {
@@ -596,7 +558,6 @@ done:
  * Purpose:     Iterate and display attributes within the specified group
  *
  * Return:      void
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -626,7 +587,6 @@ attr_iteration(hid_t gid, unsigned attr_crt_order_flags)
  * Purpose:     Iterate and display links within the specified group
  *
  * Return:      void
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -636,9 +596,9 @@ link_iteration(hid_t gid, unsigned crt_order_flags)
     /* if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
        in the group, then, sort by creation order, otherwise by name */
     if((sort_by == H5_INDEX_CRT_ORDER) && (crt_order_flags & H5P_CRT_ORDER_TRACKED))
-        H5Literate(gid, sort_by, sort_order, NULL, dump_all_cb, NULL);
+        H5Literate2(gid, sort_by, sort_order, NULL, dump_all_cb, NULL);
     else
-        H5Literate(gid, H5_INDEX_NAME, sort_order, NULL, dump_all_cb, NULL);
+        H5Literate2(gid, H5_INDEX_NAME, sort_order, NULL, dump_all_cb, NULL);
 }
 
 /*-------------------------------------------------------------------------
@@ -647,26 +607,17 @@ link_iteration(hid_t gid, unsigned crt_order_flags)
  * Purpose:     Dump named datatype
  *
  * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *  Pedro Vicente, March 27, 2006
- *   added display of attributes
- *  Pedro Vicente, October 4, 2007, added parameters to H5Aiterate2() to allow for
- *   other iteration orders
- *
  *-------------------------------------------------------------------------
  */
 void
 dump_named_datatype(hid_t tid, const char *name)
 {
-    H5O_info_t        oinfo;
+    H5O_info2_t       oinfo;
     unsigned          attr_crt_order_flags;
-    hid_t             tcpl_id = -1;  /* datatype creation property list ID */
-    hsize_t           curr_pos = 0;        /* total data element position   */
+    hid_t             tcpl_id = H5I_INVALID_HID;    /* datatype creation property list ID */
+    hsize_t           curr_pos = 0;    /* total data element position   */
     h5tools_str_t     buffer;          /* string into which to render   */
-    h5tools_context_t ctx;            /* print context  */
+    h5tools_context_t ctx;             /* print context  */
     h5tool_format_t  *outputformat = &h5tools_dataformat;
     h5tool_format_t   string_dataformat;
 
@@ -719,7 +670,7 @@ dump_named_datatype(hid_t tid, const char *name)
                         h5tools_dump_header_format->datatypeblockbegin);
     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
-    H5Oget_info(tid, &oinfo);
+    H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC);
 
     /* Must check for uniqueness of all objects if we've traversed an elink,
      * otherwise only check if the reference count > 1.
@@ -727,7 +678,7 @@ dump_named_datatype(hid_t tid, const char *name)
     if(oinfo.rc > 1 || hit_elink) {
         obj_t  *found_obj;    /* Found object */
 
-        found_obj = search_obj(type_table, oinfo.addr);
+        found_obj = search_obj(type_table, &oinfo.token);
 
         if (found_obj == NULL) {
             error_msg("internal error (file %s:line %d)\n", __FILE__, __LINE__);
@@ -783,33 +734,23 @@ done:
  * Purpose:     Dump everything within the specified group
  *
  * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
- * Call to dump_all_cb -- add parameter to select everything.
- *
- * Pedro Vicente, October 1, 2007
- *  handle several iteration orders for attributes and groups
- *
  *-------------------------------------------------------------------------
  */
 void
 dump_group(hid_t gid, const char *name)
 {
-    H5O_info_t  oinfo;
+    H5O_info2_t oinfo;
     hid_t       dset;
     hid_t       type;
     hid_t       gcpl_id;
     unsigned    crt_order_flags;
     unsigned    attr_crt_order_flags;
     char        type_name[1024];
-    h5tools_str_t buffer;          /* string into which to render   */
-    h5tools_context_t ctx;            /* print context  */
+    h5tools_str_t     buffer;          /* string into which to render   */
+    h5tools_context_t ctx;             /* print context  */
     h5tool_format_t  *outputformat = &h5tools_dataformat;
     h5tool_format_t   string_dataformat;
-    hsize_t     curr_pos = 0;        /* total data element position   */
+    hsize_t           curr_pos = 0;    /* total data element position   */
 
     if ((gcpl_id = H5Gget_create_plist(gid)) < 0) {
         error_msg("error in getting group creation property list ID\n");
@@ -875,9 +816,15 @@ dump_group(hid_t gid, const char *name)
         /* dump unamed type in root group */
         for(u = 0; u < type_table->nobjs; u++)
             if(!type_table->objs[u].recorded) {
+                char *obj_tok_str = NULL;
+
                 dset = H5Dopen2(gid, type_table->objs[u].objname, H5P_DEFAULT);
                 type = H5Dget_type(dset);
-                sprintf(type_name, "#"H5_PRINTF_HADDR_FMT, type_table->objs[u].objno);
+
+                H5Otoken_to_str(dset, &type_table->objs[u].obj_token, &obj_tok_str);
+                HDsprintf(type_name, "#%s", obj_tok_str);
+                H5free_memory(obj_tok_str);
+
                 dump_function_table->dump_named_datatype_function(type, type_name);
                 H5Tclose(type);
                 H5Dclose(dset);
@@ -889,7 +836,7 @@ dump_group(hid_t gid, const char *name)
 
     h5tools_dump_comment(rawoutstream, outputformat, &ctx, gid);
 
-    H5Oget_info(gid, &oinfo);
+    H5Oget_info3(gid, &oinfo, H5O_INFO_BASIC);
 
     /* Must check for uniqueness of all objects if we've traversed an elink,
      * otherwise only check if the reference count > 1.
@@ -897,7 +844,7 @@ dump_group(hid_t gid, const char *name)
     if(oinfo.rc > 1 || hit_elink) {
         obj_t  *found_obj;    /* Found object */
 
-        found_obj = search_obj(group_table, oinfo.addr);
+        found_obj = search_obj(group_table, &oinfo.token);
 
         if (found_obj == NULL) {
             error_msg("internal error (file %s:line %d)\n", __FILE__, __LINE__);
@@ -926,7 +873,6 @@ dump_group(hid_t gid, const char *name)
     ctx.indent_level--;
 
     ctx.need_prefix = TRUE;
-    h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
     /* Render the element */
     h5tools_str_reset(&buffer);
@@ -948,14 +894,6 @@ dump_group(hid_t gid, const char *name)
  * Purpose:     Dump the specified data set
  *
  * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *  Pedro Vicente, 2004, added dataset creation property list display
- *  Pedro Vicente, October 4, 2007, added parameters to H5Aiterate2() to allow for
- *   other  iteration orders
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -964,11 +902,11 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     h5tools_context_t ctx;            /* print context  */
     h5tool_format_t  *outputformat = &h5tools_dataformat;
     h5tool_format_t   string_dataformat;
-    hid_t       type, space;
-    unsigned    attr_crt_order_flags;
-    hid_t       dcpl_id;  /* dataset creation property list ID */
-    h5tools_str_t buffer;          /* string into which to render   */
-    hsize_t       curr_pos = 0;        /* total data element position   */
+    hid_t         type, space;
+    unsigned      attr_crt_order_flags;
+    hid_t         dcpl_id;           /* dataset creation property list ID */
+    h5tools_str_t buffer;            /* string into which to render   */
+    hsize_t       curr_pos = 0;      /* total data element position   */
 
     HDmemset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent / COL;
@@ -1040,6 +978,9 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     }
     H5Pclose(dcpl_id);
 
+    ctx.sset = sset;
+    ctx.display_index = display_ai;
+    ctx.display_char = display_char;
     if(display_data) {
         unsigned  data_loop = 1;
         unsigned  u;
@@ -1083,7 +1024,7 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
             case H5T_VLEN:
             case H5T_ARRAY:
                 {
-                    h5tools_dump_data(rawoutstream, outputformat, &ctx, did, TRUE, sset, display_ai, display_char);
+                    h5tools_dump_data(rawoutstream, outputformat, &ctx, did, TRUE);
                 }
                 break;
 
@@ -1126,13 +1067,6 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
  * Purpose:     Dump attribute or dataset data
  *
  * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications: pvn, print the matrix indices
- *  Albert Cheng, 2004/11/18
- *  Add --string printing for attributes too.
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -1163,24 +1097,22 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
     HDmemset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
+    ctx.sset = sset;
+    ctx.display_index = display_index;
+    ctx.display_char = display_char;
 
     if(obj_data == DATASET_DATA)
         print_dataset = TRUE;
-    h5tools_dump_data(rawoutstream, outputformat, &ctx, obj_id, print_dataset, sset, display_index, display_char);
+    h5tools_dump_data(rawoutstream, outputformat, &ctx, obj_id, print_dataset);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    dump_fcpl
  *
  * Purpose:     prints file creation property list information
  *
  * Return:      void
- *
- * Programmer:  pvn
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -1191,9 +1123,9 @@ dump_fcpl(hid_t fid)
     size_t   off_size;  /* size of offsets in the file */
     size_t   len_size;  /* size of lengths in the file */
     H5F_fspace_strategy_t  fs_strategy;  /* file space strategy */
-    hbool_t fs_persist;     /* Persisting free-space or not */
-    hsize_t fs_threshold;       /* free-space section threshold */
-    hsize_t fsp_size;        /* file space page size */
+    hbool_t  fs_persist;    /* Persisting free-space or not */
+    hsize_t  fs_threshold;  /* free-space section threshold */
+    hsize_t  fsp_size;      /* file space page size */
     H5F_info2_t finfo;      /* file information */
 #ifdef SHOW_FILE_DRIVER
     hid_t    fapl;      /* file access property list ID */
@@ -1203,6 +1135,18 @@ dump_fcpl(hid_t fid)
     unsigned sym_lk;    /* symbol table B-tree leaf 'K' value */
     unsigned sym_ik;    /* symbol table B-tree internal 'K' value */
     unsigned istore_ik; /* indexed storage B-tree internal 'K' value */
+
+    hbool_t supported = FALSE;
+
+    /* Dumping the information here only makes sense for the native
+     * VOL connector. The only VOL call here is H5Fget_info(), so we'll
+     * use that as a proxy for "native-ness". If that isn't supported, we'll
+     * just return.
+     */
+    H5VLquery_optional(fid, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_GET_INFO, &supported);
+
+    if (!supported)
+        return;
 
     fcpl=H5Fget_create_plist(fid);
     H5Fget_info2(fid, &finfo);
@@ -1274,13 +1218,17 @@ dump_fcpl(hid_t fid)
     indentation(dump_indent + COL);
     if(fs_strategy == H5F_FSPACE_STRATEGY_FSM_AGGR) {
         PRINTSTREAM(rawoutstream, "%s %s\n", "FILE_SPACE_STRATEGY", "H5F_FSPACE_STRATEGY_FSM_AGGR");
-    } else if(fs_strategy == H5F_FSPACE_STRATEGY_PAGE) {
+    }
+    else if(fs_strategy == H5F_FSPACE_STRATEGY_PAGE) {
         PRINTSTREAM(rawoutstream, "%s %s\n", "FILE_SPACE_STRATEGY", "H5F_FSPACE_STRATEGY_PAGE");
-    } else if(fs_strategy == H5F_FSPACE_STRATEGY_AGGR) {
+    }
+    else if(fs_strategy == H5F_FSPACE_STRATEGY_AGGR) {
         PRINTSTREAM(rawoutstream, "%s %s\n", "FILE_SPACE_STRATEGY", "H5F_FSPACE_STRATEGY_AGGR");
-    } else if(fs_strategy == H5F_FSPACE_STRATEGY_NONE) {
+    }
+    else if(fs_strategy == H5F_FSPACE_STRATEGY_NONE) {
         PRINTSTREAM(rawoutstream, "%s %s\n", "FILE_SPACE_STRATEGY", "H5F_FSPACE_STRATEGY_NONE");
-    } else
+    }
+    else
         PRINTSTREAM(rawoutstream, "%s %s\n", "FILE_SPACE_STRATEGY", "Unknown strategy");
     indentation(dump_indent + COL);
     PRINTSTREAM(rawoutstream, "%s %s\n","FREE_SPACE_PERSIST", fs_persist ? "TRUE" : "FALSE");
@@ -1309,11 +1257,6 @@ dump_fcpl(hid_t fid)
  * Purpose:     prints all objects
  *
  * Return:      void
- *
- * Programmer:  pvn
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -1326,8 +1269,13 @@ dump_fcontents(hid_t fid)
         unsigned u;
 
         for (u = 0; u < type_table->nobjs; u++) {
-            if (!type_table->objs[u].recorded)
-                PRINTSTREAM(rawoutstream, " %-10s /#"H5_PRINTF_HADDR_FMT"\n", "datatype", type_table->objs[u].objno);
+            if (!type_table->objs[u].recorded) {
+                char *obj_tok_str = NULL;
+
+                H5Otoken_to_str(fid, &type_table->objs[u].obj_token, &obj_tok_str);
+                PRINTSTREAM(rawoutstream, " %-10s /#%s\n", "datatype", obj_tok_str);
+                H5free_memory(obj_tok_str);
+            }
         }
     }
 
@@ -1394,7 +1342,7 @@ attr_search(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *a
 } /* end attr_search() */
 
 static herr_t
-obj_search(const char *path, const H5O_info_t *oi, const char H5_ATTR_UNUSED *already_visited, void *_op_data)
+obj_search(const char *path, const H5O_info2_t *oi, const char H5_ATTR_UNUSED *already_visited, void *_op_data)
 {
     trav_handle_udata_t  *handle_data = (trav_handle_udata_t*)_op_data;
     const char *op_name = handle_data->op_name;
@@ -1418,6 +1366,7 @@ obj_search(const char *path, const H5O_info_t *oi, const char H5_ATTR_UNUSED *al
                 handle_datatypes(handle_data->fid, path, NULL, 0, NULL);
                 break;
 
+            case H5O_TYPE_MAP:
             case H5O_TYPE_UNKNOWN:
             case H5O_TYPE_NTYPES:
             default:
@@ -1430,7 +1379,7 @@ obj_search(const char *path, const H5O_info_t *oi, const char H5_ATTR_UNUSED *al
 } /* end obj_search() */
 
 static herr_t
-lnk_search(const char *path, const H5L_info_t *li, void *_op_data)
+lnk_search(const char *path, const H5L_info2_t *li, void *_op_data)
 {
     size_t      search_len;
     size_t      k;
@@ -1484,13 +1433,12 @@ lnk_search(const char *path, const H5L_info_t *li, void *_op_data)
  * Purpose:     Handle objects from the command.
  *
  * Return:      void
- *
  *-------------------------------------------------------------------------
  */
 void
 handle_paths(hid_t fid, const char *path_name, void H5_ATTR_UNUSED * data, int H5_ATTR_UNUSED pe, const char H5_ATTR_UNUSED *display_name)
 {
-    hid_t  gid = -1;
+    hid_t  gid = H5I_INVALID_HID;
 
     if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) {
         error_msg("unable to open root group\n");
@@ -1526,7 +1474,7 @@ handle_paths(hid_t fid, const char *path_name, void H5_ATTR_UNUSED * data, int H
 
         handle_udata.fid = fid;
         handle_udata.op_name = path_name;
-        if(h5trav_visit(fid, "/", TRUE, TRUE, obj_search, lnk_search, &handle_udata) < 0) {
+        if(h5trav_visit(fid, "/", TRUE, TRUE, obj_search, lnk_search, &handle_udata, H5O_INFO_BASIC) < 0) {
             error_msg("error traversing information\n");
             h5tools_setstatus(EXIT_FAILURE);
         }
@@ -1539,30 +1487,21 @@ handle_paths(hid_t fid, const char *path_name, void H5_ATTR_UNUSED * data, int H
  * Purpose:     Handle the attributes from the command.
  *
  * Return:      void
- *
- * Programmer:  Bill Wendling
- *              Tuesday, 9. January 2001
- *
- * Modifications:
- *
- * PVN, May 2008
- *   add an extra parameter PE, to allow printing/not printing of error messages
- *
  *-------------------------------------------------------------------------
  */
 void
-handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED * data, int H5_ATTR_UNUSED pe, const char H5_ATTR_UNUSED *display_name)
+handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED *data, int H5_ATTR_UNUSED pe, const char H5_ATTR_UNUSED *display_name)
 {
-    hid_t  oid          = -1;
-    hid_t  attr_id      = -1;
+    hid_t  oid          = H5I_INVALID_HID;
+    hid_t  attr_id      = H5I_INVALID_HID;
     char *obj_name      = NULL;
     char *attr_name     = NULL;
     int j;
-    h5tools_str_t buffer;          /* string into which to render   */
-    h5tools_context_t ctx;            /* print context  */
+    h5tools_str_t     buffer;          /* string into which to render   */
+    h5tools_context_t ctx;             /* print context  */
     h5tool_format_t  *outputformat = &h5tools_dataformat;
     h5tool_format_t   string_dataformat;
-    hsize_t     curr_pos = 0;        /* total data element position   */
+    hsize_t           curr_pos = 0;    /* total data element position   */
 
     j = (int)HDstrlen(attr) - 1;
     obj_name = (char *)HDmalloc((size_t)j + 2);
@@ -1588,6 +1527,8 @@ handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED * data, int H
     HDmemset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
+    ctx.display_index = display_ai;
+    ctx.display_char = display_char;
 
     string_dataformat = *outputformat;
 
@@ -1614,7 +1555,6 @@ handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED * data, int H
         HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
         ctx.need_prefix = TRUE;
-        h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
         /* Render the element */
         h5tools_str_reset(&buffer);
@@ -1626,7 +1566,6 @@ handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED * data, int H
         error_msg("unable to open object \"%s\"\n", obj_name);
 
         ctx.need_prefix = TRUE;
-        h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
         /* Render the element */
         h5tools_str_reset(&buffer);
         if(HDstrlen(h5tools_dump_header_format->attributeblockend)) {
@@ -1649,7 +1588,7 @@ handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED * data, int H
     attr_data_output = display_attr_data;
 
     h5dump_type_table = type_table;
-    h5tools_dump_attribute(rawoutstream, outputformat, &ctx, attr_name, attr_id, display_ai, display_char);
+    h5tools_dump_attribute(rawoutstream, outputformat, &ctx, attr_name, attr_id);
     h5dump_type_table = NULL;
 
     if(attr_id < 0) {
@@ -1687,25 +1626,12 @@ error:
  * Purpose:     Handle the datasets from the command.
  *
  * Return:      void
- *
- * Programmer:  Bill Wendling
- *              Tuesday, 9. January 2001
- *
- * Modifications:
- *  Pedro Vicente, Tuesday, January 15, 2008
- *  check for block overlap\
- *
- *  Pedro Vicente, May 8, 2008
- *   added a flag PE that prints/not prints error messages
- *   added for cases of external links not found, to avoid printing of
- *    objects not found, since external links are dumped on a trial error basis
- *
  *-------------------------------------------------------------------------
  */
 void
 handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *display_name)
 {
-    H5O_info_t       oinfo;
+    H5O_info2_t      oinfo;
     hid_t            dsetid;
     hid_t            dapl_id = H5P_DEFAULT;  /* dataset access property list ID */
     struct subset_t *sset = (struct subset_t *)data;
@@ -1816,11 +1742,11 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
     } /* end if */
 
 
-    H5Oget_info(dsetid, &oinfo);
+    H5Oget_info3(dsetid, &oinfo, H5O_INFO_BASIC);
     if(oinfo.rc > 1 || hit_elink) {
         obj_t  *found_obj;    /* Found object */
 
-        found_obj = search_obj(dset_table, oinfo.addr);
+        found_obj = search_obj(dset_table, &oinfo.token);
 
         if(found_obj) {
             if (found_obj->displayed) {
@@ -1860,18 +1786,6 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
  * Purpose:     Handle the groups from the command.
  *
  * Return:      void
- *
- * Programmer:  Bill Wendling
- *              Tuesday, 9. January 2001
- *
- * Modifications: Pedro Vicente, September 26, 2007
- *  handle creation order
- *
- * Pedro Vicente, May 8, 2008
- *   added a flag PE that prints/not prints error messages
- *   added for cases of external links not found, to avoid printing of
- *    objects not found, since external links are dumped on a trial error basis
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -1916,20 +1830,14 @@ handle_groups(hid_t fid, const char *group, void H5_ATTR_UNUSED *data, int pe, c
  * Purpose:     Handle soft or UD links from the command.
  *
  * Return:      void
- *
- * Programmer:  Bill Wendling
- *              Tuesday, 9. January 2001
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
 handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED * data, int H5_ATTR_UNUSED pe, const char H5_ATTR_UNUSED *display_name)
 {
-    H5L_info_t linfo;
+    H5L_info2_t linfo;
 
-    if(H5Lget_info(fid, links, &linfo, H5P_DEFAULT) < 0) {
+    if(H5Lget_info2(fid, links, &linfo, H5P_DEFAULT) < 0) {
         error_msg("unable to get link info from \"%s\"\n", links);
         h5tools_setstatus(EXIT_FAILURE);
     }
@@ -1957,9 +1865,6 @@ handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED * data, int H5_AT
             break;
 
         case H5L_TYPE_EXTERNAL:
-            begin_obj(h5tools_dump_header_format->udlinkbegin, links, h5tools_dump_header_format->udlinkblockbegin);
-            PRINTVALSTREAM(rawoutstream, "\n");
-            indentation(COL);
             begin_obj(h5tools_dump_header_format->extlinkbegin, links, h5tools_dump_header_format->extlinkblockbegin);
             PRINTVALSTREAM(rawoutstream, "\n");
             if(H5Lget_val(fid, links, buf, linfo.u.val_size, H5P_DEFAULT) >= 0) {
@@ -1967,8 +1872,6 @@ handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED * data, int H5_AT
                 const char *elink_path;
 
                 if(H5Lunpack_elink_val(buf, linfo.u.val_size, NULL, &elink_file, &elink_path)>=0) {
-                    indentation(COL);
-                    PRINTSTREAM(rawoutstream, "LINKCLASS %d\n", linfo.type);
                     indentation(COL);
                     PRINTSTREAM(rawoutstream, "TARGETFILE \"%s\"\n", elink_file);
                     indentation(COL);
@@ -1993,9 +1896,6 @@ handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED * data, int H5_AT
             begin_obj(h5tools_dump_header_format->udlinkbegin, links, h5tools_dump_header_format->udlinkblockbegin);
             PRINTVALSTREAM(rawoutstream, "\n");
             indentation(COL);
-            begin_obj(h5tools_dump_header_format->udlinkbegin, links, h5tools_dump_header_format->udlinkblockbegin);
-            PRINTVALSTREAM(rawoutstream, "\n");
-            indentation(COL);
             PRINTSTREAM(rawoutstream, "LINKCLASS %d\n", linfo.type);
             end_obj(h5tools_dump_header_format->udlinkend, h5tools_dump_header_format->udlinkblockend);
             break;
@@ -2010,17 +1910,6 @@ handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED * data, int H5_AT
  * Purpose:     Handle the datatypes from the command.
  *
  * Return:      void
- *
- * Programmer:  Bill Wendling
- *              Tuesday, 9. January 2001
- *
- * Modifications:
- *
- *  Pedro Vicente, May 8, 2008
- *   added a flag PE that prints/not prints error messages
- *   added for cases of external links not found, to avoid printing of
- *    objects not found, since external links are dumped on a trial error basis
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -2037,8 +1926,12 @@ handle_datatypes(hid_t fid, const char *type, void H5_ATTR_UNUSED * data, int pe
             char name[128];
 
             if(!type_table->objs[idx].recorded) {
+                char *obj_tok_str = NULL;
+
                 /* unamed datatype */
-                sprintf(name, "/#"H5_PRINTF_HADDR_FMT, type_table->objs[idx].objno);
+                H5Otoken_to_str(fid, &type_table->objs[idx].obj_token, &obj_tok_str);
+                HDsprintf(name, "/#%s", obj_tok_str);
+                H5free_memory(obj_tok_str);
 
                 if(!HDstrcmp(name, real_name))
                     break;
@@ -2081,23 +1974,14 @@ handle_datatypes(hid_t fid, const char *type, void H5_ATTR_UNUSED * data, int pe
     }
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    dump_extlink
  *
- * made by: PVN
- *
  * Purpose:     Dump an external link
- *  Since external links are soft links, they are dumped on a trial error
- *   basis, attempting to dump as a dataset, as a group and as a named datatype
- *   Error messages are supressed
- *
- * Modifications:
- *      Neil Fortner
- *      13 October 2008
- *      Function basically rewritten.  No longer directly opens the target file,
- *      now initializes a new set of tables for the external file.  No longer
- *      dumps on a trial and error basis, but errors are still suppressed.
+ *      Function does not directly open the target file,
+ *      it initializes a new set of tables for the external file.
+ *      Errors are suppressed.
  *
  *-------------------------------------------------------------------------
  */
@@ -2105,7 +1989,7 @@ static int
 dump_extlink(hid_t group, const char *linkname, const char *objname)
 {
     hid_t       oid;
-    H5O_info_t  oi;
+    H5O_info2_t oi;
     table_t     *old_group_table = group_table;
     table_t     *old_dset_table = dset_table;
     table_t     *old_type_table = type_table;
@@ -2117,7 +2001,7 @@ dump_extlink(hid_t group, const char *linkname, const char *objname)
         goto fail;
 
     /* Get object info */
-    if (H5Oget_info(oid, &oi) < 0) {
+    if (H5Oget_info3(oid, &oi, H5O_INFO_BASIC) < 0) {
         H5Oclose(oid);
         goto fail;
     }
@@ -2159,6 +2043,7 @@ dump_extlink(hid_t group, const char *linkname, const char *objname)
                 handle_datatypes(group, linkname, NULL, 0, objname);
                 break;
 
+            case H5O_TYPE_MAP:
             case H5O_TYPE_UNKNOWN:
             case H5O_TYPE_NTYPES:
             default:

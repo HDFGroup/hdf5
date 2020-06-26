@@ -15,9 +15,9 @@ NOTE: Building applications with the dynamic/shared hdf5 libraries requires
 The following two sections are helpful if you do not use CMake to build
 your applications.
 
-========================================================================
-Using Visual Studio 2010 with HDF5 Libraries built with Visual Studio 2010
-========================================================================
+==============================================================================================
+Using Visual Studio 2010 and above with HDF5 Libraries built with Visual Studio 2010 and above
+==============================================================================================
 
    1. Set up path for external libraries and headers
 
@@ -54,11 +54,11 @@ Using Visual Studio 2008 with HDF5 Libraries built with Visual Studio 2008
           and select "x64".
 
       2.2 Find the box "Show directories for", choose "Include files", add the
-          header path (i.e. c:\Program Files\HDF_Group\HDF5\1.10.x\include)
+          header path (i.e. c:\Program Files\HDF_Group\HDF5\1.13.x\include)
           to the included directories.
 
       2.3 Find the box "Show directories for", choose "Library files", add the
-          library path (i.e. c:\Program Files\HDF_Group\HDF5\1.10.x\lib)
+          library path (i.e. c:\Program Files\HDF_Group\HDF5\1.13.x\lib)
           to the library directories.
 
       2.4 If using Fortran libraries, you will also need to setup the path
@@ -79,13 +79,9 @@ Using Visual Studio 2008 with HDF5 Libraries built with Visual Studio 2008
     3.1 FAQ
 
     Many other common questions and hints are located online and being updated
-    in the HDF5 FAQ.  For Windows-specific questions, please see:
+    in the HDF Knowledge Base, please see:
 
-        http://www.hdfgroup.org/HDF5/faq/windows.html
-
-    For all other general questions, you can look in the general FAQ:
-
-        http://hdfgroup.org/HDF5-FAQ.html
+       https://portal.hdfgroup.org/display/knowledge/HDF+Knowledge+Base
 
 ************************************************************************
  Please send email to help@hdfgroup.org for further assistance.

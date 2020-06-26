@@ -21,6 +21,7 @@
 
 
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5FDprivate.h"	/* File drivers				*/
@@ -152,7 +153,7 @@ done:
  *
  * Return:	Success:	SUCCEED
  *
- *		Failure:	Negative
+ *		Failure:	FAIL
  *
  * Programmer:	John Mainzer
  *              4/4/17
@@ -175,9 +176,8 @@ H5FD_get_mpi_info(H5FD_t *file, void** mpi_info)
     HDassert(cls->get_mpi_info);    /* All MPI drivers must implement this */
 
     /* Dispatch to driver */
-    if ((ret_value=(cls->get_mpi_info)(file, mpi_info)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, MPI_COMM_NULL, \
-                    "driver get_mpi_info request failed")
+    if((ret_value = (cls->get_mpi_info)(file, mpi_info)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_mpi_info request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -264,115 +264,6 @@ H5FD_mpi_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off/*out*/)
     else
         ret_value=SUCCEED;
 
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD_mpi_comm_info_dup
- *
- * Purpose:     Make duplicates of communicator and Info object.
- * 		If the Info object is in fact MPI_INFO_NULL, no duplicate
- * 		is made but the same value assigned to the new Info object
- * 		handle.
- *
- * Return:      Success:	Non-negative.  The new communicator and Info
- * 				object handles are returned via comm_new and
- * 				info_new pointers.
- *
- * 		Failure:	Negative.
- *
- * Programmer:  Albert Cheng
- *              Jan  8, 2003
- *
- * Modifications:
- *-------------------------------------------------------------------------
- */
-herr_t
-H5FD_mpi_comm_info_dup(MPI_Comm comm, MPI_Info info, MPI_Comm *comm_new, MPI_Info *info_new)
-{
-    herr_t	ret_value=SUCCEED;
-    MPI_Comm	comm_dup=MPI_COMM_NULL;
-    MPI_Info	info_dup=MPI_INFO_NULL;
-    int		mpi_code;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Check arguments */
-    if (MPI_COMM_NULL == comm)
-	HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "not a valid argument")
-    if (!comm_new || !info_new)
-	HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "bad pointers")
-
-    /* Dup them.  Using temporary variables for error recovery cleanup. */
-    if (MPI_SUCCESS != (mpi_code=MPI_Comm_dup(comm, &comm_dup)))
-	HMPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code)
-    if (MPI_INFO_NULL != info){
-	if (MPI_SUCCESS != (mpi_code=MPI_Info_dup(info, &info_dup)))
-	    HMPI_GOTO_ERROR(FAIL, "MPI_Info_dup failed", mpi_code)
-    }else{
-	/* No dup, just copy it. */
-	info_dup = info;
-    }
-
-    /* Set MPI_ERRORS_RETURN on comm_dup so that MPI failures are not fatal, 
-       and return codes can be checked and handled. May 23, 2017 FTW */
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_set_errhandler(comm_dup, MPI_ERRORS_RETURN)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Errhandler_set failed", mpi_code)
- 
-    /* copy them to the return arguments */
-    *comm_new = comm_dup;
-    *info_new = info_dup;
-
-done:
-    if (FAIL == ret_value){
-	/* need to free anything created here */
-	if (MPI_COMM_NULL != comm_dup)
-	    MPI_Comm_free(&comm_dup);
-	if (MPI_INFO_NULL != info_dup)
-	    MPI_Info_free(&info_dup);
-    }
-
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD_mpi_comm_info_free
- *
- * Purpose:     Free the communicator and Info object.
- * 		If comm or info is in fact MPI_COMM_NULL or MPI_INFO_NULL
- * 		respectively, no action occurs to it.
- *
- * Return:      Success:	Non-negative.  The values the pointers refer
- * 				to will be set to the corresponding NULL
- * 				handles.
- *
- * 		Failure:	Negative.
- *
- * Programmer:  Albert Cheng
- *              Jan  8, 2003
- *
- * Modifications:
- *-------------------------------------------------------------------------
- */
-herr_t
-H5FD_mpi_comm_info_free(MPI_Comm *comm, MPI_Info *info)
-{
-    herr_t      ret_value=SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Check arguments */
-    if (!comm || !info)
-	HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "not a valid argument")
-
-    if (MPI_COMM_NULL != *comm)
-	MPI_Comm_free(comm);
-    if (MPI_INFO_NULL != *info)
-	MPI_Info_free(info);
-
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -480,44 +371,5 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* NOT_YET */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FD_mpi_setup_collective
- *
- * Purpose:	Set the buffer type BTYPE, file type FTYPE for a data
- *		transfer. Also request a MPI type transfer.
- *
- * Return:	Success:	0
- *		Failure:	-1
- *
- * Programmer:	Robb Matzke
- *              Monday, August  9, 1999
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5FD_mpi_setup_collective(hid_t dxpl_id, MPI_Datatype *btype, MPI_Datatype *ftype)
-{
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Check arguments */
-    if(NULL == (plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dataset transfer list")
-
-    /* Set buffer MPI type */
-    if(H5P_set(plist, H5FD_MPI_XFER_MEM_MPI_TYPE_NAME, btype) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI-I/O property")
-
-    /* Set File MPI type */
-    if(H5P_set(plist, H5FD_MPI_XFER_FILE_MPI_TYPE_NAME, ftype) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI-I/O property")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_mpi_setup_collective() */
-
 #endif /* H5_HAVE_PARALLEL */
+

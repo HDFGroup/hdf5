@@ -54,22 +54,13 @@
 
 /* sizes of various items. these sizes won't change during program execution */
 /* The following three must have the same type */
-#define ELMT_SIZE           (sizeof(unsigned char))     /* we're doing bytes */
-#define ELMT_MPI_TYPE       MPI_BYTE
 #define ELMT_H5_TYPE        H5T_NATIVE_UCHAR
 
 #define GOTOERROR(errcode)  { ret_code = errcode; goto done; }
-#define GOTODONE        { goto done; }
 #define ERRMSG(mesg) {                                                  \
-    fprintf(stderr, "Proc %d: ", pio_mpi_rank_g);                       \
-    fprintf(stderr, "*** Assertion failed (%s) at line %4d in %s\n",    \
+    HDfprintf(stderr, "Proc %d: ", pio_mpi_rank_g);                       \
+    HDfprintf(stderr, "*** Assertion failed (%s) at line %4d in %s\n",    \
         mesg, (int)__LINE__, __FILE__);                             \
-}
-
-#define MSG(mesg) {                                     \
-    fprintf(stderr, "Proc %d: ", pio_mpi_rank_g);       \
-    fprintf(stderr, "(%s) at line %4d in %s\n",         \
-        mesg, (int)__LINE__, __FILE__);             \
 }
 
 /* verify: if val is false (0), print mesg. */
@@ -82,6 +73,12 @@
 
 
 /* POSIX I/O macros */
+#ifdef H5_HAVE_WIN32_API
+/* Can't link against the library, so this test will use the older, non-Unicode
+ * _open() call on Windows.
+ */
+#define HDopen(S,F,...)           _open(S, F | _O_BINARY, __VA_ARGS__)
+#endif /* H5_HAVE_WIN32_API */
 #define POSIXCREATE(fn)           HDopen(fn, O_CREAT|O_TRUNC|O_RDWR, 0600)
 #define POSIXOPEN(fn, F)          HDopen(fn, F, 0600)
 #define POSIXCLOSE(F)             HDclose(F)
@@ -132,6 +129,7 @@ static herr_t do_fopen(parameters *param, char *fname, file_descr *fd /*out*/,
     int flags);
 static herr_t do_fclose(iotype iot, file_descr *fd);
 static void do_cleanupfile(iotype iot, char *fname);
+static off_t sqrto(off_t);
 
 /*
  * Function:        do_pio
@@ -188,7 +186,7 @@ do_pio(parameters param)
             break;
         default:
             /* unknown request */
-            fprintf(stderr, "Unknown IO type request (%d)\n", iot);
+            HDfprintf(stderr, "Unknown IO type request (%d)\n", iot);
             GOTOERROR(FAIL);
     }
 
@@ -202,26 +200,26 @@ do_pio(parameters param)
         bsize = buf_size;   /* Actual buffer size       */
     }
     else {
-        snbytes = (off_t)sqrt(nbytes);  /* General dataset size     */
+        snbytes = sqrto(nbytes);  /* General dataset size     */
         bsize = buf_size * blk_size;    /* Actual buffer size       */
     }
 
     if (param.num_files < 0 ) {
-    fprintf(stderr,
+    HDfprintf(stderr,
         "number of files must be >= 0 (%ld)\n",
         param.num_files);
     GOTOERROR(FAIL);
     }
 
     if (ndsets < 0 ) {
-    fprintf(stderr,
+    HDfprintf(stderr,
         "number of datasets per file must be >= 0 (%ld)\n",
         ndsets);
     GOTOERROR(FAIL);
     }
 
     if (param.num_procs <= 0 ) {
-    fprintf(stderr,
+    HDfprintf(stderr,
         "maximum number of process to use must be > 0 (%d)\n",
         param.num_procs);
     GOTOERROR(FAIL);
@@ -254,7 +252,7 @@ do_pio(parameters param)
     }
 
     if (!param.dim2d){
-        if(((snbytes/pio_mpi_nprocs_g)%buf_size)!=0) {
+        if(((size_t)(snbytes/pio_mpi_nprocs_g)%buf_size)!=0) {
         HDfprintf(stderr,
             "Dataset size/process (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
             "trasfer buffer size (%zu)\n",
@@ -263,7 +261,7 @@ do_pio(parameters param)
         }
     }
     else {
-        if((snbytes%buf_size)!=0) {
+        if(((size_t)snbytes%buf_size)!=0) {
         HDfprintf(stderr,
             "Dataset side size (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
             "trasfer buffer size (%zu)\n",
@@ -286,7 +284,7 @@ do_pio(parameters param)
 
     /* output all of the times for all iterations */
     if (myrank == 0)
-        fprintf(output, "Timer details:\n");
+        HDfprintf(output, "Timer details:\n");
     }
 
     for (nf = 1; nf <= param.num_files; nf++) {
@@ -296,7 +294,7 @@ do_pio(parameters param)
     /* Open file for write */
     char base_name[256];
 
-    sprintf(base_name, "#pio_tmp_%lu", nf);
+    HDsprintf(base_name, "#pio_tmp_%lu", nf);
     pio_create_filename(iot, base_name, fname, sizeof(fname));
     if (pio_debug_level > 0)
         HDfprintf(output, "rank %d: data filename=%s\n",
@@ -305,22 +303,21 @@ do_pio(parameters param)
     /* Need barrier to make sure everyone starts at the same time */
     MPI_Barrier(pio_comm_g);
 
-    set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTART);
+    io_time_set(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTART);
     hrc = do_fopen(&param, fname, &fd, PIO_CREATE | PIO_WRITE);
 
     VRFY((hrc == SUCCESS), "do_fopen failed");
 
-    set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTART);
+    io_time_set(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTART);
     hrc = do_write(&res, &fd, &param, ndsets, nbytes, buf_size, buffer);
-    hrc == SUCCESS;
-    set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTOP);
+    io_time_set(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTOP);
 
     VRFY((hrc == SUCCESS), "do_write failed");
 
     /* Close file for write */
     hrc = do_fclose(iot, &fd);
 
-    set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTOP);
+    io_time_set(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTOP);
     VRFY((hrc == SUCCESS), "do_fclose failed");
 
     if (!param.h5_write_only) {
@@ -334,20 +331,20 @@ do_pio(parameters param)
         MPI_Barrier(pio_comm_g);
 
         /* Open file for read */
-        set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, TSTART);
+        io_time_set(res.timers, HDF5_GROSS_READ_FIXED_DIMS, TSTART);
         hrc = do_fopen(&param, fname, &fd, PIO_READ);
 
         VRFY((hrc == SUCCESS), "do_fopen failed");
 
-        set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, TSTART);
+        io_time_set(res.timers, HDF5_FINE_READ_FIXED_DIMS, TSTART);
         hrc = do_read(&res, &fd, &param, ndsets, nbytes, buf_size, buffer);
-        set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, TSTOP);
+        io_time_set(res.timers, HDF5_FINE_READ_FIXED_DIMS, TSTOP);
         VRFY((hrc == SUCCESS), "do_read failed");
 
         /* Close file for read */
         hrc = do_fclose(iot, &fd);
 
-        set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, TSTOP);
+        io_time_set(res.timers, HDF5_GROSS_READ_FIXED_DIMS, TSTOP);
         VRFY((hrc == SUCCESS), "do_fclose failed");
     }
 
@@ -366,21 +363,23 @@ done:
     switch (iot) {
         case POSIXIO:
             if (fd.posixfd != -1)
-            hrc = do_fclose(iot, &fd);
+                hrc = do_fclose(iot, &fd);
             break;
         case MPIO:
             if (fd.mpifd != MPI_FILE_NULL)
-            hrc = do_fclose(iot, &fd);
+                hrc = do_fclose(iot, &fd);
             break;
         case PHDF5:
             if (fd.h5fd != -1)
-            hrc = do_fclose(iot, &fd);
+                hrc = do_fclose(iot, &fd);
+            break;
+        default:
             break;
     }
 
     /* release generic resources */
     if(buffer)
-    free(buffer);
+        HDfree(buffer);
     res.ret_code = ret_code;
     return res;
 }
@@ -416,6 +415,8 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
             break;
         case PHDF5:
             suffix = ".h5";
+            break;
+        default:
             break;
     }
 
@@ -552,16 +553,16 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
     /* HDF5 variables */
     herr_t      hrc;                    /*HDF5 return code              */
     hsize_t     h5dims[2];              /*dataset dim sizes             */
-    hid_t       h5dset_space_id = -1;   /*dataset space ID              */
-    hid_t       h5mem_space_id = -1;    /*memory dataspace ID           */
-    hid_t       h5ds_id = -1;           /*dataset handle                */
+    hid_t       h5dset_space_id = H5I_INVALID_HID;   /*dataset space ID              */
+    hid_t       h5mem_space_id = H5I_INVALID_HID;    /*memory dataspace ID           */
+    hid_t       h5ds_id = H5I_INVALID_HID;           /*dataset handle                */
     hsize_t     h5block[2];     /*dataspace selection           */
     hsize_t     h5stride[2];
     hsize_t     h5count[2];
     hsize_t     h5start[2];
     hssize_t    h5offset[2];            /* Selection offset within dataspace */
-    hid_t       h5dcpl = -1;            /* Dataset creation property list */
-    hid_t       h5dxpl = -1;            /* Dataset transfer property list */
+    hid_t       h5dcpl = H5I_INVALID_HID;            /* Dataset creation property list */
+    hid_t       h5dxpl = H5I_INVALID_HID;            /* Dataset transfer property list */
 
     /* Get the parameters from the parameter block */
     blk_size=parms->blk_size;
@@ -584,7 +585,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
         } /* end if */
         /* Interleaved Pattern: */
         else {
-            bytes_begin[0] = (off_t)(blk_size*pio_mpi_rank_g);
+            bytes_begin[0] = (off_t)(blk_size*(size_t)pio_mpi_rank_g);
         } /* end else */
 
         /* Prepare buffer for verifying data */
@@ -596,7 +597,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
         /* nbytes is always the number of bytes per dataset (1D or 2D). If the
            dataspace is 2D, snbytes is the size of a side of the dataset square.
          */
-        snbytes = (off_t)sqrt(nbytes);
+        snbytes = sqrto(nbytes);
 
         /* Contiguous Pattern: */
         if (!parms->interleaved) {
@@ -608,14 +609,14 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
             bytes_begin[0] = 0;
 
             if(!parms->h5_use_chunks || parms->io_type==PHDF5)
-                bytes_begin[1] = (off_t)(blk_size*pio_mpi_rank_g);
+                bytes_begin[1] = (off_t)(blk_size*(size_t)pio_mpi_rank_g);
             else
-                bytes_begin[1] = (off_t)(blk_size*blk_size*pio_mpi_rank_g);
+                bytes_begin[1] = (off_t)(blk_size*blk_size*(size_t)pio_mpi_rank_g);
         } /* end else */
 
         /* Prepare buffer for verifying data */
         if (parms->verify)
-            memset(buffer,pio_mpi_rank_g+1,buf_size*blk_size);
+            HDmemset(buffer,pio_mpi_rank_g+1,buf_size*blk_size);
     } /* end else */
 
 
@@ -688,7 +689,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
             VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_COMMIT");
 
             /* Build contiguous file's derived type */
-            mrc = MPI_Type_vector((int)blk_size, (int)1, (int)(snbytes/buf_size),
+            mrc = MPI_Type_vector((int)blk_size, (int)1, (int)((size_t)snbytes/buf_size),
                 mpi_partial_buffer_cont, &mpi_cont_type);
             VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_CREATE");
 
@@ -706,7 +707,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
             VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_COMMIT");
 
             /* Build interleaved file's derived type */
-            mrc = MPI_Type_vector((int)buf_size, (int)1, (int)(snbytes/blk_size),
+            mrc = MPI_Type_vector((int)buf_size, (int)1, (int)((size_t)snbytes/blk_size),
                 mpi_partial_buffer_inter, &mpi_inter_type);
             VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_CREATE");
 
@@ -733,7 +734,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
             VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_COMMIT");
 
             /* Build chunk interleaved file's derived type */
-            mrc = MPI_Type_vector((int)(buf_size/blk_size), (int)1, (int)(snbytes/blk_size),
+            mrc = MPI_Type_vector((int)(buf_size/blk_size), (int)1, (int)((size_t)snbytes/blk_size),
                 mpi_full_chunk, &mpi_chunk_inter_type);
             VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_CREATE");
 
@@ -749,22 +750,22 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
         if (!parms->dim2d){
             if(nbytes>0) {
                 /* define a contiguous dataset of nbytes native bytes */
-                h5dims[0] = nbytes;
+                h5dims[0] = (hsize_t)nbytes;
                 h5dset_space_id = H5Screate_simple(1, h5dims, NULL);
                 VRFY((h5dset_space_id >= 0), "H5Screate_simple");
 
                 /* Set up the file dset space id to select the pattern to access */
                 if (!parms->interleaved){
                 /* Contiguous pattern */
-                h5start[0] = bytes_begin[0];
+                h5start[0] = (hsize_t)bytes_begin[0];
                 h5stride[0] = h5block[0] = blk_size;
                 h5count[0] = buf_size/blk_size;
                 } /* end if */
                 else {
                 /* Interleaved access pattern */
                 /* Skip offset over blocks of other processes */
-                h5start[0] = bytes_begin[0];
-                h5stride[0] = blk_size*pio_mpi_nprocs_g;
+                h5start[0] = (hsize_t)bytes_begin[0];
+                h5stride[0] = blk_size*(size_t)pio_mpi_nprocs_g;
                 h5block[0] = blk_size;
                 h5count[0] = buf_size/blk_size;
                 } /* end else */
@@ -792,16 +793,16 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
         else {
             if(nbytes>0) {
                 /* define a contiguous dataset of nbytes native bytes */
-                h5dims[0] = snbytes;
-                h5dims[1] = snbytes;
+                h5dims[0] = (hsize_t)snbytes;
+                h5dims[1] = (hsize_t)snbytes;
                 h5dset_space_id = H5Screate_simple(2, h5dims, NULL);
                 VRFY((h5dset_space_id >= 0), "H5Screate_simple");
 
                 /* Set up the file dset space id to select the pattern to access */
                 if (!parms->interleaved){
                 /* Contiguous pattern */
-                h5start[0] = bytes_begin[0];
-                h5start[1] = bytes_begin[1];
+                h5start[0] = (hsize_t)bytes_begin[0];
+                h5start[1] = (hsize_t)bytes_begin[1];
                 h5stride[0] = 1;
                 h5stride[1] = h5block[0] = h5block[1] = blk_size;
                 h5count[0] = 1;
@@ -810,10 +811,10 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                 else {
                 /* Interleaved access pattern */
                 /* Skip offset over blocks of other processes */
-                h5start[0] = bytes_begin[0];
-                h5start[1] = bytes_begin[1];
+                h5start[0] = (hsize_t)bytes_begin[0];
+                h5start[1] = (hsize_t)bytes_begin[1];
                 h5stride[0] = blk_size;
-                h5stride[1] = blk_size*pio_mpi_nprocs_g;
+                h5stride[1] = blk_size*(size_t)pio_mpi_nprocs_g;
                 h5block[0] = h5block[1] = blk_size;
                 h5count[0] = buf_size/blk_size;
                 h5count[1] = 1;
@@ -848,7 +849,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
         /* Create the dataset transfer property list */
         h5dxpl = H5Pcreate(H5P_DATASET_XFER);
         if (h5dxpl < 0) {
-        fprintf(stderr, "HDF5 Property List Create failed\n");
+        HDfprintf(stderr, "HDF5 Property List Create failed\n");
         GOTOERROR(FAIL);
         }
 
@@ -856,10 +857,13 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
         if(parms->collective) {
             hrc = H5Pset_dxpl_mpio(h5dxpl, H5FD_MPIO_COLLECTIVE);
             if (hrc < 0) {
-                fprintf(stderr, "HDF5 Property List Set failed\n");
+                HDfprintf(stderr, "HDF5 Property List Set failed\n");
                 GOTOERROR(FAIL);
             } /* end if */
         } /* end if */
+        break;
+
+    default:
         break;
     } /* end switch */
 
@@ -878,7 +882,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
         case PHDF5:
             h5dcpl = H5Pcreate(H5P_DATASET_CREATE);
             if (h5dcpl < 0) {
-                fprintf(stderr, "HDF5 Property List Create failed\n");
+                HDfprintf(stderr, "HDF5 Property List Create failed\n");
                 GOTOERROR(FAIL);
             }
             /* 1D dataspace */
@@ -889,7 +893,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                 h5dims[0] = blk_size;
                 hrc = H5Pset_chunk(h5dcpl, 1, h5dims);
                 if (hrc < 0) {
-                    fprintf(stderr, "HDF5 Property List Set failed\n");
+                    HDfprintf(stderr, "HDF5 Property List Set failed\n");
                     GOTOERROR(FAIL);
                 } /* end if */
                 } /* end if */
@@ -902,27 +906,30 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                 h5dims[1] = blk_size;
                 hrc = H5Pset_chunk(h5dcpl, 2, h5dims);
                 if (hrc < 0) {
-                    fprintf(stderr, "HDF5 Property List Set failed\n");
+                    HDfprintf(stderr, "HDF5 Property List Set failed\n");
                     GOTOERROR(FAIL);
                 } /* end if */
                 } /* end if */
             }/* end else */
 
-            sprintf(dname, "Dataset_%ld", ndset);
+            HDsprintf(dname, "Dataset_%ld", ndset);
             h5ds_id = H5DCREATE(fd->h5fd, dname, ELMT_H5_TYPE,
                 h5dset_space_id, h5dcpl);
 
             if (h5ds_id < 0) {
-                fprintf(stderr, "HDF5 Dataset Create failed\n");
+                HDfprintf(stderr, "HDF5 Dataset Create failed\n");
                 GOTOERROR(FAIL);
             }
 
             hrc = H5Pclose(h5dcpl);
             /* verifying the close of the dcpl */
             if (hrc < 0) {
-                fprintf(stderr, "HDF5 Property List Close failed\n");
+                HDfprintf(stderr, "HDF5 Property List Close failed\n");
                 GOTOERROR(FAIL);
             }
+            break;
+
+        default:
             break;
     }
 
@@ -953,7 +960,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
     } /* end else */
 
     /* Start "raw data" write timer */
-    set_time(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, TSTART);
+    io_time_set(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, TSTART);
 
     while (nbytes_xfer < bytes_count){
         /* Write */
@@ -977,7 +984,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                     VRFY((rc != 0), "POSIXWRITE");
 
                     /* Advance global offset in dataset */
-                    nbytes_xfer+=buf_size;
+                    nbytes_xfer+=(ssize_t)buf_size;
                 } /* end if */
                 /* Interleaved access pattern */
                 else {
@@ -1006,7 +1013,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                         buf_p+=blk_size;
 
                         /* Advance global offset in dataset */
-                        nbytes_xfer+=blk_size;
+                        nbytes_xfer+=(ssize_t)blk_size;
 
                         /* Decrement number of bytes left this time */
                         nbytes_toxfer-=blk_size;
@@ -1020,8 +1027,8 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                     /* Contiguous access pattern */
                     if (!parms->interleaved) {
                         /* Compute file offset */
-                        file_offset=posix_file_offset+(off_t)(((nbytes_xfer/blk_size)
-                            /snbytes)*(blk_size*snbytes)+((nbytes_xfer/blk_size)%snbytes));
+                        file_offset=posix_file_offset+(off_t)((((size_t)nbytes_xfer/blk_size)
+                            /(size_t)snbytes)*(blk_size*(size_t)snbytes)+(((size_t)nbytes_xfer/blk_size)%(size_t)snbytes));
 
                         /* Number of bytes to be transferred per I/O operation */
                         nbytes_xfer_advance = buf_size;
@@ -1032,9 +1039,9 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                     /* Interleaved access pattern */
                     else {
                         /* Compute file offset */
-                        file_offset=posix_file_offset+(off_t)((((nbytes_xfer/buf_size)
-                            *pio_mpi_nprocs_g)/snbytes)*(buf_size*snbytes)
-                            +((nbytes_xfer/buf_size)*pio_mpi_nprocs_g)%snbytes);
+                        file_offset=posix_file_offset+(off_t)(((((size_t)nbytes_xfer/buf_size)
+                            *(size_t)pio_mpi_nprocs_g)/(size_t)snbytes)*(buf_size*(size_t)snbytes)
+                            +(((size_t)nbytes_xfer/buf_size)*(size_t)pio_mpi_nprocs_g)%(size_t)snbytes);
 
                         /* Number of bytes to be transferred per I/O operation */
                         nbytes_xfer_advance = blk_size;
@@ -1065,16 +1072,16 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                         *snbytes/blk_size*(blk_size*blk_size))+((nbytes_xfer/(buf_size/blk_size))
                         *pio_mpi_nprocs_g)%(snbytes/blk_size*(blk_size*blk_size))); */
 
-                        file_offset=posix_file_offset+(off_t)(((nbytes_xfer/(buf_size/blk_size)
-                        *pio_mpi_nprocs_g)/(snbytes*blk_size))*(buf_size*snbytes)+((nbytes_xfer/(buf_size/blk_size))
-                        *pio_mpi_nprocs_g)%(snbytes*blk_size));
+                        file_offset=posix_file_offset+(off_t)((((size_t)nbytes_xfer/(buf_size/blk_size)
+                        *(size_t)pio_mpi_nprocs_g)/((size_t)snbytes*blk_size))*(buf_size*(size_t)snbytes)+(((size_t)nbytes_xfer/(buf_size/blk_size))
+                        *(size_t)pio_mpi_nprocs_g)%((size_t)snbytes*blk_size));
 
                         /* Number of bytes to be transferred per I/O operation */
                         nbytes_xfer_advance = blk_size * blk_size;
 
                         /* Global offset advance after each I/O operation */
                         /* file_offset_advance = (off_t)(snbytes/blk_size*(blk_size*blk_size)); */
-                        file_offset_advance = (off_t)(snbytes*blk_size);
+                        file_offset_advance = (off_t)snbytes*(off_t)blk_size;
                     } /* end else */
                 } /* end else */
 
@@ -1101,7 +1108,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                     buf_p+=nbytes_xfer_advance;
 
                     /* Advance global offset in dataset */
-                    nbytes_xfer+=nbytes_xfer_advance;
+                    nbytes_xfer+=(ssize_t)nbytes_xfer_advance;
 
                     /* Decrement number of bytes left this time */
                     nbytes_toxfer-=nbytes_xfer_advance;
@@ -1132,7 +1139,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                         VRFY((mrc==MPI_SUCCESS), "MPIO_WRITE");
 
                         /* Advance global offset in dataset */
-                        nbytes_xfer+=buf_size;
+                        nbytes_xfer+=(ssize_t)buf_size;
                     } /* end if */
                     /* Interleaved access pattern */
                     else {
@@ -1157,7 +1164,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                             buf_p+=blk_size;
 
                             /* Advance global offset in dataset */
-                            nbytes_xfer+=blk_size;
+                            nbytes_xfer+=(ssize_t)blk_size;
 
                             /* Decrement number of bytes left this time */
                             nbytes_toxfer-=blk_size;
@@ -1178,7 +1185,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                         VRFY((mrc==MPI_SUCCESS), "MPIO_WRITE");
 
                         /* Advance global offset in dataset */
-                        nbytes_xfer+=buf_size;
+                        nbytes_xfer+=(ssize_t)buf_size;
                     } /* end if */
                     /* Interleaved access pattern */
                     else {
@@ -1197,7 +1204,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                         VRFY((mrc==MPI_SUCCESS), "MPIO_WRITE");
 
                         /* Advance global offset in dataset */
-                        nbytes_xfer+=buf_size;
+                        nbytes_xfer+=(ssize_t)buf_size;
                     } /* end else */
                 } /* end else */
             } /* end if */
@@ -1208,8 +1215,8 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                     /* Contiguous access pattern */
                     if (!parms->interleaved) {
                         /* Compute offset in file */
-                        mpi_offset=mpi_file_offset+((nbytes_xfer/blk_size)/snbytes)*
-                            (blk_size*snbytes)+((nbytes_xfer/blk_size)%snbytes);
+                        mpi_offset=mpi_file_offset+(MPI_Offset)((((size_t)nbytes_xfer/blk_size)/(size_t)snbytes)*
+                            (blk_size*(size_t)snbytes))+(MPI_Offset)(((size_t)nbytes_xfer/blk_size)%(size_t)snbytes);
 
                         /* Number of bytes to be transferred per I/O operation */
                         nbytes_xfer_advance = buf_size;
@@ -1223,8 +1230,8 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                     /* Interleaved access pattern */
                     else {
                         /* Compute offset in file */
-                        mpi_offset=mpi_file_offset+(((nbytes_xfer/buf_size)*pio_mpi_nprocs_g)/snbytes)*
-                            (buf_size*snbytes)+((nbytes_xfer/buf_size)*pio_mpi_nprocs_g)%snbytes;
+                        mpi_offset=mpi_file_offset+(MPI_Offset)(((((size_t)nbytes_xfer/buf_size)*(size_t)pio_mpi_nprocs_g)/(size_t)snbytes)*
+                            (buf_size*(size_t)snbytes))+(MPI_Offset)((((size_t)nbytes_xfer/buf_size)*(size_t)pio_mpi_nprocs_g)%(size_t)snbytes);
 
                         /* Number of bytes to be transferred per I/O operation */
                         nbytes_xfer_advance = blk_size;
@@ -1261,16 +1268,16 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                             (buf_size/blk_size*snbytes/blk_size*(blk_size*blk_size))+
                             ((nbytes_xfer/(buf_size/blk_size))*pio_mpi_nprocs_g)%(snbytes
                             /blk_size*(blk_size*blk_size)); */
-                        mpi_offset=mpi_file_offset+((nbytes_xfer/(buf_size/blk_size)
-                            *pio_mpi_nprocs_g)/(snbytes*blk_size))*(buf_size*snbytes)
-                            +((nbytes_xfer/(buf_size/blk_size))*pio_mpi_nprocs_g)%(snbytes*blk_size);
+                        mpi_offset=mpi_file_offset+(MPI_Offset)((((size_t)nbytes_xfer/(buf_size/blk_size)
+                            *(size_t)pio_mpi_nprocs_g)/((size_t)snbytes*blk_size))*(buf_size*(size_t)snbytes))
+                            +(MPI_Offset)((((size_t)nbytes_xfer/(buf_size/blk_size))*(size_t)pio_mpi_nprocs_g)%((size_t)snbytes*blk_size));
 
                         /* Number of bytes to be transferred per I/O operation */
                         nbytes_xfer_advance = blk_size * blk_size;
 
                         /* Global offset advance after each I/O operation */
                         /* mpi_offset_advance = (MPI_Offset)(snbytes/blk_size*(blk_size*blk_size)); */
-                        mpi_offset_advance = (MPI_Offset)(snbytes*blk_size);
+                        mpi_offset_advance = (MPI_Offset)((size_t)snbytes*blk_size);
 
                         /* MPI type to be used for collective access */
                         mpi_collective_type = mpi_chunk_inter_type;
@@ -1296,7 +1303,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                         buf_p+=nbytes_xfer_advance;
 
                         /* Advance global offset in dataset */
-                        nbytes_xfer+=nbytes_xfer_advance;
+                        nbytes_xfer+=(ssize_t)nbytes_xfer_advance;
 
                         /* Decrement number of bytes left this time */
                         nbytes_toxfer-=nbytes_xfer_advance;
@@ -1319,7 +1326,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                     VRFY((mrc==MPI_SUCCESS), "MPIO_WRITE");
 
                     /* Advance global offset in dataset */
-                    nbytes_xfer+=buf_size*blk_size;
+                    nbytes_xfer+=(off_t)buf_size*(off_t)blk_size;
                 } /* end else */
 
             } /* end else */
@@ -1348,22 +1355,22 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
             VRFY((hrc >= 0), "H5Dwrite");
 
             /* Increment number of bytes transferred */
-            nbytes_xfer += buf_size;
+            nbytes_xfer += (ssize_t)buf_size;
             } /* end if */
             /* 2D dataspace */
             else {
             /* Set up the file dset space id to move the selection to process */
             if (!parms->interleaved){
                 /* Contiguous pattern */
-                h5offset[0] = (nbytes_xfer/(snbytes*blk_size))*blk_size;
-                h5offset[1] = (nbytes_xfer%(snbytes*blk_size))/blk_size;
+                h5offset[0] = (hssize_t)(((size_t)nbytes_xfer/((size_t)snbytes*blk_size))*blk_size);
+                h5offset[1] = (hssize_t)(((size_t)nbytes_xfer%((size_t)snbytes*blk_size))/blk_size);
 
             } /* end if */
             else {
                 /* Interleaved access pattern */
                 /* Skip offset over blocks of other processes */
-                h5offset[0] = ((nbytes_xfer*pio_mpi_nprocs_g)/(snbytes*buf_size))*buf_size;
-                h5offset[1] = ((nbytes_xfer*pio_mpi_nprocs_g)%(snbytes*buf_size))/buf_size;
+                h5offset[0] = (hssize_t)((((size_t)nbytes_xfer*(size_t)pio_mpi_nprocs_g)/((size_t)snbytes*buf_size))*buf_size);
+                h5offset[1] = (hssize_t)((((size_t)nbytes_xfer*(size_t)pio_mpi_nprocs_g)%((size_t)snbytes*buf_size))/buf_size);
 
             } /* end else */
             hrc = H5Soffset_simple(h5dset_space_id, h5offset);
@@ -1375,16 +1382,19 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
             VRFY((hrc >= 0), "H5Dwrite");
 
             /* Increment number of bytes transferred */
-            nbytes_xfer += buf_size*blk_size;
+            nbytes_xfer += (off_t)buf_size*(off_t)blk_size;
 
             } /* end else */
 
+            break;
+
+        default:
             break;
         } /* switch (parms->io_type) */
     } /* end while */
 
     /* Stop "raw data" write timer */
-    set_time(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, TSTOP);
+    io_time_set(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, TSTOP);
 
     /* Calculate write time */
 
@@ -1393,11 +1403,11 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
         hrc = H5Dclose(h5ds_id);
 
         if (hrc < 0) {
-        fprintf(stderr, "HDF5 Dataset Close failed\n");
+        HDfprintf(stderr, "HDF5 Dataset Close failed\n");
         GOTOERROR(FAIL);
         }
 
-        h5ds_id = -1;
+        h5ds_id = H5I_INVALID_HID;
     } /* end if */
     } /* end for */
 
@@ -1450,34 +1460,41 @@ done:
     if (h5dset_space_id != -1) {
     hrc = H5Sclose(h5dset_space_id);
     if (hrc < 0){
-        fprintf(stderr, "HDF5 Dataset Space Close failed\n");
+        HDfprintf(stderr, "HDF5 Dataset Space Close failed\n");
         ret_code = FAIL;
     } else {
-        h5dset_space_id = -1;
+        h5dset_space_id = H5I_INVALID_HID;
     }
     }
 
     if (h5mem_space_id != -1) {
     hrc = H5Sclose(h5mem_space_id);
     if (hrc < 0) {
-        fprintf(stderr, "HDF5 Memory Space Close failed\n");
+        HDfprintf(stderr, "HDF5 Memory Space Close failed\n");
         ret_code = FAIL;
     } else {
-        h5mem_space_id = -1;
+        h5mem_space_id = H5I_INVALID_HID;
     }
     }
 
     if (h5dxpl != -1) {
     hrc = H5Pclose(h5dxpl);
     if (hrc < 0) {
-        fprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
+        HDfprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
         ret_code = FAIL;
     } else {
-        h5dxpl = -1;
+        h5dxpl = H5I_INVALID_HID;
     }
     }
 
     return ret_code;
+}
+
+static off_t
+sqrto(off_t x)
+{
+    double root_x = sqrt((double)x);
+    return (off_t)root_x;
 }
 
 /*
@@ -1532,15 +1549,15 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
     /* HDF5 variables */
     herr_t      hrc;                    /*HDF5 return code              */
     hsize_t     h5dims[2];              /*dataset dim sizes             */
-    hid_t       h5dset_space_id = -1;   /*dataset space ID              */
-    hid_t       h5mem_space_id = -1;    /*memory dataspace ID           */
-    hid_t       h5ds_id = -1;           /*dataset handle                */
+    hid_t       h5dset_space_id = H5I_INVALID_HID;   /*dataset space ID              */
+    hid_t       h5mem_space_id = H5I_INVALID_HID;    /*memory dataspace ID           */
+    hid_t       h5ds_id = H5I_INVALID_HID;           /*dataset handle                */
     hsize_t h5block[2];     /*dataspace selection           */
     hsize_t h5stride[2];
     hsize_t h5count[2];
     hsize_t h5start[2];
     hssize_t    h5offset[2];            /* Selection offset within dataspace */
-    hid_t       h5dxpl = -1;            /* Dataset transfer property list */
+    hid_t       h5dxpl = H5I_INVALID_HID;            /* Dataset transfer property list */
 
     /* Get the parameters from the parameter block */
     blk_size=parms->blk_size;
@@ -1564,7 +1581,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
         } /* end if */
         /* Interleaved Pattern: */
         else {
-            bytes_begin[0] = (off_t)(blk_size*pio_mpi_rank_g);
+            bytes_begin[0] = (off_t)blk_size*(off_t)pio_mpi_rank_g;
         } /* end else */
     }/* end if */
     /* 2D dataspace */
@@ -1572,7 +1589,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
         /* nbytes is always the number of bytes per dataset (1D or 2D). If the
            dataspace is 2D, snbytes is the size of a side of the 'dataset square'.
          */
-        snbytes = (off_t)sqrt(nbytes);
+        snbytes = sqrto(nbytes);
 
         bsize = buf_size * blk_size;
 
@@ -1586,9 +1603,9 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
             bytes_begin[0] = 0;
 
             if (!parms->h5_use_chunks || parms->io_type==PHDF5)
-                bytes_begin[1] = (off_t)(blk_size*pio_mpi_rank_g);
+                bytes_begin[1] = (off_t)blk_size*(off_t)pio_mpi_rank_g;
             else
-                bytes_begin[1] = (off_t)(blk_size*blk_size*pio_mpi_rank_g);
+                bytes_begin[1] = (off_t)blk_size*(off_t)blk_size*(off_t)pio_mpi_rank_g;
         } /* end else */
     } /* end else */
 
@@ -1660,7 +1677,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
             VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_COMMIT");
 
             /* Build contiguous file's derived type */
-            mrc = MPI_Type_vector((int)blk_size, (int)1, (int)(snbytes/buf_size),
+            mrc = MPI_Type_vector((int)blk_size, (int)1, (int)((size_t)snbytes/buf_size),
                 mpi_partial_buffer_cont, &mpi_cont_type);
             VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_CREATE");
 
@@ -1678,7 +1695,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
             VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_COMMIT");
 
             /* Build interleaved file's derived type */
-            mrc = MPI_Type_vector((int)buf_size, (int)1, (int)(snbytes/blk_size),
+            mrc = MPI_Type_vector((int)buf_size, (int)1, (int)((size_t)snbytes/blk_size),
                 mpi_partial_buffer_inter, &mpi_inter_type);
             VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_CREATE");
 
@@ -1705,7 +1722,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
             VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_COMMIT");
 
             /* Build chunk interleaved file's derived type */
-            mrc = MPI_Type_vector((int)(buf_size/blk_size), (int)1, (int)(snbytes/blk_size),
+            mrc = MPI_Type_vector((int)(buf_size/blk_size), (int)1, (int)((size_t)snbytes/blk_size),
                 mpi_full_chunk, &mpi_chunk_inter_type);
             VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_CREATE");
 
@@ -1720,22 +1737,22 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
         if (!parms->dim2d){
         if(nbytes>0) {
             /* define a contiguous dataset of nbytes native bytes */
-            h5dims[0] = nbytes;
+            h5dims[0] = (hsize_t)nbytes;
             h5dset_space_id = H5Screate_simple(1, h5dims, NULL);
             VRFY((h5dset_space_id >= 0), "H5Screate_simple");
 
             /* Set up the file dset space id to select the pattern to access */
             if (!parms->interleaved){
             /* Contiguous pattern */
-            h5start[0] = bytes_begin[0];
+            h5start[0] = (hsize_t)bytes_begin[0];
             h5stride[0] = h5block[0] = blk_size;
             h5count[0] = buf_size/blk_size;
             } /* end if */
             else {
             /* Interleaved access pattern */
             /* Skip offset over blocks of other processes */
-            h5start[0] = bytes_begin[0];
-            h5stride[0] = blk_size*pio_mpi_nprocs_g;
+            h5start[0] = (hsize_t)bytes_begin[0];
+            h5stride[0] = blk_size*(size_t)pio_mpi_nprocs_g;
             h5block[0] = blk_size;
             h5count[0] = buf_size/blk_size;
             } /* end else */
@@ -1763,16 +1780,16 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
         else {
         if(nbytes>0) {
             /* define a contiguous dataset of nbytes native bytes */
-            h5dims[0] = snbytes;
-            h5dims[1] = snbytes;
+            h5dims[0] = (hsize_t)snbytes;
+            h5dims[1] = (hsize_t)snbytes;
             h5dset_space_id = H5Screate_simple(2, h5dims, NULL);
             VRFY((h5dset_space_id >= 0), "H5Screate_simple");
 
             /* Set up the file dset space id to select the pattern to access */
             if (!parms->interleaved){
             /* Contiguous pattern */
-            h5start[0] = bytes_begin[0];
-            h5start[1] = bytes_begin[1];
+            h5start[0] = (hsize_t)bytes_begin[0];
+            h5start[1] = (hsize_t)bytes_begin[1];
             h5stride[0] = 1;
             h5stride[1] = h5block[0] = h5block[1] = blk_size;
             h5count[0] = 1;
@@ -1781,10 +1798,10 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
             else {
             /* Interleaved access pattern */
             /* Skip offset over blocks of other processes */
-            h5start[0] = bytes_begin[0];
-            h5start[1] = bytes_begin[1];
+            h5start[0] = (hsize_t)bytes_begin[0];
+            h5start[1] = (hsize_t)bytes_begin[1];
             h5stride[0] = blk_size;
-            h5stride[1] = blk_size*pio_mpi_nprocs_g;
+            h5stride[1] = blk_size*(size_t)pio_mpi_nprocs_g;
             h5block[0] = h5block[1] = blk_size;
             h5count[0] = buf_size/blk_size;
             h5count[1] = 1;
@@ -1819,18 +1836,21 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
         /* Create the dataset transfer property list */
         h5dxpl = H5Pcreate(H5P_DATASET_XFER);
         if (h5dxpl < 0) {
-        fprintf(stderr, "HDF5 Property List Create failed\n");
-        GOTOERROR(FAIL);
+            HDfprintf(stderr, "HDF5 Property List Create failed\n");
+            GOTOERROR(FAIL);
         }
 
         /* Change to collective I/O, if asked */
         if(parms->collective) {
-        hrc = H5Pset_dxpl_mpio(h5dxpl, H5FD_MPIO_COLLECTIVE);
-        if (hrc < 0) {
-            fprintf(stderr, "HDF5 Property List Set failed\n");
-            GOTOERROR(FAIL);
+            hrc = H5Pset_dxpl_mpio(h5dxpl, H5FD_MPIO_COLLECTIVE);
+            if (hrc < 0) {
+                HDfprintf(stderr, "HDF5 Property List Set failed\n");
+                GOTOERROR(FAIL);
+            } /* end if */
         } /* end if */
-        } /* end if */
+        break;
+
+    default:
         break;
     } /* end switch */
 
@@ -1842,19 +1862,21 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
     switch (parms->io_type) {
         case POSIXIO:
         case MPIO:
-        /* both posix and mpi io just need dataset offset in file*/
-        dset_offset = (ndset - 1) * nbytes;
-        break;
+            /* both posix and mpi io just need dataset offset in file*/
+            dset_offset = (ndset - 1) * nbytes;
+            break;
 
         case PHDF5:
-        sprintf(dname, "Dataset_%ld", ndset);
-        h5ds_id = H5DOPEN(fd->h5fd, dname);
-        if (h5ds_id < 0) {
-            fprintf(stderr, "HDF5 Dataset open failed\n");
-            GOTOERROR(FAIL);
-        }
+            HDsprintf(dname, "Dataset_%ld", ndset);
+            h5ds_id = H5DOPEN(fd->h5fd, dname);
+            if (h5ds_id < 0) {
+                HDfprintf(stderr, "HDF5 Dataset open failed\n");
+                GOTOERROR(FAIL);
+            }
+            break;
 
-        break;
+        default:
+            break;
     }
 
     /* The task is to transfer bytes_count bytes, starting at
@@ -1884,7 +1906,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
     } /* end else */
 
     /* Start "raw data" read timer */
-    set_time(res->timers, HDF5_RAW_READ_FIXED_DIMS, TSTART);
+    io_time_set(res->timers, HDF5_RAW_READ_FIXED_DIMS, TSTART);
 
     while (nbytes_xfer < bytes_count){
         /* Read */
@@ -1908,7 +1930,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                     VRFY((rc != 0), "POSIXREAD");
 
                     /* Advance global offset in dataset */
-                    nbytes_xfer+=buf_size;
+                    nbytes_xfer+=(off_t)buf_size;
                 } /* end if */
                 /* Interleaved access pattern */
                 else {
@@ -1937,7 +1959,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                     buf_p+=blk_size;
 
                     /* Advance global offset in dataset */
-                    nbytes_xfer+=blk_size;
+                    nbytes_xfer+=(off_t)blk_size;
 
                     /* Decrement number of bytes left this time */
                     nbytes_toxfer-=blk_size;
@@ -1951,8 +1973,8 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                     /* Contiguous access pattern */
                     if (!parms->interleaved) {
                         /* Compute file offset */
-                        file_offset=posix_file_offset+(off_t)(((nbytes_xfer/blk_size)
-                            /snbytes)*(blk_size*snbytes)+((nbytes_xfer/blk_size)%snbytes));
+                        file_offset=posix_file_offset+(off_t)((((size_t)nbytes_xfer/blk_size)
+                            /(size_t)snbytes)*(blk_size*(size_t)snbytes)+(((size_t)nbytes_xfer/blk_size)%(size_t)snbytes));
 
                         /* Number of bytes to be transferred per I/O operation */
                         nbytes_xfer_advance = buf_size;
@@ -1963,9 +1985,9 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                     /* Interleaved access pattern */
                     else {
                         /* Compute file offset */
-                        file_offset=posix_file_offset+(off_t)((((nbytes_xfer/buf_size)
-                            *pio_mpi_nprocs_g)/snbytes)*(buf_size*snbytes)
-                            +((nbytes_xfer/buf_size)*pio_mpi_nprocs_g)%snbytes);
+                        file_offset=posix_file_offset+(off_t)(((((size_t)nbytes_xfer/buf_size)
+                            *(size_t)pio_mpi_nprocs_g)/(size_t)snbytes)*(buf_size*(size_t)snbytes)
+                            +(((size_t)nbytes_xfer/buf_size)*(size_t)pio_mpi_nprocs_g)%(size_t)snbytes);
 
                         /* Number of bytes to be transferred per I/O operation */
                         nbytes_xfer_advance = blk_size;
@@ -1996,16 +2018,16 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                         *snbytes/blk_size*(blk_size*blk_size))+((nbytes_xfer/(buf_size/blk_size))
                         *pio_mpi_nprocs_g)%(snbytes/blk_size*(blk_size*blk_size))); */
 
-                        file_offset=posix_file_offset+(off_t)(((nbytes_xfer/(buf_size/blk_size)
-                        *pio_mpi_nprocs_g)/(snbytes*blk_size))*(buf_size*snbytes)+((nbytes_xfer/(buf_size/blk_size))
-                        *pio_mpi_nprocs_g)%(snbytes*blk_size));
+                        file_offset=posix_file_offset+(off_t)((((size_t)nbytes_xfer/(buf_size/blk_size)
+                        *(size_t)pio_mpi_nprocs_g)/((size_t)snbytes*blk_size))*(buf_size*(size_t)snbytes)+(((size_t)nbytes_xfer/(buf_size/blk_size))
+                        *(size_t)pio_mpi_nprocs_g)%((size_t)snbytes*blk_size));
 
                         /* Number of bytes to be transferred per I/O operation */
                         nbytes_xfer_advance = blk_size * blk_size;
 
                         /* Global offset advance after each I/O operation */
                         /* file_offset_advance = (off_t)(snbytes/blk_size*(blk_size*blk_size)); */
-                        file_offset_advance = (off_t)(snbytes*blk_size);
+                        file_offset_advance = (off_t)((size_t)snbytes*blk_size);
                     } /* end else */
                 } /* end else */
 
@@ -2032,7 +2054,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                     buf_p+=nbytes_xfer_advance;
 
                     /* Advance global offset in dataset */
-                    nbytes_xfer+=nbytes_xfer_advance;
+                    nbytes_xfer+=(off_t)nbytes_xfer_advance;
 
                     /* Decrement number of bytes left this time */
                     nbytes_toxfer-=nbytes_xfer_advance;
@@ -2062,7 +2084,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                         VRFY((mrc==MPI_SUCCESS), "MPIO_READ");
 
                         /* Advance global offset in dataset */
-                        nbytes_xfer+=buf_size;
+                        nbytes_xfer+=(off_t)buf_size;
                     } /* end if */
                     /* Interleaved access pattern */
                     else {
@@ -2087,7 +2109,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                             buf_p+=blk_size;
 
                             /* Advance global offset in dataset */
-                            nbytes_xfer+=blk_size;
+                            nbytes_xfer+=(off_t)blk_size;
 
                             /* Decrement number of bytes left this time */
                             nbytes_toxfer-=blk_size;
@@ -2108,7 +2130,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                         VRFY((mrc==MPI_SUCCESS), "MPIO_READ");
 
                         /* Advance global offset in dataset */
-                        nbytes_xfer+=buf_size;
+                        nbytes_xfer+=(off_t)buf_size;
                     } /* end if */
                     /* Interleaved access pattern */
                     else {
@@ -2127,7 +2149,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                         VRFY((mrc==MPI_SUCCESS), "MPIO_READ");
 
                         /* Advance global offset in dataset */
-                        nbytes_xfer+=buf_size;
+                        nbytes_xfer+=(off_t)buf_size;
                     } /* end else */
                 } /* end else */
             } /* end if */
@@ -2138,8 +2160,8 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                     /* Contiguous access pattern */
                     if (!parms->interleaved) {
                         /* Compute offset in file */
-                        mpi_offset=mpi_file_offset+((nbytes_xfer/blk_size)/snbytes)*
-                            (blk_size*snbytes)+((nbytes_xfer/blk_size)%snbytes);
+                        mpi_offset=mpi_file_offset+(MPI_Offset)((((size_t)nbytes_xfer/blk_size)/(size_t)snbytes)*
+                            (blk_size*(size_t)snbytes))+(MPI_Offset)(((size_t)nbytes_xfer/blk_size)%(size_t)snbytes);
 
                         /* Number of bytes to be transferred per I/O operation */
                         nbytes_xfer_advance = buf_size;
@@ -2153,8 +2175,8 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                     /* Interleaved access pattern */
                     else {
                         /* Compute offset in file */
-                        mpi_offset=mpi_file_offset+(((nbytes_xfer/buf_size)*pio_mpi_nprocs_g)/snbytes)*
-                            (buf_size*snbytes)+((nbytes_xfer/buf_size)*pio_mpi_nprocs_g)%snbytes;
+                        mpi_offset=mpi_file_offset+(MPI_Offset)(((((size_t)nbytes_xfer/buf_size)*(size_t)pio_mpi_nprocs_g)/(size_t)snbytes)*
+                            (buf_size*(size_t)snbytes))+(MPI_Offset)((((size_t)nbytes_xfer/buf_size)*(size_t)pio_mpi_nprocs_g)%(size_t)snbytes);
 
                         /* Number of bytes to be transferred per I/O operation */
                         nbytes_xfer_advance = blk_size;
@@ -2191,16 +2213,16 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                             (buf_size/blk_size*snbytes/blk_size*(blk_size*blk_size))+
                             ((nbytes_xfer/(buf_size/blk_size))*pio_mpi_nprocs_g)%(snbytes
                             /blk_size*(blk_size*blk_size)); */
-                        mpi_offset=mpi_file_offset+((nbytes_xfer/(buf_size/blk_size)
-                            *pio_mpi_nprocs_g)/(snbytes*blk_size))*(buf_size*snbytes)
-                            +((nbytes_xfer/(buf_size/blk_size))*pio_mpi_nprocs_g)%(snbytes*blk_size);
+                        mpi_offset=mpi_file_offset+(MPI_Offset)((((size_t)nbytes_xfer/(buf_size/blk_size)
+                            *(size_t)pio_mpi_nprocs_g)/((size_t)snbytes*blk_size))*(buf_size*(size_t)snbytes))
+                            +(MPI_Offset)((((size_t)nbytes_xfer/(buf_size/blk_size))*(size_t)pio_mpi_nprocs_g)%((size_t)snbytes*blk_size));
 
                         /* Number of bytes to be transferred per I/O operation */
                         nbytes_xfer_advance = blk_size * blk_size;
 
                         /* Global offset advance after each I/O operation */
                         /* mpi_offset_advance = (MPI_Offset)(snbytes/blk_size*(blk_size*blk_size)); */
-                        mpi_offset_advance = (MPI_Offset)(snbytes*blk_size);
+                        mpi_offset_advance = (MPI_Offset)((size_t)snbytes*blk_size);
 
                         /* MPI type to be used for collective access */
                         mpi_collective_type = mpi_chunk_inter_type;
@@ -2226,7 +2248,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                         buf_p+=nbytes_xfer_advance;
 
                         /* Advance global offset in dataset */
-                        nbytes_xfer+=nbytes_xfer_advance;
+                        nbytes_xfer+=(off_t)nbytes_xfer_advance;
 
                         /* Decrement number of bytes left this time */
                         nbytes_toxfer-=nbytes_xfer_advance;
@@ -2249,7 +2271,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                     VRFY((mrc==MPI_SUCCESS), "MPIO_READ");
 
                     /* Advance global offset in dataset */
-                    nbytes_xfer+=buf_size*blk_size;
+                    nbytes_xfer+=(off_t)buf_size*(off_t)blk_size;
                 } /* end else */
 
             } /* end else */
@@ -2277,21 +2299,21 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
             VRFY((hrc >= 0), "H5Dread");
 
             /* Increment number of bytes transferred */
-            nbytes_xfer += buf_size;
+            nbytes_xfer += (off_t)buf_size;
             } /* end if */
             /* 2D dataspace */
             else {
             /* Set up the file dset space id to move the selection to process */
             if (!parms->interleaved){
                 /* Contiguous pattern */
-                h5offset[0] = (nbytes_xfer/(snbytes*blk_size))*blk_size;
-                h5offset[1] = (nbytes_xfer%(snbytes*blk_size))/blk_size;
+                h5offset[0] = (hssize_t)(((size_t)nbytes_xfer/((size_t)snbytes*blk_size))*blk_size);
+                h5offset[1] = (hssize_t)(((size_t)nbytes_xfer%((size_t)snbytes*blk_size))/blk_size);
             } /* end if */
             else {
                 /* Interleaved access pattern */
                 /* Skip offset over blocks of other processes */
-                h5offset[0] = ((nbytes_xfer*pio_mpi_nprocs_g)/(snbytes*buf_size))*buf_size;
-                h5offset[1] = ((nbytes_xfer*pio_mpi_nprocs_g)%(snbytes*buf_size))/buf_size;
+                h5offset[0] = (hssize_t)((((size_t)nbytes_xfer*(size_t)pio_mpi_nprocs_g)/((size_t)snbytes*buf_size))*buf_size);
+                h5offset[1] = (hssize_t)((((size_t)nbytes_xfer*(size_t)pio_mpi_nprocs_g)%((size_t)snbytes*buf_size))/buf_size);
 
             } /* end else */
             hrc = H5Soffset_simple(h5dset_space_id, h5offset);
@@ -2303,9 +2325,12 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
             VRFY((hrc >= 0), "H5Dread");
 
             /* Increment number of bytes transferred */
-            nbytes_xfer += buf_size*blk_size;
+            nbytes_xfer += (off_t)buf_size*(off_t)blk_size;
 
             } /* end else */
+            break;
+
+        default:
             break;
         } /* switch (parms->io_type) */
 
@@ -2339,7 +2364,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
     } /* end while */
 
     /* Stop "raw data" read timer */
-    set_time(res->timers, HDF5_RAW_READ_FIXED_DIMS, TSTOP);
+    io_time_set(res->timers, HDF5_RAW_READ_FIXED_DIMS, TSTOP);
 
     /* Calculate read time */
 
@@ -2348,11 +2373,11 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
         hrc = H5Dclose(h5ds_id);
 
         if (hrc < 0) {
-        fprintf(stderr, "HDF5 Dataset Close failed\n");
+        HDfprintf(stderr, "HDF5 Dataset Close failed\n");
         GOTOERROR(FAIL);
         }
 
-        h5ds_id = -1;
+        h5ds_id = H5I_INVALID_HID;
     } /* end if */
     } /* end for */
 
@@ -2405,30 +2430,30 @@ done:
     if (h5dset_space_id != -1) {
     hrc = H5Sclose(h5dset_space_id);
     if (hrc < 0){
-        fprintf(stderr, "HDF5 Dataset Space Close failed\n");
+        HDfprintf(stderr, "HDF5 Dataset Space Close failed\n");
         ret_code = FAIL;
     } else {
-        h5dset_space_id = -1;
+        h5dset_space_id = H5I_INVALID_HID;
     }
     }
 
     if (h5mem_space_id != -1) {
     hrc = H5Sclose(h5mem_space_id);
     if (hrc < 0) {
-        fprintf(stderr, "HDF5 Memory Space Close failed\n");
+        HDfprintf(stderr, "HDF5 Memory Space Close failed\n");
         ret_code = FAIL;
     } else {
-        h5mem_space_id = -1;
+        h5mem_space_id = H5I_INVALID_HID;
     }
     }
 
     if (h5dxpl != -1) {
     hrc = H5Pclose(h5dxpl);
     if (hrc < 0) {
-        fprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
+        HDfprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
         ret_code = FAIL;
     } else {
-        h5dxpl = -1;
+        h5dxpl = H5I_INVALID_HID;
     }
     }
 
@@ -2446,7 +2471,7 @@ done:
 do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
 {
     int ret_code = SUCCESS, mrc;
-    hid_t acc_tpl = -1;         /* file access templates */
+    hid_t acc_tpl = H5I_INVALID_HID;         /* file access templates */
 
     switch (param->io_type) {
         case POSIXIO:
@@ -2456,7 +2481,7 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
                 fd->posixfd = POSIXOPEN(fname, O_RDONLY);
 
             if (fd->posixfd < 0 ) {
-                fprintf(stderr, "POSIX File Open failed(%s)\n", fname);
+                HDfprintf(stderr, "POSIX File Open failed(%s)\n", fname);
                 GOTOERROR(FAIL);
             }
 
@@ -2480,7 +2505,7 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
                     h5_io_info_g, &fd->mpifd);
 
                 if (mrc != MPI_SUCCESS) {
-                    fprintf(stderr, "MPI File Open failed(%s)\n", fname);
+                    HDfprintf(stderr, "MPI File Open failed(%s)\n", fname);
                     GOTOERROR(FAIL);
                 }
 
@@ -2488,13 +2513,13 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
                 /*filesize , set size to 0 explicitedly.    */
                 mrc = MPI_File_set_size(fd->mpifd, (MPI_Offset)0);
                 if (mrc != MPI_SUCCESS) {
-                    fprintf(stderr, "MPI_File_set_size failed\n");
+                    HDfprintf(stderr, "MPI_File_set_size failed\n");
                     GOTOERROR(FAIL);
                 }
             } else {
                 mrc = MPI_File_open(pio_comm_g, fname, MPI_MODE_RDONLY, h5_io_info_g, &fd->mpifd);
                 if (mrc != MPI_SUCCESS) {
-                    fprintf(stderr, "MPI File Open failed(%s)\n", fname);
+                    HDfprintf(stderr, "MPI File Open failed(%s)\n", fname);
                     GOTOERROR(FAIL);
                 }
             }
@@ -2503,19 +2528,19 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
 
         case PHDF5:
             if ((acc_tpl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
-                fprintf(stderr, "HDF5 Property List Create failed\n");
+                HDfprintf(stderr, "HDF5 Property List Create failed\n");
                 GOTOERROR(FAIL);
             }
 
             /* Set the file driver to the MPI-IO driver */
             if (H5Pset_fapl_mpio(acc_tpl, pio_comm_g, h5_io_info_g) < 0) {
-                fprintf(stderr, "HDF5 Property List Set failed\n");
+                HDfprintf(stderr, "HDF5 Property List Set failed\n");
                 GOTOERROR(FAIL);
             }
 
             /* Set the alignment of objects in HDF5 file */
             if (H5Pset_alignment(acc_tpl, param->h5_thresh, param->h5_align) < 0) {
-                fprintf(stderr, "HDF5 Property List Set failed\n");
+                HDfprintf(stderr, "HDF5 Property List Set failed\n");
                 GOTOERROR(FAIL);
             }
 
@@ -2525,16 +2550,19 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
             else
                 fd->h5fd = H5Fopen(fname, H5F_ACC_RDONLY, acc_tpl);
             if (fd->h5fd < 0) {
-                fprintf(stderr, "HDF5 File Create failed(%s)\n", fname);
+                HDfprintf(stderr, "HDF5 File Create failed(%s)\n", fname);
                 GOTOERROR(FAIL);
             }
 
             /* verifying the close of the acc_tpl */
             if (H5Pclose(acc_tpl) < 0) {
-                fprintf(stderr, "HDF5 Property List Close failed\n");
+                HDfprintf(stderr, "HDF5 Property List Close failed\n");
                 GOTOERROR(FAIL);
             }
 
+            break;
+
+        default:
             break;
     }
 
@@ -2556,38 +2584,41 @@ do_fclose(iotype iot, file_descr *fd /*out*/)
     int mrc = 0, rc = 0;
 
     switch (iot) {
-    case POSIXIO:
-        rc = POSIXCLOSE(fd->posixfd);
+        case POSIXIO:
+            rc = POSIXCLOSE(fd->posixfd);
 
-        if (rc != 0){
-        fprintf(stderr, "POSIX File Close failed\n");
-        GOTOERROR(FAIL);
-        }
+            if (rc != 0){
+                HDfprintf(stderr, "POSIX File Close failed\n");
+                GOTOERROR(FAIL);
+            }
 
-        fd->posixfd = -1;
-        break;
+            fd->posixfd = -1;
+            break;
 
-    case MPIO:
-        mrc = MPI_File_close(&fd->mpifd);
+        case MPIO:
+            mrc = MPI_File_close(&fd->mpifd);
 
-        if (mrc != MPI_SUCCESS){
-        fprintf(stderr, "MPI File close failed\n");
-        GOTOERROR(FAIL);
-        }
+            if (mrc != MPI_SUCCESS){
+                HDfprintf(stderr, "MPI File close failed\n");
+                GOTOERROR(FAIL);
+            }
 
-        fd->mpifd = MPI_FILE_NULL;
-        break;
+            fd->mpifd = MPI_FILE_NULL;
+            break;
 
-    case PHDF5:
-        hrc = H5Fclose(fd->h5fd);
+        case PHDF5:
+            hrc = H5Fclose(fd->h5fd);
 
-        if (hrc < 0) {
-        fprintf(stderr, "HDF5 File Close failed\n");
-        GOTOERROR(FAIL);
-        }
+            if (hrc < 0) {
+                HDfprintf(stderr, "HDF5 File Close failed\n");
+                GOTOERROR(FAIL);
+            }
 
-        fd->h5fd = -1;
-        break;
+            fd->h5fd = -1;
+            break;
+
+        default:
+            break;
     }
 
 done:
@@ -2614,15 +2645,17 @@ do_cleanupfile(iotype iot, char *fname)
     clean_file_g = (getenv("HDF5_NOCLEANUP")==NULL) ? 1 : 0;
 
     if (clean_file_g){
-    switch (iot){
-        case POSIXIO:
-        remove(fname);
-        break;
-        case MPIO:
-        case PHDF5:
-        MPI_File_delete(fname, h5_io_info_g);
-        break;
-    }
+        switch (iot){
+            case POSIXIO:
+                HDremove(fname);
+                break;
+            case MPIO:
+            case PHDF5:
+                MPI_File_delete(fname, h5_io_info_g);
+                break;
+            default:
+                break;
+        }
     }
 }
 
@@ -2634,9 +2667,9 @@ int MPI_File_read_at(MPI_File fh, MPI_Offset offset, void *buf,
     int count, MPI_Datatype datatype, MPI_Status *status)
 {
     int err;
-    set_time(timer_g, HDF5_MPI_READ, TSTART);
+    io_time_set(timer_g, HDF5_MPI_READ, TSTART);
     err=PMPI_File_read_at(fh, offset, buf, count, datatype, status);
-    set_time(timer_g, HDF5_MPI_READ, TSTOP);
+    io_time_set(timer_g, HDF5_MPI_READ, TSTOP);
     return err;
 }
 
@@ -2645,9 +2678,9 @@ int MPI_File_read_at_all(MPI_File fh, MPI_Offset offset, void *buf,
     int count, MPI_Datatype datatype, MPI_Status *status)
 {
     int err;
-    set_time(timer_g, HDF5_MPI_READ, TSTART);
+    io_time_set(timer_g, HDF5_MPI_READ, TSTART);
     err=PMPI_File_read_at_all(fh, offset, buf, count, datatype, status);
-    set_time(timer_g, HDF5_MPI_READ, TSTOP);
+    io_time_set(timer_g, HDF5_MPI_READ, TSTOP);
     return err;
 }
 
@@ -2655,9 +2688,9 @@ int MPI_File_write_at(MPI_File fh, MPI_Offset offset, void *buf,
     int count, MPI_Datatype datatype, MPI_Status *status)
 {
     int err;
-    set_time(timer_g, HDF5_MPI_WRITE, TSTART);
+    io_time_set(timer_g, HDF5_MPI_WRITE, TSTART);
     err=PMPI_File_write_at(fh, offset, buf, count, datatype, status);
-    set_time(timer_g, HDF5_MPI_WRITE, TSTOP);
+    io_time_set(timer_g, HDF5_MPI_WRITE, TSTOP);
     return err;
 }
 
@@ -2665,9 +2698,9 @@ int MPI_File_write_at_all(MPI_File fh, MPI_Offset offset, void *buf,
     int count, MPI_Datatype datatype, MPI_Status *status)
 {
     int err;
-    set_time(timer_g, HDF5_MPI_WRITE, TSTART);
+    io_time_set(timer_g, HDF5_MPI_WRITE, TSTART);
     err=PMPI_File_write_at_all(fh, offset, buf, count, datatype, status);
-    set_time(timer_g, HDF5_MPI_WRITE, TSTOP);
+    io_time_set(timer_g, HDF5_MPI_WRITE, TSTOP);
     return err;
 }
 

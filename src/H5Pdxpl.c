@@ -128,15 +128,7 @@
 #define H5D_MPIO_ACTUAL_IO_MODE_DEF     H5D_MPIO_NO_COLLECTIVE
 /* Definitions for cause of broken collective io property */
 #define H5D_MPIO_NO_COLLECTIVE_CAUSE_SIZE   sizeof(uint32_t)
-#define H5D_MPIO_NO_COLLECTIVE_CAUSE_DEF   H5D_MPIO_COLLECTIVE 
-#ifdef H5_HAVE_PARALLEL
-/* Definitions for memory MPI type property */
-#define H5FD_MPI_XFER_MEM_MPI_TYPE_SIZE        sizeof(MPI_Datatype)
-#define H5FD_MPI_XFER_MEM_MPI_TYPE_DEF         MPI_DATATYPE_NULL
-/* Definitions for file MPI type property */
-#define H5FD_MPI_XFER_FILE_MPI_TYPE_SIZE       sizeof(MPI_Datatype)
-#define H5FD_MPI_XFER_FILE_MPI_TYPE_DEF        MPI_DATATYPE_NULL
-#endif /* H5_HAVE_PARALLEL */
+#define H5D_MPIO_NO_COLLECTIVE_CAUSE_DEF   H5D_MPIO_COLLECTIVE
 
 /* Definitions for EDC property */
 #define H5D_XFER_EDC_SIZE           sizeof(H5Z_EDC_t)
@@ -160,38 +152,6 @@
 #define H5D_XFER_XFORM_COPY         H5P__dxfr_xform_copy
 #define H5D_XFER_XFORM_CMP          H5P__dxfr_xform_cmp
 #define H5D_XFER_XFORM_CLOSE        H5P__dxfr_xform_close
-/* Definitions for properties of direct chunk write */
-#define H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_SIZE		sizeof(hbool_t)
-#define H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_DEF		FALSE
-#define H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_SIZE	sizeof(uint32_t)
-#define H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_DEF		0
-#define H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_SIZE		sizeof(hsize_t *)
-#define H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_DEF		NULL
-#define H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_SIZE	sizeof(uint32_t)
-#define H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_DEF	0
-/* Definitions for properties of direct chunk read */
-#define H5D_XFER_DIRECT_CHUNK_READ_FLAG_SIZE        sizeof(hbool_t)
-#define H5D_XFER_DIRECT_CHUNK_READ_FLAG_DEF         FALSE
-#define H5D_XFER_DIRECT_CHUNK_READ_FILTERS_SIZE     sizeof(uint32_t)
-#define H5D_XFER_DIRECT_CHUNK_READ_FILTERS_DEF      0
-#define H5D_XFER_DIRECT_CHUNK_READ_OFFSET_SIZE      sizeof(hsize_t *)
-#define H5D_XFER_DIRECT_CHUNK_READ_OFFSET_DEF       NULL
-/* Ring type - private property */
-#define H5AC_XFER_RING_SIZE      sizeof(unsigned)
-#define H5AC_XFER_RING_DEF       H5AC_RING_USER
-#define H5AC_XFER_RING_ENC       H5P__encode_unsigned
-#define H5AC_XFER_RING_DEC       H5P__decode_unsigned
-#ifdef H5_DEBUG_BUILD
-/* dxpl I/O type - private property */
-#define H5FD_DXPL_TYPE_SIZE       sizeof(H5FD_dxpl_type_t)
-#endif /* H5_DEBUG_BUILD */
-#ifdef H5_HAVE_PARALLEL
-/* Definition for reading metadata collectively */
-#define H5D_XFER_COLL_MD_READ_SIZE   sizeof(H5P_coll_md_read_flag_t)
-#define H5D_XFER_COLL_MD_READ_DEF    H5P_USER_FALSE
-#define H5D_XFER_COLL_MD_READ_ENC    H5P__encode_coll_md_read_flag_t
-#define H5D_XFER_COLL_MD_READ_DEC    H5P__decode_coll_md_read_flag_t
-#endif /* H5_HAVE_PARALLEL */
 
 
 /******************/
@@ -278,7 +238,6 @@ static const void *H5D_def_vlen_alloc_info_g = H5D_XFER_VLEN_ALLOC_INFO_DEF;   /
 static const H5MM_free_t H5D_def_vlen_free_g = H5D_XFER_VLEN_FREE_DEF;         /* Default value for vlen free function */
 static const void *H5D_def_vlen_free_info_g = H5D_XFER_VLEN_FREE_INFO_DEF;     /* Default value for vlen free information */
 static const size_t H5D_def_hyp_vec_size_g = H5D_XFER_HYPER_VECTOR_SIZE_DEF;   /* Default value for vector size */
-static const haddr_t H5D_def_tag_g = H5AC_TAG_DEF;                              /* Default value for cache entry tag */
 static const H5FD_mpio_xfer_t H5D_def_io_xfer_mode_g = H5D_XFER_IO_XFER_MODE_DEF;      /* Default value for I/O transfer mode */
 static const H5FD_mpio_chunk_opt_t H5D_def_mpio_chunk_opt_mode_g = H5D_XFER_MPIO_CHUNK_OPT_HARD_DEF;
 static const H5FD_mpio_collective_opt_t H5D_def_mpio_collective_opt_mode_g = H5D_XFER_MPIO_COLLECTIVE_OPT_DEF;
@@ -286,27 +245,11 @@ static const unsigned H5D_def_mpio_chunk_opt_num_g = H5D_XFER_MPIO_CHUNK_OPT_NUM
 static const unsigned H5D_def_mpio_chunk_opt_ratio_g = H5D_XFER_MPIO_CHUNK_OPT_RATIO_DEF;
 static const H5D_mpio_actual_chunk_opt_mode_t H5D_def_mpio_actual_chunk_opt_mode_g = H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_DEF;
 static const H5D_mpio_actual_io_mode_t H5D_def_mpio_actual_io_mode_g = H5D_MPIO_ACTUAL_IO_MODE_DEF;
-static const H5D_mpio_no_collective_cause_t H5D_def_mpio_no_collective_cause_g = H5D_MPIO_NO_COLLECTIVE_CAUSE_DEF; 
-#ifdef H5_HAVE_PARALLEL
-static const MPI_Datatype H5D_def_btype_g = H5FD_MPI_XFER_MEM_MPI_TYPE_DEF;  /* Default value for MPI buffer type */
-static const MPI_Datatype H5D_def_ftype_g = H5FD_MPI_XFER_FILE_MPI_TYPE_DEF; /* Default value for MPI file type */
-static const H5P_coll_md_read_flag_t H5D_def_coll_md_read_g = H5D_XFER_COLL_MD_READ_DEF;  /* Default setting for the collective metedata read flag */
-#endif /* H5_HAVE_PARALLEL */
+static const H5D_mpio_no_collective_cause_t H5D_def_mpio_no_collective_cause_g = H5D_MPIO_NO_COLLECTIVE_CAUSE_DEF;
 static const H5Z_EDC_t H5D_def_enable_edc_g = H5D_XFER_EDC_DEF;            /* Default value for EDC property */
 static const H5Z_cb_t H5D_def_filter_cb_g = H5D_XFER_FILTER_CB_DEF;        /* Default value for filter callback */
 static const H5T_conv_cb_t H5D_def_conv_cb_g = H5D_XFER_CONV_CB_DEF;       /* Default value for datatype conversion callback */
 static const void *H5D_def_xfer_xform_g = H5D_XFER_XFORM_DEF;          /* Default value for data transform */
-static const hbool_t H5D_def_direct_chunk_flag_g = H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_DEF; 	/* Default value for the flag of direct chunk write */
-static const uint32_t H5D_def_direct_chunk_filters_g = H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_DEF;	/* Default value for the filters of direct chunk write */
-static const hsize_t *H5D_def_direct_chunk_offset_g = H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_DEF; 	/* Default value for the offset of direct chunk write */
-static const uint32_t H5D_def_direct_chunk_datasize_g = H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_DEF; /* Default value for the datasize of direct chunk write */
-static const hbool_t direct_chunk_read_flag = H5D_XFER_DIRECT_CHUNK_READ_FLAG_DEF;         /* Default value for the flag of direct chunk read */
-static const hsize_t *direct_chunk_read_offset = H5D_XFER_DIRECT_CHUNK_READ_OFFSET_DEF;    /* Default value for the offset of direct chunk read */
-static const uint32_t direct_chunk_read_filters = H5D_XFER_DIRECT_CHUNK_READ_FILTERS_DEF;    /* Default value for the filters of direct chunk read */
-static const H5AC_ring_t H5D_ring_g = H5AC_XFER_RING_DEF; /* Default value for the cache entry ring type */
-#ifdef H5_DEBUG_BUILD
-static const H5FD_dxpl_type_t H5D_dxpl_type_g = H5FD_NOIO_DXPL; /* Default value for the dxpl type */
-#endif /* H5_DEBUG_BUILD */
 
 
 /*-------------------------------------------------------------------------
@@ -328,215 +271,134 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
     FUNC_ENTER_STATIC
 
     /* Register the max. temp buffer size property */
-    if(H5P_register_real(pclass, H5D_XFER_MAX_TEMP_BUF_NAME, H5D_XFER_MAX_TEMP_BUF_SIZE, &H5D_def_max_temp_buf_g, 
+    if(H5P__register_real(pclass, H5D_XFER_MAX_TEMP_BUF_NAME, H5D_XFER_MAX_TEMP_BUF_SIZE, &H5D_def_max_temp_buf_g,
             NULL, NULL, NULL, H5D_XFER_MAX_TEMP_BUF_ENC, H5D_XFER_MAX_TEMP_BUF_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
-    /* Register the cache tag property */
-    if(H5P_register_real(pclass, H5AC_TAG_NAME, H5AC_TAG_SIZE, &H5D_def_tag_g,
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
     /* Register the type conversion buffer property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_XFER_TCONV_BUF_NAME, H5D_XFER_TCONV_BUF_SIZE, &H5D_def_tconv_buf_g, 
+    if(H5P__register_real(pclass, H5D_XFER_TCONV_BUF_NAME, H5D_XFER_TCONV_BUF_SIZE, &H5D_def_tconv_buf_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the background buffer property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_XFER_BKGR_BUF_NAME, H5D_XFER_BKGR_BUF_SIZE, &H5D_def_bkgr_buf_g, 
+    if(H5P__register_real(pclass, H5D_XFER_BKGR_BUF_NAME, H5D_XFER_BKGR_BUF_SIZE, &H5D_def_bkgr_buf_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the background buffer type property */
-    if(H5P_register_real(pclass, H5D_XFER_BKGR_BUF_TYPE_NAME, H5D_XFER_BKGR_BUF_TYPE_SIZE, &H5D_def_bkgr_buf_type_g, 
+    if(H5P__register_real(pclass, H5D_XFER_BKGR_BUF_TYPE_NAME, H5D_XFER_BKGR_BUF_TYPE_SIZE, &H5D_def_bkgr_buf_type_g,
              NULL, NULL, NULL, H5D_XFER_BKGR_BUF_TYPE_ENC, H5D_XFER_BKGR_BUF_TYPE_DEC,
              NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the B-Tree node splitting ratios property */
-    if(H5P_register_real(pclass, H5D_XFER_BTREE_SPLIT_RATIO_NAME, H5D_XFER_BTREE_SPLIT_RATIO_SIZE, H5D_def_btree_split_ratio_g, 
+    if(H5P__register_real(pclass, H5D_XFER_BTREE_SPLIT_RATIO_NAME, H5D_XFER_BTREE_SPLIT_RATIO_SIZE, H5D_def_btree_split_ratio_g,
             NULL, NULL, NULL, H5D_XFER_BTREE_SPLIT_RATIO_ENC, H5D_XFER_BTREE_SPLIT_RATIO_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the vlen allocation function property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_XFER_VLEN_ALLOC_NAME, H5D_XFER_VLEN_ALLOC_SIZE, &H5D_def_vlen_alloc_g, 
+    if(H5P__register_real(pclass, H5D_XFER_VLEN_ALLOC_NAME, H5D_XFER_VLEN_ALLOC_SIZE, &H5D_def_vlen_alloc_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the vlen allocation information property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_XFER_VLEN_ALLOC_INFO_NAME, H5D_XFER_VLEN_ALLOC_INFO_SIZE, &H5D_def_vlen_alloc_info_g, 
+    if(H5P__register_real(pclass, H5D_XFER_VLEN_ALLOC_INFO_NAME, H5D_XFER_VLEN_ALLOC_INFO_SIZE, &H5D_def_vlen_alloc_info_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the vlen free function property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_XFER_VLEN_FREE_NAME, H5D_XFER_VLEN_FREE_SIZE, &H5D_def_vlen_free_g, 
+    if(H5P__register_real(pclass, H5D_XFER_VLEN_FREE_NAME, H5D_XFER_VLEN_FREE_SIZE, &H5D_def_vlen_free_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the vlen free information property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_XFER_VLEN_FREE_INFO_NAME, H5D_XFER_VLEN_FREE_INFO_SIZE, &H5D_def_vlen_free_info_g, 
+    if(H5P__register_real(pclass, H5D_XFER_VLEN_FREE_INFO_NAME, H5D_XFER_VLEN_FREE_INFO_SIZE, &H5D_def_vlen_free_info_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the vector size property */
-    if(H5P_register_real(pclass, H5D_XFER_HYPER_VECTOR_SIZE_NAME, H5D_XFER_HYPER_VECTOR_SIZE_SIZE, &H5D_def_hyp_vec_size_g, 
+    if(H5P__register_real(pclass, H5D_XFER_HYPER_VECTOR_SIZE_NAME, H5D_XFER_HYPER_VECTOR_SIZE_SIZE, &H5D_def_hyp_vec_size_g,
             NULL, NULL, NULL, H5D_XFER_HYPER_VECTOR_SIZE_ENC, H5D_XFER_HYPER_VECTOR_SIZE_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the I/O transfer mode properties */
-    if(H5P_register_real(pclass, H5D_XFER_IO_XFER_MODE_NAME, H5D_XFER_IO_XFER_MODE_SIZE, &H5D_def_io_xfer_mode_g, 
+    if(H5P__register_real(pclass, H5D_XFER_IO_XFER_MODE_NAME, H5D_XFER_IO_XFER_MODE_SIZE, &H5D_def_io_xfer_mode_g,
             NULL, NULL, NULL, H5D_XFER_IO_XFER_MODE_ENC, H5D_XFER_IO_XFER_MODE_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-    if(H5P_register_real(pclass, H5D_XFER_MPIO_COLLECTIVE_OPT_NAME, H5D_XFER_MPIO_COLLECTIVE_OPT_SIZE, &H5D_def_mpio_collective_opt_mode_g, 
+    if(H5P__register_real(pclass, H5D_XFER_MPIO_COLLECTIVE_OPT_NAME, H5D_XFER_MPIO_COLLECTIVE_OPT_SIZE, &H5D_def_mpio_collective_opt_mode_g,
             NULL, NULL, NULL, H5D_XFER_MPIO_COLLECTIVE_OPT_ENC, H5D_XFER_MPIO_COLLECTIVE_OPT_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-    if(H5P_register_real(pclass, H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME, H5D_XFER_MPIO_CHUNK_OPT_HARD_SIZE, &H5D_def_mpio_chunk_opt_mode_g, 
+    if(H5P__register_real(pclass, H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME, H5D_XFER_MPIO_CHUNK_OPT_HARD_SIZE, &H5D_def_mpio_chunk_opt_mode_g,
             NULL, NULL, NULL, H5D_XFER_MPIO_CHUNK_OPT_HARD_ENC, H5D_XFER_MPIO_CHUNK_OPT_HARD_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-    if(H5P_register_real(pclass, H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME, H5D_XFER_MPIO_CHUNK_OPT_NUM_SIZE, &H5D_def_mpio_chunk_opt_num_g, 
+    if(H5P__register_real(pclass, H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME, H5D_XFER_MPIO_CHUNK_OPT_NUM_SIZE, &H5D_def_mpio_chunk_opt_num_g,
             NULL, NULL, NULL, H5D_XFER_MPIO_CHUNK_OPT_NUM_ENC, H5D_XFER_MPIO_CHUNK_OPT_NUM_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-    if(H5P_register_real(pclass, H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME, H5D_XFER_MPIO_CHUNK_OPT_RATIO_SIZE, &H5D_def_mpio_chunk_opt_ratio_g, 
+    if(H5P__register_real(pclass, H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME, H5D_XFER_MPIO_CHUNK_OPT_RATIO_SIZE, &H5D_def_mpio_chunk_opt_ratio_g,
             NULL, NULL, NULL, H5D_XFER_MPIO_CHUNK_OPT_RATIO_ENC, H5D_XFER_MPIO_CHUNK_OPT_RATIO_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the chunk optimization mode property. */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_NAME, H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_SIZE, &H5D_def_mpio_actual_chunk_opt_mode_g, 
+    if(H5P__register_real(pclass, H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_NAME, H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_SIZE, &H5D_def_mpio_actual_chunk_opt_mode_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the actual I/O mode property. */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_MPIO_ACTUAL_IO_MODE_NAME, H5D_MPIO_ACTUAL_IO_MODE_SIZE, &H5D_def_mpio_actual_io_mode_g, 
+    if(H5P__register_real(pclass, H5D_MPIO_ACTUAL_IO_MODE_NAME, H5D_MPIO_ACTUAL_IO_MODE_SIZE, &H5D_def_mpio_actual_io_mode_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the local cause of broken collective I/O */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME, H5D_MPIO_NO_COLLECTIVE_CAUSE_SIZE, &H5D_def_mpio_no_collective_cause_g,
+    if(H5P__register_real(pclass, H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME, H5D_MPIO_NO_COLLECTIVE_CAUSE_SIZE, &H5D_def_mpio_no_collective_cause_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the global cause of broken collective I/O */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, H5D_MPIO_NO_COLLECTIVE_CAUSE_SIZE, &H5D_def_mpio_no_collective_cause_g,
+    if(H5P__register_real(pclass, H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, H5D_MPIO_NO_COLLECTIVE_CAUSE_SIZE, &H5D_def_mpio_no_collective_cause_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-#ifdef H5_HAVE_PARALLEL
-    /* Register the MPI memory type property */
-    /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5FD_MPI_XFER_MEM_MPI_TYPE_NAME, H5FD_MPI_XFER_MEM_MPI_TYPE_SIZE, &H5D_def_btype_g,
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the MPI file type property */
-    /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5FD_MPI_XFER_FILE_MPI_TYPE_NAME, H5FD_MPI_XFER_FILE_MPI_TYPE_SIZE, &H5D_def_ftype_g,
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the metadata collective read flag */
-    if(H5P_register_real(pclass, H5_COLL_MD_READ_FLAG_NAME, H5D_XFER_COLL_MD_READ_SIZE, 
-            &H5D_def_coll_md_read_g, 
-            NULL, NULL, NULL, H5D_XFER_COLL_MD_READ_ENC, H5D_XFER_COLL_MD_READ_DEC, 
-            NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-#endif /* H5_HAVE_PARALLEL */
 
     /* Register the EDC property */
-    if(H5P_register_real(pclass, H5D_XFER_EDC_NAME, H5D_XFER_EDC_SIZE, &H5D_def_enable_edc_g,
+    if(H5P__register_real(pclass, H5D_XFER_EDC_NAME, H5D_XFER_EDC_SIZE, &H5D_def_enable_edc_g,
             NULL, NULL, NULL, H5D_XFER_EDC_ENC, H5D_XFER_EDC_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the filter callback property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_XFER_FILTER_CB_NAME, H5D_XFER_FILTER_CB_SIZE, &H5D_def_filter_cb_g,
+    if(H5P__register_real(pclass, H5D_XFER_FILTER_CB_NAME, H5D_XFER_FILTER_CB_SIZE, &H5D_def_filter_cb_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the type conversion callback property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_XFER_CONV_CB_NAME, H5D_XFER_CONV_CB_SIZE, &H5D_def_conv_cb_g,
+    if(H5P__register_real(pclass, H5D_XFER_CONV_CB_NAME, H5D_XFER_CONV_CB_SIZE, &H5D_def_conv_cb_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the data transform property */
-    if(H5P_register_real(pclass, H5D_XFER_XFORM_NAME, H5D_XFER_XFORM_SIZE, &H5D_def_xfer_xform_g,
-            NULL, H5D_XFER_XFORM_SET, H5D_XFER_XFORM_GET, H5D_XFER_XFORM_ENC, H5D_XFER_XFORM_DEC, 
+    if(H5P__register_real(pclass, H5D_XFER_XFORM_NAME, H5D_XFER_XFORM_SIZE, &H5D_def_xfer_xform_g,
+            NULL, H5D_XFER_XFORM_SET, H5D_XFER_XFORM_GET, H5D_XFER_XFORM_ENC, H5D_XFER_XFORM_DEC,
             H5D_XFER_XFORM_DEL, H5D_XFER_XFORM_COPY, H5D_XFER_XFORM_CMP, H5D_XFER_XFORM_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the property of flag for direct chunk write */
-    /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME, H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_SIZE, &H5D_def_direct_chunk_flag_g,
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the property of filter for direct chunk write */
-    /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME, H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_SIZE, &H5D_def_direct_chunk_filters_g,
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the property of offset for direct chunk write */
-    /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME, H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_SIZE, &H5D_def_direct_chunk_offset_g,
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the property of datasize for direct chunk write */
-    /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME, H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_SIZE, &H5D_def_direct_chunk_datasize_g,
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the property of flag for direct chunk read */
-    /* (Note: this property should not have an encode/decode callback) */
-    if(H5P_register_real(pclass, H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME, H5D_XFER_DIRECT_CHUNK_READ_FLAG_SIZE, &direct_chunk_read_flag,
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the property of filter for direct chunk read */
-    /* (Note: this property should not have an encode/decode callback) */
-    if(H5P_register_real(pclass, H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME, H5D_XFER_DIRECT_CHUNK_READ_FILTERS_SIZE, &direct_chunk_read_filters,
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the property of offset for direct chunk read */
-    /* (Note: this property should not have an encode/decode callback) */
-    if(H5P_register_real(pclass, H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME, H5D_XFER_DIRECT_CHUNK_READ_OFFSET_SIZE, &direct_chunk_read_offset,
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the ring property (private) */
-    if(H5P_register_real(pclass, H5AC_RING_NAME, H5AC_XFER_RING_SIZE, &H5D_ring_g,
-            NULL, NULL, NULL, H5AC_XFER_RING_ENC, H5AC_XFER_RING_DEC, 
-            NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-#ifdef H5_DEBUG_BUILD
-    /* Register the dxpl IO type property */
-    if(H5P_register_real(pclass, H5FD_DXPL_TYPE_NAME, H5FD_DXPL_TYPE_SIZE, &H5D_dxpl_type_g,
-                         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-#endif /* H5_DEBUG_BUILD */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -833,7 +695,7 @@ H5P__dxfr_xform_enc(const void *value, void **_pp, size_t *size)
             HDassert(pexp);
 
             /* Copy the expression into the buffer */
-            HDmemcpy(*pp, (const uint8_t *)pexp, len);
+            H5MM_memcpy(*pp, (const uint8_t *)pexp, len);
             *pp += len;
             *pp[0] = '\0';
         } /* end if */
@@ -998,7 +860,7 @@ H5P__dxfr_xform_cmp(const void *_xform1, const void *_xform2, size_t H5_ATTR_UNU
 
     if(*xform1) {
         HDassert(*xform2);
-    
+
         /* Get the transform expressions */
         pexp1 = H5Z_xform_extract_xform_str(*xform1);
         pexp2 = H5Z_xform_extract_xform_str(*xform2);
@@ -1173,7 +1035,7 @@ done:
  *		for the type conversion buffer and background buffer and
  *		optionally supply pointers to application-allocated buffers.
  *		If the buffer size is smaller than the entire amount of data
- *		being transfered between application and file, and a type
+ *		being transferred between application and file, and a type
  *		conversion buffer or background buffer is required then
  *		strip mining will be used.
  *
@@ -1657,7 +1519,7 @@ done:
  *
  * Purpose:	Sets the memory allocate/free pair for VL datatypes.  The
  *		allocation routine is called when data is read into a new
- *		array and the free routine is called when H5Dvlen_reclaim is
+ *		array and the free routine is called when H5Treclaim is
  *		called.  The alloc_info and free_info are user parameters
  *		which are passed to the allocation and freeing functions
  *		respectively.  To reset the allocate/free functions to the
@@ -1701,7 +1563,7 @@ done:
  *
  * Purpose:	Sets the memory allocate/free pair for VL datatypes.  The
  *		allocation routine is called when data is read into a new
- *		array and the free routine is called when H5Dvlen_reclaim is
+ *		array and the free routine is called when H5Treclaim is
  *		called.  The alloc_info and free_info are user parameters
  *		which are passed to the allocation and freeing functions
  *		respectively.  To reset the allocate/free functions to the
@@ -2102,7 +1964,7 @@ H5Pget_mpio_actual_chunk_opt_mode(hid_t plist_id, H5D_mpio_actual_chunk_opt_mode
 {
     H5P_genplist_t     *plist;
     herr_t ret_value = SUCCEED;   /* return value */
-    
+
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Do", plist_id, actual_chunk_opt_mode);
 
@@ -2138,7 +2000,7 @@ H5Pget_mpio_actual_io_mode(hid_t plist_id, H5D_mpio_actual_io_mode_t *actual_io_
 {
     H5P_genplist_t     *plist;
     herr_t ret_value = SUCCEED;   /* return value */
-    
+
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Di", plist_id, actual_io_mode);
 
@@ -2155,6 +2017,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_mpio_actual_io_mode() */
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_mpio_no_collective_cause
  *
@@ -2171,7 +2034,7 @@ H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no_collective_ca
 {
     H5P_genplist_t     *plist;
     herr_t ret_value = SUCCEED;   /* return value */
-    
+
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*Iu*Iu", plist_id, local_no_collective_cause,
              global_no_collective_cause);
@@ -2191,8 +2054,6 @@ H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no_collective_ca
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_mpio_no_collective_cause() */
-
-
 #endif /* H5_HAVE_PARALLEL */
 
 

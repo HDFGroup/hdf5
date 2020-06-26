@@ -1,0 +1,25 @@
+JUnit version 4.11
+.testH5Dget_storage_size
+.testH5Diterate_write
+.testH5Dcreate
+.testH5Dget_offset
+.testH5Dget_type
+.testH5Dfill
+.testH5Dopen
+.testH5Dcreate_anon
+.testH5Dfill_null
+.testH5Dget_storage_size_empty
+.testH5Diterate
+.testH5Dget_access_plist
+.testH5Dvlen_read_invalid_buffer
+.testH5Dvlen_get_buf_size
+.testH5Dget_space_closed
+.testH5Dget_space_status
+.testH5Dvlen_write_read
+.testH5Dget_space
+.testH5Dget_type_closed
+
+Time:  XXXX
+
+OK (19 tests)
+

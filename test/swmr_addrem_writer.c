@@ -288,21 +288,21 @@ addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long fl
 static void
 usage(void)
 {
-    printf("\n");
-    printf("Usage error!\n");
-    printf("\n");
-    printf("Usage: swmr_addrem_writer [-q] [-f <# of operations between flushing\n");
-    printf("    file contents>] [-r <random seed>] <# of operations>\n");
-    printf("\n");
-    printf("<# of operations between flushing file contents> should be 0 (for\n");
-    printf("no flushing) or between 1 and (<# of operations> - 1).\n");
-    printf("\n");
-    printf("<# of operations> must be specified.\n");
-    printf("\n");
-    printf("Defaults to verbose (no '-q' given), flushing every 1000 operations\n");
-    printf("('-f 1000'), and will generate a random seed (no -r given).\n");
-    printf("\n");
-    HDexit(1);
+    HDprintf("\n");
+    HDprintf("Usage error!\n");
+    HDprintf("\n");
+    HDprintf("Usage: swmr_addrem_writer [-q] [-f <# of operations between flushing\n");
+    HDprintf("    file contents>] [-r <random seed>] <# of operations>\n");
+    HDprintf("\n");
+    HDprintf("<# of operations between flushing file contents> should be 0 (for\n");
+    HDprintf("no flushing) or between 1 and (<# of operations> - 1).\n");
+    HDprintf("\n");
+    HDprintf("<# of operations> must be specified.\n");
+    HDprintf("\n");
+    HDprintf("Defaults to verbose (no '-q' given), flushing every 1000 operations\n");
+    HDprintf("('-f 1000'), and will generate a random seed (no -r given).\n");
+    HDprintf("\n");
+    HDexit(EXIT_FAILURE);
 }
 
 int main(int argc, const char *argv[])
@@ -337,7 +337,7 @@ int main(int argc, const char *argv[])
                         verbose = 0;
                         u++;
                         break;
-                    
+
                     /* Random # seed */
                     case 'r':
                         use_seed = 1;
@@ -401,7 +401,7 @@ int main(int argc, const char *argv[])
     /* Open file skeleton */
     if((fid = open_skeleton(FILENAME, verbose)) < 0) {
         HDfprintf(stderr, "Error opening skeleton file!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     /* Send a message to indicate "H5Fopen" is complete--releasing the file lock */
@@ -414,7 +414,7 @@ int main(int argc, const char *argv[])
     /* Grow and shrink datasets */
     if(addrem_records(fid, verbose, (unsigned long)nops, (unsigned long)flush_count) < 0) {
         HDfprintf(stderr, "Error adding and removing records from datasets!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -424,7 +424,7 @@ int main(int argc, const char *argv[])
     /* Clean up the symbols */
     if(shutdown_symbols() < 0) {
         HDfprintf(stderr, "Error releasing symbols!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -434,7 +434,7 @@ int main(int argc, const char *argv[])
     /* Close objects opened */
     if(H5Fclose(fid) < 0) {
         HDfprintf(stderr, "Error closing file!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     return 0;

@@ -23,25 +23,27 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib -I$(top_srcdir)/hl/sr
 
 # These are our main targets, the tools
 
-TEST_SCRIPT=h52giftest.sh
-check_SCRIPTS=$(TEST_SCRIPT)
-
 bin_PROGRAMS=gif2h5 h52gif
-noinst_PROGRAMS=h52gifgentst
 
 # Add h52gif and gif2h5 specific linker flags here
 h52gif_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 gif2h5_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 
-gif2h5_SOURCES=gif2hdf.c gif2mem.c decompress.c gifread.c writehdf.c 
+gif2h5_SOURCES=gif2hdf.c gif2mem.c decompress.c gifread.c writehdf.c
 
-h52gif_SOURCES=hdf2gif.c hdfgifwr.c 
+h52gif_SOURCES=hdf2gif.c hdfgifwr.c
 
-h52gifgentst_SOURCES=h52gifgentst.c 
 
 # Programs all depend on the hdf5 library, the tools library, and the HL
 # library.
 LDADD=$(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
+
+if BUILD_TESTS_CONDITIONAL
+  TEST_SCRIPT=h52giftest.sh
+  check_SCRIPTS=$(TEST_SCRIPT)
+  noinst_PROGRAMS=h52gifgentst
+  h52gifgentst_SOURCES=h52gifgentst.c
+endif
 
 CHECK_CLEANFILES+=*.h5
 CHECK_CLEANFILES+=*.gif

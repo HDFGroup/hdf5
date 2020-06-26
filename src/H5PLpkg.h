@@ -79,6 +79,7 @@
     /* maximum size for expanding env vars */
 #   define H5PL_EXPAND_BUFFER_SIZE 32767
 
+    typedef H5PL_type_t(__cdecl *H5PL_get_plugin_type_t)(void);
     typedef const void *(__cdecl *H5PL_get_plugin_info_t)(void);
 
 #else /* H5_HAVE_WIN32_API */
@@ -105,6 +106,7 @@
     /* Clear error */
 #   define H5PL_CLR_ERROR HERROR(H5E_PLUGIN, H5E_CANTGET, "can't dlopen:%s", dlerror())
 
+    typedef H5PL_type_t(*H5PL_get_plugin_type_t)(void);
     typedef const void *(*H5PL_get_plugin_info_t)(void);
 #endif /* H5_HAVE_WIN32_API */
 
@@ -115,8 +117,8 @@
 
 /* Data used to search for plugins */
 typedef struct H5PL_search_params_t {
-    H5PL_type_t     type;
-    int             id;
+    H5PL_type_t         type;
+    const H5PL_key_t   *key;
 } H5PL_search_params_t;
 
 
@@ -134,13 +136,15 @@ H5_DLL herr_t H5PL__get_plugin_control_mask(unsigned int *mask /*out*/);
 H5_DLL herr_t H5PL__set_plugin_control_mask(unsigned int mask);
 
 /* Plugin search and manipulation */
-H5_DLL herr_t H5PL__open(const char *libname, H5PL_type_t type, int id, hbool_t *success /*out*/, const void **plugin_info /*out*/);
+H5_DLL herr_t H5PL__open(const char *libname, H5PL_type_t type, const H5PL_key_t *key,
+    hbool_t *success /*out*/, const void **plugin_info /*out*/);
 H5_DLL herr_t H5PL__close(H5PL_HANDLE handle);
 
 /* Plugin cache calls */
 H5_DLL herr_t H5PL__create_plugin_cache(void);
 H5_DLL herr_t H5PL__close_plugin_cache(hbool_t *already_closed /*out*/);
-H5_DLL herr_t H5PL__add_plugin(H5PL_type_t type, int id, H5PL_HANDLE handle);
+H5_DLL herr_t H5PL__add_plugin(H5PL_type_t type, const H5PL_key_t *key,
+    H5PL_HANDLE handle);
 H5_DLL herr_t H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *found /*out*/, const void **plugin_info /*out*/);
 
 /* Plugin search path calls */

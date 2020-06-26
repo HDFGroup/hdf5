@@ -14,8 +14,8 @@
 /* Programmer:  John Mainzer
  *              11/10/05
  *
- *		This file contains tests for the API calls associated
- *		with the cache implemented in H5C.c
+ *        This file contains tests for the API calls associated
+ *        with the cache implemented in H5C.c
  */
 
 #include "cache_common.h"
@@ -23,6 +23,11 @@
 /* extern declarations */
 
 /* global variable declarations: */
+
+const char *FILENAME[] = {
+    "cache_api_test",
+    NULL
+};
 
 /* macro definitions */
 
@@ -36,7 +41,7 @@ static hbool_t check_fapl_mdc_api_errs(void);
 static hbool_t check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id);
 
 
-
+
 /**************************************************************************/
 /**************************************************************************/
 /********************************* tests: *********************************/
@@ -104,8 +109,8 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
       /* hbool_t     apply_empty_reserve    = */ TRUE,
       /* double      empty_reserve          = */ 0.05f,
       /* int         dirty_bytes_threshold  = */ (256 * 1024),
-      /* int	    metadata_write_strategy = */
-					H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+      /* int        metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
     };
     H5AC_cache_config_t scratch;
     H5C_auto_size_ctl_t default_auto_size_ctl;
@@ -207,7 +212,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
     /* setup the file name */
     if ( pass ) {
 
-        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;
@@ -230,7 +235,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
     /* get a pointer to the files internal data structure */
     if ( pass ) {
 
-        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+        file_ptr = (H5F_t *)H5VL_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
@@ -355,7 +360,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
     /* setup the file name */
     if ( pass ) {
 
-        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;
@@ -378,7 +383,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
     /* get a pointer to the files internal data structure */
     if ( pass ) {
 
-        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+        file_ptr = (H5F_t *)H5VL_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
@@ -495,7 +500,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
 } /* check_fapl_mdc_api_calls() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_file_mdc_api_calls()
  *
@@ -560,8 +565,8 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
       /* hbool_t     apply_empty_reserve    = */ TRUE,
       /* double      empty_reserve          = */ 0.05f,
       /* int         dirty_bytes_threshold  = */ (256 * 1024),
-      /* int	    metadata_write_strategy = */
-					H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+      /* int        metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
     };
     H5AC_cache_config_t mod_config_2 =
     {
@@ -595,8 +600,8 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
       /* hbool_t     apply_empty_reserve    = */ TRUE,
       /* double      empty_reserve          = */ 0.05f,
       /* int         dirty_bytes_threshold  = */ (256 * 1024),
-      /* int	    metadata_write_strategy = */
-					H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+      /* int        metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
     };
     H5AC_cache_config_t mod_config_3 =
     {
@@ -630,8 +635,8 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
       /* hbool_t     apply_empty_reserve    = */ FALSE,
       /* double      empty_reserve          = */ 0.05f,
       /* int         dirty_bytes_threshold  = */ (256 * 1024),
-      /* int	    metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+      /* int        metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
     };
     H5AC_cache_config_t mod_config_4 =
     {
@@ -666,8 +671,8 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
       /* hbool_t     apply_empty_reserve    = */ TRUE,
       /* double      empty_reserve          = */ 0.1f,
       /* int         dirty_bytes_threshold  = */ (256 * 1024),
-      /* int	    metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+      /* int        metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
     };
 
     if(paged)
@@ -688,7 +693,7 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
     /* setup the file name */
     if ( pass ) {
 
-        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;
@@ -813,9 +818,9 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
         else {
 
             HDfprintf(stdout, "H5Fget_mdc_size() reports:\n");
-            HDfprintf(stdout, "	max_size: %ld, min_clean_size: %ld\n",
+            HDfprintf(stdout, "    max_size: %ld, min_clean_size: %ld\n",
                       (long)max_size, (long)min_clean_size);
-	    HDfprintf(stdout, "	cur_size: %ld, cur_num_entries: %d\n",
+        HDfprintf(stdout, "    cur_size: %ld, cur_num_entries: %d\n",
                       (long)cur_size, cur_num_entries);
         }
 #endif
@@ -846,7 +851,7 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
     }
 
     if ( ! pass ) {
-        
+
         HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
     }
 
@@ -854,14 +859,14 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
 } /* check_file_mdc_api_calls() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	mdc_api_call_smoke_check()
+ * Function:    mdc_api_call_smoke_check()
  *
  * Purpose:     Initial basic functional test to see if there are problems
  *              with the cache API calls.
  *
- *              NOTE: This test takes some time to run and checks the 
+ *              NOTE: This test takes some time to run and checks the
  *                    HDF5TestExpress environment variable.
  *
  * Return:      Test pass status (TRUE/FALSE)
@@ -933,8 +938,8 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
       /* hbool_t     apply_empty_reserve    = */ TRUE,
       /* double      empty_reserve          = */ 0.05f,
       /* int         dirty_bytes_threshold  = */ (256 * 1024),
-      /* int	    metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+      /* int        metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
     };
     H5AC_cache_config_t mod_config_2 =
     {
@@ -968,8 +973,8 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
       /* hbool_t     apply_empty_reserve    = */ TRUE,
       /* double      empty_reserve          = */ 0.05f,
       /* int         dirty_bytes_threshold  = */ (256 * 1024),
-      /* int	    metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+      /* int        metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
     };
     H5AC_cache_config_t mod_config_3 =
     {
@@ -1003,8 +1008,8 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
       /* hbool_t     apply_empty_reserve    = */ TRUE,
       /* double      empty_reserve          = */ 0.05f,
       /* int         dirty_bytes_threshold  = */ (256 * 1024),
-      /* int	    metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+      /* int        metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
     };
 
     if(paged)
@@ -1034,7 +1039,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
     /* setup the file name */
     if ( pass ) {
 
-        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;
@@ -1117,9 +1122,9 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
             /* create the dataset */
             if ( pass ) {
 
-                sprintf(dset_name, "/dset%03d", i);
+                HDsprintf(dset_name, "/dset%03d", i);
                 dataset_ids[i] = H5Dcreate2(file_id, dset_name, H5T_STD_I32BE,
-				            dataspace_id, H5P_DEFAULT, properties, H5P_DEFAULT);
+                            dataspace_id, H5P_DEFAULT, properties, H5P_DEFAULT);
 
                 if ( dataset_ids[i] < 0 ) {
 
@@ -1327,7 +1332,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
                 pass = FALSE;
                 failure_mssg = "slab validation failed.";
 #else /* as above */
-                fprintf(stdout, "Chunk (%0d, %0d) in /dset%03d is invalid.\n",
+                HDfprintf(stdout, "Chunk (%0d, %0d) in /dset%03d is invalid.\n",
                         i, j, m);
 #endif
             }
@@ -1448,7 +1453,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
                 pass = FALSE;
                 failure_mssg = "slab validation failed.";
 #if 0 /* as above */
-                fprintf(stdout, "Chunk (%0d, %0d) in /dset%03d is invalid.\n",
+                HDfprintf(stdout, "Chunk (%0d, %0d) in /dset%03d is invalid.\n",
                         i, j, m);
 #endif
             }
@@ -1523,9 +1528,9 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
     }
 
     if ( pass ) {
-        
+
         PASSED();
-        
+
     } else {
 
         H5_FAILED();
@@ -1561,7 +1566,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
  *-------------------------------------------------------------------------
  */
 
-#define NUM_INVALID_CONFIGS	36
+#define NUM_INVALID_CONFIGS    36
 static H5AC_cache_config_t * invalid_configs = NULL;
 
 static H5AC_cache_config_t *
@@ -1659,7 +1664,7 @@ init_invalid_configs(void) {
     configs[13].lower_hr_threshold          = 1.00000001f;
 
     /* 14 -- increment too small */
-    configs[14].increment                   = H5_DOUBLE(0.999999999999);
+    configs[14].increment                   = 0.999999999999;
 
     /* 15 -- invalid flash_incr_mode */
     configs[15].flash_incr_mode             = (enum H5C_cache_flash_incr_mode)-1;
@@ -1692,7 +1697,7 @@ init_invalid_configs(void) {
 
     /* 23 -- decrement too big */
     configs[23].decr_mode                   = H5C_decr__threshold;
-    configs[23].decrement                   = H5_DOUBLE(1.0000000001);
+    configs[23].decrement                   = 1.0000000001;
 
     /* 24 -- epochs_before_eviction too small */
     configs[24].epochs_before_eviction      = 0;
@@ -1704,13 +1709,13 @@ init_invalid_configs(void) {
     configs[26].empty_reserve               = -0.0000000001f;
 
     /* 27 -- empty_reserve too big */
-    configs[27].empty_reserve               = H5_DOUBLE(1.00000000001);
+    configs[27].empty_reserve               = 1.00000000001;
 
     /* 28 -- upper_hr_threshold too small */
     configs[28].upper_hr_threshold          = -0.000000001f;
 
     /* 29 -- upper_hr_threshold too big */
-    configs[29].upper_hr_threshold          = H5_DOUBLE(1.00000001);
+    configs[29].upper_hr_threshold          = 1.00000001;
 
     /* 30 -- upper_hr_threshold <= lower_hr_threshold */
     configs[30].lower_hr_threshold          = 0.9f;
@@ -1737,7 +1742,7 @@ init_invalid_configs(void) {
 
 } /* initialize_invalid_configs() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_fapl_mdc_api_errs()
  *
@@ -1913,7 +1918,7 @@ check_fapl_mdc_api_errs(void)
 
 } /* check_fapl_mdc_api_errs() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_file_mdc_api_errs()
  *
@@ -1963,7 +1968,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
             HDfprintf(stdout, "%s: calling h5_fixname().\n", FUNC);
         }
 
-        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;
@@ -2259,7 +2264,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
 } /* check_file_mdc_api_errs() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -2285,10 +2290,10 @@ main(void)
 
     express_test = GetTestExpress();
 
-    printf("===================================\n");
-    printf("Cache API tests\n");
-    printf("        express_test = %d\n", express_test);
-    printf("===================================\n");
+    HDprintf("===================================\n");
+    HDprintf("Cache API tests\n");
+    HDprintf("        express_test = %d\n", express_test);
+    HDprintf("===================================\n");
 
 
     /* Initialize invalid configurations.

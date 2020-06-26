@@ -33,12 +33,12 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
         int send_size = 0;
 
         /* first call to encode returns only the size of the buffer needed */
-        ret = H5Pencode(orig_pl, NULL, &buf_size);
+        ret = H5Pencode2(orig_pl, NULL, &buf_size, H5P_DEFAULT);
         VRFY((ret >= 0), "H5Pencode succeeded");
 
         sbuf = (uint8_t *)HDmalloc(buf_size);
 
-        ret = H5Pencode(orig_pl, sbuf, &buf_size);
+        ret = H5Pencode2(orig_pl, sbuf, &buf_size, H5P_DEFAULT);
         VRFY((ret >= 0), "H5Pencode succeeded");
 
         /* this is a temp fix to send this size_t */
@@ -53,7 +53,7 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
         void *rbuf;
 
         MPI_Recv(&recv_size, 1, MPI_INT, 0, 123, MPI_COMM_WORLD, &status);
-        buf_size = recv_size;
+        buf_size = (size_t)recv_size;
         rbuf = (uint8_t *)HDmalloc(buf_size);
         MPI_Recv(rbuf, recv_size, MPI_BYTE, 0, 124, MPI_COMM_WORLD, &status);
 
@@ -97,7 +97,7 @@ test_plist_ed(void)
 
     int mpi_size, mpi_rank, recv_proc;
 
-    hsize_t chunk_size = 16384;	/* chunk size */ 
+    hsize_t chunk_size = 16384;	/* chunk size */
     double fill = 2.7f;         /* Fill value */
     size_t nslots = 521*2;
     size_t nbytes = 1048576 * 10;
@@ -141,7 +141,7 @@ test_plist_ed(void)
     herr_t ret;         	/* Generic return value */
 
     if(VERBOSE_MED)
-	printf("Encode/Decode DCPLs\n");
+	HDprintf("Encode/Decode DCPLs\n");
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -165,16 +165,16 @@ test_plist_ed(void)
     VRFY((ret>=0), "set fill-value succeeded");
 
     max_size[0] = 100;
-    ret = H5Pset_external(dcpl, "ext1.data", (off_t)0, 
+    ret = H5Pset_external(dcpl, "ext1.data", (off_t)0,
                           (hsize_t)(max_size[0] * sizeof(int)/4));
     VRFY((ret>=0), "set external succeeded");
-    ret = H5Pset_external(dcpl, "ext2.data", (off_t)0, 
+    ret = H5Pset_external(dcpl, "ext2.data", (off_t)0,
                           (hsize_t)(max_size[0] * sizeof(int)/4));
     VRFY((ret>=0), "set external succeeded");
-    ret = H5Pset_external(dcpl, "ext3.data", (off_t)0, 
+    ret = H5Pset_external(dcpl, "ext3.data", (off_t)0,
                           (hsize_t)(max_size[0] * sizeof(int)/4));
     VRFY((ret>=0), "set external succeeded");
-    ret = H5Pset_external(dcpl, "ext4.data", (off_t)0, 
+    ret = H5Pset_external(dcpl, "ext4.data", (off_t)0,
                           (hsize_t)(max_size[0] * sizeof(int)/4));
     VRFY((ret>=0), "set external succeeded");
 

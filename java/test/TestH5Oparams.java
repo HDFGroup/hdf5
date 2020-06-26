@@ -71,27 +71,52 @@ public class TestH5Oparams {
 
     @Test(expected = HDF5LibraryException.class)
     public void testH5Oget_info_invalid() throws Throwable {
-        H5.H5Oget_info(-1);
+        H5.H5Oget_info(-1, 0);
     }
 
     @Test(expected = NullPointerException.class)
     public void testH5Oget_info_by_name_null() throws Throwable {
-        H5.H5Oget_info_by_name(-1, null, HDF5Constants.H5P_DEFAULT);
+        H5.H5Oget_info_by_name(-1, null, 0, HDF5Constants.H5P_DEFAULT);
     }
 
     @Test(expected = HDF5LibraryException.class)
     public void testH5Oget_info_by_name_invalid() throws Throwable {
-        H5.H5Oget_info_by_name(-1, "/testH5Gcreate", HDF5Constants.H5P_DEFAULT);
+        H5.H5Oget_info_by_name(-1, "/testH5Gcreate", 0, HDF5Constants.H5P_DEFAULT);
     }
 
     @Test(expected = HDF5LibraryException.class)
     public void testH5Oget_info_by_idx_invalid() throws Throwable {
-        H5.H5Oget_info_by_idx(-1, "Bogus", -1, -1, -1L, -1);
+        H5.H5Oget_info_by_idx(-1, "Bogus", -1, -1, -1L, 0, -1);
     }
 
     @Test(expected = NullPointerException.class)
     public void testH5Oget_info_by_idx_null() throws Throwable {
-        H5.H5Oget_info_by_idx(-1, null, 0, 0, 0L, 0);
+        H5.H5Oget_info_by_idx(-1, null, 0, 0, 0L, 0, 0);
+    }
+
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Oget_native_info_invalid() throws Throwable {
+        H5.H5Oget_native_info(-1, 0);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testH5Oget_native_info_by_name_null() throws Throwable {
+        H5.H5Oget_native_info_by_name(-1, null, 0, HDF5Constants.H5P_DEFAULT);
+    }
+
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Oget_native_info_by_name_invalid() throws Throwable {
+        H5.H5Oget_native_info_by_name(-1, "/testH5Gcreate", 0, HDF5Constants.H5P_DEFAULT);
+    }
+
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Oget_native_info_by_idx_invalid() throws Throwable {
+        H5.H5Oget_native_info_by_idx(-1, "Bogus", -1, -1, -1L, 0, -1);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testH5Oget_native_info_by_idx_null() throws Throwable {
+        H5.H5Oget_native_info_by_idx(-1, null, 0, 0, 0L, 0, 0);
     }
 
     @Test(expected = HDF5LibraryException.class)
@@ -106,17 +131,17 @@ public class TestH5Oparams {
 
     @Test(expected = NullPointerException.class)
     public void testH5Ovisit_null() throws Throwable {
-        H5.H5Ovisit(-1, -1, -1, null, null);
+        H5.H5Ovisit(-1, -1, -1, null, null, 0);
     }
 
     @Test(expected = NullPointerException.class)
     public void testH5Ovisit_by_name_nullname() throws Throwable {
-        H5.H5Ovisit_by_name(-1, null, -1, -1, null, null, -1);
+        H5.H5Ovisit_by_name(-1, null, -1, -1, null, null, 0, -1);
     }
 
     @Test(expected = NullPointerException.class)
     public void testH5Ovisit_by_name_null() throws Throwable {
-        H5.H5Ovisit_by_name(-1, "Bogus", -1, -1, null, null, -1);
+        H5.H5Ovisit_by_name(-1, "Bogus", -1, -1, null, null, 0, -1);
     }
 
     @Test(expected = HDF5LibraryException.class)
@@ -124,7 +149,7 @@ public class TestH5Oparams {
         H5.H5Oset_comment(-1, "Bogus");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5LibraryException.class)
     public void testH5Oget_comment_invalid() throws Throwable {
         H5.H5Oget_comment(-1);
     }
@@ -139,7 +164,7 @@ public class TestH5Oparams {
         H5.H5Oset_comment_by_name(-1, null, null, -1);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5LibraryException.class)
     public void testH5Oget_comment_by_name_invalid() throws Throwable {
         H5.H5Oget_comment_by_name(-1, "Bogus", -1);
     }
@@ -157,6 +182,21 @@ public class TestH5Oparams {
     @Test(expected = HDF5LibraryException.class)
     public void testH5Orefresh_invalid() throws Throwable {
         H5.H5Orefresh(-1);
+    }
+
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Odisable_mdc_flushes() throws Throwable {
+        H5.H5Odisable_mdc_flushes(-1);
+    }
+
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Oenable_mdc_flushes() throws Throwable {
+        H5.H5Oenable_mdc_flushes(-1);
+    }
+
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Oare_mdc_flushes_disabled() throws Throwable {
+        H5.H5Oare_mdc_flushes_disabled(-1);
     }
 
 }

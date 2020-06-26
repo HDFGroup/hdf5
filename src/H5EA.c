@@ -46,6 +46,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5EApkg.h"		/* Extensible Arrays			*/
 #include "H5FLprivate.h"	/* Free Lists                           */
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5VMprivate.h"        /* Vector functions			*/
 
 
@@ -59,8 +60,7 @@
 /******************/
 
 /* Typedef for generically unprotecting an object */
-typedef herr_t (*H5EA__unprotect_func_t)(void *thing, hid_t dxpl_id,
-    unsigned cache_flags);
+typedef herr_t (*H5EA__unprotect_func_t)(void *thing, unsigned cache_flags);
 
 
 /********************/
@@ -73,11 +73,11 @@ typedef herr_t (*H5EA__unprotect_func_t)(void *thing, hid_t dxpl_id,
 /********************/
 
 static herr_t
-H5EA__lookup_elmt(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, hbool_t will_extend,
+H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend,
     unsigned thing_acc, void **thing, uint8_t **thing_elmt_buf,
     hsize_t *thing_elmt_idx, H5EA__unprotect_func_t *thing_unprot_func);
-static H5EA_t *H5EA__new(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr,
-    hbool_t from_open, void *ctx_udata);
+static H5EA_t *H5EA__new(H5F_t *f, haddr_t ea_addr, hbool_t from_open,
+    void *ctx_udata);
 
 
 /*********************/
@@ -131,7 +131,7 @@ H5FL_BLK_DEFINE(ea_native_elmt);
  */
 BEGIN_FUNC(STATIC, ERR,
 H5EA_t *, NULL, NULL,
-H5EA__new(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, hbool_t from_open, void *ctx_udata))
+H5EA__new(H5F_t *f, haddr_t ea_addr, hbool_t from_open, void *ctx_udata))
 
     /* Local variables */
     H5EA_t *ea = NULL;          /* Pointer to new extensible array */
@@ -148,7 +148,7 @@ H5EA__new(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, hbool_t from_open, void *ctx
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array info")
 
     /* Lock the array header into memory */
-    if(NULL == (hdr = H5EA__hdr_protect(f, dxpl_id, ea_addr, ctx_udata, H5AC__READ_ONLY_FLAG)))
+    if(NULL == (hdr = H5EA__hdr_protect(f, ea_addr, ctx_udata, H5AC__READ_ONLY_FLAG)))
 	H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header")
 
     /* Check for pending array deletion */
@@ -172,10 +172,10 @@ H5EA__new(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, hbool_t from_open, void *ctx
 
 CATCH
 
-    if(hdr && H5EA__hdr_unprotect(hdr, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5EA__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
 	H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array header")
     if(!ret_value)
-        if(ea && H5EA_close(ea, dxpl_id) < 0)
+        if(ea && H5EA_close(ea) < 0)
             H5E_THROW(H5E_CLOSEERROR, "unable to close extensible array")
 
 END_FUNC(STATIC)  /* end H5EA__new() */
@@ -197,7 +197,7 @@ END_FUNC(STATIC)  /* end H5EA__new() */
  */
 BEGIN_FUNC(PRIV, ERR,
 H5EA_t *, NULL, NULL,
-H5EA_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam, void *ctx_udata))
+H5EA_create(H5F_t *f, const H5EA_create_t *cparam, void *ctx_udata))
 
     /* Local variables */
     H5EA_t *ea = NULL;          /* Pointer to new extensible array */
@@ -213,11 +213,11 @@ H5EA_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam, void *ctx_udat
     HDcompile_assert(H5EA_NUM_CLS_ID == NELMTS(H5EA_client_class_g));
 
     /* Create extensible array header */
-    if(HADDR_UNDEF == (ea_addr = H5EA__hdr_create(f, dxpl_id, cparam, ctx_udata)))
+    if(HADDR_UNDEF == (ea_addr = H5EA__hdr_create(f, cparam, ctx_udata)))
 	H5E_THROW(H5E_CANTINIT, "can't create extensible array header")
 
     /* Allocate and initialize new extensible array wrapper */
-    if(NULL == (ea = H5EA__new(f, dxpl_id, ea_addr, FALSE, ctx_udata)))
+    if(NULL == (ea = H5EA__new(f, ea_addr, FALSE, ctx_udata)))
 	H5E_THROW(H5E_CANTINIT, "allocation and/or initialization failed for extensible array wrapper")
 
     /* Set the return value */
@@ -226,7 +226,7 @@ H5EA_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam, void *ctx_udat
 CATCH
 
     if(!ret_value)
-        if(ea && H5EA_close(ea, dxpl_id) < 0)
+        if(ea && H5EA_close(ea) < 0)
             H5E_THROW(H5E_CLOSEERROR, "unable to close extensible array")
 
 END_FUNC(PRIV)  /* end H5EA_create() */
@@ -248,7 +248,7 @@ END_FUNC(PRIV)  /* end H5EA_create() */
  */
 BEGIN_FUNC(PRIV, ERR,
 H5EA_t *, NULL, NULL,
-H5EA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata))
+H5EA_open(H5F_t *f, haddr_t ea_addr, void *ctx_udata))
 
     /* Local variables */
     H5EA_t *ea = NULL;          /* Pointer to new extensible array wrapper */
@@ -260,7 +260,7 @@ H5EA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata))
     HDassert(H5F_addr_defined(ea_addr));
 
     /* Allocate and initialize new extensible array wrapper */
-    if(NULL == (ea = H5EA__new(f, dxpl_id, ea_addr, TRUE, ctx_udata)))
+    if(NULL == (ea = H5EA__new(f, ea_addr, TRUE, ctx_udata)))
 	H5E_THROW(H5E_CANTINIT, "allocation and/or initialization failed for extensible array wrapper")
 
     /* Set the return value */
@@ -269,7 +269,7 @@ H5EA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata))
 CATCH
 
     if(!ret_value)
-        if(ea && H5EA_close(ea, dxpl_id) < 0)
+        if(ea && H5EA_close(ea) < 0)
             H5E_THROW(H5E_CLOSEERROR, "unable to close extensible array")
 
 END_FUNC(PRIV)  /* end H5EA_open() */
@@ -354,7 +354,7 @@ END_FUNC(PRIV)  /* end H5EA_get_addr() */
  */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA__lookup_elmt(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, hbool_t will_extend,
+H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend,
     unsigned thing_acc, void **thing, uint8_t **thing_elmt_buf,
     hsize_t *thing_elmt_idx, H5EA__unprotect_func_t *thing_unprot_func))
 
@@ -395,7 +395,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, hbool_t will_ext
         /* Check if we are allowed to create the thing */
         if(0 == (thing_acc & H5AC__READ_ONLY_FLAG)) { /* i.e. r/w access */
             /* Create the index block */
-            hdr->idx_blk_addr = H5EA__iblock_create(hdr, dxpl_id, &stats_changed);
+            hdr->idx_blk_addr = H5EA__iblock_create(hdr, &stats_changed);
             if(!H5F_addr_defined(hdr->idx_blk_addr))
                 H5E_THROW(H5E_CANTCREATE, "unable to create index block")
             hdr_dirty = TRUE;
@@ -405,7 +405,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, hbool_t will_ext
     } /* end if */
 
     /* Protect index block */
-    if(NULL == (iblock = H5EA__iblock_protect(hdr, dxpl_id, thing_acc)))
+    if(NULL == (iblock = H5EA__iblock_protect(hdr, thing_acc)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array index block, address = %llu", (unsigned long long)hdr->idx_blk_addr)
 
     /* Check if element is in index block */
@@ -442,7 +442,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, hbool_t will_ext
 
                     /* Create data block */
                     dblk_off = hdr->sblk_info[sblk_idx].start_idx + (dblk_idx * hdr->sblk_info[sblk_idx].dblk_nelmts);
-                    dblk_addr = H5EA__dblock_create(hdr, dxpl_id, iblock, &stats_changed, dblk_off, hdr->sblk_info[sblk_idx].dblk_nelmts);
+                    dblk_addr = H5EA__dblock_create(hdr, iblock, &stats_changed, dblk_off, hdr->sblk_info[sblk_idx].dblk_nelmts);
                     if(!H5F_addr_defined(dblk_addr))
                         H5E_THROW(H5E_CANTCREATE, "unable to create extensible array data block")
 
@@ -455,7 +455,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, hbool_t will_ext
             } /* end if */
 
             /* Protect data block */
-            if(NULL == (dblock = H5EA__dblock_protect(hdr, dxpl_id, iblock, iblock->dblk_addrs[dblk_idx], hdr->sblk_info[sblk_idx].dblk_nelmts, thing_acc)))
+            if(NULL == (dblock = H5EA__dblock_protect(hdr, iblock, iblock->dblk_addrs[dblk_idx], hdr->sblk_info[sblk_idx].dblk_nelmts, thing_acc)))
                 H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block, address = %llu", (unsigned long long)iblock->dblk_addrs[dblk_idx])
 
             /* Adjust index to offset in data block */
@@ -487,7 +487,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, hbool_t will_ext
                     haddr_t sblk_addr;        /* Address of data block created */
 
                     /* Create super block */
-                    sblk_addr = H5EA__sblock_create(hdr, dxpl_id, iblock, &stats_changed, sblk_idx);
+                    sblk_addr = H5EA__sblock_create(hdr, iblock, &stats_changed, sblk_idx);
                     if(!H5F_addr_defined(sblk_addr))
                         H5E_THROW(H5E_CANTCREATE, "unable to create extensible array super block")
 
@@ -500,7 +500,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, hbool_t will_ext
             } /* end if */
 
             /* Protect super block */
-            if(NULL == (sblock = H5EA__sblock_protect(hdr, dxpl_id, iblock, iblock->sblk_addrs[sblk_off], sblk_idx, thing_acc)))
+            if(NULL == (sblock = H5EA__sblock_protect(hdr, iblock, iblock->sblk_addrs[sblk_off], sblk_idx, thing_acc)))
                 H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array super block, address = %llu", (unsigned long long)iblock->sblk_addrs[sblk_off])
 
             /* Compute the data block index in super block */
@@ -516,7 +516,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, hbool_t will_ext
 
                     /* Create data block */
                     dblk_off = hdr->sblk_info[sblk_idx].start_idx + (dblk_idx * hdr->sblk_info[sblk_idx].dblk_nelmts);
-                    dblk_addr = H5EA__dblock_create(hdr, dxpl_id, sblock, &stats_changed, dblk_off, sblock->dblk_nelmts);
+                    dblk_addr = H5EA__dblock_create(hdr, sblock, &stats_changed, dblk_off, sblock->dblk_nelmts);
                     if(!H5F_addr_defined(dblk_addr))
                         H5E_THROW(H5E_CANTCREATE, "unable to create extensible array data block")
 
@@ -563,7 +563,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, hbool_t will_ext
                     /* Check if we are allowed to create the thing */
                     if(0 == (thing_acc & H5AC__READ_ONLY_FLAG)) { /* i.e. r/w access */
                         /* Create the data block page */
-                        if(H5EA__dblk_page_create(hdr, dxpl_id, sblock, dblk_page_addr) < 0)
+                        if(H5EA__dblk_page_create(hdr, sblock, dblk_page_addr) < 0)
                             H5E_THROW(H5E_CANTCREATE, "unable to create data block page")
 
                         /* Mark data block page as initialized in super block */
@@ -575,7 +575,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, hbool_t will_ext
                 } /* end if */
 
                 /* Protect data block page */
-                if(NULL == (dblk_page = H5EA__dblk_page_protect(hdr, dxpl_id, sblock, dblk_page_addr, thing_acc)))
+                if(NULL == (dblk_page = H5EA__dblk_page_protect(hdr, sblock, dblk_page_addr, thing_acc)))
                     H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block page, address = %llu", (unsigned long long)dblk_page_addr)
 
                 /* Check if there is already a dependency on the header */
@@ -593,7 +593,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, hbool_t will_ext
             } /* end if */
             else {
                 /* Protect data block */
-                if(NULL == (dblock = H5EA__dblock_protect(hdr, dxpl_id, sblock, sblock->dblk_addrs[dblk_idx], sblock->dblk_nelmts, thing_acc)))
+                if(NULL == (dblock = H5EA__dblock_protect(hdr, sblock, sblock->dblk_addrs[dblk_idx], sblock->dblk_nelmts, thing_acc)))
                     H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block, address = %llu", (unsigned long long)sblock->dblk_addrs[dblk_idx])
 
                 /* Check if there is already a dependency on the header */
@@ -635,14 +635,14 @@ CATCH
             H5E_THROW(H5E_CANTMARKDIRTY, "unable to mark extensible array header as modified")
 
     /* Release resources */
-    if(iblock && *thing != iblock && H5EA__iblock_unprotect(iblock, dxpl_id, iblock_cache_flags) < 0)
+    if(iblock && *thing != iblock && H5EA__iblock_unprotect(iblock, iblock_cache_flags) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array index block")
     /* (Note: super blocks don't contain elements, so don't have a '*thing != sblock' check) */
-    if(sblock && H5EA__sblock_unprotect(sblock, dxpl_id, sblock_cache_flags) < 0)
+    if(sblock && H5EA__sblock_unprotect(sblock, sblock_cache_flags) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array super block")
-    if(dblock && *thing != dblock && H5EA__dblock_unprotect(dblock, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
+    if(dblock && *thing != dblock && H5EA__dblock_unprotect(dblock, H5AC__NO_FLAGS_SET) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array data block")
-    if(dblk_page && *thing != dblk_page && H5EA__dblk_page_unprotect(dblk_page, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
+    if(dblk_page && *thing != dblk_page && H5EA__dblk_page_unprotect(dblk_page, H5AC__NO_FLAGS_SET) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array data block page")
 
 END_FUNC(STATIC)  /* end H5EA__lookup_elmt() */
@@ -663,7 +663,7 @@ END_FUNC(STATIC)  /* end H5EA__lookup_elmt() */
  */
 BEGIN_FUNC(PRIV, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA_set(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, const void *elmt))
+H5EA_set(const H5EA_t *ea, hsize_t idx, const void *elmt))
 
     /* Local variables */
     H5EA_hdr_t *hdr = ea->hdr;          /* Header for EA */
@@ -685,7 +685,7 @@ H5EA_set(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, const void *elmt))
 
     /* Look up the array metadata containing the element we want to set */
     will_extend = (idx >= hdr->stats.stored.max_idx_set);
-    if(H5EA__lookup_elmt(ea, dxpl_id, idx, will_extend, H5AC__NO_FLAGS_SET, &thing, &thing_elmt_buf, &thing_elmt_idx, &thing_unprot_func) < 0)
+    if(H5EA__lookup_elmt(ea, idx, will_extend, H5AC__NO_FLAGS_SET, &thing, &thing_elmt_buf, &thing_elmt_idx, &thing_unprot_func) < 0)
         H5E_THROW(H5E_CANTPROTECT, "unable to protect array metadata")
 
     /* Sanity check */
@@ -694,7 +694,7 @@ H5EA_set(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, const void *elmt))
     HDassert(thing_unprot_func);
 
     /* Set element in thing's element buffer */
-    HDmemcpy(thing_elmt_buf + (hdr->cparam.cls->nat_elmt_size * thing_elmt_idx), elmt, hdr->cparam.cls->nat_elmt_size);
+    H5MM_memcpy(thing_elmt_buf + (hdr->cparam.cls->nat_elmt_size * thing_elmt_idx), elmt, hdr->cparam.cls->nat_elmt_size);
     thing_cache_flags |= H5AC__DIRTIED_FLAG;
 
     /* Update max. element set in array, if appropriate */
@@ -707,7 +707,7 @@ H5EA_set(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, const void *elmt))
 
 CATCH
     /* Release resources */
-    if(thing && (thing_unprot_func)(thing, dxpl_id, thing_cache_flags) < 0)
+    if(thing && (thing_unprot_func)(thing, thing_cache_flags) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array metadata")
 
 END_FUNC(PRIV)  /* end H5EA_set() */
@@ -728,7 +728,7 @@ END_FUNC(PRIV)  /* end H5EA_set() */
  */
 BEGIN_FUNC(PRIV, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA_get(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, void *elmt))
+H5EA_get(const H5EA_t *ea, hsize_t idx, void *elmt))
 
     /* Local variables */
     H5EA_hdr_t *hdr = ea->hdr;          /* Header for EA */
@@ -755,7 +755,7 @@ H5EA_get(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, void *elmt))
         hdr->f = ea->f;
 
         /* Look up the array metadata containing the element we want to set */
-        if(H5EA__lookup_elmt(ea, dxpl_id, idx, FALSE, H5AC__READ_ONLY_FLAG, &thing, &thing_elmt_buf, &thing_elmt_idx, &thing_unprot_func) < 0)
+        if(H5EA__lookup_elmt(ea, idx, FALSE, H5AC__READ_ONLY_FLAG, &thing, &thing_elmt_buf, &thing_elmt_idx, &thing_unprot_func) < 0)
             H5E_THROW(H5E_CANTPROTECT, "unable to protect array metadata")
 
         /* Check if the thing holding the element has been created yet */
@@ -766,12 +766,12 @@ H5EA_get(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, void *elmt))
         } /* end if */
         else
             /* Get element from thing's element buffer */
-            HDmemcpy(elmt, thing_elmt_buf + (hdr->cparam.cls->nat_elmt_size * thing_elmt_idx), hdr->cparam.cls->nat_elmt_size);
+            H5MM_memcpy(elmt, thing_elmt_buf + (hdr->cparam.cls->nat_elmt_size * thing_elmt_idx), hdr->cparam.cls->nat_elmt_size);
     } /* end else */
 
 CATCH
     /* Release thing */
-    if(thing && (thing_unprot_func)(thing, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
+    if(thing && (thing_unprot_func)(thing, H5AC__NO_FLAGS_SET) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array metadata")
 
 END_FUNC(PRIV)  /* end H5EA_get() */
@@ -793,7 +793,7 @@ END_FUNC(PRIV)  /* end H5EA_get() */
  */
 BEGIN_FUNC(PRIV, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA_depend(H5EA_t *ea, hid_t dxpl_id, H5AC_proxy_entry_t *parent))
+H5EA_depend(H5EA_t *ea, H5AC_proxy_entry_t *parent))
 
     /* Local variables */
     H5EA_hdr_t *hdr = ea->hdr;          /* Header for EA */
@@ -818,7 +818,7 @@ H5EA_depend(H5EA_t *ea, hid_t dxpl_id, H5AC_proxy_entry_t *parent))
         hdr->f = ea->f;
 
         /* Add the extensible array as a child of the parent (proxy) */
-        if(H5AC_proxy_entry_add_child(parent, hdr->f, dxpl_id, hdr->top_proxy) < 0)
+        if(H5AC_proxy_entry_add_child(parent, hdr->f, hdr->top_proxy) < 0)
             H5E_THROW(H5E_CANTSET, "unable to add extensible array as child of proxy")
         hdr->parent = parent;
     } /* end if */
@@ -843,7 +843,7 @@ END_FUNC(PRIV)  /* end H5EA_depend() */
  */
 BEGIN_FUNC(PRIV, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA_close(H5EA_t *ea, hid_t dxpl_id))
+H5EA_close(H5EA_t *ea))
 
     /* Local variables */
     hbool_t pending_delete = FALSE;     /* Whether the array is pending deletion */
@@ -894,7 +894,7 @@ H5EA_close(H5EA_t *ea, hid_t dxpl_id))
 
             /* Lock the array header into memory */
             /* (OK to pass in NULL for callback context, since we know the header must be in the cache) */
-            if(NULL == (hdr = H5EA__hdr_protect(ea->f, dxpl_id, ea_addr, NULL, H5AC__NO_FLAGS_SET)))
+            if(NULL == (hdr = H5EA__hdr_protect(ea->f, ea_addr, NULL, H5AC__NO_FLAGS_SET)))
                 H5E_THROW(H5E_CANTLOAD, "unable to load extensible array header")
 
             /* Set the shared array header's file context for this operation */
@@ -908,7 +908,7 @@ H5EA_close(H5EA_t *ea, hid_t dxpl_id))
                 H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
 
             /* Delete array, starting with header (unprotects header) */
-            if(H5EA__hdr_delete(hdr, dxpl_id) < 0)
+            if(H5EA__hdr_delete(hdr) < 0)
                 H5E_THROW(H5E_CANTDELETE, "unable to delete extensible array")
         } /* end if */
         else {
@@ -944,7 +944,7 @@ END_FUNC(PRIV)  /* end H5EA_close() */
  */
 BEGIN_FUNC(PRIV, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA_delete(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata))
+H5EA_delete(H5F_t *f, haddr_t ea_addr, void *ctx_udata))
 
     /* Local variables */
     H5EA_hdr_t *hdr = NULL;             /* The fractal heap header information */
@@ -956,7 +956,7 @@ H5EA_delete(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata))
     HDassert(H5F_addr_defined(ea_addr));
 
     /* Lock the array header into memory */
-    if(NULL == (hdr = H5EA__hdr_protect(f, dxpl_id, ea_addr, ctx_udata, H5AC__NO_FLAGS_SET)))
+    if(NULL == (hdr = H5EA__hdr_protect(f, ea_addr, ctx_udata, H5AC__NO_FLAGS_SET)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array header, address = %llu", (unsigned long long)ea_addr)
 
     /* Check for files using shared array header */
@@ -967,7 +967,7 @@ H5EA_delete(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata))
         hdr->f = f;
 
         /* Delete array now, starting with header (unprotects header) */
-        if(H5EA__hdr_delete(hdr, dxpl_id) < 0)
+        if(H5EA__hdr_delete(hdr) < 0)
             H5E_THROW(H5E_CANTDELETE, "unable to delete extensible array")
         hdr = NULL;
     } /* end if */
@@ -975,7 +975,7 @@ H5EA_delete(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata))
 CATCH
 
     /* Unprotect the header, if an error occurred */
-    if(hdr && H5EA__hdr_unprotect(hdr, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5EA__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array header")
 
 END_FUNC(PRIV)  /* end H5EA_delete() */
@@ -987,23 +987,22 @@ END_FUNC(PRIV)  /* end H5EA_delete() */
  * Purpose:	Iterate over the elements of an extensible array
  *		(copied and modified from FA_iterate() in H5FA.c)
  *
- * Return:      SUCCEED/FAIL
+ * Return:      H5_ITER_CONT/H5_ITER_ERROR
  *
  * Programmer:  Vailin Choi; Feb 2015
  *
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(PRIV, ERR,
-herr_t, SUCCEED, FAIL,
-H5EA_iterate(H5EA_t *ea, hid_t dxpl_id, H5EA_operator_t op, void *udata))
+int, H5_ITER_CONT, H5_ITER_ERROR,
+H5EA_iterate(H5EA_t *ea, H5EA_operator_t op, void *udata))
 
     /* Local variables */
     uint8_t     *elmt = NULL;
     hsize_t     u;
+    int         cb_ret = H5_ITER_CONT;     /* Return value from callback */
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments */
     HDassert(ea);
     HDassert(op);
     HDassert(udata);
@@ -1013,11 +1012,9 @@ H5EA_iterate(H5EA_t *ea, hid_t dxpl_id, H5EA_operator_t op, void *udata))
         H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array element")
 
     /* Iterate over all elements in array */
-    for(u = 0; u < ea->hdr->stats.stored.max_idx_set; u++) {
-        int cb_ret;     /* Return value from callback */
-
+    for(u = 0; u < ea->hdr->stats.stored.max_idx_set && cb_ret == H5_ITER_CONT; u++) {
         /* Get array element */
-        if(H5EA_get(ea, dxpl_id, u, elmt) < 0)
+        if(H5EA_get(ea, u, elmt) < 0)
             H5E_THROW(H5E_CANTGET, "unable to delete fixed array")
 
         /* Make callback */

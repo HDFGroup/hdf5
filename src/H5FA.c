@@ -41,6 +41,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FApkg.h"		/* Fixed Arrays				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5VMprivate.h"         /* Vector functions			*/
 
 
@@ -62,8 +63,8 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static H5FA_t *H5FA__new(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr,
-    hbool_t from_open, void *ctx_udata);
+static H5FA_t *H5FA__new(H5F_t *f, haddr_t fa_addr, hbool_t from_open,
+    void *ctx_udata);
 
 
 /*********************/
@@ -118,7 +119,7 @@ H5FL_BLK_DEFINE(fa_native_elmt);
  */
 BEGIN_FUNC(STATIC, ERR,
 H5FA_t *, NULL, NULL,
-H5FA__new(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr, hbool_t from_open, void *ctx_udata))
+H5FA__new(H5F_t *f, haddr_t fa_addr, hbool_t from_open, void *ctx_udata))
 
     /* Local variables */
     H5FA_t *fa = NULL;          /* Pointer to new fixed array */
@@ -135,7 +136,7 @@ H5FA__new(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr, hbool_t from_open, void *ctx
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array info")
 
     /* Lock the array header into memory */
-    if(NULL == (hdr = H5FA__hdr_protect(f, dxpl_id, fa_addr, ctx_udata, H5AC__READ_ONLY_FLAG)))
+    if(NULL == (hdr = H5FA__hdr_protect(f, fa_addr, ctx_udata, H5AC__READ_ONLY_FLAG)))
 	H5E_THROW(H5E_CANTPROTECT, "unable to load fixed array header")
 
     /* Check for pending array deletion */
@@ -159,10 +160,10 @@ H5FA__new(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr, hbool_t from_open, void *ctx
 
 CATCH
 
-    if(hdr && H5FA__hdr_unprotect(hdr, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5FA__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
 	H5E_THROW(H5E_CANTUNPROTECT, "unable to release fixed array header")
     if(!ret_value)
-        if(fa && H5FA_close(fa, dxpl_id) < 0)
+        if(fa && H5FA_close(fa) < 0)
             H5E_THROW(H5E_CLOSEERROR, "unable to close fixed array")
 
 END_FUNC(STATIC)  /* end H5FA__new() */
@@ -183,7 +184,7 @@ END_FUNC(STATIC)  /* end H5FA__new() */
  */
 BEGIN_FUNC(PRIV, ERR,
 H5FA_t *, NULL, NULL,
-H5FA_create(H5F_t *f, hid_t dxpl_id, const H5FA_create_t *cparam, void *ctx_udata))
+H5FA_create(H5F_t *f, const H5FA_create_t *cparam, void *ctx_udata))
 
     /* Local variables */
     H5FA_t *fa = NULL;          /* Pointer to new fixed array */
@@ -199,11 +200,11 @@ H5FA_create(H5F_t *f, hid_t dxpl_id, const H5FA_create_t *cparam, void *ctx_udat
     HDcompile_assert(H5FA_NUM_CLS_ID == NELMTS(H5FA_client_class_g));
 
     /* Create fixed array header */
-    if(HADDR_UNDEF == (fa_addr = H5FA__hdr_create(f, dxpl_id, cparam, ctx_udata)))
+    if(HADDR_UNDEF == (fa_addr = H5FA__hdr_create(f, cparam, ctx_udata)))
         H5E_THROW(H5E_CANTINIT, "can't create fixed array header")
 
     /* Allocate and initialize new fixed array wrapper */
-    if(NULL == (fa = H5FA__new(f, dxpl_id, fa_addr, FALSE, ctx_udata)))
+    if(NULL == (fa = H5FA__new(f, fa_addr, FALSE, ctx_udata)))
 	H5E_THROW(H5E_CANTINIT, "allocation and/or initialization failed for fixed array wrapper")
 
     /* Set the return value */
@@ -212,7 +213,7 @@ H5FA_create(H5F_t *f, hid_t dxpl_id, const H5FA_create_t *cparam, void *ctx_udat
 CATCH
 
     if(!ret_value)
-        if(fa && H5FA_close(fa, dxpl_id) < 0)
+        if(fa && H5FA_close(fa) < 0)
             H5E_THROW(H5E_CLOSEERROR, "unable to close fixed array")
 
 END_FUNC(PRIV)  /* end H5FA_create() */
@@ -233,7 +234,7 @@ END_FUNC(PRIV)  /* end H5FA_create() */
  */
 BEGIN_FUNC(PRIV, ERR,
 H5FA_t *, NULL, NULL,
-H5FA_open(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr, void *ctx_udata))
+H5FA_open(H5F_t *f, haddr_t fa_addr, void *ctx_udata))
 
     /* Local variables */
     H5FA_t *fa = NULL;          /* Pointer to new fixed array wrapper */
@@ -245,7 +246,7 @@ H5FA_open(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr, void *ctx_udata))
     HDassert(H5F_addr_defined(fa_addr));
 
     /* Allocate and initialize new fixed array wrapper */
-    if(NULL == (fa = H5FA__new(f, dxpl_id, fa_addr, TRUE, ctx_udata)))
+    if(NULL == (fa = H5FA__new(f, fa_addr, TRUE, ctx_udata)))
 	H5E_THROW(H5E_CANTINIT, "allocation and/or initialization failed for fixed array wrapper")
 
     /* Set the return value */
@@ -254,7 +255,7 @@ H5FA_open(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr, void *ctx_udata))
 CATCH
 
     if(!ret_value)
-        if(fa && H5FA_close(fa, dxpl_id) < 0)
+        if(fa && H5FA_close(fa) < 0)
             H5E_THROW(H5E_CLOSEERROR, "unable to close fixed array")
 
 END_FUNC(PRIV)  /* end H5FA_open() */
@@ -335,7 +336,7 @@ END_FUNC(PRIV)  /* end H5FA_get_addr() */
  */
 BEGIN_FUNC(PRIV, ERR,
 herr_t, SUCCEED, FAIL,
-H5FA_set(const H5FA_t *fa, hid_t dxpl_id, hsize_t idx, const void *elmt))
+H5FA_set(const H5FA_t *fa, hsize_t idx, const void *elmt))
 
     /* Local variables */
     H5FA_hdr_t *hdr = fa->hdr;          /* Header for fixed array */
@@ -357,7 +358,7 @@ H5FA_set(const H5FA_t *fa, hid_t dxpl_id, hsize_t idx, const void *elmt))
     /* Check if we need to create the fixed array data block */
     if(!H5F_addr_defined(hdr->dblk_addr)) {
         /* Create the data block */
-        hdr->dblk_addr = H5FA__dblock_create(hdr, dxpl_id, &hdr_dirty);
+        hdr->dblk_addr = H5FA__dblock_create(hdr, &hdr_dirty);
         if(!H5F_addr_defined(hdr->dblk_addr))
             H5E_THROW(H5E_CANTCREATE, "unable to create fixed array data block")
     } /* end if */
@@ -365,13 +366,13 @@ H5FA_set(const H5FA_t *fa, hid_t dxpl_id, hsize_t idx, const void *elmt))
     HDassert(idx < hdr->cparam.nelmts);
 
     /* Protect data block */
-    if(NULL == (dblock = H5FA__dblock_protect(hdr, dxpl_id, hdr->dblk_addr, H5AC__NO_FLAGS_SET)))
+    if(NULL == (dblock = H5FA__dblock_protect(hdr, hdr->dblk_addr, H5AC__NO_FLAGS_SET)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect fixed array data block, address = %llu", (unsigned long long)hdr->dblk_addr)
 
     /* Check for paging data block */
     if(!dblock->npages) {
         /* Set element in data block */
-        HDmemcpy(((uint8_t *)dblock->elmts) + (hdr->cparam.cls->nat_elmt_size * idx), elmt, hdr->cparam.cls->nat_elmt_size);
+        H5MM_memcpy(((uint8_t *)dblock->elmts) + (hdr->cparam.cls->nat_elmt_size * idx), elmt, hdr->cparam.cls->nat_elmt_size);
         dblock_cache_flags |= H5AC__DIRTIED_FLAG;
     } /* end if */
     else { /* paging */
@@ -397,7 +398,7 @@ H5FA_set(const H5FA_t *fa, hid_t dxpl_id, hsize_t idx, const void *elmt))
         /* Check if the page has been created yet */
         if(!H5VM_bit_get(dblock->dblk_page_init, page_idx)) {
             /* Create the data block page */
-            if(H5FA__dblk_page_create(hdr, dxpl_id, dblk_page_addr, dblk_page_nelmts) < 0)
+            if(H5FA__dblk_page_create(hdr, dblk_page_addr, dblk_page_nelmts) < 0)
                 H5E_THROW(H5E_CANTCREATE, "unable to create data block page")
 
 	    /* Mark data block page as initialized in data block */
@@ -406,11 +407,11 @@ H5FA_set(const H5FA_t *fa, hid_t dxpl_id, hsize_t idx, const void *elmt))
 	} /* end if */
 
         /* Protect the data block page */
-	if(NULL == (dblk_page = H5FA__dblk_page_protect(hdr, dxpl_id, dblk_page_addr, dblk_page_nelmts, H5AC__NO_FLAGS_SET)))
+	if(NULL == (dblk_page = H5FA__dblk_page_protect(hdr, dblk_page_addr, dblk_page_nelmts, H5AC__NO_FLAGS_SET)))
 	    H5E_THROW(H5E_CANTPROTECT, "unable to protect fixed array data block page, address = %llu", (unsigned long long)dblk_page_addr)
 
         /* Set the element in the data block page */
-        HDmemcpy(((uint8_t *)dblk_page->elmts) + (hdr->cparam.cls->nat_elmt_size * elmt_idx), elmt, hdr->cparam.cls->nat_elmt_size);
+        H5MM_memcpy(((uint8_t *)dblk_page->elmts) + (hdr->cparam.cls->nat_elmt_size * elmt_idx), elmt, hdr->cparam.cls->nat_elmt_size);
         dblk_page_cache_flags |= H5AC__DIRTIED_FLAG;
     } /* end else */
 
@@ -421,9 +422,9 @@ CATCH
             H5E_THROW(H5E_CANTMARKDIRTY, "unable to mark fixed array header as modified")
 
     /* Release resources */
-    if(dblock && H5FA__dblock_unprotect(dblock, dxpl_id, dblock_cache_flags) < 0)
+    if(dblock && H5FA__dblock_unprotect(dblock, dblock_cache_flags) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release fixed array data block")
-    if(dblk_page && H5FA__dblk_page_unprotect(dblk_page, dxpl_id, dblk_page_cache_flags) < 0)
+    if(dblk_page && H5FA__dblk_page_unprotect(dblk_page, dblk_page_cache_flags) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release fixed array data block page")
 
 END_FUNC(PRIV)  /* end H5FA_set() */
@@ -443,7 +444,7 @@ END_FUNC(PRIV)  /* end H5FA_set() */
  */
 BEGIN_FUNC(PRIV, ERR,
 herr_t, SUCCEED, FAIL,
-H5FA_get(const H5FA_t *fa, hid_t dxpl_id, hsize_t idx, void *elmt))
+H5FA_get(const H5FA_t *fa, hsize_t idx, void *elmt))
 
     /* Local variables */
     H5FA_hdr_t *hdr = fa->hdr;          /* Header for FA */
@@ -468,13 +469,13 @@ H5FA_get(const H5FA_t *fa, hid_t dxpl_id, hsize_t idx, void *elmt))
     else {
         /* Get the data block */
         HDassert(H5F_addr_defined(hdr->dblk_addr));
-        if(NULL == (dblock = H5FA__dblock_protect(hdr, dxpl_id, hdr->dblk_addr, H5AC__READ_ONLY_FLAG)))
+        if(NULL == (dblock = H5FA__dblock_protect(hdr, hdr->dblk_addr, H5AC__READ_ONLY_FLAG)))
             H5E_THROW(H5E_CANTPROTECT, "unable to protect fixed array data block, address = %llu", (unsigned long long)hdr->dblk_addr)
 
         /* Check for paged data block */
         if(!dblock->npages)
             /* Retrieve element from data block */
-            HDmemcpy(elmt, ((uint8_t *)dblock->elmts) + (hdr->cparam.cls->nat_elmt_size * idx), hdr->cparam.cls->nat_elmt_size);
+            H5MM_memcpy(elmt, ((uint8_t *)dblock->elmts) + (hdr->cparam.cls->nat_elmt_size * idx), hdr->cparam.cls->nat_elmt_size);
         else { /* paging */
             size_t  page_idx;           /* Index of page within data block */
 
@@ -508,19 +509,19 @@ H5FA_get(const H5FA_t *fa, hid_t dxpl_id, hsize_t idx, void *elmt))
                     dblk_page_nelmts = dblock->dblk_page_nelmts;
 
                 /* Protect the data block page */
-                if(NULL == (dblk_page = H5FA__dblk_page_protect(hdr, dxpl_id, dblk_page_addr, dblk_page_nelmts, H5AC__READ_ONLY_FLAG)))
+                if(NULL == (dblk_page = H5FA__dblk_page_protect(hdr, dblk_page_addr, dblk_page_nelmts, H5AC__READ_ONLY_FLAG)))
                     H5E_THROW(H5E_CANTPROTECT, "unable to protect fixed array data block page, address = %llu", (unsigned long long)dblk_page_addr)
 
                 /* Retrieve element from data block */
-                HDmemcpy(elmt, ((uint8_t *)dblk_page->elmts) + (hdr->cparam.cls->nat_elmt_size * elmt_idx), hdr->cparam.cls->nat_elmt_size);
+                H5MM_memcpy(elmt, ((uint8_t *)dblk_page->elmts) + (hdr->cparam.cls->nat_elmt_size * elmt_idx), hdr->cparam.cls->nat_elmt_size);
             } /* end else */
         } /* end else */
     } /* end else */
 
 CATCH
-    if(dblock && H5FA__dblock_unprotect(dblock, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
+    if(dblock && H5FA__dblock_unprotect(dblock, H5AC__NO_FLAGS_SET) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release fixed array data block")
-    if(dblk_page && H5FA__dblk_page_unprotect(dblk_page, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
+    if(dblk_page && H5FA__dblk_page_unprotect(dblk_page, H5AC__NO_FLAGS_SET) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release fixed array data block page")
 
 END_FUNC(PRIV)  /* end H5FA_get() */
@@ -540,7 +541,7 @@ END_FUNC(PRIV)  /* end H5FA_get() */
  */
 BEGIN_FUNC(PRIV, ERR,
 herr_t, SUCCEED, FAIL,
-H5FA_close(H5FA_t *fa, hid_t dxpl_id))
+H5FA_close(H5FA_t *fa))
 
     /* Local variables */
     hbool_t pending_delete = FALSE;     /* Whether the array is pending deletion */
@@ -591,7 +592,7 @@ H5FA_close(H5FA_t *fa, hid_t dxpl_id))
 
             /* Lock the array header into memory */
             /* (OK to pass in NULL for callback context, since we know the header must be in the cache) */
-            if(NULL == (hdr = H5FA__hdr_protect(fa->f, dxpl_id, fa_addr, NULL, H5AC__NO_FLAGS_SET)))
+            if(NULL == (hdr = H5FA__hdr_protect(fa->f, fa_addr, NULL, H5AC__NO_FLAGS_SET)))
                 H5E_THROW(H5E_CANTLOAD, "unable to load fixed array header")
 
             /* Set the shared array header's file context for this operation */
@@ -605,7 +606,7 @@ H5FA_close(H5FA_t *fa, hid_t dxpl_id))
                 H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
 
             /* Delete array, starting with header (unprotects header) */
-            if(H5FA__hdr_delete(hdr, dxpl_id) < 0)
+            if(H5FA__hdr_delete(hdr) < 0)
                 H5E_THROW(H5E_CANTDELETE, "unable to delete fixed array")
         } /* end if */
         else {
@@ -640,7 +641,7 @@ END_FUNC(PRIV)  /* end H5FA_close() */
  */
 BEGIN_FUNC(PRIV, ERR,
 herr_t, SUCCEED, FAIL,
-H5FA_delete(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr, void *ctx_udata))
+H5FA_delete(H5F_t *f, haddr_t fa_addr, void *ctx_udata))
 
     /* Local variables */
     H5FA_hdr_t *hdr = NULL;             /* The fixed array header information */
@@ -652,7 +653,7 @@ H5FA_delete(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr, void *ctx_udata))
     HDassert(H5F_addr_defined(fa_addr));
 
     /* Lock the array header into memory */
-    if(NULL == (hdr = H5FA__hdr_protect(f, dxpl_id, fa_addr, ctx_udata, H5AC__NO_FLAGS_SET)))
+    if(NULL == (hdr = H5FA__hdr_protect(f, fa_addr, ctx_udata, H5AC__NO_FLAGS_SET)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect fixed array header, address = %llu", (unsigned long long)fa_addr)
 
     /* Check for files using shared array header */
@@ -663,7 +664,7 @@ H5FA_delete(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr, void *ctx_udata))
         hdr->f = f;
 
         /* Delete array now, starting with header (unprotects header) */
-        if(H5FA__hdr_delete(hdr, dxpl_id) < 0)
+        if(H5FA__hdr_delete(hdr) < 0)
             H5E_THROW(H5E_CANTDELETE, "unable to delete fixed array")
         hdr = NULL;
     } /* end if */
@@ -671,7 +672,7 @@ H5FA_delete(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr, void *ctx_udata))
 CATCH
 
     /* Unprotect the header, if an error occurred */
-    if(hdr && H5FA__hdr_unprotect(hdr, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5FA__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release fixed array header")
 
 END_FUNC(PRIV)  /* end H5FA_delete() */
@@ -685,7 +686,7 @@ END_FUNC(PRIV)  /* end H5FA_delete() */
  * Note:        This is not very efficient, we should be iterating directly
  *              over the fixed array's direct block [pages].
  *
- * Return:      SUCCEED/FAIL
+ * Return:      H5_ITER_CONT/H5_ITER_ERROR
  *
  * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
@@ -693,12 +694,13 @@ END_FUNC(PRIV)  /* end H5FA_delete() */
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(PRIV, ERR,
-herr_t, SUCCEED, FAIL,
-H5FA_iterate(H5FA_t *fa, hid_t dxpl_id, H5FA_operator_t op, void *udata))
+int, H5_ITER_CONT, H5_ITER_ERROR,
+H5FA_iterate(H5FA_t *fa, H5FA_operator_t op, void *udata))
 
     /* Local variables */
     uint8_t     *elmt = NULL;
     hsize_t     u;
+    int         cb_ret = H5_ITER_CONT;     /* Return value from callback */
 
     /*
      * Check arguments.
@@ -712,11 +714,9 @@ H5FA_iterate(H5FA_t *fa, hid_t dxpl_id, H5FA_operator_t op, void *udata))
         H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array element")
 
     /* Iterate over all elements in array */
-    for(u = 0; u < fa->hdr->stats.nelmts; u++) {
-        int cb_ret;     /* Return value from callback */
-
+    for(u = 0; u < fa->hdr->stats.nelmts && cb_ret == H5_ITER_CONT; u++) {
         /* Get array element */
-        if(H5FA_get(fa, dxpl_id, u, elmt) < 0)
+        if(H5FA_get(fa, u, elmt) < 0)
             H5E_THROW(H5E_CANTGET, "unable to delete fixed array")
 
         /* Make callback */
@@ -749,7 +749,7 @@ END_FUNC(PRIV)  /* end H5FA_iterate() */
  */
 BEGIN_FUNC(PRIV, ERR,
 herr_t, SUCCEED, FAIL,
-H5FA_depend(H5FA_t *fa, hid_t dxpl_id, H5AC_proxy_entry_t *parent))
+H5FA_depend(H5FA_t *fa, H5AC_proxy_entry_t *parent))
 
     /* Local variables */
     H5FA_hdr_t *hdr = fa->hdr;          /* Header for FA */
@@ -774,7 +774,7 @@ H5FA_depend(H5FA_t *fa, hid_t dxpl_id, H5AC_proxy_entry_t *parent))
         hdr->f = fa->f;
 
         /* Add the fixed array as a child of the parent (proxy) */
-        if(H5AC_proxy_entry_add_child(parent, hdr->f, dxpl_id, hdr->top_proxy) < 0)
+        if(H5AC_proxy_entry_add_child(parent, hdr->f, hdr->top_proxy) < 0)
             H5E_THROW(H5E_CANTSET, "unable to add fixed array as child of proxy")
         hdr->parent = parent;
     } /* end if */

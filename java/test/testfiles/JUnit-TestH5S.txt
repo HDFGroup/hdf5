@@ -1,0 +1,29 @@
+JUnit version 4.11
+.testH5Sget_select_npoints
+.testH5Sget_select_type
+.testH5Sset_extent_simple
+.testH5Sget_select_hyper
+.testH5Sget_select_valid
+.testH5Sget_select_elem_pointlist
+.testH5Sset_extent_none
+.testH5Sencode_decode_scalar_dataspace
+.testH5Soffset_simple
+.testH5Scopy
+.testH5Sget_simple_extent_ndims
+.testH5Sextent_equal
+.testH5Sget_simple_extent_dims
+.testH5Sget_simple_extent_type
+.testH5Shyper_regular
+.testH5Sget_select_bounds
+.testH5Sget_select_elem_pointlist_invalid
+.testH5Sget_simple_extent_npoints
+.testH5Sextent_copy
+.testH5Sencode_decode_null_dataspace
+.testH5Sis_simple
+.testH5Sget_simple_extent_dims_null
+.testH5Sselect_none
+
+Time:  XXXX
+
+OK (23 tests)
+

@@ -66,13 +66,9 @@ static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              Friday, January 5, 2001
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
-test_create( H5File& file)
+static herr_t test_create( H5File& file)
 {
     SUBTEST("Create, open, close");
 
@@ -198,13 +194,9 @@ test_create( H5File& file)
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              Friday, January 5, 2001
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
-test_simple_io( H5File& file)
+static herr_t test_simple_io( H5File& file)
 {
 
     SUBTEST("Simple I/O");
@@ -276,7 +268,7 @@ test_simple_io( H5File& file)
 /*-------------------------------------------------------------------------
  * Function:    test_datasize
  *
- * Purpose      Tests DataSet::getInMemDataSize().  
+ * Purpose      Tests DataSet::getInMemDataSize().
  *
  * Return       Success: 0
  *
@@ -284,13 +276,9 @@ test_simple_io( H5File& file)
  *
  * Programmer   Binh-Minh Ribler
  *              Thursday, March 22, 2012
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
-test_datasize(FileAccPropList &fapl)
+static herr_t test_datasize(FileAccPropList &fapl)
 {
     SUBTEST("DataSet::getInMemDataSize()");
     try
@@ -354,13 +342,9 @@ test_datasize(FileAccPropList &fapl)
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              Friday, January 5, 2001
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
-test_tconv(H5File& file)
+static herr_t test_tconv(H5File& file)
 {
     // Prepare buffers for input/output
     char        *out=NULL, *in=NULL;
@@ -437,6 +421,7 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
     (H5Z_func_t)filter_bogus,   /* The actual filter function        */
 }};
 
+
 /*-------------------------------------------------------------------------
  * Function:    bogus
  *
@@ -448,13 +433,9 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
  *
  * Programmer   Robb Matzke
  *              Tuesday, April 21, 1998
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static size_t
-filter_bogus(unsigned int flags, size_t cd_nelmts,
+static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
       const unsigned int cd_values[], size_t nbytes,
       size_t *buf_size, void **buf)
 // H5_ATTR_UNUSED variables caused warning, but taking them out caused failure.
@@ -477,13 +458,9 @@ filter_bogus(unsigned int flags, size_t cd_nelmts,
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              Friday, January 5, 2001
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
-test_compression(H5File& file)
+static herr_t test_compression(H5File& file)
 {
 #ifndef H5_HAVE_FILTER_DEFLATE
     const char *not_supported;
@@ -764,9 +741,10 @@ test_compression(H5File& file)
  *
  *-------------------------------------------------------------------------
  */
-const H5std_string        DSET_NBIT_NAME("nbit_dataset");
+const H5std_string DSET_NBIT_NAME("nbit_dataset");
 const hsize_t DIM1 = 2;
 const hsize_t DIM2 = 5;
+
 static herr_t test_nbit_compression(H5File& file)
 {
     typedef struct {
@@ -880,13 +858,9 @@ static herr_t test_nbit_compression(H5File& file)
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              Saturday, February 17, 2001
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
-test_multiopen (H5File& file)
+static herr_t test_multiopen (H5File& file)
 {
 
     SUBTEST("Multi-open with extending");
@@ -927,7 +901,7 @@ test_multiopen (H5File& file)
         if (cur_size[0]!=tmp_size[0])
         {
             cerr << "    Got " << static_cast<int>(tmp_size[0])
-                 << " instead of " << static_cast<int>(cur_size[0]) 
+                 << " instead of " << static_cast<int>(cur_size[0])
                  << "!" << endl;
             throw Exception("test_multiopen", "Failed in multi-open with extending");
         }
@@ -963,13 +937,9 @@ test_multiopen (H5File& file)
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              February 17, 2001
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
-test_types(H5File& file)
+static herr_t test_types(H5File& file)
 {
     SUBTEST("Various datatypes");
 
@@ -1146,25 +1116,194 @@ test_types(H5File& file)
 
 
 /*-------------------------------------------------------------------------
- * Function:    test_virtual
+ * Function:    test_getNativeObjinfo
  *
- * Purpose:     Tests fixed, unlimited, and printf selections in the same
- *              VDS
+ * Purpose      Tests getNativeObjinfo()
  *
- * Return:      Success:        0
+ * Return       Success: 0
+ *              Failure: -1
  *
+ * July, 2018
+ *-------------------------------------------------------------------------
+ */
+static herr_t test_getnativeinfo(H5File& file)
+{
+    SUBTEST("Getting object information");
+
+    try {
+        // Create a data space
+        hsize_t     dims[2];
+        dims[0] = 256;
+        dims[1] = 512;
+        DataSpace space (2, dims, NULL);
+
+        // Create a dataset using the default dataset creation properties.
+        // We're not sure what they are, so we won't check.
+        DataSet dataset(file.openDataSet(DSET_CHUNKED_NAME));
+
+        // Get dataset header info
+        H5O_native_info_t ninfo;
+        HDmemset(&ninfo, 0, sizeof(ninfo));
+        dataset.getNativeObjinfo(ninfo, H5O_NATIVE_INFO_HDR);
+        verify_val(ninfo.hdr.nchunks, 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__);
+        dataset.close();
+
+        // Open the dataset we created above and then close it.  This is one
+        // way to open an existing dataset for accessing.
+        dataset = file.openDataSet(DSET_DEFAULT_NAME);
+        HDmemset(&ninfo, 0, sizeof(ninfo));
+        dataset.getNativeObjinfo(ninfo, H5O_NATIVE_INFO_ALL);
+        verify_val(ninfo.hdr.nchunks, 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__);
+        dataset.close();
+
+        PASSED();
+        return 0;
+    }   // outer most try block
+
+    catch (InvalidActionException& E)
+    {
+        cerr << " FAILED" << endl;
+        cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
+        return -1;
+    }
+    // catch all other exceptions
+    catch (Exception& E)
+    {
+        issue_fail_msg("test_getnativeinfo", __LINE__, __FILE__);
+        return -1;
+    }
+}   // test_getnativeinfo
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_chunk_cache
+ *
+ * Purpose      Tests setting rdcc info on a DAPL, and interaction
+ *              with the corresponding properties in the file structure.
+ *
+ * Return       Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Binh-Minh Ribler
- *              Friday, March 10, 2017
+ * July 2018
+ *-------------------------------------------------------------------------
+ */
+const int RANK1 = 1;
+const H5std_string FILE_ACCPLIST("test_accplist.h5");
+
+static herr_t test_chunk_cache(FileAccPropList fapl)
+{
+    SUBTEST("DSetAccPropList::set/getChunkCache");
+
+    try {
+        // Create a default dataset access and file access property lists
+        FileAccPropList fapl_def;
+        DSetAccPropList dapl;
+
+        // Verify that chunk cache parameters are the same
+        int mdc_nelmts = 0;
+        size_t nslots_1 = 0, nslots_4 = 0, nbytes_1 = 0, nbytes_4 = 0;
+        double w0_1 = 0.0F, w0_4 = 0.0F;
+        fapl_def.getCache(mdc_nelmts, nslots_1, nbytes_1, w0_1);
+        dapl.getChunkCache(nslots_4, nbytes_4, w0_4);
+        verify_val(nslots_1, nslots_4, "DSetAccPropList::getChunkCache",  __LINE__, __FILE__);
+        verify_val(nbytes_1, nbytes_4, "DSetAccPropList::getChunkCache",  __LINE__, __FILE__);
+        verify_val(w0_1, w0_4, "DSetAccPropList::getChunkCache",  __LINE__, __FILE__);
+
+        // Set a link access property on dapl to verify property list inheritance
+        dapl.setNumLinks((size_t)134);
+        size_t nlinks = dapl.getNumLinks();
+        verify_val(nlinks, (size_t)134, "DSetAccPropList::getNumLinks", __LINE__, __FILE__);
+
+        // Make a copy of the external fapl
+        FileAccPropList fapl_local(fapl);
+
+        // Set new rdcc settings on fapl local
+        size_t nslots_2 = nslots_1 * 2;
+        size_t nbytes_2 = nbytes_1 * 2;
+        double w0_2 = w0_1 / (double)2.0F;
+        fapl_local.getCache(mdc_nelmts, nslots_2, nbytes_2, w0_2);
+
+        // Create a new file using default fcpl and the passed-in fapl
+        H5File file(FILE_ACCPLIST, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl_local);
+
+        // Create dataset creation property list
+        DSetCreatPropList dcpl;
+
+        // Set chunk dimensions
+        hsize_t cdims[RANK1];
+        cdims[0] = 10;
+        dcpl.setChunk(RANK1, cdims);
+
+        // Create memory space
+        hsize_t mdims[RANK1];
+        mdims[0] = 10;
+        DataSpace mspace(RANK1, mdims);
+
+        // Create a dataset using that dataset creation properties
+        DataSet dataset(file.createDataSet(DSET_CHUNKED_NAME, PredType::NATIVE_INT, mspace, dcpl, dapl));
+
+        // Get the dataset access property list
+        DSetAccPropList dapl2 = dataset.getAccessPlist();
+
+        // Retrieve and verify the raw data chunk cache parameters
+        nslots_4 = nbytes_4 = 0;
+        w0_4 = 0.0F;
+        dapl2.getChunkCache(nslots_4, nbytes_4, w0_4);
+        verify_val(nslots_2, nslots_4, "DSetCreatPropList::getChunkCache", __LINE__, __FILE__);
+        verify_val(nbytes_2, nbytes_4, "DSetCreatPropList::getChunkCache", __LINE__, __FILE__);
+        verify_val(H5_DBL_ABS_EQUAL(w0_2, w0_4), 1, "DSetCreatPropList::getChunkCache", __LINE__, __FILE__);
+
+
+        // Set new values on original dapl
+        size_t nslots_3 = nslots_1 * 2;
+        size_t nbytes_3 = H5D_CHUNK_CACHE_NBYTES_DEFAULT;
+        double w0_3 = w0_2 / 2;
+        dapl.getChunkCache(nslots_3, nbytes_3, w0_3);
+
+        // Close dataset
+        dataset.close();
+
+        // Reopen dataset
+        DataSet dataset2(file.openDataSet(DSET_CHUNKED_NAME, dapl));
+
+        // Get the dataset access property list
+        DSetAccPropList dapl3 = dataset2.getAccessPlist();
+
+        // Retrieve and verify the raw data chunk cache parameters
+        dapl3.getChunkCache(nslots_4, nbytes_4, w0_4);
+        verify_val(nslots_3, nslots_4, "DSetCreatPropList::getLayout", __LINE__, __FILE__);
+        verify_val(nbytes_3, nbytes_4, "DSetCreatPropList::getLayout", __LINE__, __FILE__);
+        verify_val(H5_DBL_ABS_EQUAL(w0_3, w0_4), 1, "DSetCreatPropList::getLayout", __LINE__, __FILE__);
+
+
+        PASSED();
+        return 0;
+    } // end top try block
+
+    catch (Exception& E)
+    {
+        return -1;
+    }
+} // test_chunk_cache
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_virtual
  *
- * Modifications:
+ * Purpose      Tests fixed, unlimited, and printf selections in the same
+ *              VDS
+ *
+ * Return       Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer   Binh-Minh Ribler
+ *              Friday, March 10, 2017
  *
  *-------------------------------------------------------------------------
  */
 const int RANK = 2;
-static herr_t
-test_virtual()
+
+static herr_t test_virtual()
 {
     SUBTEST("DSetCreatPropList::setVirtual");
 
@@ -1269,12 +1408,14 @@ void test_dset()
 
         nerrors += test_create(file) < 0 ? 1:0;
         nerrors += test_simple_io(file) < 0 ? 1:0;
+        nerrors += test_getnativeinfo(file) < 0 ? 1:0;
         nerrors += test_tconv(file) < 0 ? 1:0;
         nerrors += test_compression(file) < 0 ? 1:0;
         nerrors += test_nbit_compression(file) < 0 ? 1:0;
         nerrors += test_multiopen (file) < 0 ? 1:0;
         nerrors += test_types(file) < 0 ? 1:0;
         nerrors += test_virtual() < 0 ? 1:0;
+        nerrors += test_chunk_cache(fapl) < 0 ? 1:0;
 
         // Close group "emit diagnostics".
         grp.close();
@@ -1293,17 +1434,15 @@ void test_dset()
     cleanup_dsets();
 }   // test_dset
 
+
 /*-------------------------------------------------------------------------
  * Function:    cleanup_dsets
  *
  * Purpose      Cleanup temporary test files
  *
- * Return       none
+ * Return       None
  *
  * Programmer   (use C version)
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 extern "C"

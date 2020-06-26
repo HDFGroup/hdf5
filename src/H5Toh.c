@@ -43,12 +43,10 @@
 /* Local Prototypes */
 /********************/
 
-static htri_t H5O_dtype_isa(H5O_t *loc);
-static hid_t H5O_dtype_open(const H5G_loc_t *obj_loc, hid_t lapl_id,
-    hid_t dxpl_id, hbool_t app_ref);
-static void *H5O_dtype_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc,
-    hid_t dxpl_id);
-static H5O_loc_t *H5O_dtype_get_oloc(hid_t obj_id);
+static htri_t H5O__dtype_isa(const H5O_t *loc);
+static void *H5O__dtype_open(const H5G_loc_t *obj_loc, H5I_type_t *opened_type);
+static void *H5O__dtype_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc);
+static H5O_loc_t *H5O__dtype_get_oloc(hid_t obj_id);
 
 
 /*********************/
@@ -71,17 +69,17 @@ const H5O_obj_class_t H5O_OBJ_DATATYPE[1] = {{
     "named datatype",		/* object name, for debugging	*/
     NULL,			/* get 'copy file' user data	*/
     NULL,			/* free 'copy file' user data	*/
-    H5O_dtype_isa, 		/* "isa" 			*/
-    H5O_dtype_open, 		/* open an object of this class */
-    H5O_dtype_create, 		/* create an object of this class */
-    H5O_dtype_get_oloc,		/* get an object header location for an object */
+    H5O__dtype_isa, 		/* "isa" 			*/
+    H5O__dtype_open, 		/* open an object of this class */
+    H5O__dtype_create, 		/* create an object of this class */
+    H5O__dtype_get_oloc,	/* get an object header location for an object */
     NULL,			/* get the index & heap info for an object */
     NULL 			/* flush an opened object of this class */
 }};
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_dtype_isa
+ * Function:	H5O__dtype_isa
  *
  * Purpose:	Determines if an object has the requisite messages for being
  *		a datatype.
@@ -98,11 +96,11 @@ const H5O_obj_class_t H5O_OBJ_DATATYPE[1] = {{
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5O_dtype_isa(struct H5O_t *oh)
+H5O__dtype_isa(const H5O_t *oh)
 {
     htri_t	ret_value = FAIL;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(oh);
 
@@ -111,11 +109,11 @@ H5O_dtype_isa(struct H5O_t *oh)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_dtype_isa() */
+} /* end H5O__dtype_isa() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_dtype_open
+ * Function:	H5O__dtype_open
  *
  * Purpose:	Open a datatype at a particular location
  *
@@ -127,35 +125,35 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static hid_t
-H5O_dtype_open(const H5G_loc_t *obj_loc, hid_t H5_ATTR_UNUSED lapl_id, hid_t dxpl_id, hbool_t app_ref)
+static void *
+H5O__dtype_open(const H5G_loc_t *obj_loc, H5I_type_t *opened_type)
 {
-    H5T_t       *type = NULL;           /* Datatype opened */
-    hid_t	ret_value = H5I_INVALID_HID;    /* Return value */
+    H5T_t      *type        = NULL;         /* Datatype opened */
+    void       *ret_value   = NULL;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(obj_loc);
 
-    /* Open the datatype */
-    if(NULL == (type = H5T_open(obj_loc, dxpl_id)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to open datatype")
+    *opened_type = H5I_DATATYPE;
 
-    /* Register an ID for the datatype */
-    if((ret_value = H5I_register(H5I_DATATYPE, type, app_ref)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
+    /* Open the datatype */
+    if(NULL == (type = H5T_open(obj_loc)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to open datatype")
+
+    ret_value = (void *)type;
 
 done:
-    if(ret_value < 0)
+    if(NULL == ret_value)
         if(type && H5T_close(type) < 0)
-            HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+            HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, NULL, "unable to release datatype")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_dtype_open() */
+} /* end H5O__dtype_open() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_dtype_create
+ * Function:	H5O__dtype_create
  *
  * Purpose:	Create a named datatype in a file
  *
@@ -168,12 +166,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_dtype_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id)
+H5O__dtype_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc)
 {
     H5T_obj_create_t *crt_info = (H5T_obj_create_t *)_crt_info; /* Named datatype creation parameters */
     void *ret_value = NULL;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity checks */
     HDassert(f);
@@ -181,8 +179,8 @@ H5O_dtype_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id)
     HDassert(obj_loc);
 
     /* Commit the type to the file */
-    if(H5T__commit(f, crt_info->dt, crt_info->tcpl_id, dxpl_id) < 0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to commit datatype")
+    if(H5T__commit(f, crt_info->dt, crt_info->tcpl_id) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to commit datatype")
 
     /* Set up the new named datatype's location */
     if(NULL == (obj_loc->oloc = H5T_oloc(crt_info->dt)))
@@ -195,11 +193,11 @@ H5O_dtype_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_dtype_create() */
+} /* end H5O__dtype_create() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_dtype_get_oloc
+ * Function:	H5O__dtype_get_oloc
  *
  * Purpose:	Retrieve the object header location for an open object
  *
@@ -212,16 +210,20 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5O_loc_t *
-H5O_dtype_get_oloc(hid_t obj_id)
+H5O__dtype_get_oloc(hid_t obj_id)
 {
-    H5T_t       *type;                  /* Datatype opened */
+    H5T_t       *type = NULL;           /* Datatype opened */
+    H5T_t       *dt = NULL;
     H5O_loc_t	*ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Get the datatype */
-    if(NULL == (type = (H5T_t *)H5I_object(obj_id)))
+    if(NULL == (dt = (H5T_t *)H5I_object(obj_id)))
         HGOTO_ERROR(H5E_OHDR, H5E_BADATOM, NULL, "couldn't get object from ID")
+
+    /* If this is a named datatype, get the VOL driver pointer to the datatype */
+    type = (H5T_t *)H5T_get_actual_type(dt);
 
     /* Get the datatype's object header location */
     if(NULL == (ret_value = H5T_oloc(type)))
@@ -229,5 +231,5 @@ H5O_dtype_get_oloc(hid_t obj_id)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_dtype_get_oloc() */
+} /* end H5O__dtype_get_oloc() */
 

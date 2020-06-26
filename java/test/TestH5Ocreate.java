@@ -22,8 +22,8 @@ import java.util.ArrayList;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
-import hdf.hdf5lib.callbacks.H5O_iterate_cb;
 import hdf.hdf5lib.callbacks.H5O_iterate_t;
+import hdf.hdf5lib.callbacks.H5O_iterate_opdata_t;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.structs.H5O_info_t;
@@ -37,8 +37,8 @@ import org.junit.rules.TestName;
 
 public class TestH5Ocreate {
     @Rule public TestName testname = new TestName();
-    private static final String H5_EXTFILE = "h5ex_g_iterate.hdf";
-    private static final String H5_FILE = "test.h5";
+    private static final String H5_EXTFILE = "h5ex_g_iterateO2.hdf";
+    private static final String H5_FILE = "testO.h5";
     private static final int DIM_X = 4;
     private static final int DIM_Y = 6;
     long H5fcpl = -1;
@@ -264,9 +264,9 @@ public class TestH5Ocreate {
             err.printStackTrace();
             fail("H5.H5Oget_info: " + err);
         }
-        assertFalse("H5Oget_info ", obj_info==null);
+        assertFalse("H5Oget_info", obj_info==null);
         assertTrue("H5Oget_info link type", obj_info.type==HDF5Constants.H5O_TYPE_DATASET);
-        assertTrue("Link Address ", obj_info.addr>0);
+        assertTrue("Link Object Token", obj_info.token != null);
     }
 
     @Test(expected = HDF5LibraryException.class)
@@ -286,9 +286,9 @@ public class TestH5Ocreate {
             err.printStackTrace();
             fail("H5.H5Oget_info: " + err);
         }
-        assertFalse("H5Oget_info ", obj_info==null);
+        assertFalse("H5Oget_info", obj_info==null);
         assertTrue("H5Oget_info link type", obj_info.type==HDF5Constants.H5O_TYPE_NAMED_DATATYPE);
-        assertTrue("Link Address ", obj_info.addr>0);
+        assertTrue("Link Object Token", obj_info.token != null);
     }
 
     @Test
@@ -351,18 +351,18 @@ public class TestH5Ocreate {
                 this.link_type = type;
             }
         }
-        class H5O_iter_data implements H5O_iterate_t {
+        class H5O_iter_data implements H5O_iterate_opdata_t {
             public ArrayList<idata> iterdata = new ArrayList<idata>();
         }
-        H5O_iterate_t iter_data = new H5O_iter_data();
-        class H5O_iter_callback implements H5O_iterate_cb {
-            public int callback(long group, String name, H5O_info_t info, H5O_iterate_t op_data) {
+        H5O_iterate_opdata_t iter_data = new H5O_iter_data();
+        class H5O_iter_callback implements H5O_iterate_t {
+            public int callback(long group, String name, H5O_info_t info, H5O_iterate_opdata_t op_data) {
                 idata id = new idata(name, info.type);
                 ((H5O_iter_data)op_data).iterdata.add(id);
                 return 0;
             }
         }
-        H5O_iterate_cb iter_cb = new H5O_iter_callback();
+        H5O_iterate_t iter_cb = new H5O_iter_callback();
         try {
             H5.H5Ovisit(H5fid, HDF5Constants.H5_INDEX_CRT_ORDER, HDF5Constants.H5_ITER_INC, iter_cb, iter_data);
         }
@@ -555,6 +555,59 @@ public class TestH5Ocreate {
         finally {
             try{H5.H5Oclose(oid);} catch (Exception ex) {}
         }
+    }
+
+    @Test
+    public void testH5Ocork() {
+        boolean corked = false;
+
+        // Check cork status of the group: not corked
+        try {
+            corked = H5.H5Oare_mdc_flushes_disabled(H5gid);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Ocork: H5.H5Oare_mdc_flushes_disabled: " + err);
+        }
+        assertFalse("H5Oare_mdc_flushes_disabled: ", corked);
+
+        // Cork the group: an object
+        try {
+            H5.H5Odisable_mdc_flushes(H5gid);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Ocork: H5.H5Odisable_mdc_flushes: " + err);
+        }
+
+        // Check cork status of the group: corked
+        try {
+            corked = H5.H5Oare_mdc_flushes_disabled(H5gid);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Ocork: H5.H5Oare_mdc_flushes_disabled: " + err);
+        }
+        assertTrue("H5Oare_mdc_flushes_disabled: ", corked);
+
+        // Unork the group: an object
+        try {
+            H5.H5Oenable_mdc_flushes(H5gid);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Ocork: H5.H5Oenable_mdc_flushes: " + err);
+        }
+
+        // Check cork status of the group: corked
+        try {
+            corked = H5.H5Oare_mdc_flushes_disabled(H5gid);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Ocork: H5.H5Oare_mdc_flushes_disabled: " + err);
+        }
+        assertFalse("H5Oare_mdc_flushes_disabled: ", corked);
     }
 
 }

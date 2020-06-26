@@ -1,0 +1,17 @@
+JUnit version 4.11
+.testH5get_libversion_null_param
+.testJ2C
+.testH5export_dataset
+.testIsSerializable
+.testH5garbage_collect
+.testH5error_off
+.serializeToDisk
+.testH5open
+.testH5check_version
+.testH5get_libversion
+.testH5set_free_list_limits
+
+Time:  XXXX
+
+OK (11 tests)
+

@@ -1,0 +1,9 @@
+JUnit version 4.11
+.testH5OcopyRefsDatasettosameFile
+.testH5OcopyRefsDatasettodiffFile
+.testH5OcopyRefsAttr
+
+Time:  XXXX
+
+OK (3 tests)
+

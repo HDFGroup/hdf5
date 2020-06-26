@@ -11,6 +11,6 @@ File space page size: 4096 bytes
 Summary of file space information:
   File metadata: 1485 bytes
   Raw data: 400 bytes
-  Amount/Percent of tracked free space: 680 bytes/26.5%
+  Amount/Percent of tracked free space: 563 bytes/23.0%
   Unaccounted space: 0 bytes
-Total space: 2565 bytes
+Total space: 2448 bytes

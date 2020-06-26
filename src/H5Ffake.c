@@ -50,7 +50,7 @@ H5F_fake_alloc(uint8_t sizeof_size)
     /* Allocate faked file struct */
     if(NULL == (f = H5FL_CALLOC(H5F_t)))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate top file structure")
-    if(NULL == (f->shared = H5FL_CALLOC(H5F_file_t)))
+    if(NULL == (f->shared = H5FL_CALLOC(H5F_shared_t)))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate shared file structure")
 
     /* Only set fields necessary for clients */
@@ -93,7 +93,7 @@ H5F_fake_free(H5F_t *f)
     if(f) {
         /* Destroy shared file struct */
         if(f->shared)
-            f->shared = H5FL_FREE(H5F_file_t, f->shared);
+            f->shared = H5FL_FREE(H5F_shared_t, f->shared);
         f = H5FL_FREE(H5F_t, f);
     } /* end if */
 

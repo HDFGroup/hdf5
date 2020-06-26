@@ -44,10 +44,10 @@
    extend the image, and then performs writes that extend the images. The fifth
    loop reads the extended images and verify that the content are correct. The
    sixth and final loop closes the file images and deallocates the image
-   buffers if appropriate.                                                   */ 
+   buffers if appropriate.                                                   */
 
 /*-------------------------------------------------------------------------
-* test file image operations 
+* test file image operations
 *-------------------------------------------------------------------------
 */
 static int
@@ -67,11 +67,11 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
     void        **buf_ptr;              /* pointer to array of pointers to image buffers */
     char        **filename;             /* pointer to array of pointers to filenames */
     unsigned    *input_flags;           /* pointer to array of flag combinations */
-    size_t      i, j, k, nrow, n_values; 
+    size_t      i, j, k, nrow, n_values;
     herr_t      status1;
     void        *handle_ptr = NULL;     /* pointers to driver buffer */
-    unsigned char **core_buf_ptr_ptr = NULL; 
- 
+    unsigned char **core_buf_ptr_ptr = NULL;
+
     VERIFY(open_images > 1 , "The number of open images must be greater than 1");
 
     VERIFY(nflags > 0, "The number of flag combinations  must be greater than 0");
@@ -100,7 +100,7 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
     if (NULL == (dset_id = (hid_t *)HDmalloc(sizeof(hid_t) * open_images)))
         FAIL_PUTS_ERROR("malloc() failed");
 
-    TESTING("get file images");
+    HL_TESTING2("get file images");
 
     /* create several file images */
     for (i = 0; i < open_images; i++) {
@@ -112,17 +112,17 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
         filename[i] = (char *)HDmalloc(sizeof(char) * 32);
 
         /* create file name */
-        sprintf(filename[i], "image_file%d.h5", (int)i);
+        HDsprintf(filename[i], "image_file%d.h5", (int)i);
 
         /* create file */
         if ((file_id[i] = H5Fcreate(filename[i], H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             FAIL_PUTS_ERROR("H5Fcreate() failed");
 
-        /* define dataspace for the dataset */ 
-        if ((file_space = H5Screate_simple(RANK, dims1, max_dims)) < 0) 
+        /* define dataspace for the dataset */
+        if ((file_space = H5Screate_simple(RANK, dims1, max_dims)) < 0)
             FAIL_PUTS_ERROR("H5Screate_simple() failed");
 
-        /* create dataset property list */ 
+        /* create dataset property list */
         if ((plist = H5Pcreate(H5P_DATASET_CREATE)) < 0)
             FAIL_PUTS_ERROR("H5Pcreate() failed");
 
@@ -133,8 +133,8 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
         /* create and write an integer type dataset named "dset" */
         if ((dset_id[i] = H5Dcreate2(file_id[i], DSET_NAME, H5T_NATIVE_INT, file_space, H5P_DEFAULT, plist, H5P_DEFAULT)) < 0)
             FAIL_PUTS_ERROR("H5Dcreate() failed");
-     
-        /* dataset in open image 1 is written with "wrong" data */        
+
+        /* dataset in open image 1 is written with "wrong" data */
         if (i == 1) {
             if (H5Dwrite(dset_id[i], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data2) < 0)
                 FAIL_PUTS_ERROR("H5Dwrite() failed");
@@ -144,7 +144,7 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
             if (H5Dwrite(dset_id[i], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data1) < 0)
                 FAIL_PUTS_ERROR("H5Dwrite() failed");
         } /* end else */
-          
+
         /* flush into the file */
         if (H5Fflush(file_id[i], H5F_SCOPE_LOCAL) < 0)
             FAIL_PUTS_ERROR("H5Fflush() failed");
@@ -152,7 +152,7 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
         /* close dataset property list */
         if (H5Pclose(plist) < 0)
             FAIL_PUTS_ERROR("H5Pclose() failed");
-       
+
         /* close dataspace */
         if (H5Sclose(file_space) < 0)
             FAIL_PUTS_ERROR("H5Sclose() failed");
@@ -172,7 +172,7 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
         /* buffer for file image 2 is filled with counter data (non-valid image) */
         if (i == 2) {
             for (j = 0; j < (size_t)buf_size[i]; j++)
-                ((char*)(buf_ptr[i]))[j] = (char)j; 
+                ((char*)(buf_ptr[i]))[j] = (char)j;
         } /* end if */
         /* buffers for the rest of the file images are filled with data from the respective files */
         else {
@@ -187,14 +187,14 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
 
     PASSED();
 
-    TESTING("open file images and check image copies");
- 
-    /* open the file images with the core driver for data access */ 
+    HL_TESTING2("open file images and check image copies");
+
+    /* open the file images with the core driver for data access */
     for (i = 0; i < open_images; i++) {
         /* open file image 2 filled with counter data (non-valid image) */
         if (i == 2) {
             H5E_BEGIN_TRY {
-                /* attempt to set file image in the core driver */ 
+                /* attempt to set file image in the core driver */
                 file_id[i] = H5LTopen_file_image(buf_ptr[i], (size_t)buf_size[i], input_flags[i]);
             } H5E_END_TRY
 
@@ -202,7 +202,7 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
         } /* end if */
         /* open rest of valid file images */
         else {
-            /* set file image in the core driver */ 
+            /* set file image in the core driver */
             if ((file_id[i] = H5LTopen_file_image(buf_ptr[i], (size_t)buf_size[i], input_flags[i])) < 0)
                 FAIL_PUTS_ERROR("H5LTopen_file_image() failed");
 
@@ -218,7 +218,7 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
             else
                 VERIFY(*core_buf_ptr_ptr != buf_ptr[i], "vfd buffer and user buffer should be different");
 
-	    /*
+        /*
              *  When the vfd and user buffers are different and H5LT_FILE_IMAGE_OPEN_RW is enabled,
              *  status_flags in the superblock needs to be cleared in the vfd buffer for
              *  the comparison to proceed as expected.  The user buffer as returned from H5Fget_file_image()
@@ -249,7 +249,7 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
 
     PASSED();
 
-    TESTING("read file images");
+    HL_TESTING2("read file images");
 
     /* read open file images and verify data */
     for (i = 0; i < open_images; i++) {
@@ -259,7 +259,7 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
             continue;
         } /* end if */
 
-        /* open dataset in file image */ 
+        /* open dataset in file image */
         if ((dset_id[i] = H5Dopen2(file_id[i], DSET_NAME, H5P_DEFAULT)) < 0)
             FAIL_PUTS_ERROR("H5Dopen() failed");
 
@@ -274,8 +274,8 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
         /* read dataset */
         if (H5Dread(dset_id[i], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT,  data3) < 0)
             FAIL_PUTS_ERROR("H5Dread() failed");
-        
-        /* compute number of elements in dataset */  
+
+        /* compute number of elements in dataset */
         n_values = (size_t)(dims3[0] * dims3[1]);
 
         /* determine the number of rows in dataset */
@@ -297,15 +297,15 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
                     if (data3[j * nrow + k ] != data1[j * nrow + k ])
                         FAIL_PUTS_ERROR("comparison of image values with original data failed");
         } /* end else */
-         
-        /* close dataspace */ 
+
+        /* close dataspace */
         if (H5Sclose (file_space) < 0)
             FAIL_PUTS_ERROR("H5Sclose() failed");
     } /* end for */
 
-    PASSED(); 
+    PASSED();
 
-    TESTING("write and extend file images");
+    HL_TESTING2("write and extend file images");
 
     /* write open file images and verify data */
     for (i = 0; i < open_images; i++) {
@@ -365,7 +365,7 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
                 hid_t attr_space_id = -1;
                 hid_t attr_id = -1;
                 herr_t status2;
-                size_t l; 
+                size_t l;
 
                 if ((attr_space_id = H5Screate_simple(attr_rank, attr_dims, attr_dims)) < 0)
                     FAIL_PUTS_ERROR("attr_space H5Screate_simple() failed");
@@ -396,9 +396,9 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
                     H5Aclose(attr_id);
                 } H5E_END_TRY;
 #endif
-		if (H5Dclose(dset_id[i]) < 0)
-		    FAIL_PUTS_ERROR("H5Dclose() failed");
-		dset_id[i] = -1;
+        if (H5Dclose(dset_id[i]) < 0)
+            FAIL_PUTS_ERROR("H5Dclose() failed");
+        dset_id[i] = -1;
             } /* end if */
             else {
                 /* write dataset without extending it */
@@ -422,7 +422,7 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
 
     PASSED();
 
-    TESTING("read extended file images");
+    HL_TESTING2("read extended file images");
 
     /* read open file images and verify data */
     for (i = 0; i < open_images; i++) {
@@ -430,7 +430,7 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
         if ((dset_id[i] < 0) || (file_id[i] <  0) || (!(input_flags[i] & H5LT_FILE_IMAGE_OPEN_RW )))
             continue;
 
-        /* open dataset in file image */ 
+        /* open dataset in file image */
         if ((dset_id[i] = H5Dopen2(file_id[i], DSET_NAME, H5P_DEFAULT)) < 0)
             FAIL_PUTS_ERROR("H5Dopen() failed");
 
@@ -445,8 +445,8 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
         /* read dataset */
         if (H5Dread(dset_id[i], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT,  data3) < 0)
             FAIL_PUTS_ERROR("H5Dread() failed");
-        
-        /* compute number of elements in dataset */  
+
+        /* compute number of elements in dataset */
         n_values = (size_t)(dims3[0] * dims3[1]);
 
         /* determine the number of rows in dataset */
@@ -457,8 +457,8 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
             for (k = 0; k < nrow; k++)
                 if (data3[j * nrow + k ] != data4[j * nrow + k ])
                     FAIL_PUTS_ERROR("comparison of image values with original data failed");
-         
-        /* close dataspace */ 
+
+        /* close dataspace */
         if (H5Sclose (file_space) < 0)
             FAIL_PUTS_ERROR("H5Sclose() failed");
 
@@ -467,9 +467,9 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
             FAIL_PUTS_ERROR("H5Dclose() failed");
     } /* end for */
 
-    PASSED()
+    PASSED();
 
-    TESTING("close file images");
+    HL_TESTING2("close file images");
 
     /* close file images  and release buffer if appropriate */
     for (i = 0; i < open_images; i++) {
@@ -489,7 +489,7 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
             VERIFY(buf_ptr[i] != NULL, "buffer pointer must be non NULL");
             HDfree(buf_ptr[i]);
         } /* end if */
-       
+
     } /* end for */
 
     /* release temporary working buffers */
@@ -521,8 +521,8 @@ int main( void )
     size_t    open_images = 10; /* number of open file images */
     size_t    nflags = 8; /* number of flag combinations */
     unsigned  flags[8]; /* array with flag combinations */
-   
-    /* set flag combinations for testing */ 
+
+    /* set flag combinations for testing */
     flags[0] = 0;
     flags[1] = H5LT_FILE_IMAGE_DONT_RELEASE;
     flags[2] = H5LT_FILE_IMAGE_DONT_COPY;
@@ -536,11 +536,11 @@ int main( void )
     nerrors += test_file_image(open_images, nflags, flags) < 0? 1 : 0;
 
     if (nerrors) goto error;
-    printf("File image tests passed.\n");
+    HDprintf("File image tests passed.\n");
     return 0;
 
 error:
-    printf("***** %d IMAGE TEST%s FAILED! *****\n",nerrors, 1 == nerrors ? "" : "S");
+    HDprintf("***** %d IMAGE TEST%s FAILED! *****\n",nerrors, 1 == nerrors ? "" : "S");
     return 1;
 }
 

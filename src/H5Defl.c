@@ -91,6 +91,7 @@ const H5D_layout_ops_t H5D_LOPS_EFL[1] = {{
     H5D__efl_construct,
     NULL,
     H5D__efl_is_space_alloc,
+    NULL,
     H5D__efl_io_init,
     H5D__contig_read,
     H5D__contig_write,
@@ -143,7 +144,7 @@ H5D__efl_construct(H5F_t *f, H5D_t *dset)
 
     /*
      * The maximum size of the dataset cannot exceed the storage size.
-     * Also, only the slowest varying dimension of a simple data space
+     * Also, only the slowest varying dimension of a simple dataspace
      * can be extendible (currently only for external data storage).
      */
 
@@ -226,7 +227,7 @@ H5D__efl_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNU
 {
     FUNC_ENTER_STATIC_NOERR
 
-    HDmemcpy(&io_info->store->efl, &(io_info->dset->shared->dcpl_cache.efl), sizeof(H5O_efl_t));
+    H5MM_memcpy(&io_info->store->efl, &(io_info->dset->shared->dcpl_cache.efl), sizeof(H5O_efl_t));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__efl_io_init() */
@@ -476,7 +477,6 @@ H5D__efl_readvv(const H5D_io_info_t *io_info,
     HDassert(io_info->u.rbuf);
     HDassert(io_info->dset);
     HDassert(io_info->dset->shared);
-    HDassert(io_info->dset->shared->extfile_prefix);
     HDassert(dset_curr_seq);
     HDassert(dset_len_arr);
     HDassert(dset_off_arr);
@@ -560,7 +560,6 @@ H5D__efl_writevv(const H5D_io_info_t *io_info,
     HDassert(io_info->u.wbuf);
     HDassert(io_info->dset);
     HDassert(io_info->dset->shared);
-    HDassert(io_info->dset->shared->extfile_prefix);
     HDassert(dset_curr_seq);
     HDassert(dset_len_arr);
     HDassert(dset_off_arr);
@@ -597,7 +596,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__efl_bh_info(H5F_t *f, hid_t dxpl_id, H5O_efl_t *efl, hsize_t *heap_size)
+H5D__efl_bh_info(H5F_t *f, H5O_efl_t *efl, hsize_t *heap_size)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -610,7 +609,7 @@ H5D__efl_bh_info(H5F_t *f, hid_t dxpl_id, H5O_efl_t *efl, hsize_t *heap_size)
     HDassert(heap_size);
 
     /* Get the size of the local heap for EFL's file list */
-    if(H5HL_heapsize(f, dxpl_id, efl->heap_addr, heap_size) < 0)
+    if(H5HL_heapsize(f, efl->heap_addr, heap_size) < 0)
         HGOTO_ERROR(H5E_EFL, H5E_CANTINIT, FAIL, "unable to retrieve local heap info")
 
 done:

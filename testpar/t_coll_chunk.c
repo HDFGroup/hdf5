@@ -16,7 +16,7 @@
 
 #define HYPER 1
 #define POINT 2
-#define ALL 3 
+#define ALL 3
 
 /* some commonly used routines for collective chunk IO tests*/
 
@@ -620,7 +620,6 @@ coll_chunktest(const char* filename,
   size_t  num_points;           /* for point selection */
   hsize_t *coords = NULL;       /* for point selection */
   hsize_t current_dims;         /* for point selection */
-  int i;
 
   /* set up MPI parameters */
   MPI_Comm_size(comm,&mpi_size);
@@ -638,7 +637,7 @@ coll_chunktest(const char* filename,
   VRFY((status >= 0),"");
 
   /* setup dimensionality object */
-  dims[0] = SPACE_DIM1*mpi_size;
+  dims[0] = (hsize_t)(SPACE_DIM1*mpi_size);
   dims[1] = SPACE_DIM2;
 
   /* allocate memory for data buffer */
@@ -671,7 +670,7 @@ coll_chunktest(const char* filename,
   VRFY((crp_plist >= 0),"");
 
   /* Set up chunk information.  */
-  chunk_dims[0] = dims[0]/chunk_factor;
+  chunk_dims[0] = dims[0]/(hsize_t)chunk_factor;
 
   /* to decrease the testing time, maintain bigger chunk size */
   (chunk_factor == 1) ? (chunk_dims[1] = SPACE_DIM2) : (chunk_dims[1] = SPACE_DIM2/2);
@@ -1058,7 +1057,7 @@ ccslab_set(int mpi_rank,
 	stride[1] =  1;
 	count[0]  =  SPACE_DIM1;
 	count[1]  =  SPACE_DIM2;
-	start[0]  =  mpi_rank*count[0];
+	start[0]  =  (hsize_t)mpi_rank*count[0];
 	start[1]  =  0;
 
 	break;
@@ -1067,11 +1066,11 @@ ccslab_set(int mpi_rank,
 	/* Each process takes several disjoint blocks. */
 	block[0]  =  1;
 	block[1]  =  1;
-        stride[0] =  3;
-        stride[1] =  3;
-        count[0]  =  SPACE_DIM1/(stride[0]*block[0]);
-        count[1]  =  (SPACE_DIM2)/(stride[1]*block[1]);
-	start[0]  =  SPACE_DIM1*mpi_rank;
+    stride[0] =  3;
+    stride[1] =  3;
+    count[0]  =  SPACE_DIM1/(stride[0]*block[0]);
+    count[1]  =  (SPACE_DIM2)/(stride[1]*block[1]);
+	start[0]  =  (hsize_t)SPACE_DIM1*(hsize_t)mpi_rank;
 	start[1]  =  0;
 
 	break;
@@ -1085,7 +1084,7 @@ ccslab_set(int mpi_rank,
 	stride[1] =  1;
 	count[0]  =  ((mpi_rank >= MAX(1,(mpi_size-2)))?0:SPACE_DIM1);
 	count[1]  =  SPACE_DIM2;
-	start[0]  =  mpi_rank*count[0];
+	start[0]  =  (hsize_t)mpi_rank*count[0];
 	start[1]  =  0;
 
 	break;
@@ -1096,14 +1095,14 @@ ccslab_set(int mpi_rank,
          half of the domain. */
 
         block[0]  = 1;
-	count[0]  = 2;
-        stride[0] = SPACE_DIM1*mpi_size/4+1;
+	    count[0]  = 2;
+        stride[0] = (hsize_t)SPACE_DIM1*(hsize_t)mpi_size/4+1;
         block[1]  = SPACE_DIM2;
         count[1]  = 1;
         start[1]  = 0;
         stride[1] = 1;
-	if((mpi_rank *3)<(mpi_size*2)) start[0]  = mpi_rank;
-	else start[0] = 1 + SPACE_DIM1*mpi_size/2 + (mpi_rank-2*mpi_size/3);
+	if((mpi_rank *3)<(mpi_size*2)) start[0]  = (hsize_t)mpi_rank;
+	else start[0] = (hsize_t)(1 + SPACE_DIM1*mpi_size/2 + (mpi_rank-2*mpi_size/3));
         break;
 
     case BYROW_SELECTINCHUNK:
@@ -1111,7 +1110,7 @@ ccslab_set(int mpi_rank,
 
         block[0] = 1;
         count[0] = 1;
-	start[0] = mpi_rank*SPACE_DIM1;
+	start[0] = (hsize_t)(mpi_rank*SPACE_DIM1);
         stride[0]= 1;
 	block[1] = SPACE_DIM2;
 	count[1] = 1;
@@ -1122,7 +1121,7 @@ ccslab_set(int mpi_rank,
 
     default:
 	/* Unknown mode.  Set it to cover the whole dataset. */
-	block[0]  = SPACE_DIM1*mpi_size;
+	block[0]  = (hsize_t)SPACE_DIM1*(hsize_t)mpi_size;
 	block[1]  = SPACE_DIM2;
 	stride[0] = block[0];
 	stride[1] = block[1];
@@ -1134,7 +1133,7 @@ ccslab_set(int mpi_rank,
 	break;
     }
     if (VERBOSE_MED){
-      printf("start[]=(%lu,%lu), count[]=(%lu,%lu), stride[]=(%lu,%lu), block[]=(%lu,%lu), total datapoints=%lu\n",
+      HDprintf("start[]=(%lu,%lu), count[]=(%lu,%lu), stride[]=(%lu,%lu), block[]=(%lu,%lu), total datapoints=%lu\n",
 	(unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0], (unsigned long)count[1],
 	(unsigned long)stride[0], (unsigned long)stride[1], (unsigned long)block[0], (unsigned long)block[1],
 	(unsigned long)(block[0]*block[1]*count[0]*count[1]));
@@ -1197,20 +1196,20 @@ ccdataset_print(hsize_t start[],
     hsize_t i, j;
 
     /* print the column heading */
-    printf("Print only the first block of the dataset\n");
-    printf("%-8s", "Cols:");
+    HDprintf("Print only the first block of the dataset\n");
+    HDprintf("%-8s", "Cols:");
     for (j=0; j < block[1]; j++){
-	printf("%3lu ", (unsigned long)(start[1]+j));
+	HDprintf("%3lu ", (unsigned long)(start[1]+j));
     }
-    printf("\n");
+    HDprintf("\n");
 
     /* print the slab data */
     for (i=0; i < block[0]; i++){
-	printf("Row %2lu: ", (unsigned long)(i+start[0]));
+	HDprintf("Row %2lu: ", (unsigned long)(i+start[0]));
 	for (j=0; j < block[1]; j++){
-	    printf("%03d ", *dataptr++);
+	    HDprintf("%03d ", *dataptr++);
 	}
-	printf("\n");
+	HDprintf("\n");
     }
 }
 
@@ -1233,13 +1232,13 @@ ccdataset_vrfy(hsize_t start[],
 
     /* print it if VERBOSE_MED */
     if (VERBOSE_MED) {
-	printf("dataset_vrfy dumping:::\n");
-	printf("start(%lu, %lu), count(%lu, %lu), stride(%lu, %lu), block(%lu, %lu)\n",
+	HDprintf("dataset_vrfy dumping:::\n");
+	HDprintf("start(%lu, %lu), count(%lu, %lu), stride(%lu, %lu), block(%lu, %lu)\n",
 	    (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0], (unsigned long)count[1],
 	    (unsigned long)stride[0], (unsigned long)stride[1], (unsigned long)block[0], (unsigned long)block[1]);
-	printf("original values:\n");
+	HDprintf("original values:\n");
 	ccdataset_print(start, block, original);
-	printf("compared values:\n");
+	HDprintf("compared values:\n");
 	ccdataset_print(start, block, dataset);
     }
 
@@ -1262,7 +1261,7 @@ ccdataset_vrfy(hsize_t start[],
                     }
                     if (*dataptr != *oriptr){
                         if (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED){
-                            printf("Dataset Verify failed at [%lu][%lu]: expect %d, got %d\n",
+                            HDprintf("Dataset Verify failed at [%lu][%lu]: expect %d, got %d\n",
                                    (unsigned long)i, (unsigned long)j,
                                    *(oriptr), *(dataptr));
                         }
@@ -1272,8 +1271,8 @@ ccdataset_vrfy(hsize_t start[],
         }
     }
     if (vrfyerrs > MAX_ERR_REPORT && !VERBOSE_MED)
-	printf("[more errors ...]\n");
+	HDprintf("[more errors ...]\n");
     if (vrfyerrs)
-	printf("%d errors found in ccdataset_vrfy\n", vrfyerrs);
+	HDprintf("%d errors found in ccdataset_vrfy\n", vrfyerrs);
     return(vrfyerrs);
 }

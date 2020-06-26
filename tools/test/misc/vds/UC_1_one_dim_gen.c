@@ -44,7 +44,7 @@ static char UC_1_VDS_FILE_NAME[NAME_LEN] = "1_vds.h5";
 /* Dataset names */
 static char UC_1_SOURCE_DSET_NAME[NAME_LEN] = "source_dset";
 static char UC_1_VDS_DSET_NAME[NAME_LEN]    = "vds_dset";
-    
+
 /* Fill values */
 static int UC_1_FILL_VALUES[UC_1_N_SOURCES] = {
     -1,
@@ -59,16 +59,16 @@ static int UC_1_VDS_FILL_VALUE = -9;
 int
 main(void)
 {
-    hid_t src_sid       = -1;   /* source dataset's dataspace ID            */
-    hid_t src_dcplid    = -1;   /* source dataset property list ID          */
+    hid_t src_sid       = H5I_INVALID_HID;   /* source dataset's dataspace ID            */
+    hid_t src_dcplid    = H5I_INVALID_HID;   /* source dataset property list ID          */
 
-    hid_t vds_sid       = -1;   /* VDS dataspace ID                         */
-    hid_t vds_dcplid    = -1;   /* VDS dataset property list ID             */
+    hid_t vds_sid       = H5I_INVALID_HID;   /* VDS dataspace ID                         */
+    hid_t vds_dcplid    = H5I_INVALID_HID;   /* VDS dataset property list ID             */
 
-    hid_t fid           = -1;   /* HDF5 file ID                             */
-    hid_t did           = -1;   /* dataset ID                               */
-    hid_t msid          = -1;   /* memory dataspace ID                      */
-    hid_t fsid          = -1;   /* file dataspace ID                        */
+    hid_t fid           = H5I_INVALID_HID;   /* HDF5 file ID                             */
+    hid_t did           = H5I_INVALID_HID;   /* dataset ID                               */
+    hid_t msid          = H5I_INVALID_HID;   /* memory dataspace ID                      */
+    hid_t fsid          = H5I_INVALID_HID;   /* file dataspace ID                        */
 
     hsize_t extent[RANK];       /* dataset extents                          */
     hsize_t start[RANK];        /* starting point for hyperslab             */
@@ -162,7 +162,7 @@ main(void)
 
             value = ((i + 1) * 10) + j;
             for(k = 0; k < count; k++)
-               buffer[k] = value; 
+               buffer[k] = value;
 
             start[0] = (hsize_t)j;
             start[1] = 0;

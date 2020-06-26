@@ -102,8 +102,8 @@ struct Input
 
 struct infilesformat
 {
-    char datafile[255];
-    char configfile[255];
+    char datafile[MAX_PATH_NAME_LENGTH];
+    char configfile[MAX_PATH_NAME_LENGTH];
     struct Input in;
     int config; /* Configfile present? No - 0. Yes - 1 */
 };

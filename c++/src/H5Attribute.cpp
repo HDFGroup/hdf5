@@ -27,7 +27,9 @@
 #include "H5FcreatProp.h"
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
+#include "H5DaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
 #include "H5AbstractDs.h"
@@ -50,7 +52,7 @@ Attribute::Attribute() : AbstractDs(), H5Location(), id(H5I_INVALID_HID) {}
 
 //--------------------------------------------------------------------------
 // Function:    Attribute copy constructor
-///\brief       Copy constructor: makes a copy of the original Attribute object.
+///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original  - IN: Original Attribute object to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 # ===========================================================================
-#      http://www.gnu.org/software/autoconf-archive/ax_check_junit.html
+#      https://www.gnu.org/software/autoconf-archive/ax_check_junit.html
 # ===========================================================================
 #
 # SYNOPSIS
@@ -45,7 +45,7 @@
 #   and this notice are preserved. This file is offered as-is, without any
 #   warranty.
 
-#serial 5
+#serial 6
 
 AU_ALIAS([AC_CHECK_JUNIT], [AX_CHECK_JUNIT])
 AC_DEFUN([AX_CHECK_JUNIT],[

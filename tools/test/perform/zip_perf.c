@@ -419,7 +419,9 @@ fill_with_random_data(Bytef *src, uLongf src_len)
             buf += rc;
             len -= (size_t)rc;
         }
-    } else {
+        HDclose(fd);
+    }
+    else {
         HDfprintf(stdout, "Using random() for random data\n");
 
         for (u = 0; u < src_len; ++u)
@@ -550,18 +552,18 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
  * Modifications:
  */
 int
-main(int argc, char **argv)
+main(int argc, const char *argv[])
 {
     unsigned long min_buf_size = 128 * ONE_KB, max_buf_size = ONE_MB;
     unsigned long file_size = 64 * ONE_MB;
     int opt;
 
     prog = argv[0];
-    
+
     /* Initialize h5tools lib */
     h5tools_init();
 
-    while ((opt = get_option(argc, (const char **)argv, s_opts, l_opts)) > 0) {
+    while ((opt = get_option(argc, argv, s_opts, l_opts)) > 0) {
         switch ((char)opt) {
         case '0': case '1': case '2':
         case '3': case '4': case '5':

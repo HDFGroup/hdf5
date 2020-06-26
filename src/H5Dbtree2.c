@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* 
+/*
  *
  * Purpose: v2 B-tree indexing for chunked datasets with > 1 unlimited dimensions.
  *   Each dataset chunk in the b-tree is identified by its dimensional offset.
@@ -32,6 +32,7 @@
 #include "H5Dpkg.h"		/* Datasets				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5MFprivate.h"     	/* File space management                */
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5VMprivate.h"	/* Vector and array functions		*/
 
 
@@ -59,12 +60,6 @@ typedef struct H5D_bt2_ctx_t {
     unsigned ndims;		/* Number of dimensions in chunk */
     uint32_t *dim;		/* Size of chunk in elements */
 } H5D_bt2_ctx_t;
-
-/* User data for the chunk's removal callback routine */
-typedef struct H5D_bt2_remove_ud_t {
-    H5F_t *f;                   /* File pointer for operation */
-    hid_t dxpl_id;              /* DXPL ID for operation */
-} H5D_bt2_remove_ud_t;
 
 /* Callback info for iteration over chunks in v2 B-tree */
 typedef struct H5D_bt2_it_ud_t {
@@ -111,7 +106,7 @@ static int H5D__bt2_idx_iterate_cb(const void *_record, void *_udata);
 /* Callback for H5B2_find() which is called in H5D__bt2_idx_get_addr() */
 static herr_t H5D__bt2_found_cb(const void *nrecord, void *op_data);
 
-/*  
+/*
  * Callback for H5B2_remove() and H5B2_delete() which is called
  * in H5D__bt2_idx_remove() and H5D__bt2_idx_delete().
  */
@@ -137,7 +132,7 @@ static herr_t H5D__bt2_idx_delete(const H5D_chk_idx_info_t *idx_info);
 static herr_t H5D__bt2_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
     const H5D_chk_idx_info_t *idx_info_dst);
 static herr_t H5D__bt2_idx_copy_shutdown(H5O_storage_chunk_t *storage_src,
-    H5O_storage_chunk_t *storage_dst, hid_t dxpl_id);
+    H5O_storage_chunk_t *storage_dst);
 static herr_t H5D__bt2_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *size);
 static herr_t H5D__bt2_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr);
 static herr_t H5D__bt2_idx_dump(const H5O_storage_chunk_t *storage,
@@ -209,9 +204,9 @@ const H5B2_class_t H5D_BT2_FILT[1] = {{	/* B-tree class information */
 
 /* Declare a free list to manage the H5D_bt2_ctx_t struct */
 H5FL_DEFINE_STATIC(H5D_bt2_ctx_t);
-/* Declare a free list to manage the page elements */
-H5FL_BLK_DEFINE(chunk_dim);
 
+/* Declare a free list to manage the page elements */
+H5FL_ARR_DEFINE_STATIC(uint32_t, H5O_LAYOUT_NDIMS);
 
 
 
@@ -252,12 +247,12 @@ H5D__bt2_crt_context(void *_udata)
     ctx->ndims = udata->ndims;
 
     /* Set up the "local" information for this dataset's chunk dimension sizes */
-    if(NULL == (my_dim = (uint32_t *)H5FL_BLK_MALLOC(chunk_dim, H5O_LAYOUT_NDIMS * sizeof(uint32_t))))
+    if(NULL == (my_dim = (uint32_t *)H5FL_ARR_MALLOC(uint32_t, H5O_LAYOUT_NDIMS)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate chunk dims")
-    HDmemcpy(my_dim, udata->dim, H5O_LAYOUT_NDIMS * sizeof(uint32_t));
+    H5MM_memcpy(my_dim, udata->dim, H5O_LAYOUT_NDIMS * sizeof(uint32_t));
     ctx->dim = my_dim;
 
-    /* 
+    /*
      * Compute the size required for encoding the size of a chunk,
      * allowing for an extra byte, in case the filter makes the chunk larger.
      */
@@ -297,7 +292,7 @@ H5D__bt2_dst_context(void *_ctx)
 
     /* Free array for chunk dimension sizes */
     if(ctx->dim)
-	(void)H5FL_BLK_FREE(chunk_dim, ctx->dim); 
+	(void)H5FL_ARR_FREE(uint32_t, ctx->dim);
     /* Release callback context */
     ctx = H5FL_FREE(H5D_bt2_ctx_t, ctx);
 
@@ -384,7 +379,7 @@ H5D__bt2_unfilt_encode(uint8_t *raw, const void *_record, void *_ctx)
 {
     H5D_bt2_ctx_t *ctx = (H5D_bt2_ctx_t *)_ctx;	/* Callback context structure */
     const H5D_chunk_rec_t *record = (const H5D_chunk_rec_t *)_record; /* The native record */
-    unsigned u;			/* Local index varible */
+    unsigned u;			/* Local index variable */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -574,7 +569,7 @@ H5D__bt2_filt_debug(FILE *stream, int indent, int fwidth,
     const H5D_chunk_rec_t *record = (const H5D_chunk_rec_t *)_record;   /* The native record */
     const H5D_bt2_ctx_t *ctx = (const H5D_bt2_ctx_t *)_ctx; 	/* Callback context */
     unsigned u;		/* Local index variable */
- 
+
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
@@ -664,7 +659,7 @@ H5D__btree2_idx_depend(const H5D_chk_idx_info_t *idx_info)
     oloc.addr = idx_info->storage->u.btree.dset_ohdr_addr;
 
     /* Get header */
-    if(NULL == (oh = H5O_protect(&oloc, idx_info->dxpl_id, H5AC__READ_ONLY_FLAG, TRUE)))
+    if(NULL == (oh = H5O_protect(&oloc, H5AC__READ_ONLY_FLAG, TRUE)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTPROTECT, FAIL, "unable to protect object header")
 
     /* Retrieve the dataset's object header proxy */
@@ -672,12 +667,12 @@ H5D__btree2_idx_depend(const H5D_chk_idx_info_t *idx_info)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get dataset object header proxy")
 
     /* Make the v2 B-tree a child flush dependency of the dataset's object header proxy */
-    if(H5B2_depend(idx_info->storage->u.btree2.bt2, idx_info->dxpl_id, oh_proxy) < 0)
+    if(H5B2_depend(idx_info->storage->u.btree2.bt2, oh_proxy) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on object header proxy")
 
 done:
     /* Release the object header from the cache */
-    if(oh && H5O_unprotect(&oloc, idx_info->dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
+    if(oh && H5O_unprotect(&oloc, oh, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -726,7 +721,7 @@ H5D__bt2_idx_open(const H5D_chk_idx_info_t *idx_info)
     u_ctx.dim = idx_info->layout->dim;
 
     /* Open v2 B-tree for the chunk index */
-    if(NULL == (idx_info->storage->u.btree2.bt2 = H5B2_open(idx_info->f, idx_info->dxpl_id, idx_info->storage->idx_addr, &u_ctx)))
+    if(NULL == (idx_info->storage->u.btree2.bt2 = H5B2_open(idx_info->f, idx_info->storage->idx_addr, &u_ctx)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open v2 B-tree for tracking chunked dataset")
 
     /* Check for SWMR writes to the file */
@@ -740,9 +735,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__bt2_idx_create 
+ * Function:	H5D__bt2_idx_create
  *
- * Purpose:	Create the v2 B-tree for tracking dataset chunks 
+ * Purpose:	Create the v2 B-tree for tracking dataset chunks
  *
  * Return:      SUCCEED/FAIL
  *
@@ -774,7 +769,7 @@ H5D__bt2_idx_create(const H5D_chk_idx_info_t *idx_info)
     if(idx_info->pline->nused > 0) {
 	unsigned chunk_size_len;        /* Size of encoded chunk size */
 
-        /* 
+        /*
 	 * Compute the size required for encoding the size of a chunk,
          * allowing for an extra byte, in case the filter makes the chunk larger.
          */
@@ -798,7 +793,7 @@ H5D__bt2_idx_create(const H5D_chk_idx_info_t *idx_info)
     u_ctx.dim = idx_info->layout->dim;
 
     /* Create the v2 B-tree for the chunked dataset */
-    if(NULL == (idx_info->storage->u.btree2.bt2 = H5B2_create(idx_info->f, idx_info->dxpl_id, &bt2_cparam, &u_ctx)))
+    if(NULL == (idx_info->storage->u.btree2.bt2 = H5B2_create(idx_info->f, &bt2_cparam, &u_ctx)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create v2 B-tree for tracking chunked dataset")
 
     /* Retrieve the v2 B-tree's address in the file */
@@ -842,7 +837,7 @@ H5D__bt2_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
  * Function:	H5D__bt2_mod_cb
  *
  * Purpose:	Modify record for dataset chunk when it is found in a v2 B-tree.
- * 		This is the callback for H5B2_modify() which is called in 
+ * 		This is the callback for H5B2_modify() which is called in
  *		H5D__bt2_idx_insert().
  *
  * Return:	Success:	non-negative
@@ -884,7 +879,7 @@ H5D__bt2_mod_cb(void *_record, void *_op_data, hbool_t *changed)
  * Function:	H5D__bt2_idx_insert
  *
  * Purpose:	Insert chunk address into the indexing structure.
- *		A non-filtered chunk: 
+ *		A non-filtered chunk:
  *		  Should not exist
  *		  Allocate the chunk and pass chunk address back up
  *		A filtered chunk:
@@ -947,7 +942,7 @@ H5D__bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
         bt2_udata.rec.scaled[u] = udata->common.scaled[u];
 
     /* Update record for v2 B-tree (could be insert or modify) */
-    if(H5B2_update(bt2, idx_info->dxpl_id, &bt2_udata, H5D__bt2_mod_cb, &bt2_udata) < 0)
+    if(H5B2_update(bt2, &bt2_udata, H5D__bt2_mod_cb, &bt2_udata) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTUPDATE, FAIL, "unable to update record in v2 B-tree")
 
 done:
@@ -959,7 +954,7 @@ done:
  * Function:	H5D__bt2_found_cb
  *
  * Purpose:	Retrieve record for dataset chunk when it is found in a v2 B-tree.
- * 		This is the callback for H5B2_find() which is called in 
+ * 		This is the callback for H5B2_find() which is called in
  *		H5D__bt2_idx_get_addr() and H5D__bt2_idx_insert().
  *
  * Return:	Success:	non-negative
@@ -1041,7 +1036,7 @@ H5D__bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
         bt2_udata.rec.scaled[u] = udata->common.scaled[u];
 
     /* Go get chunk information from v2 B-tree */
-    if(H5B2_find(bt2, idx_info->dxpl_id, &bt2_udata, H5D__bt2_found_cb, &found_rec) < 0)
+    if(H5B2_find(bt2, &bt2_udata, H5D__bt2_found_cb, &found_rec) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in v2 B-tree")
 
     /* Set common info for the chunk */
@@ -1078,7 +1073,7 @@ done:
  * Purpose:	Translate the B-tree specific chunk record into a generic
  *              form and make the callback to the generic chunk callback
  *              routine.
- * 		This is the callback for H5B2_iterate() which is called in 
+ * 		This is the callback for H5B2_iterate() which is called in
  *		H5D__bt2_idx_iterate().
  *
  * Return:	Success:	Non-negative
@@ -1155,7 +1150,7 @@ H5D__bt2_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     udata.udata = chunk_udata;
 
     /* Iterate over the records in the v2 B-tree */
-    if((ret_value = H5B2_iterate(bt2, idx_info->dxpl_id, H5D__bt2_idx_iterate_cb, &udata)) < 0)
+    if((ret_value = H5B2_iterate(bt2, H5D__bt2_idx_iterate_cb, &udata)) < 0)
         HERROR(H5E_DATASET, H5E_BADITER, "unable to iterate over chunk v2 B-tree");
 
 done:
@@ -1168,7 +1163,7 @@ done:
  *
  * Purpose:	Free space for 'dataset chunk' object as v2 B-tree
  *             	is being deleted or v2 B-tree node is removed.
- * 		This is the callback for H5B2_remove() and H5B2_delete() which 
+ * 		This is the callback for H5B2_remove() and H5B2_delete() which
  *		which are called in H5D__bt2_idx_remove() and H5D__bt2_idx_delete().
  *
  * Return:	Success:	non-negative
@@ -1182,18 +1177,17 @@ static herr_t
 H5D__bt2_remove_cb(const void *_record, void *_udata)
 {
     const H5D_chunk_rec_t *record = (const H5D_chunk_rec_t *)_record;	/* The native record */
-    H5D_bt2_remove_ud_t *udata = (H5D_bt2_remove_ud_t *)_udata;	/* User data for removal callback */
+    H5F_t *f = (H5F_t *)_udata;         /* User data for removal callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(udata);
-    HDassert(udata->f);
+    HDassert(f);
 
     /* Free the space in the file for the object being removed */
     H5_CHECK_OVERFLOW(record->nbytes, uint32_t, hsize_t);
-    if(H5MF_xfree(udata->f, H5FD_MEM_DRAW, udata->dxpl_id, record->chunk_addr, (hsize_t)record->nbytes) < 0)
+    if(H5MF_xfree(f, H5FD_MEM_DRAW, record->chunk_addr, (hsize_t)record->nbytes) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk")
 
 done:
@@ -1216,7 +1210,6 @@ static herr_t
 H5D__bt2_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *udata)
 {
     H5B2_t 	*bt2;                   /* v2 B-tree handle for indexing chunks */
-    H5D_bt2_remove_ud_t remove_udata;	/* User data for removal callback */
     H5D_bt2_ud_t bt2_udata;             /* User data for v2 B-tree find call */
     unsigned 	u;			/* Local index variable */
     herr_t	ret_value = SUCCEED;	/* Return value */
@@ -1245,10 +1238,6 @@ H5D__bt2_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *u
     /* Set convenience pointer to v2 B-tree structure */
     bt2 = idx_info->storage->u.btree2.bt2;
 
-    /* Initialize user data for removal callback */
-    remove_udata.f = idx_info->f;
-    remove_udata.dxpl_id = idx_info->dxpl_id;
-
     /* Prepare user data for compare callback */
     bt2_udata.ndims = idx_info->layout->ndims - 1;
 
@@ -1258,7 +1247,7 @@ H5D__bt2_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *u
 
     /* Remove the record for the "dataset chunk" object from the v2 B-tree */
     /* (space in the file for the object is freed in the 'remove' callback) */
-    if(H5B2_remove(bt2, idx_info->dxpl_id, &bt2_udata, (H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) ? NULL : H5D__bt2_remove_cb, &remove_udata) < 0)
+    if(H5B2_remove(bt2, &bt2_udata, (H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) ? NULL : H5D__bt2_remove_cb, idx_info->f) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "can't remove object from B-tree")
 
 done:
@@ -1289,7 +1278,6 @@ done:
 static herr_t
 H5D__bt2_idx_delete(const H5D_chk_idx_info_t *idx_info)
 {
-    H5D_bt2_remove_ud_t remove_udata;	/* User data for removal callback */
     H5B2_remove_t remove_op;		/* The removal callback */
     H5D_bt2_ctx_ud_t u_ctx;		/* data for context call */
     herr_t ret_value = SUCCEED;     	/* Return value */
@@ -1311,10 +1299,6 @@ H5D__bt2_idx_delete(const H5D_chk_idx_info_t *idx_info)
 	u_ctx.chunk_size = idx_info->layout->size;
 	u_ctx.dim = idx_info->layout->dim;
 
-	/* Initialize user data for removal callback */
-	remove_udata.f = idx_info->f;
-	remove_udata.dxpl_id = idx_info->dxpl_id;
-
 	/* Set remove operation.  Do not remove chunks in SWMR_WRITE mode */
         if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)
             remove_op = NULL;
@@ -1323,7 +1307,7 @@ H5D__bt2_idx_delete(const H5D_chk_idx_info_t *idx_info)
 
 	/* Delete the v2 B-tree */
 	/*(space in the file for each object is freed in the 'remove' callback) */
-	if(H5B2_delete(idx_info->f, idx_info->dxpl_id, idx_info->storage->idx_addr, &u_ctx, remove_op, &remove_udata) < 0)
+	if(H5B2_delete(idx_info->f, idx_info->storage->idx_addr, &u_ctx, remove_op, idx_info->f) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "can't delete v2 B-tree")
 
 	idx_info->storage->idx_addr = HADDR_UNDEF;
@@ -1374,7 +1358,7 @@ H5D__bt2_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree")
 
     /* Set copied metadata tag */
-    H5_BEGIN_TAG(idx_info_dst->dxpl_id, H5AC__COPIED_TAG, FAIL);
+    H5_BEGIN_TAG(H5AC__COPIED_TAG);
 
     /* Create v2 B-tree that describes the chunked dataset in the destination file */
     if(H5D__bt2_idx_create(idx_info_dst) < 0)
@@ -1382,7 +1366,7 @@ H5D__bt2_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
     HDassert(H5F_addr_defined(idx_info_dst->storage->idx_addr));
 
     /* Reset metadata tag */
-    H5_END_TAG(FAIL);
+    H5_END_TAG
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1402,7 +1386,7 @@ done:
  */
 static herr_t
 H5D__bt2_idx_copy_shutdown(H5O_storage_chunk_t *storage_src,
-    H5O_storage_chunk_t *storage_dst, hid_t H5_ATTR_UNUSED dxpl_id)
+    H5O_storage_chunk_t *storage_dst)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
@@ -1415,12 +1399,12 @@ H5D__bt2_idx_copy_shutdown(H5O_storage_chunk_t *storage_src,
     HDassert(storage_dst->u.btree2.bt2);
 
     /* Close v2 B-tree for source file */
-    if(H5B2_close(storage_src->u.btree2.bt2, dxpl_id) < 0)
+    if(H5B2_close(storage_src->u.btree2.bt2) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close v2 B-tree")
     storage_src->u.btree2.bt2 = NULL;
 
     /* Close v2 B-tree for destination file */
-    if(H5B2_close(storage_dst->u.btree2.bt2, dxpl_id) < 0)
+    if(H5B2_close(storage_dst->u.btree2.bt2) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close v2 B-tree")
     storage_dst->u.btree2.bt2 = NULL;
 
@@ -1466,12 +1450,12 @@ H5D__bt2_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
     bt2_cdset = idx_info->storage->u.btree2.bt2;
 
     /* Get v2 B-tree size for indexing chunked dataset */
-    if(H5B2_size(bt2_cdset, idx_info->dxpl_id, index_size) < 0)
+    if(H5B2_size(bt2_cdset, index_size) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve v2 B-tree storage info for chunked dataset")
 
 done:
     /* Close v2 B-tree index */
-    if(bt2_cdset && H5B2_close(bt2_cdset, idx_info->dxpl_id) < 0)
+    if(bt2_cdset && H5B2_close(bt2_cdset) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for tracking chunked dataset")
     idx_info->storage->u.btree2.bt2 = NULL;
 
@@ -1564,7 +1548,7 @@ H5D__bt2_idx_dest(const H5D_chk_idx_info_t *idx_info)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch v2 B-tree file pointer")
 
         /* Close v2 B-tree */
-	if(H5B2_close(idx_info->storage->u.btree2.bt2, idx_info->dxpl_id) < 0)
+        if(H5B2_close(idx_info->storage->u.btree2.bt2) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree")
         idx_info->storage->u.btree2.bt2 = NULL;
     } /* end if */

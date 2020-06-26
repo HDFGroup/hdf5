@@ -1,0 +1,88 @@
+#!/usr/bin/env perl
+require 5.003;
+use warnings;
+$indent=4;
+
+#
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
+
+# Run program in background
+#
+use warnings;
+use strict;
+
+use Carp;
+use Time::HiRes;
+use POSIX 'setsid';
+
+my $child_pid;
+my $child_proc;
+my $cmd = $ARGV[0];
+my $debug = 1;
+
+print "\nStart child process\n";
+start_child();
+print "\nStarted child process\n";
+
+sub start_child {
+    die "cannot execute cmd: $cmd" unless -x $cmd;
+    if ($^O eq 'MSWin32') { # Windows
+        require Win32::Process;
+        Win32::Process::Create($child_proc, $cmd, $cmd, 0, 0, ".") || confess "Could not spawn child: $!";
+        $child_pid = $child_proc->GetProcessID();
+    }
+    else { # Unix
+        $SIG{CHLD} = 'IGNORE';
+        $child_pid = fork();
+        unless (defined $child_pid) {
+            confess "Could not spawn child (Unix): $!";
+        }
+        if ($child_pid == 0) { # child
+            unless ($debug) {
+                open STDIN, "<", "/dev/null"   or die "Can't read /dev/null: $!";
+                open STDOUT, ">", "/dev/null"  or die "Can't write /dev/null: $!";
+            }
+            setsid or warn "setsid cannot start a new session: $!";
+            unless ($debug) {
+                open STDERR, '>&STDOUT'  or die "Can't dup stdout: $!";
+            }
+            local $| = 1;
+            unless (exec($cmd)) {
+                confess "Could not start child: $cmd: $!";
+                CORE::exit(0);
+            }
+        }
+        # parent
+        $SIG{CHLD} = 'DEFAULT';
+    }
+    # catch early child exit, e.g. if program path is incorrect
+    sleep(1.0);
+    POSIX::waitpid(-1, POSIX::WNOHANG()); # clean up any defunct child process
+    if (kill(0,$child_pid)) {
+        print "\nStarted child process id $child_pid\n";
+    }
+    else {
+        warn "Child process exited quickly: $cmd: process $child_pid";
+    }
+}
+
+sub stop_child
+{
+    if ($^O eq 'MSWin32') { # Windows
+        Win32::Process::KillProcess($child_pid,0);
+    }
+    else { # Unix
+        kill 9, $child_pid || warn "could not kill process $child_pid: $!";
+    }
+    print "Stopped child process id $child_pid\n";
+}

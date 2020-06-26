@@ -27,28 +27,28 @@
  */
 
 #include "H5Omodule.h"          /* This source code file is part of the H5O module */
+#define H5F_FRIEND              /*suppress error about including H5Fpkg   */
 
 
 #include "H5private.h"          /* Generic Functions                     */
 #include "H5Eprivate.h"         /* Error handling                        */
-#include "H5Fprivate.h"		/* Files				*/
+#include "H5Fpkg.h"             /* Files                                 */
 #include "H5FLprivate.h"        /* Free Lists                            */
 #include "H5Opkg.h"             /* Object headers                        */
 #include "H5MFprivate.h"        /* File space management                 */
 
 /* Callbacks for message class */
-static void *H5O__mdci_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
-    unsigned mesg_flags, unsigned *ioflags, const uint8_t *p);
-static herr_t H5O__mdci_encode(H5F_t *f, hbool_t disable_shared, 
+static void *H5O__mdci_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
+    unsigned *ioflags, size_t p_size, const uint8_t *p);
+static herr_t H5O__mdci_encode(H5F_t *f, hbool_t disable_shared,
     uint8_t *p, const void *_mesg);
 static void *H5O__mdci_copy(const void *_mesg, void *_dest);
-static size_t H5O__mdci_size(const H5F_t *f, hbool_t disable_shared, 
+static size_t H5O__mdci_size(const H5F_t *f, hbool_t disable_shared,
     const void *_mesg);
 static herr_t H5O__mdci_free(void *mesg);
-static herr_t H5O__mdci_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
-    void *_mesg);
-static herr_t H5O__mdci_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
-    FILE *stream, int indent, int fwidth);
+static herr_t H5O__mdci_delete(H5F_t *f, H5O_t *open_oh, void *_mesg);
+static herr_t H5O__mdci_debug(H5F_t *f, const void *_mesg, FILE *stream,
+    int indent, int fwidth);
 
 /* This message derives from H5O message class */
 const H5O_msg_class_t H5O_MSG_MDCI[1] = {{
@@ -97,9 +97,9 @@ H5FL_DEFINE(H5O_mdci_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__mdci_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, 
-    H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, 
-    unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
+H5O__mdci_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
+    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
+    size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
     H5O_mdci_t      *mesg;                  /* Native message        */
     void            *ret_value = NULL;      /* Return value          */
@@ -143,7 +143,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__mdci_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, 
+H5O__mdci_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared,
     uint8_t *p, const void *_mesg)
 {
     const H5O_mdci_t *mesg = (const H5O_mdci_t *)_mesg;
@@ -220,7 +220,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O__mdci_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, 
+H5O__mdci_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared,
     const void H5_ATTR_UNUSED *_mesg)
 {
     size_t ret_value = 0;       /* Return value */
@@ -228,7 +228,7 @@ H5O__mdci_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared,
     FUNC_ENTER_STATIC_NOERR
 
     /* Set return value */
-    ret_value = (size_t)( 1 +                   /* Version number           */ 
+    ret_value = (size_t)( 1 +                   /* Version number           */
                           H5F_SIZEOF_ADDR(f) +  /* addr of metadata cache   */
                                                 /* image block              */
                           H5F_SIZEOF_SIZE(f) ); /* length of metadata cache */
@@ -276,16 +276,16 @@ H5O__mdci_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__mdci_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
+H5O__mdci_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
 {
     H5O_mdci_t *mesg = (H5O_mdci_t *)_mesg;
-    herr_t ret_value = SUCCEED;   /* Return value */
+    haddr_t final_eoa;          /* For sanity check */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(f);
-    HDassert(open_oh);
     HDassert(mesg);
 
     /* Free file space for cache image */
@@ -314,7 +314,7 @@ H5O__mdci_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
          * space allocations / deallocations prior to the free of the
          * cache image.  Verify this to the extent possible.
          *
-         * If the hack to work around the persistant self referential
+         * If the hack to work around the persistent self referential
          * free space manager issue is NOT in use, just call H5MF_xfree()
          * to release the cache iamge.  In principle, we should be able
          * to just reduce the EOA to the base address of the cache
@@ -322,16 +322,24 @@ H5O__mdci_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
          * before the first metadata cache access.  However, given
          * time constraints, I don't want to go there now.
          */
-        if(H5F_FIRST_ALLOC_DEALLOC(f)) {
-            HDassert(HADDR_UNDEF != H5F_EOA_PRE_FSM_FSALLOC(f));
-            HDassert(H5F_addr_ge(mesg->addr, H5F_EOA_PRE_FSM_FSALLOC(f)));
-            if(H5MF_tidy_self_referential_fsm_hack(f, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "tidy of self referential fsm hack failed")
-        } /* end if */
-        else {
-            if(H5MF_xfree(f, H5FD_MEM_SUPER, dxpl_id, mesg->addr, mesg->size) < 0)
+
+
+
+        if(f->shared->closing) {
+
+            /* Get the eoa, and verify that it has the expected value */
+            if(HADDR_UNDEF == (final_eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)) )
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "unable to get file size")
+
+            HDassert(H5F_addr_eq(final_eoa, mesg->addr + mesg->size));
+
+            if(H5FD_free(f->shared->lf, H5FD_MEM_SUPER, f, mesg->addr, mesg->size) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't free MDC image")
+        } else {
+            if(H5MF_xfree(f, H5FD_MEM_SUPER, mesg->addr, mesg->size) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free file space for cache image block")
-        } /* end else */
+        }
+
     } /* end if */
 
 done:
@@ -352,8 +360,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__mdci_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, 
-    const void *_mesg, FILE * stream, int indent, int fwidth)
+H5O__mdci_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream,
+    int indent, int fwidth)
 {
     const H5O_mdci_t   *mdci = (const H5O_mdci_t *) _mesg;
 

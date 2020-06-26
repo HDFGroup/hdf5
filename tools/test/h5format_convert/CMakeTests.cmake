@@ -22,10 +22,8 @@
   set (HDF5_REFERENCE_FILES
       h5fc_help.ddl
       h5fc_nooption.ddl
-      h5fc_nonexistfile.ddl
       h5fc_d_file.ddl
       h5fc_dname.ddl
-      h5fc_nonexistdset_file.ddl
       h5fc_v_non_chunked.ddl
       h5fc_v_bt1.ddl
       h5fc_v_ndata_bt1.ddl
@@ -47,6 +45,13 @@
       old_h5fc_ext2_sf.ddl
       old_h5fc_ext3_isf.ddl
       h5fc_v_err.ddl
+      h5fc_v_err.ddl.err
+  )
+  set (HDF5_REFERENCE_ERR_FILES
+      h5fc_d_file.ddl.err
+      h5fc_dname.err
+      h5fc_nonexistfile.ddl.err
+      h5fc_nonexistdset_file.ddl.err
   )
   set (HDF5_REFERENCE_TEST_FILES
       h5fc_non_v3.h5
@@ -77,6 +82,10 @@
     HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${ddl_file}" "${PROJECT_BINARY_DIR}/testfiles/${ddl_file}" "h5fc_files")
   endforeach ()
 
+  foreach (h5_file ${HDF5_REFERENCE_ERR_FILES})
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5fc_files")
+  endforeach ()
+
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
     HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5fc_files")
   endforeach ()
@@ -93,28 +102,28 @@
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5FC-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove ./testfiles/outtmp.h5
+          COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/outtmp.h5
       )
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
-      if (NOT "${testfile}" STREQUAL "")
+      if (${testfile})
           add_test (
               NAME H5FC-${testname}-${testfile}-tmpfile
-              COMMAND    ${CMAKE_COMMAND}
-                  -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} ./testfiles/outtmp.h5
+              COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} ./testfiles/outtmp.h5
           )
           set_tests_properties (H5FC-${testname}-${testfile}-tmpfile PROPERTIES DEPENDS "H5FC-${testname}-clear-objects")
           add_test (
               NAME H5FC-${testname}-${testfile}
               COMMAND "${CMAKE_COMMAND}"
-                  -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert>"
+                  -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+                  -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_file_ext}>"
                   -D "TEST_ARGS=${ARGN};outtmp.h5"
                   -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                   -D "TEST_OUTPUT=${testname}.out"
                   -D "TEST_EXPECT=${resultcode}"
                   -D "TEST_REFERENCE=${resultfile}"
+                  -D "TEST_ERRREF=${resultfile}.err"
                   -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
           )
           set_tests_properties (H5FC-${testname}-${testfile} PROPERTIES DEPENDS "H5FC-${testname}-${testfile}-tmpfile")
@@ -123,7 +132,8 @@
           add_test (
               NAME H5FC-${testname}-NA
               COMMAND "${CMAKE_COMMAND}"
-                  -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert>"
+                  -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+                  -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_file_ext}>"
                   -D "TEST_ARGS=${ARGN}"
                   -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                   -D "TEST_OUTPUT=${testname}.out"
@@ -137,27 +147,91 @@
     endif ()
   endmacro ()
 
+  macro (ADD_H5_NOERR_OUTPUT testname resultfile resultcode testfile)
+    # If using memchecker add tests without using scripts
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (
+          NAME H5FC-${testname}-clear-objects
+          COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/outtmp.h5
+      )
+      if (last_test)
+        set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
+      endif ()
+      add_test (
+          NAME H5FC-${testname}-${testfile}-tmpfile
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} ./testfiles/outtmp.h5
+      )
+      set_tests_properties (H5FC-${testname}-${testfile}-tmpfile PROPERTIES DEPENDS "H5FC-${testname}-clear-objects")
+      add_test (
+          NAME H5FC-${testname}-${testfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_file_ext}>"
+              -D "TEST_ARGS=${ARGN};outtmp.h5"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${testname}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5FC-${testname}-${testfile} PROPERTIES DEPENDS "H5FC-${testname}-${testfile}-tmpfile")
+      set (last_test "H5FC-${testname}-${testfile}")
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_MASK_OUTPUT testname resultfile resultcode result_errcheck testfile)
+    # If using memchecker add tests without using scripts
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (
+          NAME H5FC-${testname}-clear-objects
+          COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/outtmp.h5
+      )
+      if (last_test)
+        set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
+      endif ()
+      add_test (
+          NAME H5FC-${testname}-${testfile}-tmpfile
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} ./testfiles/outtmp.h5
+      )
+      set_tests_properties (H5FC-${testname}-${testfile}-tmpfile PROPERTIES DEPENDS "H5FC-${testname}-clear-objects")
+      add_test (
+          NAME H5FC-${testname}-${testfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_file_ext}>"
+              -D "TEST_ARGS=${ARGN};outtmp.h5"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${testname}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}"
+              -D "TEST_ERRREF=${result_errcheck}"
+              -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
+      )
+      set_tests_properties (H5FC-${testname}-${testfile} PROPERTIES DEPENDS "H5FC-${testname}-${testfile}-tmpfile")
+      set (last_test "H5FC-${testname}-${testfile}")
+    endif ()
+  endmacro ()
+
   macro (ADD_H5_TEST testname resultcode testfile)
     # If using memchecker add tests without using scripts
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5FC-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove ./testfiles/tmp.h5
+          COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/tmp.h5
       )
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
           NAME H5FC-${testname}-tmpfile
-          COMMAND    ${CMAKE_COMMAND}
-              -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} testfiles/tmp.h5
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} testfiles/tmp.h5
       )
       set_tests_properties (H5FC-${testname}-tmpfile PROPERTIES DEPENDS "H5FC-${testname}-clear-objects")
       add_test (
           NAME H5FC-${testname}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert>"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_file_ext}>"
               -D "TEST_ARGS=${ARGN};./testfiles/tmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=testfiles/${testname}.out"
@@ -175,7 +249,7 @@
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5FC_CHECK_IDX-${testname}
-          COMMAND "$<TARGET_FILE:h5fc_chk_idx>" "./testfiles/tmp.h5" "${ARGN}"
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5fc_chk_idx> ./testfiles/tmp.h5 ${ARGN}
       )
       set_tests_properties (H5FC_CHECK_IDX-${testname} PROPERTIES DEPENDS "H5FC-${dependtest}")
     endif ()
@@ -186,22 +260,21 @@
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5FC-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove ./testfiles/chktmp.h5
+          COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/chktmp.h5
       )
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
           NAME H5FC-${testname}-tmpfile
-          COMMAND    ${CMAKE_COMMAND}
-              -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} testfiles/chktmp.h5
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} testfiles/chktmp.h5
       )
       set_tests_properties (H5FC-${testname}-tmpfile PROPERTIES DEPENDS "H5FC-${testname}-clear-objects")
       add_test (
           NAME H5FC-${testname}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert>"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_file_ext}>"
               -D "TEST_ARGS=-d;${ARGN};./testfiles/chktmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=testfiles/${testname}.out"
@@ -212,7 +285,7 @@
       set_tests_properties (H5FC-${testname} PROPERTIES DEPENDS "H5FC-${testname}-tmpfile")
       add_test (
           NAME H5FC_CHECK_IDX-${testname}
-          COMMAND "$<TARGET_FILE:h5fc_chk_idx>" "./testfiles/chktmp.h5" "${ARGN}"
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5fc_chk_idx> ./testfiles/chktmp.h5 ${ARGN}
       )
       set_tests_properties (H5FC_CHECK_IDX-${testname} PROPERTIES DEPENDS "H5FC-${testname}")
       set (last_test "H5FC_CHECK_IDX-${testname}")
@@ -220,26 +293,25 @@
   endmacro ()
 
   macro (ADD_H5_H5DUMP_CHECK testname)
-    # If using memchecker add tests without using scripts
+    # If using memchecker skip tests
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5FC-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove ./testfiles/dmptmp.h5
+          COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/dmptmp.h5
       )
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
           NAME H5FC-${testname}-tmpfile
-          COMMAND    ${CMAKE_COMMAND}
-              -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testname}.h5 testfiles/dmptmp.h5
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testname}.h5 testfiles/dmptmp.h5
       )
       set_tests_properties (H5FC-${testname}-tmpfile PROPERTIES DEPENDS "H5FC-${testname}-clear-objects")
       add_test (
           NAME H5FC-${testname}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert>"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_file_ext}>"
               -D "TEST_ARGS=${ARGN};./testfiles/dmptmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=testfiles/${testname}.out"
@@ -251,10 +323,11 @@
       add_test (
           NAME H5FC_CHECK_DUMP-${testname}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
               -D "TEST_ARGS:STRING=-BH;./testfiles/dmptmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-              -D "TEST_OUTPUT=testfiles/${testname}.out"
+              -D "TEST_OUTPUT=testfiles/${testname}_chk.out"
               -D "TEST_EXPECT=0"
               -D "TEST_REFERENCE=testfiles/${testname}.ddl"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
@@ -274,66 +347,13 @@
     # Remove any output file left over from previous test run
     add_test (
       NAME H5FC-clearall-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove
-          h5fc_help.out
-          h5fc_help.out.err
-          h5fc_nooption.out
-          h5fc_nooption.out.err
-          h5fc_nonexistfile.out
-          h5fc_nonexistfile.out.err
-          h5fc_d_file.out
-          h5fc_d_file.out.err
-          h5fc_d_file-d.out
-          h5fc_d_file-d.out.err
-          h5fc_dname.out
-          h5fc_dname.out.err
-          h5fc_nonexistdset_file.out
-          h5fc_nonexistdset_file.out.err
-          h5fc_v_non_chunked.out
-          h5fc_v_non_chunked.out.err
-          h5fc_v_bt1.out
-          h5fc_v_bt1.out.err
-          h5fc_v_ndata_bt1.out
-          h5fc_v_ndata_bt1.out.err
-          h5fc_v_all.out
-          h5fc_v_all.out.err
-          h5fc_v_n_1d.out
-          h5fc_v_n_1d.out.err
-          h5fc_v_n_all.out
-          h5fc_v_n_all.out.err
-          h5fc_ext1_i.out
-          h5fc_ext1_i.out.err
-          h5fc_ext1_s.out
-          h5fc_ext1_s.out.err
-          h5fc_ext1_f.out
-          h5fc_ext1_f.out.err
-          h5fc_ext2_if.out
-          h5fc_ext2_if.out.err
-          h5fc_ext2_is.out
-          h5fc_ext2_is.out.err
-          h5fc_ext2_sf.out
-          h5fc_ext2_sf.out.err
-          h5fc_ext3_isf.out
-          h5fc_ext3_isf.out.err
-          old_h5fc_ext1_i.out
-          old_h5fc_ext1_i.out.err
-          old_h5fc_ext1_s.out
-          old_h5fc_ext1_s.out.err
-          old_h5fc_ext1_f.out
-          old_h5fc_ext1_f.out.err
-          old_h5fc_ext2_if.out
-          old_h5fc_ext2_is.out.err
-          old_h5fc_ext2_is.out
-          old_h5fc_ext2_sf.out.err
-          old_h5fc_ext3_isf.out
-          old_h5fc_ext3_isf.out.err
+      COMMAND ${CMAKE_COMMAND} -E remove
           outtmp.h5
           tmp.h5
           chktmp.h5
           dmptmp.h5
     )
-    if (NOT "${last_test}" STREQUAL "")
+    if (last_test)
       set_tests_properties (H5FC-clearall-objects PROPERTIES DEPENDS ${last_test})
     endif ()
     set (last_test "H5FC-clearall-objects")
@@ -362,22 +382,22 @@
 # h5format_convert -d /GROUP/DSET_BT2 --verbose old_h5fc_ext_none.h5 (verbose, bt1 dataset)
 # h5format_convert -d /DSET_NDATA_BT2 -v -n old_h5fc_ext_none.h5 (verbose, noop, bt1+nodata dataset)
 # h5format_convert -v old_h5fc_ext_none.h5 (verbose, all datasets)
-  ADD_H5_OUTPUT (h5fc_v_non_chunked h5fc_v_non_chunked.ddl 0 old_h5fc_ext_none.h5 -d /DSET_CONTIGUOUS -v)
-  ADD_H5_OUTPUT (h5fc_v_bt1 h5fc_v_bt1.ddl 0 old_h5fc_ext_none.h5 -d /GROUP/DSET_BT2 --verbose)
-  ADD_H5_OUTPUT (h5fc_v_ndata_bt1 h5fc_v_ndata_bt1.ddl 0 old_h5fc_ext_none.h5 -d /DSET_NDATA_BT2 -v -n)
-  ADD_H5_OUTPUT (h5fc_v_all h5fc_v_all.ddl 0 old_h5fc_ext_none.h5 -v)
+  ADD_H5_NOERR_OUTPUT (h5fc_v_non_chunked h5fc_v_non_chunked.ddl 0 old_h5fc_ext_none.h5 -d /DSET_CONTIGUOUS -v)
+  ADD_H5_NOERR_OUTPUT (h5fc_v_bt1 h5fc_v_bt1.ddl 0 old_h5fc_ext_none.h5 -d /GROUP/DSET_BT2 --verbose)
+  ADD_H5_NOERR_OUTPUT (h5fc_v_ndata_bt1 h5fc_v_ndata_bt1.ddl 0 old_h5fc_ext_none.h5 -d /DSET_NDATA_BT2 -v -n)
+  ADD_H5_NOERR_OUTPUT (h5fc_v_all h5fc_v_all.ddl 0 old_h5fc_ext_none.h5 -v)
 #
 #
 #
 # h5format_convert -d /DSET_EA -v -n h5fc_ext_none.h5 (verbose, noop, one ea dataset)
 # h5format_convert -v -n h5fc_non_v3.h5 (verbose, noop, all datasets)
-  ADD_H5_OUTPUT (h5fc_v_n_1d h5fc_v_n_1d.ddl 0 h5fc_ext_none.h5 -d /DSET_EA -v -n)
-  ADD_H5_OUTPUT (h5fc_v_n_all h5fc_v_n_all.ddl 0 h5fc_non_v3.h5 -v -n)
+  ADD_H5_NOERR_OUTPUT (h5fc_v_n_1d h5fc_v_n_1d.ddl 0 h5fc_ext_none.h5 -d /DSET_EA -v -n)
+  ADD_H5_NOERR_OUTPUT (h5fc_v_n_all h5fc_v_n_all.ddl 0 h5fc_non_v3.h5 -v -n)
 #
 #
 #
 # h5format_convert -v h5fc_err_level.h5 (error encountered in converting the dataset)
-  ADD_H5_OUTPUT (h5fc_v_err h5fc_v_err.ddl 1 h5fc_err_level.h5 -v)
+  ADD_H5_MASK_OUTPUT (h5fc_v_err h5fc_v_err.ddl 1 "h5format_convert error: unable to downgrade dataset \"/DSET_ERR\"" h5fc_err_level.h5 -v)
 #
 #
 #

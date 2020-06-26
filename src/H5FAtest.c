@@ -70,14 +70,10 @@ typedef struct H5FA__test_ctx_t {
 static void *H5FA__test_crt_context(void *udata);
 static herr_t H5FA__test_dst_context(void *ctx);
 static herr_t H5FA__test_fill(void *nat_blk, size_t nelmts);
-static herr_t H5FA__test_encode(void *raw, const void *elmt, size_t nelmts,
-    void *ctx);
-static herr_t H5FA__test_decode(const void *raw, void *elmt, size_t nelmts,
-    void *ctx);
-static herr_t H5FA__test_debug(FILE *stream, int indent, int fwidth,
-    hsize_t idx, const void *elmt);
-static void *H5FA__test_crt_dbg_context(H5F_t *f, hid_t dxpl_id,
-    haddr_t obj_addr);
+static herr_t H5FA__test_encode(void *raw, const void *elmt, size_t nelmts, void *ctx);
+static herr_t H5FA__test_decode(const void *raw, void *elmt, size_t nelmts, void *ctx);
+static herr_t H5FA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt);
+static void *H5FA__test_crt_dbg_context(H5F_t *f, haddr_t obj_addr);
 
 
 /*********************/
@@ -319,7 +315,7 @@ H5FA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
     HDassert(elmt);
 
     /* Print element */
-    sprintf(temp_str, "Element #%llu:", (unsigned long long)idx);
+    HDsprintf(temp_str, "Element #%llu:", (unsigned long long)idx);
     HDfprintf(stream, "%*s%-*s %llu\n", indent, "", fwidth, temp_str,
         (unsigned long long)*(const uint64_t *)elmt);
 
@@ -341,7 +337,7 @@ END_FUNC(STATIC)  /* end H5FA__test_debug() */
  */
 BEGIN_FUNC(STATIC, ERR,
 void *, NULL, NULL,
-H5FA__test_crt_dbg_context(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t H5_ATTR_UNUSED obj_addr))
+H5FA__test_crt_dbg_context(H5F_t H5_ATTR_UNUSED *f, haddr_t H5_ATTR_UNUSED obj_addr))
 
     /* Local variables */
     H5FA__test_ctx_t *ctx;              /* Context for callbacks */
@@ -362,7 +358,7 @@ END_FUNC(STATIC)  /* end H5FA__test_crt_dbg_context() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FA_get_cparam_test
+ * Function:    H5FA__get_cparam_test
  *
  * Purpose:     Retrieve the parameters used to create the fixed array
  *
@@ -373,9 +369,9 @@ END_FUNC(STATIC)  /* end H5FA__test_crt_dbg_context() */
  *
  *-------------------------------------------------------------------------
  */
-BEGIN_FUNC(PRIV, NOERR,
+BEGIN_FUNC(PKG, NOERR,
 herr_t, SUCCEED, -,
-H5FA_get_cparam_test(const H5FA_t *fa, H5FA_create_t *cparam))
+H5FA__get_cparam_test(const H5FA_t *fa, H5FA_create_t *cparam))
 
     /* Check arguments. */
     HDassert(fa);
@@ -385,11 +381,11 @@ H5FA_get_cparam_test(const H5FA_t *fa, H5FA_create_t *cparam))
     cparam->raw_elmt_size = fa->hdr->cparam.raw_elmt_size;
     cparam->nelmts = fa->hdr->cparam.nelmts;
 
-END_FUNC(PRIV)  /* end H5FA_get_cparam_test() */
+END_FUNC(PKG)  /* end H5FA__get_cparam_test() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FA_cmp_cparam_test
+ * Function:    H5FA__cmp_cparam_test
  *
  * Purpose:     Compare the parameters used to create the fixed array
  *
@@ -400,9 +396,9 @@ END_FUNC(PRIV)  /* end H5FA_get_cparam_test() */
  *
  *-------------------------------------------------------------------------
  */
-BEGIN_FUNC(PRIV, ERRCATCH,
+BEGIN_FUNC(PKG, ERRCATCH,
 int, 0, -,
-H5FA_cmp_cparam_test(const H5FA_create_t *cparam1, const H5FA_create_t *cparam2))
+H5FA__cmp_cparam_test(const H5FA_create_t *cparam1, const H5FA_create_t *cparam2))
 
     /* Check arguments. */
     HDassert(cparam1);
@@ -416,5 +412,5 @@ H5FA_cmp_cparam_test(const H5FA_create_t *cparam1, const H5FA_create_t *cparam2)
 
 CATCH
 
-END_FUNC(PRIV)  /* end H5FA_cmp_cparam_test() */
+END_FUNC(PKG)  /* end H5FA__cmp_cparam_test() */
 

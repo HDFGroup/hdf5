@@ -276,6 +276,17 @@ public class TestH5Tparams {
     }
 
     @Test(expected = HDF5LibraryException.class)
+    public void testH5Treclaim_invalid() throws Throwable {
+        byte[] buf = new byte[2];
+        H5.H5Treclaim(-1, -1, -1, buf);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testH5Treclaim_null() throws Throwable {
+        H5.H5Treclaim(-1, -1, -1, null);
+    }
+
+    @Test(expected = HDF5LibraryException.class)
     public void testH5Tvlen_create_invalid() throws Throwable {
         H5.H5Tvlen_create(-1);
     }

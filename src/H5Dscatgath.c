@@ -22,10 +22,12 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Dpkg.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs                                  */
+#include "H5MMprivate.h"	/* Memory management			*/
 
 
 /****************/
@@ -42,16 +44,10 @@
 /* Local Prototypes */
 /********************/
 static herr_t H5D__scatter_file(const H5D_io_info_t *io_info,
-    const H5S_t *file_space, H5S_sel_iter_t *file_iter, size_t nelmts,
-    const void *buf);
+    H5S_sel_iter_t *file_iter, size_t nelmts, const void *buf);
 static size_t H5D__gather_file(const H5D_io_info_t *io_info,
-    const H5S_t *file_space, H5S_sel_iter_t *file_iter, size_t nelmts,
-    void *buf);
-static size_t H5D__gather_mem(const void *_buf,
-    const H5S_t *space, H5S_sel_iter_t *iter, size_t nelmts,
-    const H5D_dxpl_cache_t *dxpl_cache, void *_tgath_buf/*out*/);
-static herr_t H5D__compound_opt_read(size_t nelmts, const H5S_t *mem_space,
-    H5S_sel_iter_t *iter, const H5D_dxpl_cache_t *dxpl_cache,
+    H5S_sel_iter_t *file_iter, size_t nelmts, void *buf);
+static herr_t H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter,
     const H5D_type_info_t *type_info, void *user_buf/*out*/);
 static herr_t H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info);
 
@@ -93,9 +89,8 @@ H5FL_SEQ_EXTERN(hsize_t);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__scatter_file(const H5D_io_info_t *_io_info,
-    const H5S_t *space, H5S_sel_iter_t *iter, size_t nelmts,
-    const void *_buf)
+H5D__scatter_file(const H5D_io_info_t *_io_info, H5S_sel_iter_t *iter,
+    size_t nelmts, const void *_buf)
 {
     H5D_io_info_t tmp_io_info;     /* Temporary I/O info object */
     hsize_t *off = NULL;           /* Pointer to sequence offsets */
@@ -106,6 +101,7 @@ H5D__scatter_file(const H5D_io_info_t *_io_info,
     size_t orig_mem_len, mem_len;  /* Length of sequence in memory */
     size_t nseq;                   /* Number of sequences generated */
     size_t nelem;                  /* Number of elements used in sequences */
+    size_t dxpl_vec_size;          /* Vector length from API context's DXPL */
     size_t vec_size;               /* Vector length */
     herr_t ret_value = SUCCEED;    /* Return value */
 
@@ -113,19 +109,22 @@ H5D__scatter_file(const H5D_io_info_t *_io_info,
 
     /* Check args */
     HDassert(_io_info);
-    HDassert(space);
     HDassert(iter);
     HDassert(nelmts > 0);
     HDassert(_buf);
 
     /* Set up temporary I/O info object */
-    HDmemcpy(&tmp_io_info, _io_info, sizeof(*_io_info));
+    H5MM_memcpy(&tmp_io_info, _io_info, sizeof(*_io_info));
     tmp_io_info.op_type = H5D_IO_OP_WRITE;
     tmp_io_info.u.wbuf = _buf;
 
+    /* Get info from API context */
+    if(H5CX_get_vec_size(&dxpl_vec_size) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve I/O vector size")
+
     /* Allocate the vector I/O arrays */
-    if(tmp_io_info.dxpl_cache->vec_size > H5D_IO_VECTOR_SIZE)
-        vec_size = tmp_io_info.dxpl_cache->vec_size;
+    if(dxpl_vec_size > H5D_IO_VECTOR_SIZE)
+        vec_size = dxpl_vec_size;
     else
         vec_size = H5D_IO_VECTOR_SIZE;
     if(NULL == (len = H5FL_SEQ_MALLOC(size_t, vec_size)))
@@ -136,7 +135,7 @@ H5D__scatter_file(const H5D_io_info_t *_io_info,
     /* Loop until all elements are written */
     while(nelmts > 0) {
         /* Get list of sequences for selection to write */
-        if(H5S_SELECT_GET_SEQ_LIST(space, H5S_GET_SEQ_LIST_SORTED, iter, vec_size, nelmts, &nseq, &nelem, off, len) < 0)
+        if(H5S_SELECT_ITER_GET_SEQ_LIST(iter, vec_size, nelmts, &nseq, &nelem, off, len) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
 
         /* Reset the current sequence information */
@@ -189,9 +188,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5D__gather_file(const H5D_io_info_t *_io_info,
-    const H5S_t *space, H5S_sel_iter_t *iter, size_t nelmts,
-    void *_buf/*out*/)
+H5D__gather_file(const H5D_io_info_t *_io_info, H5S_sel_iter_t *iter,
+    size_t nelmts, void *_buf/*out*/)
 {
     H5D_io_info_t tmp_io_info;  /* Temporary I/O info object */
     hsize_t *off = NULL;        /* Pointer to sequence offsets */
@@ -202,6 +200,7 @@ H5D__gather_file(const H5D_io_info_t *_io_info,
     size_t orig_mem_len, mem_len;       /* Length of sequence in memory */
     size_t nseq;                /* Number of sequences generated */
     size_t nelem;               /* Number of elements used in sequences */
+    size_t dxpl_vec_size;       /* Vector length from API context's DXPL */
     size_t vec_size;            /* Vector length */
     size_t ret_value = nelmts;  /* Return value */
 
@@ -211,19 +210,22 @@ H5D__gather_file(const H5D_io_info_t *_io_info,
     HDassert(_io_info);
     HDassert(_io_info->dset);
     HDassert(_io_info->store);
-    HDassert(space);
     HDassert(iter);
     HDassert(nelmts > 0);
     HDassert(_buf);
 
     /* Set up temporary I/O info object */
-    HDmemcpy(&tmp_io_info, _io_info, sizeof(*_io_info));
+    H5MM_memcpy(&tmp_io_info, _io_info, sizeof(*_io_info));
     tmp_io_info.op_type = H5D_IO_OP_READ;
     tmp_io_info.u.rbuf = _buf;
 
+    /* Get info from API context */
+    if(H5CX_get_vec_size(&dxpl_vec_size) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't retrieve I/O vector size")
+
     /* Allocate the vector I/O arrays */
-    if(tmp_io_info.dxpl_cache->vec_size > H5D_IO_VECTOR_SIZE)
-        vec_size = tmp_io_info.dxpl_cache->vec_size;
+    if(dxpl_vec_size > H5D_IO_VECTOR_SIZE)
+        vec_size = dxpl_vec_size;
     else
         vec_size = H5D_IO_VECTOR_SIZE;
     if(NULL == (len = H5FL_SEQ_MALLOC(size_t, vec_size)))
@@ -234,7 +236,7 @@ H5D__gather_file(const H5D_io_info_t *_io_info,
     /* Loop until all elements are read */
     while(nelmts > 0) {
         /* Get list of sequences for selection to read */
-        if(H5S_SELECT_GET_SEQ_LIST(space, H5S_GET_SEQ_LIST_SORTED, iter, vec_size, nelmts, &nseq, &nelem, off, len) < 0)
+        if(H5S_SELECT_ITER_GET_SEQ_LIST(iter, vec_size, nelmts, &nseq, &nelem, off, len) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed")
 
         /* Reset the current sequence information */
@@ -281,8 +283,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__scatter_mem (const void *_tscat_buf, const H5S_t *space,
-    H5S_sel_iter_t *iter, size_t nelmts, const H5D_dxpl_cache_t *dxpl_cache,
+H5D__scatter_mem(const void *_tscat_buf, H5S_sel_iter_t *iter, size_t nelmts,
     void *_buf/*out*/)
 {
     uint8_t *buf = (uint8_t *)_buf;   /* Get local copies for address arithmetic */
@@ -293,6 +294,7 @@ H5D__scatter_mem (const void *_tscat_buf, const H5S_t *space,
     size_t nseq;                /* Number of sequences generated */
     size_t curr_seq;            /* Current sequence being processed */
     size_t nelem;               /* Number of elements used in sequences */
+    size_t dxpl_vec_size;       /* Vector length from API context's DXPL */
     size_t vec_size;            /* Vector length */
     herr_t ret_value = SUCCEED; /* Number of elements scattered */
 
@@ -300,14 +302,17 @@ H5D__scatter_mem (const void *_tscat_buf, const H5S_t *space,
 
     /* Check args */
     HDassert(tscat_buf);
-    HDassert(space);
     HDassert(iter);
     HDassert(nelmts > 0);
     HDassert(buf);
 
+    /* Get info from API context */
+    if(H5CX_get_vec_size(&dxpl_vec_size) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve I/O vector size")
+
     /* Allocate the vector I/O arrays */
-    if(dxpl_cache->vec_size > H5D_IO_VECTOR_SIZE)
-        vec_size = dxpl_cache->vec_size;
+    if(dxpl_vec_size > H5D_IO_VECTOR_SIZE)
+        vec_size = dxpl_vec_size;
     else
         vec_size = H5D_IO_VECTOR_SIZE;
     if(NULL == (len = H5FL_SEQ_MALLOC(size_t, vec_size)))
@@ -318,7 +323,7 @@ H5D__scatter_mem (const void *_tscat_buf, const H5S_t *space,
     /* Loop until all elements are written */
     while(nelmts > 0) {
         /* Get list of sequences for selection to write */
-        if(H5S_SELECT_GET_SEQ_LIST(space, 0, iter, vec_size, nelmts, &nseq, &nelem, off, len) < 0)
+        if(H5S_SELECT_ITER_GET_SEQ_LIST(iter, vec_size, nelmts, &nseq, &nelem, off, len) < 0)
             HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed")
 
         /* Loop, while sequences left to process */
@@ -326,7 +331,7 @@ H5D__scatter_mem (const void *_tscat_buf, const H5S_t *space,
             /* Get the number of bytes in sequence */
             curr_len = len[curr_seq];
 
-            HDmemcpy(buf + off[curr_seq], tscat_buf, curr_len);
+            H5MM_memcpy(buf + off[curr_seq], tscat_buf, curr_len);
 
             /* Advance offset in destination buffer */
             tscat_buf += curr_len;
@@ -364,9 +369,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static size_t
-H5D__gather_mem(const void *_buf, const H5S_t *space,
-    H5S_sel_iter_t *iter, size_t nelmts, const H5D_dxpl_cache_t *dxpl_cache,
+size_t
+H5D__gather_mem(const void *_buf, H5S_sel_iter_t *iter, size_t nelmts,
     void *_tgath_buf/*out*/)
 {
     const uint8_t *buf = (const uint8_t *)_buf;   /* Get local copies for address arithmetic */
@@ -377,6 +381,7 @@ H5D__gather_mem(const void *_buf, const H5S_t *space,
     size_t nseq;                /* Number of sequences generated */
     size_t curr_seq;            /* Current sequence being processed */
     size_t nelem;               /* Number of elements used in sequences */
+    size_t dxpl_vec_size;       /* Vector length from API context's DXPL */
     size_t vec_size;            /* Vector length */
     size_t ret_value = nelmts;  /* Number of elements gathered */
 
@@ -384,14 +389,17 @@ H5D__gather_mem(const void *_buf, const H5S_t *space,
 
     /* Check args */
     HDassert(buf);
-    HDassert(space);
     HDassert(iter);
     HDassert(nelmts > 0);
     HDassert(tgath_buf);
 
+    /* Get info from API context */
+    if(H5CX_get_vec_size(&dxpl_vec_size) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't retrieve I/O vector size")
+
     /* Allocate the vector I/O arrays */
-    if(dxpl_cache->vec_size > H5D_IO_VECTOR_SIZE)
-        vec_size = dxpl_cache->vec_size;
+    if(dxpl_vec_size > H5D_IO_VECTOR_SIZE)
+        vec_size = dxpl_vec_size;
     else
         vec_size = H5D_IO_VECTOR_SIZE;
     if(NULL == (len = H5FL_SEQ_MALLOC(size_t, vec_size)))
@@ -402,7 +410,7 @@ H5D__gather_mem(const void *_buf, const H5S_t *space,
     /* Loop until all elements are written */
     while(nelmts > 0) {
         /* Get list of sequences for selection to write */
-        if(H5S_SELECT_GET_SEQ_LIST(space, 0, iter, vec_size, nelmts, &nseq, &nelem, off, len) < 0)
+        if(H5S_SELECT_ITER_GET_SEQ_LIST(iter, vec_size, nelmts, &nseq, &nelem, off, len) < 0)
             HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed")
 
         /* Loop, while sequences left to process */
@@ -410,7 +418,7 @@ H5D__gather_mem(const void *_buf, const H5S_t *space,
             /* Get the number of bytes in sequence */
             curr_len = len[curr_seq];
 
-            HDmemcpy(tgath_buf, buf + off[curr_seq], curr_len);
+            H5MM_memcpy(tgath_buf, buf + off[curr_seq], curr_len);
 
             /* Advance offset in gather buffer */
             tgath_buf += curr_len;
@@ -447,7 +455,6 @@ herr_t
 H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space)
 {
-    const H5D_dxpl_cache_t *dxpl_cache = io_info->dxpl_cache;     /* Local pointer to dataset transfer info */
     void        *buf = io_info->u.rbuf; /* Local pointer to application buffer */
     H5S_sel_iter_t *mem_iter = NULL;    /* Memory selection iteration info*/
     hbool_t	mem_iter_init = FALSE;	/* Memory selection iteration info has been initialized */
@@ -481,13 +488,13 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate file iterator")
 
     /* Figure out the strip mine size. */
-    if(H5S_select_iter_init(file_iter, file_space, type_info->src_type_size) < 0)
+    if(H5S_select_iter_init(file_iter, file_space, type_info->src_type_size, H5S_SEL_ITER_GET_SEQ_LIST_SORTED) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file selection information")
     file_iter_init = TRUE;	/*file selection iteration info has been initialized */
-    if(H5S_select_iter_init(mem_iter, mem_space, type_info->dst_type_size) < 0)
+    if(H5S_select_iter_init(mem_iter, mem_space, type_info->dst_type_size, 0) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information")
     mem_iter_init = TRUE;	/*file selection iteration info has been initialized */
-    if(H5S_select_iter_init(bkg_iter, mem_space, type_info->dst_type_size) < 0)
+    if(H5S_select_iter_init(bkg_iter, mem_space, type_info->dst_type_size, 0) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize background selection information")
     bkg_iter_init = TRUE;	/*file selection iteration info has been initialized */
 
@@ -508,7 +515,7 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
 	/*
          * Gather data
          */
-        n = H5D__gather_file(io_info, file_space, file_iter, smine_nelmts, type_info->tconv_buf/*out*/);
+        n = H5D__gather_file(io_info, file_iter, smine_nelmts, type_info->tconv_buf/*out*/);
 	if(n != smine_nelmts)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed")
 
@@ -517,12 +524,12 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
          * bypass the rest of steps.
          */
         if(type_info->cmpd_subset && H5T_SUBSET_FALSE != type_info->cmpd_subset->subset) {
-            if(H5D__compound_opt_read(smine_nelmts, mem_space, mem_iter, dxpl_cache, type_info, buf /*out*/) < 0)
+            if(H5D__compound_opt_read(smine_nelmts, mem_iter, type_info, buf /*out*/) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
         } /* end if */
         else {
             if(H5T_BKG_YES == type_info->need_bkg) {
-                n = H5D__gather_mem(buf, mem_space, bkg_iter, smine_nelmts, dxpl_cache, type_info->bkg_buf/*out*/);
+                n = H5D__gather_mem(buf, bkg_iter, smine_nelmts, type_info->bkg_buf/*out*/);
                 if(n != smine_nelmts)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "mem gather failed")
             } /* end if */
@@ -532,18 +539,23 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
              */
             if(H5T_convert(type_info->tpath, type_info->src_type_id, type_info->dst_type_id,
                     smine_nelmts, (size_t)0, (size_t)0, type_info->tconv_buf,
-                    type_info->bkg_buf, io_info->md_dxpl_id) < 0)
+                    type_info->bkg_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
 
             /* Do the data transform after the conversion (since we're using type mem_type) */
-            if(!type_info->is_xform_noop)
-                if(H5Z_xform_eval(dxpl_cache->data_xform_prop, type_info->tconv_buf, smine_nelmts, type_info->mem_type) < 0)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Error performing data transform")
+            if(!type_info->is_xform_noop) {
+                H5Z_data_xform_t *data_transform;   /* Data transform info */
 
-            /*
-             * Scatter the data into memory.
-             */
-            if(H5D__scatter_mem(type_info->tconv_buf, mem_space, mem_iter, smine_nelmts, dxpl_cache, buf/*out*/) < 0)
+                /* Retrieve info from API context */
+                if(H5CX_get_data_transform(&data_transform) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info")
+
+                if(H5Z_xform_eval(data_transform, type_info->tconv_buf, smine_nelmts, type_info->mem_type) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Error performing data transform")
+            }
+
+            /* Scatter the data into memory */
+            if(H5D__scatter_mem(type_info->tconv_buf, mem_iter, smine_nelmts, buf/*out*/) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "scatter failed")
         } /* end else */
     } /* end for */
@@ -583,7 +595,6 @@ herr_t
 H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space)
 {
-    const H5D_dxpl_cache_t *dxpl_cache = io_info->dxpl_cache;     /* Local pointer to dataset transfer info */
     const void  *buf = io_info->u.wbuf; /* Local pointer to application buffer */
     H5S_sel_iter_t *mem_iter = NULL;    /* Memory selection iteration info*/
     hbool_t	mem_iter_init = FALSE;	/* Memory selection iteration info has been initialized */
@@ -617,13 +628,13 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_in
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate file iterator")
 
     /* Figure out the strip mine size. */
-    if(H5S_select_iter_init(file_iter, file_space, type_info->dst_type_size) < 0)
+    if(H5S_select_iter_init(file_iter, file_space, type_info->dst_type_size, H5S_SEL_ITER_GET_SEQ_LIST_SORTED) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file selection information")
     file_iter_init = TRUE;	/*file selection iteration info has been initialized */
-    if(H5S_select_iter_init(mem_iter, mem_space, type_info->src_type_size) < 0)
+    if(H5S_select_iter_init(mem_iter, mem_space, type_info->src_type_size, 0) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information")
     mem_iter_init = TRUE;	/*file selection iteration info has been initialized */
-    if(H5S_select_iter_init(bkg_iter, file_space, type_info->dst_type_size) < 0)
+    if(H5S_select_iter_init(bkg_iter, file_space, type_info->dst_type_size, H5S_SEL_ITER_GET_SEQ_LIST_SORTED) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize background selection information")
     bkg_iter_init = TRUE;	/*file selection iteration info has been initialized */
 
@@ -640,7 +651,7 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_in
          * buffer. Also gather data from the file into the background buffer
          * if necessary.
          */
-        n = H5D__gather_mem(buf, mem_space, mem_iter, smine_nelmts, dxpl_cache, type_info->tconv_buf/*out*/);
+        n = H5D__gather_mem(buf, mem_iter, smine_nelmts, type_info->tconv_buf/*out*/);
         if(n != smine_nelmts)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "mem gather failed")
 
@@ -657,30 +668,37 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_in
         } /* end if */
         else {
             if(H5T_BKG_YES == type_info->need_bkg) {
-                n = H5D__gather_file(io_info, file_space, bkg_iter, smine_nelmts, type_info->bkg_buf/*out*/);
+                n = H5D__gather_file(io_info, bkg_iter, smine_nelmts, type_info->bkg_buf/*out*/);
                 if(n != smine_nelmts)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed")
             } /* end if */
 
             /* Do the data transform before the type conversion (since
              * transforms must be done in the memory type). */
-            if(!type_info->is_xform_noop)
-	        if(H5Z_xform_eval(dxpl_cache->data_xform_prop, type_info->tconv_buf, smine_nelmts, type_info->mem_type) < 0)
-		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Error performing data transform")
+            if(!type_info->is_xform_noop) {
+                H5Z_data_xform_t *data_transform;   /* Data transform info */
+
+                /* Retrieve info from API context */
+                if(H5CX_get_data_transform(&data_transform) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info")
+
+                if(H5Z_xform_eval(data_transform, type_info->tconv_buf, smine_nelmts, type_info->mem_type) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Error performing data transform")
+            }
 
             /*
              * Perform datatype conversion.
              */
             if(H5T_convert(type_info->tpath, type_info->src_type_id, type_info->dst_type_id,
                     smine_nelmts, (size_t)0, (size_t)0, type_info->tconv_buf,
-                    type_info->bkg_buf, io_info->md_dxpl_id) < 0)
+                    type_info->bkg_buf) < 0)
                  HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
         } /* end else */
 
         /*
          * Scatter the data out to the file.
          */
-        if(H5D__scatter_file(io_info, file_space, file_iter, smine_nelmts, type_info->tconv_buf) < 0)
+        if(H5D__scatter_file(io_info, file_iter, smine_nelmts, type_info->tconv_buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "scatter failed")
     } /* end for */
 
@@ -736,8 +754,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__compound_opt_read(size_t nelmts, const H5S_t *space,
-    H5S_sel_iter_t *iter, const H5D_dxpl_cache_t *dxpl_cache,
+H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter,
     const H5D_type_info_t *type_info, void *user_buf/*out*/)
 {
     uint8_t    *ubuf = (uint8_t *)user_buf;     /* Cast for pointer arithmetic	*/
@@ -745,6 +762,7 @@ H5D__compound_opt_read(size_t nelmts, const H5S_t *space,
     hsize_t    *off = NULL;                     /* Pointer to sequence offsets */
     size_t     *len = NULL;                     /* Pointer to sequence lengths */
     size_t     src_stride, dst_stride, copy_size;
+    size_t     dxpl_vec_size;                   /* Vector length from API context's DXPL */
     size_t     vec_size;                        /* Vector length */
     herr_t     ret_value = SUCCEED;	        /* Return value		*/
 
@@ -752,18 +770,20 @@ H5D__compound_opt_read(size_t nelmts, const H5S_t *space,
 
     /* Check args */
     HDassert(nelmts > 0);
-    HDassert(space);
     HDassert(iter);
-    HDassert(dxpl_cache);
     HDassert(type_info);
     HDassert(type_info->cmpd_subset);
     HDassert(H5T_SUBSET_SRC == type_info->cmpd_subset->subset ||
         H5T_SUBSET_DST == type_info->cmpd_subset->subset);
     HDassert(user_buf);
 
+    /* Get info from API context */
+    if(H5CX_get_vec_size(&dxpl_vec_size) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve I/O vector size")
+
     /* Allocate the vector I/O arrays */
-    if(dxpl_cache->vec_size > H5D_IO_VECTOR_SIZE)
-        vec_size = dxpl_cache->vec_size;
+    if(dxpl_vec_size > H5D_IO_VECTOR_SIZE)
+        vec_size = dxpl_vec_size;
     else
         vec_size = H5D_IO_VECTOR_SIZE;
     if(NULL == (len = H5FL_SEQ_MALLOC(size_t, vec_size)))
@@ -786,7 +806,7 @@ H5D__compound_opt_read(size_t nelmts, const H5S_t *space,
         size_t     elmtno;		/* Element counter */
 
         /* Get list of sequences for selection to write */
-        if(H5S_SELECT_GET_SEQ_LIST(space, 0, iter, vec_size, nelmts, &nseq, &elmtno, off, len) < 0)
+        if(H5S_SELECT_ITER_GET_SEQ_LIST(iter, vec_size, nelmts, &nseq, &elmtno, off, len) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed")
 
         /* Loop, while sequences left to process */
@@ -925,8 +945,6 @@ H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id,
     size_t type_size;           /* Datatype element size */
     hssize_t nelmts;            /* Number of remaining elements in selection */
     size_t nelmts_scatter = 0;  /* Number of elements to scatter to dst_buf */
-    H5D_dxpl_cache_t _dxpl_cache; /* Data transfer property cache buffer */
-    H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache; /* Data transfer property cache */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -942,10 +960,6 @@ H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id,
     if(dst_buf == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination buffer provided")
 
-    /* Fill the DXPL cache values for later use */
-    if(H5D__get_dxpl_cache(H5AC_noio_dxpl_id, &dxpl_cache) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
-
     /* Get datatype element size */
     if(0 == (type_size = H5T_GET_SIZE(type)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get datatype size")
@@ -959,7 +973,7 @@ H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate selection iterator")
 
     /* Initialize selection iterator */
-    if(H5S_select_iter_init(iter, dst_space, type_size) < 0)
+    if(H5S_select_iter_init(iter, dst_space, type_size, 0) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize selection iterator information")
     iter_init = TRUE;
 
@@ -983,7 +997,7 @@ H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id,
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "callback returned more elements than in selection")
 
         /* Scatter data */
-        if(H5D__scatter_mem(src_buf, dst_space, iter, nelmts_scatter, dxpl_cache, dst_buf) < 0)
+        if(H5D__scatter_mem(src_buf, iter, nelmts_scatter, dst_buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "scatter failed")
 
         nelmts -= (hssize_t)nelmts_scatter;
@@ -1028,8 +1042,6 @@ H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id,
     hssize_t nelmts;            /* Number of remaining elements in selection */
     size_t dst_buf_nelmts;      /* Number of elements that can fit in dst_buf */
     size_t nelmts_gathered;     /* Number of elements gathered from src_buf */
-    H5D_dxpl_cache_t _dxpl_cache; /* Data transfer property cache buffer */
-    H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache; /* Data transfer property cache */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1047,10 +1059,6 @@ H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "destination buffer size is 0")
     if(dst_buf == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination buffer provided")
-
-    /* Fill the DXPL cache values for later use */
-    if(H5D__get_dxpl_cache(H5AC_noio_dxpl_id, &dxpl_cache) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
     /* Get datatype element size */
     if(0 == (type_size = H5T_GET_SIZE(type)))
@@ -1075,14 +1083,14 @@ H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate selection iterator")
 
     /* Initialize selection iterator */
-    if(H5S_select_iter_init(iter, src_space, type_size) < 0)
+    if(H5S_select_iter_init(iter, src_space, type_size, 0) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize selection iterator information")
     iter_init = TRUE;
 
     /* Loop until all data has been scattered */
     while(nelmts > 0) {
         /* Gather data */
-        if(0 == (nelmts_gathered = H5D__gather_mem(src_buf, src_space, iter, MIN(dst_buf_nelmts, (size_t)nelmts), dxpl_cache, dst_buf)))
+        if(0 == (nelmts_gathered = H5D__gather_mem(src_buf, iter, MIN(dst_buf_nelmts, (size_t)nelmts), dst_buf)))
             HGOTO_ERROR(H5E_IO, H5E_CANTCOPY, FAIL, "gather failed")
         HDassert(nelmts_gathered == MIN(dst_buf_nelmts, (size_t)nelmts));
 

@@ -13,7 +13,7 @@
 
 /* Purpose:     This is a small program that checks if the HDF5_DRIVER
  *              environment variable is set to a value that supports SWMR.
- *              
+ *
  *              It is intended for use in shell scripts.
  */
 
@@ -46,7 +46,7 @@ main(void)
 
     driver = HDgetenv("HDF5_DRIVER");
 
-    if(H5FD_supports_swmr_test(driver))
+    if(H5FD__supports_swmr_test(driver))
         return EXIT_SUCCESS;
     else
         return EXIT_FAILURE;

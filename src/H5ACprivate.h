@@ -35,12 +35,6 @@
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5SLprivate.h"        /* Skip lists 				*/
 
-#ifdef H5_METADATA_TRACE_FILE
-#define H5AC__TRACE_FILE_ENABLED	1
-#else /* H5_METADATA_TRACE_FILE */
-#define H5AC__TRACE_FILE_ENABLED	0
-#endif /* H5_METADATA_TRACE_FILE */
-
 /* Global metadata tag values */
 #define H5AC__INVALID_TAG      (haddr_t)0
 #define H5AC__IGNORE_TAG       (haddr_t)1
@@ -49,11 +43,6 @@
 #define H5AC__FREESPACE_TAG    (haddr_t)4
 #define H5AC__SOHM_TAG         (haddr_t)5
 #define H5AC__GLOBALHEAP_TAG   (haddr_t)6
-
-/* Definitions for cache "tag" property */
-#define H5AC_TAG_NAME          "H5AC_tag"
-#define H5AC_TAG_SIZE          sizeof(haddr_t)
-#define H5AC_TAG_DEF           (H5AC__INVALID_TAG)
 
 /* Types of metadata objects cached */
 typedef enum {
@@ -99,18 +88,18 @@ typedef enum {
  *
  * Hence the following, somewhat odd set of #defines.
  *
- * NOTE: test/cache plays games with the f->shared->cache, and thus 
- *       setting H5AC_DUMP_STATS_ON_CLOSE will generate constant, 
- *	 irrelevant data when run with that test program.  See 
+ * NOTE: test/cache plays games with the f->shared->cache, and thus
+ *       setting H5AC_DUMP_STATS_ON_CLOSE will generate constant,
+ *	 irrelevant data when run with that test program.  See
  * 	 comments on setup_cache() / takedown_cache() in test/cache_common.c.
  *       for details.
  *
  *	 If you need to dump stats at file close in test/cache.c,
- *	 use the dump_stats parameter to takedown_cache(), or call 
+ *	 use the dump_stats parameter to takedown_cache(), or call
  *	 H5C_stats() directly.
  *					JRM -- 4/12/15
  *
- * Added the H5AC_DUMP_IMAGE_STATS_ON_CLOSE #define, which works much 
+ * Added the H5AC_DUMP_IMAGE_STATS_ON_CLOSE #define, which works much
  * the same way as H5AC_DUMP_STATS_ON_CLOSE.  However, the set of stats
  * displayed is much smaller, and directed purely at the cache image feature.
  *
@@ -230,24 +219,7 @@ typedef struct H5AC_proxy_entry_t {
                                         /* (Note that this currently duplicates some cache functionality) */
 } H5AC_proxy_entry_t;
 
-
-#define H5AC_RING_NAME  "H5AC_ring_type"
-
-/* Dataset transfer property lists for metadata calls */
-H5_DLLVAR hid_t H5AC_ind_read_dxpl_id;
-#ifdef H5_HAVE_PARALLEL
-H5_DLLVAR hid_t H5AC_coll_read_dxpl_id;
-#endif /* H5_HAVE_PARALLEL */
-
-/* DXPL to be used in operations that will not result in I/O calls */
-H5_DLLVAR hid_t H5AC_noio_dxpl_id;
-
-/* DXPL to be used for raw data I/O operations when one is not
-   provided by the user (fill values in H5Dcreate) */
-H5_DLLVAR hid_t H5AC_rawdata_dxpl_id;
-
 /* Default cache configuration. */
-
 #define H5AC__DEFAULT_METADATA_WRITE_STRATEGY   \
                                 H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED
 
@@ -411,34 +383,35 @@ H5_DLL herr_t H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr,
     H5AC_cache_image_config_t * image_config_ptr);
 H5_DLL herr_t H5AC_get_entry_status(const H5F_t *f, haddr_t addr,
     unsigned *status_ptr);
-H5_DLL herr_t H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
+H5_DLL herr_t H5AC_insert_entry(H5F_t *f, const H5AC_class_t *type,
     haddr_t addr, void *thing, unsigned int flags);
 H5_DLL herr_t H5AC_pin_protected_entry(void *thing);
-H5_DLL herr_t H5AC_prep_for_file_close(H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5AC_prep_for_file_close(H5F_t *f);
 H5_DLL herr_t H5AC_create_flush_dependency(void *parent_thing, void *child_thing);
-H5_DLL void * H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
-    haddr_t addr, void *udata, unsigned flags);
+H5_DLL void * H5AC_protect(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
+    void *udata, unsigned flags);
 H5_DLL herr_t H5AC_resize_entry(void *thing, size_t new_size);
 H5_DLL herr_t H5AC_unpin_entry(void *thing);
 H5_DLL herr_t H5AC_destroy_flush_dependency(void *parent_thing, void *child_thing);
-H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
-    haddr_t addr, void *thing, unsigned flags);
-H5_DLL herr_t H5AC_flush(H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
+    void *thing, unsigned flags);
+H5_DLL herr_t H5AC_flush(H5F_t *f);
 H5_DLL herr_t H5AC_mark_entry_dirty(void *thing);
 H5_DLL herr_t H5AC_mark_entry_clean(void *thing);
 H5_DLL herr_t H5AC_mark_entry_unserialized(void *thing);
 H5_DLL herr_t H5AC_mark_entry_serialized(void *thing);
 H5_DLL herr_t H5AC_move_entry(H5F_t *f, const H5AC_class_t *type,
-    haddr_t old_addr, haddr_t new_addr, hid_t dxpl_id);
-H5_DLL herr_t H5AC_dest(H5F_t *f, hid_t dxpl_id);
-H5_DLL herr_t H5AC_evict(H5F_t *f, hid_t dxpl_id);
-H5_DLL herr_t H5AC_expunge_entry(H5F_t *f, hid_t dxpl_id,
-    const H5AC_class_t *type, haddr_t addr, unsigned flags);
+    haddr_t old_addr, haddr_t new_addr);
+H5_DLL herr_t H5AC_dest(H5F_t *f);
+H5_DLL herr_t H5AC_evict(H5F_t *f);
+H5_DLL herr_t H5AC_expunge_entry(H5F_t *f, const H5AC_class_t *type,
+    haddr_t addr, unsigned flags);
 H5_DLL herr_t H5AC_remove_entry(void *entry);
 H5_DLL herr_t H5AC_get_cache_auto_resize_config(const H5AC_t * cache_ptr,
     H5AC_cache_config_t *config_ptr);
 H5_DLL herr_t H5AC_get_cache_size(H5AC_t *cache_ptr, size_t *max_size_ptr,
     size_t *min_clean_size_ptr, size_t *cur_size_ptr, uint32_t *cur_num_entries_ptr);
+H5_DLL herr_t H5AC_get_cache_flush_in_progress(H5AC_t *cache_ptr, hbool_t *flush_in_progress_ptr);
 H5_DLL herr_t H5AC_get_cache_hit_rate(H5AC_t *cache_ptr, double *hit_rate_ptr);
 H5_DLL herr_t H5AC_reset_cache_hit_rate_stats(H5AC_t *cache_ptr);
 H5_DLL herr_t H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr,
@@ -446,28 +419,27 @@ H5_DLL herr_t H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr,
 H5_DLL herr_t H5AC_validate_config(H5AC_cache_config_t *config_ptr);
 
 /* Cache image routines */
-H5_DLL herr_t H5AC_load_cache_image_on_next_protect(H5F_t *f, haddr_t addr, 
+H5_DLL herr_t H5AC_load_cache_image_on_next_protect(H5F_t *f, haddr_t addr,
     hsize_t len, hbool_t rw);
 H5_DLL herr_t H5AC_validate_cache_image_config(H5AC_cache_image_config_t *config_ptr);
 H5_DLL hbool_t H5AC_cache_image_pending(const H5F_t *f);
-H5_DLL herr_t H5AC_force_cache_image_load(H5F_t * f, hid_t dxpl_id);
+H5_DLL herr_t H5AC_force_cache_image_load(H5F_t * f);
 H5_DLL herr_t H5AC_get_mdc_image_info(H5AC_t *cache_ptr, haddr_t *image_addr,
     hsize_t *image_len);
 
 /* Tag & Ring routines */
-H5_DLL herr_t H5AC_tag(hid_t dxpl_id, haddr_t metadata_tag, haddr_t *prev_tag);
-H5_DLL herr_t H5AC_flush_tagged_metadata(H5F_t * f, haddr_t metadata_tag, hid_t dxpl_id);
-H5_DLL herr_t H5AC_evict_tagged_metadata(H5F_t * f, haddr_t metadata_tag, hbool_t match_global, hid_t dxpl_id);
+H5_DLL void H5AC_tag(haddr_t metadata_tag, haddr_t *prev_tag);
+H5_DLL herr_t H5AC_flush_tagged_metadata(H5F_t *f, haddr_t metadata_tag);
+H5_DLL herr_t H5AC_evict_tagged_metadata(H5F_t *f, haddr_t metadata_tag, hbool_t match_global);
 H5_DLL herr_t H5AC_retag_copied_metadata(const H5F_t *f, haddr_t metadata_tag);
 H5_DLL herr_t H5AC_ignore_tags(const H5F_t *f);
 H5_DLL herr_t H5AC_cork(H5F_t *f, haddr_t obj_addr, unsigned action, hbool_t *corked);
 H5_DLL herr_t H5AC_get_entry_ring(const H5F_t *f, haddr_t addr, H5AC_ring_t *ring);
-H5_DLL herr_t H5AC_set_ring(hid_t dxpl_id, H5AC_ring_t ring, H5P_genplist_t **dxpl,
-    H5AC_ring_t *orig_ring);
-H5_DLL herr_t H5AC_reset_ring(H5P_genplist_t *dxpl, H5AC_ring_t orig_ring);
+H5_DLL void H5AC_set_ring(H5AC_ring_t ring, H5AC_ring_t *orig_ring);
 H5_DLL herr_t H5AC_unsettle_entry_ring(void *entry);
 H5_DLL herr_t H5AC_unsettle_ring(H5F_t * f, H5AC_ring_t ring);
-H5_DLL herr_t H5AC_expunge_tag_type_metadata(H5F_t *f, hid_t dxpl_id, haddr_t tag, int type_id, unsigned flags);
+H5_DLL herr_t H5AC_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id,
+    unsigned flags);
 H5_DLL herr_t H5AC_get_tag(const void *thing, /*OUT*/ haddr_t *tag);
 
 /* Virtual entry routines */
@@ -475,7 +447,7 @@ H5_DLL H5AC_proxy_entry_t *H5AC_proxy_entry_create(void);
 H5_DLL herr_t H5AC_proxy_entry_add_parent(H5AC_proxy_entry_t *pentry, void *parent);
 H5_DLL herr_t H5AC_proxy_entry_remove_parent(H5AC_proxy_entry_t *pentry, void *parent);
 H5_DLL herr_t H5AC_proxy_entry_add_child(H5AC_proxy_entry_t *pentry, H5F_t *f,
-    hid_t dxpl_id, void *child);
+    void *child);
 H5_DLL herr_t H5AC_proxy_entry_remove_child(H5AC_proxy_entry_t *pentry, void *child);
 H5_DLL herr_t H5AC_proxy_entry_dest(H5AC_proxy_entry_t *pentry);
 

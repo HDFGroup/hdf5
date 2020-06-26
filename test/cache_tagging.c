@@ -15,14 +15,16 @@
  *
  *              This file contains tests for metadata tagging.
  */
-#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
+#define H5F_FRIEND        /*suppress error about including H5Fpkg      */
 #define H5F_TESTING
 #include "H5Fpkg.h"
 
 #include "testhdf5.h"
 #include "cache_common.h"
 
+#include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5HLprivate.h"
+#include "H5VLnative_private.h" /* Native VOL connector                     */
 
 /* ============ */
 /* Test Defines */
@@ -46,7 +48,7 @@
 #define TEST_DEFAULT 0
 #define TEST_SHMESG 1
 #define NUM_TEST_TYPES 2
-    
+
 /* ===================== */
 /* Function Declarations */
 /* ===================== */
@@ -97,7 +99,7 @@ static unsigned check_invalid_tag_application(void);
 
 
 #ifndef NDEBUG
-
+
 /*-------------------------------------------------------------------------
  * Function:    dump_cache()
  *
@@ -118,7 +120,7 @@ static int dump_cache(hid_t fid)
     H5F_t *f;           /* File Pointer */
 
     /* Get Internal File / Cache Pointers */
-    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+    if(NULL == (f = (H5F_t *)H5VL_object(fid)))
         TEST_ERROR;
 
     /* Dump the cache */
@@ -126,19 +128,19 @@ static int dump_cache(hid_t fid)
         TEST_ERROR;
 
     return 0;
-    
+
 error:
     return -1;
 } /* dump_cache */
 #endif /* NDEBUG */ /* end debugging functions */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    verify_no_unknown_tags()
  *
  * Purpose:     Verifies that all tags in the provided cache have the
- *		'dirtied' flag set.  Other verification functions in this
- *		test file set this flag after checking them, so 
+ *        'dirtied' flag set.  Other verification functions in this
+ *        test file set this flag after checking them, so
  *              this is handy to verify that tests have checked all entries
  *              in the cache.
  *
@@ -158,7 +160,7 @@ verify_no_unknown_tags(hid_t fid)
     int i;              /* Iterator */
 
     /* Get Internal File / Cache Pointers */
-    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+    if(NULL == (f = (H5F_t *)H5VL_object(fid)))
         TEST_ERROR;
     cache_ptr = f->shared->cache;
 
@@ -180,7 +182,7 @@ error:
     return -1;
 } /* verify_no_unknown_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    mark_all_entries_investigated()
  *
@@ -206,7 +208,7 @@ mark_all_entries_investigated(hid_t fid)
     int i;              /* Iterator */
 
     /* Get Internal File / Cache Pointers */
-    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+    if(NULL == (f = (H5F_t *)H5VL_object(fid)))
         TEST_ERROR;
     cache_ptr = f->shared->cache;
 
@@ -228,7 +230,7 @@ error:
     return -1;
 } /* mark_all_entries_investigated */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    reset_all_entries_investigated()
  *
@@ -252,7 +254,7 @@ reset_all_entries_investigated(hid_t fid)
     int i;              /* Iterator */
 
     /* Get Internal File / Cache Pointers */
-    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+    if(NULL == (f = (H5F_t *)H5VL_object(fid)))
         TEST_ERROR;
     cache_ptr = f->shared->cache;
 
@@ -274,15 +276,15 @@ error:
     return -1;
 } /* reset_all_entries_investigated */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    verify_tag()
  *
  * Purpose:     Asserts that there is an entry in the specified cache with
  *              the provided entry id and provided tag. The function will
- *              fail if this is not the case. If found, this function will 
- *              set the entry's flush_marker flag, so future verification 
- *              attempts can skip over this entry, knowing it has already been 
+ *              fail if this is not the case. If found, this function will
+ *              set the entry's flush_marker flag, so future verification
+ *              attempts can skip over this entry, knowing it has already been
  *              checked.
  *
  * Return:      0 on Success, -1 on Failure
@@ -300,7 +302,7 @@ verify_tag(hid_t fid, int id, haddr_t tag)
     int i;                      /* Iterator */
 
     /* Get Internal File / Cache Pointers */
-    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+    if(NULL == (f = (H5F_t *)H5VL_object(fid)))
         TEST_ERROR;
     cache_ptr = f->shared->cache;
 
@@ -326,7 +328,7 @@ verify_tag(hid_t fid, int id, haddr_t tag)
 
     /* Didn't find the tagged entry, throw an error */
     TEST_ERROR;
-    
+
 done:
     return 0;
 
@@ -340,7 +342,7 @@ evict_entries(hid_t fid)
     H5F_t *f;         /* File Pointer */
 
     /* Get Internal File / Cache Pointers */
-    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+    if(NULL == (f = (H5F_t *)H5VL_object(fid)))
         TEST_ERROR;
 
     /* Mark all entries investigated */
@@ -349,7 +351,7 @@ evict_entries(hid_t fid)
     /* Evict all we can from the cache to examine full tag creation tree */
         /* This function will likely return failure since the root group
          * is still protected. Thus, don't check its return value. */
-    H5C_flush_cache(f, H5P_DEFAULT, H5C__FLUSH_INVALIDATE_FLAG);
+    H5C_flush_cache(f, H5C__FLUSH_INVALIDATE_FLAG);
 
     return 0;
 
@@ -357,7 +359,7 @@ error:
     return -1;
 } /* evict entries */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    get_object_header_tag()
  *
@@ -373,14 +375,15 @@ error:
 static int
 get_object_header_tag(hid_t loc_id, haddr_t *tag)
 {
-    H5O_info_t oinfo;           /* Object info */
+    H5O_info2_t oinfo;           /* Object info */
 
     /* Retrieve the info for the object */
-    if(H5Oget_info(loc_id, &oinfo) < 0)
+    if(H5Oget_info3(loc_id, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
 
     /* Set the tag to return */
-    *tag = oinfo.addr;
+    if(H5VLnative_token_to_addr(loc_id, oinfo.token, tag) < 0)
+        TEST_ERROR;
 
     return 0;
 
@@ -388,12 +391,12 @@ error:
     return -1;
 } /* get_object_header_tag */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    get_sbe_tag()
  *
  * Purpose:     This function retrieves the tag associated with the superblock
- *		extension (the object header address stored in the superblock)
+ *              extension (the object header address stored in the superblock)
  *
  * Return:      0 on Success; 1 on Failure
  *
@@ -406,7 +409,7 @@ static int
 get_sbe_tag(hid_t fid, haddr_t *tag)
 {
     /* Retrieve the superblock extension's object header address for the file */
-    if(H5F_get_sbe_addr_test(fid, tag) < 0)
+    if(H5F__get_sbe_addr_test(fid, tag) < 0)
         TEST_ERROR;
 
     return 0;
@@ -419,7 +422,7 @@ error:
 /* Test Functions */
 /* ============== */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_file_creation_tags
  *
@@ -433,20 +436,28 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_file_creation_tags(hid_t fcpl_id, int type)
 {
     /* Variable Declarations */
     hid_t fid = -1;             /* File Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;        /* verbose test outout */
+#endif /* NDEBUG */ /* end debugging functions */
+    hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = 0;
     haddr_t sbe_tag = 0;
 
     /* Testing Macro */
     TESTING("tag application during file creation");
 
+    /* Create Fapl */
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+
     /* Create a test file with provided fcpl_t */
-    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, fapl)) < 0 ) TEST_ERROR;
+
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
 
 #ifndef NDEBUG
     /* if verbose, print cache index to screen before verification . */
@@ -500,7 +511,7 @@ error:
     return 1;
 } /* check_file_creation_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_file_open_tags
  *
@@ -514,12 +525,15 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_file_open_tags(hid_t fcpl, int type)
 {
     /* Variable Declarations */
     hid_t fid = -1;          /* File Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;     /* verbose file outout */
+#endif /* NDEBUG */ /* end debugging functions */
+    hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag;       /* Root Group Tag */
     haddr_t sbe_tag;        /* Sblock Extension Tag */
 
@@ -530,20 +544,25 @@ check_file_open_tags(hid_t fcpl, int type)
     /* Setup */
     /* ===== */
 
+    /* Create Fapl */
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+
     /* Create a test file with provided fcpl_t */
-    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl)) < 0 ) TEST_ERROR;
+
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
 
     /* determine tag value of root group's object header */
     if ( get_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
 
     /* Retrieve various tags */
     if ( type == TEST_SHMESG ) {
-        
+
         /* determine tag value of superblock extension object header */
         if ( get_sbe_tag(fid, &sbe_tag) < 0 ) TEST_ERROR;
 
     } /* end if */
-    
+
     /* Close the file */
     if ( H5Fclose(fid) < 0 ) TEST_ERROR;
 
@@ -606,7 +625,7 @@ error:
     return 1;
 } /* check_file_open_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_group_creation_tags
  *
@@ -620,25 +639,33 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_group_creation_tags(void)
 {
     /* Variable Declarations */
     hid_t fid = -1;          /* File Identifier */
     hid_t gid = -1;          /* Group Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;     /* verbose file outout */
+#endif /* NDEBUG */ /* end debugging functions */
+    hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = HADDR_UNDEF;   /* Root Group Tag */
     haddr_t g_tag;          /* Group Tag */
 
     /* Testing Macro */
     TESTING("tag application during group creation");
-    
+
     /* ===== */
     /* Setup */
     /* ===== */
 
+    /* Create Fapl */
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+
     /* Create a test file with provided fcpl_t */
-    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
+
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
 
     /* determine tag value of root group's object header */
     if ( get_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
@@ -664,7 +691,7 @@ check_group_creation_tags(void)
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
 #endif /* NDEBUG */ /* end debugging functions */
- 
+
     /* Verify root group's tagged metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
     if ( verify_tag(fid, H5AC_SNODE_ID, root_tag) < 0 ) TEST_ERROR;
@@ -701,7 +728,7 @@ error:
     return 1;
 } /* check_group_creation_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_multi_group_creation_tags
  *
@@ -715,14 +742,16 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_multi_group_creation_tags(void)
 {
     /* Variable Declarations */
     hid_t fid = -1;          /* File Identifier */
     hid_t gid = -1;          /* Group Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;     /* verbose file outout */
-    char gname[10];          /* group name buffer */
+#endif /* NDEBUG */ /* end debugging functions */
+    char gname[16];          /* group name buffer */
     int i = 0;               /* iterator */
     hid_t fapl = -1;         /* File access prop list */
     haddr_t g_tag = 0;       /* Group tag value */
@@ -732,7 +761,7 @@ check_multi_group_creation_tags(void)
     TESTING("tag application during multiple group creation");
 
     /* Create Fapl */
-    if ( (fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     /* Set latest version of library */
     if ( H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0 ) TEST_ERROR;
@@ -755,7 +784,7 @@ check_multi_group_creation_tags(void)
 
     for (i = 0; i < MULTIGROUPS; i++) {
 
-        sprintf(gname, "%d", i);
+        HDsprintf(gname, "%d", i);
         if ( (gid = H5Gcreate2(fid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
         if ( H5Gclose(gid) < 0 ) TEST_ERROR;
 
@@ -774,7 +803,7 @@ check_multi_group_creation_tags(void)
     for (i = 0; i < MULTIGROUPS; i++) {
 
         /* Re-open the group */
-        sprintf(gname, "%d", i);
+        HDsprintf(gname, "%d", i);
         if ( (gid = H5Gopen2(fid, gname, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
         /* Verify object header for root group */
@@ -815,6 +844,7 @@ check_multi_group_creation_tags(void)
     /* Close open objects and file */
     /* =========================== */
 
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
     if ( H5Fclose(fid) < 0 ) TEST_ERROR;
 
     /* ========================================== */
@@ -828,7 +858,7 @@ error:
     return 1;
 } /* check_multi_group_creation_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_link_iteration_tags
  *
@@ -842,27 +872,35 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_link_iteration_tags(void)
 {
     /* Variable Declarations */
     hid_t fid = -1;          /* File Identifier */
     hid_t sid = -1;          /* Group Identifier */
     hid_t did = -1;          /* Group Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;     /* verbose file outout */
+#endif /* NDEBUG */ /* end debugging functions */
     int i = 0;               /* iterator */
     haddr_t root_tag = 0;   /* Root Group Tag Value */
     char dsetname[500];      /* Name of dataset */
     H5G_info_t ginfo;        /* Group Info Struct */
+    hid_t fapl = -1;         /* File access prop list */
     hid_t root_group = -1;   /* Root Group Identifier */
 
     /* Testing Macro */
     TESTING("tag application during iteration over links in a group");
 
+    /* Create Fapl */
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+
     /* =========== */
     /* Create File */
     /* =========== */
-    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
+
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
 
     /* Get root group tag */
     if ( get_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
@@ -873,7 +911,7 @@ check_link_iteration_tags(void)
     /* Create many datasets in root group */
     for (i=0;i<500;i++) {
 
-        sprintf(dsetname, "Dset %d", i);
+        HDsprintf(dsetname, "Dset %d", i);
         if ( (did = H5Dcreate2(fid, dsetname, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
         if ( H5Dclose(did) < 0 ) TEST_ERROR;
     }
@@ -940,7 +978,7 @@ error:
     return 1;
 } /* check_link_iteration_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_dense_attribute_tags
  *
@@ -954,7 +992,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_dense_attribute_tags(void)
 {
     /* Variable Declarations */
@@ -963,18 +1001,20 @@ check_dense_attribute_tags(void)
     hid_t sid = -1;          /* Group Identifier */
     hid_t did = -1;          /* Group Identifier */
     hid_t dcpl = -1;         /* Group Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;     /* verbose file outout */
+#endif /* NDEBUG */ /* end debugging functions */
     int i = 0;               /* iterator */
     hid_t fapl = -1;         /* File access property list */
     haddr_t d_tag = 0;       /* Dataset tag value */
     haddr_t root_tag = 0;    /* Root group tag value */
-    char attrname[500];	     /* Name of attribute */
+    char attrname[500];         /* Name of attribute */
 
     /* Testing Macro */
     TESTING("tag application during dense attribute manipulation");
 
     /* Create Fapl */
-    if ( (fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
     if ( H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0 ) TEST_ERROR;
 
     /* Create Dcpl */
@@ -985,6 +1025,8 @@ check_dense_attribute_tags(void)
     /* =========== */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
 
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
+
     /* determine tag value of root group's object header */
     if ( get_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
 
@@ -994,10 +1036,10 @@ check_dense_attribute_tags(void)
     /* Create dataset */
     if ( (did = H5Dcreate2(fid, DATASETNAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0 ) TEST_ERROR;
     if ( H5Pclose(dcpl) < 0 ) TEST_ERROR;
-    
+
     /* get dataset object header */
     if ( get_object_header_tag(did, &d_tag) < 0 ) TEST_ERROR;
-    
+
     /* Clear Metadata Tags (don't care about them for this test */
     mark_all_entries_investigated(fid);
 
@@ -1007,7 +1049,7 @@ check_dense_attribute_tags(void)
 
     for (i=0;i<50;i++) {
 
-        sprintf(attrname, "attr %d", i);
+        HDsprintf(attrname, "attr %d", i);
         if ( (aid = H5Acreate2(did, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
         if ( H5Awrite(aid, H5T_NATIVE_UINT, &i) < 0 ) TEST_ERROR;
         if ( H5Aclose(aid) < 0 ) TEST_ERROR;
@@ -1123,7 +1165,7 @@ error:
     return 1;
 } /* check_dense_attribute_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_group_open_tags
  *
@@ -1137,25 +1179,33 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_group_open_tags(void)
 {
     /* Variable Declarations */
     hid_t fid = -1;          /* File Identifier */
     hid_t gid = -1;          /* Group Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;     /* verbose file output */
+#endif /* NDEBUG */ /* end debugging functions */
+    hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = HADDR_UNDEF;
     haddr_t g_tag;
 
     /* Testing Macro */
     TESTING("tag application during group open");
- 
+
     /* ===== */
     /* Setup */
     /* ===== */
 
+    /* Create Fapl */
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+
     /* Create a test file with provided fcpl_t */
-    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
+
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
 
     /* determine tag value of root group's object header */
     if ( get_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
@@ -1224,7 +1274,7 @@ error:
     return 1;
 } /* check_group_open_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_attribute_creation_tags
  *
@@ -1238,7 +1288,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_attribute_creation_tags(hid_t fcpl, int type)
 {
     /* Variable Declarations */
@@ -1246,7 +1296,10 @@ check_attribute_creation_tags(hid_t fcpl, int type)
     hid_t aid = -1;          /* Attribute Identifier */
     hid_t gid = -1;          /* Group Identifier */
     hid_t sid = -1;          /* Dataspace Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;     /* verbose file outout */
+#endif /* NDEBUG */ /* end debugging functions */
+    hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = 0;   /* Root group tag */
     haddr_t g_tag = 0;
     hsize_t dims1[2] = {DIMS, DIMS}; /* dimensions */
@@ -1259,8 +1312,11 @@ check_attribute_creation_tags(hid_t fcpl, int type)
     /* Setup */
     /* ===== */
 
+    /* Create Fapl */
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+
     /* Create a test file with provided fcpl_t */
-    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl)) < 0 ) TEST_ERROR;
 
     /* determine tag value of root group's object header */
     if ( get_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
@@ -1311,7 +1367,7 @@ check_attribute_creation_tags(hid_t fcpl, int type)
         /* verify shared message index tagged with sohm */
         if ( verify_tag(fid, H5AC_SOHM_LIST_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
         if ( verify_tag(fid, H5AC_SOHM_TABLE_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
-        
+
         /* verify fractal heap header belonging to group */
         if ( verify_tag(fid, H5AC_FHEAP_HDR_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
 
@@ -1330,7 +1386,7 @@ check_attribute_creation_tags(hid_t fcpl, int type)
 
     /* verify no other entries present */
     if ( verify_no_unknown_tags(fid) < 0 ) TEST_ERROR;
-    
+
     /* Reset the changes we've made to the cache's data structures */
     if(reset_all_entries_investigated(fid) < 0) TEST_ERROR;
 
@@ -1340,6 +1396,7 @@ check_attribute_creation_tags(hid_t fcpl, int type)
 
     if ( H5Aclose(aid) < 0 ) TEST_ERROR;
     if ( H5Gclose(gid) < 0 ) TEST_ERROR;
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
     if ( H5Fclose(fid) < 0 ) TEST_ERROR;
 
     /* ========================================== */
@@ -1353,7 +1410,7 @@ error:
     return 1;
 } /* check_attribute_creation_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_attribute_open_tags
  *
@@ -1367,7 +1424,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_attribute_open_tags(hid_t fcpl, int type)
 {
     /* Variable Declarations */
@@ -1375,7 +1432,10 @@ check_attribute_open_tags(hid_t fcpl, int type)
     hid_t aid = -1;          /* Attribute Identifier */
     hid_t gid = -1;          /* Group Identifier */
     hid_t sid = -1;          /* Dataspace Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;     /* verbose file outout */
+#endif /* NDEBUG */ /* end debugging functions */
+    hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = 0;
     haddr_t g_tag = 0;
     hsize_t dims1[2] = {DIMS, DIMS}; /* dimensions */
@@ -1388,8 +1448,13 @@ check_attribute_open_tags(hid_t fcpl, int type)
     /* Setup */
     /* ===== */
 
+    /* Create Fapl */
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+
     /* Create a test file with provided fcpl_t */
-    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl)) < 0 ) TEST_ERROR;
+
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
 
     /* determine tag value of root group's object header */
     if ( get_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
@@ -1438,7 +1503,7 @@ check_attribute_open_tags(hid_t fcpl, int type)
 
     /* verify object header chunk belonging to group */
     if ( verify_tag(fid, H5AC_OHDR_CHK_ID, g_tag) < 0 ) TEST_ERROR;
-   
+
     if ( type == TEST_SHMESG ) {
 
         /* verify (another) object header chunk belonging to group */
@@ -1484,7 +1549,7 @@ error:
     return 1;
 } /* check_attribute_open_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_attribute_rename_tags
  *
@@ -1498,7 +1563,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_attribute_rename_tags(hid_t fcpl, int type)
 {
     /* Variable declarations */
@@ -1506,14 +1571,17 @@ check_attribute_rename_tags(hid_t fcpl, int type)
     hid_t gid = -1;                         /* Group Identifier */
     hid_t aid = -1;                         /* Attribute Identifier */
     hid_t sid = -1;                         /* Dataset Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
+#endif /* NDEBUG */ /* end debugging functions */
     int *data = NULL;                       /* data buffer */
     int i,j,k = 0;                          /* iterators */
+    hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = 0;
     haddr_t g_tag = 0;
     hsize_t dims1[2] = {DIMS, DIMS}; /* dimensions */
     hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* dimensions */
-    hbool_t persistant_fsms = FALSE;
+    hbool_t persistent_fsms = FALSE;
 
     /* Testing Macro */
     TESTING("tag application during attribute renaming");
@@ -1522,15 +1590,20 @@ check_attribute_rename_tags(hid_t fcpl, int type)
     /* Setup */
     /* ===== */
 
-    /* check to see if the FCPL specified persistant free space managers */
-    if(H5Pget_file_space_strategy(fcpl, NULL, &persistant_fsms, NULL) < 0)
+    /* check to see if the FCPL specified persistent free space managers */
+    if(H5Pget_file_space_strategy(fcpl, NULL, &persistent_fsms, NULL) < 0)
         TEST_ERROR;
 
     /* Allocate array */
     if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
+    /* Create Fapl */
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+
     /* Create a test file with provided fcpl_t */
-    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl)) < 0 ) TEST_ERROR;
+
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
 
     /* determine tag value of root group's object header */
     if ( get_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
@@ -1546,7 +1619,7 @@ check_attribute_rename_tags(hid_t fcpl, int type)
 
     /* Create attribute */
     if ( (aid = H5Acreate2(gid, ATTRNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
- 
+
     /* fill out data buffer */
     for(i = 0; i < DIMS; i++)
         for(j = 0; j < DIMS; j++)
@@ -1612,22 +1685,12 @@ check_attribute_rename_tags(hid_t fcpl, int type)
         /* verify shared header message stored as a list */
         if ( verify_tag(fid, H5AC_SOHM_LIST_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
 
-        /* 
-	 * 3 calls to verify_tag() for verifying free space: 
-	 *   one freespace header tag for H5FD_MEM_DRAW manager, 
-	 *   one freespace header tag for H5FD_MEM_SUPER manager 
-	 *   one freespace section info tag for H5FD_MEM_SUPER manager 
+        /*
+         *   one freespace header tag for H5FD_MEM_DRAW manager,
+         *   one freespace header tag for H5FD_MEM_SUPER manager
          */
         if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) TEST_ERROR;
-
-        /* If the free space managers are persistant, the
-         * H5MF_tidy_self_referential_fsm_hack() must have been run.
-         * Since this function floats all self referential free space
-         * managers, the H5FD_MEM_SUPER FSM will not be in the metadata
-         * cache.
-         */
-        if(!persistant_fsms && verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0) TEST_ERROR;
-        if(!persistant_fsms && verify_tag(fid, H5AC_FSPACE_SINFO_ID, H5AC__FREESPACE_TAG) < 0) TEST_ERROR;
+        if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) TEST_ERROR;
 
         /* verify btree header and leaf node belonging to group */
         if ( verify_tag(fid, H5AC_BT2_HDR_ID, g_tag) < 0 ) TEST_ERROR;
@@ -1663,7 +1726,7 @@ error:
     return 1;
 } /* check_attribute_rename_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_attribute_delete_tags
  *
@@ -1677,7 +1740,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_attribute_delete_tags(hid_t fcpl, int type)
 {
     /* Variable Declarations */
@@ -1685,14 +1748,17 @@ check_attribute_delete_tags(hid_t fcpl, int type)
     hid_t gid = -1;                         /* Group Identifier */
     hid_t aid = -1;                         /* Attribute Identifier */
     hid_t sid = -1;                         /* Dataset Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
+#endif /* NDEBUG */ /* end debugging functions */
     int *data = NULL;                       /* data buffer */
     int i,j,k = 0;                          /* iterators */
+    hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = 0;
     haddr_t g_tag = 0;
     hsize_t dims1[2] = {DIMS, DIMS}; /* dimensions */
     hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* dimensions */
-    hbool_t persistant_fsms = FALSE;
+    hbool_t persistent_fsms = FALSE;
 
     /* Testing Macro */
     TESTING("tag application during attribute delete");
@@ -1701,15 +1767,20 @@ check_attribute_delete_tags(hid_t fcpl, int type)
     /* Setup */
     /* ===== */
 
-    /* check to see if the FCPL specified persistant free space managers */
-    if ( H5Pget_file_space_strategy(fcpl, NULL, &persistant_fsms, NULL) < 0 )
+    /* check to see if the FCPL specified persistent free space managers */
+    if ( H5Pget_file_space_strategy(fcpl, NULL, &persistent_fsms, NULL) < 0 )
         TEST_ERROR;
 
     /* Allocate array */
     if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
+    /* Create Fapl */
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+
     /* Create a test file with provided fcpl_t */
-    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl)) < 0 ) TEST_ERROR;
+
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
 
     /* determine tag value of root group's object header */
     if ( get_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
@@ -1725,7 +1796,7 @@ check_attribute_delete_tags(hid_t fcpl, int type)
 
     /* Create attribute */
     if ( (aid = H5Acreate2(gid, ATTRNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
- 
+
     /* fill out data buffer */
     for(i = 0;i < DIMS; i++)
         for(j = 0;j < DIMS; j++)
@@ -1763,30 +1834,33 @@ check_attribute_delete_tags(hid_t fcpl, int type)
 
     /* verify object header belonging to group */
     if ( verify_tag(fid, H5AC_OHDR_ID, g_tag) < 0 ) TEST_ERROR;
-   
+
     if ( type == TEST_SHMESG ) {
 
         /* verify shared header message master table */
         if ( verify_tag(fid, H5AC_SOHM_TABLE_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
 
-        /* 
-         * 2 calls to verify_tag() for verifying free space: 
-         *   one freespace header tag for free-space header,
-         *   one freespace header tag for free-space section info
+        /*
+         * 2 calls to verify_tag() for verifying free space:
+         *   one freespace header tag for free-space header raw data
+         *   one freespace header tag for free-space section info raw data
+         *   one freespace header tag for free-space header metadata
          */
-        if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) 
+        if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 )
             TEST_ERROR;
-        if ( verify_tag(fid, H5AC_FSPACE_SINFO_ID, H5AC__FREESPACE_TAG) < 0 ) 
+        if ( verify_tag(fid, H5AC_FSPACE_SINFO_ID, H5AC__FREESPACE_TAG) < 0 )
+            TEST_ERROR;
+        if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 )
             TEST_ERROR;
 
 #if 0
-        /* If the free space managers are persistant, the 
+        /* If the free space managers are persistent, the
          * H5MF_tidy_self_referential_fsm_hack() must have been run.
-         * Since this function floats all self referential free space 
-         * managers, the H5FD_MEM_SUPER FSM will not be in the metadata 
+         * Since this function floats all self referential free space
+         * managers, the H5FD_MEM_SUPER FSM will not be in the metadata
          * cache.
          */
-        if ( ( ! persistant_fsms ) && 
+        if ( ( ! persistent_fsms ) &&
              ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) )
             TEST_ERROR;
 #endif
@@ -1821,7 +1895,7 @@ error:
     return 1;
 } /* check_attribute_delete_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_dataset_creation_tags
  *
@@ -1835,17 +1909,20 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_dataset_creation_tags(hid_t fcpl, int type)
 {
     /* Variable Declarations */
     hid_t fid = -1;                         /* File Identifier */
     hid_t did = -1;                         /* Dataset Identifier */
     hid_t sid = -1;                         /* Dataspace Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t dcpl = -1;                        /* dataset creation pl */
     hsize_t cdims[2] = {1,1};               /* chunk dimensions */
     int fillval = 0;
+    hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = 0;
     haddr_t d_tag = 0;
     hsize_t dims1[2] = {DIMS, DIMS}; /* dimensions */
@@ -1858,7 +1935,12 @@ check_dataset_creation_tags(hid_t fcpl, int type)
     /* Setup */
     /* ===== */
 
-    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    /* Create Fapl */
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+
+    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl)) < 0 ) TEST_ERROR;
+
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
 
     /* determine tag value of root group's object header */
     if ( get_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
@@ -1873,10 +1955,10 @@ check_dataset_creation_tags(hid_t fcpl, int type)
     /* ============================ */
     /* Create Dataset in Root Group */
     /* ============================ */
- 
+
     /* Set up creation property list */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    
+
     /* Enable chunking */
     if ( H5Pset_chunk(dcpl, RANK, cdims) < 0 ) TEST_ERROR;
 
@@ -1918,7 +2000,7 @@ check_dataset_creation_tags(hid_t fcpl, int type)
 
         /* Verify dataset's tagged metadata */
         if ( verify_tag(fid, H5AC_FHEAP_HDR_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
-        
+
         /* Verify shared object header message tags */
         if ( verify_tag(fid, H5AC_SOHM_LIST_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
 
@@ -1948,7 +2030,7 @@ error:
     return 1;
 } /* check_dataset_creation_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_dataset_creation_earlyalloc_tags
  *
@@ -1962,17 +2044,20 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_dataset_creation_earlyalloc_tags(hid_t fcpl, int type)
 {
     /* Variable Declarations */
     hid_t fid = -1;                         /* File Identifier */
     hid_t did = -1;                         /* Dataset Identifier */
     hid_t sid = -1;                         /* Dataspace Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t dcpl = -1;                        /* dataset creation pl */
     hsize_t cdims[2] = {1,1};               /* chunk dimensions */
     int fillval = 0;
+    hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = 0;
     haddr_t d_tag = 0;
     hsize_t dims1[2] = {DIMS, DIMS}; /* dimensions */
@@ -1986,7 +2071,12 @@ check_dataset_creation_earlyalloc_tags(hid_t fcpl, int type)
     /* Setup */
     /* ===== */
 
-    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    /* Create Fapl */
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+
+    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl)) < 0 ) TEST_ERROR;
+
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
 
     /* determine tag value of root group's object header */
     if ( get_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
@@ -2045,7 +2135,7 @@ check_dataset_creation_earlyalloc_tags(hid_t fcpl, int type)
 
         /* Verify dataset's tagged metadata */
         if ( verify_tag(fid, H5AC_FHEAP_HDR_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
-        
+
         /* Verify shared object header message tags */
         if ( verify_tag(fid, H5AC_SOHM_LIST_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
 
@@ -2079,7 +2169,7 @@ error:
     return 1;
 } /* check_dataset_creation_earlyalloc_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_dataset_open_tags
  *
@@ -2093,17 +2183,20 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_dataset_open_tags(void)
 {
     /* Variable Declarations */
     hid_t fid = -1;                         /* File Identifier */
     hid_t did = -1;                         /* Dataset Identifier */
     hid_t sid = -1;                         /* Dataspace Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t dcpl = -1;                        /* dataset creation pl */
     hsize_t cdims[2] = {1,1};               /* chunk dimensions */
     int fillval = 0;
+    hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = 0;
     haddr_t d_tag = 0;
     hsize_t dims1[2] = {DIMS, DIMS}; /* dimensions */
@@ -2116,15 +2209,20 @@ check_dataset_open_tags(void)
     /* Open File */
     /* ========= */
 
+    /* Create Fapl */
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+
     /* Create file */
-    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
+
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
 
     /* determine tag value of root group's object header */
     if ( get_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
 
     /* Set up creation property list */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    
+
     /* Enable chunking */
     if ( H5Pset_chunk(dcpl, RANK, cdims) < 0 ) TEST_ERROR;
 
@@ -2154,7 +2252,7 @@ check_dataset_open_tags(void)
     /* ========================== */
     /* Open Dataset in Root Group */
     /* ========================== */
- 
+
     if (( did = H5Dopen2(fid, DATASETNAME, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
     /* =================================== */
@@ -2199,7 +2297,7 @@ error:
     return 1;
 } /* check_dataset_open_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_dataset_write_tags
  *
@@ -2213,17 +2311,20 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_dataset_write_tags(void)
 {
     /* Variable Declarations */
     hid_t fid = -1;                         /* File Identifier */
     hid_t did = -1;                         /* Dataset Identifier */
     hid_t sid = -1;                         /* Dataspace Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t dcpl = -1;                        /* dataset creation pl */
     hsize_t cdims[2] = {1,1};               /* chunk dimensions */
     int fillval = 0;
+    hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = 0;
     haddr_t d_tag = 0;
     hsize_t dims1[2] = {DIMS, DIMS};        /* dimensions */
@@ -2241,15 +2342,20 @@ check_dataset_write_tags(void)
     /* Allocate array */
     if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
+    /* Create Fapl */
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+
     /* Create file */
-    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
+
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
 
     /* determine tag value of root group's object header */
     if ( get_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
 
     /* Set up creation property list */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    
+
     /* Enable chunking */
     if ( H5Pset_chunk(dcpl, RANK, cdims) < 0 ) TEST_ERROR;
 
@@ -2298,7 +2404,7 @@ check_dataset_write_tags(void)
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
 #endif /* NDEBUG */ /* end debugging functions */
- 
+
     /* Verify 10 b-tree nodes belonging to dataset  */
     for (i=0; i<10; i++)
         if ( verify_tag(fid, H5AC_BT_ID, d_tag) < 0 ) TEST_ERROR;
@@ -2334,7 +2440,7 @@ error:
     return 1;
 } /* check_dataset_write_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_attribute_write_tags
  *
@@ -2348,7 +2454,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_attribute_write_tags(hid_t fcpl, int type)
 {
     /* Variable Declarations */
@@ -2356,9 +2462,12 @@ check_attribute_write_tags(hid_t fcpl, int type)
     hid_t gid = -1;                         /* Group Identifier */
     hid_t aid = -1;                         /* Attribute Identifier */
     hid_t sid = -1;                         /* Dataset Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
+#endif /* NDEBUG */ /* end debugging functions */
     int *data = NULL;                       /* data buffer */
     int i,j,k = 0;                          /* iterators */
+    hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = 0;
     haddr_t g_tag = 0;
     hsize_t dims1[2] = {DIMS, DIMS}; /* dimensions */
@@ -2374,8 +2483,13 @@ check_attribute_write_tags(hid_t fcpl, int type)
     /* Allocate array */
     if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
+    /* Create Fapl */
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+
     /* Create a test file with provided fcpl_t */
-    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl)) < 0 ) TEST_ERROR;
+
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
 
     /* determine tag value of root group's object header */
     if ( get_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
@@ -2423,7 +2537,7 @@ check_attribute_write_tags(hid_t fcpl, int type)
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
 #endif /* NDEBUG */ /* end debugging functions */
- 
+
     /* Verify object header of group */
     if ( verify_tag(fid, H5AC_OHDR_ID, g_tag) < 0 ) TEST_ERROR;
 
@@ -2482,7 +2596,7 @@ error:
     return 1;
 } /* check_attribute_write_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_dataset_read_tags
  *
@@ -2496,17 +2610,20 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_dataset_read_tags(void)
 {
     /* Variable Declarations */
     hid_t fid = -1;                         /* File Identifier */
     hid_t did = -1;                         /* Dataset Identifier */
     hid_t sid = -1;                         /* Dataspace Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t dcpl = -1;                        /* dataset creation pl */
     hsize_t cdims[2] = {1,1};               /* chunk dimensions */
     int fillval = 0;
+    hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = 0;
     haddr_t d_tag = 0;
     hsize_t dims1[2] = {DIMS, DIMS};        /* dimensions */
@@ -2524,15 +2641,20 @@ check_dataset_read_tags(void)
     /* Allocate array */
     if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
+    /* Create Fapl */
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+
     /* Create file */
-    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
+
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
 
     /* determine tag value of root group's object header */
     if ( get_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
 
     /* Set up creation property list */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    
+
     /* Enable chunking */
     if ( H5Pset_chunk(dcpl, RANK, cdims) < 0 ) TEST_ERROR;
 
@@ -2580,7 +2702,7 @@ check_dataset_read_tags(void)
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
 #endif /* NDEBUG */ /* end debugging functions */
- 
+
     /* Verify 19 b-tree nodes belonging to dataset  */
     for (i=0; i<19; i++)
         if ( verify_tag(fid, H5AC_BT_ID, d_tag) < 0 ) TEST_ERROR;
@@ -2613,7 +2735,7 @@ error:
     return 1;
 } /* check_dataset_read_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_dataset_size_retrieval
  *
@@ -2627,17 +2749,20 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_dataset_size_retrieval(void)
 {
     /* Variable Declarations */
     hid_t fid = -1;                         /* File Identifier */
     hid_t did = -1;                         /* Dataset Identifier */
     hid_t sid = -1;                         /* Dataspace Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t dcpl = -1;                        /* dataset creation pl */
     hsize_t cdims[2] = {1,1};               /* chunk dimensions */
     int fillval = 0;
+    hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = 0;
     haddr_t d_tag = 0;
     hsize_t dims1[2] = {DIMS, DIMS};        /* dimensions */
@@ -2656,15 +2781,20 @@ check_dataset_size_retrieval(void)
     /* Allocate array */
     if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
+    /* Create Fapl */
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+
     /* Create file */
-    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
+
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
 
     /* determine tag value of root group's object header */
     if ( get_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
 
     /* Set up creation property list */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    
+
     /* Enable chunking */
     if ( H5Pset_chunk(dcpl, RANK, cdims) < 0 ) TEST_ERROR;
 
@@ -2745,7 +2875,7 @@ error:
     return 1;
 } /* check_dataset_size_retrieval */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_dataset_extend_tags
  *
@@ -2759,7 +2889,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_dataset_extend_tags(void)
 {
 
@@ -2767,10 +2897,13 @@ check_dataset_extend_tags(void)
     hid_t fid = -1;                         /* File Identifier */
     hid_t did = -1;                         /* Dataset Identifier */
     hid_t sid = -1;                         /* Dataspace Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t dcpl = -1;                        /* dataset creation pl */
     hsize_t cdims[2] = {1,1};               /* chunk dimensions */
     int fillval = 0;
+    hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = 0;
     haddr_t d_tag = 0;
     hsize_t dims1[2] = {DIMS, DIMS};        /* dimensions */
@@ -2789,15 +2922,20 @@ check_dataset_extend_tags(void)
     /* Allocate array */
     if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
+    /* Create Fapl */
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+
     /* Create file */
-    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
+
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
 
     /* determine tag value of root group's object header */
     if ( get_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
 
     /* Set up creation property list */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    
+
     /* Enable chunking */
     if ( H5Pset_chunk(dcpl, RANK, cdims) < 0 ) TEST_ERROR;
 
@@ -2878,7 +3016,7 @@ error:
     return 1;
 } /* check_dataset_extend_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_object_info_tags
  *
@@ -2892,16 +3030,19 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_object_info_tags(void)
 {
     /* Variable Declarations */
     hid_t fid = -1;          /* File Identifier */
     hid_t gid = -1;          /* Group Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;     /* verbose file output */
+#endif /* NDEBUG */ /* end debugging functions */
+    hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = HADDR_UNDEF;
     haddr_t g_tag;
-    H5O_info_t oinfo;                       /* Object info struct */    
+    H5O_native_info_t ninfo;                /* Native object info struct */
 
     /* Testing Macro */
     TESTING("tag application during object info retrieval");
@@ -2910,8 +3051,13 @@ check_object_info_tags(void)
     /* Setup */
     /* ===== */
 
+    /* Create Fapl */
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+
     /* Create a test file */
-    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
+
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
 
     /* determine tag value of root group's object header */
     if ( get_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
@@ -2936,7 +3082,10 @@ check_object_info_tags(void)
     /* Get information on an object by name  */
     /* ===================================== */
 
-    if ( H5Oget_info_by_name(fid, GROUPNAME, &oinfo, H5P_DEFAULT) < 0 ) TEST_ERROR;
+    /* Even though we do nothing with this, touching the internal
+     * data structures is needed for the test to pass.
+     */
+    if ( H5Oget_native_info_by_name(fid, GROUPNAME, &ninfo, H5O_NATIVE_INFO_ALL, H5P_DEFAULT) < 0 ) TEST_ERROR;
 
     /* =================================== */
     /* Verification of Metadata Tag Values */
@@ -2981,7 +3130,7 @@ error:
     return 1;
 } /* check_object_info_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_object_copy_tags
  *
@@ -2995,13 +3144,16 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_object_copy_tags(void)
 {
     /* Variable Declarations */
     hid_t fid = -1;                         /* File Identifier */
     hid_t gid = -1;                         /* Group Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;     /* verbose file output */
+#endif /* NDEBUG */ /* end debugging functions */
+    hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = HADDR_UNDEF;
     haddr_t g_tag;
     haddr_t copy_tag;
@@ -3013,8 +3165,13 @@ check_object_copy_tags(void)
     /* Setup */
     /* ===== */
 
+    /* Create Fapl */
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+
     /* Create a test file */
-    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
+
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
 
     /* determine tag value of root group's object header */
     if ( get_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
@@ -3045,7 +3202,7 @@ check_object_copy_tags(void)
     if ( (gid = H5Gopen2(fid, GROUPNAMECOPY, H5P_DEFAULT)) < 0 ) TEST_ERROR;
     if ( get_object_header_tag(gid, &copy_tag) < 0 ) TEST_ERROR;
     if (H5Gclose(gid) < 0) TEST_ERROR;
-  
+
     /* =================================== */
     /* Verification of Metadata Tag Values */
     /* =================================== */
@@ -3094,7 +3251,7 @@ error:
     return 1;
 } /* check_object_copy_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_link_removal_tags
  *
@@ -3108,7 +3265,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_link_removal_tags(hid_t fcpl, int type)
 {
     /* Variable Declarations */
@@ -3116,10 +3273,13 @@ check_link_removal_tags(hid_t fcpl, int type)
     hid_t did = -1;                         /* Dataset Identifier */
     hid_t sid = -1;                         /* Dataspace Identifier */
     hid_t gid = -1;                         /* Dataspace Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t dcpl = -1;                        /* dataset creation pl */
     hsize_t cdims[2] = {1,1};               /* chunk dimensions */
     int fillval = 0;
+    hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = 0;
     haddr_t d_tag = 0;
     haddr_t g_tag = 0;
@@ -3138,8 +3298,13 @@ check_link_removal_tags(hid_t fcpl, int type)
     /* Allocate array */
     if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
+    /* Create Fapl */
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+
     /* Create file */
-    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl)) < 0 ) TEST_ERROR;
+
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
 
     /* determine tag value of root group's object header */
     if ( get_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
@@ -3155,7 +3320,7 @@ check_link_removal_tags(hid_t fcpl, int type)
 
     /* Set up creation property list */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    
+
     /* Enable chunking */
     if ( H5Pset_chunk(dcpl, RANK, cdims) < 0 ) TEST_ERROR;
 
@@ -3218,7 +3383,7 @@ check_link_removal_tags(hid_t fcpl, int type)
         if ( verify_tag(fid, H5AC_SOHM_TABLE_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
 
     } /* end if */
-    
+
     /* verify no other entries present */
     if ( verify_no_unknown_tags(fid) < 0 ) TEST_ERROR;
 
@@ -3246,7 +3411,7 @@ error:
     return 1;
 } /* check_link_removal_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_link_getname_tags
  *
@@ -3260,7 +3425,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_link_getname_tags(void)
 {
     /* Variable Declarations */
@@ -3269,10 +3434,13 @@ check_link_getname_tags(void)
     hid_t did = -1;                         /* Dataset Identifier */
     hid_t sid = -1;                         /* Dataspace Identifier */
     hid_t gid = -1;                         /* Dataspace Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t dcpl = -1;                        /* dataset creation pl */
     hsize_t cdims[2] = {1,1};               /* chunk dimensions */
     int fillval = 0;
+    hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = 0;
     haddr_t d_tag = 0;
     haddr_t g_tag = 0;
@@ -3291,8 +3459,13 @@ check_link_getname_tags(void)
     /* Allocate array */
     if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
+    /* Create Fapl */
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+
     /* Create file */
-    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
+
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
 
     /* determine tag value of root group's object header */
     if ( get_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
@@ -3308,7 +3481,7 @@ check_link_getname_tags(void)
 
     /* Set up creation property list */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    
+
     /* Enable chunking */
     if ( H5Pset_chunk(dcpl, RANK, cdims) < 0 ) TEST_ERROR;
 
@@ -3391,7 +3564,7 @@ error:
     return 1;
 } /* check_link_getname_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_external_link_creation_tags
  *
@@ -3405,14 +3578,17 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_external_link_creation_tags(void)
 {
     /* Variable Declarations */
     hid_t fid = -1;                         /* File Identifier */
     hid_t fid2 = -1;                         /* File Identifier */
     hid_t gid = -1;                         /* Dataspace Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
+#endif /* NDEBUG */ /* end debugging functions */
+    hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = 0;
 
     /* Testing Macro */
@@ -3422,21 +3598,26 @@ check_external_link_creation_tags(void)
     /* Setup */
     /* ===== */
 
+    /* Create Fapl */
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+
     /* Create a test file */
-    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
 
     /* determine tag value of root group's object header */
     if ( get_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
 
     /* Close and Reopen the file */
     if ( H5Fclose(fid) < 0 ) TEST_ERROR;
-    if ( (fid = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl)) < 0 ) TEST_ERROR;
 
     /* Evict as much as we can from the cache so we can track full tag path */
     if ( evict_entries(fid) < 0 ) TEST_ERROR;
 
     /* Create a second file */
-    if ( (fid2 = H5Fcreate(FILENAME2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid2 = H5Fcreate(FILENAME2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
+
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
 
     /* Create group in second file */
     if ( (gid = H5Gcreate2(fid2, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
@@ -3448,7 +3629,7 @@ check_external_link_creation_tags(void)
     /* ==================== */
     /* Create External Link */
     /* ==================== */
-    
+
     if (H5Lcreate_external(FILENAME2, GROUPNAMEPATH, fid, LINKNAME, H5P_DEFAULT, H5P_DEFAULT) < 0 ) TEST_ERROR;
 
     /* =================================== */
@@ -3459,7 +3640,7 @@ check_external_link_creation_tags(void)
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
 #endif /* NDEBUG */ /* end debugging functions */
- 
+
     /* Verify root group metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
     if ( verify_tag(fid, H5AC_OHDR_CHK_ID, root_tag) < 0 ) TEST_ERROR;
@@ -3489,7 +3670,7 @@ error:
     return 1;
 } /* check_external_link_creation_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_external_link_open_tags
  *
@@ -3503,7 +3684,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_external_link_open_tags(void)
 {
     /* Variable Declarations */
@@ -3512,7 +3693,11 @@ check_external_link_open_tags(void)
     hid_t fid2 = -1;                        /* File Identifier */
     hid_t gid = -1;                         /* Dataspace Identifier */
     hid_t xid = -1;                         /* Dataspace Identifier */
+#ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
+#endif /* NDEBUG */ /* end debugging functions */
+    H5O_native_info_t ninfo;                /* Native object info struct */
+    hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = 0;
     haddr_t root2_tag = 0;
 
@@ -3523,14 +3708,17 @@ check_external_link_open_tags(void)
     /* Setup */
     /* ===== */
 
+    /* Create Fapl */
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+
     /* Create a test file */
-    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
 
     /* determine tag value of root group's object header */
     if ( get_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
 
     /* Create a second file */
-    if ( (fid2 = H5Fcreate(FILENAME2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid2 = H5Fcreate(FILENAME2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
 
     /* determine tag value of root group's object header */
     if ( get_object_header_tag(fid2, &root2_tag) < 0 ) TEST_ERROR;
@@ -3547,7 +3735,9 @@ check_external_link_open_tags(void)
 
     /* Close and Reopen the file */
     if ( H5Fclose(fid) < 0 ) TEST_ERROR;
-    if ( (fid = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl)) < 0 ) TEST_ERROR;
+
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
 
     /* Evict as much as we can from the cache so we can track full tag path */
     if ( evict_entries(fid) < 0 ) TEST_ERROR;
@@ -3555,11 +3745,16 @@ check_external_link_open_tags(void)
     /* ================== */
     /* Open External Link */
     /* ================== */
-  
+
     if ( (xid = H5Gopen2(fid, LINKNAME, H5P_DEFAULT)) < 0 ) TEST_ERROR;
     if ( (fid2 = H5Iget_file_id(xid)) < 0) TEST_ERROR;
     if ( get_object_header_tag(xid, &link_tag) < 0 ) TEST_ERROR;
-  
+
+    /* Even though we do nothing with this, touching the internal
+     * data structures is needed for the test to pass.
+     */
+    if ( H5Oget_native_info(xid, &ninfo, H5O_NATIVE_INFO_ALL) < 0 ) TEST_ERROR;
+
     /* =================================== */
     /* Verification of Metadata Tag Values */
     /* =================================== */
@@ -3598,7 +3793,7 @@ check_external_link_open_tags(void)
     /* =========================== */
     /* Close open objects and file */
     /* =========================== */
-    if ( (H5Gclose(xid)) < 0 ) TEST_ERROR;
+    if ( H5Gclose(xid) < 0 ) TEST_ERROR;
     if ( H5Fclose(fid) < 0 ) TEST_ERROR;
     if ( H5Fclose(fid2) < 0 ) TEST_ERROR;
 
@@ -3613,12 +3808,12 @@ error:
     return 1;
 } /* check_external_link_open_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_invalid_tag_application
  *
  * Purpose:     This function verifies that an error occurs if a tag
- *              has not been set up during a protect or set of 
+ *              has not been set up during a protect or set of
  *              a new piece of metadata.
  *
  * Return:      0 on Success, 1 on Failure
@@ -3631,50 +3826,64 @@ error:
 static unsigned
 check_invalid_tag_application(void)
 {
+#if H5C_DO_TAGGING_SANITY_CHECKS
     /* Variables */
     H5F_t * f = NULL;
-    hid_t fid, dxpl_id = -1;
+    hid_t fid = -1;
     haddr_t addr;
     H5HL_t * lheap = NULL;
+    hid_t fapl = -1;         /* File access prop list */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+#endif /* H5C_DO_TAGGING_SANITY_CHECKS */
 
     /* Testing Macro */
     TESTING("failure on invalid tag application");
-    
+
 #if H5C_DO_TAGGING_SANITY_CHECKS
+    /* Create Fapl */
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+
     /* Create a test file */
-    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
+
+    if ( H5Pclose(fapl) < 0 ) TEST_ERROR;
+
+    /* Push API context */
+    if(H5CX_push() < 0) TEST_ERROR
+    api_ctx_pushed = TRUE;
 
     /* Get internal file pointer*/
-    if ( NULL == (f = (H5F_t *)H5I_object(fid)) ) TEST_ERROR;
-
-    /* Create dxpl */
-    if ( (dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR;
+    if ( NULL == (f = (H5F_t *)H5VL_object(fid)) ) TEST_ERROR;
 
     /* Call H5HL_create, an internal function that calls H5AC_insert_entry without setting up a tag */
     /* Ensure this returns FAILURE, as a tag has not been set up. */
-    if ( H5HL_create(f, H5AC_ind_read_dxpl_id, (size_t)1024, &addr) >= 0) TEST_ERROR;
+    if ( H5HL_create(f, (size_t)1024, &addr) >= 0) TEST_ERROR;
 
-    /* Now set up a tag in the dxpl */
-    if ( H5AC_tag(H5AC_ind_read_dxpl_id, (haddr_t)25, NULL) < 0) TEST_ERROR;
+    /* Now set up a tag in the API context */
+    H5AC_tag((haddr_t)25, NULL);
 
     /* Verify the same call to H5HL_create now works as intended, with a tag set up. */
-    if ( H5HL_create(f, H5AC_ind_read_dxpl_id, (size_t)1024, &addr) < 0) TEST_ERROR;
+    if ( H5HL_create(f, (size_t)1024, &addr) < 0) TEST_ERROR;
 
-    /* Reset dxpl to use invalid tag. */
-    if ( H5AC_tag(H5AC_ind_read_dxpl_id, H5AC__INVALID_TAG, NULL) < 0) TEST_ERROR;
+    /* Reset API context to use invalid tag. */
+    H5AC_tag(H5AC__INVALID_TAG, NULL);
 
     /* Call H5HL_protect to protect the local heap created above. */
     /* This should fail as no tag is set up during the protect call */
-    if (( lheap = H5HL_protect(f, H5AC_ind_read_dxpl_id, addr, H5AC__NO_FLAGS_SET)) != NULL ) TEST_ERROR;
+    if (( lheap = H5HL_protect(f, addr, H5AC__NO_FLAGS_SET)) != NULL ) TEST_ERROR;
 
-    /* Again, set up a valid tag in the DXPL */
-    if ( H5AC_tag(H5AC_ind_read_dxpl_id, (haddr_t)25, NULL) < 0) TEST_ERROR;
+    /* Again, set up a valid tag in the API context */
+    H5AC_tag((haddr_t)25, NULL);
 
     /* Call H5HL_protect again to protect the local heap. This should succeed. */
-    if (( lheap = H5HL_protect(f, H5AC_ind_read_dxpl_id, addr, H5AC__NO_FLAGS_SET)) == NULL ) TEST_ERROR;
+    if (( lheap = H5HL_protect(f, addr, H5AC__NO_FLAGS_SET)) == NULL ) TEST_ERROR;
 
     /* Now unprotect the heap, as we're done with the test. */
     if ( H5HL_unprotect(lheap) < 0 ) TEST_ERROR;
+
+    /* Pop API context */
+    if(api_ctx_pushed && H5CX_pop() < 0) TEST_ERROR
+    api_ctx_pushed = FALSE;
 
     /* Close open objects and file */
     if ( H5Fclose(fid) < 0 ) TEST_ERROR;
@@ -3683,32 +3892,35 @@ check_invalid_tag_application(void)
     PASSED();
 #else
     SKIPPED();
-    printf("    test skipped because sanity checking on tag value is disabled.\n");
-#endif
+    HDprintf("    test skipped because sanity checking on tag value is disabled.\n");
+#endif /* H5C_DO_TAGGING_SANITY_CHECKS */
 
     return 0;
 
+#if H5C_DO_TAGGING_SANITY_CHECKS
 error:
+    if(api_ctx_pushed) H5CX_pop();
+
     return 1;
+#endif /* H5C_DO_TAGGING_SANITY_CHECKS */
+
 } /* check_invalid_tag_application */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Run tests on library's ability to tag metadata entries.
  *
- * Return:      Success:
- *
- *              Failure:
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:  Mike McGreevy
  *              January 15, 2009
  *
  *-------------------------------------------------------------------------
  */
-int 
-main(void) 
+int
+main(void)
 {
     /* Variable Declarations */
     hid_t fcpl_default = -1;        /* file creation prop list */
@@ -3716,13 +3928,13 @@ main(void)
     hid_t fcpl = -1;                /* file creation prop list */
     unsigned nerrs = 0;         /* Error Encountered */
     int test_type = 0;          /* test type iterator */
-    
+
     /* Open the HDF5 Library */
     H5open();
- 
-    /* ========== */   
+
+    /* ========== */
     /* Test Setup */
-    /* ========== */   
+    /* ========== */
 
     /* Create a standard file creation property list */
     fcpl_default = H5Pcreate(H5P_FILE_CREATE);
@@ -3738,16 +3950,16 @@ main(void)
     /* ========= */
 
     for (test_type=0; test_type<NUM_TEST_TYPES; test_type++) {
-    
+
         /* Run tests on each fcpl set up above. */
         if (test_type == TEST_DEFAULT) {
 
-            if (!nerrs) printf("Testing standard tag application cases w/ default fcpl:\n");
+            if (!nerrs) HDprintf("Testing standard tag application cases w/ default fcpl:\n");
             fcpl = fcpl_default;
-        
+
         } else if (test_type == TEST_SHMESG) {
 
-            if (!nerrs) printf("Testing standard tag application cases w/ shared messages:\n");
+            if (!nerrs) HDprintf("Testing standard tag application cases w/ shared messages:\n");
             fcpl = fcpl_shmesg_all;
 
         } else {
@@ -3767,7 +3979,7 @@ main(void)
         if (!nerrs) nerrs += check_link_removal_tags(fcpl, test_type);
     } /* end for */
 
-    if (!nerrs) printf("Testing other specific tag application cases:\n");
+    if (!nerrs) HDprintf("Testing other specific tag application cases:\n");
     if (!nerrs) nerrs += check_group_creation_tags();
     if (!nerrs) nerrs += check_multi_group_creation_tags();
     if (!nerrs) nerrs += check_group_open_tags();
@@ -3781,7 +3993,7 @@ main(void)
     if (!nerrs) nerrs += check_link_getname_tags();
     if (!nerrs) nerrs += check_external_link_creation_tags();
     if (!nerrs) nerrs += check_external_link_open_tags();
-    
+
     if (!nerrs) nerrs += check_dense_attribute_tags();
     if (!nerrs) nerrs += check_link_iteration_tags();
     if (!nerrs) nerrs += check_invalid_tag_application();
@@ -3791,10 +4003,13 @@ main(void)
     HDremove(FILENAME2);
 
     /* Return Errors */
-    return(nerrs > 0);
+    if (nerrs > 0)
+        return EXIT_FAILURE;
+    else
+        return EXIT_SUCCESS;
 
 error:
     /* Return with Error */
-    return(1);
+    return EXIT_FAILURE;
 
 } /* main */

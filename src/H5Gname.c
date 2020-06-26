@@ -42,6 +42,8 @@
 #include "H5Lprivate.h"		/* Links                                */
 #include "H5MMprivate.h"	/* Memory wrappers			*/
 
+#include "H5VLnative_private.h" /* Native VOL connector                     */
+
 
 /****************/
 /* Local Macros */
@@ -65,8 +67,6 @@ typedef struct H5G_names_t {
 typedef struct H5G_gnba_iter_t {
     /* In */
     const H5O_loc_t *loc; 	/* The location of the object we're looking for */
-    hid_t lapl_id; 		/* LAPL for operations */
-    hid_t dxpl_id; 		/* DXPL for operations */
 
     /* Out */
     char *path;                 /* Name of the object */
@@ -524,7 +524,7 @@ H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5_copy_depth_t depth)
     HDassert(depth == H5_COPY_SHALLOW || depth == H5_COPY_DEEP);
 
     /* Copy the top level information */
-    HDmemcpy(dst, src, sizeof(H5G_name_t));
+    H5MM_memcpy(dst, src, sizeof(H5G_name_t));
 
     /* Deep copy the names */
     if(depth == H5_COPY_DEEP) {
@@ -560,7 +560,7 @@ H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5_copy_depth_t depth)
  */
 ssize_t
 H5G_get_name(const H5G_loc_t *loc, char *name/*out*/, size_t size,
-    hbool_t *cached, hid_t lapl_id, hid_t dxpl_id)
+    hbool_t *cached)
 {
     ssize_t len = 0;            /* Length of object's name */
     ssize_t ret_value = -1;     /* Return value */
@@ -586,21 +586,9 @@ H5G_get_name(const H5G_loc_t *loc, char *name/*out*/, size_t size,
             *cached = TRUE;
     } /* end if */
     else if(!loc->path->obj_hidden) {
-        hid_t	  file;
-
-        /* Retrieve file ID for name search */
-        if((file = H5F_get_id(loc->oloc->file, FALSE)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get file ID")
-
         /* Search for name of object */
-        if((len = H5G_get_name_by_addr(file, lapl_id, dxpl_id, loc->oloc, name, size)) < 0) {
-            H5I_dec_ref(file);
+        if((len = H5G_get_name_by_addr(loc->oloc->file, loc->oloc, name, size)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't determine name")
-        } /* end if */
-
-        /* Close file ID used for search */
-        if(H5I_dec_ref(file) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTCLOSEFILE, FAIL, "can't determine name")
 
         /* Indicate that the name is _not_ cached, if requested */
         /* (Currently only used for testing - QAK, 2010/07/26) */
@@ -830,18 +818,22 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
             obj_path = H5T_nameof((H5T_t *)obj_ptr);
             break;
 
+        case H5I_MAP:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "maps not supported in native VOL connector")
+
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_FILE:
         case H5I_DATASPACE:
         case H5I_ATTR:
-        case H5I_REFERENCE:
         case H5I_VFL:
+        case H5I_VOL:
         case H5I_GENPROP_CLS:
         case H5I_GENPROP_LST:
         case H5I_ERROR_CLASS:
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
+        case H5I_SPACE_SEL_ITER:
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown data object")
@@ -1060,7 +1052,7 @@ done:
  * Function: H5G_name_replace
  *
  * Purpose: Search the list of open IDs and replace names according to a
- *              particular operation.  The operation occured on the
+ *              particular operation.  The operation occurred on the
  *              SRC_FILE/SRC_FULL_PATH_R object.  The new name (if there is
  *              one) is NEW_NAME_R.  Additional entry location information
  *              (currently only needed for the 'move' operation) is passed in
@@ -1076,8 +1068,7 @@ done:
  */
 herr_t
 H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file,
-    H5RS_str_t *src_full_path_r, H5F_t *dst_file, H5RS_str_t *dst_full_path_r,
-    hid_t dxpl_id)
+    H5RS_str_t *src_full_path_r, H5F_t *dst_file, H5RS_str_t *dst_full_path_r)
 {
     herr_t ret_value = SUCCEED;
 
@@ -1106,7 +1097,7 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file,
                         tmp_oloc.addr = lnk->u.hard.addr;
 
                         /* Get the type of the object */
-                        if(H5O_obj_type(&tmp_oloc, &obj_type, dxpl_id) < 0)
+                        if(H5O_obj_type(&tmp_oloc, &obj_type) < 0)
                             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object type")
 
                         /* Determine which type of objects to operate on */
@@ -1125,6 +1116,9 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file,
                                 /* Search and replace names through datatype IDs */
                                 search_datatype = TRUE;
                                 break;
+
+                            case H5O_TYPE_MAP:
+                                HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "maps not supported in native VOL connector")
 
                             case H5O_TYPE_UNKNOWN:
                             case H5O_TYPE_NTYPES:
@@ -1158,7 +1152,7 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file,
         else {
             /* We pass NULL as link pointer when we need to search all IDs */
             search_group = search_dataset = search_datatype = TRUE;
-        } /* end else */
+        }
 
         /* Check if we need to operate on the objects affected */
         if(search_group || search_dataset || search_datatype) {
@@ -1169,26 +1163,26 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file,
                 src_file = H5F_PARENT(src_file);
 
             /* Set up common information for callback */
-            names.src_file = src_file;
-            names.src_full_path_r = src_full_path_r;
-            names.dst_file = dst_file;
-            names.dst_full_path_r = dst_full_path_r;
-            names.op = op;
+            names.src_file          = src_file;
+            names.src_full_path_r   = src_full_path_r;
+            names.dst_file          = dst_file;
+            names.dst_full_path_r   = dst_full_path_r;
+            names.op                = op;
 
             /* Search through group IDs */
             if(search_group)
                 if(H5I_iterate(H5I_GROUP, H5G_name_replace_cb, &names, FALSE) < 0)
-		    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over groups")
+                    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over groups")
 
             /* Search through dataset IDs */
             if(search_dataset)
                 if(H5I_iterate(H5I_DATASET, H5G_name_replace_cb, &names, FALSE) < 0)
-		    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over datasets")
+                    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over datasets")
 
             /* Search through datatype IDs */
             if(search_datatype)
                 if(H5I_iterate(H5I_DATATYPE, H5G_name_replace_cb, &names, FALSE) < 0)
-		    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over datatypes")
+                    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over datatypes")
         } /* end if */
     } /* end if */
 
@@ -1203,16 +1197,16 @@ done:
  * Purpose:     Callback for retrieving object's name by address
  *
  * Return:      Positive if path is for object desired
- * 		0 if not correct object
- * 		negative on failure.
+ * 	            0 if not correct object
+ * 	            negative on failure.
  *
  * Programmer:	Quincey Koziol
- *		November 4 2007
+ *              November 4 2007
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info_t *linfo,
+H5G_get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info2_t *linfo,
     void *_udata)
 {
     H5G_gnba_iter_t *udata = (H5G_gnba_iter_t *)_udata; /* User data for iteration */
@@ -1220,7 +1214,7 @@ H5G_get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info_t *linfo,
     H5G_name_t  obj_path;            	/* Object's group hier. path */
     H5O_loc_t   obj_oloc;            	/* Object's object location */
     hbool_t     obj_found = FALSE;      /* Object at 'path' found */
-    herr_t ret_value = H5_ITER_CONT;    /* Return value */
+    herr_t      ret_value = H5_ITER_CONT;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1231,31 +1225,39 @@ H5G_get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info_t *linfo,
     HDassert(udata->path == NULL);
 
     /* Check for hard link with correct address */
-    if(linfo->type == H5L_TYPE_HARD && udata->loc->addr == linfo->u.address) {
-        H5G_loc_t	grp_loc;                /* Location of group */
+    if(linfo->type == H5L_TYPE_HARD) {
+        haddr_t link_addr;
 
-        /* Get group's location */
-        if(H5G_loc(gid, &grp_loc) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "bad group location")
+        /* Retrieve hard link address from VOL token */
+        if(H5VL_native_token_to_addr(udata->loc->file, H5I_FILE, linfo->u.token, &link_addr) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTUNSERIALIZE, FAIL, "can't deserialize object token into address")
 
-        /* Set up opened object location to fill in */
-        obj_loc.oloc = &obj_oloc;
-        obj_loc.path = &obj_path;
-        H5G_loc_reset(&obj_loc);
+        if(udata->loc->addr == link_addr) {
+            H5G_loc_t   grp_loc;                /* Location of group */
 
-        /* Find the object */
-        if(H5G_loc_find(&grp_loc, path, &obj_loc/*out*/, udata->lapl_id, udata->dxpl_id) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5_ITER_ERROR, "object not found")
-        obj_found = TRUE;
+            /* Get group's location */
+            if(H5G_loc(gid, &grp_loc) < 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "bad group location")
 
-        /* Check for object in same file (handles mounted files) */
-        /* (re-verify address, in case we traversed a file mount) */
-        if(udata->loc->addr == obj_loc.oloc->addr && udata->loc->file == obj_loc.oloc->file) {
-            if(NULL == (udata->path = H5MM_strdup(path)))
-                HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, H5_ITER_ERROR, "can't duplicate path string")
+            /* Set up opened object location to fill in */
+            obj_loc.oloc = &obj_oloc;
+            obj_loc.path = &obj_path;
+            H5G_loc_reset(&obj_loc);
 
-            /* We found a match so we return immediately */
-            HGOTO_DONE(H5_ITER_STOP)
+            /* Find the object */
+            if(H5G_loc_find(&grp_loc, path, &obj_loc/*out*/) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5_ITER_ERROR, "object not found")
+            obj_found = TRUE;
+
+            /* Check for object in same file (handles mounted files) */
+            /* (re-verify address, in case we traversed a file mount) */
+            if(udata->loc->addr == obj_loc.oloc->addr && udata->loc->file == obj_loc.oloc->file) {
+                if(NULL == (udata->path = H5MM_strdup(path)))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, H5_ITER_ERROR, "can't duplicate path string")
+
+                /* We found a match so we return immediately */
+                HGOTO_DONE(H5_ITER_STOP)
+            } /* end if */
         } /* end if */
     } /* end if */
 
@@ -1272,10 +1274,11 @@ done:
  *
  * Purpose:     Tries to figure out the path to an object from it's address
  *
- * Return:      returns size of path name, and copies it into buffer
- * 		pointed to by name if that buffer is big enough.
- * 		0 if it cannot find the path
- * 		negative on failure.
+ * Return:      Success:    Returns size of path name, and copies it into buffer
+ *                          pointed to by name if that buffer is big enough.
+ *                          0 if it cannot find the path
+ *
+ *              Failure:    -1
  *
  * Programmer:	Quincey Koziol
  *		November 4 2007
@@ -1283,40 +1286,37 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5G_get_name_by_addr(hid_t file, hid_t lapl_id, hid_t dxpl_id, const H5O_loc_t *loc,
-    char *name, size_t size)
+H5G_get_name_by_addr(H5F_t *f, const H5O_loc_t *loc, char *name, size_t size)
 {
-    H5G_gnba_iter_t udata;      /* User data for iteration */
-    H5G_loc_t root_loc;         /* Root group's location */
-    hbool_t found_obj = FALSE;  /* If we found the object */
-    herr_t status;              /* Status from iteration */
-    ssize_t ret_value = -1;     /* Return value */
+    H5G_gnba_iter_t udata;                  /* User data for iteration  */
+    H5G_loc_t       root_loc;               /* Root group's location    */
+    hbool_t         found_obj = FALSE;      /* If we found the object   */
+    herr_t          status;                 /* Status from iteration    */
+    ssize_t         ret_value = -1;         /* Return value             */
 
     /* Portably clear udata struct (before FUNC_ENTER) */
     HDmemset(&udata, 0, sizeof(udata));
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI((-1))
 
-    /* Construct the link info for the file's root group */
-    if(H5G_loc(file, &root_loc) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get root group's location")
+    /* Construct a group location for root group of the file */
+    if(H5G_root_loc(f, &root_loc) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, (-1), "can't get root group's location")
 
     /* Check for root group being the object looked for */
     if(root_loc.oloc->addr == loc->addr && root_loc.oloc->file == loc->file) {
         if(NULL == (udata.path = H5MM_strdup("")))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, FAIL, "can't duplicate path string")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, (-1), "can't duplicate path string")
         found_obj = TRUE;
     } /* end if */
     else {
         /* Set up user data for iterator */
         udata.loc = loc;
-        udata.lapl_id = lapl_id;
-        udata.dxpl_id = dxpl_id;
         udata.path = NULL;
 
         /* Visit all the links in the file */
-        if((status = H5G_visit(file, "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5G_get_name_by_addr_cb, &udata, lapl_id, dxpl_id)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "group traversal failed while looking for object name")
+        if((status = H5G_visit(&root_loc, "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5G_get_name_by_addr_cb, &udata)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_BADITER, (-1), "group traversal failed while looking for object name")
         else if(status > 0)
             found_obj = TRUE;
     } /* end else */
@@ -1347,3 +1347,4 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_get_name_by_addr() */
+

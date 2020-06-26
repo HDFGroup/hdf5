@@ -41,6 +41,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5EApkg.h"		/* Extensible Arrays			*/
 #include "H5MFprivate.h"	/* File memory management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5VMprivate.h"	/* Vectors and arrays 			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
@@ -110,13 +111,13 @@ static herr_t H5EA__cache_dblock_serialize(const H5F_t *f, void *image, size_t l
     void *thing);
 static herr_t H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5EA__cache_dblock_free_icr(void *thing);
-static herr_t H5EA__cache_dblock_fsf_size(const void *thing, size_t *fsf_size);
+static herr_t H5EA__cache_dblock_fsf_size(const void *thing, hsize_t *fsf_size);
 
 static herr_t H5EA__cache_dblk_page_get_initial_load_size(void *udata, size_t *image_len);
 static htri_t H5EA__cache_dblk_page_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
 static void *H5EA__cache_dblk_page_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
-static herr_t H5EA__cache_dblk_page_image_len(const void *thing, 
+static herr_t H5EA__cache_dblk_page_image_len(const void *thing,
     size_t *image_len);
 static herr_t H5EA__cache_dblk_page_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
@@ -479,14 +480,15 @@ H5EA__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     HDassert(hdr);
 
     /* Magic number */
-    HDmemcpy(image, H5EA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    H5MM_memcpy(image, H5EA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC);
     image += H5_SIZEOF_MAGIC;
 
     /* Version # */
     *image++ = H5EA_HDR_VERSION;
 
     /* Extensible array type */
-    *image++ = hdr->cparam.cls->id;
+    HDassert(hdr->cparam.cls->id <= 255);
+    *image++ = (uint8_t)hdr->cparam.cls->id;
 
     /* General array creation/configuration information */
     *image++ = hdr->cparam.raw_elmt_size;          /* Element size in file (in bytes) */
@@ -867,14 +869,15 @@ H5EA__cache_iblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
     /* Get temporary pointer to serialized info */
 
     /* Magic number */
-    HDmemcpy(image, H5EA_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    H5MM_memcpy(image, H5EA_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
     image += H5_SIZEOF_MAGIC;
 
     /* Version # */
     *image++ = H5EA_IBLOCK_VERSION;
 
     /* Extensible array type */
-    *image++ = iblock->hdr->cparam.cls->id;
+    HDassert(iblock->hdr->cparam.cls->id <= 255);
+    *image++ = (uint8_t)iblock->hdr->cparam.cls->id;
 
     /* Address of array header for array which owns this block */
     H5F_addr_encode(f, &image, iblock->hdr->addr);
@@ -1179,7 +1182,7 @@ H5EA__cache_sblock_deserialize(const void *_image, size_t len,
         size_t tot_page_init_size = sblock->ndblks * sblock->dblk_page_init_size;        /* Compute total size of 'page init' buffer */
 
         /* Retrieve the 'page init' bitmasks */
-        HDmemcpy(sblock->page_init, image, tot_page_init_size);
+        H5MM_memcpy(sblock->page_init, image, tot_page_init_size);
         image += tot_page_init_size;
     } /* end if */
 
@@ -1276,14 +1279,15 @@ H5EA__cache_sblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
     HDassert(sblock->hdr);
 
     /* Magic number */
-    HDmemcpy(image, H5EA_SBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    H5MM_memcpy(image, H5EA_SBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
     image += H5_SIZEOF_MAGIC;
 
     /* Version # */
     *image++ = H5EA_SBLOCK_VERSION;
 
     /* Extensible array type */
-    *image++ = sblock->hdr->cparam.cls->id;
+    HDassert(sblock->hdr->cparam.cls->id <= 255);
+    *image++ = (uint8_t)sblock->hdr->cparam.cls->id;
 
     /* Address of array header for array which owns this block */
     H5F_addr_encode(f, &image, sblock->hdr->addr);
@@ -1298,7 +1302,7 @@ H5EA__cache_sblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
         size_t tot_page_init_size = sblock->ndblks * sblock->dblk_page_init_size;        /* Compute total size of 'page init' buffer */
 
         /* Store the 'page init' bitmasks */
-        HDmemcpy(image, sblock->page_init, tot_page_init_size);
+        H5MM_memcpy(image, sblock->page_init, tot_page_init_size);
         image += tot_page_init_size;
     } /* end if */
 
@@ -1463,12 +1467,12 @@ H5EA__cache_dblock_get_initial_load_size(void *_udata, size_t *image_len))
     HDmemset(&dblock, 0, sizeof(dblock));
 
     /* need to set:
-     * 
+     *
      *    dblock.hdr
      *    dblock.npages
      *    dblock.nelmts
      *
-     * before we invoke either H5EA_DBLOCK_PREFIX_SIZE() or 
+     * before we invoke either H5EA_DBLOCK_PREFIX_SIZE() or
      * H5EA_DBLOCK_SIZE().
      */
     dblock.hdr = udata->hdr;
@@ -1539,7 +1543,7 @@ END_FUNC(STATIC) 	/* end H5EA__cache_sblock_verify_chksum() */
  */
 BEGIN_FUNC(STATIC, ERR,
 void *, NULL, NULL,
-H5EA__cache_dblock_deserialize(const void *_image, size_t len,
+H5EA__cache_dblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len,
     void *_udata, hbool_t H5_ATTR_UNUSED *dirty))
 
     /* Local variables */
@@ -1560,7 +1564,7 @@ H5EA__cache_dblock_deserialize(const void *_image, size_t len,
     if(NULL == (dblock = H5EA__dblock_alloc(udata->hdr, udata->parent, udata->nelmts)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array data block")
 
-    HDassert(((!dblock->npages) && (len == H5EA_DBLOCK_SIZE(dblock))) || 
+    HDassert(((!dblock->npages) && (len == H5EA_DBLOCK_SIZE(dblock))) ||
              (len == H5EA_DBLOCK_PREFIX_SIZE(dblock)));
 
     /* Set the extensible array data block's information */
@@ -1690,14 +1694,15 @@ H5EA__cache_dblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
     HDassert(dblock->hdr);
 
     /* Magic number */
-    HDmemcpy(image, H5EA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    H5MM_memcpy(image, H5EA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
     image += H5_SIZEOF_MAGIC;
 
     /* Version # */
     *image++ = H5EA_DBLOCK_VERSION;
 
     /* Extensible array type */
-    *image++ = dblock->hdr->cparam.cls->id;
+    HDassert(dblock->hdr->cparam.cls->id <= 255);
+    *image++ = (uint8_t)dblock->hdr->cparam.cls->id;
 
     /* Address of array header for array which owns this block */
     H5F_addr_encode(f, &image, dblock->hdr->addr);
@@ -1875,7 +1880,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblock_free_icr() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__cache_dblock_fsf_size(const void *_thing, size_t *fsf_size))
+H5EA__cache_dblock_fsf_size(const void *_thing, hsize_t *fsf_size))
 
     /* Local variables */
     const H5EA_dblock_t *dblock = (const H5EA_dblock_t *)_thing;        /* Pointer to the object */
@@ -2075,7 +2080,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblk_page_image_len() */
  */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA__cache_dblk_page_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len,
+H5EA__cache_dblk_page_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *_image, size_t H5_ATTR_UNUSED len,
     void *_thing))
 
     /* Local variables */

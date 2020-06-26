@@ -23,4 +23,3 @@ h5format_convert file_name
 h5format_convert -n -d /group/dataset file_name
   Go through all the steps except the actual conversion when 
   converting the dataset </group/dataset> in the HDF5 file <file_name>.
-h5format_convert error: No dataset name

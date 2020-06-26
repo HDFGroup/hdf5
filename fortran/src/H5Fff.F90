@@ -42,6 +42,21 @@ MODULE H5F
   USE H5GLOBAL
   IMPLICIT NONE
 
+  ! Number of objects opened in H5open_f
+  INTEGER(SIZE_T) :: H5OPEN_NUM_OBJ
+
+  INTERFACE
+     INTEGER(C_INT) FUNCTION h5fis_accessible(name, &
+          access_prp_default) BIND(C,NAME='H5Fis_accessible')
+       IMPORT :: C_CHAR
+       IMPORT :: HID_T
+       IMPORT :: C_INT
+       IMPLICIT NONE
+       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
+       INTEGER(HID_T), INTENT(IN), VALUE :: access_prp_default
+     END FUNCTION h5fis_accessible
+  END INTERFACE
+
 CONTAINS
 !****s* H5F/h5fcreate_f
 !
@@ -483,6 +498,63 @@ CONTAINS
 
   END SUBROUTINE h5fget_access_plist_f
 
+!****s* H5F/h5fis_accessible_f
+!
+! NAME
+!  h5fis_accessible_f
+!
+! PURPOSE
+!  Determines whether a file can be accessed as HDF5.
+!
+! INPUTS
+!  name 	 - name of the file to check
+! OUTPUTS
+!  status 	 - indicates if file is and HDF5 file
+!  hdferr 	 - Returns 0 if successful and -1 if fails
+! OPTIONAL PARAMETERS
+!  access_prp 	 - file access property list identifier
+! AUTHOR
+!  Dana Robinson
+!  September 2018
+!
+! HISTORY
+!  Explicit Fortran interfaces were added for
+!  called C functions (it is needed for Windows
+!  port).  February 28, 2001
+!
+! SOURCE
+  SUBROUTINE h5fis_accessible_f(name, status, hdferr, access_prp)
+    IMPLICIT NONE
+    CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the file
+    LOGICAL, INTENT(OUT) :: status         ! Indicates if file
+                                           ! is an HDF5 file
+    INTEGER, INTENT(OUT) :: hdferr         ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp
+                                           ! File access property list
+                                           ! identifier
+!*****
+    INTEGER(HID_T) :: access_prp_default
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+    INTEGER(C_INT) :: flag    ! "TRUE/FALSE/ERROR" flag from C routine
+
+    access_prp_default = H5P_DEFAULT_F
+    IF (PRESENT(access_prp)) access_prp_default = access_prp
+
+    c_name = TRIM(name)//C_NULL_CHAR
+
+    flag = H5Fis_accessible(c_name, access_prp_default)
+
+    hdferr = 0
+    IF(flag.LT.0) hdferr = -1
+
+    status = .TRUE.
+    IF (flag .EQ. 0) status = .FALSE.
+
+  END SUBROUTINE h5fis_accessible_f
+
+! XXX (VOL_MERGE): This function should probably be marked as
+!                  deprecated since H5Fis_hdf5() is deprecated.
+
 !****s* H5F/h5fis_hdf5_f
 !
 ! NAME
@@ -500,6 +572,12 @@ CONTAINS
 !  Elena Pourmal
 !  August 12, 1999
 !
+! NOTES
+!  The underlying HDF5 C API call (H5Fis_hdf5) has been deprecated
+!  in favor of the VOL-capable H5Fis_accessible(). New code should
+!  use h5fis_accessible_f() instead of this function in case this
+!  function is deprecated in the future.
+!
 ! HISTORY
 !  Explicit Fortran interfaces were added for
 !  called C functions (it is needed for Windows
@@ -513,26 +591,22 @@ CONTAINS
                                            ! is an HDF5 file
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
 !*****
-    INTEGER :: namelen ! Length of the name character string
-    INTEGER :: flag    ! "TRUE/FALSE" flag from C routine
-                       ! to define status value.
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+    INTEGER(C_INT) :: flag    ! "TRUE/FALSE/ERROR" flag from C routine
+                              ! to define status value.
 
-    INTERFACE
-       INTEGER FUNCTION h5fis_hdf5_c(name, namelen, flag) BIND(C,NAME='h5fis_hdf5_c')
-         IMPORT :: C_CHAR
-         IMPLICIT NONE
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-         INTEGER :: namelen
-         INTEGER :: flag
-       END FUNCTION h5fis_hdf5_c
-    END INTERFACE
+    c_name = TRIM(name)//C_NULL_CHAR
 
-    namelen = LEN_TRIM(name)
-    hdferr = h5fis_hdf5_c(name, namelen, flag)
+    flag = H5Fis_accessible(c_name, H5P_DEFAULT_F)
+
+    hdferr = 0
+    IF(flag.LT.0) hdferr = -1
+
     status = .TRUE.
     IF (flag .EQ. 0) status = .FALSE.
 
   END SUBROUTINE h5fis_hdf5_f
+
 !****s* H5F/h5fclose_f
 !
 ! NAME
@@ -618,6 +692,11 @@ CONTAINS
     END INTERFACE
 
     hdferr = h5fget_obj_count_c(file_id, obj_type, obj_count)
+
+    ! Don't include objects created by H5open in the H5F_OBJ_ALL_F count
+    IF(file_id.EQ.INT(H5F_OBJ_ALL_F,HID_T))THEN
+       obj_count = obj_count - H5OPEN_NUM_OBJ
+    ENDIF
 
   END SUBROUTINE h5fget_obj_count_f
 
@@ -806,13 +885,51 @@ CONTAINS
     hdferr = h5fget_filesize_c(file_id, size)
   END SUBROUTINE h5fget_filesize_f
 
+!****s* H5F/h5fget_fileno_f
+!
+! NAME
+!  h5fget_fileno_f
+!
+! PURPOSE
+!  Retrieves the file number of the HDF5 file.
+!
+! INPUTS
+!  file_id 	 - file identifier
+! OUTPUTS
+!  fileno 	 - file number
+!  hdferr 	 - Returns 0 if successful and -1 if fails
+!
+! AUTHOR
+!  Quincey Koziol
+!  April 13, 2019
+!
+! SOURCE
+  SUBROUTINE h5fget_fileno_f(file_id, fileno, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: file_id  ! file identifier
+    INTEGER, INTENT(OUT) :: fileno         ! File number
+    INTEGER, INTENT(OUT) :: hdferr         ! Error code: 0 on success,
+                                           !   	 -1 if fail
+!*****
+    INTERFACE
+       INTEGER FUNCTION h5fget_fileno_c(file_id, fileno) &
+            BIND(C,NAME='h5fget_fileno_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN) :: file_id
+         INTEGER, INTENT(OUT) :: fileno
+       END FUNCTION h5fget_fileno_c
+    END INTERFACE
+    hdferr = h5fget_fileno_c(file_id, fileno)
+  END SUBROUTINE h5fget_fileno_f
+
 !****s* H5F (F03)/h5fget_file_image_f_F03
 !
 ! NAME
 !  h5fget_file_image_f
 !
 ! PURPOSE
-!  Retrieves a copy of the image of an existing, open file. 
+!  Retrieves a copy of the image of an existing, open file.
 !
 ! INPUTS
 !  file_id    - Target file identifier.
@@ -822,7 +939,7 @@ CONTAINS
 ! OUTPUTS
 !  hdferr     - error code:
 !                 0 on success and -1 on failure
-! OPTIONAL PARAMETERS  
+! OPTIONAL PARAMETERS
 !  buf_size   - Returns the size in bytes of the buffer required to store the file image,
 !               no data will be copied.
 !
@@ -850,7 +967,7 @@ CONTAINS
          INTEGER(HID_T) , INTENT(IN) :: file_id
          TYPE(C_PTR)    , VALUE      :: buf_ptr
          INTEGER(SIZE_T), INTENT(IN) :: buf_len
-         INTEGER(SIZE_T), INTENT(IN) :: buf_size
+         INTEGER(SIZE_T), INTENT(OUT) :: buf_size
        END FUNCTION h5fget_file_image_c
     END INTERFACE
 
@@ -866,4 +983,97 @@ CONTAINS
 
   END SUBROUTINE h5fget_file_image_f
 
+!****s* H5F (F03)/h5fget_dset_no_attrs_hint_f_F03
+!
+! NAME
+!  h5fget_dset_no_attrs_hint_f
+!
+! PURPOSE
+!  Gets the value of the "minimize dataset headers" value which creates
+!  smaller dataset object headers when its set and no attributes are present.
+!
+! INPUTS
+!  file_id    - Target file identifier.
+!
+! OUTPUTS
+!  minimize   - Value of the setting.
+!  hdferr     - error code:
+!                 0 on success and -1 on failure
+!
+! AUTHOR
+!  Dana Robinson
+!  January 2019
+!
+! Fortran2003 Interface:
+  SUBROUTINE h5fget_dset_no_attrs_hint_f(file_id, minimize, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T) , INTENT(IN)              :: file_id
+    LOGICAL        , INTENT(OUT)             :: minimize
+    INTEGER        , INTENT(OUT)             :: hdferr
+!*****
+    LOGICAL(C_BOOL) :: c_minimize
+
+    INTERFACE
+       INTEGER FUNCTION h5fget_dset_no_attrs_hint_c(file_id, minimize) BIND(C, NAME='H5Fget_dset_no_attrs_hint')
+         IMPORT :: HID_T, C_BOOL
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN), VALUE :: file_id
+         LOGICAL(C_BOOL), INTENT(OUT) :: minimize
+       END FUNCTION h5fget_dset_no_attrs_hint_c
+    END INTERFACE
+
+    hdferr = INT(h5fget_dset_no_attrs_hint_c(file_id, c_minimize))
+
+    ! Transfer value of C C_BOOL type to Fortran LOGICAL
+    minimize = c_minimize
+
+  END SUBROUTINE h5fget_dset_no_attrs_hint_f
+
+!****s* H5F (F03)/h5fset_dset_no_attrs_hint_f_F03
+!
+! NAME
+!  h5fset_dset_no_attrs_hint_f
+!
+! PURPOSE
+!  Sets the value of the "minimize dataset headers" value which creates
+!  smaller dataset object headers when its set and no attributes are present.
+!
+! INPUTS
+!  file_id    - Target file identifier.
+!  minimize   - Value of the setting.
+!
+! OUTPUTS
+!  hdferr     - error code:
+!                 0 on success and -1 on failure
+!
+! AUTHOR
+!  Dana Robinson
+!  January 2019
+!
+! Fortran2003 Interface:
+  SUBROUTINE h5fset_dset_no_attrs_hint_f(file_id, minimize, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T) , INTENT(IN)              :: file_id
+    LOGICAL        , INTENT(IN)              :: minimize
+    INTEGER        , INTENT(OUT)             :: hdferr
+!*****
+    LOGICAL(C_BOOL) :: c_minimize
+
+    INTERFACE
+       INTEGER FUNCTION h5fset_dset_no_attrs_hint_c(file_id, minimize) BIND(C, NAME='H5Fset_dset_no_attrs_hint')
+         IMPORT :: HID_T, C_BOOL
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN), VALUE :: file_id
+         LOGICAL(C_BOOL), INTENT(IN), VALUE :: minimize
+       END FUNCTION h5fset_dset_no_attrs_hint_c
+    END INTERFACE
+
+    ! Transfer value of Fortran LOGICAL to C C_BOOL type
+    c_minimize = minimize
+
+    hdferr = INT(h5fset_dset_no_attrs_hint_c(file_id, c_minimize))
+
+  END SUBROUTINE h5fset_dset_no_attrs_hint_f
+
 END MODULE H5F
+

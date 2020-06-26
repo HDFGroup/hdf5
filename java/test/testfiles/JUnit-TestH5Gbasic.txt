@@ -1,0 +1,33 @@
+JUnit version 4.11
+.testH5Gget_info_by_name_not_exists
+.testH5Gget_info_by_idx_not_exists
+.testH5Gget_info_by_name
+.testH5Gget_create_plist
+.testH5Gopen
+.testH5Gget_info_by_idx_null
+.testH5Gopen_not_exists
+.testH5Gclose
+.testH5Gcreate_anon
+.testH5Gcreate_null
+.testH5Gget_info_by_idx_fileid
+.testH5Gclose_invalid
+.testH5Gflush_invalid
+.testH5Gopen_invalid
+.testH5Grefresh_invalid
+.testH5Gget_info_invalid
+.testH5Gcreate_invalid
+.testH5Gcreate_exists
+.testH5Gget_info_by_name_null
+.testH5Gget_info_by_name_invalid
+.testH5Gget_create_plist_invalid
+.testH5Gcreate
+.testH5Gget_info_by_name_fileid
+.testH5Gget_info_by_idx_invalid
+.testH5Gopen_null
+.testH5Gget_info_by_idx
+.testH5Gget_info
+
+Time:  XXXX
+
+OK (27 tests)
+

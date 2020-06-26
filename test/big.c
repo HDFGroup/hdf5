@@ -69,7 +69,7 @@
 #   define GB8LL	0	/*cannot do the test*/
 #endif
 
-/* Define Small, Large, Extra Large, Huge File which 
+/* Define Small, Large, Extra Large, Huge File which
  * corrspond to less than 2GB, 2GB, 4GB, and tens of GB file size.
  * NO_FILE stands for "no file" to be tested.
  */
@@ -275,6 +275,13 @@ error:
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      'name' in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+H5_GCC_DIAG_OFF(format-nonliteral)
 static int
 enough_room(hid_t fapl)
 {
@@ -315,6 +322,7 @@ done:
 
     return ret_value;
 }
+H5_GCC_DIAG_ON(format-nonliteral)
 
 
 /*-------------------------------------------------------------------------
@@ -524,7 +532,7 @@ reader(char *filename, hid_t fapl)
                     }
         if(zero) {
             H5_FAILED();
-            printf("    %d zero%s\n", zero, 1 == zero ? "" : "s");
+            HDprintf("    %d zero%s\n", zero, 1 == zero ? "" : "s");
         } else if(wrong) {
             SKIPPED();
             HDputs("    Possible overlap with another region.");
@@ -625,7 +633,7 @@ error:
     return 1;
 } /* end test_sec2() */
 
-static int 
+static int
 test_stdio(hid_t fapl)
 {
     char	filename[1024];
@@ -765,7 +773,7 @@ main (int ac, char **av)
                 family_size_def = (hsize_t)HDstrtoull(*av, NULL, 0);
             }
             else{
-                printf("***Missing fsize value***\n");
+                HDprintf("***Missing fsize value***\n");
                 usage();
                 return 1;
             }

@@ -28,7 +28,7 @@ libh5repack_la_SOURCES=h5repack.c h5repack_copy.c h5repack_filters.c \
                        h5repack_opttable.c h5repack_parse.c h5repack_refs.c \
                        h5repack_verify.c
 libh5repack_la_LDFLAGS = $(AM_LDFLAGS)
-libh5repack_la_LIBADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
+libh5repack_la_LIBADD=$(LIBH5TOOLS) $(LIBHDF5)
 
 
 # Our main target, h5repack tool

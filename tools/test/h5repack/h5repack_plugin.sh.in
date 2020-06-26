@@ -1,10 +1,10 @@
 #! /bin/sh
 #
-# Copyright by The HDF Group.                                              
-# All rights reserved.                                                     
-#                                                                          
-# This file is part of HDF5. The full HDF5 copyright notice, including     
-# terms governing use, modification, and redistribution, is contained in   
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5. The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
 # distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
 # If you do not have access to either file, you may request a copy from
@@ -247,10 +247,10 @@ COPY_TESTFILES_TO_TESTDIR
 version_str=`echo @H5_VERSION@ | awk -F"-" '{print $1}' | sed 's/\./,/g'`
 
 # Run the test
-arg="h5repack_layout.h5 -v -f UD=260,4,9,$version_str"
+arg="h5repack_layout.h5 -v -f UD=260,0,4,9,$version_str"
 TOOLTEST_DUMP plugin_version_test $arg
 
-arg="h5repack_layout.h5 -v -f UD=257,1,9"
+arg="h5repack_layout.h5 -v -f UD=257,0,1,9"
 TOOLTEST_DUMP plugin_test $arg
 
 #arg="h5repack_layout.UD.h5 -v -f NONE"

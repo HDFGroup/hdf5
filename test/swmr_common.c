@@ -26,6 +26,7 @@
 
 #include "h5test.h"
 #include "swmr_common.h"
+#include "vds_swmr.h"
 
 /*******************/
 /* Local Variables */
@@ -73,7 +74,28 @@ unsigned symbol_count[NLEVELS] = {100, 200, 400, 800, 1600};
 /* Array of dataset information entries (1 per dataset) */
 symbol_info_t *symbol_info[NLEVELS];
 
-
+hsize_t PLANES[N_SOURCES][RANK] = {
+    {1, SM_HEIGHT, WIDTH},
+    {1, LG_HEIGHT, WIDTH},
+    {1, SM_HEIGHT, WIDTH},
+    {1, LG_HEIGHT, WIDTH},
+    {1, SM_HEIGHT, WIDTH},
+    {1, LG_HEIGHT, WIDTH}
+};
+
+char FILE_NAMES[N_SOURCES][NAME_LEN] = {
+    {"vds_swmr_src_a.h5"},
+    {"vds_swmr_src_b.h5"},
+    {"vds_swmr_src_c.h5"},
+    {"vds_swmr_src_d.h5"},
+    {"vds_swmr_src_e.h5"},
+    {"vds_swmr_src_f.h5"}
+};
+
+char VDS_FILE_NAME[NAME_LEN] = "vds_swmr.h5";
+char SOURCE_DSET_PATH[NAME_LEN] = "/source_dset";
+char VDS_DSET_NAME[NAME_LEN]    = "vds_dset";
+
 /*-------------------------------------------------------------------------
  * Function:    choose_dataset
  *
@@ -101,7 +123,7 @@ choose_dataset(void)
     return &symbol_info[level][offset];
 } /* end choose_dataset() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_symbol_datatype
  *
@@ -142,7 +164,7 @@ create_symbol_datatype(void)
     return sym_type_id;
 } /* end create_symbol_datatype() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    generate_name
  *
@@ -161,7 +183,7 @@ create_symbol_datatype(void)
  *              The dataset's count
  *
  * Return:      Success:    0
- *                          
+ *
  *              Failure:    Can't fail
  *
  *-------------------------------------------------------------------------
@@ -170,13 +192,13 @@ int
 generate_name(char *name_buf, unsigned level, unsigned count)
 {
     HDassert(name_buf);
-    
-    sprintf(name_buf, "%u-%04u", level, count);
+
+    HDsprintf(name_buf, "%u-%04u", level, count);
 
     return 0;
 } /* end generate_name() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    generate_symbols
  *
@@ -210,7 +232,7 @@ generate_symbols(void)
     return 0;
 } /* end generate_symbols() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    shutdown_symbols
  *
@@ -238,7 +260,7 @@ shutdown_symbols(void)
     return 0;
 } /* end shutdown_symbols() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    print_metadata_retries_info
  *
@@ -273,7 +295,7 @@ print_metadata_retries_info(hid_t fid)
         power = 1;
         for(j = 0; j < info.nbins; j++) {
             if(info.retries[i][j])
-            HDfprintf(stderr, "\t# of retries for %u - %u retries: %u\n", 
+            HDfprintf(stderr, "\t# of retries for %u - %u retries: %u\n",
                 power, (power * 10) - 1, info.retries[i][j]);
             power *= 10;
         } /* end for */

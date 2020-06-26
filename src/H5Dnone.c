@@ -14,7 +14,7 @@
 /* Programmer: 	Vailin Choi <vchoi@hdfgroup.org>
  *	       	September 2010
  *
- * Purpose:	Implicit (Non Index) chunked I/O functions.  
+ * Purpose:	Implicit (Non Index) chunked I/O functions.
  *		This is used when the dataset is:
  *			extendible but with fixed max. dims
  *			with early allocation
@@ -114,8 +114,8 @@ const H5D_chunk_ops_t H5D_COPS_NONE[1] = {{
  * Function:	H5D__none_idx_create
  *
  * Purpose:	Allocate memory for the maximum # of chunks in the dataset.
- *		
- * Return:	Non-negative on success 
+ *
+ * Return:	Non-negative on success
  *		Negative on failure.
  *
  * Programmer:	Vailin Choi; September 2010
@@ -145,7 +145,7 @@ H5D__none_idx_create(const H5D_chk_idx_info_t *idx_info)
     nbytes = idx_info->layout->max_nchunks * idx_info->layout->size;
 
     /* Allocate space for max dataset chunks */
-    addr = H5MF_alloc(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, nbytes);
+    addr = H5MF_alloc(idx_info->f, H5FD_MEM_DRAW, nbytes);
     if(!H5F_addr_defined(addr))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "file allocation failed")
 
@@ -242,9 +242,9 @@ H5D__none_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     unsigned u;		/* Local index variable */
     int curr_dim;       /* Current rank */
     hsize_t idx;    	/* Array index of chunk */
-    int ret_value = -1; /* Return value */
+    int ret_value = H5_ITER_CONT; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_STATIC
 
     /* Sanity checks */
     HDassert(idx_info);
@@ -266,34 +266,35 @@ H5D__none_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     HDassert(ndims > 0);
 
     /* Iterate over all the chunks in the dataset's dataspace */
-    for(u = 0; u < idx_info->layout->nchunks; u++) {
-	/* Calculate the index of this chunk */
-	idx = H5VM_array_offset_pre(ndims, idx_info->layout->max_down_chunks, chunk_rec.scaled);
+    for(u = 0; u < idx_info->layout->nchunks && ret_value == H5_ITER_CONT; u++) {
+        /* Calculate the index of this chunk */
+        idx = H5VM_array_offset_pre(ndims, idx_info->layout->max_down_chunks, chunk_rec.scaled);
 
-	/* Calculate the address of the chunk */
-	chunk_rec.chunk_addr = idx_info->storage->idx_addr + idx * idx_info->layout->size;
+        /* Calculate the address of the chunk */
+        chunk_rec.chunk_addr = idx_info->storage->idx_addr + idx * idx_info->layout->size;
 
-	/* Make "generic chunk" callback */
-	if((ret_value = (*chunk_cb)(&chunk_rec, chunk_udata)) < 0)
-	    HERROR(H5E_DATASET, H5E_CALLBACK, "failure in generic chunk iterator callback");
+        /* Make "generic chunk" callback */
+        if((ret_value = (*chunk_cb)(&chunk_rec, chunk_udata)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CALLBACK, H5_ITER_ERROR, "failure in generic chunk iterator callback")
 
-	/* Update coordinates of chunk in dataset */
-	curr_dim = (int)(ndims - 1);
-	while(curr_dim >= 0) {
-	    /* Increment coordinate in current dimension */
-	    chunk_rec.scaled[curr_dim]++;
+        /* Update coordinates of chunk in dataset */
+        curr_dim = (int)(ndims - 1);
+        while(curr_dim >= 0) {
+            /* Increment coordinate in current dimension */
+            chunk_rec.scaled[curr_dim]++;
 
-	    /* Check if we went off the end of the current dimension */
-	    if(chunk_rec.scaled[curr_dim] >= idx_info->layout->chunks[curr_dim]) {
-		/* Reset coordinate & move to next faster dimension */
-		chunk_rec.scaled[curr_dim] = 0;
-		curr_dim--;
-	    } /* end if */
-	    else
-		break;
-	} /* end while */
+            /* Check if we went off the end of the current dimension */
+            if(chunk_rec.scaled[curr_dim] >= idx_info->layout->chunks[curr_dim]) {
+                /* Reset coordinate & move to next faster dimension */
+                chunk_rec.scaled[curr_dim] = 0;
+                curr_dim--;
+            } /* end if */
+            else
+                break;
+        } /* end while */
     } /* end for */
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__none_idx_iterate() */
 
@@ -355,7 +356,7 @@ H5D__none_idx_delete(const H5D_chk_idx_info_t *idx_info)
 
     /* chunk size * max # of chunks */
     nbytes = idx_info->layout->max_nchunks * idx_info->layout->size;
-    if(H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, idx_info->storage->idx_addr, nbytes) < 0)
+    if(H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, idx_info->storage->idx_addr, nbytes) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, H5_ITER_ERROR, "unable to free dataset chunks")
 
     idx_info->storage->idx_addr = HADDR_UNDEF;
@@ -377,7 +378,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__none_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
+H5D__none_idx_copy_setup(const H5D_chk_idx_info_t H5_ATTR_NDEBUG_UNUSED *idx_info_src,
     const H5D_chk_idx_info_t *idx_info_dst)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -401,14 +402,14 @@ H5D__none_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
     HDassert(idx_info_dst->storage);
 
     /* Set copied metadata tag */
-    H5_BEGIN_TAG(idx_info_dst->dxpl_id, H5AC__COPIED_TAG, FAIL);
+    H5_BEGIN_TAG(H5AC__COPIED_TAG);
 
     /* Allocate dataset chunks in the dest. file */
     if(H5D__none_idx_create(idx_info_dst) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize chunked storage")
 
     /* Reset metadata tag */
-    H5_END_TAG(FAIL);
+    H5_END_TAG
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -471,7 +472,7 @@ H5D__none_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
 /*-------------------------------------------------------------------------
  * Function:	H5D__none_idx_dump
  *
- * Purpose:	Dump 
+ * Purpose:	Dump
  *
  * Return:	Non-negative on success/Negative on failure
  *

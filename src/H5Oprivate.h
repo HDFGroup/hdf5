@@ -24,6 +24,10 @@
 #ifndef _H5Oprivate_H
 #define _H5Oprivate_H
 
+/* Early typedefs to avoid circular dependencies */
+typedef struct H5O_t H5O_t;
+typedef struct H5O_fill_t H5O_fill_t;
+
 /* Include the public header file for this API */
 #include "H5Opublic.h"          /* Object header functions              */
 
@@ -39,12 +43,12 @@
 #include "H5HGprivate.h"        /* Global Heaps                         */
 #include "H5SLprivate.h"	/* Skip lists				*/
 #include "H5Tprivate.h"		/* Datatype functions			*/
+#include "H5VLprivate.h"
 #include "H5Zprivate.h"         /* I/O pipeline filters			*/
 
 /* Forward references of package typedefs */
 typedef struct H5O_msg_class_t H5O_msg_class_t;
 typedef struct H5O_mesg_t H5O_mesg_t;
-typedef struct H5O_t H5O_t;
 
 /* Values used to create the shared message & attribute heaps */
 /* (Note that these parameters have been tuned so that the resulting heap ID
@@ -117,8 +121,14 @@ typedef struct H5O_t H5O_t;
 /* If the module using this macro is allowed access to the private variables, access them directly */
 #ifdef H5O_MODULE
 #define H5O_OH_GET_ADDR(O)    ((O)->chunk[0].addr)
+#define H5O_OH_GET_VERSION(O) ((O)->version)
+#define H5O_OH_GET_FLAGS(O)   ((O)->flags)
+#define H5O_OH_GET_MTIME(O)   ((O)->mtime)
 #else /* H5O_MODULE */
 #define H5O_OH_GET_ADDR(O)    (H5O_get_oh_addr(O))
+#define H5O_OH_GET_VERSION(O) (H5O_get_oh_version(O))
+#define H5O_OH_GET_FLAGS(O)   (H5O_get_oh_flags(O))
+#define H5O_OH_GET_MTIME(O)   (H5O_get_oh_mtime(O))
 #endif /* H5O_MODULE */
 
 /* Set the fields in a shared message structure */
@@ -174,9 +184,15 @@ typedef struct H5O_copy_t {
     H5SL_t  *dst_dt_list;               /* Skip list to hold committed datatypes in dest file */
     hbool_t dst_dt_list_complete;       /* Whether the destination datatype list is complete (i.e. not only populated with "suggestions" from H5Padd_merge_committed_dtype_path) */
     H5O_t   *oh_dst;                    /* The destination object header */
-    void    *shared_fo;                 /* The shared pointer for the object */
+    H5F_t   *file_dst;                  /* The destination file pointer */
+                                        /* This is used in the pre_copy_file callback to obtain
+                                           the destination file's high bound.  The high bound
+                                           is used to index into the corresponding message's
+                                           array of versions for doing version bounds check. */
+    void    *shared_fo;                 /* The shared pointer for the src object */
     H5O_mcdt_search_cb_t mcdt_cb;	/* The callback to invoke before searching the global list of committed datatypes at destination */
     void *mcdt_ud;			/* User data passed to callback */
+    hid_t lcpl_id;			/* LCPL for callbacks' use */
 } H5O_copy_t;
 
 /* Header message IDs */
@@ -207,15 +223,15 @@ typedef struct H5O_copy_t {
 #define H5O_MDCI_MSG_ID 0x0018		/* Metadata Cache Image Message */
 #define H5O_UNKNOWN_ID  0x0019          /* Placeholder message ID for unknown message.  */
                                         /* (this should never exist in a file) */
-/* 
+/*
  * Note: Must increment H5O_MSG_TYPES in H5Opkg.h and update H5O_msg_class_g
  *      in H5O.c when creating a new message type.  Also bump the value of
  *      H5O_BOGUS_INVALID_ID, below, to be one greater than the value of
- *      H5O_UNKNOWN_ID.
+ *      H5O_UNKNOWN_ID, and re-run gen_bogus.c.
  *
  * (this should never exist in a file)
  */
-#define H5O_BOGUS_INVALID_ID	0x001A  /* "Bogus invalid" Message.  */
+#define H5O_BOGUS_INVALID_ID	0x001a  /* "Bogus invalid" Message.  */
 
 /* Shared object message types.
  * Shared objects can be committed, in which case the shared message contains
@@ -306,7 +322,7 @@ typedef struct H5O_linfo_t {
  * message if it's shared.
  */
 
-typedef struct H5O_fill_t {
+struct H5O_fill_t {
     H5O_shared_t        sh_loc;         /* Shared message info (must be first) */
 
     unsigned	        version;	/* Encoding version number           */
@@ -316,7 +332,7 @@ typedef struct H5O_fill_t {
     H5D_alloc_time_t	alloc_time;	/* time to allocate space	     */
     H5D_fill_time_t	fill_time;	/* time to write fill value	     */
     hbool_t		fill_defined;   /* whether fill value is defined     */
-} H5O_fill_t;
+};
 
 /*
  * Link message.
@@ -383,6 +399,9 @@ typedef struct H5O_efl_t {
     H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS                       \
     | H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER                             \
     )
+
+/* Version # of encoded virtual dataset global heap blocks */
+#define H5O_LAYOUT_VDS_GH_ENC_VERS      0
 
 /* Initial version of the layout information.  Used when space is allocated */
 #define H5O_LAYOUT_VERSION_1	1
@@ -463,7 +482,7 @@ typedef struct H5O_storage_chunk_t {
     const struct H5D_chunk_ops_t *ops;  /* Pointer to chunked storage operations */
     union {
         H5O_storage_chunk_btree_t btree;   /* Information for v1 B-tree index   */
-        H5O_storage_chunk_bt2_t btree2;    /* Information for v2 B-tree index */	
+        H5O_storage_chunk_bt2_t btree2;    /* Information for v2 B-tree index */
         H5O_storage_chunk_earray_t earray; /* Information for extensible array index   */
         H5O_storage_chunk_farray_t farray; /* Information for fixed array index   */
         H5O_storage_chunk_single_filt_t single; /* Information for single chunk w/ filters index */
@@ -564,8 +583,8 @@ typedef struct H5O_storage_t {
 typedef struct H5O_layout_chunk_farray_t {
     /* Creation parameters for fixed array data structure */
     struct {
-        uint8_t max_dblk_page_nelmts_bits;  /* Log2(Max. # of elements in a data block page) - 
-                                               i.e. # of bits needed to store max. # of elements 
+        uint8_t max_dblk_page_nelmts_bits;  /* Log2(Max. # of elements in a data block page) -
+                                               i.e. # of bits needed to store max. # of elements
                                                in a data block page */
     } cparam;
 } H5O_layout_chunk_farray_t;
@@ -632,6 +651,7 @@ typedef struct H5O_layout_t {
  */
 #define H5O_BOGUS_VALUE         0xdeadbeef
 typedef struct H5O_bogus_t {
+    H5O_shared_t        sh_loc;         /* Shared message info (must be first) */
     unsigned u;                         /* Hold the bogus info */
 } H5O_bogus_t;
 #endif /* H5O_ENABLE_BOGUS */
@@ -784,6 +804,17 @@ typedef uint32_t H5O_refcount_t;        /* Contains # of links to object, if >1 
  */
 typedef unsigned H5O_unknown_t;         /* Original message type ID */
 
+/* To indicate an invalid version for a message that does not exist yet for the release */
+/* Message version is 1 byte so the value can be 0 to 255 */
+#define H5O_INVALID_VERSION     256
+
+/* The initial version of the fsinfo message: deprecated */
+/* This version is mapped to version 1 from release 1.10.1 onwards */
+#define H5O_FSINFO_VERSION_0        0
+
+/* The latest version for fsinfo message */
+#define H5O_FSINFO_VERSION_1        1
+#define H5O_FSINFO_VERSION_LATEST   H5O_FSINFO_VERSION_1
 /*
  * File space info Message.
  * Contains file space management info and
@@ -791,6 +822,7 @@ typedef unsigned H5O_unknown_t;         /* Original message type ID */
  * (Data structure in memory)
  */
 typedef struct H5O_fsinfo_t {
+    unsigned version;                       /* Version number */
     H5F_fspace_strategy_t   strategy;       /* File space strategy */
     hbool_t persist;                        /* Persisting free-space or not */
     hsize_t threshold;                      /* Free-space section threshold */
@@ -838,7 +870,6 @@ typedef struct {
     } u;
 } H5O_mesg_operator_t;
 
-
 /* Typedef for abstract object creation */
 typedef struct {
     H5O_type_t obj_type;        /* Type of object to create */
@@ -846,67 +877,75 @@ typedef struct {
     void *new_obj;              /* Pointer to new object created */
 } H5O_obj_create_t;
 
+
 /* Forward declarations for prototype arguments */
 struct H5P_genplist_t;
 
 /* Object header routines */
 H5_DLL herr_t H5O_init(void);
-H5_DLL herr_t H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint,
-    size_t initial_rc, hid_t ocpl_id, H5O_loc_t *loc/*out*/);
+H5_DLL herr_t H5O_create(H5F_t *f, size_t size_hint, size_t initial_rc,
+    hid_t ocpl_id, H5O_loc_t *loc/*out*/);
+H5_DLL H5O_t *H5O__create_ohdr(H5F_t *f, hid_t ocpl_id);
+H5_DLL herr_t H5O__apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id,
+    size_t size_hint, size_t initial_rc, H5O_loc_t *loc_out);
 H5_DLL herr_t H5O_open(H5O_loc_t *loc);
+H5_DLL void *H5O_open_by_idx(const H5G_loc_t *loc, const char *name,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, H5I_type_t *opened_type/*out*/);
+H5_DLL void *H5O_open_by_addr(const H5G_loc_t *loc, haddr_t addr, H5I_type_t *opened_type/*out*/);
+H5_DLL void *H5O_open_by_loc(const H5G_loc_t *obj_loc, H5I_type_t *opened_type/*out*/);
 H5_DLL herr_t H5O_close(H5O_loc_t *loc, hbool_t *file_closed/*out*/);
-H5_DLL int H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id);
-H5_DLL H5O_t *H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id,
-    unsigned prot_flags, hbool_t pin_all_chunks);
-H5_DLL H5O_t *H5O_pin(const H5O_loc_t *loc, hid_t dxpl_id);
+H5_DLL int H5O_link(const H5O_loc_t *loc, int adjust);
+H5_DLL H5O_t *H5O_protect(const H5O_loc_t *loc, unsigned prot_flags, hbool_t pin_all_chunks);
+H5_DLL H5O_t *H5O_pin(const H5O_loc_t *loc);
 H5_DLL herr_t H5O_unpin(H5O_t *oh);
-H5_DLL herr_t H5O_dec_rc_by_loc(const H5O_loc_t *loc, hid_t dxpl_id);
-H5_DLL herr_t H5O_unprotect(const H5O_loc_t *loc, hid_t dxpl_id, H5O_t *oh,
-    unsigned oh_flags);
-H5_DLL herr_t H5O_touch(const H5O_loc_t *loc, hbool_t force, hid_t dxpl_id);
-H5_DLL herr_t H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
-    hbool_t force);
+H5_DLL herr_t H5O_dec_rc_by_loc(const H5O_loc_t *loc);
+H5_DLL herr_t H5O_unprotect(const H5O_loc_t *loc, H5O_t *oh, unsigned oh_flags);
+H5_DLL herr_t H5O_touch(const H5O_loc_t *loc, hbool_t force);
+H5_DLL herr_t H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force);
 #ifdef H5O_ENABLE_BOGUS
-H5_DLL herr_t H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned mesg_id, unsigned mesg_flags);
+H5_DLL herr_t H5O_bogus_oh(H5F_t *f, H5O_t *oh, unsigned mesg_id, unsigned mesg_flags);
 #endif /* H5O_ENABLE_BOGUS */
-H5_DLL herr_t H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr);
-H5_DLL herr_t H5O_get_hdr_info(const H5O_loc_t *oloc, hid_t dxpl_id, H5O_hdr_info_t *hdr);
-H5_DLL herr_t H5O_get_info(const H5O_loc_t *oloc, hid_t dxpl_id, hbool_t want_ih_info,
-    H5O_info_t *oinfo);
-H5_DLL herr_t H5O_obj_type(const H5O_loc_t *loc, H5O_type_t *obj_type, hid_t dxpl_id);
-H5_DLL herr_t H5O_get_create_plist(const H5O_loc_t *loc, hid_t dxpl_id, struct H5P_genplist_t *oc_plist);
-H5_DLL hid_t H5O_open_name(H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id, hbool_t app_ref);
-H5_DLL herr_t H5O_get_nlinks(const H5O_loc_t *loc, hid_t dxpl_id, hsize_t *nlinks);
-H5_DLL void *H5O_obj_create(H5F_t *f, H5O_type_t obj_type, void *crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id);
+H5_DLL herr_t H5O_delete(H5F_t *f, haddr_t addr);
+H5_DLL herr_t H5O_get_hdr_info(const H5O_loc_t *oloc, H5O_hdr_info_t *hdr);
+H5_DLL herr_t H5O_get_info(const H5O_loc_t *oloc, H5O_info2_t *oinfo, unsigned fields);
+H5_DLL herr_t H5O_get_native_info(const H5O_loc_t *oloc, H5O_native_info_t *oinfo, unsigned fields);
+H5_DLL herr_t H5O_obj_type(const H5O_loc_t *loc, H5O_type_t *obj_type);
+H5_DLL herr_t H5O_get_create_plist(const H5O_loc_t *loc, struct H5P_genplist_t *oc_plist);
+H5_DLL void *H5O_open_name(const H5G_loc_t *loc, const char *name, H5I_type_t *opened_type/*out*/);
+H5_DLL herr_t H5O_get_nlinks(const H5O_loc_t *loc, hsize_t *nlinks);
+H5_DLL void *H5O_obj_create(H5F_t *f, H5O_type_t obj_type, void *crt_info, H5G_loc_t *obj_loc);
 H5_DLL haddr_t H5O_get_oh_addr(const H5O_t *oh);
-H5_DLL herr_t H5O_get_rc_and_type(const H5O_loc_t *oloc, hid_t dxpl_id, unsigned *rc, H5O_type_t *otype);
+H5_DLL uint8_t H5O_get_oh_flags(const H5O_t *oh);
+H5_DLL time_t H5O_get_oh_mtime(const H5O_t *oh);
+H5_DLL uint8_t H5O_get_oh_version(const H5O_t *oh);
+H5_DLL herr_t H5O_get_rc_and_type(const H5O_loc_t *oloc, unsigned *rc, H5O_type_t *otype);
 H5_DLL H5AC_proxy_entry_t *H5O_get_proxy(const H5O_t *oh);
 
 /* Object header message routines */
 H5_DLL herr_t H5O_msg_create(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
-    unsigned update_flags, void *mesg, hid_t dxpl_id);
-H5_DLL herr_t H5O_msg_append_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
+    unsigned update_flags, void *mesg);
+H5_DLL herr_t H5O_msg_append_oh(H5F_t *f, H5O_t *oh, unsigned type_id,
     unsigned mesg_flags, unsigned update_flags, void *mesg);
 H5_DLL herr_t H5O_msg_write(const H5O_loc_t *loc, unsigned type_id,
-    unsigned mesg_flags, unsigned update_flags, void *mesg, hid_t dxpl_id);
-H5_DLL herr_t H5O_msg_write_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
-    unsigned type_id, unsigned mesg_flags, unsigned update_flags, void *mesg);
-H5_DLL void *H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg,
-    hid_t dxpl_id);
-H5_DLL void *H5O_msg_read_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
-    void *mesg);
+    unsigned mesg_flags, unsigned update_flags, void *mesg);
+H5_DLL herr_t H5O_msg_write_oh(H5F_t *f, H5O_t *oh, unsigned type_id,
+    unsigned mesg_flags, unsigned update_flags, void *mesg);
+H5_DLL herr_t H5O_msg_flush(H5F_t *f, H5O_t *oh, H5O_mesg_t *mesg);
+H5_DLL void *H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg);
+H5_DLL void *H5O_msg_read_oh(H5F_t *f, H5O_t *oh, unsigned type_id, void *mesg);
 H5_DLL herr_t H5O_msg_reset(unsigned type_id, void *native);
 H5_DLL void *H5O_msg_free(unsigned type_id, void *mesg);
+H5_DLL void *H5O_msg_free_real(const H5O_msg_class_t *type, void *mesg);
 H5_DLL void *H5O_msg_copy(unsigned type_id, const void *mesg, void *dst);
-H5_DLL int H5O_msg_count(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
-H5_DLL htri_t H5O_msg_exists(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
+H5_DLL int H5O_msg_count(const H5O_loc_t *loc, unsigned type_id);
+H5_DLL htri_t H5O_msg_exists(const H5O_loc_t *loc, unsigned type_id);
 H5_DLL htri_t H5O_msg_exists_oh(const H5O_t *oh, unsigned type_id);
 H5_DLL herr_t H5O_msg_remove(const H5O_loc_t *loc, unsigned type_id, int sequence,
-    hbool_t adj_link, hid_t dxpl_id);
+    hbool_t adj_link);
 H5_DLL herr_t H5O_msg_remove_op(const H5O_loc_t *loc, unsigned type_id, int sequence,
-    H5O_operator_t op, void *op_data, hbool_t adj_link, hid_t dxpl_id);
+    H5O_operator_t op, void *op_data, hbool_t adj_link);
 H5_DLL herr_t H5O_msg_iterate(const H5O_loc_t *loc, unsigned type_id,
-    const H5O_mesg_operator_t *op, void *op_data, hid_t dxpl_id);
+    const H5O_mesg_operator_t *op, void *op_data);
 H5_DLL size_t H5O_msg_raw_size(const H5F_t *f, unsigned type_id,
     hbool_t disable_shared, const void *mesg);
 H5_DLL size_t H5O_msg_size_f(const H5F_t *f, hid_t ocpl_id, unsigned type_id,
@@ -923,34 +962,43 @@ H5_DLL herr_t H5O_msg_get_crt_index(unsigned type_id, const void *mesg,
     H5O_msg_crt_idx_t *crt_idx);
 H5_DLL herr_t H5O_msg_encode(H5F_t *f, unsigned type_id, hbool_t disable_shared,
     unsigned char *buf, const void *obj);
-H5_DLL void* H5O_msg_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
-    unsigned type_id, const unsigned char *buf);
-H5_DLL herr_t H5O_msg_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
-    unsigned type_id, void *mesg);
-H5_DLL herr_t H5O_msg_get_flags(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id, uint8_t *flags);
+H5_DLL void* H5O_msg_decode(H5F_t *f, H5O_t *open_oh, unsigned type_id,
+    size_t buf_size, const unsigned char *buf);
+H5_DLL herr_t H5O_msg_delete(H5F_t *f, H5O_t *open_oh, unsigned type_id,
+    void *mesg);
+H5_DLL herr_t H5O_msg_get_flags(const H5O_loc_t *loc, unsigned type_id, uint8_t *flags);
 
 /* Object metadata flush/refresh routines */
-H5_DLL herr_t H5O_flush_common(H5O_loc_t *oloc, hid_t obj_id, hid_t dxpl_id);
-H5_DLL herr_t H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc, hid_t dxpl_id);
-H5_DLL herr_t H5O_refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *obj_loc, hid_t dxpl_id);
-H5_DLL herr_t H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, hid_t dxpl_id, hbool_t start_swmr);
+H5_DLL herr_t H5O_flush(H5O_loc_t *oloc, hid_t obj_id);
+H5_DLL herr_t H5O_flush_common(H5O_loc_t *oloc, hid_t obj_id);
+H5_DLL herr_t H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc);
+H5_DLL herr_t H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, H5VL_t *vol_driver, hbool_t start_swmr);
+
+/* Cache corking functions */
+H5_DLL herr_t H5O_disable_mdc_flushes(H5O_loc_t *oloc);
+H5_DLL herr_t H5O_enable_mdc_flushes(H5O_loc_t *oloc);
+H5_DLL herr_t H5O_are_mdc_flushes_disabled(H5O_loc_t *oloc, hbool_t *are_disabled);
 
 /* Object copying routines */
 H5_DLL herr_t H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
-    hid_t dxpl_id, H5O_copy_t *cpy_info, hbool_t inc_depth,
+    H5O_copy_t *cpy_info, hbool_t inc_depth,
     H5O_type_t *obj_type, void **udata);
-H5_DLL herr_t H5O_copy_expand_ref(H5F_t *file_src, void *_src_ref, hid_t dxpl_id,
-    H5F_t *file_dst, void *_dst_ref, size_t ref_count, H5R_type_t ref_type,
+H5_DLL herr_t H5O_copy_expand_ref(H5F_t *file_src, hid_t tid_src, H5T_t *dt_src,
+    void *buf_src, size_t nbytes_src, H5F_t *file_dst, void *buf_dst,
     H5O_copy_t *cpy_info);
+H5_DLL herr_t H5O_copy(const H5G_loc_t *src_loc, const char *src_name,
+    H5G_loc_t *dst_loc, const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id);
 
 /* Debugging routines */
-H5_DLL herr_t H5O_debug_id(unsigned type_id, H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream, int indent, int fwidth);
-H5_DLL herr_t H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
+H5_DLL herr_t H5O_debug_id(unsigned type_id, H5F_t *f, const void *mesg, FILE *stream, int indent, int fwidth);
+H5_DLL herr_t H5O_debug(H5F_t *f, haddr_t addr, FILE * stream, int indent,
 			 int fwidth);
 
 /* These functions operate on object locations */
 H5_DLL herr_t H5O_loc_reset(H5O_loc_t *loc);
 H5_DLL herr_t H5O_loc_copy(H5O_loc_t *dst, H5O_loc_t *src, H5_copy_depth_t depth);
+H5_DLL herr_t H5O_loc_copy_shallow(H5O_loc_t *dst, H5O_loc_t *src);
+H5_DLL herr_t H5O_loc_copy_deep(H5O_loc_t *dst, const H5O_loc_t *src);
 H5_DLL herr_t H5O_loc_hold_file(H5O_loc_t *loc);
 H5_DLL herr_t H5O_loc_free(H5O_loc_t *loc);
 H5_DLL H5O_loc_t *H5O_get_loc(hid_t id);
@@ -958,17 +1006,20 @@ H5_DLL H5O_loc_t *H5O_get_loc(hid_t id);
 /* EFL operators */
 H5_DLL hsize_t H5O_efl_total_size(H5O_efl_t *efl);
 
+/* File space info routines */
+H5_DLL herr_t H5O_fsinfo_set_version(H5F_libver_t low, H5F_libver_t high, H5O_fsinfo_t *fsinfo);
+H5_DLL herr_t H5O_fsinfo_check_version(H5F_libver_t high, H5O_fsinfo_t *fsinfo);
+
 /* Fill value operators */
 H5_DLL herr_t H5O_fill_reset_dyn(H5O_fill_t *fill);
-H5_DLL herr_t H5O_fill_convert(H5O_fill_t *fill, H5T_t *type, hbool_t *fill_changed, hid_t dxpl_id);
-H5_DLL herr_t H5O_fill_set_latest_version(H5O_fill_t *fill);
+H5_DLL herr_t H5O_fill_convert(H5O_fill_t *fill, H5T_t *type, hbool_t *fill_changed);
+H5_DLL herr_t H5O_fill_set_version(H5F_t * f, H5O_fill_t *fill);
 
 /* Link operators */
-H5_DLL herr_t H5O_link_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
-    void *_mesg);
+H5_DLL herr_t H5O_link_delete(H5F_t *f, H5O_t *open_oh, void *_mesg);
 
 /* Filter pipeline operators */
-H5_DLL herr_t H5O_pline_set_latest_version(H5O_pline_t *pline);
+H5_DLL herr_t H5O_pline_set_version(H5F_t *f, H5O_pline_t *pline);
 
 /* Shared message operators */
 H5_DLL herr_t H5O_set_shared(H5O_shared_t *dst, const H5O_shared_t *src);

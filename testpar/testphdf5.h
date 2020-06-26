@@ -19,7 +19,7 @@
 #include "testpar.h"
 
 enum H5TEST_COLL_CHUNK_API {API_NONE=0,API_LINK_HARD,
-	                    API_MULTI_HARD,API_LINK_TRUE,API_LINK_FALSE,
+                        API_MULTI_HARD,API_LINK_TRUE,API_LINK_FALSE,
                             API_MULTI_COLL,API_MULTI_IND};
 
 #ifndef FALSE
@@ -32,20 +32,20 @@ enum H5TEST_COLL_CHUNK_API {API_NONE=0,API_LINK_HARD,
 
 
 /* Constants definitions */
-#define DIM0		600 	/* Default dataset sizes. */
-#define DIM1		1200	/* Values are from a monitor pixel sizes */
-#define ROW_FACTOR	8 	/* Nominal row factor for dataset size */
-#define COL_FACTOR	16	/* Nominal column factor for dataset size */
-#define RANK		2
-#define DATASETNAME1	"Data1"
-#define DATASETNAME2	"Data2"
-#define DATASETNAME3	"Data3"
-#define DATASETNAME4	"Data4"
-#define DATASETNAME5	"Data5"
-#define DATASETNAME6	"Data6"
-#define DATASETNAME7	"Data7"
-#define DATASETNAME8	"Data8"
-#define DATASETNAME9	"Data9"
+#define DIM0        600     /* Default dataset sizes. */
+#define DIM1        1200    /* Values are from a monitor pixel sizes */
+#define ROW_FACTOR    8     /* Nominal row factor for dataset size */
+#define COL_FACTOR    16    /* Nominal column factor for dataset size */
+#define RANK        2
+#define DATASETNAME1    "Data1"
+#define DATASETNAME2    "Data2"
+#define DATASETNAME3    "Data3"
+#define DATASETNAME4    "Data4"
+#define DATASETNAME5    "Data5"
+#define DATASETNAME6    "Data6"
+#define DATASETNAME7    "Data7"
+#define DATASETNAME8    "Data8"
+#define DATASETNAME9    "Data9"
 
 /* point selection order */
 #define IN_ORDER 1
@@ -179,14 +179,14 @@ enum H5TEST_COLL_CHUNK_API {API_NONE=0,API_LINK_HARD,
 
 /* Definitions of the selection mode for the no_collective_cause_tests function. */
 #define TEST_COLLECTIVE                                 0x001
-#define TEST_SET_INDEPENDENT                            0x002 
+#define TEST_SET_INDEPENDENT                            0x002
 #define TEST_DATATYPE_CONVERSION                        0x004
 #define TEST_DATA_TRANSFORMS                            0x008
 #define TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES            0x010
 #define TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT  0x020
 #define TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL 0x040
 #define TEST_FILTERS                                    0x080
-/* TEST_FILTERS will take place of this after supporting mpio + filter for 
+/* TEST_FILTERS will take place of this after supporting mpio + filter for
  * H5Dcreate and H5Dwrite */
 #define TEST_FILTERS_READ                               0x100
 
@@ -209,8 +209,8 @@ enum H5TEST_COLL_CHUNK_API {API_NONE=0,API_LINK_HARD,
 /* type definitions */
 typedef struct H5Ptest_param_t  /* holds extra test parameters */
 {
-    char	*name;
-    int		count;
+    char    *name;
+    int        count;
 } H5Ptest_param_t;
 
 /* Dataset data type.  Int's can be easily octo dumped. */
@@ -218,19 +218,19 @@ typedef int DATATYPE;
 
 /* Shape Same Tests Definitions */
 typedef enum {
-    IND_CONTIG,		/* Independent IO on contigous datasets */
-    COL_CONTIG,		/* Collective IO on contigous datasets */
-    IND_CHUNKED,	/* Independent IO on chunked datasets */
-    COL_CHUNKED		/* Collective IO on chunked datasets */
+    IND_CONTIG,        /* Independent IO on contigous datasets */
+    COL_CONTIG,        /* Collective IO on contigous datasets */
+    IND_CHUNKED,    /* Independent IO on chunked datasets */
+    COL_CHUNKED        /* Collective IO on chunked datasets */
 } ShapeSameTestMethods;
 
 /* Shared global variables */
-extern int dim0, dim1;				/*Dataset dimensions */
-extern int chunkdim0, chunkdim1;		/*Chunk dimensions */
-extern int nerrors;				/*errors count */
-extern H5E_auto2_t old_func;			/* previous error handler */
-extern void *old_client_data;			/*previous error handler arg.*/
-extern int facc_type;				/*Test file access type */
+extern int dim0, dim1;                /*Dataset dimensions */
+extern int chunkdim0, chunkdim1;        /*Chunk dimensions */
+extern int nerrors;                /*errors count */
+extern H5E_auto2_t old_func;            /* previous error handler */
+extern void *old_client_data;            /*previous error handler arg.*/
+extern int facc_type;                /*Test file access type */
 extern int dxfer_coll_type;
 
 /* Test program prototypes */
@@ -240,6 +240,7 @@ void test_file_properties(void);
 void multiple_dset_write(void);
 void multiple_group_write(void);
 void multiple_group_read(void);
+void collective_group_write_independent_group_read(void);
 void collective_group_write(void);
 void independent_group_read(void);
 void test_fapl_mpio_dup(void);
@@ -294,6 +295,9 @@ void file_image_daisy_chain_test(void);
 void compress_readAll(void);
 #endif /* H5_HAVE_FILTER_DEFLATE */
 void test_dense_attr(void);
+void test_partial_no_selection_coll_md_read(void);
+void test_multi_chunk_io_addrmap_issue(void);
+void test_link_chunk_io_sort_chunk_issue(void);
 
 /* commonly used prototypes */
 hid_t create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type);

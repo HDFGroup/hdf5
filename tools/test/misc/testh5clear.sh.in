@@ -62,10 +62,25 @@ test -d $TESTDIR || mkdir -p $TESTDIR
 # copy test files and expected output files from source dirs to test dir
 #
 COPY_TESTFILES="
+$SRC_H5CLEAR_TESTFILES/h5clear_open_fail.err
+$SRC_H5CLEAR_TESTFILES/h5clear_no_mdc_image.err
 $SRC_H5CLEAR_TESTFILES/h5clear_usage.ddl
-$SRC_H5CLEAR_TESTFILES/h5clear_open_fail.ddl
 $SRC_H5CLEAR_TESTFILES/h5clear_missing_file.ddl
-$SRC_H5CLEAR_TESTFILES/h5clear_no_mdc_image.ddl
+$SRC_H5CLEAR_TESTFILES/h5clear_status_noclose_after_size.ddl
+$SRC_H5CLEAR_TESTFILES/h5clear_noclose_before_size.ddl
+$SRC_H5CLEAR_TESTFILES/h5clear_noclose_after_size.ddl
+$SRC_H5CLEAR_TESTFILES/h5clear_equal_before_size.ddl
+$SRC_H5CLEAR_TESTFILES/h5clear_equal_after_size.ddl
+$SRC_H5CLEAR_TESTFILES/h5clear_greater_before_size.ddl
+$SRC_H5CLEAR_TESTFILES/h5clear_greater_after_size.ddl
+$SRC_H5CLEAR_TESTFILES/h5clear_less_before_size.ddl
+$SRC_H5CLEAR_TESTFILES/h5clear_less_after_size.ddl
+$SRC_H5CLEAR_TESTFILES/h5clear_user_equal_before_size.ddl
+$SRC_H5CLEAR_TESTFILES/h5clear_user_equal_after_size.ddl
+$SRC_H5CLEAR_TESTFILES/h5clear_user_greater_before_size.ddl
+$SRC_H5CLEAR_TESTFILES/h5clear_user_greater_after_size.ddl
+$SRC_H5CLEAR_TESTFILES/h5clear_user_less_before_size.ddl
+$SRC_H5CLEAR_TESTFILES/h5clear_user_less_after_size.ddl
 $SRC_H5CLEAR_TESTFILES/h5clear_sec2_v0.h5
 $SRC_H5CLEAR_TESTFILES/h5clear_sec2_v2.h5
 $SRC_H5CLEAR_TESTFILES/h5clear_sec2_v3.h5
@@ -74,6 +89,14 @@ $SRC_H5CLEAR_TESTFILES/latest_h5clear_log_v3.h5
 $SRC_H5CLEAR_TESTFILES/latest_h5clear_sec2_v3.h5
 $SRC_H5CLEAR_TESTFILES/h5clear_mdc_image.h5
 $SRC_H5CLEAR_TESTFILES/mod_h5clear_mdc_image.h5
+$SRC_H5CLEAR_TESTFILES/h5clear_status_noclose.h5
+$SRC_H5CLEAR_TESTFILES/h5clear_fsm_persist_noclose.h5
+$SRC_H5CLEAR_TESTFILES/h5clear_fsm_persist_equal.h5
+$SRC_H5CLEAR_TESTFILES/h5clear_fsm_persist_greater.h5
+$SRC_H5CLEAR_TESTFILES/h5clear_fsm_persist_less.h5
+$SRC_H5CLEAR_TESTFILES/h5clear_fsm_persist_user_equal.h5
+$SRC_H5CLEAR_TESTFILES/h5clear_fsm_persist_user_greater.h5
+$SRC_H5CLEAR_TESTFILES/h5clear_fsm_persist_user_less.h5
 "
 
 COPY_TESTFILES_TO_TESTDIR()
@@ -152,26 +175,59 @@ TOOLTEST_OUT() {
     fname=$1
     option1=$2
     option2=$3
-    expected=$4
+    option3=$4
+    expected=$5
     # Prepare expected and actual output
     expect="$TESTDIR/$expected"
+    expect_err="$TESTDIR/`basename $expected .ddl`.err"
     actual="$TESTDIR/`basename $expected .ddl`.out"
-    actual_err="$TESTDIR/`basename $expected .ddl`.err"
+    actual_err="$TESTDIR/`basename $expected .ddl`.out.err"
     actual_sav=${actual}-sav
     actual_err_sav=${actual_err}-sav
 
     # Run test.
-    TESTING $H5CLEAR $option1 $option2 $fname
+    TESTING $H5CLEAR $option1 $option2 $option3 $option4 $fname
     (
         cd $TESTDIR
-        $RUNSERIAL $H5CLEAR_BIN $option1 $option2 $fname
+        $RUNSERIAL $H5CLEAR_BIN $option1 $option2 $option3 $option4 $fname
     ) >$actual 2>$actual_err
     cp $actual $actual_sav
     cp $actual_err $actual_err_sav
-    cat $actual_err >> $actual
 
     # Compare output
     COMPARE_OUT $expect $actual
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+        $RM $actual $actual_err $actual_sav $actual_err_sav
+    fi
+}
+# same as TOOLTEST_OUT just compare stderr
+TOOLTEST_ERR() {
+    fname=$1
+    option1=$2
+    option2=$3
+    option3=$4
+    expected=$5
+    # Prepare expected and actual output
+    expect_err="$TESTDIR/$expected"
+    expect="$TESTDIR/`basename $expected .err`.ddl"
+    actual="$TESTDIR/`basename $expected .err`.out"
+    actual_err="$TESTDIR/`basename $expected .err`.out.err"
+    actual_sav=${actual}-sav
+    actual_err_sav=${actual_err}-sav
+
+    # Run test.
+    TESTING $H5CLEAR $option1 $option2 $option3 $option4 $fname
+    (
+        cd $TESTDIR
+        $RUNSERIAL $H5CLEAR_BIN $option1 $option2 $option3 $option4 $fname
+    ) >$actual 2>$actual_err
+    cp $actual $actual_sav
+    cp $actual_err $actual_err_sav
+
+    # Compare output
+    COMPARE_OUT $expect_err $actual_err
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
@@ -245,17 +301,16 @@ $CP -f $TESTDIR/h5clear_sec2_v3.h5 $TESTDIR/orig_h5clear_sec2_v3.h5
 # "h5clear -m -s junk.h5"                   (valid 2 options, nonexisting file)
 # "h5clear -m orig_h5clear_sec2_v2.h5"      (valid 1 option, existing file, no cache image)
 # "h5clear -s -m orig_h5clear_sec2_v0.h5"   (valid 2 options, existing file, no cache image)
-TOOLTEST_OUT "" -h "" h5clear_usage.ddl
-TOOLTEST_OUT "" "" "" h5clear_usage.ddl
-TOOLTEST_OUT junk.h5 "" "" h5clear_usage.ddl
-TOOLTEST_OUT orig_h5clear_sec2_v3.h5 "" "" h5clear_usage.ddl
-TOOLTEST_OUT "" -m "" h5clear_missing_file.ddl
-TOOLTEST_OUT junk.h5 -s "" h5clear_open_fail.ddl
-TOOLTEST_OUT "" -m -s h5clear_missing_file.ddl
-TOOLTEST_OUT junk.h5 -m -s h5clear_open_fail.ddl
-TOOLTEST_OUT orig_h5clear_sec2_v2.h5 -m "" h5clear_no_mdc_image.ddl
-TOOLTEST_OUT orig_h5clear_sec2_v0.h5 -s -m h5clear_no_mdc_image.ddl
-#
+TOOLTEST_OUT "" -h "" "" h5clear_usage.ddl
+TOOLTEST_OUT "" "" "" "" h5clear_usage.ddl
+TOOLTEST_OUT junk.h5 "" "" "" h5clear_usage.ddl
+TOOLTEST_OUT orig_h5clear_sec2_v3.h5 "" "" "" h5clear_usage.ddl
+TOOLTEST_OUT "" -m "" "" h5clear_missing_file.ddl
+TOOLTEST_ERR junk.h5 -s "" "" h5clear_open_fail.err
+TOOLTEST_OUT "" -m -s "" h5clear_missing_file.ddl
+TOOLTEST_ERR junk.h5 -m -s "" h5clear_open_fail.err
+TOOLTEST_ERR orig_h5clear_sec2_v2.h5 -m "" "" h5clear_no_mdc_image.err
+TOOLTEST_ERR orig_h5clear_sec2_v0.h5 -s -m "" h5clear_no_mdc_image.err
 #
 #
 # The following are tests to verify the expected exit code from h5clear:
@@ -285,8 +340,8 @@ TOOLTEST h5clear_sec2_v0.h5 -l -m $FAIL
 #
 #
 # h5clear_mdc_image.h5 already has cache image removed earlier, verify the expected warning from h5clear:
-TOOLTEST_OUT mod_h5clear_mdc_image.h5 -m "" h5clear_no_mdc_image.ddl
-TOOLTEST_OUT mod_h5clear_mdc_image.h5 -s -m h5clear_no_mdc_image.ddl
+TOOLTEST_ERR mod_h5clear_mdc_image.h5 -m "" "" h5clear_no_mdc_image.err
+TOOLTEST_ERR mod_h5clear_mdc_image.h5 -s -m "" h5clear_no_mdc_image.err
 #
 #
 #
@@ -316,6 +371,73 @@ OPEN_CHK h5clear_sec2_v0.h5 $SUCCEED
 OPEN_CHK h5clear_sec2_v2.h5 $SUCCEED
 TOOLTEST h5clear_sec2_v2.h5 -s "" $SUCCEED
 OPEN_CHK h5clear_sec2_v2.h5 $SUCCEED
+#
+#
+#
+# (1) h5clear_status_noclose.h5
+# "h5clear --filesize h5clear_status_noclose.h5"        (unable to open the file because status_flag is on)
+# "h5clear -s --increment=0 h5clear_status_noclose.h5"  (clear status_flag, EOA = MAX(EOA, EOF) + 0)
+#                                                       (no output, check exit code)
+# "h5clear --filesize h5clear_status_noclose_user.h5"   (print EOA/EOF after the last action)
+TOOLTEST_ERR h5clear_status_noclose.h5 --filesize "" "" h5clear_open_fail.err
+TOOLTEST h5clear_status_noclose.h5 -s --increment=0 $SUCCEED
+TOOLTEST_OUT h5clear_status_noclose.h5 --filesize "" "" h5clear_status_noclose_after_size.ddl
+#
+# (2) h5clear_fsm_persist_noclose.h5
+# "h5clear --filesize h5clear_fsm_persist_noclose.h5"       (print EOA/EOF before the next action)
+# "h5clear --increment=0 h5clear_fsm_persist_noclose.h5"    (EOA = MAX(EOA, EOF)) (no output, check exit code)
+# "h5clear --filesize h5clear_fsm_persist_noclose.h5"       (print EOA/EOF after the last action)
+TOOLTEST_OUT h5clear_fsm_persist_noclose.h5 --filesize "" "" h5clear_noclose_before_size.ddl
+TOOLTEST h5clear_fsm_persist_noclose.h5 --increment=0 "" $SUCCEED
+TOOLTEST_OUT h5clear_fsm_persist_noclose.h5 --filesize "" "" h5clear_noclose_after_size.ddl
+#
+# (3) h5clear_fsm_persist_equal.h5
+# "h5clear --filesize h5clear_fsm_persist_equal.h5"     (print EOA/EOF before the next action)
+# "h5clear --increment h5clear_fsm_persist_equal.h5"    (EOA = MAX(EOA, EOF) + 1M) (no output, check exit code)
+# "h5clear --filesize h5clear_fsm_persist_equal.h5"     (print EOA/EOF after the last action)
+TOOLTEST_OUT h5clear_fsm_persist_equal.h5 --filesize "" "" h5clear_equal_before_size.ddl
+TOOLTEST h5clear_fsm_persist_equal.h5 --increment "" $SUCCEED
+TOOLTEST_OUT h5clear_fsm_persist_equal.h5 --filesize "" "" h5clear_equal_after_size.ddl
+#
+# (4) h5clear_fsm_persist_greater.h5
+# "h5clear --filesize h5clear_fsm_persist_greater.h5"       (print EOA/EOF before the next action)
+# "h5clear --increment=0 h5clear_fsm_persist_greater.h5"    (EOA = MAX(EOA, EOF) + 0) (no output, check exit code)
+# "h5clear --filesize h5clear_fsm_persist_greater.h5"       (print EOA/EOF after the last action)
+TOOLTEST_OUT h5clear_fsm_persist_greater.h5 --filesize "" "" h5clear_greater_before_size.ddl
+TOOLTEST h5clear_fsm_persist_greater.h5 --increment=0 "" $SUCCEED
+TOOLTEST_OUT h5clear_fsm_persist_greater.h5 --filesize "" "" h5clear_greater_after_size.ddl
+#
+# (5) h5clear_fsm_persist_less.h5
+# "h5clear --filesize h5clear_fsm_persist_less.h5"      (print EOA/EOF before the next action)
+# "h5clear --increment=200 h5clear_fsm_persist_less.h5" (EOA = MAX(EOA, EOF) + 200) (no output, check exit code)
+# "h5clear --filesize h5clear_fsm_persist_less.h5"      (print EOA/EOF after the last action)
+TOOLTEST_OUT h5clear_fsm_persist_less.h5 --filesize "" "" h5clear_less_before_size.ddl
+TOOLTEST h5clear_fsm_persist_less.h5 --increment=200 "" $SUCCEED
+TOOLTEST_OUT h5clear_fsm_persist_less.h5 --filesize "" "" h5clear_less_after_size.ddl
+#
+# (6) h5clear_fsm_persist_user_equal.h5
+# "h5clear --filesize h5clear_fsm_persist_user_equal.h5"    (print EOA/EOF before the next action)
+# "h5clear --increment h5clear_fsm_persist_user_equal.h5"   (EOA = MAX(EOA, EOF) + 1M) (no output, check exit code)
+# "h5clear --filesize h5clear_fsm_persist_user_equal.h5"    (print EOA/EOF after the last action)
+TOOLTEST_OUT h5clear_fsm_persist_user_equal.h5 --filesize "" "" h5clear_user_equal_before_size.ddl
+TOOLTEST h5clear_fsm_persist_user_equal.h5 --increment "" $SUCCEED
+TOOLTEST_OUT h5clear_fsm_persist_user_equal.h5 --filesize "" "" h5clear_user_equal_after_size.ddl
+#
+# (7) h5clear_fsm_persist_user_greater.h5
+# "h5clear --filesize h5clear_fsm_persist_user_greater.h5"      (print EOA/EOF before the next action)
+# "h5clear --increment=0 h5clear_fsm_persist_user_greater.h5"   (EOA = MAX(EOA, EOF) + 0) (no output, check exit code)
+# "h5clear --filesize h5clear_fsm_persist_user_greater.h5"      (print EOA/EOF after the last action)
+TOOLTEST_OUT h5clear_fsm_persist_user_greater.h5 --filesize "" "" h5clear_user_greater_before_size.ddl
+TOOLTEST h5clear_fsm_persist_user_greater.h5 --increment=0 "" $SUCCEED
+TOOLTEST_OUT h5clear_fsm_persist_user_greater.h5 --filesize "" "" h5clear_user_greater_after_size.ddl
+#
+# (8) h5clear_fsm_persist_user_less.h5
+# "h5clear --filesize h5clear_fsm_persist_user_less.h5"         (print EOA/EOF before the next action)
+# "h5clear --increment=200 h5clear_fsm_persist_user_less.h5"    (EOA = MAX(EOA, EOF) + 200) (no output, check exit code)
+# "h5clear --filesize h5clear_fsm_persist_user_less.h5"         (print EOA/EOF after the last action)
+TOOLTEST_OUT h5clear_fsm_persist_user_less.h5 --filesize "" "" h5clear_user_less_before_size.ddl
+TOOLTEST h5clear_fsm_persist_user_less.h5 --increment=200 "" $SUCCEED
+TOOLTEST_OUT h5clear_fsm_persist_user_less.h5 --filesize "" "" h5clear_user_less_after_size.ddl
 #
 #
 #

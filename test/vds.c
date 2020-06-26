@@ -36,6 +36,12 @@ const char *FILENAME[] = {
     "vds_src_1",
     "vds%%_src",
     "vds_dapl",
+    "vds_virt_2",
+    "vds_virt_3",
+    "vds_src_2",
+    "vds_src_3",
+    "vds%%_src2",
+    "vds_dapl2",
     NULL
 };
 
@@ -49,6 +55,8 @@ const char *FILENAME[] = {
 
 #define FILENAME_BUF_SIZE       1024
 
+#define TMPDIR          "tmp_vds/"
+
 
 /*-------------------------------------------------------------------------
  * Function:    vds_select_equal
@@ -57,14 +65,7 @@ const char *FILENAME[] = {
  *              provided dataspaces are the same.
  *
  * Return:      Success:        0
- *
  *              Failure:        -1
- *
- * Programmer:  Neil Fortner
- *              Monday, March 2, 2015
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -114,7 +115,7 @@ vds_select_equal(hid_t space1, hid_t space2)
                 if(npoints1 != npoints2)
                     return FALSE;
 
-                /* Allocate point lists.  Do not return directly afer
+                /* Allocate point lists.  Do not return directly after
                  * allocating, to make sure buffers are freed. */
                 if(NULL == (buf1 = (hsize_t *)HDmalloc((size_t)rank1 * (size_t)npoints1 * sizeof(hsize_t))))
                     TEST_ERROR
@@ -130,7 +131,7 @@ vds_select_equal(hid_t space1, hid_t space2)
                     if(buf1[i] != buf2[i]) {
                         ret_value = FALSE;
                         break;
-                    } /* end if */
+                    }
 
                 /* Free buffers */
                 HDfree(buf1);
@@ -180,7 +181,7 @@ vds_select_equal(hid_t space1, hid_t space2)
                     if(buf1[i] != buf2[i]) {
                         ret_value = FALSE;
                         break;
-                    } /* end if */
+                    }
 
                 /* Free buffers */
                 HDfree(buf1);
@@ -217,14 +218,7 @@ error:
  *              parameters.
  *
  * Return:      Success:        0
- *
  *              Failure:        -1
- *
- * Programmer:  Neil Fortner
- *              Monday, March 2, 2015
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -298,8 +292,7 @@ vds_check_mapping(hid_t dcpl, size_t i, hid_t vspace, hid_t srcspace,
 
 error:
     H5E_BEGIN_TRY {
-        if(space_out >= 0)
-            (void)H5Sclose(space_out);
+        H5Sclose(space_out);
     } H5E_END_TRY
 
     return -1;
@@ -312,14 +305,7 @@ error:
  * Purpose:     Tests API functions related to virtual datasets.
  *
  * Return:      Success:        0
- *
  *              Failure:        number of errors
- *
- * Programmer:  Neil Fortner
- *              Monday, February 16, 2015
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 /* Helper function to get DCPL for examination depending on config */
@@ -331,7 +317,7 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl,
     hid_t       dset = -1;      /* Virtual dataset */
     H5D_space_status_t space_status; /* Dataset space status */
     void        *plist_buf = NULL; /* Serialized property list buffer */
-    H5O_info_t  oinfo;          /* Object info struct */
+    H5O_native_info_t  ninfo;          /* Object info struct */
     htri_t      tri_ret;
 
     HDassert((config >= TEST_API_BASIC) && (config < TEST_API_NTESTS));
@@ -370,12 +356,12 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl,
                 file = -1;
                 if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
                     TEST_ERROR
-            } /* end if */
+            }
 
             /* Open dataset */
             if((dset = H5Dopen2(file, "vdset", H5P_DEFAULT)) < 0)
                 TEST_ERROR
-        } /* end if */
+        }
 
         /* Get DCPL from dataset */
         if((*ex_dcpl = H5Dget_create_plist(dset)) < 0)
@@ -386,23 +372,23 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl,
             TEST_ERROR
 
         /* Test H5Oget_info returns correct metadata size */
-        if(H5Oget_info(dset, &oinfo) < 0)
+        if(H5Oget_native_info(dset, &ninfo, H5O_NATIVE_INFO_META_SIZE) < 0)
             TEST_ERROR
-        if(oinfo.meta_size.obj.index_size != (hsize_t)0)
+        if(ninfo.meta_size.obj.index_size != (hsize_t)0)
             TEST_ERROR
         if(config == TEST_API_REOPEN_FILE) {
-            if(oinfo.meta_size.obj.heap_size != exp_meta_size) {
-                printf("VDS metadata size: %llu Expected: %llu\n", (long long unsigned)oinfo.meta_size.obj.heap_size, (long long unsigned)exp_meta_size);
+            if(ninfo.meta_size.obj.heap_size != exp_meta_size) {
+                HDprintf("VDS metadata size: %llu Expected: %llu\n", (long long unsigned)ninfo.meta_size.obj.heap_size, (long long unsigned)exp_meta_size);
                 TEST_ERROR
-            } /* end if */
-        } /* end if */
+            }
+        }
         else
-            if((oinfo.meta_size.obj.heap_size != exp_meta_size)
-                    && (oinfo.meta_size.obj.heap_size != (hsize_t)0))
+            if((ninfo.meta_size.obj.heap_size != exp_meta_size)
+                    && (ninfo.meta_size.obj.heap_size != (hsize_t)0))
                 TEST_ERROR
-        if(oinfo.meta_size.attr.index_size != (hsize_t)0)
+        if(ninfo.meta_size.attr.index_size != (hsize_t)0)
             TEST_ERROR
-        if(oinfo.meta_size.attr.index_size != (hsize_t)0)
+        if(ninfo.meta_size.attr.index_size != (hsize_t)0)
             TEST_ERROR
 
         /* Test H5Dget_space_status */
@@ -424,21 +410,21 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl,
         if(H5Fclose(file) < 0)
             TEST_ERROR
         file = -1;
-    } /* end if */
+    }
     else if(config == TEST_API_COPY_PLIST) {
         /* Copy property list */
         if((*ex_dcpl = H5Pcopy(dcpl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     else if(config == TEST_API_ENCDEC_PLIST) {
         size_t plist_buf_size;
 
         /* Encode property list to plist_buf */
-        if(H5Pencode(dcpl, NULL, &plist_buf_size) < 0)
+        if(H5Pencode2(dcpl, NULL, &plist_buf_size, fapl) < 0)
             TEST_ERROR
         if(NULL == (plist_buf = HDmalloc(plist_buf_size)))
             TEST_ERROR
-        if(H5Pencode(dcpl, plist_buf, &plist_buf_size) < 0)
+        if(H5Pencode2(dcpl, plist_buf, &plist_buf_size, fapl) < 0)
             TEST_ERROR
 
         /* Decode serialized property list to *ex_dcpl */
@@ -448,14 +434,14 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl,
         /* Free plist_buf */
         HDfree(plist_buf);
         plist_buf = NULL;
-    } /* end if */
+    }
     else {
         /* Simply copy the id to ex_dcpl and increment the ref count so ex_dcpl
          * can be closed */
         if(H5Iinc_ref(dcpl) < 0)
             TEST_ERROR
         *ex_dcpl = dcpl;
-    } /* end else */
+    }
 
     /* Verify examination DCPL is equal to original DCPL.  Do not compare the
      * plist to itself, and do not do the comparison if we reopened the file,
@@ -466,16 +452,14 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl,
             TEST_ERROR
         if(!tri_ret)
             TEST_ERROR
-    } /* end if */
+    }
 
     return 0;
 
 error:
     H5E_BEGIN_TRY {
-        if(file >= 0)
-            (void)H5Fclose(file);
-        if(dset >= 0)
-            (void)H5Dclose(dset);
+        H5Fclose(file);
+        H5Dclose(dset);
     } H5E_END_TRY;
     if(plist_buf)
         HDfree(plist_buf);
@@ -485,7 +469,7 @@ error:
 
 /* Main test function */
 static int
-test_api(test_api_config_t config, hid_t fapl)
+test_api(test_api_config_t config, hid_t fapl, H5F_libver_t low)
 {
     char        filename[FILENAME_BUF_SIZE];
     hid_t       dcpl = -1;      /* Dataset creation property list */
@@ -532,7 +516,7 @@ test_api(test_api_config_t config, hid_t fapl)
         case TEST_API_NTESTS:
         default:
             TEST_ERROR
-    } /* end switch */
+    }
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
@@ -634,7 +618,8 @@ test_api(test_api_config_t config, hid_t fapl)
         TEST_ERROR
 
     /* Get examination DCPL */
-    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename, (hsize_t)213) < 0)
+    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename,
+                            (low >= H5F_LIBVER_V112)?(hsize_t)99:(low >= H5F_LIBVER_V110?174:213)) < 0)
         TEST_ERROR
 
     /* Test H5Pget_virtual_count */
@@ -818,7 +803,7 @@ test_api(test_api_config_t config, hid_t fapl)
         /* Create virtual dataspace */
         if((vspace[i] = H5Screate_simple(2, dims, NULL)) < 0)
             TEST_ERROR
-    } /* end for */
+    }
 
     /* Select all (should not be necessary, but just to be sure) */
     if(H5Sselect_all(srcspace[0]) < 0)
@@ -932,7 +917,7 @@ test_api(test_api_config_t config, hid_t fapl)
         if(H5Sclose(vspace[i]) < 0)
             TEST_ERROR
         vspace[i] = -1;
-    } /* end for */
+    }
     if(H5Pclose(ex_dcpl) < 0)
         TEST_ERROR
     ex_dcpl = -1;
@@ -1038,10 +1023,11 @@ test_api(test_api_config_t config, hid_t fapl)
         /* Add virtual layout mapping */
         if(H5Pset_virtual(dcpl, vspace[i], tmp_filename, tmp_dsetname, srcspace[0]) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get examination DCPL */
-    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename, (hsize_t)697) < 0)
+    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename,
+                            (low >= H5F_LIBVER_V112)?(hsize_t)607:(hsize_t)697) < 0)
         TEST_ERROR
 
     /* Test H5Pget_virtual_count */
@@ -1063,7 +1049,7 @@ test_api(test_api_config_t config, hid_t fapl)
         /* Check that the mapping in the DCPL is correct */
         if(vds_check_mapping(ex_dcpl, (size_t)i, vspace[i], srcspace[0], tmp_filename, tmp_dsetname) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Close */
     if(H5Sclose(srcspace[0]) < 0)
@@ -1073,7 +1059,7 @@ test_api(test_api_config_t config, hid_t fapl)
         if(H5Sclose(vspace[i]) < 0)
             TEST_ERROR
         vspace[i] = -1;
-    } /* end for */
+    }
     if(H5Pclose(ex_dcpl) < 0)
         TEST_ERROR
     ex_dcpl = -1;
@@ -1123,22 +1109,291 @@ test_api(test_api_config_t config, hid_t fapl)
 
 error:
     H5E_BEGIN_TRY {
-        for(i = 0; i < (sizeof(srcspace) / sizeof(srcspace[0])); i++) {
-            if(srcspace[i] >= 0)
-                (void)H5Sclose(srcspace[i]);
-        } /* end for */
-        for(i = 0; i < (sizeof(vspace) / sizeof(vspace[0])); i++) {
-            if(vspace[i] >= 0)
-                (void)H5Sclose(vspace[i]);
-        } /* end for */
-        if(dcpl >= 0)
-            (void)H5Pclose(dcpl);
-        if(ex_dcpl >= 0)
-            (void)H5Pclose(ex_dcpl);
+        for(i = 0; i < (sizeof(srcspace) / sizeof(srcspace[0])); i++)
+            H5Sclose(srcspace[i]);
+        for(i = 0; i < (sizeof(vspace) / sizeof(vspace[0])); i++)
+            H5Sclose(vspace[i]);
+        H5Pclose(dcpl);
+        H5Pclose(ex_dcpl);
     } H5E_END_TRY;
 
      return 1;
 } /* end test_api() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_vds_prefix_first
+ *
+ * Purpose:     Set up vds link prefix via H5Pset_virtual_prefix() to be "tmp"
+ *        Should be able to access the target source files in tmp directory via the prefix set
+ *        by H5Pset_virtual_prefix()
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *-------------------------------------------------------------------------
+ */
+static int
+test_vds_prefix_first(unsigned config, hid_t fapl)
+{
+    char        *srcfilename        = NULL;
+    char        *srcfilename_map    = NULL;
+    char        *vfilename          = NULL;
+    char        *srcfilenamepct     = NULL;
+    char        *srcfilenamepct_map = NULL;
+    const char *srcfilenamepct_map_orig = "vds%%%%_src";
+    hid_t       srcfile[4] = {-1, -1, -1, -1}; /* Files with source dsets */
+    hid_t       vfile = -1;     /* File with virtual dset */
+    hid_t       dcpl = -1;      /* Dataset creation property list */
+    hid_t       dapl = -1;      /* Dataset access property list */
+    hid_t       srcspace[4] = {-1, -1, -1, -1}; /* Source dataspaces */
+    hid_t       vspace[4] = {-1, -1, -1, -1}; /* Virtual dset dataspaces */
+    hid_t       memspace = -1;  /* Memory dataspace */
+    hid_t       srcdset[4] = {-1, -1, -1, -1}; /* Source datsets */
+    hid_t       vdset = -1;     /* Virtual dataset */
+    hsize_t     dims[4] = {10, 26, 0, 0}; /* Data space current size */
+    int         buf[10][26];    /* Write and expected read buffer */
+    int         rbuf[10][26];   /* Read buffer */
+    int         fill = -1;      /* Fill value */
+    int         i, j;
+    char        buffer[1024];   /* buffer to read vds_prefix       */
+
+    TESTING("basic virtual dataset I/O via H5Pset_vds_prefix(): all selection")
+
+    if((srcfilename = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((srcfilename_map = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((vfilename = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((srcfilenamepct = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((srcfilenamepct_map = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+
+    h5_fixname(FILENAME[0], fapl, vfilename, FILENAME_BUF_SIZE);
+    h5_fixname(FILENAME[8], fapl, srcfilename, FILENAME_BUF_SIZE);
+    h5_fixname_printf(FILENAME[8], fapl, srcfilename_map, FILENAME_BUF_SIZE);
+    h5_fixname(FILENAME[10], fapl, srcfilenamepct, FILENAME_BUF_SIZE);
+    h5_fixname_printf(srcfilenamepct_map_orig, fapl, srcfilenamepct_map, FILENAME_BUF_SIZE);
+
+    /* create tmp directory and get current working directory path */
+    if (HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST)
+        TEST_ERROR
+
+    /* Create DCPL */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR
+
+    /* Set fill value */
+    if(H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fill) < 0)
+        TEST_ERROR
+
+    /* Initialize VDS prefix items */
+    if((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
+        TEST_ERROR
+
+    if(H5Pset_virtual_prefix(dapl, TMPDIR) < 0)
+        TEST_ERROR
+    if(H5Pget_virtual_prefix(dapl, buffer, sizeof(buffer)) < 0)
+        TEST_ERROR
+
+    if(HDstrcmp(buffer, TMPDIR) != 0)
+        FAIL_PUTS_ERROR("vds prefix not set correctly");
+
+    /* Create source dataspace */
+    if((srcspace[0] = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR
+
+    /* Create virtual dataspace */
+    if((vspace[0] = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR
+
+    /* Select all (should not be necessary, but just to be sure) */
+    if(H5Sselect_all(srcspace[0]) < 0)
+        TEST_ERROR
+    if(H5Sselect_all(vspace[0]) < 0)
+        TEST_ERROR
+
+    /* Add virtual layout mapping */
+    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset", srcspace[0]) < 0)
+        TEST_ERROR
+
+    /* Create virtual file */
+    if((vfile = H5Fcreate(vfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Create source file if requested */
+    if(config & TEST_IO_DIFFERENT_FILE) {
+        if(NULL == HDgetcwd(buffer, 1024))
+            TEST_ERROR
+        if(HDchdir(TMPDIR) < 0)
+            TEST_ERROR
+        if((srcfile[0] = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            TEST_ERROR
+        if(HDchdir(buffer) < 0)
+            TEST_ERROR
+    }
+    else {
+        srcfile[0] = vfile;
+        if(H5Iinc_ref(srcfile[0]) < 0)
+            TEST_ERROR
+    }
+
+    /* Create source dataset */
+    if((srcdset[0] = H5Dcreate2(srcfile[0], "src_dset", H5T_NATIVE_INT, srcspace[0], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Create virtual dataset */
+    if((vdset = H5Dcreate2(vfile, "v_dset", H5T_NATIVE_INT, vspace[0], H5P_DEFAULT, dcpl, dapl)) < 0)
+        TEST_ERROR
+
+    /* Populate write buffer */
+    for(i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
+        for(j = 0; j < (int)(sizeof(buf[0]) / sizeof(buf[0][0])); j++)
+            buf[i][j] = (i * (int)(sizeof(buf[0]) / sizeof(buf[0][0]))) + j;
+
+    /* Write data directly to source dataset */
+    if(H5Dwrite(srcdset[0], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
+        TEST_ERROR
+
+    /* Close srcdset and srcfile if config option specified */
+    if(config & TEST_IO_CLOSE_SRC) {
+        if(H5Dclose(srcdset[0]) < 0)
+            TEST_ERROR
+        srcdset[0] = -1;
+
+        if(config & TEST_IO_DIFFERENT_FILE) {
+            if(H5Fclose(srcfile[0]) < 0)
+                TEST_ERROR
+            srcfile[0] = -1;
+        }
+    }
+
+    /* Reopen virtual dataset and file if config option specified */
+    if(config & TEST_IO_REOPEN_VIRT) {
+        if(H5Dclose(vdset) < 0)
+            TEST_ERROR
+        vdset = -1;
+        if(H5Fclose(vfile) < 0)
+            TEST_ERROR
+        vfile = -1;
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+            TEST_ERROR
+        if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
+            TEST_ERROR
+    }
+
+    /* Read data through virtual dataset */
+    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    if(H5Dread(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
+        TEST_ERROR
+
+    /* Verify read data */
+    for(i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++) {
+        for(j = 0; j < (int)(sizeof(buf[0]) / sizeof(buf[0][0])); j++)
+            if(rbuf[i][j] != buf[i][j]) {
+                TEST_ERROR
+            }
+    }
+
+    /* Adjust write buffer */
+    for(i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
+        for(j = 0; j < (int)(sizeof(buf[0]) / sizeof(buf[0][0])); j++)
+            buf[i][j] += (int)(sizeof(buf) / sizeof(buf[0][0]));
+
+    /* Write data through virtual dataset */
+    if(H5Dwrite(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
+        TEST_ERROR
+
+    /* Reopen srcdset and srcfile if config option specified */
+    if(config & TEST_IO_CLOSE_SRC) {
+        if(config & TEST_IO_DIFFERENT_FILE) {
+            if(NULL == HDgetcwd(buffer, 1024))
+                TEST_ERROR
+            if(HDchdir(TMPDIR) < 0)
+                TEST_ERROR
+            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
+                TEST_ERROR
+            if(HDchdir(buffer) < 0)
+                TEST_ERROR
+        }
+        if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset", H5P_DEFAULT)) < 0)
+            TEST_ERROR
+    }
+
+    /* Read data directly from source dataset */
+    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    if(H5Dread(srcdset[0], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
+        TEST_ERROR
+
+    /* Verify read data */
+    for(i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
+        for(j = 0; j < (int)(sizeof(buf[0]) / sizeof(buf[0][0])); j++)
+            if(rbuf[i][j] != buf[i][j])
+                TEST_ERROR
+
+    /* Close */
+    if(H5Dclose(srcdset[0]) < 0)
+        TEST_ERROR
+    srcdset[0] = -1;
+    if(H5Dclose(vdset) < 0)
+        TEST_ERROR
+    vdset = -1;
+    if(H5Fclose(srcfile[0]) < 0)
+        TEST_ERROR
+    srcfile[0] = -1;
+    if(H5Fclose(vfile) < 0)
+        TEST_ERROR
+    vfile = -1;
+    if(H5Sclose(srcspace[0]) < 0)
+        TEST_ERROR
+    srcspace[0] = -1;
+    if(H5Sclose(vspace[0]) < 0)
+        TEST_ERROR
+    vspace[0] = -1;
+    if(H5Pclose(dapl) < 0)
+        TEST_ERROR
+    dapl = -1;
+    if(H5Pclose(dcpl) < 0)
+        TEST_ERROR
+    dcpl = -1;
+
+    HDfree(srcfilename);
+    HDfree(srcfilename_map);
+    HDfree(vfilename);
+    HDfree(srcfilenamepct);
+    HDfree(srcfilenamepct_map);
+
+    PASSED();
+    return 0;
+
+ error:
+    H5E_BEGIN_TRY {
+        for(i = 0; i < (int)(sizeof(srcdset) / sizeof(srcdset[0])); i++)
+            H5Dclose(srcdset[i]);
+        H5Dclose(vdset);
+        for(i = 0; i < (int)(sizeof(srcfile) / sizeof(srcfile[0])); i++)
+            H5Fclose(srcfile[i]);
+        H5Fclose(vfile);
+        for(i = 0; i < (int)(sizeof(srcspace) / sizeof(srcspace[0])); i++)
+            H5Sclose(srcspace[i]);
+        for(i = 0; i < (int)(sizeof(vspace) / sizeof(vspace[0])); i++)
+            H5Sclose(vspace[i]);
+        H5Sclose(memspace);
+        H5Pclose(dapl);
+        H5Pclose(dcpl);
+    } H5E_END_TRY;
+
+    if(HDsetenv("HDF5_VDS_PREFIX", "", 1) < 0)
+        TEST_ERROR
+
+    HDfree(srcfilename);
+    HDfree(srcfilename_map);
+    HDfree(vfilename);
+    HDfree(srcfilenamepct);
+    HDfree(srcfilenamepct_map);
+
+    return 1;
+} /* end test_vds_prefix */
 
 
 /*-------------------------------------------------------------------------
@@ -1148,25 +1403,18 @@ error:
  *              pattern-matching file/dataset strings
  *
  * Return:      Success:        0
- *
  *              Failure:        number of errors
- *
- * Programmer:  Neil Fortner
- *              Tuesday, March 3, 2015
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_basic_io(unsigned config, hid_t fapl)
 {
-    char        srcfilename[FILENAME_BUF_SIZE];
-    char        srcfilename_map[FILENAME_BUF_SIZE];
-    char        vfilename[FILENAME_BUF_SIZE];
-    char        vfilename2[FILENAME_BUF_SIZE];
-    char        srcfilenamepct[FILENAME_BUF_SIZE];
-    char        srcfilenamepct_map[FILENAME_BUF_SIZE];
+    char        *srcfilename        = NULL;
+    char        *srcfilename_map    = NULL;
+    char        *vfilename          = NULL;
+    char        *vfilename2         = NULL;
+    char        *srcfilenamepct     = NULL;
+    char        *srcfilenamepct_map = NULL;
     const char *srcfilenamepct_map_orig = "vds%%%%_src";
     hid_t       srcfile[4] = {-1, -1, -1, -1}; /* Files with source dsets */
     hid_t       vfile = -1;     /* File with virtual dset */
@@ -1190,16 +1438,29 @@ test_basic_io(unsigned config, hid_t fapl)
     int         erbuf[10][26];  /* Expected read buffer */
     int         fill = -1;      /* Fill value */
     herr_t      ret;            /* Generic return value */
-    int         i, j;
+    int         i, j, u, v;
 
     TESTING("basic virtual dataset I/O")
 
-    h5_fixname(FILENAME[0], fapl, vfilename, sizeof vfilename);
-    h5_fixname(FILENAME[1], fapl, vfilename2, sizeof vfilename2);
-    h5_fixname(FILENAME[2], fapl, srcfilename, sizeof srcfilename);
-    h5_fixname_printf(FILENAME[2], fapl, srcfilename_map, sizeof srcfilename_map);
-    h5_fixname(FILENAME[4], fapl, srcfilenamepct, sizeof srcfilenamepct);
-    h5_fixname_printf(srcfilenamepct_map_orig, fapl, srcfilenamepct_map, sizeof srcfilenamepct_map);
+    if((srcfilename = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((srcfilename_map = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((vfilename = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((vfilename2 = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((srcfilenamepct = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((srcfilenamepct_map = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+
+    h5_fixname(FILENAME[0], fapl, vfilename, FILENAME_BUF_SIZE);
+    h5_fixname(FILENAME[1], fapl, vfilename2, FILENAME_BUF_SIZE);
+    h5_fixname(FILENAME[2], fapl, srcfilename, FILENAME_BUF_SIZE);
+    h5_fixname_printf(FILENAME[2], fapl, srcfilename_map, FILENAME_BUF_SIZE);
+    h5_fixname(FILENAME[4], fapl, srcfilenamepct, FILENAME_BUF_SIZE);
+    h5_fixname_printf(srcfilenamepct_map_orig, fapl, srcfilenamepct_map, FILENAME_BUF_SIZE);
 
     /* Create DCPL */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
@@ -1238,12 +1499,12 @@ test_basic_io(unsigned config, hid_t fapl)
     if(config & TEST_IO_DIFFERENT_FILE) {
         if((srcfile[0] = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     else {
         srcfile[0] = vfile;
         if(H5Iinc_ref(srcfile[0]) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Create source dataset */
     if((srcdset[0] = H5Dcreate2(srcfile[0], "src_dset", H5T_NATIVE_INT, srcspace[0], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -1272,8 +1533,8 @@ test_basic_io(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -1287,7 +1548,7 @@ test_basic_io(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Read data through virtual dataset */
     HDmemset(rbuf[0], 0, sizeof(rbuf));
@@ -1316,7 +1577,7 @@ test_basic_io(unsigned config, hid_t fapl)
                 TEST_ERROR
         if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Read data directly from source dataset */
     HDmemset(rbuf[0], 0, sizeof(rbuf));
@@ -1400,12 +1661,12 @@ test_basic_io(unsigned config, hid_t fapl)
     if(config & TEST_IO_DIFFERENT_FILE) {
         if((srcfile[0] = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     else {
         srcfile[0] = vfile;
         if(H5Iinc_ref(srcfile[0]) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Create source datasets */
     if((srcdset[0] = H5Dcreate2(srcfile[0], "%src_dset1", H5T_NATIVE_INT, srcspace[0], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -1441,8 +1702,8 @@ test_basic_io(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -1456,7 +1717,7 @@ test_basic_io(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Read data through virtual dataset */
     HDmemset(rbuf[0], 0, sizeof(rbuf));
@@ -1487,7 +1748,7 @@ test_basic_io(unsigned config, hid_t fapl)
             TEST_ERROR
         if((srcdset[1] = H5Dopen2(srcfile[0], "src_dset2%", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Read data directly from source datasets */
     HDmemset(rbuf[0], 0, sizeof(rbuf));
@@ -1536,8 +1797,8 @@ test_basic_io(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -1546,7 +1807,7 @@ test_basic_io(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Open v_dset2 */
     if((vdset = H5Dopen2(vfile, "v_dset2", H5P_DEFAULT)) < 0)
@@ -1572,7 +1833,7 @@ test_basic_io(unsigned config, hid_t fapl)
             TEST_ERROR
         if((srcdset[1] = H5Dopen2(srcfile[0], "src_dset2%", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Only copy to a different file if the source datasets are in a different
      * file */
@@ -1614,8 +1875,8 @@ test_basic_io(unsigned config, hid_t fapl)
                 if(H5Fclose(srcfile[0]) < 0)
                     TEST_ERROR
                 srcfile[0] = -1;
-            } /* end if */
-        } /* end if */
+            }
+        }
 
         /* Reopen copied virtual file if config option specified */
         if(config & TEST_IO_REOPEN_VIRT) {
@@ -1624,7 +1885,7 @@ test_basic_io(unsigned config, hid_t fapl)
             vfile2 = -1;
             if((vfile2 = H5Fopen(vfilename2, H5F_ACC_RDWR, fapl)) < 0)
                 TEST_ERROR
-        } /* end if */
+        }
 
         /* Open v_dset3 */
         if((vdset = H5Dopen2(vfile2, "v_dset3", H5P_DEFAULT)) < 0)
@@ -1650,13 +1911,13 @@ test_basic_io(unsigned config, hid_t fapl)
                 TEST_ERROR
             if((srcdset[1] = H5Dopen2(srcfile[0], "src_dset2%", H5P_DEFAULT)) < 0)
                 TEST_ERROR
-        } /* end if */
+        }
 
         /* Close copied virtual file */
         if(H5Fclose(vfile2) < 0)
             TEST_ERROR
         vfile2 = -1;
-    } /* end if */
+    }
 
     /* Close */
     if(H5Dclose(srcdset[0]) < 0)
@@ -1735,12 +1996,12 @@ test_basic_io(unsigned config, hid_t fapl)
     if(config & TEST_IO_DIFFERENT_FILE) {
         if((srcfile[0] = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     else {
         srcfile[0] = vfile;
         if(H5Iinc_ref(srcfile[0]) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Create source datasets */
     if((srcdset[0] = H5Dcreate2(srcfile[0], "%src_dset1", H5T_NATIVE_INT, srcspace[0], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -1782,8 +2043,8 @@ test_basic_io(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -1797,7 +2058,7 @@ test_basic_io(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Read data through virtual dataset */
     HDmemset(rbuf[0], 0, sizeof(rbuf));
@@ -1828,7 +2089,7 @@ test_basic_io(unsigned config, hid_t fapl)
             TEST_ERROR
         if((srcdset[1] = H5Dopen2(srcfile[0], "src_dset2%", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Read data directly from source datasets */
     HDmemset(rbuf[0], 0, sizeof(rbuf));
@@ -1923,12 +2184,12 @@ test_basic_io(unsigned config, hid_t fapl)
     if(config & TEST_IO_DIFFERENT_FILE) {
         if((srcfile[0] = H5Fcreate(srcfilenamepct, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     else {
         srcfile[0] = vfile;
         if(H5Iinc_ref(srcfile[0]) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Create source datasets */
     if((srcdset[0] = H5Dcreate2(srcfile[0], "src_dset1", H5T_NATIVE_INT, srcspace[0], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -1964,8 +2225,8 @@ test_basic_io(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -1979,7 +2240,7 @@ test_basic_io(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Read first source dataset through virtual dataset */
     HDmemset(rbuf[0], 0, sizeof(rbuf));
@@ -2032,7 +2293,7 @@ test_basic_io(unsigned config, hid_t fapl)
             TEST_ERROR
         if((srcdset[1] = H5Dopen2(srcfile[0], "src_dset2", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Read data directly from source datasets */
     HDmemset(rbuf[0], 0, sizeof(rbuf));
@@ -2131,12 +2392,12 @@ test_basic_io(unsigned config, hid_t fapl)
     if(config & TEST_IO_DIFFERENT_FILE) {
         if((srcfile[0] = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     else {
         srcfile[0] = vfile;
         if(H5Iinc_ref(srcfile[0]) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Create source datasets */
     if((srcdset[0] = H5Dcreate2(srcfile[0], "src_dset1", H5T_NATIVE_INT, srcspace[0], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -2164,7 +2425,7 @@ test_basic_io(unsigned config, hid_t fapl)
             evbuf[i][j] = buf[2 * i][j];
         for(/* j = 13 */; j < 26; j++)
             evbuf[i][j] = buf[2 * i + 1][j - 13];
-    } /* end for */
+    }
 
     /* Adjust write buffer */
     for(i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
@@ -2181,7 +2442,7 @@ test_basic_io(unsigned config, hid_t fapl)
             evbuf[i + 5][j] = buf[2 * i][j + 13];
         for(/* j = 13 */; j < 26; j++)
             evbuf[i + 5][j] = buf[2 * i + 1][j];
-    } /* end for */
+    }
 
     /* Close srcdsets and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
@@ -2196,8 +2457,8 @@ test_basic_io(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -2211,7 +2472,7 @@ test_basic_io(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Read data through virtual dataset by hyperslab */
     /* Reset rbuf */
@@ -2227,7 +2488,7 @@ test_basic_io(unsigned config, hid_t fapl)
             erbuf[i][j] = evbuf[2 * i][j];
         for(/* j = 13 */; j < 26; j++)
             erbuf[i][j] = evbuf[2 * i + 1][j - 13];
-    } /* end for */
+    }
 
     /* Read second slice */
     if(H5Dread(vdset, H5T_NATIVE_INT, vspace[1], srcspace[1], H5P_DEFAULT, rbuf[0]) < 0)
@@ -2239,7 +2500,7 @@ test_basic_io(unsigned config, hid_t fapl)
             erbuf[i + 5][j] = evbuf[2 * i][j + 13];
         for(/* j = 13 */; j < 26; j++)
             erbuf[i + 5][j] = evbuf[2 * i + 1][j];
-    } /* end for */
+    }
 
     /* Verify read data */
     for(i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
@@ -2263,7 +2524,7 @@ test_basic_io(unsigned config, hid_t fapl)
             evbuf[2 * i][j] = buf[i][j];
         for(/* j = 13 */; j < 26; j++)
             evbuf[2 * i + 1][j - 13] = buf[i][j];
-    } /* end for */
+    }
 
     /* Adjust write buffer */
     for(i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
@@ -2280,7 +2541,7 @@ test_basic_io(unsigned config, hid_t fapl)
             evbuf[2 * i][j + 13] = buf[i + 5][j];
         for(/* j = 13 */; j < 26; j++)
             evbuf[2 * i + 1][j] = buf[i + 5][j];
-    } /* end for */
+    }
 
     /* Reopen srcdsets and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
@@ -2291,7 +2552,7 @@ test_basic_io(unsigned config, hid_t fapl)
             TEST_ERROR
         if((srcdset[1] = H5Dopen2(srcfile[0], "src_dset2", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Read data directly from source datasets */
     /* Reset rbuf */
@@ -2307,7 +2568,7 @@ test_basic_io(unsigned config, hid_t fapl)
             erbuf[2 * i][j] = evbuf[i][j];
         for(/* j = 13 */; j < 26; j++)
             erbuf[2 * i + 1][j - 13] = evbuf[i][j];
-    } /* end for */
+    }
 
     /* Read second dataset */
     if(H5Dread(srcdset[1], H5T_NATIVE_INT, srcspace[1], srcspace[1], H5P_DEFAULT, rbuf[0]) < 0)
@@ -2319,7 +2580,7 @@ test_basic_io(unsigned config, hid_t fapl)
             erbuf[2 * i][j + 13] = evbuf[i + 5][j];
         for(/* j = 13 */; j < 26; j++)
             erbuf[2 * i + 1][j] = evbuf[i + 5][j];
-    } /* end for */
+    }
 
     /* Verify read data */
     for(i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
@@ -2439,12 +2700,12 @@ test_basic_io(unsigned config, hid_t fapl)
     if(config & TEST_IO_DIFFERENT_FILE) {
         if((srcfile[0] = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     else {
         srcfile[0] = vfile;
         if(H5Iinc_ref(srcfile[0]) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Create source datasets */
     if((srcdset[0] = H5Dcreate2(srcfile[0], "src_dset1", H5T_NATIVE_INT, srcspace[0], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -2498,8 +2759,8 @@ test_basic_io(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -2513,7 +2774,7 @@ test_basic_io(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Read data through virtual dataset by hyperslab */
     /* Reset rbuf */
@@ -2538,7 +2799,7 @@ test_basic_io(unsigned config, hid_t fapl)
         for(j = 0; j < 26; j++) {
             erbuf[i][j] += (int)(sizeof(buf) / sizeof(buf[0][0]));
             erbuf[i + 1][j] -= (int)(sizeof(buf) / sizeof(buf[0][0]));
-        } /* end for */
+        }
 
     /* Verify read data */
     for(i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
@@ -2584,7 +2845,7 @@ test_basic_io(unsigned config, hid_t fapl)
             TEST_ERROR
         if((srcdset[1] = H5Dopen2(srcfile[0], "src_dset2", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Read data directly from source datasets */
     /* Reset rbuf */
@@ -2605,7 +2866,7 @@ test_basic_io(unsigned config, hid_t fapl)
         for(j = 0; j < 26; j++) {
             erbuf[i][j] += (int)(sizeof(buf) / sizeof(buf[0][0]));
             erbuf[i + 1][j] -= (int)(sizeof(buf) / sizeof(buf[0][0]));
-        } /* end for */
+        }
 
     /* Read second dataset */
     if(H5Dread(srcdset[1], H5T_NATIVE_INT, memspace, srcspace[0], H5P_DEFAULT, rbuf[0]) < 0)
@@ -2780,12 +3041,12 @@ test_basic_io(unsigned config, hid_t fapl)
     if(config & TEST_IO_DIFFERENT_FILE) {
         if((srcfile[0] = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     else {
         srcfile[0] = vfile;
         if(H5Iinc_ref(srcfile[0]) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Create source dataset */
     if((srcdset[0] = H5Dcreate2(srcfile[0], "src_dset1", H5T_NATIVE_INT, srcspace[0], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -2822,8 +3083,8 @@ test_basic_io(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -2837,7 +3098,7 @@ test_basic_io(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
@@ -2943,7 +3204,7 @@ test_basic_io(unsigned config, hid_t fapl)
             if((j >= 3) && (j < 6)) {
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
@@ -2996,7 +3257,7 @@ test_basic_io(unsigned config, hid_t fapl)
             if((j >= 6) && (j < 9)) {
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
@@ -3214,7 +3475,7 @@ test_basic_io(unsigned config, hid_t fapl)
                 TEST_ERROR
         if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset1", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Read data directly from source dataset */
     /* Select hyperslab in memory space */
@@ -3279,43 +3540,762 @@ test_basic_io(unsigned config, hid_t fapl)
     memspace = -1;
 
 
+    /*
+     * Test 8: For code coverage: Horizontal block virtual mappings, and file
+     * selection, grid memory selection
+     */
+    /* Clear virtual layout in DCPL */
+    if(H5Pset_layout(dcpl, H5D_VIRTUAL) < 0)
+        TEST_ERROR
+
+    /* Create memory dataspace */
+    if((memspace = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR
+
+    /* Create virtual dataspaces */
+    dims[0] = 8;
+    dims[1] = 15;
+    if((vspace[0] = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR
+    if((vspace[1] = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR
+
+    /* Create source dataspace */
+    dims[0] = 4;
+    if((srcspace[0] = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR
+
+    /* Select all in source space (should not be necessary, but just to be sure)
+     */
+    if(H5Sselect_all(srcspace[0]) < 0)
+        TEST_ERROR
+
+    /* Select hyperslabs in virtual spaces */
+    start[0] = 0;
+    start[1] = 0;
+    if(H5Sselect_hyperslab(vspace[0], H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
+        TEST_ERROR
+    start[0] = 4;
+    if(H5Sselect_hyperslab(vspace[1], H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
+        TEST_ERROR
+
+    /* Add virtual layout mappings */
+    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset1", srcspace[0]) < 0)
+        TEST_ERROR
+    if(H5Pset_virtual(dcpl, vspace[1], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset2", srcspace[0]) < 0)
+        TEST_ERROR
+
+    /* Reset dims */
+    dims[0] = 10;
+    dims[1] = 26;
+
+    /* Create virtual file */
+    if((vfile = H5Fcreate(vfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Create source file if requested */
+    if(config & TEST_IO_DIFFERENT_FILE) {
+        if((srcfile[0] = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            TEST_ERROR
+    }
+    else {
+        srcfile[0] = vfile;
+        if(H5Iinc_ref(srcfile[0]) < 0)
+            TEST_ERROR
+    }
+
+    /* Create source datasets */
+    if((srcdset[0] = H5Dcreate2(srcfile[0], "src_dset1", H5T_NATIVE_INT, srcspace[0], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if((srcdset[1] = H5Dcreate2(srcfile[0], "src_dset2", H5T_NATIVE_INT, srcspace[0], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Create virtual dataset */
+    if((vdset = H5Dcreate2(vfile, "v_dset", H5T_NATIVE_INT, vspace[0], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Reset erbuf */
+    HDmemset(erbuf[0], 0, sizeof(rbuf));
+
+    /* Populate write buffer */
+    for(i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
+        for(j = 0; j < (int)(sizeof(buf[0]) / sizeof(buf[0][0])); j++)
+            buf[i][j] = (i * (int)(sizeof(buf[0]) / sizeof(buf[0][0]))) + j;
+
+    /* Select hyperslab in memory */
+    start[0] = 0;
+    start[1] = 0;
+    count[0] = 4;
+    count[1] = 15;
+    if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
+        TEST_ERROR
+
+    /* Write data directly to first source dataset */
+    if(H5Dwrite(srcdset[0], H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
+        TEST_ERROR
+
+    /* Update erbuf */
+    u = 0;
+    v = 0;
+    for(i = 2; i < 4; i++)
+        for(j = 0; j < 15; j++) {
+            erbuf[u][v] = buf[i][j];
+            v += 2;
+            if(v >= 24) {
+                u += 2;
+                v = 0;
+            }
+        }
+
+    /* Select hyperslab in memory */
+    start[0] = 4;
+    if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
+        TEST_ERROR
+
+    /* Write data directly to second source dataset */
+    if(H5Dwrite(srcdset[1], H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
+        TEST_ERROR
+
+    /* Update erbuf */
+    for(i = 4; i < 6; i++)
+        for(j = 0; j < 15; j++) {
+            erbuf[u][v] = buf[i][j];
+            v += 2;
+            if(v >= 24) {
+                u += 2;
+                v = 0;
+            }
+        }
+
+    /* Close srcdsets and srcfile if config option specified */
+    if(config & TEST_IO_CLOSE_SRC) {
+        if(H5Dclose(srcdset[0]) < 0)
+            TEST_ERROR
+        srcdset[0] = -1;
+        if(H5Dclose(srcdset[1]) < 0)
+            TEST_ERROR
+        srcdset[1] = -1;
+        if(H5Fclose(srcfile[0]) < 0)
+            TEST_ERROR
+        srcfile[0] = -1;
+    }
+
+    /* Reopen virtual dataset and file if config option specified */
+    if(config & TEST_IO_REOPEN_VIRT) {
+        if(H5Dclose(vdset) < 0)
+            TEST_ERROR
+        vdset = -1;
+        if(H5Fclose(vfile) < 0)
+            TEST_ERROR
+        vfile = -1;
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+            TEST_ERROR
+        if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
+            TEST_ERROR
+    }
+
+    /* Select hyperslab in memory */
+    start[0] = 0;
+    start[1] = 0;
+    stride[0] = 2;
+    stride[1] = 2;
+    count[0] = 5;
+    count[1] = 12;
+    block[0] = 1;
+    block[1] = 1;
+    if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, stride, count, block) < 0)
+        TEST_ERROR
+
+    /* Select hyperslab in file */
+    start[0] = 2;
+    start[1] = 0;
+    count[0] = 4;
+    count[1] = 15;
+    if(H5Sselect_hyperslab(vspace[0], H5S_SELECT_SET, start, NULL, count, NULL) < 0)
+        TEST_ERROR
+
+    /* Read data through virtual dataset */
+    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    if(H5Dread(vdset, H5T_NATIVE_INT, memspace, vspace[0], H5P_DEFAULT, rbuf[0]) < 0)
+        TEST_ERROR
+
+    /* Verify read data */
+    for(i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
+        for(j = 0; j < (int)(sizeof(buf[0]) / sizeof(buf[0][0])); j++)
+            if(rbuf[i][j] != erbuf[i][j])
+                TEST_ERROR
+
+    /* Close */
+    if(!(config & TEST_IO_CLOSE_SRC)) {
+        if(H5Dclose(srcdset[0]) < 0)
+            TEST_ERROR
+        srcdset[0] = -1;
+        if(H5Dclose(srcdset[1]) < 0)
+            TEST_ERROR
+        srcdset[1] = -1;
+        if(H5Fclose(srcfile[0]) < 0)
+            TEST_ERROR
+        srcfile[0] = -1;
+    }
+    if(H5Dclose(vdset) < 0)
+        TEST_ERROR
+    vdset = -1;
+    if(H5Fclose(vfile) < 0)
+        TEST_ERROR
+    vfile = -1;
+    if(H5Sclose(srcspace[0]) < 0)
+        TEST_ERROR
+    srcspace[0] = -1;
+    if(H5Sclose(vspace[0]) < 0)
+        TEST_ERROR
+    vspace[0] = -1;
+    if(H5Sclose(vspace[1]) < 0)
+        TEST_ERROR
+    vspace[1] = -1;
+    if(H5Sclose(memspace) < 0)
+        TEST_ERROR
+    memspace = -1;
+
+
+    /*
+     * Test 9: For code coverage: Horizontal block virtual mappings, and file
+     * selection, grid memory selection, 3 mappings, 3D memory space
+     */
+    /* Clear virtual layout in DCPL */
+    if(H5Pset_layout(dcpl, H5D_VIRTUAL) < 0)
+        TEST_ERROR
+
+    /* Create memory dataspace */
+    dims[1] = 13;
+    dims[2] = 2;
+    if((memspace = H5Screate_simple(3, dims, NULL)) < 0)
+        TEST_ERROR
+
+    /* Create virtual dataspaces */
+    dims[0] = 6;
+    dims[1] = 10;
+    if((vspace[0] = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR
+    if((vspace[1] = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR
+    if((vspace[2] = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR
+
+    /* Create source dataspace */
+    dims[0] = 2;
+    if((srcspace[0] = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR
+
+    /* Select all in source space (should not be necessary, but just to be sure)
+     */
+    if(H5Sselect_all(srcspace[0]) < 0)
+        TEST_ERROR
+
+    /* Select hyperslabs in virtual spaces */
+    start[0] = 0;
+    start[1] = 0;
+    if(H5Sselect_hyperslab(vspace[0], H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
+        TEST_ERROR
+    start[0] = 2;
+    if(H5Sselect_hyperslab(vspace[1], H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
+        TEST_ERROR
+    start[0] = 4;
+    if(H5Sselect_hyperslab(vspace[2], H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
+        TEST_ERROR
+
+    /* Add virtual layout mappings */
+    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset1", srcspace[0]) < 0)
+        TEST_ERROR
+    if(H5Pset_virtual(dcpl, vspace[1], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset2", srcspace[0]) < 0)
+        TEST_ERROR
+    if(H5Pset_virtual(dcpl, vspace[2], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset3", srcspace[0]) < 0)
+        TEST_ERROR
+
+    /* Reset dims */
+    dims[0] = 10;
+    dims[1] = 26;
+
+    /* Create virtual file */
+    if((vfile = H5Fcreate(vfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Create source file if requested */
+    if(config & TEST_IO_DIFFERENT_FILE) {
+        if((srcfile[0] = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            TEST_ERROR
+    }
+    else {
+        srcfile[0] = vfile;
+        if(H5Iinc_ref(srcfile[0]) < 0)
+            TEST_ERROR
+    }
+
+    /* Create source datasets */
+    if((srcdset[0] = H5Dcreate2(srcfile[0], "src_dset1", H5T_NATIVE_INT, srcspace[0], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if((srcdset[1] = H5Dcreate2(srcfile[0], "src_dset2", H5T_NATIVE_INT, srcspace[0], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if((srcdset[2] = H5Dcreate2(srcfile[0], "src_dset3", H5T_NATIVE_INT, srcspace[0], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Create virtual dataset */
+    if((vdset = H5Dcreate2(vfile, "v_dset", H5T_NATIVE_INT, vspace[0], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Reset erbuf */
+    HDmemset(erbuf[0], 0, sizeof(rbuf));
+
+    /* Populate write buffer */
+    for(i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
+        for(j = 0; j < (int)(sizeof(buf[0]) / sizeof(buf[0][0])); j++)
+            buf[i][j] = (i * (int)(sizeof(buf[0]) / sizeof(buf[0][0]))) + j;
+
+    /* Select hyperslab in memory */
+    start[0] = 0;
+    start[1] = 0;
+    start[2] = 0;
+    count[0] = 2;
+    count[1] = 5;
+    count[2] = 2;
+    if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
+        TEST_ERROR
+
+    /* Write data directly to first source dataset */
+    if(H5Dwrite(srcdset[0], H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
+        TEST_ERROR
+
+    /* Update erbuf */
+    u = 0;
+    v = 0;
+    for(i = 0; i < 2; i++)
+        for(j = 0; j < 10; j++) {
+            erbuf[u][v] = buf[i][j];
+            if(++v == 6)
+                v += 2;
+            else if(v == 14) {
+                u += 2;
+                v = 0;
+            }
+        }
+
+    /* Select hyperslab in memory */
+    start[0] = 2;
+    if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
+        TEST_ERROR
+
+    /* Write data directly to second source dataset */
+    if(H5Dwrite(srcdset[1], H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
+        TEST_ERROR
+
+    /* Update erbuf */
+    for(i = 2; i < 4; i++)
+        for(j = 0; j < 10; j++) {
+            erbuf[u][v] = buf[i][j];
+            if(++v == 6)
+                v += 2;
+            else if(v == 14) {
+                u += 2;
+                v = 0;
+            }
+        }
+
+    /* Select hyperslab in memory */
+    start[0] = 4;
+    if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
+        TEST_ERROR
+
+    /* Write data directly to third source dataset */
+    if(H5Dwrite(srcdset[2], H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
+        TEST_ERROR
+
+    /* Update erbuf */
+    for(i = 4; i < 6; i++)
+        for(j = 0; j < 10; j++) {
+            erbuf[u][v] = buf[i][j];
+            if(++v == 6)
+                v += 2;
+            else if(v == 14) {
+                u += 2;
+                v = 0;
+            }
+        }
+
+    /* Close srcdsets and srcfile if config option specified */
+    if(config & TEST_IO_CLOSE_SRC) {
+        if(H5Dclose(srcdset[0]) < 0)
+            TEST_ERROR
+        srcdset[0] = -1;
+        if(H5Dclose(srcdset[1]) < 0)
+            TEST_ERROR
+        srcdset[1] = -1;
+        if(H5Dclose(srcdset[2]) < 0)
+            TEST_ERROR
+        srcdset[2] = -1;
+        if(H5Fclose(srcfile[0]) < 0)
+            TEST_ERROR
+        srcfile[0] = -1;
+    }
+
+    /* Reopen virtual dataset and file if config option specified */
+    if(config & TEST_IO_REOPEN_VIRT) {
+        if(H5Dclose(vdset) < 0)
+            TEST_ERROR
+        vdset = -1;
+        if(H5Fclose(vfile) < 0)
+            TEST_ERROR
+        vfile = -1;
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+            TEST_ERROR
+        if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
+            TEST_ERROR
+    }
+
+    /* Select hyperslab in memory */
+    start[0] = 0;
+    start[1] = 0;
+    start[2] = 0;
+    stride[0] = 2;
+    stride[1] = 4;
+    stride[2] = 1;
+    count[0] = 5;
+    count[1] = 2;
+    count[2] = 1;
+    block[0] = 1;
+    block[1] = 3;
+    block[2] = 2;
+    if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, stride, count, block) < 0)
+        TEST_ERROR
+
+    /* Read data through virtual dataset */
+    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    if(H5Dread(vdset, H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
+        TEST_ERROR
+
+    /* Verify read data */
+    for(i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
+        for(j = 0; j < (int)(sizeof(buf[0]) / sizeof(buf[0][0])); j++)
+            if(rbuf[i][j] != erbuf[i][j])
+                TEST_ERROR
+
+    /* Close */
+    if(!(config & TEST_IO_CLOSE_SRC)) {
+        if(H5Dclose(srcdset[0]) < 0)
+            TEST_ERROR
+        srcdset[0] = -1;
+        if(H5Dclose(srcdset[1]) < 0)
+            TEST_ERROR
+        srcdset[1] = -1;
+        if(H5Dclose(srcdset[2]) < 0)
+            TEST_ERROR
+        srcdset[2] = -1;
+        if(H5Fclose(srcfile[0]) < 0)
+            TEST_ERROR
+        srcfile[0] = -1;
+    }
+    if(H5Dclose(vdset) < 0)
+        TEST_ERROR
+    vdset = -1;
+    if(H5Fclose(vfile) < 0)
+        TEST_ERROR
+    vfile = -1;
+    if(H5Sclose(srcspace[0]) < 0)
+        TEST_ERROR
+    srcspace[0] = -1;
+    if(H5Sclose(vspace[0]) < 0)
+        TEST_ERROR
+    vspace[0] = -1;
+    if(H5Sclose(vspace[1]) < 0)
+        TEST_ERROR
+    vspace[1] = -1;
+    if(H5Sclose(vspace[2]) < 0)
+        TEST_ERROR
+    vspace[2] = -1;
+    if(H5Sclose(memspace) < 0)
+        TEST_ERROR
+    memspace = -1;
+
+
+    /*
+     * Test 10: For code coverage: Vertical stripe virtual mappings, vertical
+     * block file selection, block memory selection, 3D VDS
+     */
+    /* Clear virtual layout in DCPL */
+    if(H5Pset_layout(dcpl, H5D_VIRTUAL) < 0)
+        TEST_ERROR
+
+    /* Create memory dataspace */
+    if((memspace = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR
+
+    /* Create virtual dataspaces */
+    dims[0] = 10;
+    dims[1] = 9;
+    dims[2] = 6;
+    if((vspace[0] = H5Screate_simple(3, dims, NULL)) < 0)
+        TEST_ERROR
+    if((vspace[1] = H5Screate_simple(3, dims, NULL)) < 0)
+        TEST_ERROR
+
+    /* Create source dataspace */
+    dims[1] = 12;
+    if((srcspace[0] = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR
+
+    /* Select all in source space (should not be necessary, but just to be sure)
+     */
+    if(H5Sselect_all(srcspace[0]) < 0)
+        TEST_ERROR
+
+    /* Select hyperslabs in virtual spaces */
+    start[0] = 0;
+    start[1] = 0;
+    start[2] = 0;
+    count[0] = 1;
+    count[1] = 4;
+    count[2] = 3;
+    stride[0] = 1;
+    stride[1] = 2;
+    stride[2] = 2;
+    block[0] = 10;
+    block[1] = 1;
+    block[2] = 1;
+    if(H5Sselect_hyperslab(vspace[0], H5S_SELECT_SET, start, stride, count, block) < 0)
+        TEST_ERROR
+    start[2] = 1;
+    if(H5Sselect_hyperslab(vspace[1], H5S_SELECT_SET, start, stride, count, block) < 0)
+        TEST_ERROR
+
+    /* Add virtual layout mappings */
+    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset1", srcspace[0]) < 0)
+        TEST_ERROR
+    if(H5Pset_virtual(dcpl, vspace[1], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset2", srcspace[0]) < 0)
+        TEST_ERROR
+
+    /* Reset dims */
+    dims[0] = 10;
+    dims[1] = 26;
+
+    /* Create virtual file */
+    if((vfile = H5Fcreate(vfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Create source file if requested */
+    if(config & TEST_IO_DIFFERENT_FILE) {
+        if((srcfile[0] = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            TEST_ERROR
+    }
+    else {
+        srcfile[0] = vfile;
+        if(H5Iinc_ref(srcfile[0]) < 0)
+            TEST_ERROR
+    }
+
+    /* Create source datasets */
+    if((srcdset[0] = H5Dcreate2(srcfile[0], "src_dset1", H5T_NATIVE_INT, srcspace[0], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if((srcdset[1] = H5Dcreate2(srcfile[0], "src_dset2", H5T_NATIVE_INT, srcspace[0], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Create virtual dataset */
+    if((vdset = H5Dcreate2(vfile, "v_dset", H5T_NATIVE_INT, vspace[0], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Initialize erbuf */
+    HDmemset(erbuf[0], 0, sizeof(rbuf));
+    for(i = 0; i < 10; i++)
+        for(j = 0; j < 24; j += 6) {
+            erbuf[i][j] = -1;
+            erbuf[i][j + 1] = -1;
+        }
+
+    /* Populate write buffer */
+    for(i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
+        for(j = 0; j < (int)(sizeof(buf[0]) / sizeof(buf[0][0])); j++)
+            buf[i][j] = (i * (int)(sizeof(buf[0]) / sizeof(buf[0][0]))) + j;
+
+    /* Select hyperslab in memory */
+    start[0] = 0;
+    start[1] = 0;
+    count[0] = 10;
+    count[1] = 12;
+    if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
+        TEST_ERROR
+
+    /* Write data directly to first source dataset */
+    if(H5Dwrite(srcdset[0], H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
+        TEST_ERROR
+
+    /* Update erbuf */
+    u = 0;
+    v = 0;
+    for(i = 0; i < 10; i++)
+        for(j = 0; j < 8; j++) {
+            if(v == 0 || v == 12)
+                erbuf[u][v] = buf[i][j];
+            v += 2;
+            if(!(v % 6))
+                v += 6;
+            if(v >= 28) {
+                u++;
+                v = 0;
+            }
+        }
+
+    /* Select hyperslab in memory */
+    start[1] = 8;
+    if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
+        TEST_ERROR
+
+    /* Write data directly to second source dataset */
+    if(H5Dwrite(srcdset[1], H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
+        TEST_ERROR
+
+    /* Update erbuf */
+    u = 0;
+    v = 1;
+    for(i = 0; i < 10; i++)
+        for(j = 8; j < 16; j++) {
+            if(v == 1 || v == 13)
+                erbuf[u][v] = buf[i][j];
+            v += 2;
+            if(!((v - 1) % 6))
+                v += 6;
+            if(v >= 28) {
+                u++;
+                v = 1;
+            }
+        }
+
+    /* Close srcdsets and srcfile if config option specified */
+    if(config & TEST_IO_CLOSE_SRC) {
+        if(H5Dclose(srcdset[0]) < 0)
+            TEST_ERROR
+        srcdset[0] = -1;
+        if(H5Dclose(srcdset[1]) < 0)
+            TEST_ERROR
+        srcdset[1] = -1;
+        if(H5Fclose(srcfile[0]) < 0)
+            TEST_ERROR
+        srcfile[0] = -1;
+    }
+
+    /* Reopen virtual dataset and file if config option specified */
+    if(config & TEST_IO_REOPEN_VIRT) {
+        if(H5Dclose(vdset) < 0)
+            TEST_ERROR
+        vdset = -1;
+        if(H5Fclose(vfile) < 0)
+            TEST_ERROR
+        vfile = -1;
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+            TEST_ERROR
+        if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
+            TEST_ERROR
+    }
+
+    /* Select hyperslab in memory */
+    start[0] = 0;
+    start[1] = 0;
+    stride[0] = 1;
+    stride[1] = 6;
+    count[0] = 1;
+    count[1] = 4;
+    block[0] = 10;
+    block[1] = 2;
+    if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, stride, count, block) < 0)
+        TEST_ERROR
+
+    /* Select hyperslab in file */
+    start[0] = 0;
+    start[1] = 0;
+    start[2] = 0;
+    count[0] = 10;
+    count[1] = 4;
+    count[2] = 2;
+    if(H5Sselect_hyperslab(vspace[0], H5S_SELECT_SET, start, NULL, count, NULL) < 0)
+        TEST_ERROR
+
+    /* Read data through virtual dataset */
+    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    if(H5Dread(vdset, H5T_NATIVE_INT, memspace, vspace[0], H5P_DEFAULT, rbuf[0]) < 0)
+        TEST_ERROR
+
+    /* Verify read data */
+    for(i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
+        for(j = 0; j < (int)(sizeof(buf[0]) / sizeof(buf[0][0])); j++)
+            if(rbuf[i][j] != erbuf[i][j])
+                TEST_ERROR
+
+    /* Close */
+    if(!(config & TEST_IO_CLOSE_SRC)) {
+        if(H5Dclose(srcdset[0]) < 0)
+            TEST_ERROR
+        srcdset[0] = -1;
+        if(H5Dclose(srcdset[1]) < 0)
+            TEST_ERROR
+        srcdset[1] = -1;
+        if(H5Fclose(srcfile[0]) < 0)
+            TEST_ERROR
+        srcfile[0] = -1;
+    }
+    if(H5Dclose(vdset) < 0)
+        TEST_ERROR
+    vdset = -1;
+    if(H5Fclose(vfile) < 0)
+        TEST_ERROR
+    vfile = -1;
+    if(H5Sclose(srcspace[0]) < 0)
+        TEST_ERROR
+    srcspace[0] = -1;
+    if(H5Sclose(vspace[0]) < 0)
+        TEST_ERROR
+    vspace[0] = -1;
+    if(H5Sclose(vspace[1]) < 0)
+        TEST_ERROR
+    vspace[1] = -1;
+    if(H5Sclose(memspace) < 0)
+        TEST_ERROR
+    memspace = -1;
+
+
     /* Close */
     if(H5Pclose(dcpl) < 0)
         TEST_ERROR
     dcpl = -1;
+
+    HDfree(srcfilename);
+    HDfree(srcfilename_map);
+    HDfree(vfilename);
+    HDfree(vfilename2);
+    HDfree(srcfilenamepct);
+    HDfree(srcfilenamepct_map);
 
     PASSED();
     return 0;
 
 error:
     H5E_BEGIN_TRY {
-        for(i = 0; i < (int)(sizeof(srcdset) / sizeof(srcdset[0])); i++) {
-            if(srcdset[i] >= 0)
-                (void)H5Dclose(srcdset[i]);
-        } /* end for */
-        if(vdset >= 0)
-            (void)H5Dclose(vdset);
-        for(i = 0; i < (int)(sizeof(srcfile) / sizeof(srcfile[0])); i++) {
-            if(srcfile[i] >= 0)
-                (void)H5Fclose(srcfile[i]);
-        } /* end for */
-        if(vfile >= 0)
-            (void)H5Fclose(vfile);
-        if(vfile2 >= 0)
-            (void)H5Fclose(vfile2);
-        for(i = 0; i < (int)(sizeof(srcspace) / sizeof(srcspace[0])); i++) {
-            if(srcspace[i] >= 0)
-                (void)H5Sclose(srcspace[i]);
-        } /* end for */
-        for(i = 0; i < (int)(sizeof(vspace) / sizeof(vspace[0])); i++) {
-            if(vspace[i] >= 0)
-                (void)H5Sclose(vspace[i]);
-        } /* end for */
-        if(memspace >= 0)
-            (void)H5Sclose(memspace);
-        if(dcpl >= 0)
-            (void)H5Pclose(dcpl);
+        for(i = 0; i < (int)(sizeof(srcdset) / sizeof(srcdset[0])); i++)
+            H5Dclose(srcdset[i]);
+        H5Dclose(vdset);
+        for(i = 0; i < (int)(sizeof(srcfile) / sizeof(srcfile[0])); i++)
+            H5Fclose(srcfile[i]);
+        H5Fclose(vfile);
+        H5Fclose(vfile2);
+        for(i = 0; i < (int)(sizeof(srcspace) / sizeof(srcspace[0])); i++)
+            H5Sclose(srcspace[i]);
+        for(i = 0; i < (int)(sizeof(vspace) / sizeof(vspace[0])); i++)
+            H5Sclose(vspace[i]);
+        H5Sclose(memspace);
+        H5Pclose(dcpl);
     } H5E_END_TRY;
+
+    HDfree(srcfilename);
+    HDfree(srcfilename_map);
+    HDfree(vfilename);
+    HDfree(vfilename2);
+    HDfree(srcfilenamepct);
+    HDfree(srcfilenamepct_map);
 
      return 1;
 } /* end test_basic_io() */
@@ -3327,14 +4307,7 @@ error:
  * Purpose:     Tests VDS with unlimited selections
  *
  * Return:      Success:        0
- *
  *              Failure:        number of errors
- *
- * Programmer:  Neil Fortner
- *              Thursday, April 30, 2015
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3447,12 +4420,12 @@ test_unlim(unsigned config, hid_t fapl)
     if(config & TEST_IO_DIFFERENT_FILE) {
         if((srcfile[0] = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     else {
         srcfile[0] = vfile;
         if(H5Iinc_ref(srcfile[0]) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Create source datasets */
     if((srcdset[0] = H5Dcreate2(srcfile[0], "src_dset1", H5T_NATIVE_INT, srcspace[0], H5P_DEFAULT, srcdcpl, H5P_DEFAULT)) < 0)
@@ -3517,8 +4490,8 @@ test_unlim(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -3532,7 +4505,7 @@ test_unlim(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -3577,11 +4550,11 @@ test_unlim(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Test H5Pget_virtual_view() */
     if(H5Pget_virtual_view(dapl, &virtual_view) < 0)
@@ -3601,7 +4574,7 @@ test_unlim(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
@@ -3649,11 +4622,11 @@ test_unlim(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Reopen srcdset[0] and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
@@ -3662,7 +4635,7 @@ test_unlim(unsigned config, hid_t fapl)
                 TEST_ERROR
         if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset1", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Extend srcdset[0] */
     dims[0] = 5;
@@ -3699,8 +4672,8 @@ test_unlim(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -3714,7 +4687,7 @@ test_unlim(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -3761,11 +4734,11 @@ test_unlim(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Close VDS and reopen with view set to H5D_VDS_LAST_AVAILABLE, reopen file
      * as well if config option specified */
@@ -3779,7 +4752,7 @@ test_unlim(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
@@ -3832,11 +4805,11 @@ test_unlim(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Reopen srcdset[1] and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
@@ -3845,7 +4818,7 @@ test_unlim(unsigned config, hid_t fapl)
                 TEST_ERROR
         if((srcdset[1] = H5Dopen2(srcfile[0], "src_dset2", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Extend srcdset[1] */
     dims[0] = 5;
@@ -3887,8 +4860,8 @@ test_unlim(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -3902,7 +4875,7 @@ test_unlim(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -3964,7 +4937,7 @@ test_unlim(unsigned config, hid_t fapl)
             if((i == 4) || (i == 5)) {
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
@@ -4029,11 +5002,11 @@ test_unlim(unsigned config, hid_t fapl)
                 if(j >= (int)dims[1]) {
                     if(rbuf[i][j] != 0)
                         TEST_ERROR
-                } /* end if */
+                }
                 else
                     if(rbuf[i][j] != erbuf[i][j])
                         TEST_ERROR
-            } /* end for */
+            }
 
         /* Shrink to 15 */
         dims[1] = 15;
@@ -4060,12 +5033,12 @@ test_unlim(unsigned config, hid_t fapl)
                 if(j >= (int)dims[1]) {
                     if(rbuf[i][j] != 0)
                         TEST_ERROR
-                } /* end if */
+                }
                 else
                     if(rbuf[i][j] != erbuf[i][j])
                         TEST_ERROR
-            } /* end for */
-    } /* end if */
+            }
+    }
 
     /* Close VDS and reopen with view set to H5D_VDS_FIRST_MISSING, reopen file
      * as well if config option specified */
@@ -4079,7 +5052,7 @@ test_unlim(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
@@ -4127,11 +5100,11 @@ test_unlim(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Now test reopening virtual dataset without calling H5Dget_space, if
      * REOPEN_VIRT flag set */
@@ -4166,11 +5139,11 @@ test_unlim(unsigned config, hid_t fapl)
                 if(j >= (int)dims[1]) {
                     if(rbuf[i][j] != 0)
                         TEST_ERROR
-                } /* end if */
+                }
                 else
                     if(rbuf[i][j] != erbuf[i][j])
                         TEST_ERROR
-            } /* end for */
+            }
 
         /* Now try setting extent manually */
         /* Grow to 18 */
@@ -4198,11 +5171,11 @@ test_unlim(unsigned config, hid_t fapl)
                 if(j >= (int)dims[1]) {
                     if(rbuf[i][j] != 0)
                         TEST_ERROR
-                } /* end if */
+                }
                 else
                     if(rbuf[i][j] != erbuf[i][j])
                         TEST_ERROR
-            } /* end for */
+            }
 
         /* Grow to 20 */
         dims[1] = 20;
@@ -4228,7 +5201,7 @@ test_unlim(unsigned config, hid_t fapl)
             for(j = 0; j < (int)mdims[1]; j++)
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-    } /* end if */
+    }
 
     /* Close */
     if(!(config & TEST_IO_CLOSE_SRC)) {
@@ -4241,12 +5214,12 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(srcfile[0]) < 0)
             TEST_ERROR
         srcfile[0] = -1;
-    } /* end if */
+    }
     else if(!(config & TEST_IO_DIFFERENT_FILE)) {
         if(H5Fclose(srcfile[0]) < 0)
             TEST_ERROR
         srcfile[0] = -1;
-    } /* end if */
+    }
     if(H5Dclose(vdset) < 0)
         TEST_ERROR
     vdset = -1;
@@ -4322,12 +5295,12 @@ test_unlim(unsigned config, hid_t fapl)
     if(config & TEST_IO_DIFFERENT_FILE) {
         if((srcfile[0] = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     else {
         srcfile[0] = vfile;
         if(H5Iinc_ref(srcfile[0]) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Create source datasets */
     if((srcdset[0] = H5Dcreate2(srcfile[0], "src_dset1", H5T_NATIVE_INT, srcspace[0], H5P_DEFAULT, srcdcpl, H5P_DEFAULT)) < 0)
@@ -4392,8 +5365,8 @@ test_unlim(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -4407,7 +5380,7 @@ test_unlim(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -4451,11 +5424,11 @@ test_unlim(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Close VDS and reopen with view set to H5D_VDS_FIRST_MISSING, reopen file
      * as well if config option specified */
@@ -4469,7 +5442,7 @@ test_unlim(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
@@ -4511,11 +5484,11 @@ test_unlim(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Reopen srcdset[0] and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
@@ -4524,7 +5497,7 @@ test_unlim(unsigned config, hid_t fapl)
                 TEST_ERROR
         if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset1", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Extend srcdset[0] */
     dims[1] = 7;
@@ -4566,8 +5539,8 @@ test_unlim(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -4581,7 +5554,7 @@ test_unlim(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -4627,11 +5600,11 @@ test_unlim(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Close VDS and reopen with view set to H5D_VDS_LAST_AVAILABLE, reopen file
      * as well if config option specified */
@@ -4645,7 +5618,7 @@ test_unlim(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
@@ -4696,11 +5669,11 @@ test_unlim(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Reopen srcdset[1] and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
@@ -4709,7 +5682,7 @@ test_unlim(unsigned config, hid_t fapl)
                 TEST_ERROR
         if((srcdset[1] = H5Dopen2(srcfile[0], "src_dset2", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Extend srcdset[1] */
     dims[1] = 10;
@@ -4751,8 +5724,8 @@ test_unlim(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -4766,7 +5739,7 @@ test_unlim(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -4828,7 +5801,7 @@ test_unlim(unsigned config, hid_t fapl)
             if((i == 4) || (i == 5)) {
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
@@ -4845,7 +5818,7 @@ test_unlim(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
@@ -4897,11 +5870,11 @@ test_unlim(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Close */
     if(!(config & TEST_IO_CLOSE_SRC)) {
@@ -4914,12 +5887,12 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(srcfile[0]) < 0)
             TEST_ERROR
         srcfile[0] = -1;
-    } /* end if */
+    }
     else if(!(config & TEST_IO_DIFFERENT_FILE)) {
         if(H5Fclose(srcfile[0]) < 0)
             TEST_ERROR
         srcfile[0] = -1;
-    } /* end if */
+    }
     if(H5Dclose(vdset) < 0)
         TEST_ERROR
     vdset = -1;
@@ -5014,12 +5987,12 @@ test_unlim(unsigned config, hid_t fapl)
     if(config & TEST_IO_DIFFERENT_FILE) {
         if((srcfile[0] = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     else {
         srcfile[0] = vfile;
         if(H5Iinc_ref(srcfile[0]) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Create source datasets */
     if((srcdset[0] = H5Dcreate2(srcfile[0], "src_dset1", H5T_NATIVE_INT, srcspace[0], H5P_DEFAULT, srcdcpl, H5P_DEFAULT)) < 0)
@@ -5059,7 +6032,7 @@ test_unlim(unsigned config, hid_t fapl)
         for(j = 0; j < 2; j++) {
             erbuf[i][6 * j] = buf[i][2 * j];
             erbuf[i][(6 * j) + 1] = buf[i][(2 * j) + 1];
-        } /* end for */
+        }
 
     /* Adjust write buffer */
     for(i = 0; i < (int)mdims[0]; i++)
@@ -5075,7 +6048,7 @@ test_unlim(unsigned config, hid_t fapl)
         for(j = 0; j < 2; j++) {
             erbuf[i][(6 * j) + 2] = buf[i][2 * j];
             erbuf[i][(6 * j) + 3] = buf[i][(2 * j) + 1];
-        } /* end for */
+        }
 
     /* Adjust write buffer */
     for(i = 0; i < (int)mdims[0]; i++)
@@ -5096,7 +6069,7 @@ test_unlim(unsigned config, hid_t fapl)
     for(i = 0; i < 10; i++) {
         erbuf[i][4] = buf[i][0];
         erbuf[i][5] = buf[i][1];
-    } /* end for */
+    }
 
     /* Close srcdsets and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
@@ -5114,8 +6087,8 @@ test_unlim(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -5129,7 +6102,7 @@ test_unlim(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -5173,11 +6146,11 @@ test_unlim(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Close VDS and reopen with view set to H5D_VDS_FIRST_MISSING, reopen file
      * as well if config option specified */
@@ -5191,7 +6164,7 @@ test_unlim(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
@@ -5233,11 +6206,11 @@ test_unlim(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Reopen srcdset[0] and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
@@ -5246,7 +6219,7 @@ test_unlim(unsigned config, hid_t fapl)
                 TEST_ERROR
         if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset1", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Extend srcdset[0] */
     dims[1] = 7;
@@ -5283,8 +6256,8 @@ test_unlim(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -5298,7 +6271,7 @@ test_unlim(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -5343,11 +6316,11 @@ test_unlim(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Close VDS and reopen with view set to H5D_VDS_LAST_AVAILABLE, reopen file
      * as well if config option specified */
@@ -5361,7 +6334,7 @@ test_unlim(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
@@ -5371,7 +6344,7 @@ test_unlim(unsigned config, hid_t fapl)
         erbuf[i][12] = buf[i][0];
         erbuf[i][13] = buf[i][1];
         erbuf[i][18] = buf[i][2];
-    } /* end for */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -5415,11 +6388,11 @@ test_unlim(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Reopen srcdset[2] and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
@@ -5428,7 +6401,7 @@ test_unlim(unsigned config, hid_t fapl)
                 TEST_ERROR
         if((srcdset[2] = H5Dopen2(srcfile[0], "src_dset3", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Extend srcdset[2] */
     dims[1] = 5;
@@ -5460,7 +6433,7 @@ test_unlim(unsigned config, hid_t fapl)
         erbuf[i][10] = buf[i][0];
         erbuf[i][11] = buf[i][1];
         erbuf[i][16] = buf[i][2];
-    } /* end for */
+    }
 
     /* Close srcdset[2] and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
@@ -5472,8 +6445,8 @@ test_unlim(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -5487,7 +6460,7 @@ test_unlim(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -5532,11 +6505,11 @@ test_unlim(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Close VDS and reopen with view set to H5D_VDS_FIRST_MISSING, reopen file
      * as well if config option specified */
@@ -5550,7 +6523,7 @@ test_unlim(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
@@ -5596,11 +6569,11 @@ test_unlim(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Reopen srcdset[1] and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
@@ -5609,7 +6582,7 @@ test_unlim(unsigned config, hid_t fapl)
                 TEST_ERROR
         if((srcdset[1] = H5Dopen2(srcfile[0], "src_dset2", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Extend srcdset[1] */
     dims[1] = 6;
@@ -5640,7 +6613,7 @@ test_unlim(unsigned config, hid_t fapl)
     for(i = 0; i < 10; i++) {
         erbuf[i][14] = buf[i][0];
         erbuf[i][15] = buf[i][1];
-    } /* end for */
+    }
 
     /* Close srcdset[1] and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
@@ -5652,8 +6625,8 @@ test_unlim(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -5667,7 +6640,7 @@ test_unlim(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -5711,11 +6684,11 @@ test_unlim(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Close VDS and reopen with view set to H5D_VDS_LAST_AVAILABLE, reopen file
      * as well if config option specified */
@@ -5729,7 +6702,7 @@ test_unlim(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
@@ -5771,11 +6744,11 @@ test_unlim(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Now just read middle 2 rows */
     HDmemset(rbuf[0], 0, sizeof(rbuf));
@@ -5801,11 +6774,11 @@ test_unlim(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else if((i == 4) || (i == 5)) {
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
@@ -5824,12 +6797,12 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(srcfile[0]) < 0)
             TEST_ERROR
         srcfile[0] = -1;
-    } /* end if */
+    }
     else if(!(config & TEST_IO_DIFFERENT_FILE)) {
         if(H5Fclose(srcfile[0]) < 0)
             TEST_ERROR
         srcfile[0] = -1;
-    } /* end if */
+    }
     if(H5Dclose(vdset) < 0)
         TEST_ERROR
     vdset = -1;
@@ -5910,12 +6883,12 @@ test_unlim(unsigned config, hid_t fapl)
     if(config & TEST_IO_DIFFERENT_FILE) {
         if((srcfile[0] = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     else {
         srcfile[0] = vfile;
         if(H5Iinc_ref(srcfile[0]) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Create source datasets */
     if((srcdset[0] = H5Dcreate2(srcfile[0], "src_dset1", H5T_NATIVE_INT, srcspace[0], H5P_DEFAULT, srcdcpl, H5P_DEFAULT)) < 0)
@@ -5968,8 +6941,8 @@ test_unlim(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -5983,7 +6956,7 @@ test_unlim(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -6029,11 +7002,11 @@ test_unlim(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Close VDS and reopen with view set to H5D_VDS_FIRST_MISSING, reopen file
      * as well if config option specified */
@@ -6047,7 +7020,7 @@ test_unlim(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
@@ -6089,11 +7062,11 @@ test_unlim(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Reopen srcdset[0] and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
@@ -6102,7 +7075,7 @@ test_unlim(unsigned config, hid_t fapl)
                 TEST_ERROR
         if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset1", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Extend srcdset[0] */
     dims[0] = 5;
@@ -6140,8 +7113,8 @@ test_unlim(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -6155,7 +7128,7 @@ test_unlim(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -6201,11 +7174,11 @@ test_unlim(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Close VDS and reopen with view set to H5D_VDS_LAST_AVAILABLE, reopen file
      * as well if config option specified */
@@ -6219,7 +7192,7 @@ test_unlim(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
@@ -6267,11 +7240,11 @@ test_unlim(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Close */
     if(!(config & TEST_IO_CLOSE_SRC)) {
@@ -6284,12 +7257,12 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(srcfile[0]) < 0)
             TEST_ERROR
         srcfile[0] = -1;
-    } /* end if */
+    }
     else if(!(config & TEST_IO_DIFFERENT_FILE)) {
         if(H5Fclose(srcfile[0]) < 0)
             TEST_ERROR
         srcfile[0] = -1;
-    } /* end if */
+    }
     if(H5Dclose(vdset) < 0)
         TEST_ERROR
     vdset = -1;
@@ -6329,36 +7302,21 @@ test_unlim(unsigned config, hid_t fapl)
 
 error:
     H5E_BEGIN_TRY {
-        for(i = 0; i < (int)(sizeof(srcdset) / sizeof(srcdset[0])); i++) {
-            if(srcdset[i] >= 0)
-                (void)H5Dclose(srcdset[i]);
-        } /* end for */
-        if(vdset >= 0)
-            (void)H5Dclose(vdset);
-        for(i = 0; i < (int)(sizeof(srcfile) / sizeof(srcfile[0])); i++) {
-            if(srcfile[i] >= 0)
-                (void)H5Fclose(srcfile[i]);
-        } /* end for */
-        if(vfile >= 0)
-            (void)H5Fclose(vfile);
-        for(i = 0; i < (int)(sizeof(srcspace) / sizeof(srcspace[0])); i++) {
-            if(srcspace[i] >= 0)
-                (void)H5Sclose(srcspace[i]);
-        } /* end for */
-        for(i = 0; i < (int)(sizeof(vspace) / sizeof(vspace[0])); i++) {
-            if(vspace[i] >= 0)
-                (void)H5Sclose(vspace[i]);
-        } /* end for */
-        if(filespace >= 0)
-            (void)H5Sclose(filespace);
-        if(memspace >= 0)
-            (void)H5Sclose(memspace);
-        if(dcpl >= 0)
-            (void)H5Pclose(dcpl);
-        if(srcdcpl >= 0)
-            (void)H5Pclose(srcdcpl);
-        if(dapl >= 0)
-            (void)H5Pclose(dapl);
+        for(i = 0; i < (int)(sizeof(srcdset) / sizeof(srcdset[0])); i++)
+            H5Dclose(srcdset[i]);
+        H5Dclose(vdset);
+        for(i = 0; i < (int)(sizeof(srcfile) / sizeof(srcfile[0])); i++)
+            H5Fclose(srcfile[i]);
+        H5Fclose(vfile);
+        for(i = 0; i < (int)(sizeof(srcspace) / sizeof(srcspace[0])); i++)
+            H5Sclose(srcspace[i]);
+        for(i = 0; i < (int)(sizeof(vspace) / sizeof(vspace[0])); i++)
+            H5Sclose(vspace[i]);
+        H5Sclose(filespace);
+        H5Sclose(memspace);
+        H5Pclose(dcpl);
+        H5Pclose(srcdcpl);
+        H5Pclose(dapl);
     } H5E_END_TRY;
 
      return 1;
@@ -6372,28 +7330,21 @@ error:
  *              source dataset resolution
  *
  * Return:      Success:        0
- *
  *              Failure:        number of errors
- *
- * Programmer:  Neil Fortner
- *              Tuesday, May 26, 2015
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_printf(unsigned config, hid_t fapl)
 {
-    char        srcfilename[FILENAME_BUF_SIZE];
-    char        srcfilename_map[FILENAME_BUF_SIZE];
-    char        srcfilename2[FILENAME_BUF_SIZE];
-    char        srcfilename2_map[FILENAME_BUF_SIZE];
-    char        vfilename[FILENAME_BUF_SIZE];
-    char        printf_srcfilename_map[FILENAME_BUF_SIZE];
+    char        *srcfilename            = NULL;
+    char        *srcfilename_map        = NULL;
+    char        *srcfilename2           = NULL;
+    char        *srcfilename2_map       = NULL;
+    char        *vfilename              = NULL;
+    char        *printf_srcfilename_map = NULL;
+    char        *srcfilenamepct         = NULL;
+    char        *srcfilenamepct_map     = NULL;
     const char *printf_srcfilename_map_orig = "vds_src_%b";
-    char        srcfilenamepct[FILENAME_BUF_SIZE];
-    char        srcfilenamepct_map[FILENAME_BUF_SIZE];
     const char *srcfilenamepct_map_orig = "vds%%%%_src";
     hid_t       srcfile[4] = {-1, -1, -1, -1}; /* Files with source dsets */
     hid_t       vfile = -1;     /* File with virtual dset */
@@ -6421,14 +7372,31 @@ test_printf(unsigned config, hid_t fapl)
 
     TESTING("virtual dataset I/O with printf source")
 
-    h5_fixname(FILENAME[0], fapl, vfilename, sizeof vfilename);
-    h5_fixname(FILENAME[2], fapl, srcfilename, sizeof srcfilename);
-    h5_fixname_printf(FILENAME[2], fapl, srcfilename_map, sizeof srcfilename_map);
-    h5_fixname(FILENAME[3], fapl, srcfilename2, sizeof srcfilename2);
-    h5_fixname_printf(FILENAME[2], fapl, srcfilename2_map, sizeof srcfilename2_map);
-    h5_fixname_printf(printf_srcfilename_map_orig, fapl, printf_srcfilename_map, sizeof printf_srcfilename_map);
-    h5_fixname(FILENAME[4], fapl, srcfilenamepct, sizeof srcfilenamepct);
-    h5_fixname_printf(srcfilenamepct_map_orig, fapl, srcfilenamepct_map, sizeof srcfilenamepct_map);
+    if((srcfilename = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((srcfilename_map = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((srcfilename2 = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((srcfilename2_map = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((vfilename = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((printf_srcfilename_map = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((srcfilenamepct = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((srcfilenamepct_map = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+
+    h5_fixname(FILENAME[0], fapl, vfilename, FILENAME_BUF_SIZE);
+    h5_fixname(FILENAME[2], fapl, srcfilename, FILENAME_BUF_SIZE);
+    h5_fixname_printf(FILENAME[2], fapl, srcfilename_map, FILENAME_BUF_SIZE);
+    h5_fixname(FILENAME[3], fapl, srcfilename2, FILENAME_BUF_SIZE);
+    h5_fixname_printf(FILENAME[2], fapl, srcfilename2_map, FILENAME_BUF_SIZE);
+    h5_fixname_printf(printf_srcfilename_map_orig, fapl, printf_srcfilename_map, FILENAME_BUF_SIZE);
+    h5_fixname(FILENAME[4], fapl, srcfilenamepct, FILENAME_BUF_SIZE);
+    h5_fixname_printf(srcfilenamepct_map_orig, fapl, srcfilenamepct_map, FILENAME_BUF_SIZE);
 
     /* Create DCPL */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
@@ -6485,12 +7453,12 @@ test_printf(unsigned config, hid_t fapl)
     if(config & TEST_IO_DIFFERENT_FILE) {
         if((srcfile[0] = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     else {
         srcfile[0] = vfile;
         if(H5Iinc_ref(srcfile[0]) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Create virtual dataset */
     if((vdset = H5Dcreate2(vfile, "v_dset", H5T_NATIVE_INT, vspace[0], H5P_DEFAULT, dcpl, dapl)) < 0)
@@ -6502,7 +7470,7 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
+        }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -6516,7 +7484,7 @@ test_printf(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -6602,8 +7570,8 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -6617,7 +7585,7 @@ test_printf(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -6661,11 +7629,11 @@ test_printf(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Reopen srcfile if config option specified */
     if((config & TEST_IO_CLOSE_SRC) && (config & TEST_IO_DIFFERENT_FILE))
@@ -6702,8 +7670,8 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -6717,7 +7685,7 @@ test_printf(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -6757,11 +7725,11 @@ test_printf(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Now try with different selections */
     count[0] = 10;
@@ -6788,12 +7756,12 @@ test_printf(unsigned config, hid_t fapl)
                     if((j < (int)start[1]) || (j >= (int)(start[1] + count[1]))) {
                         if(rbuf[i][j] != 0)
                             TEST_ERROR
-                    } /* end if */
+                    }
                     else
                         if(rbuf[i][j] != erbuf[i][j])
                             TEST_ERROR
-                } /* end for */
-        } /* end for */
+                }
+        }
     start[1] = 0;
 
     /* Now try writing through VDS */
@@ -6829,7 +7797,7 @@ test_printf(unsigned config, hid_t fapl)
             TEST_ERROR
         if((srcdset[2] = H5Dopen2(srcfile[0], "src_dset2", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Read srcdset[0] */
     count[0] = 10;
@@ -6931,12 +7899,12 @@ test_printf(unsigned config, hid_t fapl)
     if(config & TEST_IO_DIFFERENT_FILE) {
         if((srcfile[0] = H5Fcreate(srcfilenamepct, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     else {
         srcfile[0] = vfile;
         if(H5Iinc_ref(srcfile[0]) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Create virtual dataset */
     if((vdset = H5Dcreate2(vfile, "v_dset", H5T_NATIVE_INT, vspace[0], H5P_DEFAULT, dcpl, dapl)) < 0)
@@ -6948,7 +7916,7 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
+        }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -6962,7 +7930,7 @@ test_printf(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -7100,14 +8068,14 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Dclose(srcdset[i]) < 0)
                 TEST_ERROR
             srcdset[i] = -1;
-        } /* end for */
+        }
 
         if(config & TEST_IO_DIFFERENT_FILE) {
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -7121,7 +8089,7 @@ test_printf(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -7165,11 +8133,11 @@ test_printf(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Test H5Pget_virtual_printf_gap() */
     if(H5Pget_virtual_printf_gap(dapl, &gap_size) < 0)
@@ -7189,7 +8157,7 @@ test_printf(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
@@ -7241,11 +8209,11 @@ test_printf(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Close VDS and reopen with printf gap set to 2, reopen file as well if
      * config option specified */
@@ -7259,7 +8227,7 @@ test_printf(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
@@ -7311,11 +8279,11 @@ test_printf(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Close VDS and reopen with printf gap set to 3, reopen file as well if
      * config option specified */
@@ -7329,7 +8297,7 @@ test_printf(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
@@ -7381,11 +8349,11 @@ test_printf(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Close VDS and reopen with printf gap set to 4, reopen file as well if
      * config option specified */
@@ -7399,7 +8367,7 @@ test_printf(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
@@ -7451,11 +8419,11 @@ test_printf(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Close VDS and reopen with view set to H5D_VDS_FIRST_MISSING, reopen file
      * as well if config option specified */
@@ -7469,7 +8437,7 @@ test_printf(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
@@ -7515,11 +8483,11 @@ test_printf(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Reset dapl */
     if(H5Pset_virtual_printf_gap(dapl, (hsize_t)0) < 0)
@@ -7533,16 +8501,16 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Dclose(srcdset[i]) < 0)
                 TEST_ERROR
             srcdset[i] = -1;
-        } /* end for */
+        }
         if(H5Fclose(srcfile[0]) < 0)
             TEST_ERROR
         srcfile[0] = -1;
-    } /* end if */
+    }
     else if(!(config & TEST_IO_DIFFERENT_FILE)) {
         if(H5Fclose(srcfile[0]) < 0)
             TEST_ERROR
         srcfile[0] = -1;
-    } /* end if */
+    }
     if(H5Dclose(vdset) < 0)
         TEST_ERROR
     vdset = -1;
@@ -7615,7 +8583,7 @@ test_printf(unsigned config, hid_t fapl)
                 TEST_ERROR
             if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
                 TEST_ERROR
-        } /* end if */
+        }
 
         /* Get VDS space */
         if((filespace = H5Dget_space(vdset)) < 0)
@@ -7681,7 +8649,7 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[1]) < 0)
                 TEST_ERROR
             srcfile[1] = -1;
-        } /* end if */
+        }
 
         /* Reopen virtual dataset and file if config option specified */
         if(config & TEST_IO_REOPEN_VIRT) {
@@ -7695,7 +8663,7 @@ test_printf(unsigned config, hid_t fapl)
                 TEST_ERROR
             if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
                 TEST_ERROR
-        } /* end if */
+        }
 
         /* Get VDS space */
         if((filespace = H5Dget_space(vdset)) < 0)
@@ -7739,11 +8707,11 @@ test_printf(unsigned config, hid_t fapl)
                 if(j >= (int)dims[1]) {
                     if(rbuf[i][j] != 0)
                         TEST_ERROR
-                } /* end if */
+                }
                 else
                     if(rbuf[i][j] != erbuf[i][j])
                         TEST_ERROR
-            } /* end for */
+            }
 
         /* Reopen srcfile[1] if config option specified */
         if(config & TEST_IO_CLOSE_SRC)
@@ -7778,7 +8746,7 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[1]) < 0)
                 TEST_ERROR
             srcfile[1] = -1;
-        } /* end if */
+        }
 
         /* Reopen virtual dataset and file if config option specified */
         if(config & TEST_IO_REOPEN_VIRT) {
@@ -7792,7 +8760,7 @@ test_printf(unsigned config, hid_t fapl)
                 TEST_ERROR
             if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
                 TEST_ERROR
-        } /* end if */
+        }
 
         /* Get VDS space */
         if((filespace = H5Dget_space(vdset)) < 0)
@@ -7836,11 +8804,11 @@ test_printf(unsigned config, hid_t fapl)
                 if(j >= (int)dims[1]) {
                     if(rbuf[i][j] != 0)
                         TEST_ERROR
-                } /* end if */
+                }
                 else
                     if(rbuf[i][j] != erbuf[i][j])
                         TEST_ERROR
-            } /* end for */
+            }
 
         /* Close */
         if(!(config & TEST_IO_CLOSE_SRC)) {
@@ -7856,7 +8824,7 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[1]) < 0)
                 TEST_ERROR
             srcfile[1] = -1;
-        } /* end if */
+        }
         if(H5Dclose(vdset) < 0)
             TEST_ERROR
         vdset = -1;
@@ -7926,7 +8894,7 @@ test_printf(unsigned config, hid_t fapl)
                 TEST_ERROR
             if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
                 TEST_ERROR
-        } /* end if */
+        }
 
         /* Get VDS space */
         if((filespace = H5Dget_space(vdset)) < 0)
@@ -7992,7 +8960,7 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[1]) < 0)
                 TEST_ERROR
             srcfile[1] = -1;
-        } /* end if */
+        }
 
         /* Reopen virtual dataset and file if config option specified */
         if(config & TEST_IO_REOPEN_VIRT) {
@@ -8006,7 +8974,7 @@ test_printf(unsigned config, hid_t fapl)
                 TEST_ERROR
             if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
                 TEST_ERROR
-        } /* end if */
+        }
 
         /* Get VDS space */
         if((filespace = H5Dget_space(vdset)) < 0)
@@ -8050,11 +9018,11 @@ test_printf(unsigned config, hid_t fapl)
                 if(j >= (int)dims[1]) {
                     if(rbuf[i][j] != 0)
                         TEST_ERROR
-                } /* end if */
+                }
                 else
                     if(rbuf[i][j] != erbuf[i][j])
                         TEST_ERROR
-            } /* end for */
+            }
 
         /* Reopen srcfile[1] if config option specified */
         if(config & TEST_IO_CLOSE_SRC)
@@ -8089,7 +9057,7 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[1]) < 0)
                 TEST_ERROR
             srcfile[1] = -1;
-        } /* end if */
+        }
 
         /* Reopen virtual dataset and file if config option specified */
         if(config & TEST_IO_REOPEN_VIRT) {
@@ -8103,7 +9071,7 @@ test_printf(unsigned config, hid_t fapl)
                 TEST_ERROR
             if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
                 TEST_ERROR
-        } /* end if */
+        }
 
         /* Get VDS space */
         if((filespace = H5Dget_space(vdset)) < 0)
@@ -8147,11 +9115,11 @@ test_printf(unsigned config, hid_t fapl)
                 if(j >= (int)dims[1]) {
                     if(rbuf[i][j] != 0)
                         TEST_ERROR
-                } /* end if */
+                }
                 else
                     if(rbuf[i][j] != erbuf[i][j])
                         TEST_ERROR
-            } /* end for */
+            }
 
         /* Close */
         if(!(config & TEST_IO_CLOSE_SRC)) {
@@ -8167,7 +9135,7 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[1]) < 0)
                 TEST_ERROR
             srcfile[1] = -1;
-        } /* end if */
+        }
         if(H5Dclose(vdset) < 0)
             TEST_ERROR
         vdset = -1;
@@ -8180,7 +9148,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Sclose(vspace[0]) < 0)
             TEST_ERROR
         vspace[0] = -1;
-    } /* end if */
+    }
 
 
     /*
@@ -8238,12 +9206,12 @@ test_printf(unsigned config, hid_t fapl)
     if(config & TEST_IO_DIFFERENT_FILE) {
         if((srcfile[0] = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     else {
         srcfile[0] = vfile;
         if(H5Iinc_ref(srcfile[0]) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Create virtual dataset */
     if((vdset = H5Dcreate2(vfile, "v_dset", H5T_NATIVE_INT, vspace[0], H5P_DEFAULT, dcpl, dapl)) < 0)
@@ -8255,7 +9223,7 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
+        }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -8269,7 +9237,7 @@ test_printf(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -8355,8 +9323,8 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -8370,7 +9338,7 @@ test_printf(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -8414,11 +9382,11 @@ test_printf(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Reopen srcfile if config option specified */
     if((config & TEST_IO_CLOSE_SRC) && (config & TEST_IO_DIFFERENT_FILE))
@@ -8454,8 +9422,8 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -8469,7 +9437,7 @@ test_printf(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -8513,11 +9481,11 @@ test_printf(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Close VDS and reopen with view set to H5D_VDS_FIRST_MISSING, reopen file
      * as well if config option specified */
@@ -8531,7 +9499,7 @@ test_printf(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
@@ -8578,11 +9546,11 @@ test_printf(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Reopen srcfile if config option specified */
     if((config & TEST_IO_CLOSE_SRC) && (config & TEST_IO_DIFFERENT_FILE))
@@ -8618,8 +9586,8 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -8633,7 +9601,7 @@ test_printf(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -8677,11 +9645,11 @@ test_printf(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Close VDS and reopen with view set to H5D_VDS_LAST_AVAILABLE, reopen file
      * as well if config option specified */
@@ -8695,7 +9663,7 @@ test_printf(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
@@ -8742,11 +9710,11 @@ test_printf(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Close VDS and reopen with printf_gap set to 1, reopen file as well if
      * config option specified */
@@ -8760,7 +9728,7 @@ test_printf(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
@@ -8807,11 +9775,11 @@ test_printf(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Reset dapl */
     if(H5Pset_virtual_printf_gap(dapl, (hsize_t)0) < 0)
@@ -8825,16 +9793,16 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Dclose(srcdset[i]) < 0)
                 TEST_ERROR
             srcdset[i] = -1;
-        } /* end for */
+        }
         if(H5Fclose(srcfile[0]) < 0)
             TEST_ERROR
         srcfile[0] = -1;
-    } /* end if */
+    }
     else if(!(config & TEST_IO_DIFFERENT_FILE)) {
         if(H5Fclose(srcfile[0]) < 0)
             TEST_ERROR
         srcfile[0] = -1;
-    } /* end if */
+    }
     if(H5Dclose(vdset) < 0)
         TEST_ERROR
     vdset = -1;
@@ -8910,12 +9878,12 @@ test_printf(unsigned config, hid_t fapl)
     if(config & TEST_IO_DIFFERENT_FILE) {
         if((srcfile[0] = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     else {
         srcfile[0] = vfile;
         if(H5Iinc_ref(srcfile[0]) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Create virtual dataset */
     if((vdset = H5Dcreate2(vfile, "v_dset", H5T_NATIVE_INT, vspace[0], H5P_DEFAULT, dcpl, dapl)) < 0)
@@ -8927,7 +9895,7 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
+        }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -8941,7 +9909,7 @@ test_printf(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -9037,8 +10005,8 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -9052,7 +10020,7 @@ test_printf(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -9096,11 +10064,11 @@ test_printf(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Close VDS and reopen with view set to H5D_VDS_FIRST_MISSING, reopen file
      * as well if config option specified */
@@ -9114,7 +10082,7 @@ test_printf(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
@@ -9161,11 +10129,11 @@ test_printf(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Reopen srcfile if config option specified */
     if((config & TEST_IO_CLOSE_SRC) && (config & TEST_IO_DIFFERENT_FILE))
@@ -9205,8 +10173,8 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -9220,7 +10188,7 @@ test_printf(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -9264,11 +10232,11 @@ test_printf(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Close VDS and reopen with view set to H5D_VDS_LAST_AVAILABLE, reopen file
      * as well if config option specified */
@@ -9282,7 +10250,7 @@ test_printf(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
@@ -9328,11 +10296,11 @@ test_printf(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Reopen srcfile if config option specified */
     if((config & TEST_IO_CLOSE_SRC) && (config & TEST_IO_DIFFERENT_FILE))
@@ -9369,8 +10337,8 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -9384,7 +10352,7 @@ test_printf(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -9428,11 +10396,11 @@ test_printf(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Now test reopening virtual dataset without calling H5Dget_space, if
      * REOPEN_VIRT flag set */
@@ -9466,11 +10434,11 @@ test_printf(unsigned config, hid_t fapl)
                 if(j >= (int)dims[1]) {
                     if(rbuf[i][j] != 0)
                         TEST_ERROR
-                } /* end if */
+                }
                 else
                     if(rbuf[i][j] != erbuf[i][j])
                         TEST_ERROR
-            } /* end for */
+            }
 
         /* Now try setting extent manually */
         /* Shrink to 12 */
@@ -9496,11 +10464,11 @@ test_printf(unsigned config, hid_t fapl)
                 if(j >= (int)dims[1]) {
                     if(rbuf[i][j] != 0)
                         TEST_ERROR
-                } /* end if */
+                }
                 else
                     if(rbuf[i][j] != erbuf[i][j])
                         TEST_ERROR
-            } /* end for */
+            }
 
         /* Shrink to 10 */
         dims[1] = 12;
@@ -9525,12 +10493,12 @@ test_printf(unsigned config, hid_t fapl)
                 if(j >= (int)dims[1]) {
                     if(rbuf[i][j] != 0)
                         TEST_ERROR
-                } /* end if */
+                }
                 else
                     if(rbuf[i][j] != erbuf[i][j])
                         TEST_ERROR
-            } /* end for */
-    } /* end if */
+            }
+    }
 
     /* Close VDS and reopen with view set to H5D_VDS_FIRST_MISSING, reopen file
      * as well if config option specified */
@@ -9544,7 +10512,7 @@ test_printf(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
@@ -9590,11 +10558,11 @@ test_printf(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Now test reopening virtual dataset without calling H5Dget_space, if
      * REOPEN_VIRT flag set */
@@ -9628,11 +10596,11 @@ test_printf(unsigned config, hid_t fapl)
                 if(j >= (int)dims[1]) {
                     if(rbuf[i][j] != 0)
                         TEST_ERROR
-                } /* end if */
+                }
                 else
                     if(rbuf[i][j] != erbuf[i][j])
                         TEST_ERROR
-            } /* end for */
+            }
 
         /* Now try setting extent manually */
         /* Grow to 12 */
@@ -9658,11 +10626,11 @@ test_printf(unsigned config, hid_t fapl)
                 if(j >= (int)dims[1]) {
                     if(rbuf[i][j] != 0)
                         TEST_ERROR
-                } /* end if */
+                }
                 else
                     if(rbuf[i][j] != erbuf[i][j])
                         TEST_ERROR
-            } /* end for */
+            }
 
         /* Grow to 15 */
         dims[1] = 15;
@@ -9687,12 +10655,12 @@ test_printf(unsigned config, hid_t fapl)
                 if(j >= (int)dims[1]) {
                     if(rbuf[i][j] != 0)
                         TEST_ERROR
-                } /* end if */
+                }
                 else
                     if(rbuf[i][j] != erbuf[i][j])
                         TEST_ERROR
-            } /* end for */
-    } /* end if */
+            }
+    }
 
     /* Reset dapl */
     if(H5Pset_virtual_view(dapl, H5D_VDS_LAST_AVAILABLE) < 0)
@@ -9704,16 +10672,16 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Dclose(srcdset[i]) < 0)
                 TEST_ERROR
             srcdset[i] = -1;
-        } /* end for */
+        }
         if(H5Fclose(srcfile[0]) < 0)
             TEST_ERROR
         srcfile[0] = -1;
-    } /* end if */
+    }
     else if(!(config & TEST_IO_DIFFERENT_FILE)) {
         if(H5Fclose(srcfile[0]) < 0)
             TEST_ERROR
         srcfile[0] = -1;
-    } /* end if */
+    }
     if(H5Dclose(vdset) < 0)
         TEST_ERROR
     vdset = -1;
@@ -9770,12 +10738,12 @@ test_printf(unsigned config, hid_t fapl)
     if(config & TEST_IO_DIFFERENT_FILE) {
         if((srcfile[0] = H5Fcreate(srcfilenamepct, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     else {
         srcfile[0] = vfile;
         if(H5Iinc_ref(srcfile[0]) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Create virtual dataset */
     if((vdset = H5Dcreate2(vfile, "v_dset", H5T_NATIVE_INT, vspace[0], H5P_DEFAULT, dcpl, dapl)) < 0)
@@ -9787,7 +10755,7 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
+        }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -9801,7 +10769,7 @@ test_printf(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -9867,8 +10835,8 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile[0]) < 0)
                 TEST_ERROR
             srcfile[0] = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -9882,7 +10850,7 @@ test_printf(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -9926,11 +10894,11 @@ test_printf(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Close VDS and reopen with printf gap set to 127, reopen file as well if
      * config option specified */
@@ -9944,7 +10912,7 @@ test_printf(unsigned config, hid_t fapl)
         vfile = -1;
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
@@ -9990,11 +10958,11 @@ test_printf(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Reset dapl */
     if(H5Pset_virtual_printf_gap(dapl, (hsize_t)0) < 0)
@@ -10008,12 +10976,12 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(srcfile[0]) < 0)
             TEST_ERROR
         srcfile[0] = -1;
-    } /* end if */
+    }
     else if(!(config & TEST_IO_DIFFERENT_FILE)) {
         if(H5Fclose(srcfile[0]) < 0)
             TEST_ERROR
         srcfile[0] = -1;
-    } /* end if */
+    }
     if(H5Dclose(vdset) < 0)
         TEST_ERROR
     vdset = -1;
@@ -10039,38 +11007,43 @@ test_printf(unsigned config, hid_t fapl)
         TEST_ERROR
     memspace = -1;
 
+    HDfree(srcfilename);
+    HDfree(srcfilename_map);
+    HDfree(srcfilename2);
+    HDfree(srcfilename2_map);
+    HDfree(vfilename);
+    HDfree(printf_srcfilename_map);
+    HDfree(srcfilenamepct);
+    HDfree(srcfilenamepct_map);
+
     PASSED();
     return 0;
 
 error:
     H5E_BEGIN_TRY {
-        for(i = 0; i < (int)(sizeof(srcdset) / sizeof(srcdset[0])); i++) {
-            if(srcdset[i] >= 0)
-                (void)H5Dclose(srcdset[i]);
-        } /* end for */
-        if(vdset >= 0)
-            (void)H5Dclose(vdset);
-        for(i = 0; i < (int)(sizeof(srcfile) / sizeof(srcfile[0])); i++) {
-            if(srcfile[i] >= 0)
-                (void)H5Fclose(srcfile[i]);
-        } /* end for */
-        if(vfile >=  0)
-            (void)H5Fclose(vfile);
-        if(srcspace >= 0)
-            (void)H5Sclose(srcspace);
-        for(i = 0; i < (int)(sizeof(vspace) / sizeof(vspace[0])); i++) {
-            if(vspace[i] >= 0)
-                (void)H5Sclose(vspace[i]);
-        } /* end for */
-        if(filespace >= 0)
-            (void)H5Sclose(filespace);
-        if(memspace >= 0)
-            (void)H5Sclose(memspace);
-        if(dcpl >= 0)
-            (void)H5Pclose(dcpl);
-        if(dapl >= 0)
-            (void)H5Pclose(dapl);
+        for(i = 0; i < (int)(sizeof(srcdset) / sizeof(srcdset[0])); i++)
+            H5Dclose(srcdset[i]);
+        H5Dclose(vdset);
+        for(i = 0; i < (int)(sizeof(srcfile) / sizeof(srcfile[0])); i++)
+            H5Fclose(srcfile[i]);
+        H5Fclose(vfile);
+        H5Sclose(srcspace);
+        for(i = 0; i < (int)(sizeof(vspace) / sizeof(vspace[0])); i++)
+            H5Sclose(vspace[i]);
+        H5Sclose(filespace);
+        H5Sclose(memspace);
+        H5Pclose(dcpl);
+        H5Pclose(dapl);
     } H5E_END_TRY;
+
+    HDfree(srcfilename);
+    HDfree(srcfilename_map);
+    HDfree(srcfilename2);
+    HDfree(srcfilename2_map);
+    HDfree(vfilename);
+    HDfree(printf_srcfilename_map);
+    HDfree(srcfilenamepct);
+    HDfree(srcfilenamepct_map);
 
      return 1;
 } /* end test_printf() */
@@ -10083,14 +11056,7 @@ error:
  *              VDS
  *
  * Return:      Success:        0
- *
  *              Failure:        number of errors
- *
- * Programmer:  Neil Fortner
- *              Friday, August 14, 2015
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -10212,12 +11178,12 @@ test_all(unsigned config, hid_t fapl)
     if(config & TEST_IO_DIFFERENT_FILE) {
         if((srcfile = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
     else {
         srcfile = vfile;
         if(H5Iinc_ref(srcfile) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Create virtual dataset */
     if((vdset = H5Dcreate2(vfile, "v_dset", H5T_NATIVE_INT, vspace[0], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
@@ -10229,7 +11195,7 @@ test_all(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile) < 0)
                 TEST_ERROR
             srcfile = -1;
-        } /* end if */
+        }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -10243,7 +11209,7 @@ test_all(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -10314,14 +11280,14 @@ test_all(unsigned config, hid_t fapl)
             if(H5Dclose(srcdset[i]) < 0)
                 TEST_ERROR
             srcdset[i] = -1;
-        } /* end for */
+        }
 
         if(config & TEST_IO_DIFFERENT_FILE) {
             if(H5Fclose(srcfile) < 0)
                 TEST_ERROR
             srcfile = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -10335,7 +11301,7 @@ test_all(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -10381,11 +11347,11 @@ test_all(unsigned config, hid_t fapl)
             if((i >= (int)dims[0]) || (j >= (int)dims[1])) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Reopen srcdset[1] and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
@@ -10394,7 +11360,7 @@ test_all(unsigned config, hid_t fapl)
                 TEST_ERROR
         if((srcdset[1] = H5Dopen2(srcfile, "src_dset_unlim", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Extend srcdset[1] */
     dims[0] = 2;
@@ -10429,8 +11395,8 @@ test_all(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile) < 0)
                 TEST_ERROR
             srcfile = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -10444,7 +11410,7 @@ test_all(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -10490,11 +11456,11 @@ test_all(unsigned config, hid_t fapl)
             if((i >= (int)dims[0]) || (j >= (int)dims[1])) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Reopen srcfile if config option specified */
     if((config & TEST_IO_CLOSE_SRC) && (config & TEST_IO_DIFFERENT_FILE))
@@ -10534,8 +11500,8 @@ test_all(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile) < 0)
                 TEST_ERROR
             srcfile = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -10549,7 +11515,7 @@ test_all(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -10595,11 +11561,11 @@ test_all(unsigned config, hid_t fapl)
             if((i >= (int)dims[0]) || (j >= (int)dims[1])) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Reopen srcdset[1] and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
@@ -10608,7 +11574,7 @@ test_all(unsigned config, hid_t fapl)
                 TEST_ERROR
         if((srcdset[1] = H5Dopen2(srcfile, "src_dset_unlim", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Extend srcdset[1] */
     dims[0] = 3;
@@ -10652,8 +11618,8 @@ test_all(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile) < 0)
                 TEST_ERROR
             srcfile = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -10667,7 +11633,7 @@ test_all(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -10713,11 +11679,11 @@ test_all(unsigned config, hid_t fapl)
             if((i >= (int)dims[0]) || (j >= (int)dims[1])) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Reopen srcfile if config option specified */
     if((config & TEST_IO_CLOSE_SRC) && (config & TEST_IO_DIFFERENT_FILE))
@@ -10757,8 +11723,8 @@ test_all(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile) < 0)
                 TEST_ERROR
             srcfile = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -10772,7 +11738,7 @@ test_all(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -10818,11 +11784,11 @@ test_all(unsigned config, hid_t fapl)
             if((i >= (int)dims[0]) || (j >= (int)dims[1])) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Reopen srcdset[1] and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
@@ -10831,7 +11797,7 @@ test_all(unsigned config, hid_t fapl)
                 TEST_ERROR
         if((srcdset[1] = H5Dopen2(srcfile, "src_dset_unlim", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Extend srcdset[1] */
     dims[0] = 7;
@@ -10876,8 +11842,8 @@ test_all(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile) < 0)
                 TEST_ERROR
             srcfile = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -10891,7 +11857,7 @@ test_all(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -10937,11 +11903,11 @@ test_all(unsigned config, hid_t fapl)
             if(j >= (int)dims[1]) {
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
-            } /* end if */
+            }
             else
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
-        } /* end for */
+        }
 
     /* Reopen srcfile if config option specified */
     if((config & TEST_IO_CLOSE_SRC) && (config & TEST_IO_DIFFERENT_FILE))
@@ -10981,8 +11947,8 @@ test_all(unsigned config, hid_t fapl)
             if(H5Fclose(srcfile) < 0)
                 TEST_ERROR
             srcfile = -1;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* Reopen virtual dataset and file if config option specified */
     if(config & TEST_IO_REOPEN_VIRT) {
@@ -10996,7 +11962,7 @@ test_all(unsigned config, hid_t fapl)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
-    } /* end if */
+    }
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -11048,16 +12014,16 @@ test_all(unsigned config, hid_t fapl)
             if(H5Dclose(srcdset[i]) < 0)
                 TEST_ERROR
             srcdset[i] = -1;
-        } /* end for */
+        }
         if(H5Fclose(srcfile) < 0)
             TEST_ERROR
         srcfile = -1;
-    } /* end if */
+    }
     else if(!(config & TEST_IO_DIFFERENT_FILE)) {
         if(H5Fclose(srcfile) < 0)
             TEST_ERROR
         srcfile = -1;
-    } /* end if */
+    }
     if(H5Dclose(vdset) < 0)
         TEST_ERROR
     vdset = -1;
@@ -11068,12 +12034,12 @@ test_all(unsigned config, hid_t fapl)
         if(H5Sclose(srcspace[i]) < 0)
             TEST_ERROR
         srcspace[i] = -1;
-    } /* end for */
+    }
     for(i = 0; i < (int)(sizeof(vspace) / sizeof(vspace[0])); i++) {
         if(H5Sclose(vspace[i]) < 0)
             TEST_ERROR
         vspace[i] = -1;
-    } /* end for */
+    }
     if(H5Pclose(dcpl) < 0)
         TEST_ERROR
     dcpl = -1;
@@ -11089,32 +12055,19 @@ test_all(unsigned config, hid_t fapl)
 
 error:
     H5E_BEGIN_TRY {
-        for(i = 0; i < (int)(sizeof(srcdset) / sizeof(srcdset[0])); i++) {
-            if(srcdset[i] >= 0)
-                (void)H5Dclose(srcdset[i]);
-        } /* end for */
-        if(vdset >= 0)
-            (void)H5Dclose(vdset);
-        if(srcfile >= 0)
-            (void)H5Fclose(srcfile);
-        if(vfile >=  0)
-            (void)H5Fclose(vfile);
-        for(i = 0; i < (int)(sizeof(srcspace) / sizeof(srcspace[0])); i++) {
-            if(srcspace[i] >= 0)
-                (void)H5Sclose(srcspace[i]);
-        } /* end for */
-        for(i = 0; i < (int)(sizeof(vspace) / sizeof(vspace[0])); i++) {
-            if(vspace[i] >= 0)
-                (void)H5Sclose(vspace[i]);
-        } /* end for */
-        if(filespace >= 0)
-            (void)H5Sclose(filespace);
-        if(memspace >= 0)
-            (void)H5Sclose(memspace);
-        if(dcpl >= 0)
-            (void)H5Pclose(dcpl);
-        if(srcdcpl >= 0)
-            (void)H5Pclose(srcdcpl);
+        for(i = 0; i < (int)(sizeof(srcdset) / sizeof(srcdset[0])); i++)
+            H5Dclose(srcdset[i]);
+        H5Dclose(vdset);
+        H5Fclose(srcfile);
+        H5Fclose(vfile);
+        for(i = 0; i < (int)(sizeof(srcspace) / sizeof(srcspace[0])); i++)
+            H5Sclose(srcspace[i]);
+        for(i = 0; i < (int)(sizeof(vspace) / sizeof(vspace[0])); i++)
+            H5Sclose(vspace[i]);
+        H5Sclose(filespace);
+        H5Sclose(memspace);
+        H5Pclose(dcpl);
+        H5Pclose(srcdcpl);
     } H5E_END_TRY;
 
      return 1;
@@ -11128,10 +12081,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Dana Robinson
- *              March 2016
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -11272,11 +12221,12 @@ test_dapl_values(hid_t fapl_id)
  *
  * Purpose:     Tests datasets with virtual layout
  *
+ * Note:
+ *  Tests are modified to test with the low/high bounds combination
+ *  set in fapl.
+ *  Please see RFC for "H5Sencode/H5Sdecode Format Change".
+ *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:  Neil Fortner
- *              Tuesday, February 17, 2015
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -11284,8 +12234,10 @@ main(void)
 {
     char filename[FILENAME_BUF_SIZE];
     hid_t fapl;
+    hid_t my_fapl = -1;         /* File access property list */
     int test_api_config;
     unsigned bit_config;
+    H5F_libver_t low, high;     /* Low and high bounds */
     int nerrors = 0;
 
     /* Testing setup */
@@ -11294,31 +12246,66 @@ main(void)
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
-    for(test_api_config = (int)TEST_API_BASIC; test_api_config < (int)TEST_API_NTESTS; test_api_config++)
-        nerrors += test_api((test_api_config_t)test_api_config, fapl);
-    for(bit_config = 0; bit_config < TEST_IO_NTESTS; bit_config++) {
-        printf("Config: %s%s%s\n", bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "", bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file", bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "");
-        nerrors += test_basic_io(bit_config, fapl);
-        nerrors += test_unlim(bit_config, fapl);
-        nerrors += test_printf(bit_config, fapl);
-        nerrors += test_all(bit_config, fapl);
-    } /* end for */
+    /* Set to use the latest file format */
+    if((my_fapl = H5Pcopy(fapl)) < 0) TEST_ERROR
 
-    nerrors += test_dapl_values(fapl);
+     /* Loop through all the combinations of low/high version bounds */
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+            char msg[80];       /* Message for file version bounds */
+            const char *low_string;   /* The low bound string */
+            const char *high_string;  /* The high bound string */
 
-    /* Verify symbol table messages are cached */
-    nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
+            /* Invalid combinations, just continue */
+            if(high == H5F_LIBVER_EARLIEST || high < low)
+                continue;
+
+            /* Test virtual dataset only for V110 and above */
+            if(high < H5F_LIBVER_V110)
+                continue;
+
+            /* Set the low/high version bounds */
+            if(H5Pset_libver_bounds(my_fapl, low, high) < 0)
+                TEST_ERROR
+
+            /* Display testing info */
+            low_string = h5_get_version_string(low);
+            high_string = h5_get_version_string(high);
+            HDsprintf(msg, "Testing virtual dataset with file version bounds: (%s, %s):", low_string, high_string);
+            HDputs(msg);
+
+            for(test_api_config = (int)TEST_API_BASIC; test_api_config < (int)TEST_API_NTESTS; test_api_config++)
+                nerrors += test_api((test_api_config_t)test_api_config, my_fapl, low);
+            for(bit_config = 0; bit_config < TEST_IO_NTESTS; bit_config++) {
+                HDprintf("Config: %s%s%s\n", bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "", bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file", bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "");
+                nerrors += test_basic_io(bit_config, my_fapl);
+                nerrors += test_vds_prefix_first(bit_config, my_fapl);
+                nerrors += test_unlim(bit_config, my_fapl);
+                nerrors += test_printf(bit_config, my_fapl);
+                nerrors += test_all(bit_config, my_fapl);
+            }
+
+            nerrors += test_dapl_values(my_fapl);
+
+            /* Verify symbol table messages are cached */
+            nerrors += (h5_verify_cached_stabs(FILENAME, my_fapl) < 0 ? 1 : 0);
+
+       } /* end for high */
+    } /* end for low */
+
+    if(H5Pclose(my_fapl) < 0)
+        TEST_ERROR
 
     if(nerrors)
         goto error;
-    printf("All virtual dataset tests passed.\n");
+    HDprintf("All virtual dataset tests passed.\n");
     h5_cleanup(FILENAME, fapl);
 
     return EXIT_SUCCESS;
 
 error:
     nerrors = MAX(1, nerrors);
-    printf("***** %d VIRTUAL DATASET TEST%s FAILED! *****\n",
+    HDprintf("***** %d VIRTUAL DATASET TEST%s FAILED! *****\n",
             nerrors, 1 == nerrors ? "" : "S");
     return EXIT_FAILURE;
 } /* end main() */

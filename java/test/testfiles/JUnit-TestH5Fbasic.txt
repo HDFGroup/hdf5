@@ -1,0 +1,22 @@
+JUnit version 4.11
+.testH5Fget_mdc_size
+.testH5Fget_mdc_hit_rate
+.testH5F_dset_no_attrs_hint
+.testH5Fget_freespace
+.testH5Fclose
+.testH5Fget_filesize
+.testH5Fcreate_EXCL
+.testH5Freopen_closed
+.testH5Freset_mdc_hit_rate_stats
+.testH5Fget_name
+.testH5Fis_accessible
+.testH5Fcreate
+.testH5Fclear_elink_file_cache
+.testH5Fclose_twice
+.testH5Freopen
+.testH5Fopen_read_only
+
+Time:  XXXX
+
+OK (16 tests)
+

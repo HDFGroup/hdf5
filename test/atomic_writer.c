@@ -14,7 +14,7 @@
  *
  * Created:     atomic_writer.c
  *
- * Purpose:     This is the "writer" part of the standalone test to check 
+ * Purpose:     This is the "writer" part of the standalone test to check
  *              atomic read-write operation on a system.
  *                  a) atomic_writer.c--the writer (this file)
  *                  b) atomic_reader.c--the reader
@@ -53,7 +53,7 @@
 
 static void usage(void);
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    usage
  *
@@ -77,12 +77,12 @@ usage(void)
 } /* usage() */
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     To write a series of integers to a file for the reader to verify the data.
- *              A write is atomic if the whole amount written in one operation is not interleaved 
+ *              A write is atomic if the whole amount written in one operation is not interleaved
  *              with data from any other process.
  *              (1) Iterate with i iterations
  *              (2) Write a series of integers (0 to n-1) to the file with this pattern:
@@ -196,7 +196,7 @@ main(int argc, char *argv[])
                 printf("WRITER: error from lseek\n");
                 goto error;
             } /* end if */
-    
+
             /* Write the data */
             if((bytes_wrote = write(fd, buf, ((num-n) * sizeof(unsigned int)))) < 0) {
                 printf("WRITER: error from write\n");

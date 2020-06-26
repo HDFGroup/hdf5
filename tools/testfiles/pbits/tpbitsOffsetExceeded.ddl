@@ -12,6 +12,22 @@ usage: h5dump [OPTIONS] files
      -b B, --binary=B     Binary file output, of form B
      -O F, --ddl=F        Output ddl text into file F
                           Use blank(empty) filename F to suppress ddl display
+     --s3-cred=<cred>     Supply S3 authentication information to "ros3" vfd.
+                          <cred> :: "(<aws-region>,<access-id>,<access-key>)"
+                          If absent or <cred> -> "(,,)", no authentication.
+                          Has no effect is filedriver is not `ros3'.
+     --hdfs-attrs=<attrs> Supply configuration information for HDFS file access.
+                          For use with "--filedriver=hdfs"
+                          <attrs> :: (<namenode name>,<namenode port>,
+                                      <kerberos cache path>,<username>,
+                                      <buffer size>)
+                          Any absent attribute will use a default value.
+     --vol-value          Value (ID) of the VOL connector to use for opening the
+                          HDF5 file specified
+     --vol-name           Name of the VOL connector to use for opening the
+                          HDF5 file specified
+     --vol-info           VOL-specific info to pass to the VOL connector used for
+                          opening the HDF5 file specified
 --------------- Object Options ---------------
      -a P, --attribute=P  Print the specified attribute
                           If an attribute name contains a slash (/), escape the
@@ -44,8 +60,8 @@ usage: h5dump [OPTIONS] files
      -m T, --format=T     Set the floating point output format
      -q Q, --sort_by=Q    Sort groups and attributes by index Q
      -z Z, --sort_order=Z Sort groups and attributes by order Z
-     --enable-error-stack Prints messages from the HDF5 error stack as they
-                          occur.
+     --enable-error-stack Prints messages from the HDF5 error stack as they occur.
+                          Optional value 2 also prints file open errors.
      --no-compact-subset  Disable compact form of subsetting and allow the use
                           of "[" in dataset names.
      -w N, --width=N      Set the number of columns of output. A value of 0 (zero)
@@ -135,4 +151,3 @@ usage: h5dump [OPTIONS] files
 
       h5dump -d /foo -f family fam%05d.h5
 
-h5dump error: Packed Bit offset value(64) must be between 0 and 63

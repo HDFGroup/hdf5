@@ -122,19 +122,20 @@
   macro (ADD_H5_PBITS_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump> ${ARGN})
+      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> ${ARGN})
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/pbits")
-      if (NOT ${resultcode} STREQUAL "0")
+      if (${resultcode})
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-      if (NOT "${last_pbits_test}" STREQUAL "")
+      if (last_pbits_test)
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS ${last_pbits_test})
       endif ()
     else ()
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/pbits"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -150,126 +151,6 @@
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 ##############################################################################
-
-  if (HDF5_ENABLE_USING_MEMCHECKER)
-    # Remove any output file left over from previous test run
-    add_test (
-      NAME H5DUMP_PACKED_BITS-clearall-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove
-          tnofilename-with-packed-bits.out
-          tnofilename-with-packed-bits.out.err
-          tpbitsArray.out
-          tpbitsArray.out.err
-          tpbitsCompound.out
-          tpbitsCompound.out.err
-          tpbitsIncomplete.out
-          tpbitsIncomplete.out.err
-          tpbitsLengthExceeded.out
-          tpbitsLengthExceeded.out.err
-          tpbitsCharLengthExceeded.out
-          tpbitsCharLengthExceeded.out.err
-          tpbitsIntLengthExceeded.out
-          tpbitsIntLengthExceeded.out.err
-          tpbitsLongLengthExceeded.out
-          tpbitsLongLengthExceeded.out.err
-          tpbitsLengthPositive.out
-          tpbitsLengthPositive.out.err
-          tpbitsMax.out
-          tpbitsMax.out.err
-          tpbitsMaxExceeded.out
-          tpbitsMaxExceeded.out.err
-          tpbitsOffsetExceeded.out
-          tpbitsOffsetExceeded.out.err
-          tpbitsCharOffsetExceeded.out
-          tpbitsCharOffsetExceeded.out.err
-          tpbitsIntOffsetExceeded.out
-          tpbitsIntOffsetExceeded.out.err
-          tpbitsLongOffsetExceeded.out
-          tpbitsLongOffsetExceeded.out.err
-          tpbitsOffsetNegative.out
-          tpbitsOffsetNegative.out.err
-          tpbitsOverlapped.out
-          tpbitsOverlapped.out.err
-          tpbitsSigned.out
-          tpbitsSigned.out.err
-          tpbitsUnsigned.out
-          tpbitsUnsigned.out.err
-          tpbitsSignedInt.out
-          tpbitsSignedInt.out.err
-          tpbitsUnsignedInt.out
-          tpbitsUnsignedInt.out.err
-          tpbitsSignedLong.out
-          tpbitsSignedLong.out.err
-          tpbitsUnsignedLong.out
-          tpbitsUnsignedLong.out.err
-          tpbitsSignedLongLong.out
-          tpbitsSignedLongLong.out.err
-          tpbitsUnsignedLongLong.out
-          tpbitsUnsignedLongLong.out.err
-          tpbitsSignedWhole.out
-          tpbitsSignedWhole.out.err
-          tpbitsUnsignedWhole.out
-          tpbitsUnsignedWhole.out.err
-          tpbitsSignedIntWhole.out
-          tpbitsSignedIntWhole.out.err
-          tpbitsUnsignedIntWhole.out
-          tpbitsUnsignedIntWhole.out.err
-          tpbitsSignedLongWhole.out
-          tpbitsSignedLongWhole.out.err
-          tpbitsUnsignedLongWhole.out
-          tpbitsUnsignedLongWhole.out.err
-          tpbitsSignedLongLongWhole.out
-          tpbitsSignedLongLongWhole.out.err
-          tpbitsUnsignedLongLongWhole.out
-          tpbitsUnsignedLongLongWhole.out.err
-          tpbitsSignedLongLongWhole1.out
-          tpbitsSignedLongLongWhole1.out.err
-          tpbitsUnsignedLongLongWhole1.out
-          tpbitsUnsignedLongLongWhole1.out.err
-          tpbitsSignedLongLongWhole63.out
-          tpbitsSignedLongLongWhole63.out.err
-          tpbitsUnsignedLongLongWhole63.out
-          tpbitsUnsignedLongLongWhole63.out.err
-          tpbitsSigned4.out
-          tpbitsSigned4.out.err
-          tpbitsUnsigned4.out
-          tpbitsUnsigned4.out.err
-          tpbitsSignedInt8.out
-          tpbitsSignedInt8.out.err
-          tpbitsUnsignedInt8.out
-          tpbitsUnsignedInt8.out.err
-          tpbitsSignedLong16.out
-          tpbitsSignedLong16.out.err
-          tpbitsUnsignedLong16.out
-          tpbitsUnsignedLong16.out.err
-          tpbitsSignedLongLong32.out
-          tpbitsSignedLongLong32.out.err
-          tpbitsUnsignedLongLong32.out
-          tpbitsUnsignedLongLong32.out.err
-          tpbitsSigned2.out
-          tpbitsSigned2.out.err
-          tpbitsUnsigned2.out
-          tpbitsUnsigned2.out.err
-          tpbitsSignedInt4.out
-          tpbitsSignedInt4.out.err
-          tpbitsUnsignedInt4.out
-          tpbitsUnsignedInt4.out.err
-          tpbitsSignedLong8.out
-          tpbitsSignedLong8.out.err
-          tpbitsUnsignedLong8.out
-          tpbitsUnsignedLong8.out.err
-          tpbitsSignedLongLong16.out
-          tpbitsSignedLongLong16.out.err
-          tpbitsUnsignedLongLong16.out
-          tpbitsUnsignedLongLong16.out.err
-    )
-    set_tests_properties (H5DUMP_PACKED_BITS-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/pbits")
-    if (NOT "${last_pbits_test}" STREQUAL "")
-      set_tests_properties (H5DUMP_PACKED_BITS-clearall-objects PROPERTIES DEPENDS ${last_pbits_test})
-    endif ()
-    set (last_pbits_test "H5DUMP_PACKED_BITS-clearall-objects")
-  endif ()
 
   # test failure handling
   # Missing file name

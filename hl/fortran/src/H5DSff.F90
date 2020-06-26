@@ -26,7 +26,7 @@ CONTAINS
 !-------------------------------------------------------------------------
 ! Function: H5DSset_scale_f
 !
-! Purpose: Convert dataset dsid to a dimension scale, with optional name, dimname. 
+! Purpose: Convert dataset dsid to a dimension scale, with optional name, dimname.
 !
 ! Return: Success: 0, Failure: -1
 !
@@ -43,13 +43,6 @@ CONTAINS
   SUBROUTINE H5DSset_scale_f( dsid, errcode, dimname)
 
     IMPLICIT NONE
-
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5dsset_scale_f
-!DEC$endif
-!
 
     INTEGER(hid_t),   INTENT(in) :: dsid               ! The dataset to be made a Dimension Scale
     CHARACTER(LEN=*), INTENT(in), OPTIONAL :: dimname  ! The dimension name
@@ -99,35 +92,29 @@ CONTAINS
 
     IMPLICIT NONE
 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5dsattach_scale_f
-!DEC$endif
-!
     INTEGER(hid_t), INTENT(in) :: did     ! the dataset
-    INTEGER(hid_t), INTENT(in) :: dsid    ! the scale to be attached 
+    INTEGER(hid_t), INTENT(in) :: dsid    ! the scale to be attached
     INTEGER       , INTENT(in) :: idx     ! the dimension of did that dsid is associated with.
     INTEGER                    :: errcode ! error code
     INTEGER                    :: c_idx
-    
+
     INTERFACE
        INTEGER FUNCTION  H5DSattach_scale_c(did, dsid, idx) &
-            BIND(C,NAME='h5dsattach_scale_c') 
+            BIND(C,NAME='h5dsattach_scale_c')
          IMPORT :: HID_T
          IMPLICIT NONE
          INTEGER(hid_t), INTENT(in) :: did     ! the dataset
-         INTEGER(hid_t), INTENT(in) :: dsid    ! the scale to be attached 
+         INTEGER(hid_t), INTENT(in) :: dsid    ! the scale to be attached
          INTEGER       , INTENT(in) :: idx     ! the dimension of did that dsid is associated with.
        END FUNCTION H5DSattach_scale_c
     END INTERFACE
 
-    c_idx = idx -1 ! account for C-dimensions starting at 0 
-    
+    c_idx = idx -1 ! account for C-dimensions starting at 0
+
     errcode = H5DSattach_scale_c( did, dsid, c_idx)
-    
+
   END SUBROUTINE H5DSattach_scale_f
-  
+
 !-------------------------------------------------------------------------
 ! Function: H5DSdetach_scale_f
 !
@@ -146,43 +133,37 @@ CONTAINS
 !-------------------------------------------------------------------------
 
   SUBROUTINE H5DSdetach_scale_f( did, dsid, idx, errcode)
-    
+
     IMPLICIT NONE
-    
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5dsdetach_scale_f
-!DEC$endif
-!
+
     INTEGER(hid_t), INTENT(in) :: did     ! the dataset
-    INTEGER(hid_t), INTENT(in) :: dsid    ! the scale to be detached 
+    INTEGER(hid_t), INTENT(in) :: dsid    ! the scale to be detached
     INTEGER       , INTENT(in) :: idx     ! the dimension of did to detach
     INTEGER                    :: errcode ! error code
     INTEGER                    :: c_idx
-    
+
     INTERFACE
        INTEGER FUNCTION  H5DSdetach_scale_c(did, dsid, idx) &
             BIND(C,NAME='h5dsdetach_scale_c')
          IMPORT :: HID_T
          IMPLICIT NONE
          INTEGER(hid_t), INTENT(in) :: did     ! the dataset
-         INTEGER(hid_t), INTENT(in) :: dsid    ! the scale to be detached 
+         INTEGER(hid_t), INTENT(in) :: dsid    ! the scale to be detached
          INTEGER       , INTENT(in) :: idx     ! the dimension of did to detach
        END FUNCTION H5DSdetach_scale_c
     END INTERFACE
 
-    c_idx = idx - 1 ! account for C-dimensions starting at 0 
+    c_idx = idx - 1 ! account for C-dimensions starting at 0
 
     errcode = H5DSdetach_scale_c( did, dsid, c_idx)
-    
+
   END SUBROUTINE H5DSdetach_scale_f
 
 
 !-------------------------------------------------------------------------
 ! Function: H5DSis_attached_f
 !
-! Purpose: Report if dimension scale dsid is currently attached to dimension idx of dataset did. 
+! Purpose: Report if dimension scale dsid is currently attached to dimension idx of dataset did.
 !
 ! Return: Success: 0, Failure: -1
 !
@@ -197,38 +178,32 @@ CONTAINS
 !-------------------------------------------------------------------------
 
   SUBROUTINE H5DSis_attached_f( did, dsid, idx, is_attached, errcode)
-    
+
     IMPLICIT NONE
-    
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5dsis_attached_f
-!DEC$endif
-!
+
     INTEGER(hid_t), INTENT(in)  :: did         ! the dataset
     INTEGER(hid_t), INTENT(in)  :: dsid        ! the scale to be attached
     INTEGER       , INTENT(in)  :: idx         ! the dimension of did that dsid is associated with
-    LOGICAL       , INTENT(out) :: is_attached ! logical: dimension scale dsid is currently attached to 
+    LOGICAL       , INTENT(out) :: is_attached ! logical: dimension scale dsid is currently attached to
                                                ! dimension idx of dataset did
     INTEGER                     :: errcode     ! error code
     INTEGER                     :: c_is_attached
     INTEGER                     :: c_idx
-    
+
     INTERFACE
        INTEGER FUNCTION H5DSis_attached_c(did, dsid, idx, c_is_attached) &
             BIND(C,NAME='h5dsis_attached_c')
          IMPORT :: HID_T
          IMPLICIT NONE
          INTEGER(hid_t), INTENT(in)  :: did         ! the dataset
-         INTEGER(hid_t), INTENT(in)  :: dsid        ! the scale to be detached 
+         INTEGER(hid_t), INTENT(in)  :: dsid        ! the scale to be detached
          INTEGER       , INTENT(in)  :: idx         ! the dimension of did to detach
-         INTEGER       , INTENT(out) :: c_is_attached ! dimension scale dsid is currently attached to 
+         INTEGER       , INTENT(out) :: c_is_attached ! dimension scale dsid is currently attached to
        END FUNCTION H5DSis_attached_c
     END INTERFACE
 
-    c_idx = idx - 1 ! account for C-dimensions starting at 0 
-    
+    c_idx = idx - 1 ! account for C-dimensions starting at 0
+
     errcode = H5DSis_attached_c(did, dsid, c_idx, c_is_attached)
 
     is_attached = .FALSE. ! default
@@ -237,7 +212,7 @@ CONTAINS
     ELSE IF(errcode.LT.0)THEN
        errcode = -1
     ENDIF
-    
+
   END SUBROUTINE H5DSis_attached_f
 
 !
@@ -247,7 +222,7 @@ CONTAINS
 !-------------------------------------------------------------------------
 ! Function: H5DSis_scale_f
 !
-! Purpose: Determines whether dset is a Dimension Scale. 
+! Purpose: Determines whether dset is a Dimension Scale.
 !
 ! Return: Success: 0, Failure: -1
 !
@@ -262,21 +237,15 @@ CONTAINS
 !-------------------------------------------------------------------------
 
   SUBROUTINE H5DSis_scale_f( did, is_scale, errcode)
-    
+
     IMPLICIT NONE
-    
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5dsis_scale_f
-!DEC$endif
-!
+
     INTEGER(hid_t), INTENT(in)  :: did         ! the data set to query
-    LOGICAL       , INTENT(out) :: is_scale    ! logical:  
+    LOGICAL       , INTENT(out) :: is_scale    ! logical:
                                                ! .TRUE. if did is a Dimension Scale
     INTEGER                     :: errcode     ! error code
     INTEGER                     :: c_is_scale
-    
+
     INTERFACE
        INTEGER FUNCTION H5DSis_scale_c(did,c_is_scale) &
             BIND(C,NAME='h5dsis_scale_c')
@@ -286,7 +255,7 @@ CONTAINS
          INTEGER, INTENT(out) :: c_is_scale
        END FUNCTION H5DSis_scale_c
     END INTERFACE
-    
+
     errcode = H5DSis_scale_c(did, c_is_scale)
 
     is_scale = .FALSE. ! default
@@ -295,7 +264,7 @@ CONTAINS
     ELSE IF(errcode.LT.0)THEN
        errcode = -1
     ENDIF
-    
+
   END SUBROUTINE H5DSis_scale_f
 
 !-------------------------------------------------------------------------
@@ -319,13 +288,6 @@ CONTAINS
 
     IMPLICIT NONE
 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5dsset_label_f
-!DEC$endif
-!
-
     INTEGER(hid_t),   INTENT(in) :: did    ! The dataset
     INTEGER       ,   INTENT(in) :: idx    ! The dimension
     CHARACTER(LEN=*), INTENT(in) :: label  ! The label
@@ -342,7 +304,7 @@ CONTAINS
          IMPLICIT NONE
          INTEGER(hid_t),   INTENT(in) :: did        ! The dataset
          INTEGER       ,   INTENT(in) :: idx        ! The dimension
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: label      ! The label
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: label ! The label
          INTEGER(SIZE_T),  INTENT(in) :: label_len  ! Length of label
        END FUNCTION H5DSset_label_c
     END INTERFACE
@@ -357,7 +319,7 @@ CONTAINS
 !-------------------------------------------------------------------------
 ! Function: H5DSget_label_f
 !
-! Purpose: Read the label for dimension idx of did into buffer label. 
+! Purpose: Read the label for dimension idx of did into buffer label.
 !
 ! Return: Success: 0, Failure: -1
 !
@@ -375,18 +337,11 @@ CONTAINS
 
     IMPLICIT NONE
 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5dsget_label_f
-!DEC$endif
-!
-
-    INTEGER(hid_t),   INTENT(in) :: did     ! The dataget
-    INTEGER       ,   INTENT(in) :: idx     ! The dimension
-    CHARACTER(LEN=*), INTENT(in) :: label   ! The label
-    INTEGER(size_t) , INTENT(inout) :: size ! The length of the label buffer
-    INTEGER :: errcode                      ! Error code
+    INTEGER(hid_t),   INTENT(in) :: did      ! The dataget
+    INTEGER       ,   INTENT(in) :: idx      ! The dimension
+    CHARACTER(LEN=*), INTENT(INOUT) :: label ! The label
+    INTEGER(size_t) , INTENT(INOUT) :: size  ! The length of the label buffer
+    INTEGER :: errcode                       ! Error code
     INTEGER :: c_idx
 
     INTERFACE
@@ -397,7 +352,7 @@ CONTAINS
          IMPLICIT NONE
          INTEGER(hid_t),   INTENT(in)    :: did        ! The dataget
          INTEGER       ,   INTENT(in)    :: idx        ! The dimension
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: label      ! The label
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(INOUT) :: label ! The label
          INTEGER(SIZE_T),  INTENT(inout) :: size       ! Length of label
        END FUNCTION H5DSget_label_c
     END INTERFACE
@@ -430,16 +385,9 @@ CONTAINS
 
     IMPLICIT NONE
 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5dsget_scale_name_f
-!DEC$endif
-!
-
     INTEGER(hid_t),   INTENT(in) :: did     ! The dataget
-    CHARACTER(LEN=*), INTENT(out) :: name   ! The name
-    INTEGER(size_t) , INTENT(inout) :: size ! The length of the name buffer
+    CHARACTER(LEN=*), INTENT(INOUT) :: name ! The name
+    INTEGER(size_t) , INTENT(INOUT) :: size ! The length of the name buffer
     INTEGER :: errcode                      ! Error code
 
     INTERFACE
@@ -449,7 +397,7 @@ CONTAINS
          IMPORT :: HID_T, SIZE_T
          IMPLICIT NONE
          INTEGER(hid_t),   INTENT(in)    :: did       ! The dataget
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(out) :: name      ! The name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(INOUT) :: name ! The name
          INTEGER(SIZE_T),  INTENT(inout) :: size      ! Length of name
        END FUNCTION H5DSget_scale_name_c
     END INTERFACE
@@ -478,33 +426,26 @@ CONTAINS
   SUBROUTINE H5DSget_num_scales_f( did, idx, num_scales, errcode)
 
     IMPLICIT NONE
-
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5dsget_num_scales_f
-!DEC$endif
-!
-    INTEGER(hid_t), INTENT(in)  :: did         ! the dataset
-    INTEGER       , INTENT(in)  :: idx         ! the dimension of did to query
-    INTEGER       , INTENT(out) :: num_scales  ! the number of Dimension Scales associated with did
-    INTEGER                     :: errcode     ! error code
+    INTEGER(hid_t), INTENT(in)  :: did          ! the dataset
+    INTEGER       , INTENT(in)  :: idx          ! the dimension of did to query
+    INTEGER       , INTENT(INOUT) :: num_scales ! the number of Dimension Scales associated with did
+    INTEGER                     :: errcode      ! error code
     INTEGER                     :: c_idx
-    
+
     INTERFACE
        INTEGER FUNCTION H5DSget_num_scales_c(did, idx, num_scales) &
             BIND(C,NAME='h5dsget_num_scales_c')
          IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(hid_t), INTENT(in)  :: did        ! the dataset
-         INTEGER       , INTENT(in)  :: idx        ! the dimension of did to query
-         INTEGER       , INTENT(out) :: num_scales ! the number of Dimension Scales associated with did
+         INTEGER(hid_t), INTENT(in)  :: did          ! the dataset
+         INTEGER       , INTENT(in)  :: idx          ! the dimension of did to query
+         INTEGER       , INTENT(INOUT) :: num_scales ! the number of Dimension Scales associated with did
        END FUNCTION H5DSget_num_scales_c
     END INTERFACE
-    
+
     c_idx = idx - 1
     errcode = H5DSget_num_scales_c(did, c_idx, num_scales)
-    
+
   END SUBROUTINE H5DSget_num_scales_f
 
 END MODULE h5ds

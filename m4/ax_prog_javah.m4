@@ -1,5 +1,5 @@
 # ===========================================================================
-#       http://www.gnu.org/software/autoconf-archive/ax_prog_javah.html
+#      https://www.gnu.org/software/autoconf-archive/ax_prog_javah.html
 # ===========================================================================
 #
 # SYNOPSIS
@@ -21,7 +21,7 @@
 #   and this notice are preserved. This file is offered as-is, without any
 #   warranty.
 
-#serial 8
+#serial 11
 
 AU_ALIAS([AC_PROG_JAVAH], [AX_PROG_JAVAH])
 AC_DEFUN([AX_PROG_JAVAH],[
@@ -30,19 +30,19 @@ AC_REQUIRE([AC_PROG_CPP])dnl
 AC_PATH_PROG(JAVAH,javah)
 AS_IF([test -n "$ac_cv_path_JAVAH"],
       [
-        AC_TRY_CPP([#include <jni.h>],,[
+        AC_PREPROC_IFELSE([AC_LANG_SOURCE([[#include <jni.h>]])],[],[
         ac_save_CPPFLAGS="$CPPFLAGS"
-		_ACJAVAH_FOLLOW_SYMLINKS("$ac_cv_path_JAVAH")
+        _ACJAVAH_FOLLOW_SYMLINKS("$ac_cv_path_JAVAH")
         ax_prog_javah_bin_dir=`AS_DIRNAME([$_ACJAVAH_FOLLOWED])`
         ac_dir="`AS_DIRNAME([$ax_prog_javah_bin_dir])`/include"
         AS_CASE([$build_os],
-                [cygwin*],
+                [cygwin*|mingw*],
                 [ac_machdep=win32],
                 [ac_machdep=`AS_ECHO($build_os) | sed 's,[[-0-9]].*,,'`])
         CPPFLAGS="$ac_save_CPPFLAGS -I$ac_dir -I$ac_dir/$ac_machdep"
-        AC_TRY_CPP([#include <jni.h>],
-                   ac_save_CPPFLAGS="$CPPFLAGS",
-                   AC_MSG_WARN([unable to include <jni.h>]))
+        AC_PREPROC_IFELSE([AC_LANG_SOURCE([[#include <jni.h>]])],
+                          [ac_save_CPPFLAGS="$CPPFLAGS"],
+                          [AC_MSG_WARN([unable to include <jni.h>])])
         CPPFLAGS="$ac_save_CPPFLAGS"])
       ])
 ])

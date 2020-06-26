@@ -17,15 +17,15 @@
 
 namespace H5 {
 
+// Class forwarding
 class DataType;
 class DataSpace;
 
 /*! \class DSetCreatPropList
     \brief Class DSetCreatPropList inherits from ObjCreatPropList and provides
     wrappers for the HDF5 dataset creation property functions.
-
-    Inheritance: ObjCreatPropList -> PropList -> IdComponent
 */
+//  Inheritance: ObjCreatPropList -> PropList -> IdComponent
 class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
    public:
         ///\brief Default dataset creation property list.
@@ -122,7 +122,7 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
         ///\brief Returns this class name.
         virtual H5std_string fromClass () const { return("DSetCreatPropList"); }
 
-        // Copy constructor: creates a copy of a DSetCreatPropList object.
+        // Copy constructor - same as the original DSetCreatPropList.
         DSetCreatPropList(const DSetCreatPropList& orig);
 
         // Creates a copy of an existing dataset creation property list

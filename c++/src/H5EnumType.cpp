@@ -22,7 +22,9 @@
 #include "H5DcreatProp.h"
 #include "H5DxferProp.h"
 #include "H5DataSpace.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
+#include "H5DaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
 #include "H5AbstractDs.h"
@@ -52,7 +54,7 @@ EnumType::EnumType(const hid_t existing_id) : DataType( existing_id ) {}
 
 //--------------------------------------------------------------------------
 // Function:    EnumType copy constructor
-///\brief       Copy constructor: makes a copy of the original EnumType object.
+///\brief       Copy constructor: same HDF5 object as \a original
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 EnumType::EnumType(const EnumType& original) : DataType( original ) {}
@@ -143,6 +145,28 @@ EnumType::EnumType(const H5Location& loc, const char *dtype_name) : DataType()
 EnumType::EnumType(const H5Location& loc, const H5std_string& dtype_name) : DataType()
 {
     id = p_opentype(loc, dtype_name.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:    EnumType::decode
+///\brief       Returns an EnumType object via DataType* by decoding the
+///             binary object description of this type.
+///
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Aug 2017
+//--------------------------------------------------------------------------
+DataType* EnumType::decode() const
+{
+    hid_t encoded_enumtype_id = H5I_INVALID_HID;
+    try {
+        encoded_enumtype_id = p_decode();
+    }
+    catch (DataTypeIException &err) {
+        throw;
+    }
+    EnumType *encoded_enumtype = new EnumType;
+    encoded_enumtype->p_setId(encoded_enumtype_id);
+    return(encoded_enumtype);
 }
 
 //--------------------------------------------------------------------------

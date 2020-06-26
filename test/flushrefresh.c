@@ -15,10 +15,10 @@
  * Programmer: Mike McGreevy
  *             June 30, 2010
  *
- * Purpose: This test file contains routines used to test flushing and 
- *          refreshing individual objects' metadata from the cache. 
- *          
- *          Note: This file should NOT be run manually. Instead, invoke it 
+ * Purpose: This test file contains routines used to test flushing and
+ *          refreshing individual objects' metadata from the cache.
+ *
+ *          Note: This file should NOT be run manually. Instead, invoke it
  *          via its associated test script, testflushrefresh.sh
  *
  */
@@ -119,25 +119,25 @@ herr_t end_verification(void);
  * Function:    main
  *
  * Purpose:     This function coordinates the test of flush/refresh
- *              functionality verification. It accepts either one, two or 
+ *              functionality verification. It accepts either one, two or
  *              no command line parameters. The main test routine runs
  *              with no command line parameters specified, while verification
  *              routines run with one or two command line parameters.
- * 
- *              Note: This program should not be run manually, as the 
+ *
+ *              Note: This program should not be run manually, as the
  *              test is controlled by the testflushrefresh.sh script. Running
  *              the flushrefresh program manually will result in failure, as
  *              it will time out waiting for a signal from the test script
  *              which will never come.
  *
- * Return:      0 on Success, 1 on Failure
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:  Mike McGreevy
  *              July 1, 2010
  *
  *-------------------------------------------------------------------------
  */
-int main(int argc, const char *argv[]) 
+int main(int argc, const char *argv[])
 {
     /* Variables */
     const char *envval = NULL;
@@ -148,41 +148,44 @@ int main(int argc, const char *argv[])
 
     /* Parse command line options */
     if(argc == 1) {
-        /* No arguments supplied. Run main test routines if 
-         * using sec2 or stdio driver, otherwise don't run 
+        /* No arguments supplied. Run main test routines if
+         * using sec2 or stdio driver, otherwise don't run
          * anything. */
 
         /* Determine driver being used */
         envval = HDgetenv("HDF5_DRIVER");
 
-        if(envval == NULL || H5FD_supports_swmr_test(envval)) {
+        if(envval == NULL || H5FD__supports_swmr_test(envval)) {
             if(test_flush() != SUCCEED) TEST_ERROR;
             if(test_refresh() != SUCCEED) TEST_ERROR;
         } /* end if */
         else {
             HDfprintf(stdout, "Skipping all flush/refresh tests (only run with SWMR-enabled file drivers).\n");
-            
+
             /* Test script is expecting some signals, so send them out to end it. */
             if(end_verification() < 0) TEST_ERROR;
             if(end_verification() < 0) TEST_ERROR;
         } /* end else */
-    } else if(argc == 3) {
+    }
+    else if(argc == 3) {
         /* Two arguments supplied. Pass them to flush verification routine. */
         if(flush_verification(argv[1], argv[2]) != 0) PROCESS_ERROR;
-    } else if(argc == 2) {
+    }
+    else if(argc == 2) {
         /* One argument supplied. Pass it to refresh verification routine. */
         if(refresh_verification(argv[1]) != 0) PROCESS_ERROR;
-    } else {
+    }
+    else {
         /* Illegal number of arguments supplied. Error. */
         HDfprintf(stderr, "Error. %d is an Invalid number of arguments to main().\n", argc);
         PROCESS_ERROR
     } /* end if */
 
-    return SUCCEED;
+    return EXIT_SUCCESS;
 
 error:
     /* Return */
-    return FAIL;
+    return EXIT_FAILURE;
 } /* main */
 
 
@@ -199,29 +202,29 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-herr_t test_flush(void) 
+herr_t test_flush(void)
 {
     /**************************************************************************
      *
      * Test Description:
      *
-     * This test will build an HDF5 file with several objects in a varying 
+     * This test will build an HDF5 file with several objects in a varying
      * hierarchical layout. It will then attempt to flush the objects
      * in the file one by one, individually, using the four H5*flush
-     * routines (D,G,T, and O). After each call to either create or flush an 
+     * routines (D,G,T, and O). After each call to either create or flush an
      * object, a series of verifications will occur on each object in the file.
      *
      * Each verification consists of spawning off a new process and determining
-     * if the object can be opened and its information retreived in said 
-     * alternate process. It reports the results, which are compared to an 
+     * if the object can be opened and its information retreived in said
+     * alternate process. It reports the results, which are compared to an
      * expected value (either that the object can be found on disk, or that it
      * cannot).
      *
      * Note that to spawn a verification, this program sends a signal (by creating
-     * a file on disk) to the test script controlling it, indicating how to 
+     * a file on disk) to the test script controlling it, indicating how to
      * run the verification.
-     * 
-     * Implementation is funky, but basically, an example: 
+     *
+     * Implementation is funky, but basically, an example:
      *
      * Step 1. Dataset is created.
      * Step 2. Verify that dataset can't be opened by separate process, as
@@ -230,14 +233,14 @@ herr_t test_flush(void)
      * Step 4. Verify that group can't be opened by separate process.
      * Step 5. H5Gflush is called on the group.
      * Step 6. Verify that group CAN be opened, but dataset still has
-     *         yet to hit disk, and CANNOT be opened. Success! Only the group 
+     *         yet to hit disk, and CANNOT be opened. Success! Only the group
      *         was flushed.
      *
      **************************************************************************/
 
     /**************************************************************************
       * Generated Test File will look like this:
-      * 
+      *
       * GROUP "/"
       *   DATASET "Dataset1"
       *   GROUP "Group1" {
@@ -262,14 +265,14 @@ herr_t test_flush(void)
 
     /* Cleanup any old error or signal files */
     CLEANUP_FILES;
-    
+
     /* ================ */
     /* CREATE TEST FILE */
     /* ================ */
 
     /* Create file, open root group - have to use latest file format for SWMR */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) TEST_ERROR;
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR; 
+    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR;
     if((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
     if((rid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) TEST_ERROR;
 
@@ -338,7 +341,7 @@ herr_t test_flush(void)
     if(run_flush_verification_process(T2, NOT_FLUSHED) != 0) TEST_ERROR;
     if(run_flush_verification_process(T3, NOT_FLUSHED) != 0) TEST_ERROR;
 
-    /* Flush Group1 and Verify it is recently flushed, and nothing 
+    /* Flush Group1 and Verify it is recently flushed, and nothing
      * else has changed. */
     if((status = H5Gflush(gid)) < 0) TEST_ERROR;
     if(run_flush_verification_process(RG, FLUSHED) != 0) TEST_ERROR;
@@ -352,7 +355,7 @@ herr_t test_flush(void)
     if(run_flush_verification_process(T2, NOT_FLUSHED) != 0) TEST_ERROR;
     if(run_flush_verification_process(T3, NOT_FLUSHED) != 0) TEST_ERROR;
 
-    /* Flush Group2 and Verify it is recently flushed, and nothing 
+    /* Flush Group2 and Verify it is recently flushed, and nothing
      * else has changed. */
     if((status = H5Gflush(gid2)) < 0) TEST_ERROR;
     if(run_flush_verification_process(RG, FLUSHED) != 0) TEST_ERROR;
@@ -437,7 +440,7 @@ herr_t test_flush(void)
     if(run_flush_verification_process(T3, NOT_FLUSHED) != 0) TEST_ERROR;
 
     PASSED();
-    
+
     /* ============= */
     /* FLUSH OBJECTS */
     /* ============= */
@@ -487,7 +490,7 @@ herr_t test_flush(void)
     PASSED();
 
     /* ================== */
-    /* Cleanup and Return */  
+    /* Cleanup and Return */
     /* ================== */
     if(H5Pclose(fapl) < 0) TEST_ERROR;
     if(H5Gclose(gid) < 0) TEST_ERROR;
@@ -512,7 +515,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_refresh
  *
- * Purpose:     This function tests refresh (evict/reload) of individual 
+ * Purpose:     This function tests refresh (evict/reload) of individual
  *              objects' metadata from the metadata cache.
  *
  * Return:      0 on Success, 1 on Failure
@@ -522,27 +525,27 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-herr_t test_refresh(void) 
+herr_t test_refresh(void)
 {
     /**************************************************************************
      *
      * Test Description:
      *
-     * This test will build an HDF5 file with several objects in a varying 
+     * This test will build an HDF5 file with several objects in a varying
      * hierarchical layout. It will then flush the entire file to disk. Then,
      * an attribute will be added to each object in the file.
-     * 
+     *
      * One by one, this process will flush each object to disk, individually.
      * It will also be coordinating with another process, which will open
      * the object before it is flushed by this process, and then refresh the
      * object after it's been flushed, comparing the before and after object
      * information to ensure that they are as expected. (i.e., most notably,
-     * that an attribute has been added, and is only visible after a 
+     * that an attribute has been added, and is only visible after a
      * successful call to a H5*refresh function).
-     * 
-     * As with the flush case, the implemention is a bit tricky as it's 
+     *
+     * As with the flush case, the implemention is a bit tricky as it's
      * dealing with signals going back and forth between the two processes
-     * to ensure the timing is correct, but basically, an example: 
+     * to ensure the timing is correct, but basically, an example:
      *
      * Step 1. Dataset is created.
      * Step 2. Dataset is flushed.
@@ -552,7 +555,7 @@ herr_t test_refresh(void)
      * Step 5. This process flushes the dataset again (with Attribute attached).
      * Step 6. The other process calls H5Drefresh, which should evict/reload
      *         the object's metadata, and thus pick up the attribute that's
-     *         attached to it. Most other before/after object information is 
+     *         attached to it. Most other before/after object information is
      *         compared for sanity as well.
      * Step 7. Rinse and Repeat for each object in the file.
      *
@@ -560,7 +563,7 @@ herr_t test_refresh(void)
 
     /**************************************************************************
       * Generated Test File will look like this:
-      * 
+      *
       * GROUP "/"
       *   DATASET "Dataset1"
       *   GROUP "Group1" {
@@ -695,7 +698,6 @@ herr_t test_refresh(void)
     /* ================= */
     /* Refresh Datatypes */
     /* ================= */
-
     TESTING("to ensure that H5Trefresh correctly refreshes single datatypes");
 
     /* Verify First Committed Datatype can be refreshed with H5Trefresh */
@@ -715,7 +717,6 @@ herr_t test_refresh(void)
     if(H5Oflush(tid2) < 0) TEST_ERROR;
 
     if(end_refresh_verification_process() != 0) TEST_ERROR;
-
     PASSED();
 
     /* =============== */
@@ -754,7 +755,7 @@ herr_t test_refresh(void)
     PASSED();
 
     /* ================== */
-    /* Cleanup and Return */  
+    /* Cleanup and Return */
     /* ================== */
 
     /* Close Stuff */
@@ -790,8 +791,8 @@ error:
  *
  * Purpose:     This function is used to communicate with the test script
  *              in order to spawn off a process to verify that a flush
- *              of an individual object was successful. 
- * 
+ *              of an individual object was successful.
+ *
  * Return:      0 on Success, 1 on Failure
  *
  * Programmer:  Mike McGreevy
@@ -799,7 +800,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-herr_t run_flush_verification_process(const char * obj_pathname, const char * expected) 
+herr_t run_flush_verification_process(const char * obj_pathname, const char * expected)
 {
     HDremove(SIGNAL_FROM_SCRIPT);
 
@@ -824,10 +825,10 @@ error:
  * Function:    flush_verification
  *
  * Purpose:     This function tries to open target object in the test file.
- *              It compares the success of the open function to the expected 
+ *              It compares the success of the open function to the expected
  *              value, and succeeds if they are equal and fails if they differ.
  *
- *              Note that full path to the object must be provided as the 
+ *              Note that full path to the object must be provided as the
  *              obj_pathname argument.
  *
  * Return:      0 on Success, 1 on Failure
@@ -837,18 +838,18 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-herr_t flush_verification(const char * obj_pathname, const char * expected) 
+herr_t flush_verification(const char * obj_pathname, const char * expected)
 {
     /* Variables */
     hid_t oid = -1, fid = -1;
     herr_t status = 0;
-    H5O_info_t oinfo;
+    H5O_info2_t oinfo;
 
     /* Try to open the testfile and then obj_pathname within the file */
     H5E_BEGIN_TRY {
         fid = H5Fopen(FILENAME, H5F_ACC_SWMR_READ, H5P_DEFAULT);
         oid = H5Oopen(fid, obj_pathname, H5P_DEFAULT);
-        status = H5Oget_info(oid, &oinfo);
+        status = H5Oget_info3(oid, &oinfo, H5O_INFO_BASIC);
     } H5E_END_TRY;
 
     /* Compare to expected result */
@@ -886,7 +887,7 @@ error:
  * Purpose:     This function is used to communicate with the test script
  *              in order to spawn off a process which will test the
  *              H5*refresh routine.
- * 
+ *
  * Return:      0 on Success, 1 on Failure
  *
  * Programmer:  Mike McGreevy
@@ -894,14 +895,14 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-herr_t start_refresh_verification_process(const char * obj_pathname) 
+herr_t start_refresh_verification_process(const char * obj_pathname)
 {
     HDremove(SIGNAL_BETWEEN_PROCESSES_1);
 
-    /* Send Signal to SCRIPT indicating that it should kick off a refresh 
+    /* Send Signal to SCRIPT indicating that it should kick off a refresh
        verification process */
     h5_send_message(SIGNAL_TO_SCRIPT, obj_pathname, NULL);
-    
+
     /* Wait for Signal from VERIFICATION PROCESS indicating that it's opened the
        target object and ready for MAIN PROCESS to modify it */
     if(h5_wait_message(SIGNAL_BETWEEN_PROCESSES_1) < 0) TEST_ERROR;
@@ -921,10 +922,10 @@ error:
  * Function:    end_refresh_verification_process
  *
  * Purpose:     This function is used to communicate with the verification
- *              process spawned by the start_refresh_verification_process 
+ *              process spawned by the start_refresh_verification_process
  *              function. It gives it the go-ahead to call H5*refresh
  *              on an object and conlcude the refresh verification.
- * 
+ *
  * Return:      0 on Success, 1 on Failure
  *
  * Programmer:  Mike McGreevy
@@ -932,8 +933,8 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-herr_t end_refresh_verification_process(void) 
-{ 
+herr_t end_refresh_verification_process(void)
+{
     HDremove(SIGNAL_FROM_SCRIPT);
 
     /* Send Signal to REFRESH VERIFICATION PROCESS indicating that the object
@@ -973,15 +974,18 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-herr_t refresh_verification(const char * obj_pathname) 
+herr_t refresh_verification(const char * obj_pathname)
 {
     /* Variables */
     hid_t oid,fid,status = 0;
-    H5O_info_t flushed_oinfo;
-    H5O_info_t refreshed_oinfo;
+    H5O_info2_t flushed_oinfo;
+    H5O_info2_t refreshed_oinfo;
+    H5O_native_info_t flushed_ninfo;
+    H5O_native_info_t refreshed_ninfo;
     int tries = 800, sleep_tries = 400;
+    int token_cmp;
     hbool_t ok = FALSE;
-    
+
     HDremove(SIGNAL_BETWEEN_PROCESSES_2);
 
     /* Open Object */
@@ -989,37 +993,40 @@ herr_t refresh_verification(const char * obj_pathname)
     if((oid = H5Oopen(fid, obj_pathname, H5P_DEFAULT)) < 0) PROCESS_ERROR;
 
     /* Get Object info */
-    if((status = H5Oget_info(oid, &flushed_oinfo)) < 0) PROCESS_ERROR;
-    
+    if((status = H5Oget_info3(oid, &flushed_oinfo, H5O_INFO_BASIC|H5O_INFO_NUM_ATTRS)) < 0) PROCESS_ERROR;
+    if((status = H5Oget_native_info(oid, &flushed_ninfo, H5O_NATIVE_INFO_HDR)) < 0) PROCESS_ERROR;
+
     /* Make sure there are no attributes on the object. This is just a sanity
         check to ensure we didn't erroneously flush the attribute before
         starting the verification. */
     if(flushed_oinfo.num_attrs != 0)
-	PROCESS_ERROR;
+        PROCESS_ERROR;
 
-    /* Send Signal to MAIN PROCESS indicating that it can go ahead and modify the 
+    /* Send Signal to MAIN PROCESS indicating that it can go ahead and modify the
         object. */
     h5_send_message(SIGNAL_BETWEEN_PROCESSES_1, obj_pathname, NULL);
 
-    /* Wait for Signal from MAIN PROCESS indicating that it's modified the 
+    /* Wait for Signal from MAIN PROCESS indicating that it's modified the
         object and we can run verification now. */
     if(h5_wait_message(SIGNAL_BETWEEN_PROCESSES_2) < 0) PROCESS_ERROR;
 
-    /* Get object info again. This will NOT reflect what's on disk, only what's 
-       in the cache. Thus, all values will be unchanged from above, despite 
+    /* Get object info again. This will NOT reflect what's on disk, only what's
+       in the cache. Thus, all values will be unchanged from above, despite
        newer information being on disk. */
-    if((status = H5Oget_info(oid, &refreshed_oinfo)) < 0) PROCESS_ERROR;
+    if((status = H5Oget_info3(oid, &refreshed_oinfo, H5O_INFO_BASIC|H5O_INFO_NUM_ATTRS)) < 0) PROCESS_ERROR;
+    if((status = H5Oget_native_info(oid, &refreshed_ninfo, H5O_NATIVE_INFO_HDR)) < 0) PROCESS_ERROR;
 
     /* Verify that before doing a refresh, getting the object info returns stale
        information. (i.e., unchanged from above, despite new info on disk). */
-    if(flushed_oinfo.addr != refreshed_oinfo.addr) PROCESS_ERROR;
-    if(flushed_oinfo.type != refreshed_oinfo.type) PROCESS_ERROR;
-    if(flushed_oinfo.hdr.version != refreshed_oinfo.hdr.version) PROCESS_ERROR;
-    if(flushed_oinfo.hdr.flags != refreshed_oinfo.hdr.flags) PROCESS_ERROR;
-    if(flushed_oinfo.num_attrs != refreshed_oinfo.num_attrs) PROCESS_ERROR;
-    if(flushed_oinfo.hdr.nmesgs != refreshed_oinfo.hdr.nmesgs) PROCESS_ERROR;
-    if(flushed_oinfo.hdr.nchunks != refreshed_oinfo.hdr.nchunks) PROCESS_ERROR;
-    if(flushed_oinfo.hdr.space.total != refreshed_oinfo.hdr.space.total) PROCESS_ERROR;
+    if(H5Otoken_cmp(oid, &flushed_oinfo.token, &refreshed_oinfo.token, &token_cmp) < 0) PROCESS_ERROR;
+    if(token_cmp) PROCESS_ERROR;
+    if(flushed_oinfo.type               != refreshed_oinfo.type) PROCESS_ERROR;
+    if(flushed_oinfo.num_attrs          != refreshed_oinfo.num_attrs) PROCESS_ERROR;
+    if(flushed_ninfo.hdr.version        != refreshed_ninfo.hdr.version) PROCESS_ERROR;
+    if(flushed_ninfo.hdr.flags          != refreshed_ninfo.hdr.flags) PROCESS_ERROR;
+    if(flushed_ninfo.hdr.nmesgs         != refreshed_ninfo.hdr.nmesgs) PROCESS_ERROR;
+    if(flushed_ninfo.hdr.nchunks        != refreshed_ninfo.hdr.nchunks) PROCESS_ERROR;
+    if(flushed_ninfo.hdr.space.total    != refreshed_ninfo.hdr.space.total) PROCESS_ERROR;
 
     /* Refresh object */
     /* The H5*refresh function called depends on which object we are trying
@@ -1027,55 +1034,58 @@ herr_t refresh_verification(const char * obj_pathname)
      * test cases is easy). */
     do {
 
-	if((HDstrcmp(obj_pathname, D1) == 0) || (HDstrcmp(obj_pathname, D2) == 0)) {
-	    if(H5Drefresh(oid) < 0) PROCESS_ERROR;
-	} /* end if */
-	else if((HDstrcmp(obj_pathname, G1) == 0) || (HDstrcmp(obj_pathname, G2) == 0)) {
-	    if(H5Grefresh(oid) < 0) PROCESS_ERROR;
-	} /* end if */
-	else if((HDstrcmp(obj_pathname, T1) == 0) || (HDstrcmp(obj_pathname, T2) == 0)) {
-	    if(H5Trefresh(oid) < 0) PROCESS_ERROR;
-	} /* end if */
-	else if((HDstrcmp(obj_pathname, D3) == 0) || (HDstrcmp(obj_pathname, G3) == 0) ||
+        if((HDstrcmp(obj_pathname, D1) == 0) || (HDstrcmp(obj_pathname, D2) == 0)) {
+            if(H5Drefresh(oid) < 0) PROCESS_ERROR;
+        } /* end if */
+        else if((HDstrcmp(obj_pathname, G1) == 0) || (HDstrcmp(obj_pathname, G2) == 0)) {
+            if(H5Grefresh(oid) < 0) PROCESS_ERROR;
+        } /* end if */
+        else if((HDstrcmp(obj_pathname, T1) == 0) || (HDstrcmp(obj_pathname, T2) == 0)) {
+            if(H5Trefresh(oid) < 0) PROCESS_ERROR;
+        } /* end if */
+        else if((HDstrcmp(obj_pathname, D3) == 0) || (HDstrcmp(obj_pathname, G3) == 0) ||
                 (HDstrcmp(obj_pathname, T3) == 0)) {
-	    if(H5Orefresh(oid) < 0) PROCESS_ERROR;
-	} /* end if */
-	else {
-	    HDfprintf(stdout, "Error. %s is an unrecognized object.\n", obj_pathname);
-	    PROCESS_ERROR;
-	} /* end else */
+            if(H5Orefresh(oid) < 0) PROCESS_ERROR;
+        } /* end if */
+        else {
+            HDfprintf(stdout, "Error. %s is an unrecognized object.\n", obj_pathname);
+            PROCESS_ERROR;
+        } /* end else */
 
-	/* Get object info. This should now accurately reflect the refreshed object on disk. */
-	if((status = H5Oget_info(oid, &refreshed_oinfo)) < 0) PROCESS_ERROR;
-    
-	/* Confirm following (first 4) attributes are the same: */
-	/* Confirm following (last 4) attributes are different */
-	if( (flushed_oinfo.addr == refreshed_oinfo.addr) &&
-	    (flushed_oinfo.type == refreshed_oinfo.type) &&
-	    (flushed_oinfo.hdr.version == refreshed_oinfo.hdr.version) &&
-	    (flushed_oinfo.hdr.flags == refreshed_oinfo.hdr.flags) &&
-	    (flushed_oinfo.num_attrs != refreshed_oinfo.num_attrs) &&
-	    (flushed_oinfo.hdr.nmesgs != refreshed_oinfo.hdr.nmesgs) &&
-	    (flushed_oinfo.hdr.nchunks != refreshed_oinfo.hdr.nchunks) &&
-	    (flushed_oinfo.hdr.space.total != refreshed_oinfo.hdr.space.total) ) {
-		ok = TRUE;
-		break;
-	}
-	if(tries == sleep_tries)
-	    HDsleep(1);
+        /* Get object info. This should now accurately reflect the refreshed object on disk. */
+        if((status = H5Oget_info3(oid, &refreshed_oinfo, H5O_INFO_BASIC|H5O_INFO_NUM_ATTRS)) < 0) PROCESS_ERROR;
+        if((status = H5Oget_native_info(oid, &refreshed_ninfo, H5O_NATIVE_INFO_HDR)) < 0) PROCESS_ERROR;
+        if(H5Otoken_cmp(oid, &flushed_oinfo.token, &refreshed_oinfo.token, &token_cmp) < 0) PROCESS_ERROR;
+
+        /* Confirm following (first 4) attributes are the same: */
+        /* Confirm following (last 4) attributes are different */
+        if( (!token_cmp) &&
+            (flushed_oinfo.type             == refreshed_oinfo.type) &&
+            (flushed_oinfo.num_attrs        != refreshed_oinfo.num_attrs) &&
+            (flushed_ninfo.hdr.version      == refreshed_ninfo.hdr.version) &&
+            (flushed_ninfo.hdr.flags        == refreshed_ninfo.hdr.flags) &&
+            (flushed_ninfo.hdr.nmesgs       != refreshed_ninfo.hdr.nmesgs) &&
+            (flushed_ninfo.hdr.nchunks      != refreshed_ninfo.hdr.nchunks) &&
+            (flushed_ninfo.hdr.space.total  != refreshed_ninfo.hdr.space.total) ) {
+            ok = TRUE;
+            break;
+        }
+
+        if(tries == sleep_tries)
+            HDsleep(1);
 
     } while(--tries);
-    
+
     if(!ok) {
-	printf("FLUSHED: num_attrs=%d, nmesgs=%d, nchunks=%d, total=%d\n",
-	    (int)flushed_oinfo.num_attrs, (int)flushed_oinfo.hdr.nmesgs,
-	    (int)flushed_oinfo.hdr.nchunks, (int)flushed_oinfo.hdr.space.total);
-	printf("REFRESHED: num_attrs=%d, nmesgs=%d, nchunks=%d, total=%d\n",
-	    (int)refreshed_oinfo.num_attrs, (int)refreshed_oinfo.hdr.nmesgs,
-	    (int)refreshed_oinfo.hdr.nchunks, (int)refreshed_oinfo.hdr.space.total);
-	PROCESS_ERROR;
+        HDprintf("FLUSHED: num_attrs=%d, nmesgs=%d, nchunks=%d, total=%d\n",
+            (int)flushed_oinfo.num_attrs, (int)flushed_ninfo.hdr.nmesgs,
+            (int)flushed_ninfo.hdr.nchunks, (int)flushed_ninfo.hdr.space.total);
+        HDprintf("REFRESHED: num_attrs=%d, nmesgs=%d, nchunks=%d, total=%d\n",
+            (int)refreshed_oinfo.num_attrs, (int)refreshed_ninfo.hdr.nmesgs,
+            (int)refreshed_ninfo.hdr.nchunks, (int)refreshed_ninfo.hdr.space.total);
+        PROCESS_ERROR;
     }
-    
+
     /* Close objects */
     if(H5Oclose(oid) < 0) PROCESS_ERROR;
     if(H5Fclose(fid) < 0) PROCESS_ERROR;
@@ -1095,7 +1105,7 @@ error:
  *              processes to see if they've succeeded. It checks for the
  *              existance of flushrefresh_ERROR file. If present, that indicates
  *              an external verification process has failed, and this function
- *              thus fails as well. If not present, then nothing else has 
+ *              thus fails as well. If not present, then nothing else has
  *              failed, and this function succeeds.
  *
  * Return:      0 on Success, 1 on Failure
@@ -1105,7 +1115,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-herr_t check_for_errors(void) 
+herr_t check_for_errors(void)
 {
     FILE * file;
 
@@ -1121,24 +1131,24 @@ herr_t check_for_errors(void)
 
 /*-------------------------------------------------------------------------
  * Function:    end_verification
- * 
- * Purpose:     Tells test script that verification routines are completed and 
- *              that the test can wrap up. 
+ *
+ * Purpose:     Tells test script that verification routines are completed and
+ *              that the test can wrap up.
  *
  * Return:      void
  *
  * Programmer:  Mike McGreevy
  *              July 16, 2010
- * 
+ *
  *-------------------------------------------------------------------------
  */
-herr_t end_verification(void) 
+herr_t end_verification(void)
 {
     HDremove(SIGNAL_FROM_SCRIPT);
 
     /* Send Signal to SCRIPT to indicate that we're done with verification. */
     h5_send_message(SIGNAL_TO_SCRIPT, "VERIFICATION_DONE", "VERIFICATION_DONE");
-    
+
     /* Wait for Signal from SCRIPT indicating that we can continue. */
     if(h5_wait_message(SIGNAL_FROM_SCRIPT) < 0) TEST_ERROR;
 

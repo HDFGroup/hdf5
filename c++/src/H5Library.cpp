@@ -24,7 +24,9 @@
 #include "H5OcreatProp.h"
 #include "H5DxferProp.h"
 #include "H5DcreatProp.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
+#include "H5DaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
 #include "H5DataType.h"
@@ -110,8 +112,7 @@ void H5Library::getLibVersion(unsigned& majnum, unsigned& minnum, unsigned& reln
 ///\exception   H5::LibraryIException
 ///\par Description
 ///             For information about library version, please refer to
-///             the C layer Reference Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5.html#Library-VersCheck
+///             the H5check_version API in the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void H5Library::checkVersion(unsigned majnum, unsigned minnum, unsigned relnum)
@@ -174,43 +175,51 @@ void H5Library::initH5cpp()
     int ret_value = 0;
     ret_value = std::atexit(termH5cpp);
     if (ret_value != 0)
-        throw LibraryIException("H5Library::initH5cpp", "Registrating termH5cpp failed");
+        throw LibraryIException("H5Library::initH5cpp", "Registering termH5cpp failed");
 
     ret_value = std::atexit(PredType::deleteConstants);
     if (ret_value != 0)
-        throw LibraryIException("H5Library::initH5cpp", "Registrating PredType::deleteConstants failed");
+        throw LibraryIException("H5Library::initH5cpp", "Registering PredType::deleteConstants failed");
 
     ret_value = std::atexit(PropList::deleteConstants);
     if (ret_value != 0)
-        throw LibraryIException("H5Library::initH5cpp", "Registrating PropList::deleteConstants failed");
+        throw LibraryIException("H5Library::initH5cpp", "Registering PropList::deleteConstants failed");
+
+    ret_value = std::atexit(DSetAccPropList::deleteConstants);
+    if (ret_value != 0)
+        throw LibraryIException("H5Library::initH5cpp", "Registering DSetAccPropList::deleteConstants failed");
 
     ret_value = std::atexit(LinkAccPropList::deleteConstants);
     if (ret_value != 0)
-        throw LibraryIException("H5Library::initH5cpp", "Registrating LinkAccPropList::deleteConstants failed");
+        throw LibraryIException("H5Library::initH5cpp", "Registering LinkAccPropList::deleteConstants failed");
+
+    ret_value = std::atexit(LinkCreatPropList::deleteConstants);
+    if (ret_value != 0)
+        throw LibraryIException("H5Library::initH5cpp", "Registering LinkCreatPropList::deleteConstants failed");
 
     ret_value = std::atexit(FileAccPropList::deleteConstants);
     if (ret_value != 0)
-        throw LibraryIException("H5Library::initH5cpp", "Registrating FileAccPropList::deleteConstants failed");
+        throw LibraryIException("H5Library::initH5cpp", "Registering FileAccPropList::deleteConstants failed");
 
     ret_value = std::atexit(FileCreatPropList::deleteConstants);
     if (ret_value != 0)
-        throw LibraryIException("H5Library::initH5cpp", "Registrating FileCreatPropList::deleteConstants failed");
+        throw LibraryIException("H5Library::initH5cpp", "Registering FileCreatPropList::deleteConstants failed");
 
     ret_value = std::atexit(DSetMemXferPropList::deleteConstants);
     if (ret_value != 0)
-        throw LibraryIException("H5Library::initH5cpp", "Registrating DSetMemXferPropList::deleteConstants failed");
+        throw LibraryIException("H5Library::initH5cpp", "Registering DSetMemXferPropList::deleteConstants failed");
 
     ret_value = std::atexit(DSetCreatPropList::deleteConstants);
     if (ret_value != 0)
-        throw LibraryIException("H5Library::initH5cpp", "Registrating DSetCreatPropList::deleteConstants failed");
+        throw LibraryIException("H5Library::initH5cpp", "Registering DSetCreatPropList::deleteConstants failed");
 
     ret_value = std::atexit(ObjCreatPropList::deleteConstants);
     if (ret_value != 0)
-        throw LibraryIException("H5Library::initH5cpp", "Registrating ObjCreatPropList::deleteConstants failed");
+        throw LibraryIException("H5Library::initH5cpp", "Registering ObjCreatPropList::deleteConstants failed");
 
     ret_value = std::atexit(DataSpace::deleteConstants);
     if (ret_value != 0)
-        throw LibraryIException("H5Library::initH5cpp", "Registrating DataSpace::deleteConstants failed");
+        throw LibraryIException("H5Library::initH5cpp", "Registering DataSpace::deleteConstants failed");
 }
 
 //--------------------------------------------------------------------------
@@ -240,9 +249,8 @@ void H5Library::termH5cpp()
 ///\exception   H5::LibraryIException
 ///\par Description
 ///             Setting a value of -1 for a limit means no limit of that type.
-///             For more information on free list limits, please refer to C
-///             layer Reference Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5.html#Library-SetFreeListLimits
+///             For more information on free list limits, please refer to
+///             the H5set_free_list_limits API in the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void H5Library::setFreeListLimits(int reg_global_lim, int reg_list_lim,

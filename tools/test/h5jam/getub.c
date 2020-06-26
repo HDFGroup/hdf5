@@ -81,7 +81,7 @@ parse_command_line(int argc, const char *argv[])
 int
 main(int argc, const char *argv[])
 {
-    int fd = -1;
+    int fd = H5I_INVALID_HID;
     unsigned size;
     char *filename = NULL;
     long res;
@@ -148,7 +148,7 @@ main(int argc, const char *argv[])
 error:
     if(buf)
         HDfree(buf);
-    if(fd > -1)
+    if(fd >= 0)
         HDclose(fd);
     return EXIT_FAILURE;
 } /* end main() */

@@ -43,7 +43,7 @@ main(int argc, char *argv[])
      ******************************/
 
     /* The file number is passed on the command line.
-     * This is an integer index into the FILE_NAMES array. 
+     * This is an integer index into the FILE_NAMES array.
      */
     if(argc != 2) {
         HDfprintf(stderr, "ERROR: Must pass the source file number on the command line.\n");
@@ -56,7 +56,7 @@ main(int argc, char *argv[])
 
     /* Open the source file and dataset */
     /* All SWMR files need to use the latest file format */
-    if((faplid = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+    if((faplid = h5_fileaccess()) < 0)
         TEST_ERROR
     if(H5Pset_libver_bounds(faplid, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
         TEST_ERROR

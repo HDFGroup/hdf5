@@ -133,7 +133,7 @@ synchronize (void)
 #if defined(H5_HAVE_WIN32_API) && ! defined(__CYGWIN__)
     _flushall();
 #else
-    int status;
+    int H5_ATTR_NDEBUG_UNUSED status;
 
     status = HDsystem("sync");
     HDassert(status >= 0);
@@ -168,8 +168,7 @@ main (void)
     static unsigned  nread = NREAD_REQUESTS, nwrite = NWRITE_REQUESTS;
 
     unsigned char  *the_data = NULL;
-    hid_t    file, dset, file_space = -1;
-    herr_t    status;
+    hid_t    file, dset, file_space = H5I_INVALID_HID;
 #ifdef H5_HAVE_GETRUSAGE
     struct rusage  r_start, r_stop;
 #else
@@ -178,8 +177,9 @@ main (void)
     struct timeval  t_start, t_stop;
     int      fd;
     unsigned    u;
-    hssize_t    n;
-    off_t    offset;
+    herr_t      H5_ATTR_NDEBUG_UNUSED status;
+    hssize_t    H5_ATTR_NDEBUG_UNUSED n;
+    off_t       H5_ATTR_NDEBUG_UNUSED offset;
     hsize_t    start[2];
     hsize_t    count[2];
 
@@ -198,15 +198,15 @@ main (void)
 
     /* Open the files */
     file = H5Fcreate (HDF5_FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    assert (file>=0);
+    HDassert (file>=0);
     fd = HDopen (RAW_FILE_NAME, O_RDWR|O_CREAT|O_TRUNC, 0666);
-    assert (fd>=0);
+    HDassert (fd>=0);
 
     /* Create the dataset */
     file_space = H5Screate_simple (2, size, size);
-    assert(file_space >= 0);
+    HDassert(file_space >= 0);
     dset = H5Dcreate2(file, "dset", H5T_NATIVE_UCHAR, file_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    assert(dset >= 0);
+    HDassert(dset >= 0);
     the_data = (unsigned char *)malloc((size_t)(size[0] * size[1]));
 
     /* initial fill for lazy malloc */
@@ -224,7 +224,7 @@ main (void)
   _ftime(tbstart);
 #endif
 #endif
-    fprintf (stderr, HEADING, "fill raw");
+    HDfprintf (stderr, HEADING, "fill raw");
     for(u = 0; u < nwrite; u++) {
   putc (PROGRESS, stderr);
   HDfflush(stderr);
@@ -262,13 +262,13 @@ main (void)
   _ftime(tbstart);
 #endif
 #endif
-    fprintf (stderr, HEADING, "fill hdf5");
+    HDfprintf (stderr, HEADING, "fill hdf5");
     for(u = 0; u < nread; u++) {
   putc (PROGRESS, stderr);
   HDfflush(stderr);
   status = H5Dread (dset, H5T_NATIVE_UCHAR, file_space, file_space,
         H5P_DEFAULT, the_data);
-  assert (status>=0);
+  HDassert (status>=0);
     }
 #ifdef H5_HAVE_GETRUSAGE
     HDgetrusage(RUSAGE_SELF, &r_stop);
@@ -301,14 +301,14 @@ main (void)
   _ftime(tbstart);
 #endif
 #endif
-    fprintf (stderr, HEADING, "out raw");
+    HDfprintf (stderr, HEADING, "out raw");
     for(u = 0; u < nwrite; u++) {
   putc (PROGRESS, stderr);
   HDfflush(stderr);
   offset = HDlseek (fd, (off_t)0, SEEK_SET);
-  assert (0==offset);
+  HDassert (0==offset);
   n = HDwrite (fd, the_data, (size_t)(size[0]*size[1]));
-  assert (n>=0 && (size_t)n==size[0]*size[1]);
+  HDassert (n>=0 && (size_t)n==size[0]*size[1]);
     }
 #ifdef H5_HAVE_GETRUSAGE
     HDgetrusage(RUSAGE_SELF, &r_stop);
@@ -341,13 +341,13 @@ main (void)
   _ftime(tbstart);
 #endif
 #endif
-    fprintf (stderr, HEADING, "out hdf5");
+    HDfprintf (stderr, HEADING, "out hdf5");
     for(u = 0; u < nwrite; u++) {
   putc (PROGRESS, stderr);
   HDfflush(stderr);
   status = H5Dwrite (dset, H5T_NATIVE_UCHAR, H5S_ALL, H5S_ALL,
          H5P_DEFAULT, the_data);
-  assert (status>=0);
+  HDassert (status>=0);
     }
 #ifdef H5_HAVE_GETRUSAGE
     HDgetrusage(RUSAGE_SELF, &r_stop);
@@ -380,14 +380,14 @@ main (void)
   _ftime(tbstart);
 #endif
 #endif
-    fprintf (stderr, HEADING, "in raw");
+    HDfprintf (stderr, HEADING, "in raw");
     for(u = 0; u < nread; u++) {
   putc (PROGRESS, stderr);
   HDfflush(stderr);
   offset = HDlseek (fd, (off_t)0, SEEK_SET);
-  assert (0==offset);
+  HDassert (0==offset);
   n = HDread (fd, the_data, (size_t)(size[0]*size[1]));
-  assert (n>=0 && (size_t)n==size[0]*size[1]);
+  HDassert (n>=0 && (size_t)n==size[0]*size[1]);
     }
 #ifdef H5_HAVE_GETRUSAGE
     HDgetrusage(RUSAGE_SELF, &r_stop);
@@ -421,13 +421,13 @@ main (void)
   _ftime(tbstart);
 #endif
 #endif
-    fprintf (stderr, HEADING, "in hdf5");
+    HDfprintf (stderr, HEADING, "in hdf5");
     for(u = 0; u < nread; u++) {
   putc (PROGRESS, stderr);
   HDfflush(stderr);
   status = H5Dread (dset, H5T_NATIVE_UCHAR, file_space, file_space,
         H5P_DEFAULT, the_data);
-  assert (status>=0);
+  HDassert (status>=0);
     }
 #ifdef H5_HAVE_GETRUSAGE
     HDgetrusage(RUSAGE_SELF, &r_stop);
@@ -449,11 +449,11 @@ main (void)
      (size_t)(nread*size[0]*size[1]));
 
     /* Read hyperslab */
-    assert (size[0]>20 && size[1]>20);
+    HDassert (size[0]>20 && size[1]>20);
     start[0] = start[1] = 10;
     count[0] = count[1] = size[0]-20;
     status = H5Sselect_hyperslab (file_space, H5S_SELECT_SET, start, NULL, count, NULL);
-    assert (status>=0);
+    HDassert (status>=0);
     synchronize ();
 #ifdef H5_HAVE_GETRUSAGE
     HDgetrusage(RUSAGE_SELF, &r_start);
@@ -465,13 +465,13 @@ main (void)
   _ftime(tbstart);
 #endif
 #endif
-    fprintf (stderr, HEADING, "in hdf5 partial");
+    HDfprintf (stderr, HEADING, "in hdf5 partial");
     for(u = 0; u < nread; u++) {
   putc (PROGRESS, stderr);
   HDfflush(stderr);
   status = H5Dread (dset, H5T_NATIVE_UCHAR, file_space, file_space,
         H5P_DEFAULT, the_data);
-  assert (status>=0);
+  HDassert (status>=0);
     }
 #ifdef H5_HAVE_GETRUSAGE
     HDgetrusage(RUSAGE_SELF, &r_stop);

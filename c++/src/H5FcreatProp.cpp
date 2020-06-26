@@ -86,7 +86,7 @@ FileCreatPropList::FileCreatPropList() : PropList(H5P_FILE_CREATE) {}
 
 //--------------------------------------------------------------------------
 // Function:    FileCreatPropList copy constructor
-///\brief       Copy constructor: makes a copy of the original
+///\brief       Copy constructor: same HDF5 object as \a original
 ///             FileCreatPropList object.
 ///\param       original - IN: FileCreatPropList instance to copy
 // Programmer   Binh-Minh Ribler - 2000
@@ -173,9 +173,8 @@ hsize_t FileCreatPropList::getUserblock() const
 ///\param       sizeof_size - IN: Size of an object length in bytes.
 ///\exception   H5::PropListIException
 ///\par Description
-///             For information on setting sizes, please refer to the
-///             C layer Reference Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetSizes
+///             For information, please refer to the H5Pset_sizes API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void FileCreatPropList::setSizes(size_t sizeof_addr, size_t sizeof_size) const
@@ -214,8 +213,8 @@ void FileCreatPropList::getSizes(size_t& sizeof_addr, size_t& sizeof_size) const
 ///\param       lk - IN: Symbol table node size
 ///\exception   H5::PropListIException
 ///\par Description
-///             For information, please see the C layer Reference Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetSymK
+///             For information, please refer to the H5Pset_sym_k API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void FileCreatPropList::setSymk(unsigned ik, unsigned lk) const
@@ -235,8 +234,8 @@ void FileCreatPropList::setSymk(unsigned ik, unsigned lk) const
 ///
 ///\exception   H5::PropListIException
 ///\par Description
-///             For information, please see
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-GetSymK
+///             For information, please refer to the H5Pget_sym_k API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void FileCreatPropList::getSymk(unsigned& ik, unsigned& lk) const
@@ -256,8 +255,8 @@ void FileCreatPropList::getSymk(unsigned& ik, unsigned& lk) const
 ///\param       ik - IN: 1/2 rank of chunked storage B-tree
 ///\exception   H5::PropListIException
 ///\par Description
-///             For information, please see the C layer Reference Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetIstoreK
+///             For information, please refer to the H5Pset_istore_k API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void FileCreatPropList::setIstorek(unsigned ik) const
@@ -276,8 +275,8 @@ void FileCreatPropList::setIstorek(unsigned ik) const
 ///\return      1/2 rank of chunked storage B-tree
 ///\exception   H5::PropListIException
 ///\par Description
-///             For information, please see
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-GetIstoreK
+///             For information, please refer to the H5Pget_istore_k API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 unsigned FileCreatPropList::getIstorek() const
@@ -306,8 +305,8 @@ unsigned FileCreatPropList::getIstorek() const
 ///             changed and the existing strategy will be retained.
 ///             If the given threshold value is zero, the property will not be
 ///             changed and the existing threshold will be retained.
-///             For information, please see the C layer Reference Manual at:
-/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetFileSpace
+///             For information, please refer to the H5Pset_file_space_strategy
+///             API in the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - Feb, 2017
 //--------------------------------------------------------------------------
 void FileCreatPropList::setFileSpaceStrategy(H5F_fspace_strategy_t strategy, hbool_t persist, hsize_t threshold) const

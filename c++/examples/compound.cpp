@@ -41,15 +41,15 @@ int main(void)
 {
    /* First structure  and dataset*/
    typedef struct s1_t {
-	int    a;
-	float  b;
-	double c;
+        int    a;
+        float  b;
+        double c;
    } s1_t;
 
    /* Second structure (subset of s1_t)  and dataset*/
    typedef struct s2_t {
-	double c;
-	int    a;
+        double c;
+        int    a;
    } s2_t;
 
    // Try block to detect exceptions raised by any of the calls inside it
@@ -135,12 +135,12 @@ int main(void)
        */
       cout << endl << "Field c : " << endl;
       for( i = 0; i < LENGTH; i++)
-	 cout << s2[i].c << " ";
+         cout << s2[i].c << " ";
       cout << endl;
 
       cout << endl << "Field a : " << endl;
       for( i = 0; i < LENGTH; i++)
-	 cout << s2[i].a << " ";
+         cout << s2[i].a << " ";
       cout << endl;
 
       /*
@@ -161,7 +161,7 @@ int main(void)
        */
       cout << endl << "Field b : " << endl;
       for( i = 0; i < LENGTH; i++)
-	 cout << s3[i] << " ";
+         cout << s3[i] << " ";
       cout << endl;
 
       /*
@@ -174,28 +174,28 @@ int main(void)
    // catch failure caused by the H5File operations
    catch( FileIException error )
    {
-      error.printError();
+      error.printErrorStack();
       return -1;
    }
 
    // catch failure caused by the DataSet operations
    catch( DataSetIException error )
    {
-      error.printError();
+      error.printErrorStack();
       return -1;
    }
 
    // catch failure caused by the DataSpace operations
    catch( DataSpaceIException error )
    {
-      error.printError();
+      error.printErrorStack();
       return -1;
    }
 
    // catch failure caused by the DataSpace operations
    catch( DataTypeIException error )
    {
-      error.printError();
+      error.printErrorStack();
       return -1;
    }
 

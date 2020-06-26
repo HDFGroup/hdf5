@@ -22,14 +22,27 @@
 
 include $(top_srcdir)/config/commence.am
 
-if BUILD_PARALLEL_CONDITIONAL
+if BUILD_TESTS_PARALLEL_CONDITIONAL
   TESTPARALLEL_DIR=testpar
+else
+  TESTPARALLEL_DIR=
+endif
+if BUILD_TESTS_CONDITIONAL
+   TESTSERIAL_DIR=test
+else
+   TESTSERIAL_DIR=
 endif
 
 # Subdirectories in build order, not including examples directory
 ## Only recurse into subdirectories if HDF5 is configured to use Fortran.
 if BUILD_FORTRAN_CONDITIONAL
-   SUBDIRS=src test $(TESTPARALLEL_DIR)
+   SUBDIRS=src $(TESTSERIAL_DIR) $(TESTPARALLEL_DIR)
+
+# Test with just the native connector, with a single pass-through connector
+# and with a doubly-stacked pass-through.
+VOL_LIST = native "pass_through under_vol=0;under_info={}" \
+           "pass_through under_vol=505;under_info={under_vol=0;under_info={}}"
+
 endif
 
 # All directories that have Makefiles

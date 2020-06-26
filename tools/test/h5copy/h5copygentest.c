@@ -225,7 +225,7 @@ static void gent_compressed(hid_t loc_id)
 /*-------------------------------------------------------------------------
  * Function:    gent_named_vl
  *
- * Purpose:     Generate a variable lenght named datatype for a dataset in
+ * Purpose:     Generate a variable length named datatype for a dataset in
                 LOC_ID
  *
  *-------------------------------------------------------------------------
@@ -261,7 +261,7 @@ static void gent_named_vl(hid_t loc_id)
     H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
 
     /* close */
-    H5Dvlen_reclaim(tid,sid,H5P_DEFAULT,buf);
+    H5Treclaim(tid,sid,H5P_DEFAULT,buf);
     H5Sclose(sid);
     H5Dclose(did);
     H5Tclose(tid);
@@ -314,7 +314,7 @@ static void gent_nested_vl(hid_t loc_id)
     H5Dwrite(did, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
 
     /* close */
-    H5Dvlen_reclaim(tid2,sid,H5P_DEFAULT,buf);
+    H5Treclaim(tid2,sid,H5P_DEFAULT,buf);
     H5Sclose(sid);
     H5Dclose(did);
     H5Tclose(tid1);
@@ -326,7 +326,7 @@ static void gent_nested_vl(hid_t loc_id)
  * Function:    gent_att_compound_vlstr
  *
  * Purpose:     Generate a dataset and a group.
- *              Both has an attribute with a compound datatype consisting 
+ *              Both has an attribute with a compound datatype consisting
  *              of a variable length string
  *
  *-------------------------------------------------------------------------
@@ -337,15 +337,15 @@ static void gent_att_compound_vlstr(hid_t loc_id)
         int i;
         const char *v;
     } s1;
-    hsize_t dim[1] = {1};	/* Dimension size */
-    hid_t sid = -1; 		/* Dataspace ID */
-    hid_t tid = -1; 		/* Datatype ID */
-    hid_t aid = -1; 		/* Attribute ID */
-    hid_t did = -1; 		/* Dataset ID */
-    hid_t gid = -1; 		/* Group ID */
-    hid_t vl_str_tid = -1;	/* Variable length datatype ID */
-    hid_t cmpd_tid = -1;	/* Compound datatype ID */
-    hid_t null_sid = -1;	/* Null dataspace ID */
+    hsize_t dim[1] = {1};    /* Dimension size */
+    hid_t sid = H5I_INVALID_HID;         /* Dataspace ID */
+    hid_t tid = H5I_INVALID_HID;         /* Datatype ID */
+    hid_t aid = H5I_INVALID_HID;         /* Attribute ID */
+    hid_t did = H5I_INVALID_HID;         /* Dataset ID */
+    hid_t gid = H5I_INVALID_HID;         /* Group ID */
+    hid_t vl_str_tid = H5I_INVALID_HID;    /* Variable length datatype ID */
+    hid_t cmpd_tid = H5I_INVALID_HID;    /* Compound datatype ID */
+    hid_t null_sid = H5I_INVALID_HID;    /* Null dataspace ID */
     s1 buf;                 /* Buffer */
 
     buf.i = 9;
@@ -509,7 +509,7 @@ static herr_t gen_obj_ref(hid_t loc_id)
     sid = H5Screate_simple(1, dims1, NULL);
     if (sid < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -517,7 +517,7 @@ static herr_t gen_obj_ref(hid_t loc_id)
     oid = H5Dcreate2 (loc_id, OBJ_REF_DS, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (oid < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -525,7 +525,7 @@ static herr_t gen_obj_ref(hid_t loc_id)
     status = H5Dwrite(oid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -538,7 +538,7 @@ static herr_t gen_obj_ref(hid_t loc_id)
     oid = H5Gcreate2 (loc_id, OBJ_REF_GRP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (oid < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -547,14 +547,14 @@ static herr_t gen_obj_ref(hid_t loc_id)
     status = H5Rcreate (&or_data[0], loc_id, OBJ_REF_DS, H5R_OBJECT, (hid_t)-1);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
     status = H5Rcreate (&or_data[1], loc_id, OBJ_REF_GRP, H5R_OBJECT, (hid_t)-1);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -562,7 +562,7 @@ static herr_t gen_obj_ref(hid_t loc_id)
     sid = H5Screate_simple (1, dims2, NULL);
     if (sid < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -570,7 +570,7 @@ static herr_t gen_obj_ref(hid_t loc_id)
     oid = H5Dcreate2 (loc_id, "Dset_OBJREF", H5T_STD_REF_OBJ, sid, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
     if (oid < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -578,7 +578,7 @@ static herr_t gen_obj_ref(hid_t loc_id)
     status = H5Dwrite(oid, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, or_data);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -618,7 +618,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     sid = H5Screate_simple (2, dims2, NULL);
     if (sid < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -627,7 +627,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     oid2 = H5Dcreate2 (loc_id, REG_REF_DS2, H5T_STD_I8LE, sid, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
     if (oid2 < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -636,7 +636,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     status = H5Dwrite (oid2, H5T_NATIVE_CHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -645,7 +645,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     status = H5Sselect_elements (sid, H5S_SELECT_SET, 4, coords[0]);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -654,7 +654,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     status = H5Rcreate (&rr_data[0], loc_id, REG_REF_DS2, H5R_DATASET_REGION, sid);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -663,7 +663,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     status = H5Sselect_hyperslab (sid, H5S_SELECT_SET, start, stride, count, block);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Sselect_hyperslab failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Sselect_hyperslab failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -672,7 +672,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     status = H5Rcreate (&rr_data[1], loc_id, REG_REF_DS2, H5R_DATASET_REGION, sid);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -683,7 +683,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     sid = H5Screate_simple (1, dims1, NULL);
     if (sid < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -692,7 +692,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     oid1 = H5Dcreate2 (loc_id, REG_REF_DS1, H5T_STD_REF_DSETREG, sid, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
     if (oid1 < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -701,7 +701,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     status = H5Dwrite (oid1, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, rr_data);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -725,30 +725,30 @@ out:
  *------------------------------------------------------------------------*/
 static void Test_Obj_Copy(void)
 {
-    hid_t fid = -1;		        /* File id */
-    hid_t fapl_new = (-1);	        /* File access property id */
-    unsigned new_format;		/* New format or old format */
+    hid_t fid = H5I_INVALID_HID;                /* File id */
+    hid_t fapl_new = (-1);            /* File access property id */
+    unsigned new_format;        /* New format or old format */
 
     if((fapl_new = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
-        fprintf(stderr, "Error: H5Pcreate failed.\n");
+        HDfprintf(stderr, "Error: H5Pcreate failed.\n");
         goto out;
     }
     if(H5Pset_libver_bounds(fapl_new, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
-        fprintf(stderr, "Error: H5Pset_libver_bounds failed.\n");
+        HDfprintf(stderr, "Error: H5Pset_libver_bounds failed.\n");
         goto out;
     }
 
     /* Test with old & new format groups */
     for(new_format = FALSE; new_format <= TRUE; new_format++) {
-    
+
         /* Set the FAPL for the type of format */
         /* Create source file */
         if(new_format)
-	    fid = H5Fcreate(HDF_FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_new);
-	else
-	    fid = H5Fcreate(HDF_FILE1_NEW, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+            fid = H5Fcreate(HDF_FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_new);
+        else
+            fid = H5Fcreate(HDF_FILE1_NEW, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
         if(fid < 0) {
-            fprintf(stderr, "Error: H5Fcreate failed.\n");
+            HDfprintf(stderr, "Error: H5Fcreate failed.\n");
             goto out;
         }
 
@@ -756,7 +756,7 @@ static void Test_Obj_Copy(void)
         gent_empty_group(fid);
         gent_nested_datasets(fid);
         gent_nested_group(fid);
-	gent_att_compound_vlstr(fid);
+        gent_att_compound_vlstr(fid);
 
         H5Fclose(fid);
         fid = (-1);
@@ -786,19 +786,19 @@ static void Test_Ref_Copy(void)
     fid = H5Fcreate (HDF_FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid < 0)
     {
-        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", HDF_FILE2);
+        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", HDF_FILE2);
         goto out;
     }
 
     /* add object reference */
     status = gen_obj_ref(fid);
     if (status < 0)
-        fprintf(stderr, "Failed to generate object reference.\n");
+        HDfprintf(stderr, "Failed to generate object reference.\n");
 
     /* add region reference */
     status = gen_region_ref(fid);
     if (status < 0)
-        fprintf(stderr, "Failed to generate region reference.\n");
+        HDfprintf(stderr, "Failed to generate region reference.\n");
 
 out:
     /*-----------------------------------------------------------------------
@@ -829,7 +829,7 @@ static herr_t gen_extlink_trg(hid_t loc_id)
     gid = H5Gcreate2(loc_id, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -845,7 +845,7 @@ static herr_t gen_extlink_trg(hid_t loc_id)
      status = H5Tcommit2(loc_id, "datatype", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Tcommit2 failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Tcommit2 failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -878,7 +878,7 @@ static herr_t gen_extlink_src(hid_t loc_id)
     gid = H5Gcreate2(loc_id, "/group_ext", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -890,7 +890,7 @@ static herr_t gen_extlink_src(hid_t loc_id)
     status = H5Lcreate_external(HDF_EXT_TRG_FILE, "/simple", gid, "extlink_dset", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -899,7 +899,7 @@ static herr_t gen_extlink_src(hid_t loc_id)
     status = H5Lcreate_external(HDF_EXT_TRG_FILE, "/group", gid, "extlink_grp", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -908,7 +908,7 @@ static herr_t gen_extlink_src(hid_t loc_id)
     status = H5Lcreate_external(HDF_EXT_TRG_FILE, "/datatype", gid, "extlink_datatype", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -917,7 +917,7 @@ static herr_t gen_extlink_src(hid_t loc_id)
     status = H5Lcreate_external(HDF_EXT_TRG_FILE, "notyet", gid, "extlink_notyet1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -926,7 +926,7 @@ static herr_t gen_extlink_src(hid_t loc_id)
     status = H5Lcreate_external("notyet_file.h5", "notyet", gid, "extlink_notyet2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -953,26 +953,26 @@ static void Test_Extlink_Copy(void)
     fid1 = H5Fcreate (HDF_EXT_SRC_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid1 < 0)
     {
-        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", HDF_EXT_SRC_FILE);
+        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", HDF_EXT_SRC_FILE);
         goto out;
     }
 
     fid2 = H5Fcreate (HDF_EXT_TRG_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid2 < 0)
     {
-        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", HDF_EXT_TRG_FILE);
+        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", HDF_EXT_TRG_FILE);
         goto out;
     }
 
     /* add links to source external link file */
     status = gen_extlink_src(fid1);
     if (status < 0)
-        fprintf(stderr, "Error: %s> gen_extlink_src failed.\n", HDF_EXT_SRC_FILE);
+        HDfprintf(stderr, "Error: %s> gen_extlink_src failed.\n", HDF_EXT_SRC_FILE);
 
     /* add objs to target external link file */
     status = gen_extlink_trg(fid2);
     if (status < 0)
-        fprintf(stderr, "Error: %s> gen_extlink_trg failed.\n", HDF_EXT_TRG_FILE);
+        HDfprintf(stderr, "Error: %s> gen_extlink_trg failed.\n", HDF_EXT_TRG_FILE);
 
 out:
     /*-----------------------------------------------------------------------

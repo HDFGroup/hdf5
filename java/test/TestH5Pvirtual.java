@@ -429,4 +429,37 @@ public class TestH5Pvirtual {
                 try {H5.H5Dclose(H5did);} catch (Exception ex) {}
         }
     }
+
+    @Test
+    public void testH5Pset_virtual_prefix() {
+        String prefix = "tmp";
+        try {
+            H5.H5Pset_virtual_prefix(H5dapl_id, prefix);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5Pset_virtual_prefix: " + err);
+        }
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testH5Pset_virtual_prefix_null() throws Throwable{
+        H5.H5Pset_virtual_prefix(H5dapl_id, null);
+    }
+
+    @Test
+    public void testH5Pget_virtual_prefix() {
+        String prefix = "tmp";
+        String pre = "";
+
+        try {
+            H5.H5Pset_virtual_prefix(H5dapl_id, prefix);
+            pre = H5.H5Pget_virtual_prefix(H5dapl_id);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5Pget_virtual_prefix: " + err);
+        }
+        assertTrue("The prefix: ", prefix.equals(pre));
+    }
 }

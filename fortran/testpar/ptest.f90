@@ -16,10 +16,10 @@
 !
 
 PROGRAM parallel_test
-  USE hdf5
+  USE HDF5
   USE MPI
-  USE TH5_MISC 
-  
+  USE TH5_MISC
+
   IMPLICIT NONE
 
   INTEGER :: mpierror                             ! MPI hdferror flag

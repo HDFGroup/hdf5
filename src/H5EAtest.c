@@ -76,7 +76,7 @@ static herr_t H5EA__test_fill(void *nat_blk, size_t nelmts);
 static herr_t H5EA__test_encode(void *raw, const void *elmt, size_t nelmts, void *ctx);
 static herr_t H5EA__test_decode(const void *raw, void *elmt, size_t nelmts, void *ctx);
 static herr_t H5EA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt);
-static void *H5EA__test_crt_dbg_context(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t H5_ATTR_UNUSED obj_addr);
+static void *H5EA__test_crt_dbg_context(H5F_t H5_ATTR_UNUSED *f, haddr_t H5_ATTR_UNUSED obj_addr);
 static herr_t H5EA__test_dst_dbg_context(void *_ctx);
 
 /*********************/
@@ -279,7 +279,7 @@ END_FUNC(STATIC)  /* end H5EA__test_encode() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__test_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx))
+H5EA__test_decode(const void *_raw, void *_elmt, size_t nelmts, void H5_ATTR_NDEBUG_UNUSED *_ctx))
 
     /* Local variables */
 #ifndef NDEBUG
@@ -336,7 +336,7 @@ H5EA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
     HDassert(elmt);
 
     /* Print element */
-    sprintf(temp_str, "Element #%llu:", (unsigned long long)idx);
+    HDsprintf(temp_str, "Element #%llu:", (unsigned long long)idx);
     HDfprintf(stream, "%*s%-*s %llu\n", indent, "", fwidth, temp_str,
         (unsigned long long)*(const uint64_t *)elmt);
 
@@ -346,21 +346,21 @@ END_FUNC(STATIC)  /* end H5EA__test_debug() */
  * Function:    H5EA__test_crt_dbg_context
  *
  * Purpose:     Create context for debugging callback
- *              
+ *
  * Return:      Success:        non-NULL
  *              Failure:        NULL
- *              
+ *
  * Programmer:	Vailin Choi; August 2010
  *
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(STATIC, ERR,
 void *, NULL, NULL,
-H5EA__test_crt_dbg_context(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t H5_ATTR_UNUSED obj_addr))
-    
+H5EA__test_crt_dbg_context(H5F_t H5_ATTR_UNUSED *f, haddr_t H5_ATTR_UNUSED obj_addr))
+
     /* Local variables */
     H5EA__ctx_cb_t *ctx;              /* Context for callbacks */
-    
+
     /* Allocate new context structure */
     if(NULL == (ctx = H5FL_MALLOC(H5EA__ctx_cb_t)))
         H5E_THROW(H5E_CANTALLOC, "can't allocate extensible array client callback context")
@@ -401,7 +401,7 @@ END_FUNC(STATIC)  /* end H5EA__test_dst_dbg_context() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA_get_cparam_test
+ * Function:	H5EA__get_cparam_test
  *
  * Purpose:	Retrieve the parameters used to create the extensible array
  *
@@ -413,9 +413,9 @@ END_FUNC(STATIC)  /* end H5EA__test_dst_dbg_context() */
  *
  *-------------------------------------------------------------------------
  */
-BEGIN_FUNC(PRIV, NOERR,
+BEGIN_FUNC(PKG, NOERR,
 herr_t, SUCCEED, -,
-H5EA_get_cparam_test(const H5EA_t *ea, H5EA_create_t *cparam))
+H5EA__get_cparam_test(const H5EA_t *ea, H5EA_create_t *cparam))
 
     /* Check arguments. */
     HDassert(ea);
@@ -429,11 +429,11 @@ H5EA_get_cparam_test(const H5EA_t *ea, H5EA_create_t *cparam))
     cparam->data_blk_min_elmts = ea->hdr->cparam.data_blk_min_elmts;
     cparam->max_dblk_page_nelmts_bits = ea->hdr->cparam.max_dblk_page_nelmts_bits;
 
-END_FUNC(PRIV)  /* end H5EA_get_cparam_test() */
+END_FUNC(PKG)  /* end H5EA__get_cparam_test() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA_cmp_cparam_test
+ * Function:	H5EA__cmp_cparam_test
  *
  * Purpose:	Compare the parameters used to create the extensible array
  *
@@ -445,9 +445,9 @@ END_FUNC(PRIV)  /* end H5EA_get_cparam_test() */
  *
  *-------------------------------------------------------------------------
  */
-BEGIN_FUNC(PRIV, ERRCATCH,
+BEGIN_FUNC(PKG, ERRCATCH,
 int, 0, -,
-H5EA_cmp_cparam_test(const H5EA_create_t *cparam1, const H5EA_create_t *cparam2))
+H5EA__cmp_cparam_test(const H5EA_create_t *cparam1, const H5EA_create_t *cparam2))
 
     /* Check arguments. */
     HDassert(cparam1);
@@ -481,5 +481,5 @@ H5EA_cmp_cparam_test(const H5EA_create_t *cparam1, const H5EA_create_t *cparam2)
 
 CATCH
 
-END_FUNC(PRIV)  /* end H5EA_cmp_cparam_test() */
+END_FUNC(PKG)  /* end H5EA__cmp_cparam_test() */
 

@@ -32,6 +32,7 @@
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5HLprivate.h"	/* Local Heaps				*/
+#include "H5MMprivate.h"	/* Memory management			*/
 
 
 /****************/
@@ -91,7 +92,7 @@ H5FL_BLK_EXTERN(str_buf);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__ent_decode_vec(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, unsigned n)
+H5G__ent_decode_vec(const H5F_t *f, const uint8_t **pp, const uint8_t *p_end, H5G_entry_t *ent, unsigned n)
 {
     unsigned    u;                      /* Local index variable */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -104,9 +105,12 @@ H5G__ent_decode_vec(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, unsign
     HDassert(ent);
 
     /* decode entries */
-    for(u = 0; u < n; u++)
+    for(u = 0; u < n; u++) {
+        if(*pp > p_end)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "ran off the end of the image buffer")
         if(H5G_ent_decode(f, pp, ent + u) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode")
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -328,7 +332,7 @@ H5G__ent_copy(H5G_entry_t *dst, const H5G_entry_t *src, H5_copy_depth_t depth)
     HDassert(depth == H5_COPY_SHALLOW || depth == H5_COPY_DEEP);
 
     /* Copy the top level information */
-    HDmemcpy(dst, src, sizeof(H5G_entry_t));
+    H5MM_memcpy(dst, src, sizeof(H5G_entry_t));
 
     /* Deep copy the names */
     if(depth == H5_COPY_DEEP) {
@@ -387,9 +391,8 @@ H5G__ent_reset(H5G_entry_t *ent)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__ent_convert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, const char *name,
-    const H5O_link_t *lnk, H5O_type_t obj_type, const void *crt_info,
-    H5G_entry_t *ent)
+H5G__ent_convert(H5F_t *f, H5HL_t *heap, const char *name, const H5O_link_t *lnk,
+    H5O_type_t obj_type, const void *crt_info, H5G_entry_t *ent)
 {
     size_t	name_offset;            /* Offset of name in heap */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -408,7 +411,7 @@ H5G__ent_convert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, const char *name,
     /*
      * Add the new name to the heap.
      */
-    name_offset = H5HL_insert(f, dxpl_id, heap, HDstrlen(name) + 1, name);
+    name_offset = H5HL_insert(f, heap, HDstrlen(name) + 1, name);
     if(0 == name_offset || UFAIL == name_offset)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert symbol name into heap")
     ent->name_off = name_offset;
@@ -436,8 +439,7 @@ H5G__ent_convert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, const char *name,
                     targ_oloc.addr = lnk->u.hard.addr;
 
                     /* Check if a symbol table message exists */
-                    if((stab_exists = H5O_msg_exists(&targ_oloc, H5O_STAB_ID,
-                            dxpl_id)) < 0)
+                    if((stab_exists = H5O_msg_exists(&targ_oloc, H5O_STAB_ID)) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to check for STAB message")
 
                     HDassert(!stab_exists);
@@ -458,23 +460,20 @@ H5G__ent_convert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, const char *name,
                 targ_oloc.addr = lnk->u.hard.addr;
 
                 /* Get the object header */
-                if(NULL == (oh = H5O_protect(&targ_oloc, dxpl_id, H5AC__READ_ONLY_FLAG, FALSE)))
+                if(NULL == (oh = H5O_protect(&targ_oloc, H5AC__READ_ONLY_FLAG, FALSE)))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTPROTECT, FAIL, "unable to protect target object header")
 
                 /* Check if a symbol table message exists */
                 if((stab_exists = H5O_msg_exists_oh(oh, H5O_STAB_ID)) < 0) {
-                    if(H5O_unprotect(&targ_oloc, dxpl_id, oh, H5AC__NO_FLAGS_SET)
-                            < 0)
+                    if(H5O_unprotect(&targ_oloc, oh, H5AC__NO_FLAGS_SET) < 0)
                         HERROR(H5E_SYM, H5E_CANTUNPROTECT, "unable to release object header");
                     HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to check for STAB message")
                 } /* end if */
 
                 if(stab_exists) {
                     /* Read symbol table message */
-                    if(NULL == H5O_msg_read_oh(f, dxpl_id, oh, H5O_STAB_ID,
-                            &stab)) {
-                        if(H5O_unprotect(&targ_oloc, dxpl_id, oh,
-                                H5AC__NO_FLAGS_SET) < 0)
+                    if(NULL == H5O_msg_read_oh(f, oh, H5O_STAB_ID, &stab)) {
+                        if(H5O_unprotect(&targ_oloc, oh, H5AC__NO_FLAGS_SET) < 0)
                             HERROR(H5E_SYM, H5E_CANTUNPROTECT, "unable to release object header");
                         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to read STAB message")
                     } /* end if */
@@ -488,8 +487,7 @@ H5G__ent_convert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, const char *name,
                     /* No symbol table message, don't cache anything */
                     ent->type = H5G_NOTHING_CACHED;
 
-                if(H5O_unprotect(&targ_oloc, dxpl_id, oh, H5AC__NO_FLAGS_SET)
-                        < 0)
+                if(H5O_unprotect(&targ_oloc, oh, H5AC__NO_FLAGS_SET) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
             } /* end else */
             else
@@ -503,7 +501,7 @@ H5G__ent_convert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, const char *name,
                 size_t	lnk_offset;		/* Offset to sym-link value	*/
 
                 /* Insert link value into local heap */
-                if(UFAIL == (lnk_offset = H5HL_insert(f, dxpl_id, heap,
+                if(UFAIL == (lnk_offset = H5HL_insert(f, heap,
                         HDstrlen(lnk->u.soft.name) + 1, lnk->u.soft.name)))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write link value to local heap")
 

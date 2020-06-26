@@ -36,6 +36,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* Files		  	        */
 #include "H5Iprivate.h"		/* IDs			  		*/
@@ -202,7 +203,7 @@
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
         The 'set' callback function may be useful to range check the value being
-    set for the property or may perform some tranformation/translation of the
+    set for the property or may perform some transformation/translation of the
     value set.  The 'get' callback would then [probably] reverse the
     transformation, etc.  A single 'get' or 'set' callback could handle
     multiple properties by performing different actions based on the property
@@ -242,7 +243,7 @@ H5Pregister1(hid_t cls_id, const char *name, size_t size, void *def_value,
 
     /* Create the new property list class */
     orig_pclass = pclass;
-    if((ret_value = H5P_register(&pclass, name, size, def_value, prp_create, prp_set, prp_get, NULL, NULL, prp_delete, prp_copy, NULL, prp_close)) < 0)
+    if((ret_value = H5P__register(&pclass, name, size, def_value, prp_create, prp_set, prp_get, NULL, NULL, prp_delete, prp_copy, NULL, prp_close)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register property in class");
 
     /* Check if the property class changed and needs to be substituted in the ID */
@@ -255,7 +256,7 @@ H5Pregister1(hid_t cls_id, const char *name, size_t size, void *def_value,
         HDassert(old_pclass == orig_pclass);
 
         /* Close the previous class */
-        if(H5P_close_class(orig_pclass) < 0)
+        if(H5P__close_class(orig_pclass) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "unable to close original property class after substitution")
     } /* end if */
 
@@ -383,7 +384,7 @@ done:
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
         The 'set' callback function may be useful to range check the value being
-    set for the property or may perform some tranformation/translation of the
+    set for the property or may perform some transformation/translation of the
     value set.  The 'get' callback would then [probably] reverse the
     transformation, etc.  A single 'get' or 'set' callback could handle
     multiple properties by performing different actions based on the property
@@ -486,6 +487,54 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_version() */
 
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Pencode1
+ PURPOSE
+    Routine to convert the property values in a property list into a binary buffer
+ USAGE
+    herr_t H5Pencode1(plist_id, buf, nalloc)
+        hid_t plist_id;         IN: Identifier to property list to encode
+        void *buf:              OUT: buffer to gold the encoded plist
+        size_t *nalloc;         IN/OUT: size of buffer needed to encode plist
+ RETURNS
+    Returns non-negative on success, negative on failure.
+ DESCRIPTION
+    Encodes a property list into a binary buffer. If the buffer is NULL, then
+    the call will set the size needed to encode the plist in nalloc. Otherwise
+    the routine will encode the plist in buf.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc)
+{
+    H5P_genplist_t  *plist;         /* Property list to query */
+    hid_t temp_fapl_id = H5P_DEFAULT;
+    herr_t ret_value = SUCCEED;          /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i*x*z", plist_id, buf, nalloc);
+
+    /* Check arguments. */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&temp_fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
+
+    /* Call the internal encode routine */
+    if((ret_value = H5P__encode(plist, TRUE, buf, nalloc)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}   /* H5Pencode1() */
+
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_file_space
  *
@@ -514,9 +563,9 @@ H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t thresh
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid strategy")
     /*
      *  For 1.10.0 H5Pset_file_space:
-     *      If strategy is zero, the property is not changed; 
+     *      If strategy is zero, the property is not changed;
      *      the existing strategy is retained.
-     *      If threshold is zero, the property is not changed; 
+     *      If threshold is zero, the property is not changed;
      *      the existing threshold is retained.
      */
     if(!in_strategy)
@@ -530,7 +579,7 @@ H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t thresh
             new_persist = TRUE;
             new_threshold = in_threshold;
             break;
-    
+
         case H5F_FILE_SPACE_ALL:
             new_strategy = H5F_FSPACE_STRATEGY_FSM_AGGR;
             new_threshold = in_threshold;
@@ -543,7 +592,7 @@ H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t thresh
         case H5F_FILE_SPACE_VFD:
             new_strategy = H5F_FSPACE_STRATEGY_NONE;
             break;
-        
+
         case H5F_FILE_SPACE_NTYPES:
         case H5F_FILE_SPACE_DEFAULT:
         default:

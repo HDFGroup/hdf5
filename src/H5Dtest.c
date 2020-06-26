@@ -28,10 +28,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Dpkg.h"		/* Datasets 				*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Dpkg.h"             /* Datasets                                 */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 
 /****************/
@@ -88,7 +89,7 @@ H5D__layout_version_test(hid_t did, unsigned *version)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    if(NULL == (dset = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))
+    if(NULL == (dset = (H5D_t *)H5VL_object_verify(did, H5I_DATASET)))
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset")
 
     if(version)
@@ -127,7 +128,7 @@ H5D__layout_contig_size_test(hid_t did, hsize_t *size)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    if(NULL == (dset = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))
+    if(NULL == (dset = (H5D_t *)H5VL_object_verify(did, H5I_DATASET)))
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset")
 
     if(size) {
@@ -168,7 +169,7 @@ H5D__layout_compact_dirty_test(hid_t did, hbool_t *dirty)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    if(NULL == (dset = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))
+    if(NULL == (dset = (H5D_t *)H5VL_object_verify(did, H5I_DATASET)))
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset")
 
     if(dirty) {
@@ -211,7 +212,7 @@ H5D__layout_type_test(hid_t did, H5D_layout_t *layout_type)
     HDassert(layout_type);
 
     /* Check args */
-    if(NULL == (dset = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))
+    if(NULL == (dset = (H5D_t *)H5VL_object_verify(did, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     if(layout_type)
@@ -250,7 +251,7 @@ H5D__layout_idx_type_test(hid_t did, H5D_chunk_index_t *idx_type)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    if(NULL == (dset = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))
+    if(NULL == (dset = (H5D_t *)H5VL_object_verify(did, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
     if(dset->shared->layout.type != H5D_CHUNKED)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not chunked")
@@ -291,7 +292,7 @@ H5D__current_cache_size_test(hid_t did, size_t *nbytes_used, int *nused)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    if(NULL == (dset = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))
+    if(NULL == (dset = (H5D_t *)H5VL_object_verify(did, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     if(nbytes_used) {

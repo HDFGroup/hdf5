@@ -1,0 +1,10 @@
+JUnit version 4.11
+.testH5P_genprop_basic_class
+.testH5P_genprop_class_iter
+.testH5P_genprop_basic_class_prop
+.testH5P_genprop_basic_list_prop
+
+Time:  XXXX
+
+OK (4 tests)
+

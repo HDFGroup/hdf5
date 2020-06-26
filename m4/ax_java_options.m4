@@ -1,5 +1,5 @@
 # ===========================================================================
-#      http://www.gnu.org/software/autoconf-archive/ax_java_options.html
+#     https://www.gnu.org/software/autoconf-archive/ax_java_options.html
 # ===========================================================================
 #
 # SYNOPSIS
@@ -27,7 +27,7 @@
 #   and this notice are preserved. This file is offered as-is, without any
 #   warranty.
 
-#serial 6
+#serial 7
 
 AU_ALIAS([AC_JAVA_OPTIONS], [AX_JAVA_OPTIONS])
 AC_DEFUN([AX_JAVA_OPTIONS],[

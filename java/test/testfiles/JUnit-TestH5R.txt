@@ -1,0 +1,28 @@
+JUnit version 4.11
+.testH5Ropen_attr_Nullref
+.testH5Rget_attr_name_Nullref
+.testH5Ropen_region_Nullref
+.testH5Requal_Nullref1
+.testH5Requal_Nullref2
+.testH5Rget_object
+.testH5Rget_obj_type3_Nullref
+.testH5Ropen_object_Nullref
+.testH5Rdestroy_Nullref
+.testH5Rcreate_object_Nullname
+.testH5Rget_obj_type3
+.testH5Rget_name_Invalidloc
+.testH5Rcopy_Nullref1
+.testH5Rcreate_attr_Invalidloc
+.testH5Rget_file_name_Nullref
+.testH5Rget_obj_name_Nullref
+.testH5Rcreate_region_Nullname
+.testH5Rcreate_regionref_object
+.testH5Rcreate_attr_Nullattrname
+.testH5Rcreate_region_Invalidloc
+.testH5Rget_type_Nullref
+.testH5Rcreate_attr_Nullname
+
+Time:  XXXX
+
+OK (22 tests)
+

@@ -306,7 +306,7 @@ H5HF__huge_bt2_indir_remove(const void *nrecord, void *_udata)
     FUNC_ENTER_PACKAGE
 
     /* Free the space in the file for the object being removed */
-    if(H5MF_xfree(udata->hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, udata->dxpl_id, ((const H5HF_huge_bt2_indir_rec_t *)nrecord)->addr, ((const H5HF_huge_bt2_indir_rec_t *)nrecord)->len) < 0)
+    if(H5MF_xfree(udata->hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, ((const H5HF_huge_bt2_indir_rec_t *)nrecord)->addr, ((const H5HF_huge_bt2_indir_rec_t *)nrecord)->len) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free space for huge object on disk")
 
     /* Set the length of the object removed */
@@ -360,7 +360,7 @@ H5HF__huge_bt2_indir_compare(const void *_rec1, const void *_rec2, int *result)
 {
     FUNC_ENTER_STATIC_NOERR
 
-    *result = (int)(((const H5HF_huge_bt2_indir_rec_t *)_rec1)->id - 
+    *result = (int)(((const H5HF_huge_bt2_indir_rec_t *)_rec1)->id -
                     ((const H5HF_huge_bt2_indir_rec_t *)_rec2)->id);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -509,7 +509,7 @@ H5HF__huge_bt2_filt_indir_remove(const void *nrecord, void *_udata)
     FUNC_ENTER_PACKAGE
 
     /* Free the space in the file for the object being removed */
-    if(H5MF_xfree(udata->hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, udata->dxpl_id, ((const H5HF_huge_bt2_filt_indir_rec_t *)nrecord)->addr, ((const H5HF_huge_bt2_filt_indir_rec_t *)nrecord)->len) < 0)
+    if(H5MF_xfree(udata->hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, ((const H5HF_huge_bt2_filt_indir_rec_t *)nrecord)->addr, ((const H5HF_huge_bt2_filt_indir_rec_t *)nrecord)->len) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free space for huge object on disk")
 
     /* Set the length of the object removed */
@@ -563,7 +563,7 @@ H5HF__huge_bt2_filt_indir_compare(const void *_rec1, const void *_rec2, int *res
 {
     FUNC_ENTER_STATIC_NOERR
 
-    *result = (int)(((const H5HF_huge_bt2_filt_indir_rec_t *)_rec1)->id - 
+    *result = (int)(((const H5HF_huge_bt2_filt_indir_rec_t *)_rec1)->id -
                     ((const H5HF_huge_bt2_filt_indir_rec_t *)_rec2)->id);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -691,7 +691,7 @@ H5HF__huge_bt2_dir_remove(const void *nrecord, void *_udata)
     FUNC_ENTER_PACKAGE
 
     /* Free the space in the file for the object being removed */
-    if(H5MF_xfree(udata->hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, udata->dxpl_id, ((const H5HF_huge_bt2_indir_rec_t *)nrecord)->addr, ((const H5HF_huge_bt2_indir_rec_t *)nrecord)->len) < 0)
+    if(H5MF_xfree(udata->hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, ((const H5HF_huge_bt2_indir_rec_t *)nrecord)->addr, ((const H5HF_huge_bt2_indir_rec_t *)nrecord)->len) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free space for huge object on disk")
 
     /* Set the length of the object removed */
@@ -903,7 +903,7 @@ H5HF__huge_bt2_filt_dir_remove(const void *nrecord, void *_udata)
     FUNC_ENTER_PACKAGE
 
     /* Free the space in the file for the object being removed */
-    if(H5MF_xfree(udata->hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, udata->dxpl_id, ((const H5HF_huge_bt2_filt_dir_rec_t *)nrecord)->addr, ((const H5HF_huge_bt2_filt_dir_rec_t *)nrecord)->len) < 0)
+    if(H5MF_xfree(udata->hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, ((const H5HF_huge_bt2_filt_dir_rec_t *)nrecord)->addr, ((const H5HF_huge_bt2_filt_dir_rec_t *)nrecord)->len) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free space for huge object on disk")
 
     /* Set the length of the object removed */

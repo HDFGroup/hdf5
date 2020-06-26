@@ -1,0 +1,7 @@
+JUnit version 4.11
+.testH5Gget_obj_info_all
+
+Time:  XXXX
+
+OK (1 test)
+

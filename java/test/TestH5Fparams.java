@@ -22,10 +22,12 @@ import java.io.File;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
+import hdf.hdf5lib.exceptions.HDF5FunctionArgumentException;
 import hdf.hdf5lib.structs.H5F_info2_t;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -55,8 +57,8 @@ public class TestH5Fparams {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testH5Fis_hdf5_null() throws Throwable {
-        H5.H5Fis_hdf5(null);
+    public void testH5Fis_accessible_null() throws Throwable {
+        H5.H5Fis_accessible(null, -1);
     }
 
     @Test(expected = NullPointerException.class)
@@ -69,7 +71,7 @@ public class TestH5Fparams {
         H5.H5Funmount(-1, null);
     }
 
-    @Test
+    @Ignore
     public void testH5Fis_hdf5_text() {
         File txtFile = null;
         boolean isH5 = false;
@@ -190,7 +192,7 @@ public class TestH5Fparams {
                         HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
             }
             catch (Throwable err) {
-                fail("H5.H5Fopen: " + err);
+                fail("H5.H5Fcreate: " + err);
             }
 
             try {
@@ -205,6 +207,44 @@ public class TestH5Fparams {
         }
         catch (Exception e) {
            e.printStackTrace();
+        }
+        finally {
+            try {H5.H5Fclose(fid);} catch (Exception ex) {}
+        }
+    }
+
+    @Ignore//(expected = HDF5FunctionArgumentException.class)
+    public void testH5Fset_libver_bounds_invalidlow() throws Throwable {
+        long fid = -1;
+
+        try {
+            try {
+                fid = H5.H5Fcreate("test.h5", HDF5Constants.H5F_ACC_TRUNC,
+                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            }
+            catch (Throwable err) {
+                fail("H5.H5Fcreate: " + err);
+            }
+            H5.H5Fset_libver_bounds(fid, 5, HDF5Constants.H5F_LIBVER_LATEST);
+        }
+        finally {
+            try {H5.H5Fclose(fid);} catch (Exception ex) {}
+        }
+    }
+
+    @Ignore//(expected = HDF5FunctionArgumentException.class)
+    public void testH5Fset_libver_bounds_invalidhigh() throws Throwable {
+        long fid = -1;
+
+        try {
+            try {
+                fid = H5.H5Fcreate("test.h5", HDF5Constants.H5F_ACC_TRUNC,
+                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            }
+            catch (Throwable err) {
+                fail("H5.H5Fcreate: " + err);
+            }
+            H5.H5Fset_libver_bounds(fid, HDF5Constants.H5F_LIBVER_LATEST, HDF5Constants.H5F_LIBVER_LATEST+1);
         }
         finally {
             try {H5.H5Fclose(fid);} catch (Exception ex) {}

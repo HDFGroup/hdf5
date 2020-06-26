@@ -230,12 +230,12 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write,
                 unsigned chunk_num;        /* Object header chunk # for dataspace message */
 
                 /* Move the dataspace message to a new object header chunk */
-                if(H5O_msg_move_to_new_chunk_test(dsid, H5O_SDSPACE_ID) < 0)
+                if(H5O__msg_move_to_new_chunk_test(dsid, H5O_SDSPACE_ID) < 0)
                     return -1;
 
                 /* Retrieve the chunk # for the dataspace message */
                 chunk_num = UINT_MAX;
-                if(H5O_msg_get_chunkno_test(dsid, H5O_SDSPACE_ID, &chunk_num) < 0)
+                if(H5O__msg_get_chunkno_test(dsid, H5O_SDSPACE_ID, &chunk_num) < 0)
                     return -1;
                 /* Should not be in chunk #0 for now */
                 if(0 == chunk_num)
@@ -266,24 +266,24 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write,
 static void
 usage(void)
 {
-    printf("\n");
-    printf("Usage error!\n");
-    printf("\n");
-    printf("Usage: swmr_generator [-q] [-s] [-c <deflate compression level>]\n");
-    printf("    [-i <index type>] [-r <random seed>]\n");
-    printf("\n");
-    printf("NOTE: The random seed option is only used by the sparse test.  Other\n");
-    printf("      tests specify the random seed as a reader/writer option.\n");
-    printf("\n");
-    printf("<deflate compression level> should be -1 (for no compression) or 0-9\n");
-    printf("\n");
-    printf("<index type> should be b2 or ea\n");
-    printf("\n");
-    printf("Defaults to verbose (no '-q' given), no SWMR_WRITE mode (no '-s' given) no\n");
-    printf("compression ('-c -1'), v1 b-tree indexing (-i b1), and will generate a random\n");
-    printf("seed (no -r given).\n");
-    printf("\n");
-    HDexit(1);
+    HDprintf("\n");
+    HDprintf("Usage error!\n");
+    HDprintf("\n");
+    HDprintf("Usage: swmr_generator [-q] [-s] [-c <deflate compression level>]\n");
+    HDprintf("    [-i <index type>] [-r <random seed>]\n");
+    HDprintf("\n");
+    HDprintf("NOTE: The random seed option is only used by the sparse test.  Other\n");
+    HDprintf("      tests specify the random seed as a reader/writer option.\n");
+    HDprintf("\n");
+    HDprintf("<deflate compression level> should be -1 (for no compression) or 0-9\n");
+    HDprintf("\n");
+    HDprintf("<index type> should be b2 or ea\n");
+    HDprintf("\n");
+    HDprintf("Defaults to verbose (no '-q' given), no SWMR_WRITE mode (no '-s' given) no\n");
+    HDprintf("compression ('-c -1'), v1 b-tree indexing (-i b1), and will generate a random\n");
+    HDprintf("seed (no -r given).\n");
+    HDprintf("\n");
+    HDexit(EXIT_FAILURE);
 } /* end usage() */
 
 int main(int argc, const char *argv[])
@@ -358,7 +358,7 @@ int main(int argc, const char *argv[])
         HDfprintf(stderr, "\tcompression level = %d\n", comp_level);
         HDfprintf(stderr, "\tindex type = %s\n", index_type);
     } /* end if */
-    
+
     /* Set the random seed */
     if(!use_seed) {
         struct timeval t;
@@ -377,7 +377,7 @@ int main(int argc, const char *argv[])
     /* Generate file skeleton */
     if(gen_skeleton(FILENAME, verbose, swmr_write, comp_level, index_type, random_seed) < 0) {
         HDfprintf(stderr, "Error generating skeleton file!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     return 0;

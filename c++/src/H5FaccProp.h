@@ -20,9 +20,8 @@ namespace H5 {
 /*! \class FileAccPropList
     \brief Class FileAccPropList inherits from PropList and provides
     wrappers for the HDF5 file access property list.
-
-    Inheritance: PropList -> IdComponent
 */
+//  Inheritance: PropList -> IdComponent
 class H5_DLLCPP FileAccPropList : public PropList {
    public:
         ///\brief Default file access property list.
@@ -137,7 +136,7 @@ class H5_DLLCPP FileAccPropList : public PropList {
         ///\brief Returns this class name.
         virtual H5std_string fromClass () const { return("FileAccPropList"); }
 
-        // Copy constructor: creates a copy of a FileAccPropList object.
+        // Copy constructor: same as the original FileAccPropList.
         FileAccPropList(const FileAccPropList& original);
 
         // Creates a copy of an existing file access property list

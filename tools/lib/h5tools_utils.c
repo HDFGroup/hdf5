@@ -21,6 +21,10 @@
 #include "H5private.h"
 #include "h5trav.h"
 
+#ifdef H5_HAVE_ROS3_VFD
+#include "H5FDros3.h"
+#endif
+
 /* global variables */
 unsigned h5tools_nCols = 80;
 /* ``get_option'' variables */
@@ -49,24 +53,20 @@ unsigned outBuffOffset;
 FILE*    overflow_file = NULL;
 
 /* local functions */
-static void init_table(table_t **tbl);
+static void init_table(hid_t fid, table_t **tbl);
 #ifdef H5DUMP_DEBUG
-static void dump_table(char* tablename, table_t *table);
+static void dump_table(hid_t fid, char* tablename, table_t *table);
 #endif  /* H5DUMP_DEBUG */
-static void add_obj(table_t *table, haddr_t objno, const char *objname, hbool_t recorded);
+static void add_obj(table_t *table, const H5O_token_t *obj_token, const char *objname, hbool_t recorded);
 
 /*-------------------------------------------------------------------------
  * Function: parallel_print
  *
- * Purpose: wrapper for printf for use in parallel mode.
- *
- * Programmer: Leon Arber
- *
- * Date: December 1, 2004
- *
+ * Purpose:  wrapper for printf for use in parallel mode.
  *-------------------------------------------------------------------------
  */
-void parallel_print(const char* format, ...)
+void
+parallel_print(const char* format, ...)
 {
     int  bytes_written;
     va_list ap;
@@ -101,20 +101,14 @@ void parallel_print(const char* format, ...)
     HDva_end(ap);
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:    error_msg
+ * Function: error_msg
  *
- * Purpose: Print a nicely formatted error message to stderr flushing the
+ * Purpose:  Print a nicely formatted error message to stderr flushing the
  *              stdout stream first.
  *
- * Return:  Nothing
- *
- * Programmer:  Bill Wendling
- *              Tuesday, 20. February 2001
- *
- * Modifications:
- *
+ * Return:   Nothing
  *-------------------------------------------------------------------------
  */
 void
@@ -132,20 +126,14 @@ error_msg(const char *fmt, ...)
     HDva_end(ap);
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:    warn_msg
+ * Function: warn_msg
  *
- * Purpose: Print a nicely formatted warning message to stderr flushing
+ * Purpose:  Print a nicely formatted warning message to stderr flushing
  *              the stdout stream first.
  *
- * Return:  Nothing
- *
- * Programmer:  Bill Wendling
- *              Tuesday, 20. February 2001
- *
- * Modifications:
- *
+ * Return:   Nothing
  *-------------------------------------------------------------------------
  */
 void
@@ -163,14 +151,11 @@ warn_msg(const char *fmt, ...)
 }
 
 /*-------------------------------------------------------------------------
- * Function:  help_ref_msg
+ * Function: help_ref_msg
  *
- * Purpose: Print a message to refer help page
+ * Purpose:  Print a message to refer help page
  *
- * Return:  Nothing
- *
- * Modifications:
- *
+ * Return:   Nothing
  *-------------------------------------------------------------------------
  */
 void
@@ -180,26 +165,18 @@ help_ref_msg(FILE *output)
     HDfprintf(output, "see the <%s> entry in the 'HDF5 Reference Manual'.\n",h5tools_getprogname());
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:    get_option
+ * Function: get_option
  *
- * Purpose: Determine the command-line options a user specified. We can
- *      accept both short and long type command-lines.
+ * Purpose:  Determine the command-line options a user specified. We can
+ *           accept both short and long type command-lines.
  *
  * Return:  Success:    The short valued "name" of the command line
  *              parameter or EOF if there are no more
  *              parameters to process.
  *
- *      Failure:    A question mark.
- *
- * Programmer:  Bill Wendling
- *              Friday, 5. January 2001
- *
- * Modifications: Pedro Vicente
- *                October, 27 2008
- * Wilcard "*" argument type
- *
+ *          Failure:    A question mark.
  *-------------------------------------------------------------------------
  */
 int
@@ -349,18 +326,235 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
     return opt_opt;
 }
 
-
+
+/*****************************************************************************
+ *
+ * Function: parse_tuple()
+ *
+ * Purpose:
+ *
+ *     Create array of pointers to strings, identified as elements in a tuple
+ *     of arbitrary length separated by provided character.
+ *     ("tuple" because "nple" looks strange)
+ *
+ *     * Receives pointer to start of tuple sequence string, '('.
+ *     * Attempts to separate elements by token-character `sep`.
+ *         * If the separator character is preceded by a backslash '\',
+ *           the backslash is deleted and the separator is included in the
+ *           element string as any other character.
+ *     * To end an element with a backslash, escape the backslash, e.g.
+ *       "(myelem\\,otherelem) -> {"myelem\", "otherelem"}
+ *     * In all other cases, a backslash appearing not as part of "\\" or
+ *       "\<sep>" digraph will be included berbatim.
+ *     * Last two characters in the string MUST be ")\0".
+ *
+ *     * Generates a copy of the input string `start`, (src..")\0"), replacing
+ *       separators and close-paren with null charaters.
+ *         * This string is allocated at runtime and should be freed when done.
+ *     * Generates array of char pointers, and directs start of each element
+ *       (each pointer) into this copy.
+ *         * Each tuple element points to the start of its string (substring)
+ *           and ends with a null terminator.
+ *         * This array is allocated at runtime and should be freed when done.
+ *     * Reallocates and expands elements array during parsing.
+ *         * Initially allocated for 2 (plus one null entry), and grows by
+ *           powers of 2.
+ *     * The final 'slot' in the element array (elements[nelements], e.g.)
+ *       always points to NULL.
+ *     * The number of elements found and stored are passed out through pointer
+ *       to unsigned, `nelems`.
+ *
+ * Return:
+ *
+ *     FAIL    If malformed--does not look like a tuple "(...)"
+ *             or major error was encountered while parsing.
+ *     or
+ *     SUCCEED String looks properly formed "(...)" and no major errors.
+ *
+ *             Stores number of elements through pointer `nelems`.
+ *             Stores list of pointers to char (first char in each element
+ *                 string) through pointer `ptrs_out`.
+ *                 NOTE: `ptrs_out[nelems] == NULL` should be true.
+ *                 NOTE: list is malloc'd by function, and should be freed
+ *                       when done.
+ *             Stores "source string" for element pointers through `cpy_out`.
+ *                 NOTE: Each element substring is null-terminated.
+ *                 NOTE: There may be extra characters after the last element
+ *                           (past its null terminator), but is guaranteed to
+ *                           be null-terminated.
+ *                 NOTE: `cpy_out` string is malloc'd by function,
+ *                       and should be freed when done.
+ *
+ * Programmer: Jacob Smith
+ *             2017-11-10
+ *
+ * Changes: None.
+ *
+ *****************************************************************************
+ */
+herr_t
+parse_tuple(const char   *start,
+           int           sep,
+           char        **cpy_out,
+           unsigned     *nelems,
+           char       ***ptrs_out)
+{
+    char      *elem_ptr    = NULL;
+    char      *dest_ptr    = NULL;
+    unsigned   elems_count = 0;
+    char     **elems       = NULL; /* more like *elems[], but complier... */
+    char     **elems_re    = NULL; /* temporary pointer, for realloc */
+    char      *cpy         = NULL;
+    herr_t     ret_value   = SUCCEED;
+    unsigned   init_slots  = 2;
+
+
+
+    /*****************
+     * SANITY-CHECKS *
+     *****************/
+
+    /* must start with "("
+     */
+    if (start[0] != '(') {
+        ret_value = FAIL;
+        goto done;
+    }
+
+    /* must end with ")"
+     */
+    while (start[elems_count] != '\0') {
+        elems_count++;
+    }
+    if (start[elems_count - 1] != ')') {
+        ret_value = FAIL;
+        goto done;
+    }
+
+    elems_count = 0;
+
+
+
+    /***********
+     * PREPARE *
+     ***********/
+
+    /* create list
+     */
+    elems = (char **)HDmalloc(sizeof(char *) * (init_slots + 1));
+    if (elems == NULL) { ret_value = FAIL; goto done; } /* CANTALLOC */
+
+    /* create destination string
+     */
+    start++; /* advance past opening paren '(' */
+    cpy = (char *)HDmalloc(sizeof(char) * (HDstrlen(start))); /* no +1; less '(' */
+    if (cpy == NULL) { ret_value = FAIL; goto done; } /* CANTALLOC */
+
+    /* set pointers
+     */
+    dest_ptr = cpy; /* start writing copy here */
+    elem_ptr = cpy; /* first element starts here */
+    elems[elems_count++] = elem_ptr; /* set first element pointer into list */
+
+
+
+    /*********
+     * PARSE *
+     *********/
+
+    while (*start != '\0') {
+        /* For each character in the source string...
+         */
+        if (*start == '\\') {
+            /* Possibly an escape digraph.
+             */
+            if ((*(start + 1) == '\\') ||
+                (*(start + 1) == sep) )
+            {
+                /* Valid escape digraph of "\\" or "\<sep>".
+                 */
+                start++; /* advance past escape char '\' */
+                *(dest_ptr++) = *(start++); /* Copy subsequent char  */
+                                            /* and advance pointers. */
+            } else {
+               /* Not an accepted escape digraph.
+                * Copy backslash character.
+                */
+                *(dest_ptr++) = *(start++);
+            }
+        } else if (*start == sep) {
+            /* Non-escaped separator.
+             * Terminate elements substring in copy, record element, advance.
+             * Expand elements list if appropriate.
+             */
+            *(dest_ptr++) = 0; /* Null-terminate elem substring in copy */
+                               /* and advance pointer.                  */
+            start++; /* Advance src pointer past separator. */
+            elem_ptr = dest_ptr; /* Element pointer points to start of first */
+                                 /* character after null sep in copy.        */
+            elems[elems_count++] = elem_ptr; /* Set elem pointer in list */
+                                             /* and increment count.     */
+
+            /* Expand elements list, if necessary.
+             */
+            if (elems_count == init_slots) {
+                init_slots *= 2;
+                elems_re = (char **)realloc(elems, sizeof(char *) * \
+                                                   (init_slots + 1));
+                if (elems_re == NULL) {
+                    /* CANTREALLOC */
+                    ret_value = FAIL;
+                    goto done;
+                }
+                elems = elems_re;
+            }
+        } else if (*start == ')' && *(start + 1) == '\0') {
+            /* Found terminal, non-escaped close-paren. Last element.
+             * Write null terminator to copy.
+             * Advance source pointer to gently break from loop.
+             * Requred to prevent ")" from always being added to last element.
+             */
+            start++;
+        } else {
+            /* Copy character into destination. Advance pointers.
+             */
+            *(dest_ptr++) = *(start++);
+        }
+    }
+    *dest_ptr = '\0'; /* Null-terminate destination string. */
+    elems[elems_count] = NULL; /* Null-terminate elements list. */
+
+
+
+    /********************
+     * PASS BACK VALUES *
+     ********************/
+
+    *ptrs_out = elems;
+    *nelems   = elems_count;
+    *cpy_out  = cpy;
+
+done:
+    if (ret_value == FAIL) {
+        /* CLEANUP */
+        if (cpy)   free(cpy);
+        if (elems) free(elems);
+    }
+
+    return ret_value;
+
+} /* parse_tuple */
+
+
+
+
+
 /*-------------------------------------------------------------------------
- * Function:    indentation
+ * Function: indentation
  *
- * Purpose:     Print spaces for indentation
+ * Purpose:  Print spaces for indentation
  *
- * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
+ * Return:   void
  *-------------------------------------------------------------------------
  */
 void
@@ -376,19 +570,14 @@ indentation(unsigned x)
     }
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:    print_version
+ * Function: print_version
  *
- * Purpose:     Print the program name and the version information which is
- *      defined the same as the HDF5 library version.
+ * Purpose:  Print the program name and the version information which is
+ *           defined the same as the HDF5 library version.
  *
- * Return:      void
- *
- * Programmer:  unknown
- *
- * Modifications:
- *
+ * Return:   void
  *-------------------------------------------------------------------------
  */
 void
@@ -399,7 +588,7 @@ print_version(const char *progname)
            ((const char *)H5_VERS_SUBRELEASE)[0] ? "-" : "", H5_VERS_SUBRELEASE);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    init_table
  *
@@ -407,18 +596,14 @@ print_version(const char *progname)
  *              and committed types
  *
  * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
-init_table(table_t **tbl)
+init_table(hid_t fid, table_t **tbl)
 {
     table_t *table = (table_t *)HDmalloc(sizeof(table_t));
 
+    table->fid = fid;
     table->size = 20;
     table->nobjs = 0;
     table->objs = (obj_t *)HDmalloc(table->size * sizeof(obj_t));
@@ -426,7 +611,7 @@ init_table(table_t **tbl)
     *tbl = table;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    free_table
  *
@@ -434,11 +619,6 @@ init_table(table_t **tbl)
  *              and committed types
  *
  * Return:      void
- *
- * Programmer:  Paul Harten
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -455,56 +635,52 @@ free_table(table_t *table)
 }
 
 #ifdef H5DUMP_DEBUG
-
+
 /*-------------------------------------------------------------------------
  * Function:    dump_table
  *
  * Purpose:     display the contents of tables for debugging purposes
  *
  * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
-dump_table(char* tablename, table_t *table)
+dump_table(hid_t fid, char* tablename, table_t *table)
 {
     unsigned u;
+    char *obj_tok_str = NULL;
 
     PRINTSTREAM(rawoutstream,"%s: # of entries = %d\n", tablename,table->nobjs);
-    for (u = 0; u < table->nobjs; u++)
-        PRINTSTREAM(rawoutstream,"%a %s %d %d\n", table->objs[u].objno,
+    for (u = 0; u < table->nobjs; u++) {
+        H5VLconnector_token_to_str(fid, table->objs[u].obj_token, &obj_tok_str);
+
+        PRINTSTREAM(rawoutstream,"%s %s %d %d\n", obj_tok_str,
            table->objs[u].objname,
            table->objs[u].displayed, table->objs[u].recorded);
+
+        H5VLfree_token_str(fid, obj_tok_str);
+    }
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    dump_tables
  *
  * Purpose:     display the contents of tables for debugging purposes
  *
  * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
 dump_tables(find_objs_t *info)
 {
-    dump_table("group_table", info->group_table);
-    dump_table("dset_table", info->dset_table);
-    dump_table("type_table", info->type_table);
+    dump_table(info->fid, "group_table", info->group_table);
+    dump_table(info->fid, "dset_table", info->dset_table);
+    dump_table(info->fid, "type_table", info->type_table);
 }
 #endif  /* H5DUMP_DEBUG */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    search_obj
  *
@@ -513,26 +689,25 @@ dump_tables(find_objs_t *info)
  * Return:      Success:    an integer, the location of the object
  *
  *              Failure:    FAIL   if object is not found
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE obj_t *
-search_obj(table_t *table, haddr_t objno)
+search_obj(table_t *table, const H5O_token_t *obj_token)
 {
     unsigned u;
+    int token_cmp;
 
-    for(u = 0; u < table->nobjs; u++)
-        if(table->objs[u].objno == objno)
+    for(u = 0; u < table->nobjs; u++) {
+        if(H5Otoken_cmp(table->fid, &table->objs[u].obj_token, obj_token, &token_cmp) < 0)
+            return NULL;
+        if(!token_cmp)
             return &(table->objs[u]);
+    }
 
     return NULL;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    find_objs_cb
  *
@@ -541,16 +716,10 @@ search_obj(table_t *table, haddr_t objno)
  * Return:      Success:    SUCCEED
  *
  *              Failure:    FAIL
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen,
-    void *op_data)
+find_objs_cb(const char *name, const H5O_info2_t *oinfo, const char *already_seen, void *op_data)
 {
     find_objs_t *info = (find_objs_t*)op_data;
     herr_t ret_value = 0;
@@ -558,26 +727,26 @@ find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen
     switch(oinfo->type) {
         case H5O_TYPE_GROUP:
             if(NULL == already_seen)
-                add_obj(info->group_table, oinfo->addr, name, TRUE);
+                add_obj(info->group_table, &oinfo->token, name, TRUE);
             break;
 
         case H5O_TYPE_DATASET:
             if(NULL == already_seen) {
-                hid_t dset;
+                hid_t dset = H5I_INVALID_HID;
 
                 /* Add the dataset to the list of objects */
-                add_obj(info->dset_table, oinfo->addr, name, TRUE);
+                add_obj(info->dset_table, &oinfo->token, name, TRUE);
 
                 /* Check for a dataset that uses a named datatype */
                 if((dset = H5Dopen2(info->fid, name, H5P_DEFAULT)) >= 0) {
                     hid_t type = H5Dget_type(dset);
 
                     if(H5Tcommitted(type) > 0) {
-                        H5O_info_t type_oinfo;
+                        H5O_info2_t type_oinfo;
 
-                        H5Oget_info(type, &type_oinfo);
-                        if(search_obj(info->type_table, type_oinfo.addr) == NULL)
-                            add_obj(info->type_table, type_oinfo.addr, name, FALSE);
+                        H5Oget_info3(type, &type_oinfo, H5O_INFO_BASIC);
+                        if(search_obj(info->type_table, &type_oinfo.token) == NULL)
+                            add_obj(info->type_table, &type_oinfo.token, name, FALSE);
                     } /* end if */
 
                     H5Tclose(type);
@@ -592,8 +761,8 @@ find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen
             if(NULL == already_seen) {
                 obj_t *found_obj;
 
-                if((found_obj = search_obj(info->type_table, oinfo->addr)) == NULL)
-                    add_obj(info->type_table, oinfo->addr, name, TRUE);
+                if((found_obj = search_obj(info->type_table, &oinfo->token)) == NULL)
+                    add_obj(info->type_table, &oinfo->token, name, TRUE);
                 else {
                     /* Use latest version of name */
                     HDfree(found_obj->objname);
@@ -605,6 +774,7 @@ find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen
             } /* end if */
             break;
 
+        case H5O_TYPE_MAP:
         case H5O_TYPE_UNKNOWN:
         case H5O_TYPE_NTYPES:
         default:
@@ -614,7 +784,7 @@ find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen
     return ret_value;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    init_objs
  *
@@ -623,21 +793,18 @@ find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen
  * Return:      Success:    SUCCEED
  *
  *              Failure:    FAIL
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
     table_t **dset_table, table_t **type_table)
 {
+    herr_t ret_value = SUCCEED;
+
     /* Initialize the tables */
-    init_table(group_table);
-    init_table(dset_table);
-    init_table(type_table);
+    init_table(fid, group_table);
+    init_table(fid, dset_table);
+    init_table(fid, type_table);
 
     /* Init the find_objs_t */
     info->fid = fid;
@@ -646,10 +813,23 @@ init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
     info->dset_table = *dset_table;
 
     /* Find all shared objects */
-    return(h5trav_visit(fid, "/", TRUE, TRUE, find_objs_cb, NULL, info));
+    if((ret_value = h5trav_visit(fid, "/", TRUE, TRUE, find_objs_cb, NULL, info, H5O_INFO_BASIC)) < 0)
+        H5TOOLS_GOTO_ERROR(FAIL, "finding shared objects failed");
+
+done:
+    /* Release resources */
+    if(ret_value < 0) {
+        free_table(*group_table);
+        info->group_table = NULL;
+        free_table(*type_table);
+        info->type_table = NULL;
+        free_table(*dset_table);
+        info->dset_table = NULL;
+    }
+    return ret_value;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    add_obj
  *
@@ -657,15 +837,10 @@ init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
  *              realloc the table if necessary
  *
  * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
-add_obj(table_t *table, haddr_t objno, const char *objname, hbool_t record)
+add_obj(table_t *table, const H5O_token_t *obj_token, const char *objname, hbool_t record)
 {
     size_t u;
 
@@ -679,13 +854,13 @@ add_obj(table_t *table, haddr_t objno, const char *objname, hbool_t record)
     u = table->nobjs++;
 
     /* Set information about object */
-    table->objs[u].objno = objno;
+    HDmemcpy(&table->objs[u].obj_token, obj_token, sizeof(H5O_token_t));
     table->objs[u].objname = HDstrdup(objname);
     table->objs[u].recorded = record;
     table->objs[u].displayed = 0;
 }
 
-
+
 #ifndef H5_HAVE_TMPFILE
 /*-------------------------------------------------------------------------
  * Function:    tmpfile
@@ -695,11 +870,6 @@ add_obj(table_t *table, haddr_t objno, const char *objname, hbool_t record)
  *
  * Return:      a stream description when succeeds.
  *              NULL if fails.
- *
- * Programmer:  Albert Cheng, 2005/8/9
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 FILE *
@@ -723,70 +893,61 @@ tmpfile(void)
  *
  * Return:
  *   2 : given pathname is object
- *   1 : Succed to get link info.
+ *   1 : Succeed to get link info.
  *   0 : Detected as a dangling link
  *  -1 : H5 API failed.
  *
  * NOTE:
  *  link_info->trg_path must be freed out of this function
- *
- * Programmer: Jonathan Kim
- *
- * Date: Feb 8, 2010
  *-------------------------------------------------------------------------*/
 int
-H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_t *link_info,
-    hbool_t get_obj_type)
+H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_t *link_info, hbool_t get_obj_type)
 {
     htri_t l_ret;
-    H5O_info_t trg_oinfo;
+    H5O_info2_t trg_oinfo;
     hid_t fapl = H5P_DEFAULT;
     hid_t lapl = H5P_DEFAULT;
-    int ret = -1; /* init to fail */
+    int   ret_value = -1; /* init to fail */
 
     /* init */
     link_info->trg_type = H5O_TYPE_UNKNOWN;
 
     /* if path is root, return group type */
-    if(!HDstrcmp(linkpath,"/"))
-    {
+    if(!HDstrcmp(linkpath,"/")) {
         link_info->trg_type = H5O_TYPE_GROUP;
-        ret = 2;
-        goto out;
+        H5TOOLS_GOTO_DONE(2);
     }
 
     /* check if link itself exist */
     if(H5Lexists(file_id, linkpath, H5P_DEFAULT) <= 0) {
         if(link_info->opt.msg_mode == 1)
             parallel_print("Warning: link <%s> doesn't exist \n",linkpath);
-        goto out;
+        H5TOOLS_GOTO_DONE(FAIL);
     } /* end if */
 
     /* get info from link */
-    if(H5Lget_info(file_id, linkpath, &(link_info->linfo), H5P_DEFAULT) < 0) {
+    if(H5Lget_info2(file_id, linkpath, &(link_info->linfo), H5P_DEFAULT) < 0) {
         if(link_info->opt.msg_mode == 1)
             parallel_print("Warning: unable to get link info from <%s>\n",linkpath);
-        goto out;
+        H5TOOLS_GOTO_DONE(FAIL);
     } /* end if */
 
     /* given path is hard link (object) */
-    if(link_info->linfo.type == H5L_TYPE_HARD) {
-        ret = 2;
-        goto out;
-    } /* end if */
+    if(link_info->linfo.type == H5L_TYPE_HARD)
+        H5TOOLS_GOTO_DONE(2);
 
     /* trg_path must be freed out of this function when finished using */
     if((link_info->trg_path = (char*)HDcalloc(link_info->linfo.u.val_size, sizeof(char))) == NULL) {
         if(link_info->opt.msg_mode == 1)
             parallel_print("Warning: unable to allocate buffer for <%s>\n",linkpath);
-        goto out;
+        H5TOOLS_GOTO_DONE(FAIL);
     } /* end if */
 
     /* get link value */
     if(H5Lget_val(file_id, linkpath, (void *)link_info->trg_path, link_info->linfo.u.val_size, H5P_DEFAULT) < 0) {
         if(link_info->opt.msg_mode == 1)
             parallel_print("Warning: unable to get link value from <%s>\n",linkpath);
-        goto out;
+        H5TOOLS_GOTO_DONE(FAIL);
     } /* end if */
 
     /*-----------------------------------------------------
@@ -795,13 +956,13 @@ H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_
      */
     if(link_info->linfo.type == H5L_TYPE_EXTERNAL) {
         if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-            goto out;
+            H5TOOLS_GOTO_DONE(FAIL);
         if(H5Pset_fapl_sec2(fapl) < 0)
-            goto out;
+            H5TOOLS_GOTO_DONE(FAIL);
         if((lapl = H5Pcreate(H5P_LINK_ACCESS)) < 0)
-            goto out;
+            H5TOOLS_GOTO_DONE(FAIL);
         if(H5Pset_elink_fapl(lapl, fapl) < 0)
-            goto out;
+            H5TOOLS_GOTO_DONE(FAIL);
     } /* end if */
 
     /* Check for retrieving object info */
@@ -814,61 +975,63 @@ H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_
 
         /* detect dangling link */
         if(l_ret == FALSE) {
-            ret = 0;
-            goto out;
-        } /* end if */
-        /* function failed */
-        else if(l_ret < 0)
-            goto out;
+            H5TOOLS_GOTO_DONE(0);
+        }
+        else if(l_ret < 0) {       /* function failed */
+            H5TOOLS_GOTO_DONE(FAIL);
+        }
 
         /* get target object info */
-        if(H5Oget_info_by_name(file_id, linkpath, &trg_oinfo, lapl) < 0) {
+        if(H5Oget_info_by_name3(file_id, linkpath, &trg_oinfo, H5O_INFO_BASIC, lapl) < 0) {
             if(link_info->opt.msg_mode == 1)
                 parallel_print("Warning: unable to get object information for <%s>\n", linkpath);
-            goto out;
+            H5TOOLS_GOTO_DONE(FAIL);
         } /* end if */
 
         /* check unknown type */
         if(trg_oinfo.type < H5O_TYPE_GROUP || trg_oinfo.type >=H5O_TYPE_NTYPES) {
             if(link_info->opt.msg_mode == 1)
                 parallel_print("Warning: target object of <%s> is unknown type\n", linkpath);
-            goto out;
+            H5TOOLS_GOTO_DONE(FAIL);
         }  /* end if */
 
         /* set target obj type to return */
+        HDmemcpy(&link_info->obj_token, &trg_oinfo.token, sizeof(H5O_token_t));
         link_info->trg_type = trg_oinfo.type;
-        link_info->objno = trg_oinfo.addr;
         link_info->fileno = trg_oinfo.fileno;
     } /* end if */
     else
         link_info->trg_type = H5O_TYPE_UNKNOWN;
 
     /* succeed */
-    ret = 1;
+    ret_value = 1;
 
-out:
+done:
     if(fapl != H5P_DEFAULT)
         H5Pclose(fapl);
     if(lapl != H5P_DEFAULT)
         H5Pclose(lapl);
 
-    return ret;
+    return ret_value;
 } /* end H5tools_get_symlink_info() */
 
 /*-------------------------------------------------------------------------
  * Audience:    Public
- * Chapter:     H5Tools Library
+ *
  * Purpose:     Initialize the name and operation status of the H5 Tools library
+ *
  * Description:
  *      These are utility functions to set/get the program name and operation status.
  *-------------------------------------------------------------------------
  */
-void h5tools_setprogname(const char *Progname)
+void
+h5tools_setprogname(const char *Progname)
 {
     h5tools_progname = Progname;
 }
 
-void h5tools_setstatus(int D_status)
+void
+h5tools_setstatus(int D_status)
 {
     h5tools_d_status = D_status;
 }
@@ -892,25 +1055,19 @@ h5tools_getstatus(void)
  * This can be called from each tools main() as part of initial act.
  * Note: this is more of debugging purpose for now.
  */
-int h5tools_getenv_update_hyperslab_bufsize(void)
+int
+h5tools_getenv_update_hyperslab_bufsize(void)
 {
     const char *env_str = NULL;
     long hyperslab_bufsize_mb;
+    int  ret_value = 1;
 
     /* check if environment variable is set for the hyperslab buffer size */
-    if (NULL != (env_str = HDgetenv ("H5TOOLS_BUFSIZE")))
-    {
+    if (NULL != (env_str = HDgetenv ("H5TOOLS_BUFSIZE"))) {
         errno = 0;
         hyperslab_bufsize_mb = HDstrtol(env_str, (char**)NULL, 10);
         if (errno != 0 || hyperslab_bufsize_mb <= 0)
-        {
-            /* TODO: later when pubilshed
-            HDfprintf(rawerrorstream,"Error: Invalid environment variable \"H5TOOLS_BUFSIZE\" : %s\n", env_str);
-            */
-
-            goto error;
-        }
-
+            H5TOOLS_GOTO_ERROR(FAIL, "hyperslab buffer size failed");
 
         /* convert MB to byte */
         H5TOOLS_BUFSIZE = (hsize_t)hyperslab_bufsize_mb * 1024 * 1024;
@@ -918,9 +1075,311 @@ int h5tools_getenv_update_hyperslab_bufsize(void)
         H5TOOLS_MALLOCSIZE = MAX(H5TOOLS_BUFSIZE, H5TOOLS_MALLOCSIZE);
     }
 
-    return (1);
-
-error:
-    return (-1);
+done:
+    return ret_value;
 }
+
+#ifdef H5_HAVE_ROS3_VFD
+/*----------------------------------------------------------------------------
+ *
+ * Function: h5tools_parse_ros3_fapl_tuple
+ *
+ * Purpose:  A convenience function that parses a string containing a tuple
+ *           of S3 VFD credential information and then passes the result to
+ *           `h5tools_populate_ros3_fapl()` in order to setup a valid
+ *           configuration for the S3 VFD.
+ *
+ * Return:   SUCCEED/FAIL
+ *
+ *----------------------------------------------------------------------------
+ */
+herr_t
+h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim,
+    H5FD_ros3_fapl_t *fapl_config_out)
+{
+    const char  *ccred[3];
+    unsigned     nelems     = 0;
+    char        *start      = NULL;
+    char        *s3cred_src = NULL;
+    char       **s3cred     = NULL;
+    herr_t       ret_value  = SUCCEED;
+
+    /* Attempt to parse S3 credentials tuple */
+    if (parse_tuple(tuple_str, delim, &s3cred_src, &nelems, &s3cred) < 0)
+        H5TOOLS_GOTO_ERROR(FAIL, "failed to parse S3 VFD info tuple");
+
+    /* Sanity-check tuple count */
+    if (nelems != 3)
+        H5TOOLS_GOTO_ERROR(FAIL, "invalid S3 VFD credentials");
+
+    ccred[0] = (const char *)s3cred[0];
+    ccred[1] = (const char *)s3cred[1];
+    ccred[2] = (const char *)s3cred[2];
+
+    if (0 == h5tools_populate_ros3_fapl(fapl_config_out, ccred))
+        H5TOOLS_GOTO_ERROR(FAIL, "failed to populate S3 VFD FAPL config");
+
+done:
+    if (s3cred)
+        HDfree(s3cred);
+    if (s3cred_src)
+        HDfree(s3cred_src);
+
+    return ret_value;
+}
+
+
+/*----------------------------------------------------------------------------
+ *
+ * Function: h5tools_populate_ros3_fapl()
+ *
+ * Purpose:
+ *
+ *     Set the values of a ROS3 fapl configuration object.
+ *
+ *     If the values pointer is NULL, sets fapl target `fa` to a default
+ *     (valid, current-version, non-authenticating) fapl config.
+ *
+ *     If `values` pointer is _not_ NULL, expects `values` to contain at least
+ *     three non-null pointers to null-terminated strings, corresponding to:
+ *     {   aws_region,
+ *         secret_id,
+ *         secret_key,
+ *     }
+ *     If all three strings are empty (""), the default fapl will be default.
+ *     Both aws_region and secret_id values must be both empty or both
+ *         populated. If
+ *     Only secret_key is allowed to be empty (the empty string, "").
+ *     All values are checked against overflow as defined in the ros3 vfd
+ *     header file; if a value overruns the permitted space, FAIL is returned
+ *     and the function aborts without resetting the fapl to values initially
+ *     present.
+ *
+ * Return:
+ *
+ *     0 (failure) if...
+ *         * Read-Only S3 VFD is not enabled.
+ *         * NULL fapl pointer: (NULL, {...} )
+ *         * Warning: In all cases below, fapl will be set as "default"
+ *                    before error occurs.
+ *         * NULL value strings: (&fa, {NULL?, NULL? NULL?, ...})
+ *         * Incomplete fapl info:
+ *             * empty region, non-empty id, key either way
+ *                 * (&fa, {"", "...", "?"})
+ *             * empty id, non-empty region, key either way
+ *                 * (&fa, {"...", "", "?"})
+ *             * "non-empty key and either id or region empty
+ *                 * (&fa, {"",    "",    "...")
+ *                 * (&fa, {"",    "...", "...")
+ *                 * (&fa, {"...", "",    "...")
+ *             * Any string would overflow allowed space in fapl definition.
+ *     or
+ *     1 (success)
+ *         * Sets components in fapl_t pointer, copying strings as appropriate.
+ *         * "Default" fapl (valid version, authenticate->False, empty strings)
+ *             * `values` pointer is NULL
+ *                 * (&fa, NULL)
+ *             * first three strings in `values` are empty ("")
+ *                 * (&fa, {"", "", "", ...}
+ *         * Authenticating fapl
+ *             * region, id, and optional key provided
+ *                 * (&fa, {"...", "...", ""})
+ *                 * (&fa, {"...", "...", "..."})
+ *
+ * Programmer: Jacob Smith
+ *             2017-11-13
+ *
+ *----------------------------------------------------------------------------
+ */
+int
+h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t  *fa,
+                           const char       **values)
+{
+    int show_progress = 0; /* set to 1 for debugging */
+    int ret_value     = 1; /* 1 for success, 0 for failure           */
+                           /* e.g.? if (!populate()) { then failed } */
+
+    if (show_progress) {
+        HDprintf("called h5tools_populate_ros3_fapl\n");
+    }
+
+    if (fa == NULL) {
+        if (show_progress) {
+            HDprintf("  ERROR: null pointer to fapl_t\n");
+        }
+        ret_value = 0;
+        goto done;
+    }
+
+    if (show_progress) {
+        HDprintf("  preset fapl with default values\n");
+    }
+    fa->version       = H5FD_CURR_ROS3_FAPL_T_VERSION;
+    fa->authenticate  = FALSE;
+    *(fa->aws_region) = '\0';
+    *(fa->secret_id)  = '\0';
+    *(fa->secret_key) = '\0';
+
+    /* sanity-check supplied values
+     */
+    if (values != NULL) {
+        if (values[0] == NULL) {
+            if (show_progress) {
+                HDprintf("  ERROR: aws_region value cannot be NULL\n");
+            }
+            ret_value = 0;
+            goto done;
+        }
+        if (values[1] == NULL) {
+            if (show_progress) {
+                HDprintf("  ERROR: secret_id value cannot be NULL\n");
+            }
+            ret_value = 0;
+            goto done;
+        }
+        if (values[2] == NULL) {
+            if (show_progress) {
+                HDprintf("  ERROR: secret_key value cannot be NULL\n");
+            }
+            ret_value = 0;
+            goto done;
+        }
+
+        /* if region and ID are supplied (key optional), write to fapl...
+         * fail if value would overflow
+         */
+        if (*values[0] != '\0' &&
+            *values[1] != '\0')
+        {
+            if (HDstrlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN) {
+                if (show_progress) {
+                    HDprintf("  ERROR: aws_region value too long\n");
+                }
+                ret_value = 0;
+                goto done;
+            }
+            HDmemcpy(fa->aws_region,                     values[0],
+                     (HDstrlen(values[0]) + 1));
+            if (show_progress) {
+                HDprintf("  aws_region set\n");
+            }
+
+
+            if (HDstrlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN) {
+                if (show_progress) {
+                    HDprintf("  ERROR: secret_id value too long\n");
+                }
+                ret_value = 0;
+                goto done;
+            }
+            HDmemcpy(fa->secret_id,
+                     values[1],
+                     (HDstrlen(values[1]) + 1));
+            if (show_progress) {
+                HDprintf("  secret_id set\n");
+            }
+
+            if (HDstrlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN) {
+                if (show_progress) {
+                    HDprintf("  ERROR: secret_key value too long\n");
+                }
+                ret_value = 0;
+                goto done;
+            }
+            HDmemcpy(fa->secret_key,
+                     values[2],
+                     (HDstrlen(values[2]) + 1));
+            if (show_progress) {
+                HDprintf("  secret_key set\n");
+            }
+
+            fa->authenticate = TRUE;
+            if (show_progress) {
+                HDprintf("  set to authenticate\n");
+            }
+
+        } else if (*values[0] != '\0' ||
+                   *values[1] != '\0' ||
+                   *values[2] != '\0')
+        {
+            if (show_progress) {
+                HDprintf(
+                    "  ERROR: invalid assortment of empty/non-empty values\n"
+                );
+            }
+            ret_value = 0;
+            goto done;
+        }
+    } /* values != NULL */
+
+done:
+    return ret_value;
+} /* h5tools_populate_ros3_fapl */
+#endif /* H5_HAVE_ROS3_VFD */
+
+#ifdef H5_HAVE_LIBHDFS
+/*----------------------------------------------------------------------------
+ *
+ * Function: h5tools_parse_hdfs_fapl_tuple
+ *
+ * Purpose:  A convenience function that parses a string containing a tuple
+ *           of HDFS VFD configuration information.
+ *
+ * Return:   SUCCEED/FAIL
+ *
+ *----------------------------------------------------------------------------
+ */
+herr_t
+h5tools_parse_hdfs_fapl_tuple(const char *tuple_str, int delim,
+    H5FD_hdfs_fapl_t *fapl_config_out)
+{
+    unsigned long   k         = 0;
+    unsigned        nelems    = 0;
+    char           *props_src = NULL;
+    char          **props     = NULL;
+    herr_t          ret_value = SUCCEED;
+
+    /* Attempt to parse HDFS configuration tuple */
+    if (parse_tuple(tuple_str, delim, &props_src, &nelems, &props) < 0)
+        H5TOOLS_GOTO_ERROR(FAIL, "failed to parse HDFS VFD configuration tuple");
+
+    /* Sanity-check tuple count */
+    if (nelems != 5)
+        H5TOOLS_GOTO_ERROR(FAIL, "invalid HDFS VFD configuration");
+
+    /* Populate fapl configuration structure with given properties.
+     * WARNING: No error-checking is done on length of input strings...
+     *          Silent overflow is possible, albeit unlikely.
+     */
+    if (HDstrncmp(props[0], "", 1)) {
+        HDstrncpy(fapl_config_out->namenode_name, (const char *)props[0], HDstrlen(props[0]));
+    }
+    if (HDstrncmp(props[1], "", 1)) {
+        k = strtoul((const char *)props[1], NULL, 0);
+        if (errno == ERANGE)
+            H5TOOLS_GOTO_ERROR(FAIL, "supposed port number wasn't");
+        fapl_config_out->namenode_port = (int32_t)k;
+    }
+    if (HDstrncmp(props[2], "", 1)) {
+        HDstrncpy(fapl_config_out->kerberos_ticket_cache, (const char *)props[2], HDstrlen(props[2]));
+    }
+    if (HDstrncmp(props[3], "", 1)) {
+        HDstrncpy(fapl_config_out->user_name, (const char *)props[3], HDstrlen(props[3]));
+    }
+    if (HDstrncmp(props[4], "", 1)) {
+        k = HDstrtoul((const char *)props[4], NULL, 0);
+        if (errno == ERANGE)
+            H5TOOLS_GOTO_ERROR(FAIL, "supposed buffersize number wasn't");
+        fapl_config_out->stream_buffer_size = (int32_t)k;
+    }
+
+done:
+    if (props)
+        HDfree(props);
+    if (props_src)
+        HDfree(props_src);
+
+    return ret_value;
+}
+#endif /* H5_HAVE_LIBHDFS */
 

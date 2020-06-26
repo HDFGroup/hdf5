@@ -262,8 +262,9 @@ H5_DLLVAR hid_t H5T_IEEE_F64LE_g;
 #define H5T_STD_B32LE		(H5OPEN H5T_STD_B32LE_g)
 #define H5T_STD_B64BE		(H5OPEN H5T_STD_B64BE_g)
 #define H5T_STD_B64LE		(H5OPEN H5T_STD_B64LE_g)
-#define H5T_STD_REF_OBJ	        (H5OPEN H5T_STD_REF_OBJ_g)
+#define H5T_STD_REF_OBJ         (H5OPEN H5T_STD_REF_OBJ_g)
 #define H5T_STD_REF_DSETREG     (H5OPEN H5T_STD_REF_DSETREG_g)
+#define H5T_STD_REF             (H5OPEN H5T_STD_REF_g)
 H5_DLLVAR hid_t H5T_STD_I8BE_g;
 H5_DLLVAR hid_t H5T_STD_I8LE_g;
 H5_DLLVAR hid_t H5T_STD_I16BE_g;
@@ -290,6 +291,7 @@ H5_DLLVAR hid_t H5T_STD_B64BE_g;
 H5_DLLVAR hid_t H5T_STD_B64LE_g;
 H5_DLLVAR hid_t H5T_STD_REF_OBJ_g;
 H5_DLLVAR hid_t H5T_STD_REF_DSETREG_g;
+H5_DLLVAR hid_t H5T_STD_REF_g;
 
 /*
  * Types which are particular to Unix.
@@ -591,6 +593,7 @@ H5_DLL H5T_conv_t H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata);
 H5_DLL htri_t H5Tcompiler_conv(hid_t src_id, hid_t dst_id);
 H5_DLL herr_t H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts,
 			  void *buf, void *background, hid_t plist_id);
+H5_DLL herr_t H5Treclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *

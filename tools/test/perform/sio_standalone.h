@@ -47,13 +47,6 @@
 #define MAX3(a,b,c)             MAX(a,MAX(b,c))
 #define MAX4(a,b,c,d)           MAX(MAX(a,b),MAX(c,d))
 
-/*
- * A macro to portably increment enumerated types.
- */
-#ifndef H5_INC_ENUM
-#  define H5_INC_ENUM(TYPE,VAR) (VAR)=((TYPE)((VAR)+1))
-#endif
-
 #define H5_FLT_ABS_EQUAL(X,Y)       (HDfabsf((X)-(Y)) < FLT_EPSILON)
 #define H5_DBL_ABS_EQUAL(X,Y)       (HDfabs ((X)-(Y)) < DBL_EPSILON)
 #define H5_LDBL_ABS_EQUAL(X,Y)      (HDfabsl((X)-(Y)) < LDBL_EPSILON)
@@ -235,7 +228,7 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDgetpwnam(S)           getpwnam(S)
 #define HDgetpwuid(U)           getpwuid(U)
 #define HDgetrusage(X,S)        getrusage(X,S)
-#define HDgets(S)               gets(S)
+/* Don't define a macro for gets() - it was removed in C11 */
 #ifdef H5_HAVE_WIN32_API
     H5_DLL int Wgettimeofday(struct timeval *tv, struct timezone *tz);
 #define HDgettimeofday(V,Z) Wgettimeofday(V,Z)
@@ -316,6 +309,7 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDpipe(F)               pipe(F)
 #define HDpow(X,Y)              pow(X,Y)
 /* printf() variable arguments */
+#define HDprintf(...)           HDfprintf(stdout, __VA_ARGS__)
 #define HDputc(C,F)             putc(C,F)
 #define HDputchar(C)            putchar(C)
 #define HDputs(S)               puts(S)
@@ -377,6 +371,7 @@ H5_DLL int c99_snprintf(char* str, size_t size, const char* format, ...);
 #define HDsnprintf              snprintf /*varargs*/
 #endif
 /* sprintf() variable arguments */
+#define HDsprintf    sprintf /*varargs*/
 #define HDsqrt(X)               sqrt(X)
 #ifdef H5_HAVE_RAND_R
 H5_DLL void HDsrand(unsigned int seed);
@@ -503,8 +498,8 @@ extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 #endif
 
 #ifdef H5_HAVE_PARALLEL
-H5TEST_DLL int h5_set_info_object(void);
-H5TEST_DLL void h5_dump_info_object(MPI_Info info);
+int h5_set_info_object(void);
+void h5_dump_info_object(MPI_Info info);
 #endif
 
 
@@ -532,4 +527,10 @@ typedef struct long_options {
 
 extern int    get_option(int argc, const char **argv, const char *opt,
                          const struct long_options *l_opt);
+
+extern int     nCols;               /*max number of columns for outputting  */
+
+/* Definitions of useful routines */
+extern void     print_version(const char *progname);
+
 #endif

@@ -49,7 +49,7 @@ static int add_records(hid_t fid, unsigned verbose, unsigned long nrecords,
 static void usage(void);
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    open_skeleton
  *
@@ -117,7 +117,7 @@ open_skeleton(const char *filename, unsigned verbose)
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Opening datasets\n");
+        HDfprintf(stderr, "Opening datasets\n");
 
     /* Seed the random number generator with the attribute in the file */
     if((aid = H5Aopen(fid, "seed", H5P_DEFAULT)) < 0)
@@ -139,7 +139,7 @@ open_skeleton(const char *filename, unsigned verbose)
     return fid;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    add_records
  *
@@ -311,7 +311,7 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Closing datasets\n");
+        HDfprintf(stderr, "Closing datasets\n");
 
     /* Close the datasets */
     for(u = 0; u < NLEVELS; u++)
@@ -325,19 +325,19 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
 static void
 usage(void)
 {
-    printf("\n");
-    printf("Usage error!\n");
-    printf("\n");
-    printf("Usage: swmr_sparse_writer [-q] [-f <# of records to write between\n");
-    printf("    flushing file contents>] <# of records>\n");
-    printf("\n");
-    printf("<# of records to write between flushing file contents> should be 0\n");
-    printf("(for no flushing) or between 1 and (<# of records> - 1)\n");
-    printf("\n");
-    printf("Defaults to verbose (no '-q' given) and flushing every 1000 records\n");
-    printf("('-f 1000')\n");
-    printf("\n");
-    HDexit(1);
+    HDprintf("\n");
+    HDprintf("Usage error!\n");
+    HDprintf("\n");
+    HDprintf("Usage: swmr_sparse_writer [-q] [-f <# of records to write between\n");
+    HDprintf("    flushing file contents>] <# of records>\n");
+    HDprintf("\n");
+    HDprintf("<# of records to write between flushing file contents> should be 0\n");
+    HDprintf("(for no flushing) or between 1 and (<# of records> - 1)\n");
+    HDprintf("\n");
+    HDprintf("Defaults to verbose (no '-q' given) and flushing every 1000 records\n");
+    HDprintf("('-f 1000')\n");
+    HDprintf("\n");
+    HDexit(EXIT_FAILURE);
 }
 
 int main(int argc, const char *argv[])
@@ -412,7 +412,7 @@ int main(int argc, const char *argv[])
     /* Open file skeleton */
     if((fid = open_skeleton(FILENAME, verbose)) < 0) {
         HDfprintf(stderr, "Error opening skeleton file!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     /* Send a message to indicate "H5Fopen" is complete--releasing the file lock */
@@ -425,7 +425,7 @@ int main(int argc, const char *argv[])
     /* Append records to datasets */
     if(add_records(fid, verbose, (unsigned long)nrecords, (unsigned long)flush_count) < 0) {
         HDfprintf(stderr, "Error appending records to datasets!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -435,7 +435,7 @@ int main(int argc, const char *argv[])
     /* Clean up the symbols */
     if(shutdown_symbols() < 0) {
         HDfprintf(stderr, "Error releasing symbols!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -445,7 +445,7 @@ int main(int argc, const char *argv[])
     /* Close objects opened */
     if(H5Fclose(fid) < 0) {
         HDfprintf(stderr, "Error closing file!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     return 0;

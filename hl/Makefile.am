@@ -10,7 +10,7 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-# 
+#
 # This makefile mostly just reinvokes make in the various subdirectories
 # but does so in the correct order.  You can alternatively invoke make from
 # each subdirectory manually.
@@ -31,11 +31,27 @@ endif
 if BUILD_CXX_CONDITIONAL
   CXX_DIR = c++
 endif
+if BUILD_TESTS_CONDITIONAL
+  TEST_DIR = test
+else
+  TEST_DIR =
+endif
+if BUILD_TOOLS_CONDITIONAL
+  TOOLS_DIR = tools
+else
+  TOOLS_DIR =
+endif
 
 ## Don't recurse into any subdirectories if HDF5 is not configured to
 ## use the HL library
 if BUILD_HDF5_HL_CONDITIONAL
-   SUBDIRS=src test tools $(CXX_DIR) $(FORTRAN_DIR)
+   SUBDIRS=src $(TEST_DIR) $(TOOLS_DIR) $(CXX_DIR) $(FORTRAN_DIR)
+
+# Test with just the native connector, with a single pass-through connector
+# and with a doubly-stacked pass-through.
+VOL_LIST = native "pass_through under_vol=0;under_info={}" \
+           "pass_through under_vol=505;under_info={under_vol=0;under_info={}}"
+
 endif
 DIST_SUBDIRS=src test tools c++ fortran examples
 

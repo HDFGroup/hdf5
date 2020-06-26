@@ -1,0 +1,11 @@
+JUnit version 4.11
+.testH5Eget_msg_major
+.testH5Eget_msg_minor
+.testH5Epush
+.testH5Ewalk
+.testH5Epop
+
+Time:  XXXX
+
+OK (5 tests)
+

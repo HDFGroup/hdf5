@@ -52,29 +52,56 @@ Java_hdf_hdf5lib_H5_H5Ocopy
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Oget_info
- * Signature: (J)Lhdf/hdf5lib/structs/H5O_info_t;
+ * Signature: (JI)Lhdf/hdf5lib/structs/H5O_info_t;
  */
 JNIEXPORT jobject JNICALL
 Java_hdf_hdf5lib_H5_H5Oget_1info
-(JNIEnv*, jclass, jlong);
+(JNIEnv*, jclass, jlong, jint fields);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Oget_info_by_name
- * Signature: (JLjava/lang/String;J)Lhdf/hdf5lib/structs/H5O_info_t;
+ * Signature: (JLjava/lang/String;IJ)Lhdf/hdf5lib/structs/H5O_info_t;
  */
 JNIEXPORT jobject JNICALL
 Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1name
-(JNIEnv*, jclass, jlong, jstring, jlong);
+(JNIEnv*, jclass, jlong, jstring, jint fields, jlong);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Oget_info_by_idx
- * Signature: (JLjava/lang/String;IIJJ)Lhdf/hdf5lib/structs/H5O_info_t;
+ * Signature: (JLjava/lang/String;IIJIJ)Lhdf/hdf5lib/structs/H5O_info_t;
  */
 JNIEXPORT jobject JNICALL
 Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1idx
-(JNIEnv*, jclass, jlong, jstring, jint, jint, jlong, jlong);
+(JNIEnv*, jclass, jlong, jstring, jint, jint, jlong, jint fields, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Oget_native_info
+ * Signature: (JI)Lhdf/hdf5lib/structs/H5O_native_info_t;
+ */
+JNIEXPORT jobject JNICALL
+Java_hdf_hdf5lib_H5_H5Oget_1native_1info
+(JNIEnv*, jclass, jlong, jint fields);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Oget_native_info_by_name
+ * Signature: (JLjava/lang/String;IJ)Lhdf/hdf5lib/structs/H5O_native_info_t;
+ */
+JNIEXPORT jobject JNICALL
+Java_hdf_hdf5lib_H5_H5Oget_1native_1info_1by_1name
+(JNIEnv*, jclass, jlong, jstring, jint fields, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Oget_native_info_by_idx
+ * Signature: (JLjava/lang/String;IIJIJ)Lhdf/hdf5lib/structs/H5O_native_info_t;
+ */
+JNIEXPORT jobject JNICALL
+Java_hdf_hdf5lib_H5_H5Oget_1native_1info_1by_1idx
+(JNIEnv*, jclass, jlong, jstring, jint, jint, jlong, jint fields, jlong);
 
 /*
  * Class:     hdf_hdf5lib_H5
@@ -88,20 +115,20 @@ Java_hdf_hdf5lib_H5_H5Olink
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Ovisit
- * Signature: (JIILjava/lang/Object;Ljava/lang/Object;)I
+ * Signature: (JIILjava/lang/Object;Ljava/lang/Object;I)I
  */
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Ovisit
-  (JNIEnv*, jclass, jlong, jint, jint, jobject, jobject);
+  (JNIEnv*, jclass, jlong, jint, jint, jobject, jobject, jint);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Ovisit_by_name
- * Signature: (JLjava/lang/String;IILjava/lang/Object;Ljava/lang/Object;J)I
+ * Signature: (JLjava/lang/String;IILjava/lang/Object;Ljava/lang/Object;IJ)I
  */
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Ovisit_1by_1name
-  (JNIEnv*, jclass, jlong, jstring, jint, jint, jobject, jobject, jlong);
+  (JNIEnv*, jclass, jlong, jstring, jint, jint, jobject, jobject, jint, jlong);
 
 /*
  * Class:     hdf_hdf5lib_H5
@@ -168,12 +195,12 @@ Java_hdf_hdf5lib_H5_H5Oincr_1refcount
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    _H5Oopen_by_addr
- * Signature: (JJ)J;
+ * Method:    _H5Oopen_by_token
+ * Signature: (JLhdf/hdf5lib/structs/H5O_token_t;)J;
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Oopen_1by_1addr
-  (JNIEnv*, jclass, jlong, jlong);
+Java_hdf_hdf5lib_H5__1H5Oopen_1by_1token
+  (JNIEnv*, jclass, jlong, jobject);
 
 /*
  * Class:     hdf_hdf5lib_H5
@@ -200,6 +227,33 @@ Java_hdf_hdf5lib_H5_H5Oflush
  */
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Orefresh
+  (JNIEnv*, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Odisable_mdc_flushes
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Odisable_1mdc_1flushes
+  (JNIEnv*, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Oenable_mdc_flushes
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Oenable_1mdc_1flushes
+  (JNIEnv*, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Oare_mdc_flushes_disabled
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_hdf_hdf5lib_H5_H5Oare_1mdc_1flushes_1disabled
   (JNIEnv*, jclass, jlong);
 
 #ifdef __cplusplus

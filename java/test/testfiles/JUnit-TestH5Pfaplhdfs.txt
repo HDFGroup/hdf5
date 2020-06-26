@@ -1,0 +1,9 @@
+JUnit version 4.11
+.testH5Pget_fapl_hdfs_invalid_fapl_id
+.testH5Pget_fapl_hdfs_fapl_id_of_wrong_driver_type
+.testHDFS_fapl
+
+Time:  XXXX
+
+OK (3 tests)
+

@@ -18,9 +18,7 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses( { TestH5.class,
-        TestH5Eregister.class,
-        TestH5Edefault.class,
-        TestH5E.class,
+        TestH5Eparams.class, TestH5Eregister.class, TestH5Edefault.class, TestH5E.class,
         TestH5Fparams.class, TestH5Fbasic.class, TestH5F.class, TestH5Fswmr.class,
         TestH5Gbasic.class, TestH5G.class, TestH5Giterate.class,
         TestH5Sbasic.class, TestH5S.class,
@@ -29,6 +27,7 @@ import org.junit.runners.Suite;
         TestH5Lparams.class, TestH5Lbasic.class, TestH5Lcreate.class,
         TestH5R.class,
         TestH5P.class, TestH5PData.class, TestH5Pfapl.class, TestH5Pvirtual.class, TestH5Plist.class,
+        TestH5Pfapls3.class, TestH5Pfaplhdfs.class,
         TestH5A.class,
         TestH5Oparams.class, TestH5Obasic.class, TestH5Ocopy.class, TestH5Ocreate.class,
         TestH5PL.class, TestH5Z.class

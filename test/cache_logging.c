@@ -40,10 +40,10 @@ test_logging_api(void)
     char        *location = NULL;
     size_t      size;
 
-    hid_t       fid;
-    hid_t       gid;
+    hid_t       fid = -1;
+    hid_t       gid = -1;
     hbool_t     is_currently_logging;
-    char        group_name[8];
+    char        group_name[12];
     char        filename[1024];
     int         i;
 
@@ -65,16 +65,16 @@ test_logging_api(void)
     start_on_access_out = TRUE;
     location = NULL;
     size = 999;
-    if(H5Pget_mdc_log_options(fapl, &is_enabled_out, location, &size, 
+    if(H5Pget_mdc_log_options(fapl, &is_enabled_out, location, &size,
                               &start_on_access_out) < 0)
         TEST_ERROR;
-    if(size != strlen(LOG_LOCATION) + 1)
+    if(size != HDstrlen(LOG_LOCATION) + 1)
         TEST_ERROR;
 
     /* Check to make sure that the property list getter works */
     if(NULL == (location = (char *)HDcalloc(size, sizeof(char))))
         TEST_ERROR;
-    if(H5Pget_mdc_log_options(fapl, &is_enabled_out, location, &size, 
+    if(H5Pget_mdc_log_options(fapl, &is_enabled_out, location, &size,
                               &start_on_access_out) < 0)
         TEST_ERROR;
     if((is_enabled != is_enabled_out)
@@ -111,8 +111,8 @@ test_logging_api(void)
 
     /* Perform some manipulations */
     for(i = 0; i < N_GROUPS; i++) {
-        HDmemset(group_name, 0, 8);
-        HDsnprintf(group_name, 8, "%d", i);
+        HDmemset(group_name, 0, sizeof(group_name));
+        HDsnprintf(group_name, sizeof(group_name), "%d", i);
         if((gid = H5Gcreate2(fid, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
         if(H5Gclose(gid) < 0)
@@ -159,17 +159,18 @@ main(void)
     /* Reset library */
     h5_reset();
 
-    printf("Testing basic metadata cache logging functionality.\n");
+    HDprintf("Testing basic metadata cache logging functionality.\n");
 
     nerrors += test_logging_api();
 
     if(nerrors) {
-        printf("***** %d Metadata cache logging TEST%s FAILED! *****\n",
+        HDprintf("***** %d Metadata cache logging TEST%s FAILED! *****\n",
                nerrors, nerrors > 1 ? "S" : "");
-        return 1;
+        HDexit(EXIT_FAILURE);
     }
 
-    printf("All Metadata Cache Logging tests passed.\n");
-    return 0;
+    HDprintf("All Metadata Cache Logging tests passed.\n");
+
+    HDexit(EXIT_SUCCESS);
 }
 

@@ -1,4 +1,4 @@
-#							-*- shell-script -*-
+#                            -*- shell-script -*-
 #
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
@@ -14,8 +14,40 @@
 
 # This file should be sourced into configure if the compiler is the
 # GNU gcc compiler or a derivative.  It is careful not to do anything
-# if the compiler is not GNU; otherwise `cc_flags_set' is set to `yes'
+# if the compiler is not GNU; otherwise 'cc_flags_set' is set to 'yes'
 #
+
+#
+# For now, do not promote any warnings to errors.
+#
+PROMOTE_ERRORS_DFLT=no
+
+#
+# This filter rewrites -Werror= as -W, in that way demoting warnings
+# promoted to errors back to warnings, if PROMOTE_ERRORS is no.
+#
+demote_errors()
+{
+    if [ ${PROMOTE_ERRORS:-${PROMOTE_ERRORS_DFLT}} = no ]; then
+        sed 's,-Werror=,-W,g'
+    else
+        cat
+    fi
+}
+
+#
+# Prepend `$srcdir/config/gnu-warnings/` to the filename suffix(es) given as
+# subroutine argument(s), remove comments starting with # and ending
+# at EOL, replace spans of whitespace (including newlines) with spaces,
+# and re-emit the file(s) thus filtered on the standard output stream.
+#
+load_gnu_arguments()
+{
+    set -- $(for arg; do
+        sed 's,#.*$,,' $srcdir/config/gnu-warnings/${arg}
+    done)
+    IFS=' ' echo "$*"
+}
 
 # Get the compiler version in a way that works for gcc
 # unless a compiler version is already known
@@ -23,7 +55,7 @@
 #   cc_vendor:    The compiler name: gcc
 #   cc_version:   Version number: 2.91.60, 2.7.2.1
 #
-if test X = "X$cc_flags_set"; then
+if test "X-" = "X-$cc_flags_set"; then
     # PathScale compiler spits out gcc version string too. Need to
     # filter it out.
     # icc beginning with version 12 includes a "gcc version compatiblilty"
@@ -32,31 +64,32 @@ if test X = "X$cc_flags_set"; then
     # containing 'icc version'.  The cc_version for icc is correctly determined
     # and flags added in the intel-flags script.
     cc_version="`$CC $CFLAGS $H5_CFLAGS -v 2>&1 | grep -v 'PathScale' |\
-        grep -v 'icc version' |\
+        grep -v '^icc.*version' |\
         grep 'gcc version' | sed 's/.*gcc version \([-a-z0-9\.]*\).*/\1/'`"
     cc_vendor=`echo $cc_version |sed 's/\([a-z]*\).*/\1/'`
     cc_version=`echo $cc_version |sed 's/[-a-z]//g'`
     if test X = "X$cc_vendor" -a X != "X$cc_version"; then
-	cc_vendor=gcc
+        cc_vendor=gcc
     fi
     if test "-" != "$cc_vendor-$cc_version"; then
-	echo "compiler '$CC' is GNU $cc_vendor-$cc_version"
+        echo "compiler '$CC' is GNU $cc_vendor-$cc_version"
     fi
 
-    # Some version numbers
+    # Get the compiler version numbers
     cc_vers_major=`echo $cc_version | cut -f1 -d.`
     cc_vers_minor=`echo $cc_version | cut -f2 -d.`
     cc_vers_patch=`echo $cc_version | cut -f3 -d.`
     test -n "$cc_vers_major" || cc_vers_major=0
     test -n "$cc_vers_minor" || cc_vers_minor=0
     test -n "$cc_vers_patch" || cc_vers_patch=0
-    cc_vers_all=`expr $cc_vers_major '*' 1000000 + $cc_vers_minor '*' 1000 + $cc_vers_patch`
 fi
 
-# Common GCC flags for various situations
-case "$cc_vendor-$cc_version" in
-  gcc*)
-    # Architecture-specific flags
+if test "X-gcc" = "X-$cc_vendor"; then
+
+    ###############################
+    # Architecture-specific flags #
+    ###############################
+
     arch=
     case "$host_os-$host_cpu" in
         # FreeBSD sets the information from "uname -m" to the general machine
@@ -84,377 +117,155 @@ case "$cc_vendor-$cc_version" in
             ;;
     esac
 
-    # Host-specific flags
-    case "`hostname`" in
-        sleipnir.ncsa.uiuc.edu)
-            arch="$arch -pipe"
+    case "$host_os-$host_cpu" in
+        # cygwin needs the "-std=c99" flag removed, so make
+        # a specific case for Cygwin without the flag and a default
+        # case to add the flag everywhere else
+        cygwin-*)
+            ;;
+
+        *)
+            H5_CFLAGS="$H5_CFLAGS -std=c99"
             ;;
     esac
 
-    # General flags
-    #
-    # Note that some of the flags listed here really should be developer
-    # flags (listed in a separate variable, below) but we put them here
-    # because they are not raised by the current code and we'd like to
-    # know if they do start showing up.
-    #
-    # NOTE: Don't add -Wpadded here since we can't/won't fix the (many)
-    # warnings that are emitted. If you need it, add it from the 
-    # environment variable at configure time.
-    H5_CFLAGS="$H5_CFLAGS $arch -std=c99 -pedantic -Wall -Wextra -Wbad-function-cast -Wc++-compat -Wcast-align"
-    H5_CFLAGS="$H5_CFLAGS -Wcast-qual -Wconversion -Wdeclaration-after-statement -Wdisabled-optimization -Wfloat-equal"
-    H5_CFLAGS="$H5_CFLAGS -Wformat=2 -Winit-self -Winvalid-pch -Wmissing-declarations -Wmissing-include-dirs"
-    H5_CFLAGS="$H5_CFLAGS -Wmissing-prototypes -Wnested-externs -Wold-style-definition -Wpacked -Wpointer-arith"
-    H5_CFLAGS="$H5_CFLAGS -Wredundant-decls -Wshadow -Wstrict-prototypes -Wswitch-default -Wswitch-enum"
-    H5_CFLAGS="$H5_CFLAGS -Wundef -Wunused-macros -Wunsafe-loop-optimizations -Wwrite-strings"
+    H5_CFLAGS="$H5_CFLAGS $arch"
 
-    # Production
+    ##############
+    # Production #
+    ##############
+
     # NDEBUG is handled explicitly by the configure script
-    case "$cc_vendor-$cc_version" in
-      gcc-4.*)
+    if test $cc_vers_major -le 4; then
         PROD_CFLAGS=
-        ;;
-      gcc-[56].*)
+    else
         PROD_CFLAGS="-fstdarg-opt"
-        ;;
-      *)
-        # gcc automatically inlines based on the optimization level
-        # this is just a failsafe
-        PROD_CFLAGS="-finline-functions"
-        ;;
-    esac
+    fi
 
-    # Debug
+    #########
+    # Debug #
+    #########
+
     # NDEBUG is handled explicitly by the configure script
     # -g is handled by the symbols flags
-    case "$cc_vendor-$cc_version" in
-      gcc-[56].*)
-        DEBUG_CFLAGS="-ftrapv -fno-common"
-        ;;
-      *)
+    if test $cc_vers_major -le 4; then
         DEBUG_CFLAGS=
-        ;;
-    esac
+    else
+        DEBUG_CFLAGS="-ftrapv -fno-common"
+    fi
 
-    # Developer warnings (suggestions from gcc, not code problems)
-    DEVELOPER_WARNING_CFLAGS="-Winline -Waggregate-return -Wmissing-format-attribute -Wmissing-noreturn"
-    NO_DEVELOPER_WARNING_CFLAGS="-Wno-inline -Wno-aggregate-return -Wno-missing-format-attribute -Wno-missing-noreturn"
+    ###########
+    # Symbols #
+    ###########
 
-    # Symbols
     NO_SYMBOLS_CFLAGS="-s"
     SYMBOLS_CFLAGS="-g -fno-omit-frame-pointer"
 
-    # Profile
+    #############
+    # Profiling #
+    #############
+
     PROFILE_CFLAGS="-pg"
 
-    # Optimization
-    case "$cc_vendor-$cc_version" in
-      gcc-4.*)
+    ################
+    # Optimization #
+    ################
+
+    if test $cc_vers_major -le 4; then
         HIGH_OPT_CFLAGS="-O3"
         DEBUG_OPT_CFLAGS=
-        ;;
-      gcc-[56].*)
+    else
         HIGH_OPT_CFLAGS="-O3"
         DEBUG_OPT_CFLAGS="-Og"
-        ;;
-      *)
-        HIGH_OPT_CFLAGS="-O"
-        DEBUG_OPT_CFLAGS=
-        ;;
-    esac
+    fi
     NO_OPT_CFLAGS="-O0"
 
-    # Flags are set
+    ############
+    # Warnings #
+    ############
+
+    ###########
+    # General #
+    ###########
+
+    # Add various general warning flags in gnu-warnings for gcc versions 4.8 and later.
+    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 8 -o $cc_vers_major -gt 4; then
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments general)"
+        H5_ECFLAGS="$H5_ECFLAGS $(load_gnu_arguments error-general)"
+
+    ######################
+    # Developer warnings #
+    ######################
+
+        NO_DEVELOPER_WARNING_CFLAGS=$(load_gnu_arguments no-developer-general)
+        DEVELOPER_WARNING_CFLAGS=$(load_gnu_arguments developer-general)
+
+    fi
+
+    #######################
+    # gcc 4 special cases #
+    #######################
+
+    # GCC 4.8 through the end of GCC 4 series
+    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 8; then
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.8-4.last)"
+    fi
+
+    #############################
+    # Version-specific warnings #
+    #############################
+
+    # gcc >= 4.8
+    if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 8; then
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.8)"
+        DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-4.8)"
+        NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments no-developer-4.8)"
+    fi
+
+    # gcc >= 4.9
+    if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 9; then
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.9)"
+    fi
+
+    # gcc >= 5
+    if test $cc_vers_major -ge 5; then
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 5)"
+        H5_ECFLAGS="$H5_ECFLAGS $(load_gnu_arguments error-5)"
+    fi
+
+    # gcc >= 6
+    if test $cc_vers_major -ge 6; then
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 6)"
+    fi
+
+    # gcc >= 7
+    if test $cc_vers_major -ge 7; then
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 7)"
+        DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-7)"
+    fi
+
+    # gcc 8
+    if test $cc_vers_major -ge 8; then
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 8)"
+        H5_ECFLAGS="$H5_ECFLAGS $(load_gnu_arguments error-8)"
+        DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-8)"
+        NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments no-developer-8)"
+    fi
+
+    # gcc 9
+    if test $cc_vers_major -ge 9; then
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 9)"
+    fi
+
+    #################
+    # Flags are set #
+    #################
     cc_flags_set=yes
-    ;;
-esac
-
-# Version specific GCC flags
-#
-# Please follow the pattern below by adding new versions at the top, copying
-# the information from the previous version and adding modifications to that.
-case "$cc_vendor-$cc_version" in
-
-# When the gcc 7.x release is out, we should check for additional flags to
-# include and break it out into it's own section, like the other versions
-# below. -QAK
-  gcc-6*)
-    # Append warning flags that only gcc 4.2+ knows about
-    # (none, or incorporated in -Wall / -Wextra now)
-
-    # Append warning flags that only gcc 4.3+ knows about
-    #
-    # Technically, variable-length arrays are part of the C99 standard, but
-    #   we should approach them a bit cautiously... -QAK
-    H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
-
-    # Append warning flags that only gcc 4.4+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
-
-    # Append warning flags that only gcc 4.5+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
-
-    # Append warning flags that only gcc 4.6+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wtrampolines"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=const"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=const"
-
-    # Append warning flags that only gcc 4.7+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=pure -Wno-suggest-attribute=noreturn"
-
-    # Append warning flags that only gcc 4.8+ knows about
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=format"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=format"
-
-    # Append warning flags that only gcc 4.9+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wdate-time"
-
-    # Append warning flags that only gcc 5.x+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Warray-bounds=2 -Wc99-c11-compat"
-
-    # Append warning flags that only gcc 6.x+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wnull-dereference -Wunused-const-variable -Wduplicated-cond -Whsa"
-    ;;
-
-  gcc-5*)
-    # Append warning flags that only gcc 4.2+ knows about
-    # (none, or incorporated in -Wall / -Wextra now)
-
-    # Append warning flags that only gcc 4.3+ knows about
-    #
-    # Technically, variable-length arrays are part of the C99 standard, but
-    #   we should approach them a bit cautiously... -QAK
-    H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
-
-    # Append warning flags that only gcc 4.4+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
-
-    # Append warning flags that only gcc 4.5+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
-
-    # Append warning flags that only gcc 4.6+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wtrampolines"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=const"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=const"
-
-    # Append warning flags that only gcc 4.7+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=pure -Wno-suggest-attribute=noreturn"
-
-    # Append warning flags that only gcc 4.8+ knows about
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=format"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=format"
-
-    # Append warning flags that only gcc 4.9+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wdate-time"
-
-    # Append warning flags that only gcc 5.x+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Warray-bounds=2 -Wc99-c11-compat"
-    ;;
-
-  gcc-4.9*)
-    # Append warning flags that only gcc 4.2+ knows about
-    # (none, or incorporated in -Wall / -Wextra now)
-
-    # Append warning flags that only gcc 4.3+ knows about
-    #
-    # Technically, variable-length arrays are part of the C99 standard, but
-    #   we should approach them a bit cautiously... -QAK
-    H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
-
-    # Append warning flags that only gcc 4.4+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
-
-    # Append warning flags that only gcc 4.5+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
-
-    # Append warning flags that only gcc 4.6+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wtrampolines"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=const"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=const"
-
-    # Append warning flags that only gcc 4.7+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=pure -Wno-suggest-attribute=noreturn"
-
-    # Append warning flags that only gcc 4.8+ knows about
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=format"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=format"
-
-    # Append warning flags that only gcc 4.9+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wdate-time"
-    ;;
-
-  gcc-4.8*)
-    # Append warning flags that only gcc 4.2+ knows about
-    # (none, or incorporated in -Wall / -Wextra now)
-
-    # Append warning flags that only gcc 4.3+ knows about
-    #
-    # Technically, variable-length arrays are part of the C99 standard, but
-    #   we should approach them a bit cautiously... -QAK
-    H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
-
-    # Append warning flags that only gcc 4.4+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
-
-    # Append warning flags that only gcc 4.5+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow=5 -Wjump-misses-init"
-
-    # Append warning flags that only gcc 4.6+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wtrampolines"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=const"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=const"
-
-    # Append warning flags that only gcc 4.7+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=pure -Wno-suggest-attribute=noreturn"
-
-    # Append warning flags that only gcc 4.8+ knows about
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=format"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=format"
-    ;;
-
-  gcc-4.7*)
-    # Append warning flags that only gcc 4.2+ knows about
-    # (none, or incorporated in -Wall / -Wextra now)
-
-    # Append warning flags that only gcc 4.3+ knows about
-    #
-    # Technically, variable-length arrays are part of the C99 standard, but
-    #   we should approach them a bit cautiously... -QAK
-    H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
-
-    # Append warning flags that only gcc 4.4+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
-
-    # Append warning flags that only gcc 4.5+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
-
-    # Append warning flags that only gcc 4.6+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wtrampolines"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=const"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=const"
-
-    # Append warning flags that only gcc 4.7+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=pure -Wno-suggest-attribute=noreturn"
-    ;;
-
-  gcc-4.6*)
-    # Disable warnings about using 'long long' type
-    H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
-
-    # Append warning flags that only gcc 4.2+ knows about
-    # (none, or incorporated in -Wall / -Wextra now)
-
-    # Append warning flags that only gcc 4.3+ knows about
-    #
-    # Technically, variable-length arrays are part of the C99 standard, but
-    #   we should approach them a bit cautiously... -QAK
-    H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
-
-    # Append warning flags that only gcc 4.4+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
-
-    # Append warning flags that only gcc 4.5+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wstrict-aliasing -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
-
-    # Append warning flags that only gcc 4.6+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wtrampolines"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=const"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=const"
-    ;;
-
-  gcc-4.5*)
-    # Disable warnings about using 'long long' type
-    H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
-
-    # Append warning flags that only gcc 4.2+ knows about
-    # (none, or incorporated in -Wall / -Wextra now)
-
-    # Append warning flags that only gcc 4.3+ knows about
-    #
-    # Technically, variable-length arrays are part of the C99 standard, but
-    #   we should approach them a bit cautiously... -QAK
-    H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
-
-    # Append warning flags that only gcc 4.4+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
-
-    # Append warning flags that only gcc 4.5+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wstrict-aliasing -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
-    ;;
-
-  gcc-4.4*)
-    # Disable warnings about using 'long long' type
-    H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
-
-    # Append warning flags that only gcc 4.2+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow"
-
-    # Append warning flags that only gcc 4.3+ knows about
-    #
-    # Technically, variable-length arrays are part of the C99 standard, but
-    #   we should approach them a bit cautiously... -QAK
-    H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
-
-    # Append warning flags that only gcc 4.4+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
-    ;;
-
-  gcc-4.3*)
-    # Disable warnings about using 'long long' type
-    H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
-
-    # Append warning flags that only gcc 4.1+ knows about
-    # -Wvolatile-register-var was later incorporated into -Wall and
-    # needs to be specified explicitly for gcc 4.1-4.3.
-    H5_CFLAGS="$H5_CFLAGS -Wvolatile-register-var"
-
-    # Append warning flags that only gcc 4.2+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow"
-
-    # Append warning flags that only gcc 4.3+ knows about
-    #
-    # Technically, variable-length arrays are part of the C99 standard, but
-    #   we should approach them a bit cautiously... -QAK
-    H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wvla"
-    ;;
-
-  gcc-4.2*)
-    # Disable warnings about using 'long long' type
-    H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
-
-    # Append warning flags that only gcc 4.1+ knows about
-    # -Wvolatile-register-var was later incorporated into -Wall and
-    # needs to be specified explicitly for gcc 4.1-4.3.
-    H5_CFLAGS="$H5_CFLAGS -Wvolatile-register-var"
-
-    # Append warning flags that only gcc 4.2+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow"
-    ;;
-
-  gcc-4.1*)
-    # Disable warnings about using 'long long' type
-    H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
-
-    # Append warning flags that only gcc 4.1+ knows about
-    # -Wvolatile-register-var was later incorporated into -Wall and
-    # needs to be specified explicitly for gcc 4.1-4.3.
-    H5_CFLAGS="$H5_CFLAGS -Wvolatile-register-var"
-    ;;
-
-esac
+fi
 
 # Clear cc info if no flags set
 if test "X$cc_flags_set" = "X"; then
-  cc_vendor=
-  cc_version=
+    cc_vendor=
+    cc_version=
 fi
+

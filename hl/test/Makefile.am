@@ -26,8 +26,8 @@ LDADD=$(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
 
 # Test programs.  These are our main targets.  They should be listed in the
 # order to be executed, generally most specific tests to least specific tests.
-TEST_PROG=test_lite test_image test_file_image test_table test_ds test_packet test_dset_opt \
-	test_ld test_dset_append
+TEST_PROG=test_lite test_image test_file_image test_table test_ds test_packet \
+	test_ld test_dset_append test_h5do_compat
 check_PROGRAMS=$(TEST_PROG)
 
 # These programs generate test files for the tests.  They don't need to be
@@ -45,8 +45,8 @@ endif
 CHECK_CLEANFILES+=combine_tables[1-2].h5 test_ds[1-9].h5 test_ds10.h5 \
 	test_image[1-3].h5 file_img[1-2].h5 test_lite[1-4].h5 test_table.h5 \
 	test_packet_table.h5 test_packet_compress.h5 test_detach.h5 \
-	test_packet_table_vlen.h5 testfl_packet_table_vlen.h5		\
-	test_dectris.h5 test_append.h5
+	test_packet_table_vlen.h5 testfl_packet_table_vlen.h5 test_append.h5 \
+    h5do_compat.h5
 
 # Sources for test_packet executable
 test_packet_SOURCES=test_packet.c test_packet_vlen.c

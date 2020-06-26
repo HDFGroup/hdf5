@@ -185,7 +185,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5C_dump_cache_LRU
  *
- * Purpose:     Print a summary of the contents of the metadata cache 
+ * Purpose:     Print a summary of the contents of the metadata cache
  *              LRU for debugging purposes.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -209,9 +209,9 @@ H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name)
     HDassert(cache_name != NULL );
 
     HDfprintf(stdout, "\n\nDump of metadata cache LRU \"%s\"\n", cache_name);
-    HDfprintf(stdout, "LRU len = %d, LRU size = %d\n", 
+    HDfprintf(stdout, "LRU len = %d, LRU size = %d\n",
               cache_ptr->LRU_list_len, (int)(cache_ptr->LRU_list_size));
-    HDfprintf(stdout, "index_size = %d, max_cache_size = %d, delta = %d\n\n", 
+    HDfprintf(stdout, "index_size = %d, max_cache_size = %d, delta = %d\n\n",
               (int)(cache_ptr->index_size), (int)(cache_ptr->max_cache_size),
               (int)(cache_ptr->max_cache_size) - (int)(cache_ptr->index_size));
 
@@ -238,12 +238,12 @@ H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name)
         if(NULL == entry_ptr->tag_info)
             HDfprintf(stdout, "    %16s ", "N/A");
         else
-            HDfprintf(stdout, "  0x%16llx ", 
+            HDfprintf(stdout, "  0x%16llx ",
                       (long long)(entry_ptr->tag_info->tag));
 
         HDfprintf(stdout, "  %5lld ", (long long)(entry_ptr->size));
         HDfprintf(stdout, "    %d  ", (int)(entry_ptr->ring));
-        HDfprintf(stdout, "  %2d %-32s ", (int)(entry_ptr->type->id), 
+        HDfprintf(stdout, "  %2d %-32s ", (int)(entry_ptr->type->id),
                   (entry_ptr->type->name));
         HDfprintf(stdout, " %d", (int)(entry_ptr->is_dirty));
         HDfprintf(stdout, "\n");
@@ -262,8 +262,8 @@ H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name)
 /*-------------------------------------------------------------------------
  * Function:    H5C_dump_cache_skip_list
  *
- * Purpose:     Debugging routine that prints a summary of the contents of 
- *		the skip list used by the metadata cache metadata cache to 
+ * Purpose:     Debugging routine that prints a summary of the contents of
+ *		the skip list used by the metadata cache metadata cache to
  *		maintain an address sorted list of dirty entries.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -319,9 +319,8 @@ H5C_dump_cache_skip_list(H5C_t * cache_ptr, char * calling_fcn)
                (int)(entry_ptr->is_dirty),
                entry_ptr->type->name);
 
-            HDfprintf(stdout, "		node_ptr = 0x%llx, item = %p\n",
-                      (unsigned long long)node_ptr,
-                      H5SL_item(node_ptr));
+            HDfprintf(stdout, "		node_ptr = %p, item = %p\n",
+                      node_ptr, H5SL_item(node_ptr));
 
             /* increment node_ptr before we delete its target */
             node_ptr = H5SL_next(node_ptr);
@@ -344,9 +343,9 @@ H5C_dump_cache_skip_list(H5C_t * cache_ptr, char * calling_fcn)
 /*-------------------------------------------------------------------------
  * Function:    H5C_dump_coll_write_list
  *
- * Purpose:     Debugging routine that prints a summary of the contents of 
- *		the collective write skip list used by the metadata cache 
- *              in the parallel case to maintain a list of entries to write 
+ * Purpose:     Debugging routine that prints a summary of the contents of
+ *		the collective write skip list used by the metadata cache
+ *              in the parallel case to maintain a list of entries to write
  *              collectively at a sync point.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -382,7 +381,7 @@ H5C_dump_coll_write_list(H5C_t * cache_ptr, char * calling_fcn)
 
     list_len = (int)H5SL_count(cache_ptr->coll_write_list);
 
-    HDfprintf(stdout, "\n\nDumping MDC coll write list from %d:%s.\n", 
+    HDfprintf(stdout, "\n\nDumping MDC coll write list from %d:%s.\n",
               aux_ptr->mpi_rank, calling_fcn);
     HDfprintf(stdout, "	slist len = %u.\n", cache_ptr->slist_len);
 
@@ -473,42 +472,6 @@ H5C_set_prefix(H5C_t * cache_ptr, char * prefix)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_set_prefix() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5C_set_trace_file_ptr
- *
- * Purpose:     Set the trace_file_ptr field for the cache.
- *
- *              This field must either be NULL (which turns of trace
- *              file logging), or be a pointer to an open file to which
- *              trace file data is to be written.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              1/20/06
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5C_set_trace_file_ptr(H5C_t * cache_ptr, FILE * trace_file_ptr)
-{
-    herr_t		ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* This would normally be an assert, but we need to use an HGOTO_ERROR
-     * call to shut up the compiler.
-     */
-    if((NULL == cache_ptr) || (cache_ptr->magic != H5C__H5C_T_MAGIC))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr")
-
-    cache_ptr->trace_file_ptr = trace_file_ptr;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_set_trace_file_ptr() */
 
 
 /*-------------------------------------------------------------------------
@@ -716,6 +679,7 @@ H5C_stats(H5C_t * cache_ptr,
               (long)(cache_ptr->LRU_list_size),
               (unsigned long)(cache_ptr->LRU_list_len));
 
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
     HDfprintf(stdout,
               "%s  current clean LRU size / length    = %ld / %lu\n",
               cache_ptr->prefix,
@@ -727,6 +691,7 @@ H5C_stats(H5C_t * cache_ptr,
               cache_ptr->prefix,
               (long)(cache_ptr->dLRU_list_size),
               (unsigned long)(cache_ptr->dLRU_list_len));
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
     HDfprintf(stdout,
               "%s  Total hits / misses / hit_rate     = %ld / %ld / %f\n",
@@ -808,7 +773,7 @@ H5C_stats(H5C_t * cache_ptr,
             (((double)(cache_ptr->total_dirty_pf_entries_skipped_in_msic)) /
             ((double)(cache_ptr->calls_to_msic)));
 
-    HDfprintf(stdout, 
+    HDfprintf(stdout,
               "%s  MSIC: Average/max dirty pf entries skipped  = %lf / %ld\n",
               cache_ptr->prefix,
               average_dirty_pf_entries_skipped_per_call_to_msic,
@@ -833,9 +798,9 @@ H5C_stats(H5C_t * cache_ptr,
               (long long)(cache_ptr->total_entries_scanned_in_msic -
                             cache_ptr->entries_scanned_to_make_space));
 
-    HDfprintf(stdout, 
+    HDfprintf(stdout,
               "%s  slist/LRU/index scan restarts   = %lld / %lld / %lld.\n",
-              cache_ptr->prefix, 
+              cache_ptr->prefix,
               (long long)(cache_ptr->slist_scan_restarts),
               (long long)(cache_ptr->LRU_scan_restarts),
               (long long)(cache_ptr->index_scan_restarts));
@@ -862,7 +827,7 @@ H5C_stats(H5C_t * cache_ptr,
               (long long)(cache_ptr->evictions[H5AC_PREFETCHED_ENTRY_ID]));
 
     if(cache_ptr->prefetches > 0)
-        prefetch_use_rate = 
+        prefetch_use_rate =
                    (double)100.0f * ((double)(cache_ptr->prefetch_hits)) /
                    ((double)(cache_ptr->prefetches));
     else
@@ -921,7 +886,7 @@ H5C_stats(H5C_t * cache_ptr,
                       (int)(cache_ptr->max_read_protects[i]));
 
             HDfprintf(stdout,
-                      "%s    clears / flushes               = %ld / %ld\n", 
+                      "%s    clears / flushes               = %ld / %ld\n",
                       cache_ptr->prefix,
                       (long)(cache_ptr->clears[i]),
                       (long)(cache_ptr->flushes[i]));
@@ -1193,21 +1158,21 @@ H5C__dump_entry(H5C_t *cache_ptr, const H5C_cache_entry_t *entry_ptr,
 /*-------------------------------------------------------------------------
  * Function:    H5C_flush_dependency_exists()
  *
- * Purpose:	Test to see if a flush dependency relationship exists 
- *          between the supplied parent and child.  Both parties 
+ * Purpose:	Test to see if a flush dependency relationship exists
+ *          between the supplied parent and child.  Both parties
  *          are indicated by addresses so as to avoid the necessity
- *          of protect / unprotect calls prior to this call. 
+ *          of protect / unprotect calls prior to this call.
  *
- *          If either the parent or the child is not in the metadata 
+ *          If either the parent or the child is not in the metadata
  *          cache, the function sets *fd_exists_ptr to FALSE.
  *
- *          If both are in the cache, the childs list of parents is 
+ *          If both are in the cache, the childs list of parents is
  *          searched for the proposed parent.  If the proposed parent
  *          is found in the childs parent list, the function sets
- *          *fd_exists_ptr to TRUE.  In all other non-error cases, 
+ *          *fd_exists_ptr to TRUE.  In all other non-error cases,
  *          the function sets *fd_exists_ptr FALSE.
  *
- * Return:      SUCCEED on success/FAIL on failure.  Note that 
+ * Return:      SUCCEED on success/FAIL on failure.  Note that
  *              *fd_exists_ptr is undefined on failure.
  *
  * Programmer:  John Mainzer
@@ -1390,30 +1355,30 @@ done:
  *
  * Function:    H5C_get_entry_ptr_from_addr()
  *
- * Purpose:     Debugging function that attempts to look up an entry in the 
- *              cache by its file address, and if found, returns a pointer 
- *              to the entry in *entry_ptr_ptr.  If the entry is not in the 
+ * Purpose:     Debugging function that attempts to look up an entry in the
+ *              cache by its file address, and if found, returns a pointer
+ *              to the entry in *entry_ptr_ptr.  If the entry is not in the
  *              cache, *entry_ptr_ptr is set to NULL.
  *
- *              WARNING: This call should be used only in debugging  
- *                       routines, and it should be avoided when 
+ *              WARNING: This call should be used only in debugging
+ *                       routines, and it should be avoided when
  *                       possible.
  *
- *                       Further, if we ever multi-thread the cache, 
- *                       this routine will have to be either discarded 
+ *                       Further, if we ever multi-thread the cache,
+ *                       this routine will have to be either discarded
  *                       or heavily re-worked.
  *
- *                       Finally, keep in mind that the entry whose 
- *                       pointer is obtained in this fashion may not 
- *                       be in a stable state.  
+ *                       Finally, keep in mind that the entry whose
+ *                       pointer is obtained in this fashion may not
+ *                       be in a stable state.
  *
  *              Note that this function is only defined if NDEBUG
  *              is not defined.
  *
- *              As heavy use of this function is almost certainly a 
- *              bad idea, the metadata cache tracks the number of 
- *              successful calls to this function, and (if 
- *              H5C_DO_SANITY_CHECKS is defined) displays any 
+ *              As heavy use of this function is almost certainly a
+ *              bad idea, the metadata cache tracks the number of
+ *              successful calls to this function, and (if
+ *              H5C_DO_SANITY_CHECKS is defined) displays any
  *              non-zero count on cache shutdown.
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
@@ -1460,7 +1425,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5C_get_serialization_in_progress
  *
- * Purpose:     Return the current value of 
+ * Purpose:     Return the current value of
  *              cache_ptr->serialization_in_progress.
  *
  * Return:      Current value of cache_ptr->serialization_in_progress.
@@ -1489,7 +1454,7 @@ H5C_get_serialization_in_progress(const H5C_t *cache_ptr)
  *
  * Function:    H5C_cache_is_clean()
  *
- * Purpose:     Debugging function that verifies that all rings in the 
+ * Purpose:     Debugging function that verifies that all rings in the
  *		metadata cache are clean from the outermost ring, inwards
  *		to the inner ring specified.
  *
@@ -1534,16 +1499,16 @@ done:
  *
  * Function:    H5C_verify_entry_type()
  *
- * Purpose:     Debugging function that attempts to look up an entry in the 
+ * Purpose:     Debugging function that attempts to look up an entry in the
  *		cache by its file address, and if found, test to see if its
  *		type field contains the expted value.
  *
  *		If the specified entry is in cache, *in_cache_ptr is set
- *		to TRUE, and *type_ok_ptr is set to TRUE or FALSE depending 
- *		on whether the entries type field matches the expected_type 
+ *		to TRUE, and *type_ok_ptr is set to TRUE or FALSE depending
+ *		on whether the entries type field matches the expected_type
  *		parameter.
  *
- *		If the target entry is not in cache, *in_cache_ptr is 
+ *		If the target entry is not in cache, *in_cache_ptr is
  *		set to FALSE, and *type_ok_ptr is undefined.
  *
  *		Note that this function is only defined if NDEBUG

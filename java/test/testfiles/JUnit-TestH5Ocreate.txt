@@ -1,0 +1,22 @@
+JUnit version 4.11
+.testH5Oget_info_by_idx_n0_create
+.testH5Oget_info_softlink_dangle
+.testH5Oget_info_softlink
+.testH5Oget_info_externallink
+.testH5Ocopy
+.testH5Ocork
+.testH5Olink
+.testH5Ocomment_by_name
+.testH5Oget_info_by_idx_n1_create
+.testH5Ocomment
+.testH5Oinc_dec_count
+.testH5Ocomment_by_name_clear
+.testH5Ovisit_create
+.testH5Ocopy_dst_link_exists
+.testH5Ocomment_clear
+.testH5Ocopy_cur_not_exists
+
+Time:  XXXX
+
+OK (16 tests)
+

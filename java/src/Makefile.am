@@ -10,7 +10,7 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-# 
+#
 # This makefile mostly just reinvokes make in the various subdirectories
 # but does so in the correct order.  You can alternatively invoke make from
 # each subdirectory manually.
@@ -37,7 +37,7 @@ jarfile = jar$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).jar
 hdf5_javadir = $(libdir)
 
 pkgpath = hdf/hdf5lib
-CLASSPATH_ENV=CLASSPATH=.:$(top_srcdir)/java/lib/slf4j-api-1.7.5.jar:$$CLASSPATH
+CLASSPATH_ENV=CLASSPATH=.:$(top_srcdir)/java/lib/slf4j-api-1.7.25.jar:$$CLASSPATH
 
 AM_JAVACFLAGS = $(H5_JAVACFLAGS) -deprecation
 
@@ -51,10 +51,10 @@ hdf5_java_JAVA =  \
 	${pkgpath}/callbacks/H5D_iterate_t.java \
 	${pkgpath}/callbacks/H5E_walk_cb.java \
 	${pkgpath}/callbacks/H5E_walk_t.java \
-	${pkgpath}/callbacks/H5L_iterate_cb.java \
 	${pkgpath}/callbacks/H5L_iterate_t.java \
-	${pkgpath}/callbacks/H5O_iterate_cb.java \
+	${pkgpath}/callbacks/H5L_iterate_opdata_t.java \
 	${pkgpath}/callbacks/H5O_iterate_t.java \
+	${pkgpath}/callbacks/H5O_iterate_opdata_t.java \
     ${pkgpath}/callbacks/H5P_cls_close_func_cb.java \
     ${pkgpath}/callbacks/H5P_cls_close_func_t.java \
     ${pkgpath}/callbacks/H5P_cls_copy_func_cb.java \
@@ -98,9 +98,13 @@ hdf5_java_JAVA =  \
 	${pkgpath}/structs/H5A_info_t.java \
 	${pkgpath}/structs/H5E_error2_t.java \
 	${pkgpath}/structs/H5F_info2_t.java \
+	${pkgpath}/structs/H5FD_hdfs_fapl_t.java \
+	${pkgpath}/structs/H5FD_ros3_fapl_t.java \
 	${pkgpath}/structs/H5G_info_t.java \
 	${pkgpath}/structs/H5L_info_t.java \
 	${pkgpath}/structs/H5O_info_t.java \
+	${pkgpath}/structs/H5O_native_info_t.java \
+	${pkgpath}/structs/H5O_token_t.java \
 	${pkgpath}/structs/H5O_hdr_info_t.java \
 	${pkgpath}/structs/H5AC_cache_config_t.java \
 	${pkgpath}/H5.java  \

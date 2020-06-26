@@ -109,7 +109,7 @@ check_data_i(const char *dsetname, hid_t fid)
             if(data_out[i][j] != data_in[i][j])
                 if(!nerrors++) {
                     H5_FAILED();
-                    printf("element [%d][%d] is %lld but should have been %lld\n",
+                    HDprintf("element [%d][%d] is %lld but should have been %lld\n",
                             (int)i, (int)j, data_out[i][j], data_in[i][j]);
                 } /* end if */
 
@@ -119,7 +119,7 @@ check_data_i(const char *dsetname, hid_t fid)
 
     /* Failure */
     if(nerrors) {
-        printf("total of %d errors out of %d elements\n", nerrors, (int)(NX*NY));
+        HDprintf("total of %d errors out of %d elements\n", nerrors, (int)(NX*NY));
         return 1;
     } /* end if */
 
@@ -182,7 +182,7 @@ check_data_f(const char *dsetname, hid_t fid)
             if(!H5_DBL_REL_EQUAL(data_out[i][j], data_in[i][j], (double)0.001F))
                 if(!nerrors++) {
                     H5_FAILED();
-                    printf("element [%d][%d] is %g but should have been %g\n",
+                    HDprintf("element [%d][%d] is %g but should have been %g\n",
                         (int)i, (int)j, data_out[i][j], data_in[i][j]);
                 } /* end if */
 
@@ -192,7 +192,7 @@ check_data_f(const char *dsetname, hid_t fid)
 
     /* Failure */
     if(nerrors) {
-        printf("total of %d errors out of %d elements\n", nerrors, (int)(NX*NY));
+        HDprintf("total of %d errors out of %d elements\n", nerrors, (int)(NX*NY));
         return 1;
     } /* end if */
 
@@ -213,7 +213,7 @@ error:
  * Purpose:     Handle each dataset from the data file.
  *
  * Return:      Success:        0
- *              Failure:        Number of failures 
+ *              Failure:        Number of failures
  *
  * Programmer:  Raymond Lu
  *              21 January 2011
@@ -226,7 +226,9 @@ check_file(char *filename)
     const char *pathname = H5_get_srcdir_filename(filename);    /* Corrected test file name     */
     hid_t       fid = -1;                                       /* file ID                      */
     int         nerrors = 0;                                    /* # of datasets with errors    */
+#if !defined(H5_HAVE_FILTER_DEFLATE) || !defined(H5_HAVE_FILTER_SZIP)
     const char  *not_supported= "    filter is not enabled.";   /* no filter message            */
+#endif
 
     /* Open the file. */
     if((fid = H5Fopen(pathname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
@@ -240,46 +242,46 @@ check_file(char *filename)
 
     TESTING("dataset of LE FLOAT with scale-offset filter");
     nerrors += check_data_f(DATASETNAME2, fid);
- 
+
     TESTING("dataset of BE FLOAT with scale-offset filter");
     nerrors += check_data_f(DATASETNAME3, fid);
 
     TESTING("dataset of LE DOUBLE with scale-offset filter");
     nerrors += check_data_f(DATASETNAME4, fid);
- 
+
     TESTING("dataset of BE DOUBLE with scale-offset filter");
     nerrors += check_data_f(DATASETNAME5, fid);
- 
+
     TESTING("dataset of LE CHAR with scale-offset filter");
     nerrors += check_data_i(DATASETNAME6, fid);
- 
+
     TESTING("dataset of BE CHAR with scale-offset filter");
     nerrors += check_data_i(DATASETNAME7, fid);
- 
+
     TESTING("dataset of LE SHORT with scale-offset filter");
     nerrors += check_data_i(DATASETNAME8, fid);
- 
+
     TESTING("dataset of BE SHORT with scale-offset filter");
     nerrors += check_data_i(DATASETNAME9, fid);
 
     TESTING("dataset of LE INT with scale-offset filter");
     nerrors += check_data_i(DATASETNAME10, fid);
- 
+
     TESTING("dataset of BE INT with scale-offset filter");
     nerrors += check_data_i(DATASETNAME11, fid);
 
     TESTING("dataset of LE LONG LONG with scale-offset filter");
     nerrors += check_data_i(DATASETNAME12, fid);
- 
+
     TESTING("dataset of BE LONG LONG with scale-offset filter");
     nerrors += check_data_i(DATASETNAME13, fid);
 
     TESTING("dataset of LE FLOAT with Fletcher32 filter");
     nerrors += check_data_f(DATASETNAME14, fid);
- 
+
     TESTING("dataset of BE FLOAT with Fletcher32 filter");
     nerrors += check_data_f(DATASETNAME15, fid);
- 
+
     TESTING("dataset of LE FLOAT with Deflate filter");
 #ifdef H5_HAVE_FILTER_DEFLATE
     nerrors += check_data_f(DATASETNAME16, fid);
@@ -367,11 +369,11 @@ main(void)
     nerrors += check_file(filename);
 
     if(nerrors) {
-        printf("***** %d FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");
+        HDprintf("***** %d FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");
         return EXIT_FAILURE;
     } /* end if */
 
-    printf("All data type tests passed.\n");
+    HDprintf("All data type tests passed.\n");
     return EXIT_SUCCESS;
 } /* end main() */
 

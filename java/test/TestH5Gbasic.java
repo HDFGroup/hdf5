@@ -32,7 +32,7 @@ import org.junit.rules.TestName;
 
 public class TestH5Gbasic {
     @Rule public TestName testname = new TestName();
-    private static final String H5_FILE = "test.h5";
+    private static final String H5_FILE = "testGb.h5";
     long H5fid = -1;
 
     private final long _createGroup(long fid, String name) {

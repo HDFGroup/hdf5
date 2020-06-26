@@ -206,30 +206,27 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:  H5FD_direct_init
+ * Function:    H5FD_direct_init
  *
- * Purpose:  Initialize this driver by registering the driver with the
- *    library.
+ * Purpose:     Initialize this driver by registering the driver with the
+ *              library.
  *
- * Return:  Success:  The driver ID for the direct driver.
- *
- *    Failure:  Negative.
+ * Return:      Success:    The driver ID for the direct driver
+ *              Failure:    H5I_INVALID_HID
  *
  * Programmer:  Raymond Lu
  *              Wednesday, 20 September 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5FD_direct_init(void)
 {
-    hid_t ret_value;        /* Return value */
+    hid_t ret_value = H5I_INVALID_HID;        /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
-    if (H5I_VFL!=H5I_get_type(H5FD_DIRECT_g))
+    if (H5I_VFL != H5I_get_type(H5FD_DIRECT_g))
         H5FD_DIRECT_g = H5FD_register(&H5FD_direct_g,sizeof(H5FD_class_t),FALSE);
 
     /* Set return value */
@@ -237,7 +234,7 @@ H5FD_direct_init(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_direct_init() */
 
 
 /*---------------------------------------------------------------------------
@@ -291,6 +288,7 @@ H5Pset_fapl_direct(hid_t fapl_id, size_t boundary, size_t block_size, size_t cbu
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
+    HDmemset(&fa, 0, sizeof(H5FD_direct_fapl_t));
     if(boundary != 0)
         fa.mboundary = boundary;
     else
@@ -417,14 +415,14 @@ static void *
 H5FD_direct_fapl_copy(const void *_old_fa)
 {
     const H5FD_direct_fapl_t *old_fa = (const H5FD_direct_fapl_t*)_old_fa;
-    H5FD_direct_fapl_t *new_fa = H5MM_malloc(sizeof(H5FD_direct_fapl_t));
+    H5FD_direct_fapl_t *new_fa = H5MM_calloc(sizeof(H5FD_direct_fapl_t));
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(new_fa);
 
     /* Copy the general information */
-    HDmemcpy(new_fa, old_fa, sizeof(H5FD_direct_fapl_t));
+    H5MM_memcpy(new_fa, old_fa, sizeof(H5FD_direct_fapl_t));
 
     FUNC_LEAVE_NOAPI(new_fa)
 } /* end H5FD_direct_fapl_copy() */
@@ -461,8 +459,8 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
 #endif
     h5_stat_t    sb;
     H5P_genplist_t   *plist;      /* Property list */
-    int                 *buf1, *buf2;
-    H5FD_t    *ret_value;
+    void                 *buf1, *buf2;
+    H5FD_t    *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -527,13 +525,13 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
     /* NOTE: Use HDmalloc and HDfree here to ensure compatibility with
      *       HDposix_memalign.
      */
-    buf1 = (int *)HDmalloc(sizeof(int));
+    buf1 = HDmalloc(sizeof(int));
     if(HDposix_memalign(&buf2, file->fa.mboundary, file->fa.fbsize) != 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "HDposix_memalign failed")
 
     if(o_flags & O_CREAT) {
-        if(HDwrite(file->fd, (void*)buf1, sizeof(int))<0) {
-            if(HDwrite(file->fd, (void*)buf2, file->fa.fbsize)<0)
+        if(HDwrite(file->fd, buf1, sizeof(int))<0) {
+            if(HDwrite(file->fd, buf2, file->fa.fbsize)<0)
                 HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL, "file system may not support Direct I/O")
             else
                 file->fa.must_align = TRUE;
@@ -542,8 +540,8 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
             HDftruncate(file->fd, (HDoff_t)0);
         }
     } else {
-        if(HDread(file->fd, (void*)buf1, sizeof(int))<0) {
-            if(HDread(file->fd, (void*)buf2, file->fa.fbsize)<0)
+        if(HDread(file->fd, buf1, sizeof(int))<0) {
+            if(HDread(file->fd, buf2, file->fa.fbsize)<0)
                 HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "file system may not support Direct I/O")
             else
                 file->fa.must_align = TRUE;
@@ -551,7 +549,7 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
             if(o_flags & O_RDWR) {
                 if(HDlseek(file->fd, (HDoff_t)0, SEEK_SET) < 0)
                     HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, NULL, "unable to seek to proper position")
-                if(HDwrite(file->fd, (void *)buf1, sizeof(int))<0)
+                if(HDwrite(file->fd, buf1, sizeof(int))<0)
                     file->fa.must_align = TRUE;
                 else
                     file->fa.must_align = FALSE;
@@ -951,7 +949,7 @@ H5FD_direct_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
       do {
          /* Read the aligned data in file first.  Not able to handle interrupted
      * system calls and partial results like sec2 driver does because the
-     * data may no longer be aligned. It's expecially true when the data in
+     * data may no longer be aligned. It's especially true when the data in
      * file is smaller than ALLOC_SIZE. */
         HDmemset(copy_buf, 0, alloc_size);
 
@@ -978,12 +976,12 @@ H5FD_direct_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
                  * next section of data. */
         p2 = (unsigned char*)copy_buf + copy_offset;
         if((copy_size + copy_offset) <= alloc_size) {
-            HDmemcpy(buf, p2, copy_size);
+            H5MM_memcpy(buf, p2, copy_size);
             buf = (unsigned char *)buf + copy_size;
             copy_size = 0;
                 } /* end if */
                 else {
-                    HDmemcpy(buf, p2, alloc_size - copy_offset);
+                    H5MM_memcpy(buf, p2, alloc_size - copy_offset);
                     buf = (unsigned char*)buf + alloc_size - copy_offset;
                     copy_size -= alloc_size - copy_offset;
                     copy_offset = 0;
@@ -1138,9 +1136,9 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_U
 
         /*
           * Read the aligned data first if the aligned region doesn't fall
-         * entirely in the range to be writen.  Not able to handle interrupted
+         * entirely in the range to be written.  Not able to handle interrupted
      * system calls and partial results like sec2 driver does because the
-     * data may no longer be aligned. It's expecially true when the data in
+     * data may no longer be aligned. It's especially true when the data in
      * file is smaller than ALLOC_SIZE.  Only read the entire section if
                  * both ends are misaligned, otherwise only read the block on the
                  * misaligned end.
@@ -1191,11 +1189,11 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_U
          */
         p1 = (unsigned char *)copy_buf + copy_offset;
         if((copy_size + copy_offset) <= alloc_size) {
-                    HDmemcpy(p1, p3, copy_size);
+                    H5MM_memcpy(p1, p3, copy_size);
                     copy_size = 0;
                 } /* end if */
                 else {
-                    HDmemcpy(p1, p3, alloc_size - copy_offset);
+                    H5MM_memcpy(p1, p3, alloc_size - copy_offset);
                     p3 = (const unsigned char *)p3 + (alloc_size - copy_offset);
                     copy_size -= alloc_size - copy_offset;
                     copy_offset = 0;
@@ -1337,16 +1335,13 @@ static herr_t
 H5FD_direct_lock(H5FD_t *_file, hbool_t rw)
 {
     H5FD_direct_t  *file = (H5FD_direct_t*)_file;	/* VFD file struct */
-    int lock;						/* The type of lock */
+    const int lock = rw ? LOCK_EX : LOCK_SH;
     herr_t ret_value = SUCCEED;                 	/* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(file);
 
-    /* Determine the type of lock */
-    int lock = rw ? LOCK_EX : LOCK_SH;
-    
     /* Place the lock with non-blocking */
     if(HDflock(file->fd, lock | LOCK_NB) < 0)
         HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to flock file")

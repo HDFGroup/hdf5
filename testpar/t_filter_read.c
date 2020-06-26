@@ -37,9 +37,9 @@ static int mpi_size, mpi_rank;
 #define HS_DIM1       200
 #define HS_DIM2       100
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	filter_read_internal
+ * Function:    filter_read_internal
  *
  * Purpose:     Tests parallel reading of a 2D dataset written serially using
  *              filters. During the parallel reading phase, the dataset is
@@ -54,13 +54,13 @@ static void
 filter_read_internal(const char *filename, hid_t dcpl,
                      hsize_t *dset_size)
 {
-    hid_t		file, dataset;        /* HDF5 IDs */
-    hid_t		access_plist;         /* Access property list ID */
-    hid_t		sid, memspace;            /* Dataspace IDs */
-    hsize_t	        size[2];           /* Dataspace dimensions */
-    hsize_t	        hs_offset[2]; /* Hyperslab offset */
-    hsize_t	        hs_size[2];   /* Hyperslab size */
-    size_t		i, j;        /* Local index variables */
+    hid_t        file, dataset;        /* HDF5 IDs */
+    hid_t        access_plist;         /* Access property list ID */
+    hid_t        sid, memspace;            /* Dataspace IDs */
+    hsize_t            size[2];           /* Dataspace dimensions */
+    hsize_t            hs_offset[2]; /* Hyperslab offset */
+    hsize_t            hs_size[2];   /* Hyperslab size */
+    size_t        i, j;        /* Local index variables */
     char                name[32] = "dataset";
     herr_t              hrc;         /* Error status */
     int                 *points = NULL; /* Writing buffer for entire dataset */
@@ -74,10 +74,10 @@ filter_read_internal(const char *filename, hid_t dcpl,
     hs_size[0] = size[0] = HS_DIM1;
     hs_size[1] = HS_DIM2;
 
-    size[1] = hs_size[1] * mpi_size;
+    size[1] = hs_size[1] * (hsize_t)mpi_size;
 
     hs_offset[0] = 0;
-    hs_offset[1] = hs_size[1] * mpi_rank;
+    hs_offset[1] = hs_size[1] * (hsize_t)mpi_rank;
 
     /* Create the data space */
     sid = H5Screate_simple(2, size, NULL);
@@ -151,17 +151,17 @@ filter_read_internal(const char *filename, hid_t dcpl,
         for (j=0; j<hs_size[1]; j++) {
             if(points[i*size[1]+(size_t)hs_offset[1]+j] !=
                       check[i*hs_size[1]+j]) {
-		  fprintf(stderr,"    Read different values than written.\n");
-		  fprintf(stderr,"    At index %lu,%lu\n",
-		         (unsigned long)(i),
-		         (unsigned long)(hs_offset[1]+j));
-		  fprintf(stderr,"    At original: %d\n",
-		         (int)points[i*size[1]+(size_t)hs_offset[1]+j]);
-		  fprintf(stderr,"    At returned: %d\n",
-		         (int)check[i*hs_size[1]+j]);
+                HDfprintf(stderr,"    Read different values than written.\n");
+                HDfprintf(stderr,"    At index %lu,%lu\n",
+                (unsigned long)(i),
+                (unsigned long)(hs_offset[1]+j));
+                HDfprintf(stderr,"    At original: %d\n",
+                (int)points[i*size[1]+(size_t)hs_offset[1]+j]);
+                HDfprintf(stderr,"    At returned: %d\n",
+                (int)check[i*hs_size[1]+j]);
                   VRFY(FALSE, "");
-	    }
-	}
+        }
+    }
     }
 
     /* Get the storage size of the dataset */
@@ -194,10 +194,10 @@ filter_read_internal(const char *filename, hid_t dcpl,
 /*-------------------------------------------------------------------------
  * Function:    test_filter_read
  *
- * Purpose:	Tests parallel reading of datasets written serially using
+ * Purpose:    Tests parallel reading of datasets written serially using
  *              several (combinations of) filters.
  *
- * Programmer:	Christian Chilan
+ * Programmer:    Christian Chilan
  *              Tuesday, May 15, 2007
  *
  * Modifications:
@@ -208,14 +208,16 @@ filter_read_internal(const char *filename, hid_t dcpl,
 void
 test_filter_read(void)
 {
-    hid_t	dc;                 /* HDF5 IDs */
+    hid_t    dc;                 /* HDF5 IDs */
     const hsize_t chunk_size[2] = {CHUNK_DIM1, CHUNK_DIM2};  /* Chunk dimensions */
     hsize_t     null_size;          /* Size of dataset without filters */
     unsigned    chunk_opts;         /* Chunk options */
     unsigned    disable_partial_chunk_filters; /* Whether filters are disabled on partial chunks */
     herr_t      hrc;
     const char *filename;
+#ifdef H5_HAVE_FILTER_FLETCHER32
     hsize_t     fletcher32_size;       /* Size of dataset with Fletcher32 checksum */
+#endif
 
 #ifdef H5_HAVE_FILTER_DEFLATE
     hsize_t     deflate_size;       /* Size of dataset with deflate filter */
@@ -236,7 +238,7 @@ test_filter_read(void)
     filename = GetTestParameters();
 
     if(VERBOSE_MED)
-        printf("Parallel reading of dataset written with filters %s\n", filename);
+        HDprintf("Parallel reading of dataset written with filters %s\n", filename);
 
     /*----------------------------------------------------------
      * STEP 0: Test without filters.
@@ -448,10 +450,10 @@ test_filter_read(void)
 
     /* Make sure encoding is enabled */
     if(h5_szip_can_encode() == 1) {
-	hrc = H5Pset_szip(dc, szip_options_mask, szip_pixels_per_block);
+    hrc = H5Pset_szip(dc, szip_options_mask, szip_pixels_per_block);
         VRFY(hrc>=0, "H5Pset_szip");
 
-	filter_read_internal(filename,dc,&combo_size);
+    filter_read_internal(filename,dc,&combo_size);
     }
 
     /* Clean up objects used for this test */
@@ -461,25 +463,25 @@ test_filter_read(void)
     /* Testing shuffle+szip(with encoder)+checksum filters(checksum last) */
     /* Make sure encoding is enabled */
     if(h5_szip_can_encode() == 1) {
-	dc = H5Pcreate(H5P_DATASET_CREATE);
+    dc = H5Pcreate(H5P_DATASET_CREATE);
         VRFY(dc>=0, "H5Pcreate");
 
-	hrc = H5Pset_chunk (dc, 2, chunk_size);
+    hrc = H5Pset_chunk (dc, 2, chunk_size);
         VRFY(hrc>=0, "H5Pset_chunk");
 
-	hrc = H5Pset_shuffle (dc);
+    hrc = H5Pset_shuffle (dc);
         VRFY(hrc>=0, "H5Pset_shuffle");
 
-	hrc = H5Pset_szip(dc, szip_options_mask, szip_pixels_per_block);
+    hrc = H5Pset_szip(dc, szip_options_mask, szip_pixels_per_block);
         VRFY(hrc>=0, "H5Pset_szip");
 
-	hrc = H5Pset_fletcher32 (dc);
+    hrc = H5Pset_fletcher32 (dc);
         VRFY(hrc>=0, "H5Pset_fletcher32");
 
-	filter_read_internal(filename,dc,&combo_size);
+    filter_read_internal(filename,dc,&combo_size);
 
-	/* Clean up objects used for this test */
-	hrc = H5Pclose (dc);
+    /* Clean up objects used for this test */
+    hrc = H5Pclose (dc);
         VRFY(hrc>=0, "H5Pclose");
     }
 

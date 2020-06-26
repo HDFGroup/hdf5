@@ -36,83 +36,91 @@
  * Setup the dimensions of the hyperslab.
  * Two modes--by rows or by columns.
  * Assume dimension rank is 2.
- * BYROW	divide into slabs of rows
- * BYCOL	divide into blocks of columns
- * ZROW		same as BYROW except process 0 gets 0 rows
- * ZCOL		same as BYCOL except process 0 gets 0 columns
+ * BYROW    divide into slabs of rows
+ * BYCOL    divide into blocks of columns
+ * ZROW        same as BYROW except process 0 gets 0 rows
+ * ZCOL        same as BYCOL except process 0 gets 0 columns
  */
 static void
 slab_set(int mpi_rank, int mpi_size, hsize_t start[], hsize_t count[],
-	 hsize_t stride[], hsize_t block[], int mode)
+    hsize_t stride[], hsize_t block[], int mode)
 {
-    switch (mode){
+    switch (mode) {
     case BYROW:
-	/* Each process takes a slabs of rows. */
-	block[0] = dim0/mpi_size;
-	block[1] = dim1;
-	stride[0] = block[0];
-	stride[1] = block[1];
-	count[0] = 1;
-	count[1] = 1;
-	start[0] = mpi_rank*block[0];
-	start[1] = 0;
-if(VERBOSE_MED) printf("slab_set BYROW\n");
-	break;
+        /* Each process takes a slabs of rows. */
+        block[0] = (hsize_t)(dim0 / mpi_size);
+        block[1] = (hsize_t)dim1;
+        stride[0] = block[0];
+        stride[1] = block[1];
+        count[0] = 1;
+        count[1] = 1;
+        start[0] = (hsize_t)mpi_rank * block[0];
+        start[1] = 0;
+        if (VERBOSE_MED)
+            HDprintf("slab_set BYROW\n");
+        break;
     case BYCOL:
-	/* Each process takes a block of columns. */
-	block[0] = dim0;
-	block[1] = dim1/mpi_size;
-	stride[0] = block[0];
-	stride[1] = block[1];
-	count[0] = 1;
-	count[1] = 1;
-	start[0] = 0;
-	start[1] = mpi_rank*block[1];
-if(VERBOSE_MED) printf("slab_set BYCOL\n");
-	break;
+        /* Each process takes a block of columns. */
+        block[0] = (hsize_t)dim0;
+        block[1] = (hsize_t)(dim1 / mpi_size);
+        stride[0] = block[0];
+        stride[1] = block[1];
+        count[0] = 1;
+        count[1] = 1;
+        start[0] = 0;
+        start[1] = (hsize_t)mpi_rank * block[1];
+        if (VERBOSE_MED)
+            HDprintf("slab_set BYCOL\n");
+        break;
     case ZROW:
-	/* Similar to BYROW except process 0 gets 0 row */
-	block[0] = (mpi_rank ? dim0/mpi_size : 0);
-	block[1] = dim1;
-        stride[0] = (mpi_rank ? block[0] : 1);  /* avoid setting stride to 0 */
-	stride[1] = block[1];
-	count[0] = 1;
-	count[1] = 1;
-	start[0] = (mpi_rank? mpi_rank*block[0] : 0);
-	start[1] = 0;
-if(VERBOSE_MED) printf("slab_set ZROW\n");
-	break;
+        /* Similar to BYROW except process 0 gets 0 row */
+        block[0] = (hsize_t)(mpi_rank ? dim0 / mpi_size : 0);
+        block[1] = (hsize_t)dim1;
+        stride[0] = (mpi_rank ? block[0] : 1); /* avoid setting stride to 0 */
+        stride[1] = block[1];
+        count[0] = 1;
+        count[1] = 1;
+        start[0] = (mpi_rank ? (hsize_t)mpi_rank * block[0] : 0);
+        start[1] = 0;
+        if (VERBOSE_MED)
+            HDprintf("slab_set ZROW\n");
+        break;
     case ZCOL:
-	/* Similar to BYCOL except process 0 gets 0 column */
-	block[0] = dim0;
-	block[1] = (mpi_rank ? dim1/mpi_size : 0);
-	stride[0] = block[0];
-        stride[1] = (mpi_rank ? block[1] : 1);  /* avoid setting stride to 0 */
-	count[0] = 1;
-	count[1] = 1;
-	start[0] = 0;
-	start[1] = (mpi_rank? mpi_rank*block[1] : 0);
-if(VERBOSE_MED) printf("slab_set ZCOL\n");
-	break;
+        /* Similar to BYCOL except process 0 gets 0 column */
+        block[0] = (hsize_t)dim0;
+        block[1] = (hsize_t)(mpi_rank ? dim1 / mpi_size : 0);
+        stride[0] = block[0];
+        stride[1] = (hsize_t)(mpi_rank ? block[1] : 1); /* avoid setting stride to 0 */
+        count[0] = 1;
+        count[1] = 1;
+        start[0] = 0;
+        start[1] = (mpi_rank ? (hsize_t)mpi_rank * block[1] : 0);
+        if (VERBOSE_MED)
+            HDprintf("slab_set ZCOL\n");
+        break;
     default:
-	/* Unknown mode.  Set it to cover the whole dataset. */
-	printf("unknown slab_set mode (%d)\n", mode);
-	block[0] = dim0;
-	block[1] = dim1;
-	stride[0] = block[0];
-	stride[1] = block[1];
-	count[0] = 1;
-	count[1] = 1;
-	start[0] = 0;
-	start[1] = 0;
-if(VERBOSE_MED) printf("slab_set wholeset\n");
-	break;
+        /* Unknown mode.  Set it to cover the whole dataset. */
+        HDprintf("unknown slab_set mode (%d)\n", mode);
+        block[0] = (hsize_t)dim0;
+        block[1] = (hsize_t)dim1;
+        stride[0] = block[0];
+        stride[1] = block[1];
+        count[0] = 1;
+        count[1] = 1;
+        start[0] = 0;
+        start[1] = 0;
+        if (VERBOSE_MED)
+            HDprintf("slab_set wholeset\n");
+        break;
     }
-if(VERBOSE_MED){
-    printf("start[]=(%lu,%lu), count[]=(%lu,%lu), stride[]=(%lu,%lu), block[]=(%lu,%lu), total datapoints=%lu\n",
-	(unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0], (unsigned long)count[1],
-	(unsigned long)stride[0], (unsigned long)stride[1], (unsigned long)block[0], (unsigned long)block[1],
-	(unsigned long)(block[0]*block[1]*count[0]*count[1]));
+    if (VERBOSE_MED) {
+        HDprintf(
+                "start[]=(%lu,%lu), count[]=(%lu,%lu), stride[]=(%lu,%lu), block[]=(%lu,%lu), total datapoints=%lu\n",
+                (unsigned long) start[0], (unsigned long) start[1],
+                (unsigned long) count[0], (unsigned long) count[1],
+                (unsigned long) stride[0], (unsigned long) stride[1],
+                (unsigned long) block[0], (unsigned long) block[1],
+                (unsigned long) (block[0] * block[1] * count[0] * count[1]));
     }
 }
 
@@ -123,7 +131,7 @@ void point_set(hsize_t start[],
                hsize_t count[],
                hsize_t stride[],
                hsize_t block[],
-               size_t num_points, 
+               size_t num_points,
                hsize_t coords[],
                int order)
 {
@@ -153,13 +161,13 @@ void point_set(hsize_t start[],
                     }
 
     if(VERBOSE_MED) {
-        printf("start[]=(%lu, %lu), count[]=(%lu, %lu), stride[]=(%lu, %lu), block[]=(%lu, %lu), total datapoints=%lu\n",
+        HDprintf("start[]=(%lu, %lu), count[]=(%lu, %lu), stride[]=(%lu, %lu), block[]=(%lu, %lu), total datapoints=%lu\n",
                (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0], (unsigned long)count[1],
                (unsigned long)stride[0], (unsigned long)stride[1], (unsigned long)block[0], (unsigned long)block[1],
                (unsigned long)(block[0] * block[1] * count[0] * count[1]));
         k = 0;
         for(i = 0; i < num_points ; i++) {
-            printf("(%d, %d)\n", (int)coords[k], (int)coords[k + 1]);
+            HDprintf("(%d, %d)\n", (int)coords[k], (int)coords[k + 1]);
             k += 2;
         }
     }
@@ -177,10 +185,10 @@ dataset_fill(hsize_t start[], hsize_t block[], DATATYPE * dataset)
 
     /* put some trivial data in the data_array */
     for (i=0; i < block[0]; i++){
-	for (j=0; j < block[1]; j++){
-	    *dataptr = (DATATYPE)((i+start[0])*100 + (j+start[1]+1));
-	    dataptr++;
-	}
+    for (j=0; j < block[1]; j++){
+        *dataptr = (DATATYPE)((i+start[0])*100 + (j+start[1]+1));
+        dataptr++;
+    }
     }
 }
 
@@ -195,19 +203,19 @@ dataset_print(hsize_t start[], hsize_t block[], DATATYPE * dataset)
     hsize_t i, j;
 
     /* print the column heading */
-    printf("%-8s", "Cols:");
+    HDprintf("%-8s", "Cols:");
     for (j=0; j < block[1]; j++){
-	printf("%3lu ", (unsigned long)(start[1]+j));
+    HDprintf("%3lu ", (unsigned long)(start[1]+j));
     }
-    printf("\n");
+    HDprintf("\n");
 
     /* print the slab data */
     for (i=0; i < block[0]; i++){
-	printf("Row %2lu: ", (unsigned long)(i+start[0]));
-	for (j=0; j < block[1]; j++){
-	    printf("%03d ", *dataptr++);
-	}
-	printf("\n");
+    HDprintf("Row %2lu: ", (unsigned long)(i+start[0]));
+    for (j=0; j < block[1]; j++){
+        HDprintf("%03d ", *dataptr++);
+    }
+    HDprintf("\n");
     }
 }
 
@@ -223,35 +231,35 @@ dataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[]
 
     /* print it if VERBOSE_MED */
     if(VERBOSE_MED) {
-	printf("dataset_vrfy dumping:::\n");
-	printf("start(%lu, %lu), count(%lu, %lu), stride(%lu, %lu), block(%lu, %lu)\n",
-	    (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0], (unsigned long)count[1],
-	    (unsigned long)stride[0], (unsigned long)stride[1], (unsigned long)block[0], (unsigned long)block[1]);
-	printf("original values:\n");
-	dataset_print(start, block, original);
-	printf("compared values:\n");
-	dataset_print(start, block, dataset);
+    HDprintf("dataset_vrfy dumping:::\n");
+    HDprintf("start(%lu, %lu), count(%lu, %lu), stride(%lu, %lu), block(%lu, %lu)\n",
+        (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0], (unsigned long)count[1],
+        (unsigned long)stride[0], (unsigned long)stride[1], (unsigned long)block[0], (unsigned long)block[1]);
+    HDprintf("original values:\n");
+    dataset_print(start, block, original);
+    HDprintf("compared values:\n");
+    dataset_print(start, block, dataset);
     }
 
     vrfyerrs = 0;
     for (i=0; i < block[0]; i++){
-	for (j=0; j < block[1]; j++){
-	    if(*dataset != *original){
-		if(vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED){
-		    printf("Dataset Verify failed at [%lu][%lu](row %lu, col %lu): expect %d, got %d\n",
-			(unsigned long)i, (unsigned long)j,
-			(unsigned long)(i+start[0]), (unsigned long)(j+start[1]),
-			*(original), *(dataset));
-		}
-		dataset++;
-		original++;
-	    }
-	}
+    for (j=0; j < block[1]; j++){
+        if(*dataset != *original){
+        if(vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED){
+            HDprintf("Dataset Verify failed at [%lu][%lu](row %lu, col %lu): expect %d, got %d\n",
+            (unsigned long)i, (unsigned long)j,
+            (unsigned long)(i+start[0]), (unsigned long)(j+start[1]),
+            *(original), *(dataset));
+        }
+        dataset++;
+        original++;
+        }
+    }
     }
     if(vrfyerrs > MAX_ERR_REPORT && !VERBOSE_MED)
-	printf("[more errors ...]\n");
+    HDprintf("[more errors ...]\n");
     if(vrfyerrs)
-	printf("%d errors found in dataset_vrfy\n", vrfyerrs);
+    HDprintf("%d errors found in dataset_vrfy\n", vrfyerrs);
     return(vrfyerrs);
 }
 
@@ -272,20 +280,20 @@ void
 dataset_writeInd(void)
 {
     hid_t fid;                  /* HDF5 file ID */
-    hid_t acc_tpl;		/* File access templates */
-    hid_t sid;   		/* Dataspace ID */
-    hid_t file_dataspace;	/* File dataspace ID */
-    hid_t mem_dataspace;	/* memory dataspace ID */
-    hid_t dataset1, dataset2;	/* Dataset ID */
-    hsize_t dims[RANK];   	/* dataset dim sizes */
-    DATATYPE *data_array1 = NULL;	/* data buffer */
+    hid_t acc_tpl;        /* File access templates */
+    hid_t sid;           /* Dataspace ID */
+    hid_t file_dataspace;    /* File dataspace ID */
+    hid_t mem_dataspace;    /* memory dataspace ID */
+    hid_t dataset1, dataset2;    /* Dataset ID */
+    hsize_t dims[RANK];       /* dataset dim sizes */
+    DATATYPE *data_array1 = NULL;    /* data buffer */
     const char *filename;
 
-    hsize_t   start[RANK];			/* for hyperslab setting */
-    hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
-    hsize_t block[RANK];			/* for hyperslab setting */
+    hsize_t   start[RANK];            /* for hyperslab setting */
+    hsize_t count[RANK], stride[RANK];        /* for hyperslab setting */
+    hsize_t block[RANK];            /* for hyperslab setting */
 
-    herr_t ret;         	/* Generic return value */
+    herr_t ret;             /* Generic return value */
     int mpi_size, mpi_rank;
 
     MPI_Comm comm = MPI_COMM_WORLD;
@@ -293,14 +301,14 @@ dataset_writeInd(void)
 
     filename = GetTestParameters();
     if(VERBOSE_MED)
-	printf("Independent write test on file %s\n", filename);
+    HDprintf("Independent write test on file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
     /* allocate memory for data buffer */
-    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_array1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array1 != NULL), "data_array1 HDmalloc succeeded");
 
     /* ----------------------------------------
@@ -324,20 +332,20 @@ dataset_writeInd(void)
      * and the slabs local to the MPI process.
      * ------------------------------------------- */
     /* setup dimensionality object */
-    dims[0] = dim0;
-    dims[1] = dim1;
+    dims[0] = (hsize_t)dim0;
+    dims[1] = (hsize_t)dim1;
     sid = H5Screate_simple (RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
 
 
     /* create a dataset collectively */
     dataset1 = H5Dcreate2(fid, DATASETNAME1, H5T_NATIVE_INT, sid,
-			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     VRFY((dataset1 >= 0), "H5Dcreate2 succeeded");
 
     /* create another dataset collectively */
     dataset2 = H5Dcreate2(fid, DATASETNAME2, H5T_NATIVE_INT, sid,
-			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     VRFY((dataset2 >= 0), "H5Dcreate2 succeeded");
 
 
@@ -366,28 +374,28 @@ dataset_writeInd(void)
 
     /* write data independently */
     ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    H5P_DEFAULT, data_array1);
+        H5P_DEFAULT, data_array1);
     VRFY((ret >= 0), "H5Dwrite dataset1 succeeded");
     /* write data independently */
     ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    H5P_DEFAULT, data_array1);
+        H5P_DEFAULT, data_array1);
     VRFY((ret >= 0), "H5Dwrite dataset2 succeeded");
 
     /* setup dimensions again to write with zero rows for process 0 */
     if(VERBOSE_MED)
-	printf("writeInd by some with zero row\n");
+    HDprintf("writeInd by some with zero row\n");
     slab_set(mpi_rank, mpi_size, start, count, stride, block, ZROW);
     ret = H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
     /* need to make mem_dataspace to match for process 0 */
     if(MAINPROCESS){
-	ret = H5Sselect_hyperslab(mem_dataspace, H5S_SELECT_SET, start, stride, count, block);
-	VRFY((ret >= 0), "H5Sset_hyperslab mem_dataspace succeeded");
+    ret = H5Sselect_hyperslab(mem_dataspace, H5S_SELECT_SET, start, stride, count, block);
+    VRFY((ret >= 0), "H5Sset_hyperslab mem_dataspace succeeded");
     }
     MESG("writeInd by some with zero row");
 if((mpi_rank/2)*2 != mpi_rank){
     ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    H5P_DEFAULT, data_array1);
+        H5P_DEFAULT, data_array1);
     VRFY((ret >= 0), "H5Dwrite dataset1 by ZROW succeeded");
 }
 #ifdef BARRIER_CHECKS
@@ -418,19 +426,19 @@ void
 dataset_readInd(void)
 {
     hid_t fid;                  /* HDF5 file ID */
-    hid_t acc_tpl;		/* File access templates */
-    hid_t file_dataspace;	/* File dataspace ID */
-    hid_t mem_dataspace;	/* memory dataspace ID */
-    hid_t dataset1, dataset2;	/* Dataset ID */
-    DATATYPE *data_array1 = NULL;	/* data buffer */
-    DATATYPE *data_origin1 = NULL; 	/* expected data buffer */
+    hid_t acc_tpl;        /* File access templates */
+    hid_t file_dataspace;    /* File dataspace ID */
+    hid_t mem_dataspace;    /* memory dataspace ID */
+    hid_t dataset1, dataset2;    /* Dataset ID */
+    DATATYPE *data_array1 = NULL;    /* data buffer */
+    DATATYPE *data_origin1 = NULL;     /* expected data buffer */
     const char *filename;
 
-    hsize_t start[RANK];			/* for hyperslab setting */
-    hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
-    hsize_t block[RANK];			/* for hyperslab setting */
+    hsize_t start[RANK];            /* for hyperslab setting */
+    hsize_t count[RANK], stride[RANK];        /* for hyperslab setting */
+    hsize_t block[RANK];            /* for hyperslab setting */
 
-    herr_t ret;         	/* Generic return value */
+    herr_t ret;             /* Generic return value */
     int mpi_size, mpi_rank;
 
     MPI_Comm comm = MPI_COMM_WORLD;
@@ -438,16 +446,16 @@ dataset_readInd(void)
 
     filename = GetTestParameters();
     if(VERBOSE_MED)
-	printf("Independent read test on file %s\n", filename);
+    HDprintf("Independent read test on file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
     /* allocate memory for data buffer */
-    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_array1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array1 != NULL), "data_array1 HDmalloc succeeded");
-    data_origin1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_origin1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_origin1 != NULL), "data_origin1 HDmalloc succeeded");
 
     /* setup file access template */
@@ -489,7 +497,7 @@ dataset_readInd(void)
 
     /* read data independently */
     ret = H5Dread(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    H5P_DEFAULT, data_array1);
+        H5P_DEFAULT, data_array1);
     VRFY((ret >= 0), "");
 
     /* verify the read data with original expected data */
@@ -498,7 +506,7 @@ dataset_readInd(void)
 
     /* read data independently */
     ret = H5Dread(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    H5P_DEFAULT, data_array1);
+        H5P_DEFAULT, data_array1);
     VRFY((ret >= 0), "");
 
     /* verify the read data with original expected data */
@@ -540,28 +548,27 @@ void
 dataset_writeAll(void)
 {
     hid_t fid;                  /* HDF5 file ID */
-    hid_t acc_tpl;		/* File access templates */
-    hid_t xfer_plist;		/* Dataset transfer properties list */
-    hid_t sid;   		/* Dataspace ID */
-    hid_t file_dataspace;	/* File dataspace ID */
-    hid_t mem_dataspace;	/* memory dataspace ID */
+    hid_t acc_tpl;        /* File access templates */
+    hid_t xfer_plist;        /* Dataset transfer properties list */
+    hid_t sid;           /* Dataspace ID */
+    hid_t file_dataspace;    /* File dataspace ID */
+    hid_t mem_dataspace;    /* memory dataspace ID */
     hid_t dataset1, dataset2, dataset3, dataset4; /* Dataset ID */
     hid_t dataset5, dataset6, dataset7; /* Dataset ID */
-    hid_t datatype;		/* Datatype ID */
-    hsize_t dims[RANK];   	/* dataset dim sizes */
-    DATATYPE *data_array1 = NULL;	/* data buffer */
+    hid_t datatype;        /* Datatype ID */
+    hsize_t dims[RANK];       /* dataset dim sizes */
+    DATATYPE *data_array1 = NULL;    /* data buffer */
     const char *filename;
 
-    hsize_t start[RANK];			/* for hyperslab setting */
-    hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
-    hsize_t block[RANK];			/* for hyperslab setting */
+    hsize_t start[RANK];            /* for hyperslab setting */
+    hsize_t count[RANK], stride[RANK];        /* for hyperslab setting */
+    hsize_t block[RANK];            /* for hyperslab setting */
 
     size_t  num_points;         /* for point selection */
     hsize_t *coords = NULL;     /* for point selection */
     hsize_t current_dims;       /* for point selection */
-    int i;
 
-    herr_t ret;         	/* Generic return value */
+    herr_t ret;             /* Generic return value */
     int mpi_size, mpi_rank;
 
     MPI_Comm comm = MPI_COMM_WORLD;
@@ -569,19 +576,19 @@ dataset_writeAll(void)
 
     filename = GetTestParameters();
     if(VERBOSE_MED)
-	printf("Collective write test on file %s\n", filename);
+    HDprintf("Collective write test on file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
     /* set up the coords array selection */
-    num_points = dim1;
-    coords = (hsize_t *)HDmalloc(dim1 * RANK * sizeof(hsize_t));
+    num_points = (size_t)dim1;
+    coords = (hsize_t *)HDmalloc((size_t)dim1 * (size_t)RANK * sizeof(hsize_t));
     VRFY((coords != NULL), "coords malloc succeeded");
 
     /* allocate memory for data buffer */
-    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_array1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array1 != NULL), "data_array1 HDmalloc succeeded");
 
     /* -------------------
@@ -605,8 +612,8 @@ dataset_writeAll(void)
      * and create the dataset
      * ------------------------- */
     /* setup 2-D dimensionality object */
-    dims[0] = dim0;
-    dims[1] = dim1;
+    dims[0] = (hsize_t)dim0;
+    dims[1] = (hsize_t)dim1;
     sid = H5Screate_simple (RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
 
@@ -669,8 +676,8 @@ dataset_writeAll(void)
     dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
     if(VERBOSE_MED){
-	MESG("data_array created");
-	dataset_print(start, block, data_array1);
+    MESG("data_array created");
+    dataset_print(start, block, data_array1);
     }
 
     /* set up the collective transfer properties list */
@@ -679,31 +686,31 @@ dataset_writeAll(void)
     ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
     if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-     ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-     VRFY((ret>= 0),"set independent IO collectively succeeded");
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
 
     /* write data collectively */
     MESG("writeAll by Row");
     ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);
+        xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dwrite dataset1 succeeded");
 
     /* setup dimensions again to writeAll with zero rows for process 0 */
     if(VERBOSE_MED)
-	printf("writeAll by some with zero row\n");
+    HDprintf("writeAll by some with zero row\n");
     slab_set(mpi_rank, mpi_size, start, count, stride, block, ZROW);
     ret = H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
     /* need to make mem_dataspace to match for process 0 */
     if(MAINPROCESS){
-	ret = H5Sselect_hyperslab(mem_dataspace, H5S_SELECT_SET, start, stride, count, block);
-	VRFY((ret >= 0), "H5Sset_hyperslab mem_dataspace succeeded");
+    ret = H5Sselect_hyperslab(mem_dataspace, H5S_SELECT_SET, start, stride, count, block);
+    VRFY((ret >= 0), "H5Sset_hyperslab mem_dataspace succeeded");
     }
     MESG("writeAll by some with zero row");
     ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);
+        xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dwrite dataset1 by ZROW succeeded");
 
     /* release all temporary handles. */
@@ -720,8 +727,8 @@ dataset_writeAll(void)
     dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
     if(VERBOSE_MED){
-	MESG("data_array created");
-	dataset_print(start, block, data_array1);
+    MESG("data_array created");
+    dataset_print(start, block, data_array1);
     }
 
     /* create a file dataspace independently */
@@ -738,8 +745,8 @@ dataset_writeAll(void)
     dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
     if(VERBOSE_MED){
-	MESG("data_array created");
-	dataset_print(start, block, data_array1);
+    MESG("data_array created");
+    dataset_print(start, block, data_array1);
     }
 
     /* set up the collective transfer properties list */
@@ -748,30 +755,30 @@ dataset_writeAll(void)
     ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
     if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-      ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-      VRFY((ret>= 0),"set independent IO collectively succeeded");
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
 
     /* write data independently */
     ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);
+        xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dwrite dataset2 succeeded");
 
     /* setup dimensions again to writeAll with zero columns for process 0 */
     if(VERBOSE_MED)
-	printf("writeAll by some with zero col\n");
+    HDprintf("writeAll by some with zero col\n");
     slab_set(mpi_rank, mpi_size, start, count, stride, block, ZCOL);
     ret = H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
     /* need to make mem_dataspace to match for process 0 */
     if(MAINPROCESS){
-	ret = H5Sselect_hyperslab(mem_dataspace, H5S_SELECT_SET, start, stride, count, block);
-	VRFY((ret >= 0), "H5Sset_hyperslab mem_dataspace succeeded");
+    ret = H5Sselect_hyperslab(mem_dataspace, H5S_SELECT_SET, start, stride, count, block);
+    VRFY((ret >= 0), "H5Sset_hyperslab mem_dataspace succeeded");
     }
     MESG("writeAll by some with zero col");
     ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);
+        xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dwrite dataset1 by ZCOL succeeded");
 
     /* release all temporary handles. */
@@ -789,8 +796,8 @@ dataset_writeAll(void)
     file_dataspace = H5Dget_space (dataset3);
     VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
     if(MAINPROCESS) {
-	ret = H5Sselect_none(file_dataspace);
-	VRFY((ret >= 0), "H5Sselect_none file_dataspace succeeded");
+    ret = H5Sselect_none(file_dataspace);
+    VRFY((ret >= 0), "H5Sselect_none file_dataspace succeeded");
     } /* end if */
     else {
         ret = H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
@@ -801,16 +808,16 @@ dataset_writeAll(void)
     mem_dataspace = H5Screate_simple (RANK, block, NULL);
     VRFY((mem_dataspace >= 0), "");
     if(MAINPROCESS) {
-	ret = H5Sselect_none(mem_dataspace);
-	VRFY((ret >= 0), "H5Sselect_none mem_dataspace succeeded");
+    ret = H5Sselect_none(mem_dataspace);
+    VRFY((ret >= 0), "H5Sselect_none mem_dataspace succeeded");
     } /* end if */
 
     /* fill the local slab with some trivial data */
     dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
     if(VERBOSE_MED) {
-	MESG("data_array created");
-	dataset_print(start, block, data_array1);
+    MESG("data_array created");
+    dataset_print(start, block, data_array1);
     } /* end if */
 
     /* set up the collective transfer properties list */
@@ -819,21 +826,21 @@ dataset_writeAll(void)
     ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
     if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-     ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-     VRFY((ret>= 0),"set independent IO collectively succeeded");
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
 
     /* write data collectively */
     MESG("writeAll with none");
     ret = H5Dwrite(dataset3, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);
+        xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dwrite dataset3 succeeded");
 
     /* write data collectively (with datatype conversion) */
     MESG("writeAll with none");
     ret = H5Dwrite(dataset3, H5T_NATIVE_UCHAR, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);
+        xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dwrite dataset3 succeeded");
 
     /* release all temporary handles. */
@@ -850,8 +857,8 @@ dataset_writeAll(void)
     file_dataspace = H5Dget_space (dataset4);
     VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
     if(MAINPROCESS) {
-	ret = H5Sselect_none(file_dataspace);
-	VRFY((ret >= 0), "H5Sselect_all file_dataspace succeeded");
+    ret = H5Sselect_none(file_dataspace);
+    VRFY((ret >= 0), "H5Sselect_all file_dataspace succeeded");
     } /* end if */
     else {
         ret = H5Sselect_all(file_dataspace);
@@ -862,8 +869,8 @@ dataset_writeAll(void)
     mem_dataspace = H5Screate(H5S_SCALAR);
     VRFY((mem_dataspace >= 0), "");
     if(MAINPROCESS) {
-	ret = H5Sselect_none(mem_dataspace);
-	VRFY((ret >= 0), "H5Sselect_all mem_dataspace succeeded");
+    ret = H5Sselect_none(mem_dataspace);
+    VRFY((ret >= 0), "H5Sselect_all mem_dataspace succeeded");
     } /* end if */
     else {
         ret = H5Sselect_all(mem_dataspace);
@@ -874,8 +881,8 @@ dataset_writeAll(void)
     dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
     if(VERBOSE_MED) {
-	MESG("data_array created");
-	dataset_print(start, block, data_array1);
+    MESG("data_array created");
+    dataset_print(start, block, data_array1);
     } /* end if */
 
     /* set up the collective transfer properties list */
@@ -884,20 +891,20 @@ dataset_writeAll(void)
     ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
     if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-      ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-      VRFY((ret>= 0),"set independent IO collectively succeeded");
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
     /* write data collectively */
     MESG("writeAll with scalar dataspace");
     ret = H5Dwrite(dataset4, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);
+        xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dwrite dataset4 succeeded");
 
     /* write data collectively (with datatype conversion) */
     MESG("writeAll with scalar dataspace");
     ret = H5Dwrite(dataset4, H5T_NATIVE_UCHAR, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);
+        xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dwrite dataset4 succeeded");
 
     /* release all temporary handles. */
@@ -907,30 +914,30 @@ dataset_writeAll(void)
 
 
     if(data_array1) free(data_array1);
-    data_array1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
+    data_array1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
 
     block[0] = 1;
-    block[1] = dim1;
+    block[1] = (hsize_t)dim1;
     stride[0] = 1;
-    stride[1] = dim1;
+    stride[1] = (hsize_t)dim1;
     count[0] = 1;
     count[1] = 1;
-    start[0] = dim0/mpi_size * mpi_rank;
+    start[0] = (hsize_t)(dim0/mpi_size * mpi_rank);
     start[1] = 0;
 
     dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
     if(VERBOSE_MED){
-	MESG("data_array created");
-	dataset_print(start, block, data_array1);
+    MESG("data_array created");
+    dataset_print(start, block, data_array1);
     }
 
     /* Dataset5: point selection in File - Hyperslab selection in Memory*/
     /* create a file dataspace independently */
     point_set (start, count, stride, block, num_points, coords, OUT_OF_ORDER);
     file_dataspace = H5Dget_space (dataset5);
-    VRFY((file_dataspace >= 0), "H5Dget_space succeeded");    
+    VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
     ret = H5Sselect_elements(file_dataspace, H5S_SELECT_SET, num_points, coords);
     VRFY((ret >= 0), "H5Sselect_elements succeeded");
 
@@ -963,7 +970,7 @@ dataset_writeAll(void)
 
     /* Dataset6: point selection in File - Point selection in Memory*/
     /* create a file dataspace independently */
-    start[0] = dim0/mpi_size * mpi_rank;
+    start[0] = (hsize_t)(dim0/mpi_size * mpi_rank);
     start[1] = 0;
     point_set (start, count, stride, block, num_points, coords, OUT_OF_ORDER);
     file_dataspace = H5Dget_space (dataset6);
@@ -1001,11 +1008,11 @@ dataset_writeAll(void)
 
     /* Dataset7: point selection in File - All selection in Memory*/
     /* create a file dataspace independently */
-    start[0] = dim0/mpi_size * mpi_rank;
+    start[0] = (hsize_t)(dim0/mpi_size * mpi_rank);
     start[1] = 0;
     point_set (start, count, stride, block, num_points, coords, IN_ORDER);
     file_dataspace = H5Dget_space (dataset7);
-    VRFY((file_dataspace >= 0), "H5Dget_space succeeded");    
+    VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
     ret = H5Sselect_elements(file_dataspace, H5S_SELECT_SET, num_points, coords);
     VRFY((ret >= 0), "H5Sselect_elements succeeded");
 
@@ -1075,25 +1082,24 @@ void
 dataset_readAll(void)
 {
     hid_t fid;                  /* HDF5 file ID */
-    hid_t acc_tpl;		/* File access templates */
-    hid_t xfer_plist;		/* Dataset transfer properties list */
-    hid_t file_dataspace;	/* File dataspace ID */
-    hid_t mem_dataspace;	/* memory dataspace ID */
+    hid_t acc_tpl;        /* File access templates */
+    hid_t xfer_plist;        /* Dataset transfer properties list */
+    hid_t file_dataspace;    /* File dataspace ID */
+    hid_t mem_dataspace;    /* memory dataspace ID */
     hid_t dataset1, dataset2, dataset5, dataset6, dataset7; /* Dataset ID */
-    DATATYPE *data_array1 = NULL;	/* data buffer */
-    DATATYPE *data_origin1 = NULL; 	/* expected data buffer */
+    DATATYPE *data_array1 = NULL;    /* data buffer */
+    DATATYPE *data_origin1 = NULL;     /* expected data buffer */
     const char *filename;
 
-    hsize_t start[RANK];			/* for hyperslab setting */
-    hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
-    hsize_t block[RANK];			/* for hyperslab setting */
+    hsize_t start[RANK];            /* for hyperslab setting */
+    hsize_t count[RANK], stride[RANK];        /* for hyperslab setting */
+    hsize_t block[RANK];            /* for hyperslab setting */
 
     size_t num_points;          /* for point selection */
     hsize_t *coords = NULL;     /* for point selection */
-    hsize_t current_dims;       /* for point selection */
     int i,j,k;
 
-    herr_t ret;         	/* Generic return value */
+    herr_t ret;             /* Generic return value */
     int mpi_size, mpi_rank;
 
     MPI_Comm comm = MPI_COMM_WORLD;
@@ -1101,21 +1107,21 @@ dataset_readAll(void)
 
     filename = GetTestParameters();
     if(VERBOSE_MED)
-	printf("Collective read test on file %s\n", filename);
+    HDprintf("Collective read test on file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
     /* set up the coords array selection */
-    num_points = dim1;
-    coords = (hsize_t *)HDmalloc(dim0 * dim1 * RANK * sizeof(hsize_t));
+    num_points = (size_t)dim1;
+    coords = (hsize_t *)HDmalloc((size_t)dim0 * (size_t)dim1 * RANK * sizeof(hsize_t));
     VRFY((coords != NULL), "coords malloc succeeded");
 
     /* allocate memory for data buffer */
-    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_array1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array1 != NULL), "data_array1 HDmalloc succeeded");
-    data_origin1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_origin1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_origin1 != NULL), "data_origin1 HDmalloc succeeded");
 
     /* -------------------
@@ -1174,8 +1180,8 @@ dataset_readAll(void)
     dataset_fill(start, block, data_origin1);
     MESG("data_array initialized");
     if(VERBOSE_MED){
-	MESG("data_array created");
-	dataset_print(start, block, data_origin1);
+    MESG("data_array created");
+    dataset_print(start, block, data_origin1);
     }
 
     /* set up the collective transfer properties list */
@@ -1184,14 +1190,14 @@ dataset_readAll(void)
     ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
     if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-      ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-      VRFY((ret>= 0),"set independent IO collectively succeeded");
+         ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+         VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
 
     /* read data collectively */
     ret = H5Dread(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);
+        xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dread dataset1 succeeded");
 
     /* verify the read data with original expected data */
@@ -1200,18 +1206,18 @@ dataset_readAll(void)
 
     /* setup dimensions again to readAll with zero columns for process 0 */
     if(VERBOSE_MED)
-	printf("readAll by some with zero col\n");
+    HDprintf("readAll by some with zero col\n");
     slab_set(mpi_rank, mpi_size, start, count, stride, block, ZCOL);
     ret = H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
     /* need to make mem_dataspace to match for process 0 */
     if(MAINPROCESS){
-	ret = H5Sselect_hyperslab(mem_dataspace, H5S_SELECT_SET, start, stride, count, block);
-	VRFY((ret >= 0), "H5Sset_hyperslab mem_dataspace succeeded");
+    ret = H5Sselect_hyperslab(mem_dataspace, H5S_SELECT_SET, start, stride, count, block);
+    VRFY((ret >= 0), "H5Sset_hyperslab mem_dataspace succeeded");
     }
     MESG("readAll by some with zero col");
     ret = H5Dread(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);
+        xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dread dataset1 by ZCOL succeeded");
 
     /* verify the read data with original expected data */
@@ -1242,8 +1248,8 @@ dataset_readAll(void)
     dataset_fill(start, block, data_origin1);
     MESG("data_array initialized");
     if(VERBOSE_MED){
-	MESG("data_array created");
-	dataset_print(start, block, data_origin1);
+    MESG("data_array created");
+    dataset_print(start, block, data_origin1);
     }
 
     /* set up the collective transfer properties list */
@@ -1252,14 +1258,14 @@ dataset_readAll(void)
     ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
     if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-     ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-     VRFY((ret>= 0),"set independent IO collectively succeeded");
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
 
     /* read data collectively */
     ret = H5Dread(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);
+        xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dread dataset2 succeeded");
 
     /* verify the read data with original expected data */
@@ -1268,18 +1274,18 @@ dataset_readAll(void)
 
     /* setup dimensions again to readAll with zero rows for process 0 */
     if(VERBOSE_MED)
-	printf("readAll by some with zero row\n");
+    HDprintf("readAll by some with zero row\n");
     slab_set(mpi_rank, mpi_size, start, count, stride, block, ZROW);
     ret = H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
     /* need to make mem_dataspace to match for process 0 */
     if(MAINPROCESS){
-	ret = H5Sselect_hyperslab(mem_dataspace, H5S_SELECT_SET, start, stride, count, block);
-	VRFY((ret >= 0), "H5Sset_hyperslab mem_dataspace succeeded");
+    ret = H5Sselect_hyperslab(mem_dataspace, H5S_SELECT_SET, start, stride, count, block);
+    VRFY((ret >= 0), "H5Sset_hyperslab mem_dataspace succeeded");
     }
     MESG("readAll by some with zero row");
     ret = H5Dread(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);
+        xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dread dataset1 by ZROW succeeded");
 
     /* verify the read data with original expected data */
@@ -1293,25 +1299,25 @@ dataset_readAll(void)
 
     if(data_array1) free(data_array1);
     if(data_origin1) free(data_origin1);
-    data_array1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
+    data_array1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
-    data_origin1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
+    data_origin1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_origin1 != NULL), "data_origin1 malloc succeeded");
 
     block[0] = 1;
-    block[1] = dim1;
+    block[1] = (hsize_t)dim1;
     stride[0] = 1;
-    stride[1] = dim1;
+    stride[1] = (hsize_t)dim1;
     count[0] = 1;
     count[1] = 1;
-    start[0] = dim0/mpi_size * mpi_rank;
+    start[0] = (hsize_t)(dim0/mpi_size * mpi_rank);
     start[1] = 0;
 
     dataset_fill(start, block, data_origin1);
     MESG("data_array initialized");
     if(VERBOSE_MED){
-	MESG("data_array created");
-	dataset_print(start, block, data_origin1);
+    MESG("data_array created");
+    dataset_print(start, block, data_origin1);
     }
 
     /* Dataset5: point selection in memory - Hyperslab selection in file*/
@@ -1335,8 +1341,8 @@ dataset_readAll(void)
     ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
     if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-     ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-     VRFY((ret>= 0),"set independent IO collectively succeeded");
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
     /* read data collectively */
@@ -1344,7 +1350,7 @@ dataset_readAll(void)
                   xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dread dataset5 succeeded");
 
-    
+
     ret = dataset_vrfy(start, count, stride, block, data_array1, data_origin1);
     if(ret) nerrors++;
 
@@ -1355,12 +1361,12 @@ dataset_readAll(void)
 
 
     if(data_array1) free(data_array1);
-    data_array1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
+    data_array1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
 
     /* Dataset6: point selection in File - Point selection in Memory*/
     /* create a file dataspace independently */
-    start[0] = dim0/mpi_size * mpi_rank;
+    start[0] = (hsize_t)(dim0/mpi_size * mpi_rank);
     start[1] = 0;
     point_set (start, count, stride, block, num_points, coords, IN_ORDER);
     file_dataspace = H5Dget_space (dataset6);
@@ -1400,7 +1406,7 @@ dataset_readAll(void)
     H5Pclose(xfer_plist);
 
     if(data_array1) free(data_array1);
-    data_array1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
+    data_array1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
 
     /* Dataset7: point selection in memory - All selection in file*/
@@ -1410,12 +1416,12 @@ dataset_readAll(void)
     ret = H5Sselect_all(file_dataspace);
     VRFY((ret >= 0), "H5Sselect_all succeeded");
 
-    num_points = dim0 * dim1;
+    num_points = (size_t)(dim0 * dim1);
     k=0;
     for (i=0 ; i<dim0; i++) {
         for (j=0 ; j<dim1; j++) {
-            coords[k++] = i;
-            coords[k++] = j;
+            coords[k++] = (hsize_t)i;
+            coords[k++] = (hsize_t)j;
         }
     }
     mem_dataspace = H5Dget_space (dataset7);
@@ -1438,7 +1444,7 @@ dataset_readAll(void)
                   xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dread dataset7 succeeded");
 
-    start[0] = dim0/mpi_size * mpi_rank;
+    start[0] = (hsize_t)(dim0/mpi_size * mpi_rank);
     start[1] = 0;
     ret = dataset_vrfy(start, count, stride, block, data_array1+(dim0/mpi_size * dim1 * mpi_rank), data_origin1);
     if(ret) nerrors++;
@@ -1488,25 +1494,25 @@ void
 extend_writeInd(void)
 {
     hid_t fid;                  /* HDF5 file ID */
-    hid_t acc_tpl;		/* File access templates */
-    hid_t sid;   		/* Dataspace ID */
-    hid_t file_dataspace;	/* File dataspace ID */
-    hid_t mem_dataspace;	/* memory dataspace ID */
-    hid_t dataset1, dataset2;	/* Dataset ID */
+    hid_t acc_tpl;        /* File access templates */
+    hid_t sid;           /* Dataspace ID */
+    hid_t file_dataspace;    /* File dataspace ID */
+    hid_t mem_dataspace;    /* memory dataspace ID */
+    hid_t dataset1, dataset2;    /* Dataset ID */
     const char *filename;
-    hsize_t dims[RANK];   	/* dataset dim sizes */
+    hsize_t dims[RANK];       /* dataset dim sizes */
     hsize_t max_dims[RANK] =
-		{H5S_UNLIMITED, H5S_UNLIMITED};	/* dataset maximum dim sizes */
-    DATATYPE	*data_array1 = NULL;		/* data buffer */
-    hsize_t	chunk_dims[RANK];		/* chunk sizes */
-    hid_t	dataset_pl;			/* dataset create prop. list */
+        {H5S_UNLIMITED, H5S_UNLIMITED};    /* dataset maximum dim sizes */
+    DATATYPE    *data_array1 = NULL;        /* data buffer */
+    hsize_t    chunk_dims[RANK];        /* chunk sizes */
+    hid_t    dataset_pl;            /* dataset create prop. list */
 
-    hsize_t	start[RANK];			/* for hyperslab setting */
-    hsize_t	count[RANK];			/* for hyperslab setting */
-    hsize_t	stride[RANK];			/* for hyperslab setting */
-    hsize_t 	block[RANK];			/* for hyperslab setting */
+    hsize_t    start[RANK];            /* for hyperslab setting */
+    hsize_t    count[RANK];            /* for hyperslab setting */
+    hsize_t    stride[RANK];            /* for hyperslab setting */
+    hsize_t     block[RANK];            /* for hyperslab setting */
 
-    herr_t ret;         	/* Generic return value */
+    herr_t ret;             /* Generic return value */
     int mpi_size, mpi_rank;
 
     MPI_Comm comm = MPI_COMM_WORLD;
@@ -1514,18 +1520,18 @@ extend_writeInd(void)
 
     filename = GetTestParameters();
     if(VERBOSE_MED)
-	printf("Extend independent write test on file %s\n", filename);
+    HDprintf("Extend independent write test on file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
     /* setup chunk-size. Make sure sizes are > 0 */
-    chunk_dims[0] = chunkdim0;
-    chunk_dims[1] = chunkdim1;
+    chunk_dims[0] = (hsize_t)chunkdim0;
+    chunk_dims[1] = (hsize_t)chunkdim1;
 
     /* allocate memory for data buffer */
-    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_array1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array1 != NULL), "data_array1 HDmalloc succeeded");
 
     /* -------------------
@@ -1567,7 +1573,7 @@ extend_writeInd(void)
 
     /* set up dataset storage chunk sizes and creation property list */
     if(VERBOSE_MED)
-	printf("chunks[]=%lu,%lu\n", (unsigned long)chunk_dims[0], (unsigned long)chunk_dims[1]);
+    HDprintf("chunks[]=%lu,%lu\n", (unsigned long)chunk_dims[0], (unsigned long)chunk_dims[1]);
     dataset_pl = H5Pcreate(H5P_DATASET_CREATE);
     VRFY((dataset_pl >= 0), "H5Pcreate succeeded");
     ret = H5Pset_chunk(dataset_pl, RANK, chunk_dims);
@@ -1603,8 +1609,8 @@ extend_writeInd(void)
     dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
     if(VERBOSE_MED) {
-	MESG("data_array created");
-	dataset_print(start, block, data_array1);
+    MESG("data_array created");
+    dataset_print(start, block, data_array1);
     }
 
     /* create a memory dataspace independently */
@@ -1612,8 +1618,8 @@ extend_writeInd(void)
     VRFY((mem_dataspace >= 0), "");
 
     /* Extend its current dim sizes before writing */
-    dims[0] = dim0;
-    dims[1] = dim1;
+    dims[0] = (hsize_t)dim0;
+    dims[1] = (hsize_t)dim1;
     ret = H5Dset_extent(dataset1, dims);
     VRFY((ret >= 0), "H5Dset_extent succeeded");
 
@@ -1625,7 +1631,7 @@ extend_writeInd(void)
 
     /* write data independently */
     ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    H5P_DEFAULT, data_array1);
+        H5P_DEFAULT, data_array1);
     VRFY((ret >= 0), "H5Dwrite succeeded");
 
     /* release resource */
@@ -1643,8 +1649,8 @@ extend_writeInd(void)
     dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
     if(VERBOSE_MED){
-	MESG("data_array created");
-	dataset_print(start, block, data_array1);
+    MESG("data_array created");
+    dataset_print(start, block, data_array1);
     }
 
     /* create a memory dataspace independently */
@@ -1664,7 +1670,7 @@ extend_writeInd(void)
 
     /* write data independently.  Should fail. */
     ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    H5P_DEFAULT, data_array1);
+        H5P_DEFAULT, data_array1);
     VRFY((ret < 0), "H5Dwrite failed as expected");
 
     /* restore auto error reporting */
@@ -1672,8 +1678,8 @@ extend_writeInd(void)
     H5Sclose(file_dataspace);
 
     /* Extend dataset2 and try again.  Should succeed. */
-    dims[0] = dim0;
-    dims[1] = dim1;
+    dims[0] = (hsize_t)dim0;
+    dims[1] = (hsize_t)dim1;
     ret = H5Dset_extent(dataset2, dims);
     VRFY((ret >= 0), "H5Dset_extent succeeded");
 
@@ -1685,7 +1691,7 @@ extend_writeInd(void)
 
     /* write data independently */
     ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    H5P_DEFAULT, data_array1);
+        H5P_DEFAULT, data_array1);
     VRFY((ret >= 0), "H5Dwrite succeeded");
 
     /* release resource */
@@ -1719,25 +1725,25 @@ extend_writeInd2(void)
 {
     const char *filename;
     hid_t fid;                  /* HDF5 file ID */
-    hid_t fapl;			/* File access templates */
-    hid_t fs;   		/* File dataspace ID */
-    hid_t ms;   		/* Memory dataspace ID */
-    hid_t dataset;		/* Dataset ID */
-    hsize_t orig_size=10;   	/* Original dataset dim size */
-    hsize_t new_size=20;   	/* Extended dataset dim size */
+    hid_t fapl;            /* File access templates */
+    hid_t fs;           /* File dataspace ID */
+    hid_t ms;           /* Memory dataspace ID */
+    hid_t dataset;        /* Dataset ID */
+    hsize_t orig_size=10;       /* Original dataset dim size */
+    hsize_t new_size=20;       /* Extended dataset dim size */
     hsize_t one=1;
-    hsize_t max_size = H5S_UNLIMITED;	/* dataset maximum dim size */
-    hsize_t chunk_size = 16384;	/* chunk size */
-    hid_t dcpl;	       		/* dataset create prop. list */
+    hsize_t max_size = H5S_UNLIMITED;    /* dataset maximum dim size */
+    hsize_t chunk_size = 16384;    /* chunk size */
+    hid_t dcpl;                   /* dataset create prop. list */
     int   written[10],          /* Data to write */
         retrieved[10];          /* Data read in */
     int mpi_size, mpi_rank;     /* MPI settings */
     int i;                      /* Local index variable */
-    herr_t ret;         	/* Generic return value */
+    herr_t ret;             /* Generic return value */
 
     filename = GetTestParameters();
     if(VERBOSE_MED)
-	printf("Extend independent write test #2 on file %s\n", filename);
+    HDprintf("Extend independent write test #2 on file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
@@ -1794,10 +1800,10 @@ extend_writeInd2(void)
         written[i] = i;
     MESG("data array initialized");
     if(VERBOSE_MED) {
-	MESG("writing at offset zero: ");
+    MESG("writing at offset zero: ");
         for(i = 0; i < (int)orig_size; i++)
-            printf("%s%d", i?", ":"", written[i]);
-        printf("\n");
+            HDprintf("%s%d", i?", ":"", written[i]);
+        HDprintf("\n");
     }
     ret = H5Dwrite(dataset, H5T_NATIVE_INT, ms, fs, H5P_DEFAULT, written);
     VRFY((ret >= 0), "H5Dwrite succeeded");
@@ -1809,15 +1815,15 @@ extend_writeInd2(void)
     VRFY((ret >= 0), "H5Dread succeeded");
     for (i=0; i<(int)orig_size; i++)
         if(written[i]!=retrieved[i]) {
-            printf("Line #%d: written!=retrieved: written[%d]=%d, retrieved[%d]=%d\n",__LINE__,
+            HDprintf("Line #%d: written!=retrieved: written[%d]=%d, retrieved[%d]=%d\n",__LINE__,
                 i,written[i], i,retrieved[i]);
             nerrors++;
         }
     if(VERBOSE_MED){
-	MESG("read at offset zero: ");
+    MESG("read at offset zero: ");
         for (i=0; i<(int)orig_size; i++)
-            printf("%s%d", i?", ":"", retrieved[i]);
-        printf("\n");
+            HDprintf("%s%d", i?", ":"", retrieved[i]);
+        HDprintf("\n");
     }
 
     /* -------------------------
@@ -1833,14 +1839,15 @@ extend_writeInd2(void)
     /* -------------------------
      * Write to the second half of the dataset
      * -------------------------*/
+    H5_CHECK_OVERFLOW(orig_size, hsize_t, int);
     for (i=0; i<(int)orig_size; i++)
-        written[i] = orig_size + i;
+        written[i] = (int)orig_size + i;
     MESG("data array re-initialized");
     if(VERBOSE_MED) {
-	MESG("writing at offset 10: ");
+    MESG("writing at offset 10: ");
         for (i=0; i<(int)orig_size; i++)
-            printf("%s%d", i?", ":"", written[i]);
-        printf("\n");
+            HDprintf("%s%d", i?", ":"", written[i]);
+        HDprintf("\n");
     }
     ret = H5Sselect_hyperslab(fs, H5S_SELECT_SET, &orig_size, NULL, &one, &orig_size);
     VRFY((ret >= 0), "H5Sselect_hyperslab succeeded");
@@ -1854,15 +1861,15 @@ extend_writeInd2(void)
     VRFY((ret >= 0), "H5Dread succeeded");
     for (i=0; i<(int)orig_size; i++)
         if(written[i]!=retrieved[i]) {
-            printf("Line #%d: written!=retrieved: written[%d]=%d, retrieved[%d]=%d\n",__LINE__,
+            HDprintf("Line #%d: written!=retrieved: written[%d]=%d, retrieved[%d]=%d\n",__LINE__,
                 i,written[i], i,retrieved[i]);
             nerrors++;
         }
     if(VERBOSE_MED){
-	MESG("read at offset 10: ");
+    MESG("read at offset 10: ");
         for (i=0; i<(int)orig_size; i++)
-            printf("%s%d", i?", ":"", retrieved[i]);
-        printf("\n");
+            HDprintf("%s%d", i?", ":"", retrieved[i]);
+        HDprintf("\n");
     }
 
 
@@ -1879,22 +1886,22 @@ extend_writeInd2(void)
 void
 extend_readInd(void)
 {
-    hid_t fid;			/* HDF5 file ID */
-    hid_t acc_tpl;		/* File access templates */
-    hid_t file_dataspace;	/* File dataspace ID */
-    hid_t mem_dataspace;	/* memory dataspace ID */
-    hid_t dataset1, dataset2;	/* Dataset ID */
-    hsize_t dims[RANK];   	/* dataset dim sizes */
-    DATATYPE *data_array1 = NULL;	/* data buffer */
-    DATATYPE *data_array2 = NULL;	/* data buffer */
-    DATATYPE *data_origin1 = NULL; 	/* expected data buffer */
+    hid_t fid;            /* HDF5 file ID */
+    hid_t acc_tpl;        /* File access templates */
+    hid_t file_dataspace;    /* File dataspace ID */
+    hid_t mem_dataspace;    /* memory dataspace ID */
+    hid_t dataset1, dataset2;    /* Dataset ID */
+    hsize_t dims[RANK];       /* dataset dim sizes */
+    DATATYPE *data_array1 = NULL;    /* data buffer */
+    DATATYPE *data_array2 = NULL;    /* data buffer */
+    DATATYPE *data_origin1 = NULL;     /* expected data buffer */
     const char *filename;
 
-    hsize_t start[RANK];			/* for hyperslab setting */
-    hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
-    hsize_t block[RANK];			/* for hyperslab setting */
+    hsize_t start[RANK];            /* for hyperslab setting */
+    hsize_t count[RANK], stride[RANK];        /* for hyperslab setting */
+    hsize_t block[RANK];            /* for hyperslab setting */
 
-    herr_t ret;         	/* Generic return value */
+    herr_t ret;             /* Generic return value */
     int mpi_size, mpi_rank;
 
     MPI_Comm comm = MPI_COMM_WORLD;
@@ -1902,18 +1909,18 @@ extend_readInd(void)
 
     filename = GetTestParameters();
     if(VERBOSE_MED)
-	printf("Extend independent read test on file %s\n", filename);
+    HDprintf("Extend independent read test on file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
     /* allocate memory for data buffer */
-    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_array1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array1 != NULL), "data_array1 HDmalloc succeeded");
-    data_array2 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_array2 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array2 != NULL), "data_array2 HDmalloc succeeded");
-    data_origin1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_origin1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_origin1 != NULL), "data_origin1 HDmalloc succeeded");
 
     /* -------------------
@@ -1974,13 +1981,13 @@ extend_readInd(void)
     /* fill dataset with test data */
     dataset_fill(start, block, data_origin1);
     if(VERBOSE_MED){
-	MESG("data_array created");
-	dataset_print(start, block, data_array1);
+    MESG("data_array created");
+    dataset_print(start, block, data_array1);
     }
 
     /* read data independently */
     ret = H5Dread(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    H5P_DEFAULT, data_array1);
+        H5P_DEFAULT, data_array1);
     VRFY((ret >= 0), "H5Dread succeeded");
 
     /* verify the read data with original expected data */
@@ -2009,13 +2016,13 @@ extend_readInd(void)
     /* fill dataset with test data */
     dataset_fill(start, block, data_origin1);
     if(VERBOSE_MED){
-	MESG("data_array created");
-	dataset_print(start, block, data_array1);
+    MESG("data_array created");
+    dataset_print(start, block, data_array1);
     }
 
     /* read data independently */
     ret = H5Dread(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    H5P_DEFAULT, data_array1);
+        H5P_DEFAULT, data_array1);
     VRFY((ret >= 0), "H5Dread succeeded");
 
     /* verify the read data with original expected data */
@@ -2058,26 +2065,26 @@ void
 extend_writeAll(void)
 {
     hid_t fid;                  /* HDF5 file ID */
-    hid_t acc_tpl;		/* File access templates */
-    hid_t xfer_plist;		/* Dataset transfer properties list */
-    hid_t sid;   		/* Dataspace ID */
-    hid_t file_dataspace;	/* File dataspace ID */
-    hid_t mem_dataspace;	/* memory dataspace ID */
-    hid_t dataset1, dataset2;	/* Dataset ID */
+    hid_t acc_tpl;        /* File access templates */
+    hid_t xfer_plist;        /* Dataset transfer properties list */
+    hid_t sid;           /* Dataspace ID */
+    hid_t file_dataspace;    /* File dataspace ID */
+    hid_t mem_dataspace;    /* memory dataspace ID */
+    hid_t dataset1, dataset2;    /* Dataset ID */
     const char *filename;
-    hsize_t dims[RANK];   	/* dataset dim sizes */
+    hsize_t dims[RANK];       /* dataset dim sizes */
     hsize_t max_dims[RANK] =
-		{H5S_UNLIMITED, H5S_UNLIMITED};	/* dataset maximum dim sizes */
-    DATATYPE	*data_array1 = NULL;		/* data buffer */
-    hsize_t	chunk_dims[RANK];		/* chunk sizes */
-    hid_t	dataset_pl;			/* dataset create prop. list */
+        {H5S_UNLIMITED, H5S_UNLIMITED};    /* dataset maximum dim sizes */
+    DATATYPE    *data_array1 = NULL;        /* data buffer */
+    hsize_t    chunk_dims[RANK];        /* chunk sizes */
+    hid_t    dataset_pl;            /* dataset create prop. list */
 
-    hsize_t	start[RANK];			/* for hyperslab setting */
-    hsize_t	count[RANK];			/* for hyperslab setting */
-    hsize_t	stride[RANK];			/* for hyperslab setting */
-    hsize_t 	block[RANK];			/* for hyperslab setting */
+    hsize_t    start[RANK];            /* for hyperslab setting */
+    hsize_t    count[RANK];            /* for hyperslab setting */
+    hsize_t    stride[RANK];            /* for hyperslab setting */
+    hsize_t     block[RANK];            /* for hyperslab setting */
 
-    herr_t ret;         	/* Generic return value */
+    herr_t ret;             /* Generic return value */
     int mpi_size, mpi_rank;
 
     MPI_Comm comm = MPI_COMM_WORLD;
@@ -2085,18 +2092,18 @@ extend_writeAll(void)
 
     filename = GetTestParameters();
     if(VERBOSE_MED)
-	printf("Extend independent write test on file %s\n", filename);
+    HDprintf("Extend independent write test on file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
     /* setup chunk-size. Make sure sizes are > 0 */
-    chunk_dims[0] = chunkdim0;
-    chunk_dims[1] = chunkdim1;
+    chunk_dims[0] = (hsize_t)chunkdim0;
+    chunk_dims[1] = (hsize_t)chunkdim1;
 
     /* allocate memory for data buffer */
-    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_array1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array1 != NULL), "data_array1 HDmalloc succeeded");
 
     /* -------------------
@@ -2138,7 +2145,7 @@ extend_writeAll(void)
 
     /* set up dataset storage chunk sizes and creation property list */
     if(VERBOSE_MED)
-	printf("chunks[]=%lu,%lu\n", (unsigned long)chunk_dims[0], (unsigned long)chunk_dims[1]);
+    HDprintf("chunks[]=%lu,%lu\n", (unsigned long)chunk_dims[0], (unsigned long)chunk_dims[1]);
     dataset_pl = H5Pcreate(H5P_DATASET_CREATE);
     VRFY((dataset_pl >= 0), "H5Pcreate succeeded");
     ret = H5Pset_chunk(dataset_pl, RANK, chunk_dims);
@@ -2174,8 +2181,8 @@ extend_writeAll(void)
     dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
     if(VERBOSE_MED) {
-	MESG("data_array created");
-	dataset_print(start, block, data_array1);
+    MESG("data_array created");
+    dataset_print(start, block, data_array1);
     }
 
     /* create a memory dataspace independently */
@@ -2183,8 +2190,8 @@ extend_writeAll(void)
     VRFY((mem_dataspace >= 0), "");
 
     /* Extend its current dim sizes before writing */
-    dims[0] = dim0;
-    dims[1] = dim1;
+    dims[0] = (hsize_t)dim0;
+    dims[1] = (hsize_t)dim1;
     ret = H5Dset_extent(dataset1, dims);
     VRFY((ret >= 0), "H5Dset_extent succeeded");
 
@@ -2200,14 +2207,14 @@ extend_writeAll(void)
     ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
     if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-     ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-     VRFY((ret>= 0),"set independent IO collectively succeeded");
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
 
     /* write data collectively */
     ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);
+        xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dwrite succeeded");
 
     /* release resource */
@@ -2226,8 +2233,8 @@ extend_writeAll(void)
     dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
     if(VERBOSE_MED){
-	MESG("data_array created");
-	dataset_print(start, block, data_array1);
+    MESG("data_array created");
+    dataset_print(start, block, data_array1);
     }
 
     /* create a memory dataspace independently */
@@ -2240,8 +2247,8 @@ extend_writeAll(void)
     ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
     if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-     ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-     VRFY((ret>= 0),"set independent IO collectively succeeded");
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
 
@@ -2258,7 +2265,7 @@ extend_writeAll(void)
 
     /* write data independently.  Should fail. */
     ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);
+        xfer_plist, data_array1);
     VRFY((ret < 0), "H5Dwrite failed as expected");
 
     /* restore auto error reporting */
@@ -2266,8 +2273,8 @@ extend_writeAll(void)
     H5Sclose(file_dataspace);
 
     /* Extend dataset2 and try again.  Should succeed. */
-    dims[0] = dim0;
-    dims[1] = dim1;
+    dims[0] = (hsize_t)dim0;
+    dims[1] = (hsize_t)dim1;
     ret = H5Dset_extent(dataset2, dims);
     VRFY((ret >= 0), "H5Dset_extent succeeded");
 
@@ -2279,7 +2286,7 @@ extend_writeAll(void)
 
     /* write data independently */
     ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);
+        xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dwrite succeeded");
 
     /* release resource */
@@ -2308,23 +2315,23 @@ extend_writeAll(void)
 void
 extend_readAll(void)
 {
-    hid_t fid;			/* HDF5 file ID */
-    hid_t acc_tpl;		/* File access templates */
-    hid_t xfer_plist;		/* Dataset transfer properties list */
-    hid_t file_dataspace;	/* File dataspace ID */
-    hid_t mem_dataspace;	/* memory dataspace ID */
-    hid_t dataset1, dataset2;	/* Dataset ID */
+    hid_t fid;            /* HDF5 file ID */
+    hid_t acc_tpl;        /* File access templates */
+    hid_t xfer_plist;        /* Dataset transfer properties list */
+    hid_t file_dataspace;    /* File dataspace ID */
+    hid_t mem_dataspace;    /* memory dataspace ID */
+    hid_t dataset1, dataset2;    /* Dataset ID */
     const char *filename;
-    hsize_t dims[RANK];   	/* dataset dim sizes */
-    DATATYPE *data_array1 = NULL;	/* data buffer */
-    DATATYPE *data_array2 = NULL;	/* data buffer */
-    DATATYPE *data_origin1 = NULL; 	/* expected data buffer */
+    hsize_t dims[RANK];       /* dataset dim sizes */
+    DATATYPE *data_array1 = NULL;    /* data buffer */
+    DATATYPE *data_array2 = NULL;    /* data buffer */
+    DATATYPE *data_origin1 = NULL;     /* expected data buffer */
 
-    hsize_t start[RANK];			/* for hyperslab setting */
-    hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
-    hsize_t block[RANK];			/* for hyperslab setting */
+    hsize_t start[RANK];            /* for hyperslab setting */
+    hsize_t count[RANK], stride[RANK];        /* for hyperslab setting */
+    hsize_t block[RANK];            /* for hyperslab setting */
 
-    herr_t ret;         	/* Generic return value */
+    herr_t ret;             /* Generic return value */
     int mpi_size, mpi_rank;
 
     MPI_Comm comm = MPI_COMM_WORLD;
@@ -2332,18 +2339,18 @@ extend_readAll(void)
 
     filename = GetTestParameters();
     if(VERBOSE_MED)
-	printf("Extend independent read test on file %s\n", filename);
+    HDprintf("Extend independent read test on file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
     /* allocate memory for data buffer */
-    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_array1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array1 != NULL), "data_array1 HDmalloc succeeded");
-    data_array2 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_array2 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array2 != NULL), "data_array2 HDmalloc succeeded");
-    data_origin1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_origin1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_origin1 != NULL), "data_origin1 HDmalloc succeeded");
 
     /* -------------------
@@ -2404,8 +2411,8 @@ extend_readAll(void)
     /* fill dataset with test data */
     dataset_fill(start, block, data_origin1);
     if(VERBOSE_MED){
-	MESG("data_array created");
-	dataset_print(start, block, data_array1);
+    MESG("data_array created");
+    dataset_print(start, block, data_array1);
     }
 
     /* set up the collective transfer properties list */
@@ -2414,14 +2421,14 @@ extend_readAll(void)
     ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
     if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-     ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-     VRFY((ret>= 0),"set independent IO collectively succeeded");
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
 
     /* read data collectively */
     ret = H5Dread(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);
+        xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dread succeeded");
 
     /* verify the read data with original expected data */
@@ -2451,8 +2458,8 @@ extend_readAll(void)
     /* fill dataset with test data */
     dataset_fill(start, block, data_origin1);
     if(VERBOSE_MED){
-	MESG("data_array created");
-	dataset_print(start, block, data_array1);
+    MESG("data_array created");
+    dataset_print(start, block, data_array1);
     }
 
     /* set up the collective transfer properties list */
@@ -2461,14 +2468,14 @@ extend_readAll(void)
     ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
     if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-     ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-     VRFY((ret>= 0),"set independent IO collectively succeeded");
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
 
     /* read data collectively */
     ret = H5Dread(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);
+        xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dread succeeded");
 
     /* verify the read data with original expected data */
@@ -2505,27 +2512,27 @@ void
 compress_readAll(void)
 {
     hid_t fid;                  /* HDF5 file ID */
-    hid_t acc_tpl;		/* File access templates */
+    hid_t acc_tpl;        /* File access templates */
     hid_t dcpl;                 /* Dataset creation property list */
-    hid_t xfer_plist;		/* Dataset transfer properties list */
-    hid_t dataspace;		/* Dataspace ID */
-    hid_t dataset;		/* Dataset ID */
+    hid_t xfer_plist;        /* Dataset transfer properties list */
+    hid_t dataspace;        /* Dataspace ID */
+    hid_t dataset;        /* Dataset ID */
     int rank=1;                 /* Dataspace rank */
-    hsize_t dim=dim0;           /* Dataspace dimensions */
+    hsize_t dim=(hsize_t)dim0;  /* Dataspace dimensions */
     unsigned u;                 /* Local index variable */
     unsigned    chunk_opts;         /* Chunk options */
     unsigned    disable_partial_chunk_filters; /* Whether filters are disabled on partial chunks */
-    DATATYPE *data_read = NULL;	/* data buffer */
+    DATATYPE *data_read = NULL;    /* data buffer */
     DATATYPE *data_orig = NULL; /* expected data buffer */
     const char *filename;
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
     int mpi_size, mpi_rank;
-    herr_t ret;         	/* Generic return value */
+    herr_t ret;             /* Generic return value */
 
     filename = GetTestParameters();
     if(VERBOSE_MED)
-	printf("Collective chunked dataset read test on file %s\n", filename);
+    HDprintf("Collective chunked dataset read test on file %s\n", filename);
 
     /* Retrieve MPI parameters */
     MPI_Comm_size(comm,&mpi_size);
@@ -2539,7 +2546,7 @@ compress_readAll(void)
 
     /* Initialize data buffers */
     for(u=0; u<dim;u++)
-        data_orig[u]=u;
+        data_orig[u]=(DATATYPE)u;
 
     /* Run test both with and without filters disabled on partial chunks */
     for(disable_partial_chunk_filters = 0; disable_partial_chunk_filters <= 1;
@@ -2634,28 +2641,27 @@ compress_readAll(void)
             ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
             VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
             if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-            ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-            VRFY((ret>= 0),"set independent IO collectively succeeded");
+                ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+                VRFY((ret>= 0),"set independent IO collectively succeeded");
             }
 
 
             /* Try reading the data */
             ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer_plist, data_read);
-            VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
+            VRFY((ret >= 0), "H5Dread succeeded");
 
             /* Verify data read */
             for(u=0; u<dim; u++)
                 if(data_orig[u]!=data_read[u]) {
-                    printf("Line #%d: written!=retrieved: data_orig[%u]=%d, data_read[%u]=%d\n",__LINE__,
+                    HDprintf("Line #%d: written!=retrieved: data_orig[%u]=%d, data_read[%u]=%d\n",__LINE__,
                         (unsigned)u,data_orig[u],(unsigned)u,data_read[u]);
                     nerrors++;
                 }
 
-            /* Writing to the compressed, chunked dataset in parallel should fail */
-            H5E_BEGIN_TRY {
-                ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer_plist, data_read);
-            } H5E_END_TRY;
-            VRFY((ret < 0), "H5Dwrite failed");
+#if MPI_VERSION >= 3
+            ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer_plist, data_read);
+            VRFY((ret >= 0), "H5Dwrite succeeded");
+#endif
 
             ret = H5Pclose(xfer_plist);
             VRFY((ret >= 0), "H5Pclose succeeded");
@@ -2690,26 +2696,26 @@ void
 none_selection_chunk(void)
 {
     hid_t fid;                  /* HDF5 file ID */
-    hid_t acc_tpl;		/* File access templates */
-    hid_t xfer_plist;		/* Dataset transfer properties list */
-    hid_t sid;   		/* Dataspace ID */
-    hid_t file_dataspace;	/* File dataspace ID */
-    hid_t mem_dataspace;	/* memory dataspace ID */
-    hid_t dataset1, dataset2;	/* Dataset ID */
+    hid_t acc_tpl;        /* File access templates */
+    hid_t xfer_plist;        /* Dataset transfer properties list */
+    hid_t sid;           /* Dataspace ID */
+    hid_t file_dataspace;    /* File dataspace ID */
+    hid_t mem_dataspace;    /* memory dataspace ID */
+    hid_t dataset1, dataset2;    /* Dataset ID */
     const char *filename;
-    hsize_t dims[RANK];   	/* dataset dim sizes */
-    DATATYPE	*data_origin = NULL;		/* data buffer */
-    DATATYPE	*data_array = NULL;		/* data buffer */
-    hsize_t	chunk_dims[RANK];		/* chunk sizes */
-    hid_t	dataset_pl;			/* dataset create prop. list */
+    hsize_t dims[RANK];       /* dataset dim sizes */
+    DATATYPE    *data_origin = NULL;        /* data buffer */
+    DATATYPE    *data_array = NULL;        /* data buffer */
+    hsize_t    chunk_dims[RANK];        /* chunk sizes */
+    hid_t    dataset_pl;            /* dataset create prop. list */
 
-    hsize_t	start[RANK];			/* for hyperslab setting */
-    hsize_t	count[RANK];			/* for hyperslab setting */
-    hsize_t	stride[RANK];			/* for hyperslab setting */
-    hsize_t 	block[RANK];			/* for hyperslab setting */
-    hsize_t	mstart[RANK];			/* for data buffer in memory */
+    hsize_t    start[RANK];            /* for hyperslab setting */
+    hsize_t    count[RANK];            /* for hyperslab setting */
+    hsize_t    stride[RANK];            /* for hyperslab setting */
+    hsize_t     block[RANK];            /* for hyperslab setting */
+    hsize_t    mstart[RANK];            /* for data buffer in memory */
 
-    herr_t ret;         	/* Generic return value */
+    herr_t ret;             /* Generic return value */
     int mpi_size, mpi_rank;
 
     MPI_Comm comm = MPI_COMM_WORLD;
@@ -2717,15 +2723,15 @@ none_selection_chunk(void)
 
     filename = GetTestParameters();
     if(VERBOSE_MED)
-	printf("Extend independent write test on file %s\n", filename);
+    HDprintf("Extend independent write test on file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
     /* setup chunk-size. Make sure sizes are > 0 */
-    chunk_dims[0] = chunkdim0;
-    chunk_dims[1] = chunkdim1;
+    chunk_dims[0] = (hsize_t)chunkdim0;
+    chunk_dims[1] = (hsize_t)chunkdim1;
 
     /* -------------------
      * START AN HDF5 FILE
@@ -2748,15 +2754,15 @@ none_selection_chunk(void)
 
     /* set up dataset storage chunk sizes and creation property list */
     if(VERBOSE_MED)
-	printf("chunks[]=%lu,%lu\n", (unsigned long)chunk_dims[0], (unsigned long)chunk_dims[1]);
+    HDprintf("chunks[]=%lu,%lu\n", (unsigned long)chunk_dims[0], (unsigned long)chunk_dims[1]);
     dataset_pl = H5Pcreate(H5P_DATASET_CREATE);
     VRFY((dataset_pl >= 0), "H5Pcreate succeeded");
     ret = H5Pset_chunk(dataset_pl, RANK, chunk_dims);
     VRFY((ret >= 0), "H5Pset_chunk succeeded");
 
     /* setup dimensionality object */
-    dims[0] = dim0;
-    dims[1] = dim1;
+    dims[0] = (hsize_t)dim0;
+    dims[1] = (hsize_t)dim1;
     sid = H5Screate_simple(RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
 
@@ -2792,8 +2798,8 @@ none_selection_chunk(void)
         dataset_fill(mstart, block, data_origin);
         MESG("data_array initialized");
         if(VERBOSE_MED){
-	    MESG("data_array created");
-	    dataset_print(mstart, block, data_origin);
+        MESG("data_array created");
+        dataset_print(mstart, block, data_origin);
         }
     }
 
@@ -2827,12 +2833,12 @@ none_selection_chunk(void)
 
     /* write data collectively */
     ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_origin);
+        xfer_plist, data_origin);
     VRFY((ret >= 0), "H5Dwrite succeeded");
 
     /* read data independently */
     ret = H5Dread(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    H5P_DEFAULT, data_array);
+        H5P_DEFAULT, data_array);
     VRFY((ret >= 0), "");
 
     /* verify the read data with original expected data */
@@ -2849,12 +2855,12 @@ none_selection_chunk(void)
 
     /* write data collectively */
     ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_origin);
+        xfer_plist, data_origin);
     VRFY((ret >= 0), "H5Dwrite succeeded");
 
     /* read data independently */
     ret = H5Dread(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    H5P_DEFAULT, data_array);
+        H5P_DEFAULT, data_array);
     VRFY((ret >= 0), "");
 
     /* verify the read data with original expected data */
@@ -2886,20 +2892,20 @@ none_selection_chunk(void)
     if(data_array) HDfree(data_array);
 }
 
-
+
 /* Function: test_actual_io_mode
  *
- * Purpose: tests one specific case of collective I/O and checks that the 
+ * Purpose: tests one specific case of collective I/O and checks that the
  *          actual_chunk_opt_mode property and the actual_io_mode
  *          properties in the DXPL have the correct values.
  *
  * Input:   selection_mode: changes the way processes select data from the space, as well
  *          as some dxpl flags to get collective I/O to break in different ways.
- *          
+ *
  *          The relevant I/O function and expected response for each mode:
  *              TEST_ACTUAL_IO_MULTI_CHUNK_IND:
  *                  H5D_mpi_chunk_collective_io, each process reports independent I/O
- *              
+ *
  *              TEST_ACTUAL_IO_MULTI_CHUNK_COL:
  *                  H5D_mpi_chunk_collective_io, each process reports collective I/O
  *
@@ -2911,7 +2917,7 @@ none_selection_chunk(void)
  *                  collective, the rest report independent I/O
  *
  *              TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_IND:
- *                  Same test TEST_ACTUAL_IO_MULTI_CHUNK_IND. 
+ *                  Same test TEST_ACTUAL_IO_MULTI_CHUNK_IND.
  *                  Set directly go to multi-chunk-io without num threshold calc.
  *              TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_COL:
  *                  Same test TEST_ACTUAL_IO_MULTI_CHUNK_COL.
@@ -2936,20 +2942,20 @@ none_selection_chunk(void)
  *
  *          Note: DIRECT_MULTI_CHUNK_MIX and DIRECT_MULTI_CHUNK_MIX_DISAGREE
  *          is not needed as they are covered by DIRECT_CHUNK_MIX and
- *          MULTI_CHUNK_MIX_DISAGREE cases. _DIRECT_ cases are only for testing 
+ *          MULTI_CHUNK_MIX_DISAGREE cases. _DIRECT_ cases are only for testing
  *          path way to multi-chunk-io by H5FD_MPIO_CHUNK_MULTI_IO insted of num-threshold.
  *
  * Modification:
- *  - Refctore to remove multi-chunk-without-opimization test and update for 
- *    testing direct to multi-chunk-io 
+ *  - Refctore to remove multi-chunk-without-opimization test and update for
+ *    testing direct to multi-chunk-io
  * Programmer: Jonathan Kim
  * Date: 2012-10-10
  *
- * 
+ *
  * Programmer: Jacob Gruber
  * Date: 2011-04-06
  */
-static void 
+static void
 test_actual_io_mode(int selection_mode) {
     H5D_mpio_actual_chunk_opt_mode_t   actual_chunk_opt_mode_write = -1;
     H5D_mpio_actual_chunk_opt_mode_t   actual_chunk_opt_mode_read = -1;
@@ -2963,7 +2969,7 @@ test_actual_io_mode(int selection_mode) {
     hbool_t     multi_chunk_io;
     hbool_t     is_chunked;
     hbool_t     is_collective;
-    int         mpi_size = -1; 
+    int         mpi_size = -1;
     int         mpi_rank = -1;
     int         length;
     int         * buffer;
@@ -2988,12 +2994,12 @@ test_actual_io_mode(int selection_mode) {
     hsize_t     block[RANK];
     char message[256];
     herr_t      ret;
-   
+
     /* Set up some flags to make some future if statements slightly more readable */
     direct_multi_chunk_io = (
         selection_mode == TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_IND ||
         selection_mode == TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_COL );
-    
+
     /* Note: RESET performs the same tests as MULTI_CHUNK_MIX_DISAGREE and then
      * tests independent I/O
      */
@@ -3003,11 +3009,11 @@ test_actual_io_mode(int selection_mode) {
         selection_mode == TEST_ACTUAL_IO_MULTI_CHUNK_MIX ||
         selection_mode == TEST_ACTUAL_IO_MULTI_CHUNK_MIX_DISAGREE ||
         selection_mode == TEST_ACTUAL_IO_RESET );
- 
+
     is_chunked = (
         selection_mode != TEST_ACTUAL_IO_CONTIGUOUS &&
         selection_mode != TEST_ACTUAL_IO_NO_COLLECTIVE);
-    
+
     is_collective = selection_mode != TEST_ACTUAL_IO_NO_COLLECTIVE;
 
     /* Set up MPI parameters */
@@ -3015,7 +3021,7 @@ test_actual_io_mode(int selection_mode) {
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     MPI_Barrier(MPI_COMM_WORLD);
-    
+
     HDassert(mpi_size >= 1);
 
     mpi_comm = MPI_COMM_WORLD;
@@ -3032,9 +3038,9 @@ test_actual_io_mode(int selection_mode) {
     fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     VRFY((fid >= 0), "H5Fcreate succeeded");
 
-    /* Create the basic Space */    
-    dims[0] = dim0;
-    dims[1] = dim1;
+    /* Create the basic Space */
+    dims[0] = (hsize_t)dim0;
+    dims[1] = (hsize_t)dim1;
     sid = H5Screate_simple (RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
 
@@ -3045,7 +3051,7 @@ test_actual_io_mode(int selection_mode) {
     /* If we are not testing contiguous datasets */
     if(is_chunked) {
         /* Set up chunk information.  */
-        chunk_dims[0] = dims[0]/mpi_size;
+        chunk_dims[0] = dims[0]/(hsize_t)mpi_size;
         chunk_dims[1] = dims[1];
         ret = H5Pset_chunk(dcpl, 2, chunk_dims);
         VRFY((ret >= 0),"chunk creation property list succeeded");
@@ -3060,10 +3066,10 @@ test_actual_io_mode(int selection_mode) {
     file_space = H5Dget_space(dataset);
     VRFY((file_space >= 0), "H5Dget_space succeeded");
 
-    /* Choose a selection method based on the type of I/O we want to occur, 
+    /* Choose a selection method based on the type of I/O we want to occur,
      * and also set up some selection-dependeent test info. */
     switch(selection_mode) {
-        
+
         /* Independent I/O with optimization */
         case TEST_ACTUAL_IO_MULTI_CHUNK_IND:
         case TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_IND:
@@ -3072,7 +3078,7 @@ test_actual_io_mode(int selection_mode) {
              * independent.
              */
             slab_set(mpi_rank, mpi_size, start, count, stride, block, BYROW);
-            
+
             test_name = "Multi Chunk - Independent";
             actual_chunk_opt_mode_expected = H5D_MPIO_MULTI_CHUNK;
             actual_io_mode_expected = H5D_MPIO_CHUNK_INDEPENDENT;
@@ -3086,7 +3092,7 @@ test_actual_io_mode(int selection_mode) {
              * selections to each chunk, the operation is purely collective.
              */
             slab_set(mpi_rank, mpi_size, start, count, stride, block, BYCOL);
-            
+
             test_name = "Multi Chunk - Collective";
             actual_chunk_opt_mode_expected = H5D_MPIO_MULTI_CHUNK;
             if(mpi_size > 1)
@@ -3094,7 +3100,7 @@ test_actual_io_mode(int selection_mode) {
             else
                 actual_io_mode_expected = H5D_MPIO_CHUNK_INDEPENDENT;
             break;
-        
+
         /* Mixed I/O with optimization */
         case TEST_ACTUAL_IO_MULTI_CHUNK_MIX:
             /* A chunk will be assigned collective I/O only if it is selected by each
@@ -3105,22 +3111,22 @@ test_actual_io_mode(int selection_mode) {
              * assigned independent I/O. Each process will access one chunk collectively
              * and at least one chunk independently, reporting mixed I/O.
              */
-           
+
             if(mpi_rank == 0) {
                  /* Select the first column */
                  slab_set(mpi_rank, mpi_size, start, count, stride, block, BYCOL);
             } else {
                 /* Select the first and the nth chunk in the nth column */
-                block[0] = dim0 / mpi_size;
-                block[1] = dim1 / mpi_size;
+                block[0] = (hsize_t)(dim0 / mpi_size);
+                block[1] = (hsize_t)(dim1 / mpi_size);
                 count[0] = 2;
                 count[1] = 1;
-                stride[0] = mpi_rank * block[0];
+                stride[0] = (hsize_t)mpi_rank * block[0];
                 stride[1] = 1;
                 start[0] = 0;
-                start[1] = mpi_rank*block[1];
+                start[1] = (hsize_t)mpi_rank*block[1];
             }
-                
+
             test_name = "Multi Chunk - Mixed";
             actual_chunk_opt_mode_expected = H5D_MPIO_MULTI_CHUNK;
             actual_io_mode_expected = H5D_MPIO_CHUNK_MIXED;
@@ -3130,7 +3136,7 @@ test_actual_io_mode(int selection_mode) {
          * performed. To acheive this, we have RESET perform collective I/O (which would change
          * the values from the defaults) followed by independent I/O (which should report the
          * default values). RESET doesn't need to have a unique selection, so we reuse
-         * MULTI_CHUMK_MIX_DISAGREE, which was chosen because it is a complex case that works 
+         * MULTI_CHUMK_MIX_DISAGREE, which was chosen because it is a complex case that works
          * on all builds. The independent section of RESET can be found at the end of this function.
          */
         case TEST_ACTUAL_IO_RESET:
@@ -3139,7 +3145,7 @@ test_actual_io_mode(int selection_mode) {
         case TEST_ACTUAL_IO_MULTI_CHUNK_MIX_DISAGREE:
             /* A chunk will be assigned collective I/O only if it is selected by each
              * process. To get mixed I/O with disagreement, assign process n to the
-             * first chunk and the nth chunk. The first chunk, selected by all, is 
+             * first chunk and the nth chunk. The first chunk, selected by all, is
              * assgigned collective I/O, while each other process gets independent I/O.
              * Since the root process with only access the first chunk, it will report
              * collective I/O. The subsequent processes will access the first chunk
@@ -3149,25 +3155,25 @@ test_actual_io_mode(int selection_mode) {
             if(mpi_rank == 0) {
                  /* Select the first chunk in the first column */
                  slab_set(mpi_rank, mpi_size, start, count, stride, block, BYCOL);
-                 block[0] = block[0] / mpi_size;
+                 block[0] = block[0] / (hsize_t)mpi_size;
             } else {
                 /* Select the first and the nth chunk in the nth column */
-                block[0] = dim0 / mpi_size;
-                block[1] = dim1 / mpi_size;
+                block[0] = (hsize_t)(dim0 / mpi_size);
+                block[1] = (hsize_t)(dim1 / mpi_size);
                 count[0] = 2;
                 count[1] = 1;
-                stride[0] = mpi_rank * block[0];
+                stride[0] = (hsize_t)mpi_rank * block[0];
                 stride[1] = 1;
                 start[0] = 0;
-                start[1] = mpi_rank*block[1];
+                start[1] = (hsize_t)mpi_rank*block[1];
             }
-            
+
             /* If the testname was not already set by the RESET case */
             if (selection_mode == TEST_ACTUAL_IO_RESET)
                 test_name = "RESET";
             else
                 test_name = "Multi Chunk - Mixed (Disagreement)";
-            
+
             actual_chunk_opt_mode_expected = H5D_MPIO_MULTI_CHUNK;
             if(mpi_size > 1) {
                 if(mpi_rank == 0)
@@ -3177,14 +3183,14 @@ test_actual_io_mode(int selection_mode) {
             }
             else
                 actual_io_mode_expected = H5D_MPIO_CHUNK_INDEPENDENT;
-            
-            break; 
+
+            break;
 
         /* Linked Chunk I/O */
-        case TEST_ACTUAL_IO_LINK_CHUNK:        
+        case TEST_ACTUAL_IO_LINK_CHUNK:
             /* Nothing special; link chunk I/O is forced in the dxpl settings. */
             slab_set(mpi_rank, mpi_size, start, count, stride, block, BYROW);
-              
+
             test_name = "Link Chunk";
             actual_chunk_opt_mode_expected = H5D_MPIO_LINK_CHUNK;
             actual_io_mode_expected = H5D_MPIO_CHUNK_COLLECTIVE;
@@ -3195,7 +3201,7 @@ test_actual_io_mode(int selection_mode) {
             /* A non overlapping, regular selection in a contiguous dataset leads to
              * collective I/O */
             slab_set(mpi_rank, mpi_size, start, count, stride, block, BYROW);
-                
+
             test_name = "Contiguous";
             actual_chunk_opt_mode_expected = H5D_MPIO_NO_CHUNK_OPTIMIZATION;
             actual_io_mode_expected = H5D_MPIO_CONTIGUOUS_COLLECTIVE;
@@ -3203,7 +3209,7 @@ test_actual_io_mode(int selection_mode) {
 
         case TEST_ACTUAL_IO_NO_COLLECTIVE:
             slab_set(mpi_rank, mpi_size, start, count, stride, block, BYROW);
-                
+
             test_name = "Independent";
             actual_chunk_opt_mode_expected = H5D_MPIO_NO_CHUNK_OPTIMIZATION;
             actual_io_mode_expected = H5D_MPIO_NO_COLLECTIVE;
@@ -3218,13 +3224,13 @@ test_actual_io_mode(int selection_mode) {
 
     ret = H5Sselect_hyperslab(file_space, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
- 
+
     /* Create a memory dataspace mirroring the dataset and select the same hyperslab
-     * as in the file space. 
+     * as in the file space.
      */
     mem_space = H5Screate_simple (RANK, dims, NULL);
     VRFY((mem_space >= 0), "mem_space created");
-    
+
     ret = H5Sselect_hyperslab(mem_space, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
 
@@ -3232,23 +3238,23 @@ test_actual_io_mode(int selection_mode) {
     length = dim0 * dim1;
 
     /* Allocate and initialize the buffer */
-    buffer = (int *)HDmalloc(sizeof(int) * length);
-    VRFY((buffer != NULL), "HDmalloc of buffer succeeded"); 
-    for(i = 0; i < length; i++) 
+    buffer = (int *)HDmalloc(sizeof(int) * (size_t)length);
+    VRFY((buffer != NULL), "HDmalloc of buffer succeeded");
+    for(i = 0; i < length; i++)
         buffer[i] = i;
 
     /* Set up the dxpl for the write */
     dxpl_write = H5Pcreate(H5P_DATASET_XFER);
     VRFY((dxpl_write >= 0), "H5Pcreate(H5P_DATASET_XFER) succeeded");
-    
+
     /* Set collective I/O properties in the dxpl. */
     if(is_collective) {
         /* Request collective I/O */
         ret = H5Pset_dxpl_mpio(dxpl_write, H5FD_MPIO_COLLECTIVE);
         VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
-        
-        /* Set the threshold number of processes per chunk to twice mpi_size. 
-         * This will prevent the threshold from ever being met, thus forcing 
+
+        /* Set the threshold number of processes per chunk to twice mpi_size.
+         * This will prevent the threshold from ever being met, thus forcing
          * multi chunk io instead of link chunk io.
          * This is via deault.
          */
@@ -3286,12 +3292,12 @@ test_actual_io_mode(int selection_mode) {
 
     ret = H5Pget_mpio_actual_chunk_opt_mode(dxpl_write, &actual_chunk_opt_mode_write);
     VRFY((ret >= 0), "retriving actual chunk opt mode succeeded" );
-    
+
     /* Read */
     ret = H5Dread(dataset, data_type, mem_space, file_space, dxpl_read, buffer);
     if(ret < 0) H5Eprint2(H5E_DEFAULT, stdout);
     VRFY((ret >= 0), "H5Dread() dataset multichunk read succeeded");
-   
+
     /* Retreive Actual io values */
     ret = H5Pget_mpio_actual_io_mode(dxpl_read, &actual_io_mode_read);
     VRFY((ret >= 0), "retriving actual io mode succeeded" );
@@ -3307,9 +3313,9 @@ test_actual_io_mode(int selection_mode) {
 
     /* Test values */
     if(actual_chunk_opt_mode_expected != (H5D_mpio_actual_chunk_opt_mode_t) -1 && actual_io_mode_expected != (H5D_mpio_actual_io_mode_t) -1) {
-        sprintf(message, "Actual Chunk Opt Mode has the correct value for %s.\n",test_name);
+        HDsprintf(message, "Actual Chunk Opt Mode has the correct value for %s.\n",test_name);
         VRFY((actual_chunk_opt_mode_write == actual_chunk_opt_mode_expected), message);
-        sprintf(message, "Actual IO Mode has the correct value for %s.\n",test_name);
+        HDsprintf(message, "Actual IO Mode has the correct value for %s.\n",test_name);
         VRFY((actual_io_mode_write == actual_io_mode_expected), message);
     } else {
         HDfprintf(stderr, "%s %d -> (%d,%d)\n", test_name, mpi_rank,
@@ -3341,7 +3347,7 @@ test_actual_io_mode(int selection_mode) {
              "actual_chunk_opt_mode has correct value for reset write (independent)");
             VRFY(actual_io_mode_write == H5D_MPIO_NO_COLLECTIVE,
              "actual_io_mode has correct value for reset write (independent)");
-            
+
             /* Read */
             ret = H5Dread(dataset, data_type, H5S_ALL, H5S_ALL, dxpl_read, buffer);
             VRFY((ret >= 0), "H5Dwrite() dataset multichunk write succeeded");
@@ -3351,7 +3357,7 @@ test_actual_io_mode(int selection_mode) {
             VRFY( (ret >= 0), "retriving actual io mode succeeded" );
             ret = H5Pget_mpio_actual_chunk_opt_mode(dxpl_read, &actual_chunk_opt_mode_read);
             VRFY( (ret >= 0), "retriving actual chunk opt mode succeeded" );
-            
+
             VRFY(actual_chunk_opt_mode_read == H5D_MPIO_NO_CHUNK_OPTIMIZATION,
              "actual_chunk_opt_mode has correct value for reset read (independent)");
             VRFY(actual_io_mode_read == H5D_MPIO_NO_COLLECTIVE,
@@ -3373,10 +3379,10 @@ test_actual_io_mode(int selection_mode) {
     return;
 }
 
-
+
 /* Function: actual_io_mode_tests
  *
- * Purpose: Tests all possible cases of the actual_io_mode property. 
+ * Purpose: Tests all possible cases of the actual_io_mode property.
  *
  * Programmer: Jacob Gruber
  * Date: 2011-04-06
@@ -3387,10 +3393,10 @@ actual_io_mode_tests(void) {
     int mpi_rank = -1;
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_rank);
-    
+
     test_actual_io_mode(TEST_ACTUAL_IO_NO_COLLECTIVE);
-    
-    /* 
+
+    /*
      * Test multi-chunk-io via proc_num threshold
      */
     test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_IND);
@@ -3401,10 +3407,10 @@ actual_io_mode_tests(void) {
         test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_MIX);
     else
         HDfprintf(stdout, "Multi Chunk Mixed test requires 3 proceses minimum\n");
-    
+
     test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_MIX_DISAGREE);
 
-    /* 
+    /*
      * Test multi-chunk-io via setting direct property
      */
     test_actual_io_mode(TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_IND);
@@ -3412,31 +3418,31 @@ actual_io_mode_tests(void) {
 
     test_actual_io_mode(TEST_ACTUAL_IO_LINK_CHUNK);
     test_actual_io_mode(TEST_ACTUAL_IO_CONTIGUOUS);
- 
+
     test_actual_io_mode(TEST_ACTUAL_IO_RESET);
     return;
 }
 
-/* 
+/*
  * Function: test_no_collective_cause_mode
  *
- * Purpose: 
- *    tests cases for broken collective I/O and checks that the 
+ * Purpose:
+ *    tests cases for broken collective I/O and checks that the
  *    H5Pget_mpio_no_collective_cause properties in the DXPL have the correct values.
  *
- * Input:   
+ * Input:
  *    selection_mode: various mode to cause broken collective I/O
  *    Note: Originally, each TEST case is supposed to be used alone.
  *          After some discussion, this is updated to take multiple TEST cases
- *          with '|'.  However there is no error check for any of combined 
+ *          with '|'.  However there is no error check for any of combined
  *          test cases, so a tester is responsible to understand and feed
  *          proper combination of TESTs if needed.
  *
- *          
+ *
  *       TEST_COLLECTIVE:
  *         Test for regular collective I/O without cause of breaking.
  *         Just to test normal behavior.
- *       
+ *
  *       TEST_SET_INDEPENDENT:
  *         Test for Independent I/O as the cause of breaking collective I/O.
  *
@@ -3448,7 +3454,7 @@ actual_io_mode_tests(void) {
  *
  *       TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES:
  *         Test for NULL dataspace as the cause of breaking collective I/O.
- *         
+ *
  *       TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT:
  *         Test for Compact layout as the cause of breaking collective I/O.
  *
@@ -3457,17 +3463,18 @@ actual_io_mode_tests(void) {
  *
  *       TEST_FILTERS:
  *         Test for using filter (checksum) as the cause of breaking collective I/O.
- *         Note: TEST_FILTERS mode will not work until H5Dcreate and H5write is supported for mpio and filter feature. Use test_no_collective_cause_mode_filter() function instead.  
+ *         Note: TEST_FILTERS mode will not work until H5Dcreate and H5write is supported for mpio and filter feature. Use test_no_collective_cause_mode_filter() function instead.
  *
- * 
+ *
  * Programmer: Jonathan Kim
  * Date: Aug, 2012
  */
+#ifdef LATER
 #define DSET_NOCOLCAUSE "nocolcause"
-#define NELM          2
+#endif
 #define FILE_EXTERNAL "nocolcause_extern.data"
-static void 
-test_no_collective_cause_mode(int selection_mode) 
+static void
+test_no_collective_cause_mode(int selection_mode)
 {
     uint32_t no_collective_cause_local_write = 0;
     uint32_t no_collective_cause_local_read = 0;
@@ -3475,13 +3482,12 @@ test_no_collective_cause_mode(int selection_mode)
     uint32_t no_collective_cause_global_write = 0;
     uint32_t no_collective_cause_global_read = 0;
     uint32_t no_collective_cause_global_expected = 0;
-    hsize_t coord[NELM][RANK];
 
     const char  * filename;
     const char  * test_name;
     hbool_t     is_chunked=1;
     hbool_t     is_independent=0;
-    int         mpi_size = -1; 
+    int         mpi_size = -1;
     int         mpi_rank = -1;
     int         length;
     int         * buffer;
@@ -3505,7 +3511,7 @@ test_no_collective_cause_mode(int selection_mode)
     H5Z_filter_t filter_info;
 #endif /* LATER */
     /* set to global value as default */
-    int l_facc_type = facc_type;   
+    int l_facc_type = facc_type;
     char message[256];
 
     /* Set up MPI parameters */
@@ -3561,13 +3567,13 @@ test_no_collective_cause_mode(int selection_mode)
             dims[1] = COL_FACTOR * 6;
         }
         else {
-            dims[0] = dim0;
-            dims[1] = dim1;
+            dims[0] = (hsize_t)dim0;
+            dims[1] = (hsize_t)dim1;
         }
         sid = H5Screate_simple (RANK, dims, NULL);
         VRFY((sid >= 0), "H5Screate_simple succeeded");
     }
-    
+
 
     filename = (const char *)GetTestParameters();
     HDassert(filename != NULL);
@@ -3584,7 +3590,7 @@ test_no_collective_cause_mode(int selection_mode)
     /* If we are not testing contiguous datasets */
     if(is_chunked) {
         /* Set up chunk information.  */
-        chunk_dims[0] = dims[0]/mpi_size;
+        chunk_dims[0] = dims[0]/(hsize_t)mpi_size;
         chunk_dims[1] = dims[1];
         ret = H5Pset_chunk(dcpl, 2, chunk_dims);
         VRFY((ret >= 0),"chunk creation property list succeeded");
@@ -3592,20 +3598,19 @@ test_no_collective_cause_mode(int selection_mode)
 
 
     /* Create the dataset */
-    dataset = H5Dcreate2(fid, "nocolcause", data_type, sid, H5P_DEFAULT,
-            dcpl, H5P_DEFAULT);
+    dataset = H5Dcreate2(fid, "nocolcause", data_type, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     VRFY((dataset >= 0), "H5Dcreate2() dataset succeeded");
 
 
-    /* 
-     * Set expected causes and some tweaks based on the type of test 
+    /*
+     * Set expected causes and some tweaks based on the type of test
      */
     if (selection_mode & TEST_DATATYPE_CONVERSION) {
         test_name = "Broken Collective I/O - Datatype Conversion";
         no_collective_cause_local_expected |= H5D_MPIO_DATATYPE_CONVERSION;
         no_collective_cause_global_expected |= H5D_MPIO_DATATYPE_CONVERSION;
         /* set different sign to trigger type conversion */
-        data_type = H5T_NATIVE_UINT; 
+        data_type = H5T_NATIVE_UINT;
     }
 
     if (selection_mode & TEST_DATA_TRANSFORMS) {
@@ -3666,18 +3671,18 @@ test_no_collective_cause_mode(int selection_mode)
     }
 
     /* Get the number of elements in the selection */
-    length = dims[0] * dims[1];
+    H5_CHECKED_ASSIGN(length, int, dims[0] * dims[1], uint64_t);
 
     /* Allocate and initialize the buffer */
-    buffer = (int *)HDmalloc(sizeof(int) * length);
-    VRFY((buffer != NULL), "HDmalloc of buffer succeeded"); 
-    for(i = 0; i < length; i++) 
+    buffer = (int *)HDmalloc(sizeof(int) * (size_t)length);
+    VRFY((buffer != NULL), "HDmalloc of buffer succeeded");
+    for(i = 0; i < length; i++)
         buffer[i] = i;
 
     /* Set up the dxpl for the write */
     dxpl_write = H5Pcreate(H5P_DATASET_XFER);
     VRFY((dxpl_write >= 0), "H5Pcreate(H5P_DATASET_XFER) succeeded");
-    
+
     if(is_independent) {
         /* Set Independent I/O */
         ret = H5Pset_dxpl_mpio(dxpl_write, H5FD_MPIO_INDEPENDENT);
@@ -3687,17 +3692,17 @@ test_no_collective_cause_mode(int selection_mode)
         /* Set Collective I/O */
         ret = H5Pset_dxpl_mpio(dxpl_write, H5FD_MPIO_COLLECTIVE);
         VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
-        
+
     }
 
     if (selection_mode & TEST_DATA_TRANSFORMS) {
-        ret = H5Pset_data_transform (dxpl_write, "x+1"); 
+        ret = H5Pset_data_transform (dxpl_write, "x+1");
         VRFY((ret >= 0), "H5Pset_data_transform succeeded");
     }
 
     /*---------------------
      * Test Write access
-     *---------------------*/ 
+     *---------------------*/
 
     /* Write */
     ret = H5Dwrite(dataset, data_type, mem_space, file_space, dxpl_write, buffer);
@@ -3712,7 +3717,7 @@ test_no_collective_cause_mode(int selection_mode)
 
     /*---------------------
      * Test Read access
-     *---------------------*/ 
+     *---------------------*/
 
     /* Make a copy of the dxpl to test the read operation */
     dxpl_read = H5Pcopy(dxpl_write);
@@ -3723,7 +3728,7 @@ test_no_collective_cause_mode(int selection_mode)
 
     if(ret < 0) H5Eprint2(H5E_DEFAULT, stdout);
     VRFY((ret >= 0), "H5Dread() dataset multichunk read succeeded");
-   
+
     /* Get the cause of broken collective I/O */
     ret = H5Pget_mpio_no_collective_cause (dxpl_read, &no_collective_cause_local_read, &no_collective_cause_global_read);
     VRFY((ret >= 0), "retriving no collective cause succeeded" );
@@ -3733,13 +3738,13 @@ test_no_collective_cause_mode(int selection_mode)
         "reading and writing are the same for local cause of Broken Collective I/O");
     VRFY((no_collective_cause_global_read == no_collective_cause_global_write),
         "reading and writing are the same for global cause of Broken Collective I/O");
-    
+
     /* Test values */
-    memset (message, 0, sizeof (message));
-    sprintf(message, "Local cause of Broken Collective I/O has the correct value for %s.\n",test_name);
+    HDmemset (message, 0, sizeof (message));
+    HDsprintf(message, "Local cause of Broken Collective I/O has the correct value for %s.\n",test_name);
     VRFY((no_collective_cause_local_write == no_collective_cause_local_expected), message);
-    memset (message, 0, sizeof (message));
-    sprintf(message, "Global cause of Broken Collective I/O has the correct value for %s.\n",test_name);
+    HDmemset (message, 0, sizeof (message));
+    HDsprintf(message, "Global cause of Broken Collective I/O has the correct value for %s.\n",test_name);
     VRFY((no_collective_cause_global_write == no_collective_cause_global_expected), message);
 
     /* Release some resources */
@@ -3771,28 +3776,29 @@ test_no_collective_cause_mode(int selection_mode)
 }
 
 
-/* 
+/*
  * Function: test_no_collective_cause_mode_filter
  *
- * Purpose: 
- *    Test specific for using filter as a caus of broken collective I/O and 
+ * Purpose:
+ *    Test specific for using filter as a caus of broken collective I/O and
  *    checks that the H5Pget_mpio_no_collective_cause properties in the DXPL
  *    have the correct values.
  *
- * NOTE: 
- *    This is a temporary function. 
+ * NOTE:
+ *    This is a temporary function.
  *    test_no_collective_cause_mode(TEST_FILTERS) will replace this when
  *    H5Dcreate and H5write support for mpio and filter feature.
  *
- * Input:   
+ * Input:
  *     TEST_FILTERS_READ:
  *       Test for using filter (checksum) as the cause of breaking collective I/O.
- * 
+ *
  * Programmer: Jonathan Kim
  * Date: Aug, 2012
  */
-static void 
-test_no_collective_cause_mode_filter(int selection_mode) 
+#ifdef LATER
+static void
+test_no_collective_cause_mode_filter(int selection_mode)
 {
     uint32_t no_collective_cause_local_read = 0;
     uint32_t no_collective_cause_local_expected = 0;
@@ -3800,9 +3806,9 @@ test_no_collective_cause_mode_filter(int selection_mode)
     uint32_t no_collective_cause_global_expected = 0;
 
     const char  * filename;
-    const char  * test_name;
+    const char  * test_name = "I/O";
     hbool_t     is_chunked=1;
-    int         mpi_size = -1; 
+    int         mpi_size = -1;
     int         mpi_rank = -1;
     int         length;
     int         * buffer;
@@ -3832,7 +3838,7 @@ test_no_collective_cause_mode_filter(int selection_mode)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     MPI_Barrier(MPI_COMM_WORLD);
-    
+
     HDassert(mpi_size >= 1);
 
     mpi_comm = MPI_COMM_WORLD;
@@ -3858,12 +3864,12 @@ test_no_collective_cause_mode_filter(int selection_mode)
         VRFY(0, "Unexpected mode, only test for TEST_FILTERS_READ.");
     }
 
-    /* Create the basic Space */    
-    dims[0] = dim0;
-    dims[1] = dim1;
+    /* Create the basic Space */
+    dims[0] = (hsize_t)dim0;
+    dims[1] = (hsize_t)dim1;
     sid = H5Screate_simple (RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
-    
+
 
     filename = (const char *)GetTestParameters();
     HDassert(filename != NULL);
@@ -3878,7 +3884,7 @@ test_no_collective_cause_mode_filter(int selection_mode)
     /* If we are not testing contiguous datasets */
     if(is_chunked) {
         /* Set up chunk information.  */
-        chunk_dims[0] = dims[0]/mpi_size;
+        chunk_dims[0] = dims[0]/(hsize_t)mpi_size;
         chunk_dims[1] = dims[1];
         ret = H5Pset_chunk(dcpl, 2, chunk_dims);
         VRFY((ret >= 0),"chunk creation property list succeeded");
@@ -3886,8 +3892,7 @@ test_no_collective_cause_mode_filter(int selection_mode)
 
 
     /* Create the dataset */
-    dataset = H5Dcreate2(fid, DSET_NOCOLCAUSE, data_type, sid, H5P_DEFAULT,
-            dcpl, H5P_DEFAULT);
+    dataset = H5Dcreate2(fid, DSET_NOCOLCAUSE, data_type, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     VRFY((dataset >= 0), "H5Dcreate2() dataset succeeded");
 
 #ifdef LATER /* fletcher32 */
@@ -3910,16 +3915,16 @@ test_no_collective_cause_mode_filter(int selection_mode)
 
     /* Allocate and initialize the buffer */
     buffer = (int *)HDmalloc(sizeof(int) * length);
-    VRFY((buffer != NULL), "HDmalloc of buffer succeeded"); 
-    for(i = 0; i < length; i++) 
+    VRFY((buffer != NULL), "HDmalloc of buffer succeeded");
+    for(i = 0; i < length; i++)
         buffer[i] = i;
 
     /* Set up the dxpl for the write */
     dxpl = H5Pcreate(H5P_DATASET_XFER);
     VRFY((dxpl >= 0), "H5Pcreate(H5P_DATASET_XFER) succeeded");
-    
+
     if (selection_mode == TEST_FILTERS_READ)  {
-        /* To test read in collective I/O mode , write in independent mode 
+        /* To test read in collective I/O mode , write in independent mode
          * because write fails with mpio + filter */
         ret = H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_INDEPENDENT);
         VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
@@ -3929,7 +3934,7 @@ test_no_collective_cause_mode_filter(int selection_mode)
         ret = H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE);
         VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
     }
-        
+
 
     /* Write */
     ret = H5Dwrite(dataset, data_type, mem_space, file_space, dxpl, buffer);
@@ -3970,17 +3975,17 @@ test_no_collective_cause_mode_filter(int selection_mode)
 
     if(ret < 0) H5Eprint2(H5E_DEFAULT, stdout);
     VRFY((ret >= 0), "H5Dread() dataset multichunk read succeeded");
-   
+
     /* Get the cause of broken collective I/O */
     ret = H5Pget_mpio_no_collective_cause (dxpl, &no_collective_cause_local_read, &no_collective_cause_global_read);
     VRFY((ret >= 0), "retriving no collective cause succeeded" );
 
     /* Test values */
-    memset (message, 0, sizeof (message));
-    sprintf(message, "Local cause of Broken Collective I/O has the correct value for %s.\n",test_name);
+    HDmemset (message, 0, sizeof (message));
+    HDsprintf(message, "Local cause of Broken Collective I/O has the correct value for %s.\n",test_name);
     VRFY((no_collective_cause_local_read == (uint32_t)no_collective_cause_local_expected), message);
-    memset (message, 0, sizeof (message));
-    sprintf(message, "Global cause of Broken Collective I/O has the correct value for %s.\n",test_name);
+    HDmemset (message, 0, sizeof (message));
+    HDsprintf(message, "Global cause of Broken Collective I/O has the correct value for %s.\n",test_name);
     VRFY((no_collective_cause_global_read == (uint32_t)no_collective_cause_global_expected), message);
 
     /* Release some resources */
@@ -4003,19 +4008,20 @@ test_no_collective_cause_mode_filter(int selection_mode)
     HDfree(buffer);
     return;
 }
+#endif
 
 /* Function: no_collective_cause_tests
  *
- * Purpose: Tests cases for broken collective IO. 
+ * Purpose: Tests cases for broken collective IO.
  *
  * Programmer: Jonathan Kim
  * Date: Aug, 2012
  */
-void 
-no_collective_cause_tests(void) 
+void
+no_collective_cause_tests(void)
 {
-    /* 
-     * Test individual cause 
+    /*
+     * Test individual cause
      */
     test_no_collective_cause_mode (TEST_COLLECTIVE);
     test_no_collective_cause_mode (TEST_SET_INDEPENDENT);
@@ -4025,15 +4031,15 @@ no_collective_cause_tests(void)
     test_no_collective_cause_mode (TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT);
     test_no_collective_cause_mode (TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL);
 #ifdef LATER /* fletcher32 */
-   /* TODO: use this instead of below TEST_FILTERS_READ when H5Dcreate and 
+   /* TODO: use this instead of below TEST_FILTERS_READ when H5Dcreate and
     * H5Dwrite is ready for mpio + filter feature.
     */
     /* test_no_collective_cause_mode (TEST_FILTERS); */
     test_no_collective_cause_mode_filter (TEST_FILTERS_READ);
-#endif /* LATER */ 
+#endif /* LATER */
 
-    /* 
-     * Test combined causes 
+    /*
+     * Test combined causes
      */
     test_no_collective_cause_mode (TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL | TEST_DATATYPE_CONVERSION);
     test_no_collective_cause_mode (TEST_DATATYPE_CONVERSION | TEST_DATA_TRANSFORMS);
@@ -4057,22 +4063,22 @@ void
 dataset_atomicity(void)
 {
     hid_t fid;                  /* HDF5 file ID */
-    hid_t acc_tpl;		/* File access templates */
-    hid_t sid;   		/* Dataspace ID */
-    hid_t dataset1;      	/* Dataset IDs */
-    hsize_t dims[RANK];   	/* dataset dim sizes */
-    int *write_buf = NULL;	/* data buffer */
-    int *read_buf = NULL;	/* data buffer */
+    hid_t acc_tpl;        /* File access templates */
+    hid_t sid;           /* Dataspace ID */
+    hid_t dataset1;          /* Dataset IDs */
+    hsize_t dims[RANK];       /* dataset dim sizes */
+    int *write_buf = NULL;    /* data buffer */
+    int *read_buf = NULL;    /* data buffer */
     int buf_size;
     hid_t dataset2;
-    hid_t file_dataspace;	/* File dataspace ID */
-    hid_t mem_dataspace;	/* Memory dataspace ID */
+    hid_t file_dataspace;    /* File dataspace ID */
+    hid_t mem_dataspace;    /* Memory dataspace ID */
     hsize_t start[RANK];
     hsize_t stride[RANK];
     hsize_t count[RANK];
     hsize_t block[RANK];
     const char *filename;
-    herr_t ret;         	/* Generic return value */
+    herr_t ret;             /* Generic return value */
     int mpi_size, mpi_rank;
     int i, j, k;
     hbool_t atomicity = FALSE;
@@ -4082,11 +4088,11 @@ dataset_atomicity(void)
     dim0 = 64; dim1 = 32;
     filename = GetTestParameters();
     if (facc_type != FACC_MPIO) {
-	printf("Atomicity tests will not work without the MPIO VFD\n");
+        HDprintf("Atomicity tests will not work without the MPIO VFD\n");
         return;
     }
     if(VERBOSE_MED)
-	printf("atomic writes to file %s\n", filename);
+        HDprintf("atomic writes to file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
@@ -4094,10 +4100,10 @@ dataset_atomicity(void)
 
     buf_size = dim0 * dim1;
     /* allocate memory for data buffer */
-    write_buf = (int *)HDcalloc(buf_size, sizeof(int));
+    write_buf = (int *)HDcalloc((size_t)buf_size, sizeof(int));
     VRFY((write_buf != NULL), "write_buf HDcalloc succeeded");
     /* allocate memory for data buffer */
-    read_buf = (int *)HDcalloc(buf_size, sizeof(int));
+    read_buf = (int *)HDcalloc((size_t)buf_size, sizeof(int));
     VRFY((read_buf != NULL), "read_buf HDcalloc succeeded");
 
     /* setup file access template */
@@ -4113,8 +4119,8 @@ dataset_atomicity(void)
     VRFY((ret >= 0), "H5Pclose succeeded");
 
     /* setup dimensionality object */
-    dims[0] = dim0;
-    dims[1] = dim1;
+    dims[0] = (hsize_t)dim0;
+    dims[1] = (hsize_t)dim1;
     sid = H5Screate_simple (RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
 
@@ -4137,7 +4143,7 @@ dataset_atomicity(void)
                        H5P_DEFAULT, write_buf);
         VRFY((ret >= 0), "H5Dwrite dataset2 succeeded");
     }
-    
+
     ret = H5Dclose(dataset1);
     VRFY((ret >= 0), "H5Dclose succeeded");
     ret = H5Dclose(dataset2);
@@ -4152,17 +4158,17 @@ dataset_atomicity(void)
     /* make sure setting atomicity fails on a serial file ID */
     /* file locking allows only one file open (serial) for writing */
     if(MAINPROCESS){
-	fid=H5Fopen(filename,H5F_ACC_RDWR,H5P_DEFAULT);
-	VRFY((fid >= 0), "H5Fopen succeeed");
+        fid=H5Fopen(filename,H5F_ACC_RDWR,H5P_DEFAULT);
+        VRFY((fid >= 0), "H5Fopen succeeed");
     }
 
     /* should fail */
-    ret = H5Fset_mpi_atomicity (fid , TRUE);
+    ret = H5Fset_mpi_atomicity(fid , TRUE);
     VRFY((ret == FAIL), "H5Fset_mpi_atomicity failed");
 
     if(MAINPROCESS){
-	ret = H5Fclose(fid);
-	VRFY((ret >= 0), "H5Fclose succeeded");
+        ret = H5Fclose(fid);
+        VRFY((ret >= 0), "H5Fclose succeeded");
     }
 
     MPI_Barrier (comm);
@@ -4179,7 +4185,7 @@ dataset_atomicity(void)
     ret = H5Pclose(acc_tpl);
     VRFY((ret >= 0), "H5Pclose succeeded");
 
-    ret = H5Fset_mpi_atomicity (fid , TRUE);
+    ret = H5Fset_mpi_atomicity(fid , TRUE);
     VRFY((ret >= 0), "H5Fset_mpi_atomicity succeeded");
 
     /* open dataset1 (contiguous case) */
@@ -4198,7 +4204,7 @@ dataset_atomicity(void)
     }
 
     /* check that the atomicity flag is set */
-    ret = H5Fget_mpi_atomicity (fid , &atomicity);
+    ret = H5Fget_mpi_atomicity(fid , &atomicity);
     VRFY((ret >= 0), "atomcity get failed");
     VRFY((atomicity == TRUE), "atomcity set failed");
 
@@ -4218,23 +4224,23 @@ dataset_atomicity(void)
     if(VERBOSE_MED) {
         i=0;j=0;k=0;
         for (i=0 ; i<dim0 ; i++) {
-            printf ("\n");
+            HDprintf ("\n");
             for (j=0 ; j<dim1 ; j++)
-                printf ("%d ", read_buf[k++]);
+                HDprintf ("%d ", read_buf[k++]);
         }
     }
 
     /* The processes that read the dataset must either read all values
     as 0 (read happened before process 0 wrote to dataset 1), or 5
     (read happened after process 0 wrote to dataset 1) */
-    if (0 != mpi_rank) { 
+    if (0 != mpi_rank) {
         int compare = read_buf[0];
 
-        VRFY((compare == 0 || compare == 5), 
+        VRFY((compare == 0 || compare == 5),
              "Atomicity Test Failed Process %d: Value read should be 0 or 5\n");
         for (i=1; i<buf_size; i++) {
             if (read_buf[i] != compare) {
-                printf("Atomicity Test Failed Process %d: read_buf[%d] is %d, should be %d\n", mpi_rank, i, read_buf[i], compare);
+                HDprintf("Atomicity Test Failed Process %d: read_buf[%d] is %d, should be %d\n", mpi_rank, i, read_buf[i], compare);
                 nerrors ++;
             }
         }
@@ -4252,10 +4258,10 @@ dataset_atomicity(void)
     VRFY((dataset2 >= 0), "H5Dopen2 succeeded");
 
     /* allocate memory for data buffer */
-    write_buf = (int *)HDcalloc(buf_size, sizeof(int));
+    write_buf = (int *)HDcalloc((size_t)buf_size, sizeof(int));
     VRFY((write_buf != NULL), "write_buf HDcalloc succeeded");
     /* allocate memory for data buffer */
-    read_buf = (int *)HDcalloc(buf_size, sizeof(int));
+    read_buf = (int *)HDcalloc((size_t)buf_size, sizeof(int));
     VRFY((read_buf != NULL), "read_buf HDcalloc succeeded");
 
     for (i=0 ; i<buf_size ; i++) {
@@ -4267,17 +4273,17 @@ dataset_atomicity(void)
 
     atomicity = FALSE;
     /* check that the atomicity flag is set */
-    ret = H5Fget_mpi_atomicity (fid , &atomicity);
+    ret = H5Fget_mpi_atomicity(fid , &atomicity);
     VRFY((ret >= 0), "atomcity get failed");
     VRFY((atomicity == TRUE), "atomcity set failed");
 
 
-    block[0] = dim0/mpi_size - 1;
-    block[1] = dim1/mpi_size - 1;
+    block[0] = (hsize_t)(dim0/mpi_size - 1);
+    block[1] = (hsize_t)(dim1/mpi_size - 1);
     stride[0] = block[0] + 1;
     stride[1] = block[1] + 1;
-    count[0] = mpi_size;
-    count[1] = mpi_size;
+    count[0] = (hsize_t)mpi_size;
+    count[1] = (hsize_t)mpi_size;
     start[0] = 0;
     start[1] = 0;
 
@@ -4316,41 +4322,43 @@ dataset_atomicity(void)
         if (mpi_rank == 1) {
             i=0;j=0;k=0;
             for (i=0 ; i<dim0 ; i++) {
-                printf ("\n");
+                HDprintf ("\n");
                 for (j=0 ; j<dim1 ; j++)
-                    printf ("%d ", read_buf[k++]);
+                    HDprintf ("%d ", read_buf[k++]);
             }
-            printf ("\n");
+            HDprintf ("\n");
         }
     }
 
     /* The processes that read the dataset must either read all values
     as 5 (read happened after process 0 wrote to dataset 1) */
-    if (0 != mpi_rank) { 
+    if (0 != mpi_rank) {
         int compare;
         i=0;j=0;k=0;
 
         compare = 5;
 
+        H5_CHECK_OVERFLOW(block[0], hsize_t, int);
+        H5_CHECK_OVERFLOW(block[1], hsize_t, int);
         for (i=0 ; i<dim0 ; i++) {
-            if (i >= mpi_rank*(block[0]+1)) {
+            if (i >= mpi_rank*((int)block[0]+1)) {
                 break;
             }
-            if ((i+1)%(block[0]+1)==0) {
+            if ((i+1)%((int)block[0]+1)==0) {
                 k += dim1;
                 continue;
             }
             for (j=0 ; j<dim1 ; j++) {
-                if (j >= mpi_rank*(block[1]+1)) {
-                    k += dim1 - mpi_rank*(block[1]+1);
+                if (j >= mpi_rank*((int)block[1]+1)) {
+                    k += dim1 - mpi_rank*((int)block[1]+1);
                     break;
                 }
-                if ((j+1)%(block[1]+1)==0) {
+                if ((j+1)%((int)block[1]+1)==0) {
                     k++;
                     continue;
                 }
                 else if (compare != read_buf[k]) {
-                    printf("Atomicity Test Failed Process %d: read_buf[%d] is %d, should be %d\n", mpi_rank, k, read_buf[k], compare);
+                    HDprintf("Atomicity Test Failed Process %d: read_buf[%d] is %d, should be %d\n", mpi_rank, k, read_buf[k], compare);
                     nerrors++;
                 }
                 k ++;
@@ -4381,8 +4389,8 @@ dataset_atomicity(void)
  * Programmer: Quincey Koziol
  * Date: April, 2013
  */
-void 
-test_dense_attr(void) 
+void
+test_dense_attr(void)
 {
     int mpi_size, mpi_rank;
     hid_t fpid, fid;
@@ -4420,7 +4428,7 @@ test_dense_attr(void)
     status = H5Pclose(gpid);
     VRFY((status >= 0), "H5Pclose succeeded");
 
-    atFileSpace = H5Screate_simple(1, atDims, NULL);  
+    atFileSpace = H5Screate_simple(1, atDims, NULL);
     VRFY((atFileSpace > 0), "H5Screate_simple succeeded");
     atid = H5Acreate2(gid, "bar", H5T_STD_U64LE, atFileSpace, H5P_DEFAULT, H5P_DEFAULT);
     VRFY((atid > 0), "H5Acreate succeeded");

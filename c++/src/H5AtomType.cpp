@@ -19,7 +19,9 @@
 #include "H5PropList.h"
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
+#include "H5DaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
 #include "H5DataType.h"
@@ -46,7 +48,7 @@ AtomType::AtomType(const hid_t existing_id) : DataType(existing_id) {}
 
 //--------------------------------------------------------------------------
 // Function:    AtomType copy constructor
-///\brief       Copy constructor: makes a copy of the original AtomType object.
+///\brief       Copy constructor: same HDF5 object as \a original
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 AtomType::AtomType(const AtomType& original) : DataType(original) {}
@@ -175,8 +177,8 @@ size_t AtomType::getPrecision() const
 ///\param       precision - IN: Number of bits of precision
 ///\exception   H5::DataTypeIException
 ///\par Description
-///             For information, please see C layer Reference Manuat at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5T.html#Datatype-SetPrecision
+///             For information, please refer to the H5Tset_precision API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void AtomType::setPrecision(size_t precision) const
@@ -195,8 +197,8 @@ void AtomType::setPrecision(size_t precision) const
 ///\return      Offset value
 ///\exception   H5::DataTypeIException
 ///\par Description
-///             For information, please see C layer Reference Manuat at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5T.html#Datatype-GetOffset
+///             For information, please refer to the H5Tget_offset API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 // Modification
 //              12/05/00: due to C API change
@@ -222,8 +224,8 @@ int AtomType::getOffset() const
 ///\param       offset - IN: Offset of first significant bit
 ///\exception   H5::DataTypeIException
 ///\par Description
-///             For information, please see C layer Reference Manuat at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5T.html#Datatype-SetOffset
+///             For information, please refer to the H5Tset_offset API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void AtomType::setOffset(size_t offset) const

@@ -36,22 +36,22 @@ int main(void)
     }
     else {
 
-	num_errors += BasicTest();
+    num_errors += BasicTest();
 
-	num_errors += TestCompoundDatatype();
+    num_errors += TestCompoundDatatype();
 
-	num_errors += TestGetPacket();
+    num_errors += TestGetPacket();
 
-	num_errors += TestGetNext();
+    num_errors += TestGetNext();
 
-	num_errors += TestCompress();
+    num_errors += TestCompress();
 
-	num_errors += TestErrors();
+    num_errors += TestErrors();
 
-	num_errors += SystemTest();
+    num_errors += SystemTest();
 
-	/* Test data corruption in packed structs */
-	num_errors += TestHDFFV_9758();
+    /* Test data corruption in packed structs */
+    num_errors += TestHDFFV_9758();
 
         /* Terminate access to the file. */
         err = H5Fclose(fileID);
@@ -81,7 +81,8 @@ int BasicTest()
     hsize_t count;
     int error;
 
-    TESTING("basic functionality")
+    printf("Testing %-62s", "basic functionality");
+    HDfflush(stdout);
 
     FL_PacketTable wrapper(fileID, H5P_DEFAULT, BASICTEST_PT, H5T_NATIVE_INT, 1);
     if(! wrapper.IsValid())
@@ -137,10 +138,11 @@ int TestCompoundDatatype()
     hsize_t count;
     int error;
 
-    TESTING("compound datatypes")
+    printf("Testing %-62s", "compound datatypes");
+    HDfflush(stdout);
 
     /* Create compound datatype */
-    typedef struct compoundType
+    typedef struct
     {
         short a, b, c;
         int e;
@@ -206,7 +208,8 @@ int TestGetNext()
     int records[2];
     int i;
 
-    TESTING("GetNextPacket")
+    printf("Testing %-62s", "GetNextPacket");
+    HDfflush(stdout);
 
     /* Create a dataset */
     FL_PacketTable wrapper(fileID, H5P_DEFAULT, GETNEXT_PT, H5T_NATIVE_INT, 500);
@@ -264,24 +267,25 @@ error:
 const char* COMPRESS_PT("/compressTest");
 int TestCompress()
 {
+#ifdef H5_HAVE_FILTER_DEFLATE
     unsigned int flags = 0;
     unsigned int config = 0;
     size_t cd_nelemts = 0;
 
-    TESTING("compression")
-#ifdef H5_HAVE_FILTER_DEFLATE
+    printf("Testing %-62s", "compression");
+    HDfflush(stdout);
     try {
-	/* Prepare property list to set compression, randomly use deflate */
-	DSetCreatPropList dscreatplist;
-	dscreatplist.setDeflate(6);
+    /* Prepare property list to set compression, randomly use deflate */
+    DSetCreatPropList dscreatplist;
+    dscreatplist.setDeflate(6);
 
         /* Create packet table with compression. */
         FL_PacketTable wrapper(fileID, COMPRESS_PT, H5T_NATIVE_CHAR, 100, dscreatplist.getId());
 
-	/* Close the property list */
-	dscreatplist.close();
+    /* Close the property list */
+    dscreatplist.close();
 
-	/* Verify that the deflate filter is set */
+    /* Verify that the deflate filter is set */
 
         /* Create an HDF5 C++ file object */
         H5File file;
@@ -293,10 +297,10 @@ int TestCompress()
 
         DSetCreatPropList dcpl = dset.getCreatePlist();
 
-	char filter_name[8];
+    char filter_name[8];
         dcpl.getFilterById(H5Z_FILTER_DEFLATE, flags, cd_nelemts, NULL, 8, filter_name, config);
-	if (HDstrncmp(filter_name, "deflate", 7) != 0)
-	    H5_FAILED()
+    if (HDstrncmp(filter_name, "deflate", 7) != 0)
+        H5_FAILED()
     } catch (Exception e) {
       H5_FAILED();
       return 1;
@@ -304,7 +308,7 @@ int TestCompress()
     PASSED();
 #else
     SKIPPED();
-    puts("    deflate filter not enabled");
+    HDputs("    deflate filter not enabled");
 #endif /* H5_HAVE_FILTER_DEFLATE */
     return 0;
 }
@@ -315,7 +319,8 @@ int TestGetPacket()
     int record;
     int theRecs[3];
     int i;
-    TESTING("GetPacket")
+    printf("Testing %-62s", "GetPacket");
+    HDfflush(stdout);
 
     /* Create a dataset.  Does not need to specify property list because
        there is no compression. */
@@ -353,7 +358,8 @@ const char* PT_TESTERROR = "/TestErrors";
 
 int TestErrors()
 {
-    TESTING("error conditions")
+    printf("Testing %-62s", "error conditions");
+    HDfflush(stdout);
 
     /* Create a dataset */
     FL_PacketTable wrapper(fileID, PT_TESTERROR, H5T_NATIVE_INT, 1);
@@ -464,7 +470,8 @@ const char* PT_SYSTEMTST1 = "/SystemTest1";
 const char* PT_SYSTEMTST2 = "/SystemTest2";
 int SystemTest()
 {
-    TESTING("multiple datatypes")
+    printf("Testing %-62s", "multiple datatypes");
+    HDfflush(stdout);
 
     hid_t dtypeID1, dtypeID2;
     hsize_t count;
@@ -472,7 +479,7 @@ int SystemTest()
 
     /* Creating two inter-related datatypes.  Create two datasets and put
      * one datatype in each. */
-    typedef struct compoundType
+    typedef struct
     {
         short a, b, c;
         int e;
@@ -485,7 +492,7 @@ int SystemTest()
     H5Tinsert(dtypeID1, "charlie", HOFFSET( compoundType, c ), H5T_NATIVE_SHORT);
     H5Tinsert(dtypeID1, "ebert", HOFFSET( compoundType, e ), H5T_NATIVE_INT);
 
-    typedef struct cType2
+    typedef struct
     {
         char f;
         compoundType g;
@@ -560,16 +567,16 @@ error:
 
 /*-------------------------------------------------------------------------
  * TestHDFFV_9758(): Test that a packet table with compound datatype which
- *	contains string type can be created and written correctly. (HDFFV-9758)
+ *    contains string type can be created and written correctly. (HDFFV-9758)
  *
  * Notes:
- *	Previously, data of the field that follows the string was read back
- *	as garbage when #pragma pack(1) is used.
+ *    Previously, data of the field that follows the string was read back
+ *    as garbage when #pragma pack(1) is used.
  * 2016/10/20 -BMR
  *      Updated:
- *		#pragma pack(1) caused failure on Emu because Sparc cannot
- *		access misaligned data.  Changed it to pack() to do the
- *		default alignment.
+ *        #pragma pack(1) caused failure on Emu because Sparc cannot
+ *        access misaligned data.  Changed it to pack() to do the
+ *        default alignment.
  * 2016/10/25 -BMR
  *-------------------------------------------------------------------------
  */
@@ -592,57 +599,58 @@ int TestHDFFV_9758()
     };
 
     s1_t s1[NUM_PACKETS];
-    
+
     for (hsize_t i = 0; i < NUM_PACKETS; i++)
     {
         s1[i].a = i;
         s1[i].b = 1.f * static_cast<float>(i * i);
         s1[i].c = 1. / (i + 1);
-        sprintf(s1[i].d, "string%d", (int)i);
+        HDsprintf(s1[i].d, "string%d", (int)i);
         s1[i].e = 100+i;
     }
 
-    TESTING("data corruption in packed structs (HDFFV-9758)")
+    printf("Testing %-62s", "data corruption in packed structs (HDFFV-9758)");
+    HDfflush(stdout);
 
     // Build a compound datatype
     compound_type = H5Tcreate(H5T_COMPOUND, sizeof(s1_t));
     if (compound_type < 0)
-	goto error;
-    
+    goto error;
+
     err = H5Tinsert(compound_type, "a_name", HOFFSET(s1_t, a), H5T_NATIVE_INT);
     if (err < 0)
-	goto error;
+    goto error;
     err = H5Tinsert(compound_type, "b_name", HOFFSET(s1_t, b), H5T_NATIVE_FLOAT);
     if (err < 0)
-	goto error;
+    goto error;
     err = H5Tinsert(compound_type, "c_name", HOFFSET(s1_t, c), H5T_NATIVE_DOUBLE);
     if (err < 0)
-	goto error;
+    goto error;
 
     strtype = H5Tcopy (H5T_C_S1);
     if (compound_type < 0)
-	goto error;
+    goto error;
     err = H5Tset_size (strtype, STRING_LENGTH); /* create string */
     if (err < 0)
-	goto error;
+    goto error;
     err = H5Tinsert(compound_type, "d_name", HOFFSET(s1_t, d), strtype);
     if (err < 0)
-	goto error;
+    goto error;
     err = H5Tinsert(compound_type, "e_name", HOFFSET(s1_t, e), H5T_NATIVE_INT);
     if (err < 0)
-	goto error;
+    goto error;
 
     { // so ptable will go out of scope before PASSED
 
     // Create a packet table
     FL_PacketTable ptable(fileID, "/examplePacketTable", compound_type, 1);
     if (!ptable.IsValid())
-	goto error;
+    goto error;
 
     // Add packets to the table
     for (size_t i = 0; i < NUM_PACKETS; i++)
     {
-	/* Appends one packet at the current position */
+    /* Appends one packet at the current position */
         err = ptable.AppendPacket(s1 + i);
         if (err < 0) goto error;
     }
@@ -650,11 +658,11 @@ int TestHDFFV_9758()
     // Check packet count
     const hsize_t count = ptable.GetPacketCount(err);
     if (err < 0)
-	goto error;
-  
+    goto error;
+
     if (count != NUM_PACKETS)
     {
-	std::cerr
+    std::cerr
         << "Number of packets in packet table should be " << NUM_PACKETS
         << " but is " << count << endl;
     }
@@ -663,16 +671,16 @@ int TestHDFFV_9758()
     ptable.ResetIndex();
     for (size_t i = 0; i < NUM_PACKETS; i++)
     {
-	s1_t s2;
-	memset(&s2, 0, sizeof(s1_t));
-	err = ptable.GetNextPacket(&s2);
-	if (err < 0)
-	    goto error;
+    s1_t s2;
+    HDmemset(&s2, 0, sizeof(s1_t));
+    err = ptable.GetNextPacket(&s2);
+    if (err < 0)
+        goto error;
 
-	if (s2.a != s1[i].a || s2.e != s1[i].e)
-	    goto error;
-	else if (HDstrcmp(s2.d, s1[i].d))
-	    goto error;
+    if (s2.a != s1[i].a || s2.e != s1[i].e)
+        goto error;
+    else if (HDstrcmp(s2.d, s1[i].d))
+        goto error;
     }
     } // end of ptable block
 

@@ -91,7 +91,7 @@ static h5tool_format_t         ls_dataformat = {
         "", /*line_suf */
         "", /*line_sep */
         1, /*line_multi_new */
-        "", /*line_indent */
+        "   ", /*line_indent */
 
         0, /*skip_first */
 
@@ -132,7 +132,6 @@ static hbool_t  no_dangling_link_g = FALSE; /* treat dangling link is error */
 static hbool_t  follow_elink_g = FALSE;   /* follow external links */
 static hbool_t  grp_literal_g = FALSE;    /* list group, not contents */
 static hbool_t  hexdump_g = FALSE;        /* show data as raw hexadecimal */
-static hbool_t  show_errors_g = FALSE;    /* print HDF5 error messages */
 static hbool_t  simple_output_g = FALSE;  /* make output more machine-readable */
 static hbool_t  show_file_name_g = FALSE; /* show file name for full names */
 static hbool_t  no_line_wrap_g = FALSE;   /* show data content without line wrap */
@@ -158,19 +157,13 @@ static hbool_t print_int_type(h5tools_str_t *buffer, hid_t type, int ind);
 static hbool_t print_float_type(h5tools_str_t *buffer, hid_t type, int ind);
 static herr_t visit_obj(hid_t file, const char *oname, iter_t *iter);
 
-
+
 /*-------------------------------------------------------------------------
  * Function: usage
  *
  * Purpose: Prints a usage message on stderr and then returns.
  *
  * Return: void
- *
- * Programmer: Robb Matzke
- *              Thursday, July 16, 1998
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -199,7 +192,7 @@ usage (void)
     PRINTVALSTREAM(rawoutstream, "   --no-dangling-links\n");
     PRINTVALSTREAM(rawoutstream, "                   Must be used with --follow-symlinks option;\n");
     PRINTVALSTREAM(rawoutstream, "                   otherwise, h5ls shows error message and returns an exit\n");
-    PRINTVALSTREAM(rawoutstream, "                   code of 1. \n");
+    PRINTVALSTREAM(rawoutstream, "                   code of 1.\n");
     PRINTVALSTREAM(rawoutstream, "                   Check for any symbolic links (soft links or external links)\n");
     PRINTVALSTREAM(rawoutstream, "                   that do not resolve to an existing object (dataset, group,\n");
     PRINTVALSTREAM(rawoutstream, "                   or named datatype).\n");
@@ -216,6 +209,21 @@ usage (void)
     PRINTVALSTREAM(rawoutstream, "   -V, --version   Print version number and exit\n");
     PRINTVALSTREAM(rawoutstream, "   --vfd=DRIVER    Use the specified virtual file driver\n");
     PRINTVALSTREAM(rawoutstream, "   -x, --hexdump   Show raw data in hexadecimal format\n");
+    PRINTVALSTREAM(rawoutstream, "   --s3-cred=C     Supply S3 authentication information to \"ros3\" vfd.\n");
+    PRINTVALSTREAM(rawoutstream, "                   Accepts tuple of \"(<aws-region>,<access-id>,<access-key>)\".\n");
+    PRINTVALSTREAM(rawoutstream, "                   If absent or C->\"(,,)\", defaults to no-authentication.\n");
+    PRINTVALSTREAM(rawoutstream, "                   Has no effect if vfd flag not set to \"ros3\".\n");
+    PRINTVALSTREAM(rawoutstream, "   --hdfs-attrs=A  Supply configuration information to Hadoop VFD.\n");
+    PRINTVALSTREAM(rawoutstream, "                   Accepts tuple of (<namenode name>,<namenode port>,\n");
+    PRINTVALSTREAM(rawoutstream, "                   ...<kerberos cache path>,<username>,<buffer size>)\n");
+    PRINTVALSTREAM(rawoutstream, "                   If absent or A == '(,,,,)', all default values are used.\n");
+    PRINTVALSTREAM(rawoutstream, "                   Has no effect if vfd flag is not 'hdfs'.\n");
+    PRINTVALSTREAM(rawoutstream, "   --vol-value     Value (ID) of the VOL connector to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                   HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --vol-name      Name of the VOL connector to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                   HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --vol-info      VOL-specific info to pass to the VOL connector used for\n");
+    PRINTVALSTREAM(rawoutstream, "                   opening the HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "  file/OBJECT\n");
     PRINTVALSTREAM(rawoutstream, "    Each object consists of an HDF5 file name optionally followed by a\n");
@@ -225,11 +233,8 @@ usage (void)
     PRINTVALSTREAM(rawoutstream, "    \"%%05d\" to open a file family.\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "  Deprecated Options\n");
-    PRINTVALSTREAM(rawoutstream, "    The following options have been deprecated in HDF5. While they remain\n");
-    PRINTVALSTREAM(rawoutstream, "    available, they have been superseded as indicated and may be removed\n");
-    PRINTVALSTREAM(rawoutstream, "    from HDF5 in the future. Use the indicated replacement option in all\n");
-    PRINTVALSTREAM(rawoutstream, "    new work; where possible, existing scripts, et cetera, should also be\n");
-    PRINTVALSTREAM(rawoutstream, "    updated to use the replacement option.\n");
+    PRINTVALSTREAM(rawoutstream, "    The following options have been removed in HDF5 1.12. Use the indicated\n");
+    PRINTVALSTREAM(rawoutstream, "    replacement option in all work.\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "   -E or --external   Follow external links.\n");
     PRINTVALSTREAM(rawoutstream, "                      Replaced by --follow-symlinks.\n");
@@ -237,22 +242,14 @@ usage (void)
     PRINTVALSTREAM(rawoutstream, "                      Replaced by --enable-error-stack.\n");
 }
 
-
 
 /*-------------------------------------------------------------------------
- * Function: print_string
+ * Function:    print_string
  *
- * Purpose: Print a string value by escaping unusual characters. If
- *  STREAM is null then we only count how large the output would
- *  be.
+ * Purpose:     Print a string value by escaping unusual characters. If
+ *              STREAM is null then we only count how large the output would be.
  *
- * Return: Number of characters printed.
- *
- * Programmer: Robb Matzke
- *              Thursday, November  5, 1998
- *
- * Modifications:
- *
+ * Return:      Number of characters printed.
  *-------------------------------------------------------------------------
  */
 static int
@@ -263,50 +260,61 @@ print_string(h5tools_str_t *buffer, const char *s, hbool_t escape_spaces)
     for (/*void*/; s && *s; s++) {
         switch (*s) {
             case '"':
-                if (buffer) h5tools_str_append(buffer, "\\\"");
+                if (buffer)
+                    h5tools_str_append(buffer, "\\\"");
                 nprint += 2;
                 break;
             case '\\':
-                if (buffer) h5tools_str_append(buffer, "\\\\");
+                if (buffer)
+                    h5tools_str_append(buffer, "\\\\");
                 nprint += 2;
                 break;
             case '\b':
-                if (buffer) h5tools_str_append(buffer, "\\b");
+                if (buffer)
+                    h5tools_str_append(buffer, "\\b");
                 nprint += 2;
                 break;
             case '\f':
-                if (buffer) h5tools_str_append(buffer, "\\f");
+                if (buffer)
+                    h5tools_str_append(buffer, "\\f");
                 nprint += 2;
                 break;
             case '\n':
-                if (buffer) h5tools_str_append(buffer, "\\n");
+                if (buffer)
+                    h5tools_str_append(buffer, "\\n");
                 nprint += 2;
                 break;
             case '\r':
-                if (buffer) h5tools_str_append(buffer, "\\r");
+                if (buffer)
+                    h5tools_str_append(buffer, "\\r");
                 nprint += 2;
                 break;
             case '\t':
-                if (buffer) h5tools_str_append(buffer, "\\t");
+                if (buffer)
+                    h5tools_str_append(buffer, "\\t");
                 nprint += 2;
                 break;
             case ' ':
                 if (escape_spaces) {
-                    if (buffer) h5tools_str_append(buffer, "\\ ");
+                    if (buffer)
+                        h5tools_str_append(buffer, "\\ ");
                     nprint += 2;
                 }
                 else {
-                    if (buffer) h5tools_str_append(buffer, " ");
+                    if (buffer)
+                        h5tools_str_append(buffer, " ");
                     nprint++;
                 }
                 break;
             default:
                 if (isprint((int)*s)) {
-                    if (buffer) h5tools_str_append(buffer, "%c", *s);
+                    if (buffer)
+                        h5tools_str_append(buffer, "%c", *s);
                     nprint++;
                 }
                 else {
-                    if (buffer) h5tools_str_append(buffer, "\\%03o", *((const unsigned char*)s));
+                    if (buffer)
+                        h5tools_str_append(buffer, "\\%03o", *((const unsigned char*)s));
                     nprint += 4;
                 }
                 break;
@@ -315,44 +323,36 @@ print_string(h5tools_str_t *buffer, const char *s, hbool_t escape_spaces)
     return nprint;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function: print_obj_name
+ * Function:    print_obj_name
  *
- * Purpose: Print an object name and another string.
+ * Purpose:     Print an object name and another string.
  *
- * Return: Success: TRUE
- *
- *  Failure: FALSE, nothing printed
- *
- * Programmer: Quincey Koziol
- *              Tuesday, November  6, 2007
- *
- * Modifications:
- *
+ * Return:      Success: TRUE
+ *              Failure: FALSE, nothing printed
  *-------------------------------------------------------------------------
  */
 static int
-print_obj_name(h5tools_str_t *buffer, const iter_t *iter, const char *oname,
-    const char *s)
+print_obj_name(h5tools_str_t *buffer, const iter_t *iter, const char *oname, const char *s)
 {
     static char fullname[NAME_BUF_SIZE];     /* Buffer for file and/or object name */
     const char *name = fullname;                /* Pointer to buffer for printing */
     int  n;
 
-    if(show_file_name_g)
+    if (show_file_name_g)
         HDsnprintf(fullname, sizeof(fullname), "%s/%s", iter->fname, oname + iter->name_start);
     else
         name = oname + iter->name_start;
 
     /* Print the object name, either full name or base name */
-    if(fullname_g)
+    if (fullname_g)
         n = print_string(buffer, name, TRUE);
     else {
         const char *last_sep;   /* The location of the last group separator */
 
         /* Find the last component of the path name */
-        if(NULL == (last_sep = HDstrrchr(name, '/')))
+        if (NULL == (last_sep = HDstrrchr(name, '/')))
             last_sep = name;
         else {
             last_sep++;
@@ -364,161 +364,190 @@ print_obj_name(h5tools_str_t *buffer, const iter_t *iter, const char *oname,
     return TRUE;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function: print_native_type
+ * Function:    print_native_type
  *
- * Purpose: Prints the name of a native C data type.
+ * Purpose:     Prints the name of a native C data type.
  *
- * Return: Success: TRUE
- *
- *  Failure: FALSE, nothing printed.
- *
- * Programmer: Robb Matzke
- *              Thursday, November  5, 1998
- *
- * Modifications:
- *   Robb Matzke, 1999-06-11
- *  Added the C9x types, but we still prefer to display the types
- *  from the C language itself (like `int' vs. `int32_t').
- *
+ * Return:      Success: TRUE
+ *              Failure: FALSE, nothing printed.
  *-------------------------------------------------------------------------
  */
 static hbool_t
 print_native_type(h5tools_str_t *buffer, hid_t type, int ind)
 {
-    if(!simple_output_g) {
-        if (H5Tequal(type, H5T_NATIVE_SCHAR)==TRUE) {
+    if (!simple_output_g) {
+        if (H5Tequal(type, H5T_NATIVE_SCHAR) == TRUE) {
             h5tools_str_append(buffer, "native signed char");
-        } else if (H5Tequal(type, H5T_NATIVE_UCHAR)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_UCHAR) == TRUE) {
             h5tools_str_append(buffer, "native unsigned char");
-        } else if (H5Tequal(type, H5T_NATIVE_INT)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_INT) == TRUE) {
             h5tools_str_append(buffer, "native int");
-        } else if (H5Tequal(type, H5T_NATIVE_UINT)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_UINT) == TRUE) {
             h5tools_str_append(buffer, "native unsigned int");
-        } else if (H5Tequal(type, H5T_NATIVE_SHORT)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_SHORT) == TRUE) {
             h5tools_str_append(buffer, "native short");
-        } else if (H5Tequal(type, H5T_NATIVE_USHORT)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_USHORT) == TRUE) {
             h5tools_str_append(buffer, "native unsigned short");
-        } else if (H5Tequal(type, H5T_NATIVE_LONG)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_LONG) == TRUE) {
             h5tools_str_append(buffer, "native long");
-        } else if (H5Tequal(type, H5T_NATIVE_ULONG)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_ULONG) == TRUE) {
             h5tools_str_append(buffer, "native unsigned long");
-        } else if (H5Tequal(type, H5T_NATIVE_LLONG)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_LLONG) == TRUE) {
             h5tools_str_append(buffer, "native long long");
-        } else if (H5Tequal(type, H5T_NATIVE_ULLONG)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_ULLONG) == TRUE) {
             h5tools_str_append(buffer, "native unsigned long long");
-        } else if (H5Tequal(type, H5T_NATIVE_FLOAT)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_FLOAT) == TRUE) {
             h5tools_str_append(buffer, "native float");
-        } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_DOUBLE) == TRUE) {
             h5tools_str_append(buffer, "native double");
+        }
 #if H5_SIZEOF_LONG_DOUBLE !=0
-        } else if (H5Tequal(type, H5T_NATIVE_LDOUBLE)==TRUE) {
+        else if (H5Tequal(type, H5T_NATIVE_LDOUBLE) == TRUE) {
             h5tools_str_append(buffer, "native long double");
+        }
 #endif
-        } else if (H5Tequal(type, H5T_NATIVE_INT8)==TRUE) {
+        else if (H5Tequal(type, H5T_NATIVE_INT8) == TRUE) {
             h5tools_str_append(buffer, "native int8_t");
-        } else if (H5Tequal(type, H5T_NATIVE_UINT8)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_UINT8) == TRUE) {
             h5tools_str_append(buffer, "native uint8_t");
-        } else if (H5Tequal(type, H5T_NATIVE_INT16)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_INT16) == TRUE) {
             h5tools_str_append(buffer, "native int16_t");
-        } else if (H5Tequal(type, H5T_NATIVE_UINT16)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_UINT16) == TRUE) {
             h5tools_str_append(buffer, "native uint16_t");
-        } else if (H5Tequal(type, H5T_NATIVE_INT32)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_INT32) == TRUE) {
             h5tools_str_append(buffer, "native int32_t");
-        } else if (H5Tequal(type, H5T_NATIVE_UINT32)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_UINT32) == TRUE) {
             h5tools_str_append(buffer, "native uint32_t");
-        } else if (H5Tequal(type, H5T_NATIVE_INT64)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_INT64) == TRUE) {
             h5tools_str_append(buffer, "native int64_t");
-        } else if (H5Tequal(type, H5T_NATIVE_UINT64)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_UINT64) == TRUE) {
             h5tools_str_append(buffer, "native uint64_t");
-        } else if (H5Tequal(type, H5T_NATIVE_INT_LEAST8)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_INT_LEAST8) == TRUE) {
             h5tools_str_append(buffer, "native int_least8_t");
-        } else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST8)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST8) == TRUE) {
             h5tools_str_append(buffer, "native uint_least8_t");
-        } else if (H5Tequal(type, H5T_NATIVE_INT_LEAST16)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_INT_LEAST16) == TRUE) {
             h5tools_str_append(buffer, "native int_least16_t");
-        } else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST16)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST16) == TRUE) {
             h5tools_str_append(buffer, "native uint_least16_t");
-        } else if (H5Tequal(type, H5T_NATIVE_INT_LEAST32)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_INT_LEAST32) == TRUE) {
             h5tools_str_append(buffer, "native int_least32_t");
-        } else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST32)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST32) == TRUE) {
             h5tools_str_append(buffer, "native uint_least32_t");
-        } else if (H5Tequal(type, H5T_NATIVE_INT_LEAST64)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_INT_LEAST64) == TRUE) {
             h5tools_str_append(buffer, "native int_least64_t");
-        } else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST64)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST64) == TRUE) {
             h5tools_str_append(buffer, "native uint_least64_t");
-        } else if (H5Tequal(type, H5T_NATIVE_INT_FAST8)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_INT_FAST8) == TRUE) {
             h5tools_str_append(buffer, "native int_fast8_t");
-        } else if (H5Tequal(type, H5T_NATIVE_UINT_FAST8)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_UINT_FAST8) == TRUE) {
             h5tools_str_append(buffer, "native uint_fast8_t");
-        } else if (H5Tequal(type, H5T_NATIVE_INT_FAST16)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_INT_FAST16) == TRUE) {
             h5tools_str_append(buffer, "native int_fast16_t");
-        } else if (H5Tequal(type, H5T_NATIVE_UINT_FAST16)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_UINT_FAST16) == TRUE) {
             h5tools_str_append(buffer, "native uint_fast16_t");
-        } else if (H5Tequal(type, H5T_NATIVE_INT_FAST32)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_INT_FAST32) == TRUE) {
             h5tools_str_append(buffer, "native int_fast32_t");
-        } else if (H5Tequal(type, H5T_NATIVE_UINT_FAST32)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_UINT_FAST32) == TRUE) {
             h5tools_str_append(buffer, "native uint_fast32_t");
-        } else if (H5Tequal(type, H5T_NATIVE_INT_FAST64)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_INT_FAST64) == TRUE) {
             h5tools_str_append(buffer, "native int_fast64_t");
-        } else if (H5Tequal(type, H5T_NATIVE_UINT_FAST64)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_UINT_FAST64) == TRUE) {
             h5tools_str_append(buffer, "native uint_fast64_t");
-        } else if (H5Tequal(type, H5T_NATIVE_B8)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_B8) == TRUE) {
             h5tools_str_append(buffer, "native 8-bit field");
-        } else if (H5Tequal(type, H5T_NATIVE_B16)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_B16) == TRUE) {
             h5tools_str_append(buffer, "native 16-bit field");
-        } else if (H5Tequal(type, H5T_NATIVE_B32)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_B32) == TRUE) {
             h5tools_str_append(buffer, "native 32-bit field");
-        } else if (H5Tequal(type, H5T_NATIVE_B64)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_B64) == TRUE) {
             h5tools_str_append(buffer, "native 64-bit field");
-        } else if (H5Tequal(type, H5T_NATIVE_HSIZE)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_HSIZE) == TRUE) {
             h5tools_str_append(buffer, "native hsize_t");
-        } else if (H5Tequal(type, H5T_NATIVE_HSSIZE)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_HSSIZE) == TRUE) {
             h5tools_str_append(buffer, "native hssize_t");
-        } else if (H5Tequal(type, H5T_NATIVE_HERR)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_HERR) == TRUE) {
             h5tools_str_append(buffer, "native herr_t");
-        } else if (H5Tequal(type, H5T_NATIVE_HBOOL)==TRUE) {
+        }
+        else if (H5Tequal(type, H5T_NATIVE_HBOOL) == TRUE) {
             h5tools_str_append(buffer, "native hbool_t");
-        } else {
+        }
+        else {
             return print_int_type(buffer, type, ind);
         }
-    } else {
+    }
+    else {
         return print_int_type(buffer, type, ind);
     }
     return TRUE;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function: print_ieee_type
+ * Function:    print_ieee_type
  *
- * Purpose: Print the name of an IEEE floating-point data type.
+ * Purpose:     Print the name of an IEEE floating-point data type.
  *
- * Return: Success: TRUE
- *
- *  Failure: FALSE, nothing printed
- *
- * Programmer: Robb Matzke
- *              Thursday, November  5, 1998
- *
- * Modifications:
- *
+ * Return:      Success: TRUE
+ *              Failure: FALSE, nothing printed
  *-------------------------------------------------------------------------
  */
 static hbool_t
 print_ieee_type(h5tools_str_t *buffer, hid_t type, int ind)
 {
-    if (H5Tequal(type, H5T_IEEE_F32BE)==TRUE) {
+    if (H5Tequal(type, H5T_IEEE_F32BE) == TRUE) {
         h5tools_str_append(buffer, "IEEE 32-bit big-endian float");
     }
-    else if (H5Tequal(type, H5T_IEEE_F32LE)==TRUE) {
+    else if (H5Tequal(type, H5T_IEEE_F32LE) == TRUE) {
         h5tools_str_append(buffer, "IEEE 32-bit little-endian float");
     }
-    else if (H5Tequal(type, H5T_IEEE_F64BE)==TRUE) {
+    else if (H5Tequal(type, H5T_IEEE_F64BE) == TRUE) {
         h5tools_str_append(buffer, "IEEE 64-bit big-endian float");
     }
-    else if (H5Tequal(type, H5T_IEEE_F64LE)==TRUE) {
+    else if (H5Tequal(type, H5T_IEEE_F64LE) == TRUE) {
         h5tools_str_append(buffer, "IEEE 64-bit little-endian float");
     }
     else {
@@ -527,21 +556,15 @@ print_ieee_type(h5tools_str_t *buffer, hid_t type, int ind)
     return TRUE;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function: print_precision
+ * Function:    print_precision
  *
- * Purpose: Prints information on the next line about precision and
- *  padding if the precision is less than the total data type
- *  size.
+ * Purpose:     Prints information on the next line about precision and
+ *              padding if the precision is less than the total data type
+ *              size.
  *
- * Return: void
- *
- * Programmer: Robb Matzke
- *              Thursday, November  5, 1998
- *
- * Modifications:
- *
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 static void
@@ -556,13 +579,12 @@ print_precision(h5tools_str_t *buffer, hid_t type, int ind)
     /* If the precision is less than the total size then show the precision
      * and offset on the following line.  Also display the padding
      * information. */
-    if(8 * H5Tget_size(type) != (prec = H5Tget_precision(type))) {
+    if (8 * H5Tget_size(type) != (prec = H5Tget_precision(type))) {
         h5tools_str_append(buffer, "\n%*s(%lu bit%s of precision beginning at bit %lu)",
-            ind, "", (unsigned long)prec, 1 == prec ? "" : "s",
-            (unsigned long)H5Tget_offset(type));
+                ind, "", (unsigned long)prec, 1 == prec ? "" : "s", (unsigned long)H5Tget_offset(type));
 
         H5Tget_pad(type, &plsb, &pmsb);
-        if(H5Tget_offset(type) > 0) {
+        if (H5Tget_offset(type) > 0) {
             switch(plsb) {
                 case H5T_PAD_ZERO:
                     plsb_s = "zero";
@@ -581,7 +603,7 @@ print_precision(h5tools_str_t *buffer, hid_t type, int ind)
                     break;
             }
         }
-        if((unsigned)H5Tget_offset(type) + prec < 8 * H5Tget_size(type)) {
+        if ((unsigned)H5Tget_offset(type) + prec < 8 * H5Tget_size(type)) {
             switch(pmsb) {
                 case H5T_PAD_ZERO:
                     pmsb_s = "zero";
@@ -604,61 +626,53 @@ print_precision(h5tools_str_t *buffer, hid_t type, int ind)
             h5tools_str_append(buffer, "\n%*s(", ind, "");
             if (plsb_s) {
                 nbits = (unsigned)H5Tget_offset(type);
-                h5tools_str_append(buffer, "%lu %s bit%s at bit 0",
-                        (unsigned long)nbits, plsb_s, 1 == nbits ? "" : "s");
+                h5tools_str_append(buffer, "%lu %s bit%s at bit 0", (unsigned long)nbits, plsb_s, 1 == nbits ? "" : "s");
             }
-            if (plsb_s && pmsb_s) h5tools_str_append(buffer, ", ");
+            if (plsb_s && pmsb_s)
+                h5tools_str_append(buffer, ", ");
             if (pmsb_s) {
                 nbits = (8 * H5Tget_size(type)) - ((unsigned)H5Tget_offset(type) + prec);
-                h5tools_str_append(buffer, "%lu %s bit%s at bit %lu",
-                        (unsigned long)nbits, pmsb_s, 1 == nbits ? "" : "s",
-                        (unsigned long)(8 * H5Tget_size(type) - nbits));
+                h5tools_str_append(buffer, "%lu %s bit%s at bit %lu", (unsigned long)nbits, pmsb_s, 1 == nbits ? "" : "s", (unsigned long)(8 * H5Tget_size(type) - nbits));
             }
             h5tools_str_append(buffer, ")");
         }
     }
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function: print_int_type
+ * Function:    print_int_type
  *
- * Purpose: Print the name of an integer data type.  Common information
- *  like number of bits, byte order, and sign scheme appear on
- *  the first line. Additional information might appear in
- *  parentheses on the following lines.
+ * Purpose:     Print the name of an integer data type.  Common information
+ *              like number of bits, byte order, and sign scheme appear on
+ *              the first line. Additional information might appear in
+ *              parentheses on the following lines.
  *
- * Return: Success: TRUE
- *
- *  Failure: FALSE, nothing printed
- *
- * Programmer: Robb Matzke
- *              Thursday, November  5, 1998
- *
- * Modifications:
- *
+ * Return:      Success: TRUE
+ *              Failure: FALSE, nothing printed
  *-------------------------------------------------------------------------
  */
 static hbool_t
 print_int_type(h5tools_str_t *buffer, hid_t type, int ind)
 {
-    H5T_order_t order;          /* byte order value */
-    const char  *order_s=NULL;  /* byte order string */
-    H5T_sign_t  sign;           /* sign scheme value */
-    const char  *sign_s=NULL;   /* sign scheme string */
+    H5T_order_t order;            /* byte order value */
+    const char  *order_s = NULL;  /* byte order string */
+    H5T_sign_t  sign;             /* sign scheme value */
+    const char  *sign_s = NULL;   /* sign scheme string */
 
-    if (H5T_INTEGER!=H5Tget_class(type)) return FALSE;
+    if (H5T_INTEGER != H5Tget_class(type))
+        return FALSE;
 
     /* Byte order */
-    if (H5Tget_size(type)>1) {
+    if (H5Tget_size(type) > 1) {
         order = H5Tget_order(type);
-        if (H5T_ORDER_LE==order) {
+        if (H5T_ORDER_LE == order) {
             order_s = " little-endian";
         }
-        else if (H5T_ORDER_BE==order) {
+        else if (H5T_ORDER_BE == order) {
             order_s = " big-endian";
         }
-        else if (H5T_ORDER_VAX==order) {
+        else if (H5T_ORDER_VAX == order) {
             order_s = " mixed-endian";
         }
         else {
@@ -670,11 +684,11 @@ print_int_type(h5tools_str_t *buffer, hid_t type, int ind)
     }
 
     /* Sign */
-    if ((sign=H5Tget_sign(type))>=0) {
-        if (H5T_SGN_NONE==sign) {
+    if ((sign = H5Tget_sign(type)) >= 0) {
+        if (H5T_SGN_NONE == sign) {
             sign_s = " unsigned";
         }
-        else if (H5T_SGN_2==sign) {
+        else if (H5T_SGN_2 == sign) {
             sign_s = "";
         }
         else {
@@ -687,27 +701,19 @@ print_int_type(h5tools_str_t *buffer, hid_t type, int ind)
 
     /* Print size, order, and sign on first line, precision and padding
      * information on the subsequent lines */
-    h5tools_str_append(buffer, "%lu-bit%s%s integer",
-            (unsigned long)(8*H5Tget_size(type)), order_s, sign_s);
+    h5tools_str_append(buffer, "%lu-bit%s%s integer", (unsigned long)(8*H5Tget_size(type)), order_s, sign_s);
     print_precision(buffer, type, ind);
     return TRUE;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function: print_float_type
+ * Function:    print_float_type
  *
- * Purpose: Print info about a floating point data type.
+ * Purpose:     Print info about a floating point data type.
  *
- * Return: Success: TRUE
- *
- *  Failure: FALSE, nothing printed
- *
- * Programmer: Robb Matzke
- *              Thursday, November  5, 1998
- *
- * Modifications:
- *
+ * Return:      Success: TRUE
+ *              Failure: FALSE, nothing printed
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -724,18 +730,19 @@ print_float_type(h5tools_str_t *buffer, hid_t type, int ind)
     H5T_pad_t   pad;            /* internal padding value */
     const char  *pad_s=NULL;    /* internal padding string */
 
-    if (H5T_FLOAT!=H5Tget_class(type)) return FALSE;
+    if (H5T_FLOAT != H5Tget_class(type))
+        return FALSE;
 
     /* Byte order */
-    if (H5Tget_size(type)>1) {
+    if (H5Tget_size(type) > 1) {
         order = H5Tget_order(type);
-        if (H5T_ORDER_LE==order) {
+        if (H5T_ORDER_LE == order) {
             order_s = " little-endian";
         }
-        else if (H5T_ORDER_BE==order) {
+        else if (H5T_ORDER_BE == order) {
             order_s = " big-endian";
         }
-        else if (H5T_ORDER_VAX==order) {
+        else if (H5T_ORDER_VAX == order) {
             order_s = " mixed-endian";
         }
         else {
@@ -748,8 +755,7 @@ print_float_type(h5tools_str_t *buffer, hid_t type, int ind)
 
     /* Print size and byte order on first line, precision and padding on
      * subsequent lines. */
-    h5tools_str_append(buffer, "%lu-bit%s floating-point",
-        (unsigned long)(8*H5Tget_size(type)), order_s);
+    h5tools_str_append(buffer, "%lu-bit%s floating-point", (unsigned long)(8*H5Tget_size(type)), order_s);
     print_precision(buffer, type, ind);
 
     /* Print sizes, locations, and other information about each field */
@@ -774,15 +780,13 @@ print_float_type(h5tools_str_t *buffer, hid_t type, int ind)
         break;
     }
     h5tools_str_append(buffer, "\n%*s(significant for %lu bit%s at bit %lu%s)", ind, "",
-            (unsigned long)msize, 1==msize?"":"s", (unsigned long)mpos,
-            norm_s);
+            (unsigned long)msize, 1==msize?"":"s", (unsigned long)mpos, norm_s);
     h5tools_str_append(buffer, "\n%*s(exponent for %lu bit%s at bit %lu, bias is 0x%lx)",
-            ind, "", (unsigned long)esize, 1==esize?"":"s",
-            (unsigned long)epos, (unsigned long)ebias);
+            ind, "", (unsigned long)esize, 1==esize?"":"s", (unsigned long)epos, (unsigned long)ebias);
     h5tools_str_append(buffer, "\n%*s(sign bit at %lu)", ind, "", (unsigned long)spos);
 
     /* Display internal padding */
-    if (1+esize+msize<H5Tget_precision(type)) {
+    if ((1 + esize + msize) < H5Tget_precision(type)) {
         pad = H5Tget_inpad(type);
         switch (pad) {
             case H5T_PAD_ZERO:
@@ -807,25 +811,20 @@ print_float_type(h5tools_str_t *buffer, hid_t type, int ind)
     return TRUE;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function: print_cmpd_type
+ * Function:    print_cmpd_type
  *
- * Purpose: Print info about a compound data type.
+ * Purpose:     Print info about a compound data type.
  *
- * Return: Success: TRUE
- *
- *  Failure: FALSE, nothing printed
- *
- * Programmer: Robb Matzke
- *              Thursday, November  5, 1998
- *
+ * Return:      Success: TRUE
+ *              Failure: FALSE, nothing printed
  *-------------------------------------------------------------------------
  */
 static hbool_t
 print_cmpd_type(h5tools_str_t *buffer, hid_t type, int ind)
 {
-    char        *name=NULL;     /* member name */
+    char       *name = NULL;    /* member name */
     size_t      size;           /* total size of type in bytes */
     hid_t       subtype;        /* member data type */
     int         nmembs;         /* number of members */
@@ -838,14 +837,12 @@ print_cmpd_type(h5tools_str_t *buffer, hid_t type, int ind)
         return FALSE;
 
     h5tools_str_append(buffer, "struct {");
-    for(i = 0; i < (unsigned)nmembs; i++) {
-
+    for (i = 0; i < (unsigned)nmembs; i++) {
         /* Name and offset */
         name = H5Tget_member_name(type, i);
         h5tools_str_append(buffer, "\n%*s\"", ind+4, "");
         n = print_string(buffer, name, FALSE);
-        h5tools_str_append(buffer, "\"%*s +%-4lu ", MAX(0, 16-n), "",
-               (unsigned long)H5Tget_member_offset(type, i));
+        h5tools_str_append(buffer, "\"%*s +%-4lu ", MAX(0, 16-n), "", (unsigned long)H5Tget_member_offset(type, i));
         H5free_memory(name);
 
         /* Member's type */
@@ -854,27 +851,19 @@ print_cmpd_type(h5tools_str_t *buffer, hid_t type, int ind)
         H5Tclose(subtype);
     }
     size = H5Tget_size(type);
-    h5tools_str_append(buffer, "\n%*s} %lu byte%s",
-                ind, "", (unsigned long)size, 1==size?"":"s");
+    h5tools_str_append(buffer, "\n%*s} %lu byte%s", ind, "", (unsigned long)size, 1==size?"":"s");
 
     return TRUE;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function: print_enum_type
+ * Function:    print_enum_type
  *
- * Purpose: Print info about an enumeration data type.
+ * Purpose:     Print info about an enumeration data type.
  *
- * Return: Success: TRUE
- *
- *  Failure: FALSE, nothing printed
- *
- * Programmer: Robb Matzke
- *              Wednesday, December 23, 1998
- *
- * Modifications:
- *
+ * Return:      Success: TRUE
+ *              Failure: FALSE, nothing printed
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -883,9 +872,9 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
     int         nmembs;         /* number of members */
     hid_t       super;          /* enum base integer type */
 
-    if(H5T_ENUM != H5Tget_class(type))
+    if (H5T_ENUM != H5Tget_class(type))
         return FALSE;
-    if((nmembs = H5Tget_nmembers(type)) < 0)
+    if ((nmembs = H5Tget_nmembers(type)) < 0)
         return FALSE;
 
     super = H5Tget_super(type);
@@ -893,10 +882,10 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
     print_type(buffer, super, ind + 4);
     h5tools_str_append(buffer, " {");
 
-    if(nmembs > 0) {
+    if (nmembs > 0) {
         char        **name;         /* member names */
         unsigned char *value;       /* value array */
-        hid_t       native = -1;    /* native integer data type */
+        hid_t       native = H5I_INVALID_HID;    /* native integer data type */
         size_t      dst_size;       /* destination value type size */
         unsigned    i;              /* miscellaneous counters */
 
@@ -905,9 +894,9 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
          *  1. long long -- the largest native signed integer
          *  2. unsigned long long -- the largest native unsigned integer
          *  3. raw format */
-        if(H5Tget_size(type) <= sizeof(long long)) {
+        if (H5Tget_size(type) <= sizeof(long long)) {
             dst_size = sizeof(long long);
-            if(H5T_SGN_NONE == H5Tget_sign(type))
+            if (H5T_SGN_NONE == H5Tget_sign(type))
                 native = H5T_NATIVE_ULLONG;
             else
                 native = H5T_NATIVE_LLONG;
@@ -918,19 +907,20 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
         /* Get the names and raw values of all members */
         name = (char **)HDcalloc((size_t)nmembs, sizeof(char *));
         value = (unsigned char *)HDcalloc((size_t)nmembs, MAX(H5Tget_size(type), dst_size));
-        for(i = 0; i < (unsigned)nmembs; i++) {
+        for (i = 0; i < (unsigned)nmembs; i++) {
             name[i] = H5Tget_member_name(type, i);
             H5Tget_member_value(type, i, value + i * H5Tget_size(type));
         }
 
         /* Convert values to native data type */
-        if(native > 0)
-            if(H5Tconvert(super, native, (size_t)nmembs, value, NULL, H5P_DEFAULT) < 0) {
+        if (native > 0)
+            if (H5Tconvert(super, native, (size_t)nmembs, value, NULL, H5P_DEFAULT) < 0) {
                 /* Release resources */
-                for(i = 0; i < (unsigned)nmembs; i++)
+                for (i = 0; i < (unsigned)nmembs; i++)
                     H5free_memory(name[i]);
                 HDfree(name);
                 HDfree(value);
+                H5Tclose(super);
 
                 return FALSE;
             }
@@ -939,7 +929,7 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
         /*not implemented yet*/
 
         /* Print members */
-        for(i = 0; i < (unsigned)nmembs; i++) {
+        for (i = 0; i < (unsigned)nmembs; i++) {
             unsigned char *copy;        /* a pointer to value array */
             int         nchars;         /* number of output characters */
 
@@ -947,14 +937,14 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
             nchars = print_string(buffer, name[i], TRUE);
             h5tools_str_append(buffer, "%*s = ", MAX(0, 16 - nchars), "");
 
-            if(native < 0) {
+            if (native < 0) {
                 size_t j;
 
                 h5tools_str_append(buffer, "0x");
-                for(j = 0; j < dst_size; j++)
+                for (j = 0; j < dst_size; j++)
                     h5tools_str_append(buffer, "%02x", value[i*dst_size+j]);
             }
-            else if(H5T_SGN_NONE == H5Tget_sign(native)) {
+            else if (H5T_SGN_NONE == H5Tget_sign(native)) {
                 /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
                  *strangely, unless use another pointer "copy".*/
                 copy = value + i * dst_size;
@@ -964,8 +954,7 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
                 /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
                  *strangely, unless use another pointer "copy".*/
                 copy = value + i * dst_size;
-                h5tools_str_append(buffer, "%"H5_PRINTF_LL_WIDTH"d",
-                        *((long long*)((void*)copy)));
+                h5tools_str_append(buffer, "%"H5_PRINTF_LL_WIDTH"d", *((long long*)((void*)copy)));
             }
         }
 
@@ -985,21 +974,14 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
     return TRUE;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function: print_string_type
+ * Function:    print_string_type
  *
- * Purpose: Print information about a string data type.
+ * Purpose:     Print information about a string data type.
  *
- * Return: Success: TRUE
- *
- *  Failure: FALSE, nothing printed
- *
- * Programmer: Robb Matzke
- *              Thursday, November  5, 1998
- *
- * Modifications:
- *
+ * Return:      Success: TRUE
+ *              Failure: FALSE, nothing printed
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -1010,7 +992,8 @@ print_string_type(h5tools_str_t *buffer, hid_t type, int H5_ATTR_UNUSED ind)
     H5T_cset_t  cset;
     const char  *cset_s=NULL;
 
-    if (H5T_STRING!=H5Tget_class(type)) return FALSE;
+    if (H5T_STRING != H5Tget_class(type))
+        return FALSE;
 
     /* Padding */
     pad = H5Tget_strpad(type);
@@ -1086,59 +1069,46 @@ print_string_type(h5tools_str_t *buffer, hid_t type, int H5_ATTR_UNUSED ind)
     return TRUE;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function: print_reference_type
+ * Function:    print_reference_type
  *
- * Purpose: Prints information about a reference data type.
+ * Purpose:     Prints information about a reference data type.
  *
- * Return: Success: TRUE
- *
- *  Failure: FALSE, nothing printed
- *
- * Programmer: Robb Matzke
- *              Thursday, November  5, 1998
- *
- * Modifications:
- *   Robb Matzke, 1999-06-04
- *  Knows about object and dataset region references.
- *
+ * Return:      Success: TRUE
+ *              Failure: FALSE, nothing printed
  *-------------------------------------------------------------------------
  */
 static hbool_t
 print_reference_type(h5tools_str_t *buffer, hid_t type, int H5_ATTR_UNUSED ind)
 {
-    if (H5T_REFERENCE!=H5Tget_class(type)) return FALSE;
+    if (H5T_REFERENCE != H5Tget_class(type))
+        return FALSE;
 
-    if (H5Tequal(type, H5T_STD_REF_OBJ)==TRUE) {
+    if (H5Tequal(type, H5T_STD_REF) == TRUE) {
+        h5tools_str_append(buffer, "standard reference");
+    }
+    else if (H5Tequal(type, H5T_STD_REF_OBJ) == TRUE) {
         h5tools_str_append(buffer, "object reference");
     }
-    else if (H5Tequal(type, H5T_STD_REF_DSETREG)==TRUE) {
+    else if (H5Tequal(type, H5T_STD_REF_DSETREG) == TRUE) {
         h5tools_str_append(buffer, "dataset region reference");
     }
     else {
-        h5tools_str_append(buffer, "%lu-byte unknown reference",
-                (unsigned long)H5Tget_size(type));
+        h5tools_str_append(buffer, "%lu-byte unknown reference", (unsigned long)H5Tget_size(type));
     }
 
     return TRUE;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function: print_opaque_type
+ * Function:    print_opaque_type
  *
- * Purpose: Prints information about an opaque data type.
+ * Purpose:     Prints information about an opaque data type.
  *
- * Return: Success: TRUE
- *
- *  Failure: FALSE, nothing printed
- *
- * Programmer: Robb Matzke
- *              Monday, June  7, 1999
- *
- * Modifications:
- *
+ * Return:      Success: TRUE
+ *              Failure: FALSE, nothing printed
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -1147,11 +1117,12 @@ print_opaque_type(h5tools_str_t *buffer, hid_t type, int ind)
     char *tag;
     size_t size;
 
-    if (H5T_OPAQUE!=H5Tget_class(type)) return FALSE;
+    if (H5T_OPAQUE != H5Tget_class(type))
+        return FALSE;
 
     size = H5Tget_size(type);
     h5tools_str_append(buffer, "%lu-byte opaque type", (unsigned long)size);
-    if ((tag=H5Tget_tag(type))) {
+    if ((tag = H5Tget_tag(type))) {
         h5tools_str_append(buffer, "\n%*s(tag = \"", ind, "");
         print_string(buffer, tag, FALSE);
         h5tools_str_append(buffer, "\")");
@@ -1160,20 +1131,14 @@ print_opaque_type(h5tools_str_t *buffer, hid_t type, int ind)
     return TRUE;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    print_vlen_type
  *
  * Purpose:     Print information about a variable-length type
  *
  * Return:      Success:        TRUE
- *
  *              Failure:        FALSE
- *
- * Programmer:  Robb Matzke
- *              Friday, December  1, 2000
- *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -1181,27 +1146,22 @@ print_vlen_type(h5tools_str_t *buffer, hid_t type, int ind)
 {
     hid_t       super;
 
-    if (H5T_VLEN!=H5Tget_class(type)) return FALSE;
+    if (H5T_VLEN != H5Tget_class(type))
+        return FALSE;
 
-    h5tools_str_append(buffer, "variable length of\n%*s", ind+4, "");
+    h5tools_str_append(buffer, "variable length of\n%*s", ind + 4, "");
     super = H5Tget_super(type);
-    print_type(buffer, super, ind+4);
+    print_type(buffer, super, ind + 4);
     H5Tclose(super);
     return TRUE;
 }
 
-
+
 /*---------------------------------------------------------------------------
  * Purpose:     Print information about an array type
  *
  * Return:      Success:        TRUE
- *
  *              Failure:        FALSE
- *
- * Programmer:  Robb Matzke
- *              Thursday, January 31, 2002
- *
- * Modifications:
  *---------------------------------------------------------------------------
  */
 static hbool_t
@@ -1211,7 +1171,7 @@ print_array_type(h5tools_str_t *buffer, hid_t type, int ind)
     int         ndims, i;
     hsize_t     *dims=NULL;
 
-    if (H5T_ARRAY!=H5Tget_class(type))
+    if (H5T_ARRAY != H5Tget_class(type))
         return FALSE;
     ndims = H5Tget_array_ndims(type);
     if (ndims) {
@@ -1219,7 +1179,7 @@ print_array_type(h5tools_str_t *buffer, hid_t type, int ind)
         H5Tget_array_dims2(type, dims);
 
         /* Print dimensions */
-        for (i=0; i<ndims; i++)
+        for (i = 0; i < ndims; i++)
             h5tools_str_append(buffer, "%s" HSIZE_T_FORMAT , i?",":"[", dims[i]);
         h5tools_str_append(buffer, "]");
 
@@ -1237,72 +1197,60 @@ print_array_type(h5tools_str_t *buffer, hid_t type, int ind)
     return TRUE;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function: print_bitfield_type
+ * Function:    print_bitfield_type
  *
- * Purpose: Print information about a bitfield type.
+ * Purpose:     Print information about a bitfield type.
  *
- * Return: Success: TRUE
- *
- *  Failure: FALSE, nothing printed
- *
- * Programmer: Pedro Vicente
- *              Tuesday, May  20, 2003
- *
- * Modifications:
- *              Robb Matzke, LLNL 2003-06-05
- *              Generalized Pedro's original if/then/else.  Also display
- *              precision/offset information.
+ * Return:      Success: TRUE
+ *              Failure: FALSE, nothing printed
  *-------------------------------------------------------------------------
  */
 static hbool_t
 print_bitfield_type(h5tools_str_t *buffer, hid_t type, int ind)
 {
-    H5T_order_t order;          /* byte order value */
-    const char  *order_s=NULL;  /* byte order string */
+    H5T_order_t order;            /* byte order value */
+    const char  *order_s = NULL;  /* byte order string */
 
-    if (H5T_BITFIELD!=H5Tget_class(type)) return FALSE;
+    if (H5T_BITFIELD != H5Tget_class(type))
+        return FALSE;
     if (H5Tget_size(type)>1) {
         order = H5Tget_order(type);
-        if (H5T_ORDER_LE==order) {
+        if (H5T_ORDER_LE == order) {
             order_s = " little-endian";
-        } else if (H5T_ORDER_BE==order) {
+        }
+        else if (H5T_ORDER_BE == order) {
             order_s = " big-endian";
-        } else if (H5T_ORDER_VAX==order) {
+        }
+        else if (H5T_ORDER_VAX == order) {
             order_s = " mixed-endian";
-        } else {
+        }
+        else {
             order_s = "unknown-byte-order";
         }
-    } else {
+    }
+    else {
         order_s = "";
     }
 
-    h5tools_str_append(buffer, "%lu-bit%s bitfield",
-           (unsigned long)(8*H5Tget_size(type)), order_s);
+    h5tools_str_append(buffer, "%lu-bit%s bitfield", (unsigned long)(8*H5Tget_size(type)), order_s);
     print_precision(buffer, type, ind);
     return TRUE;
 }
 
 
 /*-------------------------------------------------------------------------
- * Function: print_type
+ * Function:    print_type
  *
- * Purpose: Prints a data type definition.  The definition is printed
- *  without any leading space or trailing line-feed (although
- *  there might be line-feeds inside the type definition).  The
- *  first line is assumed to have IND characters before it on
- *  the same line (printed by the caller).
+ * Purpose:     Prints a data type definition.  The definition is printed
+ *              without any leading space or trailing line-feed (although
+ *              there might be line-feeds inside the type definition).  The
+ *              first line is assumed to have IND characters before it on
+ *              the same line (printed by the caller).
+ *              Prints the OID of shared data types.
  *
- * Return: void
- *
- * Programmer: Robb Matzke
- *              Thursday, November  5, 1998
- *
- * Modifications:
- *   Robb Matzke, 1999-06-11
- *  Prints the OID of shared data types.
- *
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 static void
@@ -1311,24 +1259,30 @@ print_type(h5tools_str_t *buffer, hid_t type, int ind)
     H5T_class_t  data_class = H5Tget_class(type);
 
     /* Bad data type */
-    if (type<0) {
+    if (type < 0) {
         h5tools_str_append(buffer,"<ERROR>");
         return;
     }
 
     /* Shared? If so then print the type's OID */
-    if(H5Tcommitted(type)) {
-        H5O_info_t  oi;
+    if (H5Tcommitted(type)) {
+        H5O_info2_t oi;
 
-        if(H5Oget_info(type, &oi) >= 0)
-            h5tools_str_append(buffer,"shared-%lu:"H5_PRINTF_HADDR_FMT" ",
-                    oi.fileno, oi.addr);
+        if (H5Oget_info3(type, &oi, H5O_INFO_BASIC) >= 0) {
+            char *type_string = NULL;
+
+            H5Otoken_to_str(type, &oi.token, &type_string);
+
+            h5tools_str_append(buffer,"shared-%lu:%s", oi.fileno, type_string);
+
+            H5free_memory(type_string);
+        } /* end if */
         else
             h5tools_str_append(buffer,"shared ");
     } /* end if */
 
     /* Print the type */
-    if(print_native_type(buffer, type, ind) ||
+    if (print_native_type(buffer, type, ind) ||
             print_ieee_type(buffer, type, ind) ||
             print_cmpd_type(buffer, type, ind) ||
             print_enum_type(buffer, type, ind) ||
@@ -1341,47 +1295,270 @@ print_type(h5tools_str_t *buffer, hid_t type, int ind)
         return;
 
     /* Unknown type */
-    h5tools_str_append(buffer,"%lu-byte class-%u unknown",
-            (unsigned long)H5Tget_size(type), (unsigned)data_class);
+    h5tools_str_append(buffer,"%lu-byte class-%u unknown", (unsigned long)H5Tget_size(type), (unsigned)data_class);
 }
 
-
+/*
+ *
+ */
+static void
+dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx, hid_t container, H5R_ref_t *ref_buf, int ndims)
+{
+    hid_t               new_obj_id = H5I_INVALID_HID;
+    hid_t               new_obj_sid = H5I_INVALID_HID;
+    hsize_t             elmt_counter = 0;  /*counts the # elements printed. */
+    size_t              ncols = 80;        /* available output width        */
+    int                 i;
+    hsize_t             curr_pos = 0;      /* total data element position   */
+    h5tools_str_t       buffer;            /* string into which to render   */
+    h5tools_context_t   datactx;           /* print context  */
+
+    H5TOOLS_START_DEBUG("");
+
+    datactx = *ctx;  /* print context  */
+    /* Assume entire data space to be printed */
+    if (datactx.ndims > 0)
+        for (i = 0; (unsigned)i < datactx.ndims; i++)
+            datactx.p_min_idx[i] = 0;
+    datactx.need_prefix = TRUE;
+
+    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+    for(i = 0; i < ndims; i++, datactx.cur_elmt++, elmt_counter++) {
+        H5O_type_t obj_type = -1;   /* Object type */
+        H5R_type_t ref_type;   /* Reference type */
+
+        H5TOOLS_DEBUG("reference loop:%d with curr_pos=%ld", i, curr_pos);
+
+        datactx.need_prefix = TRUE;
+        h5tools_str_reset(&buffer);
+        H5TOOLS_DEBUG("reference loop - h5tools_str_sprint with H5T_STD_REF:%d", i);
+        h5tools_str_sprint(&buffer, info, container, H5T_STD_REF, &ref_buf[i], &datactx);
+        h5tools_render_element(stream, info, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)i, (hsize_t)ndims);
+
+        ref_type = H5Rget_type((const H5R_ref_t *)&ref_buf[i]);
+        switch (ref_type) {
+            case H5R_OBJECT1:
+                H5TOOLS_DEBUG("ref_type is H5R_OBJECT1");
+                if (H5Rget_obj_type3(&ref_buf[i], H5P_DEFAULT, &obj_type) >= 0) {
+                    switch (obj_type) {
+                        case H5O_TYPE_DATASET:
+                            if((new_obj_id = H5Ropen_object(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                                datactx.indent_level++;
+                                h5tools_dump_dset(stream, info, &datactx, new_obj_id);
+                                datactx.indent_level--;
+                                if(H5Dclose(new_obj_id) < 0)
+                                    H5TOOLS_INFO("H5Dclose H5R_OBJECT1:H5O_TYPE_DATASET failed");
+                                if(H5Rdestroy(&ref_buf[i]) < 0)
+                                    H5TOOLS_INFO("H5Rdestroy H5R_OBJECT1:H5O_TYPE_DATASET failed");
+                            }
+                            else
+                                H5TOOLS_INFO("H5Ropen_object H5R_OBJECT1:H5O_TYPE_DATASET failed");
+                            break;
+
+                        case H5O_TYPE_GROUP:
+                        case H5O_TYPE_NAMED_DATATYPE:
+                        case H5O_TYPE_MAP:
+                        case H5O_TYPE_UNKNOWN:
+                        case H5O_TYPE_NTYPES:
+                        default:
+                            break;
+                    } /* end switch */
+                }
+                else
+                    H5TOOLS_INFO("H5Rget_obj_type3 H5R_OBJECT1 failed");
+                break;
+            case H5R_DATASET_REGION1:
+                H5TOOLS_DEBUG("ref_type is H5R_DATASET_REGION1");
+                if((new_obj_id = H5Ropen_object(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                    datactx.indent_level++;
+                    h5tools_dump_dset(stream, info, &datactx, new_obj_id);
+                    datactx.indent_level--;
+                    if(H5Dclose(new_obj_id) < 0)
+                        H5TOOLS_INFO("H5Dclose H5R_DATASET_REGION1 failed");
+                    if(H5Rdestroy(&ref_buf[i]) < 0)
+                        H5TOOLS_INFO("H5Rdestroy H5R_DATASET_REGION1 failed");
+                }
+                else
+                    H5TOOLS_INFO("H5Ropen_object H5R_DATASET_REGION1 failed");
+                break;
+            case H5R_OBJECT2:
+                H5TOOLS_DEBUG("ref_type is H5R_OBJECT2");
+                if (H5Rget_obj_type3(&ref_buf[i], H5P_DEFAULT, &obj_type) >= 0) {
+                    switch (obj_type) {
+                        case H5O_TYPE_GROUP:
+                            break;
+
+                        case H5O_TYPE_DATASET:
+                            if((new_obj_id = H5Ropen_object(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                                datactx.indent_level++;
+                                h5tools_dump_dset(stream, info, &datactx, new_obj_id);
+                                datactx.indent_level--;
+                                if(H5Oclose(new_obj_id) < 0)
+                                    H5TOOLS_INFO("H5Oclose H5R_OBJECT2 failed");
+                                if(H5Rdestroy(&ref_buf[i]) < 0)
+                                    H5TOOLS_INFO("H5Rdestroy H5R_OBJECT2 failed");
+                            }
+                            else
+                                H5TOOLS_INFO("H5Ropen_object H5R_OBJECT2 failed");
+                            break;
+
+                        case H5O_TYPE_NAMED_DATATYPE:
+                            break;
+
+                        case H5O_TYPE_MAP:
+                        case H5O_TYPE_UNKNOWN:
+                        case H5O_TYPE_NTYPES:
+                        default:
+                            break;
+                    } /* end switch */
+                }
+                else
+                    H5TOOLS_INFO("H5Rget_obj_type3 H5R_OBJECT2 failed");
+                break;
+            case H5R_DATASET_REGION2:
+                H5TOOLS_DEBUG("ref_type is H5R_DATASET_REGION2");
+
+                if (info->line_ncols > 0)
+                    ncols = info->line_ncols;
+
+                /* if (new_obj_id < 0) - could mean that no reference was written do not throw failure */
+                if((new_obj_id = H5Ropen_object(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                    H5TOOLS_INFO("H5Ropen_object H5R_DATASET_REGION2 failed");
+                else {
+                    if((new_obj_sid = H5Ropen_region(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                        if (h5tools_is_zero(&ref_buf[i], H5Tget_size(H5T_STD_REF))) {
+                            H5TOOLS_DEBUG("NULL H5R_DATASET_REGION2");
+
+                            h5tools_str_reset(&buffer);
+                            h5tools_str_append(&buffer, " {");
+                            h5tools_render_element(stream, info, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
+
+                            datactx.need_prefix = TRUE;
+                            datactx.indent_level++;
+                            h5tools_str_reset(&buffer);
+                            h5tools_str_append(&buffer, "NULL");
+                            h5tools_render_element(stream, info, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
+                            datactx.indent_level--;
+                            datactx.need_prefix = TRUE;
+
+                            h5tools_str_reset(&buffer);
+                            h5tools_str_append(&buffer, "}");
+                            h5tools_render_element(stream, info, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
+                        }
+                        else {
+                            H5S_sel_type region_type;
+
+                            region_type = H5Sget_select_type(new_obj_sid);
+                            if(region_type == H5S_SEL_POINTS) {
+                                /* Print point information */
+                                H5TOOLS_DEBUG("H5S_SEL_POINTS H5R_DATASET_REGION2");
+                                h5tools_dump_region_data_points(new_obj_sid, new_obj_id, stream, info, &datactx,
+                                                    &buffer, &curr_pos, ncols, (hsize_t)i, elmt_counter);
+                            }
+                            else if(region_type == H5S_SEL_HYPERSLABS) {
+                                /* Print block information */
+                                H5TOOLS_DEBUG("H5S_SEL_HYPERSLABS H5R_DATASET_REGION2");
+                                h5tools_dump_region_data_blocks(new_obj_sid, new_obj_id, stream, info, &datactx,
+                                                    &buffer, &curr_pos, ncols, (hsize_t)i, elmt_counter);
+                            }
+                            else
+                                H5TOOLS_INFO("invalid region type");
+                        } /* end else to if (h5tools_is_zero(... */
+                        if(H5Sclose(new_obj_sid) < 0)
+                            H5TOOLS_INFO("H5Sclose H5R_DATASET_REGION2 failed");
+                    }
+                    else
+                        H5TOOLS_INFO("H5Ropen_region H5R_DATASET_REGION2 failed");
+                    if(H5Dclose(new_obj_id) < 0)
+                        H5TOOLS_INFO("H5Dclose H5R_DATASET_REGION2 failed");
+                    if(H5Rdestroy(&ref_buf[i]) < 0)
+                        H5TOOLS_INFO("H5Rdestroy H5R_DATASET_REGION2 failed");
+                }
+                break;
+            case H5R_ATTR:
+                H5TOOLS_DEBUG("ref_type is H5R_ATTR");
+                if((new_obj_id = H5Ropen_attr(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                    h5tools_dump_region_attribute(new_obj_id, stream, info, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
+                    if(H5Aclose(new_obj_id) < 0)
+                        H5TOOLS_INFO("H5Aclose H5R_ATTR failed");
+                    if(H5Rdestroy(&ref_buf[i]) < 0)
+                        H5TOOLS_INFO("H5Rdestroy H5R_ATTR failed");
+                }
+                else {
+                    H5TOOLS_DEBUG("NULL H5R_ATTR");
+
+                    h5tools_str_reset(&buffer);
+                    h5tools_str_append(&buffer, " {");
+                    h5tools_render_element(stream, info, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
+
+                    datactx.need_prefix = TRUE;
+                    datactx.indent_level++;
+                    h5tools_str_reset(&buffer);
+                    h5tools_str_append(&buffer, "NULL");
+                    h5tools_render_element(stream, info, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
+                    datactx.indent_level--;
+                    datactx.need_prefix = TRUE;
+
+                    h5tools_str_reset(&buffer);
+                    h5tools_str_append(&buffer, "}");
+                    h5tools_render_element(stream, info, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
+
+                    H5TOOLS_INFO("H5Ropen_attr H5R_ATTR failed");
+                }
+                break;
+            case H5R_BADTYPE:
+            case H5R_MAXTYPE:
+            default:
+                break;
+        } /* end switch */
+
+        H5TOOLS_DEBUG("finished reference loop:%d",i);
+    } /* end for(i = 0; i < ndims; i++, ctx->cur_elmt++, elmt_counter++) */
+
+    h5tools_str_close(&buffer);
+
+    PRINTVALSTREAM(stream, "\n");
+
+    H5TOOLS_ENDDEBUG("");
+}
+
 /*-------------------------------------------------------------------------
- * Function: dump_dataset_values
+ * Function:    dump_dataset_values
  *
- * Purpose: Prints all values of a dataset.
+ * Purpose:     Prints all values of a dataset.
  *
- * Return: void
- *
- * Programmer: Robb Matzke
- *              Tuesday, July 21, 1998
- *
- * Modifications:
- *  Robb Matzke, 1999-09-27
- *  Understands the simple_output_g switch which causes data to
- *  be displayed in a more machine-readable format.
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 static void
 dump_dataset_values(hid_t dset)
 {
+    hid_t               f_type = H5I_INVALID_HID;
+    hid_t               space = H5I_INVALID_HID;
+    hsize_t             total_size[H5S_MAX_RANK];
+    int                 ndims;
+    size_t              i;
     char                string_prefix[64];
     static char         fmt_double[16];
     static char         fmt_float[16];
-    hsize_t             curr_pos = 0;        /* total data element position   */
+    hsize_t             curr_pos = 0;    /* total data element position   */
     h5tools_str_t       buffer;          /* string into which to render   */
     h5tools_context_t   ctx;             /* print context  */
     h5tool_format_t     outputformat;
     h5tool_format_t    *info = &ls_dataformat;
+    H5R_ref_t          *ref_buf = NULL;
 
-    hid_t  f_type = H5Dget_type(dset);
-    size_t  size = H5Tget_size(f_type);
+    H5TOOLS_START_DEBUG("");
+
+    f_type = H5Dget_type(dset);
+    space = H5Dget_space(dset);
 
     HDmemset(&ctx, 0, sizeof(ctx));
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     outputformat = *info;
     outputformat.line_1st  = NULL;
+    outputformat.idx_fmt = "";
     if (simple_output_g) {
         outputformat.idx_fmt = "";
         outputformat.line_per_line = 1;
@@ -1399,7 +1576,8 @@ dump_dataset_values(hid_t dset)
         }
         outputformat.cmpd_sep = " ";
 
-        if (label_g) outputformat.cmpd_name = "%s=";
+        if (label_g)
+            outputformat.cmpd_name = "%s=";
 
         outputformat.elmt_suf1 = " ";
         outputformat.str_locale = ESCAPE_HTML;
@@ -1412,7 +1590,178 @@ dump_dataset_values(hid_t dset)
         else {
             outputformat.line_ncols = (unsigned)width_g;
         }
-        if (label_g) outputformat.cmpd_name = "%s=";
+        if (label_g)
+            outputformat.cmpd_name = "%s=";
+        outputformat.line_pre  = "        %s ";
+        outputformat.line_cont = "        %s ";
+        outputformat.str_repeat = 8;
+
+        outputformat.arr_pre = NULL;
+        outputformat.arr_suf = NULL;
+        outputformat.arr_sep = NULL;
+
+        outputformat.cmpd_pre = NULL;
+        outputformat.cmpd_suf = NULL;
+        outputformat.cmpd_sep = NULL;
+
+        outputformat.vlen_sep = NULL;
+        outputformat.vlen_pre = NULL;
+        outputformat.vlen_suf = NULL;
+        outputformat.vlen_end = NULL;
+    }
+    outputformat.arr_linebreak = 0;
+    /* Floating point types should display full precision */
+    HDsnprintf(fmt_float, sizeof(fmt_float), "%%1.%dg", FLT_DIG);
+    outputformat.fmt_float = fmt_float;
+    HDsnprintf(fmt_double, sizeof(fmt_double), "%%1.%dg", DBL_DIG);
+    outputformat.fmt_double = fmt_double;
+
+    if (hexdump_g) {
+        /* Print all data in hexadecimal format if the `-x' or `--hexdump'
+         * command line switch was given. */
+        outputformat.raw = TRUE;
+    }
+    else if (string_g && H5Tget_size(f_type) == 1 && (H5Tget_class(f_type) == H5T_INTEGER)) {
+        /* Print 1-byte integer data as an ASCI character string instead of
+         * integers if the `-s' or `--string' command-line option was given. */
+        outputformat.ascii = TRUE;
+        outputformat.elmt_suf1 = "";
+        outputformat.elmt_suf2 = "";
+        HDsnprintf(string_prefix, sizeof(string_prefix), "%s\"", outputformat.line_pre);
+        outputformat.line_pre = string_prefix;
+        outputformat.line_suf = "\"";
+    }
+    info = &outputformat;
+
+    ctx.indent_level = 1;
+    ctx.cur_column = (size_t)curr_pos;
+    /* Print all the values. */
+    h5tools_str_reset(&buffer);
+    h5tools_str_append(&buffer, "    Data:\n");
+
+    h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
+
+    ctx.need_prefix = TRUE;
+    ctx.cur_column = (size_t)curr_pos;
+    if (H5Tget_class(f_type) == H5T_REFERENCE) {
+        H5TOOLS_DEBUG("reference class type");
+        if (!H5Tequal(f_type, H5T_STD_REF) && !H5Tequal(f_type, H5T_STD_REF_DSETREG) && !H5Tequal(f_type, H5T_STD_REF_OBJ)) {
+            H5TOOLS_GOTO_DONE_NO_RET();
+        }
+
+        ndims = (int)H5Sget_simple_extent_npoints(space);
+        H5TOOLS_DEBUG("ndims=%d - ctx.ndims=%d", ndims, ctx.ndims);
+
+        /* Assume entire data space to be printed */
+        if (ctx.ndims > 0)
+            for (i = 0; i < (size_t)ctx.ndims; i++)
+                ctx.p_min_idx[i] = 0;
+
+        H5Sget_simple_extent_dims(space, total_size, NULL);
+        if (ctx.ndims > 0)
+            init_acc_pos(&ctx, total_size);
+        ctx.need_prefix = TRUE;
+
+        if (NULL != (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)ndims))) {
+            H5TOOLS_DEBUG("H5Dread reference read");
+            if(H5Dread(dset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_buf) < 0) {
+                HDfree(ref_buf);
+                H5TOOLS_INFO("H5Dread reference failed");
+                H5TOOLS_GOTO_DONE_NO_RET();
+            }
+            dump_reference(rawoutstream, info, &ctx, dset, ref_buf, ndims);
+            HDfree(ref_buf);
+        }
+    }
+    else {
+        if (h5tools_dump_dset(rawoutstream, info, &ctx, dset) < 0) {
+            h5tools_str_reset(&buffer);
+            h5tools_str_append(&buffer, "        Unable to print data.");
+            h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
+        }
+    }
+done:
+    H5Sclose(space);
+    H5Tclose(f_type);
+
+    h5tools_str_close(&buffer);
+
+    PRINTVALSTREAM(rawoutstream, "\n");
+
+    H5TOOLS_ENDDEBUG("");
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    dump_attribute_values
+ *
+ * Purpose:     Prints all values of a attribute.
+ *
+ * Return:      void
+ *-------------------------------------------------------------------------
+ */
+static void
+dump_attribute_values(hid_t attr)
+{
+    hid_t               f_type = H5I_INVALID_HID;
+    hid_t               space = H5I_INVALID_HID;
+    hsize_t             total_size[H5S_MAX_RANK];
+    int                 ndims;
+    size_t              i;
+    char                string_prefix[64];
+    static char         fmt_double[16];
+    static char         fmt_float[16];
+    hsize_t             curr_pos = 0;    /* total data element position   */
+    h5tools_str_t       buffer;          /* string into which to render   */
+    h5tools_context_t   ctx;             /* print context  */
+    h5tool_format_t     outputformat;
+    h5tool_format_t    *info = &ls_dataformat;
+    H5R_ref_t          *ref_buf = NULL;
+
+    H5TOOLS_START_DEBUG("");
+
+    f_type = H5Aget_type(attr);
+    space = H5Aget_space(attr);
+
+    HDmemset(&ctx, 0, sizeof(ctx));
+    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+
+    outputformat = *info;
+    outputformat.line_1st  = NULL;
+    outputformat.idx_fmt = "";
+    if (simple_output_g) {
+        outputformat.idx_fmt = "";
+        outputformat.line_per_line = 1;
+        outputformat.line_multi_new = 0;
+        outputformat.line_pre  = "        ";
+        outputformat.line_cont = "        ";
+
+        outputformat.arr_pre = "";
+        outputformat.arr_suf = "";
+        outputformat.arr_sep = " ";
+
+        if (!label_g) {
+            outputformat.cmpd_pre = "";
+            outputformat.cmpd_suf = "";
+        }
+        outputformat.cmpd_sep = " ";
+
+        if (label_g)
+            outputformat.cmpd_name = "%s=";
+
+        outputformat.elmt_suf1 = " ";
+        outputformat.str_locale = ESCAPE_HTML;
+
+    }
+    else {
+        if (no_line_wrap_g) {
+            outputformat.line_per_line = 1;
+        }
+        else {
+            outputformat.line_ncols = (unsigned)width_g;
+        }
+        if (label_g)
+            outputformat.cmpd_name = "%s=";
         outputformat.line_pre  = "        %s ";
         outputformat.line_cont = "        %s  ";
         outputformat.str_repeat = 8;
@@ -1442,7 +1791,7 @@ dump_dataset_values(hid_t dset)
          * command line switch was given. */
         outputformat.raw = TRUE;
     }
-    else if (string_g && 1==size && H5T_INTEGER==H5Tget_class(f_type)) {
+    else if (string_g && H5Tget_size(f_type) == 1 && (H5Tget_class(f_type) == H5T_INTEGER)) {
         /* Print 1-byte integer data as an ASCI character string instead of
          * integers if the `-s' or `--string' command-line option was given. */
         outputformat.ascii = TRUE;
@@ -1456,79 +1805,117 @@ dump_dataset_values(hid_t dset)
 
     ctx.indent_level = 2;
     ctx.cur_column = (size_t)curr_pos;
+
     /* Print all the values. */
     h5tools_str_reset(&buffer);
-    h5tools_str_append(&buffer, "    Data:\n");
+    h5tools_str_append(&buffer, "        Data:\n");
+
     h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
+
     ctx.need_prefix = TRUE;
     ctx.cur_column = (size_t)curr_pos;
-    if (h5tools_dump_dset(rawoutstream, info, &ctx, dset, NULL) < 0) {
-        h5tools_str_reset(&buffer);
-        h5tools_str_append(&buffer, "        Unable to print data.");
-        h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
-    }
+    if (H5Tget_class(f_type) == H5T_REFERENCE) {
+        H5TOOLS_DEBUG("reference class type");
+        if (!H5Tequal(f_type, H5T_STD_REF) && !H5Tequal(f_type, H5T_STD_REF_DSETREG) && !H5Tequal(f_type, H5T_STD_REF_OBJ)) {
+            H5TOOLS_GOTO_DONE_NO_RET();
+        }
 
+        ndims = (int)H5Sget_simple_extent_npoints(space);
+        H5TOOLS_DEBUG("ndims=%d - ctx.ndims=%d", ndims, ctx.ndims);
+
+        /* Assume entire data space to be printed */
+        if (ctx.ndims > 0)
+            for (i = 0; i < (size_t)ctx.ndims; i++)
+                ctx.p_min_idx[i] = 0;
+
+        H5Sget_simple_extent_dims(space, total_size, NULL);
+        if (ctx.ndims > 0)
+            init_acc_pos(&ctx, total_size);
+        ctx.need_prefix = TRUE;
+
+        if (NULL != (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)ndims))) {
+            H5TOOLS_DEBUG("H5Aread reference read");
+            if(H5Aread(attr, H5T_STD_REF, ref_buf) < 0) {
+                HDfree(ref_buf);
+                H5TOOLS_INFO("H5Aread reference failed");
+                H5TOOLS_GOTO_DONE_NO_RET();
+            }
+            ctx.indent_level++;
+            dump_reference(rawoutstream, info, &ctx, attr, ref_buf, ndims);
+            ctx.indent_level--;
+            HDfree(ref_buf);
+        }
+    }
+    else {
+        H5TOOLS_DEBUG("Attribute data read");
+        ctx.indent_level++;
+        if (h5tools_dump_mem(rawoutstream, info, &ctx, attr) < 0) {
+            h5tools_str_reset(&buffer);
+            h5tools_str_append(&buffer, "        Unable to print data.");
+            h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
+        }
+        ctx.indent_level--;
+        H5TOOLS_DEBUG("Attribute data read complete");
+    }
+done:
+    H5Sclose(space);
     H5Tclose(f_type);
 
     h5tools_str_close(&buffer);
 
     PRINTVALSTREAM(rawoutstream, "\n");
+
+    H5TOOLS_ENDDEBUG("");
 }
 
-
 /*-------------------------------------------------------------------------
- * Function: list_attr
+ * Function:    list_attr
  *
- * Purpose: Prints information about attributes.
+ * Purpose:     Prints information about attributes.
  *
- * Return: Success: 0
- *
- *  Failure: -1
- *
- * Programmer: Robb Matzke
- *              Friday, June  5, 1998
- *
- * Modifications:
- *
+ * Return:      Success: 0
+ *              Failure: -1
  *-------------------------------------------------------------------------
  */
 static herr_t
 list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ainfo,
     void H5_ATTR_UNUSED *op_data)
 {
-    hid_t               attr = -1;
-    hid_t               space = -1;
-    hid_t               type = -1;
-    hid_t               p_type = -1;
+    hid_t               attr = H5I_INVALID_HID;
+    hid_t               space = H5I_INVALID_HID;
+    hid_t               type = H5I_INVALID_HID;
     hsize_t             size[H5S_MAX_RANK];
     hsize_t             nelmts = 1;
-    hsize_t             temp_need;
-    size_t              need;
     int                 ndims;
     int                 i;
-    void               *buf;
     H5S_class_t         space_type;
     hsize_t             curr_pos = 0;        /* total data element position   */
     h5tools_str_t       buffer;          /* string into which to render   */
     h5tools_context_t   ctx;             /* print context  */
     h5tool_format_t    *info = &ls_dataformat;
-    h5tool_format_t     outputformat;
+
+    H5TOOLS_START_DEBUG("");
 
     HDmemset(&ctx, 0, sizeof(ctx));
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+
+    ctx.indent_level = 2;
+    ctx.cur_column = (size_t)curr_pos;
 
     h5tools_str_reset(&buffer);
     h5tools_str_append(&buffer, "    Attribute: ");
 
     print_string(&buffer, attr_name, TRUE);
 
-    if((attr = H5Aopen(obj, attr_name, H5P_DEFAULT))) {
+    H5TOOLS_DEBUG("Attribute name:%s", attr_name);
+    if ((attr = H5Aopen(obj, attr_name, H5P_DEFAULT)) >= 0) {
         space = H5Aget_space(attr);
         type = H5Aget_type(attr);
 
         /* Data space */
         ndims = H5Sget_simple_extent_dims(space, size, NULL);
         space_type = H5Sget_simple_extent_type(space);
+        H5TOOLS_DEBUG("Attribute ndims:%d", ndims);
         switch(space_type) {
             case H5S_SCALAR:
                 /* scalar dataspace */
@@ -1539,7 +1926,7 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
             case H5S_SIMPLE:
                 /* simple dataspace */
                 h5tools_str_append(&buffer, " {");
-                for (i=0; i<ndims; i++) {
+                for (i = 0; i < ndims; i++) {
                     h5tools_str_append(&buffer, "%s" HSIZE_T_FORMAT, i?", ":"", size[i]);
                     nelmts *= size[i];
                 }
@@ -1563,123 +1950,40 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
 
         /* Data type */
         h5tools_str_reset(&buffer);
-        h5tools_str_append(&buffer, "        Type:      ");
+        h5tools_str_append(&buffer, "        %-10s ", "Type:");
         print_type(&buffer, type, 15);
         h5tools_str_append(&buffer, "\n");
         h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
 
-        /* Data */
-        outputformat = *info;
-
-        if(nelmts < 5) {
-            outputformat.idx_fmt = "";
-            outputformat.line_1st  = "        Data:  ";
-            outputformat.line_pre  = "               ";
-            outputformat.line_cont = "                ";
-            outputformat.str_repeat = 8;
-
-        }
-        else {
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "        Data:\n");
-            h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
-            outputformat.line_1st  = NULL;
-            outputformat.line_pre  = "            %s ";
-            outputformat.line_cont = "            %s  ";
-            outputformat.str_repeat = 8;
-        }
-
-        outputformat.line_ncols = (unsigned)width_g;
-        if(label_g)
-            outputformat.cmpd_name = "%s=";
-        if(string_g && 1==H5Tget_size(type) &&
-                H5T_INTEGER==H5Tget_class(type)) {
-            outputformat.ascii = TRUE;
-            outputformat.elmt_suf1 = "";
-            outputformat.elmt_suf2 = "";
-            outputformat.line_pre = "            %s \"";
-            outputformat.line_suf = "\"";
-        } /* end if */
-
-
-        outputformat.arr_pre = NULL;
-        outputformat.arr_suf = NULL;
-        outputformat.arr_sep = NULL;
-
-        outputformat.cmpd_pre = NULL;
-        outputformat.cmpd_suf = NULL;
-        outputformat.cmpd_sep = NULL;
-
-        outputformat.vlen_sep = NULL;
-        outputformat.vlen_pre = NULL;
-        outputformat.vlen_suf = NULL;
-        outputformat.vlen_end = NULL;
-
-        info = &outputformat;
-
-        if(space_type != H5S_NULL && space_type != H5S_NO_CLASS) {
-            if(hexdump_g)
-                p_type = H5Tcopy(type);
-            else
-                p_type = H5Tget_native_type(type, H5T_DIR_DEFAULT);
-
-            if(p_type >= 0) {
-                /* VL data special information */
-                unsigned int        vl_data = 0; /* contains VL datatypes */
-
-                /* Check if we have VL data in the dataset's datatype */
-                if (h5tools_detect_vlen(p_type) == TRUE)
-                    vl_data = TRUE;
-
-                temp_need = nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
-                need = (size_t)temp_need;
-                if((buf = HDmalloc(need)) != NULL) {
-                    if(H5Aread(attr, p_type, buf) >= 0) {
-                        ctx.need_prefix = TRUE;
-                        ctx.indent_level = 2;
-                        ctx.cur_column = (size_t)curr_pos;
-                        h5tools_dump_mem(rawoutstream, info, &ctx, attr, p_type, space, buf);
-                    }
-
-                    /* Reclaim any VL memory, if necessary */
-                    if (vl_data)
-                        H5Dvlen_reclaim(p_type, space, H5P_DEFAULT, buf);
-
-                    HDfree(buf);
-                }
-                H5Tclose(p_type);
-            } /* end if */
-        }
-
         H5Sclose(space);
         H5Tclose(type);
+
+        h5tools_str_close(&buffer);
+
+        if (data_g)
+            dump_attribute_values(attr);
         H5Aclose(attr);
     }
-    h5tools_str_close(&buffer);
-
-    PRINTVALSTREAM(rawoutstream, "\n");
+    else {
+        H5TOOLS_DEBUG("Attribute open failed");
+        h5tools_str_close(&buffer);
+    }
+    H5TOOLS_ENDDEBUG("");
 
     return 0;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function: dataset_list1
+ * Function:    dataset_list1
  *
- * Purpose: List information about a dataset which should appear on the
- *  same line as the dataset name.  This information will precede
- *  information which is applicable to all objects which will be
- *  printed by the caller.
+ * Purpose:     List information about a dataset which should appear on the
+ *              same line as the dataset name.  This information will precede
+ *              information which is applicable to all objects which will be
+ *              printed by the caller.
  *
- * Return: Success: 0
- *
- *  Failure: -1
- *
- * Programmer: Robb Matzke
- *              Thursday, August 27, 1998
- *
- * Modifications:
- *
+ * Return:      Success: 0
+ *              Failure: -1
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1687,13 +1991,13 @@ dataset_list1(hid_t dset)
 {
     hsize_t     cur_size[H5S_MAX_RANK];   /* current dataset dimensions */
     hsize_t     max_size[H5S_MAX_RANK];   /* maximum dataset dimensions */
-    hid_t       space;          /* data space                 */
-    int         ndims;          /* dimensionality             */
-    H5S_class_t space_type;     /* type of dataspace          */
-    int   i;
-    hsize_t             curr_pos = 0;        /* total data element position   */
-    h5tools_str_t       buffer;          /* string into which to render   */
-    h5tools_context_t   ctx;             /* print context  */
+    hid_t       space;                    /* data space                 */
+    int         ndims;                    /* dimensionality             */
+    H5S_class_t space_type;               /* type of dataspace          */
+    int         i;
+    hsize_t             curr_pos = 0;     /* total data element position   */
+    h5tools_str_t       buffer;           /* string into which to render   */
+    h5tools_context_t   ctx;              /* print context  */
     h5tool_format_t    *info = &ls_dataformat;
 
     HDmemset(&ctx, 0, sizeof(ctx));
@@ -1707,17 +2011,19 @@ dataset_list1(hid_t dset)
     space_type = H5Sget_simple_extent_type(space);
     ndims = H5Sget_simple_extent_dims(space, cur_size, max_size);
     h5tools_str_append(&buffer, " {");
-    for (i=0; i<ndims; i++) {
+    for (i = 0; i < ndims; i++) {
         h5tools_str_append(&buffer, "%s"HSIZE_T_FORMAT, i?", ":"", cur_size[i]);
         if (max_size[i]==H5S_UNLIMITED) {
             h5tools_str_append(&buffer, "/%s", "Inf");
         }
-        else if (max_size[i]!=cur_size[i] || verbose_g>0) {
+        else if (max_size[i] != cur_size[i] || verbose_g > 0) {
             h5tools_str_append(&buffer, "/"HSIZE_T_FORMAT, max_size[i]);
         }
     }
-    if (space_type==H5S_SCALAR) h5tools_str_append(&buffer, "SCALAR");
-    else if (space_type==H5S_NULL) h5tools_str_append(&buffer, "NULL");
+    if (space_type == H5S_SCALAR)
+        h5tools_str_append(&buffer, "SCALAR");
+    else if (space_type == H5S_NULL)
+        h5tools_str_append(&buffer, "NULL");
     h5tools_str_append(&buffer, "}");
     h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
     H5Sclose (space);
@@ -1727,22 +2033,15 @@ dataset_list1(hid_t dset)
     return 0;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function: dataset_list2
+ * Function:    dataset_list2
  *
- * Purpose: List information about a dataset which should appear after
- *  information which is general to all objects.
+ * Purpose:     List information about a dataset which should appear after
+ *              information which is general to all objects.
  *
- * Return: Success: 0
- *
- *  Failure: -1
- *
- * Programmer: Robb Matzke
- *              Thursday, August 27, 1998
- *
- * Modifications:
- *
+ * Return:      Success: 0
+ *              Failure: -1
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1767,8 +2066,8 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
     double      utilization;    /* percent utilization of storage */
     H5T_class_t tclass;         /* datatype class identifier */
     int         i;
-    H5D_layout_t     stl;
-    hsize_t             curr_pos = 0;        /* total data element position   */
+    H5D_layout_t        stl;
+    hsize_t             curr_pos = 0;    /* total data element position   */
     h5tools_str_t       buffer;          /* string into which to render   */
     h5tools_context_t   ctx;             /* print context  */
     h5tool_format_t    *info = &ls_dataformat;
@@ -1778,7 +2077,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
 
     h5tools_str_reset(&buffer);
 
-    if(verbose_g > 0) {
+    if (verbose_g > 0) {
         dcpl = H5Dget_create_plist(dset);
         space = H5Dget_space(dset);
         type = H5Dget_type(dset);
@@ -1792,7 +2091,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
                     ndims = H5Pget_chunk(dcpl, (int)NELMTS(chsize), chsize/*out*/);
                     h5tools_str_append(&buffer, "    %-10s {", "Chunks:");
                     total = H5Tget_size(type);
-                    for (i=0; i<ndims; i++) {
+                    for (i = 0; i < ndims; i++) {
                         h5tools_str_append(&buffer, "%s"HSIZE_T_FORMAT, i?", ":"", chsize[i]);
                         total *= chsize[i];
                     }
@@ -1803,29 +2102,25 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
                 break;
             case H5D_CONTIGUOUS:
                 /* Print information about external storage */
-                if((nf = H5Pget_external_count(dcpl)) > 0) {
-                    for(i = 0, max_len = 0; i < nf; i++) {
-                        if(H5Pget_external(dcpl, (unsigned)i, sizeof(f_name), f_name, NULL, NULL) < 0)
+                if ((nf = H5Pget_external_count(dcpl)) > 0) {
+                    for (i = 0, max_len = 0; i < nf; i++) {
+                        if (H5Pget_external(dcpl, (unsigned)i, sizeof(f_name), f_name, NULL, NULL) < 0)
                             continue;
                         n = print_string(NULL, f_name, TRUE);
                         max_len = MAX(max_len, n);
                     } /* end for */
-                    h5tools_str_append(&buffer, "    %-10s %d external file%s\n",
-                            "Extern:", nf, 1==nf?"":"s");
-                    h5tools_str_append(&buffer, "        %4s %10s %10s %10s %s\n",
-                            "ID", "DSet-Addr", "File-Addr", "Bytes", "File");
-                    h5tools_str_append(&buffer, "        %4s %10s %10s %10s ",
-                            "----", "----------", "----------", "----------");
-                    for (i=0; i<max_len; i++) h5tools_str_append(&buffer, "-");
+                    h5tools_str_append(&buffer, "    %-10s %d external file%s\n", "Extern:", nf, 1==nf?"":"s");
+                    h5tools_str_append(&buffer, "        %4s %10s %10s %10s %s\n", "ID", "DSet-Addr", "File-Addr", "Bytes", "File");
+                    h5tools_str_append(&buffer, "        %4s %10s %10s %10s ", "----", "----------", "----------", "----------");
+                    for (i = 0; i < max_len; i++)
+                        h5tools_str_append(&buffer, "-");
                     h5tools_str_append(&buffer, "\n");
-                    for (i=0, total=0; i<nf; i++) {
+                    for (i = 0, total=0; i < nf; i++) {
                         if (H5Pget_external(dcpl, (unsigned)i, sizeof(f_name), f_name, &f_offset, &f_size)<0) {
-                            h5tools_str_append(&buffer,
-                                    "        #%03d %10"H5_PRINTF_LL_WIDTH"u %10s %10s ***ERROR*** %s\n",
-                                    i, total, "", "",
-                                    i+1<nf?"Following addresses are incorrect":"");
+                            h5tools_str_append(&buffer, "        #%03d %10"H5_PRINTF_LL_WIDTH"u %10s %10s ***ERROR*** %s\n",
+                                    i, total, "", "", i+1<nf?"Following addresses are incorrect":"");
                         }
-                        else if (H5S_UNLIMITED==f_size) {
+                        else if (H5S_UNLIMITED == f_size) {
                             h5tools_str_append(&buffer, "        #%03d %10"H5_PRINTF_LL_WIDTH"u %10"H5_PRINTF_LL_WIDTH"u %10s ",
                                     i, total, (hsize_t)f_offset, "INF");
                             print_string(&buffer, f_name, TRUE);
@@ -1838,9 +2133,8 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
                         h5tools_str_append(&buffer, "\n");
                         total += f_size;
                     }
-                    h5tools_str_append(&buffer, "        %4s %10s %10s %10s ",
-                            "----", "----------", "----------", "----------");
-                    for (i=0; i<max_len; i++)
+                    h5tools_str_append(&buffer, "        %4s %10s %10s %10s ", "----", "----------", "----------", "----------");
+                    for (i = 0; i < max_len; i++)
                         h5tools_str_append(&buffer, "-");
                     h5tools_str_append(&buffer, "\n");
                 } /* end if */
@@ -1882,16 +2176,16 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
         used = H5Dget_storage_size(dset);
         tclass = H5Tget_class(type);
         h5tools_str_append(&buffer, "    %-10s ", "Storage:");
-        switch (tclass)
-        {
-
+        switch (tclass) {
         case H5T_VLEN:
             h5tools_str_append(&buffer, "information not available");
             break;
 
         case H5T_REFERENCE:
-            if ( H5Tequal(type, H5T_STD_REF_DSETREG))
-            {
+            if (H5Tequal(dset, H5T_STD_REF)) {
+                h5tools_str_append(&buffer, "reference information not available");
+            }
+            else if (H5Tequal(dset, H5T_STD_REF_DSETREG)) {
                 h5tools_str_append(&buffer, "information not available");
             }
             break;
@@ -1908,11 +2202,8 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
         case H5T_ARRAY:
         case H5T_NCLASSES:
         default:
-            h5tools_str_append(&buffer, HSIZE_T_FORMAT" logical byte%s, "HSIZE_T_FORMAT" allocated byte%s",
-                total, 1==total?"":"s",
-                used, 1==used?"":"s");
-            if (used>0)
-            {
+            h5tools_str_append(&buffer, HSIZE_T_FORMAT" logical byte%s, "HSIZE_T_FORMAT" allocated byte%s", total, 1==total?"":"s", used, 1==used?"":"s");
+            if (used > 0) {
                 utilization = ((double)total * (double)100.0f) / (double)used;
                 h5tools_str_append(&buffer, ", %1.2f%% utilization", utilization);
             }
@@ -1921,31 +2212,29 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
         h5tools_str_append(&buffer, "\n");
 
         /* Print information about raw data filters */
-        if((nf = H5Pget_nfilters(dcpl)) > 0) {
-            for(i = 0; i < nf; i++) {
+        if ((nf = H5Pget_nfilters(dcpl)) > 0) {
+            for (i = 0; i < nf; i++) {
                 cd_nelmts = NELMTS(cd_values);
-                filt_id = H5Pget_filter2(dcpl, (unsigned)i, &filt_flags, &cd_nelmts,
-                        cd_values, sizeof(f_name), f_name, NULL);
+                filt_id = H5Pget_filter2(dcpl, (unsigned)i, &filt_flags, &cd_nelmts, cd_values, sizeof(f_name), f_name, NULL);
                 f_name[sizeof(f_name) - 1] = '\0';
                 HDsnprintf(s, sizeof(s), "Filter-%d:", i);
-                h5tools_str_append(&buffer, "    %-10s %s-%u %s {", s,
-                        (f_name[0] ? f_name : "method"),
-                        (unsigned)filt_id,
-                        ((filt_flags & H5Z_FLAG_OPTIONAL) ? "OPT" : ""));
-                for(cd_num = 0; cd_num < cd_nelmts; cd_num++)
+                h5tools_str_append(&buffer, "    %-10s %s-%u %s {", s, (f_name[0] ? f_name : "method"), (unsigned)filt_id, ((filt_flags & H5Z_FLAG_OPTIONAL) ? "OPT" : ""));
+                for (cd_num = 0; cd_num < cd_nelmts; cd_num++)
                     h5tools_str_append(&buffer, "%s%u", (cd_num ? ", " : ""), cd_values[cd_num]);
                 h5tools_str_append(&buffer, "}\n");
             } /* end for */
         } /* end if */
+        h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
 
         /* Print data type */
+        h5tools_str_reset(&buffer);
         h5tools_str_append(&buffer, "    %-10s ", "Type:");
         print_type(&buffer, type, 15);
         h5tools_str_append(&buffer, "\n");
         h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
 
         /* Print address information */
-        if(address_g)
+        if (address_g)
             H5Ddebug(dset);
 
         /* Close stuff */
@@ -1956,35 +2245,28 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
 
     h5tools_str_close(&buffer);
 
-    if(data_g)
+    if (data_g)
         dump_dataset_values(dset);
 
     return 0;
 } /* end dataset_list2() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function: datatype_list2
+ * Function:    datatype_list2
  *
- * Purpose: List information about a datatype which should appear after
- *  information which is general to all objects.
+ * Purpose:     List information about a datatype which should appear after
+ *              information which is general to all objects.
  *
- * Return: Success: 0
- *
- *  Failure: -1
- *
- * Programmer: Robb Matzke
- *              Thursday, November  5, 1998
- *
- * Modifications:
- *
+ * Return:      Success: 0
+ *              Failure: -1
  *-------------------------------------------------------------------------
  */
 static herr_t
 datatype_list2(hid_t type, const char H5_ATTR_UNUSED *name)
 {
-    if (verbose_g>0) {
-        hsize_t             curr_pos = 0;        /* total data element position   */
+    if (verbose_g > 0) {
+        hsize_t             curr_pos = 0;    /* total data element position   */
         h5tools_str_t       buffer;          /* string into which to render   */
         h5tools_context_t   ctx;             /* print context  */
         h5tool_format_t    *info = &ls_dataformat;
@@ -2004,68 +2286,67 @@ datatype_list2(hid_t type, const char H5_ATTR_UNUSED *name)
     return 0;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function: list_obj
+ * Function:    list_obj
  *
- * Purpose: Prints information about an object
+ * Purpose:     Prints information about an object
  *
- * Return: Success: 0
- *
- *  Failure: -1
- *
- * Programmer: Quincey Koziol
- *              Tuesday, November 6, 2007
- *
+ * Return:      Success: 0
+ *              Failure: -1
  *-------------------------------------------------------------------------
  */
 static herr_t
-list_obj(const char *name, const H5O_info_t *oinfo, const char *first_seen, void *_iter)
+list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, void *_iter)
 {
     H5O_type_t          obj_type = oinfo->type;          /* Type of the object */
     iter_t             *iter = (iter_t*)_iter;
-    hsize_t             curr_pos = 0;        /* total data element position   */
+    hsize_t             curr_pos = 0;    /* total data element position   */
     h5tools_str_t       buffer;          /* string into which to render   */
     h5tools_context_t   ctx;             /* print context  */
     h5tool_format_t    *info = &ls_dataformat;
+
+    H5TOOLS_START_DEBUG("");
 
     HDmemset(&ctx, 0, sizeof(ctx));
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     h5tools_str_reset(&buffer);
 
+    H5TOOLS_DEBUG("Object name:%s", name);
     /* Print the link's name, either full name or base name */
-    if(!iter->symlink_target)
+    if (!iter->symlink_target)
         print_obj_name(&buffer, iter, name, "");
 
     /* Check object information */
-    if(oinfo->type < 0 || oinfo->type >= H5O_TYPE_NTYPES) {
+    if (oinfo->type < 0 || oinfo->type >= H5O_TYPE_NTYPES) {
         h5tools_str_append(&buffer, "Unknown type(%d)", (int)oinfo->type);
         obj_type = H5O_TYPE_UNKNOWN;
     }
-    if(iter->symlink_target)
+    if (iter->symlink_target)
         h5tools_str_append(&buffer, "{");
-    if(obj_type >= 0 && dispatch_g[obj_type].name)
+    if (obj_type >= 0 && dispatch_g[obj_type].name)
         h5tools_str_append(&buffer, "%s", dispatch_g[obj_type].name);
     h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
 
     /* Check if we've seen this object before */
-    if(first_seen) {
+    if (first_seen) {
         h5tools_str_reset(&buffer);
         h5tools_str_append(&buffer, ", same as ");
         print_string(&buffer, first_seen, TRUE);
-        if(!iter->symlink_target) {
+        if (!iter->symlink_target) {
             h5tools_str_append(&buffer, "\n");
         }
         h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
     } /* end if */
     else {
-        hid_t obj = (-1);               /* ID of object opened */
+        hid_t obj_id = H5I_INVALID_HID;               /* ID of object opened */
 
         /* Open the object.  Not all objects can be opened.  If this is the case
          * then return right away.
          */
-        if(obj_type >= 0 && (obj = H5Oopen(iter->fid, name, H5P_DEFAULT)) < 0) {
+        H5TOOLS_DEBUG("Open object name=%s", name);
+        if (obj_type >= 0 && (obj_id = H5Oopen(iter->fid, name, H5P_DEFAULT)) < 0) {
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, " *ERROR*\n");
             h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
@@ -2073,9 +2354,10 @@ list_obj(const char *name, const H5O_info_t *oinfo, const char *first_seen, void
         } /* end if */
 
         /* List the first line of information for the object. */
-        if(obj_type >= 0 && dispatch_g[obj_type].list1)
-            (dispatch_g[obj_type].list1)(obj);
-        if(!iter->symlink_target || (verbose_g > 0)) {
+        H5TOOLS_DEBUG("Object type:%d", obj_type);
+        if (obj_type >= 0 && dispatch_g[obj_type].list1)
+            (dispatch_g[obj_type].list1)(obj_id);
+        if (!iter->symlink_target || (verbose_g > 0)) {
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, "\n");
             h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
@@ -2083,23 +2365,30 @@ list_obj(const char *name, const H5O_info_t *oinfo, const char *first_seen, void
 
         /* Show detailed information about the object, beginning with information
          * which is common to all objects. */
-        if(verbose_g > 0) {
+        if (verbose_g > 0) {
             size_t buf_size = 0;
             char* comment = NULL;
+            char* obj_tok_str = NULL;
             ssize_t cmt_bufsize = -1;
+            hbool_t supported = FALSE;
 
             /* Display attributes */
-            if(obj_type >= 0)
-                H5Aiterate2(obj, H5_INDEX_NAME, H5_ITER_INC, NULL, list_attr, NULL);
+            H5TOOLS_DEBUG("Display attributes");
+            if (obj_type >= 0)
+                H5Aiterate2(obj_id, H5_INDEX_NAME, H5_ITER_INC, NULL, list_attr, NULL);
 
             /* Object location & reference count */
+            H5Otoken_to_str(obj_id, &oinfo->token, &obj_tok_str);
+
             h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "    %-10s %lu:"H5_PRINTF_HADDR_FMT"\n", "Location:", oinfo->fileno, oinfo->addr);
+            h5tools_str_append(&buffer, "    %-10s %lu:%s\n", "Location:", oinfo->fileno, obj_tok_str);
             h5tools_str_append(&buffer, "    %-10s %u\n", "Links:", (unsigned)oinfo->rc);
             h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
 
+            H5free_memory(obj_tok_str);
+
             /* Modification time */
-            if(oinfo->mtime > 0) {
+            if (oinfo->mtime > 0) {
                 char buf[256];
                 struct tm *tm;
 
@@ -2107,7 +2396,7 @@ list_obj(const char *name, const H5O_info_t *oinfo, const char *first_seen, void
                     tm = HDgmtime(&(oinfo->mtime));
                 else
                     tm = HDlocaltime(&(oinfo->mtime));
-                if(tm) {
+                if (tm) {
                     HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
                     h5tools_str_reset(&buffer);
                     h5tools_str_append(&buffer, "    %-10s %s\n", "Modified:", buf);
@@ -2115,40 +2404,46 @@ list_obj(const char *name, const H5O_info_t *oinfo, const char *first_seen, void
                 } /* end if */
             } /* end if */
 
-            /* Object comment */
-            cmt_bufsize = H5Oget_comment(obj, comment, buf_size);
+            /* Only emit comments if the VOL connector supports that */
+            H5VLquery_optional(obj_id, H5VL_SUBCLS_OBJECT, H5VL_NATIVE_OBJECT_GET_COMMENT, &supported);
 
-            /* if the actual length of the comment is longer than cmt_bufsize, then call
-             * H5Oget_comment again with the correct value.
-             * If the call to H5Oget_comment returned an error, skip this block */
-            if (cmt_bufsize > 0) {
-                comment = (char *)HDmalloc((size_t)cmt_bufsize + 1); /* new_size including null terminator */
-                if(comment) {
-                    cmt_bufsize = H5Oget_comment(obj, comment, (size_t)cmt_bufsize);
-                    if(cmt_bufsize > 0) {
-                        comment[cmt_bufsize] = 0;
-                        h5tools_str_reset(&buffer);
-                        h5tools_str_append(&buffer, "    %-10s \"", "Comment:");
-                        print_string(&buffer, comment, FALSE);
-                        h5tools_str_append(&buffer, "\"\n");
-                        h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
-                    } /* end if */
-                    HDfree(comment);
+            if (supported) {
+
+                /* Object comment */
+                cmt_bufsize = H5Oget_comment(obj_id, comment, buf_size);
+
+                /* if the actual length of the comment is longer than cmt_bufsize, then call
+                 * H5Oget_comment again with the correct value.
+                 */
+                if (cmt_bufsize > 0) {
+                    comment = (char *)HDmalloc((size_t)cmt_bufsize + 1); /* new_size including null terminator */
+                    if (comment) {
+                        cmt_bufsize = H5Oget_comment(obj_id, comment, (size_t)cmt_bufsize);
+                        if (cmt_bufsize > 0) {
+                            comment[cmt_bufsize] = 0;
+                            h5tools_str_reset(&buffer);
+                            h5tools_str_append(&buffer, "    %-10s \"", "Comment:");
+                            print_string(&buffer, comment, FALSE);
+                            h5tools_str_append(&buffer, "\"\n");
+                            h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
+                        } /* end if */
+                        HDfree(comment);
+                    }
                 }
             }
         } /* end if */
 
         /* Detailed list for object */
-        if(obj_type >= 0 && dispatch_g[obj_type].list2)
-            (dispatch_g[obj_type].list2)(obj, name);
+        if (obj_type >= 0 && dispatch_g[obj_type].list2)
+            (dispatch_g[obj_type].list2)(obj_id, name);
 
         /* Close the object. */
-        if(obj_type >= 0)
-            H5Oclose(obj);
+        if (obj_type >= 0)
+            H5Oclose(obj_id);
     } /* end else */
 
 done:
-    if(iter->symlink_target) {
+    if (iter->symlink_target) {
         h5tools_str_reset(&buffer);
         h5tools_str_append(&buffer, "}\n");
         h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
@@ -2156,33 +2451,29 @@ done:
     }
     h5tools_str_close(&buffer);
 
+    H5TOOLS_ENDDEBUG("");
+
     return 0;
 } /* end list_obj() */
 
 
-
 /*-------------------------------------------------------------------------
  * Function: list_lnk
  *
  * Purpose: Prints information about a link
  *
  * Return: Success: 0
- *
- *  Failure: -1
- *
- * Programmer: Quincey Koziol
- *              Thursday, November 8, 2007
- *
+ *         Failure: -1
  *-------------------------------------------------------------------------
  */
 static herr_t
-list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
+list_lnk(const char *name, const H5L_info2_t *linfo, void *_iter)
 {
-    char *buf=NULL;
+    char   *buf = NULL;
     iter_t *iter = (iter_t*)_iter;
-    int ret;
-    hsize_t             curr_pos = 0;        /* total data element position   */
-    h5tool_link_info_t lnk_info;
+    int     ret;
+    hsize_t             curr_pos = 0;    /* total data element position   */
+    h5tool_link_info_t  lnk_info;
     h5tools_str_t       buffer;          /* string into which to render   */
     h5tools_context_t   ctx;             /* print context  */
     h5tool_format_t    *info = &ls_dataformat;
@@ -2219,15 +2510,13 @@ list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
             h5tools_str_append(&buffer, buf);
             h5tools_str_append(&buffer, "}");
             h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
-            if(follow_symlink_g)
-            {
+            if (follow_symlink_g) {
                 hbool_t orig_grp_literal = grp_literal_g;
                 h5tools_str_reset(&buffer);
                 h5tools_str_append(&buffer, " ");
 
                 /* Check if we have already seen this softlink */
-                if(symlink_is_visited(iter->symlink_list, linfo->type, NULL, buf))
-                {
+                if (symlink_is_visited(iter->symlink_list, linfo->type, NULL, buf)) {
                     h5tools_str_append(&buffer, "{Already Visited}\n");
                     h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
                     goto done;
@@ -2235,7 +2524,7 @@ list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
                 h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
 
                 /* Add this link to the list of seen softlinks */
-                if(symlink_visit_add(iter->symlink_list, linfo->type, NULL, buf) < 0)
+                if (symlink_visit_add(iter->symlink_list, linfo->type, NULL, buf) < 0)
                     goto done;
 
                 /* Adjust user data to specify that we are operating on the
@@ -2244,11 +2533,10 @@ list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
 
                 /* Prevent recursive listing of soft link target if
                  * recursive_g is off */
-                if(!recursive_g)
+                if (!recursive_g)
                     grp_literal_g = TRUE;
                 /* Recurse through the soft link */
-                if(visit_obj(iter->fid, name, iter) < 0)
-                {
+                if (visit_obj(iter->fid, name, iter) < 0) {
                     grp_literal_g = orig_grp_literal;
                     goto done;
                 }
@@ -2280,7 +2568,7 @@ list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
             else if (no_dangling_link_g && ret == 0)
                 iter->symlink_list->dangle_link = TRUE;
 
-            if(H5Lunpack_elink_val(buf, linfo->u.val_size, NULL, &filename, &path) < 0)
+            if (H5Lunpack_elink_val(buf, linfo->u.val_size, NULL, &filename, &path) < 0)
                 goto done;
 
             h5tools_str_append(&buffer, "External Link {");
@@ -2288,21 +2576,19 @@ list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
             h5tools_str_append(&buffer, "/");
             if(*path != '/')
                 h5tools_str_append(&buffer, "/");
-                        h5tools_str_append(&buffer, path);
+            h5tools_str_append(&buffer, path);
             h5tools_str_append(&buffer, "}");
             h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
 
             /* Recurse through the external link */
             /* keep the follow_elink_g for backward compatibility with -E */
-            if(follow_link)
-            {
+            if (follow_link) {
                 hbool_t orig_grp_literal = grp_literal_g;
                 h5tools_str_reset(&buffer);
                 h5tools_str_append(&buffer, " ");
 
                 /* Check if we have already seen this elink */
-                if(symlink_is_visited(iter->symlink_list, linfo->type, filename, path))
-                {
+                if (symlink_is_visited(iter->symlink_list, linfo->type, filename, path)) {
                     h5tools_str_append(&buffer, "{Already Visited}\n");
                     h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
                     goto done;
@@ -2310,8 +2596,7 @@ list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
                 h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
 
                 /* Add this link to the list of seen elinks */
-                if(symlink_visit_add(iter->symlink_list, linfo->type, filename, path) < 0)
-                {
+                if (symlink_visit_add(iter->symlink_list, linfo->type, filename, path) < 0) {
                     goto done;
                 }
 
@@ -2321,11 +2606,11 @@ list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
 
                 /* Prevent recursive listing of external link target if
                  * recursive_g is off */
-                if(!recursive_g)
+                if (!recursive_g)
                     grp_literal_g = TRUE;
 
                 /* Recurse through the external link */
-                if(visit_obj(iter->fid, name, iter) < 0) {
+                if (visit_obj(iter->fid, name, iter) < 0) {
                     grp_literal_g = orig_grp_literal;
                     goto done;
                 }
@@ -2354,28 +2639,22 @@ done:
     return 0;
 } /* end list_lnk() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function: visit_obj
+ * Function:    visit_obj
  *
- * Purpose: Begins iteration on an object
+ * Purpose:     Begins iteration on an object
  *
- * Return:
- *  Success: 0
- *  Failure: -1
- *
- * Programmer: Neil Fortner
- *              Wednesday, August 21, 2008
- *             Mostly copied from main()
- *
+ * Return:      Success: 0
+ *              Failure: -1
  *-------------------------------------------------------------------------
  */
 static herr_t
 visit_obj(hid_t file, const char *oname, iter_t *iter)
 {
-    int retval = 0;
-    H5O_info_t oi;              /* Information for object */
-    hsize_t             curr_pos = 0;        /* total data element position   */
+    int                 retval = 0;
+    H5O_info2_t         oi;              /* Information for object */
+    hsize_t             curr_pos = 0;    /* total data element position   */
     h5tools_str_t       buffer;          /* string into which to render   */
     h5tools_context_t   ctx;             /* print context  */
     h5tool_format_t    *info = &ls_dataformat;
@@ -2386,8 +2665,8 @@ visit_obj(hid_t file, const char *oname, iter_t *iter)
     h5tools_str_reset(&buffer);
 
     /* Retrieve info for object to list */
-    if(H5Oget_info_by_name(file, oname, &oi, H5P_DEFAULT) < 0) {
-        if(iter->symlink_target) {
+    if (H5Oget_info_by_name3(file, oname, &oi, H5O_INFO_BASIC|H5O_INFO_TIME, H5P_DEFAULT) < 0) {
+        if (iter->symlink_target) {
             h5tools_str_append(&buffer, "{**NOT FOUND**}\n");
             iter->symlink_target = FALSE;
         }
@@ -2399,9 +2678,9 @@ visit_obj(hid_t file, const char *oname, iter_t *iter)
     } /* end if */
 
     /* Check for group iteration */
-    if(H5O_TYPE_GROUP == oi.type && !grp_literal_g) {
+    if (H5O_TYPE_GROUP == oi.type && !grp_literal_g) {
         /* Get ID for group */
-        if(!iter->symlink_target && (iter->gid = H5Gopen2(file, oname, H5P_DEFAULT)) < 0) {
+        if (!iter->symlink_target && (iter->gid = H5Gopen2(file, oname, H5P_DEFAULT)) < 0) {
             h5tools_str_append(&buffer, "%s: unable to open '%s' as group\n", iter->fname, oname);
             h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
             goto done;   /* Previously "continue", when this code was in main().
@@ -2414,10 +2693,10 @@ visit_obj(hid_t file, const char *oname, iter_t *iter)
         iter->name_start = iter->base_len;
 
         /* Specified name is a group. List the complete contents of the group. */
-        h5trav_visit(file, oname, (hbool_t) (display_root_g || iter->symlink_target), recursive_g, list_obj, list_lnk, iter);
+        h5trav_visit(file, oname, (hbool_t) (display_root_g || iter->symlink_target), recursive_g, list_obj, list_lnk, iter, H5O_INFO_BASIC|H5O_INFO_TIME);
 
         /* Close group */
-        if(!iter->symlink_target)
+        if (!iter->symlink_target)
             H5Gclose(iter->gid);
     } /* end if */
     else {
@@ -2434,35 +2713,28 @@ done:
     return retval;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function: get_width
+ * Function:    get_width
  *
- * Purpose: Figure out how wide the screen is.  This is highly
- *  unportable, but the user can always override the width we
- *  detect by giving a command-line option. These code snippets
- *  were borrowed from the GNU less(1).
+ * Purpose:     Figure out how wide the screen is.  This is highly
+ *              unportable, but the user can always override the width we
+ *              detect by giving a command-line option. These code snippets
+ *              were borrowed from the GNU less(1).
  *
- * Return: Success: Number of columns.
- *
- *  Failure: Some default number of columms.
- *
- * Programmer: Robb Matzke
- *              Friday, November  6, 1998
- *
- * Modifications:
- *
+ * Return:      Success: Number of columns.
+ *              Failure: Some default number of columms.
  *-------------------------------------------------------------------------
  */
 static int
 get_width(void)
 {
-    int  width = 80;  /*the default   */
+    int   width = 80;  /*the default   */
     char *s;
 
     /* Try to get it from the COLUMNS environment variable first since it's
      * value is sometimes wrong. */
-    if ((s=HDgetenv("COLUMNS")) && *s && isdigit((int)*s))
+    if ((s = HDgetenv("COLUMNS")) && *s && isdigit((int)*s))
         width = (int)HDstrtol(s, NULL, 0);
 
 #if defined(H5_HAVE_STRUCT_VIDEOCONFIG) && defined(H5_HAVE__GETVIDEOCONFIG)
@@ -2510,37 +2782,31 @@ get_width(void)
 #endif
 
     /* Set to at least 1 */
-    if (width<1) width = 1;
+    if (width < 1)
+        width = 1;
     return width;
 }
 
 /*-------------------------------------------------------------------------
- * Function: is_valid_args
+ * Function:    is_valid_args
  *
- * Purpose: check if command line arguments are valid
+ * Purpose:     check if command line arguments are valid
  *
- * Return:
- *  Success: TRUE (1)
- *  Failure: FALSE (0)
- *
- * Programmer:
- *  Jonathan Kim  (06/15/2010)
- *
+ * Return:      Success: TRUE (1)
+ *              Failure: FALSE (0)
  *-------------------------------------------------------------------------*/
 static hbool_t
 is_valid_args(void)
 {
     hbool_t ret = TRUE;
 
-    if(recursive_g && grp_literal_g)
-    {
+    if (recursive_g && grp_literal_g) {
         HDfprintf(rawerrorstream, "Error: 'recursive' option not compatible with 'group info' option!\n\n");
         ret = FALSE;
         goto out;
     }
 
-    if(no_dangling_link_g && !follow_symlink_g)
-    {
+    if (no_dangling_link_g && !follow_symlink_g) {
         HDfprintf(rawerrorstream, "Error: --no-dangling-links must be used along with --follow-symlinks option!\n\n");
         ret = FALSE;
         goto out;
@@ -2550,19 +2816,13 @@ out:
     return ret;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function: leave
+ * Function:    leave
  *
- * Purpose: Close HDF5 and MPI and call exit()
+ * Purpose:     Close HDF5 and MPI and call exit()
  *
- * Return: Does not return
- *
- * Programmer: Quincey Koziol
- *              Saturday, January 31, 2004
- *
- * Modifications:
- *
+ * Return:      Does not return
  *-------------------------------------------------------------------------
  */
 static void
@@ -2573,41 +2833,75 @@ leave(int ret)
     HDexit(ret);
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function: main
+ * Function:    main
  *
- * Purpose: Opens a file and lists the specified group
+ * Purpose:     Opens a file and lists the specified group
  *
- * Return: Success: 0
- *
- *  Failure: 1
- *
- * Programmer: Robb Matzke
- *              Monday, March 23, 1998
- *
- * Modifications:
- *
+ * Return:      Success: 0
+ *              Failure: 1
  *-------------------------------------------------------------------------
  */
 int
 main(int argc, const char *argv[])
 {
-    hid_t file = -1;
-    char *fname = NULL, *oname = NULL, *x;
-    const char *s = NULL;
-    char *rest;
-    int  argno;
-    static char root_name[] = "/";
-    char        drivername[50];
-    const char *preferred_driver = NULL;
-    int err_exit = 0;
+    hid_t        file_id = H5I_INVALID_HID;
+    char        *fname = NULL, *oname = NULL, *x;
+    const char  *s = NULL;
+    char        *rest;
+    int          argno;
+    static char  root_name[] = "/";
+    char         drivername[50];
+    const char  *preferred_driver = NULL;
+    int          err_exit = 0;
+    hid_t        fapl_id = H5P_DEFAULT;
+    H5E_auto2_t  func;
+    H5E_auto2_t  tools_func;
+    void        *edata;
+    void        *tools_edata;
+    hbool_t custom_vol_fapl = FALSE;
+    h5tools_vol_info_t vol_info;
+
+#ifdef H5_HAVE_ROS3_VFD
+    /* Default "anonymous" S3 configuration */
+    H5FD_ros3_fapl_t ros3_fa = {
+        1,     /* Structure Version */
+        false, /* Authenticate?     */
+        "",    /* AWS Region        */
+        "",    /* Access Key ID     */
+        "",    /* Secret Access Key */
+    };
+#endif /* H5_HAVE_ROS3_VFD */
+
+#ifdef H5_HAVE_LIBHDFS
+    /* "Default" HDFS configuration */
+    H5FD_hdfs_fapl_t hdfs_fa = {
+        1,           /* Structure Version     */
+        "localhost", /* Namenode Name         */
+        0,           /* Namenode Port         */
+        "",          /* Kerberos ticket cache */
+        "",          /* User name             */
+        2048,        /* Stream buffer size    */
+    };
+#endif /* H5_HAVE_LIBHDFS */
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
 
+    /* Disable error reporting */
+    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
+    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+
     /* Initialize h5tools lib */
     h5tools_init();
+
+    /* Disable tools error reporting */
+    H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
+    H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
+
+    /* Initialize fapl info struct */
+    HDmemset(&vol_info, 0, sizeof(h5tools_vol_info_t));
 
     /* Build object display table */
     DISPATCH(H5O_TYPE_GROUP, "Group", NULL, NULL);
@@ -2618,90 +2912,175 @@ main(int argc, const char *argv[])
     width_g = get_width();
 
     /* Switches come before non-switch arguments */
-    for(argno = 1; argno < argc && '-' == argv[argno][0]; argno++) {
-        if(!HDstrcmp(argv[argno], "--")) {
+    for (argno = 1; argno < argc && '-' == argv[argno][0]; argno++) {
+        if (!HDstrcmp(argv[argno], "--")) {
             /* Last switch */
             argno++;
             break;
-        } else if(!HDstrcmp(argv[argno], "--help")) {
+        }
+        else if (!HDstrcmp(argv[argno], "--help")) {
             usage();
             leave(EXIT_SUCCESS);
-        } else if(!HDstrcmp(argv[argno], "--address")) {
+        }
+        else if (!HDstrcmp(argv[argno], "--address")) {
             address_g = TRUE;
-        } else if(!HDstrcmp(argv[argno], "--data")) {
+        }
+        else if(!HDstrcmp(argv[argno], "--data")) {
             data_g = TRUE;
-        } else if(!HDstrcmp(argv[argno], "--enable-error-stack")) {
-            show_errors_g = TRUE;
+        }
+        else if (!HDstrcmp(argv[argno], "--enable-error-stack")) {
+            enable_error_stack = 1;
         /* deprecated --errors */
-        } else if(!HDstrcmp(argv[argno], "--errors")) {
-            show_errors_g = TRUE;
-        } else if(!HDstrcmp(argv[argno], "--follow-symlinks")) {
+        }
+        else if (!HDstrcmp(argv[argno], "--errors")) {
+            enable_error_stack = 1;
+        }
+        else if (!HDstrcmp(argv[argno], "--follow-symlinks")) {
             follow_symlink_g = TRUE;
-        } else if(!HDstrcmp(argv[argno], "--no-dangling-links")) {
+        }
+        else if (!HDstrcmp(argv[argno], "--no-dangling-links")) {
             no_dangling_link_g = TRUE;
-        } else if(!HDstrcmp(argv[argno], "--external")) {
+        }
+        else if (!HDstrcmp(argv[argno], "--external")) {
             follow_elink_g = TRUE;
-        } else if(!HDstrcmp(argv[argno], "--full")) {
+        }
+        else if (!HDstrcmp(argv[argno], "--full")) {
             fullname_g = TRUE;
-        } else if(!HDstrcmp(argv[argno], "--group")) {
+        }
+        else if (!HDstrcmp(argv[argno], "--group")) {
             grp_literal_g = TRUE;
-        } else if(!HDstrcmp(argv[argno], "--label")) {
+        }
+        else if (!HDstrcmp(argv[argno], "--label")) {
             label_g = TRUE;
-        } else if(!HDstrcmp(argv[argno], "--recursive")) {
+        }
+        else if (!HDstrcmp(argv[argno], "--recursive")) {
             recursive_g = TRUE;
             fullname_g = TRUE;
-        } else if(!HDstrcmp(argv[argno], "--simple")) {
+        }
+        else if (!HDstrcmp(argv[argno], "--simple")) {
             simple_output_g = TRUE;
-        } else if(!HDstrcmp(argv[argno], "--string")) {
+        }
+        else if (!HDstrcmp(argv[argno], "--string")) {
             string_g = TRUE;
-        } else if(!HDstrncmp(argv[argno], "--vfd=", (size_t)6)) {
+        }
+        else if (!HDstrncmp(argv[argno], "--vfd=", (size_t)6)) {
             preferred_driver = argv[argno]+6;
-        } else if(!HDstrncmp(argv[argno], "--width=", (size_t)8)) {
+        }
+        else if (!HDstrncmp(argv[argno], "--vol-value=", (size_t)12)) {
+            vol_info.type = VOL_BY_VALUE;
+            vol_info.u.value = (H5VL_class_value_t)HDatoi(argv[argno]+12);
+            custom_vol_fapl = TRUE;
+        }
+        else if (!HDstrncmp(argv[argno], "--vol-name=", (size_t)11)) {
+            vol_info.type = VOL_BY_NAME;
+            vol_info.u.name = argv[argno]+11;
+            custom_vol_fapl = TRUE;
+        }
+        else if (!HDstrncmp(argv[argno], "--vol-info=", (size_t)11)) {
+            vol_info.info_string = argv[argno]+11;
+        }
+        else if (!HDstrncmp(argv[argno], "--width=", (size_t)8)) {
             width_g = (int)HDstrtol(argv[argno]+8, &rest, 0);
 
-            if(0 == width_g)
+            if (0 == width_g)
                 no_line_wrap_g = TRUE;
-            else if(width_g < 0 || *rest) {
+            else if (width_g < 0 || *rest) {
                 usage();
                 leave(EXIT_FAILURE);
             }
-        } else if(!HDstrcmp(argv[argno], "--width")) {
-            if((argno + 1) >= argc) {
+        }
+        else if (!HDstrcmp(argv[argno], "--width")) {
+            if ((argno + 1) >= argc) {
                 usage();
                 leave(EXIT_FAILURE);
-            } else {
+            }
+            else {
                 s = argv[++argno];
             }
             width_g = (int)HDstrtol(s, &rest, 0);
-            if(width_g <= 0 || *rest) {
+            if (width_g <= 0 || *rest) {
                 usage();
                 leave(EXIT_FAILURE);
             }
-        } else if(!HDstrcmp(argv[argno], "--verbose")) {
+        }
+        else if (!HDstrcmp(argv[argno], "--verbose")) {
             verbose_g++;
-        } else if(!HDstrcmp(argv[argno], "--version")) {
+        }
+        else if (!HDstrcmp(argv[argno], "--version")) {
             print_version(h5tools_getprogname());
             leave(EXIT_SUCCESS);
-        } else if(!HDstrcmp(argv[argno], "--hexdump")) {
+        }
+        else if (!HDstrcmp(argv[argno], "--hexdump")) {
             hexdump_g = TRUE;
-        } else if(!HDstrncmp(argv[argno], "-w", (size_t)2)) {
-            if(argv[argno][2]) {
+        }
+        else if (!HDstrncmp(argv[argno], "-w", (size_t)2)) {
+            if (argv[argno][2]) {
                 s = argv[argno] + 2;
-            } else if((argno + 1) >= argc) {
+            }
+            else if ((argno + 1) >= argc) {
                 usage();
                 leave(EXIT_FAILURE);
-            } else {
+            }
+            else {
                 s = argv[++argno];
             }
             width_g = (int)HDstrtol(s, &rest, 0);
 
-            if(0 == width_g)
+            if(0 == width_g) {
                 no_line_wrap_g = TRUE;
+            }
             else if(width_g < 0 || *rest) {
                 usage();
                 leave(EXIT_FAILURE);
             }
-        } else if('-'!=argv[argno][1]) {
+
+        }
+        else if (!HDstrncmp(argv[argno], "--s3-cred=", (size_t)10)) {
+#ifdef H5_HAVE_ROS3_VFD
+            char const *start = NULL;
+
+            start = strchr(argv[argno], '=');
+            if (start == NULL) {
+                HDfprintf(rawerrorstream, "Error: Unable to parse null credentials tuple\n"
+                          "    For anonymous access, omit \"--s3-cred\" and use only \"--vfd=ros3\"\n\n");
+                usage();
+                leave(EXIT_FAILURE);
+            }
+            start++;
+
+            if (h5tools_parse_ros3_fapl_tuple(start, ',', &ros3_fa) < 0) {
+                HDfprintf(rawerrorstream, "Error: failed to parse S3 VFD credential info\n\n");
+                usage();
+                leave(EXIT_FAILURE);
+            }
+#else
+            HDfprintf(rawerrorstream, "Error: Read-Only S3 VFD is not enabled\n\n");
+            usage();
+            leave(EXIT_FAILURE);
+#endif
+        }
+        else if (!HDstrncmp(argv[argno], "--hdfs-attrs=", (size_t)13)) {
+#ifdef H5_HAVE_LIBHDFS
+            char const *start = NULL;
+
+            start = argv[argno]+13; /* should never segfault: worst case of */
+            if (*start != '(') {    /* null-termintor after '='.            */
+                usage();
+                leave(EXIT_FAILURE);
+            }
+
+            if (h5tools_parse_hdfs_fapl_tuple(start, ',', &hdfs_fa) < 0) {
+                HDfprintf(rawerrorstream, "Error: failed to parse HDFS VFD configuration info\n\n");
+                usage();
+                leave(EXIT_FAILURE);
+            }
+#else
+            HDfprintf(rawerrorstream, "Error: The HDFS VFD is not enabled\n\n");
+            usage();
+            leave(EXIT_FAILURE);
+#endif
+        }
+        else if('-'!=argv[argno][1]) {
             /* Single-letter switches */
             for(s = argv[argno] + 1; *s; s++) {
                 switch(*s) {
@@ -2709,6 +3088,7 @@ main(int argc, const char *argv[])
                     case 'h': /* --help */
                         usage();
                         leave(EXIT_SUCCESS);
+                        break;
 
                     case 'a': /* --address */
                         address_g = TRUE;
@@ -2720,7 +3100,7 @@ main(int argc, const char *argv[])
 
                     /* deprecated -e */
                     case 'e': /* --errors */
-                        show_errors_g = TRUE;
+                        enable_error_stack = 1;
                         break;
 
                     case 'E': /* --external */
@@ -2759,6 +3139,7 @@ main(int argc, const char *argv[])
                     case 'V': /* --version */
                         print_version(h5tools_getprogname());
                         leave(EXIT_SUCCESS);
+                        break;
 
                     case 'x': /* --hexdump */
                         hexdump_g = TRUE;
@@ -2769,7 +3150,9 @@ main(int argc, const char *argv[])
                         leave(EXIT_FAILURE);
                 } /* end switch */
             } /* end for */
-        } else {
+        }
+        else {
+            HDfprintf(stderr, "Unknown argument: %s\n", argv[argno]);
             usage();
             leave(EXIT_FAILURE);
         }
@@ -2777,22 +3160,58 @@ main(int argc, const char *argv[])
 
     /* If no arguments remain then print a usage message (instead of doing
      * absolutely nothing ;-) */
-    if(argno >= argc) {
+    if (argno >= argc) {
         usage();
         leave(EXIT_FAILURE);
     } /* end if */
 
     /* Check for conflicting arguments */
-    if (!is_valid_args())
-    {
+    if (!is_valid_args()) {
         usage();
         leave(EXIT_FAILURE);
     }
 
-    /* Turn off HDF5's automatic error printing unless you're debugging h5ls */
-    if(!show_errors_g)
-        H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+    /* Setup a custom fapl for file accesses */
+    if (custom_vol_fapl) {
+        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, &vol_info, NULL)) < 0) {
+            error_msg("failed to setup file access property list (fapl) for file\n");
+            leave(EXIT_FAILURE);
+        }
+    }
 
+    if (preferred_driver) {
+        h5tools_vfd_info_t vfd_info;
+
+        vfd_info.info       = NULL;
+        vfd_info.name       = preferred_driver;
+
+        if (!HDstrcmp(preferred_driver, drivernames[ROS3_VFD_IDX])) {
+#ifdef H5_HAVE_ROS3_VFD
+            vfd_info.info = (void *)&ros3_fa;
+#else
+            HDfprintf(rawerrorstream, "Error: Read-Only S3 VFD is not enabled\n\n");
+            leave(EXIT_FAILURE);
+#endif
+        }
+        else if (!HDstrcmp(preferred_driver, drivernames[HDFS_VFD_IDX])) {
+#ifdef H5_HAVE_LIBHDFS
+            vfd_info.info = (void *)&hdfs_fa;
+#else
+            HDfprintf(rawerrorstream, "Error: The HDFS VFD is not enabled\n\n");
+            leave(EXIT_FAILURE);
+#endif
+        }
+
+        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info)) < 0) {
+            HDfprintf(rawerrorstream, "Error: Unable to create FAPL for file access\n\n");
+            leave(EXIT_FAILURE);
+        }
+    }
+
+    if (enable_error_stack > 0) {
+        H5Eset_auto2(H5E_DEFAULT, func, edata);
+        H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
+    }
 
     /* Each remaining argument is an hdf5 file followed by an optional slash
      * and object name.
@@ -2808,20 +3227,21 @@ main(int argc, const char *argv[])
      * doesn't exist). */
     show_file_name_g = (argc-argno > 1); /*show file names if more than one*/
     while(argno < argc) {
-        H5L_info_t li;
+        H5L_info2_t li;
         iter_t iter;
         symlink_trav_t symlink_list;
         size_t u;
 
         fname = HDstrdup(argv[argno++]);
         oname = NULL;
-        file = -1;
+        file_id = H5I_INVALID_HID;
 
-        while(fname && *fname) {
-            file = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, preferred_driver, drivername, sizeof drivername);
+        while (fname && *fname) {
+            file_id = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id,
+                    (fapl_id == H5P_DEFAULT) ? FALSE : TRUE, drivername, sizeof drivername);
 
-            if(file >= 0) {
-                if(verbose_g)
+            if (file_id >= 0) {
+                if (verbose_g)
                     PRINTSTREAM(rawoutstream, "Opened \"%s\" with %s driver.\n", fname, drivername);
                 break; /*success*/
             } /* end if */
@@ -2829,28 +3249,29 @@ main(int argc, const char *argv[])
             /* Shorten the file name; lengthen the object name */
             x = oname;
             oname = HDstrrchr(fname, '/');
-            if(x)
+            if (x)
                 *x = '/';
-            if(!oname)
+            if (!oname)
                 break;
             *oname = '\0';
         } /* end while */
 
-        if(file < 0) {
+        if (file_id < 0) {
             HDfprintf(rawerrorstream, "%s: unable to open file\n", argv[argno-1]);
             HDfree(fname);
             err_exit = 1;
             continue;
         } /* end if */
-        if(oname) {
+        if (oname) {
             /* Always use absolute paths to avoid confusion, keep track of where
              * to begin path name output */
             *oname = '/';
             iter.base_len = HDstrlen(oname);
             iter.base_len -= oname[iter.base_len-1] == '/';
             x = oname;
-            if(NULL == (oname = HDstrdup(oname))) {
+            if (NULL == (oname = HDstrdup(oname))) {
                 HDfprintf(rawerrorstream, "memory allocation failed\n");
+                H5Eset_auto2(H5E_DEFAULT, func, edata);
                 leave(EXIT_FAILURE);
             }
             *x = '\0';
@@ -2858,9 +3279,9 @@ main(int argc, const char *argv[])
              * is displayed if it is a link or non-group object */
             iter.name_start = 1;
         }
-        if(!oname || !*oname) {
+        if (!oname || !*oname) {
             oname = root_name;
-            if(recursive_g)
+            if (recursive_g)
                 display_root_g = TRUE;
             iter.base_len = 0;
             iter.name_start = 0;
@@ -2870,8 +3291,8 @@ main(int argc, const char *argv[])
 
         /* Remember the file information for later */
         iter.fname = fname;
-        iter.fid = file;
-        iter.gid = -1;
+        iter.fid = file_id;
+        iter.gid = H5I_INVALID_HID;
         iter.symlink_target = FALSE;
         iter.symlink_list = &symlink_list;
         iter.symlink_list->dangle_link = FALSE;
@@ -2881,9 +3302,9 @@ main(int argc, const char *argv[])
         symlink_list.objs = NULL;
 
         /* Check for root group as object name */
-        if(HDstrcmp(oname, root_name)) {
+        if (HDstrcmp(oname, root_name)) {
             /* Check the type of link given */
-            if(H5Lget_info(file, oname, &li, H5P_DEFAULT) < 0) {
+            if (H5Lget_info2(file_id, oname, &li, H5P_DEFAULT) < 0) {
                 hsize_t             curr_pos = 0;        /* total data element position   */
                 h5tools_str_t       buffer;          /* string into which to render   */
                 h5tools_context_t   ctx;             /* print context  */
@@ -2895,6 +3316,7 @@ main(int argc, const char *argv[])
                 h5tools_str_reset(&buffer);
                 print_obj_name(&buffer, &iter, oname, "**NOT FOUND**");
                 h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
+                H5Eset_auto2(H5E_DEFAULT, func, edata);
                 leave(EXIT_FAILURE);
             } /* end if */
         } /* end if */
@@ -2902,23 +3324,24 @@ main(int argc, const char *argv[])
             li.type = H5L_TYPE_HARD;
 
         /* Open the object and display it's information */
-        if(li.type == H5L_TYPE_HARD) {
-            if(visit_obj(file, oname, &iter) < 0)
+        if (li.type == H5L_TYPE_HARD) {
+            if (visit_obj(file_id, oname, &iter) < 0) {
+                H5Eset_auto2(H5E_DEFAULT, func, edata);
                 leave(EXIT_FAILURE);
+            }
         } /* end if(li.type == H5L_TYPE_HARD) */
         else {
             /* Specified name is not for object -- list that link */
-            /* Use file ID for root group ID */
-            iter.gid = file;
+            /* Use file_id ID for root group ID */
+            iter.gid = file_id;
             list_lnk(oname, &li, &iter);
         }
-        H5Fclose(file);
+        H5Fclose(file_id);
         HDfree(fname);
-        if(x)
+        if (x)
             HDfree(oname);
 
-        for(u=0; u < symlink_list.nused; u++)
-        {
+        for (u = 0; u < symlink_list.nused; u++) {
             if (symlink_list.objs[u].type == H5L_TYPE_EXTERNAL)
                 HDfree(symlink_list.objs[u].file);
 
@@ -2931,6 +3354,15 @@ main(int argc, const char *argv[])
             err_exit = 1;
     } /* end while */
 
+    if (fapl_id != H5P_DEFAULT) {
+        if (0 < H5Pclose(fapl_id)) {
+            HDfprintf(rawerrorstream, "Error: Unable to set close fapl entry\n\n");
+            H5Eset_auto2(H5E_DEFAULT, func, edata);
+            leave(EXIT_FAILURE);
+        }
+    }
+
+    H5Eset_auto2(H5E_DEFAULT, func, edata);
     if (err_exit)
         leave(EXIT_FAILURE);
     else

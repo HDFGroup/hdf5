@@ -26,7 +26,6 @@
  *  worth keeping around for now.
  */
 
-#include <stdio.h>
 #include "h5test.h"
 
 #define H5FILE_NAME        "data.h5"
@@ -79,7 +78,7 @@ int create_szip_dsets_float(hid_t fid, hid_t fsid, hid_t msid);
 int create_shuffle_dsets_float(hid_t fid, hid_t fsid, hid_t msid);
 int create_nbit_dsets_float(hid_t fid, hid_t fsid, hid_t msid);
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_normal_dset
  *
@@ -108,8 +107,8 @@ create_normal_dset(hid_t fid, hid_t fsid, hid_t msid)
      * Data and output buffer initialization.
      */
     for (j = 0; j < NX; j++) {
-	for (i = 0; i < NY; i++)
-	    data[j][i] = ((float)(i + j + 1)) / 3;
+    for (i = 0; i < NY; i++)
+        data[j][i] = ((float)(i + j + 1)) / 3;
     }
     /*
      * 1/3 2/3 3/3 4/3 5/3 6/3
@@ -143,7 +142,7 @@ create_normal_dset(hid_t fid, hid_t fsid, hid_t msid)
     if(H5Dwrite(dataset, H5T_NATIVE_FLOAT, msid, fsid, H5P_DEFAULT, data) < 0)
         TEST_ERROR
 
-    /* 
+    /*
      * Close dataset
      */
     if(H5Dclose(dataset) < 0)
@@ -163,7 +162,7 @@ create_normal_dset(hid_t fid, hid_t fsid, hid_t msid)
     if(H5Dwrite(dataset, H5T_NATIVE_FLOAT, msid, fsid, H5P_DEFAULT, data) < 0)
         TEST_ERROR
 
-    /* 
+    /*
      * Close dataset
      */
     if(H5Dclose(dataset) < 0)
@@ -186,7 +185,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_scale_offset_dsets_float
  *
@@ -277,7 +276,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_scale_offset_dsets_double
  *
@@ -307,8 +306,8 @@ create_scale_offset_dsets_double(hid_t fid, hid_t fsid, hid_t msid)
      * Data and output buffer initialization.
      */
     for (j = 0; j < NX; j++) {
-	for (i = 0; i < NY; i++)
-	    data[j][i] = ((double)(i + j + 1))/3;
+    for (i = 0; i < NY; i++)
+        data[j][i] = ((double)(i + j + 1))/3;
     }
 
     /*
@@ -368,7 +367,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_scale_offset_dset_char
  *
@@ -467,7 +466,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_scale_offset_dset_short
  *
@@ -566,7 +565,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_scale_offset_dset_int
  *
@@ -596,8 +595,8 @@ create_scale_offset_dsets_int(hid_t fid, hid_t fsid, hid_t msid)
      * Data and output buffer initialization.
      */
     for (j = 0; j < NX; j++) {
-	for (i = 0; i < NY; i++)
-	    data[j][i] = i + j;
+    for (i = 0; i < NY; i++)
+        data[j][i] = i + j;
     }
     /*
      * 0 1 2 3 4 5
@@ -665,7 +664,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_scale_offset_dset_long_long
  *
@@ -765,7 +764,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_fletcher_dsets_float
  *
@@ -856,7 +855,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_deflate_dsets_float
  *
@@ -957,7 +956,7 @@ error:
 }
 
 #ifdef H5_HAVE_FILTER_SZIP
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_szip_dsets_float
  *
@@ -1049,7 +1048,7 @@ error:
 }
 #endif /* H5_HAVE_FILTER_SZIP */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_shuffle_dsets_float
  *
@@ -1140,7 +1139,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_nbit_dsets_float
  *
@@ -1225,7 +1224,7 @@ create_nbit_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
         TEST_ERROR
 
     /* Now create a dataset with a big-endian type */
-    if(H5Tset_order(datatype, H5T_ORDER_BE) < 0) 
+    if(H5Tset_order(datatype, H5T_ORDER_BE) < 0)
         TEST_ERROR
     if((dataset = H5Dcreate2(fid, DATASETNAME23, datatype, fsid,
             H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
@@ -1252,17 +1251,15 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
- * Purpose:     Create a file for cross_read.c test.
+ * Purpose:     Create a file for cross_read.c test
  *
- * Return:      Success:        exit(EXIT_SUCCESS)
- *              Failure:        exit(EXIT_FAILURE)
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:  Raymond Lu
- *              Some time ago
  *
  *-------------------------------------------------------------------------
  */
@@ -1280,9 +1277,8 @@ main (void)
      * default file creation properties, and default file
      * access properties.
      */
-    if((file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))
-            < 0)
-        {H5_FAILED(); AT(); return 1;}
+    if((file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
 
     /*
      * Describe the size of the array and create the data space for fixed
@@ -1292,82 +1288,84 @@ main (void)
     dimsf[0] = NX + 1;
     dimsf[1] = NY;
     if((filespace = H5Screate_simple(RANK, dimsf, NULL)) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
     dimsf[0] = NX;
-    if(H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, NULL, dimsf, NULL)
-            < 0)
-        {H5_FAILED(); AT(); return 1;}
+    if(H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, NULL, dimsf, NULL) < 0)
+        TEST_ERROR;
 
     /* Create memory space.  This does not include the extra row for fill
      * values. */
     HDassert(dimsf[0] == NX);
     HDassert(dimsf[1] == NY);
     if((memspace = H5Screate_simple(RANK, dimsf, NULL)) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
     /* Create a regular dataset */
     if(create_normal_dset(file, filespace, memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
     /* Create a dataset of FLOAT with scale-offset filter */
     if(create_scale_offset_dsets_float(file, filespace, memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
     /* Create a dataset of DOUBLE with scale-offset filter */
     if(create_scale_offset_dsets_double(file, filespace, memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
     /* Create a dataset of CHAR with scale-offset filter */
     if(create_scale_offset_dsets_char(file, filespace, memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
     /* Create a dataset of SHORT with scale-offset filter */
     if(create_scale_offset_dsets_short(file, filespace, memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
     /* Create a dataset of INT with scale-offset filter */
     if(create_scale_offset_dsets_int(file, filespace, memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
     /* Create a dataset of LONG LONG with scale-offset filter */
     if(create_scale_offset_dsets_long_long(file, filespace, memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
     /* Create a dataset of FLOAT with fletcher filter */
     if(create_fletcher_dsets_float(file, filespace, memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
     /* Create a dataset of FLOAT with deflate filter */
     if(create_deflate_dsets_float(file, filespace, memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
 #ifdef H5_HAVE_FILTER_SZIP
     /* Create a dataset of FLOAT with szip filter */
     if(create_szip_dsets_float(file, filespace, memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 #else /* H5_HAVE_FILTER_SZIP */
-    puts("Szip filter is not enabled. Can't create the dataset.");
+    HDputs("Szip filter is not enabled. Can't create the dataset.");
 #endif /* H5_HAVE_FILTER_SZIP */
 
     /* Create a dataset of FLOAT with shuffle filter */
     if(create_shuffle_dsets_float(file, filespace, memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
     /* Create a dataset of FLOAT with nbit filter */
     if(create_nbit_dsets_float(file, filespace, memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
 
     /*
      * Close/release resources.
      */
     if(H5Sclose(memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
     if(H5Sclose(filespace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
     if(H5Fclose(file) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
-    return 0;
-}
+    HDexit(EXIT_SUCCESS);
+
+error:
+    HDexit(EXIT_FAILURE);
+} /* end main() */
 

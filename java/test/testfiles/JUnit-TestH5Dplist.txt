@@ -1,0 +1,8 @@
+JUnit version 4.11
+.testH5P_dset_no_attrs_hint
+.testH5Dset_extent
+
+Time:  XXXX
+
+OK (2 tests)
+

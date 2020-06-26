@@ -21,7 +21,8 @@
 #include "H5PLpublic.h"
 
 /* Private headers needed by this file */
-#include "H5private.h"          /* Generic Functions                    */
+#include "H5private.h"      /* Generic Functions            */
+#include "H5VLprivate.h"    /* Virtual Object Layer         */
 
 
 /**************************/
@@ -32,6 +33,18 @@
 /****************************/
 /* Library Private Typedefs */
 /****************************/
+
+/* The key that will be used to find the plugin */
+typedef union H5PL_key_t {
+    int         id;         /* I/O filters */
+    struct {
+        H5VL_get_connector_kind_t kind; /* Kind of VOL lookup to do */
+        union {
+            H5VL_class_value_t value;   /* VOL connector value */
+            const char *name;           /* VOL connector name */
+        } u;
+    } vol;
+} H5PL_key_t;
 
 
 /*****************************/
@@ -44,7 +57,7 @@
 /***************************************/
 
 /* Internal API routines */
-H5_DLL const void *H5PL_load(H5PL_type_t plugin_type, int type_id);
+H5_DLL const void *H5PL_load(H5PL_type_t plugin_type, const H5PL_key_t *key);
 
 #endif /* _H5PLprivate_H */
 

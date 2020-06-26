@@ -8,5 +8,4 @@ group  : </> and </>
 0 differences found
 dataset: </dynlibud> and </dynlibud>
 0 differences found
-warning: dataset </dynlibud> cannot be read, user defined filter is not available
 EXIT CODE: 2

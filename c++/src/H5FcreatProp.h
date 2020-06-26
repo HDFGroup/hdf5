@@ -20,9 +20,8 @@ namespace H5 {
 /*! \class FileCreatPropList
     \brief Class FileCreatPropList inherits from PropList and provides
     wrappers for the HDF5 file create property list.
-
-    Inheritance: PropList -> IdComponent
 */
+//  Inheritance: PropList -> IdComponent
 class H5_DLLCPP FileCreatPropList : public PropList {
    public:
         ///\brief Default file creation property list.
@@ -80,7 +79,7 @@ class H5_DLLCPP FileCreatPropList : public PropList {
         ///\brief Returns this class name.
         virtual H5std_string fromClass() const { return("FileCreatPropList"); }
 
-        // Copy constructor: creates a copy of a FileCreatPropList object.
+        // Copy constructor: same as the original FileCreatPropList.
         FileCreatPropList(const FileCreatPropList& orig);
 
         // Creates a copy of an existing file create property list

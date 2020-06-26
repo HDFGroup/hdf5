@@ -17,13 +17,11 @@
 
 namespace H5 {
 
-//! Class PropList provides operations for generic property lists.
 /*! \class PropList
     \brief Class PropList inherits from IdComponent and provides wrappers for
     the HDF5 generic property list.
-
-    Inheritance: IdComponent
 */
+//  Inheritance: IdComponent
 class H5_DLLCPP PropList : public IdComponent {
    public:
         ///\brief Default property list
@@ -94,7 +92,7 @@ class H5_DLLCPP PropList : public IdComponent {
         // Determines whether a property list is a certain class.
         bool isAClass(const PropList& prop_class) const;
 
-        /// Query the existance of a property in a property object.
+        /// Query the existence of a property in a property object.
         bool propExist(const char* name) const;
         bool propExist(const H5std_string& name) const;
 
@@ -108,7 +106,7 @@ class H5_DLLCPP PropList : public IdComponent {
         // Default constructor: creates a stub PropList object.
         PropList();
 
-        // Copy constructor: creates a copy of a PropList object.
+        // Copy constructor: same as the original PropList.
         PropList(const PropList& original);
 
         // Gets the property list id.

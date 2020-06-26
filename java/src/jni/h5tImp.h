@@ -401,6 +401,15 @@ Java_hdf_hdf5lib_H5_H5Tpack
 
 /*
  * Class:     hdf_hdf5lib_H5
+ * Method:    H5Treclaim
+ * Signature: (JJJ[B)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Treclaim
+  (JNIEnv*, jclass, jlong, jlong, jlong, jbyteArray);
+
+/*
+ * Class:     hdf_hdf5lib_H5
  * Method:    _H5Tclose
  * Signature: (J)I
  */

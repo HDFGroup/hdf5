@@ -1,0 +1,34 @@
+JUnit version 4.11
+.testH5Acreate2_nullname
+.testH5Acreate_by_name
+.testH5Aget_name_by_idx
+.testH5Aget_storage_size
+.testH5Aiterate
+.testH5Aopen_by_idx
+.testH5Aopen_invalidname
+.testH5Aopen
+.testH5Aget_info_by_name
+.testH5Aget_create_plist
+.testH5Adelete_by_name
+.testH5Aopen_by_name
+.testH5Aget_info
+.testH5Aget_name
+.testH5Aexists
+.testH5Aget_info_by_idx
+.testH5Arename
+.testH5Adelete_by_idx_name1
+.testH5Adelete_by_idx_name2
+.testH5Adelete_by_idx_order
+.testH5Arename_by_name
+.testH5Acreate2_invalidobject
+.testH5Acreate2
+.testH5Aiterate_by_name
+.testH5Adelete_by_idx_null
+.testH5Adelete_by_idx_invalidobject
+.testH5Awrite_readVL
+.testH5Aget_info1
+
+Time:  XXXX
+
+OK (28 tests)
+

@@ -21,9 +21,26 @@
 
 /* Private headers needed by this file */
 
-/* Internal data structures */
+/**************************/
+/* Library Private Macros */
+/**************************/
 
-/* Private functions */
+#define H5R_ENCODE_VERSION      0x1     /* Version for encoding references */
+
+
+/****************************/
+/* Library Private Typedefs */
+/****************************/
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/******************************/
+/* Library Private Prototypes */
+/******************************/
 
 #endif  /* _H5Rprivate_H */
 

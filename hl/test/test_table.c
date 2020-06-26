@@ -51,8 +51,6 @@
 #define NRECORDS         8
 #define NRECORDS_ADD     3
 
-#define TESTING2(WHAT) {printf("%-70s", "Testing     " WHAT); fflush(stdout);}
-
 /*-------------------------------------------------------------------------
 * structure used for all tests, a particle with properties
 *-------------------------------------------------------------------------
@@ -117,7 +115,7 @@ typedef struct particle3_t
  *-------------------------------------------------------------------------
  */
 
-/*  Push current alignment rule forcing 4-byte alignment boundary 
+/*  Push current alignment rule forcing 4-byte alignment boundary
  *  to the internal stack ...
  */
 #pragma pack(push,4)
@@ -129,7 +127,7 @@ typedef struct particle3_t
         float      aty[3];
         float      rro[2];
     } particle4_t;
-/* 
+/*
  * ... and restore original alignment rules from stack
  */
 #pragma pack(pop)
@@ -164,14 +162,14 @@ static int cmp_par(hsize_t i, hsize_t j, particle_t *rbuf, particle_t *wbuf )
     if ( ( HDstrcmp( rbuf[i].name, wbuf[j].name ) != 0 ) ||
         rbuf[i].lati != wbuf[j].lati ||
         rbuf[i].longi != wbuf[j].longi ||
-	!H5_FLT_ABS_EQUAL(rbuf[i].pressure,wbuf[j].pressure)  ||
-	!H5_DBL_ABS_EQUAL(rbuf[i].temperature,wbuf[j].temperature) )
+    !H5_FLT_ABS_EQUAL(rbuf[i].pressure,wbuf[j].pressure)  ||
+    !H5_DBL_ABS_EQUAL(rbuf[i].temperature,wbuf[j].temperature) )
     {
         HDfprintf(stderr,"read and write buffers have differences\n");
         HDfprintf(stderr,"%s %ld %f %f %d\n",
-		  rbuf[i].name,rbuf[i].longi,(double)rbuf[i].pressure,rbuf[i].temperature,rbuf[i].lati);
+        rbuf[i].name,rbuf[i].longi,(double)rbuf[i].pressure,rbuf[i].temperature,rbuf[i].lati);
         HDfprintf(stderr,"%s %ld %f %f %d\n",
-		  wbuf[j].name,wbuf[j].longi,(double)wbuf[j].pressure,wbuf[j].temperature,wbuf[j].lati);
+        wbuf[j].name,wbuf[j].longi,(double)wbuf[j].pressure,wbuf[j].temperature,wbuf[j].lati);
         return -1;
     }
     return 0;
@@ -424,7 +422,7 @@ static int test_table(hid_t fid, int do_write)
         sizeof( rbuf[0].lati)
     };
 
-    const char *field_names4[NFIELDS+1] = 
+    const char *field_names4[NFIELDS+1] =
       { "F1", "F2", "F3", "F4", "F5", "F6"};
     hid_t       field_type4[NFIELDS+1];
     particle4_t fill_data[1] = { {9999999, -9999999, 999999, {999,999,999},{999,999,999}, {999,999}} };
@@ -458,7 +456,7 @@ static int test_table(hid_t fid, int do_write)
     */
     if (do_write)
     {
-        TESTING2("making table");
+        HL_TESTING2("making table");
 
         if (H5TBmake_table(TITLE,fid,"table1",FIELDS,RECORDS,type_size_mem,
             field_names,field_offset,field_type,
@@ -467,7 +465,7 @@ static int test_table(hid_t fid, int do_write)
         PASSED();
     }
 
-    TESTING2("reading table");
+    HL_TESTING2("reading table");
 
     /*-------------------------------------------------------------------------
     * read the table
@@ -497,7 +495,7 @@ static int test_table(hid_t fid, int do_write)
     */
     if (do_write)
     {
-        TESTING2("writing records");
+        HL_TESTING2("writing records");
 
         /* create an empty table */
         if (H5TBmake_table(TITLE,fid,"table2",FIELDS,RECORDS,type_size_mem,
@@ -540,7 +538,7 @@ static int test_table(hid_t fid, int do_write)
     *-------------------------------------------------------------------------
     */
 
-    TESTING2("reading records");
+    HL_TESTING2("reading records");
 
     /*-------------------------------------------------------------------------
     * read records, start at 0, read 8
@@ -584,7 +582,7 @@ static int test_table(hid_t fid, int do_write)
     */
     if (do_write)
     {
-        TESTING2("appending records");
+        HL_TESTING2("appending records");
 
         /*-------------------------------------------------------------------------
         * append 2 records
@@ -630,7 +628,7 @@ static int test_table(hid_t fid, int do_write)
     */
     if (do_write)
     {
-        TESTING2("inserting records");
+        HL_TESTING2("inserting records");
 
         /*-------------------------------------------------------------------------
         * insert 2 records
@@ -690,7 +688,7 @@ static int test_table(hid_t fid, int do_write)
     */
     if (do_write)
     {
-        TESTING2("deleting records");
+        HL_TESTING2("deleting records");
 
         /*-------------------------------------------------------------------------
         * Create a table
@@ -883,54 +881,54 @@ static int test_table(hid_t fid, int do_write)
     /*------------------------------------------------------------------------
      * Functions tested:
      *
-     * H5TBdelete_record -- With differing memory layout from machine memory 
+     * H5TBdelete_record -- With differing memory layout from machine memory
      *                      layout. HDFFV-8055
      *
      *-------------------------------------------------------------------------
      */
     if (do_write)
     {
-        TESTING2("deleting records (differing memory layout)");
+        HL_TESTING2("deleting records (differing memory layout)");
 
-	dims = 3;
-	arry3_32f = H5Tarray_create2(H5T_NATIVE_FLOAT,  1, &dims); 
+    dims = 3;
+    arry3_32f = H5Tarray_create2(H5T_NATIVE_FLOAT,  1, &dims);
 
-	dims = 2;
-	arry2_32f = H5Tarray_create2(H5T_NATIVE_FLOAT,  1, &dims); 
+    dims = 2;
+    arry2_32f = H5Tarray_create2(H5T_NATIVE_FLOAT,  1, &dims);
 
-	/* Initialize the field field_type */
-	field_type4[0] = H5T_NATIVE_UINT32;
-	field_type4[1] = H5T_NATIVE_DOUBLE;
-	field_type4[2] = H5T_NATIVE_DOUBLE;
-	field_type4[3] = arry3_32f;
-	field_type4[4] = arry3_32f;
-	field_type4[5] = arry2_32f;
+    /* Initialize the field field_type */
+    field_type4[0] = H5T_NATIVE_UINT32;
+    field_type4[1] = H5T_NATIVE_DOUBLE;
+    field_type4[2] = H5T_NATIVE_DOUBLE;
+    field_type4[3] = arry3_32f;
+    field_type4[4] = arry3_32f;
+    field_type4[5] = arry2_32f;
 
-	/* Make the table */
-	if (H5TBmake_table("Table Title",fid,"table",NFIELDS+1,(hsize_t)NRECORDS,
+    /* Make the table */
+    if (H5TBmake_table("Table Title",fid,"table",NFIELDS+1,(hsize_t)NRECORDS,
                           tbl_size, field_names4, tbl_offset, field_type4,
                           chunk_size, fill_data, compress, p_data)<0)
-	  goto out;
-	/* Delete records */
-	start    = 3;
-	nrecords = 3;
-	if (H5TBdelete_record(fid, "table", start, nrecords)<0)
-	  goto out;;
-	/* Get table info */
-	if (H5TBget_table_info(fid,"table", &nfields_out, &nrecords_out)<0)
-	  goto out;
-	/* check */
-	if( (int)nfields_out != (int)NFIELDS+1)
-	  goto out;
-      
-	if( (int)nrecords_out != (int)NRECORDS-3)
-	  goto out;
-    
-	/* close type */
-	H5Tclose(arry3_32f);
-	H5Tclose(arry2_32f);
+    goto out;
+    /* Delete records */
+    start    = 3;
+    nrecords = 3;
+    if (H5TBdelete_record(fid, "table", start, nrecords)<0)
+    goto out;;
+    /* Get table info */
+    if (H5TBget_table_info(fid,"table", &nfields_out, &nrecords_out)<0)
+    goto out;
+    /* check */
+    if( (int)nfields_out != (int)NFIELDS+1)
+    goto out;
 
-	PASSED();
+    if( (int)nrecords_out != (int)NRECORDS-3)
+    goto out;
+
+    /* close type */
+    H5Tclose(arry3_32f);
+    H5Tclose(arry2_32f);
+
+    PASSED();
     }
 
     /*-------------------------------------------------------------------------
@@ -945,7 +943,7 @@ static int test_table(hid_t fid, int do_write)
 
     if (do_write)
     {
-        TESTING2("adding records");
+        HL_TESTING2("adding records");
 
         /* create 2 tables */
         if (H5TBmake_table(TITLE,fid,"table4",FIELDS,RECORDS,type_size_mem,
@@ -1005,7 +1003,7 @@ static int test_table(hid_t fid, int do_write)
 
     if (do_write)
     {
-        TESTING2("combining tables");
+        HL_TESTING2("combining tables");
 
         /* create 2 tables */
         if (H5TBmake_table(TITLE,fid,"table6",FIELDS,RECORDS,type_size_mem,
@@ -1100,7 +1098,7 @@ static int test_table(hid_t fid, int do_write)
     */
     if (do_write)
     {
-        TESTING2("writing fields by name");
+        HL_TESTING2("writing fields by name");
 
         /* make an empty table with fill values */
         if (H5TBmake_table(TITLE,fid,"table9",FIELDS,RECORDS,type_size_mem,
@@ -1138,10 +1136,10 @@ static int test_table(hid_t fid, int do_write)
                 {
                     if ( rbuf[i].lati       != position_in[i-NRECORDS_ADD+1].lati ||
                         rbuf[i].longi       != position_in[i-NRECORDS_ADD+1].longi ||
-			!H5_FLT_ABS_EQUAL(rbuf[i].pressure,pressure_in[i-NRECORDS_ADD+1]) )
+            !H5_FLT_ABS_EQUAL(rbuf[i].pressure,pressure_in[i-NRECORDS_ADD+1]) )
                     {
                         HDfprintf(stderr,"%ld %f %d\n",
-				  rbuf[i].longi,(double)rbuf[i].pressure,rbuf[i].lati);
+                rbuf[i].longi,(double)rbuf[i].pressure,rbuf[i].lati);
                         HDfprintf(stderr,"%ld %f %d\n",
                             position_in[i].longi,(double)pressure_in[i],position_in[i].lati);
                         goto out;
@@ -1163,7 +1161,7 @@ static int test_table(hid_t fid, int do_write)
     *
     *-------------------------------------------------------------------------
     */
-    TESTING2("reading fields by name");
+    HL_TESTING2("reading fields by name");
 
     /*-------------------------------------------------------------------------
     * write and read the "Pressure" field
@@ -1191,7 +1189,7 @@ static int test_table(hid_t fid, int do_write)
     if ( H5TBread_fields_name(fid,"table10","DoesNotExist",start,nrecords,
         sizeof(float),0,field_sizes_pre,pressure_out) >=0)
       goto out;
-    
+
     /* read the "Pressure" field */
     if ( H5TBread_fields_name(fid,"table10","Pressure",start,nrecords,
         sizeof(float),0,field_sizes_pre,pressure_out)<0)
@@ -1263,7 +1261,7 @@ static int test_table(hid_t fid, int do_write)
     for( i = 0; i < NRECORDS; i++ )
     {
         if ( ( HDstrcmp( namepre_out[i].name,  namepre_in[i].name ) != 0 ) ||
-	     !H5_FLT_ABS_EQUAL(namepre_out[i].pressure,namepre_in[i].pressure) ) {
+        !H5_FLT_ABS_EQUAL(namepre_out[i].pressure,namepre_in[i].pressure) ) {
                 goto out;
         }
     }
@@ -1292,7 +1290,7 @@ static int test_table(hid_t fid, int do_write)
     {
         hsize_t iistart = start;
         if ( ( HDstrcmp( namepre_out[i].name,  namepre_in[iistart+i].name ) != 0 ) ||
-	     !H5_FLT_ABS_EQUAL(namepre_out[i].pressure, namepre_in[iistart+i].pressure) ) {
+        !H5_FLT_ABS_EQUAL(namepre_out[i].pressure, namepre_in[iistart+i].pressure) ) {
                 goto out;
         }
     }
@@ -1311,7 +1309,7 @@ static int test_table(hid_t fid, int do_write)
     */
     if (do_write)
     {
-        TESTING2("writing fields by index");
+        HL_TESTING2("writing fields by index");
 
         /* make an empty table */
         if (H5TBmake_table(TITLE,fid,"table11",FIELDS,RECORDS,type_size_mem,
@@ -1351,7 +1349,7 @@ static int test_table(hid_t fid, int do_write)
             {
                 if ( rbuf[i].lati        != position_in[i-NRECORDS_ADD+1].lati ||
                     rbuf[i].longi       != position_in[i-NRECORDS_ADD+1].longi ||
-		    !H5_FLT_ABS_EQUAL(rbuf[i].pressure,pressure_in[i-NRECORDS_ADD+1]) )
+            !H5_FLT_ABS_EQUAL(rbuf[i].pressure,pressure_in[i-NRECORDS_ADD+1]) )
                     goto out;
             }
         }
@@ -1369,7 +1367,7 @@ static int test_table(hid_t fid, int do_write)
     *-------------------------------------------------------------------------
     */
 
-    TESTING2("reading fields by index");
+    HL_TESTING2("reading fields by index");
 
     if (do_write)
     {
@@ -1470,8 +1468,8 @@ static int test_table(hid_t fid, int do_write)
     for( i = 0; i < NRECORDS; i++ )
     {
       if ( ( HDstrcmp( namepre_out[i].name,  namepre_in[i].name ) != 0 ) ||
-	   !H5_FLT_ABS_EQUAL(namepre_out[i].pressure,namepre_in[i].pressure) ) {
-	goto out;
+    !H5_FLT_ABS_EQUAL(namepre_out[i].pressure,namepre_in[i].pressure) ) {
+    goto out;
       }
     }
 
@@ -1501,7 +1499,7 @@ static int test_table(hid_t fid, int do_write)
     {
         int iistart = (int) start;
         if ( ( HDstrcmp( namepre_out[i].name,  wbuf[iistart+(int)i].name ) != 0 ) ||
-	     !H5_FLT_ABS_EQUAL(namepre_out[i].pressure, wbuf[iistart+(int)i].pressure) ) {
+        !H5_FLT_ABS_EQUAL(namepre_out[i].pressure, wbuf[iistart+(int)i].pressure) ) {
                 goto out;
         }
     }
@@ -1520,7 +1518,7 @@ static int test_table(hid_t fid, int do_write)
 
     if (do_write)
     {
-        TESTING2("inserting fields");
+        HL_TESTING2("inserting fields");
 
         /* make a table */
         if (H5TBmake_table(TITLE,fid,"table13",FIELDS,RECORDS,type_size_mem,
@@ -1544,8 +1542,8 @@ static int test_table(hid_t fid, int do_write)
             if ( ( HDstrcmp( rbuf2[i].name,  wbuf[i].name ) != 0 ) ||
                 rbuf2[i].lati          != wbuf[i].lati ||
                 rbuf2[i].longi         != wbuf[i].longi ||
-		!H5_FLT_ABS_EQUAL(rbuf2[i].pressure,wbuf[i].pressure) ||
-		!H5_DBL_ABS_EQUAL(rbuf2[i].temperature,wbuf[i].temperature) ||
+        !H5_FLT_ABS_EQUAL(rbuf2[i].pressure,wbuf[i].pressure) ||
+        !H5_DBL_ABS_EQUAL(rbuf2[i].temperature,wbuf[i].temperature) ||
                 rbuf2[i].new_field     != buf_new[i] ) {
                     goto out;
             }
@@ -1563,7 +1561,7 @@ static int test_table(hid_t fid, int do_write)
     */
     if (do_write)
     {
-        TESTING2("deleting fields");
+        HL_TESTING2("deleting fields");
 
         /* make a table */
         if (H5TBmake_table(TITLE,fid,"table14",FIELDS,RECORDS,type_size_mem,
@@ -1585,7 +1583,7 @@ static int test_table(hid_t fid, int do_write)
             if ( ( HDstrcmp( rbuf3[i].name, wbuf[i].name ) != 0 ) ||
                 rbuf3[i].lati != wbuf[i].lati ||
                 rbuf3[i].longi != wbuf[i].longi ||
-		!H5_DBL_ABS_EQUAL(rbuf3[i].temperature,wbuf[i].temperature) ) {
+        !H5_DBL_ABS_EQUAL(rbuf3[i].temperature,wbuf[i].temperature) ) {
                     goto out;
             }
         }
@@ -1603,7 +1601,7 @@ static int test_table(hid_t fid, int do_write)
     *-------------------------------------------------------------------------
     */
 
-    TESTING2("getting table info");
+    HL_TESTING2("getting table info");
 
     /* get table info  */
     if ( H5TBget_table_info (fid, "table1", &rfields, &rrecords ) < 0 )
@@ -1624,7 +1622,7 @@ static int test_table(hid_t fid, int do_write)
     *-------------------------------------------------------------------------
     */
 
-    TESTING2("getting field info");
+    HL_TESTING2("getting field info");
 
     /* alocate */
     names_out = (char**) HDmalloc( sizeof(char*) * (size_t)NFIELDS );

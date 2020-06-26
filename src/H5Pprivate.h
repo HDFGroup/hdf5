@@ -17,6 +17,9 @@
 #ifndef _H5Pprivate_H
 #define _H5Pprivate_H
 
+/* Early typedefs to avoid circular dependencies */
+typedef struct H5P_genplist_t H5P_genplist_t;
+
 /* Include package's public header */
 #include "H5Ppublic.h"
 
@@ -52,12 +55,7 @@ typedef enum H5P_coll_md_read_flag_t {
     H5P_USER_TRUE               = 1
 } H5P_coll_md_read_flag_t;
 
-/* Forward declarations (for prototypes & type definitions) */
-struct H5O_fill_t;
-struct H5T_t;
-
 /* Forward declarations for anonymous H5P objects */
-typedef struct H5P_genplist_t H5P_genplist_t;
 typedef struct H5P_genclass_t H5P_genclass_t;
 
 typedef enum H5P_plist_type_t {
@@ -80,6 +78,10 @@ typedef enum H5P_plist_type_t {
     H5P_TYPE_LINK_CREATE       = 16,
     H5P_TYPE_LINK_ACCESS       = 17,
     H5P_TYPE_ATTRIBUTE_ACCESS  = 18,
+    H5P_TYPE_VOL_INITIALIZE    = 19,
+    H5P_TYPE_MAP_CREATE        = 20,
+    H5P_TYPE_MAP_ACCESS        = 21,
+    H5P_TYPE_REFERENCE_ACCESS  = 22,
     H5P_TYPE_MAX_TYPE
 } H5P_plist_type_t;
 
@@ -126,6 +128,8 @@ H5_DLLVAR H5P_genclass_t *H5P_CLS_GROUP_CREATE_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_GROUP_ACCESS_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_DATATYPE_CREATE_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_DATATYPE_ACCESS_g;
+H5_DLLVAR H5P_genclass_t *H5P_CLS_MAP_CREATE_g;
+H5_DLLVAR H5P_genclass_t *H5P_CLS_MAP_ACCESS_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_ATTRIBUTE_CREATE_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_ATTRIBUTE_ACCESS_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_OBJECT_COPY_g;
@@ -134,16 +138,24 @@ H5_DLLVAR H5P_genclass_t *H5P_CLS_LINK_ACCESS_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_STRING_CREATE_g;
 
 /* Internal property list classes */
+H5_DLLVAR const struct H5P_libclass_t H5P_CLS_LCRT[1];  /* Link creation */
 H5_DLLVAR const struct H5P_libclass_t H5P_CLS_LACC[1];  /* Link access */
 H5_DLLVAR const struct H5P_libclass_t H5P_CLS_AACC[1];  /* Attribute access */
 H5_DLLVAR const struct H5P_libclass_t H5P_CLS_DACC[1];  /* Dataset access */
 H5_DLLVAR const struct H5P_libclass_t H5P_CLS_GACC[1];  /* Group access */
 H5_DLLVAR const struct H5P_libclass_t H5P_CLS_TACC[1];  /* Named datatype access */
+H5_DLLVAR const struct H5P_libclass_t H5P_CLS_MACC[1];  /* Map access */
 H5_DLLVAR const struct H5P_libclass_t H5P_CLS_FACC[1];  /* File access */
+H5_DLLVAR const struct H5P_libclass_t H5P_CLS_OCPY[1];  /* Object copy */
 
 /******************************/
 /* Library Private Prototypes */
 /******************************/
+
+/* Forward declaration of structs used below */
+struct H5O_fill_t;
+struct H5T_t;
+struct H5VL_connector_prop_t;
 
 /* Package initialization routine */
 H5_DLL herr_t H5P_init(void);
@@ -173,6 +185,9 @@ H5_DLL hid_t H5P_peek_driver(H5P_genplist_t *plist);
 H5_DLL const void *H5P_peek_driver_info(H5P_genplist_t *plist);
 H5_DLL herr_t H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id,
             const void *new_driver_info);
+H5_DLL herr_t H5P_set_vol(H5P_genplist_t *plist, hid_t vol_id, const void *vol_info);
+H5_DLL herr_t H5P_reset_vol_class(const H5P_genclass_t *pclass,
+    const struct H5VL_connector_prop_t *vol_prop);
 H5_DLL herr_t H5P_set_vlen_mem_manager(H5P_genplist_t *plist,
         H5MM_allocate_t alloc_func, void *alloc_info, H5MM_free_t free_func,
         void *free_info);
@@ -186,8 +201,6 @@ H5_DLL herr_t H5P_get_filter_by_id(H5P_genplist_t *plist, H5Z_filter_t id,
     unsigned int *flags, size_t *cd_nelmts, unsigned cd_values[],
     size_t namelen, char name[], unsigned *filter_config);
 H5_DLL htri_t H5P_filter_in_pline(H5P_genplist_t *plist, H5Z_filter_t id);
-H5_DLL herr_t H5P_verify_apl_and_dxpl(hid_t *acspl_id, const H5P_libclass_t *libclass, 
-    hid_t *dxpl_id, hid_t loc_id, hbool_t is_collective);
 
 /* Query internal fields of the property list struct */
 H5_DLL hid_t H5P_get_plist_id(const H5P_genplist_t *plist);
@@ -201,7 +214,9 @@ H5_DLL H5P_genplist_t *H5P_object_verify(hid_t plist_id, hid_t pclass_id);
 H5_DLL herr_t H5P_fill_value_defined(H5P_genplist_t *plist,
     H5D_fill_value_t *status);
 H5_DLL herr_t H5P_get_fill_value(H5P_genplist_t *plist, const struct H5T_t *type,
-    void *value, hid_t dxpl_id);
+    void *value);
+H5_DLL int H5P_ignore_cmp(const void H5_ATTR_UNUSED *val1, const void H5_ATTR_UNUSED *val2,
+    size_t H5_ATTR_UNUSED size);
 
 #endif /* _H5Pprivate_H */
 

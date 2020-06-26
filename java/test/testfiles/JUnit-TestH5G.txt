@@ -1,0 +1,17 @@
+JUnit version 4.11
+.testH5Gget_info_by_name
+.testH5Gget_create_plist
+.testH5Gopen
+.testH5Gget_obj_info_all_gid2
+.testH5Gget_obj_info_all_byIndexType
+.testH5Gget_obj_info_max_limit
+.testH5Gget_obj_info_all
+.testH5Gget_obj_info_max
+.testH5Gget_obj_info_all_gid
+.testH5Gget_info_by_idx
+.testH5Gget_info
+
+Time:  XXXX
+
+OK (11 tests)
+

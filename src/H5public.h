@@ -39,6 +39,7 @@
 #endif
 #ifdef H5_STDC_HEADERS
 #   include <limits.h>		/*for H5T_NATIVE_CHAR defn in H5Tpublic.h    */
+#   include <stdarg.h>      /*for variadic functions in H5VLpublic.h     */
 #endif
 #ifndef __cplusplus
 # ifdef H5_HAVE_STDINT_H
@@ -50,12 +51,53 @@
 # endif
 #endif
 #ifdef H5_HAVE_INTTYPES_H
-#   include <inttypes.h>        /* For uint64_t on some platforms            */
+#   include <inttypes.h>        /* C99/POSIX.1 header for uint64_t, PRIu64 */
+#else /* H5_HAVE_INTTYPES_H */
+/* The following definitions should be suitable for 64-bit Windows, which is
+ * LLP64, and for 32-bit Windows, which is ILP32.  Those are the only
+ * platforms where <inttypes.h> is likely to be missing.  VS2015 and later
+ * *may* provide these definitions.
+ */
+#ifdef _WIN64
+#       define PRIdPTR "lld"
+#       define PRIoPTR "llo"
+#       define PRIuPTR "llu"
+#       define PRIxPTR "llx"
+#else /* _WIN64 */
+#       define PRIdPTR "ld"
+#       define PRIoPTR "lo"
+#       define PRIuPTR "lu"
+#       define PRIxPTR "lx"
+#endif /* _WIN64 */
+
+#   define PRId8 "d"
+#   define PRIo8 "o"
+#   define PRIu8 "u"
+#   define PRIx8 "x"
+#   define PRId16 "d"
+#   define PRIo16 "o"
+#   define PRIu16 "u"
+#   define PRIx16 "x"
+#   define PRId32 "d"
+#   define PRIo32 "o"
+#   define PRIu32 "u"
+#   define PRIx32 "x"
+#   define PRId64 "lld"
+#   define PRIo64 "llo"
+#   define PRIu64 "llu"
+#   define PRIx64 "llx"
+#   define PRIdMAX "lld"
+#   define PRIoMAX "llo"
+#   define PRIuMAX "llu"
+#   define PRIxMAX "llx"
 #endif
 #ifdef H5_HAVE_STDDEF_H
 #   include <stddef.h>
 #endif
 #ifdef H5_HAVE_PARALLEL
+/* Don't link against MPI C++ bindings */
+#   define MPICH_SKIP_MPICXX 1
+#   define OMPI_SKIP_MPICXX 1
 #   include <mpi.h>
 #ifndef MPI_FILE_NULL		/*MPIO may be defined in mpi.h already       */
 #   include <mpio.h>
@@ -91,11 +133,11 @@ extern "C" {
 
 /* Version numbers */
 #define H5_VERS_MAJOR	1	/* For major interface/format changes  	     */
-#define H5_VERS_MINOR	11	/* For minor interface/format changes  	     */
+#define H5_VERS_MINOR	13	/* For minor interface/format changes  	     */
 #define H5_VERS_RELEASE	0	/* For tweaks, bug-fixes, or development     */
 #define H5_VERS_SUBRELEASE ""	/* For pre-releases like snap0       */
 				/* Empty string for real releases.           */
-#define H5_VERS_INFO    "HDF5 library version: 1.11.0"      /* Full version string */
+#define H5_VERS_INFO    "HDF5 library version: 1.13.0"      /* Full version string */
 
 #define H5check()	H5check_version(H5_VERS_MAJOR,H5_VERS_MINOR,	      \
 				        H5_VERS_RELEASE)
@@ -114,7 +156,7 @@ extern "C" {
 /*
  * Status return values.  Failed integer functions in HDF5 result almost
  * always in a negative value (unsigned failing functions sometimes return
- * zero for failure) while successfull return is non-negative (often zero).
+ * zero for failure) while successful return is non-negative (often zero).
  * The negative failure value is most commonly -1, but don't bet on it.  The
  * proper way to detect failure is something like:
  *
@@ -297,7 +339,7 @@ typedef enum {
 } H5_iter_order_t;
 
 /* Iteration callback values */
-/* (Actually, any postive value will cause the iterator to stop and pass back
+/* (Actually, any positive value will cause the iterator to stop and pass back
  *      that positive value to the function that called the iterator)
  */
 #define H5_ITER_ERROR   (-1)
@@ -324,6 +366,31 @@ typedef struct H5_ih_info_t {
     hsize_t     heap_size;
 } H5_ih_info_t;
 
+/* Tokens are unique and permanent identifiers that are
+ * used to reference HDF5 objects in a container. */
+
+/* The maximum size allowed for tokens */
+#define H5O_MAX_TOKEN_SIZE      (16)    /* Allows for 128-bit tokens */
+
+/* Type for object tokens */
+/* (Hoisted here, since it's used by both the H5Lpublic.h and H5Opublic.h headers) */
+typedef struct H5O_token_t {
+    uint8_t __data[H5O_MAX_TOKEN_SIZE];
+} H5O_token_t;
+
+/*
+ * Allocation statistics info struct
+ */
+typedef struct H5_alloc_stats_t {
+    unsigned long long total_alloc_bytes; /* Running count of total # of bytes allocated */
+    size_t curr_alloc_bytes;           /* Current # of bytes allocated */
+    size_t peak_alloc_bytes;           /* Peak # of bytes allocated */
+    size_t max_block_size;             /* Largest block allocated */
+    size_t total_alloc_blocks_count;   /* Running count of total # of blocks allocated */
+    size_t curr_alloc_blocks_count;    /* Current # of blocks allocated */
+    size_t peak_alloc_blocks_count;    /* Peak # of blocks allocated */
+} H5_alloc_stats_t;
+
 /* Functions in H5.c */
 H5_DLL herr_t H5open(void);
 H5_DLL herr_t H5close(void);
@@ -332,6 +399,9 @@ H5_DLL herr_t H5garbage_collect(void);
 H5_DLL herr_t H5set_free_list_limits (int reg_global_lim, int reg_list_lim,
                 int arr_global_lim, int arr_list_lim, int blk_global_lim,
                 int blk_list_lim);
+H5_DLL herr_t H5get_free_list_sizes(size_t *reg_size, size_t *arr_size,
+    size_t *blk_size, size_t *fac_size);
+H5_DLL herr_t H5get_alloc_stats(H5_alloc_stats_t *stats);
 H5_DLL herr_t H5get_libversion(unsigned *majnum, unsigned *minnum,
 				unsigned *relnum);
 H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum,
@@ -345,5 +415,5 @@ H5_DLL void *H5resize_memory(void *mem, size_t size);
 }
 #endif
 #endif /* _H5public_H */
- 
+
 

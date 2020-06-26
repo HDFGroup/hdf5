@@ -23,19 +23,8 @@
  * Temporary files generated:
  *   ttsafe_dcreate.h5
  *
- * HDF5 APIs exercised in thread:
- * H5Screate_simple, H5Tcopy, H5Tset_order, H5Dcreate2, H5Dwrite, H5Dclose,
- * H5Tclose, H5Sclose.
- *
  * Created: Apr 28 2000
  * Programmer: Chee Wai LEE
- *
- * Modification History
- * --------------------
- *
- *	19 May 2000, Bill Wendling
- *	Changed so that it creates its own HDF5 file and removes it at cleanup
- *	time.
  *
  ********************************************************************/
 #include "ttsafe.h"
@@ -83,16 +72,18 @@ thread_info thread_out[NUM_THREAD];
  * Thread safe test - multiple dataset creation
  **********************************************************************
  */
-void tts_dcreate(void)
+void
+tts_dcreate(void)
 {
     /* thread definitions */
     H5TS_thread_t threads[NUM_THREAD];
 
     /* HDF5 data definitions */
-    hid_t file, dataset;
+    hid_t   file        = H5I_INVALID_HID;
+    hid_t   dataset     = H5I_INVALID_HID;
     int datavalue, i;
     H5TS_attr_t attribute;
-    int ret;
+    herr_t status;
 
     /* set pthread attribute to perform global scheduling */
     H5TS_attr_init(&attribute);
@@ -107,7 +98,7 @@ void tts_dcreate(void)
      * creation plist and default file access plist
      */
     file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    assert(file >= 0);
+    CHECK(file, H5I_INVALID_HID, "H5Fcreate");
 
     /* simultaneously create a large number of datasets within the file */
     for(i = 0; i < NUM_THREAD; i++) {
@@ -115,11 +106,10 @@ void tts_dcreate(void)
         thread_out[i].file = file;
         thread_out[i].dsetname = dsetname[i];
         threads[i] = H5TS_create_thread(tts_dcreate_creator, NULL, &thread_out[i]);
-    } /* end for */
+    }
 
-    for(i = 0;i < NUM_THREAD; i++) {
+    for(i = 0;i < NUM_THREAD; i++)
         H5TS_wait_for_thread(threads[i]);
-    } /* end for */
 
     /* compare data to see if it is written correctly */
 
@@ -129,36 +119,38 @@ void tts_dcreate(void)
             H5Fclose(file);
             return;
         } else {
-            ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &datavalue);
-            assert(ret >= 0);
+            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &datavalue);
+            CHECK(status, FAIL, "H5Dread");
 
             if(datavalue != i) {
                 TestErrPrintf("Wrong value read %d for dataset name %s - test failed\n",
                             datavalue, dsetname[i]);
-                ret = H5Dclose(dataset);
-                assert(ret >= 0);
-                ret = H5Fclose(file);
-                assert(ret >= 0);
+                status = H5Dclose(dataset);
+                CHECK(status, FAIL, "H5Dclose");
+                status = H5Fclose(file);
+                CHECK(status, FAIL, "H5Fclose");
                 return;
             }
 
-            ret = H5Dclose(dataset);
-            assert(ret >= 0);
+            status= H5Dclose(dataset);
+            CHECK(status, FAIL, "H5Dclose");
         }
     }
 
     /* close remaining resources */
-    ret = H5Fclose(file);
-    assert(ret >= 0);
+    status = H5Fclose(file);
+    CHECK(status, FAIL, "H5Fclose");
 
     /* Destroy the thread attribute */
     H5TS_attr_destroy(&attribute);
-}
+} /* end tts_dcreate() */
 
-void *tts_dcreate_creator(void *_thread_data)
+void *
+tts_dcreate_creator(void *_thread_data)
 {
-    hid_t   dataspace, dataset;
-    herr_t  ret;
+    hid_t   dataspace   = H5I_INVALID_HID;
+    hid_t   dataset     = H5I_INVALID_HID;
+    herr_t  status;
     hsize_t dimsf[1]; /* dataset dimensions */
     struct thread_info thread_data;
 
@@ -167,28 +159,29 @@ void *tts_dcreate_creator(void *_thread_data)
     /* define dataspace for dataset */
     dimsf[0] = 1;
     dataspace = H5Screate_simple(1, dimsf, NULL);
-    assert(dataspace >= 0);
+    CHECK(dataspace, H5I_INVALID_HID, "H5Screate_simple");
 
     /* create a new dataset within the file */
     dataset = H5Dcreate2(thread_data.file, thread_data.dsetname,
                         H5T_NATIVE_INT, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    assert(dataset >= 0);
+    CHECK(dataset, H5I_INVALID_HID, "H5Dcreate2");
 
     /* initialize data for dataset and write value to dataset */
-    ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+    status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
              H5P_DEFAULT, &thread_data.id);
-    assert(ret >= 0);
+    CHECK(status, FAIL, "H5Dwrite");
 
     /* close dataset and dataspace resources */
-    ret = H5Dclose(dataset);
-    assert(ret >= 0);
-    ret = H5Sclose(dataspace);
-    assert(ret >= 0);
+    status = H5Dclose(dataset);
+    CHECK(status, FAIL, "H5Dclose");
+    status = H5Sclose(dataspace);
+    CHECK(status, FAIL, "H5Sclose");
 
     return NULL;
-}
+} /* end tts_dcreate_creator() */
 
-void cleanup_dcreate(void)
+void
+cleanup_dcreate(void)
 {
     HDunlink(FILENAME);
 }

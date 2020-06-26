@@ -53,7 +53,6 @@
 #   include <limits.h>
 #   include <math.h>
 #   include <signal.h>
-#   include <stdarg.h>
 #   include <stdio.h>
 #   include <stdlib.h>
 #   include <string.h>
@@ -117,7 +116,7 @@
 #endif
 
 /*
- * flock() in sys/file.h is used for the implemention of file locking.
+ * flock() in sys/file.h is used for the implementation of file locking.
  */
 #if defined(H5_HAVE_FLOCK) && defined(H5_HAVE_SYS_FILE_H)
 #   include <sys/file.h>
@@ -133,7 +132,7 @@
 
 /*
  * Unix ioctls.   These are used by h5ls (and perhaps others) to determine a
- * resonable output width.
+ * reasonable output width.
  */
 #ifdef H5_HAVE_SYS_IOCTL_H
 #   include <sys/ioctl.h>
@@ -169,6 +168,9 @@
  * Since the removal of the Windows VFD, this is sec2 for all platforms.
  */
 #define H5_DEFAULT_VFD      H5FD_SEC2
+
+/* Define the default VOL driver */
+#define H5_DEFAULT_VOL      H5VL_NATIVE
 
 #ifdef H5_HAVE_WIN32_API
 /* The following two defines must be before any windows headers are included */
@@ -302,26 +304,81 @@
  * file). Be sure to update that file if the #ifdefs change here.
  */
 #ifdef __cplusplus
-#   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
-#   define H5_ATTR_UNUSED       /*void*/
-#   define H5_ATTR_NORETURN     /*void*/
-#   define H5_ATTR_CONST        /*void*/
-#   define H5_ATTR_PURE         /*void*/
+#   define H5_ATTR_FORMAT(X,Y,Z)                /*void*/
+#   define H5_ATTR_UNUSED                       /*void*/
+#   define H5_ATTR_DEPRECATED_USED              /*void*/
+#   define H5_ATTR_NDEBUG_UNUSED                /*void*/
+#   define H5_ATTR_DEBUG_API_USED               /*void*/
+#   define H5_ATTR_PARALLEL_UNUSED              /*void*/
+#   define H5_ATTR_PARALLEL_USED                /*void*/
+#   define H5_ATTR_NORETURN                     /*void*/
+#   define H5_ATTR_CONST                        /*void*/
+#   define H5_ATTR_PURE                         /*void*/
+#   define H5_ATTR_FALLTHROUGH                  /*void*/
 #else /* __cplusplus */
 #if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
 #   define H5_ATTR_FORMAT(X,Y,Z)  __attribute__((format(X, Y, Z)))
 #   define H5_ATTR_UNUSED       __attribute__((unused))
+#ifdef H5_HAVE_PARALLEL
+#   define H5_ATTR_PARALLEL_UNUSED       __attribute__((unused))
+#   define H5_ATTR_PARALLEL_USED         /*void*/
+#else
+#   define H5_ATTR_PARALLEL_UNUSED       /*void*/
+#   define H5_ATTR_PARALLEL_USED         __attribute__((unused))
+#endif
+#ifdef H5_NO_DEPRECATED_SYMBOLS
+#define H5_ATTR_DEPRECATED_USED    H5_ATTR_UNUSED
+#else /* H5_NO_DEPRECATED_SYMBOLS */
+#define H5_ATTR_DEPRECATED_USED    /*void*/
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+#ifdef H5_DEBUG_API
+#define H5_ATTR_DEBUG_API_USED    /*void*/
+#else /* H5_DEBUG_API */
+#define H5_ATTR_DEBUG_API_USED    H5_ATTR_UNUSED
+#endif /* H5_DEBUG_API */
+#ifndef NDEBUG
+#define H5_ATTR_NDEBUG_UNUSED     /*void*/
+#else /* NDEBUG */
+#define H5_ATTR_NDEBUG_UNUSED     H5_ATTR_UNUSED
+#endif /* NDEBUG */
 #   define H5_ATTR_NORETURN     __attribute__((noreturn))
 #   define H5_ATTR_CONST        __attribute__((const))
 #   define H5_ATTR_PURE         __attribute__((pure))
+#if defined(__GNUC__) && __GNUC__ >= 7 && !defined(__INTEL_COMPILER)
+#   define H5_ATTR_FALLTHROUGH  __attribute__((fallthrough));
 #else
-#   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
-#   define H5_ATTR_UNUSED       /*void*/
-#   define H5_ATTR_NORETURN     /*void*/
-#   define H5_ATTR_CONST        /*void*/
-#   define H5_ATTR_PURE         /*void*/
+#   define H5_ATTR_FALLTHROUGH  /*void*/
+#endif
+#else
+#   define H5_ATTR_FORMAT(X,Y,Z)    /*void*/
+#   define H5_ATTR_UNUSED           /*void*/
+#   define H5_ATTR_NDEBUG_UNUSED    /*void*/
+#   define H5_ATTR_DEBUG_API_USED   /*void*/
+#   define H5_ATTR_DEPRECATED_USED  /*void*/
+#   define H5_ATTR_PARALLEL_UNUSED  /*void*/
+#   define H5_ATTR_PARALLEL_USED    /*void*/
+#   define H5_ATTR_NORETURN         /*void*/
+#   define H5_ATTR_CONST            /*void*/
+#   define H5_ATTR_PURE             /*void*/
+#   define H5_ATTR_FALLTHROUGH      /*void*/
 #endif
 #endif /* __cplusplus */
+
+/*
+ * Networking headers used by the mirror VFD and related tests and utilities.
+ */
+#ifdef H5_HAVE_ARPA_INET_H
+#   include <arpa/inet.h>
+#endif
+#ifdef H5_HAVE_NETDB_H
+#   include <netdb.h>
+#endif
+#ifdef H5_HAVE_NETINET_IN_H
+#   include <netinet/in.h>
+#endif
+#ifdef H5_HAVE_SYS_SOCKET_H
+#   include <sys/socket.h>
+#endif
 
 /*
  * Status return values for the `herr_t' type.
@@ -335,6 +392,14 @@
 #define SUCCEED    0
 #define FAIL    (-1)
 #define UFAIL    (unsigned)(-1)
+
+/* The HDF5 library uses the symbol `ERR` frequently.  So do
+ * header files for libraries such as curses(3), terminfo(3), etc.
+ * Remove its definition here to avoid clashes with HDF5.
+ */
+#ifdef ERR
+#undef ERR
+#endif
 
 /* number of members in an array */
 #ifndef NELMTS
@@ -504,34 +569,10 @@
 #   define H5_POSIX_CREATE_MODE_RW      0666
 #endif
 
-/*
- * A macro to portably increment enumerated types.
+/* Represents an empty asynchronous request handle.
+ * Used in the VOL code.
  */
-#ifndef H5_INC_ENUM
-#  define H5_INC_ENUM(TYPE,VAR) (VAR)=((TYPE)((VAR)+1))
-#endif
-
-/*
- * A macro to portably decrement enumerated types.
- */
-#ifndef H5_DEC_ENUM
-#  define H5_DEC_ENUM(TYPE,VAR) (VAR)=((TYPE)((VAR)-1))
-#endif
-
-/* Double constant wrapper
- *
- * Quiets gcc warnings from -Wunsuffixed-float-constants.
- *
- * This is a really annoying warning since the standard specifies that
- * constants of type double do NOT get a suffix so there's no way
- * to specify a constant of type double. To quiet gcc, we specify floating
- * point constants as type long double and cast to double.
- *
- * Note that this macro only needs to be used where using a double
- * is important. For most code, suffixing constants with F will quiet the
- * compiler and not produce erroneous code.
- */
-#define H5_DOUBLE(S) ((double) S ## L)
+#define H5_REQUEST_NULL                 NULL
 
 /*
  * Methods to compare the equality of floating-point values:
@@ -637,6 +678,9 @@ typedef struct {
 #ifndef HDabs
     #define HDabs(X)    abs(X)
 #endif /* HDabs */
+#ifndef HDaccept
+    #define HDaccept(A,B,C)    accept((A),(B),(C)) /* mirror VFD */
+#endif /* HDaccept */
 #ifndef HDaccess
     #define HDaccess(F,M)    access(F, M)
 #endif /* HDaccess */
@@ -683,6 +727,9 @@ typedef struct {
 #ifndef HDatoll
     #define HDatoll(S)   atoll(S)
 #endif /* HDatol */
+#ifndef HDbind
+    #define HDbind(A,B,C)   bind((A),(B),(C)) /* mirror VFD */
+#endif /* HDbind */
 #ifndef HDbsearch
     #define HDbsearch(K,B,N,Z,F)  bsearch(K,B,N,Z,F)
 #endif /* HDbsearch */
@@ -728,6 +775,9 @@ typedef struct {
 #ifndef HDclosedir
     #define HDclosedir(D)    closedir(D)
 #endif /* HDclosedir */
+#ifndef HDconnect
+    #define HDconnect(A,B,C)    connect((A),(B),(C)) /* mirror VFD */
+#endif /* HDconnect */
 #ifndef HDcos
     #define HDcos(X)    cos(X)
 #endif /* HDcos */
@@ -972,9 +1022,12 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDgetgroups
     #define HDgetgroups(Z,G)  getgroups(Z,G)
 #endif /* HDgetgroups */
+#ifndef HDgethostbyaddr
+    #define HDgethostbyaddr(A,B,C)  gethostbyaddr((A),(B),(C)) /* mirror VFD */
+#endif /* HDgethostbyaddr */
 #ifndef HDgethostname
     #define HDgethostname(N,L)    gethostname(N,L)
-#endif /* HDgetlogin */
+#endif /* HDgethostname */
 #ifndef HDgetlogin
     #define HDgetlogin()    getlogin()
 #endif /* HDgetlogin */
@@ -996,9 +1049,12 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDgetrusage
     #define HDgetrusage(X,S)  getrusage(X,S)
 #endif /* HDgetrusage */
-#ifndef HDgets
-    #define HDgets(S)    gets(S)
+
+/* Don't define HDgets - gets() was deprecated in C99 and removed in C11 */
+#ifdef HDgets
+    #undef HDgets
 #endif /* HDgets */
+
 #ifndef HDgettimeofday
     #define HDgettimeofday(S,P)  gettimeofday(S,P)
 #endif /* HDgettimeofday */
@@ -1008,6 +1064,18 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDgmtime
     #define HDgmtime(T)    gmtime(T)
 #endif /* HDgmtime */
+#ifndef HDhtonl
+    #define HDhtonl(X)    htonl((X)) /* mirror VFD */
+#endif /* HDhtonl */
+#ifndef HDhtons
+    #define HDhtons(X)    htons((X)) /* mirror VFD */
+#endif /* HDhtons */
+#ifndef HDinet_addr
+    #define HDinet_addr(C)    inet_addr((C)) /* mirror VFD */
+#endif /* HDinet_addr */
+#ifndef HDinet_ntoa
+    #define HDinet_ntoa(C)    inet_ntoa((C)) /* mirror VFD */
+#endif /* HDinet_ntoa */
 #ifndef HDisalnum
     #define HDisalnum(C)    isalnum((int)(C)) /*cast for solaris warning*/
 #endif /* HDisalnum */
@@ -1029,6 +1097,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDislower
     #define HDislower(C)    islower((int)(C)) /*cast for solaris warning*/
 #endif /* HDislower */
+#ifndef HDisnan
+    #define HDisnan(X)      isnan(X)
+#endif /* HDisnan */
 #ifndef HDisprint
     #define HDisprint(C)    isprint((int)(C)) /*cast for solaris warning*/
 #endif /* HDisprint */
@@ -1059,6 +1130,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDlink
     #define HDlink(OLD,NEW)    link(OLD,NEW)
 #endif /* HDlink */
+#ifndef HDlisten
+    #define HDlisten(A,B)    listen((A),(B)) /* mirror VFD */
+#endif /* HDlisten */
 #ifndef HDllround
     #define HDllround(V)     llround(V)
 #endif /* HDround */
@@ -1116,12 +1190,8 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDmemcmp
     #define HDmemcmp(X,Y,Z)    memcmp(X,Y,Z)
 #endif /* HDmemcmp */
-/*
- * The (char*) casts are required for the DEC when optimizations are turned
- * on and the source and/or destination are not aligned.
- */
 #ifndef HDmemcpy
-    #define HDmemcpy(X,Y,Z)    memcpy((char*)(X),(const char*)(Y),Z)
+    #define HDmemcpy(X,Y,Z)    memcpy(X,Y,Z)
 #endif /* HDmemcpy */
 #ifndef HDmemmove
     #define HDmemmove(X,Y,Z)  memmove((char*)(X),(const char*)(Y),Z)
@@ -1144,6 +1214,12 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDnanosleep
     #define HDnanosleep(N, O)    nanosleep(N, O)
 #endif /* HDnanosleep */
+#ifndef HDntohl
+    #define HDntohl(A)    ntohl((A)) /* mirror VFD */
+#endif /* HDntohl */
+#ifndef HDntohs
+    #define HDntohs(A)    ntohs((A)) /* mirror VFD */
+#endif /* HDntohs */
 #ifndef HDopen
     #define HDopen(F,...)    open(F,__VA_ARGS__)
 #endif /* HDopen */
@@ -1168,6 +1244,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDpowf
     #define HDpowf(X,Y)   powf(X,Y)
 #endif /* HDpowf */
+#ifndef HDpread
+    #define HDpread(F,B,C,O)    pread(F,B,C,O)
+#endif /* HDpread */
 #ifndef HDprintf
     #define HDprintf(...)   HDfprintf(stdout, __VA_ARGS__)
 #endif /* HDprintf */
@@ -1180,6 +1259,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDputs
     #define HDputs(S)    puts(S)
 #endif /* HDputs */
+#ifndef HDpwrite
+    #define HDpwrite(F,B,C,O)    pwrite(F,B,C,O)
+#endif /* HDpwrite */
 #ifndef HDqsort
     #define HDqsort(M,N,Z,F)  qsort(M,N,Z,F)
 #endif /* HDqsort*/
@@ -1192,13 +1274,23 @@ typedef off_t               h5_stat_size_t;
         #define HDrandom()    HDrand()
     #endif /* HDrandom */
     H5_DLL int HDrand(void);
-#elif H5_HAVE_RANDOM
+    #ifndef HDsrandom
+        #define HDsrandom(S)    HDsrand(S)
+    #endif /* HDsrandom */
+    H5_DLL void HDsrand(unsigned int seed);
+#elif defined(H5_HAVE_RANDOM)
     #ifndef HDrand
         #define HDrand()    random()
     #endif /* HDrand */
     #ifndef HDrandom
         #define HDrandom()    random()
     #endif /* HDrandom */
+    #ifndef HDsrand
+        #define HDsrand(S)    srandom(S)
+    #endif /* HDsrand */
+    #ifndef HDsrandom
+        #define HDsrandom(S)    srandom(S)
+    #endif /* HDsrandom */
 #else /* H5_HAVE_RANDOM */
     #ifndef HDrand
         #define HDrand()    rand()
@@ -1206,6 +1298,12 @@ typedef off_t               h5_stat_size_t;
     #ifndef HDrandom
         #define HDrandom()    rand()
     #endif /* HDrandom */
+    #ifndef HDsrand
+        #define HDsrand(S)    srand(S)
+    #endif /* HDsrand */
+    #ifndef HDsrandom
+        #define HDsrandom(S)    srand(S)
+    #endif /* HDsrandom */
 #endif /* H5_HAVE_RANDOM */
 
 #ifndef HDread
@@ -1269,12 +1367,21 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDsetsid
     #define HDsetsid()    setsid()
 #endif /* HDsetsid */
+#ifndef HDsetsockopt
+    #define HDsetsockopt(A,B,C,D,E)    setsockopt((A),(B),(C),(D),(E)) /* mirror VFD */
+#endif /* HDsetsockopt */
 #ifndef HDsetuid
     #define HDsetuid(U)    setuid(U)
 #endif /* HDsetuid */
 #ifndef HDsetvbuf
     #define HDsetvbuf(F,S,M,Z)  setvbuf(F,S,M,Z)
 #endif /* HDsetvbuf */
+#ifndef HDshutdown
+    #define HDshutdown(A, B)    shutdown((A),(B)) /* mirror VFD */
+#endif /* HDshutdown */
+#ifndef HDsigaction
+    #define HDsigaction(S,A,O)  sigaction((S),(A),(O))
+#endif /* HDsigaction */
 #ifndef HDsigaddset
     #define HDsigaddset(S,N)  sigaddset(S,N)
 #endif /* HDsigaddset */
@@ -1320,34 +1427,18 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDsnprintf
     #define HDsnprintf    snprintf /*varargs*/
 #endif /* HDsnprintf */
+#ifndef HDsocket
+    #define HDsocket(A,B,C)    socket((A),(B),(C)) /* mirror VFD */
+#endif /* HDsocket */
 #ifndef HDsprintf
     #define HDsprintf    sprintf /*varargs*/
 #endif /* HDsprintf */
 #ifndef HDsqrt
     #define HDsqrt(X)    sqrt(X)
 #endif /* HDsqrt */
-#ifdef H5_HAVE_RAND_R
-    H5_DLL void HDsrand(unsigned int seed);
-    #ifndef HDsrandom
-        #define HDsrandom(S)    HDsrand(S)
-    #endif /* HDsrandom */
-#elif H5_HAVE_RANDOM
-    #ifndef HDsrand
-        #define HDsrand(S)    srandom(S)
-    #endif /* HDsrand */
-    #ifndef HDsrandom
-        #define HDsrandom(S)    srandom(S)
-    #endif /* HDsrandom */
-#else /* H5_HAVE_RAND_R */
-    #ifndef HDsrand
-        #define HDsrand(S)    srand(S)
-    #endif /* HDsrand */
-    #ifndef HDsrandom
-        #define HDsrandom(S)    srand(S)
-    #endif /* HDsrandom */
-#endif /* H5_HAVE_RAND_R */
-/* sscanf() variable arguments */
-
+#ifndef HDsscanf
+    #define HDsscanf(S,FMT,...)   sscanf(S,FMT,__VA_ARGS__)
+#endif /* HDsscanf */
 #ifndef HDstrcat
     #define HDstrcat(X,Y)    strcat(X,Y)
 #endif /* HDstrcat */
@@ -1404,6 +1495,9 @@ typedef off_t               h5_stat_size_t;
 #endif /* HDstrtod */
 #ifndef HDstrtok
     #define HDstrtok(X,Y)    strtok(X,Y)
+#endif /* HDstrtok */
+#ifndef HDstrtok_r
+    #define HDstrtok_r(X,Y,Z) strtok_r(X,Y,Z)
 #endif /* HDstrtok */
 #ifndef HDstrtol
     #define HDstrtol(S,R,N)    strtol(S,R,N)
@@ -1507,6 +1601,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDva_arg
     #define HDva_arg(A,T)    va_arg(A,T)
 #endif /* HDva_arg */
+#ifndef HDva_copy
+#define HDva_copy(D,S)    va_copy(D,S)
+#endif /* HDva_copy */
 #ifndef HDva_end
     #define HDva_end(A)    va_end(A)
 #endif /* HDva_end */
@@ -1556,15 +1653,6 @@ extern char *strdup(const char *s);
     #define HDstrdup(S)     strdup(S)
 #endif /* HDstrdup */
 
-#ifndef HDpthread_self
-    #define HDpthread_self()    pthread_self()
-#endif /* HDpthread_self */
-
-/* Use this version of pthread_self for printing the thread ID */
-#ifndef HDpthread_self_ulong
-    #define HDpthread_self_ulong()    ((unsigned long)pthread_self())
-#endif /* HDpthread_self_ulong */
-
 /* Macro for "stringizing" an integer in the C preprocessor (use H5_TOSTRING) */
 /* (use H5_TOSTRING, H5_STRINGIZE is just part of the implementation) */
 #define H5_STRINGIZE(x) #x
@@ -1608,7 +1696,7 @@ extern char *strdup(const char *s);
     srctype _tmp_src = (srctype)(src);  \
     dsttype _tmp_dst = (dsttype)(_tmp_src);  \
     HDassert(_tmp_src >= 0);   \
-    HDassert(_tmp_src == _tmp_dst);   \
+    HDassert(_tmp_src == (srctype)_tmp_dst);   \
     (dst) = _tmp_dst;                             \
 }
 
@@ -1641,9 +1729,18 @@ extern char *strdup(const char *s);
 
 /* Assign a variable to one of a different size (think safer dst = (dsttype)src").
  * The code generated by the macro checks for overflows.
+ *
+ * Use w##x##y##z instead of H5_GLUE4(w, x, y, z) because srctype
+ * or dsttype on some systems (e.g., NetBSD 8 and earlier) may
+ * supply some standard types using a macro---e.g.,
+ * #define uint8_t __uint8_t.  The preprocessor will expand the
+ * macros before it evaluates H5_GLUE4(), and that will generate
+ * an unexpected name such as ASSIGN___uint8_t_TO___uint16_t.
+ * The preprocessor does not expand macros in w##x##y##z, so
+ * that will always generate the expected name.
  */
 #define H5_CHECKED_ASSIGN(dst, dsttype, src, srctype)  \
-    H5_GLUE4(ASSIGN_,srctype,_TO_,dsttype)(dst,dsttype,src,srctype)\
+    ASSIGN_##srctype##_TO_##dsttype(dst,dsttype,src,srctype)\
 
 #else /* NDEBUG */
 #define H5_CHECKED_ASSIGN(dst, dsttype, src, srctype)  \
@@ -1707,25 +1804,27 @@ extern char *strdup(const char *s);
  *    information about the package in H5_init_library().
  */
 typedef enum {
-    H5_PKG_A,        /*Attributes      */
-    H5_PKG_AC,        /*Meta data cache    */
-    H5_PKG_B,        /*B-trees      */
-    H5_PKG_D,        /*Datasets      */
-    H5_PKG_E,        /*Error handling    */
-    H5_PKG_F,        /*Files        */
-    H5_PKG_G,        /*Groups      */
-    H5_PKG_HG,        /*Global heap      */
-    H5_PKG_HL,        /*Local heap      */
-    H5_PKG_I,        /*Interface      */
-    H5_PKG_MF,        /*File memory management  */
-    H5_PKG_MM,        /*Core memory management  */
-    H5_PKG_O,        /*Object headers    */
-    H5_PKG_P,        /*Property lists    */
-    H5_PKG_S,        /*Data spaces      */
-    H5_PKG_T,        /*Data types      */
-    H5_PKG_V,        /*Vector functions    */
-    H5_PKG_Z,        /*Raw data filters    */
-    H5_NPKGS        /*Must be last      */
+    H5_PKG_A,       /* Attributes               */
+    H5_PKG_AC,      /* Metadata cache           */
+    H5_PKG_B,       /* B-trees                  */
+    H5_PKG_D,       /* Datasets                 */
+    H5_PKG_E,       /* Error handling           */
+    H5_PKG_F,       /* Files                    */
+    H5_PKG_G,       /* Groups                   */
+    H5_PKG_HG,      /* Global heaps             */
+    H5_PKG_HL,      /* Local heaps              */
+    H5_PKG_I,       /* IDs                      */
+    H5_PKG_M,       /* Maps                     */
+    H5_PKG_MF,      /* File memory management   */
+    H5_PKG_MM,      /* Core memory management   */
+    H5_PKG_O,       /* Object headers           */
+    H5_PKG_P,       /* Property lists           */
+    H5_PKG_S,       /* Dataspaces               */
+    H5_PKG_T,       /* Datatypes                */
+    H5_PKG_V,       /* Vector functions         */
+    H5_PKG_VL,      /* VOL functions            */
+    H5_PKG_Z,       /* Raw data filters         */
+    H5_NPKGS        /* Must be last             */
 } H5_pkg_t;
 
 typedef struct H5_debug_open_stream_t {
@@ -1754,76 +1853,90 @@ extern H5_debug_t    H5_debug_g;
 extern char H5libhdf5_settings[]; /* embedded library information */
 
 /*-------------------------------------------------------------------------
- * Purpose:  These macros are inserted automatically just after the
- *    FUNC_ENTER() macro of API functions and are used to trace
- *    application program execution. Unless H5_DEBUG_API has been
- *    defined they are no-ops.
+ * Purpose: These macros are inserted automatically just after the
+ *          FUNC_ENTER() macro of API functions and are used to trace
+ *          application program execution. Unless H5_DEBUG_API has been
+ *          defined they are no-ops.
  *
- * Arguments:  R  - Return type encoded as a string
- *    T  - Argument types encoded as a string
- *    A0-An  - Arguments.  The number at the end of the macro name
- *        indicates the number of arguments.
+ * Arguments:   R  - Return type encoded as a string
+ *              T  - Argument types encoded as a string
+ *              A0-An  - Arguments.  The number at the end of the macro name
+ *                                   indicates the number of arguments.
  *
- * Programmer:  Robb Matzke
- *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 #ifdef H5_DEBUG_API
-#define H5TRACE_DECL         const char *RTYPE=NULL;                                      \
-                                           double CALLTIME;
-#define H5TRACE0(R,T)         RTYPE=R;                                                     \
-             CALLTIME=H5_trace(NULL,FUNC,T)
-#define H5TRACE1(R,T,A0)       RTYPE=R;                                      \
-             CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0)
-#define H5TRACE2(R,T,A0,A1)       RTYPE=R;                                                     \
-             CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1)
-#define H5TRACE3(R,T,A0,A1,A2)       RTYPE=R;                                      \
-             CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2)
-#define H5TRACE4(R,T,A0,A1,A2,A3)     RTYPE=R;                                                     \
-             CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3)
-#define H5TRACE5(R,T,A0,A1,A2,A3,A4)     RTYPE=R;                                                     \
-             CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
-                                                             #A4,A4)
-#define H5TRACE6(R,T,A0,A1,A2,A3,A4,A5)     RTYPE=R;                                                     \
-             CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
-                                                             #A4,A4,#A5,A5)
-#define H5TRACE7(R,T,A0,A1,A2,A3,A4,A5,A6) RTYPE=R;                                                     \
-             CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
-                                                             #A4,A4,#A5,A5,#A6,A6)
-#define H5TRACE8(R,T,A0,A1,A2,A3,A4,A5,A6,A7) RTYPE=R;                                                  \
-                                           CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
-                                                             #A4,A4,#A5,A5,#A6,A6,#A7,A7)
-#define H5TRACE9(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8) RTYPE=R;                                               \
-                                           CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
-                                                             #A4,A4,#A5,A5,#A6,A6,#A7,A7,#A8,A8)
-#define H5TRACE10(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9) RTYPE=R;                                           \
-                                           CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
-                                                             #A4,A4,#A5,A5,#A6,A6,#A7,A7,#A8,A8,#A9,A9)
-#define H5TRACE11(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) RTYPE=R;                                       \
-                                           CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
-                                                             #A4,A4,#A5,A5,#A6,A6,#A7,A7,#A8,A8,#A9,A9, \
-                                                             #A10,A10)
-#define H5TRACE_RETURN(V)       if (RTYPE) {                                                 \
-                H5_trace(&CALLTIME,FUNC,RTYPE,NULL,V);                    \
-                RTYPE=NULL;                                               \
-             }
+
+#define H5TRACE_DECL                                                                                    \
+            const char *RTYPE = NULL;                                                                   \
+            double CALLTIME;
+
+#define H5TRACE0(R,T)                                                                                   \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T)
+#define H5TRACE1(R,T,A0)                                                                                \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0)
+#define H5TRACE2(R,T,A0,A1)                                                                             \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1)
+#define H5TRACE3(R,T,A0,A1,A2)                                                                          \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2)
+#define H5TRACE4(R,T,A0,A1,A2,A3)                                                                       \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3)
+#define H5TRACE5(R,T,A0,A1,A2,A3,A4)                                                                    \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,#A4,A4)
+#define H5TRACE6(R,T,A0,A1,A2,A3,A4,A5)                                                                 \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,#A4,A4,#A5,A5)
+#define H5TRACE7(R,T,A0,A1,A2,A3,A4,A5,A6)                                                              \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,#A4,A4,#A5,A5,#A6,A6)
+#define H5TRACE8(R,T,A0,A1,A2,A3,A4,A5,A6,A7)                                                           \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,#A4,A4,#A5,A5,#A6,A6,#A7,A7)
+#define H5TRACE9(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8)                                                        \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,#A4,A4,#A5,A5,#A6,A6,#A7,A7,      \
+                                          #A8,A8)
+#define H5TRACE10(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9)                                                    \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,#A4,A4,#A5,A5,#A6,A6,#A7,A7,      \
+                                          #A8,A8,#A9,A9)
+#define H5TRACE11(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10)                                                \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,#A4,A4,#A5,A5,#A6,A6,#A7,A7,      \
+                                          #A8,A8,#A9,A9,#A10,A10)
+#define H5TRACE12(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11)                                            \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,#A4,A4,#A5,A5,#A6,A6,#A7,A7,      \
+                                          #A8,A8,#A9,A9,#A10,A10,#A11,A11)
+
+#define H5TRACE_RETURN(V)                                                                               \
+            if (RTYPE) {                                                                                \
+                H5_trace(&CALLTIME, FUNC, RTYPE, NULL, V);                                              \
+                RTYPE = NULL;                                                                           \
+            }
 #else
-#define H5TRACE_DECL                      /*void*/
-#define H5TRACE0(R,T)                      /*void*/
-#define H5TRACE1(R,T,A0)                    /*void*/
-#define H5TRACE2(R,T,A0,A1)                    /*void*/
-#define H5TRACE3(R,T,A0,A1,A2)                    /*void*/
-#define H5TRACE4(R,T,A0,A1,A2,A3)                  /*void*/
-#define H5TRACE5(R,T,A0,A1,A2,A3,A4)                  /*void*/
-#define H5TRACE6(R,T,A0,A1,A2,A3,A4,A5)                  /*void*/
-#define H5TRACE7(R,T,A0,A1,A2,A3,A4,A5,A6)              /*void*/
-#define H5TRACE8(R,T,A0,A1,A2,A3,A4,A5,A6,A7)           /*void*/
-#define H5TRACE9(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8)        /*void*/
-#define H5TRACE10(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9)    /*void*/
-#define H5TRACE11(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) /*void*/
-#define H5TRACE_RETURN(V)                    /*void*/
-#endif
+#define H5TRACE_DECL                                            /*void*/
+#define H5TRACE0(R,T)                                           /*void*/
+#define H5TRACE1(R,T,A0)                                        /*void*/
+#define H5TRACE2(R,T,A0,A1)                                     /*void*/
+#define H5TRACE3(R,T,A0,A1,A2)                                  /*void*/
+#define H5TRACE4(R,T,A0,A1,A2,A3)                               /*void*/
+#define H5TRACE5(R,T,A0,A1,A2,A3,A4)                            /*void*/
+#define H5TRACE6(R,T,A0,A1,A2,A3,A4,A5)                         /*void*/
+#define H5TRACE7(R,T,A0,A1,A2,A3,A4,A5,A6)                      /*void*/
+#define H5TRACE8(R,T,A0,A1,A2,A3,A4,A5,A6,A7)                   /*void*/
+#define H5TRACE9(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8)                /*void*/
+#define H5TRACE10(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9)            /*void*/
+#define H5TRACE11(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10)        /*void*/
+#define H5TRACE12(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11)    /*void*/
+#define H5TRACE_RETURN(V)                                       /*void*/
+#endif /* H5_DEBUG_API */
 
 H5_DLL double H5_trace(const double *calltime, const char *func, const char *type, ...);
 
@@ -1888,11 +2001,10 @@ H5_DLL double H5_trace(const double *calltime, const char *func, const char *typ
 /* global library version information string */
 extern char  H5_lib_vers_info_g[];
 
+#include "H5TSprivate.h"
+
 /* Lock headers */
 #ifdef H5_HAVE_THREADSAFE
-
-/* Include required thread-safety header */
-#include "H5TSprivate.h"
 
 /* replacement structure for original global variable */
 typedef struct H5_api_struct {
@@ -1993,6 +2105,10 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 #define H5_PACKAGE_INIT(pkg_init, err)
 #endif /* H5_MY_PKG */
 
+/* Forward declaration of H5CXpush() / H5CXpop() */
+/* (Including H5CXprivate.h creates bad circular dependencies - QAK, 3/18/2018) */
+H5_DLL herr_t H5CX_push(void);
+H5_DLL herr_t H5CX_pop(void);
 
 #ifndef NDEBUG
 #define FUNC_ENTER_CHECK_NAME(asrt)                                           \
@@ -2048,10 +2164,15 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
     } /* end if */                                                            \
                                                                               \
     /* Initialize the package, if appropriate */                              \
-    H5_PACKAGE_INIT(H5_MY_PKG_INIT, err)                                      \
-                                                                              \
+    H5_PACKAGE_INIT(H5_MY_PKG_INIT, err)
+
+#define FUNC_ENTER_API_PUSH(err)                                              \
     /* Push the name of this function on the function stack */                \
     H5_PUSH_FUNC                                                              \
+                                                                              \
+    /* Push the API context */                                                \
+    if(H5CX_push() < 0)                                                       \
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "can't set API context")      \
                                                                               \
     BEGIN_MPE_LOG
 
@@ -2059,6 +2180,7 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 #define FUNC_ENTER_API(err) {{                                                \
     FUNC_ENTER_API_COMMON                                                     \
     FUNC_ENTER_API_INIT(err);                                                 \
+    FUNC_ENTER_API_PUSH(err);                                                 \
     /* Clear thread error stack entering public functions */                  \
     H5E_clear_stack(NULL);                                                    \
     {
@@ -2070,15 +2192,17 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 #define FUNC_ENTER_API_NOCLEAR(err) {{                                        \
     FUNC_ENTER_API_COMMON                                                     \
     FUNC_ENTER_API_INIT(err);                                                 \
+    FUNC_ENTER_API_PUSH(err);                                                 \
     {
 
 /*
  * Use this macro for API functions that shouldn't perform _any_ initialization
  *      of the library or an interface, just perform tracing, etc.  Examples
- *      are: H5check_version, etc.
+ *      are: H5allocate_memory, H5is_library_threadsafe, public VOL callback
+ *      wrappers (e.g. H5VLfile_create, H5VLdataset_read, etc.), etc.
  *
  */
-#define FUNC_ENTER_API_NOINIT {{                                              \
+#define FUNC_ENTER_API_NOINIT {{{                                             \
     FUNC_ENTER_API_COMMON                                                     \
     H5_PUSH_FUNC                                                              \
     BEGIN_MPE_LOG                                                             \
@@ -2091,11 +2215,23 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
  *      are: H5close, H5check_version, etc.
  *
  */
-#define FUNC_ENTER_API_NOINIT_NOERR_NOFS {{                                   \
+#define FUNC_ENTER_API_NOINIT_NOERR_NOFS {{{{                                 \
     FUNC_ENTER_API_VARS                                                       \
     FUNC_ENTER_COMMON_NOERR(H5_IS_API(FUNC));                                 \
     FUNC_ENTER_API_THREADSAFE;                                                \
     BEGIN_MPE_LOG                                                             \
+    {
+
+/*
+ * Use this macro for API functions that should only perform initialization
+ *      of the library or an interface, but not push any state (API context,
+ *      function name, start MPE logging, etc) examples are: H5open.
+ *
+ */
+#define FUNC_ENTER_API_NOPUSH(err) {{{{{                                      \
+    FUNC_ENTER_COMMON(H5_IS_API(FUNC));                                       \
+    FUNC_ENTER_API_THREADSAFE;                                                \
+    FUNC_ENTER_API_INIT(err);                                                 \
     {
 
 /* Note: this macro only works when there's _no_ interface initialization routine for the module */
@@ -2174,23 +2310,19 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 /* Use the following two macros as replacements for the FUNC_ENTER_NOAPI
  * and FUNC_ENTER_NOAPI_NOINIT macros when the function needs to set
  * up a metadata tag. */
-#define FUNC_ENTER_NOAPI_TAG(dxpl_id, tag, err) {                             \
+#define FUNC_ENTER_NOAPI_TAG(tag, err) {                                      \
     haddr_t prev_tag = HADDR_UNDEF;                                           \
-    hid_t tag_dxpl_id = dxpl_id;                                              \
                                                                               \
     FUNC_ENTER_COMMON(!H5_IS_API(FUNC));                                      \
-    if(H5AC_tag(tag_dxpl_id, tag, &prev_tag)<0)                               \
-        HGOTO_ERROR(H5_MY_PKG_ERR, H5E_CANTTAG, err, "unable to apply metadata tag") \
+    H5AC_tag(tag, &prev_tag);                                                 \
     FUNC_ENTER_NOAPI_INIT(err)                                                \
     if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
-#define FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, tag, err) {                      \
+#define FUNC_ENTER_NOAPI_NOINIT_TAG(tag) {                                    \
     haddr_t prev_tag = HADDR_UNDEF;                                           \
-    hid_t tag_dxpl_id = dxpl_id;                                              \
                                                                               \
     FUNC_ENTER_COMMON(!H5_IS_API(FUNC));                                      \
-    if(H5AC_tag(tag_dxpl_id, tag, &prev_tag)<0)                               \
-        HGOTO_ERROR(H5_MY_PKG_ERR, H5E_CANTTAG, err, "unable to apply metadata tag") \
+    H5AC_tag(tag, &prev_tag);                                                 \
     H5_PUSH_FUNC                                                              \
     if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
@@ -2208,13 +2340,11 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 
 /* Use the following macro as replacement for the FUNC_ENTER_PACKAGE
  * macro when the function needs to set up a metadata tag. */
-#define FUNC_ENTER_PACKAGE_TAG(dxpl_id, tag, err) {                           \
+#define FUNC_ENTER_PACKAGE_TAG(tag) {                                         \
     haddr_t prev_tag = HADDR_UNDEF;                                           \
-    hid_t tag_dxpl_id = dxpl_id;                                              \
                                                                               \
     FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                       \
-    if(H5AC_tag(tag_dxpl_id, tag, &prev_tag) < 0)                             \
-        HGOTO_ERROR(H5_MY_PKG_ERR, H5E_CANTTAG, err, "unable to apply metadata tag") \
+    H5AC_tag(tag, &prev_tag);                                                 \
     H5_PUSH_FUNC                                                              \
     if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
@@ -2238,13 +2368,11 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 
 /* Use the following macro as replacement for the FUNC_ENTER_STATIC
  * macro when the function needs to set up a metadata tag. */
-#define FUNC_ENTER_STATIC_TAG(dxpl_id, tag, err) {                            \
+#define FUNC_ENTER_STATIC_TAG(tag) {                                          \
     haddr_t prev_tag = HADDR_UNDEF;                                           \
-    hid_t tag_dxpl_id = dxpl_id;                                              \
                                                                               \
     FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                       \
-    if(H5AC_tag(tag_dxpl_id, tag, &prev_tag) < 0)                             \
-        HGOTO_ERROR(H5_MY_PKG_ERR, H5E_CANTTAG, err, "unable to apply metadata tag") \
+    H5AC_tag(tag, &prev_tag);                                                 \
     H5_PUSH_FUNC                                                              \
     if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
@@ -2262,11 +2390,15 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
     H5_API_UNLOCK                                                             \
     H5_API_SET_CANCEL
 
-#define FUNC_LEAVE_API(ret_value)                                             \
+#define FUNC_LEAVE_API_COMMON(ret_value)                                      \
         ;                                                                     \
     } /*end scope from end of FUNC_ENTER*/                                    \
     FINISH_MPE_LOG                                                            \
-    H5TRACE_RETURN(ret_value);                                                \
+    H5TRACE_RETURN(ret_value);
+
+#define FUNC_LEAVE_API(ret_value)                                             \
+    FUNC_LEAVE_API_COMMON(ret_value);                                         \
+    (void)H5CX_pop();                                                         \
     H5_POP_FUNC                                                               \
     if(err_occurred)                                                          \
        (void)H5E_dump_api_stack(TRUE);                                        \
@@ -2274,15 +2406,32 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
     return(ret_value);                                                        \
 }} /*end scope from beginning of FUNC_ENTER*/
 
-/* Use this macro to match the FUNC_ENTER_API_NOFS macro */
-#define FUNC_LEAVE_API_NOFS(ret_value)                                        \
-        ;                                                                     \
-    } /*end scope from end of FUNC_ENTER*/                                    \
-    FINISH_MPE_LOG                                                            \
-    H5TRACE_RETURN(ret_value);                                                \
+/* Use this macro to match the FUNC_ENTER_API_NOINIT macro */
+#define FUNC_LEAVE_API_NOINIT(ret_value)                                      \
+    FUNC_LEAVE_API_COMMON(ret_value);                                         \
+    H5_POP_FUNC                                                               \
+    if(err_occurred)                                                          \
+       (void)H5E_dump_api_stack(TRUE);                                        \
     FUNC_LEAVE_API_THREADSAFE                                                 \
     return(ret_value);                                                        \
-}} /*end scope from beginning of FUNC_ENTER*/
+}}} /*end scope from beginning of FUNC_ENTER*/
+
+/* Use this macro to match the FUNC_ENTER_API_NOINIT_NOERR_NOFS macro */
+#define FUNC_LEAVE_API_NOFS(ret_value)                                        \
+    FUNC_LEAVE_API_COMMON(ret_value);                                         \
+    FUNC_LEAVE_API_THREADSAFE                                                 \
+    return(ret_value);                                                        \
+}}}} /*end scope from beginning of FUNC_ENTER*/
+
+/* Use this macro to match the FUNC_ENTER_API_NOPUSH macro */
+#define FUNC_LEAVE_API_NOPUSH(ret_value)                                             \
+        ;                                                                     \
+    } /*end scope from end of FUNC_ENTER*/                                    \
+    if(err_occurred)                                                          \
+       (void)H5E_dump_api_stack(TRUE);                                        \
+    FUNC_LEAVE_API_THREADSAFE                                                 \
+    return(ret_value);                                                        \
+}}}}} /*end scope from beginning of FUNC_ENTER*/
 
 #define FUNC_LEAVE_NOAPI(ret_value)                                           \
         ;                                                                     \
@@ -2310,11 +2459,10 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 } /*end scope from beginning of FUNC_ENTER*/
 
 /* Use this macro when exiting a function that set up a metadata tag */
-#define FUNC_LEAVE_NOAPI_TAG(ret_value, err)                                  \
+#define FUNC_LEAVE_NOAPI_TAG(ret_value)                                       \
         ;                                                                     \
     } /*end scope from end of FUNC_ENTER*/                                    \
-    if(H5AC_tag(tag_dxpl_id, prev_tag, NULL) < 0)                             \
-        HDONE_ERROR(H5E_CACHE, H5E_CANTTAG, err, "unable to apply metadata tag") \
+    H5AC_tag(prev_tag, NULL);                                                 \
     H5_POP_FUNC                                                               \
     return(ret_value);                                                        \
 } /*end scope from beginning of FUNC_ENTER*/
@@ -2572,15 +2720,12 @@ func_init_failed:                                                             \
 
 /* Macro to begin/end tagging (when FUNC_ENTER_*TAG macros are insufficient).
  * Make sure to use HGOTO_ERROR_TAG and HGOTO_DONE_TAG between these macros! */
-#define H5_BEGIN_TAG(dxpl, tag, err) {                                           \
-    haddr_t prv_tag = HADDR_UNDEF;                                               \
-    hid_t my_dxpl_id = dxpl;                                                     \
-    if(H5AC_tag(my_dxpl_id, tag, &prv_tag) < 0)                                  \
-        HGOTO_ERROR(H5_MY_PKG_ERR, H5E_CANTTAG, err, "unable to apply metadata tag")
+#define H5_BEGIN_TAG(tag) {                                                 \
+    haddr_t prv_tag = HADDR_UNDEF;                                          \
+    H5AC_tag(tag, &prv_tag);                                                \
 
-#define H5_END_TAG(err)                                                          \
-    if(H5AC_tag(my_dxpl_id, prv_tag, NULL) <0)                                   \
-        HGOTO_ERROR(H5_MY_PKG_ERR, H5E_CANTTAG, err, "unable to apply metadata tag") \
+#define H5_END_TAG                                                          \
+    H5AC_tag(prv_tag, NULL);                                                \
 }
 
 /* Compile-time "assert" macro */
@@ -2598,6 +2743,7 @@ H5_DLL void H5_term_library(void);
 H5_DLL int H5A_term_package(void);
 H5_DLL int H5A_top_term_package(void);
 H5_DLL int H5AC_term_package(void);
+H5_DLL int H5CX_term_package(void);
 H5_DLL int H5D_term_package(void);
 H5_DLL int H5D_top_term_package(void);
 H5_DLL int H5E_term_package(void);
@@ -2609,6 +2755,8 @@ H5_DLL int H5G_term_package(void);
 H5_DLL int H5G_top_term_package(void);
 H5_DLL int H5I_term_package(void);
 H5_DLL int H5L_term_package(void);
+H5_DLL int H5M_term_package(void);
+H5_DLL int H5M_top_term_package(void);
 H5_DLL int H5P_term_package(void);
 H5_DLL int H5PL_term_package(void);
 H5_DLL int H5R_term_package(void);
@@ -2618,6 +2766,7 @@ H5_DLL int H5S_top_term_package(void);
 H5_DLL int H5SL_term_package(void);
 H5_DLL int H5T_term_package(void);
 H5_DLL int H5T_top_term_package(void);
+H5_DLL int H5VL_term_package(void);
 H5_DLL int H5Z_term_package(void);
 
 /* Checksum functions */
@@ -2635,6 +2784,20 @@ H5_DLL double H5_get_time(void);
 /* Functions for building paths, etc. */
 H5_DLL herr_t   H5_build_extpath(const char *name, char **extpath /*out*/);
 H5_DLL herr_t   H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/);
+
+#ifdef H5_HAVE_PARALLEL
+/* Generic MPI functions */
+H5_DLL hsize_t  H5_mpi_set_bigio_count(hsize_t new_count);
+H5_DLL hsize_t  H5_mpi_get_bigio_count(void);
+H5_DLL herr_t   H5_mpi_comm_dup(MPI_Comm comm, MPI_Comm *comm_new);
+H5_DLL herr_t   H5_mpi_info_dup(MPI_Info info, MPI_Info *info_new);
+H5_DLL herr_t   H5_mpi_comm_free(MPI_Comm *comm);
+H5_DLL herr_t   H5_mpi_info_free(MPI_Info *info);
+H5_DLL herr_t   H5_mpi_comm_cmp(MPI_Comm comm1, MPI_Comm comm2, int *result);
+H5_DLL herr_t   H5_mpi_info_cmp(MPI_Info info1, MPI_Info info2, int *result);
+H5_DLL herr_t   H5_mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_bytes,
+                 MPI_Datatype old_type, MPI_Datatype *new_type);
+#endif /* H5_HAVE_PARALLEL */
 
 /* Functions for debugging */
 H5_DLL herr_t H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf,

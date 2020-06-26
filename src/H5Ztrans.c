@@ -105,10 +105,10 @@ static void H5Z_XFORM_DEBUG(H5Z_node *tree);
 static void H5Z_print(H5Z_node *tree, FILE *stream);
 #endif  /* H5Z_XFORM_DEBUG */
 
-/* PGCC (11.8-0) has trouble with the command *p++ = *p OP tree_val. It increments P first before 
+/* PGCC (11.8-0) has trouble with the command *p++ = *p OP tree_val. It increments P first before
  * doing the operation.  So I break down the command into two lines:
  *     *p = *p OP tree_val; p++;
- * Actually, the behavior of *p++ = *p OP tree_val is undefined. (SLU - 2012/3/19) 
+ * Actually, the behavior of *p++ = *p OP tree_val is undefined. (SLU - 2012/3/19)
  */
 #define H5Z_XFORM_DO_OP1(RESL,RESR,TYPE,OP,SIZE)                            \
 {   								  	    \
@@ -328,9 +328,9 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
     H5VM_array_fill(array, &val, sizeof(TYPE), (SIZE));                                             \
 }
 
-/* The difference of this macro from H5Z_XFORM_DO_OP3 is that it handles the operations when the left operand is empty, like -x or +x.  
- * The reason that it's seperated from H5Z_XFORM_DO_OP3 is because compilers don't accept operations like *x or /x.  So in H5Z_do_op, 
- * these two macros are called in different ways. (SLU 2012/3/20) 
+/* The difference of this macro from H5Z_XFORM_DO_OP3 is that it handles the operations when the left operand is empty, like -x or +x.
+ * The reason that it's separated from H5Z_XFORM_DO_OP3 is because compilers don't accept operations like *x or /x.  So in H5Z_do_op,
+ * these two macros are called in different ways. (SLU 2012/3/20)
  */
 #define H5Z_XFORM_DO_OP6(OP)                                                                                                                    \
 {                                                                                                                                               \
@@ -850,7 +850,7 @@ H5Z_parse_factor(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
 
             if (!factor)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node")
-            sscanf(current->tok_begin, "%ld", &factor->value.int_val);
+            HDsscanf(current->tok_begin, "%ld", &factor->value.int_val);
             break;
 
         case H5Z_XFORM_FLOAT:
@@ -858,7 +858,7 @@ H5Z_parse_factor(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
 
             if (!factor)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node")
-            sscanf(current->tok_begin, "%lf", &factor->value.float_val);
+            HDsscanf(current->tok_begin, "%lf", &factor->value.float_val);
             break;
 
         case H5Z_XFORM_SYMBOL:
@@ -967,7 +967,7 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:    H5Z_new_node
- * Purpose:     Create and initilize a new H5Z_node structure.
+ * Purpose:     Create and initialize a new H5Z_node structure.
  * Return:      Success:    Valid H5Z_node ptr
  *              NULLure:    NULL
  * Programmer:  Bill Wendling
@@ -999,7 +999,7 @@ done:
  * Purpose: 	If the transform is trivial, this function applies it.
  * 		Otherwise, it calls H5Z_xform_eval_full to do the full
  * 		transform.
- * Return:      SUCCEED if transform applied succesfully, FAIL otherwise
+ * Return:      SUCCEED if transform applied successfully, FAIL otherwise
  * Programmer:  Leon Arber
  * 		5/1/04
  * Modifications:
@@ -1078,7 +1078,7 @@ H5Z_xform_eval(H5Z_data_xform_t *data_xform_prop, void* array, size_t array_size
 		if(NULL == (data_xform_prop->dat_val_pointers->ptr_dat_val[i] = (void*)H5MM_malloc(array_size * H5T_get_size((H5T_t *)H5I_object(array_type)))))
 		    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "Ran out of memory trying to allocate space for data in data transform")
 
-                HDmemcpy(data_xform_prop->dat_val_pointers->ptr_dat_val[i], array, array_size * H5T_get_size((H5T_t *)H5I_object(array_type)));
+                H5MM_memcpy(data_xform_prop->dat_val_pointers->ptr_dat_val[i], array, array_size * H5T_get_size((H5T_t *)H5I_object(array_type)));
 	    } /* end for */
 	} /* end else */
 
@@ -1086,7 +1086,7 @@ H5Z_xform_eval(H5Z_data_xform_t *data_xform_prop, void* array, size_t array_size
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error while performing data transform")
 
 	if(data_xform_prop->dat_val_pointers->num_ptrs > 1)
-	    HDmemcpy(array, res.value.dat_val, array_size * H5T_get_size((H5T_t *)H5I_object(array_type)));
+	    H5MM_memcpy(array, res.value.dat_val, array_size * H5T_get_size((H5T_t *)H5I_object(array_type)));
 
         /* Free the temporary arrays we used */
         if(data_xform_prop->dat_val_pointers->num_ptrs > 1)
@@ -1229,15 +1229,15 @@ H5Z_xform_find_type(const H5T_t* type)
     HDassert(type);
 
     /* Check for SHORT type */
-    if((tmp = (H5T_t *)H5I_object(H5T_NATIVE_SHORT)) 
+    if((tmp = (H5T_t *)H5I_object(H5T_NATIVE_SHORT))
             && 0 == H5T_cmp(type, tmp, FALSE))
 	HGOTO_DONE(H5T_NATIVE_SHORT)
     /* Check for INT type */
-    else if((tmp = (H5T_t *)H5I_object(H5T_NATIVE_INT)) 
+    else if((tmp = (H5T_t *)H5I_object(H5T_NATIVE_INT))
             && 0 == H5T_cmp(type, tmp, FALSE))
         HGOTO_DONE(H5T_NATIVE_INT)
     /* Check for LONG type */
-    else if((tmp = (H5T_t *)H5I_object(H5T_NATIVE_LONG)) 
+    else if((tmp = (H5T_t *)H5I_object(H5T_NATIVE_LONG))
             && 0 == H5T_cmp(type, tmp, FALSE))
 	HGOTO_DONE(H5T_NATIVE_LONG)
     /* Check for LONGLONG type */
@@ -1370,7 +1370,7 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:    H5Z_op_is_numbs
- * Purpose:     Internal function to facilitate the condition check in 
+ * Purpose:     Internal function to facilitate the condition check in
  *              H5Z_xform_reduce_tree to reduce the bulkiness of the code.
  * Return:      TRUE or FALSE
  * Programmer:  Raymond Lu
@@ -1397,7 +1397,7 @@ H5Z_op_is_numbs(H5Z_node* _tree)
 
 /*-------------------------------------------------------------------------
  * Function:    H5Z_op_is_numbs2
- * Purpose:     Internal function to facilitate the condition check in 
+ * Purpose:     Internal function to facilitate the condition check in
  *              H5Z_xform_reduce_tree to reduce the bulkiness of the code.
  *              The difference from H5Z_op_is_numbs is that the left child
  *              can be empty, like -x or +x.
@@ -1485,7 +1485,7 @@ H5Z_xform_reduce_tree(H5Z_node* tree)
  * Purpose:     If the root of the tree passed in points to a simple
  *              arithmetic operation and the left and right subtrees are both
  *              integer or floating point values, this function does that
- *              operation, free the left and rigt subtrees, and replaces
+ *              operation, free the left and right subtrees, and replaces
  *              the root with the result of the operation.
  * Return:      None.
  * Programmer:  Leon Arber

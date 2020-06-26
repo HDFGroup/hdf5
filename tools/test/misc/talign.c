@@ -32,11 +32,11 @@ const char *setname = "align";
 
 int main(void)
 {
-    hid_t fil=-1, spc=-1, set=-1;
-    hid_t cs6=-1, cmp=-1, fix=-1;
-    hid_t cmp1=-1, cmp2=-1, cmp3=-1;
-    hid_t plist=-1;
-    hid_t array_dt=-1;
+    hid_t fil=H5I_INVALID_HID, spc=H5I_INVALID_HID, set=H5I_INVALID_HID;
+    hid_t cs6=H5I_INVALID_HID, cmp=H5I_INVALID_HID, fix=H5I_INVALID_HID;
+    hid_t cmp1=H5I_INVALID_HID, cmp2=H5I_INVALID_HID, cmp3=H5I_INVALID_HID;
+    hid_t plist=H5I_INVALID_HID;
+    hid_t array_dt=H5I_INVALID_HID;
 
     hsize_t dim[2];
     hsize_t cdim[4];
@@ -51,14 +51,14 @@ int main(void)
     int result = 0;
     herr_t error = 1;
 
-    printf("%-70s", "Testing alignment in compound datatypes");
+    HDprintf("%-70s", "Testing alignment in compound datatypes");
 
-    strcpy(string5, "Hi!");
+    HDstrcpy(string5, "Hi!");
     HDunlink(fname);
     fil = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     if (fil < 0) {
-        puts("*FAILED*");
+        HDputs("*FAILED*");
         return 1;
     }
 
@@ -123,20 +123,20 @@ int main(void)
     data = (char *)HDmalloc(H5Tget_size(fix));
 
     if(!data) {
-        perror("malloc() failed");
-        abort();
+        HDperror("malloc() failed");
+        HDabort();
     }
 
     set = H5Dopen2(fil, setname, H5P_DEFAULT);
 
     H5Dread(set, fix, spc, H5S_ALL, H5P_DEFAULT, data);
-    fptr = (float *)(data + H5Tget_member_offset(fix, 1));
+    fptr = (float *)((void *)(data + H5Tget_member_offset(fix, 1)));
     H5Dclose(set);
 
 out:
     if(error < 0) {
         result = 1;
-        puts("*FAILED - HDF5 library error*");
+        HDputs("*FAILED - HDF5 library error*");
     } else if(!(H5_FLT_ABS_EQUAL(fok[0],  fptr[0]))
            || !(H5_FLT_ABS_EQUAL(fok[1],  fptr[1]))
            || !(H5_FLT_ABS_EQUAL(fnok[0], fptr[2]))
@@ -145,15 +145,15 @@ out:
 
         result = 1;
         mname = H5Tget_member_name(fix, 0);
-        printf("%14s (%2d) %6s = %s\n",
+        HDprintf("%14s (%2d) %6s = %s\n",
             mname ? mname : "(null)", (int)H5Tget_member_offset(fix,0),
             string5, (char *)(data + H5Tget_member_offset(fix, 0)));
         if(mname)
             H5free_memory(mname);
 
-        fptr = (float *)(data + H5Tget_member_offset(fix, 1));
+        fptr = (float *)((void *)(data + H5Tget_member_offset(fix, 1)));
         mname = H5Tget_member_name(fix, 1);
-        printf("Data comparison:\n"
+        HDprintf("Data comparison:\n"
             "%14s (%2d) %6f = %f\n"
             "                    %6f = %f\n",
             mname ? mname : "(null)", (int)H5Tget_member_offset(fix,1),
@@ -162,9 +162,9 @@ out:
         if(mname)
             H5free_memory(mname);
 
-        fptr = (float *)(data + H5Tget_member_offset(fix, 2));
+        fptr = (float *)((void *)(data + H5Tget_member_offset(fix, 2)));
         mname = H5Tget_member_name(fix, 2);
-        printf("%14s (%2d) %6f = %f\n"
+        HDprintf("%14s (%2d) %6f = %f\n"
             "                    %6f = %6f\n",
             mname ? mname : "(null)", (int)H5Tget_member_offset(fix,2),
             (double)fnok[0], (double)fptr[0],
@@ -172,8 +172,8 @@ out:
         if(mname)
             H5free_memory(mname);
 
-        fptr = (float *)(data + H5Tget_member_offset(fix, 1));
-        printf("\n"
+        fptr = (float *)((void *)(data + H5Tget_member_offset(fix, 1)));
+        HDprintf("\n"
             "Short circuit\n"
             "                    %6f = %f\n"
             "                    %6f = %f\n"
@@ -183,9 +183,9 @@ out:
             (double)fok[1], (double)fptr[1],
             (double)fnok[0], (double)fptr[2],
             (double)fnok[1], (double)fptr[3]);
-        puts("*FAILED - compound type alignmnent problem*");
+        HDputs("*FAILED - compound type alignmnent problem*");
     } else {
-        puts(" PASSED");
+        HDputs(" PASSED");
     }
 
     if(data)
@@ -200,7 +200,7 @@ out:
     H5Pclose(plist);
     H5Fclose(fil);
     HDunlink(fname);
-    fflush(stdout);
+    HDfflush(stdout);
     return result;
 }
 

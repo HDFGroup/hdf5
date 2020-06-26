@@ -55,31 +55,32 @@
 ##############################################################################
 
   macro (ADD_H5_TEST resultfile resultcode resultoption)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (
+          NAME H5MKGRP-${resultfile}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5mkgrp${tgt_file_ext}> ${resultoption} ${resultfile}.h5 ${ARGN}
+      )
+    else ()
       add_test (
           NAME H5MKGRP-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-                  ${resultfile}.h5
+          COMMAND ${CMAKE_COMMAND} -E remove ${resultfile}.h5
       )
-      set_tests_properties (H5MKGRP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-    endif ()
-
-    add_test (
-        NAME H5MKGRP-${resultfile}
-        COMMAND $<TARGET_FILE:h5mkgrp> ${resultoption} ${resultfile}.h5 ${ARGN}
-    )
-    set_tests_properties (H5MKGRP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      if (NOT "${last_test}" STREQUAL "")
-        set_tests_properties (H5MKGRP-${resultfile} PROPERTIES DEPENDS ${last_test})
-      endif ()
-    else (HDF5_ENABLE_USING_MEMCHECKER)
-      set_tests_properties (H5MKGRP-${resultfile} PROPERTIES DEPENDS H5MKGRP-${resultfile}-clear-objects)
+      set_tests_properties (H5MKGRP-${resultfile}-clear-objects PROPERTIES
+          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+      )
+      add_test (
+          NAME H5MKGRP-${resultfile}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5mkgrp${tgt_file_ext}> ${resultoption} ${resultfile}.h5 ${ARGN}
+      )
+      set_tests_properties (H5MKGRP-${resultfile} PROPERTIES
+          DEPENDS H5MKGRP-${resultfile}-clear-objects
+          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+      )
       add_test (
           NAME H5MKGRP-${resultfile}-h5ls
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls${tgt_file_ext}>"
               -D "TEST_ARGS:STRING=-v;-r;${resultfile}.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -94,19 +95,20 @@
 
   macro (ADD_H5_CMP resultfile resultcode)
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5MKGRP_CMP-${resultfile} COMMAND $<TARGET_FILE:h5mkgrp> ${ARGN})
+      add_test (NAME H5MKGRP_CMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5mkgrp${tgt_file_ext}> ${ARGN})
     else ()
       add_test (
           NAME H5MKGRP_CMP-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-                  ${resultfile}.h5
+          COMMAND ${CMAKE_COMMAND} -E remove ${resultfile}.h5
       )
-      set_tests_properties (H5MKGRP_CMP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+      set_tests_properties (H5MKGRP_CMP-${resultfile}-clear-objects PROPERTIES
+          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+      )
       add_test (
           NAME H5MKGRP_CMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5mkgrp>"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5mkgrp${tgt_file_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -114,7 +116,9 @@
               -D "TEST_REFERENCE=${resultfile}.txt"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5MKGRP_CMP-${resultfile} PROPERTIES DEPENDS H5MKGRP_CMP-${resultfile}-clear-objects)
+      set_tests_properties (H5MKGRP_CMP-${resultfile} PROPERTIES
+          DEPENDS H5MKGRP_CMP-${resultfile}-clear-objects
+      )
     endif ()
   endmacro ()
 
@@ -126,54 +130,23 @@
   if (HDF5_ENABLE_USING_MEMCHECKER)
     add_test (
         NAME H5MKGRP-clearall-objects
-        COMMAND    ${CMAKE_COMMAND}
-            -E remove
-                h5mkgrp_help.out
-                h5mkgrp_help.out.err
-                h5mkgrp_version.out
-                h5mkgrp_version.out.err
-                h5mkgrp_single.h5
-                h5mkgrp_single.out
-                h5mkgrp_single.out.err
-                h5mkgrp_single_v.h5
-                h5mkgrp_single_v.out
-                h5mkgrp_single_v.out.err
-                h5mkgrp_single_p.h5
-                h5mkgrp_single_p.out
-                h5mkgrp_single_p.out.err
-                h5mkgrp_single_l.h5
-                h5mkgrp_single_l.out
-                h5mkgrp_single_l.out.err
-                h5mkgrp_several.h5
-                h5mkgrp_several.out
-                h5mkgrp_several.out.err
-                h5mkgrp_several_v.h5
-                h5mkgrp_several_v.out
-                h5mkgrp_several_v.out.err
-                h5mkgrp_several_p.h5
-                h5mkgrp_several_p.out
-                h5mkgrp_several_p.out.err
-                h5mkgrp_several_l.h5
-                h5mkgrp_several_l.out
-                h5mkgrp_several_l.out.err
-                h5mkgrp_nested_p.h5
-                h5mkgrp_nested_p.out
-                h5mkgrp_nested_p.out.err
-                h5mkgrp_nested_lp.h5
-                h5mkgrp_nested_lp.out
-                h5mkgrp_nested_lp.out.err
-                h5mkgrp_nested_mult_p.h5
-                h5mkgrp_nested_mult_p.out
-                h5mkgrp_nested_mult_p.out.err
-                h5mkgrp_nested_mult_lp.h5
-                h5mkgrp_nested_mult_lp.out
-                h5mkgrp_nested_mult_lp.out.err
+        COMMAND ${CMAKE_COMMAND} -E remove
+            h5mkgrp_single.h5
+            h5mkgrp_single_v.h5
+            h5mkgrp_single_p.h5
+            h5mkgrp_single_l.h5
+            h5mkgrp_several.h5
+            h5mkgrp_several_v.h5
+            h5mkgrp_several_p.h5
+            h5mkgrp_several_l.h5
+            h5mkgrp_nested_p.h5
+            h5mkgrp_nested_lp.h5
+            h5mkgrp_nested_mult_p.h5
+            h5mkgrp_nested_mult_lp.h5
     )
-    set_tests_properties (H5MKGRP-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-    if (NOT "${last_test}" STREQUAL "")
-      set_tests_properties (H5MKGRP-clearall-objects PROPERTIES DEPENDS ${last_test})
-    endif ()
-    set (last_test "H5MKGRP-clearall-objects")
+    set_tests_properties (H5MKGRP-clearall-objects PROPERTIES
+        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+    )
   endif ()
 
   # Check that help & version is displayed properly

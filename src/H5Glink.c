@@ -41,6 +41,8 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppublic.h"		/* Property Lists                       */
 
+#include "H5VLnative_private.h" /* Native VOL connector                     */
+
 
 /****************/
 /* Local Macros */
@@ -290,13 +292,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_link_to_info(const H5O_link_t *lnk, H5L_info_t *info)
+H5G_link_to_info(const H5O_loc_t *link_loc, const H5O_link_t *lnk, H5L_info2_t *info)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
+    HDassert(link_loc);
     HDassert(lnk);
 
     /* Get information from the link */
@@ -308,7 +311,9 @@ H5G_link_to_info(const H5O_link_t *lnk, H5L_info_t *info)
 
         switch(lnk->type) {
             case H5L_TYPE_HARD:
-                info->u.address = lnk->u.hard.addr;
+                /* Serialize the address into a VOL token */
+                if(H5VL_native_addr_to_token(link_loc->file, H5I_FILE, lnk->u.hard.addr, &info->u.token) < 0)
+                    HGOTO_ERROR(H5E_LINK, H5E_CANTSERIALIZE, FAIL, "can't serialize address into object token")
                 break;
 
             case H5L_TYPE_SOFT:
@@ -402,15 +407,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G__link_sort_table
+ * Function:    H5G__link_sort_table
  *
  * Purpose:     Sort table containing a list of links for a group
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Nov 20, 2006
+ * Programmer:  Quincey Koziol
+ *              Nov 20, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -418,10 +422,19 @@ herr_t
 H5G__link_sort_table(H5G_link_table_t *ltable, H5_index_t idx_type,
     H5_iter_order_t order)
 {
+    herr_t  ret_value = SUCCEED;
+
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(ltable);
+
+    /* Can't sort when empty since the links table will be NULL */
+    if(0 == ltable->nlinks)
+        HGOTO_DONE(ret_value);
+
+    /* This should never be NULL if the number of links is non-zero */
+    HDassert(ltable->lnks);
 
     /* Pick appropriate sorting routine */
     if(idx_type == H5_INDEX_NAME) {
@@ -442,6 +455,7 @@ H5G__link_sort_table(H5G_link_table_t *ltable, H5_index_t idx_type,
             HDassert(order == H5_ITER_NATIVE);
     } /* end else */
 
+done:
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G__link_sort_table() */
 
@@ -553,8 +567,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__link_name_replace(H5F_t *file, hid_t dxpl_id, H5RS_str_t *grp_full_path_r,
-    const H5O_link_t *lnk)
+H5G__link_name_replace(H5F_t *file, H5RS_str_t *grp_full_path_r, const H5O_link_t *lnk)
 {
     H5RS_str_t *obj_path_r = NULL;      /* Full path for link being removed */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -567,9 +580,9 @@ H5G__link_name_replace(H5F_t *file, hid_t dxpl_id, H5RS_str_t *grp_full_path_r,
     /* Search the open IDs and replace names for unlinked object */
     if(grp_full_path_r) {
         obj_path_r = H5G_build_fullpath_refstr_str(grp_full_path_r, lnk->name);
-        if(H5G_name_replace(lnk, H5G_NAME_DELETE, file, obj_path_r, NULL, NULL, dxpl_id) < 0)
+        if(H5G_name_replace(lnk, H5G_NAME_DELETE, file, obj_path_r, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to replace name")
-    } /* end if */
+    }
 
 done:
     if(obj_path_r)

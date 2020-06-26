@@ -18,16 +18,16 @@
 
 set (H5WATCH_TEST_FILES
     w-help1.ddl
-    w-err-cmpd1.ddl
-    w-err-cmpd2.ddl
-    w-err-cmpd3.ddl
-    w-err-cmpd4.ddl
-    w-err-cmpd5.ddl
-    w-err-dset1.ddl
-    w-err-dset2.ddl
-    w-err-dset-nomax.ddl
-    w-err-dset-none.ddl
-    w-err-file.ddl
+    w-err-cmpd1.err
+    w-err-cmpd2.err
+    w-err-cmpd3.err
+    w-err-cmpd4.err
+    w-err-cmpd5.err
+    w-err-dset1.err
+    w-err-dset2.err
+    w-err-dset-nomax.err
+    w-err-dset-none.err
+    w-err-file.err
     w-err-poll.ddl
     w-err-poll0.ddl
     w-err-width.ddl
@@ -73,7 +73,8 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
       add_test (
           NAME H5WATCH_ARGS-h5watch-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5watch>"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5watch${tgt_file_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -81,7 +82,33 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5WATCH_ARGS-h5watch-${resultfile} PROPERTIES DEPENDS ${last_test})
+      set_tests_properties (H5WATCH_ARGS-h5watch-${resultfile} PROPERTIES
+          DEPENDS ${last_test}
+          FIXTURES_REQUIRED gen_test_watch
+      )
+      set (last_test "H5WATCH_ARGS-h5watch-${resultfile}")
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_ERR_TEST resultfile resultcode)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (
+          NAME H5WATCH_ARGS-h5watch-${resultfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5watch${tgt_file_ext}>"
+              -D "TEST_ARGS:STRING=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.mty"
+              -D "TEST_ERRREF=${resultfile}.err"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5WATCH_ARGS-h5watch-${resultfile} PROPERTIES
+          DEPENDS ${last_test}
+          FIXTURES_REQUIRED gen_test_watch
+      )
       set (last_test "H5WATCH_ARGS-h5watch-${resultfile}")
     endif ()
   endmacro ()
@@ -91,14 +118,14 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
       add_test (
           NAME H5WATCH-${resultfile}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
-              -E remove
-                  ${resultfile}.h5
+              -E remove ${resultfile}.h5
       )
       set_tests_properties (H5WATCH-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       add_test (
           NAME H5WATCH-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5watch>"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5watch${tgt_file_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -106,7 +133,11 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
               -D "TEST_REFERENCE=${resultfile}.txt"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5WATCH-${resultfile} PROPERTIES DEPENDS H5WATCH-${resultfile}-clear-objects)
+      set_tests_properties (H5WATCH-${resultfile} PROPERTIES
+          DEPENDS H5WATCH-${resultfile}-clear-objects
+          FIXTURES_REQUIRED gen_test_watch
+      )
+      set (last_test "H5WATCH-${resultfile}")
     endif ()
   endmacro ()
 
@@ -124,11 +155,9 @@ if (NOT SWMR_INCOMPAT)
 # Remove any output file left over from previous test run
   add_test (
     NAME H5WATCH-clearall-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove
-        WATCH.h5
+    COMMAND ${CMAKE_COMMAND} -E remove WATCH.h5
   )
-  if (NOT "${last_test}" STREQUAL "")
+  if (last_test)
     set_tests_properties (H5WATCH-clearall-objects PROPERTIES DEPENDS ${last_test})
   endif ()
   set (last_test "H5WATCH-clearall-objects")
@@ -153,29 +182,32 @@ if (NOT SWMR_INCOMPAT)
 #                                               #
 #################################################################################################
 # create the output files to be used.
-  add_test (NAME H5WATCH-h5watchgentest COMMAND $<TARGET_FILE:h5watchgentest>)
-  set_tests_properties (H5WATCH-h5watchgentest PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-  set_tests_properties (H5WATCH-h5watchgentest PROPERTIES DEPENDS "H5WATCH-clearall-objects")
+  add_test (NAME H5WATCH-h5watchgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5watchgentest>)
+  set_tests_properties (H5WATCH-h5watchgentest PROPERTIES
+      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+      DEPENDS "H5WATCH-clearall-objects"
+  )
+  set_tests_properties (H5WATCH-h5watchgentest PROPERTIES FIXTURES_SETUP gen_test_watch)
   set (last_test "H5WATCH-h5watchgentest")
 
 # Test on --help options
   ADD_H5_TEST (w-help1 0 --help)
 #
 # Tests on expected failures
-  ADD_H5_TEST (w-err-dset1 1 WATCH.h5)
-  ADD_H5_TEST (w-err-dset2 1 WATCH.h5/group/DSET_CMPD)
-  ADD_H5_TEST (w-err-dset-none 1 WATCH.h5/DSET_NONE)
-  ADD_H5_TEST (w-err-dset-nomax 1 WATCH.h5/DSET_NOMAX)
-  ADD_H5_TEST (w-err-file 1 ../WATCH.h5/DSET_CMPD)
+  ADD_H5_ERR_TEST (w-err-dset1 1 WATCH.h5)
+  ADD_H5_ERR_TEST (w-err-dset2 1 WATCH.h5/group/DSET_CMPD)
+  ADD_H5_ERR_TEST (w-err-dset-none 1 WATCH.h5/DSET_NONE)
+  ADD_H5_ERR_TEST (w-err-dset-nomax 1 WATCH.h5/DSET_NOMAX)
+  ADD_H5_ERR_TEST (w-err-file 1 ../WATCH.h5/DSET_CMPD)
   ADD_H5_TEST (w-err-width 1 --width=-8 WATCH.h5/DSET_ONE)
   ADD_H5_TEST (w-err-poll 1 --polling=-8 WATCH.h5/DSET_ONE)
   ADD_H5_TEST (w-err-poll0 1 --polling=0 WATCH.h5/DSET_ONE)
 #
 # Tests on invalid field names via --fields option for a compound typed dataset: DSET_CMPD
-  ADD_H5_TEST (w-err-cmpd1 1 --fields=fieldx WATCH.h5/DSET_CMPD)
-  ADD_H5_TEST (w-err-cmpd2 1 --fields=field1,field2. WATCH.h5/DSET_CMPD)
-  ADD_H5_TEST (w-err-cmpd3 1 --fields=field1,field2, WATCH.h5/DSET_CMPD)
-  ADD_H5_TEST (w-err-cmpd4 1 --fields=field1,field2.b.k WATCH.h5/DSET_CMPD)
-  ADD_H5_TEST (w-err-cmpd5 1 --fields=field1 --fields=field2.b.k WATCH.h5/DSET_CMPD)
+  ADD_H5_ERR_TEST (w-err-cmpd1 1 --fields=fieldx WATCH.h5/DSET_CMPD)
+  ADD_H5_ERR_TEST (w-err-cmpd2 1 --fields=field1,field2. WATCH.h5/DSET_CMPD)
+  ADD_H5_ERR_TEST (w-err-cmpd3 1 --fields=field1,field2, WATCH.h5/DSET_CMPD)
+  ADD_H5_ERR_TEST (w-err-cmpd4 1 --fields=field1,field2.b.k WATCH.h5/DSET_CMPD)
+  ADD_H5_ERR_TEST (w-err-cmpd5 1 --fields=field1 --fields=field2.b.k WATCH.h5/DSET_CMPD)
 #
 endif ()

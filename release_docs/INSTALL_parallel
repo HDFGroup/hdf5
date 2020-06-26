@@ -40,9 +40,11 @@ and the parallel file system.
 
 1.2. Further Help
 -----------------
-If you still have difficulties installing PHDF5 in your system, please send
-mail to
-	help@hdfgroup.org
+
+For help with installing, questions can be posted to the HDF Forum or sent to the HDF Helpdesk:
+
+   HDF Forum:     https://forum.hdfgroup.org/
+   HDF Helpdesk:  https://portal.hdfgroup.org/display/support/The+HDF+Help+Desk
 
 In your mail, please include the output of "uname -a". If you have run the
 "configure" command, attach the output of the command and the content of
@@ -87,12 +89,8 @@ The following steps are for building HDF5 for the Hopper compute
 nodes.  They would probably work for other Cray systems but have
 not been verified.
 
-Obtain a copy from the HDF ftp server:
-http://www.hdfgroup.org/ftp/HDF5/current/src/
-(link might change, so always double check the HDF group website).
-
-$ wget http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-x.x.x.tar.gz
-unpack the tarball
+Obtain the HDF5 source code:
+    https://portal.hdfgroup.org/display/support/Downloads
 
 The entire build process should be done on a MOM node in an interactive allocation and on a file system accessible by all compute nodes.
 Request an interactive allocation with qsub:
@@ -104,7 +102,7 @@ qsub -I -q debug -l mppwidth=8
 - configure HDF5:
   RUNSERIAL="aprun -q -n 1" RUNPARALLEL="aprun -q -n 6" FC=ftn CC=cc /path/to/source/configure --enable-fortran --enable-parallel --disable-shared
 
-  RUNSERIAL and RUNPARALLEL tells the library how it should launch programs that are part of the build procedure.
+  RUNSERIAL and RUNPARALLEL tell the library how it should launch programs that are part of the build procedure.
 
 - Compile HDF5: 
   gmake
@@ -157,12 +155,16 @@ to run a parallel application on one processor and on many processors. If the
 compiler is `mpicc' and the user hasn't specified values for RUNSERIAL and
 RUNPARALLEL then configure chooses `mpiexec' from the same directory as `mpicc':
 
-    RUNSERIAL:    /usr/local/mpi/bin/mpiexec -np 1
-    RUNPARALLEL:  /usr/local/mpi/bin/mpiexec -np $${NPROCS:=6}
+    RUNSERIAL:    mpiexec -n 1
+    RUNPARALLEL:  mpiexec -n $${NPROCS:=6}
 
 The `$${NPROCS:=6}' will be substituted with the value of the NPROCS
 environment variable at the time `make check' is run (or the value 6).
 
+Note that some MPI implementations (e.g. OpenMPI 4.0) disallow oversubscribing
+nodes by default so you'll have to either set NPROCS equal to the number of
+processors available (or fewer) or redefine RUNPARALLEL with appropriate
+flag(s) (--oversubscribe in OpenMPI).
 
 4. Parallel test suite
 ----------------------

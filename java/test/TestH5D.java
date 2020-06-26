@@ -35,7 +35,7 @@ import org.junit.rules.TestName;
 
 public class TestH5D {
     @Rule public TestName testname = new TestName();
-    private static final String H5_FILE = "test.h5";
+    private static final String H5_FILE = "testD.h5";
     private static final int DIM_X = 4;
     private static final int DIM_Y = 6;
     private static final int RANK = 2;

@@ -26,6 +26,7 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
+import hdf.hdf5lib.exceptions.HDF5PropertyListInterfaceException;
 import hdf.hdf5lib.structs.H5AC_cache_config_t;
 
 import org.junit.After;
@@ -37,10 +38,10 @@ import org.junit.rules.TestName;
 public class TestH5Pfapl {
     @Rule public TestName testname = new TestName();
 
-    private static final String H5_FILE = "test.h5";
-    private static final String H5_LOG_FILE = "test.log";
-    private static final String H5_FAMILY_FILE = "test%05d";
-    private static final String H5_MULTI_FILE = "testmulti";
+    private static final String H5_FILE = "testPf.h5";
+    private static final String H5_LOG_FILE = "testPf.log";
+    private static final String H5_FAMILY_FILE = "testPf%05d";
+    private static final String H5_MULTI_FILE = "testPfmulti";
     private static char  MULTI_LETTERS[] = {'X','s','b','r','g','l','o'};
     private static final int DIM_X = 4;
     private static final int DIM_Y = 6;
@@ -1375,5 +1376,26 @@ public class TestH5Pfapl {
 
         deleteH5file();
         _deleteLogFile();
+    }
+
+    @Test
+    public void testH5P_evict_on_close() {
+        boolean ret_val_id = false;
+        try {
+            H5.H5Pset_evict_on_close(fapl_id, true);
+            ret_val_id = H5.H5Pget_evict_on_close(fapl_id);
+            assertTrue("H5P_evict_on_close", ret_val_id);
+        }
+        catch (HDF5PropertyListInterfaceException err) {
+            // parallel is not supported
+            if (err.getMinorErrorNumber() != HDF5Constants.H5E_UNSUPPORTED) {
+                err.printStackTrace();
+                fail("H5P_evict_on_close: " + err);
+            }
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5P_evict_on_close: " + err);
+        }
     }
 }

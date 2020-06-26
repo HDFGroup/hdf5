@@ -37,12 +37,12 @@
 #ifdef H5O_ENABLE_BOGUS
 
 /*
- * Create datasets in the location (in "/" or "/group") with 
+ * Create datasets in the location (in "/" or "/group") with
  *   message id: (a) H5O_BOGUS_VALID_ID or (b)H5O_BOGUS_INVALID_ID
  *   and various unknown message flags
  */
 static int
-generate_datasets(hid_t loc_id, unsigned bogus_id) 
+generate_datasets(hid_t loc_id, unsigned bogus_id)
 {
     hid_t sid = -1;             /* Dataspace ID */
     hid_t dcpl = -1;            /* Dataset creation property list ID */
@@ -87,6 +87,14 @@ generate_datasets(hid_t loc_id, unsigned bogus_id)
 
     /* Create fourth dataset, with "mark if unknown" message flag */
     if((did = H5Dcreate2(loc_id, "Dataset4", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) goto error;
+    if(H5Dclose(did) < 0) goto error;
+
+    /* Set "shareable" message flag for bogus message */
+    bogus_flags = H5O_MSG_FLAG_SHAREABLE;
+    if(H5Pset(dcpl, H5O_BOGUS_MSG_FLAGS_NAME, &bogus_flags) < 0) goto error;
+
+    /* Create fourth dataset, with "shareable" message flag */
+    if((did = H5Dcreate2(loc_id, "Dataset5", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) goto error;
     if(H5Dclose(did) < 0) goto error;
 
     /* Close dataset creation property list */

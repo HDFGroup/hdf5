@@ -41,8 +41,8 @@ public class TestH5Z {
     @Test
     public void testH5Zfilter_avail() {
         try {
-            int filter_found = H5.H5Zfilter_avail(HDF5Constants.H5Z_FILTER_DEFLATE);
-            assertTrue("H5.H5Zfilter_avail_DEFLATE", filter_found > 0);
+            int filter_found;
+
             filter_found = H5.H5Zfilter_avail(HDF5Constants.H5Z_FILTER_FLETCHER32);
             assertTrue("H5.H5Zfilter_avail_FLETCHER32", filter_found > 0);
             filter_found = H5.H5Zfilter_avail(HDF5Constants.H5Z_FILTER_NBIT);
@@ -51,8 +51,12 @@ public class TestH5Z {
             assertTrue("H5.H5Zfilter_avail_SCALEOFFSET", filter_found > 0);
             filter_found = H5.H5Zfilter_avail(HDF5Constants.H5Z_FILTER_SHUFFLE);
             assertTrue("H5.H5Zfilter_avail_SHUFFLE", filter_found > 0);
-//            filter_found = H5.H5Zfilter_avail(HDF5Constants.H5Z_FILTER_SZIP);
-//            assertTrue("H5.H5Zfilter_avail_SZIP", filter_found > 0);
+
+            // Just make sure H5Zfilter_avail() doesn't fail with szip/zlib
+            // since there is no way for us to determine if they should be present
+            // or not.
+            filter_found = H5.H5Zfilter_avail(HDF5Constants.H5Z_FILTER_DEFLATE);
+            filter_found = H5.H5Zfilter_avail(HDF5Constants.H5Z_FILTER_SZIP);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -63,9 +67,8 @@ public class TestH5Z {
     @Test
     public void testH5Zget_filter_info() {
         try {
-            int filter_flag = H5.H5Zget_filter_info(HDF5Constants.H5Z_FILTER_DEFLATE);
-            assertTrue("H5.H5Zget_filter_info_DEFLATE_DECODE_ENABLED", (filter_flag & HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED) > 0);
-            assertTrue("H5.H5Zget_filter_info_DEFLATE_ENCODE_ENABLED", (filter_flag & HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED) > 0);
+            int filter_flag;
+
             filter_flag = H5.H5Zget_filter_info(HDF5Constants.H5Z_FILTER_FLETCHER32);
             assertTrue("H5.H5Zget_filter_info_FLETCHER32_DECODE_ENABLED", (filter_flag & HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED) > 0);
             assertTrue("H5.H5Zget_filter_info_FLETCHER32_ENCODE_ENABLED", (filter_flag & HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED) > 0);
@@ -78,9 +81,19 @@ public class TestH5Z {
             filter_flag = H5.H5Zget_filter_info(HDF5Constants.H5Z_FILTER_SHUFFLE);
             assertTrue("H5.H5Zget_filter_info_DECODE_SHUFFLE_ENABLED", (filter_flag & HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED) > 0);
             assertTrue("H5.H5Zget_filter_info_ENCODE_SHUFFLE_ENABLED", (filter_flag & HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED) > 0);
-//            filter_flag = H5.H5Zget_filter_info(HDF5Constants.H5Z_FILTER_SZIP);
-//            assertTrue("H5.H5Zget_filter_info_DECODE_SZIP_ENABLED", (filter_flag & HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED) > 0);
-//            assertTrue("H5.H5Zget_filter_info_ENCODE_SZIP_ENABLED", (filter_flag & HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED) > 0);
+
+            if(1 == H5.H5Zfilter_avail(HDF5Constants.H5Z_FILTER_DEFLATE)) {
+                filter_flag = H5.H5Zget_filter_info(HDF5Constants.H5Z_FILTER_DEFLATE);
+                assertTrue("H5.H5Zget_filter_info_DEFLATE_DECODE_ENABLED", (filter_flag & HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED) > 0);
+                assertTrue("H5.H5Zget_filter_info_DEFLATE_ENCODE_ENABLED", (filter_flag & HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED) > 0);
+            }
+
+            if(1 == H5.H5Zfilter_avail(HDF5Constants.H5Z_FILTER_SZIP)) {
+                filter_flag = H5.H5Zget_filter_info(HDF5Constants.H5Z_FILTER_SZIP);
+                // Decode should always be available, but we have no way of determining
+                // if encode is so don't assert on that.
+                assertTrue("H5.H5Zget_filter_info_DECODE_SZIP_ENABLED", (filter_flag & HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED) > 0);
+            }
         }
         catch (Throwable err) {
             err.printStackTrace();

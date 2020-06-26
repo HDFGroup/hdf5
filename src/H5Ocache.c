@@ -36,6 +36,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5MFprivate.h"	/* File memory management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
@@ -65,17 +66,17 @@ static herr_t H5O__cache_get_final_load_size(const void *image_ptr, size_t image
     void *udata, size_t *actual_len);
 static htri_t H5O__cache_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
 static void *H5O__cache_deserialize(const void *image, size_t len,
-    void *udata, hbool_t *dirty); 
+    void *udata, hbool_t *dirty);
 static herr_t H5O__cache_image_len(const void *thing, size_t *image_len);
 static herr_t H5O__cache_serialize(const H5F_t *f, void *image, size_t len,
-    void *thing); 
+    void *thing);
 static herr_t H5O__cache_notify(H5AC_notify_action_t action, void *_thing);
 static herr_t H5O__cache_free_icr(void *thing);
 
 static herr_t H5O__cache_chk_get_initial_load_size(void *udata, size_t *image_len);
 static htri_t H5O__cache_chk_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
 static void *H5O__cache_chk_deserialize(const void *image, size_t len,
-    void *udata, hbool_t *dirty); 
+    void *udata, hbool_t *dirty);
 static herr_t H5O__cache_chk_image_len(const void *thing, size_t *image_len);
 static herr_t H5O__cache_chk_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
@@ -160,7 +161,7 @@ H5FL_SEQ_DEFINE(H5O_cont_t);
 /*-------------------------------------------------------------------------
  * Function:    H5O__cache_get_initial_load_size()
  *
- * Purpose:	Tell the metadata cache how much data to read from file in 
+ * Purpose:	Tell the metadata cache how much data to read from file in
  *		the first speculative read for the object header.
  *
  * Return:      Success:        SUCCEED
@@ -200,7 +201,7 @@ H5O__cache_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__cache_get_final_load_size(const void *image, size_t image_len,
+H5O__cache_get_final_load_size(const void *image, size_t H5_ATTR_NDEBUG_UNUSED image_len,
     void *_udata, size_t *actual_len)
 {
     H5O_cache_ud_t *udata = (H5O_cache_ud_t *)_udata;   /* User data for callback */
@@ -262,12 +263,23 @@ H5O__cache_verify_chksum(const void *_image, size_t len, void *_udata)
         uint32_t stored_chksum;     /* Stored metadata checksum value */
         uint32_t computed_chksum;   /* Computed metadata checksum value */
 
-	/* Get stored and computed checksums */
-	H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+        /* Get stored and computed checksums */
+        H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
 
-	if(stored_chksum != computed_chksum)
-	    ret_value = FALSE;
+        if(stored_chksum != computed_chksum) {
+            /* These fields are not deserialized yet in H5O__prefix_deserialize() */
+            HDassert(udata->oh->chunk == NULL);
+            HDassert(udata->oh->mesg == NULL);
+            HDassert(udata->oh->proxy == NULL);
+
+            /* Indicate that udata->oh is to be freed later
+               in H5O__prefix_deserialize() */
+            udata->free_oh = TRUE;
+            ret_value = FALSE;
+        } /* end if */
     } /* end if */
+    else
+        HDassert(!(udata->common.file_intent & H5F_ACC_SWMR_WRITE));
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__cache_verify_chksum() */
@@ -276,12 +288,12 @@ H5O__cache_verify_chksum(const void *_image, size_t len, void *_udata)
 /*-------------------------------------------------------------------------
  * Function:    H5O__cache_deserialize
  *
- * Purpose:	Attempt to deserialize the object header contained in the 
- *		supplied buffer, load the data into an instance of H5O_t, and 
+ * Purpose:	Attempt to deserialize the object header contained in the
+ *		supplied buffer, load the data into an instance of H5O_t, and
  *		return a pointer to the new instance.
  *
- *		Note that the object header is read with with a speculative read.  
- *		If the initial read is too small, make note of this fact and return 
+ *		Note that the object header is read with with a speculative read.
+ *		If the initial read is too small, make note of this fact and return
  *     		without error.  H5C_load_entry() will note the size discrepency
  *		and retry the deserialize operation with the correct size read.
  *
@@ -294,7 +306,7 @@ H5O__cache_verify_chksum(const void *_image, size_t len, void *_udata)
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__cache_deserialize(const void *image, size_t len, void *_udata,
+H5O__cache_deserialize(const void *image, size_t H5_ATTR_NDEBUG_UNUSED len, void *_udata,
     hbool_t *dirty)
 {
     H5O_t          *oh = NULL;          /* Object header read in */
@@ -305,7 +317,7 @@ H5O__cache_deserialize(const void *image, size_t len, void *_udata,
 
     /* Check arguments */
     HDassert(image);
-    HDassert(len > 0); 
+    HDassert(len > 0);
     HDassert(udata);
     HDassert(udata->common.f);
     HDassert(udata->common.cont_msg_info);
@@ -426,18 +438,18 @@ H5O__cache_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
     HDassert(oh->cache_info.type == H5AC_OHDR);
     HDassert(oh->chunk[0].size == len);
 #ifdef H5O_DEBUG
-    H5O_assert(oh);
+    H5O__assert(oh);
 #endif /* H5O_DEBUG */
 
-    /* Point to raw data 'image' for first chunk, which 
-     * has room for the prefix 
+    /* Point to raw data 'image' for first chunk, which
+     * has room for the prefix
      */
     chunk_image = oh->chunk[0].image;
 
     /* Later versions of object header prefix have different format and
      * also require that chunk 0 always be updated, since the checksum
      * on the entire block of memory needs to be updated if anything is
-     * modified 
+     * modified
      */
     if(oh->version > H5O_VERSION_1) {
         uint64_t chunk0_size;       /* Size of chunk 0's data */
@@ -524,14 +536,14 @@ H5O__cache_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
     HDassert((size_t)(chunk_image - oh->chunk[0].image) == (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
 
     /* Serialize messages for this chunk */
-    if(H5O__chunk_serialize(f, oh, (unsigned)0) < 0) 
+    if(H5O__chunk_serialize(f, oh, (unsigned)0) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSERIALIZE, FAIL, "unable to serialize first object header chunk")
 
-    /* copy the chunk into the image -- this is potentially expensive.  
-     * Can we rework things so that the object header and the cache 
+    /* copy the chunk into the image -- this is potentially expensive.
+     * Can we rework things so that the object header and the cache
      * share a buffer?
      */
-    HDmemcpy(image, oh->chunk[0].image, len);
+    H5MM_memcpy(image, oh->chunk[0].image, len);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -639,7 +651,7 @@ done:
  */
 static herr_t
 H5O__cache_free_icr(void *_thing)
-{ 
+{
     H5O_t      *oh = (H5O_t *)_thing;   /* Object header to destroy */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -662,8 +674,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5O__cache_chk_get_initial_load_size()
  *
- * Purpose:	Tell the metadata cache how large the on disk image of the 
- *		chunk proxy is, so it can load the image into a buffer for the 
+ * Purpose:	Tell the metadata cache how large the on disk image of the
+ *		chunk proxy is, so it can load the image into a buffer for the
  *		deserialize call.
  *
  * Return:      Success:        SUCCEED
@@ -739,7 +751,7 @@ H5O__cache_chk_verify_chksum(const void *_image, size_t len, void *_udata)
  * Function:    H5O__cache_chk_deserialize
  *
  * Purpose:	Attempt to deserialize the object header continuation chunk
- *		contained in the supplied buffer, load the data into an instance 
+ *		contained in the supplied buffer, load the data into an instance
  *		of H5O_chunk_proxy_t, and return a pointer to the new instance.
  *
  * Return:      Success:        Pointer to in core representation
@@ -751,7 +763,7 @@ H5O__cache_chk_verify_chksum(const void *_image, size_t len, void *_udata)
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__cache_chk_deserialize(const void *image, size_t len, void *_udata,
+H5O__cache_chk_deserialize(const void *image, size_t H5_ATTR_NDEBUG_UNUSED len, void *_udata,
     hbool_t *dirty)
 {
     H5O_chunk_proxy_t  *chk_proxy = NULL;       /* Chunk proxy object */
@@ -768,7 +780,7 @@ H5O__cache_chk_deserialize(const void *image, size_t len, void *_udata,
     HDassert(dirty);
 
     /* Allocate space for the object header data structure */
-    if(NULL == (chk_proxy = H5FL_CALLOC(H5O_chunk_proxy_t))) 
+    if(NULL == (chk_proxy = H5FL_CALLOC(H5O_chunk_proxy_t)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "memory allocation failed")
 
     /* Check if we are still decoding the object header */
@@ -792,14 +804,14 @@ H5O__cache_chk_deserialize(const void *image, size_t len, void *_udata,
         /* Set the chunk number for the chunk proxy */
         chk_proxy->chunkno = udata->chunkno;
 
-        /* Sanity check that the chunk representation we have in memory is 
+        /* Sanity check that the chunk representation we have in memory is
          * the same as the one being brought in from disk.
          */
         HDassert(0 == HDmemcmp(image, udata->oh->chunk[chk_proxy->chunkno].image, udata->oh->chunk[chk_proxy->chunkno].size));
     } /* end else */
 
     /* Increment reference count of object header */
-    if(H5O_inc_rc(udata->oh) < 0)
+    if(H5O__inc_rc(udata->oh) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINC, NULL, "can't increment reference count on object header")
     chk_proxy->oh = udata->oh;
 
@@ -818,7 +830,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5O__cache_chk_image_len
  *
- * Purpose:	Return the on disk image size of a object header chunk to the 
+ * Purpose:	Return the on disk image size of a object header chunk to the
  *		metadata cache via the image_len.
  *
  * Return:      Success:        SUCCEED
@@ -852,9 +864,9 @@ H5O__cache_chk_image_len(const void *_thing, size_t *image_len)
 /*-------------------------------------------------------------------------
  * Function:    H5O__cache_chk_serialize
  *
- * Purpose:	Given a pointer to an instance of an object header chunk and an 
- *		appropriately sized buffer, serialize the contents of the 
- *		instance for writing to disk, and copy the serialized data 
+ * Purpose:	Given a pointer to an instance of an object header chunk and an
+ *		appropriately sized buffer, serialize the contents of the
+ *		instance for writing to disk, and copy the serialized data
  *		into the buffer.
  *
  * Return:      Success:        SUCCEED
@@ -889,7 +901,7 @@ H5O__cache_chk_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
     /* copy the chunk into the image -- this is potentially expensive.
      * Can we rework things so that the chunk and the cache share a buffer?
      */
-    HDmemcpy(image, chk_proxy->oh->chunk[chk_proxy->chunkno].image, len);
+    H5MM_memcpy(image, chk_proxy->oh->chunk[chk_proxy->chunkno].image, len);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -912,7 +924,6 @@ static herr_t
 H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
 {
     H5O_chunk_proxy_t *chk_proxy = (H5O_chunk_proxy_t *)_thing;
-    H5O_chunk_proxy_t *cont_chk_proxy = NULL; /* Proxy for chunk containing continuation message that points to this chunk, if not chunk 0 */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -927,37 +938,26 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
         case H5AC_NOTIFY_ACTION_AFTER_INSERT:
         case H5AC_NOTIFY_ACTION_AFTER_LOAD:
             if(chk_proxy->oh->swmr_write) {
-                /* Add flush dependency on chunk parent */
-                {
-                    void *parent;       /* Chunk containing continuation message that points to this chunk */
-
-                    /* Determine the parent of the chunk */
-                    if(chk_proxy->cont_chunkno == 0)
-                        parent = chk_proxy->oh;
-                    else {
-                        if(NULL == (cont_chk_proxy = H5O_chunk_protect(chk_proxy->f, H5AC_ind_read_dxpl_id, chk_proxy->oh, chk_proxy->cont_chunkno)))
-                            HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header chunk")
-                        parent = cont_chk_proxy;
-                    } /* end else */
-
+                /* Add flush dependency on chunk with continuation, if one exists */
+                if(chk_proxy->fd_parent) {
                     /* Sanity checks */
-                    HDassert(parent);
-                    HDassert(((H5C_cache_entry_t *)parent)->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-                    HDassert(((H5C_cache_entry_t *)parent)->type);
-                    HDassert((((H5C_cache_entry_t *)(parent))->type->id == H5AC_OHDR_ID)
-                             || (((H5C_cache_entry_t *)(parent))->type->id == H5AC_OHDR_CHK_ID));
+                    HDassert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+                    HDassert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type);
+                    HDassert((((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_ID)
+                             || (((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_CHK_ID));
 
                     /* Add flush dependency from chunk containing the continuation message
                      * that points to this chunk (either oh or another chunk proxy object)
                      */
-                    if(H5AC_create_flush_dependency(parent, chk_proxy) < 0)
+                    if(H5AC_create_flush_dependency(chk_proxy->fd_parent, chk_proxy) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+                } /* end if */
 
-                    /* Make note of the address and pointer of the flush dependency
-                     * parent so we can take the dependency down on eviction.
-                     */
-                    chk_proxy->parent = parent;
-                }
+                /* Add flush dependency on object header */
+                {
+                    if(H5AC_create_flush_dependency(chk_proxy->oh, chk_proxy) < 0)
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+                } /* end if */
 
                 /* Add flush dependency on object header proxy, if proxy exists */
                 {
@@ -996,17 +996,21 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
 
         case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
             if(chk_proxy->oh->swmr_write) {
-                /* Remove flush dependency on parent object header chunk */
-                {
+                /* Remove flush dependency on parent object header chunk, if one is set */
+                if(chk_proxy->fd_parent) {
                     /* Sanity checks */
-                    HDassert(chk_proxy->parent != NULL);
-                    HDassert(((H5C_cache_entry_t *)(chk_proxy->parent))->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-                    HDassert(((H5C_cache_entry_t *)(chk_proxy->parent))->type);
-                    HDassert((((H5C_cache_entry_t *)(chk_proxy->parent))->type->id == H5AC_OHDR_ID) || (((H5C_cache_entry_t *)(chk_proxy->parent))->type->id == H5AC_OHDR_CHK_ID));
+                    HDassert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+                    HDassert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type);
+                    HDassert((((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_ID) || (((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_CHK_ID));
 
-                    if(H5AC_destroy_flush_dependency(chk_proxy->parent, chk_proxy) < 0)
+                    if(H5AC_destroy_flush_dependency(chk_proxy->fd_parent, chk_proxy) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
-                }
+                    chk_proxy->fd_parent = NULL;
+                } /* end if */
+
+                /* Unregister the object header as a parent of the virtual entry */
+                if(H5AC_destroy_flush_dependency(chk_proxy->oh, chk_proxy) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
 
                 /* Unregister the object header chunk as a parent of the virtual entry */
                 if(H5AC_proxy_entry_remove_parent(chk_proxy->oh->proxy, chk_proxy) < 0)
@@ -1023,10 +1027,6 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
     } /* end switch */
 
 done:
-    if(cont_chk_proxy)
-        if(H5O_chunk_unprotect(chk_proxy->f, H5AC_ind_read_dxpl_id, cont_chk_proxy, FALSE) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__cache_chk_notify() */
 
@@ -1263,8 +1263,22 @@ H5O__prefix_deserialize(const uint8_t *_image, H5O_cache_ud_t *udata)
     /* Verify object header prefix length */
     HDassert((size_t)(image - _image) == (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
 
-    /* Save the object header for later use in 'deserialize' callback */
-    udata->oh = oh;
+    /* If udata->oh is to be freed (see H5O__cache_verify_chksum),
+       save the pointer to udata->oh and free it later after setting
+       udata->oh with the new object header */
+    if(udata->free_oh) {
+        H5O_t *saved_oh = udata->oh;
+        HDassert(udata->oh);
+
+        /* Save the object header for later use in 'deserialize' callback */
+        udata->oh = oh;
+        if(H5O__free(saved_oh) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't destroy object header")
+        udata->free_oh = FALSE;
+    } else
+        /* Save the object header for later use in 'deserialize' callback */
+        udata->oh = oh;
+
     oh = NULL;
 
 done:
@@ -1339,7 +1353,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
     oh->chunk[chunkno].chunk_proxy = NULL;
 
     /* Copy disk image into chunk's image */
-    HDmemcpy(oh->chunk[chunkno].image, image, oh->chunk[chunkno].size);
+    H5MM_memcpy(oh->chunk[chunkno].image, image, oh->chunk[chunkno].size);
 
     /* Point into chunk image to decode */
     chunk_image = oh->chunk[chunkno].image;
@@ -1377,7 +1391,8 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
 
         /* Message size */
         UINT16DECODE(chunk_image, mesg_size);
-        HDassert(mesg_size == H5O_ALIGN_OH(oh, mesg_size));
+        if(mesg_size != H5O_ALIGN_OH(oh, mesg_size))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "message not aligned")
 
         /* Message flags */
         flags = *chunk_image++;
@@ -1389,10 +1404,9 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "bad flag combination for message")
         if((flags & H5O_MSG_FLAG_WAS_UNKNOWN) && !(flags & H5O_MSG_FLAG_MARK_IF_UNKNOWN))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "bad flag combination for message")
-        if((flags & H5O_MSG_FLAG_SHAREABLE)
-                && H5O_msg_class_g[id]
-                && !(H5O_msg_class_g[id]->share_flags & H5O_SHARE_IS_SHARABLE))
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "message of unsharable class flagged as sharable")
+        /* Delay checking the "shareable" flag until we've made sure id
+         * references a valid message class that this version of the library
+         * knows about */
 
         /* Reserved bytes/creation index */
         if(oh->version == H5O_VERSION_1)
@@ -1420,6 +1434,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
                 H5O_NULL_ID == id && oh->nmesgs > 0 &&
                 H5O_NULL_ID == oh->mesg[oh->nmesgs - 1].type->id &&
                 oh->mesg[oh->nmesgs - 1].chunkno == chunkno) {
+
             size_t mesgno;          /* Current message to operate on */
 
             /* Combine adjacent null messages */
@@ -1434,7 +1449,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
 
             /* Check if we need to extend message table to hold the new message */
             if(oh->nmesgs >= oh->alloc_nmesgs)
-                if(H5O_alloc_msgs(oh, (size_t)1) < 0)
+                if(H5O__alloc_msgs(oh, (size_t)1) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "can't allocate more space for messages")
 
             /* Get pointer to message to set up */
@@ -1454,13 +1469,13 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
 
             /* Point unknown messages at 'unknown' message class */
             /* (Usually from future versions of the library) */
-	    if(id >= H5O_UNKNOWN_ID ||
+            if(id >= H5O_UNKNOWN_ID ||
 #ifdef H5O_ENABLE_BOGUS
                     id == H5O_BOGUS_VALID_ID ||
 #endif
                     NULL == H5O_msg_class_g[id]) {
 
-		H5O_unknown_t *unknown;     /* Pointer to "unknown" message info */
+                H5O_unknown_t *unknown;     /* Pointer to "unknown" message info */
 
                 /* Allocate "unknown" message info */
                 if(NULL == (unknown = H5FL_MALLOC(H5O_unknown_t)))
@@ -1476,8 +1491,8 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
                 mesg->type = H5O_msg_class_g[H5O_UNKNOWN_ID];
 
                 /* Check for "fail if unknown" message flags */
-                if(((udata->file_intent & H5F_ACC_RDWR) && 
-                       (flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN_AND_OPEN_FOR_WRITE))
+                if(((udata->file_intent & H5F_ACC_RDWR) &&
+                        (flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN_AND_OPEN_FOR_WRITE))
                         || (flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS))
                     HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unknown message with 'fail if unknown' flag found")
                 /* Check for "mark if unknown" message flag, etc. */
@@ -1503,9 +1518,17 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
                     mesgs_modified = TRUE;
                 } /* end if */
             } /* end if */
-            else
+            else {
+                /* Check for message of unshareable class marked as "shareable"
+                 */
+                if((flags & H5O_MSG_FLAG_SHAREABLE)
+                        && H5O_msg_class_g[id]
+                        && !(H5O_msg_class_g[id]->share_flags & H5O_SHARE_IS_SHARABLE))
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "message of unshareable class flagged as shareable")
+
                 /* Set message class for "known" messages */
                 mesg->type = H5O_msg_class_g[id];
+            } /* end else */
 
             /* Do some inspection/interpretation of new messages from this chunk */
             /* (detect continuation messages, ref. count messages, etc.) */
@@ -1515,7 +1538,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
                 H5O_cont_t *cont;
 
                 /* Decode continuation message */
-                cont = (H5O_cont_t *)(H5O_MSG_CONT->decode)(udata->f, udata->dxpl_id, NULL, 0, &ioflags, mesg->raw);
+                cont = (H5O_cont_t *)(H5O_MSG_CONT->decode)(udata->f, NULL, 0, &ioflags, mesg->raw_size, mesg->raw);
                 H5_CHECKED_ASSIGN(cont->chunkno, unsigned, udata->cont_msg_info->nmsgs + 1, size_t); /* the next continuation message/chunk */
 
                 /* Save 'native' form of continuation message */
@@ -1530,14 +1553,17 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
                 H5O_refcount_t *refcount;
 
                 /* Decode ref. count message */
-                HDassert(oh->version > H5O_VERSION_1);
-                refcount = (H5O_refcount_t *)(H5O_MSG_REFCOUNT->decode)(udata->f, udata->dxpl_id, NULL, 0, &ioflags, mesg->raw);
+                if(oh->version <= H5O_VERSION_1)
+                    HGOTO_ERROR(H5E_OHDR, H5E_VERSION, FAIL, "object header version does not support reference count message")
+                refcount = (H5O_refcount_t *)(H5O_MSG_REFCOUNT->decode)(udata->f, NULL, 0, &ioflags, mesg->raw_size, mesg->raw);
 
                 /* Save 'native' form of ref. count message */
                 mesg->native = refcount;
 
                 /* Set object header values */
                 oh->has_refcount_msg = TRUE;
+                if(!refcount)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't decode refcount")
                 oh->nlink = *refcount;
             } /* end if */
             /* Check if message is a link message */
@@ -1601,6 +1627,10 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
     } /* end if */
 
 done:
+    if(ret_value < 0 && udata->cont_msg_info->msgs) {
+        udata->cont_msg_info->msgs = H5FL_SEQ_FREE(H5O_cont_t, udata->cont_msg_info->msgs);
+        udata->cont_msg_info->alloc_nmsgs = 0;
+    }
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__chunk_deserialize() */
 

@@ -56,7 +56,7 @@ CONTAINS
 !            H5Z_FILTER_SCALEOFFSET_F
 !            H5Z_FILTER_SHUFFLE_F
 !            H5Z_FILTER_FLETCHER32_F
-!            
+!
 ! OUTPUTS
 !  hdferr - Error code
 !            Success:  0
@@ -147,7 +147,7 @@ CONTAINS
 !                   H5Z_FILTER_SHUFFLE_F
 !                   H5Z_FILTER_FLETCHER32_Ffilter
 ! OUTPUTS
-!  config_flags  - Flag, indicates if filter has its encoder 
+!  config_flags  - Flag, indicates if filter has its encoder
 !                  and/or decoder available, possibly containing the
 !                  following values:
 !                     H5Z_FILTER_ENCODE_ENABLED_F

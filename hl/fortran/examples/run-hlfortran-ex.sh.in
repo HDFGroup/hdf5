@@ -18,7 +18,7 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #                                                                               #
 # This script will compile and run the fortran examples from source files       #
-# installed in .../share/hdf5_examples/hl/fortran using h5fc or h5pfc.  The     #
+# installed in @examplesdir@/hl/fortran using h5fc or h5pfc.  The               #
 # order for running programs with RunTest in the MAIN section below is taken    #
 # from the Makefile.  The order is important since some of the test programs    #
 # use data files created by earlier test programs.  Any future additions should #
@@ -80,5 +80,5 @@ rm *.o
 rm *.h5
 echo
 
-exit $EXIT_VALUE 
+exit $EXIT_VALUE
 

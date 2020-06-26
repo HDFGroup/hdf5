@@ -40,11 +40,6 @@ static hid_t create_file(const char *filename, hbool_t verbose,
     FILE *verbose_file, unsigned random_seed);
 static int create_datasets(hid_t fid, int comp_level, hbool_t verbose,
     FILE *verbose_file, const char *index_type);
-static int create_close_datasets(hid_t fid, int comp_level, hbool_t verbose,
-    FILE *verbose_file);
-static int open_datasets(hid_t fid, hbool_t verbose, FILE *verbose_file);
-static hid_t open_file(const char *filename, hbool_t verbose,
-    FILE *verbose_file);
 static int add_records(hid_t fid, hbool_t verbose, FILE *verbose_file,
     unsigned long nrecords, unsigned long flush_count);
 static void usage(void);
@@ -58,11 +53,11 @@ static void usage(void);
  * Purpose:     Creates the HDF5 file (without SWMR access) which
  *              which will be used for testing H5Fstart_swmr_write().
  *
- * Parameters:  
+ * Parameters:
  *              filename: The SWMR test file's name.
  *              verbose: whether verbose console output is desired.
  *              verbose_file: file pointer for verbose output
- *              random_seed: The random seed to store in the file.  
+ *              random_seed: The random seed to store in the file.
  *              The sparse tests use this value.
  *
  * Return:      Success:    the file ID
@@ -139,10 +134,10 @@ create_file(const char *filename, hbool_t verbose, FILE *verbose_file,
 /*-------------------------------------------------------------------------
  * Function:    create_datasets
  *
- * Purpose:     Create datasets (and keep them opened) which will be used for testing 
+ * Purpose:     Create datasets (and keep them opened) which will be used for testing
  *              H5Fstart_swmr_write().
  *
- * Parameters:  
+ * Parameters:
  *              fid: file ID for the SWMR test file
  *              comp_level: the compresssion level
  *              index_type: The chunk index type (b1 | b2 | ea | fa)
@@ -212,172 +207,12 @@ create_datasets(hid_t fid, int comp_level, hbool_t verbose, FILE *verbose_file,
 
 
 /*-------------------------------------------------------------------------
- * Function:    create_close_datasets
- *
- * Purpose:     Create and close datasets which will be used for testing 
- *              H5Fstart_swmr_write().
- *
- * Parameters:  
- *              fid: file ID for the SWMR test file
- *              comp_level: the compresssion level
- *              verbose: whether verbose console output is desired.
- *              verbose_file: file pointer for verbose output
- *
- * Return:      Success:    0
- *              Failure:    -1
- *
- *-------------------------------------------------------------------------
- */
-static int
-create_close_datasets(hid_t fid, int comp_level, hbool_t verbose, FILE *verbose_file)
-{
-    hid_t dcpl;         /* Dataset creation property list */
-    hid_t tid;          /* Datatype for dataset elements */
-    hid_t sid;          /* Dataspace ID */
-    hsize_t dims[2] = {1, 0}; /* Dataset starting dimensions */
-    hsize_t max_dims[2] = {1, H5S_UNLIMITED}; /* Dataset maximum dimensions */
-    hsize_t chunk_dims[2] = {1, CHUNK_SIZE}; /* Chunk dimensions */
-    unsigned u, v;      /* Local index variable */
-
-    /* Create datatype for creating datasets */
-    if((tid = create_symbol_datatype()) < 0)
-        return -1;
-
-    /* Create dataspace for creating datasets */
-    if((sid = H5Screate_simple(2, dims, max_dims)) < 0)
-        return -1;
-
-    /* Create dataset creation property list */
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        return -1;
-    if(H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
-        return -1;
-    if(comp_level >= 0) {
-        if(H5Pset_deflate(dcpl, (unsigned)comp_level) < 0)
-            return -1;
-    } /* end if */
-
-    /* Emit informational message */
-    if(verbose)
-        HDfprintf(verbose_file, "Creating datasets\n");
-
-    /* Create the datasets */
-    for(u = 0; u < NLEVELS; u++)
-        for(v = 0; v < symbol_count[u]; v++) {
-            hid_t dsid;         /* Dataset ID */
-            char name_buf[64];
-
-            generate_name(name_buf, u, v);
-            if((dsid = H5Dcreate2(fid, name_buf, tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-                return -1;
-
-            if(H5Dclose(dsid) < 0)
-                return -1;
-        } /* end for */
-
-    /* Closing */
-    if(H5Pclose(dcpl) < 0)
-        return -1;
-    if(H5Sclose(sid) < 0)
-        return -1;
-    if(H5Tclose(tid) < 0)
-        return -1;
-
-    return 0;
-} /* create_close_datasets() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    open_file
- *
- * Purpose:     Opens the HDF5 test file without SWMR access.
- *
- * Parameters:  
- *              filename: The filename of the HDF5 file to open
- *              verbose: whether or not to emit verbose console messages
- *              verbose_file: file pointer for verbose output
- *
- * Return:      Success: The file ID of the opened SWMR file
- *              Failure: -1
- *
- *-------------------------------------------------------------------------
- */
-static hid_t
-open_file(const char *filename, hbool_t verbose, FILE *verbose_file)
-{
-    hid_t fid;          /* File ID for new HDF5 file */
-    hid_t fapl;         /* File access property list */
-
-    HDassert(filename);
-
-    /* Create file access property list */
-    if((fapl = h5_fileaccess()) < 0)
-        return -1;
-
-    /* Set to use the latest library format */
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        return -1;
-
-    /* Emit informational message */
-    if(verbose)
-        HDfprintf(verbose_file, "Opening the file without SWMR access: %s\n", filename);
-
-    /* Open the file */
-    if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        return -1;
-
-    /* Close file access property list */
-    if(H5Pclose(fapl) < 0)
-        return -1;
-
-    return fid;
-} /* Open file() */
-
-
-
-/*-------------------------------------------------------------------------
- * Function:    open_datasets
- *
- * Purpose:     Opens the datasets.
- *
- * Parameters:  
- *              filename: the filename of the SWMR HDF5 file to open
- *              verbose: whether or not to emit verbose console messages
- *              verbose_file: file pointer for verbose output
- *
- * Return:      Success: 0
- *              Failure: -1
- *
- *-------------------------------------------------------------------------
- */
-static int
-open_datasets(hid_t fid, hbool_t verbose, FILE *verbose_file)
-{
-    unsigned u, v;      /* Local index variable */
-
-    /* Emit informational message */
-    if(verbose)
-        HDfprintf(verbose_file, "Opening datasets\n");
-
-    /* Open the datasets */
-    for(u = 0; u < NLEVELS; u++)
-        for(v = 0; v < symbol_count[u]; v++) {
-            if((symbol_info[u][v].dsid = H5Dopen2(fid, symbol_info[u][v].name, H5P_DEFAULT)) < 0)
-                return -1;
-            symbol_info[u][v].nrecords = 0;
-        } /* end for */
-
-    return 0;
-} /* open_datasets() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    add_records
  *
  * Purpose:     Writes a specified number of records to random datasets in
  *              the SWMR test file.
  *
- * Parameters:  
+ * Parameters:
  *              fid: The file ID of the SWMR HDF5 file
  *              verbose: Whether or not to emit verbose console messages
  *              verbose_file: file pointer for verbose output
@@ -502,27 +337,27 @@ add_records(hid_t fid, hbool_t verbose, FILE *verbose_file,
 static void
 usage(void)
 {
-    printf("\n");
-    printf("Usage error!\n");
-    printf("\n");
-    printf("Usage: swmr_start_write [-f <# of records to write between flushing file contents>]\n");
-    printf("    [-i <index type>] [-c <deflate compression level>]\n");
-    printf("    [-r <random seed>] [-q] <# of records>\n");
-    printf("\n");
-    printf("<# of records to write between flushing file contents> should be 0\n");
-    printf("(for no flushing) or between 1 and (<# of records> - 1).\n");
-    printf("\n");
-    printf("<index type> should be b2 or ea\n");
-    printf("\n");
-    printf("<deflate compression level> should be -1 (for no compression) or 0-9\n");
-    printf("\n");
-    printf("<# of records> must be specified.\n");
-    printf("\n");
-    printf("Defaults to flushing every 10000 records ('-f 10000'),\n");
-    printf("v1 b-tree indexing (-i b1), compression ('-c -1'),\n");
-    printf("will generate a random seed (no -r given), and verbose (no '-q' given)\n");
-    printf("\n");
-    HDexit(1);
+    HDprintf("\n");
+    HDprintf("Usage error!\n");
+    HDprintf("\n");
+    HDprintf("Usage: swmr_start_write [-f <# of records to write between flushing file contents>]\n");
+    HDprintf("    [-i <index type>] [-c <deflate compression level>]\n");
+    HDprintf("    [-r <random seed>] [-q] <# of records>\n");
+    HDprintf("\n");
+    HDprintf("<# of records to write between flushing file contents> should be 0\n");
+    HDprintf("(for no flushing) or between 1 and (<# of records> - 1).\n");
+    HDprintf("\n");
+    HDprintf("<index type> should be b2 or ea\n");
+    HDprintf("\n");
+    HDprintf("<deflate compression level> should be -1 (for no compression) or 0-9\n");
+    HDprintf("\n");
+    HDprintf("<# of records> must be specified.\n");
+    HDprintf("\n");
+    HDprintf("Defaults to flushing every 10000 records ('-f 10000'),\n");
+    HDprintf("v1 b-tree indexing (-i b1), compression ('-c -1'),\n");
+    HDprintf("will generate a random seed (no -r given), and verbose (no '-q' given)\n");
+    HDprintf("\n");
+    HDexit(EXIT_FAILURE);
 } /* usage() */
 
 /*
@@ -584,7 +419,7 @@ int main(int argc, const char *argv[])
                         verbose = FALSE;
                         u++;
                         break;
-                    
+
                     /* Random # seed */
                     case 'r':
                         use_seed = TRUE;
@@ -633,7 +468,7 @@ int main(int argc, const char *argv[])
         HDsnprintf(verbose_name, sizeof(verbose_name), "swmr_writer.out.%u", random_seed);
         if(NULL == (verbose_file = HDfopen(verbose_name, "w"))) {
             HDfprintf(stderr, "Can't open verbose output file!\n");
-            HDexit(1);
+            HDexit(EXIT_FAILURE);
         }
     } /* end if */
 
@@ -652,7 +487,7 @@ int main(int argc, const char *argv[])
     /* Create the test file */
     if((fid = create_file(FILENAME, verbose, verbose_file, random_seed)) < 0) {
         HDfprintf(stderr, "Error creating the file...\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     }
 
     /* Emit informational message */
@@ -666,13 +501,13 @@ int main(int argc, const char *argv[])
     /* Create the datasets in the file */
     if(create_datasets(fid, comp_level, verbose, verbose_file, index_type) < 0) {
         HDfprintf(stderr, "Error creating datasets...\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     }
 
     /* Enable SWMR writing mode */
     if(H5Fstart_swmr_write(fid) < 0) {
         HDfprintf(stderr, "Error starting SWMR writing mode...\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     }
 
     /* Send a message to indicate "H5Fopen" is complete--releasing the file lock */
@@ -685,7 +520,7 @@ int main(int argc, const char *argv[])
     /* Append records to datasets */
     if(add_records(fid, verbose, verbose_file, (unsigned long)nrecords, (unsigned long)flush_count) < 0) {
         HDfprintf(stderr, "Error appending records to datasets!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -695,7 +530,7 @@ int main(int argc, const char *argv[])
     /* Clean up the symbols */
     if(shutdown_symbols() < 0) {
         HDfprintf(stderr, "Error releasing symbols!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -705,7 +540,7 @@ int main(int argc, const char *argv[])
     /* Close objects opened */
     if(H5Fclose(fid) < 0) {
         HDfprintf(stderr, "Error closing file!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     return 0;

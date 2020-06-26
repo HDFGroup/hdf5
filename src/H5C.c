@@ -81,6 +81,7 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Cpkg.h"		/* Cache				*/
+#include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"		/* Files				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
@@ -105,17 +106,26 @@
 /* Local Typedefs */
 /******************/
 
+/* Alias for pointer to cache entry, for use when allocating sequences of them */
+typedef H5C_cache_entry_t *H5C_cache_entry_ptr_t;
+
 
 /********************/
 /* Local Prototypes */
 /********************/
 
-static herr_t H5C__auto_adjust_cache_size(H5F_t * f,
-                                          hid_t dxpl_id,
-                                          hbool_t write_permitted);
+static herr_t H5C__pin_entry_from_client(H5C_t *cache_ptr,
+    H5C_cache_entry_t *entry_ptr);
+
+static herr_t H5C__unpin_entry_real(H5C_t *cache_ptr,
+    H5C_cache_entry_t *entry_ptr, hbool_t update_rp);
+
+static herr_t H5C__unpin_entry_from_client(H5C_t *cache_ptr,
+    H5C_cache_entry_t *entry_ptr, hbool_t update_rp);
+
+static herr_t H5C__auto_adjust_cache_size(H5F_t *f, hbool_t write_permitted);
 
 static herr_t H5C__autoadjust__ageout(H5F_t * f,
-                                      hid_t dxpl_id,
                                       double hit_rate,
                                       enum H5C_resize_status * status_ptr,
                                       size_t * new_max_cache_size_ptr,
@@ -124,7 +134,6 @@ static herr_t H5C__autoadjust__ageout(H5F_t * f,
 static herr_t H5C__autoadjust__ageout__cycle_epoch_marker(H5C_t * cache_ptr);
 
 static herr_t H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
-                                                       hid_t dxpl_id,
                                                        hbool_t write_permitted);
 
 static herr_t H5C__autoadjust__ageout__insert_new_marker(H5C_t * cache_ptr);
@@ -136,16 +145,13 @@ static herr_t H5C__autoadjust__ageout__remove_excess_markers(H5C_t * cache_ptr);
 static herr_t H5C__flash_increase_cache_size(H5C_t * cache_ptr,
     size_t old_entry_size, size_t new_entry_size);
 
-static herr_t H5C_flush_invalidate_cache(H5F_t *f, hid_t dxpl_id, unsigned flags);
+static herr_t H5C__flush_invalidate_cache(H5F_t *f, unsigned flags);
 
-static herr_t H5C_flush_invalidate_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring,
-    unsigned flags);
+static herr_t H5C_flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags);
 
-static herr_t H5C_flush_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring,
-    unsigned flags);
+static herr_t H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags);
 
 static void * H5C_load_entry(H5F_t *             f,
-                             hid_t               dxpl_id,
 #ifdef H5_HAVE_PARALLEL
                              hbool_t             coll_access,
 #endif /* H5_HAVE_PARALLEL */
@@ -157,15 +163,15 @@ static herr_t H5C__mark_flush_dep_dirty(H5C_cache_entry_t * entry);
 
 static herr_t H5C__mark_flush_dep_clean(H5C_cache_entry_t * entry);
 
-static herr_t H5C__serialize_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring);
-static herr_t H5C__serialize_single_entry(H5F_t *f, hid_t dxpl_id, 
-    H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr);
+static herr_t H5C__serialize_ring(H5F_t *f, H5C_ring_t ring);
+static herr_t H5C__serialize_single_entry(H5F_t *f, H5C_t *cache_ptr,
+    H5C_cache_entry_t *entry_ptr);
 
 static herr_t H5C__verify_len_eoa(H5F_t *f, const H5C_class_t * type,
     haddr_t addr, size_t *len, hbool_t actual);
 
 #if H5C_DO_SLIST_SANITY_CHECKS
-static hbool_t H5C_entry_in_skip_list(H5C_t * cache_ptr, 
+static hbool_t H5C_entry_in_skip_list(H5C_t * cache_ptr,
                                       H5C_cache_entry_t *target_ptr);
 #endif /* H5C_DO_SLIST_SANITY_CHECKS */
 
@@ -204,8 +210,8 @@ H5FL_DEFINE(H5C_tag_info_t);
 /* Declare a free list to manage the H5C_t struct */
 H5FL_DEFINE_STATIC(H5C_t);
 
-/* Declare a free list to manage flush dependency arrays */
-H5FL_BLK_DEFINE_STATIC(parent);
+/* Declare a free list to manage arrays of cache entries */
+H5FL_SEQ_DEFINE_STATIC(H5C_cache_entry_ptr_t);
 
 
 
@@ -279,13 +285,8 @@ H5C_create(size_t		      max_cache_size,
 
     cache_ptr->flush_in_progress		= FALSE;
 
-    cache_ptr->logging_enabled                  = FALSE;
-
-    cache_ptr->currently_logging                = FALSE;
-
-    cache_ptr->log_file_ptr			= NULL;
-
-    cache_ptr->trace_file_ptr			= NULL;
+    if(NULL == (cache_ptr->log_info = (H5C_log_info_t *)H5MM_calloc(sizeof(H5C_log_info_t))))
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "memory allocation failed")
 
     cache_ptr->aux_ptr				= aux_ptr;
 
@@ -329,6 +330,7 @@ H5C_create(size_t		      max_cache_size,
 
     /* Tagging Field Initializations */
     cache_ptr->ignore_tags                      = FALSE;
+    cache_ptr->num_objs_corked                  = 0;
 
     cache_ptr->slist_changed			= FALSE;
     cache_ptr->slist_len			= 0;
@@ -366,6 +368,7 @@ H5C_create(size_t		      max_cache_size,
     cache_ptr->coll_write_list			= NULL;
 #endif /* H5_HAVE_PARALLEL */
 
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
     cache_ptr->cLRU_list_len			= 0;
     cache_ptr->cLRU_list_size			= (size_t)0;
     cache_ptr->cLRU_head_ptr			= NULL;
@@ -375,6 +378,7 @@ H5C_create(size_t		      max_cache_size,
     cache_ptr->dLRU_list_size			= (size_t)0;
     cache_ptr->dLRU_head_ptr			= NULL;
     cache_ptr->dLRU_tail_ptr			= NULL;
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
     cache_ptr->size_increase_possible		= FALSE;
     cache_ptr->flash_size_increase_possible     = FALSE;
@@ -487,6 +491,9 @@ done:
 
             if(cache_ptr->tag_list != NULL)
                 H5SL_close(cache_ptr->tag_list);
+
+            if(cache_ptr->log_info != NULL)
+                H5MM_xfree(cache_ptr->log_info);
 
             cache_ptr->magic = 0;
             cache_ptr = H5FL_FREE(H5C_t, cache_ptr);
@@ -715,10 +722,10 @@ H5C_free_tag_list_cb(void *_item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED 
  *
  * Function:    H5C_prep_for_file_close
  *
- * Purpose:     This function should be called just prior to the cache 
- *		flushes at file close.  There should be no protected 
+ * Purpose:     This function should be called just prior to the cache
+ *		flushes at file close.  There should be no protected
  *		entries in the cache at this point.
- *		
+ *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  John Mainzer
@@ -727,7 +734,7 @@ H5C_free_tag_list_cb(void *_item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED 
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_prep_for_file_close(H5F_t *f, hid_t dxpl_id)
+H5C_prep_for_file_close(H5F_t *f)
 {
     H5C_t *     cache_ptr;
     hbool_t     image_generated = FALSE;        /* Whether a cache image was generated */
@@ -743,8 +750,8 @@ H5C_prep_for_file_close(H5F_t *f, hid_t dxpl_id)
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
-    /* For now at least, it is possible to receive the 
-     * close warning more than once -- the following 
+    /* For now at least, it is possible to receive the
+     * close warning more than once -- the following
      * if statement handles this.
      */
     if(cache_ptr->close_warning_received)
@@ -755,13 +762,13 @@ H5C_prep_for_file_close(H5F_t *f, hid_t dxpl_id)
     HDassert(cache_ptr->pl_len == 0);
 
     /* Prepare cache image */
-    if(H5C__prep_image_for_file_close(f, dxpl_id, &image_generated) < 0)
+    if(H5C__prep_image_for_file_close(f, &image_generated) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create cache image")
 
 #ifdef H5_HAVE_PARALLEL
     if ( ( H5F_INTENT(f) & H5F_ACC_RDWR ) &&
-         ( ! image_generated ) && 
-         ( cache_ptr->aux_ptr != NULL ) && 
+         ( ! image_generated ) &&
+         ( cache_ptr->aux_ptr != NULL ) &&
          ( f->shared->fs_persist ) ) {
         /* If persistent free space managers are enabled, flushing the
          * metadata cache may result in the deletion, insertion, and/or
@@ -788,15 +795,15 @@ H5C_prep_for_file_close(H5F_t *f, hid_t dxpl_id)
          *    close, and since the close warning is issued after all
          *    non FSM related space allocations and just before the
          *    first sync point on close, this call will leave the caches
-         *    in a consistant state across the processes if they were
-         *    consistant before.
+         *    in a consistent state across the processes if they were
+         *    consistent before.
          *
          * 2) Since the FSM settle routines are only invoked once during
          *    file close, invoking them now will prevent their invocation
          *    during a flush, and thus avoid any resulting entrie dirties,
          *    deletions, insertion, or moves during the flush.
          */
-        if(H5C__serialize_cache(f, dxpl_id) < 0)
+        if(H5C__serialize_cache(f) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "serialization of the cache failed")
     } /* end if */
 #endif /* H5_HAVE_PARALLEL */
@@ -814,13 +821,6 @@ done:
  *              This function fails if any object are protected since the
  *              resulting file might not be consistent.
  *
- *		The primary_dxpl_id and secondary_dxpl_id parameters
- *		specify the dxpl_ids used on the first write occasioned
- *		by the destroy (primary_dxpl_id), and on all subsequent
- *		writes (secondary_dxpl_id).  This is useful in the metadata
- *		cache, but may not be needed elsewhere.  If so, just use the
- *		same dxpl_id for both parameters.
- *
  *		Note that *cache_ptr has been freed upon successful return.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -831,7 +831,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_dest(H5F_t * f, hid_t dxpl_id)
+H5C_dest(H5F_t * f)
 {
     H5C_t * cache_ptr = f->shared->cache;
     herr_t ret_value = SUCCEED;      /* Return value */
@@ -849,12 +849,12 @@ H5C_dest(H5F_t * f, hid_t dxpl_id)
 #endif /* H5AC_DUMP_IMAGE_STATS_ON_CLOSE */
 
     /* Flush and invalidate all cache entries */
-    if(H5C_flush_invalidate_cache(f, dxpl_id, H5C__NO_FLAGS_SET) < 0 )
+    if(H5C__flush_invalidate_cache(f, H5C__NO_FLAGS_SET) < 0 )
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
 
     /* Generate & write cache image if requested */
     if(cache_ptr->image_ctl.generate_image)
-        if(H5C__generate_cache_image(f, dxpl_id, cache_ptr) < 0)
+        if(H5C__generate_cache_image(f, cache_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "Can't generate metadata cache image")
 
     if(cache_ptr->slist_ptr != NULL) {
@@ -866,6 +866,9 @@ H5C_dest(H5F_t * f, hid_t dxpl_id)
         H5SL_destroy(cache_ptr->tag_list, H5C_free_tag_list_cb, NULL);
         cache_ptr->tag_list = NULL;
     } /* end if */
+
+    if(cache_ptr->log_info != NULL)
+        H5MM_xfree(cache_ptr->log_info);
 
 #ifndef NDEBUG
 #if H5C_DO_SANITY_CHECKS
@@ -897,7 +900,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_evict(H5F_t * f, hid_t dxpl_id)
+H5C_evict(H5F_t * f)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
@@ -907,7 +910,7 @@ H5C_evict(H5F_t * f, hid_t dxpl_id)
     HDassert(f);
 
     /* Flush and invalidate all cache entries except the pinned entries */
-    if(H5C_flush_invalidate_cache(f, dxpl_id, H5C__EVICT_ALLOW_LAST_PINS_FLAG) < 0 )
+    if(H5C__flush_invalidate_cache(f, H5C__EVICT_ALLOW_LAST_PINS_FLAG) < 0 )
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to evict entries in the cache")
 
 done:
@@ -930,8 +933,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_expunge_entry(H5F_t *f, hid_t dxpl_id, const H5C_class_t *type,
-    haddr_t addr, unsigned flags)
+H5C_expunge_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, unsigned flags)
 {
     H5C_t *		cache_ptr;
     H5C_cache_entry_t *	entry_ptr = NULL;
@@ -979,7 +981,7 @@ H5C_expunge_entry(H5F_t *f, hid_t dxpl_id, const H5C_class_t *type,
     /* Delete the entry from the skip list on destroy */
     flush_flags |= H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG;
 
-    if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, flush_flags) < 0)
+    if(H5C__flush_single_entry(f, entry_ptr, flush_flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "can't flush entry")
 
 done:
@@ -1009,38 +1011,38 @@ done:
  * Programmer:  John Mainzer
  *		6/2/04
  *
- * Changes:	Modified function to test for slist chamges in 
+ * Changes:	Modified function to test for slist chamges in
  *		pre_serialize and serialize callbacks, and re-start
  *		scans through the slist when such changes occur.
  *
  *		This has been a potential problem for some time,
- *		and there has been code in this function to deal 
- *		with elements of this issue.  However the shift 
+ *		and there has been code in this function to deal
+ *		with elements of this issue.  However the shift
  *		to the V3 cache in combination with the activities
- *		of some of the cache clients (in particular the 
+ *		of some of the cache clients (in particular the
  *		free space manager and the fractal heap) have
  *		made this re-work necessary.
  *
  *						JRM -- 12/13/14
  *
- *		Modified function to support rings.  Basic idea is that 
+ *		Modified function to support rings.  Basic idea is that
  *		every entry in the cache is assigned to a ring.  Entries
- *		in the outermost ring are flushed first, followed by 
- *		those in the next outermost ring, and so on until the 
- *		innermost ring is flushed.  See header comment on 
- *		H5C_ring_t in H5Cprivate.h for a more detailed 
+ *		in the outermost ring are flushed first, followed by
+ *		those in the next outermost ring, and so on until the
+ *		innermost ring is flushed.  See header comment on
+ *		H5C_ring_t in H5Cprivate.h for a more detailed
  *		discussion.
  *
  *						JRM -- 8/30/15
  *
- *		Modified function to call the free space manager 
+ *		Modified function to call the free space manager
  *		settling functions.
  *						JRM -- 6/9/16
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags)
+H5C_flush_cache(H5F_t *f, unsigned flags)
 {
 #if H5C_DO_SANITY_CHECKS
     int			i;
@@ -1054,7 +1056,6 @@ H5C_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags)
     H5C_ring_t		ring;
     H5C_t             * cache_ptr;
     hbool_t             destroy;
-    hbool_t		ignore_protected;
     herr_t		ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1099,19 +1100,18 @@ H5C_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
-    ignore_protected = ( (flags & H5C__FLUSH_IGNORE_PROTECTED_FLAG) != 0 );
     destroy = ( (flags & H5C__FLUSH_INVALIDATE_FLAG) != 0 );
-    HDassert( ! ( destroy && ignore_protected ) );
+    HDassert( ! ( destroy && ( (flags & H5C__FLUSH_IGNORE_PROTECTED_FLAG) != 0 )) );
     HDassert( ! ( cache_ptr->flush_in_progress ) );
 
     cache_ptr->flush_in_progress = TRUE;
 
     if(destroy) {
-        if(H5C_flush_invalidate_cache(f, dxpl_id, flags) < 0)
+        if(H5C__flush_invalidate_cache(f, flags) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "flush invalidate failed")
     } /* end if */
     else {
-	/* flush each ring, starting from the outermost ring and 
+	/* flush each ring, starting from the outermost ring and
          * working inward.
          */
         ring = H5C_RING_USER;
@@ -1128,14 +1128,14 @@ H5C_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags)
 		    case H5C_RING_RDFSM:
                         /* Settle raw data FSM */
 			if(!cache_ptr->rdfsm_settled)
-			    if(H5MF_settle_raw_data_fsm(f, dxpl_id, &cache_ptr->rdfsm_settled) < 0)
+			    if(H5MF_settle_raw_data_fsm(f, &cache_ptr->rdfsm_settled) < 0)
                                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "RD FSM settle failed")
 			break;
 
 		    case H5C_RING_MDFSM:
                         /* Settle metadata FSM */
 			if(!cache_ptr->mdfsm_settled)
-			    if(H5MF_settle_meta_data_fsm(f, dxpl_id, &cache_ptr->mdfsm_settled) < 0)
+			    if(H5MF_settle_meta_data_fsm(f, &cache_ptr->mdfsm_settled) < 0)
                                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "MD FSM settle failed")
 			break;
 
@@ -1149,7 +1149,7 @@ H5C_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags)
 		} /* end switch */
             } /* end if */
 
-	    if(H5C_flush_ring(f, dxpl_id, ring, flags) < 0)
+	    if(H5C__flush_ring(f, ring, flags) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "flush ring failed")
             ring++;
         } /* end while */
@@ -1187,19 +1187,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_flush_to_min_clean(H5F_t * f,
-		       hid_t    dxpl_id)
+H5C_flush_to_min_clean(H5F_t * f)
 {
     H5C_t *             cache_ptr;
     hbool_t		write_permitted;
-#if 0 /* modified code -- commented out for now */ /* JRM */
-    int			i;
-    int			flushed_entries_count = 0;
-    size_t		flushed_entries_size = 0;
-    size_t		space_needed = 0;
-    haddr_t	      * flushed_entries_list = NULL;
-    H5C_cache_entry_t *	entry_ptr = NULL;
-#endif /* JRM */
     herr_t		ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1222,101 +1213,8 @@ H5C_flush_to_min_clean(H5F_t * f,
     if(!write_permitted)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "cache write is not permitted!?!")
 
-#if 1 /* original code */
-    if(H5C__make_space_in_cache(f, dxpl_id, (size_t)0, write_permitted) < 0)
+    if(H5C__make_space_in_cache(f, (size_t)0, write_permitted) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C__make_space_in_cache failed")
-#else /* modified code -- commented out for now */
-    if ( cache_ptr->max_cache_size > cache_ptr->index_size ) {
-
-        if ( ((cache_ptr->max_cache_size - cache_ptr->index_size) +
-               cache_ptr->cLRU_list_size) >= cache_ptr->min_clean_size ) {
-
-            space_needed = 0;
-
-        } else {
-
-            space_needed = cache_ptr->min_clean_size -
-                ((cache_ptr->max_cache_size - cache_ptr->index_size) +
-                 cache_ptr->cLRU_list_size);
-        }
-    } else {
-
-        if ( cache_ptr->min_clean_size <= cache_ptr->cLRU_list_size ) {
-
-           space_needed = 0;
-
-        } else {
-
-            space_needed = cache_ptr->min_clean_size -
-                           cache_ptr->cLRU_list_size;
-        }
-    }
-
-    if ( space_needed > 0 ) { /* we have work to do */
-
-        HDassert( cache_ptr->slist_len > 0 );
-
-        /* allocate an array to keep a list of the entries that we
-         * mark for flush.  We need this list to touch up the LRU
-         * list after the flush.
-         */
-        flushed_entries_list = (haddr_t *)H5MM_malloc(sizeof(haddr_t) *
-                                              (size_t)(cache_ptr->slist_len));
-        if(flushed_entries_list == NULL)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for flushed entries list")
-
-        /* Scan the dirty LRU list from tail forward and mark sufficient
-         * entries to free up the necessary space.  Keep a list of the
-         * entries marked in the order in which they are encountered.
-         */
-        entry_ptr = cache_ptr->dLRU_tail_ptr;
-
-        while ( ( flushed_entries_size < space_needed ) &&
-                ( flushed_entries_count < cache_ptr->slist_len ) &&
-                ( entry_ptr != NULL ) )
-        {
-            HDassert( ! (entry_ptr->is_protected) );
-            HDassert( ! (entry_ptr->is_read_only) );
-            HDassert( entry_ptr->ro_ref_count == 0 );
-            HDassert( entry_ptr->is_dirty );
-            HDassert( entry_ptr->in_slist );
-
-            entry_ptr->flush_marker = TRUE;
-            flushed_entries_size += entry_ptr->size;
-            flushed_entries_list[flushed_entries_count] = entry_ptr->addr;
-            flushed_entries_count++;
-            entry_ptr = entry_ptr->aux_prev;
-        }
-
-        HDassert( flushed_entries_count <= cache_ptr->slist_len );
-        HDassert( flushed_entries_size >= space_needed );
-
-
-        /* Flush the marked entries */
-        if(H5C_flush_cache(f, primary_dxpl_id, secondary_dxpl_id, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_IGNORE_PROTECTED_FLAG) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_flush_cache failed")
-
-        /* Now touch up the LRU list so as to place the flushed entries in
-         * the order they they would be in if we had flushed them in the
-         * order we encountered them in.
-         */
-
-        i = 0;
-        while ( i < flushed_entries_count )
-        {
-            H5C__SEARCH_INDEX_NO_STATS(cache_ptr, flushed_entries_list[i], \
-                                       entry_ptr, FAIL)
-
-	    /* At present, the above search must always succeed.  However,
-             * that may change.  Write the code so we need only remove the
-             * following assert in that event.
-             */
-            HDassert( entry_ptr != NULL );
-            H5C__FAKE_RP_FOR_MOST_RECENT_ACCESS(cache_ptr, entry_ptr, FAIL)
-            i++;
-        }
-    } /* if ( space_needed > 0 ) */
-#endif /* end modified code -- commented out for now */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1330,17 +1228,6 @@ done:
  *              exist on disk yet, but it must have an address and disk
  *              space reserved.
  *
- *		The primary_dxpl_id and secondary_dxpl_id parameters
- *		specify the dxpl_ids used on the first write occasioned
- *		by the insertion (primary_dxpl_id), and on all subsequent
- *		writes (secondary_dxpl_id).  This is useful in the
- *		metadata cache, but may not be needed elsewhere.  If so,
- *		just use the same dxpl_id for both parameters.
- *
- *		The primary_dxpl_id is the dxpl_id passed to the
- *		check_write_permitted function if such a function has been
- *		provided.
- *
  *		Observe that this function cannot occasion a read.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -1352,14 +1239,12 @@ done:
  */
 herr_t
 H5C_insert_entry(H5F_t *             f,
-                 hid_t		     dxpl_id,
                  const H5C_class_t * type,
                  haddr_t 	     addr,
                  void *		     thing,
                  unsigned int        flags)
 {
     H5C_t               *cache_ptr;
-    H5P_genplist_t      *dxpl;
     H5AC_ring_t         ring = H5C_RING_UNDEFINED;
     hbool_t		insert_pinned;
     hbool_t             flush_last;
@@ -1402,13 +1287,8 @@ H5C_insert_entry(H5F_t *             f,
     insert_pinned      = ( (flags & H5C__PIN_ENTRY_FLAG) != 0 );
     flush_last         = ( (flags & H5C__FLUSH_LAST_FLAG) != 0 );
 
-    /* Get the dataset transfer property list */
-    if(NULL == (dxpl = (H5P_genplist_t *)H5I_object_verify(dxpl_id, H5I_GENPROP_LST)))
-        HGOTO_ERROR(H5E_CACHE, H5E_BADTYPE, FAIL, "not a property list")
-
-    /* Get the ring type from the DXPL */
-    if((H5P_get(dxpl, H5AC_RING_NAME, &ring)) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "unable to query ring value")
+    /* Get the ring type from the API context */
+    ring = H5CX_get_ring();
 
     entry_ptr = (H5C_cache_entry_t *)thing;
 
@@ -1481,8 +1361,10 @@ H5C_insert_entry(H5F_t *             f,
     entry_ptr->next = NULL;
     entry_ptr->prev = NULL;
 
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
     entry_ptr->aux_next = NULL;
     entry_ptr->aux_prev = NULL;
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
 #ifdef H5_HAVE_PARALLEL
     entry_ptr->coll_next = NULL;
@@ -1511,7 +1393,7 @@ H5C_insert_entry(H5F_t *             f,
     entry_ptr->tag_info = NULL;
 
     /* Apply tag to newly inserted entry */
-    if(H5C__tag_entry(cache_ptr, entry_ptr, dxpl_id) < 0)
+    if(H5C__tag_entry(cache_ptr, entry_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "Cannot tag metadata entry")
     entry_tagged = TRUE;
 
@@ -1573,7 +1455,7 @@ H5C_insert_entry(H5F_t *             f,
          * no point in worrying about the third.
          */
 
-        if(H5C__make_space_in_cache(f, dxpl_id, space_needed, write_permitted) < 0)
+        if(H5C__make_space_in_cache(f, space_needed, write_permitted) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "H5C__make_space_in_cache failed")
     } /* end if */
 
@@ -1602,40 +1484,17 @@ H5C_insert_entry(H5F_t *             f,
     H5C__UPDATE_STATS_FOR_INSERTION(cache_ptr, entry_ptr)
 
 #ifdef H5_HAVE_PARALLEL
-    /* Get the dataset transfer property list */
-    if(NULL == (dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-
-    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
-        coll_access = (H5P_USER_TRUE == f->coll_md_read ? TRUE : FALSE);
-
-        if(!coll_access && H5P_FORCE_FALSE != f->coll_md_read) {
-            H5P_coll_md_read_flag_t prop_value;
-
-            /* Get the property value */
-            if(H5P_get(dxpl, H5_COLL_MD_READ_FLAG_NAME, &prop_value) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "Can't get collective metadata access flag")
-            coll_access = (H5P_USER_TRUE == prop_value ? TRUE : FALSE);
-        } /* end if */
-    } /* end if */
+    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI))
+        coll_access = H5CX_get_coll_metadata_read();
 
     entry_ptr->coll_access = coll_access;
     if(coll_access) {
         H5C__INSERT_IN_COLL_LIST(cache_ptr, entry_ptr, FAIL)
 
         /* Make sure the size of the collective entries in the cache remain in check */
-        if(H5P_USER_TRUE == f->coll_md_read) {
-            if(cache_ptr->max_cache_size * 80 < cache_ptr->coll_list_size * 100) {
-                if(H5C_clear_coll_entries(cache_ptr, TRUE) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't clear collective metadata entries")
-            } /* end if */
-        } /* end if */
-        else {
-            if(cache_ptr->max_cache_size * 40 < cache_ptr->coll_list_size * 100) {
-                if(H5C_clear_coll_entries(cache_ptr, TRUE) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't clear collective metadata entries")
-            } /* end if */
-        } /* end else */
+        if(cache_ptr->max_cache_size * 80 < cache_ptr->coll_list_size * 100)
+            if(H5C_clear_coll_entries(cache_ptr, TRUE) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't clear collective metadata entries")
     } /* end if */
 #endif
 
@@ -2232,62 +2091,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_pin_entry_from_client()
- *
- * Purpose:	Internal routine to pin a cache entry from a client action.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              3/26/09
- *
- * Changes:	Added sanity checks to clarify the circumstances under
- *		which an entry can be pinned.   JRM -- 4/27/14 
- *
- *-------------------------------------------------------------------------
- */
-#ifndef NDEBUG
-static herr_t
-H5C_pin_entry_from_client(H5C_t *	          cache_ptr,
-                        H5C_cache_entry_t * entry_ptr)
-#else
-static herr_t
-H5C_pin_entry_from_client(H5C_t H5_ATTR_UNUSED *	cache_ptr,
-                        H5C_cache_entry_t * entry_ptr)
-#endif
-{
-    herr_t              ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Sanity checks */
-    HDassert( cache_ptr );
-    HDassert( entry_ptr );
-    HDassert( entry_ptr->is_protected );
-
-    /* Check if the entry is already pinned */
-    if(entry_ptr->is_pinned) {
-        /* Check if the entry was pinned through an explicit pin from a client */
-        if(entry_ptr->pinned_from_client)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTPIN, FAIL, "Entry is already pinned")
-    } /* end if */
-    else {
-        entry_ptr->is_pinned = TRUE;
-
-        H5C__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr)
-    } /* end else */
-
-    /* Mark that the entry was pinned through an explicit pin from a client */
-    entry_ptr->pinned_from_client = TRUE;
-
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5C_pin_entry_from_client() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5C_pin_protected_entry()
  *
  * Purpose:	Pin a protected cache entry.  The entry must be protected
@@ -2332,7 +2135,7 @@ H5C_pin_protected_entry(void *thing)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTPIN, FAIL, "Entry isn't protected")
 
     /* Pin the entry from a client */
-    if(H5C_pin_entry_from_client(cache_ptr, entry_ptr) < 0)
+    if(H5C__pin_entry_from_client(cache_ptr, entry_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTPIN, FAIL, "Can't pin entry by client")
 
 done:
@@ -2371,7 +2174,6 @@ done:
  */
 void *
 H5C_protect(H5F_t *		f,
-            hid_t	        dxpl_id,
             const H5C_class_t * type,
             haddr_t 	        addr,
             void *              udata,
@@ -2391,7 +2193,6 @@ H5C_protect(H5F_t *		f,
     size_t		empty_space;
     void *		thing;
     H5C_cache_entry_t *	entry_ptr;
-    H5P_genplist_t    * dxpl;    /* dataset transfer property list */
     void *		ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
@@ -2418,34 +2219,19 @@ H5C_protect(H5F_t *		f,
     /* Load the cache image, if requested */
     if(cache_ptr->load_image) {
         cache_ptr->load_image = FALSE;
-        if(H5C__load_cache_image(f, dxpl_id) < 0)
+        if(H5C__load_cache_image(f) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't load cache image")
     } /* end if */
 
     read_only          = ( (flags & H5C__READ_ONLY_FLAG) != 0 );
     flush_last         = ( (flags & H5C__FLUSH_LAST_FLAG) != 0 );
 
-    /* Get the dataset transfer property list */
-    if(NULL == (dxpl = (H5P_genplist_t *)H5I_object_verify(dxpl_id, H5I_GENPROP_LST)))
-        HGOTO_ERROR(H5E_CACHE, H5E_BADTYPE, NULL, "not a property list")
-
-    /* Get the ring type from the DXPL */
-    if((H5P_get(dxpl, H5AC_RING_NAME, &ring)) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "unable to query ring value")
+    /* Get the ring type from the API context */
+    ring = H5CX_get_ring();
 
 #ifdef H5_HAVE_PARALLEL
-    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
-        coll_access = (H5P_USER_TRUE == f->coll_md_read ? TRUE : FALSE);
-
-        if(!coll_access && H5P_FORCE_FALSE != f->coll_md_read) {
-            H5P_coll_md_read_flag_t prop_value;
-
-            /* get the property value */
-            if(H5P_get(dxpl, H5_COLL_MD_READ_FLAG_NAME, &prop_value) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "Can't get collective metadata access flag")
-            coll_access = (H5P_USER_TRUE == prop_value ? TRUE : FALSE);
-        } /* end if */
-    } /* end if */
+    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI))
+        coll_access = H5CX_get_coll_metadata_read();
 #endif /* H5_HAVE_PARALLEL */
 
     /* first check to see if the target is in cache */
@@ -2453,16 +2239,16 @@ H5C_protect(H5F_t *		f,
 
     if(entry_ptr != NULL) {
         if(entry_ptr->ring != ring)
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "ring type mismatch occured for cache entry")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "ring type mismatch occurred for cache entry")
 
         HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
 
         if(entry_ptr->prefetched) {
             /* This call removes the prefetched entry from the cache,
-             * and replaces it with an entry deserialized from the 
+             * and replaces it with an entry deserialized from the
              * image of the prefetched entry.
              */
-            if(H5C__deserialize_prefetched_entry(f, dxpl_id, cache_ptr, &entry_ptr, type, addr, udata) < 0)
+            if(H5C__deserialize_prefetched_entry(f, cache_ptr, &entry_ptr, type, addr, udata) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't deserialize prefetched entry")
 
             HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
@@ -2482,7 +2268,7 @@ H5C_protect(H5F_t *		f,
            the entry in their cache still have to participate in the
            bcast. */
 #ifdef H5_HAVE_PARALLEL
-        if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI) && coll_access) {
+        if(coll_access) {
             if(!(entry_ptr->is_dirty) && !(entry_ptr->coll_access)) {
                 MPI_Comm  comm;           /* File MPI Communicator */
                 int       mpi_code;       /* MPI error code */
@@ -2500,10 +2286,10 @@ H5C_protect(H5F_t *		f,
                     if(NULL == (entry_ptr->image_ptr = H5MM_malloc(entry_ptr->size + H5C_IMAGE_EXTRA_SPACE)))
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "memory allocation failed for on disk image buffer")
 #if H5C_DO_MEMORY_SANITY_CHECKS
-                    HDmemcpy(((uint8_t *)entry_ptr->image_ptr) + entry_ptr->size, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+                    H5MM_memcpy(((uint8_t *)entry_ptr->image_ptr) + entry_ptr->size, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
                     if(0 == mpi_rank)
-                        if(H5C__generate_image(f, cache_ptr, entry_ptr, dxpl_id) < 0)
+                        if(H5C__generate_image(f, cache_ptr, entry_ptr) < 0)
                             HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "can't generate entry's image")
                 } /* end if */
                 HDassert(entry_ptr->image_ptr);
@@ -2528,16 +2314,15 @@ H5C_protect(H5F_t *		f,
         if(cache_ptr->ignore_tags != TRUE) {
             haddr_t tag;              /* Tag value */
 
-            /* The entry is already in the cache, but make sure that the tag value 
-               being passed in via dxpl is still legal. This will ensure that had
-               the entry NOT been in the cache, tagging was still set up correctly
-               and it would have received a legal tag value after getting loaded
-               from disk. */
+            /* The entry is already in the cache, but make sure that the tag value
+             * is still legal. This will ensure that had the entry NOT been in the
+             * cache, tagging was still set up correctly and it would have received
+             * a legal tag value after getting loaded from disk.
+             */
 
-            /* Get the tag from the DXPL */
-            if((H5P_get(dxpl, H5AC_TAG_NAME, &tag)) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "unable to query property value")
-    
+            /* Get the tag */
+            tag = H5CX_get_tag();
+
             if(H5C_verify_tag(entry_ptr->type->id, tag) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "tag verification failed")
         } /* end if */
@@ -2553,9 +2338,9 @@ H5C_protect(H5F_t *		f,
 
         hit = FALSE;
 
-        if(NULL == (thing = H5C_load_entry(f, dxpl_id, 
+        if(NULL == (thing = H5C_load_entry(f,
 #ifdef H5_HAVE_PARALLEL
-                                           coll_access, 
+                                           coll_access,
 #endif /* H5_HAVE_PARALLEL */
                                            type, addr, udata)))
             HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't load entry")
@@ -2570,7 +2355,7 @@ H5C_protect(H5F_t *		f,
 #endif /* H5_HAVE_PARALLEL */
 
         /* Apply tag to newly protected entry */
-        if(H5C__tag_entry(cache_ptr, entry_ptr, dxpl_id) < 0)
+        if(H5C__tag_entry(cache_ptr, entry_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, NULL, "Cannot tag metadata entry")
 
         /* If the entry is very large, and we are configured to allow it,
@@ -2588,10 +2373,10 @@ H5C_protect(H5F_t *		f,
         else
            empty_space = cache_ptr->max_cache_size - cache_ptr->index_size;
 
-	/* try to free up if necceary and if evictions are permitted.  Note
-	 * that if evictions are enabled, we will call H5C__make_space_in_cache()
-	 * regardless if the min_free_space requirement is not met.
-	 */
+        /* try to free up if necceary and if evictions are permitted.  Note
+         * that if evictions are enabled, we will call H5C__make_space_in_cache()
+         * regardless if the min_free_space requirement is not met.
+         */
         if ( ( cache_ptr->evictions_enabled ) &&
              ( ( (cache_ptr->index_size + entry_ptr->size) >
 	         cache_ptr->max_cache_size)
@@ -2637,10 +2422,10 @@ H5C_protect(H5F_t *		f,
              *
              * Second, when writes are not permitted it is also possible
              * for the cache to grow without bound.
-	     *
-	     * Third, the user may choose to disable evictions -- causing
-	     * the cache to grow without bound until evictions are
-	     * re-enabled.
+             *
+             * Third, the user may choose to disable evictions -- causing
+             * the cache to grow without bound until evictions are
+             * re-enabled.
              *
              * Finally, we usually don't check to see if the cache is
              * oversized at the end of an unprotect.  As a result, it is
@@ -2651,7 +2436,7 @@ H5C_protect(H5F_t *		f,
              * see no point in worrying about the fourth.
              */
 
-            if(H5C__make_space_in_cache(f, dxpl_id, space_needed, write_permitted) < 0 )
+            if(H5C__make_space_in_cache(f, space_needed, write_permitted) < 0 )
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, "H5C__make_space_in_cache failed")
         } /* end if */
 
@@ -2664,12 +2449,12 @@ H5C_protect(H5F_t *		f,
          *   *******************************************
          *
          * Set the flush_last field
- 	 * of the newly loaded entry before inserting it into the 
-         * index.  Must do this, as the index tracked the number of 
-         * entries with the flush_last field set, but assumes that 
+ 	 * of the newly loaded entry before inserting it into the
+         * index.  Must do this, as the index tracked the number of
+         * entries with the flush_last field set, but assumes that
          * the field will not change after insertion into the index.
          *
-         * Note that this means that the H5C__FLUSH_LAST_FLAG flag 
+         * Note that this means that the H5C__FLUSH_LAST_FLAG flag
          * is ignored if the entry is already in cache.
          */
         entry_ptr->flush_me_last = flush_last;
@@ -2701,7 +2486,7 @@ H5C_protect(H5F_t *		f,
 	    HDassert(entry_ptr->ro_ref_count > 0);
 	    (entry_ptr->ro_ref_count)++;
 	} /* end if */
-        else 
+        else
             HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, "Target already protected & not read only?!?")
     } /* end if */
     else {
@@ -2748,7 +2533,7 @@ H5C_protect(H5F_t *		f,
         if(cache_ptr->resize_enabled &&
              (cache_ptr->cache_accesses >= (cache_ptr->resize_ctl).epoch_length)) {
 
-            if(H5C__auto_adjust_cache_size(f, dxpl_id, write_permitted) < 0)
+            if(H5C__auto_adjust_cache_size(f, write_permitted) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, "Cache auto-resize failed")
         } /* end if */
 
@@ -2777,7 +2562,7 @@ H5C_protect(H5F_t *		f,
 		if(cache_ptr->index_size > cache_ptr->max_cache_size)
                     cache_ptr->cache_full = TRUE;
 
-                if(H5C__make_space_in_cache(f, dxpl_id, (size_t)0, write_permitted) < 0 )
+                if(H5C__make_space_in_cache(f, (size_t)0, write_permitted) < 0 )
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, "H5C__make_space_in_cache failed")
             }
         } /* end if */
@@ -2798,21 +2583,11 @@ H5C_protect(H5F_t *		f,
     } /* end if */
 
 #ifdef H5_HAVE_PARALLEL
-    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
-        /* Make sure the size of the collective entries in the cache remain in check */
-        if(coll_access) {
-            if(H5P_USER_TRUE == f->coll_md_read) {
-                if(cache_ptr->max_cache_size * 80 < cache_ptr->coll_list_size * 100)
-                    if(H5C_clear_coll_entries(cache_ptr, TRUE) < 0)
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, "can't clear collective metadata entries")
-            } /* end if */
-            else {
-                if(cache_ptr->max_cache_size * 40 < cache_ptr->coll_list_size * 100)
-                    if(H5C_clear_coll_entries(cache_ptr, TRUE) < 0)
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, "can't clear collective metadata entries")
-            } /* end else */
-        } /* end if */
-    } /* end if */
+    /* Make sure the size of the collective entries in the cache remain in check */
+    if(coll_access)
+        if(cache_ptr->max_cache_size * 80 < cache_ptr->coll_list_size * 100)
+            if(H5C_clear_coll_entries(cache_ptr, TRUE) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, "can't clear collective metadata entries")
 #endif /* H5_HAVE_PARALLEL */
 
 done:
@@ -3104,60 +2879,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_unpin_entry_from_client()
- *
- * Purpose:	Internal routine to unpin a cache entry from a client action.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              3/24/09
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5C_unpin_entry_from_client(H5C_t *		  cache_ptr,
-                H5C_cache_entry_t *	  entry_ptr,
-                hbool_t update_rp)
-{
-    herr_t              ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Sanity checking */
-    HDassert( cache_ptr );
-    HDassert( entry_ptr );
-
-    /* Error checking (should be sanity checks?) */
-    if(!entry_ptr->is_pinned)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "Entry isn't pinned")
-    if(!entry_ptr->pinned_from_client)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "Entry wasn't pinned by cache client")
-
-    /* Check if the entry is not pinned from a flush dependency */
-    if(!entry_ptr->pinned_from_cache) {
-        /* If requested, update the replacement policy if the entry is not protected */
-        if(update_rp && !entry_ptr->is_protected)
-            H5C__UPDATE_RP_FOR_UNPIN(cache_ptr, entry_ptr, FAIL)
-
-        /* Unpin the entry now */
-        entry_ptr->is_pinned = FALSE;
-
-        /* Update the stats for an unpin operation */
-        H5C__UPDATE_STATS_FOR_UNPIN(cache_ptr, entry_ptr)
-    } /* end if */
-
-    /* Mark the entry as explicitly unpinned by the client */
-    entry_ptr->pinned_from_client = FALSE;
-
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5C_unpin_entry_from_client() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5C_unpin_entry()
  *
  * Purpose:	Unpin a cache entry.  The entry can be either protected or
@@ -3169,7 +2890,7 @@ done:
  *              3/22/06
  *
  * Changes:	Added extreme sanity checks on entry and exit.
-                				JRM -- 4/26/14 
+                				JRM -- 4/26/14
  *
  *-------------------------------------------------------------------------
  */
@@ -3197,7 +2918,7 @@ H5C_unpin_entry(void *_entry_ptr)
 
 
     /* Unpin the entry */
-    if(H5C_unpin_entry_from_client(cache_ptr, entry_ptr, TRUE) < 0)
+    if(H5C__unpin_entry_from_client(cache_ptr, entry_ptr, TRUE) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "Can't unpin entry from client")
 
 done:
@@ -3238,11 +2959,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_unprotect(H5F_t *		  f,
-              hid_t		  dxpl_id,
-              haddr_t		  addr,
-              void *		  thing,
-              unsigned int        flags)
+H5C_unprotect(H5F_t *f, haddr_t	addr, void *thing, unsigned flags)
 {
     H5C_t *             cache_ptr;
     hbool_t		deleted;
@@ -3319,11 +3036,11 @@ H5C_unprotect(H5F_t *		  f,
         /* Pin or unpin the entry as requested. */
         if(pin_entry) {
             /* Pin the entry from a client */
-            if(H5C_pin_entry_from_client(cache_ptr, entry_ptr) < 0)
+            if(H5C__pin_entry_from_client(cache_ptr, entry_ptr) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTPIN, FAIL, "Can't pin entry by client")
         } else if(unpin_entry) {
             /* Unpin the entry from a client */
-            if(H5C_unpin_entry_from_client(cache_ptr, entry_ptr, FALSE) < 0)
+            if(H5C__unpin_entry_from_client(cache_ptr, entry_ptr, FALSE) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "Can't unpin entry by client")
         } /* end if */
     } else {
@@ -3352,7 +3069,7 @@ H5C_unprotect(H5F_t *		  f,
          *
          * All this is a bit awkward, but until the metadata cache entries
          * are contiguous, with only one dirty flag, we have to let the supplied
-         * functions deal with the reseting the is_dirty flag.
+         * functions deal with the resetting the is_dirty flag.
          */
         if(entry_ptr->clear_on_unprotect) {
             /* Sanity check */
@@ -3395,7 +3112,7 @@ H5C_unprotect(H5F_t *		  f,
             if(entry_ptr->flush_dep_nparents > 0)
                 if(H5C__mark_flush_dep_dirty(entry_ptr) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "Can't propagate flush dep dirty flag")
-        } /* end if */ 
+        } /* end if */
         /* Check for newly clean entry */
         else if(!was_clean && !entry_ptr->is_dirty) {
             /* If the entry's type has a 'notify' callback send a 'entry cleaned'
@@ -3415,11 +3132,11 @@ H5C_unprotect(H5F_t *		  f,
         /* Pin or unpin the entry as requested. */
         if(pin_entry) {
             /* Pin the entry from a client */
-            if(H5C_pin_entry_from_client(cache_ptr, entry_ptr) < 0)
+            if(H5C__pin_entry_from_client(cache_ptr, entry_ptr) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTPIN, FAIL, "Can't pin entry by client")
         } else if(unpin_entry) {
             /* Unpin the entry from a client */
-            if(H5C_unpin_entry_from_client(cache_ptr, entry_ptr, FALSE) < 0)
+            if(H5C__unpin_entry_from_client(cache_ptr, entry_ptr, FALSE) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "Can't unpin entry by client")
         } /* end if */
 
@@ -3471,7 +3188,7 @@ H5C_unprotect(H5F_t *		  f,
             flush_flags |= H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG;
 
             HDassert(((!was_clean) || dirtied) == entry_ptr->in_slist);
-            if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, flush_flags) < 0)
+            if(H5C__flush_single_entry(f, entry_ptr, flush_flags) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "Can't flush entry")
         } /* end if */
 #ifdef H5_HAVE_PARALLEL
@@ -3484,7 +3201,7 @@ H5C_unprotect(H5F_t *		  f,
             else if(test_entry_ptr != entry_ptr)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "hash table contains multiple entries for addr?!?")
 
-            if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0)
+            if(H5C__flush_single_entry(f, entry_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "Can't clear entry")
         } /* end else if */
 #endif /* H5_HAVE_PARALLEL */
@@ -3884,7 +3601,7 @@ H5C_create_flush_dependency(void * parent_thing, void * child_thing)
             /* Array does not exist yet, allocate it */
             HDassert(!child_entry->flush_dep_parent);
 
-            if(NULL == (child_entry->flush_dep_parent = (H5C_cache_entry_t **)H5FL_BLK_MALLOC(parent, H5C_FLUSH_DEP_PARENT_INIT * sizeof(H5C_cache_entry_t *))))
+            if(NULL == (child_entry->flush_dep_parent = H5FL_SEQ_MALLOC(H5C_cache_entry_ptr_t, H5C_FLUSH_DEP_PARENT_INIT)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for flush dependency parent list")
             child_entry->flush_dep_parent_nalloc = H5C_FLUSH_DEP_PARENT_INIT;
         } /* end if */
@@ -3892,7 +3609,7 @@ H5C_create_flush_dependency(void * parent_thing, void * child_thing)
             /* Resize existing array */
             HDassert(child_entry->flush_dep_parent);
 
-            if(NULL == (child_entry->flush_dep_parent = (H5C_cache_entry_t **)H5FL_BLK_REALLOC(parent, child_entry->flush_dep_parent, 2 * child_entry->flush_dep_parent_nalloc * sizeof(H5C_cache_entry_t *))))
+            if(NULL == (child_entry->flush_dep_parent = H5FL_SEQ_REALLOC(H5C_cache_entry_ptr_t, child_entry->flush_dep_parent, 2 * child_entry->flush_dep_parent_nalloc)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for flush dependency parent list")
             child_entry->flush_dep_parent_nalloc *= 2;
         } /* end else */
@@ -4015,17 +3732,9 @@ H5C_destroy_flush_dependency(void *parent_thing, void * child_thing)
         HDassert(parent_entry->pinned_from_cache);
 
         /* Check if we should unpin parent entry now */
-        if(!parent_entry->pinned_from_client) {
-            /* Update the replacement policy if the entry is not protected */
-            if(!parent_entry->is_protected)
-                H5C__UPDATE_RP_FOR_UNPIN(cache_ptr, parent_entry, FAIL)
-
-            /* Unpin the entry now */
-            parent_entry->is_pinned = FALSE;
-
-            /* Update the stats for an unpin operation */
-            H5C__UPDATE_STATS_FOR_UNPIN(cache_ptr, parent_entry)
-        } /* end if */
+        if(!parent_entry->pinned_from_client)
+            if(H5C__unpin_entry_real(cache_ptr, parent_entry, TRUE) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "Can't unpin entry")
 
         /* Mark the entry as unpinned from the cache's action */
         parent_entry->pinned_from_cache = FALSE;
@@ -4058,13 +3767,12 @@ H5C_destroy_flush_dependency(void *parent_thing, void * child_thing)
 
     /* Shrink or free the parent array if apporpriate */
     if(child_entry->flush_dep_nparents == 0) {
-        child_entry->flush_dep_parent = (H5C_cache_entry_t **)H5FL_BLK_FREE(parent, child_entry->flush_dep_parent);
+        child_entry->flush_dep_parent = H5FL_SEQ_FREE(H5C_cache_entry_ptr_t, child_entry->flush_dep_parent);
         child_entry->flush_dep_parent_nalloc = 0;
     } /* end if */
     else if(child_entry->flush_dep_parent_nalloc > H5C_FLUSH_DEP_PARENT_INIT
-            && child_entry->flush_dep_nparents
-            <= (child_entry->flush_dep_parent_nalloc / 4)) {
-        if(NULL == (child_entry->flush_dep_parent = (H5C_cache_entry_t **)H5FL_BLK_REALLOC(parent, child_entry->flush_dep_parent, (child_entry->flush_dep_parent_nalloc / 4) * sizeof(H5C_cache_entry_t *))))
+            && child_entry->flush_dep_nparents <= (child_entry->flush_dep_parent_nalloc / 4)) {
+        if(NULL == (child_entry->flush_dep_parent = H5FL_SEQ_REALLOC(H5C_cache_entry_ptr_t, child_entry->flush_dep_parent, child_entry->flush_dep_parent_nalloc / 4)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for flush dependency parent list")
         child_entry->flush_dep_parent_nalloc /= 4;
     } /* end if */
@@ -4077,6 +3785,144 @@ done:
 /*************************************************************************/
 /**************************** Private Functions: *************************/
 /*************************************************************************/
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C__pin_entry_from_client()
+ *
+ * Purpose:	Internal routine to pin a cache entry from a client action.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              3/26/09
+ *
+ *-------------------------------------------------------------------------
+ */
+#if H5C_COLLECT_CACHE_STATS
+static herr_t
+H5C__pin_entry_from_client(H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
+#else
+static herr_t
+H5C__pin_entry_from_client(H5C_t H5_ATTR_UNUSED *cache_ptr, H5C_cache_entry_t *entry_ptr)
+#endif
+{
+    herr_t ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(cache_ptr);
+    HDassert(entry_ptr);
+    HDassert(entry_ptr->is_protected);
+
+    /* Check if the entry is already pinned */
+    if(entry_ptr->is_pinned) {
+        /* Check if the entry was pinned through an explicit pin from a client */
+        if(entry_ptr->pinned_from_client)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTPIN, FAIL, "entry is already pinned")
+    } /* end if */
+    else {
+        entry_ptr->is_pinned = TRUE;
+
+        H5C__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr)
+    } /* end else */
+
+    /* Mark that the entry was pinned through an explicit pin from a client */
+    entry_ptr->pinned_from_client = TRUE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C__pin_entry_from_client() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C__unpin_entry_real()
+ *
+ * Purpose:	Internal routine to unpin a cache entry.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              1/6/18
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5C__unpin_entry_real(H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr,
+    hbool_t update_rp)
+{
+    herr_t ret_value = SUCCEED;    /* Return value */
+
+#if H5C_DO_SANITY_CHECKS
+    FUNC_ENTER_STATIC
+#else
+    FUNC_ENTER_STATIC_NOERR
+#endif
+
+    /* Sanity checking */
+    HDassert(cache_ptr);
+    HDassert(entry_ptr);
+    HDassert(entry_ptr->is_pinned);
+
+    /* If requested, update the replacement policy if the entry is not protected */
+    if(update_rp && !entry_ptr->is_protected)
+        H5C__UPDATE_RP_FOR_UNPIN(cache_ptr, entry_ptr, FAIL)
+
+    /* Unpin the entry now */
+    entry_ptr->is_pinned = FALSE;
+
+    /* Update the stats for an unpin operation */
+    H5C__UPDATE_STATS_FOR_UNPIN(cache_ptr, entry_ptr)
+
+#if H5C_DO_SANITY_CHECKS
+done:
+#endif
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C__unpin_entry_real() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C__unpin_entry_from_client()
+ *
+ * Purpose:	Internal routine to unpin a cache entry from a client action.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              3/24/09
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5C__unpin_entry_from_client(H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr,
+    hbool_t update_rp)
+{
+    herr_t ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checking */
+    HDassert(cache_ptr);
+    HDassert(entry_ptr);
+
+    /* Error checking (should be sanity checks?) */
+    if(!entry_ptr->is_pinned)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "entry isn't pinned")
+    if(!entry_ptr->pinned_from_client)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "entry wasn't pinned by cache client")
+
+    /* Check if the entry is not pinned from a flush dependency */
+    if(!entry_ptr->pinned_from_cache)
+        if(H5C__unpin_entry_real(cache_ptr, entry_ptr, update_rp) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "can't unpin entry")
+
+    /* Mark the entry as explicitly unpinned by the client */
+    entry_ptr->pinned_from_client = FALSE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C__unpin_entry_from_client() */
 
 /*-------------------------------------------------------------------------
  *
@@ -4099,9 +3945,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C__auto_adjust_cache_size(H5F_t * f,
-                            hid_t dxpl_id,
-                            hbool_t write_permitted)
+H5C__auto_adjust_cache_size(H5F_t *f, hbool_t write_permitted)
 {
     H5C_t *			cache_ptr = f->shared->cache;
     hbool_t			reentrant_call = FALSE;
@@ -4125,8 +3969,8 @@ H5C__auto_adjust_cache_size(H5F_t * f,
     HDassert( (cache_ptr->resize_ctl).min_clean_fraction <= (double)100.0f );
 
     /* check to see if cache_ptr->resize_in_progress is TRUE.  If it, this
-     * is a re-entrant call via a client callback called in the resize 
-     * process.  To avoid an infinite recursion, set reentrant_call to 
+     * is a re-entrant call via a client callback called in the resize
+     * process.  To avoid an infinite recursion, set reentrant_call to
      * TRUE, and goto done.
      */
     if(cache_ptr->resize_in_progress) {
@@ -4294,7 +4138,7 @@ H5C__auto_adjust_cache_size(H5F_t * f,
                     if(!cache_ptr->size_decrease_possible)
                         status = decrease_disabled;
                     else {
-                        if(H5C__autoadjust__ageout(f, dxpl_id, hit_rate, &status, &new_max_cache_size, write_permitted) < 0)
+                        if(H5C__autoadjust__ageout(f, hit_rate, &status, &new_max_cache_size, write_permitted) < 0)
                             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "ageout code failed")
                     } /* end else */
                 } /* end if */
@@ -4423,12 +4267,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C__autoadjust__ageout(H5F_t * f,
-                        hid_t dxpl_id,
-                        double hit_rate,
-                        enum H5C_resize_status * status_ptr,
-                        size_t * new_max_cache_size_ptr,
-                        hbool_t write_permitted)
+H5C__autoadjust__ageout(H5F_t * f, double hit_rate, enum H5C_resize_status * status_ptr,
+    size_t * new_max_cache_size_ptr, hbool_t write_permitted)
 {
     H5C_t *     cache_ptr = f->shared->cache;
     size_t	test_size;
@@ -4460,7 +4300,7 @@ H5C__autoadjust__ageout(H5F_t * f,
         if ( cache_ptr->max_cache_size > (cache_ptr->resize_ctl).min_size ){
 
             /* evict aged out cache entries if appropriate... */
-            if(H5C__autoadjust__ageout__evict_aged_out_entries(f, dxpl_id, write_permitted) < 0)
+            if(H5C__autoadjust__ageout__evict_aged_out_entries(f, write_permitted) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "error flushing aged out entries")
 
             /* ... and then reduce cache size if appropriate */
@@ -4631,16 +4471,6 @@ done:
  *		will be re-calculated, and will be enforced the next time
  *		we have to make space in the cache.
  *
- *              The primary_dxpl_id and secondary_dxpl_id parameters
- *              specify the dxpl_ids used depending on the value of
- *		*first_flush_ptr.  The idea is to use the primary_dxpl_id
- *		on the first write in a sequence of writes, and to use
- *		the secondary_dxpl_id on all subsequent writes.
- *
- *              This is useful in the metadata cache, but may not be
- *		needed elsewhere.  If so, just use the same dxpl_id for
- *		both parameters.
- *
  *              Observe that this function cannot occasion a read.
  *
  * Return:      Non-negative on success/Negative on failure.
@@ -4650,9 +4480,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
-                                                hid_t   dxpl_id,
-                                                hbool_t write_permitted)
+H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *f, hbool_t write_permitted)
 {
     H5C_t *		cache_ptr = f->shared->cache;
     size_t		eviction_size_limit;
@@ -4725,7 +4553,7 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
                     cache_ptr->entries_removed_counter = 0;
                     cache_ptr->last_entry_removed_ptr  = NULL;
 
-                    if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, H5C__NO_FLAGS_SET) < 0)
+                    if(H5C__flush_single_entry(f, entry_ptr, H5C__NO_FLAGS_SET) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush entry")
 
                     if(cache_ptr->entries_removed_counter > 1 || cache_ptr->last_entry_removed_ptr == prev_ptr)
@@ -4736,7 +4564,7 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
 
                 bytes_evicted += entry_ptr->size;
 
-                if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, H5C__FLUSH_INVALIDATE_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0 )
+                if(H5C__flush_single_entry(f, entry_ptr, H5C__FLUSH_INVALIDATE_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0 )
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush entry")
             } /* end else-if */
             else {
@@ -4808,7 +4636,7 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
             prev_ptr = entry_ptr->prev;
 
             if(!(entry_ptr->is_dirty) && !(entry_ptr->prefetched_dirty))
-                if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, H5C__FLUSH_INVALIDATE_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0)
+                if(H5C__flush_single_entry(f, entry_ptr, H5C__FLUSH_INVALIDATE_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush clean entry")
 
             /* just skip the entry if it is dirty, as we can't do
@@ -5178,7 +5006,7 @@ H5C__flash_increase_cache_size(H5C_t * cache_ptr,
         if ( (cache_ptr->resize_ctl).rpt_fcn != NULL ) {
 
             /* get the hit rate for the reporting function.  Should still
-             * be good as we havent reset the hit rate statistics.
+             * be good as we haven't reset the hit rate statistics.
              */
             if(H5C_get_cache_hit_rate(cache_ptr, &hit_rate) != SUCCEED)
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't get hit rate")
@@ -5207,7 +5035,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_flush_invalidate_cache
+ * Function:    H5C__flush_invalidate_cache
  *
  * Purpose:	Flush and destroy the entries contained in the target
  *		cache.
@@ -5230,11 +5058,6 @@ done:
  *		until either the cache is empty, or the number of pinned
  *		entries stops decreasing on each pass.
  *
- *		The primary_dxpl_id and secondary_dxpl_id parameters
- *		specify the dxpl_ids used on the first write occasioned
- *		by the flush (primary_dxpl_id), and on all subsequent
- *		writes (secondary_dxpl_id).
- *
  * Return:      Non-negative on success/Negative on failure or if there was
  *		a request to flush all items and something was protected.
  *
@@ -5244,13 +5067,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C_flush_invalidate_cache(H5F_t *f, hid_t dxpl_id, unsigned flags)
+H5C__flush_invalidate_cache(H5F_t *f, unsigned flags)
 {
     H5C_t *		cache_ptr;
     H5C_ring_t		ring;
     herr_t		ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     HDassert(f);
     HDassert(f->shared);
@@ -5305,7 +5128,7 @@ H5C_flush_invalidate_cache(H5F_t *f, hid_t dxpl_id, unsigned flags)
      */
     ring = H5C_RING_USER;
     while(ring < H5C_RING_NTYPES) {
-        if(H5C_flush_invalidate_ring(f, dxpl_id, ring, flags) < 0)
+        if(H5C_flush_invalidate_ring(f, ring, flags) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "flush invalidate ring failed")
         ring++;
     } /* end while */
@@ -5334,7 +5157,7 @@ H5C_flush_invalidate_cache(H5F_t *f, hid_t dxpl_id, unsigned flags)
         while(entry_ptr) {
             /* Check ring */
             HDassert(entry_ptr->ring == H5C_RING_SB);
-            
+
             /* Advance to next entry in pinned entry list */
             entry_ptr = entry_ptr->next;
         } /* end while */
@@ -5349,7 +5172,7 @@ H5C_flush_invalidate_cache(H5F_t *f, hid_t dxpl_id, unsigned flags)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_flush_invalidate_cache() */
+} /* H5C__flush_invalidate_cache() */
 
 
 /*-------------------------------------------------------------------------
@@ -5376,7 +5199,7 @@ done:
  *		until either the cache is empty, or the number of pinned
  *		entries stops decreasing on each pass.
  *
- *		If flush dependencies appear in the target ring, the 
+ *		If flush dependencies appear in the target ring, the
  *		function makes repeated passes through the cache flushing
  *		entries in flush dependency order.
  *
@@ -5389,8 +5212,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C_flush_invalidate_ring(H5F_t * f, hid_t dxpl_id, H5C_ring_t ring,
-    unsigned flags)
+H5C_flush_invalidate_ring(H5F_t * f, H5C_ring_t ring, unsigned flags)
 {
     H5C_t              *cache_ptr;
     hbool_t             restart_slist_scan;
@@ -5427,11 +5249,11 @@ H5C_flush_invalidate_ring(H5F_t * f, hid_t dxpl_id, H5C_ring_t ring,
     cooked_flags = flags & H5C__FLUSH_CLEAR_ONLY_FLAG;
     evict_flags = flags & H5C__EVICT_ALLOW_LAST_PINS_FLAG;
 
-    /* The flush proceedure here is a bit strange.
+    /* The flush procedure here is a bit strange.
      *
      * In the outer while loop we make at least one pass through the
-     * cache, and then repeat until either all the pinned entries in 
-     * the ring unpin themselves, or until the number of pinned entries 
+     * cache, and then repeat until either all the pinned entries in
+     * the ring unpin themselves, or until the number of pinned entries
      * in the ring stops declining.  In this later case, we scream and die.
      *
      * Since the fractal heap can dirty, resize, and/or move entries
@@ -5487,9 +5309,9 @@ H5C_flush_invalidate_ring(H5F_t * f, hid_t dxpl_id, H5C_ring_t ring,
 
         /* There is also the possibility that entries will be
          * dirtied, resized, moved, and/or removed from the cache
-         * as the result of calls to the flush callbacks.  We use 
-         * the slist_len_increase and slist_size_increase increase 
-         * fields in struct H5C_t to track these changes for purpose 
+         * as the result of calls to the flush callbacks.  We use
+         * the slist_len_increase and slist_size_increase increase
+         * fields in struct H5C_t to track these changes for purpose
          * of sanity checking.
          *
          * To this end, we must zero these fields before we start
@@ -5504,8 +5326,8 @@ H5C_flush_invalidate_ring(H5F_t * f, hid_t dxpl_id, H5C_ring_t ring,
          * This flag is set to TRUE by H5C__flush_single_entry if the slist
          * is modified by a pre_serialize, serialize, or notify callback.
          *
-         * H5C_flush_invalidate_ring() uses this flag to detect any 
-         * modifications to the slist that might corrupt the scan of 
+         * H5C_flush_invalidate_ring() uses this flag to detect any
+         * modifications to the slist that might corrupt the scan of
          * the slist -- and restart the scan in this event.
          */
         cache_ptr->slist_changed = FALSE;
@@ -5535,14 +5357,14 @@ H5C_flush_invalidate_ring(H5F_t * f, hid_t dxpl_id, H5C_ring_t ring,
 
             entry_ptr = next_entry_ptr;
 
-            /* It is possible that entries will be dirtied, resized, 
+            /* It is possible that entries will be dirtied, resized,
              * flushed, or removed from the cache via the take ownership
-             * flag as the result of pre_serialize or serialized callbacks. 
-             * 
+             * flag as the result of pre_serialize or serialized callbacks.
+             *
              * This in turn can corrupt the scan through the slist.
              *
-             * We test for slist modifications in the pre_serialize 
-             * and serialize callbacks, and restart the scan of the 
+             * We test for slist modifications in the pre_serialize
+             * and serialize callbacks, and restart the scan of the
              * slist if we find them.  However, best we do some extra
              * sanity checking just in case.
              */
@@ -5576,7 +5398,7 @@ H5C_flush_invalidate_ring(H5F_t * f, hid_t dxpl_id, H5C_ring_t ring,
              *
              * While this optimization used to be easy, with the possibility
              * of new entries being added to the slist in the midst of the
-             * flush, we must keep the slist in cannonical form at all
+             * flush, we must keep the slist in canonical form at all
              * times.
              */
             if(((!entry_ptr->flush_me_last) ||
@@ -5591,7 +5413,7 @@ H5C_flush_invalidate_ring(H5F_t * f, hid_t dxpl_id, H5C_ring_t ring,
                     protected_entries++;
                 } /* end if */
                 else if(entry_ptr->is_pinned) {
-                    if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, H5C__DURING_FLUSH_FLAG) < 0)
+                    if(H5C__flush_single_entry(f, entry_ptr, H5C__DURING_FLUSH_FLAG) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "dirty pinned entry flush failed")
 
                     if(cache_ptr->slist_changed) {
@@ -5608,7 +5430,7 @@ H5C_flush_invalidate_ring(H5F_t * f, hid_t dxpl_id, H5C_ring_t ring,
                     } /* end if */
                 } /* end else-if */
                 else {
-                    if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, (cooked_flags | H5C__DURING_FLUSH_FLAG | H5C__FLUSH_INVALIDATE_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG)) < 0)
+                    if(H5C__flush_single_entry(f, entry_ptr, (cooked_flags | H5C__DURING_FLUSH_FLAG | H5C__FLUSH_INVALIDATE_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG)) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "dirty entry flush destroy failed")
 
                     if(cache_ptr->slist_changed) {
@@ -5675,8 +5497,8 @@ H5C_flush_invalidate_ring(H5F_t * f, hid_t dxpl_id, H5C_ring_t ring,
             if((!entry_ptr->flush_me_last || (entry_ptr->flush_me_last && cache_ptr->num_last_entries >= cache_ptr->slist_len))
                     && entry_ptr->flush_dep_nchildren == 0 && entry_ptr->ring == ring) {
                 if(entry_ptr->is_protected) {
-                    /* we have major problems -- but lets flush and 
-                     * destroy everything we can before we flag an 
+                    /* we have major problems -- but lets flush and
+                     * destroy everything we can before we flag an
                      * error.
                      */
                     protected_entries++;
@@ -5684,9 +5506,9 @@ H5C_flush_invalidate_ring(H5F_t * f, hid_t dxpl_id, H5C_ring_t ring,
                         HDassert(!(entry_ptr->is_dirty));
                 } /* end if */
                 else if(!(entry_ptr->is_pinned)) {
-                    /* if *entry_ptr is dirty, it is possible 
-                     * that one or more other entries may be 
-                     * either removed from the cache, loaded 
+                    /* if *entry_ptr is dirty, it is possible
+                     * that one or more other entries may be
+                     * either removed from the cache, loaded
                      * into the cache, or moved to a new location
                      * in the file as a side effect of the flush.
                      *
@@ -5695,14 +5517,14 @@ H5C_flush_invalidate_ring(H5F_t * f, hid_t dxpl_id, H5C_ring_t ring,
                      * entry, allowing it to be removed also and
                      * invalidating the next_entry_ptr.
                      *
-                     * If either of these happen, and one of the target 
-                     * or proxy entries happens to be the next entry in 
+                     * If either of these happen, and one of the target
+                     * or proxy entries happens to be the next entry in
                      * the hash bucket, we could either find ourselves
                      * either scanning a non-existant entry, scanning
                      * through a different bucket, or skipping an entry.
                      *
-                     * Neither of these are good, so restart the 
-                     * the scan at the head of the hash bucket 
+                     * Neither of these are good, so restart the
+                     * the scan at the head of the hash bucket
                      * after the flush if we detect that the next_entry_ptr
                      * becomes invalid.
                      *
@@ -5712,15 +5534,15 @@ H5C_flush_invalidate_ring(H5F_t * f, hid_t dxpl_id, H5C_ring_t ring,
                      */
                     cache_ptr->entry_watched_for_removal = next_entry_ptr;
 
-                    if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, (cooked_flags | H5C__DURING_FLUSH_FLAG | H5C__FLUSH_INVALIDATE_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG)) < 0)
+                    if(H5C__flush_single_entry(f, entry_ptr, (cooked_flags | H5C__DURING_FLUSH_FLAG | H5C__FLUSH_INVALIDATE_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG)) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Entry flush destroy failed")
 
                     /* Restart the index list scan if necessary.  Must
-                     * do this if the next entry is evicted, and also if 
+                     * do this if the next entry is evicted, and also if
                      * one or more entries are inserted, loaded, or moved
                      * as these operations can result in part of the scan
                      * being skipped -- which can cause a spurious failure
-                     * if this results in the size of the pinned entry 
+                     * if this results in the size of the pinned entry
                      * failing to decline during the pass.
                      */
                     if((NULL != next_entry_ptr && NULL == cache_ptr->entry_watched_for_removal)
@@ -5763,7 +5585,7 @@ H5C_flush_invalidate_ring(H5F_t * f, hid_t dxpl_id, H5C_ring_t ring,
             entry_ptr = entry_ptr->next;
         } /* end while */
 
-       /* Check if the number of pinned entries in the ring is positive, and 
+       /* Check if the number of pinned entries in the ring is positive, and
         * it is not declining.  Scream and die if so.
         */
         if(cur_ring_pel_len > 0 && cur_ring_pel_len >= old_ring_pel_len) {
@@ -5804,18 +5626,18 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_flush_ring
+ * Function:    H5C__flush_ring
  *
- * Purpose:	Flush the entries contained in the specified cache and 
+ * Purpose:	Flush the entries contained in the specified cache and
  *		ring.  All entries in rings outside the specified ring
  *		must have been flushed on entry.
  *
  *		If the cache contains protected entries in the specified
- *		ring, the function will fail, as protected entries cannot 
+ *		ring, the function will fail, as protected entries cannot
  *		be flushed.  However all unprotected entries in the target
  *		ring should be flushed before the function returns failure.
  *
- *		If flush dependencies appear in the target ring, the 
+ *		If flush dependencies appear in the target ring, the
  *		function makes repeated passes through the slist flushing
  *		entries in flush dependency order.
  *
@@ -5827,8 +5649,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5C_flush_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring,  unsigned flags)
+static herr_t
+H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
 {
     H5C_t * cache_ptr = f->shared->cache;
     hbool_t		flushed_entries_last_pass;
@@ -5847,7 +5669,7 @@ H5C_flush_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring,  unsigned flags)
     int                 i;
     herr_t		ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
@@ -5881,10 +5703,10 @@ H5C_flush_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring,  unsigned flags)
 
     /* Set the cache_ptr->slist_changed to false.
      *
-     * This flag is set to TRUE by H5C__flush_single_entry if the 
+     * This flag is set to TRUE by H5C__flush_single_entry if the
      * slist is modified by a pre_serialize, serialize, or notify callback.
      * H5C_flush_cache uses this flag to detect any modifications
-     * to the slist that might corrupt the scan of the slist -- and 
+     * to the slist that might corrupt the scan of the slist -- and
      * restart the scan in this event.
      */
     cache_ptr->slist_changed = FALSE;
@@ -5904,8 +5726,8 @@ H5C_flush_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring,  unsigned flags)
          *
          * To make things more entertaining, with the advent of the
          * fractal heap, the entry serialize callback can cause entries
-         * to be dirtied, resized, and/or moved.  Also, the 
-         * pre_serialize callback can result in an entry being 
+         * to be dirtied, resized, and/or moved.  Also, the
+         * pre_serialize callback can result in an entry being
          * removed from the cache via the take ownership flag.
          *
          * To deal with this, we first make note of the initial
@@ -5956,24 +5778,24 @@ H5C_flush_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring,  unsigned flags)
                 HDassert(next_entry_ptr->is_dirty);
                 HDassert(next_entry_ptr->in_slist);
             } /* end if */
-                
+
             entry_ptr = next_entry_ptr;
 
             /* With the advent of the fractal heap, the free space
              * manager, and the version 3 cache, it is possible
-             * that the pre-serialize or serialize callback will 
-             * dirty, resize, or take ownership of other entries 
-             * in the cache.  
+             * that the pre-serialize or serialize callback will
+             * dirty, resize, or take ownership of other entries
+             * in the cache.
              *
              * To deal with this, I have inserted code to detect any
              * change in the skip list not directly under the control
              * of this function.  If such modifications are detected,
-             * we must re-start the scan of the skip list to avoid 
+             * we must re-start the scan of the skip list to avoid
              * the possibility that the target of the next_entry_ptr
              * may have been flushed or deleted from the cache.
              *
              * To verify that all such possibilities have been dealt
-             * with, we do a bit of extra sanity checking on 
+             * with, we do a bit of extra sanity checking on
              * entry_ptr.
              */
             HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
@@ -6003,34 +5825,34 @@ H5C_flush_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring,  unsigned flags)
             else
                 next_entry_ptr = NULL;
 
-            if((!flush_marked_entries || entry_ptr->flush_marker) 
+            if((!flush_marked_entries || entry_ptr->flush_marker)
                     && (!entry_ptr->flush_me_last ||
-                        (entry_ptr->flush_me_last 
+                        (entry_ptr->flush_me_last
                             && (cache_ptr->num_last_entries >= cache_ptr->slist_len
-                               || (flush_marked_entries && entry_ptr->flush_marker)))) 
+                               || (flush_marked_entries && entry_ptr->flush_marker))))
                     && (entry_ptr->flush_dep_nchildren == 0
-                        || entry_ptr->flush_dep_ndirty_children == 0) 
+                        || entry_ptr->flush_dep_ndirty_children == 0)
                     && entry_ptr->ring == ring) {
 
                 HDassert(entry_ptr->flush_dep_nunser_children == 0);
 
                 if(entry_ptr->is_protected) {
-                    /* we probably have major problems -- but lets 
-                     * flush everything we can before we decide 
+                    /* we probably have major problems -- but lets
+                     * flush everything we can before we decide
                      * whether to flag an error.
                      */
                     tried_to_flush_protected_entry = TRUE;
                     protected_entries++;
                 } /* end if */
                 else {
-                    if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, (flags | H5C__DURING_FLUSH_FLAG)) < 0)
+                    if(H5C__flush_single_entry(f, entry_ptr, (flags | H5C__DURING_FLUSH_FLAG)) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush entry")
 
                     if(cache_ptr->slist_changed) {
                         /* The slist has been modified by something
-                         * other than the simple removal of the 
+                         * other than the simple removal of the
                          * of the flushed entry after the flush.
-                         * 
+                         *
                          * This has the potential to corrupt the
                          * scan through the slist, so restart it.
                          */
@@ -6065,7 +5887,7 @@ H5C_flush_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring,  unsigned flags)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_flush_ring() */
+} /* H5C__flush_ring() */
 
 
 /*-------------------------------------------------------------------------
@@ -6102,8 +5924,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
-    unsigned flags)
+H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
 {
     H5C_t *	     	cache_ptr;              /* Cache for file */
     hbool_t		destroy;		/* external flag */
@@ -6159,11 +5980,11 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
     else
         write_entry = FALSE;
 
-    /* if we have received close warning, and we have been instructed to 
+    /* if we have received close warning, and we have been instructed to
      * generate a metadata cache image, and we have actually constructed
      * the entry images, set suppress_image_entry_frees to TRUE.
      *
-     * Set suppress_image_entry_writes to TRUE if indicated by the 
+     * Set suppress_image_entry_writes to TRUE if indicated by the
      * image_ctl flags.
      */
     if(cache_ptr->close_warning_received && cache_ptr->image_ctl.generate_image
@@ -6228,7 +6049,7 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
             if(NULL == (entry_ptr->image_ptr = H5MM_malloc(entry_ptr->size + H5C_IMAGE_EXTRA_SPACE)))
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for on disk image buffer")
 #if H5C_DO_MEMORY_SANITY_CHECKS
-            HDmemcpy(((uint8_t *)entry_ptr->image_ptr) + entry_ptr->size, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+            H5MM_memcpy(((uint8_t *)entry_ptr->image_ptr) + entry_ptr->size, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
         } /* end if */
 
@@ -6237,16 +6058,16 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
             HDassert(!entry_ptr->prefetched);
 
             /* Generate the entry's image */
-            if(H5C__generate_image(f, cache_ptr, entry_ptr, dxpl_id) < 0)
+            if(H5C__generate_image(f, cache_ptr, entry_ptr) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't generate entry's image")
         } /* end if ( ! (entry_ptr->image_up_to_date) ) */
     } /* end if */
 
-    /* Finally, write the image to disk.  
-     * 
-     * Note that if the H5AC__CLASS_SKIP_WRITES flag is set in the 
+    /* Finally, write the image to disk.
+     *
+     * Note that if the H5AC__CLASS_SKIP_WRITES flag is set in the
      * in the entry's type, we silently skip the write.  This
-     * flag should only be used in test code. 
+     * flag should only be used in test code.
      */
     if(write_entry) {
         HDassert(entry_ptr->is_dirty);
@@ -6258,8 +6079,8 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
 
         /* Write the image to disk unless the write is suppressed.
          *
-         * This happens if both suppress_image_entry_writes and 
-         * entry_ptr->include_in_image are TRUE, or if the 
+         * This happens if both suppress_image_entry_writes and
+         * entry_ptr->include_in_image are TRUE, or if the
          * H5AC__CLASS_SKIP_WRITES is set in the entry's type.  This
          * flag should only be used in test code
          */
@@ -6273,20 +6094,26 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "unable to insert skip list item")
             } /* end if */
             else
+            {
 #endif /* H5_HAVE_PARALLEL */
 
-            if(entry_ptr->prefetched) {
-                HDassert(entry_ptr->type->id == H5AC_PREFETCHED_ENTRY_ID);
-                mem_type = cache_ptr->class_table_ptr[entry_ptr->prefetch_type_id]->mem_type;
-            } /* end if */
-            else
-                mem_type = entry_ptr->type->mem_type;
+                if(entry_ptr->prefetched) {
+                    HDassert(entry_ptr->type->id == H5AC_PREFETCHED_ENTRY_ID);
+                    mem_type = cache_ptr->
+                               class_table_ptr[entry_ptr->prefetch_type_id]->
+                               mem_type;
+                } /* end if */
+                else
+                    mem_type = entry_ptr->type->mem_type;
 
-            if(H5F_block_write(f, mem_type, entry_ptr->addr, entry_ptr->size, dxpl_id, entry_ptr->image_ptr) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't write image to file")
+                if(H5F_block_write(f, mem_type, entry_ptr->addr, entry_ptr->size, entry_ptr->image_ptr) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't write image to file")
+#ifdef H5_HAVE_PARALLEL
+            }
+#endif /* H5_HAVE_PARALLEL */
         } /* end if */
 
-        /* if the entry has a notify callback, notify it that we have 
+        /* if the entry has a notify callback, notify it that we have
          * just flushed the entry.
          */
         if(entry_ptr->type->notify &&
@@ -6298,7 +6125,7 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
      * made if it was appropriate to make them.  Similarly, the entry
      * has been written to disk if desired.
      *
-     * Thus it is now safe to update the cache data structures for the 
+     * Thus it is now safe to update the cache data structures for the
      * flush.
      */
 
@@ -6352,7 +6179,7 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
          *
          * 5) Remove it from the tag list for this object
          *
-         * Finally, if the destroy_entry flag is set, discard the 
+         * Finally, if the destroy_entry flag is set, discard the
          * entry.
          */
         H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr, FAIL)
@@ -6386,7 +6213,7 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
         /* We are either doing a flush or a clear.
          *
          * A clear and a flush are the same from the point of
-         * view of the replacement policy and the slist.  
+         * view of the replacement policy and the slist.
          * Hence no differentiation between them.
          *
          * 					JRM -- 7/7/07
@@ -6396,8 +6223,8 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
 
         H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush)
 
-        /* mark the entry as clean and update the index for 
-         * entry clean.  Also, call the clear callback 
+        /* mark the entry as clean and update the index for
+         * entry clean.  Also, call the clear callback
          * if defined.
          */
         entry_ptr->is_dirty = FALSE;
@@ -6418,7 +6245,7 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
                 HDassert(entry_ptr->flush_dep_ndirty_children == 0);
             if(entry_ptr->flush_dep_nparents > 0)
                 if(H5C__mark_flush_dep_clean(entry_ptr) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "Can't propagate flush dep clean flag")
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKCLEAN, FAIL, "Can't propagate flush dep clean flag")
         } /* end if */
     } /* end else */
 
@@ -6429,8 +6256,8 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
        end before the entry_ptr gets freed */
     entry_addr = entry_ptr->addr;
 
-    /* Internal cache data structures should now be up to date, and 
-     * consistant with the status of the entry.  
+    /* Internal cache data structures should now be up to date, and
+     * consistent with the status of the entry.
      *
      * Now discard the entry if appropriate.
      */
@@ -6439,33 +6266,33 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
         HDassert(0 == entry_ptr->flush_dep_nparents);
 
         /* if both suppress_image_entry_frees and entry_ptr->include_in_image
-         * are true, simply set entry_ptr->image_ptr to NULL, as we have 
+         * are true, simply set entry_ptr->image_ptr to NULL, as we have
          * another pointer to the buffer in an instance of H5C_image_entry_t
          * in cache_ptr->image_entries.
          *
          * Otherwise, free the buffer if it exists.
          */
-        if(suppress_image_entry_frees && entry_ptr->include_in_image) 
+        if(suppress_image_entry_frees && entry_ptr->include_in_image)
             entry_ptr->image_ptr = NULL;
         else if(entry_ptr->image_ptr != NULL)
             entry_ptr->image_ptr = H5MM_xfree(entry_ptr->image_ptr);
 
-        /* If the entry is not a prefetched entry, verify that the flush 
-         * dependency parents addresses array has been transfered.
+        /* If the entry is not a prefetched entry, verify that the flush
+         * dependency parents addresses array has been transferred.
          *
          * If the entry is prefetched, the free_isr routine will dispose of
-         * the flush dependency parents adresses array if necessary.
+         * the flush dependency parents addresses array if necessary.
          */
         if(!entry_ptr->prefetched) {
             HDassert(0 == entry_ptr->fd_parent_count);
             HDassert(NULL == entry_ptr->fd_parent_addrs);
         } /* end if */
 
-        /* Check whether we should free the space in the file that 
-         * the entry occupies 
+        /* Check whether we should free the space in the file that
+         * the entry occupies
          */
         if(free_file_space) {
-            size_t fsf_size;
+            hsize_t fsf_size;
 
             /* Sanity checks */
             HDassert(H5F_addr_defined(entry_ptr->addr));
@@ -6492,21 +6319,21 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
                 fsf_size = entry_ptr->size;
 
             /* Release the space on disk */
-            if(H5MF_xfree(f, entry_ptr->type->mem_type, dxpl_id, entry_ptr->addr, (hsize_t)fsf_size) < 0)
+            if(H5MF_xfree(f, entry_ptr->type->mem_type, entry_ptr->addr, fsf_size) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "unable to free file space for cache entry")
         } /* end if ( free_file_space ) */
 
         /* Reset the pointer to the cache the entry is within. -QAK */
         entry_ptr->cache_ptr = NULL;
 
-        /* increment entries_removed_counter and set 
-         * last_entry_removed_ptr.  As we are likely abuut to 
-         * free the entry, recall that last_entry_removed_ptr 
+        /* increment entries_removed_counter and set
+         * last_entry_removed_ptr.  As we are likely abuut to
+         * free the entry, recall that last_entry_removed_ptr
          * must NEVER be dereferenced.
          *
          * Recall that these fields are maintained to allow functions
-         * that perform scans of lists of entries to detect the 
-         * unexpected removal of entries (via expunge, eviction, 
+         * that perform scans of lists of entries to detect the
+         * unexpected removal of entries (via expunge, eviction,
          * or take ownership at present), so that they can re-start
          * their scans if necessary.
          *
@@ -6550,15 +6377,15 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
             HDassert(take_ownership);
 
             /* client is taking ownership of the entry.
-             * set bad magic here too so the cache will choke 
+             * set bad magic here too so the cache will choke
              * unless the entry is re-inserted properly
              */
             entry_ptr->magic = H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC;
         } /* end else */
     } /* if (destroy) */
 
-    /* Check if we have to update the page buffer with cleared entries 
-     * so it doesn't go out of date 
+    /* Check if we have to update the page buffer with cleared entries
+     * so it doesn't go out of date
      */
     if(update_page_buffer) {
         /* Sanity check */
@@ -6575,9 +6402,9 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "log_flush callback failed")
 
 done:
-    HDassert( ( ret_value != SUCCEED ) || ( destroy_entry ) || 
+    HDassert( ( ret_value != SUCCEED ) || ( destroy_entry ) ||
               ( ! entry_ptr->flush_in_progress ) );
-    HDassert( ( ret_value != SUCCEED ) || ( destroy_entry ) || 
+    HDassert( ( ret_value != SUCCEED ) || ( destroy_entry ) ||
               ( take_ownership ) || ( ! entry_ptr->is_dirty ) );
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -6594,7 +6421,7 @@ done:
  *              If exceed, adjust 'len' accordingly.
  *
  *              Verify that 'len' should not exceed eoa when 'actual' is
- *              true i.e. 'len' is the actual length from get_load_size 
+ *              true i.e. 'len' is the actual length from get_load_size
  *              callback with non-null image pointer.
  *              If exceed, return error.
  *
@@ -6615,7 +6442,7 @@ H5C__verify_len_eoa(H5F_t *f, const H5C_class_t *type, haddr_t addr,
 
     FUNC_ENTER_STATIC
 
-    /* if type == H5FD_MEM_GHEAP, H5F_block_read() forces 
+    /* if type == H5FD_MEM_GHEAP, H5F_block_read() forces
      * type to H5FD_MEM_DRAW via its call to H5F__accum_read().
      * Thus we do the same for purposes of computing the EOA
      * for sanity checks.
@@ -6668,7 +6495,6 @@ done:
  */
 static void *
 H5C_load_entry(H5F_t *              f,
-                hid_t               dxpl_id,
 #ifdef H5_HAVE_PARALLEL
                 hbool_t             coll_access,
 #endif /* H5_HAVE_PARALLEL */
@@ -6723,7 +6549,7 @@ H5C_load_entry(H5F_t *              f,
     if(NULL == (image = (uint8_t *)H5MM_malloc(len + H5C_IMAGE_EXTRA_SPACE)))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "memory allocation failed for on disk image buffer")
 #if H5C_DO_MEMORY_SANITY_CHECKS
-    HDmemcpy(image + len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+    H5MM_memcpy(image + len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
 
 #ifdef H5_HAVE_PARALLEL
@@ -6748,7 +6574,7 @@ H5C_load_entry(H5F_t *              f,
         /* Get the # of read attempts */
         max_tries = tries = H5F_GET_READ_ATTEMPTS(f);
 
-        /* 
+        /*
          * This do/while loop performs the following till the metadata checksum
          * is correct or the file's number of allowed read attempts are reached.
          *   --read the metadata
@@ -6761,14 +6587,14 @@ H5C_load_entry(H5F_t *              f,
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "image null after H5MM_realloc()")
                 image = (uint8_t *)new_image;
 #if H5C_DO_MEMORY_SANITY_CHECKS
-                HDmemcpy(image + len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+                H5MM_memcpy(image + len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
             } /* end if */
 
 #ifdef H5_HAVE_PARALLEL
             if(!coll_access || 0 == mpi_rank) {
 #endif /* H5_HAVE_PARALLEL */
-                if(H5F_block_read(f, type->mem_type, addr, len, dxpl_id, image) < 0)
+                if(H5F_block_read(f, type->mem_type, addr, len, image) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL, "Can't read image*")
 #ifdef H5_HAVE_PARALLEL
             } /* end if */
@@ -6805,7 +6631,7 @@ H5C_load_entry(H5F_t *              f,
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "image null after H5MM_realloc()")
                     image = (uint8_t *)new_image;
 #if H5C_DO_MEMORY_SANITY_CHECKS
-                    HDmemcpy(image + actual_len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+                    H5MM_memcpy(image + actual_len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
 
                     if(actual_len > len) {
@@ -6815,7 +6641,7 @@ H5C_load_entry(H5F_t *              f,
                             /* If the thing's image needs to be bigger for a speculatively
                              * loaded thing, go get the on-disk image again (the extra portion).
                              */
-                            if(H5F_block_read(f, type->mem_type, addr + len, actual_len - len, dxpl_id, image + len) < 0)
+                            if(H5F_block_read(f, type->mem_type, addr + len, actual_len - len, image + len) < 0)
                                 HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't read image")
 #ifdef H5_HAVE_PARALLEL
                         }
@@ -6940,8 +6766,10 @@ H5C_load_entry(H5F_t *              f,
     entry->next                         = NULL;
     entry->prev                         = NULL;
 
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
     entry->aux_next                     = NULL;
     entry->aux_prev                     = NULL;
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
 #ifdef H5_HAVE_PARALLEL
     entry->coll_next                    = NULL;
@@ -7016,8 +6844,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C__make_space_in_cache(H5F_t *f, hid_t dxpl_id, size_t space_needed,
-    hbool_t	write_permitted)
+H5C__make_space_in_cache(H5F_t *f, size_t space_needed, hbool_t	write_permitted)
 {
     H5C_t *		cache_ptr = f->shared->cache;
 #if H5C_COLLECT_CACHE_STATS
@@ -7047,8 +6874,8 @@ H5C__make_space_in_cache(H5F_t *f, hid_t dxpl_id, size_t space_needed,
     HDassert(cache_ptr->index_size == (cache_ptr->clean_index_size + cache_ptr->dirty_index_size));
 
     /* check to see if cache_ptr->msic_in_progress is TRUE.  If it, this
-     * is a re-entrant call via a client callback called in the make 
-     * space in cache process.  To avoid an infinite recursion, set 
+     * is a re-entrant call via a client callback called in the make
+     * space in cache process.  To avoid an infinite recursion, set
      * reentrant_call to TRUE, and goto done.
      */
     if(cache_ptr->msic_in_progress) {
@@ -7120,9 +6947,9 @@ H5C__make_space_in_cache(H5F_t *f, hid_t dxpl_id, size_t space_needed,
                     }
 #endif /* H5C_COLLECT_CACHE_STATS */
 
-		    /* reset entries_removed_counter and 
-                     * last_entry_removed_ptr prior to the call to 
-                     * H5C__flush_single_entry() so that we can spot 
+		    /* reset entries_removed_counter and
+                     * last_entry_removed_ptr prior to the call to
+                     * H5C__flush_single_entry() so that we can spot
                      * unexpected removals of entries from the cache,
                      * and set the restart_scan flag if proceeding
                      * would be likely to cause us to scan an entry
@@ -7131,7 +6958,7 @@ H5C__make_space_in_cache(H5F_t *f, hid_t dxpl_id, size_t space_needed,
                     cache_ptr->entries_removed_counter = 0;
                     cache_ptr->last_entry_removed_ptr  = NULL;
 
-                    if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, H5C__NO_FLAGS_SET) < 0)
+                    if(H5C__flush_single_entry(f, entry_ptr, H5C__NO_FLAGS_SET) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush entry")
 
 		    if ( ( cache_ptr->entries_removed_counter > 1 ) ||
@@ -7139,7 +6966,7 @@ H5C__make_space_in_cache(H5F_t *f, hid_t dxpl_id, size_t space_needed,
 
                         restart_scan = TRUE;
 
-                } else if ( (cache_ptr->index_size + space_needed) > cache_ptr->max_cache_size 
+                } else if ( (cache_ptr->index_size + space_needed) > cache_ptr->max_cache_size
 #ifdef H5_HAVE_PARALLEL
                             && !(entry_ptr->coll_access)
 #endif /* H5_HAVE_PARALLEL */
@@ -7148,7 +6975,7 @@ H5C__make_space_in_cache(H5F_t *f, hid_t dxpl_id, size_t space_needed,
                     cache_ptr->entries_scanned_to_make_space++;
 #endif /* H5C_COLLECT_CACHE_STATS */
 
-                    if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, H5C__FLUSH_INVALIDATE_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0)
+                    if(H5C__flush_single_entry(f, entry_ptr, H5C__FLUSH_INVALIDATE_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush entry")
                 } else {
                     /* We have enough space so don't flush clean entry. */
@@ -7276,6 +7103,7 @@ H5C__make_space_in_cache(H5F_t *f, hid_t dxpl_id, size_t space_needed,
 
         HDassert( H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS );
 
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
         initial_list_len = cache_ptr->cLRU_list_len;
         entry_ptr = cache_ptr->cLRU_tail_ptr;
 
@@ -7296,18 +7124,14 @@ H5C__make_space_in_cache(H5F_t *f, hid_t dxpl_id, size_t space_needed,
 
             prev_ptr = entry_ptr->aux_prev;
 
-            if ( ( !(entry_ptr->prefetched_dirty) ) 
+            if ( ( !(entry_ptr->prefetched_dirty) )
 #ifdef H5_HAVE_PARALLEL
                  && ( ! (entry_ptr->coll_access) )
 #endif /* H5_HAVE_PARALLEL */
                ) {
-
-                if ( H5C__flush_single_entry(f, dxpl_id, entry_ptr, 
-                                  H5C__FLUSH_INVALIDATE_FLAG | 
-                                  H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0 )
-
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                                "unable to flush entry")
+                if(H5C__flush_single_entry(f, entry_ptr,
+                        H5C__FLUSH_INVALIDATE_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush entry")
 
             } /* end if */
 
@@ -7320,6 +7144,7 @@ H5C__make_space_in_cache(H5F_t *f, hid_t dxpl_id, size_t space_needed,
             entry_ptr = prev_ptr;
 	    entries_examined++;
         }
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
     }
 
 done:
@@ -7349,7 +7174,7 @@ done:
  *
  * Changes:
  *
- *		Added code to verify that the LRU contains no pinned 
+ *		Added code to verify that the LRU contains no pinned
  *		entries.                        JRM -- 4/25/14
  *
  *-------------------------------------------------------------------------
@@ -7429,7 +7254,7 @@ H5C_validate_lru_list(H5C_t * cache_ptr)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 6 failed")
         }
 
-        if ( ( entry_ptr->is_pinned ) || 
+        if ( ( entry_ptr->is_pinned ) ||
              ( entry_ptr->pinned_from_client ) ||
              ( entry_ptr->pinned_from_cache ) ) {
 
@@ -7465,7 +7290,7 @@ done:
  *
  * Function:    H5C_validate_pinned_entry_list
  *
- * Purpose:     Debugging function that scans the pinned entry list for 
+ * Purpose:     Debugging function that scans the pinned entry list for
  *              errors.
  *
  *		If an error is detected, the function generates a
@@ -7597,7 +7422,7 @@ done:
  *
  * Function:    H5C_validate_protected_entry_list
  *
- * Purpose:     Debugging function that scans the protected entry list for 
+ * Purpose:     Debugging function that scans the protected entry list for
  *              errors.
  *
  *		If an error is detected, the function generates a
@@ -7722,11 +7547,11 @@ done:
  *
  * Function:    H5C_entry_in_skip_list
  *
- * Purpose:     Debugging function that scans skip list to see if it 
- *		is in present.  We need this, as it is possible for 
+ * Purpose:     Debugging function that scans skip list to see if it
+ *		is in present.  We need this, as it is possible for
  *		an entry to be in the skip list twice.
  *
- * Return:      FALSE if the entry is not in the skip list, and TRUE 
+ * Return:      FALSE if the entry is not in the skip list, and TRUE
  *		if it is.
  *
  * Programmer:  John Mainzer, 11/1/14
@@ -7791,8 +7616,8 @@ H5C_entry_in_skip_list(H5C_t * cache_ptr, H5C_cache_entry_t *target_ptr)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C__flush_marked_entries(H5F_t * f, hid_t dxpl_id)
-{ 
+H5C__flush_marked_entries(H5F_t * f)
+{
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -7801,7 +7626,7 @@ H5C__flush_marked_entries(H5F_t * f, hid_t dxpl_id)
     HDassert(f != NULL);
 
     /* Flush all marked entries */
-    if(H5C_flush_cache(f, dxpl_id, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_IGNORE_PROTECTED_FLAG) < 0)
+    if(H5C_flush_cache(f, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_IGNORE_PROTECTED_FLAG) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush cache")
 
 done:
@@ -7814,7 +7639,7 @@ done:
  * Function:    H5C_cork
  *
  * Purpose:     To cork/uncork/get cork status of an object depending on "action":
- *		H5C__SET_CORK: 
+ *		H5C__SET_CORK:
  *			To cork the object
  *			Return error if the object is already corked
  *		H5C__UNCORK:
@@ -7823,7 +7648,7 @@ done:
  * 		H5C__GET_CORKED:
  *			To retrieve the cork status of an object in
  *			the parameter "corked"
- *		
+ *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
@@ -7833,7 +7658,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked) 
+H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
 {
     H5C_tag_info_t *tag_info;	/* Points to a tag info struct */
     herr_t              ret_value = SUCCEED;
@@ -7883,6 +7708,8 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
 
             /* Set the corked status for the entire object */
             tag_info->corked = TRUE;
+            cache_ptr->num_objs_corked++;
+
         } /* end if */
         else {
             /* Sanity check */
@@ -7894,6 +7721,7 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
 
             /* Set the corked status for the entire object */
             tag_info->corked = FALSE;
+            cache_ptr->num_objs_corked--;
 
             /* Remove the tag info from the tag list, if there's no more entries with this tag */
             if(0 == tag_info->entry_cnt) {
@@ -7979,7 +7807,7 @@ done:
 static herr_t
 H5C__mark_flush_dep_clean(H5C_cache_entry_t * entry)
 {
-    unsigned u;                         /* Local index variable */
+    int i;                              /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -7988,16 +7816,19 @@ H5C__mark_flush_dep_clean(H5C_cache_entry_t * entry)
     HDassert(entry);
 
     /* Iterate over the parent entries, if any */
-    for(u = 0; u < entry->flush_dep_nparents; u++) {
+    /* Note reverse iteration order, in case the callback removes the flush
+     *  dependency - QAK, 2017/08/12
+     */
+    for(i = ((int)entry->flush_dep_nparents) - 1; i >= 0; i--) {
 	/* Sanity check */
-	HDassert(entry->flush_dep_parent[u]->flush_dep_ndirty_children > 0);
+	HDassert(entry->flush_dep_parent[i]->flush_dep_ndirty_children > 0);
 
 	/* Adjust the parent's number of dirty children */
-	entry->flush_dep_parent[u]->flush_dep_ndirty_children--;
+	entry->flush_dep_parent[i]->flush_dep_ndirty_children--;
 
         /* If the parent has a 'notify' callback, send a 'child entry cleaned' notice */
-        if(entry->flush_dep_parent[u]->type->notify &&
-                (entry->flush_dep_parent[u]->type->notify)(H5C_NOTIFY_ACTION_CHILD_CLEANED, entry->flush_dep_parent[u]) < 0)
+        if(entry->flush_dep_parent[i]->type->notify &&
+                (entry->flush_dep_parent[i]->type->notify)(H5C_NOTIFY_ACTION_CHILD_CLEANED, entry->flush_dep_parent[i]) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry dirty flag reset")
     } /* end for */
 
@@ -8009,8 +7840,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5C__mark_flush_dep_serialized()
  *
- * Purpose:     Decrement the flush_dep_nunser_children fields of all the 
- *		target entry's flush dependency parents in response to 
+ * Purpose:     Decrement the flush_dep_nunser_children fields of all the
+ *		target entry's flush dependency parents in response to
  *		the target entry becoming serialized.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -8023,7 +7854,7 @@ done:
 herr_t
 H5C__mark_flush_dep_serialized(H5C_cache_entry_t * entry_ptr)
 {
-    unsigned u;                         /* Local index variable */
+    int i;                              /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -8032,18 +7863,21 @@ H5C__mark_flush_dep_serialized(H5C_cache_entry_t * entry_ptr)
     HDassert(entry_ptr);
 
     /* Iterate over the parent entries, if any */
-    for(u = 0; u < entry_ptr->flush_dep_nparents; u++) {
-
+    /* Note reverse iteration order, in case the callback removes the flush
+     *  dependency - QAK, 2017/08/12
+     */
+    for(i = ((int)entry_ptr->flush_dep_nparents) - 1; i >= 0; i--) {
+	/* Sanity checks */
         HDassert(entry_ptr->flush_dep_parent);
-        HDassert(entry_ptr->flush_dep_parent[u]->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-        HDassert(entry_ptr->flush_dep_parent[u]->flush_dep_nunser_children > 0);
+        HDassert(entry_ptr->flush_dep_parent[i]->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+        HDassert(entry_ptr->flush_dep_parent[i]->flush_dep_nunser_children > 0);
 
         /* decrement the parents number of unserialized children */
-        entry_ptr->flush_dep_parent[u]->flush_dep_nunser_children--;
+        entry_ptr->flush_dep_parent[i]->flush_dep_nunser_children--;
 
         /* If the parent has a 'notify' callback, send a 'child entry serialized' notice */
-        if(entry_ptr->flush_dep_parent[u]->type->notify &&
-                (entry_ptr->flush_dep_parent[u]->type->notify)(H5C_NOTIFY_ACTION_CHILD_SERIALIZED, entry_ptr->flush_dep_parent[u]) < 0)
+        if(entry_ptr->flush_dep_parent[i]->type->notify &&
+                (entry_ptr->flush_dep_parent[i]->type->notify)(H5C_NOTIFY_ACTION_CHILD_SERIALIZED, entry_ptr->flush_dep_parent[i]) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry serialized flag set")
     } /* end for */
 
@@ -8055,8 +7889,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5C__mark_flush_dep_unserialized()
  *
- * Purpose:     Decrement the flush_dep_nunser_children fields of all the 
- *              target entry's flush dependency parents in response to 
+ * Purpose:     Increment the flush_dep_nunser_children fields of all the
+ *              target entry's flush dependency parents in response to
  *              the target entry becoming unserialized.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -8082,7 +7916,7 @@ H5C__mark_flush_dep_unserialized(H5C_cache_entry_t * entry_ptr)
         /* Sanity check */
         HDassert(entry_ptr->flush_dep_parent);
         HDassert(entry_ptr->flush_dep_parent[u]->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-        HDassert(entry_ptr->flush_dep_parent[u]->flush_dep_nunser_children < 
+        HDassert(entry_ptr->flush_dep_parent[u]->flush_dep_nunser_children <
                  entry_ptr->flush_dep_parent[u]->flush_dep_nchildren);
 
         /* increment parents number of usserialized children */
@@ -8142,11 +7976,11 @@ H5C__assert_flush_dep_nocycle(const H5C_cache_entry_t * entry,
 /*-------------------------------------------------------------------------
  * Function:    H5C__serialize_cache
  *
- * Purpose:	Serialize (i.e. construct an on disk image) for all entries 
- *		in the metadata cache including clean entries.  
+ * Purpose:	Serialize (i.e. construct an on disk image) for all entries
+ *		in the metadata cache including clean entries.
  *
  *		Note that flush dependencies and "flush me last" flags
- *		must be observed in the serialization process.  
+ *		must be observed in the serialization process.
  *
  *		Note also that entries may be loaded, flushed, evicted,
  *		expunged, relocated, resized, or removed from the cache
@@ -8154,17 +7988,17 @@ H5C__assert_flush_dep_nocycle(const H5C_cache_entry_t * entry,
  *		a regular flush.
  *
  *		However, we are given that the cache will contain no protected
- *		entries on entry to this routine (although entries may be 
- *		briefly protected and then unprotected during the serialize 
- *		process).  
+ *		entries on entry to this routine (although entries may be
+ *		briefly protected and then unprotected during the serialize
+ *		process).
  *
- *		The objective of this routine is serialize all entries and 
- *		to force all entries into their actual locations on disk.  
+ *		The objective of this routine is serialize all entries and
+ *		to force all entries into their actual locations on disk.
  *
- *		The initial need for this routine is to settle all entries 
- *		in the cache prior to construction of the metadata cache 
+ *		The initial need for this routine is to settle all entries
+ *		in the cache prior to construction of the metadata cache
  *		image so that the size of the cache image can be calculated.
- *		However, I gather that other uses for the routine are 
+ *		However, I gather that other uses for the routine are
  *		under consideration.
  *
  * Return:      Non-negative on success/Negative on failure or if there was
@@ -8176,7 +8010,7 @@ H5C__assert_flush_dep_nocycle(const H5C_cache_entry_t * entry,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C__serialize_cache(H5F_t *f, hid_t dxpl_id)
+H5C__serialize_cache(H5F_t *f)
 {
 #if H5C_DO_SANITY_CHECKS
     int                 i;
@@ -8235,10 +8069,10 @@ H5C__serialize_cache(H5F_t *f, hid_t dxpl_id)
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
 #ifndef NDEBUG
-    /* if this is a debug build, set the serialization_count field of 
+    /* if this is a debug build, set the serialization_count field of
      * each entry in the cache to zero before we start the serialization.
      * This allows us to detect the case in which any entry is serialized
-     * more than once (a performance issues), and more importantly, the 
+     * more than once (a performance issues), and more importantly, the
      * case is which any flush depencency parent is serializes more than
      * once (a correctness issue).
      */
@@ -8254,10 +8088,10 @@ H5C__serialize_cache(H5F_t *f, hid_t dxpl_id)
      } /* end block */
 #endif /* NDEBUG */
 
-    /* set cache_ptr->serialization_in_progress to TRUE, and back 
+    /* set cache_ptr->serialization_in_progress to TRUE, and back
      * to FALSE at the end of the function.  Must maintain this flag
-     * to support H5C_get_serialization_in_progress(), which is in 
-     * turn required to support sanity checking in some cache 
+     * to support H5C_get_serialization_in_progress(), which is in
+     * turn required to support sanity checking in some cache
      * clients.
      */
     HDassert(!cache_ptr->serialization_in_progress);
@@ -8276,14 +8110,14 @@ H5C__serialize_cache(H5F_t *f, hid_t dxpl_id)
             case H5C_RING_RDFSM:
                 /* Settle raw data FSM */
                 if(!cache_ptr->rdfsm_settled)
-                    if(H5MF_settle_raw_data_fsm(f, dxpl_id, &cache_ptr->rdfsm_settled) < 0)
+                    if(H5MF_settle_raw_data_fsm(f, &cache_ptr->rdfsm_settled) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "RD FSM settle failed")
                 break;
 
             case H5C_RING_MDFSM:
                 /* Settle metadata FSM */
                 if(!cache_ptr->mdfsm_settled)
-                    if(H5MF_settle_meta_data_fsm(f, dxpl_id, &cache_ptr->mdfsm_settled) < 0)
+                    if(H5MF_settle_meta_data_fsm(f, &cache_ptr->mdfsm_settled) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "MD FSM settle failed")
                 break;
 
@@ -8296,7 +8130,7 @@ H5C__serialize_cache(H5F_t *f, hid_t dxpl_id)
                 break;
         } /* end switch */
 
-        if(H5C__serialize_ring(f, dxpl_id, ring) < 0)
+        if(H5C__serialize_ring(f, ring) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "serialize ring failed")
 
         ring++;
@@ -8335,16 +8169,16 @@ done:
  *
  *              If the cache contains protected entries in the specified
  *              ring, the function will fail, as protected entries cannot
- *              be serialized.  However all unprotected entries in the 
- *		target ring should be serialized before the function 
+ *              be serialized.  However all unprotected entries in the
+ *		target ring should be serialized before the function
  *		returns failure.
  *
  *              If flush dependencies appear in the target ring, the
  *              function makes repeated passes through the index list
  *		serializing entries in flush dependency order.
  *
- *		All entries outside the H5C_RING_SBE are marked for 
- *		inclusion in the cache image.  Entries in H5C_RING_SBE 
+ *		All entries outside the H5C_RING_SBE are marked for
+ *		inclusion in the cache image.  Entries in H5C_RING_SBE
  *		and below are marked for exclusion from the image.
  *
  * Return:      Non-negative on success/Negative on failure or if there was
@@ -8356,7 +8190,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C__serialize_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring)
+H5C__serialize_ring(H5F_t *f, H5C_ring_t ring)
 {
     hbool_t		done = FALSE;
     H5C_t             * cache_ptr;
@@ -8379,76 +8213,76 @@ H5C__serialize_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring)
     /* The objective here is to serialize all entries in the cache ring
      * in flush dependency order.
      *
-     * The basic algorithm is to scan the cache index list looking for 
+     * The basic algorithm is to scan the cache index list looking for
      * unserialized entries that are either not in a flush dependency
      * relationship, or which have no unserialized children.  Any such
-     * entry is serialized and its flush dependency parents (if any) are 
+     * entry is serialized and its flush dependency parents (if any) are
      * informed -- allowing them to decrement their userialized child counts.
      *
      * However, this algorithm is complicated by the ability
-     * of client serialization callbacks to perform operations on 
-     * on the cache which can result in the insertion, deletion, 
+     * of client serialization callbacks to perform operations on
+     * on the cache which can result in the insertion, deletion,
      * relocation, resize, dirty, flush, eviction, or removal (via the
      * take ownership flag) of entries.  Changes in the flush dependency
      * structure are also possible.
      *
-     * On the other hand, the algorithm is simplified by the fact that 
-     * we are serializing, not flushing.  Thus, as long as all entries 
+     * On the other hand, the algorithm is simplified by the fact that
+     * we are serializing, not flushing.  Thus, as long as all entries
      * are serialized correctly, it doesn't matter if we have to go back
      * and serialize an entry a second time.
      *
-     * These possible actions result in the following modfications to 
+     * These possible actions result in the following modfications to
      * tha basic algorithm:
      *
-     * 1) In the event of an entry expunge, eviction or removal, we must 
-     *    restart the scan as it is possible that the next entry in our 
+     * 1) In the event of an entry expunge, eviction or removal, we must
+     *    restart the scan as it is possible that the next entry in our
      *    scan is no longer in the cache.  Were we to examine this entry,
      *    we would be accessing deallocated memory.
      *
-     * 2) A resize, dirty, or insertion of an entry may result in the 
-     *    the increment of a flush dependency parent's dirty and/or 
-     *    unserialized child count.  In the context of serializing the 
-     *    the cache, this is a non-issue, as even if we have already 
-     *    serialized the parent, it will be marked dirty and its image 
-     *    marked out of date if appropriate when the child is serialized.  
-     *    
+     * 2) A resize, dirty, or insertion of an entry may result in the
+     *    the increment of a flush dependency parent's dirty and/or
+     *    unserialized child count.  In the context of serializing the
+     *    the cache, this is a non-issue, as even if we have already
+     *    serialized the parent, it will be marked dirty and its image
+     *    marked out of date if appropriate when the child is serialized.
+     *
      *    However, this is a major issue for a flush, as were this to happen
      *    in a flush, it would violate the invariant that the flush dependency
-     *    feature is intended to enforce.  As the metadata cache has no 
-     *    control over the behavior of cache clients, it has no way of 
+     *    feature is intended to enforce.  As the metadata cache has no
+     *    control over the behavior of cache clients, it has no way of
      *    preventing this behaviour.  However, it should detect it if at all
-     *    possible.  
+     *    possible.
      *
      *    Do this by maintaining a count of the number of times each entry is
-     *    serialized during a cache serialization.  If any flush dependency 
+     *    serialized during a cache serialization.  If any flush dependency
      *    parent is serialized more than once, throw an assertion failure.
      *
-     * 3) An entry relocation will typically change the location of the 
-     *    entry in the index list.  This shouldn't cause problems as we 
-     *    will scan the index list until we make a complete pass without 
-     *    finding anything to serialize -- making relocations of either 
+     * 3) An entry relocation will typically change the location of the
+     *    entry in the index list.  This shouldn't cause problems as we
+     *    will scan the index list until we make a complete pass without
+     *    finding anything to serialize -- making relocations of either
      *    the current or next entries irrelevant.
      *
-     *    Note that since a relocation may result in our skipping part of 
+     *    Note that since a relocation may result in our skipping part of
      *    the index list, we must always do at least one more pass through
      *    the index list after an entry relocation.
      *
-     * 4) Changes in the flush dependency structure are possible on 
+     * 4) Changes in the flush dependency structure are possible on
      *    entry insertion, load, expunge, evict, or remove.  Destruction
-     *    of a flush dependency has no effect, as it can only relax the 
+     *    of a flush dependency has no effect, as it can only relax the
      *    flush dependencies.  Creation of a flush dependency can create
-     *    an unserialized child of a flush dependency parent where all 
+     *    an unserialized child of a flush dependency parent where all
      *    flush dependency children were previously serialized.  Should
      *    this child dirty the flush dependency parent when it is serialized,
      *    the parent will be re-serialized.
      *
-     *    Per the discussion of 2) above, this is a non issue for cache 
+     *    Per the discussion of 2) above, this is a non issue for cache
      *    serialization, and a major problem for cache flush.  Using the
-     *    same detection mechanism, throw an assertion failure if this 
-     *    condition appears.  
+     *    same detection mechanism, throw an assertion failure if this
+     *    condition appears.
      *
-     * Observe that either eviction or removal of entries as a result of 
-     * a serialization is not a problem as long as the flush depencency 
+     * Observe that either eviction or removal of entries as a result of
+     * a serialization is not a problem as long as the flush depencency
      * tree does not change beyond the removal of a leaf.
      */
     while(!done) {
@@ -8466,7 +8300,7 @@ H5C__serialize_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring)
 	    HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
 
 	    /* Verify that either the entry is already serialized, or
-             * that it is assigned to either the target or an inner 
+             * that it is assigned to either the target or an inner
              * ring.
              */
             HDassert((entry_ptr->ring >= ring) || (entry_ptr->image_up_to_date));
@@ -8487,7 +8321,7 @@ H5C__serialize_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring)
 		    HDassert(entry_ptr->serialization_count == 0);
 
 		    /* Serialize the entry */
-		    if(H5C__serialize_single_entry(f, dxpl_id, cache_ptr, entry_ptr) < 0)
+		    if(H5C__serialize_single_entry(f, cache_ptr, entry_ptr) < 0)
             	        HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "entry serialization failed")
 
                     HDassert(entry_ptr->flush_dep_nunser_children == 0);
@@ -8533,9 +8367,9 @@ H5C__serialize_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring)
     cache_ptr->entries_relocated_counter  = 0;
 
     /* At this point, all entries not marked "flush me last" and in
-     * the current ring or outside it should be serialized and have up 
-     * to date images.  Scan the index list again to serialize the 
-     * "flush me last" entries (if they are in the current ring) and to 
+     * the current ring or outside it should be serialized and have up
+     * to date images.  Scan the index list again to serialize the
+     * "flush me last" entries (if they are in the current ring) and to
      * verify that all other entries have up to date images.
      */
     entry_ptr = cache_ptr->il_head;
@@ -8552,7 +8386,7 @@ H5C__serialize_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring)
                     HDassert(entry_ptr->flush_dep_nunser_children == 0);
 
 	            /* Serialize the entry */
-	            if(H5C__serialize_single_entry(f, dxpl_id,  cache_ptr, entry_ptr) < 0)
+	            if(H5C__serialize_single_entry(f, cache_ptr, entry_ptr) < 0)
 		        HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "entry serialization failed")
 
                     /* Check for the cache changing */
@@ -8588,7 +8422,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5C__serialize_single_entry
  *
- * Purpose:     Serialize the cache entry pointed to by the entry_ptr 
+ * Purpose:     Serialize the cache entry pointed to by the entry_ptr
  *		parameter.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -8598,8 +8432,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C__serialize_single_entry(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr,
-    H5C_cache_entry_t *entry_ptr)
+H5C__serialize_single_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
 {
     herr_t		ret_value = SUCCEED;      /* Return value */
 
@@ -8630,12 +8463,12 @@ H5C__serialize_single_entry(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr,
         if(NULL == (entry_ptr->image_ptr = H5MM_malloc(entry_ptr->size + H5C_IMAGE_EXTRA_SPACE)) )
             HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for on disk image buffer")
 #if H5C_DO_MEMORY_SANITY_CHECKS
-        HDmemcpy(((uint8_t *)entry_ptr->image_ptr) + image_size, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+        H5MM_memcpy(((uint8_t *)entry_ptr->image_ptr) + image_size, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
     } /* end if */
 
     /* Generate image for entry */
-    if(H5C__generate_image(f, cache_ptr, entry_ptr, dxpl_id) < 0)
+    if(H5C__generate_image(f, cache_ptr, entry_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "Can't generate image for cache entry")
 
     /* Reset the flush_in progress flag */
@@ -8654,12 +8487,12 @@ done:
  * Purpose:     Serialize an entry and generate its image.
  *
  * Note:	This may cause the entry to be re-sized and/or moved in
- *              the cache.  
+ *              the cache.
  *
- *              As we will not update the metadata cache's data structures 
- *              until we we finish the write, we must touch up these 
- *              data structures for size and location changes even if we 
- *              are about to delete the entry from the cache (i.e. on a 
+ *              As we will not update the metadata cache's data structures
+ *              until we we finish the write, we must touch up these
+ *              data structures for size and location changes even if we
+ *              are about to delete the entry from the cache (i.e. on a
  *              flush destroy).
  *
  * Return:      Non-negative on success/Negative on failure
@@ -8670,8 +8503,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr, 
-    hid_t dxpl_id)
+H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
 {
     haddr_t		new_addr = HADDR_UNDEF;
     haddr_t		old_addr = HADDR_UNDEF;
@@ -8696,8 +8528,8 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr,
     old_addr = entry_ptr->addr;
 
     /* Call client's pre-serialize callback, if there's one */
-    if(entry_ptr->type->pre_serialize && 
-            (entry_ptr->type->pre_serialize)(f, dxpl_id, (void *)entry_ptr,
+    if(entry_ptr->type->pre_serialize &&
+            (entry_ptr->type->pre_serialize)(f, (void *)entry_ptr,
                 entry_ptr->addr, entry_ptr->size, &new_addr, &new_len, &serialize_flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to pre-serialize entry")
 
@@ -8735,7 +8567,7 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr,
          *     tests will be necessary.
          */
         if(cache_ptr->aux_ptr != NULL)
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "resize/move in serialize occured in parallel case")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "resize/move in serialize occurred in parallel case")
 #endif
 
         /* If required, resize the buffer and update the entry and the cache
@@ -8748,7 +8580,7 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr,
             if(NULL == (entry_ptr->image_ptr = H5MM_realloc(entry_ptr->image_ptr, new_len + H5C_IMAGE_EXTRA_SPACE)))
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for on disk image buffer")
 #if H5C_DO_MEMORY_SANITY_CHECKS
-            HDmemcpy(((uint8_t *)entry_ptr->image_ptr) + new_len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+            H5MM_memcpy(((uint8_t *)entry_ptr->image_ptr) + new_len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
 
             /* Update statistics for resizing the entry */
@@ -8764,7 +8596,7 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr,
              */
             H5C__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, entry_ptr, new_len);
 
-            /* As we haven't updated the cache data structures for 
+            /* As we haven't updated the cache data structures for
              * for the flush or flush destroy yet, the entry should
              * be in the slist.  Thus update it for the size change.
              */
@@ -8776,8 +8608,8 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr,
             entry_ptr->size = new_len;
         } /* end if */
 
-        /* If required, udate the entry and the cache data structures 
-         * for a move 
+        /* If required, udate the entry and the cache data structures
+         * for a move
          */
         if(serialize_flags & H5C__SERIALIZE_MOVED_FLAG) {
             /* Update stats and entries relocated counter */
@@ -8809,7 +8641,7 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr,
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
     entry_ptr->image_up_to_date = TRUE;
 
-    /* Propagate the fact that the entry is serialized up the 
+    /* Propagate the fact that the entry is serialized up the
      * flush dependency chain if appropriate.  Since the image must
      * have been out of date for this function to have been called
      * (see assertion on entry), no need to check that -- only check
@@ -8862,6 +8694,12 @@ H5C_remove_entry(void *_entry)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove protected entry from cache")
     if(entry->is_pinned)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove pinned entry from cache")
+    /* NOTE: If these two errors are getting tripped because the entry is
+     *          in a flush dependency with a freedspace entry, move the checks
+     *          after the "before evict" message is sent, and add the
+     *          "child being evicted" message to the "before evict" notify
+     *          section below.  QAK - 2017/08/03
+     */
     if(entry->flush_dep_nparents > 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove entry with flush dependency parents from cache")
     if(entry->flush_dep_nchildren > 0)
@@ -8928,8 +8766,8 @@ H5C_remove_entry(void *_entry)
     if(entry == cache->entry_watched_for_removal)
         cache->entry_watched_for_removal = NULL;
 
-    /* Internal cache data structures should now be up to date, and 
-     * consistant with the status of the entry.  
+    /* Internal cache data structures should now be up to date, and
+     * consistent with the status of the entry.
      *
      * Now clean up internal cache fields if appropriate.
      */

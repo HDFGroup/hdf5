@@ -20,9 +20,8 @@ namespace H5 {
 /*! \class EnumType
     \brief EnumType is a derivative of a DataType and operates on HDF5
     enum datatypes.
-
-    Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 */
+//  Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 class H5_DLLCPP EnumType : public DataType {
 
    public:
@@ -39,6 +38,10 @@ class H5_DLLCPP EnumType : public DataType {
         // Constructors that open an enum datatype, given a location.
         EnumType(const H5Location& loc, const char* name);
         EnumType(const H5Location& loc, const H5std_string& name);
+
+        // Returns an EnumType object via DataType* by decoding the
+        // binary object description of this type.
+        virtual DataType* decode() const;
 
         // Returns the number of members in this enumeration datatype.
         int getNmembers () const;
@@ -72,7 +75,7 @@ class H5_DLLCPP EnumType : public DataType {
         // Creates an enumeration datatype using an existing id
         EnumType(const hid_t existing_id);
 
-        // Copy constructor: makes a copy of the original EnumType object.
+        // Copy constructor: same as the original EnumType.
         EnumType(const EnumType& original);
 
         virtual ~EnumType();

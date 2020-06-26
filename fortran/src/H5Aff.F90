@@ -72,9 +72,12 @@
 
 MODULE H5A
 
-  USE, INTRINSIC :: ISO_C_BINDING
+  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR, C_NULL_CHAR, C_LOC, C_INT
 
   USE H5GLOBAL
+
+  PRIVATE h5awrite_char_scalar, h5awrite_ptr
+  PRIVATE h5aread_char_scalar, h5aread_ptr
 
   INTERFACE h5awrite_f
      MODULE PROCEDURE h5awrite_char_scalar
@@ -341,7 +344,7 @@ CONTAINS
          INTEGER(HID_T), INTENT(IN), VALUE :: attr_id
        END FUNCTION H5Aget_space
     END INTERFACE
-    
+
     space_id = H5Aget_space(attr_id)
 
     hdferr = 0
@@ -386,7 +389,7 @@ CONTAINS
          INTEGER(HID_T), INTENT(IN), VALUE :: attr_id
        END FUNCTION H5Aget_type
     END INTERFACE
-    
+
     type_id = H5Aget_type(attr_id)
 
     hdferr = 0
@@ -505,7 +508,7 @@ CONTAINS
                                       ! Returns attribute name size,
                                       ! -1 if fail
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id ! Link access property list
-    INTEGER(SIZE_T), OPTIONAL, INTENT(OUT) :: size  ! Indicates the size, in the number of characters, 
+    INTEGER(SIZE_T), OPTIONAL, INTENT(OUT) :: size  ! Indicates the size, in the number of characters,
                                                     ! of the attribute
 !*****
     INTEGER(HID_T) :: lapl_id_default
@@ -1763,7 +1766,7 @@ CONTAINS
 !  up to 7 dimensions.
 !
 ! Fortran2003 Interface:
-!!  SUBROUTINE H5Awrite_f(attr_id, memtype_id, buf, hdferr) 
+!!  SUBROUTINE H5Awrite_f(attr_id, memtype_id, buf, hdferr)
 !!    INTEGER(HID_T)  , INTENT(IN)  :: attr_id
 !!    INTEGER(HID_T)  , INTENT(IN)  :: memtype_id
 !!    TYPE(C_PTR)     , INTENT(IN)  :: buf
@@ -1848,7 +1851,7 @@ CONTAINS
 !  REAL, REAL(KIND=C_DOUBLE) and CHARACTER buffers
 !  up to 7 dimensions.
 ! Fortran2003 Interface:
-!!  SUBROUTINE H5Aread_f(attr_id, memtype_id, buf, hdferr) 
+!!  SUBROUTINE H5Aread_f(attr_id, memtype_id, buf, hdferr)
 !!    INTEGER(HID_T)  , INTENT(IN)    :: attr_id
 !!    INTEGER(HID_T)  , INTENT(IN)    :: memtype_id
 !!    TYPE(C_PTR)     , INTENT(INOUT) :: buf

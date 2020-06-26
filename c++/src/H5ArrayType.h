@@ -20,9 +20,8 @@ namespace H5 {
 /*! \class ArrayType
     \brief Class ArrayType inherits from DataType and provides wrappers for
      the HDF5's Array Datatypes.
-
-    Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 */
+// Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 class H5_DLLCPP ArrayType : public DataType {
    public:
         // Constructor that creates a new array data type based on the
@@ -36,6 +35,10 @@ class H5_DLLCPP ArrayType : public DataType {
         ArrayType(const H5Location& loc, const char* name);
         ArrayType(const H5Location& loc, const H5std_string& name);
 
+        // Returns an ArrayType object via DataType* by decoding the
+        // binary object description of this type.
+        virtual DataType* decode() const;
+
         // Returns the number of dimensions of this array datatype.
         int getArrayNDims() const;
         //int getArrayNDims(); // removed 1.8.18 and 1.10.1
@@ -47,7 +50,7 @@ class H5_DLLCPP ArrayType : public DataType {
         ///\brief Returns this class name.
         virtual H5std_string fromClass () const { return("ArrayType"); }
 
-        // Copy constructor: makes copy of the original object.
+        // Copy constructor: same as the original ArrayType.
         ArrayType(const ArrayType& original);
 
         // Constructor that takes an existing id

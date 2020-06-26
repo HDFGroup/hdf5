@@ -402,52 +402,6 @@ h5fget_access_plist_c (hid_t_f *file_id, hid_t_f *access_id)
      return ret_value;
 }
 
-/****if* H5Ff/h5fis_hdf5_c
- * NAME
- *  h5fis_hdf5_c
- * PURPOSE
- *  Call H5Fis_hdf5 to determone if the file is an HDF5 file
- * INPUTS
- *  name - name of the file
- *  namelen - name length
- * OUTPUTS
- *  flag - 0 if file is not HDF5 file , positive if a file
- *  is an HDF5 file, and negative on failure.
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 3, 1999
- * HISTORY
- *
- * SOURCE
-*/
-int_f
-h5fis_hdf5_c (_fcd name, int_f *namelen, int_f *flag)
-/******/
-{
-     int ret_value = -1;
-     char *c_name;
-     int_f c_namelen;
-     htri_t status;
-
-     /*
-      * Convert FORTRAN name to C name
-      */
-     c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(name, (size_t)c_namelen);
-     if (c_name == NULL) return ret_value;
-
-     /*
-      * Call H5Fopen function.
-      */
-     status = H5Fis_hdf5(c_name);
-     *flag = (int_f)status;
-     if (status >= 0) ret_value = 0;
-
-     HDfree(c_name);
-     return ret_value;
-}
 /****if* H5Ff/h5fclose_c
  * NAME
  *  h5fclose_c
@@ -532,11 +486,11 @@ h5fget_obj_count_c ( hid_t_f *file_id , int_f *obj_type, size_t_f * obj_count)
  *  Changed type of max_obj to size_t_f; added parameter for the
  *  number of open objects
  *  Thursday, September 25, 2008 EIP
- *	
+ *
  * SOURCE
 */
 int_f
-h5fget_obj_ids_c ( hid_t_f *file_id , int_f *obj_type, size_t_f *max_objs, 
+h5fget_obj_ids_c ( hid_t_f *file_id , int_f *obj_type, size_t_f *max_objs,
     hid_t_f *obj_ids, size_t_f *num_objs)
 /******/
 {
@@ -678,6 +632,40 @@ done:
       return ret_value;
 }
 
+/****if* H5Ff/h5fget_fileno_c
+ * NAME
+ *  h5fget_fileno_c
+ * PURPOSE
+ *  Call H5Fget_fileno to get file number
+ * INPUTS
+ *  file_id - file identifier
+ * OUTPUTS
+ *  fileno - file number for open file
+ * RETURNS
+ *  0 on success, -1 on failure
+ * AUTHOR
+ *  Quincey Koziol
+ *  Saturday, April 13, 2019
+ * SOURCE
+*/
+int_f
+h5fget_fileno_c(hid_t_f *file_id, int_f *fileno)
+/******/
+{
+    unsigned long fileno_c;
+    herr_t ret_value=0;          /* Return value */
+
+     /*
+      * Call H5Fget_filesize function
+      */
+     if ((ret_value = H5Fget_fileno((hid_t)*file_id, &fileno_c)) < 0)
+         HGOTO_DONE(FAIL);
+      *fileno = (hsize_t_f)fileno_c;
+
+done:
+      return ret_value;
+}
+
 /****if* H5Ff/h5fget_file_image_c
  * NAME
  *  h5fget_file_image_c
@@ -705,7 +693,7 @@ h5fget_file_image_c(hid_t_f *file_id, void *buf_ptr, size_t_f *buf_len, size_t_f
     /*
      * Call h5fget_file_image function
      */
-    
+
     if ( (c_buf_req = H5Fget_file_image((hid_t)*file_id, buf_ptr, (size_t)*buf_len)) < 0)
          HGOTO_DONE(FAIL);
 

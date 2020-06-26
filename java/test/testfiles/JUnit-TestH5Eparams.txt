@@ -1,0 +1,19 @@
+JUnit version 4.11
+.testH5EprintInt
+.testH5Eget_msg
+.testH5Eget_num
+.testH5Eget_class_name
+.testH5Eget_num_with_msg
+.testH5Eclear2
+.testH5Eprint2
+.testH5Ecreate_msg_major
+.testH5Ecreate_msg_minor
+.testH5Ecreate_stack
+.testH5Ecreate_msg_name_null
+.testH5Eauto_is_v2
+.testH5EclearInt
+
+Time:  XXXX
+
+OK (13 tests)
+

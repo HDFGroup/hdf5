@@ -20,47 +20,66 @@
   # Copy all the HDF5 files from the test directory into the source directory
   # --------------------------------------------------------------------
   set (HDF5_REFERENCE_FILES
-      h5stat_help1.ddl
-      h5stat_help2.ddl
-      h5stat_notexist.ddl
-      h5stat_nofile.ddl
-      h5stat_filters.ddl
-      h5stat_filters-file.ddl
-      h5stat_filters-F.ddl
-      h5stat_filters-d.ddl
-      h5stat_filters-g.ddl
-      h5stat_filters-dT.ddl
-      h5stat_filters-UD.ddl
-      h5stat_filters-UT.ddl
-      h5stat_tsohm.ddl
-      h5stat_newgrat.ddl
-      h5stat_newgrat-UG.ddl
-      h5stat_newgrat-UA.ddl
-      h5stat_err1_links.ddl
-      h5stat_links1.ddl
-      h5stat_links2.ddl
-      h5stat_links3.ddl
-      h5stat_links4.ddl
-      h5stat_links5.ddl
-      h5stat_err1_dims.ddl
-      h5stat_dims1.ddl
-      h5stat_dims2.ddl
-      h5stat_err1_numattrs.ddl
-      h5stat_err2_numattrs.ddl
-      h5stat_numattrs1.ddl
-      h5stat_numattrs2.ddl
-      h5stat_numattrs3.ddl
-      h5stat_numattrs4.ddl
+      h5stat_err_refcount
+      h5stat_err_old_layout
+      h5stat_err_old_fill
+      h5stat_help1
+      h5stat_help2
+      h5stat_notexist
+      h5stat_nofile
+      h5stat_filters
+      h5stat_filters-file
+      h5stat_filters-F
+      h5stat_filters-d
+      h5stat_filters-g
+      h5stat_filters-dT
+      h5stat_filters-UD
+      h5stat_filters-UT
+      h5stat_tsohm
+      h5stat_newgrat
+      h5stat_newgrat-UG
+      h5stat_newgrat-UA
+      h5stat_idx
+      h5stat_links1
+      h5stat_links2
+      h5stat_links3
+      h5stat_links4
+      h5stat_links5
+      h5stat_dims1
+      h5stat_dims2
+      h5stat_numattrs1
+      h5stat_numattrs2
+      h5stat_numattrs3
+      h5stat_numattrs4
+  )
+  set (HDF5_REFERENCE_ERR_FILES
+      h5stat_err_refcount
+      h5stat_err_old_layout
+      h5stat_err_old_fill
+      h5stat_err1_dims
+      h5stat_err1_links
+      h5stat_err1_numattrs
+      h5stat_err2_numattrs
+      h5stat_notexist
+      h5stat_nofile
   )
   set (HDF5_REFERENCE_TEST_FILES
+      h5stat_err_refcount.h5
+      h5stat_err_old_layout.h5
+      h5stat_err_old_fill.h5
       h5stat_filters.h5
+      h5stat_idx.h5
       h5stat_tsohm.h5
       h5stat_newgrat.h5
       h5stat_threshold.h5
   )
 
   foreach (ddl_file ${HDF5_REFERENCE_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5STAT_SOURCE_DIR}/testfiles/${ddl_file}" "${PROJECT_BINARY_DIR}/${ddl_file}" "h5stat_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5STAT_SOURCE_DIR}/testfiles/${ddl_file}.ddl" "${PROJECT_BINARY_DIR}/${ddl_file}.ddl" "h5stat_files")
+  endforeach ()
+
+  foreach (h5_file ${HDF5_REFERENCE_ERR_FILES})
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5STAT_SOURCE_DIR}/testfiles/${h5_file}.err" "${PROJECT_BINARY_DIR}/${h5_file}.err" "h5stat_files")
   endforeach ()
 
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
@@ -77,23 +96,45 @@
   macro (ADD_H5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5STAT-${resultfile} COMMAND $<TARGET_FILE:h5stat> ${ARGN})
-      if (NOT ${resultcode} STREQUAL "0")
+      add_test (NAME H5STAT-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat${tgt_file_ext}> ${ARGN})
+      if (${resultcode})
         set_tests_properties (H5STAT-${resultfile} PROPERTIES WILL_FAIL "true")
-      endif ()
-      if (NOT "${last_test}" STREQUAL "")
-        set_tests_properties (H5STAT-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
     else (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5STAT-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5stat${tgt_file_ext}>"
               -D "TEST_ARGS=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_ERR_TEST resultfile resultcode)
+    # If using memchecker add tests without using scripts
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (NAME H5STAT-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat${tgt_file_ext}> ${ARGN})
+      if (${resultcode})
+        set_tests_properties (H5STAT-${resultfile} PROPERTIES WILL_FAIL "true")
+      endif ()
+    else (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (
+          NAME H5STAT-${resultfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5stat${tgt_file_ext}>"
+              -D "TEST_ARGS=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.mty"
+              -D "TEST_ERRREF=${resultfile}.err"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
     endif ()
@@ -107,77 +148,13 @@
 
   if (HDF5_ENABLE_USING_MEMCHECKER)
     # Remove any output file left over from previous test run
+    foreach (ddl_file ${HDF5_REFERENCE_FILES})
+      set (CLEAR_LIST ${CLEAR_LIST} ${ddl_file}.out ${ddl_file}.out.err)
+    endforeach ()
     add_test (
       NAME H5STAT-clearall-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove
-          h5stat_help1.out
-          h5stat_help1.out.err
-          h5stat_help2.out
-          h5stat_help2.out.err
-          h5stat_notexist.out
-          h5stat_notexist.out.err
-          h5stat_nofile.out
-          h5stat_nofile.out.err
-          h5stat_filters.out
-          h5stat_filters.out.err
-          h5stat_filters-file.out
-          h5stat_filters-file.out.err
-          h5stat_filters-F.out
-          h5stat_filters-F.out.err
-          h5stat_filters-d.out
-          h5stat_filters-d.out.err
-          h5stat_filters-g.out
-          h5stat_filters-g.out.err
-          h5stat_filters-dT.out
-          h5stat_filters-dT.out.err
-          h5stat_filters-UD.out
-          h5stat_filters-UD.out.err
-          h5stat_filters-UT.out
-          h5stat_filters-UT.out.err
-          h5stat_tsohm.out
-          h5stat_tsohm.out.err
-          h5stat_newgrat.out
-          h5stat_newgrat.out.err
-          h5stat_newgrat-UG.out
-          h5stat_newgrat-UG.out.err
-          h5stat_newgrat-UA.out
-          h5stat_newgrat-UA.out.err
-          h5stat_err1_links.out
-          h5stat_err1_links.out.err
-          h5stat_links1.out
-          h5stat_links1.out.err
-          h5stat_links2.out
-          h5stat_links2.out.err
-          h5stat_links3.out
-          h5stat_links3.out.err
-          h5stat_links4.out
-          h5stat_links4.out.err
-          h5stat_links5.out
-          h5stat_links5.out.err
-          h5stat_err1_dims.out
-          h5stat_err1_dims.out.err
-          h5stat_dims1.out
-          h5stat_dims1.out.err
-          h5stat_dims2.out
-          h5stat_dims2.out.err
-          h5stat_err1_numattrs.out
-          h5stat_err1_numattrs.out.err
-          h5stat_err2_numattrs.out
-          h5stat_err2_numattrs.out.err
-          h5stat_numattrs1.out
-          h5stat_numattrs1.out.err
-          h5stat_numattrs2.out
-          h5stat_numattrs2.out.err
-          h5stat_numattrs3.out
-          h5stat_numattrs3.out.err
-          h5stat_numattrs4.out
-          h5stat_numattrs4.out.err
+      COMMAND ${CMAKE_COMMAND} -E remove ${CLEAR_LIST}
     )
-    if (NOT "${last_test}" STREQUAL "")
-      set_tests_properties (H5STAT-clearall-objects PROPERTIES DEPENDS ${last_test})
-    endif ()
-    set (last_test "H5STAT-clearall-objects")
   endif ()
 
 # Test for help flag
@@ -205,13 +182,15 @@
   ADD_H5_TEST (h5stat_newgrat 0 h5stat_newgrat.h5)
   ADD_H5_TEST (h5stat_newgrat-UG 0 -G h5stat_newgrat.h5)
   ADD_H5_TEST (h5stat_newgrat-UA 0 -A h5stat_newgrat.h5)
+# h5stat_idx.h5 is generated by h5stat_gentest.c
+  ADD_H5_TEST (h5stat_idx 0 h5stat_idx.h5)
 #
 # Tests for -l (--links) option on h5stat_threshold.h5:
 #   -l 0 (incorrect threshold value)
 #   -g -l 8
 #   --links=8
 #   --links=20 -g
-  ADD_H5_TEST (h5stat_err1_links 1 -l 0 h5stat_threshold.h5)
+  ADD_H5_ERR_TEST (h5stat_err1_links 1 -l 0 h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_links1 0 -g -l 8 h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_links2 0 --links=8 h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_links3 0 --links=20 -g h5stat_threshold.h5)
@@ -226,7 +205,7 @@
 #   -d --dims=-1 (incorrect threshold value)
 #   -gd -m 5
 #   -d --di=15
-  ADD_H5_TEST (h5stat_err1_dims 1 -d --dims=-1 h5stat_threshold.h5)
+  ADD_H5_ERR_TEST (h5stat_err1_dims 1 -d --dims=-1 h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_dims1 0 -gd -m 5 h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_dims2 0 -d --di=15 h5stat_threshold.h5)
 #
@@ -236,8 +215,8 @@
 #   -AS -a 10
 #   -a 1
 #   -A --numattrs=25
-  ADD_H5_TEST (h5stat_err1_numattrs 1 -a -2 h5stat_threshold.h5)
-  ADD_H5_TEST (h5stat_err2_numattrs 1 --numattrs h5stat_threshold.h5)
+  ADD_H5_ERR_TEST (h5stat_err1_numattrs 1 -a -2 h5stat_threshold.h5)
+  ADD_H5_ERR_TEST (h5stat_err2_numattrs 1 --numattrs h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_numattrs1 0 -AS -a 10 h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_numattrs2 0 -a 1 h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_numattrs3 0 -A --numattrs=25 h5stat_threshold.h5)
@@ -245,4 +224,12 @@
 # Tests for -a option on h5stat_newgrat.h5
 #   -A -a 100
   ADD_H5_TEST (h5stat_numattrs4 0 -A -a 100 h5stat_newgrat.h5)
+#
+# Tests to verify HDFFV-10333:
+# h5stat_err_refcount.h5 is generated by h5stat_gentest.c
+# h5stat_err_old_layout.h5 and h5stat_err_old_fill.h5: see explanation in h5stat_gentest.c
+  ADD_H5_TEST (h5stat_err_refcount 1 h5stat_err_refcount.h5)
+  ADD_H5_TEST (h5stat_err_old_layout 1 h5stat_err_old_layout.h5)
+  ADD_H5_TEST (h5stat_err_old_fill 1 h5stat_err_old_fill.h5)
+#
 #

@@ -1,5 +1,5 @@
 # ===========================================================================
-#    http://www.gnu.org/software/autoconf-archive/ax_java_check_class.html
+#   https://www.gnu.org/software/autoconf-archive/ax_java_check_class.html
 # ===========================================================================
 #
 # SYNOPSIS
@@ -15,7 +15,7 @@
 #
 #   The macro tries to compile a minimal program importing <class>. Some
 #   newer compilers moan about the failure to use this but fail or produce a
-#   class file anyway. All moaing is sunk to /dev/null since I only wanted
+#   class file anyway. All moaning is sunk to /dev/null since I only wanted
 #   to know if the class could be imported. This is a recommended followup
 #   to AX_CHECK_JAVA_PLUGIN with classpath appropriately adjusted.
 #
@@ -34,7 +34,7 @@
 #   Public License for more details.
 #
 #   You should have received a copy of the GNU General Public License along
-#   with this program. If not, see <http://www.gnu.org/licenses/>.
+#   with this program. If not, see <https://www.gnu.org/licenses/>.
 #
 #   As a special exception, the respective Autoconf Macro's copyright owner
 #   gives unlimited permission to copy, distribute and modify the configure
@@ -49,7 +49,7 @@
 #   modified version of the Autoconf Macro, you may extend this special
 #   exception to the GPL to apply to your modified version as well.
 
-#serial 9
+#serial 12
 
 AU_ALIAS([DPS_JAVA_CHECK_CLASS], [AX_JAVA_CHECK_CLASS])
 AC_DEFUN([AX_JAVA_CHECK_CLASS],[

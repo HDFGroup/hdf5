@@ -20,9 +20,8 @@ namespace H5 {
 /*! \class H5File
     \brief Class H5File represents an HDF5 file and inherits from class Group
     as file is a root group.
-
-    Inheritance: Group -> CommonFG/H5Object -> H5Location -> IdComponent
 */
+//  Inheritance: Group -> CommonFG/H5Object -> H5Location -> IdComponent
 class H5_DLLCPP H5File : public Group {
    public:
         // Creates or opens an HDF5 file.
@@ -42,10 +41,10 @@ class H5_DLLCPP H5File : public Group {
         // Close this file.
         virtual void close();
 
-        // Gets the access property list of this file.
+        // Gets a copy of the access property list of this file.
         FileAccPropList getAccessPlist() const;
 
-        // Gets the creation property list of this file.
+        // Gets a copy of the creation property list of this file.
         FileCreatPropList getCreatePlist() const;
 
         // Gets general information about this file.
@@ -70,9 +69,16 @@ class H5_DLLCPP H5File : public Group {
         // Returns the file size of the HDF5 file.
         hsize_t getFileSize() const;
 
+        // Returns the 'file number' of the HDF5 file.
+        unsigned long getFileNum() const;
+
         // Determines if a file, specified by its name, is in HDF5 format
         static bool isHdf5(const char* name);
         static bool isHdf5(const H5std_string& name);
+
+        // Determines if a file, specified by its name, can be accessed as HDF5
+        static bool isAccessible(const char* name, const FileAccPropList& access_plist = FileAccPropList::DEFAULT);
+        static bool isAccessible(const H5std_string& name, const FileAccPropList& access_plist = FileAccPropList::DEFAULT);
 
         // Reopens this file.
         void reOpen();  // added for better name
@@ -98,7 +104,7 @@ class H5_DLLCPP H5File : public Group {
         // Default constructor
         H5File();
 
-        // Copy constructor: makes a copy of the original H5File object.
+        // Copy constructor: same as the original H5File.
         H5File(const H5File& original);
 
         // Gets the HDF5 file id.

@@ -14,10 +14,13 @@
 #include "h5test.h"
 #include "vds_swmr.h"
 
+static hsize_t VDS_PLANE[RANK] = {1, FULL_HEIGHT, WIDTH};
+
 int
 main(void)
 {
     hid_t fid           = -1;   /* HDF5 file ID                     */
+    hid_t faplid        = -1;   /* file access property list ID                */
     hid_t did           = -1;   /* dataset ID                       */
     hid_t msid          = -1;   /* memory dataspace ID              */
     hid_t fsid          = -1;   /* file dataspace ID                */
@@ -32,18 +35,20 @@ main(void)
     hsize_t dims[RANK];         /* current size of dataset          */
     hsize_t max_dims[RANK];     /* max size of dataset              */
 
-    hbool_t has_errors  = FALSE;/* if the read data contains errors */
-
 
     /* Open the VDS file and dataset */
-    if((fid = H5Fopen(VDS_FILE_NAME, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, H5P_DEFAULT)) < 0)
+    if((faplid = h5_fileaccess()) < 0)
+        TEST_ERROR
+    if((fid = H5Fopen(VDS_FILE_NAME, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, faplid)) < 0)
         TEST_ERROR
     if((did = H5Dopen2(fid, VDS_DSET_NAME, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     /* Create the read buffer */
-    n_elements = VDS_PLANE[1] * VDS_PLANE[2];
-    size = n_elements * sizeof(int);
+    if(VDS_PLANE[1] * VDS_PLANE[2] > INT_MAX)
+        TEST_ERROR
+    n_elements = (int)(VDS_PLANE[1] * VDS_PLANE[2]);
+    size = (size_t)n_elements * sizeof(int);
     if(NULL == (buffer = (int *)HDmalloc(size)))
         TEST_ERROR
 
@@ -99,13 +104,14 @@ main(void)
             TEST_ERROR
         if(H5Dread(did, H5T_NATIVE_INT, msid, fsid, H5P_DEFAULT, buffer) < 0)
             TEST_ERROR
-
         if(H5Sclose(fsid) < 0)
             TEST_ERROR
 
     } while (dims[0] < N_PLANES_TO_WRITE);
 
     /* Close file and dataset */
+    if(H5Pclose(faplid) < 0)
+        TEST_ERROR
     if(H5Sclose(msid) < 0)
         TEST_ERROR
     if(H5Dclose(did) < 0)
@@ -123,6 +129,8 @@ error:
     H5E_BEGIN_TRY {
         if(fid >= 0)
             (void)H5Fclose(fid);
+        if(faplid >= 0)
+            (void)H5Pclose(faplid);
         if(did >= 0)
             (void)H5Dclose(did);
         if(msid >= 0)

@@ -28,7 +28,9 @@
 #include "H5OcreatProp.h"
 #include "H5DxferProp.h"
 #include "H5DcreatProp.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
+#include "H5DaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
 #include "H5DataType.h"
@@ -67,7 +69,7 @@ DataSet::DataSet(const hid_t existing_id) : H5Object(), AbstractDs(), id(existin
 
 //--------------------------------------------------------------------------
 // Function:    DataSet copy constructor
-///\brief       Copy constructor: makes a copy of the original DataSet object.
+///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original - IN: DataSet instance to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -90,9 +92,6 @@ DataSet::DataSet(const DataSet& original) : H5Object(), AbstractDs(), id(origina
 ///             \c loc can be DataSet, Group, H5File, or named DataType, that
 ///             is a datatype that has been named by DataType::commit.
 // Programmer   Binh-Minh Ribler - Oct, 2006
-// Modification
-//      Jul, 2008
-//              Added for application convenience.
 //--------------------------------------------------------------------------
 DataSet::DataSet(const H5Location& loc, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), AbstractDs(), id(H5I_INVALID_HID)
 {
@@ -109,9 +108,6 @@ DataSet::DataSet(const H5Location& loc, const void* ref, H5R_type_t ref_type, co
 ///\param       plist - IN: Property list - default to PropList::DEFAULT
 ///\exception   H5::ReferenceException
 // Programmer   Binh-Minh Ribler - Oct, 2006
-// Modification
-//      Jul, 2008
-//              Added for application convenience.
 //--------------------------------------------------------------------------
 DataSet::DataSet(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), AbstractDs(), id(H5I_INVALID_HID)
 {
@@ -174,6 +170,27 @@ DSetCreatPropList DataSet::getCreatePlist() const
     DSetCreatPropList create_plist;
     f_PropList_setId(&create_plist, create_plist_id);
     return(create_plist);
+}
+
+//--------------------------------------------------------------------------
+// Function:    DataSet::getAccessPlist
+///\brief       Gets the dataset access property list.
+///\return      DSetAccPropList instance
+///\exception   H5::DataSetIException
+// July 2018
+//--------------------------------------------------------------------------
+DSetAccPropList DataSet::getAccessPlist() const
+{
+    hid_t access_plist_id = H5Dget_access_plist(id);
+    if (access_plist_id < 0)
+    {
+        throw DataSetIException("DataSet::getAccessPlist", "H5Dget_access_plist failed");
+    }
+
+    // create and return the DSetCreatPropList object
+    DSetAccPropList access_plist;
+    f_PropList_setId(&access_plist, access_plist_id);
+    return(access_plist);
 }
 
 //--------------------------------------------------------------------------
@@ -352,10 +369,10 @@ void DataSet::vlenReclaim(const DataType& type, const DataSpace& space, const DS
     hid_t space_id = space.getId();
     hid_t xfer_plist_id = xfer_plist.getId();
 
-    herr_t ret_value = H5Dvlen_reclaim(type_id, space_id, xfer_plist_id, buf);
+    herr_t ret_value = H5Treclaim(type_id, space_id, xfer_plist_id, buf);
     if (ret_value < 0)
     {
-        throw DataSetIException("DataSet::vlenReclaim", "H5Dvlen_reclaim failed");
+        throw DataSetIException("DataSet::vlenReclaim", "H5Treclaim failed");
     }
 }
 
@@ -380,10 +397,10 @@ void DataSet::vlenReclaim(void* buf, const DataType& type, const DataSpace& spac
     hid_t space_id = space.getId();
     hid_t xfer_plist_id = xfer_plist.getId();
 
-    herr_t ret_value = H5Dvlen_reclaim(type_id, space_id, xfer_plist_id, buf);
+    herr_t ret_value = H5Treclaim(type_id, space_id, xfer_plist_id, buf);
     if (ret_value < 0)
     {
-        throw DataSetIException("DataSet::vlenReclaim", "H5Dvlen_reclaim failed");
+        throw DataSetIException("DataSet::vlenReclaim", "H5Treclaim failed");
     }
 }
 
@@ -577,10 +594,8 @@ int DataSet::iterateElems(void* buf, const DataType& type, const DataSpace& spac
 ///\param       size - IN: Array containing the new magnitude of each dimension
 ///\exception   H5::DataSetIException
 ///\par Description
-///             For more information, please see the Description section in
-///             C layer Reference Manual at:
-///\par
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5D.html#Dataset-Extend
+///             For information, please refer to the H5Dset_extent API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataSet::extend(const hsize_t* size) const
@@ -600,7 +615,6 @@ void DataSet::extend(const hsize_t* size) const
 ///\param       space - IN: Dataspace describing memory buffer & containing selection to use
 ///\exception   H5::DataSetIException
 // Programmer   Binh-Minh Ribler - 2014
-// Modification
 //--------------------------------------------------------------------------
 void DataSet::fillMemBuf(const void *fill, const DataType& fill_type, void *buf, const DataType& buf_type, const DataSpace& space) const
 {

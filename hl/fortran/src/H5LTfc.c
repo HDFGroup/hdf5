@@ -438,7 +438,7 @@ h5ltget_attribute_c(hid_t_f *loc_id,
       else
         goto done;
     }
- 
+
     if (ret < 0)
         goto done;
 
@@ -512,7 +512,7 @@ h5ltget_attribute_string_c(hid_t_f *loc_id,
     /*
      * Convert C name to FORTRAN and place it in the given buffer
      */
-    HD5packFstring(c_buf, _fcdtocp(buf), (size_t)*buf_size); 
+    HD5packFstring(c_buf, _fcdtocp(buf), (size_t)*buf_size);
 
     ret_value = 0;
 
@@ -893,9 +893,9 @@ done:
 */
 
 int_f
-h5ltpath_valid_c(hid_t_f *loc_id, 
-                  _fcd path, 
-                  size_t_f *pathlen, 
+h5ltpath_valid_c(hid_t_f *loc_id,
+                  _fcd path,
+                  size_t_f *pathlen,
                   int_f *check_object_valid_c)
 {
     htri_t ret = -1;
@@ -907,7 +907,7 @@ h5ltpath_valid_c(hid_t_f *loc_id,
      */
     if( NULL == (c_path = (char *)HD5f2cstring(path, (size_t)*pathlen)))
       goto done;
-    
+
     check_object_valid = FALSE;
     if(*check_object_valid_c == 1)
       check_object_valid = TRUE;

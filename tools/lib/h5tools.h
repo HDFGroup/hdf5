@@ -91,6 +91,7 @@
 #define PACKED_BITS     "PACKED_BITS"
 #define PACKED_OFFSET   "OFFSET"
 #define PACKED_LENGTH   "LENGTH"
+#define REGION          "REGION"
 #define VDS_VIRTUAL     "VIRTUAL"
 #define VDS_MAPPING     "MAPPING"
 #define VDS_SOURCE      "SOURCE"
@@ -479,10 +480,10 @@ typedef struct h5tool_format_t {
     /*used to skip the first set of checks for line length*/
     int skip_first;
 
-    /*flag used to hide or show the file number for obj refs*/
+    /*flag used to hide or show the file number for object refs*/
     int obj_hidefileno;
 
-    /*string used to format the output for the obje refs*/
+    /*string used to format the output for the object refs*/
     const char *obj_format;
 
     /*flag used to hide or show the file number for dataset regions*/
@@ -503,28 +504,6 @@ typedef struct h5tool_format_t {
 
 } h5tool_format_t;
 
-typedef struct h5tools_context_t {
-    size_t cur_column;                       /*current column for output */
-    size_t cur_elmt;                         /*current element/output line */
-    int  need_prefix;                        /*is line prefix needed? */
-    unsigned ndims;                          /*dimensionality  */
-    hsize_t p_min_idx[H5S_MAX_RANK];         /*min selected index */
-    hsize_t p_max_idx[H5S_MAX_RANK];         /*max selected index */
-    int  prev_multiline;                     /*was prev datum multiline? */
-    size_t prev_prefix_len;                  /*length of previous prefix */
-    int  continuation;                       /*continuation of previous data?*/
-    hsize_t size_last_dim;                   /*the size of the last dimension,
-                                              *needed so we can break after each
-                                              *row */
-    unsigned  indent_level;                /*the number of times we need some
-                                       *extra indentation */
-    unsigned  default_indent_level;        /*this is used when the indent level gets changed */
-    hsize_t acc[H5S_MAX_RANK];        /* accumulator position */
-    hsize_t pos[H5S_MAX_RANK];        /* matrix position */
-    hsize_t sm_pos;                   /* current stripmine element position */
-    const struct H5LD_memb_t * const *cmpd_listv;  /* h5watch: vector containing info about the list of compound fields to be printed */
-} h5tools_context_t;
-
 typedef struct subset_d {
     hsize_t     *data;
     unsigned int len;
@@ -537,6 +516,86 @@ struct subset_t {
     subset_d count;
     subset_d block;
 };
+
+typedef struct h5tools_context_t {
+    size_t cur_column;                /* current column for output */
+    size_t cur_elmt;                  /* current element/output line */
+    int  need_prefix;                 /* is line prefix needed? */
+    unsigned ndims;                   /* dimensionality  */
+    hsize_t p_min_idx[H5S_MAX_RANK];  /* min selected index */
+    hsize_t p_max_idx[H5S_MAX_RANK];  /* max selected index */
+    int  prev_multiline;              /* was prev datum multiline? */
+    size_t prev_prefix_len;           /* length of previous prefix */
+    int  continuation;                /* continuation of previous data?*/
+    hsize_t size_last_dim;            /* the size of the last dimension, needed so we can break after each row */
+    unsigned  indent_level;           /* the number of times we need some extra indentation */
+    unsigned  default_indent_level;   /* this is used when the indent level gets changed */
+    hsize_t acc[H5S_MAX_RANK];        /* accumulator position */
+    hsize_t pos[H5S_MAX_RANK];        /* matrix position */
+    hsize_t sm_pos;                   /* current stripmine element position */
+    const struct H5LD_memb_t * const *cmpd_listv;  /* h5watch: vector containing info about the list of compound fields to be printed */
+    struct subset_t *sset;            /* subsetting parameters */
+    int display_index;                /* */
+    int display_char;                 /* */
+} h5tools_context_t;
+
+/* VOL and VFD info structs used to set the file access property
+ * lists in the tools.
+ */
+
+typedef enum {
+    VOL_BY_NAME,
+    VOL_BY_VALUE
+} h5tools_vol_info_type_t;
+
+typedef struct h5tools_vol_info_t {
+    h5tools_vol_info_type_t type;
+
+    /* Pointer to information string to be passed to the connector for its setup */
+    const char *info_string;
+
+    /* Field specifying either the connector's name or value (ID) */
+    union {
+        const char          *name;
+        H5VL_class_value_t  value;
+    } u;
+} h5tools_vol_info_t;
+
+typedef struct h5tools_vfd_info_t {
+
+    /* Pointer to information to be passed to the driver for its setup */
+    const void *info;
+
+    /* Name of the VFD */
+    const char *name;
+} h5tools_vfd_info_t;
+
+H5TOOLS_DLLVAR const char *volnames[];
+H5TOOLS_DLLVAR const char *drivernames[];
+
+/* This enum should match the entries in the above 'volnames'
+ * since they are indices into the 'volnames' array. */
+typedef enum {
+    NATIVE_VOL_IDX = 0,
+    PASS_THROUGH_VOL_IDX,
+} vol_idx;
+
+/* This enum should match the entries in the above 'drivernames'
+ * since they are indices into the 'drivernames' array. */
+typedef enum {
+    SEC2_VFD_IDX = 0,
+    DIRECT_VFD_IDX,
+    LOG_VFD_IDX,
+    WINDOWS_VFD_IDX,
+    STDIO_VFD_IDX,
+    CORE_VFD_IDX,
+    FAMILY_VFD_IDX,
+    SPLIT_VFD_IDX,
+    MULTI_VFD_IDX,
+    MPIO_VFD_IDX,
+    ROS3_VFD_IDX,
+    HDFS_VFD_IDX,
+} driver_idx;
 
 /* The following include, h5tools_str.h, must be after the
  * above stucts are defined. There is a dependency in the following
@@ -569,16 +628,18 @@ H5TOOLS_DLLVAR int     data_output;         /* data output */
 H5TOOLS_DLLVAR int     attr_data_output;    /* attribute data output */
 
 /* sort parameters */
-H5TOOLS_DLLVAR H5_index_t   sort_by;        /*sort_by [creation_order | name]  */
-H5TOOLS_DLLVAR H5_iter_order_t sort_order;  /*sort_order [ascending | descending]   */
+H5TOOLS_DLLVAR H5_index_t   sort_by;        /* sort_by [creation_order | name]  */
+H5TOOLS_DLLVAR H5_iter_order_t sort_order;  /* sort_order [ascending | descending]   */
 
 /* things to display or which are set via command line parameters */
-H5TOOLS_DLLVAR int     enable_error_stack; /* re-enable error stack */
+H5TOOLS_DLLVAR int     enable_error_stack; /* re-enable error stack; disable=0 enable=1 */
 
 /* Strings for output */
 #define H5_TOOLS_GROUP           "GROUP"
 #define H5_TOOLS_DATASET         "DATASET"
 #define H5_TOOLS_DATATYPE        "DATATYPE"
+#define H5_TOOLS_ATTRIBUTE       "ATTRIBUTE"
+#define H5_TOOLS_UNKNOWN         "UNKNOWN"
 
 /* Definitions of useful routines */
 H5TOOLS_DLL void    h5tools_init(void);
@@ -588,8 +649,11 @@ H5TOOLS_DLL int     h5tools_set_attr_output_file(const char *fname, int is_bin);
 H5TOOLS_DLL int     h5tools_set_input_file(const char *fname, int is_bin);
 H5TOOLS_DLL int     h5tools_set_output_file(const char *fname, int is_bin);
 H5TOOLS_DLL int     h5tools_set_error_file(const char *fname, int is_bin);
+H5TOOLS_DLL hid_t   h5tools_get_fapl(hid_t prev_fapl_id, h5tools_vol_info_t *vol_info,
+                        h5tools_vfd_info_t *vfd_info);
+H5TOOLS_DLL herr_t  h5tools_get_vfd_name(hid_t fapl_id, char *drivername, size_t drivername_size);
 H5TOOLS_DLL hid_t   h5tools_fopen(const char *fname, unsigned flags, hid_t fapl,
-                            const char *driver, char *drivername, size_t drivername_len);
+                            hbool_t use_specific_driver, char *drivername, size_t drivername_size);
 H5TOOLS_DLL hid_t   h5tools_get_little_endian_type(hid_t type);
 H5TOOLS_DLL hid_t   h5tools_get_big_endian_type(hid_t type);
 H5TOOLS_DLL htri_t  h5tools_detect_vlen(hid_t tid);
@@ -619,12 +683,12 @@ H5TOOLS_DLL hbool_t h5tools_render_element(FILE *stream, const h5tool_format_t *
                             h5tools_context_t *ctx, h5tools_str_t *buffer, hsize_t *curr_pos,
                             size_t ncols, hsize_t local_elmt_counter, hsize_t elmt_counter);
 H5TOOLS_DLL hbool_t h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
-                h5tools_context_t *ctx/*in,out*/,
-                h5tools_str_t *buffer/*string into which to render */,
-                hsize_t *curr_pos/*total data element position*/,
-                size_t ncols, hsize_t *ptdata,
-                hsize_t local_elmt_counter/*element counter*/,
-                hsize_t elmt_counter);
+                            h5tools_context_t *ctx, /*in,out*/
+                            h5tools_str_t *buffer,  /*string into which to render */
+                            hsize_t *curr_pos,      /*total data element position*/
+                            size_t ncols, hsize_t *ptdata,
+                            hsize_t local_elmt_counter, /*element counter*/
+                            hsize_t elmt_counter);
 
 #ifdef __cplusplus
 }

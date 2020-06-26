@@ -1,14 +1,9 @@
-cmake_minimum_required (VERSION 3.2.2)
-PROJECT (HDF5_JAVA_HDF_HDF5 Java)
+cmake_minimum_required (VERSION 3.12)
+project (HDF5_JAVA_HDF_HDF5 Java)
 
 set (CMAKE_VERBOSE_MAKEFILE 1)
 
-INCLUDE_DIRECTORIES (
-    ${HDF5_JAVA_HDF_HDF5_SOURCE_DIR}
-    ${HDF5_JAVA_HDF_HDF5_BINARY_DIR}
-    ${HDF5_JAVA_LIB_DIR}
-    ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${HDF5_JAVA_HDF5_LIB_CORENAME}.dir/hdf/hdf5lib
-)
+set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${HDF5_JAVA_HDF_HDF5_SOURCE_DIR};${HDF5_JAVA_HDF_HDF5_BINARY_DIR};${HDF5_JAVA_LIB_DIR};${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${HDF5_JAVA_HDF5_LIB_CORENAME}.dir/hdf/hdf5lib")
 
 SET_GLOBAL_VARIABLE (HDF5_JAVA_SOURCE_PACKAGES
     "${HDF5_JAVA_SOURCE_PACKAGES};hdf.hdf5lib.callbacks;hdf.hdf5lib.exceptions;hdf.hdf5lib.structs;hdf.hdf5lib"
@@ -23,10 +18,10 @@ set (HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES
     callbacks/H5D_iterate_t.java
     callbacks/H5E_walk_cb.java
     callbacks/H5E_walk_t.java
-    callbacks/H5L_iterate_cb.java
     callbacks/H5L_iterate_t.java
-    callbacks/H5O_iterate_cb.java
+    callbacks/H5L_iterate_opdata_t.java
     callbacks/H5O_iterate_t.java
+    callbacks/H5O_iterate_opdata_t.java
     callbacks/H5P_cls_close_func_cb.java
     callbacks/H5P_cls_close_func_t.java
     callbacks/H5P_cls_copy_func_cb.java
@@ -78,10 +73,14 @@ set (HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES
     structs/H5AC_cache_config_t.java
     structs/H5E_error2_t.java
     structs/H5F_info2_t.java
+    structs/H5FD_ros3_fapl_t.java
+    structs/H5FD_hdfs_fapl_t.java
     structs/H5G_info_t.java
     structs/H5L_info_t.java
     structs/H5O_hdr_info_t.java
     structs/H5O_info_t.java
+    structs/H5O_native_info_t.java
+    structs/H5O_token_t.java
 )
 
 set (HDF5_JAVA_HDF_HDF5_SOURCES

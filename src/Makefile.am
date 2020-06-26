@@ -38,87 +38,87 @@ MOSTLYCLEANFILES=H5Tinit.c H5lib_settings.c
 DISTCLEANFILES=H5pubconf.h
 
 # library sources
-libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
+libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5lib_settings.c H5system.c \
+	H5timer.c H5trace.c \
         H5A.c H5Abtree2.c H5Adense.c H5Adeprec.c H5Aint.c H5Atest.c \
-        H5AC.c H5ACdbg.c H5AClog.c H5ACproxy_entry.c \
+        H5AC.c H5ACdbg.c H5ACproxy_entry.c \
         H5B.c H5Bcache.c H5Bdbg.c \
         H5B2.c H5B2cache.c H5B2dbg.c H5B2hdr.c H5B2int.c H5B2internal.c \
         H5B2leaf.c H5B2stat.c H5B2test.c \
-        H5C.c H5Cdbg.c H5Cepoch.c H5Cimage.c H5Clog.c H5Cprefetched.c \
-        H5Cquery.c H5Ctag.c H5Ctest.c \
+        H5C.c H5Cdbg.c H5Cepoch.c H5Cimage.c H5Clog.c H5Clog_json.c H5Clog_trace.c \
+        H5Cprefetched.c H5Cquery.c H5Ctag.c H5Ctest.c \
         H5CS.c \
-        H5D.c H5Dbtree.c H5Dbtree2.c H5Dchunk.c H5Dcompact.c H5Dcontig.c H5Ddbg.c \
-        H5Ddeprec.c H5Dearray.c H5Defl.c H5Dfarray.c H5Dfill.c H5Dint.c \
-        H5Dio.c H5Dlayout.c H5Dnone.c \
-        H5Doh.c H5Dscatgath.c H5Dselect.c \
-        H5Dsingle.c H5Dtest.c H5Dvirtual.c \
+        H5CX.c \
+        H5D.c H5Dbtree.c H5Dbtree2.c H5Dchunk.c H5Dcompact.c H5Dcontig.c \
+        H5Ddbg.c H5Ddeprec.c H5Dearray.c H5Defl.c H5Dfarray.c H5Dfill.c \
+        H5Dint.c H5Dio.c H5Dlayout.c H5Dnone.c H5Doh.c H5Dscatgath.c \
+        H5Dselect.c H5Dsingle.c H5Dtest.c H5Dvirtual.c \
         H5E.c H5Edeprec.c H5Eint.c \
         H5EA.c H5EAcache.c H5EAdbg.c H5EAdblkpage.c H5EAdblock.c H5EAhdr.c \
         H5EAiblock.c H5EAint.c H5EAsblock.c H5EAstat.c H5EAtest.c \
-        H5F.c H5Fint.c H5Faccum.c H5Fcwfs.c \
-        H5Fdbg.c H5Fdeprec.c H5Fefc.c H5Ffake.c H5Fio.c \
-        H5Fmount.c H5Fquery.c \
-        H5Fsfile.c H5Fspace.c H5Fsuper.c H5Fsuper_cache.c H5Ftest.c \
+        H5F.c H5Faccum.c H5Fcwfs.c H5Fdbg.c H5Fdeprec.c H5Fefc.c H5Ffake.c \
+        H5Fint.c H5Fio.c H5Fmount.c H5Fquery.c H5Fsfile.c H5Fspace.c \
+        H5Fsuper.c H5Fsuper_cache.c H5Ftest.c \
         H5FA.c H5FAcache.c H5FAdbg.c H5FAdblock.c H5FAdblkpage.c H5FAhdr.c \
         H5FAint.c H5FAstat.c H5FAtest.c \
-        H5FD.c H5FDcore.c  \
-        H5FDfamily.c H5FDint.c H5FDlog.c \
-        H5FDmulti.c H5FDsec2.c H5FDspace.c H5FDstdio.c H5FDtest.c \
+        H5FD.c H5FDcore.c H5FDfamily.c H5FDhdfs.c H5FDint.c H5FDlog.c \
+        H5FDmulti.c H5FDsec2.c H5FDspace.c \
+        H5FDsplitter.c H5FDstdio.c H5FDtest.c \
         H5FL.c H5FO.c H5FS.c H5FScache.c H5FSdbg.c H5FSint.c H5FSsection.c \
         H5FSstat.c H5FStest.c \
-        H5G.c H5Gbtree2.c H5Gcache.c \
-        H5Gcompact.c H5Gdense.c H5Gdeprec.c H5Gent.c \
-        H5Gint.c H5Glink.c \
-        H5Gloc.c H5Gname.c H5Gnode.c H5Gobj.c H5Goh.c H5Groot.c H5Gstab.c H5Gtest.c \
-        H5Gtraverse.c \
+        H5G.c H5Gbtree2.c H5Gcache.c H5Gcompact.c H5Gdense.c H5Gdeprec.c \
+        H5Gent.c H5Gint.c H5Glink.c H5Gloc.c H5Gname.c H5Gnode.c H5Gobj.c \
+        H5Goh.c H5Groot.c H5Gstab.c H5Gtest.c H5Gtraverse.c \
         H5HF.c H5HFbtree2.c H5HFcache.c H5HFdbg.c H5HFdblock.c H5HFdtable.c \
         H5HFhdr.c H5HFhuge.c H5HFiblock.c H5HFiter.c H5HFman.c H5HFsection.c \
         H5HFspace.c H5HFstat.c H5HFtest.c H5HFtiny.c \
         H5HG.c H5HGcache.c H5HGdbg.c H5HGquery.c \
-        H5HL.c H5HLcache.c H5HLdbg.c H5HLint.c H5HLprfx.c H5HLdblk.c\
-        H5HP.c H5I.c H5Itest.c H5L.c H5Lexternal.c H5lib_settings.c \
+        H5HL.c H5HLcache.c H5HLdbg.c H5HLint.c H5HLprfx.c H5HLdblk.c \
+        H5HP.c \
+        H5I.c H5Itest.c \
+        H5L.c H5Ldeprec.c H5Lexternal.c \
+        H5M.c \
         H5MF.c H5MFaggr.c H5MFdbg.c H5MFsection.c \
         H5MM.c H5MP.c H5MPtest.c \
-        H5O.c H5Oainfo.c H5Oalloc.c H5Oattr.c \
-        H5Oattribute.c H5Obogus.c H5Obtreek.c H5Ocache.c H5Ocache_image.c \
-        H5Ochunk.c \
-        H5Ocont.c H5Ocopy.c H5Odbg.c H5Odrvinfo.c H5Odtype.c H5Oefl.c \
-        H5Ofill.c H5Oflush.c H5Ofsinfo.c H5Oginfo.c \
-        H5Olayout.c \
-        H5Olinfo.c H5Olink.c H5Omessage.c H5Omtime.c \
-        H5Oname.c H5Onull.c H5Opline.c H5Orefcount.c \
-        H5Osdspace.c H5Oshared.c \
-        H5Oshmesg.c \
-        H5Ostab.c \
-        H5Otest.c H5Ounknown.c \
-        H5P.c H5Pacpl.c H5Pdapl.c H5Pdcpl.c \
-        H5Pdeprec.c H5Pdxpl.c H5Pencdec.c \
-        H5Pfapl.c H5Pfcpl.c H5Pfmpl.c \
-        H5Pgcpl.c H5Pint.c \
-        H5Plapl.c H5Plcpl.c H5Pocpl.c H5Pocpypl.c H5Pstrcpl.c H5Ptest.c \
+        H5O.c H5Odeprec.c H5Oainfo.c H5Oalloc.c H5Oattr.c H5Oattribute.c \
+        H5Obogus.c H5Obtreek.c H5Ocache.c H5Ocache_image.c H5Ochunk.c \
+        H5Ocont.c H5Ocopy.c H5Ocopy_ref.c H5Odbg.c H5Odrvinfo.c H5Odtype.c \
+        H5Oefl.c H5Ofill.c H5Oflush.c H5Ofsinfo.c H5Oginfo.c H5Oint.c \
+        H5Olayout.c H5Olinfo.c H5Olink.c H5Omessage.c H5Omtime.c H5Oname.c \
+        H5Onull.c H5Opline.c H5Orefcount.c H5Osdspace.c H5Oshared.c \
+        H5Oshmesg.c H5Ostab.c H5Otest.c H5Ounknown.c \
+        H5P.c H5Pacpl.c H5Pdapl.c H5Pdcpl.c H5Pdeprec.c H5Pdxpl.c H5Pencdec.c \
+        H5Pfapl.c H5Pfcpl.c H5Pfmpl.c H5Pgcpl.c H5Pint.c H5Plapl.c H5Plcpl.c \
+        H5Pmapl.c H5Pmcpl.c H5Pocpl.c H5Pocpypl.c H5Pstrcpl.c H5Ptest.c \
         H5PB.c \
         H5PL.c H5PLint.c H5PLpath.c H5PLplugin_cache.c \
-        H5R.c H5Rdeprec.c \
+        H5R.c H5Rdeprec.c H5Rint.c \
         H5UC.c \
         H5RS.c \
-        H5S.c H5Sall.c H5Sdbg.c H5Shyper.c H5Snone.c H5Spoint.c \
+        H5S.c H5Sall.c H5Sdbg.c H5Sdeprec.c H5Shyper.c H5Snone.c H5Spoint.c \
         H5Sselect.c H5Stest.c \
         H5SL.c \
         H5SM.c H5SMbtree2.c H5SMcache.c H5SMmessage.c H5SMtest.c \
         H5ST.c \
         H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c H5Tcompound.c H5Tconv.c \
-        H5Tcset.c H5Tdbg.c H5Tdeprec.c H5Tenum.c H5Tfields.c \
-        H5Tfixed.c \
-        H5Tfloat.c H5Tinit.c H5Tnative.c H5Toffset.c H5Toh.c \
-        H5Topaque.c \
-        H5Torder.c \
-        H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvisit.c H5Tvlen.c H5TS.c H5VM.c H5WB.c H5Z.c  \
-        H5Zdeflate.c H5Zfletcher32.c H5Znbit.c H5Zshuffle.c \
-        H5Zscaleoffset.c H5Zszip.c H5Ztrans.c
+        H5Tcset.c H5Tdbg.c H5Tdeprec.c H5Tenum.c H5Tfields.c H5Tfixed.c \
+        H5Tfloat.c H5Tinit.c H5Tnative.c H5Toffset.c H5Toh.c H5Topaque.c \
+        H5Torder.c H5Tref.c H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvisit.c \
+        H5Tvlen.c \
+        H5TS.c \
+        H5VL.c H5VLcallback.c H5VLint.c H5VLnative.c \
+        H5VLnative_attr.c H5VLnative_blob.c H5VLnative_dataset.c \
+        H5VLnative_datatype.c H5VLnative_file.c H5VLnative_group.c \
+        H5VLnative_link.c H5VLnative_introspect.c H5VLnative_object.c \
+        H5VLnative_token.c \
+        H5VLpassthru.c \
+        H5VM.c H5WB.c H5Z.c  \
+        H5Zdeflate.c H5Zfletcher32.c H5Znbit.c H5Zshuffle.c H5Zscaleoffset.c \
+        H5Zszip.c H5Ztrans.c
 
 # Only compile parallel sources if necessary
 if BUILD_PARALLEL_CONDITIONAL
-    libhdf5_la_SOURCES += H5ACmpio.c H5Cmpio.c H5Dmpio.c H5Fmpi.c H5FDmpi.c H5FDmpio.c H5Smpio.c
+    libhdf5_la_SOURCES += H5mpi.c H5ACmpio.c H5Cmpio.c H5Dmpio.c H5Fmpi.c H5FDmpi.c H5FDmpio.c H5Smpio.c
 endif
 
 # Only compile the direct VFD if necessary
@@ -126,19 +126,31 @@ if DIRECT_VFD_CONDITIONAL
     libhdf5_la_SOURCES += H5FDdirect.c
 endif
 
+# Only compile the mirror VFD if necessary
+if MIRROR_VFD_CONDITIONAL
+    libhdf5_la_SOURCES += H5FDmirror.c
+endif
+
+# Only compile the read-only S3 VFD if necessary
+if ROS3_VFD_CONDITIONAL
+    libhdf5_la_SOURCES += H5FDros3.c H5FDs3comms.c
+endif
+
 # Public headers
 include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5version.h \
         H5Apublic.h H5ACpublic.h \
         H5Cpublic.h H5Dpublic.h \
-        H5Epubgen.h H5Epublic.h H5Fpublic.h \
-        H5FDpublic.h H5FDcore.h H5FDdirect.h \
-        H5FDfamily.h H5FDlog.h H5FDmpi.h H5FDmpio.h \
-        H5FDmulti.h H5FDsec2.h  H5FDstdio.h \
+        H5Epubgen.h H5Epublic.h H5ESpublic.h H5Fpublic.h \
+        H5FDpublic.h H5FDcore.h H5FDdirect.h  H5FDfamily.h H5FDhdfs.h \
+        H5FDlog.h H5FDmirror.h H5FDmpi.h H5FDmpio.h  H5FDmulti.h H5FDros3.h \
+        H5FDsec2.h H5FDsplitter.h H5FDstdio.h H5FDwindows.h \
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
-        H5MMpublic.h H5Opublic.h H5Ppublic.h \
+        H5Mpublic.h H5MMpublic.h H5Opublic.h H5Ppublic.h \
         H5PLextern.h H5PLpublic.h \
-        H5Rpublic.h H5Spublic.h \
-        H5Tpublic.h H5Zpublic.h
+        H5Rpublic.h H5Spublic.h H5Tpublic.h \
+        H5VLconnector.h H5VLconnector_passthru.h \
+        H5VLnative.h H5VLpassthru.h H5VLpublic.h \
+        H5Zpublic.h
 
 # install libhdf5.settings in lib directory
 settingsdir=$(libdir)
@@ -152,7 +164,7 @@ settings_DATA=libhdf5.settings
 H5Tinit.c: H5detect$(EXEEXT)
 	LD_LIBRARY_PATH="$$LD_LIBRARY_PATH`echo $(LDFLAGS) |                  \
 		sed -e 's/-L/:/g' -e 's/ //g'`"                               \
-	$(RUNSERIAL) ./H5detect$(EXEEXT) > $@  ||                               \
+	$(RUNSERIAL) ./H5detect$(EXEEXT)  $@  ||                               \
 	    (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||          \
 	    ($(RM) $@ ; exit 1)
 
@@ -164,7 +176,7 @@ H5Tinit.c: H5detect$(EXEEXT)
 H5lib_settings.c: H5make_libsettings$(EXEEXT) libhdf5.settings
 	LD_LIBRARY_PATH="$$LD_LIBRARY_PATH`echo $(LDFLAGS) |                  \
 		sed -e 's/-L/:/g' -e 's/ //g'`"                               \
-	$(RUNSERIAL) ./H5make_libsettings$(EXEEXT) > $@  ||                               \
+	$(RUNSERIAL) ./H5make_libsettings$(EXEEXT)  $@  ||                               \
 	    (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||          \
 	    ($(RM) $@ ; exit 1)
 
@@ -203,3 +215,4 @@ trace: $(libhdf5_la_SOURCES)
 	done
 
 include $(top_srcdir)/config/conclude.am
+

@@ -1,0 +1,13 @@
+JUnit version 4.11
+.testH5VLget_connector_id_by_name
+.testH5VLget_connector_id_by_value
+.testH5VLget_connector_id
+.testH5VLnative_init
+.testH5VLget_connector_name
+.testH5VLclose_NegativeID
+.testH5VLunregister_connector_NegativeID
+
+Time:  XXXX
+
+OK (7 tests)
+

@@ -25,9 +25,11 @@ import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5FunctionArgumentException;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
+import hdf.hdf5lib.structs.H5F_info2_t;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -35,7 +37,7 @@ import org.junit.rules.TestName;
 public class TestH5P {
     @Rule public TestName testname = new TestName();
 
-    private static final String H5_FILE = "test.h5";
+    private static final String H5_FILE = "testP.h5";
     private static final int DIM_X = 4;
     private static final int DIM_Y = 6;
     long[] H5dims = { DIM_X, DIM_Y };
@@ -205,14 +207,14 @@ public class TestH5P {
         assertEquals(nlinks, 20L);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Pset_libver_bounds_invalidlow() throws Throwable {
-        H5.H5Pset_libver_bounds(fapl_id, 5, HDF5Constants.H5F_LIBVER_LATEST);
+        H5.H5Pset_libver_bounds(fapl_id, HDF5Constants.H5F_LIBVER_LATEST+1, HDF5Constants.H5F_LIBVER_LATEST);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Pset_libver_bounds_invalidhigh() throws Throwable {
-        H5.H5Pset_libver_bounds(fapl_id, HDF5Constants.H5F_LIBVER_LATEST, 5);
+        H5.H5Pset_libver_bounds(fapl_id, HDF5Constants.H5F_LIBVER_LATEST, HDF5Constants.H5F_LIBVER_LATEST+1);
     }
 
     @Test
@@ -852,7 +854,7 @@ public class TestH5P {
         }
         catch (Throwable err) {
             err.printStackTrace();
-            fail("H5Pset_est_link_info: " + err);
+            fail("H5Pset_elink_prefix: " + err);
         }
         assertTrue("H5Pset_elink_prefix", ret_val >= 0);
     }
@@ -886,37 +888,12 @@ public class TestH5P {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testH5Pget_version_null() throws Throwable {
-        H5.H5Pget_version(fcpl_id, null);
-    }
-
-    @Test
-    public void testH5Pget_version() {
-        int[] version_info = {255,255,255,255};
-
-        try {
-            _createH5File(fcpl_id, fapl_id);
-            H5.H5Pget_version(fcpl_id, version_info);
-            deleteH5file();
-        }
-        catch (Throwable err) {
-            err.printStackTrace();
-            fail("H5Pget_version: " + err);
-        }
-        assertTrue("super block version: "+version_info[0], version_info[0] == 0);
-        assertTrue("global freelist version: "+version_info[1], version_info[1] == 0);
-        assertTrue("symbol table version: "+version_info[2], version_info[2] == 0);
-        assertTrue("shared object header version: "+version_info[3], version_info[3] == 0);
-    }
-
-    @Test(expected = NullPointerException.class)
     public void testH5Pget_userblock_null() throws Throwable {
         H5.H5Pget_userblock(fcpl_id, null);
     }
 
     @Test
     public void testH5P_userblock() {
-        int[] version_info = {255,255,255,255};
         long[] size = {0};
 
         try {
@@ -930,7 +907,10 @@ public class TestH5P {
             fcpl_id =  H5.H5Fget_create_plist(H5fid);
 
             /* Get the file's version information */
-            H5.H5Pget_version(fcpl_id, version_info);
+            H5F_info2_t finfo = H5.H5Fget_info(H5fid);
+            assertTrue("super block version: "+finfo.super_version, finfo.super_version == 0);
+            assertTrue("free-space manager version: "+finfo.free_version, finfo.free_version == 0);
+            assertTrue("shared object header version: "+finfo.sohm_version, finfo.sohm_version == 0);
             H5.H5Pget_userblock(fcpl_id, size);
             deleteH5file();
         }
@@ -938,10 +918,6 @@ public class TestH5P {
             err.printStackTrace();
             fail("H5Pget_userblock: " + err);
         }
-        assertTrue("super block version: "+version_info[0], version_info[0] == 0);
-        assertTrue("global freelist version: "+version_info[1], version_info[1] == 0);
-        assertTrue("symbol table version: "+version_info[2], version_info[2] == 0);
-        assertTrue("shared object header version: "+version_info[3], version_info[3] == 0);
         assertTrue("user block size: "+size[0], size[0] == 1024);
     }
 
@@ -952,7 +928,6 @@ public class TestH5P {
 
     @Test
     public void testH5P_sizes() {
-        int[] version_info = {255,255,255,255};
         long[] size = {0,0};
 
         try {
@@ -966,7 +941,10 @@ public class TestH5P {
             fcpl_id =  H5.H5Fget_create_plist(H5fid);
 
             /* Get the file's version information */
-            H5.H5Pget_version(fcpl_id, version_info);
+            H5F_info2_t finfo = H5.H5Fget_info(H5fid);
+            assertTrue("super block version: "+finfo.super_version, finfo.super_version == 0);
+            assertTrue("free-space manager version: "+finfo.free_version, finfo.free_version == 0);
+            assertTrue("shared object header version: "+finfo.sohm_version, finfo.sohm_version == 0);
             H5.H5Pget_sizes(fcpl_id, size);
             deleteH5file();
         }
@@ -974,10 +952,6 @@ public class TestH5P {
             err.printStackTrace();
             fail("H5Pget_sizes: " + err);
         }
-        assertTrue("super block version: "+version_info[0], version_info[0] == 0);
-        assertTrue("global freelist version: "+version_info[1], version_info[1] == 0);
-        assertTrue("symbol table version: "+version_info[2], version_info[2] == 0);
-        assertTrue("shared object header version: "+version_info[3], version_info[3] == 0);
         assertTrue("sizeof_addr size: "+size[0], size[0] == 4);
         assertTrue("sizeof_size size: "+size[1], size[1] == 8);
     }
@@ -989,7 +963,6 @@ public class TestH5P {
 
     @Test
     public void testH5P_sym_k() {
-        int[] version_info = {255,255,255,255};
         int[] size = {0,0};
 
         try {
@@ -1003,7 +976,10 @@ public class TestH5P {
             fcpl_id =  H5.H5Fget_create_plist(H5fid);
 
             /* Get the file's version information */
-            H5.H5Pget_version(fcpl_id, version_info);
+            H5F_info2_t finfo = H5.H5Fget_info(H5fid);
+            assertTrue("super block version: "+finfo.super_version, finfo.super_version == 0);
+            assertTrue("free-space manager version: "+finfo.free_version, finfo.free_version == 0);
+            assertTrue("shared object header version: "+finfo.sohm_version, finfo.sohm_version == 0);
             H5.H5Pget_sym_k(fcpl_id, size);
             deleteH5file();
         }
@@ -1011,10 +987,6 @@ public class TestH5P {
             err.printStackTrace();
             fail("H5Pget_sym_k: " + err);
         }
-        assertTrue("super block version: "+version_info[0], version_info[0] == 0);
-        assertTrue("global freelist version: "+version_info[1], version_info[1] == 0);
-        assertTrue("symbol table version: "+version_info[2], version_info[2] == 0);
-        assertTrue("shared object header version: "+version_info[3], version_info[3] == 0);
         assertTrue("symbol table tree rank: "+size[0], size[0] == 32);
         assertTrue("symbol table node size: "+size[1], size[1] == 8);
     }
@@ -1026,7 +998,6 @@ public class TestH5P {
 
     @Test
     public void testH5P_istore_k() {
-        int[] version_info = {255,255,255,255};
         int[] size = {0};
 
         try {
@@ -1040,7 +1011,10 @@ public class TestH5P {
             fcpl_id =  H5.H5Fget_create_plist(H5fid);
 
             /* Get the file's version information */
-            H5.H5Pget_version(fcpl_id, version_info);
+            H5F_info2_t finfo = H5.H5Fget_info(H5fid);
+            assertTrue("super block version: "+finfo.super_version, finfo.super_version == 1);
+            assertTrue("free-space manager version: "+finfo.free_version, finfo.free_version == 0);
+            assertTrue("shared object header version: "+finfo.sohm_version, finfo.sohm_version == 0);
             H5.H5Pget_istore_k(fcpl_id, size);
             deleteH5file();
         }
@@ -1048,10 +1022,6 @@ public class TestH5P {
             err.printStackTrace();
             fail("H5Pget_sym_k: " + err);
         }
-        assertTrue("super block version: "+version_info[0], version_info[0] == 1);
-        assertTrue("global freelist version: "+version_info[1], version_info[1] == 0);
-        assertTrue("symbol table version: "+version_info[2], version_info[2] == 0);
-        assertTrue("shared object header version: "+version_info[3], version_info[3] == 0);
         assertTrue("chunked storage b-tree 1/2-rank: "+size[0], size[0] == 64);
     }
 
@@ -1232,4 +1202,54 @@ public class TestH5P {
             fail("testH5P_file_space_page_size: " + err);
         }
    }
+
+    @Test
+    public void testH5Pset_efile_prefix() {
+        String prefix = "tmp";
+        try {
+            H5.H5Pset_efile_prefix(lapl_id, prefix);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5Pset_efile_prefix: " + err);
+        }
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testH5Pset_efile_prefix_null() throws Throwable{
+        H5.H5Pset_efile_prefix(lapl_id, null);
+    }
+
+    @Test
+    public void testH5Pget_efile_prefix() {
+        String prefix = "tmp";
+        String pre = "";
+
+        try {
+            H5.H5Pset_efile_prefix(lapl_id, prefix);
+            pre = H5.H5Pget_efile_prefix(lapl_id);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5Pget_efile_prefix: " + err);
+        }
+        assertTrue("The prefix: ", prefix.equals(pre));
+    }
+
+    @Ignore
+    public void testH5P_chunk_opts() {
+        int chunk_opts = -1;
+
+        try {
+            chunk_opts = H5.H5Pget_chunk_opts(ocpl_id);
+            assertTrue("chunk_opts: "+chunk_opts, chunk_opts == 0);
+            H5.H5Pset_chunk_opts(ocpl_id, HDF5Constants.H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS);
+            chunk_opts = H5.H5Pget_chunk_opts(ocpl_id);
+            assertTrue("chunk_opts: "+chunk_opts, chunk_opts == HDF5Constants.H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5Pget_lchunk_opts: " + err);
+        }
+    }
 }

@@ -83,8 +83,8 @@ Abrt_Handler (int H5_ATTR_UNUSED sig)
     int i, n;
 
     for (i=0; i<T_NUMCLASSES; i++) {
-        fprintf(stderr, "%s ID reference count: %n", IDNAME[i], &n);
-        fprintf(stderr, "%*d\n", (n < ERR_WIDTH) ? (ERR_WIDTH - n) : 0, rc[i]);
+        HDfprintf(stderr, "%s ID reference count: %n", IDNAME[i], &n);
+        HDfprintf(stderr, "%*d\n", (n < ERR_WIDTH) ? (ERR_WIDTH - n) : 0, rc[i]);
     }
 }
 
@@ -195,7 +195,7 @@ main (void)
 
 error:
 
-    puts("***** APPLICATION REFERENCE COUNT TESTS FAILED *****");
+    HDputs("***** APPLICATION REFERENCE COUNT TESTS FAILED *****");
 
     return 1;
 }

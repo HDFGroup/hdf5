@@ -178,7 +178,7 @@ static int test_create_close(hid_t fid)
     hid_t table;
     hid_t part_t;
 
-    TESTING("H5PTcreate_fl and H5PTclose");
+    HL_TESTING2("H5PTcreate_fl and H5PTclose");
 
     /* Create a datatype for the particle struct */
     part_t = make_particle_type();
@@ -188,11 +188,11 @@ static int test_create_close(hid_t fid)
     /* Create the table */
     table = H5PTcreate_fl(fid, PT_NAME, part_t, (hsize_t)100, -1);
     if (H5Tclose(part_t) < 0)
-	goto error;
+    goto error;
     if( H5PTis_valid(table) < 0)
-	goto error;
+    goto error;
     if( H5PTis_varlen(table) != 0)
-	goto error;
+    goto error;
 
     /* Close the table */
     err = H5PTclose(table);
@@ -219,7 +219,7 @@ static int test_open(hid_t fid)
     herr_t err;
     hid_t table;
 
-    TESTING("H5PTopen");
+    HL_TESTING2("H5PTopen");
 
     /* Open the table */
     table = H5PTopen(fid, PT_NAME);
@@ -255,7 +255,7 @@ static int test_append(hid_t fid)
     hid_t table;
     hsize_t count = 0;
 
-    TESTING("H5PTappend");
+    HL_TESTING2("H5PTappend");
 
     /* Open the table */
     table = H5PTopen(fid, PT_NAME);
@@ -322,7 +322,7 @@ static int test_read(hid_t fid)
     particle_t readBuf[NRECORDS];
     size_t c;
 
-    TESTING("H5PTread_packets");
+    HL_TESTING2("H5PTread_packets");
 
     /* Open the table */
     table = H5PTopen(fid, PT_NAME);
@@ -383,7 +383,7 @@ static int test_get_next(hid_t fid)
     particle_t readBuf2[NRECORDS];
     size_t c;
 
-    TESTING("H5PTget_next");
+    HL_TESTING2("H5PTget_next");
 
     /* Open the table */
     table = H5PTopen(fid, PT_NAME);
@@ -454,7 +454,7 @@ static int    test_big_table(hid_t fid)
     particle_t readPart;
     hsize_t count;
 
-    TESTING("large packet table");
+    HL_TESTING2("large packet table");
 
     /* Create a datatype for the particle struct */
     part_t = make_particle_type();
@@ -528,7 +528,7 @@ static int    test_opaque(hid_t fid)
     size_t c;
     particle_t readBuf[NRECORDS];
 
-    TESTING("opaque data");
+    HL_TESTING2("opaque data");
 
     /* Create an opaque datatype for the particle struct */
     if ((part_t = H5Tcreate (H5T_OPAQUE, sizeof(particle_t) )) < 0 )
@@ -602,7 +602,7 @@ test_compress(void)
     particle_t readPart[1];
     hsize_t count;
 
-    TESTING("packet table compression");
+    HL_TESTING2("packet table compression");
 
     /* Create a file. */
     if((fid1 = H5Fcreate(TEST_COMPRESS_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
@@ -739,7 +739,7 @@ static int test_rw_nonnative_dt(hid_t fid)
  int writeBuffer[5];
  int readBuffer[5];
 
- TESTING("reading/writing non-native packet table");
+ HL_TESTING2("reading/writing non-native packet table");
 
  /* Initialize buffers */
  for(x=0; x<5; x++) {
@@ -794,7 +794,7 @@ static int test_rw_nonnative_dt(hid_t fid)
  /* Close the packet table */
  if( (err = H5PTclose(ptable)) < 0)
         goto error;
- 
+
  PASSED();
  return SUCCEED;
 
@@ -819,7 +819,7 @@ static int test_error(hid_t fid)
   int id_open=0;
   particle_t readBuf[1];
 
-  TESTING("error conditions");
+  HL_TESTING2("error conditions");
 
   /* Create a HL table */
   if(create_hl_table(fid) < 0)
@@ -981,7 +981,7 @@ int main(void)
 
     /* Close the file */
     if (H5Fclose(fid) < 0)
-	status = 1;
+    status = 1;
 
     return status;
 }

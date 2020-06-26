@@ -30,11 +30,6 @@
 -esym(534, H5UC_decr)
 -esym(534, H5VM_array_fill)
 
-
-// Turn off warnings about "Expression-like macro not parenthesized" for
-// enumerated type increment & decrement macros:
--esym(773, H5_INC_ENUM, H5_DEC_ENUM)
-
 /* So far, the following files have been linted with these options:
         H5.c
         H5A.c
@@ -60,7 +55,7 @@
         H5FO.c
 
         H5Tcommit.c
-	H5Tcompound.c
+        H5Tcompound.c
 
         H5Tcset.c
         H5Tenum.c

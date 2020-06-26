@@ -76,12 +76,12 @@
 #ifdef H5O_DEBUG
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_assert
+ * Function:    H5O__assert
  *
- * Purpose:	Sanity check the information for an object header data
+ * Purpose:     Sanity check the information for an object header data
  *              structure.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED (Doesn't fail, just crashes)
  *
  * Programmer:	Quincey Koziol
  *		koziol@hdfgroup.org
@@ -90,7 +90,7 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_assert(const H5O_t *oh)
+H5O__assert(const H5O_t *oh)
 {
     H5O_mesg_t *curr_msg;               /* Pointer to current message to examine */
     H5O_mesg_t *tmp_msg;                /* Pointer to temporary message to examine */
@@ -101,7 +101,7 @@ H5O_assert(const H5O_t *oh)
     size_t hdr_size;                    /* Size of header's chunks */
     unsigned u, v;                      /* Local index variables */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Initialize the tracking variables */
     hdr_size = 0;
@@ -153,7 +153,7 @@ H5O_assert(const H5O_t *oh)
 
     /* Loop over all messages in object header */
     for(u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++) {
-        uint8_t *curr_hdr;      /* Start of current message header */
+        uint8_t H5_ATTR_NDEBUG_UNUSED *curr_hdr;      /* Start of current message header */
         size_t  curr_tot_size;  /* Total size of current message (including header) */
 
         curr_hdr = curr_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh);
@@ -164,7 +164,7 @@ H5O_assert(const H5O_t *oh)
             free_space += curr_tot_size;
         else if(H5O_CONT_ID == curr_msg->type->id) {
             H5O_cont_t *cont = (H5O_cont_t *)curr_msg->native;
-            hbool_t found_chunk = FALSE;        /* Found a chunk that matches */
+            hbool_t H5_ATTR_NDEBUG_UNUSED found_chunk = FALSE;        /* Found a chunk that matches */
 
             HDassert(cont);
 
@@ -223,7 +223,7 @@ H5O_assert(const H5O_t *oh)
     HDassert(hdr_size == (free_space + meta_space + mesg_space));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_assert() */
+} /* end H5O__assert() */
 #endif /* H5O_DEBUG */
 
 
@@ -239,12 +239,10 @@ H5O_assert(const H5O_t *oh)
  *		koziol@ncsa.uiuc.edu
  *		Feb 13 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_debug_id(unsigned type_id, H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream, int indent, int fwidth)
+H5O_debug_id(unsigned type_id, H5F_t *f, const void *mesg, FILE *stream, int indent, int fwidth)
 {
     const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
     herr_t      ret_value = FAIL;       /* Return value */
@@ -263,7 +261,7 @@ H5O_debug_id(unsigned type_id, H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *
     HDassert(fwidth >= 0);
 
     /* Call the debug method in the class */
-    if((ret_value = (type->debug)(f, dxpl_id, mesg, stream, indent, fwidth)) < 0)
+    if((ret_value = (type->debug)(f, mesg, stream, indent, fwidth)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "unable to debug message")
 
 done:
@@ -272,31 +270,27 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_debug_real
+ * Function:    H5O__debug_real
  *
- * Purpose:	Prints debugging info about an object header.
+ * Purpose:     Prints debugging info about an object header.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
  *		Aug  6 1997
  *
- * Modifications:
- *   Feb. 2009: Vailin Choi
- *	Fixed bug in the accumulation of chunk_total
- *	Used the appropriate flag when printing creation order tracked/indexed
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int fwidth)
+H5O__debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int fwidth)
 {
     size_t	mesg_total = 0, chunk_total = 0, gap_total = 0;
     unsigned	*sequence = NULL;
     unsigned	i;              /* Local index variable */
     herr_t	ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(f);
@@ -325,16 +319,16 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
     /* Extra information for later versions */
     if(oh->version > H5O_VERSION_1) {
         /* Display object's status flags */
-	HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+        HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		   "Attribute creation order tracked:",
 		   (oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED) ? "Yes" : "No");
-	HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+        HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		   "Attribute creation order indexed:",
 		   (oh->flags & H5O_HDR_ATTR_CRT_ORDER_INDEXED) ? "Yes" : "No");
-	HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+        HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		   "Attribute storage phase change values:",
 		   (oh->flags & H5O_HDR_ATTR_STORE_PHASE_CHANGE) ? "Non-default" : "Default");
-	HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+        HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		   "Timestamps:",
 		   (oh->flags & H5O_HDR_STORE_TIMES) ? "Enabled" : "Disabled");
         if(oh->flags & ~H5O_HDR_ALL_FLAGS)
@@ -387,14 +381,14 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
     for(i = 0, chunk_total = 0; i < oh->nchunks; i++) {
         size_t chunk_size;
 
-	HDfprintf(stream, "%*sChunk %d...\n", indent, "", i);
+        HDfprintf(stream, "%*sChunk %d...\n", indent, "", i);
 
-	HDfprintf(stream, "%*s%-*s %a\n", indent + 3, "", MAX(0, fwidth - 3),
+        HDfprintf(stream, "%*s%-*s %a\n", indent + 3, "", MAX(0, fwidth - 3),
 		  "Address:",
                   oh->chunk[i].addr);
 
         /* Decrement chunk 0's size by the object header prefix size */
-	if(0 == i) {
+        if(0 == i) {
             if(H5F_addr_ne(oh->chunk[i].addr, addr))
                 HDfprintf(stream, "*** WRONG ADDRESS FOR CHUNK #0!\n");
             chunk_size = oh->chunk[i].size - (size_t)H5O_SIZEOF_HDR(oh);
@@ -403,54 +397,53 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
             chunk_size = oh->chunk[i].size;
 
         /* Accumulate chunk's size to total */
-	chunk_total += chunk_size;
-	gap_total += oh->chunk[i].gap;
+        chunk_total += chunk_size;
+        gap_total += oh->chunk[i].gap;
 
-	HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", MAX(0, fwidth - 3),
+        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", MAX(0, fwidth - 3),
 		  "Size in bytes:",
 		  chunk_size);
 
-	HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", MAX(0, fwidth - 3),
+        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", MAX(0, fwidth - 3),
 		  "Gap:",
                   oh->chunk[i].gap);
     } /* end for */
 
     /* debug each message */
     if(NULL == (sequence = (unsigned *)H5MM_calloc(NELMTS(H5O_msg_class_g) * sizeof(unsigned))))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     for(i = 0, mesg_total = 0; i < oh->nmesgs; i++) {
         const H5O_msg_class_t  *debug_type;              /* Type of message to use for callbacks */
         unsigned chunkno;                       /* Chunk for message */
 
         /* Accumulate message's size to total */
-	mesg_total += (size_t)H5O_SIZEOF_MSGHDR_OH(oh) + oh->mesg[i].raw_size;
+        mesg_total += (size_t)H5O_SIZEOF_MSGHDR_OH(oh) + oh->mesg[i].raw_size;
 
-	/* For version 2 object header, add size of "OCHK" for continuation chunk */
-	if (oh->mesg[i].type->id == H5O_CONT_ID)
-	    mesg_total += H5O_SIZEOF_CHKHDR_OH(oh);
+        /* For version 2 object header, add size of "OCHK" for continuation chunk */
+        if(oh->mesg[i].type->id == H5O_CONT_ID)
+            mesg_total += H5O_SIZEOF_CHKHDR_OH(oh);
 
-	HDfprintf(stream, "%*sMessage %d...\n", indent, "", i);
+        HDfprintf(stream, "%*sMessage %d...\n", indent, "", i);
 
-	/* check for bad message id */
-	if(oh->mesg[i].type->id >= (int)NELMTS(H5O_msg_class_g)) {
-	    HDfprintf(stream, "*** BAD MESSAGE ID 0x%04x\n",
-		      oh->mesg[i].type->id);
-	    continue;
-	} /* end if */
+        /* check for bad message id */
+        if(oh->mesg[i].type->id >= (int)NELMTS(H5O_msg_class_g)) {
+            HDfprintf(stream, "*** BAD MESSAGE ID 0x%04x\n", oh->mesg[i].type->id);
+            continue;
+        } /* end if */
 
-	/* message name and size */
-	HDfprintf(stream, "%*s%-*s 0x%04x `%s' (%d)\n",
+        /* message name and size */
+        HDfprintf(stream, "%*s%-*s 0x%04x `%s' (%d)\n",
 		  indent + 3, "", MAX(0, fwidth - 3),
 		  "Message ID (sequence number):",
 		  (unsigned) (oh->mesg[i].type->id),
 		  oh->mesg[i].type->name,
 		  sequence[oh->mesg[i].type->id]++);
-	HDfprintf(stream, "%*s%-*s %t\n", indent + 3, "", MAX (0, fwidth - 3),
+        HDfprintf(stream, "%*s%-*s %t\n", indent + 3, "", MAX (0, fwidth - 3),
 		   "Dirty:",
 		   oh->mesg[i].dirty);
         HDfprintf(stream, "%*s%-*s ", indent + 3, "", MAX (0, fwidth - 3),
                    "Message flags:");
-	if(oh->mesg[i].flags) {
+        if(oh->mesg[i].flags) {
             hbool_t flag_printed = FALSE;
 
             /* Sanity check that all flags in format are covered below */
@@ -499,39 +492,40 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
         } /* end if */
         else
             HDfprintf(stream, "<none>\n");
-	HDfprintf(stream, "%*s%-*s %u\n", indent + 3, "", MAX(0, fwidth - 3),
+
+        HDfprintf(stream, "%*s%-*s %u\n", indent + 3, "", MAX(0, fwidth - 3),
 		  "Chunk number:",
 		  oh->mesg[i].chunkno);
-	chunkno = oh->mesg[i].chunkno;
-	if(chunkno >= oh->nchunks)
-	    HDfprintf(stream, "*** BAD CHUNK NUMBER\n");
-	HDfprintf(stream, "%*s%-*s (%Zu, %Zu) bytes\n", indent + 3, "", MAX(0, fwidth - 3),
+        chunkno = oh->mesg[i].chunkno;
+        if(chunkno >= oh->nchunks)
+            HDfprintf(stream, "*** BAD CHUNK NUMBER\n");
+        HDfprintf(stream, "%*s%-*s (%Zu, %Zu) bytes\n", indent + 3, "", MAX(0, fwidth - 3),
 		  "Raw message data (offset, size) in chunk:",
 		  (size_t)(oh->mesg[i].raw - oh->chunk[chunkno].image),
 		  oh->mesg[i].raw_size);
 
-	/* check the size */
-	if((oh->mesg[i].raw + oh->mesg[i].raw_size >
+        /* check the size */
+        if((oh->mesg[i].raw + oh->mesg[i].raw_size >
                  oh->chunk[chunkno].image + oh->chunk[chunkno].size) ||
                 (oh->mesg[i].raw < oh->chunk[chunkno].image))
-	    HDfprintf(stream, "*** BAD MESSAGE RAW ADDRESS\n");
+            HDfprintf(stream, "*** BAD MESSAGE RAW ADDRESS\n");
 
-	/* decode the message */
-	debug_type = oh->mesg[i].type;
-	if(NULL == oh->mesg[i].native && debug_type->decode)
-            H5O_LOAD_NATIVE(f, dxpl_id, H5O_DECODEIO_NOCHANGE, oh, &oh->mesg[i], FAIL)
+        /* decode the message */
+        debug_type = oh->mesg[i].type;
+        if(NULL == oh->mesg[i].native && debug_type->decode)
+            H5O_LOAD_NATIVE(f, H5O_DECODEIO_NOCHANGE, oh, &oh->mesg[i], FAIL)
 
-	/* print the message */
-	HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
+        /* print the message */
+        HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
 		  "Message Information:");
-	if(debug_type->debug && oh->mesg[i].native != NULL)
-	    (debug_type->debug)(f, dxpl_id, oh->mesg[i].native, stream, indent + 6, MAX(0, fwidth - 6));
-	else
-	    HDfprintf(stream, "%*s<No info for this message>\n", indent + 6, "");
+        if(debug_type->debug && oh->mesg[i].native != NULL)
+            (debug_type->debug)(f, oh->mesg[i].native, stream, indent + 6, MAX(0, fwidth - 6));
+        else
+            HDfprintf(stream, "%*s<No info for this message>\n", indent + 6, "");
     } /* end for */
 
     if((mesg_total + gap_total) != chunk_total)
-	HDfprintf(stream, "*** TOTAL SIZE DOES NOT MATCH ALLOCATED SIZE!\n");
+        HDfprintf(stream, "*** TOTAL SIZE DOES NOT MATCH ALLOCATED SIZE!\n");
 
 done:
     /* Release resources */
@@ -539,7 +533,7 @@ done:
         sequence = (unsigned *)H5MM_xfree(sequence);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_debug_real() */
+} /* end H5O__debug_real() */
 
 
 /*-------------------------------------------------------------------------
@@ -556,7 +550,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth)
+H5O_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
 {
     H5O_t	*oh = NULL;             /* Object header to display */
     H5O_loc_t   loc;                    /* Object location for object to delete */
@@ -576,15 +570,16 @@ H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
     loc.addr = addr;
     loc.holding_file = FALSE;
 
-    if(NULL == (oh = H5O_protect(&loc, dxpl_id, H5AC__READ_ONLY_FLAG, FALSE)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
+    if(NULL == (oh = H5O_protect(&loc, H5AC__READ_ONLY_FLAG, FALSE)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* debug */
-    H5O_debug_real(f, dxpl_id, oh, addr, stream, indent, fwidth);
+    if(H5O__debug_real(f, oh, addr, stream, indent, fwidth) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_SYSTEM, FAIL, "debug dump call failed")
 
 done:
-    if(oh && H5O_unprotect(&loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
-	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+    if(oh && H5O_unprotect(&loc, oh, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_debug() */
