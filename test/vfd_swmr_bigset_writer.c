@@ -76,8 +76,8 @@ typedef struct {
         , .two_dee = false                                              \
         , .wait_for_signal = true                                       \
         , .use_vfd_swmr = true                                          \
-        , .one_dee_max_dims = {H5S_UNLIMITED, COLS}                     \
-        , .chunk_dims = {ROWS, COLS}                                 \
+        , .one_dee_max_dims = {ROWS, H5S_UNLIMITED}                     \
+        , .chunk_dims = {ROWS, COLS}                                    \
 	, .update_interval = (struct timespec){				\
 		  .tv_sec = 0						\
 		, .tv_nsec = 1000000000UL / 30 /* 1/30 second */}}
@@ -159,7 +159,7 @@ state_init(state_t *s, int argc, char **argv)
     esnprintf(tfile, sizeof(tfile), "%s", argv[0]);
     esnprintf(s->progname, sizeof(s->progname), "%s", basename(tfile));
 
-    while ((ch = getopt(argc, argv, "SWa:c:d:n:r:s:qu:")) != -1) {
+    while ((ch = getopt(argc, argv, "SWa:c:d:n:qr:s:u:")) != -1) {
         switch (ch) {
         case 'S':
             s->use_vfd_swmr = false;
@@ -244,8 +244,8 @@ state_init(state_t *s, int argc, char **argv)
 
     s->chunk_dims[0] = s->rows;
     s->chunk_dims[1] = s->cols;
-    s->one_dee_max_dims[0] = H5S_UNLIMITED;
-    s->one_dee_max_dims[1] = s->cols;
+    s->one_dee_max_dims[0] = s->rows;
+    s->one_dee_max_dims[1] = H5S_UNLIMITED;
 
     /* space for attributes */
     if ((s->one_by_one_sid = H5Screate_simple(1, &dims, &dims)) < 0)
@@ -339,10 +339,9 @@ open_extensible_dset(state_t *s, unsigned int which)
     hid_t ds, filespace, ty;
 
     assert(which < s->ndatasets);
+    assert(s->dataset[which] == badhid);
 
     esnprintf(dname, sizeof(dname), "/dataset-%d", which);
-
-    assert(s->dataset[which] == badhid);
 
     ds = H5Dopen(s->file, dname, s->dapl);
 
@@ -378,7 +377,7 @@ open_extensible_dset(state_t *s, unsigned int which)
         }
     } else if (maxdims[0] != s->one_dee_max_dims[0] ||
                maxdims[1] != s->one_dee_max_dims[1] ||
-               dims[1] != s->chunk_dims[1]) {
+               dims[0] != s->chunk_dims[0]) {
         errx(EXIT_FAILURE, "Unexpected maximum dimensions %"
             PRIuHSIZE " x %" PRIuHSIZE " or columns %" PRIuHSIZE,
             maxdims[0], maxdims[1], dims[1]);
@@ -519,7 +518,7 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat,
     hid_t ds, filespace;
     hsize_t size[RANK];
     base_t base, last;
-    unsigned int nrows, last_step, step;
+    unsigned int ncols, last_step, step;
 
     assert(which < s->ndatasets);
 
@@ -536,26 +535,27 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat,
     if (H5Sget_simple_extent_dims(filespace, size, NULL) < 0)
         errx(EXIT_FAILURE, "H5Sget_simple_extent_dims failed");
 
-    nrows = (unsigned)(size[0] / s->chunk_dims[0]);
-    if (nrows < hang_back)
+    ncols = (unsigned)(size[1] / s->chunk_dims[1]);
+    if (ncols < hang_back)
         goto out;
 
-    last_step = nrows - hang_back;
+    last_step = ncols - hang_back;
 
     for (step = *stepp; step <= last_step; step++) {
         const unsigned ofs = step % 2;
 
         dbgf(1, "%s: which %u step %u\n", __func__, which, step);
 
-        size[0] = s->chunk_dims[0] * (1 + step);
-        last.row = s->chunk_dims[0] * step + ofs;
-
         if (s->two_dee) {
+            size[0] = s->chunk_dims[0] * (1 + step);
             size[1] = s->chunk_dims[1] * (1 + step);
+            last.row = s->chunk_dims[0] * step + ofs;
             last.col = s->chunk_dims[1] * step + ofs;
         } else {
-            size[1] = s->chunk_dims[1];
-            last.col = 0;
+            size[0] = s->chunk_dims[0];
+            size[1] = s->chunk_dims[1] * (1 + step);
+            last.row = 0;
+            last.col = s->chunk_dims[1] * step + ofs;
         }
 
         dbgf(1, "new size %" PRIuHSIZE ", %" PRIuHSIZE "\n", size[0], size[1]);
@@ -630,15 +630,16 @@ write_extensible_dset(state_t *s, unsigned int which, unsigned int step,
     if (s->asteps != 0 && step % s->asteps == 0)
         add_dset_attribute(ds, s->one_by_one_sid, which, step);
 
-    size[0] = s->chunk_dims[0] * (1 + step);
-    last.row = s->chunk_dims[0] * step;
-
     if (s->two_dee) {
+        size[0] = s->chunk_dims[0] * (1 + step);
         size[1] = s->chunk_dims[1] * (1 + step);
+        last.row = s->chunk_dims[0] * step;
         last.col = s->chunk_dims[1] * step;
     } else {
-        size[1] = s->chunk_dims[1];
-        last.col = 0;
+        size[0] = s->chunk_dims[0];
+        size[1] = s->chunk_dims[1] * (1 + step);
+        last.row = 0;
+        last.col = s->chunk_dims[1] * step;
     }
 
     dbgf(1, "new size %" PRIuHSIZE ", %" PRIuHSIZE "\n", size[0], size[1]);
