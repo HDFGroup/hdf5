@@ -47,7 +47,7 @@ typedef struct _mat {
 
 typedef struct {
 	hid_t *dataset;
-        hid_t dapl, memspace, file, one_by_one_sid;
+        hid_t dapl, dcpl, filespace, memspace, file, one_by_one_sid;
         unsigned ndatasets;
 	char filename[PATH_MAX];
 	char progname[PATH_MAX];
@@ -65,7 +65,9 @@ typedef struct {
 #define ALL_HID_INITIALIZER (state_t){					\
 	  .memspace = H5I_INVALID_HID					\
 	, .dapl = H5I_INVALID_HID					\
+	, .dcpl = H5I_INVALID_HID					\
 	, .file = H5I_INVALID_HID					\
+	, .filespace = H5I_INVALID_HID					\
 	, .one_by_one_sid = H5I_INVALID_HID				\
 	, .rows = ROWS						        \
 	, .cols = COLS						        \
@@ -247,6 +249,22 @@ state_init(state_t *s, int argc, char **argv)
     s->one_dee_max_dims[0] = s->rows;
     s->one_dee_max_dims[1] = H5S_UNLIMITED;
 
+    if ((s->dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
+        errx(EXIT_FAILURE, "%s.%d: H5Pcreate failed",
+            __func__, __LINE__);
+    }
+
+    if (H5Pset_chunk(s->dcpl, RANK, s->chunk_dims) < 0)
+        errx(EXIT_FAILURE, "H5Pset_chunk failed");
+
+    s->filespace = H5Screate_simple(NELMTS(s->chunk_dims), s->chunk_dims,
+        s->two_dee ? two_dee_max_dims : s->one_dee_max_dims);
+
+    if (s->filespace < 0) {
+        errx(EXIT_FAILURE, "%s.%d: H5Screate_simple failed",
+                __func__, __LINE__);
+    }
+
     /* space for attributes */
     if ((s->one_by_one_sid = H5Screate_simple(1, &dims, &dims)) < 0)
         errx(EXIT_FAILURE, "H5Screate_simple failed");
@@ -269,43 +287,42 @@ state_init(state_t *s, int argc, char **argv)
 }
 
 static void
+state_destroy(state_t *s)
+{
+    if (H5Pclose(s->dcpl) < 0)
+        errx(EXIT_FAILURE, "H5Pclose(dcpl)");
+
+    s->dcpl = badhid;
+
+    if (H5Sclose(s->filespace) < 0)
+        errx(EXIT_FAILURE, "H5Sclose failed");
+
+    s->filespace = badhid;
+
+    if (H5Pclose(s->dapl) < 0)
+        errx(EXIT_FAILURE, "H5Pclose(fapl)");
+
+    s->dapl = badhid;
+
+    if (H5Fclose(s->file) < 0)
+        errx(EXIT_FAILURE, "H5Fclose");
+
+    s->file = badhid;
+}
+
+static void
 create_extensible_dset(state_t *s, unsigned int which)
 {
     char dname[sizeof("/dataset-9999999999")];
-    hid_t dcpl, ds, filespace;
+    hid_t ds;
 
     assert(which < s->ndatasets);
+    assert(s->dataset[which] == badhid);
 
     esnprintf(dname, sizeof(dname), "/dataset-%d", which);
 
-    assert(s->dataset[which] == badhid);
-
-    filespace = H5Screate_simple(NELMTS(s->chunk_dims), s->chunk_dims,
-        s->two_dee ? two_dee_max_dims : s->one_dee_max_dims);
-
-    if (filespace < 0) {
-        errx(EXIT_FAILURE, "%s.%d: H5Screate_simple failed",
-                __func__, __LINE__);
-    }
-
-    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
-        errx(EXIT_FAILURE, "%s.%d: H5Pcreate failed",
-            __func__, __LINE__);
-    }
-
-    if (H5Pset_chunk(dcpl, RANK, s->chunk_dims) < 0)
-        errx(EXIT_FAILURE, "H5Pset_chunk failed");
-
-    ds = H5Dcreate2(s->file, dname, H5T_STD_U32BE, filespace,
-        H5P_DEFAULT, dcpl, s->dapl);
-
-    if (H5Pclose(dcpl) < 0)
-        errx(EXIT_FAILURE, "H5Pclose(dcpl)");
-
-    if (H5Sclose(filespace) < 0)
-        errx(EXIT_FAILURE, "H5Sclose failed");
-
-    filespace = badhid;
+    ds = H5Dcreate2(s->file, dname, H5T_STD_U32BE, s->filespace,
+        H5P_DEFAULT, s->dcpl, s->dapl);
 
     if (ds < 0)
         errx(EXIT_FAILURE, "H5Dcreate(, \"%s\", ) failed", dname);
@@ -771,17 +788,13 @@ main(int argc, char **argv)
 
     restore_signals(&oldsigs);
 
-    if (H5Pclose(s.dapl) < 0)
-        errx(EXIT_FAILURE, "H5Pclose(fapl)");
-
     if (H5Pclose(fapl) < 0)
         errx(EXIT_FAILURE, "H5Pclose(fapl)");
 
     if (H5Pclose(fcpl) < 0)
         errx(EXIT_FAILURE, "H5Pclose(fcpl)");
 
-    if (H5Fclose(s.file) < 0)
-        errx(EXIT_FAILURE, "H5Fclose");
+    state_destroy(&s);
 
     free(mat);
 
