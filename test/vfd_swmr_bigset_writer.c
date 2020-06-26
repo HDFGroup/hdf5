@@ -317,10 +317,9 @@ create_extensible_dset(state_t *s, unsigned int which)
     hid_t ds;
 
     assert(which < s->ndatasets);
+    assert(s->dataset[which] == badhid);
 
     esnprintf(dname, sizeof(dname), "/dataset-%d", which);
-
-    assert(s->dataset[which] == badhid);
 
     ds = H5Dcreate2(s->file, dname, H5T_STD_U32BE, s->filespace,
         H5P_DEFAULT, s->dcpl, s->dapl);
