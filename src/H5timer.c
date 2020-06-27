@@ -215,6 +215,47 @@ H5_now_usec(void)
 } /* end H5_now_usec() */
 
 
+/*--------------------------------------------------------------------------
+ * Function:    H5_get_time
+ *
+ * Purpose:     Get the current time, as the time of seconds after the UNIX epoch
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              October 05, 2016
+ *--------------------------------------------------------------------------
+ */
+double
+H5_get_time(void)
+{
+    double ret_value = (double)0.0f;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+#if defined(H5_HAVE_CLOCK_GETTIME)
+    {
+        struct timespec ts;
+
+        HDclock_gettime(CLOCK_MONOTONIC, &ts);
+        ret_value = (double)ts.tv_sec + ((double)ts.tv_nsec / (double)1000000000.0f);
+    }
+#elif defined(H5_HAVE_GETTIMEOFDAY)
+    {
+        struct timeval now_tv;
+
+        HDgettimeofday(&now_tv, NULL);
+        ret_value = (double)now_tv.tv_sec + ((double)now_tv.tv_usec / (double)1000000.0f);
+    }
+#else /* H5_HAVE_GETTIMEOFDAY */
+    ret_value = (double)HDtime(NULL);
+#endif /* H5_HAVE_GETTIMEOFDAY */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5_get_time() */
+
+
+
 /*-------------------------------------------------------------------------
  * Function:    H5__timer_get_timevals
  *
