@@ -419,7 +419,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 
                 case 'T':       /* Elapsed time, in seconds */
                     {
-                        double seconds = va_arg(ap, double);
+                        double seconds = HDva_arg(ap, double);
                         char *time_string = H5_timer_get_time_string(seconds);
 
                         if(time_string) {
