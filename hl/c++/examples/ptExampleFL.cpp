@@ -74,7 +74,7 @@ int main(void)
     if(err < 0)
         fprintf(stderr, "Error getting packet count.");
 
-    printf("Number of packets in packet table after five appends: %d\n", count);
+    printf("Number of packets in packet table after five appends: %llu\n", count);
 
     /* Initialize packet table's "current record" */
     ptable.ResetIndex();
