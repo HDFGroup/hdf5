@@ -24,7 +24,7 @@
 #include "H5LTparse.h"
 
 /* Turn off suggest const attribute warning in gcc */
-#if __GNUC__ >= 4 && __GNUC_MINOR__ >=2 
+#if (__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 2))
 #if !defined(__clang__)
 #pragma GCC diagnostic ignored "-Wsuggest-attribute=const"
 #endif

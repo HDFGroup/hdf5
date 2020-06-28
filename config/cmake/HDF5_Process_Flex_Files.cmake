@@ -35,7 +35,7 @@ if (FILE_PARSE)
   # will simply ignore them, but we want to avoid those warnings.
     file (READ ${FILE_PARSE}.c TEST_STREAM)
     file (WRITE ${FILE_PARSE}.c "
-#if __GNUC__ >= 4 && __GNUC_MINOR__ >=2\n
+#if (__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 2))\n
 #pragma GCC diagnostic ignored \"-Wconversion\"\n
 #pragma GCC diagnostic ignored \"-Wimplicit-function-declaration\"\n
 #pragma GCC diagnostic ignored \"-Wlarger-than=\"\n
@@ -69,7 +69,7 @@ if (FILE_ANALYZE)
   # will simply ignore them, but we want to avoid those warnings.
     file (READ ${GEN_DIR}/${FILE_ANALYZE} TEST_STREAM)
     file (WRITE ${FILE_ANALYZE} "
-#if __GNUC__ >= 4 && __GNUC_MINOR__ >=2\n
+#if (__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 2))\n
 #pragma GCC diagnostic ignored \"-Wconversion\"\n
 #pragma GCC diagnostic ignored \"-Wimplicit-function-declaration\"\n
 #pragma GCC diagnostic ignored \"-Wlarger-than=\"\n
