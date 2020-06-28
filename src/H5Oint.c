@@ -43,6 +43,7 @@
 #endif /* H5O_ENABLE_BOGUS */
 #include "H5Opkg.h"             /* Object headers                           */
 #include "H5SMprivate.h"        /* Shared object header messages            */
+#include "H5CXprivate.h"
 
 
 /****************/

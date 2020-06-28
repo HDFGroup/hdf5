@@ -33,6 +33,7 @@
 #include "H5Rpkg.h"             /* References                               */
 #include "H5Sprivate.h"         /* Dataspaces                               */
 #include "H5Tprivate.h"         /* Datatypes                                */
+#include "H5CXprivate.h"
 
 
 /****************/
