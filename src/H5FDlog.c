@@ -1146,9 +1146,11 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hadd
     size_t              orig_size = size; /* Save the original size for later */
     haddr_t             orig_addr = addr;
     H5_timer_t          read_timer;             /* Timer for read operation */
-    H5_timer_t          seek_timer;             /* Timer for seek operation */
     H5_timevals_t       read_times;             /* Elapsed time for read operation */
+#ifndef H5_HAVE_PREADWRITE
+    H5_timer_t          seek_timer;             /* Timer for seek operation */
     H5_timevals_t       seek_times;             /* Elapsed time for seek operation */
+#endif /* H5_HAVE_PREADWRITE */
     HDoff_t             offset = (HDoff_t)addr;
     herr_t              ret_value = SUCCEED;    /* Return value */
 
@@ -1348,9 +1350,11 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
     size_t              orig_size = size; /* Save the original size for later */
     haddr_t             orig_addr = addr;
     H5_timer_t          write_timer;            /* Timer for write operation */
-    H5_timer_t          seek_timer;             /* Timer for seek operation */
     H5_timevals_t       write_times;            /* Elapsed time for write operation */
+#ifndef H5_HAVE_PREADWRITE
+    H5_timer_t          seek_timer;             /* Timer for seek operation */
     H5_timevals_t       seek_times;             /* Elapsed time for seek operation */
+#endif /* H5_HAVE_PREADWRITE */
     HDoff_t             offset = (HDoff_t)addr;
     herr_t              ret_value = SUCCEED;    /* Return value */
 

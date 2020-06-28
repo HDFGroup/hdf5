@@ -40,7 +40,7 @@
  * Most time strings should be < 20 or so characters (max!) so this should be a
  * safe size.  Dynamically allocating the correct size would be painful.
  */
-#define H5TIMER_TIME_STRING_LEN 256
+#define H5TIMER_TIME_STRING_LEN 1536
 
 /* Conversion factors */
 #define H5_SEC_PER_DAY  (double)(24.0F * 60.0F * 60.0F)
