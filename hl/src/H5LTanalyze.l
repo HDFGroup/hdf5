@@ -25,7 +25,9 @@
 
 /* Turn off suggest const attribute warning in gcc */
 #if __GNUC__ >= 4 && __GNUC_MINOR__ >=2 
+#if !defined(__clang__)
 #pragma GCC diagnostic ignored "-Wsuggest-attribute=const"
+#endif
 #endif 
 
 int my_yyinput(char *, int);

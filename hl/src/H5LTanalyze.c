@@ -1,7 +1,9 @@
 #if __GNUC__ >= 4 && __GNUC_MINOR__ >=2                           
 #pragma GCC diagnostic ignored "-Wconversion"                     
 #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"  
+#if !defined(__clang__)
 #pragma GCC diagnostic ignored "-Wlarger-than="                   
+#endif
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"             
 #pragma GCC diagnostic ignored "-Wnested-externs"                 
 #pragma GCC diagnostic ignored "-Wold-style-definition"           
@@ -10,7 +12,9 @@
 #pragma GCC diagnostic ignored "-Wsign-conversion"                
 #pragma GCC diagnostic ignored "-Wstrict-overflow"                
 #pragma GCC diagnostic ignored "-Wstrict-prototypes"              
+#if !defined(__clang__)
 #pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"         
+#endif
 #pragma GCC diagnostic ignored "-Wswitch-default"                 
 #pragma GCC diagnostic ignored "-Wunused-function"                
 #pragma GCC diagnostic ignored "-Wunused-macros"                  
@@ -901,7 +905,9 @@ char *H5LTyytext;
 
 /* Turn off suggest const attribute warning in gcc */
 #if __GNUC__ >= 4 && __GNUC_MINOR__ >=2 
+#if !defined(__clang__)
 #pragma GCC diagnostic ignored "-Wsuggest-attribute=const"
+#endif
 #endif 
 
 int my_yyinput(char *, int);
