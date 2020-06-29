@@ -535,7 +535,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     hssize_t hssize_ret;    /* hssize_t return value */
     htri_t tri_ret;         /* htri_t return value */
     herr_t ret;             /* Generic return value */
-    haddr_t addr = HADDR_UNDEF;     /* test for undefined reference */
+	haddr_t addr[2] = {HADDR_UNDEF, 0};     /* test for undefined reference */
     hid_t dset_NA;                  /* Dataset id for undefined reference */
     hid_t space_NA;                 /* Dataspace id for undefined reference */
     hsize_t dims_NA[1] = {1};       /* Dims array for undefined reference */
