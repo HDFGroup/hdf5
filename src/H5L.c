@@ -264,7 +264,7 @@ H5L_term_package(void)
  *              are interpreted relative to SRC_LOC_ID and DST_LOC_ID,
  *              which are either file IDs or group ID.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	James Laird
  *              Wednesday, March 29, 2006
@@ -308,13 +308,13 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
             ((src_loc_id != H5L_SAME_LOC) ? src_loc_id : dst_loc_id), TRUE) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
 
-    /* Set location paramter for source object */
+    /* Set location parameter for source object */
     loc_params1.type                            = H5VL_OBJECT_BY_NAME;
     loc_params1.loc_data.loc_by_name.name       = src_name;
     loc_params1.loc_data.loc_by_name.lapl_id    = lapl_id;
     loc_params1.obj_type                        = H5I_get_type(src_loc_id);
 
-    /* Set location paramter for destination object */
+    /* Set location parameter for destination object */
     loc_params2.type                            = H5VL_OBJECT_BY_NAME;
     loc_params2.loc_data.loc_by_name.name       = dst_name;
     loc_params2.loc_data.loc_by_name.lapl_id    = lapl_id;
@@ -354,7 +354,7 @@ done:
  *              time and target.  The new link can have a different name
  *              and be in a different location than the original.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	James Laird
  *              Wednesday, March 29, 2006
@@ -398,13 +398,13 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
             ((src_loc_id != H5L_SAME_LOC) ? src_loc_id : dst_loc_id), TRUE) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
 
-    /* Set location paramter for source object */
+    /* Set location parameter for source object */
     loc_params1.type                            = H5VL_OBJECT_BY_NAME;
     loc_params1.loc_data.loc_by_name.name       = src_name;
     loc_params1.loc_data.loc_by_name.lapl_id    = lapl_id;
     loc_params1.obj_type                        = H5I_get_type(src_loc_id);
 
-    /* Set location paramter for destination object */
+    /* Set location parameter for destination object */
     loc_params2.type                            = H5VL_OBJECT_BY_NAME;
     loc_params2.loc_data.loc_by_name.name       = dst_name;
     loc_params2.loc_data.loc_by_name.lapl_id    = lapl_id;
@@ -448,7 +448,7 @@ done:
  *              LINK_NAME is `./x/y/bar' and a request is made for `./x/y/bar'
  *              then the actual object looked up is `./x/y/./foo'.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Monday, April  6, 1998
@@ -519,7 +519,7 @@ done:
  *              NEW_NAME are interpreted relative to CUR_LOC_ID and
  *              NEW_LOC_ID, which are either file IDs or group IDs.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Monday, April  6, 1998
@@ -621,7 +621,7 @@ done:
  *              The link class of the new link must already be registered
  *              with the library.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	James Laird
  *              Tuesday, December 13, 2005
@@ -687,7 +687,7 @@ done:
  *              object is open, then the reclamation of the file space is
  *              delayed until all handles to the object are closed).
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Monday, April  6, 1998
@@ -966,11 +966,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lget_info2
+ * Function:    H5Lget_info2
  *
- * Purpose:	    Gets metadata for a link.
+ * Purpose:     Gets metadata for a link.
  *
- * Return:	    Success:    Non-negative with information in LINFO
+ * Return:      Success:    Non-negative with information in LINFO
  *              Failure:    Negative
  *
  * Programmer:	James Laird
@@ -1016,13 +1016,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lget_info_by_idx2
+ * Function:    H5Lget_info_by_idx2
  *
- * Purpose:	    Gets metadata for a link, according to the order within an
+ * Purpose:     Gets metadata for a link, according to the order within an
  *              index.
  *
- * Return:	    Success:    Non-negative with information in LINFO
- * 	            Failure:    Negative
+ * Return:      Success:    Non-negative with information in LINFO
+ *              Failure:    Negative
  *
  * Programmer:	Quincey Koziol
  *              Monday, November  6, 2006
@@ -1221,7 +1221,7 @@ done:
  * Return:      Success:    Non-negative length of name, with information
  *                          in NAME buffer
  *
- *              Failure:	-1
+ *              Failure:    -1
  *
  * Programmer:	Quincey Koziol
  *              Saturday, November 11, 2006
@@ -3178,11 +3178,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_get_info
+ * Function:    H5L_get_info
  *
- * Purpose:	    Returns metadata about a link.
+ * Purpose:     Returns metadata about a link.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	James Laird
  *              Monday, April 17 2006

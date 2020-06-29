@@ -1137,10 +1137,11 @@ HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUN
     /* If it's metadata, check if the space to free intersects with the file's
      * metadata accumulator
      */
-    if(H5FD_MEM_DRAW != alloc_type)
+    if(H5FD_MEM_DRAW != alloc_type) {
         /* Check if the space to free intersects with the file's metadata accumulator */
         if(H5F__accum_free(f->shared, alloc_type, addr, size) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't check free space intersection w/metadata accumulator")
+    } /* end if */
 
     /* Check if the free space manager for the file has been initialized */
     if(!f->shared->fs_man[fs_type]) {

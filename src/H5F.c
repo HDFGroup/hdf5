@@ -280,7 +280,7 @@ H5Fget_create_plist(hid_t file_id)
 
     /* Retrieve the file creation property list */
     if(H5VL_file_get(vol_obj, H5VL_FILE_GET_FCPL, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, H5I_INVALID_HID, "unable to retrieve file creation properties")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, H5I_INVALID_HID, "unable to retrieve file creation properties")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -320,7 +320,7 @@ H5Fget_access_plist(hid_t file_id)
 
     /* Retrieve the file's access property list */
     if(H5VL_file_get(vol_obj, H5VL_FILE_GET_FAPL, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get file access property list")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't get file access property list")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -584,8 +584,8 @@ done:
  *
  * Purpose:     Check if the file can be opened with the given fapl.
  *
- * Return:      Succeed:    TRUE/FALSE
- *              Failure:    FAIL (includes file does not exist)
+ * Return:      Success:    TRUE/FALSE
+ *              Failure:    -1 (includes file does not exist)
  *
  *-------------------------------------------------------------------------
  */
@@ -820,8 +820,7 @@ done:
  *              not remove them from the cache.  The OBJECT_ID can be a file,
  *              dataset, group, attribute, or named data type.
  *
- * Return:      SUCCEED/FAIL
- *
+ * Return:      Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -863,8 +862,8 @@ done:
  *              closed until those objects are closed; however, all data for
  *              the file and the open objects is flushed.
  *
- * Return:      SUCCEED/FAIL
- *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -879,11 +878,9 @@ H5Fclose(hid_t file_id)
     if(H5I_FILE != H5I_get_type(file_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID")
 
-    /* Decrement reference count on atom.  When it reaches zero the file will
-     * be closed.
-     */
+    /* Close the file */
     if(H5I_dec_app_ref(file_id) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "closing file ID failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1011,8 +1008,7 @@ done:
  * Purpose:     Public API to retrieve the file's 'intent' flags passed
  *              during H5Fopen()
  *
- * Return:      SUCCEED/FAIL
- *
+ * Return:      Non-negative on success/negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1117,8 +1113,8 @@ done:
  *              is called after an existing file is opened in order
  *              to learn the true size of the underlying file.
  *
- * Return:      SUCCEED/FAIL
- *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1622,14 +1618,14 @@ done:
  *              set up flush dependency/proxy even for file opened without
  *              SWMR to resolve issues with opened objects.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/negative on failure
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Fstart_swmr_write(hid_t file_id)
 {
-    H5VL_object_t   *vol_obj = NULL;                   /* File info */
+    H5VL_object_t   *vol_obj = NULL;                /* File info */
     herr_t          ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1658,8 +1654,7 @@ done:
  * Purpose:     Start metadata cache logging operations for a file.
  *                  - Logging must have been set up via the fapl.
  *
- * Return:      SUCCEED/FAIL
- *
+ * Return:      Non-negative on success/Negative on errors
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1691,8 +1686,7 @@ done:
  *                  - Does not close the log file.
  *                  - Logging must have been set up via the fapl.
  *
- * Return:      SUCCEED/FAIL
- *
+ * Return:      Non-negative on success/Negative on errors
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1724,8 +1718,7 @@ done:
  *              set up via the fapl. is_currently_logging determines if
  *              log messages are being recorded at this time.
  *
- * Return:      SUCCEED/FAIL
- *
+ * Return:      Non-negative on success/Negative on errors
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1759,8 +1752,7 @@ done:
  *              H5Fset_latest_format() starting release 1.10.2.
  *              See explanation for H5Fset_latest_format() in H5Fdeprec.c.
  *
- * Return:      SUCCEED/FAIL
- *
+ * Return:     Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1796,8 +1788,7 @@ done:
  *              downgrade persistent file space to non-persistent
  *              for 1.8 library.
  *
- * Return:      SUCCEED/FAIL
- *
+ * Return:      Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1831,8 +1822,7 @@ done:
  *
  * Purpose:     Resets statistics for the page buffer layer.
  *
- * Return:      SUCCEED/FAIL
- *
+ * Return:      Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1862,8 +1852,7 @@ done:
  *
  * Purpose:     Retrieves statistics for the page buffer layer.
  *
- * Return:      SUCCEED/FAIL
- *
+ * Return:      Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1901,8 +1890,7 @@ done:
  *              image_len:   --size of the on disk metadata cache image
  *                           --zero if no cache image
  *
- * Return:      SUCCEED/FAIL
- *
+ * Return:      Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1934,7 +1922,10 @@ done:
  *              allocated memory in the file.
  *              (See H5FDget_eoa() in H5FD.c)
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Success:    First byte after allocated memory.
+ *              Failure:    HADDR_UNDEF
+ *
+ *              Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1967,7 +1958,7 @@ done:
  *
  * Purpose:     Set the EOA for the file to the maximum of (EOA, EOF) + increment
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on errors
  *-------------------------------------------------------------------------
  */
 herr_t

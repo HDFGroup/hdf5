@@ -2490,7 +2490,7 @@ driver_is_splitter_compatible(hid_t fapl_id)
 {
     H5FD_splitter_vfd_config_t  vfd_config;
     hid_t split_fapl_id = H5I_INVALID_HID;
-    herr_t ret;
+    herr_t ret = SUCCEED;
     int ret_value = 0;
 
     split_fapl_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -2503,6 +2503,7 @@ driver_is_splitter_compatible(hid_t fapl_id)
     vfd_config.rw_fapl_id = H5P_DEFAULT;
     vfd_config.wo_fapl_id = fapl_id;
     HDstrncpy(vfd_config.wo_path, "nonesuch", H5FD_SPLITTER_PATH_MAX);
+    *vfd_config.log_file_path = '\0';
 
     H5E_BEGIN_TRY {
         ret = H5Pset_fapl_splitter(split_fapl_id, &vfd_config);
@@ -2879,6 +2880,7 @@ done:
 static int
 splitter_tentative_open_test(hid_t child_fapl_id)
 {
+    const char  filename_tmp[H5FD_SPLITTER_PATH_MAX + 1] = "splitter_tmp.h5";
     char        filename_rw[H5FD_SPLITTER_PATH_MAX + 1];
     H5FD_splitter_vfd_config_t  vfd_config;
     hid_t       fapl_id = H5I_INVALID_HID;
@@ -2925,7 +2927,16 @@ splitter_tentative_open_test(hid_t child_fapl_id)
         SPLITTER_TEST_FAULT("set FAPL not SPLITTER\n");
     }
 
-    /* H5Fopen() with RDWR access.
+    /* Create instance of file on disk.
+     * Will be copied verbatim as needed, to avoid issues where differences in
+     * the creation time would befoul comparisons.
+     */
+    if (splitter_create_single_file_at(filename_tmp, child_fapl_id, &data) < 0) {
+        SPLITTER_TEST_FAULT("can't write W/O file\n");
+    }
+
+    /*
+     * H5Fopen() with RDWR access.
      * Neither file exist already
      * Should fail.
      */
@@ -2943,13 +2954,14 @@ splitter_tentative_open_test(hid_t child_fapl_id)
         SPLITTER_TEST_FAULT("W/O file unexpectedly created\n");
     }
 
-    /* H5Fopen() with RDWR access.
-     * W/O file exists already.
+    /*
+     * H5Fopen() with RDWR access.
+     * Only W/O file present.
      * Should fail.
      */
 
-    if (splitter_create_single_file_at(vfd_config.wo_path, child_fapl_id, &data) < 0) {
-        SPLITTER_TEST_FAULT("can't write W/O file\n");
+    if (h5_duplicate_file_by_bytes(filename_tmp, vfd_config.wo_path) < 0) {
+        SPLITTER_TEST_FAULT("Can't create W/O file copy.\n");
     }
     H5E_BEGIN_TRY {
         file_id = H5Fopen(filename_rw, H5F_ACC_RDWR, fapl_id);
@@ -2968,13 +2980,14 @@ splitter_tentative_open_test(hid_t child_fapl_id)
         SPLITTER_TEST_FAULT("failed to remove W/O file\n");
     }
 
-    /* H5Fopen() with RDWR access.
-     * R/W file exists already.
+    /*
+     * H5Fopen() with RDWR access.
+     * Only R/W file present.
      * Should fail.
      */
 
-    if (splitter_create_single_file_at(filename_rw, child_fapl_id, &data) < 0) {
-        SPLITTER_TEST_FAULT("can't write R/W file\n");
+    if (h5_duplicate_file_by_bytes(filename_tmp, filename_rw) < 0) {
+        SPLITTER_TEST_FAULT("Can't create R/W file copy.\n");
     }
     H5E_BEGIN_TRY {
         file_id = H5Fopen(filename_rw, H5F_ACC_RDWR, fapl_id);
@@ -2989,12 +3002,13 @@ splitter_tentative_open_test(hid_t child_fapl_id)
         SPLITTER_TEST_FAULT("W/O file unexpectedly created\n");
     }
 
-    /* H5Fopen() with RDWR access.
-     * Both files already exist.
+    /*
+     * H5Fopen() with RDWR access.
+     * Both files present.
      */
 
-    if (splitter_create_single_file_at(vfd_config.wo_path, child_fapl_id, &data) < 0) {
-        SPLITTER_TEST_FAULT("can't write W/O file\n");
+    if (h5_duplicate_file_by_bytes(filename_tmp, vfd_config.wo_path) < 0) {
+        SPLITTER_TEST_FAULT("Can't create W/O file copy.\n");
     }
     file_id = H5Fopen(filename_rw, H5F_ACC_RDWR, fapl_id);
     if (file_id == H5I_INVALID_HID) {
@@ -3010,12 +3024,10 @@ splitter_tentative_open_test(hid_t child_fapl_id)
     if (!file_exists(vfd_config.wo_path, child_fapl_id)) {
         SPLITTER_TEST_FAULT("W/O file mysteriously disappeared\n");
     }
-    if (h5_compare_file_bytes(filename_rw, vfd_config.wo_path) < 0) {
-        SPLITTER_TEST_FAULT("files are not byte-for-byte equivalent\n");
-    }
 
-    /* H5Fcreate() with TRUNC access.
-     * Both files already exist.
+    /*
+     * H5Fcreate() with TRUNC access.
+     * Both files present.
      */
 
     file_id = H5Fcreate(filename_rw, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
@@ -3035,17 +3047,17 @@ splitter_tentative_open_test(hid_t child_fapl_id)
     if (h5_compare_file_bytes(filename_rw, vfd_config.wo_path) < 0) {
         SPLITTER_TEST_FAULT("files are not byte-for-byte equivalent\n");
     }
+    HDremove(filename_rw);
+    HDremove(vfd_config.wo_path);
 
-    /* H5Fcreate() with TRUNC access.
+    /*
+     * H5Fcreate() with TRUNC access.
      * R/W already exists.
      */
 
-    HDremove(filename_rw);
-    HDremove(vfd_config.wo_path);
-    if (splitter_create_single_file_at(filename_rw, child_fapl_id, &data) < 0) {
-        SPLITTER_TEST_FAULT("can't write R/W file\n");
+    if (h5_duplicate_file_by_bytes(filename_tmp, filename_rw) < 0) {
+        SPLITTER_TEST_FAULT("Can't create R/W file copy.\n");
     }
-
     if (file_exists(vfd_config.wo_path, child_fapl_id)) {
         SPLITTER_TEST_FAULT("failed to remove W/O file\n");
     }
@@ -3066,17 +3078,17 @@ splitter_tentative_open_test(hid_t child_fapl_id)
     if (h5_compare_file_bytes(filename_rw, vfd_config.wo_path) < 0) {
         SPLITTER_TEST_FAULT("files are not byte-for-byte equivalent\n");
     }
-
-    /* H5Fcreate() with TRUNC access.
-     * W/O already exists.
-     */
-
     HDremove(filename_rw);
     HDremove(vfd_config.wo_path);
-    if (splitter_create_single_file_at(vfd_config.wo_path, child_fapl_id, &data) < 0) {
-        SPLITTER_TEST_FAULT("can't write R/W file\n");
-    }
 
+    /*
+     * H5Fcreate() with TRUNC access.
+     * Only W/O present.
+     */
+
+    if (h5_duplicate_file_by_bytes(filename_tmp, vfd_config.wo_path) < 0) {
+        SPLITTER_TEST_FAULT("Can't create W/O file copy.\n");
+    }
     if (file_exists(filename_rw, child_fapl_id)) {
         SPLITTER_TEST_FAULT("failed to remove R/W file\n");
     }
@@ -3097,10 +3109,13 @@ splitter_tentative_open_test(hid_t child_fapl_id)
     if (h5_compare_file_bytes(filename_rw, vfd_config.wo_path) < 0) {
         SPLITTER_TEST_FAULT("files are not byte-for-byte equivalent\n");
     }
+    HDremove(filename_rw);
+    HDremove(vfd_config.wo_path);
 
     /* H5Fcreate with both files absent is tested elsewhere */
 
-    /* Cleanup
+    /*
+     * Cleanup
      */
 
     if (H5Pclose(fapl_id) < 0) {
@@ -3224,7 +3239,6 @@ test_splitter(void)
         TEST_ERROR;
     }
 
-
     /* Test file creation, utilizing different child FAPLs (default vs.
      * specified), logfile, and Write Channel error ignoring behavior.
      */
@@ -3249,7 +3263,6 @@ test_splitter(void)
 
 /* TODO: SWMR open? */
 /* Concurrent opens with both drivers using the Splitter */
-
 
     if (H5Pclose(child_fapl_id) == FAIL) {
         TEST_ERROR;
