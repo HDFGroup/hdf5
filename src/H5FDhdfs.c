@@ -517,6 +517,8 @@ static const H5FD_class_t H5FD_hdfs_g = {
     H5FD_hdfs_get_handle,       /* get_handle           */
     H5FD_hdfs_read,             /* read                 */
     H5FD_hdfs_write,            /* write                */
+    NULL,                       /* read_vector          */
+    NULL,                       /* write_vector         */
     NULL,                       /* flush                */
     H5FD_hdfs_truncate,         /* truncate             */
     H5FD_hdfs_lock,             /* lock                 */

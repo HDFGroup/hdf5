@@ -135,6 +135,8 @@ static const H5FD_class_t H5FD_family_g = {
     H5FD_family_get_handle,                     /*get_handle            */
     H5FD_family_read,				/*read			*/
     H5FD_family_write,				/*write			*/
+    NULL,                                       /*read_vector           */
+    NULL,                                       /*write_vector          */
     H5FD_family_flush,				/*flush			*/
     H5FD_family_truncate,			/*truncate		*/
     H5FD_family_lock,                           /*lock                  */
