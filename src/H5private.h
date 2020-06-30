@@ -959,7 +959,7 @@ typedef off_t               h5_stat_size_t;
 #define H5_SIZEOF_H5_STAT_SIZE_T H5_SIZEOF_OFF_T
 
 #ifndef HDftell
-    #define HDftell(F)    ftello(F)
+    #define HDftell(F)    ftell(F)
 #endif /* HDftell */
 #ifndef HDftruncate
     #define HDftruncate(F,L)        ftruncate(F,L)
