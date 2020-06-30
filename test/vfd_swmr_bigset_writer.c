@@ -45,18 +45,31 @@ typedef struct _mat {
     uint32_t elt[1];
 } mat_t;
 
+typedef struct _quadrant {
+    hsize_t start[RANK];
+    hsize_t stride[RANK];
+    hsize_t block[RANK];
+    hsize_t count[RANK];
+    hid_t space;
+} quadrant_t;
+
 typedef struct {
 	hid_t *dataset;
-        hid_t dapl, dcpl, filespace, memspace, file, one_by_one_sid;
+        hid_t dapl, dcpl, filespace, memspace, file, one_by_one_sid,
+            quadrant_dcpl, quadrant_space;
         unsigned ndatasets;
 	char filename[PATH_MAX];
 	char progname[PATH_MAX];
 	struct timespec update_interval;
+        struct {
+            quadrant_t ul, ur, bl, br, src;
+        } quadrants;
 	unsigned int cols, rows;
 	unsigned int asteps;
 	unsigned int nsteps;
         bool two_dee;
         bool wait_for_signal;
+        bool use_vds;
         bool use_vfd_swmr;
         hsize_t chunk_dims[RANK];
         hsize_t one_dee_max_dims[RANK];
@@ -69,6 +82,8 @@ typedef struct {
 	, .file = H5I_INVALID_HID					\
 	, .filespace = H5I_INVALID_HID					\
 	, .one_by_one_sid = H5I_INVALID_HID				\
+	, .quadrant_dcpl = H5I_INVALID_HID				\
+	, .quadrant_space = H5I_INVALID_HID				\
 	, .rows = ROWS						        \
 	, .cols = COLS						        \
         , .ndatasets = 5                                                \
@@ -77,6 +92,7 @@ typedef struct {
 	, .filename = ""						\
         , .two_dee = false                                              \
         , .wait_for_signal = true                                       \
+        , .use_vds = false                                              \
         , .use_vfd_swmr = true                                          \
         , .one_dee_max_dims = {ROWS, H5S_UNLIMITED}                     \
         , .chunk_dims = {ROWS, COLS}                                    \
@@ -130,6 +146,7 @@ usage(const char *progname)
                 "    [-u milliseconds]\n"
 		"\n"
 		"-S:	               do not use VFD SWMR\n"
+		"-V:	               use virtual datasets\n"
 		"-W:	               do not wait for a signal before\n"
                 "                      exiting\n"
 		"-a steps:	       `steps` between adding attributes\n"
@@ -147,6 +164,17 @@ usage(const char *progname)
 }
 
 static void
+make_quadrant_dataspace(state_t *s, quadrant_t *q)
+{
+    if ((q->space = H5Scopy(s->filespace)) < 0)
+        errx(EXIT_FAILURE, "%s: H5Scopy failed", __func__);
+
+    if (H5Sselect_hyperslab(q->space, H5S_SELECT_SET, q->start, q->stride,
+            q->count, q->block) < 0)
+        errx(EXIT_FAILURE, "%s: H5Sselect_hyperslab failed", __func__);
+}
+
+static void
 state_init(state_t *s, int argc, char **argv)
 {
     unsigned long tmp;
@@ -156,15 +184,23 @@ state_init(state_t *s, int argc, char **argv)
     char tfile[PATH_MAX];
     char *end;
     unsigned long millis;
+    quadrant_t * const ul = &s->quadrants.ul,
+               * const ur = &s->quadrants.ur,
+               * const bl = &s->quadrants.bl,
+               * const br = &s->quadrants.br,
+               * const src = &s->quadrants.src;
 
     *s = ALL_HID_INITIALIZER;
     esnprintf(tfile, sizeof(tfile), "%s", argv[0]);
     esnprintf(s->progname, sizeof(s->progname), "%s", basename(tfile));
 
-    while ((ch = getopt(argc, argv, "SWa:c:d:n:qr:s:u:")) != -1) {
+    while ((ch = getopt(argc, argv, "SVWa:c:d:n:qr:s:u:")) != -1) {
         switch (ch) {
         case 'S':
             s->use_vfd_swmr = false;
+            break;
+        case 'V':
+            s->use_vds = true;
             break;
         case 'W':
             s->wait_for_signal = false;
@@ -244,6 +280,11 @@ state_init(state_t *s, int argc, char **argv)
     if (argc > 0)
         errx(EXIT_FAILURE, "unexpected command-line arguments");
 
+    if (s->use_vds && s->two_dee) {
+        errx(EXIT_FAILURE,
+            "virtual datasets and 2D datasets are mutually exclusive");
+    }
+
     s->chunk_dims[0] = s->rows;
     s->chunk_dims[1] = s->cols;
     s->one_dee_max_dims[0] = s->rows;
@@ -263,6 +304,73 @@ state_init(state_t *s, int argc, char **argv)
     if (s->filespace < 0) {
         errx(EXIT_FAILURE, "%s.%d: H5Screate_simple failed",
                 __func__, __LINE__);
+    }
+
+    if (s->use_vds) {
+        const hsize_t half_chunk_dims[RANK] = {s->rows / 2, s->cols / 2};
+        const hsize_t half_max_dims[RANK] = {s->rows / 2, H5S_UNLIMITED};
+
+        if ((s->quadrant_dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
+            errx(EXIT_FAILURE, "%s.%d: H5Pcreate failed",
+                __func__, __LINE__);
+        }
+
+        if (H5Pset_chunk(s->quadrant_dcpl, RANK, half_chunk_dims) < 0)
+            errx(EXIT_FAILURE, "H5Pset_chunk failed");
+
+        *ul = (quadrant_t){
+          .start = {0, 0}
+        , .stride = {s->rows, s->cols}
+        , .block = {s->rows / 2, s->cols / 2}
+        , .count = {1, H5S_UNLIMITED}};
+
+        *ur = (quadrant_t){
+          .start = {s->rows / 2, 0}
+        , .stride = {s->rows, s->cols}
+        , .block = {s->rows / 2, s->cols / 2}
+        , .count = {1, H5S_UNLIMITED}};
+
+        *bl = (quadrant_t){
+          .start = {0, s->cols / 2}
+        , .stride = {s->rows, s->cols}
+        , .block = {s->rows / 2, s->cols / 2}
+        , .count = {1, H5S_UNLIMITED}};
+
+        *br = (quadrant_t){
+          .start = {s->rows / 2, s->cols / 2}
+        , .stride = {s->rows, s->cols}
+        , .block = {s->rows / 2, s->cols / 2}
+        , .count = {1, H5S_UNLIMITED}};
+
+        make_quadrant_dataspace(s, ul);
+        make_quadrant_dataspace(s, ur);
+        make_quadrant_dataspace(s, bl);
+        make_quadrant_dataspace(s, br);
+
+        *src = (quadrant_t){
+          .start = {0, 0}
+        , .stride = {s->rows / 2, s->cols / 2}
+        , .block = {s->rows / 2, s->cols / 2}
+        , .count = {1, H5S_UNLIMITED}};
+
+        s->quadrant_space = H5Screate_simple(RANK, half_chunk_dims,
+            half_max_dims);
+
+        if (s->quadrant_space < 0) {
+            errx(EXIT_FAILURE, "%s.%d: H5Screate_simple failed",
+                    __func__, __LINE__);
+        }
+
+        src->space = H5Scopy(s->quadrant_space);
+
+        if (src->space < 0) {
+            errx(EXIT_FAILURE, "%s.%d: H5Screate_simple failed",
+                    __func__, __LINE__);
+        }
+
+        if (H5Sselect_hyperslab(src->space, H5S_SELECT_SET, src->start,
+                src->stride, src->count, src->block) < 0)
+            errx(EXIT_FAILURE, "%s: H5Sselect_hyperslab failed", __func__);
     }
 
     /* space for attributes */
@@ -289,6 +397,11 @@ state_init(state_t *s, int argc, char **argv)
 static void
 state_destroy(state_t *s)
 {
+    if (H5Pclose(s->dapl) < 0)
+        errx(EXIT_FAILURE, "H5Pclose(fapl)");
+
+    s->dapl = badhid;
+
     if (H5Pclose(s->dcpl) < 0)
         errx(EXIT_FAILURE, "H5Pclose(dcpl)");
 
@@ -299,10 +412,17 @@ state_destroy(state_t *s)
 
     s->filespace = badhid;
 
-    if (H5Pclose(s->dapl) < 0)
-        errx(EXIT_FAILURE, "H5Pclose(fapl)");
+    if (s->use_vds && H5Sclose(s->quadrant_space) < 0)
+        errx(EXIT_FAILURE, "H5Sclose failed");
 
-    s->dapl = badhid;
+    s->quadrant_space = badhid;
+
+    /* TBD destroy spaces belonging to quadrants */
+
+    if (s->use_vds && H5Pclose(s->quadrant_dcpl) < 0)
+        errx(EXIT_FAILURE, "H5Pclose(dcpl)");
+
+    s->quadrant_dcpl = badhid;
 
     if (H5Fclose(s->file) < 0)
         errx(EXIT_FAILURE, "H5Fclose");
@@ -313,19 +433,87 @@ state_destroy(state_t *s)
 static void
 create_extensible_dset(state_t *s, unsigned int which)
 {
+    const quadrant_t * const ul = &s->quadrants.ul,
+                     * const ur = &s->quadrants.ur,
+                     * const bl = &s->quadrants.bl,
+                     * const br = &s->quadrants.br,
+                     * const src = &s->quadrants.src;
     char dname[sizeof("/dataset-9999999999")];
-    hid_t ds;
+    char ul_dname[sizeof("/ul-dataset-9999999999")],
+         ur_dname[sizeof("/ur-dataset-9999999999")],
+         bl_dname[sizeof("/bl-dataset-9999999999")],
+         br_dname[sizeof("/br-dataset-9999999999")];
+    hid_t ul_ds, ur_ds, bl_ds, br_ds;
+    hid_t dcpl, ds;
 
     assert(which < s->ndatasets);
     assert(s->dataset[which] == badhid);
 
     esnprintf(dname, sizeof(dname), "/dataset-%d", which);
 
+    if ((dcpl = H5Pcopy(s->dcpl)) < 0)
+        errx(EXIT_FAILURE, "%s: H5Pcopy failed", __func__);
+
+    if (s->use_vds) {
+
+        esnprintf(ul_dname, sizeof(ul_dname), "/ul-dataset-%d", which);
+        esnprintf(ur_dname, sizeof(ur_dname), "/ur-dataset-%d", which);
+        esnprintf(bl_dname, sizeof(bl_dname), "/bl-dataset-%d", which);
+        esnprintf(br_dname, sizeof(br_dname), "/br-dataset-%d", which);
+
+        ul_ds = H5Dcreate2(s->file, ul_dname, H5T_STD_U32BE, s->quadrant_space,
+            H5P_DEFAULT, s->quadrant_dcpl, s->dapl);
+
+        if (ul_ds < 0)
+            errx(EXIT_FAILURE, "H5Dcreate(, \"%s\", ) failed", ul_dname);
+
+        ur_ds = H5Dcreate2(s->file, ur_dname, H5T_STD_U32BE, s->quadrant_space,
+            H5P_DEFAULT, s->quadrant_dcpl, s->dapl);
+
+        if (ur_ds < 0)
+            errx(EXIT_FAILURE, "H5Dcreate(, \"%s\", ) failed", ur_dname);
+
+        bl_ds = H5Dcreate2(s->file, bl_dname, H5T_STD_U32BE, s->quadrant_space,
+            H5P_DEFAULT, s->quadrant_dcpl, s->dapl);
+
+        if (bl_ds < 0)
+            errx(EXIT_FAILURE, "H5Dcreate(, \"%s\", ) failed", bl_dname);
+
+        br_ds = H5Dcreate2(s->file, br_dname, H5T_STD_U32BE, s->quadrant_space,
+            H5P_DEFAULT, s->quadrant_dcpl, s->dapl);
+
+        if (br_ds < 0)
+            errx(EXIT_FAILURE, "H5Dcreate(, \"%s\", ) failed", br_dname);
+
+        if (H5Dclose(ul_ds) < 0 || H5Dclose(ur_ds) < 0 ||
+            H5Dclose(bl_ds) < 0 || H5Dclose(br_ds) < 0)
+            errx(EXIT_FAILURE, "H5Dclose failed");
+
+        if (H5Pset_virtual(dcpl, ul->space, s->filename, ul_dname,
+                src->space) < 0)
+            errx(EXIT_FAILURE, "%s: H5Pset_virtual failed", __func__);
+
+        if (H5Pset_virtual(dcpl, ur->space, s->filename, ur_dname,
+                src->space) < 0)
+            errx(EXIT_FAILURE, "%s: H5Pset_virtual failed", __func__);
+
+        if (H5Pset_virtual(dcpl, bl->space, s->filename, bl_dname,
+                src->space) < 0)
+            errx(EXIT_FAILURE, "%s: H5Pset_virtual failed", __func__);
+
+        if (H5Pset_virtual(dcpl, br->space, s->filename, br_dname,
+                src->space) < 0)
+            errx(EXIT_FAILURE, "%s: H5Pset_virtual failed", __func__);
+    }
+
     ds = H5Dcreate2(s->file, dname, H5T_STD_U32BE, s->filespace,
-        H5P_DEFAULT, s->dcpl, s->dapl);
+        H5P_DEFAULT, dcpl, s->dapl);
 
     if (ds < 0)
         errx(EXIT_FAILURE, "H5Dcreate(, \"%s\", ) failed", dname);
+
+    if (H5Pclose(dcpl) < 0)
+        errx(EXIT_FAILURE, "%s: H5Pclose failed", __func__);
 
     s->dataset[which] = ds;
 }
@@ -660,6 +848,8 @@ write_extensible_dset(state_t *s, unsigned int which, unsigned int step,
     }
 
     dbgf(1, "new size %" PRIuHSIZE ", %" PRIuHSIZE "\n", size[0], size[1]);
+
+    // if use_vds, then set_extent for each underlying dataset?
 
     if (H5Dset_extent(ds, size) < 0)
         errx(EXIT_FAILURE, "H5Dset_extent failed");
