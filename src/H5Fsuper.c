@@ -898,9 +898,9 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
                     else {
                         if(H5F__super_ext_remove_msg(f, H5O_FSINFO_ID) < 0)
                         {
-#if 1 /* when removing "KLUGE ALERT" above, tidy this up as well */ /* BMR */
+#if 1 /* bug fix test code -- tidy this up if all goes well */ /* JRM */
                             f->shared->sblock = NULL;
-#endif /* BMR */
+#endif /* JRM */
 
                             HGOTO_ERROR(H5E_FILE, H5E_CANTDELETE, FAIL,  "error in removing message from superblock extension")
                         }
