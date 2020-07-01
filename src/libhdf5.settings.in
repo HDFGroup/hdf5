@@ -64,6 +64,12 @@ Languages:
                            Java: @HDF_JAVA@
 @BUILD_JAVA_CONDITIONAL_TRUE@                  Java Compiler: @JAVA_VERSION@
 
+CUDA Options:
+-------------
+              Toolkit directory: @CUDA_DIR@
+                      nvcc path: @NVCC_PATH@
+                 Link libraries: @CUDA_LIBS@
+                  Compute level: @CUDA_LEVEL@
 
 Features:
 ---------
@@ -83,6 +89,7 @@ Parallel Filtered Dataset Writes: @PARALLEL_FILTERED_WRITES@
                       Mirror VFD: @MIRROR_VFD@
               (Read-Only) S3 VFD: @ROS3_VFD@
             (Read-Only) HDFS VFD: @HAVE_LIBHDFS@
+                   cuda (cufile): @ENABLE_CUDA@
                          dmalloc: @HAVE_DMALLOC@
   Packages w/ extra debug output: @INTERNAL_DEBUG_OUTPUT@
                      API tracing: @TRACE_API@

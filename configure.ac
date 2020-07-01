@@ -1362,18 +1362,34 @@ AC_ARG_WITH([fnord],
   ])
 
 ####################### CUDA #######################
+AC_SUBST([ENABLE_CUDA])
+
+## Default is not present
+ENABLE_CUDA=no
+
 m4_include([cuda.ac])
-##################### END CUDA #####################
 
 if test x$ENABLE_CUDA = xyes; then
-  echo
-  echo " CUDA Options"
-  echo " ------------------------------"
-  echo "    "Toolkit directory" " $CUDA_DIR
-  echo "    "nvcc path "        " $NVCC_PATH
-  echo "    "Link libraries "   " $CUDA_LIBS
-  echo "    "Compute level "    " $CUDA_LEVEL
+  AC_DEFINE([HAVE_CUDA], [1], [Define if support for cuda (cufile) is enabled])
 fi
+
+if test -n "$CUDA_DIR"; then
+  CPPFLAGS="$CPPFLAGS -I$CUDA_DIR/include"
+  AM_CPPFLAGS="$AM_CPPFLAGS -I$CUDA_DIR/include"
+fi
+
+if test -n "$CUDA_LIBS"; then
+  LDFLAGS="$LDFLAGS -L$CUDA_DIR/lib64 $CUDA_LIBS"
+  AM_LDFLAGS="$AM_LDFLAGS -L$CUDA_DIR/lib64 $CUDA_LIBS"
+fi
+
+if test -n "$CUFILE_DIR"; then
+  CPPFLAGS="$CPPFLAGS -I$CUFILE_DIR/lib"
+  AM_CPPFLAGS="$AM_CPPFLAGS -I$CUFILE_DIR/lib"
+  LDFLAGS="$LDFLAGS -L$CUFILE_DIR/lib -lcufile"
+  AM_LDFLAGS="$AM_LDFLAGS -L$CUFILE_DIR/lib -lcufile"
+fi
+##################### END CUDA #####################
 
 ## ----------------------------------------------------------------------
 ## Is dmalloc (debug malloc library) requested? It has a header file

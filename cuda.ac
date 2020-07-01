@@ -7,7 +7,7 @@ AC_ARG_WITH([cuda-level],
 		[--with-cuda-level=LEVEL],
 		[use CUDA compute capability LEVEL])],
 	[CUDA_LEVEL=$withval],
-	[CUDA_LEVEL=35])
+	[CUDA_LEVEL=70])
 
 AC_ARG_WITH([cuda],
 	[AS_HELP_STRING([--with-cuda@<:@=PATH@:>@],
@@ -45,15 +45,15 @@ if test x$ENABLE_CUDA = xyes; then
 	fi
 fi
 
-# Deprecate using the SDK
-AC_ARG_WITH([cuda-sdk],
-	[AS_HELP_STRING([--with-cuda-sdk=PATH], [DEPRECATED. Do not use.])],
-	[CUDA_SDK_DIR=$withval],
-	[CUDA_SDK_DIR=""]
-)
+AC_ARG_WITH([cufile],
+    [AS_HELP_STRING([--with-cufile=DIR],
+    [Beta. Might change in the future.])],
+    [CUFILE_DIR=$withval],
+    [withval=no])
 
 AC_SUBST([ENABLE_CUDA])
 AC_SUBST([CUDA_LEVEL])
 AC_SUBST([CUDA_DIR])
 AC_SUBST([NVCC_PATH])
 AC_SUBST([CUDA_LIBS])
+AC_SUBST([CUFILE_DIR])

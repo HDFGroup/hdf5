@@ -1,48 +1,12 @@
-# optional CUDA flags: 
-# memory:
-# -DHAPI_USE_CUDAMALLOCHOST
-# -DHAPI_MEMPOOL
-#
-# verbosity, debugging:
-# -DCUDA_PRINT_TRANSFERRED_INTERACTIONS
-# -DCUDA_PRINT_TRANSFER_BACK_PARTICLES
-# -DCUDA_NOTIFY_DATA_TRANSFER_DONE
-# -DCUDA_VERBOSE_KERNEL_ENQUEUE
-# -DCUDA_NO_KERNELS
-# -DCUDA_NO_ACC_UPDATES
-# -DCUDA_UNIT_TEST
-#
-# print errors returned by CUDA calls:
-# -DCUDA_PRINT_ERRORS
-#
-# for performance monitoring via projections/stats
-# -DCUDA_STATS
-# -DHAPI_TRACE
-# -DHAPI_INSTRUMENT_WRS: to instrument time taken for each phase of a request. 
-#                        prints average transfer, kernel and cleanup times for
-#                        various kinds of request.
-###############################################################################
-
 # Turn on if outer variable is set. Otherwise, allow user to set explicitly.
 CUDA_DEBUG   = $(DEBUG)
 CUDA_VERBOSE = $(VERBOSE)
 
-cuda_defines += -DCUDA -DSPCUDA
-cuda_defines += -DHAPI_MEMPOOL -DHAPI_USE_CUDAMALLOCHOST
-
-ifeq (1,$(CUDA_DEBUG))
-	cuda_defines += -DCUDA_VERBOSE_KERNEL_ENQUEUE
-endif
-
-ifeq (yes,@PROJECTIONS@)
-	cuda_defines += -DHAPI_TRACE
-endif
-
 cuda_includes := -I@CUDA_DIR@/include
-#cuda_srcs     := $(source_dir)/HostCUDA.cu
+#cuda_srcs     := $(srcdir)/src/H5FDsec2.c
 cuda_libs     := @CUDA_LIBS@
 cuda_ldflags  += -L@CUDA_DIR@/lib64
-cuda_objs     := $(patsubst %.cu,%.o,$(subst $(source_dir),$(build_dir),$(cuda_srcs)))
+cuda_objs     := $(patsubst %.cu,%.o,$(subst $(srcdir),$(build_dir),$(cuda_srcs)))
 
 # For more details on the architectures, see
 # http://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#virtual-architecture-feature-list
@@ -79,6 +43,6 @@ dist-clean: cuda-dist-clean
 cuda-dist-clean:
 	@ $(RM) cuda.mk
 
-$(build_dir)/%.o: $(source_dir)/%.cu
+$(build_dir)/%.o: $(srcdir)/src/%.cu
 	@ echo Compiling $<...
 	$(quiet) @NVCC_PATH@ -std=$(cxx_std) -Xcompiler "$(cxx_flags) $(depend_flags) $(depend_dir)/$*$(depend_suffix)" $(nvcc_flags) -c $< -o $@

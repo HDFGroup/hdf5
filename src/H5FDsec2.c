@@ -36,10 +36,14 @@
 #include "H5MMprivate.h"    /* Memory management        */
 #include "H5Pprivate.h"     /* Property lists           */
 
+#ifdef H5_HAVE_CUDA
+
 //#include <cuda.h>
 #include <cuda_runtime.h>
 #include <cufile.h>
 #include "cufile_sample_utils.h"
+
+#endif
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_SEC2_g = 0;
@@ -58,6 +62,11 @@ static hid_t H5FD_SEC2_g = 0;
 typedef struct H5FD_sec2_t {
     H5FD_t          pub;    /* public stuff, must be first      */
     int             fd;     /* the filesystem file descriptor   */
+
+#ifdef H5_HAVE_CUDA
+    int             cu_fd;  /* the filesystem file descriptor   */
+#endif
+
     haddr_t         eoa;    /* end of allocated region          */
     haddr_t         eof;    /* end of file; current file size   */
     haddr_t         pos;    /* current file I/O position        */
@@ -314,6 +323,12 @@ done:
 static H5FD_t *
 H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
+
+#ifdef H5_HAVE_CUDA
+    CUfileError_t status;
+    int cu_fd = -1;
+#endif
+
     H5FD_sec2_t     *file       = NULL;     /* sec2 VFD info            */
     int             fd          = -1;       /* File descriptor          */
     int             o_flags;                /* Flags for open() call    */
@@ -325,6 +340,16 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
     FUNC_ENTER_NOAPI_NOINIT
 
+#ifdef H5_HAVE_CUDA
+    status = cuFileDriverOpen();
+    if (status.err != CU_FILE_SUCCESS) {
+      fprintf(stderr, "cufile driver open error\n");
+      
+      // TODO:
+      //fprintf(stderr, "cufile driver open error: %s\n",
+      //  cuFileGetErrorString(status));
+    }
+#endif
     /* Sanity check on file offsets */
     HDcompile_assert(sizeof(HDoff_t) >= sizeof(size_t));
 
@@ -351,6 +376,14 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', errno = %d, error message = '%s', flags = %x, o_flags = %x", name, myerrno, HDstrerror(myerrno), flags, (unsigned)o_flags);
     } /* end if */
 
+#ifdef H5_HAVE_CUDA
+    cu_fd = open(name, O_CREAT | O_RDWR | O_DIRECT, 0664);
+    if(cu_fd == -1) {
+      fprintf(stderr, "cufile file open error\n");
+      //TODO: send H5 error
+    }
+#endif
+
     if(HDfstat(fd, &sb) < 0)
         HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file")
 
@@ -359,6 +392,9 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct")
 
     file->fd = fd;
+#ifdef H5_HAVE_CUDA
+    file->cu_fd = cu_fd;
+#endif
     H5_CHECKED_ASSIGN(file->eof, haddr_t, sb.st_size, h5_stat_size_t);
     file->pos = HADDR_UNDEF;
     file->op = OP_UNKNOWN;
@@ -431,10 +467,27 @@ done:
 static herr_t
 H5FD_sec2_close(H5FD_t *_file)
 {
+
+#ifdef H5_HAVE_CUDA
+    CUfileError_t status;
+#endif
+
     H5FD_sec2_t *file = (H5FD_sec2_t *)_file;
     herr_t      ret_value = SUCCEED;                /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
+
+#ifdef H5_HAVE_CUDA
+    status = cuFileDriverClose();
+    // TODO:
+    if (status.err != CU_FILE_SUCCESS) {
+      fprintf(stderr, "cufile driver close error\n");
+
+      // TODO:
+      //std::cerr << "cufile driver close failed:"
+      //  << cuFileGetErrorString(status) << std::endl;
+    }
+#endif
 
     /* Sanity check */
     HDassert(file);
@@ -442,6 +495,13 @@ H5FD_sec2_close(H5FD_t *_file)
     /* Close the underlying file */
     if(HDclose(file->fd) < 0)
         HSYS_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
+
+#ifdef H5_HAVE_CUDA
+    if(close(file->cu_fd) < 0) {
+      fprintf(stderr, "cufile file close error\n");
+    }
+
+#endif
 
     /* Release the file info */
     file = H5FL_FREE(H5FD_sec2_t, file);
@@ -679,6 +739,14 @@ static herr_t
 H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id,
     haddr_t addr, size_t size, void *buf /*out*/)
 {
+
+#ifdef H5_HAVE_CUDA
+    CUfileError_t status;
+    ssize_t ret = -1;
+    CUfileDescr_t cf_descr;
+    CUfileHandle_t cf_handle;
+#endif
+
     H5FD_sec2_t     *file       = (H5FD_sec2_t *)_file;
     HDoff_t         offset      = (HDoff_t)addr;
     herr_t          ret_value   = SUCCEED;                  /* Return value */
@@ -694,66 +762,92 @@ H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
     if(REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu", (unsigned long long)addr)
 
-#ifndef H5_HAVE_PREADWRITE
-    /* Seek to the correct location (if we don't have pread) */
-    if(addr != file->pos || OP_READ != file->op) {
-        if(HDlseek(file->fd, (HDoff_t)addr, SEEK_SET) < 0)
-            HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
+#ifdef H5_HAVE_CUDA
+    if(type == H5FD_MEM_DRAW) {
+      memset((void *)&cf_descr, 0, sizeof(CUfileDescr_t));
+      cf_descr.handle.fd = file->cu_fd;
+      cf_descr.type = CU_FILE_HANDLE_TYPE_OPAQUE_FD;
+      status = cuFileHandleRegister(&cf_handle, &cf_descr);
+      if (status.err != CU_FILE_SUCCESS) {
+        fprintf(stderr, "cufile file handle register error\n");
+      }
+
+      // writes device memory contents to a file
+      // TODO: skipped device memory registration using cuFileBufRegister
+      ret = cuFileRead(cf_handle, buf, size, offset, 0);
+      if((size_t)ret < size) {
+        fprintf(stderr, "cufile read error\n");
+      }
+
+      // close file handle
+      cuFileHandleDeregister(cf_handle);
     }
+    else {
+#endif
+
+#ifndef H5_HAVE_PREADWRITE
+      /* Seek to the correct location (if we don't have pread) */
+      if(addr != file->pos || OP_READ != file->op) {
+          if(HDlseek(file->fd, (HDoff_t)addr, SEEK_SET) < 0)
+              HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
+      }
 #endif /* H5_HAVE_PREADWRITE */
 
-    /* Read data, being careful of interrupted system calls, partial results,
-     * and the end of the file.
-     */
-    while(size > 0) {
+      /* Read data, being careful of interrupted system calls, partial results,
+       * and the end of the file.
+       */
+      while(size > 0) {
 
-        h5_posix_io_t       bytes_in        = 0;    /* # of bytes to read       */
-        h5_posix_io_ret_t   bytes_read      = -1;   /* # of bytes actually read */
+          h5_posix_io_t       bytes_in        = 0;    /* # of bytes to read       */
+          h5_posix_io_ret_t   bytes_read      = -1;   /* # of bytes actually read */
 
-        /* Trying to read more bytes than the return type can handle is
-         * undefined behavior in POSIX.
-         */
-        if(size > H5_POSIX_MAX_IO_BYTES)
-            bytes_in = H5_POSIX_MAX_IO_BYTES;
-        else
-            bytes_in = (h5_posix_io_t)size;
+          /* Trying to read more bytes than the return type can handle is
+           * undefined behavior in POSIX.
+           */
+          if(size > H5_POSIX_MAX_IO_BYTES)
+              bytes_in = H5_POSIX_MAX_IO_BYTES;
+          else
+              bytes_in = (h5_posix_io_t)size;
 
-        do {
+          do {
 #ifdef H5_HAVE_PREADWRITE
-            bytes_read = HDpread(file->fd, buf, bytes_in, offset);
-            if(bytes_read > 0)
-                offset += bytes_read;
+              bytes_read = HDpread(file->fd, buf, bytes_in, offset);
+              if(bytes_read > 0)
+                  offset += bytes_read;
 #else
-            bytes_read = HDread(file->fd, buf, bytes_in);
+              bytes_read = HDread(file->fd, buf, bytes_in);
 #endif /* H5_HAVE_PREADWRITE */
-        } while(-1 == bytes_read && EINTR == errno);
+          } while(-1 == bytes_read && EINTR == errno);
 
-        if(-1 == bytes_read) { /* error */
-            int myerrno = errno;
-            time_t mytime = HDtime(NULL);
+          if(-1 == bytes_read) { /* error */
+              int myerrno = errno;
+              time_t mytime = HDtime(NULL);
 
-            offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
+              offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
 
-            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', buf = %p, total read size = %llu, bytes this sub-read = %llu, bytes actually read = %llu, offset = %llu", HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_read, (unsigned long long)offset);
-        } /* end if */
+              HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', buf = %p, total read size = %llu, bytes this sub-read = %llu, bytes actually read = %llu, offset = %llu", HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_read, (unsigned long long)offset);
+          } /* end if */
 
-        if(0 == bytes_read) {
-            /* end of file but not end of format address space */
-            HDmemset(buf, 0, size);
-            break;
-        } /* end if */
+          if(0 == bytes_read) {
+              /* end of file but not end of format address space */
+              HDmemset(buf, 0, size);
+              break;
+          } /* end if */
 
-        HDassert(bytes_read >= 0);
-        HDassert((size_t)bytes_read <= size);
+          HDassert(bytes_read >= 0);
+          HDassert((size_t)bytes_read <= size);
 
-        size -= (size_t)bytes_read;
-        addr += (haddr_t)bytes_read;
-        buf = (char *)buf + bytes_read;
-    } /* end while */
+          size -= (size_t)bytes_read;
+          addr += (haddr_t)bytes_read;
+          buf = (char *)buf + bytes_read;
+      } /* end while */
 
-    /* Update current position */
-    file->pos = addr;
-    file->op = OP_READ;
+      /* Update current position */
+      file->pos = addr;
+      file->op = OP_READ;
+#ifdef H5_HAVE_CUDA
+    }
+#endif
 
 done:
     if(ret_value < 0) {
@@ -784,6 +878,14 @@ static herr_t
 H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id,
                 haddr_t addr, size_t size, const void *buf)
 {
+
+#ifdef H5_HAVE_CUDA
+    CUfileError_t status;
+    ssize_t ret = -1;
+    CUfileDescr_t cf_descr;
+    CUfileHandle_t cf_handle;
+#endif
+
     H5FD_sec2_t     *file       = (H5FD_sec2_t *)_file;
     HDoff_t         offset      = (HDoff_t)addr;
     herr_t          ret_value   = SUCCEED;                  /* Return value */
@@ -798,6 +900,29 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %llu", (unsigned long long)addr)
     if(REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size = %llu", (unsigned long long)addr, (unsigned long long)size)
+
+#ifdef H5_HAVE_CUDA
+    if(type == H5FD_MEM_DRAW) {
+      memset((void *)&cf_descr, 0, sizeof(CUfileDescr_t));
+      cf_descr.handle.fd = file->cu_fd;
+      cf_descr.type = CU_FILE_HANDLE_TYPE_OPAQUE_FD;
+      status = cuFileHandleRegister(&cf_handle, &cf_descr);
+      if (status.err != CU_FILE_SUCCESS) {
+        fprintf(stderr, "cufile file handle register error\n");
+      }
+
+      // writes device memory contents to a file
+      // TODO: skipped device memory registration using cuFileBufRegister
+      ret = cuFileWrite(cf_handle, buf, size, offset, 0);
+      if(ret < size) {
+        fprintf(stderr, "cufile write error\n");
+      }
+
+      // close file handle
+      cuFileHandleDeregister(cf_handle);
+    }
+    else {
+#endif
 
 #ifndef H5_HAVE_PREADWRITE
     /* Seek to the correct location (if we don't have pwrite) */
@@ -848,13 +973,16 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         size -= (size_t)bytes_wrote;
         addr += (haddr_t)bytes_wrote;
         buf = (const char *)buf + bytes_wrote;
-    } /* end while */
+      } /* end while */
 
-    /* Update current position and eof */
-    file->pos = addr;
-    file->op = OP_WRITE;
-    if(file->pos > file->eof)
+      /* Update current position and eof */
+      file->pos = addr;
+      file->op = OP_WRITE;
+      if(file->pos > file->eof)
         file->eof = file->pos;
+#ifdef H5_HAVE_CUDA
+    }
+#endif
 
 done:
     if(ret_value < 0) {
