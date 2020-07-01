@@ -158,6 +158,10 @@ done:
 		free(local_data);
 		local_data = NULL;
 	}
+	if (verify_data) {
+		free(verify_data);
+		verify_data = NULL;
+	}
 	
     H5close();
 

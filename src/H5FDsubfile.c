@@ -127,11 +127,11 @@ int sf_write_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_s
     char *this_data = (char *)data_buffer;
     ssize_t bytes_remaining = (ssize_t) data_size;
     ssize_t written = 0;
-
     while(bytes_remaining) {
         if ((written = pwrite(fd, this_data, (size_t)bytes_remaining, file_offset)) < 0) {
             perror("pwrite failed!");
             fflush(stdout);
+			break;
         }
         else {
             if (sf_verbose_flag) {
@@ -234,14 +234,29 @@ herr_t
 H5FDsubfiling_finalize(void)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
+	sf_topology_t *thisApp = NULL;
 
 	FUNC_ENTER_API(FAIL)
     H5TRACE0("e","");
 	
 	/* Shutdown the IO Concentrator threads */
-	sf_shutdown_flag = 1;
-	usleep(100);
+	
+	if (topology_id != H5I_INVALID_HID) {
+		thisApp = get_subfiling_object(topology_id);
+	}
+
+	if (thisApp && thisApp->rank_is_ioc) {
+		begin_thread_exclusive();
+		sf_shutdown_flag = 1;
+		end_thread_exclusive();
+
+		usleep(100);
+
+		wait_for_thread_main();
+	}
+	
 	MPI_Barrier(MPI_COMM_WORLD);
+	
 	delete_subfiling_context(context_id);
 
     FUNC_LEAVE_API(ret_value)

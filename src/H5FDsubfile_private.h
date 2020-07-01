@@ -73,7 +73,7 @@ typedef struct {
 } sf_topology_t;
 
 #define K(n) ((n)*1024)
-#define DEFAULT_STRIPE_SIZE K(4) /* (1024*1024) */
+#define DEFAULT_STRIPE_SIZE K(256) /* (1024*1024) */
 #define MAX_DEPTH 256
 
 typedef enum io_ops {
@@ -121,6 +121,7 @@ typedef enum {
 
 #define ACK_PART         (0x0acc << 8)
 #define DATA_PART        (0xd8da << 8)
+#define READY            (0xfeed << 8)
 #define COMPLETED        (0xfed1 << 8)
 
 #define READ_INDEP       (READ_OP)
@@ -165,6 +166,7 @@ H5_DLL void * get_subfiling_object(int64_t object_id);
 H5_DLL hid_t get_subfiling_context(void);
 H5_DLL int initialize_ioc_threads(subfiling_context_t *sf_context);
 H5_DLL int tpool_add_work(sf_work_request_t *);
+H5_DLL bool tpool_is_empty(void);
 H5_DLL int ioc_main(subfiling_context_t *context);
 H5_DLL int queue_write_coll(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm);
 H5_DLL int queue_read_coll(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm);
@@ -182,5 +184,9 @@ H5_DLL int sf_write_independent(hid_t context_id, int64_t offset, int64_t elemen
 H5_DLL int sf_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size, int subfile_rank);
 H5_DLL void delete_subfiling_context(hid_t context_id);
 H5_DLL void finalize_ioc_threads(void);
+H5_DLL int begin_thread_exclusive(void);
+H5_DLL int end_thread_exclusive(void);
+H5_DLL int wait_for_thread_main(void);
+H5_DLL int finalize_subfile_close(void);
 
 #endif
