@@ -29,7 +29,7 @@
 #include "vfd_swmr_common.h"
 
 typedef struct {
-        hid_t file, one_by_one_sid;
+        hid_t file, filetype, one_by_one_sid;
 	char filename[PATH_MAX];
 	char progname[PATH_MAX];
 	struct timespec update_interval;
@@ -43,6 +43,7 @@ typedef struct {
 	  .file = H5I_INVALID_HID					\
 	, .one_by_one_sid = H5I_INVALID_HID				\
 	, .filename = ""						\
+	, .filetype = H5T_NATIVE_UINT32					\
 	, .asteps = 10							\
 	, .nsteps = 100							\
         , .wait_for_signal = true                                       \
@@ -58,13 +59,14 @@ static const hid_t badhid = H5I_INVALID_HID;
 static void
 usage(const char *progname)
 {
-	fprintf(stderr, "usage: %s [-S] [-W] [-a steps]\n"
+	fprintf(stderr, "usage: %s [-S] [-W] [-a steps] [-b]\n"
                 "    [-n iterations] [-u milliseconds]\n"
 		"\n"
 		"-S:	               do not use VFD SWMR\n"
 		"-W:	               do not wait for a signal before\n"
                 "                      exiting\n"
 		"-a steps:	       `steps` between adding attributes\n"
+		"-b:	               write data in big-endian byte order\n"
 		"-n iterations:        how many times to expand each dataset\n"
 		"-u ms:                milliseconds interval between updates\n"
                 "                      to %s.h5\n"
@@ -87,7 +89,7 @@ state_init(state_t *s, int argc, char **argv)
     esnprintf(tfile, sizeof(tfile), "%s", argv[0]);
     esnprintf(s->progname, sizeof(s->progname), "%s", basename(tfile));
 
-    while ((ch = getopt(argc, argv, "SWa:n:qu:")) != -1) {
+    while ((ch = getopt(argc, argv, "SWa:bn:qu:")) != -1) {
         switch (ch) {
         case 'S':
             s->use_vfd_swmr = false;
@@ -112,6 +114,9 @@ state_init(state_t *s, int argc, char **argv)
                 s->asteps = (unsigned)tmp;
             else
                 s->nsteps = (unsigned)tmp;
+            break;
+        case 'b':
+            s->filetype = H5T_STD_U32BE;
             break;
         case 'q':
             verbosity = 0;
@@ -151,7 +156,7 @@ state_init(state_t *s, int argc, char **argv)
 }
 
 static void
-add_group_attribute(hid_t g, hid_t sid, unsigned int which)
+add_group_attribute(const state_t *s, hid_t g, hid_t sid, unsigned int which)
 {
     hid_t aid;
     char name[sizeof("attr-9999999999")];
@@ -160,7 +165,7 @@ add_group_attribute(hid_t g, hid_t sid, unsigned int which)
 
     dbgf(1, "setting attribute %s on group %u to %u\n", name, which, which);
 
-    if ((aid = H5Acreate2(g, name, H5T_STD_U32BE, sid, H5P_DEFAULT,
+    if ((aid = H5Acreate2(g, name, s->filetype, sid, H5P_DEFAULT,
             H5P_DEFAULT)) < 0)
         errx(EXIT_FAILURE, "H5Acreate2 failed");
 
@@ -187,7 +192,7 @@ write_group(state_t *s, unsigned int which)
         errx(EXIT_FAILURE, "H5Gcreate(, \"%s\", ) failed", name);
 
     if (s->asteps != 0 && which % s->asteps == 0)
-        add_group_attribute(g, s->one_by_one_sid, which);
+        add_group_attribute(s, g, s->one_by_one_sid, which);
 
     if (H5Gclose(g) < 0)
         errx(EXIT_FAILURE, "H5Gclose failed");
