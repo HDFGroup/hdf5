@@ -36,7 +36,7 @@ static void *H5O__attr_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_ty
     void *native_src, H5F_t *file_dst, hbool_t *recompute_size,
     H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O__attr_post_copy_file(const H5O_loc_t *src_oloc,
-    const void *mesg_src, H5O_loc_t *dst_oloc, void *mesg_dst, 
+    const void *mesg_src, H5O_loc_t *dst_oloc, void *mesg_dst,
     H5O_copy_t *cpy_info);
 static herr_t H5O_attr_get_crt_index(const void *_mesg, H5O_msg_crt_idx_t *crt_idx);
 static herr_t H5O_attr_set_crt_index(void *_mesg, H5O_msg_crt_idx_t crt_idx);
@@ -238,6 +238,11 @@ H5O_attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
 
     /* Go get the data */
     if(attr->shared->data_size) {
+        /* Ensure that data size doesn't exceed buffer size, in case of
+           it's being corrupted in the file */
+        if(attr->shared->data_size > p_size)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_OVERFLOW, NULL, "data size exceeds buffer size")
+
         if(NULL == (attr->shared->data = H5FL_BLK_MALLOC(attr_buf, attr->shared->data_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
         H5MM_memcpy(attr->shared->data, p, attr->shared->data_size);

@@ -14,7 +14,7 @@
 /* Programmer: 	Vailin Choi <vchoi@hdfgroup.org>
  *	       	September 2010
  *
- * Purpose:	Implicit (Non Index) chunked I/O functions.  
+ * Purpose:	Implicit (Non Index) chunked I/O functions.
  *		This is used when the dataset is:
  *			extendible but with fixed max. dims
  *			with early allocation
@@ -114,8 +114,8 @@ const H5D_chunk_ops_t H5D_COPS_NONE[1] = {{
  * Function:	H5D__none_idx_create
  *
  * Purpose:	Allocate memory for the maximum # of chunks in the dataset.
- *		
- * Return:	Non-negative on success 
+ *
+ * Return:	Non-negative on success
  *		Negative on failure.
  *
  * Programmer:	Vailin Choi; September 2010
@@ -267,31 +267,31 @@ H5D__none_idx_iterate(const H5D_chk_idx_info_t *idx_info,
 
     /* Iterate over all the chunks in the dataset's dataspace */
     for(u = 0; u < idx_info->layout->nchunks && ret_value == H5_ITER_CONT; u++) {
-	    /* Calculate the index of this chunk */
-	    idx = H5VM_array_offset_pre(ndims, idx_info->layout->max_down_chunks, chunk_rec.scaled);
+        /* Calculate the index of this chunk */
+        idx = H5VM_array_offset_pre(ndims, idx_info->layout->max_down_chunks, chunk_rec.scaled);
 
-	    /* Calculate the address of the chunk */
-	    chunk_rec.chunk_addr = idx_info->storage->idx_addr + idx * idx_info->layout->size;
+        /* Calculate the address of the chunk */
+        chunk_rec.chunk_addr = idx_info->storage->idx_addr + idx * idx_info->layout->size;
 
-	    /* Make "generic chunk" callback */
-	    if((ret_value = (*chunk_cb)(&chunk_rec, chunk_udata)) < 0)
+        /* Make "generic chunk" callback */
+        if((ret_value = (*chunk_cb)(&chunk_rec, chunk_udata)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CALLBACK, H5_ITER_ERROR, "failure in generic chunk iterator callback")
 
-	    /* Update coordinates of chunk in dataset */
-	    curr_dim = (int)(ndims - 1);
-	    while(curr_dim >= 0) {
-	        /* Increment coordinate in current dimension */
-	        chunk_rec.scaled[curr_dim]++;
+        /* Update coordinates of chunk in dataset */
+        curr_dim = (int)(ndims - 1);
+        while(curr_dim >= 0) {
+            /* Increment coordinate in current dimension */
+            chunk_rec.scaled[curr_dim]++;
 
-	        /* Check if we went off the end of the current dimension */
-	        if(chunk_rec.scaled[curr_dim] >= idx_info->layout->chunks[curr_dim]) {
-		        /* Reset coordinate & move to next faster dimension */
-		        chunk_rec.scaled[curr_dim] = 0;
-		        curr_dim--;
-	        } /* end if */
-	        else
-		        break;
-	    } /* end while */
+            /* Check if we went off the end of the current dimension */
+            if(chunk_rec.scaled[curr_dim] >= idx_info->layout->chunks[curr_dim]) {
+                /* Reset coordinate & move to next faster dimension */
+                chunk_rec.scaled[curr_dim] = 0;
+                curr_dim--;
+            } /* end if */
+            else
+                break;
+        } /* end while */
     } /* end for */
 
 done:
@@ -472,7 +472,7 @@ H5D__none_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
 /*-------------------------------------------------------------------------
  * Function:	H5D__none_idx_dump
  *
- * Purpose:	Dump 
+ * Purpose:	Dump
  *
  * Return:	Non-negative on success/Negative on failure
  *

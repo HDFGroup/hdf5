@@ -218,6 +218,12 @@ usage (void)
     PRINTVALSTREAM(rawoutstream, "                   ...<kerberos cache path>,<username>,<buffer size>)\n");
     PRINTVALSTREAM(rawoutstream, "                   If absent or A == '(,,,,)', all default values are used.\n");
     PRINTVALSTREAM(rawoutstream, "                   Has no effect if vfd flag is not 'hdfs'.\n");
+    PRINTVALSTREAM(rawoutstream, "   --vol-value     Value (ID) of the VOL connector to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                   HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --vol-name      Name of the VOL connector to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                   HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --vol-info      VOL-specific info to pass to the VOL connector used for\n");
+    PRINTVALSTREAM(rawoutstream, "                   opening the HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "  file/OBJECT\n");
     PRINTVALSTREAM(rawoutstream, "    Each object consists of an HDF5 file name optionally followed by a\n");
@@ -1333,10 +1339,10 @@ dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx
         switch (ref_type) {
             case H5R_OBJECT1:
                 H5TOOLS_DEBUG("ref_type is H5R_OBJECT1");
-                if (H5Rget_obj_type3((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, &obj_type) >= 0) {
+                if (H5Rget_obj_type3(&ref_buf[i], H5P_DEFAULT, &obj_type) >= 0) {
                     switch (obj_type) {
                         case H5O_TYPE_DATASET:
-                            if((new_obj_id = H5Ropen_object((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                            if((new_obj_id = H5Ropen_object(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                                 datactx.indent_level++;
                                 h5tools_dump_dset(stream, info, &datactx, new_obj_id);
                                 datactx.indent_level--;
@@ -1363,7 +1369,7 @@ dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx
                 break;
             case H5R_DATASET_REGION1:
                 H5TOOLS_DEBUG("ref_type is H5R_DATASET_REGION1");
-                if((new_obj_id = H5Ropen_object((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                if((new_obj_id = H5Ropen_object(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     datactx.indent_level++;
                     h5tools_dump_dset(stream, info, &datactx, new_obj_id);
                     datactx.indent_level--;
@@ -1377,13 +1383,13 @@ dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx
                 break;
             case H5R_OBJECT2:
                 H5TOOLS_DEBUG("ref_type is H5R_OBJECT2");
-                if (H5Rget_obj_type3((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, &obj_type) >= 0) {
+                if (H5Rget_obj_type3(&ref_buf[i], H5P_DEFAULT, &obj_type) >= 0) {
                     switch (obj_type) {
                         case H5O_TYPE_GROUP:
                             break;
 
                         case H5O_TYPE_DATASET:
-                            if((new_obj_id = H5Ropen_object((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                            if((new_obj_id = H5Ropen_object(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                                 datactx.indent_level++;
                                 h5tools_dump_dset(stream, info, &datactx, new_obj_id);
                                 datactx.indent_level--;
@@ -1416,10 +1422,10 @@ dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx
                     ncols = info->line_ncols;
 
                 /* if (new_obj_id < 0) - could mean that no reference was written do not throw failure */
-                if((new_obj_id = H5Ropen_object((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                if((new_obj_id = H5Ropen_object(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) < 0)
                     H5TOOLS_INFO("H5Ropen_object H5R_DATASET_REGION2 failed");
                 else {
-                    if((new_obj_sid = H5Ropen_region((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                    if((new_obj_sid = H5Ropen_region(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                         if (h5tools_is_zero(&ref_buf[i], H5Tget_size(H5T_STD_REF))) {
                             H5TOOLS_DEBUG("NULL H5R_DATASET_REGION2");
 
@@ -1471,7 +1477,7 @@ dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx
                 break;
             case H5R_ATTR:
                 H5TOOLS_DEBUG("ref_type is H5R_ATTR");
-                if((new_obj_id = H5Ropen_attr((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                if((new_obj_id = H5Ropen_attr(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     h5tools_dump_region_attribute(new_obj_id, stream, info, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
                     if(H5Aclose(new_obj_id) < 0)
                         H5TOOLS_INFO("H5Aclose H5R_ATTR failed");
@@ -2334,13 +2340,13 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
         h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
     } /* end if */
     else {
-        hid_t obj = H5I_INVALID_HID;               /* ID of object opened */
+        hid_t obj_id = H5I_INVALID_HID;               /* ID of object opened */
 
         /* Open the object.  Not all objects can be opened.  If this is the case
          * then return right away.
          */
         H5TOOLS_DEBUG("Open object name=%s", name);
-        if (obj_type >= 0 && (obj = H5Oopen(iter->fid, name, H5P_DEFAULT)) < 0) {
+        if (obj_type >= 0 && (obj_id = H5Oopen(iter->fid, name, H5P_DEFAULT)) < 0) {
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, " *ERROR*\n");
             h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
@@ -2350,7 +2356,7 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
         /* List the first line of information for the object. */
         H5TOOLS_DEBUG("Object type:%d", obj_type);
         if (obj_type >= 0 && dispatch_g[obj_type].list1)
-            (dispatch_g[obj_type].list1)(obj);
+            (dispatch_g[obj_type].list1)(obj_id);
         if (!iter->symlink_target || (verbose_g > 0)) {
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, "\n");
@@ -2362,23 +2368,24 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
         if (verbose_g > 0) {
             size_t buf_size = 0;
             char* comment = NULL;
-            char* obj_addr_str = NULL;
+            char* obj_tok_str = NULL;
             ssize_t cmt_bufsize = -1;
+            hbool_t supported = FALSE;
 
             /* Display attributes */
             H5TOOLS_DEBUG("Display attributes");
             if (obj_type >= 0)
-                H5Aiterate2(obj, H5_INDEX_NAME, H5_ITER_INC, NULL, list_attr, NULL);
+                H5Aiterate2(obj_id, H5_INDEX_NAME, H5_ITER_INC, NULL, list_attr, NULL);
 
             /* Object location & reference count */
-            H5Otoken_to_str(obj, &oinfo->token, &obj_addr_str);
+            H5Otoken_to_str(obj_id, &oinfo->token, &obj_tok_str);
 
             h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "    %-10s %lu:%s\n", "Location:", oinfo->fileno, obj_addr_str);
+            h5tools_str_append(&buffer, "    %-10s %lu:%s\n", "Location:", oinfo->fileno, obj_tok_str);
             h5tools_str_append(&buffer, "    %-10s %u\n", "Links:", (unsigned)oinfo->rc);
             h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
 
-            H5free_memory(obj_addr_str);
+            H5free_memory(obj_tok_str);
 
             /* Modification time */
             if (oinfo->mtime > 0) {
@@ -2397,36 +2404,42 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
                 } /* end if */
             } /* end if */
 
-            /* Object comment */
-            cmt_bufsize = H5Oget_comment(obj, comment, buf_size);
+            /* Only emit comments if the VOL connector supports that */
+            H5VLquery_optional(obj_id, H5VL_SUBCLS_OBJECT, H5VL_NATIVE_OBJECT_GET_COMMENT, &supported);
 
-            /* if the actual length of the comment is longer than cmt_bufsize, then call
-             * H5Oget_comment again with the correct value.
-             * If the call to H5Oget_comment returned an error, skip this block */
-            if (cmt_bufsize > 0) {
-                comment = (char *)HDmalloc((size_t)cmt_bufsize + 1); /* new_size including null terminator */
-                if (comment) {
-                    cmt_bufsize = H5Oget_comment(obj, comment, (size_t)cmt_bufsize);
-                    if (cmt_bufsize > 0) {
-                        comment[cmt_bufsize] = 0;
-                        h5tools_str_reset(&buffer);
-                        h5tools_str_append(&buffer, "    %-10s \"", "Comment:");
-                        print_string(&buffer, comment, FALSE);
-                        h5tools_str_append(&buffer, "\"\n");
-                        h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
-                    } /* end if */
-                    HDfree(comment);
+            if (supported) {
+
+                /* Object comment */
+                cmt_bufsize = H5Oget_comment(obj_id, comment, buf_size);
+
+                /* if the actual length of the comment is longer than cmt_bufsize, then call
+                 * H5Oget_comment again with the correct value.
+                 */
+                if (cmt_bufsize > 0) {
+                    comment = (char *)HDmalloc((size_t)cmt_bufsize + 1); /* new_size including null terminator */
+                    if (comment) {
+                        cmt_bufsize = H5Oget_comment(obj_id, comment, (size_t)cmt_bufsize);
+                        if (cmt_bufsize > 0) {
+                            comment[cmt_bufsize] = 0;
+                            h5tools_str_reset(&buffer);
+                            h5tools_str_append(&buffer, "    %-10s \"", "Comment:");
+                            print_string(&buffer, comment, FALSE);
+                            h5tools_str_append(&buffer, "\"\n");
+                            h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
+                        } /* end if */
+                        HDfree(comment);
+                    }
                 }
             }
         } /* end if */
 
         /* Detailed list for object */
         if (obj_type >= 0 && dispatch_g[obj_type].list2)
-            (dispatch_g[obj_type].list2)(obj, name);
+            (dispatch_g[obj_type].list2)(obj_id, name);
 
         /* Close the object. */
         if (obj_type >= 0)
-            H5Oclose(obj);
+            H5Oclose(obj_id);
     } /* end else */
 
 done:
@@ -2833,41 +2846,43 @@ leave(int ret)
 int
 main(int argc, const char *argv[])
 {
-    hid_t       file_id = H5I_INVALID_HID;
-    char       *fname = NULL, *oname = NULL, *x;
-    const char *s = NULL;
-    char       *rest;
-    int         argno;
-    static char root_name[] = "/";
-    char        drivername[50];
-    const char *preferred_driver = NULL;
-    int         err_exit = 0;
-    hid_t       fapl_id = H5P_DEFAULT;
-    H5E_auto2_t         func;
-    H5E_auto2_t         tools_func;
-    void               *edata;
-    void               *tools_edata;
+    hid_t        file_id = H5I_INVALID_HID;
+    char        *fname = NULL, *oname = NULL, *x;
+    const char  *s = NULL;
+    char        *rest;
+    int          argno;
+    static char  root_name[] = "/";
+    char         drivername[50];
+    const char  *preferred_driver = NULL;
+    int          err_exit = 0;
+    hid_t        fapl_id = H5P_DEFAULT;
+    H5E_auto2_t  func;
+    H5E_auto2_t  tools_func;
+    void        *edata;
+    void        *tools_edata;
+    hbool_t custom_vol_fapl = FALSE;
+    h5tools_vol_info_t vol_info;
 
 #ifdef H5_HAVE_ROS3_VFD
-    /* default "anonymous" s3 configuration */
+    /* Default "anonymous" S3 configuration */
     H5FD_ros3_fapl_t ros3_fa = {
-        1,     /* fapl version      */
-        false, /* authenticate      */
-        "",    /* aws region        */
-        "",    /* access key id     */
-        "",    /* secret access key */
+        1,     /* Structure Version */
+        false, /* Authenticate?     */
+        "",    /* AWS Region        */
+        "",    /* Access Key ID     */
+        "",    /* Secret Access Key */
     };
-#endif /* H5_HVAE_ROS3_VFD */
+#endif /* H5_HAVE_ROS3_VFD */
 
 #ifdef H5_HAVE_LIBHDFS
-    /* "default" HDFS configuration */
+    /* "Default" HDFS configuration */
     H5FD_hdfs_fapl_t hdfs_fa = {
-        1,           /* fapl version          */
-        "localhost", /* namenode name         */
-        0,           /* namenode port         */
-        "",          /* kerberos ticket cache */
-        "",          /* user name             */
-        2048,        /* stream buffer size    */
+        1,           /* Structure Version     */
+        "localhost", /* Namenode Name         */
+        0,           /* Namenode Port         */
+        "",          /* Kerberos ticket cache */
+        "",          /* User name             */
+        2048,        /* Stream buffer size    */
     };
 #endif /* H5_HAVE_LIBHDFS */
 
@@ -2884,6 +2899,9 @@ main(int argc, const char *argv[])
     /* Disable tools error reporting */
     H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
     H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
+
+    /* Initialize fapl info struct */
+    HDmemset(&vol_info, 0, sizeof(h5tools_vol_info_t));
 
     /* Build object display table */
     DISPATCH(H5O_TYPE_GROUP, "Group", NULL, NULL);
@@ -2948,6 +2966,19 @@ main(int argc, const char *argv[])
         else if (!HDstrncmp(argv[argno], "--vfd=", (size_t)6)) {
             preferred_driver = argv[argno]+6;
         }
+        else if (!HDstrncmp(argv[argno], "--vol-value=", (size_t)12)) {
+            vol_info.type = VOL_BY_VALUE;
+            vol_info.u.value = (H5VL_class_value_t)HDatoi(argv[argno]+12);
+            custom_vol_fapl = TRUE;
+        }
+        else if (!HDstrncmp(argv[argno], "--vol-name=", (size_t)11)) {
+            vol_info.type = VOL_BY_NAME;
+            vol_info.u.name = argv[argno]+11;
+            custom_vol_fapl = TRUE;
+        }
+        else if (!HDstrncmp(argv[argno], "--vol-info=", (size_t)11)) {
+            vol_info.info_string = argv[argno]+11;
+        }
         else if (!HDstrncmp(argv[argno], "--width=", (size_t)8)) {
             width_g = (int)HDstrtol(argv[argno]+8, &rest, 0);
 
@@ -3005,18 +3036,9 @@ main(int argc, const char *argv[])
 
         }
         else if (!HDstrncmp(argv[argno], "--s3-cred=", (size_t)10)) {
-#ifndef H5_HAVE_ROS3_VFD
-            HDfprintf(rawerrorstream, "Error: Read-Only S3 VFD is not enabled\n\n");
-            usage();
-            leave(EXIT_FAILURE);
-#else
-            unsigned           nelems     = 0;
-            char              *start      = NULL;
-            char              *s3cred_src = NULL;
-            char             **s3cred     = NULL;
-            char const        *ccred[3];
-            /* try to parse s3 credentials tuple
-             */
+#ifdef H5_HAVE_ROS3_VFD
+            char const *start = NULL;
+
             start = strchr(argv[argno], '=');
             if (start == NULL) {
                 HDfprintf(rawerrorstream, "Error: Unable to parse null credentials tuple\n"
@@ -3025,124 +3047,38 @@ main(int argc, const char *argv[])
                 leave(EXIT_FAILURE);
             }
             start++;
-            if (FAIL == parse_tuple((const char *)start, ',', &s3cred_src, &nelems, &s3cred)) {
-                HDfprintf(rawerrorstream, "Error: Unable to parse S3 credentials\n\n");
-                usage();
-                leave(EXIT_FAILURE);
-            }
-            /* sanity-check tuple count
-             */
-            if (nelems != 3) {
-                HDfprintf(rawerrorstream, "Error: Invalid S3 credentials\n\n");
-                usage();
-                leave(EXIT_FAILURE);
-            }
-            ccred[0] = (const char *)s3cred[0];
-            ccred[1] = (const char *)s3cred[1];
-            ccred[2] = (const char *)s3cred[2];
-            if (0 == h5tools_populate_ros3_fapl(&ros3_fa, ccred)) {
-                HDfprintf(rawerrorstream, "Error: Invalid S3 credentials\n\n");
-                usage();
-                leave(EXIT_FAILURE);
-            }
-            HDfree(s3cred);
-            HDfree(s3cred_src);
-#endif /* H5_HAVE_ROS3_VFD */
 
+            if (h5tools_parse_ros3_fapl_tuple(start, ',', &ros3_fa) < 0) {
+                HDfprintf(rawerrorstream, "Error: failed to parse S3 VFD credential info\n\n");
+                usage();
+                leave(EXIT_FAILURE);
+            }
+#else
+            HDfprintf(rawerrorstream, "Error: Read-Only S3 VFD is not enabled\n\n");
+            usage();
+            leave(EXIT_FAILURE);
+#endif
         }
         else if (!HDstrncmp(argv[argno], "--hdfs-attrs=", (size_t)13)) {
-#ifndef H5_HAVE_LIBHDFS
-            PRINTVALSTREAM(rawoutstream, "The HDFS VFD is not enabled.\n");
-            leave(EXIT_FAILURE);
-#else
-            /* Parse received configuration data and set fapl config struct */
+#ifdef H5_HAVE_LIBHDFS
+            char const *start = NULL;
 
-            hbool_t            _debug    = FALSE;
-            unsigned           nelems    = 0;
-            char const        *start     = NULL;
-            char              *props_src = NULL;
-            char             **props     = NULL;
-            unsigned long      k         = 0;
-
-            /* try to parse tuple
-             */
-            if (_debug) {
-                HDfprintf(stderr, "configuring hdfs...\n");
-            }
             start = argv[argno]+13; /* should never segfault: worst case of */
             if (*start != '(') {    /* null-termintor after '='.            */
-
-                if (_debug) {
-                    HDfprintf(stderr, "    no tuple.\n");
-                }
-                usage();
-                leave(EXIT_FAILURE);
-            }
-            if (FAIL == parse_tuple((const char *)start, ',', &props_src, &nelems, &props)) {
-                HDfprintf(stderr, "    unable to parse tuple.\n");
                 usage();
                 leave(EXIT_FAILURE);
             }
 
-            /* sanity-check tuple count
-             */
-            if (nelems != 5) {
-                HDfprintf(stderr, "    expected 5-ple, got `%d`\n", nelems);
+            if (h5tools_parse_hdfs_fapl_tuple(start, ',', &hdfs_fa) < 0) {
+                HDfprintf(rawerrorstream, "Error: failed to parse HDFS VFD configuration info\n\n");
                 usage();
                 leave(EXIT_FAILURE);
             }
-            if (_debug) {
-                HDfprintf(stderr, "    got hdfs-attrs tuple: `(%s,%s,%s,%s,%s)`\n", props[0], props[1], props[2], props[3], props[4]);
-            }
-
-            /* Populate fapl configuration structure with given properties.
-             * WARNING: No error-checking is done on length of input strings...
-             *          Silent overflow is possible, albeit unlikely.
-             */
-            if (HDstrncmp(props[0], "", 1)) {
-                if (_debug) {
-                    HDfprintf(stderr, "    setting namenode name: %s\n", props[0]);
-                }
-                HDstrncpy(hdfs_fa.namenode_name, (const char *)props[0], HDstrlen(props[0]));
-            }
-            if (HDstrncmp(props[1], "", 1)) {
-                k = strtoul((const char *)props[1], NULL, 0);
-                if (errno == ERANGE) {
-                    HDfprintf(stderr, "    supposed port number wasn't.\n");
-                    leave(EXIT_FAILURE);
-                }
-                if (_debug) {
-                    HDfprintf(stderr, "    setting namenode port: %lu\n", k);
-                }
-                hdfs_fa.namenode_port = (int32_t)k;
-            }
-            if (HDstrncmp(props[2], "", 1)) {
-                if (_debug) {
-                    HDfprintf(stderr, "    setting kerb cache path: %s\n", props[2]);
-                }
-                HDstrncpy(hdfs_fa.kerberos_ticket_cache, (const char *)props[2], HDstrlen(props[2]));
-            }
-            if (HDstrncmp(props[3], "", 1)) {
-                if (_debug) {
-                    HDfprintf(stderr, "    setting username: %s\n", props[3]);
-                }
-                HDstrncpy(hdfs_fa.user_name, (const char *)props[3], HDstrlen(props[3]));
-            }
-            if (HDstrncmp(props[4], "", 1)) {
-                k = HDstrtoul((const char *)props[4], NULL, 0);
-                if (errno == ERANGE) {
-                    HDfprintf(stderr, "    supposed buffersize number wasn't.\n");
-                    leave(EXIT_FAILURE);
-                }
-                if (_debug) {
-                    HDfprintf(stderr, "    setting stream buffer size: %lu\n", k);
-                }
-                hdfs_fa.stream_buffer_size = (int32_t)k;
-            }
-            HDfree(props);
-            HDfree(props_src);
-#endif /* H5_HAVE_LIBHDFS */
-
+#else
+            HDfprintf(rawerrorstream, "Error: The HDFS VFD is not enabled\n\n");
+            usage();
+            leave(EXIT_FAILURE);
+#endif
         }
         else if('-'!=argv[argno][1]) {
             /* Single-letter switches */
@@ -3235,42 +3171,42 @@ main(int argc, const char *argv[])
         leave(EXIT_FAILURE);
     }
 
+    /* Setup a custom fapl for file accesses */
+    if (custom_vol_fapl) {
+        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, &vol_info, NULL)) < 0) {
+            error_msg("failed to setup file access property list (fapl) for file\n");
+            leave(EXIT_FAILURE);
+        }
+    }
+
     if (preferred_driver) {
-        void *conf_fa = NULL;
+        h5tools_vfd_info_t vfd_info;
 
-        if (!HDstrcmp(preferred_driver, "ros3")) {
-#ifndef H5_HAVE_ROS3_VFD
-            HDfprintf(rawerrorstream, "Error: Read-Only S3 VFD not enabled.\n\n");
-            usage();
-            leave(EXIT_FAILURE);
+        vfd_info.info       = NULL;
+        vfd_info.name       = preferred_driver;
+
+        if (!HDstrcmp(preferred_driver, drivernames[ROS3_VFD_IDX])) {
+#ifdef H5_HAVE_ROS3_VFD
+            vfd_info.info = (void *)&ros3_fa;
 #else
-            conf_fa = (void *)&ros3_fa;
-#endif /* H5_HAVE_ROS3_VFD */
-
-        }
-        else if (!HDstrcmp(preferred_driver, "hdfs")) {
-#ifndef H5_HAVE_LIBHDFS
-            PRINTVALSTREAM(rawoutstream, "The HDFS VFD is not enabled.\n");
+            HDfprintf(rawerrorstream, "Error: Read-Only S3 VFD is not enabled\n\n");
             leave(EXIT_FAILURE);
+#endif
+        }
+        else if (!HDstrcmp(preferred_driver, drivernames[HDFS_VFD_IDX])) {
+#ifdef H5_HAVE_LIBHDFS
+            vfd_info.info = (void *)&hdfs_fa;
 #else
-            conf_fa = (void *)&hdfs_fa;
-#endif /* H5_HAVE_LIBHDFS */
+            HDfprintf(rawerrorstream, "Error: The HDFS VFD is not enabled\n\n");
+            leave(EXIT_FAILURE);
+#endif
         }
 
-        if (conf_fa != NULL) {
-            HDassert(fapl_id == H5P_DEFAULT);
-            fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-            if (fapl_id < 0) {
-                HDfprintf(rawerrorstream, "Error: Unable to create fapl entry\n\n");
-                leave(EXIT_FAILURE);
-            }
-            if (0 == h5tools_set_configured_fapl(fapl_id, preferred_driver, conf_fa)) {
-                HDfprintf(rawerrorstream, "Error: Unable to set fapl\n\n");
-                usage();
-                leave(EXIT_FAILURE);
-            }
+        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info)) < 0) {
+            HDfprintf(rawerrorstream, "Error: Unable to create FAPL for file access\n\n");
+            leave(EXIT_FAILURE);
         }
-    } /* preferred_driver defined */
+    }
 
     if (enable_error_stack > 0) {
         H5Eset_auto2(H5E_DEFAULT, func, edata);
@@ -3301,12 +3237,8 @@ main(int argc, const char *argv[])
         file_id = H5I_INVALID_HID;
 
         while (fname && *fname) {
-            if (fapl_id != H5P_DEFAULT) {
-                file_id = H5Fopen(fname, H5F_ACC_RDONLY, fapl_id);
-            }
-            else {
-                file_id = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, preferred_driver, drivername, sizeof drivername);
-            }
+            file_id = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id,
+                    (fapl_id == H5P_DEFAULT) ? FALSE : TRUE, drivername, sizeof drivername);
 
             if (file_id >= 0) {
                 if (verbose_g)

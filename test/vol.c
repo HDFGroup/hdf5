@@ -919,11 +919,11 @@ test_basic_object_operation(void)
         TEST_ERROR;
 
     /* H5Oexists_by_name */
-    if (H5Oexists_by_name(fid, NATIVE_VOL_TEST_GROUP_NAME, H5P_DEFAULT) != TRUE) 
+    if (H5Oexists_by_name(fid, NATIVE_VOL_TEST_GROUP_NAME, H5P_DEFAULT) != TRUE)
         TEST_ERROR;
 
     /* H5Oopen/close */
-    if ((oid = H5Oopen(fid, NATIVE_VOL_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) 
+    if ((oid = H5Oopen(fid, NATIVE_VOL_TEST_GROUP_NAME, H5P_DEFAULT)) < 0)
         TEST_ERROR;
     if (H5Oclose(oid) < 0)
         TEST_ERROR;

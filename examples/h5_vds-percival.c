@@ -12,8 +12,8 @@
 /************************************************************
 
   This example illustrates the concept of the virtual dataset.
-  Percival use case. Every fifth 10x10 plane in VDS is stored in 
-  the corresponding 3D unlimited dataset. 
+  Percival use case. Every fifth 10x10 plane in VDS is stored in
+  the corresponding 3D unlimited dataset.
   EIP: For now we will use finite dimension.
   There are 4 source datasets total.
   This file is intended for use with HDF5 Library version 1.10
@@ -28,18 +28,18 @@
 #define FILE         "vds-percival.h5"
 #define DATASET      "VDS-Percival"
 /* later
-#define VDSDIM0       H5S_UNLIMITED 
+#define VDSDIM0       H5S_UNLIMITED
 */
 #define VDSDIM0       40
-#define VDSDIM1       10 
-#define VDSDIM2       10 
+#define VDSDIM1       10
+#define VDSDIM2       10
 /* later
-#define DIM0          H5S_UNLIMITED 
+#define DIM0          H5S_UNLIMITED
 */
-#define DIM0          10 
-#define DIM1          10 
-#define DIM2          10 
-#define RANK          3 
+#define DIM0          10
+#define DIM1          10
+#define DIM2          10
+#define RANK          3
 #define PLANE_STRIDE  4
 
 const char *SRC_FILE[] = {
@@ -64,7 +64,7 @@ main (void)
     hid_t        dcpl;
     herr_t       status;
     hsize_t      vdsdims[3] = {VDSDIM0, VDSDIM1, VDSDIM2},
-                 vdsdims_max[3] = {VDSDIM0, VDSDIM1, VDSDIM2}, 
+                 vdsdims_max[3] = {VDSDIM0, VDSDIM1, VDSDIM2},
                  dims[3] = {DIM0, DIM1, DIM2},
                  dims_max[3] = {DIM0, DIM1, DIM2},
                  start[3],                   /* Hyperslab start parameter for VDS */
@@ -94,7 +94,7 @@ main (void)
         for (j = 0; j < DIM0*DIM1*DIM2; j++) wdata[j] = i+1;
 
         /*
-         * Create the source files and  datasets. Write data to each dataset and 
+         * Create the source files and  datasets. Write data to each dataset and
          * close all resources.
          */
 
@@ -107,7 +107,7 @@ main (void)
         status = H5Sclose (src_space);
         status = H5Dclose (dset);
         status = H5Fclose (file);
-    }    
+    }
 
     file = H5Fcreate (FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -119,7 +119,7 @@ main (void)
 
     /* Create VDS creation property */
     dcpl = H5Pcreate (H5P_DATASET_CREATE);
-     
+
     /* Initialize hyperslab values */
 
     start[0] = 0;
@@ -144,18 +144,18 @@ main (void)
     block[1] = DIM1;
     block[2] = DIM2;
 
-    /* 
-     * Build the mappings 
+    /*
+     * Build the mappings
      *
      */
     status = H5Sselect_hyperslab (src_space, H5S_SELECT_SET, start, NULL, src_count, block);
     for (i=0; i < PLANE_STRIDE; i++) {
         status = H5Sselect_hyperslab (vspace, H5S_SELECT_SET, start, stride, count, block);
         status = H5Pset_virtual (dcpl, vspace, SRC_FILE[i], SRC_DATASET[i], src_space);
-        start[0]++; 
-    } 
+        start[0]++;
+    }
 
-    H5Sselect_none(vspace); 
+    H5Sselect_none(vspace);
 
     /* Create a virtual dataset */
     dset = H5Dcreate2 (file, DATASET, H5T_NATIVE_INT, vspace, H5P_DEFAULT,
@@ -163,8 +163,8 @@ main (void)
     status = H5Sclose (vspace);
     status = H5Sclose (src_space);
     status = H5Dclose (dset);
-    status = H5Fclose (file);    
-     
+    status = H5Fclose (file);
+
     /*
      * Now we begin the read section of this example.
      */
@@ -185,7 +185,7 @@ main (void)
      */
     layout = H5Pget_layout (dcpl);
 
-    if (H5D_VIRTUAL == layout) 
+    if (H5D_VIRTUAL == layout)
         printf(" Dataset has a virtual layout \n");
     else
         printf(" Wrong layout found \n");
@@ -196,15 +196,15 @@ main (void)
      status = H5Pget_virtual_count (dcpl, &num_map);
      printf(" Number of mappings is %lu\n", (unsigned long)num_map);
 
-     /* 
+     /*
       * Get mapping parameters for each mapping.
       */
-      for (i = 0; i < (int)num_map; i++) {   
+      for (i = 0; i < (int)num_map; i++) {
       printf(" Mapping %d \n", i);
       printf("         Selection in the virtual dataset \n");
       /* Get selection in the virttual  dataset */
           vspace = H5Pget_virtual_vspace (dcpl, (size_t)i);
-          if (H5Sget_select_type(vspace) == H5S_SEL_HYPERSLABS) { 
+          if (H5Sget_select_type(vspace) == H5S_SEL_HYPERSLABS) {
               if (H5Sis_regular_hyperslab(vspace)) {
                    status = H5Sget_regular_hyperslab (vspace, start_out, stride_out, count_out, block_out);
                    printf("         start  = [%llu, %llu, %llu] \n", (unsigned long long)start_out[0], (unsigned long long)start_out[1], (unsigned long long)start_out[2]);

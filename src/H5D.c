@@ -150,9 +150,9 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     if(NULL == (dset = H5VL_dataset_create(vol_obj, &loc_params, name, lcpl_id, type_id, space_id, dcpl_id, dapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "unable to create dataset")
 
-    /* Get an atom for the dataset */
+    /* Get an ID for the dataset */
     if((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize dataset handle")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataset")
 
 done:
     if(H5I_INVALID_HID == ret_value)
@@ -315,7 +315,7 @@ done:
  *              it. It is illegal to subsequently use that same dataset
  *              ID in calls to other dataset functions.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -332,7 +332,7 @@ H5Dclose(hid_t dset_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset ID")
 
     /* Decrement the counter on the dataset.  It will be freed if the count
-     * reaches zero.  
+     * reaches zero.
      */
     if(H5I_dec_app_ref_always_close(dset_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't decrement count on dataset ID")
@@ -382,7 +382,7 @@ done:
  *
  * Purpose:     Returns the status of dataspace allocation.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -719,8 +719,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
-    hsize_t *size)
+H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id, hsize_t *size)
 {
     H5VL_object_t *vol_obj;     /* Dataset for this operation */
     hbool_t supported;          /* Whether 'get vlen buf size' operation is supported by VOL connector */
@@ -765,7 +764,7 @@ done:
  * Purpose:     Modifies the dimensions of a dataset.
  *              Can change to a smaller dimension.
  *
- * Return:      SUCCEED/FAIL
+ * Return:	Non-negative on success, negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -802,7 +801,7 @@ done:
  *
  * Purpose:     Flushes all buffers associated with a dataset.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success, negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -814,7 +813,7 @@ H5Dflush(hid_t dset_id)
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", dset_id);
-    
+
     /* Check args */
     if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id parameter is not a valid dataset identifier")
@@ -840,7 +839,7 @@ done:
  *
  * Purpose:     Refreshes all buffers associated with a dataset.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success, negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -873,14 +872,14 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Dformat_convert (Internal)
  *
- * Purpose:     For chunked: 
+ * Purpose:     For chunked:
  *                  Convert the chunk indexing type to version 1 B-tree if not
  *              For compact/contiguous:
  *                  Downgrade layout version to 3 if greater than 3
  *              For virtual:
  *                  No conversion
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success, negative on failure
  *
  * Programmer:  Vailin Choi
  *              Feb 2015
@@ -892,7 +891,7 @@ H5Dformat_convert(hid_t dset_id)
 {
     H5VL_object_t  *vol_obj;                   /* Dataset for this operation   */
     herr_t          ret_value = SUCCEED;    /* Return value                 */
-    
+
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", dset_id);
 
@@ -957,7 +956,7 @@ done:
  *              Intended for use with the H5D(O)read_chunk API call so
  *              the caller can construct an appropriate buffer.
  *
- * Return:      SUCCEED/FAIL
+ * Return:	Non-negative on success, negative on failure
  *
  * Programmer:  Matthew Strong (GE Healthcare)
  *              20 October 2016

@@ -34,7 +34,7 @@
     if (VERBOSE_MED && *mesg != '\0')                                  \
         HDprintf("%s\n", mesg)
 
-/* 
+/*
  * VRFY: Verify if the condition val is true.
  * If it is true, then call MESG to print mesg, depending on the verbose
  * level.

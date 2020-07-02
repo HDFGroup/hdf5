@@ -15,6 +15,7 @@
 #define H5DIFF_H__
 
 #include "hdf5.h"
+#include "h5tools.h"
 #include "h5trav.h"
 
 /*
@@ -52,9 +53,9 @@ typedef struct {
  */
 /* linked list to keep exclude path list */
 struct exclude_path_list {
-    char  *obj_path;
-    h5trav_type_t obj_type;
-    struct exclude_path_list * next;
+    const char                 *obj_path;
+    h5trav_type_t               obj_type;
+    struct exclude_path_list   *next;
 };
 
 /* Enumeration value for keeping track of whether an error occurred or differences were found */
@@ -86,6 +87,10 @@ typedef struct {
     int        m_list_not_cmp;        /* list not comparable messages */
     int        exclude_path;          /* exclude path to an object */
     struct     exclude_path_list * exclude; /* keep exclude path list */
+    h5tools_vol_info_t  vol_info_1;   /* VOL information for input file */
+    h5tools_vol_info_t  vol_info_2;   /* VOL information for output file */
+    hbool_t    custom_vol_1;          /* Using a custom input VOL? */
+    hbool_t    custom_vol_2;          /* Using a custom output VOL? */
 } diff_opt_t;
 
 

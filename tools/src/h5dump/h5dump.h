@@ -43,6 +43,7 @@ typedef struct h5dump_table_items_t {
     table_t         *dset_table;    /* Table of datasets */
     table_t         *type_table;    /* Table of datatypes */
 } h5dump_table_items_t;
+
 typedef struct h5dump_table_list_t {
     size_t                  nalloc;
     size_t                  nused;

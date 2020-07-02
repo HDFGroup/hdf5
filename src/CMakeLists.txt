@@ -231,6 +231,7 @@ set (H5FD_SOURCES
     ${HDF5_SRC_DIR}/H5FDhdfs.c
     ${HDF5_SRC_DIR}/H5FDint.c
     ${HDF5_SRC_DIR}/H5FDlog.c
+    ${HDF5_SRC_DIR}/H5FDmirror.c
     ${HDF5_SRC_DIR}/H5FDmpi.c
     ${HDF5_SRC_DIR}/H5FDmpio.c
     ${HDF5_SRC_DIR}/H5FDmulti.c
@@ -238,6 +239,7 @@ set (H5FD_SOURCES
     ${HDF5_SRC_DIR}/H5FDs3comms.c
     ${HDF5_SRC_DIR}/H5FDsec2.c
     ${HDF5_SRC_DIR}/H5FDspace.c
+    ${HDF5_SRC_DIR}/H5FDsplitter.c
     ${HDF5_SRC_DIR}/H5FDstdio.c
     ${HDF5_SRC_DIR}/H5FDtest.c
     ${HDF5_SRC_DIR}/H5FDwindows.c
@@ -249,6 +251,7 @@ set (H5FD_HDRS
     ${HDF5_SRC_DIR}/H5FDfamily.h
     ${HDF5_SRC_DIR}/H5FDhdfs.h
     ${HDF5_SRC_DIR}/H5FDlog.h
+    ${HDF5_SRC_DIR}/H5FDmirror.h
     ${HDF5_SRC_DIR}/H5FDmpi.h
     ${HDF5_SRC_DIR}/H5FDmpio.h
     ${HDF5_SRC_DIR}/H5FDmulti.h
@@ -256,6 +259,7 @@ set (H5FD_HDRS
     ${HDF5_SRC_DIR}/H5FDros3.h
     ${HDF5_SRC_DIR}/H5FDs3comms.h
     ${HDF5_SRC_DIR}/H5FDsec2.h
+    ${HDF5_SRC_DIR}/H5FDsplitter.h
     ${HDF5_SRC_DIR}/H5FDstdio.h
     ${HDF5_SRC_DIR}/H5FDwindows.h
 )
@@ -1137,6 +1141,7 @@ if (NOT ONLY_SHARED_LIBS)
       PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
       INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
   )
+  target_compile_options(${HDF5_LIB_TARGET} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
   target_compile_definitions(${HDF5_LIB_TARGET}
       PUBLIC
           ${HDF_EXTRA_C_FLAGS}
@@ -1173,6 +1178,7 @@ if (BUILD_SHARED_LIBS)
       PUBLIC "$<$<BOOL:${HDF5_ENABLE_HDFS}>:${HDFS_INCLUDE_DIR}>"
       INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
   )
+  target_compile_options(${HDF5_LIBSH_TARGET} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
   target_compile_definitions(${HDF5_LIBSH_TARGET}
       PUBLIC
           "H5_BUILT_AS_DYNAMIC_LIB"

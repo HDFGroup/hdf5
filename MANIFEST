@@ -33,6 +33,8 @@
 ./autogen.sh
 ./configure.ac
 
+./.github/workflows/main.yml  _DO_NOT_DISTRIBUTE_
+
 ./m4/aclocal_cxx.m4
 ./m4/aclocal_fc.m4
 ./m4/aclocal_fc.f90
@@ -143,10 +145,43 @@
 ./config/solaris
 
 #warnings files for both autotools and CMake
-./config/gnu-warnings-general
-./config/gnu-warnings-developer-general
-./config/gnu-warnings-no-developer-general
-./config/intel-warnings-general
+./config/clang-cxxflags
+./config/clang-flags
+./config/clang-warnings/developer-general
+./config/clang-warnings/error-general
+./config/clang-warnings/general
+./config/clang-warnings/no-developer-general
+./config/gnu-warnings/4.8-4.last
+./config/gnu-warnings/4.8
+./config/gnu-warnings/4.9
+./config/gnu-warnings/5
+./config/gnu-warnings/6
+./config/gnu-warnings/7
+./config/gnu-warnings/8
+./config/gnu-warnings/9
+./config/gnu-warnings/cxx-general
+./config/gnu-warnings/cxx-4.9
+./config/gnu-warnings/cxx-5
+./config/gnu-warnings/cxx-error-5
+./config/gnu-warnings/cxx-error-general
+./config/gnu-warnings/developer-4.8
+./config/gnu-warnings/developer-7
+./config/gnu-warnings/developer-8
+./config/gnu-warnings/developer-general
+./config/gnu-warnings/error-5
+./config/gnu-warnings/error-8
+./config/gnu-warnings/error-general
+./config/gnu-warnings/general
+./config/gnu-warnings/gfort-general
+./config/gnu-warnings/gfort-4.8
+./config/gnu-warnings/gfort-5
+./config/gnu-warnings/gfort-6
+./config/gnu-warnings/gfort-8
+./config/gnu-warnings/no-developer-4.8
+./config/gnu-warnings/no-developer-8
+./config/gnu-warnings/no-developer-general
+./config/intel-warnings/ifort-general
+./config/intel-warnings/general
 
 ./config/site-specific/BlankForm
 
@@ -157,6 +192,7 @@
 ./examples/h5_chunk_read.c
 ./examples/h5_compound.c
 ./examples/h5_crtgrpd.c
+./examples/h5_debug_trace.c
 ./examples/h5_subset.c
 ./examples/h5_cmprss.c
 ./examples/h5_rdwt.c
@@ -654,6 +690,8 @@
 ./src/H5FDint.c
 ./src/H5FDlog.c
 ./src/H5FDlog.h
+./src/H5FDmirror.c
+./src/H5FDmirror.h
 ./src/H5FDmodule.h
 ./src/H5FDmpi.c
 ./src/H5FDmpi.h
@@ -671,6 +709,8 @@
 ./src/H5FDsec2.c
 ./src/H5FDsec2.h
 ./src/H5FDspace.c
+./src/H5FDsplitter.c
+./src/H5FDsplitter.h
 ./src/H5FDstdio.c
 ./src/H5FDstdio.h
 ./src/H5FDtest.c
@@ -1113,6 +1153,7 @@
 ./test/memleak_H5O_dtype_decode_helper_H5Odtype.h5
 ./test/mergemsg.h5
 ./test/mf.c
+./test/mirror_vfd.c
 ./test/mount.c
 ./test/mtime.c
 ./test/multi_file_v16-r.h5
@@ -1173,6 +1214,7 @@
 ./test/testhdf5.c
 ./test/testhdf5.h
 ./test/testlibinfo.sh.in
+./test/test_mirror.sh.in
 ./test/test_usecases.sh.in
 ./test/test_vol_plugin.sh.in
 ./test/testmeta.c
@@ -1187,6 +1229,7 @@
 ./test/theap.c
 ./test/thread_id.c
 ./test/tid.c
+./test/timer.c
 ./test/titerate.c
 ./test/tlayouto.h5
 ./test/tmeta.c
@@ -1216,6 +1259,7 @@
 ./test/unlink.c
 ./test/unregister.c
 ./test/use_append_chunk.c
+./test/use_append_chunk_mirror.c
 ./test/use_append_mchunks.c
 ./test/use_common.c
 ./test/use_disable_mdc_flushes.c
@@ -2772,6 +2816,18 @@
 ./tools/test/perform/sio_standalone.h
 ./tools/test/perform/zip_perf.c
 
+# Utils directory
+./utils/COPYING
+./utils/Makefile.am
+
+# Mirror VFD utilities
+./utils/mirror_vfd/Makefile.am
+./utils/mirror_vfd/mirror_remote.c
+./utils/mirror_vfd/mirror_remote.h
+./utils/mirror_vfd/mirror_server.c
+./utils/mirror_vfd/mirror_server_stop.c
+./utils/mirror_vfd/mirror_writer.c
+
 # high level libraries
 ./hl/COPYING
 ./hl/Makefile.am
@@ -3357,6 +3413,8 @@
 ./config/cmake/hdf5-config.cmake.in
 ./config/cmake/hdf5-config-version.cmake.in
 ./config/cmake/HDFCompilerFlags.cmake
+./config/cmake/HDFCXXCompilerFlags.cmake
+./config/cmake/HDFFortranCompilerFlags.cmake
 ./config/cmake/HDF5_Process_Flex_Files.cmake
 ./config/cmake/HDF5Macros.cmake
 ./config/cmake/HDF5UseFortran.cmake
@@ -3507,6 +3565,8 @@
 ./tools/test/misc/vds/CMakeLists.txt
 ./tools/test/perform/CMakeLists.txt
 ./tools/test/perform/CMakeTests.cmake
+./utils/CMakeLists.txt
+./utils/mirror_vfd/CMakeLists.txt
 
 # CMake-specific User Scripts
 ./config/cmake/CTestScript.cmake

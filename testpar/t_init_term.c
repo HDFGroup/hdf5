@@ -37,7 +37,7 @@ main (int argc, char **argv)
     /* Initialize and finalize MPI */
     MPI_Init(&argc, &argv);
     MPI_Comm_size(comm, &mpi_size);
-    MPI_Comm_rank(comm, &mpi_rank);  
+    MPI_Comm_rank(comm, &mpi_rank);
 
     if(MAINPROCESS)
 	TESTING("Usage of Serial HDF5 after MPI_Finalize() is called");

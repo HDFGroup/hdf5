@@ -365,6 +365,22 @@
 #endif /* __cplusplus */
 
 /*
+ * Networking headers used by the mirror VFD and related tests and utilities.
+ */
+#ifdef H5_HAVE_ARPA_INET_H
+#   include <arpa/inet.h>
+#endif
+#ifdef H5_HAVE_NETDB_H
+#   include <netdb.h>
+#endif
+#ifdef H5_HAVE_NETINET_IN_H
+#   include <netinet/in.h>
+#endif
+#ifdef H5_HAVE_SYS_SOCKET_H
+#   include <sys/socket.h>
+#endif
+
+/*
  * Status return values for the `herr_t' type.
  * Since some unix/c routines use 0 and -1 (or more precisely, non-negative
  * vs. negative) as their return code, and some assumption had been made in
@@ -598,21 +614,37 @@
 #define LOCK_UN     0x08
 #endif /* H5_HAVE_FLOCK */
 
-/*
- * Data types and functions for timing certain parts of the library.
+/* Typedefs and functions for timing certain parts of the library. */
+
+/* A set of elapsed/user/system times emitted as a time point by the
+ * platform-independent timers.
  */
 typedef struct {
-    double  utime;    /*user time      */
-    double  stime;    /*system time      */
-    double  etime;    /*elapsed wall-clock time  */
+    double user;      /* User time in seconds */
+    double system;    /* System time in seconds */
+    double elapsed;   /* Elapsed (wall clock) time in seconds */
+} H5_timevals_t;
+
+/* Timer structure for platform-independent timers */
+typedef struct {
+    H5_timevals_t   initial;            /* Current interval start time */
+    H5_timevals_t   final_interval;     /* Last interval elapsed time */
+    H5_timevals_t   total;              /* Total elapsed time for all intervals */
+    hbool_t         is_running;         /* Whether timer is running */
 } H5_timer_t;
 
-H5_DLL void H5_timer_reset (H5_timer_t *timer);
-H5_DLL void H5_timer_begin (H5_timer_t *timer);
-H5_DLL void H5_timer_end (H5_timer_t *sum/*in,out*/,
-         H5_timer_t *timer/*in,out*/);
+/* Returns library bandwidth as a pretty string */
 H5_DLL void H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds);
+
+/* Timer functionality */
 H5_DLL time_t H5_now(void);
+H5_DLL uint64_t H5_now_usec(void);
+H5_DLL herr_t H5_timer_init(H5_timer_t *timer /*in,out*/);
+H5_DLL herr_t H5_timer_start(H5_timer_t *timer /*in,out*/);
+H5_DLL herr_t H5_timer_stop(H5_timer_t *timer /*in,out*/);
+H5_DLL herr_t H5_timer_get_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/);
+H5_DLL herr_t H5_timer_get_total_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/);
+H5_DLL char *H5_timer_get_time_string(double seconds);
 
 /* Depth of object copy */
 typedef enum {
@@ -646,6 +678,9 @@ typedef struct {
 #ifndef HDabs
     #define HDabs(X)    abs(X)
 #endif /* HDabs */
+#ifndef HDaccept
+    #define HDaccept(A,B,C)    accept((A),(B),(C)) /* mirror VFD */
+#endif /* HDaccept */
 #ifndef HDaccess
     #define HDaccess(F,M)    access(F, M)
 #endif /* HDaccess */
@@ -692,6 +727,9 @@ typedef struct {
 #ifndef HDatoll
     #define HDatoll(S)   atoll(S)
 #endif /* HDatol */
+#ifndef HDbind
+    #define HDbind(A,B,C)   bind((A),(B),(C)) /* mirror VFD */
+#endif /* HDbind */
 #ifndef HDbsearch
     #define HDbsearch(K,B,N,Z,F)  bsearch(K,B,N,Z,F)
 #endif /* HDbsearch */
@@ -728,12 +766,18 @@ typedef struct {
 #ifndef HDclock
     #define HDclock()    clock()
 #endif /* HDclock */
+#ifndef HDclock_gettime
+    #define HDclock_gettime(CID, TS)    clock_gettime(CID, TS)
+#endif /* HDclock_gettime */
 #ifndef HDclose
     #define HDclose(F)    close(F)
 #endif /* HDclose */
 #ifndef HDclosedir
     #define HDclosedir(D)    closedir(D)
 #endif /* HDclosedir */
+#ifndef HDconnect
+    #define HDconnect(A,B,C)    connect((A),(B),(C)) /* mirror VFD */
+#endif /* HDconnect */
 #ifndef HDcos
     #define HDcos(X)    cos(X)
 #endif /* HDcos */
@@ -934,7 +978,7 @@ typedef off_t               h5_stat_size_t;
 #define H5_SIZEOF_H5_STAT_SIZE_T H5_SIZEOF_OFF_T
 
 #ifndef HDftell
-    #define HDftell(F)    ftello(F)
+    #define HDftell(F)    ftell(F)
 #endif /* HDftell */
 #ifndef HDftruncate
     #define HDftruncate(F,L)        ftruncate(F,L)
@@ -978,9 +1022,12 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDgetgroups
     #define HDgetgroups(Z,G)  getgroups(Z,G)
 #endif /* HDgetgroups */
+#ifndef HDgethostbyaddr
+    #define HDgethostbyaddr(A,B,C)  gethostbyaddr((A),(B),(C)) /* mirror VFD */
+#endif /* HDgethostbyaddr */
 #ifndef HDgethostname
     #define HDgethostname(N,L)    gethostname(N,L)
-#endif /* HDgetlogin */
+#endif /* HDgethostname */
 #ifndef HDgetlogin
     #define HDgetlogin()    getlogin()
 #endif /* HDgetlogin */
@@ -1002,9 +1049,12 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDgetrusage
     #define HDgetrusage(X,S)  getrusage(X,S)
 #endif /* HDgetrusage */
-#ifndef HDgets
-    #define HDgets(S)    gets(S)
+
+/* Don't define HDgets - gets() was deprecated in C99 and removed in C11 */
+#ifdef HDgets
+    #undef HDgets
 #endif /* HDgets */
+
 #ifndef HDgettimeofday
     #define HDgettimeofday(S,P)  gettimeofday(S,P)
 #endif /* HDgettimeofday */
@@ -1014,6 +1064,18 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDgmtime
     #define HDgmtime(T)    gmtime(T)
 #endif /* HDgmtime */
+#ifndef HDhtonl
+    #define HDhtonl(X)    htonl((X)) /* mirror VFD */
+#endif /* HDhtonl */
+#ifndef HDhtons
+    #define HDhtons(X)    htons((X)) /* mirror VFD */
+#endif /* HDhtons */
+#ifndef HDinet_addr
+    #define HDinet_addr(C)    inet_addr((C)) /* mirror VFD */
+#endif /* HDinet_addr */
+#ifndef HDinet_ntoa
+    #define HDinet_ntoa(C)    inet_ntoa((C)) /* mirror VFD */
+#endif /* HDinet_ntoa */
 #ifndef HDisalnum
     #define HDisalnum(C)    isalnum((int)(C)) /*cast for solaris warning*/
 #endif /* HDisalnum */
@@ -1068,6 +1130,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDlink
     #define HDlink(OLD,NEW)    link(OLD,NEW)
 #endif /* HDlink */
+#ifndef HDlisten
+    #define HDlisten(A,B)    listen((A),(B)) /* mirror VFD */
+#endif /* HDlisten */
 #ifndef HDllround
     #define HDllround(V)     llround(V)
 #endif /* HDround */
@@ -1149,6 +1214,12 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDnanosleep
     #define HDnanosleep(N, O)    nanosleep(N, O)
 #endif /* HDnanosleep */
+#ifndef HDntohl
+    #define HDntohl(A)    ntohl((A)) /* mirror VFD */
+#endif /* HDntohl */
+#ifndef HDntohs
+    #define HDntohs(A)    ntohs((A)) /* mirror VFD */
+#endif /* HDntohs */
 #ifndef HDopen
     #define HDopen(F,...)    open(F,__VA_ARGS__)
 #endif /* HDopen */
@@ -1296,12 +1367,21 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDsetsid
     #define HDsetsid()    setsid()
 #endif /* HDsetsid */
+#ifndef HDsetsockopt
+    #define HDsetsockopt(A,B,C,D,E)    setsockopt((A),(B),(C),(D),(E)) /* mirror VFD */
+#endif /* HDsetsockopt */
 #ifndef HDsetuid
     #define HDsetuid(U)    setuid(U)
 #endif /* HDsetuid */
 #ifndef HDsetvbuf
     #define HDsetvbuf(F,S,M,Z)  setvbuf(F,S,M,Z)
 #endif /* HDsetvbuf */
+#ifndef HDshutdown
+    #define HDshutdown(A, B)    shutdown((A),(B)) /* mirror VFD */
+#endif /* HDshutdown */
+#ifndef HDsigaction
+    #define HDsigaction(S,A,O)  sigaction((S),(A),(O))
+#endif /* HDsigaction */
 #ifndef HDsigaddset
     #define HDsigaddset(S,N)  sigaddset(S,N)
 #endif /* HDsigaddset */
@@ -1347,6 +1427,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDsnprintf
     #define HDsnprintf    snprintf /*varargs*/
 #endif /* HDsnprintf */
+#ifndef HDsocket
+    #define HDsocket(A,B,C)    socket((A),(B),(C)) /* mirror VFD */
+#endif /* HDsocket */
 #ifndef HDsprintf
     #define HDsprintf    sprintf /*varargs*/
 #endif /* HDsprintf */
@@ -2081,8 +2164,9 @@ H5_DLL herr_t H5CX_pop(void);
     } /* end if */                                                            \
                                                                               \
     /* Initialize the package, if appropriate */                              \
-    H5_PACKAGE_INIT(H5_MY_PKG_INIT, err)                                      \
-                                                                              \
+    H5_PACKAGE_INIT(H5_MY_PKG_INIT, err)
+
+#define FUNC_ENTER_API_PUSH(err)                                              \
     /* Push the name of this function on the function stack */                \
     H5_PUSH_FUNC                                                              \
                                                                               \
@@ -2096,6 +2180,7 @@ H5_DLL herr_t H5CX_pop(void);
 #define FUNC_ENTER_API(err) {{                                                \
     FUNC_ENTER_API_COMMON                                                     \
     FUNC_ENTER_API_INIT(err);                                                 \
+    FUNC_ENTER_API_PUSH(err);                                                 \
     /* Clear thread error stack entering public functions */                  \
     H5E_clear_stack(NULL);                                                    \
     {
@@ -2107,6 +2192,7 @@ H5_DLL herr_t H5CX_pop(void);
 #define FUNC_ENTER_API_NOCLEAR(err) {{                                        \
     FUNC_ENTER_API_COMMON                                                     \
     FUNC_ENTER_API_INIT(err);                                                 \
+    FUNC_ENTER_API_PUSH(err);                                                 \
     {
 
 /*
@@ -2134,6 +2220,18 @@ H5_DLL herr_t H5CX_pop(void);
     FUNC_ENTER_COMMON_NOERR(H5_IS_API(FUNC));                                 \
     FUNC_ENTER_API_THREADSAFE;                                                \
     BEGIN_MPE_LOG                                                             \
+    {
+
+/*
+ * Use this macro for API functions that should only perform initialization
+ *      of the library or an interface, but not push any state (API context,
+ *      function name, start MPE logging, etc) examples are: H5open.
+ *
+ */
+#define FUNC_ENTER_API_NOPUSH(err) {{{{{                                      \
+    FUNC_ENTER_COMMON(H5_IS_API(FUNC));                                       \
+    FUNC_ENTER_API_THREADSAFE;                                                \
+    FUNC_ENTER_API_INIT(err);                                                 \
     {
 
 /* Note: this macro only works when there's _no_ interface initialization routine for the module */
@@ -2324,6 +2422,16 @@ H5_DLL herr_t H5CX_pop(void);
     FUNC_LEAVE_API_THREADSAFE                                                 \
     return(ret_value);                                                        \
 }}}} /*end scope from beginning of FUNC_ENTER*/
+
+/* Use this macro to match the FUNC_ENTER_API_NOPUSH macro */
+#define FUNC_LEAVE_API_NOPUSH(ret_value)                                             \
+        ;                                                                     \
+    } /*end scope from end of FUNC_ENTER*/                                    \
+    if(err_occurred)                                                          \
+       (void)H5E_dump_api_stack(TRUE);                                        \
+    FUNC_LEAVE_API_THREADSAFE                                                 \
+    return(ret_value);                                                        \
+}}}}} /*end scope from beginning of FUNC_ENTER*/
 
 #define FUNC_LEAVE_NOAPI(ret_value)                                           \
         ;                                                                     \

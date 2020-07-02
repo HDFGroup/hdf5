@@ -615,7 +615,7 @@ H5D__earray_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
  *		Failure:	NULL
  *
  * Programmer:	Vailin Choi; July 2010
- *		
+ *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -933,7 +933,7 @@ H5D__earray_idx_create(const H5D_chk_idx_info_t *idx_info)
     /* General parameters */
     if(idx_info->pline->nused > 0) {
         unsigned chunk_size_len;        /* Size of encoded chunk size */
-        
+
         /* Compute the size required for encoding the size of a chunk, allowing
          *      for an extra byte, in case the filter makes the chunk larger.
          */
@@ -1349,7 +1349,7 @@ H5D__earray_idx_iterate(const H5D_chk_idx_info_t *idx_info,
         } /* end if */
 	udata.cb = chunk_cb;
 	udata.udata = chunk_udata;
-	
+
         /* Iterate over the extensible array elements */
 	if((ret_value = H5EA_iterate(ea, H5D__earray_idx_iterate_cb, &udata)) < 0)
 	    HERROR(H5E_DATASET, H5E_BADITER, "unable to iterate over fixed array chunk index");

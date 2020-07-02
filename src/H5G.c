@@ -782,7 +782,7 @@ H5Gflush(hid_t group_id)
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", group_id);
-    
+
     /* Check args */
     if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(group_id, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group ID")

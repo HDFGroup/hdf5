@@ -69,7 +69,7 @@
 #   define GB8LL	0	/*cannot do the test*/
 #endif
 
-/* Define Small, Large, Extra Large, Huge File which 
+/* Define Small, Large, Extra Large, Huge File which
  * corrspond to less than 2GB, 2GB, 4GB, and tens of GB file size.
  * NO_FILE stands for "no file" to be tested.
  */
@@ -633,7 +633,7 @@ error:
     return 1;
 } /* end test_sec2() */
 
-static int 
+static int
 test_stdio(hid_t fapl)
 {
     char	filename[1024];

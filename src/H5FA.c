@@ -691,11 +691,6 @@ END_FUNC(PRIV)  /* end H5FA_delete() */
  * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
- * Modification:
- *              Prototype changed (HDFFV-10661)
- *              - herr_t to int
- *              - SUCCEED/FAIL to H5_ITER_CONT/H5_ITER_ERROR
- *              June 6, 2019 -BMR
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(PRIV, ERR,

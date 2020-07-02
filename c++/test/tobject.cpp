@@ -430,7 +430,6 @@ const H5std_string DSETNAME("dataset");
 static void test_open_object_header()
 {
     hsize_t     dims[2];
-    H5G_info_t  ginfo;                      /* Group info struct */
 
     // Output message about test being performed
     SUBTEST("Group::getObjId");
@@ -485,6 +484,7 @@ static void test_open_object_header()
         dset.setId(obj_dset);
         dspace = dset.getSpace();
         bool is_simple = dspace.isSimple();
+        verify_val(is_simple, true, "isSimple", __LINE__, __FILE__);
         dspace.close();
 
         // Open datatype object from the group
@@ -542,7 +542,7 @@ const H5std_string GROUP1NAME("group1");
 const H5std_string GROUP2NAME("group2");
 static void test_getobjectinfo_same_file()
 {
-    H5O_info2_t	oinfo1, oinfo2;         /* Object info structs */
+    H5O_info2_t    oinfo1, oinfo2;         /* Object info structs */
 
     // Output message about test being performed
     SUBTEST("Group::getObjinfo");

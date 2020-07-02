@@ -272,7 +272,7 @@ int main(int argc, const char *argv[])
                         verbose = 0;
                         u++;
                         break;
-                    
+
                     /* Random # seed */
                     case 'r':
                         use_seed = 1;

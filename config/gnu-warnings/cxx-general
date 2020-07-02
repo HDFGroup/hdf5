@@ -9,24 +9,23 @@
 -Wall
 -Wcast-qual
 -Wconversion
+-Wctor-dtor-privacy
+-Weffc++
 -Wextra
 -Wfloat-equal
 -Wformat=2
 -Winit-self
 -Winvalid-pch
 -Wmissing-include-dirs
-#
-# NOTE: Due to the divergence in the C and C++, we're dropping support for
-# compiling the C library with a C++ compiler and dropping the -Wc++-compat
-# warning.
-#
--Wno-c++-compat
-#
-# NOTE: Disable the -Wformat-nonliteral from -Wformat=2 here and re-add
-# it to the developer flags.
-#
 -Wno-format-nonliteral
+-Wnon-virtual-dtor
+-Wold-style-cast
+-Woverloaded-virtual
+-Wreorder
 -Wshadow
+-Wsign-promo
+##-Wunreachable-code
 -Wundef
+##-Wvariadic-macros
 -Wwrite-strings
 -pedantic

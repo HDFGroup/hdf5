@@ -103,10 +103,15 @@ AC_SUBST([AR_FLAGS])
 
 ## H5_CFLAGS (and company) are for CFLAGS that should be used on HDF5, but
 ## not exported to h5cc (or h5fc, etc.)
+##
+## H5_ECFLAGS (and company) are for warnings that should be treated as errors.
+##
 AC_SUBST([H5_CFLAGS])
+AC_SUBST([H5_ECFLAGS])
 AC_SUBST([H5_CPPFLAGS])
 AC_SUBST([H5_FCFLAGS])
 AC_SUBST([H5_CXXFLAGS])
+AC_SUBST([H5_ECXXFLAGS])
 AC_SUBST([H5_JNIFLAGS])
 AC_SUBST([H5_JAVACFLAGS])
 AC_SUBST([H5_JAVAFLAGS])
@@ -284,6 +289,62 @@ while test -n "$hname"; do
   test "$hname_tmp" = "$hname" && break
 done
 
+##
+## Enable/disable sanitizer checks for clang compilers, initially address sanitizer
+##
+AC_MSG_CHECKING([for clang sanitizer checks])
+AC_ARG_ENABLE([sanitize-checks],
+              [AS_HELP_STRING([--enable-sanitize-checks=address],
+                              [(clang/clang++ compilers only) Enable sanitize checks.
+                               Address is useful for detecting issues dealing with 
+                               memory. See AddressSanitizer in config/sanitizer/README.md
+                               for more information.
+                               [default=none]
+                               ])],
+              [CLANG_SANITIZE_CHECKS=$enableval])
+
+# Set default
+if test "X-$CLANG_SANITIZE_CHECKS" = X- ; then
+  CLANG_SANITIZE_CHECKS=none
+fi
+
+if test "X$CC_BASENAME" = "Xclang"; then
+  AC_SUBST([CLANG_SANITIZE_CHECKS])
+
+  # There are several sanitizer tools.  At present we are testing 
+  # and describing only -fsanitizer=address with autotools.
+  case "X-$CLANG_SANITIZE_CHECKS" in
+    X-no|X-none)
+      CLANG_SANITIZE_CHECKS=none
+      CLANG_SANITIZE_LIST=
+      ;;
+    *)
+      CLANG_SANITIZE_LIST=$CLANG_SANITIZE_CHECKS
+      ;;
+  esac
+  AC_MSG_RESULT([$CLANG_SANITIZE_CHECKS])
+
+  # Other tools can be added to the list of checks
+  # The clang compiler doesn't support some of them; they should be
+  # checked before adding them to the list in the help message.
+  # The sanitizers/sanitizers.cmake file lists these options:
+  # address, memory, memoryWithOrigins, undefined, thread, leak, 
+  # 'address;undefined'.  Which and which combinations of these are 
+  #  supported varies by compiler version, but unsupported options
+  # or combinations will result in configure errors reported in config.log.
+  # Comma separated lists of sanitize options wil be entered intact in
+  # one -fsanitize=<list> flag.  Space separated lists will be entered in
+  # separate -fsanitize=<item> flags.
+  # NOTE: No sanity checking done here!
+  if test -n "$CLANG_SANITIZE_LIST"; then
+    H5_CFLAGS="$H5_CFLAGS -fno-omit-frame-pointer"
+    H5_CXXFLAGS="$H5_CXXFLAGS -fno-omit-frame-pointer"
+    for sanitizer in `echo $CLANG_SANITIZE_LIST`; do
+      H5_CFLAGS="$H5_CFLAGS -fsanitize=${sanitizer}"
+      H5_CXXFLAGS="$H5_CXXFLAGS -fsanitize=${sanitizer}"
+    done
+  fi
+fi
 
 ## ----------------------------------------------------------------------
 ## Determine build mode (debug, production, clean).
@@ -1086,14 +1147,16 @@ AC_CHECK_HEADERS([stddef.h setjmp.h features.h])
 AC_CHECK_HEADERS([dirent.h])
 AC_CHECK_HEADERS([stdint.h], [C9x=yes])
 AC_CHECK_HEADERS([stdbool.h])
+AC_CHECK_HEADERS([netdb.h netinet/in.h arpa/inet.h])
 
 ## Darwin
-AC_CHECK_HEADERS([mach/mach_time.h])
-## Also need to detect Darwin for pubconf
+AC_SUBST([H5_IS_DARWIN])
+H5_IS_DARWIN="no
 case $host_os in
   darwin*)
     AC_DEFINE([HAVE_DARWIN], [1], [Define if Darwin or Mac OS X])
-  ;;
+    H5_IS_DARWIN="yes"
+    ;;
 esac
 
 ## Windows
@@ -2838,6 +2901,50 @@ fi
 AM_CONDITIONAL([DIRECT_VFD_CONDITIONAL], [test "X$DIRECT_VFD" = "Xyes"])
 
 ## ----------------------------------------------------------------------
+## Check whether the Mirror VFD can be built.
+## Auto-enabled if the required libraries are present.
+##
+AC_SUBST([MIRROR_VFD])
+
+## Default is no Mirror VFD
+MIRROR_VFD=no
+
+AC_ARG_ENABLE([mirror-vfd],
+              [AS_HELP_STRING([--enable-mirror-vfd],
+                              [Build the socket-based Mirror virtual file driver (VFD).
+                               [default=no]])],
+              [MIRROR_VFD=$enableval], [MIRROR_VFD=no])
+
+if test "X$MIRROR_VFD" = "Xyes"; then
+
+    AC_CHECK_HEADERS([arpa/inet.h],, [unset MIRROR_VFD])
+    AC_CHECK_HEADERS([netinet/in.h],, [unset MIRROR_VFD])
+    AC_CHECK_HEADERS([netdb.h],, [unset MIRROR_VFD])
+    AC_CHECK_HEADERS([sys/socket.h],, [unset MIRROR_VFD])
+    AC_CHECK_FUNC([fork], [], [unset MIRROR_VFD])
+
+    AC_MSG_CHECKING([if the Mirror virtual file driver (VFD) can be built])
+    if test "X$MIRROR_VFD" = "Xyes"; then
+        AC_DEFINE([HAVE_MIRROR_VFD], [1],
+                [Define whether the Mirror virtual file driver (VFD) will be compiled])
+        AC_MSG_RESULT([yes])
+    else
+        AC_MSG_RESULT([no])
+        MIRROR_VFD=no
+        AC_MSG_ERROR([The Mirror VFD cannot be built.
+                      Missing one or more of: arpa/inet.h, netinet/in.h,
+                      netdb.h, sys/socket.h, fork().])
+    fi
+else
+    AC_MSG_CHECKING([if the Mirror virtual file driver (VFD) is enabled])
+    AC_MSG_RESULT([no])
+    MIRROR_VFD=no
+fi
+
+## Mirror VFD files built only if able.
+AM_CONDITIONAL([MIRROR_VFD_CONDITIONAL], [test "X$MIRROR_VFD" = "Xyes"])
+
+## ----------------------------------------------------------------------
 ## Check if Read-Only S3 virtual file driver is enabled by --enable-ros3-vfd
 ##
 AC_SUBST([ROS3_VFD])
@@ -3716,10 +3823,13 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/testvds_env.sh
                  test/testvdsswmr.sh
                  test/test_filter_plugin.sh
+                 test/test_mirror.sh
                  test/test_usecases.sh
                  test/test_vol_plugin.sh
                  testpar/Makefile
                  testpar/testpflush.sh
+                 utils/Makefile
+                 utils/mirror_vfd/Makefile
                  tools/Makefile
                  tools/lib/Makefile
                  tools/libtest/Makefile

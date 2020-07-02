@@ -273,7 +273,7 @@ H5VL_term_package(void)
         else {
             if(H5I_nmembers(H5I_VOL) > 0) {
                 /* Unregister all VOL connectors */
-                (void)H5I_clear_type(H5I_VOL, FALSE, FALSE);
+                (void)H5I_clear_type(H5I_VOL, TRUE, FALSE);
                 n++;
             } /* end if */
             else {
