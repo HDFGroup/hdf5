@@ -55,7 +55,7 @@ typedef struct _quadrant {
 
 typedef struct {
 	hid_t *dataset;
-        hid_t dapl, dcpl, filespace, memspace, file, one_by_one_sid,
+        hid_t dapl, dcpl, file, filespace, filetype, memspace, one_by_one_sid,
             quadrant_dcpl, quadrant_space;
         unsigned ndatasets;
 	char filename[PATH_MAX];
@@ -81,6 +81,7 @@ typedef struct {
 	, .dcpl = H5I_INVALID_HID					\
 	, .file = H5I_INVALID_HID					\
 	, .filespace = H5I_INVALID_HID					\
+	, .filetype = H5T_NATIVE_UINT32					\
 	, .one_by_one_sid = H5I_INVALID_HID				\
 	, .quadrant_dcpl = H5I_INVALID_HID				\
 	, .quadrant_space = H5I_INVALID_HID				\
@@ -141,7 +142,8 @@ newmat(unsigned rows, unsigned cols)
 static void
 usage(const char *progname)
 {
-	fprintf(stderr, "usage: %s [-S] [-W] [-a steps] [-c cols] [-d dims]\n"
+	fprintf(stderr, "usage: %s [-S] [-W] [-a steps] [-b] [-c cols]\n"
+                "    [-d dims]\n"
                 "    [-n iterations] [-r rows] [-s datasets]\n"
                 "    [-u milliseconds]\n"
 		"\n"
@@ -150,6 +152,7 @@ usage(const char *progname)
 		"-W:	               do not wait for a signal before\n"
                 "                      exiting\n"
 		"-a steps:	       `steps` between adding attributes\n"
+		"-b:	               write data in big-endian byte order\n"
 		"-c cols:	       `cols` columns per chunk\n"
 		"-d 1|one|2|two|both:  select dataset expansion in one or\n"
                 "                      both dimensions\n"
@@ -194,7 +197,7 @@ state_init(state_t *s, int argc, char **argv)
     esnprintf(tfile, sizeof(tfile), "%s", argv[0]);
     esnprintf(s->progname, sizeof(s->progname), "%s", basename(tfile));
 
-    while ((ch = getopt(argc, argv, "SVWa:c:d:n:qr:s:u:")) != -1) {
+    while ((ch = getopt(argc, argv, "SVWa:bc:d:n:qr:s:u:")) != -1) {
         switch (ch) {
         case 'S':
             s->use_vfd_swmr = false;
@@ -249,6 +252,9 @@ state_init(state_t *s, int argc, char **argv)
                 s->rows = (unsigned)tmp;
             else
                 s->ndatasets = (unsigned)tmp;
+            break;
+        case 'b':
+            s->filetype = H5T_STD_U32BE;
             break;
         case 'q':
             verbosity = 0;
@@ -461,25 +467,25 @@ create_extensible_dset(state_t *s, unsigned int which)
         esnprintf(bl_dname, sizeof(bl_dname), "/bl-dataset-%d", which);
         esnprintf(br_dname, sizeof(br_dname), "/br-dataset-%d", which);
 
-        ul_ds = H5Dcreate2(s->file, ul_dname, H5T_STD_U32BE, s->quadrant_space,
+        ul_ds = H5Dcreate2(s->file, ul_dname, s->filetype, s->quadrant_space,
             H5P_DEFAULT, s->quadrant_dcpl, s->dapl);
 
         if (ul_ds < 0)
             errx(EXIT_FAILURE, "H5Dcreate(, \"%s\", ) failed", ul_dname);
 
-        ur_ds = H5Dcreate2(s->file, ur_dname, H5T_STD_U32BE, s->quadrant_space,
+        ur_ds = H5Dcreate2(s->file, ur_dname, s->filetype, s->quadrant_space,
             H5P_DEFAULT, s->quadrant_dcpl, s->dapl);
 
         if (ur_ds < 0)
             errx(EXIT_FAILURE, "H5Dcreate(, \"%s\", ) failed", ur_dname);
 
-        bl_ds = H5Dcreate2(s->file, bl_dname, H5T_STD_U32BE, s->quadrant_space,
+        bl_ds = H5Dcreate2(s->file, bl_dname, s->filetype, s->quadrant_space,
             H5P_DEFAULT, s->quadrant_dcpl, s->dapl);
 
         if (bl_ds < 0)
             errx(EXIT_FAILURE, "H5Dcreate(, \"%s\", ) failed", bl_dname);
 
-        br_ds = H5Dcreate2(s->file, br_dname, H5T_STD_U32BE, s->quadrant_space,
+        br_ds = H5Dcreate2(s->file, br_dname, s->filetype, s->quadrant_space,
             H5P_DEFAULT, s->quadrant_dcpl, s->dapl);
 
         if (br_ds < 0)
@@ -506,7 +512,7 @@ create_extensible_dset(state_t *s, unsigned int which)
             errx(EXIT_FAILURE, "%s: H5Pset_virtual failed", __func__);
     }
 
-    ds = H5Dcreate2(s->file, dname, H5T_STD_U32BE, s->filespace,
+    ds = H5Dcreate2(s->file, dname, s->filetype, s->filespace,
         H5P_DEFAULT, dcpl, s->dapl);
 
     if (ds < 0)
@@ -556,7 +562,7 @@ open_extensible_dset(state_t *s, unsigned int which)
     if ((ty = H5Dget_type(ds)) < 0)
         errx(EXIT_FAILURE, "H5Dget_type failed");
 
-    if (H5Tequal(ty, H5T_STD_U32BE) <= 0)
+    if (H5Tequal(ty, s->filetype) <= 0)
         errx(EXIT_FAILURE, "Unexpected data type");
 
     if ((filespace = H5Dget_space(ds)) < 0)
@@ -799,7 +805,8 @@ out:
 }
 
 static void
-add_dset_attribute(hid_t ds, hid_t sid, unsigned int which, unsigned int step)
+add_dset_attribute(const state_t *s, hid_t ds, hid_t sid, unsigned int which,
+    unsigned int step)
 {
     hid_t aid;
     char name[sizeof("attr-9999999999")];
@@ -808,7 +815,7 @@ add_dset_attribute(hid_t ds, hid_t sid, unsigned int which, unsigned int step)
 
     dbgf(1, "setting attribute %s on dataset %u to %u\n", name, which, step);
 
-    if ((aid = H5Acreate2(ds, name, H5T_STD_U32BE, sid, H5P_DEFAULT,
+    if ((aid = H5Acreate2(ds, name, s->filetype, sid, H5P_DEFAULT,
             H5P_DEFAULT)) < 0)
         errx(EXIT_FAILURE, "H5Acreate2 failed");
 
@@ -833,7 +840,7 @@ write_extensible_dset(state_t *s, unsigned int which, unsigned int step,
     ds = s->dataset[which];
 
     if (s->asteps != 0 && step % s->asteps == 0)
-        add_dset_attribute(ds, s->one_by_one_sid, which, step);
+        add_dset_attribute(s, ds, s->one_by_one_sid, which, step);
 
     if (s->two_dee) {
         size[0] = s->chunk_dims[0] * (1 + step);
