@@ -1013,6 +1013,14 @@ Bug Fixes since HDF5-1.10.3 release
 
     Testing
     -------
+    - Stopped java/test/junit.sh.in installing libs for testing under ${prefix}
+
+      Lib files needed are now copied to a subdirectory in the java/test 
+      directory, and on Macs the loader path for libhdf5.xxxs.so is changed 
+      in the temporary copy of libhdf5_java.dylib. 
+
+      (LRK, 2020/7/2, HDFFV-11063)
+
     - Fixed a test failure in testpar/t_dset.c caused by
       the test trying to use the parallel filters feature
       on MPI-2 implementations.
