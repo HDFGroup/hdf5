@@ -121,7 +121,7 @@ main(int argc, char **argv)
     err = H5Pset_shuffle(pid);
     
     sid = H5Screate_simple(1, dims, dims);
-    did = H5Dcreate(fid, "somedata", H5T_NATIVE_INT, sid, H5P_DEFAULT, pid, H5P_DEFAULT);
+    did = H5Dcreate2(fid, "somedata", H5T_NATIVE_INT, sid, H5P_DEFAULT, pid, H5P_DEFAULT);
     err = H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data);
     
     H5Sclose(sid);
