@@ -156,7 +156,7 @@ int main(int argc , char **argv)
             goto out;
         }
 
-    	if (width > IMAGE_WIDTH_MAX || height > IMAGE_HEIGHT_MAX)
+        if (width > IMAGE_WIDTH_MAX || height > IMAGE_HEIGHT_MAX)
         {
 	        fprintf(stderr, "HDF5 image is too large. Limit is %d by %d.\n", IMAGE_WIDTH_MAX, IMAGE_HEIGHT_MAX);
 	        goto out;
@@ -222,9 +222,9 @@ int main(int argc , char **argv)
             numcols = 256;
             for (i = 0 ; i < numcols ; i++)
             {
-	      Red[i] = (GIFBYTE)(255 - i);
-	      Green[i] = (GIFBYTE)(255 - i);
-	      Blue[i] = (GIFBYTE)(255 - i);
+                Red[i] = (GIFBYTE)(255 - i);
+                Green[i] = (GIFBYTE)(255 - i);
+                Blue[i] = (GIFBYTE)(255 - i);
             }
         }
         else
@@ -257,7 +257,7 @@ int main(int argc , char **argv)
             if (j==i)
             {
                 /* wasn't found */
-	            pc2nc[i] = (GIFBYTE)nc;
+                pc2nc[i] = (GIFBYTE)nc;
                 r1[nc] = Red[i];
                 g1[nc] = Green[i];
                 b1[nc] = Blue[i];
