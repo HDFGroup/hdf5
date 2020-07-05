@@ -18,8 +18,8 @@
 #include "h5tools.h"
 #include "h5tools_utils.h"
 
-#define IMAGE_WIDTH_MAX		65535	/* unsigned 16bits integer */
-#define IMAGE_HEIGHT_MAX	65535	/* unsigned 16bits integer */
+#define IMAGE_WIDTH_MAX     65535   /* unsigned 16bits integer */
+#define IMAGE_HEIGHT_MAX    65535   /* unsigned 16bits integer */
 
 
 int EndianOrder;
@@ -149,30 +149,41 @@ int main(int argc , char **argv)
             goto out;
         }
 
-        /* read image */
+        /* get image's information */
         if ( H5IMget_image_info( fid, image_name, &width, &height, &planes, interlace, &npals ) < 0 )
+        {
+            fprintf(stderr , "Unable to get information of the image. Aborting.\n");
             goto out;
+        }
 
-	if (width > IMAGE_WIDTH_MAX || height > IMAGE_HEIGHT_MAX){
-	    fprintf(stderr, "HDF5 image is too large. Limit is %d by %d.\n", IMAGE_WIDTH_MAX, IMAGE_HEIGHT_MAX);
-	    goto out;
-	}
+        if (width > IMAGE_WIDTH_MAX || height > IMAGE_HEIGHT_MAX)
+        {
+            fprintf(stderr, "HDF5 image is too large. Limit is %d by %d.\n", IMAGE_WIDTH_MAX, IMAGE_HEIGHT_MAX);
+            goto out;
+        }
 
-	/* tool can handle single plane images only. */
-	if (planes > 1){
-	    fprintf(stderr, "Cannot handle multiple planes image\n");
-	    goto out;
-	}
+        /* tool can handle single plane images only. */
+        if (planes > 1)
+        {
+            fprintf(stderr, "Cannot handle multiple planes image\n");
+            goto out;
+        }
 
         Image = (GIFBYTE*) malloc( (size_t) width * (size_t) height );
 
         if ( H5IMread_image( fid, image_name, Image ) < 0 )
+        {
+            fprintf(stderr , "Unable to read the image. Aborting.\n");
             goto out;
+        }
 
         if (npals)
         {
             if ( H5IMget_palette_info( fid, image_name, 0, pal_dims ) < 0 )
+            {
+                fprintf(stderr , "Unable to get information of the palette. Aborting.\n");
                 goto out;
+            }
 
             pal = (GIFBYTE*) malloc( (size_t) pal_dims[0] * (size_t) pal_dims[1] );
 
@@ -211,9 +222,9 @@ int main(int argc , char **argv)
             numcols = 256;
             for (i = 0 ; i < numcols ; i++)
             {
-	      Red[i] = (GIFBYTE)(255 - i);
-	      Green[i] = (GIFBYTE)(255 - i);
-	      Blue[i] = (GIFBYTE)(255 - i);
+                Red[i] = (GIFBYTE)(255 - i);
+                Green[i] = (GIFBYTE)(255 - i);
+                Blue[i] = (GIFBYTE)(255 - i);
             }
         }
         else
@@ -246,7 +257,7 @@ int main(int argc , char **argv)
             if (j==i)
             {
                 /* wasn't found */
-	      pc2nc[i] = (GIFBYTE)nc;
+                pc2nc[i] = (GIFBYTE)nc;
                 r1[nc] = Red[i];
                 g1[nc] = Green[i];
                 b1[nc] = Blue[i];

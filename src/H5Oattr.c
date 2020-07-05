@@ -109,7 +109,10 @@ H5FL_EXTERN(H5S_extent_t);
  USAGE
     void *H5O_attr_decode(f, mesg_flags, p)
         H5F_t *f;               IN: pointer to the HDF5 file struct
-        unsigned mesg_flags;    IN: Message flags to influence decoding
+        H5O_t    *open_oh;      IN: pointer to the object header
+        unsigned mesg_flags;    IN: message flags to influence decoding
+        unsigned *ioflags;      IN: flags for decoding
+        size_t   p_size;        IN: size of buffer *p
         const uint8_t *p;       IN: the raw information buffer
  RETURNS
     Pointer to the new message in native order on success, NULL on failure
@@ -120,16 +123,16 @@ H5FL_EXTERN(H5S_extent_t);
 --------------------------------------------------------------------------*/
 static void *
 H5O_attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-    unsigned *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+    unsigned *ioflags, size_t p_size, const uint8_t *p)
 {
-    H5A_t		*attr = NULL;
-    H5S_extent_t	*extent;	/*extent dimensionality information  */
-    size_t		name_len;   	/*attribute name length */
-    size_t		dt_size;   	/* Datatype size */
-    hssize_t		sds_size;   	/* Signed Dataspace size */
-    hsize_t		ds_size;   	/* Dataspace size */
-    unsigned            flags = 0;      /* Attribute flags */
-    H5A_t		*ret_value = NULL;      /* Return value */
+    H5A_t        *attr = NULL;
+    H5S_extent_t *extent;       /*extent dimensionality information  */
+    size_t       name_len;      /*attribute name length */
+    size_t       dt_size;       /* Datatype size */
+    hssize_t     sds_size;      /* Signed Dataspace size */
+    hsize_t      ds_size;       /* Dataspace size */
+    unsigned     flags = 0;     /* Attribute flags */
+    H5A_t        *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -138,7 +141,7 @@ H5O_attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
     HDassert(p);
 
     if(NULL == (attr = H5FL_CALLOC(H5A_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     if(NULL == (attr->shared = H5FL_CALLOC(H5A_shared_t)))
         HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate shared attr structure")
@@ -146,7 +149,7 @@ H5O_attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
     /* Version number */
     attr->shared->version = *p++;
     if(attr->shared->version < H5O_ATTR_VERSION_1 || attr->shared->version > H5O_ATTR_VERSION_LATEST)
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, NULL, "bad version number for attribute message")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, NULL, "bad version number for attribute message")
 
     /* Get the flags byte if we have a later version of the attribute */
     if(attr->shared->version >= H5O_ATTR_VERSION_2) {
@@ -176,7 +179,7 @@ H5O_attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
 
     /* Decode and store the name */
     if(NULL == (attr->shared->name = H5MM_strdup((const char *)p)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Make an attempt to detect corrupted name or name length - HDFFV-10588 */
     if(name_len != (HDstrlen(attr->shared->name) + 1))
@@ -200,7 +203,7 @@ H5O_attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
      * What's actually shared, though, is only the extent.
      */
     if(NULL == (attr->shared->ds = H5FL_CALLOC(H5S_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Decode attribute's dataspace extent */
     if((extent = (H5S_extent_t *)(H5O_MSG_SDSPACE->decode)(f, open_oh,
@@ -238,6 +241,11 @@ H5O_attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
 
     /* Go get the data */
     if(attr->shared->data_size) {
+        /* Ensure that data size doesn't exceed buffer size, in case of
+           it's being corrupted in the file */
+        if(attr->shared->data_size > p_size)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_OVERFLOW, NULL, "data size exceeds buffer size")
+
         if(NULL == (attr->shared->data = H5FL_BLK_MALLOC(attr_buf, attr->shared->data_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
         H5MM_memcpy(attr->shared->data, p, attr->shared->data_size);
