@@ -2766,7 +2766,7 @@ H5D__virtual_write_one(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     H5S_t       *projected_src_space = NULL; /* File space for selection in a single source dataset */
     herr_t      ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE_TAG(source_dset->dset->oloc.addr) //FUNC_ENTER_STATIC
 
     HDassert(source_dset);
 
@@ -2802,7 +2802,7 @@ done:
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close projected source space")
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value) //FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_write_one() */
 
 

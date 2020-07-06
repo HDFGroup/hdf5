@@ -991,7 +991,7 @@ H5T__vlen_disk_write(H5VL_object_t *file,
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to put blob")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value) //FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__vlen_disk_write() */
 
 

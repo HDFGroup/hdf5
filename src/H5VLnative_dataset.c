@@ -190,7 +190,7 @@ H5VL__native_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id,
     const H5S_t     *file_space = NULL;
     herr_t           ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr) // FUNC_ENTER_PACKAGE
 
     /* check arguments */
     if(NULL == dset->oloc.file)
@@ -207,7 +207,7 @@ H5VL__native_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id,
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value) //FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__native_dataset_write() */
 
 

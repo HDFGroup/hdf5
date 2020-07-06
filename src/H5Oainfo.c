@@ -478,7 +478,7 @@ H5O__ainfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
     const H5O_ainfo_t *ainfo_src = (const H5O_ainfo_t *)mesg_src;
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_NOAPI_TAG(H5AC__GLOBALHEAP_TAG, FAIL) //FUNC_ENTER_STATIC
 
     HDassert(ainfo_src);
 
@@ -487,7 +487,7 @@ H5O__ainfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
             HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, FAIL, "can't copy attribute")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value) //FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__ainfo_post_copy_file() */
 
 

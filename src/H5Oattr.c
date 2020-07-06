@@ -707,13 +707,13 @@ H5O__attr_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_NOAPI_TAG(H5AC__GLOBALHEAP_TAG, FAIL) //FUNC_ENTER_STATIC
 
     if(H5A__attr_post_copy_file(src_oloc, (const H5A_t *)mesg_src, dst_oloc, (H5A_t *)mesg_dst, cpy_info) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, FAIL, "can't copy attribute")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value) //FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__attr_post_copy_file() */
 
 

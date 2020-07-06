@@ -514,7 +514,7 @@ H5HG_insert(H5F_t *f, size_t size, const void *obj, H5HG_t *hobj/*out*/)
     unsigned 	heap_flags = H5AC__NO_FLAGS_SET;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5AC__GLOBALHEAP_TAG, FAIL)
+    FUNC_ENTER_PACKAGE //FUNC_ENTER_NOAPI_TAG(H5AC__GLOBALHEAP_TAG, FAIL)
 
     /* Check args */
     HDassert(f);
@@ -570,7 +570,7 @@ done:
     if(heap && H5AC_unprotect(f, H5AC_GHEAP, heap->addr, heap, heap_flags) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to unprotect heap.")
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)  //FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* H5HG_insert() */
 
 

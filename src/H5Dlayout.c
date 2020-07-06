@@ -469,7 +469,7 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
     hbool_t             layout_init = FALSE;    /* Flag to indicate that chunk information was initialized */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
+    FUNC_ENTER_PACKAGE //FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
 
     /* Sanity checking */
     HDassert(file);
@@ -586,7 +586,7 @@ done:
             if(dset->shared->layout.ops->dest && (dset->shared->layout.ops->dest)(dset) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy layout info")
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value) // FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5D__layout_oh_create() */
 
 
