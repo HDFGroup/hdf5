@@ -631,7 +631,15 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
-    - Fixed the decoding of an attribute message to prevent a segfault by h52gif
+    - Fixed CVE-2020-10810
+
+      The tool h5clear produced a segfault during an error recovery in
+      the superblock decoding.  An internal pointer was reset to prevent
+      further accessing when it is not assigned with a value.
+
+      (BMR - 2020/6/29, HDFFV-11053)
+
+    - Fixed CVE-2018-17435
 
       The tool h52gif produced a segfault when the size of an attribute
       message was corrupted and caused a buffer overflow.
@@ -1005,6 +1013,14 @@ Bug Fixes since HDF5-1.10.3 release
 
     Testing
     -------
+    - Stopped java/test/junit.sh.in installing libs for testing under ${prefix}
+
+      Lib files needed are now copied to a subdirectory in the java/test 
+      directory, and on Macs the loader path for libhdf5.xxxs.so is changed 
+      in the temporary copy of libhdf5_java.dylib. 
+
+      (LRK, 2020/7/2, HDFFV-11063)
+
     - Fixed a test failure in testpar/t_dset.c caused by
       the test trying to use the parallel filters feature
       on MPI-2 implementations.
