@@ -44,6 +44,7 @@
 #include "H5FDcore.h"           /* Files stored entirely in memory          */
 #include "H5FDdirect.h"         /* Linux direct I/O                         */
 #include "H5FDfamily.h"         /* File families                            */
+#include "H5FDgds.h"            /* CUDA GPUDirect Storage cufile I/O        */
 #include "H5FDhdfs.h"           /* Hadoop HDFS                              */
 #include "H5FDlog.h"            /* sec2 driver with I/O logging (for debugging) */
 #include "H5FDmirror.h"         /* Mirror VFD and IPC definitions           */

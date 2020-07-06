@@ -1363,15 +1363,13 @@ AC_ARG_WITH([fnord],
 
 ####################### CUDA #######################
 AC_SUBST([ENABLE_CUDA])
+AC_SUBST([GDS_VFD])
 
 ## Default is not present
 ENABLE_CUDA=no
+GDS_VFD=no
 
 m4_include([cuda.ac])
-
-if test x$ENABLE_CUDA = xyes; then
-  AC_DEFINE([HAVE_CUDA], [1], [Define if support for cuda (cufile) is enabled])
-fi
 
 if test -n "$CUDA_DIR"; then
   CPPFLAGS="$CPPFLAGS -I$CUDA_DIR/include"
@@ -1384,6 +1382,15 @@ if test -n "$CUDA_LIBS"; then
 fi
 
 if test -n "$CUFILE_DIR"; then
+
+  if test x$ENABLE_CUDA = xyes; then
+    GDS_VFD=yes
+    AC_DEFINE([HAVE_GDS_VFD], [1], [Define if support for gds (cufile) is enabled])
+  else
+    GDS_VFD=no
+    AC_MSG_ERROR([GDS VFD was requested but missing cuda path, verify --with-cuda=])
+  fi
+
   CPPFLAGS="$CPPFLAGS -I$CUFILE_DIR/lib"
   AM_CPPFLAGS="$AM_CPPFLAGS -I$CUFILE_DIR/lib"
   LDFLAGS="$LDFLAGS -L$CUFILE_DIR/lib -lcufile"

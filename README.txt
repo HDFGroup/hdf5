@@ -16,6 +16,12 @@ project, tools and services can be found at the Group's website.
 
     https://www.hdfgroup.org/
 
+PURPOSE of cu_dev 
+------------------
+
+The motivation of cu_dev is to interface with Nvidia's GPUDirect Storage (GDS)
+API through a HDF5 VFD. You need to configure hdf5 with both --with-cuda and 
+--with-gds to make GDS VFD work.
 
 DOCUMENTATION
 -------------
