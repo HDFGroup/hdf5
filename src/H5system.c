@@ -73,6 +73,7 @@
 /* Track whether tzset routine was called */
 static hbool_t H5_ntzset = FALSE;
 
+#ifndef HDvasprintf
 /* HDvasprintf provides vasprintf-like function on targets where it is
  * unavailable.
  */
@@ -100,6 +101,7 @@ HDvasprintf(char **bufp, const char *fmt, va_list _ap)
     }
     return -1;
 }
+#endif
 
 
 /*-------------------------------------------------------------------------
