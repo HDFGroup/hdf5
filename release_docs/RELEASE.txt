@@ -317,6 +317,18 @@ Bug Fixes since HDF5-1.10.5 release
 
     Library
     -------
+    - Fixed CVE-2018-17435
+
+      The tool h52gif produced a segfault when the size of an attribute
+      message was corrupted and caused a buffer overflow.
+
+      The problem was fixed by verifying the attribute message's size
+      against the buffer size before accessing the buffer.  h52gif was
+      also fixed to display the failure instead of silently exiting
+      after the segfault was eliminated.
+
+      (BMR - 2020/6/19, HDFFV-10591)
+
     - Improved peformance when creating a large number of small datasets by
       retrieving default property values from the API context instead of doing
       skip list searches.
