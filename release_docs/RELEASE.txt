@@ -542,7 +542,13 @@ Bug Fixes since HDF5-1.10.5 release
 
     Testing
     -------
-    -
+    -  Stopped java/test/junit.sh.in installing libs for testing under ${prefix}
+
+      Lib files needed are now copied to a subdirectory in the java/test
+      directory, and on Macs the loader path for libhdf5.xxxs.so is changed
+      in the temporary copy of libhdf5_java.dylib.
+
+      (LRK, 2020/7/2, HDFFV-11063)
 
 
 Supported Platforms
