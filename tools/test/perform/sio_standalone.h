@@ -151,7 +151,7 @@
 #define HDfopen(S,M)            fopen(S,M)
 #define HDfork()                fork()
 #define HDfpathconf(F,N)        fpathconf(F,N)
-H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
+#define HDfprintf fprintf
 #define HDfputc(C,F)            fputc(C,F)
 #define HDfputs(S,F)            fputs(S,F)
 #define HDfread(M,Z,N,F)        fread(M,Z,N,F)
