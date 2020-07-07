@@ -2781,7 +2781,7 @@ H5D__virtual_write_one(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
          * extent in the unlimited dimension.  -NAF */
         /* Project intersection of file space and mapping virtual space onto
          * mapping source space */
-        if(H5S_select_project_intersection(source_dset->virtual_select, source_dset->clipped_source_select, file_space, &projected_src_space, TRUE) < 0)
+        if(H5S_select_project_intersection(source_dset->clipped_virtual_select, source_dset->clipped_source_select, file_space, &projected_src_space, TRUE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't project virtual intersection onto source space")
 
         /* Perform write on source dataset */
