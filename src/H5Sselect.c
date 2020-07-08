@@ -124,6 +124,49 @@ H5S_select_offset(H5S_t *space, const hssize_t *offset)
 
 /*--------------------------------------------------------------------------
  NAME
+    H5Soffset_simple
+ PURPOSE
+    Changes the offset of a selection within a simple dataspace extent
+ USAGE
+    herr_t H5Soffset_simple(space_id, offset)
+        hid_t space_id;	        IN: Dataspace object to reset
+        const hssize_t *offset; IN: Offset to position the selection at
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+	This function creates an offset for the selection within an extent, allowing
+    the same shaped selection to be moved to different locations within a
+    dataspace without requiring it to be re-defined.
+--------------------------------------------------------------------------*/
+herr_t
+H5Soffset_simple(hid_t space_id, const hssize_t *offset)
+{
+    H5S_t *space;                   /* Dataspace to modify */
+    herr_t ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*Hs", space_id, offset);
+
+    /* Check args */
+    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a dataspace")
+    if(space->extent.rank == 0 || (H5S_GET_EXTENT_TYPE(space) == H5S_SCALAR
+            || H5S_GET_EXTENT_TYPE(space) == H5S_NULL))
+        HGOTO_ERROR(H5E_ATOM, H5E_UNSUPPORTED, FAIL, "can't set offset on scalar or null dataspace")
+    if(offset == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no offset specified")
+
+    /* Set the selection offset */
+    if(H5S_select_offset(space, offset) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't set offset")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Soffset_simple() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5S_select_copy
  PURPOSE
     Copy a selection from one dataspace to another
@@ -189,7 +232,7 @@ done:
 herr_t
 H5S_select_release(H5S_t *ds)
 {
-    herr_t ret_value = FAIL;    /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -870,11 +913,11 @@ H5S_select_is_regular(const H5S_t *space)
  PURPOSE
     Adjust a selection by subtracting an offset
  USAGE
-    void H5S_select_adjust_u(space, offset)
+    herr_t H5S_select_adjust_u(space, offset)
         H5S_t *space;           IN/OUT: Pointer to dataspace to adjust
         const hsize_t *offset; IN: Offset to subtract
  RETURNS
-    None
+    Non-negative on success, negative on failure
  DESCRIPTION
     Moves a selection by subtracting an offset from it.
  GLOBAL VARIABLES
@@ -885,18 +928,21 @@ H5S_select_is_regular(const H5S_t *space)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-void
+herr_t
 H5S_select_adjust_u(H5S_t *space, const hsize_t *offset)
 {
+    herr_t ret_value = SUCCEED;         /* Return value */
+
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(space);
     HDassert(offset);
 
-    (*space->select.type->adjust_u)(space, offset);
+    /* Perform operation */
+    ret_value = (*space->select.type->adjust_u)(space, offset);
 
-    FUNC_LEAVE_NOAPI_VOID
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_select_adjust_u() */
 
 
@@ -1024,7 +1070,7 @@ H5S_select_iter_init(H5S_sel_iter_t *sel_iter, const H5S_t *space,
     sel_iter->elmt_size = elmt_size;
 
     /* Call initialization routine for selection type */
-    ret_value = (*space->select.type->iter_init)(sel_iter, space);
+    ret_value = (*space->select.type->iter_init)(space, sel_iter);
     HDassert(sel_iter->type);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2277,7 +2323,7 @@ herr_t
 H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     const H5S_t *src_intersect_space, H5S_t **new_space_ptr)
 {
-    H5S_t *new_space = NULL;           /* New dataspace constructed */
+    H5S_t *new_space = NULL;            /* New dataspace constructed */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2287,6 +2333,8 @@ H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     HDassert(dst_space);
     HDassert(src_intersect_space);
     HDassert(new_space_ptr);
+    HDassert(H5S_GET_SELECT_NPOINTS(src_space) == H5S_GET_SELECT_NPOINTS(dst_space));
+    HDassert(H5S_GET_EXTENT_NDIMS(src_space) == H5S_GET_EXTENT_NDIMS(src_intersect_space));
 
     /* Create new space, using dst extent.  Start with "all" selection. */
     if(NULL == (new_space = H5S_create(H5S_SIMPLE)))
@@ -2296,15 +2344,16 @@ H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
 
     /* If the intersecting space is "all", the intersection must be equal to the
      * source space and the projection must be equal to the destination space */
-    if(src_intersect_space->select.type->type == H5S_SEL_ALL) {
+    if(H5S_GET_SELECT_TYPE(src_intersect_space) == H5S_SEL_ALL) {
         /* Copy the destination selection. */
         if(H5S_select_copy(new_space, dst_space, FALSE) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy destination space selection")
     } /* end if */
-    /* If any of the spaces are "none", the projection must also be "none" */
-    else if((src_intersect_space->select.type->type == H5S_SEL_NONE)
-            || (src_space->select.type->type == H5S_SEL_NONE)
-            || (dst_space->select.type->type == H5S_SEL_NONE)) {
+    /* If any of the selections contain no elements, the projection must be
+     * "none" */
+    else if((H5S_GET_SELECT_NPOINTS(src_intersect_space) == 0)
+            || (H5S_GET_SELECT_NPOINTS(src_space) == 0)
+            || (H5S_GET_SELECT_NPOINTS(dst_space) == 0)) {
         /* Change to "none" selection */
         if(H5S_select_none(new_space) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")

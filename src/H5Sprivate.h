@@ -30,21 +30,13 @@
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5Tprivate.h"		/* Datatypes				*/
 
-/* Flags for H5S_find */
-#define H5S_CONV_PAR_IO_POSSIBLE        0x0001
-/* The storage options are mutually exclusive */
-/* (2-bits reserved for storage type currently) */
-#define H5S_CONV_STORAGE_COMPACT        0x0000  /* i.e. '0' */
-#define H5S_CONV_STORAGE_CONTIGUOUS     0x0002  /* i.e. '1' */
-#define H5S_CONV_STORAGE_CHUNKED        0x0004  /* i.e. '2' */
-#define H5S_CONV_STORAGE_MASK           0x0006
-
 /* Flags for "get_seq_list" methods */
 #define H5S_GET_SEQ_LIST_SORTED         0x0001
 
 /* Forward references of package typedefs */
 typedef struct H5S_extent_t H5S_extent_t;
 typedef struct H5S_pnt_node_t H5S_pnt_node_t;
+typedef struct H5S_pnt_list_t H5S_pnt_list_t;
 typedef struct H5S_hyper_span_t H5S_hyper_span_t;
 typedef struct H5S_hyper_span_info_t H5S_hyper_span_info_t;
 
@@ -144,7 +136,6 @@ typedef struct H5S_sel_iter_op_t {
 #define H5S_GET_SELECT_TYPE(S)          ((S)->select.type->type)
 #define H5S_SELECT_GET_SEQ_LIST(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN)             ((*(S)->select.type->get_seq_list)(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN))
 #define H5S_SELECT_VALID(S)             ((*(S)->select.type->is_valid)(S))
-#define H5S_SELECT_RELEASE(S)           ((*(S)->select.type->release)(S))
 #define H5S_SELECT_SERIAL_SIZE(S)       ((*(S)->select.type->serial_size)(S))
 #define H5S_SELECT_SERIALIZE(S,BUF)     ((*(S)->select.type->serialize)(S,BUF))
 #define H5S_SELECT_BOUNDS(S,START,END)  ((*(S)->select.type->bounds)(S,START,END))
@@ -170,7 +161,6 @@ typedef struct H5S_sel_iter_op_t {
 #define H5S_GET_SELECT_TYPE(S)          (H5S_get_select_type(S))
 #define H5S_SELECT_GET_SEQ_LIST(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN)       (H5S_select_get_seq_list(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN))
 #define H5S_SELECT_VALID(S)             (H5S_select_valid(S))
-#define H5S_SELECT_RELEASE(S)           (H5S_select_release(S))
 #define H5S_SELECT_SERIAL_SIZE(S)       (H5S_select_serial_size(S))
 #define H5S_SELECT_SERIALIZE(S,BUF)     (H5S_select_serialize(S,BUF))
 #define H5S_SELECT_BOUNDS(S,START,END)  (H5S_get_select_bounds(S,START,END))
@@ -189,8 +179,11 @@ typedef struct H5S_sel_iter_op_t {
 #define H5S_SELECT_ITER_NEXT_BLOCK(ITER)        (H5S_select_iter_next_block(ITER))
 #define H5S_SELECT_ITER_RELEASE(ITER)   (H5S_select_iter_release(ITER))
 #endif /* H5S_MODULE */
+
 /* Handle these callbacks in a special way, since they have prologs that need to be executed */
 #define H5S_SELECT_COPY(DST,SRC,SHARE)  (H5S_select_copy(DST,SRC,SHARE))
+#define H5S_SELECT_SHAPE_SAME(S1,S2)    (H5S_select_shape_same(S1,S2))
+#define H5S_SELECT_RELEASE(S)           (H5S_select_release(S))
 #define H5S_SELECT_DESERIALIZE(S,BUF)   (H5S_select_deserialize(S,BUF))
 
 
@@ -259,7 +252,7 @@ H5_DLL herr_t H5S_select_serialize(const H5S_t *space, uint8_t **p);
 H5_DLL htri_t H5S_select_is_contiguous(const H5S_t *space);
 H5_DLL htri_t H5S_select_is_single(const H5S_t *space);
 H5_DLL htri_t H5S_select_is_regular(const H5S_t *space);
-H5_DLL void H5S_select_adjust_u(H5S_t *space, const hsize_t *offset);
+H5_DLL herr_t H5S_select_adjust_u(H5S_t *space, const hsize_t *offset);
 H5_DLL herr_t H5S_select_project_scalar(const H5S_t *space, hsize_t *offset);
 H5_DLL herr_t H5S_select_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset);
 H5_DLL herr_t H5S_select_project_intersection(const H5S_t *src_space,

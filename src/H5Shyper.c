@@ -117,7 +117,7 @@ static htri_t H5S__hyper_is_regular(const H5S_t *space);
 static herr_t H5S__hyper_adjust_u(H5S_t *space, const hsize_t *offset);
 static herr_t H5S__hyper_project_scalar(const H5S_t *space, hsize_t *offset);
 static herr_t H5S__hyper_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset);
-static herr_t H5S__hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space);
+static herr_t H5S__hyper_iter_init(const H5S_t *space, H5S_sel_iter_t *iter);
 
 /* Selection iteration callbacks */
 static herr_t H5S__hyper_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords);
@@ -181,8 +181,6 @@ static const H5S_sel_iter_class_t H5S_sel_iter_hyper[1] = {{
     H5S__hyper_iter_release,
 }};
 
-/* Static variables */
-
 /* Arrays for default stride, block, etc. */
 static const hsize_t H5S_hyper_zeros_g[H5O_LAYOUT_NDIMS] = {
     0,0,0,0, 0,0,0,0,
@@ -207,6 +205,7 @@ H5FL_DEFINE_STATIC(H5S_hyper_span_info_t);
 /* Declare extern free list to manage the H5S_sel_iter_t struct */
 H5FL_EXTERN(H5S_sel_iter_t);
 
+/* Uncomment this to provide the debugging routines for printing selection info */
 /* #define H5S_HYPER_DEBUG */
 #ifdef H5S_HYPER_DEBUG
 static herr_t
@@ -290,13 +289,13 @@ H5S__hyper_print_diminfo(FILE *f, const H5S_t *space)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S__hyper_iter_init
+ * Function:    H5S__hyper_iter_init
  *
- * Purpose:	Initializes iteration information for hyperslab span tree selection.
+ * Purpose:     Initializes iteration information for hyperslab span tree selection.
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:      Non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, February 24, 2001
  *
  * Notes:       If the 'elmt_size' parameter is set to zero, the regular
@@ -307,13 +306,13 @@ H5S__hyper_print_diminfo(FILE *f, const H5S_t *space)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S__hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
+H5S__hyper_iter_init(const H5S_t *space, H5S_sel_iter_t *iter)
 {
     const H5S_hyper_dim_t *tdiminfo;    /* Temporary pointer to diminfo information */
     H5S_hyper_span_info_t *spans;   /* Pointer to hyperslab span info node */
-    unsigned rank;                  /* Dataspace's dimension rank */
-    unsigned u;                     /* Index variable */
-    int i;                          /* Index variable */
+    unsigned rank;              /* Dataspace's dimension rank */
+    unsigned u;                 /* Index variable */
+    int i;                      /* Index variable */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -484,14 +483,14 @@ H5S__hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S__hyper_iter_coords
+ * Function:    H5S__hyper_iter_coords
  *
- * Purpose:	Retrieve the current coordinates of iterator for current
+ * Purpose:     Retrieve the current coordinates of iterator for current
  *              selection
  *
- * Return:	non-negative on success, negative on failure
+ * Return:      Non-negative on success, negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, April 22, 2003
  *
  *-------------------------------------------------------------------------
@@ -604,16 +603,14 @@ H5S__hyper_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
         for(u = 0; u < iter->rank; u++) {
             start[u] = iter->u.hyp.off[u];
             end[u] = (start[u] + iter->u.hyp.diminfo[u].block) - 1;
-        } /* end for */
+        }
     } /* end if */
     else {
-        /* Copy the start of the block */
-        for(u = 0; u < iter->rank; u++)
+        /* Copy the start & end of the block */
+        for(u = 0; u < iter->rank; u++) {
             start[u] = iter->u.hyp.span[u]->low;
-
-        /* Copy the end of the block */
-        for(u = 0; u < iter->rank; u++)
             end[u] = iter->u.hyp.span[u]->high;
+        }
     } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

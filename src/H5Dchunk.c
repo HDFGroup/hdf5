@@ -1272,7 +1272,7 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
         } /* end else */
 
         /* Build the memory selection for each chunk */
-        if(sel_hyper_flag && H5S_select_shape_same(file_space, mem_space) == TRUE) {
+        if(sel_hyper_flag && H5S_SELECT_SHAPE_SAME(file_space, mem_space) == TRUE) {
             /* Reset chunk template information */
             fm->mchunk_tmpl = NULL;
 
@@ -1404,7 +1404,7 @@ H5D__chunk_mem_alloc(size_t size, const H5O_pline_t *pline)
 /*-------------------------------------------------------------------------
  * Function:    H5D__chunk_mem_xfree
  *
- * Purpose:    Free space for a chunk in memory.  This routine allocates
+ * Purpose:    Free space for a chunk in memory.  This routine releases
  *              memory space for non-filtered chunks from a block free list
  *              and uses malloc()/free() for filtered chunks.
  *
@@ -1565,7 +1565,8 @@ H5D__create_chunk_map_single(H5D_chunk_map_t *fm, const H5D_io_info_t
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy file selection")
 
     /* Move selection back to have correct offset in chunk */
-    H5S_SELECT_ADJUST_U(fm->single_space, coords);
+    if(H5S_SELECT_ADJUST_U(fm->single_space, coords) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't adjust chunk selection")
 
 #ifdef H5_HAVE_PARALLEL
     /* store chunk selection information */
@@ -1626,7 +1627,7 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(fm->f_ndims>0);
+    HDassert(fm->f_ndims > 0);
 
     /* Get number of elements selected in file */
     sel_points = fm->nelmts;
@@ -1652,7 +1653,7 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
     while(sel_points) {
         /* Check for intersection of temporary chunk and file selection */
         /* (Casting away const OK - QAK) */
-        if(TRUE == H5S_hyper_intersect_block((H5S_t *)fm->file_space, coords, end)) {
+        if(TRUE == H5S_hyper_intersect_block(fm->file_space, coords, end)) {
             H5S_t *tmp_fchunk;                  /* Temporary file dataspace */
             H5D_chunk_info_t *new_chunk_info;   /* chunk information to insert into skip list */
             hsize_t    chunk_points;            /* Number of elements in chunk selection */
@@ -1680,12 +1681,13 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
             } /* end if */
 
             /* Move selection back to have correct offset in chunk */
-            H5S_SELECT_ADJUST_U(tmp_fchunk, coords);
+            if(H5S_SELECT_ADJUST_U(tmp_fchunk, coords) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTSELECT, FAIL, "can't adjust chunk selection")
 
             /* Add temporary chunk to the list of chunks */
 
             /* Allocate the file & memory chunk information */
-            if (NULL==(new_chunk_info = H5FL_MALLOC(H5D_chunk_info_t))) {
+            if(NULL == (new_chunk_info = H5FL_MALLOC(H5D_chunk_info_t))) {
                 (void)H5S_close(tmp_fchunk);
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate chunk info")
             } /* end if */
@@ -1693,7 +1695,7 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
             /* Initialize the chunk information */
 
             /* Set the chunk index */
-            new_chunk_info->index=chunk_index;
+            new_chunk_info->index = chunk_index;
 
 #ifdef H5_HAVE_PARALLEL
             /* Store chunk selection information, for multi-chunk I/O */
@@ -1706,15 +1708,12 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
             new_chunk_info->fspace_shared = FALSE;
 
             /* Set the memory chunk dataspace */
-            new_chunk_info->mspace=NULL;
+            new_chunk_info->mspace = NULL;
             new_chunk_info->mspace_shared = FALSE;
 
             /* Copy the chunk's scaled coordinates */
-        H5MM_memcpy(new_chunk_info->scaled, scaled, sizeof(hsize_t) * fm->f_ndims);
+            H5MM_memcpy(new_chunk_info->scaled, scaled, sizeof(hsize_t) * fm->f_ndims);
             new_chunk_info->scaled[fm->f_ndims] = 0;
-
-            /* Copy the chunk's scaled coordinates */
-        H5MM_memcpy(new_chunk_info->scaled, scaled, sizeof(hsize_t) * fm->f_ndims);
 
             /* Insert the new chunk into the skip list */
             if(H5SL_insert(fm->sel_chunks, new_chunk_info, &new_chunk_info->index) < 0) {
@@ -1723,8 +1722,7 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
             } /* end if */
 
             /* Get number of elements selected in chunk */
-            if((chunk_points = H5S_GET_SELECT_NPOINTS(tmp_fchunk)) < 0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection # of elements")
+            chunk_points = H5S_GET_SELECT_NPOINTS(tmp_fchunk);
             H5_CHECKED_ASSIGN(new_chunk_info->chunk_points, uint32_t, chunk_points, hsize_t);
 
             /* Decrement # of points left in file selection */
@@ -1739,12 +1737,12 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
         chunk_index++;
 
         /* Set current increment dimension */
-        curr_dim=(int)fm->f_ndims-1;
+        curr_dim = (int)fm->f_ndims - 1;
 
         /* Increment chunk location in fastest changing dimension */
         H5_CHECK_OVERFLOW(fm->chunk_dim[curr_dim],hsize_t,hssize_t);
-        coords[curr_dim]+=fm->chunk_dim[curr_dim];
-        end[curr_dim]+=fm->chunk_dim[curr_dim];
+        coords[curr_dim] += fm->chunk_dim[curr_dim];
+        end[curr_dim] += fm->chunk_dim[curr_dim];
         scaled[curr_dim]++;
 
         /* Bring chunk location back into bounds, if necessary */
@@ -1813,7 +1811,7 @@ H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm)
         H5D_chunk_info_t *chunk_info;   /* Pointer to chunk information */
 
         /* Get the node */
-        curr_node=H5SL_first(fm->sel_chunks);
+        curr_node = H5SL_first(fm->sel_chunks);
 
         /* Get pointer to chunk's information */
         chunk_info = (H5D_chunk_info_t *)H5SL_item(curr_node);
@@ -1836,15 +1834,15 @@ H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection bound info")
 
         /* Calculate the adjustment for memory selection from file selection */
-        HDassert(fm->m_ndims==fm->f_ndims);
-        for(u=0; u<fm->f_ndims; u++) {
-            H5_CHECK_OVERFLOW(file_sel_start[u],hsize_t,hssize_t);
-            H5_CHECK_OVERFLOW(mem_sel_start[u],hsize_t,hssize_t);
-            adjust[u]=(hssize_t)file_sel_start[u]-(hssize_t)mem_sel_start[u];
+        HDassert(fm->m_ndims == fm->f_ndims);
+        for(u = 0; u < fm->f_ndims; u++) {
+            H5_CHECK_OVERFLOW(file_sel_start[u], hsize_t, hssize_t);
+            H5_CHECK_OVERFLOW(mem_sel_start[u], hsize_t, hssize_t);
+            adjust[u] = (hssize_t)file_sel_start[u] - (hssize_t)mem_sel_start[u];
         } /* end for */
 
         /* Iterate over each chunk in the chunk list */
-        curr_node=H5SL_first(fm->sel_chunks);
+        curr_node = H5SL_first(fm->sel_chunks);
         while(curr_node) {
             H5D_chunk_info_t *chunk_info;   /* Pointer to chunk information */
 
@@ -1879,11 +1877,11 @@ H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm)
             } /* end for */
 
             /* Adjust the selection */
-            if(H5S_hyper_adjust_s(chunk_info->mspace, chunk_adjust) < 0) /*lint !e772 The chunk_adjust array will always be initialized */
+            if(H5S_hyper_adjust_s(chunk_info->mspace, chunk_adjust) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to adjust selection")
 
             /* Get the next chunk node in the skip list */
-            curr_node=H5SL_next(curr_node);
+            curr_node = H5SL_next(curr_node);
         } /* end while */
     } /* end else */
 

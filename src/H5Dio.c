@@ -102,7 +102,6 @@ H5D__get_offset_copy(const H5D_t *dset, const hsize_t *offset, hsize_t *offset_c
     HDassert(offset);
     HDassert(offset_copy);
 
-
     /* The library's chunking code requires the offset to terminate with a zero.
      * So transfer the offset array to an internal offset array that we
      * can properly terminate (handled via the calloc call).
@@ -127,14 +126,13 @@ done:
 
 } /* end H5D__get_offset_copy() */
 
-
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dread
+ * Function:    H5Dread
  *
  * Purpose:     Reads (part of) a DSET from the file into application
  *              memory BUF. The part of the dataset to read is defined with
- *              MEM_SPACE_ID and FILE_SPACE_ID.	 The data points are
+ *              MEM_SPACE_ID and FILE_SPACE_ID. The data points are
  *              converted from their file type to the MEM_TYPE_ID specified.
  *              Additional miscellaneous data transfer properties can be
  *              passed to this function with the PLIST_ID argument.
@@ -194,8 +192,8 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     /* Set DXPL for operation */
     H5CX_set_dxpl(dxpl_id);
 
-    /* Read raw data */
-    if (H5D__read(dset, mem_type_id, mem_space, file_space, buf/*out*/) < 0)
+    /* Read the data */
+    if (H5D__read(dset, mem_type_id, mem_space, file_space, buf) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
 done:
@@ -518,7 +516,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
      * Note that in general, this requires us to touch up the memory buffer as
      * well.
      */
-    if(TRUE == H5S_select_shape_same(mem_space, file_space) &&
+    if(TRUE == H5S_SELECT_SHAPE_SAME(mem_space, file_space) &&
             H5S_GET_EXTENT_NDIMS(mem_space) != H5S_GET_EXTENT_NDIMS(file_space)) {
         void *adj_buf = NULL;   /* Pointer to the location in buf corresponding  */
                                 /* to the beginning of the projected mem space.  */
@@ -753,7 +751,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
      * Note that in general, this requires us to touch up the memory buffer
      * as well.
      */
-    if(TRUE == H5S_select_shape_same(mem_space, file_space) &&
+    if(TRUE == H5S_SELECT_SHAPE_SAME(mem_space, file_space) &&
             H5S_GET_EXTENT_NDIMS(mem_space) != H5S_GET_EXTENT_NDIMS(file_space)) {
         void *adj_buf = NULL;   /* Pointer to the location in buf corresponding  */
                                 /* to the beginning of the projected mem space.  */
