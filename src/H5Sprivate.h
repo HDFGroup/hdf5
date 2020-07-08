@@ -17,9 +17,6 @@
 #ifndef _H5Sprivate_H
 #define _H5Sprivate_H
 
-/* Early typedefs to avoid circular dependencies */
-typedef struct H5S_t H5S_t;
-
 /* Include package's public header */
 #include "H5Spublic.h"
 
@@ -197,6 +194,9 @@ typedef struct H5S_sel_iter_op_t {
 #define H5S_SELECT_DESERIALIZE(S,BUF)   (H5S_select_deserialize(S,BUF))
 
 
+/* Early typedef to avoid circular dependencies */
+typedef struct H5S_t H5S_t;
+
 /* Operations on dataspaces */
 H5_DLL H5S_t *H5S_copy(const H5S_t *src, hbool_t share_selection, hbool_t copy_max);
 H5_DLL herr_t H5S_close(H5S_t *ds);
@@ -275,7 +275,7 @@ H5_DLL herr_t H5S_select_none(H5S_t *space);
 
 /* Operations on point selections */
 H5_DLL herr_t H5S_select_elements(H5S_t *space, H5S_seloper_t op,
-    hsize_t num_elem, const hsize_t *coord);
+    size_t num_elem, const hsize_t *coord);
 
 /* Operations on hyperslab selections */
 H5_DLL herr_t H5S_select_hyperslab(H5S_t *space, H5S_seloper_t op, const hsize_t start[],
@@ -284,9 +284,6 @@ H5_DLL herr_t H5S_hyper_add_span_element(H5S_t *space, unsigned rank,
     const hsize_t *coords);
 H5_DLL herr_t H5S_hyper_reset_scratch(H5S_t *space);
 H5_DLL herr_t H5S_hyper_convert(H5S_t *space);
-#ifdef LATER
-H5_DLL htri_t H5S_hyper_intersect (H5S_t *space1, H5S_t *space2);
-#endif /* LATER */
 H5_DLL htri_t H5S_hyper_intersect_block(H5S_t *space, const hsize_t *start, const hsize_t *end);
 H5_DLL herr_t H5S_hyper_adjust_s(H5S_t *space, const hssize_t *offset);
 H5_DLL htri_t H5S_hyper_normalize_offset(H5S_t *space, hssize_t *old_offset);
