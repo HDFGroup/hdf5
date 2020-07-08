@@ -154,7 +154,7 @@ H5MM__is_our_block(void *mem)
  *
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE static void
+static void
 H5MM__sanity_check_block(const H5MM_block_t *block)
 {
     HDassert(block->u.info.size > 0);
@@ -180,7 +180,7 @@ H5MM__sanity_check_block(const H5MM_block_t *block)
  *
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE static void
+static void
 H5MM__sanity_check(void *mem)
 {
     H5MM_block_t *block = H5MM_BLOCK_FROM_BUF(mem);
@@ -201,7 +201,7 @@ H5MM__sanity_check(void *mem)
  *
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE void
+void
 H5MM_sanity_check_all(void)
 {
     H5MM_block_t *curr = NULL;
@@ -226,7 +226,7 @@ H5MM_sanity_check_all(void)
  *
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE void
+void
 H5MM_final_sanity_check(void)
 {
     HDassert(0 == H5MM_curr_alloc_bytes_s);
@@ -235,7 +235,7 @@ H5MM_final_sanity_check(void)
     HDassert(H5MM_block_head_s.prev == &H5MM_block_head_s);
 #ifdef H5MM_PRINT_MEMORY_STATS
     HDfprintf(stderr, "%s: H5MM_total_alloc_bytes_s = %llu\n", __func__, H5MM_total_alloc_bytes_s);
-    HDfprintf(stderr, "%s: H5MM_peak_alloc_bytes_s = %llu\n", __func__, H5MM_peak_alloc_bytes_s);
+    HDfprintf(stderr, "%s: H5MM_peak_alloc_bytes_s = %zu\n", __func__, H5MM_peak_alloc_bytes_s);
     HDfprintf(stderr, "%s: H5MM_max_block_size_s = %zu\n", __func__, H5MM_max_block_size_s);
     HDfprintf(stderr, "%s: H5MM_total_alloc_blocks_count_s = %zu\n", __func__, H5MM_total_alloc_blocks_count_s);
     HDfprintf(stderr, "%s: H5MM_peak_alloc_blocks_count_s = %zu\n", __func__, H5MM_peak_alloc_blocks_count_s);
@@ -625,4 +625,46 @@ H5MM_memcpy(void *dest, const void *src, size_t n)
 
 } /* end H5MM_memcpy() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5MM_get_alloc_stats
+ *
+ * Purpose:	Gets the memory allocation statistics for the library, if the
+ *	H5_MEMORY_ALLOC_SANITY_CHECK macro is defined.  If the macro is not
+ *	defined, zeros are returned.  These statistics are global for the
+ *	entire library.
+ *
+ * Parameters:
+ *  H5_alloc_stats_t *stats;            OUT: Memory allocation statistics
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, March 7, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5MM_get_alloc_stats(H5_alloc_stats_t *stats)
+{
+    FUNC_ENTER_NOAPI_NOERR
+
+#if defined H5_MEMORY_ALLOC_SANITY_CHECK
+    if(stats) {
+        stats->total_alloc_bytes = H5MM_total_alloc_bytes_s;
+        stats->curr_alloc_bytes = H5MM_curr_alloc_bytes_s;
+        stats->peak_alloc_bytes = H5MM_peak_alloc_bytes_s;
+        stats->max_block_size = H5MM_max_block_size_s;
+        stats->total_alloc_blocks_count = H5MM_total_alloc_blocks_count_s;
+        stats->curr_alloc_blocks_count = H5MM_curr_alloc_blocks_count_s;
+        stats->peak_alloc_blocks_count = H5MM_peak_alloc_blocks_count_s;
+    } /* end if */
+#else /* H5_MEMORY_ALLOC_SANITY_CHECK */
+    if(stats)
+        HDmemset(stats, 0, sizeof(H5_alloc_stats_t));
+#endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+}   /* end H5MM_get_alloc_stats() */
 
