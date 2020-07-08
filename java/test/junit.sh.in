@@ -151,7 +151,7 @@ COPY_LIBFILES_TO_BLDLIBDIR()
          install_name_tool -add_rpath @loader_path libhdf5_java.dylib; \
          exist_path=` otool -l libhdf5_java.dylib | grep libhdf5 | grep -v java | awk '{print $2}'`; \
          echo $exist_path; \
-         install_name_tool -change $exist_path @rpath/libhdf5.1000.dylib libhdf5_java.dylib)
+         install_name_tool -change $exist_path @rpath/libhdf5.dylib libhdf5_java.dylib)
     fi
     # copy jar files. Used -f to make sure get a new copy
     for tstfile in $COPY_JARTESTFILES
