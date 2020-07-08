@@ -1866,7 +1866,7 @@ int main(int argc, char **argv)
     int ExpressMode = 0;
     hsize_t newsize = 1048576;
     /* Set the bigio processing limit to be 'newsize' bytes */
-    hsize_t oldsize = H5S_mpio_set_bigio_count(newsize);
+    hsize_t oldsize = H5_mpi_set_bigio_count(newsize);
 
     /* Having set the bigio handling to a size that is managable,
      * we'll set our 'bigcount' variable to be 2X that limit so

@@ -25,7 +25,6 @@
 #define H5S_TESTING
 
 #include "testhdf5.h"
-#include "hdf5.h"
 #include "H5Spkg.h"        /* Dataspaces                */
 
 #define FILENAME   "tselect.h5"
@@ -11850,7 +11849,8 @@ test_space_rebuild(void)
    hid_t sid_irreg1,sid_irreg2,sid_irreg3,sid_irreg4,sid_irreg5;
 
    /* rebuild status state */
-   htri_t rebuild_stat,rebuild_check;
+   htri_t rebuild_stat;
+   htri_t rebuild_check;
    herr_t ret;
 
    /* dimensions of rank 1 to rank 5 */
@@ -11920,7 +11920,7 @@ test_space_rebuild(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     rebuild_stat = FALSE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_reg1);
+    rebuild_stat = H5S__get_rebuild_status_test(sid_reg1);
     HDassert(rebuild_stat!=FAIL);
     /* In this case, rebuild_stat should be TRUE. */
     if(!rebuild_stat){
@@ -11952,7 +11952,7 @@ test_space_rebuild(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     rebuild_stat = TRUE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_irreg1);
+    rebuild_stat = H5S__get_rebuild_status_test(sid_irreg1);
     HDassert(rebuild_stat != FAIL);
     /* In this case, rebuild_stat should be FALSE. */
     if(rebuild_stat){
@@ -12000,7 +12000,7 @@ test_space_rebuild(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     rebuild_stat = FALSE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_reg2);
+    rebuild_stat = H5S__get_rebuild_status_test(sid_reg2);
     HDassert(rebuild_stat != FAIL);
     /* In this case, rebuild_stat should be TRUE. */
     if(!rebuild_stat){
@@ -12037,7 +12037,7 @@ test_space_rebuild(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     rebuild_stat = TRUE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_irreg2);
+    rebuild_stat = H5S__get_rebuild_status_test(sid_irreg2);
     HDassert(rebuild_stat != FAIL);
     /* In this case, rebuild_stat should be FALSE. */
     if(rebuild_stat){
@@ -12090,7 +12090,7 @@ test_space_rebuild(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     rebuild_stat = FALSE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_reg3);
+    rebuild_stat = H5S__get_rebuild_status_test(sid_reg3);
     assert(rebuild_stat != FAIL);
 
     /* In this case, rebuild_stat should be TRUE. */
@@ -12133,7 +12133,7 @@ test_space_rebuild(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     rebuild_stat = TRUE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_irreg3);
+    rebuild_stat = H5S__get_rebuild_status_test(sid_irreg3);
     assert(rebuild_stat != FAIL);
     /* In this case, rebuild_stat should be FALSE. */
     if(rebuild_stat){
@@ -12194,7 +12194,7 @@ test_space_rebuild(void)
 
 
     rebuild_stat = FALSE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_reg4);
+    rebuild_stat = H5S__get_rebuild_status_test(sid_reg4);
     assert(rebuild_stat != FAIL);
     /* In this case, rebuild_stat should be TRUE. */
     if(!rebuild_stat){
@@ -12247,7 +12247,7 @@ test_space_rebuild(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     rebuild_stat = TRUE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_irreg4);
+    rebuild_stat = H5S__get_rebuild_status_test(sid_irreg4);
     assert(rebuild_stat != FAIL);
     /* In this case, rebuild_stat should be FALSE. */
     if(rebuild_stat){
@@ -12312,7 +12312,7 @@ test_space_rebuild(void)
 
 
     rebuild_stat = FALSE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_reg5);
+    rebuild_stat = H5S__get_rebuild_status_test(sid_reg5);
     assert(rebuild_stat != FAIL);
     /* In this case, rebuild_stat should be TRUE. */
     if(!rebuild_stat){
@@ -12370,7 +12370,7 @@ test_space_rebuild(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     rebuild_stat = TRUE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_irreg5);
+    rebuild_stat = H5S__get_rebuild_status_test(sid_irreg5);
     assert(rebuild_stat != FAIL);
     /* In this case, rebuild_stat should be FALSE. */
     if(rebuild_stat){
@@ -12412,7 +12412,7 @@ test_space_rebuild(void)
     ret = H5Sselect_hyperslab(sid_spec,H5S_SELECT_SET,start5,stride5,count5,block5);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
     rebuild_stat = FALSE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_spec);
+    rebuild_stat = H5S__get_rebuild_status_test(sid_spec);
     /* In this case, rebuild_stat should be TRUE. */
     if(!rebuild_stat){
        ret = FAIL;
@@ -12435,7 +12435,7 @@ test_space_rebuild(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     rebuild_stat = TRUE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_spec);
+    rebuild_stat = H5S__get_rebuild_status_test(sid_spec);
     HDassert(rebuild_stat != FAIL);
     /* In this case, rebuild_stat should be FALSE. */
     if(rebuild_stat){
@@ -12459,7 +12459,7 @@ test_space_rebuild(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     rebuild_stat = FALSE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_spec);
+    rebuild_stat = H5S__get_rebuild_status_test(sid_spec);
     HDassert(rebuild_stat!=FAIL);
     /* In this case, rebuild_stat should be FALSE. */
     if(!rebuild_stat){

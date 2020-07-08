@@ -8,6 +8,7 @@ set (H5_SOURCES
     ${HDF5_SRC_DIR}/H5.c
     ${HDF5_SRC_DIR}/H5checksum.c
     ${HDF5_SRC_DIR}/H5dbg.c
+    ${HDF5_SRC_DIR}/H5mpi.c
     ${HDF5_SRC_DIR}/H5system.c
     ${HDF5_SRC_DIR}/H5timer.c
     ${HDF5_SRC_DIR}/H5trace.c
