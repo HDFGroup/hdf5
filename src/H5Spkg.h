@@ -26,6 +26,7 @@
 #ifndef _H5Spkg_H
 #define _H5Spkg_H
 
+/* Get package's private header */
 #include "H5Sprivate.h"
 
 /* Flags to indicate special dataspace features are active */
@@ -53,12 +54,13 @@
 #define H5S_ALL_VERSION_1           1
 #define H5S_ALL_VERSION_LATEST      H5S_ALL_VERSION_1
 
-/* Size of point/offset info for H5S_SEL_POINTS/H5S_SEL_HYPER */
+/* Encoded size of selection info for H5S_SEL_POINTS/H5S_SEL_HYPER */
 #define H5S_SELECT_INFO_ENC_SIZE_4 0x04        /* 4 bytes: 32 bits */
 #define H5S_SELECT_INFO_ENC_SIZE_8 0x08        /* 8 bytes: 64 bits */
-#define H5S_SELECT_INFO_ENC_SIZE_BITS   (H5S_SELECT_INFO_ENC_SIZE_4|H5S_SELECT_INFO_ENC_SIZE_8)
+#define H5S_SELECT_INFO_ENC_SIZE_BITS   ( H5S_SELECT_INFO_ENC_SIZE_4 |    \
+                                          H5S_SELECT_INFO_ENC_SIZE_8 )
 
-#define H5S_UINT32_MAX      4294967295  /* 2^32 - 1 */
+#define H5S_UINT32_MAX      0xFFFFFFFF  /* 2^32 - 1 = 4,294,967,295                     */
 
 /* Length of stack-allocated sequences for "project intersect" routines */
 #define H5S_PROJECT_INTERSECT_NSEQS 256
@@ -101,6 +103,7 @@ struct H5S_extent_t {
 /*
  * Dataspace selection information
  */
+
 /* Node in point selection list (typedef'd in H5Sprivate.h) */
 struct H5S_pnt_node_t {
     hsize_t *pnt;          /* Pointer to a selected point */
@@ -112,7 +115,7 @@ typedef struct {
     H5S_pnt_node_t *head;   /* Pointer to head of point list */
 } H5S_pnt_list_t;
 
-/* Information about new-style hyperslab spans */
+/* Information about hyperslab spans */
 
 /* Information a particular hyperslab span */
 struct H5S_hyper_span_t {
@@ -135,7 +138,7 @@ struct H5S_hyper_span_info_t {
     struct H5S_hyper_span_t *head;  /* Pointer to list of spans in next dimension down */
 };
 
-/* Information about new-style hyperslab selection */
+/* Information about hyperslab selection */
 typedef struct {
     hbool_t diminfo_valid;                      /* Whether the dataset has valid diminfo */
     H5S_hyper_dim_t opt_diminfo[H5S_MAX_RANK];  /* per-dim selection info */
@@ -148,7 +151,7 @@ typedef struct {
          * information. */
     int unlim_dim;                      /* Dimension where selection is unlimited, or -1 if none */
     hsize_t num_elem_non_unlim;         /* # of elements in a "slice" excluding the unlimited dimension */
-    H5S_hyper_span_info_t *span_lst;    /* List of hyperslab span information */
+    H5S_hyper_span_info_t *span_lst;    /* List of hyperslab span information of all dimensions */
 } H5S_hyper_sel_t;
 
 /* Selection information methods */
@@ -293,8 +296,8 @@ H5_DLLVAR const unsigned H5O_sdspace_ver_bounds[H5F_LIBVER_NBOUNDS];
 H5_DLLVAR const unsigned H5O_sds_hyper_ver_bounds[H5F_LIBVER_NBOUNDS];
 
 /* Extent functions */
-H5_DLL herr_t H5S_extent_release(H5S_extent_t *extent);
-H5_DLL herr_t H5S_extent_copy_real(H5S_extent_t *dst, const H5S_extent_t *src,
+H5_DLL herr_t H5S__extent_release(H5S_extent_t *extent);
+H5_DLL herr_t H5S__extent_copy_real(H5S_extent_t *dst, const H5S_extent_t *src,
     hbool_t copy_max);
 
 /* Operations on selections */
@@ -305,8 +308,8 @@ H5_DLL herr_t H5S__hyper_subtract(H5S_t *space, H5S_t *subtract_space);
 
 /* Testing functions */
 #ifdef H5S_TESTING
+H5_DLL htri_t H5S__get_rebuild_status_test(hid_t space_id);
 H5_DLL htri_t H5S_select_shape_same_test(hid_t sid1, hid_t sid2);
-H5_DLL htri_t H5S_get_rebuild_status_test(hid_t space_id);
 #endif /* H5S_TESTING */
 
 #endif /*_H5Spkg_H*/

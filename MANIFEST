@@ -522,6 +522,7 @@
 ./src/H5err.txt
 ./src/H5detect.c
 ./src/H5make_libsettings.c
+./src/H5mpi.c
 ./src/H5overflow.txt
 ./src/H5private.h
 ./src/H5public.h
