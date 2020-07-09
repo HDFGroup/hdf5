@@ -287,14 +287,14 @@ H5S__hyper_print_diminfo(FILE *f, const H5S_t *space)
 /*-------------------------------------------------------------------------
  * Function:    H5S__hyper_iter_init
  *
- * Purpose:     Initializes iteration information for hyperslab span tree selection.
+ * Purpose:     Initializes iteration information for hyperslab selection.
  *
  * Return:      Non-negative on success, negative on failure.
  *
  * Programmer:  Quincey Koziol
  *              Saturday, February 24, 2001
  *
- * Notes:       If the 'elmt_size' parameter is set to zero, the regular
+ * Notes:       If the 'iter->elmt_size' field is set to zero, the regular
  *              hyperslab selection iterator will not be 'flattened'.  This
  *              is used by the H5S_select_shape_same() code to avoid changing
  *              the rank and appearance of the selection.
@@ -362,7 +362,7 @@ H5S__hyper_iter_init(const H5S_t *space, H5S_sel_iter_t *iter)
 
         /* Check if the regular selection can be "flattened" */
         if(cont_dim > 0) {
-            unsigned last_dim_flattened = 1;    /* Flag to indicate that the last dimension was flattened */
+            hbool_t last_dim_flattened = TRUE;  /* Flag to indicate that the last dimension was flattened */
             unsigned flat_rank = rank-cont_dim; /* Number of dimensions after flattening */
             unsigned curr_dim;                  /* Current dimension */
 
@@ -378,7 +378,7 @@ H5S__hyper_iter_init(const H5S_t *space, H5S_sel_iter_t *iter)
                     acc *= mem_size[i];
 
                     /* Indicate that the dimension was flattened */
-                    last_dim_flattened = 1;
+                    last_dim_flattened = TRUE;
                 } /* end if */
                 else {
                     if(last_dim_flattened) {
@@ -396,7 +396,7 @@ H5S__hyper_iter_init(const H5S_t *space, H5S_sel_iter_t *iter)
                         iter->u.hyp.sel_off[curr_dim] = space->select.offset[i] * (hssize_t)acc;
 
                         /* Reset the "last dim flattened" flag to avoid flattened any further dimensions */
-                        last_dim_flattened = 0;
+                        last_dim_flattened = FALSE;
 
                         /* Reset the "accumulator" for possible further dimension flattening */
                         acc = 1;
@@ -763,7 +763,7 @@ H5S__hyper_iter_next(H5S_sel_iter_t *iter, size_t nelem)
                     block_elem = tdiminfo[temp_dim].block - iter_offset[temp_dim];
 
                     /* Compute the number of actual elements to advance */
-                    actual_elem = (size_t)MIN(nelem,block_elem);
+                    actual_elem = (size_t)MIN(nelem, block_elem);
 
                     /* Move the iterator over as many elements as possible */
                     iter_offset[temp_dim] += actual_elem;
@@ -1306,7 +1306,7 @@ H5S__hyper_span_scratch(H5S_hyper_span_info_t *spans)
     Helper routine to copy a hyperslab span tree
  USAGE
     H5S_hyper_span_info_t * H5S__hyper_copy_span_helper(spans)
-        H5S_hyper_span_info_t *spans;      IN: Span tree to copy
+        H5S_hyper_span_info_t *spans;   IN: Span tree to copy
  RETURNS
     Pointer to the copied span tree on success, NULL on failure
  DESCRIPTION
@@ -1394,9 +1394,9 @@ done:
     Copy a hyperslab span tree
  USAGE
     H5S_hyper_span_info_t * H5S__hyper_copy_span(span_info)
-        H5S_hyper_span_info_t *span_info;      IN: Span tree to copy
+        H5S_hyper_span_info_t *span_info;       IN: Span tree to copy
  RETURNS
-    Non-negative on success, negative on failure
+    Pointer to the copied span tree on success, NULL on failure
  DESCRIPTION
     Copy a hyperslab span tree, using reference counting as appropriate.
     (Which means that just the nodes in the top span tree are duplicated and
@@ -4758,6 +4758,8 @@ H5S__hyper_adjust_s_helper(H5S_hyper_span_info_t *spans,
 herr_t
 H5S_hyper_adjust_s(H5S_t *space, const hssize_t *offset)
 {
+    hbool_t non_zero_offset = FALSE;    /* Whether any offset is non-zero */
+    unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -4766,23 +4768,31 @@ H5S_hyper_adjust_s(H5S_t *space, const hssize_t *offset)
     HDassert(space);
     HDassert(offset);
 
-    /* Subtract the offset from the "regular" coordinates, if they exist */
-    if(space->select.sel_info.hslab->diminfo_valid) {
-        unsigned u;                         /* Local index variable */
+    /* Check for an all-zero offset vector */
+    for(u = 0; u < space->extent.rank; u++)
+        if(0 != offset[u]) {
+            non_zero_offset = TRUE;
+            break;
+        } /* end if */
 
-        for(u = 0; u < space->extent.rank; u++) {
-            HDassert((hssize_t)space->select.sel_info.hslab->opt_diminfo[u].start >= offset[u]);
-            space->select.sel_info.hslab->opt_diminfo[u].start = (hsize_t)((hssize_t)space->select.sel_info.hslab->opt_diminfo[u].start - offset[u]);
-        } /* end for */
-    } /* end if */
+    /* Only perform operation if the offset is non-zero */
+    if(non_zero_offset) {
+        /* Subtract the offset from the "regular" coordinates, if they exist */
+        if(space->select.sel_info.hslab->diminfo_valid) {
+            for(u = 0; u < space->extent.rank; u++) {
+                HDassert((hssize_t)space->select.sel_info.hslab->opt_diminfo[u].start >= offset[u]);
+                space->select.sel_info.hslab->opt_diminfo[u].start = (hsize_t)((hssize_t)space->select.sel_info.hslab->opt_diminfo[u].start - offset[u]);
+            } /* end for */
+        } /* end if */
 
-    /* Subtract the offset from the span tree coordinates, if they exist */
-    if(space->select.sel_info.hslab->span_lst) {
-        H5S__hyper_adjust_s_helper(space->select.sel_info.hslab->span_lst, offset);
+        /* Subtract the offset from the span tree coordinates, if they exist */
+        if(space->select.sel_info.hslab->span_lst) {
+            H5S__hyper_adjust_s_helper(space->select.sel_info.hslab->span_lst, offset);
 
-        /* Reset the scratch pointers for the next routine which needs them */
-        H5S__hyper_span_scratch(space->select.sel_info.hslab->span_lst);
-    } /* end if */
+            /* Reset the scratch pointers for the next routine which needs them */
+            H5S__hyper_span_scratch(space->select.sel_info.hslab->span_lst);
+        } /* end if */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
