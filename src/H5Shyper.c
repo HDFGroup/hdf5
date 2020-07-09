@@ -8659,15 +8659,15 @@ H5S__hyper_get_seq_list_opt(const H5S_t *space, H5S_sel_iter_t *iter,
     /* Read in data until an entire sequence can't be written out any longer */
     while(curr_rows > 0) {
 
-#define DUFF_GUTS							      \
-/* Store the sequence information */				      \
-off[curr_seq] = loc;						      \
-len[curr_seq] = actual_bytes;					      \
-                                                                          \
-/* Increment sequence count */					      \
-curr_seq++;								      \
-                                                                          \
-/* Increment information to reflect block just processed */		      \
+#define DUFF_GUTS                                                       \
+/* Store the sequence information */                                    \
+off[curr_seq] = loc;                                                    \
+len[curr_seq] = actual_bytes;                                           \
+                                                                        \
+/* Increment sequence count */                                          \
+curr_seq++;                                                             \
+                                                                        \
+/* Increment information to reflect block just processed */             \
 loc += fast_dim_buf_off;
 
 #ifdef NO_DUFFS_DEVICE
@@ -8691,18 +8691,25 @@ loc += fast_dim_buf_off;
                     do
                       {
                         DUFF_GUTS
+                        H5_ATTR_FALLTHROUGH
                 case 7:
                         DUFF_GUTS
+                        H5_ATTR_FALLTHROUGH
                 case 6:
                         DUFF_GUTS
+                        H5_ATTR_FALLTHROUGH
                 case 5:
                         DUFF_GUTS
+                        H5_ATTR_FALLTHROUGH
                 case 4:
                         DUFF_GUTS
+                        H5_ATTR_FALLTHROUGH
                 case 3:
                         DUFF_GUTS
+                        H5_ATTR_FALLTHROUGH
                 case 2:
                         DUFF_GUTS
+                        H5_ATTR_FALLTHROUGH
                 case 1:
                         DUFF_GUTS
                   } while (--duffs_index > 0);
