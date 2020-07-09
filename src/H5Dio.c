@@ -21,14 +21,14 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5CXprivate.h"        /* API Contexts                         */
-#include "H5Dpkg.h"		/* Dataset functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MMprivate.h"        /* Memory management                    */
-#include "H5Sprivate.h"		/* Dataspace			  	*/
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5CXprivate.h"        /* API Contexts                             */
+#include "H5Dpkg.h"             /* Dataset functions                        */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5FLprivate.h"        /* Free Lists                               */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5MMprivate.h"        /* Memory management                        */
+#include "H5Sprivate.h"         /* Dataspace                                */
 
 #ifdef H5_HAVE_PARALLEL
 /* Remove this if H5R_DATASET_REGION is no longer used in this file */
@@ -50,6 +50,7 @@
 /* Local Prototypes */
 /********************/
 
+/* Setup/teardown routines */
 static herr_t H5D__get_offset_copy(const H5D_t *dset, const hsize_t *offset,
         hsize_t *offset_copy/*out*/);
 static herr_t H5D__ioinfo_init(H5D_t *dset, const H5D_type_info_t *type_info,
@@ -440,9 +441,9 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
                                         /* Note that if this variable is used, the        */
                                         /* projected mem space must be discarded at the   */
                                         /* end of the function to avoid a memory leak.    */
-    H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
-    hssize_t	snelmts;                /*total number of elmts	(signed) */
-    hsize_t	nelmts;                 /*total number of elmts	*/
+    H5D_storage_t store;                /* union of EFL and chunk pointer in file space */
+    hssize_t    snelmts;                /* total number of elmts	(signed) */
+    hsize_t     nelmts;                 /* total number of elmts	*/
     hbool_t     io_op_init = FALSE;     /* Whether the I/O op has been initialized */
     char        fake_char;              /* Temporary variable for NULL buffer pointers */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
@@ -654,9 +655,9 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
                                         /* Note that if this variable is used, the        */
                                         /* projected mem space must be discarded at the   */
                                         /* end of the function to avoid a memory leak.    */
-    H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
-    hssize_t	snelmts;                /*total number of elmts	(signed) */
-    hsize_t	nelmts;                 /*total number of elmts	*/
+    H5D_storage_t store;                /* union of EFL and chunk pointer in file space */
+    hssize_t    snelmts;                /* total number of elmts	(signed) */
+    hsize_t     nelmts;                 /* total number of elmts	*/
     hbool_t     io_op_init = FALSE;     /* Whether the I/O op has been initialized */
     char        fake_char;              /* Temporary variable for NULL buffer pointers */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
@@ -971,8 +972,7 @@ H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write,
         type_info->dst_type_id = mem_type_id;
     } /* end else */
 
-    /*
-     * Locate the type conversion function and dataspace conversion
+    /* Locate the type conversion function and dataspace conversion
      * functions, and set up the element numbering information. If a data
      * type conversion is necessary then register datatype atoms. Data type
      * conversion is necessary if the user has set the `need_bkg' to a high
@@ -1168,7 +1168,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
                 uint32_t                        global_no_collective_cause;
                 hbool_t                         local_error_message_previously_written = FALSE;
                 hbool_t                         global_error_message_previously_written = FALSE;
-                size_t                          index;
+                size_t                          idx;
                 size_t                          cause_strings_len;
                 char                            local_no_collective_cause_string[512] = "";
                 char                            global_no_collective_cause_string[512] = "";
@@ -1190,8 +1190,8 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
 
                 /* Append each of the "reason for breaking collective I/O" error messages to the
                  * local and global no collective cause strings */
-                for (cause = 1, index = 0; (cause < H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE) && (index < cause_strings_len); cause <<= 1, index++) {
-                    size_t cause_strlen = HDstrlen(cause_strings[index]);
+                for (cause = 1, idx = 0; (cause < H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE) && (idx < cause_strings_len); cause <<= 1, idx++) {
+                    size_t cause_strlen = HDstrlen(cause_strings[idx]);
 
                     if (cause & local_no_collective_cause) {
                         /* Check if there were any previous error messages included. If so, prepend a semicolon
@@ -1200,7 +1200,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
                         if(local_error_message_previously_written)
                             HDstrncat(local_no_collective_cause_string, "; ", 2);
 
-                        HDstrncat(local_no_collective_cause_string, cause_strings[index], cause_strlen);
+                        HDstrncat(local_no_collective_cause_string, cause_strings[idx], cause_strlen);
 
                         local_error_message_previously_written = TRUE;
                     } /* end if */
@@ -1212,7 +1212,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
                         if(global_error_message_previously_written)
                             HDstrncat(global_no_collective_cause_string, "; ", 2);
 
-                        HDstrncat(global_no_collective_cause_string, cause_strings[index], cause_strlen);
+                        HDstrncat(global_no_collective_cause_string, cause_strings[idx], cause_strlen);
 
                         global_error_message_previously_written = TRUE;
                     } /* end if */
@@ -1240,7 +1240,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__ioinfo_adjust() */
-#endif /*H5_HAVE_PARALLEL*/
+#endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------

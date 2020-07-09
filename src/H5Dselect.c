@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.ued>
+/* Programmer:  Quincey Koziol
  *              Thursday, September 30, 2004
  *
  * Purpose:	Dataspace I/O functions.
@@ -227,6 +227,8 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size,
 
             /* Decrement number of elements left to process */
             HDassert(((size_t)tmp_file_len % elmt_size) == 0);
+            if(elmt_size == 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "Resulted in division by zero")
             nelmts -= ((size_t)tmp_file_len / elmt_size);
         } /* end while */
     } /* end else */

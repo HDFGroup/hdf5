@@ -39,6 +39,7 @@
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MFprivate.h"	/* File space management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Sprivate.h"         /* Dataspaces                           */
 #include "H5VMprivate.h"		/* Vector and array functions		*/
@@ -252,7 +253,7 @@ H5D__btree_get_shared(const H5F_t H5_ATTR_UNUSED *f, const void *_udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__btree_new_node(H5F_t *f, H5B_ins_t op, void *_lt_key, void *_udata,
+H5D__btree_new_node(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5B_ins_t op, void *_lt_key, void *_udata,
     void *_rt_key, haddr_t *addr_p/*out*/)
 {
     H5D_btree_key_t	*lt_key = (H5D_btree_key_t *) _lt_key;
@@ -535,7 +536,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5B_ins_t
-H5D__btree_insert(H5F_t *f, haddr_t addr, void *_lt_key, hbool_t *lt_key_changed,
+H5D__btree_insert(H5F_t H5_ATTR_NDEBUG_UNUSED *f, haddr_t H5_ATTR_NDEBUG_UNUSED addr, void *_lt_key, hbool_t *lt_key_changed,
     void *_md_key, void *_udata, void *_rt_key, hbool_t H5_ATTR_UNUSED *rt_key_changed,
     haddr_t *new_node_p/*out*/)
 {
@@ -685,13 +686,12 @@ H5D__btree_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key
     /* decode */
     UINT32DECODE(raw, key->nbytes);
     UINT32DECODE(raw, key->filter_mask);
-    for(u = 0; u < layout->ndims; u++)
-    {
-        if (layout->dim[u] == 0)
+    for(u = 0; u < layout->ndims; u++) {
+        if(layout->dim[u] == 0)
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk size must be > 0, dim = %u ", u)
 
         /* Retrieve coordinate offset */
-	    UINT64DECODE(raw, tmp_offset);
+        UINT64DECODE(raw, tmp_offset);
         HDassert(0 == (tmp_offset % layout->dim[u]));
 
         /* Convert to a scaled offset */
@@ -943,7 +943,7 @@ H5D__btree_idx_create(const H5D_chk_idx_info_t *idx_info)
 
     /* Create the v1 B-tree for the chunk index */
     if(H5B_create(idx_info->f, H5B_BTREE, &udata, &(idx_info->storage->idx_addr)/*out*/) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create B-tree")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create B-tree")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

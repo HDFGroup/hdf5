@@ -38,6 +38,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5VMprivate.h"	/* Vector and array functions		*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
@@ -174,7 +175,7 @@ done:
 --------------------------------------------------------------------------*/
 herr_t
 H5D__fill(const void *fill, const H5T_t *fill_type, void *buf,
-    const H5T_t *buf_type, const H5S_t *space)
+          const H5T_t *buf_type, const H5S_t *space)
 {
     H5S_sel_iter_t *mem_iter = NULL; /* Memory selection iteration info */
     hbool_t mem_iter_init = FALSE; /* Whether the memory selection iterator has been initialized */
@@ -248,12 +249,11 @@ H5D__fill(const void *fill, const H5T_t *fill_type, void *buf,
          * of the VL data.
          */
         if(TRUE == H5T_detect_class(fill_type, H5T_VLEN, FALSE)) {
-            hssize_t nelmts;                    /* Number of data elements */
+            hsize_t nelmts;                    /* Number of data elements */
 
             /* Get the number of elements in the selection */
             nelmts = H5S_GET_SELECT_NPOINTS(space);
-            HDassert(nelmts >= 0);
-            H5_CHECK_OVERFLOW(nelmts, hssize_t, size_t);
+            H5_CHECK_OVERFLOW(nelmts, hsize_t, size_t);
 
             /* Allocate a temporary buffer */
             if(NULL == (tmp_buf = H5FL_BLK_MALLOC(type_conv, (size_t)nelmts * buf_size)))
