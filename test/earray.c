@@ -340,49 +340,49 @@ check_stats(const H5EA_t *ea, const earray_state_t *state)
 
     /* Compare information */
     if(earray_stats.stored.max_idx_set != state->max_idx_set) {
-        HDfprintf(stdout, "earray_stats.stored.max_idx_set = %Hu, state->max_idx_set = %Hu\n", earray_stats.stored.max_idx_set, state->max_idx_set);
+        HDfprintf(stdout, "earray_stats.stored.max_idx_set = %" PRIuHSIZE ", state->max_idx_set = %" PRIuHSIZE "\n", earray_stats.stored.max_idx_set, state->max_idx_set);
         TEST_ERROR
     } /* end if */
     if(earray_stats.stored.nelmts != state->nelmts) {
-        HDfprintf(stdout, "earray_stats.stored.nelmts = %Hu, state->nelmts = %Hu\n", earray_stats.stored.nelmts, state->nelmts);
+        HDfprintf(stdout, "earray_stats.stored.nelmts = %" PRIuHSIZE ", state->nelmts = %" PRIuHSIZE "\n", earray_stats.stored.nelmts, state->nelmts);
         TEST_ERROR
     } /* end if */
     if(earray_stats.computed.hdr_size != state->hdr_size) {
-        HDfprintf(stdout, "earray_stats.computed.hdr_size = %Hu, state->hdr_size = %Hu\n", earray_stats.computed.hdr_size, state->hdr_size);
+        HDfprintf(stdout, "earray_stats.computed.hdr_size = %" PRIuHSIZE ", state->hdr_size = %" PRIuHSIZE "\n", earray_stats.computed.hdr_size, state->hdr_size);
         TEST_ERROR
     } /* end if */
     if(earray_stats.computed.nindex_blks != state->nindex_blks) {
-        HDfprintf(stdout, "earray_stats.computed.nindex_blks = %Hu, state->nindex_blks = %Hu\n", earray_stats.computed.nindex_blks, state->nindex_blks);
+        HDfprintf(stdout, "earray_stats.computed.nindex_blks = %" PRIuHSIZE ", state->nindex_blks = %" PRIuHSIZE "\n", earray_stats.computed.nindex_blks, state->nindex_blks);
         TEST_ERROR
     } /* end if */
     if(earray_stats.computed.index_blk_size != state->index_blk_size) {
-        HDfprintf(stdout, "earray_stats.computed.index_blk_size = %Hu, state->index_blk_size = %Hu\n", earray_stats.computed.index_blk_size, state->index_blk_size);
+        HDfprintf(stdout, "earray_stats.computed.index_blk_size = %" PRIuHSIZE ", state->index_blk_size = %" PRIuHSIZE "\n", earray_stats.computed.index_blk_size, state->index_blk_size);
         TEST_ERROR
     } /* end if */
     if(earray_stats.stored.ndata_blks != state->ndata_blks) {
-        HDfprintf(stdout, "earray_stats.stored.ndata_blks = %Hu, state->ndata_blks = %Hu\n", earray_stats.stored.ndata_blks, state->ndata_blks);
+        HDfprintf(stdout, "earray_stats.stored.ndata_blks = %" PRIuHSIZE ", state->ndata_blks = %" PRIuHSIZE "\n", earray_stats.stored.ndata_blks, state->ndata_blks);
         TEST_ERROR
     } /* end if */
 /* Don't compare this currently, it's very hard to compute */
 #ifdef NOT_YET
     if(earray_stats.stored.data_blk_size != state->data_blk_size) {
-        HDfprintf(stdout, "earray_stats.stored.data_blk_size = %Hu, state->data_blk_size = %Hu\n", earray_stats.stored.data_blk_size, state->data_blk_size);
+        HDfprintf(stdout, "earray_stats.stored.data_blk_size = %" PRIuHSIZE ", state->data_blk_size = %" PRIuHSIZE "\n", earray_stats.stored.data_blk_size, state->data_blk_size);
         TEST_ERROR
     } /* end if */
 #endif /* NOT_YET */
     if(earray_stats.stored.nsuper_blks != state->nsuper_blks) {
-        HDfprintf(stdout, "earray_stats.stored.nsuper_blks = %Hu, state->nsuper_blks = %Hu\n", earray_stats.stored.nsuper_blks, state->nsuper_blks);
+        HDfprintf(stdout, "earray_stats.stored.nsuper_blks = %" PRIuHSIZE ", state->nsuper_blks = %" PRIuHSIZE "\n", earray_stats.stored.nsuper_blks, state->nsuper_blks);
         TEST_ERROR
     } /* end if */
 /* Don't compare this currently, it's very hard to compute */
 #ifdef NOT_YET
     if(earray_stats.stored.super_blk_size != state->super_blk_size) {
-        HDfprintf(stdout, "earray_stats.stored.super_blk_size = %Hu, state->super_blk_size = %Hu\n", earray_stats.stored.super_blk_size, state->super_blk_size);
+        HDfprintf(stdout, "earray_stats.stored.super_blk_size = %" PRIuHSIZE ", state->super_blk_size = %" PRIuHSIZE "\n", earray_stats.stored.super_blk_size, state->super_blk_size);
         TEST_ERROR
     } /* end if */
 #endif /* NOT_YET */
 #ifdef QAK
-HDfprintf(stderr, "nelmts = %Hu, total EA size = %Hu\n", earray_stats.stored.nelmts,
+HDfprintf(stderr, "nelmts = %" PRIuHSIZE ", total EA size = %" PRIuHSIZE "\n", earray_stats.stored.nelmts,
         (earray_stats.computed.hdr_size + earray_stats.computed.index_blk_size + earray_stats.stored.super_blk_size + earray_stats.stored.data_blk_size));
 #endif /* QAK */
 
@@ -561,7 +561,7 @@ finish(hid_t file, hid_t fapl, H5F_t *f, H5EA_t *ea, haddr_t ea_addr)
         FAIL_STACK_ERROR
 
 #ifdef QAK
-HDfprintf(stderr, "ea_addr = %a\n", ea_addr);
+HDfprintf(stderr, "ea_addr = %" PRIuHADDR "\n", ea_addr);
 H5Fflush(file, H5F_SCOPE_GLOBAL);
 HDsystem("cp earray.h5 earray.h5.save");
 #endif /* QAK */
@@ -1385,17 +1385,17 @@ eiter_fw_state(void *_eiter, const H5EA_create_t *cparam,
         /* (same eqn. as in H5EA__dblock_sblk_idx()) */
         sblk_idx = H5VM_log2_gen((uint64_t)(((idx - cparam->idx_blk_elmts) / cparam->data_blk_min_elmts) + 1));
 #ifdef QAK
-HDfprintf(stderr, "idx = %Hu, tparam->sblk_info[%u] = {%Zu, %Zu, %Hu, %Hu}\n", idx, sblk_idx, tparam->sblk_info[sblk_idx].ndblks, tparam->sblk_info[sblk_idx].dblk_nelmts, tparam->sblk_info[sblk_idx].start_idx, tparam->sblk_info[sblk_idx].start_dblk);
+HDfprintf(stderr, "idx = %" PRIuHSIZE ", tparam->sblk_info[%u] = {%zu, %zu, %" PRIuHSIZE ", %" PRIuHSIZE "}\n", idx, sblk_idx, tparam->sblk_info[sblk_idx].ndblks, tparam->sblk_info[sblk_idx].dblk_nelmts, tparam->sblk_info[sblk_idx].start_idx, tparam->sblk_info[sblk_idx].start_dblk);
 #endif /* QAK */
 
         state->nelmts = EA_NELMTS(cparam, tparam, idx, sblk_idx);
 #ifdef QAK
-HDfprintf(stderr, "state->nelmts = %Hu\n", state->nelmts);
+HDfprintf(stderr, "state->nelmts = %" PRIuHSIZE "\n", state->nelmts);
 #endif /* QAK */
 
         state->ndata_blks = EA_NDATA_BLKS(cparam, tparam, idx, sblk_idx);
 #ifdef QAK
-HDfprintf(stderr, "state->ndata_blks = %Hu\n", state->ndata_blks);
+HDfprintf(stderr, "state->ndata_blks = %" PRIuHSIZE "\n", state->ndata_blks);
 #endif /* QAK */
 
         /* Check if we have any super blocks yet */
@@ -1406,7 +1406,7 @@ HDfprintf(stderr, "state->ndata_blks = %Hu\n", state->ndata_blks);
 
             state->nsuper_blks = (sblk_idx - eiter->base_sblk_idx) + 1;
 #ifdef QAK
-HDfprintf(stderr, "state->nsuper_blks = %Hu\n", state->nsuper_blks);
+HDfprintf(stderr, "state->nsuper_blks = %" PRIuHSIZE "\n", state->nsuper_blks);
 #endif /* QAK */
         } /* end if */
         else
@@ -1620,9 +1620,9 @@ eiter_rv_state(void *_eiter, const H5EA_create_t *cparam,
             loc_sblk_idx = H5VM_log2_gen((uint64_t)(((loc_idx - cparam->idx_blk_elmts) / cparam->data_blk_min_elmts) + 1));
         } /* end else */
 #ifdef QAK
-HDfprintf(stderr, "idx = %Hu, loc_idx = %Hu, eiter->max_sblk_idx = %u, idx_sblk_idx = %u, loc_sblk_idx = %u\n", idx, loc_idx, eiter->max_sblk_idx, idx_sblk_idx, loc_sblk_idx);
-HDfprintf(stderr, "tparam->sblk_info[%u] = {%Zu, %Zu, %Hu, %Hu}\n", idx_sblk_idx, tparam->sblk_info[idx_sblk_idx].ndblks, tparam->sblk_info[idx_sblk_idx].dblk_nelmts, tparam->sblk_info[idx_sblk_idx].start_idx, tparam->sblk_info[idx_sblk_idx].start_dblk);
-HDfprintf(stderr, "tparam->sblk_info[%u] = {%Zu, %Zu, %Hu, %Hu}\n", eiter->max_sblk_idx, tparam->sblk_info[eiter->max_sblk_idx].ndblks, tparam->sblk_info[eiter->max_sblk_idx].dblk_nelmts, tparam->sblk_info[eiter->max_sblk_idx].start_idx, tparam->sblk_info[eiter->max_sblk_idx].start_dblk);
+HDfprintf(stderr, "idx = %" PRIuHSIZE ", loc_idx = %" PRIuHSIZE ", eiter->max_sblk_idx = %u, idx_sblk_idx = %u, loc_sblk_idx = %u\n", idx, loc_idx, eiter->max_sblk_idx, idx_sblk_idx, loc_sblk_idx);
+HDfprintf(stderr, "tparam->sblk_info[%u] = {%zu, %zu, %" PRIuHSIZE ", %" PRIuHSIZE "}\n", idx_sblk_idx, tparam->sblk_info[idx_sblk_idx].ndblks, tparam->sblk_info[idx_sblk_idx].dblk_nelmts, tparam->sblk_info[idx_sblk_idx].start_idx, tparam->sblk_info[idx_sblk_idx].start_dblk);
+HDfprintf(stderr, "tparam->sblk_info[%u] = {%zu, %zu, %" PRIuHSIZE ", %" PRIuHSIZE "}\n", eiter->max_sblk_idx, tparam->sblk_info[eiter->max_sblk_idx].ndblks, tparam->sblk_info[eiter->max_sblk_idx].dblk_nelmts, tparam->sblk_info[eiter->max_sblk_idx].start_idx, tparam->sblk_info[eiter->max_sblk_idx].start_dblk);
 #endif /* QAK */
 
         if(idx < cparam->idx_blk_elmts + cparam->data_blk_min_elmts)
@@ -1631,7 +1631,7 @@ HDfprintf(stderr, "tparam->sblk_info[%u] = {%Zu, %Zu, %Hu, %Hu}\n", eiter->max_s
             idx_nelmts = EA_NELMTS(cparam, tparam, loc_idx, loc_sblk_idx);
         state->nelmts = (eiter->max_nelmts - idx_nelmts) + cparam->idx_blk_elmts;
 #ifdef QAK
-HDfprintf(stderr, "eiter->max_nelmts = %Hu, idx_nelmts = %Hu, state->nelmts = %Hu\n", eiter->max_nelmts, idx_nelmts, state->nelmts);
+HDfprintf(stderr, "eiter->max_nelmts = %" PRIuHSIZE ", idx_nelmts = %" PRIuHSIZE ", state->nelmts = %" PRIuHSIZE "\n", eiter->max_nelmts, idx_nelmts, state->nelmts);
 #endif /* QAK */
 
         if(idx < cparam->idx_blk_elmts + cparam->data_blk_min_elmts)
@@ -1640,7 +1640,7 @@ HDfprintf(stderr, "eiter->max_nelmts = %Hu, idx_nelmts = %Hu, state->nelmts = %H
             idx_ndata_blks = EA_NDATA_BLKS(cparam, tparam, loc_idx, loc_sblk_idx);
         state->ndata_blks = eiter->max_ndata_blks - idx_ndata_blks;
 #ifdef QAK
-HDfprintf(stderr, "eiter->max_ndata_blks = %Hu, idx_ndata_blks = %Hu, state->ndata_blks = %Hu\n", eiter->max_ndata_blks, idx_ndata_blks, state->ndata_blks);
+HDfprintf(stderr, "eiter->max_ndata_blks = %" PRIuHSIZE ", idx_ndata_blks = %" PRIuHSIZE ", state->ndata_blks = %" PRIuHSIZE "\n", eiter->max_ndata_blks, idx_ndata_blks, state->ndata_blks);
 #endif /* QAK */
 
         /* Check if we have any super blocks yet */
@@ -1650,7 +1650,7 @@ HDfprintf(stderr, "eiter->max_ndata_blks = %Hu, idx_ndata_blks = %Hu, state->nda
             else
                 state->nsuper_blks = (eiter->max_sblk_idx - eiter->idx_blk_nsblks) + 1;
 #ifdef QAK
-HDfprintf(stderr, "eiter->idx_blk_nsblks = %Hu, state->nsuper_blks = %Hu\n", eiter->idx_blk_nsblks, state->nsuper_blks);
+HDfprintf(stderr, "eiter->idx_blk_nsblks = %" PRIuHSIZE ", state->nsuper_blks = %" PRIuHSIZE "\n", eiter->idx_blk_nsblks, state->nsuper_blks);
 #endif /* QAK */
         } /* end if */
     } /* end else */

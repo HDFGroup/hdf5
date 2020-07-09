@@ -852,10 +852,10 @@ H5O__attr_debug(H5F_t *f, const void *_mesg, FILE * stream, int indent, int fwid
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
             "Character Set of Name:",
             s);
-    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	    "Object opened:",
-	    mesg->obj_opened);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+	    mesg->obj_opened ? "TRUE" : "FALSE");
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
 	    "Object:",
 	    mesg->oloc.addr);
 

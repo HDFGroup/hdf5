@@ -273,7 +273,7 @@ H5O__cont_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream,
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
 	      "Continuation address:", cont->addr);
 
     HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,

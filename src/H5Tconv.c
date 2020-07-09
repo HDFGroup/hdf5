@@ -911,15 +911,15 @@ done:                                                                         \
 #   define CI_PRINT_STATS(STYPE,DTYPE) {				      \
     if (H5DEBUG(T) && ((H5T_conv_hw_t *)cdata->priv)->s_aligned) {	      \
 	HDfprintf(H5DEBUG(T),						      \
-		  "      %Hu src elements aligned on %lu-byte boundaries\n",  \
+		  "      %zu src elements aligned on %zu-byte boundaries\n",  \
 		  ((H5T_conv_hw_t *)cdata->priv)->s_aligned,		      \
-		  (unsigned long)H5T_NATIVE_##STYPE##_ALIGN_g);		      \
+		  H5T_NATIVE_##STYPE##_ALIGN_g);		              \
     }									      \
     if (H5DEBUG(T) && ((H5T_conv_hw_t *)cdata->priv)->d_aligned) {	      \
 	HDfprintf(H5DEBUG(T),						      \
-		  "      %Hu dst elements aligned on %lu-byte boundaries\n",  \
+		  "      %zu dst elements aligned on %zu-byte boundaries\n",  \
 		  ((H5T_conv_hw_t *)cdata->priv)->d_aligned,		      \
-		  (unsigned long)H5T_NATIVE_##DTYPE##_ALIGN_g);		      \
+		  H5T_NATIVE_##DTYPE##_ALIGN_g);		              \
     }									      \
 }
 

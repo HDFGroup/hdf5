@@ -305,7 +305,7 @@ H5O__drvinfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream,
 
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Driver name:", mesg->name);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
 	      "Buffer size:", mesg->len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

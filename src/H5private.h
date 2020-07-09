@@ -687,6 +687,11 @@ typedef struct {
 #ifndef HDacos
     #define HDacos(X)    acos(X)
 #endif /* HDacos */
+#ifndef HDvasprintf
+#   ifdef H5_HAVE_VASPRINTF
+#       define HDvasprintf(RET,FMT,A)  vasprintf(RET,FMT,A)
+#   endif /* H5_HAVE_VASPRINTF */
+#endif /* HDvasprintf */
 #ifndef HDalarm
     #ifdef H5_HAVE_ALARM
         #define HDalarm(N)              alarm(N)
@@ -912,10 +917,12 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDfork
     #define HDfork()    fork()
 #endif /* HDfork */
+#ifndef HDfprintf
+#define HDfprintf fprintf
+#endif
 #ifndef HDfpathconf
     #define HDfpathconf(F,N)  fpathconf(F,N)
 #endif /* HDfpathconf */
-H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #ifndef HDfputc
     #define HDfputc(C,F)    fputc(C,F)
 #endif /* HDfputc */
@@ -1248,7 +1255,7 @@ typedef off_t               h5_stat_size_t;
     #define HDpread(F,B,C,O)    pread(F,B,C,O)
 #endif /* HDpread */
 #ifndef HDprintf
-    #define HDprintf(...)   HDfprintf(stdout, __VA_ARGS__)
+    #define HDprintf   printf
 #endif /* HDprintf */
 #ifndef HDputc
     #define HDputc(C,F)    putc(C,F)
@@ -1610,9 +1617,6 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDva_start
     #define HDva_start(A,P)    va_start(A,P)
 #endif /* HDva_start */
-#ifndef HDvasprintf
-    #define HDvasprintf(RET,FMT,A)  vasprintf(RET,FMT,A)
-#endif /* HDvasprintf */
 #ifndef HDvfprintf
     #define HDvfprintf(F,FMT,A)  vfprintf(F,FMT,A)
 #endif /* HDvfprintf */

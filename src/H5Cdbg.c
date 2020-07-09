@@ -310,17 +310,17 @@ H5C_dump_cache_skip_list(H5C_t * cache_ptr, char * calling_fcn)
             HDassert( entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC );
 
             HDfprintf(stdout,
-               "%s%d       0x%016llx  %4lld    %d/%d       %d    %s\n",
+               "%s%d       0x%016" PRIxHADDR "  %4zu    %d/%d       %d    %s\n",
                cache_ptr->prefix, i,
-               (long long)(entry_ptr->addr),
-               (long long)(entry_ptr->size),
+               entry_ptr->addr,
+               entry_ptr->size,
                (int)(entry_ptr->is_protected),
                (int)(entry_ptr->is_pinned),
                (int)(entry_ptr->is_dirty),
                entry_ptr->type->name);
 
             HDfprintf(stdout, "		node_ptr = %p, item = %p\n",
-                      node_ptr, H5SL_item(node_ptr));
+                      (void *)node_ptr, H5SL_item(node_ptr));
 
             /* increment node_ptr before we delete its target */
             node_ptr = H5SL_next(node_ptr);
@@ -806,7 +806,7 @@ H5C_stats(H5C_t * cache_ptr,
               (long long)(cache_ptr->index_scan_restarts));
 
     HDfprintf(stdout,
-	    "%s  cache image creations/reads/loads/size = %d / %d /%d / %Hu\n",
+	    "%s  cache image creations/reads/loads/size = %d / %d /%d / %" PRIuHSIZE "\n",
               cache_ptr->prefix,
               cache_ptr->images_created,
               cache_ptr->images_read,
@@ -1147,7 +1147,7 @@ H5C__dump_entry(H5C_t *cache_ptr, const H5C_cache_entry_t *entry_ptr,
     HDassert(cache_ptr);
     HDassert(entry_ptr);
 
-    HDfprintf(stderr, "%*s%s: entry_ptr = (%a, '%s', %a, %t, %u, %u/%u)\n", indent, "", prefix, entry_ptr->addr, entry_ptr->type->name, entry_ptr->tag_info ? entry_ptr->tag_info->tag : HADDR_UNDEF, entry_ptr->is_dirty, entry_ptr->flush_dep_nparents, entry_ptr->flush_dep_nchildren, entry_ptr->flush_dep_ndirty_children);
+    HDfprintf(stderr, "%*s%s: entry_ptr = (%" PRIuHADDR ", '%s', %" PRIuHADDR ", %s, %u, %u/%u)\n", indent, "", prefix, entry_ptr->addr, entry_ptr->type->name, entry_ptr->tag_info ? entry_ptr->tag_info->tag : HADDR_UNDEF, (entry_ptr->is_dirty) ? "TRUE" : "FALSE", entry_ptr->flush_dep_nparents, entry_ptr->flush_dep_nchildren, entry_ptr->flush_dep_ndirty_children);
     if(dump_parents && entry_ptr->flush_dep_nparents)
         H5C__dump_parents(cache_ptr, entry_ptr, "Parent", indent);
     if(entry_ptr->flush_dep_nchildren)

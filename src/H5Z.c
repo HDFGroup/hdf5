@@ -137,48 +137,61 @@ H5Z_term_package(void)
         size_t	i;
 
         if(H5DEBUG(Z)) {
-            for(i = 0; i < H5Z_table_used_g; i++) {
-                for(dir = 0; dir<2; dir++) {
-                    if(0 == H5Z_stat_table_g[i].stats[dir].total)
-                        continue;
+            for(i = 0; i < H5Z_table_used_g; i++) for (dir = 0; dir<2; dir++) {
+                struct {
+                    char *user;
+                    char *system;
+                    char *elapsed;
+                } timestrs = {
+                    H5_timer_get_time_string(H5Z_stat_table_g[i].stats[dir].times.user),
+                    H5_timer_get_time_string(H5Z_stat_table_g[i].stats[dir].times.system),
+                    H5_timer_get_time_string(H5Z_stat_table_g[i].stats[dir].times.elapsed)
+                };
+                if(0 == H5Z_stat_table_g[i].stats[dir].total)
+                    goto next;
 
-		    if(0 == nprint++) {
-			/* Print column headers */
-			HDfprintf(H5DEBUG(Z), "H5Z: filter statistics "
-				   "accumulated over life of library:\n");
-			HDfprintf(H5DEBUG(Z),
-				   "   %-16s %10s %10s %8s %8s %8s %10s\n",
-				   "Filter", "Total", "Errors", "User",
-				   "System", "Elapsed", "Bandwidth");
-			HDfprintf(H5DEBUG(Z),
-				   "   %-16s %10s %10s %8s %8s %8s %10s\n",
-				   "------", "-----", "------", "----",
-				   "------", "-------", "---------");
-		    } /* end if */
+                if(0 == nprint++) {
+                    /* Print column headers */
+                    HDfprintf(H5DEBUG(Z), "H5Z: filter statistics "
+                               "accumulated over life of library:\n");
+                    HDfprintf(H5DEBUG(Z),
+                               "   %-16s %10s %10s %8s %8s %8s %10s\n",
+                               "Filter", "Total", "Errors", "User",
+                               "System", "Elapsed", "Bandwidth");
+                    HDfprintf(H5DEBUG(Z),
+                               "   %-16s %10s %10s %8s %8s %8s %10s\n",
+                               "------", "-----", "------", "----",
+                               "------", "-------", "---------");
+                } /* end if */
 
-		    /* Truncate the comment to fit in the field */
-		    HDstrncpy(comment, H5Z_table_g[i].name, sizeof comment);
-		    comment[sizeof(comment) - 1] = '\0';
+                /* Truncate the comment to fit in the field */
+                HDstrncpy(comment, H5Z_table_g[i].name, sizeof comment);
+                comment[sizeof(comment) - 1] = '\0';
 
-		    /*
-		     * Format bandwidth to have four significant digits and
-		     * units of `B/s', `kB/s', `MB/s', `GB/s', or `TB/s' or
-		     * the word `Inf' if the elapsed time is zero.
-		     */
-                    H5_bandwidth(bandwidth, (double)(H5Z_stat_table_g[i].stats[dir].total),
-                            H5Z_stat_table_g[i].stats[dir].times.elapsed);
+                /*
+                 * Format bandwidth to have four significant digits and
+                 * units of `B/s', `kB/s', `MB/s', `GB/s', or `TB/s' or
+                 * the word `Inf' if the elapsed time is zero.
+                 */
+                H5_bandwidth(bandwidth, (double)(H5Z_stat_table_g[i].stats[dir].total),
+                        H5Z_stat_table_g[i].stats[dir].times.elapsed);
 
-		    /* Print the statistics */
-                    HDfprintf(H5DEBUG(Z), "   %s%-15s %10Hd %10Hd %8T %8T %8T %10s\n",
-                            (dir ? "<" : ">"), comment,
-                            H5Z_stat_table_g[i].stats[dir].total,
-                            H5Z_stat_table_g[i].stats[dir].errors,
-                            H5Z_stat_table_g[i].stats[dir].times.user,
-                            H5Z_stat_table_g[i].stats[dir].times.system,
-                            H5Z_stat_table_g[i].stats[dir].times.elapsed,
-                            bandwidth);
-		} /* end for */
-	    } /* end for */
+                /* Print the statistics */
+                HDfprintf(H5DEBUG(Z),
+                    "   %s%-15s %10" PRIdHSIZE " %10" PRIdHSIZE
+                    " %8s %8s %8s %10s\n",
+                    (dir ? "<" : ">"), comment,
+                    H5Z_stat_table_g[i].stats[dir].total,
+                    H5Z_stat_table_g[i].stats[dir].errors,
+                    timestrs.user,
+                    timestrs.system,
+                    timestrs.elapsed,
+                    bandwidth);
+next:
+                free(timestrs.user);
+                free(timestrs.system);
+                free(timestrs.elapsed);
+            } /* end for */
 	} /* end if */
 #endif /* H5Z_DEBUG */
 
