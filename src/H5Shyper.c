@@ -87,10 +87,6 @@ static herr_t H5S__hyper_generate_spans(H5S_t *space);
 static herr_t H5S__generate_hyperslab(H5S_t *space, H5S_seloper_t op,
     const hsize_t start[], const hsize_t stride[], const hsize_t count[],
     const hsize_t block[]);
-/* Needed for use in hyperslab code (H5Shyper.c) */
-#ifdef NEW_HYPERSLAB_API
-static herr_t H5S__select_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2);
-#endif /*NEW_HYPERSLAB_API*/
 static void H5S__hyper_get_clip_diminfo(hsize_t start, hsize_t stride,
     hsize_t *count, hsize_t *block, hsize_t clip_size);
 static hsize_t H5S__hyper_get_clip_extent_real(const H5S_t *clip_space,
@@ -7848,7 +7844,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5S__select_select
+ * Function:    H5S__modify_select
  *
  * Purpose:     Internal version of H5Sselect_select().
  *
@@ -7859,14 +7855,14 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5S_select_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
+herr_t
+H5S__modify_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
 {
     H5S_hyper_span_info_t *tmp_spans = NULL;   /* Temporary copy of selection */
     hbool_t span2_owned=FALSE;          /* Flag to indicate that span2 was used in H5S_operate_hyperslab() */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(space1);
@@ -7906,7 +7902,7 @@ done:
         H5S__hyper_free_span_info(tmp_spans);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S_select_select() */
+} /* end H5S__modify_select() */
 
 
 /*--------------------------------------------------------------------------
@@ -7914,7 +7910,7 @@ done:
     H5Sselect_select
  PURPOSE
     Refine a hyperslab selection with an operation using a second hyperslab
-    to modify it.
+    to modify it
  USAGE
     herr_t H5Sselect_select(space1, op, space2)
         hid_t space1;           IN/OUT: First Dataspace ID
@@ -7934,8 +7930,8 @@ done:
 herr_t
 H5Sselect_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
 {
-    H5S_t	*space1;                /* First Dataspace */
-    H5S_t	*space2;                /* Second Dataspace */
+    H5S_t   *space1;                /* First Dataspace */
+    H5S_t   *space2;                /* Second Dataspace */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -7958,7 +7954,7 @@ H5Sselect_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspaces don't have hyperslab selections")
 
     /* Go refine the first selection */
-    if(H5S_select_select(space1, op, space2)<0)
+    if(H5S__modify_select(space1, op, space2) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to modify hyperslab selection")
 
 done:
@@ -10348,7 +10344,7 @@ H5S_hyper_get_first_inc_block(const H5S_t *space, hsize_t clip_size,
     hbool_t *partial)
 {
     H5S_hyper_sel_t *hslab;     /* Convenience pointer to hyperslab info */
-    H5S_hyper_dim_t *diminfo;   /* Convenience pointer to opt_diminfo in unlimited dimension */
+    H5S_hyper_dim_t *diminfo;   /* Convenience pointer to diminfo in unlimited dimension */
     hsize_t ret_value = 0;
 
     FUNC_ENTER_NOAPI(0)

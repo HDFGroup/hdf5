@@ -303,7 +303,8 @@ H5_DLL herr_t H5S__extent_release(H5S_extent_t *extent);
 H5_DLL herr_t H5S__extent_copy_real(H5S_extent_t *dst, const H5S_extent_t *src,
     hbool_t copy_max);
 
-/* Operations on selections */
+/* Operations on hyperslab selections */
+H5_DLL herr_t H5S__modify_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2);
 H5_DLL herr_t H5S__hyper_project_intersection(const H5S_t *src_space,
     const H5S_t *dst_space, const H5S_t *src_intersect_space,
     H5S_t *proj_space);
