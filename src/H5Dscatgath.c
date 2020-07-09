@@ -27,6 +27,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs                                  */
+#include "H5MMprivate.h"	/* Memory management			*/
 
 
 /****************/
@@ -559,11 +560,9 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
 
                 if(H5Z_xform_eval(data_transform, type_info->tconv_buf, smine_nelmts, type_info->mem_type) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Error performing data transform")
-            } /* end if */
+            }
 
-            /*
-             * Scatter the data into memory.
-             */
+            /* Scatter the data into memory */
             if(H5D__scatter_mem(type_info->tconv_buf, mem_space, mem_iter, smine_nelmts, buf/*out*/) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "scatter failed")
         } /* end else */
@@ -691,9 +690,9 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_in
                 if(H5CX_get_data_transform(&data_transform) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info")
 
-	        if(H5Z_xform_eval(data_transform, type_info->tconv_buf, smine_nelmts, type_info->mem_type) < 0)
-		    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Error performing data transform")
-            } /* end if */
+                if(H5Z_xform_eval(data_transform, type_info->tconv_buf, smine_nelmts, type_info->mem_type) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Error performing data transform")
+            }
 
             /*
              * Perform datatype conversion.

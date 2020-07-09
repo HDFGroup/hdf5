@@ -1836,49 +1836,6 @@ done:
 } /* end H5Sset_extent_none() */
 
 
-/*--------------------------------------------------------------------------
- NAME
-    H5Soffset_simple
- PURPOSE
-    Changes the offset of a selection within a simple dataspace extent
- USAGE
-    herr_t H5Soffset_simple(space_id, offset)
-        hid_t space_id;	        IN: Dataspace object to reset
-        const hssize_t *offset; IN: Offset to position the selection at
- RETURNS
-    Non-negative on success/Negative on failure
- DESCRIPTION
-	This function creates an offset for the selection within an extent, allowing
-    the same shaped selection to be moved to different locations within a
-    dataspace without requiring it to be re-defined.
---------------------------------------------------------------------------*/
-herr_t
-H5Soffset_simple(hid_t space_id, const hssize_t *offset)
-{
-    H5S_t		   *space;	/* dataspace to modify */
-    herr_t                  ret_value=SUCCEED;  /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Hs", space_id, offset);
-
-    /* Check args */
-    if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a dataspace")
-    if (space->extent.rank==0 || (H5S_GET_EXTENT_TYPE(space)==H5S_SCALAR
-            || H5S_GET_EXTENT_TYPE(space)==H5S_NULL))
-        HGOTO_ERROR(H5E_ATOM, H5E_UNSUPPORTED, FAIL, "can't set offset on scalar or null dataspace")
-    if (offset == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no offset specified")
-
-    /* Set the selection offset */
-    if(H5S_select_offset(space,offset)<0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't set offset")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-}   /* end H5Soffset_simple() */
-
-
 /*-------------------------------------------------------------------------
  * Function:    H5S_set_extent
  *

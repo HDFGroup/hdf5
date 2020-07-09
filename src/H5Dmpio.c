@@ -82,6 +82,7 @@
 /* Macros to represent the regularity of the selection for multiple chunk IO case. */
 #define H5D_CHUNK_SELECT_REG          1
 
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -2844,30 +2845,30 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
             size_t            mod_data_size;
 
             /* Look up the chunk and get its file and memory dataspaces */
-            if (NULL == (chunk_info = (H5D_chunk_info_t *) H5SL_search(fm->sel_chunks, &chunk_entry->index)))
+            if(NULL == (chunk_info = (H5D_chunk_info_t *) H5SL_search(fm->sel_chunks, &chunk_entry->index)))
                 HGOTO_ERROR(H5E_DATASPACE, H5E_NOTFOUND, FAIL, "can't locate chunk in skip list")
 
             /* Determine size of serialized chunk file dataspace, plus the size of
              * the data being written
              */
-            if (H5S_encode(chunk_info->fspace, &mod_data_p, &mod_data_size) < 0)
+            if(H5S_encode(chunk_info->fspace, &mod_data_p, &mod_data_size) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "unable to get encoded dataspace size")
 
-            if ((iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_info->mspace)) < 0)
+            if((iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_info->mspace)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
 
             mod_data_size += (size_t) iter_nelmts * type_info->src_type_size;
 
-            if (NULL == (mod_data[num_send_requests] = (unsigned char *) H5MM_malloc(mod_data_size)))
+            if(NULL == (mod_data[num_send_requests] = (unsigned char *) H5MM_malloc(mod_data_size)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk modification send buffer")
 
             /* Serialize the chunk's file dataspace into the buffer */
             mod_data_p = mod_data[num_send_requests];
-            if (H5S_encode(chunk_info->fspace, &mod_data_p, &mod_data_size) < 0)
+            if(H5S_encode(chunk_info->fspace, &mod_data_p, &mod_data_size) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "unable to encode dataspace")
 
             /* Initialize iterator for memory selection */
-            if (H5S_select_iter_init(mem_iter, chunk_info->mspace, type_info->src_type_size) < 0)
+            if(H5S_select_iter_init(mem_iter, chunk_info->mspace, type_info->src_type_size) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information")
             mem_iter_init = TRUE;
 
@@ -2878,11 +2879,11 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
             /* Send modification data to new owner */
             H5_CHECK_OVERFLOW(mod_data_size, size_t, int)
             H5_CHECK_OVERFLOW(chunk_entry->index, hsize_t, int)
-            if (MPI_SUCCESS != (mpi_code = MPI_Isend(mod_data[num_send_requests], (int) mod_data_size, MPI_BYTE,
+            if(MPI_SUCCESS != (mpi_code = MPI_Isend(mod_data[num_send_requests], (int) mod_data_size, MPI_BYTE,
                     chunk_entry->owners.new_owner, (int) chunk_entry->index, io_info->comm, &send_requests[num_send_requests])))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Isend failed", mpi_code)
 
-            if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
+            if(mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release memory selection iterator")
             mem_iter_init = FALSE;
 
@@ -3051,11 +3052,11 @@ H5D__mpio_filtered_collective_write_type(H5D_filtered_collective_io_info_t *chun
     } /* end if */
 
 done:
-    if (write_buf_array)
+    if(write_buf_array)
         H5MM_free(write_buf_array);
-    if (file_offset_array)
+    if(file_offset_array)
         H5MM_free(file_offset_array);
-    if (length_array)
+    if(length_array)
         H5MM_free(length_array);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3183,53 +3184,53 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
      * from the current process, then apply any modifications from other processes. Finally,
      * filter the newly-updated chunk.
      */
-    switch (io_info->op_type) {
+    switch(io_info->op_type) {
         case H5D_IO_OP_READ:
-            if (NULL == (file_iter = (H5S_sel_iter_t *) H5MM_malloc(sizeof(H5S_sel_iter_t))))
+            if(NULL == (file_iter = (H5S_sel_iter_t *) H5MM_malloc(sizeof(H5S_sel_iter_t))))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate file iterator")
 
-            if (H5S_select_iter_init(file_iter, chunk_info->fspace, type_info->src_type_size) < 0)
+            if(H5S_select_iter_init(file_iter, chunk_info->fspace, type_info->src_type_size) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information")
             file_iter_init = TRUE;
 
-            if ((iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_info->fspace)) < 0)
+            if((iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_info->fspace)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
 
-            if (NULL == (tmp_gath_buf = H5MM_malloc((hsize_t) iter_nelmts * type_info->src_type_size)))
+            if(NULL == (tmp_gath_buf = H5MM_malloc((hsize_t) iter_nelmts * type_info->src_type_size)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate temporary gather buffer")
 
-            if (!H5D__gather_mem(chunk_entry->buf, chunk_info->fspace, file_iter, (size_t) iter_nelmts, tmp_gath_buf))
+            if(!H5D__gather_mem(chunk_entry->buf, chunk_info->fspace, file_iter, (size_t) iter_nelmts, tmp_gath_buf))
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "couldn't gather from chunk buffer")
 
-            if ((iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_info->mspace)) < 0)
+            if((iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_info->mspace)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
 
-            if (H5D__scatter_mem(tmp_gath_buf, chunk_info->mspace, mem_iter, (size_t) iter_nelmts, io_info->u.rbuf) < 0)
-                   HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "couldn't scatter to read buffer")
+            if(H5D__scatter_mem(tmp_gath_buf, chunk_info->mspace, mem_iter, (size_t) iter_nelmts, io_info->u.rbuf) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "couldn't scatter to read buffer")
 
             break;
 
         case H5D_IO_OP_WRITE:
-            if ((iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_info->mspace)) < 0)
+            if((iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_info->mspace)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
 
-            if (NULL == (tmp_gath_buf = H5MM_malloc((hsize_t) iter_nelmts * type_info->src_type_size)))
+            if(NULL == (tmp_gath_buf = H5MM_malloc((hsize_t) iter_nelmts * type_info->src_type_size)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate temporary gather buffer")
 
             /* Gather modification data from the application write buffer into a temporary buffer */
             if(!H5D__gather_mem(io_info->u.wbuf, chunk_info->mspace, mem_iter, (size_t) iter_nelmts, tmp_gath_buf))
                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "couldn't gather from write buffer")
 
-            if (H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
+            if(H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
             mem_iter_init = FALSE;
 
             /* Initialize iterator for file selection */
-            if (H5S_select_iter_init(mem_iter, chunk_info->fspace, type_info->dst_type_size) < 0)
+            if(H5S_select_iter_init(mem_iter, chunk_info->fspace, type_info->dst_type_size) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file selection information")
             mem_iter_init = TRUE;
 
-            if ((iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_info->fspace)) < 0)
+            if((iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_info->fspace)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
 
             /* Scatter the owner's modification data into the chunk data buffer according to
@@ -3238,41 +3239,41 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
             if(H5D__scatter_mem(tmp_gath_buf, chunk_info->fspace, mem_iter, (size_t) iter_nelmts, chunk_entry->buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "couldn't scatter to chunk data buffer")
 
-            if (H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
+            if(H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
             mem_iter_init = FALSE;
 
-            if (MPI_SUCCESS != (mpi_code = MPI_Waitall(chunk_entry->async_info.num_receive_requests,
+            if(MPI_SUCCESS != (mpi_code = MPI_Waitall(chunk_entry->async_info.num_receive_requests,
                     chunk_entry->async_info.receive_requests_array, MPI_STATUSES_IGNORE)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Waitall failed", mpi_code)
 
             /* For each asynchronous receive call previously posted, receive the chunk modification
              * buffer from another rank and update the chunk data
              */
-            for (i = 0; i < (size_t) chunk_entry->async_info.num_receive_requests; i++) {
+            for(i = 0; i < (size_t) chunk_entry->async_info.num_receive_requests; i++) {
                 const unsigned char *mod_data_p;
 
                 /* Decode the process' chunk file dataspace */
                 mod_data_p = chunk_entry->async_info.receive_buffer_array[i];
-                if (NULL == (dataspace = H5S_decode(&mod_data_p)))
+                if(NULL == (dataspace = H5S_decode(&mod_data_p)))
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, FAIL, "unable to decode dataspace")
 
-                if (H5S_select_iter_init(mem_iter, dataspace, type_info->dst_type_size) < 0)
+                if(H5S_select_iter_init(mem_iter, dataspace, type_info->dst_type_size) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information")
                 mem_iter_init = TRUE;
 
-                if ((iter_nelmts = H5S_GET_SELECT_NPOINTS(dataspace)) < 0)
+                if((iter_nelmts = H5S_GET_SELECT_NPOINTS(dataspace)) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
 
                 /* Update the chunk data with the received modification data */
                 if(H5D__scatter_mem(mod_data_p, dataspace, mem_iter, (size_t) iter_nelmts, chunk_entry->buf) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "couldn't scatter to write buffer")
 
-                if (H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
+                if(H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
                 mem_iter_init = FALSE;
-                if (dataspace) {
-                    if (H5S_close(dataspace) < 0)
+                if(dataspace) {
+                    if(H5S_close(dataspace) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace")
                     dataspace = NULL;
                 }

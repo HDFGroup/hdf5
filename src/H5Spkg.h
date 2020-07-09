@@ -29,6 +29,9 @@
 /* Get package's private header */
 #include "H5Sprivate.h"
 
+/* Other private headers needed by this file */
+#include "H5Oprivate.h"		/* Object headers		  	*/
+
 /* Flags to indicate special dataspace features are active */
 #define H5S_VALID_MAX	0x01
 #define H5S_VALID_PERM	0x02
@@ -106,29 +109,29 @@ struct H5S_extent_t {
 
 /* Node in point selection list (typedef'd in H5Sprivate.h) */
 struct H5S_pnt_node_t {
+    struct H5S_pnt_node_t *next; /* Pointer to next point in list */
     hsize_t *pnt;          /* Pointer to a selected point */
-    struct H5S_pnt_node_t *next;  /* pointer to next point in list */
 };
 
-/* Information about point selection list */
-typedef struct {
+/* Information about point selection list (typedef'd in H5Sprivate.h) */
+struct H5S_pnt_list_t {
     H5S_pnt_node_t *head;   /* Pointer to head of point list */
-} H5S_pnt_list_t;
+};
 
 /* Information about hyperslab spans */
 
-/* Information a particular hyperslab span */
+/* Information a particular hyperslab span (typedef'd in H5Sprivate.h) */
 struct H5S_hyper_span_t {
-    hsize_t low, high;          /* Low & high bounds of span */
+    hsize_t low, high;  /* Low & high bounds of elements selected for span, inclusive */
     hsize_t nelem;              /* Number of elements in span (only needed during I/O) */
     hsize_t pstride;            /* Pseudo-stride from start of previous span (only used during I/O) */
-    struct H5S_hyper_span_info_t *down;     /* Pointer to list of spans in next dimension down */
-    struct H5S_hyper_span_t *next;     /* Pointer to next span in list */
+    struct H5S_hyper_span_info_t *down; /* Pointer to list of spans in next dimension down */
+    struct H5S_hyper_span_t *next;      /* Pointer to next span in list */
 };
 
-/* Information about a list of hyperslab spans in one dimension */
+/* Information about a list of hyperslab spans in one dimension (typedef'd in H5Sprivate.h) */
 struct H5S_hyper_span_info_t {
-    unsigned count;                    /* Ref. count of number of spans which share this span */
+    unsigned count;     /* Ref. count of number of spans which share this span */
     struct H5S_hyper_span_info_t *scratch;  /* Scratch pointer
                                              * (used during copies, as mark
                                              * during precomputes for I/O &
@@ -140,7 +143,7 @@ struct H5S_hyper_span_info_t {
 
 /* Information about hyperslab selection */
 typedef struct {
-    hbool_t diminfo_valid;                      /* Whether the dataset has valid diminfo */
+    hbool_t diminfo_valid;  /* Whether the dataset has valid diminfo */
     H5S_hyper_dim_t opt_diminfo[H5S_MAX_RANK];  /* per-dim selection info */
     H5S_hyper_dim_t app_diminfo[H5S_MAX_RANK];  /* per-dim selection info */
 	/* 'opt_diminfo' points to a [potentially] optimized version of the user's
@@ -187,13 +190,13 @@ typedef htri_t (*H5S_sel_is_single_func_t)(const H5S_t *space);
 /* Method to determine if current selection is "regular" */
 typedef htri_t (*H5S_sel_is_regular_func_t)(const H5S_t *space);
 /* Method to adjust a selection by an offset */
-typedef void (*H5S_sel_adjust_u_func_t)(H5S_t *space, const hsize_t *offset);
+typedef herr_t (*H5S_sel_adjust_u_func_t)(H5S_t *space, const hsize_t *offset);
 /* Method to construct single element projection onto scalar dataspace */
 typedef herr_t (*H5S_sel_project_scalar)(const H5S_t *space, hsize_t *offset);
 /* Method to construct selection projection onto/into simple dataspace */
 typedef herr_t (*H5S_sel_project_simple)(const H5S_t *space, H5S_t *new_space, hsize_t *offset);
 /* Method to initialize iterator for current selection */
-typedef herr_t (*H5S_sel_iter_init_func_t)(H5S_sel_iter_t *sel_iter, const H5S_t *space);
+typedef herr_t (*H5S_sel_iter_init_func_t)(const H5S_t *space, H5S_sel_iter_t *sel_iter);
 
 /* Selection class information */
 typedef struct {

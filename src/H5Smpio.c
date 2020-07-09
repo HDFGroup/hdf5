@@ -31,12 +31,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fprivate.h"		/* File access				*/
-#include "H5FDprivate.h"	/* File drivers				*/
-#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"        /* Memory management                    */
-#include "H5Oprivate.h"		/* Object headers		  	*/
-#include "H5Pprivate.h"         /* Property lists                       */
 #include "H5Spkg.h"		/* Dataspaces 				*/
 #include "H5VMprivate.h"        /* Vector and array functions		*/
 
@@ -198,10 +193,15 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points,
 {
     MPI_Datatype   elmt_type;           /* MPI datatype for individual element */
     hbool_t        elmt_type_created = FALSE;   /* Whether the element MPI datatype was created */
-    int            mpi_code;            /* MPI error code */
+    int            *inner_blocks = NULL;        /* Arrays for MPI datatypes when "large" datatype needed */
+    MPI_Aint       *inner_disps = NULL;
+    MPI_Datatype   *inner_types = NULL;
+#if MPI_VERSION < 3
     int            *blocks = NULL;      /* Array of block sizes for MPI hindexed create call */
     hsize_t        u;                   /* Local index variable */
+#endif
     hsize_t        bigio_count;         /* Transition point to create derived type */
+    int            mpi_code;            /* MPI error code */
     herr_t	   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -246,10 +246,6 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points,
         int num_big_types;
         hsize_t leftover;
 
-        int *inner_blocks;
-        MPI_Aint *inner_disps;
-        MPI_Datatype *inner_types = NULL;
-
         /* Calculate how many Big MPI datatypes are needed to represent the buffer */
         num_big_types = (int)(num_points / bigio_count);
 
@@ -279,8 +275,8 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points,
 
         for(i = 0; i < num_big_types; i++) {
 #if MPI_VERSION >= 3
-            if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed_block(bigio_count,
-                    1, &disp[i*bigio_count], elmt_type, &inner_types[i])))
+            if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed_block((int)bigio_count,
+                    1, &disp[(hsize_t)i*bigio_count], elmt_type, &inner_types[i])))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed_block failed", mpi_code);
 #else
             if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)bigio_count,
@@ -294,7 +290,7 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points,
         if(remaining_points) {
 #if MPI_VERSION >= 3
             if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed_block(remaining_points,
-                    1, &disp[num_big_types*bigio_count], elmt_type, &inner_types[num_big_types])))
+                    1, &disp[(hsize_t)num_big_types*bigio_count], elmt_type, &inner_types[num_big_types])))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed_block failed", mpi_code);
 #else
             if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)remaining_points,
@@ -312,10 +308,6 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points,
         for(i = 0; i < total_types; i++)
             MPI_Type_free(&inner_types[i]);
 
-        H5MM_free(inner_types);
-        H5MM_free(inner_blocks);
-        H5MM_free(inner_disps);
-
         /* Commit MPI datatype for later use */
         if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(new_type)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
@@ -324,8 +316,16 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points,
 done:
     if(elmt_type_created)
         MPI_Type_free(&elmt_type);
+#if MPI_VERSION < 3
     if(blocks)
         H5MM_free(blocks);
+#endif
+    if(inner_types)
+        H5MM_free(inner_types);
+    if(inner_blocks)
+        H5MM_free(inner_blocks);
+    if(inner_disps)
+        H5MM_free(inner_disps);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5S__mpio_create_point_datatype() */
@@ -1033,6 +1033,7 @@ static herr_t
 H5S__obtain_datatype(const hsize_t *down, H5S_hyper_span_t *spans,
     const MPI_Datatype *elmt_type, MPI_Datatype *span_type, size_t elmt_size)
 {
+    H5S_hyper_span_t      *span;                /* Hyperslab span to iterate with */
     hsize_t               bigio_count;          /* Transition point to create derived type */
     size_t                alloc_count = 0;      /* Number of span tree nodes allocated at this level */
     size_t                outercount = 0;       /* Number of span tree nodes at this level */
@@ -1042,7 +1043,7 @@ H5S__obtain_datatype(const hsize_t *down, H5S_hyper_span_t *spans,
     hbool_t large_block = FALSE;                /* Wether the block length is larger than 32 bit integer */
     int                   *blocklen = NULL;
     MPI_Aint              *disp = NULL;
-    H5S_hyper_span_t      *tspan = NULL;        /* Temporary pointer to span tree node */
+    size_t                u;                    /* Local index variable */
     int                   mpi_code;             /* MPI return status code */
     herr_t                ret_value = SUCCEED;  /* Return value */
 
@@ -1061,9 +1062,9 @@ H5S__obtain_datatype(const hsize_t *down, H5S_hyper_span_t *spans,
 
     /* if this is the fastest changing dimension, it is the base case for derived datatype. */
     if(NULL == spans->down) {
-        tspan = spans;
+        span = spans;
         outercount = 0;
-        while(tspan) {
+        while(span) {
             /* Check if we need to increase the size of the buffers */
             if(outercount >= alloc_count) {
                 MPI_Aint     *tmp_disp;         /* Temporary pointer to new displacement buffer */
@@ -1082,10 +1083,10 @@ H5S__obtain_datatype(const hsize_t *down, H5S_hyper_span_t *spans,
             } /* end if */
 
             /* Store displacement & block length */
-            disp[outercount]      = (MPI_Aint)elmt_size * tspan->low;
-            H5_CHECK_OVERFLOW(tspan->nelem, hsize_t, int)
-            blocklen[outercount]  = (int)tspan->nelem;
-            tspan                 = tspan->next;
+            disp[outercount]      = (MPI_Aint)elmt_size * span->low;
+            H5_CHECK_OVERFLOW(span->nelem, hsize_t, int)
+            blocklen[outercount]  = (int)span->nelem;
+            span                 = span->next;
 
             if (bigio_count < blocklen[outercount]) {
                 large_block = TRUE; /* at least one block type is large, so set this flag to true */
@@ -1146,14 +1147,13 @@ H5S__obtain_datatype(const hsize_t *down, H5S_hyper_span_t *spans,
 
     } /* end if */
     else {
-        size_t u;               /* Local index variable */
 
         if(NULL == (inner_type = (MPI_Datatype *)H5MM_malloc(alloc_count * sizeof(MPI_Datatype))))
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of inner MPI datatypes")
 
-        tspan = spans;
+        span = spans;
         outercount = 0;
-        while(tspan) {
+        while(span) {
             MPI_Datatype down_type;     /* Temporary MPI datatype for a span tree node's children */
             MPI_Aint stride;            /* Distance between inner MPI datatypes */
 
@@ -1182,17 +1182,17 @@ H5S__obtain_datatype(const hsize_t *down, H5S_hyper_span_t *spans,
             /* First using MPI Type vector to build derived data type for this span only */
             /* Need to calculate the disp in byte for this dimension. */
             /* Calculate the total bytes of the lower dimension */
-            disp[outercount]      = tspan->low * (*down) * elmt_size;
+            disp[outercount]      = span->low * (*down) * elmt_size;
             blocklen[outercount]  = 1;
 
             /* Generate MPI datatype for next dimension down */
-            if(H5S__obtain_datatype(down + 1, tspan->down->head, elmt_type, &down_type, elmt_size) < 0)
+            if(H5S__obtain_datatype(down + 1, span->down->head, elmt_type, &down_type, elmt_size) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't obtain  MPI derived data type")
 
             /* Build the MPI datatype for this node */
             stride = (*down) * elmt_size;
-            H5_CHECK_OVERFLOW(tspan->nelem, hsize_t, int)
-            if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hvector((int)tspan->nelem, 1, stride, down_type, &inner_type[outercount]))) {
+            H5_CHECK_OVERFLOW(span->nelem, hsize_t, int)
+            if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hvector((int)span->nelem, 1, stride, down_type, &inner_type[outercount]))) {
                 MPI_Type_free(&down_type);
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
             } /* end if */
@@ -1201,7 +1201,7 @@ H5S__obtain_datatype(const hsize_t *down, H5S_hyper_span_t *spans,
             if(MPI_SUCCESS != (mpi_code = MPI_Type_free(&down_type)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
 
-            tspan = tspan->next;
+            span = span->next;
             outercount++;
          } /* end while */
 
@@ -1221,14 +1221,10 @@ H5S__obtain_datatype(const hsize_t *down, H5S_hyper_span_t *spans,
 done:
     /* General cleanup */
     if(inner_type != NULL) {
-        if(!inner_types_freed) {
-            size_t u;          /* Local index variable */
-
+        if(!inner_types_freed)
             for(u = 0; u < outercount; u++)
                 if(MPI_SUCCESS != (mpi_code = MPI_Type_free(&inner_type[u])))
                     HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
-        } /* end if */
-
         H5MM_free(inner_type);
     } /* end if */
     if(blocklen != NULL)
