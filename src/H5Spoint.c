@@ -1816,7 +1816,7 @@ H5S__point_get_seq_list(const H5S_t *space, unsigned flags, H5S_sel_iter_t *iter
     size_t io_left;             /* The number of bytes left in the selection */
     size_t start_io_left;       /* The initial number of bytes left in the selection */
     H5S_pnt_node_t *node;       /* Point node */
-    hsize_t dims[H5O_LAYOUT_NDIMS];     /* Total size of memory buf */
+    hsize_t dims[H5S_MAX_RANK];     /* Total size of memory buf */
     int	ndims;                  /* Dimensionality of space*/
     hsize_t	acc;            /* Coordinate accumulator */
     hsize_t	loc;            /* Coordinate offset */

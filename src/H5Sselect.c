@@ -1397,7 +1397,7 @@ H5S_select_iterate(void *buf, const H5T_t *type, const H5S_t *space,
     hsize_t *off = NULL;        /* Array to store sequence offsets */
     size_t *len = NULL;         /* Array to store sequence lengths */
     hssize_t nelmts;            /* Number of elements in selection */
-    hsize_t space_size[H5O_LAYOUT_NDIMS]; /* Dataspace size */
+    hsize_t space_size[H5S_MAX_RANK]; /* Dataspace size */
     size_t max_elem;            /* Maximum number of elements allowed in sequences */
     size_t elmt_size;           /* Datatype size */
     unsigned ndims;             /* Number of dimensions in dataspace */
@@ -1471,7 +1471,7 @@ H5S_select_iterate(void *buf, const H5T_t *type, const H5S_t *space,
 
             /* Loop, while bytes left in sequence */
             while(curr_len > 0 && user_ret == 0) {
-                hsize_t coords[H5O_LAYOUT_NDIMS];  /* Coordinates of element in dataspace */
+                hsize_t coords[H5S_MAX_RANK];  /* Coordinates of element in dataspace */
                 hsize_t tmp_off;        /* Temporary offset within sequence */
                 uint8_t *loc;           /* Current element location in buffer */
                 int i;			/* Local Index variable */
@@ -1694,8 +1694,8 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
 
         /* Check for "easy" cases before getting into generalized block iteration code */
         if((H5S_GET_SELECT_TYPE(space_a) == H5S_SEL_ALL) && (H5S_GET_SELECT_TYPE(space_b) == H5S_SEL_ALL)) {
-            hsize_t dims1[H5O_LAYOUT_NDIMS];    /* End point of selection block in dataspace #1 */
-            hsize_t dims2[H5O_LAYOUT_NDIMS];    /* End point of selection block in dataspace #2 */
+            hsize_t dims1[H5S_MAX_RANK];    /* End point of selection block in dataspace #1 */
+            hsize_t dims2[H5S_MAX_RANK];    /* End point of selection block in dataspace #2 */
             int space_a_dim;                /* Current dimension in dataspace A */
             int space_b_dim;                /* Current dimension in dataspace B */
 
