@@ -29,7 +29,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"          /* Generic Functions                        */
-#include "H5Eprivate.h"		/* Error handling			    */
+#include "H5Eprivate.h"         /* Error handling                           */
 #include "H5Iprivate.h"         /* ID Functions                             */
 #include "H5Spkg.h"             /* Dataspace functions                      */
 #include "H5VMprivate.h"        /* Vector functions                         */
@@ -68,8 +68,7 @@ static htri_t H5S__none_intersect_block(const H5S_t *space, const hsize_t *start
 static herr_t H5S__none_adjust_u(H5S_t *space, const hsize_t *offset);
 static herr_t H5S__none_adjust_s(H5S_t *space, const hssize_t *offset);
 static herr_t H5S__none_project_scalar(const H5S_t *space, hsize_t *offset);
-static herr_t H5S__none_project_simple(const H5S_t *space, H5S_t *new_space,
-    hsize_t *offset);
+static herr_t H5S__none_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset);
 static herr_t H5S__none_iter_init(const H5S_t *space, H5S_sel_iter_t *iter);
 
 /* Selection iteration callbacks */
@@ -143,13 +142,13 @@ static const H5S_sel_iter_class_t H5S_sel_iter_none[1] = {{
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S__none_iter_init
+ * Function:    H5S__none_iter_init
  *
- * Purpose:	Initializes iteration information for "none" selection.
+ * Purpose:     Initializes iteration information for "none" selection.
  *
- * Return:	Non-negative on success, negative on failure.
+ * Return:      Non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, June 16, 1998
  *
  *-------------------------------------------------------------------------
@@ -171,21 +170,20 @@ H5S__none_iter_init(const H5S_t H5_ATTR_UNUSED *space, H5S_sel_iter_t *iter)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S__none_iter_coords
+ * Function:    H5S__none_iter_coords
  *
- * Purpose:	Retrieve the current coordinates of iterator for current
+ * Purpose:     Retrieve the current coordinates of iterator for current
  *              selection
  *
- * Return:	Non-negative on success, negative on failure
+ * Return:      Non-negative on success, negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, April 22, 2003
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S__none_iter_coords(const H5S_sel_iter_t H5_ATTR_UNUSED *iter,
-    hsize_t H5_ATTR_UNUSED *coords)
+H5S__none_iter_coords(const H5S_sel_iter_t H5_ATTR_UNUSED *iter, hsize_t H5_ATTR_UNUSED *coords)
 {
     FUNC_ENTER_STATIC_NOERR
 
@@ -198,21 +196,20 @@ H5S__none_iter_coords(const H5S_sel_iter_t H5_ATTR_UNUSED *iter,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S__none_iter_block
+ * Function:    H5S__none_iter_block
  *
- * Purpose:	Retrieve the current block of iterator for current
+ * Purpose:     Retrieve the current block of iterator for current
  *              selection
  *
- * Return:	Non-negative on success, negative on failure
+ * Return:      Non-negative on success, negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, June 2, 2003
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S__none_iter_block(const H5S_sel_iter_t H5_ATTR_UNUSED *iter,
-    hsize_t H5_ATTR_UNUSED *start, hsize_t H5_ATTR_UNUSED *end)
+H5S__none_iter_block(const H5S_sel_iter_t H5_ATTR_UNUSED *iter, hsize_t H5_ATTR_UNUSED *start, hsize_t H5_ATTR_UNUSED *end)
 {
     FUNC_ENTER_STATIC_NOERR
 
@@ -226,13 +223,13 @@ H5S__none_iter_block(const H5S_sel_iter_t H5_ATTR_UNUSED *iter,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S__none_iter_nelmts
+ * Function:    H5S__none_iter_nelmts
  *
- * Purpose:	Return number of elements left to process in iterator
+ * Purpose:     Return number of elements left to process in iterator
  *
- * Return:	Non-negative number of elements on success, zero on failure
+ * Return:      Non-negative number of elements on success, zero on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, June 16, 1998
  *
  *-------------------------------------------------------------------------
@@ -472,8 +469,7 @@ H5S__none_release(H5S_t H5_ATTR_UNUSED *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__none_copy(H5S_t *dst, const H5S_t H5_ATTR_UNUSED *src,
-    hbool_t H5_ATTR_UNUSED share_selection)
+H5S__none_copy(H5S_t *dst, const H5S_t H5_ATTR_UNUSED *src, hbool_t H5_ATTR_UNUSED share_selection)
 {
     FUNC_ENTER_STATIC_NOERR
 
@@ -586,8 +582,8 @@ H5S__none_serialize(const H5S_t *space, uint8_t **p)
     HDassert(pp);
 
     /* Store the preamble information */
-    UINT32ENCODE(pp, (uint32_t)H5S_GET_SELECT_TYPE(space));  /* Store the type of selection */
-    UINT32ENCODE(pp, (uint32_t)H5S_NONE_VERSION_1);  /* Store the version number */
+    UINT32ENCODE(pp, (uint32_t)H5S_GET_SELECT_TYPE(space)); /* Store the type of selection */
+    UINT32ENCODE(pp, (uint32_t)H5S_NONE_VERSION_1);         /* Store the version number */
     UINT32ENCODE(pp, (uint32_t)0);  /* Store the un-used padding */
     UINT32ENCODE(pp, (uint32_t)0);  /* Store the additional information length */
 
@@ -698,8 +694,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__none_bounds(const H5S_t H5_ATTR_UNUSED *space, hsize_t H5_ATTR_UNUSED *start,
-    hsize_t H5_ATTR_UNUSED *end)
+H5S__none_bounds(const H5S_t H5_ATTR_UNUSED *space, hsize_t H5_ATTR_UNUSED *start, hsize_t H5_ATTR_UNUSED *end)
 {
     FUNC_ENTER_STATIC_NOERR
 
@@ -708,7 +703,7 @@ H5S__none_bounds(const H5S_t H5_ATTR_UNUSED *space, hsize_t H5_ATTR_UNUSED *star
     HDassert(end);
 
     FUNC_LEAVE_NOAPI(FAIL)
-} /* end H5Sget_none_bounds() */
+} /* end H5S_none_bounds() */
 
 
 /*--------------------------------------------------------------------------
@@ -991,11 +986,11 @@ H5S__none_adjust_s(H5S_t H5_ATTR_UNUSED *space, const hssize_t H5_ATTR_UNUSED *o
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S__none_project_scalar
+ * Function:    H5S__none_project_scalar
  *
- * Purpose:	Projects a 'none' selection into a scalar dataspace
+ * Purpose:     Projects a 'none' selection into a scalar dataspace
  *
- * Return:	Non-negative on success, negative on failure.
+ * Return:      Non-negative on success, negative on failure.
  *
  * Programmer:	Quincey Koziol
  *              Sunday, July 18, 2010
@@ -1016,14 +1011,14 @@ H5S__none_project_scalar(const H5S_t H5_ATTR_UNUSED *space, hsize_t H5_ATTR_UNUS
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S__none_project_simple
+ * Function:    H5S__none_project_simple
  *
- * Purpose:	Projects an 'none' selection onto/into a simple dataspace
+ * Purpose:     Projects an 'none' selection onto/into a simple dataspace
  *              of a different rank
  *
- * Return:	Non-negative on success, negative on failure.
+ * Return:      Non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Sunday, July 18, 2010
  *
  *-------------------------------------------------------------------------
