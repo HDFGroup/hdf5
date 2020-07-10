@@ -406,8 +406,18 @@ H5FD_vfd_swmr_close(H5FD_t *_file)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* Sanity check */
-    HDassert(file);
+    if (file->hdf5_file_lf != NULL) {
+        if (file->hdf5_file_lf->exc_owner != NULL) {
+            assert(file->hdf5_file_lf->exc_owner == &file->pub);
+            file->hdf5_file_lf->exc_owner = NULL;
+        }
+
+        /* Close the underlying file */
+        if (H5FD_close(file->hdf5_file_lf) < 0)
+             /* Push error, but keep going */
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, \
+                        "unable to close the HDF5 file")
+    }
 
     vfd_swmr_reader_did_increase_tick_to(0);
 
@@ -420,12 +430,6 @@ H5FD_vfd_swmr_close(H5FD_t *_file)
         }
         free(file->api_elapsed_ticks);
     }
-
-    /* Close the underlying file */
-    if(file->hdf5_file_lf && H5FD_close(file->hdf5_file_lf) < 0)
-         /* Push error, but keep going */
-        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, \
-                    "unable to close the HDF5 file")
 
     /* Close the metadata file */
     if(file->md_fd >= 0 && HDclose(file->md_fd) < 0)
