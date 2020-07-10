@@ -351,7 +351,7 @@ h5rget_name_ptr_c (hid_t_f *loc_id, int_f *ref_type, void *ref, _fcd name, size_
  * OUTPUTS
  *  obj_type - Type of referenced object. These are defined in H5Opublic.h,
  *  enum H5O_type_t
- *              
+ *
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR

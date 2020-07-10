@@ -66,7 +66,7 @@ typedef struct set_t {
  *
  * Extending a two-dimensional dataset by action1 and action2.
  *        --action1 and action2 can be a positive # or negative # or 0.
- *  
+ *
  ***********************************************************************
  */
 static herr_t
@@ -399,12 +399,12 @@ main(int argc, const char *argv[])
     if(!HDstrcmp(dname, DSET_CMPD) || !HDstrcmp(dname, DSET_CMPD_ESC)) {
         if(extend_dset_one(fname, dname, action1) < 0)
             goto error;
-    } else if(!HDstrcmp(dname, DSET_ONE) || 
-              !HDstrcmp(dname, DSET_ALLOC_LATE) || 
+    } else if(!HDstrcmp(dname, DSET_ONE) ||
+              !HDstrcmp(dname, DSET_ALLOC_LATE) ||
               !HDstrcmp(dname, DSET_ALLOC_EARLY)) {
         if(extend_dset_one(fname, dname, action1) < 0)
             goto error;
-    } else if(!HDstrcmp(dname, DSET_TWO) || 
+    } else if(!HDstrcmp(dname, DSET_TWO) ||
               !HDstrcmp(dname, DSET_CMPD_TWO)) {
         if(extend_dset_two(fname, dname, action1, action2) < 0)
             goto error;

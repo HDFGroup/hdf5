@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- *  This example illustrates how to create and close a group. 
+ *  This example illustrates how to create and close a group.
  *  It is used in the HDF5 Tutorial.
  */
 

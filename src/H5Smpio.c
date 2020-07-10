@@ -899,7 +899,7 @@ if(H5DEBUG(S))
 
         /* Calculate start and extent values of this dimension */
         /* Check if value overflow to cast to type MPI_Aint */
-        if(d[i].start > LONG_MAX || offset[i] > LONG_MAX || elmt_size > LONG_MAX) 
+        if(d[i].start > LONG_MAX || offset[i] > LONG_MAX || elmt_size > LONG_MAX)
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "result overflow")
 	    start_disp = (MPI_Aint)d[i].start * (MPI_Aint)offset[i] * (MPI_Aint)elmt_size;
 

@@ -48,6 +48,44 @@ New Features
 
     Configuration:
     -------------
+    - CMake option to use AEC (open source SZip) library instead of SZip
+
+      The open source AEC library is a replacement library for SZip. In
+      order to use it for hdf5 the libaec CMake source was changed to add
+      "-fPIC" and exclude test files. Autotools does not build the
+      compression libraries within hdf5 builds. New option USE_LIBAEC is
+      required to compensate for the different files produced by AEC build.
+
+      (ADB - 2020/04/22, OESS-65)
+
+    - CMake ConfigureChecks.cmake file now uses CHECK_STRUCT_HAS_MEMBER
+
+      Some handcrafted tests in HDFTests.c has been removed and the CMake
+      CHECK_STRUCT_HAS_MEMBER module has been used.
+
+      (ADB - 2020/03/24, TRILAB-24)
+
+    - Both build systems use same set of warnings flags
+
+      GNU C, C++ and gfortran warnings flags were moved to files in a config
+      sub-folder named gnu-warnings. Flags that only are available for a specific
+      version of the compiler are in files named with that version.
+      Clang C warnings flags were moved to files in a config sub-folder
+      named clang-warnings.
+      Intel C, Fortran warnings flags were moved to files in a config sub-folder
+      named intel-warnings.
+
+      There are flags in named "error-xxx" files with warnings that may
+      be promoted to errors. Some source files may still need fixes.
+
+      There are also pairs of files named "developer-xxx" and "no-developer-xxx"
+      that are chosen by the CMake option:HDF5_ENABLE_DEV_WARNINGS or the
+      configure option:--enable-developer-warnings.
+
+      In addition, CMake no longer applies these warnings for examples.
+
+      (ADB - 2020/03/24, TRILAB-192)
+
     - Added test script for file size compare
 
       if CMake minimum version is at least 3.14, the fileCompareTest.cmake
@@ -270,6 +308,20 @@ New Features
 
     Library:
     --------
+    - Add Mirror VFD
+
+      Use TCP/IP sockets to perform write-only (W/O) file I/O on a remote
+      machine. Must be used in conjunction with the Splitter VFD.
+
+      (JOS - 2020/03/13, TBD)
+
+    - Add Splitter VFD
+
+      Maintain separate R/W and W/O channels for "concurrent" file writes
+      to two files using a single HDF5 file handle.
+
+     (JOS - 2020/03/13, TBD)
+
     - Refactored public exposure of haddr_t type in favor of "object tokens"
 
       To better accommodate HDF5 VOL connectors where "object addresses in a file"
@@ -418,6 +470,17 @@ New Features
       H5make_libsettings.c, supply a location for those files.
 
       (ADB - 2018/09/18, HDFFV-10332)
+
+    - Fix shutdown failure when using H5VLregister_connector_by_name/value
+
+      When using H5VLregister_connector_by_name/value to dynamically load a
+      VOL connector plugin, the library can experience segmentation faults
+      when the library is closed. This is due to the library unloading
+      the plugin interface before the virtual object layer. Then, when the
+      VOL shutdown occurs, it will attempt to close the VOL connector,
+      however this will fail since the plugin will already have been unloaded.
+
+      (DER - 2020/03/18, HDFFV-11057)
 
 
     Parallel Library:
@@ -568,6 +631,26 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - Fixed CVE-2020-10810
+
+      The tool h5clear produced a segfault during an error recovery in
+      the superblock decoding.  An internal pointer was reset to prevent
+      further accessing when it is not assigned with a value.
+
+      (BMR - 2020/6/29, HDFFV-11053)
+
+    - Fixed CVE-2018-17435
+
+      The tool h52gif produced a segfault when the size of an attribute
+      message was corrupted and caused a buffer overflow.
+
+      The problem was fixed by verifying the attribute message's size
+      against the buffer size before accessing the buffer.  h52gif was
+      also fixed to display the failure instead of silently exiting
+      after the segfault was eliminated.
+
+      (BMR - 2020/6/19, HDFFV-10591)
+
     - Improved peformance when creating a large number of small datasets by
       retrieving default property values from the API context instead of doing
       skip list searches.
@@ -930,6 +1013,14 @@ Bug Fixes since HDF5-1.10.3 release
 
     Testing
     -------
+    - Stopped java/test/junit.sh.in installing libs for testing under ${prefix}
+
+      Lib files needed are now copied to a subdirectory in the java/test 
+      directory, and on Macs the loader path for libhdf5.xxxs.so is changed 
+      in the temporary copy of libhdf5_java.dylib. 
+
+      (LRK, 2020/7/2, HDFFV-11063)
+
     - Fixed a test failure in testpar/t_dset.c caused by
       the test trying to use the parallel filters feature
       on MPI-2 implementations.

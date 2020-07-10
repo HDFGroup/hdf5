@@ -55,7 +55,7 @@ const H5Z_class2_t H5Z_DUMMY[1] = {{
  * Function:    do_nothing
  *
  * Purpose:     A dummy compression method that doesn't do anything. This
- *              filter is only for test_unregister_filters. Please don't 
+ *              filter is only for test_unregister_filters. Please don't
  *              use it for other tests because it may mess up this test.
  *
  * Return:      Data chunk size
@@ -124,12 +124,12 @@ test_unregister_filters(hid_t fapl_id)
         goto error;
     if (H5Zfilter_avail(H5Z_FILTER_DUMMY) != TRUE)
         goto error;
- 
+
     /*******************
      * PART 1 - GROUPS *
      *******************/
 
-    /* Use DUMMY filter for creating groups */ 
+    /* Use DUMMY filter for creating groups */
     if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
         goto error;
     if(H5Pset_filter(gcpl_id, H5Z_FILTER_DUMMY, H5Z_FLAG_MANDATORY, (size_t)0, NULL) < 0)
@@ -145,7 +145,7 @@ test_unregister_filters(hid_t fapl_id)
         if((gid_loop = H5Gcreate2(gid, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto error;
         if(H5Gclose(gid_loop) < 0)
-            goto error; 
+            goto error;
     }
 
     /* Flush the file containing the groups */
@@ -174,7 +174,7 @@ test_unregister_filters(hid_t fapl_id)
      * PART 2 - DATASETS *
      *********************/
 
-    /* Use DUMMY filter for creating datasets */ 
+    /* Use DUMMY filter for creating datasets */
     if((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto error;
     if(H5Pset_chunk(dcpl_id, 2, chunk_dims) < 0)
@@ -227,7 +227,7 @@ test_unregister_filters(hid_t fapl_id)
     if(H5Dclose(did) < 0)
         goto error;
 
-    /* Unregister the filter after closing all objects but before closing files. 
+    /* Unregister the filter after closing all objects but before closing files.
      * It should flush all files.
      */
     if(H5Zunregister(H5Z_FILTER_DUMMY) < 0)

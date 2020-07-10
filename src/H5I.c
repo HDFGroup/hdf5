@@ -67,6 +67,7 @@ typedef struct {
     unsigned	init_count;	/* # of times this type has been initialized*/
     uint64_t	id_count;	/* Current number of IDs held		    */
     uint64_t	nextid;		/* ID to use for the next atom		    */
+    H5I_id_info_t *last_info;   /* Info for most recent ID looked up        */
     H5SL_t      *ids;           /* Pointer to skip list that stores IDs     */
 } H5I_id_type_t;
 
@@ -318,6 +319,7 @@ H5I_register_type(const H5I_class_t *cls)
         type_ptr->cls = cls;
         type_ptr->id_count = 0;
         type_ptr->nextid = cls->reserved;
+        type_ptr->last_info = NULL;
         if(NULL == (type_ptr->ids = H5SL_create(H5SL_TYPE_HID, NULL)))
             HGOTO_ERROR(H5E_ATOM, H5E_CANTCREATE, FAIL, "skip list creation failed")
     } /* end if */
@@ -807,6 +809,9 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
     /* Sanity check for the 'nextid' getting too large and wrapping around */
     HDassert(type_ptr->nextid <= ID_MASK);
 
+    /* Set the most recent ID to this object */
+    type_ptr->last_info = id_ptr;
+
     /* Set return value */
     ret_value = new_id;
 
@@ -820,7 +825,7 @@ done:
  *
  * Purpose:     Registers an OBJECT in a TYPE with the supplied ID for it.
  *              This routine will check to ensure the supplied ID is not already
- *              in use, and ensure that it is a valid ID for the given type, 
+ *              in use, and ensure that it is a valid ID for the given type,
  *              but will NOT check to ensure the OBJECT is not already
  *              registered (thus, it is possible to register one object under
  *              multiple IDs).
@@ -877,6 +882,9 @@ H5I_register_using_existing_id(H5I_type_t type, void *object, hbool_t app_ref, h
     if(H5SL_insert(type_ptr->ids, id_ptr, &id_ptr->id) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINSERT, FAIL, "can't insert ID node into skip list")
     type_ptr->id_count++;
+
+    /* Set the most recent ID to this object */
+    type_ptr->last_info = id_ptr;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1236,6 +1244,10 @@ H5I__remove_common(H5I_id_type_t *type_ptr, hid_t id)
     if(NULL == (curr_id = (H5I_id_info_t *)H5SL_remove(type_ptr->ids, &id)))
         HGOTO_ERROR(H5E_ATOM, H5E_CANTDELETE, NULL, "can't remove ID node from skip list")
 
+    /* Check if this ID was the last one accessed */
+    if(type_ptr->last_info == curr_id)
+        type_ptr->last_info = NULL;
+
     ret_value = (void *)curr_id->obj_ptr;       /* (Casting away const OK -QAK) */
     curr_id = H5FL_FREE(H5I_id_info_t, curr_id);
 
@@ -1361,10 +1373,10 @@ H5I_dec_ref(hid_t id)
      * reference count without calling the free method.
      *
      * Beware: the free method may call other H5I functions.
-     * 
-     * If an object is closing, we can remove the ID even though the free 
+     *
+     * If an object is closing, we can remove the ID even though the free
      * method might fail.  This can happen when a mandatory filter fails to
-     * write when a dataset is closed and the chunk cache is flushed to the 
+     * write when a dataset is closed and the chunk cache is flushed to the
      * file.  We have to close the dataset anyway. (SLU - 2010/9/7)
      */
     if(1 == id_ptr->count) {
@@ -1468,9 +1480,9 @@ H5I_dec_app_ref_always_close(hid_t id)
     /* Check for failure */
     if (ret_value < 0) {
         /*
-         * If an object is closing, we can remove the ID even though the free 
+         * If an object is closing, we can remove the ID even though the free
          * method might fail.  This can happen when a mandatory filter fails to
-         * write when a dataset is closed and the chunk cache is flushed to the 
+         * write when a dataset is closed and the chunk cache is flushed to the
          * file.  We have to close the dataset anyway. (SLU - 2010/9/7)
          */
         H5I_remove(id);
@@ -1949,7 +1961,7 @@ H5Isearch(H5I_type_t type, H5I_search_func_t func, void *key)
     udata.app_key = key;
     udata.ret_obj = NULL;
 
-    /* Note that H5I_iterate returns an error code.  We ignore it 
+    /* Note that H5I_iterate returns an error code.  We ignore it
      * here, as we can't do anything with it without revising the API.
      */
     (void)H5I_iterate(type, H5I__search_cb, &udata, TRUE);
@@ -2100,22 +2112,22 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 /*-------------------------------------------------------------------------
  * Function:	H5I_iterate
  *
- * Purpose:     Apply function FUNC to each member of type TYPE (with 
- *              non-zero application reference count if app_ref is TRUE).  
- *              Stop if FUNC returns a non zero value (i.e. anything 
- *              other than H5_ITER_CONT).  
+ * Purpose:     Apply function FUNC to each member of type TYPE (with
+ *              non-zero application reference count if app_ref is TRUE).
+ *              Stop if FUNC returns a non zero value (i.e. anything
+ *              other than H5_ITER_CONT).
  *
- *              If FUNC returns a positive value (i.e. H5_ITER_STOP), 
+ *              If FUNC returns a positive value (i.e. H5_ITER_STOP),
  *              return SUCCEED.
  *
- *              If FUNC returns a negative value (i.e. H5_ITER_ERROR), 
+ *              If FUNC returns a negative value (i.e. H5_ITER_ERROR),
  *              return FAIL.
- *		
- *              The FUNC should take a pointer to the object and the 
- *              udata as arguments and return non-zero to terminate 
+ *
+ *              The FUNC should take a pointer to the object and the
+ *              udata as arguments and return non-zero to terminate
  *              siteration, and zero to continue.
  *
- * Limitation:  Currently there is no way to start the iteration from 
+ * Limitation:  Currently there is no way to start the iteration from
  *              where a previous iteration left off.
  *
  * Return:      SUCCEED/FAIL
@@ -2185,8 +2197,16 @@ H5I__find_id(hid_t id)
     if(!type_ptr || type_ptr->init_count <= 0)
         HGOTO_DONE(NULL)
 
-    /* Locate the ID node for the ID */
-    ret_value = (H5I_id_info_t *)H5SL_search(type_ptr->ids, &id);
+    /* Check for same ID as we have looked up last time */
+    if(type_ptr->last_info && type_ptr->last_info->id == id)
+        ret_value = type_ptr->last_info;
+    else {
+        /* Locate the ID node for the ID */
+        ret_value = (H5I_id_info_t *)H5SL_search(type_ptr->ids, &id);
+
+        /* Remember this ID */
+        type_ptr->last_info = ret_value;
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -34,7 +34,7 @@ jarfile = jar$(PACKAGE_TARNAME)test.jar
 
 AM_JAVACFLAGS = $(H5_JAVACFLAGS) -deprecation
 
-TESTPACKAGE = 
+TESTPACKAGE =
 
 noinst_JAVA = \
 	TestH5.java \

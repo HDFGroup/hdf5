@@ -48,7 +48,7 @@ libhdf5_fortran_la_SOURCES=H5f90global.F90 \
           H5f90kit.c H5_f.c H5Af.c H5Df.c H5Ef.c H5Ff.c H5Gf.c           \
           H5If.c H5Lf.c H5Of.c H5Pf.c H5Rf.c H5Sf.c H5Tf.c H5Zf.c HDF5.F90
 
-# HDF5 Fortran library depends on HDF5 Library. 
+# HDF5 Fortran library depends on HDF5 Library.
 libhdf5_fortran_la_LIBADD=$(LIBHDF5)
 
 # h5fc is generated during configure.

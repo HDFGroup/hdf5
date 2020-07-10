@@ -62,6 +62,12 @@ static struct long_options l_opts[] = {
     { "sort_by",             require_arg, 'q' },
     { "sort_order",          require_arg, 'z' },
     { "enable-error-stack",  no_arg,      'E' },
+    { "src-vol-value",       require_arg, '1' },
+    { "src-vol-name",        require_arg, '2' },
+    { "src-vol-info",        require_arg, '3' },
+    { "dst-vol-value",       require_arg, '4' },
+    { "dst-vol-name",        require_arg, '5' },
+    { "dst-vol-info",        require_arg, '6' },
     { NULL, 0, '\0' }
 };
 
@@ -86,6 +92,18 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "   -n, --native            Use a native HDF5 type when repacking\n");
     PRINTVALSTREAM(rawoutstream, "   --enable-error-stack    Prints messages from the HDF5 error stack as they\n");
     PRINTVALSTREAM(rawoutstream, "                           occur\n");
+    PRINTVALSTREAM(rawoutstream, "   --src-vol-value         Value (ID) of the VOL connector to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                           input HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --src-vol-name          Name of the VOL connector to use for opening the input\n");
+    PRINTVALSTREAM(rawoutstream, "                           HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --src-vol-info          VOL-specific info to pass to the VOL connector used for\n");
+    PRINTVALSTREAM(rawoutstream, "                           opening the input HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --dst-vol-value         Value (ID) of the VOL connector to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                           output HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --dst-vol-name          Name of the VOL connector to use for opening the output\n");
+    PRINTVALSTREAM(rawoutstream, "                           HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --dst-vol-info          VOL-specific info to pass to the VOL connector used for\n");
+    PRINTVALSTREAM(rawoutstream, "                           opening the output HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "   -L, --latest            Use latest version of file format\n");
     PRINTVALSTREAM(rawoutstream, "                           This option will take precedence over the options\n");
     PRINTVALSTREAM(rawoutstream, "                           --low and --high\n");
@@ -293,6 +311,8 @@ int read_info(const char *filename, pack_opt_t *options)
 
     /* cycle until end of file reached */
     while (1) {
+        if (EOF == fscanf(fp, "%9s", stype))
+            break;
 
         /* Info indicator must be for layout or filter */
         if (HDstrcmp(stype,"-l") && HDstrcmp(stype, "-f")) {
@@ -334,7 +354,7 @@ int read_info(const char *filename, pack_opt_t *options)
 
         if (!HDstrcmp(stype, "-l")) {
             if (h5repack_addlayout(comp_info, options) == -1) {
-                error_msg("could not add chunck option\n");
+                error_msg("could not add chunk option\n");
                 h5tools_setstatus(EXIT_FAILURE);
                 ret_value = EXIT_FAILURE;
                 goto done;
@@ -412,8 +432,17 @@ set_sort_order(const char *form)
 static
 int parse_command_line(int argc, const char **argv, pack_opt_t* options)
 {
+    h5tools_vol_info_t in_vol_info;
+    h5tools_vol_info_t out_vol_info;
+    hbool_t custom_in_fapl = FALSE;
+    hbool_t custom_out_fapl = FALSE;
+    hid_t tmp_fapl = H5I_INVALID_HID;
     int bound, opt;
     int ret_value = 0;
+
+    /* Initialize fapl info structs */
+    HDmemset(&in_vol_info, 0, sizeof(h5tools_vol_info_t));
+    HDmemset(&out_vol_info, 0, sizeof(h5tools_vol_info_t));
 
     /* parse command line options */
     while (EOF != (opt = get_option(argc, argv, s_opts, l_opts))) {
@@ -434,13 +463,13 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
             case 'h':
                 usage(h5tools_getprogname());
                 h5tools_setstatus(EXIT_SUCCESS);
-                ret_value = -1;
+                ret_value = 1;
                 goto done;
 
             case 'V':
                 print_version(h5tools_getprogname());
                 h5tools_setstatus(EXIT_SUCCESS);
-                ret_value = -1;
+                ret_value = 1;
                 goto done;
 
             case 'v':
@@ -478,9 +507,12 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case 'e':
-                ret_value = read_info(opt_arg, options);
-                if (ret_value < 0)
+                if ((ret_value = read_info(opt_arg, options)) < 0) {
+                    error_msg("failed to read from repack options file <%s>\n", opt_arg);
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret_value = -1;
                     goto done;
+                }
                 break;
 
             case 'n':
@@ -495,6 +527,8 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 bound = HDatoi(opt_arg);
                 if (bound < H5F_LIBVER_EARLIEST || bound > H5F_LIBVER_LATEST) {
                     error_msg("in parsing low bound\n");
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret_value = -1;
                     goto done;
                 }
                 options->low_bound = bound;
@@ -504,6 +538,8 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 bound = HDatoi(opt_arg);
                 if (bound < H5F_LIBVER_EARLIEST || bound > H5F_LIBVER_LATEST) {
                     error_msg("in parsing high bound\n");
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret_value = -1;
                     goto done;
                 }
                 options->high_bound = bound;
@@ -625,8 +661,8 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case 'q':
-                if (H5_INDEX_UNKNOWN == set_sort_by(opt_arg)) {
-                    error_msg(" failed to set sort by form <%s>\n", opt_arg);
+                if (H5_INDEX_UNKNOWN == (sort_by = set_sort_by(opt_arg))) {
+                    error_msg("failed to set sort by form <%s>\n", opt_arg);
                     h5tools_setstatus(EXIT_FAILURE);
                     ret_value = -1;
                     goto done;
@@ -634,8 +670,8 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case 'z':
-                if (set_sort_order(opt_arg) == H5_ITER_UNKNOWN) {
-                    error_msg(" failed to set sort order form <%s>\n", opt_arg);
+                if (H5_ITER_UNKNOWN == (sort_order = set_sort_order(opt_arg))) {
+                    error_msg("failed to set sort order form <%s>\n", opt_arg);
                     h5tools_setstatus(EXIT_FAILURE);
                     ret_value = -1;
                     goto done;
@@ -646,6 +682,38 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 enable_error_stack = 1;
                 break;
 
+            case '1':
+                in_vol_info.type = VOL_BY_VALUE;
+                in_vol_info.u.value = (H5VL_class_value_t)HDatoi(opt_arg);
+                custom_in_fapl = TRUE;
+                break;
+
+            case '2':
+                in_vol_info.type = VOL_BY_NAME;
+                in_vol_info.u.name = opt_arg;
+                custom_in_fapl = TRUE;
+                break;
+
+            case '3':
+                in_vol_info.info_string = opt_arg;
+                break;
+
+            case '4':
+                out_vol_info.type = VOL_BY_VALUE;
+                out_vol_info.u.value = (H5VL_class_value_t)HDatoi(opt_arg);
+                custom_out_fapl = TRUE;
+                break;
+
+            case '5':
+                out_vol_info.type = VOL_BY_NAME;
+                out_vol_info.u.name = opt_arg;
+                custom_out_fapl = TRUE;
+                break;
+
+            case '6':
+                out_vol_info.info_string = opt_arg;
+                break;
+
             default:
                 break;
         } /* end switch */
@@ -653,30 +721,71 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
     /* If neither -i nor -o given, get in and out files positionally */
     if (0 == (has_i + has_o)) {
-         if (argv[opt_ind] != NULL && argv[opt_ind + 1] != NULL) {
-             infile = argv[opt_ind];
-             outfile = argv[opt_ind + 1];
+        if (argv[opt_ind] != NULL && argv[opt_ind + 1] != NULL) {
+            infile = argv[opt_ind];
+            outfile = argv[opt_ind + 1];
 
-             if (!HDstrcmp(infile, outfile)) {
-                 error_msg("file names cannot be the same\n");
-                 usage(h5tools_getprogname());
-                 h5tools_setstatus(EXIT_FAILURE);
-                 ret_value = -1;
-             }
-         }
-         else {
-             error_msg("file names missing\n");
-             usage(h5tools_getprogname());
-             h5tools_setstatus(EXIT_FAILURE);
-             ret_value = -1;
-         }
-     }
-     else if (has_i != 1 || has_o != 1) {
-         error_msg("filenames must be either both -i -o or both positional\n");
-         usage(h5tools_getprogname());
-         h5tools_setstatus(EXIT_FAILURE);
-         ret_value = -1;
-     }
+            if (!HDstrcmp(infile, outfile)) {
+                error_msg("file names cannot be the same\n");
+                usage(h5tools_getprogname());
+                h5tools_setstatus(EXIT_FAILURE);
+                ret_value = -1;
+            }
+        }
+        else {
+            error_msg("file names missing\n");
+            usage(h5tools_getprogname());
+            h5tools_setstatus(EXIT_FAILURE);
+            ret_value = -1;
+        }
+    }
+    else if (has_i != 1 || has_o != 1) {
+        error_msg("filenames must be either both -i -o or both positional\n");
+        usage(h5tools_getprogname());
+        h5tools_setstatus(EXIT_FAILURE);
+        ret_value = -1;
+    }
+
+    /* Setup FAPL for input and output file accesses */
+    if (custom_in_fapl) {
+        if ((tmp_fapl = h5tools_get_fapl(options->fin_fapl, &in_vol_info, NULL)) < 0) {
+            error_msg("failed to setup FAPL for input file\n");
+            h5tools_setstatus(EXIT_FAILURE);
+            ret_value = -1;
+            goto done;
+        }
+
+        /* Close old FAPL */
+        if (options->fin_fapl != H5P_DEFAULT)
+            if (H5Pclose(options->fin_fapl) < 0) {
+                error_msg("failed to close FAPL\n");
+                h5tools_setstatus(EXIT_FAILURE);
+                ret_value = -1;
+                goto done;
+            }
+
+        options->fin_fapl = tmp_fapl;
+    }
+
+    if (custom_out_fapl) {
+        if ((tmp_fapl = h5tools_get_fapl(options->fout_fapl, &out_vol_info, NULL)) < 0) {
+            error_msg("failed to setup FAPL for output file\n");
+            h5tools_setstatus(EXIT_FAILURE);
+            ret_value = -1;
+            goto done;
+        }
+
+        /* Close old FAPL */
+        if (options->fout_fapl != H5P_DEFAULT)
+            if (H5Pclose(options->fout_fapl) < 0) {
+                error_msg("failed to close FAPL\n");
+                h5tools_setstatus(EXIT_FAILURE);
+                ret_value = -1;
+                goto done;
+            }
+
+        options->fout_fapl = tmp_fapl;
+    }
 
 done:
     return ret_value;
@@ -694,13 +803,17 @@ done:
  */
 int main(int argc, const char **argv)
 {
-    pack_opt_t options; /*the global options */
+    pack_opt_t          options; /*the global options */
     H5E_auto2_t         func;
     H5E_auto2_t         tools_func;
     void               *edata;
     void               *tools_edata;
+    int                 parse_ret;
 
     HDmemset(&options, 0, sizeof(pack_opt_t));
+
+    /* Initialize h5tools lib */
+    h5tools_init();
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
@@ -709,29 +822,38 @@ int main(int argc, const char **argv)
     H5Eget_auto2(H5E_DEFAULT, &func, &edata);
     H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
-    /* Initialize h5tools lib */
-    h5tools_init();
-
     /* Disable tools error reporting */
     H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
     H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
 
     /* update hyperslab buffer size from H5TOOLS_BUFSIZE env if exist */
     if (h5tools_getenv_update_hyperslab_bufsize() < 0) {
+        HDprintf("Error occurred while retrieving H5TOOLS_BUFSIZE value\n");
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
 
     /* initialize options  */
     if (h5repack_init(&options, 0, FALSE) < 0) {
+        HDprintf("Error occurred while initializing repack options\n");
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
+
     /* Initialize default indexing options */
     sort_by = H5_INDEX_CRT_ORDER;
 
-    if (parse_command_line(argc, argv, &options) < 0)
+    parse_ret = parse_command_line(argc, argv, &options);
+    if (parse_ret < 0) {
+        HDprintf("Error occurred while parsing command-line options\n");
+        h5tools_setstatus(EXIT_FAILURE);
         goto done;
+    }
+    else if (parse_ret > 0) {
+        /* Short-circuit success */
+        h5tools_setstatus(EXIT_SUCCESS);
+        goto done;
+    }
 
     if (enable_error_stack > 0) {
         H5Eset_auto2(H5E_DEFAULT, func, edata);
@@ -739,9 +861,20 @@ int main(int argc, const char **argv)
     }
 
     /* pack it */
-    h5tools_setstatus(h5repack(infile, outfile, &options));
+    if (h5repack(infile, outfile, &options) < 0) {
+        HDprintf("Error occurred while repacking\n");
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
+    }
+
+    h5tools_setstatus(EXIT_SUCCESS);
 
 done:
+    if (options.fin_fapl >= 0 && options.fin_fapl != H5P_DEFAULT)
+        H5Pclose(options.fin_fapl);
+    if (options.fout_fapl >= 0 && options.fout_fapl != H5P_DEFAULT)
+        H5Pclose(options.fout_fapl);
+
     /* free tables */
     h5repack_end(&options);
 

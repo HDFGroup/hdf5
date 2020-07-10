@@ -1591,6 +1591,10 @@ H5VL_pass_through_file_create(const char *name, unsigned flags, hid_t fcpl_id,
     /* Get copy of our VOL info from FAPL */
     H5Pget_vol_info(fapl_id, (void **)&info);
 
+    /* Make sure we have info about the underlying VOL to be used */
+    if (!info)
+        return NULL;
+
     /* Copy the FAPL */
     under_fapl_id = H5Pcopy(fapl_id);
 
@@ -1644,6 +1648,10 @@ H5VL_pass_through_file_open(const char *name, unsigned flags, hid_t fapl_id,
 
     /* Get copy of our VOL info from FAPL */
     H5Pget_vol_info(fapl_id, (void **)&info);
+
+    /* Make sure we have info about the underlying VOL to be used */
+    if (!info)
+        return NULL;
 
     /* Copy the FAPL */
     under_fapl_id = H5Pcopy(fapl_id);
@@ -1784,6 +1792,10 @@ H5VL_pass_through_file_specific(void *file, H5VL_file_specific_t specific_type,
 
         /* Get copy of our VOL info from FAPL */
         H5Pget_vol_info(fapl_id, (void **)&info);
+
+        /* Make sure we have info about the underlying VOL to be used */
+        if (!info)
+            return (-1);
 
         /* Copy the FAPL */
         under_fapl_id = H5Pcopy(fapl_id);

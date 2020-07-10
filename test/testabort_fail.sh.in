@@ -14,7 +14,7 @@
 # Test to verify that the assertion/abort failure is fixed when the application
 # does not close the file. (See HDFFV-10160)
 #
-# Test to verify that the infinite loop closing library/abort failure is fixed 
+# Test to verify that the infinite loop closing library/abort failure is fixed
 # when the application creates and removes dense attributes (See HDFFV-10659)
 
 srcdir=@srcdir@
@@ -33,7 +33,7 @@ TEST_NAME=filenotclosed     # The test name
 TEST_BIN=`pwd`/$TEST_NAME   # The path of the test binary
 #
 # Run the test
-$RUNSERIAL $TEST_BIN >/dev/null 2>&1 
+$RUNSERIAL $TEST_BIN >/dev/null 2>&1
 exitcode=$?
 if [ $exitcode -eq 0 ]; then
     echo "Test PASSED"
@@ -47,7 +47,7 @@ echo "Testing infinite loop closing library/abort failure"
 TEST_NAME=del_many_dense_attrs  # The test name
 TEST_BIN=`pwd`/$TEST_NAME 	    # The path of the test binary
 # Run the test
-$RUNSERIAL $TEST_BIN >/dev/null 2>&1 
+$RUNSERIAL $TEST_BIN >/dev/null 2>&1
 exitcode=$?
 if [ $exitcode -eq 0 ]; then
     echo "Test PASSED"

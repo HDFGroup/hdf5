@@ -47,7 +47,7 @@ SKIP() {
     LINEMSG $*
     echo  " -SKIP-"
 }
-  
+
 # Function definitions
 CHECK_LIBINFO(){
     LINEMSG $1
@@ -80,9 +80,9 @@ if [ -n $Shared_Lib ]; then
    shlib=$(grep dlname ../src/libhdf5.la | sed -e "s/dlname='//" -e "s/'//")
 else
    h5libdir=../src
-fi 
+fi
 
-h5libsettings=../src/libhdf5.settings 
+h5libsettings=../src/libhdf5.settings
 
 # Part 1:
 # Verify the HDF5 library does contains an exact copy of the content of the

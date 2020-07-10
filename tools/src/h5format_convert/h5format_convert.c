@@ -18,7 +18,7 @@
 
 /*
  * We include the private header file so we can get to the uniform
- * programming environment it declares.  
+ * programming environment it declares.
  * HDF5 API functions (except for H5G_basename())
  */
 #include "H5private.h"
@@ -42,13 +42,13 @@ static int verbose_g = 0;
 static const char *s_opts = "hVvd:n";
 static struct long_options l_opts[] = {
         { "help", no_arg, 'h' },
-	{ "hel", no_arg, 'h'},
-	{ "he", no_arg, 'h'},
+        { "hel", no_arg, 'h'},
+        { "he", no_arg, 'h'},
         { "version", no_arg, 'V' },
-	{ "version", no_arg, 'V' },
-	{ "versio", no_arg, 'V' },
-	{ "versi", no_arg, 'V' },
-	{ "vers", no_arg, 'V' },
+        { "version", no_arg, 'V' },
+        { "versio", no_arg, 'V' },
+        { "versi", no_arg, 'V' },
+        { "vers", no_arg, 'V' },
         { "verbose", no_arg, 'v' },
         { "verbos", no_arg, 'v' },
         { "verbo", no_arg, 'v' },
@@ -60,6 +60,7 @@ static struct long_options l_opts[] = {
         { "noop", no_arg, 'n' },
         { "noo", no_arg, 'n' },
         { "no", no_arg, 'n' },
+        { "enable-error-stack", no_arg, 'E' },
         { NULL, 0, '\0' }
 };
 
@@ -73,7 +74,7 @@ static struct long_options l_opts[] = {
  *
  *-------------------------------------------------------------------------
  */
-static void usage(const char *prog) 
+static void usage(const char *prog)
 {
     HDfprintf(stdout, "usage: %s [OPTIONS] file_name\n", prog);
     HDfprintf(stdout, "  OPTIONS\n");
@@ -113,62 +114,66 @@ static void usage(const char *prog)
  *-------------------------------------------------------------------------
  */
 static int
-parse_command_line(int argc, const char **argv) 
+parse_command_line(int argc, const char **argv)
 {
     int opt;
 
      /* no arguments */
     if (argc == 1) {
         usage(h5tools_getprogname());
-	h5tools_setstatus(EXIT_FAILURE);
+        h5tools_setstatus(EXIT_FAILURE);
         goto error;
     }
 
     /* parse command line options */
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
-	switch((char) opt) {
-	    case 'h':
-		usage(h5tools_getprogname());
-		h5tools_setstatus(EXIT_SUCCESS);
-		goto error;
+    switch((char) opt) {
+        case 'h':
+        usage(h5tools_getprogname());
+        h5tools_setstatus(EXIT_SUCCESS);
+        goto error;
 
-	    case 'V':
-		print_version(h5tools_getprogname());
-		h5tools_setstatus(EXIT_SUCCESS);
-		goto error;
+        case 'V':
+        print_version(h5tools_getprogname());
+        h5tools_setstatus(EXIT_SUCCESS);
+        goto error;
 
-	    case 'v':
-		verbose_g = TRUE;
-		break;
+        case 'v':
+        verbose_g = TRUE;
+        break;
 
-	    case 'd': /* -d dname */
-		if(opt_arg != NULL && *opt_arg)
-		    dname_g = HDstrdup(opt_arg);
-		if(dname_g == NULL) {
-		    h5tools_setstatus(EXIT_FAILURE);
-		    error_msg("No dataset name\n", opt_arg);
-		    usage(h5tools_getprogname());
-		    goto error;
-		}
-		dset_g = TRUE;
-		break;
+        case 'd': /* -d dname */
+        if(opt_arg != NULL && *opt_arg)
+            dname_g = HDstrdup(opt_arg);
+        if(dname_g == NULL) {
+            h5tools_setstatus(EXIT_FAILURE);
+            error_msg("No dataset name\n", opt_arg);
+            usage(h5tools_getprogname());
+            goto error;
+        }
+        dset_g = TRUE;
+        break;
 
-	    case 'n': /* -n */
-		noop_g = TRUE;
-		break;
+        case 'n': /* -n */
+        noop_g = TRUE;
+        break;
 
-	    default:
-		h5tools_setstatus(EXIT_FAILURE);
-		usage(h5tools_getprogname());
-		goto error;
-		break;
-	} /* switch */
+        case 'E':
+        enable_error_stack = 1;
+        break;
+
+        default:
+        h5tools_setstatus(EXIT_FAILURE);
+        usage(h5tools_getprogname());
+        goto error;
+        break;
+    } /* switch */
     } /* while */
 
     if (argc <= opt_ind) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
-	h5tools_setstatus(EXIT_FAILURE);
+        h5tools_setstatus(EXIT_FAILURE);
         goto error;
     }
 
@@ -327,7 +332,7 @@ done:
     }
     else if(verbose_g)
         HDfprintf(stdout, "Close the dataset\n");
-    
+
     /* Close the dataset creation property list */
     if(H5Pclose(dcpl) < 0) {
         error_msg("unable to close dataset creation property list\n");
@@ -421,7 +426,7 @@ main(int argc, const char *argv[])
 	HDfprintf(stdout, "It is noop...\n");
 
     /* Open the HDF5 file */
-    if((fid = h5tools_fopen(fname_g, H5F_ACC_RDWR, H5P_DEFAULT, NULL, NULL, 0)) < 0) {
+    if((fid = h5tools_fopen(fname_g, H5F_ACC_RDWR, H5P_DEFAULT, FALSE, NULL, 0)) < 0) {
 	error_msg("unable to open file \"%s\"\n", fname_g);
 	h5tools_setstatus(EXIT_FAILURE);
 	goto done;
@@ -470,7 +475,7 @@ done:
 	HDfree(fname_g);
     if(dname_g)
 	HDfree(dname_g);
-    
+
     H5Eset_auto2(H5E_DEFAULT, func, edata);
     leave(h5tools_getstatus());
 

@@ -33,7 +33,7 @@
 ## INSTALL_TOP_FILES
 ##
 ## EXAMPLEDIR
-## The directory into which examples should be installed. 
+## The directory into which examples should be installed.
 ##
 ## Build rules for $(EXTRA_PROG).
 ## Dependencies for example programs.
@@ -62,7 +62,7 @@ install-data-local:
 uninstall-local:
 	@$(MAKE) $(AM_MAKEFLAGS) uninstall-examples
 
-install-examples: $(EXAMPLEDIR) $(INSTALL_FILES) 
+install-examples: $(EXAMPLEDIR) $(INSTALL_FILES)
 	@for f in X $(INSTALL_FILES); do                                     \
 	  if test $$f != X; then                                             \
 	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLEDIR)/. || exit 1);    \
@@ -109,7 +109,7 @@ installcheck-local:
 	  H5CCFLAGS="-shlib" $(MAKE) $(AM_MAKEFLAGS) check;                \
 	else                                                              \
 	  $(MAKE) $(AM_MAKEFLAGS) check;                                   \
-	fi 
+	fi
 	@if test "$(INSTALL_FILES)" -a $(TEST_EXAMPLES_SCRIPT) -a -d $(EXAMPLEDIR); then \
 	    echo "============================";                                         \
 	    echo "Testing $(TEST_EXAMPLES_SCRIPT)";                                      \

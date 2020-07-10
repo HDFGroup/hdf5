@@ -85,7 +85,7 @@ typedef struct H5FD_sec2_t {
     DWORD           nFileIndexLow;
     DWORD           nFileIndexHigh;
     DWORD           dwVolumeSerialNumber;
-    
+
     HANDLE          hFile;      /* Native windows file handle */
 #endif  /* H5_HAVE_WIN32_API */
 
@@ -521,6 +521,12 @@ H5FD_sec2_query(const H5FD_t *_file, unsigned long *flags /* out */)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Set the VFL feature flags that this driver supports */
+    /* Notice: the Mirror VFD Writer currently uses only the Sec2 driver as
+     * the underying driver -- as such, the Mirror VFD implementation copies
+     * these feature flags as its own. Any modifications made here must be
+     * reflected in H5FDmirror.c
+     * -- JOS 2020-01-13
+     */
     if(flags) {
         *flags = 0;
         *flags |= H5FD_FEAT_AGGREGATE_METADATA;     /* OK to aggregate metadata allocations                             */
@@ -599,7 +605,7 @@ H5FD_sec2_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
  *              either the filesystem end-of-file or the HDF5 end-of-address
  *              markers.
  *
- * Return:      End of file address, the first address past the end of the 
+ * Return:      End of file address, the first address past the end of the
  *              "file", either the filesystem file or the HDF5 file.
  *
  * Programmer:  Robb Matzke
@@ -716,7 +722,7 @@ H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
             bytes_read = HDread(file->fd, buf, bytes_in);
 #endif /* H5_HAVE_PREADWRITE */
         } while(-1 == bytes_read && EINTR == errno);
-        
+
         if(-1 == bytes_read) { /* error */
             int myerrno = errno;
             time_t mytime = HDtime(NULL);
@@ -725,16 +731,16 @@ H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
 
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', buf = %p, total read size = %llu, bytes this sub-read = %llu, bytes actually read = %llu, offset = %llu", HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_read, (unsigned long long)offset);
         } /* end if */
-        
+
         if(0 == bytes_read) {
             /* end of file but not end of format address space */
             HDmemset(buf, 0, size);
             break;
         } /* end if */
-        
+
         HDassert(bytes_read >= 0);
         HDassert((size_t)bytes_read <= size);
-        
+
         size -= (size_t)bytes_read;
         addr += (haddr_t)bytes_read;
         buf = (char *)buf + bytes_read;
@@ -802,7 +808,7 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     while(size > 0) {
 
         h5_posix_io_t       bytes_in        = 0;    /* # of bytes to write  */
-        h5_posix_io_ret_t   bytes_wrote     = -1;   /* # of bytes written   */ 
+        h5_posix_io_ret_t   bytes_wrote     = -1;   /* # of bytes written   */
 
         /* Trying to write more bytes than the return type can handle is
          * undefined behavior in POSIX.
@@ -821,7 +827,7 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
             bytes_wrote = HDwrite(file->fd, buf, bytes_in);
 #endif /* H5_HAVE_PREADWRITE */
         } while(-1 == bytes_wrote && EINTR == errno);
-        
+
         if(-1 == bytes_wrote) { /* error */
             int myerrno = errno;
             time_t mytime = HDtime(NULL);
@@ -830,7 +836,7 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', buf = %p, total write size = %llu, bytes this sub-write = %llu, bytes actually written = %llu, offset = %llu", HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_wrote, (unsigned long long)offset);
         } /* end if */
-        
+
         HDassert(bytes_wrote > 0);
         HDassert((size_t)bytes_wrote <= size);
 

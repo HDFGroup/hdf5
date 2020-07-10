@@ -28,8 +28,8 @@
 /*-------------------------------------------------------------------------
  * Function:	main
  *
- *              Generate an HDF5 file with groups, datasets and symbolic links. 
- *              After the file is generated, write bad offset values to 
+ *              Generate an HDF5 file with groups, datasets and symbolic links.
+ *              After the file is generated, write bad offset values to
  *              the heap at 3 locations in the file:
  *              (A) Open the file:
  *                  fd = HDopen(TESTFILE, O_RDWR, 0663);
@@ -37,7 +37,7 @@
  *                  (1) HDlseek(fd, (HDoff_t)880, SEEK_SET);
  *                      "/group1/group2": replace heap offset "8" by bad offset
  *                  (2) HDlseek(fd, (HDoff_t)1512, SEEK_SET);
- *                      "/dsetA": replace name offset into private heap "72" by bad offset 
+ *                      "/dsetA": replace name offset into private heap "72" by bad offset
  *                  (3) HDlseek(fd, (HDoff_t)1616, SEEK_SET);
  *                      /soft_one: replace link value offset in the scratch pad "32" by bad offset
  *              (C) Write the bad offset value to the file for (1), (2) and (3):
@@ -98,7 +98,7 @@ main(void)
     if(H5Fclose(fid) < 0)
         FAIL_STACK_ERROR
 
-    /* 
+    /*
      * Write bad offset values at 3 locations in the file
      */
 

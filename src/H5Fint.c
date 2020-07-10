@@ -391,7 +391,7 @@ H5F__get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id
             if(H5I_iterate(H5I_DATASET, H5F__get_objects_cb, &olist, app_ref) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(2)")
         } /* end if */
-    } /* end if */
+    }
 
     /* If the caller just wants to count the number of objects (OLIST.MAX_NOBJS is zero),
      * or the caller wants to get the list of IDs and the list isn't full,
@@ -402,8 +402,8 @@ H5F__get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id
             olist.obj_type = H5I_GROUP;
             if(H5I_iterate(H5I_GROUP, H5F__get_objects_cb, &olist, app_ref) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(3)")
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     /* If the caller just wants to count the number of objects (OLIST.MAX_NOBJS is zero),
      * or the caller wants to get the list of IDs and the list isn't full,
@@ -415,7 +415,7 @@ H5F__get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id
             if(H5I_iterate(H5I_DATATYPE, H5F__get_objects_cb, &olist, app_ref) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(4)")
         } /* end if */
-    } /* end if */
+    }
 
     /* If the caller just wants to count the number of objects (OLIST.MAX_NOBJS is zero),
      * or the caller wants to get the list of IDs and the list isn't full,
@@ -427,7 +427,7 @@ H5F__get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id
             if(H5I_iterate(H5I_ATTR, H5F__get_objects_cb, &olist, app_ref) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(5)")
         } /* end if */
-    } /* end if */
+    }
 
     /* Set the number of objects currently open */
     *obj_id_count_ptr = obj_id_count;
@@ -1066,12 +1066,12 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
             f->shared->feature_flags &= ~(unsigned)H5FD_FEAT_ACCUMULATE_METADATA;
             if(H5FD_set_feature_flags(f->shared->lf, f->shared->feature_flags) < 0)
                  HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't set feature_flags in VFD")
-        } /* end if */
+        }
         else {
             /* If no value for read attempts has been set, use the default */
             if(!f->shared->read_attempts)
                 f->shared->read_attempts = H5F_METADATA_READ_ATTEMPTS;
-        } /* end else */
+        }
 
         /* Determine the # of bins for metdata read retries */
         if(H5F_set_retries(f) < 0)
@@ -1138,7 +1138,7 @@ done:
                     HDONE_ERROR(H5E_FILE, H5E_CANTDEC, NULL, "can't close property list")
 
             f->shared = H5FL_FREE(H5F_shared_t, f->shared);
-        } /* end if */
+        }
 
         /* Free VOL object */
         if(f->vol_obj)
@@ -1146,7 +1146,7 @@ done:
                 HDONE_ERROR(H5E_FILE, H5E_CANTDEC, NULL, "unable to free VOL object")
 
         f = H5FL_FREE(H5F_t, f);
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__new() */
@@ -2298,7 +2298,7 @@ H5F_get_id(H5F_t *file)
         if((ret_value = H5VL_wrap_register(H5I_FILE, file, FALSE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register group")
         file->id_exists = TRUE;
-    } /* end if */
+    }
     else {
         /* Increment reference count on existing ID */
         if(H5I_inc_ref(ret_value, FALSE) < 0)
@@ -3033,7 +3033,7 @@ H5F_set_retries(H5F_t *f)
     /* Initialize the # of bins for retries */
     f->shared->retries_nbins = 0;
     if(f->shared->read_attempts > 1) {
-        /* Use HDceil to ensure that the log10 value is rounded up to the 
+        /* Use HDceil to ensure that the log10 value is rounded up to the
            nearest integer before casting to unsigned */
         tmp = HDceil(HDlog10((double)f->shared->read_attempts));
         f->shared->retries_nbins = (unsigned)tmp;

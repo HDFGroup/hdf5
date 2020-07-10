@@ -8,6 +8,18 @@ usage: h5repack [OPTIONS] file1 file2
    -n, --native            Use a native HDF5 type when repacking
    --enable-error-stack    Prints messages from the HDF5 error stack as they
                            occur
+   --src-vol-value         Value (ID) of the VOL connector to use for opening the
+                           input HDF5 file specified
+   --src-vol-name          Name of the VOL connector to use for opening the input
+                           HDF5 file specified
+   --src-vol-info          VOL-specific info to pass to the VOL connector used for
+                           opening the input HDF5 file specified
+   --dst-vol-value         Value (ID) of the VOL connector to use for opening the
+                           output HDF5 file specified
+   --dst-vol-name          Name of the VOL connector to use for opening the output
+                           HDF5 file specified
+   --dst-vol-info          VOL-specific info to pass to the VOL connector used for
+                           opening the output HDF5 file specified
    -L, --latest            Use latest version of file format
                            This option will take precedence over the options
                            --low and --high

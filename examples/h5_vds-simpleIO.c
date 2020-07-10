@@ -14,7 +14,7 @@
   This example illustrates the concept of virtual dataset I/O
   The program  creates 2-dim source dataset and writes
   data to it. Then it creates 2-dim virtual dataset that has
-  the same dimension sizes and maps the all elements of the 
+  the same dimension sizes and maps the all elements of the
   virtual dataset to all elements of the source dataset.
   Then VDS is read back.
 
@@ -30,7 +30,7 @@
 #define FILE         "vds-simpleIO.h5"
 #define DATASET      "VDS"
 #define DIM1            6
-#define DIM0            4 
+#define DIM0            4
 #define RANK            2
 
 #define SRC_FILE      "a.h5"
@@ -40,27 +40,27 @@
 int
 main (void)
 {
-    hid_t        file, space, src_space, vspace, dset; /* Handles */ 
+    hid_t        file, space, src_space, vspace, dset; /* Handles */
     hid_t        dcpl;
     herr_t       status;
     hsize_t      vdsdims[2] = {DIM0, DIM1},     /* Virtual dataset dimension */
                  dims[2] = {DIM0, DIM1};        /* Source dataset dimensions */
     int          wdata[DIM0][DIM1],             /* Write buffer for source dataset */
                  rdata[DIM0][DIM1],             /* Read buffer for virtual dataset */
-                 i, j;  
+                 i, j;
     H5D_layout_t layout;                        /* Storage layout */
     size_t       num_map;                       /* Number of mappings */
     ssize_t      len;                           /* Length of the string; also a return value */
-    char         *filename;                  
+    char         *filename;
     char         *dsetname;
     /*
      * Initialize data.
      */
-        for (i = 0; i < DIM0; i++) 
+        for (i = 0; i < DIM0; i++)
             for (j = 0; j < DIM1; j++) wdata[i][j] = i+1;
-         
+
      /*
-      * Create the source file and the dataset. Write data to the source dataset 
+      * Create the source file and the dataset. Write data to the source dataset
       * and close all resources.
       */
 
@@ -82,12 +82,12 @@ main (void)
 
     /* Set VDS creation property. */
     dcpl = H5Pcreate (H5P_DATASET_CREATE);
-     
-    /* 
+
+    /*
      * Build the mappings.
      * Selections in the source datasets are H5S_ALL.
-     * In the virtual dataset we select the first, the second and the third rows 
-     * and map each row to the data in the corresponding source dataset. 
+     * In the virtual dataset we select the first, the second and the third rows
+     * and map each row to the data in the corresponding source dataset.
      */
     src_space = H5Screate_simple (RANK, dims, NULL);
     status = H5Pset_virtual (dcpl, vspace, SRC_FILE, SRC_DATASET, src_space);
@@ -98,8 +98,8 @@ main (void)
     status = H5Sclose (vspace);
     status = H5Sclose (src_space);
     status = H5Dclose (dset);
-    status = H5Fclose (file);    
-     
+    status = H5Fclose (file);
+
     /*
      * Now we begin the read section of this example.
      */
@@ -118,7 +118,7 @@ main (void)
      * Get storage layout.
      */
     layout = H5Pget_layout (dcpl);
-    if (H5D_VIRTUAL == layout) 
+    if (H5D_VIRTUAL == layout)
         printf(" Dataset has a virtual layout \n");
     else
         printf(" Wrong layout found \n");
@@ -129,10 +129,10 @@ main (void)
      status = H5Pget_virtual_count (dcpl, &num_map);
      printf(" Number of mappings is %lu\n", (unsigned long)num_map);
 
-     /* 
+     /*
       * Get mapping parameters for each mapping.
       */
-    for (i = 0; i < (int)num_map; i++) {   
+    for (i = 0; i < (int)num_map; i++) {
         printf(" Mapping %d \n", i);
         printf("         Selection in the virtual dataset ");
         /* Get selection in the virttual  dataset */

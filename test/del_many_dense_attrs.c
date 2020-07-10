@@ -13,7 +13,7 @@
 
 /*
  * Purpose:	Test to verify that the infinite loop closing library/abort failure
- *          is fixed when the application creates and removes dense attributes 
+ *          is fixed when the application creates and removes dense attributes
  *          (See HDFFV-10659).
  */
 
@@ -22,7 +22,7 @@
 
 /* The test file name */
 const char *FILENAME[] = {
-    "del_many_dense_attrs", 
+    "del_many_dense_attrs",
     NULL
 };
 
@@ -49,7 +49,7 @@ static void catch_signal(int H5_ATTR_UNUSED signo)
  * Function:	main
  *
  * Purpose:	Test to verify that the infinite loop closing library/abort failure
- *          is fixed when the application creates and removes dense attributes 
+ *          is fixed when the application creates and removes dense attributes
  *          (See HDFFV-10659).
  *
  * Return:	Success:	exit(EXIT_SUCCESS)
@@ -62,17 +62,17 @@ static void catch_signal(int H5_ATTR_UNUSED signo)
 int
 main(void)
 {
-    hid_t fid = -1;             /* HDF5 File ID                 */
-    hid_t gid = -1;             /* Group ID                     */
-    hid_t sid = -1;             /* Dataspace ID                 */
-    hid_t aid = -1;             /* Attribute ID                 */
-    hid_t tid = -1;             /* Datatype ID                  */
-    hid_t fapl = -1;            /* File access property lists   */
-    hid_t gcpl = -1;            /* Group creation property list */
-    char aname[50];             /* Name of attribute            */
-    char *basename="attr";      /* Name prefix for attribute    */
-    char filename[100];         /* File name                    */
-    int i;                      /* Local index variable         */
+    hid_t fid = -1;                 /* HDF5 File ID                 */
+    hid_t gid = -1;                 /* Group ID                     */
+    hid_t sid = -1;                 /* Dataspace ID                 */
+    hid_t aid = -1;                 /* Attribute ID                 */
+    hid_t tid = -1;                 /* Datatype ID                  */
+    hid_t fapl = -1;                /* File access property lists   */
+    hid_t gcpl = -1;                /* Group creation property list */
+    char aname[50];                 /* Name of attribute            */
+    const char *basename="attr";    /* Name prefix for attribute    */
+    char filename[100];             /* File name                    */
+    int i;                          /* Local index variable         */
 
     /* Testing setup */
     h5_reset();
@@ -137,7 +137,7 @@ main(void)
         if(H5Aclose(aid) < 0)
             TEST_ERROR
     }
-    
+
     /* Close the datatype */
     if(H5Tclose(tid) < 0)
        TEST_ERROR

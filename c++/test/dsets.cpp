@@ -268,7 +268,7 @@ static herr_t test_simple_io( H5File& file)
 /*-------------------------------------------------------------------------
  * Function:    test_datasize
  *
- * Purpose      Tests DataSet::getInMemDataSize().  
+ * Purpose      Tests DataSet::getInMemDataSize().
  *
  * Return       Success: 0
  *
@@ -901,7 +901,7 @@ static herr_t test_multiopen (H5File& file)
         if (cur_size[0]!=tmp_size[0])
         {
             cerr << "    Got " << static_cast<int>(tmp_size[0])
-                 << " instead of " << static_cast<int>(cur_size[0]) 
+                 << " instead of " << static_cast<int>(cur_size[0])
                  << "!" << endl;
             throw Exception("test_multiopen", "Failed in multi-open with extending");
         }

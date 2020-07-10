@@ -554,6 +554,13 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
     )
   endif ()
 
+  cpack_add_component (utilsapplications
+      DISPLAY_NAME "HDF5 Utility Applications"
+      DEPENDS libraries
+      GROUP Applications
+      INSTALL_TYPES Full Developer User
+  )
+
   if (HDF5_BUILD_TOOLS)
     cpack_add_component (toolsapplications
         DISPLAY_NAME "HDF5 Tools Applications"

@@ -210,7 +210,7 @@ static void test_array_compound_array()
         // Verify the compound datatype info
         CompType ctype_check(base_type.getId());
         base_type.close();
-        
+
         // Check the number of members
         nmemb = ctype_check.getNmembers();
         verify_val(nmemb, 2, "ctype_check.getNmembers", __LINE__, __FILE__);
@@ -282,11 +282,11 @@ static void test_array_compound_array()
  */
 H5::DataType getArr()
 {
-    hsize_t *dims = new hsize_t; 
-    *dims = 5; 
-    H5::ArrayType ret; 
-    ret = H5::ArrayType(H5::PredType::NATIVE_INT, 1, dims); 
-    delete dims; 
+    hsize_t *dims = new hsize_t;
+    *dims = 5;
+    H5::ArrayType ret;
+    ret = H5::ArrayType(H5::PredType::NATIVE_INT, 1, dims);
+    delete dims;
     return ret;
 }
 
@@ -368,7 +368,6 @@ static void test_array_info()
         float f[ARRAY1_DIM1];
     } s1_t;
     s1_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   // Information to write
-    s1_t rdata[SPACE1_DIM1][ARRAY1_DIM1];   // Information read in
     hsize_t sdims1[] = {SPACE1_DIM1};
     hsize_t tdims1[] = {ARRAY1_DIM1};
     int     ii;         // counting variables

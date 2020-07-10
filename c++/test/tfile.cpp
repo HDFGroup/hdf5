@@ -633,7 +633,7 @@ static void test_file_attribute()
         verify_val(num_objs, 0, "H5File::getObjCount(H5F_OBJ_DATATYPE)", __LINE__, __FILE__);
         num_objs = file5.getObjCount(H5F_OBJ_FILE);
         verify_val(num_objs, 1, "H5File::getObjCount(H5F_OBJ_FILE)", __LINE__, __FILE__);
-        
+
         // Get the file name using the attributes
         H5std_string fname = fattr1.getFileName();
         verify_val(fname, FILE5, "H5File::getFileName()", __LINE__, __FILE__);
@@ -984,7 +984,7 @@ static void test_file_info()
     /*  ret=H5Pget_shared_mesg_nindexes(fcpl2,&nindexes);
     CHECK(ret, FAIL, "H5Pget_shared_mesg_nindexes");
     VERIFY(nindexes, MISC11_NINDEXES, "H5Pget_shared_mesg_nindexes");
- */ 
+ */
 
         // Get and verify the file space info from the creation property list */
         fcpl2.getFileSpaceStrategy(out_strategy, out_persist, out_threshold);

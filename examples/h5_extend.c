@@ -12,9 +12,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- *  This example how to work with extendible datasets. The dataset 
+ *  This example how to work with extendible datasets. The dataset
  *  must be chunked in order to be extendible.
- * 
+ *
  *  It is used in the HDF5 Tutorial.
  */
 
@@ -29,28 +29,28 @@ int
 main (void)
 {
     hid_t        file;                          /* handles */
-    hid_t        dataspace, dataset;  
+    hid_t        dataspace, dataset;
     hid_t        filespace, memspace;
-    hid_t        prop;                     
+    hid_t        prop;
 
-    hsize_t      dims[2]  = {3, 3};           /* dataset dimensions at creation time */		
+    hsize_t      dims[2]  = {3, 3};           /* dataset dimensions at creation time */
     hsize_t      maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
-    herr_t       status;                             
+    herr_t       status;
     hsize_t      chunk_dims[2] = {2, 5};
     int          data[3][3] = { {1, 1, 1},    /* data to write */
                                 {1, 1, 1},
-                                {1, 1, 1} };      
+                                {1, 1, 1} };
 
     /* Variables used in extending and writing to the extended portion of dataset */
     hsize_t      size[2];
     hsize_t      offset[2];
     hsize_t      dimsext[2] = {7, 3};         /* extend dimensions */
-    int          dataext[7][3] = { {2, 3, 4}, 
-                                   {2, 3, 4}, 
-                                   {2, 3, 4}, 
-                                   {2, 3, 4}, 
-                                   {2, 3, 4}, 
-                                   {2, 3, 4}, 
+    int          dataext[7][3] = { {2, 3, 4},
+                                   {2, 3, 4},
+                                   {2, 3, 4},
+                                   {2, 3, 4},
+                                   {2, 3, 4},
+                                   {2, 3, 4},
                                    {2, 3, 4} };
 
     /* Variables used in reading data back */
@@ -58,11 +58,11 @@ main (void)
     hsize_t      dimsr[2];
     hsize_t      i, j;
     int          rdata[10][3];
-    herr_t       status_n;                             
+    herr_t       status_n;
     int          rank, rank_chunk;
 
     /* Create the data space with unlimited dimensions. */
-    dataspace = H5Screate_simple (RANK, dims, maxdims); 
+    dataspace = H5Screate_simple (RANK, dims, maxdims);
 
     /* Create a new file. If file exists its contents will be overwritten. */
     file = H5Fcreate (FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -71,7 +71,7 @@ main (void)
     prop = H5Pcreate (H5P_DATASET_CREATE);
     status = H5Pset_chunk (prop, RANK, chunk_dims);
 
-    /* Create a new dataset within the file using chunk 
+    /* Create a new dataset within the file using chunk
        creation properties.  */
     dataset = H5Dcreate2 (file, DATASETNAME, H5T_NATIVE_INT, dataspace,
                          H5P_DEFAULT, prop, H5P_DEFAULT);
@@ -90,10 +90,10 @@ main (void)
     offset[0] = 3;
     offset[1] = 0;
     status = H5Sselect_hyperslab (filespace, H5S_SELECT_SET, offset, NULL,
-                                  dimsext, NULL);  
+                                  dimsext, NULL);
 
     /* Define memory space */
-    memspace = H5Screate_simple (RANK, dimsext, NULL); 
+    memspace = H5Screate_simple (RANK, dimsext, NULL);
 
     /* Write the data to the extended portion of dataset  */
     status = H5Dwrite (dataset, H5T_NATIVE_INT, memspace, filespace,
@@ -120,7 +120,7 @@ main (void)
 
     prop = H5Dget_create_plist (dataset);
 
-    if (H5D_CHUNKED == H5Pget_layout (prop)) 
+    if (H5D_CHUNKED == H5Pget_layout (prop))
        rank_chunk = H5Pget_chunk (prop, rank, chunk_dimsr);
 
     memspace = H5Screate_simple (rank, dimsr, NULL);

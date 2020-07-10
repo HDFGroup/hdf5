@@ -24,7 +24,7 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/test
 # Test scripts--
 #       testpflush.sh:
 TEST_SCRIPT_PARA = testpflush.sh
-SCRIPT_DEPEND = t_pflush1$(EXEEXT) t_pflush2$(EXEEXT) 
+SCRIPT_DEPEND = t_pflush1$(EXEEXT) t_pflush2$(EXEEXT)
 
 check_SCRIPTS = $(TEST_SCRIPT_PARA)
 
