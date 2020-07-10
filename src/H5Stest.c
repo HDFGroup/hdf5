@@ -94,7 +94,10 @@ H5S__get_rebuild_status_test(hid_t space_id)
     if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
-    ret_value = (htri_t)space->select.sel_info.hslab->diminfo_valid;
+    if(H5S_DIMINFO_VALID_YES == space->select.sel_info.hslab->diminfo_valid)
+        ret_value = TRUE;
+    else
+        ret_value = FALSE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

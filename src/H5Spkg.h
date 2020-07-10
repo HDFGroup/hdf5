@@ -141,9 +141,18 @@ struct H5S_hyper_span_info_t {
     struct H5S_hyper_span_t *head;  /* Pointer to list of spans in next dimension down */
 };
 
+/* Enum for diminfo_valid field in H5S_hyper_sel_t */
+typedef enum {
+    /* DER: Revert to develop order once the hyperslab optimizations are complete */
+    H5S_DIMINFO_VALID_NO,       /* 1: diminfo is not valid but may or may not be possible to constuct */
+    H5S_DIMINFO_VALID_IMPOSSIBLE, /* 0: diminfo is not valid and can never be valid with the current selection */
+    H5S_DIMINFO_VALID_YES       /* 2: diminfo is valid */
+} H5S_diminfo_valid_t;
+
 /* Information about hyperslab selection */
 typedef struct {
-    hbool_t diminfo_valid;  /* Whether the dataset has valid diminfo */
+    H5S_diminfo_valid_t diminfo_valid;  /* Whether the dataset has valid diminfo */
+
     H5S_hyper_dim_t opt_diminfo[H5S_MAX_RANK];  /* per-dim selection info */
     H5S_hyper_dim_t app_diminfo[H5S_MAX_RANK];  /* per-dim selection info */
 	/* 'opt_diminfo' points to a [potentially] optimized version of the user's
