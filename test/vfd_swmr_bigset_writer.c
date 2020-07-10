@@ -776,7 +776,7 @@ verify_dset_attribute(hid_t ds, unsigned int which, unsigned int step)
         step);
 
     if ((aid = H5Aopen(ds, name, H5P_DEFAULT)) < 0)
-        errx(EXIT_FAILURE, "H5Acreate2 failed");
+        errx(EXIT_FAILURE, "H5Aopen failed");
 
     if (H5Aread(aid, H5T_NATIVE_UINT, &read_step) < 0)
         errx(EXIT_FAILURE, "H5Aread failed");
