@@ -1572,7 +1572,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     hbool_t             ci_load = FALSE;    /* whether MDC ci load requested */
     hbool_t             ci_write = FALSE;   /* whether MDC CI write requested */
     hbool_t             file_create = FALSE;    /* creating a new file or not */
-    H5FD_t             *underlying_lf = NULL;   /* underlying file driver for VFD SWMR */
     H5F_vfd_swmr_config_t *vfd_swmr_config_ptr = NULL;  /* Points to VFD SMWR config info */
     H5F_t              *ret_value = NULL;       /*actual return value           */
 
@@ -1645,14 +1644,20 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', tent_flags = %x", name, tent_flags)
     } /* end if */
 
-    /* For VFD SWMR driver, retrieve the underlying vfd for the search in H5F__sfile_search() */
-    if(H5FD_is_vfd_swmr_driver(lf))
-        underlying_lf = H5FD_vfd_swmr_get_underlying_vfd(lf);
-    else
-        underlying_lf = lf;
+    /* Do not reuse a virtual file opened exclusively by a second virtual
+     * file.
+     */
+    if (H5FD_has_conflict(lf)) {
+        if(H5FD_close(lf) < 0) {
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
+                "file '%s' already open exclusively; could not close", name);
+        }
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
+            "file '%s' already open exclusively", name);
+    }
 
     /* Is the file already open? */
-    if((shared = H5F__sfile_search(underlying_lf)) != NULL) {
+    if((shared = H5F__sfile_search(lf)) != NULL) {
         /*
          * The file is already open, so use that one instead of the one we
          * just opened. We only one one H5FD_t* per file so one doesn't

@@ -17,7 +17,7 @@
 #include <syslog.h>
 #include <sys/cdefs.h>
 
-#include "bsdqueue.h"
+#include "H5queue.h"
 
 #ifndef _unused
 #define _unused __attribute__((unused))

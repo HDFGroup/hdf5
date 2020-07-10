@@ -351,6 +351,8 @@ H5FD_vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id,
                                        maxaddr)) == NULL)
         HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "can't set driver info");
 
+    file->hdf5_file_lf->exc_owner = &file->pub;
+
     /* set pb_configured to FALSE.  This field should not exist, but 
      * until we modify the file open procedure to create the page buffer
      * before there is any file I/O when opening a file VFD SWMR reader, 

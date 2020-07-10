@@ -12,7 +12,7 @@
 #ifndef _H5FDvfd_swmr_private_H
 #define _H5FDvfd_swmr_private_H
 
-#include "bsdqueue.h"   /* for TAILQ_* */
+#include "H5queue.h"   /* for TAILQ_* */
 #include "hlog.h"   /* for TAILQ_* */
 
 /* Forward declaration */
