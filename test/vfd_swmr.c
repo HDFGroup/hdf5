@@ -75,9 +75,9 @@ static hid_t
 init_vfd_swmr_config_fapl(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint32_t max_lag, 
     hbool_t is_writer, uint32_t md_pages_reserved, const char *md_file_path, size_t pbuf_size)
 {
-    hid_t fapl = H5I_INVALID_HID;
+    hid_t fapl;
 
-    HDmemset(config, 0, sizeof(H5F_vfd_swmr_config_t));
+    HDmemset(config, 0, sizeof(*config));
 
     config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
     config->tick_len = tick_len; 
