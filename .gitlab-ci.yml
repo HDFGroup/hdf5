@@ -18,7 +18,6 @@ build-nobatch-standard:
     - module avail mpi
     - module avail cmake
     - module load cmake
-    - module load mpi
     - echo "-- modules used for this GitLab run are"
     - module list
     - echo "------------------------------------------------"
