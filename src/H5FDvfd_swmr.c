@@ -376,12 +376,12 @@ finish:
 done:
     /* Free the buffer */
     if(vfd_swmr_config)
-        vfd_swmr_config = (H5F_vfd_swmr_config_t *)H5MM_xfree(vfd_swmr_config);
+        vfd_swmr_config = H5MM_xfree(vfd_swmr_config);
 
     /* Handle closing if error */
     if(NULL == ret_value && file) {
 
-        if(H5FD_vfd_swmr_close((H5FD_t *)file) < 0)
+        if(H5FD_vfd_swmr_close(&file->pub) < 0)
 
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "error from closing")
 
