@@ -19,7 +19,7 @@
 *
 *************************************************************/
 
-#include "bsdqueue.h"
+#include "H5queue.h"
 #include "h5test.h"
 #include "vfd_swmr_common.h"
 
