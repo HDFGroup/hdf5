@@ -58,6 +58,7 @@ typedef struct H5FD_vfd_swmr_t {
                                                 /* when the page buffer is    */
                                                 /* and to FALSE otherwise.    */
                                                 /* Used for sanity checking.  */
+    bool writer;                            /* True iff configured to write. */
 } H5FD_vfd_swmr_t;
 
 #define MAXADDR (((haddr_t)1<<(8*sizeof(HDoff_t)-1))-1)
@@ -293,9 +294,6 @@ H5FD_vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id,
                     "can't get VFD SWMR config info");
     }
 
-    /* Ensure that this is the reader */
-    HDassert(!vfd_swmr_config->writer);
-
     /* Create the new driver struct */
     if(NULL == (file = H5FL_CALLOC(H5FD_vfd_swmr_t))) {
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
@@ -313,6 +311,12 @@ H5FD_vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id,
     HDstrncpy(file->md_file_path, vfd_swmr_config->md_file_path, 
               sizeof(file->md_file_path));
     file->md_file_path[sizeof(file->md_file_path) - 1] = '\0';
+
+    file->writer = vfd_swmr_config->writer;
+
+    /* Ensure that this is the reader */
+    if (vfd_swmr_config->writer)
+        goto finish;
 
     file->api_elapsed_nslots = vfd_swmr_config->max_lag + 1;
 
@@ -345,6 +349,8 @@ H5FD_vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id,
     if(H5FD__vfd_swmr_load_hdr_and_idx((H5FD_t *)file, TRUE) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL,
                     "unable to load/decode the md file header/index");
+
+finish:
 
     /* Hard-wired to open the underlying HDF5 file with SEC2 */
     if((file->hdf5_file_lf = H5FD_open(name, flags, H5P_FILE_ACCESS_DEFAULT, 
@@ -419,6 +425,9 @@ H5FD_vfd_swmr_close(H5FD_t *_file)
                         "unable to close the HDF5 file")
     }
 
+    if (!file->writer)
+        goto finish;
+
     vfd_swmr_reader_did_increase_tick_to(0);
 
     if (file->api_elapsed_ticks != NULL) {
@@ -441,6 +450,8 @@ H5FD_vfd_swmr_close(H5FD_t *_file)
     if(file->md_index.num_entries && file->md_index.entries)
         file->md_index.entries = H5FL_SEQ_FREE(H5FD_vfd_swmr_idx_entry_t, 
                                                file->md_index.entries);
+
+finish:
 
     /* Release the driver info */
     file = H5FL_FREE(H5FD_vfd_swmr_t, file);
@@ -702,6 +713,9 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type,
     herr_t ret_value = SUCCEED;
     char *p = buf;
 
+    if (file->writer)
+        return H5FD_read(file->hdf5_file_lf, type, addr, size, buf);
+
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(file && file->pub.cls);
@@ -823,23 +837,11 @@ H5FD_vfd_swmr_write(H5FD_t *_file, H5FD_mem_t type,
     hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, size_t size, const void *buf)
 {
     H5FD_vfd_swmr_t     *file       = (H5FD_vfd_swmr_t *)_file;
-    herr_t              ret_value   = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
-
-    HDassert(file && file->pub.cls);
-    HDassert(buf);
-
-    /* This function should always fail.  For now assert FALSE */
-    HDassert(FALSE);
+    HDassert(file->writer);
     
-    /* SHOULDN'T come here ?? */
-    if(H5FD_write(file->hdf5_file_lf, type, addr, size, buf) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file write request failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_vfd_swmr_write() */
+    return H5FD_write(file->hdf5_file_lf, type, addr, size, buf);
+}
 
 
 /*-------------------------------------------------------------------------
@@ -857,9 +859,6 @@ H5FD_vfd_swmr_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id,
    hbool_t closing)
 {
     H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file; /* VFD SWMR file struct */
-    herr_t ret_value = SUCCEED;                       /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
 
     /* The VFD SWMR vfd should only be used by the VFD SWMR reader, 
      * and thus this file should only be opened R/O.
@@ -868,16 +867,10 @@ H5FD_vfd_swmr_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id,
      *
      * For now, just assert FALSE.
      */
-    HDassert(FALSE);
+    HDassert(file->writer);
 
-    HDassert(file);
-
-    if(H5FD_truncate(file->hdf5_file_lf, closing) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_BADVALUE, FAIL, "unable to truncate the HDF5 file")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_vfd_swmr_truncate() */
+    return H5FD_truncate(file->hdf5_file_lf, closing);
+}
 
 
 /*-------------------------------------------------------------------------
