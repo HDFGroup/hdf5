@@ -2404,9 +2404,6 @@ test_file_end_tick_concur(void)
         hid_t fid_reader3 = H5I_INVALID_HID;    /* File ID for reader */
         hid_t fapl_reader = H5I_INVALID_HID;    /* File access property list for reader */
         H5F_vfd_swmr_config_t *config_reader = NULL;    /* VFD SWMR configuration */
-        H5F_t *file_reader;         /* File pointer */
-        eot_queue_entry_t *curr;    /* Pointer to an entry on the EOT queue */
-        unsigned count = 0;         /* Counter */
         H5F_t *f1, *f2, *f3;        /* File pointer */
         uint64_t s1 = 0;            /* Saved tick_num */
         uint64_t s2 = 0;            /* Saved tick_num */
@@ -2864,7 +2861,6 @@ test_same_file_opens(void)
     
     if(H5Pclose(fapl2) < 0)
         FAIL_STACK_ERROR;
-
 
     /* Open the same file again as regular writer */
     /* Should fail: 1st open--VFD SWMR writer, 2nd open--regular writer */
