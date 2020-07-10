@@ -1604,7 +1604,10 @@ case "X-$withval" in
 
     if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
       AC_CHECK_LIB([sz], [SZ_BufftoBuffCompress],,
-                   [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SZLIB])
+                   [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SZLIB])
+      if test -z "$HAVE_SZLIB"; then
+        AC_MSG_RESULT([Using SZ_BufftoBuffCompress from libsz in $szlib_lib failed.  Szip not enabled.])
+      fi
     fi
 
     if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
