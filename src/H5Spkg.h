@@ -141,17 +141,32 @@ struct H5S_hyper_span_info_t {
     struct H5S_hyper_span_t *head;  /* Pointer to list of spans in next dimension down */
 };
 
+/* Enum for diminfo_valid field in H5S_hyper_sel_t */
+typedef enum {
+    H5S_DIMINFO_VALID_IMPOSSIBLE, /* 0: diminfo is not valid and can never be valid with the current selection */
+    H5S_DIMINFO_VALID_NO,       /* 1: diminfo is not valid but may or may not be possible to constuct */
+    H5S_DIMINFO_VALID_YES       /* 2: diminfo is valid */
+} H5S_diminfo_valid_t;
+
+/* Information about 'diminfo' form of hyperslab selection */
+typedef struct {
+    /* 'opt' points to a [potentially] optimized version of the user's
+     * regular hyperslab information.  'app' points to the actual parameters
+     * that the application used for setting the hyperslab selection.
+     *
+     * The 'app' values are only used for regurgitating the original values
+     * used to set the hyperslab to the application when it queries the
+     * hyperslab selection information.
+     */
+    H5S_hyper_dim_t app[H5S_MAX_RANK];  /* Application-set per-dim selection info */
+    H5S_hyper_dim_t opt[H5S_MAX_RANK];  /* Optimized per-dim selection info */
+} H5S_hyper_diminfo_t;
+
 /* Information about hyperslab selection */
 typedef struct {
-    hbool_t diminfo_valid;  /* Whether the dataset has valid diminfo */
-    H5S_hyper_dim_t opt_diminfo[H5S_MAX_RANK];  /* per-dim selection info */
-    H5S_hyper_dim_t app_diminfo[H5S_MAX_RANK];  /* per-dim selection info */
-	/* 'opt_diminfo' points to a [potentially] optimized version of the user's
-         * hyperslab information.  'app_diminfo' points to the actual parameters
-         * that the application used for setting the hyperslab selection.  These
-         * are only used for re-gurgitating the original values used to set the
-         * hyperslab to the application when it queries the hyperslab selection
-         * information. */
+    H5S_diminfo_valid_t diminfo_valid;  /* Whether the dataset has valid diminfo */
+
+    H5S_hyper_diminfo_t diminfo;        /* Dimension info form of hyperslab selection */
     int unlim_dim;                      /* Dimension where selection is unlimited, or -1 if none */
     hsize_t num_elem_non_unlim;         /* # of elements in a "slice" excluding the unlimited dimension */
     H5S_hyper_span_info_t *span_lst;    /* List of hyperslab span information of all dimensions */
@@ -303,7 +318,8 @@ H5_DLL herr_t H5S__extent_release(H5S_extent_t *extent);
 H5_DLL herr_t H5S__extent_copy_real(H5S_extent_t *dst, const H5S_extent_t *src,
     hbool_t copy_max);
 
-/* Operations on selections */
+/* Operations on hyperslab selections */
+H5_DLL herr_t H5S__modify_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2);
 H5_DLL herr_t H5S__hyper_project_intersection(const H5S_t *src_space,
     const H5S_t *dst_space, const H5S_t *src_intersect_space,
     H5S_t *proj_space);

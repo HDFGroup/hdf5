@@ -221,16 +221,16 @@ H5_DLL herr_t H5FS__destroy_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t 
 /* Free space manager header routines */
 H5_DLL H5FS_t *H5FS__new(const H5F_t *f, uint16_t nclasses,
     const H5FS_section_class_t *classes[], void *cls_init_udata);
-H5_DLL herr_t H5FS_incr(H5FS_t *fspace);
-H5_DLL herr_t H5FS_decr(H5FS_t *fspace);
-H5_DLL herr_t H5FS_dirty(H5FS_t *fspace);
+H5_DLL herr_t H5FS__incr(H5FS_t *fspace);
+H5_DLL herr_t H5FS__decr(H5FS_t *fspace);
+H5_DLL herr_t H5FS__dirty(H5FS_t *fspace);
 
 /* Free space section routines */
-H5_DLL H5FS_sinfo_t *H5FS_sinfo_new(H5F_t *f, H5FS_t *fspace);
+H5_DLL H5FS_sinfo_t *H5FS__sinfo_new(H5F_t *f, H5FS_t *fspace);
 
 /* Routines for destroying structures */
 H5_DLL herr_t H5FS__hdr_dest(H5FS_t *hdr);
-H5_DLL herr_t H5FS_sinfo_dest(H5FS_sinfo_t *sinfo);
+H5_DLL herr_t H5FS__sinfo_dest(H5FS_sinfo_t *sinfo);
 
 /* Sanity check routines */
 #ifdef H5FS_DEBUG_ASSERT

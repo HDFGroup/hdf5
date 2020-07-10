@@ -47,7 +47,7 @@
 /* Local Typedefs */
 /******************/
 
-/* Struct only used by functions H5F_get_objects and H5F_get_objects_cb */
+/* Struct only used by functions H5F__get_objects and H5F__get_objects_cb */
 typedef struct H5F_olist_t {
     H5I_type_t obj_type;        /* Type of object to look for */
     hid_t      *obj_id_list;    /* Pointer to the list of open IDs to return */
@@ -73,10 +73,11 @@ typedef struct H5F_olist_t {
 /* Local Prototypes */
 /********************/
 
-static int H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
+static herr_t H5F__get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list, hbool_t app_ref, size_t *obj_id_count_ptr);
+static int H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5F__build_name(const char *prefix, const char *file_name, char **full_name/*out*/);
 static char *H5F__getenv_prefix_name(char **env_prefix/*in,out*/);
-static herr_t H5F_build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *name, char ** /*out*/ actual_name);
+static herr_t H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *name, char ** /*out*/ actual_name);
 static herr_t H5F__flush_phase1(H5F_t *f);
 static herr_t H5F__flush_phase2(H5F_t *f, hbool_t closing);
 
@@ -237,8 +238,8 @@ H5F_get_obj_count(const H5F_t *f, unsigned types, hbool_t app_ref, size_t *obj_i
     HDassert(obj_id_count_ptr);
 
     /* Perform the query */
-    if((ret_value = H5F_get_objects(f, types, 0, NULL, app_ref, obj_id_count_ptr)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "H5F_get_objects failed")
+    if((ret_value = H5F__get_objects(f, types, 0, NULL, app_ref, obj_id_count_ptr)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "H5F__get_objects failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -264,8 +265,8 @@ H5F_get_obj_ids(const H5F_t *f, unsigned types, size_t max_objs, hid_t *oid_list
     HDassert(obj_id_count_ptr);
 
     /* Perform the query */
-    if((ret_value = H5F_get_objects(f, types, max_objs, oid_list, app_ref, obj_id_count_ptr)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "H5F_get_objects failed")
+    if((ret_value = H5F__get_objects(f, types, max_objs, oid_list, app_ref, obj_id_count_ptr)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "H5F__get_objects failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -282,14 +283,14 @@ done:
  * Return:      SUCCEED/FAIL
  *---------------------------------------------------------------------------
  */
-herr_t
-H5F_get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id_list, hbool_t app_ref, size_t *obj_id_count_ptr)
+static herr_t
+H5F__get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id_list, hbool_t app_ref, size_t *obj_id_count_ptr)
 {
     size_t obj_id_count = 0;    /* Number of open IDs */
     H5F_olist_t olist;          /* Structure to hold search results */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(obj_id_count_ptr);
@@ -314,7 +315,7 @@ H5F_get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id_
      * IDs on the object list.  */
     if(types & H5F_OBJ_FILE) {
         olist.obj_type = H5I_FILE;
-        if(H5I_iterate(H5I_FILE, H5F_get_objects_cb, &olist, app_ref) < 0)
+        if(H5I_iterate(H5I_FILE, H5F__get_objects_cb, &olist, app_ref) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(1)")
     } /* end if */
 
@@ -325,7 +326,7 @@ H5F_get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id_
     if(!olist.max_nobjs || (olist.max_nobjs && olist.list_index<olist.max_nobjs)) {
         if(types & H5F_OBJ_DATASET) {
             olist.obj_type = H5I_DATASET;
-            if(H5I_iterate(H5I_DATASET, H5F_get_objects_cb, &olist, app_ref) < 0)
+            if(H5I_iterate(H5I_DATASET, H5F__get_objects_cb, &olist, app_ref) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(2)")
         } /* end if */
     }
@@ -337,7 +338,7 @@ H5F_get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id_
     if(!olist.max_nobjs || (olist.max_nobjs && olist.list_index<olist.max_nobjs)) {
         if(types & H5F_OBJ_GROUP) {
             olist.obj_type = H5I_GROUP;
-            if(H5I_iterate(H5I_GROUP, H5F_get_objects_cb, &olist, app_ref) < 0)
+            if(H5I_iterate(H5I_GROUP, H5F__get_objects_cb, &olist, app_ref) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(3)")
         }
     }
@@ -349,7 +350,7 @@ H5F_get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id_
     if(!olist.max_nobjs || (olist.max_nobjs && olist.list_index<olist.max_nobjs)) {
         if(types & H5F_OBJ_DATATYPE) {
             olist.obj_type = H5I_DATATYPE;
-            if(H5I_iterate(H5I_DATATYPE, H5F_get_objects_cb, &olist, app_ref) < 0)
+            if(H5I_iterate(H5I_DATATYPE, H5F__get_objects_cb, &olist, app_ref) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(4)")
         } /* end if */
     }
@@ -361,7 +362,7 @@ H5F_get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id_
     if(!olist.max_nobjs || (olist.max_nobjs && olist.list_index<olist.max_nobjs)) {
         if(types & H5F_OBJ_ATTR) {
             olist.obj_type = H5I_ATTR;
-            if(H5I_iterate(H5I_ATTR, H5F_get_objects_cb, &olist, app_ref) < 0)
+            if(H5I_iterate(H5I_ATTR, H5F__get_objects_cb, &olist, app_ref) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(5)")
         } /* end if */
     }
@@ -371,11 +372,11 @@ H5F_get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id_
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_get_objects() */
+} /* end H5F__get_objects() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_get_objects_cb
+ * Function:    H5F__get_objects_cb
  *
  * Purpose:     H5F__get_objects' callback function.  It verifies if an
  *              object is in the file, and either count it or put its ID
@@ -386,13 +387,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
+H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 {
     H5F_olist_t *olist = (H5F_olist_t *)key;    /* Alias for search info */
     hbool_t     add_obj = FALSE;
     int         ret_value = H5_ITER_CONT;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(obj_ptr);
     HDassert(olist);
@@ -481,31 +482,7 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_get_objects_cb() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5F_set_min_dset_ohdr
- *
- * Purpose:     Set the crt_dset_ohdr_flag field with a new value.
- *
- * Return:      SUCCEED/FAIL
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_set_min_dset_ohdr(H5F_t *f, hbool_t minimize)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
-
-    f->shared->crt_dset_min_ohdr_flag = minimize;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5F_set_min_dset_ohdr() */
+} /* end H5F__get_objects_cb() */
 
 
 /*--------------------------------------------------------------------------
@@ -800,16 +777,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5F__is_hdf5
+ * Function:    H5F__is_hdf5
  *
- * Purpose:  Check the file signature to detect an HDF5 file.
+ * Purpose:     Check the file signature to detect an HDF5 file.
  *
- * Bugs:     This function is not robust: it only uses the default file
- *           driver when attempting to open the file when in fact it
- *           should use all known file drivers.
+ * Bugs:        This function is not robust: it only uses the default file
+ *              driver when attempting to open the file when in fact it
+ *              should use all known file drivers.
  *
- * Return:   Success:    TRUE/FALSE
- * *         Failure:    Negative
+ * Return:      TRUE/FALSE/FAIL
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -821,7 +797,7 @@ H5F__is_hdf5(const char *name)
 
     FUNC_ENTER_PACKAGE
 
-    /* Open the file at the virtual file layer */
+    /* Open the file */
     if(NULL == (file = H5FD_open(name, H5F_ACC_RDONLY, H5P_FILE_ACCESS_DEFAULT, HADDR_UNDEF)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to open file")
 
@@ -1710,7 +1686,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to build extpath")
 
     /* Formulate the actual file name, after following symlinks, etc. */
-    if(H5F_build_actual_name(file, a_plist, name, &file->actual_name) < 0)
+    if(H5F__build_actual_name(file, a_plist, name, &file->actual_name) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to build actual name")
 
     if(set_flag) {
@@ -2274,7 +2250,7 @@ H5F_decr_nopen_objs(H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_build_actual_name
+ * Function:    H5F__build_actual_name
  *
  * Purpose:     Retrieve the name of a file, after following symlinks, etc.
  *
@@ -2284,7 +2260,7 @@ H5F_decr_nopen_objs(H5F_t *f)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *name,
+H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *name,
     char **actual_name/*out*/)
 {
     hid_t       new_fapl_id = H5I_INVALID_HID;       /* ID for duplicated FAPL */
@@ -2294,7 +2270,7 @@ H5F_build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *na
 #endif /* H5_HAVE_SYMLINK */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(f);
@@ -2391,7 +2367,7 @@ done:
 #endif /* H5_HAVE_SYMLINK */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F_build_actual_name() */
+} /* H5F__build_actual_name() */
 
 
 /*-------------------------------------------------------------------------
@@ -3512,4 +3488,28 @@ H5F__format_convert(H5F_t *f)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__format_convert() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_set_min_dset_ohdr
+ *
+ * Purpose:     Set the crt_dset_ohdr_flag field with a new value.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_set_min_dset_ohdr(H5F_t *f, hbool_t minimize)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+
+    f->shared->crt_dset_min_ohdr_flag = minimize;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5F_set_min_dset_ohdr() */
 

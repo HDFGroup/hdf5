@@ -1734,8 +1734,8 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
             /* (Both must be, at this point, if one is) */
             HGOTO_DONE(TRUE)
         } /* end if */
-        else if((H5S_GET_SELECT_TYPE(space_a) == H5S_SEL_HYPERSLABS && space_a->select.sel_info.hslab->diminfo_valid)
-                && (H5S_GET_SELECT_TYPE(space_b) == H5S_SEL_HYPERSLABS && space_b->select.sel_info.hslab->diminfo_valid)) {
+        else if((H5S_GET_SELECT_TYPE(space_a) == H5S_SEL_HYPERSLABS && (H5S_DIMINFO_VALID_YES == space_a->select.sel_info.hslab->diminfo_valid))
+                && (H5S_GET_SELECT_TYPE(space_b) == H5S_SEL_HYPERSLABS && (H5S_DIMINFO_VALID_YES == space_b->select.sel_info.hslab->diminfo_valid))) {
             int space_a_dim;                /* Current dimension in dataspace A */
             int space_b_dim;                /* Current dimension in dataspace B */
 
@@ -1746,16 +1746,16 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
              * block == 1 in all dimensions that appear only in space_a.
              */
             while(space_b_dim >= 0) {
-                if(space_a->select.sel_info.hslab->opt_diminfo[space_a_dim].stride !=
-                        space_b->select.sel_info.hslab->opt_diminfo[space_b_dim].stride)
+                if(space_a->select.sel_info.hslab->diminfo.opt[space_a_dim].stride !=
+                        space_b->select.sel_info.hslab->diminfo.opt[space_b_dim].stride)
                     HGOTO_DONE(FALSE)
 
-                if(space_a->select.sel_info.hslab->opt_diminfo[space_a_dim].count !=
-                        space_b->select.sel_info.hslab->opt_diminfo[space_b_dim].count)
+                if(space_a->select.sel_info.hslab->diminfo.opt[space_a_dim].count !=
+                        space_b->select.sel_info.hslab->diminfo.opt[space_b_dim].count)
                     HGOTO_DONE(FALSE)
 
-                if(space_a->select.sel_info.hslab->opt_diminfo[space_a_dim].block !=
-                        space_b->select.sel_info.hslab->opt_diminfo[space_b_dim].block)
+                if(space_a->select.sel_info.hslab->diminfo.opt[space_a_dim].block !=
+                        space_b->select.sel_info.hslab->diminfo.opt[space_b_dim].block)
                     HGOTO_DONE(FALSE)
 
                 space_a_dim--;
@@ -1763,7 +1763,7 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
             } /* end while */
 
             while(space_a_dim >= 0) {
-                if(space_a->select.sel_info.hslab->opt_diminfo[space_a_dim].block != 1)
+                if(space_a->select.sel_info.hslab->diminfo.opt[space_a_dim].block != 1)
                     HGOTO_DONE(FALSE)
 
                 space_a_dim--;

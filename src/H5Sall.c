@@ -426,9 +426,10 @@ H5S__all_release(H5S_t *space)
  PURPOSE
     Copy a selection from one dataspace to another
  USAGE
-    herr_t H5S__all_copy(dst, src)
+    herr_t H5S__all_copy(dst, src, share_selection)
         H5S_t *dst;  OUT: Pointer to the destination dataspace
         H5S_t *src;  IN: Pointer to the source dataspace
+        hbool_t;     IN: Whether to share the selection between the dataspaces
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
