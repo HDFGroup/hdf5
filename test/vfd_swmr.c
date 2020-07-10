@@ -88,18 +88,19 @@ init_vfd_swmr_config_fapl(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint
 
     /* Create a copy of the file access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        goto done;
+        return H5I_INVALID_HID;
 
-    if(H5Pset_vfd_swmr_config(fapl, config) < 0)
-        goto done;
-
-    /* Enable page buffering */
-    if(pbuf_size != 0) {
-        if(H5Pset_page_buffer_size(fapl, pbuf_size, 0, 0) < 0)
-            goto done;
+    if(H5Pset_vfd_swmr_config(fapl, config) < 0) {
+        (void)H5Pclose(fapl);
+        return H5I_INVALID_HID;
     }
 
-done:
+    /* Enable page buffering */
+    if(pbuf_size != 0 && H5Pset_page_buffer_size(fapl, pbuf_size, 0, 0) < 0) {
+        (void)H5Pclose(fapl);
+        return H5I_INVALID_HID;
+    }
+
     return fapl;
 } /* init_vfd_swmr_config_fapl() */
 
