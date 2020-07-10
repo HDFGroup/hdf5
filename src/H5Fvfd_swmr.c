@@ -85,6 +85,7 @@ unsigned int vfd_swmr_api_entries_g = 0;/* Times the library was entered
                                          */
 HLOG_OUTLET_SHORT_DEFN(swmr, all);
 HLOG_OUTLET_SHORT_DEFN(eot, swmr);
+HLOG_OUTLET_SHORT_DEFN(eotq, eot);
 HLOG_OUTLET_SHORT_DEFN(shadow_defrees, swmr);
 HLOG_OUTLET_MEDIUM_DEFN(noisy_shadow_defrees, shadow_defrees,
     HLOG_OUTLET_S_OFF);
@@ -1428,6 +1429,11 @@ H5F_vfd_swmr_remove_entry_eot(H5F_t *f)
     }
 
     if (curr != NULL) {
+        hlog_fast(eotq, "%s: entry %p file %p "
+            "tick %" PRIu64 " ending %jd.%09ld", __func__,
+            (void *)curr, (void *)curr->vfd_swmr_file, curr->tick_num,
+            (intmax_t)curr->end_of_tick.tv_sec,
+            curr->end_of_tick.tv_nsec);
         TAILQ_REMOVE(&eot_queue_g, curr, link);
         curr = H5FL_FREE(eot_queue_entry_t, curr);
     }
@@ -1473,6 +1479,12 @@ H5F_vfd_swmr_insert_entry_eot(H5F_t *f)
         if (timespeccmp(&prec_ptr->end_of_tick, &entry_ptr->end_of_tick, <=))
             break;
     }
+
+    hlog_fast(eotq, "%s: entry %p after %p file %p "
+        "tick %" PRIu64 " ending %jd.%09ld", __func__,
+        (void *)entry_ptr, (void *)prec_ptr, (void *)entry_ptr->vfd_swmr_file,
+        entry_ptr->tick_num, (intmax_t)entry_ptr->end_of_tick.tv_sec,
+        entry_ptr->end_of_tick.tv_nsec);
 
     /* Insert the entry onto the EOT queue */
     if (prec_ptr != NULL)
