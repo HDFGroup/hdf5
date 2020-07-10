@@ -432,6 +432,16 @@ state_init(state_t *s, int argc, char **argv)
         errx(EXIT_FAILURE,
              "unknown personality, expected vfd_swmr_bigset_{reader,writer}");
     }
+
+    if ((s->dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
+        errx(EXIT_FAILURE, "%s.%d: H5Pcreate failed", __func__, __LINE__);
+
+    if (H5Pset_chunk_cache(s->dapl, 0, 0,
+                        H5D_CHUNK_CACHE_W0_DEFAULT) < 0)
+        errx(EXIT_FAILURE, "H5Pset_chunk_cache failed");
+
+    if (s->use_vds && H5Pset_virtual_view(s->dapl, H5D_VDS_FIRST_MISSING) < 0)
+        errx(EXIT_FAILURE, "H5Pset_virtual_view failed");
 }
 
 static void
@@ -991,13 +1001,6 @@ main(int argc, char **argv)
     ret = H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, 1);
     if (ret < 0)
         errx(EXIT_FAILURE, "H5Pset_file_space_strategy");
-
-    if ((s.dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
-        errx(EXIT_FAILURE, "%s.%d: H5Pcreate failed", __func__, __LINE__);
-
-    if (H5Pset_chunk_cache(s.dapl, 0, 0,
-                        H5D_CHUNK_CACHE_W0_DEFAULT) < 0)
-        errx(EXIT_FAILURE, "H5Pset_chunk_cache failed");
 
     if (s.writer)
         s.file = H5Fcreate(s.filename, H5F_ACC_TRUNC, fcpl, fapl);
