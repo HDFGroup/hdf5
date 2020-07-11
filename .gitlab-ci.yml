@@ -27,7 +27,6 @@ build-nobatch-standard:
     - ls
     
     - echo "this is a test"
-    - jsrun env | grep SLURM_JOB_NAME
     - whoami
     - echo "HOSTNAME=$HOSTNAME"
 
