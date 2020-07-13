@@ -26,6 +26,7 @@
 #include "H5Apkg.h"             /* Attributes                               */
 #include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Eprivate.h"         /* Error handling                           */
+#include "H5ESprivate.h"        /* Event Sets                               */
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5MMprivate.h"        /* Memory management                        */
 #include "H5Opkg.h"             /* Object headers                           */
@@ -52,6 +53,13 @@
 /* Local Prototypes */
 /********************/
 
+/* Helper routines for sync/async API calls */
+static hid_t H5A__create_api_common(hid_t loc_id, const char *attr_name, hid_t type_id,
+    hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t es_id);
+static herr_t H5A__write_api_common(hid_t attr_id, hid_t dtype_id,
+    const void *buf, hid_t es_id);
+static herr_t H5A__close_api_common(hid_t attr_id, hid_t es_id);
+
 
 /*********************/
 /* Package Variables */
@@ -67,6 +75,103 @@
 /* Local Variables */
 /*******************/
 
+
+
+/*--------------------------------------------------------------------------
+ * Function:    H5A__create_api_common
+ *
+ * Purpose:     This is the common function for creating HDF5 datasets.
+ *
+ * Return:      Success:    A attribute ID
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+H5A__create_api_common(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
+    hid_t acpl_id, hid_t aapl_id, hid_t es_id)
+{
+    void *attr = NULL;                  /* Attribute created */
+    H5ES_t *es = NULL;                  /* Event set for the operation */
+    void *token = NULL, **token_ptr;    /* Request token for async operation */
+    H5VL_object_t *token_obj = NULL;    /* Async token VOL object */
+    H5VL_object_t *vol_obj = NULL;      /* object of loc_id */
+    H5VL_loc_params_t loc_params;
+    hid_t ret_value = H5I_INVALID_HID;  /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check arguments */
+    if(H5I_ATTR == H5I_get_type(loc_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "location is not valid for an attribute")
+    if(!attr_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "attr_name parameter cannot be NULL")
+    if(!*attr_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "attr_name parameter cannot be an empty string")
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == acpl_id)
+        acpl_id = H5P_ATTRIBUTE_CREATE_DEFAULT;
+
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&aapl_id, H5P_CLS_AACC, loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
+
+    /* Get the location object */
+    if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
+
+    /* Set location parameters */
+    loc_params.type     = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* Get the event set and set up request token pointer for operation */
+    if(H5ES_NONE != es_id) {
+        /* Get event set */
+        if(NULL == (es = (H5ES_t *)H5I_object_verify(es_id, H5I_EVENTSET)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an event set")
+
+        /* Point at token for operation to set up */
+        token_ptr = &token;
+    } /* end if */
+    else
+        /* Synchronous operation */
+        token_ptr = H5_REQUEST_NULL;
+
+    /* Create the attribute */
+    if(NULL == (attr = H5VL_attr_create(vol_obj, &loc_params, attr_name, type_id, space_id, acpl_id, aapl_id, H5P_DATASET_XFER_DEFAULT, token_ptr)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to create attribute")
+
+    /* If there's an event set and a token was created, add the token to it */
+    if(H5ES_NONE != es_id && NULL != token) {
+        /* Create vol object for token */
+        if(NULL == (token_obj = H5VL_create_object(token, vol_obj->connector))) {
+            if(H5VL_request_free(token) < 0)
+                HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't free request")
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't create vol object for request token")
+        } /* end if */
+
+        /* Add token to event set */
+        if(H5ES_insert(es, token_obj) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+        token_obj = NULL;
+    } /* end if */
+
+    /* Register the new attribute and get an ID for it */
+    if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize attribute handle")
+
+done:
+    /* Cleanup on failure */
+    if(H5I_INVALID_HID == ret_value) {
+        if(attr && H5VL_attr_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close attribute")
+        if(token_obj && H5VL_free_object(token_obj) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't free request token")
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5A__create_api_common() */
 
 
 /*--------------------------------------------------------------------------
@@ -106,54 +211,47 @@ hid_t
 H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
     hid_t acpl_id, hid_t aapl_id)
 {
-    void           *attr = NULL;                        /* Attribute created            */
-    H5VL_object_t  *vol_obj = NULL;                     /* Object of loc_id             */
-    H5VL_loc_params_t   loc_params;
-    hid_t           ret_value = H5I_INVALID_HID;        /* Return value                 */
+    hid_t ret_value;            /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE6("i", "i*siiii", loc_id, attr_name, type_id, space_id, acpl_id, aapl_id);
 
-    /* Check arguments */
-    if(H5I_ATTR == H5I_get_type(loc_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "location is not valid for an attribute")
-    if(!attr_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "attr_name parameter cannot be NULL")
-    if(!*attr_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "attr_name parameter cannot be an empty string")
-
-    /* Get correct property list */
-    if(H5P_DEFAULT == acpl_id)
-        acpl_id = H5P_ATTRIBUTE_CREATE_DEFAULT;
-
-    /* Verify access property list and set up collective metadata if appropriate */
-    if(H5CX_set_apl(&aapl_id, H5P_CLS_AACC, loc_id, TRUE) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
-
-    /* Get the location object */
-    if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
-
-    /* Set location parameters */
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(loc_id);
-
-    /* Create the attribute */
-    if(NULL == (attr = H5VL_attr_create(vol_obj, &loc_params, attr_name, type_id, space_id, acpl_id, aapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to create attribute")
-
-    /* Register the new attribute and get an ID for it */
-    if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize attribute handle")
+    /* Create the attribute synchronously */
+    if((ret_value = H5A__create_api_common(loc_id, attr_name, type_id, space_id, acpl_id, aapl_id, H5ES_NONE)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, H5I_INVALID_HID, "unable to synchronously create attribute")
 
 done:
-    /* Cleanup on failure */
-    if(H5I_INVALID_HID == ret_value)
-        if(attr && H5VL_attr_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close attribute")
-
     FUNC_LEAVE_API(ret_value)
 } /* H5Acreate2() */
+
+
+/*--------------------------------------------------------------------------
+ * Function:    H5Acreate_sync
+ *
+ * Purpose:     Asynchronous version of H5Acreate
+ *
+ * Return:      Success:    A attribute ID
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Acreate_async(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
+    hid_t acpl_id, hid_t aapl_id, hid_t es_id)
+{
+    hid_t ret_value;            /* Return value */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE7("i", "i*siiiii", loc_id, attr_name, type_id, space_id, acpl_id,
+             aapl_id, es_id);
+
+    /* Create the attribute asynchronously */
+    if((ret_value = H5A__create_api_common(loc_id, attr_name, type_id, space_id, acpl_id, aapl_id, es_id)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, H5I_INVALID_HID, "unable to asynchronously create attribute")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Acreate_async() */
 
 
 /*--------------------------------------------------------------------------
@@ -475,6 +573,77 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5A__write_api_common
+ PURPOSE
+    Common helper routine for sync/async dataset write operations.
+ RETURNS
+    Non-negative on success/Negative on failure
+--------------------------------------------------------------------------*/
+static herr_t
+H5A__write_api_common(hid_t attr_id, hid_t type_id, const void *buf, hid_t es_id)
+{
+    H5ES_t *es = NULL;                  /* Event set for the operation */
+    void *token = NULL, **token_ptr;    /* Request token for async operation */
+    H5VL_object_t *token_obj = NULL;    /* Async token VOL object */
+    H5VL_object_t *vol_obj = NULL;      /* Attribute VOL object */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check arguments */
+    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+    if(H5I_DATATYPE != H5I_get_type(type_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    if(NULL == buf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf parameter can't be NULL")
+
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(attr_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set collective metadata read")
+
+    /* Get the event set and set up request token pointer for operation */
+    if(H5ES_NONE != es_id) {
+        /* Get event set */
+        if(NULL == (es = (H5ES_t *)H5I_object_verify(es_id, H5I_EVENTSET)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an event set")
+
+        /* Point at token for operation to set up */
+        token_ptr = &token;
+    } /* end if */
+    else
+        /* Synchronous operation */
+        token_ptr = H5_REQUEST_NULL;
+
+    /* Write the attribute data */
+    if((ret_value = H5VL_attr_write(vol_obj, type_id, buf, H5P_DATASET_XFER_DEFAULT, token_ptr)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "unable to write attribute")
+
+    /* If there's an event set and a token was created, add the token to it */
+    if(H5ES_NONE != es_id && NULL != token) {
+        /* Create vol object for token */
+        if(NULL == (token_obj = H5VL_create_object(token, vol_obj->connector))) {
+            if(H5VL_request_free(token) < 0)
+                HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't free request")
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't create vol object for request token")
+        } /* end if */
+
+        /* Add token to event set */
+        if(H5ES_insert(es, token_obj) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+    } /* end if */
+
+done:
+    if(ret_value < 0 && token_obj)
+        if(H5VL_free_object(token_obj) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't free request token")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5A__write_api_common() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5Awrite
  PURPOSE
     Write out data to an attribute
@@ -492,31 +661,43 @@ done:
 herr_t
 H5Awrite(hid_t attr_id, hid_t dtype_id, const void *buf)
 {
-    H5VL_object_t  *vol_obj;                   /* Attribute object for ID */
     herr_t          ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ii*x", attr_id, dtype_id, buf);
 
-    /* Check arguments */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
-    if(H5I_DATATYPE != H5I_get_type(dtype_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
-    if(NULL == buf)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf parameter can't be NULL")
-
-    /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(attr_id) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set collective metadata read")
-
-    /* Write the attribute data */
-    if((ret_value = H5VL_attr_write(vol_obj, dtype_id, buf, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "unable to write attribute")
+    /* Synchronously write the data */
+    if(H5A__write_api_common(attr_id, dtype_id, buf, H5ES_NONE) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "can't synchronously write data")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Awrite() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Awrite_async
+ PURPOSE
+    Asynchronous version of H5Awrite
+ RETURNS
+    Non-negative on success/Negative on failure
+--------------------------------------------------------------------------*/
+herr_t
+H5Awrite_async(hid_t attr_id, hid_t dtype_id, const void *buf, hid_t es_id)
+{
+    herr_t          ret_value;              /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "ii*xi", attr_id, dtype_id, buf, es_id);
+
+    /* Asynchronously write the data */
+    if(H5A__write_api_common(attr_id, dtype_id, buf, es_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "can't asynchronously write data")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Awrite_async() */
 
 
 /*--------------------------------------------------------------------------
@@ -1460,6 +1641,88 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5A__close_api_common
+ *
+ * Purpose:     This is the common function for closing HDF5 attributes.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5A__close_api_common(hid_t attr_id, hid_t es_id)
+{
+    H5ES_t *es = NULL;                  /* Event set for the operation */
+    void *token = NULL, **token_ptr;    /* Request token for async operation */
+    H5VL_object_t *token_obj = NULL;    /* Async token VOL object */
+    H5VL_t *connector = NULL;           /* VOL connector */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check arguments */
+    if(H5I_ATTR != H5I_get_type(attr_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a attribute ID")
+
+    /* Get the event set and set up request token pointer for operation */
+    if(H5ES_NONE != es_id) {
+        H5VL_object_t *vol_obj = NULL;
+
+        /* Get event set */
+        if(NULL == (es = (H5ES_t *)H5I_object_verify(es_id, H5I_EVENTSET)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an event set")
+
+        /* Get attribute object's connector and increate its rc, so it doesn't get
+         * closed if closing the dataset closes the file */
+        if(NULL == (vol_obj = H5VL_vol_object(attr_id)))
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get VOL object for attribute")
+        connector = vol_obj->connector;
+        H5VL_conn_inc_rc(connector);
+
+        /* Point at token for operation to set up */
+        token_ptr = &token;
+    } /* end if */
+    else
+        /* Synchronous operation */
+        token_ptr = H5_REQUEST_NULL;
+
+    /* Decrement references to that atom (and close it) */
+    if(H5I_dec_app_ref_async(attr_id, token_ptr) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "can't close attribute")
+
+    /* If there's an event set and a token was created, add the token to it */
+    if(H5ES_NONE != es_id && NULL != token) {
+        /* Create vol object for token */
+        if(NULL == (token_obj = H5VL_create_object(token, connector))) {
+            if(H5VL_request_free(token) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "can't free request")
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't create vol object for request token")
+        } /* end if */
+
+        /* Add token to event set */
+        if(H5ES_insert(es, token_obj) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+        if(H5VL_conn_dec_rc(connector) < 0) {
+            connector = NULL;
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
+        } /* end if */
+        connector = NULL;
+    } /* end if */
+
+done:
+    if(ret_value < 0) {
+        if(token_obj && H5VL_free_object(token_obj) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't free request token")
+        if(connector && H5VL_conn_dec_rc(connector) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5A__close_api_common() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5Aclose
  *
  * Purpose:     Closes access to an attribute and releases resources used by
@@ -1478,17 +1741,39 @@ H5Aclose(hid_t attr_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", attr_id);
 
-    /* Check arguments */
-    if(NULL == H5I_object_verify(attr_id, H5I_ATTR))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
-
-    /* Decrement references to that atom (and close it) */
-    if(H5I_dec_app_ref(attr_id) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "can't close attribute")
+    /* Synchronously close the attribute ID */
+    if(H5A__close_api_common(attr_id, H5ES_NONE) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, FAIL, "synchronous attribute close failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aclose() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Aclose_async
+ *
+ * Purpose:     Asynchronous version of H5Aclose
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Aclose_async(hid_t attr_id, hid_t es_id)
+{
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ii", attr_id, es_id);
+
+    /* Asynchronously close the attribute ID */
+    if(H5A__close_api_common(attr_id, es_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, FAIL, "asynchronous attribute close failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Aclose_async() */
 
 
 /*-------------------------------------------------------------------------

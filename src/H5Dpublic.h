@@ -131,10 +131,13 @@ extern "C" {
 
 H5_DLL hid_t H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id,
     hid_t space_id, hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id);
+H5_DLL hid_t H5Dcreate_async(hid_t loc_id, const char *name, hid_t type_id,
+    hid_t space_id, hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id, hid_t es_id);
 H5_DLL hid_t H5Dcreate_anon(hid_t file_id, hid_t type_id, hid_t space_id,
     hid_t plist_id, hid_t dapl_id);
 H5_DLL hid_t H5Dopen2(hid_t file_id, const char *name, hid_t dapl_id);
 H5_DLL herr_t H5Dclose(hid_t dset_id);
+H5_DLL herr_t H5Dclose_async(hid_t dset_id, hid_t es_id);
 H5_DLL hid_t H5Dget_space(hid_t dset_id);
 H5_DLL herr_t H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation);
 H5_DLL hid_t H5Dget_type(hid_t dset_id);

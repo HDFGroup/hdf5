@@ -638,6 +638,7 @@ H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id,
     H5ES_t *es = NULL;                  /* Event set for the operation              */
     void *token = NULL, **token_ptr;    /* Request token for async operation        */
     H5VL_object_t *vol_obj = NULL;      /* VOL object for file                      */
+    H5VL_object_t *token_obj = NULL;    /* Async token VOL object */
     hbool_t supported;                  /* Whether 'post open' operation is supported by VOL connector */
     hid_t ret_value = H5I_INVALID_HID;  /* Return value                             */
 
@@ -706,10 +707,19 @@ H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id,
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to create file")
 
     /* If there's an event set and a token was created, add the token to it */
-    if(H5ES_NONE != es_id && NULL != token)
+    if(H5ES_NONE != es_id && NULL != token) {
+        /* Create vol object for token */
+        if(NULL == (token_obj = H5VL_create_object(token, vol_obj->connector))) {
+            if(H5VL_request_free(token) < 0)
+                HDONE_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free request")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't create vol object for request token")
+        } /* end if */
+
         /* Add token to event set */
-        if(H5ES_insert(es, token) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTAPPEND, FAIL, "can't append token to event set")
+        if(H5ES_insert(es, token_obj) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+        token_obj = NULL;
+    } /* end if */
 
     /* Get an atom for the file */
     if((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
@@ -734,13 +744,26 @@ H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id,
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to make file 'post open' callback")
 
         /* If there's an event set and a token was created, add the token to it */
-        if(H5ES_NONE != es_id && NULL != token)
+        if(H5ES_NONE != es_id && NULL != token) {
+            /* Create vol object for token */
+            if(NULL == (token_obj = H5VL_create_object(token, vol_obj->connector))) {
+                if(H5VL_request_free(token) < 0)
+                    HDONE_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free request")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't create vol object for request token")
+            } /* end if */
+
             /* Add token to event set */
-            if(H5ES_insert(es, token) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTAPPEND, FAIL, "can't append token to event set")
+            if(H5ES_insert(es, token_obj) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+            token_obj = NULL;
+        } /* end if */
     } /* end if */
 
 done:
+    if(ret_value < 0 && token_obj)
+        if(H5VL_free_object(token_obj) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free request token")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__create_api_common() */
 
@@ -888,7 +911,7 @@ H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, hid_t 
         token_ptr = H5_REQUEST_NULL;
 
     /* Open the file through the VOL layer */
-    if(NULL == (new_file = (H5F_t *)H5VL_file_open(&connector_prop, filename, flags, fapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (new_file = (H5F_t *)H5VL_file_open(&connector_prop, filename, flags, fapl_id, H5P_DATASET_XFER_DEFAULT, token_ptr)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to open file")
 
     /* If there's an event set and a token was created, add the token to it */
@@ -902,7 +925,7 @@ H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, hid_t 
 
         /* Add token to event set */
         if(H5ES_insert(es, token_obj) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTAPPEND, FAIL, "can't append token to event set")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, FAIL, "can't insert token into event set")
         token_obj = NULL;
     } /* end if */
 
@@ -939,7 +962,7 @@ H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, hid_t 
 
             /* Add token to event set */
             if(H5ES_insert(es, token_obj) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTAPPEND, FAIL, "can't append token to event set")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, FAIL, "can't insert token into event set")
         } /* end if */
     } /* end if */
 
@@ -1113,13 +1136,13 @@ H5F__close_api_common(hid_t file_id, hid_t es_id)
         /* Create vol object for token */
         if(NULL == (token_obj = H5VL_create_object(token, connector))) {
             if(H5VL_request_free(token) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't free request")
+                HDONE_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free request")
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't create vol object for request token")
         } /* end if */
 
         /* Add token to event set */
         if(H5ES_insert(es, token_obj) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTAPPEND, FAIL, "can't append token to event set")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
         if(H5VL_conn_dec_rc(connector) < 0) {
             connector = NULL;
@@ -1130,10 +1153,10 @@ H5F__close_api_common(hid_t file_id, hid_t es_id)
 
 done:
     if(ret_value < 0) {
-        if(connector && H5VL_conn_dec_rc(connector) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
         if(token_obj && H5VL_free_object(token_obj) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free request token")
+        if(connector && H5VL_conn_dec_rc(connector) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1162,9 +1185,9 @@ H5Fclose(hid_t file_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", file_id);
 
-    /* Close the file ID */
+    /* Synchronously close the file ID */
     if(H5F__close_api_common(file_id, H5ES_NONE) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "synchronous file close failed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "synchronous file close failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1190,7 +1213,7 @@ H5Fclose_async(hid_t file_id, hid_t es_id)
 
     /* Close the file ID */
     if(H5F__close_api_common(file_id, es_id) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "asynchronous file close failed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "asynchronous file close failed")
 
 done:
     FUNC_LEAVE_API(ret_value)

@@ -84,6 +84,7 @@
 #include "H5private.h"          /* Generic Functions                        */
 #include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Eprivate.h"         /* Error handling                           */
+#include "H5ESprivate.h"        /* Event Sets                               */
 #include "H5Gpkg.h"             /* Groups                                   */
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5Pprivate.h"         /* Property lists                           */
@@ -108,6 +109,11 @@
 /********************/
 /* Local Prototypes */
 /********************/
+
+/* Helper routines for sync/async API calls */
+static hid_t H5G__create_api_common(hid_t loc_id, const char *name,
+    hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t es_id);
+static herr_t H5G__close_api_common(hid_t group_id, hid_t es_id);
 
 /* Group close callback */
 static herr_t H5G__close_cb(H5VL_object_t *grp_vol_obj, void **request);
@@ -314,39 +320,28 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Gcreate2
+ * Function:    H5G__create_api_common
  *
- * Purpose:     Creates a new group relative to LOC_ID, giving it the
- *              specified creation property list GCPL_ID and access
- *              property list GAPL_ID.  The link to the new group is
- *              created with the LCPL_ID.
+ * Purpose:     This is the common function for creating HDF5 groups.
  *
- * Usage:       H5Gcreate2(loc_id, char *name, lcpl_id, gcpl_id, gapl_id)
- *                  hid_t loc_id;	  IN: File or group identifier
- *                  const char *name; IN: Absolute or relative name of the new group
- *                  hid_t lcpl_id;	  IN: Property list for link creation
- *                  hid_t gcpl_id;	  IN: Property list for group creation
- *                  hid_t gapl_id;	  IN: Property list for group access
- *
- * Return:      Success:    The object ID of a new, empty group open for
- *                          writing.  Call H5Gclose() when finished with
- *                          the group.
- *
+ * Return:      Success:    A group ID
  *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
-hid_t
-H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
-    hid_t gapl_id)
+static hid_t
+H5G__create_api_common(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
+    hid_t gapl_id, hid_t es_id)
 {
-    void               *grp = NULL;                     /* Structure for new group */
-    H5VL_object_t      *vol_obj = NULL;                 /* object of loc_id */
-    H5VL_loc_params_t   loc_params;
-    hid_t               ret_value = H5I_INVALID_HID;    /* Return value */
+    void *grp = NULL;                   /* Structure for new group */
+    H5ES_t *es = NULL;                  /* Event set for the operation              */
+    void *token = NULL, **token_ptr;    /* Request token for async operation        */
+    H5VL_object_t *token_obj = NULL;    /* Async token VOL object */
+    H5VL_object_t *vol_obj = NULL;      /* object of loc_id */
+    H5VL_loc_params_t loc_params;
+    hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
-    FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE5("i", "i*siii", loc_id, name, lcpl_id, gcpl_id, gapl_id);
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     if(!name)
@@ -383,21 +378,121 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
     loc_params.type         = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type     = H5I_get_type(loc_id);
 
+    /* Get the event set and set up request token pointer for operation */
+    if(H5ES_NONE != es_id) {
+        /* Get event set */
+        if(NULL == (es = (H5ES_t *)H5I_object_verify(es_id, H5I_EVENTSET)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an event set")
+
+        /* Point at token for operation to set up */
+        token_ptr = &token;
+    } /* end if */
+    else
+        /* Synchronous operation */
+        token_ptr = H5_REQUEST_NULL;
+
     /* Create the group */
-    if(NULL == (grp = H5VL_group_create(vol_obj, &loc_params, name, lcpl_id, gcpl_id, gapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (grp = H5VL_group_create(vol_obj, &loc_params, name, lcpl_id, gcpl_id, gapl_id, H5P_DATASET_XFER_DEFAULT, token_ptr)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5I_INVALID_HID, "unable to create group")
+
+    /* If there's an event set and a token was created, add the token to it */
+    if(H5ES_NONE != es_id && NULL != token) {
+        /* Create vol object for token */
+        if(NULL == (token_obj = H5VL_create_object(token, vol_obj->connector))) {
+            if(H5VL_request_free(token) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "can't free request")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create vol object for request token")
+        } /* end if */
+
+        /* Add token to event set */
+        if(H5ES_insert(es, token_obj) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+        token_obj = NULL;
+    } /* end if */
 
     /* Get an atom for the group */
     if((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize group handle")
 
 done:
-    if(H5I_INVALID_HID == ret_value)
+    if(H5I_INVALID_HID == ret_value) {
         if(grp && H5VL_group_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group")
+        if(token_obj && H5VL_free_object(token_obj) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "can't free request token")
+    } /* end if */
 
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G__create_api_common() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Gcreate2
+ *
+ * Purpose:     Creates a new group relative to LOC_ID, giving it the
+ *              specified creation property list GCPL_ID and access
+ *              property list GAPL_ID.  The link to the new group is
+ *              created with the LCPL_ID.
+ *
+ * Usage:       H5Gcreate2(loc_id, char *name, lcpl_id, gcpl_id, gapl_id)
+ *                  hid_t loc_id;	  IN: File or group identifier
+ *                  const char *name; IN: Absolute or relative name of the new group
+ *                  hid_t lcpl_id;	  IN: Property list for link creation
+ *                  hid_t gcpl_id;	  IN: Property list for group creation
+ *                  hid_t gapl_id;	  IN: Property list for group access
+ *
+ * Return:      Success:    The object ID of a new, empty group open for
+ *                          writing.  Call H5Gclose() when finished with
+ *                          the group.
+ *
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
+    hid_t gapl_id)
+{
+    hid_t ret_value;            /* Return value */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE5("i", "i*siii", loc_id, name, lcpl_id, gcpl_id, gapl_id);
+
+    /* Create the group synchronously */
+    if((ret_value = H5G__create_api_common(loc_id, name, lcpl_id, gcpl_id, gapl_id, H5ES_NONE)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, H5I_INVALID_HID, "unable to synchronously create group")
+
+done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gcreate2() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Gcreate_async
+ *
+ * Purpose:     Asynchronous version of H5Gcreate
+ *
+ * Return:      Success:    A group ID
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Gcreate_async(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
+    hid_t gapl_id, hid_t es_id)
+{
+    hid_t ret_value;            /* Return value */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE6("i", "i*siiii", loc_id, name, lcpl_id, gcpl_id, gapl_id, es_id);
+
+    /* Create the group asynchronously */
+    if((ret_value = H5G__create_api_common(loc_id, name, lcpl_id, gcpl_id, gapl_id, es_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, H5I_INVALID_HID, "unable to asynchronously create group")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Gcreate_async() */
 
 
 /*-------------------------------------------------------------------------
@@ -730,6 +825,90 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5G__close_api_common
+ *
+ * Purpose:     This is the common function for closing HDF5 groups.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G__close_api_common(hid_t group_id, hid_t es_id)
+{
+    H5ES_t *es = NULL;                  /* Event set for the operation */
+    void *token = NULL, **token_ptr;    /* Request token for async operation */
+    H5VL_object_t *token_obj = NULL;    /* Async token VOL object */
+    H5VL_t *connector = NULL;           /* VOL connector */
+    herr_t  ret_value = SUCCEED;    /* Return value                     */
+
+    FUNC_ENTER_STATIC
+
+    /* Check arguments */
+    if(H5I_GROUP != H5I_get_type(group_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group ID")
+
+    /* Get the event set and set up request token pointer for operation */
+    if(H5ES_NONE != es_id) {
+        H5VL_object_t *vol_obj = NULL;
+
+        /* Get event set */
+        if(NULL == (es = (H5ES_t *)H5I_object_verify(es_id, H5I_EVENTSET)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an event set")
+
+        /* Get group object's connector and increate its rc, so it doesn't get
+         * closed if closing the group closes the file */
+        if(NULL == (vol_obj = H5VL_vol_object(group_id)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get VOL object for group")
+        connector = vol_obj->connector;
+        H5VL_conn_inc_rc(connector);
+
+        /* Point at token for operation to set up */
+        token_ptr = &token;
+    } /* end if */
+    else
+        /* Synchronous operation */
+        token_ptr = H5_REQUEST_NULL;
+
+    /* Decrement the counter on the group atom. It will be freed if the count
+     * reaches zero.
+     */
+    if(H5I_dec_app_ref_async(group_id, token_ptr) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "decrementing group ID failed")
+
+    /* If there's an event set and a token was created, add the token to it */
+    if(H5ES_NONE != es_id && NULL != token) {
+        /* Create vol object for token */
+        if(NULL == (token_obj = H5VL_create_object(token, connector))) {
+            if(H5VL_request_free(token) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "can't free request")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create vol object for request token")
+        } /* end if */
+
+        /* Add token to event set */
+        if(H5ES_insert(es, token_obj) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+        if(H5VL_conn_dec_rc(connector) < 0) {
+            connector = NULL;
+            HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
+        } /* end if */
+        connector = NULL;
+    } /* end if */
+
+done:
+    if(ret_value < 0) {
+        if(token_obj && H5VL_free_object(token_obj) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "can't free request token")
+        if(connector && H5VL_conn_dec_rc(connector) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G__close_api_common() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5Gclose
  *
  * Purpose:     Closes the specified group. The group ID will no longer be
@@ -747,15 +926,35 @@ H5Gclose(hid_t group_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", group_id);
 
-    /* Check args */
-    if(NULL == H5I_object_verify(group_id, H5I_GROUP))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+    /* Synchronously close the group ID */
+    if(H5G__close_api_common(group_id, H5ES_NONE) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "synchronous group close failed")
 
-    /* Decrement the counter on the group atom. It will be freed if the count
-     * reaches zero.
-     */
-    if(H5I_dec_app_ref(group_id) < 0)
-    	HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group")
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Gclose() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Gclose_async
+ *
+ * Purpose:     Asynchronous version of H5Gclose
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Gclose_async(hid_t group_id, hid_t es_id)
+{
+    herr_t  ret_value = SUCCEED;    /* Return value                     */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ii", group_id, es_id);
+
+    /* Asynchronously close the group ID */
+    if(H5G__close_api_common(group_id, es_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "asynchronous group close failed")
 
 done:
     FUNC_LEAVE_API(ret_value)

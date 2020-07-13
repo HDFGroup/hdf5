@@ -1614,6 +1614,48 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5I_dec_app_ref_always_close_async
+ *
+ * Purpose:     Asynchronous H5I_dec_app_ref wrapper for case of always closing
+ *              the ID, even when the free routine fails
+ *
+ * Return:      Success:    New app. reference count
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5I_dec_app_ref_always_close_async(hid_t id, void **token)
+{
+    int ret_value = 0;          /* Return value */
+
+    FUNC_ENTER_NOAPI((-1))
+
+    /* Sanity check */
+    HDassert(id >= 0);
+
+    /* Call application decrement reference count routine */
+    ret_value = H5I_dec_app_ref_async(id, token);
+
+    /* Check for failure */
+    if(ret_value < 0) {
+        /*
+         * If an object is closing, we can remove the ID even though the free
+         * method might fail.  This can happen when a mandatory filter fails to
+         * write when a dataset is closed and the chunk cache is flushed to the
+         * file.  We have to close the dataset anyway. (SLU - 2010/9/7)
+         */
+        H5I_remove(id);
+
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTDEC, (-1), "can't decrement ID ref count")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5I_dec_app_ref_always_close_async() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5Iinc_ref
  *
  * Purpose:     Increments the number of references outstanding for an ID.
