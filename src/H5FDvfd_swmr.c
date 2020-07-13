@@ -652,7 +652,7 @@ H5FD_vfd_swmr_get_handle(H5FD_t *_file, hid_t fapl, void **file_handle)
 
     /* LATER? H5P_get(plist, H5F_ACS_SWMR_FILE_NAME, &type) */
 
-    if((ret_value = H5FD_get_vfd_handle(file->hdf5_file_lf, 
+    if((ret_value = H5FD_get_vfd_handle(file->hdf5_file_lf,
                                         fapl, file_handle)) < 0)
 
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, \
