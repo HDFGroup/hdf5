@@ -76,6 +76,8 @@ static int H5F__get_all_count_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t H5_ATTR_UNU
 static int H5F__get_all_ids_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void *key);
 
 /* Helper routines for sync/async API calls */
+static hid_t H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id,
+    hid_t fapl_id, hid_t es_id);
 static hid_t H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id,
     hid_t es_id);
 static herr_t H5F__close_api_common(hid_t file_id, hid_t es_id);
@@ -617,42 +619,29 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Fcreate
+ * Function:    H5F__create_api_common
  *
- * Purpose:     This is the primary function for creating HDF5 files . The
- *              flags parameter determines whether an existing file will be
- *              overwritten or not.  All newly created files are opened for
- *              both reading and writing.  All flags may be combined with the
- *              bit-wise OR operator (`|') to change the behavior of the file
- *              create call.
- *
- *              The more complex behaviors of a file's creation and access
- *              are controlled through the file-creation and file-access
- *              property lists.  The value of H5P_DEFAULT for a template
- *              value indicates that the library should use the default
- *              values for the appropriate template.
- *
- * See also:    H5Fpublic.h for the list of supported flags. H5Ppublic.h for
- *              the list of file creation and file access properties.
+ * Purpose:     This is the common function for creating new  HDF5 files.
  *
  * Return:      Success:    A file ID
- *
  *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
-hid_t
-H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
+static hid_t
+H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id,
+    hid_t fapl_id, hid_t es_id)
 {
-    H5F_t              *new_file = NULL;    /* File struct for new file                 */
-    H5P_genplist_t     *plist;              /* Property list pointer                    */
+    H5F_t *new_file = NULL;             /* File struct for new file                 */
+    H5P_genplist_t *plist;              /* Property list pointer                    */
     H5VL_connector_prop_t connector_prop;   /* Property for VOL connector ID & info     */
-    H5VL_object_t       *vol_obj = NULL;    /* VOL object for file                      */
-    hbool_t             supported;          /* Whether 'post open' operation is supported by VOL connector */
-    hid_t               ret_value;          /* return value                             */
+    H5ES_t *es = NULL;                  /* Event set for the operation              */
+    void *token = NULL, **token_ptr;    /* Request token for async operation        */
+    H5VL_object_t *vol_obj = NULL;      /* VOL object for file                      */
+    hbool_t supported;                  /* Whether 'post open' operation is supported by VOL connector */
+    hid_t ret_value = H5I_INVALID_HID;  /* Return value                             */
 
-    FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE4("i", "*sIuii", filename, flags, fcpl_id, fapl_id);
+    FUNC_ENTER_STATIC
 
     /* Check/fix arguments */
     if(!filename || !*filename)
@@ -699,9 +688,28 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         flags |= H5F_ACC_EXCL;	 /*default*/
     flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
+    /* Get the event set and set up request token pointer for operation */
+    if(H5ES_NONE != es_id) {
+        /* Get event set */
+        if(NULL == (es = (H5ES_t *)H5I_object_verify(es_id, H5I_EVENTSET)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an event set")
+
+        /* Point at token for operation to set up */
+        token_ptr = &token;
+    } /* end if */
+    else
+        /* Synchronous operation */
+        token_ptr = H5_REQUEST_NULL;
+
     /* Create a new file or truncate an existing file through the VOL */
-    if(NULL == (new_file = (H5F_t *)H5VL_file_create(&connector_prop, filename, flags, fcpl_id, fapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (new_file = (H5F_t *)H5VL_file_create(&connector_prop, filename, flags, fcpl_id, fapl_id, H5P_DATASET_XFER_DEFAULT, token_ptr)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to create file")
+
+    /* If there's an event set and a token was created, add the token to it */
+    if(H5ES_NONE != es_id && NULL != token)
+        /* Add token to event set */
+        if(H5ES_insert(es, token) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTAPPEND, FAIL, "can't append token to event set")
 
     /* Get an atom for the file */
     if((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
@@ -711,17 +719,102 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     if(NULL == (vol_obj = H5VL_vol_object(ret_value)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid object identifier")
 
-    /* Make the 'post open' callback */
+    /* Check for 'post open' callback */
     supported = FALSE;
     if(H5VL_introspect_opt_query(vol_obj, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_POST_OPEN, &supported) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't check for 'post open' operation")
-    if(supported)
-        if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_POST_OPEN, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if(supported) {
+        /* Reset token for 'post open' operation */
+        /* (Technically unnecessary if create operation didn't change it, but not
+         *      worth checking -QAK) */
+        token = NULL;
+
+        /* Make the 'post open' callback */
+        if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_POST_OPEN, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to make file 'post open' callback")
+
+        /* If there's an event set and a token was created, add the token to it */
+        if(H5ES_NONE != es_id && NULL != token)
+            /* Add token to event set */
+            if(H5ES_insert(es, token) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTAPPEND, FAIL, "can't append token to event set")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__create_api_common() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fcreate
+ *
+ * Purpose:     This is the primary function for creating HDF5 files . The
+ *              flags parameter determines whether an existing file will be
+ *              overwritten or not.  All newly created files are opened for
+ *              both reading and writing.  All flags may be combined with the
+ *              bit-wise OR operator (`|') to change the behavior of the file
+ *              create call.
+ *
+ *              The more complex behaviors of a file's creation and access
+ *              are controlled through the file-creation and file-access
+ *              property lists.  The value of H5P_DEFAULT for a template
+ *              value indicates that the library should use the default
+ *              values for the appropriate template.
+ *
+ * See also:    H5Fpublic.h for the list of supported flags. H5Ppublic.h for
+ *              the list of file creation and file access properties.
+ *
+ * Return:      Success:    A file ID
+ *
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
+{
+    hid_t ret_value;            /* Return value */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE4("i", "*sIuii", filename, flags, fcpl_id, fapl_id);
+
+    /* Create the file synchronously */
+    if((ret_value = H5F__create_api_common(filename, flags, fcpl_id, fapl_id, H5ES_NONE)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, H5I_INVALID_HID, "unable to synchronously create file")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fcreate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fcreate_async
+ *
+ * Purpose:     Asynchronous version of H5Fcreate
+ *
+ * See Also:    H5Fpublic.h for a list of possible values for FLAGS.
+ *
+ * Return:      Success:    A file ID
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Fcreate_async(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
+    hid_t es_id)
+{
+    hid_t ret_value;            /* Return value */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE5("i", "*sIuiii", filename, flags, fcpl_id, fapl_id, es_id);
+
+    /* Create the file, possibly asynchronously */
+    if((ret_value = H5F__create_api_common(filename, flags, fcpl_id, fapl_id, es_id)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, H5I_INVALID_HID, "unable to asynchronously create file")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fcreate_async() */
 
 
 /*-------------------------------------------------------------------------
@@ -798,10 +891,6 @@ H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, hid_t 
     if(NULL == (new_file = (H5F_t *)H5VL_file_open(&connector_prop, filename, flags, fapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to open file")
 
-    /* Get an ID for the file */
-    if((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
-
     /* If there's an event set and a token was created, add the token to it */
     if(H5ES_NONE != es_id && NULL != token) {
         /* Create vol object for token */
@@ -816,6 +905,10 @@ H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, hid_t 
             HGOTO_ERROR(H5E_FILE, H5E_CANTAPPEND, FAIL, "can't append token to event set")
         token_obj = NULL;
     } /* end if */
+
+    /* Get an ID for the file */
+    if((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
     /* Get the file object */
     if(NULL == (vol_obj = H5VL_vol_object(ret_value)))
@@ -886,14 +979,13 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "*sIui", filename, flags, fapl_id);
 
-    /* Get an ID for the file */
+    /* Open the file synchronously */
     if((ret_value = H5F__open_api_common(filename, flags, fapl_id, H5ES_NONE)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to synchronously open file")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fopen() */
-
 
 
 /*-------------------------------------------------------------------------
@@ -916,7 +1008,7 @@ H5Fopen_async(const char *filename, unsigned flags, hid_t fapl_id, hid_t es_id)
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE4("i", "*sIuii", filename, flags, fapl_id, es_id);
 
-    /* Get an ID for the file */
+    /* Open the file, possibly asynchronously */
     if((ret_value = H5F__open_api_common(filename, flags, fapl_id, es_id)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to asynchronously open file")
 

@@ -999,7 +999,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *offset, 
+H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *offset,
          size_t data_size, const void *buf)
 {
     H5VL_object_t  *vol_obj = NULL;

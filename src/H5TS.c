@@ -535,6 +535,7 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
         if(err != 0)
             ret_value = err;
     } /* end if */
+#endif  /* H5_HAVE_WIN_THREADS */
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)

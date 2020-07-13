@@ -227,8 +227,10 @@ extern "C" {
 #endif
 
 H5_DLL htri_t H5Fis_accessible(const char *container_name, hid_t fapl_id);
-H5_DLL hid_t  H5Fcreate(const char *filename, unsigned flags,
-                hid_t create_plist, hid_t access_plist);
+H5_DLL hid_t  H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id,
+    hid_t fapl_id);
+H5_DLL hid_t H5Fcreate_async(const char *filename, unsigned flags, hid_t fcpl_id,
+    hid_t fapl_id, hid_t es_id);
 H5_DLL hid_t  H5Fopen(const char *filename, unsigned flags, hid_t access_plist);
 H5_DLL hid_t  H5Fopen_async(const char *filename, unsigned flags, hid_t access_plist,
     hid_t es_id);
