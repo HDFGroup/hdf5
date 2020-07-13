@@ -148,6 +148,84 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5EStest
+ *
+ * Purpose:     Test if all operations in event set have completed
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, July 13, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5EStest(hid_t es_id, H5ES_status_t *status)
+{
+    H5ES_t *es;                         /* Event set */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if(NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event set identifier")
+    if(NULL == status)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL status pointer")
+
+    /* Check status of events in event set */
+    if(H5ES__test(es, status) < 0)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL, "can't check status of operations")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5EStest() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5ESwait
+ *
+ * Purpose:     Wait (with timeout) for all operations in event set to complete
+ *
+ * Note:        Timeout value is in ns, and is per-operation, not for H5ESwait
+ *              itself.
+ *
+ * Note:        This call will stop waiting on operations and will return after
+ *              the first operation that does not succeed (i.e. FAIL or CANCEL
+ *              for its status) or is still in progress when the timeout is
+ *              reached (i.e. IN_PROGRESS for its status).
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, July 13, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5ESwait(hid_t es_id, uint64_t timeout, H5ES_status_t *status)
+{
+    H5ES_t *es;                         /* Event set */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if(NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event set identifier")
+    if(NULL == status)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL status pointer")
+
+    /* Wait for operations */
+    if(H5ES__wait(es, timeout, status) < 0)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTWAIT, FAIL, "can't wait on operations")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5ESwait() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5ESclose
  *
  * Purpose:     Closes an event set.

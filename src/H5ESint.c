@@ -282,21 +282,82 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5ES__close
+ * Function:    H5ES__test
  *
- * Purpose:     Destroy an event set object
+ * Purpose:     Test if all operations in event set have completed
  *
  * Return:      SUCCEED / FAIL
  *
  * Programmer:	Quincey Koziol
- *	        Monday, April 6, 2020
+ *	        Monday, July 13, 2020
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES__close(H5ES_t *es)
+H5ES__test(const H5ES_t *es, H5ES_status_t *status)
+{
+    const H5ES_event_t *ev;             /* Event to check */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(es);
+    HDassert(status);
+
+    /* Iterate over the events in the set, testing them for completion */
+    ev = es->head;
+    if(ev) {
+        /* If there are events in the event set, assume that they are in progress */
+        *status = H5ES_STATUS_IN_PROGRESS;
+
+        /* Iterate over events */
+        while(ev) {
+            H5ES_status_t ev_status = H5ES_STATUS_SUCCEED;      /* Status from event's operation */
+
+            /* Test the request (i.e. wait for 0 time) */
+            if(H5VL_request_wait(ev->request, 0, &ev_status) < 0)
+                HGOTO_ERROR(H5E_EVENTSET, H5E_CANTWAIT, FAIL, "unable to test operation")
+
+            /* Check for status values that indicate we should break out of the loop */
+            if(ev_status == H5ES_STATUS_FAIL || ev_status == H5ES_STATUS_CANCELED) {
+                *status = ev_status;
+                break;
+            } /* end if */
+
+            /* Advance to next node */
+            ev = ev->next;
+        } /* end while */
+    } /* end if */
+    else
+        /* If no operations in event set, assume they have successfully completed */
+        *status = H5ES_STATUS_SUCCEED;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5ES__test() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5ES__wait
+ *
+ * Purpose:     Wait for operations in event set to complete
+ *
+ * Note:        Timeout value is in ns, and is per-operation, not for H5ES__wait
+ *              itself.
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *	        Monday, July 13, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status)
 {
     H5ES_event_t *ev;                   /* Event to operate on */
+    hbool_t early_exit = FALSE;         /* Whether the loop exited early */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -308,14 +369,21 @@ H5ES__close(H5ES_t *es)
     ev = es->head;
     while(ev) {
         H5ES_event_t *tmp;              /* Temporary event */
-        H5ES_status_t status;           /* Status from event's operation */
+        H5ES_status_t ev_status;        /* Status from event's operation */
 
         /* Get pointer to next node, so we can free this one */
         tmp = ev->next;
 
         /* Wait on the request */
-        if(H5VL_request_wait(ev->request, H5ES_WAIT_FOREVER, &status) < 0)
+        if(H5VL_request_wait(ev->request, timeout, &ev_status) < 0)
             HGOTO_ERROR(H5E_EVENTSET, H5E_CANTWAIT, FAIL, "unable to wait for operation")
+
+        /* Check for non-success status values that indicate we should break out of the loop */
+        if(ev_status != H5ES_STATUS_SUCCEED) {
+            *status = ev_status;
+            early_exit = TRUE;
+            break;
+        } /* end if */
 
         /* Free the request */
         if(H5VL_request_free(ev->request) < 0)
@@ -331,6 +399,41 @@ H5ES__close(H5ES_t *es)
         /* Advance to next node */
         ev = tmp;
     } /* end while */
+
+    /* Check for all operations completed */
+    if(!early_exit)
+        *status = H5ES_STATUS_SUCCEED;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5ES__wait() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5ES__close
+ *
+ * Purpose:     Destroy an event set object
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *	        Monday, April 6, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5ES__close(H5ES_t *es)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(es);
+
+    /* Wait on operations in the set to complete */
+    if(H5ES__wait(es, H5ES_WAIT_FOREVER, NULL) < 0)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTWAIT, FAIL, "can't wait on operations")
 
     /* Release the event set */
     es = H5FL_FREE(H5ES_t, es);

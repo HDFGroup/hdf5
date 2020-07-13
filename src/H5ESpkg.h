@@ -59,6 +59,8 @@ struct H5ES_t {
 /* Package Private Prototypes */
 /******************************/
 H5_DLL H5ES_t *H5ES__create(void);
+H5_DLL herr_t H5ES__test(const H5ES_t *es, H5ES_status_t *status);
+H5_DLL herr_t H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status);
 H5_DLL herr_t H5ES__close(H5ES_t *es);
 
 #endif /* _H5ESpkg_H */
