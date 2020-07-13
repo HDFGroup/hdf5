@@ -616,7 +616,7 @@ H5A__write_api_common(hid_t attr_id, hid_t type_id, const void *buf, hid_t es_id
         token_ptr = H5_REQUEST_NULL;
 
     /* Write the attribute data */
-    if((ret_value = H5VL_attr_write(vol_obj, type_id, buf, H5P_DATASET_XFER_DEFAULT, token_ptr)) < 0)
+    if(H5VL_attr_write(vol_obj, type_id, buf, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "unable to write attribute")
 
     /* If there's an event set and a token was created, add the token to it */
@@ -661,7 +661,7 @@ done:
 herr_t
 H5Awrite(hid_t attr_id, hid_t dtype_id, const void *buf)
 {
-    herr_t          ret_value;              /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ii*x", attr_id, dtype_id, buf);
@@ -686,7 +686,7 @@ done:
 herr_t
 H5Awrite_async(hid_t attr_id, hid_t dtype_id, const void *buf, hid_t es_id)
 {
-    herr_t          ret_value;              /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "ii*xi", attr_id, dtype_id, buf, es_id);
@@ -720,7 +720,7 @@ herr_t
 H5Aread(hid_t attr_id, hid_t dtype_id, void *buf)
 {
     H5VL_object_t  *vol_obj;               /* Attribute object for ID */
-    herr_t          ret_value;          /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ii*x", attr_id, dtype_id, buf);
@@ -734,7 +734,7 @@ H5Aread(hid_t attr_id, hid_t dtype_id, void *buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf parameter can't be NULL")
 
     /* Read the attribute data */
-    if((ret_value = H5VL_attr_read(vol_obj, dtype_id, buf, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
+    if(H5VL_attr_read(vol_obj, dtype_id, buf, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "unable to read attribute")
 
 done:
