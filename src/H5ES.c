@@ -166,6 +166,7 @@ H5EStest(hid_t es_id, H5ES_status_t *status)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*Es", es_id, status);
 
     /* Check arguments */
     if(NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
@@ -209,6 +210,7 @@ H5ESwait(hid_t es_id, uint64_t timeout, H5ES_status_t *status)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "iUL*Es", es_id, timeout, status);
 
     /* Check arguments */
     if(NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
