@@ -27,21 +27,27 @@ static int check_d_input(const char*);
  */
 static const char *s_opts = "hVrv:qn:d:p:NcelxE:S";
 static struct long_options l_opts[] = {
-    { "help", no_arg, 'h' },
-    { "version", no_arg, 'V' },
-    { "report", no_arg, 'r' },
-    { "verbose", optional_arg, 'v' },
-    { "quiet", no_arg, 'q' },
-    { "count", require_arg, 'n' },
-    { "delta", require_arg, 'd' },
-    { "relative", require_arg, 'p' },
-    { "nan", no_arg, 'N' },
-    { "compare", no_arg, 'c' },
+    { "help",               no_arg, 'h' },
+    { "version",            no_arg, 'V' },
+    { "report",             no_arg, 'r' },
+    { "verbose",            optional_arg, 'v' },
+    { "quiet",              no_arg, 'q' },
+    { "count",              require_arg, 'n' },
+    { "delta",              require_arg, 'd' },
+    { "relative",           require_arg, 'p' },
+    { "nan",                no_arg, 'N' },
+    { "compare",            no_arg, 'c' },
     { "use-system-epsilon", no_arg, 'e' },
-    { "follow-symlinks", no_arg, 'l' },
-    { "no-dangling-links", no_arg, 'x' },
-    { "exclude-path", require_arg, 'E' },
+    { "follow-symlinks",    no_arg, 'l' },
+    { "no-dangling-links",  no_arg, 'x' },
+    { "exclude-path",       require_arg, 'E' },
     { "enable-error-stack", no_arg, 'S' },
+    { "vol-value-1",        require_arg, '1' },
+    { "vol-name-1",         require_arg, '2' },
+    { "vol-info-1",         require_arg, '3' },
+    { "vol-value-2",        require_arg, '4' },
+    { "vol-name-2",         require_arg, '5' },
+    { "vol-info-2",         require_arg, '6' },
     { NULL, 0, '\0' }
 };
 
@@ -91,7 +97,7 @@ void parse_command_line(int argc,
     struct exclude_path_list *exclude_head, *exclude_prev, *exclude_node;
 
     /* process the command-line */
-    memset(opts, 0, sizeof (diff_opt_t));
+    HDmemset(opts, 0, sizeof (diff_opt_t));
 
     /* assume equal contents initially */
     opts->contents = 1;
@@ -191,7 +197,7 @@ void parse_command_line(int argc,
             }
 
             /* init */
-            exclude_node->obj_path = (char*)opt_arg;
+            exclude_node->obj_path = opt_arg;
             exclude_node->obj_type = H5TRAV_TYPE_UNKNOWN;
             exclude_prev = exclude_head;
 
@@ -201,7 +207,7 @@ void parse_command_line(int argc,
             }
             else {
                 while(NULL != exclude_prev->next)
-                    exclude_prev=exclude_prev->next;
+                    exclude_prev = exclude_prev->next;
 
                 exclude_node->next = NULL;
                 exclude_prev->next = exclude_node;
@@ -209,14 +215,14 @@ void parse_command_line(int argc,
             break;
 
         case 'd':
-            opts->d=1;
+            opts->d = 1;
 
             if (check_d_input(opt_arg) == - 1) {
                 HDprintf("<-d %s> is not a valid option\n", opt_arg);
                 usage();
                 h5diff_exit(EXIT_FAILURE);
             }
-            opts->delta = atof(opt_arg);
+            opts->delta = HDatof(opt_arg);
 
             /* -d 0 is the same as default */
             if (H5_DBL_ABS_EQUAL(opts->delta, (double)0.0F))
@@ -224,13 +230,13 @@ void parse_command_line(int argc,
             break;
 
         case 'p':
-            opts->p=1;
+            opts->p = 1;
             if (check_p_input(opt_arg) == -1) {
                 HDprintf("<-p %s> is not a valid option\n", opt_arg);
                 usage();
                 h5diff_exit(EXIT_FAILURE);
             }
-            opts->percent = atof(opt_arg);
+            opts->percent = HDatof(opt_arg);
 
             /* -p 0 is the same as default */
             if (H5_DBL_ABS_EQUAL(opts->percent, (double)0.0F))
@@ -238,7 +244,7 @@ void parse_command_line(int argc,
             break;
 
         case 'n':
-            opts->n=1;
+            opts->n = 1;
             if ( check_n_input(opt_arg) == -1) {
                 HDprintf("<-n %s> is not a valid option\n", opt_arg);
                 usage();
@@ -257,6 +263,38 @@ void parse_command_line(int argc,
 
         case 'e':
             opts->use_system_epsilon = 1;
+            break;
+
+        case '1':
+            opts->vol_info_1.type = VOL_BY_VALUE;
+            opts->vol_info_1.u.value = (H5VL_class_value_t)HDatoi(opt_arg);
+            opts->custom_vol_1 = TRUE;
+            break;
+
+        case '2':
+            opts->vol_info_1.type = VOL_BY_NAME;
+            opts->vol_info_1.u.name = opt_arg;
+            opts->custom_vol_1 = TRUE;
+            break;
+
+        case '3':
+            opts->vol_info_1.info_string = opt_arg;
+            break;
+
+        case '4':
+            opts->vol_info_2.type = VOL_BY_VALUE;
+            opts->vol_info_2.u.value = (H5VL_class_value_t)HDatoi(opt_arg);
+            opts->custom_vol_2 = TRUE;
+            break;
+
+        case '5':
+            opts->vol_info_2.type = VOL_BY_NAME;
+            opts->vol_info_2.u.name = opt_arg;
+            opts->custom_vol_2 = TRUE;
+            break;
+
+        case '6':
+            opts->vol_info_2.info_string = opt_arg;
             break;
         }
     }
@@ -389,7 +427,7 @@ check_p_input( const char *str )
     if (HDstrlen(str) > 2 && str[0] == '0' && str[1] == 'x')
         return -1;
 
-    x = atof(str);
+    x = HDatof(str);
     if (x < 0)
         return -1;
 
@@ -423,7 +461,7 @@ check_d_input( const char *str )
     if (HDstrlen(str) > 2 && str[0] == '0' && str[1] == 'x')
         return -1;
 
-    x = atof(str);
+    x = HDatof(str);
     if (x < 0)
         return -1;
 
@@ -469,6 +507,18 @@ void usage(void)
  PRINTVALSTREAM(rawoutstream, "         Quiet mode. Do not produce output.\n");
  PRINTVALSTREAM(rawoutstream, "   --enable-error-stack\n");
  PRINTVALSTREAM(rawoutstream, "                   Prints messages from the HDF5 error stack as they occur.\n");
+ PRINTVALSTREAM(rawoutstream, "   --vol-value-1           Value (ID) of the VOL connector to use for opening the\n");
+ PRINTVALSTREAM(rawoutstream, "                           first HDF5 file specified\n");
+ PRINTVALSTREAM(rawoutstream, "   --vol-name-1            Name of the VOL connector to use for opening the first\n");
+ PRINTVALSTREAM(rawoutstream, "                           HDF5 file specified\n");
+ PRINTVALSTREAM(rawoutstream, "   --vol-info-1            VOL-specific info to pass to the VOL connector used for\n");
+ PRINTVALSTREAM(rawoutstream, "                           opening the first HDF5 file specified\n");
+ PRINTVALSTREAM(rawoutstream, "   --vol-value-2           Value (ID) of the VOL connector to use for opening the\n");
+ PRINTVALSTREAM(rawoutstream, "                           second HDF5 file specified\n");
+ PRINTVALSTREAM(rawoutstream, "   --vol-name-2            Name of the VOL connector to use for opening the second\n");
+ PRINTVALSTREAM(rawoutstream, "                           HDF5 file specified\n");
+ PRINTVALSTREAM(rawoutstream, "   --vol-info-2            VOL-specific info to pass to the VOL connector used for\n");
+ PRINTVALSTREAM(rawoutstream, "                           opening the second HDF5 file specified\n");
  PRINTVALSTREAM(rawoutstream, "   --follow-symlinks\n");
  PRINTVALSTREAM(rawoutstream, "         Follow symbolic links (soft links and external links and compare the)\n");
  PRINTVALSTREAM(rawoutstream, "         links' target objects.\n");

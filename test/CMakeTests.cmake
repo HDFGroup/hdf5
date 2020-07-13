@@ -263,6 +263,9 @@ set (test_CLEANFILES
     bt2_hdr_fd.h5
     storage_size.h5
     dls_01_strings.h5
+    power2up.h5
+    version_bounds.h5
+    alloc_0sized.h5
     extend.h5
     istore.h5
     extlinks*.h5
@@ -285,60 +288,19 @@ set (test_CLEANFILES
     dt_arith2
     links.h5
     links*.h5
-    extlinks16A00000.h5
-    extlinks16A00001.h5
-    extlinks16A00002.h5
-    extlinks16B-b.h5
-    extlinks16B-g.h5
-    extlinks16B-l.h5
-    extlinks16B-r.h5
-    extlinks16B-s.h5
-    extlinks19B00000.h5
-    extlinks19B00001.h5
-    extlinks19B00002.h5
-    extlinks19B00003.h5
-    extlinks19B00004.h5
-    extlinks19B00005.h5
-    extlinks19B00006.h5
-    extlinks19B00007.h5
-    extlinks19B00008.h5
-    extlinks19B00009.h5
-    extlinks19B00010.h5
-    extlinks19B00011.h5
-    extlinks19B00012.h5
-    extlinks19B00013.h5
-    extlinks19B00014.h5
-    extlinks19B00015.h5
-    extlinks19B00016.h5
-    extlinks19B00017.h5
-    extlinks19B00018.h5
-    extlinks19B00019.h5
-    extlinks19B00020.h5
-    extlinks19B00021.h5
-    extlinks19B00022.h5
-    extlinks19B00023.h5
-    extlinks19B00024.h5
-    extlinks19B00025.h5
-    extlinks19B00026.h5
-    extlinks19B00027.h5
-    extlinks19B00028.h5
+    extlinks*.h5
+    tmp
+    tmp_links
+    tmp2_links
+    tmp_links_env
+    tmp_vds/*
+    tmp_vds_env/*
     big.data
     big*.h5
     stdio.h5
     sec2.h5
-    dtypes0.h5
-    dtypes1.h5
-    dtypes2.h5
-    dtypes3.h5
-    dtypes4.h5
-    dtypes5.h5
-    dtypes6.h5
-    dtypes7.h5
-    dtypes8.h5
-    dtypes9.h5
-    dtypes10.h5
-    dt_arith1.h5
-    dt_arith2.h5
+    dtypes*.h5
+    dt_arith*.h5
     tattr.h5
     tselect.h5
     mtime.h5
@@ -350,40 +312,38 @@ set (test_CLEANFILES
     mount_*.h5
     testmeta.h5
     ttime.h5
-    trefer1.h5
-    trefer2.h5
-    trefer3.h5
+    trefer*.h5
+    trefer_*.h5
     tvltypes.h5
     tvlstr.h5
     tvlstr2.h5
     twriteorder.dat
+    flush.h5
+    flush-swmr.h5
+    noflush.h5
+    noflush-swmr.h5
+    flush_extend.h5
+    flush_extend-swmr.h5
+    noflush_extend.h5
+    noflush_extend-swmr.h5
     enum1.h5
     titerate.h5
     ttsafe.h5
     tarray1.h5
     tgenprop.h5
     tmisc*.h5
-    set_extent1.h5
-    set_extent2.h5
-    set_extent3.h5
-    set_extent4.h5
-    set_extent5.h5
-    ext1.bin
-    ext2.bin
+    set_extent*.h5
+    ext*.bin
     getname.h5
-    getname1.h5
-    getname2.h5
-    getname3.h5
+    getname*.h5
     sec2_file.h5
     direct_file.h5
     family_file000*.h5
     new_family_v16_000*.h5
-    multi_file-r.h5
-    multi_file-s.h5
+    multi_file-*.h5
     core_file
     filter_plugin.h5
-    new_move_a.h5
-    new_move_b.h5
+    new_move_*.h5
     ntypes.h5
     dangle.h5
     error_test.h5
@@ -391,28 +351,22 @@ set (test_CLEANFILES
     dtransform.h5
     test_filters.h5
     get_file_name.h5
-    tstint1.h5
-    tstint2.h5
+    tstint*.h5
     unlink_chunked.h5
     btree2.h5
     btree2_tmp.h5
     objcopy_src.h5
     objcopy_dst.h5
     objcopy_ext.dat
-    trefer1.h5
-    trefer2.h5
     app_ref.h5
     farray.h5
     farray_tmp.h5
     earray.h5
     earray_tmp.h5
-    efc0.h5
-    efc1.h5
-    efc2.h5
-    efc3.h5
-    efc4.h5
-    efc5.h5
+    efc*.h5
     log_vfd_out.log
+    log_ros3_out.log
+    log_s3comms_out.log
     new_multi_file_v16-r.h5
     new_multi_file_v16-s.h5
     split_get_file_image_test-m.h5
@@ -422,13 +376,11 @@ set (test_CLEANFILES
     unregister_filter_2.h5
     vds_virt.h5
     vds_dapl.h5
-    vds_src_0.h5
-    vds_src_1.h5
+    vds_src_*.h5
     swmr_data.h5
     use_use_append_chunk.h5
     use_append_mchunks.h5
     use_disable_mdc_flushes.h5
-    tbogus.h5.copy
     flushrefresh.h5
     flushrefresh_VERIFICATION_START
     flushrefresh_VERIFICATION_CHECKPOINT1
@@ -444,13 +396,19 @@ set (test_CLEANFILES
     cache_logging.out
     vds_swmr.h5
     vds_swmr_src_*.h5
-    tmp_vds_env/vds_src_2.h5
+    swmr*.h5
+    swmr_writer.out
+    swmr_writer.log.*
+    swmr_reader.out.*
+    swmr_reader.log.*
+    tbogus.h5.copy
+    cache_image_test.h5
     direct_chunk.h5
+    native_vol_test.h5
     splitter*.h5
     splitter.log
     mirror_rw/*
     mirror_wo/*
-    native_vol_test.h5
     event_set_*.h5
 )
 

@@ -33,9 +33,9 @@
 #include "H5ACprivate.h"        /* Metadata cache                           */
 #include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Dprivate.h"         /* Datasets                                 */
-#include "H5Eprivate.h"		/* Error handling                           */
-#include "H5Fprivate.h"		/* File access				    */
-#include "H5FLprivate.h"	/* Free Lists                               */
+#include "H5Eprivate.h"        /* Error handling                           */
+#include "H5Fprivate.h"        /* File access                    */
+#include "H5FLprivate.h"    /* Free Lists                               */
 #include "H5Gprivate.h"         /* Groups                                   */
 #include "H5Ipkg.h"             /* IDs                                      */
 #include "H5MMprivate.h"        /* Memory management                        */
@@ -48,25 +48,26 @@
 /* Local Macros */
 
 /* Combine a Type number and an atom index into an atom */
-#define H5I_MAKE(g,i)	((((hid_t)(g) & TYPE_MASK) << ID_BITS) |	  \
-			     ((hid_t)(i) & ID_MASK))
+#define H5I_MAKE(g,i)    ((((hid_t)(g) & TYPE_MASK) << ID_BITS) |      \
+                ((hid_t)(i) & ID_MASK))
 
 /* Local typedefs */
 
 /* Atom information structure used */
 typedef struct H5I_id_info_t {
-    hid_t	id;		/* ID for this info			    */
-    unsigned	count;		/* ref. count for this atom		    */
+    hid_t    id;        /* ID for this info                */
+    unsigned    count;        /* ref. count for this atom            */
     unsigned    app_count;      /* ref. count of application visible atoms  */
-    const void	*obj_ptr;	/* pointer associated with the atom	    */
+    const void    *obj_ptr;    /* pointer associated with the atom        */
 } H5I_id_info_t;
 
 /* ID type structure used */
 typedef struct {
     const H5I_class_t *cls;     /* Pointer to ID class                      */
-    unsigned	init_count;	/* # of times this type has been initialized*/
-    uint64_t	id_count;	/* Current number of IDs held		    */
-    uint64_t	nextid;		/* ID to use for the next atom		    */
+    unsigned    init_count;    /* # of times this type has been initialized*/
+    uint64_t    id_count;    /* Current number of IDs held            */
+    uint64_t    nextid;        /* ID to use for the next atom            */
+    H5I_id_info_t *last_info;   /* Info for most recent ID looked up        */
     H5SL_t      *ids;           /* Pointer to skip list that stores IDs     */
 } H5I_id_type_t;
 
@@ -143,8 +144,9 @@ static H5I_id_info_t *H5I__find_id(hid_t id);
 static int H5I__iterate_pub_cb(void *obj, hid_t id, void *udata);
 static int H5I__find_id_cb(void *_item, void *_key, void *_udata);
 static int H5I__id_dump_cb(void *_item, void *_key, void *_udata);
+static int H5I__dec_ref_async(hid_t id, void **token);
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_term_package
  *
@@ -155,14 +157,14 @@ static int H5I__id_dump_cb(void *_item, void *_key, void *_udata);
  * Return:      Success:    Positive if any action was taken that might
  *                          affect some other interface; zero otherwise.
  *
- *              Failure:	Negative
+ *              Failure:    Negative
  *
  *-------------------------------------------------------------------------
  */
 int
 H5I_term_package(void)
 {
-    int	n = 0;
+    int    n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -196,7 +198,7 @@ H5I_term_package(void)
     FUNC_LEAVE_NOAPI(n)
 } /* end H5I_term_package() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iregister_type
  *
@@ -277,7 +279,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iregister_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_register_type
  *
@@ -292,7 +294,7 @@ done:
 herr_t
 H5I_register_type(const H5I_class_t *cls)
 {
-    H5I_id_type_t *type_ptr = NULL;	/* Ptr to the atomic type*/
+    H5I_id_type_t *type_ptr = NULL;    /* Ptr to the atomic type*/
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -318,6 +320,7 @@ H5I_register_type(const H5I_class_t *cls)
         type_ptr->cls = cls;
         type_ptr->id_count = 0;
         type_ptr->nextid = cls->reserved;
+        type_ptr->last_info = NULL;
         if(NULL == (type_ptr->ids = H5SL_create(H5SL_TYPE_HID, NULL)))
             HGOTO_ERROR(H5E_ATOM, H5E_CANTCREATE, FAIL, "skip list creation failed")
     } /* end if */
@@ -326,7 +329,7 @@ H5I_register_type(const H5I_class_t *cls)
     type_ptr->init_count++;
 
 done:
-    if(ret_value < 0) {	/* Clean up on error */
+    if(ret_value < 0) {    /* Clean up on error */
         if(type_ptr) {
             if(type_ptr->ids)
                 H5SL_close(type_ptr->ids);
@@ -337,7 +340,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_register_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Itype_exists
  *
@@ -369,7 +372,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Itype_exists() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Inmembers
  *
@@ -380,8 +383,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	James Laird
- *		Nathaniel Furrer
+ * Programmer:    James Laird
+ *        Nathaniel Furrer
  *              Friday, April 23, 2004
  *
  *-------------------------------------------------------------------------
@@ -419,7 +422,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Inmembers() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_nmembers
  *
@@ -430,7 +433,7 @@ done:
  *
  *              Failure:    Negative
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Wednesday, March 24, 1999
  *
  *-------------------------------------------------------------------------
@@ -456,7 +459,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_nmembers() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__unwrap
  *
@@ -500,7 +503,7 @@ H5I__unwrap(void *obj_ptr, H5I_type_t type)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__unwrap() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iclear_type
  *
@@ -510,8 +513,8 @@ H5I__unwrap(void *obj_ptr, H5I_type_t type)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	James Laird
- *		Nathaniel Furrer
+ * Programmer:    James Laird
+ *        Nathaniel Furrer
  *              Friday, April 23, 2004
  *
  *-------------------------------------------------------------------------
@@ -533,7 +536,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iclear_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_clear_type
  *
@@ -542,7 +545,7 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Wednesday, March 24, 1999
  *
  *-------------------------------------------------------------------------
@@ -575,7 +578,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_clear_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__clear_type_cb
  *
@@ -641,7 +644,7 @@ H5I__clear_type_cb(void *_id, void H5_ATTR_UNUSED *key, void *_udata)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__clear_type_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Idestroy_type
  *
@@ -653,8 +656,8 @@ H5I__clear_type_cb(void *_id, void H5_ATTR_UNUSED *key, void *_udata)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Nathaniel Furrer
- *		James Laird
+ * Programmer:    Nathaniel Furrer
+ *        James Laird
  *
  *-------------------------------------------------------------------------
  */
@@ -675,7 +678,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Idestroy_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__destroy_type
  *
@@ -686,15 +689,15 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Nathaniel Furrer
- *		James Laird
+ * Programmer:    Nathaniel Furrer
+ *        James Laird
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5I__destroy_type(H5I_type_t type)
 {
-    H5I_id_type_t *type_ptr;	/* ptr to the atomic type */
+    H5I_id_type_t *type_ptr;    /* ptr to the atomic type */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -727,7 +730,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__destroy_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iregister
  *
@@ -755,7 +758,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iregister() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_register
  *
@@ -807,6 +810,9 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
     /* Sanity check for the 'nextid' getting too large and wrapping around */
     HDassert(type_ptr->nextid <= ID_MASK);
 
+    /* Set the most recent ID to this object */
+    type_ptr->last_info = id_ptr;
+
     /* Set return value */
     ret_value = new_id;
 
@@ -814,7 +820,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_register() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_register_using_existing_id
  *
@@ -878,11 +884,14 @@ H5I_register_using_existing_id(H5I_type_t type, void *object, hbool_t app_ref, h
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINSERT, FAIL, "can't insert ID node into skip list")
     type_ptr->id_count++;
 
+    /* Set the most recent ID to this object */
+    type_ptr->last_info = id_ptr;
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_register_using_existing_id() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_subst
  *
@@ -892,8 +901,8 @@ done:
  *                          with the specified ID.
  *              Failure:    NULL
  *
- * Programmer:	Quincey Koziol
- *		Saturday, February 27, 2010
+ * Programmer:    Quincey Koziol
+ *        Saturday, February 27, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -901,7 +910,7 @@ void *
 H5I_subst(hid_t id, const void *new_object)
 {
     H5I_id_info_t *id_ptr;      /* Pointer to the atom */
-    void *ret_value = NULL;	/* Return value */
+    void *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -919,7 +928,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_subst() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_object
  *
@@ -935,8 +944,8 @@ done:
 void *
 H5I_object(hid_t id)
 {
-    H5I_id_info_t	*id_ptr;            /* Pointer to the new atom  */
-    void		    *ret_value = NULL;  /* Return value             */
+    H5I_id_info_t    *id_ptr;            /* Pointer to the new atom  */
+    void            *ret_value = NULL;  /* Return value             */
 
     FUNC_ENTER_NOAPI_NOERR
 
@@ -949,7 +958,7 @@ H5I_object(hid_t id)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_object() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iobject_verify
  *
@@ -983,7 +992,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iobject_verify() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_object_verify
  *
@@ -994,8 +1003,8 @@ done:
  *                          specified ID.
  *              Failure:    NULL
  *
- * Programmer:	Quincey Koziol
- *		Wednesday, July 31, 2002
+ * Programmer:    Quincey Koziol
+ *        Wednesday, July 31, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -1018,7 +1027,7 @@ H5I_object_verify(hid_t id, H5I_type_t id_type)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5I_object_verify() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_get_type
  *
@@ -1032,8 +1041,8 @@ H5I_object_verify(hid_t id, H5I_type_t id_type)
  *                          ID types).
  *              Failure:    H5I_BADID
  *
- * Programmer:	Robb Matzke
- *		Friday, February 19, 1999
+ * Programmer:    Robb Matzke
+ *        Friday, February 19, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1052,7 +1061,7 @@ H5I_get_type(hid_t id)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_get_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iget_type
  *
@@ -1079,13 +1088,13 @@ H5Iget_type(hid_t id)
     ret_value = H5I_get_type(id);
 
     if(ret_value <= H5I_BADID || (int)ret_value >= H5I_next_type || NULL == H5I_object(id))
-	HGOTO_DONE(H5I_BADID);
+    HGOTO_DONE(H5I_BADID);
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iget_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_is_file_object
  *
@@ -1136,7 +1145,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5I_is_file_object() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iremove_verify
  *
@@ -1149,8 +1158,8 @@ done:
  *                          calling H5I_object().
  *              Failure:    NULL
  *
- * Programmer:	James Laird
- *		Nathaniel Furrer
+ * Programmer:    James Laird
+ *        Nathaniel Furrer
  *
  *-------------------------------------------------------------------------
  */
@@ -1172,7 +1181,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iremove_verify() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__remove_verify
  *
@@ -1184,15 +1193,15 @@ done:
  *                          calling H5I_object().
  *              Failure:    NULL
  *
- * Programmer:	James Laird
- *		Nat Furrer
+ * Programmer:    James Laird
+ *        Nat Furrer
  *
  *-------------------------------------------------------------------------
  */
 static void *
 H5I__remove_verify(hid_t id, H5I_type_t id_type)
 {
-    void * ret_value = NULL;	/*return value			*/
+    void * ret_value = NULL;    /*return value            */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -1205,7 +1214,7 @@ H5I__remove_verify(hid_t id, H5I_type_t id_type)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__remove_verify() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__remove_common
  *
@@ -1224,8 +1233,8 @@ H5I__remove_verify(hid_t id, H5I_type_t id_type)
 static void *
 H5I__remove_common(H5I_id_type_t *type_ptr, hid_t id)
 {
-    H5I_id_info_t *curr_id;	/* Pointer to the current atom */
-    void *ret_value = NULL;	/* Return value */
+    H5I_id_info_t *curr_id;    /* Pointer to the current atom */
+    void *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1235,6 +1244,10 @@ H5I__remove_common(H5I_id_type_t *type_ptr, hid_t id)
     /* Get the ID node for the ID */
     if(NULL == (curr_id = (H5I_id_info_t *)H5SL_remove(type_ptr->ids, &id)))
         HGOTO_ERROR(H5E_ATOM, H5E_CANTDELETE, NULL, "can't remove ID node from skip list")
+
+    /* Check if this ID was the last one accessed */
+    if(type_ptr->last_info == curr_id)
+        type_ptr->last_info = NULL;
 
     ret_value = (void *)curr_id->obj_ptr;       /* (Casting away const OK -QAK) */
     curr_id = H5FL_FREE(H5I_id_info_t, curr_id);
@@ -1246,7 +1259,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__remove_common() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_remove
  *
@@ -1257,16 +1270,16 @@ done:
  *                          calling H5I_object().
  *              Failure:    NULL
  *
- * Programmer:	Unknown
+ * Programmer:    Unknown
  *
  *-------------------------------------------------------------------------
  */
 void *
 H5I_remove(hid_t id)
 {
-    H5I_id_type_t	*type_ptr;	        /* Pointer to the atomic type */
-    H5I_type_t		type;		        /* Atom's atomic type */
-    void *	        ret_value = NULL;	/* Return value */
+    H5I_id_type_t    *type_ptr;            /* Pointer to the atomic type */
+    H5I_type_t        type;                /* Atom's atomic type */
+    void *            ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1286,7 +1299,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_remove() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Idec_ref
  *
@@ -1322,7 +1335,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Idec_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_dec_ref
  *
@@ -1368,7 +1381,7 @@ H5I_dec_ref(hid_t id)
      * file.  We have to close the dataset anyway. (SLU - 2010/9/7)
      */
     if(1 == id_ptr->count) {
-        H5I_id_type_t	*type_ptr;		/*ptr to the type	*/
+        H5I_id_type_t    *type_ptr;        /*ptr to the type    */
 
         /* Get the ID's type */
         type_ptr = H5I_id_type_list_g[H5I_TYPE(id)];
@@ -1392,10 +1405,9 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_dec_ref() */
 
-
 
 /*-------------------------------------------------------------------------
- * Function:    H5I_dec_ref_async
+ * Function:    H5I__dec_ref_async
  *
  * Purpose:     Asynchronous version of H5I_dec_ref
  *              This will fail if the type is not a reference counted type.
@@ -1409,13 +1421,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-int
-H5I_dec_ref_async(hid_t id, void **token)
+static int
+H5I__dec_ref_async(hid_t id, void **token)
 {
     H5I_id_info_t *id_ptr;      /* Pointer to the new ID */
     int ret_value = 0;          /* Return value */
 
-    FUNC_ENTER_NOAPI((-1))
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(id >= 0);
@@ -1461,7 +1473,7 @@ H5I_dec_ref_async(hid_t id, void **token)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5I_dec_ref(_async) */
+} /* end H5I__dec_ref_async */
 
 
 /*-------------------------------------------------------------------------
@@ -1489,7 +1501,7 @@ H5I_dec_app_ref_async(hid_t id, void **token)
     HDassert(id >= 0);
 
     /* Call regular decrement reference count routine */
-    if((ret_value = H5I_dec_ref_async(id, token)) < 0)
+    if((ret_value = H5I__dec_ref_async(id, token)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTDEC, (-1), "can't decrement ID ref count")
 
     /* Check if the ID still exists */
@@ -1509,7 +1521,6 @@ H5I_dec_app_ref_async(hid_t id, void **token)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_dec_app_ref_async() */
-
 
 
 /*-------------------------------------------------------------------------
@@ -1559,7 +1570,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_dec_app_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_dec_app_ref_always_close
  *
@@ -1601,7 +1612,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_dec_app_ref_always_close() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iinc_ref
  *
@@ -1632,7 +1643,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iinc_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_inc_ref
  *
@@ -1670,7 +1681,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_inc_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iget_ref
  *
@@ -1701,7 +1712,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iget_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_get_ref
  *
@@ -1734,7 +1745,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_get_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iinc_type_ref
  *
@@ -1767,7 +1778,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iinc_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__inc_type_ref
  *
@@ -1801,14 +1812,14 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__inc_type_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Idec_type_ref
  *
  * Purpose:     Decrements the reference count on an entire type of IDs.
  *              If the type reference count becomes zero then the type is
  *              destroyed along with all atoms in that type regardless of
- *              their reference counts.	 Destroying IDs involves calling
+ *              their reference counts.     Destroying IDs involves calling
  *              the free-func for each ID's object and then adding the ID
  *              struct to the ID free list.  Public interface to
  *              H5I_dec_type_ref.
@@ -1843,14 +1854,14 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Idec_type_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_dec_type_ref
  *
  * Purpose:     Decrements the reference count on an entire type of IDs.
  *              If the type reference count becomes zero then the type is
  *              destroyed along with all atoms in that type regardless of
- *              their reference counts.	 Destroying IDs involves calling
+ *              their reference counts.     Destroying IDs involves calling
  *              the free-func for each ID's object and then adding the ID
  *              struct to the ID free list.
  *              Returns the number of references to the type on success; a
@@ -1896,7 +1907,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_dec_type_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iget_type_ref
  *
@@ -1929,7 +1940,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iget_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__get_type_ref
  *
@@ -1964,7 +1975,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__get_type_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iis_valid
  *
@@ -1994,7 +2005,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iis_valid() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__search_cb
  *
@@ -2020,7 +2031,7 @@ H5I__search_cb(void *obj, hid_t id, void *_udata)
 
     /* Set the return value based on the callback's return value */
     if(cb_ret_val > 0) {
-        ret_value = H5_ITER_STOP;	/* terminate iteration early */
+        ret_value = H5_ITER_STOP;    /* terminate iteration early */
         udata->ret_obj = obj;       /* also set out parameter */
     }
     else if(cb_ret_val < 0)
@@ -2029,7 +2040,7 @@ H5I__search_cb(void *obj, hid_t id, void *_udata)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__search_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Isearch
  *
@@ -2080,7 +2091,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Isearch() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__iterate_pub_cb
  *
@@ -2111,7 +2122,7 @@ H5I__iterate_pub_cb(void H5_ATTR_UNUSED *obj, hid_t id, void *_udata)
 
     /* Set the return value based on the callback's return value */
     if(cb_ret_val > 0)
-        ret_value = H5_ITER_STOP;	/* terminate iteration early */
+        ret_value = H5_ITER_STOP;    /* terminate iteration early */
     else if(cb_ret_val < 0)
         ret_value = H5_ITER_ERROR;  /* indicate failure (which terminates iteration) */
     else
@@ -2120,7 +2131,7 @@ H5I__iterate_pub_cb(void H5_ATTR_UNUSED *obj, hid_t id, void *_udata)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__iterate_pub_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iiterate
  *
@@ -2167,7 +2178,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iiterate() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__iterate_cb
  *
@@ -2207,7 +2218,7 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 
         /* Set the return value based on the callback's return value */
         if(cb_ret_val > 0)
-            ret_value = H5_ITER_STOP;	/* terminate iteration early */
+            ret_value = H5_ITER_STOP;    /* terminate iteration early */
         else if(cb_ret_val < 0)
             ret_value = H5_ITER_ERROR;  /* indicate failure (which terminates iteration) */
     } /* end if */
@@ -2215,9 +2226,9 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__iterate_cb() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5I_iterate
+ * Function:    H5I_iterate
  *
  * Purpose:     Apply function FUNC to each member of type TYPE (with
  *              non-zero application reference count if app_ref is TRUE).
@@ -2245,7 +2256,7 @@ herr_t
 H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_ref)
 {
     H5I_id_type_t *type_ptr;            /* Pointer to the type  */
-    herr_t	   ret_value = SUCCEED;     /* Return value         */
+    herr_t       ret_value = SUCCEED;     /* Return value         */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2274,7 +2285,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_iterate() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__find_id
  *
@@ -2290,9 +2301,9 @@ done:
 static H5I_id_info_t *
 H5I__find_id(hid_t id)
 {
-    H5I_type_t		type;			/*ID's type		*/
-    H5I_id_type_t	*type_ptr;		/*ptr to the type	*/
-    H5I_id_info_t	*ret_value = NULL;	/* Return value */
+    H5I_type_t        type;            /*ID's type        */
+    H5I_id_type_t    *type_ptr;        /*ptr to the type    */
+    H5I_id_info_t    *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -2304,14 +2315,22 @@ H5I__find_id(hid_t id)
     if(!type_ptr || type_ptr->init_count <= 0)
         HGOTO_DONE(NULL)
 
-    /* Locate the ID node for the ID */
-    ret_value = (H5I_id_info_t *)H5SL_search(type_ptr->ids, &id);
+    /* Check for same ID as we have looked up last time */
+    if(type_ptr->last_info && type_ptr->last_info->id == id)
+        ret_value = type_ptr->last_info;
+    else {
+        /* Locate the ID node for the ID */
+        ret_value = (H5I_id_info_t *)H5SL_search(type_ptr->ids, &id);
+
+        /* Remember this ID */
+        type_ptr->last_info = ret_value;
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__find_id() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iget_name
  *
@@ -2362,7 +2381,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iget_name() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iget_file_id
  *
@@ -2406,7 +2425,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iget_file_id() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__find_id_cb
  *
@@ -2444,7 +2463,7 @@ H5I__find_id_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__find_id_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_find_id
  *
@@ -2493,7 +2512,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_find_id() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__id_dump_cb
  *
@@ -2513,9 +2532,9 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 
     FUNC_ENTER_STATIC_NOERR
 
-    HDfprintf(stderr, "		 id = %lu\n", (unsigned long)(item->id));
-    HDfprintf(stderr, "		 count = %u\n", item->count);
-    HDfprintf(stderr, "		 obj   = 0x%08lx\n", (unsigned long)(item->obj_ptr));
+    HDfprintf(stderr, "         id = %lu\n", (unsigned long)(item->id));
+    HDfprintf(stderr, "         count = %u\n", item->count);
+    HDfprintf(stderr, "         obj   = 0x%08p\n", item->obj_ptr);
 
     /* Get the group location, so we get get the name */
     switch (type) {
@@ -2582,7 +2601,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     FUNC_LEAVE_NOAPI(H5_ITER_CONT)
 } /* end H5I__id_dump_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_dump_ids_for_type
  *
@@ -2605,14 +2624,14 @@ H5I_dump_ids_for_type(H5I_type_t type)
     if(type_ptr) {
 
         /* Header */
-        HDfprintf(stderr, "	 init_count = %u\n", type_ptr->init_count);
-        HDfprintf(stderr, "	 reserved   = %u\n", type_ptr->cls->reserved);
-        HDfprintf(stderr, "	 id_count   = %llu\n", (unsigned long long)type_ptr->id_count);
-        HDfprintf(stderr, "	 nextid	    = %llu\n", (unsigned long long)type_ptr->nextid);
+        HDfprintf(stderr, "     init_count = %u\n", type_ptr->init_count);
+        HDfprintf(stderr, "     reserved   = %u\n", type_ptr->cls->reserved);
+        HDfprintf(stderr, "     id_count   = %llu\n", (unsigned long long)type_ptr->id_count);
+        HDfprintf(stderr, "     nextid        = %llu\n", (unsigned long long)type_ptr->nextid);
 
         /* List */
         if(type_ptr->id_count > 0) {
-            HDfprintf(stderr, "	 List:\n");
+            HDfprintf(stderr, "     List:\n");
             H5SL_iterate(type_ptr->ids, H5I__id_dump_cb, &type);
         }
     }

@@ -127,8 +127,11 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     hssize_t            i;
     void                *vp = NULL;
     FILE                *out = H5_debug_g.trace;
-    H5_timer_t          event_time;
-    static H5_timer_t   first_time = {0.0F, 0.0F, 0.0F};
+    static hbool_t      is_first_invocation = TRUE;
+    H5_timer_t          function_timer;
+    H5_timevals_t       function_times;
+    static H5_timer_t   running_timer;
+    H5_timevals_t       running_times;
     static int          current_depth = 0;
     static int          last_call_depth = 0;
 
@@ -154,13 +157,18 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
         } /* end else */
     } /* end if */
 
-    /* Get time for event */
-    if(H5_DBL_ABS_EQUAL(first_time.etime, (double)0.0f))
-        H5_timer_begin(&first_time);
-    if(H5_debug_g.ttimes)
-        H5_timer_begin(&event_time);
-    else
-        HDmemset(&event_time, 0, sizeof event_time);
+    /* Get time for event if the trace times flag is set */
+    if(is_first_invocation && H5_debug_g.ttimes) {
+        /* start the library-wide timer */
+        is_first_invocation = FALSE;
+        H5_timer_init(&running_timer);
+        H5_timer_start(&running_timer);
+    } /* end if */
+    if(H5_debug_g.ttimes) {
+        /* start the timer for this function */
+        H5_timer_init(&function_timer);
+        H5_timer_start(&function_timer);
+    } /* end if */
 
     /* Print the first part of the line.  This is the indication of the
      * nesting depth followed by the function name and either start of
@@ -176,7 +184,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
             if(H5_debug_g.ttimes) {
                 char tmp[320];
 
-                HDsprintf(tmp, "%.6f", event_time.etime-first_time.etime);
+                H5_timer_get_times(function_timer, &function_times);
+                H5_timer_get_times(running_timer, &running_times);
+                HDsprintf(tmp, "%.6f", (function_times.elapsed - running_times.elapsed));
                 HDfprintf(out, " %*s ", (int)HDstrlen(tmp), "");
             } /* end if */
             for(i = 0; i < current_depth; i++)
@@ -191,8 +201,11 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     else {
         if(current_depth>last_call_depth)
             HDfputs(" = <delayed>\n", out);
-        if(H5_debug_g.ttimes)
-            HDfprintf(out, "@%.6f ", event_time.etime - first_time.etime);
+        if(H5_debug_g.ttimes) {
+            H5_timer_get_times(function_timer, &function_times);
+            H5_timer_get_times(running_timer, &running_times);
+            HDfprintf(out, "@%.6f ", (function_times.elapsed - running_times.elapsed));
+        } /* end if */
         for(i = 0; i < current_depth; i++)
             HDfputc('+', out);
         HDfprintf(out, "%*s%s(", 2*current_depth, "", func);
@@ -3700,9 +3713,12 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     } /* end for */
 
     /* Display event time for return */
-    if(returning && H5_debug_g.ttimes)
-        HDfprintf(out, " @%.6f [dt=%.6f]", (event_time.etime - first_time.etime),
-                (event_time.etime - *returning));
+    if(returning && H5_debug_g.ttimes) {
+        H5_timer_get_times(function_timer, &function_times);
+        H5_timer_get_times(running_timer, &running_times);
+        HDfprintf(out, " @%.6f [dt=%.6f]", (function_times.elapsed - running_times.elapsed),
+                (function_times.elapsed - *returning));
+    } /* end if */
 
 error:
     HDva_end(ap);
@@ -3714,6 +3730,9 @@ error:
     } /* end else */
     HDfflush(out);
 
-    return event_time.etime;
+    if(H5_debug_g.ttimes)
+        return function_times.elapsed;
+    else
+        return 0.0F;
 } /* end H5_trace() */
 

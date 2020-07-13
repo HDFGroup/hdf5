@@ -1549,7 +1549,7 @@ H5P__free_del_name_cb(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED 
  NAME
     H5P__access_class
  PURPOSE
-    Internal routine to increment or decrement list & class dependancies on a
+    Internal routine to increment or decrement list & class dependencies on a
         property list class
  USAGE
     herr_t H5P__access_class(pclass,mod)

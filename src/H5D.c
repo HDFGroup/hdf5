@@ -156,9 +156,9 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     if(NULL == (dset = H5VL_dataset_create(vol_obj, &loc_params, name, lcpl_id, type_id, space_id, dcpl_id, dapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "unable to create dataset")
 
-    /* Get an atom for the dataset */
+    /* Get an ID for the dataset */
     if((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize dataset handle")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataset")
 
 done:
     if(H5I_INVALID_HID == ret_value)
@@ -321,7 +321,7 @@ done:
  *              it. It is illegal to subsequently use that same dataset
  *              ID in calls to other dataset functions.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -388,7 +388,7 @@ done:
  *
  * Purpose:     Returns the status of dataspace allocation.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -716,7 +716,7 @@ done:
  *              The PLIST_ID can be the constant H5P_DEFAULT in which
  *              case the default data transfer properties are used.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              Thursday, December 4, 1997
@@ -929,7 +929,7 @@ done:
  *              The PLIST_ID can be the constant H5P_DEFAULT in which
  *              case the default data transfer properties are used.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              Thursday, December 4, 1997
@@ -938,7 +938,7 @@ done:
  */
 herr_t
 H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-	 hid_t file_space_id, hid_t dxpl_id, const void *buf)
+    hid_t file_space_id, hid_t dxpl_id, const void *buf)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1156,8 +1156,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
-    hsize_t *size)
+H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id, hsize_t *size)
 {
     H5VL_object_t *vol_obj;     /* Dataset for this operation */
     hbool_t supported;          /* Whether 'get vlen buf size' operation is supported by VOL connector */
@@ -1202,7 +1201,7 @@ done:
  * Purpose:     Modifies the dimensions of a dataset.
  *              Can change to a smaller dimension.
  *
- * Return:      SUCCEED/FAIL
+ * Return:	Non-negative on success, negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -1239,7 +1238,7 @@ done:
  *
  * Purpose:     Flushes all buffers associated with a dataset.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success, negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -1312,7 +1311,7 @@ done:
  *
  * Purpose:     Refreshes all buffers associated with a dataset.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success, negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -1352,7 +1351,7 @@ done:
  *              For virtual:
  *                  No conversion
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success, negative on failure
  *
  * Programmer:  Vailin Choi
  *              Feb 2015
@@ -1429,7 +1428,7 @@ done:
  *              Intended for use with the H5D(O)read_chunk API call so
  *              the caller can construct an appropriate buffer.
  *
- * Return:      SUCCEED/FAIL
+ * Return:	Non-negative on success, negative on failure
  *
  * Programmer:  Matthew Strong (GE Healthcare)
  *              20 October 2016

@@ -68,7 +68,7 @@ typedef struct {
     hsize_t n;                          /* Offset of link within index */
 
     /* Out */
-    H5L_info2_t      *linfo;            /* Buffer to return to user */
+    H5L_info2_t     *linfo;             /* Buffer to return to user */
 } H5L_trav_gibi_t;
 
 /* User data for path traversal routine for getting name by index */

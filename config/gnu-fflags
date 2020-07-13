@@ -26,7 +26,7 @@
 load_gnu_arguments()
 {
     set -- $(for arg; do
-        sed 's,#.*$,,' $srcdir/config/gnu-warnings/${arg} | demote_errors
+        sed 's,#.*$,,' $srcdir/config/gnu-warnings/${arg}
     done)
     IFS=' ' echo "$*"
 }
@@ -144,25 +144,6 @@ if test "X-gfortran" = "X-$f9x_vendor"; then
     #############################
     # Version-specific warnings #
     #############################
-
-    # gfortran 4.3 (nothing new)
-
-    # gfortran >= 4.4
-    if test $f9x_vers_major -ge 5 -o $f9x_vers_major -eq 4 -a $f9x_vers_minor -ge 4; then
-        H5_FCFLAGS="$H5_FCFLAGS $(load_gnu_arguments gfort-4.4)"
-    fi
-
-    # gfortran >= 4.5
-    if test $f9x_vers_major -ge 5 -o $f9x_vers_major -eq 4 -a $f9x_vers_minor -ge 5; then
-        H5_FCFLAGS="$H5_FCFLAGS $(load_gnu_arguments gfort-4.5)"
-    fi
-
-    # gfortran 4.6 (nothing new)
-
-    # gfortran >= 4.7
-    if test $f9x_vers_major -ge 5 -o $f9x_vers_major -eq 4 -a $f9x_vers_minor -ge 7; then
-        H5_FCFLAGS="$H5_FCFLAGS $(load_gnu_arguments gfort-4.7)"
-    fi
 
     # gfortran >= 4.8
     if test $f9x_vers_major -ge 5 -o $f9x_vers_major -eq 4 -a $f9x_vers_minor -ge 8; then

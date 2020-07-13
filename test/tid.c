@@ -20,7 +20,7 @@
 #include "H5Ipkg.h"
 
 static herr_t
-free_wrapper(void *p)
+free_wrapper(void *p, void **_ctx)
 {
     HDfree(p);
     return SUCCEED;
@@ -588,7 +588,7 @@ typedef struct test_rct_obj_t {
 } test_rct_obj_t;
 
 /* Free callback */
-static herr_t test_rct_free(void *_obj) {
+static herr_t test_rct_free(void *_obj, void **_ctx) {
     test_rct_obj_t *obj = (test_rct_obj_t *)_obj;
     long rem_idx, i;
     herr_t  ret;        /* return value */

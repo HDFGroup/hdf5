@@ -33,6 +33,8 @@
 ./autogen.sh
 ./configure.ac
 
+./.github/workflows/main.yml  _DO_NOT_DISTRIBUTE_
+
 ./m4/aclocal_cxx.m4
 ./m4/aclocal_fc.m4
 ./m4/aclocal_fc.f90
@@ -143,20 +145,13 @@
 ./config/solaris
 
 #warnings files for both autotools and CMake
+./config/clang-cxxflags
+./config/clang-flags
 ./config/clang-warnings/developer-general
 ./config/clang-warnings/error-general
 ./config/clang-warnings/general
 ./config/clang-warnings/no-developer-general
-./config/gnu-warnings/4.2-4.3
-./config/gnu-warnings/4.2-4.4
-./config/gnu-warnings/4.2-4.6
-./config/gnu-warnings/4.2-4.last
-./config/gnu-warnings/4.3
-./config/gnu-warnings/4.4
-./config/gnu-warnings/4.5
-./config/gnu-warnings/4.5-4.6
-./config/gnu-warnings/4.6
-./config/gnu-warnings/4.7
+./config/gnu-warnings/4.8-4.last
 ./config/gnu-warnings/4.8
 ./config/gnu-warnings/4.9
 ./config/gnu-warnings/5
@@ -166,9 +161,9 @@
 ./config/gnu-warnings/9
 ./config/gnu-warnings/cxx-general
 ./config/gnu-warnings/cxx-4.9
-./config/gnu-warnings/developer-4.5
-./config/gnu-warnings/developer-4.6
-./config/gnu-warnings/developer-4.7
+./config/gnu-warnings/cxx-5
+./config/gnu-warnings/cxx-error-5
+./config/gnu-warnings/cxx-error-general
 ./config/gnu-warnings/developer-4.8
 ./config/gnu-warnings/developer-7
 ./config/gnu-warnings/developer-8
@@ -178,16 +173,10 @@
 ./config/gnu-warnings/error-general
 ./config/gnu-warnings/general
 ./config/gnu-warnings/gfort-general
-./config/gnu-warnings/gfort-4.4
-./config/gnu-warnings/gfort-4.5
-./config/gnu-warnings/gfort-4.7
 ./config/gnu-warnings/gfort-4.8
 ./config/gnu-warnings/gfort-5
 ./config/gnu-warnings/gfort-6
 ./config/gnu-warnings/gfort-8
-./config/gnu-warnings/no-developer-4.5
-./config/gnu-warnings/no-developer-4.6
-./config/gnu-warnings/no-developer-4.7
 ./config/gnu-warnings/no-developer-4.8
 ./config/gnu-warnings/no-developer-8
 ./config/gnu-warnings/no-developer-general
@@ -203,6 +192,7 @@
 ./examples/h5_chunk_read.c
 ./examples/h5_compound.c
 ./examples/h5_crtgrpd.c
+./examples/h5_debug_trace.c
 ./examples/h5_subset.c
 ./examples/h5_cmprss.c
 ./examples/h5_rdwt.c
@@ -1248,6 +1238,7 @@
 ./test/theap.c
 ./test/thread_id.c
 ./test/tid.c
+./test/timer.c
 ./test/titerate.c
 ./test/tlayouto.h5
 ./test/tmeta.c

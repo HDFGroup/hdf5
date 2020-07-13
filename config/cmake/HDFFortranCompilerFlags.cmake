@@ -10,24 +10,6 @@
 # help@hdfgroup.org.
 #
 
-macro (ADD_H5_FFLAGS h5_fflag_var infile)
-  file (STRINGS ${infile} TEST_FLAG_STREAM)
-  #message (STATUS "TEST_FLAG_STREAM=${TEST_FLAG_STREAM}")
-  list (LENGTH TEST_FLAG_STREAM len_flag)
-  if (len_flag GREATER 0)
-    math (EXPR _FP_LEN "${len_flag} - 1")
-    foreach (line RANGE 0 ${_FP_LEN})
-      list (GET TEST_FLAG_STREAM ${line} str_flag)
-      string (REGEX REPLACE "^#.*" "" str_flag "${str_flag}")
-      #message (STATUS "str_flag=${str_flag}")
-      if (str_flag)
-        list (APPEND ${h5_fflag_var} "${str_flag}")
-      endif ()
-    endforeach ()
-  endif ()
-  #message (STATUS "h5_fflag_var=${${h5_fflag_var}}")
-endmacro ()
-
 message (STATUS "Warnings Configuration: default Fortran: ${CMAKE_Fortran_FLAGS}")
 
 #-----------------------------------------------------------------------------
@@ -66,7 +48,7 @@ endif ()
 # CDash is configured to only allow 3000 warnings, so
 # break into groups (from the config/gnu-flags file)
 #-----------------------------------------------------------------------------
-if (NOT MSVC)
+if (NOT MSVC AND NOT MINGW)
   # General flags
   if (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
     ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/intel-warnings/ifort-general")
@@ -85,23 +67,6 @@ if (NOT MSVC)
   message (STATUS "HDF5_CMAKE_Fortran_FLAGS=${HDF5_CMAKE_Fortran_FLAGS}")
 
   if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
-    # Append warning flags that only gcc 4.4+ knows about
-    ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/gfort-4.4")
-
-    # Append more extra warning flags that only gcc 4.5+ know about
-    if (NOT CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 4.5)
-      ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/gfort-4.5")
-    endif ()
-
-    # Append more extra warning flags that only gcc 4.6+ know about
-    #if (NOT CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 4.6)
-    #  ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/gfort-4.6")
-    #endif ()
-
-    # Append more extra warning flags that only gcc 4.7+ know about
-    if (NOT CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 4.7)
-      ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/gfort-4.7")
-    endif ()
 
     # Append more extra warning flags that only gcc 4.8+ know about
     if (NOT CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 4.8)
@@ -113,7 +78,7 @@ if (NOT MSVC)
     #  ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/gfort-4.9")
     #endif ()
 
-    # Append more extra warning flags that only gcc 5.1+ know about
+    # Append more extra warning flags that only gcc 5.x+ know about
     if (NOT CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 5.0)
       ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/gfort-5")
     endif ()

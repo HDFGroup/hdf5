@@ -1666,10 +1666,10 @@ verify_select_hyper_contig_dr__run_test(const uint16_t *cube_buf,
 /****************************************************************
 **
 **  test_select_hyper_contig_dr__run_test(): Test H5S (dataspace)
-**    selection code with contiguous source and target having
-**    different ranks but the same shape.  We have already
-**    tested H5Sselect_shape_same in isolation, so now we try to do
-**    I/O.
+**  selection code with contiguous source and target having
+**  different ranks but the same shape.  We have already
+**  tested H5Sselect_shape_same in isolation, so now we try to do
+**  I/O.
 **
 ****************************************************************/
 static void
@@ -6118,8 +6118,8 @@ test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
      */
     tmpdata = data;
     for (j = 0; j < X; j++)
-    for (i = 0; i < Y; i++)
-        for (k = 0; k < Z; k++)
+        for (i = 0; i < Y; i++)
+            for (k = 0; k < Z; k++)
                 *tmpdata++ =  (short)((k+1)%256);
 
     /*
@@ -6281,8 +6281,8 @@ test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
     tmpdata = data;
     tmpdata_out = data_out;
     for (j = 0; j < X; j++)
-    for (i = 0; i < Y; i++)
-        for (k = 0; k < Z; k++,tmpdata++,tmpdata_out++) {
+        for (i = 0; i < Y; i++)
+            for (k = 0; k < Z; k++,tmpdata++,tmpdata_out++) {
                 if(*tmpdata!=*tmpdata_out)
                     TestErrPrintf("Line %d: Error! j=%d, i=%d, k=%d, *tmpdata=%x, *tmpdata_out=%x\n",__LINE__,j,i,k,(unsigned)*tmpdata,(unsigned)*tmpdata_out);
             } /* end for */
@@ -6350,7 +6350,7 @@ test_select_point_chunk(void)
      */
     tmpdata = data;
     for (i = 0; i < SPACE7_DIM1; i++)
-    for (j = 0; j < SPACE7_DIM1; j++)
+        for (j = 0; j < SPACE7_DIM1; j++)
             *tmpdata++ = ((i*SPACE7_DIM2)+j)%256;
 
     /*
@@ -9388,15 +9388,15 @@ test_shape_same_dr__smoke_check_1(void)
 **    a "checker board" hyperslab as follows:
 **
 **        * * - - * * - - * *
-**              * * - - * * - - * *
-**              - - * * - - * * - -
-**              - - * * - - * * - -
 **        * * - - * * - - * *
-**              * * - - * * - - * *
-**              - - * * - - * * - -
-**              - - * * - - * * - -
+**        - - * * - - * * - -
+**        - - * * - - * * - -
 **        * * - - * * - - * *
-**              * * - - * * - - * *
+**        * * - - * * - - * *
+**        - - * * - - * * - -
+**        - - * * - - * * - -
+**        * * - - * * - - * *
+**        * * - - * * - - * *
 **
 **    where asterisks indicate selected elements, and dashes
 **    indicate unselected elements.
@@ -12026,16 +12026,16 @@ test_space_rebuild(void)
     if(rebuild_stat1 != H5S_DIMINFO_VALID_YES) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     if(rebuild_stat2 != H5S_DIMINFO_VALID_YES) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     if(ret != FAIL) {
        /* In this case, rebuild_check should be TRUE. */
        rebuild_check = H5Sselect_shape_same(sid_reg1, sid_reg_ori1);
        CHECK(rebuild_check, FALSE, "H5Sselect_shape_same");
-    } /* end if */
+    }
 
     /* For irregular hyperslab */
     sid_irreg1     = H5Screate_simple(SPACERE1_RANK,dims1,NULL);
@@ -12062,11 +12062,11 @@ test_space_rebuild(void)
     if(rebuild_stat1 != H5S_DIMINFO_VALID_NO) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     if(rebuild_stat2 != H5S_DIMINFO_VALID_IMPOSSIBLE) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     /* No need to do shape comparision */
 
 
@@ -12114,7 +12114,7 @@ test_space_rebuild(void)
     if(rebuild_stat1 != H5S_DIMINFO_VALID_YES) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     if(rebuild_stat2 != H5S_DIMINFO_VALID_YES) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
@@ -12123,7 +12123,7 @@ test_space_rebuild(void)
        /* In this case, rebuild_check should be TRUE. */
        rebuild_check = H5Sselect_shape_same(sid_reg2, sid_reg_ori2);
        CHECK(rebuild_check, FALSE, "H5Sselect_shape_same");
-    } /* end if */
+    }
 
     /* 2-D irregular case */
     sid_irreg2     = H5Screate_simple(SPACERE2_RANK,dims2,NULL);
@@ -12155,11 +12155,11 @@ test_space_rebuild(void)
     if(rebuild_stat1 != H5S_DIMINFO_VALID_NO) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     if(rebuild_stat2 != H5S_DIMINFO_VALID_IMPOSSIBLE) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     /* No need to do shape comparision */
 
     MESSAGE(7, ("Testing functionality to rebuild 3-D hyperslab selection\n"));
@@ -12212,16 +12212,16 @@ test_space_rebuild(void)
     if(rebuild_stat1 != H5S_DIMINFO_VALID_YES) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     if(rebuild_stat2 != H5S_DIMINFO_VALID_YES) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     if(ret != FAIL) {
        /* In this case, rebuild_check should be TRUE. */
        rebuild_check = H5Sselect_shape_same(sid_reg3, sid_reg_ori3);
        CHECK(rebuild_check, FALSE, "H5Sselect_shape_same");
-    } /* end if */
+    }
 
     sid_irreg3     = H5Screate_simple(SPACERE3_RANK,dims3,NULL);
 
@@ -12258,11 +12258,11 @@ test_space_rebuild(void)
     if(rebuild_stat1 != H5S_DIMINFO_VALID_NO) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     if(rebuild_stat2 != H5S_DIMINFO_VALID_IMPOSSIBLE) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     /* No need to do shape comparision */
 
     MESSAGE(7, ("Testing functionality to rebuild 4-D hyperslab selection\n"));
@@ -12323,16 +12323,16 @@ test_space_rebuild(void)
     if(rebuild_stat1 != H5S_DIMINFO_VALID_YES) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     if(rebuild_stat2 != H5S_DIMINFO_VALID_YES) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     if(ret != FAIL) {
        /* In this case, rebuild_check should be TRUE. */
        rebuild_check = H5Sselect_shape_same(sid_reg4, sid_reg_ori4);
        CHECK(rebuild_check, FALSE, "H5Sselect_shape_same");
-    } /* end if */
+    }
 
     /* Testing irregular selection */
     sid_irreg4     = H5Screate_simple(SPACERE4_RANK,dims4,NULL);
@@ -12380,11 +12380,11 @@ test_space_rebuild(void)
     if(rebuild_stat1 != H5S_DIMINFO_VALID_NO) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     if(rebuild_stat2 != H5S_DIMINFO_VALID_IMPOSSIBLE) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     /* No need to do shape comparision */
 
     MESSAGE(7, ("Testing functionality to rebuild 5-D hyperslab selection\n"));
@@ -12449,16 +12449,16 @@ test_space_rebuild(void)
     if(rebuild_stat1 != H5S_DIMINFO_VALID_YES) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     if(rebuild_stat2 != H5S_DIMINFO_VALID_YES) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     if(ret != FAIL) {
        /* In this case, rebuild_check should be TRUE. */
        rebuild_check = H5Sselect_shape_same(sid_reg5, sid_reg_ori5);
        CHECK(rebuild_check, FALSE, "H5Sselect_shape_same");
-    } /* end if */
+    }
 
     sid_irreg5     = H5Screate_simple(SPACERE5_RANK,dims5,NULL);
 
@@ -12511,11 +12511,11 @@ test_space_rebuild(void)
     if(rebuild_stat1 != H5S_DIMINFO_VALID_NO) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     if(rebuild_stat2 != H5S_DIMINFO_VALID_IMPOSSIBLE) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     /* No need to do shape comparision */
 
    /* We use 5-D to test a special case with
@@ -12558,11 +12558,11 @@ test_space_rebuild(void)
     if(rebuild_stat1 != H5S_DIMINFO_VALID_YES) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     if(rebuild_stat2 != H5S_DIMINFO_VALID_YES) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     /* No need to do shape comparision */
 
     /* Adding some selections to make it real irregular */
@@ -12586,11 +12586,11 @@ test_space_rebuild(void)
     if(rebuild_stat1 != H5S_DIMINFO_VALID_NO) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     if(rebuild_stat2 != H5S_DIMINFO_VALID_IMPOSSIBLE) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     /* No need to do shape comparision */
 
     /* Add more selections to make it regular again */
@@ -12614,11 +12614,11 @@ test_space_rebuild(void)
     if(rebuild_stat1 != H5S_DIMINFO_VALID_NO) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     if(rebuild_stat2 != H5S_DIMINFO_VALID_YES) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    } /* end if */
+    }
     /* No need to do shape comparision */
 
     H5Sclose(sid_reg1);

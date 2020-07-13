@@ -78,7 +78,7 @@ typedef struct {
 /********************/
 
 /* General stuff */
-static H5D_shared_t *H5D__new(hid_t dcpl_id, hid_t dapl, hbool_t creating, hbool_t vl_type);
+static H5D_shared_t *H5D__new(hid_t dcpl_id, hid_t dapl_id, hbool_t creating, hbool_t vl_type);
 static herr_t H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type);
 static herr_t H5D__cache_dataspace_info(const H5D_t *dset);
 static herr_t H5D__init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space);
@@ -738,7 +738,7 @@ H5D__use_minimized_dset_headers(H5F_t *file, hbool_t *minimize)
 {
     herr_t          ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT;
+    FUNC_ENTER_STATIC
 
     HDassert(file);
     HDassert(minimize);
@@ -779,7 +779,7 @@ H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr)
     size_t      get_value        = 0;
     size_t      ret_value        = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT;
+    FUNC_ENTER_STATIC
 
     HDassert(file);
     HDassert(dset);
@@ -897,7 +897,7 @@ H5D__prepare_minimized_oh(H5F_t *file, H5D_t *dset, H5O_loc_t *oloc)
     size_t  ohdr_size = 0;
     herr_t  ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT;
+    FUNC_ENTER_STATIC
 
     HDassert(file);
     HDassert(dset);
@@ -942,7 +942,7 @@ H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id)
     hbool_t           fill_changed = FALSE;   /* Flag indicating the fill value was changed */
     hbool_t           layout_init = FALSE;    /* Flag to indicate that chunk information was initialized */
     hbool_t           use_at_least_v18;       /* Flag indicating to use at least v18 format versions */
-    hbool_t           minimize_header = FALSE;
+    hbool_t           use_minimized_header = FALSE; /* Flag to use minimized dataset object headers */
     herr_t            ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1011,10 +1011,10 @@ H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set fill value info")
     } /* end if */
 
-    if(H5D__use_minimized_dset_headers(file, &minimize_header) == FAIL)
+    if(H5D__use_minimized_dset_headers(file, &use_minimized_header) == FAIL)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get minimize settings")
 
-    if(TRUE == minimize_header) {
+    if(TRUE == use_minimized_header) {
         if(H5D__prepare_minimized_oh(file, dset, oloc) == FAIL)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create minimized dataset object header")
     } else {
@@ -1027,7 +1027,7 @@ H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id)
         /* Create an object header for the dataset */
         if(H5O_create(file, ohdr_size, (size_t)1, dset->shared->dcpl_id, oloc/*out*/) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset object header")
-    } /* If use minimum/standard object header space */
+    } /* if using default/minimized object headers */
 
     HDassert(file == dset->oloc.file);
 
@@ -1160,17 +1160,19 @@ H5D__build_file_prefix(const H5D_t *dset, H5F_prefix_open_t prefix_type, char **
     if(H5F_PREFIX_VDS == prefix_type) {
         prefix = H5D_prefix_vds_env;
 
-        if(prefix == NULL || *prefix == '\0')
+        if(prefix == NULL || *prefix == '\0') {
             if(H5CX_get_vds_prefix(&prefix) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get the prefix for vds file")
-    } /* end if */
+        }
+    }
     else if(H5F_PREFIX_EFILE == prefix_type) {
         prefix = H5D_prefix_ext_env;
 
-        if(prefix == NULL || *prefix == '\0')
+        if(prefix == NULL || *prefix == '\0') {
             if(H5CX_get_ext_file_prefix(&prefix) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get the prefix for the external file")
-    } /* end else-if */
+        }
+    }
     else
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "prefix name is not sensible")
 
@@ -1276,6 +1278,7 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     /* Initialize the shared dataset space */
     if(NULL == (new_dset->shared = H5D__new(dcpl_id, dapl_id, TRUE, has_vl_type)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
     /* Copy & initialize datatype for dataset */
     if(H5D__init_type(file, new_dset, type_id, type) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't copy datatype")
@@ -2028,7 +2031,7 @@ H5D_close(H5D_t *dataset)
             if(H5AC_cork(dataset->oloc.file, dataset->oloc.addr, H5AC__UNCORK, NULL) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTUNCORK, FAIL, "unable to uncork an object")
 
-        /* Release datatype, dataspace and creation and access property lists -- there isn't
+        /* Release datatype, dataspace, and creation and access property lists -- there isn't
          * much we can do if one of these fails, so we just continue.
          */
         free_failed |= (H5I_dec_ref(dataset->shared->type_id) < 0) ||
@@ -2291,7 +2294,7 @@ H5D__alloc_storage(const H5D_io_info_t *io_info, H5D_time_alloc_t time_alloc,
      * We assume that external storage is already
      * allocated by the caller, or at least will be before I/O is performed.
      */
-    if(!(H5S_NULL == H5S_GET_EXTENT_TYPE(dset->shared->space) || dset->shared->dcpl_cache.efl.nused > 0)) {
+    if(!(0 == H5S_GET_EXTENT_NPOINTS(dset->shared->space) || dset->shared->dcpl_cache.efl.nused > 0)) {
         /* Get a pointer to the dataset's layout information */
         layout = &(dset->shared->layout);
 
