@@ -1117,8 +1117,9 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
     HDassert(!f->shared->vfd_swmr_writer);
     HDassert(file);
 
-    hlog_fast(eot, "%s enter index len %" PRIu32 " used %" PRIu32,
-        __func__, f->shared->mdf_idx_len, f->shared->mdf_idx_entries_used);
+    hlog_fast(eot, "%s enter file %p index len %" PRIu32 " used %" PRIu32,
+        __func__, (void *)file,
+        f->shared->mdf_idx_len, f->shared->mdf_idx_entries_used);
 
     /* 1) Direct the VFD SWMR reader VFD to load the current header
      *    from the metadata file, and report the current tick.

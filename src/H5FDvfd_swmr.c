@@ -86,11 +86,11 @@ static herr_t H5FD_vfd_swmr_lock(H5FD_t *_file, hbool_t rw);
 static herr_t H5FD_vfd_swmr_unlock(H5FD_t *_file);
 
 /* VFD SWMR */
-static htri_t H5FD__vfd_swmr_header_deserialize(H5FD_t *_file,
-    H5FD_vfd_swmr_md_header *md_header);
-static htri_t H5FD__vfd_swmr_index_deserialize(const H5FD_t *_file,
+static htri_t H5FD__vfd_swmr_header_deserialize(H5FD_vfd_swmr_t *,
+    H5FD_vfd_swmr_md_header *);
+static htri_t H5FD__vfd_swmr_index_deserialize(const H5FD_vfd_swmr_t *file,
     H5FD_vfd_swmr_md_index *md_index, const H5FD_vfd_swmr_md_header *md_header);
-static herr_t H5FD__vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open);
+static herr_t H5FD__vfd_swmr_load_hdr_and_idx(H5FD_vfd_swmr_t *, hbool_t);
 
 HLOG_OUTLET_SHORT_DEFN(index_motion, swmr);
 HLOG_OUTLET_SHORT_DEFN(swmr_stats, swmr);
@@ -286,7 +286,7 @@ H5FD__swmr_reader_open(H5FD_vfd_swmr_t *file, H5F_vfd_swmr_config_t *vfd_swmr_co
     /* Retry on loading and decoding the header and index in the
      *  metadata file
      */
-    if(H5FD__vfd_swmr_load_hdr_and_idx((H5FD_t *)file, TRUE) < 0)
+    if(H5FD__vfd_swmr_load_hdr_and_idx(file, TRUE) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
                     "unable to load/decode the md file header/index");
 
@@ -822,6 +822,8 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type,
         hlog_fast(swmr_read_exception,
             "%s: skipping checksum, buffer size != entry size", __func__);
     } else if (H5_checksum_metadata(buf, entry->length, 0) != entry->chksum) {
+        H5FD_vfd_swmr_md_header tmp_header;
+
         hlog_fast(swmr_read_err, "%s: bad checksum", __func__);
         hlog_fast(swmr_read_err, "addr %" PRIuHADDR " page %" PRIuHADDR
             " len %zu type %d ...", addr, addr / fs_page_size, init_size, type);
@@ -829,6 +831,14 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type,
             " shadow pgno %" PRIu64 " len %" PRIu32 " sum %" PRIx32,
             (int64_t)(entry - index), entry->hdf5_page_offset,
             entry->md_file_page_offset, entry->length, entry->chksum);
+
+        if (H5FD__vfd_swmr_header_deserialize(file, &tmp_header) != TRUE) {
+            HGOTO_ERROR(H5E_VFL, H5E_CANTLOAD, FAIL,
+                "checksum error in shadow file entry; could not load header");
+        }
+
+        hlog_fast(swmr_read_err, "... header tick last read %" PRIu64
+            " latest %" PRIu64, file->md_header.tick_num, tmp_header.tick_num);
 
         HGOTO_ERROR(H5E_VFL, H5E_CANTLOAD, FAIL,
             "checksum error in shadow file entry");
@@ -995,10 +1005,8 @@ done:
  *
  */
 static herr_t
-H5FD__vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open)
+H5FD__vfd_swmr_load_hdr_and_idx(H5FD_vfd_swmr_t *file, hbool_t open)
 {
-    H5FD_vfd_swmr_t *file =              /* VFD SWMR file struct          */
-        (H5FD_vfd_swmr_t *)_file;
     bool do_try;
     h5_retry_t retry;
     H5FD_vfd_swmr_md_header md_header;      /* Metadata file header, take 1 */
@@ -1018,7 +1026,7 @@ H5FD__vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open)
         /* Load and decode the header.  Go around again on a temporary
          * failure (FALSE).  Bail on an irrecoverable failure (FAIL).
          */
-        rc = H5FD__vfd_swmr_header_deserialize(_file, &md_header);
+        rc = H5FD__vfd_swmr_header_deserialize(file, &md_header);
 
         /* Temporary failure, try again. */
         if (rc == FALSE)
@@ -1052,7 +1060,7 @@ H5FD__vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open)
         /* Load and decode the index.  Go around again on a temporary
          * failure (FALSE).  Bail on an irrecoverable failure (FAIL).
          */
-        rc = H5FD__vfd_swmr_index_deserialize(_file, &md_index, &md_header);
+        rc = H5FD__vfd_swmr_index_deserialize(file, &md_index, &md_header);
 
         if (rc == FALSE)
             continue;
@@ -1065,7 +1073,7 @@ H5FD__vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open)
          * then we should have a consistent picture of the index.
          */
         if (md_header.tick_num == md_index.tick_num &&
-            (rc = H5FD__vfd_swmr_header_deserialize(_file,
+            (rc = H5FD__vfd_swmr_header_deserialize(file,
                 &md_header_two)) == TRUE &&
             md_header.tick_num == md_header_two.tick_num &&
             md_header.index_length == md_header_two.index_length &&
@@ -1131,11 +1139,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5FD__vfd_swmr_header_deserialize(H5FD_t *_file,
+H5FD__vfd_swmr_header_deserialize(H5FD_vfd_swmr_t *file,
     H5FD_vfd_swmr_md_header *md_header)
 {
-    H5FD_vfd_swmr_t *file =                 /* VFD SWMR file struct */
-        (H5FD_vfd_swmr_t *)_file;
     uint8_t image[H5FD_MD_HEADER_SIZE];     /* Buffer for element data */
     uint32_t stored_chksum;                 /* Stored metadata checksum */
     uint32_t computed_chksum;               /* Computed metadata checksum */
@@ -1235,10 +1241,9 @@ done:
  *
  */
 static htri_t
-H5FD__vfd_swmr_index_deserialize(const H5FD_t *_file,
+H5FD__vfd_swmr_index_deserialize(const H5FD_vfd_swmr_t *file,
     H5FD_vfd_swmr_md_index *md_index, const H5FD_vfd_swmr_md_header *md_header)
 {
-    const H5FD_vfd_swmr_t *file = (const H5FD_vfd_swmr_t *)_file;
     uint8_t *image;                 /* Buffer */
     uint8_t *p = NULL;              /* Pointer to buffer */
     uint32_t stored_chksum;         /* Stored metadata checksum value */
@@ -1419,7 +1424,7 @@ H5FD_vfd_swmr_get_tick_and_idx(H5FD_t *_file, hbool_t reload_hdr_and_index,
 
     /* Load and decode the header and index as indicated */
     if (reload_hdr_and_index &&
-        H5FD__vfd_swmr_load_hdr_and_idx(_file, FALSE) < 0) {
+        H5FD__vfd_swmr_load_hdr_and_idx(file, FALSE) < 0) {
             HGOTO_ERROR(H5E_VFL, H5E_CANTLOAD, FAIL,
                 "unable to load/decode md header and index")
     }
@@ -1448,52 +1453,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 }  /* H5FD_vfd_swmr_get_tick_and_idx() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD_is_vfd_swmr_driver()
- *
- * Purpose:     Determine if the driver is a VFD SWMR driver
- *
- * Return:      Success:    TRUE/FALSE
- *              Failure:    FAIL
- *
- *-------------------------------------------------------------------------
- */
-hbool_t
-H5FD_is_vfd_swmr_driver(H5FD_t *_file)
-{
-    H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file; /* VFD SWMR file struct */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    HDassert(file);
-
-    FUNC_LEAVE_NOAPI(file->pub.driver_id == H5FD_VFD_SWMR)
-}  /* H5FD_is_vfd_swmr_driver() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD_vfd_swmr_get_underlying_vfd()
- *
- * Purpose:     Retrieve the underlying driver for the HDF5 file
- *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
- *
- *-------------------------------------------------------------------------
- */
-H5FD_t *
-H5FD_vfd_swmr_get_underlying_vfd(H5FD_t *_file)
-{
-    H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file; /* VFD SWMR file struct */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    HDassert(file);
-
-    FUNC_LEAVE_NOAPI(file->hdf5_file_lf)
-}  /* H5FD_vfd_swmr_get_underlying_vfd() */
 
 
 /*-------------------------------------------------------------------------
