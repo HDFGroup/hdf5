@@ -198,7 +198,7 @@ write_group(state_t *s, unsigned int which)
         errx(EXIT_FAILURE, "H5Gclose failed");
 }
 
-static void
+static bool
 verify_group_attribute(hid_t g, unsigned int which)
 {
     unsigned int read_which;
@@ -211,16 +211,18 @@ verify_group_attribute(hid_t g, unsigned int which)
         which);
 
     if ((aid = H5Aopen(g, name, H5P_DEFAULT)) < 0)
-        errx(EXIT_FAILURE, "H5Acreate2 failed");
+        return false;
 
-    if (H5Aread(aid, H5T_NATIVE_UINT, &read_which) < 0)
-        errx(EXIT_FAILURE, "H5Aread failed");
+    if (H5Aread(aid, H5T_NATIVE_UINT, &read_which) < 0) {
+        if (H5Aclose(aid) < 0)
+            errx(EXIT_FAILURE, "H5Aclose failed");
+        return false;
+    }
 
     if (H5Aclose(aid) < 0)
         errx(EXIT_FAILURE, "H5Aclose failed");
 
-    if (read_which != which)
-        errx(EXIT_FAILURE, "expected %u read %u", which, read_which);
+    return read_which == which;
 }
 
 static bool
@@ -229,6 +231,7 @@ verify_group(state_t *s, unsigned int which)
     char name[sizeof("/group-9999999999")];
     hid_t g;
     estack_state_t es;
+    bool result;
 
     assert(which < s->nsteps);
 
@@ -242,12 +245,14 @@ verify_group(state_t *s, unsigned int which)
         return false;
 
     if (s->asteps != 0 && which % s->asteps == 0)
-        verify_group_attribute(g, which);
+        result = verify_group_attribute(g, which);
+    else
+        result = true;
 
     if (H5Gclose(g) < 0)
         errx(EXIT_FAILURE, "H5Gclose failed");
 
-    return true;
+    return result;
 }
 
 int
