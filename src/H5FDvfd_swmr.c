@@ -300,6 +300,7 @@ H5FD_vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id,
                     "unable to allocate file struct");
     }
 
+    file->md_fd = -1;
     file->hdf5_file_lf = NULL;
     file->md_pages_reserved = vfd_swmr_config->md_pages_reserved;
 
