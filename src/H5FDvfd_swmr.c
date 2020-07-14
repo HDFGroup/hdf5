@@ -249,6 +249,51 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_fapl_vfd_swmr() */
 
+static herr_t
+H5FD__swmr_reader_open(H5FD_vfd_swmr_t *file, H5F_vfd_swmr_config_t *vfd_swmr_config)
+{
+    h5_retry_t retry;                        /* retry state */
+    bool do_try;                             /* more tries remain */
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    file->api_elapsed_nslots = vfd_swmr_config->max_lag + 1;
+
+    file->api_elapsed_ticks =
+        calloc(file->api_elapsed_nslots, sizeof(*file->api_elapsed_ticks));
+
+    if (file->api_elapsed_ticks == NULL) {
+        HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL,
+            "could not allocate API elapsed ticks");
+    }
+
+    /* Retry on opening the metadata file */
+    for (do_try = h5_retry_init(&retry, H5FD_VFD_SWMR_MD_FILE_RETRY_MAX,
+                                 H5_RETRY_DEFAULT_MINIVAL,
+                                 H5_RETRY_DEFAULT_MAXIVAL);
+         do_try;
+         do_try = h5_retry_next(&retry)) {
+        if((file->md_fd = HDopen(file->md_file_path, O_RDONLY)) >= 0)
+            break;
+    }
+
+    /* Exhaust all retries for opening the md file */
+    if(!do_try)
+        HGOTO_ERROR(H5E_VFL, H5E_OPENERROR, FAIL,
+                   "unable to open the metadata file after all retry attempts");
+
+    /* Retry on loading and decoding the header and index in the
+     *  metadata file
+     */
+    if(H5FD__vfd_swmr_load_hdr_and_idx((H5FD_t *)file, TRUE) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
+                    "unable to load/decode the md file header/index");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_vfd_swmr_open
@@ -270,8 +315,6 @@ H5FD_vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id,
     H5P_genplist_t *plist;                   /* Property list pointer       */
     H5F_vfd_swmr_config_t *vfd_swmr_config = /* Points to VFD SWMR          */
         NULL;                                /* configuration               */
-    h5_retry_t retry;                        /* retry state */
-    bool do_try;                             /* more tries remain */
     H5FD_t *ret_value  = NULL;               /* Return value     */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -316,42 +359,11 @@ H5FD_vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id,
     file->writer = vfd_swmr_config->writer;
 
     /* Ensure that this is the reader */
-    if (vfd_swmr_config->writer)
-        goto finish;
-
-    file->api_elapsed_nslots = vfd_swmr_config->max_lag + 1;
-
-    file->api_elapsed_ticks =
-        calloc(file->api_elapsed_nslots, sizeof(*file->api_elapsed_ticks));
-
-    if (file->api_elapsed_ticks == NULL) {
-        HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL,
-            "could not allocate API elapsed ticks");
-    }
-
-    /* Retry on opening the metadata file */
-    for (do_try = h5_retry_init(&retry, H5FD_VFD_SWMR_MD_FILE_RETRY_MAX,
-                                 H5_RETRY_DEFAULT_MINIVAL,
-                                 H5_RETRY_DEFAULT_MAXIVAL);
-         do_try;
-         do_try = h5_retry_next(&retry)) {
-        if((file->md_fd = HDopen(file->md_file_path, O_RDONLY)) >= 0)
-            break;
-    }
-
-    /* Exhaust all retries for opening the md file */
-    if(!do_try)
+    if (!vfd_swmr_config->writer &&
+        H5FD__swmr_reader_open(file, vfd_swmr_config) < 0) {
         HGOTO_ERROR(H5E_VFL, H5E_OPENERROR, NULL,
-                   "unable to open the metadata file after all retry attempts");
-
-    /* Retry on loading and decoding the header and index in the
-     *  metadata file
-     */
-    if(H5FD__vfd_swmr_load_hdr_and_idx((H5FD_t *)file, TRUE) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL,
-                    "unable to load/decode the md file header/index");
-
-finish:
+                   "perform reader-specific opening steps failed");
+    }
 
     /* Hard-wired to open the underlying HDF5 file with SEC2 */
     if((file->hdf5_file_lf = H5FD_open(name, flags, H5P_FILE_ACCESS_DEFAULT,
@@ -391,6 +403,34 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_vfd_swmr_open() */
 
+static void
+swmr_reader_close(H5FD_vfd_swmr_t *file)
+{
+    vfd_swmr_reader_did_increase_tick_to(0);
+
+    if (file->api_elapsed_ticks != NULL) {
+        uint32_t i;
+        for (i = 0; i < file->api_elapsed_nslots; i++) {
+            hlog_fast(swmr_stats,
+                "%s: %" PRIu32 " ticks elapsed in API %" PRIu64 " times",
+                __func__, i, file->api_elapsed_ticks[i]);
+        }
+        free(file->api_elapsed_ticks);
+    }
+
+    /* Close the metadata file */
+    if(file->md_fd >= 0 && HDclose(file->md_fd) < 0) {
+        /* Push error, but keep going */
+        HERROR(H5E_FILE, H5E_CANTCLOSEFILE,
+            "unable to close the metadata file");
+    }
+
+    /* Free the index entries */
+    if(file->md_index.num_entries && file->md_index.entries)
+        file->md_index.entries = H5FL_SEQ_FREE(H5FD_vfd_swmr_idx_entry_t,
+                                               file->md_index.entries);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_vfd_swmr_close
@@ -427,32 +467,7 @@ H5FD_vfd_swmr_close(H5FD_t *_file)
     }
 
     if (!file->writer)
-        goto finish;
-
-    vfd_swmr_reader_did_increase_tick_to(0);
-
-    if (file->api_elapsed_ticks != NULL) {
-        uint32_t i;
-        for (i = 0; i < file->api_elapsed_nslots; i++) {
-            hlog_fast(swmr_stats,
-                "%s: %" PRIu32 " ticks elapsed in API %" PRIu64 " times",
-                __func__, i, file->api_elapsed_ticks[i]);
-        }
-        free(file->api_elapsed_ticks);
-    }
-
-    /* Close the metadata file */
-    if(file->md_fd >= 0 && HDclose(file->md_fd) < 0)
-        /* Push error, but keep going */
-        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, \
-                     "unable to close the metadata file")
-
-    /* Free the index entries */
-    if(file->md_index.num_entries && file->md_index.entries)
-        file->md_index.entries = H5FL_SEQ_FREE(H5FD_vfd_swmr_idx_entry_t,
-                                               file->md_index.entries);
-
-finish:
+        (void)swmr_reader_close(file);
 
     /* Release the driver info */
     file = H5FL_FREE(H5FD_vfd_swmr_t, file);
