@@ -1250,12 +1250,6 @@ case "$host_cpu-$host_vendor-$host_os" in
     H5_CPPFLAGS="-D_GNU_SOURCE $H5_CPPFLAGS"
     ;;
 
-  *solaris*)
-    ## Solaris also needs _POSIX_C_SOURCE set correctly to pick up
-    ## clock_gettime().
-    H5_CPPFLAGS="-D_POSIX_C_SOURCE=200112L $H5_CPPFLAGS"
-    H5_CPPFLAGS="-D_GNU_SOURCE $H5_CPPFLAGS"
-    ;;
 esac
 
 ## Need to add the AM_ and H5_ into CFLAGS/CPPFLAGS to make them visible
