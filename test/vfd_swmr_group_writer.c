@@ -201,6 +201,7 @@ write_group(state_t *s, unsigned int which)
 static bool
 verify_group_attribute(hid_t g, unsigned int which)
 {
+    estack_state_t es;
     unsigned int read_which;
     hid_t aid;
     char name[sizeof("attr-9999999999")];
@@ -210,14 +211,20 @@ verify_group_attribute(hid_t g, unsigned int which)
     dbgf(1, "verifying attribute %s on group %u equals %u\n", name, which,
         which);
 
-    if ((aid = H5Aopen(g, name, H5P_DEFAULT)) < 0)
+    es = disable_estack();
+    if ((aid = H5Aopen(g, name, H5P_DEFAULT)) < 0) {
+        restore_estack(es);
         return false;
+    }
 
     if (H5Aread(aid, H5T_NATIVE_UINT, &read_which) < 0) {
+        restore_estack(es);
         if (H5Aclose(aid) < 0)
             errx(EXIT_FAILURE, "H5Aclose failed");
         return false;
     }
+
+    restore_estack(es);
 
     if (H5Aclose(aid) < 0)
         errx(EXIT_FAILURE, "H5Aclose failed");
