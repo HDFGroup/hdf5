@@ -1125,7 +1125,7 @@ H5FD__vfd_swmr_header_deserialize(H5FD_t *_file,
     uint32_t stored_chksum;                 /* Stored metadata checksum */
     uint32_t computed_chksum;               /* Computed metadata checksum */
     uint8_t *p;
-    htri_t ret_value = TRUE;
+    htri_t ret_value = FAIL;
     uint64_t index_length;
     ssize_t nread;
 
@@ -1192,6 +1192,8 @@ H5FD__vfd_swmr_header_deserialize(H5FD_t *_file,
              md_header->fs_page_size, md_header->tick_num,
              md_header->index_offset, md_header->index_length);
 #endif /* JRM */
+
+    ret_value = TRUE;
 
 done:
 
