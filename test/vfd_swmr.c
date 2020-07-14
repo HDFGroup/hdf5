@@ -19,7 +19,7 @@
 *
 *************************************************************/
 
-#include "bsdqueue.h"
+#include "H5queue.h"
 #include "h5test.h"
 #include "vfd_swmr_common.h"
 
@@ -75,9 +75,9 @@ static hid_t
 init_vfd_swmr_config_fapl(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint32_t max_lag, 
     hbool_t is_writer, uint32_t md_pages_reserved, const char *md_file_path, size_t pbuf_size)
 {
-    hid_t fapl = H5I_INVALID_HID;
+    hid_t fapl;
 
-    HDmemset(config, 0, sizeof(H5F_vfd_swmr_config_t));
+    HDmemset(config, 0, sizeof(*config));
 
     config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
     config->tick_len = tick_len; 
@@ -88,18 +88,19 @@ init_vfd_swmr_config_fapl(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint
 
     /* Create a copy of the file access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        goto done;
+        return H5I_INVALID_HID;
 
-    if(H5Pset_vfd_swmr_config(fapl, config) < 0)
-        goto done;
-
-    /* Enable page buffering */
-    if(pbuf_size != 0) {
-        if(H5Pset_page_buffer_size(fapl, pbuf_size, 0, 0) < 0)
-            goto done;
+    if(H5Pset_vfd_swmr_config(fapl, config) < 0) {
+        (void)H5Pclose(fapl);
+        return H5I_INVALID_HID;
     }
 
-done:
+    /* Enable page buffering */
+    if(pbuf_size != 0 && H5Pset_page_buffer_size(fapl, pbuf_size, 0, 0) < 0) {
+        (void)H5Pclose(fapl);
+        return H5I_INVALID_HID;
+    }
+
     return fapl;
 } /* init_vfd_swmr_config_fapl() */
 
@@ -2403,9 +2404,6 @@ test_file_end_tick_concur(void)
         hid_t fid_reader3 = H5I_INVALID_HID;    /* File ID for reader */
         hid_t fapl_reader = H5I_INVALID_HID;    /* File access property list for reader */
         H5F_vfd_swmr_config_t *config_reader = NULL;    /* VFD SWMR configuration */
-        H5F_t *file_reader;         /* File pointer */
-        eot_queue_entry_t *curr;    /* Pointer to an entry on the EOT queue */
-        unsigned count = 0;         /* Counter */
         H5F_t *f1, *f2, *f3;        /* File pointer */
         uint64_t s1 = 0;            /* Saved tick_num */
         uint64_t s2 = 0;            /* Saved tick_num */
@@ -2863,7 +2861,6 @@ test_same_file_opens(void)
     
     if(H5Pclose(fapl2) < 0)
         FAIL_STACK_ERROR;
-
 
     /* Open the same file again as regular writer */
     /* Should fail: 1st open--VFD SWMR writer, 2nd open--regular writer */

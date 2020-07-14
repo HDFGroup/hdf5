@@ -139,7 +139,9 @@ if ROS3_VFD_CONDITIONAL
 endif
 
 # Public headers
-include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5version.h \
+include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h \
+	H5queue.h \
+	H5version.h \
         H5Apublic.h H5ACpublic.h \
         H5Cpublic.h H5Dpublic.h \
         H5Epubgen.h H5Epublic.h H5ESpublic.h H5Fpublic.h \

@@ -92,6 +92,8 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
  */
 static unsigned long H5FD_file_serial_no_g;
 
+static TAILQ_HEAD(_all_vfds, H5FD_t) all_vfds = TAILQ_HEAD_INITIALIZER(all_vfds);
+
 /* File driver ID class */
 static const H5I_class_t H5I_VFL_CLS[1] = {{
     H5I_VFL,                    /* ID class value */
@@ -677,6 +679,24 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
+/* Return `true` if a second H5FD_t identical to `file`
+ * has an exclusive owner, `false` otherwise.
+ */
+bool
+H5FD_has_conflict(H5FD_t *file)
+{
+    H5FD_t *item;
+
+    TAILQ_FOREACH(item, &all_vfds, link) {
+        // skip "self", skip unowned
+        if (item == file || item->exc_owner == NULL)
+            continue;
+        if (H5FDcmp(file, item) == 0)
+            return true;
+    }
+    return false;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_open
@@ -693,7 +713,7 @@ H5FD_t *
 H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
     H5FD_class_t	*driver;                /* VFD for file */
-    H5FD_t		*file = NULL;           /* VFD file struct */
+    H5FD_t		*file;
     H5FD_driver_prop_t  driver_prop;            /* Property for driver ID & info */
     H5P_genplist_t      *plist;                 /* Property list pointer */
     unsigned long       driver_flags = 0;       /* File-inspecific driver feature flags */
@@ -743,6 +763,8 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     if(NULL == (file = (driver->open)(name, flags, fapl_id, maxaddr)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "open failed")
 
+    file->exc_owner = NULL;
+
     /* Set the file access flags */
     file->access_flags = flags;
 
@@ -774,10 +796,13 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     /* (This will be changed later, when the superblock is located) */
     file->base_addr = 0;
 
+    TAILQ_INSERT_TAIL(&all_vfds, file, link);
+
     /* Set return value */
     ret_value = file;
 
 done:
+    /* XXX We leak H5FD_t's on many error conditions. */
     /* Can't cleanup 'file' information, since we don't know what type it is */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_open() */
@@ -832,6 +857,7 @@ herr_t
 H5FD_close(H5FD_t *file)
 {
     const H5FD_class_t *driver;
+    H5FD_t *item;
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -844,6 +870,12 @@ H5FD_close(H5FD_t *file)
     driver = file->cls;
     if(H5I_dec_ref(file->driver_id) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close driver ID")
+
+    TAILQ_FOREACH(item, &all_vfds, link) {
+        if (item->exc_owner == file)
+            item->exc_owner = NULL;
+    }
+    TAILQ_REMOVE(&all_vfds, file, link);
 
     /* Dispatch to the driver for actual close. If the driver fails to
      * close the file then the file will be in an unusable state.

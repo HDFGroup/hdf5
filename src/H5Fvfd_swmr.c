@@ -65,7 +65,7 @@ static herr_t H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t in
 static herr_t H5F__vfd_swmr_construct_write_md_hdr(H5F_t *f, uint32_t num_entries);
 static herr_t H5F__vfd_swmr_construct_write_md_idx(H5F_t *f, uint32_t num_entries, struct H5FD_vfd_swmr_idx_entry_t index[]);
 static herr_t H5F__idx_entry_cmp(const void *_entry1, const void *_entry2);
-static herr_t H5F__vfd_swmr_create_index(H5F_t * f);
+static herr_t H5F__vfd_swmr_create_index(H5F_shared_t *);
 static herr_t H5F__vfd_swmr_writer__wait_a_tick(H5F_t *f);
 
 /*********************/
@@ -85,6 +85,7 @@ unsigned int vfd_swmr_api_entries_g = 0;/* Times the library was entered
                                          */
 HLOG_OUTLET_SHORT_DEFN(swmr, all);
 HLOG_OUTLET_SHORT_DEFN(eot, swmr);
+HLOG_OUTLET_SHORT_DEFN(eotq, eot);
 HLOG_OUTLET_SHORT_DEFN(shadow_defrees, swmr);
 HLOG_OUTLET_MEDIUM_DEFN(noisy_shadow_defrees, shadow_defrees,
     HLOG_OUTLET_S_OFF);
@@ -231,7 +232,7 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
         HDassert(f->shared->mdf_idx == NULL);
 
         /* allocate an index to save the initial index */
-        if (H5F__vfd_swmr_create_index(f) < 0)
+        if (H5F__vfd_swmr_create_index(f->shared) < 0)
            HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL,
                "unable to allocate metadata file index");
 
@@ -906,7 +907,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, bool wait_for_reader)
      *    in memory version of the metadata file index.
      */
     if ( ( f->shared->tick_num == 1 ) &&
-         ( H5F__vfd_swmr_create_index(f) < 0 ) )
+         ( H5F__vfd_swmr_create_index(f->shared) < 0 ) )
 
        HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, \
                    "unable to allocate metadata file index")
@@ -1167,7 +1168,8 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
         f->shared->mdf_idx_entries_used = tmp_mdf_idx_entries_used;
 
         /* if f->shared->mdf_idx is NULL, allocate an index */
-        if (f->shared->mdf_idx == NULL && H5F__vfd_swmr_create_index(f) < 0)
+        if (f->shared->mdf_idx == NULL &&
+            H5F__vfd_swmr_create_index(f->shared) < 0)
            HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL,
                        "unable to allocate metadata file index");
 
@@ -1427,6 +1429,11 @@ H5F_vfd_swmr_remove_entry_eot(H5F_t *f)
     }
 
     if (curr != NULL) {
+        hlog_fast(eotq, "%s: entry %p file %p "
+            "tick %" PRIu64 " ending %jd.%09ld", __func__,
+            (void *)curr, (void *)curr->vfd_swmr_file, curr->tick_num,
+            (intmax_t)curr->end_of_tick.tv_sec,
+            curr->end_of_tick.tv_nsec);
         TAILQ_REMOVE(&eot_queue_g, curr, link);
         curr = H5FL_FREE(eot_queue_entry_t, curr);
     }
@@ -1472,6 +1479,12 @@ H5F_vfd_swmr_insert_entry_eot(H5F_t *f)
         if (timespeccmp(&prec_ptr->end_of_tick, &entry_ptr->end_of_tick, <=))
             break;
     }
+
+    hlog_fast(eotq, "%s: entry %p after %p file %p "
+        "tick %" PRIu64 " ending %jd.%09ld", __func__,
+        (void *)entry_ptr, (void *)prec_ptr, (void *)entry_ptr->vfd_swmr_file,
+        entry_ptr->tick_num, (intmax_t)entry_ptr->end_of_tick.tv_sec,
+        entry_ptr->end_of_tick.tv_nsec);
 
     /* Insert the entry onto the EOT queue */
     if (prec_ptr != NULL)
@@ -1552,9 +1565,6 @@ H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t incr_tick_num)
     struct timespec new_end_of_tick;    /* new end_of_tick in struct timespec */
     int64_t curr_nsecs;                    /* current time in nanoseconds */
     int64_t tlen_nsecs;                    /* tick_len in nanoseconds */
-#if 0 /* JRM */
-    int64_t end_nsecs;                     /* end_of_tick in nanoseconds */
-#endif /* JRM */
     int64_t new_end_nsecs;                 /* new end_of_tick in nanoseconds */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1845,7 +1855,7 @@ H5F__idx_entry_cmp(const void *_entry1, const void *_entry2)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F__vfd_swmr_create_index(H5F_t * f)
+H5F__vfd_swmr_create_index(H5F_shared_t *shared)
 {
     size_t bytes_available;
     size_t entries_in_index;
@@ -1854,14 +1864,14 @@ H5F__vfd_swmr_create_index(H5F_t * f)
 
     FUNC_ENTER_STATIC
 
-    HDassert(f->shared->vfd_swmr);
-    HDassert(f->shared->mdf_idx == NULL);
-    HDassert(f->shared->mdf_idx_len == 0);
-    HDassert(f->shared->mdf_idx_entries_used == 0);
+    HDassert(shared->vfd_swmr);
+    HDassert(shared->mdf_idx == NULL);
+    HDassert(shared->mdf_idx_len == 0);
+    HDassert(shared->mdf_idx_entries_used == 0);
 
     bytes_available =
-        (size_t)f->shared->fs_page_size *
-        (size_t)(f->shared->vfd_swmr_config.md_pages_reserved - 1);
+        (size_t)shared->fs_page_size *
+        (size_t)(shared->vfd_swmr_config.md_pages_reserved - 1);
 
     HDassert(bytes_available > 0);
 
@@ -1879,9 +1889,9 @@ H5F__vfd_swmr_create_index(H5F_t * f)
 
     HDassert(entries_in_index <= UINT32_MAX);
 
-    f->shared->mdf_idx              = index;
-    f->shared->mdf_idx_len          = (uint32_t)entries_in_index;
-    f->shared->mdf_idx_entries_used = 0;
+    shared->mdf_idx              = index;
+    shared->mdf_idx_len          = (uint32_t)entries_in_index;
+    shared->mdf_idx_entries_used = 0;
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -1979,16 +1989,15 @@ H5F__vfd_swmr_writer__wait_a_tick(H5F_t *f)
     struct timespec req;
     struct timespec rem;
     uint64_t tick_in_nsec;
+    H5F_shared_t *shared = f->shared;
     herr_t ret_value = SUCCEED;              /* Return value */
 
     FUNC_ENTER_STATIC
 
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->vfd_swmr);
-    HDassert(f->shared->vfd_swmr_writer);
+    HDassert(shared->vfd_swmr);
+    HDassert(shared->vfd_swmr_writer);
 
-    tick_in_nsec = f->shared->vfd_swmr_config.tick_len * nanosecs_per_tenth_sec;
+    tick_in_nsec = shared->vfd_swmr_config.tick_len * nanosecs_per_tenth_sec;
     req.tv_nsec = (long)(tick_in_nsec % nanosecs_per_second);
     req.tv_sec = (time_t)(tick_in_nsec / nanosecs_per_second);
 

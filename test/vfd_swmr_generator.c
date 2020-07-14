@@ -178,6 +178,8 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write,
         return -1;
     if(H5Awrite(aid, H5T_NATIVE_UINT, &random_seed) < 0)
         return -1;
+    if(H5Aclose(aid) < 0)
+        return -1;
     if(H5Sclose(sid) < 0)
         return -1;
 

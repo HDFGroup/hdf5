@@ -18,6 +18,7 @@
 #ifndef _H5FDpublic_H
 #define _H5FDpublic_H
 
+#include "H5queue.h"
 #include "H5public.h"
 #include "H5Fpublic.h"		/*for H5F_close_degree_t */
 
@@ -319,6 +320,11 @@ typedef struct H5FD_free_t {
 struct H5FD_t {
     hid_t               driver_id;      /*driver ID for this file   */
     const H5FD_class_t *cls;            /*constant class info       */
+
+    TAILQ_ENTRY(H5FD_t) link;           /* Linkage for list of all VFs. */
+    H5FD_t *exc_owner;                  /* Pointer to an exclusive owner
+                                         * or NULL if none.
+                                         */
     unsigned long       fileno;         /* File 'serial' number     */
     unsigned            access_flags;   /* File access flags (from create or open) */
     unsigned long       feature_flags;  /* VFL Driver feature Flags */
