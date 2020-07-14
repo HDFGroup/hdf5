@@ -380,7 +380,8 @@ H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status)
 
         /* Check for non-success status values that indicate we should break out of the loop */
         if(ev_status != H5ES_STATUS_SUCCEED) {
-            *status = ev_status;
+            if(status)
+                *status = ev_status;
             early_exit = TRUE;
             break;
         } /* end if */
@@ -401,7 +402,7 @@ H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status)
     } /* end while */
 
     /* Check for all operations completed */
-    if(!early_exit)
+    if(!early_exit && status)
         *status = H5ES_STATUS_SUCCEED;
 
 done:
