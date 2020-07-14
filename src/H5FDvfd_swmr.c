@@ -822,6 +822,8 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type,
         hlog_fast(swmr_read_exception,
             "%s: skipping checksum, buffer size != entry size", __func__);
     } else if (H5_checksum_metadata(buf, entry->length, 0) != entry->chksum) {
+        H5FD_vfd_swmr_md_header tmp_header;
+
         hlog_fast(swmr_read_err, "%s: bad checksum", __func__);
         hlog_fast(swmr_read_err, "addr %" PRIuHADDR " page %" PRIuHADDR
             " len %zu type %d ...", addr, addr / fs_page_size, init_size, type);
@@ -829,6 +831,14 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type,
             " shadow pgno %" PRIu64 " len %" PRIu32 " sum %" PRIx32,
             (int64_t)(entry - index), entry->hdf5_page_offset,
             entry->md_file_page_offset, entry->length, entry->chksum);
+
+        if (H5FD__vfd_swmr_header_deserialize(file, &tmp_header) != TRUE) {
+            HGOTO_ERROR(H5E_VFL, H5E_CANTLOAD, FAIL,
+                "checksum error in shadow file entry; could not load header");
+        }
+
+        hlog_fast(swmr_read_err, "... header tick last read %" PRIu64
+            " latest %" PRIu64, file->md_header.tick_num, tmp_header.tick_num);
 
         HGOTO_ERROR(H5E_VFL, H5E_CANTLOAD, FAIL,
             "checksum error in shadow file entry");
