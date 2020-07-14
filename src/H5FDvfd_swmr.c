@@ -1451,52 +1451,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_is_vfd_swmr_driver()
- *
- * Purpose:     Determine if the driver is a VFD SWMR driver
- *
- * Return:      Success:    TRUE/FALSE
- *              Failure:    FAIL
- *
- *-------------------------------------------------------------------------
- */
-hbool_t
-H5FD_is_vfd_swmr_driver(H5FD_t *_file)
-{
-    H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file; /* VFD SWMR file struct */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    HDassert(file);
-
-    FUNC_LEAVE_NOAPI(file->pub.driver_id == H5FD_VFD_SWMR)
-}  /* H5FD_is_vfd_swmr_driver() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD_vfd_swmr_get_underlying_vfd()
- *
- * Purpose:     Retrieve the underlying driver for the HDF5 file
- *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
- *
- *-------------------------------------------------------------------------
- */
-H5FD_t *
-H5FD_vfd_swmr_get_underlying_vfd(H5FD_t *_file)
-{
-    H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file; /* VFD SWMR file struct */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    HDassert(file);
-
-    FUNC_LEAVE_NOAPI(file->hdf5_file_lf)
-}  /* H5FD_vfd_swmr_get_underlying_vfd() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5FD_vfd_swmr_dump_status
  *
  * Purpose:     Dump a variety of information about the vfd swmr reader
