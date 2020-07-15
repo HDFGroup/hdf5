@@ -87,6 +87,7 @@ H5_DLL herr_t H5F_vfd_swmr_reader_end_of_tick(struct H5F_t *f, bool);
 
 H5_DLL herr_t H5F_vfd_swmr_remove_entry_eot(struct H5F_t *f);
 H5_DLL herr_t H5F_vfd_swmr_insert_entry_eot(struct H5F_t *f);
+H5_DLL void H5F_vfd_swmr_update_entry_eot(eot_queue_entry_t *);
 H5_DLL herr_t H5F_dump_eot_queue(void);
 
 #endif /* _H5FDvfd_swmr_private_H */

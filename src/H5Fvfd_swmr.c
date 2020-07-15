@@ -1401,6 +1401,59 @@ done:
 
 } /* end H5F_vfd_swmr_reader_end_of_tick() */
 
+static void
+insert_eot_entry(eot_queue_entry_t *entry_ptr)
+{
+    eot_queue_entry_t *prec_ptr;     /* The predecessor entry on the EOT end of tick queue */
+
+    /* Find the insertion point for the entry on the EOT queue */
+    TAILQ_FOREACH_REVERSE(prec_ptr, &eot_queue_g, eot_queue, link) {
+        if (timespeccmp(&prec_ptr->end_of_tick, &entry_ptr->end_of_tick, <=))
+            break;
+    }
+
+    hlog_fast(eotq, "%s: entry %p after %p file %p "
+        "tick %" PRIu64 " ending %jd.%09ld", __func__,
+        (void *)entry_ptr, (void *)prec_ptr, (void *)entry_ptr->vfd_swmr_file,
+        entry_ptr->tick_num, (intmax_t)entry_ptr->end_of_tick.tv_sec,
+        entry_ptr->end_of_tick.tv_nsec);
+
+    /* Insert the entry onto the EOT queue */
+    if (prec_ptr != NULL)
+        TAILQ_INSERT_AFTER(&eot_queue_g, prec_ptr, entry_ptr, link);
+    else
+        TAILQ_INSERT_HEAD(&eot_queue_g, entry_ptr, link);
+}
+
+
+/* Update an entry on the EOT queue and move it to its proper place.
+ */
+void
+H5F_vfd_swmr_update_entry_eot(eot_queue_entry_t *entry)
+{
+    H5F_t *f = entry->vfd_swmr_file;
+
+    /* Free the entry on the EOT queue that corresponds to f */
+
+    TAILQ_REMOVE(&eot_queue_g, entry, link);
+
+    hlog_fast(eotq, "%s: updating entry %p file %p "
+        "tick %" PRIu64 " ending %jd.%09ld", __func__,
+        (void *)entry, (void *)entry->vfd_swmr_file,
+        entry->tick_num, (intmax_t)entry->end_of_tick.tv_sec,
+        entry->end_of_tick.tv_nsec);
+
+    assert(entry->vfd_swmr_writer == f->shared->vfd_swmr_writer);
+    entry->tick_num = f->shared->tick_num;
+    entry->end_of_tick = f->shared->end_of_tick;
+
+    hlog_fast(eotq, "%s: ... to tick %" PRIu64 " ending %jd.%09ld", __func__,
+        entry->tick_num, (intmax_t)entry->end_of_tick.tv_sec,
+        entry->end_of_tick.tv_nsec);
+
+    insert_eot_entry(entry);
+}
+
 
 /*-------------------------------------------------------------------------
  *
@@ -1460,7 +1513,6 @@ herr_t
 H5F_vfd_swmr_insert_entry_eot(H5F_t *f)
 {
     eot_queue_entry_t *entry_ptr;    /* An entry on the EOT end of tick queue */
-    eot_queue_entry_t *prec_ptr;     /* The predecessor entry on the EOT end of tick queue */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1475,23 +1527,7 @@ H5F_vfd_swmr_insert_entry_eot(H5F_t *f)
     entry_ptr->end_of_tick = f->shared->end_of_tick;
     entry_ptr->vfd_swmr_file = f;
 
-    /* Found the position to insert the entry on the EOT queue */
-    TAILQ_FOREACH_REVERSE(prec_ptr, &eot_queue_g, eot_queue, link) {
-        if (timespeccmp(&prec_ptr->end_of_tick, &entry_ptr->end_of_tick, <=))
-            break;
-    }
-
-    hlog_fast(eotq, "%s: entry %p after %p file %p "
-        "tick %" PRIu64 " ending %jd.%09ld", __func__,
-        (void *)entry_ptr, (void *)prec_ptr, (void *)entry_ptr->vfd_swmr_file,
-        entry_ptr->tick_num, (intmax_t)entry_ptr->end_of_tick.tv_sec,
-        entry_ptr->end_of_tick.tv_nsec);
-
-    /* Insert the entry onto the EOT queue */
-    if (prec_ptr != NULL)
-        TAILQ_INSERT_AFTER(&eot_queue_g, prec_ptr, entry_ptr, link);
-    else
-        TAILQ_INSERT_HEAD(&eot_queue_g, entry_ptr, link);
+    insert_eot_entry(entry_ptr);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2045,7 +2081,15 @@ H5F_vfd_swmr_process_eot_queue(bool entering_api)
         }
         if(timespeccmp(&now, &head->end_of_tick, <))
             break;
-        if (f->shared->vfd_swmr_writer) {
+        /* If the H5F_shared_t is labeled with a later EOT time than
+         * the queue entry is, then we have already performed the
+         * H5F_shared_t's EOT processing.  That can happen if
+         * multiple H5F_t share the H5F_shared_t.  Just update the
+         * EOT queue entry and move to the next.
+         */
+        if (timespeccmp(&head->end_of_tick, &f->shared->end_of_tick, <)) {
+            H5F_vfd_swmr_update_entry_eot(head);
+        } else if (f->shared->vfd_swmr_writer) {
             if (H5F_vfd_swmr_writer_end_of_tick(f, false) < 0)
                 HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, FAIL,
                             "end of tick error for VFD SWMR writer");
