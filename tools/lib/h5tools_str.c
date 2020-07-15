@@ -278,16 +278,12 @@ h5tools_str_fmt(h5tools_str_t *str/*in,out*/, size_t start, const char *fmt)
  * Purpose: Renders the line prefix value into string STR.
  *
  * Return:  Success:    Pointer to the prefix.
- *
  *          Failure:    NULL
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 23, 1998
  *-------------------------------------------------------------------------
  */
 char *
-h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
-    hsize_t elmtno, unsigned ndims, h5tools_context_t *ctx)
+h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info, hsize_t elmtno,
+        h5tools_context_t *ctx)
 {
     size_t    i = 0;
     hsize_t   curr_pos = elmtno;
@@ -297,28 +293,16 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
     H5TOOLS_DEBUG("elmtno=%ld, ctx->ndims=%d", elmtno, ctx->ndims);
     h5tools_str_reset(str);
 
-    H5TOOLS_DEBUG("ndims=%d", ndims);
-    if(ndims > 0) {
-        /*
-         * Calculate the number of elements represented by a unit change in a
-         * certain index position.
-         */
-        for(i = 0; i < (size_t) ndims; i++) {
-            H5TOOLS_DEBUG("curr_pos=%ld - ctx->acc[%d]=%ld", curr_pos, i, ctx->acc[i]);
-            ctx->pos[i] = curr_pos / ctx->acc[i];
-            curr_pos -= ctx->acc[i] * ctx->pos[i];
-            H5TOOLS_DEBUG("curr_pos=%ld - ctx->pos[%d]=%ld - ctx->acc[%d]=%ld", curr_pos, i, ctx->pos[i], i, ctx->acc[i]);
-        }
+    curr_pos = calc_acc_pos(ctx->ndims, elmtno, ctx->acc, ctx->pos);
+    if(ctx->ndims > 0) {
         HDassert(curr_pos == 0);
 
         /* Print the index values */
-        for(i = 0; i < (size_t) ndims; i++) {
+        for(i = 0; i < (size_t) ctx->ndims; i++) {
             if (i)
                 h5tools_str_append(str, "%s", OPT(info->idx_sep, ","));
 
-            h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT),
-                    (hsize_t) ctx->pos[i]);
-
+            h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT), (hsize_t) ctx->pos[i]);
         }
     }
     else        /* Scalar */
@@ -338,52 +322,38 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
  *
  * Return:  Success:    Pointer to the prefix.
  *          Failure:    NULL
- *
- * In/Out:
- *      h5tools_context_t *ctx
- *      h5tools_str_t     *str
  *-------------------------------------------------------------------------
  */
 char *
-h5tools_str_region_prefix(h5tools_str_t *str, const h5tool_format_t *info,
-        hsize_t elmtno, hsize_t *ptdata, unsigned ndims, hsize_t max_idx[],
-        h5tools_context_t *ctx)
+h5tools_str_region_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info, hsize_t elmtno,
+        hsize_t *ptdata, h5tools_context_t *ctx)
 {
     size_t    i = 0;
     hsize_t   curr_pos = elmtno;
-    hsize_t   p_prod[H5S_MAX_RANK];
 
+    H5TOOLS_START_DEBUG("");
+
+    H5TOOLS_DEBUG("elmtno=%ld, ctx->ndims=%d", elmtno, ctx->ndims);
     h5tools_str_reset(str);
 
-    if(ndims > 0) {
-        /*
-         * Calculate the number of elements represented by a unit change in a
-         * certain index position.
-         */
-        for(i = ndims - 1, p_prod[ndims - 1] = 1; i > 0; --i)
-            p_prod[i - 1] = (max_idx[i]) * p_prod[i];
-
-        for(i = 0; i < (size_t) ndims; i++) {
-            if(curr_pos > 0) {
-                ctx->pos[i] = curr_pos / p_prod[i];
-                curr_pos -= p_prod[i] * ctx->pos[i];
-            }
-            else
-                ctx->pos[i] = 0;
-            ctx->pos[i] += (unsigned long) ptdata[ctx->sm_pos+i];
-        }
+    curr_pos = calc_acc_pos(ctx->ndims, elmtno, ctx->acc, ctx->pos);
+    if(ctx->ndims > 0) {
+        HDassert(curr_pos == 0);
 
         /* Print the index values */
-        for(i = 0; i < (size_t) ndims; i++) {
-            if(i)
+        for(i = 0; i < (size_t) ctx->ndims; i++) {
+            ctx->pos[i] += (unsigned long) ptdata[ctx->sm_pos+i];
+            if (i)
                 h5tools_str_append(str, "%s", OPT(info->idx_sep, ","));
 
             h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT), (hsize_t) ctx->pos[i]);
-
         }
-    } /* if (ndims > 0) */
+    }
     else        /* Scalar */
-        h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT), (hsize_t) 0);
+        h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT), (hsize_t)0);
+    H5TOOLS_DEBUG("str=%s", str->s);
+
+    H5TOOLS_ENDDEBUG("");
 
     /* Add prefix and suffix to the index */
     return h5tools_str_fmt(str, (size_t)0, OPT(info->idx_fmt, "%s: "));
