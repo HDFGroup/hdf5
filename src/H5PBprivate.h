@@ -610,6 +610,7 @@ typedef struct H5PB_t {
     int64_t flushes[H5PB__NUM_STAT_TYPES];
     int64_t evictions[H5PB__NUM_STAT_TYPES];
     int64_t clears[H5PB__NUM_STAT_TYPES];
+    uint64_t access_size_count[6];
     int64_t max_lru_len;
     int64_t max_lru_size;
     int64_t lru_md_skips;
