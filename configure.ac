@@ -1150,12 +1150,13 @@ AC_CHECK_HEADERS([stdbool.h])
 AC_CHECK_HEADERS([netdb.h netinet/in.h arpa/inet.h])
 
 ## Darwin
-AC_CHECK_HEADERS([mach/mach_time.h])
-## Also need to detect Darwin for pubconf
+AC_SUBST([H5_IS_DARWIN])
+H5_IS_DARWIN="no"
 case $host_os in
   darwin*)
     AC_DEFINE([HAVE_DARWIN], [1], [Define if Darwin or Mac OS X])
-  ;;
+    H5_IS_DARWIN="yes"
+    ;;
 esac
 
 ## Windows
@@ -1248,6 +1249,7 @@ case "$host_cpu-$host_vendor-$host_os" in
     ## VFD on Linux systems.
     H5_CPPFLAGS="-D_GNU_SOURCE $H5_CPPFLAGS"
     ;;
+
 esac
 
 ## Need to add the AM_ and H5_ into CFLAGS/CPPFLAGS to make them visible
@@ -1603,7 +1605,10 @@ case "X-$withval" in
 
     if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
       AC_CHECK_LIB([sz], [SZ_BufftoBuffCompress],,
-                   [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SZLIB])
+                   [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SZLIB])
+      if test -z "$HAVE_SZLIB"; then
+        AC_MSG_RESULT([Using SZ_BufftoBuffCompress from libsz in $szlib_lib failed.  Szip not enabled.])
+      fi
     fi
 
     if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then

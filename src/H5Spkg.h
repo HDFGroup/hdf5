@@ -324,11 +324,9 @@ struct H5S_t {
 
 /* Selection iteration methods */
 /* Method to retrieve the current coordinates of iterator for current selection */
-typedef herr_t (*H5S_sel_iter_coords_func_t)(const H5S_sel_iter_t *iter,
-    hsize_t *coords);
+typedef herr_t (*H5S_sel_iter_coords_func_t)(const H5S_sel_iter_t *iter, hsize_t *coords);
 /* Method to retrieve the current block of iterator for current selection */
-typedef herr_t (*H5S_sel_iter_block_func_t)(const H5S_sel_iter_t *iter,
-    hsize_t *start, hsize_t *end);
+typedef herr_t (*H5S_sel_iter_block_func_t)(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end);
 /* Method to determine number of elements left in iterator for current selection */
 typedef hsize_t (*H5S_sel_iter_nelmts_func_t)(const H5S_sel_iter_t *iter);
 /* Method to determine if there are more blocks left in the current selection */

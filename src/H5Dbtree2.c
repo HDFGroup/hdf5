@@ -292,7 +292,7 @@ H5D__bt2_dst_context(void *_ctx)
 
     /* Free array for chunk dimension sizes */
     if(ctx->dim)
-	(void)H5FL_ARR_FREE(uint32_t, ctx->dim);
+        H5FL_ARR_FREE(uint32_t, ctx->dim);
     /* Release callback context */
     ctx = H5FL_FREE(H5D_bt2_ctx_t, ctx);
 
