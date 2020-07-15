@@ -1296,20 +1296,13 @@ H5FD__vfd_swmr_index_deserialize(const H5FD_vfd_swmr_t *file,
         HGOTO_DONE(FALSE);
 
     /* If the index magic is incorrect, then assume that is a
-     * temporary error such as a "torn write."  Try again.
+     * temporary error and try again.
      *
      * XXX XXX XXX
      * Under the new protocol, where the index is written in
      * one write(2), and the header is written in a distinct
-     * second write(2), it is reasonable to expect that the
-     * index-write is complete when the index-read occurs.
-     * So we should not read bad magic because we read a
-     * "torn" write.
-     *
-     * (I am not sure I believe any recent version of UNIX or
-     * Linux suffers from torn writes on local filesystems!
-     * Linux manual pages indicate that there was an issue, but
-     * it was fixed.)
+     * second write(2), and the header and index are read in
+     * the reverse order, the index magic usually will be intact.
      *
      * It is possible under the new protocol that we read
      * the header on tick `t`, then an arbitrary delay

@@ -117,6 +117,8 @@ static herr_t H5PB__write_raw(H5F_shared_t *, H5FD_mem_t, haddr_t,
     size_t, const void *);
 
 
+static void H5PB_log_access_by_size_counts(const H5PB_t *);
+
 /*********************/
 /* Package Variables */
 /*********************/
@@ -143,6 +145,7 @@ H5FL_DEFINE_STATIC(H5PB_entry_t);
 
 HLOG_OUTLET_DECL(pagebuffer);
 HLOG_OUTLET_SHORT_DEFN(pagebuffer, all);
+HLOG_OUTLET_SHORT_DEFN(pb_access_sizes, pagebuffer);
 HLOG_OUTLET_SHORT_DEFN(pbflush, pagebuffer);
 HLOG_OUTLET_SHORT_DEFN(pbflush_entry, pbflush);
 HLOG_OUTLET_SHORT_DEFN(pbio, pagebuffer);
@@ -744,6 +747,8 @@ H5PB_dest(H5F_shared_t *shared)
 
         pb_ptr = shared->pb_ptr;
 
+        H5PB_log_access_by_size_counts(pb_ptr);
+
         HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
 
         /* the current implementation if very inefficient, and will 
@@ -942,6 +947,37 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5PB_page_exists */
+
+static void
+H5PB_count_access_by_size(H5PB_t *pb, size_t size)
+{
+    const size_t nslots = NELMTS(pb->access_size_count);
+    size_t i, hi;
+
+    for (hi = pb->page_size, i = 0; i < nslots - 1; i++, hi *= 2){
+        if (size <= hi)
+            break;
+    }
+    pb->access_size_count[i]++;
+}
+
+static void
+H5PB_log_access_by_size_counts(const H5PB_t *pb)
+{
+    const size_t nslots = NELMTS(pb->access_size_count);
+    size_t i, lo, hi;
+
+    for (lo = 0, hi = pb->page_size, i = 0;
+         i < nslots - 1;
+         i++, lo = hi + 1, hi *= 2) {
+        hlog_fast(pb_access_sizes,
+            "%p %16" PRIu64 " accesses %8zu - %8zu bytes long",
+            (const void *)pb, pb->access_size_count[i], lo, hi);
+    }
+    hlog_fast(pb_access_sizes,
+        "%p %16" PRIu64 " accesses %8zu - greater  bytes long",
+        (const void *)pb, pb->access_size_count[i], lo);
+}
 
 
 /*-------------------------------------------------------------------------
@@ -1144,6 +1180,9 @@ H5PB_read(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
 
 
     pb_ptr = shared->pb_ptr;
+
+    if (pb_ptr != NULL)
+        H5PB_count_access_by_size(pb_ptr, size);
 
     if ( pb_ptr == NULL ) {
 
@@ -2483,6 +2522,9 @@ H5PB_write(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
         __func__, (void *)shared, type, addr, size);
 
     pb_ptr = shared->pb_ptr;
+
+    if (pb_ptr != NULL)
+        H5PB_count_access_by_size(pb_ptr, size);
 
     if ( pb_ptr == NULL ) {
 
