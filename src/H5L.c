@@ -2573,7 +2573,7 @@ H5L__delete_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_ATT
     H5L_trav_gvbi_t *udata = (H5L_trav_gvbi_t *)_udata;   /* User data passed in */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC_TAG((obj_loc) ? (obj_loc->oloc->addr) : HADDR_UNDEF) //KEEP
+    FUNC_ENTER_STATIC_TAG((obj_loc) ? (obj_loc->oloc->addr) : HADDR_UNDEF)
 
     /* Check if the name of the group resolved to a valid object */
     if(obj_loc == NULL)

@@ -129,6 +129,7 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
     hsize_t k;				/* Local index variable */
     unsigned u; 		        /* Local index variable */
     herr_t ret_value = FAIL;		/* Return value */
+
     /* check arguments */
     if(H5I_DATASET != H5Iget_type(dset_id))
         goto done;

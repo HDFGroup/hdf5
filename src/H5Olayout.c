@@ -1008,7 +1008,7 @@ H5O__layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
     hbool_t             copied = FALSE;         /* Whether the data was copied */
     void               *ret_value = NULL;       /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5AC__GLOBALHEAP_TAG, FAIL) //FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(file_src);
@@ -1083,7 +1083,7 @@ done:
 	if(layout_dst)
 	    layout_dst = H5FL_FREE(H5O_layout_t, layout_dst);
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value) //FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__layout_copy_file() */
 
 

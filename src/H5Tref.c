@@ -855,7 +855,7 @@ H5T__ref_disk_write(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
     uint8_t *p_bg = (uint8_t *)bg_buf;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC_TAG(H5AC__GLOBALHEAP_TAG) //FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC
 
     HDassert(src_buf);
     HDassert(src_size);
@@ -893,7 +893,7 @@ H5T__ref_disk_write(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to put blob")
 
 done:
-    FUNC_LEAVE_NOAPI_TAG(ret_value) //FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5T__ref_disk_write() */
 
 

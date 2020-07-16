@@ -316,7 +316,7 @@ H5O_msg_write_oh(H5F_t *f, H5O_t *oh, unsigned type_id, unsigned mesg_flags,
     const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE //FUNC_ENTER_NOAPI_TAG(oh->cache_info.addr, FAIL)
+    FUNC_ENTER_NOAPI_TAG(oh->cache_info.addr, FAIL)
 
     /* check args */
     HDassert(f);
@@ -333,7 +333,7 @@ H5O_msg_write_oh(H5F_t *f, H5O_t *oh, unsigned type_id, unsigned mesg_flags,
         HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to write object header message")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value) //FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O_msg_write_oh() */
 
 

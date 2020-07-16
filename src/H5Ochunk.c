@@ -164,7 +164,7 @@ H5O__chunk_protect(H5F_t *f, H5O_t *oh, unsigned idx)
     H5O_chunk_proxy_t *chk_proxy = NULL;        /* Proxy for protected chunk */
     H5O_chunk_proxy_t *ret_value = NULL;        /* Return value */
 
-    FUNC_ENTER_PACKAGE //FUNC_ENTER_PACKAGE_TAG(oh->cache_info.addr) // H5O__chunk_protect
+    FUNC_ENTER_PACKAGE_TAG(oh->cache_info.addr)
 
     /* check args */
     HDassert(f);
@@ -215,7 +215,7 @@ done:
         if(0 == idx && chk_proxy && H5O__chunk_dest(chk_proxy) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "unable to destroy object header chunk")
 
-    FUNC_LEAVE_NOAPI(ret_value) //FUNC_LEAVE_NOAPI_TAG(ret_value) //H5O__chunk_protect
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O__chunk_protect() */
 
 
@@ -382,7 +382,7 @@ H5O__chunk_delete(H5F_t *f, H5O_t *oh, unsigned idx)
     unsigned cache_flags = H5AC__DELETED_FLAG; /* Flags for unprotecting proxy */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE// FUNC_ENTER_PACKAGE_TAG(oh->cache_info.addr)
+    FUNC_ENTER_PACKAGE_TAG(oh->cache_info.addr)
 
     /* check args */
     HDassert(f);
@@ -403,7 +403,7 @@ done:
     if(chk_proxy && H5AC_unprotect(f, H5AC_OHDR_CHK, oh->chunk[idx].addr, chk_proxy, cache_flags) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header chunk")
 
-    FUNC_LEAVE_NOAPI(ret_value) //FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O__chunk_delete() */
 
 

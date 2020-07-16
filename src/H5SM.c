@@ -1246,7 +1246,7 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header,
     size_t                empty_pos = UFAIL; /* Empty entry in list */
     herr_t                ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC //FUNC_ENTER_STATIC_TAG(H5AC__SOHM_TAG)
+    FUNC_ENTER_STATIC_TAG(H5AC__SOHM_TAG)
 
     /* Sanity check */
     HDassert(header);
@@ -1509,7 +1509,7 @@ done:
     if(encoding_buf)
         encoding_buf = H5MM_xfree(encoding_buf);
 
-    FUNC_LEAVE_NOAPI //FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5SM__write_mesg() */
 
 
@@ -1781,7 +1781,7 @@ H5SM__delete_from_index(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header,
     unsigned        type_id;            /* Message type to operate on */
     herr_t          ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC //FUNC_ENTER_STATIC_TAG(H5AC__SOHM_TAG)
+    FUNC_ENTER_STATIC_TAG(H5AC__SOHM_TAG)
 
     /* Sanity check */
     HDassert(f);
@@ -1946,7 +1946,7 @@ done:
         *mesg_size = 0;
     }
 
-    FUNC_LEAVE_NOAPI(ret_value) //FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5SM__delete_from_index() */
 
 
@@ -2387,7 +2387,7 @@ H5SM__read_mesg(H5F_t *f, const H5SM_sohm_t *mesg, H5HF_t *fheap,
     H5O_t *oh = NULL;           /* Object header for message in object header */
     herr_t ret_value = SUCCEED;
 
-   FUNC_ENTER_STATIC // FUNC_ENTER_STATIC_TAG(H5AC__SOHM_TAG)
+    FUNC_ENTER_STATIC_TAG(H5AC__SOHM_TAG)
 
     HDassert(f);
     HDassert(mesg);
@@ -2461,7 +2461,7 @@ done:
     if(ret_value < 0 && udata.encoding_buf)
         udata.encoding_buf = H5MM_xfree(udata.encoding_buf);
 
-    FUNC_LEAVE_NOAPI(ret_value) //FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5SM__read_mesg */
 
 

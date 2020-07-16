@@ -1699,7 +1699,7 @@ H5R__encode_token_region_compat(H5F_t *f, const H5O_token_t *obj_token,
     unsigned char *data = NULL;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_TAG(H5AC__GLOBALHEAP_TAG, FAIL) //FUNC_ENTER_PACKAGE
+    FUNC_ENTER_PACKAGE
 
     HDassert(f);
     HDassert(obj_token);
@@ -1753,7 +1753,7 @@ H5R__encode_token_region_compat(H5F_t *f, const H5O_token_t *obj_token,
 
 done:
     H5MM_free(data);
-    FUNC_LEAVE_NOAPI_TAG(ret_value) //FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5R__encode_token_region_compat() */
 
 

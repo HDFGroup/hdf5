@@ -51,7 +51,7 @@
 static herr_t H5D__ioinfo_init(H5D_t *dset, const H5D_type_info_t *type_info,
     H5D_storage_t *store, H5D_io_info_t *io_info);
 static herr_t H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id,
-    hbool_t do_write,hbool_t do_append, H5D_type_info_t *type_info);
+    hbool_t do_write, hbool_t do_append, H5D_type_info_t *type_info);
 #ifdef H5_HAVE_PARALLEL
 static herr_t H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
     const H5S_t *file_space, const H5S_t *mem_space, const H5D_type_info_t *type_info);
@@ -861,9 +861,6 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
      * Note that in general, this requires us to touch up the memory buffer
      * as well.
      */
-        if(!do_append){
-
-        }
     if((do_append || TRUE == H5S_SELECT_SHAPE_SAME(mem_space, file_space)) &&
             H5S_GET_EXTENT_NDIMS(mem_space) != H5S_GET_EXTENT_NDIMS(file_space)) {
         const void *adj_buf = NULL;   /* Pointer to the location in buf corresponding  */

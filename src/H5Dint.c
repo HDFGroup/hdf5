@@ -1130,7 +1130,6 @@ done:
 } /* end H5D__update_oh_info() */
 
 
-
 /*--------------------------------------------------------------------------
  * Function:    H5D__build_file_prefix
  *
@@ -1244,7 +1243,7 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     H5G_loc_t           dset_loc;               /* Dataset location */
     H5D_t              *ret_value = NULL;       /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5AC__GLOBALHEAP_TAG, FAIL) //FUNC_ENTER_PACKAGE
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(file);
@@ -1458,7 +1457,7 @@ done:
         new_dset = H5FL_FREE(H5D_t, new_dset);
     } /* end if */
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__create() */
 
 
@@ -3308,7 +3307,7 @@ H5D__format_convert(H5D_t *dataset)
     hbool_t add_new_layout = FALSE;         /* Indicate that the new layout message is added */
     herr_t ret_value = SUCCEED;             /* Return value */
 
-    FUNC_ENTER_PACKAGE_TAG(dataset->oloc.addr) //KEEP
+    FUNC_ENTER_PACKAGE_TAG(dataset->oloc.addr)
 
     /* Check args */
     HDassert(dataset);

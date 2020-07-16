@@ -460,7 +460,7 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
     hbool_t use_new_dense = FALSE;      /* Whether to use "dense" form of 'new format' group */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(grp_oloc->addr, FAIL) //KEEP
+    FUNC_ENTER_NOAPI_TAG(grp_oloc->addr, FAIL)
 
     /* check arguments */
     HDassert(grp_oloc && grp_oloc->file);
@@ -627,7 +627,7 @@ done:
     if(pline && H5O_msg_reset(H5O_PLINE_ID, pline) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "can't release pipeline")
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value) //KEEP
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5G_obj_insert() */
 
 
@@ -1040,7 +1040,7 @@ H5G_obj_remove_by_idx(const H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r,
     hbool_t     use_old_format; /* Whether to use 'old format' (symbol table) for deletion or not */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)//FUNC_ENTER_NOAPI_TAG(grp_oloc->addr, FAIL) //H5G_obj_remove_by_idx
+    FUNC_ENTER_NOAPI_TAG(grp_oloc->addr, FAIL)
 
     /* Sanity check */
     HDassert(grp_oloc && grp_oloc->file);
@@ -1090,7 +1090,7 @@ H5G_obj_remove_by_idx(const H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r,
             HGOTO_ERROR(H5E_SYM, H5E_CANTUPDATE, FAIL, "unable to update link info")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value) //FUNC_LEAVE_NOAPI_TAG(ret_value) //H5G_obj_remove_by_idx
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5G_obj_remove_by_idx() */
 
 

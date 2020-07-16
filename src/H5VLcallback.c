@@ -36,8 +36,8 @@
 #include "H5MMprivate.h"        /* Memory management                                */
 #include "H5Pprivate.h"         /* Property lists                                   */
 #include "H5VLpkg.h"            /* Virtual Object Layer                             */
-//For tagging
-#include "H5ACprivate.h"        /* Metadata cache                           */
+
+
 /****************/
 /* Local Macros */
 /****************/
@@ -6876,7 +6876,8 @@ H5VL_blob_put(const H5VL_object_t *vol_obj, const void *buf, size_t size,
     hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-	FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
+
     /* Sanity check */
     HDassert(vol_obj);
     HDassert(size == 0 || buf);
@@ -6895,7 +6896,7 @@ done:
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
         HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
-    FUNC_LEAVE_NOAPI(ret_value) //FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_blob_put() */
 
 
