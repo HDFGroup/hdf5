@@ -423,6 +423,10 @@ H5R__destroy(H5R_ref_priv_t *ref)
 
     HDassert(ref != NULL);
 
+    H5R_LOG_DEBUG("Destroying reference, filename=%s, obj_addr=%s, encode size=%u",
+        ref->info.obj.filename, H5R__print_token(ref->info.obj.token),
+        ref->encode_size);
+
     H5MM_xfree(ref->info.obj.filename);
     ref->info.obj.filename = NULL;
 
@@ -1027,6 +1031,10 @@ H5R__encode(const char *filename, const H5R_ref_priv_t *ref, unsigned char *buf,
             HDassert("unknown reference type" && 0);
             HGOTO_ERROR(H5E_REFERENCE, H5E_UNSUPPORTED, FAIL, "internal error (unknown reference type)")
     } /* end switch */
+
+    H5R_LOG_DEBUG("Encoded reference, filename=%s, obj_addr=%s, encode size=%u",
+        ref->info.obj.filename, H5R__print_token(ref->info.obj.token),
+        encode_size);
 
     *nalloc = encode_size;
 
