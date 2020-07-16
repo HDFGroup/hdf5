@@ -274,7 +274,7 @@ set (H5_TESTS
     enc_dec_plist
     enc_dec_plist_cross_platform
     getname
-    vfd
+    #vfd # broken on windows
     ros3
     s3comms
     hdfs
@@ -297,6 +297,9 @@ set (H5_TESTS
     vol
     timer
 )
+if (NOT WIN32)
+  list (APPEND ${H5_TESTS} vfd)
+endif ()
 
 macro (ADD_H5_EXE file)
   add_executable (${file} ${HDF5_TEST_SOURCE_DIR}/${file}.c)
