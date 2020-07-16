@@ -2289,11 +2289,11 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size,
                                                    large_sel_start);
 
 
-    /* verify that H5S_select_shape_same() reports the two
+    /* verify that H5Sselect_shape_same() reports the two
      * selections as having the same shape.
      */
-    check = H5S_select_shape_same_test(mem_large_ds_sid, file_small_ds_sid);
-    VRFY((check == TRUE), "H5S_select_shape_same_test passed (1)");
+    check = H5Sselect_shape_same(mem_large_ds_sid, file_small_ds_sid);
+    VRFY((check == TRUE), "H5Sselect_shape_same passed (1)");
 
 
     ret = H5Dread(small_dataset,
@@ -2409,11 +2409,11 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size,
                                                    large_sel_start);
 
 
-    /* verify that H5S_select_shape_same() reports the two
+    /* verify that H5Sselect_shape_same() reports the two
      * selections as having the same shape.
      */
-    check = H5S_select_shape_same_test(mem_small_ds_sid, file_large_ds_sid);
-    VRFY((check == TRUE), "H5S_select_shape_same_test passed (2)");
+    check = H5Sselect_shape_same(mem_small_ds_sid, file_large_ds_sid);
+    VRFY((check == TRUE), "H5Sselect_shape_same passed (2)");
 
 
     ret = H5Dread(large_dataset,

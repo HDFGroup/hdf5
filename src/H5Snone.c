@@ -33,7 +33,6 @@
 #include "H5Iprivate.h"         /* ID Functions                             */
 #include "H5Spkg.h"             /* Dataspace functions                      */
 #include "H5VMprivate.h"        /* Vector functions                         */
-#include "H5Dprivate.h"
 
 
 /****************/
@@ -52,9 +51,6 @@
 
 /* Selection callbacks */
 static herr_t H5S__none_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection);
-static herr_t H5S__none_get_seq_list(const H5S_t *space, unsigned flags,
-    H5S_sel_iter_t *iter, size_t maxseq, size_t maxbytes,
-    size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 static herr_t H5S__none_release(H5S_t *space);
 static htri_t H5S__none_is_valid(const H5S_t *space);
 static hssize_t H5S__none_serial_size(const H5S_t *space);
@@ -66,7 +62,11 @@ static int H5S__none_unlim_dim(const H5S_t *space);
 static htri_t H5S__none_is_contiguous(const H5S_t *space);
 static htri_t H5S__none_is_single(const H5S_t *space);
 static htri_t H5S__none_is_regular(const H5S_t *space);
+static htri_t H5S__none_shape_same(const H5S_t *space1, const H5S_t *space2);
+static htri_t H5S__none_intersect_block(const H5S_t *space, const hsize_t *start,
+    const hsize_t *end);
 static herr_t H5S__none_adjust_u(H5S_t *space, const hsize_t *offset);
+static herr_t H5S__none_adjust_s(H5S_t *space, const hssize_t *offset);
 static herr_t H5S__none_project_scalar(const H5S_t *space, hsize_t *offset);
 static herr_t H5S__none_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset);
 static herr_t H5S__none_iter_init(const H5S_t *space, H5S_sel_iter_t *iter);
@@ -78,6 +78,8 @@ static hsize_t H5S__none_iter_nelmts(const H5S_sel_iter_t *iter);
 static htri_t H5S__none_iter_has_next_block(const H5S_sel_iter_t *iter);
 static herr_t H5S__none_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
 static herr_t H5S__none_iter_next_block(H5S_sel_iter_t *sel_iter);
+static herr_t H5S__none_iter_get_seq_list(H5S_sel_iter_t *iter, size_t maxseq,
+    size_t maxbytes, size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 static herr_t H5S__none_iter_release(H5S_sel_iter_t *sel_iter);
 
 
@@ -96,7 +98,6 @@ const H5S_select_class_t H5S_sel_none[1] = {{
 
     /* Methods on selection */
     H5S__none_copy,
-    H5S__none_get_seq_list,
     H5S__none_release,
     H5S__none_is_valid,
     H5S__none_serial_size,
@@ -109,7 +110,10 @@ const H5S_select_class_t H5S_sel_none[1] = {{
     H5S__none_is_contiguous,
     H5S__none_is_single,
     H5S__none_is_regular,
+    H5S__none_shape_same,
+    H5S__none_intersect_block,
     H5S__none_adjust_u,
+    H5S__none_adjust_s,
     H5S__none_project_scalar,
     H5S__none_project_simple,
     H5S__none_iter_init,
@@ -131,6 +135,7 @@ static const H5S_sel_iter_class_t H5S_sel_iter_none[1] = {{
     H5S__none_iter_has_next_block,
     H5S__none_iter_next,
     H5S__none_iter_next_block,
+    H5S__none_iter_get_seq_list,
     H5S__none_iter_release,
 }};
 
@@ -328,6 +333,61 @@ H5S__none_iter_next_block(H5S_sel_iter_t H5_ATTR_UNUSED *iter)
 
     FUNC_LEAVE_NOAPI(FAIL)
 } /* end H5S__none_iter_next_block() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S__none_iter_get_seq_list
+ PURPOSE
+    Create a list of offsets & lengths for a selection
+ USAGE
+    herr_t H5S__none_iter_get_seq_list(iter,maxseq,maxelem,nseq,nelem,off,len)
+        H5S_sel_iter_t *iter;   IN/OUT: Selection iterator describing last
+                                    position of interest in selection.
+        size_t maxseq;          IN: Maximum number of sequences to generate
+        size_t maxelem;         IN: Maximum number of elements to include in the
+                                    generated sequences
+        size_t *nseq;           OUT: Actual number of sequences generated
+        size_t *nelem;          OUT: Actual number of elements in sequences generated
+        hsize_t *off;           OUT: Array of offsets
+        size_t *len;            OUT: Array of lengths
+ RETURNS
+    Non-negative on success/Negative on failure.
+ DESCRIPTION
+    Use the selection in the dataspace to generate a list of byte offsets and
+    lengths for the region(s) selected.  Start/Restart from the position in the
+    ITER parameter.  The number of sequences generated is limited by the MAXSEQ
+    parameter and the number of sequences actually generated is stored in the
+    NSEQ parameter.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5S__none_iter_get_seq_list(H5S_sel_iter_t H5_ATTR_UNUSED *iter,
+    size_t H5_ATTR_UNUSED maxseq, size_t H5_ATTR_UNUSED maxelem, size_t *nseq,
+    size_t *nelem, hsize_t H5_ATTR_UNUSED *off, size_t H5_ATTR_UNUSED *len)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check args */
+    HDassert(iter);
+    HDassert(maxseq > 0);
+    HDassert(maxelem > 0);
+    HDassert(nseq);
+    HDassert(nelem);
+    HDassert(off);
+    HDassert(len);
+
+    /* "none" selections don't generate sequences of bytes */
+    *nseq = 0;
+
+    /* They don't use any elements, either */
+    *nelem = 0;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5S__none_iter_get_seq_list() */
 
 
 /*--------------------------------------------------------------------------
@@ -797,6 +857,74 @@ H5S__none_is_regular(const H5S_t H5_ATTR_UNUSED *space)
 
 /*--------------------------------------------------------------------------
  NAME
+    H5S__none_shape_same
+ PURPOSE
+    Check if a two "none" selections are the same shape
+ USAGE
+    htri_t H5S__none_shape_same(space1, space2)
+        const H5S_t *space1;     IN: First dataspace to check
+        const H5S_t *space2;     IN: Second dataspace to check
+ RETURNS
+    TRUE / FALSE / FAIL
+ DESCRIPTION
+    Checks to see if the current selection in each dataspace are the same
+    shape.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static htri_t
+H5S__none_shape_same(const H5S_t H5_ATTR_UNUSED *space1,
+    const H5S_t H5_ATTR_UNUSED *space2)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check args */
+    HDassert(space1);
+    HDassert(space2);
+
+    FUNC_LEAVE_NOAPI(TRUE)
+} /* end H5S__none_shape_same() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S__none_intersect_block
+ PURPOSE
+    Detect intersections of selection with block
+ USAGE
+    htri_t H5S__none_intersect_block(space, start, end)
+        const H5S_t *space;     IN: Dataspace with selection to use
+        const hsize_t *start;   IN: Starting coordinate for block
+        const hsize_t *end;     IN: Ending coordinate for block
+ RETURNS
+    Non-negative TRUE / FALSE on success, negative on failure
+ DESCRIPTION
+    Quickly detect intersections with a block
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t
+H5S__none_intersect_block(const H5S_t H5_ATTR_UNUSED *space,
+    const hsize_t H5_ATTR_UNUSED *start, const hsize_t H5_ATTR_UNUSED *end)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(space);
+    HDassert(H5S_SEL_NONE == H5S_GET_SELECT_TYPE(space));
+    HDassert(start);
+    HDassert(end);
+
+    FUNC_LEAVE_NOAPI(FALSE)
+} /* end H5S__none_intersect_block() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5S__none_adjust_u
  PURPOSE
     Adjust an "none" selection by subtracting an offset
@@ -824,6 +952,37 @@ H5S__none_adjust_u(H5S_t H5_ATTR_UNUSED *space, const hsize_t H5_ATTR_UNUSED *of
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__none_adjust_u() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S__none_adjust_s
+ PURPOSE
+    Adjust an "none" selection by subtracting an offset
+ USAGE
+    herr_t H5S__none_adjust_u(space, offset)
+        H5S_t *space;           IN/OUT: Pointer to dataspace to adjust
+        const hssize_t *offset; IN: Offset to subtract
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Moves selection by subtracting an offset from it.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5S__none_adjust_s(H5S_t H5_ATTR_UNUSED *space, const hssize_t H5_ATTR_UNUSED *offset)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check args */
+    HDassert(space);
+    HDassert(offset);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5S__none_adjust_s() */
 
 
 /*-------------------------------------------------------------------------
@@ -965,62 +1124,4 @@ H5Sselect_none(hid_t spaceid)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Sselect_none() */
-
-
-/*--------------------------------------------------------------------------
- NAME
-    H5S__none_get_seq_list
- PURPOSE
-    Create a list of offsets & lengths for a selection
- USAGE
-    herr_t H5S__none_get_seq_list(space,flags,iter,maxseq,maxelem,nseq,nelem,off,len)
-        H5S_t *space;           IN: Dataspace containing selection to use.
-        unsigned flags;         IN: Flags for extra information about operation
-        H5S_sel_iter_t *iter;   IN/OUT: Selection iterator describing last
-                                    position of interest in selection.
-        size_t maxseq;          IN: Maximum number of sequences to generate
-        size_t maxelem;         IN: Maximum number of elements to include in the
-                                    generated sequences
-        size_t *nseq;           OUT: Actual number of sequences generated
-        size_t *nelem;          OUT: Actual number of elements in sequences generated
-        hsize_t *off;           OUT: Array of offsets
-        size_t *len;            OUT: Array of lengths
- RETURNS
-    Non-negative on success/Negative on failure.
- DESCRIPTION
-    Use the selection in the dataspace to generate a list of byte offsets and
-    lengths for the region(s) selected.  Start/Restart from the position in the
-    ITER parameter.  The number of sequences generated is limited by the MAXSEQ
-    parameter and the number of sequences actually generated is stored in the
-    NSEQ parameter.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-static herr_t
-H5S__none_get_seq_list(const H5S_t H5_ATTR_UNUSED *space, unsigned H5_ATTR_UNUSED flags, H5S_sel_iter_t H5_ATTR_UNUSED *iter,
-    size_t H5_ATTR_UNUSED maxseq, size_t H5_ATTR_UNUSED maxelem, size_t *nseq, size_t *nelem,
-    hsize_t H5_ATTR_UNUSED *off, size_t H5_ATTR_UNUSED *len)
-{
-    FUNC_ENTER_STATIC_NOERR
-
-    /* Check args */
-    HDassert(space);
-    HDassert(iter);
-    HDassert(maxseq > 0);
-    HDassert(maxelem > 0);
-    HDassert(nseq);
-    HDassert(nelem);
-    HDassert(off);
-    HDassert(len);
-
-    /* "none" selections don't generate sequences of bytes */
-    *nseq = 0;
-
-    /* They don't use any elements, either */
-    *nelem = 0;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5S__none_get_seq_list() */
 
