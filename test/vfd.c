@@ -3998,6 +3998,164 @@ error:
     return -1;
 } /* end test_vector_io() */
 
+/*-------------------------------------------------------------------------
+ * Function:    test_subfiling
+ *
+ * Purpose:     Tests the file handle interface for subfiling driver
+ *
+ *              Richard:  
+ *
+ *              This test is serial only -- I'm including it
+ *              because I used the sec2 VFD as the base of the skeletal
+ *              sub-filing VFD.  Needless to say, sub-filing proper will
+ *              be parallel only, which implies that the associated test
+ *              code will be in testpar.
+ *
+ *              That said, we will eventually need to be able to do 
+ *              sub-file I/O in serial.  Also, it may be appropriate to 
+ *              test subfiling property lists in the serial code.
+ *
+ *              Thus you may want to keep this function in stub form once
+ *              modify the subfiling skeleton, and move the test code 
+ *              to testpar.
+ *                                               -- John
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  <prgrammer>
+ *              <date>
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_subfiling(void)
+{
+    hid_t       fid = -1;                   /* file ID                      */
+    hid_t       fapl_id = -1;               /* file access property list ID */
+    hid_t       fapl_id_out = -1;           /* from H5Fget_access_plist     */
+    hid_t       driver_id = -1;             /* ID for this VFD              */
+    unsigned long driver_flags = 0;         /* VFD feature flags            */
+    char        filename[1024];             /* filename                     */
+    void        *os_file_handle = NULL;     /* OS file handle               */
+    hsize_t     file_size;                  /* file size                    */
+    H5FD_subfiling_fapl_t fa_in = {H5FD_CURR_SUBFILING_FAPL_T_VERSION};
+    H5FD_subfiling_fapl_t fa_out;
+
+    TESTING("subfiling file driver");
+
+    /* Set property list and file name for subfiling driver. */
+    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
+    if(H5Pset_fapl_subfiling(fapl_id, &fa_in) < 0)
+        TEST_ERROR;
+
+    /* get and verify the H5FD_subfiling_fapl_t */
+    if(H5Pget_fapl_subfiling(fapl_id, &fa_out) < 0)
+        TEST_ERROR;
+
+    if(fa_out.version != H5FD_CURR_SUBFILING_FAPL_T_VERSION)
+        TEST_ERROR;
+
+    h5_fixname(FILENAME[0], fapl_id, filename, sizeof(filename));
+
+    /* Check that the VFD feature flags are correct */
+    if ((driver_id = H5Pget_driver(fapl_id)) < 0)
+        TEST_ERROR
+
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
+        TEST_ERROR
+
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))      TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_DATA_SIEVE))              TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_POSIX_COMPAT_HANDLE))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_SUPPORTS_SWMR_IO))        TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))  TEST_ERROR
+
+    /* Check for extra flags not accounted for above */
+    if(driver_flags != (H5FD_FEAT_AGGREGATE_METADATA
+                        | H5FD_FEAT_ACCUMULATE_METADATA
+                        | H5FD_FEAT_DATA_SIEVE
+                        | H5FD_FEAT_AGGREGATE_SMALLDATA
+                        | H5FD_FEAT_POSIX_COMPAT_HANDLE
+                        | H5FD_FEAT_SUPPORTS_SWMR_IO
+                        | H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
+        TEST_ERROR
+
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        TEST_ERROR;
+
+    /* Retrieve the access property list... */
+    if((fapl_id_out = H5Fget_access_plist(fid)) < 0)
+        TEST_ERROR;
+
+    /* Check that the driver is correct */
+    if(H5FD_SUBFILING != H5Pget_driver(fapl_id_out))
+        TEST_ERROR;
+
+    /* get and verify the H5FD_subfiling_fapl_t again */
+    if(H5Pget_fapl_subfiling(fapl_id_out, &fa_out) < 0)
+        TEST_ERROR;
+
+    if(fa_out.version != H5FD_CURR_SUBFILING_FAPL_T_VERSION)
+        TEST_ERROR;
+
+    /* ...and close the property list */
+    if(H5Pclose(fapl_id_out) < 0)
+        TEST_ERROR;
+
+    /* Check that we can get an operating-system-specific handle from
+     * the library.
+     *
+     * Not sure that this will be meaningful in the subfiling case.
+     */
+    if(H5Fget_vfd_handle(fid, H5P_DEFAULT, &os_file_handle) < 0)
+        TEST_ERROR;
+
+    if(os_file_handle == NULL)
+        FAIL_PUTS_ERROR("NULL os-specific vfd/file handle was returned from H5Fget_vfd_handle");
+
+
+    /* There is no garantee the size of metadata in file is constant.
+     * Just try to check if it's reasonable.
+     *
+     * Currently it should be around 2 KB.
+     */
+    if(H5Fget_filesize(fid, &file_size) < 0)
+        TEST_ERROR;
+
+    if(file_size < 1 * KB || file_size > 4 * KB)
+        FAIL_PUTS_ERROR("suspicious file size obtained from H5Fget_filesize");
+
+    /* Close and delete the file */
+    if(H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    h5_delete_test_file(FILENAME[0], fapl_id);
+
+    /* Close the fapl */
+    if(H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl_id);
+        H5Pclose(fapl_id_out);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+
+    return -1;
+
+} /* end test_subfiling() */
+
+
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -4035,6 +4193,7 @@ main(void)
     nerrors += test_splitter() < 0             ? 1 : 0;
     nerrors += test_vector_io("sec2") < 0      ? 1 : 0;
     nerrors += test_vector_io("stdio") < 0     ? 1 : 0;
+    nerrors += test_subfiling() < 0            ? 1 : 0;
 
 
     if(nerrors) {

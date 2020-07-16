@@ -710,8 +710,12 @@
 ./src/H5FDspace.c
 ./src/H5FDsplitter.c
 ./src/H5FDsplitter.h
+./src/H5FDsubfile.c
+./src/H5FDsubfile.h
 ./src/H5FDstdio.c
 ./src/H5FDstdio.h
+./src/H5FDsubfiling.c
+./src/H5FDsubfiling.h
 ./src/H5FDtest.c
 ./src/H5FDwindows.c
 ./src/H5FDwindows.h
