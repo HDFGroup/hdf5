@@ -770,7 +770,7 @@ TOOLTEST h5diff_609.txt -d 200 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dse
 TOOLTEST h5diff_610.txt -d 1 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4
 
 # eps: number smaller than epsilon
-TOOLTEST h5diff_eps.txt -v3 -d 1e-16 h5diff_eps1.h5 h5diff_eps2.h5
+TOOLTEST h5diff_eps.txt -v3 -d 1e-16 diff_eps1.h5 diff_eps2.h5
 
 
 # ##############################################################################
