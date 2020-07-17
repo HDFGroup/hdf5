@@ -1249,6 +1249,7 @@
 ./test/ttsafe.c
 ./test/ttsafe.h
 ./test/ttsafe_acreate.c
+./test/ttsafe_attr_vlen.c
 ./test/ttsafe_cancel.c
 ./test/ttsafe_dcreate.c
 ./test/ttsafe_error.c
