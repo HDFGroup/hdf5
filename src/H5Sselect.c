@@ -1171,7 +1171,7 @@ H5S_select_iter_init(H5S_sel_iter_t *sel_iter, const H5S_t *space,
     if(sel_iter->rank > 0) {
         H5MM_memcpy(sel_iter->dims, space->extent.size, sizeof(hsize_t) * space->extent.rank);
         H5MM_memcpy(sel_iter->sel_off, space->select.offset, sizeof(hsize_t) * space->extent.rank);
-    } /* end if */
+    }
 
     /* Save the element size */
     sel_iter->elmt_size = elmt_size;
