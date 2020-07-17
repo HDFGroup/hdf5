@@ -22,7 +22,6 @@
 #include "testhdf5.h"
 #include "H5srcdir.h"
 
-#include "H5Bprivate.h"
 #include "H5Iprivate.h"
 #include "H5Pprivate.h"
 
@@ -31,6 +30,7 @@
  * This file also needs to access the dataspace testing code.
  */
 #define H5S_FRIEND      /*suppress error about including H5Spkg   */
+#define H5S_TESTING	/*suppress warning about H5S testing funcs*/
 #include "H5Spkg.h"     /* Dataspaces               */
 
 /*

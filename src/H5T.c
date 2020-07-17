@@ -290,12 +290,9 @@ typedef H5T_t *(*H5T_copy_func_t)(H5T_t *old_dt);
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5T__register_int(H5T_pers_t pers, const char *name, H5T_t *src,
-    H5T_t *dst, H5T_lib_conv_t func);
-static herr_t H5T__register(H5T_pers_t pers, const char *name, H5T_t *src,
-    H5T_t *dst, H5T_conv_func_t *conv);
-static herr_t H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src,
-    H5T_t *dst, H5T_conv_t func);
+static herr_t H5T__register_int(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_lib_conv_t func);
+static herr_t H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_conv_func_t *conv);
+static herr_t H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_conv_t func);
 static htri_t H5T__compiler_conv(H5T_t *src, H5T_t *dst);
 static herr_t H5T__set_size(H5T_t *dt, size_t size);
 static herr_t H5T__close_cb(H5T_t *dt);
@@ -306,6 +303,7 @@ static H5T_t *H5T__copy_transient(H5T_t *old_dt);
 static H5T_t *H5T__copy_all(H5T_t *old_dt);
 static herr_t H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt,
     H5T_shared_t *reopened_fo, hbool_t set_memory_type, H5T_copy_func_t copyfn);
+
 
 /*****************************/
 /* Library Private Variables */
@@ -1705,6 +1703,7 @@ H5Tcopy(hid_t obj_id)
         case H5I_ERROR_CLASS:
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
+        case H5I_SPACE_SEL_ITER:
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a datatype or dataset")
@@ -5165,6 +5164,8 @@ H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id, size_t nelmts,
     if(H5DEBUG(T))
         H5_timer_begin(&timer);
 #endif
+
+    /* Call the appropriate conversion callback */
     tpath->cdata.command = H5T_CONV_CONV;
     if(tpath->conv.is_app) {
         if((tpath->conv.u.app_func)(src_id, dst_id, &(tpath->cdata), nelmts, buf_stride, bkg_stride, buf, bkg, H5CX_get_dxpl()) < 0)
@@ -5503,7 +5504,7 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
 
                     /* Mark the VL, compound or array type */
                     if((changed=H5T_set_loc(dt->shared->parent,f,loc))<0)
-                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location")
                     if(changed>0)
                         ret_value=changed;
 

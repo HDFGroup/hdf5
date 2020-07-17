@@ -1153,7 +1153,7 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
                 if((obj2_sid = H5Rget_region(parent2, H5R_DATASET_REGION, ref_buf2)) < 0) TEST_ERROR
 
                 /* Check if dataspaces are the same shape */
-                if(H5S_select_shape_same_test(obj1_sid, obj2_sid) < 0) TEST_ERROR
+                if(H5Sselect_shape_same(obj1_sid, obj2_sid) < 0) TEST_ERROR
 
                 /* Close dataspaces */
                 if(H5Sclose(obj1_sid) < 0) TEST_ERROR

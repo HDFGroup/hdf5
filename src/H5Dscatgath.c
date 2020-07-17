@@ -44,13 +44,11 @@
 /* Local Prototypes */
 /********************/
 static herr_t H5D__scatter_file(const H5D_io_info_t *io_info,
-    const H5S_t *file_space, H5S_sel_iter_t *file_iter, size_t nelmts,
-    const void *buf);
+    H5S_sel_iter_t *file_iter, size_t nelmts, const void *buf);
 static size_t H5D__gather_file(const H5D_io_info_t *io_info,
-    const H5S_t *file_space, H5S_sel_iter_t *file_iter, size_t nelmts,
-    void *buf);
-static herr_t H5D__compound_opt_read(size_t nelmts, const H5S_t *mem_space,
-    H5S_sel_iter_t *iter, const H5D_type_info_t *type_info, void *user_buf/*out*/);
+    H5S_sel_iter_t *file_iter, size_t nelmts, void *buf);
+static herr_t H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter,
+    const H5D_type_info_t *type_info, void *user_buf/*out*/);
 static herr_t H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info);
 
 
@@ -91,9 +89,8 @@ H5FL_SEQ_EXTERN(hsize_t);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__scatter_file(const H5D_io_info_t *_io_info,
-    const H5S_t *space, H5S_sel_iter_t *iter, size_t nelmts,
-    const void *_buf)
+H5D__scatter_file(const H5D_io_info_t *_io_info, H5S_sel_iter_t *iter,
+    size_t nelmts, const void *_buf)
 {
     H5D_io_info_t tmp_io_info;     /* Temporary I/O info object */
     hsize_t *off = NULL;           /* Pointer to sequence offsets */
@@ -112,7 +109,6 @@ H5D__scatter_file(const H5D_io_info_t *_io_info,
 
     /* Check args */
     HDassert(_io_info);
-    HDassert(space);
     HDassert(iter);
     HDassert(nelmts > 0);
     HDassert(_buf);
@@ -139,7 +135,7 @@ H5D__scatter_file(const H5D_io_info_t *_io_info,
     /* Loop until all elements are written */
     while(nelmts > 0) {
         /* Get list of sequences for selection to write */
-        if(H5S_SELECT_GET_SEQ_LIST(space, H5S_GET_SEQ_LIST_SORTED, iter, vec_size, nelmts, &nseq, &nelem, off, len) < 0)
+        if(H5S_SELECT_ITER_GET_SEQ_LIST(iter, vec_size, nelmts, &nseq, &nelem, off, len) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
 
         /* Reset the current sequence information */
@@ -192,9 +188,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5D__gather_file(const H5D_io_info_t *_io_info,
-    const H5S_t *space, H5S_sel_iter_t *iter, size_t nelmts,
-    void *_buf/*out*/)
+H5D__gather_file(const H5D_io_info_t *_io_info, H5S_sel_iter_t *iter,
+    size_t nelmts, void *_buf/*out*/)
 {
     H5D_io_info_t tmp_io_info;  /* Temporary I/O info object */
     hsize_t *off = NULL;        /* Pointer to sequence offsets */
@@ -215,7 +210,6 @@ H5D__gather_file(const H5D_io_info_t *_io_info,
     HDassert(_io_info);
     HDassert(_io_info->dset);
     HDassert(_io_info->store);
-    HDassert(space);
     HDassert(iter);
     HDassert(nelmts > 0);
     HDassert(_buf);
@@ -242,7 +236,7 @@ H5D__gather_file(const H5D_io_info_t *_io_info,
     /* Loop until all elements are read */
     while(nelmts > 0) {
         /* Get list of sequences for selection to read */
-        if(H5S_SELECT_GET_SEQ_LIST(space, H5S_GET_SEQ_LIST_SORTED, iter, vec_size, nelmts, &nseq, &nelem, off, len) < 0)
+        if(H5S_SELECT_ITER_GET_SEQ_LIST(iter, vec_size, nelmts, &nseq, &nelem, off, len) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed")
 
         /* Reset the current sequence information */
@@ -289,8 +283,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__scatter_mem (const void *_tscat_buf, const H5S_t *space,
-    H5S_sel_iter_t *iter, size_t nelmts, void *_buf/*out*/)
+H5D__scatter_mem(const void *_tscat_buf, H5S_sel_iter_t *iter, size_t nelmts,
+    void *_buf/*out*/)
 {
     uint8_t *buf = (uint8_t *)_buf;   /* Get local copies for address arithmetic */
     const uint8_t *tscat_buf = (const uint8_t *)_tscat_buf;
@@ -308,7 +302,6 @@ H5D__scatter_mem (const void *_tscat_buf, const H5S_t *space,
 
     /* Check args */
     HDassert(tscat_buf);
-    HDassert(space);
     HDassert(iter);
     HDassert(nelmts > 0);
     HDassert(buf);
@@ -330,7 +323,7 @@ H5D__scatter_mem (const void *_tscat_buf, const H5S_t *space,
     /* Loop until all elements are written */
     while(nelmts > 0) {
         /* Get list of sequences for selection to write */
-        if(H5S_SELECT_GET_SEQ_LIST(space, 0, iter, vec_size, nelmts, &nseq, &nelem, off, len) < 0)
+        if(H5S_SELECT_ITER_GET_SEQ_LIST(iter, vec_size, nelmts, &nseq, &nelem, off, len) < 0)
             HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed")
 
         /* Loop, while sequences left to process */
@@ -377,8 +370,8 @@ done:
  *-------------------------------------------------------------------------
  */
 size_t
-H5D__gather_mem(const void *_buf, const H5S_t *space,
-    H5S_sel_iter_t *iter, size_t nelmts, void *_tgath_buf/*out*/)
+H5D__gather_mem(const void *_buf, H5S_sel_iter_t *iter, size_t nelmts,
+    void *_tgath_buf/*out*/)
 {
     const uint8_t *buf = (const uint8_t *)_buf;   /* Get local copies for address arithmetic */
     uint8_t *tgath_buf = (uint8_t *)_tgath_buf;
@@ -396,7 +389,6 @@ H5D__gather_mem(const void *_buf, const H5S_t *space,
 
     /* Check args */
     HDassert(buf);
-    HDassert(space);
     HDassert(iter);
     HDassert(nelmts > 0);
     HDassert(tgath_buf);
@@ -418,7 +410,7 @@ H5D__gather_mem(const void *_buf, const H5S_t *space,
     /* Loop until all elements are written */
     while(nelmts > 0) {
         /* Get list of sequences for selection to write */
-        if(H5S_SELECT_GET_SEQ_LIST(space, 0, iter, vec_size, nelmts, &nseq, &nelem, off, len) < 0)
+        if(H5S_SELECT_ITER_GET_SEQ_LIST(iter, vec_size, nelmts, &nseq, &nelem, off, len) < 0)
             HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed")
 
         /* Loop, while sequences left to process */
@@ -496,13 +488,13 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate file iterator")
 
     /* Figure out the strip mine size. */
-    if(H5S_select_iter_init(file_iter, file_space, type_info->src_type_size) < 0)
+    if(H5S_select_iter_init(file_iter, file_space, type_info->src_type_size, H5S_SEL_ITER_GET_SEQ_LIST_SORTED) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file selection information")
     file_iter_init = TRUE;	/*file selection iteration info has been initialized */
-    if(H5S_select_iter_init(mem_iter, mem_space, type_info->dst_type_size) < 0)
+    if(H5S_select_iter_init(mem_iter, mem_space, type_info->dst_type_size, 0) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information")
     mem_iter_init = TRUE;	/*file selection iteration info has been initialized */
-    if(H5S_select_iter_init(bkg_iter, mem_space, type_info->dst_type_size) < 0)
+    if(H5S_select_iter_init(bkg_iter, mem_space, type_info->dst_type_size, 0) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize background selection information")
     bkg_iter_init = TRUE;	/*file selection iteration info has been initialized */
 
@@ -523,7 +515,7 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
 	/*
          * Gather data
          */
-        n = H5D__gather_file(io_info, file_space, file_iter, smine_nelmts, type_info->tconv_buf/*out*/);
+        n = H5D__gather_file(io_info, file_iter, smine_nelmts, type_info->tconv_buf/*out*/);
 	if(n != smine_nelmts)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed")
 
@@ -532,12 +524,12 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
          * bypass the rest of steps.
          */
         if(type_info->cmpd_subset && H5T_SUBSET_FALSE != type_info->cmpd_subset->subset) {
-            if(H5D__compound_opt_read(smine_nelmts, mem_space, mem_iter, type_info, buf /*out*/) < 0)
+            if(H5D__compound_opt_read(smine_nelmts, mem_iter, type_info, buf /*out*/) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
         } /* end if */
         else {
             if(H5T_BKG_YES == type_info->need_bkg) {
-                n = H5D__gather_mem(buf, mem_space, bkg_iter, smine_nelmts, type_info->bkg_buf/*out*/);
+                n = H5D__gather_mem(buf, bkg_iter, smine_nelmts, type_info->bkg_buf/*out*/);
                 if(n != smine_nelmts)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "mem gather failed")
             } /* end if */
@@ -563,7 +555,7 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
             }
 
             /* Scatter the data into memory */
-            if(H5D__scatter_mem(type_info->tconv_buf, mem_space, mem_iter, smine_nelmts, buf/*out*/) < 0)
+            if(H5D__scatter_mem(type_info->tconv_buf, mem_iter, smine_nelmts, buf/*out*/) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "scatter failed")
         } /* end else */
     } /* end for */
@@ -636,13 +628,13 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_in
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate file iterator")
 
     /* Figure out the strip mine size. */
-    if(H5S_select_iter_init(file_iter, file_space, type_info->dst_type_size) < 0)
+    if(H5S_select_iter_init(file_iter, file_space, type_info->dst_type_size, H5S_SEL_ITER_GET_SEQ_LIST_SORTED) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file selection information")
     file_iter_init = TRUE;	/*file selection iteration info has been initialized */
-    if(H5S_select_iter_init(mem_iter, mem_space, type_info->src_type_size) < 0)
+    if(H5S_select_iter_init(mem_iter, mem_space, type_info->src_type_size, 0) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information")
     mem_iter_init = TRUE;	/*file selection iteration info has been initialized */
-    if(H5S_select_iter_init(bkg_iter, file_space, type_info->dst_type_size) < 0)
+    if(H5S_select_iter_init(bkg_iter, file_space, type_info->dst_type_size, H5S_SEL_ITER_GET_SEQ_LIST_SORTED) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize background selection information")
     bkg_iter_init = TRUE;	/*file selection iteration info has been initialized */
 
@@ -659,7 +651,7 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_in
          * buffer. Also gather data from the file into the background buffer
          * if necessary.
          */
-        n = H5D__gather_mem(buf, mem_space, mem_iter, smine_nelmts, type_info->tconv_buf/*out*/);
+        n = H5D__gather_mem(buf, mem_iter, smine_nelmts, type_info->tconv_buf/*out*/);
         if(n != smine_nelmts)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "mem gather failed")
 
@@ -676,7 +668,7 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_in
         } /* end if */
         else {
             if(H5T_BKG_YES == type_info->need_bkg) {
-                n = H5D__gather_file(io_info, file_space, bkg_iter, smine_nelmts, type_info->bkg_buf/*out*/);
+                n = H5D__gather_file(io_info, bkg_iter, smine_nelmts, type_info->bkg_buf/*out*/);
                 if(n != smine_nelmts)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed")
             } /* end if */
@@ -706,7 +698,7 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_in
         /*
          * Scatter the data out to the file.
          */
-        if(H5D__scatter_file(io_info, file_space, file_iter, smine_nelmts, type_info->tconv_buf) < 0)
+        if(H5D__scatter_file(io_info, file_iter, smine_nelmts, type_info->tconv_buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "scatter failed")
     } /* end for */
 
@@ -762,7 +754,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__compound_opt_read(size_t nelmts, const H5S_t *space, H5S_sel_iter_t *iter,
+H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter,
     const H5D_type_info_t *type_info, void *user_buf/*out*/)
 {
     uint8_t    *ubuf = (uint8_t *)user_buf;     /* Cast for pointer arithmetic	*/
@@ -778,7 +770,6 @@ H5D__compound_opt_read(size_t nelmts, const H5S_t *space, H5S_sel_iter_t *iter,
 
     /* Check args */
     HDassert(nelmts > 0);
-    HDassert(space);
     HDassert(iter);
     HDassert(type_info);
     HDassert(type_info->cmpd_subset);
@@ -815,7 +806,7 @@ H5D__compound_opt_read(size_t nelmts, const H5S_t *space, H5S_sel_iter_t *iter,
         size_t     elmtno;		/* Element counter */
 
         /* Get list of sequences for selection to write */
-        if(H5S_SELECT_GET_SEQ_LIST(space, 0, iter, vec_size, nelmts, &nseq, &elmtno, off, len) < 0)
+        if(H5S_SELECT_ITER_GET_SEQ_LIST(iter, vec_size, nelmts, &nseq, &elmtno, off, len) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed")
 
         /* Loop, while sequences left to process */
@@ -982,7 +973,7 @@ H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate selection iterator")
 
     /* Initialize selection iterator */
-    if(H5S_select_iter_init(iter, dst_space, type_size) < 0)
+    if(H5S_select_iter_init(iter, dst_space, type_size, 0) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize selection iterator information")
     iter_init = TRUE;
 
@@ -1006,7 +997,7 @@ H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id,
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "callback returned more elements than in selection")
 
         /* Scatter data */
-        if(H5D__scatter_mem(src_buf, dst_space, iter, nelmts_scatter, dst_buf) < 0)
+        if(H5D__scatter_mem(src_buf, iter, nelmts_scatter, dst_buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "scatter failed")
 
         nelmts -= (hssize_t)nelmts_scatter;
@@ -1092,14 +1083,14 @@ H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate selection iterator")
 
     /* Initialize selection iterator */
-    if(H5S_select_iter_init(iter, src_space, type_size) < 0)
+    if(H5S_select_iter_init(iter, src_space, type_size, 0) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize selection iterator information")
     iter_init = TRUE;
 
     /* Loop until all data has been scattered */
     while(nelmts > 0) {
         /* Gather data */
-        if(0 == (nelmts_gathered = H5D__gather_mem(src_buf, src_space, iter, MIN(dst_buf_nelmts, (size_t)nelmts), dst_buf)))
+        if(0 == (nelmts_gathered = H5D__gather_mem(src_buf, iter, MIN(dst_buf_nelmts, (size_t)nelmts), dst_buf)))
             HGOTO_ERROR(H5E_IO, H5E_CANTCOPY, FAIL, "gather failed")
         HDassert(nelmts_gathered == MIN(dst_buf_nelmts, (size_t)nelmts));
 

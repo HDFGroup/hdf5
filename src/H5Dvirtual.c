@@ -35,6 +35,13 @@
  *      until the virtual dataset is closed.
  */
 
+/*
+ * Note: H5S_select_project_intersection has been updated to no longer require
+ * that the source and source intersect spaces have the same extent.  This file
+ * should therefore be updated to remove code that ensures this condition, which
+ * should improve both maintainability and performance.
+ */
+
 /****************/
 /* Module Setup */
 /****************/
@@ -2399,7 +2406,7 @@ H5D__virtual_pre_io(H5D_io_info_t *io_info,
                         /* Project intersection of virtual space and clipped
                          * virtual space onto source space (create
                          * clipped_source_select) */
-                        if(H5S_select_project_intersection(storage->list[i].sub_dset[j].virtual_select, storage->list[i].source_select, storage->list[i].sub_dset[j].clipped_virtual_select, &storage->list[i].sub_dset[j].clipped_source_select) < 0)
+                        if(H5S_select_project_intersection(storage->list[i].sub_dset[j].virtual_select, storage->list[i].source_select, storage->list[i].sub_dset[j].clipped_virtual_select, &storage->list[i].sub_dset[j].clipped_source_select, TRUE) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't project virtual intersection onto memory space")
 
                         /* Set extents of virtual_select and
@@ -2416,7 +2423,7 @@ H5D__virtual_pre_io(H5D_io_info_t *io_info,
                 if(storage->list[i].sub_dset[j].clipped_virtual_select) {
                     /* Project intersection of file space and mapping virtual space
                      * onto memory space */
-                    if(H5S_select_project_intersection(file_space, mem_space, storage->list[i].sub_dset[j].clipped_virtual_select, &storage->list[i].sub_dset[j].projected_mem_space) < 0)
+                    if(H5S_select_project_intersection(file_space, mem_space, storage->list[i].sub_dset[j].clipped_virtual_select, &storage->list[i].sub_dset[j].projected_mem_space, TRUE) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't project virtual intersection onto memory space")
 
                     /* Check number of elements selected */
@@ -2453,7 +2460,7 @@ H5D__virtual_pre_io(H5D_io_info_t *io_info,
             if(storage->list[i].source_dset.clipped_virtual_select) {
                 /* Project intersection of file space and mapping virtual space onto
                  * memory space */
-                if(H5S_select_project_intersection(file_space, mem_space, storage->list[i].source_dset.clipped_virtual_select, &storage->list[i].source_dset.projected_mem_space) < 0)
+                if(H5S_select_project_intersection(file_space, mem_space, storage->list[i].source_dset.clipped_virtual_select, &storage->list[i].source_dset.projected_mem_space, TRUE) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't project virtual intersection onto memory space")
 
                 /* Check number of elements selected, add to tot_nelmts */
@@ -2583,7 +2590,7 @@ H5D__virtual_read_one(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 
         /* Project intersection of file space and mapping virtual space onto
          * mapping source space */
-        if(H5S_select_project_intersection(source_dset->clipped_virtual_select, source_dset->clipped_source_select, file_space, &projected_src_space) < 0)
+        if(H5S_select_project_intersection(source_dset->clipped_virtual_select, source_dset->clipped_source_select, file_space, &projected_src_space, TRUE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't project virtual intersection onto source space")
 
         /* Perform read on source dataset */
@@ -2774,7 +2781,7 @@ H5D__virtual_write_one(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
          * extent in the unlimited dimension.  -NAF */
         /* Project intersection of file space and mapping virtual space onto
          * mapping source space */
-        if(H5S_select_project_intersection(source_dset->virtual_select, source_dset->clipped_source_select, file_space, &projected_src_space) < 0)
+        if(H5S_select_project_intersection(source_dset->virtual_select, source_dset->clipped_source_select, file_space, &projected_src_space, TRUE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't project virtual intersection onto source space")
 
         /* Perform write on source dataset */
