@@ -1195,8 +1195,8 @@ TOOLTEST h5diff_646.txt -v --use-system-epsilon -p 0.05 h5diff_basic1.h5 h5diff_
 # ##############################################################################
 # # Test array variances
 # ##############################################################################
-TOOLTEST h5diff_800 -v h5diff_dset1.h5 h5diff_dset2.h5 /g1/array /g1/array
-TOOLTEST h5diff_801 -v h5diff_dset1.h5 h5diff_dset3.h5 /g1/array /g1/array
+TOOLTEST h5diff_800.txt -v h5diff_dset1.h5 h5diff_dset2.h5 /g1/array /g1/array
+TOOLTEST h5diff_801.txt -v h5diff_dset1.h5 h5diff_dset3.h5 /g1/array /g1/array
 
 # ##############################################################################
 # VDS tests
