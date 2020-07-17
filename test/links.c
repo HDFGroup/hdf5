@@ -3452,17 +3452,23 @@ error:
 static int
 external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
 {
-    hid_t    fid = (-1);             /* File ID */
-    hid_t    gid = (-1);             /* Group IDs */
-    hid_t    core_fapl = -1, space = -1, dset = -1, did = -1, dapl_id = -1, dcpl = -1;
+    hid_t   fid         = H5I_INVALID_HID;
+    hid_t   gid         = H5I_INVALID_HID;
+    hid_t   core_fapl   = H5I_INVALID_HID;
+    hid_t   space       = H5I_INVALID_HID;
+    hid_t   dset        = H5I_INVALID_HID;
+    hid_t   did         = H5I_INVALID_HID;
+    hid_t   dapl_id     = H5I_INVALID_HID;
+    hid_t   dcpl        = H5I_INVALID_HID;
     char     filename1[NAME_BUF_SIZE],
              filename2[NAME_BUF_SIZE],
              tmpname[NAME_BUF_SIZE],
              cwdpath[NAME_BUF_SIZE];
-    hsize_t  dims[2];
+    hsize_t dims[2];
     int      points[NUM40][NUM40];
-    int      i, j, n;
-    h5_stat_size_t    filesize, new_filesize;
+    int     i, j, n;
+    h5_stat_size_t      filesize;
+    h5_stat_size_t      new_filesize;
 
     if(new_format)
         TESTING("H5Pset/get_elink_fapl() with same physical layout (w/new group format)")
@@ -3501,7 +3507,8 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
         dcpl = H5Pcreate(H5P_DATASET_CREATE);
     else
         dcpl = H5Pcopy(dcpl_g);
-    if (0 > dcpl) TEST_ERROR;
+    if (0 > dcpl)
+        TEST_ERROR;
     if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_LATE) < 0) TEST_ERROR;
 
     /* create "Dataset" in group "A" of target file */
@@ -7120,6 +7127,7 @@ done:
             case H5I_ERROR_CLASS:
             case H5I_ERROR_MSG:
             case H5I_ERROR_STACK:
+            case H5I_SPACE_SEL_ITER:
             case H5I_NTYPES:
             default:
               return FAIL;
@@ -7208,6 +7216,7 @@ done:
             case H5I_ERROR_CLASS:
             case H5I_ERROR_MSG:
             case H5I_ERROR_STACK:
+            case H5I_SPACE_SEL_ITER:
             case H5I_NTYPES:
             default:
                 return FAIL;

@@ -840,6 +840,7 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
         case H5I_ERROR_CLASS:
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
+        case H5I_SPACE_SEL_ITER:
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown data object")
@@ -1281,8 +1282,7 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5G_get_name_by_addr(hid_t file, const H5O_loc_t *loc,
-    char *name, size_t size)
+H5G_get_name_by_addr(hid_t file, const H5O_loc_t *loc, char *name, size_t size)
 {
     H5G_gnba_iter_t udata;                  /* User data for iteration  */
     H5G_loc_t       root_loc;               /* Root group's location    */

@@ -270,7 +270,6 @@ done:
  *        Failure:    Negative
  *
  * Programmer:    Robb Matzke
- *        matzke@llnl.gov
  *        Aug  5 1997
  *
  *-------------------------------------------------------------------------
@@ -703,8 +702,8 @@ done:
  *
  * Purpose:     Internal routine to open an object by its address
  *
- * Return:    Success:    Non-negative
- *        Failure:    Negative
+ * Return:    Success:    Valid object identifier
+ *        Failure:    H5I_INVALID_HID
  *
  * Programmer:    Quincey Koziol
  *        December 28, 2017
@@ -1854,6 +1853,7 @@ H5O_get_loc(hid_t object_id)
         case H5I_ERROR_CLASS:
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
+        case H5I_SPACE_SEL_ITER:
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, NULL, "invalid object type")
@@ -1892,7 +1892,7 @@ H5O_loc_reset(H5O_loc_t *loc)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_loc_reset() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5O_loc_copy
  *
@@ -1925,7 +1925,7 @@ H5O_loc_copy(H5O_loc_t *dst, H5O_loc_t *src, H5_copy_depth_t depth)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_loc_copy() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5O_loc_copy_shallow
  *
@@ -1960,7 +1960,7 @@ H5O_loc_copy_shallow(H5O_loc_t *dst, H5O_loc_t *src)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_loc_copy_shallow() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5O_loc_copy_deep
  *
@@ -1997,7 +1997,7 @@ H5O_loc_copy_deep(H5O_loc_t *dst, const H5O_loc_t *src)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_loc_copy_deep() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5O_loc_hold_file
  *

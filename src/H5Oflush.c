@@ -58,11 +58,11 @@ static herr_t H5O__refresh_metadata_close(hid_t oid, H5O_loc_t oloc,
 
 
 /*-------------------------------------------------------------------------
- * Function:   H5Oflush
+ * Function:    H5Oflush
  *
- * Purpose:    Flushes all buffers associated with an object to disk.
+ * Purpose:     Flushes all buffers associated with an object to disk.
  *
- * Return:    Non-negative on success, negative on failure
+ * Return:      Non-negative on success, negative on failure
  *
  * Programmer:  Mike McGreevy
  *              May 19, 2010
@@ -72,7 +72,7 @@ static herr_t H5O__refresh_metadata_close(hid_t oid, H5O_loc_t oloc,
 herr_t
 H5Oflush(hid_t obj_id)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t              ret_value   = SUCCEED;  /* Return value     */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", obj_id);
@@ -81,7 +81,7 @@ H5Oflush(hid_t obj_id)
     if(H5CX_set_loc(obj_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
-    /* Call internal routine */
+    /* Flush the object */
     if(H5O__flush(obj_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
 
@@ -245,7 +245,7 @@ H5Orefresh(hid_t oid)
     if(H5CX_set_loc(oid) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
-    /* Call internal routine */
+    /* Refresh the object */
     if(H5O_refresh_metadata(oid, *oloc) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
@@ -450,6 +450,7 @@ H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, hbool_t start_swmr)
         case H5I_ERROR_CLASS:
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
+        case H5I_SPACE_SEL_ITER:
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "not a valid file object ID (dataset, group, or datatype)")
@@ -458,7 +459,7 @@ H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, hbool_t start_swmr)
 
     /* Re-register ID for the object */
     if((H5I_register_using_existing_id(type, object, TRUE, oid)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, FAIL, "unable to re-register object atom")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, FAIL, "unable to re-register object ID after refresh")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
