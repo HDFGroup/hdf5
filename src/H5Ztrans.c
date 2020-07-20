@@ -400,8 +400,6 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
  * Return:      Always succeeds.
  * Programmer:  Bill Wendling
  *              26. August 2003
- * Modifications:
-  *              Leon Arber:  Added FUNC_ENTER / FUNC_LEAVE pairs
 *
  *-------------------------------------------------------------------------
  */
@@ -565,8 +563,6 @@ done:
  * Return:      Nothing
  * Programmer:  Bill Wendling
  *              25. August 2003
- * Modifications:
- *              Leon Arber: Added FUNC_ENTER / FUNC_LEAVE pairs
  *
  *-------------------------------------------------------------------------
  */
@@ -634,8 +630,6 @@ done:
  *              NULLure:    NULL
  * Programmer:  Bill Wendling
  *              26. August 2003
- * Modifications:
-  *              Leon Arber: Added FUNC_ENTER / FUNC_LEAVE pairs
 *
  *-------------------------------------------------------------------------
  */
@@ -728,8 +722,6 @@ done:
  *              NULLure:    NULL
  * Programmer:  Bill Wendling
  *              26. August 2003
- * Modifications:
-  *              Leon Arber: Added FUNC_ENTER / FUNC_LEAVE pairs
 *
  *-------------------------------------------------------------------------
  */
@@ -828,8 +820,6 @@ done:
  *              NULLure:    NULL
  * Programmer:  Bill Wendling
  *              26. August 2003
- * Modifications:
- *              Leon Arber: Added FUNC_ENTER / FUNC_LEAVE pairs
  *
  *-------------------------------------------------------------------------
  */
@@ -972,8 +962,6 @@ done:
  *              NULLure:    NULL
  * Programmer:  Bill Wendling
  *              26. August 2003
- * Modifications:
- *              Leon Arber: Added FUNC_ENTER / FUNC_LEAVE pairs
  *
  *-------------------------------------------------------------------------
  */
@@ -1002,7 +990,6 @@ done:
  * Return:      SUCCEED if transform applied successfully, FAIL otherwise
  * Programmer:  Leon Arber
  * 		5/1/04
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1115,8 +1102,6 @@ done:
  * Return:      Nothing
  * Programmer:  Leon Arber
  * 		5/1/04
- * Modifications:
- *
  *
  * Notes:   In the case of a polynomial data transform (ie, the left and right subtree
  * are both of type H5Z_XFORM_SYMBOL), the convention is that the left hand side
@@ -1213,8 +1198,6 @@ done:
  * Function:    H5Z_find_type
  * Return:      Native type of datatype that is passed in
  * Programmer:  Leon Arber, 4/20/04
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -1301,7 +1284,6 @@ done:
  *              of the one passed in.
  * Programmer:  Leon Arber
  *              April 1, 2004.
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1375,7 +1357,6 @@ done:
  * Return:      TRUE or FALSE
  * Programmer:  Raymond Lu
  *              15 March 2012
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1404,7 +1385,6 @@ H5Z_op_is_numbs(H5Z_node* _tree)
  * Return:      TRUE or FALSE
  * Programmer:  Raymond Lu
  *              15 March 2012
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1490,11 +1470,6 @@ H5Z_xform_reduce_tree(H5Z_node* tree)
  * Return:      None.
  * Programmer:  Leon Arber
  *              April 1, 2004.
- * Modifications:
- *              Raymond Lu
- *              15 March 2012
- *              I added a new macro H5Z_XFORM_DO_OP6 to handle the special
- *              operations like -x or +x when the left operand is empty.
  *
  *-------------------------------------------------------------------------
  */
@@ -1525,13 +1500,9 @@ H5Z_do_op(H5Z_node* tree)
  *      Success: SUCCEED
  *      Failure: FAIL
  *
- * Programmer: Quincey Koziol, koziol@ncsa.uiuc.edu
+ * Programmer: Quincey Koziol
  *
  * Date: May 4, 2004
- *
- * Comments:
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1616,13 +1587,9 @@ done:
  *      Success: SUCCEED
  *      Failure: FAIL
  *
- * Programmer: Quincey Koziol, koziol@ncsa.uiuc.edu
+ * Programmer: Quincey Koziol
  *
  * Date: May 4, 2004
- *
- * Comments:
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1662,7 +1629,7 @@ H5Z_xform_destroy(H5Z_data_xform_t *data_xform_prop)
  *      Success: SUCCEED
  *      Failure: FAIL
  *
- * Programmer: Quincey Koziol, koziol@ncsa.uiuc.edu
+ * Programmer: Quincey Koziol
  *
  * Date: May 4, 2004
  *
@@ -1742,13 +1709,11 @@ done:
  *
  * Return:  TRUE for no data transform, FALSE for a data transform
  *
- * Programmer: Quincey Koziol, koziol@ncsa.uiuc.edu
+ * Programmer: Quincey Koziol
  *
  * Date: May 4, 2004
  *
  * Comments: Can't fail
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1773,11 +1738,9 @@ H5Z_xform_noop(const H5Z_data_xform_t *data_xform_prop)
  * Return:
  *          Pointer to a copy of the string in the data_xform property.
  *
- * Programmer: Leon Arber, larber@ncsa.uiuc.edu
+ * Programmer: Leon Arber
  *
  * Date: Sept. 4, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
