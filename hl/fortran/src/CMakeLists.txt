@@ -143,7 +143,6 @@ if (NOT ONLY_SHARED_LIBS)
       ${MOD_BUILD_DIR}/h5lt.mod
       ${MOD_BUILD_DIR}/h5im.mod
   )
-
   install (
       FILES
           ${mod_files}
@@ -152,6 +151,16 @@ if (NOT ONLY_SHARED_LIBS)
       COMPONENT
           fortheaders
   )
+  if (HDF5_INSTALL_MOD_FORTRAN MATCHES "STATIC")
+    install (
+        FILES
+            ${mod_files}
+        DESTINATION
+            ${HDF5_INSTALL_INCLUDE_DIR}
+        COMPONENT
+            fortheaders
+    )
+  endif ()
 endif ()
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   set (modsh_files
@@ -168,6 +177,16 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
       COMPONENT
           fortheaders
   )
+  if (HDF5_INSTALL_MOD_FORTRAN MATCHES "SHARED")
+    install (
+        FILES
+            ${modsh_files}
+        DESTINATION
+            ${HDF5_INSTALL_INCLUDE_DIR}
+        COMPONENT
+            fortheaders
+    )
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------

@@ -56,6 +56,31 @@ New Features
 
     Configuration
     -------------
+    - CMake option to link the generated Fortran MOD files into the include
+      directory.
+
+      The Fortran generation of MOD files by a Fortran compile can produce
+      different binary files between SHARED and STATIC compiles with different
+      compilers and/or different platforms. Note that it has been found that
+      different versions of Fortran compilers will produce incompatible MOD
+      files. Currently, CMake will locate these MOD files in subfolders of
+      the include directory and add that path to the Fortran library target
+      in the CMake config file, which can be used by the CMake find library
+      process. For other build systems using the binary from a CMake install,
+      a new CMake configuration can be used to copy the pre-chosen version
+      of the Fortran MOD files into the install include directory.
+
+      The default will depend on the configuration of
+      BUILD_STATIC_LIBS and BUILD_SHARED_LIBS:
+            YES                   YES         Default to SHARED
+            YES                   NO          Default to STATIC
+            NO                    YES         Default to SHARED
+            NO                    NO          Default to SHARED
+      The defaults can be overriden by setting the config option
+         HDF5_INSTALL_MOD_FORTRAN to one of NO, SHARED, or STATIC
+
+      (ADB - 2020/07/9, HDFFV-11116)
+
     - CMake option to use AEC (open source SZip) library instead of SZip
 
       The open source AEC library is a replacement library for SZip. In
