@@ -48,7 +48,7 @@ endif ()
 # CDash is configured to only allow 3000 warnings, so
 # break into groups (from the config/gnu-flags file)
 #-----------------------------------------------------------------------------
-if (NOT MSVC)
+if (NOT MSVC AND NOT MINGW)
   # General flags
   if (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
     ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/intel-warnings/ifort-general")
