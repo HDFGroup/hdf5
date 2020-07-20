@@ -32,18 +32,17 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5CXprivate.h"        /* API Contexts                         */
-#include "H5Dprivate.h"         /* Datasets                             */
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fprivate.h"		/* File access				*/
-#include "H5Gpkg.h"		/* Groups		  		*/
-#include "H5HLprivate.h"	/* Local Heaps				*/
-#include "H5Iprivate.h"		/* IDs					*/
-#include "H5Lprivate.h"		/* Links				*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Ppublic.h"		/* Property Lists			*/
-#include "H5WBprivate.h"        /* Wrapped Buffers                      */
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5CXprivate.h"        /* API Contexts                             */
+#include "H5Dprivate.h"         /* Datasets                                 */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Fprivate.h"         /* File access                              */
+#include "H5Gpkg.h"             /* Groups                                   */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5Lprivate.h"         /* Links                                    */
+#include "H5MMprivate.h"        /* Memory management                        */
+#include "H5Ppublic.h"          /* Property Lists                           */
+#include "H5WBprivate.h"        /* Wrapped Buffers                          */
 
 
 /****************/
@@ -359,8 +358,7 @@ done:
  */
 herr_t
 H5G__traverse_special(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
-    unsigned target, hbool_t last_comp, H5G_loc_t *obj_loc,
-    hbool_t *obj_exists)
+    unsigned target, hbool_t last_comp, H5G_loc_t *obj_loc, hbool_t *obj_exists)
 {
     size_t nlinks;                      /* # of soft / UD links left to traverse */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -372,13 +370,13 @@ H5G__traverse_special(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
     HDassert(lnk);
     HDassert(obj_loc);
 
-    /*
-     * If we found a symbolic link then we should follow it.  But if this
+    /* If we found a symbolic link then we should follow it.  But if this
      * is the last component of the name and the H5G_TARGET_SLINK bit of
      * TARGET is set then we don't follow it.
      */
     if(H5L_TYPE_SOFT == lnk->type &&
             (0 == (target & H5G_TARGET_SLINK) || !last_comp)) {
+
         /* Get the # of soft / UD links left to traverse */
         if(H5CX_get_nlinks(&nlinks) < 0)
             HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to retrieve # of soft / UD links to traverse")
@@ -403,6 +401,7 @@ H5G__traverse_special(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
      */
     if(lnk->type >= H5L_TYPE_UD_MIN &&
             (0 == (target & H5G_TARGET_UDLINK) || !last_comp) ) {
+
         /* Get the # of soft / UD links left to traverse */
         if(H5CX_get_nlinks(&nlinks) < 0)
             HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to retrieve # of soft / UD links to traverse")

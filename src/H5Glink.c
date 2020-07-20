@@ -15,7 +15,7 @@
  *
  * Created:		H5Glink.c
  *			Nov 13 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Functions for handling links in groups.
  *
@@ -96,7 +96,6 @@ static int H5G_link_cmp_corder_dec(const void *lnk1, const void *lnk2);
  *              (i.e. same as strcmp())
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep  5 2005
  *
  *-------------------------------------------------------------------------
@@ -123,7 +122,6 @@ H5G_link_cmp_name_inc(const void *lnk1, const void *lnk2)
  *              (i.e. opposite strcmp())
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep 25 2006
  *
  *-------------------------------------------------------------------------
@@ -149,7 +147,6 @@ H5G_link_cmp_name_dec(const void *lnk1, const void *lnk2)
  *              as equal, their order in the sorted array is undefined.
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov  6 2006
  *
  *-------------------------------------------------------------------------
@@ -184,7 +181,6 @@ H5G_link_cmp_corder_inc(const void *lnk1, const void *lnk2)
  *              as equal, their order in the sorted array is undefined.
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov  6 2006
  *
  *-------------------------------------------------------------------------
@@ -215,7 +211,6 @@ H5G_link_cmp_corder_dec(const void *lnk1, const void *lnk2)
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 16 2006
  *
  *-------------------------------------------------------------------------
@@ -556,7 +551,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov 13 2006
  *
  *-------------------------------------------------------------------------

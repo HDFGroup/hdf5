@@ -15,7 +15,7 @@
  *
  * Created:        H5dbg.c
  *            Mar  4 2006
- *            Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *            Quincey Koziol
  *
  * Purpose:        Generic debugging routines
  *
@@ -61,7 +61,7 @@
 /*******************/
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5_buffer_dump
  *
@@ -70,7 +70,6 @@
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Quincey Koziol
- *        koziol@ncsa.uiuc.edu
  *        Mar  4 2006
  *
  *-------------------------------------------------------------------------
