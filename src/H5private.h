@@ -1596,15 +1596,6 @@ extern char *strdup(const char *s);
     #define HDstrdup(S)     strdup(S)
 #endif /* HDstrdup */
 
-#ifndef HDpthread_self
-    #define HDpthread_self()    pthread_self()
-#endif /* HDpthread_self */
-
-/* Use this version of pthread_self for printing the thread ID */
-#ifndef HDpthread_self_ulong
-    #define HDpthread_self_ulong()    ((unsigned long)pthread_self())
-#endif /* HDpthread_self_ulong */
-
 /* Macro for "stringizing" an integer in the C preprocessor (use H5_TOSTRING) */
 /* (use H5_TOSTRING, H5_STRINGIZE is just part of the implementation) */
 #define H5_STRINGIZE(x) #x
