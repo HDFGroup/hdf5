@@ -1139,22 +1139,22 @@ H5C__load_cache_image(H5F_t *f)
      */
     if(H5F_addr_defined(cache_ptr->image_addr)) {
         /* Sanity checks */
-	HDassert(cache_ptr->image_len > 0);
+        HDassert(cache_ptr->image_len > 0);
         HDassert(cache_ptr->image_buffer == NULL);
 
-	/* Allocate space for the image */
+        /* Allocate space for the image */
         if(NULL == (cache_ptr->image_buffer = H5MM_malloc(cache_ptr->image_len + 1)))
             HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for cache image buffer")
 
-	/* Load the image from file */
-	if(H5C__read_cache_image(f, cache_ptr) < 0)
+        /* Load the image from file */
+        if(H5C__read_cache_image(f, cache_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_READERROR, FAIL, "Can't read metadata cache image block")
 
-	/* Reconstruct cache contents, from image */
-	if(H5C__reconstruct_cache_contents(f, cache_ptr) < 0)
+        /* Reconstruct cache contents, from image */
+        if(H5C__reconstruct_cache_contents(f, cache_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTDECODE, FAIL, "Can't reconstruct cache contents from image block")
 
-	/* Free the image buffer */
+        /* Free the image buffer */
         cache_ptr->image_buffer = H5MM_xfree(cache_ptr->image_buffer);
 
         /* Update stats -- must do this now, as we are about

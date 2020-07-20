@@ -15,7 +15,7 @@
  *
  * Created:		H5Gloc.c
  *			Sep 13 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Functions for working with group "locations"
  *
