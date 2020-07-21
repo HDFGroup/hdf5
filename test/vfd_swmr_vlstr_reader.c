@@ -135,8 +135,9 @@ main(int argc, char **argv)
     if (argc > 0)
         errx(EXIT_FAILURE, "unexpected command-line arguments");
 
-    /* Create file access property list */
-    if ((fapl = vfd_swmr_create_fapl(false, sel == TEST_OOB, use_vfd_swmr)) < 0)
+    fapl = vfd_swmr_create_fapl(false, sel == TEST_OOB, use_vfd_swmr,
+        "./shadow");
+    if (fapl < 0)
         errx(EXIT_FAILURE, "vfd_swmr_create_fapl");
 
     fid = H5Fopen("vfd_swmr_vlstr.h5", H5F_ACC_RDONLY, fapl);
