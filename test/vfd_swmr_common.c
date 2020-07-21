@@ -34,19 +34,26 @@ static const hid_t badhid = H5I_INVALID_HID;
 int verbosity = 2;
 
 void
-esnprintf(char *buf, size_t bufsz, const char *fmt, ...)
+evsnprintf(char *buf, size_t bufsz, const char *fmt, va_list ap)
 {
     int rc;
-    va_list ap;
 
-    va_start(ap, fmt);
     rc = vsnprintf(buf, bufsz, fmt, ap);
-    va_end(ap);
 
     if (rc < 0)
         err(EXIT_FAILURE, "%s: vsnprintf", __func__);
     else if ((size_t)rc >= bufsz)
         errx(EXIT_FAILURE, "%s: buffer too small", __func__);
+}
+
+void
+esnprintf(char *buf, size_t bufsz, const char *fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+    evsnprintf(buf, bufsz, fmt, ap);
+    va_end(ap);
 }
 
 void

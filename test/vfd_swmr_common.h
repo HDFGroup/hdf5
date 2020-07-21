@@ -18,6 +18,7 @@
 /* Headers */
 /***********/
 
+#include <stdarg.h>
 #include "h5test.h"
 
 /**********/
@@ -97,6 +98,7 @@ H5TEST_DLL void await_signal(hid_t);
 H5TEST_DLL hid_t vfd_swmr_create_fapl(bool, bool, bool);
 
 H5TEST_DLL void dbgf(int, const char *, ...) H5_ATTR_FORMAT(printf, 2, 3);
+H5TEST_DLL void evsnprintf(char *, size_t, const char *, va_list);
 H5TEST_DLL void esnprintf(char *, size_t, const char *, ...)
     H5_ATTR_FORMAT(printf, 3, 4);
 
