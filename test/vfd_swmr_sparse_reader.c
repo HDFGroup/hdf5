@@ -287,26 +287,22 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords,
 
         /* Wait until we can read the dataset */
         for (;;) {
-            /* Check if sequence attribute exists */
             if((attr_exists = H5Aexists_by_name(fid, symbol->name, "seq", H5P_DEFAULT)) < 0)
                 goto error;
 
             if(attr_exists) {
-                /* Read sequence number attribute */
-                if((aid = H5Aopen_by_name(fid, symbol->name, "seq", H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                if((aid = H5Aopen_by_name(fid, symbol->name, "seq",
+                    H5P_DEFAULT, H5P_DEFAULT)) < 0)
                     goto error;
                 if(H5Aread(aid, H5T_NATIVE_ULONG, &file_u) < 0)
                     goto error;
                 if(H5Aclose(aid) < 0)
                     goto error;
 
-                /* Check if sequence number is at least u - if so, this should
-                 * guarantee that this record has been written */
                 if(file_u >= u)
                     break;
-            } /* end if */
+            }
 
-            /* Check for timeout */
             if(HDtime(NULL) >= (time_t)(start_time + (time_t)TIMEOUT)) {
                 HDfprintf(stderr,
                     "READER: Reader timed at record %lu level %u offset %u",
@@ -318,24 +314,19 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords,
                     HDfprintf(stderr, ", read no sequence\n");
                 }
                 goto error;
-            } /* end if */
+            }
 
-            /* Pause */
             HDsleep(poll_time);
 
-            /* Emit informational message */
             if(verbose)
                 HDfprintf(stderr, "READER: Reopening file (do while loop): %s\n", filename);
 
-            /* Retrieve and print the collection of metadata read retries */
             if(print_metadata_retries_info(fid) < 0)
                 HDfprintf(stderr, "READER: Warning: could not obtain metadata retries info\n");
 
-            /* Reopen the file */
             if(H5Fclose(fid) < 0)
                 goto error;
 
-            /* Remove H5E_BEGIN_TRY/END_TRY if you want to see the error stack */
             H5E_BEGIN_TRY {
                 fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
             } H5E_END_TRY;
