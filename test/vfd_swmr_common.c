@@ -34,19 +34,26 @@ static const hid_t badhid = H5I_INVALID_HID;
 int verbosity = 2;
 
 void
-esnprintf(char *buf, size_t bufsz, const char *fmt, ...)
+evsnprintf(char *buf, size_t bufsz, const char *fmt, va_list ap)
 {
     int rc;
-    va_list ap;
 
-    va_start(ap, fmt);
     rc = vsnprintf(buf, bufsz, fmt, ap);
-    va_end(ap);
 
     if (rc < 0)
         err(EXIT_FAILURE, "%s: vsnprintf", __func__);
     else if ((size_t)rc >= bufsz)
         errx(EXIT_FAILURE, "%s: buffer too small", __func__);
+}
+
+void
+esnprintf(char *buf, size_t bufsz, const char *fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+    evsnprintf(buf, bufsz, fmt, ap);
+    va_end(ap);
 }
 
 void
@@ -143,6 +150,8 @@ await_signal(hid_t fid)
     if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
         errx(EXIT_FAILURE, "%s: H5Fflush failed", __func__);
 
+    dbgf(1, "waiting for signal\n");
+
     for (;;) {
         const int rc = sigtimedwait(&sleepset, NULL, &tick);
 
@@ -170,10 +179,12 @@ await_signal(hid_t fid)
 }
 
 hid_t
-vfd_swmr_create_fapl(bool writer, bool only_meta_pages, bool use_vfd_swmr)
+vfd_swmr_create_fapl(bool writer, bool only_meta_pages, bool use_vfd_swmr,
+    const char *mdfile_fmtstr, ...)
 {
     H5F_vfd_swmr_config_t config;
     hid_t fapl;
+    va_list ap;
 
     /* Create file access property list */
     if((fapl = h5_fileaccess()) < 0) {
@@ -204,7 +215,10 @@ vfd_swmr_create_fapl(bool writer, bool only_meta_pages, bool use_vfd_swmr)
     config.max_lag = 7;
     config.writer = writer;
     config.md_pages_reserved = 128;
-    HDstrcpy(config.md_file_path, "./my_md_file");
+    va_start(ap, mdfile_fmtstr);
+    evsnprintf(config.md_file_path, sizeof(config.md_file_path),
+        mdfile_fmtstr, ap);
+    va_end(ap);
 
     /* Enable VFD SWMR configuration */
     if(use_vfd_swmr && H5Pset_vfd_swmr_config(fapl, &config) < 0) {

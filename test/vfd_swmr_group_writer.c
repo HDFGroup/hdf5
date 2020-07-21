@@ -288,7 +288,7 @@ main(int argc, char **argv)
              "unknown personality, expected vfd_swmr_group_{reader,writer}");
     }
 
-    fapl = vfd_swmr_create_fapl(writer, true, s.use_vfd_swmr);
+    fapl = vfd_swmr_create_fapl(writer, true, s.use_vfd_swmr, "./shadow");
 
     if (fapl < 0)
         errx(EXIT_FAILURE, "vfd_swmr_create_fapl");

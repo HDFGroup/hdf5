@@ -949,7 +949,7 @@ done:
 } /* H5PB_page_exists */
 
 static void
-H5PB_count_access_by_size(H5PB_t *pb, size_t size)
+H5PB_count_meta_access_by_size(H5PB_t *pb, size_t size)
 {
     const size_t nslots = NELMTS(pb->access_size_count);
     size_t i, hi;
@@ -967,16 +967,20 @@ H5PB_log_access_by_size_counts(const H5PB_t *pb)
     const size_t nslots = NELMTS(pb->access_size_count);
     size_t i, lo, hi;
 
+    hlog_fast(pb_access_sizes, "page buffer %p metadata accesses by size:",
+        (const void *)pb);
+
     for (lo = 0, hi = pb->page_size, i = 0;
          i < nslots - 1;
          i++, lo = hi + 1, hi *= 2) {
         hlog_fast(pb_access_sizes,
-            "%p %16" PRIu64 " accesses %8zu - %8zu bytes long",
-            (const void *)pb, pb->access_size_count[i], lo, hi);
+            "%16" PRIu64 " accesses %8zu - %8zu bytes long",
+            pb->access_size_count[i], lo, hi);
     }
+
     hlog_fast(pb_access_sizes,
-        "%p %16" PRIu64 " accesses %8zu - greater  bytes long",
-        (const void *)pb, pb->access_size_count[i], lo);
+        "%16" PRIu64 " accesses %8zu -  greater bytes long",
+        pb->access_size_count[i], lo);
 }
 
 
@@ -1181,8 +1185,8 @@ H5PB_read(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
 
     pb_ptr = shared->pb_ptr;
 
-    if (pb_ptr != NULL)
-        H5PB_count_access_by_size(pb_ptr, size);
+    if (pb_ptr != NULL && type != H5FD_MEM_DRAW)
+        H5PB_count_meta_access_by_size(pb_ptr, size);
 
     if ( pb_ptr == NULL ) {
 
@@ -2523,8 +2527,8 @@ H5PB_write(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
 
     pb_ptr = shared->pb_ptr;
 
-    if (pb_ptr != NULL)
-        H5PB_count_access_by_size(pb_ptr, size);
+    if (pb_ptr != NULL && type != H5FD_MEM_DRAW)
+        H5PB_count_meta_access_by_size(pb_ptr, size);
 
     if ( pb_ptr == NULL ) {
 
