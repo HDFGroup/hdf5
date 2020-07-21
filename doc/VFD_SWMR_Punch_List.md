@@ -187,3 +187,6 @@ guide to the syntax.
     reliable fashion with VFD SWMR while structural metadata is mixed
     with user data and stored in raw data pages.  For a simple example,
     see the variable-length string test, `vfd_swmr_vlstr`.
+
+37. Let a writer start writing in VFD SWMR mode after the reader has started
+    reading in VFD SWMR mode.  Let the reader start reading right away.
