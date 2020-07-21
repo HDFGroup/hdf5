@@ -84,8 +84,8 @@ CHECK_CLEANFILES+=$(EXTLINK_DIRS)
 
 # Example directory
 # Note: no '/' after DESTDIR.  Explanation in commence.am
-EXAMPLEDIR=$(examplesdir)/c
-EXAMPLETOPDIR=$(examplesdir)
+EXAMPLEDIR=${DESTDIR}$(examplesdir)/c
+EXAMPLETOPDIR=${DESTDIR}$(examplesdir)
 
 # List dependencies for each program.  Normally, automake would take
 # care of this for us, but if we tell automake about the programs it
