@@ -18,8 +18,11 @@
 #include "h5tools.h"
 #include "h5tools_utils.h"
 
-#define IMAGE_WIDTH_MAX     65535   /* unsigned 16bits integer */
-#define IMAGE_HEIGHT_MAX    65535   /* unsigned 16bits integer */
+/* Name of tool */
+#define PROGRAMNAME "hdf2gif"
+
+#define IMAGE_WIDTH_MAX        65535    /* unsigned 16bits integer */
+#define IMAGE_HEIGHT_MAX       65535    /* unsigned 16bits integer */
 
 
 int EndianOrder;
@@ -42,12 +45,17 @@ usage(void)
 
 }
 
+static void
+leave(int ret)
+{
+   h5tools_close();
+   HDexit(ret);
+}
+
 FILE *fpGif = NULL;
 int main(int argc , char **argv)
 {
     GIFBYTE *Image;
-    void *edata;
-    H5E_auto2_t func;
 
     /* compression structs */
     GIFCHAR *HDFName = NULL;
@@ -73,9 +81,8 @@ int main(int argc , char **argv)
     char *image_name = NULL;
     int idx;
 
-    /* Disable error reporting */
-    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+    h5tools_setprogname(PROGRAMNAME);
+    h5tools_setstatus(EXIT_SUCCESS);
 
     /* Initialize h5tools lib */
     h5tools_init();
@@ -83,8 +90,7 @@ int main(int argc , char **argv)
     if ( argv[1] && (strcmp("-V",argv[1])==0) )
     {
         print_version("gif2h5");
-        exit(EXIT_SUCCESS);
-
+        h5tools_setstatus(EXIT_SUCCESS);
     }
 
 
@@ -92,7 +98,7 @@ int main(int argc , char **argv)
     {
         /* they didn't supply at least one image -- bail */
         usage();
-        return EXIT_FAILURE;
+        h5tools_setstatus(EXIT_FAILURE);
     }
 
     HDFName = argv[1];
@@ -345,9 +351,7 @@ int main(int argc , char **argv)
     if (image_name != NULL)
         free(image_name);
 
-    H5Eset_auto2(H5E_DEFAULT, func, edata);
-
-    return EXIT_SUCCESS;
+    leave(h5tools_getstatus());
 
 
 out:
@@ -357,7 +361,6 @@ out:
     if (image_name != NULL)
         free(image_name);
 
-    H5Eset_auto2(H5E_DEFAULT, func, edata);
-
-    return EXIT_FAILURE;
+    h5tools_setstatus(EXIT_FAILURE);
+    leave(h5tools_getstatus());
 }

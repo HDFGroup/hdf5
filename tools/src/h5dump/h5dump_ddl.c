@@ -103,13 +103,13 @@ dump_attr_cb(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *
     HDmemset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
-    ctx.display_index = display_ai;
-    ctx.display_char = display_char;
+    ctx.display_index = dump_opts.display_ai;
+    ctx.display_char = dump_opts.display_char;
 
     attr_id = H5Aopen(oid, attr_name, H5P_DEFAULT);
-    oid_output = display_oid;
-    data_output = display_data;
-    attr_data_output = display_attr_data;
+    oid_output = dump_opts.display_oid;
+    data_output = dump_opts.display_data;
+    attr_data_output = dump_opts.display_attr_data;
 
     string_dataformat = *outputformat;
 
@@ -125,7 +125,7 @@ dump_attr_cb(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *
     else
         string_dataformat.line_ncols = h5tools_nCols;
 
-    string_dataformat.do_escape = display_escape;
+    string_dataformat.do_escape = dump_opts.display_escape;
     outputformat = &string_dataformat;
 
     h5dump_type_table = type_table;
@@ -185,7 +185,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
     else
         string_dataformat.line_ncols = h5tools_nCols;
 
-    string_dataformat.do_escape = display_escape;
+    string_dataformat.do_escape = dump_opts.display_escape;
     outputformat = &string_dataformat;
 
     /* Build the object's path name */
@@ -242,16 +242,16 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
             break;
 
         case H5O_TYPE_DATASET:
-            if(display_data) {
+            if(dump_opts.display_data) {
                 if ((dapl_id = H5Pcreate(H5P_DATASET_ACCESS)) < 0) {
                     error_msg("error in creating default access property list ID\n");
                 }
-                if (display_vds_first) {
+                if (dump_opts.display_vds_first) {
                     if(H5Pset_virtual_view(dapl_id, H5D_VDS_FIRST_MISSING) < 0)
                         error_msg("error in setting access property list ID, virtual_view\n");
                 }
-                if (vds_gap_size > 0) {
-                    if(H5Pset_virtual_printf_gap(dapl_id, (hsize_t)vds_gap_size) < 0)
+                if (dump_opts.vds_gap_size > 0) {
+                    if(H5Pset_virtual_printf_gap(dapl_id, (hsize_t)dump_opts.vds_gap_size) < 0)
                         error_msg("error in setting access property list ID, virtual_printf_gap\n");
                 }
             }
@@ -564,7 +564,7 @@ attr_iteration(hid_t gid, unsigned attr_crt_order_flags)
 {
     /* attribute iteration: if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
        in the group for attributes, then, sort by creation order, otherwise by name */
-    if(include_attrs) {
+    if(dump_opts.include_attrs) {
         if((sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED)) {
             if(H5Aiterate2(gid, sort_by, sort_order, NULL, dump_attr_cb, NULL) < 0) {
                 error_msg("error getting attribute information\n");
@@ -641,7 +641,7 @@ dump_named_datatype(hid_t tid, const char *name)
     else
         string_dataformat.line_ncols = h5tools_nCols;
 
-    string_dataformat.do_escape = display_escape;
+    string_dataformat.do_escape = dump_opts.display_escape;
     outputformat = &string_dataformat;
 
     if ((tcpl_id = H5Tget_create_plist(tid)) < 0) {
@@ -794,7 +794,7 @@ dump_group(hid_t gid, const char *name)
     else
         string_dataformat.line_ncols = h5tools_nCols;
 
-    string_dataformat.do_escape = display_escape;
+    string_dataformat.do_escape = dump_opts.display_escape;
     outputformat = &string_dataformat;
 
     ctx.need_prefix = TRUE;
@@ -824,7 +824,7 @@ dump_group(hid_t gid, const char *name)
             }
     } /* end if */
 
-    if(display_oid)
+    if(dump_opts.display_oid)
         h5tools_dump_oid(rawoutstream, outputformat, &ctx, gid);
 
     h5tools_dump_comment(rawoutstream, outputformat, &ctx, gid);
@@ -919,7 +919,7 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     else
         string_dataformat.line_ncols = h5tools_nCols;
 
-    string_dataformat.do_escape = display_escape;
+    string_dataformat.do_escape = dump_opts.display_escape;
     outputformat = &string_dataformat;
 
     if ((dcpl_id = H5Dget_create_plist(did)) < 0) {
@@ -960,11 +960,11 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     h5tools_dump_dataspace(rawoutstream, outputformat, &ctx, space);
     H5Sclose(space);
 
-    if(display_oid) {
+    if(dump_opts.display_oid) {
         h5tools_dump_oid(rawoutstream, outputformat, &ctx, did);
     }
 
-    if(display_dcpl) {
+    if(dump_opts.display_dcpl) {
         h5dump_type_table = type_table;
         h5tools_dump_dcpl(rawoutstream, outputformat, &ctx, dcpl_id, type, did);
         h5dump_type_table = NULL;
@@ -972,16 +972,16 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     H5Pclose(dcpl_id);
 
     ctx.sset = sset;
-    ctx.display_index = display_ai;
-    ctx.display_char = display_char;
-    if(display_data) {
+    ctx.display_index = dump_opts.display_ai;
+    ctx.display_char = dump_opts.display_char;
+    if(dump_opts.display_data) {
         unsigned  data_loop = 1;
         unsigned  u;
 
-        if(display_packed_bits)
+        if(dump_opts.display_packed_bits)
             data_loop = packed_bits_num;
         for(u = 0; u < data_loop; u++) {
-            if(display_packed_bits) {
+            if(dump_opts.display_packed_bits) {
                 ctx.need_prefix = TRUE;
                 h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
                 /* Render the element */
@@ -1084,7 +1084,7 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
     else
         string_dataformat.line_ncols = h5tools_nCols;
 
-    string_dataformat.do_escape = display_escape;
+    string_dataformat.do_escape = dump_opts.display_escape;
     outputformat = &string_dataformat;
 
     HDmemset(&ctx, 0, sizeof(ctx));
@@ -1092,7 +1092,7 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
     ctx.cur_column = dump_indent;
     ctx.sset = sset;
     ctx.display_index = display_index;
-    ctx.display_char = display_char;
+    ctx.display_char = dump_opts.display_char;
 
     if(obj_data == DATASET_DATA)
         print_dataset = TRUE;
@@ -1502,8 +1502,8 @@ handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED *data, int H5
     HDmemset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
-    ctx.display_index = display_ai;
-    ctx.display_char = display_char;
+    ctx.display_index = dump_opts.display_ai;
+    ctx.display_char = dump_opts.display_char;
 
     string_dataformat = *outputformat;
 
@@ -1519,7 +1519,7 @@ handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED *data, int H5
     else
         string_dataformat.line_ncols = h5tools_nCols;
 
-    string_dataformat.do_escape = display_escape;
+    string_dataformat.do_escape = dump_opts.display_escape;
     outputformat = &string_dataformat;
 
     attr_name = h5tools_str_replace(attr + j + 1, "\\/", "/");
@@ -1558,9 +1558,9 @@ handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED *data, int H5
     } /* end if */
 
     attr_id = H5Aopen(oid, attr_name, H5P_DEFAULT);
-    oid_output = display_oid;
-    data_output = display_data;
-    attr_data_output = display_attr_data;
+    oid_output = dump_opts.display_oid;
+    data_output = dump_opts.display_data;
+    attr_data_output = dump_opts.display_attr_data;
 
     h5dump_type_table = type_table;
     h5tools_dump_attribute(rawoutstream, outputformat, &ctx, attr_name, attr_id);
@@ -1612,16 +1612,16 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
     struct subset_t *sset = (struct subset_t *)data;
     const char      *real_name = display_name ? display_name : dset;
 
-    if(display_data) {
+    if(dump_opts.display_data) {
         if ((dapl_id = H5Pcreate(H5P_DATASET_ACCESS)) < 0) {
             error_msg("error in creating default access property list ID\n");
         }
-        if (display_vds_first) {
+        if (dump_opts.display_vds_first) {
             if(H5Pset_virtual_view(dapl_id, H5D_VDS_FIRST_MISSING) < 0)
                 error_msg("error in setting access property list ID, virtual_view\n");
         }
-        if (vds_gap_size > 0) {
-            if(H5Pset_virtual_printf_gap(dapl_id, (hsize_t)vds_gap_size) < 0)
+        if (dump_opts.vds_gap_size > 0) {
+            if(H5Pset_virtual_printf_gap(dapl_id, (hsize_t)dump_opts.vds_gap_size) < 0)
                 error_msg("error in setting access property list ID, virtual_printf_gap\n");
         }
     }

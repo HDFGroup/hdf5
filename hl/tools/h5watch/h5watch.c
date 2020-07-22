@@ -821,8 +821,6 @@ main(int argc, const char *argv[])
     char        drivername[50];     /* VFD name */
     char        *fname = NULL;      /* File name */
     char        *dname = NULL;      /* Dataset name */
-    void        *edata;             /* Error reporting */
-    H5E_auto2_t func;               /* Error reporting */
     char        *x;                 /* Temporary string pointer */
     hid_t       fid = -1;           /* File ID */
     hid_t       fapl = -1;          /* File access property list */
@@ -830,10 +828,6 @@ main(int argc, const char *argv[])
     /* Set up tool name and exit status */
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
-
-    /* Disable error reporting */
-    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
     /* Initialize h5tools lib */
     h5tools_init();
@@ -859,6 +853,9 @@ main(int argc, const char *argv[])
         leave(EXIT_FAILURE);
     }
 
+    /* enable error reporting if command line option */
+    h5tools_error_report();
+
     /* Mostly copied from tools/h5ls coding & modified accordingly */
     /*
      * [OBJECT] is specified as
@@ -875,22 +872,26 @@ main(int argc, const char *argv[])
      * doesn't exist).
      */
     if((fname = HDstrdup(argv[opt_ind])) == NULL) {
-        error_msg("memory allocation failed (file %s:line %d)\n",
-                   __FILE__, __LINE__);
+        error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
         h5tools_setstatus(EXIT_FAILURE);
+        goto done;
     }
 
     /* Create a copy of file access property list */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        return -1;
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
+    }
 
     /* Set to use the latest library format */
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        return -1;
+    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
+    }
 
     do {
         while(fname && *fname) {
-            fid = h5tools_fopen(fname, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl, NULL, drivername, sizeof drivername);
+            fid = h5tools_fopen(fname, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl, FALSE, drivername, sizeof drivername);
 
             if(fid >= 0) {
                 HDfprintf(stdout, "Opened \"%s\" with %s driver.\n", fname, drivername);
@@ -911,30 +912,37 @@ main(int argc, const char *argv[])
 
     if(fid < 0) {
         error_msg("unable to open file \"%s\"\n", fname);
-        if(fname) HDfree(fname);
-        if(fapl >= 0) H5Pclose(fapl);
-        leave(EXIT_FAILURE);
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
     }
 
     if(!dname) {
         error_msg("no dataset specified\n");
         h5tools_setstatus(EXIT_FAILURE);
-    } else {
+        goto done;
+    }
+    else {
         *dname = '/';
         x = dname;
         if((dname = HDstrdup(dname)) == NULL) {
-            error_msg("memory allocation failed (file %s:line %d)\n",
-                       __FILE__, __LINE__);
+            error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
             h5tools_setstatus(EXIT_FAILURE);
-        } else {
+            goto done;
+        }
+        else {
             *x = '\0';
             /* Validate dataset */
-            if(check_dataset(fid, dname) < 0)
+            if(check_dataset(fid, dname) < 0) {
                 h5tools_setstatus(EXIT_FAILURE);
+                goto done;
+            }
             /* Validate input "fields" */
-            else if(g_list_of_fields && *g_list_of_fields)
-                if(process_cmpd_fields(fid, dname) < 0)
+            else if(g_list_of_fields && *g_list_of_fields) {
+                if(process_cmpd_fields(fid, dname) < 0) {
                     h5tools_setstatus(EXIT_FAILURE);
+                    goto done;
+                }
+            }
         }
     }
 
@@ -943,15 +951,20 @@ main(int argc, const char *argv[])
         if(monitor_dataset(fid, dname) < 0)
             h5tools_setstatus(EXIT_FAILURE);
 
+done:
     /* Free spaces */
-    if(fname) HDfree(fname);
-    if(dname) HDfree(dname);
-    if(g_list_of_fields) HDfree(g_list_of_fields);
+    if(fname)
+        HDfree(fname);
+    if(dname)
+        HDfree(dname);
+    if(g_list_of_fields)
+        HDfree(g_list_of_fields);
     if(g_listv) {
         H5LD_clean_vector(g_listv);
         HDfree(g_listv);
     }
-    if(g_dup_fields) HDfree(g_dup_fields);
+    if(g_dup_fields)
+        HDfree(g_dup_fields);
 
     /* Close the file access property list */
     if(fapl >= 0 && H5Pclose(fapl) < 0) {
@@ -960,12 +973,11 @@ main(int argc, const char *argv[])
     }
 
     /* Close the file */
-    if(H5Fclose(fid) < 0) {
+    if(fid >= 0 && H5Fclose(fid) < 0) {
         error_msg("unable to close file\n");
         h5tools_setstatus(EXIT_FAILURE);
     }
 
-    H5Eset_auto2(H5E_DEFAULT, func, edata);
     /* exit */
     leave(h5tools_getstatus());
 } /* main() */

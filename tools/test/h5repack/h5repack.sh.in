@@ -741,7 +741,7 @@ TOOLTEST1()
     TESTING $H5REPACK $@
     (
         cd $TESTDIR
-        $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
+        $ENVCMD $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
     )
     RET=$?
     if [ $RET != 0 ] ; then
