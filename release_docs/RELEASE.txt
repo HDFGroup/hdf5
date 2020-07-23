@@ -354,6 +354,20 @@ Bug Fixes since HDF5-1.8.21
 
     Library
     -------
+    - Fixed the segmentation fault when reading attributes with multiple threads
+
+      It was reported that the reading of attributes with variable length string
+      datatype will crash with segmentation fault particularly when the number of 
+      threads is high (>16 threads).  The problem was due to the file pointer that
+      was set in the variable length string datatype for the attribute.  That file
+      pointer was already closed when the attribute was accessed.
+
+      The problem was fixed by setting the file pointer to the current opened file pointer
+      when the attribute was accessed.  Similar patch up was done before when reading
+      dataset with variable length string datatype.
+
+      (VC - 2020/07/13, HDFFV-11080)
+
     - Fixed CVE-2018-17435
 
       The tool h52gif produced a segfault when the size of an attribute

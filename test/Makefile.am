@@ -111,7 +111,7 @@ LDADD=libh5test.la $(LIBHDF5)
 
 # List the source files for tests that have more than one
 ttsafe_SOURCES=ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c       \
-               ttsafe_acreate.c
+               ttsafe_acreate.c ttsafe_attr_vlen.c
 
 VFD_LIST = sec2 stdio core core_paged split multi family
 if DIRECT_VFD_CONDITIONAL

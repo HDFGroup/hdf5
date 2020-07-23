@@ -623,6 +623,10 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
     HDassert(attr);
     HDassert(mem_type);
     HDassert(buf);
+    
+    /* Patch the top level file pointer in attr->shared->dt->shared->u.vlen.f if needed */
+    if(H5T_patch_vlen_file(attr->shared->dt, attr->oloc.file) < 0 )
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch VL datatype file pointer")
 
     /* Create buffer for data to store on disk */
     if((snelmts = H5S_GET_EXTENT_NPOINTS(attr->shared->ds)) < 0)

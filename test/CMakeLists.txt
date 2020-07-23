@@ -169,6 +169,7 @@ set (ttsafe_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_error.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_cancel.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_acreate.c
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe_attr_vlen.c
 )
 
 set (H5_TESTS
