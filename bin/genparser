@@ -1,0 +1,250 @@
+#! /bin/bash
+#
+# Copyright by The HDF Group.                                              
+# All rights reserved.                                                     
+#                                                                          
+# This file is part of HDF5. The full HDF5 copyright notice, including     
+# terms governing use, modification, and redistribution, is contained in   
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
+
+# This script runs flex/lex and bison/yacc to generate parser code for
+# the high-level library. It used to be a part of autogen.sh, but many
+# people encountered problems with installing flex and bison on their
+# system and the parser code rarely changes, so those parts of the
+# script were moved to their own file.
+#
+# NOTE CAREFULLY!
+#
+# There is NO dependency in either the autotools or CMake to regenerate
+# the parser code. If you modify H5LT analyze.l or H5LTparse.y, you
+# will need to run this scrpit manually on a system with a suitable
+# lexer and parser generator.
+#
+# IMPORTANT OS X NOTE
+#
+# If you are using OS X, you will probably not have flex or bison
+# installed. In addtion, even if you do have bison installed, the bison
+# version you have installed may also have a bug that makes it unable to
+# process our input files.
+#
+# The easiest way to fix this is to install everything via Homebrew:
+#
+#   http://brew.sh/
+#
+# After you install the base packages, install flex/bison.
+#
+#   brew install flex
+#   brew install bison
+#
+# END IMPORTANT OS X NOTE
+#
+# If you want to use a particular version of flex or bison, the paths
+# to each tool can be overridden using the following environment
+# variables:
+#
+#   HDF5_FLEX
+#   HDF5_BISON
+#
+# This script takes two potential options:
+#
+# -p
+#
+# When this is selected, the flex/bison versions are set to the paths
+# and versions used by The HDF Group to produce the released versions
+# of the library.
+#
+# NOTE: This is probably temporary. Once we update our dev machines
+# to have recent versions of the autotools this option will probably
+# be removed.
+#
+# -v
+#
+# This emits some extra information, mainly tool versions.
+
+echo
+echo "*******************************************"
+echo "* HDF5 high-level parser generator script *"
+echo "*******************************************"
+echo
+
+# Default is not verbose output
+verbose=false
+
+optspec=":hpv-"
+while getopts "$optspec" optchar; do
+    case "${optchar}" in
+    h)
+        echo "usage: $0 [OPTIONS] /path/to/hl/src/directory"
+        echo
+        echo "      -h      Print this help message."
+        echo
+        echo "      -p      Used by THG to use hard-codes flex/bison"
+        echo "              paths on THG machines. Not for non-HDF-Group"
+        echo "              users!"
+        echo
+        echo "      -v      Show more verbose output."
+        echo
+        echo "  NOTE: Each tool can be set via an environment variable."
+        echo "        These are documented inside this script."
+        echo
+        exit 0
+        ;;
+    p)
+        echo "Setting THG production mode..."
+        echo
+        production=true
+        ;;
+    v)
+        echo "Setting verbosity: high"
+        echo
+        verbose=true
+        ;;
+    *)
+        if [ "$OPTERR" != 1 ] || [ "${optspec:0:1}" = ":" ]; then
+            echo "Non-option argument: '-${OPTARG}'" >&2
+        fi
+        ;;
+    esac
+done
+
+# Get the path to the hl src directory
+shift $(($OPTIND - 1))
+path_to_hl_src=$1
+if test -z ${path_to_hl_src}; then
+    echo "*** ERROR *** - Path to hl/src not set"
+    echo "Please add the path to the hl/src directory as a parameter"
+    echo "See $0 -h for more help."
+    echo
+    exit -1
+fi
+
+if [ "$production" = true ] ; then
+
+    # Production mode
+    #
+    # Hard-code canonical HDF Group tool locations.
+
+    # If paths to tools are not specified, assume they are
+    # located in /usr/hdf/bin/AUTOTOOLS and set paths accordingly.
+    if test -z ${HDF5_BISON}; then
+        HDF5_BISON=/usr/hdf/bin/AUTOTOOLS/bison
+    fi
+    if test -z ${HDF5_FLEX}; then
+        HDF5_FLEX=/usr/hdf/bin/AUTOTOOLS/flex
+    fi
+
+else
+
+    # Not in production mode
+    #
+    # If paths to autotools are not specified, use whatever the system
+    # has installed as the default. We use 'which <tool>' to
+    # show exactly what's being used.
+    if test -z ${HDF5_BISON}; then
+        HDF5_BISON=$(which bison)
+    fi
+    if test -z ${HDF5_FLEX}; then
+        HDF5_FLEX=$(which flex)
+    fi
+
+fi # production
+
+# Make sure that these versions of the tools are in the path
+BISON_DIR=`dirname ${HDF5_BISON}`
+FLEX_DIR=`dirname ${HDF5_FLEX}`
+PATH=${FLEX_DIR}:${BISON_DIR}:$PATH
+
+# Run flex and bison
+# automatically generates hl/src/H5LTanalyze.c and hl/src/H5LTparse.c
+# Note that, as of Xcode 6.1 (2015), the default bison version on OS X
+# is old enough to have the circular dependency bug. You'll have
+# to install a later version of bison. See the OS X note at the top
+# of this script.
+echo
+echo "Generating H5LT parser code (requires yacc/bison):"
+echo "Generate hl/src/H5LTparse.c from hl/src/H5LTparse.y"
+# HDF5_BISON is set via the environment or 'which bison', above
+if test -z ${HDF5_BISON}; then
+    echo
+    echo "*************************"
+    echo " ERROR - bison not found"
+    echo "*************************"
+    echo "bison is required to generate parser code in H5LT"
+    echo
+    exit 127
+fi
+if [ "$verbose" = true ] ; then
+    ${HDF5_BISON} --version
+fi
+${HDF5_BISON} -pH5LTyy -o ${path_to_hl_src}/H5LTparse.c -d ${path_to_hl_src}/H5LTparse.y
+
+echo
+echo "Generating H5LT lexer code (requires lex/flex):"
+echo "Generate hl/src/H5LTanalyze.c from hl/src/H5LTanalyze.l"
+# HDF5_FLEX is set via the environment or 'which flex', above
+if test -z ${HDF5_FLEX}; then
+    echo
+    echo "************************"
+    echo " ERROR - flex not found"
+    echo "************************"
+    echo "flex is required to generate lexer code in H5LT"
+    echo
+    exit 127
+fi
+if [ "$verbose" = true ] ; then
+    ${HDF5_FLEX} --version
+fi
+${HDF5_FLEX} --nounistd -PH5LTyy -o ${path_to_hl_src}/H5LTanalyze.c ${path_to_hl_src}/H5LTanalyze.l
+
+# fix H5LTparse.c to declare H5LTyyparse return type as an hid_t
+# instead of int.  Currently the generated function H5LTyyparse is
+# generated with a return value of type int, which is a mapping to the
+# flex yyparse function.  The return value in the HL library should be
+# an hid_t. 
+# I propose to not use flex to generate this function, but for now I am 
+# adding a perl command to find and replace this function declaration in
+# H5LTparse.c.
+perl -0777 -pi -e 's/int yyparse/hid_t yyparse/igs' ${path_to_hl_src}/H5LTparse.c
+perl -0777 -pi -e 's/int\nyyparse/hid_t\nyyparse/igs' ${path_to_hl_src}/H5LTparse.c
+perl -0777 -pi -e 's/int H5LTyyparse/hid_t H5LTyyparse/igs' ${path_to_hl_src}/H5LTparse.c
+
+# Add code that disables warnings in the flex/bison-generated code.
+#
+# Note that the GCC pragmas did not exist until gcc 4.2. Earlier versions
+# will simply ignore them, but we want to avoid those warnings.
+for f in ${path_to_hl_src}/H5LTparse.c ${path_to_hl_src}/H5LTanalyze.c
+do
+    echo '#if defined __GNUC__ && 402 <= __GNUC__ * 100 + __GNUC_MINOR__    ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wconversion"                     ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wimplicit-function-declaration"  ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wlarger-than="                   ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wmissing-prototypes"             ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wnested-externs"                 ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wold-style-definition"           ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wredundant-decls"                ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wsign-compare"                   ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wsign-conversion"                ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wstrict-overflow"                ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wstrict-prototypes"              ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"         ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wswitch-default"                 ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wunused-function"                ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wunused-macros"                  ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wunused-parameter"               ' >> tmp.out
+    echo '#elif defined __SUNPRO_CC                                         ' >> tmp.out
+    echo '#pragma disable_warn                                              ' >> tmp.out
+    echo '#elif defined _MSC_VER                                            ' >> tmp.out
+    echo '#pragma warning(push, 1)                                          ' >> tmp.out
+    echo '#endif                                                            ' >> tmp.out
+
+    cat $f >> tmp.out
+    mv tmp.out $f
+done
+
+echo
+exit 0
+
