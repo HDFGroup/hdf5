@@ -62,7 +62,7 @@
 ./bin/distdep
 ./bin/errors                 _DO_NOT_DISTRIBUTE_
 ./bin/gcov_script            _DO_NOT_DISTRIBUTE_
-./bin/genltanalyze           _DO_NOT_DISTRIBUTE_
+./bin/genparser              _DO_NOT_DISTRIBUTE_
 ./bin/h5cc.in
 ./bin/h5redeploy.in
 ./bin/h5vers
