@@ -30,8 +30,8 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_H5LTYY_H5LTPARSE_H_INCLUDED
-# define YY_H5LTYY_H5LTPARSE_H_INCLUDED
+#ifndef YY_H5LTYY_HL_SRC_H5LTPARSE_H_INCLUDED
+# define YY_H5LTYY_HL_SRC_H5LTPARSE_H_INCLUDED
 /* Enabling traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -110,7 +110,7 @@ extern int H5LTyydebug;
 typedef union YYSTYPE
 {
 /* Line 2058 of yacc.c  */
-#line 72 "H5LTparse.y"
+#line 72 "hl/src/H5LTparse.y"
 
     int     ival;         /*for integer token*/
     char    *sval;        /*for name string*/
@@ -118,7 +118,7 @@ typedef union YYSTYPE
 
 
 /* Line 2058 of yacc.c  */
-#line 122 "H5LTparse.h"
+#line 122 "hl/src/H5LTparse.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -141,4 +141,4 @@ int H5LTyyparse ();
 #endif
 #endif /* ! YYPARSE_PARAM */
 
-#endif /* !YY_H5LTYY_H5LTPARSE_H_INCLUDED  */
+#endif /* !YY_H5LTYY_HL_SRC_H5LTPARSE_H_INCLUDED  */
