@@ -141,11 +141,7 @@ static herr_t H5G__loc_get_comment_cb(H5G_loc_t *grp_loc, const char *name,
  *
  * Purpose:     Given an object ID return a location for the object.
  *
- * Return:      Success:    Group pointer.
- *              Failure:    NULL
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, September 13, 2005
+ * Returns:     SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -702,9 +698,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_loc_info
+ * Function:    H5G_loc_info
  *
- * Purpose:	Retrieve the information for an object from a group location
+ * Purpose:     Retrieve the information for an object from a group location
  *              and path to that object
  *
  * Return:	Non-negative on success/Negative on failure

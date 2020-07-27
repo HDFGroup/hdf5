@@ -35,6 +35,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5B2pkg.h"		/* v2 B-trees				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5VMprivate.h"	/* Vectors and arrays 			*/
 
 
@@ -1572,23 +1573,20 @@ H5B2__iterate_node(H5B2_hdr_t *hdr, uint16_t depth, const H5B2_node_ptr_t *curr_
     /* Iterate through records, in order */
     for(u = 0; u < curr_node->node_nrec && !ret_value; u++) {
         /* Descend into child node, if current node is an internal node */
-        if(depth > 0) {
+        if(depth > 0)
             if((ret_value = H5B2__iterate_node(hdr, (uint16_t)(depth - 1), &(node_ptrs[u]), node, op, op_data)) < 0)
                 HERROR(H5E_BTREE, H5E_CANTLIST, "node iteration failed");
-        } /* end if */
 
         /* Make callback for current record */
-        if(!ret_value) {
+        if(!ret_value)
             if((ret_value = (op)(H5B2_NAT_NREC(native, hdr, u), op_data)) < 0)
                 HERROR(H5E_BTREE, H5E_CANTLIST, "iterator function failed");
-        } /* end if */
     } /* end for */
 
     /* Descend into last child node, if current node is an internal node */
-    if(!ret_value && depth > 0) {
+    if(!ret_value && depth > 0)
         if((ret_value = H5B2__iterate_node(hdr, (uint16_t)(depth - 1), &(node_ptrs[u]), node, op, op_data)) < 0)
             HERROR(H5E_BTREE, H5E_CANTLIST, "node iteration failed");
-    } /* end if */
 
 done:
     /* Unpin the node if it was pinned */

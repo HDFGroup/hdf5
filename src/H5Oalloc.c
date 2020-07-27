@@ -36,6 +36,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5MFprivate.h"	/* File memory management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 
 /****************/
@@ -690,7 +691,7 @@ H5O__alloc_extend_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno, size_t size,
     } /* end for */
 
     /* Resize the chunk in the cache */
-    if(H5O_chunk_resize(oh, chk_proxy) < 0)
+    if(H5O__chunk_resize(oh, chk_proxy) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTRESIZE, FAIL, "unable to resize object header chunk")
 
     /* Set new message index */
@@ -2523,7 +2524,7 @@ H5O__alloc_shrink_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno)
     HDassert(new_size <= old_size);
 
     /* Resize the chunk in the cache */
-    if(H5O_chunk_resize(oh, chk_proxy) < 0)
+    if(H5O__chunk_resize(oh, chk_proxy) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTRESIZE, FAIL, "unable to resize object header chunk")
 
     /* Free the unused space in the file */
