@@ -15476,7 +15476,7 @@ test_hyper_io_1d(void)
 
 /****************************************************************
 **
-**  test_get_extent_no_class:
+**  test_h5s_set_extent_none:
 **  Test to verify the behavior of dataspace code when passed
 **  a dataspace modified by H5Sset_extent_none().
 **
@@ -15542,7 +15542,7 @@ test_h5s_set_extent_none(void)
     ret = H5Sclose(null_sid);
     CHECK(ret, FAIL, "H5Sclose");
 
-} /* test_get_extent_no_class() */
+} /* test_h5s_set_extent_none() */
 
 
 /****************************************************************
