@@ -750,6 +750,7 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl_id, hbool_t use_spec
     hid_t    fid = H5I_INVALID_HID;
     hid_t    tmp_fapl_id = H5I_INVALID_HID;
     hid_t    used_fapl_id = H5I_INVALID_HID;
+    unsigned drivernum;
     hid_t    ret_value = H5I_INVALID_HID;
 
     /*
@@ -779,6 +780,34 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl_id, hbool_t use_spec
      */
     if (fid < 0 && use_specific_driver)
         H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "failed to open file using specified FAPL");
+
+    for (drivernum = 0; drivernum < NUM_DRIVERS; drivernum++) {
+        h5tools_vfd_info_t vfd_info;
+
+        /* Skip the log VFD as it prints out to standard out
+        * and is fundamentally SEC2 anyway.
+        */
+        if (drivernum == LOG_VFD_IDX)
+            continue;
+
+        vfd_info.info           = NULL;
+        vfd_info.name           = drivernames[drivernum];
+
+        /* Get a fapl reflecting the selected VFD */
+        if ((tmp_fapl_id = h5tools_get_fapl(fapl_id, &vfd_info)) < 0)
+            continue;
+
+        /* Can we open the file with this combo? */
+        if ((fid = h5tools_fopen(fname, flags, tmp_fapl_id, TRUE, drivername, drivername_size)) >= 0) {
+            used_fapl_id = tmp_fapl_id;
+            H5TOOLS_GOTO_DONE(fid);
+        }
+        else {
+            /* Close the temporary fapl */
+            H5Pclose(tmp_fapl_id);
+            tmp_fapl_id = H5I_INVALID_HID;
+        }
+    }
 
     /* File was unable to be opened at all */
     ret_value = H5I_INVALID_HID;
