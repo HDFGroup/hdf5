@@ -5,7 +5,9 @@
 -Werror=bad-function-cast
 -Werror=declaration-after-statement
 -Werror=implicit-function-declaration
+-Werror=int-to-pointer-cast
 -Werror=missing-declarations
+-Werror=missing-field-initializers
 -Werror=missing-prototypes
 -Werror=nested-externs
 -Werror=old-style-definition
