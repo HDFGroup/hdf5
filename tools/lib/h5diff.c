@@ -29,7 +29,7 @@
 H5_ATTR_PURE int
 print_objname (diff_opt_t * opts, hsize_t nfound)
 {
-    return ((opts->m_verbose || nfound) && !opts->m_quiet) ? 1 : 0;
+    return ((opts->mode_verbose || nfound) && !opts->mode_quiet) ? 1 : 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -45,7 +45,7 @@ do_print_objname (const char *OBJ, const char *path1, const char *path2, diff_op
      * displaying any object or symbolic links. This improves
      * readability of the output.
      */
-    if (opts->m_verbose_level >= 1)
+    if (opts->mode_verbose_level >= 1)
         parallel_print("\n");
     parallel_print("%-7s: <%s> and <%s>\n", OBJ, path1, path2);
 }
@@ -74,7 +74,7 @@ do_print_attrname (const char *attr, const char *path1, const char *path2)
 static int
 print_warn(diff_opt_t *opts)
 {
-    return ((opts->m_verbose)) ? 1: 0;
+    return ((opts->mode_verbose)) ? 1: 0;
 }
 
 
@@ -141,7 +141,7 @@ is_valid_options(diff_opt_t *opts)
 
     /*-----------------------------------------------
      * no -q(quiet) with -v (verbose) or -r (report) */
-    if(opts->m_quiet && (opts->m_verbose || opts->m_report)) {
+    if(opts->mode_quiet && (opts->mode_verbose || opts->mode_report)) {
         parallel_print("Error: -q (quiet mode) cannot be added to verbose or report modes\n");
         opts->err_stat = H5DIFF_ERR;
         H5TOOLS_GOTO_DONE(0);
@@ -169,9 +169,9 @@ done:
  *           0 - not excluded path
  *------------------------------------------------------------------------*/
 static int
-is_exclude_path (char * path, h5trav_type_t type, diff_opt_t *opts)
+is_exclude_path (char *path, h5trav_type_t type, diff_opt_t *opts)
 {
-    struct exclude_path_list * exclude_path_ptr;
+    struct exclude_path_list *exclude_path_ptr;
     int   ret_cmp;
     int   ret_value = 0;
 
@@ -210,7 +210,7 @@ is_exclude_path (char * path, h5trav_type_t type, diff_opt_t *opts)
             if (ret_cmp == 0) {  /* found matching object */
                 /* excluded non-group object */
                 ret_value = 1;
-                /* remember the type of this maching object.
+                /* remember the type of this matching object.
                  * if it's group, it can be used for excluding its member
                  * objects in this while() loop */
                 exclude_path_ptr->obj_type = type;
@@ -218,6 +218,71 @@ is_exclude_path (char * path, h5trav_type_t type, diff_opt_t *opts)
             }
         }
         exclude_path_ptr = exclude_path_ptr->next;
+    }
+
+done:
+    return  ret_value;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: is_exclude_attr
+ *
+ * Purpose:  check if 'paths' are part of exclude path list
+ *
+ * Return:
+ *           1 - excluded path
+ *           0 - not excluded path
+ *------------------------------------------------------------------------*/
+static int
+is_exclude_attr (char *path, h5trav_type_t type, diff_opt_t *opts)
+{
+    struct exclude_path_list *exclude_ptr;
+    int   ret_cmp;
+    int   ret_value = 0;
+
+    /* check if exclude attr option is given */
+    if (!opts->exclude_attr_path)
+        H5TOOLS_GOTO_DONE(0);
+
+    /* assign to local exclude list pointer */
+    exclude_ptr = opts->exclude_attr;
+
+    /* search objects in exclude list */
+    while (NULL != exclude_ptr) {
+        /* if exclude path is is group, exclude its members as well */
+        if (exclude_ptr->obj_type == H5TRAV_TYPE_GROUP) {
+            ret_cmp = HDstrncmp(exclude_ptr->obj_path, path,
+                                HDstrlen(exclude_ptr->obj_path));
+            if (ret_cmp == 0) {  /* found matching members */
+                size_t len_grp;
+
+                /* check if given path belong to an excluding group, if so
+                 * exclude it as well.
+                 * This verifies if “/grp1/dset1” is only under “/grp1”, but
+                 * not under “/grp1xxx/” group.
+                 */
+                len_grp = HDstrlen(exclude_ptr->obj_path);
+                if (path[len_grp] == '/') {
+                    /* belong to excluded group! */
+                    ret_value = 1;
+                    break;  /* while */
+                }
+            }
+        }
+        /* exclude target is not group, just exclude the object */
+        else {
+            ret_cmp = HDstrcmp(exclude_ptr->obj_path, path);
+            if (ret_cmp == 0) {  /* found matching object */
+                /* excluded non-group object */
+                ret_value = 1;
+                /* remember the type of this matching object.
+                 * if it's group, it can be used for excluding its member
+                 * objects in this while() loop */
+                exclude_ptr->obj_type = type;
+                break; /* while */
+            }
+        }
+        exclude_ptr = exclude_ptr->next;
     }
 
 done:
@@ -234,6 +299,25 @@ static void
 free_exclude_path_list(diff_opt_t *opts)
 {
     struct exclude_path_list *curr = opts->exclude;
+    struct exclude_path_list *next;
+
+    while (NULL != curr) {
+        next = curr->next;
+        HDfree(curr);
+        curr = next;
+    }
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: free_exclude_attr_list
+ *
+ * Purpose:  free exclude object attribute list from diff options
+ *------------------------------------------------------------------------*/
+static void
+free_exclude_attr_list(diff_opt_t *opts)
+{
+    struct exclude_path_list *curr = opts->exclude_attr;
     struct exclude_path_list *next;
 
     while (NULL != curr) {
@@ -288,6 +372,7 @@ build_match_list (const char *objname1, trav_info_t *info1, const char *objname2
      * All the objects belong to given groups are the candidates.
      * So prepare to compare paths without the group names.
      */
+    H5TOOLS_DEBUG("objname1 = %s objname2 = %s ", objname1, objname2);
 
     /* if obj1 is not root */
     if (HDstrcmp (objname1,"/") != 0)
@@ -572,8 +657,8 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
     *-------------------------------------------------------------------------
     */
     /* open file 1 */
-    if (opts->custom_vol_1) {
-        if((fapl1_id = h5tools_get_fapl(H5P_DEFAULT, &(opts->vol_info_1), NULL)) < 0 ) {
+    if (opts->custom_vol[0]) {
+        if((fapl1_id = h5tools_get_fapl(H5P_DEFAULT, &(opts->vol_info[0]), NULL)) < 0 ) {
             parallel_print("h5diff: unable to create fapl for input file\n");
             H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "unable to create input fapl\n");
         }
@@ -587,8 +672,8 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
 
     /* open file 2 */
 
-    if (opts->custom_vol_2) {
-        if((fapl2_id = h5tools_get_fapl(H5P_DEFAULT, &(opts->vol_info_2), NULL)) < 0 ) {
+    if (opts->custom_vol[1]) {
+        if((fapl2_id = h5tools_get_fapl(H5P_DEFAULT, &(opts->vol_info[1]), NULL)) < 0 ) {
             parallel_print("h5diff: unable to create fapl for output file\n");
             H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "unable to create output fapl\n");
         }
@@ -627,6 +712,7 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
         }
         else
             obj1fullname = HDstrdup(objname1);
+        H5TOOLS_DEBUG("obj1fullname = %s", obj1fullname);
 
         /* make the given object2 fullpath, start with "/" */
         if (HDstrncmp(objname2, "/", 1)) {
@@ -644,6 +730,7 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
         }
         else
             obj2fullname = HDstrdup(objname2);
+        H5TOOLS_DEBUG("obj2fullname = %s", obj2fullname);
 
         /*----------------------------------------------------------
          * check if obj1 is root, group, single object or symlink
@@ -777,12 +864,12 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
             H5TOOLS_DEBUG("h5diff ... dangling link");
             if (opts->no_dangle_links) {
                 /* treat dangling link as error */
-                if(opts->m_verbose)
+                if(opts->mode_verbose)
                     parallel_print("Warning: <%s> is a dangling link.\n", obj1fullname);
                 H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "treat dangling link as error");
             }
             else {
-                if(opts->m_verbose)
+                if(opts->mode_verbose)
                     parallel_print("obj1 <%s> is a dangling link.\n", obj1fullname);
                 if (l_ret1 != 0 ||  l_ret2 != 0) {
                     nfound++;
@@ -818,12 +905,12 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
             H5TOOLS_DEBUG("h5diff ... dangling link");
             if (opts->no_dangle_links) {
                 /* treat dangling link as error */
-                if(opts->m_verbose)
+                if(opts->mode_verbose)
                     parallel_print("Warning: <%s> is a dangling link.\n", obj2fullname);
                 H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "treat dangling link as error");
             }
             else {
-                if(opts->m_verbose)
+                if(opts->mode_verbose)
                     parallel_print("obj2 <%s> is a dangling link.\n", obj2fullname);
                 if (l_ret1 != 0 || l_ret2 != 0) {
                     nfound++;
@@ -857,8 +944,8 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
     * comparing details of same objects.
     */
 
-    if(!(opts->m_verbose || opts->m_report)) {
-        H5TOOLS_DEBUG("h5diff NOT (opts->m_verbose || opts->m_report)");
+    if(!(opts->mode_verbose || opts->mode_report)) {
+        H5TOOLS_DEBUG("h5diff NOT (opts->mode_verbose || opts->mode_report)");
         /* if no danglink links */
         if (l_ret1 > 0 && l_ret2 > 0)
             if (h5tools_is_obj_same(file1_id, obj1fullname, file2_id, obj2fullname) != 0)
@@ -924,8 +1011,13 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
         /*------------------------------------------------------
          * print the list
          */
-         if(opts->m_verbose) {
+         if(opts->mode_verbose) {
              unsigned u;
+
+             if(opts->mode_verbose_level > 2) {
+                parallel_print("file1: %s\n", fname1);
+                parallel_print("file2: %s\n", fname2);
+             }
 
              parallel_print("\n");
              /* if given objects is group under root */
@@ -947,6 +1039,7 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
     nfound = diff_match(file1_id, obj1fullname, info1_lp,
                         file2_id, obj2fullname, info2_lp,
                         match_list, opts);
+    H5TOOLS_DEBUG("diff_match nfound: %d - errstat:%d", nfound, opts->err_stat);
 
 done:
     opts->err_stat = opts->err_stat | ret_value;
@@ -1047,12 +1140,14 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
      *-------------------------------------------------------------------------
      */
 
+    H5TOOLS_DEBUG("exclude_path opts->contents:%d", opts->contents);
     /* not valid compare used when --exclude-path option is used */
     if (!opts->exclude_path) {
         /* number of different objects */
         if (info1->nused != info2->nused) {
             opts->contents = 0;
         }
+        H5TOOLS_DEBUG("opts->exclude_path opts->contents:%d", opts->contents);
     }
 
     /* objects in one file and not the other */
@@ -1061,6 +1156,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
             opts->contents = 0;
             break;
         }
+        H5TOOLS_DEBUG("table->nobjs[%d] opts->contents:%d", i, opts->contents);
     }
 
     /*-------------------------------------------------------------------------
@@ -1133,9 +1229,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
             opts->cmn_objs = 1;
             if(!g_Parallel) {
                 H5TOOLS_DEBUG("diff paths - errstat:%d", opts->err_stat);
-                nfound += diff(file1_id, obj1_fullpath,
-                               file2_id, obj2_fullpath,
-                            opts, &argdata);
+                nfound += diff(file1_id, obj1_fullpath, file2_id, obj2_fullpath, opts, &argdata);
             } /* end if */
 #ifdef H5_HAVE_PARALLEL
             else {
@@ -1380,6 +1474,8 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
 
     opts->err_stat = opts->err_stat | ret_value;
 
+    free_exclude_attr_list (opts);
+
     /* free table */
     if (table)
         trav_table_free(table);
@@ -1404,7 +1500,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
  *-------------------------------------------------------------------------
  */
 hsize_t
-diff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2, diff_opt_t * opts, diff_args_t *argdata)
+diff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2, diff_opt_t *opts, diff_args_t *argdata)
 {
     int           status = -1;
     hid_t         dset1_id = H5I_INVALID_HID;
@@ -1453,7 +1549,7 @@ diff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2, diff_
         if (status == 0) {
             if (opts->no_dangle_links) {
                 /* dangling link is error */
-                if(opts->m_verbose)
+                if(opts->mode_verbose)
                     parallel_print("Warning: <%s> is a dangling link.\n", path1);
                 H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "dangling link is error");
             }
@@ -1468,7 +1564,7 @@ diff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2, diff_
         if (status == 0) {
             if (opts->no_dangle_links) {
                 /* dangling link is error */
-                if(opts->m_verbose)
+                if(opts->mode_verbose)
                     parallel_print("Warning: <%s> is a dangling link.\n", path2);
                 H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "dangling link is error");
             }
@@ -1494,11 +1590,11 @@ diff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2, diff_
     /* if objects are not the same type */
     if (argdata->type[0] != argdata->type[1]) {
         H5TOOLS_DEBUG("diff objects are not the same");
-        if (opts->m_verbose||opts->m_list_not_cmp) {
+        if (opts->mode_verbose||opts->mode_list_not_cmp) {
             parallel_print("Not comparable: <%s> is of type %s and <%s> is of type %s\n",
-            path1, get_type(argdata->type[0]),
-            path2, get_type(argdata->type[1]));
+                    path1, get_type(argdata->type[0]), path2, get_type(argdata->type[1]));
         }
+
         opts->not_cmp = 1;
         /* TODO: will need to update non-comparable is different
          * opts->contents = 0;
@@ -1523,7 +1619,7 @@ diff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2, diff_
                         object_type == H5TRAV_TYPE_GROUP);
         if (opts->follow_links || is_hard_link) {
             /* print information is only verbose option is used */
-            if(opts->m_verbose || opts->m_report) {
+            if(opts->mode_verbose || opts->mode_report) {
                 switch(object_type) {
                     case H5TRAV_TYPE_DATASET:
                         do_print_objname("dataset", path1, path2, opts);
@@ -1552,7 +1648,7 @@ diff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2, diff_
                 } /* switch(type)*/
 
                 print_found(nfound);
-            } /* if(opts->m_verbose || opts->m_report) */
+            } /* if(opts->mode_verbose || opts->mode_report) */
 
             /* exact same, so comparison is done */
             H5TOOLS_GOTO_DONE(H5DIFF_NO_ERR);
@@ -1570,15 +1666,16 @@ diff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2, diff_
                 H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Dopen2 failed");
             if((dset2_id = H5Dopen2(file2_id, path2, H5P_DEFAULT)) < 0)
                 H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Dopen2 failed");
+            H5TOOLS_DEBUG("paths: %s - %s", path1, path2);
             /* verbose (-v) and report (-r) mode */
-            if(opts->m_verbose || opts->m_report) {
+            if(opts->mode_verbose || opts->mode_report) {
                 do_print_objname("dataset", path1, path2, opts);
                 H5TOOLS_DEBUG("call diff_dataset 1:%s  2:%s ", path1, path2);
                 nfound = diff_dataset(file1_id, file2_id, path1, path2, opts);
                 print_found(nfound);
             }
             /* quiet mode (-q), just count differences */
-            else if(opts->m_quiet) {
+            else if(opts->mode_quiet) {
                 nfound = diff_dataset(file1_id, file2_id, path1, path2, opts);
             }
             /* the rest (-c, none, ...) */
@@ -1598,7 +1695,7 @@ diff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2, diff_
              * referenced object
              *---------------------------------------------------------
              */
-            if(path1) {
+            if(path1 && !is_exclude_attr(path1, object_type, opts)) {
                 H5TOOLS_DEBUG( "call diff_attr 1:%s  2:%s ", path1, path2);
                 nfound += diff_attr(dset1_id, dset2_id, path1, path2, opts);
             }
@@ -1630,7 +1727,7 @@ diff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2, diff_
                 do_print_objname("datatype", path1, path2, opts);
 
             /* always print the number of differences found in verbose mode */
-            if(opts->m_verbose)
+            if(opts->mode_verbose)
                 print_found(nfound);
 
             /*-----------------------------------------------------------------
@@ -1639,7 +1736,7 @@ diff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2, diff_
              * referenced object
              *-----------------------------------------------------------------
              */
-            if(path1) {
+            if(path1 && !is_exclude_attr(path1, object_type, opts)) {
                 H5TOOLS_DEBUG("call diff_attr 1:%s  2:%s ", path1, path2);
                 nfound += diff_attr(type1_id, type2_id, path1, path2, opts);
             }
@@ -1660,7 +1757,7 @@ diff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2, diff_
                 do_print_objname("group", path1, path2, opts);
 
             /* always print the number of differences found in verbose mode */
-            if(opts->m_verbose)
+            if(opts->mode_verbose)
                 print_found(nfound);
 
             if((grp1_id = H5Gopen2(file1_id, path1, H5P_DEFAULT)) < 0)
@@ -1674,7 +1771,7 @@ diff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2, diff_
              * referenced object
              *-----------------------------------------------------------------
              */
-            if(path1) {
+            if(path1 && !is_exclude_attr(path1, object_type, opts)) {
                 H5TOOLS_DEBUG("call diff_attr 1:%s  2:%s ", path1, path2);
                 nfound += diff_attr(grp1_id, grp2_id, path1, path2, opts);
             }
@@ -1702,7 +1799,7 @@ diff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2, diff_
                     do_print_objname("link", path1, path2, opts);
 
                 /* always print the number of differences found in verbose mode */
-                if(opts->m_verbose)
+                if(opts->mode_verbose)
                     print_found(nfound);
                 }
             break;
@@ -1752,14 +1849,14 @@ diff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2, diff_
                 } /* end else */
 
                 /* always print the number of differences found in verbose mode */
-                if(opts->m_verbose)
+                if(opts->mode_verbose)
                     print_found(nfound);
             }
             break;
 
         case H5TRAV_TYPE_UNKNOWN:
         default:
-            if(opts->m_verbose)
+            if(opts->mode_verbose)
                 parallel_print("Comparison not supported: <%s> and <%s> are of type %s\n",
                     path1, path2, get_type(object_type) );
             opts->not_cmp = 1;
@@ -1781,7 +1878,7 @@ done:
     }
     /* path1 is dangling link */
     else if (is_dangle_link1) {
-        if(opts->m_verbose)
+        if(opts->mode_verbose)
            parallel_print("obj1 <%s> is a dangling link.\n", path1);
         nfound++;
         if(print_objname(opts, nfound))
@@ -1789,7 +1886,7 @@ done:
     }
     /* path2 is dangling link */
     else if (is_dangle_link2) {
-        if(opts->m_verbose)
+        if(opts->mode_verbose)
             parallel_print("obj2 <%s> is a dangling link.\n", path2);
         nfound++;
         if(print_objname(opts, nfound))

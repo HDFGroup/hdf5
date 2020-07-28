@@ -804,10 +804,6 @@ done:
 int main(int argc, const char **argv)
 {
     pack_opt_t          options; /*the global options */
-    H5E_auto2_t         func;
-    H5E_auto2_t         tools_func;
-    void               *edata;
-    void               *tools_edata;
     int                 parse_ret;
 
     HDmemset(&options, 0, sizeof(pack_opt_t));
@@ -817,14 +813,6 @@ int main(int argc, const char **argv)
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
-
-    /* Disable error reporting */
-    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
-    /* Disable tools error reporting */
-    H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
-    H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
 
     /* update hyperslab buffer size from H5TOOLS_BUFSIZE env if exist */
     if (h5tools_getenv_update_hyperslab_bufsize() < 0) {
@@ -855,10 +843,8 @@ int main(int argc, const char **argv)
         goto done;
     }
 
-    if (enable_error_stack > 0) {
-        H5Eset_auto2(H5E_DEFAULT, func, edata);
-        H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
-    }
+    /* enable error reporting if command line option */
+    h5tools_error_report();
 
     /* pack it */
     if (h5repack(infile, outfile, &options) < 0) {
