@@ -15503,7 +15503,7 @@ test_h5s_set_extent_none(void)
 
     /* Dataspace class will be H5S_NULL after this.
      * In versions prior to 1.10.7 / 1.12.1 this would produce a
-     * dataspace with the internal H5S_NO_SPACE class.
+     * dataspace with the internal H5S_NO_CLASS class.
      */
     ret = H5Sset_extent_none(sid);
     CHECK(ret, FAIL, "H5Sset_extent_none");
