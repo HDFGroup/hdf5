@@ -95,6 +95,7 @@ const H5AC_class_t H5AC_SOHM_TABLE[1] = {{
     NULL,                               /* 'notify' callback */
     H5SM__cache_table_free_icr,         /* 'free_icr' callback */
     NULL,                               /* 'fsf_size' callback */
+    NULL,                               /* 'refresh' callback */
 }};
 
 const H5AC_class_t H5AC_SOHM_LIST[1] = {{
@@ -112,6 +113,7 @@ const H5AC_class_t H5AC_SOHM_LIST[1] = {{
     NULL,                               /* 'notify' callback */
     H5SM__cache_list_free_icr,          /* 'free_icr' callback */
     NULL,                               /* 'fsf_size' callback */
+    NULL,                               /* 'refresh' callback */
 }};
 
 
