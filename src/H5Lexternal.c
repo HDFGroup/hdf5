@@ -317,23 +317,137 @@ done:
 } /* end H5L__extern_query() */
 
 
-/*-------------------------------------------------------------------------
- * Function:    H5Lcreate_external
+/**\ingroup H5L
  *
- * Purpose:     Creates an external link from LINK_NAME to OBJ_NAME.
+ * \brief Creates an external link, a soft link to an object in a different file.
  *
- *              External links are links to objects in other HDF5 files.  They
- *              are allowed to "dangle" like soft links internal to a file.
- *              FILE_NAME is the name of the file that OBJ_NAME is is contained
- *              within.  If OBJ_NAME is given as a relative path name, the
- *              path will be relative to the root group of FILE_NAME.
- *              LINK_NAME is interpreted relative to LINK_LOC_ID, which is
- *              either a file ID or a group ID.
+ * \param[in] file_name   Name of the target file containing the target object.
+ * \param[in] obj_name    Path within the target file to the target object
+ * \param[in] link_loc_id Location identifier where the new link is to be
+ *                        created; may be a file, group, dataset, named
+ *                        datatype or attribute identifier.
+ * \param[in] link_name   Name of the new link, relative to \p link_loc_id
+ * \param[in] lcpl_id     Link creation property list identifier
+ * \param[in] lapl_id     Link access property list identifier
+ * \return \herr_t
  *
- * Return:      Non-negative on success/Negative on failure
+ * \details H5Lcreate_external() creates a new external link. An external link
+ *          is a soft link to an object in a different HDF5 file from the
+ *          location of the link, i.e., to an external object.
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, May 18, 2005
+ *          \p file_name identifies the target file containing the target
+ *          object; \p obj_name specifies the path of the target object within
+ *          that file. \p obj_name must be an absolute pathname in
+ *          \p file_name, i.e., it must start at the target file’s root group,
+ *          but it is not interpreted until an application attempts to traverse
+ *          it.
+ *
+ *          \p link_loc_id and \p link_name specify the location and name,
+ *          respectively, of the new link. \p link_name is interpreted relative
+ *          to \p link_loc_id.
+ *
+ *          \p lcpl_id is the link creation property list used in creating the
+ *          new link.
+ *
+ *          \p lapl_id is the link access property list used in traversing the
+ *          new link. Note that an external file opened by the traversal of an
+ *          external link is always opened with the weak file close degree
+ *          property setting, #H5F_CLOSE_WEAK (see H5Pset_fclose_degree());
+ *          any file close degree property setting in \p lapl_id is ignored.
+ *
+ *          An external link behaves similarly to a soft link, and like a soft
+ *          link in an HDF5 file, it may dangle: the target file and object
+ *          need not exist at the time that the external link is created.
+ *
+ *          When the external link \p link_name is accessed, the library will
+ *          search for the target file \p file_name as described below:
+ *
+ *          - If \p file_name is a relative pathname, the following steps are
+ *            performed:
+ *            - The library will get the prefix(es) set in the environment
+ *              variable \c HDF5_EXT_PREFIX and will try to prepend each prefix
+ *              to \p file_name to form a new \p file_name.
+ *            - If the new \p file_name does not exist or if \c HDF5_EXT_PREFIX
+ *              is not set, the library will get the prefix set via
+ *              H5Pset_elink_prefix() and prepend it to \p file_name to form a
+ *              new \p file_name.
+ *            - If the new \p file_name does not exist or no prefix is being
+ *              set by H5Pset_elink_prefix(), then the path of the file
+ *              associated with \p link_loc_id is obtained. This path can be
+ *              the absolute path or the current working directory plus the
+ *              relative path of that file when it is created/opened. The
+ *              library will prepend this path to \p file_name to form a new
+ *              \p file_name.
+ *            - If the new \p file_name does not exist, then the library will
+ *              look for \p file_name and will return failure/success
+ *              accordingly.
+ *          - If \p file_name is an absolute pathname, the library will first
+ *            try to find \p file_name. If \p file_name does not exist,
+ *            \p file_name is stripped of directory paths to form a new
+ *            \p file_name. The search for the new \p file_name then follows
+ *            the same steps as described above for a relative pathname. See
+ *            examples below illustrating how target_file_name is stripped to
+ *            form a new \p file_name.
+ *
+ *          Note that \p file_name is considered to be an absolute pathname
+ *          when the following condition is true:
+ *
+ *          - For Unix, the first character of \p file_name is a slash (\c /).
+ *            For example, consider a \p file_name of \c /tmp/A.h5.
+ *            If that target file does not exist, the new \p file_name after
+ *            stripping will be \c A.h5.
+ *          - For Windows, there are 6 cases:
+ *            -# \p file_name is an absolute drive with absolute pathname.
+ *               For example, consider a \p file_name of \c /tmp/A.h5. If that
+ *               target file does not exist, the new \p file_name after
+ *               stripping will be \c A.h5.
+ *            -# \p file_name is an absolute pathname without specifying drive
+ *               name. For example, consider a \p file_name of \c /tmp/A.h5.
+ *               If that target file does not exist, the new \p file_name after
+ *               stripping will be \c A.h5.
+ *            -# \p file_name is an absolute drive with relative pathname.
+ *               For example, consider a \p file_name of \c /tmp/A.h5. If that
+ *               target file does not exist, the new \p file_name after
+ *               stripping will be \c tmp\A.h5.
+ *            -# \p file_name is in UNC (Uniform Naming Convention) format with
+ *               server name, share name, and pathname. For example, consider
+ *               a \p file_name of \c /tmp/A.h5. If that target file does not
+ *               exist, the new \p file_name after stripping will be \c A.h5.
+ *            -# \p file_name is in Long UNC (Uniform Naming Convention) format
+ *               with server name, share name, and pathname. For example,
+ *               consider a \p file_name of \c /tmp/A.h5. If that target file
+ *               does not exist, the new \p file_name after stripping will be
+ *               \c A.h5.
+ *            -# \p file_name is in Long UNC (Uniform Naming Convention) format
+ *               with an absolute drive and an absolute pathname. For example,
+ *               consider a \p file_name of \c /tmp/A.h5. If that target file
+ *               does not exist, the new \p file_name after stripping will be
+ *               \c A.h5.
+ *
+ *          The library opens target file \p file_name with the file access
+ *          property list that is set via H5Pset_elink_fapl() when the external
+ *          link link_name is accessed. If no such property list is set, the
+ *          library uses the file access property list associated with the file
+ *          of \p link_loc_id to open the target file.
+ *
+ *          If an application requires additional control over file access
+ *          flags or the file access property list, see H5Pset_elink_cb(); this
+ *          function enables the use of an external link callback function as
+ *          described in H5L_elink_traverse_t().
+ *
+ * \attention A file close degree property setting (H5Pset_fclose_degree()) in
+ *            the external link file access property list or in the external
+ *            link callback function will be ignored. A file opened by means of
+ *            traversing an external link is always opened with the weak file
+ *            close degree property setting, #H5F_CLOSE_WEAK .
+ *
+ * \author Quincey Koziol
+ *
+ * \date Wednesday, May 18, 2005
+ *
+ * \since 1.8.0 Function was introduced in this release.
+ *
+ * \see H5Lcreate_hard(), H5Lcreate_soft(), H5Lcreate_ud()
  *
  *-------------------------------------------------------------------------
  */
@@ -525,4 +639,3 @@ H5Lunpack_elink_val(const void *_ext_linkval, size_t link_size,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Lunpack_elink_val() */
-

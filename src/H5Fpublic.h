@@ -97,28 +97,22 @@
 #define H5F_MPIO_DEBUG_KEY "H5F_mpio_debug_key"
 #endif /* H5_HAVE_PARALLEL */
 
-/* The difference between a single file and a set of mounted files */
+/** The difference between a single file and a set of mounted files */
 typedef enum H5F_scope_t {
-    H5F_SCOPE_LOCAL    = 0,    /*specified file handle only        */
-    H5F_SCOPE_GLOBAL    = 1     /*entire virtual file            */
+    H5F_SCOPE_LOCAL    = 0,    /**< specified file handle only        */
+    H5F_SCOPE_GLOBAL   = 1     /**< entire virtual file            */
 } H5F_scope_t;
 
-/* Unlimited file size for H5Pset_external() */
+/** Unlimited file size for H5Pset_external() */
 #define H5F_UNLIMITED    ((hsize_t)(-1L))
 
-/* How does file close behave?
- * H5F_CLOSE_DEFAULT - Use the degree pre-defined by underlining VFL
- * H5F_CLOSE_WEAK    - file closes only after all opened objects are closed
- * H5F_CLOSE_SEMI    - if no opened objects, file is close; otherwise, file
-            close fails
- * H5F_CLOSE_STRONG  - if there are opened objects, close them first, then
-            close file
+/** How does file close behave?
  */
 typedef enum H5F_close_degree_t {
-    H5F_CLOSE_DEFAULT   = 0,
-    H5F_CLOSE_WEAK      = 1,
-    H5F_CLOSE_SEMI      = 2,
-    H5F_CLOSE_STRONG    = 3
+    H5F_CLOSE_DEFAULT   = 0, /**< Use the degree pre-defined by underlining VFL */
+    H5F_CLOSE_WEAK      = 1, /**< File closes only after all opened objects are closed */
+    H5F_CLOSE_SEMI      = 2, /**< If no opened objects, file is close; otherwise, file close fails */
+    H5F_CLOSE_STRONG    = 3  /**< If there are opened objects, close them first, then close file */
 } H5F_close_degree_t;
 
 /* Current "global" information about file */
@@ -318,4 +312,3 @@ H5_DLL htri_t H5Fis_hdf5(const char *filename);
 }
 #endif
 #endif /* _H5Fpublic_H */
-

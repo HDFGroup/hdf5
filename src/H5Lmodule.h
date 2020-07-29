@@ -29,6 +29,10 @@
 #define H5_MY_PKG_ERR   H5E_LINK
 #define H5_MY_PKG_INIT  YES
 
+/**\defgroup H5L H5L: Link Interface
+   The Link interface, H5L, functions create and manipulate links in an HDF5
+   group. This interface includes functions that enable the creation and use
+   of user-defined link classes.
+ */
+
 #endif /* _H5Lmodule_H */
-
-

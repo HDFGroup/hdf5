@@ -291,13 +291,13 @@ H5_GCC_DIAG_ON(long-long)
 #   error "nothing appropriate for uint64_t"
 #endif
 
-/* Common iteration orders */
+/** Common iteration orders */
 typedef enum {
-    H5_ITER_UNKNOWN = -1,       /* Unknown order */
-    H5_ITER_INC,                /* Increasing order */
-    H5_ITER_DEC,                /* Decreasing order */
-    H5_ITER_NATIVE,             /* No particular order, whatever is fastest */
-    H5_ITER_N                /* Number of iteration orders */
+    H5_ITER_UNKNOWN = -1,      /**< Unknown order */
+    H5_ITER_INC,               /**< Increasing order */
+    H5_ITER_DEC,               /**< Decreasing order */
+    H5_ITER_NATIVE,            /**< No particular order, whatever is fastest */
+    H5_ITER_N                  /**< Number of iteration orders */
 } H5_iter_order_t;
 
 /* Iteration callback values */
@@ -308,19 +308,19 @@ typedef enum {
 #define H5_ITER_CONT    (0)
 #define H5_ITER_STOP    (1)
 
-/*
+/**
  * The types of indices on links in groups/attributes on objects.
  * Primarily used for "<do> <foo> by index" routines and for iterating over
  * links in groups/attributes on objects.
  */
 typedef enum H5_index_t {
-    H5_INDEX_UNKNOWN = -1,    /* Unknown index type            */
-    H5_INDEX_NAME,        /* Index on names             */
-    H5_INDEX_CRT_ORDER,        /* Index on creation order         */
-    H5_INDEX_N            /* Number of indices defined         */
+    H5_INDEX_UNKNOWN = -1,    /**< Unknown index type                */
+    H5_INDEX_NAME,            /**< Index on names                    */
+    H5_INDEX_CRT_ORDER,       /**< Index on creation order           */
+    H5_INDEX_N                /**< Number of indices defined         */
 } H5_index_t;
 
-/*
+/**
  * Storage info struct used by H5O_info_t and H5F_info_t
  */
 typedef struct H5_ih_info_t {
@@ -331,26 +331,26 @@ typedef struct H5_ih_info_t {
 /* Tokens are unique and permanent identifiers that are
  * used to reference HDF5 objects in a container. */
 
-/* The maximum size allowed for tokens */
+/** The maximum size allowed for tokens */
 #define H5O_MAX_TOKEN_SIZE      (16)    /* Allows for 128-bit tokens */
 
-/* Type for object tokens */
+/** Type for object tokens */
 /* (Hoisted here, since it's used by both the H5Lpublic.h and H5Opublic.h headers) */
 typedef struct H5O_token_t {
     uint8_t __data[H5O_MAX_TOKEN_SIZE];
 } H5O_token_t;
 
-/*
+/**
  * Allocation statistics info struct
  */
 typedef struct H5_alloc_stats_t {
-    unsigned long long total_alloc_bytes; /* Running count of total # of bytes allocated */
-    size_t curr_alloc_bytes;           /* Current # of bytes allocated */
-    size_t peak_alloc_bytes;           /* Peak # of bytes allocated */
-    size_t max_block_size;             /* Largest block allocated */
-    size_t total_alloc_blocks_count;   /* Running count of total # of blocks allocated */
-    size_t curr_alloc_blocks_count;    /* Current # of blocks allocated */
-    size_t peak_alloc_blocks_count;    /* Peak # of blocks allocated */
+    unsigned long long total_alloc_bytes; /**< Running count of total # of bytes allocated */
+    size_t curr_alloc_bytes;           /**< Current # of bytes allocated */
+    size_t peak_alloc_bytes;           /**< Peak # of bytes allocated */
+    size_t max_block_size;             /**< Largest block allocated */
+    size_t total_alloc_blocks_count;   /**< Running count of total # of blocks allocated */
+    size_t curr_alloc_blocks_count;    /**< Current # of blocks allocated */
+    size_t peak_alloc_blocks_count;    /**< Peak # of blocks allocated */
 } H5_alloc_stats_t;
 
 /* Functions in H5.c */
@@ -377,5 +377,3 @@ H5_DLL void *H5resize_memory(void *mem, size_t size);
 }
 #endif
 #endif /* _H5public_H */
-
-

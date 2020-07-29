@@ -1,0 +1,9 @@
+ALIASES += Bold{1}="<b>\1</b>"
+ALIASES += Emph{1}="<em>\1</em>"
+ALIASES += Code{1}="<tt>\1</tt>"
+
+ALIASES += success{1}="\Bold{Success:} \1"
+ALIASES += failure{1}="\Bold{Failure:} \1"
+
+ALIASES += herr_t="Returns a non-negative value if successful; otherwise returns a negative value."
+ALIASES += hid_t{1}="Returns a \1 identifier if successful; otherwise returns a negative value. "

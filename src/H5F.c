@@ -725,22 +725,96 @@ done:
 } /* end H5Fcreate() */
 
 
-/*-------------------------------------------------------------------------
- * Function:    H5Fopen
+/**\ingroup H5F
  *
- * Purpose:     This is the primary function for accessing existing HDF5
- *              files.  The FLAGS argument determines whether writing to an
- *              existing file will be allowed or not.  All flags may be
- *              combined with the bit-wise OR operator (`|') to change the
- *              behavior of the file open call.  The more complex behaviors
- *              of a file's access are controlled through the file-access
- *              property list.
+ * \brief Opens an existing HDF5 file
  *
- * See Also:    H5Fpublic.h for a list of possible values for FLAGS.
+ * \param[in] filename Name of the file to be opened
+ * \param[in] flags    File access flags. Allowable values are:
+ *                     - #H5F_ACC_RDWR: Allows read and write access to file
+ *                     - #H5F_ACC_RDONLY: Allows read-only access to file
+ *                     - #H5F_ACC_RDWR \c | #H5F_ACC_SWMR_WRITE: Indicates that
+ *                       the file is open for writing in a
+ *                       single-writer/multi-writer (SWMR) scenario.
+ *                     - #H5F_ACC_RDONLY \c | #H5F_ACC_SWMR_READ:  Indicates
+ *                       that the file is open for reading in a
+ *                       single-writer/multi-reader (SWMR) scenario.
+ *                     - An additional flag, #H5F_ACC_DEBUG, prints debug
+ *                       information. This flag can be combined with one of the
+ *                       above values using the bit-wise OR operator (\c |), but
+ *                       it is used only by HDF5 library developers;
+ *                       \Emph{it is neither tested nor supported} for use in
+ *                       applications.
+ * \param[in] fapl_id  Identifier for the file access properties list. If
+ *                     parallel file access is desired, this is a collective
+ *                     call according to the communicator stored in the
+ *                     \p fapl_id. Use #H5P_DEFAULT for default file access
+ *                     properties.
+ * \return \hid_t{file}
  *
- * Return:      Success:    A file ID
+ * \details H5Fopen() is the primary function for accessing existing HDF5 files.
+ *          This function opens the named file in the specified access mode and
+ *          with the specified access property list.
  *
- *              Failure:    H5I_INVALID_HID
+ *          Note that H5Fopen() does not create a file if it does not already
+ *          exist; see H5Fcreate().
+ *
+ *          The \p filename parameter specifies the name of the file to be
+ *          opened.
+ *
+ *          The \p fapl_id parameter specifies the file access property list.
+ *          Use of #H5P_DEFAULT specifies that default I/O access properties
+ *          are to be used.
+ *
+ *          The \p flags parameter specifies whether the file will be opened in
+ *          read-write or read-only mode, #H5F_ACC_RDWR or #H5F_ACC_RDONLY,
+ *          respectively. More complex behaviors of file access are controlled
+ *          through the file-access property list.
+ *
+ *          The return value is a file identifier for the open file; this file
+ *          identifier should be closed by calling H5Fclose() when it is no
+ *          longer needed.
+ *
+ * \note  #H5F_ACC_RDWR and #H5F_ACC_RDONLY are mutually exclusive; use
+ *        exactly one.
+ *
+ * \attention \Bold{Special cases — Multiple opens:} A file can often be opened
+ *            with a new H5Fopen() call without closing an already-open
+ *            identifier established in a previous H5Fopen() or H5Fcreate()
+ *            call. Each such H5Fopen() call will return a unique identifier
+ *            and the file can be accessed through any of these identifiers as
+ *            long as the identifier remains valid. In such multiply-opened
+ *            cases, the open calls must use the same flags argument and the
+ *            file access property lists must use the same file close degree
+ *            property setting (see the external link discussion below and
+ *            H5Pset_fclose_degree()).\n
+ *            In some cases, such as files on a local Unix file system, the
+ *            HDF5 library can detect that a file is multiply opened and will
+ *            maintain coherent access among the file identifiers.\n
+ *            But in many other cases, such as parallel file systems or
+ *            networked file systems, it is not always possible to detect
+ *            multiple opens of the same physical file. In such cases, HDF5
+ *            will treat the file identifiers as though they are accessing
+ *            different files and will be unable to maintain coherent access.
+ *            Errors are likely to result in these cases. While unlikely, the
+ *            HDF5 library may not be able to detect, and thus report,
+ *            such errors.\n
+ *            It is generally recommended that applications avoid multiple
+ *            opens of the same file.
+ *
+ * \attention \Bold{Special restriction on multiple opens of a file first
+ *            opened by means of an external link:} When an external link is
+ *            followed, the external file is always opened with the weak file
+ *            close degree property setting, #H5F_CLOSE_WEAK (see
+ *            H5Lcreate_external() and H5Pset_fclose_degree()). If the file is
+ *            reopened with H5Fopen while it remains held open from such an
+ *            external link call, the file access property list used in the
+ *            open call must include the file close degree setting
+ *            #H5F_CLOSE_WEAK or the open will fail.
+ *
+ * \version 1.10.0 The #H5F_ACC_SWMR_WRITE and #H5F_ACC_SWMR_READ flags were added.
+ *
+ * \see H5Fclose()
  *
  *-------------------------------------------------------------------------
  */
@@ -852,18 +926,51 @@ done:
 } /* end H5Fflush() */
 
 
-/*-------------------------------------------------------------------------
- * Function:    H5Fclose
+/** \example H5Fclose.c
+ *           After creating an HDF5 file with H5Fcreate(), we close it with
+ *           H5Fclose().
+ */
+/**\ingroup H5F
  *
- * Purpose:     This function closes the file specified by FILE_ID by
- *              flushing all data to storage, and terminating access to the
- *              file through FILE_ID.  If objects (e.g., datasets, groups,
- *              etc.) are open in the file then the underlying storage is not
- *              closed until those objects are closed; however, all data for
- *              the file and the open objects is flushed.
+ * \brief Terminates access to an HDF5 file
  *
- * Return:      Success:    Non-negative
- *              Failure:    Negative
+ * \param[in] file_id Identifier of a file to terminate access to
+ * \return \herr_t
+ *
+ * \details H5Fclose() terminates access to an HDF5 file (specified by
+ *          \p file_id) by flushing all data to storage.
+ *
+ *          If this is the last file identifier open for the file and no other
+ *          access identifier is open (e.g., a dataset identifier, group
+ *          identifier, or shared datatype identifier), the file will be fully
+ *          closed and access will end.
+ *
+ *          Use H5Fclose() as shown in the following example:
+ * \include H5Fclose.c
+ *
+ * \note \Bold{Delayed close:} Note the following deviation from the
+ *       above-described behavior. If H5Fclose() is called for a file but one
+ *       or more objects within the file remain open, those objects will remain
+ *       accessible until they are individually closed. Thus, if the dataset
+ *       \c data_sample is open when H5Fclose() is called for the file
+ *       containing it, \c data_sample will remain open and accessible
+ *       (including writable) until it is explicitly closed. The file will be
+ *       automatically closed once all objects in the file have been closed.\n
+ *       Be warned, however, that there are circumstances where it is not
+ *       possible to delay closing a file. For example, an MPI-IO file close is
+ *       a collective call; all of the processes that opened the file must
+ *       close it collectively. The file cannot be closed at some time in the
+ *       future by each process in an independent fashion. Another example is
+ *       that an application using an AFS token-based file access privilege may
+ *       destroy its AFS token after H5Fclose() has returned successfully. This
+ *       would make any future access to the file, or any object within it,
+ *       illegal.\n
+ *       In such situations, applications must close all open objects in a file
+ *       before calling H5Fclose. It is generally recommended to do so in all
+ *       cases.
+ *
+ * \see H5Fopen()
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2067,4 +2174,3 @@ H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fset_dset_no_attrs_hint */
-

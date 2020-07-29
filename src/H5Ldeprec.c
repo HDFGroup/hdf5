@@ -50,7 +50,7 @@
 /* Local Typedefs */
 /******************/
 
-/* Shim data for using native H5Literate/visit callbacks with the VOL */
+/** Shim data for using native H5Literate/visit callbacks with the VOL */
 typedef struct H5L_shim_data_t {
     H5L_iterate1_t   real_op;
     void            *real_op_data;
@@ -126,23 +126,74 @@ done:
 } /* end H5L__iterate2_shim() */
 
 
-/*-------------------------------------------------------------------------
- * Function:    H5Literate1
+/**\ingroup H5L
  *
- * Purpose:     Iterates over links in a group, with user callback routine,
- *              according to the order within an index.
+ * \brief Iterates over links in a group, with user callback routine,
+ *        according to the order within an index.
  *
- *              Same pattern of behavior as H5Giterate.
+ * \param[in]     group_id The group ID to iterate over
+ * \param[in]     idx_type The index type
+ * \param[in]     order    Specifies the order how to iterate
+ * \param[in,out] idx_p    Pointer to an iteration index to allow
+ *                         continuing a previous iteration
+ * \param[in]     op       Function pointer for a callback operation to be
+ *                         invoked at each iteration
+ * \param[in,out] op_data  User-defined data structure that will be passed
+ *                         on to the callback function
+ * \return \success{The return value of the first operator that returns
+ *                  non-zero, or zero if all members were processed with no
+ *                  operator returning non-zero.}
+ * \return \failure{Negative if an error occurs in the library, or the negative
+ *                  value returned by one of the operators.}
  *
- * Note:        Deprecated in favor of H5Literate2
+ * \deprecated Deprecated in favor of H5Literate2().
  *
- * Return:      Success:    The return value of the first operator that
- *                          returns non-zero, or zero if all members were
- *                          processed with no operator returning non-zero.
+ * \details H5Literate1() iterates through the links in a file or
+ *          group, \p group_id, in the order of the specified
+ *          index, \p idx_type, using a user-defined callback routine
+ *          \p op. H5Literate1() does not recursively follow links into
+ *          subgroups of the specified group.
  *
- *              Failure:    Negative if something goes wrong within the
- *                          library, or the negative value returned by one
- *                          of the operators.
+ *          Three parameters are used to manage progress of the iteration:
+ *          \p idx_type, \p order, and \p idx_p.
+ *
+ *          \p idx_type specifies the index to be used. If the links have
+ *          not been indexed by the index type, they will first be sorted by
+ *          that index then the iteration will begin; if the links have been
+ *          so indexed, the sorting step will be unnecessary, so the iteration
+ *          may begin more quickly.
+ *
+ *          \p order specifies the order in which objects are to be inspected
+ *          along the index \p idx_type.
+ *
+ *          \p idx_p tracks the iteration and allows an iteration to be
+ *          resumed if it was stopped before all members were processed. It is
+ *          passed in by the application with a starting point and returned by
+ *          the library with the point at which the iteration stopped.
+ *
+ *          \p op_data is a user-defined pointer to the data required to
+ *          process links in the course of the iteration. This pointer is
+ *          passed back to each step of the iteration in the \p op callback
+ *          function's \p op_data parameter. \p op is invoked for each link
+ *          encounter.
+ *
+ *          \p op_data is passed to and from each iteration and can be used to
+ *          supply or aggregate information across iterations.
+ *
+ * \remark Same pattern of behavior as H5Giterate().
+ *
+ * \note This function is also available through the H5Literate() macro.
+ *
+ * \warning The behavior of H5Literate1() is undefined if the link
+ *          membership of \p group_id changes during the iteration.
+ *          This does not limit the ability to change link destinations
+ *          while iterating, but caution is advised.
+ *
+ *
+ * \version 1.12.0 Function was deprecated in this release.
+ * \since 1.8.0 Function was introduced in this release.
+ *
+ * \see H5Literate_by_name2(), H5Lvisit2(), H5Lvisit_by_name2()
  *
  *-------------------------------------------------------------------------
  */
@@ -625,4 +676,3 @@ done:
 } /* end H5Lvisit_by_name1() */
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-
