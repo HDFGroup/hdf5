@@ -19,7 +19,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include files in /src directory and /tools/lib directory
-AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
+AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib
 
 # Test programs and scripts
 TEST_PROG=h5dumpgentest

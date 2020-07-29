@@ -60,7 +60,7 @@ main(int argc, char *argv[])
     dname = HDstrdup(argv[2]);
 
     /* Try opening the file */
-    if((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0) {
+    if((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, FALSE, NULL, (size_t)0)) < 0) {
 	HDfprintf(stderr, "h5fc_chk_idx: unable to open the file\n");
 	HDexit(EXIT_FAILURE);
     } /* end if */

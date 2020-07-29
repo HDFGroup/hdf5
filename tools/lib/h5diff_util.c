@@ -211,7 +211,7 @@ diff_basename(const char *name)
  * Purpose:  Returns the type as a string
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE H5_ATTR_CONST const char*
+H5_ATTR_CONST const char*
 get_type(h5trav_type_t type)
 {
     switch(type) {
@@ -242,7 +242,7 @@ get_type(h5trav_type_t type)
  * Purpose:  Returns the sign as a string
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE const char*
+H5_ATTR_CONST const char*
 get_sign(H5T_sign_t sign)
 {
     switch(sign) {
@@ -270,7 +270,7 @@ get_sign(H5T_sign_t sign)
  * Purpose:  Returns the class as a string
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE const char*
+H5_ATTR_CONST const char*
 get_class(H5T_class_t tclass)
 {
     switch(tclass) {

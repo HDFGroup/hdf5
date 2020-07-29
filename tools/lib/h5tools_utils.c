@@ -1048,7 +1048,7 @@ h5tools_getenv_update_hyperslab_bufsize(void)
 {
     const char *env_str = NULL;
     long hyperslab_bufsize_mb;
-    int ret_value = 1;
+    int  ret_value = 1;
 
     /* check if environment variable is set for the hyperslab buffer size */
     if (NULL != (env_str = HDgetenv ("H5TOOLS_BUFSIZE"))) {
@@ -1064,6 +1064,55 @@ h5tools_getenv_update_hyperslab_bufsize(void)
     }
 
 done:
+    return ret_value;
+}
+
+#ifdef H5_HAVE_ROS3_VFD
+/*----------------------------------------------------------------------------
+ *
+ * Function: h5tools_parse_ros3_fapl_tuple
+ *
+ * Purpose:  A convenience function that parses a string containing a tuple
+ *           of S3 VFD credential information and then passes the result to
+ *           `h5tools_populate_ros3_fapl()` in order to setup a valid
+ *           configuration for the S3 VFD.
+ *
+ * Return:   SUCCEED/FAIL
+ *
+ *----------------------------------------------------------------------------
+ */
+herr_t
+h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim,
+    H5FD_ros3_fapl_t *fapl_config_out)
+{
+    const char  *ccred[3];
+    unsigned     nelems     = 0;
+    char        *start      = NULL;
+    char        *s3cred_src = NULL;
+    char       **s3cred     = NULL;
+    herr_t       ret_value  = SUCCEED;
+
+    /* Attempt to parse S3 credentials tuple */
+    if (parse_tuple(tuple_str, delim, &s3cred_src, &nelems, &s3cred) < 0)
+        H5TOOLS_GOTO_ERROR(FAIL, "failed to parse S3 VFD info tuple");
+
+    /* Sanity-check tuple count */
+    if (nelems != 3)
+        H5TOOLS_GOTO_ERROR(FAIL, "invalid S3 VFD credentials");
+
+    ccred[0] = (const char *)s3cred[0];
+    ccred[1] = (const char *)s3cred[1];
+    ccred[2] = (const char *)s3cred[2];
+
+    if (0 == h5tools_populate_ros3_fapl(fapl_config_out, ccred))
+        H5TOOLS_GOTO_ERROR(FAIL, "failed to populate S3 VFD FAPL config");
+
+done:
+    if (s3cred)
+        HDfree(s3cred);
+    if (s3cred_src)
+        HDfree(s3cred_src);
+
     return ret_value;
 }
 
@@ -1130,7 +1179,6 @@ done:
  *
  *----------------------------------------------------------------------------
  */
-#ifdef H5_HAVE_ROS3_VFD
 int
 h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t  *fa,
                            const char       **values)
@@ -1254,73 +1302,72 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t  *fa,
 
 done:
     return ret_value;
-
 } /* h5tools_populate_ros3_fapl */
 #endif /* H5_HAVE_ROS3_VFD */
 
-
-/*-----------------------------------------------------------------------------
- *
- * Function: h5tools_set_configured_fapl
- *
- * Purpose: prepare fapl_id with the given property list, according to
- *          VFD prototype.
- *
- * Return: 0 on failure, 1 on success
- *
- * Programmer: Jacob Smith
- *             2018-05-21
- *
- * Changes: None.
- *
- *-----------------------------------------------------------------------------
- */
-int
-h5tools_set_configured_fapl(hid_t      fapl_id,
-                           const char  vfd_name[],
-                           void       *fapl_t_ptr)
-{
-    int ret_value = 1;
-
-    if (fapl_id < 0) {
-        return 0;
-    }
-
-    if (!strcmp("", vfd_name)) {
-        goto done;
-
-#ifdef H5_HAVE_ROS3_VFD
-    } else if (!strcmp("ros3", vfd_name)) {
-        if ((fapl_id == H5P_DEFAULT) ||
-            (fapl_t_ptr == NULL) ||
-            (FAIL == H5Pset_fapl_ros3(
-                fapl_id,
-                (H5FD_ros3_fapl_t *)fapl_t_ptr)))
-        {
-            ret_value = 0;
-            goto done;
-        }
-#endif /* H5_HAVE_ROS3_VFD */
-
 #ifdef H5_HAVE_LIBHDFS
-    } else if (!strcmp("hdfs", vfd_name)) {
-        if ((fapl_id == H5P_DEFAULT) ||
-            (fapl_t_ptr == NULL) ||
-            (FAIL == H5Pset_fapl_hdfs(
-                fapl_id,
-                (H5FD_hdfs_fapl_t *)fapl_t_ptr)))
-        {
-            ret_value = 0;
-            goto done;
-        }
-#endif /* H5_HAVE_LIBHDFS */
+/*----------------------------------------------------------------------------
+ *
+ * Function: h5tools_parse_hdfs_fapl_tuple
+ *
+ * Purpose:  A convenience function that parses a string containing a tuple
+ *           of HDFS VFD configuration information.
+ *
+ * Return:   SUCCEED/FAIL
+ *
+ *----------------------------------------------------------------------------
+ */
+herr_t
+h5tools_parse_hdfs_fapl_tuple(const char *tuple_str, int delim,
+    H5FD_hdfs_fapl_t *fapl_config_out)
+{
+    unsigned long   k         = 0;
+    unsigned        nelems    = 0;
+    char           *props_src = NULL;
+    char          **props     = NULL;
+    herr_t          ret_value = SUCCEED;
 
-    } else {
-        ret_value = 0; /* unrecognized fapl type "name" */
+    /* Attempt to parse HDFS configuration tuple */
+    if (parse_tuple(tuple_str, delim, &props_src, &nelems, &props) < 0)
+        H5TOOLS_GOTO_ERROR(FAIL, "failed to parse HDFS VFD configuration tuple");
+
+    /* Sanity-check tuple count */
+    if (nelems != 5)
+        H5TOOLS_GOTO_ERROR(FAIL, "invalid HDFS VFD configuration");
+
+    /* Populate fapl configuration structure with given properties.
+     * WARNING: No error-checking is done on length of input strings...
+     *          Silent overflow is possible, albeit unlikely.
+     */
+    if (HDstrncmp(props[0], "", 1)) {
+        HDstrncpy(fapl_config_out->namenode_name, (const char *)props[0], HDstrlen(props[0]));
+    }
+    if (HDstrncmp(props[1], "", 1)) {
+        k = strtoul((const char *)props[1], NULL, 0);
+        if (errno == ERANGE)
+            H5TOOLS_GOTO_ERROR(FAIL, "supposed port number wasn't");
+        fapl_config_out->namenode_port = (int32_t)k;
+    }
+    if (HDstrncmp(props[2], "", 1)) {
+        HDstrncpy(fapl_config_out->kerberos_ticket_cache, (const char *)props[2], HDstrlen(props[2]));
+    }
+    if (HDstrncmp(props[3], "", 1)) {
+        HDstrncpy(fapl_config_out->user_name, (const char *)props[3], HDstrlen(props[3]));
+    }
+    if (HDstrncmp(props[4], "", 1)) {
+        k = HDstrtoul((const char *)props[4], NULL, 0);
+        if (errno == ERANGE)
+            H5TOOLS_GOTO_ERROR(FAIL, "supposed buffersize number wasn't");
+        fapl_config_out->stream_buffer_size = (int32_t)k;
     }
 
 done:
-    return ret_value;
+    if (props)
+        HDfree(props);
+    if (props_src)
+        HDfree(props_src);
 
-} /* h5tools_set_configured_fapl() */
+    return ret_value;
+}
+#endif /* H5_HAVE_LIBHDFS */
 

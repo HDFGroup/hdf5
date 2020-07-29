@@ -21,7 +21,7 @@ include $(top_srcdir)/config/commence.am
 SUBDIRS=vds
 
 # Include src directory
-AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
+AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib
 
 #test scripts and programs
 TEST_PROG=h5repart_gentest h5clear_gentest talign
