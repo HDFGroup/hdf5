@@ -66,10 +66,10 @@
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/non_comparables2.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/tudfilter.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/tudfilter2.h5
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/diff_strings1.h5
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/diff_strings2.h5
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/diff_eps1.h5
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/diff_eps2.h5
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_strings1.h5
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_strings2.h5
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_eps1.h5
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_eps2.h5
       # tools/testfiles/vds
       ${HDF5_TOOLS_DIR}/testfiles/vds/1_a.h5
       ${HDF5_TOOLS_DIR}/testfiles/vds/1_b.h5
@@ -542,11 +542,11 @@
   set (ATTR_VERBOSE_LEVEL_FILE1 h5diff_attr_v_level1.h5)
   set (ATTR_VERBOSE_LEVEL_FILE2 h5diff_attr_v_level2.h5)
   # strings
-  set (STRINGS1 diff_strings1.h5)
-  set (STRINGS2 diff_strings2.h5)
+  set (STRINGS1 h5diff_strings1.h5)
+  set (STRINGS2 h5diff_strings2.h5)
   # epsilon
-  set (EPS1 diff_eps1.h5)
-  set (EPS2 diff_eps2.h5)
+  set (EPS1 h5diff_eps1.h5)
+  set (EPS2 h5diff_eps2.h5)
 
 # VDS tests
   set (FILEV1 1_vds.h5)
