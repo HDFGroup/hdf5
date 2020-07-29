@@ -120,10 +120,10 @@ $SRC_H5DIFF_TESTFILES/h5diff_attr_v_level2.h5
 $SRC_H5DIFF_TESTFILES/h5diff_enum_invalid_values.h5
 $SRC_H5DIFF_TESTFILES/non_comparables1.h5
 $SRC_H5DIFF_TESTFILES/non_comparables2.h5
-$SRC_H5DIFF_TESTFILES/diff_strings1.h5
-$SRC_H5DIFF_TESTFILES/diff_strings2.h5
-$SRC_H5DIFF_TESTFILES/diff_eps1.h5
-$SRC_H5DIFF_TESTFILES/diff_eps2.h5
+$SRC_H5DIFF_TESTFILES/h5diff_strings1.h5
+$SRC_H5DIFF_TESTFILES/h5diff_strings2.h5
+$SRC_H5DIFF_TESTFILES/h5diff_eps1.h5
+$SRC_H5DIFF_TESTFILES/h5diff_eps2.h5
 $SRC_TOOLS_TESTFILES/tvlstr.h5
 "
 
@@ -723,10 +723,10 @@ TOOLTEST h5diff_59.txt -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset11a dset11b
 
 # Strings
 # ( HDFFV-10128 )
-TOOLTEST h5diff_60.txt -v diff_strings1.h5 diff_strings2.h5 string1 string1
-TOOLTEST h5diff_61.txt -v diff_strings1.h5 diff_strings2.h5 string2 string2
-TOOLTEST h5diff_62.txt -v diff_strings1.h5 diff_strings2.h5 string3 string3
-TOOLTEST h5diff_63.txt -v diff_strings1.h5 diff_strings2.h5 string4 string4
+TOOLTEST h5diff_60.txt -v h5diff_strings1.h5 h5diff_strings2.h5 string1 string1
+TOOLTEST h5diff_61.txt -v h5diff_strings1.h5 h5diff_strings2.h5 string2 string2
+TOOLTEST h5diff_62.txt -v h5diff_strings1.h5 h5diff_strings2.h5 string3 string3
+TOOLTEST h5diff_63.txt -v h5diff_strings1.h5 h5diff_strings2.h5 string4 string4
 
 # ##############################################################################
 # # Error messages
@@ -770,7 +770,7 @@ TOOLTEST h5diff_609.txt -d 200 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dse
 TOOLTEST h5diff_610.txt -d 1 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4
 
 # eps: number smaller than epsilon
-TOOLTEST h5diff_eps.txt -v3 -d 1e-16 diff_eps1.h5 diff_eps2.h5
+TOOLTEST h5diff_eps.txt -v3 -d 1e-16 h5diff_eps1.h5 h5diff_eps2.h5
 
 
 # ##############################################################################
