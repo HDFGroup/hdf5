@@ -3,8 +3,8 @@ file2: h5diff_eps2.h5
 
 file1     file2
 ---------------------------------------
-    x      x    /
-    x      x    /DS1
+    x      x    /              
+    x      x    /DS1           
 
 
 group  : </> and </>
