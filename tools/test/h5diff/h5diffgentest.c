@@ -94,11 +94,11 @@ size_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
 #define NON_COMPARBLES1 "non_comparables1.h5"
 #define NON_COMPARBLES2 "non_comparables2.h5"
 /* string dataset and attribute */
-#define DIFF_STRINGS1 "diff_strings1.h5"
-#define DIFF_STRINGS2 "diff_strings2.h5"
+#define DIFF_STRINGS1 "h5diff_strings1.h5"
+#define DIFF_STRINGS2 "h5diff_strings2.h5"
 /* double dataset and epsilon */
-#define DIFF_EPS1 "diff_eps1.h5"
-#define DIFF_EPS2 "diff_eps2.h5"
+#define DIFF_EPS1 "h5diff_eps1.h5"
+#define DIFF_EPS2 "h5diff_eps2.h5"
 
 #define UIMAX    4294967295u /*Maximum value for a variable of type unsigned int */
 #define STR_SIZE 3
