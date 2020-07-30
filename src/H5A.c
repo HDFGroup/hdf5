@@ -242,16 +242,21 @@ H5A_term_package(void)
  *
  * \brief Creates an attribute attached to a specified object
  *
- * \param[in]  loc_id  Location or object identifier
- *                     The identifier may be a file, group, dataset, or named datatype.
- *                     If \p loc_id is a file identifier, the attribute will be attached to that file’s root group.           
- * \param[in] attr_name Name of attribute to locate and open
- * \param[in] type_id   Attribute datatype identifier
- * \param[in] space_id  Attribute dataspace identifier
- * \param[in] acpl_id   Attribute creation property list identifier
- *                      (Currently not used; specify H5P_DEFAULT)
- * \param[in] aapl_id   Attribute access property list identifier 
+ * \param[in]  loc_id    Location or object identifier
+ *                       The identifier may be a file, group, dataset, or named datatype.
+ *                       If \p loc_id is a file identifier, the attribute will be attached
+ *                       to that file’s root group.
+ * \param[in] attr_name  Name of attribute to locate and open
+ * \param[in] type_id    Attribute datatype identifier
+ * \param[in] space_id   Attribute dataspace identifier
+ * \param[in] acpl_id    Attribute creation property list identifier
+ *                       (Currently not used; specify H5P_DEFAULT)
+ * \param[in] aapl_id    Attribute access property list identifier 
+ *                       (Currently not used; specify H5P_DEFAULT)
+ *
  * \return \hid_t{attribute}
+ * \return An attribute identifier if successful; otherwise returns a negative value.
+ *
  * \details H5Acreate2() creates an attribute, attr_name, which is attached to the object 
  *          specified by the identifier \p loc_id.
  *
@@ -271,9 +276,11 @@ H5A_term_package(void)
  *          The attribute identifier returned by this function must be released with H5Aclose()
  *          or resource leaks will develop.
  *
- * \version 1.8.0 C function introduced in this release.
+ * \example ../example/h5_crtatt.c
  *
  * \see H5Aclose()
+ *
+ * \since 1.8.0
  *
  * --------------------------------------------------------------------------
  */
@@ -454,6 +461,34 @@ done:
 } /* H5Acreate_by_name() */
 
 
+/**\ingroup H5A
+ *
+ * \brief Opens an attribute for an object specified by object identifier and attribute name
+ *
+ * \param[in]  obj_id     Identifier for object to which attribute is attached; may be a file,
+ *                        group, dataset, or named datatype
+ * \param[in]  attr_name  Name of attribute to open
+ * \param[in]  aapl_id    Attribute access property list
+ *
+ * \return \hid_t {attribute}
+ *               Returns an attribute identifier if successful; 
+ *               otherwise returns a negative value.                       
+ *
+ * \details H5Aopen() opens an existing attribute, \p attr_name, that is attached to 
+ *          an object specified by an object identifier, \p obj_id.
+ *
+ *          The attribute access property list, \p aapl_id, is currently unused and 
+ *          should be H5P_DEFAULT.
+ *
+ *          This function, H5Aopen_by_idx() or H5Aopen_by_name() must be called before
+ *          an attribute can be accessed for any further purpose, including reading, 
+ *          writing, or any modification.
+ *
+ *          The attribute identifier returned by this function must be released with
+ *          H5Aclose() or resource leaks will develop.
+ * 
+ * \since 1.8.0
+ */
 /*--------------------------------------------------------------------------
  NAME
     H5Aopen
@@ -681,6 +716,40 @@ done:
 } /* H5Aopen_by_idx() */
 
 
+/*--------------------------------------------------------------------------*/
+
+/**\ingroup H5A
+ *
+ * \brief Writes data to an attribute
+ *
+ * \param[in]   attr_id   Identifier of an attribute to write
+ * \param[in]   dtype_id  Identifier of the attribute datatype (in memory)
+ * \param[out]  buf       Data to be written
+ *
+ * \return \herr_t 
+ *         Returns a non-negative value if successful; 
+ *         otherwise returns a negative value.
+ *
+ * \details H5Awrite() writes an attribute, specified with \p attr_id. The 
+ *          attribute's memory datatype is specified with \p dtype_id. 
+ *          The entire attribute is written from \p buf to the file.
+ *
+ *          If \p dtype_id is either a fixed-length or variable-length string, 
+ *          it is important to set the string length when defining the datatype. 
+ *          String datatypes are derived from H5T_C_S1 (or H5T_FORTRAN_S1 for 
+ *          Fortran codes), which defaults to 1 character in size. See H5Tset_size()
+ *          and Creating variable-length string datatypes.
+ *
+ *          Datatype conversion takes place at the time of a read or write and
+ *          is automatic. See the “Data Transfer: Datatype Conversion and Selection”
+ *          section in the “HDF5 Datatypes” chapter of the HDF5 User’s Guide for a
+ *          discussion of data conversion.
+ *
+ * \version 1.8.8   Fortran updated to Fortran2003.
+ * \version 1.4.2   Fortran \p dims parameter added in this release 
+ * \since 1.0.0
+ * 
+ */
 /*--------------------------------------------------------------------------
  NAME
     H5Awrite
@@ -727,6 +796,32 @@ done:
 } /* H5Awrite() */
 
 
+
+/*-------------------------------------------------------------------------- */
+
+/**\ingroup H5A
+ *
+ * \brief Reads an attribute
+ *
+ * \param[in]  attr_id      Identifier of an attribute to read
+ * \param[in]  mem_type_id  Identifier of the attribute datatype (in memory)
+ * \param[out] buf          Buffer for data to be read
+ *
+ * \details H5Aread() reads an attribute, specified with \p attr_id. The attribute's memory datatype 
+ *          is specified with \p mem_type_id. The entire attribute is read into \p buf from the file.
+ *
+ *          Datatype conversion takes place at the time of a read or write and is automatic. See the 
+ *          “Data Transfer: Datatype Conversion and Selection” section in the “HDF5 Datatypes” 
+ *          chapter of the HDF5 User’s Guide for a discussion of data conversion.
+ *
+ * \return \herr_t 
+ *         Returns a non-negative value if successful; otherwise returns a negative value.
+ *
+ * \version 1.8.8  Fortran updated to Fortran2003.
+ * \version 1.4.2  The \p dims parameter was added to the Fortran API in this release.
+ * \since   1.0.0
+ * 
+*/
 /*--------------------------------------------------------------------------
  NAME
     H5Aread
@@ -1667,6 +1762,30 @@ done:
 } /* H5Adelete_by_idx() */
 
 
+/*-------------------------------------------------------------------------*/
+ 
+/**\ingroup H5A
+ *
+ * \brief Closes the specified attribute
+ *
+ * \param[in] attr_id   Attribute to release access to
+ *
+ * \return \herr_t      Returns a non-negative value if successful; otherwise returns a 
+ *                      negative value. 
+ *
+ * \details H5Aclose() terminates access to the attribute specified by attr_id by releasing 
+ *          the identifier.
+ *
+ *          Further use of a released attribute identifier is illegal; a function using such 
+ *          an identifier will fail.
+ *
+ * \example ../example/h5_crtatt.c
+ *
+ * \since 1.0.0 
+ *
+ * --------------------------------------------------------------------------
+ */
+
 /*-------------------------------------------------------------------------
  * Function:    H5Aclose
  *
