@@ -2416,7 +2416,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 
     HDfprintf(stderr, "         id = %" PRIdHID "\n", item->id);
     HDfprintf(stderr, "         count = %u\n", item->count);
-    HDfprintf(stderr, "         obj   = 0x%08p\n", item->obj_ptr);
+    HDfprintf(stderr, "         obj   = 0x%8p\n", item->obj_ptr);
 
     /* Get the group location, so we get get the name */
     switch (type) {
