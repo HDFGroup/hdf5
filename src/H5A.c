@@ -238,6 +238,7 @@ H5A_term_package(void)
 } /* H5A_term_package() */
 
 
+/* --------------------------------------------------------------------------*/
 /**\ingroup H5A 
  *
  * \brief Creates an attribute attached to a specified object
@@ -275,8 +276,6 @@ H5A_term_package(void)
  *
  *          The attribute identifier returned by this function must be released with H5Aclose()
  *          or resource leaks will develop.
- *
- * \example ../example/h5_crtatt.c
  *
  * \see H5Aclose()
  *
@@ -465,10 +464,10 @@ done:
  *
  * \brief Opens an attribute for an object specified by object identifier and attribute name
  *
- * \param[in]  obj_id     Identifier for object to which attribute is attached; may be a file,
- *                        group, dataset, or named datatype
- * \param[in]  attr_name  Name of attribute to open
- * \param[in]  aapl_id    Attribute access property list
+ * \param[in]  loc_id       Identifier for object to which attribute is attached; may be a
+ *                          file, group, dataset, or named datatype
+ * \param[in]  attr_name    Name of attribute to open
+ * \param[in]  aapl_id      Attribute access property list
  *
  * \return \hid_t {attribute}
  *               Returns an attribute identifier if successful; 
@@ -807,15 +806,15 @@ done:
  * \param[in]  mem_type_id  Identifier of the attribute datatype (in memory)
  * \param[out] buf          Buffer for data to be read
  *
+ * \return \herr_t 
+ *         Returns a non-negative value if successful; otherwise returns a negative value.
+ *
  * \details H5Aread() reads an attribute, specified with \p attr_id. The attribute's memory datatype 
  *          is specified with \p mem_type_id. The entire attribute is read into \p buf from the file.
  *
  *          Datatype conversion takes place at the time of a read or write and is automatic. See the 
  *          “Data Transfer: Datatype Conversion and Selection” section in the “HDF5 Datatypes” 
  *          chapter of the HDF5 User’s Guide for a discussion of data conversion.
- *
- * \return \herr_t 
- *         Returns a non-negative value if successful; otherwise returns a negative value.
  *
  * \version 1.8.8  Fortran updated to Fortran2003.
  * \version 1.4.2  The \p dims parameter was added to the Fortran API in this release.
@@ -1763,7 +1762,6 @@ done:
 
 
 /*-------------------------------------------------------------------------*/
- 
 /**\ingroup H5A
  *
  * \brief Closes the specified attribute
@@ -1773,17 +1771,14 @@ done:
  * \return \herr_t      Returns a non-negative value if successful; otherwise returns a 
  *                      negative value. 
  *
- * \details H5Aclose() terminates access to the attribute specified by attr_id by releasing 
+ * \details H5Aclose() terminates access to the attribute specified by \p attr_id by releasing 
  *          the identifier.
  *
  *          Further use of a released attribute identifier is illegal; a function using such 
  *          an identifier will fail.
  *
- * \example ../example/h5_crtatt.c
- *
  * \since 1.0.0 
  *
- * --------------------------------------------------------------------------
  */
 
 /*-------------------------------------------------------------------------
