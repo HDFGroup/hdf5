@@ -1236,7 +1236,7 @@ test_reader_md_concur(void)
         /* Set up the VFD SWMR configuration as reader + page buffering */
         fapl_reader = init_vfd_swmr_config_fapl(config_reader, 1, 3, FALSE, 256, MD_FILENAME, FS_PAGE_SIZE);
         if(fapl_reader == H5I_INVALID_HID)
-            FAIL_STACK_ERROR;
+            HDexit(EXIT_FAILURE);
 
         /* Open the test file as reader */
         if((fid_reader = H5Fopen(FILENAME, H5F_ACC_RDONLY, fapl_reader)) < 0)
