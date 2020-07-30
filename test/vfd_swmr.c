@@ -618,9 +618,9 @@ test_file_end_tick(void)
         TEST_ERROR;
 
      /* Get file pointer for the 3 files */
-    f1 = (H5F_t *)H5VL_object(fid1);
-    f2 = (H5F_t *)H5VL_object(fid2);
-    f3 = (H5F_t *)H5VL_object(fid3);
+    f1 = H5VL_object(fid1);
+    f2 = H5VL_object(fid2);
+    f3 = H5VL_object(fid3);
 
     /* Saved tick_num for the 3 files */
     s1 = f1->shared->tick_num;
@@ -1244,7 +1244,7 @@ test_reader_md_concur(void)
             HDexit(EXIT_FAILURE);
 
         /* Get file pointer */
-        file_reader = (H5F_t *)H5VL_object(fid_reader);
+        file_reader = H5VL_object(fid_reader);
 
         /* Read and verify header and an empty index in the metadata file */
         if(H5FD__vfd_swmr_reader_md_test(file_reader->shared->lf, 0, NULL) < 0)
@@ -1277,15 +1277,13 @@ test_reader_md_concur(void)
         if(child_num_entries) {
 
             /* Allocate memory for num_entries index */
-            if((child_index = (H5FD_vfd_swmr_idx_entry_t *)
-                          HDcalloc(child_num_entries, 
-                                   sizeof(H5FD_vfd_swmr_idx_entry_t))) == NULL)
+            if((child_index = HDcalloc(child_num_entries,
+                                   sizeof(*child_index))) == NULL)
                 HDexit(EXIT_FAILURE);
 
             /* Read index from writer pipe */
             if(HDread(parent_pfd[0], child_index, 
-                     child_num_entries * sizeof(H5FD_vfd_swmr_idx_entry_t)) < 0)
-
+                     child_num_entries * sizeof(*child_index)) < 0)
                 HDexit(EXIT_FAILURE);
         }
 
@@ -1516,7 +1514,7 @@ test_reader_md_concur(void)
     }
 
     /* Get the file pointer */
-    file_writer = (H5F_t *)H5VL_object(fid_writer);
+    file_writer = H5VL_object(fid_writer);
 
     /* Update the metadata file with the index */
     if(H5F_update_vfd_swmr_metadata_file(file_writer, num_entries, index) < 0)
@@ -1926,7 +1924,7 @@ test_multiple_file_opens_concur(void)
         FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f1 = (H5F_t *)H5VL_object(fid1)))
+    if(NULL == (f1 = H5VL_object(fid1)))
         FAIL_STACK_ERROR
 
     /* Head of EOT queue should be a writer */
@@ -1965,7 +1963,7 @@ test_multiple_file_opens_concur(void)
         FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f2 = (H5F_t *)H5VL_object(fid2)))
+    if(NULL == (f2 = H5VL_object(fid2)))
         FAIL_STACK_ERROR
 
     /* Head of EOT queue should NOT be a writer */
@@ -2196,7 +2194,7 @@ test_disable_enable_eot_concur(void)
             HDexit(EXIT_FAILURE);
 
         /* Get file pointer */
-        file_reader = (H5F_t *)H5VL_object(fid_reader2);
+        file_reader = H5VL_object(fid_reader2);
 
         /* Should not find the second opened file on the EOT queue */
         TAILQ_FOREACH(curr, &eot_queue_g, link) {
@@ -2450,9 +2448,9 @@ test_file_end_tick_concur(void)
             HDexit(EXIT_FAILURE);
 
         /* Get file pointer */
-        f1 = (H5F_t *)H5VL_object(fid_reader1);
-        f2 = (H5F_t *)H5VL_object(fid_reader2);
-        f3 = (H5F_t *)H5VL_object(fid_reader3);
+        f1 = H5VL_object(fid_reader1);
+        f2 = H5VL_object(fid_reader2);
+        f3 = H5VL_object(fid_reader3);
 
         /* Saved tick_num for the 3 files */
         s1 = f1->shared->tick_num;
@@ -2643,7 +2641,7 @@ test_multiple_file_opens(void)
         TEST_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5VL_object(fid)))
+    if(NULL == (f = H5VL_object(fid)))
         FAIL_STACK_ERROR
 
     /* Verify the global vfd_swmr_writer_g is not set */
@@ -2658,7 +2656,7 @@ test_multiple_file_opens(void)
         TEST_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f1 = (H5F_t *)H5VL_object(fid1)))
+    if(NULL == (f1 = H5VL_object(fid1)))
         FAIL_STACK_ERROR
 
     /* Head of EOT queue should be a writer */
@@ -2673,7 +2671,7 @@ test_multiple_file_opens(void)
         TEST_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f2 = (H5F_t *)H5VL_object(fid2)))
+    if(NULL == (f2 = H5VL_object(fid2)))
         FAIL_STACK_ERROR
 
     /* Head of EOT queue should be a writer */
@@ -3236,7 +3234,7 @@ test_enable_disable_eot(void)
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f1 = (H5F_t *)H5VL_object(fid1)))
+    if(NULL == (f1 = H5VL_object(fid1)))
         FAIL_STACK_ERROR
 
     /* Should not find file 1 on the EOT queue */
@@ -3255,7 +3253,7 @@ test_enable_disable_eot(void)
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f2 = (H5F_t *)H5VL_object(fid2)))
+    if(NULL == (f2 = H5VL_object(fid2)))
         FAIL_STACK_ERROR
 
     /* File 2 should be on the EOT queue */
@@ -3275,7 +3273,7 @@ test_enable_disable_eot(void)
         TEST_ERROR
 
     /* Get a pointer to the internal file object for file 3 */
-    if(NULL == (f3 = (H5F_t *)H5VL_object(fid3)))
+    if(NULL == (f3 = H5VL_object(fid3)))
         FAIL_STACK_ERROR
 
     /* File 3 should not exist on the EOT queue */

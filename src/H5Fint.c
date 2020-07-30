@@ -1582,7 +1582,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
 
     /* Allocate space for VFD SWMR configuration info */
-    if(NULL == (vfd_swmr_config_ptr = (H5F_vfd_swmr_config_t *)H5MM_calloc(sizeof(H5F_vfd_swmr_config_t))))
+    if(NULL == (vfd_swmr_config_ptr = H5MM_calloc(sizeof(H5F_vfd_swmr_config_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate memory for mdc log file name")
 
     /* Get VFD SWMR configuration */
