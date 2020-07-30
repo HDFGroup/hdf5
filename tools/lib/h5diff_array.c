@@ -134,7 +134,7 @@ typedef struct mcomp_t {
  */
 static hbool_t all_zero(const void *_mem, size_t size);
 static int ull2float(unsigned long long ull_value, float *f_value);
-static hsize_t character_compare(char *mem1, char *mem2, hsize_t elemtno, ssize_t u, diff_opt_t *opts);
+static hsize_t character_compare(char *mem1, char *mem2, hsize_t elemtno, size_t u, diff_opt_t *opts);
 static hsize_t character_compare_opt(unsigned char *mem1, unsigned char *mem2, hsize_t elemtno, diff_opt_t *opts);
 static hbool_t equal_float(float value, float expected, diff_opt_t *opts);
 static hbool_t equal_double(double value, double expected, diff_opt_t *opts);
@@ -143,7 +143,7 @@ static hbool_t equal_ldouble(long double value, long double expected, diff_opt_t
 #endif
 
 static int print_data(diff_opt_t *opts);
-static void print_pos(diff_opt_t *opts, hsize_t elemtno, ssize_t u);
+static void print_pos(diff_opt_t *opts, hsize_t elemtno, size_t u);
 static void h5diff_print_char(char ch);
 
 static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t region2_id, diff_opt_t *opts);
@@ -679,7 +679,7 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
                      */
                     nfound += 1;
                     opts->print_percentage = 0;
-                    print_pos(opts, elemtno, -1);
+                    print_pos(opts, elemtno, 0);
                     if (print_data(opts)) {
                         parallel_print(S_FORMAT, enum_name1, enum_name2);
                     }
@@ -689,7 +689,7 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
                     if (HDstrcmp(enum_name1, enum_name2) != 0) {
                         nfound = 1;
                         opts->print_percentage = 0;
-                        print_pos(opts, elemtno, -1);
+                        print_pos(opts, elemtno, 0);
                         if (print_data(opts)) {
                             parallel_print(S_FORMAT, enum_name1, enum_name2);
                         }
@@ -1322,7 +1322,7 @@ done:
  *-------------------------------------------------------------------------
  */
 
-static hsize_t character_compare(char *mem1, char *mem2, hsize_t elemtno, ssize_t u, diff_opt_t *opts)
+static hsize_t character_compare(char *mem1, char *mem2, hsize_t elemtno, size_t u, diff_opt_t *opts)
 {
     hsize_t nfound = 0; /* differences found */
     char    temp1_uchar;
@@ -1335,6 +1335,7 @@ static hsize_t character_compare(char *mem1, char *mem2, hsize_t elemtno, ssize_
     if (temp1_uchar != temp2_uchar) {
         if (print_data(opts)) {
             opts->print_percentage = 0;
+            opts->print_dims = 1;
             print_pos(opts, elemtno, u);
             parallel_print("  ");
             h5diff_print_char(temp1_uchar);
@@ -1374,7 +1375,7 @@ static hsize_t character_compare_opt(unsigned char *mem1, unsigned char *mem2, h
     if (opts->delta_bool && !opts->percent_bool) {
         if (PDIFF(temp1_uchar,temp2_uchar) > opts->delta) {
             opts->print_percentage = 0;
-            print_pos(opts, elemtno, -1);
+            print_pos(opts, elemtno, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT, temp1_uchar, temp2_uchar, PDIFF(temp1_uchar, temp2_uchar));
             }
@@ -1386,7 +1387,7 @@ static hsize_t character_compare_opt(unsigned char *mem1, unsigned char *mem2, h
         PER_UNSIGN(signed char, temp1_uchar, temp2_uchar);
         if (per > opts->percent) {
             opts->print_percentage = 1;
-            print_pos(opts, elemtno, -1);
+            print_pos(opts, elemtno, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT_P, temp1_uchar, temp2_uchar, PDIFF(temp1_uchar, temp2_uchar), per);
             }
@@ -1398,7 +1399,7 @@ static hsize_t character_compare_opt(unsigned char *mem1, unsigned char *mem2, h
         PER_UNSIGN(signed char, temp1_uchar, temp2_uchar);
         if (per > opts->percent && PDIFF(temp1_uchar,temp2_uchar) > opts->delta) {
             opts->print_percentage = 1;
-            print_pos(opts, elemtno, -1);
+            print_pos(opts, elemtno, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT_P, temp1_uchar, temp2_uchar, PDIFF(temp1_uchar, temp2_uchar), per);
             }
@@ -1407,7 +1408,7 @@ static hsize_t character_compare_opt(unsigned char *mem1, unsigned char *mem2, h
     }
     else if (temp1_uchar != temp2_uchar) {
         opts->print_percentage = 0;
-        print_pos(opts, elemtno, -1);
+        print_pos(opts, elemtno, 0);
         if (print_data(opts)) {
             parallel_print(I_FORMAT, temp1_uchar, temp2_uchar, PDIFF(temp1_uchar, temp2_uchar));
         }
@@ -1462,7 +1463,7 @@ static hsize_t diff_float_element(unsigned char *mem1, unsigned char *mem2, hsiz
         if (!isnan1 && !isnan2) {
             if ((double) ABS(temp1_float - temp2_float) > opts->delta) {
                 opts->print_percentage = 0;
-                print_pos(opts, elem_idx, -1);
+                print_pos(opts, elem_idx, 0);
                 if (print_data(opts)) {
                     parallel_print(F_FORMAT, (double) temp1_float, (double) temp2_float, (double) ABS(temp1_float - temp2_float));
                 }
@@ -1472,7 +1473,7 @@ static hsize_t diff_float_element(unsigned char *mem1, unsigned char *mem2, hsiz
         /* only one is NaN, assume difference */
         else if ((isnan1 && !isnan2) || (!isnan1 && isnan2)) {
             opts->print_percentage = 0;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(F_FORMAT, (double) temp1_float, (double) temp2_float, (double) ABS(temp1_float - temp2_float));
             }
@@ -1498,7 +1499,7 @@ static hsize_t diff_float_element(unsigned char *mem1, unsigned char *mem2, hsiz
 
             if (not_comparable && !both_zero) {
                 opts->print_percentage = 1;
-                print_pos(opts, elem_idx, -1);
+                print_pos(opts, elem_idx, 0);
                 if (print_data(opts)) {
                     parallel_print(F_FORMAT_P_NOTCOMP, (double) temp1_float, (double) temp2_float, (double) ABS(temp1_float - temp2_float));
                 }
@@ -1506,7 +1507,7 @@ static hsize_t diff_float_element(unsigned char *mem1, unsigned char *mem2, hsiz
             }
             else if (per > opts->percent) {
                 opts->print_percentage = 1;
-                print_pos(opts, elem_idx, -1);
+                print_pos(opts, elem_idx, 0);
                 if (print_data(opts)) {
                     parallel_print(F_FORMAT_P, (double) temp1_float, (double) temp2_float,
                             (double) ABS(temp1_float - temp2_float), (double) ABS(1 - temp2_float / temp1_float));
@@ -1517,7 +1518,7 @@ static hsize_t diff_float_element(unsigned char *mem1, unsigned char *mem2, hsiz
         /* only one is NaN, assume difference */
         else if ((isnan1 && !isnan2) || (!isnan1 && isnan2)) {
             opts->print_percentage = 0;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(F_FORMAT, (double) temp1_float, (double) temp2_float, (double) ABS(temp1_float - temp2_float));
             }
@@ -1544,7 +1545,7 @@ static hsize_t diff_float_element(unsigned char *mem1, unsigned char *mem2, hsiz
 
             if (not_comparable && !both_zero) {
                 opts->print_percentage = 1;
-                print_pos(opts, elem_idx, -1);
+                print_pos(opts, elem_idx, 0);
                 if (print_data(opts)) {
                     parallel_print(F_FORMAT_P_NOTCOMP, (double) temp1_float, (double) temp2_float, (double) ABS(temp1_float - temp2_float));
                 }
@@ -1552,7 +1553,7 @@ static hsize_t diff_float_element(unsigned char *mem1, unsigned char *mem2, hsiz
             }
             else if (per > opts->percent && (double) ABS(temp1_float - temp2_float) > opts->delta) {
                 opts->print_percentage = 1;
-                print_pos(opts, elem_idx, -1);
+                print_pos(opts, elem_idx, 0);
                 if (print_data(opts)) {
                     parallel_print(F_FORMAT_P, (double) temp1_float, (double) temp2_float,
                             (double) ABS(temp1_float - temp2_float), (double) ABS(1 - temp2_float / temp1_float));
@@ -1563,7 +1564,7 @@ static hsize_t diff_float_element(unsigned char *mem1, unsigned char *mem2, hsiz
         /* only one is NaN, assume difference */
         else if ((isnan1 && !isnan2) || (!isnan1 && isnan2)) {
             opts->print_percentage = 0;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(F_FORMAT, (double) temp1_float, (double) temp2_float, (double) ABS(temp1_float - temp2_float));
             }
@@ -1577,7 +1578,7 @@ static hsize_t diff_float_element(unsigned char *mem1, unsigned char *mem2, hsiz
     else {
         if (equal_float(temp1_float, temp2_float, opts) == FALSE) {
             opts->print_percentage = 0;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(F_FORMAT, (double) temp1_float, (double) temp2_float, (double) ABS(temp1_float - temp2_float));
             }
@@ -1630,7 +1631,7 @@ static hsize_t diff_double_element(unsigned char *mem1, unsigned char *mem2, hsi
         if (!isnan1 && !isnan2) {
             if (ABS(temp1_double-temp2_double) > opts->delta) {
                 opts->print_percentage = 0;
-                print_pos(opts, elem_idx, -1);
+                print_pos(opts, elem_idx, 0);
                 if (print_data(opts)) {
                     parallel_print(F_FORMAT, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
                 }
@@ -1640,7 +1641,7 @@ static hsize_t diff_double_element(unsigned char *mem1, unsigned char *mem2, hsi
         /* only one is NaN, assume difference */
         else if ((isnan1 && !isnan2) || (!isnan1 && isnan2)) {
             opts->print_percentage = 0;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(F_FORMAT, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
             }
@@ -1667,7 +1668,7 @@ static hsize_t diff_double_element(unsigned char *mem1, unsigned char *mem2, hsi
 
             if (not_comparable && !both_zero) {
                 opts->print_percentage = 1;
-                print_pos(opts, elem_idx, -1);
+                print_pos(opts, elem_idx, 0);
                 if (print_data(opts)) {
                     parallel_print(F_FORMAT_P_NOTCOMP, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
                 }
@@ -1675,7 +1676,7 @@ static hsize_t diff_double_element(unsigned char *mem1, unsigned char *mem2, hsi
             }
             else if (per > opts->percent) {
                 opts->print_percentage = 1;
-                print_pos(opts, elem_idx, -1);
+                print_pos(opts, elem_idx, 0);
                 if (print_data(opts)) {
                     parallel_print(F_FORMAT_P, temp1_double, temp2_double,
                             ABS(temp1_double - temp2_double), ABS(1 - temp2_double / temp1_double));
@@ -1686,7 +1687,7 @@ static hsize_t diff_double_element(unsigned char *mem1, unsigned char *mem2, hsi
         /* only one is NaN, assume difference */
         else if ((isnan1 && !isnan2) || (!isnan1 && isnan2)) {
             opts->print_percentage = 0;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(F_FORMAT, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
             }
@@ -1713,7 +1714,7 @@ static hsize_t diff_double_element(unsigned char *mem1, unsigned char *mem2, hsi
 
             if (not_comparable && !both_zero)  {
                 opts->print_percentage = 1;
-                print_pos(opts, elem_idx, -1);
+                print_pos(opts, elem_idx, 0);
                 if (print_data(opts)) {
                     parallel_print(F_FORMAT_P_NOTCOMP, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
                 }
@@ -1721,7 +1722,7 @@ static hsize_t diff_double_element(unsigned char *mem1, unsigned char *mem2, hsi
             }
             else if (per > opts->percent && ABS(temp1_double-temp2_double) > opts->delta) {
                 opts->print_percentage = 1;
-                print_pos(opts, elem_idx, -1);
+                print_pos(opts, elem_idx, 0);
                 if (print_data(opts)) {
                     parallel_print(F_FORMAT_P, temp1_double, temp2_double,
                             ABS(temp1_double - temp2_double), ABS(1 - temp2_double / temp1_double));
@@ -1732,7 +1733,7 @@ static hsize_t diff_double_element(unsigned char *mem1, unsigned char *mem2, hsi
         /* only one is NaN, assume difference */
         else if ((isnan1 && !isnan2) || (!isnan1 && isnan2)) {
             opts->print_percentage = 0;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(F_FORMAT, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
             }
@@ -1746,7 +1747,7 @@ static hsize_t diff_double_element(unsigned char *mem1, unsigned char *mem2, hsi
     else {
         if (equal_double(temp1_double, temp2_double, opts) == FALSE) {
             opts->print_percentage = 0;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(F_FORMAT, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
             }
@@ -1803,7 +1804,7 @@ static hsize_t diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hs
         if (!isnan1 && !isnan2) {
             if (ABS(temp1_double-temp2_double) > opts->delta) {
                 opts->print_percentage = 0;
-                print_pos(opts, elem_idx, -1);
+                print_pos(opts, elem_idx, 0);
                 if (print_data(opts)) {
                     parallel_print(LD_FORMAT, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
                 }
@@ -1813,7 +1814,7 @@ static hsize_t diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hs
         /* only one is NaN, assume difference */
         else if ((isnan1 && !isnan2) || (!isnan1 && isnan2)) {
             opts->print_percentage = 0;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(F_FORMAT, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
             }
@@ -1840,7 +1841,7 @@ static hsize_t diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hs
 
             if (not_comparable && !both_zero) {
                 opts->print_percentage = 1;
-                print_pos(opts, elem_idx, -1);
+                print_pos(opts, elem_idx, 0);
                 if (print_data(opts)) {
                     parallel_print(LD_FORMAT_P_NOTCOMP, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
                 }
@@ -1848,7 +1849,7 @@ static hsize_t diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hs
             }
             else if (per > opts->percent) {
                 opts->print_percentage = 1;
-                print_pos(opts, elem_idx, -1);
+                print_pos(opts, elem_idx, 0);
                 if (print_data(opts)) {
                     parallel_print(LD_FORMAT_P, temp1_double, temp2_double, ABS(temp1_double - temp2_double), ABS(1 - temp2_double / temp1_double));
                 }
@@ -1858,7 +1859,7 @@ static hsize_t diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hs
         /* only one is NaN, assume difference */
         else if ((isnan1 && !isnan2) || (!isnan1 && isnan2)) {
             opts->print_percentage = 0;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(F_FORMAT, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
             }
@@ -1885,7 +1886,7 @@ static hsize_t diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hs
 
             if (not_comparable && !both_zero) {
                 opts->print_percentage = 1;
-                print_pos(opts, elem_idx, -1);
+                print_pos(opts, elem_idx, 0);
                 if (print_data(opts)) {
                     parallel_print(LD_FORMAT_P_NOTCOMP, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
                 }
@@ -1893,7 +1894,7 @@ static hsize_t diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hs
             }
             else if (per > opts->percent && ABS(temp1_double-temp2_double) > opts->delta) {
                 opts->print_percentage = 1;
-                print_pos(opts, elem_idx, -1);
+                print_pos(opts, elem_idx, 0);
                 if (print_data(opts)) {
                     parallel_print(LD_FORMAT_P, temp1_double, temp2_double, ABS(temp1_double - temp2_double), ABS(1 - temp2_double / temp1_double));
                 }
@@ -1903,7 +1904,7 @@ static hsize_t diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hs
         /* only one is NaN, assume difference */
         else if ((isnan1 && !isnan2) || (!isnan1 && isnan2)) {
             opts->print_percentage = 0;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(F_FORMAT, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
             }
@@ -1916,7 +1917,7 @@ static hsize_t diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hs
      */
     else if (equal_ldouble(temp1_double, temp2_double, opts) == FALSE) {
         opts->print_percentage = 0;
-        print_pos(opts, elem_idx, -1);
+        print_pos(opts, elem_idx, 0);
         if (print_data(opts)) {
             parallel_print(LD_FORMAT, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
         }
@@ -1953,7 +1954,7 @@ static hsize_t diff_schar_element(unsigned char *mem1, unsigned char *mem2, hsiz
     if (opts->delta_bool && !opts->percent_bool) {
         if (ABS(temp1_char-temp2_char) > opts->delta) {
             opts->print_percentage = 0;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT, temp1_char, temp2_char, ABS(temp1_char - temp2_char));
             }
@@ -1966,7 +1967,7 @@ static hsize_t diff_schar_element(unsigned char *mem1, unsigned char *mem2, hsiz
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT_P_NOTCOMP, temp1_char, temp2_char, ABS(temp1_char - temp2_char));
             }
@@ -1974,7 +1975,7 @@ static hsize_t diff_schar_element(unsigned char *mem1, unsigned char *mem2, hsiz
         }
         else if (per > opts->percent) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT_P, temp1_char, temp2_char, ABS(temp1_char - temp2_char), per);
             }
@@ -1987,7 +1988,7 @@ static hsize_t diff_schar_element(unsigned char *mem1, unsigned char *mem2, hsiz
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT_P_NOTCOMP, temp1_char, temp2_char, ABS(temp1_char - temp2_char));
             }
@@ -1995,7 +1996,7 @@ static hsize_t diff_schar_element(unsigned char *mem1, unsigned char *mem2, hsiz
         }
         else if (per > opts->percent && ABS(temp1_char - temp2_char) > opts->delta) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT_P, temp1_char, temp2_char, ABS(temp1_char - temp2_char), per);
             }
@@ -2004,7 +2005,7 @@ static hsize_t diff_schar_element(unsigned char *mem1, unsigned char *mem2, hsiz
     }
     else if (temp1_char != temp2_char) {
         opts->print_percentage = 0;
-        print_pos(opts, elem_idx, -1);
+        print_pos(opts, elem_idx, 0);
         if (print_data(opts)) {
             parallel_print(I_FORMAT, temp1_char, temp2_char, ABS(temp1_char - temp2_char));
         }
@@ -2040,7 +2041,7 @@ static hsize_t diff_uchar_element(unsigned char *mem1, unsigned char *mem2, hsiz
     if (opts->delta_bool && !opts->percent_bool) {
         if (PDIFF(temp1_uchar, temp2_uchar) > opts->delta) {
             opts->print_percentage = 0;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT, temp1_uchar, temp2_uchar, PDIFF(temp1_uchar, temp2_uchar));
             }
@@ -2053,7 +2054,7 @@ static hsize_t diff_uchar_element(unsigned char *mem1, unsigned char *mem2, hsiz
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT_P_NOTCOMP, temp1_uchar, temp2_uchar, PDIFF(temp1_uchar, temp2_uchar));
             }
@@ -2061,7 +2062,7 @@ static hsize_t diff_uchar_element(unsigned char *mem1, unsigned char *mem2, hsiz
         }
         else if (per > opts->percent) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT_P, temp1_uchar, temp2_uchar, PDIFF(temp1_uchar, temp2_uchar), per);
             }
@@ -2074,7 +2075,7 @@ static hsize_t diff_uchar_element(unsigned char *mem1, unsigned char *mem2, hsiz
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT_P_NOTCOMP, temp1_uchar, temp2_uchar, PDIFF(temp1_uchar, temp2_uchar));
             }
@@ -2082,7 +2083,7 @@ static hsize_t diff_uchar_element(unsigned char *mem1, unsigned char *mem2, hsiz
         }
         else if (per > opts->percent && PDIFF(temp1_uchar, temp2_uchar) > opts->delta) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT_P, temp1_uchar, temp2_uchar, PDIFF(temp1_uchar, temp2_uchar), per);
             }
@@ -2091,7 +2092,7 @@ static hsize_t diff_uchar_element(unsigned char *mem1, unsigned char *mem2, hsiz
     }
     else if (temp1_uchar != temp2_uchar) {
         opts->print_percentage = 0;
-        print_pos(opts, elem_idx, -1);
+        print_pos(opts, elem_idx, 0);
         if (print_data(opts)) {
             parallel_print(I_FORMAT, temp1_uchar, temp2_uchar, PDIFF(temp1_uchar, temp2_uchar));
         }
@@ -2127,7 +2128,7 @@ static hsize_t diff_short_element(unsigned char *mem1, unsigned char *mem2, hsiz
     if (opts->delta_bool && !opts->percent_bool) {
         if (ABS(temp1_short - temp2_short) > opts->delta) {
             opts->print_percentage = 0;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT, temp1_short, temp2_short, ABS(temp1_short - temp2_short));
             }
@@ -2140,7 +2141,7 @@ static hsize_t diff_short_element(unsigned char *mem1, unsigned char *mem2, hsiz
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT_P_NOTCOMP, temp1_short, temp2_short, ABS(temp1_short - temp2_short));
             }
@@ -2148,7 +2149,7 @@ static hsize_t diff_short_element(unsigned char *mem1, unsigned char *mem2, hsiz
         }
         else if (per > opts->percent) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT_P, temp1_short, temp2_short, ABS(temp1_short - temp2_short), per);
             }
@@ -2161,7 +2162,7 @@ static hsize_t diff_short_element(unsigned char *mem1, unsigned char *mem2, hsiz
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT_P_NOTCOMP, temp1_short, temp2_short, ABS(temp1_short - temp2_short));
             }
@@ -2169,7 +2170,7 @@ static hsize_t diff_short_element(unsigned char *mem1, unsigned char *mem2, hsiz
         }
         else if (per > opts->percent && ABS(temp1_short - temp2_short) > opts->delta) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT_P, temp1_short, temp2_short, ABS(temp1_short - temp2_short), per);
             }
@@ -2178,7 +2179,7 @@ static hsize_t diff_short_element(unsigned char *mem1, unsigned char *mem2, hsiz
     }
     else if (temp1_short != temp2_short) {
         opts->print_percentage = 0;
-        print_pos(opts, elem_idx, -1);
+        print_pos(opts, elem_idx, 0);
         if (print_data(opts)) {
             parallel_print(I_FORMAT, temp1_short, temp2_short, ABS(temp1_short - temp2_short));
         }
@@ -2214,7 +2215,7 @@ static hsize_t diff_ushort_element(unsigned char *mem1, unsigned char *mem2, hsi
     if (opts->delta_bool && !opts->percent_bool) {
         if (PDIFF(temp1_ushort, temp2_ushort) > opts->delta) {
             opts->print_percentage = 0;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT, temp1_ushort, temp2_ushort, PDIFF(temp1_ushort, temp2_ushort));
             }
@@ -2227,7 +2228,7 @@ static hsize_t diff_ushort_element(unsigned char *mem1, unsigned char *mem2, hsi
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT_P_NOTCOMP, temp1_ushort, temp2_ushort, PDIFF(temp1_ushort, temp2_ushort));
             }
@@ -2235,7 +2236,7 @@ static hsize_t diff_ushort_element(unsigned char *mem1, unsigned char *mem2, hsi
         }
         else if (per > opts->percent) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT_P, temp1_ushort, temp2_ushort, PDIFF(temp1_ushort, temp2_ushort), per);
             }
@@ -2248,7 +2249,7 @@ static hsize_t diff_ushort_element(unsigned char *mem1, unsigned char *mem2, hsi
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT_P_NOTCOMP, temp1_ushort, temp2_ushort, PDIFF(temp1_ushort, temp2_ushort));
             }
@@ -2256,7 +2257,7 @@ static hsize_t diff_ushort_element(unsigned char *mem1, unsigned char *mem2, hsi
         }
         else if (per > opts->percent && PDIFF(temp1_ushort, temp2_ushort) > opts->delta) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT_P, temp1_ushort, temp2_ushort, PDIFF(temp1_ushort, temp2_ushort), per);
             }
@@ -2265,7 +2266,7 @@ static hsize_t diff_ushort_element(unsigned char *mem1, unsigned char *mem2, hsi
     }
     else if (temp1_ushort != temp2_ushort) {
         opts->print_percentage = 0;
-        print_pos(opts, elem_idx, -1);
+        print_pos(opts, elem_idx, 0);
         if (print_data(opts)) {
             parallel_print(I_FORMAT, temp1_ushort, temp2_ushort, PDIFF(temp1_ushort, temp2_ushort));
         }
@@ -2301,7 +2302,7 @@ static hsize_t diff_int_element(unsigned char *mem1, unsigned char *mem2, hsize_
     if (opts->delta_bool && !opts->percent_bool) {
         if (ABS(temp1_int-temp2_int) > opts->delta) {
             opts->print_percentage = 0;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT, temp1_int, temp2_int, ABS(temp1_int - temp2_int));
             }
@@ -2314,7 +2315,7 @@ static hsize_t diff_int_element(unsigned char *mem1, unsigned char *mem2, hsize_
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT_P_NOTCOMP, temp1_int, temp2_int, ABS(temp1_int - temp2_int));
             }
@@ -2322,7 +2323,7 @@ static hsize_t diff_int_element(unsigned char *mem1, unsigned char *mem2, hsize_
         }
         else if (per > opts->percent) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT_P, temp1_int, temp2_int, ABS(temp1_int - temp2_int), per);
             }
@@ -2335,7 +2336,7 @@ static hsize_t diff_int_element(unsigned char *mem1, unsigned char *mem2, hsize_
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT_P_NOTCOMP, temp1_int, temp2_int, ABS(temp1_int - temp2_int));
             }
@@ -2343,7 +2344,7 @@ static hsize_t diff_int_element(unsigned char *mem1, unsigned char *mem2, hsize_
         }
         else if (per > opts->percent && ABS(temp1_int - temp2_int) > opts->delta) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(I_FORMAT_P, temp1_int, temp2_int, ABS(temp1_int - temp2_int), per);
             }
@@ -2352,7 +2353,7 @@ static hsize_t diff_int_element(unsigned char *mem1, unsigned char *mem2, hsize_
     }
     else if (temp1_int != temp2_int) {
         opts->print_percentage = 0;
-        print_pos(opts, elem_idx, -1);
+        print_pos(opts, elem_idx, 0);
         if (print_data(opts)) {
             parallel_print(I_FORMAT, temp1_int, temp2_int, ABS(temp1_int - temp2_int));
         }
@@ -2388,7 +2389,7 @@ static hsize_t diff_uint_element(unsigned char *mem1, unsigned char *mem2, hsize
     if (opts->delta_bool && !opts->percent_bool) {
         if (PDIFF(temp1_uint, temp2_uint) > opts->delta) {
             opts->print_percentage = 0;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(UI_FORMAT, temp1_uint, temp2_uint, PDIFF(temp1_uint, temp2_uint));
             }
@@ -2401,7 +2402,7 @@ static hsize_t diff_uint_element(unsigned char *mem1, unsigned char *mem2, hsize
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(UI_FORMAT_P_NOTCOMP, temp1_uint, temp2_uint, PDIFF(temp1_uint, temp2_uint));
             }
@@ -2409,7 +2410,7 @@ static hsize_t diff_uint_element(unsigned char *mem1, unsigned char *mem2, hsize
         }
         else if (per > opts->percent) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(UI_FORMAT_P, temp1_uint, temp2_uint, PDIFF(temp1_uint, temp2_uint), per);
             }
@@ -2422,7 +2423,7 @@ static hsize_t diff_uint_element(unsigned char *mem1, unsigned char *mem2, hsize
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(UI_FORMAT_P_NOTCOMP, temp1_uint, temp2_uint, PDIFF(temp1_uint, temp2_uint));
             }
@@ -2430,7 +2431,7 @@ static hsize_t diff_uint_element(unsigned char *mem1, unsigned char *mem2, hsize
         }
         else if (per > opts->percent && PDIFF(temp1_uint,temp2_uint) > opts->delta) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(UI_FORMAT_P, temp1_uint, temp2_uint, PDIFF(temp1_uint, temp2_uint), per);
             }
@@ -2439,7 +2440,7 @@ static hsize_t diff_uint_element(unsigned char *mem1, unsigned char *mem2, hsize
     }
     else if (temp1_uint != temp2_uint) {
         opts->print_percentage = 0;
-        print_pos(opts, elem_idx, -1);
+        print_pos(opts, elem_idx, 0);
         if (print_data(opts)) {
             parallel_print(UI_FORMAT, temp1_uint, temp2_uint, PDIFF(temp1_uint, temp2_uint));
         }
@@ -2475,7 +2476,7 @@ static hsize_t diff_long_element(unsigned char *mem1, unsigned char *mem2, hsize
     if (opts->delta_bool && !opts->percent_bool) {
         if (ABS(temp1_long-temp2_long) > opts->delta) {
             opts->print_percentage = 0;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(LI_FORMAT, temp1_long, temp2_long, ABS(temp1_long - temp2_long));
             }
@@ -2488,7 +2489,7 @@ static hsize_t diff_long_element(unsigned char *mem1, unsigned char *mem2, hsize
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(LI_FORMAT_P_NOTCOMP, temp1_long, temp2_long, ABS(temp1_long - temp2_long));
             }
@@ -2496,7 +2497,7 @@ static hsize_t diff_long_element(unsigned char *mem1, unsigned char *mem2, hsize
         }
         else if (per > opts->percent) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(LI_FORMAT_P, temp1_long, temp2_long, ABS(temp1_long - temp2_long), per);
             }
@@ -2509,7 +2510,7 @@ static hsize_t diff_long_element(unsigned char *mem1, unsigned char *mem2, hsize
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(LI_FORMAT_P_NOTCOMP, temp1_long, temp2_long, ABS(temp1_long - temp2_long));
             }
@@ -2517,7 +2518,7 @@ static hsize_t diff_long_element(unsigned char *mem1, unsigned char *mem2, hsize
         }
         else if (per > opts->percent && ABS(temp1_long-temp2_long) > opts->delta) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(LI_FORMAT_P, temp1_long, temp2_long, ABS(temp1_long - temp2_long), per);
             }
@@ -2526,7 +2527,7 @@ static hsize_t diff_long_element(unsigned char *mem1, unsigned char *mem2, hsize
     }
     else if (temp1_long != temp2_long) {
         opts->print_percentage = 0;
-        print_pos(opts, elem_idx, -1);
+        print_pos(opts, elem_idx, 0);
         if (print_data(opts)) {
             parallel_print(LI_FORMAT, temp1_long, temp2_long, ABS(temp1_long - temp2_long));
         }
@@ -2562,7 +2563,7 @@ static hsize_t diff_ulong_element(unsigned char *mem1, unsigned char *mem2, hsiz
     if (opts->delta_bool && !opts->percent_bool) {
         if (PDIFF(temp1_ulong, temp2_ulong) > opts->delta) {
             opts->print_percentage = 0;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(ULI_FORMAT, temp1_ulong, temp2_ulong, PDIFF(temp1_ulong, temp2_ulong));
             }
@@ -2575,7 +2576,7 @@ static hsize_t diff_ulong_element(unsigned char *mem1, unsigned char *mem2, hsiz
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(ULI_FORMAT_P_NOTCOMP, temp1_ulong, temp2_ulong, PDIFF(temp1_ulong, temp2_ulong));
             }
@@ -2583,7 +2584,7 @@ static hsize_t diff_ulong_element(unsigned char *mem1, unsigned char *mem2, hsiz
         }
         else if (per > opts->percent) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(ULI_FORMAT_P, temp1_ulong, temp2_ulong, PDIFF(temp1_ulong, temp2_ulong), per);
             }
@@ -2596,7 +2597,7 @@ static hsize_t diff_ulong_element(unsigned char *mem1, unsigned char *mem2, hsiz
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(ULI_FORMAT_P_NOTCOMP, temp1_ulong, temp2_ulong, PDIFF(temp1_ulong, temp2_ulong));
             }
@@ -2604,7 +2605,7 @@ static hsize_t diff_ulong_element(unsigned char *mem1, unsigned char *mem2, hsiz
         }
         else if (per > opts->percent && PDIFF(temp1_ulong,temp2_ulong) > opts->delta) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(ULI_FORMAT_P, temp1_ulong, temp2_ulong, PDIFF(temp1_ulong, temp2_ulong), per);
             }
@@ -2613,7 +2614,7 @@ static hsize_t diff_ulong_element(unsigned char *mem1, unsigned char *mem2, hsiz
     }
     else if (temp1_ulong != temp2_ulong) {
         opts->print_percentage = 0;
-        print_pos(opts, elem_idx, -1);
+        print_pos(opts, elem_idx, 0);
         if (print_data(opts)) {
             parallel_print(ULI_FORMAT, temp1_ulong, temp2_ulong, PDIFF(temp1_ulong, temp2_ulong));
         }
@@ -2650,7 +2651,7 @@ static hsize_t diff_llong_element(unsigned char *mem1, unsigned char *mem2, hsiz
     if (opts->delta_bool && !opts->percent_bool) {
         if (ABS( temp1_llong-temp2_llong) > opts->delta) {
             opts->print_percentage = 0;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(LLI_FORMAT, temp1_llong, temp2_llong, ABS(temp1_llong - temp2_llong));
             }
@@ -2663,7 +2664,7 @@ static hsize_t diff_llong_element(unsigned char *mem1, unsigned char *mem2, hsiz
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(LLI_FORMAT_P_NOTCOMP, temp1_llong, temp2_llong, ABS(temp1_llong - temp2_llong));
             }
@@ -2671,7 +2672,7 @@ static hsize_t diff_llong_element(unsigned char *mem1, unsigned char *mem2, hsiz
         }
         else if (per > opts->percent) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(LLI_FORMAT_P, temp1_llong, temp2_llong, ABS(temp1_llong - temp2_llong),per);
             }
@@ -2684,7 +2685,7 @@ static hsize_t diff_llong_element(unsigned char *mem1, unsigned char *mem2, hsiz
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(LLI_FORMAT_P_NOTCOMP, temp1_llong, temp2_llong, ABS(temp1_llong - temp2_llong));
             }
@@ -2692,7 +2693,7 @@ static hsize_t diff_llong_element(unsigned char *mem1, unsigned char *mem2, hsiz
         }
         else if (per > opts->percent && ABS(temp1_llong-temp2_llong) > opts->delta) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(LLI_FORMAT_P, temp1_llong, temp2_llong, ABS(temp1_llong - temp2_llong),per);
             }
@@ -2702,7 +2703,7 @@ static hsize_t diff_llong_element(unsigned char *mem1, unsigned char *mem2, hsiz
     else {
         if (temp1_llong != temp2_llong) {
             opts->print_percentage = 0;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(LLI_FORMAT, temp1_llong, temp2_llong, ABS(temp1_llong - temp2_llong));
             }
@@ -2741,7 +2742,7 @@ static hsize_t diff_ullong_element(unsigned char *mem1, unsigned char *mem2, hsi
     if (opts->delta_bool && !opts->percent_bool) {
         if (PDIFF(temp1_ullong,temp2_ullong) > (unsigned long long) opts->delta) {
             opts->print_percentage = 0;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(ULLI_FORMAT, temp1_ullong, temp2_ullong, PDIFF(temp1_ullong, temp2_ullong));
             }
@@ -2756,7 +2757,7 @@ static hsize_t diff_ullong_element(unsigned char *mem1, unsigned char *mem2, hsi
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(ULLI_FORMAT_P_NOTCOMP, temp1_ullong, temp2_ullong, PDIFF(temp1_ullong, temp2_ullong));
             }
@@ -2764,7 +2765,7 @@ static hsize_t diff_ullong_element(unsigned char *mem1, unsigned char *mem2, hsi
         }
         else if (per > opts->percent) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(ULLI_FORMAT_P, temp1_ullong, temp2_ullong, PDIFF(temp1_ullong,temp2_ullong), per);
             }
@@ -2779,7 +2780,7 @@ static hsize_t diff_ullong_element(unsigned char *mem1, unsigned char *mem2, hsi
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(ULLI_FORMAT_P_NOTCOMP, temp1_ullong, temp2_ullong, PDIFF(temp1_ullong, temp2_ullong));
             }
@@ -2787,7 +2788,7 @@ static hsize_t diff_ullong_element(unsigned char *mem1, unsigned char *mem2, hsi
         }
         else if (per > opts->percent && PDIFF(temp1_ullong,temp2_ullong) > (unsigned long long) opts->delta) {
             opts->print_percentage = 1;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(ULLI_FORMAT_P, temp1_ullong, temp2_ullong, PDIFF(temp1_ullong, temp2_ullong), per);
             }
@@ -2797,7 +2798,7 @@ static hsize_t diff_ullong_element(unsigned char *mem1, unsigned char *mem2, hsi
     else {
         if (temp1_ullong != temp2_ullong) {
             opts->print_percentage = 0;
-            print_pos(opts, elem_idx, -1);
+            print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
                 parallel_print(ULLI_FORMAT, temp1_ullong, temp2_ullong, PDIFF(temp1_ullong, temp2_ullong));
             }
@@ -3048,7 +3049,7 @@ void print_header(diff_opt_t *opts)
  *-------------------------------------------------------------------------
  */
 static
-void print_pos(diff_opt_t *opts, hsize_t idx, ssize_t u)
+void print_pos(diff_opt_t *opts, hsize_t idx, size_t u)
 {
     int i,j;
 
@@ -3111,7 +3112,7 @@ void print_pos(diff_opt_t *opts, hsize_t idx, ssize_t u)
              * Calculate the number of elements represented by a unit change in a
              * certain index position.
              */
-            calc_acc_pos(opts->rank, curr_pos, opts->acc, opts->pos);
+            calc_acc_pos((unsigned)opts->rank, curr_pos, opts->acc, opts->pos);
 
             for (i = 0; i < opts->rank; i++) {
                 H5TOOLS_DEBUG("pos loop:%d with opts->pos=%ld opts->sm_pos=%ld", i, opts->pos[i], opts->sm_pos[i]);
@@ -3123,10 +3124,11 @@ void print_pos(diff_opt_t *opts, hsize_t idx, ssize_t u)
             parallel_print("]");
         }
         else {
-            if (u >= 0) {
+            if (opts->print_dims) {
                 parallel_print("[ ");
                 parallel_print("%zu", u);
                 parallel_print("]");
+                opts->print_dims = 0;
             }
             else
                 parallel_print("      ");

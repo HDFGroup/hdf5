@@ -1564,8 +1564,8 @@ static herr_t
 h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx, hid_t dset, hid_t p_type)
 {
     int     sndims;
-    hid_t   f_space = H5I_INVALID_HID;            /* file data space */
-    hsize_t total_size[H5S_MAX_RANK];/* total size of dataset*/
+    hid_t   f_space = H5I_INVALID_HID;    /* file data space */
+    hsize_t total_size[H5S_MAX_RANK];     /* total size of dataset*/
     hbool_t past_catch = FALSE;
     herr_t  ret_value = SUCCEED;
 
