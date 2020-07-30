@@ -472,10 +472,8 @@ test_file_fapl(void)
     if(H5Fclose(fid2) < 0)
         FAIL_STACK_ERROR;
     if(H5Fclose(fid) < 0)
-
-    /* Closing */
-    if(H5Pclose(fapl1) < 0)
         FAIL_STACK_ERROR;
+
     if(H5Pclose(fapl2) < 0)
         FAIL_STACK_ERROR;
     if(H5Pclose(file_fapl) < 0)
@@ -501,6 +499,7 @@ error:
         H5Pclose(file_fapl);
         H5Pclose(fcpl);
         H5Fclose(fid);
+        H5Fclose(fid2);
     } H5E_END_TRY;
     if(config1)
         HDfree(config1);
