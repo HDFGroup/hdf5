@@ -266,13 +266,8 @@ main (int argc, const char *argv[])
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
 
-    /* Disable the HDF5 library's error reporting */
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
     /* initialize h5tools lib */
     h5tools_init();
-
-    H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
 
     /* Parse command line options */
     if(parse_command_line(argc, argv) < 0)
@@ -280,6 +275,9 @@ main (int argc, const char *argv[])
 
     if(fname_g == NULL)
         goto done;
+
+    /* enable error reporting if command line option */
+    h5tools_error_report();
 
     /* Print usage/exit if not using at least one of the options */
     if(!clear_status_flags && !remove_cache_image &&
@@ -386,7 +384,6 @@ main (int argc, const char *argv[])
         if(image_addr == HADDR_UNDEF && image_len == 0)
             warn_msg("No cache image in the file\n");
     }
-
 
     h5tools_setstatus(EXIT_SUCCESS);
 

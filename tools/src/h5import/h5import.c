@@ -3735,8 +3735,8 @@ static int getExternalFilename(struct Input *in, FILE *strm)
         return (-1);
     }
 
-    in->externFilename = (char *) HDmalloc ((size_t) (HDstrlen(temp)) * sizeof(char));
-    (void) HDstrcpy(in->externFilename, temp);
+    in->externFilename = (char *) HDmalloc ((size_t) (HDstrlen(temp) + 1) * sizeof(char));
+    (void) HDstrncpy(in->externFilename, temp, HDstrlen(temp) + 1);
     return (0);
 }
 

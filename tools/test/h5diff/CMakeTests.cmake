@@ -66,8 +66,10 @@
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/non_comparables2.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/tudfilter.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/tudfilter2.h5
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/diff_strings1.h5
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/diff_strings2.h5
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_strings1.h5
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_strings2.h5
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_eps1.h5
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_eps2.h5
       # tools/testfiles/vds
       ${HDF5_TOOLS_DIR}/testfiles/vds/1_a.h5
       ${HDF5_TOOLS_DIR}/testfiles/vds/1_b.h5
@@ -302,6 +304,7 @@
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_v2.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_v3.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_vlstr.txt
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_eps.txt
   )
 
   set (LIST_WIN_TEST_FILES
@@ -539,8 +542,11 @@
   set (ATTR_VERBOSE_LEVEL_FILE1 h5diff_attr_v_level1.h5)
   set (ATTR_VERBOSE_LEVEL_FILE2 h5diff_attr_v_level2.h5)
   # strings
-  set (STRINGS1 diff_strings1.h5)
-  set (STRINGS2 diff_strings2.h5)
+  set (STRINGS1 h5diff_strings1.h5)
+  set (STRINGS2 h5diff_strings2.h5)
+  # epsilon
+  set (EPS1 h5diff_eps1.h5)
+  set (EPS2 h5diff_eps2.h5)
 
 # VDS tests
   set (FILEV1 1_vds.h5)
@@ -926,6 +932,8 @@
           h5diff_v3.out.err
           h5diff_vlstr.out
           h5diff_vlstr.out.err
+          h5diff_eps.out
+          h5diff_eps.out.err
     )
     set_tests_properties (H5DIFF-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
     if (last_test)
@@ -1106,6 +1114,9 @@ ADD_H5_TEST (h5diff_609 0 -d 200 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
 # 6.10: number smaller than smallest difference
 ADD_H5_TEST (h5diff_610 1 -d 1 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
+
+# eps: number smaller than epsilon
+ADD_H5_TEST (h5diff_eps 0 -v3 -d 1e-16 ${EPS1} ${EPS2})
 
 # ##############################################################################
 # # -p
@@ -1492,9 +1503,9 @@ ADD_H5_TEST (h5diff_484 0 -v --exclude-path "/dset3" ${EXCLUDE_FILE1_1} ${EXCLUD
 # Only one file contains unique objs. Common objs are same.
 # (HDFFV-7837)
 #
-ADD_H5_TEST (h5diff_485 0 -v --exclude-path "/group1" h5diff_exclude3-1.h5 h5diff_exclude3-2.h5)
-ADD_H5_TEST (h5diff_486 0 -v --exclude-path "/group1" h5diff_exclude3-2.h5 h5diff_exclude3-1.h5)
-ADD_H5_TEST (h5diff_487 1 -v --exclude-path "/group1/dset" h5diff_exclude3-1.h5 h5diff_exclude3-2.h5)
+ADD_H5_TEST (h5diff_485 0 -v --exclude-path "/group1" ${EXCLUDE_FILE3_1} ${EXCLUDE_FILE3_2})
+ADD_H5_TEST (h5diff_486 0 -v --exclude-path "/group1" ${EXCLUDE_FILE3_2} ${EXCLUDE_FILE3_1})
+ADD_H5_TEST (h5diff_487 1 -v --exclude-path "/group1/dset" ${EXCLUDE_FILE3_1} ${EXCLUDE_FILE3_2})
 
 # ##############################################################################
 # # diff various multiple vlen and fixed strings in a compound type dataset
@@ -1528,8 +1539,6 @@ ADD_H5_TEST (h5diff_646 1 -v --use-system-epsilon -p 0.05 ${FILE1} ${FILE2} /g1/
 # ##############################################################################
 # # Test array variances
 # ##############################################################################
-#
-# Test with -d , -p and --use-system-epsilon.
 ADD_H5_TEST (h5diff_800 1 -v ${FILE7} ${FILE8} /g1/array /g1/array)
 ADD_H5_TEST (h5diff_801 1 -v ${FILE7} ${FILE8A} /g1/array /g1/array)
 

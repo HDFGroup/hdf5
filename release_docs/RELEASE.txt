@@ -48,6 +48,31 @@ New Features
 
     Configuration:
     -------------
+    - CMake option to link the generated Fortran MOD files into the include
+      directory.
+
+      The Fortran generation of MOD files by a Fortran compile can produce
+      different binary files between SHARED and STATIC compiles with different
+      compilers and/or different platforms. Note that it has been found that
+      different versions of Fortran compilers will produce incompatible MOD
+      files. Currently, CMake will locate these MOD files in subfolders of
+      the include directory and add that path to the Fortran library target
+      in the CMake config file, which can be used by the CMake find library
+      process. For other build systems using the binary from a CMake install,
+      a new CMake configuration can be used to copy the pre-chosen version
+      of the Fortran MOD files into the install include directory.
+
+      The default will depend on the configuration of
+      BUILD_STATIC_LIBS and BUILD_SHARED_LIBS:
+            YES                   YES         Default to SHARED
+            YES                   NO          Default to STATIC
+            NO                    YES         Default to SHARED
+            NO                    NO          Default to SHARED
+      The defaults can be overriden by setting the config option
+         HDF5_INSTALL_MOD_FORTRAN to one of NO, SHARED, or STATIC
+
+      (ADB - 2020/07/9, HDFFV-11116)
+
     - CMake option to use AEC (open source SZip) library instead of SZip
 
       The open source AEC library is a replacement library for SZip. In
@@ -631,6 +656,31 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - Fixed issues CVE-2018-13870 and CVE-2018-13869
+
+      When a buffer overflow occurred because a name length was corrupted
+      and became very large, h5dump crashed on memory access violation.
+
+      A check for reading pass the end of the buffer was added to multiple
+      locations to prevent the crashes and h5dump now simply fails with an
+      error message when this error condition occurs.
+
+      (BMR - 2020/7/22, HDFFV-11120 and HDFFV-11121)
+
+    - Fixed the segmentation fault when reading attributes with multiple threads
+
+      It was reported that the reading of attributes with variable length string
+      datatype will crash with segmentation fault particularly when the number of
+      threads is high (>16 threads).  The problem was due to the file pointer that
+      was set in the variable length string datatype for the attribute.  That file
+      pointer was already closed when the attribute was accessed.
+
+      The problem was fixed by setting the file pointer to the current opened file pointer
+      when the attribute was accessed.  Similar patch up was done before when reading
+      dataset with variable length string datatype.
+
+      (VC - 2020/07/13, HDFFV-11080)
+
     - Fixed CVE-2020-10810
 
       The tool h5clear produced a segfault during an error recovery in
@@ -912,6 +962,21 @@ Bug Fixes since HDF5-1.10.3 release
 
       (DER - 2019/12/09, HDFFV-10945)
 
+    - H5Sset_extent_none() sets the dataspace class to H5S_NO_CLASS which
+      causes asserts/errors when passed to other dataspace API calls.
+
+      H5S_NO_CLASS is an internal class value that should not have been
+      exposed via a public API call.
+
+      In debug builds of the library, this can cause asserts to trip. In
+      non-debug builds, it will produce normal library errors.
+
+      The new library behavior is for H5Sset_extent_none() to convert
+      the dataspace into one of type H5S_NULL, which is better handled
+      by the library and easier for developers to reason about.
+
+      (DER - 2020/07/27, HDFFV-11027)
+
 
     Java Library:
     ----------------
@@ -989,7 +1054,43 @@ Bug Fixes since HDF5-1.10.3 release
 
     Tools
     -----
-    -
+    - The tools library was updated by standardizing the error stack process.
+
+      General sequence is:
+          h5tools_setprogname(PROGRAMNAME);
+          h5tools_setstatus(EXIT_SUCCESS);
+          h5tools_init();
+          ... process the command-line (check for error-stack enable) ...
+          h5tools_error_report();
+          ... (do work) ...
+          h5diff_exit(ret);
+
+      (ADB - 2020/07/20, HDFFV-11066)
+
+    - h5diff fixed a command line parsing error.
+
+      h5diff would ignore the argument to -d (delta) if it is smaller than DBL_EPSILON.
+      The macro H5_DBL_ABS_EQUAL was removed and a direct value comparision was used.
+
+      (ADB - 2020/07/20, HDFFV-10897)
+
+    - h5diff added a command line option to ignore attributes.
+
+      h5diff would ignore all objects with a supplied path if the exclude-path argument is used.
+      Adding the exclude-attribute argument will only eclude attributes, with the supplied path,
+      from comparision.
+
+      (ADB - 2020/07/20, HDFFV-5935)
+
+    - h5diff added another level to the verbose argument to print filenames.
+
+      Added verbose level 3 that is level 2 plus the filenames. The levels are:
+          0 : Identical to '-v' or '--verbose'
+          1 : All level 0 information plus one-line attribute status summary
+          2 : All level 1 information plus extended attribute status report
+          3 : All level 2 information plus file names
+
+      (ADB - 2020/07/20, HDFFV-10005)
 
     High-Level APIs:
     ------
@@ -1015,9 +1116,9 @@ Bug Fixes since HDF5-1.10.3 release
     -------
     - Stopped java/test/junit.sh.in installing libs for testing under ${prefix}
 
-      Lib files needed are now copied to a subdirectory in the java/test 
-      directory, and on Macs the loader path for libhdf5.xxxs.so is changed 
-      in the temporary copy of libhdf5_java.dylib. 
+      Lib files needed are now copied to a subdirectory in the java/test
+      directory, and on Macs the loader path for libhdf5.xxxs.so is changed
+      in the temporary copy of libhdf5_java.dylib.
 
       (LRK, 2020/7/2, HDFFV-11063)
 

@@ -13,11 +13,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5EAdbg.c
- *			Sep 11 2008
- *			Quincey Koziol <koziol@hdfgroup.org>
+ * Created:         H5EAdbg.c
+ *                  Sep 11 2008
+ *                  Quincey Koziol
  *
- * Purpose:		Dump debugging information about an extensible array.
+ * Purpose:        Dump debugging information about an extensible array.
  *
  *-------------------------------------------------------------------------
  */
@@ -37,9 +37,9 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5EApkg.h"		/* Extensible Arrays			*/
+#include "H5private.h"          /* Generic Functions            */
+#include "H5Eprivate.h"         /* Error handling               */
+#include "H5EApkg.h"            /* Extensible Arrays            */
 
 
 /****************/
@@ -79,15 +79,14 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA__hdr_debug
+ * Function:    H5EA__hdr_debug
  *
- * Purpose:	Prints debugging info about a extensible array header.
+ * Purpose:     Prints debugging info about a extensible array header.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Sep 11 2008
+ * Programmer:  Quincey Koziol
+ *              Sep 11 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -97,7 +96,7 @@ H5EA__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent,
     int fwidth, const H5EA_class_t *cls, haddr_t obj_addr))
 
     /* Local variables */
-    H5EA_hdr_t *hdr = NULL; 	/* Shared extensible array header */
+    H5EA_hdr_t *hdr = NULL;     /* Shared extensible array header */
     void *dbg_ctx = NULL;       /* Extensible array debugging context */
 
     /* Check arguments */
@@ -117,59 +116,59 @@ H5EA__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent,
 
     /* Load the extensible array header */
     if(NULL == (hdr = H5EA__hdr_protect(f, addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
-	H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header")
+        H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header")
 
     /* Print opening message */
     HDfprintf(stream, "%*sExtensible Array Header...\n", indent, "");
 
     /* Print the values */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-	      "Array class ID:",  hdr->cparam.cls->name);
+        "Array class ID:",  hdr->cparam.cls->name);
     HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-	      "Header size:",
-	      hdr->size);
+        "Header size:",
+        hdr->size);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Raw Element Size:",
-	      (unsigned)hdr->cparam.raw_elmt_size);
+        "Raw Element Size:",
+        (unsigned)hdr->cparam.raw_elmt_size);
     HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-	      "Native Element Size (on this platform):",
-	      hdr->cparam.cls->nat_elmt_size);
+        "Native Element Size (on this platform):",
+        hdr->cparam.cls->nat_elmt_size);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Log2(Max. # of elements in array):",
-	      (unsigned)hdr->cparam.max_nelmts_bits);
+        "Log2(Max. # of elements in array):",
+        (unsigned)hdr->cparam.max_nelmts_bits);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "# of elements in index block:",
-	      (unsigned)hdr->cparam.idx_blk_elmts);
+        "# of elements in index block:",
+        (unsigned)hdr->cparam.idx_blk_elmts);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Min. # of elements per data block:",
-	      (unsigned)hdr->cparam.data_blk_min_elmts);
+        "Min. # of elements per data block:",
+        (unsigned)hdr->cparam.data_blk_min_elmts);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Min. # of data block pointers for a super block:",
-	      (unsigned)hdr->cparam.sup_blk_min_data_ptrs);
+        "Min. # of data block pointers for a super block:",
+        (unsigned)hdr->cparam.sup_blk_min_data_ptrs);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Log2(Max. # of elements in data block page):",
-	      (unsigned)hdr->cparam.max_dblk_page_nelmts_bits);
+        "Log2(Max. # of elements in data block page):",
+        (unsigned)hdr->cparam.max_dblk_page_nelmts_bits);
     HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-	      "Highest element index stored (+1):",
-	      hdr->stats.stored.max_idx_set);
+        "Highest element index stored (+1):",
+        hdr->stats.stored.max_idx_set);
     HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-	      "Number of super blocks created:",
-	      hdr->stats.stored.nsuper_blks);
+        "Number of super blocks created:",
+        hdr->stats.stored.nsuper_blks);
     HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-	      "Number of data blocks created:",
-	      hdr->stats.stored.ndata_blks);
+        "Number of data blocks created:",
+        hdr->stats.stored.ndata_blks);
     HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-	      "Number of elements 'realized':",
-	      hdr->stats.stored.nelmts);
+        "Number of elements 'realized':",
+        hdr->stats.stored.nelmts);
     HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-	      "Index Block Address:",
-	      hdr->idx_blk_addr);
+        "Index Block Address:",
+        hdr->idx_blk_addr);
 
 CATCH
     if(dbg_ctx && cls->dst_dbg_ctx(dbg_ctx) < 0)
         H5E_THROW(H5E_CANTRELEASE, "unable to release extensible array debugging context")
     if(hdr && H5EA__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
-	H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array header")
+        H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array header")
 
 END_FUNC(PKG)   /* end H5EA__hdr_debug() */
 
@@ -384,21 +383,20 @@ CATCH
     if(sblock && H5EA__sblock_unprotect(sblock, H5AC__NO_FLAGS_SET) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array super block")
     if(hdr && H5EA__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
-	H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array header")
+        H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array header")
 
 END_FUNC(PKG)   /* end H5EA__sblock_debug() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA__dblock_debug
+ * Function:    H5EA__dblock_debug
  *
- * Purpose:	Prints debugging info about a extensible array data block.
+ * Purpose:     Prints debugging info about a extensible array data block.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Sep 22 2008
+ * Programmer:  Quincey Koziol
+ *              Sep 22 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -432,7 +430,7 @@ H5EA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent,
 
     /* Load the extensible array header */
     if(NULL == (hdr = H5EA__hdr_protect(f, hdr_addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
-	H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header")
+        H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header")
 
     /* Protect data block */
     /* (Note: setting parent of data block to 'hdr' for this operation should be OK -QAK) */
@@ -444,10 +442,10 @@ H5EA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent,
 
     /* Print the values */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-	      "Array class ID:",  hdr->cparam.cls->name);
+        "Array class ID:",  hdr->cparam.cls->name);
     HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-	      "Data Block size:",
-	      dblock->size);
+        "Data Block size:",
+        dblock->size);
 
 
     /* Print the elements in the index block */
@@ -466,7 +464,7 @@ CATCH
     if(dblock && H5EA__dblock_unprotect(dblock, H5AC__NO_FLAGS_SET) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array data block")
     if(hdr && H5EA__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
-	H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array header")
+        H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array header")
 
 END_FUNC(PKG)   /* end H5EA__dblock_debug() */
 

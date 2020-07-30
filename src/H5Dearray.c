@@ -11,10 +11,10 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer: 	Quincey Koziol <koziol@hdfgroup.org>
- *	       	Tuesday, January 27, 2009
+/* Programmer:      Quincey Koziol
+ *                  Tuesday, January 27, 2009
  *
- * Purpose:	Extensible array indexed (chunked) I/O functions.  The chunks
+ * Purpose:     Extensible array indexed (chunked) I/O functions.  The chunks
  *              are given a single-dimensional index which is used as the
  *              offset in an extensible array that maps a chunk coordinate to
  *              a disk address.
@@ -183,7 +183,7 @@ const H5EA_class_t H5EA_CLS_CHUNK[1]={{
     H5D__earray_fill,           /* Fill block of missing elements callback */
     H5D__earray_encode,         /* Element encoding callback */
     H5D__earray_decode,         /* Element decoding callback */
-    H5D__earray_debug,		/* Element debugging callback */
+    H5D__earray_debug,          /* Element debugging callback */
     H5D__earray_crt_dbg_context, /* Create debugging context */
     H5D__earray_dst_dbg_context  /* Destroy debugging context */
 }};
@@ -216,14 +216,14 @@ H5FL_DEFINE_STATIC(H5D_earray_ctx_ud_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_crt_context
+ * Function:    H5D__earray_crt_context
  *
- * Purpose:	Create context for callbacks
+ * Purpose:     Create context for callbacks
  *
- * Return:	Success:	non-NULL
- *		Failure:	NULL
+ * Return:      Success:    non-NULL
+ *              Failure:    NULL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, January 29, 2009
  *
  *-------------------------------------------------------------------------
@@ -265,14 +265,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_dst_context
+ * Function:    H5D__earray_dst_context
  *
- * Purpose:	Destroy context for callbacks
+ * Purpose:     Destroy context for callbacks
  *
- * Return:	Success:	non-NULL
- *		Failure:	NULL
+ * Return:      Success:    non-NULL
+ *              Failure:    NULL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, January 29, 2009
  *
  *-------------------------------------------------------------------------
@@ -295,14 +295,14 @@ H5D__earray_dst_context(void *_ctx)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_fill
+ * Function:    H5D__earray_fill
  *
- * Purpose:	Fill "missing elements" in block of elements
+ * Purpose:    Fill "missing elements" in block of elements
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:    Success:    non-negative
+ *        Failure:    negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, January 27, 2009
  *
  *-------------------------------------------------------------------------
@@ -325,14 +325,14 @@ H5D__earray_fill(void *nat_blk, size_t nelmts)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_encode
+ * Function:    H5D__earray_encode
  *
- * Purpose:	Encode an element from "native" to "raw" form
+ * Purpose:     Encode an element from "native" to "raw" form
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, January 27, 2009
  *
  *-------------------------------------------------------------------------
@@ -369,14 +369,14 @@ H5D__earray_encode(void *raw, const void *_elmt, size_t nelmts, void *_ctx)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_decode
+ * Function:    H5D__earray_decode
  *
- * Purpose:	Decode an element from "raw" to "native" form
+ * Purpose:     Decode an element from "raw" to "native" form
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, January 29, 2009
  *
  *-------------------------------------------------------------------------
@@ -413,14 +413,14 @@ H5D__earray_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_debug
+ * Function:    H5D__earray_debug
  *
- * Purpose:	Display an element for debugging
+ * Purpose:     Display an element for debugging
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, January 29, 2009
  *
  *-------------------------------------------------------------------------
@@ -447,14 +447,14 @@ H5D__earray_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_filt_fill
+ * Function:    H5D__earray_filt_fill
  *
- * Purpose:	Fill "missing elements" in block of elements
+ * Purpose:     Fill "missing elements" in block of elements
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, January 31, 2009
  *
  *-------------------------------------------------------------------------
@@ -478,14 +478,14 @@ H5D__earray_filt_fill(void *nat_blk, size_t nelmts)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_filt_encode
+ * Function:    H5D__earray_filt_encode
  *
- * Purpose:	Encode an element from "native" to "raw" form
+ * Purpose:     Encode an element from "native" to "raw" form
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, January 31, 2009
  *
  *-------------------------------------------------------------------------
@@ -525,14 +525,14 @@ H5D__earray_filt_encode(void *_raw, const void *_elmt, size_t nelmts, void *_ctx
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_filt_decode
+ * Function:    H5D__earray_filt_decode
  *
- * Purpose:	Decode an element from "raw" to "native" form
+ * Purpose:     Decode an element from "raw" to "native" form
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, January 31, 2009
  *
  *-------------------------------------------------------------------------
@@ -571,14 +571,14 @@ H5D__earray_filt_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_filt_debug
+ * Function:    H5D__earray_filt_debug
  *
- * Purpose:	Display an element for debugging
+ * Purpose:     Display an element for debugging
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, January 31, 2009
  *
  *-------------------------------------------------------------------------
@@ -606,15 +606,15 @@ H5D__earray_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_crt_dbg_context
+ * Function:    H5D__earray_crt_dbg_context
  *
- * Purpose:	Create context for debugging callback
- *		(get the layout message in the specified object header)
+ * Purpose:     Create context for debugging callback
+ *              (get the layout message in the specified object header)
  *
- * Return:	Success:	non-NULL
- *		Failure:	NULL
+ * Return:      Success:    non-NULL
+ *              Failure:    NULL
  *
- * Programmer:	Vailin Choi; July 2010
+ * Programmer:  Vailin Choi; July 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -680,15 +680,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_dst_dbg_context
+ * Function:    H5D__earray_dst_dbg_context
  *
- * Purpose:	Destroy context for debugging callback
- *		(free the layout message from the specified object header)
+ * Purpose:     Destroy context for debugging callback
+ *              (free the layout message from the specified object header)
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
- * Programmer:	Vailin Choi; July 2010
+ * Programmer:  Vailin Choi; July 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -710,16 +710,16 @@ H5D__earray_dst_dbg_context(void *_dbg_ctx)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_idx_depend
+ * Function:    H5D__earray_idx_depend
  *
- * Purpose:	Create flush dependency between extensible array and dataset's
+ * Purpose:     Create flush dependency between extensible array and dataset's
  *              object header.
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, June  2, 2009
+ * Programmer:  Quincey Koziol
+ *              Tuesday, June  2, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -772,20 +772,20 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_idx_open
+ * Function:    H5D__earray_idx_open
  *
- * Purpose:	Opens an existing extensible array.
+ * Purpose:     Opens an existing extensible array.
  *
- * Note:	This information is passively initialized from each index
+ * Note:        This information is passively initialized from each index
  *              operation callback because those abstract chunk index operations
  *              are designed to work with the v1 B-tree chunk indices also,
  *              which don't require an 'open' for the data structure.
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
- * Programmer:	Quincey Koziol
- *		Thursday, January 29, 2009
+ * Programmer:  Quincey Koziol
+ *              Thursday, January 29, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -814,7 +814,7 @@ H5D__earray_idx_open(const H5D_chk_idx_info_t *idx_info)
 
     /* Open the extensible array for the chunk index */
     if(NULL == (idx_info->storage->u.earray.ea = H5EA_open(idx_info->f, idx_info->storage->idx_addr, &udata)))
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open extensible array")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open extensible array")
 
     /* Check for SWMR writes to the file */
     if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)
@@ -827,13 +827,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_idx_init
+ * Function:    H5D__earray_idx_init
  *
- * Purpose:	Initialize the indexing information for a dataset.
+ * Purpose:     Initialize the indexing information for a dataset.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Wednesday, May 27, 2009
  *
  *-------------------------------------------------------------------------
@@ -862,7 +862,7 @@ H5D__earray_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t *space,
 
     /* Get the dim info for dataset */
     if((sndims = H5S_get_simple_extent_dims(space, NULL, max_dims)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace dimensions")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace dimensions")
     H5_CHECKED_ASSIGN(ndims, unsigned, sndims, int);
 
     /* Find the rank of the unlimited dimension */
@@ -895,20 +895,20 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_idx_create
+ * Function:    H5D__earray_idx_create
  *
- * Purpose:	Creates a new indexed-storage extensible array and initializes
+ * Purpose:     Creates a new indexed-storage extensible array and initializes
  *              the layout struct with information about the storage.  The
- *		struct should be immediately written to the object header.
+ *              struct should be immediately written to the object header.
  *
- *		This function must be called before passing LAYOUT to any of
- *		the other indexed storage functions!
+ *              This function must be called before passing LAYOUT to any of
+ *              the other indexed storage functions!
  *
- * Return:	Non-negative on success (with the LAYOUT argument initialized
- *		and ready to write to an object header). Negative on failure.
+ * Return:      Non-negative on success (with the LAYOUT argument initialized
+ *              and ready to write to an object header). Negative on failure.
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, January 27, 2009
+ * Programmer:  Quincey Koziol
+ *              Tuesday, January 27, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -965,11 +965,11 @@ H5D__earray_idx_create(const H5D_chk_idx_info_t *idx_info)
 
     /* Create the extensible array for the chunk index */
     if(NULL == (idx_info->storage->u.earray.ea = H5EA_create(idx_info->f, &cparam, &udata)))
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create extensible array")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create extensible array")
 
     /* Get the address of the extensible array in file */
     if(H5EA_get_addr(idx_info->storage->u.earray.ea, &(idx_info->storage->idx_addr)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query extensible array address")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query extensible array address")
 
     /* Check for SWMR writes to the file */
     if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)
@@ -982,14 +982,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_idx_is_space_alloc
+ * Function:    H5D__earray_idx_is_space_alloc
  *
- * Purpose:	Query if space is allocated for index method
+ * Purpose:     Query if space is allocated for index method
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, January 29, 2009
+ * Programmer:  Quincey Koziol
+ *              Thursday, January 29, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1006,13 +1006,13 @@ H5D__earray_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_idx_insert
+ * Function:    H5D__earray_idx_insert
  *
- * Purpose:	Insert chunk address into the indexing structure.
+ * Purpose:     Insert chunk address into the indexing structure.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi; May 2014
+ * Programmer:  Vailin Choi; May 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -1021,7 +1021,7 @@ H5D__earray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
     const H5D_t H5_ATTR_UNUSED *dset)
 {
     H5EA_t      *ea;                    /* Pointer to extensible array structure */
-    herr_t	ret_value = SUCCEED;	/* Return value */
+    herr_t    ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1046,26 +1046,26 @@ H5D__earray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
     ea = idx_info->storage->u.earray.ea;
 
     if(!H5F_addr_defined(udata->chunk_block.offset))
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "The chunk should have allocated already")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "The chunk should have allocated already")
     if(udata->chunk_idx != (udata->chunk_idx & 0xffffffff)) /* negative value */
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "chunk index must be less than 2^32")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "chunk index must be less than 2^32")
 
     /* Check for filters on chunks */
     if(idx_info->pline->nused > 0) {
-	H5D_earray_filt_elmt_t elmt;            /* Extensible array element */
+        H5D_earray_filt_elmt_t elmt;            /* Extensible array element */
 
-	elmt.addr = udata->chunk_block.offset;
+        elmt.addr = udata->chunk_block.offset;
         H5_CHECKED_ASSIGN(elmt.nbytes, uint32_t, udata->chunk_block.length, hsize_t);
-	elmt.filter_mask = udata->filter_mask;
+        elmt.filter_mask = udata->filter_mask;
 
-	/* Set the info for the chunk */
-	if(H5EA_set(ea, udata->chunk_idx, &elmt) < 0)
-	    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set chunk info")
+        /* Set the info for the chunk */
+        if(H5EA_set(ea, udata->chunk_idx, &elmt) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set chunk info")
     } /* end if */
     else {
-	/* Set the address for the chunk */
-	if(H5EA_set(ea, udata->chunk_idx, &udata->chunk_block.offset) < 0)
-	    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set chunk address")
+        /* Set the address for the chunk */
+        if(H5EA_set(ea, udata->chunk_idx, &udata->chunk_block.offset) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set chunk address")
     } /* end else */
 
 done:
@@ -1074,15 +1074,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_idx_get_addr
+ * Function:    H5D__earray_idx_get_addr
  *
- * Purpose:	Get the file address of a chunk if file space has been
- *		assigned.  Save the retrieved information in the udata
- *		supplied.
+ * Purpose:     Get the file address of a chunk if file space has been
+ *              assigned.  Save the retrieved information in the udata
+ *              supplied.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, January 29, 2009
  *
  *-------------------------------------------------------------------------
@@ -1092,7 +1092,7 @@ H5D__earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
 {
     H5EA_t      *ea;                    /* Pointer to extensible array structure */
     hsize_t     idx;                    /* Array index of chunk */
-    herr_t	ret_value = SUCCEED;	/* Return value */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1118,13 +1118,13 @@ H5D__earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
 
     /* Check for unlimited dim. not being the slowest-changing dim. */
     if(idx_info->layout->u.earray.unlim_dim > 0) {
-        hsize_t swizzled_coords[H5O_LAYOUT_NDIMS];	/* swizzled chunk coordinates */
+        hsize_t swizzled_coords[H5O_LAYOUT_NDIMS];    /* swizzled chunk coordinates */
         unsigned ndims = (idx_info->layout->ndims - 1); /* Number of dimensions */
-	unsigned u;
+        unsigned u;
 
-	/* Compute coordinate offset from scaled offset */
-	for(u = 0; u < ndims; u++)
-	    swizzled_coords[u] = udata->common.scaled[u] * idx_info->layout->dim[u];
+        /* Compute coordinate offset from scaled offset */
+        for(u = 0; u < ndims; u++)
+            swizzled_coords[u] = udata->common.scaled[u] * idx_info->layout->dim[u];
 
         H5VM_swizzle_coords(hsize_t, swizzled_coords, idx_info->layout->u.earray.unlim_dim);
 
@@ -1157,12 +1157,12 @@ H5D__earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address")
 
         /* Update the other (constant) information for the chunk */
-	udata->chunk_block.length = idx_info->layout->size;
+        udata->chunk_block.length = idx_info->layout->size;
         udata->filter_mask = 0;
     } /* end else */
 
     if(!H5F_addr_defined(udata->chunk_block.offset))
-	udata->chunk_block.length = 0;
+        udata->chunk_block.length = 0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1170,14 +1170,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_idx_resize
+ * Function:    H5D__earray_idx_resize
  *
- * Purpose:	Calculate/setup the swizzled down chunk array, used for chunk
+ * Purpose:     Calculate/setup the swizzled down chunk array, used for chunk
  *              index calculations.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, July 23, 2009
  *
  *-------------------------------------------------------------------------
@@ -1224,13 +1224,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_idx_iterate_cb
+ * Function:    H5D__earray_idx_iterate_cb
  *
- * Purpose:	Callback routine for extensible array element iteration.
+ * Purpose:     Callback routine for extensible array element iteration.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi; Feb 2015
+ * Programmer:  Vailin Choi; Feb 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1257,8 +1257,8 @@ H5D__earray_idx_iterate_cb(hsize_t H5_ATTR_UNUSED idx, const void *_elmt, void *
 
     /* Make "generic chunk" callback */
     if(H5F_addr_defined(udata->chunk_rec.chunk_addr))
-	if((ret_value = (udata->cb)(&udata->chunk_rec, udata->udata)) < 0)
-	    HERROR(H5E_DATASET, H5E_CALLBACK, "failure in generic chunk iterator callback");
+        if((ret_value = (udata->cb)(&udata->chunk_rec, udata->udata)) < 0)
+            HERROR(H5E_DATASET, H5E_CALLBACK, "failure in generic chunk iterator callback");
 
     /* Update coordinates of chunk in dataset */
     ndims = udata->common.layout->ndims - 1;
@@ -1283,18 +1283,18 @@ H5D__earray_idx_iterate_cb(hsize_t H5_ATTR_UNUSED idx, const void *_elmt, void *
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_idx_iterate
+ * Function:    H5D__earray_idx_iterate
  *
- * Purpose:	Iterate over the chunks in an index, making a callback
+ * Purpose:     Iterate over the chunks in an index, making a callback
  *              for each one.
  *
- * Note:	This implementation is slow, particularly for sparse
+ * Note:        This implementation is slow, particularly for sparse
  *              extensible arrays, replace it with call to H5EA_iterate()
  *              when that's available.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, January 29, 2009
  *
  *-------------------------------------------------------------------------
@@ -1332,27 +1332,27 @@ H5D__earray_idx_iterate(const H5D_chk_idx_info_t *idx_info,
 
     /* Get the extensible array statistics */
     if(H5EA_get_stats(ea, &ea_stat) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query extensible array statistics")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query extensible array statistics")
 
     if(ea_stat.stored.max_idx_set > 0) {
         H5D_earray_it_ud_t udata;   /* User data for iteration callback */
 
-	/* Initialize userdata */
-	HDmemset(&udata, 0, sizeof udata);
-	udata.common.layout = idx_info->layout;
-	udata.common.storage = idx_info->storage;
+        /* Initialize userdata */
+        HDmemset(&udata, 0, sizeof udata);
+        udata.common.layout = idx_info->layout;
+        udata.common.storage = idx_info->storage;
         HDmemset(&udata.chunk_rec, 0, sizeof(udata.chunk_rec));
         udata.filtered = (idx_info->pline->nused > 0);
         if(!udata.filtered) {
             udata.chunk_rec.nbytes = idx_info->layout->size;
             udata.chunk_rec.filter_mask = 0;
         } /* end if */
-	udata.cb = chunk_cb;
-	udata.udata = chunk_udata;
+        udata.cb = chunk_cb;
+        udata.udata = chunk_udata;
 
         /* Iterate over the extensible array elements */
-	if((ret_value = H5EA_iterate(ea, H5D__earray_idx_iterate_cb, &udata)) < 0)
-	    HERROR(H5E_DATASET, H5E_BADITER, "unable to iterate over fixed array chunk index");
+        if((ret_value = H5EA_iterate(ea, H5D__earray_idx_iterate_cb, &udata)) < 0)
+            HERROR(H5E_DATASET, H5E_BADITER, "unable to iterate over fixed array chunk index");
     } /* end if */
 
 done:
@@ -1361,13 +1361,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_idx_remove
+ * Function:    H5D__earray_idx_remove
  *
- * Purpose:	Remove chunk from index.
+ * Purpose:     Remove chunk from index.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, January 29, 2009
  *
  *-------------------------------------------------------------------------
@@ -1377,7 +1377,7 @@ H5D__earray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
 {
     H5EA_t      *ea;                    /* Pointer to extensible array structure */
     hsize_t     idx;                    /* Array index of chunk */
-    herr_t	ret_value = SUCCEED;	/* Return value */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1404,13 +1404,13 @@ H5D__earray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
 
     /* Check for unlimited dim. not being the slowest-changing dim. */
     if(idx_info->layout->u.earray.unlim_dim > 0) {
-        hsize_t swizzled_coords[H5O_LAYOUT_NDIMS];	/* swizzled chunk coordinates */
+        hsize_t swizzled_coords[H5O_LAYOUT_NDIMS];    /* swizzled chunk coordinates */
         unsigned ndims = (idx_info->layout->ndims - 1); /* Number of dimensions */
-	unsigned u;
+        unsigned u;
 
-	/* Compute coordinate offset from scaled offset */
-	for(u = 0; u < ndims; u++)
-	    swizzled_coords[u] = udata->scaled[u] * idx_info->layout->dim[u];
+        /* Compute coordinate offset from scaled offset */
+        for(u = 0; u < ndims; u++)
+            swizzled_coords[u] = udata->scaled[u] * idx_info->layout->dim[u];
 
         H5VM_swizzle_coords(hsize_t, swizzled_coords, idx_info->layout->u.earray.unlim_dim);
 
@@ -1472,14 +1472,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_idx_delete_cb
+ * Function:    H5D__earray_idx_delete_cb
  *
- * Purpose:	Delete space for chunk in file
+ * Purpose:     Delete space for chunk in file
  *
- * Return:	Success:	Non-negative
- *		Failure:	negative
+ * Return:      Success:    Non-negative
+ *              Failure:    negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, January 31, 2009
  *
  *-------------------------------------------------------------------------
@@ -1509,19 +1509,19 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_idx_delete
+ * Function:    H5D__earray_idx_delete
  *
- * Purpose:	Delete index and raw data storage for entire dataset
+ * Purpose:     Delete index and raw data storage for entire dataset
  *              (i.e. all chunks)
  *
- * Note:	This implementation is slow, particularly for sparse
+ * Note:        This implementation is slow, particularly for sparse
  *              extensible arrays, replace it with call to H5EA_iterate()
  *              when that's available.
  *
- * Return:	Success:	Non-negative
- *		Failure:	negative
+ * Return:      Success:    Non-negative
+ *              Failure:    negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, January 29, 2009
  *
  *-------------------------------------------------------------------------
@@ -1571,13 +1571,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_idx_copy_setup
+ * Function:    H5D__earray_idx_copy_setup
  *
- * Purpose:	Set up any necessary information for copying chunks
+ * Purpose:     Set up any necessary information for copying chunks
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, January 31, 2009
  *
  *-------------------------------------------------------------------------
@@ -1626,13 +1626,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_idx_copy_shutdown
+ * Function:    H5D__earray_idx_copy_shutdown
  *
- * Purpose:	Shutdown any information from copying chunks
+ * Purpose:     Shutdown any information from copying chunks
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, January 31, 2009
  *
  *-------------------------------------------------------------------------
@@ -1704,7 +1704,7 @@ H5D__earray_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
 
     /* Get the extensible array statistics */
     if(H5EA_get_stats(ea, &ea_stat) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query extensible array statistics")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query extensible array statistics")
 
     /* Set the size of the extensible array */
     *index_size = ea_stat.computed.hdr_size + ea_stat.computed.index_blk_size
@@ -1722,13 +1722,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_idx_reset
+ * Function:    H5D__earray_idx_reset
  *
- * Purpose:	Reset indexing information.
+ * Purpose:     Reset indexing information.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, January 31, 2009
  *
  *-------------------------------------------------------------------------
@@ -1743,7 +1743,7 @@ H5D__earray_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
 
     /* Reset index info */
     if(reset_addr) {
-	storage->idx_addr = HADDR_UNDEF;
+        storage->idx_addr = HADDR_UNDEF;
         storage->u.earray.dset_ohdr_addr = HADDR_UNDEF;
     } /* end if */
     storage->u.earray.ea = NULL;
@@ -1753,13 +1753,13 @@ H5D__earray_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_idx_dump
+ * Function:    H5D__earray_idx_dump
  *
- * Purpose:	Dump indexing information to a stream.
+ * Purpose:     Dump indexing information to a stream.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, January 31, 2009
  *
  *-------------------------------------------------------------------------
@@ -1780,13 +1780,13 @@ H5D__earray_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__earray_idx_dest
+ * Function:    H5D__earray_idx_dest
  *
- * Purpose:	Release indexing information in memory.
+ * Purpose:     Release indexing information in memory.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, January 31, 2009
  *
  *-------------------------------------------------------------------------
@@ -1806,7 +1806,7 @@ H5D__earray_idx_dest(const H5D_chk_idx_info_t *idx_info)
     /* Check if the extensible array is open */
     if(idx_info->storage->u.earray.ea) {
 
-	/* Patch the top level file pointer contained in ea if needed */
+        /* Patch the top level file pointer contained in ea if needed */
         if(H5EA_patch_file(idx_info->storage->u.earray.ea, idx_info->f) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch earray file pointer")
 

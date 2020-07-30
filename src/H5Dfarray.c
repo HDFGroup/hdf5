@@ -261,14 +261,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__farray_dst_context
+ * Function:    H5D__farray_dst_context
  *
- * Purpose:	Destroy context for callbacks
+ * Purpose:     Destroy context for callbacks
  *
- * Return:	Success:	non-NULL
- *		Failure:	NULL
+ * Return:      Success:    non-NULL
+ *              Failure:    NULL
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -291,14 +291,14 @@ H5D__farray_dst_context(void *_ctx)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__farray_fill
+ * Function:    H5D__farray_fill
  *
- * Purpose:	Fill "missing elements" in block of elements
+ * Purpose:     Fill "missing elements" in block of elements
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -321,14 +321,14 @@ H5D__farray_fill(void *nat_blk, size_t nelmts)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__farray_encode
+ * Function:    H5D__farray_encode
  *
- * Purpose:	Encode an element from "native" to "raw" form
+ * Purpose:     Encode an element from "native" to "raw" form
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -365,14 +365,14 @@ H5D__farray_encode(void *raw, const void *_elmt, size_t nelmts, void *_ctx)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__farray_decode
+ * Function:    H5D__farray_decode
  *
- * Purpose:	Decode an element from "raw" to "native" form
+ * Purpose:     Decode an element from "raw" to "native" form
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -409,14 +409,14 @@ H5D__farray_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__farray_debug
+ * Function:    H5D__farray_debug
  *
- * Purpose:	Display an element for debugging
+ * Purpose:     Display an element for debugging
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -443,23 +443,23 @@ H5D__farray_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__farray_crt_dbg_context
+ * Function:    H5D__farray_crt_dbg_context
  *
- * Purpose:	Create context for debugging callback
- *		(get the layout message in the specified object header)
+ * Purpose:     Create context for debugging callback
+ *              (get the layout message in the specified object header)
  *
- * Return:	Success:	non-NULL
- *		Failure:	NULL
+ * Return:      Success:    non-NULL
+ *              Failure:    NULL
  *
- * Programmer:	Vailin Choi
- *		5th August, 2009
+ * Programmer:  Vailin Choi
+ *              5th August, 2009
  *
  *-------------------------------------------------------------------------
  */
 static void *
 H5D__farray_crt_dbg_context(H5F_t *f, haddr_t obj_addr)
 {
-    H5D_farray_ctx_ud_t	*dbg_ctx = NULL;   /* Context for fixed array callback */
+    H5D_farray_ctx_ud_t     *dbg_ctx = NULL;   /* Context for fixed array callback */
     H5O_loc_t obj_loc;          /* Pointer to an object's location */
     hbool_t obj_opened = FALSE; /* Flag to indicate that the object header was opened */
     H5O_layout_t layout;        /* Layout message */
@@ -518,16 +518,16 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__farray_dst_dbg_context
+ * Function:    H5D__farray_dst_dbg_context
  *
- * Purpose:	Destroy context for debugging callback
- *		(free the layout message from the specified object header)
+ * Purpose:     Destroy context for debugging callback
+ *              (free the layout message from the specified object header)
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
- * Programmer:	Quincey Koziol
- *		24th September, 2009
+ * Programmer:  Quincey Koziol
+ *              24th September, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -549,14 +549,14 @@ H5D__farray_dst_dbg_context(void *_dbg_ctx)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__farray_filt_fill
+ * Function:    H5D__farray_filt_fill
  *
- * Purpose:	Fill "missing elements" in block of elements
+ * Purpose:     Fill "missing elements" in block of elements
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -580,14 +580,14 @@ H5D__farray_filt_fill(void *nat_blk, size_t nelmts)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__farray_filt_encode
+ * Function:    H5D__farray_filt_encode
  *
- * Purpose:	Encode an element from "native" to "raw" form
+ * Purpose:     Encode an element from "native" to "raw" form
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -627,14 +627,14 @@ H5D__farray_filt_encode(void *_raw, const void *_elmt, size_t nelmts, void *_ctx
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__farray_filt_decode
+ * Function:    H5D__farray_filt_decode
  *
- * Purpose:	Decode an element from "raw" to "native" form
+ * Purpose:     Decode an element from "raw" to "native" form
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -673,14 +673,14 @@ H5D__farray_filt_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__farray_filt_debug
+ * Function:    H5D__farray_filt_debug
  *
- * Purpose:	Display an element for debugging
+ * Purpose:     Display an element for debugging
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -708,15 +708,15 @@ H5D__farray_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__farray_idx_depend
+ * Function:    H5D__farray_idx_depend
  *
- * Purpose:	Create flush dependency between fixed array and dataset's
+ * Purpose:     Create flush dependency between fixed array and dataset's
  *              object header.
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -798,15 +798,15 @@ H5D__farray_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t H5_ATTR_UNU
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__farray_idx_open
+ * Function:    H5D__farray_idx_open
  *
- * Purpose:	Opens an existing fixed array and initializes
+ * Purpose:     Opens an existing fixed array and initializes
  *              the layout struct with information about the storage.
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -849,19 +849,19 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__farray_idx_create
+ * Function:    H5D__farray_idx_create
  *
- * Purpose:	Creates a new indexed-storage fixed array and initializes
+ * Purpose:     Creates a new indexed-storage fixed array and initializes
  *              the layout struct with information about the storage.  The
- *		struct should be immediately written to the object header.
+ *              struct should be immediately written to the object header.
  *
- *		This function must be called before passing LAYOUT to any of
- *		the other indexed storage functions!
+ *              This function must be called before passing LAYOUT to any of
+ *              the other indexed storage functions!
  *
- * Return:	Non-negative on success (with the LAYOUT argument initialized
- *		and ready to write to an object header). Negative on failure.
+ * Return:      Non-negative on success (with the LAYOUT argument initialized
+ *              and ready to write to an object header). Negative on failure.
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -869,9 +869,9 @@ done:
 static herr_t
 H5D__farray_idx_create(const H5D_chk_idx_info_t *idx_info)
 {
-    H5FA_create_t 	cparam; /* Fixed array creation parameters */
+    H5FA_create_t     cparam; /* Fixed array creation parameters */
     H5D_farray_ctx_ud_t udata;  /* User data for fixed array create call */
-    herr_t 	ret_value = SUCCEED; 	/* Return value */
+    herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -930,13 +930,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__farray_idx_is_space_alloc
+ * Function:    H5D__farray_idx_is_space_alloc
  *
- * Purpose:	Query if space is allocated for index method
+ * Purpose:     Query if space is allocated for index method
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -954,13 +954,13 @@ H5D__farray_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__farray_idx_insert
+ * Function:    H5D__farray_idx_insert
  *
- * Purpose:	Insert chunk address into the indexing structure.
+ * Purpose:     Insert chunk address into the indexing structure.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi; 5 May 2014
+ * Programmer:  Vailin Choi; 5 May 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -968,8 +968,8 @@ static herr_t
 H5D__farray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
     const H5D_t H5_ATTR_UNUSED *dset)
 {
-    H5FA_t      *fa;  	/* Pointer to fixed array structure */
-    herr_t	ret_value = SUCCEED;		/* Return value */
+    H5FA_t      *fa;      /* Pointer to fixed array structure */
+    herr_t      ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_STATIC
 

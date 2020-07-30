@@ -3272,7 +3272,7 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
                     if(H5S_close(dataspace) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace")
                     dataspace = NULL;
-                } /* end if */
+                }
                 H5MM_free(chunk_entry->async_info.receive_buffer_array[i]);
             } /* end for */
 

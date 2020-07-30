@@ -3110,8 +3110,24 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if(NULL == (tpath = H5T_path_find(src->shared->parent, dst->shared->parent)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest datatypes")
             else if(!H5T_path_noop(tpath)) {
-                if((tsrc_id = H5I_register(H5I_DATATYPE, H5T_copy(src->shared->parent, H5T_COPY_ALL), FALSE)) < 0 ||
-                        (tdst_id = H5I_register(H5I_DATATYPE, H5T_copy(dst->shared->parent, H5T_COPY_ALL), FALSE)) < 0)
+                H5T_t *tsrc_cpy = NULL, *tdst_cpy = NULL;
+
+                if(NULL == (tsrc_cpy = H5T_copy(src->shared->parent, H5T_COPY_ALL)))
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "unable to copy src type for conversion")
+                /* References need to know about the src file */
+                if(tsrc_cpy->shared->type == H5T_REFERENCE)
+                    if(H5T_set_loc(tsrc_cpy, src->shared->u.vlen.file, H5T_LOC_MEMORY) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set datatype location");
+
+                if(NULL == (tdst_cpy = H5T_copy(dst->shared->parent, H5T_COPY_ALL)))
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "unable to copy dst type for conversion")
+                /* References need to know about the dst file */
+                if(tdst_cpy->shared->type == H5T_REFERENCE)
+                    if(H5T_set_loc(tdst_cpy, dst->shared->u.vlen.file, H5T_LOC_MEMORY) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set datatype location");
+
+                if(((tsrc_id = H5I_register(H5I_DATATYPE, tsrc_cpy, FALSE)) < 0)
+                    || ((tdst_id = H5I_register(H5I_DATATYPE, tdst_cpy, FALSE)) < 0))
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
             } /* end else-if */
             else

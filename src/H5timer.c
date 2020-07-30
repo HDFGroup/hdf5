@@ -220,7 +220,8 @@ H5_now_usec(void)
  *
  * Purpose:     Get the current time, as the time of seconds after the UNIX epoch
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Success:    A non-negative time value
+ *              Failure:    -1.0 (in theory, can't currently fail)
  *
  * Programmer:  Quincey Koziol
  *              October 05, 2016
@@ -247,9 +248,9 @@ H5_get_time(void)
         HDgettimeofday(&now_tv, NULL);
         ret_value = (double)now_tv.tv_sec + ((double)now_tv.tv_usec / (double)1000000.0f);
     }
-#else /* H5_HAVE_GETTIMEOFDAY */
+#else
     ret_value = (double)HDtime(NULL);
-#endif /* H5_HAVE_GETTIMEOFDAY */
+#endif
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_get_time() */
@@ -279,9 +280,9 @@ H5__timer_get_timevals(H5_timevals_t *times /*in,out*/)
     /* Windows call handles both system/user and elapsed times */
 #ifdef H5_HAVE_WIN32_API
     if(H5_get_win32_times(times) < 0) {
-        times->elapsed   = -1;
-        times->system    = -1;
-        times->user      = -1;
+        times->elapsed   = -1.0;
+        times->system    = -1.0;
+        times->user      = -1.0;
 
         return -1;
     } /* end if */
@@ -310,24 +311,8 @@ H5__timer_get_timevals(H5_timevals_t *times /*in,out*/)
      * Elapsed time *
      ****************/
 
-    /* NOTE: Not having a way to get elapsed time IS an error, unlike
-     * the system and user times.
-     */
+    times->elapsed = H5_get_time();
 
-#if defined(H5_HAVE_CLOCK_GETTIME)
-{
-    struct timespec ts;
-
-    if(HDclock_gettime(CLOCK_MONOTONIC, &ts) != 0)
-        return -1;
-    times->elapsed = (double)ts.tv_sec + ((double)ts.tv_nsec / (double)1.0E9F);
-}
-#else
-    /* Die here.  We'd like to know about this so we can support some
-     * other time functionality.
-     */
-    HDassert(0);
-#endif
 #endif /* H5_HAVE_WIN32_API */
 
     return 0;
