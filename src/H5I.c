@@ -2414,7 +2414,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 
     FUNC_ENTER_STATIC_NOERR
 
-    HDfprintf(stderr, "         id = %lu\n", (unsigned long)(item->id));
+    HDfprintf(stderr, "         id = %" PRIdHID "\n", item->id);
     HDfprintf(stderr, "         count = %u\n", item->count);
     HDfprintf(stderr, "         obj   = 0x%08p\n", item->obj_ptr);
 
