@@ -215,6 +215,7 @@ static const H5FD_class_t H5FD_log_g = {
     H5FD_log_truncate,				/*truncate		*/
     H5FD_log_lock,                              /*lock                  */
     H5FD_log_unlock,                            /*unlock                */
+    NULL,                                       /*dedup                 */
     H5FD_FLMAP_DICHOTOMY			/*fl_map		*/
 };
 

@@ -679,6 +679,73 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
+/* Return `other` if `self` has no de-duplication method.  Otherwise, return
+ * `other` if it duplicates `self`, `self` if `other` does NOT duplicate it,
+ * NULL if `other` conflicts with `self` or if there is an error.
+ *
+ * Unlike H5FD_deduplicate(), this routine does not free `self` under any
+ * circumstances.
+ */
+static H5FD_t *
+H5FD_dedup(H5FD_t *self, H5FD_t *other, hid_t fapl)
+{
+    H5FD_t *(*dedup)(H5FD_t *, H5FD_t *, hid_t);
+
+    if ((dedup = self->cls->dedup) != NULL)
+        return (*dedup)(self, other, fapl);
+
+    if (H5FDcmp(self, other) == 0)
+        return self;
+
+    return other;
+}
+
+/* If any other open H5FD_t is functionally equivalent to `file` under
+ * the given file-access properties, then return it and close `file`.
+ *
+ * If any other open H5FD_t is not equivalent to `file`, but its
+ * operation would conflict with `file`, then return NULL and close `file`.
+ */
+H5FD_t *
+H5FD_deduplicate(H5FD_t *file, hid_t fapl)
+{
+    H5FD_t *deduped = file, *item;
+
+    TAILQ_FOREACH(item, &all_vfds, link) {
+        /* skip "self" */
+        if (item == file)
+            continue;
+
+        /* skip files with exclusive owners, for now */
+        if (item->exc_owner != NULL)
+            continue;
+
+        if ((deduped = H5FD_dedup(item, file, fapl)) != file)
+            goto finish;
+    }
+
+    /* If we reach this stage, then we identified neither a conflict nor a
+     * duplicate.  If any lower VFD with an exclusive owner matches `file`,
+     * return NULL to indicate the conflict.
+     */
+    TAILQ_FOREACH(item, &all_vfds, link) {
+        if (item == file || item->exc_owner == NULL)
+            continue;
+
+        if (H5FDcmp(file, item) == 0) {
+            deduped = NULL;
+            break;
+        }
+    }
+
+finish:
+    if (deduped != file && H5FD_close(file) < 0) {
+        HERROR(H5E_FILE, H5E_CANTOPENFILE, "could not close file");
+        return NULL;
+    }
+    return deduped;
+}
+
 /* Return `true` if a second H5FD_t identical to `file`
  * has an exclusive owner, `false` otherwise.
  */

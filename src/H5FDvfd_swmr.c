@@ -58,6 +58,7 @@ typedef struct H5FD_vfd_swmr_t {
                                                 /* when the page buffer is    */
                                                 /* and to FALSE otherwise.    */
                                                 /* Used for sanity checking.  */
+    H5F_vfd_swmr_config_t config;
     bool writer;                            /* True iff configured to write. */
 } H5FD_vfd_swmr_t;
 
@@ -69,6 +70,7 @@ static H5FD_t *H5FD_vfd_swmr_open(const char *name, unsigned flags,
     hid_t fapl_id, haddr_t maxaddr);
 static herr_t H5FD_vfd_swmr_close(H5FD_t *_file);
 static int H5FD_vfd_swmr_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
+static H5FD_t *H5FD_vfd_swmr_dedup(H5FD_t *, H5FD_t *, hid_t);
 static herr_t H5FD_vfd_swmr_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_vfd_swmr_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t H5FD_vfd_swmr_set_eoa(H5FD_t *_file, H5FD_mem_t type,
@@ -130,6 +132,7 @@ static const H5FD_class_t H5FD_vfd_swmr_g = {
     H5FD_vfd_swmr_truncate,     /* truncate             */
     H5FD_vfd_swmr_lock,         /* lock                 */
     H5FD_vfd_swmr_unlock,       /* unlock               */
+    H5FD_vfd_swmr_dedup,        /* dedup               */
     H5FD_FLMAP_DICHOTOMY        /* fl_map               */
 };
 
@@ -250,15 +253,14 @@ done:
 } /* end H5Pset_fapl_vfd_swmr() */
 
 static herr_t
-H5FD__swmr_reader_open(H5FD_vfd_swmr_t *file, H5F_vfd_swmr_config_t *vfd_swmr_config)
+H5FD__swmr_reader_open(H5FD_vfd_swmr_t *file)
 {
     h5_retry_t retry;                        /* retry state */
     bool do_try;                             /* more tries remain */
     herr_t      ret_value = SUCCEED;
-
     FUNC_ENTER_STATIC
 
-    file->api_elapsed_nslots = vfd_swmr_config->max_lag + 1;
+    file->api_elapsed_nslots = file->config.max_lag + 1;
 
     file->api_elapsed_ticks =
         calloc(file->api_elapsed_nslots, sizeof(*file->api_elapsed_ticks));
@@ -311,36 +313,44 @@ static H5FD_t *
 H5FD_vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id,
     haddr_t maxaddr)
 {
-    H5FD_vfd_swmr_t *file = NULL;            /* VFD SWMR driver info        */
-    H5P_genplist_t *plist;                   /* Property list pointer       */
-    H5F_vfd_swmr_config_t *vfd_swmr_config = /* Points to VFD SWMR          */
-        NULL;                                /* configuration               */
+    H5FD_vfd_swmr_t *file = NULL;
+    size_t page_buf_size;
+    H5P_genplist_t *plist;
+    H5F_vfd_swmr_config_t *vfd_swmr_config;
     H5FD_t *ret_value  = NULL;               /* Return value     */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Get file access property list */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, \
-                    "not a file access property list")
-
-    /* Allocate buffer for reading the VFD SWMR configuration */
-    if(NULL == (vfd_swmr_config = H5MM_malloc(sizeof(H5F_vfd_swmr_config_t)))) {
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL,
-                    "memory allocation failed for H5F_vfd_swmr_config_t");
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id))) {
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL,
+                    "not a file access property list");
     }
 
-    /* Get VFD SWMR configuration */
-    if(H5P_get(plist, H5F_ACS_VFD_SWMR_CONFIG_NAME, vfd_swmr_config) < 0) {
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL,
-                    "can't get VFD SWMR config info");
+    if (H5P_get(plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get page buffer size");
+
+    /* Paged allocation, too, has to be enabled, but the page buffer
+     * initialization (H5PB_create) will detect a conflicting configuration
+     * and return an error.
+     */
+    if (page_buf_size == 0) {
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL,
+            "page buffering must be enabled");
     }
 
     /* Create the new driver struct */
     if(NULL == (file = H5FL_CALLOC(H5FD_vfd_swmr_t))) {
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
                     "unable to allocate file struct");
+    }
+
+    vfd_swmr_config = &file->config;
+
+    /* Get VFD SWMR configuration */
+    if(H5P_get(plist, H5F_ACS_VFD_SWMR_CONFIG_NAME, vfd_swmr_config) < 0) {
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL,
+                    "can't get VFD SWMR config info");
     }
 
     file->md_fd = -1;
@@ -359,8 +369,7 @@ H5FD_vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id,
     file->writer = vfd_swmr_config->writer;
 
     /* Ensure that this is the reader */
-    if (!vfd_swmr_config->writer &&
-        H5FD__swmr_reader_open(file, vfd_swmr_config) < 0) {
+    if (!vfd_swmr_config->writer && H5FD__swmr_reader_open(file) < 0) {
         HGOTO_ERROR(H5E_VFL, H5E_OPENERROR, NULL,
                    "perform reader-specific opening steps failed");
     }
@@ -384,13 +393,9 @@ H5FD_vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id,
     file->pb_configured = FALSE;
 
     /* Set return value */
-    ret_value = (H5FD_t*)file;
+    ret_value = &file->pub;
 
 done:
-    /* Free the buffer */
-    if(vfd_swmr_config)
-        vfd_swmr_config = H5MM_xfree(vfd_swmr_config);
-
     /* Handle closing if error */
     if(NULL == ret_value && file) {
 
@@ -502,6 +507,63 @@ H5FD_vfd_swmr_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_vfd_swmr_cmp() */
+
+static H5FD_t *
+H5FD_vfd_swmr_dedup(H5FD_t *_self, H5FD_t *_other, hid_t fapl)
+{
+    H5FD_vfd_swmr_t *self = (H5FD_vfd_swmr_t *)_self;
+
+    assert(_self->driver_id == H5FD_VFD_SWMR_g);
+
+    if (_self->cls == _other->cls) {
+        H5FD_vfd_swmr_t *other = (H5FD_vfd_swmr_t *)_other;
+        H5P_genplist_t *plist;
+        H5F_vfd_swmr_config_t *config;
+        bool equal_configs;
+
+        if (H5FD_cmp(self->hdf5_file_lf, other->hdf5_file_lf) != 0)
+            return _other;
+
+        /* If fapl == _ANY_VFD, then the match between lower files is
+         * sufficient.
+         */
+        if (fapl == H5P_FILE_ACCESS_ANY_VFD)
+            return _self;
+
+        /* If fapl != _ANY_VFD, then we have either a duplicate or
+         * a conflict.  If the VFD SWMR parameters match, then
+         * return `self` to indicate a duplicate.  Otherwise, return
+         * NULL to indicate a mismatch.
+         */
+        if (NULL == (plist = H5I_object(fapl))) {
+            HERROR(H5E_ARGS, H5E_BADTYPE, "could not get fapl");
+            return NULL;
+        }
+
+        if ((config = malloc(sizeof(*config))) == NULL) {
+            HERROR(H5E_ARGS, H5E_BADTYPE, "could not allocate config");
+            return NULL;
+        }
+        if (H5P_get(plist, H5F_ACS_VFD_SWMR_CONFIG_NAME, config) < 0) {
+           HERROR(H5E_PLIST, H5E_CANTGET, "cannot get VFD SWMR config");
+           return NULL;
+        }
+
+        equal_configs = memcmp(&self->config, config, sizeof(*config)) == 0;
+
+        free(config);
+
+        if (equal_configs)
+            return _self;
+
+        HERROR(H5E_PLIST, H5E_CANTGET, "inconsistent VFD SWMR config");
+        return NULL;
+    } else if (H5FD_cmp(self->hdf5_file_lf, _other) == 0) {
+        return (fapl == H5P_FILE_ACCESS_ANY_VFD) ? _self : NULL;
+    } else {
+        return _other;
+    }
+}
 
 
 /*-------------------------------------------------------------------------

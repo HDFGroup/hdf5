@@ -164,6 +164,7 @@ static const H5FD_class_t H5FD_splitter_g = {
     H5FD_splitter_truncate,     /* truncate             */
     H5FD_splitter_lock,         /* lock                 */
     H5FD_splitter_unlock,       /* unlock               */
+    NULL,                       /* dedup                */
     H5FD_FLMAP_DICHOTOMY        /* fl_map               */
 };
 
