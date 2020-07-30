@@ -802,15 +802,15 @@ done:
  *
  * \brief Reads an attribute
  *
- * \param[in]  attr_id      Identifier of an attribute to read
- * \param[in]  mem_type_id  Identifier of the attribute datatype (in memory)
- * \param[out] buf          Buffer for data to be read
+ * \param[in]  attr_id    Identifier of an attribute to read
+ * \param[in]  dtype_id   Identifier of the attribute datatype (in memory)
+ * \param[out] buf        Buffer for data to be read
  *
  * \return \herr_t 
  *         Returns a non-negative value if successful; otherwise returns a negative value.
  *
  * \details H5Aread() reads an attribute, specified with \p attr_id. The attribute's memory datatype 
- *          is specified with \p mem_type_id. The entire attribute is read into \p buf from the file.
+ *          is specified with \p dtype_id. The entire attribute is read into \p buf from the file.
  *
  *          Datatype conversion takes place at the time of a read or write and is automatic. See the 
  *          “Data Transfer: Datatype Conversion and Selection” section in the “HDF5 Datatypes” 
