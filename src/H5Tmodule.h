@@ -30,8 +30,7 @@
 #define H5_MY_PKG_INIT  YES
 
 /**\defgroup H5T H5T: Datatype Interface
-   These functions create and manipulate the datatype which describes elements
-   of a dataset.
+   \todo Describe concisely what the functions in this module are about.
  */
 
 #endif /* _H5Tmodule_H */
