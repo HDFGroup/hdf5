@@ -438,9 +438,7 @@ done:
  * \param[in]  attr_name    Name of attribute to open
  * \param[in]  aapl_id      Attribute access property list
  *
- * \return \hid_t {attribute}
- *               Returns an attribute identifier if successful; 
- *               otherwise returns a negative value.                       
+ * \return \hid_t{attribute}
  *
  * \details H5Aopen() opens an existing attribute, \p attr_name, that is attached to 
  *          an object specified by an object identifier, \p obj_id.
@@ -678,8 +676,6 @@ done:
  * \param[out]  buf       Data to be written
  *
  * \return \herr_t 
- *         Returns a non-negative value if successful; 
- *         otherwise returns a negative value.
  *
  * \details H5Awrite() writes an attribute, specified with \p attr_id. The 
  *          attribute's memory datatype is specified with \p dtype_id. 
@@ -745,7 +741,6 @@ done:
  * \param[out] buf        Buffer for data to be read
  *
  * \return \herr_t 
- *         Returns a non-negative value if successful; otherwise returns a negative value.
  *
  * \details H5Aread() reads an attribute, specified with \p attr_id. The attribute's memory datatype 
  *          is specified with \p dtype_id. The entire attribute is read into \p buf from the file.
@@ -1692,8 +1687,7 @@ done:
  *
  * \param[in] attr_id   Attribute to release access to
  *
- * \return \herr_t      Returns a non-negative value if successful; otherwise returns a 
- *                      negative value. 
+ * \return \herr_t      
  *
  * \details H5Aclose() terminates access to the attribute specified by \p attr_id by releasing 
  *          the identifier.
