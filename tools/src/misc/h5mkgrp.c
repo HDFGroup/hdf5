@@ -123,8 +123,6 @@ parse_command_line(int argc, const char *argv[], mkgrp_opt_t *options)
 {
     int opt;            /* Option from command line */
     size_t curr_group;  /* Current group name to copy */
-    hbool_t custom_fapl = FALSE;
-    hid_t tmp_fapl_id = H5I_INVALID_HID;
 
     /* Check for empty command line */
     if(argc == 1) {

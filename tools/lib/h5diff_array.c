@@ -1203,7 +1203,6 @@ static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t
                 /* print differences if found */
                 if (nfound_b && opts->mode_verbose) {
                     H5O_info_t oi1, oi2;
-                    char *obj1_str = NULL, *obj2_str = NULL;
 
                     H5Oget_info2(obj1_id, &oi1, H5O_INFO_BASIC);
                     H5Oget_info2(obj2_id, &oi2, H5O_INFO_BASIC);
