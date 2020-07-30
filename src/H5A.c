@@ -282,40 +282,8 @@ H5A_term_package(void)
  * \since 1.8.0
  *
  */
+/*------------------------------------------------------------------------- */
 
-/* --------------------------------------------------------------------------*/
-/* Function:    H5Acreate2
- *
- * Purpose:     Creates an attribute on an object
- *
- * Usage:
- *              hid_t H5Acreate2(loc_id, attr_name, type_id, space_id, acpl_id,
- *                  aapl_id)
- *
- * Description: This function creates an attribute which is attached to the
- *              object specified with 'loc_id'. The name specified with
- *              'attr_name' for each attribute for an object must be unique
- *              for that object. The 'type_id' and 'space_id' are created
- *              with the H5T and H5S interfaces respectively. The 'aapl_id'
- *              property list is currently unused, but will be used in the
- *              future for optional attribute access properties. The
- *              attribute ID returned from this function must be released
- *              with H5Aclose or resource leaks will develop.
- *
- * Parameters:
- *              hid_t loc_id;           IN: Object (dataset or group) to be attached to
- *              const char *attr_name;  IN: Name of attribute to locate and open
- *              hid_t type_id;          IN: ID of datatype for attribute
- *              hid_t space_id;         IN: ID of dataspace for attribute
- *              hid_t acpl_id;          IN: ID of creation property list (currently not used)
- *              hid_t aapl_id;          IN: Attribute access property list
- *
- * Return:      Success:    An ID for the created attribute
- *
- *              Failure:    H5I_INVALID_HID
- *
- *-------------------------------------------------------------------------
- */
 hid_t
 H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
     hid_t acpl_id, hid_t aapl_id)
@@ -460,6 +428,7 @@ done:
 } /* H5Acreate_by_name() */
 
 
+/*--------------------------------------------------------------------------*/
 /**\ingroup H5A
  *
  * \brief Opens an attribute for an object specified by object identifier and attribute name
@@ -488,25 +457,8 @@ done:
  * 
  * \since 1.8.0
  */
-/*--------------------------------------------------------------------------
- NAME
-    H5Aopen
- PURPOSE
-    Opens an attribute for an object by looking up the attribute name
- USAGE
-    hid_t H5Aopen(loc_id, attr_name, aapl_id)
-        hid_t loc_id;           IN: Object that attribute is attached to
-        const char *attr_name;  IN: Name of attribute to locate and open
-        hid_t aapl_id;          IN: Attribute access property list
- RETURNS
-    ID of attribute on success, H5I_INVALID_HID on failure
+/*--------------------------------------------------------------------------*/
 
- DESCRIPTION
-        This function opens an existing attribute for access.  The attribute
-    name specified is used to look up the corresponding attribute for the
-    object.  The attribute ID returned from this function must be released with
-    H5Aclose or resource leaks will develop.
---------------------------------------------------------------------------*/
 hid_t
 H5Aopen(hid_t loc_id, const char *attr_name, hid_t aapl_id)
 {
@@ -749,22 +701,8 @@ done:
  * \since 1.0.0
  * 
  */
-/*--------------------------------------------------------------------------
- NAME
-    H5Awrite
- PURPOSE
-    Write out data to an attribute
- USAGE
-    herr_t H5Awrite (attr_id, dtype_id, buf)
-        hid_t attr_id;       IN: Attribute to write
-        hid_t dtype_id;       IN: Memory datatype of buffer
-        const void *buf;     IN: Buffer of data to write
- RETURNS
-    Non-negative on success/Negative on failure
+/*--------------------------------------------------------------------------*/
 
- DESCRIPTION
-        This function writes a complete attribute to disk.
---------------------------------------------------------------------------*/
 herr_t
 H5Awrite(hid_t attr_id, hid_t dtype_id, const void *buf)
 {
@@ -821,22 +759,8 @@ done:
  * \since   1.0.0
  * 
 */
-/*--------------------------------------------------------------------------
- NAME
-    H5Aread
- PURPOSE
-    Read in data from an attribute
- USAGE
-    herr_t H5Aread (attr_id, dtype_id, buf)
-        hid_t attr_id;       IN: Attribute to read
-        hid_t dtype_id;       IN: Memory datatype of buffer
-        void *buf;           IN: Buffer for data to read
- RETURNS
-    Non-negative on success/Negative on failure
+/*--------------------------------------------------------------------------*/
 
- DESCRIPTION
-        This function reads a complete attribute from disk.
---------------------------------------------------------------------------*/
 herr_t
 H5Aread(hid_t attr_id, hid_t dtype_id, void *buf)
 {
@@ -1780,18 +1704,8 @@ done:
  * \since 1.0.0 
  *
  */
+/*-------------------------------------------------------------------------*/
 
-/*-------------------------------------------------------------------------
- * Function:    H5Aclose
- *
- * Purpose:     Closes access to an attribute and releases resources used by
- *              it. It is illegal to subsequently use that same dataset
- *              ID in calls to other attribute functions.
- *
- * Return:      SUCCEED/FAIL
- *
- *-------------------------------------------------------------------------
- */
 herr_t
 H5Aclose(hid_t attr_id)
 {
