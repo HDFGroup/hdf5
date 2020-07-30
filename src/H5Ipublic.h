@@ -21,45 +21,47 @@
 /* Public headers needed by this file */
 #include "H5public.h"
 
-/*
- * Library type values.  Start with `1' instead of `0' because it makes the
- * tracing output look better when hid_t values are large numbers.  Change the
- * TYPE_BITS in H5I.c if the MAXID gets larger than 32 (an assertion will
- * fail otherwise).
+/** Library type values.
+ * \internal Library type values.  Start with `1' instead of `0' because it
+ *           makes the tracing output look better when hid_t values are large
+ *           numbers. Change the TYPE_BITS in H5I.c if the MAXID gets larger
+ *           than 32 (an assertion will fail otherwise).
  *
- * When adding types here, add a section to the 'misc19' test in test/tmisc.c
- * to verify that the H5I{inc|dec|get}_ref() routines work correctly with it.
+ *           When adding types here, add a section to the 'misc19' test in
+ *           test/tmisc.c to verify that the H5I{inc|dec|get}_ref() routines
+ *           work correctly with it. \endinternal
  */
 typedef enum H5I_type_t {
-    H5I_UNINIT      = (-2),     /* uninitialized type                           */
-    H5I_BADID       = (-1),     /* invalid Type                                 */
-    H5I_FILE        = 1,        /* type ID for File objects                     */
-    H5I_GROUP,                  /* type ID for Group objects                    */
-    H5I_DATATYPE,               /* type ID for Datatype objects                 */
-    H5I_DATASPACE,              /* type ID for Dataspace objects                */
-    H5I_DATASET,                /* type ID for Dataset objects                  */
-    H5I_MAP,                    /* type ID for Map objects                      */
-    H5I_ATTR,                   /* type ID for Attribute objects                */
-    H5I_VFL,                    /* type ID for virtual file layer               */
-    H5I_VOL,                    /* type ID for virtual object layer             */
-    H5I_GENPROP_CLS,            /* type ID for generic property list classes    */
-    H5I_GENPROP_LST,            /* type ID for generic property lists           */
-    H5I_ERROR_CLASS,            /* type ID for error classes                    */
-    H5I_ERROR_MSG,              /* type ID for error messages                   */
-    H5I_ERROR_STACK,            /* type ID for error stacks                     */
-    H5I_SPACE_SEL_ITER,         /* type ID for dataspace selection iterator     */
-    H5I_NTYPES                  /* number of library types, MUST BE LAST!       */
+    H5I_UNINIT      = (-2),     /**< uninitialized type                        */
+    H5I_BADID       = (-1),     /**< invalid Type                              */
+    H5I_FILE        = 1,        /**< type ID for File objects                  */
+    H5I_GROUP,                  /**< type ID for Group objects                 */
+    H5I_DATATYPE,               /**< type ID for Datatype objects              */
+    H5I_DATASPACE,              /**< type ID for Dataspace objects             */
+    H5I_DATASET,                /**< type ID for Dataset objects               */
+    H5I_MAP,                    /**< type ID for Map objects                   */
+    H5I_ATTR,                   /**< type ID for Attribute objects             */
+    H5I_VFL,                    /**< type ID for virtual file layer            */
+    H5I_VOL,                    /**< type ID for virtual object layer          */
+    H5I_GENPROP_CLS,            /**< type ID for generic property list classes */
+    H5I_GENPROP_LST,            /**< type ID for generic property lists        */
+    H5I_ERROR_CLASS,            /**< type ID for error classes                 */
+    H5I_ERROR_MSG,              /**< type ID for error messages                */
+    H5I_ERROR_STACK,            /**< type ID for error stacks                  */
+    H5I_SPACE_SEL_ITER,         /**< type ID for dataspace selection iterator  */
+    H5I_NTYPES                  /**< number of library types, MUST BE LAST!    */
 } H5I_type_t;
 
-/* Type of atoms to return to users */
+/** Type of atoms to return to users */
 typedef int64_t hid_t;
+/** The size of identifiers */
 #define H5_SIZEOF_HID_T         H5_SIZEOF_INT64_T
 
-/* An invalid object ID. This is also negative for error return. */
+/** An invalid object ID. This is also negative for error return. */
 #define H5I_INVALID_HID         (-1)
 
-/*
- * Function for freeing objects. This function will be called with an object
+/**
+ * A function for freeing objects. This function will be called with an object
  * ID type number and a pointer to the object. The function should free the
  * object and return non-negative to indicate that the object
  * can be removed from the ID type. If the function returns negative
@@ -67,10 +69,10 @@ typedef int64_t hid_t;
  */
 typedef herr_t (*H5I_free_t)(void *);
 
-/* Type of the function to compare objects & keys */
+/** The type of a function to compare objects & keys */
 typedef int (*H5I_search_func_t)(void *obj, hid_t id, void *key);
 
-/* Type of the H5Iiterate callback function */
+/** The type of H5Iiterate() callback functions */
 typedef herr_t (*H5I_iterate_func_t)(hid_t id, void *udata);
 
 #ifdef __cplusplus
@@ -104,4 +106,3 @@ H5_DLL htri_t H5Iis_valid(hid_t id);
 }
 #endif
 #endif /* _H5Ipublic_H */
-
