@@ -29,5 +29,8 @@
 #define H5_MY_PKG_ERR   H5E_ATTR
 #define H5_MY_PKG_INIT  YES
 
-#endif /* _H5Amodule_H */
+/**\defgroup H5A H5A: Attribute Interface
+   \todo Describe concisely what the functions in this module are about.
+ */
 
+#endif /* _H5Amodule_H */

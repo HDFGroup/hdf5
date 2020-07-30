@@ -29,5 +29,8 @@
 #define H5_MY_PKG_ERR   H5E_PLIST
 #define H5_MY_PKG_INIT  YES
 
-#endif /* _H5Pmodule_H */
+/**\defgroup H5P H5P: Property List Interface
+   \todo Describe concisely what the functions in this module are about.
+ */
 
+#endif /* _H5Pmodule_H */

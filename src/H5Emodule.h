@@ -29,6 +29,8 @@
 #define H5_MY_PKG_ERR   H5E_ERROR
 #define H5_MY_PKG_INIT  YES
 
+/**\defgroup H5E H5E: Error Interface
+   \todo Describe concisely what the functions in this module are about.
+ */
+
 #endif /* _H5Emodule_H */
-
-
