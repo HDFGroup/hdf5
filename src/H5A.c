@@ -238,8 +238,47 @@ H5A_term_package(void)
 } /* H5A_term_package() */
 
 
-/*--------------------------------------------------------------------------
- * Function:    H5Acreate2
+/**\ingroup H5A 
+ *
+ * \brief Creates an attribute attached to a specified object
+ *
+ * \param[in]  loc_id  Location or object identifier
+ *                     The identifier may be a file, group, dataset, or named datatype.
+ *                     If \p loc_id is a file identifier, the attribute will be attached to that file’s root group.           
+ * \param[in] attr_name Name of attribute to locate and open
+ * \param[in] type_id   Attribute datatype identifier
+ * \param[in] space_id  Attribute dataspace identifier
+ * \param[in] acpl_id   Attribute creation property list identifier
+ *                      (Currently not used; specify H5P_DEFAULT)
+ * \param[in] aapl_id   Attribute access property list identifier 
+ * \return \hid_t{attribute}
+ * \details H5Acreate2() creates an attribute, attr_name, which is attached to the object 
+ *          specified by the identifier \p loc_id.
+ *
+ *          The attribute name, \p attr_name, must be unique for the object.
+ *
+ *          The attribute is created with the specified datatype and dataspace, \p type_id 
+ *          and \p space_id, which are created with the H5T and H5S interfaces, respectively.
+ *
+ *          If \p type_id is either a fixed-length or variable-length string, it is important 
+ *          to set the string length when defining the datatype. String datatypes are derived 
+ *          from H5T_C_S1 (or H5T_FORTRAN_S1 for Fortran), which defaults to 1 character in 
+ *          size. See H5Tset_size() and Creating variable-length string datatypes.
+ *
+ *          The access property list is currently unused, but will be used in the future. This 
+ *          property list should currently be H5P_DEFAULT.
+ *
+ *          The attribute identifier returned by this function must be released with H5Aclose()
+ *          or resource leaks will develop.
+ *
+ * \version 1.8.0 C function introduced in this release.
+ *
+ * \see H5Aclose()
+ *
+ * --------------------------------------------------------------------------
+ */
+
+/* Function:    H5Acreate2
  *
  * Purpose:     Creates an attribute on an object
  *
