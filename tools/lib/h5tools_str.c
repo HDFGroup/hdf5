@@ -286,17 +286,14 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info, hs
         h5tools_context_t *ctx)
 {
     size_t    i = 0;
-    hsize_t   curr_pos = elmtno;
 
     H5TOOLS_START_DEBUG("");
 
     H5TOOLS_DEBUG("elmtno=%ld, ctx->ndims=%d", elmtno, ctx->ndims);
     h5tools_str_reset(str);
 
-    curr_pos = calc_acc_pos(ctx->ndims, elmtno, ctx->acc, ctx->pos);
+    calc_acc_pos(ctx->ndims, elmtno, ctx->acc, ctx->pos);
     if(ctx->ndims > 0) {
-        HDassert(curr_pos == 0);
-
         /* Print the index values */
         for(i = 0; i < (size_t) ctx->ndims; i++) {
             if (i)
@@ -329,17 +326,14 @@ h5tools_str_region_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *i
         hsize_t *ptdata, h5tools_context_t *ctx)
 {
     size_t    i = 0;
-    hsize_t   curr_pos = elmtno;
 
     H5TOOLS_START_DEBUG("");
 
     H5TOOLS_DEBUG("elmtno=%ld, ctx->ndims=%d", elmtno, ctx->ndims);
     h5tools_str_reset(str);
 
-    curr_pos = calc_acc_pos(ctx->ndims, elmtno, ctx->acc, ctx->pos);
+    calc_acc_pos(ctx->ndims, elmtno, ctx->acc, ctx->pos);
     if(ctx->ndims > 0) {
-        HDassert(curr_pos == 0);
-
         /* Print the index values */
         for(i = 0; i < (size_t) ctx->ndims; i++) {
             ctx->pos[i] += (unsigned long) ptdata[ctx->sm_pos+i];
@@ -678,6 +672,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
     if(info->raw) {
         size_t i;
 
+        H5TOOLS_DEBUG("info->raw");
         if(1 == nsize)
             h5tools_str_append(str, OPT(info->fmt_raw, "0x%02x"), ucp_vp[0]);
         else
@@ -688,8 +683,11 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
             }
     }
     else {
-        if((type_class = H5Tget_class(type)) < 0)
+        H5TOOLS_DEBUG("H5Tget_class(type)");
+        if((type_class = H5Tget_class(type)) < 0) {
+            H5TOOLS_ENDDEBUG(" with %s", "NULL");
             return NULL;
+        }
         switch (type_class) {
             case H5T_FLOAT:
                 H5TOOLS_DEBUG("H5T_FLOAT");

@@ -1252,7 +1252,6 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
     size_t            j;                       /* counters  */
     hsize_t           zero[1] = {0};           /* vector of zeros */
     unsigned int      flags;                   /* buffer extent flags */
-    hsize_t           elmtno;                  /* elemnt index  */
     hsize_t           low[H5S_MAX_RANK];       /* low bound of hyperslab */
     hsize_t           high[H5S_MAX_RANK];      /* higher bound of hyperslab */
     size_t            p_type_nbytes;           /* size of memory type */
@@ -1565,9 +1564,8 @@ static herr_t
 h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx, hid_t dset, hid_t p_type)
 {
     int     sndims;
-    hid_t   f_space = H5I_INVALID_HID;            /* file data space */
-    size_t  i;                       /* counters  */
-    hsize_t total_size[H5S_MAX_RANK];/* total size of dataset*/
+    hid_t   f_space = H5I_INVALID_HID;    /* file data space */
+    hsize_t total_size[H5S_MAX_RANK];     /* total size of dataset*/
     hbool_t past_catch = FALSE;
     herr_t  ret_value = SUCCEED;
 
