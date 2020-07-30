@@ -1313,7 +1313,6 @@ dump_dataset_values(hid_t dset)
     hid_t               space = H5I_INVALID_HID;
     hsize_t             total_size[H5S_MAX_RANK];
     int                 ndims;
-    size_t              i;
     char                string_prefix[64];
     static char         fmt_double[16];
     static char         fmt_float[16];
@@ -1481,7 +1480,6 @@ dump_attribute_values(hid_t attr)
     hid_t               space = H5I_INVALID_HID;
     hsize_t             total_size[H5S_MAX_RANK];
     int                 ndims;
-    size_t              i;
     char                string_prefix[64];
     static char         fmt_double[16];
     static char         fmt_float[16];
