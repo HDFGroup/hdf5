@@ -229,12 +229,12 @@ typedef long long ssize_t;
  */
 typedef uint64_t    hsize_t;
 typedef int64_t     hssize_t;
-#define PRIXHSIZE   PRIX64
 #define PRIdHSIZE   PRId64
 #define PRIiHSIZE   PRIi64
 #define PRIoHSIZE   PRIo64
 #define PRIuHSIZE   PRIu64
 #define PRIxHSIZE   PRIx64
+#define PRIXHSIZE   PRIX64
 #define H5_SIZEOF_HSIZE_T   H5_SIZEOF_UINT64_T
 #define H5_SIZEOF_HSSIZE_T  H5_SIZEOF_INT64_T
 #define HSIZE_UNDEF         UINT64_MAX
@@ -271,16 +271,19 @@ typedef int64_t     hssize_t;
 #   define PRIoHADDR  "o"
 #   define PRIuHADDR  "u"
 #   define PRIxHADDR  "x"
+#   define PRIXHADDR  "X"
 #elif H5_SIZEOF_HADDR_T == H5_SIZEOF_LONG
 #   define PRIXHADDR  "lX"
 #   define PRIoHADDR  "lo"
 #   define PRIuHADDR  "lu"
 #   define PRIxHADDR  "lx"
+#   define PRIXHADDR  "lX"
 #elif H5_SIZEOF_HADDR_T == H5_SIZEOF_LONG_LONG
 #   define PRIXHADDR  H5_PRINTF_LL_WIDTH "X"
 #   define PRIoHADDR  H5_PRINTF_LL_WIDTH "o"
 #   define PRIuHADDR  H5_PRINTF_LL_WIDTH "u"
 #   define PRIxHADDR  H5_PRINTF_LL_WIDTH "x"
+#   define PRIXHADDR  H5_PRINTF_LL_WIDTH "X"
 #else
 #   error "nothing appropriate for H5_PRINTF_HADDR_FMT"
 #endif

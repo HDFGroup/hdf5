@@ -87,7 +87,7 @@ HDvasprintf(char **bufp, const char *fmt, va_list _ap)
         int ret;
         va_list ap;
 
-        va_copy(ap, _ap);
+        HDva_copy(ap, _ap);
         ret = HDvsnprintf(buf, bufsz, fmt, ap);
         va_end(ap);
         if (ret >= 0 && (size_t)ret < bufsz) {
