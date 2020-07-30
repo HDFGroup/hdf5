@@ -29,5 +29,8 @@
 #define H5_MY_PKG_ERR   H5E_ATOM
 #define H5_MY_PKG_INIT  NO
 
-#endif /* _H5Imodule_H */
+/**\defgroup H5I H5I: Identifier Interface
+   \todo Describe concisely what the functions in this module are about.
+ */
 
+#endif /* _H5Imodule_H */

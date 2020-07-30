@@ -29,5 +29,8 @@
 #define H5_MY_PKG_ERR   H5E_PLINE
 #define H5_MY_PKG_INIT  YES
 
-#endif /* _H5Zmodule_H */
+/**\defgroup H5Z H5Z: Filter and Compression Interface
+   \todo Describe concisely what the functions in this module are about.
+ */
 
+#endif /* _H5Zmodule_H */

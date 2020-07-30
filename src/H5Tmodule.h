@@ -29,5 +29,9 @@
 #define H5_MY_PKG_ERR   H5E_DATATYPE
 #define H5_MY_PKG_INIT  YES
 
-#endif /* _H5Tmodule_H */
+/**\defgroup H5T H5T: Datatype Interface
+   These functions create and manipulate the datatype which describes elements
+   of a dataset.
+ */
 
+#endif /* _H5Tmodule_H */

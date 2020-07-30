@@ -30,9 +30,7 @@
 #define H5_MY_PKG_INIT  YES
 
 /**\defgroup H5F H5F: File Interface
-   These functions are designed to provide file-level access to HDF5 files.
-   Further manipulation of objects inside a file is performed through one of
-   APIs documented below.
+   \todo Describe concisely what the functions in this module are about.
  */
 
 #endif /* _H5Fmodule_H */

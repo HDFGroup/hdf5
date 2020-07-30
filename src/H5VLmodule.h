@@ -27,5 +27,8 @@
 #define H5_MY_PKG_ERR   H5E_VOL
 #define H5_MY_PKG_INIT  YES
 
-#endif /* _H5VLmodule_H */
+/**\defgroup H5VL H5VL: Virtual Object Layer Interface
+   \todo Describe concisely what the functions in this module are about.
+ */
 
+#endif /* _H5VLmodule_H */
