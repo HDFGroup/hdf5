@@ -641,7 +641,6 @@ done:
 herr_t
 h5tools_get_vfd_name(hid_t fapl_id, char *drivername, size_t drivername_size)
 {
-    hid_t  fapl_vol_id = H5I_INVALID_HID;
     herr_t ret_value = SUCCEED;
 
     if (fapl_id < 0)

@@ -4057,7 +4057,6 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     h5tool_format_t    string_dataformat;
     h5tool_format_t    outputformat;
     unsigned char     *region_buf = NULL;
-    int                ret_value = 0;
 
     H5TOOLS_START_DEBUG(" file=%p", (void*)stream);
     H5TOOLS_DEBUG("rawdata file=%p", (void*)rawdatastream);
