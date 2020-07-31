@@ -1,7 +1,21 @@
-/*! \mainpage Draft Documentation of HDF5 1.13
+/*! \mainpage API Documentation for HDF5 Version 1.13 (Draft)
+ *
+ * \todo Determine what else needs to go here.
  *
  * \section intro_sec Introduction
  *
  * \todo Write an introduction.
+ *
+ * For all other types of documentation check the HDF5 Wiki at https://hdf5.wiki.
+ *
+ * \section builtin_types Predefined HDF5 Datatypes
+ *
+ * \todo Revise and transplant
+ *       https://portal.hdfgroup.org/display/HDF5/HDF5+Predefined+Datatypes
+ *
+ * \section api_compat API Compatibility Macros
+ *
+ * \todo Revise and transplant
+ *       https://portal.hdfgroup.org/display/HDF5/API+Compatibility+Macros
  *
  */
