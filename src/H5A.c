@@ -243,10 +243,7 @@ H5A_term_package(void)
  *
  * \brief Creates an attribute attached to a specified object
  *
- * \param[in]  loc_id    Location or object identifier
- *                       The identifier may be a file, group, dataset, or named
- *                       datatype. If \p loc_id is a file identifier, the
- *                       attribute will be attached that file’s root group.
+ * \fgdt_loc_id
  * \param[in] attr_name  Name of attribute to locate and open
  * \type_id
  * \space_id
@@ -254,9 +251,6 @@ H5A_term_package(void)
  * \aapl_id
  *
  * \return \hid_tv{attribute}
- *
- * \note The \p acpl and \p aapl parameters are currently not used; specify
- *       #H5P_DEFAULT.
  *
  * \details H5Acreate2() creates an attribute, \p attr_name, which is attached
  *          to the object specified by the identifier \p loc_id.
@@ -279,6 +273,11 @@ H5A_term_package(void)
  *
  *          The attribute identifier returned by this function must be released
  *          with H5Aclose() resource leaks will develop.
+ *
+ * \note The \p acpl and \p aapl parameters are currently not used; specify
+ *       #H5P_DEFAULT.
+ * \note If \p loc_id is a file identifier, the attribute will be attached
+ *       that file’s root group.
  *
  * \since 1.8.0
  *
@@ -436,9 +435,7 @@ done:
  * \brief Opens an attribute for an object specified by object identifier and
  *        attribute name
  *
- * \param[in]  loc_id       Identifier for object to which attribute is
- *                          attached; may be a file, group, dataset, or named
- *                          datatype
+ * \fgdt_loc_id
  * \param[in]  attr_name    Name of attribute to open
  * \aapl_id
  *

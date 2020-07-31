@@ -353,19 +353,16 @@ done:
  *        target.  The new link can have a different name and be in a different
  *        location than the original.
  *
- * \param[in] src_loc_id Location identifier of the source link; may be a file,
- *                       group, dataset, named datatype or attribute identifier
+ * \fgdt_loc_id{src_loc_id}
  * \param[in] src_name   Name of the link to be copied
- * \param[in] dst_loc_id Location identifier specifying the destination of the
- *                       copy; may be a file, group, dataset, named datatype or
- *                       attribute identifier
+ * \fgdt_loc_id{dst_loc_id}
  * \param[in] dst_name   Name to be assigned to the new copy
  * \lcpl_id
  * \lapl_id
  * \return \herr_t
  *
- * \details H5Lcopy() copies the link specified by \p src_name from the file or
- *          group specified by \p src_loc_id to the file or group specified by
+ * \details H5Lcopy() copies the link specified by \p src_name from the location
+ *          specified by \p src_loc_id to the location specified by
  *          \p dst_loc_id. The new copy of the link is created with the name
  *          \p dst_name.
  *

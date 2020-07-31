@@ -90,10 +90,7 @@
  *
  * \brief Creates an attribute attached to a specified object
  *
- * \param[in] loc_id  Location or object identifier
- *                    The identifier may be a file, group, dataset, or named
- *                    datatype. If \p loc_id is a file identifier, the
- *                    attribute will be attached that file’s root group.
+ * \fgdt_loc_id
  * \param[in] name    Name of attribute to locate and open
  * \type_id
  * \space_id

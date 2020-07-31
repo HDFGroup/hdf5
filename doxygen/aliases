@@ -78,6 +78,19 @@ ALIASES += group_id="\param[in] group_id Group identifier"
 ALIASES += group_id{1}="\param[in] \1 Group identifier"
 
 ################################################################################
+# Locations
+################################################################################
+
+ALIASES += loc_id="\param[in] loc_id Location identifier"
+ALIASES += loc_id{1}="\param[in] \1 Location identifier"
+
+ALIASES += fgdt_loc_id="\loc_id. The identifier may be that of a file, group, dataset, or named datatype."
+ALIASES += fgdt_loc_id{1}="\loc_id{\1}. The identifier may be that of a file, group, dataset, or named datatype."
+
+ALIASES += fgdta_loc_id="\loc_id. The identifier may be that of a file, group, dataset, named datatype, or attribute."
+ALIASES += fgdta_loc_id{1}="\loc_id{\1}. The identifier may be that of a file, group, dataset, named datatype, or attribute."
+
+################################################################################
 # Property lists
 ################################################################################
 

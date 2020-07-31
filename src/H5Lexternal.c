@@ -323,9 +323,7 @@ done:
  *
  * \param[in] file_name   Name of the target file containing the target object.
  * \param[in] obj_name    Path within the target file to the target object
- * \param[in] link_loc_id Location identifier where the new link is to be
- *                        created; may be a file, group, dataset, named
- *                        datatype or attribute identifier.
+ * \fgdt_loc_id{link_loc_id}
  * \param[in] link_name   Name of the new link, relative to \p link_loc_id
  * \lcpl_id
  * \lapl_id
