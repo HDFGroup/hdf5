@@ -83,7 +83,7 @@ test_configure(void)
  *
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE void
+void
 cleanup_configure(void)
 {
     /* no file to clean */
@@ -106,7 +106,7 @@ cleanup_configure(void)
  *
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE void
+void
 test_config_ctypes(void)
 {
     /* standard C89 basic types */
@@ -215,7 +215,7 @@ test_config_ctypes(void)
  *
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE void
+void
 test_exit_definitions(void)
 {
     /* Verify the EXIT_SUCCESS and EXIT_FAILURE are 0 and 1 respectively. */

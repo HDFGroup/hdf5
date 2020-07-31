@@ -65,23 +65,23 @@ typedef struct s1_t {
 static void
 test_reference_params(void)
 {
-    hid_t       fid1;       /* HDF5 File IDs        */
-    hid_t       dataset,    /* Dataset ID           */
-                dset2;      /* Dereferenced dataset ID */
-    hid_t       group;      /* Group ID             */
-    hid_t       sid1;       /* Dataspace ID         */
-    hid_t       tid1;       /* Datatype ID          */
-    hid_t       dapl_id;    /* Dataset access property list */
+    hid_t       fid1;       /* HDF5 File IDs                    */
+    hid_t       dataset,    /* Dataset ID                       */
+                dset2;      /* Dereferenced dataset ID          */
+    hid_t       group;      /* Group ID                         */
+    hid_t       sid1;       /* Dataspace ID                     */
+    hid_t       tid1;       /* Datatype ID                      */
+    hid_t       dapl_id;    /* Dataset access property list     */
     hsize_t     dims1[] = {SPACE1_DIM1};
-    hobj_ref_t *wbuf,       /* buffer to write to disk */
-               *rbuf,       /* buffer read from disk */
-               *tbuf;       /* temp. buffer read from disk */
+    hobj_ref_t *wbuf,       /* buffer to write to disk          */
+               *rbuf,       /* buffer read from disk            */
+               *tbuf;       /* temp. buffer read from disk      */
     unsigned   *tu32;       /* Temporary pointer to uint32 data */
-    int         i;          /* counting variables */
-    const char *write_comment = "Foo!"; /* Comments for group */
-    hid_t    ret_id;        /* Generic hid_t return value    */
-    ssize_t     name_size;  /* Size of reference name */
-    herr_t      ret;        /* Generic return value     */
+    int         i;          /* Counters                         */
+    const char *write_comment = "Foo!"; /* Comments for group   */
+    hid_t       ret_id;     /* Generic hid_t return value       */
+    ssize_t     name_size;  /* Size of reference name           */
+    herr_t      ret;        /* Generic return value             */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Reference Parameters\n"));
@@ -234,7 +234,7 @@ test_reference_params(void)
     HDfree(wbuf);
     HDfree(rbuf);
     HDfree(tbuf);
-}   /* test_reference_obj() */
+}   /* test_reference_params() */
 
 /****************************************************************
 **
@@ -245,25 +245,25 @@ test_reference_params(void)
 static void
 test_reference_obj(void)
 {
-    hid_t        fid1;        /* HDF5 File IDs        */
-    hid_t        dataset,    /* Dataset ID            */
-                        dset2;      /* Dereferenced dataset ID */
-    hid_t        group;      /* Group ID             */
-    hid_t        sid1;       /* Dataspace ID            */
-    hid_t        tid1;       /* Datatype ID            */
-    hsize_t        dims1[] = {SPACE1_DIM1};
-    hid_t               dapl_id;    /* Dataset access property list */
-    hobj_ref_t          *wbuf,      /* buffer to write to disk */
-                        *rbuf,      /* buffer read from disk */
-                        *tbuf;      /* temp. buffer read from disk */
+    hid_t       fid1;       /* HDF5 File IDs                    */
+    hid_t       dataset,    /* Dataset ID                       */
+                dset2;      /* Dereferenced dataset ID          */
+    hid_t       group;      /* Group ID                         */
+    hid_t       sid1;       /* Dataspace ID                     */
+    hid_t       tid1;       /* Datatype ID                      */
+    hsize_t     dims1[] = {SPACE1_DIM1};
+    hid_t       dapl_id;    /* Dataset access property list     */
+    hobj_ref_t *wbuf,       /* buffer to write to disk          */
+               *rbuf,       /* buffer read from disk            */
+               *tbuf;       /* temp. buffer read from disk      */
     hobj_ref_t  nvrbuf[3]={0,101,1000000000}; /* buffer with non-valid refs */
-    unsigned            *tu32;      /* Temporary pointer to uint32 data */
-    int                 i, j;       /* counting variables */
+    unsigned   *tu32;       /* Temporary pointer to uint32 data */
+    int         i, j;       /* Counters                         */
     const char *write_comment="Foo!"; /* Comments for group */
     char read_comment[10];
-    H5O_type_t          obj_type;   /* Object type */
-    ssize_t             size;       /* Comment length */
-    herr_t        ret;        /* Generic return value        */
+    H5O_type_t  obj_type;   /* Object type                      */
+    ssize_t     size;       /* Comment length                   */
+    herr_t      ret;        /* Generic return value             */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Object Reference Functions\n"));

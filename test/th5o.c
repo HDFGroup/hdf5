@@ -241,10 +241,10 @@ test_h5o_open_by_addr(void)
 {
     hid_t       fid;                        /* HDF5 File ID      */
     hid_t       grp, dset, dtype, dspace;   /* Object identifiers */
-    H5L_info_t li;                      /* Buffer for H5Lget_info */
-    haddr_t grp_addr;                       /* Addresses for objects */
-    haddr_t dset_addr;
-    haddr_t dtype_addr;
+    H5L_info_t li;                          /* Buffer for H5Lget_info */
+    haddr_t     grp_addr;                   /* Addresses for objects */
+    haddr_t     dset_addr;
+    haddr_t     dtype_addr;
     hsize_t     dims[RANK];
     H5I_type_t  id_type;                    /* Type of IDs returned from H5Oopen */
     H5G_info_t  ginfo;                      /* Group info struct */
@@ -1491,18 +1491,18 @@ test_h5o(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Objects\n"));
 
-    test_h5o_open();              /* Test generic open function */
-    test_h5o_open_by_addr();      /* Test opening objects by address */
-    test_h5o_close();             /* Test generic close function */
-    test_h5o_refcount();          /* Test incrementing and decrementing reference count */
-    test_h5o_plist();             /* Test object creation properties */
-    test_h5o_link();              /* Test object link routine */
-    test_h5o_comment();           /* Test routines for comment */
-    test_h5o_comment_by_name();   /* Test routines for comment by name */
-    test_h5o_getinfo_same_file(); /* Test info for objects in the same file */
+    test_h5o_open();                /* Test generic open function */
+    test_h5o_open_by_addr();        /* Test opening objects by address */
+    test_h5o_close();               /* Test generic close function */
+    test_h5o_refcount();            /* Test incrementing and decrementing reference count */
+    test_h5o_plist();               /* Test object creation properties */
+    test_h5o_link();                /* Test object link routine */
+    test_h5o_comment();             /* Test routines for comment */
+    test_h5o_comment_by_name();     /* Test routines for comment by name */
+    test_h5o_getinfo_same_file();   /* Test info for objects in the same file */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-    test_h5o_getinfo_visit();     /* Test object info for H5Oget_info/2 and H5Ovisit */
-#endif
+    test_h5o_getinfo_visit();       /* Test object info for H5Oget_info/2 and H5Ovisit */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 } /* test_h5o() */
 
 
