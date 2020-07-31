@@ -289,8 +289,8 @@ H5C_dump_cache_skip_list(H5C_t * cache_ptr, char * calling_fcn)
     HDassert(calling_fcn != NULL);
 
     HDfprintf(stdout, "\n\nDumping metadata cache skip list from %s.\n", calling_fcn);
-    HDfprintf(stdout, "	slist len = %u.\n", cache_ptr->slist_len);
-    HDfprintf(stdout, "	slist size = %lld.\n", (long long)(cache_ptr->slist_size));
+    HDfprintf(stdout, "	slist len = %" PRIu32 ".\n", cache_ptr->slist_len);
+    HDfprintf(stdout, "	slist size = %zu.\n", cache_ptr->slist_size);
 
     if(cache_ptr->slist_len > 0) {
         /* If we get this far, all entries in the cache are listed in the

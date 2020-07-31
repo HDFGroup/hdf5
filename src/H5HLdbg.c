@@ -66,9 +66,9 @@ H5HL_debug(H5F_t *f, haddr_t addr, FILE * stream, int indent, int fwidth))
         H5E_THROW(H5E_CANTPROTECT, "unable to load/protect local heap");
 
     HDfprintf(stream, "%*sLocal Heap...\n", indent, "");
-    HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
 	    "Header size (in bytes):",
-	    (unsigned long)h->prfx_size);
+	    h->prfx_size);
     HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
               "Address of heap data:",
               h->dblk_addr);
