@@ -87,12 +87,12 @@ test_reference_params(void)
     hid_t       aapl_id;    /* Attribute access property list   */
     hid_t       dapl_id;    /* Dataset access property list     */
     hsize_t     dims1[] = {SPACE1_DIM1};
-    H5R_ref_t     *wbuf,       /* buffer to write to disk          */
+    H5R_ref_t  *wbuf,       /* buffer to write to disk          */
                *rbuf,       /* buffer read from disk            */
                *tbuf;       /* temp. buffer read from disk      */
     unsigned *obuf;
     H5R_type_t  type;       /* Reference type                   */
-    unsigned int i;          /* Counters                         */
+    unsigned int i;         /* Counters                         */
     const char *write_comment = "Foo!"; /* Comments for group   */
     hid_t       ret_id;     /* Generic hid_t return value       */
     ssize_t     name_size;  /* Size of reference name           */
@@ -320,10 +320,10 @@ test_reference_obj(void)
     hid_t       tid1;       /* Datatype ID                      */
     hsize_t     dims1[] = {SPACE1_DIM1};
     hid_t       dapl_id;    /* Dataset access property list     */
-    H5R_ref_t     *wbuf,       /* buffer to write to disk          */
+    H5R_ref_t     *wbuf,    /* buffer to write to disk          */
                *rbuf;       /* buffer read from disk            */
     unsigned    *ibuf, *obuf;
-    unsigned         i, j;       /* Counters                         */
+    unsigned    i, j;       /* Counters                         */
     H5O_type_t  obj_type;   /* Object type                      */
     herr_t      ret;        /* Generic return value             */
 
