@@ -809,9 +809,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_loc_info
+ * Function:    H5G_loc_info
  *
- * Purpose:	Retrieve the data model information for an object from a group location
+ * Purpose:     Retrieve the data model information for an object from a group location
  *              and path to that object
  *
  * Return:	Non-negative on success/Negative on failure
