@@ -1582,7 +1582,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
 
     /* Allocate space for VFD SWMR configuration info */
-    if(NULL == (vfd_swmr_config_ptr = (H5F_vfd_swmr_config_t *)H5MM_calloc(sizeof(H5F_vfd_swmr_config_t))))
+    if(NULL == (vfd_swmr_config_ptr = H5MM_calloc(sizeof(H5F_vfd_swmr_config_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate memory for mdc log file name")
 
     /* Get VFD SWMR configuration */
@@ -1644,23 +1644,19 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', tent_flags = %x", name, tent_flags)
     } /* end if */
 
-    /* Do not reuse a virtual file opened exclusively by a second virtual
-     * file.
+    /* Avoid reusing a virtual file opened exclusively by a second virtual
+     * file, or opening the same file twice with different parameters.
      */
-    if (H5FD_has_conflict(lf)) {
-        if(H5FD_close(lf) < 0) {
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-                "file '%s' already open exclusively; could not close", name);
-        }
+    if ((lf = H5FD_deduplicate(lf, fapl_id)) == NULL) {
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-            "file '%s' already open exclusively", name);
+            "an already-open file conflicts with '%s'", name);
     }
 
     /* Is the file already open? */
     if((shared = H5F__sfile_search(lf)) != NULL) {
         /*
-         * The file is already open, so use that one instead of the one we
-         * just opened. We only one one H5FD_t* per file so one doesn't
+         * The file is already open, so use the corresponding H5F_shared_t.
+         * We only allow one H5FD_t* per file so one doesn't
          * confuse the other.  But fail if this request was to truncate the
          * file (since we can't do that while the file is open), or if the
          * request was to create a non-existent file (since the file already
@@ -1668,8 +1664,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
          * readers don't expect the file to change under them), or if the
          * SWMR write/read access flags don't agree.
          */
-        if(H5FD_close(lf) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to close low-level file info")
         if(flags & H5F_ACC_TRUNC)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to truncate a file which is already open")
         if(flags & H5F_ACC_EXCL)
@@ -1807,10 +1801,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
     /* Checked if configured for VFD SWMR */
     if(H5F_VFD_SWMR_CONFIG(file)) {
-        /* Page buffering and page allocation strategy have to be enabled */
-        if(!page_buf_size || !H5F_PAGED_AGGR(file))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "VFD SWMR file open fail: page buffering must be enabled")
-
         /* Initialization for VFD SWMR writer and reader */
         if(1 == shared->nrefs) {
             if(H5F_vfd_swmr_init(file, file_create) < 0)
@@ -1820,12 +1810,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         /* Insert the entry that corresponds to file onto the EOT queue */
         if(H5F_vfd_swmr_insert_entry_eot(file) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "unable to insert entry into the EOT queue")
-    }
-
-    /* For multiple opens of the same file, verify that the VFD SWMR setting is consistent */
-    if(shared->nrefs > 1) {
-        if(HDmemcmp(vfd_swmr_config_ptr, &shared->vfd_swmr_config, sizeof(H5F_vfd_swmr_config_t)))
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "inconsistent VFD SWMR config info")
     }
 
     /*

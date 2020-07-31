@@ -121,8 +121,6 @@ H5FL_DEFINE(eot_queue_entry_t);
  *
  *              For both VFD SWMR writer and reader:
  *
- *                  --set vfd_swmr_g to TRUE
- *                  --set vfd_swmr_file_g to f
  *                  --set end_of_tick to the current time + tick length
  *
  *              For VFD SWMR writer:

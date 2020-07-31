@@ -721,6 +721,13 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
             H5F_ACS_VOL_CONN_DEL, H5F_ACS_VOL_CONN_COPY, H5F_ACS_VOL_CONN_CMP, H5F_ACS_VOL_CONN_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
+    if (H5P_LST_FILE_ACCESS_ANY_VFD_g == H5I_INVALID_HID) {
+        H5P_LST_FILE_ACCESS_ANY_VFD_g = H5P_create_id(pclass, false);
+        if (H5P_LST_FILE_ACCESS_ANY_VFD_g == H5I_INVALID_HID) {
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
+                "can't create any-vfd fapl");
+        }
+    }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_reg_prop() */

@@ -1952,6 +1952,7 @@ static const H5FD_class_t H5FD_dummy_g = {
     NULL,                       /* truncate     */
     NULL,                       /* lock         */
     NULL,                       /* unlock       */
+    NULL,                       /* dedup        */
     H5FD_FLMAP_DICHOTOMY    /* fl_map       */
 };
 

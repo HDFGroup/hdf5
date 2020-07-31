@@ -624,7 +624,7 @@ if [ ${do_groups:-no} = yes ]; then
 	rm -f vfd_swmr_group_reader.*.{out,rc}
 fi
 
-for options in "-d 1" "-d 2" "-d 1 -V"; do
+for options in "-d 1" "-d 2" "-d 1 -V" "-d 1 -M"; do
 	if [ ${do_many_small:-no} = no ]; then
 		continue
 	fi
@@ -673,7 +673,7 @@ for options in "-d 1" "-d 2" "-d 1 -V"; do
 	rm -f vfd_swmr_bigset_reader.*.{out,rc}
 done
 
-for options in "-d 1" "-d 2" "-d 1 -V"; do
+for options in "-d 1" "-d 2" "-d 1 -V" "-d 1 -M"; do
 	#
 	# Test a few big datasets of one and two dimensions.
 	#
@@ -690,11 +690,11 @@ for options in "-d 1" "-d 2" "-d 1 -V"; do
 	fi
 	echo launch vfd_swmr_bigset_writer few big, options $options
 	catch_out_err_and_rc vfd_swmr_bigset_writer \
-	    ../vfd_swmr_bigset_writer -n 50 $options -s 5 -r 256 -c 256 -q &
+	    ../vfd_swmr_bigset_writer -n 50 $options -s 40 -r 256 -c 256 -q &
 	pid_writer=$!
 
 	catch_out_err_and_rc vfd_swmr_bigset_reader \
-	    ../vfd_swmr_bigset_reader -n 50 $options -s 5 -r 256 -c 256 -q -W &
+	    ../vfd_swmr_bigset_reader -n 50 $options -s 40 -r 256 -c 256 -q -W &
 	pid_reader=$!
 
 	# Wait for the reader to finish before signalling the

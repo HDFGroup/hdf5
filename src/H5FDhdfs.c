@@ -521,6 +521,7 @@ static const H5FD_class_t H5FD_hdfs_g = {
     H5FD_hdfs_truncate,         /* truncate             */
     H5FD_hdfs_lock,             /* lock                 */
     H5FD_hdfs_unlock,           /* unlock               */
+    NULL,                       /* dedup                */
     H5FD_FLMAP_DICHOTOMY        /* fl_map               */
 };
 
