@@ -176,13 +176,12 @@ END_FUNC(PKG)   /* end H5EA__hdr_debug() */
 /*-------------------------------------------------------------------------
  * Function:    H5EA__iblock_debug
  *
- * Purpose:    Prints debugging info about a extensible array index block.
+ * Purpose:     Prints debugging info about a extensible array index block.
  *
- * Return:    Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
- *        Sep 11 2008
+ * Programmer:  Quincey Koziol
+ *              Sep 11 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -214,7 +213,7 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
 
     /* Load the extensible array header */
     if(NULL == (hdr = H5EA__hdr_protect(f, hdr_addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
-    H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header")
+        H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header")
 
     /* Sanity check */
     HDassert(H5F_addr_eq(hdr->idx_blk_addr, addr));
@@ -292,7 +291,7 @@ CATCH
     if(iblock && H5EA__iblock_unprotect(iblock, H5AC__NO_FLAGS_SET) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array index block")
     if(hdr && H5EA__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
-    H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array header")
+        H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array header")
 
 END_FUNC(PKG)   /* end H5EA__iblock_debug() */
 
@@ -300,13 +299,12 @@ END_FUNC(PKG)   /* end H5EA__iblock_debug() */
 /*-------------------------------------------------------------------------
  * Function:    H5EA__sblock_debug
  *
- * Purpose:    Prints debugging info about a extensible array super block.
+ * Purpose:     Prints debugging info about a extensible array super block.
  *
- * Return:    Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
- *        Sep 30 2008
+ * Programmer:  Quincey Koziol
+ *              Sep 30 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -338,7 +336,7 @@ H5EA__sblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent,
 
     /* Load the extensible array header */
     if(NULL == (hdr = H5EA__hdr_protect(f, hdr_addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
-    H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header")
+        H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header")
 
     /* Protect super block */
     /* (Note: setting parent of super block to 'hdr' for this operation should be OK -QAK) */

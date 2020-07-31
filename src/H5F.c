@@ -344,16 +344,17 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5Fis_hdf5
+ * Function:    H5Fis_hdf5
  *
- * Purpose:  Check the file signature to detect an HDF5 file.
+ * Purpose:     Check the file signature to detect an HDF5 file.
  *
- * Bugs:     This function is not robust: it only uses the default file
- *           driver when attempting to open the file when in fact it
- *           should use all known file drivers.
+ * Bugs:        This function is not robust: it only uses the default file
+ *              driver when attempting to open the file when in fact it
+ *              should use all known file drivers.
  *
  * Return:      Success:    TRUE/FALSE
  *              Failure:    -1 (includes file does not exist)
+ *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -439,7 +440,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
      * the EXCL or TRUNC bit is set.  All newly-created files are opened for
      * reading and writing.
      */
-    if (0 == (flags & (H5F_ACC_EXCL | H5F_ACC_TRUNC)))
+    if(0 == (flags & (H5F_ACC_EXCL | H5F_ACC_TRUNC)))
         flags |= H5F_ACC_EXCL;	 /*default*/
     flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
@@ -1261,7 +1262,7 @@ done:
  *              If SECT_INFO is null, this routine returns the total # of free-space
  *              sections.
  *
- * Return:      Success:    The total # of free space sections
+ * Return:      Success:   The total # of free space sections
  *              Failure:   -1
  *-------------------------------------------------------------------------
  */
@@ -1731,10 +1732,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_dset_no_attrs_hint
  *
- * Purpose:
- *
- *     Get the file-level setting to create minimized dataset object headers.
- *     Result is stored at pointer `minimize`.
+ * Purpose:     Get the file-level setting to create minimized dataset object headers.
+ *              Result is stored at pointer `minimize`.
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative

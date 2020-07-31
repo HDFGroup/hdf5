@@ -120,7 +120,7 @@ const unsigned H5O_attr_ver_bounds[] = {
 /* Local Variables */
 /*******************/
 
-typedef H5A_t*	H5A_t_ptr;
+typedef H5A_t*      H5A_t_ptr;
 H5FL_SEQ_DEFINE(H5A_t_ptr);
 
 
@@ -232,9 +232,9 @@ H5A__create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
      * SOHM table
      */
     if(H5SM_try_share(attr->oloc.file, NULL, 0, H5O_DTYPE_ID, attr->shared->dt, NULL) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, NULL, "trying to share datatype failed")
+        HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, NULL, "trying to share datatype failed")
     if(H5SM_try_share(attr->oloc.file, NULL, 0, H5O_SDSPACE_ID, attr->shared->ds, NULL) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, NULL, "trying to share dataspace failed")
+        HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, NULL, "trying to share dataspace failed")
 
     /* Check whether datatype is committed & increment ref count
      * (to maintain ref. count incr/decr similarity with "shared message"
@@ -287,14 +287,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__create_by_name
+ * Function:    H5A__create_by_name
  *
- * Purpose:	Create an attribute on object, according to it's name
+ * Purpose:     Create an attribute on object, according to it's name
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		December 6, 2017
+ * Programmer:  Quincey Koziol
+ *              December 6, 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -303,8 +303,8 @@ H5A__create_by_name(const H5G_loc_t *loc, const char *obj_name, const char *attr
     const H5T_t *type, const H5S_t *space, hid_t acpl_id)
 {
     H5G_loc_t   obj_loc;                /* Location used to open group */
-    H5G_name_t  obj_path;            	/* Opened object group hier. path */
-    H5O_loc_t   obj_oloc;            	/* Opened object object location */
+    H5G_name_t  obj_path;               /* Opened object group hier. path */
+    H5O_loc_t   obj_oloc;               /* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
     H5A_t       *attr = NULL;           /* Attribute from object header */
     H5A_t       *ret_value = NULL;      /* Return value */
@@ -348,20 +348,19 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__open_common
+ * Function:    H5A__open_common
  *
- * Purpose:
- *      Finishes initializing an attributes the open
+ * Purpose:     Finishes initializing an attributes the open
  *
  * Usage:
  *  herr_t H5A__open_common(loc, name)
  *      const H5G_loc_t *loc;   IN: Pointer to group location for object
  *      H5A_t *attr;            IN/OUT: Pointer to attribute to initialize
  *
- * Return: Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		December 18, 2006
+ * Programmer:  Quincey Koziol
+ *              December 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -409,7 +408,7 @@ done:
  *
  * Purpose:	Open an attribute in an object header
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *		December 9, 2017
@@ -450,11 +449,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__open_by_idx
+ * Function:    H5A__open_by_idx
  *
- * Purpose: 	Open an attribute according to its index order
+ * Purpose:     Open an attribute according to its index order
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *		April 2, 1998
@@ -514,11 +513,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__open_by_name
+ * Function:    H5A__open_by_name
  *
- * Purpose:	Open an attribute in an object header, according to it's name
+ * Purpose:     Open an attribute in an object header, according to it's name
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *		December 11, 2006
@@ -529,8 +528,8 @@ H5A_t *
 H5A__open_by_name(const H5G_loc_t *loc, const char *obj_name, const char *attr_name)
 {
     H5G_loc_t   obj_loc;                /* Location used to open group */
-    H5G_name_t  obj_path;            	/* Opened object group hier. path */
-    H5O_loc_t   obj_oloc;            	/* Opened object object location */
+    H5G_name_t  obj_path;               /* Opened object group hier. path */
+    H5O_loc_t   obj_oloc;               /* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
     H5A_t       *attr = NULL;           /* Attribute from object header */
     H5A_t       *ret_value = NULL;      /* Return value */
@@ -678,7 +677,7 @@ done:
     if(tconv_buf)
         tconv_buf = H5FL_BLK_FREE(attr_buf, tconv_buf);
     if(bkg_buf)
-	bkg_buf = H5FL_BLK_FREE(attr_buf, bkg_buf);
+        bkg_buf = H5FL_BLK_FREE(attr_buf, bkg_buf);
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* H5A__read() */
@@ -774,7 +773,7 @@ H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf)
                 if(NULL == (attr->shared->data = H5FL_BLK_MALLOC(attr_buf, dst_type_size * nelmts)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-            /* Copy the attribute data into the user's buffer */
+            /* Copy the attribute data into the attribute data buffer */
             H5MM_memcpy(attr->shared->data, buf, (dst_type_size * nelmts));
         } /* end else */
 
@@ -818,7 +817,7 @@ ssize_t
 H5A__get_name(H5A_t *attr, size_t buf_size, char *buf)
 {
     size_t              copy_len, nbytes;
-    ssize_t		ret_value = -1;         /* Return value */
+    ssize_t             ret_value = -1;         /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -887,8 +886,7 @@ done:
  * Purpose:     Returns an ID for the datatype of an attribute
  *
  * Return:      Success:    A valid ID for the datatype of an attribute
- *
- *              Failure:	H5I_INVALID_HID
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
@@ -926,8 +924,9 @@ H5A__get_type(H5A_t *attr)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register datatype")
 
 done:
-    if(H5I_INVALID_HID == ret_value && dt && (H5T_close(dt) < 0))
-        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release datatype")
+    if(H5I_INVALID_HID == ret_value)
+        if(dt && H5T_close(dt) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release datatype")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A__get_type() */
@@ -964,7 +963,7 @@ H5A__get_create_plist(H5A_t* attr)
 
     /* Create the property list object to return */
     if((new_plist_id = H5P_copy_plist(plist, TRUE)) < 0)
-	HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to copy attribute creation properties")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to copy attribute creation properties")
     if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_plist_id)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "can't get property list")
 
@@ -1021,20 +1020,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__copy
+ * Function:    H5A__copy
  *
- * Purpose:	Copies attribute OLD_ATTR.
+ * Purpose:     Copies attribute OLD_ATTR.
  *
- * Return:	Success:	Pointer to a new copy of the OLD_ATTR argument.
- *
- *		Failure:	NULL
+ * Return:      Success:    Pointer to a new copy of the OLD_ATTR argument.
+ *              Failure:    NULL
  *
  * Programmer:	Robb Matzke
  *		Thursday, December  4, 1997
- *
- * Modification:Raymond Lu
- *              4 June 2008
- *              Changed some attribute information to be shared.
  *
  *-------------------------------------------------------------------------
  */
@@ -1088,17 +1082,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__free
+ * Function:    H5A__free
  *
  * Purpose:	Frees all memory associated with an attribute, but does not
  *              free the H5A_t structure (which should be done in H5T_close).
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *		Monday, November 15, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1135,14 +1127,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__close_cb
+ * Function:    H5A__close_cb
  *
  * Purpose:	Frees an attribute and all associated memory.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Sunday, February 18, 1997
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -1167,11 +1156,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__close
+ * Function:    H5A__close
  *
- * Purpose:	Frees an attribute and all associated memory.
+ * Purpose:     Frees an attribute and all associated memory.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Robb Matzke
  *		Monday, December  8, 1997
@@ -1220,7 +1209,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_oloc
+ * Function:    H5A_oloc
  *
  * Purpose:	Return the object location for an attribute.  It's the
  *		object location for the object to which the attribute
@@ -1252,7 +1241,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_nameof
+ * Function:    H5A_nameof
  *
  * Purpose:	Return the group hier. path for an attribute.  It's the
  *		group hier. path for the object to which the attribute
@@ -1314,12 +1303,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__exists_by_name
+ * Function:    H5A__exists_by_name
  *
  * Purpose:	Private version of H5Aexists_by_name
  *
- * Return:	Success:	TRUE/FALSE
- * 		Failure:	Negative
+ * Return:      TRUE/FALSE/FAIL
  *
  * Programmer:	Quincey Koziol
  *              Thursday, November 1, 2007
@@ -1369,7 +1357,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 18 2006
  *
  * Modification:Raymond Lu
@@ -1422,19 +1409,18 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__compact_build_table
+ * Function:    H5A__compact_build_table
  *
  * Purpose:     Builds a table containing a sorted list of attributes for
  *              an object
  *
- * Note:	Used for building table of attributes in non-native iteration
+ * Note:        Used for building table of attributes in non-native iteration
  *              order for an index
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Dec 18, 2006
+ * Programmer:  Quincey Koziol
+ *              Dec 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1491,11 +1477,9 @@ done:
  * Purpose:	Callback routine for building table of attributes from dense
  *              attribute storage.
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 11 2006
  *
  *-------------------------------------------------------------------------
@@ -1530,7 +1514,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__dense_build_table
+ * Function:    H5A__dense_build_table
  *
  * Purpose:     Builds a table containing a sorted list of attributes for
  *              an object
@@ -1539,8 +1523,7 @@ done:
  *              order for an index.  Uses the "name" index to retrieve records,
  *		but the 'idx_type' index for sorting them.
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *	        Dec 11, 2006
@@ -1616,19 +1599,18 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__attr_cmp_name_inc
+ * Function:    H5A__attr_cmp_name_inc
  *
- * Purpose:	Callback routine for comparing two attribute names, in
+ * Purpose:     Callback routine for comparing two attribute names, in
  *              increasing alphabetic order
  *
- * Return:	An integer less than, equal to, or greater than zero if the
+ * Return:      An integer less than, equal to, or greater than zero if the
  *              first argument is considered to be respectively less than,
  *              equal to, or greater than the second.  If two members compare
  *              as equal, their order in the sorted array is undefined.
  *              (i.e. same as strcmp())
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 11 2006
  *
  *-------------------------------------------------------------------------
@@ -1656,7 +1638,6 @@ H5A__attr_cmp_name_inc(const void *attr1, const void *attr2)
  *              (i.e. opposite of strcmp())
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Feb  8 2007
  *
  *-------------------------------------------------------------------------
@@ -1683,7 +1664,6 @@ H5A__attr_cmp_name_dec(const void *attr1, const void *attr2)
  *              as equal, their order in the sorted array is undefined.
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Feb  8 2007
  *
  *-------------------------------------------------------------------------
@@ -1707,19 +1687,18 @@ H5A__attr_cmp_corder_inc(const void *attr1, const void *attr2)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__attr_cmp_corder_dec
+ * Function:    H5A__attr_cmp_corder_dec
  *
- * Purpose:	Callback routine for comparing two attributes, in
+ * Purpose:     Callback routine for comparing two attributes, in
  *              decreasing creation order
  *
- * Return:	An integer less than, equal to, or greater than zero if the
+ * Return:      An integer less than, equal to, or greater than zero if the
  *              second argument is considered to be respectively less than,
  *              equal to, or greater than the first.  If two members compare
  *              as equal, their order in the sorted array is undefined.
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Feb  8 2007
+ * Programmer:  Quincey Koziol
+ *              Feb  8 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1742,15 +1721,14 @@ H5A__attr_cmp_corder_dec(const void *attr1, const void *attr2)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__attr_sort_table
+ * Function:    H5A__attr_sort_table
  *
  * Purpose:     Sort table containing a list of attributes for an object
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Dec 11, 2006
+ * Programmer:  Quincey Koziol
+ *              Dec 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1787,16 +1765,15 @@ H5A__attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__attr_iterate_table
+ * Function:    H5A__attr_iterate_table
  *
  * Purpose:     Iterate over table containing a list of attributes for an object,
  *              making appropriate callbacks
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Dec 18, 2006
+ * Programmer:  Quincey Koziol
+ *              Dec 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1870,22 +1847,21 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	  H5A__attr_release_table
+ * Function:    H5A__attr_release_table
  *
- * Purpose:       Release table containing a list of attributes for an object
+ * Purpose:     Release table containing a list of attributes for an object
  *
- * Return:	  Success:        Non-negative
- *		  Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	  Quincey Koziol
- *	          Dec 11, 2006
+ * Programmer:  Quincey Koziol
+ *              Dec 11, 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5A__attr_release_table(H5A_attr_table_t *atable)
 {
-    herr_t	ret_value = SUCCEED;    /* Return value */
+    herr_t  ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1917,11 +1893,9 @@ done:
  * Purpose:     Retrieves the "attribute info" message for an object.  Also
  *              sets the number of attributes correctly, if it isn't set up yet.
  *
- * Return:	Success:	TRUE/FALSE whether message was found & retrieved
- *              Failure:        FAIL if error occurred
+ * Return:      TRUE/FALSE/FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar 11 2007
  *
  *-------------------------------------------------------------------------
@@ -1941,11 +1915,11 @@ H5A__get_ainfo(H5F_t *f, H5O_t *oh, H5O_ainfo_t *ainfo)
 
     /* Check if the "attribute info" message exists */
     if((ret_value = H5O_msg_exists_oh(oh, H5O_AINFO_ID)) < 0)
-	HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "unable to check object header")
+        HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "unable to check object header")
     if(ret_value > 0) {
         /* Retrieve the "attribute info" structure */
         if(NULL == H5O_msg_read_oh(f, oh, H5O_AINFO_ID, ainfo))
-	    HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't read AINFO message")
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't read AINFO message")
 
         /* Check if we don't know how many attributes there are */
         if(ainfo->nattrs == HSIZET_MAX) {
@@ -1982,11 +1956,9 @@ done:
  *              Chooses the oldest version possible, unless the
  *              file's low bound indicates otherwise.
  *
- * Return:	Success:    Non-negative
- *          Failure:    Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Jul 17 2007
  *
  *-------------------------------------------------------------------------
@@ -2060,7 +2032,7 @@ done:
  */
 H5A_t *
 H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_size,
-    H5O_copy_t *cpy_info)
+    H5O_copy_t H5_ATTR_NDEBUG_UNUSED *cpy_info)
 {
     H5A_t      *attr_dst = NULL;        /* Destination attribute */
     hid_t       tid_src = -1;           /* Datatype ID for source datatype */
@@ -2123,7 +2095,7 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_s
          */
         if(H5O_msg_reset_share(H5O_DTYPE_ID, attr_dst->shared->dt) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to reset datatype sharing")
-    } /* end if */
+    }
 
     /* Copy the dataspace for the attribute. Make sure the maximal dimension is also copied.
      * Otherwise the comparison in the test may complain about it. SLU 2011/4/12 */
@@ -2141,9 +2113,9 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_s
      * committed or sharing is disabled.
      */
     if(H5SM_try_share(file_dst, NULL, H5SM_DEFER, H5O_DTYPE_ID, attr_dst->shared->dt, NULL) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, NULL, "can't share attribute datatype")
+        HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, NULL, "can't share attribute datatype")
     if(H5SM_try_share(file_dst, NULL, H5SM_DEFER, H5O_SDSPACE_ID, attr_dst->shared->ds, NULL) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, NULL, "can't share attribute dataspace")
+        HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, NULL, "can't share attribute dataspace")
 
     /* Compute the sizes of the datatype and dataspace. This is their raw
      * size unless they're shared.
@@ -2247,10 +2219,10 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_s
 
             H5MM_memcpy(buf, attr_src->shared->data, attr_src->shared->data_size);
 
-	    /* Allocate background memory */
-	    if(H5T_path_bkg(tpath_src_mem) || H5T_path_bkg(tpath_mem_dst))
-		if(NULL == (bkg_buf = H5FL_BLK_CALLOC(attr_buf, buf_size)))
-		    HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, NULL, "memory allocation failed")
+            /* Allocate background memory */
+            if(H5T_path_bkg(tpath_src_mem) || H5T_path_bkg(tpath_mem_dst))
+                if(NULL == (bkg_buf = H5FL_BLK_CALLOC(attr_buf, buf_size)))
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, NULL, "memory allocation failed")
 
             /* Convert from source file to memory */
             if(H5T_convert(tpath_src_mem, tid_src, tid_mem, nelmts, (size_t)0, (size_t)0, buf, bkg_buf) < 0)
@@ -2258,9 +2230,9 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_s
 
             H5MM_memcpy(reclaim_buf, buf, buf_size);
 
-	    /* Set background buffer to all zeros */
-	    if(bkg_buf)
-		HDmemset(bkg_buf, 0, buf_size);
+            /* Set background buffer to all zeros */
+            if(bkg_buf)
+                HDmemset(bkg_buf, 0, buf_size);
 
             /* Convert from memory to destination file */
             if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, bkg_buf) < 0)
@@ -2330,7 +2302,7 @@ done:
  *              an object may have a reference attribute that points to the
  *              object itself.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Peter Cao
  *              March 6, 2005
@@ -2378,7 +2350,7 @@ H5A__attr_post_copy_file(const H5O_loc_t *src_oloc, const H5A_t *attr_src,
 
         /* Update shared message info from named datatype info */
         H5T_update_shared(attr_dst->shared->dt);
-    } /* end if */
+    }
 
     /* Try to share both the datatype and dataset.  This does nothing if the
      * datatype is committed or sharing is disabled.
@@ -2481,11 +2453,9 @@ done:
  *
  * Purpose:     Copy all dense attributes from SRC to DST.
  *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Peter Cao
- *              xcao@hdfgroup.org
  *              July 20, 2007
  *
  *-------------------------------------------------------------------------
@@ -2525,14 +2495,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__rename_by_name
+ * Function:    H5A__rename_by_name
  *
  * Purpose:     Private version of H5Arename_by_name
  *
- * Return:	Success:             Non-negative
- *		Failure:             Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              February 20, 2007
  *
  *-------------------------------------------------------------------------
@@ -2542,10 +2511,10 @@ H5A__rename_by_name(H5G_loc_t loc, const char *obj_name, const char *old_attr_na
     const char *new_attr_name)
 {
     H5G_loc_t   obj_loc;                /* Location used to open group */
-    H5G_name_t  obj_path;            	/* Opened object group hier. path */
-    H5O_loc_t   obj_oloc;            	/* Opened object object location */
+    H5G_name_t  obj_path;               /* Opened object group hier. path */
+    H5O_loc_t   obj_oloc;               /* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
-    herr_t	ret_value = SUCCEED;    /* Return value */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2573,14 +2542,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__iterate_common
+ * Function:    H5A__iterate_common
  *
  * Purpose:     Internal common version of H5Aiterate
  *
- * Return:	Success:             Non-negative
- *		Failure:             Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              December 6, 2017
  *
  *-------------------------------------------------------------------------
@@ -2609,15 +2577,11 @@ H5A__iterate_common(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__iterate
+ * Function:    H5A__iterate
  *
  * Purpose:     Private version of H5Aiterate2
  *
- * Return:	Success:             Non-negative
- *		Failure:             Negative
- *
- * Programmer:	Quincey Koziol
- *              December 6, 2017
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -2640,19 +2604,18 @@ H5A__iterate(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5A__iterate() */
+} /* end H5A__iterate() */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__iterate_old
+ * Function:    H5A__iterate_old
  *
  * Purpose:     Private version of H5Aiterate1
  *
- * Return:	Success:             Non-negative
- *		Failure:             Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              December 6, 2017
  *
  *-------------------------------------------------------------------------
@@ -2751,14 +2714,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__delete_by_name
+ * Function:    H5A__delete_by_name
  *
  * Purpose:     Private version of H5Adelete_by_name
  *
- * Return:	Success:             Non-negative
- *		Failure:             Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              December 6, 2017
  *
  *-------------------------------------------------------------------------
@@ -2767,8 +2729,8 @@ herr_t
 H5A__delete_by_name(const H5G_loc_t *loc, const char *obj_name, const char *attr_name)
 {
     H5G_loc_t   obj_loc;                /* Location used to open group */
-    H5G_name_t  obj_path;            	/* Opened object group hier. path */
-    H5O_loc_t   obj_oloc;            	/* Opened object object location */
+    H5G_name_t  obj_path;               /* Opened object group hier. path */
+    H5O_loc_t   obj_oloc;               /* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -2798,14 +2760,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__delete_by_idx
+ * Function:    H5A__delete_by_idx
  *
  * Purpose:     Private version of H5Adelete_by_idx
  *
- * Return:	Success:             Non-negative
- *		Failure:             Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              December 6, 2017
  *
  *-------------------------------------------------------------------------
@@ -2815,8 +2776,8 @@ H5A__delete_by_idx(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_ty
     H5_iter_order_t order, hsize_t n)
 {
     H5G_loc_t   obj_loc;                /* Location used to open group */
-    H5G_name_t  obj_path;            	/* Opened object group hier. path */
-    H5O_loc_t   obj_oloc;            	/* Opened object object location */
+    H5G_name_t  obj_path;               /* Opened object group hier. path */
+    H5O_loc_t   obj_oloc;               /* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
     herr_t ret_value = SUCCEED;         /* Return value */
 
