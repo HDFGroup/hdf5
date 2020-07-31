@@ -925,7 +925,14 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
         intent = H5F_INTENT(vdset->oloc.file);
 
         /* Try opening the file */
-        src_file = H5F_prefix_open_file(vdset->oloc.file, H5F_PREFIX_VDS, vdset->shared->vds_prefix, source_dset->file_name, intent, vdset->shared->layout.storage.u.virt.source_fapl);
+        /* XXX Pass the special file-access property list ID,
+         * H5P_FILE_ACCESS_ANY_VFD, so that if the file is already open in
+         * VFD SWMR mode, the library just creates a new H5F_t for the file
+         * instead of returning an error because of the discrepancy between
+         * the default file-access properties and the already-open file's
+         * VFD SWMR properties.
+         */
+        src_file = H5F_prefix_open_file(vdset->oloc.file, H5F_PREFIX_VDS, vdset->shared->vds_prefix, source_dset->file_name, intent, H5P_FILE_ACCESS_ANY_VFD);
 
         /* If we opened the source file here, we should close it when leaving */
         if(src_file)
