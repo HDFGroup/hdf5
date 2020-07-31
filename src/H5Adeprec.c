@@ -90,17 +90,18 @@
  *
  * \brief Creates an attribute attached to a specified object
  *
- * \param[in] loc_id    Location or object identifier
- *                       The identifier may be a file, group, dataset, or named
- *                       datatype. If \p loc_id is a file identifier, the
- *                       attribute will be attached that file’s root group.
- * \param[in] name       Name of attribute to locate and open
- * \param[in] type_id    Attribute datatype identifier
- * \param[in] space_id   Attribute dataspace identifier
- * \param[in] acpl_id    Attribute creation property list identifier
- *                       (Currently not used; specify H5P_DEFAULT)
+ * \param[in] loc_id  Location or object identifier
+ *                    The identifier may be a file, group, dataset, or named
+ *                    datatype. If \p loc_id is a file identifier, the
+ *                    attribute will be attached that file’s root group.
+ * \param[in] name    Name of attribute to locate and open
+ * \type_id
+ * \space_id
+ * \acpl_id
  *
  * \return \hid_tv{attribute}
+ *
+ * \note The \p acpl parameters is currently not used; specify #H5P_DEFAULT.
  *
  * \deprecated Deprecated in favor of H5Acreate2()
  *

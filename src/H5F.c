@@ -745,11 +745,7 @@ done:
  *                       it is used only by HDF5 library developers;
  *                       \Emph{it is neither tested nor supported} for use in
  *                       applications.
- * \param[in] fapl_id  Identifier for the file access properties list. If
- *                     parallel file access is desired, this is a collective
- *                     call according to the communicator stored in the
- *                     \p fapl_id. Use #H5P_DEFAULT for default file access
- *                     properties.
+ * \fapl_id
  * \return \hid_t{file}
  *
  * \details H5Fopen() is the primary function for accessing existing HDF5 files.
@@ -934,7 +930,7 @@ done:
  *
  * \brief Terminates access to an HDF5 file
  *
- * \param[in] file_id Identifier of a file to terminate access to
+ * \file_id
  * \return \herr_t
  *
  * \details H5Fclose() terminates access to an HDF5 file (specified by

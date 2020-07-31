@@ -248,14 +248,15 @@ H5A_term_package(void)
  *                       datatype. If \p loc_id is a file identifier, the
  *                       attribute will be attached that file’s root group.
  * \param[in] attr_name  Name of attribute to locate and open
- * \param[in] type_id    Attribute datatype identifier
- * \param[in] space_id   Attribute dataspace identifier
- * \param[in] acpl_id    Attribute creation property list identifier
- *                       (Currently not used; specify H5P_DEFAULT)
- * \param[in] aapl_id    Attribute access property list identifier
- *                       (Currently not used; specify H5P_DEFAULT)
+ * \type_id
+ * \space_id
+ * \acpl_id
+ * \aapl_id
  *
  * \return \hid_tv{attribute}
+ *
+ * \note The \p acpl and \p aapl parameters are currently not used; specify
+ *       #H5P_DEFAULT.
  *
  * \details H5Acreate2() creates an attribute, \p attr_name, which is attached
  *          to the object specified by the identifier \p loc_id.
@@ -439,7 +440,7 @@ done:
  *                          attached; may be a file, group, dataset, or named
  *                          datatype
  * \param[in]  attr_name    Name of attribute to open
- * \param[in]  aapl_id      Attribute access property list
+ * \aapl_id
  *
  * \return \hid_tv{attribute}
  *
@@ -675,14 +676,14 @@ done:
  *
  * \brief Writes data to an attribute
  *
- * \param[in]   attr_id   Identifier of an attribute to write
- * \param[in]   dtype_id  Identifier of the attribute datatype (in memory)
+ * \attr_id
+ * \mem_type_id{dtype}
  * \param[out]  buf       Data to be written
  *
  * \return \herr_t
  *
  * \details H5Awrite() writes an attribute, specified with \p attr_id. The
- *          attribute's memory datatype is specified with \p dtype_id.
+ *          attribute's in-memory datatype is specified with \p dtype_id.
  *          The entire attribute is written from \p buf to the file.
  *
  *          If \p dtype_id is either a fixed-length or variable-length string,
@@ -742,14 +743,14 @@ done:
  *
  * \brief Reads the value of an attribute
  *
- * \param[in]  attr_id    Identifier of an attribute to read
- * \param[in]  dtype_id   Identifier of the attribute datatype (in memory)
+ * \attr_id
+ * \mem_type_id{dtype_id}
  * \param[out] buf        Buffer for data to be read
  *
  * \return \herr_t
  *
  * \details H5Aread() reads an attribute, specified with \p attr_id. The
- *          attribute's memory datatype is specified with \p dtype_id. The
+ *          attribute's in-memory datatype is specified with \p dtype_id. The
  *          entire attribute is read into \p buf from the file.
  *
  *          Datatype conversion takes place at the time of a read or write and
@@ -1697,7 +1698,7 @@ done:
  *
  * \brief Closes the specified attribute
  *
- * \param[in] attr_id   Attribute to release access to
+ * \attr_id
  *
  * \return \herr_t
  *

@@ -327,8 +327,8 @@ done:
  *                        created; may be a file, group, dataset, named
  *                        datatype or attribute identifier.
  * \param[in] link_name   Name of the new link, relative to \p link_loc_id
- * \param[in] lcpl_id     Link creation property list identifier
- * \param[in] lapl_id     Link access property list identifier
+ * \lcpl_id
+ * \lapl_id
  * \return \herr_t
  *
  * \details H5Lcreate_external() creates a new external link. An external link

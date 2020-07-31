@@ -1,6 +1,14 @@
+################################################################################
+# Styling
+################################################################################
+
 ALIASES += Bold{1}="<b>\1</b>"
 ALIASES += Emph{1}="<em>\1</em>"
 ALIASES += Code{1}="<tt>\1</tt>"
+
+################################################################################
+# Return values
+################################################################################
 
 ALIASES += success{1}="\Bold{Success:} \1"
 ALIASES += failure{1}="\Bold{Failure:} \1"
@@ -8,3 +16,79 @@ ALIASES += failure{1}="\Bold{Failure:} \1"
 ALIASES += herr_t="Returns a non-negative value if successful; otherwise returns a negative value."
 ALIASES += hid_t{1}="Returns a \1 identifier if successful; otherwise returns a negative value. "
 ALIASES += hid_tv{1}="Returns an \1 identifier if successful; otherwise returns a negative value. "
+
+################################################################################
+# General
+################################################################################
+
+ALIASES += idx_type="\param[in] idx_type Index type"
+ALIASES += idx_type{1}="\param[in] \1 Index type"
+
+ALIASES += order="\param[in] order Iteration order"
+ALIASES += order{1}="\param[in] \1 Iteration order"
+
+ALIASES += op="\param[in] op Callback function"
+ALIASES += op{1}="\param[in] \1 Callback function"
+
+ALIASES += op_data="\param[in,out] op_data User-defined callback function context"
+ALIASES += op_data{1}="\param[in,out] \1 User-defined callback function context"
+
+################################################################################
+# Attributes
+################################################################################
+
+ALIASES += attr_id="\param[in] attr_id Attribute identifier"
+ALIASES += attr_id{1}="\param[in] \1 Attribute identifier"
+
+################################################################################
+# Dataspaces
+################################################################################
+
+ALIASES += space_id="\param[in] space_id Dataspace identifier"
+ALIASES += space_id{1}="\param[in] \1 Dataspace identifier"
+
+################################################################################
+# Dataypes
+################################################################################
+
+ALIASES += type_id="\param[in] type_id Datatype identifier"
+ALIASES += type_id{1}="\param[in] \1 Datatype identifier"
+
+ALIASES += file_type_id{1}="\param[in] \1 Datatype (in-file) identifier"
+ALIASES += mem_type_id{1}="\param[in] \1 Datatype (in-memory) identifier"
+
+################################################################################
+# Files
+################################################################################
+
+ALIASES += file_id="\param[in] file_id File identifier"
+ALIASES += file_id{1}="\param[in] \1 File identifier"
+
+ALIASES += fapl_id="\param[in] fapl_id File access property list identifier"
+ALIASES += fapl_id{1}="\param[in] \1 File access property list identifier"
+
+ALIASES += fcpl_id="\param[in] fapl_id File creation property list identifier"
+ALIASES += fcpl_id{1}="\param[in] \1 File creation property list identifier"
+
+################################################################################
+# Groups
+################################################################################
+
+ALIASES += group_id="\param[in] group_id Group identifier"
+ALIASES += group_id{1}="\param[in] \1 Group identifier"
+
+################################################################################
+# Property lists
+################################################################################
+
+ALIASES += aapl_id="\param[in] aapl_id Attribute access property list identifier"
+ALIASES += aapl_id{1}="\param[in] \1 Attribute access property list identifier"
+
+ALIASES += acpl_id="\param[in] aapl_id Attribute creation property list identifier"
+ALIASES += acpl_id{1}="\param[in] \1 Attribute creation property list identifier"
+
+ALIASES += lapl_id="\param[in] lapl_id Link access property list identifier"
+ALIASES += lapl_id{1}="\param[in] \1 Link access property list identifier"
+
+ALIASES += lcpl_id="\param[in] lcpl_id Link creation property list identifier"
+ALIASES += lcpl_id{1}="\param[in] \1 Link creation property list identifier"

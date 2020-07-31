@@ -131,15 +131,13 @@ done:
  * \brief Iterates over links in a group, with user callback routine,
  *        according to the order within an index.
  *
- * \param[in]     group_id The group ID to iterate over
- * \param[in]     idx_type The index type
- * \param[in]     order    Specifies the order how to iterate
+ * \group_id
+ * \idx_type
+ * \order
  * \param[in,out] idx_p    Pointer to an iteration index to allow
  *                         continuing a previous iteration
- * \param[in]     op       Function pointer for a callback operation to be
- *                         invoked at each iteration
- * \param[in,out] op_data  User-defined data structure that will be passed
- *                         on to the callback function
+ * \op
+ * \op_data
  * \return \success{The return value of the first operator that returns
  *                  non-zero, or zero if all members were processed with no
  *                  operator returning non-zero.}
