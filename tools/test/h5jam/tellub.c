@@ -71,6 +71,7 @@ parse_command_line (int argc, const char *argv[])
             case 'h':
                 usage (h5tools_getprogname());
                 h5tools_setstatus(EXIT_SUCCESS);
+                break;
             case '?':
             default:
                 usage (h5tools_getprogname());
@@ -105,7 +106,7 @@ int
 main (int argc, const char *argv[])
 {
     char *ifname;
-    hid_t ifile;
+    hid_t ifile = H5I_INVALID_HID;
     hsize_t usize;
     htri_t testval;
     herr_t status;
@@ -165,7 +166,8 @@ main (int argc, const char *argv[])
 
 done:
     H5Pclose (plist);
-    H5Fclose (ifile);
+    if(ifile >= 0)
+        H5Fclose (ifile);
 
     leave(h5tools_getstatus());
 } /* end main() */
