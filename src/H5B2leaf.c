@@ -1027,7 +1027,8 @@ done:
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE herr_t
-H5B2__assert_leaf(const H5B2_hdr_t *hdr, const H5B2_leaf_t *leaf)
+H5B2__assert_leaf(const H5B2_hdr_t H5_ATTR_NDEBUG_UNUSED *hdr,
+    const H5B2_leaf_t H5_ATTR_NDEBUG_UNUSED *leaf)
 {
     /* General sanity checking on node */
     HDassert(leaf->nrec <= hdr->node_info->split_nrec);
@@ -1050,7 +1051,7 @@ H5B2__assert_leaf(const H5B2_hdr_t *hdr, const H5B2_leaf_t *leaf)
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE herr_t
-H5B2__assert_leaf2(const H5B2_hdr_t *hdr, const H5B2_leaf_t *leaf, const H5B2_leaf_t H5_ATTR_UNUSED *leaf2)
+H5B2__assert_leaf2(const H5B2_hdr_t H5_ATTR_NDEBUG_UNUSED *hdr, const H5B2_leaf_t H5_ATTR_NDEBUG_UNUSED *leaf, const H5B2_leaf_t H5_ATTR_UNUSED *leaf2)
 {
     /* General sanity checking on node */
     HDassert(leaf->nrec <= hdr->node_info->split_nrec);
