@@ -57,6 +57,7 @@ typedef struct {
     int        mode_list_not_cmp;          /* list not comparable messages */
     int        print_header;               /* print header */
     int        print_percentage;           /* print percentage */
+    int        print_dims;                 /* print dimension index */
     int        delta_bool;                 /* delta, absolute value to compare */
     double     delta;                      /* delta value */
     int        use_system_epsilon;         /* flag to use system epsilon (1 or 0) */

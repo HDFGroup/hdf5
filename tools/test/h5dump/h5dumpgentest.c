@@ -3629,7 +3629,6 @@ gent_group_comments(void)
 {
     hid_t fid = H5I_INVALID_HID;
     hid_t group = H5I_INVALID_HID;
-    hbool_t supports_comments = FALSE;
 
     fid = H5Fcreate(FILE33, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 

@@ -234,7 +234,7 @@ done:
  *           0 - not excluded path
  *------------------------------------------------------------------------*/
 static int
-is_exclude_attr (char *path, h5trav_type_t type, diff_opt_t *opts)
+is_exclude_attr (const char *path, h5trav_type_t type, diff_opt_t *opts)
 {
     struct exclude_path_list *exclude_ptr;
     int   ret_cmp;

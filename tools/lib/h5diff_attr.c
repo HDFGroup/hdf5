@@ -375,18 +375,16 @@ hsize_t diff_attr_data(hid_t attr1_id, hid_t attr2_id,
         j = (int)HDstrlen(name1);
         H5TOOLS_DEBUG("attr1_name: %s - %d", name1, j);
         if (j > 0) {
-            opts->obj_name[0] = (char *)HDcalloc((size_t)j + 1, sizeof(char));
-            HDstrncpy(opts->obj_name[0], name1, (size_t)j);
-            opts->obj_name[0][j] = '\0';
+            opts->obj_name[0] = (char *)HDmalloc((size_t)j + 1);
+            HDstrncpy(opts->obj_name[0], name1, (size_t)j + 1);
         }
     }
     if (name2) {
         j = (int)HDstrlen(name2);
         H5TOOLS_DEBUG("attr2_name: %s - %d", name2, j);
         if (j > 0) {
-            opts->obj_name[1] = (char *)HDcalloc((size_t)j + 1, sizeof(char));
-            HDstrncpy(opts->obj_name[1], name2, (size_t)j);
-            opts->obj_name[1][j] = '\0';
+            opts->obj_name[1] = (char *)HDmalloc((size_t)j + 1);
+            HDstrncpy(opts->obj_name[1], name2, (size_t)j + 1);
         }
     }
     H5TOOLS_DEBUG("attr_names: %s - %s", opts->obj_name[0], opts->obj_name[1]);
@@ -412,7 +410,7 @@ hsize_t diff_attr_data(hid_t attr1_id, hid_t attr2_id,
             opts->nelmts *= dims1[j];
         }
         opts->rank = rank1;
-        init_acc_pos(opts->rank, opts->dims, opts->acc, opts->pos, opts->p_min_idx);
+        init_acc_pos((unsigned)opts->rank, opts->dims, opts->acc, opts->pos, opts->p_min_idx);
 
         /*---------------------------------------------------------------------
         * read

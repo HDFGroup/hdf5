@@ -277,9 +277,8 @@ diff_datasetid(hid_t did1, hid_t did2, const char *obj1_name, const char *obj2_n
         j = (int)HDstrlen(obj1_name);
         H5TOOLS_DEBUG("obj1_name: %s - %d", obj1_name, j);
         if (j > 0) {
-            opts->obj_name[0] = (char *)HDcalloc((size_t)j + 1, sizeof(char));
-            HDstrncpy(opts->obj_name[0], obj1_name, (size_t)j );
-            opts->obj_name[0][j] = '\0';
+            opts->obj_name[0] = (char *)HDmalloc((size_t)j + 1);
+            HDstrncpy(opts->obj_name[0], obj1_name, (size_t)j + 1);
         }
     }
 
@@ -289,9 +288,8 @@ diff_datasetid(hid_t did1, hid_t did2, const char *obj1_name, const char *obj2_n
         j = (int)HDstrlen(obj2_name);
         H5TOOLS_DEBUG("obj2_name: %s - %d", obj2_name, j);
         if (j > 0) {
-            opts->obj_name[1] = (char *)HDcalloc((size_t)j + 1, sizeof(char));
-            HDstrncpy(opts->obj_name[1], obj2_name, (size_t)j);
-            opts->obj_name[1][j] = '\0';
+            opts->obj_name[1] = (char *)HDmalloc((size_t)j + 1);
+            HDstrncpy(opts->obj_name[1], obj2_name, (size_t)j + 1);
         }
     }
 
@@ -439,7 +437,7 @@ diff_datasetid(hid_t did1, hid_t did2, const char *obj1_name, const char *obj2_n
         } /* end if */
 
         /* Assume entire data space to be printed */
-        init_acc_pos(opts->rank, opts->dims, opts->acc, opts->pos, opts->p_min_idx);
+        init_acc_pos((unsigned)opts->rank, opts->dims, opts->acc, opts->pos, opts->p_min_idx);
 
         for(i = 0; i < opts->rank; i++) {
             opts->p_max_idx[i] = opts->dims[i];
@@ -780,7 +778,7 @@ diff_datasetid(hid_t did1, hid_t did2, const char *obj1_name, const char *obj2_n
                     opts->sm_pos[j] = low[j];
 
                 /* Assume entire data space to be printed */
-                init_acc_pos(opts->rank, opts->dims, opts->acc, opts->pos, opts->p_min_idx);
+                init_acc_pos((unsigned)opts->rank, opts->dims, opts->acc, opts->pos, opts->p_min_idx);
 
                 /* get array differences. in the case of hyperslab read, increment the number of differences
                 found in each hyperslab and pass the position at the beginning for printing */

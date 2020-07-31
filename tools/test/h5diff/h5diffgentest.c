@@ -8035,7 +8035,6 @@ void test_double_epsilon(const char *fname1, const char *fname2)
 {
     hid_t    fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID;
     hsize_t  dims1[2] = { 4, 7 };
-    hsize_t  dims2[2] = { 4, 7 };
     double   wdata[4][7];
     int i, j;
 

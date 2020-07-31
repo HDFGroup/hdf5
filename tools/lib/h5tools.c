@@ -641,7 +641,6 @@ done:
 herr_t
 h5tools_get_vfd_name(hid_t fapl_id, char *drivername, size_t drivername_size)
 {
-    hid_t  fapl_vol_id = H5I_INVALID_HID;
     herr_t ret_value = SUCCEED;
 
     if (fapl_id < 0)
@@ -1492,7 +1491,7 @@ calc_acc_pos(unsigned ndims, hsize_t elmtno, hsize_t *acc, hsize_t *pos)
     H5TOOLS_START_DEBUG("");
 
     if(ndims > 0) {
-        for(i = 0; i < (size_t) ndims; i++) {
+        for(i = 0; i < (int)ndims; i++) {
             if(curr_pos > 0) {
                 H5TOOLS_DEBUG("curr_pos=%ld - ctx->acc[%d]=%ld", curr_pos, i, acc[i]);
                 pos[i] = curr_pos / acc[i];
