@@ -3286,8 +3286,7 @@ error:
  *
  * Purpose:     Tests the basic features of Virtual File Drivers
  *
- * Return:      Success:        0
- *              Failure:        1
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  *-------------------------------------------------------------------------
  */
@@ -3317,11 +3316,11 @@ main(void)
     if(nerrors) {
         HDprintf("***** %d Virtual File Driver TEST%s FAILED! *****\n",
             nerrors, nerrors > 1 ? "S" : "");
-        return 1;
+        return EXIT_FAILURE;
     } /* end if */
 
     HDprintf("All Virtual File Driver tests passed.\n");
 
-    return 0;
+    return EXIT_SUCCESS;
 } /* end main() */
 
