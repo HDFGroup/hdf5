@@ -15167,14 +15167,14 @@ test_hyper_io_1d(void)
 
     /* Get the dataset's dataspace */
     sid = H5Dget_space(did);
-    CHECK(sid, H5I_INVALID_HID, "H5Pcreate");
+    CHECK(sid, H5I_INVALID_HID, "H5Dget_space");
     ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, offset, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* Set up contiguous memory dataspace for the selected elements */
     dimsm[0] = count[0];
     mid = H5Screate_simple(RANK, dimsm, NULL);
-    CHECK(mid, H5I_INVALID_HID, "H5Screate");
+    CHECK(mid, H5I_INVALID_HID, "H5Screate_simple");
 
     /* Read all the selected 10th elements in the dataset into "rdata" */
     ret = H5Dread(did, H5T_NATIVE_INT, mid, sid, H5P_DEFAULT, rdata);

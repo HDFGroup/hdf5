@@ -11448,8 +11448,8 @@ error:
         H5Tclose(f_tid);
         H5Tclose(g_tid);
         H5Tclose(anon_tid);
-    H5Pclose(ocpypl_id);
-    H5Aclose(aid);
+        H5Pclose(ocpypl_id);
+        H5Aclose(aid);
         H5Dclose(did);
         H5Sclose(sid);
         H5Gclose(gid);
@@ -11688,14 +11688,14 @@ test_copy_cdt_merge_cdt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
 
 error:
     H5E_BEGIN_TRY {
-    H5Pclose(ocpypl_id);
-    H5Tclose(tid);
-    H5Tclose(tid1);
-    H5Tclose(tid2);
-    H5Tclose(tid3);
-    H5Tclose(tid4);
-    H5Tclose(tid5);
-    H5Aclose(aid);
+        H5Pclose(ocpypl_id);
+        H5Tclose(tid);
+        H5Tclose(tid1);
+        H5Tclose(tid2);
+        H5Tclose(tid3);
+        H5Tclose(tid4);
+        H5Tclose(tid5);
+        H5Aclose(aid);
         H5Sclose(sid);
         H5Fclose(fid_dst);
         H5Fclose(fid_src);
@@ -13419,8 +13419,7 @@ test_copy_iterate(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl
 
     /* Iterate over links in the root group, copying each object */
     if((gid = H5Gopen2(fid1, "/", H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Literate(gid, H5_INDEX_NAME, H5_ITER_INC, NULL, test_copy_iterate_cb,
-            &fid2) < 0)
+    if(H5Literate(gid, H5_INDEX_NAME, H5_ITER_INC, NULL, test_copy_iterate_cb, &fid2) < 0)
         TEST_ERROR
 
     /* Close */

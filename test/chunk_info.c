@@ -10,10 +10,7 @@
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 /*
- * Programmer:  Pedro Vicente <pvn@hdfgroup.edu>
- *              April 7, 2008
  *
  * Purpose:     Tests chunk query API functions
  *
@@ -136,12 +133,12 @@ void reinit_vars(unsigned *read_flt_msk, haddr_t *addr, hsize_t *size)
 }
 
 /*-------------------------------------------------------------------------
- * Function:	test_get_chunk_info_highest18
+ * Function:    test_get_chunk_info_highest18
  *
- * Purpose:	    Test getting various chunk information
+ * Purpose:     Test getting various chunk information
  *
- * Return:	    Success:	SUCCEED
- *		        Failure:	FAIL
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
  *
  * Note:        Note that the dataspace argument in these new functions are
  *              currently not used.  The functionality involved the dataspace
@@ -206,7 +203,7 @@ test_get_chunk_info_highest18(hid_t fapl)
     if(chunkfile < 0)
         TEST_ERROR
 
-    /* Create the file and memory dataspaces */
+    /* Create the file and memory dataspace */
     if((dspace = H5Screate_simple(RANK, dims, maxdims)) < 0)
         TEST_ERROR
 
@@ -389,7 +386,7 @@ test_get_chunk_info_highest18(hid_t fapl)
     if(H5Dclose(dset) < 0) TEST_ERROR
 
     /************************************************************************
-     * Test empty dataset with H5P_ALLOC_TIME_EARLY                         *
+     * Test empty dataset with H5D_ALLOC_TIME_EARLY                         *
      ************************************************************************/
 
     /* Set space allocation to early so that chunk query functions will
@@ -417,9 +414,11 @@ test_get_chunk_info_highest18(hid_t fapl)
     ret = H5Dget_chunk_info(dset, dspace, index, out_offset, &read_flt_msk, &addr, &size);
     if(ret < 0) TEST_ERROR
 
-    /* Because of H5P_ALLOC_TIME_EARLY, addr cannot be HADDR_UNDEF and size not 0 */
-    if(addr == HADDR_UNDEF) TEST_ERROR
-    if(size == 0) TEST_ERROR
+    /* Because of H5D_ALLOC_TIME_EARLY, addr cannot be HADDR_UNDEF and size not 0 */
+    if(addr == HADDR_UNDEF)
+        TEST_ERROR
+    if(size == 0)
+        TEST_ERROR
 
     index = 10;
     reinit_vars(&read_flt_msk, &addr, &size);
@@ -427,8 +426,10 @@ test_get_chunk_info_highest18(hid_t fapl)
     if(ret < 0) TEST_ERROR
 
     /* Because of H5P_ALLOC_TIME_EARLY, addr cannot be HADDR_UNDEF and size not 0 */
-    if(addr == HADDR_UNDEF) TEST_ERROR
-    if(size == 0) TEST_ERROR
+    if(addr == HADDR_UNDEF)
+        TEST_ERROR
+    if(size == 0)
+        TEST_ERROR
 
     /* Attempt to get info of a chunk given its coords from an empty dataset,
        verify the returned address and size */
@@ -437,8 +438,10 @@ test_get_chunk_info_highest18(hid_t fapl)
     if(H5Dget_chunk_info_by_coord(dset, offset, &read_flt_msk, &addr, &size) < 0)
         TEST_ERROR
     /* Because of H5P_ALLOC_TIME_EARLY, addr cannot be HADDR_UNDEF and size not 0 */
-    if(addr == HADDR_UNDEF) TEST_ERROR
-    if(size == 0) TEST_ERROR
+    if(addr == HADDR_UNDEF)
+        TEST_ERROR
+    if(size == 0)
+        TEST_ERROR
 
     if(H5Dclose(dset) < 0) TEST_ERROR
 
@@ -463,13 +466,13 @@ error:
 } /* test_get_chunk_info_highest18() */
 
 /*-------------------------------------------------------------------------
- * Function:	test_chunk_info_single_chunk
+ * Function:    test_chunk_info_single_chunk
  *
- * Purpose:	    Test getting various chunk information when Single Chunk
+ * Purpose:     Test getting various chunk information when Single Chunk
  *              index type is used
  *
- * Return:	    Success:	SUCCEED
- *		        Failure:	FAIL
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
  *
  * Note:        Note that the dataspace argument in these new functions are
  *              currently not used.  The functionality involved the dataspace
@@ -527,7 +530,7 @@ test_chunk_info_single_chunk(char *filename, hid_t fapl)
     if(idx_type != H5D_CHUNK_IDX_SINGLE)
         FAIL_PUTS_ERROR("should be using Single Chunk index type");
 
-    /* Close the dataset then... */
+    /* Close the dataset */
     if(H5Dclose(dset) < 0) TEST_ERROR
 
     /* ...open it again to test the chunk query functions on a single empty
@@ -590,13 +593,13 @@ error:
 } /* test_chunk_info_single_chunk() */
 
 /*-------------------------------------------------------------------------
- * Function:	test_chunk_info_implicit
+ * Function:    test_chunk_info_implicit
  *
- * Purpose:	    Test getting various chunk information when Implicit
+ * Purpose:     Test getting various chunk information when Implicit
  *              index type is used
  *
- * Return:	    Success:	SUCCEED
- *		        Failure:	FAIL
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
  *
  * Note:        Note that the dataspace argument in these new functions are
  *              currently not used.  The functionality involved the dataspace
@@ -648,6 +651,7 @@ test_chunk_info_implicit(char *filename, hid_t fapl)
     if(H5Pset_chunk(cparms, RANK, chunk_dims) < 0)
         TEST_ERROR
 
+    /* Set allocation time to early */
     if(H5Pset_alloc_time(cparms, H5D_ALLOC_TIME_EARLY) < 0)
         TEST_ERROR
 
@@ -813,13 +817,13 @@ error:
 } /* test_chunk_info_implicit() */
 
 /*-------------------------------------------------------------------------
- * Function:	test_chunk_info_fixed_array
+ * Function:    test_chunk_info_fixed_array
  *
- * Purpose:	    Test getting various chunk information when Fixed Array
+ * Purpose:     Test getting various chunk information when Fixed Array
  *              index type is used
  *
- * Return:	    Success:	SUCCEED
- *		        Failure:	FAIL
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
  *
  * Note:        Note that the dataspace argument in these new functions are
  *              currently not used.  The functionality involved the dataspace
@@ -1022,13 +1026,13 @@ error:
 } /* test_chunk_info_fixed_array() */
 
 /*-------------------------------------------------------------------------
- * Function:	test_chunk_info_extensible_array
+ * Function:    test_chunk_info_extensible_array
  *
- * Purpose:	    Test getting various chunk information when Extensible Array
+ * Purpose:     Test getting various chunk information when Extensible Array
  *              index type is used
  *
- * Return:	    Success:	SUCCEED
- *		        Failure:	FAIL
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
  *
  * Note:        Note that the dataspace argument in these new functions are
  *              currently not used.  The functionality involved the dataspace
@@ -1041,13 +1045,13 @@ error:
 static herr_t
 test_chunk_info_extensible_array(char *filename, hid_t fapl)
 {
-    hid_t    chunkfile = -1;     /* File ID */
-    hid_t    dspace = -1;        /* Dataspace ID */
-    hid_t    dset = -1;          /* Dataset ID */
-    hid_t    cparms = -1;        /* Creation plist */
-    hsize_t  dims[2]  = {NX, NY};/* Dataset dimensions */
-    hsize_t  chunk_dims[2] = {CHUNK_NX, CHUNK_NY};      /* Chunk dimensions */
-    hsize_t  maxdims[2] = {H5S_UNLIMITED, NY}; /* One unlimited dimension */
+    hid_t    chunkfile = H5I_INVALID_HID;   /* File ID */
+    hid_t    dspace = H5I_INVALID_HID;      /* Dataspace ID */
+    hid_t    dset = H5I_INVALID_HID;        /* Dataset ID */
+    hid_t    cparms = H5I_INVALID_HID;      /* Creation plist */
+    hsize_t  dims[2] = {NX, NY};            /* Dataset dimensions */
+    hsize_t  chunk_dims[2] = {CHUNK_NX, CHUNK_NY}; /* Chunk dimensions */
+    hsize_t  maxdims[2] = {H5S_UNLIMITED, NY};     /* One unlimited dimension */
     int      direct_buf[NUM_CHUNKS][CHUNK_NX][CHUNK_NY];/* Data in chunks */
     int      out_buf[NX][NY];    /* Buffer to read data in */
     size_t   buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);  /* Buffer size of a chk */
@@ -1229,13 +1233,13 @@ error:
 } /* test_chunk_info_extensible_array() */
 
 /*-------------------------------------------------------------------------
- * Function:	test_chunk_info_version2_btrees
+ * Function:    test_chunk_info_version2_btrees
  *
- * Purpose:	    Test getting various chunk information when Version 2 B-trees
+ * Purpose:     Test getting various chunk information when Version 2 B-trees
  *              index type is used
  *
- * Return:	    Success:	SUCCEED
- *		        Failure:	FAIL
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
  *
  * Note:        Note that the dataspace argument in these new functions are
  *              currently not used.  The functionality involved the dataspace
@@ -1248,10 +1252,10 @@ error:
 static herr_t
 test_chunk_info_version2_btrees(char *filename, hid_t fapl)
 {
-    hid_t    chunkfile = -1;     /* File ID */
-    hid_t    dspace = -1;        /* Dataspace ID */
-    hid_t    dset = -1;          /* Dataset ID */
-    hid_t    cparms = -1;        /* Creation plist */
+    hid_t    chunkfile = H5I_INVALID_HID;   /* File ID */
+    hid_t    dspace = H5I_INVALID_HID;      /* Dataspace ID */
+    hid_t    dset = H5I_INVALID_HID;        /* Dataset ID */
+    hid_t    cparms = H5I_INVALID_HID;      /* Creation plist */
     hsize_t  dims[2]  = {NX, NY};/* Dataset dimensions */
     hsize_t  chunk_dims[2] = {CHUNK_NX, CHUNK_NY};      /* Chunk dimensions */
     hsize_t  maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* Two unlimited dims */
@@ -1437,12 +1441,12 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_get_chunk_info_110
+ * Function:    test_get_chunk_info_110
  *
- * Purpose:	    Test getting various chunk information in version 1.10.
+ * Purpose:     Test getting various chunk information in version 1.10.
  *
- * Return:	    Success:	SUCCEED
- *		        Failure:	FAIL
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
  *
  * Note:        Note that the dataspace argument in these new functions are
  *              currently not used.  The functionality involved the dataspace
@@ -1533,7 +1537,7 @@ error:
  *              later time, so it is kept here.
  *              -BMR, November 5, 2018
  *
- * Programmer:  Pedro Vicente <pvn@hdfgroup.edu>
+ * Programmer:  Pedro Vicente
  *              April 7, 2008
  *
  *-------------------------------------------------------------------------
@@ -1645,8 +1649,7 @@ error:
  *
  * Purpose:     Tests functions related to chunk information
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:  Binh-Minh Ribler
  *              November 5, 2018
@@ -1656,7 +1659,7 @@ error:
 int
 main(void)
 {
-    hid_t fapl = -1;    /* File access property list */
+    hid_t fapl = H5I_INVALID_HID;    /* File access property list */
     int   nerrors = 0;  /* Number of errors so far */
 
     h5_reset();
@@ -1681,13 +1684,13 @@ main(void)
 
     h5_cleanup(FILENAME, fapl);
 
-    return SUCCEED;
+    return EXIT_SUCCESS;
 
 error:
     nerrors = MAX(1, nerrors);
     HDprintf("***** %d QUERY CHUNK INFO TEST%s FAILED! *****\n",
               nerrors, 1 == nerrors ? "" : "S");
-    return FAIL;
+    return EXIT_FAILURE;
 }
 
 /****************************************************************************

@@ -70,8 +70,10 @@ const char *FILENAME[] = {
 #define GCPL_ON_ROOT_MAX_COMPACT   4
 #define GCPL_ON_ROOT_MIN_DENSE     2
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 /* Definitions for 'old_api' test */
 #define OLD_API_GROUP           "/old_api"
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 /* Definitions for 'corrupt_stab_msg' test */
 #define CORRUPT_STAB_FILE           "corrupt_stab_msg.h5"

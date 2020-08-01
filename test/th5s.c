@@ -1284,6 +1284,7 @@ test_h5s_encode(void)
         CHECK(null_sbuf, NULL, "HDcalloc");
     }
 
+    /* Encode the null dataspace in the buffer */
     ret = H5Sencode(sid2, null_sbuf, &null_size);
     CHECK(ret, FAIL, "H5Sencode");
 
@@ -1319,6 +1320,7 @@ test_h5s_encode(void)
         CHECK(scalar_buf, NULL, "HDcalloc");
     }
 
+    /* Encode the scalar dataspace in the buffer */
     ret = H5Sencode(sid3, scalar_buf, &scalar_size);
     CHECK(ret, FAIL, "H5Sencode");
 
@@ -2836,6 +2838,7 @@ test_h5s(void)
     test_h5s_basic();        /* Test basic H5S code */
     test_h5s_null();        /* Test Null dataspace H5S code */
     test_h5s_zero_dim();        /* Test dataspace with zero dimension size */
+
     test_h5s_encode();          /* Test encoding and decoding */
     test_h5s_encode_regular_exceed32();     /* Test encoding regular hyperslab selection that exceeds 32 bits */
     test_h5s_encode_irregular_exceed32();   /* Testing encoding irregular hyperslab selection that exceeds 32 bits */
