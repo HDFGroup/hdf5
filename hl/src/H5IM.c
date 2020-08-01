@@ -274,7 +274,8 @@ herr_t H5IMget_image_info( hid_t loc_id,
         return -1;
 
     /* Try to find the attribute "INTERLACE_MODE" on the >>image<< dataset */
-    has_attr = H5LT_find_attribute(did, "INTERLACE_MODE");
+    if ((has_attr = H5LT_find_attribute(did, "INTERLACE_MODE")) < 0)
+        goto out;
 
     /* It exists, get it */
     if(has_attr == 1)

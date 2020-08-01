@@ -525,7 +525,8 @@ done:
  */
 herr_t
 H5VL__native_attr_optional(void H5_ATTR_UNUSED *obj, H5VL_attr_optional_t opt_type,
-    hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
+    hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req,
+    va_list H5_ATTR_DEPRECATED_USED arguments)
 {
     herr_t ret_value = SUCCEED;    /* Return value */
 

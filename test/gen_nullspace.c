@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:  Quincey Koziol
  *              Saturday, April 17, 2004
  *
  * Purpose:	Create a dataset with a null dataspace and an attribute
@@ -24,8 +24,7 @@
  *      put into the 'test' directory in the 1.6.x branch of the library.
  */
 
-#include "hdf5.h"
-#include <assert.h>
+#include "h5test.h"
 
 #define NULLFILE   "tnullspace.h5"
 #define NULLDATASET  "null_dataset"
@@ -39,7 +38,7 @@ main(void)
     hid_t sid;          /* Dataspace ID */
     hid_t did;          /* Dataset ID */
     hid_t attr;         /* Attribute ID */
-    herr_t ret;         /* Generic return value */
+    herr_t H5_ATTR_NDEBUG_UNUSED ret;         /* Generic return value */
 
     /* Create the file */
     fid = H5Fcreate(NULLFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);

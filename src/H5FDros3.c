@@ -325,7 +325,9 @@ hid_t
 H5FD_ros3_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID;
+#if ROS3_STATS
     unsigned int bin_i;
+#endif
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1347,7 +1349,7 @@ H5FD_ros3_cmp(
     }
 
     /* FAPL: AWS_REGION */
-    if (f1->fa.aws_region[0] != '\0' && f1->fa.aws_region[0] != '\0') {
+    if (f1->fa.aws_region[0] != '\0' && f2->fa.aws_region[0] != '\0') {
         if (HDstrcmp(f1->fa.aws_region, f2->fa.aws_region)) {
             HGOTO_DONE(-1);
         }
@@ -1362,7 +1364,7 @@ H5FD_ros3_cmp(
     }
 
     /* FAPL: SECRET_ID */
-    if (f1->fa.secret_id[0] != '\0' && f1->fa.secret_id[0] != '\0') {
+    if (f1->fa.secret_id[0] != '\0' && f2->fa.secret_id[0] != '\0') {
         if (HDstrcmp(f1->fa.secret_id, f2->fa.secret_id)) {
             HGOTO_DONE(-1);
         }
@@ -1377,7 +1379,7 @@ H5FD_ros3_cmp(
     }
 
     /* FAPL: SECRET_KEY */
-    if (f1->fa.secret_key[0] != '\0' && f1->fa.secret_key[0] != '\0') {
+    if (f1->fa.secret_key[0] != '\0' && f2->fa.secret_key[0] != '\0') {
         if (HDstrcmp(f1->fa.secret_key, f2->fa.secret_key)) {
             HGOTO_DONE(-1);
         }

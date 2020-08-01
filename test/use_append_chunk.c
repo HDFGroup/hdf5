@@ -69,43 +69,40 @@
 
 #include "use.h"
 
-/* Global Variable definitions */
-options_t UC_opts;	/* Use Case Options */
-const char *progname_g="use_append_chunk";	/* program name */
+#define USE_APPEND_CHUNK_PROGNAME "use_append_chunk"
+
+static options_t UC_opts; /* Use Case Options */
 
 /* Setup parameters for the use case.
  * Return: 0 succeed; -1 fail.
  */
-int setup_parameters(int argc, char * const argv[])
+int
+setup_parameters(int argc, char * const argv[], options_t * opts)
 {
     /* use case defaults */
-    HDmemset(&UC_opts, 0, sizeof(options_t));
-    UC_opts.chunksize = Chunksize_DFT;
-    UC_opts.use_swmr = TRUE;	/* use swmr open */
-    UC_opts.iterations = 1;
-    UC_opts.chunkplanes = 1;
+    HDmemset(opts, 0, sizeof(options_t));
+    opts->chunksize = Chunksize_DFT;
+    opts->use_swmr = TRUE; /* use swmr open */
+    opts->iterations = 1;
+    opts->chunkplanes = 1;
+    opts->progname = USE_APPEND_CHUNK_PROGNAME;
 
-    /* parse options */
-    if (parse_option(argc, argv) < 0)
-	return(-1);
+    if (parse_option(argc, argv, opts) < 0)
+        return(-1);
 
-    /* set chunk dims */
-    UC_opts.chunkdims[0] = UC_opts.chunkplanes;
-    UC_opts.chunkdims[1] = UC_opts.chunkdims[2] = UC_opts.chunksize;
+    opts->chunkdims[0] = opts->chunkplanes;
+    opts->chunkdims[1] = opts->chunkdims[2] = opts->chunksize;
 
-    /* set dataset initial and max dims */
-    UC_opts.dims[0] = 0;
-    UC_opts.max_dims[0] = H5S_UNLIMITED;
-    UC_opts.dims[1] = UC_opts.dims[2] = UC_opts.max_dims[1] = UC_opts.max_dims[2] = UC_opts.chunksize;
+    opts->dims[0] = 0;
+    opts->max_dims[0] = H5S_UNLIMITED;
+    opts->dims[1] = opts->dims[2] = opts->max_dims[1] = opts->max_dims[2] = opts->chunksize;
 
-    /* set nplanes */
-    if (UC_opts.nplanes == 0)
-        UC_opts.nplanes = (hsize_t)UC_opts.chunksize;
+    if (opts->nplanes == 0)
+        opts->nplanes = (hsize_t)opts->chunksize;
 
-    /* show parameters and return */
-    show_parameters();
+    show_parameters(opts);
     return(0);
-}
+} /* setup_parameters() */
 
 
 /* Overall Algorithm:
@@ -127,10 +124,8 @@ main(int argc, char *argv[])
     hbool_t send_wait = FALSE;
     hid_t fapl = -1;    /* File access property list */
     hid_t fid = -1;     /* File ID */
-    char *name;         /* Test file name */
 
-    /* initialization */
-    if (setup_parameters(argc, argv) < 0){
+    if (setup_parameters(argc, argv, &UC_opts) < 0) {
         Hgoto_error(1);
     }
 
@@ -150,31 +145,56 @@ main(int argc, char *argv[])
     /* =========== */
     if (UC_opts.launch != UC_READER) {
         HDprintf("Creating skeleton data file for test...\n");
-        if (create_uc_file() < 0){
+        if ((UC_opts.fapl_id = h5_fileaccess()) < 0) {
+            HDfprintf(stderr, "can't create creation FAPL\n");
+            Hgoto_error(1);
+        }
+        if (H5Pset_libver_bounds(UC_opts.fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
+            HDfprintf(stderr, "can't set creation FAPL libver bounds\n");
+            Hgoto_error(1);
+        }
+        if (create_uc_file(&UC_opts) < 0) {
             HDfprintf(stderr, "***encounter error\n");
             Hgoto_error(1);
-        } else
+        } else {
             HDprintf("File created.\n");
+        }
+        /* Close FAPL to prevent issues with forking later */
+        if (H5Pclose(UC_opts.fapl_id) < 0) {
+            HDfprintf(stderr, "can't close creation FAPL\n");
+            Hgoto_error(1);
+        }
+        UC_opts.fapl_id = H5I_INVALID_HID;
     }
 
-    if (UC_opts.launch==UC_READWRITE){
-        /* fork process */
-        if((childpid = HDfork()) < 0) {
+    /* ============ */
+    /* Fork process */
+    /* ============ */
+    if (UC_opts.launch == UC_READWRITE) {
+        if ((childpid = HDfork()) < 0) {
             HDperror("fork");
             Hgoto_error(1);
-        };
-    };
+        }
+    }
     mypid = HDgetpid();
 
     /* ============= */
     /* launch reader */
     /* ============= */
-    if (UC_opts.launch != UC_WRITER){
+    if (UC_opts.launch != UC_WRITER) {
         /* child process launch the reader */
-        if(0 == childpid) {
+        if (0 == childpid) {
             HDprintf("%d: launch reader process\n", mypid);
-            if (read_uc_file(send_wait) < 0){
+            if ((UC_opts.fapl_id = h5_fileaccess()) < 0) {
+                HDfprintf(stderr, "can't create read FAPL\n");
+                HDexit(EXIT_FAILURE);
+            }
+            if (read_uc_file(send_wait, &UC_opts) < 0) {
                 HDfprintf(stderr, "read_uc_file encountered error\n");
+                HDexit(EXIT_FAILURE);
+            }
+            if (H5Pclose(UC_opts.fapl_id) < 0) {
+                HDfprintf(stderr, "can't close read FAPL\n");
                 HDexit(EXIT_FAILURE);
             }
             HDexit(EXIT_SUCCESS);
@@ -187,50 +207,49 @@ main(int argc, char *argv[])
     /* this process continues to launch the writer */
     HDprintf("%d: continue as the writer process\n", mypid);
 
-    name = UC_opts.filename;
-
-    /* Set file access proeprty list */
-    if((fapl = h5_fileaccess()) < 0)
+    if ((fapl = h5_fileaccess()) < 0) {
+        HDfprintf(stderr, "can't create write FAPL\n");
         Hgoto_error(1);
+    }
 
-    if(UC_opts.use_swmr)
-        if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+    if (UC_opts.use_swmr) {
+        if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
+            HDfprintf(stderr, "can't set write FAPL libver bounds\n");
             Hgoto_error(1);
+        }
+    }
 
-    /* Open the file */
-    if((fid = H5Fopen(name, H5F_ACC_RDWR | (UC_opts.use_swmr ? H5F_ACC_SWMR_WRITE : 0), fapl)) < 0) {
+    if ((fid = H5Fopen(UC_opts.filename, H5F_ACC_RDWR | (UC_opts.use_swmr ? H5F_ACC_SWMR_WRITE : 0), fapl)) < 0) {
         HDfprintf(stderr, "H5Fopen failed\n");
         Hgoto_error(1);
     }
 
-    if(write_uc_file(send_wait, fid) < 0) {
+    if (write_uc_file(send_wait, fid, &UC_opts) < 0) {
         HDfprintf(stderr, "write_uc_file encountered error\n");
+        Hgoto_error(1);
+    }
+
+    if (H5Fclose(fid) < 0) {
+        HDfprintf(stderr, "Failed to close write\n");
+        Hgoto_error(1);
+    }
+
+    if (H5Pclose(fapl) < 0) {
+        HDfprintf(stderr, "can't close write FAPL\n");
         Hgoto_error(1);
     }
 
     /* ================================================ */
     /* If readwrite, collect exit code of child process */
     /* ================================================ */
-    if (UC_opts.launch == UC_READWRITE){
-        if ((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0){
+    if (UC_opts.launch == UC_READWRITE) {
+        if ((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0) {
             HDperror("waitpid");
             Hgoto_error(1);
         }
 
-        /* Close the file */
-        if(H5Fclose(fid) < 0) {
-            HDfprintf(stderr, "Failed to close file id\n");
-            Hgoto_error(1);
-        }
-
-        /* Close the property list */
-        if(H5Pclose(fapl) < 0) {
-            HDfprintf(stderr, "Failed to close the property list\n");
-            Hgoto_error(1);
-        }
-
-        if (WIFEXITED(child_status)){
-            if ((child_ret_value=WEXITSTATUS(child_status)) != 0){
+        if (WIFEXITED(child_status)) {
+            if ((child_ret_value = WEXITSTATUS(child_status)) != 0) {
                 HDprintf("%d: child process exited with non-zero code (%d)\n",
                         mypid, child_ret_value);
                 Hgoto_error(2);
@@ -242,8 +261,7 @@ main(int argc, char *argv[])
     }
 
 done:
-    /* Print result and exit */
-    if (ret_value != 0){
+    if (ret_value != 0) {
         HDprintf("Error(s) encountered\n");
     } else {
         HDprintf("All passed\n");

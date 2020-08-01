@@ -304,17 +304,38 @@
  * file). Be sure to update that file if the #ifdefs change here.
  */
 #ifdef __cplusplus
-#   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
-#   define H5_ATTR_UNUSED         /*void*/
-#   define H5_ATTR_NDEBUG_UNUSED  /*void*/
-#   define H5_ATTR_NORETURN       /*void*/
-#   define H5_ATTR_CONST          /*void*/
-#   define H5_ATTR_PURE           /*void*/
-#   define H5_ATTR_FALLTHROUGH    /*void*/
+#   define H5_ATTR_FORMAT(X,Y,Z)                /*void*/
+#   define H5_ATTR_UNUSED                       /*void*/
+#   define H5_ATTR_DEPRECATED_USED              /*void*/
+#   define H5_ATTR_NDEBUG_UNUSED                /*void*/
+#   define H5_ATTR_DEBUG_API_USED               /*void*/
+#   define H5_ATTR_PARALLEL_UNUSED              /*void*/
+#   define H5_ATTR_PARALLEL_USED                /*void*/
+#   define H5_ATTR_NORETURN                     /*void*/
+#   define H5_ATTR_CONST                        /*void*/
+#   define H5_ATTR_PURE                         /*void*/
+#   define H5_ATTR_FALLTHROUGH                  /*void*/
 #else /* __cplusplus */
 #if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
 #   define H5_ATTR_FORMAT(X,Y,Z)  __attribute__((format(X, Y, Z)))
 #   define H5_ATTR_UNUSED       __attribute__((unused))
+#ifdef H5_HAVE_PARALLEL
+#   define H5_ATTR_PARALLEL_UNUSED       __attribute__((unused))
+#   define H5_ATTR_PARALLEL_USED         /*void*/
+#else
+#   define H5_ATTR_PARALLEL_UNUSED       /*void*/
+#   define H5_ATTR_PARALLEL_USED         __attribute__((unused))
+#endif
+#ifdef H5_NO_DEPRECATED_SYMBOLS
+#define H5_ATTR_DEPRECATED_USED    H5_ATTR_UNUSED
+#else /* H5_NO_DEPRECATED_SYMBOLS */
+#define H5_ATTR_DEPRECATED_USED    /*void*/
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+#ifdef H5_DEBUG_API
+#define H5_ATTR_DEBUG_API_USED    /*void*/
+#else /* H5_DEBUG_API */
+#define H5_ATTR_DEBUG_API_USED    H5_ATTR_UNUSED
+#endif /* H5_DEBUG_API */
 #ifndef NDEBUG
 #define H5_ATTR_NDEBUG_UNUSED     /*void*/
 #else /* NDEBUG */
@@ -329,15 +350,35 @@
 #   define H5_ATTR_FALLTHROUGH  /*void*/
 #endif
 #else
-#   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
-#   define H5_ATTR_UNUSED         /*void*/
-#   define H5_ATTR_NDEBUG_UNUSED  /*void*/
-#   define H5_ATTR_NORETURN       /*void*/
-#   define H5_ATTR_CONST          /*void*/
-#   define H5_ATTR_PURE           /*void*/
-#   define H5_ATTR_FALLTHROUGH    /*void*/
+#   define H5_ATTR_FORMAT(X,Y,Z)    /*void*/
+#   define H5_ATTR_UNUSED           /*void*/
+#   define H5_ATTR_NDEBUG_UNUSED    /*void*/
+#   define H5_ATTR_DEBUG_API_USED   /*void*/
+#   define H5_ATTR_DEPRECATED_USED  /*void*/
+#   define H5_ATTR_PARALLEL_UNUSED  /*void*/
+#   define H5_ATTR_PARALLEL_USED    /*void*/
+#   define H5_ATTR_NORETURN         /*void*/
+#   define H5_ATTR_CONST            /*void*/
+#   define H5_ATTR_PURE             /*void*/
+#   define H5_ATTR_FALLTHROUGH      /*void*/
 #endif
 #endif /* __cplusplus */
+
+/*
+ * Networking headers used by the mirror VFD and related tests and utilities.
+ */
+#ifdef H5_HAVE_ARPA_INET_H
+#   include <arpa/inet.h>
+#endif
+#ifdef H5_HAVE_NETDB_H
+#   include <netdb.h>
+#endif
+#ifdef H5_HAVE_NETINET_IN_H
+#   include <netinet/in.h>
+#endif
+#ifdef H5_HAVE_SYS_SOCKET_H
+#   include <sys/socket.h>
+#endif
 
 /*
  * Status return values for the `herr_t' type.
@@ -534,28 +575,6 @@
 #define H5_REQUEST_NULL                 NULL
 
 /*
- * A macro to portably decrement enumerated types.
- */
-#ifndef H5_DEC_ENUM
-#  define H5_DEC_ENUM(TYPE,VAR) (VAR)=((TYPE)((VAR)-1))
-#endif
-
-/* Double constant wrapper
- *
- * Quiets gcc warnings from -Wunsuffixed-float-constants.
- *
- * This is a really annoying warning since the standard specifies that
- * constants of type double do NOT get a suffix so there's no way
- * to specify a constant of type double. To quiet gcc, we specify floating
- * point constants as type long double and cast to double.
- *
- * Note that this macro only needs to be used where using a double
- * is important. For most code, suffixing constants with F will quiet the
- * compiler and not produce erroneous code.
- */
-#define H5_DOUBLE(S) ((double) S ## L)
-
-/*
  * Methods to compare the equality of floating-point values:
  *
  *    1. H5_XXX_ABS_EQUAL - check if the difference is smaller than the
@@ -595,21 +614,37 @@
 #define LOCK_UN     0x08
 #endif /* H5_HAVE_FLOCK */
 
-/*
- * Data types and functions for timing certain parts of the library.
+/* Typedefs and functions for timing certain parts of the library. */
+
+/* A set of elapsed/user/system times emitted as a time point by the
+ * platform-independent timers.
  */
 typedef struct {
-    double  utime;    /*user time      */
-    double  stime;    /*system time      */
-    double  etime;    /*elapsed wall-clock time  */
+    double user;      /* User time in seconds */
+    double system;    /* System time in seconds */
+    double elapsed;   /* Elapsed (wall clock) time in seconds */
+} H5_timevals_t;
+
+/* Timer structure for platform-independent timers */
+typedef struct {
+    H5_timevals_t   initial;            /* Current interval start time */
+    H5_timevals_t   final_interval;     /* Last interval elapsed time */
+    H5_timevals_t   total;              /* Total elapsed time for all intervals */
+    hbool_t         is_running;         /* Whether timer is running */
 } H5_timer_t;
 
-H5_DLL void H5_timer_reset (H5_timer_t *timer);
-H5_DLL void H5_timer_begin (H5_timer_t *timer);
-H5_DLL void H5_timer_end (H5_timer_t *sum/*in,out*/,
-         H5_timer_t *timer/*in,out*/);
+/* Returns library bandwidth as a pretty string */
 H5_DLL void H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds);
+
+/* Timer functionality */
 H5_DLL time_t H5_now(void);
+H5_DLL uint64_t H5_now_usec(void);
+H5_DLL herr_t H5_timer_init(H5_timer_t *timer /*in,out*/);
+H5_DLL herr_t H5_timer_start(H5_timer_t *timer /*in,out*/);
+H5_DLL herr_t H5_timer_stop(H5_timer_t *timer /*in,out*/);
+H5_DLL herr_t H5_timer_get_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/);
+H5_DLL herr_t H5_timer_get_total_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/);
+H5_DLL char *H5_timer_get_time_string(double seconds);
 
 /* Depth of object copy */
 typedef enum {
@@ -643,6 +678,9 @@ typedef struct {
 #ifndef HDabs
     #define HDabs(X)    abs(X)
 #endif /* HDabs */
+#ifndef HDaccept
+    #define HDaccept(A,B,C)    accept((A),(B),(C)) /* mirror VFD */
+#endif /* HDaccept */
 #ifndef HDaccess
     #define HDaccess(F,M)    access(F, M)
 #endif /* HDaccess */
@@ -689,6 +727,9 @@ typedef struct {
 #ifndef HDatoll
     #define HDatoll(S)   atoll(S)
 #endif /* HDatol */
+#ifndef HDbind
+    #define HDbind(A,B,C)   bind((A),(B),(C)) /* mirror VFD */
+#endif /* HDbind */
 #ifndef HDbsearch
     #define HDbsearch(K,B,N,Z,F)  bsearch(K,B,N,Z,F)
 #endif /* HDbsearch */
@@ -725,12 +766,18 @@ typedef struct {
 #ifndef HDclock
     #define HDclock()    clock()
 #endif /* HDclock */
+#ifndef HDclock_gettime
+    #define HDclock_gettime(CID, TS)    clock_gettime(CID, TS)
+#endif /* HDclock_gettime */
 #ifndef HDclose
     #define HDclose(F)    close(F)
 #endif /* HDclose */
 #ifndef HDclosedir
     #define HDclosedir(D)    closedir(D)
 #endif /* HDclosedir */
+#ifndef HDconnect
+    #define HDconnect(A,B,C)    connect((A),(B),(C)) /* mirror VFD */
+#endif /* HDconnect */
 #ifndef HDcos
     #define HDcos(X)    cos(X)
 #endif /* HDcos */
@@ -931,7 +978,7 @@ typedef off_t               h5_stat_size_t;
 #define H5_SIZEOF_H5_STAT_SIZE_T H5_SIZEOF_OFF_T
 
 #ifndef HDftell
-    #define HDftell(F)    ftello(F)
+    #define HDftell(F)    ftell(F)
 #endif /* HDftell */
 #ifndef HDftruncate
     #define HDftruncate(F,L)        ftruncate(F,L)
@@ -975,9 +1022,12 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDgetgroups
     #define HDgetgroups(Z,G)  getgroups(Z,G)
 #endif /* HDgetgroups */
+#ifndef HDgethostbyaddr
+    #define HDgethostbyaddr(A,B,C)  gethostbyaddr((A),(B),(C)) /* mirror VFD */
+#endif /* HDgethostbyaddr */
 #ifndef HDgethostname
     #define HDgethostname(N,L)    gethostname(N,L)
-#endif /* HDgetlogin */
+#endif /* HDgethostname */
 #ifndef HDgetlogin
     #define HDgetlogin()    getlogin()
 #endif /* HDgetlogin */
@@ -999,9 +1049,12 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDgetrusage
     #define HDgetrusage(X,S)  getrusage(X,S)
 #endif /* HDgetrusage */
-#ifndef HDgets
-    #define HDgets(S)    gets(S)
+
+/* Don't define HDgets - gets() was deprecated in C99 and removed in C11 */
+#ifdef HDgets
+    #undef HDgets
 #endif /* HDgets */
+
 #ifndef HDgettimeofday
     #define HDgettimeofday(S,P)  gettimeofday(S,P)
 #endif /* HDgettimeofday */
@@ -1011,6 +1064,18 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDgmtime
     #define HDgmtime(T)    gmtime(T)
 #endif /* HDgmtime */
+#ifndef HDhtonl
+    #define HDhtonl(X)    htonl((X)) /* mirror VFD */
+#endif /* HDhtonl */
+#ifndef HDhtons
+    #define HDhtons(X)    htons((X)) /* mirror VFD */
+#endif /* HDhtons */
+#ifndef HDinet_addr
+    #define HDinet_addr(C)    inet_addr((C)) /* mirror VFD */
+#endif /* HDinet_addr */
+#ifndef HDinet_ntoa
+    #define HDinet_ntoa(C)    inet_ntoa((C)) /* mirror VFD */
+#endif /* HDinet_ntoa */
 #ifndef HDisalnum
     #define HDisalnum(C)    isalnum((int)(C)) /*cast for solaris warning*/
 #endif /* HDisalnum */
@@ -1065,6 +1130,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDlink
     #define HDlink(OLD,NEW)    link(OLD,NEW)
 #endif /* HDlink */
+#ifndef HDlisten
+    #define HDlisten(A,B)    listen((A),(B)) /* mirror VFD */
+#endif /* HDlisten */
 #ifndef HDllround
     #define HDllround(V)     llround(V)
 #endif /* HDround */
@@ -1146,6 +1214,12 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDnanosleep
     #define HDnanosleep(N, O)    nanosleep(N, O)
 #endif /* HDnanosleep */
+#ifndef HDntohl
+    #define HDntohl(A)    ntohl((A)) /* mirror VFD */
+#endif /* HDntohl */
+#ifndef HDntohs
+    #define HDntohs(A)    ntohs((A)) /* mirror VFD */
+#endif /* HDntohs */
 #ifndef HDopen
     #define HDopen(F,...)    open(F,__VA_ARGS__)
 #endif /* HDopen */
@@ -1293,12 +1367,21 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDsetsid
     #define HDsetsid()    setsid()
 #endif /* HDsetsid */
+#ifndef HDsetsockopt
+    #define HDsetsockopt(A,B,C,D,E)    setsockopt((A),(B),(C),(D),(E)) /* mirror VFD */
+#endif /* HDsetsockopt */
 #ifndef HDsetuid
     #define HDsetuid(U)    setuid(U)
 #endif /* HDsetuid */
 #ifndef HDsetvbuf
     #define HDsetvbuf(F,S,M,Z)  setvbuf(F,S,M,Z)
 #endif /* HDsetvbuf */
+#ifndef HDshutdown
+    #define HDshutdown(A, B)    shutdown((A),(B)) /* mirror VFD */
+#endif /* HDshutdown */
+#ifndef HDsigaction
+    #define HDsigaction(S,A,O)  sigaction((S),(A),(O))
+#endif /* HDsigaction */
 #ifndef HDsigaddset
     #define HDsigaddset(S,N)  sigaddset(S,N)
 #endif /* HDsigaddset */
@@ -1344,6 +1427,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDsnprintf
     #define HDsnprintf    snprintf /*varargs*/
 #endif /* HDsnprintf */
+#ifndef HDsocket
+    #define HDsocket(A,B,C)    socket((A),(B),(C)) /* mirror VFD */
+#endif /* HDsocket */
 #ifndef HDsprintf
     #define HDsprintf    sprintf /*varargs*/
 #endif /* HDsprintf */
@@ -1915,9 +2001,6 @@ H5_DLL double H5_trace(const double *calltime, const char *func, const char *typ
 /* global library version information string */
 extern char  H5_lib_vers_info_g[];
 
-/* Include required thread-safety header, always, for the H5TS_thread_id()
- * definition.
- */
 #include "H5TSprivate.h"
 
 /* Lock headers */

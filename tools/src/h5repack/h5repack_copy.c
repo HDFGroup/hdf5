@@ -67,7 +67,6 @@ copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
     hid_t         grp_in = H5I_INVALID_HID;   /* group ID */
     hid_t         gcpl_in = H5I_INVALID_HID;  /* group creation property list */
     hid_t         fcpl = H5P_DEFAULT;     /* file creation property list ID */
-    hid_t         fapl = H5P_DEFAULT;     /* file access property list ID */
     trav_table_t *travt = NULL;
     hsize_t       ub_size = 0;            /* size of user block */
     H5F_fspace_strategy_t set_strategy;   /* Strategy to be set in outupt file */
@@ -85,7 +84,8 @@ copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
      * open input file
      *-------------------------------------------------------------------------
      */
-    if ((fidin = h5tools_fopen(fnamein, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t) 0)) < 0)
+    if ((fidin = h5tools_fopen(fnamein, H5F_ACC_RDONLY, options->fin_fapl,
+            (options->fin_fapl == H5P_DEFAULT) ? FALSE : TRUE, NULL, (size_t) 0)) < 0)
         H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fnamein, H5FOPENERROR);
 
     /* get user block size and file space strategy/persist/threshold */
@@ -122,12 +122,14 @@ copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
 
     if(options->latest)
         options->low_bound = options->high_bound = H5F_LIBVER_LATEST;
+
     /* Create file access property list */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        H5TOOLS_GOTO_ERROR((-1), "H5Pcreate failed to create file access property list");
+    if (options->fout_fapl == H5P_DEFAULT)
+        if ((options->fout_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+            H5TOOLS_GOTO_ERROR((-1), "H5Pcreate failed to create file access property list");
 
     /* It can be default, latest or other settings by users */
-    if(H5Pset_libver_bounds(fapl, options->low_bound, options->high_bound) < 0)
+    if(H5Pset_libver_bounds(options->fout_fapl, options->low_bound, options->high_bound) < 0)
         H5TOOLS_GOTO_ERROR((-1), "H5Pset_libver_bounds failed to set format version bounds");
 
     /* Check if we need to create a non-default file creation property list */
@@ -218,12 +220,12 @@ print_user_block(fnamein, fidin);
      */
     if (options->alignment > 0) {
         /* either use the FAPL already created or create a new one */
-        if (fapl == H5P_DEFAULT)
+        if (options->fout_fapl == H5P_DEFAULT)
             /* create a file access property list */
-            if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+            if ((options->fout_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
                 H5TOOLS_GOTO_ERROR((-1), "H5Pcreate failed to create file access property list");
 
-        if (H5Pset_alignment(fapl, options->threshold, options->alignment) < 0)
+        if (H5Pset_alignment(options->fout_fapl, options->threshold, options->alignment) < 0)
             H5TOOLS_GOTO_ERROR((-1), "H5Pset_alignment failed to set alignment");
     }
 
@@ -233,12 +235,12 @@ print_user_block(fnamein, fidin);
      */
     if (options->meta_block_size > 0) {
         /* either use the FAPL already created or create a new one */
-        if (fapl == H5P_DEFAULT)
+        if (options->fout_fapl == H5P_DEFAULT)
             /* create a file access property list */
-            if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+            if ((options->fout_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
                 H5TOOLS_GOTO_ERROR((-1), "H5Pcreate failed to create file access property list");
 
-        if (H5Pset_meta_block_size(fapl, options->meta_block_size) < 0)
+        if (H5Pset_meta_block_size(options->fout_fapl, options->meta_block_size) < 0)
             H5TOOLS_GOTO_ERROR((-1), "H5Pset_meta_block_size failed to set metadata block size");
     }
 
@@ -297,7 +299,7 @@ print_user_block(fnamein, fidin);
     if (options->verbose)
         HDprintf("Making new file ...\n");
 
-    if ((fidout = H5Fcreate(fnameout, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
+    if ((fidout = H5Fcreate(fnameout, H5F_ACC_TRUNC, fcpl, options->fout_fapl)) < 0)
         H5TOOLS_GOTO_ERROR((-1), "H5Fcreate could not create file <%s>:", fnameout);
 
     /*-------------------------------------------------------------------------
@@ -352,7 +354,6 @@ done:
     H5E_BEGIN_TRY {
         H5Pclose(fcpl_in);
         H5Pclose(gcpl_in);
-        H5Pclose(fapl);
         H5Pclose(fcpl);
         H5Gclose(grp_in);
         H5Fclose(fidin);
@@ -702,11 +703,14 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 
                 break;
 
-                /*-------------------------------------------------------------------------
-                 * H5TRAV_TYPE_DATASET
-                 *-------------------------------------------------------------------------
-                 */
+            /*-------------------------------------------------------------------------
+             * H5TRAV_TYPE_DATASET
+             *-------------------------------------------------------------------------
+             */
             case H5TRAV_TYPE_DATASET:
+            {
+                hbool_t use_h5ocopy;
+
                 has_filter = 0;
                 req_filter = 0;
 
@@ -764,9 +768,47 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                  * otherwise we do a copy using H5Ocopy
                  *-------------------------------------------------------------------------
                  */
-                if (options->op_tbl->nelems || options->all_filter == 1
-                        || options->all_layout == 1 || is_ref || is_named) {
+                use_h5ocopy = !(options->op_tbl->nelems || options->all_filter == 1
+                        || options->all_layout == 1 || is_ref || is_named);
 
+                /*
+                 * Check if we are using different source and destination VOL connectors.
+                 * In this case, we currently have to avoid usage of H5Ocopy since it
+                 * doesn't support this.
+                 */
+                if (use_h5ocopy && (options->fin_fapl != H5P_DEFAULT || options->fout_fapl != H5P_DEFAULT)) {
+                    hid_t in_vol_id;
+                    hid_t out_vol_id;
+                    hid_t default_vol_id;
+
+                    if (H5Pget_vol_id(H5P_FILE_ACCESS_DEFAULT, &default_vol_id) < 0)
+                        H5TOOLS_GOTO_ERROR((-1), "H5Pget_vol_id failed");
+
+                    if (options->fin_fapl == H5P_DEFAULT)
+                        in_vol_id = default_vol_id;
+                    else
+                        if (H5Pget_vol_id(options->fin_fapl, &in_vol_id) < 0)
+                            H5TOOLS_GOTO_ERROR((-1), "H5Pget_vol_id failed");
+                    if (options->fout_fapl == H5P_DEFAULT)
+                        out_vol_id = default_vol_id;
+                    else
+                        if (H5Pget_vol_id(options->fout_fapl, &out_vol_id) < 0)
+                            H5TOOLS_GOTO_ERROR((-1), "H5Pget_vol_id failed");
+
+                    if (in_vol_id != out_vol_id)
+                        use_h5ocopy = FALSE;
+
+                    if (in_vol_id != default_vol_id)
+                        if (H5VLclose(in_vol_id) < 0)
+                            H5TOOLS_GOTO_ERROR((-1), "H5VLclose failed");
+                    if (out_vol_id != default_vol_id)
+                        if (H5VLclose(out_vol_id) < 0)
+                            H5TOOLS_GOTO_ERROR((-1), "H5VLclose failed");
+                    if (H5VLclose(default_vol_id) < 0)
+                        H5TOOLS_GOTO_ERROR((-1), "H5VLclose failed");
+                }
+
+                if (!use_h5ocopy) {
                     int j;
 
                     if ((dset_in = H5Dopen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
@@ -1135,7 +1177,9 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                         HDprintf(FORMAT_OBJ, "dset", travt->objs[i].name);
 
                 } /* end whether we have request for filter/chunking */
+
                 break;
+            } /* H5TRAV_TYPE_DATASET */
 
             /*-------------------------------------------------------------------------
              * H5TRAV_TYPE_NAMED_DATATYPE

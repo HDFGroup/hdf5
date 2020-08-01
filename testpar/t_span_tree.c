@@ -867,6 +867,12 @@ coll_read_test(void)
   VRFY((ret >= 0),"H5D contiguous irregular collective read succeed");
 
   /*
+   * Free read buffers.
+   */
+  HDfree(matrix_out);
+  HDfree(matrix_out1);
+
+  /*
    * Close memory file and memory dataspaces.
    */
   ret = H5Sclose(mspaceid);

@@ -327,7 +327,7 @@ static off_t squareo(off_t);
  * Modifications:
  */
 int
-main(int argc, char **argv)
+main(int argc, char *argv[])
 {
     int ret;
     int exit_value = EXIT_SUCCESS;

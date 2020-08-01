@@ -95,10 +95,19 @@ test_unregister_filters(hid_t fapl_id)
     char        filename[FILENAME_BUF_SIZE];
     const hsize_t chunk_dims[2] = {FILTER_CHUNK_DIM1, FILTER_CHUNK_DIM2};  /* Chunk dimensions */
     hsize_t     dims[2];
-    int	        data[DSET_DIM1][DSET_DIM2];
+    int         **buf = NULL;
+    int         *buf_data = NULL;
     herr_t      ret;
 
     TESTING("Unregistering filter");
+
+    /* Set up data array */
+    if(NULL == (buf_data = (int *)HDcalloc(DSET_DIM1 * DSET_DIM2, sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (buf = (int **)HDcalloc(DSET_DIM1, sizeof(buf_data))))
+        TEST_ERROR;
+    for (i = 0; i < DSET_DIM1; i++)
+        buf[i] = buf_data + (i * DSET_DIM2);
 
     /* Create first file */
     h5_fixname(FILENAME[0], fapl_id, filename, sizeof(filename));
@@ -176,7 +185,7 @@ test_unregister_filters(hid_t fapl_id)
     /* Initialize the data for writing */
     for(i = n = 0; i < DSET_DIM1; i++)
         for(j = 0; j < DSET_DIM2; j++)
-            data[i][j] = n++;
+            buf[i][j] = n++;
 
     /* Create the dataspace */
     dims[0] = DSET_DIM1;
@@ -189,7 +198,7 @@ test_unregister_filters(hid_t fapl_id)
         goto error;
 
     /* Write the data to the dataset */
-    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_data) < 0)
         goto error;
 
     /* Unregister the filter before closing the dataset.  It should fail */
@@ -211,7 +220,7 @@ test_unregister_filters(hid_t fapl_id)
         goto error;
 
     /* Write the data to the dataset */
-    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_data) < 0)
         goto error;
 
     /* Close the dataset in the second file */
@@ -232,6 +241,9 @@ test_unregister_filters(hid_t fapl_id)
     if(H5Fclose(fid2) < 0)
         goto error;
 
+    HDfree(buf);
+    HDfree(buf_data);
+
     PASSED();
     return SUCCEED;
 
@@ -246,6 +258,9 @@ error:
         H5Dclose(did);
         H5Sclose(sid);
     } H5E_END_TRY;
+
+    HDfree(buf);
+    HDfree(buf_data);
 
     return FAIL;
 }

@@ -238,6 +238,11 @@ H5O_attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
 
     /* Go get the data */
     if(attr->shared->data_size) {
+        /* Ensure that data size doesn't exceed buffer size, in case of
+           it's being corrupted in the file */
+        if(attr->shared->data_size > p_size)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_OVERFLOW, NULL, "data size exceeds buffer size")
+
         if(NULL == (attr->shared->data = H5FL_BLK_MALLOC(attr_buf, attr->shared->data_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
         H5MM_memcpy(attr->shared->data, p, attr->shared->data_size);

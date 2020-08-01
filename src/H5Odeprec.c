@@ -189,10 +189,10 @@ H5O__iterate1_adapter(hid_t obj_id, const char *name, const H5O_info2_t *oinfo2,
 
         /* Set the native fields */
         if(shim_data->fields & H5O_INFO_HDR)
-            HDmemcpy(&(oinfo.hdr), &(nat_info.hdr), sizeof(H5O_hdr_info_t));
+            H5MM_memcpy(&(oinfo.hdr), &(nat_info.hdr), sizeof(H5O_hdr_info_t));
         if(shim_data->fields & H5O_INFO_META_SIZE) {
-            HDmemcpy(&(oinfo.meta_size.obj),  &(nat_info.meta_size.obj),  sizeof(H5_ih_info_t));
-            HDmemcpy(&(oinfo.meta_size.attr), &(nat_info.meta_size.attr), sizeof(H5_ih_info_t));
+            H5MM_memcpy(&(oinfo.meta_size.obj),  &(nat_info.meta_size.obj),  sizeof(H5_ih_info_t));
+            H5MM_memcpy(&(oinfo.meta_size.attr), &(nat_info.meta_size.attr), sizeof(H5_ih_info_t));
         }
     }
 
@@ -279,10 +279,10 @@ H5O__get_info_old(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params,
 
         /* Set the native fields */
         if(fields & H5O_INFO_HDR)
-            HDmemcpy(&(oinfo->hdr), &(nat_info.hdr), sizeof(H5O_hdr_info_t));
+            H5MM_memcpy(&(oinfo->hdr), &(nat_info.hdr), sizeof(H5O_hdr_info_t));
         if(fields & H5O_INFO_META_SIZE) {
-            HDmemcpy(&(oinfo->meta_size.obj),  &(nat_info.meta_size.obj),  sizeof(H5_ih_info_t));
-            HDmemcpy(&(oinfo->meta_size.attr), &(nat_info.meta_size.attr), sizeof(H5_ih_info_t));
+            H5MM_memcpy(&(oinfo->meta_size.obj),  &(nat_info.meta_size.obj),  sizeof(H5_ih_info_t));
+            H5MM_memcpy(&(oinfo->meta_size.attr), &(nat_info.meta_size.attr), sizeof(H5_ih_info_t));
         } /* end if */
     } /* end if */
 
