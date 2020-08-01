@@ -129,6 +129,8 @@ typedef struct {
     int             fs_persist;        /* Free space section threshold */
     long            fs_threshold;      /* Free space section threshold */
     long long       fs_pagesize;       /* File space page size */
+    hbool_t         merge;             /* Merge external file. */
+    hbool_t         prune;	       /* Don't follow external file. */
 } pack_opt_t;
 
 

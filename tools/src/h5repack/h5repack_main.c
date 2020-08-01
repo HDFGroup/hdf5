@@ -32,7 +32,7 @@ const char *outfile = NULL;
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVvf:l:m:e:nLj:k:c:d:s:u:b:M:t:a:i:o:S:P:T:G:q:z:E";
+static const char *s_opts = "hVvfXpl:m:e:nLj:k:c:d:s:u:b:M:t:a:i:o:S:P:T:G:q:z:E:";
 static struct long_options l_opts[] = {
     { "help",                no_arg,      'h' },
     { "version",             no_arg,      'V' },

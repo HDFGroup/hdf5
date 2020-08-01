@@ -1227,12 +1227,38 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
             case H5TRAV_TYPE_UDLINK:
                 if (options->verbose)
                     HDprintf(FORMAT_OBJ, "link", travt->objs[i].name);
+		/* Check -X option. */
+		if (options->merge) {
+		  hid_t        ocpl_id = (-1);
+		  hid_t        lcpl_id = (-1);
+		  /* create property to pass copy options */
+		  if ((ocpl_id = H5Pcreate(H5P_OBJECT_COPY)) < 0)
+		    H5TOOLS_GOTO_ERROR(EXIT_FAILURE, "H5Pcreate failed");
+		  /* Create link creation property list */
+		  if((lcpl_id = H5Pcreate(H5P_LINK_CREATE)) < 0) {
+		    error_msg("Could not create link creation property list\n");
+		    H5TOOLS_GOTO_ERROR(EXIT_FAILURE, "H5Pcreate failed");
+		  } /* end if */
 
-                if (H5Lcopy(fidin, travt->objs[i].name, fidout, travt->objs[i].name, H5P_DEFAULT, H5P_DEFAULT) < 0)
-                    H5TOOLS_GOTO_ERROR((-1), "H5Lcopy failed");
-
-                if (options->verbose)
-                    HDprintf(FORMAT_OBJ, "link", travt->objs[i].name);
+		  if (H5Ocopy(fidin,
+			      travt->objs[i].name,
+			      fidout,
+			      travt->objs[i].name,
+			      ocpl_id,  
+			      lcpl_id) < 0) 
+		    H5TOOLS_GOTO_ERROR(EXIT_FAILURE, "H5Ocopy failed");
+		} /* merge */
+		else {
+		  if (options->prune) {
+		    HDprintf("Pruned %s.\n", travt->objs[i].name);
+		  }
+		  else {
+		    if (H5Lcopy(fidin, travt->objs[i].name, fidout,
+				travt->objs[i].name, H5P_DEFAULT, H5P_DEFAULT)
+			< 0)
+		      H5TOOLS_GOTO_ERROR((-1), "H5Lcopy failed");
+		  }
+		} /* copy link */
                 break;
 
             default:
