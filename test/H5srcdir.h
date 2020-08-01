@@ -12,15 +12,13 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:  Quincey Koziol
  *              Wednesday, March 17, 2010
  *
  * Purpose:     srcdir querying support.
  */
 #ifndef _H5SRCDIR_H
 #define _H5SRCDIR_H
-
-/* Include the header file with the correct relative path for the srcdir string */
 
 #ifdef __cplusplus
 extern "C" {

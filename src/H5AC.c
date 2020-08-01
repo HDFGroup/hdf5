@@ -138,7 +138,7 @@ static const H5AC_class_t *const H5AC_class_s[] = {
 /*-------------------------------------------------------------------------
  * Function:    H5AC_init
  *
- * Purpose:    Initialize the interface from some other layer.
+ * Purpose:     Initialize the interface from some other layer.
  *
  * Return:      Success:    non-negative
  *              Failure:    negative

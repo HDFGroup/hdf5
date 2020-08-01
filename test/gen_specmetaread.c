@@ -23,9 +23,8 @@
  *      the library on the trunk as of when this file is checked in.
  */
 
-#include <assert.h>
 
-#include "testhdf5.h"
+#include "h5test.h"
 
 #define FILENAME        "specmetaread.h5"
 #define DIM             10
