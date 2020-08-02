@@ -118,11 +118,12 @@ H5FL_DEFINE_STATIC(H5O_link_t);
 static void *
 H5O_link_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
-    size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+    size_t p_size, const uint8_t *p)
 {
     H5O_link_t          *lnk = NULL;    /* Pointer to link message */
     size_t              len = 0;        /* Length of a string in the message */
     unsigned char       link_flags;     /* Flags for encoding link info */
+    const uint8_t       *p_end = p + p_size;  /* End of the p buffer */
     void                *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -198,6 +199,11 @@ H5O_link_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *op
     if(len == 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "invalid name length")
 
+    /* Make sure that length doesn't exceed buffer size, which could occur
+       when the file is corrupted */
+    if(p + len > p_end)
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "name length causes read past end of buffer")
+
     /* Get the link's name */
     if(NULL == (lnk->name = (char *)H5MM_malloc(len + 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -217,6 +223,12 @@ H5O_link_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *op
             UINT16DECODE(p, len)
             if(len == 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "invalid link length")
+
+            /* Make sure that length doesn't exceed buffer size, which could occur
+               when the file is corrupted */
+            if(p + len > p_end)
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "name length causes read past end of buffer")
+
             if(NULL == (lnk->u.soft.name = (char *)H5MM_malloc((size_t)len + 1)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
             HDmemcpy(lnk->u.soft.name, p, len);
@@ -237,6 +249,11 @@ H5O_link_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *op
             lnk->u.ud.size = len;
             if(len > 0)
             {
+                /* Make sure that length doesn't exceed buffer size, which could
+                   occur when the file is corrupted */
+                if(p + len > p_end)
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "name length causes read past end of buffer")
+
                 if(NULL == (lnk->u.ud.udata = H5MM_malloc((size_t)len)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
                 HDmemcpy(lnk->u.ud.udata, p, len);
