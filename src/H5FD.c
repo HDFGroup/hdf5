@@ -1436,7 +1436,7 @@ done:
  *              constant H5P_DEFAULT). The bytes to be written come from the
  *              buffer BUF.
  *
- * Return:      SNon-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */

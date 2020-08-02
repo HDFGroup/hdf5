@@ -33,9 +33,9 @@
 #include "H5ACprivate.h"        /* Metadata cache                           */
 #include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Dprivate.h"         /* Datasets                                 */
-#include "H5Eprivate.h"        /* Error handling                           */
-#include "H5Fprivate.h"        /* File access                    */
-#include "H5FLprivate.h"    /* Free Lists                               */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Fprivate.h"         /* File access                              */
+#include "H5FLprivate.h"        /* Free Lists                               */
 #include "H5Gprivate.h"         /* Groups                                   */
 #include "H5Ipkg.h"             /* IDs                                      */
 #include "H5MMprivate.h"        /* Memory management                        */
@@ -145,7 +145,7 @@ static int H5I__iterate_pub_cb(void *obj, hid_t id, void *udata);
 static int H5I__find_id_cb(void *_item, void *_key, void *_udata);
 static int H5I__id_dump_cb(void *_item, void *_key, void *_udata);
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_term_package
  *
@@ -197,7 +197,7 @@ H5I_term_package(void)
     FUNC_LEAVE_NOAPI(n)
 } /* end H5I_term_package() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iregister_type
  *
@@ -278,7 +278,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iregister_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_register_type
  *
@@ -339,7 +339,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_register_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Itype_exists
  *
@@ -371,7 +371,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Itype_exists() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Inmembers
  *
@@ -421,7 +421,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Inmembers() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_nmembers
  *
@@ -458,7 +458,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_nmembers() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__unwrap
  *
@@ -502,7 +502,7 @@ H5I__unwrap(void *obj_ptr, H5I_type_t type)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__unwrap() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iclear_type
  *
@@ -535,7 +535,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iclear_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_clear_type
  *
@@ -577,7 +577,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_clear_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__clear_type_cb
  *
@@ -643,7 +643,7 @@ H5I__clear_type_cb(void *_id, void H5_ATTR_UNUSED *key, void *_udata)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__clear_type_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Idestroy_type
  *
@@ -677,7 +677,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Idestroy_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__destroy_type
  *
@@ -729,7 +729,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__destroy_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iregister
  *
@@ -757,7 +757,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iregister() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_register
  *
@@ -819,7 +819,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_register() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_register_using_existing_id
  *
@@ -890,7 +890,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_register_using_existing_id() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_subst
  *
@@ -927,7 +927,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_subst() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_object
  *
@@ -957,7 +957,7 @@ H5I_object(hid_t id)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_object() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iobject_verify
  *
@@ -991,7 +991,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iobject_verify() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_object_verify
  *
@@ -1026,7 +1026,7 @@ H5I_object_verify(hid_t id, H5I_type_t id_type)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5I_object_verify() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_get_type
  *
@@ -1060,7 +1060,7 @@ H5I_get_type(hid_t id)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_get_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iget_type
  *
@@ -1087,13 +1087,13 @@ H5Iget_type(hid_t id)
     ret_value = H5I_get_type(id);
 
     if(ret_value <= H5I_BADID || (int)ret_value >= H5I_next_type || NULL == H5I_object(id))
-    HGOTO_DONE(H5I_BADID);
+        HGOTO_DONE(H5I_BADID);
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iget_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_is_file_object
  *
@@ -1144,7 +1144,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5I_is_file_object() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iremove_verify
  *
@@ -1180,7 +1180,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iremove_verify() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__remove_verify
  *
@@ -1213,7 +1213,7 @@ H5I__remove_verify(hid_t id, H5I_type_t id_type)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__remove_verify() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__remove_common
  *
@@ -1258,7 +1258,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__remove_common() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_remove
  *
@@ -1298,7 +1298,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_remove() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Idec_ref
  *
@@ -1334,7 +1334,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Idec_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_dec_ref
  *
@@ -1404,7 +1404,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_dec_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_dec_app_ref
  *
@@ -1452,7 +1452,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_dec_app_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_dec_app_ref_always_close
  *
@@ -1494,7 +1494,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_dec_app_ref_always_close() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iinc_ref
  *
@@ -1525,7 +1525,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iinc_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_inc_ref
  *
@@ -1563,7 +1563,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_inc_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iget_ref
  *
@@ -1594,7 +1594,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iget_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_get_ref
  *
@@ -1627,7 +1627,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_get_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iinc_type_ref
  *
@@ -1660,7 +1660,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iinc_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__inc_type_ref
  *
@@ -1694,14 +1694,14 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__inc_type_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Idec_type_ref
  *
  * Purpose:     Decrements the reference count on an entire type of IDs.
  *              If the type reference count becomes zero then the type is
  *              destroyed along with all atoms in that type regardless of
- *              their reference counts.     Destroying IDs involves calling
+ *              their reference counts. Destroying IDs involves calling
  *              the free-func for each ID's object and then adding the ID
  *              struct to the ID free list.  Public interface to
  *              H5I_dec_type_ref.
@@ -1736,14 +1736,14 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Idec_type_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_dec_type_ref
  *
  * Purpose:     Decrements the reference count on an entire type of IDs.
  *              If the type reference count becomes zero then the type is
  *              destroyed along with all atoms in that type regardless of
- *              their reference counts.     Destroying IDs involves calling
+ *              their reference counts. Destroying IDs involves calling
  *              the free-func for each ID's object and then adding the ID
  *              struct to the ID free list.
  *              Returns the number of references to the type on success; a
@@ -1789,7 +1789,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_dec_type_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iget_type_ref
  *
@@ -1822,7 +1822,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iget_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__get_type_ref
  *
@@ -1857,7 +1857,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__get_type_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iis_valid
  *
@@ -1887,7 +1887,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iis_valid() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__search_cb
  *
@@ -1922,7 +1922,7 @@ H5I__search_cb(void *obj, hid_t id, void *_udata)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__search_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Isearch
  *
@@ -1973,7 +1973,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Isearch() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__iterate_pub_cb
  *
@@ -2013,7 +2013,7 @@ H5I__iterate_pub_cb(void H5_ATTR_UNUSED *obj, hid_t id, void *_udata)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__iterate_pub_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iiterate
  *
@@ -2060,7 +2060,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iiterate() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__iterate_cb
  *
@@ -2108,7 +2108,7 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__iterate_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_iterate
  *
@@ -2167,7 +2167,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_iterate() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__find_id
  *
@@ -2212,7 +2212,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__find_id() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iget_name
  *
@@ -2263,7 +2263,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iget_name() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Iget_file_id
  *
@@ -2307,7 +2307,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iget_file_id() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__find_id_cb
  *
@@ -2345,7 +2345,7 @@ H5I__find_id_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__find_id_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_find_id
  *
@@ -2394,7 +2394,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_find_id() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I__id_dump_cb
  *
@@ -2482,7 +2482,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     FUNC_LEAVE_NOAPI(H5_ITER_CONT)
 } /* end H5I__id_dump_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5I_dump_ids_for_type
  *
