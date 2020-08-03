@@ -705,6 +705,14 @@ H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id,
     if(NULL == (new_file = (H5F_t *)H5VL_file_create(&connector_prop, filename, flags, fcpl_id, fapl_id, H5P_DATASET_XFER_DEFAULT, token_ptr)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to create file")
 
+    /* Get an atom for the file */
+    if((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+
+    /* Get the file object */
+    if(NULL == (vol_obj = H5VL_vol_object(ret_value)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid object identifier")
+
     /* If there's an event set and a token was created, add the token to it */
     if(H5ES_NONE != es_id && NULL != token) {
         /* Create vol object for token */
@@ -719,14 +727,6 @@ H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id,
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, FAIL, "can't insert token into event set")
         token_obj = NULL;
     } /* end if */
-
-    /* Get an atom for the file */
-    if((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
-
-    /* Get the file object */
-    if(NULL == (vol_obj = H5VL_vol_object(ret_value)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid object identifier")
 
     /* Check for 'post open' callback */
     supported = FALSE;
@@ -912,6 +912,14 @@ H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, hid_t 
     if(NULL == (new_file = (H5F_t *)H5VL_file_open(&connector_prop, filename, flags, fapl_id, H5P_DATASET_XFER_DEFAULT, token_ptr)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to open file")
 
+    /* Get an ID for the file */
+    if((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+
+    /* Get the file object */
+    if(NULL == (vol_obj = H5VL_vol_object(ret_value)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "invalid object identifier")
+
     /* If there's an event set and a token was created, add the token to it */
     if(H5ES_NONE != es_id && NULL != token) {
         /* Create vol object for token */
@@ -926,14 +934,6 @@ H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, hid_t 
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, FAIL, "can't insert token into event set")
         token_obj = NULL;
     } /* end if */
-
-    /* Get an ID for the file */
-    if((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
-
-    /* Get the file object */
-    if(NULL == (vol_obj = H5VL_vol_object(ret_value)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "invalid object identifier")
 
     /* Check for 'post open' callback */
     supported = FALSE;
