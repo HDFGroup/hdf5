@@ -933,3 +933,4 @@ H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr, void *udata)
 } /* H5TS_create_thread */
 
 #endif  /* H5_HAVE_THREADSAFE */
+

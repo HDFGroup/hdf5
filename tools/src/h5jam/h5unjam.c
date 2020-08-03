@@ -185,6 +185,13 @@ done:
     return EXIT_FAILURE;
 }
 
+static void
+leave(int ret)
+{
+   h5tools_close();
+   HDexit(ret);
+}
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -197,8 +204,6 @@ done:
 int
 main(int argc, const char *argv[])
 {
-    void               *edata;
-    H5E_auto2_t         func;
     hid_t               ifile = H5I_INVALID_HID;
     hid_t               plist = H5I_INVALID_HID;
     off_t               fsize;
@@ -211,15 +216,14 @@ main(int argc, const char *argv[])
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
 
-    /* Disable error reporting  */
-    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
     /* Initialize h5tools lib  */
     h5tools_init();
 
     if(EXIT_FAILURE == parse_command_line(argc, argv))
         goto done;
+
+    /* enable error reporting if command line option */
+    h5tools_error_report();
 
     if (input_file == NULL) {
         /* no user block  */
@@ -319,9 +323,7 @@ done:
         HDfree(ub_file);
     }
 
-    h5tools_close();
-
-    return h5tools_getstatus();
+    leave(h5tools_getstatus());
 }
 
 /*-------------------------------------------------------------------------

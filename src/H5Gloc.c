@@ -15,7 +15,7 @@
  *
  * Created:		H5Gloc.c
  *			Sep 13 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Functions for working with group "locations"
  *
@@ -812,9 +812,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_loc_info
+ * Function:    H5G_loc_info
  *
- * Purpose:	Retrieve the data model information for an object from a group location
+ * Purpose:     Retrieve the data model information for an object from a group location
  *              and path to that object
  *
  * Return:	Non-negative on success/Negative on failure

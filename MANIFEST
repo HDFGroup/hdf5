@@ -1257,6 +1257,7 @@
 ./test/ttsafe.c
 ./test/ttsafe.h
 ./test/ttsafe_acreate.c
+./test/ttsafe_attr_vlen.c
 ./test/ttsafe_cancel.c
 ./test/ttsafe_dcreate.c
 ./test/ttsafe_error.c
@@ -2615,6 +2616,8 @@
 ./tools/test/h5diff/testfiles/h5diff_dset3.h5
 ./tools/test/h5diff/testfiles/h5diff_dtypes.h5
 ./tools/test/h5diff/testfiles/h5diff_empty.h5
+./tools/test/h5diff/testfiles/h5diff_eps1.h5
+./tools/test/h5diff/testfiles/h5diff_eps2.h5
 ./tools/test/h5diff/testfiles/h5diff_hyper1.h5
 ./tools/test/h5diff/testfiles/h5diff_hyper2.h5
 ./tools/test/h5diff/testfiles/h5diff_types.h5
@@ -2643,6 +2646,7 @@
 ./tools/test/h5diff/testfiles/h5diff_dset_zero_dim_size1.h5
 ./tools/test/h5diff/testfiles/h5diff_dset_zero_dim_size2.h5
 ./tools/test/h5diff/testfiles/h5diff_enum_invalid_values.h5
+./tools/test/h5diff/testfiles/h5diff_eps.txt
 ./tools/test/h5diff/testfiles/compounds_array_vlen1.h5
 ./tools/test/h5diff/testfiles/compounds_array_vlen2.h5
 ./tools/test/h5diff/testfiles/non_comparables1.h5
@@ -2654,8 +2658,8 @@
 ./tools/test/h5diff/testfiles/h5diff_ud.txt
 ./tools/test/h5diff/testfiles/h5diff_udfail.err
 ./tools/test/h5diff/testfiles/h5diff_udfail.txt
-./tools/test/h5diff/testfiles/diff_strings1.h5
-./tools/test/h5diff/testfiles/diff_strings2.h5
+./tools/test/h5diff/testfiles/h5diff_strings1.h5
+./tools/test/h5diff/testfiles/h5diff_strings2.h5
 ./tools/test/h5diff/testfiles/h5diff_vlstr.txt
 #vds
 ./tools/test/h5diff/testfiles/h5diff_v1.txt

@@ -13,11 +13,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5system.c
- *			Aug 21 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ * Created:     H5system.c
+ *              Aug 21 2006
+ *              Quincey Koziol
  *
- * Purpose:             System call wrapper implementations.
+ * Purpose:     System call wrapper implementations.
  *
  *-------------------------------------------------------------------------
  */

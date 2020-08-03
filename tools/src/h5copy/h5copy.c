@@ -207,10 +207,6 @@ static int parse_flag(const char* s_flag, unsigned *flag)
 int
 main (int argc, const char *argv[])
 {
-    H5E_auto2_t         func;
-    H5E_auto2_t         tools_func;
-    void               *edata;
-    void               *tools_edata;
     hid_t        fid_src = H5I_INVALID_HID;
     hid_t        fid_dst = H5I_INVALID_HID;
     unsigned     flag = 0;
@@ -226,16 +222,8 @@ main (int argc, const char *argv[])
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
 
-    /* Disable error reporting */
-    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
     /* Initialize h5tools lib */
     h5tools_init();
-
-    /* Disable tools error reporting */
-    H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
-    H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
 
     /* init linkinfo struct */
     HDmemset(&linkinfo, 0, sizeof(h5tool_link_info_t));
@@ -330,10 +318,8 @@ main (int argc, const char *argv[])
         leave(EXIT_FAILURE);
     }
 
-    if (enable_error_stack > 0) {
-        H5Eset_auto2(H5E_DEFAULT, func, edata);
-        H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
-    }
+    /* enable error reporting if command line option */
+    h5tools_error_report();
 
    /*-------------------------------------------------------------------------
     * open output file

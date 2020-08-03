@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:  Quincey Koziol
  *              Thursday, June 18, 1998
  *
  * Purpose:     Hyperslab selection dataspace I/O functions.
@@ -1756,7 +1756,7 @@ H5S__hyper_iter_get_seq_list_gen(H5S_sel_iter_t *iter, size_t maxseq, size_t max
         /* Work back up through the dimensions */
         while(curr_dim >= 0) {
             /* Reset the current span */
-        curr_span = ispan[curr_dim];
+            curr_span = ispan[curr_dim];
 
             /* Increment absolute position */
             abs_arr[curr_dim]++;
@@ -2110,15 +2110,15 @@ H5S__hyper_iter_get_seq_list_opt(H5S_sel_iter_t *iter, size_t maxseq, size_t max
     /* Read in data until an entire sequence can't be written out any longer */
     while(curr_rows > 0) {
 
-#define DUFF_GUTS                              \
-/* Store the sequence information */                      \
-off[curr_seq] = loc;                              \
-len[curr_seq] = actual_bytes;                          \
-                                                                      \
-/* Increment sequence count */                          \
-curr_seq++;                                  \
-                                                                      \
-/* Increment information to reflect block just processed */          \
+#define DUFF_GUTS                                                       \
+/* Store the sequence information */                                    \
+off[curr_seq] = loc;                                                    \
+len[curr_seq] = actual_bytes;                                           \
+                                                                        \
+/* Increment sequence count */                                          \
+curr_seq++;                                                             \
+                                                                        \
+/* Increment information to reflect block just processed */             \
 loc += fast_dim_buf_off;
 
 #ifdef NO_DUFFS_DEVICE
@@ -2574,7 +2574,6 @@ H5S__hyper_iter_get_seq_list_single(H5S_sel_iter_t *iter, size_t maxseq, size_t 
  USAGE
     herr_t H5S__hyper_iter_get_seq_list(iter,maxseq,maxelem,nseq,nelem,off,len)
         H5S_t *space;           IN: Dataspace containing selection to use.
-        unsigned flags;         IN: Flags for extra information about operation
         H5S_sel_iter_t *iter;   IN/OUT: Selection iterator describing last
                                     position of interest in selection.
         size_t maxseq;          IN: Maximum number of sequences to generate
@@ -2808,7 +2807,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_new_span() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_new_span_info
@@ -4285,7 +4284,7 @@ H5S__hyper_deserialize(H5S_t **space, const uint8_t **p)
          /* Check for unknown flags */
         if(flags & ~H5S_SELECT_FLAG_BITS)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTLOAD, FAIL, "unknown flag for selection")
-     } /* end if */
+     }
      else {
         /* Skip over the remainder of the header */
         pp += 8;
@@ -4301,7 +4300,7 @@ H5S__hyper_deserialize(H5S_t **space, const uint8_t **p)
 
     if(!*space) {
         /* Patch the rank of the allocated dataspace */
-        (void)HDmemset(dims, 0, (size_t)rank * sizeof(dims[0]));
+        HDmemset(dims, 0, (size_t)rank * sizeof(dims[0]));
         if(H5S_set_extent_simple(tmp_space, rank, dims, NULL) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't set dimensions")
     } /* end if */
@@ -4316,7 +4315,7 @@ H5S__hyper_deserialize(H5S_t **space, const uint8_t **p)
 
         /* Sanity checks */
         HDassert(H5S_UNLIMITED == HSIZE_UNDEF);
-        HDassert(version >= 2);
+        HDassert(version >= H5S_HYPER_VERSION_2);
 
          /* Decode start/stride/block/count */
         switch(enc_size) {
@@ -4462,7 +4461,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_deserialize() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_span_blocklist
@@ -4567,7 +4566,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_span_blocklist() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__get_select_hyper_blocklist
@@ -7061,7 +7060,7 @@ H5S__hyper_adjust_s(H5S_t *space, const hssize_t *offset)
              * simultaneous operations */
             H5S__hyper_adjust_s_helper(space->select.sel_info.hslab->span_lst, space->extent.rank, offset, 0, op_gen);
         } /* end if */
-    } /* end if */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -12175,7 +12174,7 @@ H5S_hyper_get_first_inc_block(const H5S_t *space, hsize_t clip_size,
     hbool_t *partial)
 {
     H5S_hyper_sel_t *hslab;     /* Convenience pointer to hyperslab info */
-    H5S_hyper_dim_t *diminfo;   /* Convenience pointer to diminfo.opt in unlimited dimension */
+    H5S_hyper_dim_t *diminfo;   /* Convenience pointer to diminfo in unlimited dimension */
     hsize_t ret_value = 0;
 
     FUNC_ENTER_NOAPI(0)

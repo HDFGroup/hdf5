@@ -550,8 +550,8 @@ done:
  * Purpose:     Returns a pointer to the file handle of the low-level file
  *              driver.
  *
- * Return:      SUCCEED/FAIL
- *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -625,7 +625,6 @@ done:
  *
  * Return:      Success:    A file ID
  *              Failure:    H5I_INVALID_HID
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -819,7 +818,6 @@ done:
  *
  * Return:      Success:    A file ID
  *              Failure:    H5I_INVALID_HID
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -1047,7 +1045,8 @@ done:
  *              not remove them from the cache.  The OBJECT_ID can be a file,
  *              dataset, group, attribute, or named data type.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1341,7 +1340,8 @@ done:
  * Purpose:     Public API to retrieve the file's 'intent' flags passed
  *              during H5Fopen()
  *
- * Return:      Non-negative on success/negative on failure
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1412,9 +1412,7 @@ done:
  * Purpose:     Retrieves the amount of free space in the file.
  *
  * Return:      Success:    Amount of free space for type
- *
  *              Failure:    -1
- *
  *-------------------------------------------------------------------------
  */
 hssize_t
@@ -1508,9 +1506,7 @@ done:
  *              this now.
  *
  * Return:      Success:    Bytes copied / number of bytes needed
- *
  *              Failure:    -1
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -1545,8 +1541,8 @@ done:
  *              filled in by the caller.  This allows us to adapt for
  *              obsolete versions of the structure.
  *
- * Return:      SUCCEED/FAIL
- *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1582,8 +1578,8 @@ done:
  *              configuration, using the contents of the instance of
  *              H5AC_cache_config_t pointed to by config_ptr.
  *
- * Return:      SUCCEED/FAIL
- *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1616,8 +1612,8 @@ done:
  *              the hit rate statistics were reset either manually or
  *              automatically.
  *
- * Return:      SUCCEED/FAIL
- *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1653,8 +1649,8 @@ done:
  *              the ptr parameters are NULL, the associated datum is
  *              not returned.
  *
- * Return:      SUCCEED/FAIL
- *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1693,8 +1689,8 @@ done:
  *              you are controlling cache size from your program instead
  *              of using our cache size control code.
  *
- * Return:      SUCCEED/FAIL
- *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1735,9 +1731,7 @@ done:
  *              not the actual name after resolving symlinks, etc.
  *
  * Return:      Success:    The length of the file name
- *
  *              Failure:    -1
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -1777,8 +1771,8 @@ done:
  *                 in the SOHM table if there is one.
  *              3. The amount of free space tracked in the file.
  *
- * Return:      SUCCEED/FAIL
- *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1819,8 +1813,8 @@ done:
  * Purpose:     To retrieve the collection of read retries for metadata
  *              items with checksum.
  *
- * Return:      SUCCEED/FAIL
- *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1858,9 +1852,7 @@ done:
  *              sections.
  *
  * Return:      Success:   The total # of free space sections
- *
  *              Failure:   -1
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -1895,8 +1887,8 @@ done:
  *              provided file, potentially closing any cached files
  *              unless they are held open from somewhere\ else.
  *
- * Return:      SUCCEED/FAIL
- *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1951,8 +1943,8 @@ done:
  *              set up flush dependency/proxy even for file opened without
  *              SWMR to resolve issues with opened objects.
  *
- * Return:      Non-negative on success/negative on failure
- *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1987,7 +1979,8 @@ done:
  * Purpose:     Start metadata cache logging operations for a file.
  *                  - Logging must have been set up via the fapl.
  *
- * Return:      Non-negative on success/Negative on errors
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2019,7 +2012,8 @@ done:
  *                  - Does not close the log file.
  *                  - Logging must have been set up via the fapl.
  *
- * Return:      Non-negative on success/Negative on errors
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2051,7 +2045,8 @@ done:
  *              set up via the fapl. is_currently_logging determines if
  *              log messages are being recorded at this time.
  *
- * Return:      Non-negative on success/Negative on errors
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2085,7 +2080,8 @@ done:
  *              H5Fset_latest_format() starting release 1.10.2.
  *              See explanation for H5Fset_latest_format() in H5Fdeprec.c.
  *
- * Return:     Non-negative on success/Negative on failure
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2121,7 +2117,8 @@ done:
  *              downgrade persistent file space to non-persistent
  *              for 1.8 library.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2155,7 +2152,8 @@ done:
  *
  * Purpose:     Resets statistics for the page buffer layer.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2185,7 +2183,8 @@ done:
  *
  * Purpose:     Retrieves statistics for the page buffer layer.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2223,7 +2222,8 @@ done:
  *              image_len:   --size of the on disk metadata cache image
  *                           --zero if no cache image
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2251,14 +2251,12 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_eoa
  *
- * Purpose:     Returns the address of the first byte after the last
+ * Purpose:     Gets the address of the first byte after the last
  *              allocated memory in the file.
  *              (See H5FDget_eoa() in H5FD.c)
  *
- * Return:      Success:    First byte after allocated memory.
- *              Failure:    HADDR_UNDEF
- *
- *              Non-negative on success/Negative on failure
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2291,7 +2289,8 @@ done:
  *
  * Purpose:     Set the EOA for the file to the maximum of (EOA, EOF) + increment
  *
- * Return:      Non-negative on success/Negative on errors
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2317,24 +2316,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5Fget_dset_no_attrs_hint
+ * Function:    H5Fget_dset_no_attrs_hint
  *
- * Purpose:
+ * Purpose:     Get the file-level setting to create minimized dataset object headers.
+ *              Result is stored at pointer `minimize`.
  *
- *     Get the file-level setting to create minimized dataset object headers.
- *     Result is stored at pointer `minimize`.
- *
- * Return:
- *
- *     Success: SUCCEED (0) (non-negative value)
- *     Failure: FAIL (-1) (negative value)
- *
- * Programmer:
- *
- *     Jacob Smith
- *     15 August 2018
- *
- * Changes: None.
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2362,23 +2350,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5Fset_dset_no_attrs_hint
+ * Function:    H5Fset_dset_no_attrs_hint
  *
- * Purpose:
+ * Purpose:     Set the file-level setting to create minimized dataset object
+ *              headers.
  *
- *     Set the file-level setting to create minimized dataset object headers.
- *
- * Return:
- *
- *     Success: SUCCEED (0) (non-negative value)
- *     Failure: FAIL (-1) (negative value)
- *
- * Programmer:
- *
- *     Jacob Smith
- *     15 August 2018
- *
- * Changes: None.
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t

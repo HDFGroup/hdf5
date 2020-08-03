@@ -469,6 +469,9 @@ H5S__extent_release(H5S_extent_t *extent)
             extent->max = H5FL_ARR_FREE(hsize_t, extent->max);
     } /* end if */
 
+    extent->rank = 0;
+    extent->nelem = 0;
+
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__extent_release() */
 
@@ -1864,7 +1867,7 @@ done:
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
-    This function resets the type of a dataspace back to "none" with no
+    This function resets the type of a dataspace to H5S_NULL with no
     extent information stored for the dataspace.
 --------------------------------------------------------------------------*/
 herr_t
@@ -1884,7 +1887,7 @@ H5Sset_extent_none(hid_t space_id)
     if(H5S__extent_release(&space->extent) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTDELETE, FAIL, "can't release previous dataspace")
 
-    space->extent.type = H5S_NO_CLASS;
+    space->extent.type = H5S_NULL;
 
 done:
     FUNC_LEAVE_API(ret_value)
