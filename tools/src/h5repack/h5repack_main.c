@@ -68,6 +68,8 @@ static struct long_options l_opts[] = {
     { "dst-vol-value",       require_arg, '4' },
     { "dst-vol-name",        require_arg, '5' },
     { "dst-vol-info",        require_arg, '6' },
+    { "merge",        no_arg, 'X' },
+    { "prune",        no_arg, 'p' },            
     { NULL, 0, '\0' }
 };
 
@@ -235,6 +237,9 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "        COMPA (no parameter)\n");
     PRINTVALSTREAM(rawoutstream, "        CONTI (no parameter)\n");
     PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "   -X, --merge    Follow external soft link recursively and merge data.\n");
+    PRINTVALSTREAM(rawoutstream, "   -p, --prune    Never follow external soft link and delete it.\n");    
+    PRINTVALSTREAM(rawoutstream, "\n");    
     PRINTVALSTREAM(rawoutstream, "Examples of use:\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "1) h5repack -v -f GZIP=1 file1 file2\n");
@@ -714,8 +719,16 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 out_vol_info.info_string = opt_arg;
                 break;
 
-            default:
-                break;
+	case 'X':
+	  options->merge = TRUE;
+	  break;
+	  
+	case 'p':
+	  options->prune = TRUE;
+	  break;
+	  
+	default:
+	  break;
         } /* end switch */
     } /* end while there are more options to parse */
 
