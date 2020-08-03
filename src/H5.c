@@ -1118,6 +1118,35 @@ H5is_library_threadsafe(hbool_t *is_ts)
 } /* end H5is_library_threadsafe() */
 
 
+/*-------------------------------------------------------------------------
+ * Function:	H5is_library_terminating
+ *
+ * Purpose:	Checks to see if the library is shutting down.
+ *
+ * Note:	Useful for plugins to detect when the library is terminating.
+ *		For example, a VOL connector could check if a "file close"
+ *		callback was the result of the library shutdown process, or
+ *		an API action from the application.
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5is_library_terminating(hbool_t *is_terminating)
+{
+    FUNC_ENTER_API_NOINIT
+    H5TRACE1("e", "*b", is_terminating);
+
+    HDassert(is_terminating);
+
+    /* At this time, it is impossible for this to fail. */
+    *is_ts = H5_TERM_GLOBAL;
+
+    FUNC_LEAVE_API_NOINIT(SUCCEED)
+} /* end H5is_library_terminating() */
+
+
 #if defined(H5_HAVE_THREADSAFE) && defined(H5_BUILT_AS_DYNAMIC_LIB) \
     && defined(H5_HAVE_WIN32_API) && defined(H5_HAVE_WIN_THREADS)
 /*-------------------------------------------------------------------------
