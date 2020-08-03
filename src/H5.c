@@ -1141,7 +1141,7 @@ H5is_library_terminating(hbool_t *is_terminating)
     HDassert(is_terminating);
 
     /* At this time, it is impossible for this to fail. */
-    *is_ts = H5_TERM_GLOBAL;
+    *is_terminating = H5_TERM_GLOBAL;
 
     FUNC_LEAVE_API_NOINIT(SUCCEED)
 } /* end H5is_library_terminating() */
