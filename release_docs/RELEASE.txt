@@ -342,6 +342,17 @@ Bug Fixes since HDF5-1.10.5 release
 
     Library
     -------
+    - Fixed issues CVE-2018-13870 and CVE-2018-13869
+
+      When a buffer overflow occurred because a name length was corrupted
+      and became very large, h5dump crashed on memory access violation.
+
+      A check for reading pass the end of the buffer was added to multiple
+      locations to prevent the crashes and h5dump now simply fails with an
+      error message when this error condition occurs.
+
+      (BMR - 2020/7/31, HDFFV-11120 and HDFFV-11121)
+
     - Fixed the segmentation fault when reading attributes with multiple threads
 
       It was reported that the reading of attributes with variable length string
