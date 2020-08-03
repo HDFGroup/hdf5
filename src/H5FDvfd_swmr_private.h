@@ -82,7 +82,7 @@ H5_DLL herr_t H5F_vfd_swmr_writer__delay_write(struct H5F_shared_t *, uint64_t,
 H5_DLL herr_t H5F_vfd_swmr_writer__prep_for_flush_or_close(struct H5F_t *f);
 herr_t H5F_vfd_swmr_process_eot_queue(bool);
 H5_DLL herr_t H5F_vfd_swmr_writer_end_of_tick(struct H5F_t *f, bool);
-H5_DLL herr_t H5F_vfd_swmr_writer__dump_index(struct H5F_t * f);
+H5_DLL herr_t H5F_vfd_swmr_writer__dump_index(struct H5F_shared_t *);
 H5_DLL herr_t H5F_vfd_swmr_reader_end_of_tick(struct H5F_t *f, bool);
 
 H5_DLL herr_t H5F_vfd_swmr_remove_entry_eot(struct H5F_t *f);
