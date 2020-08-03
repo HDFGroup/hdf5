@@ -67,6 +67,7 @@ struct H5ES_event_t {
 /* Local Prototypes */
 /********************/
 static herr_t H5ES__close_cb(void *es, void **request_token);
+static herr_t H5ES__remove(H5ES_t *es, const H5ES_event_t *ev);
 
 
 /*********************/
@@ -339,6 +340,45 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5ES__remove
+ *
+ * Purpose:     Remove an event from an event set
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Houjun Tang
+ *	        Thursday, July 30, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5ES__remove(H5ES_t *es, const H5ES_event_t *ev)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(es);
+    HDassert(es->head);
+    HDassert(ev);
+
+    /* Stitch event out of list */
+    if(ev == es->head)
+        es->head = ev->next;
+    if(NULL != ev->next)
+        ev->next->prev = ev->next;
+    if(NULL != ev->prev)
+        ev->prev->next = ev->next;
+    if(NULL == es->head)
+        es->tail = NULL;
+
+    /* Decrement the # of events in set */
+    es->count--;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5ES__remove() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5ES__wait
  *
  * Purpose:     Wait for operations in event set to complete
@@ -393,6 +433,9 @@ H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status)
         /* Free request VOL object */
         if(H5VL_free_object(ev->request) < 0)
             HGOTO_ERROR(H5E_EVENTSET, H5E_CANTFREE, FAIL, "unable to free VOL object")
+
+        /* Remove the event node from the event set */
+        H5ES__remove(es, ev);
 
         /* Free the event node */
         H5FL_FREE(H5ES_event_t, ev);
