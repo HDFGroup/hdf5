@@ -531,7 +531,7 @@ HDfprintf(stderr, "%s: Entering - addr = %a, size = %Hu\n", FUNC, addr, size);
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTMERGE, FAIL, "can't check if section can shrink container")
     else if(ret_value > 0) {
         /* Shrink or absorb the section */
-        if(H5MV__sect_shrink((H5FS_section_info_t **)&node, NULL) < 0)
+        if(H5MV__sect_shrink((H5FS_section_info_t **)&node, f) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink container")
     } /* end if */
 
