@@ -824,6 +824,21 @@ error:
     return 1;
 } /* test_writer_create_open_flush() */
 
+/* Sleep for `tenths` tenths of a second.
+ *
+ * This routine may quietly perform a too-short sleep if an error occurs
+ * in nanosleep(2).
+ */
+static void
+decisleep(uint32_t tenths)
+{
+    struct timespec delay = {.tv_sec = tenths / 10,
+                             .tv_nsec = tenths * 100 * 1000 * 1000};
+
+    while (nanosleep(&delay, &delay) == -1 && errno == EINTR)
+        ; // do nothing
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    test_writer_md()
@@ -854,7 +869,7 @@ test_writer_md(void)
     hid_t fid = -1;             /* File ID */
     hid_t fapl = -1;            /* File access property list */
     hid_t fcpl = -1;            /* File creation property list */
-    unsigned num_entries = 0;   /* Number of entries in the index */
+    const unsigned num_entries = 10;    /* index size */
     unsigned i = 0;             /* Local index variables */
     uint8_t *buf = NULL;        /* Data page from the page buffer */
     hid_t dcpl = -1;            /* Dataset creation property list */
@@ -895,7 +910,6 @@ test_writer_md(void)
         FAIL_STACK_ERROR;
 
     /* Allocate num_entries for the data buffer */
-    num_entries = 10;
     if((buf = HDcalloc(num_entries, FS_PAGE_SIZE)) == NULL)
         FAIL_STACK_ERROR;
 
@@ -930,7 +944,8 @@ test_writer_md(void)
         FAIL_STACK_ERROR
 
     /* Perform activities to ensure that max_lag ticks elapse */
-    for(i = 0; i < 1000; i++) {
+    for(i = 0; i < my_config->max_lag + 1; i++) {
+        decisleep(my_config->tick_len);
 
         /* Create a chunked dataset */
         sprintf(dname, "dset %d", i);
@@ -962,7 +977,9 @@ test_writer_md(void)
         rwbuf[i] = (int)i;
 
     /* Perform activities to ensure that max_lag ticks elapse */
-    for(i = 0; i < 1000; i++) {
+    for(i = 0; i < my_config->max_lag + 1; i++) {
+        decisleep(my_config->tick_len);
+
         /* Open the dataset */
         sprintf(dname, "dset %d", i);
         if((did = H5Dopen2(fid, dname, H5P_DEFAULT)) < 0)
@@ -994,7 +1011,9 @@ test_writer_md(void)
     HDmemset(rwbuf, 0, sizeof(sizeof(int) * (50 * 20)));
 
     /* Perform activities to ensure that max_lag ticks elapse */
-    for(i = 0; i < 1000; i++) {
+    for(i = 0; i < my_config->max_lag + 1; i++) {
+        decisleep(my_config->tick_len);
+
         /* Open the dataset */
         sprintf(dname, "dset %d", i);
         if((did = H5Dopen2(fid, dname, H5P_DEFAULT)) < 0)
@@ -1476,7 +1495,8 @@ test_reader_md_concur(void)
         FAIL_STACK_ERROR
 
     /* Perform activities to ensure that ticks elapse */
-    for(i = 0; i < 2000; i++) {
+    for(i = 0; i < config_writer->max_lag + 1; i++) {
+        decisleep(config_writer->tick_len);
 
         /* Create a chunked dataset */
         sprintf(dname, "dset %d", i);
@@ -1553,7 +1573,9 @@ test_reader_md_concur(void)
         rwbuf[i] = (int)i;
 
     /* Perform activities to ensure that max_lag ticks elapse */
-    for(i = 0; i < 1000; i++) {
+    for(i = 0; i < config_writer->max_lag + 1; i++) {
+        decisleep(config_writer->tick_len);
+
         /* Open the dataset */
         sprintf(dname, "dset %d", i);
         if((did = H5Dopen2(fid_writer, dname, H5P_DEFAULT)) < 0)
@@ -1606,7 +1628,9 @@ test_reader_md_concur(void)
     }
 
     /* Perform activities to ensure that max_lag ticks elapse */
-    for(i = 0; i < 1000; i++) {
+    for(i = 0; i < config_writer->max_lag + 1; i++) {
+        decisleep(config_writer->tick_len);
+
         /* Open the dataset */
         sprintf(dname, "dset %d", i);
         if((did = H5Dopen2(fid_writer, dname, H5P_DEFAULT)) < 0)
@@ -1658,7 +1682,9 @@ test_reader_md_concur(void)
     }
 
     /* Perform activities to ensure that ticks elapse */
-    for(i = 0; i < 1000; i++) {
+    for(i = 0; i < config_writer->max_lag + 1; i++) {
+        decisleep(config_writer->tick_len);
+
         /* Open the dataset */
         sprintf(dname, "dset %d", i);
         if((did = H5Dopen2(fid_writer, dname, H5P_DEFAULT)) < 0)

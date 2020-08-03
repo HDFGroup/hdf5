@@ -581,7 +581,7 @@ H5F__vfd_swmr_writer_md_test(hid_t file_id, unsigned num_entries,
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "error updating the md file with the index")
 
     /* Verify the number of entries in the delayed list is as expected */
-    if(count_shadow_defrees(&f->shared->shadow_defrees) < nshadow_defrees)
+    if(count_shadow_defrees(&f->shared->shadow_defrees) == nshadow_defrees)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect # of entries in the delayed list")
 
     /* Open the metadata file */
