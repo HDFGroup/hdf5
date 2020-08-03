@@ -97,7 +97,7 @@ ALIASES += fgdta_loc_id{1}="\loc_id{\1}. The identifier may be that of a file, g
 ALIASES += aapl_id="\param[in] aapl_id Attribute access property list identifier"
 ALIASES += aapl_id{1}="\param[in] \1 Attribute access property list identifier"
 
-ALIASES += acpl_id="\param[in] aapl_id Attribute creation property list identifier"
+ALIASES += acpl_id="\param[in] acpl_id Attribute creation property list identifier"
 ALIASES += acpl_id{1}="\param[in] \1 Attribute creation property list identifier"
 
 ALIASES += lapl_id="\param[in] lapl_id Link access property list identifier"
