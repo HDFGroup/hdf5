@@ -2236,3 +2236,61 @@ done:
     return ret_value;
 } /* end h5_duplicate_file_by_bytes() */
 
+/*-------------------------------------------------------------------------
+ * Function:    h5_check_if_file_locking_enabled
+ *
+ * Purpose:     Checks if file locking is enabled on this file system.
+ *
+ * Return:      SUCCEED/FAIL
+ *              are_enabled will be FALSE if file locking is disabled on
+ *              the file system of if there were errors.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+h5_check_if_file_locking_enabled(hbool_t *are_enabled)
+{
+    const char *filename = "locking_test_file";
+    mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+    int fd = -1;
+
+    *are_enabled = TRUE;
+
+    if((fd = HDcreat(filename, mode)) < 0)
+        goto error;
+
+    /* Test HDflock() to see if it works */
+    if(HDflock(fd, LOCK_EX | LOCK_NB) < 0) {
+        if(ENOSYS == errno) {
+            /* When errno is set to ENOSYS, the file system does not support
+             * locking, so ignore it. This is most frequently used on
+             * Lustre. If we also want to check for disabled NFS locks
+             * we'll need to check for ENOLCK, too. That isn't done by
+             * default here since that could also represent an actual
+             * error condition.
+             */
+            errno = 0;
+            *are_enabled = FALSE;
+        }
+        else
+            goto error;
+    }
+    if(HDflock(fd, LOCK_UN) < 0)
+        goto error;
+
+    if(HDclose(fd) < 0)
+        goto error;
+    if(HDremove(filename) < 0)
+        goto error;
+
+    return SUCCEED;
+
+error:
+    *are_enabled = FALSE;
+    if (fd > -1) {
+        HDclose(fd);
+        HDremove(filename);
+    }
+    return FAIL;
+} /* end h5_check_if_file_locking_enabled() */
+

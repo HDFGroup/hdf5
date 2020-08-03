@@ -481,6 +481,8 @@ H5_FCDLL int_f h5pset_nlinks_c(hid_t_f *lapl_id, size_t_f *nlinks);
 H5_FCDLL int_f h5pget_nlinks_c(hid_t_f *lapl_id, size_t_f *nlinks);
 H5_FCDLL int_f h5pset_chunk_cache_c(hid_t_f *dapl_id, size_t_f *rdcc_nslots, size_t_f *rdcc_nbytes, real_f *rdcc_w0);
 H5_FCDLL int_f h5pget_chunk_cache_c(hid_t_f *dapl_id, size_t_f *rdcc_nslots, size_t_f *rdcc_nbytes, real_f *rdcc_w0);
+H5_FCDLL int_f h5pset_file_locking_c(hid_t_f *prp_id, int_f *use_file_locking, int_f *ignore_disabled_file_locking);
+H5_FCDLL int_f h5pget_file_locking_c(hid_t_f *prp_id, int_f *use_file_locking, int_f *ignore_disabled_file_locking);
 #ifdef H5_HAVE_PARALLEL
 H5_FCDLL int_f h5pget_mpio_actual_io_mode_c(hid_t_f *dxpl_id, int_f *actual_io_mode);
 H5_FCDLL int_f h5pget_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info);

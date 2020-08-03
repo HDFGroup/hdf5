@@ -6687,6 +6687,51 @@ public class H5 implements java.io.Serializable {
     public synchronized static native void H5Pset_evict_on_close(long fapl_id, boolean evict_on_close)
             throws HDF5LibraryException;
 
+    /**
+     * H5Pget_use_file_locking retrieves whether we are using file locking.
+     *
+     * @param fapl_id
+     *            IN: File access property list identifier
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     *
+     **/
+    public synchronized static native boolean H5Pget_use_file_locking(long fapl_id)
+            throws HDF5LibraryException;
+
+    /**
+     * H5Pget_use_file_locking retrieves whether we ignore file locks when they are disabled.
+     *
+     * @param fapl_id
+     *            IN: File access property list identifier
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     *
+     **/
+    public synchronized static native boolean H5Pget_ignore_disabled_file_locking(long fapl_id)
+            throws HDF5LibraryException;
+
+    /**
+     * H5Pset_file_locking sets parameters related to file locking.
+     *
+     * @param fapl_id
+     *            IN: File access property list identifier
+     *
+     * @param use_file_locking
+     *            IN: Whether the library will use file locking when opening files (mainly for SWMR semantics).
+     *
+     * @param ignore_when_disabled
+     *            IN: Whether file locking will be ignored when disabled on a file system (useful for Lustre).
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     *
+     **/
+    public synchronized static native void H5Pset_file_locking(long fapl_id, boolean use_file_locking, boolean ignore_when_disabled)
+            throws HDF5LibraryException;
+
     //  /////  unimplemented /////
     // herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info);
     // herr_t H5Pget_vol_id(hid_t plist_id, hid_t *vol_id);

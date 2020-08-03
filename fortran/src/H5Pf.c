@@ -5241,6 +5241,83 @@ h5pget_file_image_c(hid_t_f *fapl_id, void **buf_ptr, size_t_f *buf_len_ptr)
   return ret_value;
 }
 
+/****if* H5Pf/h5pset_file_locking_c
+ * NAME
+ *  h5pset_file_locking_c
+ * PURPOSE
+ *  Call H5Pset_file_locking to set file locking properties.
+ * INPUTS
+ *  prp_id - file access property list identifier
+ *  use_file_locking - TRUE/FALSE flag
+ *  ignore_disabled_file_locking - TRUE/FALSE flag
+ * RETURNS
+ *  0 on success, -1 on failure
+ * AUTHOR
+ *  Dana Robinson
+ *  Summer 2020
+ * SOURCE
+*/
+int_f
+h5pset_file_locking_c(hid_t_f *prp_id, int_f *use_file_locking, int_f *ignore_disabled_file_locking)
+/******/
+{
+  int ret_value = 0;
+  hid_t c_prp_id = H5I_INVALID_HID;
+  herr_t status;
+  hbool_t c_use_flag = 1;
+  hbool_t c_ignore_flag = 1;
+
+  if (*use_file_locking == 0) c_use_flag = 0;
+  if (*ignore_disabled_file_locking == 0) c_ignore_flag = 1;
+
+  c_prp_id = (hid_t)*prp_id;
+
+  status = H5Pset_file_locking(c_prp_id, c_use_flag, c_ignore_flag);
+  
+  if ( status < 0  ) ret_value = -1;
+  
+  return ret_value;
+}
+
+
+/****if* H5Pf/h5pget_file_locking_c
+ * NAME
+ *  h5pget_file_locking_c
+ * PURPOSE
+ *  Call H5Pget_file_locking to get file locking properties.
+ * INPUTS
+ *  prp_id - file access property list identifier
+ *  use_file_locking - TRUE/FALSE flag
+ *  ignore_disabled_file_locking - TRUE/FALSE flag
+ * RETURNS
+ *  0 on success, -1 on failure
+ * AUTHOR
+ *  Dana Robinson
+ *  Summer 2020
+ * SOURCE
+*/
+int_f
+h5pget_file_locking_c(hid_t_f *prp_id, int_f *use_file_locking, int_f *ignore_disabled_file_locking)
+/******/
+{
+  int ret_value = 0;
+  hid_t c_prp_id = H5I_INVALID_HID;
+  hbool_t c_use_flag = 1;
+  hbool_t c_ignore_flag = 1;
+  herr_t c_ret;
+
+  c_prp_id = (hid_t)*prp_id;
+
+  c_ret = H5Pget_file_locking(c_prp_id, &c_use_flag, &c_ignore_flag);
+
+  if ( c_ret < 0  ) ret_value = -1;
+
+  *use_file_locking = (int_f)c_use_flag;
+  *ignore_disabled_file_locking = (int_f)c_ignore_flag;
+
+  return ret_value;
+}
+
 #ifdef H5_HAVE_PARALLEL
 /****if* H5Pf/h5pset_fapl_mpio_c
  * NAME
