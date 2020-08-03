@@ -113,6 +113,7 @@ HLOG_OUTLET_SHORT_DEFN(h5mv, all);
 herr_t
 H5MV__create(H5F_t *f)
 {
+    H5F_shared_t *shared = f->shared;
     /* Free space section classes implemented for file */
     const H5FS_section_class_t *classes[] = { H5MV_FSPACE_SECT_CLS_SIMPLE };
     H5FS_create_t fs_create;    /* Free space creation parameters */
@@ -123,22 +124,21 @@ H5MV__create(H5F_t *f)
     /*
      * Check arguments.
      */
-    HDassert(f->shared);
-    HDassert(f->shared->fs_state_md == H5F_FS_STATE_CLOSED);
+    HDassert(shared->fs_state_md == H5F_FS_STATE_CLOSED);
 
     /* Set the free space creation parameters */
     fs_create.client = H5FS_CLIENT_MD_VFD_ID;
     fs_create.shrink_percent = H5MV_FSPACE_SHRINK;
     fs_create.expand_percent = H5MV_FSPACE_EXPAND;
-    fs_create.max_sect_addr = 1 + H5VM_log2_gen((uint64_t)f->shared->maxaddr);
-    fs_create.max_sect_size = f->shared->maxaddr;
+    fs_create.max_sect_addr = 1 + H5VM_log2_gen((uint64_t)shared->maxaddr);
+    fs_create.max_sect_size = shared->maxaddr;
 
-    if(NULL == (f->shared->fs_man_md = H5FS_create(f, NULL, &fs_create, NELMTS(classes), classes, f, f->shared->fs_page_size, f->shared->fs_page_size)))
+    if(NULL == (shared->fs_man_md = H5FS_create(f, NULL, &fs_create, NELMTS(classes), classes, f, shared->fs_page_size, shared->fs_page_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space info")
 
     /* Set the state for the free space manager to "open", if it is now */
-    if(f->shared->fs_man_md)
-        f->shared->fs_state_md = H5F_FS_STATE_OPEN;
+    if(shared->fs_man_md)
+        shared->fs_state_md = H5F_FS_STATE_OPEN;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -158,6 +158,7 @@ done:
 herr_t
 H5MV_close(H5F_t *f)
 {
+    H5F_shared_t *shared = f->shared;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -165,25 +166,24 @@ H5MV_close(H5F_t *f)
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(f->shared);
+    HDassert(shared);
 #ifdef H5MV_VFD_SWMR_DEBUG
 HDfprintf(stderr, "%s: Trying to close free space manager\n", FUNC);
 #endif
 
     /* Close an existing free space structure for the file */
-    if(f->shared->fs_man_md) {
+    if(shared->fs_man_md) {
 #ifdef H5MV_VFD_SWMR_DEBUG
 HDfprintf(stderr, "%s: Going to close free space manager\n", FUNC);
 #endif
-        HDassert(f->shared->fs_state_md != H5F_FS_STATE_CLOSED);
+        HDassert(shared->fs_state_md != H5F_FS_STATE_CLOSED);
 
-        if(H5FS_close(f, f->shared->fs_man_md) < 0)
+        if(H5FS_close(f, shared->fs_man_md) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't release free space info")
     }
 
-    f->shared->fs_man_md = NULL;
-    f->shared->fs_state_md = H5F_FS_STATE_CLOSED;
+    shared->fs_man_md = NULL;
+    shared->fs_state_md = H5F_FS_STATE_CLOSED;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -275,6 +275,7 @@ done:
 haddr_t
 H5MV_alloc(H5F_t *f, hsize_t size)
 {
+    H5F_shared_t *shared = f->shared;
     haddr_t eoa;                        /* EOA for the file */
     hsize_t frag_size = 0;              /* Fragment size */
     hsize_t misalign_size = 0;          /* Mis-aligned size */
@@ -285,14 +286,12 @@ H5MV_alloc(H5F_t *f, hsize_t size)
     hlog_fast(h5mv, "%s: enter size %" PRIuHSIZE, __func__, size);
 
     /* check arguments */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->vfd_swmr_md_fd >= 0);
+    HDassert(shared->vfd_swmr_md_fd >= 0);
     HDassert(size > 0);
 
     /* Search for large enough space in the free space manager */
-    if(f->shared->fs_man_md != NULL) {
-        if(H5MV__find_sect(f, size, f->shared->fs_man_md, &ret_value) < 0)
+    if(shared->fs_man_md != NULL) {
+        if(H5MV__find_sect(f, size, shared->fs_man_md, &ret_value) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "error locating a node")
     }
 
@@ -300,32 +299,32 @@ H5MV_alloc(H5F_t *f, hsize_t size)
     if(!H5F_addr_defined(ret_value)) {
 
         /* Get the EOA for the metadata file */
-        if(HADDR_UNDEF == (eoa = H5MV_get_vfd_swmr_md_eoa(f)))
+        if(HADDR_UNDEF == (eoa = H5MV_get_vfd_swmr_md_eoa(shared)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, HADDR_UNDEF, "Unable to get eoa for VFD SWMR metadata file")
 
         /* If EOA is mis-aligned, calculate the fragment size */
-        if(H5F_addr_gt(eoa, 0) && (misalign_size = eoa % f->shared->fs_page_size))
-            frag_size = f->shared->fs_page_size - misalign_size;
+        if(H5F_addr_gt(eoa, 0) && (misalign_size = eoa % shared->fs_page_size))
+            frag_size = shared->fs_page_size - misalign_size;
 
         /* Allocate from end of file */
-        if(HADDR_UNDEF == (ret_value = H5MV__alloc_md(f->shared, size + frag_size)))
+        if(HADDR_UNDEF == (ret_value = H5MV__alloc_md(shared, size + frag_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "allocation failed")
 
         /* If there is a mis-aligned fragment at EOA */
         if(frag_size) {
             /* Start up the free-space manager if not so */
-            if(f->shared->fs_man_md == NULL) {
+            if(shared->fs_man_md == NULL) {
                 if(H5MV__create(f) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, HADDR_UNDEF, "can't initialize free space manager")
             }
-            HDassert(f->shared->fs_man_md);
+            HDassert(shared->fs_man_md);
 
             /* Create the free-space section for the fragment */
             if(NULL == (node = H5MV__sect_new(eoa, frag_size)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, HADDR_UNDEF, "can't initialize free space section")
 
             /* Add the section */
-            if(H5FS_sect_add(f, f->shared->fs_man_md, &node->sect_info, H5FS_ADD_RETURNED_SPACE, f) < 0)
+            if(H5FS_sect_add(f, shared->fs_man_md, &node->sect_info, H5FS_ADD_RETURNED_SPACE, f) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, HADDR_UNDEF, "can't re-add section to file free space")
 
             node = NULL;
@@ -358,6 +357,7 @@ done:
 herr_t
 H5MV_free(H5F_t *f, haddr_t addr, hsize_t size)
 {
+    H5F_shared_t *shared = f->shared;
     H5MV_free_section_t *node = NULL;   /* Free space section pointer */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -374,7 +374,7 @@ H5MV_free(H5F_t *f, haddr_t addr, hsize_t size)
 
 
     /* Check if the free space manager for the file has been initialized */
-    if(f->shared->fs_man_md == NULL) {
+    if(shared->fs_man_md == NULL) {
         /* If there's no free space manager for objects of this type,
          *  see if we can avoid creating one by checking if the freed
          *  space is at the end of the file
@@ -393,7 +393,7 @@ H5MV_free(H5F_t *f, haddr_t addr, hsize_t size)
         /* If we are deleting the free space manager, leave now, to avoid
          *  [re-]starting it: dropping free space section on the floor.
          */
-        if(f->shared->fs_state_md == H5F_FS_STATE_DELETING) {
+        if(shared->fs_state_md == H5F_FS_STATE_DELETING) {
             hlog_fast(h5mv, "%s: dropping addr %" PRIuHADDR
                 " size %" PRIuHSIZE " on the floor!", __func__, addr, size);
             HGOTO_DONE(SUCCEED)
@@ -411,13 +411,13 @@ H5MV_free(H5F_t *f, haddr_t addr, hsize_t size)
     if(NULL == (node = H5MV__sect_new(addr, size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space section")
 
-    HDassert(f->shared->fs_man_md);
+    HDassert(shared->fs_man_md);
 
     hlog_fast(h5mv, "%s: before H5FS_sect_add, addr %" PRIuHADDR
         " size %" PRIuHSIZE, __func__, addr, size);
 
      /* Add the section */
-    if(H5FS_sect_add(f, f->shared->fs_man_md, &node->sect_info, H5FS_ADD_RETURNED_SPACE, f) < 0)
+    if(H5FS_sect_add(f, shared->fs_man_md, &node->sect_info, H5FS_ADD_RETURNED_SPACE, f) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, FAIL, "can't re-add section to file free space")
 
     node = NULL;
@@ -450,6 +450,7 @@ done:
 htri_t
 H5MV_try_extend(H5F_t *f, haddr_t addr, hsize_t size, hsize_t extra_requested)
 {
+    H5F_shared_t *shared = f->shared;
     haddr_t end;                    /* End of block to extend */
     htri_t ret_value = FALSE;       /* Return value */
 
@@ -460,13 +461,13 @@ HDfprintf(stderr, "%s: Entering: addr = %a, size = %Hu, extra_requested = %Hu\n"
 
     /* Sanity check */
     HDassert(f);
-    HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
+    HDassert(H5F_SHARED_INTENT(shared) & H5F_ACC_RDWR);
 
     /* Compute end of block to extend */
     end = addr + size;
 
     /* Try extending the block at EOA */
-    if((ret_value = H5MV__try_extend_md(f->shared, end, extra_requested)) < 0)
+    if((ret_value = H5MV__try_extend_md(shared, end, extra_requested)) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTEXTEND, FAIL, "error extending file")
 #ifdef H5MV_VFD_SWMR_DEBUG
 HDfprintf(stderr, "%s: extended = %t\n", FUNC, ret_value);
@@ -476,8 +477,8 @@ HDfprintf(stderr, "%s: extended = %t\n", FUNC, ret_value);
     if(ret_value == FALSE) {
 
         /* Try to extend the block into a free-space section */
-        if(f->shared->fs_man_md) {
-            if((ret_value = H5FS_sect_try_extend(f, f->shared->fs_man_md, addr, size, extra_requested, H5FS_ADD_RETURNED_SPACE, NULL)) < 0)
+        if(shared->fs_man_md) {
+            if((ret_value = H5FS_sect_try_extend(f, shared->fs_man_md, addr, size, extra_requested, H5FS_ADD_RETURNED_SPACE, NULL)) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTEXTEND, FAIL, "error extending block in free space manager")
 #ifdef H5MV_VFD_SWMR_DEBUG
 HDfprintf(stderr, "%s: Try to H5FS_sect_try_extend = %t\n", FUNC, ret_value);
@@ -507,6 +508,7 @@ HDfprintf(stderr, "%s: Leaving: ret_value = %t\n", FUNC, ret_value);
 htri_t
 H5MV_try_shrink(H5F_t *f, haddr_t addr, hsize_t size)
 {
+    H5F_shared_t *shared = f->shared;
     H5MV_free_section_t *node = NULL;   /* Free space section pointer */
     htri_t ret_value = FALSE;               /* Return value */
 
@@ -516,9 +518,7 @@ HDfprintf(stderr, "%s: Entering - addr = %a, size = %Hu\n", FUNC, addr, size);
 #endif
 
     /* check arguments */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->lf);
+    HDassert(shared->lf);
     HDassert(H5F_addr_defined(addr));
     HDassert(size > 0);
 
@@ -710,14 +710,12 @@ done:
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5MV_get_vfd_swmr_md_eoa(const H5F_t *f)
+H5MV_get_vfd_swmr_md_eoa(const H5F_shared_t *shared)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->vfd_swmr);
+    HDassert(shared->vfd_swmr);
 
-    FUNC_LEAVE_NOAPI(f->shared->vfd_swmr_md_eoa)
+    FUNC_LEAVE_NOAPI(shared->vfd_swmr_md_eoa)
 }

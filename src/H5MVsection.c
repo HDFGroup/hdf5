@@ -274,6 +274,7 @@ H5MV__sect_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
 {
     const H5MV_free_section_t *sect = (const H5MV_free_section_t *)_sect;   /* File free section */
     H5F_t *f = (H5F_t *)_udata;
+    H5F_shared_t *shared = f->shared;
     haddr_t eoa;                /* End of address space in the file */
     haddr_t end;                /* End of section to extend */
     htri_t ret_value = FALSE;   /* Return value */
@@ -282,10 +283,9 @@ H5MV__sect_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
 
     /* Check arguments. */
     HDassert(sect);
-    HDassert(f);
 
     /* Retrieve the end oa the file's address space */
-    if(HADDR_UNDEF == (eoa = H5MV_get_vfd_swmr_md_eoa(f)))
+    if(HADDR_UNDEF == (eoa = H5MV_get_vfd_swmr_md_eoa(shared)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "get_eoa request for VFD SWMR metadata file failed")
 
     /* Compute address of end of section to check */
@@ -315,6 +315,7 @@ herr_t
 H5MV__sect_shrink(H5FS_section_info_t **_sect, void *_udata)
 {
     H5F_t *f = (H5F_t *)_udata;
+    H5F_shared_t *shared = f->shared;
     H5MV_free_section_t **sect = (H5MV_free_section_t **)_sect;   /* File free section */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -322,14 +323,14 @@ H5MV__sect_shrink(H5FS_section_info_t **_sect, void *_udata)
 
     /* Check arguments. */
     HDassert(sect);
-    HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
+    HDassert(H5F_SHARED_INTENT(shared) & H5F_ACC_RDWR);
 
     /* Release section's space at EOA */
-    if(H5MV__free_md(f->shared, (*sect)->sect_info.addr, (*sect)->sect_info.size) < 0)
+    if(H5MV__free_md(shared, (*sect)->sect_info.addr, (*sect)->sect_info.size) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "free request for VFD SWMR metadata file failed")
 
     /* Free the section */
-    if(H5MV__sect_free((H5FS_section_info_t *)*sect) < 0)
+    if(H5MV__sect_free(&(*sect)->sect_info) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node")
 
    /* Mark section as freed, for free space manager */
