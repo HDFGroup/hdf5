@@ -10166,21 +10166,21 @@ done:
  *          is to be combined with the already existing selection for the 
  *          dataspace. The following operators are supported:
  *
- *          H5S_SELECT_SET	Replaces the existing selection with the 
+ *          -H5S_SELECT_SET	Replaces the existing selection with the 
  *                              parameters from this call. Overlapping blocks 
  *                              are not supported with this operator.
- *          H5S_SELECT_OR	Adds the new selection to the existing 
+ *          -H5S_SELECT_OR	Adds the new selection to the existing 
  *                              selection.  (Binary OR)
- *          H5S_SELECT_AND	Retains only the overlapping portions of the 
+ *          -H5S_SELECT_AND	Retains only the overlapping portions of the 
  *                              new selection and the existing selection.    
  *                              (Binary AND)
- *          H5S_SELECT_XOR	Retains only the elements that are members of 
+ *          -H5S_SELECT_XOR	Retains only the elements that are members of 
  *                              the new selection or the existing selection, 
  *                              excluding elements that are members of both 
  *                              selections. (Binary exclusive-OR, XOR)
- *          H5S_SELECT_NOTB  	Retains only elements of the existing selection
+ *          -H5S_SELECT_NOTB  	Retains only elements of the existing selection
  *                              that are not in the new selection.
- *          H5S_SELECT_NOTA	Retains only elements of the new selection that
+ *          -H5S_SELECT_NOTA	Retains only elements of the new selection that
  *                              are not in the existing selection.
  *
  *          The \p start array specifies the offset of the starting element 

@@ -370,13 +370,13 @@ done:
  *
  * \param[in] type   Type of dataspace to be created
  *
- * \return hid_tv{dataspace}
+ * \return \hid_tv{dataspace}
  *
  * \details H5Screate() creates a new dataspace of a particular type. Currently 
  *          supported types are as follows:
- *              H5S_SCALAR
- *              H5S_SIMPLE
- *              H5S_NULL
+ *              -H5S_SCALAR
+ *              -H5S_SIMPLE
+ *              -H5S_NULL
  *
  *          Further dataspace types may be added later.
  *
@@ -1088,12 +1088,12 @@ done:
  *         otherwise returns a negative value.
  *
  * \details H5Sget_simple_extent_dims() returns the size and maximum sizes 
- *          of each dimension of a dataspace space_id through the dims and 
- *          maxdims parameters.
+ *          of each dimension of a dataspace \p space_id through the \p dims 
+ *          and \p maxdims parameters.
  *
- *          Either or both of dims and maxdims may be NULL.
+ *          Either or both of \p dims and \p maxdims may be NULL.
  *
- *          If a value in the returned array maxdims is H5S_UNLIMITED (-1), 
+ *          If a value in the returned array \p maxdims is H5S_UNLIMITED (-1), 
  *          the maximum size of that dimension is unlimited.
  *
  * \version 1.4.0 Fortran subroutine introduced.
@@ -1553,7 +1553,7 @@ done:
  * \param[in] current_dims  Array specifying the size of each dimension
  * \param[in] maximum_dims  Array specifying the maximum size of each dimension
  *
- * \return hid_tv{dataspace}
+ * \return \hid_tv{dataspace}
  *
  * \details  H5Screate_simple() creates a new simple dataspace and opens it
  * for access, returning a dataspace identifier.
