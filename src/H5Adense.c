@@ -171,7 +171,6 @@ typedef struct H5A_bt2_ud_rmbi_t {
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec  4 2006
  *
  *-------------------------------------------------------------------------
@@ -290,9 +289,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec 11 2006
+ * Programmer:  Quincey Koziol
+ *              Dec 11 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -351,9 +349,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec 11 2006
+ * Programmer:  Quincey Koziol
+ *              Dec 11 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -440,9 +437,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec  4 2006
+ * Programmer:  Quincey Koziol
+ *              Dec  4 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -598,7 +594,7 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, February 20, 2007
  *
  *-------------------------------------------------------------------------
@@ -632,7 +628,7 @@ H5A__dense_write_bt2_cb2(void *_record, void *_op_data, hbool_t *changed)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, December  5, 2006
  *
  *-------------------------------------------------------------------------
@@ -743,9 +739,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec  4 2006
+ * Programmer:  Quincey Koziol
+ *              Dec  4 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -840,9 +835,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec  5 2006
+ * Programmer:  Quincey Koziol
+ *              Dec  5 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -883,9 +877,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Jan  3 2007
+ * Programmer:  Quincey Koziol
+ *              Jan  3 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1065,9 +1058,8 @@ done:
  *
  * Return:      H5_ITER_ERROR/H5_ITER_CONT/H5_ITER_STOP
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec  5 2006
+ * Programmer:  Quincey Koziol
+ *              Dec  5 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1161,9 +1153,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec  5 2006
+ * Programmer:  Quincey Koziol
+ *              Dec  5 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1296,9 +1287,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec 11 2006
+ * Programmer:  Quincey Koziol
+ *              Dec 11 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1360,9 +1350,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec 11 2006
+ * Programmer:  Quincey Koziol
+ *              Dec 11 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1448,9 +1437,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Feb 14 2007
+ * Programmer:  Quincey Koziol
+ *              Feb 14 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1574,9 +1562,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Feb 14 2007
+ * Programmer:  Quincey Koziol
+ *              Feb 14 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1702,9 +1689,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec 11 2006
+ * Programmer:  Quincey Koziol
+ *              Dec 11 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1788,9 +1774,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Jan  3 2007
+ * Programmer:  Quincey Koziol
+ *              Jan  3 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1852,9 +1837,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec  6 2006
+ * Programmer:  Quincey Koziol
+ *              Dec  6 2006
  *
  *-------------------------------------------------------------------------
  */

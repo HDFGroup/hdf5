@@ -1137,7 +1137,7 @@ H5D__virtual_str_append(const char *src, size_t src_len, char **p, char **buf,
 
     /* Copy string to *p.  Note that since src in not NULL terminated, we must
      * use memcpy */
-    (void)H5MM_memcpy(*p, src, src_len);
+    H5MM_memcpy(*p, src, src_len);
 
     /* Advance *p */
     *p += src_len;

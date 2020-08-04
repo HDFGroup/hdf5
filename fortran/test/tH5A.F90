@@ -21,7 +21,7 @@
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 ! CONTAINS SUBROUTINES
-!  attribute_test 
+!  attribute_test
 !
 !
 !*****

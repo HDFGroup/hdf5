@@ -243,17 +243,17 @@ test_h5o_close(void)
 static void
 test_h5o_open_by_addr(void)
 {
-    hid_t        fid;                        /* HDF5 File ID      */
-    hid_t        grp, dset, dtype, dspace;   /* Object identifiers */
-    H5L_info2_t  li;                         /* Buffer for H5Lget_info */
-    haddr_t      grp_addr;                   /* Addresses for objects */
-    haddr_t      dset_addr;
-    haddr_t      dtype_addr;
-    hsize_t      dims[RANK];
-    H5I_type_t   id_type;                    /* Type of IDs returned from H5Oopen */
-    H5G_info_t   ginfo;                      /* Group info struct */
-    H5T_class_t  type_class;                 /* Class of the datatype */
-    herr_t       ret;                        /* Value returned from API calls */
+    hid_t       fid;                        /* HDF5 File ID      */
+    hid_t       grp, dset, dtype, dspace;   /* Object identifiers */
+    H5L_info2_t li;                         /* Buffer for H5Lget_info2 */
+    haddr_t     grp_addr;                   /* Addresses for objects */
+    haddr_t     dset_addr;
+    haddr_t     dtype_addr;
+    hsize_t     dims[RANK];
+    H5I_type_t  id_type;                    /* Type of IDs returned from H5Oopen */
+    H5G_info_t  ginfo;                      /* Group info struct */
+    H5T_class_t type_class;                 /* Class of the datatype */
+    herr_t      ret;                        /* Value returned from API calls */
 
     /* Create a new HDF5 file */
     fid = H5Fcreate(TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);

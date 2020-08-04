@@ -25,15 +25,15 @@ typedef struct H5F_t H5F_t;
 #include "H5Fpublic.h"
 
 /* Public headers needed by this file */
-#include "H5FDpublic.h"         /* File drivers                */
+#include "H5FDpublic.h"         /* File drivers                 */
 
 /* Private headers needed by this file */
-#include "H5MMprivate.h"	/* Memory management	       */
+#include "H5MMprivate.h"        /* Memory management            */
 #ifdef H5_HAVE_PARALLEL
-#include "H5Pprivate.h"         /* Property lists              */
+#include "H5Pprivate.h"         /* Property lists               */
 #endif /* H5_HAVE_PARALLEL */
-#include "H5VMprivate.h"        /* Vectors and arrays          */
-#include "H5VLprivate.h"        /* Virtual Object Layer        */
+#include "H5VMprivate.h"        /* Vectors and arrays           */
+#include "H5VLprivate.h"        /* Virtual Object Layer         */
 
 
 /**************************/
@@ -835,7 +835,6 @@ H5_DLL hsize_t H5F_get_alignment(const H5F_t *f);
 H5_DLL hsize_t H5F_get_threshold(const H5F_t *f);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL H5P_coll_md_read_flag_t H5F_coll_md_read(const H5F_t *f);
-H5_DLL void H5F_set_coll_md_read(H5F_t *f, H5P_coll_md_read_flag_t flag);
 #endif /* H5_HAVE_PARALLEL */
 H5_DLL hbool_t H5F_use_mdc_logging(const H5F_t *f);
 H5_DLL hbool_t H5F_start_mdc_log_on_access(const H5F_t *f);

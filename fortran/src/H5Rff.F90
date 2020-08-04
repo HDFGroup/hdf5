@@ -61,7 +61,7 @@ MODULE H5R
   PRIVATE h5rcreate_object_f, h5rcreate_region_f, h5rcreate_ptr_f
   PRIVATE h5rdereference_object_f, h5rdereference_region_f, h5rdereference_ptr_f
   PRIVATE h5rget_name_object_f, h5rget_name_region_f, h5rget_name_ptr_f
-  
+
   INTERFACE h5rget_object_type_f
 
      MODULE PROCEDURE h5rget_object_type_obj_f

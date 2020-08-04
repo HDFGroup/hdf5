@@ -995,6 +995,17 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
       endif ()
     endif ()
 
+    #option (HDF5_INSTALL_MOD_FORTRAN "Copy FORTRAN mod files to include directory (NO SHARED STATIC)" "NO")
+    set (HDF5_INSTALL_MOD_FORTRAN "SHARED" CACHE STRING "Copy FORTRAN mod files to include directory (NO SHARED STATIC)")
+    set_property (CACHE HDF5_INSTALL_MOD_FORTRAN PROPERTY STRINGS NO SHARED STATIC)
+    if (NOT HDF5_INSTALL_MOD_FORTRAN MATCHES "NO")
+      if (NOT BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)
+        set (HDF5_INSTALL_MOD_FORTRAN "STATIC")
+      elseif (BUILD_SHARED_LIBS AND NOT BUILD_STATIC_LIBS)
+        set (HDF5_INSTALL_MOD_FORTRAN "SHARED")
+      endif ()
+    endif ()
+
     add_subdirectory (fortran)
     if (HDF5_BUILD_HL_LIB)
       if (EXISTS "${HDF5_SOURCE_DIR}/hl/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl/fortran")
