@@ -377,7 +377,11 @@ done:
  *          <table>
  *            <tr>
  *              <td>H5S_SCALAR</td>
+ *            </tr>
+ *            <tr>
  *              <td>H5S_SIMPLE</td>
+ *            </tr>
+ *            <tr>
  *              <td>H5S_NULL</td>
  *            </tr>
  *          </table>

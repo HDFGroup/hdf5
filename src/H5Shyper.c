@@ -10185,20 +10185,21 @@ done:
  *               (Binary AND)</td>
  *          </tr>
  *          <tr> 
- *          <td>H5S_SELECT_XOR</td>
- *          <td>Retains only the elements that are members of 
+ *             <td>H5S_SELECT_XOR</td>
+ *             <td>Retains only the elements that are members of 
  *                  the new selection or the existing selection, 
  *                  excluding elements that are members of both 
  *                  selections. (Binary exclusive-OR, XOR)
  *                 </td>
  *          </tr>
  *          <tr>
- *          <td>H5S_SELECT_NOTB</td>
- *          <td>Retains only elements of the existing selection
+ *             <td>H5S_SELECT_NOTB</td>
+ *             <td>Retains only elements of the existing selection
  *               that are not in the new selection.</td>
+ *          </tr>
  *          <tr>
- *          <td>H5S_SELECT_NOTA<td>
- *          <td>Retains only elements of the new selection that
+ *             <td>H5S_SELECT_NOTA<td>
+ *             <td>Retains only elements of the new selection that
  *              are not in the existing selection.</td>
  *          </tr>
  *          </table>
