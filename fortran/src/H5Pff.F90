@@ -8298,16 +8298,16 @@ END SUBROUTINE h5pget_virtual_dsetname_f
     LOGICAL(C_BOOL) :: c_ignore_flag
 
     INTERFACE
-       INTEGER FUNCTION h5pget_file_locking_c(fapl_id, use_file_locking, ignore_disabled_locks) BIND(C, NAME='H5Pget_file_locking')
+       INTEGER FUNCTION h5pget_file_locking(fapl_id, use_file_locking, ignore_disabled_locks) BIND(C, NAME='H5Pget_file_locking')
          IMPORT :: HID_T, C_BOOL
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN), VALUE :: fapl_id
          LOGICAL(C_BOOL), INTENT(OUT) :: use_file_locking
          LOGICAL(C_BOOL), INTENT(OUT) :: ignore_disabled_locks
-       END FUNCTION h5pget_file_locking_c
+       END FUNCTION h5pget_file_locking
     END INTERFACE
 
-    hdferr = INT(h5pget_file_locking_c(fapl_id, c_use_flag, c_ignore_flag))
+    hdferr = INT(h5pget_file_locking(fapl_id, c_use_flag, c_ignore_flag))
 
     ! Transfer value of C C_BOOL type to Fortran LOGICAL
     use_file_locking = c_use_flag
@@ -8348,20 +8348,20 @@ END SUBROUTINE h5pget_virtual_dsetname_f
     LOGICAL(C_BOOL) :: c_ignore_flag
 
     INTERFACE
-       INTEGER FUNCTION h5pset_file_locking_c(fapl_id, use_file_locking, ignore_disabled_locks) BIND(C, NAME='H5Pset_file_locking')
+       INTEGER FUNCTION h5pset_file_locking(fapl_id, use_file_locking, ignore_disabled_locks) BIND(C, NAME='H5Pset_file_locking')
          IMPORT :: HID_T, C_BOOL
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN), VALUE :: fapl_id
-         LOGICAL(C_BOOL), INTENT(IN) :: use_file_locking
-         LOGICAL(C_BOOL), INTENT(IN) :: ignore_disabled_locks
-       END FUNCTION h5pset_file_locking_c
+         LOGICAL(C_BOOL), INTENT(IN), VALUE :: use_file_locking
+         LOGICAL(C_BOOL), INTENT(IN), VALUE :: ignore_disabled_locks
+       END FUNCTION h5pset_file_locking
     END INTERFACE
 
     ! Transfer value of Fortran LOGICAL to C C_BOOL type
     c_use_flag = use_file_locking
     c_ignore_flag = ignore_disabled_locks
 
-    hdferr = INT(h5pset_file_locking_c(fapl_id, c_use_flag, c_ignore_flag))
+    hdferr = INT(h5pset_file_locking(fapl_id, c_use_flag, c_ignore_flag))
 
   END SUBROUTINE h5pset_file_locking_f
 
