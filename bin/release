@@ -39,7 +39,7 @@ USAGE()
 {
 cat << EOF
 Usage: $0 -d <dir> [--docver BRANCHNAME] [-h] [--nocheck] [--private] <methods> ...
-   -d DIR    The name of the directory where the releas(es) should be
+   -d DIR   The name of the directory where the releas(es) should be
                 placed.
    --docver BRANCHNAME  This is added for 1.8 and beyond to get the correct
                         version of documentation files from the hdf5docs
@@ -53,10 +53,10 @@ The other command-line options are the names of the programs to use
 for compressing the resulting tar archive (if none are given then
 "tar" is assumed):
 
-    tar        -- use tar and don't do any compressing.
-    gzip    -- use gzip with "-9" and append ".gz" to the output name.
+    tar         -- use tar and don't do any compressing.
+    gzip        -- use gzip with "-9" and append ".gz" to the output name.
     bzip2       -- use bzip2 with "-9" and append ".bz2" to the output name.
-    zip        -- convert all text files to DOS style and form a zip file for Windows use.
+    zip         -- convert all text files to DOS style and form a zip file for Windows use.
     cmake-tgz   -- create a tar file using the gzip default level with a build-unix.sh
                    command file and all other CMake files needed to build HDF5 source
                    using CMake on unix machines.
@@ -122,8 +122,8 @@ EOF
 tar2zip()
 {
     if [ $# -ne 3 ]; then
-    echo "usage: tar2zip <tarfilename> <zipfilename>"
-    return 1
+        echo "usage: tar2zip <tarfilename> <zipfilename>"
+        return 1
     fi
     ztmpdir=/tmp/ztmpdir$$
     mkdir -p $ztmpdir
@@ -135,10 +135,10 @@ tar2zip()
     (cd $ztmpdir; tar xf -) < $tarfile
     # sanity check
     if [ ! -d $ztmpdir/$version ]; then
-    echo "untar did not create $ztmpdir/$version source dir"
-    # cleanup
-    rm -rf $ztmpdir
-    return 1
+        echo "untar did not create $ztmpdir/$version source dir"
+        # cleanup
+        rm -rf $ztmpdir
+        return 1
     fi
     # step 2: convert text files
     # There maybe a simpler way to do this.
@@ -147,11 +147,11 @@ tar2zip()
     # -q   quiet mode
     # grep redirect output to /dev/null because -q or -s are not portable.
     find $ztmpdir/$version | \
-    while read inf; do \
-        if file $inf | grep "$inf\: .*text" > /dev/null 2>&1 ; then \
-        unix2dos -q -k $inf; \
-        fi\
-    done
+        while read inf; do \
+            if file $inf | grep "$inf\: .*text" > /dev/null 2>&1 ; then \
+                unix2dos -q -k $inf; \
+            fi\
+        done
     # step 3: make zipball
     # -9 maximum compression
     # -y Store symbolic links as such in the zip archive
@@ -202,8 +202,8 @@ tar2zip()
 tar2cmakezip()
 {
     if [ $# -ne 3 ]; then
-    echo "usage: tar2cmakezip <tarfilename> <zipfilename>"
-    return 1
+        echo "usage: tar2cmakezip <tarfilename> <zipfilename>"
+        return 1
     fi
     cmziptmpdir=/tmp/cmziptmpdir$$
     cmziptmpsubdir=$cmziptmpdir/CMake-$HDF5_VERS
@@ -216,10 +216,10 @@ tar2cmakezip()
     (cd $cmziptmpsubdir; tar xf -) < $tarfile
     # sanity check
     if [ ! -d $cmziptmpsubdir/$version ]; then
-    echo "untar did not create $cmziptmpsubdir/$version source dir"
-    # cleanup
-    rm -rf $cmziptmpdir
-    return 1
+        echo "untar did not create $cmziptmpsubdir/$version source dir"
+        # cleanup
+        rm -rf $cmziptmpdir
+        return 1
     fi
 
     # step 2: add batch file for building CMake on window
@@ -245,11 +245,11 @@ tar2cmakezip()
     # -q   quiet mode
     # grep redirect output to /dev/null because -q or -s are not portable.
     find $cmziptmpsubdir/$version | \
-    while read inf; do \
-        if file $inf | grep "$inf\: .*text" > /dev/null 2>&1 ; then \
-        unix2dos -q -k $inf; \
-        fi\
-    done
+        while read inf; do \
+            if file $inf | grep "$inf\: .*text" > /dev/null 2>&1 ; then \
+                unix2dos -q -k $inf; \
+            fi\
+        done
 
     # step 3: make zipball
     # -9 maximum compression
@@ -301,8 +301,8 @@ tar2cmakezip()
 tar2cmaketgz()
 {
     if [ $# -ne 3 ]; then
-    echo "usage: tar2cmaketgz <tarfilename> <tgzfilename>"
-    return 1
+        echo "usage: tar2cmaketgz <tarfilename> <tgzfilename>"
+        return 1
     fi
     cmgztmpdir=/tmp/cmgztmpdir$$
     cmgztmpsubdir=$cmgztmpdir/CMake-$HDF5_VERS
@@ -315,10 +315,10 @@ tar2cmaketgz()
     (cd $cmgztmpsubdir; tar xf -) < $tarfile
     # sanity check
     if [ ! -d $cmgztmpsubdir/$version ]; then
-    echo "untar did not create $cmgztmpsubdir/$version source dir"
-    # cleanup
-    rm -rf $cmgztmpdir
-    return 1
+        echo "untar did not create $cmgztmpsubdir/$version source dir"
+        # cleanup
+        rm -rf $cmgztmpdir
+        return 1
     fi
 
 
@@ -384,8 +384,8 @@ tar2cmaketgz()
 tar2hpccmaketgz()
 {
     if [ $# -ne 3 ]; then
-    echo "usage: tar2hpccmaketgz <tarfilename> <tgzfilename>"
-    return 1
+        echo "usage: tar2hpccmaketgz <tarfilename> <tgzfilename>"
+        return 1
     fi
     cmgztmpdir=/tmp/cmgztmpdir$$
     cmgztmpsubdir=$cmgztmpdir/HPC-CMake-$HDF5_VERS
@@ -398,10 +398,10 @@ tar2hpccmaketgz()
     (cd $cmgztmpsubdir; tar xf -) < $tarfile
     # sanity check
     if [ ! -d $cmgztmpsubdir/$version ]; then
-    echo "untar did not create $cmgztmpsubdir/$version source dir"
-    # cleanup
-    rm -rf $cmgztmpdir
-    return 1
+        echo "untar did not create $cmgztmpsubdir/$version source dir"
+        # cleanup
+        rm -rf $cmgztmpdir
+        return 1
     fi
 
 
@@ -442,7 +442,7 @@ check=yes
 release_date=`date +%F`
 today=`date +%Y%m%d`
 pmode='no'
-tmpdir="../#release_tmp.$$"    # tmp work directory
+tmpdir="../#release_tmp.$$"     # tmp work directory
 DOC_URL=https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5doc.git
 CPPLUS_RM_NAME=cpplus_RM
 MAINT_MODE_ENABLED=""
@@ -459,11 +459,11 @@ fi
 RESTORE_VERSION()
 {
     if [ X-${VERS_OLD} != X- ]; then
-    echo restoring version information back to $VERS_OLD
-    rm -f config/lt_vers.am
-    cp $tmpdir/lt_vers.am config/lt_vers.am
-    bin/h5vers -s $VERS_OLD
-    VERS_OLD=
+        echo restoring version information back to $VERS_OLD
+        rm -f config/lt_vers.am
+        cp $tmpdir/lt_vers.am config/lt_vers.am
+        bin/h5vers -s $VERS_OLD
+        VERS_OLD=
     fi
 }
 
@@ -473,32 +473,32 @@ while [ -n "$1" ]; do
     arg=$1
     shift
     case "$arg" in
-    -d)
-        DEST=$1
-        shift
-        ;;
-    --nocheck)
-        check=no
-        ;;
-    -h)
-        USAGE
-        exit 0
-        ;;
-    --private)
-        pmode=yes
-        ;;
+        -d)
+            DEST=$1
+            shift
+            ;;
+        --nocheck)
+            check=no
+            ;;
+        -h)
+            USAGE
+            exit 0
+            ;;
+        --private)
+            pmode=yes
+            ;;
         --docver)
             DOCVERSION=$1
             shift
             ;;
-    -*)
-        echo "Unknown switch: $arg" 1>&2
-        USAGE
-        exit 1
-        ;;
-    *)
-        methods="$methods $arg"
-        ;;
+        -*)
+            echo "Unknown switch: $arg" 1>&2
+            USAGE
+            exit 1
+            ;;
+        *)
+            methods="$methods $arg"
+            ;;
     esac
 done
 
@@ -553,7 +553,7 @@ if [ "X$fail" = "Xyes" ]; then
         echo "--nocheck argument to the bin/release command."
         exit 1
     else
-    echo "Continuing anyway..."
+        echo "Continuing anyway..."
     fi
 fi
 
@@ -595,61 +595,61 @@ MD5file=$HDF5_VERS.md5
 cp /dev/null $DEST/$MD5file
 for comp in $methods; do
     case $comp in
-    tar)
-        cp -p $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.tar
-        (cd $DEST; md5sum $HDF5_VERS.tar >> $MD5file)
-        ;;
-    gzip)
-        test "$verbose" && echo "   Running gzip..." 1>&2
-        gzip -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.gz
-        (cd $DEST; md5sum $HDF5_VERS.tar.gz >> $MD5file)
-        ;;
+        tar)
+            cp -p $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.tar
+            (cd $DEST; md5sum $HDF5_VERS.tar >> $MD5file)
+            ;;
+        gzip)
+            test "$verbose" && echo "   Running gzip..." 1>&2
+            gzip -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.gz
+            (cd $DEST; md5sum $HDF5_VERS.tar.gz >> $MD5file)
+            ;;
         cmake-tgz)
-        test "$verbose" && echo "   Creating CMake tar.gz file..." 1>&2
-        tar2cmaketgz $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/CMake-$HDF5_VERS.tar.gz 1>&2
-        (cd $DEST; md5sum CMake-$HDF5_VERS.tar.gz >> $MD5file)
+            test "$verbose" && echo "   Creating CMake tar.gz file..." 1>&2
+            tar2cmaketgz $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/CMake-$HDF5_VERS.tar.gz 1>&2
+            (cd $DEST; md5sum CMake-$HDF5_VERS.tar.gz >> $MD5file)
             ;;
         hpc-cmake-tgz)
-        test "$verbose" && echo "   Creating HPC-CMake tar.gz file..." 1>&2
-        tar2hpccmaketgz $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/HPC-CMake-$HDF5_VERS.tar.gz 1>&2
-        (cd $DEST; md5sum HPC-CMake-$HDF5_VERS.tar.gz >> $MD5file)
+            test "$verbose" && echo "   Creating HPC-CMake tar.gz file..." 1>&2
+            tar2hpccmaketgz $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/HPC-CMake-$HDF5_VERS.tar.gz 1>&2
+            (cd $DEST; md5sum HPC-CMake-$HDF5_VERS.tar.gz >> $MD5file)
             ;;
-    bzip2)
-        test "$verbose" && echo "   Running bzip2..." 1>&2
-        bzip2 -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.bz2
-        (cd $DEST; md5sum $HDF5_VERS.tar.bz2 >> $MD5file)
-        ;;
-    zip)
-        test "$verbose" && echo "   Creating zip ball..." 1>&2
-        tar2zip $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.zip 1>&2
-        (cd $DEST; md5sum $HDF5_VERS.zip >> $MD5file)
-        ;;
+        bzip2)
+            test "$verbose" && echo "   Running bzip2..." 1>&2
+            bzip2 -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.bz2
+            (cd $DEST; md5sum $HDF5_VERS.tar.bz2 >> $MD5file)
+            ;;
+        zip)
+            test "$verbose" && echo "   Creating zip ball..." 1>&2
+            tar2zip $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.zip 1>&2
+            (cd $DEST; md5sum $HDF5_VERS.zip >> $MD5file)
+            ;;
         cmake-zip)
             test "$verbose" && echo "   Creating CMake-zip ball..." 1>&2
             tar2cmakezip $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/CMake-$HDF5_VERS.zip 1>&2
             (cd $DEST; md5sum CMake-$HDF5_VERS.zip >> $MD5file)
             ;;
-    doc)
+        doc)
             if [ "${DOCVERSION}" = "" ]; then
                 DOCVERSION=master
             fi
-        test "$verbose" && echo "   Creating docs..." 1>&2
-        # Check out docs from git repo
-        (cd $tmpdir; git clone -q $DOC_URL ${DOCVERSION} > /dev/null) || exit 1
+            test "$verbose" && echo "   Creating docs..." 1>&2
+            # Check out docs from git repo
+            (cd $tmpdir; git clone -q $DOC_URL ${DOCVERSION} > /dev/null) || exit 1
             # Create doxygen C++ RM
-        (cd c++/src && doxygen cpp_doc_config > /dev/null ) || exit 1
-        # Replace version of C++ RM with just-created version
-        rm -rf $tmpdir/${DOCVERSION}/html/$CPPLUS_RM_NAME || exit 1
-        mv c++/src/$CPPLUS_RM_NAME $tmpdir/${DOCVERSION}/html/$CPPLUS_RM_NAME || exit 1
+            (cd c++/src && doxygen cpp_doc_config > /dev/null ) || exit 1
+            # Replace version of C++ RM with just-created version
+            rm -rf $tmpdir/${DOCVERSION}/html/$CPPLUS_RM_NAME || exit 1
+            mv c++/src/$CPPLUS_RM_NAME $tmpdir/${DOCVERSION}/html/$CPPLUS_RM_NAME || exit 1
             # Compress the docs and move them to the release area
-        mv $tmpdir/${DOCVERSION} $tmpdir/${HDF5_VERS}_docs || exit 1
-        (cd $tmpdir && tar cf ${HDF5_VERS}_docs.tar ${HDF5_VERS}_docs) || exit 1
-        mv $tmpdir/${HDF5_VERS}_docs.tar $DEST || exit 1
-        ;;
-    *)
-        echo "***Error*** Unknown method $comp"
-        exit 1
-        ;;
+            mv $tmpdir/${DOCVERSION} $tmpdir/${HDF5_VERS}_docs || exit 1
+            (cd $tmpdir && tar cf ${HDF5_VERS}_docs.tar ${HDF5_VERS}_docs) || exit 1
+            mv $tmpdir/${HDF5_VERS}_docs.tar $DEST || exit 1
+            ;;
+        *)
+            echo "***Error*** Unknown method $comp"
+            exit 1
+            ;;
     esac
 done
 

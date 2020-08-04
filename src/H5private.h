@@ -614,21 +614,37 @@
 #define LOCK_UN     0x08
 #endif /* H5_HAVE_FLOCK */
 
-/*
- * Data types and functions for timing certain parts of the library.
+/* Typedefs and functions for timing certain parts of the library. */
+
+/* A set of elapsed/user/system times emitted as a time point by the
+ * platform-independent timers.
  */
 typedef struct {
-    double  utime;    /*user time      */
-    double  stime;    /*system time      */
-    double  etime;    /*elapsed wall-clock time  */
+    double user;      /* User time in seconds */
+    double system;    /* System time in seconds */
+    double elapsed;   /* Elapsed (wall clock) time in seconds */
+} H5_timevals_t;
+
+/* Timer structure for platform-independent timers */
+typedef struct {
+    H5_timevals_t   initial;            /* Current interval start time */
+    H5_timevals_t   final_interval;     /* Last interval elapsed time */
+    H5_timevals_t   total;              /* Total elapsed time for all intervals */
+    hbool_t         is_running;         /* Whether timer is running */
 } H5_timer_t;
 
-H5_DLL void H5_timer_reset (H5_timer_t *timer);
-H5_DLL void H5_timer_begin (H5_timer_t *timer);
-H5_DLL void H5_timer_end (H5_timer_t *sum/*in,out*/,
-         H5_timer_t *timer/*in,out*/);
+/* Returns library bandwidth as a pretty string */
 H5_DLL void H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds);
+
+/* Timer functionality */
 H5_DLL time_t H5_now(void);
+H5_DLL uint64_t H5_now_usec(void);
+H5_DLL herr_t H5_timer_init(H5_timer_t *timer /*in,out*/);
+H5_DLL herr_t H5_timer_start(H5_timer_t *timer /*in,out*/);
+H5_DLL herr_t H5_timer_stop(H5_timer_t *timer /*in,out*/);
+H5_DLL herr_t H5_timer_get_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/);
+H5_DLL herr_t H5_timer_get_total_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/);
+H5_DLL char *H5_timer_get_time_string(double seconds);
 
 /* Depth of object copy */
 typedef enum {
@@ -750,6 +766,9 @@ typedef struct {
 #ifndef HDclock
     #define HDclock()    clock()
 #endif /* HDclock */
+#ifndef HDclock_gettime
+    #define HDclock_gettime(CID, TS)    clock_gettime(CID, TS)
+#endif /* HDclock_gettime */
 #ifndef HDclose
     #define HDclose(F)    close(F)
 #endif /* HDclose */
@@ -959,7 +978,7 @@ typedef off_t               h5_stat_size_t;
 #define H5_SIZEOF_H5_STAT_SIZE_T H5_SIZEOF_OFF_T
 
 #ifndef HDftell
-    #define HDftell(F)    ftello(F)
+    #define HDftell(F)    ftell(F)
 #endif /* HDftell */
 #ifndef HDftruncate
     #define HDftruncate(F,L)        ftruncate(F,L)
@@ -2148,8 +2167,9 @@ H5_DLL herr_t H5CX_pop(void);
     } /* end if */                                                            \
                                                                               \
     /* Initialize the package, if appropriate */                              \
-    H5_PACKAGE_INIT(H5_MY_PKG_INIT, err)                                      \
-                                                                              \
+    H5_PACKAGE_INIT(H5_MY_PKG_INIT, err)
+
+#define FUNC_ENTER_API_PUSH(err)                                              \
     /* Push the name of this function on the function stack */                \
     H5_PUSH_FUNC                                                              \
                                                                               \
@@ -2196,6 +2216,7 @@ H5_DLL herr_t H5CX_pop(void);
 #define FUNC_ENTER_API(err) {{                                                \
     FUNC_ENTER_API_COMMON                                                     \
     FUNC_ENTER_API_INIT(err);                                                 \
+    FUNC_ENTER_API_PUSH(err);                                                 \
     VFD_SWMR_ENTER(err);                                                      \
     /* Clear thread error stack entering public functions */                  \
     H5E_clear_stack(NULL);                                                    \
@@ -2205,6 +2226,7 @@ H5_DLL herr_t H5CX_pop(void);
 #define FUNC_ENTER_API_NO_EOT(err) {{                                         \
     FUNC_ENTER_API_COMMON                                                     \
     FUNC_ENTER_API_INIT(err);                                                 \
+    FUNC_ENTER_API_PUSH(err);                                                 \
     /* Clear thread error stack entering public functions */                  \
     H5E_clear_stack(NULL);                                                    \
     {
@@ -2216,6 +2238,7 @@ H5_DLL herr_t H5CX_pop(void);
 #define FUNC_ENTER_API_NOCLEAR(err) {{                                        \
     FUNC_ENTER_API_COMMON                                                     \
     FUNC_ENTER_API_INIT(err);                                                 \
+    FUNC_ENTER_API_PUSH(err);                                                 \
     VFD_SWMR_ENTER(err);                                                      \
     {
 
@@ -2244,6 +2267,18 @@ H5_DLL herr_t H5CX_pop(void);
     FUNC_ENTER_COMMON_NOERR(H5_IS_API(FUNC));                                 \
     FUNC_ENTER_API_THREADSAFE;                                                \
     BEGIN_MPE_LOG                                                             \
+    {
+
+/*
+ * Use this macro for API functions that should only perform initialization
+ *      of the library or an interface, but not push any state (API context,
+ *      function name, start MPE logging, etc) examples are: H5open.
+ *
+ */
+#define FUNC_ENTER_API_NOPUSH(err) {{{{{                                      \
+    FUNC_ENTER_COMMON(H5_IS_API(FUNC));                                       \
+    FUNC_ENTER_API_THREADSAFE;                                                \
+    FUNC_ENTER_API_INIT(err);                                                 \
     {
 
 /* Note: this macro only works when there's _no_ interface initialization routine for the module */
@@ -2446,6 +2481,16 @@ H5_DLL herr_t H5CX_pop(void);
     FUNC_LEAVE_API_THREADSAFE                                                 \
     return(ret_value);                                                        \
 }}}} /*end scope from beginning of FUNC_ENTER*/
+
+/* Use this macro to match the FUNC_ENTER_API_NOPUSH macro */
+#define FUNC_LEAVE_API_NOPUSH(ret_value)                                             \
+        ;                                                                     \
+    } /*end scope from end of FUNC_ENTER*/                                    \
+    if(err_occurred)                                                          \
+       (void)H5E_dump_api_stack(TRUE);                                        \
+    FUNC_LEAVE_API_THREADSAFE                                                 \
+    return(ret_value);                                                        \
+}}}}} /*end scope from beginning of FUNC_ENTER*/
 
 #define FUNC_LEAVE_NOAPI(ret_value)                                           \
         ;                                                                     \

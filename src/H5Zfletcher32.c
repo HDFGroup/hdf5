@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu <slu@ncsa.uiuc.edu>
+ * Programmer:  Raymond Lu
  *              Jan 3, 2003
  */
 

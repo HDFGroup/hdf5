@@ -31,28 +31,37 @@ int       H5tools_INDENT_g = 0;
 
 
 /* global variables */
+H5E_auto2_t lib_func;
+H5E_auto2_t tools_func;
+void       *lib_edata;
+void       *tools_edata;
+
 hid_t       H5tools_ERR_STACK_g = H5I_INVALID_HID;
 hid_t       H5tools_ERR_CLS_g = H5I_INVALID_HID;
 hid_t       H5E_tools_g = H5I_INVALID_HID;
 hid_t       H5E_tools_min_id_g = H5I_INVALID_HID;
 hid_t       H5E_tools_min_info_id_g = H5I_INVALID_HID;
 hid_t       H5E_tools_min_dbg_id_g = H5I_INVALID_HID;
-int         compound_data;
+
 FILE       *rawattrstream = NULL;      /* should initialize to stdout but gcc moans about it */
 FILE       *rawdatastream = NULL;      /* should initialize to stdout but gcc moans about it */
 FILE       *rawinstream = NULL;        /* should initialize to stdin but gcc moans about it */
 FILE       *rawoutstream = NULL;       /* should initialize to stdout but gcc moans about it */
 FILE       *rawerrorstream = NULL;     /* should initialize to stderr but gcc moans about it */
+
 int         bin_output;         /* binary output */
 int         bin_form = 0;       /* binary form, default NATIVE */
 int         region_output;      /* region output */
 int         oid_output;         /* oid output */
 int         data_output;        /* data output */
 int         attr_data_output;   /* attribute data output */
+int         compound_data;
+
 unsigned    packed_bits_num;    /* number of packed bits to display */
 unsigned    packed_data_offset; /* offset of packed bits to display */
 unsigned    packed_data_length; /* length of packed bits to display */
 unsigned long long packed_data_mask;  /* mask in which packed bits to display */
+
 int         enable_error_stack = 0;   /* re-enable error stack; disable=0 enable=1 */
 
 /* sort parameters */
@@ -106,6 +115,10 @@ const char *drivernames[]={
 void
 h5tools_init(void)
 {
+    /* Disable error reporting */
+    H5Eget_auto2(H5E_DEFAULT, &lib_func, &lib_edata);
+    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+
     if (!h5tools_init_g) {
         H5TOOLS_INIT_ERROR();
 
@@ -124,6 +137,29 @@ h5tools_init(void)
 
         h5tools_init_g++;
     }
+
+    /* Disable tools error reporting */
+    H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
+    H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
+}
+
+/*-------------------------------------------------------------------------
+ * Function: h5tools_error_report
+ *
+ * Purpose:  Enable error stack reporting after command line is parsed.
+ *
+ * Return:   None
+ *-------------------------------------------------------------------------
+ */
+void
+h5tools_error_report(void)
+{
+    if (h5tools_init_g) {
+        if (enable_error_stack > 0) {
+            H5Eset_auto2(H5E_DEFAULT, lib_func, lib_edata);
+            H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
+        }
+    }
 }
 
 /*-------------------------------------------------------------------------
@@ -140,15 +176,10 @@ h5tools_init(void)
 void
 h5tools_close(void)
 {
-    H5E_auto2_t  tools_func;
-    void        *tools_edata;
-
     if (h5tools_init_g) {
         /* special case where only data is output to stdout */
         if ((rawoutstream == NULL) && rawdatastream && (rawdatastream == stdout))
             HDfprintf(rawdatastream, "\n");
-
-        H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
 
         if (tools_func)
             H5Eprint2(H5tools_ERR_STACK_g, rawerrorstream);
@@ -186,6 +217,10 @@ h5tools_close(void)
 
         /* Clean up the reference path table, if it's been used */
         term_ref_path_table();
+
+        /* Restore error stacks from init */
+        H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
+        H5Eset_auto2(H5E_DEFAULT, lib_func, lib_edata);
 
         H5TOOLS_CLOSE_ERROR();
 
@@ -1151,8 +1186,8 @@ done:
  *-------------------------------------------------------------------------
  */
 void
-h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
-                      h5tools_context_t *ctx, hsize_t elmtno, int secnum)
+h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx,
+        hsize_t elmtno, int secnum)
 {
     h5tools_str_t prefix;
     h5tools_str_t str;          /*temporary for indentation */
@@ -1180,7 +1215,7 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
     H5TOOLS_DEBUG("after CR elmtno=%ld, ctx->ndims=%d", elmtno, ctx->ndims);
 
     /* Calculate new prefix */
-    h5tools_str_prefix(&prefix, info, elmtno, ctx->ndims, ctx);
+    h5tools_str_prefix(&prefix, info, elmtno, ctx);
     H5TOOLS_DEBUG("prefix=%s - str=%s", prefix.s, str.s);
 
     /* Write new prefix to output */
@@ -1247,8 +1282,8 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
  *-------------------------------------------------------------------------
  */
 void
-h5tools_region_simple_prefix(FILE *stream, const h5tool_format_t *info,
-        h5tools_context_t *ctx, hsize_t elmtno, hsize_t *ptdata, int secnum)
+h5tools_region_simple_prefix(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx,
+        hsize_t elmtno, hsize_t *ptdata, int secnum)
 {
     h5tools_str_t prefix;
     h5tools_str_t str;       /*temporary for indentation */
@@ -1272,7 +1307,7 @@ h5tools_region_simple_prefix(FILE *stream, const h5tool_format_t *info,
     }
 
     /* Calculate new prefix */
-    h5tools_str_region_prefix(&prefix, info, elmtno, ptdata, ctx->ndims, ctx->p_max_idx, ctx);
+    h5tools_str_region_prefix(&prefix, info, elmtno, ptdata, ctx);
 
     /* Write new prefix to output */
     if (ctx->indent_level > 0)
@@ -1345,9 +1380,8 @@ h5tools_region_simple_prefix(FILE *stream, const h5tool_format_t *info,
  *-------------------------------------------------------------------------
  */
 hbool_t
-h5tools_render_element(FILE *stream, const h5tool_format_t *info,
-        h5tools_context_t *ctx, h5tools_str_t *buffer, hsize_t *curr_pos,
-        size_t ncols, hsize_t local_elmt_counter, hsize_t elmt_counter)
+h5tools_render_element(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx,
+        h5tools_str_t *buffer, hsize_t *curr_pos, size_t ncols, hsize_t local_elmt_counter, hsize_t elmt_counter)
 {
     hbool_t  dimension_break = TRUE;
     char    *s = NULL;
@@ -1516,9 +1550,8 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
  *-------------------------------------------------------------------------
  */
 hbool_t
-h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
-        h5tools_context_t *ctx, h5tools_str_t *buffer, hsize_t *curr_pos,
-        size_t ncols, hsize_t *ptdata, hsize_t local_elmt_counter, hsize_t elmt_counter)
+h5tools_render_region_element(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx,
+        h5tools_str_t *buffer, hsize_t *curr_pos, size_t ncols, hsize_t *ptdata, hsize_t local_elmt_counter, hsize_t elmt_counter)
 {
     hbool_t  dimension_break = TRUE;
     char    *s = NULL;
@@ -1535,8 +1568,10 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
      * If the element would split on multiple lines if printed at our
      * current location...
      */
-    if (info->line_multi_new == 1 && (ctx->cur_column + h5tools_count_ncols(s) +
-                    HDstrlen(OPT(info->elmt_suf2, " ")) + HDstrlen(OPT(info->line_suf, ""))) > ncols) {
+    if (info->line_multi_new == 1 &&
+            (ctx->cur_column + h5tools_count_ncols(s) +
+                    HDstrlen(OPT(info->elmt_suf2, " ")) +
+                    HDstrlen(OPT(info->line_suf, ""))) > ncols) {
         if (ctx->prev_multiline) {
             /*
              * ... and the previous element also occupied more than one
@@ -1545,7 +1580,8 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
             ctx->need_prefix = TRUE;
         }
         else if ((ctx->prev_prefix_len + h5tools_count_ncols(s) +
-                HDstrlen(OPT(info->elmt_suf2, " ")) + HDstrlen(OPT(info->line_suf, ""))) <= ncols) {
+                HDstrlen(OPT(info->elmt_suf2, " ")) +
+                HDstrlen(OPT(info->line_suf, ""))) <= ncols) {
             /*
              * ...but *could* fit on one line otherwise, then we
              * should end the current line and start this element on its
@@ -1576,7 +1612,9 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
      * beginning of the line.
      */
     if (info->line_multi_new == 1 && ctx->prev_multiline &&
-            (ctx->cur_column + h5tools_count_ncols(s) + HDstrlen(OPT(info->elmt_suf2, " ")) + HDstrlen(OPT(info->line_suf, ""))) > ncols)
+            (ctx->cur_column + h5tools_count_ncols(s) +
+            HDstrlen(OPT(info->elmt_suf2, " ")) +
+            HDstrlen(OPT(info->line_suf, ""))) > ncols)
         ctx->need_prefix = TRUE;
 
     /*
@@ -1604,7 +1642,9 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
          * this check to happen for the first line
          */
         if ((!info->skip_first || local_elmt_counter) &&
-                (ctx->cur_column + HDstrlen(section) + HDstrlen(OPT(info->elmt_suf2, " ")) + HDstrlen(OPT(info->line_suf, ""))) > ncols)
+                (ctx->cur_column + HDstrlen(section) +
+                        HDstrlen(OPT(info->elmt_suf2, " ")) +
+                        HDstrlen(OPT(info->line_suf, ""))) > ncols)
             ctx->need_prefix = 1;
 
         /*
@@ -1650,24 +1690,62 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
  *-------------------------------------------------------------------------
  */
 void
-init_acc_pos(h5tools_context_t *ctx, hsize_t *dims)
+init_acc_pos(unsigned ndims, hsize_t *dims, hsize_t *acc, hsize_t *pos, hsize_t *p_min_idx)
 {
     int i;
     unsigned j;
 
     H5TOOLS_START_DEBUG("");
 
-    if(ctx->ndims > 0) {
-        ctx->acc[ctx->ndims - 1] = 1;
-        for (i = ((int)ctx->ndims - 2); i >= 0; i--) {
-            ctx->acc[i] = ctx->acc[i + 1] * dims[i + 1];
-            H5TOOLS_DEBUG("ctx->acc[%d]=%ld", i, ctx->acc[i]);
+    for (i = 0; (unsigned)i < ndims; i++)
+        p_min_idx[i] = 0;
+
+    if(ndims > 0) {
+        acc[ndims - 1] = 1;
+        for (i = ((int)ndims - 2); i >= 0; i--) {
+            acc[i] = acc[i + 1] * dims[i + 1];
+            H5TOOLS_DEBUG("acc[%d]=%ld", i, acc[i]);
         }
-        for (j = 0; j < ctx->ndims; j++)
-            ctx->pos[j] = 0;
+        for (j = 0; j < ndims; j++)
+            pos[j] = 0;
     }
 
     H5TOOLS_ENDDEBUG("");
+}
+
+/*-------------------------------------------------------------------------
+ * Function: calc_acc_pos
+ *
+ * Purpose:  Calculate the number of elements represented by a unit change
+ *           in a certain index position.
+ *
+ * Return:   void
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+calc_acc_pos(unsigned ndims, hsize_t elmtno, hsize_t *acc, hsize_t *pos)
+{
+    int i;
+    hsize_t   curr_pos = elmtno;
+
+    H5TOOLS_START_DEBUG("");
+
+    if(ndims > 0) {
+        for(i = 0; i < (int)ndims; i++) {
+            if(curr_pos > 0) {
+                H5TOOLS_DEBUG("curr_pos=%ld - ctx->acc[%d]=%ld", curr_pos, i, acc[i]);
+                pos[i] = curr_pos / acc[i];
+                curr_pos -= acc[i] * pos[i];
+            }
+            else
+                pos[i] = 0;
+            H5TOOLS_DEBUG("curr_pos=%ld - pos[%d]=%ld - acc[%d]=%ld", curr_pos, i, pos[i], i, acc[i]);
+        }
+    }
+
+    H5TOOLS_ENDDEBUG("");
+
+    return curr_pos;
 }
 
 /*-------------------------------------------------------------------------

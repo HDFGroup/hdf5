@@ -884,7 +884,7 @@ done:
  *              will be all zero during the driver close callback like during
  *              the 'open' callback.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -1190,7 +1190,7 @@ done:
  *              doesn't map to a free list then either the application 'free'
  *              callback is invoked (if defined) or the memory is leaked.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -1484,11 +1484,11 @@ done:
  *              be the constant H5P_DEFAULT). The result is written into the
  *              buffer BUF.
  *
- * Return:      Success:    SUCCEED
+ * Return:      Success:    Non-negative
  *                          The read result is written into the BUF buffer
  *                          which should be allocated by the caller.
  *
- *              Failure:	FAIL
+ *              Failure:	Negative
  *                          The contents of BUF are undefined.
  *
  *-------------------------------------------------------------------------
@@ -1538,7 +1538,7 @@ done:
  *              constant H5P_DEFAULT). The bytes to be written come from the
  *              buffer BUF.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -1585,7 +1585,7 @@ done:
  * Purpose:     Notify driver to flush all cached data.  If the driver has no
  *              flush method then nothing happens.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failureL
  *
  *-------------------------------------------------------------------------
  */
@@ -1655,7 +1655,7 @@ done:
  *
  * Purpose:     Notify driver to truncate the file back to the allocated size.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -1724,7 +1724,7 @@ done:
  *
  * Purpose:     Set a file lock
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -1786,7 +1786,7 @@ done:
  *
  * Purpose:     Remove a file lock
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -1875,7 +1875,7 @@ H5FD_get_fileno(const H5FD_t *file, unsigned long *filenum)
  * Purpose:     Returns a pointer to the file handle of low-level virtual
  *              file driver.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  *--------------------------------------------------------------------------
  */
@@ -2021,7 +2021,7 @@ H5FD_set_paged_aggr(H5FD_t *file, hbool_t paged)
 *           can't use the file to get the driver, the driver ID is passed
 *           in as a parameter.
 *
-* Return:   SUCCEED/FAIL
+* Return:   Non-negative on success/Negative on failure
 *
 *-------------------------------------------------------------------------
 */

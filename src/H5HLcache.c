@@ -36,7 +36,7 @@
 #include "H5Eprivate.h"     /* Error handling               */
 #include "H5HLpkg.h"        /* Local Heaps                  */
 #include "H5MFprivate.h"    /* File memory management       */
-#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5MMprivate.h"    /* Memory management			*/
 #include "H5WBprivate.h"    /* Wrapped Buffers              */
 
 
