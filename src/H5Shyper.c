@@ -10198,7 +10198,7 @@ done:
  *               that are not in the new selection.</td>
  *          </tr>
  *          <tr>
- *             <td>H5S_SELECT_NOTA<td>
+ *             <td>H5S_SELECT_NOTA</td>
  *             <td>Retains only elements of the new selection that
  *              are not in the existing selection.</td>
  *          </tr>
