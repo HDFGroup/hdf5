@@ -149,6 +149,7 @@ H5A__create(const H5G_loc_t *loc, const char *attr_name, const H5T_t *type,
     H5A_t    *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(loc->oloc->addr)
+	//FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(loc);
@@ -286,6 +287,7 @@ done:
         HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "can't close attribute")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
+	//FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__create() */
 
 
@@ -715,6 +717,7 @@ H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf)
     herr_t        ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE_TAG(attr->oloc.addr)
+	//FUNC_ENTER_PACKAGE
 
     HDassert(attr);
     HDassert(mem_type);
@@ -794,6 +797,7 @@ done:
         bkg_buf = H5FL_BLK_FREE(attr_buf, bkg_buf);
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
+	//FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__write() */
 
 
@@ -974,7 +978,7 @@ H5A__get_create_plist(H5A_t* attr)
 
     /* Create the property list object to return */
     if((new_plist_id = H5P_copy_plist(plist, TRUE)) < 0)
-    HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to copy attribute creation properties")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to copy attribute creation properties")
     if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_plist_id)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "can't get property list")
 
@@ -1945,11 +1949,11 @@ H5A__get_ainfo(H5F_t *f, H5O_t *oh, H5O_ainfo_t *ainfo)
 
     /* Check if the "attribute info" message exists */
     if((ret_value = H5O_msg_exists_oh(oh, H5O_AINFO_ID)) < 0)
-    HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "unable to check object header")
+        HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "unable to check object header")
     if(ret_value > 0) {
         /* Retrieve the "attribute info" structure */
         if(NULL == H5O_msg_read_oh(f, oh, H5O_AINFO_ID, ainfo))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't read AINFO message")
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't read AINFO message")
 
         /* Check if we don't know how many attributes there are */
         if(ainfo->nattrs == HSIZET_MAX) {

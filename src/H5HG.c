@@ -515,6 +515,7 @@ H5HG_insert(H5F_t *f, size_t size, const void *obj, H5HG_t *hobj/*out*/)
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(H5AC__GLOBALHEAP_TAG, FAIL)
+	//FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(f);
@@ -571,6 +572,7 @@ done:
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to unprotect heap.")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
+	//FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HG_insert() */
 
 
@@ -763,7 +765,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HG_remove (H5F_t *f, H5HG_t *hobj)
+H5HG_remove(H5F_t *f, H5HG_t *hobj)
 {
     H5HG_heap_t *heap = NULL;
     uint8_t     *p = NULL, *obj_start = NULL;

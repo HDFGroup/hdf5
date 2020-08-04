@@ -491,7 +491,7 @@ H5FA__hdr_unprotect(H5FA_hdr_t *hdr, unsigned cache_flags))
 
 CATCH
 
-END_FUNC(PKG)   /* end H5EA__hdr_unprotect() */
+END_FUNC(PKG)   /* end H5FA__hdr_unprotect() */
 
 
 /*-------------------------------------------------------------------------

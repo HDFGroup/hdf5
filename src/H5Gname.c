@@ -1192,7 +1192,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5G_get_name_by_addr_cb
+ * Function:    H5G__get_name_by_addr_cb
  *
  * Purpose:     Callback for retrieving object's name by address
  *
@@ -1206,7 +1206,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info2_t *linfo,
+H5G__get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info2_t *linfo,
     void *_udata)
 {
     H5G_gnba_iter_t *udata = (H5G_gnba_iter_t *)_udata; /* User data for iteration */
@@ -1216,7 +1216,7 @@ H5G_get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info2_t *linfo,
     hbool_t     obj_found = FALSE;      /* Object at 'path' found */
     herr_t      ret_value = H5_ITER_CONT;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(path);
@@ -1266,7 +1266,7 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, H5_ITER_ERROR, "can't free location")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_get_name_by_addr_cb() */
+} /* end H5G__get_name_by_addr_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -1315,7 +1315,7 @@ H5G_get_name_by_addr(H5F_t *f, const H5O_loc_t *loc, char *name, size_t size)
         udata.path = NULL;
 
         /* Visit all the links in the file */
-        if((status = H5G_visit(&root_loc, "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5G_get_name_by_addr_cb, &udata)) < 0)
+        if((status = H5G_visit(&root_loc, "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5G__get_name_by_addr_cb, &udata)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_BADITER, (-1), "group traversal failed while looking for object name")
         else if(status > 0)
             found_obj = TRUE;

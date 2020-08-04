@@ -151,7 +151,7 @@ static herr_t H5C_flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flag
 
 static herr_t H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags);
 
-static void * H5C_load_entry(H5F_t *             f,
+static void * H5C__load_entry(H5F_t *             f,
 #ifdef H5_HAVE_PARALLEL
                              hbool_t             coll_access,
 #endif /* H5_HAVE_PARALLEL */
@@ -166,7 +166,8 @@ static herr_t H5C__mark_flush_dep_clean(H5C_cache_entry_t * entry);
 static herr_t H5C__serialize_ring(H5F_t *f, H5C_ring_t ring);
 static herr_t H5C__serialize_single_entry(H5F_t *f, H5C_t *cache_ptr,
     H5C_cache_entry_t *entry_ptr);
-
+static herr_t H5C__generate_image(H5F_t *f, H5C_t *cache_ptr,
+    H5C_cache_entry_t *entry_ptr);
 static herr_t H5C__verify_len_eoa(H5F_t *f, const H5C_class_t * type,
     haddr_t addr, size_t *len, hbool_t actual);
 
@@ -406,17 +407,17 @@ H5C_create(size_t		      max_cache_size,
     (cache_ptr->resize_ctl).max_increment	= H5C__DEF_AR_MAX_INCREMENT;
 
     (cache_ptr->resize_ctl).flash_incr_mode     = H5C_flash_incr__off;
-    (cache_ptr->resize_ctl).flash_multiple      = 1.0f;
-    (cache_ptr->resize_ctl).flash_threshold     = 0.25f;
+    (cache_ptr->resize_ctl).flash_multiple      = (double)1.0f;
+    (cache_ptr->resize_ctl).flash_threshold     = (double)0.25f;
 
     (cache_ptr->resize_ctl).decr_mode		= H5C_decr__off;
-    (cache_ptr->resize_ctl).upper_hr_threshold	= H5C__DEF_AR_UPPER_THRESHHOLD;
-    (cache_ptr->resize_ctl).decrement	        = H5C__DEF_AR_DECREMENT;
+    (cache_ptr->resize_ctl).upper_hr_threshold	= (double)H5C__DEF_AR_UPPER_THRESHHOLD;
+    (cache_ptr->resize_ctl).decrement	        = (double)H5C__DEF_AR_DECREMENT;
     (cache_ptr->resize_ctl).apply_max_decrement	= TRUE;
     (cache_ptr->resize_ctl).max_decrement	= H5C__DEF_AR_MAX_DECREMENT;
     (cache_ptr->resize_ctl).epochs_before_eviction = H5C__DEF_AR_EPCHS_B4_EVICT;
     (cache_ptr->resize_ctl).apply_empty_reserve = TRUE;
-    (cache_ptr->resize_ctl).empty_reserve	= H5C__DEF_AR_EMPTY_RESERVE;
+    (cache_ptr->resize_ctl).empty_reserve	= (double)H5C__DEF_AR_EMPTY_RESERVE;
 
     cache_ptr->epoch_markers_active		= 0;
 
@@ -2338,7 +2339,7 @@ H5C_protect(H5F_t *		f,
 
         hit = FALSE;
 
-        if(NULL == (thing = H5C_load_entry(f,
+        if(NULL == (thing = H5C__load_entry(f,
 #ifdef H5_HAVE_PARALLEL
                                            coll_access,
 #endif /* H5_HAVE_PARALLEL */
@@ -6477,7 +6478,7 @@ done:
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5C_load_entry
+ * Function:    H5C__load_entry
  *
  * Purpose:     Attempt to load the entry at the specified disk address
  *              and with the specified type into memory.  If successful.
@@ -6494,7 +6495,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5C_load_entry(H5F_t *              f,
+H5C__load_entry(H5F_t *              f,
 #ifdef H5_HAVE_PARALLEL
                 hbool_t             coll_access,
 #endif /* H5_HAVE_PARALLEL */
@@ -6514,7 +6515,7 @@ H5C_load_entry(H5F_t *              f,
 #endif /* H5_HAVE_PARALLEL */
     void *      ret_value = NULL;       /* Return value                             */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity checks */
     HDassert(f);
@@ -6812,7 +6813,7 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_load_entry() */
+} /* H5C__load_entry() */
 
 
 /*-------------------------------------------------------------------------
@@ -8502,7 +8503,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
 {
     haddr_t		new_addr = HADDR_UNDEF;
@@ -8511,7 +8512,7 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
     unsigned            serialize_flags = H5C__SERIALIZE_NO_FLAGS_SET;
     herr_t              ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(f);

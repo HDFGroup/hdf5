@@ -2247,7 +2247,7 @@ H5FS__sect_assert(const H5FS_t *fspace)
 
     FUNC_ENTER_PACKAGE_NOERR
 #ifdef QAK
-HDfprintf(stderr, "%s: fspace->tot_sect_count = %Hu\n", "H5FS__sect_assert", fspace->tot_sect_count);
+HDfprintf(stderr, "%s: fspace->tot_sect_count = %Hu\n", FUNC, fspace->tot_sect_count);
 #endif /* QAK */
 
     /* Initialize state */
@@ -2306,7 +2306,7 @@ HDfprintf(stderr, "%s: fspace->tot_sect_count = %Hu\n", "H5FS__sect_assert", fsp
                         sect = (H5FS_section_info_t *)H5SL_item(curr_sect_node);
                         cls = &fspace->sect_cls[sect->type];
 #ifdef QAK
-HDfprintf(stderr, "%s: sect->size = %Hu, sect->addr = %a, sect->type = %u\n", "H5FS__sect_assert", sect->size, sect->addr, sect->type);
+HDfprintf(stderr, "%s: sect->size = %Hu, sect->addr = %a, sect->type = %u\n", FUNC, sect->size, sect->addr, sect->type);
 #endif /* QAK */
 
                         /* Sanity check section */

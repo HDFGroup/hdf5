@@ -461,7 +461,7 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(grp_oloc->addr, FAIL)
-
+	//FUNC_ENTER_NOAPI(FAIL)
     /* check arguments */
     HDassert(grp_oloc && grp_oloc->file);
     HDassert(name && *name);
@@ -628,6 +628,7 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "can't release pipeline")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
+	//FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_obj_insert() */
 
 
@@ -656,6 +657,7 @@ H5G__obj_iterate(const H5O_loc_t *grp_oloc, H5_index_t idx_type,
     herr_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(grp_oloc->addr)
+	//FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(grp_oloc);
@@ -699,6 +701,7 @@ H5G__obj_iterate(const H5O_loc_t *grp_oloc, H5_index_t idx_type,
 
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
+	//FUNC_LEAVE_NOAPI(ret_value)	
 } /* end H5G__obj_iterate() */
 
 

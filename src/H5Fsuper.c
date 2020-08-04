@@ -342,6 +342,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
     herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(H5AC__SUPERBLOCK_TAG)
+	//FUNC_ENTER_PACKAGE
 
     /* initialize the drvinfo to NULL -- we will overwrite this if there
      * is a driver information block
@@ -896,8 +897,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
                             HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error in writing fsinfo message to superblock extension")
                     }
                     else {
-                        if(H5F__super_ext_remove_msg(f, H5O_FSINFO_ID) < 0)
-                        {
+                        if(H5F__super_ext_remove_msg(f, H5O_FSINFO_ID) < 0) {
 #if 1 /* bug fix test code -- tidy this up if all goes well */ /* JRM */
                             f->shared->sblock = NULL;
 #endif /* JRM */
@@ -1053,6 +1053,7 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
+	//FUNC_LEAVE_NOAPI(ret_value)	
 } /* end H5F__super_read() */
 
 
@@ -1092,6 +1093,7 @@ H5F__super_init(H5F_t *f)
     herr_t          ret_value = SUCCEED; /* Return Value                              */
 
     FUNC_ENTER_PACKAGE_TAG(H5AC__SUPERBLOCK_TAG)
+	//FUNC_ENTER_PACKAGE	
 
     /* Allocate space for the superblock */
     if(NULL == (sblock = H5FL_CALLOC(H5F_super_t)))
@@ -1486,6 +1488,7 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
+	//FUNC_LEAVE_NOAPI(ret_value)	
 } /* end H5F__super_init() */
 
 

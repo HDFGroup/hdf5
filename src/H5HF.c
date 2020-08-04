@@ -168,7 +168,7 @@ H5HF_create(H5F_t *f, const H5HF_create_t *cparam)
     HDassert(cparam);
 
     /* Create shared fractal heap header */
-    if(HADDR_UNDEF == (fh_addr = H5HF_hdr_create(f, cparam)))
+    if(HADDR_UNDEF == (fh_addr = H5HF__hdr_create(f, cparam)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't create fractal heap header")
 
     /* Allocate fractal heap wrapper */

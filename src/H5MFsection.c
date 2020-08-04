@@ -112,7 +112,7 @@ H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SIMPLE[1] = {{
     NULL,				/* Add section                  */
     NULL,				/* Serialize section            */
     H5MF__sect_deserialize,		/* Deserialize section          */
-    H5MF__sect_simple_can_merge,		/* Can sections merge?          */
+    H5MF__sect_simple_can_merge,	/* Can sections merge?          */
     H5MF__sect_simple_merge,		/* Merge sections               */
     H5MF__sect_simple_can_shrink,	/* Can section shrink container?*/
     H5MF__sect_simple_shrink,		/* Shrink container w/section   */
@@ -136,16 +136,16 @@ H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SMALL[1] = {{
 
     /* Object methods */
     H5MF__sect_small_add,        /* Add section                  */
-    NULL,                       /* Serialize section            */
-    H5MF__sect_deserialize,		/* Deserialize section          */
+    NULL,                        /* Serialize section            */
+    H5MF__sect_deserialize,	 /* Deserialize section          */
     H5MF__sect_small_can_merge,  /* Can sections merge?          */
     H5MF__sect_small_merge,      /* Merge sections               */
-    NULL,		                /* Can section shrink container?*/
-    NULL,		                /* Shrink container w/section   */
+    NULL,		         /* Can section shrink container?*/
+    NULL,		         /* Shrink container w/section   */
     H5MF__sect_free,             /* Free section                 */
     H5MF__sect_valid,            /* Check validity of section    */
     H5MF__sect_split,            /* Split section node for alignment */
-    NULL,                       /* Dump debugging for section   */
+    NULL,                        /* Dump debugging for section   */
 }};
 
 /* Class info for "large" free space sections */
@@ -166,7 +166,7 @@ H5FS_section_class_t H5MF_FSPACE_SECT_CLS_LARGE[1] = {{
     H5MF__sect_deserialize,		/* Deserialize section          */
     H5MF__sect_large_can_merge,		/* Can sections merge?          */
     H5MF__sect_large_merge,		/* Merge sections               */
-    H5MF__sect_large_can_shrink,		/* Can section shrink container?*/
+    H5MF__sect_large_can_shrink,	/* Can section shrink container?*/
     H5MF__sect_large_shrink,		/* Shrink container w/section   */
     H5MF__sect_free,			/* Free section                 */
     H5MF__sect_valid,			/* Check validity of section    */

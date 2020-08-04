@@ -617,7 +617,7 @@ H5_DLL hsize_t H5HF_dtable_span_size(const H5HF_dtable_t *dtable, unsigned start
 
 /* Heap header routines */
 H5_DLL H5HF_hdr_t * H5HF_hdr_alloc(H5F_t *f);
-H5_DLL haddr_t H5HF_hdr_create(H5F_t *f, const H5HF_create_t *cparam);
+H5_DLL haddr_t H5HF__hdr_create(H5F_t *f, const H5HF_create_t *cparam);
 H5_DLL H5HF_hdr_t *H5HF__hdr_protect(H5F_t *f, haddr_t addr, unsigned flags);
 H5_DLL herr_t H5HF_hdr_finish_init_phase1(H5HF_hdr_t *hdr);
 H5_DLL herr_t H5HF_hdr_finish_init_phase2(H5HF_hdr_t *hdr);
@@ -638,7 +638,7 @@ H5_DLL herr_t H5HF_hdr_inc_iter(H5HF_hdr_t *hdr, hsize_t adv_size, unsigned nent
 H5_DLL herr_t H5HF__hdr_reverse_iter(H5HF_hdr_t *hdr, haddr_t dblock_addr);
 H5_DLL herr_t H5HF_hdr_reset_iter(H5HF_hdr_t *hdr, hsize_t curr_off);
 H5_DLL herr_t H5HF__hdr_empty(H5HF_hdr_t *hdr);
-H5_DLL herr_t H5HF_hdr_free(H5HF_hdr_t *hdr);
+H5_DLL herr_t H5HF__hdr_free(H5HF_hdr_t *hdr);
 H5_DLL herr_t H5HF__hdr_delete(H5HF_hdr_t *hdr);
 H5_DLL herr_t H5HF_hdr_dest(H5HF_hdr_t *hdr);
 

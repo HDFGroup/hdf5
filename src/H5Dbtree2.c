@@ -112,7 +112,7 @@ static herr_t H5D__bt2_found_cb(const void *nrecord, void *op_data);
  */
 static herr_t H5D__bt2_remove_cb(const void *nrecord, void *_udata);
 
-/* Callback for H5B2_modify() which is called in H5D__bt2_idx_insert() */
+/* Callback for H5B2_update() which is called in H5D__bt2_idx_insert() */
 static herr_t H5D__bt2_mod_cb(void *_record, void *_op_data, hbool_t *changed);
 
 /* Chunked layout indexing callbacks for v2 B-tree indexing */
@@ -837,7 +837,7 @@ H5D__bt2_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
  * Function:	H5D__bt2_mod_cb
  *
  * Purpose:	Modify record for dataset chunk when it is found in a v2 B-tree.
- * 		This is the callback for H5B2_modify() which is called in
+ * 		This is the callback for H5B2_update() which is called in
  *		H5D__bt2_idx_insert().
  *
  * Return:	Success:	non-negative

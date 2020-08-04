@@ -32,15 +32,15 @@
 #include "H5Sprivate.h"     /* Dataspaces           */
 
 
-static void  *H5O_fill_old_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
+static void  *H5O__fill_old_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
     unsigned *ioflags, size_t p_size, const uint8_t *p);
-static herr_t H5O_fill_old_encode(H5F_t *f, uint8_t *p, const void *_mesg);
-static size_t H5O_fill_old_size(const H5F_t *f, const void *_mesg);
-static void  *H5O_fill_new_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
+static herr_t H5O__fill_old_encode(H5F_t *f, uint8_t *p, const void *_mesg);
+static size_t H5O__fill_old_size(const H5F_t *f, const void *_mesg);
+static void  *H5O__fill_new_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
     unsigned *ioflags, size_t p_size, const uint8_t *p);
-static herr_t H5O_fill_new_encode(H5F_t *f, uint8_t *p, const void *_mesg);
-static size_t H5O_fill_new_size(const H5F_t *f, const void *_mesg);
-static void  *H5O_fill_copy(const void *_mesg, void *_dest);
+static herr_t H5O__fill_new_encode(H5F_t *f, uint8_t *p, const void *_mesg);
+static size_t H5O__fill_new_size(const H5F_t *f, const void *_mesg);
+static void  *H5O__fill_copy(const void *_mesg, void *_dest);
 static herr_t H5O__fill_reset(void *_mesg);
 static herr_t H5O__fill_free(void *_mesg);
 static herr_t H5O__fill_pre_copy_file(H5F_t *file_src, const void *mesg_src,
@@ -49,59 +49,59 @@ static herr_t H5O__fill_debug(H5F_t *f, const void *_mesg, FILE *stream,
     int indent, int fwidth);
 
 /* Set up & include shared message "interface" info */
-#define H5O_SHARED_TYPE            H5O_MSG_FILL
-#define H5O_SHARED_DECODE        H5O_fill_shared_decode
-#define H5O_SHARED_DECODE_REAL        H5O_fill_old_decode
-#define H5O_SHARED_ENCODE        H5O_fill_shared_encode
-#define H5O_SHARED_ENCODE_REAL        H5O_fill_old_encode
-#define H5O_SHARED_SIZE            H5O_fill_shared_size
-#define H5O_SHARED_SIZE_REAL        H5O_fill_old_size
-#define H5O_SHARED_DELETE        H5O__fill_shared_delete
+#define H5O_SHARED_TYPE                 H5O_MSG_FILL
+#define H5O_SHARED_DECODE               H5O__fill_shared_decode
+#define H5O_SHARED_DECODE_REAL          H5O__fill_old_decode
+#define H5O_SHARED_ENCODE               H5O__fill_shared_encode
+#define H5O_SHARED_ENCODE_REAL          H5O__fill_old_encode
+#define H5O_SHARED_SIZE                 H5O__fill_shared_size
+#define H5O_SHARED_SIZE_REAL            H5O__fill_old_size
+#define H5O_SHARED_DELETE               H5O__fill_shared_delete
 #undef H5O_SHARED_DELETE_REAL
-#define H5O_SHARED_LINK            H5O__fill_shared_link
+#define H5O_SHARED_LINK                 H5O__fill_shared_link
 #undef H5O_SHARED_LINK_REAL
-#define H5O_SHARED_COPY_FILE        H5O__fill_shared_copy_file
+#define H5O_SHARED_COPY_FILE            H5O__fill_shared_copy_file
 #undef H5O_SHARED_COPY_FILE_REAL
-#define H5O_SHARED_POST_COPY_FILE    H5O_fill_shared_post_copy_file
+#define H5O_SHARED_POST_COPY_FILE       H5O__fill_shared_post_copy_file
 #undef H5O_SHARED_POST_COPY_FILE_REAL
 #undef  H5O_SHARED_POST_COPY_FILE_UPD
-#define H5O_SHARED_DEBUG        H5O_fill_shared_debug
-#define H5O_SHARED_DEBUG_REAL        H5O__fill_debug
-#include "H5Oshared.h"            /* Shared Object Header Message Callbacks */
+#define H5O_SHARED_DEBUG                H5O__fill_shared_debug
+#define H5O_SHARED_DEBUG_REAL           H5O__fill_debug
+#include "H5Oshared.h"          /* Shared Object Header Message Callbacks */
 
 /* Set up & include shared message "interface" info */
 /* (Kludgy 'undef's in order to re-include the H5Oshared.h header) */
 #undef H5O_SHARED_TYPE
-#define H5O_SHARED_TYPE            H5O_MSG_FILL_NEW
+#define H5O_SHARED_TYPE                 H5O_MSG_FILL_NEW
 #undef H5O_SHARED_DECODE
-#define H5O_SHARED_DECODE        H5O_fill_new_shared_decode
+#define H5O_SHARED_DECODE               H5O__fill_new_shared_decode
 #undef H5O_SHARED_DECODE_REAL
-#define H5O_SHARED_DECODE_REAL        H5O_fill_new_decode
+#define H5O_SHARED_DECODE_REAL          H5O__fill_new_decode
 #undef H5O_SHARED_ENCODE
-#define H5O_SHARED_ENCODE        H5O_fill_new_shared_encode
+#define H5O_SHARED_ENCODE               H5O__fill_new_shared_encode
 #undef H5O_SHARED_ENCODE_REAL
-#define H5O_SHARED_ENCODE_REAL        H5O_fill_new_encode
+#define H5O_SHARED_ENCODE_REAL          H5O__fill_new_encode
 #undef H5O_SHARED_SIZE
-#define H5O_SHARED_SIZE            H5O_fill_new_shared_size
+#define H5O_SHARED_SIZE                 H5O__fill_new_shared_size
 #undef H5O_SHARED_SIZE_REAL
-#define H5O_SHARED_SIZE_REAL        H5O_fill_new_size
+#define H5O_SHARED_SIZE_REAL            H5O__fill_new_size
 #undef H5O_SHARED_DELETE
-#define H5O_SHARED_DELETE        H5O__fill_new_shared_delete
+#define H5O_SHARED_DELETE               H5O__fill_new_shared_delete
 #undef H5O_SHARED_DELETE_REAL
 #undef H5O_SHARED_LINK
-#define H5O_SHARED_LINK            H5O__fill_new_shared_link
+#define H5O_SHARED_LINK                 H5O__fill_new_shared_link
 #undef H5O_SHARED_LINK_REAL
 #undef H5O_SHARED_COPY_FILE
-#define H5O_SHARED_COPY_FILE        H5O__fill_new_shared_copy_file
+#define H5O_SHARED_COPY_FILE            H5O__fill_new_shared_copy_file
 #undef H5O_SHARED_COPY_FILE_REAL
 #undef H5O_SHARED_POST_COPY_FILE
-#define H5O_SHARED_POST_COPY_FILE    H5O_fill_new_shared_post_copy_file
+#define H5O_SHARED_POST_COPY_FILE       H5O__fill_new_shared_post_copy_file
 #undef H5O_SHARED_POST_COPY_FILE_REAL
 #undef  H5O_SHARED_POST_COPY_FILE_UPD
 #undef H5O_SHARED_DEBUG
-#define H5O_SHARED_DEBUG        H5O_fill_new_shared_debug
+#define H5O_SHARED_DEBUG                H5O__fill_new_shared_debug
 #undef H5O_SHARED_DEBUG_REAL
-#define H5O_SHARED_DEBUG_REAL        H5O__fill_debug
+#define H5O_SHARED_DEBUG_REAL           H5O__fill_debug
 #undef H5Oshared_H
 #include "H5Oshared.h"            /* Shared Object Header Message Callbacks */
 
@@ -110,11 +110,11 @@ const H5O_msg_class_t H5O_MSG_FILL[1] = {{
     H5O_FILL_ID,                /*message id number                         */
     "fill",                     /*message name for debugging                */
     sizeof(H5O_fill_t),         /*native message size                       */
-    H5O_SHARE_IS_SHARABLE|H5O_SHARE_IN_OHDR,    /* messages are sharable?   */
-    H5O_fill_shared_decode,     /*decode message                            */
-    H5O_fill_shared_encode,     /*encode message                            */
-    H5O_fill_copy,              /*copy the native value                     */
-    H5O_fill_shared_size,       /*raw message size                          */
+    H5O_SHARE_IS_SHARABLE | H5O_SHARE_IN_OHDR,  /* messages are sharable?   */
+    H5O__fill_shared_decode,    /*decode message                            */
+    H5O__fill_shared_encode,    /*encode message                            */
+    H5O__fill_copy,             /*copy the native value                     */
+    H5O__fill_shared_size,      /*raw message size                          */
     H5O__fill_reset,            /*free internal memory                      */
     H5O__fill_free,             /* free method                              */
     H5O__fill_shared_delete,    /* file delete method                       */
@@ -123,10 +123,10 @@ const H5O_msg_class_t H5O_MSG_FILL[1] = {{
     NULL,                       /*can share method                          */
     H5O__fill_pre_copy_file,    /* pre copy native value to file            */
     H5O__fill_shared_copy_file, /* copy native value to file                */
-    H5O_fill_shared_post_copy_file, /* post copy native value to file       */
+    H5O__fill_shared_post_copy_file, /* post copy native value to file      */
     NULL,                       /* get creation index                       */
     NULL,                       /* set creation index                       */
-    H5O_fill_shared_debug       /*debug the message                         */
+    H5O__fill_shared_debug      /*debug the message                         */
 }};
 
 /* This message derives from H5O message class, for new fill value after version 1.4  */
@@ -134,11 +134,11 @@ const H5O_msg_class_t H5O_MSG_FILL_NEW[1] = {{
     H5O_FILL_NEW_ID,                    /*message id number                 */
     "fill_new",                         /*message name for debugging        */
     sizeof(H5O_fill_t),                 /*native message size               */
-    H5O_SHARE_IS_SHARABLE|H5O_SHARE_IN_OHDR,    /* messages are sharable?   */
-    H5O_fill_new_shared_decode,         /*decode message                    */
-    H5O_fill_new_shared_encode,         /*encode message                    */
-    H5O_fill_copy,                      /*copy the native value             */
-    H5O_fill_new_shared_size,           /*raw message size                  */
+    H5O_SHARE_IS_SHARABLE | H5O_SHARE_IN_OHDR,  /* messages are sharable?   */
+    H5O__fill_new_shared_decode,        /*decode message                    */
+    H5O__fill_new_shared_encode,        /*encode message                    */
+    H5O__fill_copy,                     /*copy the native value             */
+    H5O__fill_new_shared_size,          /*raw message size                  */
     H5O__fill_reset,                    /*free internal memory              */
     H5O__fill_free,                     /* free method                      */
     H5O__fill_new_shared_delete,        /* file delete method               */
@@ -146,11 +146,11 @@ const H5O_msg_class_t H5O_MSG_FILL_NEW[1] = {{
     NULL,                               /* set share method                 */
     NULL,                               /*can share method                  */
     H5O__fill_pre_copy_file,            /* pre copy native value to file    */
-    H5O__fill_new_shared_copy_file,      /* copy native value to file        */
-    H5O_fill_new_shared_post_copy_file, /* post copy native value to file   */
+    H5O__fill_new_shared_copy_file,     /* copy native value to file        */
+    H5O__fill_new_shared_post_copy_file, /* post copy native value to file  */
     NULL,                               /* get creation index               */
     NULL,                               /* set creation index               */
-    H5O_fill_new_shared_debug           /*debug the message                    */
+    H5O__fill_new_shared_debug          /*debug the message                 */
 }};
 
 /* Format version bounds for fill value */
@@ -179,7 +179,7 @@ H5FL_BLK_EXTERN(type_conv);
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_fill_new_decode
+ * Function:    H5O__fill_new_decode
  *
  * Purpose:    Decode a new fill value message.  The new fill value
  *          message is fill value plus space allocation time and
@@ -194,14 +194,14 @@ H5FL_BLK_EXTERN(type_conv);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_fill_new_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
+H5O__fill_new_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
     size_t p_size, const uint8_t *p)
 {
     H5O_fill_t    *fill = NULL;
     void *ret_value = NULL;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(f);
     HDassert(p);
@@ -294,11 +294,11 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_fill_new_decode() */
+} /* end H5O__fill_new_decode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_fill_old_decode
+ * Function:    H5O__fill_old_decode
  *
  * Purpose:     Decode an old fill value message.
  *
@@ -311,7 +311,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_fill_old_decode(H5F_t *f, H5O_t *open_oh,
+H5O__fill_old_decode(H5F_t *f, H5O_t *open_oh,
     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
     size_t p_size, const uint8_t *p)
 {
@@ -320,7 +320,7 @@ H5O_fill_old_decode(H5F_t *f, H5O_t *open_oh,
     H5T_t *dt = NULL;
     void *ret_value = NULL;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(f);
     HDassert(p);
@@ -375,11 +375,11 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_fill_old_decode() */
+} /* end H5O__fill_old_decode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_fill_new_encode
+ * Function:    H5O__fill_new_encode
  *
  * Purpose:    Encode a new fill value message.  The new fill value
  *          message is fill value plus space allocation time and
@@ -393,11 +393,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_fill_new_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
+H5O__fill_new_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
 {
     const H5O_fill_t    *fill = (const H5O_fill_t *)_fill;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(f);
     HDassert(p);
@@ -473,11 +473,11 @@ H5O_fill_new_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
     } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_fill_new_encode() */
+} /* end H5O__fill_new_encode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_fill_old_encode
+ * Function:    H5O__fill_old_encode
  *
  * Purpose:     Encode an old fill value message.
  *
@@ -489,11 +489,11 @@ H5O_fill_new_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_fill_old_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
+H5O__fill_old_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
 {
     const H5O_fill_t *fill = (const H5O_fill_t *)_fill;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(f);
     HDassert(p);
@@ -504,11 +504,11 @@ H5O_fill_old_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
         H5MM_memcpy(p, fill->buf, (size_t)fill->size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_fill_old_encode() */
+} /* end H5O__fill_old_encode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_fill_copy
+ * Function:    H5O__fill_copy
  *
  * Purpose:    Copies a message from _MESG to _DEST, allocating _DEST if
  *        necessary.  The new fill value message is fill value plus
@@ -524,7 +524,7 @@ H5O_fill_old_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_fill_copy(const void *_src, void *_dst)
+H5O__fill_copy(const void *_src, void *_dst)
 {
     const H5O_fill_t    *src = (const H5O_fill_t *)_src;
     H5O_fill_t          *dst = (H5O_fill_t *)_dst;
@@ -621,11 +621,11 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_fill_copy() */
+} /* end H5O__fill_copy() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_fill_new_size
+ * Function:    H5O__fill_new_size
  *
  * Purpose:    Returns the size of the raw message in bytes not counting the
  *          message type or size fields, but only the data fields.  This
@@ -642,7 +642,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_fill_new_size(const H5F_t H5_ATTR_UNUSED *f, const void *_fill)
+H5O__fill_new_size(const H5F_t H5_ATTR_UNUSED *f, const void *_fill)
 {
     const H5O_fill_t    *fill = (const H5O_fill_t *)_fill;
     size_t              ret_value = 0;          /* Return value */
@@ -671,11 +671,11 @@ H5O_fill_new_size(const H5F_t H5_ATTR_UNUSED *f, const void *_fill)
     } /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_fill_new_size() */
+} /* end H5O__fill_new_size() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_fill_old_size
+ * Function:    H5O__fill_old_size
  *
  * Purpose:     Returns the size of the raw message in bytes not counting the
  *              message type or size fields, but only the data fields.  This
@@ -690,7 +690,7 @@ H5O_fill_new_size(const H5F_t H5_ATTR_UNUSED *f, const void *_fill)
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_fill_old_size(const H5F_t H5_ATTR_UNUSED *f, const void *_fill)
+H5O__fill_old_size(const H5F_t H5_ATTR_UNUSED *f, const void *_fill)
 {
     const H5O_fill_t *fill = (const H5O_fill_t *)_fill;
 
@@ -699,7 +699,7 @@ H5O_fill_old_size(const H5F_t H5_ATTR_UNUSED *f, const void *_fill)
     HDassert(fill);
 
     FUNC_LEAVE_NOAPI(4 + (size_t)fill->size)
-} /* end H5O_fill_old_size() */
+} /* end H5O__fill_old_size() */
 
 
 /*-------------------------------------------------------------------------

@@ -308,13 +308,13 @@ H5O_create(H5F_t *f, size_t size_hint, size_t initial_rc, hid_t ocpl_id, H5O_loc
     /* create object header in freelist
      * header version is set internally
      */
-    oh = H5O__create_ohdr(f, ocpl_id);
+    oh = H5O_create_ohdr(f, ocpl_id);
     if(NULL == oh)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "Can't instantiate object header")
 
     /* apply object header information to file
      */
-    if(H5O__apply_ohdr(f, oh, ocpl_id, size_hint, initial_rc, loc) < 0)
+    if(H5O_apply_ohdr(f, oh, ocpl_id, size_hint, initial_rc, loc) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "Can't apply object header to file")
 
 done:
@@ -326,7 +326,7 @@ done:
 
 
 /*-----------------------------------------------------------------------------
- * Function:   H5O__create_ohdr
+ * Function:   H5O_create_ohdr
  *
  * Purpose:    Create the object header, set version and flags.
  *
@@ -339,7 +339,7 @@ done:
  *-----------------------------------------------------------------------------
  */
 H5O_t *
-H5O__create_ohdr(H5F_t *f, hid_t ocpl_id)
+H5O_create_ohdr(H5F_t *f, hid_t ocpl_id)
 {
     H5P_genplist_t *oc_plist;
     H5O_t          *oh = NULL;        /* Object header in Freelist */
@@ -364,15 +364,13 @@ H5O__create_ohdr(H5F_t *f, hid_t ocpl_id)
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, NULL, "not a property list")
 
     /* Get any object header status flags set by properties */
-    if(H5P_DATASET_CREATE_DEFAULT == ocpl_id)
-    {
+    if(H5P_DATASET_CREATE_DEFAULT == ocpl_id) {
         /* If the OCPL is the default DCPL, we can get the header flags from the
          * API context. Otherwise we have to call H5P_get */
         if(H5CX_get_ohdr_flags(&oh_flags) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get object header flags")
     }
-    else
-    {
+    else {
         if(H5P_get(oc_plist, H5O_CRT_OHDR_FLAGS_NAME, &oh_flags) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get object header flags")
     }
@@ -389,11 +387,11 @@ done:
         HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, NULL, "can't delete object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5O__create_ohdr() */
+} /* H5O_create_ohdr() */
 
 
 /*-----------------------------------------------------------------------------
- * Function:   H5O__apply_ohdr
+ * Function:   H5O_apply_ohdr
  *
  * Purpose:    Initialize and set the object header in the file.
  *             Record some information at `loc_out`.
@@ -407,7 +405,7 @@ done:
  *-----------------------------------------------------------------------------
  */
 herr_t
-H5O__apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t initial_rc, H5O_loc_t *loc_out)
+H5O_apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t initial_rc, H5O_loc_t *loc_out)
 {
     haddr_t         oh_addr;
     size_t          oh_size;
@@ -564,7 +562,7 @@ H5O__apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t ini
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-} /* H5O__apply_ohdr() */
+} /* H5O_apply_ohdr() */
 
 
 /*-------------------------------------------------------------------------
@@ -664,7 +662,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_open_by_idx
+ * Function:    H5O__open_by_idx
  *
  * Purpose:     Internal routine to open an object by index within group
  *
@@ -677,7 +675,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5O_open_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
+H5O__open_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, H5I_type_t *opened_type)
 {
     H5G_loc_t   obj_loc;                /* Location used to open group */
@@ -686,7 +684,7 @@ H5O_open_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
     hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
     void *ret_value = NULL;             /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -712,11 +710,11 @@ done:
             HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "can't free location")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_open_by_idx() */
+} /* end H5O__open_by_idx() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_open_by_addr
+ * Function:    H5O__open_by_addr
  *
  * Purpose:     Internal routine to open an object by its address
  *
@@ -729,14 +727,14 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5O_open_by_addr(const H5G_loc_t *loc, haddr_t addr, H5I_type_t *opened_type)
+H5O__open_by_addr(const H5G_loc_t *loc, haddr_t addr, H5I_type_t *opened_type)
 {
     H5G_loc_t   obj_loc;                /* Location used to open group */
     H5G_name_t  obj_path;                /* Opened object group hier. path */
     H5O_loc_t   obj_oloc;                /* Opened object object location */
     void *ret_value = NULL;             /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -755,7 +753,7 @@ H5O_open_by_addr(const H5G_loc_t *loc, haddr_t addr, H5I_type_t *opened_type)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_open_by_addr() */
+} /* end H5O__open_by_addr() */
 
 
 /*-------------------------------------------------------------------------
@@ -1696,7 +1694,7 @@ H5O_obj_type(const H5O_loc_t *loc, H5O_type_t *obj_type)
 
 done:
     if(oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O_obj_type() */
@@ -2131,7 +2129,7 @@ H5O_get_hdr_info(const H5O_loc_t *loc, H5O_hdr_info_t *hdr)
 
 done:
     if(oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_get_hdr_info() */
@@ -2238,7 +2236,7 @@ H5O_get_info(const H5O_loc_t *loc, H5O_info2_t *oinfo, unsigned fields)
     H5O_t *oh = NULL;                   /* Object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(loc->addr, FAIL)
+    FUNC_ENTER_NOAPI(FAIL) //FUNC_ENTER_NOAPI_TAG(loc->addr, FAIL)
 
     /* Check args */
     HDassert(loc);
@@ -2324,7 +2322,7 @@ done:
     if(oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value) //FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O_get_info() */
 
 
@@ -2348,7 +2346,7 @@ H5O_get_native_info(const H5O_loc_t *loc, H5O_native_info_t *oinfo, unsigned fie
     H5O_t *oh = NULL;                   /* Object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(loc->addr, FAIL)
+    FUNC_ENTER_NOAPI(FAIL) //FUNC_ENTER_NOAPI_TAG(loc->addr, FAIL)
 
     /* Check args */
     HDassert(loc);
@@ -2387,7 +2385,7 @@ done:
     if(oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+     FUNC_LEAVE_NOAPI(ret_value) //FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O_get_native_info() */
 
 

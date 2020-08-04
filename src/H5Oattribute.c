@@ -456,6 +456,7 @@ H5O__attr_open_by_name(const H5O_loc_t *loc, const char *name)
     H5A_t *ret_value = NULL;            /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(loc->addr)
+	//FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -530,6 +531,7 @@ done:
             HDONE_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, NULL, "can't close attribute")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
+	//FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__attr_open_by_name() */
 
 
@@ -1142,6 +1144,7 @@ H5O__attr_rename(const H5O_loc_t *loc, const char *old_name,
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(loc->addr)
+	//FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -1206,6 +1209,7 @@ done:
         HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
+	//FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__attr_rename() */
 
 
@@ -1232,6 +1236,7 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, H5_index_t idx_type,
     herr_t ret_value = FAIL;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_TAG(loc->addr)
+	//FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(loc);
@@ -1293,6 +1298,7 @@ done:
         HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute table")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
+	//FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_iterate_real() */
 
 
@@ -1529,6 +1535,7 @@ H5O__attr_remove(const H5O_loc_t *loc, const char *name)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(loc->addr)
+	//FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -1586,6 +1593,7 @@ done:
         HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
+	//FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__attr_remove() */
 
 
@@ -1613,6 +1621,7 @@ H5O__attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(loc->addr)
+	//FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -1679,6 +1688,7 @@ done:
         HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute table")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
+	//FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__attr_remove_by_idx() */
 
 
@@ -1796,6 +1806,7 @@ H5O__attr_exists(const H5O_loc_t *loc, const char *name)
     htri_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(loc->addr)
+	//FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -1843,6 +1854,7 @@ done:
         HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
+	//FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__attr_exists() */
 
 
@@ -1927,49 +1939,4 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5O__attr_bh_info() */
-
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-
-/*-------------------------------------------------------------------------
- * Function:    H5O__attr_count
- *
- * Purpose:     Determine the # of attributes on an object
- *
- * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Monday, December 11, 2006
- *
- *-------------------------------------------------------------------------
- */
-int
-H5O__attr_count(const H5O_loc_t *loc)
-{
-    H5O_t *oh = NULL;           /* Pointer to actual object header */
-    hsize_t nattrs;             /* Number of attributes */
-    int ret_value = -1;         /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /* Check arguments */
-    HDassert(loc);
-
-    /* Protect the object header to iterate over */
-    if(NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, FAIL, "unable to load object header")
-
-    /* Retrieve # of attributes on object */
-    if(H5O__attr_count_real(loc->file, oh, &nattrs) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve attribute count")
-
-    /* Set return value */
-    ret_value = (int)nattrs;
-
-done:
-    if(oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O__attr_count */
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
 

@@ -271,19 +271,16 @@ H5FD__copy_plist(hid_t   fapl_id,
 
     HDassert(id_out_ptr != NULL);
 
-    if (FALSE == H5P_isa_class(fapl_id, H5P_FILE_ACCESS)) {
+    if(FALSE == H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, -1, "not a file access property list");
-    }
 
     plist_ptr = (H5P_genplist_t *)H5I_object(fapl_id);
-    if (NULL == plist_ptr) {
+    if(NULL == plist_ptr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, -1, "unable to get property list");
-    }
 
     *id_out_ptr = H5P_copy_plist(plist_ptr, FALSE);
-    if (H5I_INVALID_HID == *id_out_ptr) {
+    if(H5I_INVALID_HID == *id_out_ptr)
         HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, -1, "unable to copy file access property list");
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

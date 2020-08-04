@@ -1316,7 +1316,7 @@ done:
          */
 	if(oh_modified & H5O_MODIFY_CONDENSE)
 	    if(H5O__condense_header(f, oh) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTPACK, FAIL, "can't pack object header")
+                HDONE_ERROR(H5E_OHDR, H5E_CANTPACK, FAIL, "can't pack object header")
 
         /* Mark object header as changed */
         if(H5O_touch_oh(f, oh, FALSE) < 0)

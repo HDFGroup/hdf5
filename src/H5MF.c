@@ -794,7 +794,8 @@ H5MF_alloc(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
     H5F_mem_page_t  fs_type;            /* Free space type (mapped from allocation type) */
     haddr_t ret_value = HADDR_UNDEF;    /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, HADDR_UNDEF)
+    //FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, HADDR_UNDEF)
+	FUNC_ENTER_NOAPI(FAIL)
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: alloc_type = %u, size = %Hu\n", FUNC, (unsigned)alloc_type, size);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -873,7 +874,8 @@ HDfprintf(stderr, "%s: Leaving: ret_value = %a, size = %Hu\n", FUNC, ret_value, 
 H5MF__sects_dump(f, stderr);
 #endif /* H5MF_ALLOC_DEBUG_DUMP */
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    //FUNC_LEAVE_NOAPI_TAG(ret_value)
+	FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF_alloc() */
 
 
@@ -1101,7 +1103,8 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
     H5AC_ring_t fsm_ring;               /* Ring of FSM */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
+    //FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
+	FUNC_ENTER_NOAPI(FAIL)
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUNC, (unsigned)alloc_type, addr, size);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -1253,7 +1256,8 @@ HDfprintf(stderr, "%s: Leaving, ret_value = %d\n", FUNC, ret_value);
 #ifdef H5MF_ALLOC_DEBUG_DUMP
 H5MF__sects_dump(f, stderr);
 #endif /* H5MF_ALLOC_DEBUG_DUMP */
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    //FUNC_LEAVE_NOAPI_TAG(ret_value)
+	FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF_xfree() */
 
 
@@ -1292,7 +1296,8 @@ H5MF_try_extend(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size,
     hsize_t frag_size = 0;                  /* Size of mis-aligned fragment */
     htri_t ret_value = FALSE;      	    /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
+    //FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
+	FUNC_ENTER_NOAPI(FAIL)
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Entering: alloc_type = %u, addr = %a, size = %Hu, extra_requested = %Hu\n", FUNC, (unsigned)alloc_type, addr, size, extra_requested);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -1435,7 +1440,8 @@ HDfprintf(stderr, "%s: Leaving: ret_value = %t\n", FUNC, ret_value);
 H5MF__sects_dump(f, stderr);
 #endif /* H5MF_ALLOC_DEBUG_DUMP */
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    //FUNC_LEAVE_NOAPI_TAG(ret_value)
+	FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF_try_extend() */
 
 
@@ -1546,6 +1552,7 @@ H5MF_close(H5F_t *f)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
+	//FUNC_ENTER_NOAPI(FAIL)
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Entering\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -1568,6 +1575,7 @@ done:
 HDfprintf(stderr, "%s: Leaving\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG */
     FUNC_LEAVE_NOAPI_TAG(ret_value)
+	//FUNC_LEAVE_NOAPI(ret_value)	
 } /* end H5MF_close() */
 
 
@@ -1651,7 +1659,8 @@ H5MF_try_close(H5F_t *f)
     H5AC_ring_t needed_ring = H5AC_RING_INV;    /* Ring value needed for this iteration */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
+    FUNC_ENTER_NOAPI(FAIL) 
+	//FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Entering\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -1734,7 +1743,8 @@ done:
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Leaving\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG */
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value) 
+	//FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* H5MF_try_close() */
 
 
@@ -2173,7 +2183,7 @@ H5MF__close_shrink_eoa(H5F_t *f)
             } /* end for */
 
             /* check the two aggregators */
-            if((status = H5MF_aggrs_try_shrink_eoa(f)) < 0)
+            if((status = H5MF__aggrs_try_shrink_eoa(f)) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't check for shrinking eoa")
             else if(status > 0)
                 eoa_shrank = TRUE;
@@ -2222,7 +2232,8 @@ H5MF_get_freespace(H5F_t *f, hsize_t *tot_space, hsize_t *meta_size)
     H5AC_ring_t needed_ring = H5AC_RING_INV;    /* Ring value needed for this iteration.  */
     herr_t ret_value = SUCCEED;             /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
+    //FUNC_ENTER_NOAPI(FAIL)
+	FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
 
     /* check args */
     HDassert(f);
@@ -2330,7 +2341,8 @@ done:
     if(orig_ring != H5AC_RING_INV)
         H5AC_set_ring(orig_ring, NULL);
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    //FUNC_LEAVE_NOAPI(ret_value) 
+	FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5MF_get_freespace() */
 
 
@@ -2359,7 +2371,8 @@ H5MF_get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t
     H5F_mem_page_t ty;                          /* Memory type for iteration */
     ssize_t ret_value = -1;                     /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, (-1))
+    //FUNC_ENTER_NOAPI(FAIL) 
+	FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, (-1))
 
     /* check args */
     HDassert(f);
@@ -2450,7 +2463,8 @@ done:
     if(orig_ring != H5AC_RING_INV)
         H5AC_set_ring(orig_ring, NULL);
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    //FUNC_LEAVE_NOAPI(ret_value) 
+	FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* H5MF_get_free_sections() */
 
 
@@ -2643,7 +2657,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
-
+	//FUNC_ENTER_NOAPI(FAIL)
     /* Check args */
     HDassert(f);
     HDassert(f->shared);
@@ -2989,6 +3003,7 @@ done:
         H5AC_set_ring(orig_ring, NULL);
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
+	//FUNC_LEAVE_NOAPI(ret_value)
 } /* H5MF_settle_raw_data_fsm() */
 
 
@@ -3107,6 +3122,7 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
     herr_t 	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
+	//FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(f);
@@ -3314,6 +3330,7 @@ done:
         H5AC_set_ring(orig_ring, NULL);
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
+	//FUNC_LEAVE_NOAPI(ret_value)
 } /* H5MF_settle_meta_data_fsm() */
 
 

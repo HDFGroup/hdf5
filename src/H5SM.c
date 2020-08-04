@@ -1055,6 +1055,7 @@ H5SM_try_share(H5F_t *f, H5O_t *open_oh, unsigned defer_flags,
     htri_t              ret_value = TRUE;
 
     FUNC_ENTER_NOAPI_TAG(H5AC__SOHM_TAG, FAIL)
+	//FUNC_ENTER_NOAPI(FAIL)
 
     /* If we previously deferred this operation, the saved message type should
      * be the same as the one we get here.  In debug mode, we make sure this
@@ -1134,6 +1135,7 @@ done:
         HDONE_ERROR(H5E_SOHM, H5E_CANTUNPROTECT, FAIL, "unable to close SOHM master table")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
+	//FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_try_share() */
 
 
@@ -1545,6 +1547,7 @@ H5SM_delete(H5F_t *f, H5O_t *open_oh, H5O_shared_t *sh_mesg)
     herr_t                ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_TAG(H5AC__SOHM_TAG, FAIL)
+	//FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(f);
     HDassert(H5F_addr_defined(H5F_SOHM_ADDR(f)));
@@ -1602,6 +1605,7 @@ done:
         mesg_buf = H5MM_xfree(mesg_buf);
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
+	//FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_delete() */
 
 
@@ -2170,6 +2174,7 @@ H5SM_get_refcount(H5F_t *f, unsigned type_id, const H5O_shared_t *sh_mesg,
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_TAG(H5AC__SOHM_TAG)
+	//FUNC_ENTER_NOAPI_NOINIT	
 
     /* Sanity check */
     HDassert(f);
@@ -2265,6 +2270,7 @@ done:
         encoding_buf = H5MM_xfree(encoding_buf);
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
+	//FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_get_refcount() */
 
 
