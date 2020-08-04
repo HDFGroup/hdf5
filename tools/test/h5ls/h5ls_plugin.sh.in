@@ -139,8 +139,8 @@ CLEAN_TESTFILES_AND_TESTDIR()
 # Print a $* message left justified in a field of 70 characters
 #
 MESSAGE() {
-   SPACES="                                                               "
-   echo "$* $SPACES" | cut -c1-70 | tr -d '\012'
+    SPACES="                                                               "
+    echo "$* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
 # Print a line-line message left justified in a field of 70 characters
@@ -206,7 +206,7 @@ TOOLTEST() {
             echo ""
         fi
     elif [ ! -f $expect ]; then
-    # Create the expect file if it doesn't yet exist.
+        # Create the expect file if it doesn't yet exist.
         echo " CREATED"
         cp $actual $expect
         echo "    Expected result (*.ls) missing"
