@@ -359,7 +359,7 @@ Bug Fixes since HDF5-1.8.21
       When a buffer overflow occurred because a name length was corrupted
       and became very large, h5dump crashed on memory access violation.
 
-      A check for reading pass the end of the buffer was added to multiple
+      A check for reading past the end of the buffer was added to multiple
       locations to prevent the crashes and h5dump now simply fails with an
       error message when this error condition occurs.
 
