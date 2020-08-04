@@ -374,9 +374,13 @@ done:
  *
  * \details H5Screate() creates a new dataspace of a particular type. Currently 
  *          supported types are as follows:
- *              -H5S_SCALAR
- *              -H5S_SIMPLE
- *              -H5S_NULL
+ *          <table>
+ *            <tr>
+ *              <td>H5S_SCALAR</td>
+ *              <td>H5S_SIMPLE</td>
+ *              <td>H5S_NULL</td>
+ *            </tr>
+ *          </table>
  *
  *          Further dataspace types may be added later.
  *
