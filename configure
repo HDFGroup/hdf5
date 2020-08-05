@@ -25679,27 +25679,13 @@ $as_echo "suppressed" >&6; }
       AM_CPPFLAGS="$AM_CPPFLAGS -I$szlib_inc"
     fi
 
-    for ac_header in szlib.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "szlib.h" "ac_cv_header_szlib_h" "$ac_includes_default"
-if test "x$ac_cv_header_szlib_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_SZLIB_H 1
-_ACEOF
- HAVE_SZLIB_H="yes"
-else
-  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS" unset HAVE_SZLIB
-fi
-
-done
-
 
     if test -n "$szlib_lib"; then
       LDFLAGS="$LDFLAGS -L$szlib_lib"
       AM_LDFLAGS="$AM_LDFLAGS -L$szlib_lib"
     fi
 
-    if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
+    if test "x$HAVE_SZLIB" = "xyes"; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for SZ_BufftoBuffCompress in -lsz" >&5
 $as_echo_n "checking for SZ_BufftoBuffCompress in -lsz... " >&6; }
 if ${ac_cv_lib_sz_SZ_BufftoBuffCompress+:} false; then :
@@ -25755,9 +25741,25 @@ else
   CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SZLIB
 fi
 
-      if test -z "$HAVE_SZLIB"; then
+      if test -n "$HAVE_SZLIB"; then
+        for ac_header in szlib.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "szlib.h" "ac_cv_header_szlib_h" "$ac_includes_default"
+if test "x$ac_cv_header_szlib_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SZLIB_H 1
+_ACEOF
+ HAVE_SZLIB_H="yes"
+else
+  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS" unset HAVE_SZLIB
+fi
+
+done
+
+      else
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using SZ_BufftoBuffCompress from libsz in $szlib_lib failed.  Szip not enabled." >&5
 $as_echo "Using SZ_BufftoBuffCompress from libsz in $szlib_lib failed.  Szip not enabled." >&6; }
+        HAVE_SZLIB_H="no"
       fi
     fi
 
