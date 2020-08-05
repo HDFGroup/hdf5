@@ -461,6 +461,10 @@ done:
  *
  * Programmer:  John Mainzer, 8/10/15
  *
+ * Changes:     Updated sanity checks for possibility that the slist 
+ *              is disabled.
+ *                                            JRM -- 5/17/20
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -700,9 +704,14 @@ H5C__deserialize_prefetched_entry(H5F_t *f, H5C_t *cache_ptr,
      *     and H5C__FLUSH_CLEAR_ONLY_FLAG flags set.
      */
     pf_entry_ptr->image_ptr = NULL;
-    if(pf_entry_ptr->is_dirty) {
-        HDassert(pf_entry_ptr->in_slist);
+
+    if ( pf_entry_ptr->is_dirty ) {
+
+        HDassert(((cache_ptr->slist_enabled) && (pf_entry_ptr->in_slist)) || \
+                 ((!cache_ptr->slist_enabled) && (!pf_entry_ptr->in_slist)));
+
         flush_flags |= H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG;
+
     } /* end if */
 
     if(H5C__flush_single_entry(f, pf_entry_ptr, flush_flags) < 0)
