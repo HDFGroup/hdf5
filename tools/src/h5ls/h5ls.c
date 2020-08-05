@@ -2966,33 +2966,8 @@ main(int argc, const char *argv[])
         }
     }
 
-    if (preferred_driver) {
-        h5tools_vfd_info_t vfd_info;
-
-        vfd_info.info       = NULL;
-        vfd_info.name       = preferred_driver;
-
-        if (!HDstrcmp(preferred_driver, drivernames[ROS3_VFD_IDX])) {
-#ifdef H5_HAVE_ROS3_VFD
-            vfd_info.info = (void *)&ros3_fa;
-#else
-            HDfprintf(rawerrorstream, "Error: Read-Only S3 VFD is not enabled\n\n");
-            leave(EXIT_FAILURE);
-#endif
-        }
-        else if (!HDstrcmp(preferred_driver, drivernames[HDFS_VFD_IDX])) {
-#ifdef H5_HAVE_LIBHDFS
-            vfd_info.info = (void *)&hdfs_fa;
-#else
-            HDfprintf(rawerrorstream, "Error: The HDFS VFD is not enabled\n\n");
-            leave(EXIT_FAILURE);
-#endif
-        }
-
-        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info)) < 0) {
-            HDfprintf(rawerrorstream, "Error: Unable to create FAPL for file access\n\n");
-            leave(EXIT_FAILURE);
-        }
+    if (vfd_swmr_poll_g) {
+        preferred_driver = "swmr";
     }
 
     /* Each remaining argument is an hdf5 file followed by an optional slash
@@ -3014,15 +2989,41 @@ main(int argc, const char *argv[])
         symlink_trav_t symlink_list;
         size_t u;
 
-        if (vfd_swmr_poll_g) {
-            preferred_driver = "swmr";
-        }
-
         fname = HDstrdup(argv[argno++]);
         oname = NULL;
         file_id = H5I_INVALID_HID;
 
         while (fname && *fname) {
+            if (preferred_driver) {
+                h5tools_vfd_info_t vfd_info;
+
+                vfd_info.info       = NULL;
+                vfd_info.name       = preferred_driver;
+                vfd_info.fname      = fname;
+
+                if (!HDstrcmp(preferred_driver, drivernames[ROS3_VFD_IDX])) {
+#ifdef H5_HAVE_ROS3_VFD
+                    vfd_info.info = (void *)&ros3_fa;
+#else
+                    HDfprintf(rawerrorstream, "Error: Read-Only S3 VFD is not enabled\n\n");
+                    leave(EXIT_FAILURE);
+#endif
+                }
+                else if (!HDstrcmp(preferred_driver, drivernames[HDFS_VFD_IDX])) {
+#ifdef H5_HAVE_LIBHDFS
+                    vfd_info.info = (void *)&hdfs_fa;
+#else
+                    HDfprintf(rawerrorstream, "Error: The HDFS VFD is not enabled\n\n");
+                    leave(EXIT_FAILURE);
+#endif
+                }
+
+                if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info)) < 0) {
+                    HDfprintf(rawerrorstream, "Error: Unable to create FAPL for file access\n\n");
+                    leave(EXIT_FAILURE);
+                }
+            }
+
             file_id = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id,
                     (fapl_id == H5P_DEFAULT) ? FALSE : TRUE, drivername, sizeof drivername);
 
@@ -3145,6 +3146,13 @@ main(int argc, const char *argv[])
         /* if no-dangling-links option specified and dangling link found */
         if (no_dangling_link_g && iter.symlink_list->dangle_link)
             err_exit = 1;
+        if (fapl_id != H5P_DEFAULT) {
+            if (0 < H5Pclose(fapl_id)) {
+                HDfprintf(rawerrorstream, "Error: Unable to set close fapl entry\n\n");
+                leave(EXIT_FAILURE);
+            }
+            fapl_id = H5P_DEFAULT;
+        }
     } /* end while */
 
     if (fapl_id != H5P_DEFAULT) {
