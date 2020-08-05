@@ -676,7 +676,7 @@ done:
  *
  * \brief Gets the bounding box containing the current selection
  *
- * \space_id
+ * \space_id{spaceid}
  * \param[out] start  Starting coordinates of the bounding box 
  * \param[out] end    Ending coordinates of the bounding box, i.e., the 
  *                    coordinates of the diagonally opposite corner
@@ -687,15 +687,16 @@ done:
  *          box containing the current selection and places them into 
  *          user-supplied buffers.
  *
- *          The start and end buffers must be large enough to hold the 
- *          dataspace rank number of coordinates.
+ *          The \p start and \p end buffers must be large enough to hold 
+ *          the dataspace rank number of coordinates.
  *
  *          The bounding box exactly contains the selection. I.e., if a 
  *          2-dimensional element selection is currently defined as containing 
  *          the points (4,5), (6,8), and (10,7), then the bounding box 
  *          will be (4, 5), (10, 8).
  *
- *          The bounding box calculation includes the current offset of the selection within the dataspace extent.
+ *          The bounding box calculation includes the current offset of the 
+ *          selection within the dataspace extent.
  *
  *          Calling this function on a \a none selection will fail.
  *
