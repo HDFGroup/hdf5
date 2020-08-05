@@ -43,6 +43,7 @@ $Source = "";
                "H5D_space_status_t"         => "Ds",
                "H5D_vds_view_t"             => "Dv",
                "H5FD_mpio_xfer_t"           => "Dt",
+               "H5FD_splitter_vfd_config_t" => "Dr",
                "herr_t"                     => "e",
                "H5E_direction_t"            => "Ed",
                "H5E_error_t"                => "Ee",
@@ -159,6 +160,7 @@ $Source = "";
                "H5FD_ros3_fapl_t"           => "x",
                "H5FD_hdfs_fapl_t"           => "x",
                "H5FD_file_image_callbacks_t" => "x",
+               "H5FD_mirror_fapl_t"         => "x",
                "H5G_iterate_t"              => "x",
                "H5G_info_t"                 => "x",
                "H5I_free_t"                 => "x",
@@ -240,7 +242,11 @@ sub argstring ($$$) {
   # certain type qualifiers, and indirection.
   $atype =~ s/^\bconst\b//;
   $atype =~ s/\bH5_ATTR_UNUSED\b//g;
+  $atype =~ s/\bH5_ATTR_DEPRECATED_USED\b//g;
   $atype =~ s/\bH5_ATTR_NDEBUG_UNUSED\b//g;
+  $atype =~ s/\bH5_ATTR_DEBUG_API_USED\b//g;
+  $atype =~ s/\bH5_ATTR_PARALLEL_UNUSED\b//g;
+  $atype =~ s/\bH5_ATTR_PARALLEL_USED\b//g;
   $atype =~ s/\s+/ /g;
   $ptr = length $1 if  $atype =~ s/(\*+)//;
   $atype =~ s/^\s+//;

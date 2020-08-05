@@ -273,7 +273,7 @@ H5VL_term_package(void)
         else {
             if(H5I_nmembers(H5I_VOL) > 0) {
                 /* Unregister all VOL connectors */
-                (void)H5I_clear_type(H5I_VOL, FALSE, FALSE);
+                (void)H5I_clear_type(H5I_VOL, TRUE, FALSE);
                 n++;
             } /* end if */
             else {
@@ -318,7 +318,7 @@ H5VL__free_cls(H5VL_class_t *cls)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "VOL connector did not terminate cleanly")
 
     /* Release the class */
-    H5MM_xfree((void *)cls->name);      /* Casting away const OK -QAK */
+    H5MM_xfree_const(cls->name);
     H5FL_FREE(H5VL_class_t, cls);
 
 done:
@@ -682,14 +682,14 @@ H5VL_conn_free(const H5VL_connector_prop_t *connector_prop)
         if(connector_prop->connector_id > 0) {
             if(connector_prop->connector_info)
                 /* Free the connector info */
-                if(H5VL_free_connector_info(connector_prop->connector_id, (void *)connector_prop->connector_info) < 0)        /* Casting away const OK - QAK */
+                if(H5VL_free_connector_info(connector_prop->connector_id, connector_prop->connector_info) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to release VOL connector info object")
 
             /* Decrement reference count for connector ID */
             if(H5I_dec_ref(connector_prop->connector_id) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "can't decrement reference count for connector ID")
-        } /* end if */
-    } /* end if */
+        }
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1144,7 +1144,7 @@ H5VL_register_connector(const void *_cls, hbool_t app_ref, hid_t vipl_id)
 done:
     if(ret_value < 0 && saved) {
         if(saved->name)
-            H5MM_xfree((void *)(saved->name));  /* Casting away const OK -QAK */
+            H5MM_xfree_const(saved->name);
 
         H5FL_FREE(H5VL_class_t, saved);
     } /* end if */

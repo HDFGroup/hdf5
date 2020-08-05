@@ -25,11 +25,16 @@ const char *FILENAME[] = {
     NULL
 };
 
-#define NX	100		/* USE AN EVEN NUMBER!*/
-#define NY	100		/* USE AN EVEN NUMBER!*/
+#define N1X     100         /* USE AN EVEN NUMBER! */
+#define N1Y     100         /* USE AN EVEN NUMBER! */
+#define N2X     (N1X / 2)
+#define N2Y     (N1Y / 2)
 
 /* Data buffers */
-static int			buf1[NY][NX], buf2[NX / 2][NY / 2];
+static int  **buf1      = NULL;
+static int  *buf1_data  = NULL;
+static int  **buf2      = NULL;
+static int  *buf2_data  = NULL;
 
 
 /*-------------------------------------------------------------------------
@@ -49,8 +54,8 @@ static int
 write_data(const char *msg, hid_t file, const char *name, hid_t cparms, hid_t mem_space)
 {
     hid_t			dataset, file_space, half_space;
-    static const hsize_t 	dims[2] = {NX, NY};
-    static const hsize_t 	half_dims[2] = {NX / 2, NY / 2};
+    static const hsize_t 	dims[2] = {N1X, N1Y};
+    static const hsize_t 	half_dims[2] = {N2X, N2Y};
     hsize_t		        size[2];
     hsize_t		        max_size[2] = {0, 0};
     hsize_t			offset[2];
@@ -65,11 +70,11 @@ write_data(const char *msg, hid_t file, const char *name, hid_t cparms, hid_t me
     for(i = 0; i < 5; i++)
         for(j = 0; j < 5; j++) {
 
-	    /* Extend the dataset */
-	    offset[0] = (hsize_t)(i * NX);
-	    offset[1] = (hsize_t)(j * NY);
-	    size[0] = offset[0] + NX;
-	    size[1] = offset[1] + NY;
+            /* Extend the dataset */
+            offset[0] = (hsize_t)(i * N1X);
+            offset[1] = (hsize_t)(j * N1Y);
+            size[0] = offset[0] + N1X;
+            size[1] = offset[1] + N1Y;
             if(size[0] > max_size[0] || size[1] > max_size[1]) {
                 if(size[0] > max_size[0])
                     max_size[0] = size[0];
@@ -82,8 +87,8 @@ write_data(const char *msg, hid_t file, const char *name, hid_t cparms, hid_t me
             if((file_space = H5Dget_space(dataset)) < 0) TEST_ERROR;
             if(H5Sselect_hyperslab(file_space, H5S_SELECT_SET, offset, NULL, dims, NULL) < 0) TEST_ERROR;
 
-	    /* Write to the hyperslab */
-	    if(H5Dwrite(dataset, H5T_NATIVE_INT, mem_space, file_space, H5P_DEFAULT, buf1) < 0) TEST_ERROR;
+            /* Write to the hyperslab */
+            if(H5Dwrite(dataset, H5T_NATIVE_INT, mem_space, file_space, H5P_DEFAULT, buf1_data) < 0) TEST_ERROR;
             if(H5Sclose(file_space) < 0) TEST_ERROR;
         } /* end for */
 
@@ -93,24 +98,24 @@ write_data(const char *msg, hid_t file, const char *name, hid_t cparms, hid_t me
     for(i = 0; i < 10; i++) {
         for(j = 0; j < 10; j++) {
 
-	    /* Select a hyperslab */
-	    offset[0] = (hsize_t)(i * (NX / 2));
-	    offset[1] = (hsize_t)(j * (NY / 2));
-	    if(H5Sselect_hyperslab(file_space, H5S_SELECT_SET, offset, NULL, half_dims, NULL) < 0) TEST_ERROR;
+            /* Select a hyperslab */
+            offset[0] = (hsize_t)(i * N2X);
+            offset[1] = (hsize_t)(j * N2Y);
+            if(H5Sselect_hyperslab(file_space, H5S_SELECT_SET, offset, NULL, half_dims, NULL) < 0) TEST_ERROR;
 
-	    /* Read */
-	    if(H5Dread(dataset, H5T_NATIVE_INT, half_space, file_space, H5P_DEFAULT, buf2) < 0) TEST_ERROR;
+            /* Read */
+            if(H5Dread(dataset, H5T_NATIVE_INT, half_space, file_space, H5P_DEFAULT, buf2_data) < 0) TEST_ERROR;
 
-	    /* Compare */
-	    for(k = 0; k < (NX / 2); k++)
-		for(m = 0; m < (NY / 2); m++)
-		    if(buf2[k][m] != buf1[(i % 2) * (NX / 2) + k][(j % 2) * (NY / 2) + m]) {
-			HDprintf("    i=%d, j=%d, k=%d, m=%d\n", i, j, k, m);
-			HDprintf("    buf2[%d][%d]=%d\n", k, m, buf2[k][m]);
-			HDprintf("    buf1[%d][%d]=%d\n", (i % 2) * (NX / 2) + k, (j % 2) * (NY / 2) + m, buf1[(i % 2) * (NX / 2) + k][(j % 2) * (NY / 2) + m]);
-			TEST_ERROR;
-		    } /* end if */
-	} /* end for */
+            /* Compare */
+            for(k = 0; k < N2X; k++)
+                for(m = 0; m < N2Y; m++)
+                    if(buf2[k][m] != buf1[(i % 2) * N2X + k][(j % 2) * N2Y + m]) {
+                        HDprintf("    i=%d, j=%d, k=%d, m=%d\n", i, j, k, m);
+                        HDprintf("    buf2[%d][%d]=%d\n", k, m, buf2[k][m]);
+                        HDprintf("    buf1[%d][%d]=%d\n", (i % 2) * N2X + k, (j % 2) * N2Y + m, buf1[(i % 2) * N2X + k][(j % 2) * N2Y + m]);
+                        TEST_ERROR;
+                    } /* end if */
+        } /* end for */
     } /* end for */
 
     /* Cleanup */
@@ -145,8 +150,8 @@ static int
 write_data_deprec(const char *msg, hid_t file, const char *name, hid_t cparms, hid_t mem_space)
 {
     hid_t			dataset, file_space, half_space;
-    static const hsize_t 	dims[2] = {NX, NY};
-    static const hsize_t 	half_dims[2] = {NX / 2, NY / 2};
+    static const hsize_t 	dims[2] = {N1X, N1Y};
+    static const hsize_t 	half_dims[2] = {N2X, N2Y};
     static hsize_t		size[2];
     hsize_t			offset[2];
     int				i, j, k, m;
@@ -160,19 +165,19 @@ write_data_deprec(const char *msg, hid_t file, const char *name, hid_t cparms, h
     for(i = 0; i < 5; i++)
         for(j = 0; j < 5; j++) {
 
-	    /* Extend the dataset */
-	    offset[0] = (hsize_t)(i * NX);
-	    offset[1] = (hsize_t)(j * NY);
-	    size[0] = offset[0] + NX;
-	    size[1] = offset[1] + NY;
-	    if(H5Dextend(dataset, size) < 0) TEST_ERROR;
+            /* Extend the dataset */
+            offset[0] = (hsize_t)(i * N1X);
+            offset[1] = (hsize_t)(j * N1Y);
+            size[0] = offset[0] + N1X;
+            size[1] = offset[1] + N1Y;
+            if(H5Dextend(dataset, size) < 0) TEST_ERROR;
 
             /* Select a hyperslab */
             if((file_space = H5Dget_space(dataset)) < 0) TEST_ERROR;
             if(H5Sselect_hyperslab(file_space, H5S_SELECT_SET, offset, NULL, dims, NULL) < 0) TEST_ERROR;
 
-	    /* Write to the hyperslab */
-	    if(H5Dwrite(dataset, H5T_NATIVE_INT, mem_space, file_space, H5P_DEFAULT, buf1) < 0) TEST_ERROR;
+            /* Write to the hyperslab */
+            if(H5Dwrite(dataset, H5T_NATIVE_INT, mem_space, file_space, H5P_DEFAULT, buf1_data) < 0) TEST_ERROR;
             if(H5Sclose(file_space) < 0) TEST_ERROR;
         } /* end for */
 
@@ -182,24 +187,24 @@ write_data_deprec(const char *msg, hid_t file, const char *name, hid_t cparms, h
     for(i = 0; i < 10; i++) {
         for(j = 0; j < 10; j++) {
 
-	    /* Select a hyperslab */
-	    offset[0] = (hsize_t)(i * (NX / 2));
-	    offset[1] = (hsize_t)(j * (NY / 2));
-	    if(H5Sselect_hyperslab(file_space, H5S_SELECT_SET, offset, NULL, half_dims, NULL) < 0) TEST_ERROR;
+            /* Select a hyperslab */
+            offset[0] = (hsize_t)(i * N2X);
+            offset[1] = (hsize_t)(j * N2Y);
+            if(H5Sselect_hyperslab(file_space, H5S_SELECT_SET, offset, NULL, half_dims, NULL) < 0) TEST_ERROR;
 
-	    /* Read */
-	    if(H5Dread(dataset, H5T_NATIVE_INT, half_space, file_space, H5P_DEFAULT, buf2) < 0) TEST_ERROR;
+            /* Read */
+            if(H5Dread(dataset, H5T_NATIVE_INT, half_space, file_space, H5P_DEFAULT, buf2_data) < 0) TEST_ERROR;
 
-	    /* Compare */
-	    for(k = 0; k < (NX / 2); k++)
-		for(m = 0; m < (NY / 2); m++)
-		    if(buf2[k][m] != buf1[(i % 2) * (NX / 2) + k][(j % 2) * (NY / 2) + m]) {
-			HDprintf("    i=%d, j=%d, k=%d, m=%d\n", i, j, k, m);
-			HDprintf("    buf2[%d][%d]=%d\n", k, m, buf2[k][m]);
-			HDprintf("    buf1[%d][%d]=%d\n", (i % 2) * (NX / 2) + k, (j % 2) * (NY / 2) + m, buf1[(i % 2) * (NX / 2) + k][(j % 2) * (NY / 2) + m]);
-			TEST_ERROR;
-		    } /* end if */
-	} /* end for */
+            /* Compare */
+            for(k = 0; k < N2X; k++)
+                for(m = 0; m < N2Y; m++)
+                    if(buf2[k][m] != buf1[(i % 2) * N2X + k][(j % 2) * N2Y + m]) {
+                        HDprintf("    i=%d, j=%d, k=%d, m=%d\n", i, j, k, m);
+                        HDprintf("    buf2[%d][%d]=%d\n", k, m, buf2[k][m]);
+                        HDprintf("    buf1[%d][%d]=%d\n", (i % 2) * N2X + k, (j % 2) * N2Y + m, buf1[(i % 2) * N2X + k][(j % 2) * N2Y + m]);
+                        TEST_ERROR;
+                    } /* end if */
+        } /* end for */
     } /* end for */
 
 
@@ -235,8 +240,8 @@ main (void)
     hid_t			file, mem_space, cparms;
     hid_t			fapl;
     int		nerrors = 0;
-    static const hsize_t	dims[2] = {NX, NY};
-    static const hsize_t 	chunk_dims[2] = {NX/2, NY/2};
+    static const hsize_t	dims[2] = {N1X, N1Y};
+    static const hsize_t 	chunk_dims[2] = {N2X, N2Y};
     static hsize_t		maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
     char			filename[1024];
     int				i, j;
@@ -245,9 +250,23 @@ main (void)
     fapl = h5_fileaccess();
 
     /* Initialize buffer and space */
-    for(i = 0; i < NX; i++)
-        for(j = 0; j < NY; j++)
-            buf1[i][j] = i * NY + j;
+    if(NULL == (buf1_data = (int *)HDcalloc(N1X * N1Y, sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (buf1 = (int **)HDcalloc(N1X, sizeof(buf1_data))))
+        TEST_ERROR;
+    for (i = 0; i < N1X; i++)
+        buf1[i] = buf1_data + (i * N1Y);
+
+    if(NULL == (buf2_data = (int *)HDcalloc(N2X * N2Y, sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (buf2 = (int **)HDcalloc(N2X, sizeof(buf2_data))))
+        TEST_ERROR;
+    for (i = 0; i < N2X; i++)
+        buf2[i] = buf2_data + (i * N2Y);
+
+    for(i = 0; i < N1X; i++)
+        for(j = 0; j < N1Y; j++)
+            buf1[i][j] = i * N1Y + j;
 
     if((mem_space = H5Screate_simple(2, dims, maxdims)) < 0) TEST_ERROR;
 
@@ -287,9 +306,20 @@ main (void)
     HDprintf("All extend tests passed.\n");
     h5_cleanup(FILENAME, fapl);
 
+    HDfree(buf1);
+    HDfree(buf1_data);
+    HDfree(buf2);
+    HDfree(buf2_data);
+
     HDexit(EXIT_SUCCESS);
 
 error:
+
+    HDfree(buf1);
+    HDfree(buf1_data);
+    HDfree(buf2);
+    HDfree(buf2_data);
+
     HDprintf("*** One or more extend tests failed ***\n");
     HDexit(EXIT_FAILURE);
 } /* end main() */

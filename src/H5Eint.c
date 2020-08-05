@@ -33,7 +33,6 @@
 /* Headers */
 /***********/
 #include "H5private.h"          /* Generic Functions                        */
-#include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Epkg.h"             /* Error handling                           */
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5MMprivate.h"        /* Memory management                        */
@@ -576,7 +575,7 @@ H5E__walk(const H5E_t *estack, H5E_direction_t direction, const H5E_walk_op_t *o
                     ret_value = (op->u.func2)((unsigned)(estack->nused - (size_t)(i + 1)), estack->slot + i, client_data);
             } /* end else */
 
-            if(ret_value  < 0)
+            if(ret_value < 0)
                 HERROR(H5E_ERROR, H5E_CANTLIST, "can't walk error stack");
         } /* end if */
     } /* end else */
@@ -880,12 +879,12 @@ H5E__clear_entries(H5E_t *estack, size_t nentries)
 
         /* Release strings */
         if(error->func_name)
-            error->func_name = (const char *) H5MM_xfree((void *)error->func_name);        /* Casting away const OK - QAK */
+            error->func_name = (const char *) H5MM_xfree_const(error->func_name);
         if(error->file_name)
-            error->file_name = (const char *) H5MM_xfree((void *)error->file_name);        /* Casting away const OK - QAK */
+            error->file_name = (const char *) H5MM_xfree_const(error->file_name);
         if(error->desc)
-            error->desc = (const char *) H5MM_xfree((void *)error->desc);     /* Casting away const OK - QAK */
-    } /* end for */
+            error->desc = (const char *) H5MM_xfree_const(error->desc);
+    }
 
     /* Decrement number of errors on stack */
     estack->nused -= u;

@@ -26,7 +26,6 @@
 /* Turn off suggest const & malloc attribute warnings in gcc */
 #if defined __GNUC__ && 402 <= __GNUC__ * 100 + __GNUC_MINOR__
 #pragma GCC diagnostic ignored "-Wsuggest-attribute=const"
-#pragma GCC diagnostic ignored "-Wsuggest-attribute=malloc"
 #endif 
 
 int my_yyinput(char *, int);

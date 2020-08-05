@@ -162,7 +162,7 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5
     else
         string_dataformat.line_ncols = h5tools_nCols;
 
-    string_dataformat.do_escape = display_escape;
+    string_dataformat.do_escape = dump_opts.display_escape;
     outputformat = &string_dataformat;
 
     /* Build the object's path name */
@@ -578,7 +578,7 @@ int
 xml_name_to_XID(hid_t loc_id, const char *str, char *outstr, int outlen, int gen)
 {
     H5O_token_t obj_token;
-    char *obj_addr_str = NULL;
+    char *obj_tok_str = NULL;
     int lookup_ret;
 
     if (outlen < 22) return 1;
@@ -591,9 +591,9 @@ xml_name_to_XID(hid_t loc_id, const char *str, char *outstr, int outlen, int gen
                 if (gen) {
                     ref_path_table_gen_fake(str, &obj_token);
 
-                    H5Otoken_to_str(loc_id, &obj_token, &obj_addr_str);
-                    HDsprintf(outstr, "xid_%s", obj_addr_str);
-                    H5free_memory(obj_addr_str);
+                    H5Otoken_to_str(loc_id, &obj_token, &obj_tok_str);
+                    HDsprintf(outstr, "xid_%s", obj_tok_str);
+                    H5free_memory(obj_tok_str);
 
                     return 0;
                 }
@@ -606,9 +606,9 @@ xml_name_to_XID(hid_t loc_id, const char *str, char *outstr, int outlen, int gen
             if (gen) {
                 ref_path_table_gen_fake(str, &obj_token);
 
-                H5Otoken_to_str(loc_id, &obj_token, &obj_addr_str);
-                HDsprintf(outstr, "xid_%s", obj_addr_str);
-                H5free_memory(obj_addr_str);
+                H5Otoken_to_str(loc_id, &obj_token, &obj_tok_str);
+                HDsprintf(outstr, "xid_%s", obj_tok_str);
+                H5free_memory(obj_tok_str);
 
                 return 0;
             }
@@ -618,9 +618,9 @@ xml_name_to_XID(hid_t loc_id, const char *str, char *outstr, int outlen, int gen
         }
     }
 
-    H5Otoken_to_str(loc_id, &obj_token, &obj_addr_str);
-    HDsprintf(outstr, "xid_%s", obj_addr_str);
-    H5free_memory(obj_addr_str);
+    H5Otoken_to_str(loc_id, &obj_token, &obj_tok_str);
+    HDsprintf(outstr, "xid_%s", obj_tok_str);
+    H5free_memory(obj_tok_str);
 
     return 0;
 }
@@ -738,9 +738,9 @@ xml_escape_the_string(const char *str, int slen)
     size_t      extra;
     size_t      len;
     size_t      i;
-    const char *cp;
-    char       *ncp;
-    char       *rcp;
+    const char *cp = NULL;
+    char       *ncp = NULL;
+    char       *rcp = NULL;
     size_t      ncp_len;
 
     if (!str)
@@ -783,29 +783,31 @@ xml_escape_the_string(const char *str, int slen)
 
         if (*cp == '\\') {
             *ncp++ = '\\';
+            ncp_len--;
             *ncp = *cp;
             esc_len = 1;
         }
         else if (*cp == '\"') {
             *ncp++ = '\\';
+            ncp_len--;
             *ncp = *cp;
             esc_len = 1;
         }
         else if (*cp == '\'') {
+            HDstrncpy(ncp, apos, ncp_len);
             esc_len = HDstrlen(apos);
-            HDstrncpy(ncp, apos, esc_len);
         }
         else if (*cp == '<') {
+            HDstrncpy(ncp, lt, ncp_len);
             esc_len = HDstrlen(lt);
-            HDstrncpy(ncp, lt, esc_len);
         }
         else if (*cp == '>') {
+            HDstrncpy(ncp, gt, ncp_len);
             esc_len = HDstrlen(gt);
-            HDstrncpy(ncp, gt, esc_len);
         }
         else if (*cp == '&') {
+            HDstrncpy(ncp, amp, ncp_len);
             esc_len = HDstrlen(amp);
-            HDstrncpy(ncp, amp, esc_len);
         }
         else {
             *ncp = *cp;
@@ -886,7 +888,7 @@ xml_print_datatype(hid_t type, unsigned in_group)
     else
         string_dataformat.line_ncols = h5tools_nCols;
 
-    string_dataformat.do_escape = display_escape;
+    string_dataformat.do_escape = dump_opts.display_escape;
     outputformat = &string_dataformat;
 
     if(!in_group && H5Tcommitted(type) > 0) {
@@ -1536,7 +1538,7 @@ xml_dump_datatype(hid_t type)
     else
         string_dataformat.line_ncols = h5tools_nCols;
 
-    string_dataformat.do_escape = display_escape;
+    string_dataformat.do_escape = dump_opts.display_escape;
     outputformat = &string_dataformat;
 
     ctx.indent_level++;
@@ -1667,7 +1669,7 @@ xml_dump_dataspace(hid_t space)
     else
         string_dataformat.line_ncols = h5tools_nCols;
 
-    string_dataformat.do_escape = display_escape;
+    string_dataformat.do_escape = dump_opts.display_escape;
     outputformat = &string_dataformat;
 
     ctx.indent_level++;
@@ -1990,7 +1992,7 @@ xml_dump_attr(hid_t attr, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED
     else
         string_dataformat.line_ncols = h5tools_nCols;
 
-    string_dataformat.do_escape = display_escape;
+    string_dataformat.do_escape = dump_opts.display_escape;
     outputformat = &string_dataformat;
 
     ctx.need_prefix = TRUE;
@@ -2012,7 +2014,7 @@ xml_dump_attr(hid_t attr, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED
         ctx.indent_level++;
         dump_indent += COL;
 
-        if (display_attr_data && space_type != H5S_NULL) {
+        if (dump_opts.display_attr_data && space_type != H5S_NULL) {
             switch (H5Tget_class(type)) {
             case H5T_INTEGER:
             case H5T_FLOAT:
@@ -2291,7 +2293,7 @@ xml_dump_named_datatype(hid_t type, const char *name)
     else
         string_dataformat.line_ncols = h5tools_nCols;
 
-    string_dataformat.do_escape = display_escape;
+    string_dataformat.do_escape = dump_opts.display_escape;
     outputformat = &string_dataformat;
 
     dtxid = (char *)HDmalloc((size_t)100);
@@ -2504,7 +2506,7 @@ xml_dump_group(hid_t gid, const char *name)
     else
         string_dataformat.line_ncols = h5tools_nCols;
 
-    string_dataformat.do_escape = display_escape;
+    string_dataformat.do_escape = dump_opts.display_escape;
     outputformat = &string_dataformat;
 
     if(HDstrcmp(name, "/") == 0) {
@@ -2659,14 +2661,14 @@ xml_dump_group(hid_t gid, const char *name)
                     /* Very special case: dump unamed type in root group */
                     for(u = 0; u < type_table->nobjs; u++) {
                         if(!type_table->objs[u].recorded) {
-                            char *obj_addr_str = NULL;
+                            char *obj_tok_str = NULL;
 
                             dset = H5Dopen2(gid, type_table->objs[u].objname, H5P_DEFAULT);
                             type = H5Dget_type(dset);
 
-                            H5Otoken_to_str(dset, &type_table->objs[u].obj_token, &obj_addr_str);
-                            HDsprintf(type_name, "#%s", obj_addr_str);
-                            H5free_memory(obj_addr_str);
+                            H5Otoken_to_str(dset, &type_table->objs[u].obj_token, &obj_tok_str);
+                            HDsprintf(type_name, "#%s", obj_tok_str);
+                            H5free_memory(obj_tok_str);
 
                             dump_function_table->dump_named_datatype_function(type, type_name);
                             H5Tclose(type);
@@ -2747,14 +2749,14 @@ xml_dump_group(hid_t gid, const char *name)
             /* Very special case: dump unamed type in root group */
             for(u = 0; u < type_table->nobjs; u++) {
                 if(!type_table->objs[u].recorded) {
-                    char *obj_addr_str = NULL;
+                    char *obj_tok_str = NULL;
 
                     dset = H5Dopen2(gid, type_table->objs[u].objname, H5P_DEFAULT);
                     type = H5Dget_type(dset);
 
-                    H5Otoken_to_str(dset, &type_table->objs[u].obj_token, &obj_addr_str);
-                    HDsprintf(type_name, "#%s", obj_addr_str);
-                    H5free_memory(obj_addr_str);
+                    H5Otoken_to_str(dset, &type_table->objs[u].obj_token, &obj_tok_str);
+                    HDsprintf(type_name, "#%s", obj_tok_str);
+                    H5free_memory(obj_tok_str);
 
                     dump_function_table->dump_named_datatype_function(type, type_name);
                     H5Tclose(type);
@@ -2887,7 +2889,7 @@ xml_print_refs(hid_t did, int source)
     else
         string_dataformat.line_ncols = h5tools_nCols;
 
-    string_dataformat.do_escape = display_escape;
+    string_dataformat.do_escape = dump_opts.display_escape;
     outputformat = &string_dataformat;
 
     for (i = 0; i < (hsize_t)ssiz; i++) {
@@ -3037,7 +3039,7 @@ xml_print_strs(hid_t did, int source)
     else
         string_dataformat.line_ncols = h5tools_nCols;
 
-    string_dataformat.do_escape = display_escape;
+    string_dataformat.do_escape = dump_opts.display_escape;
     outputformat = &string_dataformat;
 
     for (i = 0; i < (hsize_t)ssiz; i++) {
@@ -3149,7 +3151,7 @@ check_filters(hid_t dcpl)
     else
         string_dataformat.line_ncols = h5tools_nCols;
 
-    string_dataformat.do_escape = display_escape;
+    string_dataformat.do_escape = dump_opts.display_escape;
     outputformat = &string_dataformat;
 
     nfilt = H5Pget_nfilters(dcpl);
@@ -3285,7 +3287,7 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
     else
         string_dataformat.line_ncols = h5tools_nCols;
 
-    string_dataformat.do_escape = display_escape;
+    string_dataformat.do_escape = dump_opts.display_escape;
     outputformat = &string_dataformat;
 
     ctx.indent_level++;
@@ -3625,7 +3627,7 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED *ss
     else
         string_dataformat.line_ncols = h5tools_nCols;
 
-    string_dataformat.do_escape = display_escape;
+    string_dataformat.do_escape = dump_opts.display_escape;
     outputformat = &string_dataformat;
 
     xml_name_to_XID(did, tmp, rstr, 100, 1);
@@ -3914,7 +3916,7 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED *ss
     dump_indent -= COL;
     tempi = H5Dget_storage_size(did);
 
-    if (display_data && (tempi > 0)) {
+    if (dump_opts.display_data && (tempi > 0)) {
         switch (H5Tget_class(type)) {
         case H5T_INTEGER:
         case H5T_FLOAT:
@@ -4170,7 +4172,7 @@ xml_print_enum(hid_t type)
     else
         string_dataformat.line_ncols = h5tools_nCols;
 
-    string_dataformat.do_escape = display_escape;
+    string_dataformat.do_escape = dump_opts.display_escape;
     outputformat = &string_dataformat;
 
     nmembs = (unsigned)H5Tget_nmembers(type);

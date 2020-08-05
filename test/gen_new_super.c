@@ -23,8 +23,7 @@
  *      put into the 'test' directory in the 1.4+ branch of the library.
  */
 
-#include <assert.h>
-#include "hdf5.h"
+#include "h5test.h"
 
 #define TESTFILE   "tsupern.h5"
 #define ISTORE_IK  64
@@ -50,7 +49,7 @@ main(void)
 {
     hid_t       file;           /* File IDs for old & new files */
     hid_t       fcpl;           /* File creation property list */
-    herr_t      ret;            /* Generic return value */
+    herr_t      H5_ATTR_NDEBUG_UNUSED ret;
 
     /* Create a file creation property list */
     fcpl = H5Pcreate(H5P_FILE_CREATE);

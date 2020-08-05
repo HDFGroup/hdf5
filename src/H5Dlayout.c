@@ -65,7 +65,7 @@ const unsigned H5O_layout_ver_bounds[] = {
 
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__layout_set_io_ops
  *
@@ -152,7 +152,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__layout_set_io_ops() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__layout_meta_size
  *
@@ -283,7 +283,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__layout_meta_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__layout_set_version
  *
@@ -321,7 +321,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__layout_set_version() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__layout_set_latest_indexing
  *
@@ -361,7 +361,7 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space,
         if(ndims > 0) {
             hsize_t max_dims[H5O_LAYOUT_NDIMS]; /* Maximum dimension sizes */
             hsize_t cur_dims[H5O_LAYOUT_NDIMS]; /* Current dimension sizes */
-            unsigned unlim_count = 0;              /* Count of unlimited max. dimensions */
+            unsigned unlim_count = 0;           /* Count of unlimited max. dimensions */
             hbool_t single = TRUE;              /* Fulfill single chunk indexing */
             unsigned u;                         /* Local index variable */
 
@@ -445,7 +445,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__layout_set_latest_indexing() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__layout_oh_create
  *
@@ -588,17 +588,17 @@ done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5D__layout_oh_create() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__layout_oh_read
  *
- * Purpose:    Read layout/pline/efl information for dataset
+ * Purpose:     Read layout/pline/efl information for dataset
  *
- * Return:    Success:    SUCCEED
- *        Failure:    FAIL
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
  *
- * Programmer:    Quincey Koziol
- *        Monday, July 27, 2009
+ * Programmer:  Quincey Koziol
+ *              Monday, July 27, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -682,17 +682,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__layout_oh_read() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__layout_oh_write
  *
- * Purpose:    Write layout information for dataset
+ * Purpose:     Write layout information for dataset
  *
- * Return:    Success:    SUCCEED
- *        Failure:    FAIL
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
  *
- * Programmer:    Quincey Koziol
- *        Monday, July 27, 2009
+ * Programmer:  Quincey Koziol
+ *              Monday, July 27, 2009
  *
  *-------------------------------------------------------------------------
  */

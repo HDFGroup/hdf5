@@ -59,7 +59,7 @@ H5_mpi_set_bigio_count(hsize_t new_count)
        bigio_count = new_count;
     }
     return orig_count;
-} /* end H5_mpio_set_bigio_count() */
+} /* end H5_mpi_set_bigio_count() */
 
 
 /*-------------------------------------------------------------------------

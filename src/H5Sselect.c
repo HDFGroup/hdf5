@@ -32,6 +32,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Spkg.h"		/* Dataspaces 				*/
 #include "H5VMprivate.h"	/* Vector and array functions		*/
 
@@ -144,8 +145,8 @@ H5S_select_offset(H5S_t *space, const hssize_t *offset)
 herr_t
 H5Soffset_simple(hid_t space_id, const hssize_t *offset)
 {
-    H5S_t *space;	        /* Dataspace to query */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5S_t *space;                   /* Dataspace to modify */
+    herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Hs", space_id, offset);
@@ -582,7 +583,7 @@ H5S_select_deserialize(H5S_t **space, const uint8_t **p)
 
         default:
             break;
-    } /* end switch */
+    }
 
     if(ret_value < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTLOAD, FAIL, "can't deserialize selection")
@@ -1170,7 +1171,7 @@ H5S_select_iter_init(H5S_sel_iter_t *sel_iter, const H5S_t *space,
     if(sel_iter->rank > 0) {
         H5MM_memcpy(sel_iter->dims, space->extent.size, sizeof(hsize_t) * space->extent.rank);
         H5MM_memcpy(sel_iter->sel_off, space->select.offset, sizeof(hsize_t) * space->extent.rank);
-    } /* end if */
+    }
 
     /* Save the element size */
     sel_iter->elmt_size = elmt_size;
@@ -2610,9 +2611,9 @@ H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
 {
     H5S_t *new_space = NULL;            /* New dataspace constructed */
     H5S_t *tmp_src_intersect_space = NULL; /* Temporary SIS converted from points->hyperslabs */
-    H5S_sel_iter_t ss_iter;             /* Selection iterator for src_space */
+    H5S_sel_iter_t *ss_iter = NULL;     /* Selection iterator for src_space */
     hbool_t ss_iter_init = FALSE;       /* Whether ss_iter has been initialized */
-    H5S_sel_iter_t ds_iter;             /* Selection iterator for dst_space */
+    H5S_sel_iter_t *ds_iter = NULL;     /* Selection iterator for dst_space */
     hbool_t ds_iter_init = FALSE;       /* Whether ds_iter has been initialized */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -2625,6 +2626,11 @@ H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     HDassert(new_space_ptr);
     HDassert(H5S_GET_SELECT_NPOINTS(src_space) == H5S_GET_SELECT_NPOINTS(dst_space));
     HDassert(H5S_GET_EXTENT_NDIMS(src_space) == H5S_GET_EXTENT_NDIMS(src_intersect_space));
+
+    if(NULL == (ss_iter = H5FL_CALLOC(H5S_sel_iter_t)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate selection iterator")
+    if(NULL == (ds_iter = H5FL_CALLOC(H5S_sel_iter_t)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate selection iterator")
 
     /* Create new space, using dst extent.  Start with "all" selection. */
     if(NULL == (new_space = H5S_create(H5S_SIMPLE)))
@@ -2726,20 +2732,20 @@ H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
                     HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
 
                 /* Initialize iterators */
-                if(H5S_select_iter_init(&ss_iter, src_space, 1, H5S_SEL_ITER_SHARE_WITH_DATASPACE) < 0)
+                if(H5S_select_iter_init(ss_iter, src_space, 1, H5S_SEL_ITER_SHARE_WITH_DATASPACE) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't initialize source space selection iterator")
                 ss_iter_init = TRUE;
-                if(H5S_select_iter_init(&ds_iter, dst_space, 1, H5S_SEL_ITER_SHARE_WITH_DATASPACE) < 0)
+                if(H5S_select_iter_init(ds_iter, dst_space, 1, H5S_SEL_ITER_SHARE_WITH_DATASPACE) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't initialize destination space selection iterator")
                 ds_iter_init = TRUE;
 
                 /* Iterate over points */
                 do {
-                    HDassert(ss_iter.elmt_left > 0);
-                    HDassert(ss_iter.elmt_left > 0);
+                    HDassert(ss_iter->elmt_left > 0);
+                    HDassert(ss_iter->elmt_left > 0);
 
                     /* Get SS coords */
-                    if(H5S_SELECT_ITER_COORDS(&ss_iter, coords) < 0)
+                    if(H5S_SELECT_ITER_COORDS(ss_iter, coords) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get source selection coordinates")
 
                     /* Check for intersection */
@@ -2749,7 +2755,7 @@ H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
                     /* Add point if it intersects */
                     if(intersect) {
                         /* Get DS coords */
-                        if(H5S_SELECT_ITER_COORDS(&ds_iter, coords) < 0)
+                        if(H5S_SELECT_ITER_COORDS(ds_iter, coords) < 0)
                             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get destination selection coordinates")
 
                         /* Add point to new_space */
@@ -2758,14 +2764,14 @@ H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
                     } /* end if */
 
                     /* Advance iterators */
-                    if(H5S_SELECT_ITER_NEXT(&ss_iter, 1) < 0)
+                    if(H5S_SELECT_ITER_NEXT(ss_iter, 1) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTNEXT, FAIL, "can't advacne source selection iterator")
-                    ss_iter.elmt_left--;
-                    if(H5S_SELECT_ITER_NEXT(&ds_iter, 1) < 0)
+                    ss_iter->elmt_left--;
+                    if(H5S_SELECT_ITER_NEXT(ds_iter, 1) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTNEXT, FAIL, "can't advacne destination selection iterator")
-                    ds_iter.elmt_left--;
-                } while(ss_iter.elmt_left > 0);
-                HDassert(H5S_SELECT_ITER_NELMTS(&ds_iter) == 0);
+                    ds_iter->elmt_left--;
+                } while(ss_iter->elmt_left > 0);
+                HDassert(H5S_SELECT_ITER_NELMTS(ds_iter) == 0);
             } /* end if */
             else {
                 HDassert(H5S_GET_SELECT_TYPE(src_space) != H5S_SEL_NONE);
@@ -2792,10 +2798,13 @@ done:
     /* General cleanup */
     if(tmp_src_intersect_space && H5S_close(tmp_src_intersect_space) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release temporary dataspace")
-    if(ss_iter_init && H5S_SELECT_ITER_RELEASE(&ss_iter) < 0)
+    if(ss_iter_init && H5S_SELECT_ITER_RELEASE(ss_iter) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release source selection iterator")
-    if(ds_iter_init && H5S_SELECT_ITER_RELEASE(&ds_iter) < 0)
+    if(ds_iter_init && H5S_SELECT_ITER_RELEASE(ds_iter) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release destination selection iterator")
+
+    ss_iter = H5FL_FREE(H5S_sel_iter_t, ss_iter);
+    ds_iter = H5FL_FREE(H5S_sel_iter_t, ds_iter);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_select_project_intersection() */

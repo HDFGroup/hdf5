@@ -33,11 +33,11 @@
 /***********/
 #include "H5private.h"          /* Generic Functions                    */
 #include "H5CXprivate.h"        /* API Contexts                         */
-#include "H5Dprivate.h"		/* Datasets				*/
+#include "H5Dprivate.h"         /* Datasets                             */
 #include "H5Eprivate.h"         /* Error handling                       */
 #include "H5FLprivate.h"        /* Free Lists                           */
 #include "H5Iprivate.h"         /* IDs                                  */
-#include "H5Lprivate.h"		/* Links		  		*/
+#include "H5Lprivate.h"         /* Links                                */
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Pprivate.h"         /* Property lists                       */
 
@@ -295,8 +295,8 @@ typedef struct H5CX_t {
     hbool_t nlinks_valid;       /* Whether number of soft / UD links to traverse is valid */
 
     /* Cached DCPL properties */
-    hbool_t   do_min_dset_ohdr;   /* Whether to minimize dataset object header */
-    hbool_t   do_min_dset_ohdr_valid;   /* Whether minimize dataset object header flag is valid */
+    hbool_t do_min_dset_ohdr;   /* Whether to minimize dataset object header */
+    hbool_t do_min_dset_ohdr_valid;   /* Whether minimize dataset object header flag is valid */
     uint8_t ohdr_flags;  /* Object header flags */
     hbool_t ohdr_flags_valid;  /* Whether the object headers flags are valid */
 
@@ -580,7 +580,6 @@ H5CX__init_package(void)
     /* Get number of soft / UD links to traverse */
     if(H5P_get(la_plist, H5L_ACS_NLINKS_NAME, &H5CX_def_lapl_cache.nlinks) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve number of soft / UD links to traverse")
-
 
     /* Reset the "default DCPL cache" information */
     HDmemset(&H5CX_def_dcpl_cache, 0, sizeof(H5CX_dcpl_cache_t));
@@ -1171,6 +1170,7 @@ H5CX_set_dcpl(hid_t dcpl_id)
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5CX_set_dcpl() */
 
+
 /*-------------------------------------------------------------------------
  * Function:    H5CX_set_libver_bounds
  *
@@ -2593,6 +2593,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_get_nlinks() */
 
+
 /*-------------------------------------------------------------------------
  * Function:    H5CX_get_libver_bounds
  *

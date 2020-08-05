@@ -27,7 +27,7 @@ set (CTEST_CUSTOM_WARNING_EXCEPTION
     "config.cmake.xlatefile.c"
     "warning.*unknown pragma"
     "warning.*unrecognized .pragma"
-    "note: expanded from macro"
+#    "note: expanded from macro"
     # HDDFFV-11074
     "This directive is not standard"
 )

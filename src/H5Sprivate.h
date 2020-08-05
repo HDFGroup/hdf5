@@ -183,6 +183,7 @@ typedef struct H5S_sel_iter_op_t {
 #define H5S_SELECT_ITER_GET_SEQ_LIST(ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN)  (H5S_select_iter_get_seq_list(ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN))
 #define H5S_SELECT_ITER_RELEASE(ITER)   (H5S_select_iter_release(ITER))
 #endif /* H5S_MODULE */
+
 /* Handle these callbacks in a special way, since they have prologs that need to be executed */
 #define H5S_SELECT_COPY(DST,SRC,SHARE)  (H5S_select_copy(DST,SRC,SHARE))
 #define H5S_SELECT_SHAPE_SAME(S1,S2)    (H5S_select_shape_same(S1,S2))

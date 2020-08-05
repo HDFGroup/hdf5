@@ -81,7 +81,7 @@ PROGRAM fortranlibtest
   CALL file_space("file_space",cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' File free space test', total_error)
 
-!     
+!
 !      '========================================='
 !      'Testing DATASET Interface                '
 !      '========================================='
@@ -97,7 +97,7 @@ PROGRAM fortranlibtest
   CALL test_userblock_offset(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Dataset offset with user block', total_error)
 
-!     
+!
 !      '========================================='
 !      'Testing DATASPACE Interface             '
 !      '========================================='
@@ -106,7 +106,7 @@ PROGRAM fortranlibtest
   CALL dataspace_basic_test(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Basic dataspace test', total_error)
 
-!     
+!
 !      '========================================='
 !      'Testing REFERENCE Interface              '
 !      '========================================='
@@ -119,7 +119,7 @@ PROGRAM fortranlibtest
   CALL refregtest(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Reference to dataset region test', total_error)
 
-!     
+!
 !      '========================================='
 !      'Testing selection functionalities        '
 !      '========================================='
@@ -148,8 +148,8 @@ PROGRAM fortranlibtest
   ret_total_error = 0
   CALL test_select_bounds(ret_total_error)
   CALL write_test_status(ret_total_error, ' Selection bounds test ', total_error)
-  
-!     
+
+!
 !      '========================================='
 !      'Testing DATATYPE interface               '
 !      '========================================='
@@ -169,7 +169,7 @@ PROGRAM fortranlibtest
   CALL test_derived_flt(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Derived float datatype test', total_error)
 
-!     
+!
 !      '========================================='
 !      'Testing PROPERTY interface               '
 !      '========================================='
@@ -186,7 +186,7 @@ PROGRAM fortranlibtest
   CALL test_chunk_cache (cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Dataset chunk cache configuration', total_error)
 
-!     
+!
 !      '========================================='
 !      'Testing ATTRIBUTE interface              '
 !      '========================================='
@@ -195,7 +195,7 @@ PROGRAM fortranlibtest
   CALL attribute_test(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Attribute test', total_error)
 
-!     
+!
 !      '========================================='
 !      'Testing IDENTIFIER interface             '
 !      '========================================='
@@ -217,7 +217,7 @@ PROGRAM fortranlibtest
      CALL write_test_status(ret_total_error, ' SZIP filter test', total_error)
   ENDIF
 
-!     
+!
 !      '========================================='
 !      'Testing GROUP interface                  '
 !      '========================================='
