@@ -1938,7 +1938,7 @@ done:
  *
  * \param[in] buf  Buffer for the data space object to be decoded
  *
- * \return \hid_t
+ * \return \hid_t{dataspace}
  *
  * \details Given an object description of a dataspace in binary in a 
  *          buffer, H5Sdecode() reconstructs the HDF5 data type object and 
@@ -2115,7 +2115,8 @@ done:
  *  
  * \space_id
  *
- * \return \hid_t
+ * \return Returns a dataspace class name if successful; 
+ *         otherwise #H5S_NO_CLASS (-1).
  *
  * \details H5Sget_simple_extent_type() determines the current class of a 
  *          dataspace \p space_id.
