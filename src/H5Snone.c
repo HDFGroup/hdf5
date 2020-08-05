@@ -703,7 +703,7 @@ H5S__none_bounds(const H5S_t H5_ATTR_UNUSED *space, hsize_t H5_ATTR_UNUSED *star
     HDassert(end);
 
     FUNC_LEAVE_NOAPI(FAIL)
-} /* end H5S_none_bounds() */
+} /* end H5S__none_bounds() */
 
 
 /*--------------------------------------------------------------------------

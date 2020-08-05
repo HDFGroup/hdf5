@@ -248,7 +248,7 @@ H5S__point_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5S_point_iter_block
+ * Function:    H5S__point_iter_block
  *
  * Purpose:     Retrieve the current block of iterator for current
  *              selection
@@ -2233,7 +2233,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5S_point_project_simple
+ * Function:    H5S__point_project_simple
  *
  * Purpose:     Projects a point selection onto/into a simple dataspace
  *              of a different rank
