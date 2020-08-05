@@ -15,7 +15,7 @@
  *
  * Created:		H5Ochunk.c
  *			Jul 13 2008
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Object header chunk routines.
  *
@@ -84,7 +84,6 @@ H5FL_DEFINE(H5O_chunk_proxy_t);
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jul 13 2008
  *
  *-------------------------------------------------------------------------
@@ -146,14 +145,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_chunk_protect
+ * Function:    H5O__chunk_protect
  *
  * Purpose:     Protect an object header chunk for modifications
  *
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jul 17 2008
  *
  *-------------------------------------------------------------------------
@@ -227,7 +225,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jul 17 2008
  *
  *-------------------------------------------------------------------------
@@ -278,7 +275,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		May  6 2010
  *
  *-------------------------------------------------------------------------
@@ -319,7 +315,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jul 13 2008
  *
  *-------------------------------------------------------------------------
@@ -370,7 +365,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jul 13 2008
  *
  *-------------------------------------------------------------------------
@@ -415,7 +409,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 13, 2008
  *
  *-------------------------------------------------------------------------

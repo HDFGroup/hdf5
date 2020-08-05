@@ -35,12 +35,14 @@ void                    tts_dcreate(void);
 void                    tts_error(void);
 void                    tts_cancel(void);
 void                    tts_acreate(void);
+void                    tts_attr_vlen(void);
 
 /* Prototypes for the cleanup routines */
 void                    cleanup_dcreate(void);
 void                    cleanup_error(void);
 void                    cleanup_cancel(void);
 void                    cleanup_acreate(void);
+void                    cleanup_attr_vlen(void);
 
 #endif /* H5_HAVE_THREADSAFE */
 #endif /* TTSAFE_H */

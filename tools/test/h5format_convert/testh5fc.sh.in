@@ -483,7 +483,7 @@ TOOLTEST_OUT h5fc_v_n_all.ddl h5fc_non_v3.h5 -v -n
 #
 #
 # h5format_convert -v h5fc_err_level.h5 (error encountered in converting the dataset)
-TOOLTEST_MASK_OUT h5fc_v_err.ddl h5fc_err_level.h5 -v --enable-error-stack
+TOOLTEST_MASK_OUT h5fc_v_err.ddl h5fc_err_level.h5 -v
 #
 #
 #
