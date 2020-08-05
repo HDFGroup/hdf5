@@ -2113,13 +2113,13 @@ done:
  *
  * \brief  Determines the current class of a dataspace 
  *  
- * \space_id
+ * \space_id{sid}
  *
  * \return Returns a dataspace class name if successful; 
  *         otherwise #H5S_NO_CLASS (-1).
  *
  * \details H5Sget_simple_extent_type() determines the current class of a 
- *          dataspace \p space_id.
+ *          dataspace \p sid.
  *
  * \version 1.4.0 Fortran subroutine was introduced.
  * \since 1.0.0
