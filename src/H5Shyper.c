@@ -10733,16 +10733,17 @@ done:
  * \brief Combine two hyperslab selections with an operation, returning a 
  *        dataspace with the resulting selection
  *
- * \space_id{space1}
+ * \space_id{space1_id}
  * \param[in] op  Selection operator
- * \space_id{space2}
+ * \space_id{space2_id}
  *
  * \return \hid_tv{dataspace}
  *
- * \details H5Scombine_select() combines two hyperslab selections \p space1 
- *          and \p space2 with an operation, returning a new dataspace with 
- *          the resulting selection. The dataspace extent from \p space1 is 
- *          copied for the dataspace extent of the newly created dataspace.
+ * \details H5Scombine_select() combines two hyperslab selections 
+ *          \p space1_id and \p space2_id with an operation, returning a 
+ *          new dataspace with the resulting selection. The dataspace extent 
+ *          from \p space1_id is copied for the dataspace extent of the 
+ *          newly created dataspace.
  *
  * \since 1.12.0
 */
@@ -10892,7 +10893,7 @@ done:
  * \param[in] op  Selection operator
  * \space_id{space2_id}
  *
- * \return \herrt_t
+ * \return \herr_t
  *
  * \details H5Smodify_select() refines an existing hyperslab selection 
  * \p space1_id with an operation \p op, using a second hyperslab 
@@ -10947,7 +10948,7 @@ H5Smodify_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspaces not same rank")
 
     /* Check that both dataspaces have the same offset */
-    /** Note that this is a tricky part of this function. It's
+    /* Note that this is a tricky part of this function. It's
      *  possible that two dataspaces have different "offset". If the
      *  space2 has smaller offset value than that of space1 in a
      *  dimension, then the span elements of this dimension in
@@ -12461,7 +12462,7 @@ done:
  * \param[out] count   Number of blocks in the regular hyperslab
  * \param[out] block   Size of a block in the regular hyperslab
  *
- * \return \herrt_t
+ * \return \herr_t
  *
  * \details H5Sget_regular_hyperslab() takes the dataspace identifier, 
  * \p spaceid, and retrieves the values of \p start, \p stride, \p count, 
