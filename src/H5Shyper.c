@@ -10153,91 +10153,91 @@ done:
  *
  * \return \herr_t
  *
- * \details H5Sselect_hyperslab() selects a hyperslab region to add to the 
- *          current selected region for the dataspace specified by 
+ * \details H5Sselect_hyperslab() selects a hyperslab region to add to the
+ *          current selected region for the dataspace specified by
  *          \p space_id.
  *
- *          The \p start, \p stride, \p count, and \p block arrays must be the 
- *          same size as the rank of the dataspace. For example, if the 
- *          dataspace is 4-dimensional, each of these parameters must be a 
+ *          The \p start, \p stride, \p count, and \p block arrays must be the
+ *          same size as the rank of the dataspace. For example, if the
+ *          dataspace is 4-dimensional, each of these parameters must be a
  *          1-dimensional array of size 4.
  *
- *          The selection operator \p op determines how the new selection 
- *          is to be combined with the already existing selection for the 
+ *          The selection operator \p op determines how the new selection
+ *          is to be combined with the already existing selection for the
  *          dataspace. The following operators are supported:
  *
  *          <table>
  *           <tr>
- *             <td>H5S_SELECT_SET</td>
- *             <td>Replaces the existing selection with the 
- *              parameters from this call. Overlapping blocks 
+ *             <td>#H5S_SELECT_SET</td>
+ *             <td>Replaces the existing selection with the
+ *              parameters from this call. Overlapping blocks
  *             are not supported with this operator.</td>
  *           </tr>
  *           <tr>
- *              <td>H5S_SELECT_OR</td>
+ *              <td>#H5S_SELECT_OR</td>
  *              <td>Adds the new selection to the existing selection.
  *              (Binary OR)</td>
  *           </tr>
  *           <tr>
- *             <td>H5S_SELECT_AND</td>
- *             <td>Retains only the overlapping portions of the 
- *                new selection and the existing selection.    
+ *             <td>#H5S_SELECT_AND</td>
+ *             <td>Retains only the overlapping portions of the
+ *                new selection and the existing selection.
  *               (Binary AND)</td>
  *          </tr>
- *          <tr> 
- *             <td>H5S_SELECT_XOR</td>
- *             <td>Retains only the elements that are members of 
- *                  the new selection or the existing selection, 
- *                  excluding elements that are members of both 
+ *          <tr>
+ *             <td>#H5S_SELECT_XOR</td>
+ *             <td>Retains only the elements that are members of
+ *                  the new selection or the existing selection,
+ *                  excluding elements that are members of both
  *                  selections. (Binary exclusive-OR, XOR)
  *                 </td>
  *          </tr>
  *          <tr>
- *             <td>H5S_SELECT_NOTB</td>
+ *             <td>#H5S_SELECT_NOTB</td>
  *             <td>Retains only elements of the existing selection
  *               that are not in the new selection.</td>
  *          </tr>
  *          <tr>
- *             <td>H5S_SELECT_NOTA</td>
+ *             <td>#H5S_SELECT_NOTA</td>
  *             <td>Retains only elements of the new selection that
  *              are not in the existing selection.</td>
  *          </tr>
  *          </table>
  *
- *          The \p start array specifies the offset of the starting element 
+ *          The \p start array specifies the offset of the starting element
  *          of the specified hyperslab.
  *
- *          The \p stride array chooses array locations from the dataspace with 
- *          each value in the \p stride array determining how many elements to 
- *          move in each dimension. Setting a value in the \p stride array to 
- *          \p 1 moves to each element in that dimension of the dataspace; 
- *          setting a value of \p 2 in allocation in the \p stride array moves 
- *          to every other element in that dimension of the dataspace. In 
- *          other words, the \p stride determines the number of elements to 
- *          move from the \p start location in each dimension. Stride values 
- *          of \p 0 are not allowed. If the \p stride parameter is NULL, a 
- *          contiguous hyperslab is selected (as if each value in the \p stride 
+ *          The \p stride array chooses array locations from the dataspace with
+ *          each value in the \p stride array determining how many elements to
+ *          move in each dimension. Setting a value in the \p stride array to
+ *          \p 1 moves to each element in that dimension of the dataspace;
+ *          setting a value of \p 2 in allocation in the \p stride array moves
+ *          to every other element in that dimension of the dataspace. In
+ *          other words, the \p stride determines the number of elements to
+ *          move from the \p start location in each dimension. Stride values
+ *          of \p 0 are not allowed. If the \p stride parameter is NULL, a
+ *          contiguous hyperslab is selected (as if each value in the \p stride
  *          array were set to \p 1).
  *
- *          The \p count array determines how many blocks to select from the 
+ *          The \p count array determines how many blocks to select from the
  *          dataspace, in each dimension.
  *
- *          The \p block array determines the size of the element block 
- *          selected from the dataspace. If the \p block parameter is set to 
- *          NULL, the block size defaults to a single element in each dimension 
+ *          The \p block array determines the size of the element block
+ *          selected from the dataspace. If the \p block parameter is set to
+ *          NULL, the block size defaults to a single element in each dimension
  *          (as if each value in the \p block array were set to \p 1).
  *
- *          For example, consider a 2-dimensional dataspace with hyperslab 
- *          selection settings as follows: the \p start offset is specified as 
- *          [1,1], \p stride is [4,4], \p count is [3,7], and \p block is [2,2]. 
- *          In C, these settings will specify a hyperslab consisting of 21 
- *          2x2 blocks of array elements starting with location (1,1) with the 
- *          selected blocks at locations (1,1), (5,1), (9,1), (1,5), (5,5), etc.; 
- *          in Fortran, they will specify a hyperslab consisting of 21 2x2 
- *          blocks of array elements starting with location (2,2) with the 
+ *          For example, consider a 2-dimensional dataspace with hyperslab
+ *          selection settings as follows: the \p start offset is specified as
+ *          [1,1], \p stride is [4,4], \p count is [3,7], and \p block is [2,2].
+ *          In C, these settings will specify a hyperslab consisting of 21
+ *          2x2 blocks of array elements starting with location (1,1) with the
+ *          selected blocks at locations (1,1), (5,1), (9,1), (1,5), (5,5), etc.;
+ *          in Fortran, they will specify a hyperslab consisting of 21 2x2
+ *          blocks of array elements starting with location (2,2) with the
  *          selected blocks at locations (2,2), (6,2), (10,2), (2,6), (6,6), etc.
  *
- *          Regions selected with this function call default to C order 
+ *          Regions selected with this function call default to C order
  *          iteration when I/O is performed.
  *
  * \version 1.4.0 Fortran subroutine introduced in this release.
@@ -12423,4 +12423,3 @@ H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[], hsize_t stride[],
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Sget_regular_hyperslab() */
-

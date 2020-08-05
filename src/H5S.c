@@ -36,7 +36,7 @@
 /* Local Macros */
 /****************/
 
-/* Version of dataspace encoding */
+/** Version of dataspace encoding */
 #define H5S_ENCODE_VERSION      0
 
 
@@ -63,13 +63,13 @@ static htri_t H5S__is_simple(const H5S_t *sdim);
 /* Package initialization variable */
 hbool_t H5_PKG_INIT_VAR = FALSE;
 
-/* Format version bounds for dataspace */
+/** Format version bounds for dataspace */
 const unsigned H5O_sdspace_ver_bounds[] = {
-    H5O_SDSPACE_VERSION_1,      /* H5F_LIBVER_EARLIEST */
-    H5O_SDSPACE_VERSION_2,      /* H5F_LIBVER_V18 */
-    H5O_SDSPACE_VERSION_2,      /* H5F_LIBVER_V110 */
-    H5O_SDSPACE_VERSION_2,      /* H5F_LIBVER_V112 */
-    H5O_SDSPACE_VERSION_LATEST  /* H5F_LIBVER_LATEST */
+    H5O_SDSPACE_VERSION_1,      /**> H5F_LIBVER_EARLIEST */
+    H5O_SDSPACE_VERSION_2,      /**> H5F_LIBVER_V18 */
+    H5O_SDSPACE_VERSION_2,      /**> H5F_LIBVER_V110 */
+    H5O_SDSPACE_VERSION_2,      /**> H5F_LIBVER_V112 */
+    H5O_SDSPACE_VERSION_LATEST  /**> H5F_LIBVER_LATEST */
 };
 
 /* Declare a free list to manage the H5S_extent_t struct */
@@ -372,34 +372,23 @@ done:
  *
  * \return \hid_tv{dataspace}
  *
- * \details H5Screate() creates a new dataspace of a particular type. Currently 
- *          supported types are as follows:
- *          <table>
- *            <tr>
- *              <td>H5S_SCALAR</td>
- *            </tr>
- *            <tr>
- *              <td>H5S_SIMPLE</td>
- *            </tr>
- *            <tr>
- *              <td>H5S_NULL</td>
- *            </tr>
- *          </table>
+ * \details H5Screate() creates a new dataspace of a particular type. Currently
+ *          supported types are #H5S_SCALAR, #H5S_SIMPLE, and #H5S_NULL.
  *
  *          Further dataspace types may be added later.
  *
- *          A scalar dataspace, H5S_SCALAR, has a single element, though that 
- *          element may be of a complex datatype, such as a compound or array 
- *          datatype. By convention, the rank of a scalar dataspace is always \p 0 
- *          (zero); think of it geometrically as a single, dimensionless point, 
+ *          A scalar dataspace, #H5S_SCALAR, has a single element, though that
+ *          element may be of a complex datatype, such as a compound or array
+ *          datatype. By convention, the rank of a scalar dataspace is always \p 0
+ *          (zero); think of it geometrically as a single, dimensionless point,
  *          though that point can be complex.
  *
- *          A simple dataspace, H5S_SIMPLE, consists of a regular array of elements.
+ *          A simple dataspace, #H5S_SIMPLE, consists of a regular array of elements.
  *
- *          A null dataspace, H5S_NULL, has no data elements.
+ *          A null dataspace, #H5S_NULL, has no data elements.
  *
- *          The dataspace identifier returned by this function can be released with 
- *          H5Sclose() so that resource leaks will not occur. 
+ *          The dataspace identifier returned by this function can be released with
+ *          H5Sclose() so that resource leaks will not occur.
  *
  * \version 1.4.0 Fortran subroutine introduced.
  * \since 1.0.0
@@ -535,8 +524,8 @@ done:
  *
  * \return \herr_t
  *
- * \details H5Sclose() releases a dataspace. Further access through the 
- *          dataspace identifier is illegal. Failure to release a dataspace with this 
+ * \details H5Sclose() releases a dataspace. Further access through the
+ *          dataspace identifier is illegal. Failure to release a dataspace with this
  *          call will result in resource leaks.
  *
  * \version 1.4.0 Fortran subroutine introduced in this release.
@@ -578,7 +567,7 @@ done:
 
 
 /*-------------------------------------------------------------------------*/
-/**\ingroup H5S 
+/**\ingroup H5S
  *
  * \brief Creates an exact copy of a dataspace
  *
@@ -586,9 +575,9 @@ done:
  *
  * \return \hid_tv{dataspace}
  *
- * \details H5Scopy() creates a new dataspace which is an exact copy of the 
- *          dataspace identified by \p space_id. The dataspace identifier 
- *          returned from this function should be released with H5Sclose() 
+ * \details H5Scopy() creates a new dataspace which is an exact copy of the
+ *          dataspace identified by \p space_id. The dataspace identifier
+ *          returned from this function should be released with H5Sclose()
  *          or resource leaks will occur.
  *
  * \version 1.4.0   Fortran subroutine introduced.
@@ -876,11 +865,11 @@ done:
  *
  * \space_id
  *
- * \return Returns the number of elements in the dataspace if successful; 
+ * \return Returns the number of elements in the dataspace if successful;
  *         otherwise returns a negative value.
  *
- * \details H5Sget_simple_extent_npoints() determines the number of elements 
- *          in a dataspace \p space_id. For example, a simple 3-dimensional 
+ * \details H5Sget_simple_extent_npoints() determines the number of elements
+ *          in a dataspace \p space_id. For example, a simple 3-dimensional
  *          dataspace with dimensions 2, 3, and 4 would have 24 elements.
  *
  * \version 1.4.0 Fortran subroutine introduced.
@@ -992,10 +981,10 @@ done:
  *
  * \space_id
  *
- * \return Returns the number of dimensions in the dataspace if successful; 
+ * \return Returns the number of dimensions in the dataspace if successful;
  *         otherwise returns a negative value.
  *
- * \details H5Sget_simple_extent_ndims() determines the dimensionality (or 
+ * \details H5Sget_simple_extent_ndims() determines the dimensionality (or
  *          rank) of a dataspace.
  *
  * \version 1.4.0 Fortran subroutine introduced.
@@ -1089,25 +1078,25 @@ done:
  *
  * \space_id
  * \param[out] dims Pointer to array to store the size of each dimension
- * \param[out] maxdims Pointer to array to store the maximum size of each 
- *                     dimension   
+ * \param[out] maxdims Pointer to array to store the maximum size of each
+ *                     dimension
  *
- * \return Returns the number of dimensions in the dataspace if successful; 
+ * \return Returns the number of dimensions in the dataspace if successful;
  *         otherwise returns a negative value.
  *
- * \details H5Sget_simple_extent_dims() returns the size and maximum sizes 
- *          of each dimension of a dataspace \p space_id through the \p dims 
+ * \details H5Sget_simple_extent_dims() returns the size and maximum sizes
+ *          of each dimension of a dataspace \p space_id through the \p dims
  *          and \p maxdims parameters.
  *
  *          Either or both of \p dims and \p maxdims may be NULL.
  *
- *          If a value in the returned array \p maxdims is H5S_UNLIMITED (-1), 
+ *          If a value in the returned array \p maxdims is #H5S_UNLIMITED (-1),
  *          the maximum size of that dimension is unlimited.
  *
  * \version 1.4.0 Fortran subroutine introduced.
  * \since 1.0.0
  *
- */         
+ */
 /*-------------------------------------------------------------------------
  * Function:    H5Sget_simple_extent_dims
  *
@@ -1565,37 +1554,37 @@ done:
  *
  * \details  H5Screate_simple() creates a new simple dataspace and opens it
  * for access, returning a dataspace identifier.
- * 
+ *
  * \p rank is the number of dimensions used in the dataspace.
  *
- * \p current_dims is a one-dimensional array of size rank specifying the 
- * size of each dimension of the dataset. \p maximum_dims is an array of the 
+ * \p current_dims is a one-dimensional array of size rank specifying the
+ * size of each dimension of the dataset. \p maximum_dims is an array of the
  * same size specifying the upper limit on the size of each dimension.
  *
- * Any element of \p current_dims can be \p 0 (zero). Note that no data can 
- * be written to a dataset if the size of any dimension of its current 
+ * Any element of \p current_dims can be \p 0 (zero). Note that no data can
+ * be written to a dataset if the size of any dimension of its current
  * dataspace is \p 0. This is sometimes a useful initial state for a dataset.
  *
- * \p maximum_dims may be the null pointer, in which case the upper limit is 
- * the same as \p current_dims. Otherwise, no element of \p maximum_dims 
+ * \p maximum_dims may be the null pointer, in which case the upper limit is
+ * the same as \p current_dims. Otherwise, no element of \p maximum_dims
  * should be smaller than the corresponding element of \p current_dims.
  *
- * If an element of \p maximum_dims is H5S_UNLIMITED, the maximum size of the 
+ * If an element of \p maximum_dims is #H5S_UNLIMITED, the maximum size of the
  * corresponding dimension is unlimited.
  *
- * Any dataset with an unlimited dimension must also be chunked; see 
- * H5Pset_chunk(). Similarly, a dataset must be chunked if \p current_dims does 
+ * Any dataset with an unlimited dimension must also be chunked; see
+ * H5Pset_chunk(). Similarly, a dataset must be chunked if \p current_dims does
  * not equal \p maximum_dims.
  *
- * The dataspace identifier returned from this function must be released with 
+ * The dataspace identifier returned from this function must be released with
  * H5Sclose() or resource leaks will occur.
  *
- * \note Once a dataspace has been created, specific regions or elements in 
- *       the dataspace can be selected and selections can be removed, as well. 
- *       For example, H5Sselect_hyperslab() selects a region in a dataspace and 
- *       H5Sselect_elements() selects array elements in a dataspace. These 
- *       functions are used for subsetting. H5Sselect_none() removes all 
- *       selections from a dataspace and is used in Parallel HDF5 when a process 
+ * \note Once a dataspace has been created, specific regions or elements in
+ *       the dataspace can be selected and selections can be removed, as well.
+ *       For example, H5Sselect_hyperslab() selects a region in a dataspace and
+ *       H5Sselect_elements() selects array elements in a dataspace. These
+ *       functions are used for subsetting. H5Sselect_none() removes all
+ *       selections from a dataspace and is used in Parallel HDF5 when a process
  *       does not have or need to write data.
  *
  * \version 1.4.0 Fortran subroutine introduced.
@@ -2337,4 +2326,3 @@ H5S_set_version(H5F_t *f, H5S_t *ds)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_set_version() */
-
