@@ -10571,7 +10571,7 @@ done:
 /*--------------------------------------------------------------------------*/
 /**\ingroup H5S
  *
- * \brief Performs an operation on a hyperslab and an existing selection and 
+ * \brief Performs an operation on a hyperslab and an existing selection and
  *        returns the resulting selection
  *
  * \space_id
@@ -10583,13 +10583,13 @@ done:
  *
  * \return \hid_tv{dataspace}
  *
- * \details H5Scombine_hyperslab() combines a hyperslab selection specified 
- *          by \p start, \p stride, \p count and \p block with the current 
- *          selection for the dataspace \p space_id, creating a new dataspace 
- *          to return the generated selection.  If the current selection is 
- *          not a hyperslab, it is freed and the hyperslab parameters passed 
- *          in are combined with the H5S_SEL_ALL hyperslab (ie. a selection 
- *          composing the entire current extent). If either \p stride or 
+ * \details H5Scombine_hyperslab() combines a hyperslab selection specified
+ *          by \p start, \p stride, \p count and \p block with the current
+ *          selection for the dataspace \p space_id, creating a new dataspace
+ *          to return the generated selection.  If the current selection is
+ *          not a hyperslab, it is freed and the hyperslab parameters passed
+ *          in are combined with the H5S_SEL_ALL hyperslab (ie. a selection
+ *          composing the entire current extent). If either \p stride or
  *          \p block is NULL, then it will be set to \p 1.
  *
  * \since 1.12.0
@@ -10730,19 +10730,19 @@ done:
 /*--------------------------------------------------------------------------*/
 /**\ingroup H5S
  *
- * \brief Combine two hyperslab selections with an operation, returning a 
+ * \brief Combine two hyperslab selections with an operation, returning a
  *        dataspace with the resulting selection
  *
  * \space_id{space1_id}
  * \param[in] op  Selection operator
  * \space_id{space2_id}
  *
- * \return \hid_tv{dataspace}
+ * \return \hid_t{dataspace}
  *
- * \details H5Scombine_select() combines two hyperslab selections 
- *          \p space1_id and \p space2_id with an operation, returning a 
- *          new dataspace with the resulting selection. The dataspace extent 
- *          from \p space1_id is copied for the dataspace extent of the 
+ * \details H5Scombine_select() combines two hyperslab selections
+ *          \p space1_id and \p space2_id with an operation, returning a
+ *          new dataspace with the resulting selection. The dataspace extent
+ *          from \p space1_id is copied for the dataspace extent of the
  *          newly created dataspace.
  *
  * \since 1.12.0
@@ -10885,8 +10885,8 @@ done:
 
 /*--------------------------------------------------------------------------*/
 /**\ingroup H5S
- * 
- * \brief Refines a hyperslab selection with an operation, using a second 
+ *
+ * \brief Refines a hyperslab selection with an operation, using a second
  *        hyperslab to modify it
  *
  * \space_id{space1_id}
@@ -10895,9 +10895,9 @@ done:
  *
  * \return \herr_t
  *
- * \details H5Smodify_select() refines an existing hyperslab selection 
- * \p space1_id with an operation \p op, using a second hyperslab 
- * \p space2_id. The first selection is modified to contain the result of 
+ * \details H5Smodify_select() refines an existing hyperslab selection
+ * \p space1_id with an operation \p op, using a second hyperslab
+ * \p space2_id. The first selection is modified to contain the result of
  * \p space1_id operated on by \p space2_id.
  *
  * \since 1.12.0
@@ -12396,13 +12396,13 @@ done:
  *
  * \return \htri_t
  *
- * \details H5Sis_regular_hyperslab() takes the dataspace identifier, 
+ * \details H5Sis_regular_hyperslab() takes the dataspace identifier,
  *          \p spaceid, and queries the type of the hyperslab selection.
  *
- *          A regular hyperslab selection is a hyperslab selection described 
- *          by setting the offset, stride, count, and block parameters for 
- *          a single H5Sselect_hyperslab() call. If several calls to 
- *          H5Sselect_hyperslab() are needed, then the hyperslab selection 
+ *          A regular hyperslab selection is a hyperslab selection described
+ *          by setting the offset, stride, count, and block parameters for
+ *          a single H5Sselect_hyperslab() call. If several calls to
+ *          H5Sselect_hyperslab() are needed, then the hyperslab selection
  *          is irregular.
  *
  * \since 1.10.0
@@ -12464,21 +12464,21 @@ done:
  *
  * \return \herr_t
  *
- * \details H5Sget_regular_hyperslab() takes the dataspace identifier, 
- * \p spaceid, and retrieves the values of \p start, \p stride, \p count, 
+ * \details H5Sget_regular_hyperslab() takes the dataspace identifier,
+ * \p spaceid, and retrieves the values of \p start, \p stride, \p count,
  * and \p block for the regular hyperslab selection.
  *
- * A regular hyperslab selection is a hyperslab selection described by 
- * setting the \p offset, \p stride, \p count, and \p block parameters to 
+ * A regular hyperslab selection is a hyperslab selection described by
+ * setting the \p offset, \p stride, \p count, and \p block parameters to
  * the H5Sselect_hyperslab() call. If several calls to H5Sselect_hyperslab()
  * are needed, the hyperslab selection is irregular.
  *
- * See H5Sselect_hyperslab() for descriptions of \p offset, \p stride, 
+ * See H5Sselect_hyperslab() for descriptions of \p offset, \p stride,
  * \p count, and \p block.
  *
- * \note If a hyperslab selection is originally regular, then becomes 
- *       irregular through selection operations, and then becomes regular 
- *       again, the final regular selection may be equivalent but not 
+ * \note If a hyperslab selection is originally regular, then becomes
+ *       irregular through selection operations, and then becomes regular
+ *       again, the final regular selection may be equivalent but not
  *       identical to the original regular selection.
  *
  * \since 1.10.0
