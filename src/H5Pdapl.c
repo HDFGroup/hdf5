@@ -331,7 +331,7 @@ H5P__dapl_vds_file_pref_enc(const void *value, void **_pp, size_t *size)
         len = HDstrlen(vds_file_pref);
 
     enc_value = (uint64_t)len;
-    enc_size = H5VM__limit_enc_size(enc_value);
+    enc_size = H5VM_limit_enc_size(enc_value);
     HDassert(enc_size < 256);
 
     if(NULL != *pp) {
@@ -579,7 +579,7 @@ H5P__dapl_efile_pref_enc(const void *value, void **_pp, size_t *size)
         len = HDstrlen(efile_pref);
 
     enc_value = (uint64_t)len;
-    enc_size = H5VM__limit_enc_size(enc_value);
+    enc_size = H5VM_limit_enc_size(enc_value);
     HDassert(enc_size < 256);
 
     if(NULL != *pp) {
@@ -899,7 +899,7 @@ H5P__encode_chunk_cache_nslots(const void *value, void **_pp, size_t *size)
     } /* end if */
     else {
         enc_value = (uint64_t)*(const size_t *)value;
-        enc_size = H5VM__limit_enc_size(enc_value);
+        enc_size = H5VM_limit_enc_size(enc_value);
         HDassert(enc_size > 0);
         *size += (1 + enc_size);
     } /* end else */
@@ -1001,7 +1001,7 @@ H5P__encode_chunk_cache_nbytes(const void *value, void **_pp, size_t *size)
     } /* end if */
     else {
         enc_value = (uint64_t)*(const size_t *)value;
-        enc_size = H5VM__limit_enc_size(enc_value);
+        enc_size = H5VM_limit_enc_size(enc_value);
         HDassert(enc_size > 0);
         *size += (1 + enc_size);
     } /* end else */

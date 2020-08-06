@@ -117,7 +117,7 @@ typedef struct H5F_t H5F_t;
 /* (Assumes that the high bits of the integer are zero) */
 #  define UINT64ENCODE_VARLEN(p, n) {                          \
    uint64_t __n = (uint64_t)(n);                               \
-   unsigned _s = H5VM__limit_enc_size(__n);                    \
+   unsigned _s = H5VM_limit_enc_size(__n);                     \
                                                                \
    *(p)++ = (uint8_t)_s;                                       \
    UINT64ENCODE_VAR(p, __n, _s);                               \

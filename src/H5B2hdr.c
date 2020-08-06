@@ -174,7 +174,7 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata,
 
     /* Compute size to store # of records in each node */
     /* (uses leaf # of records because its the largest) */
-    u_max_nrec_size = H5VM__limit_enc_size((uint64_t)hdr->node_info[0].max_nrec);
+    u_max_nrec_size = H5VM_limit_enc_size((uint64_t)hdr->node_info[0].max_nrec);
     H5_CHECKED_ASSIGN(hdr->max_nrec_size, uint8_t, u_max_nrec_size, unsigned)
     HDassert(hdr->max_nrec_size <= H5B2_SIZEOF_RECORDS_PER_NODE);
 
@@ -190,7 +190,7 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata,
 
             hdr->node_info[u].cum_max_nrec = ((hdr->node_info[u].max_nrec + 1) *
                 hdr->node_info[u - 1].cum_max_nrec) + hdr->node_info[u].max_nrec;
-            u_max_nrec_size = H5VM__limit_enc_size((uint64_t)hdr->node_info[u].cum_max_nrec);
+            u_max_nrec_size = H5VM_limit_enc_size((uint64_t)hdr->node_info[u].cum_max_nrec);
             H5_CHECKED_ASSIGN(hdr->node_info[u].cum_max_nrec_size, uint8_t, u_max_nrec_size, unsigned)
 
             if(NULL == (hdr->node_info[u].nat_rec_fac = H5FL_fac_init(hdr->cls->nrec_size * hdr->node_info[u].max_nrec)))

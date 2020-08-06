@@ -144,10 +144,10 @@ HDfprintf(stderr, "%s: fspace->addr = %a\n", FUNC, fspace->addr);
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Set non-zero values */
-    sinfo->nbins = H5VM__log2_gen(fspace->max_sect_size);
+    sinfo->nbins = H5VM_log2_gen(fspace->max_sect_size);
     sinfo->sect_prefix_size = H5FS_SINFO_PREFIX_SIZE(f);
     sinfo->sect_off_size = (fspace->max_sect_addr + 7) / 8;
-    sinfo->sect_len_size = H5VM__limit_enc_size((uint64_t)fspace->max_sect_size);
+    sinfo->sect_len_size = H5VM_limit_enc_size((uint64_t)fspace->max_sect_size);
 #ifdef H5FS_SINFO_DEBUG
 HDfprintf(stderr, "%s: fspace->max_sect_size = %Hu\n", FUNC, fspace->max_sect_size);
 HDfprintf(stderr, "%s: fspace->max_sect_addr = %u\n", FUNC, fspace->max_sect_addr);
@@ -527,7 +527,7 @@ H5FS__sect_serialize_size(H5FS_t *fspace)
         sect_buf_size = fspace->sinfo->sect_prefix_size;
 
         /* Count for each differently sized serializable section */
-        sect_buf_size += fspace->sinfo->serial_size_count * H5VM__limit_enc_size((uint64_t)fspace->serial_sect_count);
+        sect_buf_size += fspace->sinfo->serial_size_count * H5VM_limit_enc_size((uint64_t)fspace->serial_sect_count);
 
         /* Size for each differently sized serializable section */
         sect_buf_size += fspace->sinfo->serial_size_count * fspace->sinfo->sect_len_size;
@@ -777,7 +777,7 @@ H5FS__sect_unlink_size(H5FS_sinfo_t *sinfo, const H5FS_section_class_t *cls,
     HDassert(cls);
 
     /* Determine correct bin which holds items of at least the section's size */
-    bin = H5VM__log2_gen(sect->size);
+    bin = H5VM_log2_gen(sect->size);
     HDassert(bin < sinfo->nbins);
     if(sinfo->bins[bin].bin_list == NULL)
         HGOTO_ERROR(H5E_FSPACE, H5E_NOTFOUND, FAIL, "node's bin is empty?")
@@ -963,7 +963,7 @@ H5FS__sect_link_size(H5FS_sinfo_t *sinfo, const H5FS_section_class_t *cls,
     HDassert(sect->size);
 
     /* Determine correct bin which holds items of the section's size */
-    bin = H5VM__log2_gen(sect->size);
+    bin = H5VM_log2_gen(sect->size);
     HDassert(bin < sinfo->nbins);
     if(sinfo->bins[bin].bin_list == NULL) {
         if(NULL == (sinfo->bins[bin].bin_list = H5SL_create(H5SL_TYPE_HSIZE, NULL)))
@@ -1640,7 +1640,7 @@ H5FS__sect_find_node(H5FS_t *fspace, hsize_t request, H5FS_section_info_t **node
     HDassert(node);
 
     /* Determine correct bin which holds items of at least the section's size */
-    bin = H5VM__log2_gen(request);
+    bin = H5VM_log2_gen(request);
     HDassert(bin < fspace->sinfo->nbins);
     alignment = fspace->alignment;
     if(!((alignment > 1) && (request >= fspace->align_thres)))
@@ -2028,7 +2028,7 @@ H5FS_sect_change_class(H5F_t *f, H5FS_t *fspace, H5FS_section_info_t *sect,
         HDassert(fspace->sinfo->bins);
 
         /* Determine correct bin which holds items of at least the section's size */
-        bin = H5VM__log2_gen(sect->size);
+        bin = H5VM_log2_gen(sect->size);
         HDassert(bin < fspace->sinfo->nbins);
         HDassert(fspace->sinfo->bins[bin].bin_list);
 

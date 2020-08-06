@@ -266,7 +266,7 @@ H5EA__dblock_sblk_idx(const H5EA_hdr_t *hdr, hsize_t idx))
 
     /* Determine the superblock information for the index */
     H5_CHECK_OVERFLOW(idx, /*From:*/hsize_t, /*To:*/uint64_t);
-    sblk_idx = H5VM__log2_gen((uint64_t)((idx / hdr->cparam.data_blk_min_elmts) + 1));
+    sblk_idx = H5VM_log2_gen((uint64_t)((idx / hdr->cparam.data_blk_min_elmts) + 1));
 
     /* Set return value */
     ret_value = sblk_idx;

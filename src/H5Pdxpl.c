@@ -685,7 +685,7 @@ H5P__dxfr_xform_enc(const void *value, void **_pp, size_t *size)
 
         /* encode the length of the prefix */
         enc_value = (uint64_t)len;
-        enc_size = H5VM__limit_enc_size(enc_value);
+        enc_size = H5VM_limit_enc_size(enc_value);
         HDassert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -702,7 +702,7 @@ H5P__dxfr_xform_enc(const void *value, void **_pp, size_t *size)
     } /* end if */
 
     /* Size of encoded data transform */
-    *size += (1 + H5VM__limit_enc_size((uint64_t)len));
+    *size += (1 + H5VM_limit_enc_size((uint64_t)len));
     if(NULL != pexp)
         *size += len;
 

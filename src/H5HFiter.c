@@ -210,7 +210,7 @@ H5HF__man_iter_start_offset(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter,
 
             /* Compute # of rows in context indirect block */
             child_size = hdr->man_dtable.row_block_size[biter->curr->up->row];
-            iblock_nrows = (H5VM__log2_gen(child_size) - hdr->man_dtable.first_row_bits) + 1;
+            iblock_nrows = (H5VM_log2_gen(child_size) - hdr->man_dtable.first_row_bits) + 1;
         } /* end else */
 
         /* Load indirect block for this context location */

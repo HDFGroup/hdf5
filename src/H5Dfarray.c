@@ -248,7 +248,7 @@ H5D__farray_crt_context(void *_udata)
     /* Compute the size required for encoding the size of a chunk, allowing
      *      for an extra byte, in case the filter makes the chunk larger.
      */
-    ctx->chunk_size_len = 1 + ((H5VM__log2_gen((uint64_t)udata->chunk_size) + 8) / 8);
+    ctx->chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)udata->chunk_size) + 8) / 8);
     if(ctx->chunk_size_len > 8)
         ctx->chunk_size_len = 8;
 
@@ -892,7 +892,7 @@ H5D__farray_idx_create(const H5D_chk_idx_info_t *idx_info)
         /* Compute the size required for encoding the size of a chunk, allowing
          *      for an extra byte, in case the filter makes the chunk larger.
          */
-        chunk_size_len = 1 + ((H5VM__log2_gen((uint64_t)idx_info->layout->size) + 8) / 8);
+        chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)idx_info->layout->size) + 8) / 8);
         if(chunk_size_len > 8)
             chunk_size_len = 8;
 

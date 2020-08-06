@@ -419,7 +419,7 @@ H5MF__create_fstype(H5F_t *f, H5F_mem_page_t type)
     fs_create.client = H5FS_CLIENT_FILE_ID;
     fs_create.shrink_percent = H5MF_FSPACE_SHRINK;
     fs_create.expand_percent = H5MF_FSPACE_EXPAND;
-    fs_create.max_sect_addr = 1 + H5VM__log2_gen((uint64_t)f->shared->maxaddr);
+    fs_create.max_sect_addr = 1 + H5VM_log2_gen((uint64_t)f->shared->maxaddr);
     fs_create.max_sect_size = f->shared->maxaddr;
 
     /* Set up alignment and threshold to use depending on TYPE */
