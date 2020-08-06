@@ -1372,9 +1372,9 @@ H5FD_family_lock(H5FD_t *_file, hbool_t rw)
         for(v = 0; v < u; v++) {
             if(H5FD_unlock(file->memb[v]) < 0)
                 /* Push error, but keep going */
-                HDONE_ERROR(H5E_IO, H5E_CANTUNLOCK, FAIL, "unable to unlock member files")
+                HDONE_ERROR(H5E_IO, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock member files")
         } /* end for */
-        HGOTO_ERROR(H5E_IO, H5E_CANTLOCK, FAIL, "unable to lock member files")
+        HGOTO_ERROR(H5E_IO, H5E_CANTLOCKFILE, FAIL, "unable to lock member files")
     } /* end if */
 
 done:
@@ -1406,7 +1406,7 @@ H5FD_family_unlock(H5FD_t *_file)
     for(u = 0; u < file->nmembs; u++)
         if(file->memb[u])
             if(H5FD_unlock(file->memb[u]) < 0)
-                HGOTO_ERROR(H5E_IO, H5E_CANTUNLOCK, FAIL, "unable to unlock member files")
+                HGOTO_ERROR(H5E_IO, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock member files")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
