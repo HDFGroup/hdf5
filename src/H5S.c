@@ -2170,8 +2170,8 @@ done:
  *
  * \return  \herr_t
  *
- * \details H5Sset_extent_none() resets the type of a dataspace to 
- *          H5S_NULL with no extent information stored for the dataspace.
+ * \details H5Sset_extent_none() resets the type of a dataspace to
+ *          #H5S_NULL with no extent information stored for the dataspace.
  *
  * \version 1.10.7, 1.12.1  The function behavior changed. The previous
  *                          behavior was to set the class to #H5S_NO_CLASS.
