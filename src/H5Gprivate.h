@@ -15,7 +15,7 @@
  *
  * Created:             H5Gprivate.h
  *                      Jul 11 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             Library-visible declarations.
  *

@@ -990,7 +990,7 @@ typedef struct H5T_conv_hw_t {
 /* Local Prototypes */
 /********************/
 
-static herr_t H5T_reverse_order(uint8_t *rev, uint8_t *s, size_t size, H5T_order_t order);
+static herr_t H5T__reverse_order(uint8_t *rev, uint8_t *s, size_t size, H5T_order_t order);
 
 
 /*********************/
@@ -1725,7 +1725,7 @@ H5T__conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 if(src->shared->u.atomic.prec > dst->shared->u.atomic.prec) {
                     /*overflow*/
                     if(cb_struct.func) { /*If user's exception handler is present, use it*/
-                        H5T_reverse_order(src_rev, s, src->shared->size, src->shared->u.atomic.order); /*reverse order first*/
+                        H5T__reverse_order(src_rev, s, src->shared->size, src->shared->u.atomic.order); /*reverse order first*/
                         except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, src_id, dst_id,
                                 src_rev, d, cb_struct.user_data);
                     } /* end if */
@@ -1824,7 +1824,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_struct_free
+ * Function:	H5T__conv_struct_free
  *
  * Purpose:	Free the private data structure used by the compound
  *      conversion functions.
@@ -1837,14 +1837,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5T_conv_struct_t *
-H5T_conv_struct_free(H5T_conv_struct_t *priv)
+H5T__conv_struct_free(H5T_conv_struct_t *priv)
 {
     int         *src2dst = priv->src2dst;
     hid_t       *src_memb_id = priv->src_memb_id,
                 *dst_memb_id = priv->dst_memb_id;
     unsigned    i;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     for(i = 0; i < priv->src_nmembs; i++)
         if(src2dst[i] >= 0) {
@@ -1862,11 +1862,11 @@ H5T_conv_struct_free(H5T_conv_struct_t *priv)
     H5MM_xfree(priv->memb_path);
 
     FUNC_LEAVE_NOAPI((H5T_conv_struct_t *)H5MM_xfree(priv))
-} /* end H5T_conv_struct_free() */
+} /* end H5T__conv_struct_free() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_struct_init
+ * Function:	H5T__conv_struct_init
  *
  * Purpose:	Initialize the `priv' field of `cdata' with conversion
  *		information that is relatively constant.  If `priv' is
@@ -1912,7 +1912,7 @@ H5T_conv_struct_free(H5T_conv_struct_t *priv)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
+H5T__conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 {
     H5T_conv_struct_t	*priv = (H5T_conv_struct_t*)(cdata->priv);
     int		        *src2dst = NULL;
@@ -1920,7 +1920,7 @@ H5T_conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
     unsigned		i, j;
     herr_t              ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     src_nmembs = src->shared->u.compnd.nmembs;
     dst_nmembs = dst->shared->u.compnd.nmembs;
@@ -2000,7 +2000,7 @@ H5T_conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
             H5T_path_t *tpath = H5T_path_find(src->shared->u.compnd.memb[i].type, dst->shared->u.compnd.memb[src2dst[i]].type);
 
             if(NULL == (priv->memb_path[i] = tpath)) {
-                cdata->priv = H5T_conv_struct_free(priv);
+                cdata->priv = H5T__conv_struct_free(priv);
                 HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unable to convert member datatype")
             } /* end if */
         } /* end if */
@@ -2053,7 +2053,7 @@ H5T_conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_conv_struct_init() */
+} /* end H5T__conv_struct_init() */
 
 
 /*-------------------------------------------------------------------------
@@ -2160,7 +2160,7 @@ H5T__conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if(H5T_COMPOUND != dst->shared->type)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_COMPOUND datatype")
 
-            if(H5T_conv_struct_init(src, dst, cdata) < 0)
+            if(H5T__conv_struct_init(src, dst, cdata) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize conversion data")
             break;
 
@@ -2168,7 +2168,7 @@ H5T__conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             /*
              * Free the private conversion data.
              */
-            cdata->priv = H5T_conv_struct_free(priv);
+            cdata->priv = H5T__conv_struct_free(priv);
             break;
 
         case H5T_CONV_CONV:
@@ -2180,7 +2180,7 @@ H5T__conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             HDassert(priv);
             HDassert(bkg && cdata->need_bkg);
 
-            if(cdata->recalc && H5T_conv_struct_init(src, dst, cdata) < 0)
+            if(cdata->recalc && H5T__conv_struct_init(src, dst, cdata) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize conversion data")
 
             /*
@@ -2389,7 +2389,7 @@ H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_COMPOUND datatype")
 
             /* Initialize data which is relatively constant */
-            if(H5T_conv_struct_init(src, dst, cdata) < 0)
+            if(H5T__conv_struct_init(src, dst, cdata) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize conversion data")
             priv = (H5T_conv_struct_t *)(cdata->priv);
             src2dst = priv->src2dst;
@@ -2422,7 +2422,7 @@ H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                     if(dst_memb->size > src_memb->size) {
                         offset -= src_memb->size;
                         if(dst_memb->size > src->shared->size-offset) {
-                            cdata->priv = H5T_conv_struct_free(priv);
+                            cdata->priv = H5T__conv_struct_free(priv);
                             HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "conversion is unsupported by this function")
                         } /* end if */
                     } /* end if */
@@ -2434,7 +2434,7 @@ H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
             /*
              * Free the private conversion data.
              */
-            cdata->priv = H5T_conv_struct_free((H5T_conv_struct_t *)(cdata->priv));
+            cdata->priv = H5T__conv_struct_free((H5T_conv_struct_t *)(cdata->priv));
             break;
 
         case H5T_CONV_CONV:
@@ -2445,7 +2445,7 @@ H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
             /* Update cached data if necessary */
-            if(cdata->recalc && H5T_conv_struct_init(src, dst, cdata) < 0)
+            if(cdata->recalc && H5T__conv_struct_init(src, dst, cdata) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize conversion data")
             priv = (H5T_conv_struct_t *)(cdata->priv);
             HDassert(priv);
@@ -2579,7 +2579,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_enum_init
+ * Function:	H5T__conv_enum_init
  *
  * Purpose:	Initialize information for H5T__conv_enum().
  *
@@ -2593,7 +2593,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
+H5T__conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 {
     H5T_enum_struct_t	*priv = NULL;	/*private conversion data	*/
     int		n;		/*src value cast as native int	*/
@@ -2603,7 +2603,7 @@ H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
     unsigned	i, j;		/*counters			*/
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     cdata->need_bkg = H5T_BKG_NO;
     if(NULL == (priv = (H5T_enum_struct_t *)(cdata->priv = H5MM_calloc(sizeof(*priv)))))
@@ -2766,7 +2766,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if(H5T_ENUM != dst->shared->type)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_ENUM datatype")
 
-            if(H5T_conv_enum_init(src, dst, cdata) < 0)
+            if(H5T__conv_enum_init(src, dst, cdata) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize private data")
             break;
 
@@ -2794,7 +2794,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_ENUM datatype")
 
             /* priv->src2dst map was computed for certain sort keys. Make sure those same
-             * sort keys are used here during conversion. See H5T_conv_enum_init(). But
+             * sort keys are used here during conversion. See H5T__conv_enum_init(). But
              * we actually don't care about the source type's order when doing the O(1)
              * conversion algorithm, which is turned on by non-zero priv->length */
             H5T__sort_name(dst, NULL);
@@ -2831,7 +2831,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     /* (The casting won't work when the byte orders are different. i.g. if the source value
                      * is big-endian 0x0000000f, the direct casting "n = *((int*)s);" will make it a big
                      * number 0x0f000000 on little-endian machine. But we won't fix it because it's an
-                     * optimization code. Please also see the comment in the H5T_conv_enum_init() function.
+                     * optimization code. Please also see the comment in the H5T__conv_enum_init() function.
                      * SLU - 2011/5/24)
                      */
                     if(1 == src->shared->size)
@@ -3869,7 +3869,7 @@ H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     } else if (first>=dst->shared->u.atomic.prec) {
                         /*overflow*/
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
-                            H5T_reverse_order(src_rev, s, src->shared->size, src->shared->u.atomic.order); /*reverse order first*/
+                            H5T__reverse_order(src_rev, s, src->shared->size, src->shared->u.atomic.order); /*reverse order first*/
                             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, src_id, dst_id,
                                     src_rev, d, cb_struct.user_data);
                         }
@@ -3898,7 +3898,7 @@ H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     if (first+1 == src->shared->u.atomic.prec) {
                         /*overflow - source is negative*/
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
-                            H5T_reverse_order(src_rev, s, src->shared->size, src->shared->u.atomic.order); /*reverse order first*/
+                            H5T__reverse_order(src_rev, s, src->shared->size, src->shared->u.atomic.order); /*reverse order first*/
                             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW, src_id, dst_id,
                                     src_rev, d, cb_struct.user_data);
                         }
@@ -3918,7 +3918,7 @@ H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     } else if (first>=dst->shared->u.atomic.prec) {
                         /*overflow - source is positive*/
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
-                            H5T_reverse_order(src_rev, s, src->shared->size, src->shared->u.atomic.order); /*reverse order first*/
+                            H5T__reverse_order(src_rev, s, src->shared->size, src->shared->u.atomic.order); /*reverse order first*/
                             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, src_id, dst_id,
                                     src_rev, d, cb_struct.user_data);
                         }
@@ -3945,7 +3945,7 @@ H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     if (first+1 >= dst->shared->u.atomic.prec) {
                         /*overflow*/
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
-                            H5T_reverse_order(src_rev, s, src->shared->size, src->shared->u.atomic.order); /*reverse order first*/
+                            H5T__reverse_order(src_rev, s, src->shared->size, src->shared->u.atomic.order); /*reverse order first*/
                             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, src_id, dst_id,
                                     src_rev, d, cb_struct.user_data);
                         }
@@ -3982,7 +3982,7 @@ H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     if (sfz>=0 && fz+1>=dst->shared->u.atomic.prec) {
                         /*overflow*/
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
-                            H5T_reverse_order(src_rev, s, src->shared->size, src->shared->u.atomic.order); /*reverse order first*/
+                            H5T__reverse_order(src_rev, s, src->shared->size, src->shared->u.atomic.order); /*reverse order first*/
                             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW, src_id, dst_id,
                                     src_rev, d, cb_struct.user_data);
                         }
@@ -4012,7 +4012,7 @@ H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     if (first+1>=dst->shared->u.atomic.prec) {
                         /*overflow*/
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
-                            H5T_reverse_order(src_rev, s, src->shared->size, src->shared->u.atomic.order); /*reverse order first*/
+                            H5T__reverse_order(src_rev, s, src->shared->size, src->shared->u.atomic.order); /*reverse order first*/
                             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, src_id, dst_id, src_rev, d,
                                     cb_struct.user_data);
                         }
@@ -4293,7 +4293,7 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         /* +Inf or -Inf */
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
                             /*reverse order first*/
-                            H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                            H5T__reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                             if(sign)
                                 except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_NINF,
                                     src_id, dst_id, src_rev, d, cb_struct.user_data);
@@ -4332,7 +4332,7 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     /* +Inf or -Inf */
                     if(cb_struct.func) { /*If user's exception handler is present, use it*/
                         /*reverse order first*/
-                        H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                        H5T__reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                         if(sign)
                             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_NINF,
                                 src_id, dst_id, src_rev, d, cb_struct.user_data);
@@ -4371,7 +4371,7 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     /* NaN */
                     if(cb_struct.func) { /*If user's exception handler is present, use it*/
                         /*reverse order first*/
-                        H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                        H5T__reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                         except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_NAN,
                                 src_id, dst_id, src_rev, d, cb_struct.user_data);
                     }
@@ -4490,7 +4490,7 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                      */
                     if(cb_struct.func) { /*If user's exception handler is present, use it*/
                         /*reverse order first*/
-                        H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                        H5T__reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                         except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, src_id, dst_id,
                                 src_rev, d, cb_struct.user_data);
                     }
@@ -4583,7 +4583,7 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                          */
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
                             /*reverse order first*/
-                            H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                            H5T__reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, src_id, dst_id,
                                     src_rev, d, cb_struct.user_data);
                         }
@@ -8696,7 +8696,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         if(sign) { /* -Infinity */
                             if(cb_struct.func) { /*If user's exception handler is present, use it*/
                                 /*reverse order first*/
-                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                                H5T__reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                                 except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_NINF,
                                         src_id, dst_id, src_rev, d, cb_struct.user_data);
                             }
@@ -8713,7 +8713,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         } else { /* +Infinity */
                             if(cb_struct.func) { /*If user's exception handler is present, use it*/
                                 /*reverse order first*/
-                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                                H5T__reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                                 except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_PINF,
                                         src_id, dst_id, src_rev, d, cb_struct.user_data);
                             }
@@ -8742,7 +8742,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     if(sign) { /* -Infinity */
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
                             /*reverse order first*/
-                            H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                            H5T__reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_NINF,
                                     src_id, dst_id, src_rev, d, cb_struct.user_data);
                         }
@@ -8759,7 +8759,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     } else { /* +Infinity */
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
                             /*reverse order first*/
-                            H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                            H5T__reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_PINF,
                                     src_id, dst_id, src_rev, d, cb_struct.user_data);
                         }
@@ -8782,7 +8782,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     /* NaN */
                     if(cb_struct.func) { /*If user's exception handler is present, use it*/
                         /*reverse order first*/
-                        H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                        H5T__reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                         except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_NAN,
                                 src_id, dst_id, src_rev, d, cb_struct.user_data);
                     }
@@ -8878,7 +8878,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     if(sign) { /*source is negative*/
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
                             /*reverse order first*/
-                            H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                            H5T__reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW,
                                     src_id, dst_id, src_rev, d, cb_struct.user_data);
                             if(except_ret == H5T_CONV_ABORT)
@@ -8894,7 +8894,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                             /*overflow*/
                             if(cb_struct.func) { /*If user's exception handler is present, use it*/
                                 /*reverse order first*/
-                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                                H5T__reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                                 except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,
                                         src_id, dst_id, src_rev, d, cb_struct.user_data);
                             }
@@ -8910,7 +8910,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         } else if (first <dst.prec) {
                             if(truncated && cb_struct.func) { /*If user's exception handler is present, use it*/
                                 /*reverse order first*/
-                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                                H5T__reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                                 except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_TRUNCATE,
                                         src_id, dst_id, src_rev, d, cb_struct.user_data);
                             }
@@ -8931,7 +8931,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         if(first < dst.prec-1) {
                             if(truncated && cb_struct.func) { /*If user's exception handler is present, use it*/
                                 /*reverse order first*/
-                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                                H5T__reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                                 except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_TRUNCATE,
                                         src_id, dst_id, src_rev, d, cb_struct.user_data);
                             }
@@ -8957,7 +8957,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                              */
                             if(cb_struct.func) { /*If user's exception handler is present, use it*/
                                 /*reverse order first*/
-                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                                H5T__reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                                 except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW,
                                         src_id, dst_id, src_rev, d, cb_struct.user_data);
                             }
@@ -8977,7 +8977,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                             /*overflow*/
                             if(cb_struct.func) { /*If user's exception handler is present, use it*/
                                 /*reverse order first*/
-                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                                H5T__reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                                 except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,
                                         src_id, dst_id, src_rev, d, cb_struct.user_data);
                             }
@@ -8994,7 +8994,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         } else if(first < dst.prec-1) {
                             if(truncated && cb_struct.func) { /*If user's exception handler is present, use it*/
                                 /*reverse order first*/
-                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                                H5T__reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                                 except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_TRUNCATE,
                                         src_id, dst_id, src_rev, d, cb_struct.user_data);
                             }
@@ -9316,7 +9316,7 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                      * precision loss.  Let user's handler deal with the case if it's present
                      */
                     if(cb_struct.func) {
-                        H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order); /*reverse order first*/
+                        H5T__reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order); /*reverse order first*/
                         except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_PRECISION, src_id, dst_id,
                                 src_rev, d, cb_struct.user_data);
                     }
@@ -9384,7 +9384,7 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                 if(expo > expo_max) {  /*overflows*/
                     if(cb_struct.func) { /*user's exception handler.  Reverse back source order*/
-                        H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order); /*reverse order first*/
+                        H5T__reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order); /*reverse order first*/
                         except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, src_id, dst_id,
                                 src_rev, d, cb_struct.user_data);
 
@@ -9486,7 +9486,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_reverse_order
+ * Function:	H5T__reverse_order
  *
  * Purpose:	Internal assisting function to reverse the order of
  *              a sequence of byte when it's big endian or VAX order.
@@ -9502,11 +9502,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_reverse_order(uint8_t *rev, uint8_t *s, size_t size, H5T_order_t order)
+H5T__reverse_order(uint8_t *rev, uint8_t *s, size_t size, H5T_order_t order)
 {
     size_t      i;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(s);
     HDassert(size);
@@ -9595,7 +9595,7 @@ H5T_reclaim_cb(void *elem, const H5T_t *dt, unsigned H5_ATTR_UNUSED ndim,
     HDassert(dt);
 
     if(dt->shared->type == H5T_REFERENCE) {
-        if(H5T_ref_reclaim(elem, dt) < 0)
+        if(H5T__ref_reclaim(elem, dt) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't reclaim ref elements")
     } else {
         HDassert(op_data);

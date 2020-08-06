@@ -232,7 +232,7 @@ init_tparam(earray_test_param_t *tparam, const H5EA_create_t *cparam)
     HDmemset(tparam, 0, sizeof(*tparam));
 
     /* Compute general information */
-    tparam->nsblks = 1 + (cparam->max_nelmts_bits - H5VM_log2_of2(cparam->data_blk_min_elmts));
+    tparam->nsblks = 1 + (cparam->max_nelmts_bits - H5VM__log2_of2(cparam->data_blk_min_elmts));
 
     /* Allocate information for each super block */
     tparam->sblk_info = (H5EA_sblk_info_t *)HDmalloc(sizeof(H5EA_sblk_info_t) * tparam->nsblks);
@@ -381,10 +381,6 @@ check_stats(const H5EA_t *ea, const earray_state_t *state)
         TEST_ERROR
     } /* end if */
 #endif /* NOT_YET */
-#ifdef QAK
-HDfprintf(stderr, "nelmts = %Hu, total EA size = %Hu\n", earray_stats.stored.nelmts,
-        (earray_stats.computed.hdr_size + earray_stats.computed.index_blk_size + earray_stats.stored.super_blk_size + earray_stats.stored.data_blk_size));
-#endif /* QAK */
 
     /* All tests passed */
     return(0);
@@ -560,12 +556,6 @@ finish(hid_t file, hid_t fapl, H5F_t *f, H5EA_t *ea, haddr_t ea_addr)
     if(H5EA_close(ea) < 0)
         FAIL_STACK_ERROR
 
-#ifdef QAK
-HDfprintf(stderr, "ea_addr = %a\n", ea_addr);
-H5Fflush(file, H5F_SCOPE_GLOBAL);
-HDsystem("cp earray.h5 earray.h5.save");
-#endif /* QAK */
-
     /* Delete array */
     if(H5EA_delete(f, ea_addr, NULL) < 0)
         FAIL_STACK_ERROR
@@ -728,7 +718,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
     /* Set invalid max. # of elements per data block page bits */
     if(test_cparam.idx_blk_elmts > 0) {
         HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
-        test_cparam.max_dblk_page_nelmts_bits = (uint8_t)(H5VM_log2_gen((uint64_t)test_cparam.idx_blk_elmts) - 1);
+        test_cparam.max_dblk_page_nelmts_bits = (uint8_t)(H5VM__log2_gen((uint64_t)test_cparam.idx_blk_elmts) - 1);
         H5E_BEGIN_TRY {
             ea = H5EA_create(f, &test_cparam, NULL);
         } H5E_END_TRY;
@@ -1383,20 +1373,9 @@ eiter_fw_state(void *_eiter, const H5EA_create_t *cparam,
 
         /* Compute super block index for element index */
         /* (same eqn. as in H5EA__dblock_sblk_idx()) */
-        sblk_idx = H5VM_log2_gen((uint64_t)(((idx - cparam->idx_blk_elmts) / cparam->data_blk_min_elmts) + 1));
-#ifdef QAK
-HDfprintf(stderr, "idx = %Hu, tparam->sblk_info[%u] = {%Zu, %Zu, %Hu, %Hu}\n", idx, sblk_idx, tparam->sblk_info[sblk_idx].ndblks, tparam->sblk_info[sblk_idx].dblk_nelmts, tparam->sblk_info[sblk_idx].start_idx, tparam->sblk_info[sblk_idx].start_dblk);
-#endif /* QAK */
-
+        sblk_idx = H5VM__log2_gen((uint64_t)(((idx - cparam->idx_blk_elmts) / cparam->data_blk_min_elmts) + 1));
         state->nelmts = EA_NELMTS(cparam, tparam, idx, sblk_idx);
-#ifdef QAK
-HDfprintf(stderr, "state->nelmts = %Hu\n", state->nelmts);
-#endif /* QAK */
-
         state->ndata_blks = EA_NDATA_BLKS(cparam, tparam, idx, sblk_idx);
-#ifdef QAK
-HDfprintf(stderr, "state->ndata_blks = %Hu\n", state->ndata_blks);
-#endif /* QAK */
 
         /* Check if we have any super blocks yet */
         if(tparam->sblk_info[sblk_idx].ndblks >= cparam->sup_blk_min_data_ptrs) {
@@ -1405,9 +1384,6 @@ HDfprintf(stderr, "state->ndata_blks = %Hu\n", state->ndata_blks);
                 eiter->base_sblk_idx = sblk_idx;
 
             state->nsuper_blks = (sblk_idx - eiter->base_sblk_idx) + 1;
-#ifdef QAK
-HDfprintf(stderr, "state->nsuper_blks = %Hu\n", state->nsuper_blks);
-#endif /* QAK */
         } /* end if */
         else
             state->nsuper_blks = 0;
@@ -1489,10 +1465,10 @@ eiter_rv_init(const H5EA_create_t *cparam, const earray_test_param_t *tparam,
     eiter->idx = cnt - 1;
     eiter->max = cnt - 1;
     if(cnt > cparam->idx_blk_elmts) {
-        eiter->max_sblk_idx = H5VM_log2_gen((uint64_t)(((eiter->max - cparam->idx_blk_elmts) / cparam->data_blk_min_elmts) + 1));
+        eiter->max_sblk_idx = H5VM__log2_gen((uint64_t)(((eiter->max - cparam->idx_blk_elmts) / cparam->data_blk_min_elmts) + 1));
         eiter->max_nelmts = EA_NELMTS(cparam, tparam, eiter->max, eiter->max_sblk_idx);
         eiter->max_ndata_blks = EA_NDATA_BLKS(cparam, tparam, eiter->max, eiter->max_sblk_idx);
-        eiter->idx_blk_nsblks = 2 * H5VM_log2_of2((uint32_t)cparam->sup_blk_min_data_ptrs);
+        eiter->idx_blk_nsblks = 2 * H5VM__log2_of2((uint32_t)cparam->sup_blk_min_data_ptrs);
     } /* end if */
     else {
         eiter->max_sblk_idx = (hsize_t)0;
@@ -1610,38 +1586,27 @@ eiter_rv_state(void *_eiter, const H5EA_create_t *cparam,
             hsize_t tmp_idx;    /* Temporary index in superblock */
             hsize_t dblk_idx;   /* Index of data block within superblock */
 
-            idx_sblk_idx = H5VM_log2_gen((uint64_t)(((idx - cparam->idx_blk_elmts) / cparam->data_blk_min_elmts) + 1));
+            idx_sblk_idx = H5VM__log2_gen((uint64_t)(((idx - cparam->idx_blk_elmts) / cparam->data_blk_min_elmts) + 1));
             tmp_idx = idx - (cparam->idx_blk_elmts + tparam->sblk_info[idx_sblk_idx].start_idx);
             dblk_idx = tmp_idx / tparam->sblk_info[idx_sblk_idx].dblk_nelmts;
             if(dblk_idx > 0)
                 loc_idx = idx - tparam->sblk_info[idx_sblk_idx].dblk_nelmts;
             else
                 loc_idx = cparam->idx_blk_elmts + tparam->sblk_info[idx_sblk_idx].start_idx - 1;
-            loc_sblk_idx = H5VM_log2_gen((uint64_t)(((loc_idx - cparam->idx_blk_elmts) / cparam->data_blk_min_elmts) + 1));
+            loc_sblk_idx = H5VM__log2_gen((uint64_t)(((loc_idx - cparam->idx_blk_elmts) / cparam->data_blk_min_elmts) + 1));
         } /* end else */
-#ifdef QAK
-HDfprintf(stderr, "idx = %Hu, loc_idx = %Hu, eiter->max_sblk_idx = %u, idx_sblk_idx = %u, loc_sblk_idx = %u\n", idx, loc_idx, eiter->max_sblk_idx, idx_sblk_idx, loc_sblk_idx);
-HDfprintf(stderr, "tparam->sblk_info[%u] = {%Zu, %Zu, %Hu, %Hu}\n", idx_sblk_idx, tparam->sblk_info[idx_sblk_idx].ndblks, tparam->sblk_info[idx_sblk_idx].dblk_nelmts, tparam->sblk_info[idx_sblk_idx].start_idx, tparam->sblk_info[idx_sblk_idx].start_dblk);
-HDfprintf(stderr, "tparam->sblk_info[%u] = {%Zu, %Zu, %Hu, %Hu}\n", eiter->max_sblk_idx, tparam->sblk_info[eiter->max_sblk_idx].ndblks, tparam->sblk_info[eiter->max_sblk_idx].dblk_nelmts, tparam->sblk_info[eiter->max_sblk_idx].start_idx, tparam->sblk_info[eiter->max_sblk_idx].start_dblk);
-#endif /* QAK */
 
         if(idx < cparam->idx_blk_elmts + cparam->data_blk_min_elmts)
             idx_nelmts = (hsize_t)cparam->idx_blk_elmts;
         else
             idx_nelmts = EA_NELMTS(cparam, tparam, loc_idx, loc_sblk_idx);
         state->nelmts = (eiter->max_nelmts - idx_nelmts) + cparam->idx_blk_elmts;
-#ifdef QAK
-HDfprintf(stderr, "eiter->max_nelmts = %Hu, idx_nelmts = %Hu, state->nelmts = %Hu\n", eiter->max_nelmts, idx_nelmts, state->nelmts);
-#endif /* QAK */
 
         if(idx < cparam->idx_blk_elmts + cparam->data_blk_min_elmts)
             idx_ndata_blks = 0;
         else
             idx_ndata_blks = EA_NDATA_BLKS(cparam, tparam, loc_idx, loc_sblk_idx);
         state->ndata_blks = eiter->max_ndata_blks - idx_ndata_blks;
-#ifdef QAK
-HDfprintf(stderr, "eiter->max_ndata_blks = %Hu, idx_ndata_blks = %Hu, state->ndata_blks = %Hu\n", eiter->max_ndata_blks, idx_ndata_blks, state->ndata_blks);
-#endif /* QAK */
 
         /* Check if we have any super blocks yet */
         if(tparam->sblk_info[eiter->max_sblk_idx].ndblks >= cparam->sup_blk_min_data_ptrs) {
@@ -1649,9 +1614,6 @@ HDfprintf(stderr, "eiter->max_ndata_blks = %Hu, idx_ndata_blks = %Hu, state->nda
                 state->nsuper_blks = (eiter->max_sblk_idx - idx_sblk_idx) + 1;
             else
                 state->nsuper_blks = (eiter->max_sblk_idx - eiter->idx_blk_nsblks) + 1;
-#ifdef QAK
-HDfprintf(stderr, "eiter->idx_blk_nsblks = %Hu, state->nsuper_blks = %Hu\n", eiter->idx_blk_nsblks, state->nsuper_blks);
-#endif /* QAK */
         } /* end if */
     } /* end else */
 
@@ -2355,7 +2317,7 @@ test_skip_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam,
 
         /* Compute super block index for element index */
         /* (same eqn. as in H5EA__dblock_sblk_idx()) */
-        sblk_idx = H5VM_log2_gen((uint64_t)(((idx - cparam->idx_blk_elmts) / cparam->data_blk_min_elmts) + 1));
+        sblk_idx = H5VM__log2_gen((uint64_t)(((idx - cparam->idx_blk_elmts) / cparam->data_blk_min_elmts) + 1));
         state.nelmts = (hsize_t)cparam->idx_blk_elmts + tparam->sblk_info[sblk_idx].dblk_nelmts;
         state.ndata_blks = (hsize_t)1;
         state.nsuper_blks = (hsize_t)1;

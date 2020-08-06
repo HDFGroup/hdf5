@@ -112,7 +112,7 @@ static herr_t H5D__bt2_found_cb(const void *nrecord, void *op_data);
  */
 static herr_t H5D__bt2_remove_cb(const void *nrecord, void *_udata);
 
-/* Callback for H5B2_modify() which is called in H5D__bt2_idx_insert() */
+/* Callback for H5B2_update() which is called in H5D__bt2_idx_insert() */
 static herr_t H5D__bt2_mod_cb(void *_record, void *_op_data, hbool_t *changed);
 
 /* Chunked layout indexing callbacks for v2 B-tree indexing */
@@ -256,7 +256,7 @@ H5D__bt2_crt_context(void *_udata)
      * Compute the size required for encoding the size of a chunk,
      * allowing for an extra byte, in case the filter makes the chunk larger.
      */
-    ctx->chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)udata->chunk_size) + 8) / 8);
+    ctx->chunk_size_len = 1 + ((H5VM__log2_gen((uint64_t)udata->chunk_size) + 8) / 8);
     if(ctx->chunk_size_len > 8)
         ctx->chunk_size_len = 8;
 
@@ -355,7 +355,7 @@ H5D__bt2_compare(const void *_udata, const void *_rec2, int *result)
     HDassert(rec2);
 
     /* Compare the offsets but ignore the other fields */
-    *result = H5VM_vector_cmp_u(udata->ndims, rec1->scaled, rec2->scaled);
+    *result = H5VM__vector_cmp_u(udata->ndims, rec1->scaled, rec2->scaled);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__bt2_compare() */
@@ -773,7 +773,7 @@ H5D__bt2_idx_create(const H5D_chk_idx_info_t *idx_info)
 	 * Compute the size required for encoding the size of a chunk,
          * allowing for an extra byte, in case the filter makes the chunk larger.
          */
-        chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)idx_info->layout->size) + 8) / 8);
+        chunk_size_len = 1 + ((H5VM__log2_gen((uint64_t)idx_info->layout->size) + 8) / 8);
         if(chunk_size_len > 8)
             chunk_size_len = 8;
 
@@ -837,7 +837,7 @@ H5D__bt2_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
  * Function:	H5D__bt2_mod_cb
  *
  * Purpose:	Modify record for dataset chunk when it is found in a v2 B-tree.
- * 		This is the callback for H5B2_modify() which is called in
+ * 		This is the callback for H5B2_update() which is called in
  *		H5D__bt2_idx_insert().
  *
  * Return:	Success:	non-negative
@@ -1265,13 +1265,6 @@ done:
  *		Failure:	negative
  *
  * Programmer:	Vailin Choi; June 2010
- *
- * Modifications:
- *	Vailin Choi; March 2011
- *	Initialize size of an unfiltered chunk.
- *	This is a fix for for the assertion failure in:
- *	[src/H5FSsection.c:968: H5FS_sect_link_size: Assertion `bin < sinfo->nbins' failed.]
- *	which is uncovered by test_unlink_chunked_dataset() in test/unlink.c
  *
  *-------------------------------------------------------------------------
  */

@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Robb Matzke <matzke@llnl.gov>
+ * Programmer:	Robb Matzke
  *		Monday, November 10, 1997
  *
  * Purpose:	Implements a family of files that acts as a single hdf5
@@ -79,67 +79,67 @@ typedef struct H5FD_family_fapl_t {
 } H5FD_family_fapl_t;
 
 /* Callback prototypes */
-static herr_t H5FD_family_term(void);
-static void *H5FD_family_fapl_get(H5FD_t *_file);
-static void *H5FD_family_fapl_copy(const void *_old_fa);
-static herr_t H5FD_family_fapl_free(void *_fa);
-static hsize_t H5FD_family_sb_size(H5FD_t *_file);
-static herr_t H5FD_family_sb_encode(H5FD_t *_file, char *name/*out*/,
+static herr_t H5FD__family_term(void);
+static void *H5FD__family_fapl_get(H5FD_t *_file);
+static void *H5FD__family_fapl_copy(const void *_old_fa);
+static herr_t H5FD__family_fapl_free(void *_fa);
+static hsize_t H5FD__family_sb_size(H5FD_t *_file);
+static herr_t H5FD__family_sb_encode(H5FD_t *_file, char *name/*out*/,
 		     unsigned char *buf/*out*/);
-static herr_t H5FD_family_sb_decode(H5FD_t *_file, const char *name,
+static herr_t H5FD__family_sb_decode(H5FD_t *_file, const char *name,
                     const unsigned char *buf);
-static H5FD_t *H5FD_family_open(const char *name, unsigned flags,
+static H5FD_t *H5FD__family_open(const char *name, unsigned flags,
 				hid_t fapl_id, haddr_t maxaddr);
-static herr_t H5FD_family_close(H5FD_t *_file);
-static int H5FD_family_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
-static herr_t H5FD_family_query(const H5FD_t *_f1, unsigned long *flags);
-static haddr_t H5FD_family_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
-static herr_t H5FD_family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa);
-static haddr_t H5FD_family_get_eof(const H5FD_t *_file, H5FD_mem_t type);
-static herr_t  H5FD_family_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
-static herr_t H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
+static herr_t H5FD__family_close(H5FD_t *_file);
+static int H5FD__family_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
+static herr_t H5FD__family_query(const H5FD_t *_f1, unsigned long *flags);
+static haddr_t H5FD__family_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
+static herr_t H5FD__family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa);
+static haddr_t H5FD__family_get_eof(const H5FD_t *_file, H5FD_mem_t type);
+static herr_t H5FD__family_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
+static herr_t H5FD__family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 			       size_t size, void *_buf/*out*/);
-static herr_t H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
+static herr_t H5FD__family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 				size_t size, const void *_buf);
-static herr_t H5FD_family_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t H5FD_family_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t H5FD_family_lock(H5FD_t *_file, hbool_t rw);
-static herr_t H5FD_family_unlock(H5FD_t *_file);
+static herr_t H5FD__family_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t H5FD__family_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t H5FD__family_lock(H5FD_t *_file, hbool_t rw);
+static herr_t H5FD__family_unlock(H5FD_t *_file);
 
 /* The class struct */
 static const H5FD_class_t H5FD_family_g = {
-    "family",					/*name			*/
-    HADDR_MAX,					/*maxaddr		*/
-    H5F_CLOSE_WEAK,				/*fc_degree		*/
-    H5FD_family_term,                           /*terminate             */
-    H5FD_family_sb_size,			/*sb_size		*/
-    H5FD_family_sb_encode,			/*sb_encode		*/
-    H5FD_family_sb_decode,			/*sb_decode		*/
-    sizeof(H5FD_family_fapl_t),			/*fapl_size		*/
-    H5FD_family_fapl_get,			/*fapl_get		*/
-    H5FD_family_fapl_copy,			/*fapl_copy		*/
-    H5FD_family_fapl_free,			/*fapl_free		*/
-    0,						/*dxpl_size		*/
-    NULL,					/*dxpl_copy		*/
-    NULL,					/*dxpl_free		*/
-    H5FD_family_open,				/*open			*/
-    H5FD_family_close,				/*close			*/
-    H5FD_family_cmp,				/*cmp			*/
-    H5FD_family_query,		                /*query			*/
-    NULL,					/*get_type_map		*/
-    NULL,					/*alloc			*/
-    NULL,					/*free			*/
-    H5FD_family_get_eoa,			/*get_eoa		*/
-    H5FD_family_set_eoa,			/*set_eoa		*/
-    H5FD_family_get_eof,			/*get_eof		*/
-    H5FD_family_get_handle,                     /*get_handle            */
-    H5FD_family_read,				/*read			*/
-    H5FD_family_write,				/*write			*/
-    H5FD_family_flush,				/*flush			*/
-    H5FD_family_truncate,			/*truncate		*/
-    H5FD_family_lock,                           /*lock                  */
-    H5FD_family_unlock,                         /*unlock                */
-    H5FD_FLMAP_DICHOTOMY                        /*fl_map                */
+    "family",					/* name			*/
+    HADDR_MAX,					/* maxaddr		*/
+    H5F_CLOSE_WEAK,				/* fc_degree		*/
+    H5FD__family_term,                          /* terminate            */
+    H5FD__family_sb_size,			/* sb_size		*/
+    H5FD__family_sb_encode,			/* sb_encode		*/
+    H5FD__family_sb_decode,			/* sb_decode		*/
+    sizeof(H5FD_family_fapl_t),			/* fapl_size		*/
+    H5FD__family_fapl_get,			/* fapl_get		*/
+    H5FD__family_fapl_copy,			/* fapl_copy		*/
+    H5FD__family_fapl_free,			/* fapl_free		*/
+    0,						/* dxpl_size		*/
+    NULL,					/* dxpl_copy		*/
+    NULL,					/* dxpl_free		*/
+    H5FD__family_open,				/* open			*/
+    H5FD__family_close,				/* close		*/
+    H5FD__family_cmp,				/* cmp			*/
+    H5FD__family_query,		                /* query		*/
+    NULL,					/* get_type_map		*/
+    NULL,					/* alloc		*/
+    NULL,					/* free			*/
+    H5FD__family_get_eoa,			/* get_eoa		*/
+    H5FD__family_set_eoa,			/* set_eoa		*/
+    H5FD__family_get_eof,			/* get_eof		*/
+    H5FD__family_get_handle,                    /* get_handle           */
+    H5FD__family_read,				/* read			*/
+    H5FD__family_write,				/* write		*/
+    H5FD__family_flush,				/* flush		*/
+    H5FD__family_truncate,			/* truncate		*/
+    H5FD__family_lock,                          /* lock                 */
+    H5FD__family_unlock,                        /* unlock               */
+    H5FD_FLMAP_DICHOTOMY                        /* fl_map               */
 };
 
 
@@ -203,7 +203,7 @@ done:
 
 
 /*---------------------------------------------------------------------------
- * Function:	H5FD_family_term
+ * Function:	H5FD__family_term
  *
  * Purpose:	Shut down the VFD
  *
@@ -215,15 +215,15 @@ done:
  *---------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_term(void)
+H5FD__family_term(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Reset VFL ID */
     H5FD_FAMILY_g=0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5FD_family_term() */
+} /* end H5FD__family_term() */
 
 
 /*-------------------------------------------------------------------------
@@ -241,13 +241,6 @@ H5FD_family_term(void)
  *
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
- *
- * Modifications:
- *
- *		Raymond Lu
- * 		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property
- *		list.
  *
  *-------------------------------------------------------------------------
  */
@@ -296,13 +289,6 @@ done:
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *
- *		Raymond Lu
- * 		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property
- *		list.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -335,7 +321,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_family_fapl_get
+ * Function:	H5FD__family_fapl_get
  *
  * Purpose:	Gets a file access property list which could be used to
  *		create an identical file.
@@ -347,19 +333,17 @@ done:
  * Programmer:	Robb Matzke
  *              Friday, August 13, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
-H5FD_family_fapl_get(H5FD_t *_file)
+H5FD__family_fapl_get(H5FD_t *_file)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     H5FD_family_fapl_t	*fa = NULL;
     H5P_genplist_t *plist;      /* Property list pointer */
     void *ret_value = NULL;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     if(NULL == (fa = (H5FD_family_fapl_t *)H5MM_calloc(sizeof(H5FD_family_fapl_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -373,16 +357,16 @@ H5FD_family_fapl_get(H5FD_t *_file)
     ret_value=fa;
 
 done:
-    if(ret_value==NULL) {
+    if(ret_value==NULL)
         if(fa!=NULL)
             H5MM_xfree(fa);
-    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_family_fapl_copy
+ * Function:	H5FD__family_fapl_copy
  *
  * Purpose:	Copies the family-specific file access properties.
  *
@@ -393,19 +377,17 @@ done:
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
-H5FD_family_fapl_copy(const void *_old_fa)
+H5FD__family_fapl_copy(const void *_old_fa)
 {
     const H5FD_family_fapl_t *old_fa = (const H5FD_family_fapl_t*)_old_fa;
     H5FD_family_fapl_t *new_fa = NULL;
     H5P_genplist_t *plist;      /* Property list pointer */
     void *ret_value = NULL;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     if(NULL == (new_fa = (H5FD_family_fapl_t *)H5MM_malloc(sizeof(H5FD_family_fapl_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -428,16 +410,16 @@ H5FD_family_fapl_copy(const void *_old_fa)
     ret_value=new_fa;
 
 done:
-    if(ret_value==NULL) {
+    if(ret_value==NULL)
         if(new_fa!=NULL)
             H5MM_xfree(new_fa);
-    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_family_fapl_free
+ * Function:	H5FD__family_fapl_free
  *
  * Purpose:	Frees the family-specific file access properties.
  *
@@ -448,17 +430,15 @@ done:
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_fapl_free(void *_fa)
+H5FD__family_fapl_free(void *_fa)
 {
     H5FD_family_fapl_t	*fa = (H5FD_family_fapl_t*)_fa;
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     if(H5I_dec_ref(fa->memb_fapl_id) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close driver ID")
@@ -470,7 +450,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_family_sb_size
+ * Function:	H5FD__family_sb_size
  *
  * Purpose:	Returns the size of the private information to be stored in
  *		the superblock.
@@ -482,14 +462,12 @@ done:
  * Programmer:	Raymond Lu
  *              Tuesday, May 10, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static hsize_t
-H5FD_family_sb_size(H5FD_t H5_ATTR_UNUSED *_file)
+H5FD__family_sb_size(H5FD_t H5_ATTR_UNUSED *_file)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* 8 bytes field for the size of member file size field should be
      * enough for now. */
@@ -498,7 +476,7 @@ H5FD_family_sb_size(H5FD_t H5_ATTR_UNUSED *_file)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_family_sb_encode
+ * Function:	H5FD__family_sb_encode
  *
  * Purpose:	Encode driver information for the superblock. The NAME
  *		argument is a nine-byte buffer which will be initialized with
@@ -513,16 +491,14 @@ H5FD_family_sb_size(H5FD_t H5_ATTR_UNUSED *_file)
  * Programmer:	Raymond Lu
  *              Tuesday, May 10, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_sb_encode(H5FD_t *_file, char *name/*out*/, unsigned char *buf/*out*/)
+H5FD__family_sb_encode(H5FD_t *_file, char *name/*out*/, unsigned char *buf/*out*/)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Name and version number */
     HDstrncpy(name, "NCSAfami", (size_t)9);
@@ -532,18 +508,18 @@ H5FD_family_sb_encode(H5FD_t *_file, char *name/*out*/, unsigned char *buf/*out*
      * This is to guarantee backward compatibility.  If a file is created with
      * v1.6 library and the driver info isn't saved in the superblock.  We open
      * it with v1.8, the FILE->MEMB_SIZE will be the actual size of the first
-     * member file (see H5FD_family_open).  So it isn't safe to use FILE->MEMB_SIZE.
+     * member file (see H5FD__family_open).  So it isn't safe to use FILE->MEMB_SIZE.
      * If the file is created with v1.8, the correctness of FILE->PMEM_SIZE is
-     * checked in H5FD_family_sb_decode. SLU - 2009/3/21
+     * checked in H5FD__family_sb_decode. SLU - 2009/3/21
      */
     UINT64ENCODE(buf, (uint64_t)file->pmem_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5FD_family_sb_encode() */
+} /* end H5FD__family_sb_encode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_family_sb_decode
+ * Function:	H5FD__family_sb_decode
  *
  * Purpose:	This function has 2 separate purpose.  One is to decodes the
  *              superblock information for this driver. The NAME argument is
@@ -561,13 +537,13 @@ H5FD_family_sb_encode(H5FD_t *_file, char *name/*out*/, unsigned char *buf/*out*
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_sb_decode(H5FD_t *_file, const char H5_ATTR_UNUSED *name, const unsigned char *buf)
+H5FD__family_sb_decode(H5FD_t *_file, const char H5_ATTR_UNUSED *name, const unsigned char *buf)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     uint64_t            msize;
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Read member file size. Skip name template for now although it's saved. */
     UINT64DECODE(buf, msize);
@@ -594,11 +570,11 @@ H5FD_family_sb_decode(H5FD_t *_file, const char H5_ATTR_UNUSED *name, const unsi
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_family_sb_decode() */
+} /* end H5FD__family_sb_decode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_family_open
+ * Function:	H5FD__family_open
  *
  * Purpose:	Creates and/or opens a family of files as an HDF5 file.
  *
@@ -621,7 +597,7 @@ done:
  */
 H5_GCC_DIAG_OFF(format-nonliteral)
 static H5FD_t *
-H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
+H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id,
 		 haddr_t maxaddr)
 {
     H5FD_family_t	*file = NULL;
@@ -630,7 +606,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
     unsigned		t_flags = flags & ~H5F_ACC_CREAT;
     H5FD_t     		*ret_value = NULL;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     if(!name || !*name)
@@ -769,12 +745,12 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_family_open() */
+} /* end H5FD__family_open() */
 H5_GCC_DIAG_ON(format-nonliteral)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_family_close
+ * Function:	H5FD__family_close
  *
  * Purpose:	Closes a family of files.
  *
@@ -790,14 +766,14 @@ H5_GCC_DIAG_ON(format-nonliteral)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_close(H5FD_t *_file)
+H5FD__family_close(H5FD_t *_file)
 {
     H5FD_family_t *file = (H5FD_family_t*)_file;
     unsigned	nerrors = 0;    /* Number of errors while closing member files */
     unsigned	u;              /* Local index variable */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Close as many members as possible. Use private function here to avoid clearing
      * the error stack. We need the error message to indicate wrong member file size. */
@@ -822,11 +798,11 @@ H5FD_family_close(H5FD_t *_file)
     H5MM_xfree(file);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_family_close() */
+} /* end H5FD__family_close() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_family_cmp
+ * Function:	H5FD__family_cmp
  *
  * Purpose:	Compares two file families to see if they are the same. It
  *		does this by comparing the first member of the two families.
@@ -839,18 +815,16 @@ H5FD_family_close(H5FD_t *_file)
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
-H5FD_family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
+H5FD__family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 {
     const H5FD_family_t	*f1 = (const H5FD_family_t*)_f1;
     const H5FD_family_t	*f2 = (const H5FD_family_t*)_f2;
     int ret_value = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(f1->nmembs >= 1 && f1->memb[0]);
     HDassert(f2->nmembs >= 1 && f2->memb[0]);
@@ -858,11 +832,11 @@ H5FD_family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     ret_value = H5FDcmp(f1->memb[0], f2->memb[0]);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_family_cmp() */
+} /* end H5FD__family_cmp() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_family_query
+ * Function:	H5FD__family_query
  *
  * Purpose:	Set the flags that this VFL driver is capable of supporting.
  *              (listed in H5FDpublic.h)
@@ -876,11 +850,11 @@ H5FD_family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_query(const H5FD_t * _file, unsigned long *flags /* out */)
+H5FD__family_query(const H5FD_t * _file, unsigned long *flags /* out */)
 {
     const H5FD_family_t	*file = (const H5FD_family_t*)_file;    /* Family VFD info */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
@@ -896,11 +870,11 @@ H5FD_family_query(const H5FD_t * _file, unsigned long *flags /* out */)
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5FD_family_query() */
+} /* end H5FD__family_query() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_family_get_eoa
+ * Function:	H5FD__family_get_eoa
  *
  * Purpose:	Returns the end-of-address marker for the file. The EOA
  *		marker is the first address past the last byte allocated in
@@ -913,26 +887,21 @@ H5FD_family_query(const H5FD_t * _file, unsigned long *flags /* out */)
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *              Raymond Lu
- *              21 Dec. 2006
- *              Added the parameter TYPE.  It's only used for MULTI driver.
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_family_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
+H5FD__family_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_family_t	*file = (const H5FD_family_t*)_file;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     FUNC_LEAVE_NOAPI(file->eoa)
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_family_set_eoa
+ * Function:	H5FD__family_set_eoa
  *
  * Purpose:	Set the end-of-address marker for the file.
  *
@@ -942,11 +911,6 @@ H5FD_family_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  *
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
- *
- * Modifications:
- *              Raymond Lu
- *              21 Dec. 2006
- *              Added the parameter TYPE.  It's only used for MULTI driver.
  *
  *-------------------------------------------------------------------------
  */
@@ -958,7 +922,7 @@ H5FD_family_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  */
 H5_GCC_DIAG_OFF(format-nonliteral)
 static herr_t
-H5FD_family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
+H5FD__family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     haddr_t		addr = abs_eoa;
@@ -966,7 +930,7 @@ H5FD_family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
     unsigned		u;                      /* Local index variable */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Allocate space for the member name buffer */
     if(NULL == (memb_name = (char *)H5MM_malloc(H5FD_FAM_MEMB_NAME_BUF_SIZE)))
@@ -1027,7 +991,7 @@ H5_GCC_DIAG_ON(format-nonliteral)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_family_get_eof
+ * Function:	H5FD__family_get_eof
  *
  * Purpose:	Returns the end-of-file marker, which is the greater of
  *		either the total family size or the current EOA marker.
@@ -1041,19 +1005,17 @@ H5_GCC_DIAG_ON(format-nonliteral)
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_family_get_eof(const H5FD_t *_file, H5FD_mem_t type)
+H5FD__family_get_eof(const H5FD_t *_file, H5FD_mem_t type)
 {
     const H5FD_family_t	*file = (const H5FD_family_t*)_file;
     haddr_t		eof=0;
     int			i;      /* Local index variable */
     haddr_t ret_value = HADDR_UNDEF;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /*
      * Find the last member that has a non-zero EOF and break out of the loop
@@ -1085,7 +1047,7 @@ H5FD_family_get_eof(const H5FD_t *_file, H5FD_mem_t type)
 
 
 /*-------------------------------------------------------------------------
- * Function:       H5FD_family_get_handle
+ * Function:       H5FD__family_get_handle
  *
  * Purpose:        Returns the file handle of FAMILY file driver.
  *
@@ -1094,12 +1056,10 @@ H5FD_family_get_eof(const H5FD_t *_file, H5FD_mem_t type)
  * Programmer:     Raymond Lu
  *                 Sept. 16, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
+H5FD__family_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
 {
     H5FD_family_t       *file = (H5FD_family_t *)_file;
     H5P_genplist_t      *plist;
@@ -1107,7 +1067,7 @@ H5FD_family_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
     int                 memb;
     herr_t              ret_value = FAIL;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Get the plist structure and family offset */
     if(NULL == (plist = H5P_object_verify(fapl, H5P_FILE_ACCESS)))
@@ -1127,7 +1087,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_family_read
+ * Function:	H5FD__family_read
  *
  * Purpose:	Reads SIZE bytes of data from FILE beginning at address ADDR
  *		into buffer BUF according to data transfer properties in
@@ -1141,12 +1101,10 @@ done:
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
+H5FD__family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
 		 void *_buf/*out*/)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
@@ -1158,7 +1116,7 @@ H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
     H5P_genplist_t      *plist;      /* Property list pointer */
     herr_t              ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /*
      * Get the member data transfer property list. If the transfer property
@@ -1197,7 +1155,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_family_write
+ * Function:	H5FD__family_write
  *
  * Purpose:	Writes SIZE bytes of data to FILE beginning at address ADDR
  *		from buffer BUF according to data transfer properties in
@@ -1210,12 +1168,10 @@ done:
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
+H5FD__family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
 		  const void *_buf)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
@@ -1227,7 +1183,7 @@ H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, s
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /*
      * Get the member data transfer property list. If the transfer property
@@ -1266,7 +1222,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_family_flush
+ * Function:	H5FD__family_flush
  *
  * Purpose:	Flushes all family members.
  *
@@ -1279,13 +1235,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
+H5FD__family_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     unsigned		u, nerrors = 0;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     for(u = 0; u < file->nmembs; u++)
         if(file->memb[u] && H5FD_flush(file->memb[u], closing) < 0)
@@ -1296,11 +1252,11 @@ H5FD_family_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_family_flush() */
+} /* end H5FD__family_flush() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_family_truncate
+ * Function:	H5FD__family_truncate
  *
  * Purpose:	Truncates all family members.
  *
@@ -1314,13 +1270,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
+H5FD__family_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     unsigned		u, nerrors = 0;
     herr_t      	ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     for(u = 0; u < file->nmembs; u++)
         if(file->memb[u] && H5FD_truncate(file->memb[u], closing) < 0)
@@ -1331,11 +1287,11 @@ H5FD_family_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closin
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_family_truncate() */
+} /* end H5FD__family_truncate() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_family_lock
+ * Function:    H5FD__family_lock
  *
  * Purpose:     To place an advisory lock on a file.
  *              The lock type to apply depends on the parameter "rw":
@@ -1349,13 +1305,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_lock(H5FD_t *_file, hbool_t rw)
+H5FD__family_lock(H5FD_t *_file, hbool_t rw)
 {
     H5FD_family_t *file = (H5FD_family_t *)_file;   /* VFD file struct */
     unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;	        /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Place the lock on all the member files */
     for(u = 0; u < file->nmembs; u++)
@@ -1379,11 +1335,11 @@ H5FD_family_lock(H5FD_t *_file, hbool_t rw)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_family_lock() */
+} /* end H5FD__family_lock() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_family_unlock
+ * Function:    H5FD__family_unlock
  *
  * Purpose:     To remove the existing lock on the file
  *
@@ -1394,13 +1350,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_unlock(H5FD_t *_file)
+H5FD__family_unlock(H5FD_t *_file)
 {
     H5FD_family_t *file = (H5FD_family_t *)_file;   	/* VFD file struct */
     unsigned	u;                                      /* Local index variable */
     herr_t ret_value = SUCCEED;                         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Remove the lock on the member files */
     for(u = 0; u < file->nmembs; u++)
@@ -1410,5 +1366,5 @@ H5FD_family_unlock(H5FD_t *_file)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_family_unlock() */
+} /* end H5FD__family_unlock() */
 

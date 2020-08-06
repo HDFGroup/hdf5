@@ -15,7 +15,7 @@
  *
  * Created:		H5Ftest.c
  *			Jan  3 2007
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		File testing routines.
  *

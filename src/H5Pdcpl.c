@@ -1029,7 +1029,7 @@ H5P__dcrt_fill_value_enc(const void *value, void **_pp, size_t *size)
 
             /* Encode the size of a size_t */
             enc_value = (uint64_t)dt_size;
-            enc_size = H5VM_limit_enc_size(enc_value);
+            enc_size = H5VM__limit_enc_size(enc_value);
             HDassert(enc_size < 256);
 
             /* Encode the size */
@@ -1058,7 +1058,7 @@ H5P__dcrt_fill_value_enc(const void *value, void **_pp, size_t *size)
             if(H5T_encode(fill->type, NULL, &dt_size) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
             enc_value = (uint64_t)dt_size;
-            enc_size = H5VM_limit_enc_size(enc_value);
+            enc_size = H5VM__limit_enc_size(enc_value);
         }
         *size += (1 + enc_size);
         *size += dt_size;
@@ -1414,7 +1414,7 @@ H5P__dcrt_ext_file_list_enc(const void *value, void **_pp, size_t *size)
     if(NULL != *pp) {
         /* Encode number of slots used */
         enc_value = (uint64_t)efl->nused;
-        enc_size = H5VM_limit_enc_size(enc_value);
+        enc_size = H5VM__limit_enc_size(enc_value);
         HDassert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -1424,7 +1424,7 @@ H5P__dcrt_ext_file_list_enc(const void *value, void **_pp, size_t *size)
             /* Calculate length of slot name and encode it */
             len = HDstrlen(efl->slot[u].name) + 1;
             enc_value = (uint64_t)len;
-            enc_size = H5VM_limit_enc_size(enc_value);
+            enc_size = H5VM__limit_enc_size(enc_value);
             HDassert(enc_size < 256);
             *(*pp)++ = (uint8_t)enc_size;
             UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -1435,14 +1435,14 @@ H5P__dcrt_ext_file_list_enc(const void *value, void **_pp, size_t *size)
 
             /* Encode offset */
             enc_value = (uint64_t)efl->slot[u].offset;
-            enc_size = H5VM_limit_enc_size(enc_value);
+            enc_size = H5VM__limit_enc_size(enc_value);
             HDassert(enc_size < 256);
             *(*pp)++ = (uint8_t)enc_size;
             UINT64ENCODE_VAR(*pp, enc_value, enc_size);
 
             /* encode size */
             enc_value = (uint64_t)efl->slot[u].size;
-            enc_size = H5VM_limit_enc_size(enc_value);
+            enc_size = H5VM__limit_enc_size(enc_value);
             HDassert(enc_size < 256);
             *(*pp)++ = (uint8_t)enc_size;
             UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -1450,13 +1450,13 @@ H5P__dcrt_ext_file_list_enc(const void *value, void **_pp, size_t *size)
     } /* end if */
 
     /* Calculate size needed for encoding */
-    *size += (1 + H5VM_limit_enc_size((uint64_t)efl->nused));
+    *size += (1 + H5VM__limit_enc_size((uint64_t)efl->nused));
     for(u = 0; u < efl->nused; u++) {
         len = HDstrlen(efl->slot[u].name) + 1;
-        *size += (1 + H5VM_limit_enc_size((uint64_t)len));
+        *size += (1 + H5VM__limit_enc_size((uint64_t)len));
         *size += len;
-        *size += (1 + H5VM_limit_enc_size((uint64_t)efl->slot[u].offset));
-        *size += (1 + H5VM_limit_enc_size((uint64_t)efl->slot[u].size));
+        *size += (1 + H5VM__limit_enc_size((uint64_t)efl->slot[u].offset));
+        *size += (1 + H5VM__limit_enc_size((uint64_t)efl->slot[u].size));
     } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1847,13 +1847,6 @@ H5P__init_def_layout(void)
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
  *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for
- *              generic property list.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1928,13 +1921,6 @@ done:
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
  *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and get property for
- *              generic property list.
- *
  *-------------------------------------------------------------------------
  */
 H5D_layout_t
@@ -1977,13 +1963,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
- *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for
- *              generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -2059,13 +2038,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
- *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for
- *              generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -2828,13 +2800,6 @@ done:
  * Programmer:	Robb Matzke
  *              Tuesday, March  3, 1998
  *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for
- *              generic property list.
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -2884,13 +2849,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *              Tuesday, March  3, 1998
- *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and get property for
- *              generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -3013,8 +2971,6 @@ done:
  * Programmer:	Kent Yang
  *              Wednesday, November 13, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3057,9 +3013,6 @@ done:
  *
  * Programmer:  Xiaowen Wu
  *              Wednesday, December 22, 2004
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -3119,9 +3072,6 @@ done:
  *
  * Programmer:  Xiaowen Wu
  *              Thursday, April 14, 2005
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -3526,9 +3476,6 @@ done:
  * Programmer:	Raymond Lu
  * 		Wednesday, January 16, 2002
  *
- * Modifications:
- *
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3709,9 +3656,6 @@ done:
  * Programmer:  Raymond Lu
  *              Wednesday, January 16, 2002
  *
- * Modifications:
- *
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3760,8 +3704,6 @@ done:
  * Programmer: Jacob Smith
  *             2018 August 14
  *
- * Modifications: None.
- *
  *-----------------------------------------------------------------------------
  */
 herr_t
@@ -3806,8 +3748,6 @@ done:
  *
  * Programmer: Jacob Smith
  *             2018 August 14
- *
- * Modifications: None.
  *
  *-----------------------------------------------------------------------------
  */

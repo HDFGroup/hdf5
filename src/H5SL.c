@@ -568,10 +568,10 @@ struct H5SL_t {
 };
 
 /* Static functions */
-static H5SL_node_t * H5SL_new_node(void *item, const void *key, uint32_t hashval);
-static H5SL_node_t *H5SL_insert_common(H5SL_t *slist, void *item, const void *key);
-static herr_t H5SL_release_common(H5SL_t *slist, H5SL_operator_t op, void *op_data);
-static herr_t H5SL_close_common(H5SL_t *slist, H5SL_operator_t op, void *op_data);
+static H5SL_node_t *H5SL__new_node(void *item, const void *key, uint32_t hashval);
+static H5SL_node_t *H5SL__insert_common(H5SL_t *slist, void *item, const void *key);
+static herr_t H5SL__release_common(H5SL_t *slist, H5SL_operator_t op, void *op_data);
+static herr_t H5SL__close_common(H5SL_t *slist, H5SL_operator_t op, void *op_data);
 
 /* Package initialization variable */
 hbool_t H5_PKG_INIT_VAR = FALSE;
@@ -642,7 +642,8 @@ H5SL__init_package(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-int H5SL_term_package(void)
+int
+H5SL_term_package(void)
 {
     int     n = 0;
 
@@ -682,11 +683,11 @@ int H5SL_term_package(void)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5SL_new_node
+    H5SL__new_node
  PURPOSE
     Create a new skip list node of level 0
  USAGE
-    H5SL_node_t *H5SL_new_node(item,key,hasval)
+    H5SL_node_t *H5SL__new_node(item,key,hasval)
         void *item;             IN: Pointer to item info for node
         void *key;              IN: Pointer to key info for node
         uint32_t hashval;       IN: Hash value for node
@@ -703,11 +704,11 @@ int H5SL_term_package(void)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static H5SL_node_t *
-H5SL_new_node(void *item, const void *key, uint32_t hashval)
+H5SL__new_node(void *item, const void *key, uint32_t hashval)
 {
     H5SL_node_t *ret_value = NULL;      /* New skip list node */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Allocate the node */
     if(NULL == (ret_value = (H5SL_node_t *)H5FL_MALLOC(H5SL_node_t)))
@@ -727,16 +728,16 @@ H5SL_new_node(void *item, const void *key, uint32_t hashval)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5SL_new_node() */
+} /* end H5SL__new_node() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5SL_insert_common
+    H5SL__insert_common
  PURPOSE
     Common code for inserting an object into a skip list
  USAGE
-    H5SL_node_t *H5SL_insert_common(slist,item,key)
+    H5SL_node_t *H5SL__insert_common(slist,item,key)
         H5SL_t *slist;          IN/OUT: Pointer to skip list
         void *item;             IN: Item to insert
         void *key;              IN: Key for item to insert
@@ -752,14 +753,14 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static H5SL_node_t *
-H5SL_insert_common(H5SL_t *slist, void *item, const void *key)
+H5SL__insert_common(H5SL_t *slist, void *item, const void *key)
 {
     H5SL_node_t *x;                             /* Current node to examine */
     H5SL_node_t *prev;                          /* Node before the new node */
     uint32_t hashval = 0;                       /* Hash value for key */
     H5SL_node_t *ret_value;                     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(slist);
@@ -822,7 +823,7 @@ H5SL_insert_common(H5SL_t *slist, void *item, const void *key)
         slist->curr_level = 0;
 
     /* Create new node of level 0 */
-    if(NULL == (x = H5SL_new_node(item, key, hashval)))
+    if(NULL == (x = H5SL__new_node(item, key, hashval)))
         HGOTO_ERROR(H5E_SLIST ,H5E_NOSPACE, NULL, "can't create new skip list node")
 
     /* Update the links */
@@ -844,16 +845,16 @@ H5SL_insert_common(H5SL_t *slist, void *item, const void *key)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5SL_insert_common() */
+} /* end H5SL__insert_common() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5SL_release_common
+    H5SL__release_common
  PURPOSE
     Release all nodes from a skip list, optionally calling a 'free' operator
  USAGE
-    herr_t H5SL_release_common(slist,op,opdata)
+    herr_t H5SL__release_common(slist,op,opdata)
         H5SL_t *slist;            IN/OUT: Pointer to skip list to release nodes
         H5SL_operator_t op;     IN: Callback function to free item & key
         void *op_data;          IN/OUT: Pointer to application data for callback
@@ -872,12 +873,12 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5SL_release_common(H5SL_t *slist, H5SL_operator_t op, void *op_data)
+H5SL__release_common(H5SL_t *slist, H5SL_operator_t op, void *op_data)
 {
     H5SL_node_t *node, *next_node;      /* Pointers to skip list nodes */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(slist);
@@ -917,16 +918,16 @@ H5SL_release_common(H5SL_t *slist, H5SL_operator_t op, void *op_data)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5SL_release_common() */
+} /* end H5SL__release_common() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5SL_close_common
+    H5SL__close_common
  PURPOSE
     Close a skip list, deallocating it and potentially freeing all its nodes.
  USAGE
-    herr_t H5SL_close_common(slist,op,opdata)
+    herr_t H5SL__close_common(slist,op,opdata)
         H5SL_t *slist;          IN/OUT: Pointer to skip list to close
         H5SL_operator_t op;     IN: Callback function to free item & key
         void *op_data;          IN/OUT: Pointer to application data for callback
@@ -944,11 +945,11 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5SL_close_common(H5SL_t *slist, H5SL_operator_t op, void *op_data)
+H5SL__close_common(H5SL_t *slist, H5SL_operator_t op, void *op_data)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(slist);
@@ -957,7 +958,7 @@ H5SL_close_common(H5SL_t *slist, H5SL_operator_t op, void *op_data)
     /* (Pre-condition) */
 
     /* Free skip list nodes */
-    if(H5SL_release_common(slist, op, op_data) < 0)
+    if(H5SL__release_common(slist, op, op_data) < 0)
         HGOTO_ERROR(H5E_SLIST, H5E_CANTFREE, FAIL, "can't release skip list nodes")
 
     /* Release header node */
@@ -969,7 +970,7 @@ H5SL_close_common(H5SL_t *slist, H5SL_operator_t op, void *op_data)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5SL_close_common() */
+} /* end H5SL__close_common() */
 
 
 /*--------------------------------------------------------------------------
@@ -1016,7 +1017,7 @@ H5SL_create(H5SL_type_t type, H5SL_cmp_t cmp)
     new_slist->safe_iterating = FALSE;
 
     /* Allocate the header node */
-    if(NULL == (header = H5SL_new_node(NULL, NULL, (uint32_t)ULONG_MAX)))
+    if(NULL == (header = H5SL__new_node(NULL, NULL, (uint32_t)ULONG_MAX)))
         HGOTO_ERROR(H5E_SLIST ,H5E_NOSPACE, NULL, "can't create new skip list node")
 
     /* Initialize header node's forward pointer */
@@ -1118,8 +1119,8 @@ H5SL_insert(H5SL_t *slist, void *item, const void *key)
     /* (Pre-condition) */
 
     /* Insert item into skip list */
-    if(H5SL_insert_common(slist,item,key)==NULL)
-        HGOTO_ERROR(H5E_SLIST,H5E_CANTINSERT,FAIL,"can't create new skip list node")
+    if(NULL == H5SL__insert_common(slist, item, key))
+        HGOTO_ERROR(H5E_SLIST, H5E_CANTINSERT, FAIL, "can't create new skip list node")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1168,8 +1169,8 @@ H5SL_add(H5SL_t *slist, void *item, const void *key)
     /* (Pre-condition) */
 
     /* Insert item into skip list */
-    if((ret_value=H5SL_insert_common(slist,item,key))==NULL)
-        HGOTO_ERROR(H5E_SLIST,H5E_CANTINSERT,NULL,"can't create new skip list node")
+    if(NULL == (ret_value = H5SL__insert_common(slist, item, key)))
+        HGOTO_ERROR(H5E_SLIST, H5E_CANTINSERT, NULL, "can't create new skip list node")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2241,7 +2242,9 @@ H5SL_iterate(H5SL_t *slist, H5SL_operator_t op, void *op_data)
 herr_t
 H5SL_release(H5SL_t *slist)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(slist);
@@ -2253,8 +2256,10 @@ H5SL_release(H5SL_t *slist)
     /* (Pre-condition) */
 
     /* Free skip list nodes */
-    H5SL_release_common(slist,NULL,NULL); /* always succeeds */
+    if(H5SL__release_common(slist, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SLIST, H5E_CANTFREE, FAIL, "can't release skip list nodes")
 
+done:
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SL_release() */
 
@@ -2290,7 +2295,9 @@ H5SL_release(H5SL_t *slist)
 herr_t
 H5SL_free(H5SL_t *slist, H5SL_operator_t op, void *op_data)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(slist);
@@ -2302,9 +2309,11 @@ H5SL_free(H5SL_t *slist, H5SL_operator_t op, void *op_data)
     /* (Pre-condition) */
 
     /* Free skip list nodes */
-    H5SL_release_common(slist,op,op_data); /* always succeeds */
+    if(H5SL__release_common(slist, op, op_data) < 0)
+        HGOTO_ERROR(H5E_SLIST, H5E_CANTFREE, FAIL, "can't release skip list nodes")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SL_free() */
 
 
@@ -2516,9 +2525,9 @@ done:
 herr_t
 H5SL_destroy(H5SL_t *slist, H5SL_operator_t op, void *op_data)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(slist);
@@ -2527,8 +2536,10 @@ H5SL_destroy(H5SL_t *slist, H5SL_operator_t op, void *op_data)
     /* (Pre-condition) */
 
     /* Close skip list */
-    (void)H5SL_close_common(slist,op,op_data); /* always succeeds */
+    if(H5SL__close_common(slist, op, op_data) < 0)
+        HGOTO_ERROR(H5E_SLIST, H5E_CANTCLOSEOBJ, FAIL, "can't close skip list")
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SL_destroy() */
 
@@ -2555,7 +2566,9 @@ H5SL_destroy(H5SL_t *slist, H5SL_operator_t op, void *op_data)
 herr_t
 H5SL_close(H5SL_t *slist)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(slist);
@@ -2564,8 +2577,10 @@ H5SL_close(H5SL_t *slist)
     /* (Pre-condition) */
 
     /* Close skip list */
-    (void)H5SL_close_common(slist,NULL,NULL); /* always succeeds */
+    if(H5SL__close_common(slist, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SLIST, H5E_CANTCLOSEOBJ, FAIL, "can't close skip list")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SL_close() */
 

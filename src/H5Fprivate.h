@@ -116,16 +116,16 @@ typedef struct H5F_t H5F_t;
 /* Encode a 64-bit unsigned integer and its length into a variable-sized buffer */
 /* (Assumes that the high bits of the integer are zero) */
 #  define UINT64ENCODE_VARLEN(p, n) {                          \
-   uint64_t __n = (uint64_t)(n);                                  \
-   unsigned _s = H5VM_limit_enc_size(__n);                      \
-                                        \
-   *(p)++ = (uint8_t)_s;                              \
-   UINT64ENCODE_VAR(p, __n, _s);                              \
+   uint64_t __n = (uint64_t)(n);                               \
+   unsigned _s = H5VM__limit_enc_size(__n);                    \
+                                                               \
+   *(p)++ = (uint8_t)_s;                                       \
+   UINT64ENCODE_VAR(p, __n, _s);                               \
 }
 
 #  define H5_ENCODE_UNSIGNED(p, n) {                          \
-    HDcompile_assert(sizeof(unsigned) == sizeof(uint32_t));              \
-    UINT32ENCODE(p, n)                                  \
+    HDcompile_assert(sizeof(unsigned) == sizeof(uint32_t));   \
+    UINT32ENCODE(p, n)                                        \
 }
 
 /* Assumes the endianness of uint64_t is the same as double */

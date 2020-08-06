@@ -36,7 +36,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FApkg.h"		/* Fixed Arrays				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5VMprivate.h"         /* Vector functions			*/
+#include "H5VMprivate.h"        /* Vector functions			*/
 
 
 /****************/

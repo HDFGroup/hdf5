@@ -11723,9 +11723,9 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_power2up
  *
- * Purpose:     Tests that the H5VM_power2up(n) function does not result in an
+ * Purpose:     Tests that the H5VM__power2up(n) function does not result in an
  *              infinite loop when input n exceeds 2^63. (HDFFV-10217)
- *              H5VM_power2up() is used to calculate the next power of 2 for
+ *              H5VM__power2up() is used to calculate the next power of 2 for
  *              a dataset's scaled dimension sizes.
  *
  * Return:      Success: 0

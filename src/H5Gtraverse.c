@@ -15,7 +15,7 @@
  *
  * Created:		H5Gtraverse.c
  *			Sep 13 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Functions for traversing group hierarchy
  *
@@ -355,7 +355,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov 20 2006
  *
  *-------------------------------------------------------------------------
@@ -464,7 +463,6 @@ done:
  *				resolved.
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug 11 1997
  *
  *-------------------------------------------------------------------------
@@ -811,7 +809,6 @@ done:
  *				traversed.
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep 13 2005
  *
  *-------------------------------------------------------------------------
@@ -835,7 +832,7 @@ H5G_traverse(const H5G_loc_t *loc, const char *name, unsigned target, H5G_traver
 
     /* Retrieve the original # of soft / UD links that are able to be traversed
      * (So that multiple calls to H5G_traverse don't incorrectly look
-     *  like they've traversed too many.  Nested calls, like in H5L_move(),
+     *  like they've traversed too many.  Nested calls, like in H5L__move(),
      *  may need their own mechanism to set & reset the # of links to traverse)
      */
     if(H5CX_get_nlinks(&orig_nlinks) < 0)

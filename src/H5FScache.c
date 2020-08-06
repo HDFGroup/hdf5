@@ -15,7 +15,7 @@
  *
  * Created:     H5FScache.c
  *              May  2 2006
- *              Quincey Koziol <koziol@hdfgroup.org>
+ *              Quincey Koziol
  *
  * Purpose:     Implement file free space metadata cache methods.
  *
@@ -163,7 +163,6 @@ const H5AC_class_t H5AC_FSPACE_SINFO[1] = {{
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              August 14, 2013
  *
  *-------------------------------------------------------------------------
@@ -235,7 +234,6 @@ H5FS__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		August 18 2013
  *
  *-------------------------------------------------------------------------
@@ -350,7 +348,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              August 14, 2013
  *
  *-------------------------------------------------------------------------
@@ -796,7 +793,6 @@ H5FS__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UN
  * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@lbl.gov
  *              January 3, 2017
  *
  *-------------------------------------------------------------------------
@@ -860,7 +856,6 @@ done:
  *              Failure:        FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May  2 2006
  *
  *-------------------------------------------------------------------------
@@ -1032,7 +1027,7 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
         unsigned sect_cnt_size;                             /* The size of the section size counts */
 
         /* Compute the size of the section counts */
-        sect_cnt_size = H5VM_limit_enc_size((uint64_t)fspace->serial_sect_count);
+        sect_cnt_size = H5VM__limit_enc_size((uint64_t)fspace->serial_sect_count);
 
         /* Reset the section count, the "add" routine will update it */
         old_tot_sect_count = fspace->tot_sect_count;
@@ -1132,7 +1127,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              August 14, 2013
  *
  *-------------------------------------------------------------------------
@@ -1300,7 +1294,7 @@ H5FS__cache_sinfo_serialize(const H5F_t *f, void *_image, size_t len,
     /* Set up user data for iterator */
     udata.sinfo = sinfo;
     udata.image = &image;
-    udata.sect_cnt_size = H5VM_limit_enc_size((uint64_t)sinfo->fspace->serial_sect_count);
+    udata.sect_cnt_size = H5VM__limit_enc_size((uint64_t)sinfo->fspace->serial_sect_count);
 
     /* Iterate over all the bins */
     for(bin = 0; bin < sinfo->nbins; bin++)

@@ -15,7 +15,7 @@
  *
  * Created:		H5B2int.c
  *			Feb 27 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Internal routines for managing v2 B-trees.
  *
@@ -97,7 +97,6 @@ H5FL_SEQ_EXTERN(H5B2_node_info_t);
  *              record to locate is greater than all records to search).
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  3 2005
  *
  *-------------------------------------------------------------------------
@@ -141,7 +140,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 28 2006
  *
  *-------------------------------------------------------------------------
@@ -336,7 +334,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  3 2005
  *
  *-------------------------------------------------------------------------
@@ -370,7 +367,7 @@ H5B2__split_root(H5B2_hdr_t *hdr)
     hdr->node_info[hdr->depth].merge_nrec = (hdr->node_info[hdr->depth].max_nrec * hdr->merge_percent) / 100;
     hdr->node_info[hdr->depth].cum_max_nrec = ((hdr->node_info[hdr->depth].max_nrec + 1) *
         hdr->node_info[hdr->depth - 1].cum_max_nrec) + hdr->node_info[hdr->depth].max_nrec;
-    u_max_nrec_size = H5VM_limit_enc_size((uint64_t)hdr->node_info[hdr->depth].cum_max_nrec);
+    u_max_nrec_size = H5VM__limit_enc_size((uint64_t)hdr->node_info[hdr->depth].cum_max_nrec);
     H5_CHECKED_ASSIGN(hdr->node_info[hdr->depth].cum_max_nrec_size, uint8_t, u_max_nrec_size, unsigned)
     if(NULL == (hdr->node_info[hdr->depth].nat_rec_fac = H5FL_fac_init(hdr->cls->nrec_size * hdr->node_info[hdr->depth].max_nrec)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create node native key block factory")
@@ -414,7 +411,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  9 2005
  *
  *-------------------------------------------------------------------------
@@ -658,7 +654,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  9 2005
  *
  *-------------------------------------------------------------------------
@@ -1032,7 +1027,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar  4 2005
  *
  *-------------------------------------------------------------------------
@@ -1195,7 +1189,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar  4 2005
  *
  *-------------------------------------------------------------------------
@@ -1437,7 +1430,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 23 2015
  *
  *-------------------------------------------------------------------------
@@ -1497,7 +1489,6 @@ done:
  * Return:	Value from callback, non-negative on success, negative on error
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 11 2005
  *
  *-------------------------------------------------------------------------
@@ -1612,7 +1603,6 @@ done:
  * Return:	Value from callback, non-negative on success, negative on error
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar  9 2005
  *
  *-------------------------------------------------------------------------
@@ -1779,7 +1769,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *		koziol@lbl.gov
  *		Dec  1 2016
  *
  *-------------------------------------------------------------------------
@@ -1877,7 +1866,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *		koziol@lbl.gov
  *		Dec  1 2016
  *
  *-------------------------------------------------------------------------

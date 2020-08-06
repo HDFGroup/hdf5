@@ -178,30 +178,29 @@ H5O__copy_expand_ref_object1(H5O_loc_t *src_oloc, const void *buf_src,
         H5O_token_t tmp_token = { 0 };
 
         /* If data is not initialized, copy zeros and skip */
-        if(0 == HDmemcmp(src_buf, zeros, buf_size)) {
+        if(0 == HDmemcmp(src_buf, zeros, buf_size))
             HDmemset(dst_buf, 0, buf_size);
-            continue;
-        }
+        else {
+            /* Set up for the object copy for the reference */
+            if(H5R__decode_token_obj_compat(src_buf, &buf_size, &tmp_token, token_size) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode src object address")
+            if(H5VL_native_token_to_addr(src_oloc->file, H5I_FILE, tmp_token, &src_oloc->addr) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTUNSERIALIZE, FAIL, "can't deserialize object token into address")
 
-        /* Set up for the object copy for the reference */
-        if(H5R__decode_token_obj_compat(src_buf, &buf_size, &tmp_token, token_size) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode src object address")
-        if(H5VL_native_token_to_addr(src_oloc->file, H5I_FILE, tmp_token, &src_oloc->addr) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTUNSERIALIZE, FAIL, "can't deserialize object token into address")
+            if(!H5F_addr_defined(src_oloc->addr) || src_oloc->addr == 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "undefined reference pointer")
+            dst_oloc->addr = HADDR_UNDEF;
 
-        if(!H5F_addr_defined(src_oloc->addr) || src_oloc->addr == 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "undefined reference pointer")
-        dst_oloc->addr = HADDR_UNDEF;
+            /* Attempt to copy object from source to destination file */
+            if(H5O__copy_obj_by_ref(src_oloc, dst_oloc, dst_root_loc, cpy_info) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
-        /* Attempt to copy object from source to destination file */
-        if(H5O__copy_obj_by_ref(src_oloc, dst_oloc, dst_root_loc, cpy_info) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
-
-        /* Set the object reference info for the destination file */
-        if(H5VL_native_addr_to_token(dst_oloc->file, H5I_FILE, dst_oloc->addr, &tmp_token) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTSERIALIZE, FAIL, "can't serialize address into object token")
-        if(H5R__encode_token_obj_compat((const H5O_token_t *)&tmp_token, token_size, dst_buf, &buf_size) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to encode dst object address")
+            /* Set the object reference info for the destination file */
+            if(H5VL_native_addr_to_token(dst_oloc->file, H5I_FILE, dst_oloc->addr, &tmp_token) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTSERIALIZE, FAIL, "can't serialize address into object token")
+            if(H5R__encode_token_obj_compat((const H5O_token_t *)&tmp_token, token_size, dst_buf, &buf_size) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to encode dst object address")
+        } /* end else */
     } /* end for */
 
 done:
@@ -242,42 +241,41 @@ H5O__copy_expand_ref_region1(H5O_loc_t *src_oloc, const void *buf_src,
         uint8_t *q;
 
         /* If data is not initialized, copy zeros and skip */
-        if(0 == HDmemcmp(src_buf, zeros, buf_size)) {
+        if(0 == HDmemcmp(src_buf, zeros, buf_size))
             HDmemset(dst_buf, 0, buf_size);
-            continue;
-        }
+        else {
+            /* Read from heap */
+            if(H5R__decode_heap(src_oloc->file, src_buf, &buf_size, &data, &data_size) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode dataset region information")
 
-        /* Read from heap */
-        if(H5R__decode_heap(src_oloc->file, src_buf, &buf_size, &data, &data_size) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode dataset region information")
+            /* Get object address */
+            p = (const uint8_t *)data;
+            H5F_addr_decode(src_oloc->file, &p, &src_oloc->addr);
+            if(!H5F_addr_defined(src_oloc->addr) || src_oloc->addr == 0) {
+                H5MM_free(data);
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "undefined reference pointer")
+            }
+            dst_oloc->addr = HADDR_UNDEF;
 
-        /* Get object address */
-        p = (const uint8_t *)data;
-        H5F_addr_decode(src_oloc->file, &p, &src_oloc->addr);
-        if(!H5F_addr_defined(src_oloc->addr) || src_oloc->addr == 0) {
+            /* Attempt to copy object from source to destination file */
+            if(H5O__copy_obj_by_ref(src_oloc, dst_oloc, dst_root_loc, cpy_info) < 0) {
+                H5MM_free(data);
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
+            } /* end if */
+
+            /* Serialize object addr */
+            q = (uint8_t *)data;
+            H5F_addr_encode(dst_oloc->file, &q, dst_oloc->addr);
+
+            /* Write to heap */
+            if(H5R__encode_heap(dst_oloc->file, dst_buf, &buf_size, data, (size_t)data_size) < 0) {
+                H5MM_free(data);
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode dataset region information")
+            }
+
+            /* Free the buffer allocated in H5R__decode_heap() */
             H5MM_free(data);
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "undefined reference pointer")
-        }
-        dst_oloc->addr = HADDR_UNDEF;
-
-        /* Attempt to copy object from source to destination file */
-        if(H5O__copy_obj_by_ref(src_oloc, dst_oloc, dst_root_loc, cpy_info) < 0) {
-            H5MM_free(data);
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
-        } /* end if */
-
-        /* Serialize object addr */
-        q = (uint8_t *)data;
-        H5F_addr_encode(dst_oloc->file, &q, dst_oloc->addr);
-
-        /* Write to heap */
-        if(H5R__encode_heap(dst_oloc->file, dst_buf, &buf_size, data, (size_t)data_size) < 0) {
-            H5MM_free(data);
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode dataset region information")
-        }
-
-        /* Free the buffer allocated in H5R__decode_heap() */
-        H5MM_free(data);
+        } /* end else */
     } /* end for */
 
 done:

@@ -15,7 +15,7 @@
  *
  * Created:		H5Plapl.c
  *			July 14 2006
- *			James Laird <jlaird@ncsa.uiuc.edu>
+ *			James Laird
  *
  * Purpose:		Link access property list class routines
  *
@@ -373,7 +373,7 @@ H5P__lacc_elink_fapl_enc(const void *value, void **_pp, size_t *size)
 
             /* encode the length of the plist */
             enc_value = (uint64_t)fapl_size;
-            enc_size = H5VM_limit_enc_size(enc_value);
+            enc_size = H5VM__limit_enc_size(enc_value);
             HDassert(enc_size < 256);
             *(*pp)++ = (uint8_t)enc_size;
             UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -384,7 +384,7 @@ H5P__lacc_elink_fapl_enc(const void *value, void **_pp, size_t *size)
 
             *pp += fapl_size;
         }
-        fapl_size += (1 + H5VM_limit_enc_size((uint64_t)fapl_size));
+        fapl_size += (1 + H5VM__limit_enc_size((uint64_t)fapl_size));
     } /* end if */
 
     *size += (1 + fapl_size);      /* Non-default flag, plus encoded property list size */
@@ -705,7 +705,7 @@ H5P__lacc_elink_pref_enc(const void *value, void **_pp, size_t *size)
         len = HDstrlen(elink_pref);
 
     enc_value = (uint64_t)len;
-    enc_size = H5VM_limit_enc_size(enc_value);
+    enc_size = H5VM__limit_enc_size(enc_value);
     HDassert(enc_size < 256);
 
     if(NULL != *pp) {
