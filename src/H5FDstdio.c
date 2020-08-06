@@ -242,7 +242,7 @@ H5FD_stdio_init(void)
 
     /* Check the use disabled file locks environment variable */
     lock_env_var = getenv("HDF5_USE_FILE_LOCKING");
-    if(lock_env_var && !strcmp(lock_env_var, "BEST-EFFORT"))
+    if(lock_env_var && !strcmp(lock_env_var, "BEST_EFFORT"))
         ignore_disabled_file_locks_s = 1;       /* Override: Ignore disabled locks */
     else if(lock_env_var && (!strcmp(lock_env_var, "TRUE") || !strcmp(lock_env_var, "1")))
         ignore_disabled_file_locks_s = 0;       /* Override: Don't ignore disabled locks */
