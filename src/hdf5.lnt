@@ -1,9 +1,9 @@
 // Lint options shared by both PC-Lint for Windows and Flexelint for Linux
 
 // Turn off warnings about not using the inlined H5V* functions:
--esym(528, H5VM_vector_reduce_product, H5VM_vector_inc)
--esym(528, H5VM_vector_cmp, H5VM_vector_cmp_s, H5VM_vector_cmp_u)
--esym(528, H5VM_vector_zerop_s, H5VM_vector_zerop_u)
+-esym(528, H5VM_vector_reduce_product, H5VM__vector_inc)
+-esym(528, H5VM__vector_cmp_s)
+-esym(528, H5VM__vector_zerop_s, H5VM__vector_zerop_u)
 
 // Suppress message about using 'goto' in a few functions
 -efunc(801,H5_term_library,H5_trace)

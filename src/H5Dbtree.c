@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer: 	Robb Matzke <matzke@llnl.gov>
+/* Programmer: 	Robb Matzke
  *	       	Wednesday, October  8, 1997
  *
  * Purpose:	v1 B-tree indexed (chunked) I/O functions.  The chunks are
@@ -338,7 +338,7 @@ H5D__btree_cmp2(void *_lt_key, void *_udata, void *_rt_key)
     HDassert(udata->layout->ndims > 0 && udata->layout->ndims <= H5O_LAYOUT_NDIMS);
 
     /* Compare the offsets but ignore the other fields */
-    ret_value = H5VM_vector_cmp_u(udata->layout->ndims, lt_key->scaled, rt_key->scaled);
+    ret_value = H5VM__vector_cmp_u(udata->layout->ndims, lt_key->scaled, rt_key->scaled);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__btree_cmp2() */
@@ -620,8 +620,7 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer: Robb Matzke
- *             Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer:  Pedro Vicente
  * 		March 28, 2002
  *
  *-------------------------------------------------------------------------

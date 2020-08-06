@@ -15,7 +15,7 @@
  *
  * Created:             H5Ostab.c
  *                      Aug  6 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             Symbol table messages.
  *
@@ -90,7 +90,6 @@ H5FL_DEFINE_STATIC(H5O_stab_t);
  *              Failure:        NULL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug  6 1997
  *
  *-------------------------------------------------------------------------
@@ -103,7 +102,7 @@ H5O__stab_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
     H5O_stab_t          *stab = NULL;
     void                *ret_value = NULL;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(f);
@@ -119,10 +118,9 @@ H5O__stab_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
     ret_value = stab;
 
 done:
-    if(ret_value == NULL) {
+    if(ret_value == NULL)
         if(stab != NULL)
             stab = H5FL_FREE(H5O_stab_t, stab);
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__stab_decode() */
@@ -136,7 +134,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug  6 1997
  *
  *-------------------------------------------------------------------------
@@ -172,7 +169,6 @@ H5O__stab_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
  *              Failure:        NULL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug  6 1997
  *
  *-------------------------------------------------------------------------
@@ -214,7 +210,6 @@ done:
  *              Failure:        zero
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug  6 1997
  *
  *-------------------------------------------------------------------------
@@ -415,10 +410,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug  6 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

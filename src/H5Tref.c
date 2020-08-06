@@ -1207,7 +1207,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5T_ref_reclaim
+ * Function:    H5T__ref_reclaim
  *
  * Purpose: Internal routine to free reference datatypes
  *
@@ -1216,11 +1216,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_ref_reclaim(void *elem, const H5T_t *dt)
+H5T__ref_reclaim(void *elem, const H5T_t *dt)
 {
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
+    H5T_REF_LOG_DEBUG("");
 
     /* Sanity checks */
     HDassert(elem);
@@ -1231,5 +1232,5 @@ H5T_ref_reclaim(void *elem, const H5T_t *dt)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_ref_reclaim() */
+} /* end H5T__ref_reclaim() */
 

@@ -15,7 +15,7 @@
  *
  * Created:   H5Pocpl.c
  *            Nov 28 2006
- *            Quincey Koziol <koziol@hdfgroup.org>
+ *            Quincey Koziol
  *
  * Purpose:   Object creation property list class routines
  *
@@ -581,13 +581,6 @@ done:
  * Programmer:  Quincey Koziol
  *              Friday, April  5, 2003
  *
- * Modifications:
- *
- *              Neil Fortner
- *              Thursday, March 26, 2009
- *              Overloaded to accept gcpl's as well as dcpl's and moved to
- *              H5Pocpl.c
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -651,18 +644,6 @@ done:
  *
  * Programmer:    Robb Matzke
  *              Wednesday, April 15, 1998
- *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for
- *              generic property list.
- *
- *              Neil Fortner
- *              Wednesday, May 20, 2009
- *              Overloaded to accept gcpl's as well as dcpl's and moved to
- *              H5Pocpl.c
  *
  *-------------------------------------------------------------------------
  */
@@ -781,13 +762,6 @@ done:
  * Programmer:    Robb Matzke
  *              Tuesday, August  4, 1998
  *
- * Modifications:
- *
- *              Neil Fortner
- *              Wednesday, May 20, 2009
- *              Overloaded to accept gcpl's as well as dcpl's and moved to
- *              H5Pocpl.c
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -837,13 +811,6 @@ done:
  *
  * Programmer:    Robb Matzke
  *              Wednesday, April 15, 1998
- *
- * Modifications:
- *
- *              Neil Fortner
- *              Wednesday, May 20, 2009
- *              Overloaded to accept gcpl's as well as dcpl's and moved to
- *              H5Pocpl.c
  *
  *-------------------------------------------------------------------------
  */
@@ -980,13 +947,6 @@ done:
  * Programmer:    Quincey Koziol
  *              Friday, April  5, 2003
  *
- * Modifications:
- *
- *              Neil Fortner
- *              Thursday, May 21, 2009
- *              Overloaded to accept gcpl's as well as dcpl's and moved to
- *              H5Pocpl.c
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1048,13 +1008,6 @@ done:
  *
  * Programmer:    Quincey Koziol
  *              Tuesday, April  8, 2003
- *
- * Modifications:
- *
- *              Neil Fortner
- *              Thursday, May 21, 2009
- *              Overloaded to accept gcpl's as well as dcpl's and moved to
- *              H5Pocpl.c
  *
  *-------------------------------------------------------------------------
  */
@@ -1132,13 +1085,6 @@ done:
  * Programmer:  Pedro Vicente
  *              January 26, 2004
  *
- * Modifications:
- *
- *              Neil Fortner
- *              Thursday, May 21, 2009
- *              Overloaded to accept gcpl's as well as dcpl's and moved to
- *              H5Pocpl.c
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1191,18 +1137,6 @@ done:
  * Programmer:    Robb Matzke
  *              Wednesday, April 15, 1998
  *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for
- *              generic property list.
- *
- *              Neil Fortner
- *              Thursday, March 26, 2009
- *              Overloaded to accept gcpl's as well as dcpl's and moved to
- *              H5Pocpl.c
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1250,13 +1184,6 @@ done:
  *
  * Programmer:    Raymond Lu
  *              Dec 19, 2002
- *
- * Modifications:
- *
- *              Neil Fortner
- *              Wednesday, May 6, 2009
- *              Overloaded to accept gcpl's as well as dcpl's and moved to
- *              H5Pocpl.c
  *
  *-------------------------------------------------------------------------
  */
@@ -1480,7 +1407,7 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
 
         /* encode nused value */
         enc_value = (uint64_t)pline->nused;
-        enc_size = H5VM_limit_enc_size(enc_value);
+        enc_size = H5VM__limit_enc_size(enc_value);
         HDassert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -1510,7 +1437,7 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
 
             /* encode cd_nelmts */
             enc_value = (uint64_t)pline->filter[u].cd_nelmts;
-            enc_size = H5VM_limit_enc_size(enc_value);
+            enc_size = H5VM__limit_enc_size(enc_value);
             HDassert(enc_size < 256);
             *(*pp)++ = (uint8_t)enc_size;
             UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -1523,12 +1450,12 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
 
     /* calculate size required for encoding */
     *size += 1;
-    *size += (1 + H5VM_limit_enc_size((uint64_t)pline->nused));
+    *size += (1 + H5VM__limit_enc_size((uint64_t)pline->nused));
     for(u = 0; u < pline->nused; u++) {
         *size += (sizeof(int32_t) + sizeof(unsigned) + 1);
         if(NULL != pline->filter[u].name)
             *size += H5Z_COMMON_NAME_LEN;
-        *size += (1 + H5VM_limit_enc_size((uint64_t)pline->filter[u].cd_nelmts));
+        *size += (1 + H5VM__limit_enc_size((uint64_t)pline->filter[u].cd_nelmts));
         *size += pline->filter[u].cd_nelmts * sizeof(unsigned);
     } /* end for */
 

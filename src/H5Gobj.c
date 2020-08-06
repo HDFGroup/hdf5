@@ -15,7 +15,7 @@
  *
  * Created:		H5Gobj.c
  *			Sep  5 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Functions for abstract handling of objects in groups.
  *
@@ -85,7 +85,7 @@ typedef struct {
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5G_obj_compact_to_dense_cb(const void *_mesg, unsigned idx,
+static herr_t H5G__obj_compact_to_dense_cb(const void *_mesg, unsigned idx,
     void *_udata);
 static herr_t H5G__obj_remove_update_linfo(const H5O_loc_t *oloc, H5O_linfo_t *linfo);
 
@@ -114,7 +114,6 @@ static herr_t H5G__obj_remove_update_linfo(const H5O_loc_t *oloc, H5O_linfo_t *l
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Sep 29 2005
  *
  *-------------------------------------------------------------------------
@@ -169,7 +168,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Sep 29 2005
  *
  *-------------------------------------------------------------------------
@@ -304,7 +302,6 @@ done:
  *              Failure:        FAIL if error occurred
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar 11 2007
  *
  *-------------------------------------------------------------------------
@@ -360,7 +357,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_obj_compact_to_dense_cb
+ * Function:	H5G__obj_compact_to_dense_cb
  *
  * Purpose:	Callback routine for converting "compact" to "dense"
  *              link storage form.
@@ -368,19 +365,18 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Aug 30 2005
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_obj_compact_to_dense_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_udata)
+H5G__obj_compact_to_dense_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_udata)
 {
     const H5O_link_t *lnk = (const H5O_link_t *)_mesg;  /* Pointer to link */
     H5G_obj_oh_it_ud1_t *udata = (H5G_obj_oh_it_ud1_t *)_udata;     /* 'User data' passed in */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(udata->oh_addr)
+    FUNC_ENTER_STATIC_TAG(udata->oh_addr)
 
     /* check arguments */
     HDassert(lnk);
@@ -392,11 +388,11 @@ H5G_obj_compact_to_dense_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void
 
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
-} /* end H5G_obj_compact_to_dense_cb() */
+} /* end H5G__obj_compact_to_dense_cb() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_obj_stab_to_new_cb
+ * Function:	H5G__obj_stab_to_new_cb
  *
  * Purpose:	Callback routine for converting "symbol table" link storage to
  *              "new format" storage (either "compact" or "dense" storage).
@@ -404,18 +400,17 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sept 16 2006
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_obj_stab_to_new_cb(const H5O_link_t *lnk, void *_udata)
+H5G__obj_stab_to_new_cb(const H5O_link_t *lnk, void *_udata)
 {
     H5G_obj_stab_it_ud1_t *udata = (H5G_obj_stab_it_ud1_t *)_udata;     /* 'User data' passed in */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check arguments */
     HDassert(lnk);
@@ -428,7 +423,7 @@ H5G_obj_stab_to_new_cb(const H5O_link_t *lnk, void *_udata)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_obj_stab_to_new_cb() */
+} /* end H5G__obj_stab_to_new_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -443,7 +438,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep  6 2005
  *
  *-------------------------------------------------------------------------
@@ -529,7 +523,7 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
 
             /* Iterate over the 'link' messages, inserting them into the dense link storage  */
             op.op_type = H5O_MESG_OP_APP;
-            op.u.app_op = H5G_obj_compact_to_dense_cb;
+            op.u.app_op = H5G__obj_compact_to_dense_cb;
             if(H5O_msg_iterate(grp_oloc, H5O_LINK_ID, &op, &udata) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over links")
 
@@ -561,7 +555,7 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
             udata.grp_oloc = grp_oloc;
 
             /* Iterate through all links in "old format" group and insert them into new format */
-            if(H5G__stab_iterate(grp_oloc, H5_ITER_NATIVE, (hsize_t)0, NULL, H5G_obj_stab_to_new_cb, &udata) < 0)
+            if(H5G__stab_iterate(grp_oloc, H5_ITER_NATIVE, (hsize_t)0, NULL, H5G__obj_stab_to_new_cb, &udata) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over old format links")
 
             /* Remove the symbol table message from the group */
@@ -710,7 +704,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov 27 2006
  *
  *-------------------------------------------------------------------------
@@ -1102,7 +1095,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep 26 2005
  *
  *-------------------------------------------------------------------------
@@ -1155,7 +1147,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov  6 2006
  *
  *-------------------------------------------------------------------------

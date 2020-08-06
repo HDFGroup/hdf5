@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Robb Matzke <matzke@llnl.gov>
+ * Programmer: Robb Matzke
  *	       Tuesday, November 25, 1997
  */
 
@@ -27,11 +27,11 @@
 #include "H5Opkg.h"             /* Object headers			*/
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_efl_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
+static void *H5O__efl_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
     unsigned *ioflags, size_t p_size, const uint8_t *p);
-static herr_t H5O_efl_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static void *H5O_efl_copy(const void *_mesg, void *_dest);
-static size_t H5O_efl_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static herr_t H5O__efl_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static void *H5O__efl_copy(const void *_mesg, void *_dest);
+static size_t H5O__efl_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O__efl_reset(void *_mesg);
 static void *H5O__efl_copy_file(H5F_t *file_src, void *mesg_src,
     H5F_t *file_dst, hbool_t *recompute_size, unsigned *mesg_flags,
@@ -45,10 +45,10 @@ const H5O_msg_class_t H5O_MSG_EFL[1] = {{
     "external file list",   	/*message name for debugging    */
     sizeof(H5O_efl_t),	    	/*native message size	    	*/
     0,				/* messages are sharable?       */
-    H5O_efl_decode,	    	/*decode message		*/
-    H5O_efl_encode,	    	/*encode message		*/
-    H5O_efl_copy,	    	/*copy native value		*/
-    H5O_efl_size,	    	/*size of message on disk	*/
+    H5O__efl_decode,	    	/*decode message		*/
+    H5O__efl_encode,	    	/*encode message		*/
+    H5O__efl_copy,	    	/*copy native value		*/
+    H5O__efl_size,	    	/*size of message on disk	*/
     H5O__efl_reset,	    	/*reset method		    	*/
     NULL,		        /* free method			*/
     NULL,		        /* file delete method		*/
@@ -67,7 +67,7 @@ const H5O_msg_class_t H5O_MSG_EFL[1] = {{
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_efl_decode
+ * Function:    H5O__efl_decode
  *
  * Purpose:	Decode an external file list message and return a pointer to
  *          the message (and some other data).
@@ -87,7 +87,7 @@ const H5O_msg_class_t H5O_MSG_EFL[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
+H5O__efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
     size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
@@ -98,7 +98,7 @@ H5O_efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
     size_t      u;                  /* Local index variable */
     void        *ret_value = NULL;  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(f);
@@ -177,11 +177,11 @@ done:
             H5MM_xfree(mesg);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_efl_decode() */
+} /* end H5O__efl_decode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_efl_encode
+ * Function:	H5O__efl_encode
  *
  * Purpose:	Encodes a message.
  *
@@ -193,12 +193,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_efl_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__efl_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_efl_t	*mesg = (const H5O_efl_t *)_mesg;
     size_t		u;      /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(f);
@@ -236,11 +236,11 @@ H5O_efl_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, cons
     } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_efl_encode() */
+} /* end H5O__efl_encode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_efl_copy
+ * Function:	H5O__efl_copy
  *
  * Purpose:	Copies a message from _MESG to _DEST, allocating _DEST if
  *		necessary.
@@ -255,7 +255,7 @@ H5O_efl_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, cons
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_efl_copy(const void *_mesg, void *_dest)
+H5O__efl_copy(const void *_mesg, void *_dest)
 {
     const H5O_efl_t	*mesg = (const H5O_efl_t *) _mesg;
     H5O_efl_t		*dest = (H5O_efl_t *) _dest;
@@ -263,7 +263,7 @@ H5O_efl_copy(const void *_mesg, void *_dest)
     hbool_t             slot_allocated = FALSE; /* Flag to indicate that dynamic allocation has begun */
     void                *ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(mesg);
@@ -303,11 +303,11 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_efl_copy() */
+} /* end H5O__efl_copy() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_efl_size
+ * Function:	H5O__efl_size
  *
  * Purpose:	Returns the size of the raw message in bytes not counting the
  *		message type or size fields, but only the data fields.	This
@@ -324,27 +324,27 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_efl_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
+H5O__efl_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_efl_t	*mesg = (const H5O_efl_t *) _mesg;
     size_t		ret_value = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(f);
     HDassert(mesg);
 
     ret_value = (size_t)H5F_SIZEOF_ADDR(f) +			/*heap address	*/
-		2 +					/*slots allocated*/
-		2 +					/*num slots used*/
-		4 +					/*reserved	*/
+		2 +					        /*slots allocated*/
+		2 +					        /*num slots used*/
+		4 +					        /*reserved	*/
 		mesg->nused * ((size_t)H5F_SIZEOF_SIZE(f) +	/*name offset	*/
 			       (size_t)H5F_SIZEOF_SIZE(f) +	/*file offset	*/
 			       (size_t)H5F_SIZEOF_SIZE(f));	/*file size	*/
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_efl_size() */
+} /* end H5O__efl_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -402,11 +402,11 @@ H5O__efl_reset(void *_mesg)
  *-------------------------------------------------------------------------
  */
 hsize_t
-H5O_efl_total_size (H5O_efl_t *efl)
+H5O_efl_total_size(H5O_efl_t *efl)
 {
     hsize_t	ret_value = 0, tmp;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI(0)
 
     if(efl->nused > 0 && H5O_EFL_UNLIMITED == efl->slot[efl->nused - 1].size)
 	ret_value = H5O_EFL_UNLIMITED;

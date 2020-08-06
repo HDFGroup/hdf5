@@ -15,7 +15,7 @@
  *
  * Created:		H5EA.c
  *			Jun 17 2008
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Implements an "extensible array" for storing elements
  *                      in an array whose high bounds can extend and shrink.
@@ -124,7 +124,6 @@ H5FL_BLK_DEFINE(ea_native_elmt);
  *              NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@lbl.gov
  *		Oct 10 2016
  *
  *-------------------------------------------------------------------------
@@ -190,7 +189,6 @@ END_FUNC(STATIC)  /* end H5EA__new() */
  *              NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jun 17 2008
  *
  *-------------------------------------------------------------------------
@@ -241,7 +239,6 @@ END_FUNC(PRIV)  /* end H5EA_create() */
  *              NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 28 2008
  *
  *-------------------------------------------------------------------------
@@ -283,7 +280,6 @@ END_FUNC(PRIV)  /* end H5EA_open() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 21 2008
  *
  *-------------------------------------------------------------------------
@@ -314,7 +310,6 @@ END_FUNC(PRIV)  /* end H5EA_get_nelmts() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 21 2008
  *
  *-------------------------------------------------------------------------
@@ -347,7 +342,6 @@ END_FUNC(PRIV)  /* end H5EA_get_addr() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep  9 2008
  *
  *-------------------------------------------------------------------------
@@ -559,7 +553,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend,
                         (page_idx * sblock->dblk_page_size);
 
                 /* Check if page has been initialized yet */
-                if(!H5VM_bit_get(sblock->page_init, page_init_idx)) {
+                if(!H5VM__bit_get(sblock->page_init, page_init_idx)) {
                     /* Check if we are allowed to create the thing */
                     if(0 == (thing_acc & H5AC__READ_ONLY_FLAG)) { /* i.e. r/w access */
                         /* Create the data block page */
@@ -567,7 +561,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend,
                             H5E_THROW(H5E_CANTCREATE, "unable to create data block page")
 
                         /* Mark data block page as initialized in super block */
-                        H5VM_bit_set(sblock->page_init, page_init_idx, TRUE);
+                        H5VM__bit_set(sblock->page_init, page_init_idx, TRUE);
                         sblock_cache_flags |= H5AC__DIRTIED_FLAG;
                     } /* end if */
                     else
@@ -656,7 +650,6 @@ END_FUNC(STATIC)  /* end H5EA__lookup_elmt() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep  9 2008
  *
  *-------------------------------------------------------------------------
@@ -721,7 +714,6 @@ END_FUNC(PRIV)  /* end H5EA_set() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 11 2008
  *
  *-------------------------------------------------------------------------
@@ -786,7 +778,6 @@ END_FUNC(PRIV)  /* end H5EA_get() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		May 27 2009
  *
  *-------------------------------------------------------------------------
@@ -836,7 +827,6 @@ END_FUNC(PRIV)  /* end H5EA_depend() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 21 2008
  *
  *-------------------------------------------------------------------------
@@ -937,7 +927,6 @@ END_FUNC(PRIV)  /* end H5EA_close() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 28 2008
  *
  *-------------------------------------------------------------------------

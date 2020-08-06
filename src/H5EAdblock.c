@@ -15,7 +15,7 @@
  *
  * Created:		H5EAdblock.c
  *			Sep 11 2008
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Data block routines for extensible arrays.
  *
@@ -92,7 +92,6 @@ H5FL_DEFINE_STATIC(H5EA_dblock_t);
  * Return:	Non-NULL pointer to data block on success/NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 11 2008
  *
  *-------------------------------------------------------------------------
@@ -153,7 +152,6 @@ END_FUNC(PKG)   /* end H5EA__dblock_alloc() */
  * Return:	Valid file address on success/HADDR_UNDEF on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep  9 2008
  *
  *-------------------------------------------------------------------------
@@ -248,7 +246,6 @@ END_FUNC(PKG)   /* end H5EA__dblock_create() */
  * Return:	Super block index on success/Can't fail
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 11 2008
  *
  *-------------------------------------------------------------------------
@@ -269,7 +266,7 @@ H5EA__dblock_sblk_idx(const H5EA_hdr_t *hdr, hsize_t idx))
 
     /* Determine the superblock information for the index */
     H5_CHECK_OVERFLOW(idx, /*From:*/hsize_t, /*To:*/uint64_t);
-    sblk_idx = H5VM_log2_gen((uint64_t)((idx / hdr->cparam.data_blk_min_elmts) + 1));
+    sblk_idx = H5VM__log2_gen((uint64_t)((idx / hdr->cparam.data_blk_min_elmts) + 1));
 
     /* Set return value */
     ret_value = sblk_idx;
@@ -285,7 +282,6 @@ END_FUNC(PKG)   /* end H5EA__dblock_sblk_idx() */
  * Return:	Non-NULL pointer to data block on success/NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 18 2008
  *
  *-------------------------------------------------------------------------
@@ -348,7 +344,6 @@ END_FUNC(PKG)   /* end H5EA__dblock_protect() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 11 2008
  *
  *-------------------------------------------------------------------------
@@ -379,7 +374,6 @@ END_FUNC(PKG)   /* end H5EA__dblock_unprotect() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 22 2008
  *
  *-------------------------------------------------------------------------
@@ -442,7 +436,6 @@ END_FUNC(PKG)   /* end H5EA__dblock_delete() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 11 2008
  *
  *-------------------------------------------------------------------------

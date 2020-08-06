@@ -15,7 +15,7 @@
  *
  * Created:        H5Pdapl.c
  *              October 27, 2008
- *              Neil Fortner <nfortne2@hdfgroup.org>
+ *              Neil Fortner
  *
  * Purpose:        Dataset access property list class routines
  *
@@ -322,7 +322,7 @@ H5P__dapl_vds_file_pref_enc(const void *value, void **_pp, size_t *size)
     uint64_t enc_value;
     unsigned enc_size;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
@@ -331,7 +331,7 @@ H5P__dapl_vds_file_pref_enc(const void *value, void **_pp, size_t *size)
         len = HDstrlen(vds_file_pref);
 
     enc_value = (uint64_t)len;
-    enc_size = H5VM_limit_enc_size(enc_value);
+    enc_size = H5VM__limit_enc_size(enc_value);
     HDassert(enc_size < 256);
 
     if(NULL != *pp) {
@@ -374,7 +374,7 @@ H5P__dapl_vds_file_pref_dec(const void **_pp, void *_value)
     unsigned enc_size;                  /* Size of encoded property */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(pp);
     HDassert(*pp);
@@ -418,7 +418,7 @@ static herr_t
 H5P__dapl_vds_file_pref_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
     size_t H5_ATTR_UNUSED size, void *value)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(value);
 
@@ -439,7 +439,7 @@ H5P__dapl_vds_file_pref_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNU
 static herr_t
 H5P__dapl_vds_file_pref_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(value);
 
@@ -466,7 +466,7 @@ H5P__dapl_vds_file_pref_cmp(const void *value1, const void *value2, size_t H5_AT
     const char *pref2 = *(const char * const *)value2;
     int ret_value = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     if(NULL == pref1 && NULL != pref2)
         HGOTO_DONE(1);
@@ -491,7 +491,7 @@ done:
 static herr_t
 H5P__dapl_vds_file_pref_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(value);
 
@@ -570,7 +570,7 @@ H5P__dapl_efile_pref_enc(const void *value, void **_pp, size_t *size)
     uint64_t enc_value;
     unsigned enc_size;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
@@ -579,7 +579,7 @@ H5P__dapl_efile_pref_enc(const void *value, void **_pp, size_t *size)
         len = HDstrlen(efile_pref);
 
     enc_value = (uint64_t)len;
-    enc_size = H5VM_limit_enc_size(enc_value);
+    enc_size = H5VM__limit_enc_size(enc_value);
     HDassert(enc_size < 256);
 
     if(NULL != *pp) {
@@ -622,7 +622,7 @@ H5P__dapl_efile_pref_dec(const void **_pp, void *_value)
     unsigned enc_size;                  /* Size of encoded property */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(pp);
     HDassert(*pp);
@@ -666,7 +666,7 @@ static herr_t
 H5P__dapl_efile_pref_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
     size_t H5_ATTR_UNUSED size, void *value)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(value);
 
@@ -687,7 +687,7 @@ H5P__dapl_efile_pref_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
 static herr_t
 H5P__dapl_efile_pref_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(value);
 
@@ -714,7 +714,7 @@ H5P__dapl_efile_pref_cmp(const void *value1, const void *value2, size_t H5_ATTR_
     const char *pref2 = *(const char * const *)value2;
     int ret_value = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     if(NULL == pref1 && NULL != pref2)
         HGOTO_DONE(1);
@@ -739,7 +739,7 @@ done:
 static herr_t
 H5P__dapl_efile_pref_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(value);
 
@@ -885,7 +885,7 @@ H5P__encode_chunk_cache_nslots(const void *value, void **_pp, size_t *size)
     uint8_t **pp = (uint8_t **)_pp;
     unsigned enc_size;      /* Size of encoded property */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
@@ -899,7 +899,7 @@ H5P__encode_chunk_cache_nslots(const void *value, void **_pp, size_t *size)
     } /* end if */
     else {
         enc_value = (uint64_t)*(const size_t *)value;
-        enc_size = H5VM_limit_enc_size(enc_value);
+        enc_size = H5VM__limit_enc_size(enc_value);
         HDassert(enc_size > 0);
         *size += (1 + enc_size);
     } /* end else */
@@ -941,7 +941,7 @@ H5P__decode_chunk_cache_nslots(const void **_pp, void *_value)
     uint64_t enc_value;                 /* Decoded property value */
     unsigned enc_size;                  /* Size of encoded property */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
@@ -987,7 +987,7 @@ H5P__encode_chunk_cache_nbytes(const void *value, void **_pp, size_t *size)
     uint8_t **pp = (uint8_t **)_pp;
     unsigned enc_size;      /* Size of encoded property */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
@@ -1001,7 +1001,7 @@ H5P__encode_chunk_cache_nbytes(const void *value, void **_pp, size_t *size)
     } /* end if */
     else {
         enc_value = (uint64_t)*(const size_t *)value;
-        enc_size = H5VM_limit_enc_size(enc_value);
+        enc_size = H5VM__limit_enc_size(enc_value);
         HDassert(enc_size > 0);
         *size += (1 + enc_size);
     } /* end else */
@@ -1043,7 +1043,7 @@ H5P__decode_chunk_cache_nbytes(const void **_pp, void *_value)
     uint64_t enc_value;                 /* Decoded property value */
     unsigned enc_size;                  /* Size of encoded property */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));

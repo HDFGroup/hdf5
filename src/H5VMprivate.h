@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Robb Matzke <matzke@llnl.gov>
+ * Programmer: Robb Matzke
  *             Friday, October 10, 1997
  */
 #ifndef H5VMprivate_H
@@ -28,16 +28,16 @@ typedef herr_t (*H5VM_opvv_func_t)(hsize_t dst_off, hsize_t src_off,
     size_t len, void *udata);
 
 /* Vector comparison functions like Fortran66 comparison operators */
-#define H5VM_vector_eq_s(N,V1,V2) (H5VM_vector_cmp_s (N, V1, V2)==0)
-#define H5VM_vector_lt_s(N,V1,V2) (H5VM_vector_cmp_s (N, V1, V2)<0)
-#define H5VM_vector_gt_s(N,V1,V2) (H5VM_vector_cmp_s (N, V1, V2)>0)
-#define H5VM_vector_le_s(N,V1,V2) (H5VM_vector_cmp_s (N, V1, V2)<=0)
-#define H5VM_vector_ge_s(N,V1,V2) (H5VM_vector_cmp_s (N, V1, V2)>=0)
-#define H5VM_vector_eq_u(N,V1,V2) (H5VM_vector_cmp_u (N, V1, V2)==0)
-#define H5VM_vector_lt_u(N,V1,V2) (H5VM_vector_cmp_u (N, V1, V2)<0)
-#define H5VM_vector_gt_u(N,V1,V2) (H5VM_vector_cmp_u (N, V1, V2)>0)
-#define H5VM_vector_le_u(N,V1,V2) (H5VM_vector_cmp_u (N, V1, V2)<=0)
-#define H5VM_vector_ge_u(N,V1,V2) (H5VM_vector_cmp_u (N, V1, V2)>=0)
+#define H5VM_vector_eq_s(N,V1,V2) (H5VM__vector_cmp_s(N, V1, V2) == 0)
+#define H5VM_vector_lt_s(N,V1,V2) (H5VM__vector_cmp_s(N, V1, V2) < 0)
+#define H5VM_vector_gt_s(N,V1,V2) (H5VM__vector_cmp_s(N, V1, V2) > 0)
+#define H5VM_vector_le_s(N,V1,V2) (H5VM__vector_cmp_s(N, V1, V2) <= 0)
+#define H5VM_vector_ge_s(N,V1,V2) (H5VM__vector_cmp_s(N, V1, V2) >= 0)
+#define H5VM_vector_eq_u(N,V1,V2) (H5VM__vector_cmp_u(N, V1, V2) == 0)
+#define H5VM_vector_lt_u(N,V1,V2) (H5VM__vector_cmp_u(N, V1, V2) < 0)
+#define H5VM_vector_gt_u(N,V1,V2) (H5VM__vector_cmp_u(N, V1, V2) > 0)
+#define H5VM_vector_le_u(N,V1,V2) (H5VM__vector_cmp_u(N, V1, V2) <= 0)
+#define H5VM_vector_ge_u(N,V1,V2) (H5VM__vector_cmp_u(N, V1, V2) >= 0)
 
 /* Other functions */
 #define H5VM_vector_cpy(N,DST,SRC) {                                           \
@@ -139,7 +139,7 @@ H5_DLL ssize_t H5VM_memcpyvv(void *_dst,
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VM_vector_reduce_product
+ * Function:    H5VM__vector_reduce_product
  *
  * Purpose:     Product reduction of a vector.  Vector elements and return
  *              value are size_t because we usually want the number of
@@ -153,17 +153,15 @@ H5_DLL ssize_t H5VM_memcpyvv(void *_dst,
  * Programmer:  Robb Matzke
  *              Friday, October 10, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static H5_INLINE hsize_t H5_ATTR_UNUSED
-H5VM_vector_reduce_product(unsigned n, const hsize_t *v)
+H5VM__vector_reduce_product(unsigned n, const hsize_t *v)
 {
     hsize_t                  ret_value = 1;
 
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    /* Use FUNC_ENTER_STATIC_NOERR here to avoid performance issues */
+    FUNC_ENTER_STATIC_NOERR
 
     if (n && !v) HGOTO_DONE(0)
     while (n--) ret_value *= *v++;
@@ -173,7 +171,7 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5VM_vector_zerop_u
+ * Function:    H5VM__vector_zerop_u
  *
  * Purpose:     Determines if all elements of a vector are zero.
  *
@@ -185,17 +183,15 @@ done:
  * Programmer:  Robb Matzke
  *              Friday, October 10, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static H5_INLINE htri_t H5_ATTR_UNUSED
-H5VM_vector_zerop_u(int n, const hsize_t *v)
+H5VM__vector_zerop_u(int n, const hsize_t *v)
 {
     htri_t      ret_value=TRUE;       /* Return value */
 
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    /* Use FUNC_ENTER_STATIC_NOERR here to avoid performance issues */
+    FUNC_ENTER_STATIC_NOERR
 
     if (!v)
         HGOTO_DONE(TRUE)
@@ -220,8 +216,6 @@ done:
  * Programmer:  Robb Matzke
  *              Friday, October 10, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static H5_INLINE htri_t H5_ATTR_UNUSED
@@ -229,8 +223,8 @@ H5VM_vector_zerop_s(int n, const hssize_t *v)
 {
     htri_t      ret_value=TRUE;       /* Return value */
 
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    /* Use FUNC_ENTER_STATIC_NOERR here to avoid performance issues */
+    FUNC_ENTER_STATIC_NOERR
 
     if (!v)
         HGOTO_DONE(TRUE)
@@ -243,7 +237,7 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5VM_vector_cmp_u
+ * Function:    H5VM__vector_cmp_u
  *
  * Purpose:     Compares two vectors of the same size and determines if V1 is
  *              lexicographically less than, equal, or greater than V2.
@@ -257,17 +251,15 @@ done:
  * Programmer:  Robb Matzke
  *              Friday, October 10, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static H5_INLINE int H5_ATTR_UNUSED
-H5VM_vector_cmp_u (unsigned n, const hsize_t *v1, const hsize_t *v2)
+H5VM__vector_cmp_u(unsigned n, const hsize_t *v1, const hsize_t *v2)
 {
     int ret_value=0;    /* Return value */
 
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    /* Use FUNC_ENTER_STATIC_NOERR here to avoid performance issues */
+    FUNC_ENTER_STATIC_NOERR
 
     if (v1 == v2) HGOTO_DONE(0)
     if (v1 == NULL) HGOTO_DONE(-1)
@@ -285,7 +277,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VM_vector_cmp_s
+ * Function:	H5VM__vector_cmp_s
  *
  * Purpose:     Compares two vectors of the same size and determines if V1 is
  *              lexicographically less than, equal, or greater than V2.
@@ -299,17 +291,15 @@ done:
  * Programmer:	Robb Matzke
  *              Wednesday, April  8, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static H5_INLINE int H5_ATTR_UNUSED
-H5VM_vector_cmp_s (unsigned n, const hssize_t *v1, const hssize_t *v2)
+H5VM__vector_cmp_s(unsigned n, const hssize_t *v1, const hssize_t *v2)
 {
     int ret_value=0;    /* Return value */
 
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    /* Use FUNC_ENTER_STATIC_NOERR here to avoid performance issues */
+    FUNC_ENTER_STATIC_NOERR
 
     if (v1 == v2) HGOTO_DONE(0)
     if (v1 == NULL) HGOTO_DONE(-1)
@@ -327,7 +317,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VM_vector_inc
+ * Function:    H5VM__vector_inc
  *
  * Purpose:     Increments V1 by V2
  *
@@ -336,12 +326,10 @@ done:
  * Programmer:  Robb Matzke
  *              Monday, October 13, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static H5_INLINE void H5_ATTR_UNUSED
-H5VM_vector_inc(int n, hsize_t *v1, const hsize_t *v2)
+H5VM__vector_inc(int n, hsize_t *v1, const hsize_t *v2)
 {
     while (n--) *v1++ += *v2++;
 }
@@ -369,7 +357,7 @@ static const unsigned char LogTable256[] =
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VM_log2_gen
+ * Function:    H5VM__log2_gen
  *
  * Purpose:     Determines the log base two of a number (i.e. log2(n)).
  *              (i.e. the highest bit set in a number)
@@ -388,7 +376,7 @@ static const unsigned char LogTable256[] =
  *-------------------------------------------------------------------------
  */
 static H5_INLINE unsigned H5_ATTR_UNUSED
-H5VM_log2_gen(uint64_t n)
+H5VM__log2_gen(uint64_t n)
 {
     unsigned r;                         /* r will be log2(n) */
     register unsigned int t, tt, ttt;   /* temporaries */
@@ -406,7 +394,7 @@ H5VM_log2_gen(uint64_t n)
             r = (t = (unsigned)(n >> 8)) ? 8 + (unsigned)LogTable256[t] : (unsigned)LogTable256[(uint8_t)n];
 
     return(r);
-} /* H5VM_log2_gen() */
+} /* H5VM__log2_gen() */
 
 
 /* Lookup table for specialized log2(n) of power of two routine */
@@ -418,7 +406,7 @@ static const unsigned MultiplyDeBruijnBitPosition[32] =
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VM_log2_of2
+ * Function:    H5VM__log2_of2
  *
  * Purpose:     Determines the log base two of a number (i.e. log2(n)).
  *              (i.e. the highest bit set in a number)
@@ -436,17 +424,17 @@ static const unsigned MultiplyDeBruijnBitPosition[32] =
  *-------------------------------------------------------------------------
  */
 static H5_INLINE H5_ATTR_PURE unsigned
-H5VM_log2_of2(uint32_t n)
+H5VM__log2_of2(uint32_t n)
 {
 #ifndef NDEBUG
     HDassert(POWER_OF_TWO(n));
 #endif /* NDEBUG */
     return(MultiplyDeBruijnBitPosition[(n * (uint32_t)0x077CB531UL) >> 27]);
-} /* H5VM_log2_of2() */
+} /* H5VM__log2_of2() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VM_power2up
+ * Function:	H5VM__power2up
  *
  * Purpose:	Round up a number to the next power of 2
  *
@@ -457,7 +445,7 @@ H5VM_log2_of2(uint32_t n)
  *-------------------------------------------------------------------------
  */
 static H5_INLINE H5_ATTR_CONST hsize_t
-H5VM_power2up(hsize_t n)
+H5VM__power2up(hsize_t n)
 {
     hsize_t     ret_value = 1;  /* Return value */
 
@@ -469,11 +457,11 @@ H5VM_power2up(hsize_t n)
         ret_value <<= 1;
 
     return(ret_value);
-} /* H5VM_power2up */
+} /* H5VM__power2up */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VM_limit_enc_size
+ * Function:    H5VM__limit_enc_size
  *
  * Purpose:     Determine the # of bytes needed to encode values within a
  *              range from 0 to a given limit
@@ -486,17 +474,17 @@ H5VM_power2up(hsize_t n)
  *-------------------------------------------------------------------------
  */
 static H5_INLINE unsigned H5_ATTR_UNUSED
-H5VM_limit_enc_size(uint64_t limit)
+H5VM__limit_enc_size(uint64_t limit)
 {
-    return (H5VM_log2_gen(limit) / 8) + 1;
-} /* end H5VM_limit_enc_size() */
+    return (H5VM__log2_gen(limit) / 8) + 1;
+} /* end H5VM__limit_enc_size() */
 
 static const unsigned char H5VM_bit_set_g[8] = {0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01};
 static const unsigned char H5VM_bit_clear_g[8] = {0x7F, 0xBF, 0xDF, 0xEF, 0xF7, 0xFB, 0xFD, 0xFE};
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VM_bit_get
+ * Function:    H5VM__bit_get
  *
  * Purpose:     Determine the value of the n'th bit in a buffer.
  *
@@ -515,15 +503,15 @@ static const unsigned char H5VM_bit_clear_g[8] = {0x7F, 0xBF, 0xDF, 0xEF, 0xF7, 
  *-------------------------------------------------------------------------
  */
 static H5_INLINE hbool_t H5_ATTR_UNUSED
-H5VM_bit_get(const unsigned char *buf, size_t offset)
+H5VM__bit_get(const unsigned char *buf, size_t offset)
 {
     /* Test the appropriate bit in the buffer */
     return (hbool_t)((buf[offset / 8] & (H5VM_bit_set_g[offset % 8])) ? TRUE : FALSE);
-} /* end H5VM_bit_get() */
+} /* end H5VM__bit_get() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VM_bit_set
+ * Function:    H5VM__bit_set
  *
  * Purpose:     Set/reset the n'th bit in a buffer.
  *
@@ -542,14 +530,14 @@ H5VM_bit_get(const unsigned char *buf, size_t offset)
  *-------------------------------------------------------------------------
  */
 static H5_INLINE void H5_ATTR_UNUSED
-H5VM_bit_set(unsigned char *buf, size_t offset, hbool_t val)
+H5VM__bit_set(unsigned char *buf, size_t offset, hbool_t val)
 {
     /* Set/reset the appropriate bit in the buffer */
     if(val)
         buf[offset / 8] |= H5VM_bit_set_g[offset % 8];
     else
         buf[offset / 8] &= H5VM_bit_clear_g[offset % 8];
-} /* end H5VM_bit_set() */
+} /* end H5VM__bit_set() */
 
 #endif /* H5VMprivate_H */
 

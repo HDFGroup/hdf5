@@ -15,7 +15,7 @@
  *
  * Created:     H5FA.c
  *              April 2009
- *              Vailin Choi <vchoi@hdfgroup.org>
+ *              Vailin Choi
  *
  * Purpose:     Implements a Fixed Array for storing elements
  *              of datasets with fixed dimensions.
@@ -112,7 +112,6 @@ H5FL_BLK_DEFINE(fa_native_elmt);
  *              NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@lbl.gov
  *		Oct 17 2016
  *
  *-------------------------------------------------------------------------
@@ -396,13 +395,13 @@ H5FA_set(const H5FA_t *fa, hsize_t idx, const void *elmt))
             dblk_page_nelmts = dblock->dblk_page_nelmts;
 
         /* Check if the page has been created yet */
-        if(!H5VM_bit_get(dblock->dblk_page_init, page_idx)) {
+        if(!H5VM__bit_get(dblock->dblk_page_init, page_idx)) {
             /* Create the data block page */
             if(H5FA__dblk_page_create(hdr, dblk_page_addr, dblk_page_nelmts) < 0)
                 H5E_THROW(H5E_CANTCREATE, "unable to create data block page")
 
 	    /* Mark data block page as initialized in data block */
-	    H5VM_bit_set(dblock->dblk_page_init, page_idx, TRUE);
+	    H5VM__bit_set(dblock->dblk_page_init, page_idx, TRUE);
 	    dblock_cache_flags |= H5AC__DIRTIED_FLAG;
 	} /* end if */
 
@@ -483,7 +482,7 @@ H5FA_get(const H5FA_t *fa, hsize_t idx, void *elmt))
             page_idx = (size_t)(idx / dblock->dblk_page_nelmts);
 
             /* Check if the page is defined yet */
-            if(!H5VM_bit_get(dblock->dblk_page_init, page_idx)) {
+            if(!H5VM__bit_get(dblock->dblk_page_init, page_idx)) {
                 /* Call the class's 'fill' callback */
                 if((hdr->cparam.cls->fill)(elmt, (size_t)1) < 0)
                     H5E_THROW(H5E_CANTSET, "can't set element to class's fill value")
