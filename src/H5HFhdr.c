@@ -46,7 +46,7 @@
 #ifndef NDEBUG
 /* Limit on the size of the max. direct block size */
 /* (This is limited to 32-bits currently, because I think it's unlikely to
- *      need to be larger, the 32-bit limit for H5VM__log2_of2(n), and
+ *      need to be larger, the 32-bit limit for H5VM_log2_of2(n), and
  *      some offsets/sizes are encoded with a maximum of 32-bits  - QAK)
  */
 #define H5HF_MAX_DIRECT_SIZE_LIMIT ((hsize_t)2 * 1024 * 1024 * 1024)
@@ -221,7 +221,7 @@ H5HF__hdr_finish_init_phase1(H5HF_hdr_t *hdr)
 
     /* Set the size of heap IDs */
     hdr->heap_len_size = (uint8_t)MIN(hdr->man_dtable.max_dir_blk_off_size,
-            H5VM__limit_enc_size((uint64_t)hdr->max_man_size));
+            H5VM_limit_enc_size((uint64_t)hdr->max_man_size));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1070,7 +1070,7 @@ H5HF__hdr_update_iter(H5HF_hdr_t *hdr, size_t min_dblock_size)
                     unsigned child_entry;           /* Entry of child indirect block */
 
                     /* Compute # of rows needed in child indirect block */
-                    child_rows_needed = (H5VM__log2_of2((uint32_t)min_dblock_size) - H5VM__log2_of2((uint32_t)hdr->man_dtable.cparam.start_block_size)) + 2;
+                    child_rows_needed = (H5VM_log2_of2((uint32_t)min_dblock_size) - H5VM_log2_of2((uint32_t)hdr->man_dtable.cparam.start_block_size)) + 2;
                     HDassert(child_rows_needed > child_nrows);
                     child_entry = (next_row + (child_rows_needed - child_nrows)) * hdr->man_dtable.cparam.width;
                     if(child_entry > (iblock->nrows * hdr->man_dtable.cparam.width))

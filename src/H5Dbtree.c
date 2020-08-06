@@ -338,7 +338,7 @@ H5D__btree_cmp2(void *_lt_key, void *_udata, void *_rt_key)
     HDassert(udata->layout->ndims > 0 && udata->layout->ndims <= H5O_LAYOUT_NDIMS);
 
     /* Compare the offsets but ignore the other fields */
-    ret_value = H5VM__vector_cmp_u(udata->layout->ndims, lt_key->scaled, rt_key->scaled);
+    ret_value = H5VM_vector_cmp_u(udata->layout->ndims, lt_key->scaled, rt_key->scaled);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__btree_cmp2() */

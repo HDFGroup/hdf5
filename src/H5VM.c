@@ -75,7 +75,7 @@ H5VM__stride_optimize1(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
      * This has to be true because if we optimize the dimensionality down to
      * zero we still must make one reference.
      */
-    HDassert(1 == H5VM__vector_reduce_product(0, NULL));
+    HDassert(1 == H5VM_vector_reduce_product(0, NULL));
 
     /*
      * Combine adjacent memory accesses
@@ -119,7 +119,7 @@ H5VM__stride_optimize2(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
      * This has to be true because if we optimize the dimensionality down to
      * zero we still must make one reference.
      */
-    HDassert(1 == H5VM__vector_reduce_product(0, NULL));
+    HDassert(1 == H5VM_vector_reduce_product(0, NULL));
     HDassert(*elmt_size>0);
 
     /*
@@ -642,7 +642,7 @@ H5VM_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size,
     HDassert(elmt_size < SIZET_MAX);
 
     H5VM_vector_cpy(n, idx, size);
-    nelmts = H5VM__vector_reduce_product(n, size);
+    nelmts = H5VM_vector_reduce_product(n, size);
     for (i=0; i<nelmts; i++) {
         /* Copy an element */
         H5_CHECK_OVERFLOW(elmt_size,hsize_t,size_t);
@@ -703,7 +703,7 @@ H5VM_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *size,
 
     if (n) {
         H5VM_vector_cpy(n, idx, size);
-        nelmts = H5VM__vector_reduce_product(n, size);
+        nelmts = H5VM_vector_reduce_product(n, size);
         for (i=0; i<nelmts; i++) {
 
             /* Copy an element */
@@ -770,7 +770,7 @@ H5VM_stride_copy_s(unsigned n, hsize_t elmt_size, const hsize_t *size,
 
     if (n) {
         H5VM_vector_cpy(n, idx, size);
-        nelmts = H5VM__vector_reduce_product(n, size);
+        nelmts = H5VM_vector_reduce_product(n, size);
         for (i=0; i<nelmts; i++) {
 
             /* Copy an element */

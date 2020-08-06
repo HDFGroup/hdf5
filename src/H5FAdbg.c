@@ -229,7 +229,7 @@ H5FA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent,
 
 	/* Read and print each page's elements in the data block */
 	for(page_idx = 0; page_idx < dblock->npages; page_idx++) {
-	    if(!H5VM__bit_get(dblock->dblk_page_init, page_idx)) {
+	    if(!H5VM_bit_get(dblock->dblk_page_init, page_idx)) {
 		HDfprintf(stream, "%*s%-*s %Hu %s\n", indent, "", fwidth,
 		    "Page %Zu:", page_idx, "empty");
 

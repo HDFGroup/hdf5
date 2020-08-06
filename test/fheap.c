@@ -1592,7 +1592,7 @@ fill_all_2nd_indirect_rows(H5HF_t *fh, size_t obj_size,
     width = DTABLE_WIDTH(fh);
 
     /* Loop over rows of 2nd level deep indirect blocks */
-    for(u = 0; u < (H5VM__log2_of2(width) + 1); u++)
+    for(u = 0; u < (H5VM_log2_of2(width) + 1); u++)
         if(fill_2nd_indirect_row(fh, (u + 1), obj_size, state, keep_ids))
             TEST_ERROR
 
@@ -1710,7 +1710,7 @@ fill_all_3rd_indirect_rows(H5HF_t *fh, size_t obj_size,
     width = DTABLE_WIDTH(fh);
 
     /* Loop over rows of 3rd level deep indirect blocks */
-    for(u = 0; u < (H5VM__log2_of2(width) + 1); u++)
+    for(u = 0; u < (H5VM_log2_of2(width) + 1); u++)
         /* Fill row of 3rd level indirect blocks */
         if(fill_3rd_indirect_row(fh, (u + 1), obj_size, state, keep_ids))
             TEST_ERROR
@@ -1800,7 +1800,7 @@ fill_all_4th_indirect_rows(H5HF_t *fh, size_t obj_size,
     width = DTABLE_WIDTH(fh);
 
     /* Loop over rows of 4th level deep indirect blocks */
-    for(u = 0; u < (H5VM__log2_of2(width) + 1); u++) {
+    for(u = 0; u < (H5VM_log2_of2(width) + 1); u++) {
         /* Fill row of 4th level indirect blocks */
         if(fill_4th_indirect_row(fh, (u + 1), obj_size, state, keep_ids))
             TEST_ERROR

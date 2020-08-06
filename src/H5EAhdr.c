@@ -199,7 +199,7 @@ H5EA__hdr_init(H5EA_hdr_t *hdr, void *ctx_udata))
     HDassert(hdr->cparam.sup_blk_min_data_ptrs);
 
     /* Compute general information */
-    hdr->nsblks = 1 + (hdr->cparam.max_nelmts_bits - H5VM__log2_of2(hdr->cparam.data_blk_min_elmts));
+    hdr->nsblks = 1 + (hdr->cparam.max_nelmts_bits - H5VM_log2_of2(hdr->cparam.data_blk_min_elmts));
     hdr->dblk_page_nelmts = (size_t)1 << hdr->cparam.max_dblk_page_nelmts_bits;
     hdr->arr_off_size = (unsigned char)H5EA_SIZEOF_OFFSET_BITS(hdr->cparam.max_nelmts_bits);
 
@@ -261,7 +261,7 @@ H5EA__hdr_alloc_elmts(H5EA_hdr_t *hdr, size_t nelmts))
 
     /* Compute the index of the element buffer factory */
     H5_CHECK_OVERFLOW(nelmts, /*From:*/size_t, /*To:*/uint32_t);
-    idx = H5VM__log2_of2((uint32_t)nelmts) - H5VM__log2_of2((uint32_t)hdr->cparam.data_blk_min_elmts);
+    idx = H5VM_log2_of2((uint32_t)nelmts) - H5VM_log2_of2((uint32_t)hdr->cparam.data_blk_min_elmts);
 
     /* Check for needing to increase size of array of factories */
     if(idx >= hdr->elmt_fac.nalloc) {
@@ -327,7 +327,7 @@ H5EA__hdr_free_elmts(H5EA_hdr_t *hdr, size_t nelmts, void *elmts))
 
     /* Compute the index of the element buffer factory */
     H5_CHECK_OVERFLOW(nelmts, /*From:*/size_t, /*To:*/uint32_t);
-    idx = H5VM__log2_of2((uint32_t)nelmts) - H5VM__log2_of2((uint32_t)hdr->cparam.data_blk_min_elmts);
+    idx = H5VM_log2_of2((uint32_t)nelmts) - H5VM_log2_of2((uint32_t)hdr->cparam.data_blk_min_elmts);
 
     /* Free buffer for elements in index block */
     HDassert(idx < hdr->elmt_fac.nalloc);

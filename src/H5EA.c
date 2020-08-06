@@ -553,7 +553,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend,
                         (page_idx * sblock->dblk_page_size);
 
                 /* Check if page has been initialized yet */
-                if(!H5VM__bit_get(sblock->page_init, page_init_idx)) {
+                if(!H5VM_bit_get(sblock->page_init, page_init_idx)) {
                     /* Check if we are allowed to create the thing */
                     if(0 == (thing_acc & H5AC__READ_ONLY_FLAG)) { /* i.e. r/w access */
                         /* Create the data block page */
@@ -561,7 +561,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend,
                             H5E_THROW(H5E_CANTCREATE, "unable to create data block page")
 
                         /* Mark data block page as initialized in super block */
-                        H5VM__bit_set(sblock->page_init, page_init_idx, TRUE);
+                        H5VM_bit_set(sblock->page_init, page_init_idx, TRUE);
                         sblock_cache_flags |= H5AC__DIRTIED_FLAG;
                     } /* end if */
                     else

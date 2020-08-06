@@ -833,7 +833,7 @@ H5D__chunk_set_sizes(H5D_t *dset)
         unsigned enc_bytes_per_dim;     /* Number of bytes required to encode this dimension */
 
         /* Get encoded size of dim, in bytes */
-        enc_bytes_per_dim = (H5VM__log2_gen(dset->shared->layout.u.chunk.dim[u]) + 8) / 8;
+        enc_bytes_per_dim = (H5VM_log2_gen(dset->shared->layout.u.chunk.dim[u]) + 8) / 8;
 
         /* Check if this is the largest value so far */
         if(enc_bytes_per_dim > max_enc_bytes_per_dim)
@@ -997,14 +997,14 @@ H5D__chunk_init(H5F_t *f, const H5D_t * const dset, hid_t dapl_id)
             rdcc->scaled_dims[u] = (dset->shared->curr_dims[u] + dset->shared->layout.u.chunk.dim[u] - 1) /
                 dset->shared->layout.u.chunk.dim[u];
 
-            if(!(scaled_power2up = H5VM__power2up(rdcc->scaled_dims[u])))
+            if(!(scaled_power2up = H5VM_power2up(rdcc->scaled_dims[u])))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get the next power of 2")
 
             /* Inital 'power2up' values for scaled dimensions */
             rdcc->scaled_power2up[u] = scaled_power2up;
 
             /* Number of bits required to encode scaled dimension size */
-            rdcc->scaled_encode_bits[u] = H5VM__log2_gen(rdcc->scaled_power2up[u]);
+            rdcc->scaled_encode_bits[u] = H5VM_log2_gen(rdcc->scaled_power2up[u]);
         } /* end for */
     } /* end if */
 
@@ -6887,12 +6887,12 @@ H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old
             /* Compute the size required for encoding the size of a chunk, allowing
              * for an extra byte, in case the filter makes the chunk larger.
              */
-            allow_chunk_size_len = 1 + ((H5VM__log2_gen((uint64_t)(idx_info->layout->size)) + 8) / 8);
+            allow_chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)(idx_info->layout->size)) + 8) / 8);
             if(allow_chunk_size_len > 8)
                 allow_chunk_size_len = 8;
 
             /* Compute encoded size of chunk */
-            new_chunk_size_len = (H5VM__log2_gen((uint64_t)(new_chunk->length)) + 8) / 8;
+            new_chunk_size_len = (H5VM_log2_gen((uint64_t)(new_chunk->length)) + 8) / 8;
             if(new_chunk_size_len > 8)
                 HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "encoded chunk size is more than 8 bytes?!?")
 

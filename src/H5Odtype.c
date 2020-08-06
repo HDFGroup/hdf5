@@ -264,7 +264,7 @@ H5O__dtype_decode_helper(unsigned *ioflags/*in,out*/, const uint8_t **pp, H5T_t 
                 unsigned j;
 
                 /* Compute the # of bytes required to store a member offset */
-                offset_nbytes = H5VM__limit_enc_size((uint64_t)dt->shared->size);
+                offset_nbytes = H5VM_limit_enc_size((uint64_t)dt->shared->size);
 
                 /*
                  * Compound datatypes...
@@ -905,7 +905,7 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                 unsigned offset_nbytes;         /* Size needed to encode member offsets */
 
                 /* Compute the # of bytes required to store a member offset */
-                offset_nbytes = H5VM__limit_enc_size((uint64_t)dt->shared->size);
+                offset_nbytes = H5VM_limit_enc_size((uint64_t)dt->shared->size);
 
                 /*
                  * Compound datatypes...
@@ -1277,7 +1277,7 @@ H5O__dtype_size(const H5F_t *f, const void *_mesg)
                 unsigned offset_nbytes;         /* Size needed to encode member offsets */
 
                 /* Compute the # of bytes required to store a member offset */
-                offset_nbytes = H5VM__limit_enc_size((uint64_t)dt->shared->size);
+                offset_nbytes = H5VM_limit_enc_size((uint64_t)dt->shared->size);
 
                 /* Compute the total size needed to encode compound datatype */
                 for(u = 0; u < dt->shared->u.compnd.nmembs; u++) {

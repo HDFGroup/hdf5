@@ -371,7 +371,7 @@ H5HF__man_iblock_root_create(H5HF_hdr_t *hdr, size_t min_dblock_size)
 
         nrows = hdr->man_dtable.cparam.start_root_rows;
 
-        block_row_off = H5VM__log2_of2((uint32_t)min_dblock_size) - H5VM__log2_of2((uint32_t)hdr->man_dtable.cparam.start_block_size);
+        block_row_off = H5VM_log2_of2((uint32_t)min_dblock_size) - H5VM_log2_of2((uint32_t)hdr->man_dtable.cparam.start_block_size);
         if(block_row_off > 0)
             block_row_off++;        /* Account for the pair of initial rows of the initial block size */
         rows_needed = 1 + block_row_off;
@@ -689,7 +689,7 @@ H5HF__man_iblock_root_halve(H5HF_indirect_t *iblock)
     max_child_row = iblock->max_child / hdr->man_dtable.cparam.width;
 
     /* Compute new # of rows in root indirect block */
-    new_nrows = (unsigned)1 << (1 + H5VM__log2_gen((uint64_t)max_child_row));
+    new_nrows = (unsigned)1 << (1 + H5VM_log2_gen((uint64_t)max_child_row));
 
     /* Check if the indirect block is NOT currently allocated in temp. file space */
     /* (temp. file space does not need to be freed) */
@@ -1722,10 +1722,10 @@ H5HF__man_iblock_size(H5F_t *f, H5HF_hdr_t *hdr, haddr_t iblock_addr,
         size_t      u;                  /* Local index variable */
 
         entry = hdr->man_dtable.max_direct_rows * hdr->man_dtable.cparam.width;
-        first_row_bits = H5VM__log2_of2((uint32_t)hdr->man_dtable.cparam.start_block_size) +
-                H5VM__log2_of2(hdr->man_dtable.cparam.width);
+        first_row_bits = H5VM_log2_of2((uint32_t)hdr->man_dtable.cparam.start_block_size) +
+                H5VM_log2_of2(hdr->man_dtable.cparam.width);
         num_indirect_rows =
-                (H5VM__log2_gen(hdr->man_dtable.row_block_size[hdr->man_dtable.max_direct_rows]) - first_row_bits) + 1;
+                (H5VM_log2_gen(hdr->man_dtable.row_block_size[hdr->man_dtable.max_direct_rows]) - first_row_bits) + 1;
         for(u = hdr->man_dtable.max_direct_rows; u < iblock->nrows; u++, num_indirect_rows++) {
             size_t      v;                      /* Local index variable */
 

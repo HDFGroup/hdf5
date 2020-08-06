@@ -153,7 +153,7 @@ H5F__accum_read(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr,
                     size_t new_alloc_size;        /* New size of accumulator */
 
                     /* Adjust the buffer size to be a power of 2 that is large enough to hold data */
-                    new_alloc_size = (size_t)1 << (1 + H5VM__log2_gen((uint64_t)(new_size - 1)));
+                    new_alloc_size = (size_t)1 << (1 + H5VM_log2_gen((uint64_t)(new_size - 1)));
 
                     /* Reallocate the metadata accumulator buffer */
                     if(NULL == (accum->buf = H5FL_BLK_REALLOC(meta_accum, accum->buf, new_alloc_size)))
@@ -296,7 +296,7 @@ H5F__accum_adjust(H5F_meta_accum_t *accum, H5FD_t *file,
         size_t new_size;        /* New size of accumulator */
 
         /* Adjust the buffer size to be a power of 2 that is large enough to hold data */
-        new_size = (size_t)1 << (1 + H5VM__log2_gen((uint64_t)((size + accum->size) - 1)));
+        new_size = (size_t)1 << (1 + H5VM_log2_gen((uint64_t)((size + accum->size) - 1)));
 
         /* Check for accumulator getting too big */
         if(new_size > H5F_ACCUM_MAX_SIZE) {
@@ -609,7 +609,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr,
                             size_t new_alloc_size;        /* New size of accumulator */
 
                             /* Adjust the buffer size to be a power of 2 that is large enough to hold data */
-                            new_alloc_size = (size_t)1 << (1 + H5VM__log2_gen((uint64_t)(size - 1)));
+                            new_alloc_size = (size_t)1 << (1 + H5VM_log2_gen((uint64_t)(size - 1)));
 
                             /* Reallocate the metadata accumulator buffer */
                             if(NULL == (accum->buf = H5FL_BLK_REALLOC(meta_accum, accum->buf, new_alloc_size)))
@@ -653,7 +653,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr,
                         size_t clear_size;      /* Size of memory that needs clearing */
 
                         /* Adjust the buffer size to be a power of 2 that is large enough to hold data */
-                        new_size = (size_t)1 << (1 + H5VM__log2_gen((uint64_t)(size - 1)));
+                        new_size = (size_t)1 << (1 + H5VM_log2_gen((uint64_t)(size - 1)));
 
                         /* Grow the metadata accumulator buffer */
                         if(NULL == (accum->buf = H5FL_BLK_REALLOC(meta_accum, accum->buf, new_size)))
@@ -701,7 +701,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr,
                     size_t new_size;        /* New size of accumulator */
 
                     /* Adjust the buffer size to be a power of 2 that is large enough to hold data */
-                    new_size = (size_t)1 << (1 + H5VM__log2_gen((uint64_t)(size - 1)));
+                    new_size = (size_t)1 << (1 + H5VM_log2_gen((uint64_t)(size - 1)));
 
                     /* Reallocate the metadata accumulator buffer */
                     if(NULL == (accum->buf = H5FL_BLK_REALLOC(meta_accum, accum->buf, new_size)))

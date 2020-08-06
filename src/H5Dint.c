@@ -672,7 +672,7 @@ H5D__cache_dataspace_info(const H5D_t *dset)
     for(u = 0; u < dset->shared->ndims; u++) {
         hsize_t scaled_power2up;    /* Scaled value, rounded to next power of 2 */
 
-        if(!(scaled_power2up = H5VM__power2up(dset->shared->curr_dims[u])))
+        if(!(scaled_power2up = H5VM_power2up(dset->shared->curr_dims[u])))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get the next power of 2")
         dset->shared->curr_power2up[u] = scaled_power2up;
     }
@@ -3088,14 +3088,14 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
                                 dset->shared->cache.chunk.scaled_dims[dim_idx] > dset->shared->cache.chunk.nslots))
                         update_chunks = TRUE;
 
-                    if(!(scaled_power2up = H5VM__power2up(scaled)))
+                    if(!(scaled_power2up = H5VM_power2up(scaled)))
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get the next power of 2")
 
                     /* Check if the number of bits required to encode the scaled size value changed */
                     if(dset->shared->cache.chunk.scaled_power2up[dim_idx] != scaled_power2up) {
                         /* Update the 'power2up' & 'encode_bits' values for the current dimension */
                         dset->shared->cache.chunk.scaled_power2up[dim_idx] = scaled_power2up;
-                        dset->shared->cache.chunk.scaled_encode_bits[dim_idx] = H5VM__log2_gen(scaled_power2up);
+                        dset->shared->cache.chunk.scaled_encode_bits[dim_idx] = H5VM_log2_gen(scaled_power2up);
 
                         /* Indicate that the cached chunk indices need to be updated */
                         update_chunks = TRUE;

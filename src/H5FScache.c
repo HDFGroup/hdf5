@@ -1027,7 +1027,7 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
         unsigned sect_cnt_size;                             /* The size of the section size counts */
 
         /* Compute the size of the section counts */
-        sect_cnt_size = H5VM__limit_enc_size((uint64_t)fspace->serial_sect_count);
+        sect_cnt_size = H5VM_limit_enc_size((uint64_t)fspace->serial_sect_count);
 
         /* Reset the section count, the "add" routine will update it */
         old_tot_sect_count = fspace->tot_sect_count;
@@ -1294,7 +1294,7 @@ H5FS__cache_sinfo_serialize(const H5F_t *f, void *_image, size_t len,
     /* Set up user data for iterator */
     udata.sinfo = sinfo;
     udata.image = &image;
-    udata.sect_cnt_size = H5VM__limit_enc_size((uint64_t)sinfo->fspace->serial_sect_count);
+    udata.sect_cnt_size = H5VM_limit_enc_size((uint64_t)sinfo->fspace->serial_sect_count);
 
     /* Iterate over all the bins */
     for(bin = 0; bin < sinfo->nbins; bin++)
