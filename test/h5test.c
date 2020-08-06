@@ -2097,8 +2097,14 @@ h5_compare_file_bytes(char *f1name, char *f2name)
     HDrewind(f1ptr);
     HDrewind(f2ptr);
     for (ii = 0; ii < f1size; ii++) {
-        HDfread(&f1char, 1, 1, f1ptr);
-        HDfread(&f2char, 1, 1, f2ptr);
+        if(HDfread(&f1char, 1, 1, f1ptr) != 1) {
+            ret_value = -1;
+            goto done;
+        }
+        if(HDfread(&f2char, 1, 1, f2ptr) != 1) {
+            ret_value = -1;
+            goto done;
+        }
         if (f1char != f2char) {
             HDfprintf(stderr, "Mismatch @ 0x%llX: 0x%X != 0x%X\n", ii, f1char, f2char);
             ret_value = -1;
@@ -2107,13 +2113,11 @@ h5_compare_file_bytes(char *f1name, char *f2name)
     }
 
 done:
-    if (f1ptr) {
+    if (f1ptr)
         HDfclose(f1ptr);
-    }
-    if (f2ptr) {
+    if (f2ptr)
         HDfclose(f2ptr);
-    }
-    return(ret_value);
+    return ret_value;
 } /* end h5_compare_file_bytes() */
 
 /*-------------------------------------------------------------------------
@@ -2220,7 +2224,10 @@ h5_duplicate_file_by_bytes(const char *orig, const char *dest)
     }
 
     while (read_size > 0) {
-        HDfread(dup_buf, read_size, 1, orig_ptr); /* warning: no error-check */
+        if(HDfread(dup_buf, read_size, 1, orig_ptr) != 1) {
+            ret_value = -1;
+            goto done;
+        }
         HDfwrite(dup_buf, read_size, 1, dest_ptr);
         fsize -= read_size;
         read_size = MIN(fsize, max_buf);
