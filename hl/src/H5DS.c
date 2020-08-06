@@ -1460,10 +1460,6 @@ out:
 *
 * Date: January 11, 2005
 *
-* Comments:
-*
-* Modifications:
-*
 *-------------------------------------------------------------------------
 */
 
@@ -1481,6 +1477,9 @@ herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label)
       char  ** buf;            /* discarding the 'const' qualifier in the free */
       char const ** const_buf; /* buf calls */
     } u;
+
+    HDmemset(&u, 0, sizeof(u));
+
     /*-------------------------------------------------------------------------
     * parameter checking
     *-------------------------------------------------------------------------
