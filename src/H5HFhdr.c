@@ -325,7 +325,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_create
+ * Function:	H5HF__hdr_create
  *
  * Purpose:	Create new fractal heap header
  *
@@ -338,13 +338,13 @@ done:
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5HF_hdr_create(H5F_t *f, const H5HF_create_t *cparam)
+H5HF__hdr_create(H5F_t *f, const H5HF_create_t *cparam)
 {
     H5HF_hdr_t *hdr = NULL;     /* The new fractal heap header information */
     size_t dblock_overhead;     /* Direct block's overhead */
     haddr_t ret_value = HADDR_UNDEF;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -506,11 +506,11 @@ H5HF_hdr_create(H5F_t *f, const H5HF_create_t *cparam)
 
 done:
     if(!H5F_addr_defined(ret_value) && hdr)
-        if(H5HF_hdr_free(hdr) < 0)
+        if(H5HF__hdr_free(hdr) < 0)
             HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, HADDR_UNDEF, "unable to release fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_create() */
+} /* end H5HF__hdr_create() */
 
 
 /*-------------------------------------------------------------------------
@@ -1387,7 +1387,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_free
+ * Function:	H5HF__hdr_free
  *
  * Purpose:	Free shared fractal heap header
  *
@@ -1400,11 +1400,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_free(H5HF_hdr_t *hdr)
+H5HF__hdr_free(H5HF_hdr_t *hdr)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -1425,7 +1425,7 @@ H5HF_hdr_free(H5HF_hdr_t *hdr)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_free() */
+} /* end H5HF__hdr_free() */
 
 
 /*-------------------------------------------------------------------------

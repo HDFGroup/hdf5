@@ -712,7 +712,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5Z_prelude_callback
+ * Function: H5Z__prelude_callback
  *
  * Purpose:  Makes a dataset creation "prelude" callback for the "can_apply"
  *           or "set_local" routines.
@@ -725,14 +725,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Z_prelude_callback(const H5O_pline_t *pline, hid_t dcpl_id, hid_t type_id,
+H5Z__prelude_callback(const H5O_pline_t *pline, hid_t dcpl_id, hid_t type_id,
     hid_t space_id, H5Z_prelude_type_t prelude_type)
 {
     H5Z_class2_t    *fclass;                /* Individual filter information */
     size_t          u;                      /* Local index variable */
     htri_t          ret_value = TRUE;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(pline->nused > 0);
 
@@ -790,11 +790,11 @@ H5Z_prelude_callback(const H5O_pline_t *pline, hid_t dcpl_id, hid_t type_id,
 done:
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Z_prelude_callback() */
+} /* end H5Z__prelude_callback() */
 
 
 /*-------------------------------------------------------------------------
- * Function: H5Z_prepare_prelude_callback_dcpl
+ * Function: H5Z__prepare_prelude_callback_dcpl
  *
  * Purpose:  Prepares to make a dataset creation "prelude" callback
  *           for the "can_apply" or "set_local" routines.
@@ -807,13 +807,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Z_prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_type)
+H5Z__prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_type)
 {
     hid_t   space_id = -1;            /* ID for dataspace describing chunk */
     H5O_layout_t *dcpl_layout = NULL; /* Dataset's layout information */
     herr_t  ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(H5I_GENPROP_LST == H5I_get_type(dcpl_id));
     HDassert(H5I_DATATYPE == H5I_get_type(type_id));
@@ -861,7 +861,7 @@ H5Z_prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type
                 }
 
                 /* Make the callbacks */
-                if (H5Z_prelude_callback(&dcpl_pline, dcpl_id, type_id, space_id, prelude_type) < 0)
+                if (H5Z__prelude_callback(&dcpl_pline, dcpl_id, type_id, space_id, prelude_type) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply filter")
             }
         }
@@ -875,7 +875,7 @@ done:
         dcpl_layout = (H5O_layout_t *)H5MM_xfree(dcpl_layout);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Z_prepare_prelude_callback_dcpl() */
+} /* end H5Z__prepare_prelude_callback_dcpl() */
 
 
 /*-------------------------------------------------------------------------
@@ -901,7 +901,7 @@ H5Z_can_apply(hid_t dcpl_id, hid_t type_id)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Make "can apply" callbacks for filters in pipeline */
-    if (H5Z_prepare_prelude_callback_dcpl(dcpl_id, type_id, H5Z_PRELUDE_CAN_APPLY) < 0)
+    if (H5Z__prepare_prelude_callback_dcpl(dcpl_id, type_id, H5Z_PRELUDE_CAN_APPLY) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply filter")
 
 done:
@@ -932,7 +932,7 @@ H5Z_set_local(hid_t dcpl_id, hid_t type_id)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Make "set local" callbacks for filters in pipeline */
-    if (H5Z_prepare_prelude_callback_dcpl(dcpl_id, type_id, H5Z_PRELUDE_SET_LOCAL) < 0)
+    if (H5Z__prepare_prelude_callback_dcpl(dcpl_id, type_id, H5Z_PRELUDE_SET_LOCAL) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_SETLOCAL, FAIL, "local filter parameters not set")
 
 done:
@@ -961,7 +961,7 @@ H5Z_can_apply_direct(const H5O_pline_t *pline)
     HDassert(pline->nused > 0);
 
     /* Make "can apply" callbacks for filters in pipeline */
-    if (H5Z_prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, H5Z_PRELUDE_CAN_APPLY) < 0)
+    if (H5Z__prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, H5Z_PRELUDE_CAN_APPLY) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply filter")
 
 done:
@@ -994,7 +994,7 @@ H5Z_set_local_direct(const H5O_pline_t *pline)
     HDassert(pline->nused > 0);
 
     /* Make "set local" callbacks for filters in pipeline */
-    if (H5Z_prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, H5Z_PRELUDE_SET_LOCAL) < 0)
+    if (H5Z__prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, H5Z_PRELUDE_SET_LOCAL) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_SETLOCAL, FAIL, "local filter parameters not set")
 
 done:

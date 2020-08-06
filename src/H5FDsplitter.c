@@ -103,16 +103,15 @@ typedef struct H5FD_splitter_t {
 
 /* Print error messages from W/O channel to log file */
 static herr_t H5FD__splitter_log_error(const H5FD_splitter_t *file, const char *atfunc, const char *msg);
-
 static int H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr);
 
 /* Prototypes */
-static herr_t H5FD_splitter_term(void);
-static hsize_t H5FD_splitter_sb_size(H5FD_t *_file);
-static herr_t H5FD_splitter_sb_encode(H5FD_t *_file, char *name/*out*/, unsigned char *buf/*out*/);
-static herr_t H5FD_splitter_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf);
-static void *H5FD_splitter_fapl_get(H5FD_t *_file);
-static void *H5FD_splitter_fapl_copy(const void *_old_fa);
+static herr_t H5FD__splitter_term(void);
+static hsize_t H5FD__splitter_sb_size(H5FD_t *_file);
+static herr_t H5FD__splitter_sb_encode(H5FD_t *_file, char *name/*out*/, unsigned char *buf/*out*/);
+static herr_t H5FD__splitter_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf);
+static void *H5FD__splitter_fapl_get(H5FD_t *_file);
+static void *H5FD__splitter_fapl_copy(const void *_old_fa);
 static herr_t H5FD_splitter_fapl_free(void *_fapl);
 static H5FD_t *H5FD_splitter_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
 static herr_t H5FD_splitter_close(H5FD_t *_file);
@@ -136,13 +135,13 @@ static const H5FD_class_t H5FD_splitter_g = {
     "splitter",                 /* name                 */
     MAXADDR,                    /* maxaddr              */
     H5F_CLOSE_WEAK,             /* fc_degree            */
-    H5FD_splitter_term,         /* terminate            */
-    H5FD_splitter_sb_size,      /* sb_size              */
-    H5FD_splitter_sb_encode,    /* sb_encode            */
-    H5FD_splitter_sb_decode,    /* sb_decode            */
+    H5FD__splitter_term,         /* terminate            */
+    H5FD__splitter_sb_size,      /* sb_size              */
+    H5FD__splitter_sb_encode,    /* sb_encode            */
+    H5FD__splitter_sb_decode,    /* sb_decode            */
     sizeof(H5FD_splitter_fapl_t), /* fapl_size          */
-    H5FD_splitter_fapl_get,     /* fapl_get             */
-    H5FD_splitter_fapl_copy,    /* fapl_copy            */
+    H5FD__splitter_fapl_get,     /* fapl_get             */
+    H5FD__splitter_fapl_copy,    /* fapl_copy            */
     H5FD_splitter_fapl_free,    /* fapl_free            */
     0,                          /* dxpl_size            */
     NULL,                       /* dxpl_copy            */
@@ -186,7 +185,7 @@ H5FD__init_package(void)
 
     FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL("H5FD__init_package");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     if (H5FD_splitter_init() < 0) {
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize splitter VFD")
@@ -214,7 +213,7 @@ H5FD_splitter_init(void)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_init");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     if (H5I_VFL != H5I_get_type(H5FD_SPLITTER_g)) {
         H5FD_SPLITTER_g = H5FDregister(&H5FD_splitter_g);
@@ -228,7 +227,7 @@ done:
 
 
 /*---------------------------------------------------------------------------
- * Function:    H5FD_splitter_term
+ * Function:    H5FD__splitter_term
  *
  * Purpose:     Shut down the splitter VFD.
  *
@@ -236,17 +235,17 @@ done:
  *---------------------------------------------------------------------------
  */
 static herr_t
-H5FD_splitter_term(void)
+H5FD__splitter_term(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_term");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     /* Reset VFL ID */
     H5FD_SPLITTER_g = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5FD_splitter_term() */
+} /* end H5FD__splitter_term() */
 
 
  /*-------------------------------------------------------------------------
@@ -267,23 +266,20 @@ H5FD__copy_plist(hid_t   fapl_id,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    H5FD_SPLITTER_LOG_CALL("H5FD__copy_plist");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     HDassert(id_out_ptr != NULL);
 
-    if (FALSE == H5P_isa_class(fapl_id, H5P_FILE_ACCESS)) {
+    if(FALSE == H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, -1, "not a file access property list");
-    }
 
     plist_ptr = (H5P_genplist_t *)H5I_object(fapl_id);
-    if (NULL == plist_ptr) {
+    if(NULL == plist_ptr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, -1, "unable to get property list");
-    }
 
     *id_out_ptr = H5P_copy_plist(plist_ptr, FALSE);
-    if (H5I_INVALID_HID == *id_out_ptr) {
+    if(H5I_INVALID_HID == *id_out_ptr)
         HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, -1, "unable to copy file access property list");
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -306,24 +302,17 @@ H5Pset_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *vfd_config)
     H5P_genplist_t       *plist_ptr = NULL;
     herr_t                ret_value = SUCCEED;
 
-    H5Eclear2(H5E_DEFAULT);
-
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Dr", fapl_id, vfd_config);
 
-    H5FD_SPLITTER_LOG_CALL("H5Pset_fapl_splitter");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
-    if (H5FD_SPLITTER_MAGIC != vfd_config->magic) {
+    if(H5FD_SPLITTER_MAGIC != vfd_config->magic)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid configuration (magic number mismatch)")
-    }
-    if (H5FD_CURR_SPLITTER_VFD_CONFIG_VERSION != vfd_config->version) {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invlaid config (version number mismatch)")
-    }
-
-    if (NULL == (plist_ptr = (H5P_genplist_t *)H5I_object(fapl_id))) {
+    if(H5FD_CURR_SPLITTER_VFD_CONFIG_VERSION != vfd_config->version)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid config (version number mismatch)")
+    if(NULL == (plist_ptr = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid property list")
-    }
-
 
     /* Make sure that the W/O channel supports write-only capability.
      * Some drivers (e.g. family or multi) do revision of the superblock
@@ -331,31 +320,25 @@ H5Pset_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *vfd_config)
      * Uses the feature flag H5FD_FEAT_DEFAULT_VFD_COMPATIBLE as the
      * determining attribute.
      */
-    if (H5P_DEFAULT != vfd_config->wo_fapl_id) {
+    if(H5P_DEFAULT != vfd_config->wo_fapl_id) {
         H5FD_class_t       *wo_driver = NULL;
         H5FD_driver_prop_t  wo_driver_prop;
         H5P_genplist_t     *wo_plist_ptr = NULL;
         unsigned long       wo_driver_flags = 0;
 
         wo_plist_ptr = (H5P_genplist_t *)H5I_object(vfd_config->wo_fapl_id);
-        if (NULL == wo_plist_ptr) {
+        if(NULL == wo_plist_ptr)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-        }
-        if (H5P_peek(wo_plist_ptr, H5F_ACS_FILE_DRV_NAME, &wo_driver_prop) < 0) {
+        if(H5P_peek(wo_plist_ptr, H5F_ACS_FILE_DRV_NAME, &wo_driver_prop) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID & info")
-        }
         wo_driver = (H5FD_class_t *)H5I_object(wo_driver_prop.driver_id);
-        if (NULL == wo_driver) {
+        if(NULL == wo_driver)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid driver ID in file access property list")
-        }
-        if (H5FD_driver_query(wo_driver, &wo_driver_flags) < 0) {
+        if(H5FD_driver_query(wo_driver, &wo_driver_flags) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't query VFD flags")
-        }
-        if (0 == (H5FD_FEAT_DEFAULT_VFD_COMPATIBLE & wo_driver_flags)) {
+        if(0 == (H5FD_FEAT_DEFAULT_VFD_COMPATIBLE & wo_driver_flags))
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unsuitable W/O driver")
-        }
     } /* end if W/O VFD is non-default */
-
 
     info.ignore_wo_errs = vfd_config->ignore_wo_errs;
     HDstrncpy(info.wo_path, vfd_config->wo_path, H5FD_SPLITTER_PATH_MAX);
@@ -406,7 +389,7 @@ H5Pget_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *config_out)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Dr", fapl_id, config_out);
 
-    H5FD_SPLITTER_LOG_CALL("H5Pget_fapl_splitter");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     /* Check arguments */
     if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS)) {
@@ -470,7 +453,7 @@ H5FD_splitter_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_flush");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     /* Public API for dxpl "context" */
     if (H5FDflush(file->rw_file, dxpl_id, closing) < 0) {
@@ -515,7 +498,7 @@ H5FD_splitter_read(
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_read");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     HDassert(file && file->pub.cls);
     HDassert(buf);
@@ -558,7 +541,7 @@ H5FD_splitter_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_write");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     if (NULL == (plist_ptr = (H5P_genplist_t *)H5I_object(dxpl_id))) {
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
@@ -581,7 +564,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_splitter_fapl_get
+ * Function:    H5FD__splitter_fapl_get
  *
  * Purpose:     Returns a file access property list which indicates how the
  *              specified file is being accessed. The return list could be
@@ -593,23 +576,23 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5FD_splitter_fapl_get(H5FD_t *_file)
+H5FD__splitter_fapl_get(H5FD_t *_file)
 {
     H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
     void            *ret_value = NULL;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_fapl_get");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
-    ret_value = H5FD_splitter_fapl_copy(&(file->fa));
+    ret_value = H5FD__splitter_fapl_copy(&(file->fa));
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD__splitter_fapl_get() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_splitter_fapl_copy
+ * Function:    H5FD__splitter_fapl_copy
  *
  * Purpose:     Copies the file access properties.
  *
@@ -618,52 +601,41 @@ H5FD_splitter_fapl_get(H5FD_t *_file)
  *-------------------------------------------------------------------------
  */
 static void *
-H5FD_splitter_fapl_copy(const void *_old_fa)
+H5FD__splitter_fapl_copy(const void *_old_fa)
 {
     const H5FD_splitter_fapl_t *old_fa_ptr = (const H5FD_splitter_fapl_t *)_old_fa;
     H5FD_splitter_fapl_t       *new_fa_ptr = NULL;
     void                       *ret_value  = NULL;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_fapl_copy");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     HDassert(old_fa_ptr);
 
     new_fa_ptr = (H5FD_splitter_fapl_t *)H5MM_calloc(sizeof(H5FD_splitter_fapl_t));
-    if (NULL == new_fa_ptr) {
+    if(NULL == new_fa_ptr)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate log file FAPL")
-    }
 
-    if (HDmemcpy(new_fa_ptr, old_fa_ptr, sizeof(H5FD_splitter_fapl_t)) == NULL) {
-        HGOTO_ERROR(H5E_ARGS, H5E_CANTCOPY, NULL, "unable to shallow-copy info")
-    }
-    if (HDstrncpy(new_fa_ptr->wo_path, old_fa_ptr->wo_path, H5FD_SPLITTER_PATH_MAX) == NULL) {
-        HGOTO_ERROR(H5E_ARGS, H5E_CANTCOPY, NULL, "unable to copy write-only channel file path")
-    }
-    if (HDstrncpy(new_fa_ptr->log_file_path, old_fa_ptr->log_file_path, H5FD_SPLITTER_PATH_MAX) == NULL) {
-        HGOTO_ERROR(H5E_ARGS, H5E_CANTCOPY, NULL, "unable to copy log file path")
-    }
+    HDmemcpy(new_fa_ptr, old_fa_ptr, sizeof(H5FD_splitter_fapl_t));
+    HDstrncpy(new_fa_ptr->wo_path, old_fa_ptr->wo_path, H5FD_SPLITTER_PATH_MAX);
+    HDstrncpy(new_fa_ptr->log_file_path, old_fa_ptr->log_file_path, H5FD_SPLITTER_PATH_MAX);
 
     /* Copy R/W and W/O FAPLs */
-    if (H5FD__copy_plist(old_fa_ptr->rw_fapl_id, &(new_fa_ptr->rw_fapl_id)) < 0) {
+    if(H5FD__copy_plist(old_fa_ptr->rw_fapl_id, &(new_fa_ptr->rw_fapl_id)) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't copy R/W FAPL");
-    }
-    if (H5FD__copy_plist(old_fa_ptr->wo_fapl_id, &(new_fa_ptr->wo_fapl_id)) < 0) {
+    if(H5FD__copy_plist(old_fa_ptr->wo_fapl_id, &(new_fa_ptr->wo_fapl_id)) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't copy W/O FAPL");
-    }
 
     ret_value = (void *)new_fa_ptr;
 
 done:
-    if (NULL == ret_value) {
-        if (new_fa_ptr) {
+    if(NULL == ret_value)
+        if(new_fa_ptr)
             H5MM_free(new_fa_ptr);
-        }
-    }
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_splitter_fapl_copy() */
+} /* end H5FD__splitter_fapl_copy() */
 
 
 /*--------------------------------------------------------------------------
@@ -682,7 +654,7 @@ H5FD_splitter_fapl_free(void *_fapl)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_fapl_free");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     /* Check arguments */
     HDassert(fapl);
@@ -723,7 +695,7 @@ H5FD_splitter_open(const char *name, unsigned flags, hid_t splitter_fapl_id, had
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_open");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     /* Check arguments */
     if (!name || !*name) {
@@ -846,7 +818,7 @@ H5FD_splitter_close(H5FD_t *_file)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_close");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     /* Sanity check */
     HDassert(file);
@@ -905,7 +877,7 @@ H5FD_splitter_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_get_eoa");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     /* Sanity check */
     HDassert(file);
@@ -938,7 +910,7 @@ H5FD_splitter_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t add
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_set_eoa";)
+    H5FD_SPLITTER_LOG_CALL(FUNC)
 
     /* Sanity check */
     HDassert(file);
@@ -980,7 +952,7 @@ H5FD_splitter_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_get_eof");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     /* Sanity check */
     HDassert(file);
@@ -1011,7 +983,7 @@ H5FD_splitter_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_truncate");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     HDassert(file);
     HDassert(file->rw_file);
@@ -1033,7 +1005,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_splitter_sb_size
+ * Function:    H5FD__splitter_sb_size
  *
  * Purpose:     Obtains the number of bytes required to store the driver file
  *              access data in the HDF5 superblock.
@@ -1047,29 +1019,28 @@ done:
  *-------------------------------------------------------------------------
  */
 static hsize_t
-H5FD_splitter_sb_size(H5FD_t *_file)
+H5FD__splitter_sb_size(H5FD_t *_file)
 {
     H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
     hsize_t          ret_value = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_sb_size");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     /* Sanity check */
     HDassert(file);
     HDassert(file->rw_file);
 
-    if (file->rw_file) {
+    if(file->rw_file)
         ret_value = H5FD_sb_size(file->rw_file);
-    }
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_splitter_sb_size */
+} /* end H5FD__splitter_sb_size */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_splitter_sb_encode
+ * Function:    H5FD__splitter_sb_encode
  *
  * Purpose:     Encode driver-specific data into the output arguments.
  *
@@ -1077,30 +1048,29 @@ H5FD_splitter_sb_size(H5FD_t *_file)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_splitter_sb_encode(H5FD_t *_file, char *name/*out*/, unsigned char *buf/*out*/)
+H5FD__splitter_sb_encode(H5FD_t *_file, char *name/*out*/, unsigned char *buf/*out*/)
 {
     H5FD_splitter_t *file = (H5FD_splitter_t *)_file;
     herr_t           ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_sb_encode");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     /* Sanity check */
     HDassert(file);
     HDassert(file->rw_file);
 
-    if (file->rw_file && H5FD_sb_encode(file->rw_file, name, buf) < 0) {
+    if(file->rw_file && H5FD_sb_encode(file->rw_file, name, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTENCODE, FAIL, "unable to encode the superblock in R/W file")
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_splitter_sb_encode */
+} /* end H5FD__splitter_sb_encode */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_splitter_sb_decode
+ * Function:    H5FD__splitter_sb_decode
  *
  * Purpose:     Decodes the driver information block.
  *
@@ -1110,26 +1080,25 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_splitter_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
+H5FD__splitter_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
 {
     H5FD_splitter_t *file = (H5FD_splitter_t *)_file;
     herr_t           ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_sb_decode");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     /* Sanity check */
     HDassert(file);
     HDassert(file->rw_file);
 
-    if (H5FD_sb_load(file->rw_file, name, buf) < 0) {
+    if(H5FD_sb_load(file->rw_file, name, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "unable to decode the superblock in R/W file")
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_splitter_sb_decode */
+} /* end H5FD__splitter_sb_decode */
 
 
 /*-------------------------------------------------------------------------
@@ -1150,7 +1119,7 @@ H5FD_splitter_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_cmp");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     HDassert(f1);
     HDassert(f2);
@@ -1181,7 +1150,7 @@ H5FD_splitter_get_handle(
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_get_handle");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     /* Check arguments */
     HDassert(file);
@@ -1215,7 +1184,7 @@ H5FD_splitter_lock(H5FD_t *_file, hbool_t rw)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_lock");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     HDassert(file);
     HDassert(file->rw_file);
@@ -1253,7 +1222,7 @@ H5FD_splitter_unlock(H5FD_t *_file)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_unlock");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     /* Check arguments */
     HDassert(file);
@@ -1292,7 +1261,7 @@ H5FD_splitter_query(const H5FD_t *_file, unsigned long *flags /* out */)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_query");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     if (file) {
         HDassert(file);
@@ -1333,7 +1302,7 @@ H5FD_splitter_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_alloc");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     /* Check arguments */
     HDassert(file);
@@ -1371,7 +1340,7 @@ H5FD_splitter_get_type_map(const H5FD_t *_file, H5FD_mem_t *type_map)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_get_type_map");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     /* Check arguments */
     HDassert(file);
@@ -1403,7 +1372,7 @@ H5FD_splitter_free(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, 
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    H5FD_SPLITTER_LOG_CALL("H5FD_splitter_free");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     /* Check arguments */
     HDassert(file);
@@ -1441,7 +1410,7 @@ H5FD__splitter_log_error(const H5FD_splitter_t *file, const char *atfunc, const 
 
     FUNC_ENTER_STATIC_NOERR
 
-    H5FD_SPLITTER_LOG_CALL("H5FD__splitter_log_error");
+    H5FD_SPLITTER_LOG_CALL(FUNC);
 
     /* Check arguments */
     HDassert(file);

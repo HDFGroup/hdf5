@@ -88,6 +88,7 @@ typedef struct {
 /********************/
 
 static herr_t H5G__open_oid(H5G_t *grp);
+static herr_t H5G__visit_cb(const H5O_link_t *lnk, void *_udata);
 
 
 /*********************/
@@ -858,7 +859,7 @@ H5G_free_visit_visited(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_visit_cb
+ * Function:	H5G__visit_cb
  *
  * Purpose:     Callback function for recursively visiting links from a group
  *
@@ -871,7 +872,7 @@ H5G_free_visit_visited(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_visit_cb(const H5O_link_t *lnk, void *_udata)
+H5G__visit_cb(const H5O_link_t *lnk, void *_udata)
 {
     H5G_iter_visit_ud_t *udata = (H5G_iter_visit_ud_t *)_udata;     /* User data for callback */
     H5L_info2_t info;                   /* Link info */
@@ -884,7 +885,7 @@ H5G_visit_cb(const H5O_link_t *lnk, void *_udata)
     size_t len_needed;                  /* Length of path string needed */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(lnk);
@@ -998,7 +999,7 @@ H5G_visit_cb(const H5O_link_t *lnk, void *_udata)
                 udata->curr_loc = &obj_loc;
 
                 /* Iterate over links in group */
-                ret_value = H5G__obj_iterate(&obj_oloc, idx_type, udata->order, (hsize_t)0, NULL, H5G_visit_cb, udata);
+                ret_value = H5G__obj_iterate(&obj_oloc, idx_type, udata->order, (hsize_t)0, NULL, H5G__visit_cb, udata);
 
                 /* Restore location */
                 udata->curr_loc = old_loc;
@@ -1016,7 +1017,7 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, H5_ITER_ERROR, "can't free location")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_visit_cb() */
+} /* end H5G__visit_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -1140,7 +1141,7 @@ H5G_visit(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type,
     } /* end if */
 
     /* Call the link iteration routine */
-    if((ret_value = H5G__obj_iterate(&(grp->oloc), idx_type, order, (hsize_t)0, NULL, H5G_visit_cb, &udata)) < 0)
+    if((ret_value = H5G__obj_iterate(&(grp->oloc), idx_type, order, (hsize_t)0, NULL, H5G__visit_cb, &udata)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't visit links")
 
 done:

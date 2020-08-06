@@ -257,7 +257,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_compact_remove_common_cb
+ * Function:	H5G__compact_remove_common_cb
  *
  * Purpose:	Common callback routine for deleting 'link' message for a
  *              particular name.
@@ -271,13 +271,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_compact_remove_common_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_udata)
+H5G__compact_remove_common_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_udata)
 {
     const H5O_link_t *lnk = (const H5O_link_t *)_mesg;  /* Pointer to link */
     H5G_iter_rm_t *udata = (H5G_iter_rm_t *)_udata;     /* 'User data' passed in */
     herr_t ret_value = H5_ITER_CONT;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check arguments */
     HDassert(lnk);
@@ -295,7 +295,7 @@ H5G_compact_remove_common_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, voi
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_compact_remove_common_cb() */
+} /* end H5G__compact_remove_common_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -328,7 +328,7 @@ H5G__compact_remove(const H5O_loc_t *oloc, H5RS_str_t *grp_full_path_r,
     udata.name = name;
 
     /* Iterate over the link messages to delete the right one */
-    if(H5O_msg_remove_op(oloc, H5O_LINK_ID, H5O_FIRST, H5G_compact_remove_common_cb, &udata, TRUE) < 0)
+    if(H5O_msg_remove_op(oloc, H5O_LINK_ID, H5O_FIRST, H5G__compact_remove_common_cb, &udata, TRUE) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link message")
 
 done:
@@ -376,7 +376,7 @@ H5G__compact_remove_by_idx(const H5O_loc_t *oloc, const H5O_linfo_t *linfo,
     udata.name = ltable.lnks[n].name;
 
     /* Iterate over the link messages to delete the right one */
-    if(H5O_msg_remove_op(oloc, H5O_LINK_ID, H5O_FIRST, H5G_compact_remove_common_cb, &udata, TRUE) < 0)
+    if(H5O_msg_remove_op(oloc, H5O_LINK_ID, H5O_FIRST, H5G__compact_remove_common_cb, &udata, TRUE) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link message")
 
 done:

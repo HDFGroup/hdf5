@@ -98,7 +98,7 @@ typedef struct {
 /* Local Prototypes */
 /********************/
 
-static int H5L_find_class_idx(H5L_type_t id);
+static int H5L__find_class_idx(H5L_type_t id);
 static herr_t H5L__link_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
@@ -1559,7 +1559,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_find_class_idx
+ * Function:	H5L__find_class_idx
  *
  * Purpose:	Given a link class ID, return the offset in the global array
  *              that holds all the registered link classes.
@@ -1574,12 +1574,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5L_find_class_idx(H5L_type_t id)
+H5L__find_class_idx(H5L_type_t id)
 {
     size_t i;                   /* Local index variable */
     int ret_value = FAIL;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     for(i = 0; i < H5L_table_used_g; i++)
 	if(H5L_table_g[i].id == id)
@@ -1587,7 +1587,7 @@ H5L_find_class_idx(H5L_type_t id)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5L_find_class_idx */
+} /* end H5L__find_class_idx */
 
 
 /*-------------------------------------------------------------------------
@@ -1613,7 +1613,7 @@ H5L_find_class(H5L_type_t id)
     FUNC_ENTER_NOAPI(NULL)
 
     /* Get the index in the global table */
-    if((idx = H5L_find_class_idx(id)) < 0)
+    if((idx = H5L__find_class_idx(id)) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_NOTREGISTERED, NULL, "unable to find link class")
 
     /* Set return value */
@@ -2054,7 +2054,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_create_hard
+ * Function:	H5L__create_hard
  *
  * Purpose:	Creates a hard link from NEW_NAME to CUR_NAME.
  *
@@ -2066,7 +2066,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5L_create_hard(H5G_loc_t *cur_loc, const char *cur_name,
+H5L__create_hard(H5G_loc_t *cur_loc, const char *cur_name,
     const H5G_loc_t *link_loc, const char *link_name, hid_t lcpl_id)
 {
     char *norm_cur_name = NULL;	        /* Pointer to normalized current name */
@@ -2078,7 +2078,7 @@ H5L_create_hard(H5G_loc_t *cur_loc, const char *cur_name,
     hbool_t loc_valid = FALSE;
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(cur_loc);
@@ -2123,11 +2123,11 @@ done:
         H5MM_xfree(norm_cur_name);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5L_create_hard() */
+} /* end H5L__create_hard() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5L_create_soft
+ * Function:    H5L__create_soft
  *
  * Purpose:     Creates a soft link from LINK_NAME to TARGET_PATH.
  *
@@ -2139,14 +2139,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5L_create_soft(const char *target_path, const H5G_loc_t *link_loc,
+H5L__create_soft(const char *target_path, const H5G_loc_t *link_loc,
     const char *link_name, hid_t lcpl_id)
 {
     char *norm_target = NULL;	        /* Pointer to normalized current name */
     H5O_link_t lnk;                     /* Link to insert */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(link_loc);
@@ -2171,7 +2171,7 @@ done:
         H5MM_xfree(norm_target);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5L_create_soft() */
+} /* end H5L__create_soft() */
 
 
 /*-------------------------------------------------------------------------
@@ -2206,7 +2206,7 @@ H5L__create_ud(const H5G_loc_t *link_loc, const char *link_name,
     lnk.u.ud.udata = NULL;
 
     /* Make sure that this link class is registered */
-    if(H5L_find_class_idx(type) < 0)
+    if(H5L__find_class_idx(type) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "link class has not been registered with library")
 
     /* Fill in UD link-specific information in the link struct*/
@@ -2327,7 +2327,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_get_val
+ * Function:	H5L__get_val
  *
  * Purpose:	Returns the value of a symbolic link or the udata for a
  *              user-defined link.
@@ -2346,12 +2346,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5L_get_val(const H5G_loc_t *loc, const char *name, void *buf/*out*/, size_t size)
+H5L__get_val(const H5G_loc_t *loc, const char *name, void *buf/*out*/, size_t size)
 {
     H5L_trav_gv_t udata;           /* User data for callback */
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(loc);
@@ -2367,7 +2367,7 @@ H5L_get_val(const H5G_loc_t *loc, const char *name, void *buf/*out*/, size_t siz
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5L_get_val() */
+} /* H5L__get_val() */
 
 
 /*-------------------------------------------------------------------------
@@ -2422,7 +2422,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5L_get_val_by_idx
+ * Function:    H5L__get_val_by_idx
  *
  * Purpose:     Internal routine to query a link value according to the
  *              index within a group
@@ -2435,13 +2435,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5L_get_val_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
+H5L__get_val_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, void *buf/*out*/, size_t size)
 {
     H5L_trav_gvbi_t udata;              /* User data for callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -2460,7 +2460,7 @@ H5L_get_val_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5L_get_val_by_idx() */
+} /* end H5L__get_val_by_idx() */
 
 
 /*-------------------------------------------------------------------------
@@ -2513,7 +2513,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_delete
+ * Function:	H5L__delete
  *
  * Purpose:	Delete a link from a group.
  *
@@ -2525,12 +2525,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5L_delete(const H5G_loc_t *loc, const char *name)
+H5L__delete(const H5G_loc_t *loc, const char *name)
 {
     char		*norm_name = NULL;	/* Pointer to normalized name */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(loc);
@@ -2550,7 +2550,7 @@ done:
         H5MM_xfree(norm_name);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5L_delete() */
+} /* end H5L__delete() */
 
 
 /*-------------------------------------------------------------------------
@@ -2593,7 +2593,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5L_delete_by_idx
+ * Function:    H5L__delete_by_idx
  *
  * Purpose:     Internal routine to delete a link according to its index
  *              within a group.
@@ -2606,13 +2606,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5L_delete_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
+H5L__delete_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n)
 {
     H5L_trav_rmbi_t udata;              /* User data for callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(loc);
@@ -2629,7 +2629,7 @@ H5L_delete_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5L_delete_by_idx() */
+} /* end H5L__delete_by_idx() */
 
 
 /*-------------------------------------------------------------------------
@@ -2859,7 +2859,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_move
+ * Function:	H5L__move
  *
  * Purpose:	Atomically move or copy a link.
  *
@@ -2879,7 +2879,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5L_move(const H5G_loc_t *src_loc, const char *src_name, const H5G_loc_t *dst_loc,
+H5L__move(const H5G_loc_t *src_loc, const char *src_name, const H5G_loc_t *dst_loc,
     const char *dst_name, hbool_t copy_flag, hid_t lcpl_id)
 {
     unsigned    dst_target_flags = H5G_TARGET_NORMAL;
@@ -2888,7 +2888,7 @@ H5L_move(const H5G_loc_t *src_loc, const char *src_name, const H5G_loc_t *dst_lo
     H5L_trav_mv_t      udata;          /* User data for traversal */
     herr_t              ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(src_loc);
@@ -2935,7 +2935,7 @@ H5L_move(const H5G_loc_t *src_loc, const char *src_name, const H5G_loc_t *dst_lo
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5L_move() */
+} /* end H5L__move() */
 
 
 /*-------------------------------------------------------------------------
@@ -3036,7 +3036,7 @@ done:
  *
  * Purpose:	Returns whether a link exists in a group
  *
- * Note:	Same as H5L_exists, except that missing links are reported
+ * Note:	Same as H5L__exists, except that missing links are reported
  *		as 'FALSE' instead of causing failures
  *
  * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
@@ -3099,7 +3099,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_exists
+ * Function:	H5L__exists
  *
  * Purpose:	Returns whether a link exists in a group
  *
@@ -3114,12 +3114,12 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5L_exists(const H5G_loc_t *loc, const char *name)
+H5L__exists(const H5G_loc_t *loc, const char *name)
 {
     H5L_trav_le_t udata;        /* User data for traversal */
     htri_t ret_value = FAIL;    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* A path of "/" will always exist in a file */
     if(0 == HDstrcmp(name, "/"))
@@ -3135,7 +3135,7 @@ H5L_exists(const H5G_loc_t *loc, const char *name)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5L_exists() */
+} /* H5L__exists() */
 
 
 /*-------------------------------------------------------------------------
@@ -3260,7 +3260,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5L_get_info_by_idx
+ * Function:    H5L__get_info_by_idx
  *
  * Purpose:     Internal routine to retrieve link info according to an
  *              index's order.
@@ -3270,13 +3270,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5L_get_info_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
+H5L__get_info_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, H5L_info2_t *linfo /*out*/)
 {
     H5L_trav_gibi_t udata;              /* User data for callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -3295,7 +3295,7 @@ H5L_get_info_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5L_get_info_by_idx() */
+} /* end H5L__get_info_by_idx() */
 
 
 /*-------------------------------------------------------------------------
@@ -3339,7 +3339,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5L_get_name_by_idx
+ * Function:    H5L__get_name_by_idx
  *
  * Purpose:     Internal routine to retrieve link name according to an
  *              index's order.
@@ -3349,14 +3349,14 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5L_get_name_by_idx(const H5G_loc_t *loc, const char *group_name,
+H5L__get_name_by_idx(const H5G_loc_t *loc, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, char *name /*out*/,
     size_t size)
 {
     H5L_trav_gnbi_t udata;      /* User data for callback */
     ssize_t ret_value = FAIL;   /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -3379,7 +3379,7 @@ H5L_get_name_by_idx(const H5G_loc_t *loc, const char *group_name,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5L_get_name_by_idx() */
+} /* end H5L__get_name_by_idx() */
 
 
 /*-------------------------------------------------------------------------

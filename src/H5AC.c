@@ -587,7 +587,6 @@ H5AC_evict(H5F_t *f)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't evict cache")
 
 done:
-
     /* If currently logging, generate a message */
     if(f->shared->cache->log_info->logging)
         if(H5C_log_write_evict_cache_msg(f->shared->cache, ret_value) < 0)
@@ -1527,8 +1526,8 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing,
     HDassert(type->image_len);
     HDassert(H5F_addr_defined(addr));
     HDassert(thing);
-    HDassert( ((H5AC_info_t *)thing)->addr == addr );
-    HDassert( ((H5AC_info_t *)thing)->type == type );
+    HDassert(((H5AC_info_t *)thing)->addr == addr);
+    HDassert(((H5AC_info_t *)thing)->type == type);
 
     dirtied = (hbool_t)(((flags & H5AC__DIRTIED_FLAG) == H5AC__DIRTIED_FLAG) ||
         (((H5AC_info_t *)thing)->dirtied));

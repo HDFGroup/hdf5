@@ -478,7 +478,7 @@ H5D__append(H5D_t *dset, unsigned axis, size_t extension, hid_t memtype,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "extended dimension overflowed (bad extension value?)")
 
     /* Extend the dataset in the requested dimension */
-    if(H5D__set_extent(dset, dims) < 0)
+    if(H5D__set_extent(dset, dims, TRUE) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't extend dataset dimensions")
 
     /* Select a hyperslab corresponding to the append operation */
@@ -773,8 +773,10 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     char        fake_char;              /* Temporary variable for NULL buffer pointers */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
-    FUNC_ENTER_PACKAGE_TAG(dataset->oloc.addr)
-
+    //FUNC_ENTER_PACKAGE_TAG(dataset->oloc.addr)
+	FUNC_ENTER_PACKAGE 
+	if(!do_append)
+		H5_BEGIN_TAG(dataset->oloc.addr)
     /* check args */
     HDassert(dataset && dataset->oloc.file);
 
@@ -961,7 +963,11 @@ done:
         if(H5S_close(projected_mem_space) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down projected memory dataspace")
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    //FUNC_LEAVE_NOAPI_TAG(ret_value)
+	if(!do_append)
+		H5_END_TAG
+
+	FUNC_LEAVE_NOAPI(ret_value)		
 } /* end H5D__write() */
 
 

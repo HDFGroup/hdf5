@@ -97,6 +97,7 @@ static herr_t H5D__vlen_get_buf_size_cb(void *elem, hid_t type_id, unsigned ndim
     const hsize_t *point, void *op_data);
 static herr_t H5D__vlen_get_buf_size_gen_cb(void *elem, hid_t type_id, unsigned ndim,
     const hsize_t *point, void *op_data);
+static herr_t H5D__check_filters(H5D_t *dataset);
 
 
 /*********************/
@@ -908,7 +909,7 @@ H5D__prepare_minimized_oh(H5F_t *file, H5D_t *dset, H5O_loc_t *oloc)
     HDassert(dset);
     HDassert(oloc);
 
-    oh = H5O__create_ohdr(file, dset->shared->dcpl_id);
+    oh = H5O_create_ohdr(file, dset->shared->dcpl_id);
     if(NULL == oh)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "can't instantiate object header")
 
@@ -917,7 +918,7 @@ H5D__prepare_minimized_oh(H5F_t *file, H5D_t *dset, H5O_loc_t *oloc)
        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "computed header size is invalid")
 
     /* Special allocation of space for compact datsets is handled by the call here. */
-    if(H5O__apply_ohdr(file, oh, dset->shared->dcpl_id, ohdr_size, (size_t)1, oloc) == FAIL)
+    if(H5O_apply_ohdr(file, oh, dset->shared->dcpl_id, ohdr_size, (size_t)1, oloc) == FAIL)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "can't apply object header to file")
 
 done:
@@ -1022,7 +1023,8 @@ H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id)
     if(TRUE == use_minimized_header) {
         if(H5D__prepare_minimized_oh(file, dset, oloc) == FAIL)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create minimized dataset object header")
-    } else {
+    } /* end if */
+    else {
         /* Add the dataset's raw data size to the size of the header, if the
          * raw data will be stored as compact
          */
@@ -2959,13 +2961,13 @@ done:
  * Return:   Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5D__check_filters(H5D_t *dataset)
 {
     H5O_fill_t *fill;                   /* Dataset's fill value */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(dataset);
@@ -3011,7 +3013,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__set_extent(H5D_t *dset, const hsize_t *size)
+H5D__set_extent(H5D_t *dset, const hsize_t *size, hbool_t do_append)
 {
     hsize_t curr_dims[H5S_MAX_RANK];    /* Current dimension sizes */
     htri_t  changed;                    /* Whether the dataspace changed size */
@@ -3019,7 +3021,11 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
     unsigned dim_idx;                   /* Dimension index */
     herr_t  ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
+    //FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
+	FUNC_ENTER_PACKAGE
+	
+	if(!do_append)
+		H5_BEGIN_TAG(dset->oloc.addr)
 
     /* Check args */
     HDassert(dset);
@@ -3181,7 +3187,11 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
     } /* end if */
 
 done:
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    //FUNC_LEAVE_NOAPI_TAG(ret_value)
+	if(!do_append)
+		H5_END_TAG
+
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__set_extent() */
 
 

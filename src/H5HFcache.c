@@ -353,7 +353,7 @@ H5HF__dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *dtable)
  *
  *		Note also that the value returned by this function presumes that
  *		there is no I/O filtering data in the header.  If there is, the
- *		size reported will be too small, and H5C_load_entry()
+ *		size reported will be too small, and H5C__load_entry()
  *		will have to make two tries to load the fractal heap header.
  *
  * Return:	Success:	SUCCEED
@@ -599,7 +599,7 @@ H5HF__cache_hdr_deserialize(const void *_image, size_t len, void *_udata,
 
 done:
     if(!ret_value && hdr)
-        if(H5HF_hdr_free(hdr) < 0)
+        if(H5HF__hdr_free(hdr) < 0)
             HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to release fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -879,7 +879,7 @@ H5HF__cache_hdr_free_icr(void *_thing)
     HDassert(hdr->cache_info.type == H5AC_FHEAP_HDR);
     HDassert(hdr->rc == 0);
 
-    if(H5HF_hdr_free(hdr) < 0)
+    if(H5HF__hdr_free(hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "unable to release fractal heap header")
 
 done:

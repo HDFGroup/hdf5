@@ -27,7 +27,7 @@
 #include "H5Opkg.h"             /* Object headers			*/
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_efl_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
+static void *H5O__efl_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
     unsigned *ioflags, size_t p_size, const uint8_t *p);
 static herr_t H5O_efl_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static void *H5O_efl_copy(const void *_mesg, void *_dest);
@@ -45,7 +45,7 @@ const H5O_msg_class_t H5O_MSG_EFL[1] = {{
     "external file list",   	/*message name for debugging    */
     sizeof(H5O_efl_t),	    	/*native message size	    	*/
     0,				/* messages are sharable?       */
-    H5O_efl_decode,	    	/*decode message		*/
+    H5O__efl_decode,	    	/*decode message		*/
     H5O_efl_encode,	    	/*encode message		*/
     H5O_efl_copy,	    	/*copy native value		*/
     H5O_efl_size,	    	/*size of message on disk	*/
@@ -67,7 +67,7 @@ const H5O_msg_class_t H5O_MSG_EFL[1] = {{
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_efl_decode
+ * Function:    H5O__efl_decode
  *
  * Purpose:	Decode an external file list message and return a pointer to
  *          the message (and some other data).
@@ -87,7 +87,7 @@ const H5O_msg_class_t H5O_MSG_EFL[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
+H5O__efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
     size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
@@ -98,7 +98,7 @@ H5O_efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
     size_t      u;                  /* Local index variable */
     void        *ret_value = NULL;  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(f);
@@ -177,7 +177,7 @@ done:
             H5MM_xfree(mesg);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_efl_decode() */
+} /* end H5O__efl_decode() */
 
 
 /*-------------------------------------------------------------------------

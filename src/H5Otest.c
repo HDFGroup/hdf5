@@ -789,5 +789,5 @@ done:
         HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context")
 
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5O__msg_get_chunkno_test() */
+}   /* H5O__msg_move_to_new_chunk_test() */
 

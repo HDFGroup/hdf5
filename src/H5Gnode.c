@@ -80,7 +80,7 @@ static herr_t H5G__node_create(H5F_t *f, H5B_ins_t op, void *_lt_key,
     void *_udata, void *_rt_key, haddr_t *addr_p/*out*/);
 static int H5G_node_cmp2(void *_lt_key, void *_udata, void *_rt_key);
 static int H5G_node_cmp3(void *_lt_key, void *_udata, void *_rt_key);
-static htri_t H5G_node_found(H5F_t *f, haddr_t addr, const void *_lt_key,
+static htri_t H5G__node_found(H5F_t *f, haddr_t addr, const void *_lt_key,
     void *_udata);
 static H5B_ins_t H5G__node_insert(H5F_t *f, haddr_t addr, void *_lt_key,
     hbool_t *lt_key_changed, void *_md_key, void *_udata, void *_rt_key,
@@ -105,7 +105,7 @@ H5B_class_t H5B_SNODE[1] = {{
     H5G__node_create,           /*new           */
     H5G_node_cmp2,              /*cmp2          */
     H5G_node_cmp3,              /*cmp3          */
-    H5G_node_found,             /*found	        */
+    H5G__node_found,            /*found	        */
     H5G__node_insert,           /*insert        */
     TRUE,                       /*follow min branch?    */
     TRUE,                       /*follow max branch?    */
@@ -481,7 +481,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5G_node_found
+ * Function:    H5G__node_found
  *
  * Purpose:     The B-tree search engine has found the symbol table node
  *              which contains the requested symbol if the symbol exists.
@@ -507,7 +507,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5G_node_found(H5F_t *f, haddr_t addr, const void H5_ATTR_UNUSED *_lt_key,
+H5G__node_found(H5F_t *f, haddr_t addr, const void H5_ATTR_UNUSED *_lt_key,
     void *_udata)
 {
     H5G_bt_lkp_t    *udata = (H5G_bt_lkp_t *)_udata;
@@ -517,7 +517,7 @@ H5G_node_found(H5F_t *f, haddr_t addr, const void H5_ATTR_UNUSED *_lt_key,
     const char      *s;
     htri_t          ret_value = TRUE;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /*
      * Check arguments.
@@ -561,7 +561,7 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to release symbol table node")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_node_found() */
+} /* end H5G__node_found() */
 
 
 /*-------------------------------------------------------------------------

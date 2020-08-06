@@ -835,7 +835,7 @@ H5G_traverse(const H5G_loc_t *loc, const char *name, unsigned target, H5G_traver
 
     /* Retrieve the original # of soft / UD links that are able to be traversed
      * (So that multiple calls to H5G_traverse don't incorrectly look
-     *  like they've traversed too many.  Nested calls, like in H5L_move(),
+     *  like they've traversed too many.  Nested calls, like in H5L__move(),
      *  may need their own mechanism to set & reset the # of links to traverse)
      */
     if(H5CX_get_nlinks(&orig_nlinks) < 0)

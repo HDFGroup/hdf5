@@ -330,7 +330,7 @@ H5VL__native_dataset_specific(void *obj, H5VL_dataset_specific_t specific_type,
             { /* H5Dset_extent (H5Dextend - deprecated) */
                 const hsize_t *size = HDva_arg(arguments, const hsize_t *);
 
-                if(H5D__set_extent(dset, size) < 0)
+                if(H5D__set_extent(dset, size, FALSE) < 0)//FALSE for do_append argument in H5D__set_extent()
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extent of dataset")
                 break;
             }
