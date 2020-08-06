@@ -921,15 +921,18 @@ done:
 } /* end H5check_version() */
 
 
-/*-------------------------------------------------------------------------
- * Function:    H5open
+/* --------------------------------------------------------------------------*/
+/**\ingroup H5
  *
- * Purpose:     Initialize the library.  This is normally called
- *              automatically, but if you find that an HDF5 library function
- *              is failing inexplicably, then try calling this function
- *              first.
+ * \brief Initializes the library
  *
- * Return:	Non-negative on success/Negative on failure
+ * \return \herr_t
+ *
+ * \note H5open() is normally called automatically, but if you find that an
+ *       HDF5 library function is failing inexplicably, then try calling this
+ *       function first.
+ *
+ * \see H5close()
  *
  *-------------------------------------------------------------------------
  */
@@ -948,12 +951,14 @@ done:
 } /* end H5open() */
 
 
-/*-------------------------------------------------------------------------
- * Function:	H5close
+/* --------------------------------------------------------------------------*/
+/**\ingroup H5
  *
- * Purpose:	Terminate the library and release all resources.
+ * \brief Terminates the library and release all resources.
  *
- * Return:	Non-negative on success/Negative on failure
+ * \return \herr_t
+ *
+ * \see H5open()
  *
  *-------------------------------------------------------------------------
  */
@@ -1167,4 +1172,3 @@ DllMain(_In_ HINSTANCE hinstDLL, _In_ DWORD fdwReason, _In_ LPVOID lpvReserved)
     return fOkay;
 }
 #endif /* H5_HAVE_WIN32_API && H5_BUILT_AS_DYNAMIC_LIB && H5_HAVE_WIN_THREADS && H5_HAVE_THREADSAFE*/
-
