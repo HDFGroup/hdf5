@@ -90,6 +90,7 @@ static void check_options(diff_opt_t* opts)
  * Return:      <none>
  *-------------------------------------------------------------------------
  */
+#if 0
 static void
 parse_hsize_list(const char *h_list, subset_d *d)
 {
@@ -139,6 +140,7 @@ parse_hsize_list(const char *h_list, subset_d *d)
     d->len = size_count;
     H5TOOLS_ENDDEBUG("");
 }
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:    parse_subset_params
@@ -149,6 +151,7 @@ parse_hsize_list(const char *h_list, subset_d *d)
  *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
+#if 0
 static struct subset_t *
 parse_subset_params(const char *dset)
 {
@@ -190,7 +193,7 @@ parse_subset_params(const char *dset)
 
     return s;
 }
-
+#endif
 
 /*-------------------------------------------------------------------------
  * Function: parse_command_line
