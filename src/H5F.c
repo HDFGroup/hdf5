@@ -617,28 +617,88 @@ done:
 } /* end H5Fis_accessible() */
 
 
-/*-------------------------------------------------------------------------
- * Function:    H5Fcreate
+/** \example H5Fcreate.c
+ *           After creating an HDF5 file with H5Fcreate(), we close it with
+ *           H5Fclose().
+ */
+/**\ingroup H5F
  *
- * Purpose:     This is the primary function for creating HDF5 files . The
- *              flags parameter determines whether an existing file will be
- *              overwritten or not.  All newly created files are opened for
- *              both reading and writing.  All flags may be combined with the
- *              bit-wise OR operator (`|') to change the behavior of the file
- *              create call.
+ * \brief Creates an HDF5 file
  *
- *              The more complex behaviors of a file's creation and access
- *              are controlled through the file-creation and file-access
- *              property lists.  The value of H5P_DEFAULT for a template
- *              value indicates that the library should use the default
- *              values for the appropriate template.
+ * \param[in] filename Name of the file to create
+ * \param[in] flags    File access flags. Allowable values are:
+ *                     - #H5F_ACC_TRUNC: Truncate file, if it already exists,
+ *                       erasing all data previously stored in the file
+ *                     - #H5F_ACC_EXCL: Fail if file already exists
+ * \fcpl_id
+ * \fapl_id
+ * \return \hid_t{file}
  *
- * See also:    H5Fpublic.h for the list of supported flags. H5Ppublic.h for
- *              the list of file creation and file access properties.
+ * \details H5Fcreate() is the primary function for creating HDF5 files; it
+ *          creates a new HDF5 file with the specified name and property lists.
  *
- * Return:      Success:    A file ID
+ *          The \p filename parameter specifies the name of the new file.
  *
- *              Failure:    H5I_INVALID_HID
+ *          The \p flags parameter specifies whether an existing file is to be
+ *          overwritten. It should be set to either #H5F_ACC_TRUNC to overwrite
+ *          an existing file or #H5F_ACC_EXCL, instructing the function to fail
+ *          if the file already exists.
+ *
+ *          New files are always created in read-write mode, so the read-write
+ *          and read-only flags, #H5F_ACC_RDWR and #H5F_ACC_RDONLY,
+ *          respectively, are not relevant in this function. Further note that
+ *          a specification of #H5F_ACC_RDONLY will be ignored; the file will
+ *          be created in read-write mode, regardless.
+ *
+ *          More complex behaviors of file creation and access are controlled
+ *          through the file creation and file access property lists,
+ *          \p fcpl_id and \p fapl_id, respectively. The value of #H5P_DEFAULT
+ *          for any property list value indicates that the library should use
+ *          the default values for that appropriate property list.
+ *
+ *          The return value is a file identifier for the newly-created file;
+ *          this file identifier should be closed by calling H5Fclose() when
+ *          it is no longer needed.
+ *
+ * \include H5Fcreate.c
+ *
+ * \note  #H5F_ACC_TRUNC and #H5F_ACC_EXCL are mutually exclusive; use
+ *        exactly one.
+ *
+ * \note An additional flag, #H5F_ACC_DEBUG, prints debug information. This
+ *       flag can be combined with one of the above values using the bit-wise
+ *       OR operator (\c |), but it is used only by HDF5 library developers;
+ *       \Emph{it is neither tested nor supported for use in applications}.
+ *
+ * \attention \Bold{Special case — File creation in the case of an already-open file:}
+ *            If a file being created is already opened, by either a previous
+ *            H5Fopen() or H5Fcreate() call, the HDF5 library may or may not
+ *            detect that the open file and the new file are the same physical
+ *            file. (See H5Fopen() regarding the limitations in detecting the
+ *            re-opening of an already-open file.)\n
+ *            If the library detects that the file is already opened,
+ *            H5Fcreate() will return a failure, regardless of the use of
+ *            #H5F_ACC_TRUNC.\n
+ *            If the library does not detect that the file is already opened
+ *            and #H5F_ACC_TRUNC is not used, H5Fcreate() will return a failure
+ *            because the file already exists. Note that this is correct
+ *            behavior.\n
+ *            But if the library does not detect that the file is already
+ *            opened and #H5F_ACC_TRUNC is used, H5Fcreate() will truncate the
+ *            existing file and return a valid file identifier. Such a
+ *            truncation of a currently-opened file will almost certainly
+ *            result in errors. While unlikely, the HDF5 library may not be
+ *            able to detect, and thus report, such errors.\n
+ *            Applications should avoid calling H5Fcreate() with an already
+ *            opened file.
+ *
+ * \version 1.8.10 Removed #H5F_ACC_RDWR_F and #H5F_ACC_RDONLY_F from comments
+ *                 for access_flag field in Fortran subroutine, and changed
+ *                 “Possible values” to “Valid values”.
+ * \version 1.4.0 Fortran API introduced in this release.
+ * \version 1.0.0 C function introduced in this release.
+ *
+ * \see H5Fopen(), H5Fclose()
  *
  *-------------------------------------------------------------------------
  */
