@@ -84,7 +84,6 @@ H5FL_BLK_EXTERN(type_conv);
  *
  * \return \hid_t{dataset}
  *
-new
  * \details H5Dcreate2() creates a new dataset named \p name at the
  * location specified by \p loc_id, and associates constant and initial
  * persistent properties with that dataset, including \p dtype_id, the
