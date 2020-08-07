@@ -112,15 +112,13 @@ H5FL_BLK_EXTERN(type_conv);
  * link(s) by which the new dataset is accessed and the creation of any
  * intermediate groups that may be missing.
  * 
- * The datatype and dataspace properties (---- need verification ----)
- * and the dataset creation and access property lists are attached to the
- * dataset, so the caller may derive new datatypes, dataspaces, and creation
- * and access properties from the old ones and reuse them in calls to create
- * additional datasets.
- * 
+ * The datatype and dataspace properties and the dataset creation and
+ * access property lists are attached to the dataset, so the caller may
+ * derive new datatypes, dataspaces, and creation and access properties from
+ * the old ones and reuse them in calls to create additional datasets.
  * Once created, the dataset is ready to receive raw data. Immediately
- * attempting to read raw data from the dataset will probably (---- need
- * verification ----) return the fill value.
+ * attempting to read raw data from the dataset will probably return the
+ * fill value.
  * 
  * To conserve and release resources, the dataset should be closed when
  * access is no longer required.
