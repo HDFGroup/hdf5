@@ -29,8 +29,9 @@
 #define H5_MY_PKG_ERR   H5E_DATATYPE
 #define H5_MY_PKG_INIT  YES
 
-/**\defgroup H5T H5T: Datatype Interface
-   \todo Describe concisely what the functions in this module are about.
+/**\defgroup H5T H5T
+ * \brief Datatype Interface
+ * \todo Describe concisely what the functions in this module are about.
  */
 
 #endif /* _H5Tmodule_H */

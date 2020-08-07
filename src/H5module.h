@@ -26,8 +26,9 @@
 #define H5_MY_PKG_ERR   H5E_LIB
 #define H5_MY_PKG_INIT  YES
 
-/**\defgroup H5 H5: General Library Functions
-   \todo Describe concisely what the functions in this module are about.
+/**\defgroup H5 H5
+ * \brief General Library Functions
+ * \todo Describe concisely what the functions in this module are about.
  */
 
 #endif /* _H5module_H */

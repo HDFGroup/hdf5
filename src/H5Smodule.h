@@ -29,8 +29,9 @@
 #define H5_MY_PKG_ERR   H5E_DATASPACE
 #define H5_MY_PKG_INIT  YES
 
-/**\defgroup H5S H5S: Dataspace Interface
-   \todo Describe concisely what the functions in this module are about.
+/**\defgroup H5S H5S
+ * \brief Dataspace Interface
+ * \todo Describe concisely what the functions in this module are about.
  */
 
 #endif /* _H5Smodule_H */

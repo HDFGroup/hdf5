@@ -25,8 +25,9 @@
 #define H5_MY_PKG_ERR   H5E_REFERENCE
 #define H5_MY_PKG_INIT  YES
 
-/**\defgroup H5R H5R: Reference Interface
-   \todo Describe concisely what the functions in this module are about.
+/**\defgroup H5R H5R
+ * \brief Reference Interface
+ * \todo Describe concisely what the functions in this module are about.
  */
 
 #endif /* _H5Rmodule_H */
