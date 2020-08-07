@@ -234,16 +234,98 @@ done:
  *          follows:
  *     <table>
  *      <tr>
- *        <td>H5Pcreate Class Identifier</td>
- *       <td>H5Pget_class_name Class Name</td>
- *       <td>Comments</td>
+ *        <th>H5Pcreate Class Identifier</th>
+ *       <th>H5Pget_class_name Class Name</th>
+ *       <th>Comments</th>
  *     </tr>
  *     <tr>
  *         <td>#H5P_ATTRIBUTE_CREATE</td>
  *         <td>attribute create</td>
  *         <td>Properties for attribute creation</td>
  *     </tr>
- *     </table>
+ *     <tr>
+          <td>#H5P_DATASET_ACCESS</td>
+          <td>dataset access</td>
+          <td>Properties for dataset access</td>
+      </tr>
+      <tr>
+          <td>#H5P_DATASET_CREATE</td>
+          <td>dataset create</td>
+          <td>Properties for dataset creation</td>
+      </tr>
+      <tr>
+          <td>#H5P_DATASET_XFER</td>
+          <td>data transfer</td>
+          <td>Properties for raw data transfer</td>
+      </tr>
+      <tr>
+          <td>#H5P_DATATYPE_ACCESS</td>
+          <td>datatype access</td>
+          <td>Properties for datatype access</td>
+      </tr>
+      <tr>
+          <td>#H5P_DATATYPE_CREATE</td>
+          <td>datatype create</td>
+          <td>Properties for datatype creation</td>
+      </tr>
+      <tr>
+          <td>#H5P_FILE_ACCESS</td>
+          <td>file access</td>
+          <td>Properties for file access</td>
+      </tr>
+      <tr>
+          <td>#H5P_FILE_CREATE</td>
+          <td>file create</td>
+          <td>Properties for file creation</td>
+      </tr>
+     <tr>
+          <td>#H5P_FILE_MOUNT</td>
+          <td>file mount</td>
+          <td>Properties for file mounting</td>
+      </tr>
+      <tr valign="top">
+          <td>#H5P_GROUP_ACCESS</td>
+          <td>group access</td>
+          <td>Properties for group access</td>
+      </tr>
+      <tr>
+          <td>#H5P_GROUP_CREATE</td>
+          <td>group create</td>
+          <td>Properties for group creation</td>
+      </tr>
+      <tr>
+          <td>#H5P_LINK_ACCESS</td>
+          <td>link access</td>
+          <td>Properties governing link traversal when accessing objects</td>
+      </tr>
+      <tr>
+          <td>#H5P_LINK_CREATE</td>
+          <td>link create</td>
+          <td>Properties governing link creation</td>
+      </tr>
+      <tr>
+          <td>#H5P_OBJECT_COPY</td>
+          <td>object copy</td>
+          <td>Properties governing the object copying process</td>
+      </tr>
+      <tr>
+          <td>#H5P_OBJECT_CREATE</td>
+          <td>object create</td>
+          <td>Properties for object creation</td>
+      </tr>
+      <tr>
+          <td>#H5P_STRING_CREATE</td>
+          <td>string create</td>
+          <td>Properties for character encoding when encoding strings or
+          object names</td>
+      </tr>
+      <tr>
+          <td>#H5P_VOL_INITIALIZE</td>
+          <td>vol initialize</td>
+          <td>Properties for VOL initialization</td> 
+      </tr>
+        </table>
+ *
  *     This property list must eventually be closed with H5Pclose(); 
  *     otherwise, errors are likely to occur.
  *
@@ -251,14 +333,15 @@ done:
  * \version 1.8.15 For each class, the class name returned by 
  *                 H5Pget_class_name() was added.
  *                 The list of possible Fortran values was updated.
- * \version 1.8.0 The following property list classes were added at this release:
- *         H5P_DATASET_ACCESS 
- *         H5P_GROUP_CREATE 
- *         H5P_GROUP_ACCESS 
- *         H5P_DATATYPE_CREATE 
- *         H5P_DATATYPE_ACCESS 
- *         H5P_ATTRIBUTE_CREATE                   
- * 
+ * \version 1.8.0 The following property list classes were added at this 
+ *                release:
+          #H5P_DATASET_ACCESS 
+          #H5P_GROUP_CREATE 
+          #H5P_GROUP_ACCESS 
+          #H5P_DATATYPE_CREATE 
+          #H5P_DATATYPE_ACCESS 
+          #H5P_ATTRIBUTE_CREATE                   
+  
  * \version 1.4.0 Fortran subroutine was introduced.
  * \since 1.0.0
  */
@@ -1531,6 +1614,25 @@ done:
 }   /* H5Punregister() */
 
 
+/*--------------------------------------------------------------------------*/
+/**\ingroup H5P
+ *
+ * \brief Terminates access to a property list
+ *
+ * \param[in] plist_id Identifier of the property list to terminate 
+ *                     access to
+ *
+ * \return \herr_t
+ *
+ * \details H5Pclose() terminates access to a property list. All property 
+ *          lists should be closed when the application is finished 
+ *          accessing them. This frees resources used by the property 
+ *          list.
+ *
+ * \version 1.4.0 Fortran subroutine introduced.
+ * \since 1.0.0
+ */
+
 /*--------------------------------------------------------------------------
  NAME
     H5Pclose
