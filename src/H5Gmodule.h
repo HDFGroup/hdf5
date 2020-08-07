@@ -29,8 +29,9 @@
 #define H5_MY_PKG_ERR   H5E_SYM
 #define H5_MY_PKG_INIT  YES
 
-/**\defgroup H5G H5G: Group Interface
-   \todo Describe concisely what the functions in this module are about.
+/**\defgroup H5G H5G
+ * \brief Group Interface
+ * \todo Describe concisely what the functions in this module are about.
  */
 
 #endif /* _H5Gmodule_H */

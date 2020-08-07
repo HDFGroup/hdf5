@@ -29,8 +29,9 @@
 #define H5_MY_PKG_ERR   H5E_FILE
 #define H5_MY_PKG_INIT  YES
 
-/**\defgroup H5F H5F: File Interface
-   \todo Describe concisely what the functions in this module are about.
+/**\defgroup H5F H5F
+ * \brief File Interface
+ * \todo Describe concisely what the functions in this module are about.
  */
 
 #endif /* _H5Fmodule_H */
