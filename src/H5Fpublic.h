@@ -115,78 +115,77 @@ typedef enum H5F_close_degree_t {
     H5F_CLOSE_STRONG    = 3  /**< If there are opened objects, close them first, then close file */
 } H5F_close_degree_t;
 
-/* Current "global" information about file */
+/** Current "global" information about file */
 typedef struct H5F_info2_t {
     struct {
-    unsigned    version;    /* Superblock version # */
-    hsize_t        super_size;    /* Superblock size */
-    hsize_t        super_ext_size;    /* Superblock extension size */
+    unsigned    version;    /**< Superblock version # */
+    hsize_t        super_size;    /**< Superblock size */
+    hsize_t        super_ext_size;    /**< Superblock extension size */
     } super;
     struct {
-    unsigned    version;    /* Version # of file free space management */
-    hsize_t        meta_size;    /* Free space manager metadata size */
-    hsize_t        tot_space;    /* Amount of free space in the file */
+    unsigned    version;    /**< Version # of file free space management */
+    hsize_t        meta_size;    /**< Free space manager metadata size */
+    hsize_t        tot_space;    /**< Amount of free space in the file */
     } free;
     struct {
-    unsigned    version;    /* Version # of shared object header info */
-    hsize_t        hdr_size;       /* Shared object header message header size */
-    H5_ih_info_t    msgs_info;      /* Shared object header message index & heap size */
+    unsigned    version;    /**< Version # of shared object header info */
+    hsize_t        hdr_size;       /**< Shared object header message header size */
+    H5_ih_info_t    msgs_info;      /**< Shared object header message index & heap size */
     } sohm;
 } H5F_info2_t;
 
-/*
- * Types of allocation requests. The values larger than H5FD_MEM_DEFAULT
+/** Types of allocation requests. The values larger than H5FD_MEM_DEFAULT
  * should not change other than adding new types to the end. These numbers
  * might appear in files.
  *
- * Note: please change the log VFD flavors array if you change this
- * enumeration.
+ * \internal Please change the log VFD flavors array if you change this
+ *           enumeration.
  */
 typedef enum H5F_mem_t {
-    H5FD_MEM_NOLIST     = -1,   /* Data should not appear in the free list.
+    H5FD_MEM_NOLIST     = -1,   /**< Data should not appear in the free list.
                                  * Must be negative.
                                  */
-    H5FD_MEM_DEFAULT    = 0,    /* Value not yet set.  Can also be the
+    H5FD_MEM_DEFAULT    = 0,    /**< Value not yet set.  Can also be the
                                  * datatype set in a larger allocation
                                  * that will be suballocated by the library.
                                  * Must be zero.
                                  */
-    H5FD_MEM_SUPER      = 1,    /* Superblock data */
-    H5FD_MEM_BTREE      = 2,    /* B-tree data */
-    H5FD_MEM_DRAW       = 3,    /* Raw data (content of datasets, etc.) */
-    H5FD_MEM_GHEAP      = 4,    /* Global heap data */
-    H5FD_MEM_LHEAP      = 5,    /* Local heap data */
-    H5FD_MEM_OHDR       = 6,    /* Object header data */
+    H5FD_MEM_SUPER      = 1,    /**< Superblock data */
+    H5FD_MEM_BTREE      = 2,    /**< B-tree data */
+    H5FD_MEM_DRAW       = 3,    /**< Raw data (content of datasets, etc.) */
+    H5FD_MEM_GHEAP      = 4,    /**< Global heap data */
+    H5FD_MEM_LHEAP      = 5,    /**< Local heap data */
+    H5FD_MEM_OHDR       = 6,    /**< Object header data */
 
-    H5FD_MEM_NTYPES             /* Sentinel value - must be last */
+    H5FD_MEM_NTYPES             /**< Sentinel value - must be last */
 } H5F_mem_t;
 
-/* Free space section information */
+/** Free space section information */
 typedef struct H5F_sect_info_t {
-    haddr_t             addr;   /* Address of free space section */
-    hsize_t             size;   /* Size of free space section */
+    haddr_t             addr;   /**< Address of free space section */
+    hsize_t             size;   /**< Size of free space section */
 } H5F_sect_info_t;
 
-/* Library's format versions */
+/** Library's format versions */
 typedef enum H5F_libver_t {
     H5F_LIBVER_ERROR = -1,
-    H5F_LIBVER_EARLIEST = 0,    /* Use the earliest possible format for storing objects */
-    H5F_LIBVER_V18 = 1,         /* Use the latest v18 format for storing objects */
-    H5F_LIBVER_V110 = 2,        /* Use the latest v110 format for storing objects */
-    H5F_LIBVER_V112 = 3,        /* Use the latest v112 format for storing objects */
-    H5F_LIBVER_V114 = 4,        /* Use the latest v114 format for storing objects */
+    H5F_LIBVER_EARLIEST = 0,    /**< Use the earliest possible format for storing objects */
+    H5F_LIBVER_V18 = 1,         /**< Use the latest v18 format for storing objects */
+    H5F_LIBVER_V110 = 2,        /**< Use the latest v110 format for storing objects */
+    H5F_LIBVER_V112 = 3,        /**< Use the latest v112 format for storing objects */
+    H5F_LIBVER_V114 = 4,        /**< Use the latest v114 format for storing objects */
     H5F_LIBVER_NBOUNDS
 } H5F_libver_t;
 
 #define H5F_LIBVER_LATEST   H5F_LIBVER_V114
 
-/* File space handling strategy */
+/** File space handling strategy */
 typedef enum H5F_fspace_strategy_t {
-    H5F_FSPACE_STRATEGY_FSM_AGGR = 0,   /* Mechanisms: free-space managers, aggregators, and virtual file drivers */
+    H5F_FSPACE_STRATEGY_FSM_AGGR = 0,   /**< Mechanisms: free-space managers, aggregators, and virtual file drivers */
                                         /* This is the library default when not set */
-    H5F_FSPACE_STRATEGY_PAGE = 1,   /* Mechanisms: free-space managers with embedded paged aggregation and virtual file drivers */
-    H5F_FSPACE_STRATEGY_AGGR = 2,   /* Mechanisms: aggregators and virtual file drivers */
-    H5F_FSPACE_STRATEGY_NONE = 3,   /* Mechanisms: virtual file drivers */
+    H5F_FSPACE_STRATEGY_PAGE = 1,   /**< Mechanisms: free-space managers with embedded paged aggregation and virtual file drivers */
+    H5F_FSPACE_STRATEGY_AGGR = 2,   /**< Mechanisms: aggregators and virtual file drivers */
+    H5F_FSPACE_STRATEGY_NONE = 3,   /**< Mechanisms: virtual file drivers */
     H5F_FSPACE_STRATEGY_NTYPES      /* must be last */
 } H5F_fspace_strategy_t;
 
@@ -221,12 +220,232 @@ extern "C" {
 #endif
 
 H5_DLL htri_t H5Fis_accessible(const char *container_name, hid_t fapl_id);
+/** \example H5Fcreate.c
+ *           After creating an HDF5 file with H5Fcreate(), we close it with
+ *           H5Fclose().
+ */
+/**\ingroup H5F
+ *
+ * \brief Creates an HDF5 file
+ *
+ * \param[in] filename Name of the file to create
+ * \param[in] flags    File access flags. Allowable values are:
+ *                     - #H5F_ACC_TRUNC: Truncate file, if it already exists,
+ *                       erasing all data previously stored in the file
+ *                     - #H5F_ACC_EXCL: Fail if file already exists
+ * \fcpl_id
+ * \fapl_id
+ * \return \hid_t{file}
+ *
+ * \details H5Fcreate() is the primary function for creating HDF5 files; it
+ *          creates a new HDF5 file with the specified name and property lists.
+ *
+ *          The \p filename parameter specifies the name of the new file.
+ *
+ *          The \p flags parameter specifies whether an existing file is to be
+ *          overwritten. It should be set to either #H5F_ACC_TRUNC to overwrite
+ *          an existing file or #H5F_ACC_EXCL, instructing the function to fail
+ *          if the file already exists.
+ *
+ *          New files are always created in read-write mode, so the read-write
+ *          and read-only flags, #H5F_ACC_RDWR and #H5F_ACC_RDONLY,
+ *          respectively, are not relevant in this function. Further note that
+ *          a specification of #H5F_ACC_RDONLY will be ignored; the file will
+ *          be created in read-write mode, regardless.
+ *
+ *          More complex behaviors of file creation and access are controlled
+ *          through the file creation and file access property lists,
+ *          \p fcpl_id and \p fapl_id, respectively. The value of #H5P_DEFAULT
+ *          for any property list value indicates that the library should use
+ *          the default values for that appropriate property list.
+ *
+ *          The return value is a file identifier for the newly-created file;
+ *          this file identifier should be closed by calling H5Fclose() when
+ *          it is no longer needed.
+ *
+ * \include H5Fcreate.c
+ *
+ * \note  #H5F_ACC_TRUNC and #H5F_ACC_EXCL are mutually exclusive; use
+ *        exactly one.
+ *
+ * \note An additional flag, #H5F_ACC_DEBUG, prints debug information. This
+ *       flag can be combined with one of the above values using the bit-wise
+ *       OR operator (\c |), but it is used only by HDF5 library developers;
+ *       \Emph{it is neither tested nor supported for use in applications}.
+ *
+ * \attention \Bold{Special case — File creation in the case of an already-open file:}
+ *            If a file being created is already opened, by either a previous
+ *            H5Fopen() or H5Fcreate() call, the HDF5 library may or may not
+ *            detect that the open file and the new file are the same physical
+ *            file. (See H5Fopen() regarding the limitations in detecting the
+ *            re-opening of an already-open file.)\n
+ *            If the library detects that the file is already opened,
+ *            H5Fcreate() will return a failure, regardless of the use of
+ *            #H5F_ACC_TRUNC.\n
+ *            If the library does not detect that the file is already opened
+ *            and #H5F_ACC_TRUNC is not used, H5Fcreate() will return a failure
+ *            because the file already exists. Note that this is correct
+ *            behavior.\n
+ *            But if the library does not detect that the file is already
+ *            opened and #H5F_ACC_TRUNC is used, H5Fcreate() will truncate the
+ *            existing file and return a valid file identifier. Such a
+ *            truncation of a currently-opened file will almost certainly
+ *            result in errors. While unlikely, the HDF5 library may not be
+ *            able to detect, and thus report, such errors.\n
+ *            Applications should avoid calling H5Fcreate() with an already
+ *            opened file.
+ *
+ * \version 1.8.10 Removed #H5F_ACC_RDWR_F and #H5F_ACC_RDONLY_F from comments
+ *                 for access_flag field in Fortran subroutine, and changed
+ *                 “Possible values” to “Valid values”.
+ * \version 1.4.0 Fortran API introduced in this release.
+ * \version 1.0.0 C function introduced in this release.
+ *
+ * \see H5Fopen(), H5Fclose()
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL hid_t  H5Fcreate(const char *filename, unsigned flags,
-                hid_t create_plist, hid_t access_plist);
-H5_DLL hid_t  H5Fopen(const char *filename, unsigned flags,
-                hid_t access_plist);
+                        hid_t create_plist, hid_t access_plist);
+/**\ingroup H5F
+ *
+ * \brief Opens an existing HDF5 file
+ *
+ * \param[in] filename Name of the file to be opened
+ * \param[in] flags    File access flags. Allowable values are:
+ *                     - #H5F_ACC_RDWR: Allows read and write access to file
+ *                     - #H5F_ACC_RDONLY: Allows read-only access to file
+ *                     - #H5F_ACC_RDWR \c | #H5F_ACC_SWMR_WRITE: Indicates that
+ *                       the file is open for writing in a
+ *                       single-writer/multi-writer (SWMR) scenario.
+ *                     - #H5F_ACC_RDONLY \c | #H5F_ACC_SWMR_READ:  Indicates
+ *                       that the file is open for reading in a
+ *                       single-writer/multi-reader (SWMR) scenario.
+ *                     - An additional flag, #H5F_ACC_DEBUG, prints debug
+ *                       information. This flag can be combined with one of the
+ *                       above values using the bit-wise OR operator (\c |), but
+ *                       it is used only by HDF5 library developers;
+ *                       \Emph{it is neither tested nor supported} for use in
+ *                       applications.
+ * \fapl_id
+ * \return \hid_t{file}
+ *
+ * \details H5Fopen() is the primary function for accessing existing HDF5 files.
+ *          This function opens the named file in the specified access mode and
+ *          with the specified access property list.
+ *
+ *          Note that H5Fopen() does not create a file if it does not already
+ *          exist; see H5Fcreate().
+ *
+ *          The \p filename parameter specifies the name of the file to be
+ *          opened.
+ *
+ *          The \p fapl_id parameter specifies the file access property list.
+ *          Use of #H5P_DEFAULT specifies that default I/O access properties
+ *          are to be used.
+ *
+ *          The \p flags parameter specifies whether the file will be opened in
+ *          read-write or read-only mode, #H5F_ACC_RDWR or #H5F_ACC_RDONLY,
+ *          respectively. More complex behaviors of file access are controlled
+ *          through the file-access property list.
+ *
+ *          The return value is a file identifier for the open file; this file
+ *          identifier should be closed by calling H5Fclose() when it is no
+ *          longer needed.
+ *
+ * \note  #H5F_ACC_RDWR and #H5F_ACC_RDONLY are mutually exclusive; use
+ *        exactly one.
+ *
+ * \attention \Bold{Special cases — Multiple opens:} A file can often be opened
+ *            with a new H5Fopen() call without closing an already-open
+ *            identifier established in a previous H5Fopen() or H5Fcreate()
+ *            call. Each such H5Fopen() call will return a unique identifier
+ *            and the file can be accessed through any of these identifiers as
+ *            long as the identifier remains valid. In such multiply-opened
+ *            cases, the open calls must use the same flags argument and the
+ *            file access property lists must use the same file close degree
+ *            property setting (see the external link discussion below and
+ *            H5Pset_fclose_degree()).\n
+ *            In some cases, such as files on a local Unix file system, the
+ *            HDF5 library can detect that a file is multiply opened and will
+ *            maintain coherent access among the file identifiers.\n
+ *            But in many other cases, such as parallel file systems or
+ *            networked file systems, it is not always possible to detect
+ *            multiple opens of the same physical file. In such cases, HDF5
+ *            will treat the file identifiers as though they are accessing
+ *            different files and will be unable to maintain coherent access.
+ *            Errors are likely to result in these cases. While unlikely, the
+ *            HDF5 library may not be able to detect, and thus report,
+ *            such errors.\n
+ *            It is generally recommended that applications avoid multiple
+ *            opens of the same file.
+ *
+ * \attention \Bold{Special restriction on multiple opens of a file first
+ *            opened by means of an external link:} When an external link is
+ *            followed, the external file is always opened with the weak file
+ *            close degree property setting, #H5F_CLOSE_WEAK (see
+ *            H5Lcreate_external() and H5Pset_fclose_degree()). If the file is
+ *            reopened with H5Fopen while it remains held open from such an
+ *            external link call, the file access property list used in the
+ *            open call must include the file close degree setting
+ *            #H5F_CLOSE_WEAK or the open will fail.
+ *
+ * \version 1.10.0 The #H5F_ACC_SWMR_WRITE and #H5F_ACC_SWMR_READ flags were added.
+ *
+ * \see H5Fclose()
+ *
+ *-------------------------------------------------------------------------
+ */
+H5_DLL hid_t  H5Fopen(const char *filename, unsigned flags, hid_t access_plist);
 H5_DLL hid_t  H5Freopen(hid_t file_id);
 H5_DLL herr_t H5Fflush(hid_t object_id, H5F_scope_t scope);
+/** \example H5Fclose.c
+ *           After creating an HDF5 file with H5Fcreate(), we close it with
+ *           H5Fclose().
+ */
+/**\ingroup H5F
+ *
+ * \brief Terminates access to an HDF5 file
+ *
+ * \file_id
+ * \return \herr_t
+ *
+ * \details H5Fclose() terminates access to an HDF5 file (specified by
+ *          \p file_id) by flushing all data to storage.
+ *
+ *          If this is the last file identifier open for the file and no other
+ *          access identifier is open (e.g., a dataset identifier, group
+ *          identifier, or shared datatype identifier), the file will be fully
+ *          closed and access will end.
+ *
+ *          Use H5Fclose() as shown in the following example:
+ * \include H5Fclose.c
+ *
+ * \note \Bold{Delayed close:} Note the following deviation from the
+ *       above-described behavior. If H5Fclose() is called for a file but one
+ *       or more objects within the file remain open, those objects will remain
+ *       accessible until they are individually closed. Thus, if the dataset
+ *       \c data_sample is open when H5Fclose() is called for the file
+ *       containing it, \c data_sample will remain open and accessible
+ *       (including writable) until it is explicitly closed. The file will be
+ *       automatically closed once all objects in the file have been closed.\n
+ *       Be warned, however, that there are circumstances where it is not
+ *       possible to delay closing a file. For example, an MPI-IO file close is
+ *       a collective call; all of the processes that opened the file must
+ *       close it collectively. The file cannot be closed at some time in the
+ *       future by each process in an independent fashion. Another example is
+ *       that an application using an AFS token-based file access privilege may
+ *       destroy its AFS token after H5Fclose() has returned successfully. This
+ *       would make any future access to the file, or any object within it,
+ *       illegal.\n
+ *       In such situations, applications must close all open objects in a file
+ *       before calling H5Fclose. It is generally recommended to do so in all
+ *       cases.
+ *
+ * \see H5Fopen()
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fclose(hid_t file_id);
 H5_DLL herr_t H5Fdelete(const char *filename, hid_t fapl_id);
 H5_DLL hid_t  H5Fget_create_plist(hid_t file_id);
