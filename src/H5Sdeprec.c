@@ -77,6 +77,47 @@
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 
+/* --------------------------------------------------------------------------*/
+/**\ingroup H5S
+ *
+ * \brief Encodes a data space object description into a binary buffer
+ *
+ * \space_id{obj_id}
+ * \param[in,out] buf     Buffer for the object to be encoded into;
+ *                        If the provided buffer is NULL, only the size of 
+ *                        buffer needed is returned through \p nalloc.   
+ * \param[in,out] nalloc  The size of the allocated buffer
+ *
+ * \return \herr_t
+ *
+ * \deprecated Deprecated in favor of H5Sencode2()
+ *
+ * \details Given the data space identifier \p obj_id, H5Sencode1() converts 
+ *          a data space description into binary form in a buffer. Using 
+ *          this binary form in the buffer, a data space object can be 
+ *          reconstructed using H5Sdecode() to return a new object handle 
+ *          (\p hid_t) for this data space.
+ *
+ *          A preliminary H5Sencode1() call can be made to find out the size 
+ *          of the buffer needed. This value is returned as \p nalloc. That 
+ *          value can then be assigned to \p nalloc for a second H5Sencode1() 
+ *          call, which will retrieve the actual encoded object.
+ *
+ *          If the library finds out \p nalloc is not big enough for the 
+ *          object, it simply returns the size of the buffer needed through 
+ *          \p nalloc without encoding the provided buffer.
+ *
+ *          The types of data space addressed in this function are null, 
+ *          scalar, and simple space. For a simple data space, the information 
+ *          on the selection, for example, hyperslab selection, is also 
+ *          encoded and decoded. A complex data space has not been 
+ *          implemented in the library.
+ *
+ * \version 1.12.0 The function H5Sencode was renamed H5Sencode1() and
+ *                 deprecated.
+ * \since 1.8.0
+ */
+
 /*-------------------------------------------------------------------------
  * Function:	H5Sencode1
  *

@@ -1768,7 +1768,7 @@ done:
  * \brief Encodes a data space object description into a binary buffer
  *
  * \space_id{obj_id}
- * \param[in,out] buf      Buffer for the object to be encoded into
+ * \param[in,out] buf      Buffer for the object to be encoded into;
  *                         If the provided buffer is NULL, only the size
  *                         of buffer needed is returned through \p nalloc.
  * \param[in,out] nalloc   The size of the allocated buffer
