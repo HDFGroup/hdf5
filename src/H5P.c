@@ -217,9 +217,55 @@ done:
 }   /* H5Pcreate_class() */
 
 
-/*--------------------------------------------------------------------------
- NAME
-    H5Pcreate
+/*--------------------------------------------------------------------------*/
+/**\ingroup H5P
+ *
+ * \brief Creates a new property list as an instance of a property list 
+ *        class
+ *
+ * \param[in] cls_id The class of the property list to create. Valid values
+ *                   are listed in the Description, below.
+ *
+ * \return \hid_t{property list}                   
+ *
+ * \details H5Pcreate() creates a new property list as an instance of 
+ *          some property list class. The new property list is initialized 
+ *          with default values for the specified class. The classes are as 
+ *          follows:
+ *     <table>
+ *      <tr>
+ *        <td>H5Pcreate Class Identifier</td>
+ *       <td>H5Pget_class_name Class Name</td>
+ *       <td>Comments</td>
+ *     </tr>
+ *     <tr>
+ *         <td>#H5P_ATTRIBUTE_CREATE</td>
+ *         <td>attribute create</td>
+ *         <td>Properties for attribute creation</td>
+ *     </tr>
+ *     </table>
+ *     This property list must eventually be closed with H5Pclose(); 
+ *     otherwise, errors are likely to occur.
+ *
+ * \version 1.12.0 The #H5P_VOL_INITIALIZE property list class was added
+ * \version 1.8.15 For each class, the class name returned by 
+ *                 H5Pget_class_name() was added.
+ *                 The list of possible Fortran values was updated.
+ * \version 1.8.0 The following property list classes were added at this release:
+ *         H5P_DATASET_ACCESS 
+ *         H5P_GROUP_CREATE 
+ *         H5P_GROUP_ACCESS 
+ *         H5P_DATATYPE_CREATE 
+ *         H5P_DATATYPE_ACCESS 
+ *         H5P_ATTRIBUTE_CREATE                   
+ * 
+ * \version 1.4.0 Fortran subroutine was introduced.
+ * \since 1.0.0
+ */
+
+ /*--------------------------------------------------------------------------
+   NAME
+   H5Pcreate
  PURPOSE
     Routine to create a new property list of a property list class.
  USAGE
