@@ -223,8 +223,7 @@ done:
  * \brief Creates a new property list as an instance of a property list 
  *        class
  *
- * \param[in] cls_id The class of the property list to create. Valid values
- *                   are listed in the Description, below.
+ * \param[in] cls_id The class of the property list to create. 
  *
  * \return \hid_t{property list}                   
  *
@@ -234,8 +233,8 @@ done:
  *          follows:
  *     <table>
  *      <tr>
- *        <th>H5Pcreate Class Identifier</th>
- *       <th>H5Pget_class_name Class Name</th>
+ *        <th>Class Identifier</th>
+ *       <th>Class Name</th>
  *       <th>Comments</th>
  *     </tr>
  *     <tr>
