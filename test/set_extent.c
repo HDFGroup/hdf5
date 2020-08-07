@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Pedro Vicente <pvn@ncsa.uiuc.edu>
+ * Programmer:  Pedro Vicente
  *              April 12, 2002
  *
  * Purpose:     Tests the H5Dset_extent call
