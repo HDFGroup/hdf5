@@ -38,7 +38,7 @@ static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
  *
  *		Failure:	-1
  *
- * Programmer:  Pedro Vicente <pvn@ncsa.uiuc.edu>
+ * Programmer:  Pedro Vicente
  *              Thursday, March 25, 2004
  *
  *-------------------------------------------------------------------------

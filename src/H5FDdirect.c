@@ -38,6 +38,9 @@
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_DIRECT_g = 0;
 
+/* Whether to ignore file locks when disabled (env var value) */
+static htri_t ignore_disabled_file_locks_s = FAIL;
+
 /* File operations */
 #define OP_UNKNOWN  0
 #define OP_READ    1
@@ -71,6 +74,7 @@ typedef struct H5FD_direct_t {
     haddr_t  pos;      /*current file I/O position  */
     int    op;      /*last operation    */
     H5FD_direct_fapl_t  fa;    /*file access properties  */
+    hbool_t         ignore_disabled_file_locks;
 #ifndef H5_HAVE_WIN32_API
     /*
      * On most systems the combination of device and i-node number uniquely
@@ -192,9 +196,19 @@ DESCRIPTION
 static herr_t
 H5FD__init_package(void)
 {
+    char    *lock_env_var   = NULL;     /* Environment variable pointer */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
+
+    /* Check the use disabled file locks environment variable */
+    lock_env_var = HDgetenv("HDF5_USE_FILE_LOCKING");
+    if(lock_env_var && !HDstrcmp(lock_env_var, "BEST_EFFORT"))
+        ignore_disabled_file_locks_s = TRUE;    /* Override: Ignore disabled locks */
+    else if(lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "1")))
+        ignore_disabled_file_locks_s = FALSE;   /* Override: Don't ignore disabled locks */
+    else
+        ignore_disabled_file_locks_s = FAIL;    /* Environment variable not set, or not set correctly */
 
     if(H5FD_direct_init() < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize direct VFD")
@@ -510,6 +524,16 @@ H5FD__direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
     file->fa.mboundary = fa->mboundary;
     file->fa.fbsize = fa->fbsize;
     file->fa.cbsize = fa->cbsize;
+
+    /* Check the file locking flags in the fapl */
+    if(ignore_disabled_file_locks_s != FAIL)
+        /* The environment variable was set, so use that preferentially */
+        file->ignore_disabled_file_locks = ignore_disabled_file_locks_s;
+    else {
+        /* Use the value in the property list */
+        if(H5P_get(plist, H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_NAME, &file->ignore_disabled_file_locks) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get ignore disabled file locks property")
+    }
 
     /* Try to decide if data alignment is required.  The reason to check it here
      * is to handle correctly the case that the file is in a different file system
@@ -1303,17 +1327,28 @@ done:
 static herr_t
 H5FD__direct_lock(H5FD_t *_file, hbool_t rw)
 {
-    H5FD_direct_t  *file = (H5FD_direct_t*)_file;	/* VFD file struct */
-    const int lock = rw ? LOCK_EX : LOCK_SH;
-    herr_t ret_value = SUCCEED;                 	/* Return value */
+    H5FD_direct_t *file = (H5FD_direct_t*)_file;    /* VFD file struct      */
+    int lock_flags;                                 /* file locking flags   */
+    herr_t ret_value = SUCCEED;                     /* Return value         */
 
     FUNC_ENTER_STATIC
 
     HDassert(file);
 
-    /* Place the lock with non-blocking */
-    if(HDflock(file->fd, lock | LOCK_NB) < 0)
-        HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to flock file")
+    /* Set exclusive or shared lock based on rw status */
+    lock_flags = rw ? LOCK_EX : LOCK_SH;
+
+    /* Place a non-blocking lock on the file */
+    if(HDflock(file->fd, lock_flags | LOCK_NB) < 0) {
+        if(file->ignore_disabled_file_locks && ENOSYS == errno) {
+            /* When errno is set to ENOSYS, the file system does not support
+             * locking, so ignore it.
+             */
+            errno = 0;
+        }
+        else
+            HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTLOCKFILE, FAIL, "unable to lock file")
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1341,8 +1376,16 @@ H5FD__direct_unlock(H5FD_t *_file)
 
     HDassert(file);
 
-    if(HDflock(file->fd, LOCK_UN) < 0)
-        HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to flock (unlock) file")
+    if(HDflock(file->fd, LOCK_UN) < 0) {
+        if(file->ignore_disabled_file_locks && ENOSYS == errno) {
+            /* When errno is set to ENOSYS, the file system does not support
+             * locking, so ignore it.
+             */
+            errno = 0;
+        }
+        else
+            HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock file")
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

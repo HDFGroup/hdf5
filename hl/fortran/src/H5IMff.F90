@@ -41,7 +41,7 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 05, 2004
 !
@@ -95,7 +95,7 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 05, 2004
 !
@@ -142,7 +142,7 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 05, 2004
 !
@@ -204,7 +204,7 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 05, 2004
 !
@@ -267,7 +267,7 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 05, 2004
 !
@@ -313,7 +313,7 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 06, 2004
 !
@@ -364,7 +364,7 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 06, 2004
 !
@@ -416,7 +416,7 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 06, 2004
 !
@@ -467,7 +467,7 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 05, 2004
 !
@@ -516,7 +516,7 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 06, 2004
 !
@@ -567,7 +567,7 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 06, 2004
 !
@@ -619,7 +619,7 @@ CONTAINS
 !
 ! Return: true, false, fail
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 06, 2004
 !

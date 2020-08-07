@@ -12,9 +12,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Wednesday, April  8, 1998
- * Modified:	Albert Cheng <acheng@hdfgroup.org>
+ * Modified:	Albert Cheng
  * 		September 11, 2010
  */
 /*

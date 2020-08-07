@@ -1398,4 +1398,36 @@ public class TestH5Pfapl {
             fail("H5P_evict_on_close: " + err);
         }
     }
+
+    @Test
+    public void testH5P_file_locking() {
+        boolean use_file_locking = false;
+        boolean ignore_disabled_file_locking = false;
+        try {
+            // false values (usually not the default)
+            H5.H5Pset_file_locking(fapl_id, false, false);
+            use_file_locking = H5.H5Pget_use_file_locking(fapl_id);
+            ignore_disabled_file_locking = H5.H5Pget_ignore_disabled_file_locking(fapl_id);
+            assertFalse("H5P_file_locking", use_file_locking);
+            assertFalse("H5P_file_locking", ignore_disabled_file_locking);
+
+            // true values (typically the default)
+            H5.H5Pset_file_locking(fapl_id, true, true);
+            use_file_locking = H5.H5Pget_use_file_locking(fapl_id);
+            ignore_disabled_file_locking = H5.H5Pget_ignore_disabled_file_locking(fapl_id);
+            assertTrue("H5P_file_locking", use_file_locking);
+            assertTrue("H5P_file_locking", ignore_disabled_file_locking);
+        }
+        catch (HDF5PropertyListInterfaceException err) {
+            // parallel is not supported
+            if (err.getMinorErrorNumber() != HDF5Constants.H5E_UNSUPPORTED) {
+                err.printStackTrace();
+                fail("H5P_test_file_locking: " + err);
+            }
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5P_test_file_locking: " + err);
+        }
+    }
 }

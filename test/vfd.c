@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu<slu@ncsa.uiuc.edu>
+ * Programmer:  Raymond Lu
  *              Tuesday, Sept 24, 2002
  *
  * Purpose:     Tests the basic features of Virtual File Drivers

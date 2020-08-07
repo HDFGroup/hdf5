@@ -13,8 +13,6 @@
 
 #include "H5IMprivate.h"
 #include "H5LTprivate.h"
-#include <string.h>
-#include <stdlib.h>
 
 /*-------------------------------------------------------------------------
 * Function: H5IMmake_image_8bit
@@ -23,7 +21,7 @@
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente Nunes
 *
 * Date: June 13, 2001
 *
@@ -77,7 +75,7 @@ herr_t H5IMmake_image_8bit( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente Nunes
 *
 * Date: June 13, 2001
 *
@@ -162,7 +160,7 @@ herr_t H5IMmake_image_24bit( hid_t loc_id,
 *
 * Return:
 *
-* Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente Nunes
 *
 * Date: May 28, 2001
 *
@@ -204,7 +202,7 @@ static herr_t find_palette(hid_t loc_id,
 *
 * Return: Success: 1, Failure: 0
 *
-* Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente Nunes
 *
 * Date: May 11, 2001
 *
@@ -230,7 +228,7 @@ herr_t H5IM_find_palette( hid_t loc_id )
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente Nunes
 *
 * Date: July 25, 2001
 *
@@ -412,7 +410,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente Nunes
 *
 * Date: June 13, 2001
 *
@@ -462,7 +460,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente Nunes
 *
 * Date: May 01, 2001
 *
@@ -518,7 +516,7 @@ herr_t H5IMmake_palette( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente Nunes
 *
 * Date: May 01, 2001
 *
@@ -695,7 +693,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente Nunes
 *
 * Date: September 10, 2001
 *
@@ -796,7 +794,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente Nunes
 *
 * Date: July 22, 2001
 *
@@ -887,7 +885,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente Nunes
 *
 * Date: July 22, 2001
 *
@@ -1003,7 +1001,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente Nunes
 *
 * Date: August 30, 2001
 *
@@ -1110,7 +1108,7 @@ out:
 *
 * Return: true, false, fail
 *
-* Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente Nunes
 *
 * Date: August 30, 2001
 *
@@ -1214,7 +1212,7 @@ out:
 *
 * Return: true, false, fail
 *
-* Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente Nunes
 *
 * Date: August 30, 2001
 *

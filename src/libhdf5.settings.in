@@ -89,5 +89,6 @@ Parallel Filtered Dataset Writes: @PARALLEL_FILTERED_WRITES@
             Using memory checker: @USINGMEMCHECKER@
  Memory allocation sanity checks: @MEMORYALLOCSANITYCHECK@
           Function stack tracing: @CODESTACK@
+                Use file locking: @DESIRED_FILE_LOCKING@
        Strict file format checks: @STRICT_FORMAT_CHECKS@
     Optimization instrumentation: @INSTRUMENT_LIBRARY@

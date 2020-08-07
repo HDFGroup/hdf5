@@ -1837,7 +1837,7 @@ H5FD_multi_lock(H5FD_t *_file, hbool_t rw)
     } /* end if */
 
     if(nerrors)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "error locking member files", -1)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_CANTLOCKFILE, "error locking member files", -1)
     return 0;
 
 } /* H5FD_multi_lock() */
@@ -1874,7 +1874,7 @@ H5FD_multi_unlock(H5FD_t *_file)
     } END_MEMBERS;
 
     if(nerrors)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "error unlocking member files", -1)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_CANTUNLOCKFILE, "error unlocking member files", -1)
 
     return 0;
 } /* H5FD_multi_unlock() */
