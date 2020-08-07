@@ -76,11 +76,11 @@ H5FL_BLK_EXTERN(type_conv);
  *
  * \fgdta_loc_id
  * \param[in] name      Name of the dataset to open
- * \dtype_id
+ * \type_id
  * \space_id
  * \lcpl_id
- * \param[in] dcpl_id   Dataset creation property list
- * \param[in] dapl_id   Dataset access property list
+ * \dcpl_id
+ * \dapl_id
  *
  * \return \hid_t{dataset}
  *
@@ -101,8 +101,7 @@ H5FL_BLK_EXTERN(type_conv);
  * If \p dtype_id is either a fixed-length or variable-length string, it is
  * important to set the string length when defining the datatype. String
  * datatypes are derived from #H5T_C_S1 (or #H5T_FORTRAN_S1 for Fortran
- * codes), which defaults to 1 character in size. See H5Tset_size() and
- * Creating variable-length string datatypes.
+ * codes), which defaults to 1 character in size.
  * 
  * If \p dtype_id is a committed datatype, and if the file location
  * associated with the committed datatype is different from the file location
@@ -126,11 +125,9 @@ H5FL_BLK_EXTERN(type_conv);
  * To conserve and release resources, the dataset should be closed when
  * access is no longer required.
  *
- * \include H5Dcreate2.c (---- need verification ----)
- *
  * \since 1.8.0
  *
- * \see H5Dopen2(), H5Dclose()
+ * \see H5Dopen2(), H5Dclose(), H5Tset_size()
  *
  *-------------------------------------------------------------------------
  */
@@ -319,7 +316,7 @@ done:
  *
  * \fgdta_loc_id
  * \param[in] name      Name of the dataset to open
- * \param[in] dapl_id   Dataset access property list
+ * \dapl_id
  *
  * \return \hid_t{dataset}
  *
@@ -335,8 +332,6 @@ done:
  *
  * To conserve and release resources, the dataset should be closed when
  * access is no longer required.
- *
- * \include H5Dopen2.c (---- need verification ----)
  *
  * \since 1.8.0
  *
@@ -429,8 +424,6 @@ done:
  * To conserve and release resources, the dataset should be closed when
  * access is no longer required.
  *
- * \include H5Dopen2.c (---- need verification ----)
- *
  * \since 1.8.0
  *
  * \see H5Dcreate2(), H5Dclose()
@@ -491,6 +484,27 @@ done:
 } /* end H5Dclose() */
 
 
+/* --------------------------------------------------------------------------*/
+/**\ingroup H5D
+ *
+ * \brief Returns an identifier for a copy of the dataspace for a dataset
+ *
+ * \dset_id
+ *
+ * \return \hid_t{dataspace}
+ *
+ * \details H5Dget_space() makes a copy of the dataspace of the dataset
+ * specified by \p dataset_id. The function returns an identifier for the
+ * new copy of the dataspace.
+
+ * A dataspace identifier returned from this function should be released
+ * with H5Sclose() when the identifier is no longer needed so that resource
+ * leaks will not occur.
+ *
+ * \see H5Sclose()
+ *
+ *-------------------------------------------------------------------------
+ */
 /*-------------------------------------------------------------------------
  * Function:    H5Dget_space
  *
@@ -557,6 +571,43 @@ done:
 } /* H5Dget_space_status() */
 
 
+/* --------------------------------------------------------------------------*/
+/**\ingroup H5D
+ *
+ * \brief Returns an identifier for a copy of the datatype for a dataset
+ *
+ * \dset_id
+ *
+ * \return \hid_t{datatype}
+ *
+ * \details H5Dget_type() returns an identifier for a copy of the datatype
+ * for a dataset.
+ * 
+ * If a dataset has a named datatype, then an identifier to the opened
+ * datatype is returned. Otherwise, the returned datatype is read-only. If
+ * atomization of the datatype fails, then the datatype is closed.
+ * 
+ * A datatype identifier returned from this function should be released
+ * with H5Tclose() when the identifier is no longer needed so that resource
+ * leaks will not occur.
+ * 
+ * \note Datatype Identifiers
+ * 
+ * \note Please note that a datatype is actually an object identifier or
+ * handle returned from opening the datatype. It is not persistent and its
+ * value can be different from one HDF5 session to the next.
+ * 
+ * \note H5T_EQUAL can be used to compare datatypes.
+ * 
+ * \note HDF5 High Level APIs that may also be of interest are:
+ * 
+ * \note H5LT_DTYPE_TO_TEXT creates a text description of a datatype.  \note
+ * H5LT_TEXT_TO_DTYPE creates an HDF5 datatype given a text description.
+ *
+ * \see H5Tclose()
+ *
+ *-------------------------------------------------------------------------
+ */
 /*-------------------------------------------------------------------------
  * Function:    H5Dget_type
  *
@@ -592,6 +643,23 @@ done:
 } /* end H5Dget_type() */
 
 
+/* --------------------------------------------------------------------------*/
+/**\ingroup H5D
+ *
+ * \brief Returns an identifier for a copy of the dataset creation
+ *  property list for a dataset
+ *
+ * \dset_id
+ *
+ * \return \hid_t{dataset creation property list}
+ *
+ * \details H5Dget_create_plist() returns an identifier for a copy of
+ * the dataset creation property list associated with the specified dataset
+ *
+ * The creation property list identifier should be released with H5Pclose().
+ *
+ *-------------------------------------------------------------------------
+ */
 /*-------------------------------------------------------------------------
  * Function:    H5Dget_create_plist
  *
@@ -907,6 +975,63 @@ done:
 } /* end H5Dvlen_get_buf_size() */
 
 
+/* --------------------------------------------------------------------------*/
+/**\ingroup H5D
+ *
+ * \brief Changes the sizes of a dataset’s dimensions
+ *
+ * \dset_id
+ * \param[in] size[]   Array containing the new magnitude of each dimension
+ *                     of the dataset
+ *
+ * \return \herr_t
+ *
+ * \details H5Dset_extent() sets the current dimensions of the chunked
+ * dataset \p dset_id to the sizes specified in size.
+
+ * \p size is a 1-dimensional array with n elements, where n is the rank of
+ * the dataset’s current dataspace.
+
+ * This function can be applied to the following datasets:
+ * - A chunked dataset with unlimited dimensions
+ * - A chunked dataset with fixed dimensions if the new dimension sizes
+ * are less than the maximum sizes set with maxdims (see H5Screate_simple())
+ * - An external dataset with unlimited dimensions
+ * - An external dataset with fixed dimensions if the new dimension
+ * sizes are less than the maximum sizes set with \p maxdims
+ *
+ * Note that external datasets are always contiguous and can be extended
+ * only along the first dimension.
+ *
+ * Space on disk is immediately allocated for the new dataset extent if
+ * the dataset’s space allocation time is set to #H5D_ALLOC_TIME_EARLY.
+ * 
+ * Fill values will be written to the dataset in either of the following
+ * situations, but not otherwise:
+ *
+ * - If the dataset’s fill time is set to #H5D_FILL_TIME_IFSET and a fill
+ * value is defined (see H5Pset_fill_time() and H5Pset_fill_value())
+ * - If the dataset’s fill time is set to #H5D_FILL_TIME_ALLOC
+ * (see H5Pset_alloc_time())
+ *
+ * \note
+ * + If the sizes specified in size are smaller than
+ * the dataset’s current dimension sizes, H5Dset_extent() will reduce
+ * the dataset’s dimension sizes to the specified values. It is the user
+ * application’s responsibility to ensure that valuable data is not lost
+ * as H5Dset_extent() does not check.
+ * + Except for external datasets, H5Dset_extent() is for use with chunked
+ * datasets only, not contiguous datasets.
+ * + A call to H5Dset_extent affects the dataspace of a dataset. If a
+ * dataspace handle was opened for a dataset prior to a call to H5Dset_extent()
+ * then that dataspace handle will no longer reflect the correct dataspace
+ * extent of the dataset. H5Dset_space() must be called (after closing the
+ * previous handle) to obtain the current dataspace extent.
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 /*-------------------------------------------------------------------------
  * Function:    H5Dset_extent
  *

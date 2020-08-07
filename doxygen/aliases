@@ -14,7 +14,7 @@ ALIASES += success{1}="\Bold{Success:} \1"
 ALIASES += failure{1}="\Bold{Failure:} \1"
 
 ALIASES += herr_t="Returns a non-negative value if successful; otherwise returns a negative value."
-ALIASES += hid_t{1}="Returns a \1 identifier if successful; otherwise returns a negative value. "
+ALIASES += hid_t{1}="Returns a \1 identifier if successful; otherwise returns H5I_INVALID_HID. "
 ALIASES += hid_tv{1}="Returns an \1 identifier if successful; otherwise returns a negative value. "
 ALIASES += htri_t="Returns zero (false), a positive (true) or a negative (failure) value."
 
@@ -40,6 +40,13 @@ ALIASES += op_data{1}="\param[in,out] \1 User-defined callback function context"
 
 ALIASES += attr_id="\param[in] attr_id Attribute identifier"
 ALIASES += attr_id{1}="\param[in] \1 Attribute identifier"
+
+################################################################################
+# Dataset
+################################################################################
+
+ALIASES += dset_id="\param[in] dset_id Dataset identifier"
+ALIASES += dset_id{1}="\param[in] \1 Dataset identifier"
 
 ################################################################################
 # Dataspaces
@@ -100,6 +107,18 @@ ALIASES += aapl_id{1}="\param[in] \1 Attribute access property list identifier"
 
 ALIASES += acpl_id="\param[in] acpl_id Attribute creation property list identifier"
 ALIASES += acpl_id{1}="\param[in] \1 Attribute creation property list identifier"
+
+ALIASES += dapl_id="\param[in] dapl_id Dataset access property list identifier"
+ALIASES += dapl_id{1}="\param[in] \1 Dataset access property list identifier"
+
+ALIASES += dcpl_id="\param[in] dapl_id Dataset creation property list identifier"
+ALIASES += dcpl_id{1}="\param[in] \1 Dataset creation property list identifier"
+
+ALIASES += gapl_id="\param[in] gapl_id Group access property list identifier"
+ALIASES += gapl_id{1}="\param[in] \1 Group access property list identifier"
+
+ALIASES += gcpl_id="\param[in] gcpl_id Group creation property list identifier"
+ALIASES += gcpl_id{1}="\param[in] \1 Group creation property list identifier"
 
 ALIASES += lapl_id="\param[in] lapl_id Link access property list identifier"
 ALIASES += lapl_id{1}="\param[in] \1 Link access property list identifier"
