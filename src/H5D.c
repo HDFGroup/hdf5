@@ -69,6 +69,72 @@ H5FL_BLK_EXTERN(type_conv);
 
 
 
+/* --------------------------------------------------------------------------*/
+/**\ingroup H5D
+ *
+ * \brief Creates a new dataset and links it into the file
+ *
+ * \fgdta_loc_id
+ * \param[in] name      Name of the dataset to open
+ * \dtype_id
+ * \space_id
+ * \lcpl_id
+ * \param[in] dcpl_id   Dataset creation property list
+ * \param[in] dapl_id   Dataset access property list
+ *
+ * \return \hid_t{dataset}
+ *
+new
+ * \details H5Dcreate2() creates a new dataset named \p name at the
+ * location specified by \p loc_id, and associates constant and initial
+ * persistent properties with that dataset, including \p dtype_id, the
+ * datatype of each data element as stored in the file; \p space_id, the
+ * dataspace of the dataset; and other initial properties as defined in
+ * the dataset creation property and access property lists, \p dcpl_id and
+ * \p dapl_id, respectively. Once created, the dataset is opened for access.
+ * 
+ * \p loc_id may be a file, group, dataset, named datatype, or attribute.
+ * If an attribute, dataset, or named datatype is specified for \p loc_id
+ * then the dataset will be created at the location where the attribute,
+ * dataset, or named datatype is attached. \p name may be either an absolute
+ * path in the file or a relative path from \p loc_id naming the dataset.
+ * 
+ * If \p dtype_id is either a fixed-length or variable-length string, it is
+ * important to set the string length when defining the datatype. String
+ * datatypes are derived from #H5T_C_S1 (or #H5T_FORTRAN_S1 for Fortran
+ * codes), which defaults to 1 character in size. See H5Tset_size() and
+ * Creating variable-length string datatypes.
+ * 
+ * If \p dtype_id is a committed datatype, and if the file location
+ * associated with the committed datatype is different from the file location
+ * where the dataset will be created, the datatype is copied and converted
+ * to a transient type.
+ * 
+ * The link creation property list, \p lcpl_id, governs creation of the
+ * link(s) by which the new dataset is accessed and the creation of any
+ * intermediate groups that may be missing.
+ * 
+ * The datatype and dataspace properties (---- need verification ----)
+ * and the dataset creation and access property lists are attached to the
+ * dataset, so the caller may derive new datatypes, dataspaces, and creation
+ * and access properties from the old ones and reuse them in calls to create
+ * additional datasets.
+ * 
+ * Once created, the dataset is ready to receive raw data. Immediately
+ * attempting to read raw data from the dataset will probably (---- need
+ * verification ----) return the fill value.
+ * 
+ * To conserve and release resources, the dataset should be closed when
+ * access is no longer required.
+ *
+ * \include H5Dcreate2.c (---- need verification ----)
+ *
+ * \since 1.8.0
+ *
+ * \see H5Dopen2(), H5Dclose()
+ *
+ *-------------------------------------------------------------------------
+ */
 /*-------------------------------------------------------------------------
  * Function:    H5Dcreate2
  *
@@ -247,6 +313,38 @@ done:
 } /* end H5Dcreate_anon() */
 
 
+/* --------------------------------------------------------------------------*/
+/**\ingroup H5D
+ *
+ * \brief Opens a new dataset and links it into the file
+ *
+ * \fgdta_loc_id
+ * \param[in] name      Name of the dataset to open
+ * \param[in] dapl_id   Dataset access property list
+ *
+ * \return \hid_t{dataset}
+ *
+ * \details H5Dopen2() opens the existing dataset specified by a
+ * location identifier and name, \p loc_id and \p name, respectively. \p
+ * loc_id may be a file, group, dataset, named datatype, or attribute.
+ * If an attribute, dataset, or named datatype is specified for \p loc_id
+ * then the dataset will be opened at the location where the attribute,
+ * dataset, or named datatype is attached.
+ *
+ * The dataset access property list, \p dapl_id, provides information
+ * regarding access to the dataset.
+ *
+ * To conserve and release resources, the dataset should be closed when
+ * access is no longer required.
+ *
+ * \include H5Dopen2.c (---- need verification ----)
+ *
+ * \since 1.8.0
+ *
+ * \see H5Dcreate2(), H5Dclose()
+ *
+ *-------------------------------------------------------------------------
+ */
 /*-------------------------------------------------------------------------
  * Function:    H5Dopen2
  *
@@ -308,6 +406,58 @@ done:
 } /* end H5Dopen2() */
 
 
+/* --------------------------------------------------------------------------*/
+/**\ingroup H5D
+ *
+ * \brief Creates a new dataset and links it into the file
+ *
+ * \fgdta_loc_id
+ * \param[in] name      Name of the dataset to open
+ * \param[in] dapl_id   Dataset access property list
+ *
+ * \return \hid_t{dataset}
+ *
+ * \details H5Dopen2() opens the existing dataset specified by a
+ * location identifier and name, \p loc_id and \p name, respectively. \p
+ * loc_id may be a file, group, dataset, named datatype, or attribute.
+ * If an attribute, dataset, or named datatype is specified for \p loc_id
+ * then the dataset will be opened at the location where the attribute,
+ * dataset, or named datatype is attached.
+ *
+ * The dataset access property list, \p dapl_id, provides information
+ * regarding access to the dataset.
+ *
+ * To conserve and release resources, the dataset should be closed when
+ * access is no longer required.
+ *
+ * \include H5Dopen2.c (---- need verification ----)
+ *
+ * \since 1.8.0
+ *
+ * \see H5Dcreate2(), H5Dclose()
+ *
+ *-------------------------------------------------------------------------
+ */
+/*-------------------------------------------------------------------------*/
+/**\ingroup H5D
+ *
+ * \brief Closes the specified dataset
+ *
+ * \dset_id
+ *
+ * \return \herr_t
+ *
+ * \details H5Dclose() ends access to a dataset specified by \p dset_id
+ * and releases resources used by it.
+ *
+ * \attention Further use of a released dataset identifier is illegal; a
+ *            function using such an identifier will generate an error.
+ *
+ * \since 1.0.0
+ *
+ * \see H5Dcreate2(), H5Dopen2()
+ */
+/*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------
  * Function:    H5Dclose
  *

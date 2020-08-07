@@ -126,6 +126,69 @@ done:
 } /* end H5D__get_offset_copy() */
 
 
+/* --------------------------------------------------------------------------*/
+/**\ingroup H5D
+ *
+ * \brief Reads raw data from a dataset into a provided buffer
+ *
+ * \param[in] dset_id        Identifier of the dataset to read from
+ * \param[in] mem_type_id    Identifier of the memory datatype
+ * \param[in] mem_space_id   Identifier of the memory dataspace
+ * \param[in] file_space_id  Identifier of the dataset's dataspace in the file
+ * \param[in] xfer_plist_id  Identifier of a transfer property list
+ * \param[out] buf           Buffer to receive data read from file
+ *
+ * \return \herr_t
+ *
+ * \details H5Dread() reads a (partial or whole ---- verification ----)
+ * dataset, specified by its identifier \p dset_id, from the file into an
+ * application memory buffer \p buf. Data transfer properties are defined
+ * by the argument \p xfer_plist_id. The memory datatype of the (partial)
+ * dataset is identified by the identifier \p mem_type_id. The part of
+ * the dataset to read is defined by \p mem_space_id and \p file_space_id.
+ * 
+ * \p file_space_id is used to specify only the selection within the file
+ * dataset's dataspace. Any dataspace specified in \p file_space_id is
+ * ignored by the library and the dataset's dataspace is always used. \p
+ * file_space_id can be the constant #H5S_ALL. which indicates that the
+ * entire file dataspace, as defined by the current dimensions of the
+ * dataset, is to be selected.
+ * 
+ * \p mem_space_id is used to specify both the memory dataspace and the
+ * selection within that dataspace. \p mem_space_id can be the constant
+ * #H5S_ALL, in which case the file dataspace is used for the memory
+ * dataspace and the selection defined with \p file_space_id is used for
+ * the selection within that dataspace.
+ * 
+ * If raw data storage space has not been allocated for the dataset and a
+ * fill value has been defined, the returned buffer \p buf is filled with
+ * the fill value.
+ * 
+ * The behavior of the library for the various combinations of valid
+ * dataspace identifiers and #H5S_ALL for the \p mem_space_id and the \p
+ * file_space_id parameters is described below:
+
+   mem_space_id    |  file_space_id     | Behavior
+------------------ | ------------------ | --------
+valid dataspace ID | valid dataspace ID | \p mem_space_id specifies the memory dataspace and the selection within it. \p file_space_id specifies the selection within the file dataset's dataspace.
+
+H5S_ALL valid dataspace identifier  The file dataset's dataspace is used for the memory dataspace and the selection specified with file_space_id specifies the selection within it. The combination of the file dataset's dataspace and the selection from file_space_id is used for memory also.
+valid dataspace identifier  H5S_ALL mem_space_id specifies the memory dataspace and the selection within it. The selection within the file dataset's dataspace is set to the "all" selection.
+H5S_ALL H5S_ALL The file dataset's dataspace is used for the memory dataspace and the selection within the memory dataspace is set to the "all" selection. The selection within the file dataset's dataspace is set to the "all" selection.
+ 
+
+ * Setting an #H5S_ALL selection indicates that the entire dataspace, as
+ * defined by the current dimensions of a dataspace, will be selected. The
+ * number of elements selected in the memory dataspace must match the number
+ * of elements selected in the file dataspace.
+
+ * \p xfer_plist_id can be the constant #H5P_DEFAULT. in which case the
+ * default data transfer properties are used.
+ *
+ * \include H5Dread.c (---- need verification ----)
+ *
+ *-------------------------------------------------------------------------
+ */
 /*-------------------------------------------------------------------------
  * Function:    H5Dread
  *
