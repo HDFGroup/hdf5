@@ -17,7 +17,7 @@ use Text::Tabs;
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-# Robb Matzke, matzke@llnl.gov
+# Robb Matzke
 # 30 Aug 1997
 #
 # Purpose: This script will read standard input which should be a
