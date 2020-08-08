@@ -28,7 +28,7 @@ extern "C" {
 H5_HLDLL herr_t H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis,
     size_t extension, hid_t memtype, const void *buf);
 H5_DLL herr_t H5DOsequence(hid_t dataset_id, hid_t dxpl_id, unsigned axis,
-    hsize_t start, sequence, hid_t memtype, void *buffer);
+    hsize_t start, size_t sequence, hid_t memtype, void *buffer);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *
