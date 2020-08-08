@@ -7696,6 +7696,8 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
                 TEST_ERROR
 
             if(fs_persist) {
+                haddr_t prv_tag = HADDR_UNDEF;
+
                 /* Re-open the file */
                 if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_new)) < 0)
                     TEST_ERROR
@@ -7703,6 +7705,9 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
                 /* Get a pointer to the internal file object */
                 if(NULL == (f = (H5F_t *)H5VL_object(fid)))
                     TEST_ERROR
+
+                /* Set the freespace tag for the metadata cache */
+                H5AC_tag(H5AC__FREESPACE_TAG, &prv_tag);                                                \
 
                 /* Verify that the large generic manager is there */
                 H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_DRAW, TBLOCK_SIZE5000, (H5F_mem_page_t *)&fs_type);
@@ -7753,6 +7758,9 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
                     TEST_ERROR
                 if(found_addr != gaddr1)
                     TEST_ERROR
+
+                /* Reset the previous tag */
+                H5AC_tag(prv_tag, NULL);                                                \
 
                 /* Close file */
                 if(H5Fclose(fid) < 0)
