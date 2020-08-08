@@ -3145,8 +3145,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__chunk_hash_val
  *
- * Purpose:    To calculate an index based on the dataset's scaled
- *        coordinates and sizes of the faster dimensions.
+ * Purpose:     To calculate an index based on the dataset's scaled
+ *              coordinates and sizes of the faster dimensions.
  *
  * Return:    Hash value index
  *

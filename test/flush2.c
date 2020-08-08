@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Friday, October 23, 1998
  *
  * Purpose:  This is the second half of a two-part test that makes sure

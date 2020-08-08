@@ -1190,16 +1190,12 @@ H5FD_splitter_lock(H5FD_t *_file, hbool_t rw)
     HDassert(file->rw_file);
 
     /* Place the lock on each file */
-    if (H5FD_lock(file->rw_file, rw) < 0) {
-        HGOTO_ERROR(H5E_VFL, H5E_CANTLOCK, FAIL, "unable to lock R/W file")
-    }
-    if (file->wo_file != NULL) {
-        if (H5FD_lock(file->wo_file, rw) < 0) {
-           H5FD_SPLITTER_WO_ERROR(file, "H5FD_splitter_lock",
-                                  H5E_VFL, H5E_CANTLOCK, FAIL,
-                                  "unable to lock W/O file")
-        }
-    }
+    if (H5FD_lock(file->rw_file, rw) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTLOCKFILE, FAIL, "unable to lock R/W file")
+
+    if (file->wo_file != NULL)
+        if (H5FD_lock(file->wo_file, rw) < 0)
+           H5FD_SPLITTER_WO_ERROR(file, "H5FD_splitter_lock", H5E_VFL, H5E_CANTLOCKFILE, FAIL, "unable to lock W/O file")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1229,15 +1225,12 @@ H5FD_splitter_unlock(H5FD_t *_file)
     HDassert(file->rw_file);
 
     /* Remove the lock on each file */
-    if (H5FD_unlock(file->rw_file) < 0) {
-        HGOTO_ERROR(H5E_VFL, H5E_CANTUNLOCK, FAIL, "unable to unlock R/W file")
-    }
-    if (file->wo_file != NULL) {
-        if (H5FD_unlock(file->wo_file) < 0) {
-            HGOTO_ERROR(H5E_VFL, H5E_CANTUNLOCK, FAIL,
-                        "unable to unlock W/O file")
-        }
-    }
+    if (H5FD_unlock(file->rw_file) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock R/W file")
+
+    if (file->wo_file != NULL)
+        if (H5FD_unlock(file->wo_file) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock W/O file")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

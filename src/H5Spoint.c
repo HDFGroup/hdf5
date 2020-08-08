@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:  Quincey Koziol
  *              Tuesday, June 16, 1998
  *
  * Purpose:     Point selection dataspace I/O functions.
@@ -78,7 +78,7 @@ static htri_t H5S__point_shape_same(const H5S_t *space1, const H5S_t *space2);
 static htri_t H5S__point_intersect_block(const H5S_t *space, const hsize_t *start, const hsize_t *end);
 static herr_t H5S__point_adjust_u(H5S_t *space, const hsize_t *offset);
 static herr_t H5S__point_adjust_s(H5S_t *space, const hssize_t *offset);
-static herr_t H5S__point_project_scalar(const H5S_t *spasce, hsize_t *offset);
+static herr_t H5S__point_project_scalar(const H5S_t *space, hsize_t *offset);
 static herr_t H5S__point_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset);
 static herr_t H5S__point_iter_init(const H5S_t *space, H5S_sel_iter_t *iter);
 static herr_t H5S__point_get_version_enc_size(const H5S_t *space, uint32_t *version, uint8_t *enc_size);
@@ -538,7 +538,7 @@ H5S__point_iter_get_seq_list(H5S_sel_iter_t *iter, size_t maxseq, size_t maxelem
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__point_iter_get_seq_list() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__point_iter_release
@@ -873,7 +873,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__copy_pnt_list() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__free_pnt_list
@@ -915,7 +915,7 @@ H5S__free_pnt_list(H5S_pnt_list_t *pnt_lst)
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5S__free_pnt_list() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__point_copy
@@ -943,7 +943,7 @@ H5S__point_copy(H5S_t *dst, const H5S_t *src, hbool_t H5_ATTR_UNUSED share_selec
 
     FUNC_ENTER_STATIC
 
-    /* Sanity check */
+    /* Sanity checks */
     HDassert(src);
     HDassert(dst);
 
@@ -1189,7 +1189,7 @@ H5S__point_serial_size(const H5S_t *space)
 
     /* Determine the version and encoded size for point selection */
     if(H5S__point_get_version_enc_size(space, &version, &enc_size) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't determine hyper version")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't determine version and enc_size")
 
     /* Basic number of bytes required to serialize point selection: */
     if(version >= H5S_POINT_VERSION_2)
@@ -1259,7 +1259,7 @@ H5S__point_serialize(const H5S_t *space, uint8_t **p)
 
     /* Determine the version and encoded size for point selection info */
     if(H5S__point_get_version_enc_size(space, &version, &enc_size) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't determine hyper version")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't determine version and enc_size")
 
     /* Store the preamble information */
     UINT32ENCODE(pp, (uint32_t)H5S_GET_SELECT_TYPE(space));  /* Store the type of selection */
@@ -1997,7 +1997,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__point_shape_same() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__point_intersect_block

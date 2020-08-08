@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Tuesday, November 24, 1998
  *
  * Purpose:    Test local heaps used by symbol tables (groups).

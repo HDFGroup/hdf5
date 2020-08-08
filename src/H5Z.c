@@ -35,10 +35,10 @@
 #ifdef H5Z_DEBUG
 typedef struct H5Z_stats_t {
     struct {
-	hsize_t	total;		/* total number of bytes processed */
-	hsize_t	errors;		/* bytes of total attributable to errors */
+        hsize_t     total;      /* total number of bytes processed */
+        hsize_t     errors;     /* bytes of total attributable to errors */
         H5_timevals_t times;    /* execution time including errors */
-    } stats[2];			/* 0 = output, 1 = input */
+    } stats[2];                 /* 0 = output, 1 = input */
 } H5Z_stats_t;
 #endif /* H5Z_DEBUG */
 
@@ -132,9 +132,9 @@ H5Z_term_package(void)
 
     if(H5_PKG_INIT_VAR) {
 #ifdef H5Z_DEBUG
-        char	comment[16], bandwidth[32];
-        int	dir, nprint = 0;
-        size_t	i;
+        char    comment[16], bandwidth[32];
+        int     dir, nprint = 0;
+        size_t  i;
 
         if(H5DEBUG(Z)) {
             for(i = 0; i < H5Z_table_used_g; i++) {
@@ -142,33 +142,34 @@ H5Z_term_package(void)
                     if(0 == H5Z_stat_table_g[i].stats[dir].total)
                         continue;
 
-		    if(0 == nprint++) {
-			/* Print column headers */
-			HDfprintf(H5DEBUG(Z), "H5Z: filter statistics "
-				   "accumulated over life of library:\n");
-			HDfprintf(H5DEBUG(Z),
-				   "   %-16s %10s %10s %8s %8s %8s %10s\n",
-				   "Filter", "Total", "Errors", "User",
-				   "System", "Elapsed", "Bandwidth");
-			HDfprintf(H5DEBUG(Z),
-				   "   %-16s %10s %10s %8s %8s %8s %10s\n",
-				   "------", "-----", "------", "----",
-				   "------", "-------", "---------");
-		    } /* end if */
+                    if(0 == nprint++) {
+                        /* Print column headers */
+                        HDfprintf(H5DEBUG(Z), "H5Z: filter statistics "
+                                "accumulated over life of library:\n");
+                        HDfprintf(H5DEBUG(Z),
+                                "   %-16s %10s %10s %8s %8s %8s %10s\n",
+                                "Filter", "Total", "Errors", "User",
+                                "System", "Elapsed", "Bandwidth");
+                        HDfprintf(H5DEBUG(Z),
+                                "   %-16s %10s %10s %8s %8s %8s %10s\n",
+                                "------", "-----", "------", "----",
+                                "------", "-------", "---------");
+                    } /* end if */
 
-		    /* Truncate the comment to fit in the field */
-		    HDstrncpy(comment, H5Z_table_g[i].name, sizeof comment);
-		    comment[sizeof(comment) - 1] = '\0';
+                    /* Truncate the comment to fit in the field */
+                    HDstrncpy(comment, H5Z_table_g[i].name, sizeof comment);
+                    comment[sizeof(comment) - 1] = '\0';
 
-		    /*
-		     * Format bandwidth to have four significant digits and
-		     * units of `B/s', `kB/s', `MB/s', `GB/s', or `TB/s' or
-		     * the word `Inf' if the elapsed time is zero.
-		     */
-                    H5_bandwidth(bandwidth, (double)(H5Z_stat_table_g[i].stats[dir].total),
+                    /*
+                    * Format bandwidth to have four significant digits and
+                    * units of `B/s', `kB/s', `MB/s', `GB/s', or `TB/s' or
+                    * the word `Inf' if the elapsed time is zero.
+                    */
+                    H5_bandwidth(bandwidth,
+                            (double)(H5Z_stat_table_g[i].stats[dir].total),
                             H5Z_stat_table_g[i].stats[dir].times.elapsed);
 
-		    /* Print the statistics */
+                    /* Print the statistics */
                     HDfprintf(H5DEBUG(Z), "   %s%-15s %10Hd %10Hd %8T %8T %8T %10s\n",
                             (dir ? "<" : ">"), comment,
                             H5Z_stat_table_g[i].stats[dir].total,
@@ -177,12 +178,12 @@ H5Z_term_package(void)
                             H5Z_stat_table_g[i].stats[dir].times.system,
                             H5Z_stat_table_g[i].stats[dir].times.elapsed,
                             bandwidth);
-		} /* end for */
-	    } /* end for */
-	} /* end if */
+                } /* end for */
+            } /* end for */
+        } /* end if */
 #endif /* H5Z_DEBUG */
 
-	/* Free the table of filters */
+        /* Free the table of filters */
         if(H5Z_table_g) {
             H5Z_table_g = (H5Z_class2_t *)H5MM_xfree(H5Z_table_g);
 
@@ -1256,7 +1257,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
     int             fclass_idx;     /* Index of filter class in global table */
     H5Z_class2_t   *fclass = NULL;  /* Filter class pointer */
 #ifdef H5Z_DEBUG
-    H5Z_stats_t	   *fstats = NULL;   /* Filter stats pointer */
+    H5Z_stats_t   *fstats = NULL;   /* Filter stats pointer */
     H5_timer_t      timer;           /* Timer for filter operations */
     H5_timevals_t   times;           /* Elapsed time for each operation */
 #endif
@@ -1278,12 +1279,12 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
     H5_timer_init(&timer);
 #endif
     if(pline && (flags & H5Z_FLAG_REVERSE)) { /* Read */
-	for(i = pline->nused; i > 0; --i) {
-	    idx = i - 1;
-	    if(*filter_mask & ((unsigned)1 << idx)) {
-		failed |= (unsigned)1 << idx;
-		continue;       /* filter excluded */
-	    } /* end if */
+        for(i = pline->nused; i > 0; --i) {
+            idx = i - 1;
+            if(*filter_mask & ((unsigned)1 << idx)) {
+                failed |= (unsigned)1 << idx;
+                continue;   /* filter excluded */
+            }
 
             /* If the filter isn't registered and the application doesn't
              * indicate no plugin through HDF5_PRELOAD_PLUG (using the symbol "::"),
@@ -1304,7 +1305,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
                     /* Search in the table of registered filters again to find the dynamic filter just loaded and registered */
                     if((fclass_idx = H5Z_find_idx(pline->filter[idx].id)) < 0)
                         issue_error = TRUE;
-                } /* end if */
+                }
                 else
                     issue_error = TRUE;
 
@@ -1353,24 +1354,25 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
                 *nbytes = *buf_size;
                 failed |= (unsigned)1 << idx;
                 H5E_clear_stack(NULL);
-            } /* end if */
+            }
             else
                 *nbytes = new_nbytes;
-	} /* end for */
-    } else if (pline) { /* Write */
-	for(idx = 0; idx < pline->nused; idx++) {
-	    if(*filter_mask & ((unsigned)1 << idx)) {
-		failed |= (unsigned)1 << idx;
-		continue;       /* filter excluded */
-	    } /* end if */
-	    if((fclass_idx = H5Z_find_idx(pline->filter[idx].id)) < 0) {
+        }
+    }
+    else if(pline) { /* Write */
+        for(idx = 0; idx < pline->nused; idx++) {
+            if(*filter_mask & ((unsigned)1 << idx)) {
+                failed |= (unsigned)1 << idx;
+                continue;       /* filter excluded */
+            }
+            if((fclass_idx = H5Z_find_idx(pline->filter[idx].id)) < 0) {
                 /* Check if filter is optional -- If it isn't, then error */
-		if((pline->filter[idx].flags & H5Z_FLAG_OPTIONAL) == 0)
-		    HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "required filter is not registered")
-		failed |= (unsigned)1 << idx;
+                if((pline->filter[idx].flags & H5Z_FLAG_OPTIONAL) == 0)
+                    HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "required filter is not registered")
+                failed |= (unsigned)1 << idx;
                 H5E_clear_stack(NULL);
-		continue;       /* filter excluded */
-	    } /* end if */
+                continue;       /* filter excluded */
+            } /* end if */
 
             fclass = &H5Z_table_g[fclass_idx];
 
@@ -1390,25 +1392,25 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
             fstats->stats[0].times.system  += times.system;
             fstats->stats[0].times.user    += times.user;
 
-	    fstats->stats[0].total += MAX(*nbytes, new_nbytes);
+            fstats->stats[0].total += MAX(*nbytes, new_nbytes);
             if(0 == new_nbytes)
                 fstats->stats[0].errors += *nbytes;
 #endif
 
             if(0 == new_nbytes) {
                 if(0 == (pline->filter[idx].flags & H5Z_FLAG_OPTIONAL)) {
-                    if((cb_struct.func && (H5Z_CB_FAIL==cb_struct.func(pline->filter[idx].id, *buf, *nbytes, cb_struct.op_data)))
+                    if((cb_struct.func && (H5Z_CB_FAIL == cb_struct.func(pline->filter[idx].id, *buf, *nbytes, cb_struct.op_data)))
                             || !cb_struct.func)
                         HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "filter returned failure")
 
                     *nbytes = *buf_size;
-                } /* end if */
+                }
                 failed |= (unsigned)1 << idx;
                 H5E_clear_stack(NULL);
-            } /* end if */
+            }
             else
                 *nbytes = new_nbytes;
-	} /* end for */
+        } /* end for */
     }
 
     *filter_mask = failed;

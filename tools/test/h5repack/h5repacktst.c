@@ -3872,7 +3872,7 @@ out:
 *
 * Purpose: write datasets in LOC_ID
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 12, 2003
 *
@@ -4736,7 +4736,7 @@ out:
 *
 * Purpose: write attributes in LOC_ID (dataset, group, named datatype)
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 12, 2003
 *
@@ -5927,7 +5927,7 @@ out:
 *
 * Purpose: utility function to create and write a dataset in LOC_ID
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 12, 2003
 *
@@ -5963,7 +5963,7 @@ out:
 *
 * Purpose: utility function to create and write a dataset in LOC_ID
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 12, 2003
 *
@@ -6011,7 +6011,7 @@ out:
 *
 * Purpose: utility function to write an attribute in LOC_ID
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 12, 2003
 *
