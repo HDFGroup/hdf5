@@ -111,7 +111,7 @@ H5FL_EXTERN(H5S_extent_t);
         H5F_t    *f;            IN: pointer to the HDF5 file struct
         H5O_t    *open_oh;      IN: pointer to the object header
         unsigned mesg_flags;    IN: message flags to influence decoding
-        unsigned *ioflags;      IN: flags for decoding
+        unsigned *ioflags;      IN/OUT: flags for decoding
         size_t   p_size;        IN: size of buffer *p
         const uint8_t *p;       IN: the raw information buffer
  RETURNS

@@ -18,8 +18,8 @@
 #include "h5tools.h"
 #include "h5tools_utils.h"
 
-#define IMAGE_WIDTH_MAX		65535	/* unsigned 16bits integer */
-#define IMAGE_HEIGHT_MAX	65535	/* unsigned 16bits integer */
+#define IMAGE_WIDTH_MAX     65535   /* unsigned 16bits integer */
+#define IMAGE_HEIGHT_MAX    65535   /* unsigned 16bits integer */
 
 
 int EndianOrder;
@@ -158,16 +158,16 @@ int main(int argc , char **argv)
 
         if (width > IMAGE_WIDTH_MAX || height > IMAGE_HEIGHT_MAX)
         {
-	        fprintf(stderr, "HDF5 image is too large. Limit is %d by %d.\n", IMAGE_WIDTH_MAX, IMAGE_HEIGHT_MAX);
-	        goto out;
-	    }
+            fprintf(stderr, "HDF5 image is too large. Limit is %d by %d.\n", IMAGE_WIDTH_MAX, IMAGE_HEIGHT_MAX);
+            goto out;
+        }
 
-	    /* tool can handle single plane images only. */
-	    if (planes > 1)
+        /* tool can handle single plane images only. */
+        if (planes > 1)
         {
-	        fprintf(stderr, "Cannot handle multiple planes image\n");
-	        goto out;
-	    }
+            fprintf(stderr, "Cannot handle multiple planes image\n");
+            goto out;
+        }
 
         Image = (GIFBYTE*) malloc( (size_t) width * (size_t) height );
 
@@ -188,7 +188,10 @@ int main(int argc , char **argv)
             pal = (GIFBYTE*) malloc( (size_t) pal_dims[0] * (size_t) pal_dims[1] );
 
             if ( H5IMget_palette( fid, image_name, 0, pal ) < 0 )
+            {
+                fprintf(stderr , "Unable to get the palette. Aborting.\n");
                 goto out;
+            }
 
             numcols = (int) pal_dims[0];
 
