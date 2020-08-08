@@ -152,6 +152,8 @@ H5_DLL herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 			 hid_t file_space_id, hid_t plist_id, const void *buf);
 H5_DLL herr_t H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters,
             const hsize_t *offset, size_t data_size, const void *buf);
+H5_DLL herr_t H5Dappend(hid_t dset_id, hid_t dxpl_id, unsigned axis,
+    size_t extension, hid_t memtype, const void *buf);
 H5_DLL herr_t H5Dread_chunk(hid_t dset_id, hid_t dxpl_id,
             const hsize_t *offset, uint32_t *filters, void *buf);
 H5_DLL herr_t H5Diterate(void *buf, hid_t type_id, hid_t space_id,

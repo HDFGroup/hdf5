@@ -2785,7 +2785,7 @@ H5D__virtual_write_one(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't project virtual intersection onto source space")
 
         /* Perform write on source dataset */
-        if(H5D__write(source_dset->dset, type_info->dst_type_id, source_dset->projected_mem_space, projected_src_space, io_info->u.wbuf) < 0)
+        if(H5D__write(source_dset->dset, type_info->dst_type_id, source_dset->projected_mem_space, projected_src_space, io_info->u.wbuf, FALSE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write to source dataset")
 
         /* Close projected_src_space */

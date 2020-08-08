@@ -51,7 +51,7 @@
 static herr_t H5D__ioinfo_init(H5D_t *dset, const H5D_type_info_t *type_info,
     H5D_storage_t *store, H5D_io_info_t *io_info);
 static herr_t H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id,
-    hbool_t do_write, H5D_type_info_t *type_info);
+    hbool_t do_write, hbool_t do_append, H5D_type_info_t *type_info);
 #ifdef H5_HAVE_PARALLEL
 static herr_t H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
     const H5S_t *file_space, const H5S_t *mem_space, const H5D_type_info_t *type_info);
@@ -376,6 +376,153 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Dappend
+ *
+ * Purpose:     Append elements to a dataset.
+ *
+ *      axis:       the dataset dimension (zero-based) for the append
+ *      extension:  the # of elements to append for the axis-th dimension
+ *      memtype:    the datatype
+ *      buf:        buffer with data for the append
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
+    hid_t memtype, const void *buf)
+{
+    H5VL_object_t  *vol_obj = NULL;     /* Object for dset_id */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "iiIuzi*x", dset_id, dxpl_id, axis, extension, memtype, buf);
+
+    /* Get dataset pointer */
+    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id is not a dataset ID")
+
+    /* If the user passed in a default DXPL, sanity check it */
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
+
+    /* Sanity check the extension */
+    if(0 == extension)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid extension value of 0")
+
+    /* Make certain we have a valid buffer */
+    if(NULL == buf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL pointer for buffer parameter")
+
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
+
+    /* Append the record/row/slice */
+    if(H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_APPEND, dxpl_id, H5_REQUEST_NULL,
+            axis, extension, memtype, buf) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't append data")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dappend() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__append
+ *
+ * Purpose:     Internal routine to append a record/row/slice/etc to a dataset.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__append(H5D_t *dset, unsigned axis, size_t extension, hid_t memtype,
+    const void *buf)
+{
+    H5S_t *tmp_space = NULL;    /* Temporary dataset dataspace */
+    H5S_t *mem_space = NULL;    /* Memory dataspace */
+    hsize_t start[H5S_MAX_RANK]; /* H5Sselect_Hyperslab: starting offset */
+    hsize_t count[H5S_MAX_RANK]; /* H5Sselect_hyperslab: # of blocks to select */
+    hsize_t dims[H5S_MAX_RANK]; /* The dataset's dimension sizes */
+    hsize_t old_size;           /* The size of the dimension to be extended */
+    int sndims;                 /* Number of dimensions in dataspace (signed) */
+    unsigned ndims;             /* Number of dimensions in dataspace */
+    hsize_t nelmts;             /* Number of elements in selection */
+    unsigned u;                 /* Local index variable */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE //_TAG(dset->oloc.addr)
+
+    /* Get the rank of this dataspace */
+    if((sndims = H5S_get_simple_extent_dims(dset->shared->space, dims, NULL)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace dimensions")
+    ndims = (unsigned)sndims;
+
+    /* Verify valid axis */
+    if(axis >= ndims)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "axis value too large for dataset")
+
+    /* Adjust the dimension size of the requested dimension,
+     * but first record the old dimension size
+     */
+    old_size = dims[axis];
+    dims[axis] += extension;
+
+    /* Check for overflow */
+    if(dims[axis] < old_size)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "extended dimension overflowed (bad extension value?)")
+
+    /* Extend the dataset in the requested dimension */
+    if(H5D__set_extent(dset, dims) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't extend dataset dimensions")
+
+    /* Select a hyperslab corresponding to the append operation */
+    for(u = 0 ; u < ndims ; u++) {
+        start[u] = 0;
+        count[u] = dims[u];
+        if(u == axis) {
+            count[u] = extension;
+            start[u] = old_size;
+        } /* end if */
+    } /* end for */
+
+    /* Make a copy of the dataset's dataspace */
+    if(NULL == (tmp_space = H5S_copy(dset->shared->space, TRUE, FALSE)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy dataset's dataspace")
+
+    /* Select hyperslab that covers newly extended region */
+    if(H5S_select_hyperslab(tmp_space, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSELECT, FAIL, "can't select hyperslab to cover extended region")
+
+    /* The # of elements in the new extended dataspace */
+    if(0 == (nelmts = H5S_GET_SELECT_NPOINTS(tmp_space)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get selected # of elements")
+
+    /* Create a memory space, for the buffer */
+    if(NULL == (mem_space = H5S_create_simple(1, &nelmts, NULL)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create memory space for buffer")
+
+    /* Write the data to the newly extended area of the dataset */
+    if(H5D__write(dset, memtype, mem_space, tmp_space, buf, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write to newly extended area of dataset")
+
+done:
+    /* Release temporary objects */
+    if(tmp_space && H5S_close(tmp_space) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close temporary dataspace")
+    if(mem_space && H5S_close(mem_space) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close memory dataspace")
+
+    FUNC_LEAVE_NOAPI(ret_value) //_TAG(ret_value)
+} /* end H5D__append() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D__read
  *
  * Purpose:	Reads (part of) a DATASET into application memory BUF. See
@@ -427,7 +574,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     nelmts = H5S_GET_SELECT_NPOINTS(mem_space);
 
     /* Set up datatype info for operation */
-    if(H5D__typeinfo_init(dataset, mem_type_id, FALSE, &type_info) < 0)
+    if(H5D__typeinfo_init(dataset, mem_type_id, FALSE, FALSE, &type_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
     type_info_init = TRUE;
 
@@ -601,7 +748,7 @@ done:
  */
 herr_t
 H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
-    const H5S_t *file_space, const void *buf)
+    const H5S_t *file_space, const void *buf, hbool_t do_append)
 {
     H5D_chunk_map_t *fm = NULL;         /* Chunk file<->memory mapping */
     H5D_io_info_t io_info;              /* Dataset I/O info     */
@@ -644,7 +791,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     /* Set up datatype info for operation */
-    if(H5D__typeinfo_init(dataset, mem_type_id, TRUE, &type_info) < 0)
+    if(H5D__typeinfo_init(dataset, mem_type_id, TRUE, do_append, &type_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
     type_info_init = TRUE;
 
@@ -714,7 +861,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
      * Note that in general, this requires us to touch up the memory buffer
      * as well.
      */
-    if(TRUE == H5S_SELECT_SHAPE_SAME(mem_space, file_space) &&
+    if((do_append || TRUE == H5S_SELECT_SHAPE_SAME(mem_space, file_space)) &&
             H5S_GET_EXTENT_NDIMS(mem_space) != H5S_GET_EXTENT_NDIMS(file_space)) {
         const void *adj_buf = NULL;   /* Pointer to the location in buf corresponding  */
                                 /* to the beginning of the projected mem space.  */
@@ -896,7 +1043,7 @@ H5D__ioinfo_init(H5D_t *dset, const H5D_type_info_t *type_info,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write,
+H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write,  hbool_t do_append,
     H5D_type_info_t *type_info)
 {
     const H5T_t	*src_type;              /* Source datatype */
@@ -1029,8 +1176,10 @@ H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write,
          */
         if(NULL == (type_info->tconv_buf = (uint8_t *)tconv_buf)) {
             /* Allocate temporary buffer */
-            if(NULL == (type_info->tconv_buf = H5FL_BLK_CALLOC(type_conv, target_size)))
+            if(NULL == (type_info->tconv_buf = H5FL_BLK_MALLOC(type_conv, target_size)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
+			if(!do_append)
+				HDmemset(type_info->tconv_buf, 0, target_size);
             type_info->tconv_buf_allocated = TRUE;
         } /* end if */
         if(type_info->need_bkg && NULL == (type_info->bkg_buf = (uint8_t *)bkgr_buf)) {

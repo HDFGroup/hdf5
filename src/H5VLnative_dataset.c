@@ -203,7 +203,7 @@ H5VL__native_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not get a validated dataspace from file_space_id")
 
     /* Write the data */
-    if(H5D__write(dset, mem_type_id, mem_space, file_space, buf) < 0)
+    if(H5D__write(dset, mem_type_id, mem_space, file_space, buf, FALSE) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 done:
@@ -601,6 +601,20 @@ H5VL__native_dataset_optional(void *obj, H5VL_dataset_optional_t optional_type,
                 *ret = H5D__get_offset(dset);
                 if(!H5F_addr_defined(*ret))
                     *ret = HADDR_UNDEF;
+                break;
+            }
+
+        /* H5Dappend */
+        case H5VL_NATIVE_DATASET_APPEND:
+            {
+                unsigned axis = HDva_arg(arguments, unsigned);
+                size_t extension = HDva_arg(arguments, size_t);
+                hid_t memtype = HDva_arg(arguments, hid_t);
+                const void *buf = HDva_arg(arguments, const void*);
+
+                /* Append the record/row/slice */
+                if(H5D__append(dset, axis, extension, memtype, buf) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't append to dataset")
                 break;
             }
 

@@ -2747,8 +2747,8 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                 udata.chunk_block.length = io_info->dset->shared->layout.u.chunk.size;
 
                 /* Allocate the chunk */
-        if(H5D__chunk_file_alloc(&idx_info, NULL, &udata.chunk_block, &need_insert, chunk_info->scaled) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert/resize chunk on chunk level")
+                if(H5D__chunk_file_alloc(&idx_info, NULL, &udata.chunk_block, &need_insert, chunk_info->scaled) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert/resize chunk on chunk level")
 
                 /* Make sure the address of the chunk is returned. */
                 if(!H5F_addr_defined(udata.chunk_block.offset))
@@ -2773,16 +2773,16 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                 (hsize_t)chunk_info->chunk_points, chunk_info->fspace, chunk_info->mspace) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked write failed")
 
-    /* Release the cache lock on the chunk, or insert chunk into index. */
-    if(chunk) {
-        if(H5D__chunk_unlock(io_info, &udata, TRUE, chunk, dst_accessed_bytes) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
-    } /* end if */
-    else {
+        /* Release the cache lock on the chunk, or insert chunk into index. */
+        if(chunk) {
+            if(H5D__chunk_unlock(io_info, &udata, TRUE, chunk, dst_accessed_bytes) < 0)
+                HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
+        } /* end if */
+        else {
             if(need_insert && io_info->dset->shared->layout.storage.u.chunk.ops->insert)
                 if((io_info->dset->shared->layout.storage.u.chunk.ops->insert)(&idx_info, &udata, NULL) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert chunk addr into index")
-    } /* end else */
+        } /* end else */
 
         /* Advance to next chunk in list */
         chunk_node = H5D_CHUNK_GET_NEXT_NODE(fm, chunk_node);
@@ -4638,8 +4638,8 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
             udata.filter_mask = filter_mask;
 
             /* Allocate the chunk (with all processes) */
-        if(H5D__chunk_file_alloc(&idx_info, NULL, &udata.chunk_block, &need_insert, scaled) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert/resize chunk on chunk level")
+            if(H5D__chunk_file_alloc(&idx_info, NULL, &udata.chunk_block, &need_insert, scaled) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert/resize chunk on chunk level")
             HDassert(H5F_addr_defined(udata.chunk_block.offset));
 
             /* Check if fill values should be written to chunks */
@@ -4678,7 +4678,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
             } /* end if */
 
             /* Insert the chunk record into the index */
-        if(need_insert && ops->insert)
+            if(need_insert && ops->insert)
                 if((ops->insert)(&idx_info, &udata, dset) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert chunk addr into index")
 
@@ -5599,7 +5599,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, const hsize_t *old_dim)
                 /* Remove the chunk from disk, if present */
                 if(H5F_addr_defined(chk_udata.chunk_block.offset)) {
                     /* Update the offset in idx_udata */
-            idx_udata.scaled = udata.common.scaled;
+                    idx_udata.scaled = udata.common.scaled;
 
                     /* Remove the chunk from disk */
                     if((sc->ops->remove)(&idx_info, &idx_udata) < 0)
@@ -7107,7 +7107,7 @@ H5D__chunk_format_convert(H5D_t *dset, H5D_chk_idx_info_t *idx_info, H5D_chk_idx
 
     /* Iterate over the chunks in the current index and insert the chunk addresses into version 1 B-tree index */
     if((idx_info->storage->ops->iterate)(idx_info, H5D__chunk_format_convert_cb, &udata) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to iterate over chunk index to chunk info")
+        HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to iterate over chunk index to chunk info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

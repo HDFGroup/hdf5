@@ -1091,7 +1091,7 @@ H5G_obj_remove_by_idx(const H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r,
 
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
-} /* end H5G_obj_remove() */
+} /* end H5G_obj_remove_by_idx() */
 
 
 /*-------------------------------------------------------------------------

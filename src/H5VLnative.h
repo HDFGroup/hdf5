@@ -49,6 +49,7 @@
 #define H5VL_NATIVE_DATASET_CHUNK_WRITE             7   /* H5Dchunk_write               */
 #define H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE       8   /* H5Dvlen_get_buf_size         */
 #define H5VL_NATIVE_DATASET_GET_OFFSET              9   /* H5Dget_offset                */
+#define H5VL_NATIVE_DATASET_APPEND                  10  /* H5Dappend                    */
 
 /* Values for native VOL connector file optional VOL operations */
 #define H5VL_NATIVE_FILE_CLEAR_ELINK_CACHE             0   /* H5Fclear_elink_file_cache            */

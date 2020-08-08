@@ -573,6 +573,9 @@ H5_DLL herr_t H5D__flush_real(H5D_t *dataset);
 H5_DLL herr_t H5D__flush(H5D_t *dset, hid_t dset_id);
 H5_DLL herr_t H5D__mark(const H5D_t *dataset, unsigned flags);
 H5_DLL herr_t H5D__refresh(hid_t dset_id, H5D_t *dataset);
+H5_DLL herr_t H5D__append(H5D_t *dset, unsigned axis, size_t extension,
+    hid_t memtype, const void *buf);
+
 
 /* To convert a dataset's chunk indexing type to v1 B-tree */
 H5_DLL herr_t H5D__format_convert(H5D_t *dataset);
@@ -581,7 +584,7 @@ H5_DLL herr_t H5D__format_convert(H5D_t *dataset);
 H5_DLL herr_t H5D__read(H5D_t *dataset, hid_t mem_type_id,
     const H5S_t *mem_space, const H5S_t *file_space, void *buf/*out*/);
 H5_DLL herr_t H5D__write(H5D_t *dataset, hid_t mem_type_id,
-    const H5S_t *mem_space, const H5S_t *file_space, const void *buf);
+    const H5S_t *mem_space, const H5S_t *file_space, const void *buf, hbool_t do_append);
 
 /* Functions that perform direct serial I/O operations */
 H5_DLL herr_t H5D__select_read(const H5D_io_info_t *io_info,
