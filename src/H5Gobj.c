@@ -1090,7 +1090,7 @@ H5G_obj_remove_by_idx(const H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r,
             HGOTO_ERROR(H5E_SYM, H5E_CANTUPDATE, FAIL, "unable to update link info")
 
 done:
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_obj_remove_by_idx() */
 
 
