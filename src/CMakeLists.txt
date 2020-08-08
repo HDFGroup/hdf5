@@ -1296,14 +1296,16 @@ endif ()
 # Option to build documentation
 #-----------------------------------------------------------------------------
 if (DOXYGEN_FOUND)
-  set (DOXYGEN_OUTPUT_DIRECTORY ${HDF5_BINARY_DIR}/hdf5lib_docs)
   set (HDF5_ALIASES ${HDF5_DOXYGEN_DIR}/aliases)
   set (HDF5_PROJECT_LOGO ${HDF5_DOXYGEN_DIR}/img/HDFG-logo.png)
   set (HDF5_PROJECT_BRIEF "HDF5 (Hierarchical Data Format 5) Software Library and Utilities")
-  configure_file(${HDF5_DOXYGEN_DIR}/doxyfile.in doxyfile @ONLY)
+  set (DOXYGEN_INPUT_DIRECTORY ${HDF5_SRC_DIR} ${HDF5_DOXYGEN_DIR}/dox ${HDF5_GENERATED_SOURCE_DIR}/shared)
+  set (DOXYGEN_OUTPUT_DIRECTORY ${HDF5_BINARY_DIR}/hdf5lib_docs)
+  # Replace variables inside @@ with the current values
+  configure_file(${HDF5_DOXYGEN_DIR}/Doxyfile.in Doxyfile @ONLY)
 
   doxygen_add_docs(hdf5lib_doc
-      ${common_SRCS} ${shared_gen_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS} ${H5_GENERATED_HEADERS}
+      ${common_SRCS} ${shared_gen_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS} ${H5_GENERATED_HEADERS} ${HDF5_DOXYGEN_DIR}/dox
       ALL
       WORKING_DIRECTORY ${HDF5_SRC_DIR}
       COMMENT "Generating HDF5 library Source Documentation"
