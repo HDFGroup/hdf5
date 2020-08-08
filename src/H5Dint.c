@@ -3011,7 +3011,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__set_extent(H5D_t *dset, const hsize_t *size)
+H5D__set_extent(H5D_t *dset, const hsize_t *size, hbool_t do_append)
 {
     hsize_t curr_dims[H5S_MAX_RANK];    /* Current dimension sizes */
     htri_t  changed;                    /* Whether the dataspace changed size */
@@ -3019,7 +3019,11 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
     unsigned dim_idx;                   /* Dimension index */
     herr_t  ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
+    FUNC_ENTER_PACKAGE
+
+    /* Only apply tag when called independently, not during append operation */
+    if(!do_append)
+        H5_BEGIN_TAG(dset->oloc.addr)
 
     /* Check args */
     HDassert(dset);
@@ -3181,7 +3185,11 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
     } /* end if */
 
 done:
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    /* Only remove tag when called independently, not during append operation */
+    if(!do_append)
+        H5_END_TAG
+
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__set_extent() */
 
 
