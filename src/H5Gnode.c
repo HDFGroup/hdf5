@@ -15,7 +15,7 @@
  *
  * Created:	    H5Gnode.c
  *              Jun 26 1997
- *              Robb Matzke <matzke@llnl.gov>
+ *              Robb Matzke
  *
  * Purpose:     Functions for handling symbol table nodes.  A
  *              symbol table node is a small collection of symbol
@@ -145,8 +145,6 @@ H5FL_SEQ_DEFINE(H5G_entry_t);
  * Programmer:  Robb Matzke
  *              Wednesday, October  8, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static H5UC_t *
@@ -169,7 +167,6 @@ H5G_node_get_shared(const H5F_t *f, const void H5_ATTR_UNUSED *_udata)
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul  8 1997
  *
  *-------------------------------------------------------------------------
@@ -199,7 +196,6 @@ H5G_node_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key)
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul  8 1997
  *
  *-------------------------------------------------------------------------
@@ -270,7 +266,6 @@ H5G_node_debug_key(FILE *stream, int indent, int fwidth, const void *_key,
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Jan 15 2003
  *
  *-------------------------------------------------------------------------
@@ -310,7 +305,6 @@ H5G__node_free(H5G_node_t *sym)
  *          Failure:    Negative
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jun 23 1997
  *
  *-------------------------------------------------------------------------
@@ -382,10 +376,7 @@ done:
  *          Failure:    FAIL (same as LT_KEY<RT_KEY)
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jun 23 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -439,10 +430,7 @@ done:
  *          Failure:    FAIL (same as UDATA < LT_KEY)
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jun 23 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -501,7 +489,6 @@ done:
  *              Failure:    Negative if not found.
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jun 23 1997
  *
  *-------------------------------------------------------------------------
@@ -591,7 +578,6 @@ done:
  *              Failure:    H5B_INS_ERROR, NEW_NODE_P might not be initialized.
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jun 24 1997
  *
  *-------------------------------------------------------------------------
@@ -951,7 +937,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jun 24 1997
  *
  *-------------------------------------------------------------------------
@@ -1368,7 +1353,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Nov 19 2006
  *
  *-------------------------------------------------------------------------
@@ -1475,7 +1459,6 @@ H5G__node_iterate_size(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key,
  * Return:      0(zero) on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug  4 1997
  *
  *-------------------------------------------------------------------------

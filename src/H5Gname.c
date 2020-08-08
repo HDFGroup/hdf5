@@ -15,7 +15,7 @@
  *
  * Created:		H5Gname.c
  *			Sep 12 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Functions for handling group hierarchy paths.
  *
@@ -123,7 +123,6 @@ H5FL_BLK_EXTERN(str_buf);
  *		Failure:	Ptr to the null terminator of NAME.
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug 11 1997
  *
  *-------------------------------------------------------------------------
@@ -216,7 +215,7 @@ done:
  * Return: TRUE for valid prefix, FALSE for not a valid prefix, FAIL
  *              on error
  *
- * Programmer: Quincey Koziol, koziol@ncsa.uiuc.edu
+ * Programmer: Quincey Koziol
  *
  * Date: September 24, 2002
  *
@@ -281,7 +280,7 @@ done:
  *
  * Return: Pointer to reference counted string on success, NULL on error
  *
- * Programmer: Quincey Koziol, koziol@ncsa.uiuc.edu
+ * Programmer: Quincey Koziol
  *
  * Date: August 19, 2005
  *
@@ -343,7 +342,7 @@ done:
  * Return:	Success:	Non-NULL, combined path
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol, koziol@ncsa.uiuc.edu
+ * Programmer:	Quincey Koziol
  *              Tuesday, October 11, 2005
  *
  *-------------------------------------------------------------------------
@@ -379,7 +378,7 @@ H5G_build_fullpath_refstr_str(H5RS_str_t *prefix_r, const char *name)
  *
  * Return: Pointer to reference counted string on success, NULL on error
  *
- * Programmer: Quincey Koziol, koziol@ncsa.uiuc.edu
+ * Programmer: Quincey Koziol
  *
  * Date: August 19, 2005
  *
@@ -448,7 +447,7 @@ H5G__name_init(H5G_name_t *name, const char *path)
  * Return:	Success:	Non-negative
  *		Failure:	Negative
  *
- * Programmer:	Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer:	Pedro Vicente
  *              Thursday, August 22, 2002
  *
  *-------------------------------------------------------------------------
@@ -552,10 +551,6 @@ H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5_copy_depth_t depth)
  * Programmer:	Quincey Koziol
  *              Tuesday, December 13, 2005
  *
- * Modifications: Leon Arber
- * 		  Oct. 18, 2006
- * 		  Added functionality to get the name for a reference.
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -639,7 +634,7 @@ H5G_name_reset(H5G_name_t *name)
  *
  * Return:	Success
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: August 22, 2002
  *
@@ -777,7 +772,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: June 5, 2002
  *
@@ -1060,7 +1055,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: June 11, 2002
  *

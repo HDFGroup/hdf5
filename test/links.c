@@ -9037,15 +9037,15 @@ error:
 static int
 external_link_query(hid_t fapl, hbool_t new_format)
 {
-    hid_t        fid = -1;                       /* File ID */
-    hid_t        gid = -1;                       /* Group IDs */
-    const char  *file_name;                      /* Name of the file the external link points to */
-    const char  *object_name;                    /* Name of the object the external link points to */
-    H5O_info2_t  oi;                            /* Object information */
-    H5L_info2_t  li;                             /* Link information */
-    char         filename1[NAME_BUF_SIZE],
-                 filename2[NAME_BUF_SIZE],       /* Names of files to externally link across */
-                 query_buf[NAME_BUF_SIZE];       /* Buffer to hold query result */
+    hid_t       fid = -1;                       /* File ID */
+    hid_t       gid = -1;                       /* Group IDs */
+    const char *file_name;                      /* Name of the file the external link points to */
+    const char *object_name;                    /* Name of the object the external link points to */
+    H5O_info2_t oi;                             /* Object information */
+    H5L_info2_t li;                             /* Link information */
+    char        filename1[NAME_BUF_SIZE],
+                filename2[NAME_BUF_SIZE],       /* Names of files to externally link across */
+                query_buf[NAME_BUF_SIZE];       /* Buffer to hold query result */
 
     if(new_format)
         TESTING("query aspects of external link (w/new group format)")
@@ -18285,7 +18285,6 @@ main(void)
             nerrors += test_move_preserves_deprec(my_fapl, new_format);
             nerrors += test_deprec(my_fapl, new_format);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-
 
             /* tests for external link */
             /* Test external file cache first, so it sees the default efc setting on the fapl

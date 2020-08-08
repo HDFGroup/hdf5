@@ -1436,7 +1436,7 @@ done:
  *              constant H5P_DEFAULT). The bytes to be written come from the
  *              buffer BUF.
  *
- * Return:      SNon-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -1642,7 +1642,7 @@ H5FDlock(H5FD_t *file, hbool_t rw)
 
     /* Call private function */
     if(H5FD_lock(file, rw) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "file lock request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTLOCKFILE, FAIL, "file lock request failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1672,7 +1672,7 @@ H5FD_lock(H5FD_t *file, hbool_t rw)
 
     /* Dispatch to driver */
     if(file->cls->lock && (file->cls->lock)(file, rw) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "driver lock request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTLOCKFILE, FAIL, "driver lock request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1704,7 +1704,7 @@ H5FDunlock(H5FD_t *file)
 
     /* Call private function */
     if(H5FD_unlock(file) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "file unlock request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTUNLOCKFILE, FAIL, "file unlock request failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1733,7 +1733,7 @@ H5FD_unlock(H5FD_t *file)
 
     /* Dispatch to driver */
     if(file->cls->unlock && (file->cls->unlock)(file) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "driver unlock request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTUNLOCKFILE, FAIL, "driver unlock request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

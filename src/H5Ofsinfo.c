@@ -110,7 +110,7 @@ H5O_fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
 
     /* Allocate space for message */
     if(NULL == (fsinfo = H5FL_CALLOC(H5O_fsinfo_t)))
-    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     for(ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; ptype++)
         fsinfo->fs_addr[ptype - 1] = HADDR_UNDEF;

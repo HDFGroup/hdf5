@@ -655,12 +655,12 @@ parse_hsize_list(const char *h_list, subset_d *d)
  *-------------------------------------------------------------------------
  */
 static struct subset_t *
-parse_subset_params(char *dset)
+parse_subset_params(const char *dset)
 {
     struct subset_t *s = NULL;
     char   *brace;
 
-    if (!disable_compact_subset && ((brace = HDstrrchr(dset, '[')) != NULL)) {
+    if (!dump_opts.disable_compact_subset && ((brace = HDstrrchr(dset, '[')) != NULL)) {
         *brace++ = '\0';
 
         s = (struct subset_t *)HDcalloc(1, sizeof(struct subset_t));
@@ -891,50 +891,50 @@ parse_command_line(int argc, const char *argv[])
 parse_start:
         switch ((char)opt) {
         case 'R':
-            display_region = TRUE;
+            dump_opts.display_region = TRUE;
             region_output = TRUE;
             break;
         case 'B':
-            display_bb = TRUE;
+            dump_opts.display_bb = TRUE;
             last_was_dset = FALSE;
             break;
         case 'n':
-            display_fi = TRUE;
+            dump_opts.display_fi = TRUE;
             last_was_dset = FALSE;
             if (opt_arg != NULL)
                 h5trav_set_verbose(HDatoi(opt_arg));
             break;
         case 'p':
-            display_dcpl = TRUE;
+            dump_opts.display_dcpl = TRUE;
             break;
         case 'y':
-            display_ai = FALSE;
+            dump_opts.display_ai = FALSE;
             break;
         case 'e':
-            display_escape = TRUE;
+            dump_opts.display_escape = TRUE;
             break;
         case 'H':
-            display_data = FALSE;
-            display_attr_data = FALSE;
+            dump_opts.display_data = FALSE;
+            dump_opts.display_attr_data = FALSE;
             last_was_dset = FALSE;
             break;
         case 'A':
             if (opt_arg != NULL) {
                 if(0 == HDatoi(opt_arg))
-                    include_attrs = FALSE;
+                    dump_opts.include_attrs = FALSE;
             }
             else {
-                display_data = FALSE;
-                display_attr_data = TRUE;
+                dump_opts.display_data = FALSE;
+                dump_opts.display_attr_data = TRUE;
                 last_was_dset = FALSE;
             }
             break;
         case 'i':
-            display_oid = TRUE;
+            dump_opts.display_oid = TRUE;
             last_was_dset = FALSE;
             break;
         case 'r':
-            display_char = TRUE;
+            dump_opts.display_char = TRUE;
             break;
         case 'V':
             print_version(h5tools_getprogname());
@@ -955,7 +955,7 @@ parse_start:
             }
             break;
         case 'N':
-            display_all = 0;
+            dump_opts.display_all = 0;
 
             for (i = 0; i < argc; i++)
                 if (!hand[i].func) {
@@ -967,7 +967,7 @@ parse_start:
             last_was_dset = FALSE;
             break;
         case 'a':
-            display_all = 0;
+            dump_opts.display_all = 0;
 
             for (i = 0; i < argc; i++)
                 if (!hand[i].func) {
@@ -979,7 +979,7 @@ parse_start:
             last_was_dset = FALSE;
             break;
         case 'd':
-            display_all = 0;
+            dump_opts.display_all = 0;
 
             for (i = 0; i < argc; i++)
                 if (!hand[i].func) {
@@ -996,7 +996,7 @@ parse_start:
             driver_name_g = opt_arg;
             break;
         case 'g':
-            display_all = 0;
+            dump_opts.display_all = 0;
 
             for (i = 0; i < argc; i++)
                 if (!hand[i].func) {
@@ -1008,7 +1008,7 @@ parse_start:
             last_was_dset = FALSE;
             break;
         case 'l':
-            display_all = 0;
+            dump_opts.display_all = 0;
 
             for (i = 0; i < argc; i++)
                 if (!hand[i].func) {
@@ -1020,7 +1020,7 @@ parse_start:
             last_was_dset = FALSE;
             break;
         case 't':
-            display_all = 0;
+            dump_opts.display_all = 0;
 
             for (i = 0; i < argc; i++)
                 if (!hand[i].func) {
@@ -1047,13 +1047,13 @@ parse_start:
                 }
             }
             else {
-                if(display_attr_data && !display_data) {
+                if(dump_opts.display_attr_data && !dump_opts.display_data) {
                     if (h5tools_set_attr_output_file(opt_arg, 0) < 0) {
                         usage(h5tools_getprogname());
                         goto error;
                     }
                 }
-                if(display_data || display_all) {
+                if(dump_opts.display_data || dump_opts.display_all) {
                     if (h5tools_set_data_output_file(opt_arg, 0) < 0) {
                         usage(h5tools_getprogname());
                         goto error;
@@ -1061,7 +1061,7 @@ parse_start:
                 }
             }
 
-            usingdasho = TRUE;
+            dump_opts.usingdasho = TRUE;
             last_was_dset = FALSE;
             outfname_g = opt_arg;
             break;
@@ -1111,14 +1111,14 @@ parse_start:
                 usage(h5tools_getprogname());
                 goto error;
             }
-            display_packed_bits = TRUE;
+            dump_opts.display_packed_bits = TRUE;
             break;
         case 'v':
-            display_vds_first = TRUE;
+            dump_opts.display_vds_first = TRUE;
             break;
         case 'G':
-            vds_gap_size = HDatoi(opt_arg);
-            if (vds_gap_size < 0) {
+            dump_opts.vds_gap_size = HDatoi(opt_arg);
+            if (dump_opts.vds_gap_size < 0) {
                 usage(h5tools_getprogname());
                 goto error;
             }
@@ -1255,7 +1255,7 @@ end_collect:
                 enable_error_stack = 1;
             break;
         case 'C':
-            disable_compact_subset = TRUE;
+            dump_opts.disable_compact_subset = TRUE;
             break;
         case 'h':
             usage(h5tools_getprogname());
@@ -1357,14 +1357,10 @@ main(int argc, const char *argv[])
     hid_t               fid = H5I_INVALID_HID;
     hid_t               gid = H5I_INVALID_HID;
     hid_t               fapl_id = H5P_DEFAULT;
-    H5E_auto2_t         func;
-    H5E_auto2_t         tools_func;
     H5O_info2_t         oi;
     struct handler_t   *hand = NULL;
     int                 i;
     unsigned            u;
-    void               *edata;
-    void               *tools_edata;
     char               *fname = NULL;
 
     h5tools_setprogname(PROGRAMNAME);
@@ -1373,16 +1369,8 @@ main(int argc, const char *argv[])
     dump_function_table = &ddl_function_table;
     dump_indent = 0;
 
-    /* Disable error reporting */
-    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
     /* Initialize h5tools lib */
     h5tools_init();
-
-    /* Disable tools error reporting */
-    H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
-    H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
 
     if((hand = parse_command_line(argc, argv))==NULL) {
         goto done;
@@ -1394,34 +1382,29 @@ main(int argc, const char *argv[])
         goto done;
     }
 
-    if (enable_error_stack > 0) {
-        H5Eset_auto2(H5E_DEFAULT, func, edata);
-        H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
-    }
-
     /* Check for conflicting options */
     if (doxml_g) {
-        if (!display_all) {
+        if (!dump_opts.display_all) {
             error_msg("option \"%s\" not available for XML\n", "to display selected objects");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
         }
-        else if (display_bb) {
+        else if (dump_opts.display_bb) {
             error_msg("option \"%s\" not available for XML\n", "--boot-block");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
         }
-        else if (display_oid == 1) {
+        else if (dump_opts.display_oid == 1) {
             error_msg("option \"%s\" not available for XML\n", "--object-ids");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
         }
-        else if (display_char == TRUE) {
+        else if (dump_opts.display_char == TRUE) {
             error_msg("option \"%s\" not available for XML\n", "--string");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
         }
-        else if (usingdasho) {
+        else if (dump_opts.usingdasho) {
             error_msg("option \"%s\" not available for XML\n", "--output");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
@@ -1439,6 +1422,10 @@ main(int argc, const char *argv[])
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
+
+    /* enable error reporting if command line option */
+    h5tools_error_report();
+
     /* Initialize indexing options */
     h5trav_set_index(sort_by, sort_order);
 
@@ -1584,7 +1571,7 @@ main(int argc, const char *argv[])
         }
 
         if (!doxml_g) {
-            if (display_fi) {
+            if (dump_opts.display_fi) {
                 PRINTVALSTREAM(rawoutstream, "\n");
                 dump_fcontents(fid);
                 end_obj(h5tools_dump_header_format->fileend,h5tools_dump_header_format->fileblockend);
@@ -1592,11 +1579,11 @@ main(int argc, const char *argv[])
                 goto done;
             }
 
-            if (display_bb)
+            if (dump_opts.display_bb)
                 dump_fcpl(fid);
         }
 
-        if(display_all) {
+        if(dump_opts.display_all) {
             if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) {
                 error_msg("unable to open root group\n");
                 h5tools_setstatus(EXIT_FAILURE);
@@ -1661,9 +1648,6 @@ main(int argc, const char *argv[])
 
     /* To Do:  clean up XML table */
 
-    H5Eset_auto2(H5E_DEFAULT, func, edata);
-    H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
-
     leave(h5tools_getstatus());
 
 done:
@@ -1692,9 +1676,6 @@ done:
         free_handler(hand, argc);
 
     /* To Do:  clean up XML table */
-
-    H5Eset_auto2(H5E_DEFAULT, func, edata);
-    H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
 
     leave(h5tools_getstatus());
 } /* main */

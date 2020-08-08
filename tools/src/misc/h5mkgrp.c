@@ -268,9 +268,6 @@ main(int argc, const char *argv[])
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
 
-    /* Disable the HDF5 library's error reporting */
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
     /* Initialize h5tools lib */
     h5tools_init();
 
@@ -288,6 +285,9 @@ main(int argc, const char *argv[])
         error_msg("unable to parse command line arguments\n");
         leave(EXIT_FAILURE);
     }
+
+    /* enable error reporting if command line option */
+    h5tools_error_report();
 
     /* Check for creating groups with new format version */
     if(params_g.latest) {
