@@ -2255,15 +2255,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-h5_check_if_file_locking_enabled(hbool_t *are_enabled)
+h5_check_if_file_locking_enabled(hbool_t *is_enabled)
 {
     const char *filename = "locking_test_file";
-    mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+    int pmode = O_RDWR | O_CREAT | O_TRUNC;
     int fd = -1;
 
-    *are_enabled = TRUE;
+    *is_enabled = TRUE;
 
-    if((fd = HDcreat(filename, mode)) < 0)
+    if((fd = HDopen(filename, pmode, H5_POSIX_CREATE_MODE_RW)) < 0)
         goto error;
 
     /* Test HDflock() to see if it works */
@@ -2277,7 +2277,7 @@ h5_check_if_file_locking_enabled(hbool_t *are_enabled)
              * error condition.
              */
             errno = 0;
-            *are_enabled = FALSE;
+            *is_enabled = FALSE;
         }
         else
             goto error;
@@ -2293,7 +2293,7 @@ h5_check_if_file_locking_enabled(hbool_t *are_enabled)
     return SUCCEED;
 
 error:
-    *are_enabled = FALSE;
+    *is_enabled = FALSE;
     if (fd > -1) {
         HDclose(fd);
         HDremove(filename);
