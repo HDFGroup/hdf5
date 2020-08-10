@@ -311,7 +311,7 @@ H5FD_s3comms_hrb_node_set(
 
     if(*L == NULL)  {
         if(value == NULL)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "trying to remove node from empty list");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "trying to remove node from empty list")
         else {
 #if S3COMMS_DEBUG
 HDprintf("CREATE NEW\n"); HDfflush(stdout);
@@ -414,7 +414,7 @@ HDprintf("MODIFY HEAD\n"); HDfflush(stdout);
         is_looking = FALSE;
 
         if(value == NULL)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "trying to remove a node 'before' head");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "trying to remove a node 'before' head")
         else {
 #if S3COMMS_DEBUG
 HDprintf("PREPEND NEW HEAD\n"); HDfflush(stdout);
@@ -442,7 +442,7 @@ HDprintf("PREPEND NEW HEAD\n"); HDfflush(stdout);
             is_looking = FALSE;
 
             if(value == NULL)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "trying to remove absent node");
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "trying to remove absent node")
             else {
 #if S3COMMS_DEBUG
 HDprintf("APPEND A NODE\n"); HDfflush(stdout);
@@ -465,7 +465,7 @@ HDprintf("APPEND A NODE\n"); HDfflush(stdout);
             is_looking = FALSE;
 
             if(value == NULL)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "trying to remove absent node");
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "trying to remove absent node")
             else {
 #if S3COMMS_DEBUG
 HDprintf("INSERT A NODE\n"); HDfflush(stdout);
@@ -944,9 +944,9 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem in reading during getsize.");
 
     if(sds.size > CURL_MAX_HTTP_HEADER)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "HTTP metadata buffer overrun");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "HTTP metadata buffer overrun")
     else if (sds.size == 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "No HTTP metadata");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "No HTTP metadata")
 #if S3COMMS_DEBUG
     else
         HDfprintf(stderr, "GETSIZE: OK\n");
@@ -2305,7 +2305,7 @@ H5FD_s3comms_parse_url(
     purl->scheme = (char *)H5MM_malloc(sizeof(char) * (size_t)(len + 1));
     if(purl->scheme == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, FAIL, "can't allocate space for SCHEME");
-    (void)HDstrncpy(purl->scheme, curstr, (size_t)len);
+    HDstrncpy(purl->scheme, curstr, (size_t)len);
     purl->scheme[len] = '\0';
     for(i = 0; i < len; i++ )
         purl->scheme[i] = (char)HDtolower(purl->scheme[i]);
@@ -2337,7 +2337,7 @@ H5FD_s3comms_parse_url(
     } /* end else (IPv4) */
     len = tmpstr - curstr;
     if(len == 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "HOST substring cannot be empty");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "HOST substring cannot be empty")
     else if(len > urllen)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem with length of HOST substring");
 
@@ -2345,7 +2345,7 @@ H5FD_s3comms_parse_url(
     purl->host = (char *)H5MM_malloc(sizeof(char) * (size_t)(len + 1));
     if(purl->host == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, FAIL, "can't allocate space for HOST");
-    (void)HDstrncpy(purl->host, curstr, (size_t)len);
+    HDstrncpy(purl->host, curstr, (size_t)len);
     purl->host[len] = 0;
 
     /*************
@@ -2359,7 +2359,7 @@ H5FD_s3comms_parse_url(
             tmpstr++;
         len = tmpstr - curstr;
         if(len == 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "PORT element cannot be empty");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "PORT element cannot be empty")
         else if(len > urllen)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem with length of PORT substring");
         for(i = 0; i < len; i ++)
@@ -2370,7 +2370,7 @@ H5FD_s3comms_parse_url(
         purl->port = (char *)H5MM_malloc(sizeof(char) * (size_t)(len + 1));
         if(purl->port == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, FAIL, "can't allocate space for PORT");
-        (void)HDstrncpy(purl->port, curstr, (size_t)len);
+        HDstrncpy(purl->port, curstr, (size_t)len);
         purl->port[len] = 0;
     } /* end if PORT element */
 
@@ -2392,8 +2392,8 @@ H5FD_s3comms_parse_url(
         if(len > 0) {
             purl->path = (char *)H5MM_malloc(sizeof(char) * (size_t)(len + 1));
             if(purl->path == NULL)
-                    HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, FAIL, "can't allocate space for PATH");
-            (void)HDstrncpy(purl->path, curstr, (size_t)len);
+                HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, FAIL, "can't allocate space for PATH");
+            HDstrncpy(purl->path, curstr, (size_t)len);
             purl->path[len] = 0;
         }
     } /* end if PATH element */
@@ -2409,13 +2409,13 @@ H5FD_s3comms_parse_url(
             tmpstr++;
         len = tmpstr - curstr;
         if(len == 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "QUERY cannot be empty");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "QUERY cannot be empty")
         else if(len > urllen)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem with length of QUERY substring");
         purl->query = (char *)H5MM_malloc(sizeof(char) * (size_t)(len + 1));
         if(purl->query == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, FAIL, "can't allocate space for QUERY");
-        (void)HDstrncpy(purl->query, curstr, (size_t)len);
+        HDstrncpy(purl->query, curstr, (size_t)len);
         purl->query[len] = 0;
     } /* end if QUERY exists */
 

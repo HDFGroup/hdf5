@@ -185,7 +185,7 @@ H5O__stab_copy(const void *_mesg, void *_dest)
     /* check args */
     HDassert(stab);
     if(!dest && NULL == (dest = H5FL_MALLOC(H5O_stab_t)))
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* copy */
     *dest = *stab;

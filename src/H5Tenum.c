@@ -414,8 +414,7 @@ H5T__enum_nameof(const H5T_t *dt, const void *value, char *name/*out*/, size_t s
 
     /* Save result name */
     if(!name) {
-        if(NULL == (name = (char *)H5MM_malloc(
-                HDstrlen(copied_dt->shared->u.enumer.name[md]) + 1)))
+        if(NULL == (name = (char *)H5MM_malloc(HDstrlen(copied_dt->shared->u.enumer.name[md]) + 1)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
         alloc_name = TRUE;
     } /* end if */
