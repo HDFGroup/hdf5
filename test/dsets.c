@@ -5707,8 +5707,8 @@ error:
  *              type, space, etc... doesn't work for filter and filter is
  *              optional.
  *
- * Return:      Success:    0
- *              Failure:    -1
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
  *
  * Programmer:  Binh-Minh Ribler
  *              24 July 2020
