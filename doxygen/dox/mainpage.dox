@@ -1,22 +1,26 @@
 /*! \mainpage API Documentation for HDF5 Version 1.13 (Draft)
  *
  * \todo Fix the search form for server deployments.
- * \todo Determine what else needs to go here.
+ * \todo Make it mobile-friendly
  *
  * \section intro_sec Introduction
  *
  * \todo Write an introduction.
- *
- * For all other types of documentation check the HDF5 Wiki at https://hdf5.wiki.
  *
  * \section builtin_types Predefined HDF5 Datatypes
  *
  * \todo Revise and transplant
  *       https://portal.hdfgroup.org/display/HDF5/HDF5+Predefined+Datatypes
  *
+ * \section using_locations The Use of Locations (Identifier + Name) in the HDF5 API
+ *
+ * \todo Make this crystal clear!
+ *
  * \section api_compat API Compatibility Macros
  *
  * \todo Revise and transplant
  *       https://portal.hdfgroup.org/display/HDF5/API+Compatibility+Macros
+ *
+ * For all other types of documentation check the HDF5 Wiki at https://hdf5.wiki.
  *
  */
