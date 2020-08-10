@@ -439,15 +439,15 @@ H5O__dtype_decode_helper(unsigned *ioflags/*in,out*/, const uint8_t **pp, H5T_t 
             /* Set reference type */
             dt->shared->u.atomic.u.r.rtype = (H5R_type_t)(flags & 0x0f);
             if(dt->shared->u.atomic.u.r.rtype <= H5R_BADTYPE
-                || dt->shared->u.atomic.u.r.rtype >= H5R_MAXTYPE)
+                    || dt->shared->u.atomic.u.r.rtype >= H5R_MAXTYPE)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "invalid reference type");
 
             /* Set generic flag */
             if(dt->shared->u.atomic.u.r.rtype == H5R_OBJECT2
-                || dt->shared->u.atomic.u.r.rtype == H5R_DATASET_REGION2
-                || dt->shared->u.atomic.u.r.rtype == H5R_ATTR) {
-                dt->shared->u.atomic.u.r.opaque = TRUE;
-                dt->shared->u.atomic.u.r.version = (unsigned)((flags >> 4) & 0x0f);
+                    || dt->shared->u.atomic.u.r.rtype == H5R_DATASET_REGION2
+                    || dt->shared->u.atomic.u.r.rtype == H5R_ATTR) {
+                    dt->shared->u.atomic.u.r.opaque = TRUE;
+                    dt->shared->u.atomic.u.r.version = (unsigned)((flags >> 4) & 0x0f);
                 if(dt->shared->u.atomic.u.r.version != H5R_ENCODE_VERSION)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "reference version does not match");
             } else

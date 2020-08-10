@@ -486,11 +486,11 @@ done:
     if(!ret_value) {
         if(prfx) {
             if(FAIL == H5HL__prfx_dest(prfx))
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to destroy local heap prefix");
+                HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to destroy local heap prefix");
         } /* end if */
         else {
             if(heap && FAIL == H5HL__dest(heap))
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to destroy local heap");
+                HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to destroy local heap");
         } /* end else */
     } /* end if */
 
@@ -771,7 +771,7 @@ done:
     /* Release the [possibly partially initialized] local heap on errors */
     if(!ret_value && dblk)
         if(FAIL == H5HL__dblk_dest(dblk))
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to destroy local heap data block");
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to destroy local heap data block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HL__cache_datablock_deserialize() */
