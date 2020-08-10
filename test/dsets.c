@@ -111,6 +111,8 @@ const char *FILENAME[] = {
 #define DSET_FLETCHER32_NAME_3      "fletcher32_3"
 #define DSET_SHUF_DEF_FLET_NAME     "shuffle+deflate+fletcher32"
 #define DSET_SHUF_DEF_FLET_NAME_2   "shuffle+deflate+fletcher32_2"
+#define DSET_OPTIONAL_SCALAR        "dataset_with_scalar_space"
+#define DSET_OPTIONAL_VLEN          "dataset_with_vlen_type"
 #ifdef H5_HAVE_FILTER_SZIP
 #define DSET_SZIP_NAME              "szip"
 #define DSET_SHUF_SZIP_FLET_NAME    "shuffle+szip+fletcher32"
@@ -5698,6 +5700,150 @@ error:
 } /* end test_can_apply2() */
 
 
+/*-------------------------------------------------------------------------
+ * Function:    test_optional_filters
+ *
+ * Purpose:     Tests that H5Dcreate2 will not fail when a combination of
+ *              type, space, etc... doesn't work for filter and filter is
+ *              optional.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ * Programmer:  Binh-Minh Ribler
+ *              24 July 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_optional_filters(hid_t file)
+{
+    unsigned int level = 9;
+    size_t cd_nelmts = 1;
+    unsigned int cd_values[1] = {level};
+    hsize_t dim1d[1];           /* Dataspace dimensions */
+    hid_t       dsid;           /* Dataset ID */
+    hid_t       sid;            /* Dataspace ID */
+    hid_t       strtid;         /* Datatype ID for string */
+    hid_t       vlentid;        /* Datatype ID for vlen */
+    hid_t       dcpl;           /* Dataspace creation property list ID */
+
+    TESTING("dataset with optional filters");
+
+    /* Create dcpl with special filter */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
+        H5_FAILED();
+        HDprintf("    Line %d: Can't create dcpl\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Create the datatype */
+    if((strtid = H5Tcreate(H5T_STRING, H5T_VARIABLE)) < 0) {
+        H5_FAILED();
+        HDprintf("    Line %d: Can't create datatype\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Create the data space */
+    if((sid = H5Screate(H5S_SCALAR)) < 0) {
+        H5_FAILED();
+        HDprintf("    Line %d: Can't open dataspace\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* The filter is optional. */
+    if(H5Pset_filter(dcpl, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts, cd_values) < 0) {
+        H5_FAILED();
+        HDprintf("    Line %d: Can't set deflate filter\n",__LINE__);
+        goto error;
+    }
+
+    /* Create dataset with optional filter */
+    if((dsid = H5Dcreate2(file, DSET_OPTIONAL_SCALAR, strtid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        HDprintf("    Line %d: Can't create dataset with optional filter\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Close dataset */
+    if(H5Dclose(dsid) < 0) {
+        H5_FAILED();
+        HDprintf("    Line %d: Can't close dataset\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Close dataspace */
+    if(H5Sclose(sid) < 0) {
+        H5_FAILED();
+        HDprintf("    Line %d: Can't close dataspace\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Close datatype */
+    if(H5Tclose(strtid) < 0) {
+        H5_FAILED();
+        HDprintf("    Line %d: Can't close datatype\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Set dataspace dimensions */
+    dim1d[0]=DIM1;
+
+    /* Create a non-scalar dataspace */
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) {
+        H5_FAILED();
+        HDprintf("    Line %d: Can't open dataspace\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Create a vlen datatype */
+    if((vlentid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) {
+        H5_FAILED();
+        HDprintf("    Line %d: Can't create datatype\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Create dataset with optional filter */
+    if((dsid = H5Dcreate2(file, DSET_OPTIONAL_VLEN, vlentid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        HDprintf("    Line %d: Can't create dataset with optional filter\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Close dataset */
+    if(H5Dclose(dsid) < 0) {
+        H5_FAILED();
+        HDprintf("    Line %d: Can't close dataset\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Close dataspace */
+    if(H5Sclose(sid) < 0) {
+        H5_FAILED();
+        HDprintf("    Line %d: Can't close dataspace\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Close datatype */
+    if(H5Tclose(vlentid) < 0) {
+        H5_FAILED();
+        HDprintf("    Line %d: Can't close datatype\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Close dataset creation property list */
+    if(H5Pclose(dcpl) < 0) {
+        H5_FAILED();
+        HDprintf("    Line %d: Can't close dcpl\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    return FAIL;
+} /* end test_optional_filters() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_can_apply_szip
@@ -13314,6 +13460,7 @@ main(void)
                 nerrors += (test_missing_filter(file) < 0        ? 1 : 0);
                 nerrors += (test_can_apply(file) < 0                ? 1 : 0);
                 nerrors += (test_can_apply2(file) < 0                ? 1 : 0);
+                nerrors += (test_optional_filters(file) < 0          ? 1 : 0);
                 nerrors += (test_set_local(my_fapl) < 0                ? 1 : 0);
                 nerrors += (test_can_apply_szip(file) < 0        ? 1 : 0);
                 nerrors += (test_compare_dcpl(file) < 0                ? 1 : 0);

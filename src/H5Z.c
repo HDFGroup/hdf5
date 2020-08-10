@@ -876,7 +876,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5Z_has_optional_filter
+ * Function: H5Z_ignore_filter
  *
  * Purpose:  If one filter optional, this filter can be ignored.
  *
@@ -887,38 +887,52 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5Z_has_optional_filter(hid_t dcpl_id)
-
-/*H5Z_can_ignore(hid_t dcpl_id, hid_t type_id) */
-/*H5Z_can_ignore(hid_t dcpl_id, hid_t type_id,const H5S_t *space) */
+H5Z_ignore_filter(hid_t dcpl_id, H5T_t *type, const H5S_t *space)
 {
-    htri_t ret_value = FALSE;   /* Return value */
-    H5P_genplist_t     *dc_plist;           /* Dataset creation property list object */
-    H5O_pline_t     dcpl_pline;     /* Object's I/O pipeline information */
+    H5P_genplist_t  *dc_plist;   /* Dataset creation property list object */
+    H5O_pline_t     pline;       /* Object's I/O pipeline information */
+    H5S_class_t     space_class;            /* To check class of space */
+    H5T_class_t     type_class;             /* To check if type is VL */
+    bool            bad_for_filters = FALSE;/* Suitable to have filters */
+    htri_t          ret_value = FALSE;      /* TRUE for ignoring filters */
 
     FUNC_ENTER_NOAPI(FAIL)
-
 
     if (NULL == (dc_plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get dataset creation property list")
 
-    /* Get I/O pipeline information */
-    if (H5P_peek(dc_plist, H5O_CRT_PIPELINE_NAME, &dcpl_pline) < 0)
+    /* Get pipeline information */
+    if (H5P_peek(dc_plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve pipeline filter")
 
-    if (dcpl_pline.nused > 0) {
-        size_t u;
-        for ( u = 0; u<dcpl_pline.nused;u++) {
-            if(dcpl_pline.filter[u].flags & H5Z_FLAG_OPTIONAL) {
-                ret_value = TRUE;
-                break;
-            }         
+    /* Get datatype and dataspace classes for quick access */
+    space_class = H5S_GET_EXTENT_TYPE(space);
+    type_class = H5T_get_class(type, FALSE);
+
+    /* These conditions are not suitable for filters */
+    bad_for_filters = (H5S_NULL == space_class || H5S_SCALAR == space_class
+        || H5T_VLEN == type_class
+        || (H5T_STRING == type_class && TRUE == H5T_is_variable_str(type)));
+
+    /* When these conditions occur, if there are required filters in pline,
+       then report a failure, otherwise, set flag that they can be ignored */
+    if (bad_for_filters) {
+        size_t ii;
+        if (pline.nused > 0) {
+            for (ii = 0; ii < pline.nused; ii++)
+            {
+                if (!(pline.filter[ii].flags & H5Z_FLAG_OPTIONAL))
+                    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "not suitable for filters")
+            }
+
+            /* All filters are optional, we can ignore them */
+            ret_value = TRUE;
         }
-    }
+    } /* bad for filters */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Z_can_apply() */
+} /* end H5Z_ignore_filter() */
 
 
 
