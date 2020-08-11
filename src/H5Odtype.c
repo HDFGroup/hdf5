@@ -1093,9 +1093,12 @@ done:
 	with the decoded information
  USAGE
     void *H5O__dtype_decode(f, mesg_flags, p)
-	H5F_t *f;		IN: pointer to the HDF5 file struct
+        H5F_t    *f;            IN: pointer to the HDF5 file struct
+        H5O_t    *open_oh;      IN: pointer to the object header
         unsigned mesg_flags;    IN: Message flags to influence decoding
-	const uint8 *p;		IN: the raw information buffer
+        unsigned *ioflags;      IN/OUT: flags for decoding
+        size_t   p_size;        IN: size of buffer *p
+        const uint8_t *p;       IN: the raw information buffer
  RETURNS
     Pointer to the new message in native order on success, NULL on failure
  DESCRIPTION
