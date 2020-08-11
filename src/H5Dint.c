@@ -3017,13 +3017,14 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size, hbool_t do_append)
     htri_t  changed;                    /* Whether the dataspace changed size */
     size_t  u, v;                       /* Local index variable */
     unsigned dim_idx;                   /* Dimension index */
+    haddr_t prv_tag = HADDR_UNDEF;      /* Previous metadata tag */
     herr_t  ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Only apply tag when called independently, not during append operation */
     if(!do_append)
-        H5_BEGIN_TAG(dset->oloc.addr)
+        H5AC_tag(dset->oloc.addr, &prv_tag);
 
     /* Check args */
     HDassert(dset);
@@ -3187,7 +3188,7 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size, hbool_t do_append)
 done:
     /* Only remove tag when called independently, not during append operation */
     if(!do_append)
-        H5_END_TAG
+        H5AC_tag(prv_tag, NULL);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__set_extent() */

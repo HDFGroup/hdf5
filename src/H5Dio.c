@@ -771,13 +771,14 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     hsize_t     nelmts;                 /* total number of elmts	*/
     hbool_t     io_op_init = FALSE;     /* Whether the I/O op has been initialized */
     char        fake_char;              /* Temporary variable for NULL buffer pointers */
+    haddr_t     prv_tag = HADDR_UNDEF;  /* Previous metadata tag */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
     FUNC_ENTER_PACKAGE
 
     /* Only apply tag when called independently, not during append operation */
     if(!do_append)
-        H5_BEGIN_TAG(dataset->oloc.addr)
+        H5AC_tag(dataset->oloc.addr, &prv_tag);
 
     /* check args */
     HDassert(dataset && dataset->oloc.file);
@@ -967,7 +968,7 @@ done:
 
     /* Only remove tag when called independently, not during append operation */
     if(!do_append)
-        H5_END_TAG
+        H5AC_tag(prv_tag, NULL);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__write() */
