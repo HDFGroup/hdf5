@@ -171,10 +171,9 @@ done:
    mem_space_id    |  file_space_id     | Behavior
 ------------------ | ------------------ | --------
 valid dataspace ID | valid dataspace ID | \p mem_space_id specifies the memory dataspace and the selection within it. \p file_space_id specifies the selection within the file dataset's dataspace.
-
-H5S_ALL valid dataspace identifier  The file dataset's dataspace is used for the memory dataspace and the selection specified with file_space_id specifies the selection within it. The combination of the file dataset's dataspace and the selection from file_space_id is used for memory also.
-valid dataspace identifier  H5S_ALL mem_space_id specifies the memory dataspace and the selection within it. The selection within the file dataset's dataspace is set to the "all" selection.
-H5S_ALL H5S_ALL The file dataset's dataspace is used for the memory dataspace and the selection within the memory dataspace is set to the "all" selection. The selection within the file dataset's dataspace is set to the "all" selection.
+H5S_ALL            | valid dataspace ID | The file dataset's dataspace is used for the memory dataspace and the selection specified with \p file_space_id specifies the selection within it. The combination of the file dataset's dataspace and the selection from \p file_space_id is used for memory also.
+valid dataspace ID | H5S_ALL            | \p mem_space_id specifies the memory dataspace and the selection within it. The selection within the file dataset's dataspace is set to the "all" selection.
+H5S_ALL            | H5S_ALL            | The file dataset's dataspace is used for the memory dataspace and the selection within the memory dataspace is set to the "all" selection. The selection within the file dataset's dataspace is set to the "all" selection.
  
 
  * Setting an #H5S_ALL selection indicates that the entire dataspace, as
@@ -185,7 +184,7 @@ H5S_ALL H5S_ALL The file dataset's dataspace is used for the memory dataspace an
  * \p xfer_plist_id can be the constant #H5P_DEFAULT. in which case the
  * default data transfer properties are used.
  *
- * \include H5Dread.c (---- need verification ----)
+ * \include H5Dread.c
  *
  *-------------------------------------------------------------------------
  */
@@ -310,6 +309,88 @@ done:
 } /* end H5Dread_chunk() */
 
 
+/* --------------------------------------------------------------------------*/
+/**\ingroup H5D
+ *
+ * \brief Writes raw data from a buffer to a dataset
+ *
+ * \param[in] dset_id        Identifier of the dataset to read from
+ * \param[in] mem_type_id    Identifier of the memory datatype
+ * \param[in] mem_space_id   Identifier of the memory dataspace
+ * \param[in] file_space_id  Identifier of the dataset's dataspace in the file
+ * \param[in] xfer_plist_id  Identifier of a transfer property list
+ * \param[out] buf           Buffer with data to be written to the file
+ *
+ * \return \herr_t
+ *
+ * \details H5Dwrite() writes a (partial) dataset, specified by its
+ * identifier \p dset_id, from the application memory buffer \p buf
+ * into the file. Data transfer properties are defined by the argument
+ * \p xfer_plist_id. The memory datatype of the (partial) dataset is
+ * identified by the identifier \p mem_type_id. The part of the dataset
+ * to write is defined by \p mem_space_id and \p file_space_id.
+ * 
+ * If \p mem_type_id is either a fixed-length or variable-length string, it
+ * is important to set the string length when defining the datatype. String
+ * datatypes are derived from #H5T_C_S1 (or #H5T_FORTRAN_S1 for Fortran codes),
+ * which defaults to 1 character in size. See #H5T_SET_SIZE and Creating
+ * variable-length string datatypes.
+ * 
+ * \p file_space_id is used to specify only the selection within the file
+ * dataset's dataspace. Any dataspace specified in \p file_space_id is
+ * ignored by the library and the dataset's dataspace is always used. \p
+ * file_space_id can be the constant #H5S_ALL. which indicates that the entire
+ * file dataspace, as defined by the current dimensions of the dataset,
+ * is to be selected.
+ * 
+ * \p mem_space_id is used to specify both the memory dataspace and the
+ * selection within that dataspace. mem_space_id can be the constant #H5S_ALL,
+ * in which case the file dataspace is used for the memory dataspace and
+ * the selection defined with \p file_space_id is used for the selection
+ * within that dataspace.
+ * 
+ * The behavior of the library for the various combinations of valid
+ * dataspace IDs and #H5S_ALL for the mem_space_id and thefile_space_id
+ * parameters is described below:
+ * 
+ * 
+   mem_space_id    |  file_space_id     | Behavior
+------------------ | ------------------ | --------
+valid dataspace ID | valid dataspace ID | \p mem_space_id specifies the memory dataspace and the selection within it. \p file_space_id specifies the selection within the file dataset's dataspace.
+H5S_ALL            | valid dataspace ID | The file dataset's dataspace is used for the memory dataspace and the selection specified with \p file_space_id specifies the selection within it. The combination of the file dataset's dataspace and the selection from \p file_space_id is used for memory also.
+valid dataspace ID | H5S_ALL            | \p mem_space_id specifies the memory dataspace and the selection within it. The selection within the file dataset's dataspace is set to the "all" selection.
+H5S_ALL            | H5S_ALL            | The file dataset's dataspace is used for the memory dataspace and the selection within the memory dataspace is set to the "all" selection. The selection within the file dataset's dataspace is set to the "all" selection.
+ 
+ * 
+ * Setting an "all" selection indicates that the entire dataspace, as defined
+ * by the current dimensions of a dataspace, will be selected. The number
+ * of elements selected in the memory dataspace must match the number of
+ * elements selected in the file dataspace.
+ * 
+ * \p xfer_plist_id can be the constant #H5P_DEFAULT. in which case the
+ * default data transfer properties are used.
+ * 
+ * Writing to a dataset will fail if the HDF5 file was not opened with
+ * write access permissions.
+
+ * If the dataset's space allocation time is set to #H5D_ALLOC_TIME_LATE
+ * or #H5D_ALLOC_TIME_INCR and the space for the dataset has not yet
+ * been allocated, that space is allocated when the first raw data is
+ * written to the dataset. Unused space in the dataset will be written
+ * with fill values at the same time if the dataset's fill time is set to
+ * #H5D_FILL_TIME_IFSET or #H5D_FILL_TIME_ALLOC.
+ * 
+ * If a dataset's storage layout is 'compact', care must be taken when
+ * writing data to the dataset in parallel. A compact dataset's raw data
+ * is cached in memory and may be flushed to the file from any of the
+ * parallel processes, so parallel applications should always attempt to
+ * write identical data to the dataset from all processes.
+ * 
+ * \see H5Pset_fill_time(), H5Pset_alloc_time()
+ *
+ *-------------------------------------------------------------------------
+ */
+
 /*-------------------------------------------------------------------------
  * Function:    H5Dwrite
  *
