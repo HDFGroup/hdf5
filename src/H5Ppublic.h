@@ -357,11 +357,11 @@ H5_DLL char *H5Pget_class_name(hid_t pclass_id);
  *                 The list of possible Fortran values was updated.
  * \version 1.8.0 The following property list classes were added at this 
  *                release:
-          #H5P_DATASET_ACCESS 
-          #H5P_GROUP_CREATE 
-          #H5P_GROUP_ACCESS 
-          #H5P_DATATYPE_CREATE 
-          #H5P_DATATYPE_ACCESS 
+          #H5P_DATASET_ACCESS, 
+          #H5P_GROUP_CREATE, 
+          #H5P_GROUP_ACCESS, 
+          #H5P_DATATYPE_CREATE, 
+          #H5P_DATATYPE_ACCESS, 
           #H5P_ATTRIBUTE_CREATE                   
   
  * \version 1.4.0 Fortran subroutine was introduced.
@@ -543,7 +543,70 @@ H5_DLL herr_t H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size, unsigned
 /* Dataset creation property list (DCPL) routines */
 H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
 H5_DLL H5D_layout_t H5Pget_layout(hid_t plist_id);
+/*--------------------------------------------------------------------------*/
+/**\ingroup H5P
+ *
+ * \brief Sets the size of the chunks used to store a chunked layout 
+ *        dataset
+ *
+ * \dcpl_id{plist}
+ * \param[in] ndims  The number of dimensions of each chunk
+ * \param[in] dim    An array defining the size, in dataset elements, of 
+ *                   each chunk 
+ *
+ * \return \herr_t
+ * \details H5Pset_chunk() sets the size of the chunks used to store a 
+ *          chunked layout dataset. This function is only valid for dataset 
+ *          creation property lists.
+ *
+ *          The \p ndims parameter currently must be the same size as the 
+ *          rank of the dataset.
+ *
+ *          The values of the \p dim array define the size of the chunks 
+ *          to store the dataset's raw data. The unit of measure for \p dim 
+ *          values is dataset elements.
+ *
+ *          As a side-effect of this function, the layout of the dataset is 
+ *          changed to #H5D_CHUNKED, if it is not already so set. 
+ *
+ * \note Chunk size cannot exceed the size of a fixed-size dataset. For 
+ *       example, a dataset consisting of a 5x4 fixed-size array cannot be 
+ *       defined with 10x10 chunks. Chunk maximums:
+ *       - The maximum number of elements in a chunk is 232-1 which is 
+ *         equal to 4,294,967,295. If the number of elements in a chunk is 
+ *         set via H5Pset_chunk() to a value greater than 232-1, then 
+ *         H5Pset_chunk() will fail.
+ *       - The maximum size for any chunk is 4GB. If a chunk that is larger 
+ *         than 4GB attempts to be written with H5Dwrite(), then H5Dwrite() 
+ *         will fail.
+ *
+ * \see H5Pset_layout(), H5Dwrite()
+ *
+ * \since 1.0.0
+ *--------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/]);
+/*--------------------------------------------------------------------------*/
+/**\ingroup H5P
+ *
+ * \brief Retrieves the size of chunks for the raw data of a chunked 
+ *        layout dataset
+ *
+ * \dcpl_id{plist}
+ * \param[in]  max_ndims Size of the \p dims array
+ * \param[out] dims Array to store the chunk dimensions
+ *
+ * \return Returns chunk dimensionality if successful; 
+ *         otherwise returns a negative value. 
+ *
+ * \details H5Pget_chunk() retrieves the size of chunks for the raw data 
+ *          of a chunked layout dataset. This function is only valid for 
+ *          dataset creation property lists. At most, \p max_ndims elements 
+ *          of \p dims will be initialized.
+ *
+ * \since 1.0.0
+ *--------------------------------------------------------------------------
+ */
 H5_DLL int H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/);
 H5_DLL herr_t H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id,
     const char *src_file_name, const char *src_dset_name, hid_t src_space_id);
