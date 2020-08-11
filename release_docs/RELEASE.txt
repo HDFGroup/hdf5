@@ -179,6 +179,21 @@ Bug Fixes since HDF5-1.12.0 release
 
       (QAK - 2020/05/07)
 
+    - H5Sset_extent_none() sets the dataspace class to H5S_NO_CLASS which
+      causes asserts/errors when passed to other dataspace API calls.
+
+      H5S_NO_CLASS is an internal class value that should not have been
+      exposed via a public API call.
+
+      In debug builds of the library, this can cause asserts to trip. In
+      non-debug builds, it will produce normal library errors.
+
+      The new library behavior is for H5Sset_extent_none() to convert
+      the dataspace into one of type H5S_NULL, which is better handled
+      by the library and easier for developers to reason about.
+
+      (DER - 2020/07/27, HDFFV-11027)
+
     Tools:
     ------
 
