@@ -15201,6 +15201,77 @@ test_hyper_io_1d(void)
 
 /****************************************************************
 **
+**  test_h5s_set_extent_none:
+**  Test to verify the behavior of dataspace code when passed
+**  a dataspace modified by H5Sset_extent_none().
+**
+****************************************************************/
+static void
+test_h5s_set_extent_none(void)
+{
+    hid_t sid = H5I_INVALID_HID;
+    hid_t dst_sid = H5I_INVALID_HID;
+    hid_t null_sid = H5I_INVALID_HID;
+    int rank = 1;
+    hsize_t current_dims = 123;
+    H5S_class_t cls;
+    int out_rank;
+    hsize_t out_dims;
+    hsize_t out_maxdims;
+    hssize_t out_points;
+    htri_t equal;
+    herr_t ret;
+
+    /* Specific values here don't matter as we're just going to reset */
+    sid = H5Screate_simple(rank, &current_dims, NULL);
+    CHECK(sid, H5I_INVALID_HID, "H5Screate_simple");
+
+    /* Dataspace class will be H5S_NULL after this.
+     * In versions prior to 1.10.7 / 1.12.1 this would produce a
+     * dataspace with the internal H5S_NO_CLASS class.
+     */
+    ret = H5Sset_extent_none(sid);
+    CHECK(ret, FAIL, "H5Sset_extent_none");
+    cls = H5Sget_simple_extent_type(sid);
+    VERIFY(cls, H5S_NULL, "H5Sget_simple_extent_type");
+
+    /* Extent getters should generate normal results and not segfault.
+     */
+    out_rank = H5Sget_simple_extent_dims(sid, &out_dims, &out_maxdims);
+    VERIFY(out_rank, 0, "H5Sget_simple_extent_dims");
+    out_rank = H5Sget_simple_extent_ndims(sid);
+    VERIFY(out_rank, 0, "H5Sget_simple_extent_ndims");
+    out_points = H5Sget_simple_extent_npoints(sid);
+    VERIFY(out_points, 0, "H5Sget_simple_extent_npoints");
+
+    /* Check that copying the new (non-)extent works.
+     */
+    dst_sid = H5Screate_simple(rank, &current_dims, NULL);
+    CHECK(dst_sid, H5I_INVALID_HID, "H5Screate_simple");
+    ret = H5Sextent_copy(dst_sid, sid);
+    CHECK(ret, FAIL, "H5Sextent_copy");
+
+    /* Check that H5Sset_extent_none() produces the same extent as
+     * H5Screate(H5S_NULL).
+     */
+    null_sid = H5Screate(H5S_NULL);
+    CHECK(null_sid, H5I_INVALID_HID, "H5Screate");
+    equal = H5Sextent_equal(sid, null_sid);
+    VERIFY(equal, TRUE, "H5Sextent_equal");
+
+    /* Close */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(dst_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(null_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+} /* test_h5s_set_extent_none() */
+
+
+/****************************************************************
+**
 **  test_select(): Main H5S selection testing routine.
 **
 ****************************************************************/
@@ -15381,6 +15452,11 @@ test_select(void)
 
     /* Test reading of 1-d disjoint file space to 1-d single block memory space */
     test_hyper_io_1d();
+
+    /* Test H5Sset_extent_none() functionality after we updated it to set
+     * the class to H5S_NULL instead of H5S_NO_CLASS.
+     */
+    test_h5s_set_extent_none();
 
 }   /* test_select() */
 
