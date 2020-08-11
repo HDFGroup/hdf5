@@ -1301,7 +1301,12 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
         H5O_pline_t     *pline;         /* Dataset's I/O pipeline information */
         H5O_fill_t      *fill;          /* Dataset's fill value info */
         H5O_efl_t       *efl;           /* Dataset's external file list info */
+        htri_t          ignore_filter = FALSE;
 
+        if((ignore_filter = H5Z_ignore_filter(new_dset->shared->dcpl_id, dt, space))<0)
+            HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "H5Z_has_optional_filter() failed")
+
+        if(FALSE == ignore_filter) {
         /* Check if the filters in the DCPL can be applied to this dataset */
         if(H5Z_can_apply(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "I/O filters can't operate on this dataset")
@@ -1309,6 +1314,7 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
         /* Make the "set local" filter callbacks for this dataset */
         if(H5Z_set_local(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set local filter parameters")
+        }
 
         /* Get new dataset's property list object */
         if(NULL == (dc_plist = (H5P_genplist_t *)H5I_object(new_dset->shared->dcpl_id)))
@@ -1332,9 +1338,11 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't retrieve external file list")
         efl_copied = TRUE;
 
+        if(FALSE == ignore_filter) {
         /* Check that chunked layout is used if filters are enabled */
         if(pline->nused > 0 && H5D_CHUNKED != layout->type)
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "filters can only be used with chunked layout")
+        }
 
         /* Check if the alloc_time is the default and error out */
         if(fill->alloc_time == H5D_ALLOC_TIME_DEFAULT)
