@@ -349,9 +349,9 @@ New Features
       added to the libhdf5.settings file.
 
       Autotools:
-      
+
         An --enable-file-locking=(yes|no|best-effort) option has been added.
-      
+
         yes:          Use file locking.
         no:           Do not use file locking.
         best-effort:  Use file locking and ignore "disabled" errors.
@@ -765,6 +765,15 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - Explicitly declared dlopen to use RTLD_LOCAL
+
+      dlopen documentation states that f neither RTLD_GLOBAL nor
+      RTLD_LOCAL are specified, then the default behavior is unspecified.
+      The default on linux is usually RTLD_LOCAL while macos will default
+      to RTLD_GLOBAL.
+
+      (ADB - 2020/08/12, HDFFV-11127)
+
     - Fixed issues CVE-2018-13870 and CVE-2018-13869
 
       When a buffer overflow occurred because a name length was corrupted
@@ -774,7 +783,7 @@ Bug Fixes since HDF5-1.10.3 release
       locations to prevent the crashes and h5dump now simply fails with an
       error message when this error condition occurs.
 
-      (BMR - 2020/7/22, HDFFV-11120 and HDFFV-11121)
+      (BMR - 2020/07/22, HDFFV-11120 and HDFFV-11121)
 
     - Fixed the segmentation fault when reading attributes with multiple threads
 
