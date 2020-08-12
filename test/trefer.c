@@ -2720,10 +2720,10 @@ test_reference_compat_conv(void)
     hsize_t count[SPACE2_RANK]; /* Element count of hyperslab */
     hsize_t block[SPACE2_RANK]; /* Block size of hyperslab  */
     hsize_t coord1[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
-    hobj_ref_t *wbuf_obj;       /* Buffer to write to disk  */
-    H5R_ref_t     *rbuf_obj;       /* Buffer read from disk    */
-    hdset_reg_ref_t  *wbuf_reg; /* Buffer to write to disk  */
-    H5R_ref_t           *rbuf_reg; /* Buffer read from disk    */
+    hobj_ref_t      *wbuf_obj = NULL;   /* Buffer to write to disk  */
+    H5R_ref_t       *rbuf_obj = NULL;   /* Buffer read from disk    */
+    hdset_reg_ref_t *wbuf_reg = NULL;   /* Buffer to write to disk  */
+    H5R_ref_t       *rbuf_reg = NULL;   /* Buffer read from disk    */
     H5O_type_t       obj_type;  /* Object type              */
     herr_t  ret;                /* Generic return value     */
     unsigned int     i;         /* Counter                  */
