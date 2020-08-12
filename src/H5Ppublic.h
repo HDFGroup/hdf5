@@ -537,6 +537,42 @@ H5_DLL herr_t H5Pset_page_buffer_size(hid_t plist_id, size_t buf_size, unsigned 
 H5_DLL herr_t H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size, unsigned *min_meta_per, unsigned *min_raw_per);
 
 /* Dataset creation property list (DCPL) routines */
+/*--------------------------------------------------------------------------*/
+/**\ingroup DCPL
+ *
+ * \brief Sets the type of storage used to store the raw data for a dataset
+ *
+ * \dcpl_id{plist_id}
+ * \param[in] layout Type of storage layout for raw data
+ *
+ * \return \herr_t
+ * \details H5Pset_layout() sets the type of storage used to store the raw 
+ *          data for a dataset. This function is only valid for dataset 
+ *          creation property lists.
+ *
+ *          Valid values for \p layout are:
+ *           - #H5D_COMPACT: Store raw data in the dataset object header 
+ *                           in file. This should only be used for datasets 
+ *                           with small amounts of raw data. The raw data 
+ *                           size limit is 64K (65520 bytes). Attempting 
+ *                           to create a dataset with raw data larger than 
+ *                           this limit will cause the H5Dcreate() call to 
+ *                           fail.
+ *           - #H5D_CONTIGUOUS: Store raw data separately from the object 
+ *                              header in one large chunk in the file.
+ *           - #H5D_CHUNKED: Store raw data separately from the object header 
+ *                           as chunks of data in separate locations in 
+ *                           the file.
+ *           - #H5D_VIRTUAL: Draw raw data from multiple datasets in 
+ *                           different files.
+ *
+ *          Note that a compact storage layout may affect writing data to 
+ *          the dataset with parallel applications. See the note in 
+ *          H5Dwrite() documentation for details. 
+ * \version 1.10.0 #H5D_VIRTUAL added in this release.
+ * \since 1.0.0
+ *--------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
 H5_DLL H5D_layout_t H5Pget_layout(hid_t plist_id);
 /*--------------------------------------------------------------------------*/
