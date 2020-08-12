@@ -2067,13 +2067,13 @@ h5_compare_file_bytes(char *f1name, char *f2name)
     int         ret_value = 0; /* for error handling */
 
     /* Open files for reading */
-    f1ptr = HDfopen(f1name, "r");
+    f1ptr = HDfopen(f1name, "rb");
     if (f1ptr == NULL) {
         HDfprintf(stderr, "Unable to fopen() %s\n", f1name);
         ret_value = -1;
         goto done;
     }
-    f2ptr = HDfopen(f2name, "r");
+    f2ptr = HDfopen(f2name, "rb");
     if (f2ptr == NULL) {
         HDfprintf(stderr, "Unable to fopen() %s\n", f2name);
         ret_value = -1;
@@ -2200,7 +2200,7 @@ h5_duplicate_file_by_bytes(const char *orig, const char *dest)
 
     max_buf = 4096 * sizeof(char);
 
-    orig_ptr = HDfopen(orig, "r");
+    orig_ptr = HDfopen(orig, "rb");
     if (NULL == orig_ptr) {
         ret_value = -1;
         goto done;
@@ -2210,7 +2210,7 @@ h5_duplicate_file_by_bytes(const char *orig, const char *dest)
     fsize = (hsize_t)HDftell(orig_ptr);
     HDrewind(orig_ptr);
 
-    dest_ptr = HDfopen(dest, "w");
+    dest_ptr = HDfopen(dest, "wb");
     if (NULL == dest_ptr) {
         ret_value = -1;
         goto done;
@@ -2224,7 +2224,7 @@ h5_duplicate_file_by_bytes(const char *orig, const char *dest)
     }
 
     while (read_size > 0) {
-        if(HDfread(dup_buf, read_size, 1, orig_ptr) != 1) {
+        if (HDfread(dup_buf, read_size, 1, orig_ptr) != 1) {
             ret_value = -1;
             goto done;
         }
