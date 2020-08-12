@@ -60,7 +60,7 @@ tts_attr_vlen(void)
     hid_t atid = H5I_INVALID_HID;           /* Datatype ID for attribute */
     hid_t asid = H5I_INVALID_HID;           /* Dataspace ID for attribute */
     hid_t aid = H5I_INVALID_HID;            /* The attribute ID */
-    char *string_attr = "2.0";              /* The attribute data */
+    const char *string_attr = "2.0";        /* The attribute data */
     int ret;                                /* Return value */
     int i;                                  /* Local index variable */
 
@@ -109,26 +109,24 @@ tts_attr_vlen(void)
     for(i = 0; i < NUM_THREADS; i++) {
         threads[i] = H5TS_create_thread(tts_attr_vlen_thread, NULL, NULL);
     }
-    //pthread_create(&threads[i], NULL, tts_attr_vlen_thread, NULL);
 
     /* Wait for the threads to end */
     for(i = 0; i < NUM_THREADS; i++)
         H5TS_wait_for_thread(threads[i]);
-        //pthread_join(threads[i], NULL);
 
 } /* end tts_attr_vlen() */
 
 /* Start execution for each thread */
 void *
-tts_attr_vlen_thread(void *client_data)
+tts_attr_vlen_thread(void H5_ATTR_UNUSED *client_data)
 {
-    hid_t fid = H5I_INVALID_HID;    /* File ID */
-    hid_t gid = H5I_INVALID_HID;    /* Group ID */
-    hid_t aid = H5I_INVALID_HID;    /* Attribute ID */
-    hid_t atid = H5I_INVALID_HID;   /* Datatype ID for the attribute */
-    char *string_attr_check;        /* The attribute data being read */
-    char *string_attr = "2.0";      /* The expected attribute data */
-    herr_t  ret;                    /* Return value */
+    hid_t fid = H5I_INVALID_HID;        /* File ID */
+    hid_t gid = H5I_INVALID_HID;        /* Group ID */
+    hid_t aid = H5I_INVALID_HID;        /* Attribute ID */
+    hid_t atid = H5I_INVALID_HID;       /* Datatype ID for the attribute */
+    char *string_attr_check;            /* The attribute data being read */
+    const char *string_attr = "2.0";    /* The expected attribute data */
+    herr_t  ret;                        /* Return value */
 
     /* Open the test file */
     fid = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
