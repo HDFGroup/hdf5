@@ -32,6 +32,26 @@
 /**\defgroup H5T H5T
  * \brief Datatype Interface
  * \todo Describe concisely what the functions in this module are about.
+ *
+ * \defgroup ARRAY Array Datatypes
+ * \ingroup H5T
+ * \defgroup ATOM Atomic Datatypes
+ * \ingroup H5T
+ * \defgroup COMPOUND Compound Datatype Properties
+ * \ingroup H5T
+ * \defgroup CONV Conversion Function
+ * \ingroup H5T
+ * \defgroup ENUM Enuermation Datatypes
+ * \ingroup H5T
+ * \defgroup GTO General Datatype Operations
+ * \ingroup H5T
+ * \defgroup OPAQUE Opaque Datatypes
+ * \ingroup H5T
+ * \defgroup STRING String Datatypes
+ * \ingroup H5T
+ * \defgroup VLEN Variable-length Sequence Datatypes
+ * \ingroup H5T
+
  */
 
 #endif /* _H5Tmodule_H */
