@@ -347,65 +347,17 @@ done:
 } /* end H5Lmove() */
 
 
-/**\ingroup H5L
+/*-------------------------------------------------------------------------
+ * Function:    H5Lcopy
  *
- * \brief Creates an identical copy of a link with the same creation time and
- *        target.  The new link can have a different name and be in a different
- *        location than the original.
+ * Purpose:     Creates an identical copy of a link with the same creation
+ *              time and target.  The new link can have a different name
+ *              and be in a different location than the original.
  *
- * \fgdt_loc_id{src_loc_id}
- * \param[in] src_name   Name of the link to be copied
- * \fgdt_loc_id{dst_loc_id}
- * \param[in] dst_name   Name to be assigned to the new copy
- * \lcpl_id
- * \lapl_id
- * \return \herr_t
+ * Return:      Non-negative on success/Negative on failure
  *
- * \details H5Lcopy() copies the link specified by \p src_name from the location
- *          specified by \p src_loc_id to the location specified by
- *          \p dst_loc_id. The new copy of the link is created with the name
- *          \p dst_name.
- *
- *          If \p dst_loc_id is a file identifier, \p dst_name will be
- *          interpreted relative to that file’s root group.
- *
- *          The new link is created with the creation and access property lists
- *          specified by \p lcpl_id and \p lapl_id. The interpretation of
- *          \p lcpl_id is limited in the manner described in the next paragraph.
- *
- *          H5Lcopy() retains the creation time and the target of the original
- *          link. However, since the link may be renamed, the character
- *          encoding is that specified in \p lcpl_id rather than that of the
- *          original link. Other link creation properties are ignored.
- *
- *          If the link is a soft link, also known as a symbolic link, its
- *          target is interpreted relative to the location of the copy.
- *
- *          Several properties are available to govern the behavior of
- *          H5Lcopy(). These properties are set in the link creation and access
- *          property lists, \p lcpl_id and \p lapl_id, respectively. The
- *          property controlling creation of missing intermediate groups is set
- *          in the link creation property list with
- *          H5Pset_create_intermediate_group(); this function ignores any
- *          other properties in the link creation property list. Properties
- *          controlling character encoding, link traversals, and external link
- *          prefixes are set in the link access property list with
- *          H5Pset_char_encoding(), H5Pset_nlinks(), and
- *          H5Pset_elink_prefix().
- *
- * \note H5Lcopy() does not affect the object that the link points to.
- *
- * \attention H5Lcopy() cannot copy hard links across files as a hard link is
- *            not valid without a target object; to copy objects from one file
- *            to another, see H5Ocopy().
- *
- * \author Lames Laird
- *
- * \date Wednesday, March 29, 2006
- *
- * \since 1.8.0 Function was introduced in this release.
- *
- * \see H5Ocopy()
+ * Programmer:	James Laird
+ *              Wednesday, March 29, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1323,69 +1275,21 @@ done:
 } /* end H5Lget_name_by_idx() */
 
 
-/**\ingroup H5L
+/*-------------------------------------------------------------------------
+ * Function:    H5Literate2
  *
- * \brief Iterates over links in a group, with user callback routine,
- *        according to the order within an index.
+ * Purpose:     Iterates over links in a group, with user callback routine,
+ *              according to the order within an index.
  *
- * \group_id
- * \idx_type
- * \order
- * \param[in,out] idx_p    Pointer to an iteration index to allow
- *                         continuing a previous iteration
- * \op
- * \op_data
- * \return \success{The return value of the first operator that returns
- *                  non-zero, or zero if all members were processed with no
- *                  operator returning non-zero.}
- * \return \failure{Negative if an error occurs in the library, or the negative
- *                  value returned by one of the operators.}
+ *              Same pattern of behavior as H5Giterate.
  *
- * \details H5Literate2() iterates through the links in a file or
- *          group, \p group_id, in the order of the specified
- *          index, \p idx_type, using a user-defined callback routine
- *          \p op. H5Literate2() does not recursively follow links into
- *          subgroups of the specified group.
+ * Return:      Success:    The return value of the first operator that
+ *                          returns non-zero, or zero if all members were
+ *                          processed with no operator returning non-zero.
  *
- *          Three parameters are used to manage progress of the iteration:
- *          \p idx_type, \p order, and \p idx_p.
- *
- *          \p idx_type specifies the index to be used. If the links have
- *          not been indexed by the index type, they will first be sorted by
- *          that index then the iteration will begin; if the links have been
- *          so indexed, the sorting step will be unnecessary, so the iteration
- *          may begin more quickly.
- *
- *          \p order specifies the order in which objects are to be inspected
- *          along the index \p idx_type.
- *
- *          \p idx_p tracks the iteration and allows an iteration to be
- *          resumed if it was stopped before all members were processed. It is
- *          passed in by the application with a starting point and returned by
- *          the library with the point at which the iteration stopped.
- *
- *          \p op_data is a user-defined pointer to the data required to
- *          process links in the course of the iteration. This pointer is
- *          passed back to each step of the iteration in the \p op callback
- *          function's \p op_data parameter. \p op is invoked for each link
- *          encounter.
- *
- *          \p op_data is passed to and from each iteration and can be used to
- *          supply or aggregate information across iterations.
- *
- * \remark Same pattern of behavior as H5Giterate().
- *
- * \note This function is also available through the H5Literate() macro.
- *
- * \warning The behavior of H5Literate2() is undefined if the link
- *          membership of \p group_id changes during the iteration.
- *          This does not limit the ability to change link destinations
- *          while iterating, but caution is advised.
- *
- *
- * \since 1.12.0 Function was introduced in this release.
- *
- * \see H5Literate_by_name2(), H5Lvisit2(), H5Lvisit_by_name2()
+ *              Failure:    Negative if something goes wrong within the
+ *                          library, or the negative value returned by one
+ *                          of the operators.
  *
  *-------------------------------------------------------------------------
  */

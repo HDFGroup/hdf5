@@ -37,7 +37,7 @@
  * \ingroup H5T
  * \defgroup ATOM Atomic Datatypes
  * \ingroup H5T
- * \defgroup COMPOUND Compound Datatype Properties
+ * \defgroup COMPOUND Compound Datatypes
  * \ingroup H5T
  * \defgroup CONV Conversion Function
  * \ingroup H5T
