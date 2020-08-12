@@ -103,7 +103,7 @@ typedef const void *(__cdecl *H5PL_get_plugin_info_t)(void);
 #define H5PL_HANDLE void *
 
 /* Get a handle to a plugin library.  Windows: TEXT macro handles Unicode strings */
-#define H5PL_OPEN_DLIB(S) dlopen(S, RTLD_LAZY)
+#define H5PL_OPEN_DLIB(S) dlopen(S, RTLD_LAZY | RTLD_LOCAL))
 
 /* Get the address of a symbol in dynamic library */
 #define H5PL_GET_LIB_FUNC(H,N) dlsym(H,N)
@@ -173,7 +173,7 @@ static hbool_t          H5PL_path_found_g = FALSE;
 /* Enable all plugin libraries */
 static unsigned int     H5PL_plugin_g = H5PL_ALL_PLUGIN;
 
-
+
 /*--------------------------------------------------------------------------
 NAME
    H5PL__init_interface -- Initialize interface-specific information
@@ -204,7 +204,7 @@ H5PL__init_interface(void)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5PL__init_interface() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5PLset_loading_state
  *
@@ -246,7 +246,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5PLset_loading_state() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5PLget_loading_state
  *
@@ -274,7 +274,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5PLget_loading_state() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5PL_term_interface
  *
@@ -324,7 +324,7 @@ H5PL_term_interface(void)
     FUNC_LEAVE_NOAPI(i)
 } /* end H5PL_term_interface() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5PL_load
  *
@@ -395,7 +395,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL_load() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5PLappend
  *
@@ -704,7 +704,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__init_path_table() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5PL__find
  *
@@ -838,7 +838,7 @@ done:
 } /* end H5PL__find() */
 #endif /* H5_HAVE_WIN32_API */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5PL__open
  *
@@ -926,7 +926,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__open() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5PL__search_table
  *
@@ -974,7 +974,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__search_table() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5PL__close
  *
