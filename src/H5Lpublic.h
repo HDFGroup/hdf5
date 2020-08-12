@@ -149,6 +149,68 @@ typedef herr_t (*H5L_elink_traverse_t)(const char *parent_file_name,
 /*********************/
 H5_DLL herr_t H5Lmove(hid_t src_loc, const char *src_name, hid_t dst_loc,
     const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
+/**\ingroup H5L
+ *
+ * \brief Creates an identical copy of a link with the same creation time and
+ *        target.  The new link can have a different name and be in a different
+ *        location than the original.
+ *
+ * \fgdt_loc_id{src_loc_id}
+ * \param[in] src_name   Name of the link to be copied
+ * \fgdt_loc_id{dst_loc_id}
+ * \param[in] dst_name   Name to be assigned to the new copy
+ * \lcpl_id
+ * \lapl_id
+ * \return \herr_t
+ *
+ * \details H5Lcopy() copies the link specified by \p src_name from the location
+ *          specified by \p src_loc_id to the location specified by
+ *          \p dst_loc_id. The new copy of the link is created with the name
+ *          \p dst_name.
+ *
+ *          If \p dst_loc_id is a file identifier, \p dst_name will be
+ *          interpreted relative to that file’s root group.
+ *
+ *          The new link is created with the creation and access property lists
+ *          specified by \p lcpl_id and \p lapl_id. The interpretation of
+ *          \p lcpl_id is limited in the manner described in the next paragraph.
+ *
+ *          H5Lcopy() retains the creation time and the target of the original
+ *          link. However, since the link may be renamed, the character
+ *          encoding is that specified in \p lcpl_id rather than that of the
+ *          original link. Other link creation properties are ignored.
+ *
+ *          If the link is a soft link, also known as a symbolic link, its
+ *          target is interpreted relative to the location of the copy.
+ *
+ *          Several properties are available to govern the behavior of
+ *          H5Lcopy(). These properties are set in the link creation and access
+ *          property lists, \p lcpl_id and \p lapl_id, respectively. The
+ *          property controlling creation of missing intermediate groups is set
+ *          in the link creation property list with
+ *          H5Pset_create_intermediate_group(); this function ignores any
+ *          other properties in the link creation property list. Properties
+ *          controlling character encoding, link traversals, and external link
+ *          prefixes are set in the link access property list with
+ *          H5Pset_char_encoding(), H5Pset_nlinks(), and
+ *          H5Pset_elink_prefix().
+ *
+ * \note H5Lcopy() does not affect the object that the link points to.
+ *
+ * \attention H5Lcopy() cannot copy hard links across files as a hard link is
+ *            not valid without a target object; to copy objects from one file
+ *            to another, see H5Ocopy().
+ *
+ * \author Lames Laird
+ *
+ * \date Wednesday, March 29, 2006
+ *
+ * \since 1.8.0
+ *
+ * \see H5Ocopy()
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Lcopy(hid_t src_loc, const char *src_name, hid_t dst_loc,
     const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
 H5_DLL herr_t H5Lcreate_hard(hid_t cur_loc, const char *cur_name,
@@ -172,6 +234,72 @@ H5_DLL herr_t H5Lget_info_by_idx2(hid_t loc_id, const char *group_name,
 H5_DLL ssize_t H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     char *name /*out*/, size_t size, hid_t lapl_id);
+/**\ingroup H5L
+ *
+ * \brief Iterates over links in a group, with user callback routine,
+ *        according to the order within an index.
+ *
+ * \group_id
+ * \idx_type
+ * \order
+ * \param[in,out] idx_p    Pointer to an iteration index to allow
+ *                         continuing a previous iteration
+ * \op
+ * \op_data
+ * \return \success{The return value of the first operator that returns
+ *                  non-zero, or zero if all members were processed with no
+ *                  operator returning non-zero.}
+ * \return \failure{Negative if an error occurs in the library, or the negative
+ *                  value returned by one of the operators.}
+ *
+ * \details H5Literate2() iterates through the links in a file or
+ *          group, \p group_id, in the order of the specified
+ *          index, \p idx_type, using a user-defined callback routine
+ *          \p op. H5Literate2() does not recursively follow links into
+ *          subgroups of the specified group.
+ *
+ *          Three parameters are used to manage progress of the iteration:
+ *          \p idx_type, \p order, and \p idx_p.
+ *
+ *          \p idx_type specifies the index to be used. If the links have
+ *          not been indexed by the index type, they will first be sorted by
+ *          that index then the iteration will begin; if the links have been
+ *          so indexed, the sorting step will be unnecessary, so the iteration
+ *          may begin more quickly.
+ *
+ *          \p order specifies the order in which objects are to be inspected
+ *          along the index \p idx_type.
+ *
+ *          \p idx_p tracks the iteration and allows an iteration to be
+ *          resumed if it was stopped before all members were processed. It is
+ *          passed in by the application with a starting point and returned by
+ *          the library with the point at which the iteration stopped.
+ *
+ *          \p op_data is a user-defined pointer to the data required to
+ *          process links in the course of the iteration. This pointer is
+ *          passed back to each step of the iteration in the \p op callback
+ *          function's \p op_data parameter. \p op is invoked for each link
+ *          encounter.
+ *
+ *          \p op_data is passed to and from each iteration and can be used to
+ *          supply or aggregate information across iterations.
+ *
+ * \remark Same pattern of behavior as H5Giterate().
+ *
+ * \note This function is also available through the H5Literate() macro.
+ *
+ * \warning The behavior of H5Literate2() is undefined if the link
+ *          membership of \p group_id changes during the iteration.
+ *          This does not limit the ability to change link destinations
+ *          while iterating, but caution is advised.
+ *
+ *
+ * \since 1.12.0 Function was introduced in this release.
+ *
+ * \see H5Literate_by_name2(), H5Lvisit2(), H5Lvisit_by_name2()
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Literate2(hid_t grp_id, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t *idx, H5L_iterate2_t op, void *op_data);
 H5_DLL herr_t H5Literate_by_name2(hid_t loc_id, const char *group_name,
@@ -194,6 +322,138 @@ H5_DLL htri_t H5Lis_registered(H5L_type_t id);
 /* External link functions */
 H5_DLL herr_t H5Lunpack_elink_val(const void *ext_linkval/*in*/, size_t link_size,
    unsigned *flags, const char **filename/*out*/, const char **obj_path /*out*/);
+/**\ingroup H5L
+ *
+ * \brief Creates an external link, a soft link to an object in a different file.
+ *
+ * \param[in] file_name   Name of the target file containing the target object.
+ * \param[in] obj_name    Path within the target file to the target object
+ * \fgdt_loc_id{link_loc_id}
+ * \param[in] link_name   Name of the new link, relative to \p link_loc_id
+ * \lcpl_id
+ * \lapl_id
+ * \return \herr_t
+ *
+ * \details H5Lcreate_external() creates a new external link. An external link
+ *          is a soft link to an object in a different HDF5 file from the
+ *          location of the link, i.e., to an external object.
+ *
+ *          \p file_name identifies the target file containing the target
+ *          object; \p obj_name specifies the path of the target object within
+ *          that file. \p obj_name must be an absolute pathname in
+ *          \p file_name, i.e., it must start at the target file’s root group,
+ *          but it is not interpreted until an application attempts to traverse
+ *          it.
+ *
+ *          \p link_loc_id and \p link_name specify the location and name,
+ *          respectively, of the new link. \p link_name is interpreted relative
+ *          to \p link_loc_id.
+ *
+ *          \p lcpl_id is the link creation property list used in creating the
+ *          new link.
+ *
+ *          \p lapl_id is the link access property list used in traversing the
+ *          new link. Note that an external file opened by the traversal of an
+ *          external link is always opened with the weak file close degree
+ *          property setting, #H5F_CLOSE_WEAK (see H5Pset_fclose_degree());
+ *          any file close degree property setting in \p lapl_id is ignored.
+ *
+ *          An external link behaves similarly to a soft link, and like a soft
+ *          link in an HDF5 file, it may dangle: the target file and object
+ *          need not exist at the time that the external link is created.
+ *
+ *          When the external link \p link_name is accessed, the library will
+ *          search for the target file \p file_name as described below:
+ *
+ *          - If \p file_name is a relative pathname, the following steps are
+ *            performed:
+ *            - The library will get the prefix(es) set in the environment
+ *              variable \c HDF5_EXT_PREFIX and will try to prepend each prefix
+ *              to \p file_name to form a new \p file_name.
+ *            - If the new \p file_name does not exist or if \c HDF5_EXT_PREFIX
+ *              is not set, the library will get the prefix set via
+ *              H5Pset_elink_prefix() and prepend it to \p file_name to form a
+ *              new \p file_name.
+ *            - If the new \p file_name does not exist or no prefix is being
+ *              set by H5Pset_elink_prefix(), then the path of the file
+ *              associated with \p link_loc_id is obtained. This path can be
+ *              the absolute path or the current working directory plus the
+ *              relative path of that file when it is created/opened. The
+ *              library will prepend this path to \p file_name to form a new
+ *              \p file_name.
+ *            - If the new \p file_name does not exist, then the library will
+ *              look for \p file_name and will return failure/success
+ *              accordingly.
+ *          - If \p file_name is an absolute pathname, the library will first
+ *            try to find \p file_name. If \p file_name does not exist,
+ *            \p file_name is stripped of directory paths to form a new
+ *            \p file_name. The search for the new \p file_name then follows
+ *            the same steps as described above for a relative pathname. See
+ *            examples below illustrating how target_file_name is stripped to
+ *            form a new \p file_name.
+ *
+ *          Note that \p file_name is considered to be an absolute pathname
+ *          when the following condition is true:
+ *
+ *          - For Unix, the first character of \p file_name is a slash (\c /).
+ *            For example, consider a \p file_name of \c /tmp/A.h5.
+ *            If that target file does not exist, the new \p file_name after
+ *            stripping will be \c A.h5.
+ *          - For Windows, there are 6 cases:
+ *            -# \p file_name is an absolute drive with absolute pathname.
+ *               For example, consider a \p file_name of \c /tmp/A.h5. If that
+ *               target file does not exist, the new \p file_name after
+ *               stripping will be \c A.h5.
+ *            -# \p file_name is an absolute pathname without specifying drive
+ *               name. For example, consider a \p file_name of \c /tmp/A.h5.
+ *               If that target file does not exist, the new \p file_name after
+ *               stripping will be \c A.h5.
+ *            -# \p file_name is an absolute drive with relative pathname.
+ *               For example, consider a \p file_name of \c /tmp/A.h5. If that
+ *               target file does not exist, the new \p file_name after
+ *               stripping will be \c tmp\A.h5.
+ *            -# \p file_name is in UNC (Uniform Naming Convention) format with
+ *               server name, share name, and pathname. For example, consider
+ *               a \p file_name of \c /tmp/A.h5. If that target file does not
+ *               exist, the new \p file_name after stripping will be \c A.h5.
+ *            -# \p file_name is in Long UNC (Uniform Naming Convention) format
+ *               with server name, share name, and pathname. For example,
+ *               consider a \p file_name of \c /tmp/A.h5. If that target file
+ *               does not exist, the new \p file_name after stripping will be
+ *               \c A.h5.
+ *            -# \p file_name is in Long UNC (Uniform Naming Convention) format
+ *               with an absolute drive and an absolute pathname. For example,
+ *               consider a \p file_name of \c /tmp/A.h5. If that target file
+ *               does not exist, the new \p file_name after stripping will be
+ *               \c A.h5.
+ *
+ *          The library opens target file \p file_name with the file access
+ *          property list that is set via H5Pset_elink_fapl() when the external
+ *          link link_name is accessed. If no such property list is set, the
+ *          library uses the file access property list associated with the file
+ *          of \p link_loc_id to open the target file.
+ *
+ *          If an application requires additional control over file access
+ *          flags or the file access property list, see H5Pset_elink_cb(); this
+ *          function enables the use of an external link callback function as
+ *          described in H5L_elink_traverse_t().
+ *
+ * \attention A file close degree property setting (H5Pset_fclose_degree()) in
+ *            the external link file access property list or in the external
+ *            link callback function will be ignored. A file opened by means of
+ *            traversing an external link is always opened with the weak file
+ *            close degree property setting, #H5F_CLOSE_WEAK .
+ *
+ * \author Quincey Koziol
+ *
+ * \date Wednesday, May 18, 2005
+ *
+ * \since 1.8.0 Function was introduced in this release.
+ *
+ * \see H5Lcreate_hard(), H5Lcreate_soft(), H5Lcreate_ud()
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Lcreate_external(const char *file_name, const char *obj_name,
     hid_t link_loc_id, const char *link_name, hid_t lcpl_id, hid_t lapl_id);
 
@@ -251,6 +511,75 @@ H5_DLL herr_t H5Lget_info1(hid_t loc_id, const char *name,
 H5_DLL herr_t H5Lget_info_by_idx1(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     H5L_info1_t *linfo /*out*/, hid_t lapl_id);
+/**\ingroup H5L
+ *
+ * \brief Iterates over links in a group, with user callback routine,
+ *        according to the order within an index.
+ *
+ * \group_id
+ * \idx_type
+ * \order
+ * \param[in,out] idx_p    Pointer to an iteration index to allow
+ *                         continuing a previous iteration
+ * \op
+ * \op_data
+ * \return \success{The return value of the first operator that returns
+ *                  non-zero, or zero if all members were processed with no
+ *                  operator returning non-zero.}
+ * \return \failure{Negative if an error occurs in the library, or the negative
+ *                  value returned by one of the operators.}
+ *
+ * \deprecated Deprecated in favor of H5Literate2().
+ *
+ * \details H5Literate1() iterates through the links in a file or
+ *          group, \p group_id, in the order of the specified
+ *          index, \p idx_type, using a user-defined callback routine
+ *          \p op. H5Literate1() does not recursively follow links into
+ *          subgroups of the specified group.
+ *
+ *          Three parameters are used to manage progress of the iteration:
+ *          \p idx_type, \p order, and \p idx_p.
+ *
+ *          \p idx_type specifies the index to be used. If the links have
+ *          not been indexed by the index type, they will first be sorted by
+ *          that index then the iteration will begin; if the links have been
+ *          so indexed, the sorting step will be unnecessary, so the iteration
+ *          may begin more quickly.
+ *
+ *          \p order specifies the order in which objects are to be inspected
+ *          along the index \p idx_type.
+ *
+ *          \p idx_p tracks the iteration and allows an iteration to be
+ *          resumed if it was stopped before all members were processed. It is
+ *          passed in by the application with a starting point and returned by
+ *          the library with the point at which the iteration stopped.
+ *
+ *          \p op_data is a user-defined pointer to the data required to
+ *          process links in the course of the iteration. This pointer is
+ *          passed back to each step of the iteration in the \p op callback
+ *          function's \p op_data parameter. \p op is invoked for each link
+ *          encounter.
+ *
+ *          \p op_data is passed to and from each iteration and can be used to
+ *          supply or aggregate information across iterations.
+ *
+ * \remark Same pattern of behavior as H5Giterate().
+ *
+ * \note This function is also available through the H5Literate() macro.
+ *
+ * \warning The behavior of H5Literate1() is undefined if the link
+ *          membership of \p group_id changes during the iteration.
+ *          This does not limit the ability to change link destinations
+ *          while iterating, but caution is advised.
+ *
+ *
+ * \version 1.12.0 Function was deprecated in this release.
+ * \since 1.8.0 Function was introduced in this release.
+ *
+ * \see H5Literate_by_name2(), H5Lvisit2(), H5Lvisit_by_name2()
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Literate1(hid_t grp_id, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t *idx, H5L_iterate1_t op, void *op_data);
 H5_DLL herr_t H5Literate_by_name1(hid_t loc_id, const char *group_name,
@@ -268,4 +597,3 @@ H5_DLL herr_t H5Lvisit_by_name1(hid_t loc_id, const char *group_name,
 }
 #endif
 #endif /* _H5Lpublic_H */
-
