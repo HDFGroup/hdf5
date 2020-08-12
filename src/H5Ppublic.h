@@ -243,129 +243,126 @@ H5_DLL char *H5Pget_class_name(hid_t pclass_id);
 /*--------------------------------------------------------------------------*/
 /**\ingroup H5P
  *
- * \brief Creates a new property list as an instance of a property list 
- *        class
+ * \brief Creates a new property list as an instance of a property list class
  *
- * \param[in] cls_id The class of the property list to create. 
+ * \param[in] cls_id The class of the property list to create.
  *
- * \return \hid_t{property list}                   
+ * \return \hid_t{property list}
  *
- * \details H5Pcreate() creates a new property list as an instance of 
- *          some property list class. The new property list is initialized 
- *          with default values for the specified class. The classes are as 
+ * \details H5Pcreate() creates a new property list as an instance of
+ *          some property list class. The new property list is initialized
+ *          with default values for the specified class. The classes are as
  *          follows:
- *     <table>
- *      <tr>
- *        <th>Class Identifier</th>
- *       <th>Class Name</th>
- *       <th>Comments</th>
- *     </tr>
- *     <tr>
- *         <td>#H5P_ATTRIBUTE_CREATE</td>
- *         <td>attribute create</td>
- *         <td>Properties for attribute creation</td>
- *     </tr>
- *     <tr>
-          <td>#H5P_DATASET_ACCESS</td>
-          <td>dataset access</td>
-          <td>Properties for dataset access</td>
-      </tr>
-      <tr>
-          <td>#H5P_DATASET_CREATE</td>
-          <td>dataset create</td>
-          <td>Properties for dataset creation</td>
-      </tr>
-      <tr>
-          <td>#H5P_DATASET_XFER</td>
-          <td>data transfer</td>
-          <td>Properties for raw data transfer</td>
-      </tr>
-      <tr>
-          <td>#H5P_DATATYPE_ACCESS</td>
-          <td>datatype access</td>
-          <td>Properties for datatype access</td>
-      </tr>
-      <tr>
-          <td>#H5P_DATATYPE_CREATE</td>
-          <td>datatype create</td>
-          <td>Properties for datatype creation</td>
-      </tr>
-      <tr>
-          <td>#H5P_FILE_ACCESS</td>
-          <td>file access</td>
-          <td>Properties for file access</td>
-      </tr>
-      <tr>
-          <td>#H5P_FILE_CREATE</td>
-          <td>file create</td>
-          <td>Properties for file creation</td>
-      </tr>
-     <tr>
-          <td>#H5P_FILE_MOUNT</td>
-          <td>file mount</td>
-          <td>Properties for file mounting</td>
-      </tr>
-      <tr valign="top">
-          <td>#H5P_GROUP_ACCESS</td>
-          <td>group access</td>
-          <td>Properties for group access</td>
-      </tr>
-      <tr>
-          <td>#H5P_GROUP_CREATE</td>
-          <td>group create</td>
-          <td>Properties for group creation</td>
-      </tr>
-      <tr>
-          <td>#H5P_LINK_ACCESS</td>
-          <td>link access</td>
-          <td>Properties governing link traversal when accessing objects</td>
-      </tr>
-      <tr>
-          <td>#H5P_LINK_CREATE</td>
-          <td>link create</td>
-          <td>Properties governing link creation</td>
-      </tr>
-      <tr>
-          <td>#H5P_OBJECT_COPY</td>
-          <td>object copy</td>
-          <td>Properties governing the object copying process</td>
-      </tr>
-      <tr>
-          <td>#H5P_OBJECT_CREATE</td>
-          <td>object create</td>
-          <td>Properties for object creation</td>
-      </tr>
-      <tr>
-          <td>#H5P_STRING_CREATE</td>
-          <td>string create</td>
-          <td>Properties for character encoding when encoding strings or
-          object names</td>
-      </tr>
-      <tr>
-          <td>#H5P_VOL_INITIALIZE</td>
-          <td>vol initialize</td>
-          <td>Properties for VOL initialization</td> 
-      </tr>
-        </table>
  *
- *     This property list must eventually be closed with H5Pclose(); 
- *     otherwise, errors are likely to occur.
+ * <table>
+ *   <tr>
+ *     <th>Class Identifier</th>
+ *     <th>Class Name</th>
+ *     <th>Comments</th>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_ATTRIBUTE_CREATE</td>
+ *     <td>attribute create</td>
+ *     <td>Properties for attribute creation</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_DATASET_ACCESS</td>
+ *     <td>dataset access</td>
+ *     <td>Properties for dataset access</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_DATASET_CREATE</td>
+ *     <td>dataset create</td>
+ *     <td>Properties for dataset creation</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_DATASET_XFER</td>
+ *     <td>data transfer</td>
+ *     <td>Properties for raw data transfer</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_DATATYPE_ACCESS</td>
+ *     <td>datatype access</td>
+ *     <td>Properties for datatype access</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_DATATYPE_CREATE</td>
+ *     <td>datatype create</td>
+ *     <td>Properties for datatype creation</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_FILE_ACCESS</td>
+ *     <td>file access</td>
+ *     <td>Properties for file access</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_FILE_CREATE</td>
+ *     <td>file create</td>
+ *     <td>Properties for file creation</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_FILE_MOUNT</td>
+ *     <td>file mount</td>
+ *     <td>Properties for file mounting</td>
+ *   </tr>
+ *   <tr valign="top">
+ *     <td>#H5P_GROUP_ACCESS</td>
+ *     <td>group access</td>
+ *     <td>Properties for group access</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_GROUP_CREATE</td>
+ *     <td>group create</td>
+ *     <td>Properties for group creation</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_LINK_ACCESS</td>
+ *     <td>link access</td>
+ *     <td>Properties governing link traversal when accessing objects</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_LINK_CREATE</td>
+ *     <td>link create</td>
+ *     <td>Properties governing link creation</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_OBJECT_COPY</td>
+ *     <td>object copy</td>
+ *     <td>Properties governing the object copying process</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_OBJECT_CREATE</td>
+ *     <td>object create</td>
+ *     <td>Properties for object creation</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_STRING_CREATE</td>
+ *     <td>string create</td>
+ *     <td>Properties for character encoding when encoding strings or
+ *       object names</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5P_VOL_INITIALIZE</td>
+ *     <td>vol initialize</td>
+ *     <td>Properties for VOL initialization</td>
+ *   </tr>
+ * </table>
+ *
+ * This property list must eventually be closed with H5Pclose();
+ * otherwise, errors are likely to occur.
  *
  * \version 1.12.0 The #H5P_VOL_INITIALIZE property list class was added
- * \version 1.8.15 For each class, the class name returned by 
+ * \version 1.8.15 For each class, the class name returned by
  *                 H5Pget_class_name() was added.
  *                 The list of possible Fortran values was updated.
- * \version 1.8.0 The following property list classes were added at this 
- *                release:
-          #H5P_DATASET_ACCESS, 
-          #H5P_GROUP_CREATE, 
-          #H5P_GROUP_ACCESS, 
-          #H5P_DATATYPE_CREATE, 
-          #H5P_DATATYPE_ACCESS, 
-          #H5P_ATTRIBUTE_CREATE                   
-  
- * \version 1.4.0 Fortran subroutine was introduced.
+ * \version 1.8.0 The following property list classes were added at this
+ *                release: #H5P_DATASET_ACCESS, #H5P_GROUP_CREATE,
+ *                #H5P_GROUP_ACCESS, #H5P_DATATYPE_CREATE,
+ *                #H5P_DATATYPE_ACCESS, #H5P_ATTRIBUTE_CREATE
+ * \version 1.4.0 \f_fun_intro
+ *
  * \since 1.0.0
+ *
  * --------------------------------------------------------------------------
  */
 H5_DLL hid_t H5Pcreate(hid_t cls_id);
@@ -400,8 +397,7 @@ H5_DLL herr_t H5Pclose_class(hid_t plist_id);
  *
  * \brief Terminates access to a property list
  *
- * \param[in] plist_id Identifier of the property list to terminate
- *                     access to
+ * \plist_id
  *
  * \return \herr_t
  *
@@ -410,7 +406,7 @@ H5_DLL herr_t H5Pclose_class(hid_t plist_id);
  *          accessing them. This frees resources used by the property
  *          list.
  *
- * \version 1.4.0 Fortran subroutine introduced.
+ * \version 1.4.0 \f_fun_intro
  * \since 1.0.0
  * -------------------------------------------------------------------------
  */
@@ -546,38 +542,38 @@ H5_DLL H5D_layout_t H5Pget_layout(hid_t plist_id);
 /*--------------------------------------------------------------------------*/
 /**\ingroup H5P
  *
- * \brief Sets the size of the chunks used to store a chunked layout 
+ * \brief Sets the size of the chunks used to store a chunked layout
  *        dataset
  *
  * \dcpl_id{plist}
  * \param[in] ndims  The number of dimensions of each chunk
- * \param[in] dim    An array defining the size, in dataset elements, of 
- *                   each chunk 
+ * \param[in] dim    An array defining the size, in dataset elements, of
+ *                   each chunk
  *
  * \return \herr_t
- * \details H5Pset_chunk() sets the size of the chunks used to store a 
- *          chunked layout dataset. This function is only valid for dataset 
+ * \details H5Pset_chunk() sets the size of the chunks used to store a
+ *          chunked layout dataset. This function is only valid for dataset
  *          creation property lists.
  *
- *          The \p ndims parameter currently must be the same size as the 
+ *          The \p ndims parameter currently must be the same size as the
  *          rank of the dataset.
  *
- *          The values of the \p dim array define the size of the chunks 
- *          to store the dataset's raw data. The unit of measure for \p dim 
+ *          The values of the \p dim array define the size of the chunks
+ *          to store the dataset's raw data. The unit of measure for \p dim
  *          values is dataset elements.
  *
- *          As a side-effect of this function, the layout of the dataset is 
- *          changed to #H5D_CHUNKED, if it is not already so set. 
+ *          As a side-effect of this function, the layout of the dataset is
+ *          changed to #H5D_CHUNKED, if it is not already so set.
  *
- * \note Chunk size cannot exceed the size of a fixed-size dataset. For 
- *       example, a dataset consisting of a 5x4 fixed-size array cannot be 
+ * \note Chunk size cannot exceed the size of a fixed-size dataset. For
+ *       example, a dataset consisting of a 5x4 fixed-size array cannot be
  *       defined with 10x10 chunks. Chunk maximums:
- *       - The maximum number of elements in a chunk is 232-1 which is 
- *         equal to 4,294,967,295. If the number of elements in a chunk is 
- *         set via H5Pset_chunk() to a value greater than 232-1, then 
- *         H5Pset_chunk() will fail.
- *       - The maximum size for any chunk is 4GB. If a chunk that is larger 
- *         than 4GB attempts to be written with H5Dwrite(), then H5Dwrite() 
+ *       - The maximum number of elements in a chunk is 2<sup>32</sup>-1 which
+ *         is equal to 4,294,967,295. If the number of elements in a chunk is
+ *         set via H5Pset_chunk() to a value greater than 2<sup>32</sup>-1,
+ *         then H5Pset_chunk() will fail.
+ *       - The maximum size for any chunk is 4GB. If a chunk that is larger
+ *         than 4GB attempts to be written with H5Dwrite(), then H5Dwrite()
  *         will fail.
  *
  * \see H5Pset_layout(), H5Dwrite()
@@ -589,19 +585,19 @@ H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*
 /*--------------------------------------------------------------------------*/
 /**\ingroup H5P
  *
- * \brief Retrieves the size of chunks for the raw data of a chunked 
+ * \brief Retrieves the size of chunks for the raw data of a chunked
  *        layout dataset
  *
  * \dcpl_id{plist}
  * \param[in]  max_ndims Size of the \p dims array
  * \param[out] dims Array to store the chunk dimensions
  *
- * \return Returns chunk dimensionality if successful; 
- *         otherwise returns a negative value. 
+ * \return Returns chunk dimensionality if successful;
+ *         otherwise returns a negative value.
  *
- * \details H5Pget_chunk() retrieves the size of chunks for the raw data 
- *          of a chunked layout dataset. This function is only valid for 
- *          dataset creation property lists. At most, \p max_ndims elements 
+ * \details H5Pget_chunk() retrieves the size of chunks for the raw data
+ *          of a chunked layout dataset. This function is only valid for
+ *          dataset creation property lists. At most, \p max_ndims elements
  *          of \p dims will be initialized.
  *
  * \since 1.0.0
@@ -788,4 +784,3 @@ H5_DLL herr_t H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy,
 }
 #endif
 #endif /* _H5Ppublic_H */
-
