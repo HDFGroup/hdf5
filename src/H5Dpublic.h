@@ -32,36 +32,36 @@
 #define H5D_CHUNK_CACHE_NBYTES_DEFAULT      ((size_t) -1)
 #define H5D_CHUNK_CACHE_W0_DEFAULT          (-1.0f)
 
-/* Bit flags for the H5Pset_chunk_opts() and H5Pget_chunk_opts() */
+/** Bit flags for the H5Pset_chunk_opts() and H5Pget_chunk_opts() */
 #define H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS      (0x0002u)
 
 /*******************/
 /* Public Typedefs */
 /*******************/
 
-/* Values for the H5D_LAYOUT property */
+/** Values for the H5D_LAYOUT property */
 typedef enum H5D_layout_t {
     H5D_LAYOUT_ERROR	= -1,
 
-    H5D_COMPACT		= 0,	/*raw data is very small		     */
-    H5D_CONTIGUOUS	= 1,	/*the default				     */
-    H5D_CHUNKED		= 2,	/*slow and fancy			     */
-    H5D_VIRTUAL         = 3,    /*actual data is stored in other datasets     */
+    H5D_COMPACT		= 0,	/**< raw data is very small		     */
+    H5D_CONTIGUOUS	= 1,	/**< the default				     */
+    H5D_CHUNKED		= 2,	/**< slow and fancy			     */
+    H5D_VIRTUAL         = 3,    /**< actual data is stored in other datasets     */
     H5D_NLAYOUTS	= 4	/*this one must be last!		     */
 } H5D_layout_t;
 
-/* Types of chunk index data structures */
+/** Types of chunk index data structures */
 typedef enum H5D_chunk_index_t {
-    H5D_CHUNK_IDX_BTREE	= 0,    /* v1 B-tree index (default)                */
-    H5D_CHUNK_IDX_SINGLE = 1,   /* Single Chunk index (cur dims[]=max dims[]=chunk dims[]; filtered & non-filtered) */
-    H5D_CHUNK_IDX_NONE = 2,     /* Implicit: No Index (H5D_ALLOC_TIME_EARLY, non-filtered, fixed dims) */
-    H5D_CHUNK_IDX_FARRAY = 3,   /* Fixed array (for 0 unlimited dims)       */
-    H5D_CHUNK_IDX_EARRAY = 4,   /* Extensible array (for 1 unlimited dim)   */
-    H5D_CHUNK_IDX_BT2 = 5,      /* v2 B-tree index (for >1 unlimited dims)  */
-    H5D_CHUNK_IDX_NTYPES        /* This one must be last!                   */
+    H5D_CHUNK_IDX_BTREE	= 0,    /**< v1 B-tree index (default)                */
+    H5D_CHUNK_IDX_SINGLE = 1,   /**< Single Chunk index (cur dims[]=max dims[]=chunk dims[]; filtered & non-filtered) */
+    H5D_CHUNK_IDX_NONE = 2,     /**< Implicit: No Index (H5D_ALLOC_TIME_EARLY, non-filtered, fixed dims) */
+    H5D_CHUNK_IDX_FARRAY = 3,   /**< Fixed array (for 0 unlimited dims)       */
+    H5D_CHUNK_IDX_EARRAY = 4,   /**< Extensible array (for 1 unlimited dim)   */
+    H5D_CHUNK_IDX_BT2 = 5,      /**< v2 B-tree index (for >1 unlimited dims)  */
+    H5D_CHUNK_IDX_NTYPES        /**< This one must be last!                   */
 } H5D_chunk_index_t;
 
-/* Values for the space allocation time property */
+/** Values for the space allocation time property */
 typedef enum H5D_alloc_time_t {
     H5D_ALLOC_TIME_ERROR	= -1,
     H5D_ALLOC_TIME_DEFAULT  	= 0,
@@ -70,7 +70,7 @@ typedef enum H5D_alloc_time_t {
     H5D_ALLOC_TIME_INCR		= 3
 } H5D_alloc_time_t;
 
-/* Values for the status of space allocation */
+/** Values for the status of space allocation */
 typedef enum H5D_space_status_t {
     H5D_SPACE_STATUS_ERROR		= -1,
     H5D_SPACE_STATUS_NOT_ALLOCATED	= 0,
@@ -78,7 +78,7 @@ typedef enum H5D_space_status_t {
     H5D_SPACE_STATUS_ALLOCATED		= 2
 } H5D_space_status_t;
 
-/* Values for time of writing fill value property */
+/** Values for time of writing fill value property */
 typedef enum H5D_fill_time_t {
     H5D_FILL_TIME_ERROR	= -1,
     H5D_FILL_TIME_ALLOC = 0,
@@ -86,7 +86,7 @@ typedef enum H5D_fill_time_t {
     H5D_FILL_TIME_IFSET	= 2
 } H5D_fill_time_t;
 
-/* Values for fill value status */
+/** Values for fill value status */
 typedef enum H5D_fill_value_t {
     H5D_FILL_VALUE_ERROR        =-1,
     H5D_FILL_VALUE_UNDEFINED    =0,
@@ -94,26 +94,26 @@ typedef enum H5D_fill_value_t {
     H5D_FILL_VALUE_USER_DEFINED =2
 } H5D_fill_value_t;
 
-/* Values for VDS bounds option */
+/** Values for VDS bounds option */
 typedef enum H5D_vds_view_t {
     H5D_VDS_ERROR               = -1,
     H5D_VDS_FIRST_MISSING       = 0,
     H5D_VDS_LAST_AVAILABLE      = 1
 } H5D_vds_view_t;
 
-/* Callback for H5Pset_append_flush() in a dataset access property list */
+/** Callback for H5Pset_append_flush() in a dataset access property list */
 typedef herr_t (*H5D_append_cb_t)(hid_t dataset_id, hsize_t *cur_dims, void *op_data);
 
-/* Define the operator function pointer for H5Diterate() */
+/** Define the operator function pointer for H5Diterate() */
 typedef herr_t (*H5D_operator_t)(void *elem, hid_t type_id, unsigned ndim,
 				 const hsize_t *point, void *operator_data);
 
-/* Define the operator function pointer for H5Dscatter() */
+/** Define the operator function pointer for H5Dscatter() */
 typedef herr_t (*H5D_scatter_func_t)(const void **src_buf/*out*/,
                                      size_t *src_buf_bytes_used/*out*/,
                                      void *op_data);
 
-/* Define the operator function pointer for H5Dgather() */
+/** Define the operator function pointer for H5Dgather() */
 typedef herr_t (*H5D_gather_func_t)(const void *dst_buf,
                                     size_t dst_buf_bytes_used, void *op_data);
 
@@ -210,4 +210,3 @@ H5_DLL herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, voi
 }
 #endif
 #endif /* _H5Dpublic_H */
-
