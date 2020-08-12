@@ -32,6 +32,31 @@
 /**\defgroup H5P H5P
  * \brief Property List Interface
  * \todo Describe concisely what the functions in this module are about.
+ *
+ * \defgroup GPLO General Property List Operations
+ * \ingroup H5P
+ * \defgroup GPLOA General Property List Operations (Advanced)
+ * \ingroup H5P
+ * \defgroup FCPL File Creation Properties
+ * \ingroup H5P
+ * \defgroup FAPL File Access Properties
+ * \ingroup H5P
+ * \defgroup GCPL Group Creation Properties
+ * \ingroup H5P
+ * \defgroup ALCAPL Attribute and Link Creation Properties
+ * \ingroup H5P
+ * \defgroup LAPL Link Access Properties
+ * \ingroup H5P
+ * \defgroup DCPL Dataset Creation Properties
+ * \ingroup H5P
+ * \defgroup DAPL Dataset Access Properties
+ * \ingroup H5P
+ * \defgroup DXPL Dataset Transfer Properties
+ * \ingroup H5P
+ * \defgroup OCPL Object Creation Properties
+ * \ingroup H5P
+ * \defgroup OCPPL Object Copy Properties
+ * \ingroup H5P
  */
 
 #endif /* _H5Pmodule_H */

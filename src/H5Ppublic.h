@@ -241,7 +241,7 @@ H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name,
     H5P_cls_close_func_t cls_close, void *close_data);
 H5_DLL char *H5Pget_class_name(hid_t pclass_id);
 /*--------------------------------------------------------------------------*/
-/**\ingroup H5P
+/**\ingroup GPLO
  *
  * \brief Creates a new property list as an instance of a property list class
  *
@@ -393,7 +393,7 @@ H5_DLL herr_t H5Premove(hid_t plist_id, const char *name);
 H5_DLL herr_t H5Punregister(hid_t pclass_id, const char *name);
 H5_DLL herr_t H5Pclose_class(hid_t plist_id);
 /*--------------------------------------------------------------------------*/
-/**\ingroup H5P
+/**\ingroup GPLO
  *
  * \brief Terminates access to a property list
  *
@@ -540,7 +540,7 @@ H5_DLL herr_t H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size, unsigned
 H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
 H5_DLL H5D_layout_t H5Pget_layout(hid_t plist_id);
 /*--------------------------------------------------------------------------*/
-/**\ingroup H5P
+/**\ingroup DCPL
  *
  * \brief Sets the size of the chunks used to store a chunked layout
  *        dataset
@@ -583,7 +583,7 @@ H5_DLL H5D_layout_t H5Pget_layout(hid_t plist_id);
  */
 H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/]);
 /*--------------------------------------------------------------------------*/
-/**\ingroup H5P
+/**\ingroup DCPL
  *
  * \brief Retrieves the size of chunks for the raw data of a chunked
  *        layout dataset
