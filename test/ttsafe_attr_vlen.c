@@ -54,7 +54,7 @@ void *tts_attr_vlen_thread(void *);
 void
 tts_attr_vlen(void)
 {
-    pthread_t threads[NUM_THREADS] = {0};   /* Thread declaration */
+    H5TS_thread_t threads[NUM_THREADS] = {0};   /* Thread declaration */
     hid_t fid = H5I_INVALID_HID;            /* File ID */
     hid_t gid = H5I_INVALID_HID;            /* Group ID */ 
     hid_t atid = H5I_INVALID_HID;           /* Datatype ID for attribute */
@@ -106,12 +106,15 @@ tts_attr_vlen(void)
     CHECK(ret, H5I_INVALID_HID, "H5Tclose");
 
     /* Start multiple threads and execute tts_attr_vlen_thread() for each thread */
-    for(i = 0; i < NUM_THREADS; i++)
-        pthread_create(&threads[i], NULL, tts_attr_vlen_thread, NULL);
+    for(i = 0; i < NUM_THREADS; i++) {
+        threads[i] = H5TS_create_thread(tts_attr_vlen_thread, NULL, NULL);
+    }
+    //pthread_create(&threads[i], NULL, tts_attr_vlen_thread, NULL);
 
     /* Wait for the threads to end */
     for(i = 0; i < NUM_THREADS; i++)
-        pthread_join(threads[i], NULL);
+        H5TS_wait_for_thread(threads[i]);
+        //pthread_join(threads[i], NULL);
 
 } /* end tts_attr_vlen() */
 
