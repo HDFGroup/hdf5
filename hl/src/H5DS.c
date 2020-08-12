@@ -1915,9 +1915,9 @@ htri_t H5DSis_scale(hid_t did)
     hid_t      aid = -1;     /* attribute ID */
     herr_t     attr_class;   /* has the "CLASS" attribute */
     htri_t     is_ds = 0;    /* set to "not a dimension scale" */
-    H5I_type_t it;           /* type of identofier */
-    char       *buf;         /* buffer to read a name of attribute */
-    size_t      string_size; /* Size of storage for the attribute */
+    H5I_type_t it;           /* type of identifier */
+    char       *buf;         /* buffer to read name of attribute */
+    size_t      string_size; /* size of storage for the attribute */
     H5T_class_t type_class;
     H5T_str_t   strpad;
 
