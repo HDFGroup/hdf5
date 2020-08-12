@@ -1678,50 +1678,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__close_cb() */
 
-
-/* ---------------------------------------------------------------------------*/
-/**\ingroup GTO
- *
- *\todo Original has a reference to “Creating variable-length string datatypes”.
- *\todo Create an example for H5Tcreate.
- *
- *\brief Creates a new datatype.
- *
- * \param[in] class Class of datatype to create
- * \param[in] size  Size, in bytes, of the datatype being created
- *
- * \return hid_t{datatype}
- *
- * \details H5Tcreate creates a new datatype of the specified class with the
- * specified number of bytes. This function is used only with the following
- * datatype classes:
- *          - #H5T_COMPOUND
- *          - #H5T_OPAQUE
- *          - #H5T_ENUM
- *          - #H5T_STRING
- *
- *
- * Other datatypes, including integer and floating-point datatypes, are typically
- * created by using H5Tcopy to copy and modify a predefined datatype.
- *
- * When creating a variable-length string datatype, size must be #H5T_VARIABLE.
- *
- * When creating a fixed-length string datatype, size will be the length of
- * the string in bytes. The length of the string in characters will depend on i
- * the encoding used; see H5Pset_char_encoding.
- *
- * ENUMs created with this function have a signed native integer base datatype.
- * Use H5Tenum_create if a different integer base datatype is required.
- *
- * The datatype identifier returned from this function should be released with
- * H5Tclose or resource leaks will result.
- *
- * \since 1.2.0
- *
- * \see H5Tclose()
- *
- * ------------------------------------------------------------------------
- */
 /*-------------------------------------------------------------------------
  * Function:   H5Tcreate
  *
@@ -1766,37 +1722,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tcreate() */
 
-
-/* ---------------------------------------------------------------------------*/
-/**\ingroup GTO
- *
- *\todo H5Tcopy returns #H5I_INVALID_HID on fail; we will need to modify return
- *  macro to include H5I_INVALID_HID instead of "negative value".
- *\todo Create an example for H5Tcopy.
- *
- * \brief Copies an existing datatype.
- * \param[in] obj_id identifier; can be a datatype identifier, a predefined
- * datatype, or a dataset identifier.
- *
- * \return \hid_t{datatype}
- *
- * \details H5Tcopy copies an existing datatype. The returned type is always
- * transient and unlocked.
- *
- * The \p dtype_id argument can be either a datatype identifier, a predefined
- * datatype (defined in H5Tpublic.h), or a dataset identifier.
- * If \p dtype_id is a dataset identifier,this function returns a transient,
- * modifiable datatype which is a copy of the dataset's datatype.
- *
- * The datatype identifier should be released with H5Tclose or
- * resource leak will occur.
- *
- * \since 1.2.0
- *
- * \see H5Tclose()
- *
- * -----------------------------------------------------------------------
- */
 /*-------------------------------------------------------------------------
  * Function:    H5Tcopy
  *
@@ -1896,50 +1821,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tcopy() */
 
-
-/* ---------------------------------------------------------------------------*/
-/**\ingroup GTO
- *
- *\todo Original has a reference to “Creating variable-length string datatypes”.
- *\todo Create an example for H5Tcreate.
- *
- *\brief Creates a new datatype.
- *
- * \param[in] class Class of datatype to create
- * \param[in] size  Size, in bytes, of the datatype being created
- *
- * \return hid_t{datatype}
- *
- * \details H5Tcreate creates a new datatype of the specified class with the
- * specified number of bytes. This function is used only with the following
- * datatype classes:
- *          - #H5T_COMPOUND
- *          - #H5T_OPAQUE
- *          - #H5T_ENUM
- *          - #H5T_STRING
- *
- *
- * Other datatypes, including integer and floating-point datatypes, are typically
- * created by using H5Tcopy to copy and modify a predefined datatype.
- *
- * When creating a variable-length string datatype, size must be #H5T_VARIABLE.
- *
- * When creating a fixed-length string datatype, size will be the length of
- * the string in bytes. The length of the string in characters will depend on i
- * the encoding used; see H5Pset_char_encoding.
- *
- * ENUMs created with this function have a signed native integer base datatype.
- * Use H5Tenum_create if a different integer base datatype is required.
- *
- * The datatype identifier returned from this function should be released with
- * H5Tclose or resource leaks will result.
- *
- * \since 1.2.0
- *
- * \see H5Tclose()
- *
- * ---------------------------------------------------------------------------
- */
 /*-------------------------------------------------------------------------
  * Function:    H5Tclose
  *
@@ -2302,39 +2183,6 @@ H5T_is_variable_str(const H5T_t *dt)
     FUNC_LEAVE_NOAPI(H5T_IS_VL_STRING(dt->shared))
 } /* end H5T_is_variable_str() */
 
-
-/* ---------------------------------------------------------------------------*/
-/**\ingroup GTO
- *
- *\todo Original has a reference to “Creating variable-length string datatypes”.
- *\todo Create an example for H5Tget_size.
- *\brief Returns the size of a datatype
- *
- * \type_id
- *
- * \return Returns the size of the datatype in bytes if successful; otherwise 0.
- *
- * \details H5Tget_size returns the size of a datatype in bytes.
- *
- * For atomic datatypes, array datatypes, compound datatypes, and other
- * datatypes of a constant size, the returned value is the size of the actual
- * datatype in bytes.
- *
- * For variable-length string datatypes the returned value is the size of the
- * pointer to the actual string, or \c sizeof(\c char \c*). This function does not
- * return the size of actual variable-length string data.
- *
- * For variable-length sequence datatypes (see H5Tvlen_create), the returned
- * value is the size of the \p hvl_t struct, or \c sizeof(\p hvl_t). The \p hvl_t
- * struct contains a pointer to the actual data and a size value.
- * This function does not return the size of actual variable-length sequence data.
- *
- * \since 1.2.0
- *
- * \see H5Tset_size()
- *
- * ------------------------------------------------------------------------
- */
 /*-------------------------------------------------------------------------
  * Function:  H5Tget_size
  *
@@ -2371,52 +2219,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tget_size() */
 
-
-/* ---------------------------------------------------------------------------*/
-/**\ingroup GTO
- *
- *\todo Create an example for H5Tset_size.
- *\todo Original has a reference to “Creating variable-length string datatypes”.
- *
- * \brief Sets size for a datatype.
- * \type_id for which the size is being set
- * \param[in] size New datatype size is bytes or #H5T_VARIABLE
- *
- * \return \herr_t
- *
- * \details H5Tset_size  sets the total size in bytes, \psize, for a datatype.
- *
- * The parameter \p size must have a positive value, unless it is passed as
- * #H5T_VARIABLE and the datatype is a string datatype.
- *
- * Numeric datatypes: If the datatype is atomic and the size is decreased so
- * that significant bits of the datatype extend beyond the edge of the new size,
- * then the offset property of the datatype is decreased toward zero.
- * If the offset becomes zero and the significant bits of the datatype still
- * hang over the edge of the new size, then the number of significant bits
- * is decreased.
- *
- * String or character datatypes: The size set for a string datatype should
- * include space for the null-terminator character, otherwise it will not be
- * stored on (or retrieved from) disk. Adjusting the size of a string
- * automatically sets the precision to \p 8*size.
- *
- * Variable-length string datatypes: If \p dtype_id is a variable-length string,
- * size must normally be set to #H5T_VARIABLE.
- *
- * Compound datatypes: This function may be used to increase or decrease the
- * size of a compound datatype, but the function will fail if the new size is
- * too small to accommodate all member fields.
- *
- * Ineligible datatypes: This function cannot be used with enumerated
- * datatypes (#H5T_ENUM), array datatypes (#H5T_ARRAY), variable-length
- * array datatypes (#H5T_VLEN), or reference datatypes (#H5T_REFERENCE).
- *
- * \since 1.2.0
- *
- * \see H5Tget_size()
- *
- */
 /*-------------------------------------------------------------------------
  * Function:    H5Tset_size
  *

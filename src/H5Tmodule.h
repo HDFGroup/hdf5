@@ -41,7 +41,7 @@
  * \ingroup H5T
  * \defgroup CONV Conversion Function
  * \ingroup H5T
- * \defgroup ENUM Enuermation Datatypes
+ * \defgroup ENUM Enumeration Datatypes
  * \ingroup H5T
  * \defgroup GTO General Datatype Operations
  * \ingroup H5T

@@ -498,7 +498,81 @@ H5_DLLVAR hid_t H5T_NATIVE_INT_FAST64_g;
 H5_DLLVAR hid_t H5T_NATIVE_UINT_FAST64_g;
 
 /* Operations defined on all datatypes */
+
+/* ---------------------------------------------------------------------------*/
+/**\ingroup GTO
+ *
+ *\todo Original has a reference to “Creating variable-length string datatypes”.
+ *\todo Create an example for H5Tcreate.
+ *
+ *\brief Creates a new datatype.
+ *
+ * \param[in] class Class of datatype to create
+ * \param[in] size  Size, in bytes, of the datatype being created
+ *
+ * \return hid_t{datatype}
+ *
+ * \details H5Tcreate creates a new datatype of the specified class with the
+ * specified number of bytes. This function is used only with the following
+ * datatype classes:
+ *          - #H5T_COMPOUND
+ *          - #H5T_OPAQUE
+ *          - #H5T_ENUM
+ *          - #H5T_STRING
+ *
+ *
+ * Other datatypes, including integer and floating-point datatypes, are typically
+ * created by using H5Tcopy to copy and modify a predefined datatype.
+ *
+ * When creating a variable-length string datatype, size must be #H5T_VARIABLE.
+ *
+ * When creating a fixed-length string datatype, size will be the length of
+ * the string in bytes. The length of the string in characters will depend on i
+ * the encoding used; see H5Pset_char_encoding.
+ *
+ * ENUMs created with this function have a signed native integer base datatype.
+ * Use H5Tenum_create if a different integer base datatype is required.
+ *
+ * The datatype identifier returned from this function should be released with
+ * H5Tclose or resource leaks will result.
+ *
+ * \since 1.2.0
+ *
+ * \see H5Tclose()
+ *
+ * ------------------------------------------------------------------------
+ */
 H5_DLL hid_t H5Tcreate(H5T_class_t type, size_t size);
+/* ---------------------------------------------------------------------------*/
+/**\ingroup GTO
+ *
+ *\todo H5Tcopy returns #H5I_INVALID_HID on fail; we will need to modify return
+ *  macro to include H5I_INVALID_HID instead of "negative value".
+ *\todo Create an example for H5Tcopy.
+ *
+ * \brief Copies an existing datatype.
+ * \param[in] obj_id identifier; can be a datatype identifier, a predefined
+ * datatype, or a dataset identifier.
+ *
+ * \return \hid_t{datatype}
+ *
+ * \details H5Tcopy copies an existing datatype. The returned type is always
+ * transient and unlocked.
+ *
+ * The \p dtype_id argument can be either a datatype identifier, a predefined
+ * datatype (defined in H5Tpublic.h), or a dataset identifier.
+ * If \p dtype_id is a dataset identifier,this function returns a transient,
+ * modifiable datatype which is a copy of the dataset's datatype.
+ *
+ * The datatype identifier should be released with H5Tclose or
+ * resource leak will occur.
+ *
+ * \since 1.2.0
+ *
+ * \see H5Tclose()
+ *
+ * -----------------------------------------------------------------------
+ */
 H5_DLL hid_t H5Tcopy(hid_t type_id);
 H5_DLL herr_t H5Tclose(hid_t type_id);
 H5_DLL htri_t H5Tequal(hid_t type1_id, hid_t type2_id);
@@ -515,6 +589,36 @@ H5_DLL herr_t H5Tflush(hid_t type_id);
 H5_DLL herr_t H5Trefresh(hid_t type_id);
 
 /* Operations defined on compound datatypes */
+
+/* ---------------------------------------------------------------------------*/
+/**\ingroup COMPOUND
+ *
+ * \todo Create example for  H5Tinsert
+ *
+ * \brief Adds a new member to a compound datatype.
+ *
+ * \param[in] dtype_id  Identifier of compound datatype to modify
+ * \param[in] name      Name of the field to insert
+ * \param[in] offset    Offset in memory structure of the field to insert
+ * \param[in] field_id  Datatype identifier of the field to insert
+ *
+ * \return \herr_t
+ *
+ * \details H5Tinsert adds another member to the compound datatype \p dtype_id.
+ * The new member has a \p name which must be unique within the compound
+ * datatype. The \p offset argument defines the start of the member in an
+ * instance of the compound datatype, and \p field_id is the datatype identifier
+ * of the new member.
+ *
+ * Note: Members of a compound datatype do not have to be atomic datatypes;
+ * a compound datatype can have a member which is a compound datatype.
+ *
+ * \since 1.2.0
+ *
+ * \see H5Tcreate()
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Tinsert(hid_t parent_id, const char *name, size_t offset,
 			 hid_t member_id);
 H5_DLL herr_t H5Tpack(hid_t type_id);
@@ -544,6 +648,38 @@ H5_DLL char *H5Tget_tag(hid_t type);
 H5_DLL hid_t H5Tget_super(hid_t type);
 H5_DLL H5T_class_t H5Tget_class(hid_t type_id);
 H5_DLL htri_t H5Tdetect_class(hid_t type_id, H5T_class_t cls);
+/* ---------------------------------------------------------------------------*/
+/**\ingroup GTO
+ *
+ *\todo Original has a reference to “Creating variable-length string datatypes”.
+ *\todo Create an example for H5Tget_size.
+ *\brief Returns the size of a datatype
+ *
+ * \type_id
+ *
+ * \return Returns the size of the datatype in bytes if successful; otherwise 0.
+ *
+ * \details H5Tget_size returns the size of a datatype in bytes.
+ *
+ * For atomic datatypes, array datatypes, compound datatypes, and other
+ * datatypes of a constant size, the returned value is the size of the actual
+ * datatype in bytes.
+ *
+ * For variable-length string datatypes the returned value is the size of the
+ * pointer to the actual string, or \c sizeof(\c char \c*). This function does not
+ * return the size of actual variable-length string data.
+ *
+ * For variable-length sequence datatypes (see H5Tvlen_create), the returned
+ * value is the size of the \p hvl_t struct, or \c sizeof(\p hvl_t). The \p hvl_t
+ * struct contains a pointer to the actual data and a size value.
+ * This function does not return the size of actual variable-length sequence data.
+ *
+ * \since 1.2.0
+ *
+ * \see H5Tset_size()
+ *
+ * ------------------------------------------------------------------------
+ */
 H5_DLL size_t H5Tget_size(hid_t type_id);
 H5_DLL H5T_order_t H5Tget_order(hid_t type_id);
 H5_DLL size_t H5Tget_precision(hid_t type_id);
@@ -570,6 +706,52 @@ H5_DLL htri_t H5Tis_variable_str(hid_t type_id);
 H5_DLL hid_t H5Tget_native_type(hid_t type_id, H5T_direction_t direction);
 
 /* Setting property values */
+
+/* ---------------------------------------------------------------------------*/
+/**\ingroup GTO
+ *
+ *\todo Create an example for H5Tset_size.
+ *\todo Original has a reference to “Creating variable-length string datatypes”.
+ *
+ * \brief Sets size for a datatype.
+ * \type_id for which the size is being set
+ * \param[in] size New datatype size is bytes or #H5T_VARIABLE
+ *
+ * \return \herr_t
+ *
+ * \details H5Tset_size  sets the total size in bytes, \psize, for a datatype.
+ *
+ * The parameter \p size must have a positive value, unless it is passed as
+ * #H5T_VARIABLE and the datatype is a string datatype.
+ *
+ * Numeric datatypes: If the datatype is atomic and the size is decreased so
+ * that significant bits of the datatype extend beyond the edge of the new size,
+ * then the offset property of the datatype is decreased toward zero.
+ * If the offset becomes zero and the significant bits of the datatype still
+ * hang over the edge of the new size, then the number of significant bits
+ * is decreased.
+ *
+ * String or character datatypes: The size set for a string datatype should
+ * include space for the null-terminator character, otherwise it will not be
+ * stored on (or retrieved from) disk. Adjusting the size of a string
+ * automatically sets the precision to \p 8*size.
+ *
+ * Variable-length string datatypes: If \p dtype_id is a variable-length string,
+ * size must normally be set to #H5T_VARIABLE.
+ *
+ * Compound datatypes: This function may be used to increase or decrease the
+ * size of a compound datatype, but the function will fail if the new size is
+ * too small to accommodate all member fields.
+ *
+ * Ineligible datatypes: This function cannot be used with enumerated
+ * datatypes (#H5T_ENUM), array datatypes (#H5T_ARRAY), variable-length
+ * array datatypes (#H5T_VLEN), or reference datatypes (#H5T_REFERENCE).
+ *
+ * \since 1.2.0
+ *
+ * \see H5Tget_size()
+ *
+ */
 H5_DLL herr_t H5Tset_size(hid_t type_id, size_t size);
 H5_DLL herr_t H5Tset_order(hid_t type_id, H5T_order_t order);
 H5_DLL herr_t H5Tset_precision(hid_t type_id, size_t prec);
@@ -621,4 +803,3 @@ H5_DLL int H5Tget_array_dims1(hid_t type_id, hsize_t dims[], int perm[]);
 }
 #endif
 #endif /* _H5Tpublic_H */
-

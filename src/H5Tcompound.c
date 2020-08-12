@@ -341,36 +341,6 @@ H5T__get_member_size(const H5T_t *dt, unsigned membno)
 } /* end H5T__get_member_size() */
 
 
-
-/* ---------------------------------------------------------------------------*/
-/**\ingroup COMPOUND
- *
- * \todo Create example for  H5Tinsert
- *
- * \brief Adds a new member to a compound datatype.
- *
- * \param[in] dtype_id  Identifier of compound datatype to modify
- * \param[in] name      Name of the field to insert
- * \param[in] offset    Offset in memory structure of the field to insert
- * \param[in] field_id  Datatype identifier of the field to insert
- *
- * \return herr_t
- *
- * \details H5Tinsert adds another member to the compound datatype \p dtype_id.
- * The new member has a \p name which must be unique within the compound
- * datatype. The \p offset argument defines the start of the member in an
- * instance of the compound datatype, and \p field_id is the datatype identifier
- * of the new member.
- *
- * Note: Members of a compound datatype do not have to be atomic datatypes;
- * a compound datatype can have a member which is a compound datatype.
- *
- * \since 1.2.0
- *
- * \see H5Tcreate()
- *
- *-------------------------------------------------------------------------
- */
 /*-------------------------------------------------------------------------
  * Function:	H5Tinsert
  *
