@@ -5806,21 +5806,21 @@ test_optional_filters(hid_t file)
         H5_FAILED();
         HDprintf("    Line %d: Can't create dcpl\n",__LINE__);
         goto error;
-    } /* end if */
+    }
 
     /* Create the datatype */
     if((strtid = H5Tcreate(H5T_STRING, H5T_VARIABLE)) < 0) {
         H5_FAILED();
         HDprintf("    Line %d: Can't create datatype\n",__LINE__);
         goto error;
-    } /* end if */
+    }
 
     /* Create the data space */
     if((sid = H5Screate(H5S_SCALAR)) < 0) {
         H5_FAILED();
         HDprintf("    Line %d: Can't open dataspace\n",__LINE__);
         goto error;
-    } /* end if */
+    }
 
     /* The filter is optional. */
     if(H5Pset_filter(dcpl, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts, cd_values) < 0) {
@@ -5834,28 +5834,28 @@ test_optional_filters(hid_t file)
         H5_FAILED();
         HDprintf("    Line %d: Can't create dataset with optional filter\n",__LINE__);
         goto error;
-    } /* end if */
+    }
 
     /* Close dataset */
     if(H5Dclose(dsid) < 0) {
         H5_FAILED();
         HDprintf("    Line %d: Can't close dataset\n",__LINE__);
         goto error;
-    } /* end if */
+    }
 
     /* Close dataspace */
     if(H5Sclose(sid) < 0) {
         H5_FAILED();
         HDprintf("    Line %d: Can't close dataspace\n",__LINE__);
         goto error;
-    } /* end if */
+    }
 
     /* Close datatype */
     if(H5Tclose(strtid) < 0) {
         H5_FAILED();
         HDprintf("    Line %d: Can't close datatype\n",__LINE__);
         goto error;
-    } /* end if */
+    }
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM1;
@@ -5865,49 +5865,49 @@ test_optional_filters(hid_t file)
         H5_FAILED();
         HDprintf("    Line %d: Can't open dataspace\n",__LINE__);
         goto error;
-    } /* end if */
+    }
 
     /* Create a vlen datatype */
     if((vlentid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) {
         H5_FAILED();
         HDprintf("    Line %d: Can't create datatype\n",__LINE__);
         goto error;
-    } /* end if */
+    }
 
     /* Create dataset with optional filter */
     if((dsid = H5Dcreate2(file, DSET_OPTIONAL_VLEN, vlentid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) {
         H5_FAILED();
         HDprintf("    Line %d: Can't create dataset with optional filter\n",__LINE__);
         goto error;
-    } /* end if */
+    }
 
     /* Close dataset */
     if(H5Dclose(dsid) < 0) {
         H5_FAILED();
         HDprintf("    Line %d: Can't close dataset\n",__LINE__);
         goto error;
-    } /* end if */
+    }
 
     /* Close dataspace */
     if(H5Sclose(sid) < 0) {
         H5_FAILED();
         HDprintf("    Line %d: Can't close dataspace\n",__LINE__);
         goto error;
-    } /* end if */
+    }
 
     /* Close datatype */
     if(H5Tclose(vlentid) < 0) {
         H5_FAILED();
         HDprintf("    Line %d: Can't close datatype\n",__LINE__);
         goto error;
-    } /* end if */
+    }
 
     /* Close dataset creation property list */
     if(H5Pclose(dcpl) < 0) {
         H5_FAILED();
         HDprintf("    Line %d: Can't close dcpl\n",__LINE__);
         goto error;
-    } /* end if */
+    }
 
     PASSED();
     return SUCCEED;
