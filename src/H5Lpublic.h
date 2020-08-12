@@ -294,7 +294,7 @@ H5_DLL ssize_t H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
  *          while iterating, but caution is advised.
  *
  *
- * \since 1.12.0 Function was introduced in this release.
+ * \since 1.12.0
  *
  * \see H5Literate_by_name2(), H5Lvisit2(), H5Lvisit_by_name2()
  *
@@ -448,7 +448,7 @@ H5_DLL herr_t H5Lunpack_elink_val(const void *ext_linkval/*in*/, size_t link_siz
  *
  * \date Wednesday, May 18, 2005
  *
- * \since 1.8.0 Function was introduced in this release.
+ * \since 1.8.0
  *
  * \see H5Lcreate_hard(), H5Lcreate_soft(), H5Lcreate_ud()
  *
@@ -574,7 +574,7 @@ H5_DLL herr_t H5Lget_info_by_idx1(hid_t loc_id, const char *group_name,
  *
  *
  * \version 1.12.0 Function was deprecated in this release.
- * \since 1.8.0 Function was introduced in this release.
+ * \since 1.8.0
  *
  * \see H5Literate_by_name2(), H5Lvisit2(), H5Lvisit_by_name2()
  *
