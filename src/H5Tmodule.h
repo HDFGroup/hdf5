@@ -47,6 +47,20 @@
  * \ingroup H5T
  * \defgroup OPAQUE Opaque Datatypes
  * \ingroup H5T
+ * \defgroup PDT Predefined Datatypes
+ * \ingroup H5T
+ * \defgroup PDTB Bitfields
+ * \ingroup PDT
+ * \defgroup PDTF Floating-point Numbers
+ * \ingroup PDT
+ * \defgroup PDTI Signed Integers
+ * \ingroup PDT
+ * \defgroup PDTR References
+ * \ingroup PDT
+ * \defgroup PDTS Strings
+ * \ingroup PDT
+ * \defgroup PDTU Unsigned Integers
+ * \ingroup PDT
  * \defgroup STRING String Datatypes
  * \ingroup H5T
  * \defgroup VLEN Variable-length Sequence Datatypes
