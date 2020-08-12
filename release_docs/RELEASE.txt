@@ -134,6 +134,15 @@ Bug Fixes since HDF5-1.12.0 release
 ==================================
     Library
     -------
+    - Explicitly declared dlopen to use RTLD_LOCAL
+
+      dlopen documentation states that f neither RTLD_GLOBAL nor
+      RTLD_LOCAL are specified, then the default behavior is unspecified.
+      The default on linux is usually RTLD_LOCAL while macos will default
+      to RTLD_GLOBAL.
+
+      (ADB - 2020/08/12, HDFFV-11127)
+
     - Fixed the segmentation fault when reading attributes with multiple threads
 
       It was reported that the reading of attributes with variable length string
