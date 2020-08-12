@@ -342,6 +342,15 @@ Bug Fixes since HDF5-1.10.5 release
 
     Library
     -------
+    - Explicitly declared dlopen to use RTLD_LOCAL
+
+      dlopen documentation states that f neither RTLD_GLOBAL nor
+      RTLD_LOCAL are specified, then the default behavior is unspecified.
+      The default on linux is usually RTLD_LOCAL while macos will default
+      to RTLD_GLOBAL.
+
+      (ADB - 2020/08/12, HDFFV-11127)
+
     - Fixed issues CVE-2018-13870 and CVE-2018-13869
 
       When a buffer overflow occurred because a name length was corrupted
