@@ -408,6 +408,7 @@ H5_DLL herr_t H5Pclose_class(hid_t plist_id);
  *
  * \version 1.4.0 \f_fun_intro
  * \since 1.0.0
+ *
  * -------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Pclose(hid_t plist_id);
@@ -426,7 +427,99 @@ H5_DLL herr_t H5Pmodify_filter(hid_t plist_id, H5Z_filter_t filter,
 H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter,
         unsigned int flags, size_t cd_nelmts,
         const unsigned int c_values[]);
+/*--------------------------------------------------------------------------*/
+/**\ingroup OCPL
+ *
+ * \brief Returns the number of filters in the pipeline
+ *
+ * \todo Signature for H5Pget_nfilters() is different in H5Pocpl.c than in
+ *       H5Ppublic.h.
+ *
+ * \plist_id{plist}
+ *
+ * \return  Returns the number of filters in the pipeline if successful; 
+ *          otherwise returns a negative value.
+ *
+ * \details H5Pget_nfilters() returns the number of filters defined in the 
+ *          filter pipeline associated with the property list \p plist.
+ *
+ *          In each pipeline, the filters are numbered from 0 through N-1, 
+ *          where N is the value returned by this function. During output to 
+ *          the file, the filters are applied in increasing order; during 
+ *          input from the file, they are applied in decreasing order.
+ *
+ *          H5Pget_nfilters() returns the number of filters in the pipeline, 
+ *          including zero (0) if there are none.
+ *
+ * \since 1.0.0
+ *
+ *--------------------------------------------------------------------------
+ */
 H5_DLL int H5Pget_nfilters(hid_t plist_id);
+/*--------------------------------------------------------------------------*/
+/**\ingroup OCPL
+ * 
+ * \brief Returns information about a filter in a pipeline
+ *
+ * \todo Signature for H5Pget_filter2 is different in H5Pocpl.c than in
+ *       H5Ppublic.h
+ *
+ * \plist_id{plist_id}
+ * \param[in] idx    Sequence number within the filter pipeline of the filter
+ *                   for which information is sought
+ * \param[out] flags Bit vector specifying certain general properties of the
+ *                   filter
+ * \param[in,out] cd_nelmts Number of elements in \p cd_values
+ * \param[out]    cd_values Auxiliary data for the filter
+ * \param[in]     namelen   Anticipated number of characters in \p name
+ * \param[out]    name      Name of the filter
+ * \param[out] filter_config Bit field, as described in H5Zget_filter_info()
+ *
+ * \return #H5Z_filter_t
+ *         - #H5Z_FILTER_DEFLATE     Data compression filter,
+ *                                    employing the gzip algorithm
+ *         - #H5Z_FILTER_SHUFFLE     Data shuffling filter
+ *         - #H5Z_FILTER_FLETCHER32  Error detection filter, employing the
+ *                                     Fletcher32 checksum algorithm
+ *         - #H5Z_FILTER_SZIP        Data compression filter, employing the
+ *                                     SZIP algorithm
+ *         - #H5Z_FILTER_NBIT        Data compression filter, employing the
+ *                                     N-bit algorithm
+ *         - #H5Z_FILTER_SCALEOFFSET Data compression filter, employing the
+ *                                     scale-offset algorithm
+ *
+ * \details H5Pget_filter2() returns information about a filter specified by 
+ *          its filter number, in a filter pipeline specified by the property 
+ *          list with which it is associated.
+ *
+ *          \p plist_id must be a dataset or group creation property list.
+ *
+ *          \p idx is a value between zero and N-1, as described in 
+ *          H5Pget_nfilters(). The function will return a negative value if 
+ *          the filter number is out of range.
+ *
+ *          The structure of the \p flags argument is discussed in 
+ *          H5Pset_filter().
+ *
+ *          On input, \p cd_nelmts indicates the number of entries in the 
+ *          \p cd_values array, as allocated by the caller; on return, 
+ *          \p cd_nelmts contains the number of values defined by the filter.
+ *
+ *          If \p name is a pointer to an array of at least \p namelen bytes, 
+ *          the filter name will be copied into that array. The name will be 
+ *          null terminated if \p namelen is large enough. The filter name 
+ *          returned will be the name appearing in the file, the name 
+ *          registered for the filter, or an empty string.
+ *
+ *          \p filter_config is the bit field described in 
+ *          H5Zget_filter_info().
+ *
+ * \version 1.8.5 Function extended to work with group creation property 
+ *                lists.
+ * \since 1.8.0
+ *
+ *--------------------------------------------------------------------------
+ */
 H5_DLL H5Z_filter_t H5Pget_filter2(hid_t plist_id, unsigned filter,
        unsigned int *flags/*out*/,
        size_t *cd_nelmts/*out*/,
@@ -439,6 +532,63 @@ H5_DLL herr_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t id,
        unsigned *filter_config/*out*/);
 H5_DLL htri_t H5Pall_filters_avail(hid_t plist_id);
 H5_DLL herr_t H5Premove_filter(hid_t plist_id, H5Z_filter_t filter);
+/*--------------------------------------------------------------------------*/
+/**\ingroup OCPL
+ *
+ * \brief Sets deflate (GNU gzip) compression method and compression level
+ *
+ * \todo H5Pset_deflate prototype does not match source code
+ * \plist_id{plist_id}
+ * \param[in] level Compression level
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_deflate() sets the deflate compression method and the 
+ *          compression level, \p level, for a dataset or group creation 
+ *          property list, \p plist_id.
+ *
+ *          The filter identifier set in the property list is 
+ *          #H5Z_FILTER_DEFLATE.
+ *
+ *          The compression level, \p level, is a value from zero to nine, 
+ *          inclusive. A compression level of 0 (zero) indicates no 
+ *          compression; compression improves but speed slows progressively 
+ *          from levels 1 through 9:
+ *
+ *          <table>
+ *            <tr>
+ *              <th>Compression Level</th> 
+ *              <th>Gzip Action</th>
+ *            </tr>
+ *            <tr>
+ *              <td>0</td>
+ *              <td>No compression</td>
+ *            </tr>
+ *            <tr>
+ *              <td>1</td>
+ *              <td>Best compression speed; least compression</td> 
+ *            </tr> 
+ *           <tr>
+ *             <td>2 through 8</td>
+ *             <td>Compression improves; speed degrades</td>
+ *           </tr>
+ *           <tr>
+ *             <td>9</td> 
+ *             <td>Best compression ratio; slowest speed</td>
+ *           </tr>
+ *          </table>
+ *
+ *          Note that setting the compression level to 0 (zero) does not turn 
+ *          off use of the gzip filter; it simply sets the filter to perform 
+ *          no compression as it processes the data.
+ *
+ *          HDF5 relies on GNU gzip for this compression. 
+ *
+ * \version 1.8.5 Function extended to work with group creation property lists.
+ * \since 1.0.0
+ *
+ *--------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned aggression);
 H5_DLL herr_t H5Pset_fletcher32(hid_t plist_id);
 
@@ -571,6 +721,7 @@ H5_DLL herr_t H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size, unsigned
  *          H5Dwrite() documentation for details. 
  * \version 1.10.0 #H5D_VIRTUAL added in this release.
  * \since 1.0.0
+ *
  *--------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
@@ -581,7 +732,7 @@ H5_DLL H5D_layout_t H5Pget_layout(hid_t plist_id);
  * \brief Sets the size of the chunks used to store a chunked layout
  *        dataset
  *
- * \dcpl_id{plist}
+ * \dcpl_id{plist_id}
  * \param[in] ndims  The number of dimensions of each chunk
  * \param[in] dim    An array defining the size, in dataset elements, of
  *                   each chunk
@@ -615,6 +766,7 @@ H5_DLL H5D_layout_t H5Pget_layout(hid_t plist_id);
  * \see H5Pset_layout(), H5Dwrite()
  *
  * \since 1.0.0
+ *
  *--------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/]);
@@ -624,7 +776,7 @@ H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*
  * \brief Retrieves the size of chunks for the raw data of a chunked
  *        layout dataset
  *
- * \dcpl_id{plist}
+ * \dcpl_id{plist_id}
  * \param[in]  max_ndims Size of the \p dims array
  * \param[out] dims Array to store the chunk dimensions
  *
@@ -637,6 +789,7 @@ H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*
  *          of \p dims will be initialized.
  *
  * \since 1.0.0
+ *
  *--------------------------------------------------------------------------
  */
 H5_DLL int H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/);
@@ -803,6 +956,59 @@ H5_DLL herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size,
     H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy,
     H5P_prp_close_func_t prp_close);
 H5_DLL herr_t H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc);
+/*--------------------------------------------------------------------------*/
+/**\ingroup OCPL
+ *
+ * \brief Returns information about a filter in a pipeline (DEPRECATED)
+ *
+ * \todo H5Pget_filter1() prototype does not match source in H5Pocpl.c. 
+ *       Also, it is not in a deprecated file. Is that okay?
+ *
+ * \plist_id{plist_id}
+ * \param[in] idx Sequence number within the filter pipeline of the filter 
+ *                for which information is sought
+ * \param[out] flags Bit vector specifying certain general properties of 
+ *                the filter
+ * \param[in,out] cd_nelmts Number of elements in \p cd_values
+ * \param[out] cd_values Auxiliary data for the filter
+ * \param[in] namelen Anticipated number of characters in \p name
+ * \param[out] name Name of the filter
+ *
+ * \return Returns the filter identifier if successful;  Otherwise returns 
+ *         a negative value. See: #H5Z_filter_t
+ *
+ * \details H5Pget_filter1() returns information about a filter, specified 
+ *          by its filter number, in a filter pipeline, specified by the 
+ *          property list with which it is associated.
+ *
+ *          \p plist_id must be a dataset or group creation property list.
+ *
+ *          \p idx is a value between zero and N-1, as described in 
+ *          H5Pget_nfilters(). The function will return a negative value 
+ *          if the filter number is out of range.
+ *
+ *          The structure of the \p flags argument is discussed in 
+ *          H5Pset_filter().
+ *
+ *          On input, \p cd_nelmts indicates the number of entries in the 
+ *          \p cd_values array, as allocated by the caller; on return,
+ *          \p cd_nelmts contains the number of values defined by the filter.
+ *
+ *          If \p name is a pointer to an array of at least \p namelen 
+ *          bytes, the filter name will be copied into that array. The name 
+ *          will be null terminated if \p namelen is large enough. The 
+ *          filter name returned will be the name appearing in the file, the 
+ *          name registered for the filter, or an empty string.
+ *
+ * \version 1.8.5 Function extended to work with group creation property 
+ *                lists.
+ * \version 1.8.0 N-bit and scale-offset filters added.
+ * \version 1.8.0 Function H5Pget_filter() renamed to H5Pget_filter1() and 
+ *                deprecated in this release.
+ * \version 1.6.4 \p filter parameter type changed to unsigned.
+ *
+ *-------------------------------------------------------------------------
+ */ 
 H5_DLL H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned filter,
     unsigned int *flags/*out*/, size_t *cd_nelmts/*out*/,
     unsigned cd_values[]/*out*/, size_t namelen, char name[]);
