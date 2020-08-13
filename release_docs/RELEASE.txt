@@ -319,9 +319,9 @@ New Features
 
     Fortran API
     -----------
-    - Corrected INTERFACE INTENT(IN) to INTENT(OUT) for buf_size in h5fget_file_image_f.  
-    
-      (MSB - 2020/2/18, HDFFV-11029) 
+    - Corrected INTERFACE INTENT(IN) to INTENT(OUT) for buf_size in h5fget_file_image_f.
+
+      (MSB - 2020/2/18, HDFFV-11029)
 
 
     C++ API
@@ -354,6 +354,15 @@ Bug Fixes since HDF5-1.8.21
 
     Library
     -------
+    - Explicitly declared dlopen to use RTLD_LOCAL
+
+      dlopen documentation states that if neither RTLD_GLOBAL nor
+      RTLD_LOCAL are specified, then the default behavior is unspecified.
+      The default on linux is usually RTLD_LOCAL while macos will default
+      to RTLD_GLOBAL.
+
+      (ADB - 2020/08/12, HDFFV-11127)
+
     - Fixed issues CVE-2018-13870 and CVE-2018-13869
 
       When a buffer overflow occurred because a name length was corrupted
@@ -368,7 +377,7 @@ Bug Fixes since HDF5-1.8.21
     - Fixed the segmentation fault when reading attributes with multiple threads
 
       It was reported that the reading of attributes with variable length string
-      datatype will crash with segmentation fault particularly when the number of 
+      datatype will crash with segmentation fault particularly when the number of
       threads is high (>16 threads).  The problem was due to the file pointer that
       was set in the variable length string datatype for the attribute.  That file
       pointer was already closed when the attribute was accessed.
@@ -443,15 +452,15 @@ Bug Fixes since HDF5-1.8.21
 
     Tools
     -----
-    - h5repack was fixed to repack the reference attributes properly. 
-      The code line that checks if the update of reference inside a compound 
-      datatype is misplaced outside the code block loop that carries out the 
+    - h5repack was fixed to repack the reference attributes properly.
+      The code line that checks if the update of reference inside a compound
+      datatype is misplaced outside the code block loop that carries out the
       check. In consequence, the next attribute that is not the reference
       type was repacked again as the reference type and caused the failure of
       repacking. The fix is to move the corresponding code line to the correct
       code block.
 
-      (KY -2020/02/05, HDFFV-11014) 
+      (KY -2020/02/05, HDFFV-11014)
 
 
     - h5repack was fixed to repack datasets with external storage
