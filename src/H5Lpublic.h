@@ -34,14 +34,13 @@
 /* Public Macros */
 /*****************/
 
-/* Maximum length of a link's name */
-/* (encoded in a 32-bit unsigned integer) */
+/** Maximum length of a link's name (encoded in a 32-bit unsigned integer) */
 #define H5L_MAX_LINK_NAME_LEN   ((uint32_t)(-1))  /* (4GB - 1) */
 
-/* Macro to indicate operation occurs on same location */
+/** Macro to indicate operation occurs on same location */
 #define H5L_SAME_LOC (hid_t)0
 
-/* Current version of the H5L_class_t struct */
+/** Current version of the H5L_class_t struct */
 #define H5L_LINK_CLASS_T_VERS       1
 
 #ifdef __cplusplus
@@ -52,35 +51,38 @@ extern "C" {
 /* Public Typedefs */
 /*******************/
 
-/* Link class types.
- * Values less than 64 are reserved for the HDF5 library's internal use.
- * Values 64 to 255 are for "user-defined" link class types; these types are
- * defined by HDF5 but their behavior can be overridden by users.
- * Users who want to create new classes of links should contact the HDF5
- * development team at hdfhelp@ncsa.uiuc.edu .
- * These values can never change because they appear in HDF5 files.
+/** Link class types.
+ * Values less than 64 are reserved for the HDF5 library's internal
+ * use. Values 64 to 255 are for "user-defined" link class types;
+ * these types are defined by HDF5 but their behavior can be overridden
+ * by users. Users who want to create new classes of links should
+ * contact the HDF5 development team at help@hdfgroup.org. These
+ * values can never change because they appear in HDF5 files.
  */
 typedef enum {
-    H5L_TYPE_ERROR = (-1),      /* Invalid link type id         */
-    H5L_TYPE_HARD = 0,          /* Hard link id                 */
-    H5L_TYPE_SOFT = 1,          /* Soft link id                 */
-    H5L_TYPE_EXTERNAL = 64,     /* External link id             */
-    H5L_TYPE_MAX = 255	        /* Maximum link type id         */
+    H5L_TYPE_ERROR = (-1),      /**< Invalid link type id         */
+    H5L_TYPE_HARD = 0,          /**< Hard link id                 */
+    H5L_TYPE_SOFT = 1,          /**< Soft link id                 */
+    H5L_TYPE_EXTERNAL = 64,     /**< External link id             */
+    H5L_TYPE_MAX = 255	        /**< Maximum link type id         */
 } H5L_type_t;
-#define H5L_TYPE_BUILTIN_MAX H5L_TYPE_SOFT      /* Maximum value link value for "built-in" link types */
-#define H5L_TYPE_UD_MIN      H5L_TYPE_EXTERNAL  /* Link ids at or above this value are "user-defined" link types. */
 
-/* Information struct for link (for H5Lget_info2/H5Lget_info_by_idx2)
+/** Maximum value link value for "built-in" link types */
+#define H5L_TYPE_BUILTIN_MAX H5L_TYPE_SOFT
+/** Link ids at or above this value are "user-defined" link types. */
+#define H5L_TYPE_UD_MIN      H5L_TYPE_EXTERNAL
+
+/** Information struct for link (for H5Lget_info2() / H5Lget_info_by_idx2())
  * H5O_token_t version used in VOL layer and future public API calls
  */
 typedef struct {
-    H5L_type_t          type;           /* Type of link                   */
-    hbool_t             corder_valid;   /* Indicate if creation order is valid */
-    int64_t             corder;         /* Creation order                 */
-    H5T_cset_t          cset;           /* Character set of link name     */
+    H5L_type_t          type;           /**< Type of link                   */
+    hbool_t             corder_valid;   /**< Indicate if creation order is valid */
+    int64_t             corder;         /**< Creation order                 */
+    H5T_cset_t          cset;           /**< Character set of link name     */
     union {
-        H5O_token_t     token;          /* Token of location that hard link points to */
-        size_t          val_size;       /* Size of a soft link or UD link value */
+        H5O_token_t     token;          /**< Token of location that hard link points to */
+        size_t          val_size;       /**< Size of a soft link or UD link value */
     } u;
 } H5L_info2_t;
 
@@ -89,50 +91,49 @@ typedef struct {
  * functions defined below.
  */
 /* Callback prototypes for user-defined links */
-/* Link creation callback */
+/** Link creation callback */
 typedef herr_t (*H5L_create_func_t)(const char *link_name, hid_t loc_group,
     const void *lnkdata, size_t lnkdata_size, hid_t lcpl_id);
 
-/* Callback for when the link is moved */
+/** Callback for when the link is moved */
 typedef herr_t (*H5L_move_func_t)(const char *new_name, hid_t new_loc,
     const void *lnkdata, size_t lnkdata_size);
 
-/* Callback for when the link is copied */
+/** Callback for when the link is copied */
 typedef herr_t (*H5L_copy_func_t)(const char *new_name, hid_t new_loc,
     const void *lnkdata, size_t lnkdata_size);
 
-/* Callback during link traversal */
+/** Callback during link traversal */
 typedef hid_t (*H5L_traverse_func_t)(const char *link_name, hid_t cur_group,
     const void *lnkdata, size_t lnkdata_size, hid_t lapl_id, hid_t dxpl_id);
 
-/* Callback for when the link is deleted */
+/** Callback for when the link is deleted */
 typedef herr_t (*H5L_delete_func_t)(const char *link_name, hid_t file,
     const void *lnkdata, size_t lnkdata_size);
 
-/* Callback for querying the link */
-/* Returns the size of the buffer needed */
+/** Callback for querying the link. Returns the size of the buffer needed */
 typedef ssize_t (*H5L_query_func_t)(const char *link_name, const void *lnkdata,
     size_t lnkdata_size, void *buf /*out*/, size_t buf_size);
 
 typedef struct {
-    int version;                    /* Version number of this struct        */
-    H5L_type_t id;                  /* Link type ID                         */
-    const char *comment;            /* Comment for debugging                */
-    H5L_create_func_t create_func;  /* Callback during link creation        */
-    H5L_move_func_t move_func;      /* Callback after moving link           */
-    H5L_copy_func_t copy_func;      /* Callback after copying link          */
-    H5L_traverse_func_t trav_func;  /* Callback during link traversal       */
-    H5L_delete_func_t del_func;     /* Callback for link deletion           */
-    H5L_query_func_t query_func;    /* Callback for queries                 */
+    int version;                    /**< Version number of this struct        */
+    H5L_type_t id;                  /**< Link type ID                         */
+    const char *comment;            /**< Comment for debugging                */
+    H5L_create_func_t create_func;  /**< Callback during link creation        */
+    H5L_move_func_t move_func;      /**< Callback after moving link           */
+    H5L_copy_func_t copy_func;      /**< Callback after copying link          */
+    H5L_traverse_func_t trav_func;  /**< Callback during link traversal       */
+    H5L_delete_func_t del_func;     /**< Callback for link deletion           */
+    H5L_query_func_t query_func;    /**< Callback for queries                 */
 } H5L_class_t;
 
-/* Prototype for H5Literate2/H5Literate_by_name2() operator
+/** Prototype for H5Literate2() / H5Literate_by_name2() operator
  * H5O_token_t version used in VOL layer and future public API calls
  */
 typedef herr_t (*H5L_iterate2_t)(hid_t group, const char *name, const H5L_info2_t *info,
     void *op_data);
 
-/* Callback for external link traversal */
+/** Callback for external link traversal */
 typedef herr_t (*H5L_elink_traverse_t)(const char *parent_file_name,
     const char *parent_group_name, const char *child_file_name,
     const char *child_object_name, unsigned *acc_flags, hid_t fapl_id,
@@ -147,6 +148,64 @@ typedef herr_t (*H5L_elink_traverse_t)(const char *parent_file_name,
 /*********************/
 /* Public Prototypes */
 /*********************/
+
+/**\ingroup H5L
+ *
+ * \brief Moves a link within an HDF5 file
+ *
+ * \fgdta_loc_id{src_loc}
+ * \param[in] src_name Original link name
+ * \fgdta_loc_id{dst_loc}
+ * \param[in] dst_name New link name
+ * \lcpl_id
+ * \lapl_id
+ *
+ * \return \herr_t
+ *
+ * \todo We need to get the location ID story straight!
+ *
+ * \details H5Lmove() moves a link within an HDF5 file. The original link,
+ *          \p src_name, is removed from \p src_loc and the new link,
+ *          \p dst_name, is inserted at dst_loc. This change is
+ *          accomplished as an atomic operation.
+ *
+ *          \p src_loc and \p src_name identify the original link.
+ *          \p src_loc is the original location identifier; \p src_name is
+ *          the path to the link and is interpreted relative to \p src_loc.
+ *
+ *          \p dst_loc and \p dst_name identify the new link. \p dst_loc is
+ *          either a file or group identifier; \p dst_name is the path to
+ *          the link and is interpreted relative to \p dst_loc.
+ *
+ *          \p lcpl_id and \p lapl_id are the link creation and link access
+ *          property lists, respectively, associated with the new link,
+ *          \p dst_name.
+ *
+ *          Through these property lists, several properties are available to
+ *          govern the behavior of H5Lmove(). The property controlling creation
+ *          of missing intermediate groups is set in the link creation property
+ *          list with H5Pset_create_intermediate_group(); H5Lmove() ignores any
+ *          other properties in the link creation property list. Properties
+ *          controlling character encoding, link traversals, and external link
+ *          prefixes are set in the link access property list with
+ *          H5Pset_char_encoding(), H5Pset_nlinks(), and H5Pset_elink_prefix(),
+ *          respectively.
+ *
+ * \note Note that H5Lmove() does not modify the value of the link; the new
+ *       link points to the same object as the original link pointed to.
+ *       Furthermore, if the object pointed to by the original link was already
+ *       open with a valid object identifier, that identifier will remain valid
+ *       after the call to H5Lmove().
+ *
+ * \attention Exercise care in moving links as it is possible to render data in
+ *            a file inaccessible with H5L_MOVE. If the link being moved is on
+ *            the only path leading to an HDF5 object, that object may become
+ *            permanently inaccessible in the file.
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Lmove(hid_t src_loc, const char *src_name, hid_t dst_loc,
     const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
 /**\ingroup H5L
@@ -213,8 +272,119 @@ H5_DLL herr_t H5Lmove(hid_t src_loc, const char *src_name, hid_t dst_loc,
  */
 H5_DLL herr_t H5Lcopy(hid_t src_loc, const char *src_name, hid_t dst_loc,
     const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
+/**\ingroup H5L
+ *
+ * \brief Creates a hard link to an object
+ *
+ * \fgdta_loc_id{cur_loc}
+ * \param[in] cur_name Name of the target object, which must already exist
+ * \fgdta_loc_id{dst_loc}
+ * \param[in] dst_name The name of the new link
+ * \lcpl_id
+ * \lapl_id
+ *
+ * \return \herr_t
+ *
+ * \todo We need to get the location ID story straight!
+ *
+ * \details H5Lcreate_hard() creates a new hard link to a pre-existing object
+ *          in an HDF5 file.
+ *
+ *          \p cur_loc and \p cur_name specify the location
+ *          and name, respectively, of the target object, i.e., the object that
+ *          the new hard link points to. \p dst_loc and \p dst_name specify the
+ *          location and name, respectively, of the new hard link.
+ *
+ *          \p cur_name and \p dst_name are interpreted relative to \p cur_loc
+ *          and \p dst_loc, respectively. If \p cur_loc and \p dst_loc are the
+ *          same location, the HDF5 macro #H5L_SAME_LOC can be used for either
+ *          parameter (but not both).
+ *
+ *          \p lcpl_id and \p lapl_id are the link creation and access property
+ *          lists associated with the new link.
+ *
+ * \note Hard and soft links are for use only if the target object is in the
+ *       current file. If the desired target object is in a different file from
+ *       the new link, an external link may be created with
+ *       H5Lcreate_external().
+ *
+ * \note The HDF5 library keeps a count of all hard links pointing to an
+ *       object; if the hard link count reaches zero (0), the object will be
+ *       deleted from the file. Creating new hard links to an object will
+ *       prevent it from being deleted if other links are removed. The
+ *       library maintains no similar count for soft links and they can dangle.
+ *
+ * \note The new link may be one of many that point to that object.
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Lcreate_hard(hid_t cur_loc, const char *cur_name,
     hid_t dst_loc, const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
+/**\ingroup H5L
+ *
+ * \brief Creates a soft link
+ *
+ * \param[in] link_target An HDF5 path name
+ * \fgdta_loc_id{link_loc_id}
+ * \param[in] link_name The name of the new link
+ * \lcpl_id
+ * \lapl_id
+ *
+ * \return \herr_t
+ *
+ * \todo We need to get the location ID story straight!
+ *
+ * \details H5Lcreate_soft() creates a new soft link to an object in an HDF5
+ *          file.
+ *
+ *          \p link_target specifies the HDF5 path name the soft link contains.
+ *          \p link_target can be an arbitrary HDF5 path name and is
+ *          interpreted only at lookup time. This path may be absolute in the
+ *          file or relative to \p link_loc_id.
+ *
+ *          \p link_loc_id and \p link_name specify the location and name,
+ *          respectively, of the new soft link. \p link_name is interpreted
+ *          relative to \p link_loc_id and must contain only the name of the soft
+ *          link; \p link_name may not contain any additional path elements.
+ *
+ *          If \p link_loc_id is a group identifier, the object pointed to by
+ *          \p link_name will be accessed as a member of that group. If
+ *          \p link_loc_id is a file identifier, the object will be accessed as a
+ *          member of the file's root group.
+ *
+ *          \p lcpl_id and \p lapl_id are the link creation and access property
+ *          lists associated with the new link.
+ *
+ *          For instance, if target_path is \c ./foo, \p link_loc_id specifies
+ *          \c ./x/y/bar, and the name of the new link is \c new_link, then a
+ *          subsequent request for \c ./x/y/bar/new_link will return same the
+ *          object as would be found at \c ./foo.
+ *
+ * \note H5Lcreate_soft() is for use only if the target object is in the
+ *       current file. If the desired target object is in a different file from
+ *       the new link, use H5Lcreate_external() to create an external link.
+ *
+ * \note Soft links and external links are also known as symbolic links as they
+ *       use a name to point to an object; hard links employ an object’s
+ *       address in the file.
+ *
+ * \note Unlike hard links, a soft link in an HDF5 file is allowed to dangle,
+ *       meaning that the target object need not exist at the time that the
+ *       link is created.
+ *
+ * \note The HDF5 library does not keep a count of soft links as it does of
+ *       hard links.
+ *
+ * \note The new link may be one of many that point to that object.
+ *
+ * \see H5Lcreate_hard(), H5Lcreate_external()
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Lcreate_soft(const char *link_target, hid_t link_loc_id,
     const char *link_name, hid_t lcpl_id, hid_t lapl_id);
 H5_DLL herr_t H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id);
