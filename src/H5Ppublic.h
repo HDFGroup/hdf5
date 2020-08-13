@@ -725,6 +725,41 @@ H5_DLL herr_t H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size, unsigned
  *--------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
+/*--------------------------------------------------------------------------*/
+/**\ingroup DCPL
+ *
+ * \brief Returns the layout of the raw data for a dataset
+ *
+ * \dcpl_id{plist_id}
+ *
+ * \return Returns the layout type (a non-negative value) of a dataset 
+ *         creation property list if successful. Valid return values are:
+ *         - #H5D_COMPACT: Raw data is stored in the object header in the 
+ *                        file.
+ *         - #H5D_CONTIGUOUS: Raw data is stored separately from the object 
+ *                           header in one contiguous chunk in the file.
+ *         - #H5D_CHUNKED: Raw data is stored separately from the object 
+ *                        header in chunks in separate locations in the 
+ *                        file.
+ *         - #H5D_VIRTUAL: Raw data is drawn from multiple datasets in 
+ *                        different files.
+ * \return
+ *         Otherwise, returns a negative value indicating failure.
+ *
+ * \details H5Pget_layout() returns the layout of the raw data for a 
+ *          dataset. This function is only valid for dataset creation 
+ *          property lists.
+ *
+ *          Note that a compact storage layout may affect writing data to 
+ *          the dataset with parallel applications. See the H5Dwrite() 
+ *          documentation for details.
+ *         
+ * \version 1.10.0 #H5D_VIRTUAL and #H5D_VIRTUAL_F added in this release.
+ *
+ * \since 1.0.0
+ *
+ *--------------------------------------------------------------------------
+ */
 H5_DLL H5D_layout_t H5Pget_layout(hid_t plist_id);
 /*--------------------------------------------------------------------------*/
 /**\ingroup DCPL
