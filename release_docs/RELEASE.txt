@@ -344,7 +344,7 @@ Bug Fixes since HDF5-1.10.5 release
     -------
     - Explicitly declared dlopen to use RTLD_LOCAL
 
-      dlopen documentation states that f neither RTLD_GLOBAL nor
+      dlopen documentation states that if neither RTLD_GLOBAL nor
       RTLD_LOCAL are specified, then the default behavior is unspecified.
       The default on linux is usually RTLD_LOCAL while macos will default
       to RTLD_GLOBAL.
@@ -365,7 +365,7 @@ Bug Fixes since HDF5-1.10.5 release
     - Fixed the segmentation fault when reading attributes with multiple threads
 
       It was reported that the reading of attributes with variable length string
-      datatype will crash with segmentation fault particularly when the number of 
+      datatype will crash with segmentation fault particularly when the number of
       threads is high (>16 threads).  The problem was due to the file pointer that
       was set in the variable length string datatype for the attribute.  That file
       pointer was already closed when the attribute was accessed.
@@ -613,7 +613,7 @@ Bug Fixes since HDF5-1.10.5 release
           3 : All level 2 information plus file names
 
       (ADB - 2020/07/20, HDFFV-10005)
-      
+
     - h5repack was fixed to repack the reference attributes properly.
       The code line that checks if the update of reference inside a compound
       datatype is misplaced outside the code block loop that carries out the
