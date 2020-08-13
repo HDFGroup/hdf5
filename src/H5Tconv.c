@@ -3641,7 +3641,7 @@ H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         if(0 == (buf_size = src->shared->u.atomic.u.r.cls->getsize(
                                 src->shared->u.atomic.u.r.file, s, src->shared->size,
                                 dst->shared->u.atomic.u.r.file, &dst_copy)))
-                            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "incorrect size")
+                            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to obtain size of reference")
 
                         /* Check if conversion buffer is large enough, resize if necessary. */
                         if(conv_buf_size < buf_size) {

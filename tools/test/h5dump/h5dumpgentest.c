@@ -3964,7 +3964,7 @@ static void gent_char(void)
  *
  * Return: void
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: May 28, 2003
  *
@@ -4404,7 +4404,7 @@ static void write_attr_in(hid_t loc_id,
  *
  * Return: void
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: May 28, 2003
  *
@@ -4854,7 +4854,7 @@ static void write_dset_in(hid_t loc_id,
  *
  * Return: void
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: May 19, 2003
  *
@@ -4923,7 +4923,7 @@ static void gent_attr_all(void)
  *
  * Purpose: utility function to write an attribute
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: May 19, 2003
  *
@@ -4962,7 +4962,7 @@ int write_attr(hid_t loc_id, int rank, hsize_t *dims, const char *attr_name,
  *
  * Return:
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: May 27, 2003
  *

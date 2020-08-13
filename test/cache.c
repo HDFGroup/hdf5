@@ -28239,7 +28239,6 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
  * Return:    void
  *
  * Programmer:    Mike McGreevy
- *              <mamcgree@hdfgroup.org>
  *              12/16/08
  *
  * Modifications:

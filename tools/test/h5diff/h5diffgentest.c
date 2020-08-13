@@ -31,7 +31,7 @@ size_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
  *
  * Purpose: generate files for h5diff testing
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 12, 2003
  *
