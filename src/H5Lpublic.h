@@ -198,7 +198,7 @@ typedef herr_t (*H5L_elink_traverse_t)(const char *parent_file_name,
  *       after the call to H5Lmove().
  *
  * \attention Exercise care in moving links as it is possible to render data in
- *            a file inaccessible with H5L_MOVE. If the link being moved is on
+ *            a file inaccessible with H5Lmove(). If the link being moved is on
  *            the only path leading to an HDF5 object, that object may become
  *            permanently inaccessible in the file.
  *
@@ -260,13 +260,9 @@ H5_DLL herr_t H5Lmove(hid_t src_loc, const char *src_name, hid_t dst_loc,
  *            not valid without a target object; to copy objects from one file
  *            to another, see H5Ocopy().
  *
- * \author Lames Laird
- *
- * \date Wednesday, March 29, 2006
+ * \see H5Ocopy()
  *
  * \since 1.8.0
- *
- * \see H5Ocopy()
  *
  *-------------------------------------------------------------------------
  */
@@ -614,14 +610,9 @@ H5_DLL herr_t H5Lunpack_elink_val(const void *ext_linkval/*in*/, size_t link_siz
  *            traversing an external link is always opened with the weak file
  *            close degree property setting, #H5F_CLOSE_WEAK .
  *
- * \author Quincey Koziol
- *
- * \date Wednesday, May 18, 2005
- *
- * \since 1.8.0
- *
  * \see H5Lcreate_hard(), H5Lcreate_soft(), H5Lcreate_ud()
  *
+ * \since 1.8.0
  *-------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Lcreate_external(const char *file_name, const char *obj_name,
