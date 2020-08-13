@@ -767,7 +767,7 @@ Bug Fixes since HDF5-1.10.3 release
     -------
     - Explicitly declared dlopen to use RTLD_LOCAL
 
-      dlopen documentation states that f neither RTLD_GLOBAL nor
+      dlopen documentation states that if neither RTLD_GLOBAL nor
       RTLD_LOCAL are specified, then the default behavior is unspecified.
       The default on linux is usually RTLD_LOCAL while macos will default
       to RTLD_GLOBAL.
