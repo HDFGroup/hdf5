@@ -383,7 +383,73 @@ H5_DLL herr_t H5Lcreate_hard(hid_t cur_loc, const char *cur_name,
  */
 H5_DLL herr_t H5Lcreate_soft(const char *link_target, hid_t link_loc_id,
     const char *link_name, hid_t lcpl_id, hid_t lapl_id);
+/**\ingroup H5L
+ *
+ * \brief Removes a link from a group
+ *
+ * \fgdta_loc_id
+ * \param[in] name Name of the link to delete
+ * \lapl_id
+ *
+ * \return \herr_t
+ *
+ * \todo We need to get the location ID story straight!
+ *
+ * \details H5Ldelete() removes the link specified by \p name from the location
+ *          \p loc_id.
+ *
+ *          If the link being removed is a hard link, H5Ldelete() also
+ *          decrements the link count for the object to which name points.
+ *          Unless there is a duplicate hard link in that group, this action
+ *          removes the object to which name points from the group that
+ *          previously contained it.
+ *
+ *          Object headers keep track of how many hard links refer to an
+ *          object; when the hard link count, also referred to as the reference
+ *          count, reaches zero, the object can be removed from the file. The
+ *          file space associated will then be released, i.e., identified in
+ *          memory as freespace. Objects which are open are not removed until
+ *          all identifiers to the object are closed.
+ *
+ * \attention Exercise caution in the use of H5Ldelete(); if the link being
+ *            removed is on the only path leading to an HDF5 object, that
+ *            object may become permanently inaccessible in the file.
+ *
+ * \see H5Lcreate_hard(), H5Lcreate_soft(), H5Lcreate_external()
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id);
+/**\ingroup H5L
+ *
+ * \brief Removes the \Emph{n}-th link in a group
+ *
+ * \fgdta_loc_id
+ * \param[in] group_name Name of subject group
+ * \param[in] idx_type Index or field which determines the order
+ * \param[in] order Order within field or index
+ * \param[in] n Link for which to retrieve information
+ * \lapl_id
+ *
+ * \return \herr_t
+ *
+ * \todo We need to get the location ID story straight!
+ *
+ * \details H5Ldelete_by_idx() removes the \Emph{n}-th link in a group
+ *          according to the specified order, \p order, in the specified index,
+ *          \p index.
+ *
+ *          If \p loc_id specifies the group in which the link resides,
+ *          \p group_name can be a dot (\c .).
+ *
+ * \see H5Ldelete()
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id);
 H5_DLL herr_t H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/,
@@ -632,36 +698,36 @@ H5_DLL herr_t H5Lcreate_external(const char *file_name, const char *obj_name,
 
 /* Typedefs */
 
-/* Information struct for link (for H5Lget_info1/H5Lget_info_by_idx1) */
+/** Information struct for link (for H5Lget_info1() / H5Lget_info_by_idx1()) */
 typedef struct {
-    H5L_type_t          type;           /* Type of link                   */
-    hbool_t             corder_valid;   /* Indicate if creation order is valid */
-    int64_t             corder;         /* Creation order                 */
-    H5T_cset_t          cset;           /* Character set of link name     */
+    H5L_type_t          type;           /**< Type of link                   */
+    hbool_t             corder_valid;   /**< Indicate if creation order is valid */
+    int64_t             corder;         /**< Creation order                 */
+    H5T_cset_t          cset;           /**< Character set of link name     */
     union {
-        haddr_t         address;        /* Address hard link points to    */
-        size_t          val_size;       /* Size of a soft link or UD link value */
+        haddr_t         address;        /**< Address hard link points to    */
+        size_t          val_size;       /**< Size of a soft link or UD link value */
     } u;
 } H5L_info1_t;
 
-/* Callback during link traversal */
+/** Callback during link traversal */
 typedef hid_t (*H5L_traverse_0_func_t)(const char *link_name, hid_t cur_group,
     const void *lnkdata, size_t lnkdata_size, hid_t lapl_id);
 
-/* User-defined link types */
+/** User-defined link types */
 typedef struct {
-    int version;                    /* Version number of this struct        */
-    H5L_type_t id;                  /* Link type ID                         */
-    const char *comment;            /* Comment for debugging                */
-    H5L_create_func_t create_func;  /* Callback during link creation        */
-    H5L_move_func_t move_func;      /* Callback after moving link           */
-    H5L_copy_func_t copy_func;      /* Callback after copying link          */
-    H5L_traverse_0_func_t trav_func; /* Callback during link traversal       */
-    H5L_delete_func_t del_func;     /* Callback for link deletion           */
-    H5L_query_func_t query_func;    /* Callback for queries                 */
+    int version;                    /**< Version number of this struct        */
+  H5L_type_t id;                    /**< Link type ID                         */
+    const char *comment;            /**< Comment for debugging                */
+    H5L_create_func_t create_func;  /**< Callback during link creation        */
+    H5L_move_func_t move_func;      /**< Callback after moving link           */
+    H5L_copy_func_t copy_func;      /**< Callback after copying link          */
+    H5L_traverse_0_func_t trav_func; /**< Callback during link traversal       */
+    H5L_delete_func_t del_func;     /**< Callback for link deletion           */
+    H5L_query_func_t query_func;    /**< Callback for queries                 */
 } H5L_class_0_t;
 
-/* Prototype for H5Literate1/H5Literate_by_name1() operator */
+/** Prototype for H5Literate1() / H5Literate_by_name1() operator */
 typedef herr_t (*H5L_iterate1_t)(hid_t group, const char *name, const H5L_info1_t *info,
     void *op_data);
 
