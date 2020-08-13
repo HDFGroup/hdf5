@@ -136,7 +136,7 @@ Bug Fixes since HDF5-1.12.0 release
     -------
     - Explicitly declared dlopen to use RTLD_LOCAL
 
-      dlopen documentation states that f neither RTLD_GLOBAL nor
+      dlopen documentation states that if neither RTLD_GLOBAL nor
       RTLD_LOCAL are specified, then the default behavior is unspecified.
       The default on linux is usually RTLD_LOCAL while macos will default
       to RTLD_GLOBAL.
@@ -146,7 +146,7 @@ Bug Fixes since HDF5-1.12.0 release
     - Fixed the segmentation fault when reading attributes with multiple threads
 
       It was reported that the reading of attributes with variable length string
-      datatype will crash with segmentation fault particularly when the number of 
+      datatype will crash with segmentation fault particularly when the number of
       threads is high (>16 threads).  The problem was due to the file pointer that
       was set in the variable length string datatype for the attribute.  That file
       pointer was already closed when the attribute was accessed.
@@ -212,7 +212,7 @@ Bug Fixes since HDF5-1.12.0 release
 
     - Fixed configure issue when building HDF5 with NAG Fortran 7.0.
 
-    HDF5 now accounts for the addition of half-precision floating-point 
+    HDF5 now accounts for the addition of half-precision floating-point
     in NAG 7.0 with a KIND=16.
 
     (MSB - 2020/02/28, HDFFV-11033)
