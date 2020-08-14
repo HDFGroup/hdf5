@@ -7,20 +7,16 @@
  *
  * \todo Write an introduction.
  *
- * \section builtin_types Predefined HDF5 Datatypes
+ * \section quick_links Quick Links
  *
- * \todo Revise and transplant
- *       https://portal.hdfgroup.org/display/HDF5/HDF5+Predefined+Datatypes
+ * <ul>
+ * <li>\ref PDT "Predefined Datatypes"</li>
+ * <li><a href="https://portal.hdfgroup.org/display/HDF5/API+Compatibility+Macros">API Compatibility Macros</a></li>
+ * <li><a href="https://hdf5.wiki/">HDF5 Wiki</a></li>
+ * </ul>
  *
  * \section using_locations The Use of Locations (Identifier + Name) in the HDF5 API
  *
  * \todo Make this crystal clear!
- *
- * \section api_compat API Compatibility Macros
- *
- * \todo Revise and transplant
- *       https://portal.hdfgroup.org/display/HDF5/API+Compatibility+Macros
- *
- * For all other types of documentation check the HDF5 Wiki at https://hdf5.wiki.
  *
  */

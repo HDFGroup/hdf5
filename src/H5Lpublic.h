@@ -115,6 +115,7 @@ typedef herr_t (*H5L_delete_func_t)(const char *link_name, hid_t file,
 typedef ssize_t (*H5L_query_func_t)(const char *link_name, const void *lnkdata,
     size_t lnkdata_size, void *buf /*out*/, size_t buf_size);
 
+/** Link prototype */
 typedef struct {
     int version;                    /**< Version number of this struct        */
     H5L_type_t id;                  /**< Link type ID                         */
@@ -383,11 +384,187 @@ H5_DLL herr_t H5Lcreate_hard(hid_t cur_loc, const char *cur_name,
  */
 H5_DLL herr_t H5Lcreate_soft(const char *link_target, hid_t link_loc_id,
     const char *link_name, hid_t lcpl_id, hid_t lapl_id);
+/**\ingroup H5L
+ *
+ * \brief Removes a link from a group
+ *
+ * \fgdta_loc_id
+ * \param[in] name Name of the link to delete
+ * \lapl_id
+ *
+ * \return \herr_t
+ *
+ * \todo We need to get the location ID story straight!
+ *
+ * \details H5Ldelete() removes the link specified by \p name from the location
+ *          \p loc_id.
+ *
+ *          If the link being removed is a hard link, H5Ldelete() also
+ *          decrements the link count for the object to which name points.
+ *          Unless there is a duplicate hard link in that group, this action
+ *          removes the object to which name points from the group that
+ *          previously contained it.
+ *
+ *          Object headers keep track of how many hard links refer to an
+ *          object; when the hard link count, also referred to as the reference
+ *          count, reaches zero, the object can be removed from the file. The
+ *          file space associated will then be released, i.e., identified in
+ *          memory as freespace. Objects which are open are not removed until
+ *          all identifiers to the object are closed.
+ *
+ * \attention Exercise caution in the use of H5Ldelete(); if the link being
+ *            removed is on the only path leading to an HDF5 object, that
+ *            object may become permanently inaccessible in the file.
+ *
+ * \see H5Lcreate_hard(), H5Lcreate_soft(), H5Lcreate_external()
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id);
+/**\ingroup H5L
+ *
+ * \brief Removes the \Emph{n}-th link in a group
+ *
+ * \fgdta_loc_id
+ * \param[in] group_name Name of subject group
+ * \param[in] idx_type Index or field which determines the order
+ * \param[in] order Order within field or index
+ * \param[in] n Link for which to retrieve information
+ * \lapl_id
+ *
+ * \return \herr_t
+ *
+ * \todo We need to get the location ID story straight!
+ *
+ * \details H5Ldelete_by_idx() removes the \Emph{n}-th link in a group
+ *          according to the specified order, \p order, in the specified index,
+ *          \p index.
+ *
+ *          If \p loc_id specifies the group in which the link resides,
+ *          \p group_name can be a dot (\c .).
+ *
+ * \see H5Ldelete()
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id);
+/**\ingroup H5L
+ *
+ * \brief Returns the value of a link
+ *
+ * \fgdta_loc_id
+ * \param[in] name Link name
+ * \param[out] buf The buffer to hold the link value
+ * \param[in] size Maximum number of bytes of link value to be returned
+ * \lapl_id
+ *
+ * \return \herr_t
+ *
+ * \todo We need to get the location ID story straight!
+ *
+ * \details H5Lget_val() returns tha value of link \p name. For smbolic links,
+ *          this is the path to which the link points, including the null
+ *          terminator. For external and user-defined links, it is the link
+ *          buffer.
+ *
+ *          \p size is the size of \p buf and should be the size of the link
+ *          value being returned. This size value can be determined through a
+ *          call to H5Lget_info(); it is returned in the \c val_size field of
+ *          the #H5L_info_t struct.
+ *
+ *          If \p size is smaller than the size of the returned value, then the
+ *          string stored in \p buf will be truncated to \p size bytes. For
+ *          soft links, this means that the value will not be null terminated.
+ *
+ *          In the case of external links, the target file and object names are
+ *          extracted from \p buf by calling H5Lunpack_elink_val().
+ *
+ *          The link class of link \p name can be determined with a call to
+ *          H5Lget_info().
+ *
+ *          \p lapl_id specifies the link access property list associated with
+ *          the link \p name. In the general case, when default link access
+ *          properties are acceptable, this can be passed in as #H5P_DEFAULT. An
+ *          example of a situation that requires a non-default link access
+ *          property list is when the link is an external link; an external
+ *          link may require that a link prefix be set in a link access
+ *          property list (see H5Pset_elink_prefix()).
+ *
+ *          This function should be used only after H5Lget_info() has been
+ *          called to verify that \p name is a symbolic link. This can be
+ *          deteremined from the \c link_type field of the #H5L_info_t struct.
+ *
+ * \note This function will fail if called on a hard link.
+ *
+ * \see H5Lget_val_by_idx()
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/,
     size_t size, hid_t lapl_id);
+/**\ingroup H5L
+ *
+ * \brief Retrieves value of the \Emph{n}-th link in a group, according to the order within an index
+ *
+ * \fgdta_loc_id
+ * \param[in] group_name Group name
+ * \param[in] idx_type Type of index
+ * \param[in] order Order within field or index
+ * \param[in] n Link position for which to retrieve information
+ * \param[out] buf The buffer to hold the link value
+ * \param[in] size Maximum number of bytes of link value to be returned
+ * \lapl_id
+ *
+ * \return \herr_t
+ *
+ * \todo We need to get the location ID story straight!
+ *
+ * \details H5Lget_val_by_idx() retrieves the value of the \Emph{n}-th link in
+ *          a group, according to the specified order, \p order, within an
+ *          index, \p index.
+ *
+ *          For soft links, the value is an HDF5 path name.
+ *
+ *          For external links, this is a compound value containing file and
+ *          path name information; to use this external link information, it
+ *          must first be decoded with H5Lunpack_elink_val()
+ *
+ *          For user-defined links, this value will be described in the
+ *          definition of the user-defined link type.
+ *
+ *          \p loc_id specifies the location identifier of the group specified
+ *          by \p group_name.
+ *
+ *          \p group_name specifies the group in which the link exists. If
+ *          \p loc_id already specifies the group in which the link exists,
+ *          \p group_name must be a dot (\c .).
+ *
+ *          The size in bytes of link_val is specified in \p size. The size
+ *          value can be determined through a call to H5Lget_info_by_idx(); it
+ *          is returned in the \c val_size field of the #H5L_info_t struct. If
+ *          size is smaller than the size of the returned value, then the
+ *          string stored in link_val will be truncated to size bytes. For soft
+ *          links, this means that the value will not be null terminated.
+ *
+ *          If the type of the link is unknown or uncertain, H5Lget_val_by_idx()
+ *          should be called only after the type has been determined via a call
+ *          to H5Lget_info_by_idx().
+ *
+ * \note This function will fail if called on a hard link.
+ *
+ * \see H5Lget_val()
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     void *buf/*out*/, size_t size, hid_t lapl_id);
@@ -632,36 +809,36 @@ H5_DLL herr_t H5Lcreate_external(const char *file_name, const char *obj_name,
 
 /* Typedefs */
 
-/* Information struct for link (for H5Lget_info1/H5Lget_info_by_idx1) */
+/** Information struct for link (for H5Lget_info1() / H5Lget_info_by_idx1()) */
 typedef struct {
-    H5L_type_t          type;           /* Type of link                   */
-    hbool_t             corder_valid;   /* Indicate if creation order is valid */
-    int64_t             corder;         /* Creation order                 */
-    H5T_cset_t          cset;           /* Character set of link name     */
+    H5L_type_t          type;           /**< Type of link                   */
+    hbool_t             corder_valid;   /**< Indicate if creation order is valid */
+    int64_t             corder;         /**< Creation order                 */
+    H5T_cset_t          cset;           /**< Character set of link name     */
     union {
-        haddr_t         address;        /* Address hard link points to    */
-        size_t          val_size;       /* Size of a soft link or UD link value */
+        haddr_t         address;        /**< Address hard link points to    */
+        size_t          val_size;       /**< Size of a soft link or UD link value */
     } u;
 } H5L_info1_t;
 
-/* Callback during link traversal */
+/** Callback during link traversal */
 typedef hid_t (*H5L_traverse_0_func_t)(const char *link_name, hid_t cur_group,
     const void *lnkdata, size_t lnkdata_size, hid_t lapl_id);
 
-/* User-defined link types */
+/** User-defined link types */
 typedef struct {
-    int version;                    /* Version number of this struct        */
-    H5L_type_t id;                  /* Link type ID                         */
-    const char *comment;            /* Comment for debugging                */
-    H5L_create_func_t create_func;  /* Callback during link creation        */
-    H5L_move_func_t move_func;      /* Callback after moving link           */
-    H5L_copy_func_t copy_func;      /* Callback after copying link          */
-    H5L_traverse_0_func_t trav_func; /* Callback during link traversal       */
-    H5L_delete_func_t del_func;     /* Callback for link deletion           */
-    H5L_query_func_t query_func;    /* Callback for queries                 */
+    int version;                    /**< Version number of this struct        */
+  H5L_type_t id;                    /**< Link type ID                         */
+    const char *comment;            /**< Comment for debugging                */
+    H5L_create_func_t create_func;  /**< Callback during link creation        */
+    H5L_move_func_t move_func;      /**< Callback after moving link           */
+    H5L_copy_func_t copy_func;      /**< Callback after copying link          */
+    H5L_traverse_0_func_t trav_func; /**< Callback during link traversal       */
+    H5L_delete_func_t del_func;     /**< Callback for link deletion           */
+    H5L_query_func_t query_func;    /**< Callback for queries                 */
 } H5L_class_0_t;
 
-/* Prototype for H5Literate1/H5Literate_by_name1() operator */
+/** Prototype for H5Literate1() / H5Literate_by_name1() operator */
 typedef herr_t (*H5L_iterate1_t)(hid_t group, const char *name, const H5L_info1_t *info,
     void *op_data);
 

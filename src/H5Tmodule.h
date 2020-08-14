@@ -49,6 +49,7 @@
  * \ingroup H5T
  * \defgroup PDT Predefined Datatypes
  * \ingroup H5T
+ * \details What is a predefined HDF5 datatype?
  * \defgroup PDTB Bitfields
  * \ingroup PDT
  * \defgroup PDTF Floating-point Numbers
