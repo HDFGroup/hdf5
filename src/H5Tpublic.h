@@ -23,193 +23,198 @@
 
 #define HOFFSET(S,M)    (offsetof(S,M))
 
-/* These are the various classes of datatypes */
-/* If this goes over 16 types (0-15), the file format will need to change) */
+/** These are the various classes of datatypes
+ *  \internal If this goes over 16 types (0-15), the file format will need to
+ *            change.
+ */
 typedef enum H5T_class_t {
-    H5T_NO_CLASS         = -1,  /*error                                      */
-    H5T_INTEGER          = 0,   /*integer types                              */
-    H5T_FLOAT            = 1,   /*floating-point types                       */
-    H5T_TIME             = 2,   /*date and time types                        */
-    H5T_STRING           = 3,   /*character string types                     */
-    H5T_BITFIELD         = 4,   /*bit field types                            */
-    H5T_OPAQUE           = 5,   /*opaque types                               */
-    H5T_COMPOUND         = 6,   /*compound types                             */
-    H5T_REFERENCE        = 7,   /*reference types                            */
-    H5T_ENUM		 = 8,	/*enumeration types                          */
-    H5T_VLEN		 = 9,	/*Variable-Length types                      */
-    H5T_ARRAY	         = 10,	/*Array types                                */
+    H5T_NO_CLASS         = -1,  /**< error                                   */
+    H5T_INTEGER          = 0,   /**< integer types                           */
+    H5T_FLOAT            = 1,   /**< floating-point types                    */
+    H5T_TIME             = 2,   /**< date and time types                     */
+    H5T_STRING           = 3,   /**< character string types                  */
+    H5T_BITFIELD         = 4,   /**< bit field types                         */
+    H5T_OPAQUE           = 5,   /**< opaque types                            */
+    H5T_COMPOUND         = 6,   /**< compound types                          */
+    H5T_REFERENCE        = 7,   /**< reference types                         */
+    H5T_ENUM		 = 8,	    /**< enumeration types                       */
+    H5T_VLEN		 = 9,	    /**< variable-Length types                   */
+    H5T_ARRAY	         = 10,	/**< array types                             */
 
     H5T_NCLASSES                /*this must be last                          */
 } H5T_class_t;
 
-/* Byte orders */
+/** Byte orders */
 typedef enum H5T_order_t {
-    H5T_ORDER_ERROR      = -1,  /*error                                      */
-    H5T_ORDER_LE         = 0,   /*little endian                              */
-    H5T_ORDER_BE         = 1,   /*bit endian                                 */
-    H5T_ORDER_VAX        = 2,   /*VAX mixed endian                           */
-    H5T_ORDER_MIXED      = 3,   /*Compound type with mixed member orders     */
-    H5T_ORDER_NONE       = 4    /*no particular order (strings, bits,..)     */
+    H5T_ORDER_ERROR      = -1,  /**< error                                   */
+    H5T_ORDER_LE         = 0,   /**< little endian                           */
+    H5T_ORDER_BE         = 1,   /**< bit endian                              */
+    H5T_ORDER_VAX        = 2,   /**< VAX mixed endian                        */
+    H5T_ORDER_MIXED      = 3,   /**< Compound type with mixed member orders  */
+    H5T_ORDER_NONE       = 4    /**< no particular order (strings, bits,..)  */
     /*H5T_ORDER_NONE must be last */
 } H5T_order_t;
 
-/* Types of integer sign schemes */
+/** Types of integer sign schemes */
 typedef enum H5T_sign_t {
-    H5T_SGN_ERROR        = -1,  /*error                                      */
-    H5T_SGN_NONE         = 0,   /*this is an unsigned type                   */
-    H5T_SGN_2            = 1,   /*two's complement                           */
+    H5T_SGN_ERROR        = -1,  /**< error                                   */
+    H5T_SGN_NONE         = 0,   /**< this is an unsigned type                */
+    H5T_SGN_2            = 1,   /**< two's complement                        */
 
     H5T_NSGN             = 2    /*this must be last!                         */
 } H5T_sign_t;
 
-/* Floating-point normalization schemes */
+/** Floating-point normalization schemes */
 typedef enum H5T_norm_t {
-    H5T_NORM_ERROR       = -1,  /*error                                      */
-    H5T_NORM_IMPLIED     = 0,   /*msb of mantissa isn't stored, always 1     */
-    H5T_NORM_MSBSET      = 1,   /*msb of mantissa is always 1                */
-    H5T_NORM_NONE        = 2    /*not normalized                             */
+    H5T_NORM_ERROR       = -1,  /**< error                                   */
+    H5T_NORM_IMPLIED     = 0,   /**< msb of mantissa isn't stored, always 1  */
+    H5T_NORM_MSBSET      = 1,   /**< msb of mantissa is always 1             */
+    H5T_NORM_NONE        = 2    /**< not normalized                          */
     /*H5T_NORM_NONE must be last */
 } H5T_norm_t;
 
-/*
- * Character set to use for text strings.  Do not change these values since
- * they appear in HDF5 files!
+/** Character set to use for text strings.
+ * \internal Do not change these values since they appear in HDF5 files!
  */
 typedef enum H5T_cset_t {
-    H5T_CSET_ERROR       = -1,  /*error                                      */
-    H5T_CSET_ASCII       = 0,   /*US ASCII                                   */
-    H5T_CSET_UTF8        = 1,   /*UTF-8 Unicode encoding		     */
-    H5T_CSET_RESERVED_2  = 2,   /*reserved for later use		     */
-    H5T_CSET_RESERVED_3  = 3,   /*reserved for later use		     */
-    H5T_CSET_RESERVED_4  = 4,   /*reserved for later use		     */
-    H5T_CSET_RESERVED_5  = 5,   /*reserved for later use		     */
-    H5T_CSET_RESERVED_6  = 6,   /*reserved for later use		     */
-    H5T_CSET_RESERVED_7  = 7,   /*reserved for later use		     */
-    H5T_CSET_RESERVED_8  = 8,   /*reserved for later use		     */
-    H5T_CSET_RESERVED_9  = 9,   /*reserved for later use		     */
-    H5T_CSET_RESERVED_10 = 10,  /*reserved for later use		     */
-    H5T_CSET_RESERVED_11 = 11,  /*reserved for later use		     */
-    H5T_CSET_RESERVED_12 = 12,  /*reserved for later use		     */
-    H5T_CSET_RESERVED_13 = 13,  /*reserved for later use		     */
-    H5T_CSET_RESERVED_14 = 14,  /*reserved for later use		     */
-    H5T_CSET_RESERVED_15 = 15   /*reserved for later use		     */
+    H5T_CSET_ERROR       = -1,  /**< error                           */
+    H5T_CSET_ASCII       = 0,   /**< US ASCII                        */
+    H5T_CSET_UTF8        = 1,   /**< UTF-8 Unicode encoding		     */
+    H5T_CSET_RESERVED_2  = 2,   /**< reserved for later use		     */
+    H5T_CSET_RESERVED_3  = 3,   /**< reserved for later use		     */
+    H5T_CSET_RESERVED_4  = 4,   /**< reserved for later use		     */
+    H5T_CSET_RESERVED_5  = 5,   /**< reserved for later use		     */
+    H5T_CSET_RESERVED_6  = 6,   /**< reserved for later use		     */
+    H5T_CSET_RESERVED_7  = 7,   /**< reserved for later use		     */
+    H5T_CSET_RESERVED_8  = 8,   /**< reserved for later use		     */
+    H5T_CSET_RESERVED_9  = 9,   /**< reserved for later use		     */
+    H5T_CSET_RESERVED_10 = 10,  /**< reserved for later use		     */
+    H5T_CSET_RESERVED_11 = 11,  /**< reserved for later use		     */
+    H5T_CSET_RESERVED_12 = 12,  /**< reserved for later use		     */
+    H5T_CSET_RESERVED_13 = 13,  /**< reserved for later use		     */
+    H5T_CSET_RESERVED_14 = 14,  /**< reserved for later use		     */
+    H5T_CSET_RESERVED_15 = 15   /**< reserved for later use		     */
 } H5T_cset_t;
 #define H5T_NCSET H5T_CSET_RESERVED_2    		/*Number of character sets actually defined  */
 
-/*
- * Type of padding to use in character strings.  Do not change these values
- * since they appear in HDF5 files!
+/** Type of padding to use in character strings.
+ * \internal  Do not change these values since they appear in HDF5 files!
  */
 typedef enum H5T_str_t {
-    H5T_STR_ERROR        = -1,  /*error                                      */
-    H5T_STR_NULLTERM     = 0,   /*null terminate like in C                   */
-    H5T_STR_NULLPAD      = 1,   /*pad with nulls                             */
-    H5T_STR_SPACEPAD     = 2,   /*pad with spaces like in Fortran            */
-    H5T_STR_RESERVED_3   = 3,   /*reserved for later use		     */
-    H5T_STR_RESERVED_4   = 4,   /*reserved for later use		     */
-    H5T_STR_RESERVED_5   = 5,   /*reserved for later use		     */
-    H5T_STR_RESERVED_6   = 6,   /*reserved for later use		     */
-    H5T_STR_RESERVED_7   = 7,   /*reserved for later use		     */
-    H5T_STR_RESERVED_8   = 8,   /*reserved for later use		     */
-    H5T_STR_RESERVED_9   = 9,   /*reserved for later use		     */
-    H5T_STR_RESERVED_10  = 10,  /*reserved for later use		     */
-    H5T_STR_RESERVED_11  = 11,  /*reserved for later use		     */
-    H5T_STR_RESERVED_12  = 12,  /*reserved for later use		     */
-    H5T_STR_RESERVED_13  = 13,  /*reserved for later use		     */
-    H5T_STR_RESERVED_14  = 14,  /*reserved for later use		     */
-    H5T_STR_RESERVED_15  = 15   /*reserved for later use		     */
+    H5T_STR_ERROR        = -1,  /**< error                           */
+    H5T_STR_NULLTERM     = 0,   /**< null terminate like in C        */
+    H5T_STR_NULLPAD      = 1,   /**< pad with nulls                  */
+    H5T_STR_SPACEPAD     = 2,   /**< pad with spaces like in Fortran */
+    H5T_STR_RESERVED_3   = 3,   /**< reserved for later use		     */
+    H5T_STR_RESERVED_4   = 4,   /**< reserved for later use		     */
+    H5T_STR_RESERVED_5   = 5,   /**< reserved for later use		     */
+    H5T_STR_RESERVED_6   = 6,   /**< reserved for later use		     */
+    H5T_STR_RESERVED_7   = 7,   /**< reserved for later use		     */
+    H5T_STR_RESERVED_8   = 8,   /**< reserved for later use		     */
+    H5T_STR_RESERVED_9   = 9,   /**< reserved for later use		     */
+    H5T_STR_RESERVED_10  = 10,  /**< reserved for later use		     */
+    H5T_STR_RESERVED_11  = 11,  /**< reserved for later use		     */
+    H5T_STR_RESERVED_12  = 12,  /**< reserved for later use		     */
+    H5T_STR_RESERVED_13  = 13,  /**< reserved for later use		     */
+    H5T_STR_RESERVED_14  = 14,  /**< reserved for later use		     */
+    H5T_STR_RESERVED_15  = 15   /**< reserved for later use		     */
 } H5T_str_t;
 #define H5T_NSTR H5T_STR_RESERVED_3		/*num H5T_str_t types actually defined	     */
 
-/* Type of padding to use in other atomic types */
+/** Type of padding to use in other atomic types */
 typedef enum H5T_pad_t {
-    H5T_PAD_ERROR        = -1,  /*error                                      */
-    H5T_PAD_ZERO         = 0,   /*always set to zero                         */
-    H5T_PAD_ONE          = 1,   /*always set to one                          */
-    H5T_PAD_BACKGROUND   = 2,   /*set to background value                    */
+    H5T_PAD_ERROR        = -1,  /**< error                           */
+    H5T_PAD_ZERO         = 0,   /**< always set to zero              */
+    H5T_PAD_ONE          = 1,   /**< always set to one               */
+    H5T_PAD_BACKGROUND   = 2,   /**< set to background value         */
 
     H5T_NPAD             = 3    /*THIS MUST BE LAST                          */
 } H5T_pad_t;
 
-/* Commands sent to conversion functions */
+/** Commands sent to conversion functions */
 typedef enum H5T_cmd_t {
-    H5T_CONV_INIT	= 0,	/*query and/or initialize private data	     */
-    H5T_CONV_CONV	= 1, 	/*convert data from source to dest datatype */
-    H5T_CONV_FREE	= 2	/*function is being removed from path	     */
+    H5T_CONV_INIT	= 0,	/**< query and/or initialize private data	     */
+    H5T_CONV_CONV	= 1, 	/**< convert data from source to dest datatype */
+    H5T_CONV_FREE	= 2	/**< function is being removed from path	     */
 } H5T_cmd_t;
 
-/* How is the `bkg' buffer used by the conversion function? */
+/** How is the `bkg' buffer used by the conversion function? */
 typedef enum H5T_bkg_t {
-    H5T_BKG_NO		= 0, 	/*background buffer is not needed, send NULL */
-    H5T_BKG_TEMP	= 1,	/*bkg buffer used as temp storage only       */
-    H5T_BKG_YES		= 2	/*init bkg buf with data before conversion   */
+    H5T_BKG_NO		= 0, 	/**< background buffer is not needed, send NULL */
+    H5T_BKG_TEMP	= 1,	/**< bkg buffer used as temp storage only       */
+    H5T_BKG_YES		= 2	/**< init bkg buf with data before conversion   */
 } H5T_bkg_t;
 
-/* Type conversion client data */
+/** Type conversion client data */
 typedef struct H5T_cdata_t {
-    H5T_cmd_t		command;/*what should the conversion function do?    */
-    H5T_bkg_t		need_bkg;/*is the background buffer needed?	     */
-    hbool_t		recalc;	/*recalculate private data		     */
-    void		*priv;	/*private data				     */
+    H5T_cmd_t		command;/**< what should the conversion function do?    */
+    H5T_bkg_t		need_bkg;/**< is the background buffer needed?	     */
+    hbool_t		recalc;	/**< recalculate private data		     */
+    void		*priv;	/**< private data				     */
 } H5T_cdata_t;
 
-/* Conversion function persistence */
+/** Conversion function persistence */
 typedef enum H5T_pers_t {
-    H5T_PERS_DONTCARE	= -1, 	/*wild card				     */
-    H5T_PERS_HARD	= 0,	/*hard conversion function		     */
-    H5T_PERS_SOFT	= 1 	/*soft conversion function		     */
+    H5T_PERS_DONTCARE	= -1, 	/**< wild card				     */
+    H5T_PERS_HARD	= 0,	/**< hard conversion function		     */
+    H5T_PERS_SOFT	= 1 	/**< soft conversion function		     */
 } H5T_pers_t;
 
-/* The order to retrieve atomic native datatype */
+/** The order to retrieve atomic native datatype */
 typedef enum H5T_direction_t {
-    H5T_DIR_DEFAULT     = 0,    /*default direction is inscendent            */
-    H5T_DIR_ASCEND      = 1,    /*in inscendent order                        */
-    H5T_DIR_DESCEND     = 2     /*in descendent order                        */
+    H5T_DIR_DEFAULT     = 0,    /**< default direction is inscendent        */
+    H5T_DIR_ASCEND      = 1,    /**< in inscendent order                    */
+    H5T_DIR_DESCEND     = 2     /**< in descendent order                    */
 } H5T_direction_t;
 
-/* The exception type passed into the conversion callback function */
+/** The exception type passed into the conversion callback function */
 typedef enum H5T_conv_except_t {
-    H5T_CONV_EXCEPT_RANGE_HI       = 0,   /*source value is greater than destination's range */
-    H5T_CONV_EXCEPT_RANGE_LOW      = 1,   /*source value is less than destination's range    */
-    H5T_CONV_EXCEPT_PRECISION      = 2,   /*source value loses precision in destination      */
-    H5T_CONV_EXCEPT_TRUNCATE       = 3,   /*source value is truncated in destination         */
-    H5T_CONV_EXCEPT_PINF           = 4,   /*source value is positive infinity(floating number) */
-    H5T_CONV_EXCEPT_NINF           = 5,   /*source value is negative infinity(floating number) */
-    H5T_CONV_EXCEPT_NAN            = 6    /*source value is NaN(floating number)             */
+    H5T_CONV_EXCEPT_RANGE_HI       = 0,   /**< source value is greater than destination's range */
+    H5T_CONV_EXCEPT_RANGE_LOW      = 1,   /**< source value is less than destination's range    */
+    H5T_CONV_EXCEPT_PRECISION      = 2,   /**< source value loses precision in destination      */
+    H5T_CONV_EXCEPT_TRUNCATE       = 3,   /**< source value is truncated in destination         */
+    H5T_CONV_EXCEPT_PINF           = 4,   /**< source value is positive infinity(floating number) */
+    H5T_CONV_EXCEPT_NINF           = 5,   /**< source value is negative infinity(floating number) */
+    H5T_CONV_EXCEPT_NAN            = 6    /**< source value is NaN(floating number)             */
 } H5T_conv_except_t;
 
-/* The return value from conversion callback function H5T_conv_except_func_t */
+/** The return value from conversion callback function H5T_conv_except_func_t() */
 typedef enum H5T_conv_ret_t {
-    H5T_CONV_ABORT      = -1,   /*abort conversion                           */
-    H5T_CONV_UNHANDLED  = 0,    /*callback function failed to handle the exception      */
-    H5T_CONV_HANDLED    = 1     /*callback function handled the exception successfully  */
+    H5T_CONV_ABORT      = -1,   /**< abort conversion                           */
+    H5T_CONV_UNHANDLED  = 0,    /**< callback function failed to handle the exception      */
+    H5T_CONV_HANDLED    = 1     /**< callback function handled the exception successfully  */
 } H5T_conv_ret_t;
 
-/* Variable Length Datatype struct in memory */
-/* (This is only used for VL sequences, not VL strings, which are stored in char *'s) */
+/** Variable Length Datatype struct in memory (This is only used for VL
+ * sequences, not VL strings, which are stored in char *'s)
+ */
 typedef struct {
-    size_t len; /* Length of VL data (in base type units) */
-    void *p;    /* Pointer to VL data */
+    size_t len; /**< Length of VL data (in base type units) */
+    void *p;    /**< Pointer to VL data */
 } hvl_t;
 
 /* Variable Length String information */
-#define H5T_VARIABLE    ((size_t)(-1))  /* Indicate that a string is variable length (null-terminated in C, instead of fixed length) */
+/** Indicate that a string is variable length (null-terminated in C, instead of fixed length) */
+#define H5T_VARIABLE    ((size_t)(-1))
 
 /* Opaque information */
-#define H5T_OPAQUE_TAG_MAX      256     /* Maximum length of an opaque tag */
-                                        /* This could be raised without too much difficulty */
+/** Maximum length of an opaque tag
+ * \internal This could be raised without too much difficulty
+ */
+#define H5T_OPAQUE_TAG_MAX      256
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* All datatype conversion functions are... */
+/** All datatype conversion functions are... */
 typedef herr_t (*H5T_conv_t) (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
       size_t nelmts, size_t buf_stride, size_t bkg_stride, void *buf,
       void *bkg, hid_t dset_xfer_plist);
 
-/* Exception handler.  If an exception like overflow happenes during conversion,
- * this function is called if it's registered through H5Pset_type_conv_cb.
+/** Exception handler.  If an exception like overflow happenes during conversion,
+ * this function is called if it's registered through H5Pset_type_conv_cb().
  */
 typedef H5T_conv_ret_t (*H5T_conv_except_func_t)(H5T_conv_except_t except_type,
     hid_t src_id, hid_t dst_id, void *src_buf, void *dst_buf, void *user_data);
@@ -400,15 +405,14 @@ H5_DLLVAR hid_t H5T_UNIX_D32LE_g;
 H5_DLLVAR hid_t H5T_UNIX_D64BE_g;
 H5_DLLVAR hid_t H5T_UNIX_D64LE_g;
 
-/*
- * Types particular to the C language.  String types use `bytes' instead
- * of `bits' as their size.
+/** \ingroup PDTS
+ * String datatype in C (size defined in bytes rather than in bits)
  */
 #define H5T_C_S1		(H5OPEN H5T_C_S1_g)
 H5_DLLVAR hid_t H5T_C_S1_g;
 
-/*
- * Types particular to Fortran.
+/** \ingroup PDTS
+ * String datatype in Fortran (as defined for the HDF5 C library)
  */
 #define H5T_FORTRAN_S1		(H5OPEN H5T_FORTRAN_S1_g)
 H5_DLLVAR hid_t H5T_FORTRAN_S1_g;
@@ -429,7 +433,13 @@ H5_DLLVAR hid_t H5T_FORTRAN_S1_g;
 #define H5T_INTEL_B16		H5T_STD_B16LE
 #define H5T_INTEL_B32		H5T_STD_B32LE
 #define H5T_INTEL_B64		H5T_STD_B64LE
+/** \ingroup PDTF
+ * 32-bit little-endian IEEE floating-point numbers for Intel CPUs
+ */
 #define H5T_INTEL_F32		H5T_IEEE_F32LE
+/** \ingroup PDTF
+ * 64-bit little-endian IEEE floating-point numbers for Intel CPUs
+ */
 #define H5T_INTEL_F64		H5T_IEEE_F64LE
 
 /*
@@ -448,7 +458,13 @@ H5_DLLVAR hid_t H5T_FORTRAN_S1_g;
 #define H5T_ALPHA_B16		H5T_STD_B16LE
 #define H5T_ALPHA_B32		H5T_STD_B32LE
 #define H5T_ALPHA_B64		H5T_STD_B64LE
+/** \ingroup PDTF
+ * 32-bit little-endian IEEE floating-point numbers for DEC Alpha CPUs
+ */
 #define H5T_ALPHA_F32		H5T_IEEE_F32LE
+/** \ingroup PDTF
+ * 64-bit little-endian IEEE floating-point numbers for DEC Alpha CPUs
+ */
 #define H5T_ALPHA_F64		H5T_IEEE_F64LE
 
 /*
@@ -467,13 +483,25 @@ H5_DLLVAR hid_t H5T_FORTRAN_S1_g;
 #define H5T_MIPS_B16		H5T_STD_B16BE
 #define H5T_MIPS_B32		H5T_STD_B32BE
 #define H5T_MIPS_B64		H5T_STD_B64BE
+/** \ingroup PDTF
+ * 32-bit big-endian IEEE floating-point numbers for MIPS CPUs
+ */
 #define H5T_MIPS_F32		H5T_IEEE_F32BE
+/** \ingroup PDTF
+ * 64-bit big-endian IEEE floating-point numbers for MIPS CPUs
+ */
 #define H5T_MIPS_F64		H5T_IEEE_F64BE
 
 /*
  * The VAX floating point types (i.e. in VAX byte order)
  */
+/** \ingroup PDTF
+ * 32-bit VAX byte order floating-point numbers for OpenVMS on DEC Alpha CPUs
+ */
 #define H5T_VAX_F32		(H5OPEN H5T_VAX_F32_g)
+/** \ingroup PDTF
+ * 64-bit VAX byte order floating-point numbers for OpenVMS on DEC Alpha CPUs
+ */
 #define H5T_VAX_F64		(H5OPEN H5T_VAX_F64_g)
 H5_DLLVAR hid_t H5T_VAX_F32_g;
 H5_DLLVAR hid_t H5T_VAX_F64_g;
@@ -498,9 +526,18 @@ H5_DLLVAR hid_t H5T_VAX_F64_g;
 #define H5T_NATIVE_ULONG        (H5OPEN H5T_NATIVE_ULONG_g)
 #define H5T_NATIVE_LLONG        (H5OPEN H5T_NATIVE_LLONG_g)
 #define H5T_NATIVE_ULLONG       (H5OPEN H5T_NATIVE_ULLONG_g)
+/** \ingroup PDTF
+ *  \c float floating-point numbers per \c H5detect.c
+ */
 #define H5T_NATIVE_FLOAT        (H5OPEN H5T_NATIVE_FLOAT_g)
+/** \ingroup PDTF
+ *  \c double floating-point numbers per H5detect()
+ */
 #define H5T_NATIVE_DOUBLE       (H5OPEN H5T_NATIVE_DOUBLE_g)
 #if H5_SIZEOF_LONG_DOUBLE !=0
+/** \ingroup PDTF
+ *  \Code{long double} floating-point numbers per \c H5detect.c
+ */
 #define H5T_NATIVE_LDOUBLE	(H5OPEN H5T_NATIVE_LDOUBLE_g)
 #endif
 #define H5T_NATIVE_B8		(H5OPEN H5T_NATIVE_B8_g)
