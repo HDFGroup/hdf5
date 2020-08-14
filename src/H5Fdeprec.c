@@ -15,7 +15,7 @@
  *
  * Created:	H5Fdeprec.c
  *		October 1 2009
- *		Quincey Koziol <koziol@hdfgroup.org>
+ *		Quincey Koziol
  *
  * Purpose:	Deprecated functions from the H5F interface.  These
  *              functions are here for compatibility purposes and may be

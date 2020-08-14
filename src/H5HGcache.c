@@ -15,7 +15,7 @@
  *
  * Created:		H5HGcache.c
  *			Feb  5 2008
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Implement global heap metadata cache methods.
  *

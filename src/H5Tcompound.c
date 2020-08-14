@@ -93,8 +93,6 @@ static H5T_t *H5T__reopen_member_type(const H5T_t *dt, unsigned membno);
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 size_t
@@ -162,8 +160,6 @@ H5T_get_member_offset(const H5T_t *dt, unsigned membno)
  *
  * Programmer:	Quincey Koziol
  *		Thursday, November  9, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -361,8 +357,6 @@ H5T__get_member_size(const H5T_t *dt, unsigned membno)
  * Programmer:	Robb Matzke
  *		Monday, December  8, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -406,8 +400,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -616,8 +608,6 @@ done:
  * Programmer:	Quincey Koziol
  *		Thursday, September 11, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -653,8 +643,6 @@ H5T__is_packed(const H5T_t *dt)
  *
  * Programmer:	Neil Fortner
  *		Monday, October 19, 2009
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

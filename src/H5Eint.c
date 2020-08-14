@@ -15,7 +15,7 @@
  *
  * Created:	H5Eint.c
  *		April 11 2007
- *		Quincey Koziol <koziol@hdfgroup.org>
+ *		Quincey Koziol
  *
  * Purpose:	General use, "internal" routines for error handling.
  *

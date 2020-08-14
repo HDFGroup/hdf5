@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Tuesday, August 10, 1999
  *
  * Purpose:     A driver which stores the HDF5 data in main memory  using
@@ -148,8 +148,8 @@ static herr_t H5FD__core_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, ha
             size_t size, const void *buf);
 static herr_t H5FD__core_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t H5FD__core_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t H5FD_core_lock(H5FD_t *_file, hbool_t rw);
-static herr_t H5FD_core_unlock(H5FD_t *_file);
+static herr_t H5FD__core_lock(H5FD_t *_file, hbool_t rw);
+static herr_t H5FD__core_unlock(H5FD_t *_file);
 
 static const H5FD_class_t H5FD_core_g = {
     "core",                     /* name                 */
@@ -181,8 +181,8 @@ static const H5FD_class_t H5FD_core_g = {
     H5FD__core_write,           /* write                */
     H5FD__core_flush,           /* flush                */
     H5FD__core_truncate,        /* truncate             */
-    H5FD_core_lock,             /* lock                 */
-    H5FD_core_unlock,           /* unlock               */
+    H5FD__core_lock,            /* lock                 */
+    H5FD__core_unlock,          /* unlock               */
     H5FD_FLMAP_DICHOTOMY        /* fl_map               */
 };
 
@@ -349,7 +349,7 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
     HDoff_t         offset      = (HDoff_t)addr;        /* Offset to write at */
     herr_t          ret_value   = SUCCEED;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(file);
 
@@ -419,7 +419,7 @@ H5FD__init_package(void)
     char    *lock_env_var   = NULL;     /* Environment variable pointer */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check the use disabled file locks environment variable */
     lock_env_var = HDgetenv("HDF5_USE_FILE_LOCKING");
@@ -1605,7 +1605,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_core_lock
+ * Function:    H5FD__core_lock
  *
  * Purpose:     To place an advisory lock on a file.
  *		The lock type to apply depends on the parameter "rw":
@@ -1619,13 +1619,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_lock(H5FD_t *_file, hbool_t rw)
+H5FD__core_lock(H5FD_t *_file, hbool_t rw)
 {
     H5FD_core_t *file = (H5FD_core_t*)_file;    /* VFD file struct          */
     int lock_flags;                             /* file locking flags       */
     herr_t ret_value = SUCCEED;                 /* Return value             */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(file);
 
@@ -1633,7 +1633,6 @@ H5FD_core_lock(H5FD_t *_file, hbool_t rw)
      * descriptor, this is a no-op.
      */
     if(file->fd >= 0) {
-
         /* Set exclusive or shared lock based on rw status */
         lock_flags = rw ? LOCK_EX : LOCK_SH;
 
@@ -1648,16 +1647,15 @@ H5FD_core_lock(H5FD_t *_file, hbool_t rw)
             else
                 HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to lock file")
         } /* end if */
-
     } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_core_lock() */
+} /* end H5FD__core_lock() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_core_unlock
+ * Function:    H5FD__core_unlock
  *
  * Purpose:     To remove the existing lock on the file
  *
@@ -1668,17 +1666,16 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_unlock(H5FD_t *_file)
+H5FD__core_unlock(H5FD_t *_file)
 {
     H5FD_core_t *file = (H5FD_core_t*)_file;	/* VFD file struct */
     herr_t ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(file);
 
-    if(file->fd >= 0) {
-
+    if(file->fd >= 0)
         if(HDflock(file->fd, LOCK_UN) < 0) {
             if(file->ignore_disabled_file_locks && ENOSYS == errno) {
                 /* When errno is set to ENOSYS, the file system does not support
@@ -1690,9 +1687,7 @@ H5FD_core_unlock(H5FD_t *_file)
                 HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to unlock file")
         }
 
-    } /* end if */
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_core_unlock() */
+} /* end H5FD__core_unlock() */
 

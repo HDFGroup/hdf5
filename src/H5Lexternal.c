@@ -291,7 +291,7 @@ H5L__extern_query(const char H5_ATTR_UNUSED * link_name, const void *_udata, siz
     const uint8_t *udata = (const uint8_t *)_udata;      /* Pointer to external link buffer */
     ssize_t     ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check external link version & flags */
     if(((*udata >> 4) & 0x0F) != H5L_EXT_VERSION)

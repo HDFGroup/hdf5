@@ -15,7 +15,7 @@
  *
  * Created:             H5Fquery.c
  *                      Jan 10 2008
- *                      Quincey Koziol <koziol@hdfgroup.org>
+ *                      Quincey Koziol
  *
  * Purpose:             File structure query routines.
  *
@@ -763,7 +763,6 @@ H5F_sieve_buf_size(const H5F_t *f)
  *          Failure:    (should not happen)
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Jul  8 2005
  *
  *-------------------------------------------------------------------------

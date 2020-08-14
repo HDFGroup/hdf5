@@ -803,10 +803,10 @@ main (int ac, char **av)
 
     /* Choose random # seed */
     seed = (unsigned long)HDtime(NULL);
-#ifdef QAK
+#if 0
     /* seed = (unsigned long)1155438845; */
     HDfprintf(stderr, "Random # seed was: %lu\n", seed);
-#endif /* QAK */
+#endif
     HDsrandom((unsigned)seed);
 
     /* run VFD-specific test */
