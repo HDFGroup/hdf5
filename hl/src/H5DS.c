@@ -1914,9 +1914,9 @@ htri_t H5DSis_scale(hid_t did)
     hid_t      tid = -1;     /* attribute type ID */
     hid_t      aid = -1;     /* attribute ID */
     herr_t     attr_class;   /* has the "CLASS" attribute */
-    htri_t     is_ds = 0;    /* set to "not a dimension scale" */
+    htri_t     is_ds = -1;   /* set to "not a dimension scale" */
     H5I_type_t it;           /* type of identifier */
-    char       *buf;         /* buffer to read name of attribute */
+    char       *buf = NULL;  /* buffer to read name of attribute */
     size_t      string_size; /* size of storage for the attribute */
     H5T_class_t type_class;
     H5T_str_t   strpad;
@@ -1927,18 +1927,19 @@ htri_t H5DSis_scale(hid_t did)
     */
     /* get ID type */
     if ((it = H5Iget_type(did)) < 0)
-        return FAIL;
+        goto out;
 
     if(H5I_DATASET != it)
-        return FAIL;
+        goto out;
 
     /* try to find the attribute "CLASS" on the dataset */
     if((attr_class = H5LT_find_attribute(did, "CLASS")) < 0)
-        return FAIL;
+        goto out;
 
-    if(attr_class == 0)
-        return is_ds;
-
+    if(attr_class == 0) {
+        is_ds = 0;
+        goto out;
+    }
     else
     {
         if((aid = H5Aopen(did, "CLASS", H5P_DEFAULT)) < 0)
@@ -1951,21 +1952,27 @@ htri_t H5DSis_scale(hid_t did)
            if not, then it is not dimension scale  */
         if((type_class = H5Tget_class(tid)) < 0)
             goto out;
-        if(H5T_STRING != type_class)
-            goto out_success;
-
+        if(H5T_STRING != type_class) {
+            is_ds = 0;
+            goto out;
+        }
         /* check to make sure string is null-terminated; 
            if not, then it is not dimension scale */
         if((strpad = H5Tget_strpad(tid)) < 0 )
             goto out;
-        if(H5T_STR_NULLTERM != strpad)
-            goto out_success;
+        if(H5T_STR_NULLTERM != strpad) {
+            is_ds = 0;
+            goto out;
+        }
 
-        /* get string size should be 16 to hold "DIMENSION_SCALE" string */
+        /* According to Spec string is ASCII and its size should be 16 to hold 
+           "DIMENSION_SCALE" string */
         if((string_size = H5Tget_size(tid)) == 0)
-            return FAIL;
-        if(string_size != 16) 
-            goto out_success;
+             goto out;
+        if(string_size != 16) {
+            is_ds = 0; 
+            goto out;
+        }
 
         buf = (char*)HDmalloc((size_t)string_size * sizeof(char));
         if(buf == NULL)
@@ -1987,20 +1994,16 @@ htri_t H5DSis_scale(hid_t did)
 
         if (H5Aclose(aid) < 0)
             goto out;
-
-        goto out_success;
-
     }
-out_success:
-        return is_ds;
-    /* error zone */
 out:
-    H5E_BEGIN_TRY {
-        H5Aclose(aid);
-        H5Tclose(tid);
-    } H5E_END_TRY;
-    return FAIL;
-
+    if(is_ds < 0) {
+        HDfree(buf);
+        H5E_BEGIN_TRY {
+            H5Aclose(aid);
+            H5Tclose(tid);
+        } H5E_END_TRY;
+    }
+    return is_ds;
 }
 
 /*-------------------------------------------------------------------------
