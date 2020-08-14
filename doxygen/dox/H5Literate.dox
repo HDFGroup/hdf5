@@ -12,4 +12,6 @@
       (using 1.10 or 1.8 source)
   \li Emulate Release 1.12: H5Literate2()
   \li Emulate Release 1.8 or 1.10 interface: H5Literate1()
+
+  \todo Fix the reference.
 */

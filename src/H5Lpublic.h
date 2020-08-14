@@ -34,13 +34,21 @@
 /* Public Macros */
 /*****************/
 
-/** Maximum length of a link's name (encoded in a 32-bit unsigned integer) */
+/**
+ * \brief Maximum length of a link's name
+ *
+ * The maximum length of a link's name is encoded in a 32-bit unsigned integer.
+ */
 #define H5L_MAX_LINK_NAME_LEN   ((uint32_t)(-1))  /* (4GB - 1) */
 
-/** Macro to indicate operation occurs on same location */
+/**
+ * \brief Macro to indicate operation occurs on same location
+ */
 #define H5L_SAME_LOC (hid_t)0
 
-/** Current version of the H5L_class_t struct */
+/**
+ * \brief Current version of the H5L_class_t struct
+ */
 #define H5L_LINK_CLASS_T_VERS       1
 
 #ifdef __cplusplus
@@ -51,12 +59,14 @@ extern "C" {
 /* Public Typedefs */
 /*******************/
 
-/** Link class types.
+/**
+ * \brief  Link class types.
+ *
  * Values less than 64 are reserved for the HDF5 library's internal
  * use. Values 64 to 255 are for "user-defined" link class types;
  * these types are defined by HDF5 but their behavior can be overridden
  * by users. Users who want to create new classes of links should
- * contact the HDF5 development team at help@hdfgroup.org. These
+ * contact the HDF5 development team at mailto:help@hdfgroup.org. These
  * values can never change because they appear in HDF5 files.
  */
 typedef enum {
@@ -67,74 +77,93 @@ typedef enum {
     H5L_TYPE_MAX = 255	        /**< Maximum link type id         */
 } H5L_type_t;
 
-/** Maximum value link value for "built-in" link types */
+/**
+ * \brief  Maximum value link value for "built-in" link types
+ */
 #define H5L_TYPE_BUILTIN_MAX H5L_TYPE_SOFT
-/** Link ids at or above this value are "user-defined" link types. */
+/**
+ * \brief Link ids at or above this value are "user-defined" link types.
+ */
 #define H5L_TYPE_UD_MIN      H5L_TYPE_EXTERNAL
 
-/** Information struct for link (for H5Lget_info2() / H5Lget_info_by_idx2())
- * H5O_token_t version used in VOL layer and future public API calls
+/**
+ * \brief Information struct for links
  */
 typedef struct {
-    H5L_type_t          type;           /**< Type of link                   */
-    hbool_t             corder_valid;   /**< Indicate if creation order is valid */
-    int64_t             corder;         /**< Creation order                 */
-    H5T_cset_t          cset;           /**< Character set of link name     */
+    H5L_type_t          type;         /**< Type of link                   */
+    hbool_t             corder_valid; /**< Indicate if creation order is valid */
+    int64_t             corder;       /**< Creation order                 */
+    H5T_cset_t          cset;         /**< Character set of link name     */
     union {
-        H5O_token_t     token;          /**< Token of location that hard link points to */
-        size_t          val_size;       /**< Size of a soft link or UD link value */
+        H5O_token_t     token;        /**< Token of location that hard link points to */
+        size_t          val_size;     /**< Size of a soft link or user-defined link value */
     } u;
 } H5L_info2_t;
 
-/* The H5L_class_t struct can be used to override the behavior of a
- * "user-defined" link class. Users should populate the struct with callback
- * functions defined below.
- */
 /* Callback prototypes for user-defined links */
-/** Link creation callback */
+/**
+ * \brief Link creation callback
+ */
 typedef herr_t (*H5L_create_func_t)(const char *link_name, hid_t loc_group,
     const void *lnkdata, size_t lnkdata_size, hid_t lcpl_id);
-
-/** Callback for when the link is moved */
+/**
+ * \brief Callback for link move
+ */
 typedef herr_t (*H5L_move_func_t)(const char *new_name, hid_t new_loc,
     const void *lnkdata, size_t lnkdata_size);
-
-/** Callback for when the link is copied */
+/**
+ * \brief Callback for link copy
+ */
 typedef herr_t (*H5L_copy_func_t)(const char *new_name, hid_t new_loc,
     const void *lnkdata, size_t lnkdata_size);
-
-/** Callback during link traversal */
+/**
+ * \brief Callback during link traversal
+ */
 typedef hid_t (*H5L_traverse_func_t)(const char *link_name, hid_t cur_group,
     const void *lnkdata, size_t lnkdata_size, hid_t lapl_id, hid_t dxpl_id);
-
-/** Callback for when the link is deleted */
+/**
+ * \brief Callback for link deletion
+ */
 typedef herr_t (*H5L_delete_func_t)(const char *link_name, hid_t file,
     const void *lnkdata, size_t lnkdata_size);
-
-/** Callback for querying the link. Returns the size of the buffer needed */
+/**
+ * \brief Callback for querying the link.
+ *
+ * Returns the size of the buffer needed.
+ */
 typedef ssize_t (*H5L_query_func_t)(const char *link_name, const void *lnkdata,
     size_t lnkdata_size, void *buf /*out*/, size_t buf_size);
 
-/** Link prototype */
+/**
+ * \brief Link prototype
+ *
+ * The H5L_class_t struct can be used to override the behavior of a
+ * "user-defined" link class. Users should populate the struct with callback
+ * functions defined elsewhere.
+ */
 typedef struct {
-    int version;                    /**< Version number of this struct        */
-    H5L_type_t id;                  /**< Link type ID                         */
-    const char *comment;            /**< Comment for debugging                */
-    H5L_create_func_t create_func;  /**< Callback during link creation        */
-    H5L_move_func_t move_func;      /**< Callback after moving link           */
-    H5L_copy_func_t copy_func;      /**< Callback after copying link          */
-    H5L_traverse_func_t trav_func;  /**< Callback during link traversal       */
-    H5L_delete_func_t del_func;     /**< Callback for link deletion           */
-    H5L_query_func_t query_func;    /**< Callback for queries                 */
+    int version;                    /**< Version number of this struct       */
+    H5L_type_t id;                  /**< Link type ID                        */
+    const char *comment;            /**< Comment for debugging               */
+    H5L_create_func_t create_func;  /**< Callback during link creation       */
+    H5L_move_func_t move_func;      /**< Callback after moving link          */
+    H5L_copy_func_t copy_func;      /**< Callback after copying link         */
+    H5L_traverse_func_t trav_func;  /**< Callback during link traversal      */
+    H5L_delete_func_t del_func;     /**< Callback for link deletion          */
+    H5L_query_func_t query_func;    /**< Callback for queries                */
 } H5L_class_t;
 
-/** Prototype for H5Literate2() / H5Literate_by_name2() operator
- * H5O_token_t version used in VOL layer and future public API calls
+/**
+ * \brief Prototype for H5Literate2(), H5Literate_by_name2() operator
+ *
+ * The H5O_token_t version is used in the VOL layer and future public API calls.
  */
 typedef herr_t (*H5L_iterate2_t)(hid_t group, const char *name, const H5L_info2_t *info,
     void *op_data);
 
-/** Callback for external link traversal */
+/**
+ * \brief Callback for external link traversal
+ */
 typedef herr_t (*H5L_elink_traverse_t)(const char *parent_file_name,
     const char *parent_group_name, const char *child_file_name,
     const char *child_object_name, unsigned *acc_flags, hid_t fapl_id,
@@ -656,6 +685,90 @@ H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name,
  *-------------------------------------------------------------------------
  */
 H5_DLL htri_t H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id);
+/**\ingroup H5L
+ *
+ * \brief Returns information about a link
+ *
+ * \fgdta_loc_id
+ * \param[in] name Link name
+ * \param[out] linfo Buffer in which link information is returned
+ * \lapl_id
+ *
+ * \return \herr_t
+ *
+ * \todo We need to get the location ID story straight!
+ *
+ * \details H5Lget_info2() returns information about the specified link through
+ *          the \p linfo argument.
+ *
+ *          The location identifier, \p loc_id, specifies the location of the
+ *          link. A link name, \p name, interpreted relative to \p loc_id,
+ *          specifies the link being queried.
+ *
+ *          \p lapl_id is the link access property list associated with the
+ *          link name. In the general case, when default link access properties
+ *          are acceptable, this can be passed in as #H5P_DEFAULT. An example
+ *          of a situation that requires a non-default link access property
+ *          list is when the link is an external link; an external link may
+ *          require that a link prefix be set in a link access property list
+ *          (see H5Pset_elink_prefix()).
+ *
+ *          H5Lget_info2() returns information about name in the data structure
+ *          H5L_info2_t, which is described below and defined in H5Lpublic.h.
+ *          This structure is returned in the buffer \p linfo.
+ *          \code
+ *          typedef struct { H5L_type_t type;   /* Type of link */
+ *            hbool_t             corder_valid; /* Indicate if creation order is valid */
+ *            int64_t             corder;       /* Creation order                 */
+ *            H5T_cset_t          cset;         /* Character set of link name     */
+ *            union {
+ *              H5O_token_t     token;          /* Token of location that hard link points to */
+ *              size_t          val_size;       /* Size of a soft link or user-defined link value */
+ *            } u;
+ *          } H5L_info2_t;
+ *          \endcode
+ *          In the above struct, \c type specifies the link class. Valid values
+ *          include the following:
+ *          \link_types
+ *          There will be additional valid values if user-defined links have
+ *          been registered.
+ *
+ *          \p corder specifies the link’s creation order position while
+ *          \p corder_valid indicates whether the value in corder is valid.
+ *
+ *          If \p corder_valid is \c TRUE, the value in \p corder is known to
+ *          be valid; if \p corder_valid is \c FALSE, the value in \p corder is
+ *          presumed to be invalid; \p corder starts at zero (0) and is
+ *          incremented by one (1) as new links are created. But
+ *          higher-numbered entries are not adjusted when a lower-numbered link
+ *          is deleted; the deleted link's creation order position is simply
+ *          left vacant. In such situations, the value of \p corder for the
+ *          last link created will be larger than the number of links remaining
+ *          in the group.
+ *
+ *          \p cset specifies the character set in which the link name is
+ *          encoded. Valid values include the following:
+ *          \csets
+ *          This value is set with H5Pset_char_encoding().
+ *
+ *          \c token is the location that a hard link points to, and
+ *          \c val_size is the size of a soft link or user defined link value.
+ *          H5O_token_t is used in the VOL layer. It is defined in H5public.h
+ *          as:
+ *          \code
+ *          typedef struct H5O_token_t {
+ *            uint8_t __data[H5O_MAX_TOKEN_SIZE];
+ *          } H5O_token_t;
+ *          \endcode
+ *
+ *          If the link is a symbolic link, \c val_size will be the length of
+ *          the link value, e.g., the length of the HDF5 path name with a null
+ *          terminator.
+ *
+ * \since 1.12.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Lget_info2(hid_t loc_id, const char *name,
     H5L_info2_t *linfo /*out*/, hid_t lapl_id);
 H5_DLL herr_t H5Lget_info_by_idx2(hid_t loc_id, const char *group_name,
