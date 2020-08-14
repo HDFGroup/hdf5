@@ -264,8 +264,8 @@ H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name)
  * Function:    H5C_dump_cache_skip_list
  *
  * Purpose:     Debugging routine that prints a summary of the contents of
- *		the skip list used by the metadata cache metadata cache to
- *		maintain an address sorted list of dirty entries.
+ *              the skip list used by the metadata cache metadata cache to
+ *              maintain an address sorted list of dirty entries.
  *
  * Return:      Non-negative on success/Negative on failure
  *

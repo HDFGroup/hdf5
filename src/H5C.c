@@ -387,32 +387,32 @@ H5C_create(size_t		      max_cache_size,
     cache_ptr->dirty_index_size			= (size_t)0;
 
     for(i = 0; i < H5C_RING_NTYPES; i++) {
-	cache_ptr->index_ring_len[i]		= 0;
-	cache_ptr->index_ring_size[i]		= (size_t)0;
-	cache_ptr->clean_index_ring_size[i]	= (size_t)0;
-	cache_ptr->dirty_index_ring_size[i]	= (size_t)0;
+        cache_ptr->index_ring_len[i]            = 0;
+        cache_ptr->index_ring_size[i]           = (size_t)0;
+        cache_ptr->clean_index_ring_size[i]     = (size_t)0;
+        cache_ptr->dirty_index_ring_size[i]     = (size_t)0;
 
-	cache_ptr->slist_ring_len[i]		= 0;
-	cache_ptr->slist_ring_size[i]		= (size_t)0;
+        cache_ptr->slist_ring_len[i]            = 0;
+        cache_ptr->slist_ring_size[i]           = (size_t)0;
     } /* end for */
 
     for(i = 0; i < H5C__HASH_TABLE_LEN; i++)
         (cache_ptr->index)[i] = NULL;
 
-    cache_ptr->il_len				= 0;
-    cache_ptr->il_size				= (size_t)0;
-    cache_ptr->il_head				= NULL;
-    cache_ptr->il_tail				= NULL;
+    cache_ptr->il_len                           = 0;
+    cache_ptr->il_size                          = (size_t)0;
+    cache_ptr->il_head                          = NULL;
+    cache_ptr->il_tail                          = NULL;
 
     /* Tagging Field Initializations */
     cache_ptr->ignore_tags                      = FALSE;
     cache_ptr->num_objs_corked                  = 0;
 
     /* slist field initializations */
-    cache_ptr->slist_enabled			= ! H5C__SLIST_OPT_ENABLED;
-    cache_ptr->slist_changed			= FALSE;
-    cache_ptr->slist_len			= 0;
-    cache_ptr->slist_size			= (size_t)0;
+    cache_ptr->slist_enabled                    = ! H5C__SLIST_OPT_ENABLED;
+    cache_ptr->slist_changed                    = FALSE;
+    cache_ptr->slist_len                        = 0;
+    cache_ptr->slist_size                       = (size_t)0;
 
     /* slist_ring_len, slist_ring_size, and 
      * slist_ptr initializaed above.
@@ -1056,7 +1056,6 @@ H5C_evict(H5F_t * f)
     if ( H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0 )
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed")
- 
 
     /* Flush and invalidate all cache entries except the pinned entries */
     if ( H5C__flush_invalidate_cache(f, H5C__EVICT_ALLOW_LAST_PINS_FLAG) < 0 )
@@ -3219,8 +3218,8 @@ done:
  * Programmer:  John Mainzer
  *              3/22/06
  *
- * Changes:	Added extreme sanity checks on entry and exit.
- *              				JRM -- 4/26/14
+ * Changes:     Added extreme sanity checks on entry and exit.
+ *                                      JRM -- 4/26/14
  *
  *-------------------------------------------------------------------------
  */
@@ -3438,16 +3437,16 @@ H5C_unprotect(H5F_t *f, haddr_t	addr, void *thing, unsigned flags)
     if ( entry_ptr->ro_ref_count > 1 ) {
 
         /* Sanity check */
-	HDassert(entry_ptr->is_protected);
+        HDassert(entry_ptr->is_protected);
         HDassert(entry_ptr->is_read_only);
 
-	if ( dirtied )
+        if ( dirtied )
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
                         "Read only entry modified??")
 
         /* Reduce the RO ref count */
-	(entry_ptr->ro_ref_count)--;
+        (entry_ptr->ro_ref_count)--;
 
         /* Pin or unpin the entry as requested. */
         if ( pin_entry ) {
@@ -3469,20 +3468,20 @@ H5C_unprotect(H5F_t *f, haddr_t	addr, void *thing, unsigned flags)
         } /* end if */
     } else {
 
-	if ( entry_ptr->is_read_only ) {
+        if ( entry_ptr->is_read_only ) {
 
             /* Sanity check */
-	    HDassert(entry_ptr->ro_ref_count == 1);
+            HDassert(entry_ptr->ro_ref_count == 1);
 
-	    if ( dirtied )
+            if ( dirtied )
 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
                             "Read only entry modified??")
 
-	    entry_ptr->is_read_only = FALSE;
-	    entry_ptr->ro_ref_count = 0;
+            entry_ptr->is_read_only = FALSE;
+            entry_ptr->ro_ref_count = 0;
 
-	} /* end if */
+        } /* end if */
 
 #ifdef H5_HAVE_PARALLEL
         /* When the H5C code is used to implement the metadata cache in the
@@ -3518,15 +3517,15 @@ H5C_unprotect(H5F_t *f, haddr_t	addr, void *thing, unsigned flags)
         /* Mark the entry as dirty if appropriate */
         entry_ptr->is_dirty = (entry_ptr->is_dirty || dirtied);
 
-	if ( dirtied ) {
+        if ( dirtied ) {
 
-	    if ( entry_ptr->image_up_to_date ) {
+            if ( entry_ptr->image_up_to_date ) {
 
-	        entry_ptr->image_up_to_date = FALSE;
+                entry_ptr->image_up_to_date = FALSE;
 
-	        if ( entry_ptr->flush_dep_nparents > 0 ) {
+                if ( entry_ptr->flush_dep_nparents > 0 ) {
 
-		    if ( H5C__mark_flush_dep_unserialized(entry_ptr) < 0 )
+                    if ( H5C__mark_flush_dep_unserialized(entry_ptr) < 0 )
 
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, \
                           "Can't propagate serialization status to fd parents")
@@ -3700,7 +3699,6 @@ H5C_unprotect(H5F_t *f, haddr_t	addr, void *thing, unsigned flags)
             if ( H5C__flush_single_entry(f, entry_ptr, 
                                       H5C__FLUSH_CLEAR_ONLY_FLAG | 
                                       H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0 )
-
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
                             "Can't clear entry")
 
@@ -5753,36 +5751,36 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5C_flush_invalidate_ring
  *
- * Purpose:	Flush and destroy the entries contained in the target
- *		cache and ring.
+ * Purpose:     Flush and destroy the entries contained in the target
+ *              cache and ring.
  *
- *		If the ring contains protected entries, the function will
- *		fail, as protected entries cannot be either flushed or
- *		destroyed.  However all unprotected entries should be
- *		flushed and destroyed before the function returns failure.
+ *              If the ring contains protected entries, the function will
+ *              fail, as protected entries cannot be either flushed or
+ *              destroyed.  However all unprotected entries should be
+ *              flushed and destroyed before the function returns failure.
  *
- *		While pinned entries can usually be flushed, they cannot
- *		be destroyed.  However, they should be unpinned when all
- *		the entries that reference them have been destroyed (thus
- *		reduding the pinned entry's reference count to 0, allowing
- *		it to be unpinned).
+ *              While pinned entries can usually be flushed, they cannot
+ *              be destroyed.  However, they should be unpinned when all
+ *              the entries that reference them have been destroyed (thus
+ *              reduding the pinned entry's reference count to 0, allowing
+ *              it to be unpinned).
  *
- *		If pinned entries are present, the function makes repeated
- *		passes through the cache, flushing all dirty entries
- *		(including the pinned dirty entries where permitted) and
- *		destroying all unpinned entries.  This process is repeated
- *		until either the cache is empty, or the number of pinned
- *		entries stops decreasing on each pass.
+ *              If pinned entries are present, the function makes repeated
+ *              passes through the cache, flushing all dirty entries
+ *              (including the pinned dirty entries where permitted) and
+ *              destroying all unpinned entries.  This process is repeated
+ *              until either the cache is empty, or the number of pinned
+ *              entries stops decreasing on each pass.
  *
- *		If flush dependencies appear in the target ring, the
- *		function makes repeated passes through the cache flushing
- *		entries in flush dependency order.
+ *              If flush dependencies appear in the target ring, the
+ *              function makes repeated passes through the cache flushing
+ *              entries in flush dependency order.
  *
  * Return:      Non-negative on success/Negative on failure or if there was
- *		a request to flush all items and something was protected.
+ *              a request to flush all items and something was protected.
  *
  * Programmer:  John Mainzer
- *		9/1/15
+ *              9/1/15
  *
  * Changes:     Added support for the H5C__EVICT_ALLOW_LAST_PINS_FLAG.
  *              This flag is used to flush and evict all entries in 
@@ -6317,24 +6315,24 @@ done:
  *
  * Function:    H5C__flush_ring
  *
- * Purpose:	Flush the entries contained in the specified cache and
- *		ring.  All entries in rings outside the specified ring
- *		must have been flushed on entry.
+ * Purpose:     Flush the entries contained in the specified cache and
+ *              ring.  All entries in rings outside the specified ring
+ *              must have been flushed on entry.
  *
- *		If the cache contains protected entries in the specified
- *		ring, the function will fail, as protected entries cannot
- *		be flushed.  However all unprotected entries in the target
- *		ring should be flushed before the function returns failure.
+ *              If the cache contains protected entries in the specified
+ *              ring, the function will fail, as protected entries cannot
+ *              be flushed.  However all unprotected entries in the target
+ *              ring should be flushed before the function returns failure.
  *
- *		If flush dependencies appear in the target ring, the
- *		function makes repeated passes through the slist flushing
- *		entries in flush dependency order.
+ *              If flush dependencies appear in the target ring, the
+ *              function makes repeated passes through the slist flushing
+ *              entries in flush dependency order.
  *
  * Return:      Non-negative on success/Negative on failure or if there was
- *		a request to flush all items and something was protected.
+ *              a request to flush all items and something was protected.
  *
  * Programmer:  John Mainzer
- *		9/1/15
+ *              9/1/15
  *
  * Changes:     A recent optimization turns off the slist unless a flush
  *              is in progress.  This should not effect this function, as
@@ -6392,7 +6390,7 @@ H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
 
         for ( i = (int)H5C_RING_UNDEFINED; i < (int)ring; i++ ) {
 
-	    HDassert(cache_ptr->slist_ring_len[i] == 0);
+            HDassert(cache_ptr->slist_ring_len[i] == 0);
         }
     }
 
@@ -6416,8 +6414,8 @@ H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
     cache_ptr->slist_changed = FALSE;
 
     while ( ( cache_ptr->slist_ring_len[ring] > 0 ) &&
-	    ( protected_entries == 0 )  &&
-	    ( flushed_entries_last_pass ) ) {
+            ( protected_entries == 0 )  &&
+            ( flushed_entries_last_pass ) ) {
 
         flushed_entries_last_pass = FALSE;
 
@@ -6641,23 +6639,23 @@ done:
  * Function:    H5C__flush_single_entry
  *
  * Purpose:     Flush or clear (and evict if requested) the cache entry
- *		with the specified address and type.  If the type is NULL,
- *		any unprotected entry at the specified address will be
- *		flushed (and possibly evicted).
+ *              with the specified address and type.  If the type is NULL,
+ *              any unprotected entry at the specified address will be
+ *              flushed (and possibly evicted).
  *
- *		Attempts to flush a protected entry will result in an
- *		error.
+ *              Attempts to flush a protected entry will result in an
+ *              error.
  *
- *		If the H5C__FLUSH_INVALIDATE_FLAG flag is set, the entry will
- *		be cleared and not flushed, and the call can't be part of a
+ *              If the H5C__FLUSH_INVALIDATE_FLAG flag is set, the entry will
+ *              be cleared and not flushed, and the call can't be part of a
  *              sequence of flushes.
  *
- *		The function does nothing silently if there is no entry
- *		at the supplied address, or if the entry found has the
- *		wrong type.
+ *              The function does nothing silently if there is no entry
+ *              at the supplied address, or if the entry found has the
+ *              wrong type.
  *
  * Return:      Non-negative on success/Negative on failure or if there was
- *		an attempt to flush a protected item.
+ *              an attempt to flush a protected item.
  *
  * Programmer:  John Mainzer, 5/5/04
  *
@@ -6729,22 +6727,22 @@ done:
 herr_t
 H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
 {
-    H5C_t *	     	cache_ptr;              /* Cache for file */
-    hbool_t		destroy;		/* external flag */
-    hbool_t		clear_only;		/* external flag */
-    hbool_t		free_file_space;	/* external flag */
-    hbool_t		take_ownership;		/* external flag */
-    hbool_t             del_from_slist_on_destroy;    /* external flag */
-    hbool_t		during_flush;		/* external flag */
-    hbool_t		write_entry;		/* internal flag */
-    hbool_t		destroy_entry;		/* internal flag */
-    hbool_t		generate_image;		/* internal flag */
-    hbool_t		update_page_buffer;	/* internal flag */
-    hbool_t		was_dirty;
-    hbool_t		suppress_image_entry_writes = FALSE;
-    hbool_t		suppress_image_entry_frees = FALSE;
-    haddr_t             entry_addr = HADDR_UNDEF;
-    herr_t		ret_value = SUCCEED;      /* Return value */
+    H5C_t *     cache_ptr;                      /* Cache for file */
+    hbool_t     destroy;                        /* external flag */
+    hbool_t     clear_only;                     /* external flag */
+    hbool_t     free_file_space;                /* external flag */
+    hbool_t     take_ownership;                 /* external flag */
+    hbool_t     del_from_slist_on_destroy;      /* external flag */
+    hbool_t     during_flush;                   /* external flag */
+    hbool_t     write_entry;                    /* internal flag */
+    hbool_t     destroy_entry;                  /* internal flag */
+    hbool_t     generate_image;                 /* internal flag */
+    hbool_t     update_page_buffer;             /* internal flag */
+    hbool_t     was_dirty;
+    hbool_t     suppress_image_entry_writes = FALSE;
+    hbool_t     suppress_image_entry_frees = FALSE;
+    haddr_t     entry_addr = HADDR_UNDEF;
+    herr_t      ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -7101,9 +7099,9 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, \
                         "can't remove entry from tag list")
 
-	/* verify that the entry is no longer part of any flush dependencies */
+        /* verify that the entry is no longer part of any flush dependencies */
         HDassert(entry_ptr->flush_dep_nparents == 0);
-	HDassert(entry_ptr->flush_dep_nchildren == 0);
+        HDassert(entry_ptr->flush_dep_nchildren == 0);
 
     } /* end if */
     else {
@@ -7118,7 +7116,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
          * view of the replacement policy and the slist.
          * Hence no differentiation between them.
          *
-         * 					JRM -- 7/7/07
+         *                              JRM -- 7/7/07
          */
 
         H5C__UPDATE_RP_FOR_FLUSH(cache_ptr, entry_ptr, FAIL)
@@ -9482,7 +9480,7 @@ done:
  *
  * Purpose:     Serialize an entry and generate its image.
  *
- * Note:	This may cause the entry to be re-sized and/or moved in
+ * Note:        This may cause the entry to be re-sized and/or moved in
  *              the cache.
  *
  *              As we will not update the metadata cache's data structures
@@ -9505,9 +9503,9 @@ done:
 herr_t
 H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
 {
-    haddr_t		new_addr = HADDR_UNDEF;
-    haddr_t		old_addr = HADDR_UNDEF;
-    size_t		new_len = 0;
+    haddr_t             new_addr = HADDR_UNDEF;
+    haddr_t             old_addr = HADDR_UNDEF;
+    size_t              new_len = 0;
     unsigned            serialize_flags = H5C__SERIALIZE_NO_FLAGS_SET;
     herr_t              ret_value = SUCCEED;
 

@@ -1707,8 +1707,8 @@ if ( ( (cache_ptr)->index_size !=                                           \
  * Function:    H5C__REMOVE_ENTRY_FROM_SLIST
  *
  * Purpose:     Remove the specified instance of H5C_cache_entry_t from the
- *		index skip list in the specified instance of H5C_t.  Update
- *		the associated length and size fields.
+ *              index skip list in the specified instance of H5C_t.  Update
+ *              the associated length and size fields.
  *
  * Return:      N/A
  *
@@ -1845,7 +1845,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
  * Function:    H5C__UPDATE_SLIST_FOR_SIZE_CHANGE
  *
  * Purpose:     Update cache_ptr->slist_size for a change in the size of
- *		and entry in the slist.
+ *              and entry in the slist.
  *
  * Return:      N/A
  *
@@ -1853,24 +1853,24 @@ if ( ( (cache_ptr)->index_size !=                                           \
  *
  * Modifications:
  *
- *		JRM -- 8/27/06
- *		Added the H5C_DO_SANITY_CHECKS version of the macro.
+ *              JRM -- 8/27/06
+ *              Added the H5C_DO_SANITY_CHECKS version of the macro.
  *
- *		This version maintains the slist_size_increase field
- *		that are used in sanity checks in the flush routines.
+ *              This version maintains the slist_size_increase field
+ *              that are used in sanity checks in the flush routines.
  *
- *		All this is needed as the fractal heap needs to be
- *		able to dirty, resize and/or move entries during the
- *		flush.
+ *              All this is needed as the fractal heap needs to be
+ *              able to dirty, resize and/or move entries during the
+ *              flush.
  *
- *		JRM -- 12/13/14
- *		Note that we do not set cache_ptr->slist_changed to TRUE
- *		in this case, as the structure of the slist is not
- *		modified.
+ *              JRM -- 12/13/14
+ *              Note that we do not set cache_ptr->slist_changed to TRUE
+ *              in this case, as the structure of the slist is not
+ *              modified.
  *
- *		JRM -- 9/1/15
- *		Added code to maintain the cache_ptr->slist_ring_len
- *		and cache_ptr->slist_ring_size arrays.
+ *              JRM -- 9/1/15
+ *              Added code to maintain the cache_ptr->slist_ring_len
+ *              and cache_ptr->slist_ring_size arrays.
  *
  *              JRM -- 4/29/20
  *              Reworked macro to support the slist_enabled field 
@@ -3852,7 +3852,7 @@ typedef struct H5C_tag_info_t {
  *		one.
  *
  * entry_watched_for_removal:	Pointer to an instance of H5C_cache_entry_t
- *		which contains the 'next' entry for an iteration.  Removing
+ *              which contains the 'next' entry for an iteration.  Removing
  *              this entry must trigger a rescan of the iteration, so each
  *              entry removed from the cache is compared against this pointer
  *              and the pointer is reset to NULL if the watched entry is 

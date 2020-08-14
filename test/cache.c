@@ -3067,15 +3067,15 @@ check_insert_entry(unsigned paged)
             /* Verify that the flush marker got set correctly */
         if((i == 1) || (i == 3)) {
 
-        if(!((entry_ptr->header).flush_marker)) {
+            if(!((entry_ptr->header).flush_marker)) {
 
                     pass = FALSE;
                     failure_mssg = "Unexpected insert results 5.";
-        }
+            }
         } else if((entry_ptr->header).flush_marker) {
 
-                pass = FALSE;
-                failure_mssg = "Unexpected insert results 6.";
+            pass = FALSE;
+            failure_mssg = "Unexpected insert results 6.";
         }
     }
 
