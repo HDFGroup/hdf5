@@ -115,6 +115,7 @@ typedef herr_t (*H5L_delete_func_t)(const char *link_name, hid_t file,
 typedef ssize_t (*H5L_query_func_t)(const char *link_name, const void *lnkdata,
     size_t lnkdata_size, void *buf /*out*/, size_t buf_size);
 
+/** Link prototype */
 typedef struct {
     int version;                    /**< Version number of this struct        */
     H5L_type_t id;                  /**< Link type ID                         */
@@ -452,8 +453,118 @@ H5_DLL herr_t H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id);
  */
 H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id);
+/**\ingroup H5L
+ *
+ * \brief Returns the value of a link
+ *
+ * \fgdta_loc_id
+ * \param[in] name Link name
+ * \param[out] buf The buffer to hold the link value
+ * \param[in] size Maximum number of bytes of link value to be returned
+ * \lapl_id
+ *
+ * \return \herr_t
+ *
+ * \todo We need to get the location ID story straight!
+ *
+ * \details H5Lget_val() returns tha value of link \p name. For smbolic links,
+ *          this is the path to which the link points, including the null
+ *          terminator. For external and user-defined links, it is the link
+ *          buffer.
+ *
+ *          \p size is the size of \p buf and should be the size of the link
+ *          value being returned. This size value can be determined through a
+ *          call to H5Lget_info(); it is returned in the \c val_size field of
+ *          the #H5L_info_t struct.
+ *
+ *          If \p size is smaller than the size of the returned value, then the
+ *          string stored in \p buf will be truncated to \p size bytes. For
+ *          soft links, this means that the value will not be null terminated.
+ *
+ *          In the case of external links, the target file and object names are
+ *          extracted from \p buf by calling H5Lunpack_elink_val().
+ *
+ *          The link class of link \p name can be determined with a call to
+ *          H5Lget_info().
+ *
+ *          \p lapl_id specifies the link access property list associated with
+ *          the link \p name. In the general case, when default link access
+ *          properties are acceptable, this can be passed in as #H5P_DEFAULT. An
+ *          example of a situation that requires a non-default link access
+ *          property list is when the link is an external link; an external
+ *          link may require that a link prefix be set in a link access
+ *          property list (see H5Pset_elink_prefix()).
+ *
+ *          This function should be used only after H5Lget_info() has been
+ *          called to verify that \p name is a symbolic link. This can be
+ *          deteremined from the \c link_type field of the #H5L_info_t struct.
+ *
+ * \note This function will fail if called on a hard link.
+ *
+ * \see H5Lget_val_by_idx()
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/,
     size_t size, hid_t lapl_id);
+/**\ingroup H5L
+ *
+ * \brief Retrieves value of the \Emph{n}-th link in a group, according to the order within an index
+ *
+ * \fgdta_loc_id
+ * \param[in] group_name Group name
+ * \param[in] idx_type Type of index
+ * \param[in] order Order within field or index
+ * \param[in] n Link position for which to retrieve information
+ * \param[out] buf The buffer to hold the link value
+ * \param[in] size Maximum number of bytes of link value to be returned
+ * \lapl_id
+ *
+ * \return \herr_t
+ *
+ * \todo We need to get the location ID story straight!
+ *
+ * \details H5Lget_val_by_idx() retrieves the value of the \Emph{n}-th link in
+ *          a group, according to the specified order, \p order, within an
+ *          index, \p index.
+ *
+ *          For soft links, the value is an HDF5 path name.
+ *
+ *          For external links, this is a compound value containing file and
+ *          path name information; to use this external link information, it
+ *          must first be decoded with H5Lunpack_elink_val()
+ *
+ *          For user-defined links, this value will be described in the
+ *          definition of the user-defined link type.
+ *
+ *          \p loc_id specifies the location identifier of the group specified
+ *          by \p group_name.
+ *
+ *          \p group_name specifies the group in which the link exists. If
+ *          \p loc_id already specifies the group in which the link exists,
+ *          \p group_name must be a dot (\c .).
+ *
+ *          The size in bytes of link_val is specified in \p size. The size
+ *          value can be determined through a call to H5Lget_info_by_idx(); it
+ *          is returned in the \c val_size field of the #H5L_info_t struct. If
+ *          size is smaller than the size of the returned value, then the
+ *          string stored in link_val will be truncated to size bytes. For soft
+ *          links, this means that the value will not be null terminated.
+ *
+ *          If the type of the link is unknown or uncertain, H5Lget_val_by_idx()
+ *          should be called only after the type has been determined via a call
+ *          to H5Lget_info_by_idx().
+ *
+ * \note This function will fail if called on a hard link.
+ *
+ * \see H5Lget_val()
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     void *buf/*out*/, size_t size, hid_t lapl_id);
