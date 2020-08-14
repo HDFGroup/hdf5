@@ -699,6 +699,17 @@ New Features
 
     Tools:
     ------
+    - h5repack added options to control how external links are handled.
+
+      Currently h5repack preserves external links and cannot copy and merge
+      data from the external files. Two options, merge and prune, were added to
+      control how to merge data from an external link into the resulting file.
+       --merge             Follow external soft link recursively and merge data.
+       --prune             Do not follow external soft links and remove link.
+       --merge --prune     Follow external link, merge data and remove dangling link.
+
+      (ADB - 2020/08/05, HDFFV-9984)
+
     - h5repack was fixed to repack the reference attributes properly.
       The code line that checks if the update of reference inside a compound
       datatype is misplaced outside the code block loop that carries out the
