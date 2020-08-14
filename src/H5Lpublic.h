@@ -568,6 +568,93 @@ H5_DLL herr_t H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/,
 H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     void *buf/*out*/, size_t size, hid_t lapl_id);
+/**\ingroup H5L
+ *
+ * \brief Determines whether a link with the specified name exists in a group
+ *
+ * \fgdta_loc_id
+ * \param[in] name Link name
+ * \lapl_id
+ *
+ * \return \herr_t
+ *
+ * \todo We need to get the location ID story straight!
+ *
+ * \details H5Lexists() allows an application to determine whether the link \p
+ *          name exists in the location specified by \p loc_id. The link may be
+ *          of any type; only the presence of a link with that name is checked.
+ *
+ *          Note that H5Lexists() verifies only that the target link exists. If
+ *          name includes either a relative path or an absolute path to the
+ *          target link, intermediate steps along the path must be verified
+ *          before the existence of the target link can be safely checked. If
+ *          the path is not verified and an intermediate element of the path
+ *          does not exist, H5Lexists() will fail. The example in the next
+ *          paragraph illustrates one step-by-step method for verifying the
+ *          existence of a link with a relative or absolute path.
+ *
+ *          \Bold{Example:} Use the following steps to verify the existence of
+ *          the link \c datasetD in the \c group group1/group2/softlink_to_group3/,
+ *          where \c group1 is a member of the group specified by \c loc_id:
+ *
+ *          1. First use H5Lexists() to verify that \c group1 exists.
+ *          2. If \c group1 exists, use H5Lexists() again, this time with name
+ *             set to \c group1/group2, to verify that \c group2 exists.
+ *          3. If \c group2 exists, use H5Lexists() with name set to
+ *             \c group1/group2/softlink_to_group3 to verify that
+ *             \c softlink_to_group3 exists.
+ *          4. If \c softlink_to_group3 exists, you can now safely use
+ *             H5Lexists() with \c name set to
+ *             \c group1/group2/softlink_to_group3/datasetD to verify that the
+ *             target link, \c datasetD, exists.
+ *
+ *          If the link to be verified is specified with an absolute path, the
+ *          same approach should be used, but starting with the first link in
+ *          the file’s root group. For instance, if \c datasetD were in
+ *          \c /group1/group2/softlink_to_group3, the first call to H5Lexists()
+ *          would have name set to \c /group1.
+ *
+ *          Note that this is an outline and does not include all necessary
+ *          details. Depending on circumstances, for example, you may need to
+ *          verify that an intermediate link points to a group and that a soft
+ *          link points to an existing target.
+ *
+ * \note The behavior of H5Lexists() was changed in the 1.10 release in the
+ *       case where the root group, \c "/", is the name of the link. This
+ *       change is described below:
+ *       <ol>
+ *       <li>Let \c file denote a valid HDF5 file identifier, and let \c lapl
+ *          denote a valid link access property list identifier. A call to
+ *          H5Lexists() with arguments \c file, \c "/", and \c lapl
+ *          returns a positive value; in other words,
+ *          \Code{H5Lexists(file, "/", lapl)} returns a positive value.
+ *          In HDF5 version 1.8.16, this function returns 0.</li>
+ *       <li>Let \c root denote a valid HDF5 group identifier that refers to the
+ *          root group of an HDF5 file, and let \c lapl denote a valid link
+ *          access property list identifier. A call to H5Lexists() with
+ *          arguments c root, \c "/", and \c lapl returns a positive value;
+ *          in other words, \Code{H5Lexists(root, "/", lapl)} returns a postive
+ *          value. In HDF5 version 1.8.16, this function returns 0.</li>
+ *       </ol>
+ *       Note that the function accepts link names and path names. This is
+ *       potentially misleading to callers, and we plan to separate the
+ *       functionality for link names and path names in a future release.
+ *
+ * \attention H5Lexists() checks the existence of only the final element in a
+ *            relative or absolute path; it does not check any other path
+ *            elements. The function will therefore fail when both of the
+ *            following conditions exist:
+ *            - \c name is not local to the group specified by \c loc_id or,
+ *              if \c loc_id is something other than a group identifier, \c name
+ *              is not local to the root group.
+ *            - Any element of the relative path or absolute path in name,
+ *              except the target link, does not exist.
+ *
+ * \version 1.10.0 Function behavior changed in this release. (See the note.)
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL htri_t H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id);
 H5_DLL herr_t H5Lget_info2(hid_t loc_id, const char *name,
     H5L_info2_t *linfo /*out*/, hid_t lapl_id);
