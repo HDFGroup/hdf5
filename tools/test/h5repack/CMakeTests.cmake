@@ -170,6 +170,12 @@
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/attrregion.tattrreg.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/dataregion.tdatareg.h5
       # tools/testfiles for external links
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinkfar-base.textlinkfar.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinksrc-base.textlinksrc.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinktar-base.textlinktar.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlink-base.textlink.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/tsoftlinks-base.tsoftlinks.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5copy_extlinks_src-base.h5copy_extlinks_src.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinkfar-prune.textlinkfar.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinksrc-prune.textlinksrc.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinktar-prune.textlinktar.h5
