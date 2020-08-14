@@ -1847,13 +1847,6 @@ H5P__init_def_layout(void)
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
  *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for
- *              generic property list.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1928,13 +1921,6 @@ done:
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
  *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and get property for
- *              generic property list.
- *
  *-------------------------------------------------------------------------
  */
 H5D_layout_t
@@ -1977,13 +1963,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
- *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for
- *              generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -2059,13 +2038,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
- *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for
- *              generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -2828,13 +2800,6 @@ done:
  * Programmer:	Robb Matzke
  *              Tuesday, March  3, 1998
  *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for
- *              generic property list.
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -2884,13 +2849,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *              Tuesday, March  3, 1998
- *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and get property for
- *              generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -3013,8 +2971,6 @@ done:
  * Programmer:	Kent Yang
  *              Wednesday, November 13, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3057,9 +3013,6 @@ done:
  *
  * Programmer:  Xiaowen Wu
  *              Wednesday, December 22, 2004
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -3119,9 +3072,6 @@ done:
  *
  * Programmer:  Xiaowen Wu
  *              Thursday, April 14, 2005
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -3526,9 +3476,6 @@ done:
  * Programmer:	Raymond Lu
  * 		Wednesday, January 16, 2002
  *
- * Modifications:
- *
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3709,9 +3656,6 @@ done:
  * Programmer:  Raymond Lu
  *              Wednesday, January 16, 2002
  *
- * Modifications:
- *
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3760,8 +3704,6 @@ done:
  * Programmer: Jacob Smith
  *             2018 August 14
  *
- * Modifications: None.
- *
  *-----------------------------------------------------------------------------
  */
 herr_t
@@ -3806,8 +3748,6 @@ done:
  *
  * Programmer: Jacob Smith
  *             2018 August 14
- *
- * Modifications: None.
  *
  *-----------------------------------------------------------------------------
  */

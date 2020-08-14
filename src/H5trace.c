@@ -15,7 +15,7 @@
  *
  * Created:     H5trace.c
  *              Aug 21 2006
- *              Quincey Koziol <koziol@hdfgroup.org>
+ *              Quincey Koziol
  *
  * Purpose:     Internal code for tracing API calls
  *

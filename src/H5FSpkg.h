@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:  Quincey Koziol
  *              Tuesday, May  2, 2006
  *
  * Purpose:     This file contains declarations which are visible only within

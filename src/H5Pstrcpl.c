@@ -15,7 +15,7 @@
  *
  * Created:		H5Pstrcpl.c
  *			October 26 2005
- *			James Laird <jlaird@ncsa.uiuc.edu>
+ *			James Laird
  *
  * Purpose:		String creation property list class routines
  *

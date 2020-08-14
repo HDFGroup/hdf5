@@ -516,8 +516,6 @@ H5_GCC_DIAG_ON(format-nonliteral)
  * Programmer:  Robb Matzke
  *              Thursday, April  9, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 #ifndef HDstrtoll

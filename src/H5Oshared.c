@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Robb Matzke <matzke@llnl.gov>
+ * Programmer:	Robb Matzke
  *		Wednesday, April  1, 1998
  *
  * Purpose:	Functions that operate on a shared message.  The shared
@@ -103,7 +103,6 @@ static herr_t H5O__shared_link_adj(H5F_t *f, H5O_t *open_oh,
  *              Failure:    NULL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep 24 2003
  *
  *-------------------------------------------------------------------------
@@ -217,7 +216,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep 26 2003
  *
  *-------------------------------------------------------------------------
@@ -443,7 +441,6 @@ H5O__shared_encode(const H5F_t *f, uint8_t *buf/*out*/, const H5O_shared_t *sh_m
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep 26 2003
  *
  *-------------------------------------------------------------------------
@@ -654,7 +651,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:  Peter Cao
- *              xcao@hdfgroup.org
  *              May 24 2007
  *
  *-------------------------------------------------------------------------
