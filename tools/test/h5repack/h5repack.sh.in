@@ -871,13 +871,13 @@ TOOLTESTSV()
     nerrors="`expr $nerrors + 1`"
     else
     echo " PASSED"
-    VERIFY h5diff unequal $@
+    VERIFY h5diff equal $@
     (
         cd $TESTDIR
         $RUNSERIAL $H5DIFF_BIN -v $infile $outfile
     ) >$actual 2>$actual_err
     RET=$?
-    if [ $RET == 0 ] ; then
+    if [ $RET != 0 ] ; then
          echo "*FAILED*"
          nerrors="`expr $nerrors + 1`"
     else

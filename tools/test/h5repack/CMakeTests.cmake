@@ -1626,16 +1626,15 @@ ADD_H5_DMP_TEST (textlinkfar-base "TEST" 0 textlinkfar.h5 --enable-error-stack)
 ADD_H5_DMP_TEST (textlinksrc-base "TEST" 0 textlinksrc.h5 --enable-error-stack)
 ADD_H5_DMP_TEST (textlinktar-base "TEST" 0 textlinktar.h5 --enable-error-stack)
 
-### HDFFV-11128 needs fixed to enable the following test
-#ADD_H5_DIFF_TEST (textlinksrc-merge "TEST" 1 textlinksrc.h5 --merge)
+ADD_H5_DIFF_TEST (h5copy_extlinks_src-merge "TEST" 0 h5copy_extlinks_src.h5 --merge)
 ADD_H5_DIFF_TEST (tsoftlinks-merge "TEST" 1 tsoftlinks.h5 --merge)
 ADD_H5_DIFF_TEST (textlink-merge "TEST" 0 textlink.h5 --merge)
 ### HDFFV-11128 needs fixed to enable the following test
 #ADD_H5_DIFF_TEST (textlinkfar-merge "TEST" 1 textlinkfar.h5 --merge)
 ### HDFFV-11128 needs fixed to enable the following test
-#ADD_H5_DIFF_TEST (textlinktar-merge "TEST" 1 textlinktar.h5 --merge)
+#ADD_H5_DIFF_TEST (textlinksrc-merge "TEST" 1 textlinksrc.h5 --merge)
 ### HDFFV-11128 needs fixed to enable the following test
-#ADD_H5_DIFF_TEST (h5copy_extlinks_src-merge "TEST" 0 h5copy_extlinks_src.h5 --merge)
+#ADD_H5_DIFF_TEST (textlinktar-merge "TEST" 1 textlinktar.h5 --merge)
 
 ADD_H5_DMP_TEST (h5copy_extlinks_src-prune "TEST" 0 h5copy_extlinks_src.h5 --prune --enable-error-stack)
 ADD_H5_DMP_TEST (tsoftlinks-prune "TEST" 0 tsoftlinks.h5 --prune --enable-error-stack)
