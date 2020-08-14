@@ -43,6 +43,7 @@ $Source = "";
                "H5D_space_status_t"         => "Ds",
                "H5D_vds_view_t"             => "Dv",
                "H5FD_mpio_xfer_t"           => "Dt",
+               "H5FD_splitter_vfd_config_t" => "Dr",
                "herr_t"                     => "e",
                "H5E_direction_t"            => "Ed",
                "H5E_error_t"                => "Ee",

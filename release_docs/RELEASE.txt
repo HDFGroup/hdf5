@@ -303,6 +303,14 @@ New Features
 
     Library:
     --------
+
+    - Add Splitter VFD
+
+      Maintain separate R/W and W/O channels for "concurrent" file writes
+      to two files using a single HDF5 file handle.
+
+     (JOS - 2020/03/13, TBD)
+
     - Add S3 and HDFS VFDs to HDF5 maintenance
 
       Fix windows requirements and java tests. Windows requires CMake 3.13.

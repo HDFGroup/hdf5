@@ -699,6 +699,8 @@
 ./src/H5FDsec2.c
 ./src/H5FDsec2.h
 ./src/H5FDspace.c
+./src/H5FDsplitter.c
+./src/H5FDsplitter.h
 ./src/H5FDstdio.c
 ./src/H5FDstdio.h
 ./src/H5FDtest.c
