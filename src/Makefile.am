@@ -127,6 +127,11 @@ if DIRECT_VFD_CONDITIONAL
     libhdf5_la_SOURCES += H5FDdirect.c
 endif
 
+# Only compile the mirror VFD if necessary
+if MIRROR_VFD_CONDITIONAL
+    libhdf5_la_SOURCES += H5FDmirror.c
+endif
+
 # Only compile the read-only S3 VFD if necessary
 if ROS3_VFD_CONDITIONAL
     libhdf5_la_SOURCES += H5FDros3.c H5FDs3comms.c
@@ -138,7 +143,7 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5vers
         H5Cpublic.h H5Dpublic.h \
         H5Epubgen.h H5Epublic.h H5Fpublic.h \
         H5FDpublic.h H5FDcore.h H5FDdirect.h H5FDfamily.h H5FDhdfs.h \
-        H5FDlog.h H5FDmpi.h H5FDmpio.h H5FDmulti.h H5FDros3.h \
+        H5FDlog.h H5FDmirror.h H5FDmpi.h H5FDmpio.h H5FDmulti.h H5FDros3.h \
         H5FDsec2.h H5FDsplitter.h H5FDstdio.h H5FDwindows.h \
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
         H5MMpublic.h H5Opublic.h H5Ppublic.h \

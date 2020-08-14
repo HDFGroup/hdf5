@@ -448,6 +448,8 @@ set (test_CLEANFILES
     direct_chunk.h5
     splitter*.h5
     splitter.log
+    mirror_rw/*
+    mirror_wo/*
 )
 
 # Remove any output file left over from previous test run

@@ -303,6 +303,12 @@ New Features
 
     Library:
     --------
+    - Add Mirror VFD
+
+      Use TCP/IP sockets to perform write-only (W/O) file I/O on a remote
+      machine. Must be used in conjunction with the Splitter VFD.
+
+      (JOS - 2020/03/13, TBD)
 
     - Add Splitter VFD
 

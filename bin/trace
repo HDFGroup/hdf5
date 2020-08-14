@@ -127,6 +127,7 @@ $Source = "";
                "H5FD_ros3_fapl_t"           => "x",
                "H5FD_hdfs_fapl_t"           => "x",
                "H5FD_file_image_callbacks_t" => "x",
+               "H5FD_mirror_fapl_t"         => "x",
                "H5G_iterate_t"              => "x",
                "H5G_info_t"                 => "x",
                "H5I_free_t"                 => "x",

@@ -44,6 +44,7 @@
 #include "H5FDfamily.h"         /* File families                            */
 #include "H5FDhdfs.h"           /* Hadoop HDFS                              */
 #include "H5FDlog.h"            /* sec2 driver with I/O logging (for debugging) */
+#include "H5FDmirror.h"         /* Mirror VFD and IPC definitions           */
 #include "H5FDmpi.h"            /* MPI-based file drivers                   */
 #include "H5FDmulti.h"          /* Usage-partitioned file family            */
 #include "H5FDros3.h"           /* R/O S3 "file" I/O                        */
