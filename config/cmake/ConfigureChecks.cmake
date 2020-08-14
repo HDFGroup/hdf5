@@ -61,6 +61,31 @@ if (HDF5_ENABLE_CODESTACK)
 endif ()
 MARK_AS_ADVANCED (HDF5_ENABLE_CODESTACK)
 
+# ----------------------------------------------------------------------
+# Check if they would like to use file locking by default
+#-----------------------------------------------------------------------------
+option (HDF5_USE_FILE_LOCKING "Use file locking by default (mainly for SWMR)" ON)
+if (HDF5_USE_FILE_LOCKING)
+  set (${HDF_PREFIX}_USE_FILE_LOCKING 1)
+endif ()
+
+# ----------------------------------------------------------------------
+# Check if they would like to ignore file locks when disabled on a file system
+#-----------------------------------------------------------------------------
+option (HDF5_IGNORE_DISABLED_FILE_LOCKS "Ignore file locks when disabled on file system" ON)
+if (HDF5_IGNORE_DISABLED_FILE_LOCKS)
+  set (${HDF_PREFIX}_IGNORE_DISABLED_FILE_LOCKS 1)
+endif ()
+
+# Set the libhdf5.settings file variable
+if (HDF5_IGNORE_DISABLED_FILE_LOCKS AND HDF5_USE_FILE_LOCKING)
+  set (HDF5_FILE_LOCKING_SETTING "best-effort")
+elseif (HDF5_IGNORE_DISABLED_FILE_LOCKS)
+  set (HDF5_FILE_LOCKING_SETTING "yes")
+else ()
+  set (HDF5_FILE_LOCKING_SETTING "no")
+endif ()
+
 #-----------------------------------------------------------------------------
 #  Are we going to use HSIZE_T
 #-----------------------------------------------------------------------------

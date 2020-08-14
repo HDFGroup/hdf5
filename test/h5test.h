@@ -206,6 +206,7 @@ H5TEST_DLL int h5_make_local_copy(const char *origfilename, const char *local_co
 H5TEST_DLL herr_t h5_verify_cached_stabs(const char *base_name[], hid_t fapl);
 H5TEST_DLL H5FD_class_t *h5_get_dummy_vfd_class(void);
 H5TEST_DLL const char *h5_get_version_string(H5F_libver_t libver);
+H5TEST_DLL herr_t h5_check_if_file_locking_enabled(hbool_t *are_enabled);
 
 /* Functions that will replace components of a FAPL */
 H5TEST_DLL herr_t h5_get_vfd_fapl(hid_t fapl_id);
