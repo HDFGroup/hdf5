@@ -238,53 +238,39 @@ H5A_term_package(void)
 } /* H5A_term_package() */
 
 
-/* --------------------------------------------------------------------------*/
-/**\ingroup H5A
+/*--------------------------------------------------------------------------
+ * Function:    H5Acreate2
  *
- * \brief Creates an attribute attached to a specified object
+ * Purpose:     Creates an attribute on an object
  *
- * \fgdt_loc_id
- * \param[in] attr_name  Name of attribute to locate and open
- * \type_id
- * \space_id
- * \acpl_id
- * \aapl_id
+ * Usage:
+ *              hid_t H5Acreate2(loc_id, attr_name, type_id, space_id, acpl_id,
+ *                  aapl_id)
  *
- * \return \hid_tv{attribute}
+ * Description: This function creates an attribute which is attached to the
+ *              object specified with 'loc_id'. The name specified with
+ *              'attr_name' for each attribute for an object must be unique
+ *              for that object. The 'type_id' and 'space_id' are created
+ *              with the H5T and H5S interfaces respectively. The 'aapl_id'
+ *              property list is currently unused, but will be used in the
+ *              future for optional attribute access properties. The
+ *              attribute ID returned from this function must be released
+ *              with H5Aclose or resource leaks will develop.
  *
- * \details H5Acreate2() creates an attribute, \p attr_name, which is attached
- *          to the object specified by the identifier \p loc_id.
+ * Parameters:
+ *              hid_t loc_id;           IN: Object (dataset or group) to be attached to
+ *              const char *attr_name;  IN: Name of attribute to locate and open
+ *              hid_t type_id;          IN: ID of datatype for attribute
+ *              hid_t space_id;         IN: ID of dataspace for attribute
+ *              hid_t acpl_id;          IN: ID of creation property list (currently not used)
+ *              hid_t aapl_id;          IN: Attribute access property list
  *
- *          The attribute name, \p attr_name, must be unique for the object.
+ * Return:      Success:    An ID for the created attribute
  *
- *          The attribute is created with the specified datatype and dataspace,
- *          \p type_id and \p space_id, which are created with the \ref H5T and
- *          \ref H5S interfaces, respectively.
+ *              Failure:    H5I_INVALID_HID
  *
- *          If \p type_id is either a fixed-length or variable-length string,
- *          it is important to set the string length when defining the
- *          datatype. String datatypes are derived from #H5T_C_S1 (or
- *          #H5T_FORTRAN_S1 for Fortran), which defaults to 1 character in
- *          size. See H5Tset_size() and Creating variable-length string
- *          datatypes.
- *
- *          The access property list is currently unused, but will be used in
- *          the future. This property list should currently be #H5P_DEFAULT.
- *
- *          The attribute identifier returned by this function must be released
- *          with H5Aclose() resource leaks will develop.
- *
- * \note The \p acpl and \p aapl parameters are currently not used; specify
- *       #H5P_DEFAULT.
- * \note If \p loc_id is a file identifier, the attribute will be attached
- *       that file’s root group.
- *
- * \since 1.8.0
- *
- * \see H5Aclose()
- *
+ *-------------------------------------------------------------------------
  */
-/*------------------------------------------------------------------------- */
 hid_t
 H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
     hid_t acpl_id, hid_t aapl_id)
@@ -429,36 +415,25 @@ done:
 } /* H5Acreate_by_name() */
 
 
-/*--------------------------------------------------------------------------*/
-/**\ingroup H5A
- *
- * \brief Opens an attribute for an object specified by object identifier and
- *        attribute name
- *
- * \fgdt_loc_id
- * \param[in]  attr_name    Name of attribute to open
- * \aapl_id
- *
- * \return \hid_tv{attribute}
- *
- * \details H5Aopen() opens an existing attribute, \p attr_name, that is
- *          attached to object specified by an object identifier, \p obj_id.
- *
- *          The attribute access property list, \p aapl_id, is currently unused
- *          and should be #H5P_DEFAULT.
- *
- *          This function, H5Aopen_by_idx() or H5Aopen_by_name() must be called
- *          before the attribute can be accessed for any further purpose,
- *          including reading, writing, or any modification.
- *
- *          The attribute identifier returned by this function must be released
- *          with H5Aclose() or resource leaks will develop.
- *
- * \since 1.8.0
- *
- * \see H5Aclose(), H5Acreate()
- */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+ NAME
+    H5Aopen
+ PURPOSE
+    Opens an attribute for an object by looking up the attribute name
+ USAGE
+    hid_t H5Aopen(loc_id, attr_name, aapl_id)
+        hid_t loc_id;           IN: Object that attribute is attached to
+        const char *attr_name;  IN: Name of attribute to locate and open
+        hid_t aapl_id;          IN: Attribute access property list
+ RETURNS
+    ID of attribute on success, H5I_INVALID_HID on failure
+
+ DESCRIPTION
+        This function opens an existing attribute for access.  The attribute
+    name specified is used to look up the corresponding attribute for the
+    object.  The attribute ID returned from this function must be released with
+    H5Aclose or resource leaks will develop.
+--------------------------------------------------------------------------*/
 hid_t
 H5Aopen(hid_t loc_id, const char *attr_name, hid_t aapl_id)
 {
@@ -667,42 +642,22 @@ done:
 } /* H5Aopen_by_idx() */
 
 
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+ NAME
+    H5Awrite
+ PURPOSE
+    Write out data to an attribute
+ USAGE
+    herr_t H5Awrite (attr_id, dtype_id, buf)
+        hid_t attr_id;       IN: Attribute to write
+        hid_t dtype_id;       IN: Memory datatype of buffer
+        const void *buf;     IN: Buffer of data to write
+ RETURNS
+    Non-negative on success/Negative on failure
 
-/**\ingroup H5A
- *
- * \brief Writes data to an attribute
- *
- * \attr_id
- * \mem_type_id{dtype}
- * \param[out]  buf       Data to be written
- *
- * \return \herr_t
- *
- * \details H5Awrite() writes an attribute, specified with \p attr_id. The
- *          attribute's in-memory datatype is specified with \p dtype_id.
- *          The entire attribute is written from \p buf to the file.
- *
- *          If \p dtype_id is either a fixed-length or variable-length string,
- *          it is important to set the string length when defining the datatype.
- *          String datatypes are derived from #H5T_C_S1 (or #H5T_FORTRAN_S1 for
- *          Fortran codes), which defaults to 1 character in size.
- *          See H5Tset_size() and Creating variable-length string datatypes.
- *
- *          Datatype conversion takes place at the time of a read or write and
- *          is automatic. See the “Data Transfer: Datatype Conversion and
- *          Selection” section in the “HDF5 Datatypes” chapter of the HDF5
- *          User’s Guide for a discussion of data conversion.
- *
- * \version 1.8.8   Fortran updated to Fortran2003.
- * \version 1.4.2   Fortran \p dims parameter added in this release
- * \since 1.0.0
- * \see H5Aread()
- *
- * \todo Eliminate the reference to the HDF5 User's Guide!
- */
-/*--------------------------------------------------------------------------*/
-
+ DESCRIPTION
+        This function writes a complete attribute to disk.
+--------------------------------------------------------------------------*/
 herr_t
 H5Awrite(hid_t attr_id, hid_t dtype_id, const void *buf)
 {
@@ -733,39 +688,22 @@ done:
 } /* H5Awrite() */
 
 
+/*--------------------------------------------------------------------------
+ NAME
+    H5Aread
+ PURPOSE
+    Read in data from an attribute
+ USAGE
+    herr_t H5Aread (attr_id, dtype_id, buf)
+        hid_t attr_id;       IN: Attribute to read
+        hid_t dtype_id;       IN: Memory datatype of buffer
+        void *buf;           IN: Buffer for data to read
+ RETURNS
+    Non-negative on success/Negative on failure
 
-/*-------------------------------------------------------------------------- */
-
-/**\ingroup H5A
- *
- * \brief Reads the value of an attribute
- *
- * \attr_id
- * \mem_type_id{dtype_id}
- * \param[out] buf        Buffer for data to be read
- *
- * \return \herr_t
- *
- * \details H5Aread() reads an attribute, specified with \p attr_id. The
- *          attribute's in-memory datatype is specified with \p dtype_id. The
- *          entire attribute is read into \p buf from the file.
- *
- *          Datatype conversion takes place at the time of a read or write and
- *          is automatic. See the "Data Transfer: Datatype Conversion and
- *          Selection” section in the "HDF5 Datatypes" chapter of the HDF5
- *          User’s Guide for a discussion of data conversion.
- *
- * \version 1.8.8  Fortran updated to Fortran2003.
- * \version 1.4.2  The \p dims parameter was added to the Fortran API in this
- *                 release.
- * \since   1.0.0
- *
- * \see H5Awrite()
- *
- * \todo Eliminate the reference to the HDF5 User's Guide!
-*/
-/*--------------------------------------------------------------------------*/
-
+ DESCRIPTION
+        This function reads a complete attribute from disk.
+--------------------------------------------------------------------------*/
 herr_t
 H5Aread(hid_t attr_id, hid_t dtype_id, void *buf)
 {
@@ -1690,27 +1628,17 @@ done:
 } /* H5Adelete_by_idx() */
 
 
-/*-------------------------------------------------------------------------*/
-/**\ingroup H5A
+/*-------------------------------------------------------------------------
+ * Function:    H5Aclose
  *
- * \brief Closes the specified attribute
+ * Purpose:     Closes access to an attribute and releases resources used by
+ *              it. It is illegal to subsequently use that same dataset
+ *              ID in calls to other attribute functions.
  *
- * \attr_id
+ * Return:      SUCCEED/FAIL
  *
- * \return \herr_t
- *
- * \details H5Aclose() terminates access to the attribute specified by
- *          \p attr_id by releasing the identifier.
- *
- * \attention Further use of a released attribute identifier is illegal; a
- *            function using such an identifier will generate an error.
- *
- * \since 1.0.0
- *
- * \see H5Acreate(), H5Aopen()
+ *-------------------------------------------------------------------------
  */
-/*-------------------------------------------------------------------------*/
-
 herr_t
 H5Aclose(hid_t attr_id)
 {
