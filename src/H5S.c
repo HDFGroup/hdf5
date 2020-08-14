@@ -363,36 +363,6 @@ done:
 } /* end H5S_create() */
 
 
-/*--------------------------------------------------------------------------*/
-/**\ingroup H5S
- *
- * \brief Creates a new dataspace of a specified type
- *
- * \param[in] type   Type of dataspace to be created
- *
- * \return \hid_tv{dataspace}
- *
- * \details H5Screate() creates a new dataspace of a particular type. Currently
- *          supported types are #H5S_SCALAR, #H5S_SIMPLE, and #H5S_NULL.
- *
- *          Further dataspace types may be added later.
- *
- *          A scalar dataspace, #H5S_SCALAR, has a single element, though that
- *          element may be of a complex datatype, such as a compound or array
- *          datatype. By convention, the rank of a scalar dataspace is always \p 0
- *          (zero); think of it geometrically as a single, dimensionless point,
- *          though that point can be complex.
- *
- *          A simple dataspace, #H5S_SIMPLE, consists of a regular array of elements.
- *
- *          A null dataspace, #H5S_NULL, has no data elements.
- *
- *          The dataspace identifier returned by this function can be released with
- *          H5Sclose() so that resource leaks will not occur.
- *
- * \version 1.4.0 Fortran subroutine introduced.
- * \since 1.0.0
- */
 /*--------------------------------------------------------------------------
  NAME
     H5Screate
@@ -515,24 +485,6 @@ done:
 } /* end H5S_close() */
 
 
-/*------------------------------------------------------------------------- */
-/**\ingroup H5S
- *
- * \brief Releases and terminates access to a dataspace
- *
- * \space_id
- *
- * \return \herr_t
- *
- * \details H5Sclose() releases a dataspace. Further access through the
- *          dataspace identifier is illegal. Failure to release a dataspace with this
- *          call will result in resource leaks.
- *
- * \version 1.4.0 Fortran subroutine introduced in this release.
- * \since 1.0.0
- *
- */
-
 /*-------------------------------------------------------------------------
  * Function:    H5Sclose
  *
@@ -566,24 +518,6 @@ done:
 } /* end H5Sclose() */
 
 
-/*-------------------------------------------------------------------------*/
-/**\ingroup H5S
- *
- * \brief Creates an exact copy of a dataspace
- *
- * \space_id
- *
- * \return \hid_tv{dataspace}
- *
- * \details H5Scopy() creates a new dataspace which is an exact copy of the
- *          dataspace identified by \p space_id. The dataspace identifier
- *          returned from this function should be released with H5Sclose()
- *          or resource leaks will occur.
- *
- * \version 1.4.0   Fortran subroutine introduced.
- * \since 1.0.0
- *
- */
 /*-------------------------------------------------------------------------
  * Function:    H5Scopy
  *
@@ -629,23 +563,6 @@ done:
 } /* end H5Scopy() */
 
 
-/*-------------------------------------------------------------------------*/
-/**\ingroup H5S
- *
- * \brief Copies the extent of a dataspace
- *
- * \space_id{dst_id}
- * \space_id{src_id}
- *
- * \return \herr_t
- *
- * \details H5Sextent_copy() copies the extent from \p src_id to \p dst_id.
- *          This action may change the type of the dataspace.
- *
- * \version 1.4.0 Fortran subroutine was introduced.
- * \since 1.0.0
- */
-
 /*-------------------------------------------------------------------------
  * Function:    H5Sextent_copy
  *
@@ -875,24 +792,6 @@ done:
 } /* end H5S_get_simple_extent_npoints() */
 
 
-/*-------------------------------------------------------------------------*/
-/**\ingroup H5S
- *
- * \brief Determines the number of elements in a dataspace
- *
- * \space_id
- *
- * \return Returns the number of elements in the dataspace if successful;
- *         otherwise returns a negative value.
- *
- * \details H5Sget_simple_extent_npoints() determines the number of elements
- *          in a dataspace \p space_id. For example, a simple 3-dimensional
- *          dataspace with dimensions 2, 3, and 4 would have 24 elements.
- *
- * \version 1.4.0 Fortran subroutine introduced.
- * \since 1.0.0
- *
- */
 /*-------------------------------------------------------------------------
  * Function:    H5Sget_simple_extent_npoints
  *
@@ -991,23 +890,6 @@ done:
 } /* end H5S_get_npoints_max() */
 
 
-/*-------------------------------------------------------------------------*/
-/**\ingroup H5S
- *
- * \brief Determines the dimensionality of a dataspace
- *
- * \space_id
- *
- * \return Returns the number of dimensions in the dataspace if successful;
- *         otherwise returns a negative value.
- *
- * \details H5Sget_simple_extent_ndims() determines the dimensionality (or
- *          rank) of a dataspace.
- *
- * \version 1.4.0 Fortran subroutine introduced.
- * \since 1.0.0
- *
- */
 /*-------------------------------------------------------------------------
  * Function:    H5Sget_simple_extent_ndims
  *
@@ -1088,32 +970,6 @@ done:
 } /* end H5S_get_simple_extent_ndims() */
 
 
-/*-------------------------------------------------------------------------*/
-/**\ingroup H5S
- *
- * \brief Retrieves dataspace dimension size and maximum size
- *
- * \space_id
- * \param[out] dims Pointer to array to store the size of each dimension
- * \param[out] maxdims Pointer to array to store the maximum size of each
- *                     dimension
- *
- * \return Returns the number of dimensions in the dataspace if successful;
- *         otherwise returns a negative value.
- *
- * \details H5Sget_simple_extent_dims() returns the size and maximum sizes
- *          of each dimension of a dataspace \p space_id through the \p dims
- *          and \p maxdims parameters.
- *
- *          Either or both of \p dims and \p maxdims may be NULL.
- *
- *          If a value in the returned array \p maxdims is #H5S_UNLIMITED (-1),
- *          the maximum size of that dimension is unlimited.
- *
- * \version 1.4.0 Fortran subroutine introduced.
- * \since 1.0.0
- *
- */
 /*-------------------------------------------------------------------------
  * Function:    H5Sget_simple_extent_dims
  *
@@ -1385,23 +1241,6 @@ H5S__is_simple(const H5S_t *sdim)
 } /* end H5S__is_simple() */
 
 
-/*--------------------------------------------------------------------------*/
-/**\ingroup H5S
- *
- *  \brief Determines whether a dataspace is a simple dataspace
- *
- *  \space_id
- *
- *  \return \htri_t
- *
- *  \details H5Sis_simple() determines whether or not a dataspace is a simple
- *  dataspace. [Currently, all dataspace objects are simple dataspaces;
- *  complex dataspace support will be added in the future.]
- *
- *  \version 1.4.0 Fortran subroutine was introduced.
- *  \since 1.0.0
- */
-
 /*--------------------------------------------------------------------------
  NAME
     H5Sis_simple
@@ -1436,40 +1275,6 @@ done:
 } /* end H5Sis_simple() */
 
 
-/*--------------------------------------------------------------------------*/
-/**\ingroup H5S
- *
- * \brief Sets or resets the size of an existing dataspace
- *
- * \space_id
- * \param[in] rank   Rank, or dimensionality, of the dataspace
- * \param[in] dims   Array containing current size of dataspace
- * \param[in] max    Array containing maximum size of dataspace
- *
- * \return \herr_t
- *
- * \details H5Sset_extent_simple() sets or resets the size of an existing
- *          dataspace.
- *
- *          \p rank is the dimensionality, or number of dimensions, of the
- *          dataspace.
- *
- *          \p dims is an array of size \p rank which contains the new size
- *          of each dimension in the dataspace. \p max is an array of size
- *          \p rank which contains the maximum size of each dimension in
- *          the dataspace.
- *
- *          Any previous extent is removed from the dataspace, the dataspace
- *          type is set to #H5S_SIMPLE, and the extent is set as specified.
- *
- *          Note that a dataset must be chunked if \p dims does not equal
- *          \p max.
- *
- *
- * \version 1.4.0 Fortran subroutine was introduced.
- * \since 1.0.0
- */
-
 /*--------------------------------------------------------------------------
  NAME
     H5Sset_extent_simple
@@ -1610,56 +1415,6 @@ done:
 } /* end H5S_set_extent_simple() */
 
 
-/*----------------------------------------------------------------------------*/
-/**\ingroup H5S
- * \brief Creates a new simple dataspace and opens it for access
- *
- * \param[in] rank          Number of dimensions of dataspace
- * \param[in] current_dims  Array specifying the size of each dimension
- * \param[in] maximum_dims  Array specifying the maximum size of each dimension
- *
- * \return \hid_tv{dataspace}
- *
- * \details  H5Screate_simple() creates a new simple dataspace and opens it
- * for access, returning a dataspace identifier.
- *
- * \p rank is the number of dimensions used in the dataspace.
- *
- * \p current_dims is a one-dimensional array of size rank specifying the
- * size of each dimension of the dataset. \p maximum_dims is an array of the
- * same size specifying the upper limit on the size of each dimension.
- *
- * Any element of \p current_dims can be \p 0 (zero). Note that no data can
- * be written to a dataset if the size of any dimension of its current
- * dataspace is \p 0. This is sometimes a useful initial state for a dataset.
- *
- * \p maximum_dims may be the null pointer, in which case the upper limit is
- * the same as \p current_dims. Otherwise, no element of \p maximum_dims
- * should be smaller than the corresponding element of \p current_dims.
- *
- * If an element of \p maximum_dims is #H5S_UNLIMITED, the maximum size of the
- * corresponding dimension is unlimited.
- *
- * Any dataset with an unlimited dimension must also be chunked; see
- * H5Pset_chunk(). Similarly, a dataset must be chunked if \p current_dims does
- * not equal \p maximum_dims.
- *
- * The dataspace identifier returned from this function must be released with
- * H5Sclose() or resource leaks will occur.
- *
- * \note Once a dataspace has been created, specific regions or elements in
- *       the dataspace can be selected and selections can be removed, as well.
- *       For example, H5Sselect_hyperslab() selects a region in a dataspace and
- *       H5Sselect_elements() selects array elements in a dataspace. These
- *       functions are used for subsetting. H5Sselect_none() removes all
- *       selections from a dataspace and is used in Parallel HDF5 when a process
- *       does not have or need to write data.
- *
- * \version 1.4.0 Fortran subroutine introduced.
- *
- * \since 1.0.0
- *
- */
 /*-------------------------------------------------------------------------
  * Function:    H5Screate_simple
  *
@@ -1762,58 +1517,6 @@ done:
 } /* end H5S_create_simple() */
 
 
-/*--------------------------------------------------------------------------*/
-/**\ingroup H5S
- *
- * \brief Encodes a data space object description into a binary buffer
- *
- * \space_id{obj_id}
- * \param[in,out] buf      Buffer for the object to be encoded into;
- *                         If the provided buffer is NULL, only the size
- *                         of buffer needed is returned through \p nalloc.
- * \param[in,out] nalloc   The size of the allocated buffer
- * \fapl_id
- *
- * \return \herr_t
- * \details Given the data space identifier \p obj_id, H5Sencode2() converts
- *          a data space description into binary form in a buffer. Using this
- *          binary form in the buffer, a data space object can be
- *          reconstructed with H5Sdecode() to return a new object handle
- *          (\p hid_t) for this data space.
- *
- *          A preliminary H5Sencode2() call can be made to determine the
- *          size of the buffer needed. This value is returned in \p nalloc.
- *          That value can then be assigned to \p nalloc for a second
- *          H5Sencode2() call, which will retrieve the actual encoded object.
- *
- *          If the library determines that \p nalloc is not big enough for the
- *          object, it simply returns the size of the buffer needed through
- *          \p nalloc without encoding the provided buffer.
- *
- *          The file access property list \p fapl_id is used to control the
- *          encoding via the \a libver_bounds property (see
- *          H5Pset_libver_bounds()). If the \a libver_bounds property is missing,
- *          H5Sencode2() proceeds as if the \a libver_bounds property were set to
- *          (#H5F_LIBVER_EARLIEST, #H5F_LIBVER_LATEST). (Functionally,
- *          H5Sencode1() is identical to H5Sencode2() with libver_bounds set to
- *          (#H5F_LIBVER_EARLIEST, #H5F_LIBVER_LATEST).)
- *
- *          The types of data space that are addressed in this function are
- *          null, scalar, and simple space. For a simple data space, the
- *          information on the selection, for example, hyperslab selection,
- *          is also encoded and decoded. A complex data space has not been
- *          implemented in the library.
- *
- * \note Motivation: This function was introduced in HDF5-1.12 as part of the
- *       \a H5Sencode format change to enable 64-bit selection encodings and
- *       a dataspace selection that is tied to a file. See the New Features
- *       in HDF5 Release 1.12 as well as the H5Sencode / H5Sdecode Format Change RFC.
- *
- * \todo Fix the references.
- *
- * \since 1.12.0
- */
-
 /*-------------------------------------------------------------------------
  * Function:    H5Sencode2
  *
@@ -1932,29 +1635,6 @@ done:
 } /* end H5S_encode() */
 
 
-/*--------------------------------------------------------------------------*/
-/**\ingroup H5S
- *
- * \brief Decodes a binary object description of data space and returns a
- *        new object handle
- *
- * \param[in] buf  Buffer for the data space object to be decoded
- *
- * \return \hid_t{dataspace}
- *
- * \details Given an object description of a dataspace in binary in a
- *          buffer, H5Sdecode() reconstructs the HDF5 data type object and
- *          returns a new object handle for it. The binary description of the
- *          object is encoded by H5Sencode(). The user is responsible for
- *          passing in the right buffer. The types of dataspace addressed
- *          in this function are null, scalar, and simple space. For a
- *          simple dataspace, the selection information (for example,
- *          hyperslab selection) is also encoded and decoded. A complex
- *          dataspace has not been implemented in the library.
- *
- * \since 1.8.0
- */
-
 /*-------------------------------------------------------------------------
  * Function:    H5Sdecode
  *
@@ -2110,23 +1790,6 @@ done:
 } /* end H5S_get_simple_extent_type() */
 
 
-/*--------------------------------------------------------------------------*/
-/**\ingroup H5S
- *
- * \brief  Determines the current class of a dataspace
- *
- * \space_id{sid}
- *
- * \return Returns a dataspace class name if successful;
- *         otherwise #H5S_NO_CLASS (-1).
- *
- * \details H5Sget_simple_extent_type() determines the current class of a
- *          dataspace \p sid.
- *
- * \version 1.4.0 Fortran subroutine was introduced.
- * \since 1.0.0
- */
-
 /*-------------------------------------------------------------------------
  * Function:    H5Sget_simple_extent_type
  *
@@ -2161,24 +1824,6 @@ done:
 } /* end H5Sget_simple_extent_type() */
 
 
-/*--------------------------------------------------------------------------*/
-/**\ingroup H5S
- *
- * \brief Resets the extent of a dataspace back to "none"
- *
- * \space_id
- *
- * \return  \herr_t
- *
- * \details H5Sset_extent_none() resets the type of a dataspace to
- *          #H5S_NULL with no extent information stored for the dataspace.
- *
- * \version 1.10.7, 1.12.1  The function behavior changed. The previous
- *                          behavior was to set the class to #H5S_NO_CLASS.
- * \version 1.4.0           Fortran subroutine was introduced.
- * \since 1.0.0
- */
-
 /*--------------------------------------------------------------------------
  NAME
     H5Sset_extent_none
@@ -2343,22 +1988,6 @@ done:
 } /* end H5S_set_extent_real() */
 
 
-/*--------------------------------------------------------------------------*/
-/**\ingroup H5S
- *
- * \brief Determines whether two dataspace extents are equal
- *
- * \space_id{space1_id}
- * \space_id{space2_id}
- *
- * \return \htri_t
- *
- * \details H5Sextent_equal() determines whether the dataspace extents of
- *          two dataspaces, \p space1_id and \p space2_id, are equal.
- *
- * \since 1.8.0
- */
-
 /*-------------------------------------------------------------------------
  * Function:    H5Sextent_equal
  *
