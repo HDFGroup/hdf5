@@ -69,6 +69,7 @@ static void check_options(diff_opt_t* opts)
     }
 }
 
+#if TRILABS-227
 /*-------------------------------------------------------------------------
  * Function:    parse_hsize_list
  *
@@ -84,7 +85,6 @@ static void check_options(diff_opt_t* opts)
  * Return:      <none>
  *-------------------------------------------------------------------------
  */
-#if 0
 static void
 parse_hsize_list(const char *h_list, subset_d *d)
 {
@@ -134,7 +134,6 @@ parse_hsize_list(const char *h_list, subset_d *d)
     d->len = size_count;
     H5TOOLS_ENDDEBUG("");
 }
-#endif
 
 /*-------------------------------------------------------------------------
  * Function:    parse_subset_params
@@ -145,7 +144,6 @@ parse_hsize_list(const char *h_list, subset_d *d)
  *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
-#if 0
 static struct subset_t *
 parse_subset_params(const char *dset)
 {
@@ -444,10 +442,13 @@ void parse_command_line(int argc, const char* argv[], const char** fname1, const
     /*
      * TRILABS-227 is complete except for an issue with printing indices
      * the following calls will enable subsetting
+    */
+#if TRILABS-227
     opts->sset[0] = parse_subset_params(*objname1);
 
     opts->sset[1] = parse_subset_params(*objname2);
-    */
+#endif
+
     H5TOOLS_ENDDEBUG("");
 }
 
