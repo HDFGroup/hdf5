@@ -179,7 +179,8 @@ typedef herr_t (*H5L_elink_traverse_t)(const char *parent_file_name,
 /* Public Prototypes */
 /*********************/
 
-/**\ingroup H5L
+/**
+ * \ingroup H5L
  *
  * \brief Moves a link within an HDF5 file
  *
@@ -238,7 +239,8 @@ typedef herr_t (*H5L_elink_traverse_t)(const char *parent_file_name,
  */
 H5_DLL herr_t H5Lmove(hid_t src_loc, const char *src_name, hid_t dst_loc,
     const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
-/**\ingroup H5L
+/**
+ * \ingroup H5L
  *
  * \brief Creates an identical copy of a link with the same creation time and
  *        target.  The new link can have a different name and be in a different
@@ -298,7 +300,8 @@ H5_DLL herr_t H5Lmove(hid_t src_loc, const char *src_name, hid_t dst_loc,
  */
 H5_DLL herr_t H5Lcopy(hid_t src_loc, const char *src_name, hid_t dst_loc,
     const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
-/**\ingroup H5L
+/**
+ * \ingroup H5L
  *
  * \brief Creates a hard link to an object
  *
@@ -348,7 +351,8 @@ H5_DLL herr_t H5Lcopy(hid_t src_loc, const char *src_name, hid_t dst_loc,
  */
 H5_DLL herr_t H5Lcreate_hard(hid_t cur_loc, const char *cur_name,
     hid_t dst_loc, const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
-/**\ingroup H5L
+/**
+ * \ingroup H5L
  *
  * \brief Creates a soft link
  *
@@ -413,7 +417,8 @@ H5_DLL herr_t H5Lcreate_hard(hid_t cur_loc, const char *cur_name,
  */
 H5_DLL herr_t H5Lcreate_soft(const char *link_target, hid_t link_loc_id,
     const char *link_name, hid_t lcpl_id, hid_t lapl_id);
-/**\ingroup H5L
+/**
+ * \ingroup H5L
  *
  * \brief Removes a link from a group
  *
@@ -452,7 +457,8 @@ H5_DLL herr_t H5Lcreate_soft(const char *link_target, hid_t link_loc_id,
  *-------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id);
-/**\ingroup H5L
+/**
+ * \ingroup H5L
  *
  * \brief Removes the \Emph{n}-th link in a group
  *
@@ -482,7 +488,8 @@ H5_DLL herr_t H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id);
  */
 H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id);
-/**\ingroup H5L
+/**
+ * \ingroup H5L
  *
  * \brief Returns the value of a link
  *
@@ -538,7 +545,8 @@ H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
  */
 H5_DLL herr_t H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/,
     size_t size, hid_t lapl_id);
-/**\ingroup H5L
+/**
+ * \ingroup H5L
  *
  * \brief Retrieves value of the \Emph{n}-th link in a group, according to the order within an index
  *
@@ -597,7 +605,8 @@ H5_DLL herr_t H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/,
 H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     void *buf/*out*/, size_t size, hid_t lapl_id);
-/**\ingroup H5L
+/**
+ * \ingroup H5L
  *
  * \brief Determines whether a link with the specified name exists in a group
  *
@@ -685,7 +694,8 @@ H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name,
  *-------------------------------------------------------------------------
  */
 H5_DLL htri_t H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id);
-/**\ingroup H5L
+/**
+ * \ingroup H5L
  *
  * \brief Returns information about a link
  *
@@ -771,13 +781,120 @@ H5_DLL htri_t H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id);
  */
 H5_DLL herr_t H5Lget_info2(hid_t loc_id, const char *name,
     H5L_info2_t *linfo /*out*/, hid_t lapl_id);
+/**
+ * \ingroup H5L
+ *
+ * \brief Retrieves metadata for a link in a group, according to the order
+ *        within a field or index
+ *
+ * \loc_id
+ * \param[in] group_name Group name
+ * \idx_type
+ * \order
+ * \param[in] n Link position for which to retrieve information
+ * \param[out] linfo Buffer in which link information is returned
+ * \lapl_id
+ *
+ * \return \herr_t
+ *
+ * \details H5get_info_by_idx2() returns the metadata for a link in a group
+ *          according to a specified field or index and a specified order. The
+ *          link for which information is to be returned is specified by \p
+ *          idx_type, \p order, and \p n as follows:
+ *
+ *          - \p idx_type specifies the field by which the links in \p
+ *            group_name are ordered. The links may be indexed on this field,
+ *            in which case operations seeking specific links are likely to
+ *            complete more quickly.
+ *          - \p order specifies the order in which
+ *            the links are to be referenced for the purposes of this function.
+ *          - \p n specifies the position of the subject link. Note that this
+ *            count is zero-based; 0 (zero) indicates that the function will
+ *            return the value of the first link; if \p n is 5, the function
+ *            will return the value of the sixth link; etc.
+ *
+ *          For example, assume that \p idx_type, \p order, and \n are
+ *          #H5_INDEX_NAME, #H5_ITER_DEC, and 5, respectively. #H5_INDEX_NAME
+ *          indicates that the links are accessed in lexicographic order by
+ *          their names. #H5_ITER_DEC specifies that the list be traversed in
+ *          reverse order, or in decremented order. And 5 specifies that this
+ *          call to the function will return the metadata for the 6th link
+ *          (\c n + 1) from the end.
+ *
+ *          See H5Literate2() for a list of valid values and further discussion
+ *          regarding \p idx_type and \p order.
+ *
+ *          If \p loc_id specifies the group in which the link resides,
+ *          \p group_name can be a dot (\c .).
+ *
+ * \since 1.12.0
+ *
+ * \see H5Lget_info2()
+ *
+ * \todo Document H5Lget_info_by_idx()
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Lget_info_by_idx2(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     H5L_info2_t *linfo /*out*/, hid_t lapl_id);
+/**
+ * \ingroup H5L
+ *
+ * \brief Retrieves name of the \Emph{n}-th link in a group, according to the
+ *        order within a specified field or index
+ *
+ * \loc_id
+ * \param[in] group_name Group name
+ * \idx_type
+ * \order
+ * \param[in] n Link position for which to retrieve information
+ * \param[out] name Buffer in which link name is returned
+ * \param[in] size Size in bytes of \p name
+ * \lapl_id
+ *
+ * \return Returns the size of the link name if successful; otherwise returns a
+ *         negative value.
+ *
+ * \details H5get_name_by_idx() retrieves the name of the \Emph{n}-th link in a
+ *          group, according to the specified order, \p order, within a specified
+ *          field or index, \p idx_type.
+ *
+ *          \p idx_type specifies the index that is used. Valid values include
+ *          the following:
+ *          \indexes
+ *
+ *          \p order specifies the order in which objects are inspected along
+ *          the index specified in \p idx_type. Valid values include the
+ *          following:
+ *          \orders
+ *
+ *          If \p loc_id specifies the group in which the link resides,
+ *          \p group_name can be a dot (\c .).
+ *
+ *          The size in bytes of name is specified in \p size. If \p size is
+ *          unknown, it can be determined via an initial H5Lget_name_by_idx()
+ *          call with name set to NULL; the function's return value will be the
+ *          size of the name.
+ *
+ * \note Please note that in order for the specified index to correspond to the
+ *       creation order index, \p order must be set to #H5_ITER_INC or
+ *       #H5_ITER_DEC when calling H5Lget_name_by_idx(). \note The index \p n
+ *       passed to H5Lget_name_by_idx() is the index of the link within the
+ *       link table, sorted according to \p order and \p idx_type. If order is
+ *       #H5_ITER_NATIVE, then the link table is not sorted, and it does not
+ *       matter what \p idx_type is. Specifying #H5_ITER_NATIVE does not
+ *       guarantee any particular order, only that it remains consistent.
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL ssize_t H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     char *name /*out*/, size_t size, hid_t lapl_id);
-/**\ingroup H5L
+/**
+ * \ingroup H5L
  *
  * \brief Iterates over links in a group, with user callback routine,
  *        according to the order within an index.
@@ -865,7 +982,8 @@ H5_DLL htri_t H5Lis_registered(H5L_type_t id);
 /* External link functions */
 H5_DLL herr_t H5Lunpack_elink_val(const void *ext_linkval/*in*/, size_t link_size,
    unsigned *flags, const char **filename/*out*/, const char **obj_path /*out*/);
-/**\ingroup H5L
+/**
+ * \ingroup H5L
  *
  * \brief Creates an external link, a soft link to an object in a different file.
  *
@@ -1049,7 +1167,8 @@ H5_DLL herr_t H5Lget_info1(hid_t loc_id, const char *name,
 H5_DLL herr_t H5Lget_info_by_idx1(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     H5L_info1_t *linfo /*out*/, hid_t lapl_id);
-/**\ingroup H5L
+/**
+ * \ingroup H5L
  *
  * \brief Iterates over links in a group, with user callback routine,
  *        according to the order within an index.
