@@ -1268,8 +1268,7 @@ done:
  *      'temp' in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+H5_GCC_DIAG_OFF(format-nonliteral)
 static void
 do_cleanupfile(iotype iot, char *filename)
 {
@@ -1331,5 +1330,5 @@ do_cleanupfile(iotype iot, char *filename)
         }
     }
 }
-#pragma GCC diagnostic pop
+H5_GCC_DIAG_ON(format-nonliteral)
 

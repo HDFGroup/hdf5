@@ -73,6 +73,21 @@ else ()
 endif ()
 set_target_properties (iopipe PROPERTIES FOLDER perform)
 
+#-- Adding test for chunk_cache
+set (chunk_cache_SOURCES
+    ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/chunk_cache.c
+)
+add_executable (chunk_cache ${chunk_cache_SOURCES})
+target_include_directories (chunk_cache PRIVATE "${HDF5_TEST_SRC_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+if (NOT BUILD_SHARED_LIBS)
+  TARGET_C_PROPERTIES (chunk_cache STATIC)
+  target_link_libraries (chunk_cache PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+else ()
+  TARGET_C_PROPERTIES (chunk_cache SHARED)
+  target_link_libraries (chunk_cache PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+endif ()
+set_target_properties (chunk_cache PROPERTIES FOLDER perform)
+
 #-- Adding test for overhead
 set (overhead_SOURCES
     ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/overhead.c

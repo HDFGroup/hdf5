@@ -190,6 +190,7 @@
 ./examples/h5_chunk_read.c
 ./examples/h5_compound.c
 ./examples/h5_crtgrpd.c
+./examples/h5_debug_trace.c
 ./examples/h5_subset.c
 ./examples/h5_cmprss.c
 ./examples/h5_rdwt.c
@@ -682,6 +683,9 @@
 ./src/H5FDint.c
 ./src/H5FDlog.c
 ./src/H5FDlog.h
+./src/H5FDmirror.c
+./src/H5FDmirror.h
+./src/H5FDmirror_priv.h
 ./src/H5FDmodule.h
 ./src/H5FDmpi.c
 ./src/H5FDmpi.h
@@ -699,6 +703,8 @@
 ./src/H5FDsec2.c
 ./src/H5FDsec2.h
 ./src/H5FDspace.c
+./src/H5FDsplitter.c
+./src/H5FDsplitter.h
 ./src/H5FDstdio.c
 ./src/H5FDstdio.h
 ./src/H5FDtest.c
@@ -1001,6 +1007,7 @@
 ./test/cache_image.c
 ./test/cache_logging.c
 ./test/cache_tagging.c
+./test/chunk_info.c
 ./test/cmpd_dset.c
 ./test/cork.c
 ./test/corrupt_stab_msg.h5
@@ -1066,6 +1073,7 @@
 ./test/gen_deflate.c
 ./test/gen_file_image.c
 ./test/gen_filespace.c
+./test/gen_filters.c
 ./test/gen_mergemsg.c
 ./test/gen_new_array.c
 ./test/gen_new_fill.c
@@ -1104,6 +1112,7 @@
 ./test/corrupted_name_len.h5
 ./test/mergemsg.h5
 ./test/mf.c
+./test/mirror_vfd.c
 ./test/mount.c
 ./test/mtime.c
 ./test/multi_file_v16-r.h5
@@ -1161,6 +1170,7 @@
 ./test/testhdf5.c
 ./test/testhdf5.h
 ./test/testlibinfo.sh.in
+./test/test_mirror.sh.in
 ./test/test_usecases.sh.in
 ./test/testmeta.c
 ./test/testswmr.sh.in
@@ -1174,6 +1184,7 @@
 ./test/theap.c
 ./test/thread_id.c
 ./test/tid.c
+./test/timer.c
 ./test/titerate.c
 ./test/tlayouto.h5
 ./test/tmeta.c
@@ -1202,19 +1213,18 @@
 ./test/unlink.c
 ./test/unregister.c
 ./test/use_append_chunk.c
+./test/use_append_chunk_mirror.c
 ./test/use_append_mchunks.c
 ./test/use_common.c
 ./test/use_disable_mdc_flushes.c
 ./test/use.h
-./test/vfd.c
-./test/gen_filters.c
-./test/chunk_info.c
 ./test/vds.c
 ./test/vds_env.c
 ./test/vds_swmr.h
 ./test/vds_swmr_gen.c
 ./test/vds_swmr_reader.c
 ./test/vds_swmr_writer.c
+./test/vfd.c
 
 ./test/testfiles/err_compat_1
 ./test/testfiles/err_compat_2
@@ -2747,6 +2757,18 @@
 ./tools/test/perform/sio_standalone.h
 ./tools/test/perform/zip_perf.c
 
+# Utils directory
+./utils/COPYING
+./utils/Makefile.am
+
+# Mirror VFD utilities
+./utils/mirror_vfd/Makefile.am
+./utils/mirror_vfd/mirror_remote.c
+./utils/mirror_vfd/mirror_remote.h
+./utils/mirror_vfd/mirror_server.c
+./utils/mirror_vfd/mirror_server_stop.c
+./utils/mirror_vfd/mirror_writer.c
+
 # high level libraries
 ./hl/COPYING
 ./hl/Makefile.am
@@ -3475,6 +3497,8 @@
 ./tools/test/misc/vds/CMakeLists.txt
 ./tools/test/perform/CMakeLists.txt
 ./tools/test/perform/CMakeTests.cmake
+./utils/CMakeLists.txt
+./utils/mirror_vfd/CMakeLists.txt
 
 # CMake-specific User Scripts
 ./config/cmake/CTestScript.cmake

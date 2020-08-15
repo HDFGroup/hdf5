@@ -205,8 +205,8 @@ TOOLTEST() {
     # Run test.
     TESTING $DUMPER $@
     (
-    cd $TESTDIR
-      $RUNSERIAL $DUMPER_BIN "$@"
+        cd $TESTDIR
+        $RUNSERIAL $DUMPER_BIN "$@"
     ) >$actual 2>$actual_err
 
     # save actual and actual_err in case they are needed later.
@@ -216,26 +216,25 @@ TOOLTEST() {
     STDERR_FILTER $actual_err
     cat $actual_err >> $actual
 
-  if [ ! -f $expect ]; then
-    # Create the expect file if it doesn't yet exist.
-     echo " CREATED"
-     cp $actual $expect
-     echo "    Expected result (*.ddl) missing"
-     nerrors="`expr $nerrors + 1`"
+    if [ ! -f $expect ]; then
+        # Create the expect file if it doesn't yet exist.
+        echo " CREATED"
+        cp $actual $expect
+        echo "    Expected result (*.ddl) missing"
+        nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
-     echo " PASSED"
+        echo " PASSED"
     else
-     echo "*FAILED*"
-     echo "    Expected result (*.ddl) differs from actual result (*.out)"
-   nerrors="`expr $nerrors + 1`"
-   test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+        echo "*FAILED*"
+        echo "    Expected result (*.ddl) differs from actual result (*.out)"
+        nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     fi
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-   rm -f $actual $actual_err $actual_sav $actual_err_sav $actual_ext
+        rm -f $actual $actual_err $actual_sav $actual_err_sav $actual_ext
     fi
-
 }
 
 
@@ -254,42 +253,42 @@ TOOLTEST2() {
     # Run test.
     TESTING $DUMPER $@
     (
-      cd $TESTDIR
-      $RUNSERIAL $DUMPER_BIN "$@"
+        cd $TESTDIR
+        $RUNSERIAL $DUMPER_BIN "$@"
     ) >$actual 2>$actual_err
     cat $actual_err >> $actual
 
     if [ ! -f $expect ]; then
-    # Create the expect file if it doesn't yet exist.
-     echo " CREATED"
-     cp $actual $expect
-     echo "    Expected result (*.ddl) missing"
-     nerrors="`expr $nerrors + 1`"
-    elif $CMP $expect $actual; then
-      if [ ! -f $expectdata ]; then
-      # Create the expect data file if it doesn't yet exist.
+        # Create the expect file if it doesn't yet exist.
         echo " CREATED"
-        cp $actualdata $expectdata
-        echo "    Expected data (*.exp) missing"
+        cp $actual $expect
+        echo "    Expected result (*.ddl) missing"
         nerrors="`expr $nerrors + 1`"
-      elif $CMP $expectdata $actualdata; then
-        echo " PASSED"
-      else
-        echo "*FAILED*"
-        echo "    Expected datafile (*.exp) differs from actual datafile (*.txt)"
-        nerrors="`expr $nerrors + 1`"
-        test yes = "$verbose" && $DIFF $expectdata $actualdata |sed 's/^/    /'
-      fi
+    elif $CMP $expect $actual; then
+        if [ ! -f $expectdata ]; then
+            # Create the expect data file if it doesn't yet exist.
+            echo " CREATED"
+            cp $actualdata $expectdata
+            echo "    Expected data (*.exp) missing"
+            nerrors="`expr $nerrors + 1`"
+        elif $CMP $expectdata $actualdata; then
+            echo " PASSED"
+        else
+            echo "*FAILED*"
+            echo "    Expected datafile (*.exp) differs from actual datafile (*.txt)"
+            nerrors="`expr $nerrors + 1`"
+            test yes = "$verbose" && $DIFF $expectdata $actualdata |sed 's/^/    /'
+        fi
     else
-     echo "*FAILED*"
-     echo "    Expected result (*.ddl) differs from actual result (*.out)"
-     nerrors="`expr $nerrors + 1`"
-     test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+        echo "*FAILED*"
+        echo "    Expected result (*.ddl) differs from actual result (*.out)"
+        nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     fi
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-     rm -f $actual $actualdata $actual_err
+        rm -f $actual $actualdata $actual_err
     fi
 
 }
@@ -309,8 +308,8 @@ TOOLTEST3() {
     # Run test.
     TESTING $DUMPER $@
     (
-      cd $TESTDIR
-      $RUNSERIAL $DUMPER_BIN "$@"
+        cd $TESTDIR
+        $RUNSERIAL $DUMPER_BIN "$@"
     ) >$actual 2>$actual_err
 
     # save actual and actual_err in case they are needed later.
@@ -326,27 +325,27 @@ TOOLTEST3() {
         -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
         -e 's/H5Eget_auto[1-2]*/H5Eget_auto(1 or 2)/' \
         -e 's/H5Eset_auto[1-2]*/H5Eset_auto(1 or 2)/' \
-     $actual_err > $actual_ext
+        $actual_err > $actual_ext
     cat $actual_ext >> $actual
 
     if [ ! -f $expect ]; then
-    # Create the expect file if it doesn't yet exist.
-     echo " CREATED"
-     cp $actual $expect
-     echo "    Expected result (*.ddl) missing"
-     nerrors="`expr $nerrors + 1`"
+        # Create the expect file if it doesn't yet exist.
+        echo " CREATED"
+        cp $actual $expect
+        echo "    Expected result (*.ddl) missing"
+        nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
-     echo " PASSED"
+        echo " PASSED"
     else
-     echo "*FAILED*"
-     echo "    Expected result (*.ddl) differs from actual result (*.out)"
-     nerrors="`expr $nerrors + 1`"
-     test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+        echo "*FAILED*"
+        echo "    Expected result (*.ddl) differs from actual result (*.out)"
+        nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     fi
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-   rm -f $actual $actual_err $actual_sav $actual_err_sav
+        rm -f $actual $actual_err $actual_sav $actual_err_sav
     fi
 
 }
@@ -367,8 +366,8 @@ TOOLTEST4() {
     # Run test.
     TESTING $DUMPER $@
     (
-      cd $TESTDIR
-      $RUNSERIAL $DUMPER_BIN "$@"
+        cd $TESTDIR
+        $RUNSERIAL $DUMPER_BIN "$@"
     ) >$actual 2>$actual_err
 
     # save actual and actual_err in case they are needed later.
@@ -384,47 +383,46 @@ TOOLTEST4() {
         -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
         -e 's/H5Eget_auto[1-2]*/H5Eget_auto(1 or 2)/' \
         -e 's/H5Eset_auto[1-2]*/H5Eset_auto(1 or 2)/' \
-     $actual_err > $actual_ext
+        $actual_err > $actual_ext
     #cat $actual_ext >> $actual
 
     if [ ! -f $expect ]; then
-    # Create the expect file if it doesn't yet exist.
-     echo " CREATED"
-     cp $actual $expect
+        # Create the expect file if it doesn't yet exist.
+        echo " CREATED"
+        cp $actual $expect
     elif $CMP $expect $actual; then
-     if $CMP $expect_err $actual_ext; then
-      echo " PASSED"
+        if $CMP $expect_err $actual_ext; then
+            echo " PASSED"
+        else
+            echo "*FAILED*"
+            echo "    Expected result (*.err) differs from actual result (*.oerr)"
+            nerrors="`expr $nerrors + 1`"
+            test yes = "$verbose" && $DIFF $expect_err $actual_ext |sed 's/^/    /'
+        fi
     else
-     echo "*FAILED*"
-     echo "    Expected result (*.err) differs from actual result (*.oerr)"
-     nerrors="`expr $nerrors + 1`"
-     test yes = "$verbose" && $DIFF $expect_err $actual_ext |sed 's/^/    /'
-    fi
-    else
-     echo "*FAILED*"
-     echo "    Expected result (*.ddl) differs from actual result (*.out)"
-     nerrors="`expr $nerrors + 1`"
-     test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+        echo "*FAILED*"
+        echo "    Expected result (*.ddl) differs from actual result (*.out)"
+        nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     fi
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-   rm -f $actual $actual_err $actual_sav $actual_err_sav
+        rm -f $actual $actual_err $actual_sav $actual_err_sav
     fi
-
 }
 
 # Print a "SKIP" message
 SKIP() {
-   TESTING $DUMPER $@
+    TESTING $DUMPER $@
     echo  " -SKIP-"
 }
 
 # Print a line-line message left justified in a field of 70 characters
 #
 PRINT_H5DIFF() {
- SPACES="                                                               "
- echo " Running h5diff $* $SPACES" | cut -c1-70 | tr -d '\012'
+    SPACES="                                                               "
+    echo " Running h5diff $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
 
@@ -434,25 +432,25 @@ DIFFTEST()
 {
     PRINT_H5DIFF  $@
     (
-  cd $TESTDIR
-  $RUNSERIAL $H5DIFF_BIN "$@" -q
+        cd $TESTDIR
+        $RUNSERIAL $H5DIFF_BIN "$@" -q
     )
     RET=$?
+
     if [ $RET != 0 ] ; then
          echo "*FAILED*"
          nerrors="`expr $nerrors + 1`"
     else
          echo " PASSED"
     fi
-
 }
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Verifying".
 #
 PRINT_H5IMPORT() {
- SPACES="                                                               "
- echo " Running h5import $* $SPACES" | cut -c1-70 | tr -d '\012'
+    SPACES="                                                               "
+    echo " Running h5import $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
 # Call the h5import tool
@@ -462,22 +460,22 @@ IMPORTTEST()
     # remove the output hdf5 file if it exists
     hdf5_file="$TESTDIR/$5"
     if [ -f $hdf5_file ]; then
-     rm -f $hdf5_file
+        rm -f $hdf5_file
     fi
 
     PRINT_H5IMPORT  $@
     (
-  cd $TESTDIR
-  $RUNSERIAL $H5IMPORT_BIN "$@"
+        cd $TESTDIR
+        $RUNSERIAL $H5IMPORT_BIN "$@"
     )
     RET=$?
+
     if [ $RET != 0 ] ; then
          echo "*FAILED*"
          nerrors="`expr $nerrors + 1`"
     else
          echo " PASSED"
     fi
-
 }
 
 
@@ -491,7 +489,7 @@ COPY_TESTFILES_TO_TESTDIR
 
 ####### test for dataset vds ######
 
-  # Data read
+# Data read
 if test $USE_FILTER_DEFLATE = "yes" ; then
     TOOLTEST tvds-1.ddl --enable-error-stack 1_vds.h5
     TOOLTEST tvds-2.ddl --enable-error-stack 2_vds.h5
@@ -504,7 +502,7 @@ if test $USE_FILTER_DEFLATE = "yes" ; then
     TOOLTEST vds-gap2.ddl --vds-gap-size=2 --enable-error-stack vds-eiger.h5
 fi
 
-  # Layout read
+# Layout read
 if test $USE_FILTER_DEFLATE = "yes" ; then
     TOOLTEST tvds_layout-1.ddl -p --enable-error-stack 1_vds.h5
     TOOLTEST tvds_layout-2.ddl -p --enable-error-stack 2_vds.h5
