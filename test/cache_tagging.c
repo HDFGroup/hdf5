@@ -30,16 +30,16 @@
 /* Test Defines */
 /* ============ */
 
-#define FILENAME "tagging_test.h5"
-#define FILENAME2 "tagging_ext_test.h5"
-#define GROUPNAME "Group"
+#define FILENAME      "tagging_test.h5"
+#define FILENAME2     "tagging_ext_test.h5"
+#define GROUPNAME     "Group"
 #define GROUPNAMEPATH "/Group"
 #define GROUPNAMECOPY "GroupCopy"
-#define ATTRNAME "Attribute 1"
-#define ATTRNAME3 "Attribute 3"
-#define DATASETNAME "Dataset"
-#define DATASETNAME2 "Dataset2"
-#define LINKNAME "Link"
+#define ATTRNAME      "Attribute 1"
+#define ATTRNAME3     "Attribute 3"
+#define DATASETNAME   "Dataset"
+#define DATASETNAME2  "Dataset2"
+#define LINKNAME      "Link"
 #define RANK 2
 #define DIMS 32
 
