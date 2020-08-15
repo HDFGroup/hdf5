@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Tuesday, December  9, 1997
  *
  * Purpose:     Tests the datatype interface (H5T)
@@ -7642,19 +7642,19 @@ test_versionbounds(void)
     ret = H5Tenum_insert(enum_type, "RED", &enum_val);
     if (ret < 0) TEST_ERROR
 
-    enum_val++;
+    enum_val = E1_GREEN;
     ret = H5Tenum_insert(enum_type, "GREEN", &enum_val);
     if (ret < 0) TEST_ERROR
 
-    enum_val++;
+    enum_val = E1_BLUE;
     ret = H5Tenum_insert(enum_type, "BLUE", &enum_val);
     if (ret < 0) TEST_ERROR
 
-    enum_val++;
+    enum_val = E1_ORANGE;
     ret = H5Tenum_insert(enum_type, "ORANGE", &enum_val);
     if (ret < 0) TEST_ERROR
 
-    enum_val++;
+    enum_val = E1_YELLOW;
     ret = H5Tenum_insert(enum_type, "YELLOW", &enum_val);
     if (ret < 0) TEST_ERROR
 

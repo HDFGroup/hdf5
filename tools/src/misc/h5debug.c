@@ -15,7 +15,7 @@
  *
  * Created:             debug.c
  *                      Jul 18 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             Debugs an existing HDF5 file at a low level.
  *

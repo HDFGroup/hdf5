@@ -531,7 +531,7 @@ test_attr_flush(hid_t fapl)
     ret=H5Aread(att, H5T_NATIVE_DOUBLE, &rdata);
     CHECK(ret, FAIL, "H5Awrite");
 
-    if(!H5_DBL_ABS_EQUAL(rdata, H5_DOUBLE(0.0)))
+    if(!H5_DBL_ABS_EQUAL(rdata, (double)0.0f))
         TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n",rdata,(double)0.0F);
 
     ret=H5Fflush(fil, H5F_SCOPE_GLOBAL);
@@ -540,7 +540,7 @@ test_attr_flush(hid_t fapl)
     ret=H5Aread(att, H5T_NATIVE_DOUBLE, &rdata);
     CHECK(ret, FAIL, "H5Awrite");
 
-    if(!H5_DBL_ABS_EQUAL(rdata, H5_DOUBLE(0.0)))
+    if(!H5_DBL_ABS_EQUAL(rdata, (double)0.0f))
         TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n",rdata,(double)0.0F);
 
     ret=H5Awrite(att, H5T_NATIVE_DOUBLE, &wdata);
@@ -6559,13 +6559,6 @@ attr_iterate2_cb(hid_t loc_id, const char *attr_name, const H5A_info_t *info,
     attr_iter_info_t *op_data = (attr_iter_info_t *)_op_data;   /* User data */
     char attrname[NAME_BUF_SIZE]; /* Object name */
     H5A_info_t my_info;         /* Local attribute info */
-
-#ifdef QAK
-HDfprintf(stderr, "attr_name = '%s'\n", attr_name);
-if(info)
-    HDfprintf(stderr, "info->corder = %u\n", (unsigned)info->corder);
-HDfprintf(stderr, "op_data->curr = %Hd\n", op_data->curr);
-#endif /* QAK */
 
     /* Increment # of times the callback was called */
     op_data->ncalled++;

@@ -389,6 +389,10 @@ H5FL_EXTERN(H5F_t);
 /* Declare a free list to manage the H5F_shared_t struct */
 H5FL_EXTERN(H5F_shared_t);
 
+/* Whether or not to use file locking (based on the environment variable)
+ * FAIL means ignore the environment variable.
+ */
+H5_DLLVAR htri_t use_locks_env_g;
 
 /******************************/
 /* Package Private Prototypes */
@@ -407,6 +411,7 @@ H5_DLL herr_t H5F__start_swmr_write(H5F_t *f);
 H5_DLL herr_t H5F__close(hid_t file_id);
 H5_DLL herr_t H5F__close_cb(H5F_t *f);
 H5_DLL herr_t H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high);
+H5_DLL herr_t H5F__parse_file_lock_env_var(htri_t *use_locks);
 
 /* File mount related routines */
 H5_DLL herr_t H5F__mount(H5G_loc_t *loc, const char *name, H5F_t *child, hid_t plist_id);
@@ -466,6 +471,7 @@ H5_DLL herr_t H5F__get_sohm_mesg_count_test(hid_t fid, unsigned type_id, size_t 
 H5_DLL herr_t H5F__check_cached_stab_test(hid_t file_id);
 H5_DLL herr_t H5F__get_maxaddr_test(hid_t file_id, haddr_t *maxaddr);
 H5_DLL herr_t H5F__get_sbe_addr_test(hid_t file_id, haddr_t *sbe_addr);
+H5_DLL herr_t H5F__reparse_file_lock_variable_test(void);
 #endif /* H5F_TESTING */
 
 #endif /* _H5Fpkg_H */

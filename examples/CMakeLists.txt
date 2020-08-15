@@ -29,6 +29,7 @@ set (examples
     h5_extlink
     h5_elink_unix2win
     h5_shared_mesg
+    h5_debug_trace
     h5_vds
     h5_vds-exc
     h5_vds-exclim

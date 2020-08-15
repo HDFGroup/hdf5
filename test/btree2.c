@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+/* Programmer:  Quincey Koziol
  *              Tuesday, February  1, 2005
  */
 #include "h5test.h"
@@ -26,7 +26,7 @@
 
 /* Other private headers that this test requires */
 #include "H5CXprivate.h"        /* API Contexts                         */
-#include "H5Iprivate.h"        /* Virtual Object Layer                     */
+#include "H5Iprivate.h"        /* Identifiers                     */
 
 const char *FILENAME[] = {
     "btree2",

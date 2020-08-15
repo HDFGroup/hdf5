@@ -12,9 +12,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Wednesday, April  8, 1998
- * Modified:	Albert Cheng <acheng@hdfgroup.org>
+ * Modified:	Albert Cheng
  * 		September 11, 2010
  */
 /*
@@ -803,10 +803,10 @@ main (int ac, char **av)
 
     /* Choose random # seed */
     seed = (unsigned long)HDtime(NULL);
-#ifdef QAK
+#if 0
     /* seed = (unsigned long)1155438845; */
     HDfprintf(stderr, "Random # seed was: %lu\n", seed);
-#endif /* QAK */
+#endif
     HDsrandom((unsigned)seed);
 
     /* run VFD-specific test */

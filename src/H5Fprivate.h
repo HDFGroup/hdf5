@@ -516,6 +516,8 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_PAGE_BUFFER_SIZE_NAME           "page_buffer_size" /* the maximum size for the page buffer cache */
 #define H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME  "page_buffer_min_meta_perc" /* the min metadata percentage for the page buffer cache */
 #define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME   "page_buffer_min_raw_perc" /* the min raw data percentage for the page buffer cache */
+#define H5F_ACS_USE_FILE_LOCKING_NAME           "use_file_locking" /* whether or not we use file locks for SWMR control and to prevent multiple writers */
+#define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_NAME "ignore_disabled_file_locks" /* whether or not we ignore "locks disabled" errors */
 
 /* ======================== File Mount properties ====================*/
 #define H5F_MNT_SYM_LOCAL_NAME         "local"                 /* Whether absolute symlinks local to file. */

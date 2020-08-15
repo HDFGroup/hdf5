@@ -461,7 +461,7 @@ encode_plist(hid_t plist_id, int little_endian, int word_length, const char *fil
     herr_t ret = 0;
     void *temp_buf = NULL;
     size_t temp_size = 0;
-    ssize_t write_size;
+    ssize_t H5_ATTR_NDEBUG_UNUSED write_size;
     char filename[1024];
 
     /* Generate filename */
