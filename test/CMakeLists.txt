@@ -256,6 +256,7 @@ set (H5_TESTS
     cork
     swmr
     thread_id # special link
+    timer
 )
 
 macro (ADD_H5_EXE file)

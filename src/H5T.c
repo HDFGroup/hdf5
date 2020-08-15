@@ -1815,12 +1815,6 @@ done:
  * Programmer:    Robb Matzke
  *        Friday, January     9, 1998
  *
- * Modifications:
- *
- *     Robb Matzke, 1 Jun 1998
- *    It is illegal to lock a named datatype since we must allow named
- *    types to be closed (to release file resources) but locking a type
- *    prevents that.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1892,9 +1886,6 @@ done:
  *
  * Programmer:    Robb Matzke
  *        Monday, December  8, 1997
- *
- * Modifications:
- *      Broke out from H5Tget_class - QAK - 6/4/99
  *
  *-------------------------------------------------------------------------
  */
@@ -2882,10 +2873,6 @@ done:
  * Programmer:    Raymond Lu
  *              July 14, 2004
  *
- * Modification:Raymond Lu
- *              17 February 2011
- *              I changed the value for the APP_REF parameter of H5I_register
- *              from FALSE to TRUE.
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -3046,10 +3033,6 @@ done:
  * Programmer:    Robb Matzke
  *        Friday, December  5, 1997
  *
- * Modifications:
- *              Raymond Lu
- *              19 May 2011
- *              We support fixed size or variable-length string now.
  *-------------------------------------------------------------------------
  */
 H5T_t *
@@ -5055,11 +5038,6 @@ H5T_path_noop(const H5T_path_t *p)
  * Programmer:    Raymond Lu
  *        8 June 2007
  *
- * Modifications:  Neil Fortner
- *      19 September 2008
- *      Changed return value to H5T_subset_info_t
- *      (to allow it to return copy_size)
- *
  *-------------------------------------------------------------------------
  */
 H5T_subset_info_t *
@@ -5154,15 +5132,18 @@ H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id, size_t nelmts,
     size_t buf_stride, size_t bkg_stride, void *buf, void *bkg)
 {
 #ifdef H5T_DEBUG
-    H5_timer_t        timer;
+    H5_timer_t  timer;                  /* Timer for conversion */
 #endif
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
 #ifdef H5T_DEBUG
-    if(H5DEBUG(T))
-        H5_timer_begin(&timer);
+    if(H5DEBUG(T)) {
+        /* Initialize and start timer */
+        H5_timer_init(&timer);
+        H5_timer_start(&timer);
+    } /* end if */
 #endif
 
     /* Call the appropriate conversion callback */
@@ -5176,10 +5157,16 @@ H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id, size_t nelmts,
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
 #ifdef H5T_DEBUG
     if(H5DEBUG(T)) {
-        H5_timer_end(&(tpath->stats.timer), &timer);
+        /* Stop timer */
+        H5_timer_stop(&timer);
+
+        /* Record elapsed timer info */
+        H5_timer_get_times(timer, &tpath->stats.times);
+
+        /* Increment # of calls and # of elements converted */
         tpath->stats.ncalls++;
         tpath->stats.nelmts += nelmts;
-    }
+    } /* end if */
 #endif
 
 done:
