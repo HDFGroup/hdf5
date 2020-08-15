@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:    Robb Matzke <matzke@llnl.gov>
+ * Programmer:    Robb Matzke
  *        Tuesday, December  9, 1997
  *
  * Purpose:    Tests the dataset interface (H5D)
@@ -273,13 +273,6 @@ const char *FILENAME[] = {
 #define STORAGE_SIZE_MAX_DIM2   80
 #define STORAGE_SIZE_CHUNK_DIM1 5
 #define STORAGE_SIZE_CHUNK_DIM2 5
-
-/* Parameters for testing version bounds */
-#define VDS_FNAME1  "virtual_file1"
-#define VDS_FNAME2  "virtual_file2"
-#define SRC_FNAME   "source_file"
-#define SRC_DSET    "src_dset"
-#define V_DSET      "v_dset"
 
 /* Shared global arrays */
 #define DSET_DIM1       100
@@ -3176,18 +3169,18 @@ test_nbit_double(hid_t file)
      */
     double              orig_data[2][5] = {
         {
-            H5_DOUBLE(1.6081706885101836e+60),
-            H5_DOUBLE(-255.32099170994480),
-            H5_DOUBLE(1.2677579992621376e-61),
-            H5_DOUBLE(64568.289448797700),
-            H5_DOUBLE(-1.0619721778839084e-75)
+            (double)1.6081706885101836e+60L,
+            -255.32099170994480f,
+            (double)1.2677579992621376e-61L,
+            64568.289448797700f,
+            (double)-1.0619721778839084e-75L
         },
         {
-            H5_DOUBLE(2.1499497833454840e+56),
-            H5_DOUBLE(6.6562295504670740e-3),
-            H5_DOUBLE(-1.5747263393432150),
-            H5_DOUBLE(1.0711093225222612),
-            H5_DOUBLE(-9.8971679387636870e-1)
+            (double)2.1499497833454840e+56L,
+            6.6562295504670740e-3f,
+            -1.5747263393432150f,
+            1.0711093225222612f,
+            -9.8971679387636870e-1f
         }};
     double              new_data[2][5];
     size_t              precision, offset;
@@ -13232,6 +13225,11 @@ error:
  *
  *-------------------------------------------------------------------------
  */
+#define VDS_FNAME1  "virtual_file1"
+#define VDS_FNAME2  "virtual_file2"
+#define SRC_FNAME   "source_file"
+#define SRC_DSET    "src_dset"
+#define V_DSET      "v_dset"
 static herr_t
 test_versionbounds(void)
 {

@@ -522,6 +522,8 @@ done:
              */
             if (TRUE == h5tools_detect_vlen(wtype_id))
                 H5Dvlen_reclaim(wtype_id, space_id, H5P_DEFAULT, buf);
+
+            /* Free buf */
             HDfree(buf);
         }
 

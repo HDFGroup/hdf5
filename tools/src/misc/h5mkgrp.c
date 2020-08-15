@@ -46,7 +46,7 @@ typedef struct mkgrp_opt_t {
 
 mkgrp_opt_t params_g;           /* Command line parameter settings */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    leave
  *
@@ -78,7 +78,7 @@ leave(int ret)
     HDexit(ret);
 } /* end leave() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: usage
  *
@@ -104,7 +104,7 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "\n");
 } /* end usage() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    parse_command_line
  *
@@ -200,7 +200,7 @@ parse_command_line(int argc, const char *argv[], mkgrp_opt_t *options)
     return 0;
 } /* parse_command_line() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: main
  *
