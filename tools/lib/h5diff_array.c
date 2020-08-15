@@ -756,15 +756,14 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
             hid_t obj2_id = H5I_INVALID_HID;
             diff_opt_t ref_opts;
 
-            ref_opts = *opts;
-            ref_opts.obj_name[0] = NULL;
-            ref_opts.obj_name[1] = NULL;
-
             /*-------------------------------------------------------------------------
              * H5T_STD_REF_OBJ
              * Object references. get the type and OID of the referenced object
              *-------------------------------------------------------------------------
              */
+            ref_opts = *opts;
+            ref_opts.obj_name[0] = NULL;
+            ref_opts.obj_name[1] = NULL;
             if (type_size == H5R_OBJ_REF_BUF_SIZE) {
                 H5O_type_t obj1_type;
                 H5O_type_t obj2_type;
