@@ -346,8 +346,8 @@ done:
  *
  * Purpose:     This function unregisters a filter.
  *
- * Return:      SUCCEED/FAIL
- *
+ * Return:      Non-negative on success
+ *              Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1340,7 +1340,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
             fstats->stats[1].times.system  += times.system;
             fstats->stats[1].times.user    += times.user;
 
-	    fstats->stats[1].total += MAX(*nbytes, new_nbytes);
+            fstats->stats[1].total += MAX(*nbytes, new_nbytes);
             if(0 == new_nbytes)
                 fstats->stats[1].errors += *nbytes;
 #endif

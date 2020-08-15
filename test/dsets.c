@@ -1888,7 +1888,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         if(H5Pset_filter_callback(write_dxpl, filter_cb_fail, NULL) < 0) TEST_ERROR;
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
         H5E_BEGIN_TRY {
-            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
         } H5E_END_TRY;
         if(status>=0) TEST_ERROR;
     }
@@ -1934,7 +1934,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         /* Default behavior is failure when data is corrupted. */
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
         H5E_BEGIN_TRY {
-            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
         } H5E_END_TRY;
         if(status>=0) TEST_ERROR;
 
@@ -1947,7 +1947,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         if(H5Pset_filter_callback(write_dxpl, filter_cb_fail, NULL) < 0) TEST_ERROR;
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
         H5E_BEGIN_TRY {
-            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
         } H5E_END_TRY;
         if(status>=0) TEST_ERROR;
     }
@@ -2048,7 +2048,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         /* Default behavior is failure when data is corrupted. */
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
         H5E_BEGIN_TRY {
-            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
         } H5E_END_TRY;
         if(status>=0) TEST_ERROR;
 
@@ -2061,12 +2061,12 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         if(H5Pset_filter_callback(write_dxpl, filter_cb_fail, NULL) < 0) TEST_ERROR;
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
         H5E_BEGIN_TRY {
-            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
         } H5E_END_TRY;
         if(status>=0) TEST_ERROR;
     }
     else {
-        if(H5Dread (dataset, H5T_NATIVE_INT, sid, sid, dxpl, check_data) < 0)
+        if(H5Dread(dataset, H5T_NATIVE_INT, sid, sid, dxpl, check_data) < 0)
             TEST_ERROR;
 
         /* Check that the values read are the same as the values written */
@@ -13366,7 +13366,7 @@ test_versionbounds(void)
     return FAIL;
 } /* end test_versionbounds() */
 
-
+
 /*-----------------------------------------------------------------------------
  * Function:   test_object_header_minimization_dcpl
  *
