@@ -32,36 +32,38 @@ const char *outfile = NULL;
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVvf:l:m:e:nLj:k:c:d:s:u:b:M:t:a:i:o:S:P:T:G:q:z:E";
+static const char *s_opts = "a:b:c:d:e:f:hi:j:k:l:m:no:q:s:t:u:vz:EG:LM:P:S:T:VXW1:2:3:4:5:6:";
 static struct long_options l_opts[] = {
-    { "help",                no_arg,      'h' },
-    { "version",             no_arg,      'V' },
-    { "verbose",             no_arg,      'v' },
-    { "filter",              require_arg, 'f' },
-    { "layout",              require_arg, 'l' },
-    { "minimum",             require_arg, 'm' },
-    { "file",                require_arg, 'e' },
-    { "native",              no_arg,      'n' },
-    { "latest",              no_arg,      'L' },
-    { "low",                 require_arg, 'j' },
-    { "high",                require_arg, 'k' },
+    { "alignment",           require_arg, 'a' },
+    { "block",               require_arg, 'b' },
     { "compact",             require_arg, 'c' },
     { "indexed",             require_arg, 'd' },
-    { "ssize",               require_arg, 's' },
-    { "ublock",              require_arg, 'u' },
-    { "block",               require_arg, 'b' },
-    { "metadata_block_size", require_arg, 'M' },
-    { "threshold",           require_arg, 't' },
-    { "alignment",           require_arg, 'a' },
+    { "file",                require_arg, 'e' },
+    { "filter",              require_arg, 'f' },
+    { "help",                no_arg,      'h' },
     { "infile",              require_arg, 'i' }, /* for backward compability */
+    { "low",                 require_arg, 'j' },
+    { "high",                require_arg, 'k' },
+    { "layout",              require_arg, 'l' },
+    { "minimum",             require_arg, 'm' },
+    { "native",              no_arg,      'n' },
     { "outfile",             require_arg, 'o' }, /* for backward compability */
-    { "fs_strategy",         require_arg, 'S' },
-    { "fs_persist",          require_arg, 'P' },
-    { "fs_threshold",        require_arg, 'T' },
-    { "fs_pagesize",         require_arg, 'G' },
     { "sort_by",             require_arg, 'q' },
+    { "ssize",               require_arg, 's' },
+    { "threshold",           require_arg, 't' },
+    { "ublock",              require_arg, 'u' },
+    { "verbose",             no_arg,      'v' },
     { "sort_order",          require_arg, 'z' },
     { "enable-error-stack",  no_arg,      'E' },
+    { "fs_pagesize",         require_arg, 'G' },
+    { "latest",              no_arg,      'L' },
+    { "metadata_block_size", require_arg, 'M' },
+    { "fs_persist",          require_arg, 'P' },
+    { "fs_strategy",         require_arg, 'S' },
+    { "fs_threshold",        require_arg, 'T' },
+    { "version",             no_arg,      'V' },
+    { "merge",               no_arg,      'X' },
+    { "prune",               no_arg,      'W' },
     { "src-vol-value",       require_arg, '1' },
     { "src-vol-name",        require_arg, '2' },
     { "src-vol-info",        require_arg, '3' },
@@ -113,6 +115,9 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "   --high=BOUND            The high bound for library release versions to use\n");
     PRINTVALSTREAM(rawoutstream, "                           when creating objects in the file\n");
     PRINTVALSTREAM(rawoutstream, "                           (default is H5F_LIBVER_LATEST)\n");
+    PRINTVALSTREAM(rawoutstream, "   --merge                 Follow external soft link recursively and merge data\n");
+    PRINTVALSTREAM(rawoutstream, "   --prune                 Do not follow external soft links and remove link\n");
+    PRINTVALSTREAM(rawoutstream, "   --merge --prune         Follow external link, merge data and remove dangling link\n");
     PRINTVALSTREAM(rawoutstream, "   -c L1, --compact=L1     Maximum number of links in header messages\n");
     PRINTVALSTREAM(rawoutstream, "   -d L2, --indexed=L2     Minimum number of links in the indexed format\n");
     PRINTVALSTREAM(rawoutstream, "   -s S[:F], --ssize=S[:F] Shared object header message minimum size\n");
@@ -543,6 +548,14 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                     goto done;
                 }
                 options->high_bound = bound;
+                break;
+
+            case 'X':
+                options->merge = TRUE;
+                break;
+
+            case 'W':
+                options->prune = TRUE;
                 break;
 
             case 'c':
