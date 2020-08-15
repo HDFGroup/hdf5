@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu<slu@ncsa.uiuc.edu>
+ * Programmer:  Raymond Lu
  *              Tuesday, Sept 24, 2002
  *
  * Purpose:     Tests the basic features of Virtual File Drivers
@@ -1188,6 +1188,123 @@ error:
     return -1;
 } /* end test_family_compat() */
 H5_GCC_DIAG_ON(format-nonliteral)
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_family_member_fapl
+ *
+ * Purpose:     Actually use the member fapl input to the member vfd.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Jacob Smith
+ *              21 May 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_family_member_fapl(void)
+{
+    hid_t    file           = H5I_INVALID_HID;
+    hid_t    fapl_id        = H5I_INVALID_HID;
+    hid_t    memb_fapl_id   = H5I_INVALID_HID;
+    hid_t    space          = H5I_INVALID_HID;
+    hid_t    dset           = H5I_INVALID_HID;
+    char     filename[1024];
+    char     dname[]        = "dataset";
+    unsigned i              = 0;
+    unsigned j              = 0;
+    int     **buf           = NULL;
+    int     *buf_data       = NULL;
+    hsize_t  dims[2]        = {FAMILY_NUMBER, FAMILY_SIZE};
+
+    TESTING("Family member FAPL");
+
+    /* Set up data array */
+    if(NULL == (buf_data = (int *)HDcalloc(FAMILY_NUMBER * FAMILY_SIZE, sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (buf = (int **)HDcalloc(FAMILY_NUMBER, sizeof(buf_data))))
+        TEST_ERROR;
+    for (i = 0; i < FAMILY_NUMBER; i++)
+        buf[i] = buf_data + (i * FAMILY_SIZE);
+
+    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) == H5I_INVALID_HID)
+        TEST_ERROR;
+
+    if((memb_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) ==  H5I_INVALID_HID)
+        TEST_ERROR;
+
+    if (H5Pset_fapl_sec2(memb_fapl_id) == FAIL)
+        TEST_ERROR;
+    if (H5Pset_fapl_family(fapl_id, (hsize_t)FAMILY_SIZE, memb_fapl_id) == FAIL)
+        TEST_ERROR;
+
+    h5_fixname(FILENAME[2], fapl_id, filename, sizeof(filename));
+
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) == H5I_INVALID_HID)
+        TEST_ERROR;
+
+    if((space = H5Screate_simple(2, dims, NULL)) == H5I_INVALID_HID)
+        TEST_ERROR;
+
+    /* Create and write to dataset, then close file.
+     */
+    if((dset = H5Dcreate2(file, dname, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) == H5I_INVALID_HID)
+        TEST_ERROR;
+
+    for (i = 0; i < FAMILY_NUMBER; i++) {
+        for (j = 0; j < FAMILY_SIZE; j++) {
+            buf[i][j] = (int)((i * 10000) + j);
+        }
+    }
+
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_data) == FAIL)
+        TEST_ERROR;
+
+    if (H5Dclose(dset) == FAIL)
+        TEST_ERROR;
+    if (H5Sclose(space) == FAIL)
+        TEST_ERROR;
+    if (H5Fclose(file) == FAIL)
+        TEST_ERROR;
+
+    /* "Close" member FAPL at top level and re-open file.
+     * Should succeed, with library managing reference count properly
+     */
+    if (H5Pclose(memb_fapl_id) == FAIL)
+        TEST_ERROR;
+
+    if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) == H5I_INVALID_HID)
+        TEST_ERROR;
+
+    if (H5Fclose(file) == FAIL)
+        TEST_ERROR;
+
+    h5_delete_test_file(FILENAME[2], fapl_id);
+
+    if (H5Pclose(fapl_id) == FAIL)
+        TEST_ERROR;
+
+    HDfree(buf);
+    HDfree(buf_data);
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Sclose(space);
+        H5Dclose(dset);
+        H5Pclose(memb_fapl_id);
+        H5Pclose(fapl_id);
+        H5Fclose(file);
+    } H5E_END_TRY;
+
+    HDfree(buf);
+    HDfree(buf_data);
+
+    return FAIL;
+} /* end test_family_member_fapl() */
 
 
 /*-------------------------------------------------------------------------
@@ -3226,6 +3343,7 @@ main(void)
     nerrors += test_direct() < 0         ? 1 : 0;
     nerrors += test_family() < 0         ? 1 : 0;
     nerrors += test_family_compat() < 0  ? 1 : 0;
+    nerrors += test_family_member_fapl() < 0  ? 1 : 0;
     nerrors += test_multi() < 0          ? 1 : 0;
     nerrors += test_multi_compat() < 0   ? 1 : 0;
     nerrors += test_log() < 0            ? 1 : 0;
@@ -3238,7 +3356,7 @@ main(void)
         HDprintf("***** %d Virtual File Driver TEST%s FAILED! *****\n",
             nerrors, nerrors > 1 ? "S" : "");
         return EXIT_FAILURE;
-    } /* end if */
+    }
 
     HDprintf("All Virtual File Driver tests passed.\n");
 
