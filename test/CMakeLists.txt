@@ -274,6 +274,7 @@ macro (ADD_H5_EXE file)
 endmacro ()
 
 set (H5_TESTS_MULTIPLE
+    chunk_info
     direct_chunk
     testhdf5
     cache_image
