@@ -123,8 +123,6 @@ H5CS__get_stack(void)
  * Programmer:	Quincey Koziol
  *              Thursday, February 6, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -213,8 +211,6 @@ H5CS_push(const char *func_name)
  *
  * Programmer:	Quincey Koziol
  *		Thursday, February 6, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

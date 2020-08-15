@@ -15,7 +15,7 @@
  *
  * Created:	H5Gdeprec.c
  *		June 21 2006
- *		James Laird <jlaird@ncsa.uiuc.edu>
+ *		James Laird
  *
  * Purpose:	Deprecated functions from the H5G interface.  These
  *              functions are here for compatibility purposes and may be
@@ -986,7 +986,7 @@ H5G__get_objinfo_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char *name, c
     H5G_trav_goi_t *udata = (H5G_trav_goi_t *)_udata;   /* User data passed in */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC;
+    FUNC_ENTER_STATIC
 
     /* Check if the name in this group resolved to a valid link */
     if(lnk == NULL && obj_loc == NULL)
@@ -1082,7 +1082,7 @@ H5G__get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link,
     HDassert(name && *name);
 
     /* Reset stat buffer */
-    if (statbuf)
+    if(statbuf)
         HDmemset(statbuf, 0, sizeof(H5G_stat_t));
 
     /* Set up user data for retrieving information */
@@ -1091,11 +1091,11 @@ H5G__get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link,
     udata.loc_file = loc->oloc->file;
 
     /* Traverse the group hierarchy to locate the object to get info about */
-    if (H5G_traverse(loc, name, (unsigned)(follow_link ? H5G_TARGET_NORMAL : (H5G_TARGET_SLINK | H5G_TARGET_UDLINK)), H5G__get_objinfo_cb, &udata) < 0)
+    if(H5G_traverse(loc, name, (unsigned)(follow_link ? H5G_TARGET_NORMAL : (H5G_TARGET_SLINK | H5G_TARGET_UDLINK)), H5G__get_objinfo_cb, &udata) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "name doesn't exist");
 
     /* If we're pointing at a soft or UD link, get the real link length and type */
-    if (statbuf && follow_link == 0) {
+    if(statbuf && follow_link == 0) {
         H5L_info2_t linfo;           /* Link information buffer */
         herr_t ret;
 

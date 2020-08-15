@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Monday, July 26, 1999
  */
 #ifndef _H5FDprivate_H

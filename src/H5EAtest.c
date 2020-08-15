@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@hdfgroup.org>
+/* Programmer:  Quincey Koziol
  *              Thursday, August 28, 2008
  *
  * Purpose:	Extensible array testing functions.
@@ -38,7 +38,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5EApkg.h"		/* Extensible Arrays			*/
 #include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5VMprivate.h"         /* Vector functions			*/
+#include "H5VMprivate.h"        /* Vector functions			*/
 
 
 /****************/

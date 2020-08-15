@@ -15,7 +15,7 @@
  *
  * Created:             H5ACmpio.c
  *                      Jun 20 2015
- *                      Quincey Koziol <koziol@hdfgroup.org>
+ *                      Quincey Koziol
  *
  * Purpose:             Functions in this file implement support for parallel
  *                      I/O cache functionality
@@ -2304,7 +2304,6 @@ H5AC__tidy_cache_0_lists(H5AC_t *cache_ptr, unsigned num_candidates,
  *              request to flush all items and something was protected.
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Aug 22 2009
  *
  *-------------------------------------------------------------------------
