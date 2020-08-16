@@ -15,7 +15,7 @@
  *
  * Created:	H5Gint.c
  *		April 5 2007
- *		Quincey Koziol <koziol@hdfgroup.org>
+ *		Quincey Koziol
  *
  * Purpose:	General use, "internal" routines for groups.
  *
@@ -178,7 +178,6 @@ done:
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug 11 1997
  *
  *-------------------------------------------------------------------------

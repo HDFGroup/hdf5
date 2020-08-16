@@ -15,7 +15,7 @@
  *
  * Created:		H5Plapl.c
  *			July 14 2006
- *			James Laird <jlaird@ncsa.uiuc.edu>
+ *			James Laird
  *
  * Purpose:		Link access property list class routines
  *
