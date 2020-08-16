@@ -15,7 +15,7 @@
  *
  * Created:             H5Oginfo.c
  *                      Aug 23 2005
- *                      Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *                      Quincey Koziol
  *
  * Purpose:             Group Information messages.
  *

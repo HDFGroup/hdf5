@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke <matzke@llnl.gov>
+/* Programmer:  Robb Matzke
  *              Wednesday, October  8, 1997
  *
  * Purpose:     Messages related to data layout.
@@ -554,10 +554,8 @@ done:
 static herr_t
 H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
-    const H5O_layout_t      *mesg = (const H5O_layout_t *) _mesg;
-    uint8_t                 *heap_block = NULL;
-    size_t                  *str_size = NULL;
-    unsigned                u;
+    const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
+    unsigned               u;
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_STATIC
@@ -693,10 +691,6 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
     } /* end switch */
 
 done:
-
-    heap_block = (uint8_t *)H5MM_xfree(heap_block);
-    str_size = (size_t *)H5MM_xfree(str_size);
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__layout_encode() */
 
@@ -973,7 +967,7 @@ H5O__layout_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
     const H5O_layout_t *layout_src = (const H5O_layout_t *)mesg_src;  /* Source layout */
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(cpy_info);

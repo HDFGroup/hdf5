@@ -15,7 +15,7 @@
  *
  * Created:		H5MP.c
  *			May  2 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Implements memory pools.  (Similar to Apache's APR
  *                      memory pools)

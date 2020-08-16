@@ -15,7 +15,7 @@
  *
  * Created:     H5Oflush.c
  *              Aug 19, 2010
- *              Mike McGreevy <mamcgree@hdfgroup.org>
+ *              Mike McGreevy
  *
  * Purpose:     Object flush/refresh routines.
  *

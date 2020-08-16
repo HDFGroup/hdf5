@@ -237,7 +237,6 @@ get_H5FA_class(const uint8_t *sig)
  *              Failure:        exit (non-zero)
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 18 1997
  *
  *-------------------------------------------------------------------------

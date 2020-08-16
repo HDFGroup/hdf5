@@ -15,7 +15,7 @@
  *
  * Created:             H5Olink.c
  *                      Aug 29 2005
- *                      Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *                      Quincey Koziol
  *
  * Purpose:             Link messages.
  *
@@ -111,7 +111,6 @@ H5FL_DEFINE_STATIC(H5O_link_t);
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 29 2005
  *
  *-------------------------------------------------------------------------
@@ -291,7 +290,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 29 2005
  *
  *-------------------------------------------------------------------------
@@ -418,7 +416,6 @@ H5O_link_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, con
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 29 2005
  *
  *-------------------------------------------------------------------------
@@ -486,7 +483,6 @@ done:
  *              Failure:        zero
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 29 2005
  *
  *-------------------------------------------------------------------------
@@ -814,7 +810,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 29 2005
  *
  *-------------------------------------------------------------------------
@@ -826,7 +821,7 @@ H5O__link_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream,
     const H5O_link_t    *lnk = (const H5O_link_t *) _mesg;
     herr_t               ret_value = SUCCEED;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(f);
