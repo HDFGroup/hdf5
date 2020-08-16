@@ -15,7 +15,7 @@
  *
  * Created:             H5MF.c
  *                      Jul 11 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             File memory management functions.
  *
@@ -51,9 +51,11 @@
 #define H5MF_FSPACE_EXPAND      120             /* Percent of "normal" size to expand serialized free space size */
 
 #define H5MF_CHECK_FSM(FSM, CF)                                             \
-    HDassert(*CF == FALSE);                                                 \
-    if(!H5F_addr_defined(FSM->addr) || !H5F_addr_defined(FSM->sect_addr))   \
-        *CF = TRUE;
+    do {                                                                    \
+        HDassert(*CF == FALSE);                                             \
+        if(!H5F_addr_defined(FSM->addr) || !H5F_addr_defined(FSM->sect_addr)) \
+            *CF = TRUE;                                                     \
+    } while(0)
 
 /* For non-paged aggregation: map allocation request type to tracked free-space type */
 /* F_SH -- pointer to H5F_shared_t; T -- H5FD_mem_t */
@@ -100,7 +102,7 @@ static herr_t H5MF__close_shrink_eoa(H5F_t *f);
 static herr_t H5MF__get_free_sects(H5F_t *f, H5FS_t *fspace, H5MF_sect_iter_ud_t *sect_udata, size_t *nums);
 static hbool_t H5MF__fsm_type_is_self_referential(H5F_shared_t *f_sh, H5F_mem_page_t fsm_type);
 static hbool_t H5MF__fsm_is_self_referential(H5F_shared_t *f_sh, H5FS_t *fspace);
-static herr_t H5MF__continue_alloc_fsm(H5F_shared_t *f_sh, H5FS_t *sm_hdr_fspace, H5FS_t *sm_sinfo_fspace, 
+static herr_t H5MF__continue_alloc_fsm(H5F_shared_t *f_sh, H5FS_t *sm_hdr_fspace, H5FS_t *sm_sinfo_fspace,
     H5FS_t  *lg_hdr_fspace, H5FS_t *lg_sinfo_fspace, hbool_t *continue_alloc_fsm);
 
 /* Free-space type manager routines */
@@ -300,7 +302,6 @@ H5MF__alloc_to_fs_type(H5F_shared_t *f_sh, H5FD_mem_t alloc_type, hsize_t size, 
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jan  8 2008
  *
  *-------------------------------------------------------------------------
@@ -380,7 +381,6 @@ done:
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jan  8 2008
  *
  *-------------------------------------------------------------------------
@@ -399,7 +399,7 @@ H5MF__create_fstype(H5F_t *f, H5F_mem_page_t type)
     H5AC_ring_t fsm_ring;                   /* Ring of FSM */
     herr_t ret_value = SUCCEED;             /* Return value */
 
-    FUNC_ENTER_STATIC_TAG(H5AC__FREESPACE_TAG)
+    FUNC_ENTER_STATIC
 
     /*
      * Check arguments.
@@ -452,7 +452,7 @@ done:
     if(orig_ring != H5AC_RING_INV)
         H5AC_set_ring(orig_ring, NULL);
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF__create_fstype() */
 
 
@@ -466,7 +466,6 @@ done:
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jan  8 2008
  *
  *-------------------------------------------------------------------------
@@ -476,7 +475,7 @@ H5MF__start_fstype(H5F_t *f, H5F_mem_page_t type)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_TAG(H5AC__FREESPACE_TAG)
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -503,7 +502,7 @@ H5MF__start_fstype(H5F_t *f, H5F_mem_page_t type)
     } /* end else */
 
 done:
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF__start_fstype() */
 
 
@@ -528,7 +527,7 @@ H5MF__delete_fstype(H5F_t *f, H5F_mem_page_t type)
     haddr_t tmp_fs_addr;       	        /* Temporary holder for free space manager address */
     herr_t ret_value = SUCCEED;	        /* Return value */
 
-    FUNC_ENTER_STATIC_TAG(H5AC__FREESPACE_TAG)
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(f);
@@ -575,7 +574,7 @@ done:
     if(orig_ring != H5AC_RING_INV)
         H5AC_set_ring(orig_ring, NULL);
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF__delete_fstype() */
 
 
@@ -597,7 +596,7 @@ H5MF__close_fstype(H5F_t *f, H5F_mem_page_t type)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC_TAG(H5AC__FREESPACE_TAG)
+    FUNC_ENTER_STATIC
 
     /*
      * Check arguments.
@@ -622,7 +621,7 @@ HDfprintf(stderr, "%s: Before closing free space manager\n", FUNC);
     f->shared->fs_state[type] = H5F_FS_STATE_CLOSED;
 
 done:
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF__close_fstype() */
 
 
@@ -647,7 +646,7 @@ H5MF__add_sect(H5F_t *f, H5FD_mem_t alloc_type, H5FS_t *fspace, H5MF_free_sectio
     H5F_mem_page_t  fs_type;                /* Free space type (mapped from allocation type) */
     herr_t ret_value = SUCCEED; 	        /* Return value */
 
-    FUNC_ENTER_PACKAGE_TAG(H5AC__FREESPACE_TAG)
+    FUNC_ENTER_PACKAGE
 
     HDassert(f);
     HDassert(fspace);
@@ -680,7 +679,7 @@ done:
     if(orig_ring != H5AC_RING_INV)
         H5AC_set_ring(orig_ring, NULL);
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF__add_sect() */
 
 
@@ -706,7 +705,7 @@ H5MF__find_sect(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size, H5FS_t *fspace,
     H5MF_free_section_t *node;              /* Free space section pointer */
     htri_t ret_value = FAIL;      	    /* Whether an existing free list node was found */
 
-    FUNC_ENTER_PACKAGE_TAG(H5AC__FREESPACE_TAG)
+    FUNC_ENTER_PACKAGE
 
     HDassert(f);
     HDassert(fspace);
@@ -765,7 +764,7 @@ done:
     if(orig_ring != H5AC_RING_INV)
         H5AC_set_ring(orig_ring, NULL);
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF__find_sect() */
 
 
@@ -781,7 +780,6 @@ done:
  *              Failure:        HADDR_UNDEF
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 11 1997
  *
  *-------------------------------------------------------------------------
@@ -905,7 +903,7 @@ H5MF__alloc_pagefs(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
     H5MF_free_section_t *node = NULL;  	/* Free space section pointer */
     haddr_t ret_value = HADDR_UNDEF; 	/* Return value */
 
-    FUNC_ENTER_STATIC_TAG(H5AC__FREESPACE_TAG)
+    FUNC_ENTER_STATIC
 
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: alloc_type = %u, size = %Hu\n", FUNC, (unsigned)alloc_type, size);
@@ -1013,7 +1011,7 @@ H5MF__sects_dump(f, stderr);
         if(H5MF__sect_free((H5FS_section_info_t *)node) < 0)
             HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, HADDR_UNDEF, "can't free section node")
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF__alloc_pagefs() */
 
 
@@ -1086,7 +1084,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 17 1997
  *
  *-------------------------------------------------------------------------
@@ -1137,10 +1134,11 @@ HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUN
     /* If it's metadata, check if the space to free intersects with the file's
      * metadata accumulator
      */
-    if(H5FD_MEM_DRAW != alloc_type)
+    if(H5FD_MEM_DRAW != alloc_type) {
         /* Check if the space to free intersects with the file's metadata accumulator */
         if(H5F__accum_free(f->shared, alloc_type, addr, size) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't check free space intersection w/metadata accumulator")
+    } /* end if */
 
     /* Check if the free space manager for the file has been initialized */
     if(!f->shared->fs_man[fs_type]) {
@@ -1307,7 +1305,7 @@ HDfprintf(stderr, "%s: Entering: alloc_type = %u, addr = %a, size = %Hu, extra_r
     end = addr + size;
 
     /* For paged aggregation:
-     *   To extend a small block: can only extend if not crossing page boundary 
+     *   To extend a small block: can only extend if not crossing page boundary
      *   To extend a large block at EOA: calculate in advance mis-aligned fragment so EOA will still end at page boundary
      */
     if(H5F_PAGED_AGGR(f)) {
@@ -1447,7 +1445,6 @@ H5MF__sects_dump(f, stderr);
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Feb 14 2008
  *
  *-------------------------------------------------------------------------
@@ -1589,7 +1586,7 @@ H5MF__close_delete_fstype(H5F_t *f, H5F_mem_page_t type)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC_TAG(H5AC__FREESPACE_TAG)
+    FUNC_ENTER_STATIC
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Entering\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -1624,7 +1621,7 @@ done:
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Leaving\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG */
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5MF__close_delete() */
 
 
@@ -1658,8 +1655,8 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
     /* check args */
     HDassert(f);
 
-    /* If there have been no file space allocations / deallocation so 
-     * far, must call H5MF_tidy_self_referential_fsm_hack() to float 
+    /* If there have been no file space allocations / deallocation so
+     * far, must call H5MF_tidy_self_referential_fsm_hack() to float
      * all self referential FSMs and release file space allocated to
      * them.  Otherwise, the function will be called after the format
      * conversion, and will become very confused.
@@ -1758,7 +1755,7 @@ H5MF__close_aggrfs(H5F_t *f)
     H5FD_mem_t type;          	    /* Memory type for iteration */
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_STATIC_TAG(H5AC__FREESPACE_TAG)
+    FUNC_ENTER_STATIC
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Entering\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -1797,9 +1794,9 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
          */
         HDassert(H5F_addr_defined(f->shared->sblock->ext_addr));
 
-        /* file space for all non-empty free space managers should be 
+        /* file space for all non-empty free space managers should be
          * allocated at this point, and these free space managers should
-         * be written to file and thus their headers and section info 
+         * be written to file and thus their headers and section info
          * entries in the metadata cache should be clean.
          */
 
@@ -1870,8 +1867,8 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
         if(HADDR_UNDEF == (final_eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)) )
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size")
 
-        /* f->shared->eoa_post_fsm_fsalloc is undefined if there has 
-         * been no file space allocation or deallocation since file 
+        /* f->shared->eoa_post_fsm_fsalloc is undefined if there has
+         * been no file space allocation or deallocation since file
          * open.
          */
         HDassert(H5F_NULL_FSM_ADDR(f) || final_eoa == f->shared->eoa_fsm_fsalloc);
@@ -1900,7 +1897,7 @@ done:
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Leaving\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG */
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF__close_aggrfs() */
 
 
@@ -1925,7 +1922,7 @@ H5MF__close_pagefs(H5F_t *f)
     H5O_fsinfo_t fsinfo;	/* File space info message */
     herr_t ret_value = SUCCEED;	/* Return value */
 
-    FUNC_ENTER_STATIC_TAG(H5AC__FREESPACE_TAG)
+    FUNC_ENTER_STATIC
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Entering\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -2031,13 +2028,13 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
          * been no file space allocation or deallocation since file
          * open.
          *
-         * If there is a cache image in the file at file open, 
-         * f->shared->first_alloc_dealloc will always be FALSE unless 
+         * If there is a cache image in the file at file open,
+         * f->shared->first_alloc_dealloc will always be FALSE unless
          * the file is opened R/O, as otherwise, the image will have been
          * read and discarded by this point.
          *
-         * If a cache image was created on file close, the actual EOA 
-         * should be in f->shared->eoa_post_mdci_fsalloc.  Note that in 
+         * If a cache image was created on file close, the actual EOA
+         * should be in f->shared->eoa_post_mdci_fsalloc.  Note that in
          * this case, it is conceivable that f->shared->first_alloc_dealloc
          * will still be TRUE, as the cache image is allocated directly from
          * the file driver layer.  However, as this possibility seems remote,
@@ -2049,8 +2046,8 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
                   (final_eoa == f->shared->eoa_post_mdci_fsalloc)));
     } /* end if */
     else {
-        /* Iterate over all the free space types that have managers 
-         * and get each free list's space 
+        /* Iterate over all the free space types that have managers
+         * and get each free list's space
          */
         for(ptype = H5F_MEM_PAGE_META; ptype < H5F_MEM_PAGE_NTYPES; ptype++)
             if(H5MF__close_delete_fstype(f, ptype) < 0)
@@ -2075,7 +2072,7 @@ done:
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Leaving\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG */
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF__close_pagefs() */
 
 
@@ -2104,7 +2101,7 @@ H5MF__close_shrink_eoa(H5F_t *f)
     H5MF_sect_ud_t udata;	/* User data for callback */
     herr_t ret_value = SUCCEED;	/* Return value */
 
-    FUNC_ENTER_STATIC_TAG(H5AC__FREESPACE_TAG)
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(f);
@@ -2172,7 +2169,7 @@ H5MF__close_shrink_eoa(H5F_t *f)
             } /* end for */
 
             /* check the two aggregators */
-            if((status = H5MF_aggrs_try_shrink_eoa(f)) < 0)
+            if((status = H5MF__aggrs_try_shrink_eoa(f)) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't check for shrinking eoa")
             else if(status > 0)
                 eoa_shrank = TRUE;
@@ -2184,7 +2181,7 @@ done:
     if(orig_ring != H5AC_RING_INV)
         H5AC_set_ring(orig_ring, NULL);
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF__close_shrink_eoa() */
 
 
@@ -2365,16 +2362,16 @@ H5MF_get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t
     HDassert(f->shared);
     HDassert(f->shared->lf);
 
-    /* H5MF_tidy_self_referential_fsm_hack() will fail if any self 
+    /* H5MF_tidy_self_referential_fsm_hack() will fail if any self
      * referential FSM is opened prior to the call to it.  Thus call
      * it here if necessary and if it hasn't been called already.
      *
      * The situation is further complicated if a cache image exists
      * and had not yet been loaded into the metadata cache.  In this
-     * case, call H5AC_force_cache_image_load() instead of 
+     * case, call H5AC_force_cache_image_load() instead of
      * H5MF_tidy_self_referential_fsm_hack().  H5AC_force_cache_image_load()
-     * will load the cache image, and then call 
-     * H5MF_tidy_self_referential_fsm_hack() to discard the cache image 
+     * will load the cache image, and then call
+     * H5MF_tidy_self_referential_fsm_hack() to discard the cache image
      * block.
      */
 
@@ -2502,7 +2499,7 @@ H5MF__get_free_sects(H5F_t *f, H5FS_t *fspace, H5MF_sect_iter_ud_t *sect_udata, 
     hsize_t hnums = 0;          	/* # of sections */
     herr_t ret_value = SUCCEED; 	/* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(f);
@@ -2529,50 +2526,50 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5MF_settle_raw_data_fsm()
  *
- * Purpose: 	Handle any tasks required before the metadata cache 
+ * Purpose: 	Handle any tasks required before the metadata cache
  *		can serialize or flush the raw data free space manager
- *		and any metadata free space managers that reside in the 
+ *		and any metadata free space managers that reside in the
  *		raw data free space manager ring.
  *
- *              Specifically, this means any metadata managers that DON'T 
- *              handle space allocation for free space manager header or 
- *              section info will reside in the raw data free space manager 
+ *              Specifically, this means any metadata managers that DON'T
+ *              handle space allocation for free space manager header or
+ *              section info will reside in the raw data free space manager
  *              ring.
  *
- *              In the absence of page allocation, there is at most one 
+ *              In the absence of page allocation, there is at most one
  *		free space manager per memory type defined in H5F_mem_t.
- *		Of these, the one that allocates H5FD_MEM_DRAW will 
+ *		Of these, the one that allocates H5FD_MEM_DRAW will
  *		always reside in the raw data free space manager ring.
- *		If there is more than one metadata free space manager, 
- *		all that don't handle H5FD_MEM_FSPACE_HDR or 
- *              H5FD_MEM_FSPACE_SINFO (which map to H5FD_MEM_OHDR and 
- *              H5FD_MEM_LHEAP respectively) will reside in the raw 
+ *		If there is more than one metadata free space manager,
+ *		all that don't handle H5FD_MEM_FSPACE_HDR or
+ *              H5FD_MEM_FSPACE_SINFO (which map to H5FD_MEM_OHDR and
+ *              H5FD_MEM_LHEAP respectively) will reside in the raw
  *		data free space manager ring as well
  *
- *		With page allocation, the situation is conceptually 
+ *		With page allocation, the situation is conceptually
  *		identical, but more complex in practice.
  *
- *              In the worst case (multi file driver) page allocation 
- *		can result in two free space managers for each memory 
+ *              In the worst case (multi file driver) page allocation
+ *		can result in two free space managers for each memory
  *		type -- one for small (less than on equal to one page)
  *              allocations, and one for large (greater than one page)
  *              allocations.
  *
  *		In the more common one file case, page allocation will
- *              result in a total of three free space managers -- one for 
- *              small (<= one page) raw data allocations, one for small 
- *              metadata allocations (i.e, all memory types other than 
- *              H5FD_MEM_DRAW), and one for all large (> one page) 
+ *              result in a total of three free space managers -- one for
+ *              small (<= one page) raw data allocations, one for small
+ *              metadata allocations (i.e, all memory types other than
+ *              H5FD_MEM_DRAW), and one for all large (> one page)
  *              allocations.
  *
  *              Despite these complications, the solution is the same in
- *		the page allocation case -- free space managers (be they 
- *              small data or large) are assigned to the raw data free 
+ *		the page allocation case -- free space managers (be they
+ *              small data or large) are assigned to the raw data free
  *              space manager ring if they don't allocate file space for
- *              free space managers.  Note that in the one file case, the 
+ *              free space managers.  Note that in the one file case, the
  *		large free space manager must be assigned to the metadata
- *		free space manager ring, as it both allocates pages for 
- *		the metadata free space manager, and allocates space for 
+ *		free space manager ring, as it both allocates pages for
+ *		the metadata free space manager, and allocates space for
  *		large (> 1 page) metadata cache entries.
  *
  *              At present, the task list for this routine is:
@@ -2582,14 +2579,14 @@ done:
  *		    a) Free both aggregators.  Space not at EOA will be
  *		       added to the appropriate free space manager.
  *
- *		       The raw data aggregator should not be restarted 
+ *		       The raw data aggregator should not be restarted
  *		       after this point.  It is possible that the metadata
  *		       aggregator will be.
  *
  *		    b) Free all file space currently allocated to free
  *		       space managers.
  *
- *		    c) Delete the free space manager superblock 
+ *		    c) Delete the free space manager superblock
  *		       extension message if allocated.
  *
  *		   This done, reduce the EOA by moving it to just before
@@ -2597,23 +2594,23 @@ done:
  *
  *		2) Ensure that space is allocated for the free space
  *                 manager superblock extension message.  Must do this
- *                 now, before reallocating file space for free space 
+ *                 now, before reallocating file space for free space
  *		   managers, as it is possible that this allocation may
  *		   grab the last section in a FSM -- making it unnecessary
  *		   to re-allocate file space for it.
  *
  *		3) Scan all free space managers not involved in allocating
  *		   space for free space managers.  For each such free space
- *		   manager, test to see if it contains free space.  If 
+ *		   manager, test to see if it contains free space.  If
  *		   it does, allocate file space for its header and section
- *		   data.  If it contains no free space, leave it without 
- *		   allocated file space as there is no need to save it to 
+ *		   data.  If it contains no free space, leave it without
+ *		   allocated file space as there is no need to save it to
  *		   file.
  *
  *		   Note that all free space managers in this class should
- *		   see no further space allocations / deallocations as 
- *		   at this point, all raw data allocations should be 
- *		   finalized, as should all metadata allocations not 
+ *		   see no further space allocations / deallocations as
+ *		   at this point, all raw data allocations should be
+ *		   finalized, as should all metadata allocations not
  *		   involving free space managers.
  *
  *		   We will allocate space for free space managers involved
@@ -2648,7 +2645,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
     HDassert(f->shared);
     HDassert(fsm_settled);
 
-    /* 
+    /*
      * Only need to settle things if we are persisting free space and
      * the private property in f->shared->null_fsm_addr is not enabled.
      */
@@ -2683,7 +2680,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
          * Note that while the raw data aggregator should not be restarted during
          * the close process, this need not be the case for the metadata aggregator.
          *
-         * Note also that the aggregators will not exist if page aggregation 
+         * Note also that the aggregators will not exist if page aggregation
          * is enabled -- skip this if so.
          */
         /* Vailin -- is this correct? */
@@ -2719,10 +2716,10 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
          * referential nature of the problem.  These FSMs are dealt with in
          * H5MF_settle_meta_data_fsm().
          *
-         * Since paged allocation may be enabled, there may be up to two 
+         * Since paged allocation may be enabled, there may be up to two
          * free space managers per memory type -- one for small and one for
          * large allocation.  Hence we must loop over the memory types twice
-         * setting the allocation size accordingly if paged allocation is 
+         * setting the allocation size accordingly if paged allocation is
          * enabled.
          */
         for(pass_count = 0; pass_count <= 1; pass_count++) {
@@ -2783,7 +2780,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
 
                         /* Check if the free space manager has space in the file */
                         if(H5F_addr_defined(fs_stat.addr) || H5F_addr_defined(fs_stat.sect_addr)) {
-                            /* Delete the free space manager in the file.  Will 
+                            /* Delete the free space manager in the file.  Will
                              * reallocate later if the free space manager contains
                              * any free space.
                              */
@@ -2808,7 +2805,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
          *    extension messages will choke if the target message is
          *    unexpectedly either absent or present.
          *
-         *    Update: This is probably unnecessary, as I gather that the 
+         *    Update: This is probably unnecessary, as I gather that the
          *            file space manager info message is guaranteed to exist.
          *            Leave it in for now, but consider removing it.
          */
@@ -2911,9 +2908,9 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                     fsm_visited[fsm_type] = TRUE;
 
                     if(f->shared->fs_man[fsm_type]) {
-                        /* Only allocate file space if the target free space manager 
-                         * doesn't allocate file space for free space managers.  Note 
-                         * that this is also the deciding factor as to whether a FSM 
+                        /* Only allocate file space if the target free space manager
+                         * doesn't allocate file space for free space managers.  Note
+                         * that this is also the deciding factor as to whether a FSM
                          * in in the raw data FSM ring.
                          */
                         if(!H5MF__fsm_type_is_self_referential(f->shared, fsm_type)) {
@@ -2995,15 +2992,15 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5MF_settle_meta_data_fsm()
  *
- * Purpose: 	If the free space manager is persistent, handle any tasks 
- *		required before the metadata cache can serialize or flush 
- *		the metadata free space manager(s) that handle file space 
+ * Purpose: 	If the free space manager is persistent, handle any tasks
+ *		required before the metadata cache can serialize or flush
+ *		the metadata free space manager(s) that handle file space
  *		allocation for free space managers.
  *
- *		In most cases, there will be only one manager assigned 
+ *		In most cases, there will be only one manager assigned
  *		to this role.  However, since for reasons unknown,
- *		free space manager headers and section info blocks are 
- *		different classes of memory, it is possible that two free 
+ *		free space manager headers and section info blocks are
+ *		different classes of memory, it is possible that two free
  *		space managers will be involved.
  *
  *		On entry to this function, the raw data settle routine
@@ -3020,23 +3017,23 @@ done:
  *		5) Re-created the free space manager superblock extension
  *		   message.
  *
- *		6) Reallocated file space for all non-empty free space 
- *		   managers NOT involved in allocation of space for free 
+ *		6) Reallocated file space for all non-empty free space
+ *		   managers NOT involved in allocation of space for free
  *		   space managers.
  *
  *		   Note that these free space managers (if not empty) should
  *		   have been written to file by this point, and that no
- *		   further space allocations involving them should take 
+ *		   further space allocations involving them should take
  *		   place during file close.
  *
  *		On entry to this routine, the free space manager(s) involved
  *		in allocation of file space for free space managers should
- *		still be floating. (i.e. should not have any file space 
+ *		still be floating. (i.e. should not have any file space
  *		allocated to them.)
  *
- *		Similarly, the raw data aggregator should not have been 
- *		restarted.  Note that it is probable that reallocation of 
- *		space in 5) and 6) above will have re-started the metadata 
+ *		Similarly, the raw data aggregator should not have been
+ *		restarted.  Note that it is probable that reallocation of
+ *		space in 5) and 6) above will have re-started the metadata
  *		aggregator.
  *
  *
@@ -3048,35 +3045,35 @@ done:
  *      2) Free the aggregators.
  *
  *      3) Reduce the EOA to the extent possible, and make note
- *		   of the resulting value.  This value will be stored 
+ *		   of the resulting value.  This value will be stored
  *		   in the fsinfo superblock extension message and be used
  *          in the subsequent file open.
  *
  *		4) Re-allocate space for any free space manager(s) that:
  *
- *		   a) are involved in allocation of space for free space 
- *		      managers, and 
+ *		   a) are involved in allocation of space for free space
+ *		      managers, and
  *
  *		   b) contain free space.
  *
- *		   It is possible that we could allocate space for one 
- *		   of these free space manager(s) only to have the allocation 
- *		   result in the free space manager being empty and thus 
+ *		   It is possible that we could allocate space for one
+ *		   of these free space manager(s) only to have the allocation
+ *		   result in the free space manager being empty and thus
  *		   obliging us to free the space again.  Thus there is the
  *		   potential for an infinite loop if we want to avoid saving
  *		   empty free space managers.
  *
- *		   Similarly, it is possible that we could allocate space 
- *		   for a section info block, only to discover that this 
- *		   allocation has changed the size of the section info -- 
+ *		   Similarly, it is possible that we could allocate space
+ *		   for a section info block, only to discover that this
+ *		   allocation has changed the size of the section info --
  *		   forcing us to deallocate and start the loop over again.
  *
- *		   The solution is to modify the FSM code to 
+ *		   The solution is to modify the FSM code to
  *		   save empty FSMs to file, and to allow section info blocks
  *		   to be oversized.  That is, only allow section info to increase
  *         in size, not shrink.  The solution is now implemented.
  *
- *      5) Make note of the EOA -- used for sanity checking on 
+ *      5) Make note of the EOA -- used for sanity checking on
  *         FSM shutdown.  This is saved as eoa_pre_fsm_fsalloc in
  *         the free-space info message for backward compatibility
  *         with the 1.10 library that has the hack.
@@ -3112,7 +3109,7 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
     HDassert(f->shared);
     HDassert(fsm_settled);
 
-    /* 
+    /*
      * Only need to settle things if we are persisting free space and
      * the private property in f->shared->null_fsm_addr is not enabled.
      */
@@ -3197,8 +3194,8 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                 HDassert(fs_stat.alloc_sect_size == 0);
             } /* end if */
 
-            /* Verify that lg_sinfo_fspace is floating if it 
-             * exists and is distinct 
+            /* Verify that lg_sinfo_fspace is floating if it
+             * exists and is distinct
              */
             if((lg_sinfo_fspace) && (lg_hdr_fspace != lg_sinfo_fspace)) {
                 /* Query free space manager info for this type */
@@ -3217,7 +3214,7 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
          * H5MF_free_aggrs() call.  Note that the raw data aggregator must
          * have already been freed.  Sanity checks for this?
          *
-         * Note that the aggregators will not exist if paged aggregation 
+         * Note that the aggregators will not exist if paged aggregation
          * is enabled -- don't attempt to free if this is the case.
          */
         /* (for space not at EOF, it may be put into free space managers) */
@@ -3228,30 +3225,30 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
         if(H5MF__close_shrink_eoa(f) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink eoa")
 
-        /* WARNING:  This approach settling the self referential free space 
-         *           managers and allocating space for them in the file will 
-         *           not work as currently implemented with the split and 
-         *           multi file drivers, as the self referential free space 
-         *           manager header and section info can be stored in up to 
-         *           two different files -- requiring that up to two EOA's 
-         *           be stored in the the free space managers super block 
-         *           extension message.  
+        /* WARNING:  This approach settling the self referential free space
+         *           managers and allocating space for them in the file will
+         *           not work as currently implemented with the split and
+         *           multi file drivers, as the self referential free space
+         *           manager header and section info can be stored in up to
+         *           two different files -- requiring that up to two EOA's
+         *           be stored in the the free space managers super block
+         *           extension message.
          *
-         *           As of this writing, we are solving this problem by 
-         *           simply not supporting persistent FSMs with the split 
+         *           As of this writing, we are solving this problem by
+         *           simply not supporting persistent FSMs with the split
          *           and multi file drivers.
          *
-         *           Current plans are to do away with the multi file 
+         *           Current plans are to do away with the multi file
          *           driver, so this should be a non-issue in this case.
          *
-         *           We should be able to support the split file driver 
-         *           without a file format change.  However, the code to 
+         *           We should be able to support the split file driver
+         *           without a file format change.  However, the code to
          *           do so does not exist at present.
          * NOTE: not sure whether to remove or keep the above comments
          */
 
-        /* 
-         * Continue allocating file space for the header and section info until 
+        /*
+         * Continue allocating file space for the header and section info until
          * they are all settled,
          */
         do {
@@ -3288,8 +3285,8 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
 
         /* All free space managers should have file space allocated for them
          * now, and should see no further allocations / deallocations.
-         * For backward compatibility, store the eoa in f->shared->eoa_fsm_fsalloc 
-         * which will be set to fsinfo.eoa_pre_fsm_fsalloc when we actually write 
+         * For backward compatibility, store the eoa in f->shared->eoa_fsm_fsalloc
+         * which will be set to fsinfo.eoa_pre_fsm_fsalloc when we actually write
          * the free-space info message to the superblock extension.
          * This will allow the 1.10 library with the hack to open the file with
          * the new solution.
@@ -3330,38 +3327,34 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5MF__continue_alloc_fsm(H5F_shared_t *f_sh, H5FS_t *sm_hdr_fspace, H5FS_t *sm_sinfo_fspace, 
+H5MF__continue_alloc_fsm(H5F_shared_t *f_sh, H5FS_t *sm_hdr_fspace, H5FS_t *sm_sinfo_fspace,
     H5FS_t  *lg_hdr_fspace, H5FS_t *lg_sinfo_fspace, hbool_t *continue_alloc_fsm)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
     HDassert(f_sh);
     HDassert(continue_alloc_fsm);
 
     /* Check sm_hdr_fspace */
-    if(sm_hdr_fspace && sm_hdr_fspace->serial_sect_count > 0 && sm_hdr_fspace->sinfo) {
+    if(sm_hdr_fspace && sm_hdr_fspace->serial_sect_count > 0 && sm_hdr_fspace->sinfo)
         H5MF_CHECK_FSM(sm_hdr_fspace, continue_alloc_fsm);
-    } /* end if */
 
     if(!(*continue_alloc_fsm))
         if(sm_sinfo_fspace && sm_sinfo_fspace != sm_hdr_fspace &&
-           sm_sinfo_fspace->serial_sect_count > 0 && sm_sinfo_fspace->sinfo) {
+                sm_sinfo_fspace->serial_sect_count > 0 && sm_sinfo_fspace->sinfo)
             H5MF_CHECK_FSM(sm_hdr_fspace, continue_alloc_fsm);
-        } /* end if */
 
     if(H5F_SHARED_PAGED_AGGR(f_sh) && !(*continue_alloc_fsm)) {
         /* Check lg_hdr_fspace */
-        if(lg_hdr_fspace && lg_hdr_fspace->serial_sect_count > 0 && lg_hdr_fspace->sinfo) {
+        if(lg_hdr_fspace && lg_hdr_fspace->serial_sect_count > 0 && lg_hdr_fspace->sinfo)
             H5MF_CHECK_FSM(lg_hdr_fspace, continue_alloc_fsm);
-        } /* end if */
 
         /* Check lg_sinfo_fspace */
         if(!(*continue_alloc_fsm))
             if(lg_sinfo_fspace && lg_sinfo_fspace != lg_hdr_fspace &&
-                    lg_sinfo_fspace->serial_sect_count > 0 && lg_sinfo_fspace->sinfo) {
+                    lg_sinfo_fspace->serial_sect_count > 0 && lg_sinfo_fspace->sinfo)
                 H5MF_CHECK_FSM(lg_sinfo_fspace, continue_alloc_fsm);
-            } /* end if */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

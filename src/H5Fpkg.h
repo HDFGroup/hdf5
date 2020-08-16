@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:	Quincey Koziol
  *		Thursday, September 28, 2000
  *
  * Purpose:	This file contains declarations which are visible only within
@@ -80,17 +80,17 @@
         + 1) /* superblock version */
 
 /* The H5F_SUPERBLOCK_MINIMAL_VARLEN_SIZE is the minimal amount of super block
- * variable length data guarnateed to load the sizeof offsets and the sizeof 
+ * variable length data guarnateed to load the sizeof offsets and the sizeof
  * lengths fields in all versions of the superblock.
  *
- * This is necessary in the V3 cache, as on the initial load, we need to 
+ * This is necessary in the V3 cache, as on the initial load, we need to
  * get enough of the superblock to determine its version and size so that
- * the metadata cache can load the correct amount of data from file to 
+ * the metadata cache can load the correct amount of data from file to
  * allow the second deserialization attempt to succeed.
  *
- * The value selected will have to be revisited for each new version 
+ * The value selected will have to be revisited for each new version
  * of the super block.  Note that the current value is one byte larger
- * than it needs to be. 
+ * than it needs to be.
  */
 #define H5F_SUPERBLOCK_MINIMAL_VARLEN_SIZE	7
 
@@ -166,8 +166,8 @@ typedef struct H5F_superblock_cache_ud_t {
     unsigned btree_k[H5B_NUM_BTREE_ID]; /* B-tree key values for each type */
     haddr_t stored_eof;     /* End-of-file in file */
     hbool_t drvrinfo_removed; /* Indicate if the driver info was removed */
-    unsigned    super_vers;   /* Superblock version obtained in get_load_size callback. 
-			       * It will be used later in verify_chksum callback 
+    unsigned    super_vers;   /* Superblock version obtained in get_load_size callback.
+			       * It will be used later in verify_chksum callback
 			       */
 } H5F_superblock_cache_ud_t;
 
@@ -242,16 +242,16 @@ typedef struct H5F_super_t {
 struct H5F_shared_t {
     H5FD_t	*lf; 		/* Lower level file handle for I/O	*/
     H5F_super_t *sblock;        /* Pointer to (pinned) superblock for file */
-    H5O_drvinfo_t *drvinfo;	/* Pointer to the (pinned) driver info 
+    H5O_drvinfo_t *drvinfo;	/* Pointer to the (pinned) driver info
                                  * cache entry.  This field is only defined
                                  * for older versions of the super block,
                                  * and then only when a driver information
                                  * block is present.  At all other times
                                  * it should be NULL.
                                  */
-    hbool_t drvinfo_sb_msg_exists;  /* Convenience field used to track 
-                                     * whether the driver info superblock 
-                                     * extension message has been created 
+    hbool_t drvinfo_sb_msg_exists;  /* Convenience field used to track
+                                     * whether the driver info superblock
+                                     * extension message has been created
                                      * yet. This field should be TRUE iff the
                                      * superblock extension exists and contains
                                      * a driver info message.  Under all other
@@ -278,7 +278,7 @@ struct H5F_shared_t {
                                 /* metadata cache.  This structure is   */
                                 /* fixed at creation time and should    */
                                 /* not change thereafter.               */
-    H5AC_cache_image_config_t 
+    H5AC_cache_image_config_t
 		mdc_initCacheImageCfg;  /* initial configuration for the */
                                         /* generate metadata cache image on     */
                                         /* close option.  This structure is     */
@@ -318,7 +318,7 @@ struct H5F_shared_t {
     hsize_t     fs_threshold;	/* Free space section threshold 	*/
     hbool_t     fs_persist;     /* Free-space persist or not */
     unsigned    fs_version;     /* Free-space version: */
-                                /* It is used to update fsinfo message in the superblock 
+                                /* It is used to update fsinfo message in the superblock
                                    extension when closing down the free-space managers */
     hbool_t     use_tmp_space;  /* Whether temp. file space allocation is allowed */
     haddr_t	tmp_addr;       /* Next address to use for temp. space in the file */
@@ -384,6 +384,7 @@ struct H5F_t {
     unsigned            nmounts;        /* Number of children mounted to this file                      */
 };
 
+
 /*****************************/
 /* Package Private Variables */
 /*****************************/
@@ -394,6 +395,10 @@ H5FL_EXTERN(H5F_t);
 /* Declare a free list to manage the H5F_shared_t struct */
 H5FL_EXTERN(H5F_shared_t);
 
+/* Whether or not to use file locking (based on the environment variable)
+ * FAIL means ignore the environment variable.
+ */
+H5_DLLVAR htri_t use_locks_env_g;
 
 /******************************/
 /* Package Private Prototypes */
@@ -412,6 +417,7 @@ H5_DLL herr_t H5F__start_swmr_write(H5F_t *f);
 H5_DLL herr_t H5F__close(H5F_t *f);
 H5_DLL herr_t H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high);
 H5_DLL herr_t H5F__get_cont_info(const H5F_t *f, H5VL_file_cont_info_t *info);
+H5_DLL herr_t H5F__parse_file_lock_env_var(htri_t *use_locks);
 
 /* File mount related routines */
 H5_DLL herr_t H5F__mount(H5G_loc_t *loc, const char *name, H5F_t *child, hid_t plist_id);
@@ -472,6 +478,7 @@ H5_DLL herr_t H5F__check_cached_stab_test(hid_t file_id);
 H5_DLL herr_t H5F__get_maxaddr_test(hid_t file_id, haddr_t *maxaddr);
 H5_DLL herr_t H5F__get_sbe_addr_test(hid_t file_id, haddr_t *sbe_addr);
 H5_DLL htri_t H5F__same_file_test(hid_t file_id1, hid_t file_id2);
+H5_DLL herr_t H5F__reparse_file_lock_variable_test(void);
 #endif /* H5F_TESTING */
 
 #endif /* _H5Fpkg_H */

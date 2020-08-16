@@ -54,7 +54,7 @@ using namespace H5;
     H5T_NATIVE_##TYPE##_ALIGN_g=MAX(H5T_NATIVE_##TYPE##_ALIGN_g, VAL)
 #endif
  /* #include "H5Tpkg.h"
- */ 
+ */
 
 const char *FILENAME[] = {
     "dtypes1.h5",
@@ -392,7 +392,7 @@ static void test_vltype()
     try
     {
         VarLenType vltype(PredType::NATIVE_INT);
-        
+
         bool in_class = vltype.detectClass(H5T_VLEN);
         verify_val(in_class, true, "VarLenType::detectClass() with H5T_VLEN", __LINE__, __FILE__);
         in_class = vltype.detectClass(H5T_INTEGER);
@@ -403,7 +403,7 @@ static void test_vltype()
 
         // Verify that the copied type has a valid id
         bool is_valid = IdComponent::isValid(vltype2.getId());
-        verify_val(in_class, true, "isValid on vltype2", __LINE__, __FILE__);
+        verify_val(is_valid, true, "isValid on vltype2", __LINE__, __FILE__);
 
         in_class = vltype2.detectClass(H5T_VLEN);
         verify_val(in_class, true, "VarLenType::detectClass() with H5T_VLEN for vltype2", __LINE__, __FILE__);
@@ -1010,8 +1010,8 @@ static void test_encode_decode()
         FloatType decoded_flttyp(decoded_flt_ptr->getId());
         verify_val(flttyp == decoded_flttyp, true, "DataType::decode", __LINE__, __FILE__);
 
-        H5std_string norm_string;
-        H5T_norm_t mant_norm = decoded_flttyp.getNorm(norm_string);
+        //H5std_string norm_string;
+        //H5T_norm_t mant_norm = decoded_flttyp.getNorm(norm_string);
         //verify_val(decoded_flttyp.isVariableStr(), true, "DataType::decode", __LINE__, __FILE__);
 
         delete decoded_flt_ptr;

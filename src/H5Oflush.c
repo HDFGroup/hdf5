@@ -15,7 +15,7 @@
  *
  * Created:     H5Oflush.c
  *              Aug 19, 2010
- *              Mike McGreevy <mamcgree@hdfgroup.org>
+ *              Mike McGreevy
  *
  * Purpose:     Object flush/refresh routines.
  *
@@ -270,11 +270,11 @@ done:
  * Purpose:     Refreshes all buffers associated with an object.
  *
  * Note:	This is based on the original H5O_refresh_metadata() but
- *	        is split into 2 routines.  
+ *	        is split into 2 routines.
  *	        This is done so that H5Fstart_swmr_write() can use these
- *	        2 routines to refresh opened objects.  This may be 
+ *	        2 routines to refresh opened objects.  This may be
  *	        restored back to the original code when H5Fstart_swmr_write()
- *	        uses a different approach to handle issues with opened objects.	
+ *	        uses a different approach to handle issues with opened objects.
  *	 	H5Fstart_swmr_write() no longer calls the 1st routine.	(12/24/15)
  *
  * Return:    	Non-negative on success, negative on failure
@@ -383,7 +383,7 @@ H5O__refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *obj_loc)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
-    
+
     /* Make deep local copy of object's location information */
     if(obj_loc) {
         H5G_loc_t tmp_loc;

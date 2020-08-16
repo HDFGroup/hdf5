@@ -15,7 +15,7 @@
  *
  * Created:		H5EAcache.c
  *			Aug 26 2008
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Implement extensible array metadata cache methods.
  *
@@ -117,7 +117,7 @@ static herr_t H5EA__cache_dblk_page_get_initial_load_size(void *udata, size_t *i
 static htri_t H5EA__cache_dblk_page_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
 static void *H5EA__cache_dblk_page_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
-static herr_t H5EA__cache_dblk_page_image_len(const void *thing, 
+static herr_t H5EA__cache_dblk_page_image_len(const void *thing,
     size_t *image_len);
 static herr_t H5EA__cache_dblk_page_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
@@ -239,7 +239,6 @@ const H5AC_class_t H5AC_EARRAY_DBLK_PAGE[1] = {{
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 16, 2013
  *
  *-------------------------------------------------------------------------
@@ -305,7 +304,6 @@ END_FUNC(STATIC) 	/* end H5EA__cache_hdr_verify_chksum() */
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 16, 2013
  *
  *-------------------------------------------------------------------------
@@ -429,7 +427,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_hdr_deserialize() */
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 16, 2013
  *
  *-------------------------------------------------------------------------
@@ -459,7 +456,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_hdr_image_len() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 16, 2013
  *
  *-------------------------------------------------------------------------
@@ -606,7 +602,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_hdr_notify() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 16, 2013
  *
  *-------------------------------------------------------------------------
@@ -635,7 +630,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_hdr_free_icr() */
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -708,7 +702,6 @@ END_FUNC(STATIC) 	/* end H5EA__cache_iblock_verify_chksum() */
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -815,7 +808,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_iblock_deserialize() */
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -845,7 +837,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_iblock_image_len() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -932,7 +923,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_iblock_serialize() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1001,7 +991,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_iblock_notify() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1030,7 +1019,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_iblock_free_icr() */
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1122,7 +1110,6 @@ END_FUNC(STATIC) 	/* end H5EA__cache_sblock_verify_chksum() */
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1226,7 +1213,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_sblock_deserialize() */
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1256,7 +1242,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_sblock_image_len() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1330,7 +1315,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_sblock_serialize() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Mar 31 2009
  *
  *-------------------------------------------------------------------------
@@ -1414,7 +1398,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_sblock_notify() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1443,7 +1426,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_sblock_free_icr() */
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1467,12 +1449,12 @@ H5EA__cache_dblock_get_initial_load_size(void *_udata, size_t *image_len))
     HDmemset(&dblock, 0, sizeof(dblock));
 
     /* need to set:
-     * 
+     *
      *    dblock.hdr
      *    dblock.npages
      *    dblock.nelmts
      *
-     * before we invoke either H5EA_DBLOCK_PREFIX_SIZE() or 
+     * before we invoke either H5EA_DBLOCK_PREFIX_SIZE() or
      * H5EA_DBLOCK_SIZE().
      */
     dblock.hdr = udata->hdr;
@@ -1536,7 +1518,6 @@ END_FUNC(STATIC) 	/* end H5EA__cache_sblock_verify_chksum() */
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1564,7 +1545,7 @@ H5EA__cache_dblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
     if(NULL == (dblock = H5EA__dblock_alloc(udata->hdr, udata->parent, udata->nelmts)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array data block")
 
-    HDassert(((!dblock->npages) && (len == H5EA_DBLOCK_SIZE(dblock))) || 
+    HDassert(((!dblock->npages) && (len == H5EA_DBLOCK_SIZE(dblock))) ||
              (len == H5EA_DBLOCK_PREFIX_SIZE(dblock)));
 
     /* Set the extensible array data block's information */
@@ -1639,7 +1620,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblock_deserialize() */
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1672,7 +1652,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblock_image_len() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1744,7 +1723,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblock_serialize() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Mar 31 2009
  *
  *-------------------------------------------------------------------------
@@ -1828,7 +1806,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblock_notify() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1904,7 +1881,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblock_fsf_size() */
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1970,7 +1946,6 @@ END_FUNC(STATIC) 	/* end H5EA__cache_dblk_page_verify_chksum() */
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -2043,7 +2018,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblk_page_deserialize() */
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -2073,7 +2047,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblk_page_image_len() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -2125,7 +2098,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblk_page_serialize() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Mar 31 2009
  *
  *-------------------------------------------------------------------------
@@ -2209,7 +2181,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblk_page_notify() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------

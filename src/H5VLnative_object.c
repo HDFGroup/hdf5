@@ -41,7 +41,7 @@
  *-------------------------------------------------------------------------
  */
 void *
-H5VL__native_object_open(void *obj, const H5VL_loc_params_t *loc_params, H5I_type_t *opened_type, 
+H5VL__native_object_open(void *obj, const H5VL_loc_params_t *loc_params, H5I_type_t *opened_type,
     hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
     H5G_loc_t   loc;
@@ -64,7 +64,7 @@ H5VL__native_object_open(void *obj, const H5VL_loc_params_t *loc_params, H5I_typ
         case H5VL_OBJECT_BY_IDX:
             {
                 /* Open the object */
-                if(NULL == (ret_value = H5O_open_by_idx(&loc, loc_params->loc_data.loc_by_idx.name, loc_params->loc_data.loc_by_idx.idx_type,
+                if(NULL == (ret_value = H5O__open_by_idx(&loc, loc_params->loc_data.loc_by_idx.name, loc_params->loc_data.loc_by_idx.idx_type,
                         loc_params->loc_data.loc_by_idx.order, loc_params->loc_data.loc_by_idx.n, opened_type)))
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, NULL, "unable to open object by index")
                 break;
@@ -80,7 +80,7 @@ H5VL__native_object_open(void *obj, const H5VL_loc_params_t *loc_params, H5I_typ
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTUNSERIALIZE, NULL, "can't deserialize object token into address")
 
                 /* Open the object */
-                if(NULL == (ret_value = H5O_open_by_addr(&loc, addr, opened_type)))
+                if(NULL == (ret_value = H5O__open_by_addr(&loc, addr, opened_type)))
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, NULL, "unable to open object by address")
                 break;
             }
@@ -104,15 +104,15 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
-H5VL__native_object_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, const char *src_name, 
-    void *dst_obj, const H5VL_loc_params_t *loc_params2, const char *dst_name, 
+herr_t
+H5VL__native_object_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, const char *src_name,
+    void *dst_obj, const H5VL_loc_params_t *loc_params2, const char *dst_name,
     hid_t ocpypl_id, hid_t lcpl_id, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
     H5G_loc_t   src_loc;                /* Source object group location */
     H5G_loc_t   dst_loc;                /* Destination group location */
     herr_t      ret_value = FAIL;
-    
+
     FUNC_ENTER_PACKAGE
 
     /* get location for objects */
@@ -122,8 +122,8 @@ H5VL__native_object_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, co
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
     /* Copy the object */
-    if((ret_value = H5O_copy(&src_loc, src_name, &dst_loc, dst_name, ocpypl_id, lcpl_id)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, FAIL, "unable to copy object")    
+    if((ret_value = H5O__copy(&src_loc, src_name, &dst_loc, dst_name, ocpypl_id, lcpl_id)) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -140,7 +140,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_get_t get_type, 
+H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_get_t get_type,
     hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -300,7 +300,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_specific_t specific_type, 
+H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_specific_t specific_type,
     hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
     H5G_loc_t    loc;
@@ -579,7 +579,7 @@ H5VL__native_object_optional(void *obj, H5VL_object_optional_t optional_type,
             }
 
         default:
-            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't perform this operation on object");       
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't perform this operation on object");
     } /* end switch */
 
 done:

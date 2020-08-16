@@ -26,70 +26,32 @@
  * it via H5public.h.  The #ifndef _H5public_H guard above would
  * prevent repeated include.
  */
-#include "H5pubconf.h"		/*from configure                             */
+#include "H5pubconf.h"          /* From configure */
 
 /* API Version macro wrapper definitions */
 #include "H5version.h"
 
 #ifdef H5_HAVE_FEATURES_H
-#include <features.h>           /*for setting POSIX, BSD, etc. compatibility */
+#include <features.h>           /* For setting POSIX, BSD, etc. compatibility */
 #endif
 #ifdef H5_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #ifdef H5_STDC_HEADERS
-#   include <limits.h>		/*for H5T_NATIVE_CHAR defn in H5Tpublic.h    */
-#   include <stdarg.h>      /*for variadic functions in H5VLpublic.h     */
+#   include <limits.h>          /* For H5T_NATIVE_CHAR defn in H5Tpublic.h  */
+#   include <stdarg.h>          /* For variadic functions in H5VLpublic.h   */
 #endif
 #ifndef __cplusplus
 # ifdef H5_HAVE_STDINT_H
-#   include <stdint.h>		/*for C9x types				     */
+#   include <stdint.h>          /* For C9x types */
 # endif
 #else
 # ifdef H5_HAVE_STDINT_H_CXX
-#   include <stdint.h>		/*for C9x types	when include from C++	     */
+#   include <stdint.h>          /* For C9x types (when included from C++) */
 # endif
 #endif
 #ifdef H5_HAVE_INTTYPES_H
 #   include <inttypes.h>        /* C99/POSIX.1 header for uint64_t, PRIu64 */
-#else /* H5_HAVE_INTTYPES_H */
-/* The following definitions should be suitable for 64-bit Windows, which is
- * LLP64, and for 32-bit Windows, which is ILP32.  Those are the only
- * platforms where <inttypes.h> is likely to be missing.  VS2015 and later
- * *may* provide these definitions.
- */
-#ifdef _WIN64
-#       define PRIdPTR "lld"
-#       define PRIoPTR "llo"
-#       define PRIuPTR "llu"
-#       define PRIxPTR "llx"
-#else /* _WIN64 */
-#       define PRIdPTR "ld"
-#       define PRIoPTR "lo"
-#       define PRIuPTR "lu"
-#       define PRIxPTR "lx"
-#endif /* _WIN64 */
-
-#   define PRId8 "d"
-#   define PRIo8 "o"
-#   define PRIu8 "u"
-#   define PRIx8 "x"
-#   define PRId16 "d"
-#   define PRIo16 "o"
-#   define PRIu16 "u"
-#   define PRIx16 "x"
-#   define PRId32 "d"
-#   define PRIo32 "o"
-#   define PRIu32 "u"
-#   define PRIx32 "x"
-#   define PRId64 "lld"
-#   define PRIo64 "llo"
-#   define PRIu64 "llu"
-#   define PRIx64 "llx"
-#   define PRIdMAX "lld"
-#   define PRIoMAX "llo"
-#   define PRIuMAX "llu"
-#   define PRIxMAX "llx"
 #endif
 #ifdef H5_HAVE_STDDEF_H
 #   include <stddef.h>
@@ -99,7 +61,7 @@
 #   define MPICH_SKIP_MPICXX 1
 #   define OMPI_SKIP_MPICXX 1
 #   include <mpi.h>
-#ifndef MPI_FILE_NULL		/*MPIO may be defined in mpi.h already       */
+#ifndef MPI_FILE_NULL           /* MPIO may be defined in mpi.h already */
 #   include <mpio.h>
 #endif
 #endif
@@ -132,15 +94,15 @@ extern "C" {
 #endif
 
 /* Version numbers */
-#define H5_VERS_MAJOR	1	/* For major interface/format changes  	     */
-#define H5_VERS_MINOR	13	/* For minor interface/format changes  	     */
-#define H5_VERS_RELEASE	0	/* For tweaks, bug-fixes, or development     */
-#define H5_VERS_SUBRELEASE ""	/* For pre-releases like snap0       */
-				/* Empty string for real releases.           */
+#define H5_VERS_MAJOR   1   /* For major interface/format changes       */
+#define H5_VERS_MINOR   13  /* For minor interface/format changes       */
+#define H5_VERS_RELEASE 0   /* For tweaks, bug-fixes, or development    */
+#define H5_VERS_SUBRELEASE ""   /* For pre-releases like snap0          */
+                /* Empty string for real releases.           */
 #define H5_VERS_INFO    "HDF5 library version: 1.13.0"      /* Full version string */
 
-#define H5check()	H5check_version(H5_VERS_MAJOR,H5_VERS_MINOR,	      \
-				        H5_VERS_RELEASE)
+#define H5check()   H5check_version(H5_VERS_MAJOR,H5_VERS_MINOR,            \
+                        H5_VERS_RELEASE)
 
 /* macros for comparing the version */
 #define H5_VERSION_GE(Maj,Min,Rel) \
@@ -160,8 +122,8 @@ extern "C" {
  * The negative failure value is most commonly -1, but don't bet on it.  The
  * proper way to detect failure is something like:
  *
- * 	if((dset = H5Dopen2(file, name)) < 0)
- *	    fprintf(stderr, "unable to open the requested dataset\n");
+ *  if((dset = H5Dopen2(file, name)) < 0)
+ *      fprintf(stderr, "unable to open the requested dataset\n");
  */
 typedef int herr_t;
 
@@ -173,13 +135,13 @@ typedef int herr_t;
  * (false), positive (true), or negative (failure). The proper way to test
  * for truth from a htri_t function is:
  *
- * 	if ((retval = H5Tcommitted(type))>0) {
- *	    printf("data type is committed\n");
- *	} else if (!retval) {
- * 	    printf("data type is not committed\n");
- *	} else {
- * 	    printf("error determining whether data type is committed\n");
- *	}
+ *  if ((retval = H5Tcommitted(type)) > 0) {
+ *      printf("data type is committed\n");
+ *  } else if (!retval) {
+ *      printf("data type is not committed\n");
+ *  } else {
+ *      printf("error determining whether data type is committed\n");
+ *  }
  */
 #ifdef H5_HAVE_STDBOOL_H
   #include <stdbool.h>
@@ -221,8 +183,8 @@ typedef long long ssize_t;
  */
 #if H5_SIZEOF_LONG_LONG >= 8
 H5_GCC_DIAG_OFF(long-long)
-typedef unsigned long long 	hsize_t;
-typedef signed long long	hssize_t;
+typedef unsigned long long  hsize_t;
+typedef signed long long    hssize_t;
 H5_GCC_DIAG_ON(long-long)
 #       define H5_SIZEOF_HSIZE_T H5_SIZEOF_LONG_LONG
 #       define H5_SIZEOF_HSSIZE_T H5_SIZEOF_LONG_LONG
@@ -267,7 +229,7 @@ H5_GCC_DIAG_ON(long-long)
 #else
 #   error "nothing appropriate for H5_PRINTF_HADDR_FMT"
 #endif
-#define HADDR_MAX		(HADDR_UNDEF-1)
+#define HADDR_MAX       (HADDR_UNDEF-1)
 
 /* uint32_t type is used for creation order field for messages.  It may be
  * defined in Posix.1g, otherwise it is defined here.
@@ -335,7 +297,7 @@ typedef enum {
     H5_ITER_INC,                /* Increasing order */
     H5_ITER_DEC,                /* Decreasing order */
     H5_ITER_NATIVE,             /* No particular order, whatever is fastest */
-    H5_ITER_N		        /* Number of iteration orders */
+    H5_ITER_N                   /* Number of iteration orders */
 } H5_iter_order_t;
 
 /* Iteration callback values */
@@ -352,10 +314,10 @@ typedef enum {
  * links in groups/attributes on objects.
  */
 typedef enum H5_index_t {
-    H5_INDEX_UNKNOWN = -1,	/* Unknown index type			*/
-    H5_INDEX_NAME,		/* Index on names 			*/
-    H5_INDEX_CRT_ORDER,		/* Index on creation order 		*/
-    H5_INDEX_N			/* Number of indices defined 		*/
+    H5_INDEX_UNKNOWN = -1,      /* Unknown index type                   */
+    H5_INDEX_NAME,              /* Index on names                       */
+    H5_INDEX_CRT_ORDER,         /* Index on creation order              */
+    H5_INDEX_N                  /* Number of indices defined            */
 } H5_index_t;
 
 /*
@@ -403,9 +365,9 @@ H5_DLL herr_t H5get_free_list_sizes(size_t *reg_size, size_t *arr_size,
     size_t *blk_size, size_t *fac_size);
 H5_DLL herr_t H5get_alloc_stats(H5_alloc_stats_t *stats);
 H5_DLL herr_t H5get_libversion(unsigned *majnum, unsigned *minnum,
-				unsigned *relnum);
+                unsigned *relnum);
 H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum,
-			       unsigned relnum);
+                unsigned relnum);
 H5_DLL herr_t H5is_library_threadsafe(hbool_t *is_ts);
 H5_DLL herr_t H5free_memory(void *mem);
 H5_DLL void *H5allocate_memory(size_t size, hbool_t clear);
@@ -415,5 +377,5 @@ H5_DLL void *H5resize_memory(void *mem, size_t size);
 }
 #endif
 #endif /* _H5public_H */
- 
+
 

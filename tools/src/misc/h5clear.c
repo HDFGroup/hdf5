@@ -101,8 +101,13 @@ static void usage(const char *prog)
     HDfprintf(stdout, "   -s, --status              Clear the status_flags field in the file's superblock\n");
     HDfprintf(stdout, "   -m, --image               Remove the metadata cache image from the file\n");
     HDfprintf(stdout, "   --filesize                Print the file's EOA and EOF\n");
-    HDfprintf(stdout, "   --increment=C             Set the file's EOA to the maximum of (EOA, EOF) + C for the file <file_name>\n");
-    HDfprintf(stdout, "                             C is >= 0; C is optional and will default to 1M when not set");
+    HDfprintf(stdout, "   --increment=C             Set the file's EOA to the maximum of (EOA, EOF) + C for\n");
+    HDfprintf(stdout, "                             the file <file_name>.\n");
+    HDfprintf(stdout, "                             C is >= 0; C is optional and will default to 1M when not set.\n");
+    HDfprintf(stdout, "                             This option helps to repair a crashed file where the stored EOA\n");
+    HDfprintf(stdout, "                             in the superblock is different from the actual EOF.\n");
+    HDfprintf(stdout, "                             The file’s EOA and EOF will be the same after applying\n");
+    HDfprintf(stdout, "                             this option to the file.\n");
     HDfprintf(stdout, "\n");
     HDfprintf(stdout, "Examples of use:\n");
     HDfprintf(stdout, "\n");
@@ -261,13 +266,8 @@ main (int argc, const char *argv[])
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
 
-    /* Disable the HDF5 library's error reporting */
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
     /* initialize h5tools lib */
     h5tools_init();
-
-    H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
 
     /* Parse command line options */
     if(parse_command_line(argc, argv) < 0)
@@ -275,6 +275,9 @@ main (int argc, const char *argv[])
 
     if(fname_g == NULL)
         goto done;
+
+    /* enable error reporting if command line option */
+    h5tools_error_report();
 
     /* Print usage/exit if not using at least one of the options */
     if(!clear_status_flags && !remove_cache_image &&
@@ -381,7 +384,6 @@ main (int argc, const char *argv[])
         if(image_addr == HADDR_UNDEF && image_len == 0)
             warn_msg("No cache image in the file\n");
     }
-
 
     h5tools_setstatus(EXIT_SUCCESS);
 

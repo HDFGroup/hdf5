@@ -15,7 +15,7 @@
  *
  * Created:             H5Fquery.c
  *                      Jan 10 2008
- *                      Quincey Koziol <koziol@hdfgroup.org>
+ *                      Quincey Koziol
  *
  * Purpose:             File structure query routines.
  *
@@ -229,6 +229,7 @@ H5F_get_extpath(const H5F_t *f)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(f);
+    HDassert(f->shared);
     HDassert(f->shared->extpath);
 
     FUNC_LEAVE_NOAPI(f->shared->extpath)
@@ -762,7 +763,6 @@ H5F_sieve_buf_size(const H5F_t *f)
  *          Failure:    (should not happen)
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Jul  8 2005
  *
  *-------------------------------------------------------------------------
@@ -1259,6 +1259,7 @@ H5F_get_point_of_no_return(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->point_of_no_return)
 } /* end H5F_get_point_of_no_return() */
 
+
 /*-------------------------------------------------------------------------
  * Function: H5F_get_null_fsm_addr
  *

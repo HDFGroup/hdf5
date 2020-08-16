@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Tuesday, March  3, 1998
  *
  * Purpose:    Tests datasets stored in external raw files.
@@ -1418,7 +1418,7 @@ main(void)
         nerrors += test_path_absolute(current_fapl_id);
         nerrors += test_path_relative(current_fapl_id);
         nerrors += test_path_relative_cwd(current_fapl_id);
- 
+
         /* Verify symbol table messages are cached */
         nerrors += (h5_verify_cached_stabs(EXT_FNAME, current_fapl_id) < 0 ? 1 : 0);
 

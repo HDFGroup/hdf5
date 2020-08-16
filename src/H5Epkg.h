@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:	Quincey Koziol
  *		Wednesday, April 11, 2007
  *
  * Purpose:	This file contains declarations which are visible only within
@@ -79,7 +79,7 @@ typedef struct {
 typedef struct {
     H5E_auto2_t func2;      /* Only the new style callback function is available. */
 } H5E_auto_op_t;
-#endif /* H5_NO_DEPRECATED_SYMBOLS */ 
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 /* Some syntactic sugar to make the compiler happy with two different kinds of callbacks */
 typedef struct {

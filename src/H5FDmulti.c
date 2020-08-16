@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Robb Matzke <matzke@llnl.gov>
+ * Programmer:	Robb Matzke
  *		Monday, November 10, 1997
  *
  * Purpose:	Implements a file driver which dispatches I/O requests to
@@ -87,7 +87,7 @@ typedef struct H5FD_multi_t {
     haddr_t             memb_next[H5FD_MEM_NTYPES]; /*addr of next member                       */
     H5FD_t             *memb[H5FD_MEM_NTYPES];      /*member pointers                           */
     haddr_t             memb_eoa[H5FD_MEM_NTYPES];  /*EOA for individual files,
-                                                     *end of allocated addresses.  v1.6 library 
+                                                     *end of allocated addresses.  v1.6 library
                                                      *have the EOA for the entire file. But it's
                                                      *meaningless for MULTI file.  We replaced it
                                                      *with the EOAs for individual files        */
@@ -831,9 +831,9 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
         if (file->memb[mt])
             if(H5FDset_eoa(file->memb[mt], mt, memb_eoa[mt])<0)
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_CANTSET, "set_eoa() failed", -1)
-       
-        /* Save the individual EOAs in one place for later comparison (in H5FD_multi_set_eoa) */ 
-        file->memb_eoa[mt] = memb_eoa[mt]; 
+
+        /* Save the individual EOAs in one place for later comparison (in H5FD_multi_set_eoa) */
+        file->memb_eoa[mt] = memb_eoa[mt];
     } END_MEMBERS;
 
     return 0;
@@ -1001,7 +1001,7 @@ H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     /*
      * Initialize the file from the file access properties, using default
      * values if necessary.  Make sure to use CALLOC here because the code
-     * in H5FD_multi_set_eoa depends on the proper initialization of memb_eoa 
+     * in H5FD_multi_set_eoa depends on the proper initialization of memb_eoa
      * in H5FD_multi_t.
      */
     if(NULL == (file = (H5FD_multi_t *)calloc((size_t)1, sizeof(H5FD_multi_t))))
@@ -1234,14 +1234,6 @@ H5FD_multi_get_type_map(const H5FD_t *_file, H5FD_mem_t *type_map)
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *              Raymond Lu
- *              21 Dec. 2006
- *              Added the parameter TYPE.  It's only used for MULTI driver.
- *              If the TYPE is H5FD_MEM_DEFAULT, simply find the biggest
- *              EOA of individual file because the EOA for the whole file
- *              is meaningless.
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -1334,17 +1326,6 @@ H5FD_multi_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *              Raymond Lu
- *              10 January 2007
- *              EOA for the whole file is discarded because it's meaningless
- *              for MULTI file.  This function only sets eoa for individual
- *              file.
- *
- *              Raymond Lu
- *              21 June 2011
- *              Backward compatibility of EOA.  Please the comment in the
- *              code.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1856,7 +1837,7 @@ H5FD_multi_lock(H5FD_t *_file, hbool_t rw)
     } /* end if */
 
     if(nerrors)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "error locking member files", -1)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_CANTLOCKFILE, "error locking member files", -1)
     return 0;
 
 } /* H5FD_multi_lock() */
@@ -1893,7 +1874,7 @@ H5FD_multi_unlock(H5FD_t *_file)
     } END_MEMBERS;
 
     if(nerrors)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "error unlocking member files", -1)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_CANTUNLOCKFILE, "error unlocking member files", -1)
 
     return 0;
 } /* H5FD_multi_unlock() */

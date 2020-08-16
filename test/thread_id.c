@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Check that a thread ID returned by H5TS_thread_id() possesses the
- * following properties: 
+ * following properties:
  *
  * 1 ID >= 1.
  * 2 The ID is constant over the thread's lifetime.
@@ -24,6 +24,8 @@
  * so we include the private headers here.
  */
 #include "testhdf5.h"
+
+#if defined(H5_HAVE_THREADSAFE) && !defined(H5_HAVE_WIN_THREADS)
 
 static void my_errx(int, const char *, ...) H5_ATTR_FORMAT(printf, 2, 3);
 
@@ -39,8 +41,6 @@ my_errx(int code, const char *fmt, ...)
     (void)HDfputc('\n', stderr);
     HDexit(code);
 }
-
-#if defined(H5_HAVE_THREADSAFE) && !defined(H5_HAVE_WIN_THREADS)
 
 #if defined(H5_HAVE_DARWIN)
 

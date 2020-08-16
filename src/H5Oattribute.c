@@ -149,7 +149,6 @@ static herr_t H5O__attr_exists_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg,
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec  4 2006
  *
  *-------------------------------------------------------------------------
@@ -393,7 +392,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 11 2006
  *
  *-------------------------------------------------------------------------
@@ -541,7 +539,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 18 2006
  *
  *-------------------------------------------------------------------------
@@ -727,7 +724,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jan  2 2007
  *
  *-------------------------------------------------------------------------
@@ -802,7 +798,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec  4 2006
  *
  *-------------------------------------------------------------------------
@@ -830,7 +825,7 @@ H5O__attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
             HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, H5_ITER_ERROR, "unable to load object header chunk")
 
         /* Because the attribute structure is shared now. The only situation that requires
-         * copying the data is when the metadata cache evicts and reloads this attribute. 
+         * copying the data is when the metadata cache evicts and reloads this attribute.
          * The shared attribute structure will be different in that situation. SLU-2010/7/29 */
         if(((H5A_t *)mesg->native)->shared != udata->attr->shared) {
             /* Sanity check */
@@ -960,7 +955,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec  5 2006
  *
  *-------------------------------------------------------------------------
@@ -1006,7 +1000,6 @@ H5O__attr_rename_chk_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec  5 2006
  *
  *-------------------------------------------------------------------------
@@ -1468,7 +1461,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 11 2006
  *
  *-------------------------------------------------------------------------
@@ -1699,7 +1691,7 @@ H5O__attr_count_real(H5F_t *f, H5O_t *oh, hsize_t *nattrs)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_TAG(oh->cache_info.addr)
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(f);
@@ -1732,7 +1724,7 @@ H5O__attr_count_real(H5F_t *f, H5O_t *oh, hsize_t *nattrs)
     } /* end else */
 
 done:
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__attr_count_real */
 
 
@@ -1745,7 +1737,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 11 2006
  *
  *-------------------------------------------------------------------------
@@ -1927,49 +1918,4 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5O__attr_bh_info() */
-
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-
-/*-------------------------------------------------------------------------
- * Function:    H5O__attr_count
- *
- * Purpose:     Determine the # of attributes on an object
- *
- * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Monday, December 11, 2006
- *
- *-------------------------------------------------------------------------
- */
-int
-H5O__attr_count(const H5O_loc_t *loc)
-{
-    H5O_t *oh = NULL;           /* Pointer to actual object header */
-    hsize_t nattrs;             /* Number of attributes */
-    int ret_value = -1;         /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /* Check arguments */
-    HDassert(loc);
-
-    /* Protect the object header to iterate over */
-    if(NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, FAIL, "unable to load object header")
-
-    /* Retrieve # of attributes on object */
-    if(H5O__attr_count_real(loc->file, oh, &nattrs) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve attribute count")
-
-    /* Set return value */
-    ret_value = (int)nattrs;
-
-done:
-    if(oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O__attr_count */
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
 

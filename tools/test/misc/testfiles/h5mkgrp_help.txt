@@ -5,3 +5,10 @@ usage: h5mkgrp [OPTIONS] FILE GROUP...
       -p, --parents      No error if existing, make parent groups as needed
       -v, --verbose      Print information about OBJECTS and OPTIONS
       -V, --version      Print version number and exit
+      --vol-value        Value (ID) of the VOL connector to use for opening the
+                         HDF5 file specified
+      --vol-name         Name of the VOL connector to use for opening the
+                         HDF5 file specified
+      --vol-info         VOL-specific info to pass to the VOL connector used for
+                         opening the HDF5 file specified
+

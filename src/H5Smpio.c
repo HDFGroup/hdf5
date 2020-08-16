@@ -14,7 +14,7 @@
 /*
  * Programmer:  rky 980813
  *
- * Purpose:	Create MPI data types for HDF5 selections.
+ * Purpose:     Create MPI data types for HDF5 selections.
  *
  */
 
@@ -148,14 +148,14 @@ H5S__mpio_all_type(const H5S_t *space, size_t elmt_size,
         *new_type = MPI_BYTE;
         H5_CHECKED_ASSIGN(*count, int, total_bytes, hsize_t);
         *is_derived_type = FALSE;
-    } /* end if */
+    }
     else {
         /* Create a LARGE derived datatype for this transfer */
         if(H5_mpio_create_large_type(total_bytes, 0, MPI_BYTE, new_type) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create a large datatype from the all selection")
         *count = 1;
         *is_derived_type = TRUE;
-    } /* end else */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -253,7 +253,7 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points,
         /* Commit MPI datatype for later use */
         if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(new_type)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
-    } /* end if */
+    }
     else {
         /* use LARGE_DATATYPE::
          * We'll create an hindexed_block type for every 2G point count and then combine
@@ -295,7 +295,7 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points,
 #if MPI_VERSION >= 3
             if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed_block((int)bigio_count,
                     1, &disp[(hsize_t)i*bigio_count], elmt_type, &inner_types[i])))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed_block failed", mpi_code)
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed_block failed", mpi_code);
 #else
             if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)bigio_count,
                     blocks, &disp[i*bigio_count], elmt_type, &inner_types[i])))
@@ -309,7 +309,7 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points,
 #if MPI_VERSION >= 3
             if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed_block(remaining_points,
                     1, &disp[(hsize_t)num_big_types*bigio_count], elmt_type, &inner_types[num_big_types])))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed_block failed", mpi_code)
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed_block failed", mpi_code);
 #else
             if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)remaining_points,
                     blocks, &disp[num_big_types*bigio_count], elmt_type, &inner_types[num_big_types])))
@@ -317,11 +317,12 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points,
 #endif
             inner_blocks[num_big_types] = 1;
             inner_disps[num_big_types] = 0;
-        } /* end if */
+        }
 
         if(MPI_SUCCESS != (mpi_code = MPI_Type_create_struct(total_types,
                 inner_blocks, inner_disps, inner_types, new_type)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct", mpi_code)
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct", mpi_code);
+
         for(i = 0; i < total_types; i++)
             MPI_Type_free(&inner_types[i]);
 
@@ -492,7 +493,7 @@ done:
  *              selection and so the memory datatype has to be permuted using the
  *              permutation map created by the file selection.
  *
- * Note:	This routine is called from H5_mpio_space_type(), which is
+ * Note:	This routine is called from H5S_mpio_space_type(), which is
  *              called first for the file dataspace and creates
  *
  * Return:	Non-negative on success, negative on failure.
@@ -799,7 +800,7 @@ if(H5DEBUG(S)) {
         /* Use a single MPI datatype that has a 32 bit size */
         if(MPI_SUCCESS != (mpi_code = MPI_Type_contiguous((int)elmt_size, MPI_BYTE, &inner_type)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
-    } /* end if */
+    }
     else
         /* Create the compound datatype for this operation (> 2GB) */
         if(H5_mpio_create_large_type(elmt_size, 0, MPI_BYTE, &inner_type) < 0)
@@ -836,7 +837,7 @@ if(H5DEBUG(S))
             MPI_Type_free(&inner_type);
             if(mpi_code != MPI_SUCCESS)
                 HMPI_GOTO_ERROR(FAIL, "couldn't create MPI vector type", mpi_code)
-       } /* end if */
+       }
        else {
             /* Things get a bit more complicated and require LARGE_DATATYPE processing
              * There are two MPI datatypes that need to be created:
@@ -858,7 +859,7 @@ if(H5DEBUG(S))
             if(bigio_count < d[i].block) {
                 if(H5_mpio_create_large_type(d[i].block, 0, inner_type, &block_type) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create a large block datatype in hyper selection")
-            } /* end if */
+            }
             else
                 if(MPI_SUCCESS != (mpi_code = MPI_Type_contiguous((int)d[i].block, inner_type, &block_type)))
                     HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
@@ -879,7 +880,7 @@ if(H5DEBUG(S))
             if(bigio_count < d[i].count) {
                 if(H5_mpio_create_large_type(d[i].count, stride_in_bytes, block_type, &outer_type) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create a large outer datatype in hyper selection")
-            } /* end if */
+            }
             /* otherwise a regular create_hvector will do */
             else
                 if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hvector((int)d[i].count, /* count */
@@ -891,7 +892,7 @@ if(H5DEBUG(S))
 
             MPI_Type_free(&block_type);
             MPI_Type_free(&inner_type);
-       } /* end else */
+        } /* end else */
 
         /****************************************
          *  Then build the dimension type as (start, vector type, xtent).
@@ -899,7 +900,7 @@ if(H5DEBUG(S))
 
         /* Calculate start and extent values of this dimension */
         /* Check if value overflow to cast to type MPI_Aint */
-        if(d[i].start > LONG_MAX || offset[i] > LONG_MAX || elmt_size > LONG_MAX) 
+        if(d[i].start > LONG_MAX || offset[i] > LONG_MAX || elmt_size > LONG_MAX)
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "result overflow")
 	    start_disp = (MPI_Aint)d[i].start * (MPI_Aint)offset[i] * (MPI_Aint)elmt_size;
 
@@ -1004,7 +1005,7 @@ H5S__mpio_span_hyper_type(const H5S_t *space, size_t elmt_size,
     if(bigio_count >= elmt_size) {
         if(MPI_SUCCESS != (mpi_code = MPI_Type_contiguous((int)elmt_size, MPI_BYTE, &elmt_type)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
-    } /* end if */
+    }
     else
         if(H5_mpio_create_large_type(elmt_size, 0, MPI_BYTE, &elmt_type) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create a large element datatype in span_hyper selection")
@@ -1113,7 +1114,6 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down,
 {
     H5S_hyper_span_t      *span;                /* Hyperslab span to iterate with */
     hsize_t               bigio_count;          /* Transition point to create derived type */
-
     size_t                alloc_count = 0;      /* Number of span tree nodes allocated at this level */
     size_t                outercount = 0;       /* Number of span tree nodes at this level */
     MPI_Datatype          *inner_type = NULL;

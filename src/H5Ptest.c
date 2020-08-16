@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+/* Programmer:  Quincey Koziol
  *              Saturday May 31, 2003
  *
  * Purpose:	Generic Property Testing Functions
@@ -82,7 +82,7 @@ done:
  PURPOSE
     Routine to open a [copy of] a class with its full path name
  USAGE
-    hid_t H5P__open_class_name_test(path)
+    hid_t H5P__open_class_path_test(path)
         const char *path;       IN: Full path name of class to open [copy of]
  RETURNS
     Success: ID of generic property class
@@ -105,19 +105,19 @@ H5P__open_class_path_test(const char *path)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    if(NULL == path || *path=='\0')
+    if (NULL == path || *path=='\0')
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid class path");
 
     /* Open the property list class */
-    if(NULL == (pclass = H5P__open_class_path(path)))
+    if (NULL == (pclass = H5P__open_class_path(path)))
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, H5I_INVALID_HID, "unable to find class with full path");
 
     /* Get an atom for the class */
-    if((ret_value = H5I_register(H5I_GENPROP_CLS, pclass, TRUE)) < 0)
+    if ((ret_value = H5I_register(H5I_GENPROP_CLS, pclass, TRUE)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize property list class");
 
 done:
-    if(H5I_INVALID_HID == ret_value && pclass)
+    if (H5I_INVALID_HID == ret_value && pclass)
         H5P__close_class(pclass);
 
     FUNC_LEAVE_NOAPI(ret_value)

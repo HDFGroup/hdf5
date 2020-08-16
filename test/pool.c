@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+/* Programmer:  Quincey Koziol
  *              Tuesday, May 3, 2005
  */
 #include "h5test.h"
@@ -636,10 +636,10 @@ test_allocate_random(void)
 
     /* Initialize random number seed */
     curr_time = HDtime(NULL);
-#ifdef QAK
+#if 0
 curr_time=1115412944;
 HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
-#endif /* QAK */
+#endif
     HDsrandom((unsigned)curr_time);
 
     /* Create a memory pool */

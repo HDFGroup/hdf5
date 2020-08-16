@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Monday, March 23, 1998
  */
 
@@ -218,6 +218,12 @@ usage (void)
     PRINTVALSTREAM(rawoutstream, "                   ...<kerberos cache path>,<username>,<buffer size>)\n");
     PRINTVALSTREAM(rawoutstream, "                   If absent or A == '(,,,,)', all default values are used.\n");
     PRINTVALSTREAM(rawoutstream, "                   Has no effect if vfd flag is not 'hdfs'.\n");
+    PRINTVALSTREAM(rawoutstream, "   --vol-value     Value (ID) of the VOL connector to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                   HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --vol-name      Name of the VOL connector to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                   HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --vol-info      VOL-specific info to pass to the VOL connector used for\n");
+    PRINTVALSTREAM(rawoutstream, "                   opening the HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "  file/OBJECT\n");
     PRINTVALSTREAM(rawoutstream, "    Each object consists of an HDF5 file name optionally followed by a\n");
@@ -1292,230 +1298,6 @@ print_type(h5tools_str_t *buffer, hid_t type, int ind)
     h5tools_str_append(buffer,"%lu-byte class-%u unknown", (unsigned long)H5Tget_size(type), (unsigned)data_class);
 }
 
-/*
- *
- */
-static void
-dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx, hid_t container, H5R_ref_t *ref_buf, int ndims)
-{
-    hid_t               new_obj_id = H5I_INVALID_HID;
-    hid_t               new_obj_sid = H5I_INVALID_HID;
-    hsize_t             elmt_counter = 0;  /*counts the # elements printed. */
-    size_t              ncols = 80;        /* available output width        */
-    int                 i;
-    hsize_t             curr_pos = 0;      /* total data element position   */
-    h5tools_str_t       buffer;            /* string into which to render   */
-    h5tools_context_t   datactx;           /* print context  */
-
-    H5TOOLS_START_DEBUG("");
-
-    datactx = *ctx;  /* print context  */
-    /* Assume entire data space to be printed */
-    if (datactx.ndims > 0)
-        for (i = 0; (unsigned)i < datactx.ndims; i++)
-            datactx.p_min_idx[i] = 0;
-    datactx.need_prefix = TRUE;
-
-    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
-    for(i = 0; i < ndims; i++, datactx.cur_elmt++, elmt_counter++) {
-        H5O_type_t obj_type = -1;   /* Object type */
-        H5R_type_t ref_type;   /* Reference type */
-
-        H5TOOLS_DEBUG("reference loop:%d with curr_pos=%ld", i, curr_pos);
-
-        datactx.need_prefix = TRUE;
-        h5tools_str_reset(&buffer);
-        H5TOOLS_DEBUG("reference loop - h5tools_str_sprint with H5T_STD_REF:%d", i);
-        h5tools_str_sprint(&buffer, info, container, H5T_STD_REF, &ref_buf[i], &datactx);
-        h5tools_render_element(stream, info, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)i, (hsize_t)ndims);
-
-        ref_type = H5Rget_type((const H5R_ref_t *)&ref_buf[i]);
-        switch (ref_type) {
-            case H5R_OBJECT1:
-                H5TOOLS_DEBUG("ref_type is H5R_OBJECT1");
-                if (H5Rget_obj_type3(&ref_buf[i], H5P_DEFAULT, &obj_type) >= 0) {
-                    switch (obj_type) {
-                        case H5O_TYPE_DATASET:
-                            if((new_obj_id = H5Ropen_object(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-                                datactx.indent_level++;
-                                h5tools_dump_dset(stream, info, &datactx, new_obj_id);
-                                datactx.indent_level--;
-                                if(H5Dclose(new_obj_id) < 0)
-                                    H5TOOLS_INFO("H5Dclose H5R_OBJECT1:H5O_TYPE_DATASET failed");
-                                if(H5Rdestroy(&ref_buf[i]) < 0)
-                                    H5TOOLS_INFO("H5Rdestroy H5R_OBJECT1:H5O_TYPE_DATASET failed");
-                            }
-                            else
-                                H5TOOLS_INFO("H5Ropen_object H5R_OBJECT1:H5O_TYPE_DATASET failed");
-                            break;
-
-                        case H5O_TYPE_GROUP:
-                        case H5O_TYPE_NAMED_DATATYPE:
-                        case H5O_TYPE_MAP:
-                        case H5O_TYPE_UNKNOWN:
-                        case H5O_TYPE_NTYPES:
-                        default:
-                            break;
-                    } /* end switch */
-                }
-                else
-                    H5TOOLS_INFO("H5Rget_obj_type3 H5R_OBJECT1 failed");
-                break;
-            case H5R_DATASET_REGION1:
-                H5TOOLS_DEBUG("ref_type is H5R_DATASET_REGION1");
-                if((new_obj_id = H5Ropen_object(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-                    datactx.indent_level++;
-                    h5tools_dump_dset(stream, info, &datactx, new_obj_id);
-                    datactx.indent_level--;
-                    if(H5Dclose(new_obj_id) < 0)
-                        H5TOOLS_INFO("H5Dclose H5R_DATASET_REGION1 failed");
-                    if(H5Rdestroy(&ref_buf[i]) < 0)
-                        H5TOOLS_INFO("H5Rdestroy H5R_DATASET_REGION1 failed");
-                }
-                else
-                    H5TOOLS_INFO("H5Ropen_object H5R_DATASET_REGION1 failed");
-                break;
-            case H5R_OBJECT2:
-                H5TOOLS_DEBUG("ref_type is H5R_OBJECT2");
-                if (H5Rget_obj_type3(&ref_buf[i], H5P_DEFAULT, &obj_type) >= 0) {
-                    switch (obj_type) {
-                        case H5O_TYPE_GROUP:
-                            break;
-
-                        case H5O_TYPE_DATASET:
-                            if((new_obj_id = H5Ropen_object(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-                                datactx.indent_level++;
-                                h5tools_dump_dset(stream, info, &datactx, new_obj_id);
-                                datactx.indent_level--;
-                                if(H5Oclose(new_obj_id) < 0)
-                                    H5TOOLS_INFO("H5Oclose H5R_OBJECT2 failed");
-                                if(H5Rdestroy(&ref_buf[i]) < 0)
-                                    H5TOOLS_INFO("H5Rdestroy H5R_OBJECT2 failed");
-                            }
-                            else
-                                H5TOOLS_INFO("H5Ropen_object H5R_OBJECT2 failed");
-                            break;
-
-                        case H5O_TYPE_NAMED_DATATYPE:
-                            break;
-
-                        case H5O_TYPE_MAP:
-                        case H5O_TYPE_UNKNOWN:
-                        case H5O_TYPE_NTYPES:
-                        default:
-                            break;
-                    } /* end switch */
-                }
-                else
-                    H5TOOLS_INFO("H5Rget_obj_type3 H5R_OBJECT2 failed");
-                break;
-            case H5R_DATASET_REGION2:
-                H5TOOLS_DEBUG("ref_type is H5R_DATASET_REGION2");
-
-                if (info->line_ncols > 0)
-                    ncols = info->line_ncols;
-
-                /* if (new_obj_id < 0) - could mean that no reference was written do not throw failure */
-                if((new_obj_id = H5Ropen_object(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) < 0)
-                    H5TOOLS_INFO("H5Ropen_object H5R_DATASET_REGION2 failed");
-                else {
-                    if((new_obj_sid = H5Ropen_region(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-                        if (h5tools_is_zero(&ref_buf[i], H5Tget_size(H5T_STD_REF))) {
-                            H5TOOLS_DEBUG("NULL H5R_DATASET_REGION2");
-
-                            h5tools_str_reset(&buffer);
-                            h5tools_str_append(&buffer, " {");
-                            h5tools_render_element(stream, info, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
-
-                            datactx.need_prefix = TRUE;
-                            datactx.indent_level++;
-                            h5tools_str_reset(&buffer);
-                            h5tools_str_append(&buffer, "NULL");
-                            h5tools_render_element(stream, info, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
-                            datactx.indent_level--;
-                            datactx.need_prefix = TRUE;
-
-                            h5tools_str_reset(&buffer);
-                            h5tools_str_append(&buffer, "}");
-                            h5tools_render_element(stream, info, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
-                        }
-                        else {
-                            H5S_sel_type region_type;
-
-                            region_type = H5Sget_select_type(new_obj_sid);
-                            if(region_type == H5S_SEL_POINTS) {
-                                /* Print point information */
-                                H5TOOLS_DEBUG("H5S_SEL_POINTS H5R_DATASET_REGION2");
-                                h5tools_dump_region_data_points(new_obj_sid, new_obj_id, stream, info, &datactx,
-                                                    &buffer, &curr_pos, ncols, (hsize_t)i, elmt_counter);
-                            }
-                            else if(region_type == H5S_SEL_HYPERSLABS) {
-                                /* Print block information */
-                                H5TOOLS_DEBUG("H5S_SEL_HYPERSLABS H5R_DATASET_REGION2");
-                                h5tools_dump_region_data_blocks(new_obj_sid, new_obj_id, stream, info, &datactx,
-                                                    &buffer, &curr_pos, ncols, (hsize_t)i, elmt_counter);
-                            }
-                            else
-                                H5TOOLS_INFO("invalid region type");
-                        } /* end else to if (h5tools_is_zero(... */
-                        if(H5Sclose(new_obj_sid) < 0)
-                            H5TOOLS_INFO("H5Sclose H5R_DATASET_REGION2 failed");
-                    }
-                    else
-                        H5TOOLS_INFO("H5Ropen_region H5R_DATASET_REGION2 failed");
-                    if(H5Dclose(new_obj_id) < 0)
-                        H5TOOLS_INFO("H5Dclose H5R_DATASET_REGION2 failed");
-                    if(H5Rdestroy(&ref_buf[i]) < 0)
-                        H5TOOLS_INFO("H5Rdestroy H5R_DATASET_REGION2 failed");
-                }
-                break;
-            case H5R_ATTR:
-                H5TOOLS_DEBUG("ref_type is H5R_ATTR");
-                if((new_obj_id = H5Ropen_attr(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-                    h5tools_dump_region_attribute(new_obj_id, stream, info, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
-                    if(H5Aclose(new_obj_id) < 0)
-                        H5TOOLS_INFO("H5Aclose H5R_ATTR failed");
-                    if(H5Rdestroy(&ref_buf[i]) < 0)
-                        H5TOOLS_INFO("H5Rdestroy H5R_ATTR failed");
-                }
-                else {
-                    H5TOOLS_DEBUG("NULL H5R_ATTR");
-
-                    h5tools_str_reset(&buffer);
-                    h5tools_str_append(&buffer, " {");
-                    h5tools_render_element(stream, info, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
-
-                    datactx.need_prefix = TRUE;
-                    datactx.indent_level++;
-                    h5tools_str_reset(&buffer);
-                    h5tools_str_append(&buffer, "NULL");
-                    h5tools_render_element(stream, info, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
-                    datactx.indent_level--;
-                    datactx.need_prefix = TRUE;
-
-                    h5tools_str_reset(&buffer);
-                    h5tools_str_append(&buffer, "}");
-                    h5tools_render_element(stream, info, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
-
-                    H5TOOLS_INFO("H5Ropen_attr H5R_ATTR failed");
-                }
-                break;
-            case H5R_BADTYPE:
-            case H5R_MAXTYPE:
-            default:
-                break;
-        } /* end switch */
-
-        H5TOOLS_DEBUG("finished reference loop:%d",i);
-    } /* end for(i = 0; i < ndims; i++, ctx->cur_elmt++, elmt_counter++) */
-
-    h5tools_str_close(&buffer);
-
-    PRINTVALSTREAM(stream, "\n");
-
-    H5TOOLS_ENDDEBUG("");
-}
-
 /*-------------------------------------------------------------------------
  * Function:    dump_dataset_values
  *
@@ -1531,7 +1313,6 @@ dump_dataset_values(hid_t dset)
     hid_t               space = H5I_INVALID_HID;
     hsize_t             total_size[H5S_MAX_RANK];
     int                 ndims;
-    size_t              i;
     char                string_prefix[64];
     static char         fmt_double[16];
     static char         fmt_float[16];
@@ -1647,13 +1428,9 @@ dump_dataset_values(hid_t dset)
         H5TOOLS_DEBUG("ndims=%d - ctx.ndims=%d", ndims, ctx.ndims);
 
         /* Assume entire data space to be printed */
-        if (ctx.ndims > 0)
-            for (i = 0; i < (size_t)ctx.ndims; i++)
-                ctx.p_min_idx[i] = 0;
-
         H5Sget_simple_extent_dims(space, total_size, NULL);
-        if (ctx.ndims > 0)
-            init_acc_pos(&ctx, total_size);
+        init_acc_pos(ctx.ndims, total_size, ctx.acc, ctx.pos, ctx.p_min_idx);
+
         ctx.need_prefix = TRUE;
 
         if (NULL != (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)ndims))) {
@@ -1663,7 +1440,9 @@ dump_dataset_values(hid_t dset)
                 H5TOOLS_INFO("H5Dread reference failed");
                 H5TOOLS_GOTO_DONE_NO_RET();
             }
-            dump_reference(rawoutstream, info, &ctx, dset, ref_buf, ndims);
+            h5tools_dump_reference(rawoutstream, info, &ctx, dset, ref_buf, ndims);
+
+            PRINTVALSTREAM(rawoutstream, "\n");
             HDfree(ref_buf);
         }
     }
@@ -1701,7 +1480,6 @@ dump_attribute_values(hid_t attr)
     hid_t               space = H5I_INVALID_HID;
     hsize_t             total_size[H5S_MAX_RANK];
     int                 ndims;
-    size_t              i;
     char                string_prefix[64];
     static char         fmt_double[16];
     static char         fmt_float[16];
@@ -1818,13 +1596,9 @@ dump_attribute_values(hid_t attr)
         H5TOOLS_DEBUG("ndims=%d - ctx.ndims=%d", ndims, ctx.ndims);
 
         /* Assume entire data space to be printed */
-        if (ctx.ndims > 0)
-            for (i = 0; i < (size_t)ctx.ndims; i++)
-                ctx.p_min_idx[i] = 0;
-
         H5Sget_simple_extent_dims(space, total_size, NULL);
-        if (ctx.ndims > 0)
-            init_acc_pos(&ctx, total_size);
+        init_acc_pos(ctx.ndims, total_size, ctx.acc, ctx.pos, ctx.p_min_idx);
+
         ctx.need_prefix = TRUE;
 
         if (NULL != (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)ndims))) {
@@ -1835,7 +1609,9 @@ dump_attribute_values(hid_t attr)
                 H5TOOLS_GOTO_DONE_NO_RET();
             }
             ctx.indent_level++;
-            dump_reference(rawoutstream, info, &ctx, attr, ref_buf, ndims);
+            h5tools_dump_reference(rawoutstream, info, &ctx, attr, ref_buf, ndims);
+
+            PRINTVALSTREAM(rawoutstream, "\n");
             ctx.indent_level--;
             HDfree(ref_buf);
         }
@@ -2850,10 +2626,8 @@ main(int argc, const char *argv[])
     const char  *preferred_driver = NULL;
     int          err_exit = 0;
     hid_t        fapl_id = H5P_DEFAULT;
-    H5E_auto2_t  func;
-    H5E_auto2_t  tools_func;
-    void        *edata;
-    void        *tools_edata;
+    hbool_t custom_vol_fapl = FALSE;
+    h5tools_vol_info_t vol_info;
 
 #ifdef H5_HAVE_ROS3_VFD
     /* Default "anonymous" S3 configuration */
@@ -2881,16 +2655,11 @@ main(int argc, const char *argv[])
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
 
-    /* Disable error reporting */
-    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
     /* Initialize h5tools lib */
     h5tools_init();
 
-    /* Disable tools error reporting */
-    H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
-    H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
+    /* Initialize fapl info struct */
+    HDmemset(&vol_info, 0, sizeof(h5tools_vol_info_t));
 
     /* Build object display table */
     DISPATCH(H5O_TYPE_GROUP, "Group", NULL, NULL);
@@ -2954,6 +2723,19 @@ main(int argc, const char *argv[])
         }
         else if (!HDstrncmp(argv[argno], "--vfd=", (size_t)6)) {
             preferred_driver = argv[argno]+6;
+        }
+        else if (!HDstrncmp(argv[argno], "--vol-value=", (size_t)12)) {
+            vol_info.type = VOL_BY_VALUE;
+            vol_info.u.value = (H5VL_class_value_t)HDatoi(argv[argno]+12);
+            custom_vol_fapl = TRUE;
+        }
+        else if (!HDstrncmp(argv[argno], "--vol-name=", (size_t)11)) {
+            vol_info.type = VOL_BY_NAME;
+            vol_info.u.name = argv[argno]+11;
+            custom_vol_fapl = TRUE;
+        }
+        else if (!HDstrncmp(argv[argno], "--vol-info=", (size_t)11)) {
+            vol_info.info_string = argv[argno]+11;
         }
         else if (!HDstrncmp(argv[argno], "--width=", (size_t)8)) {
             width_g = (int)HDstrtol(argv[argno]+8, &rest, 0);
@@ -3134,6 +2916,9 @@ main(int argc, const char *argv[])
         }
     } /* end for */
 
+    /* enable error reporting if command line option */
+    h5tools_error_report();
+
     /* If no arguments remain then print a usage message (instead of doing
      * absolutely nothing ;-) */
     if (argno >= argc) {
@@ -3147,17 +2932,23 @@ main(int argc, const char *argv[])
         leave(EXIT_FAILURE);
     }
 
-    if (preferred_driver) {
-        h5tools_fapl_info_t fapl_info;
+    /* Setup a custom fapl for file accesses */
+    if (custom_vol_fapl) {
+        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, &vol_info, NULL)) < 0) {
+            error_msg("failed to setup file access property list (fapl) for file\n");
+            leave(EXIT_FAILURE);
+        }
+    }
 
-        /* Currently, only retrieval of VFDs is supported. */
-        fapl_info.type          = VFD_BY_NAME;
-        fapl_info.info_string   = NULL;
-        fapl_info.u.name        = preferred_driver;
+    if (preferred_driver) {
+        h5tools_vfd_info_t vfd_info;
+
+        vfd_info.info       = NULL;
+        vfd_info.name       = preferred_driver;
 
         if (!HDstrcmp(preferred_driver, drivernames[ROS3_VFD_IDX])) {
 #ifdef H5_HAVE_ROS3_VFD
-            fapl_info.info_string = (void *)&ros3_fa;
+            vfd_info.info = (void *)&ros3_fa;
 #else
             HDfprintf(rawerrorstream, "Error: Read-Only S3 VFD is not enabled\n\n");
             leave(EXIT_FAILURE);
@@ -3165,22 +2956,17 @@ main(int argc, const char *argv[])
         }
         else if (!HDstrcmp(preferred_driver, drivernames[HDFS_VFD_IDX])) {
 #ifdef H5_HAVE_LIBHDFS
-            fapl_info.info_string = (void *)&hdfs_fa;
+            vfd_info.info = (void *)&hdfs_fa;
 #else
             HDfprintf(rawerrorstream, "Error: The HDFS VFD is not enabled\n\n");
             leave(EXIT_FAILURE);
 #endif
         }
 
-        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, &fapl_info)) < 0) {
+        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info)) < 0) {
             HDfprintf(rawerrorstream, "Error: Unable to create FAPL for file access\n\n");
             leave(EXIT_FAILURE);
         }
-    }
-
-    if (enable_error_stack > 0) {
-        H5Eset_auto2(H5E_DEFAULT, func, edata);
-        H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
     }
 
     /* Each remaining argument is an hdf5 file followed by an optional slash
@@ -3241,7 +3027,6 @@ main(int argc, const char *argv[])
             x = oname;
             if (NULL == (oname = HDstrdup(oname))) {
                 HDfprintf(rawerrorstream, "memory allocation failed\n");
-                H5Eset_auto2(H5E_DEFAULT, func, edata);
                 leave(EXIT_FAILURE);
             }
             *x = '\0';
@@ -3286,7 +3071,6 @@ main(int argc, const char *argv[])
                 h5tools_str_reset(&buffer);
                 print_obj_name(&buffer, &iter, oname, "**NOT FOUND**");
                 h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
-                H5Eset_auto2(H5E_DEFAULT, func, edata);
                 leave(EXIT_FAILURE);
             } /* end if */
         } /* end if */
@@ -3296,7 +3080,6 @@ main(int argc, const char *argv[])
         /* Open the object and display it's information */
         if (li.type == H5L_TYPE_HARD) {
             if (visit_obj(file_id, oname, &iter) < 0) {
-                H5Eset_auto2(H5E_DEFAULT, func, edata);
                 leave(EXIT_FAILURE);
             }
         } /* end if(li.type == H5L_TYPE_HARD) */
@@ -3327,12 +3110,10 @@ main(int argc, const char *argv[])
     if (fapl_id != H5P_DEFAULT) {
         if (0 < H5Pclose(fapl_id)) {
             HDfprintf(rawerrorstream, "Error: Unable to set close fapl entry\n\n");
-            H5Eset_auto2(H5E_DEFAULT, func, edata);
             leave(EXIT_FAILURE);
         }
     }
 
-    H5Eset_auto2(H5E_DEFAULT, func, edata);
     if (err_exit)
         leave(EXIT_FAILURE);
     else

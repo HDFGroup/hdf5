@@ -1,0 +1,17 @@
+file1: h5diff_eps1.h5
+file2: h5diff_eps2.h5
+
+file1     file2
+---------------------------------------
+    x      x    /              
+    x      x    /DS1           
+
+
+group  : </> and </>
+0 differences found
+Attributes status:  0 common, 0 only in obj1, 0 only in obj2
+
+dataset: </DS1> and </DS1>
+0 differences found
+Attributes status:  0 common, 0 only in obj1, 0 only in obj2
+EXIT CODE: 0

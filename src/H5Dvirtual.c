@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Neil Fortner <nfortne2@hdfgroup.org>
+ * Programmer:  Neil Fortner
  *              Wednesday, January 28, 2015
  *
  * Purpose:
@@ -1120,7 +1120,7 @@ H5D__virtual_str_append(const char *src, size_t src_len, char **p, char **buf,
 
     /* Copy string to *p.  Note that since src in not NULL terminated, we must
      * use memcpy */
-    (void)H5MM_memcpy(*p, src, src_len);
+    H5MM_memcpy(*p, src, src_len);
 
     /* Advance *p */
     *p += src_len;
@@ -2238,7 +2238,7 @@ H5D__virtual_is_data_cached(const H5D_shared_t *shared_dset)
     size_t i, j;                            /* Local index variables */
     hbool_t ret_value = FALSE;              /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
     HDassert(shared_dset);

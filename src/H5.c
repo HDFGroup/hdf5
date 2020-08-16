@@ -50,9 +50,9 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static void H5_debug_mask(const char*);
+static void H5__debug_mask(const char*);
 #ifdef H5_HAVE_PARALLEL
-static int H5_mpi_delete_cb(MPI_Comm comm, int keyval, void *attr_val, int *flag);
+static int H5__mpi_delete_cb(MPI_Comm comm, int keyval, void *attr_val, int *flag);
 #endif /*H5_HAVE_PARALLEL*/
 
 /*********************/
@@ -138,8 +138,8 @@ H5_init_library(void)
         if (mpi_initialized && !mpi_finalized) {
             int key_val;
 
-            if(MPI_SUCCESS != (mpi_code = MPI_Comm_create_keyval(MPI_COMM_NULL_COPY_FN, 
-                                                                 (MPI_Comm_delete_attr_function *)H5_mpi_delete_cb, 
+            if(MPI_SUCCESS != (mpi_code = MPI_Comm_create_keyval(MPI_COMM_NULL_COPY_FN,
+                                                                 (MPI_Comm_delete_attr_function *)H5__mpi_delete_cb,
                                                                  &key_val, NULL)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Comm_create_keyval failed", mpi_code)
 
@@ -209,7 +209,7 @@ H5_init_library(void)
      * The link interface needs to be initialized so that link property lists
      * have their properties registered.
      * The FS module needs to be initialized as a result of the fix for HDFFV-10160:
-     *   It might not be initialized during normal file open. 
+     *   It might not be initialized during normal file open.
      *   When the application does not close the file, routines in the module might
      *   be called via H5_term_library() when shutting down the file.
      */
@@ -219,10 +219,6 @@ H5_init_library(void)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize vol interface")
     if(H5P_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize property list interface")
-    if(H5T_init() < 0)
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize datatype interface")
-    if(H5D_init() < 0)
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize dataset interface")
     if(H5AC_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize metadata caching interface")
     if(H5L_init() < 0)
@@ -235,8 +231,8 @@ H5_init_library(void)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize vol interface")
 
     /* Debugging? */
-    H5_debug_mask("-all");
-    H5_debug_mask(HDgetenv("HDF5_DEBUG"));
+    H5__debug_mask("-all");
+    H5__debug_mask(HDgetenv("HDF5_DEBUG"));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -639,7 +635,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5_debug_mask
+ * Function:    H5__debug_mask
  *
  * Purpose:     Set runtime debugging flags according to the string S.  The
  *              string should contain file numbers and package names
@@ -662,7 +658,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void
-H5_debug_mask(const char *s)
+H5__debug_mask(const char *s)
 {
     FILE	*stream = stderr;
     char	pkg_name[32], *rest;
@@ -738,21 +734,21 @@ H5_debug_mask(const char *s)
 
     return;
 
-} /* end H5_debug_mask() */
+} /* end H5__debug_mask() */
 
 #ifdef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
- * Function:	H5_mpi_delete_cb
+ * Function:	H5__mpi_delete_cb
  *
- * Purpose:	Callback attribute on MPI_COMM_SELF to terminate the HDF5 
+ * Purpose:	Callback attribute on MPI_COMM_SELF to terminate the HDF5
  *              library when the communicator is destroyed, i.e. on MPI_Finalize.
  *
  * Return:	MPI_SUCCESS
  *
  *-------------------------------------------------------------------------
  */
-static int H5_mpi_delete_cb(MPI_Comm H5_ATTR_UNUSED comm, int H5_ATTR_UNUSED keyval, void H5_ATTR_UNUSED *attr_val, int H5_ATTR_UNUSED *flag)
+static int H5__mpi_delete_cb(MPI_Comm H5_ATTR_UNUSED comm, int H5_ATTR_UNUSED keyval, void H5_ATTR_UNUSED *attr_val, int H5_ATTR_UNUSED *flag)
 {
     H5_term_library();
     return MPI_SUCCESS;
@@ -938,11 +934,13 @@ H5open(void)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_API_NOCLEAR(FAIL)
-    H5TRACE0("e","");
+    FUNC_ENTER_API_NOPUSH(FAIL)
+    /*NO TRACE*/
+
     /* all work is done by FUNC_ENTER() */
+
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_NOPUSH(ret_value)
 } /* end H5open() */
 
 
@@ -991,7 +989,7 @@ H5close(void)
  * Return:
  *
  *      Success:    A pointer to the allocated buffer.
- *  
+ *
  *      Failure:    NULL
  *
  *-------------------------------------------------------------------------
@@ -1032,7 +1030,7 @@ H5allocate_memory(size_t size, hbool_t clear)
  * Return:
  *
  *      Success:    A pointer to the resized buffer.
- *  
+ *
  *      Failure:    NULL (the input buffer will be unchanged)
  *
  *-------------------------------------------------------------------------
@@ -1093,7 +1091,7 @@ H5is_library_threadsafe(hbool_t *is_ts)
     H5TRACE1("e", "*b", is_ts);
 
     HDassert(is_ts);
- 
+
     /* At this time, it is impossible for this to fail. */
 #ifdef H5_HAVE_THREADSAFE
     *is_ts = TRUE;

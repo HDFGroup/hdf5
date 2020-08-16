@@ -28,6 +28,8 @@
 
 #ifdef H5_HAVE_MIRROR_VFD
 
+#include "H5FDmirror_priv.h"    /* Private header for the mirror VFD */
+
 /* For future consideration, IP address and port number might be
  * environment variables?
  */
@@ -107,7 +109,7 @@ static void mybzero(void *dest, size_t size);
 /* ----------------------------------------------------------------------------
  * Function:   mybzero
  *
- * Purpose:    Have bzero simplicity and abstraction in (possible) absence of 
+ * Purpose:    Have bzero simplicity and abstraction in (possible) absence of
  *             it being available.
  *
  * Programmer: Jacob Smith

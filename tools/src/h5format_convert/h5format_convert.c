@@ -18,7 +18,7 @@
 
 /*
  * We include the private header file so we can get to the uniform
- * programming environment it declares.  
+ * programming environment it declares.
  * HDF5 API functions (except for H5G_basename())
  */
 #include "H5private.h"
@@ -74,7 +74,7 @@ static struct long_options l_opts[] = {
  *
  *-------------------------------------------------------------------------
  */
-static void usage(const char *prog) 
+static void usage(const char *prog)
 {
     HDfprintf(stdout, "usage: %s [OPTIONS] file_name\n", prog);
     HDfprintf(stdout, "  OPTIONS\n");
@@ -109,12 +109,12 @@ static void usage(const char *prog)
  * Purpose: parse command line input
  *
  * Return: Success: 0
- *  	   Failure: 1
+ *         Failure: 1
  *
  *-------------------------------------------------------------------------
  */
 static int
-parse_command_line(int argc, const char **argv) 
+parse_command_line(int argc, const char **argv)
 {
     int opt;
 
@@ -127,47 +127,47 @@ parse_command_line(int argc, const char **argv)
 
     /* parse command line options */
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
-    switch((char) opt) {
-        case 'h':
-        usage(h5tools_getprogname());
-        h5tools_setstatus(EXIT_SUCCESS);
-        goto error;
+        switch((char) opt) {
+            case 'h':
+                usage(h5tools_getprogname());
+                h5tools_setstatus(EXIT_SUCCESS);
+                goto error;
 
-        case 'V':
-        print_version(h5tools_getprogname());
-        h5tools_setstatus(EXIT_SUCCESS);
-        goto error;
+            case 'V':
+                print_version(h5tools_getprogname());
+                h5tools_setstatus(EXIT_SUCCESS);
+                goto error;
 
-        case 'v':
-        verbose_g = TRUE;
-        break;
+            case 'v':
+                verbose_g = TRUE;
+                break;
 
-        case 'd': /* -d dname */
-        if(opt_arg != NULL && *opt_arg)
-            dname_g = HDstrdup(opt_arg);
-        if(dname_g == NULL) {
-            h5tools_setstatus(EXIT_FAILURE);
-            error_msg("No dataset name\n", opt_arg);
-            usage(h5tools_getprogname());
-            goto error;
-        }
-        dset_g = TRUE;
-        break;
+            case 'd': /* -d dname */
+                if(opt_arg != NULL && *opt_arg)
+                    dname_g = HDstrdup(opt_arg);
+                if(dname_g == NULL) {
+                    h5tools_setstatus(EXIT_FAILURE);
+                    error_msg("No dataset name\n", opt_arg);
+                    usage(h5tools_getprogname());
+                    goto error;
+                }
+                dset_g = TRUE;
+                break;
 
-        case 'n': /* -n */
-        noop_g = TRUE;
-        break;
+            case 'n': /* -n */
+                noop_g = TRUE;
+                break;
 
-        case 'E':
-        enable_error_stack = 1;
-        break;
+            case 'E':
+                enable_error_stack = 1;
+                break;
 
-        default:
-        h5tools_setstatus(EXIT_FAILURE);
-        usage(h5tools_getprogname());
-        goto error;
-        break;
-    } /* switch */
+            default:
+                h5tools_setstatus(EXIT_FAILURE);
+                usage(h5tools_getprogname());
+                goto error;
+                break;
+        } /* switch */
     } /* while */
 
     if (argc <= opt_ind) {
@@ -207,17 +207,17 @@ leave(int ret)
  * Function: convert()
  *
  * Purpose: To downgrade a dataset's indexing type or layout version:
- *		For chunked:
- *		  Downgrade the chunk indexing type to version 1 B-tree
- *	    	  If type is already version 1 B-tree, no further action
- *		For compact/contiguous:
- *		  Downgrade the layout version from 4 to 3
- *		  If version is already <= 3, no further action
- *		For virtual:
- *		  No further action
+ *        For chunked:
+ *          Downgrade the chunk indexing type to version 1 B-tree
+ *              If type is already version 1 B-tree, no further action
+ *        For compact/contiguous:
+ *          Downgrade the layout version from 4 to 3
+ *          If version is already <= 3, no further action
+ *        For virtual:
+ *          No further action
  *
  * Return: Success: 0
- *  	   Failure: 1
+ *         Failure: 1
  *
  *-------------------------------------------------------------------------
  */
@@ -312,7 +312,7 @@ convert(hid_t fid, const char *dname)
     }
 
     if(verbose_g)
-	HDfprintf(stdout, "Converting the dataset...\n");
+        HDfprintf(stdout, "Converting the dataset...\n");
 
     /* Downgrade the dataset */
     if(H5Dformat_convert(did) < 0) {
@@ -332,7 +332,7 @@ done:
     }
     else if(verbose_g)
         HDfprintf(stdout, "Close the dataset\n");
-    
+
     /* Close the dataset creation property list */
     if(H5Pclose(dcpl) < 0) {
         error_msg("unable to close dataset creation property list\n");
@@ -377,7 +377,7 @@ convert_dsets_cb(const char *path, const H5O_info2_t *oi, const char *already_vi
             if(verbose_g)
                 HDfprintf(stdout, "Going to process dataset:%s...\n", path);
             if(convert(fid, path) < 0)
-            goto error;
+                goto error;
         } /* end if */
     } /* end if */
 
@@ -392,57 +392,56 @@ error:
  * Function: main
  *
  * Purpose: To convert the chunk indexing type of a dataset in a file to
- *	    version 1 B-tree.
+ *        version 1 B-tree.
  *
  * Return: Success: 0
- *  	   Failure: 1
+ *         Failure: 1
  *
  *-------------------------------------------------------------------------
  */
 int
 main(int argc, const char *argv[])
 {
-    H5E_auto2_t func;
-    void *edata;
     hid_t fid = H5I_INVALID_HID;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
-
-    /* Disable error reporting */
-    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
     /* Initialize h5tools lib */
     h5tools_init();
 
     /* Parse command line options */
     if(parse_command_line(argc, argv) < 0)
-	goto done;
+        goto done;
     else if(verbose_g)
-	HDfprintf(stdout, "Process command line options\n");
+        HDfprintf(stdout, "Process command line options\n");
 
     if(noop_g && verbose_g)
-	HDfprintf(stdout, "It is noop...\n");
+        HDfprintf(stdout, "It is noop...\n");
+
+    /* enable error reporting if command line option */
+    h5tools_error_report();
 
     /* Open the HDF5 file */
     if((fid = h5tools_fopen(fname_g, H5F_ACC_RDWR, H5P_DEFAULT, FALSE, NULL, 0)) < 0) {
-	error_msg("unable to open file \"%s\"\n", fname_g);
-	h5tools_setstatus(EXIT_FAILURE);
-	goto done;
-    } else if(verbose_g)
-	HDfprintf(stdout, "Open the file %s\n", fname_g);
+        error_msg("unable to open file \"%s\"\n", fname_g);
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
+    }
+    else if(verbose_g)
+        HDfprintf(stdout, "Open the file %s\n", fname_g);
 
     if(dset_g) { /* Convert a specified dataset in the file */
-	if(verbose_g)
-	    HDfprintf(stdout, "Going to process dataset: %s...\n", dname_g);
-	if(convert(fid, dname_g) < 0)
-	    goto done;
-    } else { /* Convert all datasets in the file */
-	if(verbose_g)
-	    HDfprintf(stdout, "Processing all datasets in the file...\n");
-	if(h5trav_visit(fid, "/", TRUE, TRUE, convert_dsets_cb, NULL, &fid, H5O_INFO_BASIC) < 0)
-	    goto done;
+        if(verbose_g)
+            HDfprintf(stdout, "Going to process dataset: %s...\n", dname_g);
+        if(convert(fid, dname_g) < 0)
+            goto done;
+    }
+    else { /* Convert all datasets in the file */
+        if(verbose_g)
+            HDfprintf(stdout, "Processing all datasets in the file...\n");
+        if(h5trav_visit(fid, "/", TRUE, TRUE, convert_dsets_cb, NULL, &fid, H5O_INFO_BASIC) < 0)
+            goto done;
     } /* end else */
 
     if(verbose_g) {
@@ -464,19 +463,20 @@ main(int argc, const char *argv[])
 done:
     /* Close the file */
     if(fid >= 0) {
-	if(H5Fclose(fid) < 0) {
-	    error_msg("unable to close file \"%s\"\n", fname_g);
-	    h5tools_setstatus(EXIT_FAILURE);
-	} else if(verbose_g)
-	    HDfprintf(stdout, "Close the file\n");
+        if(H5Fclose(fid) < 0) {
+            error_msg("unable to close file \"%s\"\n", fname_g);
+            h5tools_setstatus(EXIT_FAILURE);
+        }
+        else if(verbose_g) {
+            HDfprintf(stdout, "Close the file\n");
+        }
     }  /* end if */
 
     if(fname_g)
-	HDfree(fname_g);
+        HDfree(fname_g);
     if(dname_g)
-	HDfree(dname_g);
-    
-    H5Eset_auto2(H5E_DEFAULT, func, edata);
+        HDfree(dname_g);
+
     leave(h5tools_getstatus());
 
 } /* end main() */

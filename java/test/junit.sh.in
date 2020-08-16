@@ -15,12 +15,12 @@
 top_builddir=@top_builddir@
 top_srcdir=@top_srcdir@
 srcdir=@srcdir@
-prefix=@prefix@
 
 USE_FILTER_SZIP="@USE_FILTER_SZIP@"
 USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
 USE_ROS3_VFD="@HAVE_ROS3_VFD@"
 USE_HDFS_VFD="@HAVE_LIBHDFS@"
+IS_DARWIN="@H5_IS_DARWIN@"
 
 TESTNAME=JUnitInterface
 EXIT_SUCCESS=0
@@ -43,8 +43,8 @@ myos=`uname -s`
 
 # where the libs exist
 HDFLIB_HOME="$top_srcdir/java/lib"
-BLDLIBDIR="$prefix/lib"
 BLDDIR="."
+BLDLIBDIR="$BLDDIR/testlibs"
 HDFTEST_HOME="$top_srcdir/java/test"
 JARFILE=jar@PACKAGE_TARNAME@-@PACKAGE_VERSION@.jar
 TESTJARFILE=jar@PACKAGE_TARNAME@test.jar
@@ -146,6 +146,13 @@ COPY_LIBFILES_TO_BLDLIBDIR()
             fi
         fi
     done
+    if [ "$IS_DARWIN" = "yes" ]; then 
+       (cd testlibs; \
+         install_name_tool -add_rpath @loader_path libhdf5_java.dylib; \
+         exist_path=` otool -l libhdf5_java.dylib | grep libhdf5 | grep -v java | awk '{print $2}'`; \
+         echo $exist_path; \
+         install_name_tool -change $exist_path @rpath/libhdf5.dylib libhdf5_java.dylib)
+    fi
     # copy jar files. Used -f to make sure get a new copy
     for tstfile in $COPY_JARTESTFILES
     do
@@ -204,10 +211,7 @@ CLEAN_LIBFILES_AND_BLDLIBDIR()
     INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
     INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
     if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-        for tstfile in $COPY_JARTESTFILES
-        do
-            $RM $BLDLIBDIR/tstfile
-        done
+        $RM -rf $BLDLIBDIR
     fi
 }
 

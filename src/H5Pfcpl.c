@@ -15,7 +15,7 @@
  *
  * Created:		H5Pfcpl.c
  *			January  6 1998
- *			Robb Matzke <matzke@llnl.gov>
+ *			Robb Matzke
  *
  * Purpose:		File creation property list class routines
  *
@@ -128,7 +128,7 @@
 /********************/
 
 /* Property class callbacks */
-static herr_t H5P_fcrt_reg_prop(H5P_genclass_t *pclass);
+static herr_t H5P__fcrt_reg_prop(H5P_genclass_t *pclass);
 
 /* property callbacks */
 static herr_t H5P__fcrt_btree_rank_enc(const void *value, void **_pp, size_t *size);
@@ -154,7 +154,7 @@ const H5P_libclass_t H5P_CLS_FCRT[1] = {{
     &H5P_CLS_FILE_CREATE_g,	/* Pointer to class             */
     &H5P_CLS_FILE_CREATE_ID_g,	/* Pointer to class ID          */
     &H5P_LST_FILE_CREATE_ID_g,	/* Pointer to default property list ID */
-    H5P_fcrt_reg_prop,		/* Default property registration routine */
+    H5P__fcrt_reg_prop,		/* Default property registration routine */
 
     NULL,		        /* Class creation callback      */
     NULL,		        /* Class creation callback info */
@@ -194,7 +194,7 @@ static const hsize_t H5F_def_file_space_page_size_g = H5F_CRT_FILE_SPACE_PAGE_SI
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_fcrt_reg_prop
+ * Function:    H5P__fcrt_reg_prop
  *
  * Purpose:     Register the file creation property list class's properties
  *
@@ -205,45 +205,45 @@ static const hsize_t H5F_def_file_space_page_size_g = H5F_CRT_FILE_SPACE_PAGE_SI
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
+H5P__fcrt_reg_prop(H5P_genclass_t *pclass)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Register the user block size */
-    if(H5P__register_real(pclass, H5F_CRT_USER_BLOCK_NAME, H5F_CRT_USER_BLOCK_SIZE, &H5F_def_userblock_size_g, 
-            NULL, NULL, NULL, H5F_CRT_USER_BLOCK_ENC, H5F_CRT_USER_BLOCK_DEC, 
+    if(H5P__register_real(pclass, H5F_CRT_USER_BLOCK_NAME, H5F_CRT_USER_BLOCK_SIZE, &H5F_def_userblock_size_g,
+            NULL, NULL, NULL, H5F_CRT_USER_BLOCK_ENC, H5F_CRT_USER_BLOCK_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the 1/2 rank for symbol table leaf nodes */
-    if(H5P__register_real(pclass, H5F_CRT_SYM_LEAF_NAME, H5F_CRT_SYM_LEAF_SIZE, &H5F_def_sym_leaf_k_g, 
-            NULL, NULL, NULL, H5F_CRT_SYM_LEAF_ENC, H5F_CRT_SYM_LEAF_DEC, 
+    if(H5P__register_real(pclass, H5F_CRT_SYM_LEAF_NAME, H5F_CRT_SYM_LEAF_SIZE, &H5F_def_sym_leaf_k_g,
+            NULL, NULL, NULL, H5F_CRT_SYM_LEAF_ENC, H5F_CRT_SYM_LEAF_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the 1/2 rank for btree internal nodes */
-    if(H5P__register_real(pclass, H5F_CRT_BTREE_RANK_NAME, H5F_CRT_BTREE_RANK_SIZE, H5F_def_btree_k_g, 
-            NULL, NULL, NULL, H5F_CRT_BTREE_RANK_ENC, H5F_CRT_BTREE_RANK_DEC, 
+    if(H5P__register_real(pclass, H5F_CRT_BTREE_RANK_NAME, H5F_CRT_BTREE_RANK_SIZE, H5F_def_btree_k_g,
+            NULL, NULL, NULL, H5F_CRT_BTREE_RANK_ENC, H5F_CRT_BTREE_RANK_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the byte number for an address */
-    if(H5P__register_real(pclass, H5F_CRT_ADDR_BYTE_NUM_NAME, H5F_CRT_ADDR_BYTE_NUM_SIZE, &H5F_def_sizeof_addr_g, 
-            NULL, NULL, NULL, H5F_CRT_ADDR_BYTE_NUM_ENC, H5F_CRT_ADDR_BYTE_NUM_DEC, 
+    if(H5P__register_real(pclass, H5F_CRT_ADDR_BYTE_NUM_NAME, H5F_CRT_ADDR_BYTE_NUM_SIZE, &H5F_def_sizeof_addr_g,
+            NULL, NULL, NULL, H5F_CRT_ADDR_BYTE_NUM_ENC, H5F_CRT_ADDR_BYTE_NUM_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the byte number for object size */
-    if(H5P__register_real(pclass, H5F_CRT_OBJ_BYTE_NUM_NAME, H5F_CRT_OBJ_BYTE_NUM_SIZE, &H5F_def_sizeof_size_g, 
-            NULL, NULL, NULL, H5F_CRT_OBJ_BYTE_NUM_ENC, H5F_CRT_OBJ_BYTE_NUM_DEC, 
+    if(H5P__register_real(pclass, H5F_CRT_OBJ_BYTE_NUM_NAME, H5F_CRT_OBJ_BYTE_NUM_SIZE, &H5F_def_sizeof_size_g,
+            NULL, NULL, NULL, H5F_CRT_OBJ_BYTE_NUM_ENC, H5F_CRT_OBJ_BYTE_NUM_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the superblock version number */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P__register_real(pclass, H5F_CRT_SUPER_VERS_NAME, H5F_CRT_SUPER_VERS_SIZE, &H5F_def_superblock_ver_g, 
+    if(H5P__register_real(pclass, H5F_CRT_SUPER_VERS_NAME, H5F_CRT_SUPER_VERS_SIZE, &H5F_def_superblock_ver_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
@@ -272,8 +272,8 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the file space handling strategy */
-    if(H5P__register_real(pclass, H5F_CRT_FILE_SPACE_STRATEGY_NAME, H5F_CRT_FILE_SPACE_STRATEGY_SIZE, &H5F_def_file_space_strategy_g, 
-            NULL, NULL, NULL, H5F_CRT_FILE_SPACE_STRATEGY_ENC, H5F_CRT_FILE_SPACE_STRATEGY_DEC, 
+    if(H5P__register_real(pclass, H5F_CRT_FILE_SPACE_STRATEGY_NAME, H5F_CRT_FILE_SPACE_STRATEGY_SIZE, &H5F_def_file_space_strategy_g,
+            NULL, NULL, NULL, H5F_CRT_FILE_SPACE_STRATEGY_ENC, H5F_CRT_FILE_SPACE_STRATEGY_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
@@ -284,8 +284,8 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the free space section threshold */
-    if(H5P__register_real(pclass, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, H5F_CRT_FREE_SPACE_THRESHOLD_SIZE, &H5F_def_free_space_threshold_g, 
-            NULL, NULL, NULL, H5F_CRT_FREE_SPACE_THRESHOLD_ENC, H5F_CRT_FREE_SPACE_THRESHOLD_DEC, 
+    if(H5P__register_real(pclass, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, H5F_CRT_FREE_SPACE_THRESHOLD_SIZE, &H5F_def_free_space_threshold_g,
+            NULL, NULL, NULL, H5F_CRT_FREE_SPACE_THRESHOLD_ENC, H5F_CRT_FREE_SPACE_THRESHOLD_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
@@ -297,7 +297,7 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_fcrt_reg_prop() */
+} /* end H5P__fcrt_reg_prop() */
 
 
 /*-------------------------------------------------------------------------
@@ -358,11 +358,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
- *
- * Modifications:
- *
- *		Raymond Lu, Oct 14, 2001
- *		Changed to the new generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -517,11 +512,6 @@ done:
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
  *
- * Modifications:
- *
- *		Raymond Lu, Oct 14, 2001
- *         	Changed to the new generic property list.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -571,11 +561,6 @@ done:
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
  *
- * Modifications:
- *
- *		Raymond Lu
- *		Changed to the new generic property list.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -618,11 +603,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
- *
- * Modifications:
- *
- *		Raymond Lu, Oct 14, 2001
- *		Changed to the new generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -672,11 +652,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
- *
- * Modifications:
- *
- *		Raymond Lu, Oct 14, 2001
- *		Changed to the new generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -1333,7 +1308,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_file_space_strategy
  *
- * Purpose:	Retrieves the strategy, persist, and threshold that the library 
+ * Purpose:	Retrieves the strategy, persist, and threshold that the library
  *          uses in managing file space.
  *
  * Return:	Non-negative on success/Negative on failure

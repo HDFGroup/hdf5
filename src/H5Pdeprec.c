@@ -15,7 +15,7 @@
  *
  * Created:	H5Pdeprec.c
  *		October 11 2007
- *		Quincey Koziol <koziol@hdfgroup.org>
+ *		Quincey Koziol
  *
  * Purpose:	Deprecated functions from the H5P interface.  These
  *              functions are here for compatibility purposes and may be
@@ -563,9 +563,9 @@ H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t thresh
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid strategy")
     /*
      *  For 1.10.0 H5Pset_file_space:
-     *      If strategy is zero, the property is not changed; 
+     *      If strategy is zero, the property is not changed;
      *      the existing strategy is retained.
-     *      If threshold is zero, the property is not changed; 
+     *      If threshold is zero, the property is not changed;
      *      the existing threshold is retained.
      */
     if(!in_strategy)
@@ -579,7 +579,7 @@ H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t thresh
             new_persist = TRUE;
             new_threshold = in_threshold;
             break;
-    
+
         case H5F_FILE_SPACE_ALL:
             new_strategy = H5F_FSPACE_STRATEGY_FSM_AGGR;
             new_threshold = in_threshold;
@@ -592,7 +592,7 @@ H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t thresh
         case H5F_FILE_SPACE_VFD:
             new_strategy = H5F_FSPACE_STRATEGY_NONE;
             break;
-        
+
         case H5F_FILE_SPACE_NTYPES:
         case H5F_FILE_SPACE_DEFAULT:
         default:

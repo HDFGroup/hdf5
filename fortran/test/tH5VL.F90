@@ -21,7 +21,7 @@
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 ! CONTAINS SUBROUTINES
-!  vl_test_integer, vl_test_real, vl_test_string 
+!  vl_test_integer, vl_test_real, vl_test_string
 !
 !*****
 
@@ -119,7 +119,7 @@ CONTAINS
 
 
 
-          !   
+          !
           ! End access to the dataset and release resources used by it.
           !
           CALL h5dclose_f(dset_id, error)

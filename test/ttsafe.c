@@ -106,11 +106,12 @@ int main(int argc, char *argv[])
 #ifdef H5_HAVE_THREADSAFE
     AddTest("dcreate", tts_dcreate, cleanup_dcreate, "multi-dataset creation", NULL);
     AddTest("error", tts_error, cleanup_error, "per-thread error stacks", NULL);
-#ifdef H5_HAVE_PTHREAD_H    
+#ifdef H5_HAVE_PTHREAD_H
     /* Thread cancellability only supported with pthreads ... */
     AddTest("cancel", tts_cancel, cleanup_cancel, "thread cancellation safety test", NULL);
 #endif /* H5_HAVE_PTHREAD_H */
     AddTest("acreate", tts_acreate, cleanup_acreate, "multi-attribute creation", NULL);
+    AddTest("attr_vlen", tts_attr_vlen, cleanup_attr_vlen, "multi-file-attribute-vlen read", NULL);
 
 #else /* H5_HAVE_THREADSAFE */
 

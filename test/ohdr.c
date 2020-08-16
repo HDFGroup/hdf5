@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke <matzke@llnl.gov>
+/* Programmer:  Robb Matzke
  *              Tuesday, November 24, 1998
  */
 #include "h5test.h"
@@ -1053,7 +1053,7 @@ test_minimized_dset_ohdr_size_comparisons(hid_t fapl_id)
 
         dcpl_default = H5Pcreate(H5P_DATASET_CREATE);
         if(dcpl_default < 0) TEST_ERROR
- 
+
         dcpl_minimize = H5Pcreate(H5P_DATASET_CREATE);
         if(dcpl_minimize < 0) TEST_ERROR
         ret = H5Pset_dset_no_attrs_hint(dcpl_minimize, TRUE);

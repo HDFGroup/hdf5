@@ -15,7 +15,7 @@
  *
  * Created:	H5Eint.c
  *		April 11 2007
- *		Quincey Koziol <koziol@hdfgroup.org>
+ *		Quincey Koziol
  *
  * Purpose:	General use, "internal" routines for error handling.
  *
@@ -33,7 +33,6 @@
 /* Headers */
 /***********/
 #include "H5private.h"          /* Generic Functions                        */
-#include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Epkg.h"             /* Error handling                           */
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5MMprivate.h"        /* Memory management                        */
@@ -576,7 +575,7 @@ H5E__walk(const H5E_t *estack, H5E_direction_t direction, const H5E_walk_op_t *o
                     ret_value = (op->u.func2)((unsigned)(estack->nused - (size_t)(i + 1)), estack->slot + i, client_data);
             } /* end else */
 
-            if(ret_value  < 0)
+            if(ret_value < 0)
                 HERROR(H5E_ERROR, H5E_CANTLIST, "can't walk error stack");
         } /* end if */
     } /* end else */
@@ -994,7 +993,7 @@ H5E_dump_api_stack(hbool_t is_api)
 #ifdef H5_NO_DEPRECATED_SYMBOLS
             if(estack->auto_op.func2)
                 (void)((estack->auto_op.func2)(H5E_DEFAULT, estack->auto_data));
-#else /* H5_NO_DEPRECATED_SYMBOLS */ 
+#else /* H5_NO_DEPRECATED_SYMBOLS */
         if(estack->auto_op.vers == 1) {
             if(estack->auto_op.func1)
                 (void)((estack->auto_op.func1)(estack->auto_data));

@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@lbl.gov>
+ * Programmer:  Quincey Koziol
  *              July, 2019
  *
  * Purpose:     Private declaration for external.c and external_env.c

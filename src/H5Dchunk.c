@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:     Quincey Koziol <koziol@hdfgroup.org>
+/* Programmer:     Quincey Koziol
  *               Thursday, April 24, 2008
  *
  * Purpose:    Abstract indexed (chunked) I/O functions.  The logical
@@ -216,6 +216,7 @@ typedef struct H5D_chunk_readvv_ud_t {
     const H5D_t *dset;          /* Dataset to operate on */
 } H5D_chunk_readvv_ud_t;
 
+/* Typedef for chunk info iterator callback */
 typedef struct H5D_chunk_info_iter_ud_t {
     hsize_t  scaled[H5O_LAYOUT_NDIMS];    /* Logical offset of the chunk */
     hsize_t  ndims;             /* Number of dimensions in the dataset */
@@ -277,7 +278,7 @@ H5D__nonexistent_readvv(const H5D_io_info_t *io_info,
     size_t chunk_max_nseq, size_t *chunk_curr_seq, size_t chunk_len_arr[], hsize_t chunk_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
 
-/* format convert cb */
+/* Format convert cb */
 static int H5D__chunk_format_convert_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
 
 /* Helper routines */
@@ -299,9 +300,7 @@ static herr_t H5D__create_chunk_file_map_all(H5D_chunk_map_t *fm,
     const H5D_io_info_t *io_info);
 static herr_t H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm,
     const H5D_io_info_t *io_info);
-
 static herr_t H5D__create_chunk_mem_map_1d(const H5D_chunk_map_t *fm);
-
 static herr_t H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_file_cb(void *elem, const H5T_t *type, unsigned ndims,
     const hsize_t *coords, void *fm);
@@ -326,8 +325,8 @@ static herr_t H5D__chunk_collective_fill(const H5D_t *dset,
 static int H5D__chunk_cmp_addr(const void *addr1, const void *addr2);
 #endif /* H5_HAVE_PARALLEL */
 
-static int
-H5D__chunk_dump_index_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
+/* Debugging helper routine callback */
+static int H5D__chunk_dump_index_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
 
 /*********************/
 /* Package Variables */
@@ -433,7 +432,7 @@ H5D__chunk_direct_write(const H5D_t *dset, uint32_t filters, hsize_t *offset,
         /* Allocate storage */
         if(H5D__alloc_storage(&io_info, H5D_ALLOC_WRITE, FALSE, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
-    } /* end if */
+    }
 
     /* Calculate the index of this chunk */
     H5VM_chunk_scaled(dset->shared->ndims, offset, layout->u.chunk.dim, scaled);
@@ -998,7 +997,7 @@ H5D__chunk_init(H5F_t *f, const H5D_t * const dset, hid_t dapl_id)
             rdcc->scaled_dims[u] = (dset->shared->curr_dims[u] + dset->shared->layout.u.chunk.dim[u] - 1) /
                 dset->shared->layout.u.chunk.dim[u];
 
-            if( !(scaled_power2up = H5VM_power2up(rdcc->scaled_dims[u])) )
+            if(!(scaled_power2up = H5VM_power2up(rdcc->scaled_dims[u])))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get the next power of 2")
 
             /* Inital 'power2up' values for scaled dimensions */
@@ -1913,7 +1912,7 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
             new_chunk_info->mspace_shared = FALSE;
 
             /* Copy the chunk's scaled coordinates */
-        H5MM_memcpy(new_chunk_info->scaled, scaled, sizeof(hsize_t) * fm->f_ndims);
+            H5MM_memcpy(new_chunk_info->scaled, scaled, sizeof(hsize_t) * fm->f_ndims);
             new_chunk_info->scaled[fm->f_ndims] = 0;
 
             /* Insert the new chunk into the skip list */
@@ -2094,7 +2093,7 @@ H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm)
                 for(u = 0; u < fm->f_ndims; u++) {
                     /* Compensate for the chunk offset */
                     H5_CHECK_OVERFLOW(coords[u], hsize_t, hssize_t);
-                    chunk_adjust[u] = adjust[u] - (hssize_t)coords[u]; /*lint !e771 The adjust array will always be initialized */
+                    chunk_adjust[u] = adjust[u] - (hssize_t)coords[u];
                 } /* end for */
 
                 /* Adjust the selection */
@@ -2328,7 +2327,7 @@ H5D__chunk_mem_cb(void H5_ATTR_UNUSED *elem, const H5T_t H5_ATTR_UNUSED *type, u
 {
     H5D_chunk_map_t      *fm = (H5D_chunk_map_t *)_fm;  /* File<->memory chunk mapping info */
     H5D_chunk_info_t *chunk_info;               /* Chunk information for current chunk */
-    hsize_t     coords_in_mem[H5S_MAX_RANK];    /* Coordinates of element in memory */
+    hsize_t    coords_in_mem[H5S_MAX_RANK];    /* Coordinates of element in memory */
     hsize_t     chunk_index;                    /* Chunk index */
     herr_t    ret_value = SUCCEED;            /* Return value        */
 
@@ -2820,12 +2819,12 @@ H5D__chunk_flush(H5D_t *dset)
 
     /* Loop over all entries in the chunk cache */
     for(ent = rdcc->head; ent; ent = next) {
-    next = ent->next;
+        next = ent->next;
         if(H5D__chunk_flush_entry(dset, ent, FALSE) < 0)
             nerrors++;
     } /* end for */
     if(nerrors)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2969,7 +2968,7 @@ H5D_chunk_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
 
     /* Reset index structures */
     if((storage->ops->reset)(storage, reset_addr) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset chunk index info")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset chunk index info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2991,7 +2990,7 @@ done:
 static herr_t
 H5D__chunk_cinfo_cache_reset(H5D_chunk_cached_t *last)
 {
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
     HDassert(last);
@@ -3146,8 +3145,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__chunk_hash_val
  *
- * Purpose:    To calculate an index based on the dataset's scaled
- *        coordinates and sizes of the faster dimensions.
+ * Purpose:     To calculate an index based on the dataset's scaled
+ *              coordinates and sizes of the faster dimensions.
  *
  * Return:    Hash value index
  *
@@ -3350,7 +3349,7 @@ H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t reset)
     H5O_storage_chunk_t *sc = &(dset->shared->layout.storage.u.chunk);
     herr_t    ret_value = SUCCEED;    /* Return value            */
 
-    FUNC_ENTER_STATIC_TAG(dset->oloc.addr)
+    FUNC_ENTER_STATIC
 
     HDassert(dset);
     HDassert(dset->shared);
@@ -3514,7 +3513,7 @@ done:
                     ((ent->edge_chunk_state & H5D_RDCC_DISABLE_FILTERS) ? NULL
                     : &(dset->shared->dcpl_cache.pline)));
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_flush_entry() */
 
 
@@ -3614,14 +3613,14 @@ H5D__chunk_cache_evict(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t flush)
 static herr_t
 H5D__chunk_cache_prune(const H5D_t *dset, size_t size)
 {
-    const H5D_rdcc_t    *rdcc = &(dset->shared->cache.chunk);
-    size_t        total = rdcc->nbytes_max;
-    const int        nmeth = 2;    /*number of methods        */
-    int                w[1];        /*weighting as an interval    */
-    H5D_rdcc_ent_t    *p[2], *cur;    /*list pointers            */
-    H5D_rdcc_ent_t    *n[2];        /*list next pointers        */
-    int        nerrors = 0;            /* Accumulated error count during preemptions */
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    const H5D_rdcc_t *rdcc = &(dset->shared->cache.chunk);
+    size_t          total = rdcc->nbytes_max;
+    const int       nmeth = 2;          /* Number of methods */
+    int             w[1];               /* Weighting as an interval */
+    H5D_rdcc_ent_t *p[2], *cur;         /* List pointers */
+    H5D_rdcc_ent_t *n[2];               /* List next pointers */
+    int             nerrors = 0;        /* Accumulated error count during preemptions */
+    herr_t          ret_value = SUCCEED;/* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -3642,62 +3641,62 @@ H5D__chunk_cache_prune(const H5D_t *dset, size_t size)
     while((p[0] || p[1]) && (rdcc->nbytes_used + size) > total) {
         int i;          /* Local index variable */
 
-    /* Introduce new pointers */
-    for(i = 0; i < nmeth - 1; i++)
+        /* Introduce new pointers */
+        for(i = 0; i < nmeth - 1; i++)
             if(0 == w[i])
                 p[i + 1] = rdcc->head;
 
-    /* Compute next value for each pointer */
-    for(i = 0; i < nmeth; i++)
+        /* Compute next value for each pointer */
+        for(i = 0; i < nmeth; i++)
             n[i] = p[i] ? p[i]->next : NULL;
 
-    /* Give each method a chance */
-    for(i = 0; i < nmeth && (rdcc->nbytes_used + size) > total; i++) {
-        if(0 == i && p[0] && !p[0]->locked &&
+        /* Give each method a chance */
+        for(i = 0; i < nmeth && (rdcc->nbytes_used + size) > total; i++) {
+            if(0 == i && p[0] && !p[0]->locked &&
                     ((0 == p[0]->rd_count && 0 == p[0]->wr_count) ||
-                     (0 == p[0]->rd_count && dset->shared->layout.u.chunk.size == p[0]->wr_count) ||
-                     (dset->shared->layout.u.chunk.size == p[0]->rd_count && 0 == p[0]->wr_count))) {
-        /*
-        * Method 0: Preempt entries that have been completely written
-        * and/or completely read but not entries that are partially
-        * written or partially read.
-        */
-        cur = p[0];
-        } else if(1 == i && p[1] && !p[1]->locked) {
-        /*
-        * Method 1: Preempt the entry without regard to
-        * considerations other than being locked.  This is the last
-        * resort preemption.
-        */
-        cur = p[1];
-        } else {
-        /* Nothing to preempt at this point */
-        cur = NULL;
-        }
+                    (0 == p[0]->rd_count && dset->shared->layout.u.chunk.size == p[0]->wr_count) ||
+                    (dset->shared->layout.u.chunk.size == p[0]->rd_count && 0 == p[0]->wr_count))) {
+                /*
+                * Method 0: Preempt entries that have been completely written
+                * and/or completely read but not entries that are partially
+                * written or partially read.
+                */
+                cur = p[0];
+            } else if(1 == i && p[1] && !p[1]->locked) {
+                /*
+                * Method 1: Preempt the entry without regard to
+                * considerations other than being locked.  This is the last
+                * resort preemption.
+                */
+                cur = p[1];
+            } else {
+                /* Nothing to preempt at this point */
+                cur = NULL;
+            }
 
-        if(cur) {
+            if(cur) {
                 int j;          /* Local index variable */
 
-        for(j = 0; j < nmeth; j++) {
-            if(p[j] == cur)
+                for(j = 0; j < nmeth; j++) {
+                    if(p[j] == cur)
                         p[j] = NULL;
-            if(n[j] == cur)
+                    if(n[j] == cur)
                         n[j] = cur->next;
-        } /* end for */
-        if(H5D__chunk_cache_evict(dset, cur, TRUE) < 0)
+                } /* end for */
+                if(H5D__chunk_cache_evict(dset, cur, TRUE) < 0)
                     nerrors++;
-        } /* end if */
-    } /* end for */
+            } /* end if */
+        } /* end for */
 
-    /* Advance pointers */
-    for(i = 0; i < nmeth; i++)
+        /* Advance pointers */
+        for(i = 0; i < nmeth; i++)
             p[i] = n[i];
-    for(i = 0; i < nmeth - 1; i++)
+        for(i = 0; i < nmeth - 1; i++)
             w[i] -= 1;
     } /* end while */
 
     if(nerrors)
-    HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to preempt one or more raw data cache entry")
+        HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to preempt one or more raw data cache entry")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4346,10 +4345,10 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
     hbool_t     unfilt_edge_chunk_dim[H5O_LAYOUT_NDIMS]; /* Whether there are unfiltered edge chunks at the edge of each dimension */
     hsize_t     edge_chunk_scaled[H5O_LAYOUT_NDIMS]; /* Offset of the unfiltered edge chunks at the edge of each dimension */
     unsigned    nunfilt_edge_chunk_dims = 0; /* Number of dimensions on an edge */
-    const H5O_storage_chunk_t *sc = &(layout->storage.u.chunk);
+    H5O_storage_chunk_t *sc = &(layout->storage.u.chunk);       /* Convenience variable */
     herr_t    ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(dset && H5D_CHUNKED == layout->type);
@@ -4555,9 +4554,8 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
 #ifndef NDEBUG
             /* None of the chunks should be allocated */
-            if(H5D_CHUNK_IDX_NONE != sc->idx_type) {
+            if(H5D_CHUNK_IDX_NONE != sc->idx_type)
                 HDassert(!H5F_addr_defined(udata.chunk_block.offset));
-            }
 
             /* Make sure the chunk is really in the dataset and outside the
              * original dimensions */
@@ -4753,7 +4751,7 @@ done:
         H5MM_free(chunk_info.addr);
 #endif
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_allocate() */
 
 
@@ -4852,7 +4850,7 @@ H5D__chunk_update_old_edge_chunks(H5D_t *dset, hsize_t old_dim[])
 
         /* Check if the dataspace expanded enough to cause the old edge chunks
          * in this dimension to become full */
-    if((space_dim[op_dim]/chunk_dim[op_dim]) >= (old_edge_chunk_sc[op_dim] + 1))
+        if((space_dim[op_dim]/chunk_dim[op_dim]) >= (old_edge_chunk_sc[op_dim] + 1))
             new_full_dim[op_dim] = TRUE;
     } /* end for */
 
@@ -5125,8 +5123,8 @@ H5D__chunk_cmp_addr(const void *addr1, const void *addr2)
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Pedro Vicente, pvn@ncsa.uiuc.edu
- *         March 26, 2002
+ * Programmer:    Pedro Vicente
+ *              March 26, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -5251,7 +5249,7 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer:    Pedro Vicente
  * Algorithm:    Robb Matzke
  *         March 27, 2002
  *
@@ -5404,13 +5402,13 @@ H5D__chunk_prune_by_extent(H5D_t *dset, const hsize_t *old_dim)
     elmts_per_chunk = 1;
     for(u = 0; u < space_ndims; u++) {
         elmts_per_chunk *= layout->u.chunk.dim[u];
-    chunk_dim[u] = layout->u.chunk.dim[u];
-    shrunk_dim[u] = (space_dim[u] < old_dim[u]);
+        chunk_dim[u] = layout->u.chunk.dim[u];
+        shrunk_dim[u] = (space_dim[u] < old_dim[u]);
     } /* end for */
 
     /* Create a dataspace for a chunk & set the extent */
     if(NULL == (chunk_space = H5S_create_simple(space_ndims, chunk_dim, NULL)))
-    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
 
     /* Reset hyperslab start array */
     /* (hyperslabs will always start from origin) */
@@ -5598,7 +5596,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, const hsize_t *old_dim)
                 /* Remove the chunk from disk, if present */
                 if(H5F_addr_defined(chk_udata.chunk_block.offset)) {
                     /* Update the offset in idx_udata */
-            idx_udata.scaled = udata.common.scaled;
+                    idx_udata.scaled = udata.common.scaled;
 
                     /* Remove the chunk from disk */
                     if((sc->ops->remove)(&idx_info, &idx_udata) < 0)
@@ -5988,9 +5986,9 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     if(pline && pline->nused) {
         must_filter = TRUE;
         if((udata->common.layout->flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS) &&
-            H5D__chunk_is_partial_edge_chunk(udata->dset_ndims, udata->common.layout->dim, chunk_rec->scaled, udata->dset_dims))
+                H5D__chunk_is_partial_edge_chunk(udata->dset_ndims, udata->common.layout->dim, chunk_rec->scaled, udata->dset_dims))
             must_filter = FALSE;
-    } /* end if */
+    }
 
     /* Check parameter for type conversion */
     if(udata->do_convert) {
@@ -6028,7 +6026,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         HDassert(!H5F_addr_defined(chunk_rec->chunk_addr));
         H5MM_memcpy(buf, udata->chunk, nbytes);
         udata->chunk = NULL;
-    } /* end if */
+    }
     else {
         H5D_rdcc_ent_t *ent = NULL;    /* Cache entry */
         unsigned idx;                   /* Index of chunk in cache, if present */
@@ -6061,13 +6059,13 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
             H5_CHECKED_ASSIGN(nbytes, size_t, shared_fo->layout.u.chunk.size, uint32_t);
             H5MM_memcpy(buf, ent->chunk, nbytes);
-        } /* end if */
+        }
         else {
             /* read chunk data from the source file */
             if(H5F_block_read(udata->file_src, H5FD_MEM_DRAW, chunk_rec->chunk_addr, nbytes, buf) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, H5_ITER_ERROR, "unable to read raw data chunk")
-        } /* end else */
-    } /* end else */
+        }
+    }
 
     /* Need to uncompress filtered variable-length & reference data elements that are not found in chunk cache */
     if(must_filter && (is_vlen || fix_ref) && !udata->chunk_in_cache) {
@@ -6931,9 +6929,9 @@ H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old
         } /* end else */
     } /* end if */
     else {
-    HDassert(!H5F_addr_defined(new_chunk->offset));
-    HDassert(new_chunk->length == idx_info->layout->size);
-    alloc_chunk = TRUE;
+        HDassert(!H5F_addr_defined(new_chunk->offset));
+        HDassert(new_chunk->length == idx_info->layout->size);
+        alloc_chunk = TRUE;
     }  /* end else */
 
     /* Actually allocate space for the chunk in the file */
@@ -7200,7 +7198,7 @@ H5D__get_num_chunks(const H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space, hsize_
         if((dset->shared->layout.storage.u.chunk.ops->iterate)(&idx_info, H5D__get_num_chunks_cb, &num_chunks) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve allocated chunk information from index")
         *nchunks = num_chunks;
-    } /* end else */
+    }
 
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
@@ -7247,7 +7245,7 @@ H5D__get_chunk_info_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
         /* Stop iterating */
         ret_value = H5_ITER_STOP;
-    } /* end if */
+    }
     /* Go to the next chunk */
     else
         chunk_info->curr_idx++;
@@ -7306,9 +7304,9 @@ H5D__get_chunk_info(const H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space, hsize_
     idx_info.storage = &dset->shared->layout.storage.u.chunk;
 
     /* Set addr & size for when dset is not written or queried chunk is not found */
-    if(addr)
+    if (addr)
         *addr = HADDR_UNDEF;
-    if(size)
+    if (size)
         *size = 0;
 
     /* If the chunk is written, get its info, otherwise, return without error */
@@ -7374,12 +7372,12 @@ H5D__get_chunk_info_by_coord_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     HDassert(chunk_info);
 
     /* Going through the scaled, stop when a mismatch is found */
-    for(ii = 0; ii < chunk_info->ndims && !different; ii++)
-        if(chunk_info->scaled[ii] != chunk_rec->scaled[ii])
+    for (ii = 0; ii < chunk_info->ndims && !different; ii++)
+        if (chunk_info->scaled[ii] != chunk_rec->scaled[ii])
             different = TRUE;
 
     /* Same scaled coords means the chunk is found, copy the chunk info */
-    if(!different) {
+    if (!different) {
         chunk_info->nbytes = chunk_rec->nbytes;
         chunk_info->filter_mask = chunk_rec->filter_mask;
         chunk_info->chunk_addr = chunk_rec->chunk_addr;
@@ -7387,7 +7385,7 @@ H5D__get_chunk_info_by_coord_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
         /* Stop iterating */
         ret_value = H5_ITER_STOP;
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__get_chunk_info_by_coord_cb() */

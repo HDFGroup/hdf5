@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:	Quincey Koziol
  *              Tuesday, January  8, 2008
  *
  * Purpose:	Free space section callbacks for file.
@@ -112,7 +112,7 @@ H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SIMPLE[1] = {{
     NULL,				/* Add section                  */
     NULL,				/* Serialize section            */
     H5MF__sect_deserialize,		/* Deserialize section          */
-    H5MF__sect_simple_can_merge,		/* Can sections merge?          */
+    H5MF__sect_simple_can_merge,	/* Can sections merge?          */
     H5MF__sect_simple_merge,		/* Merge sections               */
     H5MF__sect_simple_can_shrink,	/* Can section shrink container?*/
     H5MF__sect_simple_shrink,		/* Shrink container w/section   */
@@ -136,16 +136,16 @@ H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SMALL[1] = {{
 
     /* Object methods */
     H5MF__sect_small_add,        /* Add section                  */
-    NULL,                       /* Serialize section            */
-    H5MF__sect_deserialize,		/* Deserialize section          */
+    NULL,                        /* Serialize section            */
+    H5MF__sect_deserialize,	 /* Deserialize section          */
     H5MF__sect_small_can_merge,  /* Can sections merge?          */
     H5MF__sect_small_merge,      /* Merge sections               */
-    NULL,		                /* Can section shrink container?*/
-    NULL,		                /* Shrink container w/section   */
+    NULL,		         /* Can section shrink container?*/
+    NULL,		         /* Shrink container w/section   */
     H5MF__sect_free,             /* Free section                 */
     H5MF__sect_valid,            /* Check validity of section    */
     H5MF__sect_split,            /* Split section node for alignment */
-    NULL,                       /* Dump debugging for section   */
+    NULL,                        /* Dump debugging for section   */
 }};
 
 /* Class info for "large" free space sections */
@@ -166,7 +166,7 @@ H5FS_section_class_t H5MF_FSPACE_SECT_CLS_LARGE[1] = {{
     H5MF__sect_deserialize,		/* Deserialize section          */
     H5MF__sect_large_can_merge,		/* Can sections merge?          */
     H5MF__sect_large_merge,		/* Merge sections               */
-    H5MF__sect_large_can_shrink,		/* Can section shrink container?*/
+    H5MF__sect_large_can_shrink,	/* Can section shrink container?*/
     H5MF__sect_large_shrink,		/* Shrink container w/section   */
     H5MF__sect_free,			/* Free section                 */
     H5MF__sect_valid,			/* Check validity of section    */
@@ -186,7 +186,7 @@ H5FS_section_class_t H5MF_FSPACE_SECT_CLS_LARGE[1] = {{
 /* Declare a free list to manage the H5MF_free_section_t struct */
 H5FL_DEFINE(H5MF_free_section_t);
 
-/* 
+/*
  * "simple/small/large" section callbacks
  */
 
@@ -199,7 +199,6 @@ H5FL_DEFINE(H5MF_free_section_t);
  * Return:	Pointer to new section on success/NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		January  8 2008
  *
  *-------------------------------------------------------------------------
@@ -371,7 +370,7 @@ done:
     FUNC_LEAVE_NOAPI((H5FS_section_info_t *)ret_value)
 } /* end H5MF__sect_split() */
 
-/* 
+/*
  * "simple" section callbacks
  */
 
@@ -615,7 +614,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5MF__sect_simple_shrink() */
 
-/* 
+/*
  * "small" section callbacks
  */
 
@@ -625,7 +624,7 @@ done:
  *
  * Purpose:     Perform actions on a small "meta" action before adding it to the free space manager:
  *              1) Drop the section if it is at page end and its size <= page end threshold
- *              2) Adjust section size to include page end threshold if 
+ *              2) Adjust section size to include page end threshold if
  *                 (section size + threshold) is at page end
  *
  * Return:      Success:        non-negative
@@ -792,7 +791,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5MF__sect_small_merge() */
 
-/* 
+/*
  * "Large" section callbacks
  */
 

@@ -34,7 +34,7 @@ jarfile = jar$(PACKAGE_TARNAME)groups.jar
 
 AM_JAVACFLAGS = $(H5_JAVACFLAGS) -deprecation
 
-TESTPACKAGE = 
+TESTPACKAGE =
 
 noinst_JAVA = \
     H5Ex_G_Create.java \

@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.ued>
+/* Programmer:  Quincey Koziol
  *              Friday, May 29, 1998
  *
  * Purpose:	Dataspace selection functions.
@@ -32,6 +32,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Spkg.h"		/* Dataspaces 				*/
 #include "H5VMprivate.h"	/* Vector and array functions		*/
 
@@ -55,9 +56,9 @@
 /********************/
 
 #ifdef LATER
-static herr_t H5S_select_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end);
-static htri_t H5S_select_iter_has_next_block(const H5S_sel_iter_t *iter);
-static herr_t H5S_select_iter_next_block(H5S_sel_iter_t *iter);
+static herr_t H5S__select_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end);
+static htri_t H5S__select_iter_has_next_block(const H5S_sel_iter_t *iter);
+static herr_t H5S__select_iter_next_block(H5S_sel_iter_t *iter);
 #endif /* LATER */
 
 
@@ -144,8 +145,8 @@ H5S_select_offset(H5S_t *space, const hssize_t *offset)
 herr_t
 H5Soffset_simple(hid_t space_id, const hssize_t *offset)
 {
-    H5S_t *space;	        /* Dataspace to query */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5S_t *space;                   /* Dataspace to modify */
+    herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Hs", space_id, offset);
@@ -582,7 +583,7 @@ H5S_select_deserialize(H5S_t **space, const uint8_t **p)
 
         default:
             break;
-    } /* end switch */
+    }
 
     if(ret_value < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTLOAD, FAIL, "can't deserialize selection")
@@ -1170,7 +1171,7 @@ H5S_select_iter_init(H5S_sel_iter_t *sel_iter, const H5S_t *space,
     if(sel_iter->rank > 0) {
         H5MM_memcpy(sel_iter->dims, space->extent.size, sizeof(hsize_t) * space->extent.rank);
         H5MM_memcpy(sel_iter->sel_off, space->select.offset, sizeof(hsize_t) * space->extent.rank);
-    } /* end if */
+    }
 
     /* Save the element size */
     sel_iter->elmt_size = elmt_size;
@@ -1232,11 +1233,11 @@ H5S_select_iter_coords(const H5S_sel_iter_t *sel_iter, hsize_t *coords)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_select_iter_block
+    H5S__select_iter_block
  PURPOSE
     Get the block of the current iterator position
  USAGE
-    herr_t H5S_select_iter_block(sel_iter,start,end)
+    herr_t H5S__select_iter_block(sel_iter,start,end)
         const H5S_sel_iter_t *sel_iter; IN: Selection iterator to query
         hsize_t *start;    OUT: Array to place iterator start block coordinates
         hsize_t *end;      OUT: Array to place iterator end block coordinates
@@ -1254,11 +1255,11 @@ H5S_select_iter_coords(const H5S_sel_iter_t *sel_iter, hsize_t *coords)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_select_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
+H5S__select_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
 {
     herr_t ret_value;         /* return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -1269,7 +1270,7 @@ H5S_select_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
     ret_value = (*iter->type->iter_block)(iter, start, end);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S_select_iter_block() */
+} /* end H5S__select_iter_block() */
 #endif /* LATER */
 
 
@@ -1313,11 +1314,11 @@ H5S_select_iter_nelmts(const H5S_sel_iter_t *sel_iter)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_select_iter_has_next_block
+    H5S__select_iter_has_next_block
  PURPOSE
     Check if there is another block available in the selection iterator
  USAGE
-    htri_t H5S_select_iter_has_next_block(sel_iter)
+    htri_t H5S__select_iter_has_next_block(sel_iter)
         const H5S_sel_iter_t *sel_iter; IN: Selection iterator to query
  RETURNS
     Non-negative on success, negative on failure.
@@ -1333,11 +1334,11 @@ H5S_select_iter_nelmts(const H5S_sel_iter_t *sel_iter)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static htri_t
-H5S_select_iter_has_next_block(const H5S_sel_iter_t *iter)
+H5S__select_iter_has_next_block(const H5S_sel_iter_t *iter)
 {
     herr_t ret_value;         /* return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -1346,7 +1347,7 @@ H5S_select_iter_has_next_block(const H5S_sel_iter_t *iter)
     ret_value = (*iter->type->iter_has_next_block)(iter);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S_select_iter_has_next_block() */
+} /* end H5S__select_iter_has_next_block() */
 #endif /* LATER */
 
 
@@ -1396,11 +1397,11 @@ H5S_select_iter_next(H5S_sel_iter_t *iter, size_t nelem)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_select_iter_next_block
+    H5S__select_iter_next_block
  PURPOSE
     Advance selection iterator to next block
  USAGE
-    herr_t H5S_select_iter_next_block(iter)
+    herr_t H5S__select_iter_next_block(iter)
         H5S_sel_iter_t *iter;   IN/OUT: Selection iterator to change
  RETURNS
     Non-negative on success, negative on failure.
@@ -1418,11 +1419,11 @@ H5S_select_iter_next(H5S_sel_iter_t *iter, size_t nelem)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_select_iter_next_block(H5S_sel_iter_t *iter)
+H5S__select_iter_next_block(H5S_sel_iter_t *iter)
 {
     herr_t ret_value;         /* return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -1431,7 +1432,7 @@ H5S_select_iter_next_block(H5S_sel_iter_t *iter)
     ret_value = (*iter->type->iter_next_block)(iter);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S_select_iter_next_block() */
+} /* end H5S__select_iter_next_block() */
 #endif /* LATER */
 
 
@@ -1885,6 +1886,15 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
 
                 space_a_dim--;
             } /* end while */
+
+            /* Check for a single block in each selection */
+            if(H5S_SELECT_IS_SINGLE(space_a) && H5S_SELECT_IS_SINGLE(space_b)) {
+                /* If both selections are a single block and their bounds are
+                 * the same, then the selections are the same, even if the
+                 * selection types are different.
+                 */
+                HGOTO_DONE(TRUE)
+            } /* end if */
         } /* end if */
 
         /* If the dataspaces have the same selection type, use the selection's
@@ -3044,7 +3054,7 @@ done:
     Retrieve a list of offset / length pairs (a list of "sequences") matching
     the selected elements for an iterator, according to the iteration order for
     the iterator.  The lengths returned are in _bytes_, not elements.
-    
+
     Note that the iteration order for "all" and "hyperslab" selections is
     row-major (i.e. "C-ordered"), but the iteration order for "point"
     selections is "in order selected", unless the H5S_SEL_ITER_GET_SEQ_LIST_SORTED

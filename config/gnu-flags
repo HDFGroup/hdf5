@@ -28,11 +28,11 @@ PROMOTE_ERRORS_DFLT=no
 #
 demote_errors()
 {
-	if [ ${PROMOTE_ERRORS:-${PROMOTE_ERRORS_DFLT}} = no ]; then
-		sed 's,-Werror=,-W,g'
-	else
-		cat
-	fi
+    if [ ${PROMOTE_ERRORS:-${PROMOTE_ERRORS_DFLT}} = no ]; then
+        sed 's,-Werror=,-W,g'
+    else
+        cat
+    fi
 }
 
 #
@@ -44,7 +44,7 @@ demote_errors()
 load_gnu_arguments()
 {
     set -- $(for arg; do
-        sed 's,#.*$,,' $srcdir/config/gnu-warnings/${arg} | demote_errors
+        sed 's,#.*$,,' $srcdir/config/gnu-warnings/${arg}
     done)
     IFS=' ' echo "$*"
 }
@@ -188,85 +188,38 @@ if test "X-gcc" = "X-$cc_vendor"; then
     # General #
     ###########
 
-    H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments general)"
-    H5_ECFLAGS="$H5_ECFLAGS $(load_gnu_arguments error-general)"
+    # Add various general warning flags in gnu-warnings for gcc versions 4.8 and later.
+    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 8 -o $cc_vers_major -gt 4; then
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments general)"
+        H5_ECFLAGS="$H5_ECFLAGS $(load_gnu_arguments error-general)"
 
     ######################
     # Developer warnings #
     ######################
 
-    NO_DEVELOPER_WARNING_CFLAGS=$(load_gnu_arguments no-developer-general)
-    DEVELOPER_WARNING_CFLAGS=$(load_gnu_arguments developer-general)
+        NO_DEVELOPER_WARNING_CFLAGS=$(load_gnu_arguments no-developer-general)
+        DEVELOPER_WARNING_CFLAGS=$(load_gnu_arguments developer-general)
+
+    fi
 
     #######################
     # gcc 4 special cases #
     #######################
 
-    # GCC 4.2 through 4.6
-    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2 -o $cc_vers_major -eq 4 -a $cc_vers_minor -le 6; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.2-4.6)"
-    fi
-
-    # GCC 4.2 through 4.3
-    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2 -o $cc_vers_major -eq 4 -a $cc_vers_minor -le 3; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.2-4.3)"
-    fi 
-
-    # GCC 4.5 through 4.6
-    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -le 6; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.5-4.6)"
-    fi
-
-    # GCC 4.2 through 4.4
-    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2 -a $cc_vers_major -eq 4 -a $cc_vers_minor -le 4; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.2-4.4)"
-    fi
-
-    # GCC 4.2 through the end of GCC 4 series
-    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.2-4.last)"
+    # GCC 4.8 through the end of GCC 4 series
+    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 8; then
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.8-4.last)"
     fi
 
     #############################
     # Version-specific warnings #
     #############################
 
-    # gcc >= 4.3
-    if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 3; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.3)"
-    fi 
-
-    # gcc >= 4.4
-    if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 4; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.4)"
-    fi
-
-    # gcc >= 4.5
-    if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 5; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.5)"
-	DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-4.5)"
-	NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments no-developer-4.5)"
-    fi
-
-    # gcc >= 4.6
-    if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 6; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.6)"
-	DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-4.6)"
-	NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments no-developer-4.6)"
-    fi
-
-    # gcc >= 4.7
-    if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 7; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.7)"
-	DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-4.7)"
-	NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments no-developer-4.7)"
-    fi
-
     # gcc >= 4.8
     if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 8; then
         H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.8)"
-	DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-4.8)"
-	NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments no-developer-4.8)"
+        DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-4.8)"
+        NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments no-developer-4.8)"
     fi
 
     # gcc >= 4.9
@@ -288,15 +241,15 @@ if test "X-gcc" = "X-$cc_vendor"; then
     # gcc >= 7
     if test $cc_vers_major -ge 7; then
         H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 7)"
-	DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-7)"
+        DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-7)"
     fi
 
     # gcc 8
     if test $cc_vers_major -ge 8; then
         H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 8)"
         H5_ECFLAGS="$H5_ECFLAGS $(load_gnu_arguments error-8)"
-	DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-8)"
-	NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments no-developer-8)"
+        DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-8)"
+        NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments no-developer-8)"
     fi
 
     # gcc 9

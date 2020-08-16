@@ -13,7 +13,7 @@
 ## Makefile.am
 ## Run automake to generate a Makefile.in from this file.
 ##
-# 
+#
 # This makefile mostly just reinvokes make in the various subdirectories
 # but does so in the correct order.  You can alternatively invoke make from
 # each subdirectory manually.
@@ -45,7 +45,7 @@ include $(top_srcdir)/config/commence.am
 # Since we're explicitly listing DIST_SUBDIRS, we also need to list
 # directories that are only conditionally built (so that their Makefiles
 # are cleaned as well).
-# Note that `make clean' will not affect the examples or doc directories. 
+# Note that `make clean' will not affect the examples or doc directories.
 
 # Conditionals.  These conditionals are defined during configure
 # Define each variable to empty if it is not used to placate pmake
@@ -133,7 +133,7 @@ mostlyclean-local:
 # 'make install' will now install examples, the same as 'make install-all'.
 # 'make-install-all' will be redundant but will still work.
 install: install-recursive install-examples
-uninstall: uninstall-recursive uninstall-examples 
+uninstall: uninstall-recursive uninstall-examples
 
 # 'make install-all' also installs examples
 install-all:
@@ -154,7 +154,7 @@ install-doc:
 uninstall-doc:
 	@echo "docs no longer live in this tree.  Use install-examples to install examples."
 
-# `make check-install' or `make installcheck' checks that examples can 
+# `make check-install' or `make installcheck' checks that examples can
 #  be successfully built
 installcheck-local:
 	if test -n "${DESTDIR}"; then                                  \
@@ -190,10 +190,10 @@ trace:
 # Run tests with different Virtual File Drivers.
 # Currently, only invoke check-vfd in the test directory.
 check-vfd:
-	for d in src utils test; do                                 \
-	  if test $$d != .; then                                       \
-	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;          \
-	  fi;                                                          \
+	for d in src utils test; do                                     \
+	  if test $$d != .; then                                        \
+	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;           \
+	  fi;                                                           \
 	done
 
 # Run tests with different passthrough Virtual Object Layer Connectors.

@@ -25,15 +25,15 @@ typedef struct H5F_t H5F_t;
 #include "H5Fpublic.h"
 
 /* Public headers needed by this file */
-#include "H5FDpublic.h"         /* File drivers                */
+#include "H5FDpublic.h"         /* File drivers                 */
 
 /* Private headers needed by this file */
-#include "H5MMprivate.h"	/* Memory management	       */
+#include "H5MMprivate.h"        /* Memory management            */
 #ifdef H5_HAVE_PARALLEL
-#include "H5Pprivate.h"         /* Property lists              */
+#include "H5Pprivate.h"         /* Property lists               */
 #endif /* H5_HAVE_PARALLEL */
-#include "H5VMprivate.h"        /* Vectors and arrays          */
-#include "H5VLprivate.h"        /* Virtual Object Layer        */
+#include "H5VMprivate.h"        /* Vectors and arrays           */
+#include "H5VLprivate.h"        /* Virtual Object Layer         */
 
 
 /**************************/
@@ -116,16 +116,16 @@ typedef struct H5F_t H5F_t;
 /* Encode a 64-bit unsigned integer and its length into a variable-sized buffer */
 /* (Assumes that the high bits of the integer are zero) */
 #  define UINT64ENCODE_VARLEN(p, n) {                          \
-   uint64_t __n = (uint64_t)(n);                                  \
-   unsigned _s = H5VM_limit_enc_size(__n);                      \
-                                        \
-   *(p)++ = (uint8_t)_s;                              \
-   UINT64ENCODE_VAR(p, __n, _s);                              \
+   uint64_t __n = (uint64_t)(n);                               \
+   unsigned _s = H5VM_limit_enc_size(__n);                     \
+                                                               \
+   *(p)++ = (uint8_t)_s;                                       \
+   UINT64ENCODE_VAR(p, __n, _s);                               \
 }
 
 #  define H5_ENCODE_UNSIGNED(p, n) {                          \
-    HDcompile_assert(sizeof(unsigned) == sizeof(uint32_t));              \
-    UINT32ENCODE(p, n)                                  \
+    HDcompile_assert(sizeof(unsigned) == sizeof(uint32_t));   \
+    UINT32ENCODE(p, n)                                        \
 }
 
 /* Assumes the endianness of uint64_t is the same as double */
@@ -518,6 +518,8 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_PAGE_BUFFER_SIZE_NAME           "page_buffer_size" /* the maximum size for the page buffer cache */
 #define H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME  "page_buffer_min_meta_perc" /* the min metadata percentage for the page buffer cache */
 #define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME   "page_buffer_min_raw_perc" /* the min raw data percentage for the page buffer cache */
+#define H5F_ACS_USE_FILE_LOCKING_NAME           "use_file_locking" /* whether or not we use file locks for SWMR control and to prevent multiple writers */
+#define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_NAME "ignore_disabled_file_locks" /* whether or not we ignore "locks disabled" errors */
 #ifdef H5_HAVE_PARALLEL
 #define H5F_ACS_MPI_PARAMS_COMM_NAME            "mpi_params_comm" /* the MPI communicator */
 #define H5F_ACS_MPI_PARAMS_INFO_NAME            "mpi_params_info" /* the MPI info struct */
@@ -795,7 +797,6 @@ H5_DLL hsize_t H5F_get_alignment(const H5F_t *f);
 H5_DLL hsize_t H5F_get_threshold(const H5F_t *f);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL H5P_coll_md_read_flag_t H5F_coll_md_read(const H5F_t *f);
-H5_DLL void H5F_set_coll_md_read(H5F_t *f, H5P_coll_md_read_flag_t flag);
 #endif /* H5_HAVE_PARALLEL */
 H5_DLL hbool_t H5F_use_mdc_logging(const H5F_t *f);
 H5_DLL hbool_t H5F_start_mdc_log_on_access(const H5F_t *f);

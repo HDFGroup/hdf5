@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+/* Programmer:  Quincey Koziol
  *              Friday, February 24, 2006
  */
 #include "h5test.h"
@@ -82,7 +82,7 @@
 
 /* The number of settings for testing: page buffering, file space strategy and persisting free-space */
 #define NUM_PB_FS                   6
-#define PAGE_BUFFER_PAGE_SIZE       4096 
+#define PAGE_BUFFER_PAGE_SIZE       4096
 
 const char *FILENAME[] = {
     "fheap",
@@ -3195,7 +3195,6 @@ error:
     return(1);
 } /* test_reopen_hdr() */
 
-#ifndef QAK2
 
 /*-------------------------------------------------------------------------
  * Function:	test_man_insert_weird
@@ -6237,7 +6236,6 @@ error:
 } /* test_man_fill_all_4th_recursive_indirect() */
 #endif /* ALL_INSERT_TESTS */
 
-#ifndef QAK
 
 /*-------------------------------------------------------------------------
  * Function:	test_man_start_5th_recursive_indirect
@@ -6369,9 +6367,7 @@ error:
     } H5E_END_TRY;
     return(1);
 } /* test_man_start_5th_recursive_indirect() */
-#endif /* QAK */
 
-#ifndef QAK
 
 /*-------------------------------------------------------------------------
  * Function:	test_man_remove_bogus
@@ -6448,10 +6444,10 @@ test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
 
     /* Choose random # seed */
     seed = (unsigned long)HDtime(NULL);
-#ifdef QAK
+#if 0
 /* seed = (unsigned long)1155438845; */
 HDfprintf(stderr, "Random # seed was: %lu\n", seed);
-#endif /* QAK */
+#endif
     HDsrandom((unsigned)seed);
 
     /* Set heap ID to random (non-null) value */
@@ -7270,10 +7266,6 @@ test_man_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         TEST_ERROR
 
     /* Verify the file is correct size */
-#ifdef QAK
-HDfprintf(stderr, "empty_size = %lu\n", (unsigned long)empty_size);
-HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
-#endif /* QAK */
     if(file_size != empty_size)
         TEST_ERROR
 
@@ -7573,10 +7565,6 @@ test_man_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         TEST_ERROR
 
     /* Verify the file is correct size */
-#ifdef QAK
-HDfprintf(stderr, "empty_size = %lu\n", (unsigned long)empty_size);
-HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
-#endif /* QAK */
     if(file_size != empty_size)
         TEST_ERROR
 
@@ -7665,7 +7653,7 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
         FAIL_STACK_ERROR
 
     /*
-     * Test incremental insert and removal 
+     * Test incremental insert and removal
      */
     TESTING("incremental object insertion and removal")
 
@@ -7691,7 +7679,7 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
         if(H5HF_insert(fh, (sizeof(obj1)), &obj1, heap_id[i]) < 0)
             FAIL_STACK_ERROR
     } /* end for */
-     
+
     /* Close the fractal heap */
     if(H5HF_close(fh) < 0)
         TEST_ERROR
@@ -7720,9 +7708,7 @@ error:
 
     return 1;
 } /* test_man_incr_insert_remove() */
-#endif /* QAK */
 
-#ifndef QAK
 
 /*-------------------------------------------------------------------------
  * Function:	test_man_remove_root_direct
@@ -8323,9 +8309,7 @@ error:
     } H5E_END_TRY;
     return(1);
 } /* test_man_remove_3rd_indirect() */
-#endif /* QAK */
 
-#ifndef QAK
 
 /*-------------------------------------------------------------------------
  * Function:	test_man_skip_start_block
@@ -9589,9 +9573,6 @@ test_man_fill_2nd_direct_less_one_wrap_start_block_add_skipped(hid_t fapl, H5HF_
      * object
      */
     obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
-#ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
-#endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
@@ -9725,9 +9706,6 @@ test_man_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped(hid_t fapl, H5
      * object
      */
     obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
-#ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
-#endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
@@ -9747,9 +9725,6 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 
     /* Insert object too large for initial block size in skipped indirect blocks */
     obj_size = (size_t)DBLOCK_SIZE(fh, 3) + 1;
-#ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
-#endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, 4);
     if(add_obj(fh, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
@@ -9760,9 +9735,6 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 
     /* Insert object to fill space in (medium) block just created */
     obj_size = (size_t)DBLOCK_FREE(fh, 4) - obj_size;
-#ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
-#endif /* QAK */
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -10506,9 +10478,6 @@ test_man_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(h
      * object
      */
     obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
-#ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
-#endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
@@ -10627,9 +10596,6 @@ test_man_fill_2nd_direct_fill_direct_skip2_3rd_indirect_start_block_add_skipped(
 
     /* Retrieve info about heap */
     num_first_indirect_rows = IBLOCK_MAX_DROWS(fh, 1);
-#ifdef QAK
-HDfprintf(stderr, "num_first_indirect_rows = %u\n", num_first_indirect_rows);
-#endif /* QAK */
 
     /* Fill direct blocks in root indirect block */
     if(fill_root_direct(fh, fill_size, &state, &keep_ids))
@@ -10660,9 +10626,6 @@ HDfprintf(stderr, "num_first_indirect_rows = %u\n", num_first_indirect_rows);
      * object
      */
     obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows) + 1;
-#ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
-#endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows + 1);
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
@@ -10673,9 +10636,6 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 
     /* Insert object to fill space in (large) block created */
     obj_size = (size_t)DBLOCK_FREE(fh, num_first_indirect_rows + 1) - obj_size;
-#ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
-#endif /* QAK */
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -10829,9 +10789,6 @@ test_man_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped(hid_t
      * object
      */
     obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
-#ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
-#endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
@@ -10998,9 +10955,6 @@ test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_s
      * object
      */
     obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
-#ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
-#endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
@@ -11155,9 +11109,6 @@ test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(hid_t fapl, H5
      * object
      */
     obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
-#ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
-#endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
@@ -11332,9 +11283,6 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_blo
      * object
      */
     obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
-#ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
-#endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
@@ -11544,9 +11492,6 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_
      * object
      */
     obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
-#ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
-#endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
@@ -11740,9 +11685,6 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_star
      * object
      */
     obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
-#ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
-#endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
@@ -11972,9 +11914,6 @@ test_man_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_
      * object
      */
     obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
-#ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
-#endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
@@ -12043,9 +11982,7 @@ error:
     } H5E_END_TRY;
     return(1);
 } /* test_man_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped() */
-#endif /* QAK */
 
-#ifndef QAK
 
 /*-------------------------------------------------------------------------
  * Function:	test_man_frag_simple
@@ -12396,9 +12333,6 @@ test_man_frag_2nd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
 
     /* Compute # of bits used in first row */
     num_first_indirect_rows = IBLOCK_MAX_DROWS(fh, 1);
-#ifdef QAK
-HDfprintf(stderr, "num_first_indirect_rows = %u\n", num_first_indirect_rows);
-#endif /* QAK */
 
     /* Fill direct blocks in root indirect block */
     if(fill_root_direct(fh, fill_size, &state, &keep_ids))
@@ -12576,9 +12510,7 @@ error:
     } H5E_END_TRY;
     return(1);
 } /* test_man_frag_3rd_direct() */
-#endif /* QAK */
 
-#ifndef QAK
 
 /*-------------------------------------------------------------------------
  * Function:	test_huge_insert_one
@@ -12699,9 +12631,6 @@ test_huge_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     /* Get the size of the file */
     if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
-#ifdef QAK
-HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
-#endif /* QAK */
 
     /* Verify the file is correct size */
     if(file_size != empty_size)
@@ -12929,9 +12858,6 @@ test_huge_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     /* Get the size of the file */
     if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
-#ifdef QAK
-HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
-#endif /* QAK */
 
     /* Verify the file is correct size */
     if(file_size != empty_size)
@@ -13234,9 +13160,6 @@ test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
     /* Get the size of the file */
     if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
-#ifdef QAK
-HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
-#endif /* QAK */
 
     /* Verify the file is correct size */
     if(file_size != empty_size)
@@ -13657,9 +13580,6 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     /* Get the size of the file */
     if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
-#ifdef QAK
-HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
-#endif /* QAK */
 
     /* Verify the file is correct size */
     if(file_size != empty_size)
@@ -13879,9 +13799,6 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
     /* Get the size of the file */
     if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
-#ifdef QAK
-HDfprintf(stderr, "empty_size = %lu, file_size = %lu\n", (unsigned long)empty_size, (unsigned long)file_size);
-#endif /* QAK */
 
     /* Verify the file is correct size */
     if(file_size != empty_size)
@@ -13911,9 +13828,7 @@ error:
     } H5E_END_TRY;
     return(1);
 } /* test_filtered_huge() */
-#endif /* QAK */
 
-#ifndef QAK
 
 /*-------------------------------------------------------------------------
  * Function:	test_tiny_insert_one
@@ -14034,9 +13949,6 @@ test_tiny_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     /* Get the size of the file */
     if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
-#ifdef QAK
-HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
-#endif /* QAK */
 
     /* Verify the file is correct size */
     if(file_size != empty_size)
@@ -14264,9 +14176,6 @@ test_tiny_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     /* Get the size of the file */
     if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
-#ifdef QAK
-HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
-#endif /* QAK */
 
     /* Verify the file is correct size */
     if(file_size != empty_size)
@@ -14864,9 +14773,6 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     /* Get the size of the file */
     if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
-#ifdef QAK
-HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
-#endif /* QAK */
 
     /* Verify the file is correct size */
     if(file_size != empty_size)
@@ -14907,10 +14813,7 @@ error:
     } H5E_END_TRY;
     return(1);
 } /* test_tiny_insert_mix() */
-#endif /* QAK */
-#endif /* QAK2 */
 
-#ifndef QAK
 
 /*-------------------------------------------------------------------------
  * Function:	test_filtered_man_root_direct
@@ -15060,9 +14963,6 @@ test_filtered_man_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
     /* Get the size of the file */
     if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
-#ifdef QAK
-HDfprintf(stderr, "empty_size = %lu, file_size = %lu\n", (unsigned long)empty_size, (unsigned long)file_size);
-#endif /* QAK */
 
     /* Verify the file is correct size */
     if(file_size != empty_size)
@@ -15388,9 +15288,6 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     /* Get the size of the file */
     if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
-#ifdef QAK
-HDfprintf(stderr, "empty_size = %lu, file_size = %lu\n", (unsigned long)empty_size, (unsigned long)file_size);
-#endif /* QAK */
 
     /* Verify the file is correct size */
     if(file_size != empty_size)
@@ -15413,9 +15310,7 @@ error:
     } H5E_END_TRY;
     return(1);
 } /* test_filtered_man_root_indirect() */
-#endif /* QAK */
 
-#ifndef QAK
 
 /*-------------------------------------------------------------------------
  * Function:	test_random
@@ -15498,10 +15393,10 @@ test_random(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
 
     /* Choose random # seed */
     seed = (unsigned long)HDtime(NULL);
-#ifdef QAK
+#if 0
 /* seed = (unsigned long)1156158635; */
 HDfprintf(stderr, "Random # seed was: %lu\n", seed);
-#endif /* QAK */
+#endif
     HDsrandom((unsigned)seed);
 
     /* Loop over adding objects to the heap, until the size limit is reached */
@@ -15522,9 +15417,6 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
         /* Increment the amount of objects added */
         total_obj_added += obj_size;
     } /* end while */
-#ifdef QAK
-HDfprintf(stderr, "keep_ids.num_ids = %Zu, total_obj_added = %Hu, size_limit = %Hu\n", keep_ids.num_ids, total_obj_added, size_limit);
-#endif /* QAK */
 
     /* Randomize the order of the IDs kept */
     for(u = 0; u < keep_ids.num_ids; u++) {
@@ -15583,9 +15475,6 @@ HDfprintf(stderr, "keep_ids.num_ids = %Zu, total_obj_added = %Hu, size_limit = %
     /* Get the size of the file */
     if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
-#ifdef QAK
-HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
-#endif /* QAK */
 
     /* Verify the file is correct size */
     if(file_size != empty_size)
@@ -15704,10 +15593,10 @@ test_random_pow2(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_te
 
     /* Choose random # seed */
     seed = (unsigned long)HDtime(NULL);
-#ifdef QAK
+#if 0
 /* seed = (unsigned long)1155181717; */
 HDfprintf(stderr, "Random # seed was: %lu\n", seed);
-#endif /* QAK */
+#endif
     HDsrandom((unsigned)seed);
 
     /* Loop over adding objects to the heap, until the size limit is reached */
@@ -15740,9 +15629,6 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
         /* Increment the amount of objects added */
         total_obj_added += obj_size;
     } /* end while */
-#ifdef QAK
-HDfprintf(stderr, "keep_ids.num_ids = %Zu, total_obj_added = %Hu, size_limit = %Hu\n", keep_ids.num_ids, total_obj_added, size_limit);
-#endif /* QAK */
 
     /* Randomize the order of the IDs kept */
     for(u = 0; u < keep_ids.num_ids; u++) {
@@ -15801,10 +15687,6 @@ HDfprintf(stderr, "keep_ids.num_ids = %Zu, total_obj_added = %Hu, size_limit = %
     /* Get the size of the file */
     if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
-#ifdef QAK
-HDfprintf(stderr, "empty_size = %lu\n", (unsigned long)empty_size);
-HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
-#endif /* QAK */
 
     /* Verify the file is correct size */
     if(file_size != empty_size)
@@ -15838,9 +15720,7 @@ error:
     } H5E_END_TRY;
     return(1);
 } /* test_random_pow2() */
-#endif /* QAK */
 
-#ifndef QAK
 
 /*-------------------------------------------------------------------------
  * Function:	test_write
@@ -16124,9 +16004,7 @@ error:
     } H5E_END_TRY;
     return(1);
 } /* test_write() */
-#endif /* QAK */
 
-#ifndef QAK
 
 /*-------------------------------------------------------------------------
  * Function:	test_bug1
@@ -16301,7 +16179,6 @@ error:
     } H5E_END_TRY;
     return(1);
 } /* test_bug1() */
-#endif /* QAK */
 
 
 /*-------------------------------------------------------------------------
@@ -16350,7 +16227,7 @@ main(void)
     def_fapl = h5_fileaccess();
     ExpressMode = GetTestExpress();
 
-    /* 
+    /*
      * Caution when turning on ExpressMode 0:
      *  It will activate testing with different combinations of
      *       page buffering and file space strategy and the
@@ -16400,12 +16277,12 @@ main(void)
     for(v = 0; v < num_pb_fs; v++) {
         /* Skip test when:
            a) multi/split drivers and
-           b) persisting free-space or using paged aggregation strategy 
+           b) persisting free-space or using paged aggregation strategy
            because the library will fail file creation (temporary) for the above conditions */
         if(!contig_addr_vfd && v)
             break;
 
-        if((fcpl = H5Pcopy(def_fcpl)) < 0) 
+        if((fcpl = H5Pcopy(def_fcpl)) < 0)
             TEST_ERROR
 
         switch(v) {
@@ -16419,14 +16296,14 @@ main(void)
                     TEST_ERROR
                 fapl = def_fapl;
                 /* This is a fix for the daily test failure from the checkin for libver bounds. */
-                /* 
+                /*
                  * Many tests failed the file size check when comparing (a) and (b) as below:
                  * --Create a file and close the file.  Got the initial file size (a).
                  * --Reopen the file, perform fractal heap operations, and close the file.
                  *   Got the file size (b).
                  * The cause for the file size differences:
-                 *   When the file is initially created with persisting free-space and with 
-                 *   (earliest, latest) libver bounds, the file will have version 2 superblock 
+                 *   When the file is initially created with persisting free-space and with
+                 *   (earliest, latest) libver bounds, the file will have version 2 superblock
                  *   due to non-default free-space handling.  As the low bound is earliest,
                  *   the library uses version 1 object header when creating the superblock
                  *   extension message.
@@ -16440,7 +16317,7 @@ main(void)
                  *  The fix:
                  *    Set libver bounds in fapl to (v18, latest) so that the file created in the
                  *    test routines will have low bound set to v18.  This will cause the
-                 *    library to use version 2 object header for the superblock extension 
+                 *    library to use version 2 object header for the superblock extension
                  *    message.
                  */
                 if(H5Pset_libver_bounds(fapl, H5F_LIBVER_V18, H5F_LIBVER_LATEST) < 0)

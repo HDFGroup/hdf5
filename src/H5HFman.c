@@ -15,7 +15,7 @@
  *
  * Created:		H5HFman.c
  *			Feb 24 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		"Managed" object routines for fractal heaps.
  *
@@ -97,7 +97,6 @@ static herr_t H5HF__man_op_real(H5HF_hdr_t *hdr, const uint8_t *id,
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 13 2006
  *
  *-------------------------------------------------------------------------
@@ -154,7 +153,7 @@ H5HF__man_insert(H5HF_hdr_t *hdr, size_t obj_size, const void *obj, void *_id)
     HDassert(sec_node->sect_info.state == H5FS_SECT_LIVE);
 
     /* Retrieve direct block address from section */
-    if(H5HF_sect_single_dblock_info(hdr, sec_node, &dblock_addr, &dblock_size) < 0)
+    if(H5HF__sect_single_dblock_info(hdr, sec_node, &dblock_addr, &dblock_size) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve direct block information")
 
     /* Lock direct block */
@@ -197,7 +196,7 @@ H5HF__man_insert(H5HF_hdr_t *hdr, size_t obj_size, const void *obj, void *_id)
     hdr->man_nobjs++;
 
     /* Reduce space available in heap (marks header dirty) */
-    if(H5HF_hdr_adj_free(hdr, -(ssize_t)obj_size) < 0)
+    if(H5HF__hdr_adj_free(hdr, -(ssize_t)obj_size) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't adjust free space for heap")
 
 done:
@@ -215,22 +214,22 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5HF_man_get_obj_len
+ * Function:    H5HF__man_get_obj_len
  *
  * Purpose:     Get the size of a managed heap object
  *
  * Return:      SUCCEED (Can't fail)
  *
- * Programmer:  Dana Robinson (derobins@hdfgroup.org)
+ * Programmer:  Dana Robinson
  *              August 2012
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_man_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
+H5HF__man_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
 {
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /*
      * Check arguments.
@@ -238,7 +237,7 @@ H5HF_man_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
     HDassert(hdr);
     HDassert(id);
     HDassert(obj_len_p);
-    
+
     /* Skip over the flag byte */
     id++;
 
@@ -249,7 +248,7 @@ H5HF_man_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
     UINT64DECODE_VAR(id, *obj_len_p, hdr->heap_len_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HF_man_get_obj_len() */
+} /* end H5HF__man_get_obj_len() */
 
 
 /*-------------------------------------------------------------------------
@@ -260,7 +259,6 @@ H5HF_man_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
  * Return:      SUCCEED (Can't fail)
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 20 2015
  *
  *-------------------------------------------------------------------------
@@ -276,7 +274,7 @@ H5HF__man_get_obj_off(const H5HF_hdr_t *hdr, const uint8_t *id, hsize_t *obj_off
     HDassert(hdr);
     HDassert(id);
     HDassert(obj_off_p);
-    
+
     /* Skip over the flag byte */
     id++;
 
@@ -296,7 +294,6 @@ H5HF__man_get_obj_off(const H5HF_hdr_t *hdr, const uint8_t *id, hsize_t *obj_off
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 17 2006
  *
  *-------------------------------------------------------------------------
@@ -307,8 +304,8 @@ H5HF__man_op_real(H5HF_hdr_t *hdr, const uint8_t *id,
 {
     H5HF_direct_t *dblock = NULL;       /* Pointer to direct block to query */
     unsigned dblock_access_flags;       /* Access method for direct block */
-                                        /* must equal either 
-                                         * H5AC__NO_FLAGS_SET or 
+                                        /* must equal either
+                                         * H5AC__NO_FLAGS_SET or
                                          * H5AC__READ_ONLY_FLAG
                                          */
     haddr_t dblock_addr;                /* Direct block address */
@@ -445,7 +442,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 17 2006
  *
  *-------------------------------------------------------------------------
@@ -465,7 +461,7 @@ H5HF__man_read(H5HF_hdr_t *hdr, const uint8_t *id, void *obj)
     HDassert(obj);
 
     /* Call the internal 'op' routine routine */
-    if(H5HF__man_op_real(hdr, id, H5HF_op_read, obj, 0) < 0)
+    if(H5HF__man_op_real(hdr, id, H5HF__op_read, obj, 0) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "unable to operate on heap object")
 
 done:
@@ -481,7 +477,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 18 2006
  *
  *-------------------------------------------------------------------------
@@ -502,7 +497,7 @@ H5HF__man_write(H5HF_hdr_t *hdr, const uint8_t *id, const void *obj)
 
     /* Call the internal 'op' routine routine */
     /* (Casting away const OK - QAK) */
-    if(H5HF__man_op_real(hdr, id, H5HF_op_write, (void *)obj, H5HF_OP_MODIFY) < 0)
+    if(H5HF__man_op_real(hdr, id, H5HF__op_write, (void *)obj, H5HF_OP_MODIFY) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "unable to operate on heap object")
 
 done:
@@ -518,7 +513,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sept 11 2006
  *
  *-------------------------------------------------------------------------
@@ -554,7 +548,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 15 2006
  *
  *-------------------------------------------------------------------------
@@ -643,7 +636,7 @@ H5HF__man_remove(H5HF_hdr_t *hdr, const uint8_t *id)
         HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "object overruns end of direct block")
 
     /* Create free space section node */
-    if(NULL == (sec_node = H5HF_sect_single_new(obj_off, obj_len, iblock, dblock_entry)))
+    if(NULL == (sec_node = H5HF__sect_single_new(obj_off, obj_len, iblock, dblock_entry)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create section for direct block's free space")
 
     /* Unlock indirect block */
@@ -654,7 +647,7 @@ H5HF__man_remove(H5HF_hdr_t *hdr, const uint8_t *id)
     } /* end if */
 
     /* Increase space available in heap (marks header dirty) */
-    if(H5HF_hdr_adj_free(hdr, (ssize_t)obj_len) < 0)
+    if(H5HF__hdr_adj_free(hdr, (ssize_t)obj_len) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't adjust free space for heap")
 
     /* Update statistics about heap */

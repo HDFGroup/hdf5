@@ -13,7 +13,7 @@
 
 /*
  * A program to verify that the chunk indexing type of a dataset in a file
- * is version 1 B-tree.  
+ * is version 1 B-tree.
  * This is to support the testing of the tool "h5format_convert".
  */
 
@@ -32,7 +32,7 @@ usage(void)
 /*-------------------------------------------------------------------------
  * Function:	main
  *
- * Purpose:	To check that the chunk indexing type for the dataset in 
+ * Purpose:	To check that the chunk indexing type for the dataset in
  *		the file is version 1 B-tree.
  *
  * Return:	0 -- the indexing type is version 1 B-tree
@@ -90,7 +90,7 @@ main(int argc, char *argv[])
     } /* end if */
 
     /* Return success when the chunk indexing type is version 1 B-tree */
-    if(idx_type == H5D_CHUNK_IDX_BTREE) 
+    if(idx_type == H5D_CHUNK_IDX_BTREE)
 	HDexit(EXIT_SUCCESS);
     else {
 	HDfprintf(stderr, "Error: chunk indexing type is %d\n", idx_type);

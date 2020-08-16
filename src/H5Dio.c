@@ -149,7 +149,7 @@ done:
  *              The PLIST_ID can be the constant H5P_DEFAULT in which
  *              case the default data transfer properties are used.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              Thursday, December 4, 1997
@@ -271,7 +271,7 @@ done:
  *              The PLIST_ID can be the constant H5P_DEFAULT in which
  *              case the default data transfer properties are used.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              Thursday, December 4, 1997
@@ -280,7 +280,7 @@ done:
  */
 herr_t
 H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-	 hid_t file_space_id, hid_t dxpl_id, const void *buf)
+    hid_t file_space_id, hid_t dxpl_id, const void *buf)
 {
     H5VL_object_t          *vol_obj = NULL;
     herr_t                  ret_value = SUCCEED;    /* Return value */
@@ -321,7 +321,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Dwrite_chunk
  *
- * Purpose:     Writes an entire chunk to the file directly.	
+ * Purpose:     Writes an entire chunk to the file directly.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -331,13 +331,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *offset, 
+H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *offset,
          size_t data_size, const void *buf)
 {
     H5VL_object_t  *vol_obj = NULL;
     uint32_t        data_size_32;                   /* Chunk data size (limited to 32-bits currently) */
     herr_t          ret_value = SUCCEED;            /* Return value */
-    
+
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iiIu*hz*x", dset_id, dxpl_id, filters, offset, data_size, buf);
 
@@ -410,7 +410,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
                                         /* projected mem space must be discarded at the   */
                                         /* end of the function to avoid a memory leak.    */
     H5D_storage_t store;                /* union of EFL and chunk pointer in file space */
-    hsize_t	nelmts;                     /* total number of elmts	*/
+    hsize_t     nelmts;                 /* total number of elmts	*/
     hbool_t     io_op_init = FALSE;     /* Whether the I/O op has been initialized */
     char        fake_char;              /* Temporary variable for NULL buffer pointers */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
@@ -621,7 +621,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
                                         /* projected mem space must be discarded at the   */
                                         /* end of the function to avoid a memory leak.    */
     H5D_storage_t store;                /* union of EFL and chunk pointer in file space */
-    hsize_t	nelmts;                     /* total number of elmts	*/
+    hsize_t     nelmts;                 /* total number of elmts	*/
     hbool_t     io_op_init = FALSE;     /* Whether the I/O op has been initialized */
     char        fake_char;              /* Temporary variable for NULL buffer pointers */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
@@ -1153,10 +1153,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
 
                 /* Append each of the "reason for breaking collective I/O" error messages to the
                  * local and global no collective cause strings */
-                for (cause = 1, idx = 0;
-                     (cause < H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE) &&
-                     (idx < cause_strings_len);
-                     cause <<= 1, idx++) {
+                for (cause = 1, idx = 0; (cause < H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE) && (idx < cause_strings_len); cause <<= 1, idx++) {
                     size_t cause_strlen = HDstrlen(cause_strings[idx]);
 
                     if (cause & local_no_collective_cause) {
@@ -1166,8 +1163,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
                         if(local_error_message_previously_written)
                             HDstrncat(local_no_collective_cause_string, "; ", 2);
 
-                        HDstrncat(local_no_collective_cause_string,
-				  cause_strings[idx], cause_strlen);
+                        HDstrncat(local_no_collective_cause_string, cause_strings[idx], cause_strlen);
 
                         local_error_message_previously_written = TRUE;
                     } /* end if */
@@ -1179,8 +1175,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
                         if(global_error_message_previously_written)
                             HDstrncat(global_no_collective_cause_string, "; ", 2);
 
-                        HDstrncat(global_no_collective_cause_string,
-				  cause_strings[idx], cause_strlen);
+                        HDstrncat(global_no_collective_cause_string, cause_strings[idx], cause_strlen);
 
                         global_error_message_previously_written = TRUE;
                     } /* end if */

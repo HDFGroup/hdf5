@@ -31,7 +31,7 @@ size_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
  *
  * Purpose: generate files for h5diff testing
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 12, 2003
  *
@@ -94,8 +94,11 @@ size_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
 #define NON_COMPARBLES1 "non_comparables1.h5"
 #define NON_COMPARBLES2 "non_comparables2.h5"
 /* string dataset and attribute */
-#define DIFF_STRINGS1 "diff_strings1.h5"
-#define DIFF_STRINGS2 "diff_strings2.h5"
+#define DIFF_STRINGS1 "h5diff_strings1.h5"
+#define DIFF_STRINGS2 "h5diff_strings2.h5"
+/* double dataset and epsilon */
+#define DIFF_EPS1 "h5diff_eps1.h5"
+#define DIFF_EPS2 "h5diff_eps2.h5"
 
 #define UIMAX    4294967295u /*Maximum value for a variable of type unsigned int */
 #define STR_SIZE 3
@@ -110,7 +113,7 @@ size_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
 
 /* Error macros */
 #define AT()            HDprintf("ERROR at %s:%d in %s()...\n", __FILE__, __LINE__, FUNC);
-#define PROGRAM_ERROR   {AT(); goto error;}
+#define PROGRAM_ERROR   do {AT(); goto error;} while(0)
 
 /* A UD link traversal function.  Shouldn't actually be called. */
 static hid_t
@@ -172,6 +175,7 @@ static void test_comps_vlen_arry(const char *fname, const char *dset,
 static void test_data_nocomparables(const char *fname, int diff);
 static void test_objs_nocomparables(const char *fname1, const char *fname2);
 static void test_objs_strings(const char *fname, const char *fname2);
+static void test_double_epsilon(const char *fname1, const char *fname2);
 
 /* called by test_attributes() and test_datasets() */
 static void write_attr_strings(hid_t loc_id, const char* dset_name, hid_t fid, int make_diffs);
@@ -287,6 +291,9 @@ int main(void)
 
     /* string dataset and attribute. HDFFV-10028 */
     test_objs_strings(DIFF_STRINGS1, DIFF_STRINGS2);
+
+    /* double dataset and epsilion. HDFFV-10897 */
+    test_double_epsilon(DIFF_EPS1, DIFF_EPS2);
 
     return EXIT_SUCCESS;
 }
@@ -4928,73 +4935,73 @@ test_objs_nocomparables(const char *fname1, const char *fname2)
     *------------------------------------------------------------------------*/
     /* file1 */
     if((fid1 = H5Fopen(fname1, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
-        PROGRAM_ERROR
+        PROGRAM_ERROR;
 
     /* file2 */
     if((fid2 = H5Fopen(fname2, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
-        PROGRAM_ERROR
+        PROGRAM_ERROR;
 
     /*-----------------------------------------------------------------------
     * in file1 : add member objects
     *------------------------------------------------------------------------*/
     /* parent group */
     if((topgid1 = H5Gcreate2(fid1, "diffobjtypes", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        PROGRAM_ERROR
+        PROGRAM_ERROR;
 
     /* dataset */
     if(write_dset(topgid1, 1, dims, "obj1", H5T_NATIVE_INT, data1) < 0)
-        PROGRAM_ERROR
+        PROGRAM_ERROR;
 
     /* group */
     if((gid1 = H5Gcreate2(topgid1, "obj2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        PROGRAM_ERROR
+        PROGRAM_ERROR;
 
     /* committed type */
     if((tid1 = H5Tcopy(H5T_NATIVE_INT)) < 0)
-        PROGRAM_ERROR
+        PROGRAM_ERROR;
     if(H5Tcommit2(topgid1, "obj3", tid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
-        PROGRAM_ERROR
+        PROGRAM_ERROR;
 
     /*-----------------------------------------------------------------------
     * in file2 : add member objects
     *------------------------------------------------------------------------*/
     /* parent group */
     if((topgid2 = H5Gcreate2(fid2, "diffobjtypes", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        PROGRAM_ERROR
+        PROGRAM_ERROR;
 
     /* group */
     if((gid2 = H5Gcreate2(topgid2, "obj1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        PROGRAM_ERROR
+        PROGRAM_ERROR;
 
     /* committed type */
     if((tid2 = H5Tcopy(H5T_NATIVE_INT)) < 0)
-        PROGRAM_ERROR
+        PROGRAM_ERROR;
     if(H5Tcommit2(topgid2, "obj2", tid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
-        PROGRAM_ERROR
+        PROGRAM_ERROR;
 
     /* dataset */
     if(write_dset(topgid2, 1, dims, "obj3", H5T_NATIVE_INT, data2) < 0)
-        PROGRAM_ERROR
+        PROGRAM_ERROR;
 
     /*-----------------------------------------------------------------------
     * Close IDs
     *-----------------------------------------------------------------------*/
     if(H5Fclose(fid1) < 0)
-        PROGRAM_ERROR
+        PROGRAM_ERROR;
     if(H5Fclose(fid2) < 0)
-        PROGRAM_ERROR
+        PROGRAM_ERROR;
     if(H5Gclose(topgid1) < 0)
-        PROGRAM_ERROR
+        PROGRAM_ERROR;
     if(H5Gclose(topgid2) < 0)
-        PROGRAM_ERROR
+        PROGRAM_ERROR;
     if(H5Gclose(gid1) < 0)
-        PROGRAM_ERROR
+        PROGRAM_ERROR;
     if(H5Gclose(gid2) < 0)
-        PROGRAM_ERROR
+        PROGRAM_ERROR;
     if(H5Tclose(tid1) < 0)
-        PROGRAM_ERROR
+        PROGRAM_ERROR;
     if(H5Tclose(tid2) < 0)
-        PROGRAM_ERROR
+        PROGRAM_ERROR;
 
     return;
 
@@ -8018,6 +8025,59 @@ out:
     return -1;
 }
 
+/*
+ * Function: test_double_epsilion
+ *
+ * Purpose: Create test files to compare data with epsilion
+ */
+static
+void test_double_epsilon(const char *fname1, const char *fname2)
+{
+    hid_t    fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID;
+    hsize_t  dims1[2] = { 4, 7 };
+    double   wdata[4][7];
+    int i, j;
+
+    /*-------------------------------------------------------------------------
+    * create two files
+    *-------------------------------------------------------------------------
+    */
+    if ((fid1 = H5Fcreate(fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        PROGRAM_ERROR;
+    if ((fid2 = H5Fcreate(fname2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        PROGRAM_ERROR;
+
+    /*
+    * Initialize data.
+    */
+    for (i=0; i<4; i++)
+        for (j=0; j<7; j++)
+            wdata[i][j] = 0.0;
+
+    /* dataset */
+    if(write_dset(fid1, 2, dims1, "dataset", H5T_IEEE_F64LE, wdata) < 0)
+        PROGRAM_ERROR;
+
+    /*
+    * Initialize data.
+    */
+    for (i=0; i<4; i++)
+        for (j=0; j<7; j++)
+            wdata[i][j] = (double)1.e-19;
+
+    /* dataset */
+    if(write_dset(fid2, 2, dims1, "dataset", H5T_IEEE_F64LE, wdata) < 0)
+        PROGRAM_ERROR;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid1);
+        H5Fclose(fid2);
+    } H5E_END_TRY;
+
+    return;
+}
+
 /*-------------------------------------------------------------------------
  * Function: write_attr
  *
@@ -8073,22 +8133,22 @@ write_dset(hid_t loc_id, int rank, hsize_t *dims, const char *name, hid_t tid, v
 
     /* create a space  */
     if((sid = H5Screate_simple(rank, dims, NULL)) < 0)
-        PROGRAM_ERROR
+        PROGRAM_ERROR;
 
     /* create the dataset */
     if((did = H5Dcreate2(loc_id, name, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        PROGRAM_ERROR
+        PROGRAM_ERROR;
 
     /* write */
     if(buf)
         if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
-            PROGRAM_ERROR
+            PROGRAM_ERROR;
 
     /* close */
     if(H5Dclose(did) < 0)
-        PROGRAM_ERROR
+        PROGRAM_ERROR;
     if(H5Sclose(sid) < 0)
-        PROGRAM_ERROR
+        PROGRAM_ERROR;
 
     return SUCCEED;
 

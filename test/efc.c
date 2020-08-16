@@ -636,7 +636,7 @@ test_graph_nocycle(void)
     /* Test 3: Simple "inverted" tree.  Two parent files share a child file,
      * which has its own child file.  Verify that the child's child is not
      * closed until both parents' EFCs are released.  First release through one
-     * parent, then reopen through that parent and release the other, then 
+     * parent, then reopen through that parent and release the other, then
      * re-release the first parent. */
     if(NULL == (f0 = H5F_open(filename[0],
             H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
@@ -867,7 +867,7 @@ test_graph_cycle(void)
 
 
     /* Test 1: File caches itself. Verify that closing the file causes it to be
-     * actually closed, and there is no other unexpected behavior. 
+     * actually closed, and there is no other unexpected behavior.
      */
     if(NULL == (f0 = H5F_open(filename[0],
             H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))

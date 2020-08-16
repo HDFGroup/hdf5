@@ -391,15 +391,15 @@ typedef struct H5O_chunk_proxy_t {
     H5O_t       *oh;                    /* Object header for this chunk */
     unsigned    chunkno;                /* Chunk number for this chunk */
 
-    /* Flush depencency parent information (not stored) 
+    /* Flush depencency parent information (not stored)
      *
-     * The following field is used to store a pointer 
+     * The following field is used to store a pointer
      * to the in-core representation of a new chunk proxy's flush dependency
      * parent -- if it exists.  If it does not exist, this field will
      * contain NULL.
      *
-     * If the file is opened in SWMR write mode, the flush dependency 
-     * parent of the chunk proxy will be either its object header 
+     * If the file is opened in SWMR write mode, the flush dependency
+     * parent of the chunk proxy will be either its object header
      * or the chunk with the continuation message that references this chunk.
      */
     void *fd_parent;                    /* Pointer to flush dependency parent */
@@ -554,7 +554,12 @@ H5_DLLVAR const H5O_obj_class_t H5O_OBJ_DATASET[1];
 H5_DLLVAR const H5O_obj_class_t H5O_OBJ_DATATYPE[1];
 
 /* Package-local function prototypes */
+H5_DLL void *H5O__open_by_addr(const H5G_loc_t *loc, haddr_t addr, H5I_type_t *opened_type/*out*/);
+H5_DLL void *H5O__open_by_idx(const H5G_loc_t *loc, const char *name,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, H5I_type_t *opened_type/*out*/);
 H5_DLL const H5O_obj_class_t *H5O__obj_class(const H5O_loc_t *loc);
+H5_DLL herr_t H5O__copy(const H5G_loc_t *src_loc, const char *src_name,
+    H5G_loc_t *dst_loc, const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id);
 H5_DLL int H5O__link_oh(H5F_t *f, int adjust, H5O_t *oh, hbool_t *deleted);
 H5_DLL herr_t H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
     H5_iter_order_t order, H5O_iterate2_t op, void *op_data, unsigned fields);

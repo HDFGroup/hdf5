@@ -15,7 +15,7 @@
  *
  * Created:	H5Gint.c
  *		April 5 2007
- *		Quincey Koziol <koziol@hdfgroup.org>
+ *		Quincey Koziol
  *
  * Purpose:	General use, "internal" routines for groups.
  *
@@ -88,6 +88,7 @@ typedef struct {
 /********************/
 
 static herr_t H5G__open_oid(H5G_t *grp);
+static herr_t H5G__visit_cb(const H5O_link_t *lnk, void *_udata);
 
 
 /*********************/
@@ -179,7 +180,6 @@ done:
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug 11 1997
  *
  *-------------------------------------------------------------------------
@@ -496,9 +496,9 @@ H5G_close(H5G_t *grp)
 
         /* Evict group metadata if evicting on close */
         if(!file_closed && H5F_SHARED(grp->oloc.file) && H5F_EVICT_ON_CLOSE(grp->oloc.file)) {
-            if(H5AC_flush_tagged_metadata(grp->oloc.file, grp->oloc.addr) < 0) 
+            if(H5AC_flush_tagged_metadata(grp->oloc.file, grp->oloc.addr) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
-            if(H5AC_evict_tagged_metadata(grp->oloc.file, grp->oloc.addr, FALSE) < 0) 
+            if(H5AC_evict_tagged_metadata(grp->oloc.file, grp->oloc.addr, FALSE) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to evict tagged metadata")
         } /* end if */
 
@@ -719,7 +719,7 @@ H5G_unmount(H5G_t *grp)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_iterate_cb
+ * Function:	H5G__iterate_cb
  *
  * Purpose:     Callback function for iterating over links in a group
  *
@@ -732,12 +732,12 @@ H5G_unmount(H5G_t *grp)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_iterate_cb(const H5O_link_t *lnk, void *_udata)
+H5G__iterate_cb(const H5O_link_t *lnk, void *_udata)
 {
     H5G_iter_appcall_ud_t *udata = (H5G_iter_appcall_ud_t *)_udata;     /* User data for callback */
     herr_t ret_value = H5_ITER_ERROR;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(lnk);
@@ -770,7 +770,7 @@ H5G_iterate_cb(const H5O_link_t *lnk, void *_udata)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_iterate_cb() */
+} /* end H5G__iterate_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -818,7 +818,7 @@ H5G_iterate(H5G_loc_t *loc, const char *group_name,
     udata.op_data = op_data;
 
     /* Call the real group iteration routine */
-    if((ret_value = H5G__obj_iterate(&(grp->oloc), idx_type, order, skip, last_lnk, H5G_iterate_cb, &udata)) < 0)
+    if((ret_value = H5G__obj_iterate(&(grp->oloc), idx_type, order, skip, last_lnk, H5G__iterate_cb, &udata)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "error iterating over links")
 
 done:
@@ -835,7 +835,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5G_free_visit_visited
+ * Function:    H5G__free_visit_visited
  *
  * Purpose:     Free the key for an object visited during a group traversal
  *
@@ -847,18 +847,18 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_free_visit_visited(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *operator_data/*in,out*/)
+H5G__free_visit_visited(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *operator_data/*in,out*/)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     item = H5FL_FREE(H5_obj_t, item);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5G_free_visit_visited() */
+} /* end H5G__free_visit_visited() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_visit_cb
+ * Function:	H5G__visit_cb
  *
  * Purpose:     Callback function for recursively visiting links from a group
  *
@@ -871,7 +871,7 @@ H5G_free_visit_visited(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_visit_cb(const H5O_link_t *lnk, void *_udata)
+H5G__visit_cb(const H5O_link_t *lnk, void *_udata)
 {
     H5G_iter_visit_ud_t *udata = (H5G_iter_visit_ud_t *)_udata;     /* User data for callback */
     H5L_info2_t info;                   /* Link info */
@@ -884,7 +884,7 @@ H5G_visit_cb(const H5O_link_t *lnk, void *_udata)
     size_t len_needed;                  /* Length of path string needed */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(lnk);
@@ -998,7 +998,7 @@ H5G_visit_cb(const H5O_link_t *lnk, void *_udata)
                 udata->curr_loc = &obj_loc;
 
                 /* Iterate over links in group */
-                ret_value = H5G__obj_iterate(&obj_oloc, idx_type, udata->order, (hsize_t)0, NULL, H5G_visit_cb, udata);
+                ret_value = H5G__obj_iterate(&obj_oloc, idx_type, udata->order, (hsize_t)0, NULL, H5G__visit_cb, udata);
 
                 /* Restore location */
                 udata->curr_loc = old_loc;
@@ -1016,7 +1016,7 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, H5_ITER_ERROR, "can't free location")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_visit_cb() */
+} /* end H5G__visit_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -1140,14 +1140,14 @@ H5G_visit(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type,
     } /* end if */
 
     /* Call the link iteration routine */
-    if((ret_value = H5G__obj_iterate(&(grp->oloc), idx_type, order, (hsize_t)0, NULL, H5G_visit_cb, &udata)) < 0)
+    if((ret_value = H5G__obj_iterate(&(grp->oloc), idx_type, order, (hsize_t)0, NULL, H5G__visit_cb, &udata)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't visit links")
 
 done:
     /* Release user data resources */
     H5MM_xfree(udata.path);
     if(udata.visited)
-        H5SL_destroy(udata.visited, H5G_free_visit_visited, NULL);
+        H5SL_destroy(udata.visited, H5G__free_visit_visited, NULL);
 
     /* Release the group opened */
     if(gid != H5I_INVALID_HID) {

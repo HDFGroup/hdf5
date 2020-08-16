@@ -75,7 +75,7 @@ H5VL__native_link_create(H5VL_link_create_type_t create_type, void *obj,
                         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "source and destination should be in the same file.")
 
                     /* Create the link */
-                    if((ret_value = H5L_create_hard(cur_loc_p, cur_params->loc_data.loc_by_name.name, 
+                    if((ret_value = H5L__create_hard(cur_loc_p, cur_params->loc_data.loc_by_name.name,
                                                     link_loc_p, loc_params->loc_data.loc_by_name.name, lcpl_id)) < 0)
                         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
                 } /* end if */
@@ -96,7 +96,7 @@ H5VL__native_link_create(H5VL_link_create_type_t create_type, void *obj,
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                 /* Create the link */
-                if((ret_value = H5L_create_soft(target_name, &link_loc, loc_params->loc_data.loc_by_name.name, lcpl_id)) < 0)
+                if((ret_value = H5L__create_soft(target_name, &link_loc, loc_params->loc_data.loc_by_name.name, lcpl_id)) < 0)
                     HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
                 break;
             }
@@ -136,7 +136,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_link_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, 
+H5VL__native_link_copy(void *src_obj, const H5VL_loc_params_t *loc_params1,
     void *dst_obj, const H5VL_loc_params_t *loc_params2, hid_t lcpl_id,
     hid_t H5_ATTR_UNUSED lapl_id, hid_t H5_ATTR_UNUSED dxpl_id,
     void H5_ATTR_UNUSED **req)
@@ -161,8 +161,8 @@ H5VL__native_link_copy(void *src_obj, const H5VL_loc_params_t *loc_params1,
         dst_loc_p = src_loc_p;
 
     /* Copy the link */
-    if(H5L_move(src_loc_p, loc_params1->loc_data.loc_by_name.name, 
-                dst_loc_p, loc_params2->loc_data.loc_by_name.name, 
+    if(H5L__move(src_loc_p, loc_params1->loc_data.loc_by_name.name,
+                dst_loc_p, loc_params2->loc_data.loc_by_name.name,
                 TRUE, lcpl_id) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to copy link")
 
@@ -181,7 +181,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_link_move(void *src_obj, const H5VL_loc_params_t *loc_params1, 
+H5VL__native_link_move(void *src_obj, const H5VL_loc_params_t *loc_params1,
     void *dst_obj, const H5VL_loc_params_t *loc_params2, hid_t lcpl_id,
     hid_t H5_ATTR_UNUSED lapl_id, hid_t H5_ATTR_UNUSED dxpl_id,
     void H5_ATTR_UNUSED **req)
@@ -206,8 +206,8 @@ H5VL__native_link_move(void *src_obj, const H5VL_loc_params_t *loc_params1,
         dst_loc_p = src_loc_p;
 
     /* Move the link */
-    if(H5L_move(src_loc_p, loc_params1->loc_data.loc_by_name.name, 
-                dst_loc_p, loc_params2->loc_data.loc_by_name.name, 
+    if(H5L__move(src_loc_p, loc_params1->loc_data.loc_by_name.name,
+                dst_loc_p, loc_params2->loc_data.loc_by_name.name,
                 FALSE, lcpl_id) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTMOVE, FAIL, "unable to move link")
 
@@ -226,7 +226,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_get_t get_type, 
+H5VL__native_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_get_t get_type,
     hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
     H5G_loc_t   loc;
@@ -249,7 +249,7 @@ H5VL__native_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_
                         HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to get link info")
                 } /* end if */
                 else if(loc_params->type == H5VL_OBJECT_BY_IDX) { /* H5Lget_info_by_idx */
-                    if(H5L_get_info_by_idx(&loc, loc_params->loc_data.loc_by_idx.name, loc_params->loc_data.loc_by_idx.idx_type,
+                    if(H5L__get_info_by_idx(&loc, loc_params->loc_data.loc_by_idx.name, loc_params->loc_data.loc_by_idx.idx_type,
                             loc_params->loc_data.loc_by_idx.order, loc_params->loc_data.loc_by_idx.n, linfo2) < 0)
                         HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to get link info")
                 } /* end else-if */
@@ -267,7 +267,7 @@ H5VL__native_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_
                 ssize_t    *ret    = HDva_arg(arguments, ssize_t *);
 
                 /* Get the link name */
-                if((*ret = H5L_get_name_by_idx(&loc, loc_params->loc_data.loc_by_idx.name, loc_params->loc_data.loc_by_idx.idx_type,
+                if((*ret = H5L__get_name_by_idx(&loc, loc_params->loc_data.loc_by_idx.name, loc_params->loc_data.loc_by_idx.idx_type,
                             loc_params->loc_data.loc_by_idx.order, loc_params->loc_data.loc_by_idx.n, name, size)) < 0)
                     HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to get link info")
 
@@ -282,14 +282,14 @@ H5VL__native_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_
 
                 /* Get the link information */
                 if(loc_params->type == H5VL_OBJECT_BY_NAME) { /* H5Lget_val */
-                    if(H5L_get_val(&loc, loc_params->loc_data.loc_by_name.name, buf, size) < 0)
+                    if(H5L__get_val(&loc, loc_params->loc_data.loc_by_name.name, buf, size) < 0)
                         HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to get link value")
                 }
                 else if(loc_params->type == H5VL_OBJECT_BY_IDX) { /* H5Lget_val_by_idx */
 
-                    if(H5L_get_val_by_idx(&loc, loc_params->loc_data.loc_by_idx.name, loc_params->loc_data.loc_by_idx.idx_type,
+                    if(H5L__get_val_by_idx(&loc, loc_params->loc_data.loc_by_idx.name, loc_params->loc_data.loc_by_idx.idx_type,
                             loc_params->loc_data.loc_by_idx.order, loc_params->loc_data.loc_by_idx.n, buf, size) < 0)
-                        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to get link val")                    
+                        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to get link val")
                 }
                 else
                     HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to get link val")
@@ -316,7 +316,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_link_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_specific_t specific_type, 
+H5VL__native_link_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_specific_t specific_type,
     hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -333,7 +333,7 @@ H5VL__native_link_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                 /* Check for the existence of the link */
-                if((*ret = H5L_exists(&loc, loc_params->loc_data.loc_by_name.name)) < 0)
+                if((*ret = H5L__exists(&loc, loc_params->loc_data.loc_by_name.name)) < 0)
                     HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to specific link info")
                 break;
             }
@@ -392,11 +392,11 @@ H5VL__native_link_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_
 
                 /* Unlink */
                 if(loc_params->type == H5VL_OBJECT_BY_NAME) { /* H5Ldelete */
-                    if(H5L_delete(&loc, loc_params->loc_data.loc_by_name.name) < 0)
+                    if(H5L__delete(&loc, loc_params->loc_data.loc_by_name.name) < 0)
                         HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to delete link")
                 } /* end if */
                 else if(loc_params->type == H5VL_OBJECT_BY_IDX) { /* H5Ldelete_by_idx */
-                    if(H5L_delete_by_idx(&loc, loc_params->loc_data.loc_by_idx.name, loc_params->loc_data.loc_by_idx.idx_type,
+                    if(H5L__delete_by_idx(&loc, loc_params->loc_data.loc_by_idx.name, loc_params->loc_data.loc_by_idx.idx_type,
                             loc_params->loc_data.loc_by_idx.order, loc_params->loc_data.loc_by_idx.n) < 0)
                         HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to delete link")
                 } /* end else-if */

@@ -6,14 +6,26 @@
 # NOTE: Don't add -Wpadded here since we can't/won't fix the (many)
 # warnings that are emitted. If you need it, add it from the
 # environment variable at configure time.
--Wabi
+-Wall
+-Wcast-qual
+-Wconversion
 -Wctor-dtor-privacy
 -Weffc++
-##-Wendif-labels
+-Wextra
+-Wfloat-equal
+-Wformat=2
+-Winit-self
+-Winvalid-pch
+-Wmissing-include-dirs
+-Wno-format-nonliteral
 -Wnon-virtual-dtor
 -Wold-style-cast
 -Woverloaded-virtual
 -Wreorder
+-Wshadow
 -Wsign-promo
 ##-Wunreachable-code
+-Wundef
 ##-Wvariadic-macros
+-Wwrite-strings
+-pedantic

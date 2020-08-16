@@ -15,7 +15,7 @@
  *
  * Created:             H5MFdbg.c
  *                      Jan 31 2008
- *                      Quincey Koziol <koziol@hdfgroup.org>
+ *                      Quincey Koziol
  *
  * Purpose:             File memory management debugging functions.
  *
@@ -92,7 +92,6 @@ static herr_t H5MF__sects_debug_cb(H5FS_section_info_t *_sect, void *_udata);
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		January 31 2008
  *
  *-------------------------------------------------------------------------
@@ -115,8 +114,8 @@ H5MF__sects_debug_cb(H5FS_section_info_t *_sect, void *_udata)
     /* Print generic section information */
     HDfprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth,
 	      "Section type:",
-          (sect->sect_info.type == H5MF_FSPACE_SECT_SIMPLE ? "simple" : 
-          (sect->sect_info.type == H5MF_FSPACE_SECT_SMALL ? "small" : 
+          (sect->sect_info.type == H5MF_FSPACE_SECT_SIMPLE ? "simple" :
+          (sect->sect_info.type == H5MF_FSPACE_SECT_SMALL ? "small" :
           (sect->sect_info.type == H5MF_FSPACE_SECT_LARGE ? "large" : "unknown"))));
     HDfprintf(udata->stream, "%*s%-*s %a\n", udata->indent, "", udata->fwidth,
 	      "Section address:",
@@ -148,7 +147,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		January 31 2008
  *
  *-------------------------------------------------------------------------
@@ -209,7 +207,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jan 31 2008
  *
  *-------------------------------------------------------------------------

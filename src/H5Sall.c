@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:  Quincey Koziol
  *              Tuesday, June 16, 1998
  *
  * Purpose:	"All" selection dataspace I/O functions.
@@ -29,7 +29,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"          /* Generic Functions                        */
-#include "H5Eprivate.h"		/* Error handling			    */
+#include "H5Eprivate.h"         /* Error handling                           */
 #include "H5Iprivate.h"         /* ID Functions                             */
 #include "H5Spkg.h"             /* Dataspace functions                      */
 #include "H5VMprivate.h"        /* Vector functions                         */
@@ -599,7 +599,7 @@ H5S__all_serial_size(const H5S_t H5_ATTR_UNUSED *space)
  PURPOSE
     Serialize the current selection into a user-provided buffer.
  USAGE
-    herr_t H5S_all_serialize(space, p)
+    herr_t H5S__all_serialize(space, p)
         const H5S_t *space;     IN: Dataspace with selection to serialize
         uint8_t **p;            OUT: Pointer to buffer to put serialized
                                 selection.  Will be advanced to end of
@@ -627,8 +627,8 @@ H5S__all_serialize(const H5S_t *space, uint8_t **p)
     HDassert(pp);
 
     /* Store the preamble information */
-    UINT32ENCODE(pp, (uint32_t)H5S_GET_SELECT_TYPE(space));  /* Store the type of selection */
-    UINT32ENCODE(pp, (uint32_t)H5S_ALL_VERSION_1);  /* Store the version number */
+    UINT32ENCODE(pp, (uint32_t)H5S_GET_SELECT_TYPE(space)); /* Store the type of selection */
+    UINT32ENCODE(pp, (uint32_t)H5S_ALL_VERSION_1);          /* Store the version number */
     UINT32ENCODE(pp, (uint32_t)0);  /* Store the un-used padding */
     UINT32ENCODE(pp, (uint32_t)0);  /* Store the additional information length */
 
@@ -675,7 +675,7 @@ H5S__all_deserialize(H5S_t **space, const uint8_t **p)
     HDassert(*p);
 
     /* As part of the efforts to push all selection-type specific coding
-       to the callbacks, the coding for the allocation of a null dataspace 
+       to the callbacks, the coding for the allocation of a null dataspace
        is moved from H5S_select_deserialize() in H5Sselect.c.
        This is needed for decoding virtual layout in H5O__layout_decode() */
 

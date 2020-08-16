@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu <songyulu@hdfgroup.org>
+ * Programmer:  Raymond Lu
  *              April, 2019
  *
  * Purpose:     Private function for external.c and external_env.c
@@ -65,7 +65,7 @@ reset_raw_data_files(hbool_t is_env)
             HDsprintf(filename, "extern_%lur.raw", (unsigned long)i + 1);
         if((fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0)
             goto error;
-        
+
         /* Write garbage data to the file. This allows us to test the
          * the ability to set an offset in the raw data file.
          */
@@ -102,7 +102,7 @@ reset_raw_data_files(hbool_t is_env)
             HDsprintf(filename, "extern_%luw.raw", (unsigned long)i + 1);
         if((fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0)
             goto error;
-        
+
         /* Write garbage data to the file. This allows us to test the
          * the ability to set an offset in the raw data file.
          */

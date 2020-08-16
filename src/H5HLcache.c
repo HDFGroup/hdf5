@@ -15,7 +15,7 @@
  *
  * Created:     H5HLcache.c
  *              Feb  5 2008
- *              Quincey Koziol <koziol@hdfgroup.org>
+ *              Quincey Koziol
  *
  * Purpose:     Implement local heap metadata cache methods.
  *
@@ -36,7 +36,7 @@
 #include "H5Eprivate.h"     /* Error handling               */
 #include "H5HLpkg.h"        /* Local Heaps                  */
 #include "H5MFprivate.h"    /* File memory management       */
-#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5MMprivate.h"    /* Memory management			*/
 #include "H5WBprivate.h"    /* Wrapped Buffers              */
 
 
@@ -77,16 +77,16 @@ static void *H5HL__cache_prefix_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5HL__cache_prefix_image_len(const void *thing, size_t *image_len);
 static herr_t H5HL__cache_prefix_serialize(const H5F_t *f, void *image,
-    size_t len, void *thing); 
+    size_t len, void *thing);
 static herr_t H5HL__cache_prefix_free_icr(void *thing);
 
 /* Local heap data block */
 static herr_t H5HL__cache_datablock_get_initial_load_size(void *udata, size_t *image_len);
 static void *H5HL__cache_datablock_deserialize(const void *image, size_t len,
-    void *udata, hbool_t *dirty); 
+    void *udata, hbool_t *dirty);
 static herr_t H5HL__cache_datablock_image_len(const void *thing, size_t *image_len);
 static herr_t H5HL__cache_datablock_serialize(const H5F_t *f, void *image,
-    size_t len, void *thing); 
+    size_t len, void *thing);
 static herr_t H5HL__cache_datablock_notify(H5C_notify_action_t action, void *_thing);
 static herr_t H5HL__cache_datablock_free_icr(void *thing);
 
@@ -176,12 +176,12 @@ H5HL__hdr_deserialize( H5HL_t *heap, const uint8_t *image,
     HDassert(udata);
 
     /* Check magic number */
-    if(HDmemcmp(image, H5HL_MAGIC, (size_t)H5_SIZEOF_MAGIC)) 
+    if(HDmemcmp(image, H5HL_MAGIC, (size_t)H5_SIZEOF_MAGIC))
         HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad local heap signature")
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
-    if(H5HL_VERSION != *image++) 
+    if(H5HL_VERSION != *image++)
         HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "wrong version number in local heap")
 
     /* Reserved */
@@ -323,7 +323,7 @@ H5HL__fl_serialize(const H5HL_t *heap)
 /*-------------------------------------------------------------------------
  * Function:    H5HL__cache_prefix_get_initial_load_size()
  *
- * Purpose:	Return the initial size of the buffer the metadata cache should 
+ * Purpose:	Return the initial size of the buffer the metadata cache should
  *		load from file and pass to the deserialize routine.
  *
  * Return:      Success:        SUCCEED
@@ -352,7 +352,7 @@ H5HL__cache_prefix_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *im
 /*-------------------------------------------------------------------------
  * Function:    H5HL__cache_prefix_get_final_load_size()
  *
- * Purpose:	Return the final size of the buffer the metadata cache should 
+ * Purpose:	Return the final size of the buffer the metadata cache should
  *		load from file and pass to the deserialize routine.
  *
  * Return:      Success:        SUCCEED
@@ -402,7 +402,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5HL__cache_prefix_deserialize
  *
- * Purpose:	Given a buffer containing the on disk image of the local 
+ * Purpose:	Given a buffer containing the on disk image of the local
  *		heap prefix, deserialize it, load its contents into a newly allocated
  *		instance of H5HL_prfx_t, and return a pointer to the new instance.
  *
@@ -415,7 +415,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5HL__cache_prefix_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len, 
+H5HL__cache_prefix_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len,
     void *_udata, hbool_t H5_ATTR_UNUSED *dirty)
 {
     H5HL_t               *heap = NULL;  /* Local heap */
@@ -472,8 +472,8 @@ H5HL__cache_prefix_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't initialize free list")
         } /* end if */
         else
-            /* Note that the heap should _NOT_ be a single 
-             * object in the cache 
+            /* Note that the heap should _NOT_ be a single
+             * object in the cache
              */
             heap->single_cache_obj = FALSE;
     } /* end if */
@@ -486,11 +486,11 @@ done:
     if(!ret_value) {
         if(prfx) {
             if(FAIL == H5HL__prfx_dest(prfx))
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to destroy local heap prefix");
+                HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to destroy local heap prefix");
         } /* end if */
         else {
             if(heap && FAIL == H5HL__dest(heap))
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to destroy local heap");
+                HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to destroy local heap");
         } /* end else */
     } /* end if */
 
@@ -501,7 +501,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5HL__cache_prefix_image_len
  *
- * Purpose:	Return the on disk image size of a local heap prefix to the 
+ * Purpose:	Return the on disk image size of a local heap prefix to the
  *		metadata cache via the image_len.
  *
  * Return:      Success:        SUCCEED
@@ -528,8 +528,8 @@ H5HL__cache_prefix_image_len(const void *_thing, size_t *image_len)
     /* Set the prefix's size */
     *image_len = prfx->heap->prfx_size;
 
-    /* If the heap is stored as a single object, add in the 
-     * data block size also 
+    /* If the heap is stored as a single object, add in the
+     * data block size also
      */
     if(prfx->heap->single_cache_obj)
         *image_len += prfx->heap->dblk_size;
@@ -541,9 +541,9 @@ H5HL__cache_prefix_image_len(const void *_thing, size_t *image_len)
 /*-------------------------------------------------------------------------
  * Function:    H5HL__cache_prefix_serialize
  *
- * Purpose:	Given a pointer to an instance of H5HL_prfx_t and an 
- *		appropriately sized buffer, serialize the contents of the 
- *		instance for writing to disk, and copy the serialized data 
+ * Purpose:	Given a pointer to an instance of H5HL_prfx_t and an
+ *		appropriately sized buffer, serialize the contents of the
+ *		instance for writing to disk, and copy the serialized data
  *		into the buffer.
  *
  * Return:      Success:        SUCCEED
@@ -603,9 +603,9 @@ H5HL__cache_prefix_serialize(const H5_ATTR_NDEBUG_UNUSED H5F_t *f, void *_image,
         if((size_t)(image - (uint8_t *)_image) < heap->prfx_size) {
             size_t gap;         /* Size of gap between prefix and data block */
 
-            /* Set image to the start of the data block.  This is necessary 
-             * because there may be a gap between the used portion of 
-             * the prefix and the data block due to alignment constraints. 
+            /* Set image to the start of the data block.  This is necessary
+             * because there may be a gap between the used portion of
+             * the prefix and the data block due to alignment constraints.
              */
             gap = heap->prfx_size - (size_t)(image - (uint8_t *)_image);
             HDmemset(image, 0, gap);
@@ -636,11 +636,11 @@ H5HL__cache_prefix_serialize(const H5_ATTR_NDEBUG_UNUSED H5F_t *f, void *_image,
 /*-------------------------------------------------------------------------
  * Function:    H5HL__cache_prefix_free_icr
  *
- * Purpose:	Free the supplied in core representation of a local heap 
+ * Purpose:	Free the supplied in core representation of a local heap
  *		prefix.
  *
- *		Note that this function handles the partially initialize prefix 
- *		from a failed speculative load attempt.  See comments below for 
+ *		Note that this function handles the partially initialize prefix
+ *		from a failed speculative load attempt.  See comments below for
  *		details.
  *
  * Note:	The metadata cache sets the object's cache_info.magic to
@@ -681,7 +681,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5HL__cache_datablock_get_initial_load_size()
  *
- * Purpose:	Tell the metadata cache how large a buffer to read from 
+ * Purpose:	Tell the metadata cache how large a buffer to read from
  *		file when loading a datablock.  In this case, we simply lookup
  *		the correct value in the user data, and return it in *image_len.
  *
@@ -715,7 +715,7 @@ H5HL__cache_datablock_get_initial_load_size(void *_udata, size_t *image_len)
 /*-------------------------------------------------------------------------
  * Function:    H5HL__cache_datablock_deserialize
  *
- * Purpose:	Given a buffer containing the on disk image of a local 
+ * Purpose:	Given a buffer containing the on disk image of a local
  *		heap data block, deserialize it, load its contents into a newly allocated
  *		instance of H5HL_dblk_t, and return a pointer to the new instance.
  *
@@ -771,7 +771,7 @@ done:
     /* Release the [possibly partially initialized] local heap on errors */
     if(!ret_value && dblk)
         if(FAIL == H5HL__dblk_dest(dblk))
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to destroy local heap data block");
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to destroy local heap data block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HL__cache_datablock_deserialize() */
@@ -826,7 +826,7 @@ H5HL__cache_datablock_image_len(const void *_thing, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL__cache_datablock_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *image, 
+H5HL__cache_datablock_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *image,
     size_t H5_ATTR_NDEBUG_UNUSED len, void *_thing)
 {
     H5HL_t      *heap;          /* Pointer to the local heap */
@@ -872,7 +872,7 @@ H5HL__cache_datablock_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *imag
  *
  *-------------------------------------------------------------------------
  */
-static herr_t 
+static herr_t
 H5HL__cache_datablock_notify(H5C_notify_action_t action, void *_thing)
 {
     H5HL_dblk_t *dblk = (H5HL_dblk_t *)_thing;  /* Pointer to the local heap data block */

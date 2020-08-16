@@ -15,7 +15,7 @@
  *
  * Created:		H5Oprivate.h
  *			Aug  5 1997
- *			Robb Matzke <matzke@llnl.gov>
+ *			Robb Matzke
  *
  * Purpose:		Object header private include file.
  *
@@ -223,7 +223,7 @@ typedef struct H5O_copy_t {
 #define H5O_MDCI_MSG_ID 0x0018		/* Metadata Cache Image Message */
 #define H5O_UNKNOWN_ID  0x0019          /* Placeholder message ID for unknown message.  */
                                         /* (this should never exist in a file) */
-/* 
+/*
  * Note: Must increment H5O_MSG_TYPES in H5Opkg.h and update H5O_msg_class_g
  *      in H5O.c when creating a new message type.  Also bump the value of
  *      H5O_BOGUS_INVALID_ID, below, to be one greater than the value of
@@ -482,7 +482,7 @@ typedef struct H5O_storage_chunk_t {
     const struct H5D_chunk_ops_t *ops;  /* Pointer to chunked storage operations */
     union {
         H5O_storage_chunk_btree_t btree;   /* Information for v1 B-tree index   */
-        H5O_storage_chunk_bt2_t btree2;    /* Information for v2 B-tree index */	
+        H5O_storage_chunk_bt2_t btree2;    /* Information for v2 B-tree index */
         H5O_storage_chunk_earray_t earray; /* Information for extensible array index   */
         H5O_storage_chunk_farray_t farray; /* Information for fixed array index   */
         H5O_storage_chunk_single_filt_t single; /* Information for single chunk w/ filters index */
@@ -583,8 +583,8 @@ typedef struct H5O_storage_t {
 typedef struct H5O_layout_chunk_farray_t {
     /* Creation parameters for fixed array data structure */
     struct {
-        uint8_t max_dblk_page_nelmts_bits;  /* Log2(Max. # of elements in a data block page) - 
-                                               i.e. # of bits needed to store max. # of elements 
+        uint8_t max_dblk_page_nelmts_bits;  /* Log2(Max. # of elements in a data block page) -
+                                               i.e. # of bits needed to store max. # of elements
                                                in a data block page */
     } cparam;
 } H5O_layout_chunk_farray_t;
@@ -885,13 +885,10 @@ struct H5P_genplist_t;
 H5_DLL herr_t H5O_init(void);
 H5_DLL herr_t H5O_create(H5F_t *f, size_t size_hint, size_t initial_rc,
     hid_t ocpl_id, H5O_loc_t *loc/*out*/);
-H5_DLL H5O_t *H5O__create_ohdr(H5F_t *f, hid_t ocpl_id);
-H5_DLL herr_t H5O__apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id,
+H5_DLL H5O_t *H5O_create_ohdr(H5F_t *f, hid_t ocpl_id);
+H5_DLL herr_t H5O_apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id,
     size_t size_hint, size_t initial_rc, H5O_loc_t *loc_out);
 H5_DLL herr_t H5O_open(H5O_loc_t *loc);
-H5_DLL void *H5O_open_by_idx(const H5G_loc_t *loc, const char *name,
-    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, H5I_type_t *opened_type/*out*/);
-H5_DLL void *H5O_open_by_addr(const H5G_loc_t *loc, haddr_t addr, H5I_type_t *opened_type/*out*/);
 H5_DLL void *H5O_open_by_loc(const H5G_loc_t *obj_loc, H5I_type_t *opened_type/*out*/);
 H5_DLL herr_t H5O_close(H5O_loc_t *loc, hbool_t *file_closed/*out*/);
 H5_DLL int H5O_link(const H5O_loc_t *loc, int adjust);
@@ -986,8 +983,6 @@ H5_DLL herr_t H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst
 H5_DLL herr_t H5O_copy_expand_ref(H5F_t *file_src, hid_t tid_src, H5T_t *dt_src,
     void *buf_src, size_t nbytes_src, H5F_t *file_dst, void *buf_dst,
     H5O_copy_t *cpy_info);
-H5_DLL herr_t H5O_copy(const H5G_loc_t *src_loc, const char *src_name,
-    H5G_loc_t *dst_loc, const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id);
 
 /* Debugging routines */
 H5_DLL herr_t H5O_debug_id(unsigned type_id, H5F_t *f, const void *mesg, FILE *stream, int indent, int fwidth);

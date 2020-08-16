@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@hdfgroup.org>
+/* Programmer:  Quincey Koziol
  *              Thursday, August 28, 2008
  *
  * Purpose:	Extensible array testing functions.
@@ -38,7 +38,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5EApkg.h"		/* Extensible Arrays			*/
 #include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5VMprivate.h"         /* Vector functions			*/
+#include "H5VMprivate.h"        /* Vector functions			*/
 
 
 /****************/
@@ -346,10 +346,10 @@ END_FUNC(STATIC)  /* end H5EA__test_debug() */
  * Function:    H5EA__test_crt_dbg_context
  *
  * Purpose:     Create context for debugging callback
- *              
+ *
  * Return:      Success:        non-NULL
  *              Failure:        NULL
- *              
+ *
  * Programmer:	Vailin Choi; August 2010
  *
  *-------------------------------------------------------------------------
@@ -357,10 +357,10 @@ END_FUNC(STATIC)  /* end H5EA__test_debug() */
 BEGIN_FUNC(STATIC, ERR,
 void *, NULL, NULL,
 H5EA__test_crt_dbg_context(H5F_t H5_ATTR_UNUSED *f, haddr_t H5_ATTR_UNUSED obj_addr))
-    
+
     /* Local variables */
     H5EA__ctx_cb_t *ctx;              /* Context for callbacks */
-    
+
     /* Allocate new context structure */
     if(NULL == (ctx = H5FL_MALLOC(H5EA__ctx_cb_t)))
         H5E_THROW(H5E_CANTALLOC, "can't allocate extensible array client callback context")

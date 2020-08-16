@@ -1786,43 +1786,32 @@ main(int argc, const char *argv[])
     iter_t              iter;
     const char         *fname = NULL;
     hid_t               fid = H5I_INVALID_HID;
-    H5E_auto2_t         func;
-    H5E_auto2_t         tools_func;
-    void               *edata;
-    void               *tools_edata;
     struct handler_t   *hand = NULL;
     hid_t               fapl_id = H5P_DEFAULT;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
 
-    /* Disable error reporting */
-    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
     /* Initialize h5tools lib */
     h5tools_init();
-
-    /* Disable tools error reporting */
-    H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
-    H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
 
     HDmemset(&iter, 0, sizeof(iter));
 
     if(parse_command_line(argc, argv, &hand) < 0)
         goto done;
 
-    if (drivername) {
-        h5tools_fapl_info_t fapl_info;
+    /* enable error reporting if command line option */
+    h5tools_error_report();
 
-        /* Currently, only retrieval of VFDs is supported. */
-        fapl_info.type          = VFD_BY_NAME;
-        fapl_info.info_string   = NULL;
-        fapl_info.u.name        = drivername;
+    if (drivername) {
+        h5tools_vfd_info_t vfd_info;
+
+        vfd_info.info       = NULL;
+        vfd_info.name       = drivername;
 
         if (!HDstrcmp(drivername, drivernames[ROS3_VFD_IDX])) {
 #ifdef H5_HAVE_ROS3_VFD
-            fapl_info.info_string = (void *)&ros3_fa;
+            vfd_info.info = (void *)&ros3_fa;
 #else
             error_msg("Read-Only S3 VFD not enabled.\n");
             goto done;
@@ -1830,25 +1819,20 @@ main(int argc, const char *argv[])
         }
         else if (!HDstrcmp(drivername, drivernames[HDFS_VFD_IDX])) {
 #ifdef H5_HAVE_LIBHDFS
-            fapl_info.info_string = (void *)&hdfs_fa;
+            vfd_info.info = (void *)&hdfs_fa;
 #else
             error_msg("HDFS VFD not enabled.\n");
             goto done;
 #endif
         }
 
-        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, &fapl_info)) < 0) {
+        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info)) < 0) {
             error_msg("Unable to create FAPL for file access\n");
             goto done;
         }
     }
 
     fname = argv[opt_ind];
-
-    if(enable_error_stack > 0) {
-        H5Eset_auto2(H5E_DEFAULT, func, edata);
-        H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
-    }
 
     /* Check for filename given */
     if(fname) {
@@ -1953,8 +1937,6 @@ done:
         error_msg("unable to close file \"%s\"\n", fname);
         h5tools_setstatus(EXIT_FAILURE);
     } /* end if */
-
-    H5Eset_auto2(H5E_DEFAULT, func, edata);
 
     leave(h5tools_getstatus());
 } /* end main() */

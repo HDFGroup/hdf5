@@ -77,12 +77,12 @@ void accum_printf(const H5F_t *f);
 
 /*-------------------------------------------------------------------------
  * Function:    main
- * 
+ *
  * Purpose:     Test the metadata accumulator code
- * 
+ *
  * Return:      Success: SUCCEED
  *              Failure: FAIL
- * 
+ *
  * Programmer:  Mike McGreevy
  *              October 7, 2010
  *
@@ -157,7 +157,7 @@ main(void)
 
     return 0;
 
-error: 
+error:
     if(api_ctx_pushed) H5CX_pop();
 
     HDputs("*** TESTS FAILED ***");
@@ -171,12 +171,12 @@ error:
 
 /*-------------------------------------------------------------------------
  * Function:    test_write_read
- * 
+ *
  * Purpose:     Simple test to write to then read from metadata accumulator.
- * 
+ *
  * Return:      Success: SUCCEED
  *              Failure: FAIL
- * 
+ *
  * Programmer:  Mike McGreevy
  *              October 7, 2010
  *
@@ -222,17 +222,17 @@ error:
     HDfree(read_buf);
 
     return 1;
-} /* test_write_read */ 
+} /* test_write_read */
 
 
 /*-------------------------------------------------------------------------
  * Function:    test_write_read_nonacc_front
- * 
+ *
  * Purpose:     Simple test to write to then read from before metadata accumulator.
- * 
+ *
  * Return:      Success: SUCCEED
  *              Failure: FAIL
- * 
+ *
  * Programmer:  Allen Byrne
  *              October 8, 2010
  *
@@ -281,17 +281,17 @@ error:
     HDfree(read_buf);
 
     return 1;
-} /* test_write_read */ 
+} /* test_write_read */
 
 
 /*-------------------------------------------------------------------------
  * Function:    test_write_read_nonacc_end
- * 
+ *
  * Purpose:     Simple test to write to then read from after metadata accumulator.
- * 
+ *
  * Return:      Success: SUCCEED
  *              Failure: FAIL
- * 
+ *
  * Programmer:  Allen Byrne
  *              October 8, 2010
  *
@@ -340,17 +340,17 @@ error:
     HDfree(read_buf);
 
     return 1;
-} /* test_write_read */ 
+} /* test_write_read */
 
 
 /*-------------------------------------------------------------------------
  * Function:    test_free
  *
  * Purpose:     Simple test to free metadata accumulator.
- * 
+ *
  * Return:      Success: SUCCEED
  *              Failure: FAIL
- * 
+ *
  * Programmer:  Raymond Lu
  *              October 8, 2010
  *
@@ -366,7 +366,7 @@ test_free(H5F_t *f)
 
     TESTING("simple freeing metadata accumulator");
 
-    /* Write and free the whole accumulator. */ 
+    /* Write and free the whole accumulator. */
     wbuf = (int32_t *)HDmalloc(256 * sizeof(int32_t));
     HDassert(wbuf);
     rbuf = (int32_t *)HDmalloc(256 * sizeof(int32_t));
@@ -388,12 +388,12 @@ test_free(H5F_t *f)
     /* Write second quarter of the accumulator */
     if(accum_write(64 * sizeof(int32_t), 64 * sizeof(int32_t), wbuf) < 0) FAIL_STACK_ERROR;
 
-    /* Free the second quarter of the accumulator, the requested area 
+    /* Free the second quarter of the accumulator, the requested area
      * is bigger than the data region on the right side. */
     if(accum_free(f, 64 * sizeof(int32_t), 65 * sizeof(int32_t)) < 0) FAIL_STACK_ERROR;
 
 
-    /* Write half of the accumulator. */ 
+    /* Write half of the accumulator. */
     if(accum_write(0, 128 * sizeof(int32_t), wbuf) < 0) FAIL_STACK_ERROR;
 
     /* Free the first block of 4B */
@@ -525,19 +525,19 @@ error:
         HDfree(expect);
 
     return 1;
-} /* test_free */ 
+} /* test_free */
 
 
 /*-------------------------------------------------------------------------
  * Function:    test_accum_overlap
- * 
+ *
  * Purpose:     This test will write a series of pieces of data
  *              to the accumulator with the goal of overlapping
  *              the writes in various different ways.
- * 
+ *
  * Return:      Success: SUCCEED
  *              Failure: FAIL
- * 
+ *
  * Programmer:  Mike McGreevy
  *              October 7, 2010
  *
@@ -629,9 +629,9 @@ test_accum_overlap(H5F_t *f)
     if(accum_write(96, 3 * sizeof(int32_t), wbuf) < 0) FAIL_STACK_ERROR;
     if(accum_read(96, 3 * sizeof(int32_t), rbuf) < 0) FAIL_STACK_ERROR;
     if(HDmemcmp(wbuf, rbuf, 3 * sizeof(int32_t)) != 0) TEST_ERROR;
- 
+
     /* Set up expected data buffer and verify contents of
-        accumulator as constructed by cases 1-8, above */    
+        accumulator as constructed by cases 1-8, above */
     for(i = 0; i < 5; i++)
         wbuf[i] = 4;
     for(i = 5; i < 6; i++)
@@ -881,14 +881,14 @@ error:
 
 /*-------------------------------------------------------------------------
  * Function:    test_accum_non_overlap_size
- * 
+ *
  * Purpose:     This test will write a series of pieces of data
  *              to the accumulator with the goal of not overlapping
  *              the writes with a data size larger then the accum size.
- * 
+ *
  * Return:      Success: SUCCEED
  *              Failure: FAIL
- * 
+ *
  * Programmer:  Allen Byrne
  *              October 8, 2010
  *
@@ -950,7 +950,7 @@ error:
  *
  * Purpose:     This test will write a series of pieces of data
  *              to the accumulator with the goal of overlapping
- *              the writes with a data size completely overlapping 
+ *              the writes with a data size completely overlapping
  *              the accumulator at both ends.
  *
  * Return:      Success: SUCCEED
@@ -1015,25 +1015,25 @@ error:
 
 /*-------------------------------------------------------------------------
  * Function:    test_accum_adjust
- * 
+ *
  * Purpose:     This test examines the various ways the accumulator might
  *              adjust itself as a result of data appending or prepending
  *              to it.
  *
- *              This test program covers all the code in H5F_accum_adjust, 
+ *              This test program covers all the code in H5F_accum_adjust,
  *              but NOT all possible paths through said code. It only covers
  *              six potential paths through the function. (Again, though, each
  *              piece of code within an if/else statement in H5F_accum_adjust is
- *              covered by one of the paths in this test function). Since there 
- *              are a ridiculous number of total possible paths through this 
+ *              covered by one of the paths in this test function). Since there
+ *              are a ridiculous number of total possible paths through this
  *              function due to its large number of embedded if/else statements,
- *              that's certainly a lot of different test cases to write by hand. 
- *              (Though if someone comes across this code and has some free 
+ *              that's certainly a lot of different test cases to write by hand.
+ *              (Though if someone comes across this code and has some free
  *              time, go for it).
- * 
+ *
  * Return:      Success: SUCCEED
  *              Failure: FAIL
- * 
+ *
  * Programmer:  Mike McGreevy
  *              October 11, 2010
  *
@@ -1068,7 +1068,7 @@ test_accum_adjust(H5F_t *f)
      * an increase in size because it's already at it's maximum size */
     if(accum_write((1024 * 1024), (1024 * 1024) - 1, wbuf) < 0) FAIL_STACK_ERROR;
 
-    /* Write a small (1KB) block that prepends to the front of the accumulator. */ 
+    /* Write a small (1KB) block that prepends to the front of the accumulator. */
     /* ==> Accumulator will need more buffer space */
     /* ==> Accumulator will try to resize, but see that it's getting too big */
     /* ==> Size of new block is less than half maximum size of accumulator */
@@ -1084,7 +1084,7 @@ test_accum_adjust(H5F_t *f)
     /* Read back and verify second write */
     if(accum_read((1024 * 1024) - 1024, 1024, rbuf) < 0) FAIL_STACK_ERROR;
     if(HDmemcmp(wbuf, rbuf, (size_t)1024) != 0) TEST_ERROR;
-    
+
     /* Reset accumulator for next case */
     if(accum_reset(f) < 0) FAIL_STACK_ERROR;
 
@@ -1144,7 +1144,7 @@ test_accum_adjust(H5F_t *f)
         to disk */
     if(accum_write(0, 1, wbuf) < 0) FAIL_STACK_ERROR;
 
-    /* Read in the piece we wrote to disk above, and then verify that 
+    /* Read in the piece we wrote to disk above, and then verify that
         the data is as expected */
     if(accum_read((1024 * 1024) - 1, 1024, rbuf) < 0) FAIL_STACK_ERROR;
     if(HDmemcmp(wbuf, rbuf, (size_t)1024) != 0) TEST_ERROR;
@@ -1175,7 +1175,7 @@ test_accum_adjust(H5F_t *f)
     /* ==> Size of new block is less than than half maximum size of accumulator */
     /* ==> New block being appended to accumulator */
     /* ==> We can slide the dirty region down, to accomodate the request */
-    /* ==> Max Buffer Size - (dirty offset + adjust size) >= 2 * size) */ 
+    /* ==> Max Buffer Size - (dirty offset + adjust size) >= 2 * size) */
     /* ==> Need to adjust location of accumulator while appending */
     /* ==> Accumulator will need to be reallocated */
     if(accum_write(1048571, 349523, wbuf) < 0) FAIL_STACK_ERROR;
@@ -1184,7 +1184,7 @@ test_accum_adjust(H5F_t *f)
         to disk */
     if(accum_write(1398900, 1, wbuf) < 0) FAIL_STACK_ERROR;
 
-    /* Read in the piece we wrote to disk above, and then verify that 
+    /* Read in the piece we wrote to disk above, and then verify that
         the data is as expected */
     if(accum_read(1048571, 349523, rbuf) < 0) FAIL_STACK_ERROR;
     if(HDmemcmp(wbuf, rbuf, (size_t)349523) != 0) TEST_ERROR;
@@ -1213,7 +1213,7 @@ test_accum_adjust(H5F_t *f)
     /* ==> Size of new block is less than than half maximum size of accumulator */
     /* ==> New block being appended to accumulator */
     /* ==> We can slide the dirty region down, to accomodate the request */
-    /* ==> Max Buffer Size - (dirty offset + adjust size) < 2 * size) */ 
+    /* ==> Max Buffer Size - (dirty offset + adjust size) < 2 * size) */
     /* ==> Need to adjust location of accumulator while appending */
     if(accum_write((1024 * 1024) - 5, 10, wbuf) < 0) FAIL_STACK_ERROR;
 
@@ -1221,7 +1221,7 @@ test_accum_adjust(H5F_t *f)
         to disk */
     if(accum_write(0, 1, wbuf) < 0) FAIL_STACK_ERROR;
 
-    /* Read in the piece we wrote to disk above, and then verify that 
+    /* Read in the piece we wrote to disk above, and then verify that
         the data is as expected */
     if(accum_read((1024 * 1024) - 5, 10, rbuf) < 0) FAIL_STACK_ERROR;
     if(HDmemcmp(wbuf, rbuf, (size_t)10) != 0) TEST_ERROR;
@@ -1253,7 +1253,7 @@ test_accum_adjust(H5F_t *f)
         to disk */
     if(accum_write(1398900, 1, wbuf) < 0) FAIL_STACK_ERROR;
 
-    /* Read in the piece we wrote to disk above, and then verify that 
+    /* Read in the piece we wrote to disk above, and then verify that
         the data is as expected */
     if(accum_read(1048571, 349523, rbuf) < 0) FAIL_STACK_ERROR;
     if(HDmemcmp(wbuf, rbuf, (size_t)349523) != 0) TEST_ERROR;
@@ -1279,23 +1279,23 @@ error:
 
 /*-------------------------------------------------------------------------
  * Function:    test_read_after
- * 
- * Purpose:     This test will verify the case when metadata is read partly 
- *              from the accumulator and partly from disk.  The test will 
+ *
+ * Purpose:     This test will verify the case when metadata is read partly
+ *              from the accumulator and partly from disk.  The test will
  *              write a block of data at address 512, force the data to be
- *              written to disk, write new data partially overlapping the 
- *              original block from below, then read data at address 512.  
- *              The data read should be partly new and partly original. 
- * 
+ *              written to disk, write new data partially overlapping the
+ *              original block from below, then read data at address 512.
+ *              The data read should be partly new and partly original.
+ *
  * Return:      Success: SUCCEED
  *              Failure: FAIL
- * 
+ *
  * Programmer:  Larry Knox
  *              October 8, 2010
  *
  *-------------------------------------------------------------------------
  */
-unsigned 
+unsigned
 test_read_after(H5F_t *f)
 {
     int i = 0;
@@ -1329,14 +1329,14 @@ test_read_after(H5F_t *f)
         of the original block */
     if(accum_write(256, 512, wbuf) < 0) FAIL_STACK_ERROR;
 
-    /* Read 128 bytes at the original address, and then  */ 
+    /* Read 128 bytes at the original address, and then  */
     if(accum_read(512, 512, rbuf) < 0) FAIL_STACK_ERROR;
 
-    /* Set the second half of wbuf back to 1s */ 
+    /* Set the second half of wbuf back to 1s */
     for(i = 64; i < s; i++)
         wbuf[i] = 1;
 
-    /* Read in the piece we wrote to disk above, and then verify that 
+    /* Read in the piece we wrote to disk above, and then verify that
         the data is as expected */
     if(accum_read(512, 512, rbuf) < 0) FAIL_STACK_ERROR;
     if(HDmemcmp(wbuf, rbuf, (size_t)128) != 0) TEST_ERROR;
@@ -1362,19 +1362,19 @@ error:
 
 /*-------------------------------------------------------------------------
  * Function:    test_big
- * 
+ *
  * Purpose:     This test exercises writing large pieces of metadata to the
  *		file.
- * 
+ *
  * Return:      Success: SUCCEED
  *              Failure: FAIL
- * 
+ *
  * Programmer:  Quincey Koziol
  *              October 12, 2010
  *
  *-------------------------------------------------------------------------
  */
-unsigned 
+unsigned
 test_big(H5F_t *f)
 {
     uint8_t *wbuf, *wbuf2, *rbuf, *zbuf;        /* Buffers for reading & writing, etc */
@@ -1670,19 +1670,19 @@ error:
 
 /*-------------------------------------------------------------------------
  * Function:    test_random_write
- * 
+ *
  * Purpose:     This test writes random pieces of data to the file and
  *		then reads it all back.
- * 
+ *
  * Return:      Success: SUCCEED
  *              Failure: FAIL
- * 
+ *
  * Programmer:  Quincey Koziol
  *              October 11, 2010
  *
  *-------------------------------------------------------------------------
  */
-unsigned 
+unsigned
 test_random_write(H5F_t *f)
 {
     uint8_t *wbuf, *rbuf;       /* Buffers for reading & writing */
@@ -1708,10 +1708,10 @@ test_random_write(H5F_t *f)
 
     /* Choose random # seed */
     seed = (unsigned)HDtime(NULL);
-#ifdef QAK
+#if 0
 /* seed = (unsigned)1155438845; */
 HDfprintf(stderr, "Random # seed was: %u\n", seed);
-#endif /* QAK */
+#endif
     HDsrandom(seed);
 
     /* Allocate space for the segment length buffer */
@@ -1808,23 +1808,23 @@ error:
 
 /*-------------------------------------------------------------------------
  * Function:    test_swmr_write_big
- * 
+ *
  * Purpose:    	A SWMR test: verifies that writing "large" metadata to a file
- *		opened with SWMR_WRITE will flush the existing metadata in the 
+ *		opened with SWMR_WRITE will flush the existing metadata in the
  *		accumulator to disk first before writing the "large" metadata
- *	 	to disk.  
+ *	 	to disk.
  *		This test will fork and exec a reader "accum_swmr_reader" which
  *		opens the same file with SWMR_READ and verifies that the correct
  *		metadata is read from disk.
- * 
+ *
  * Return:      Success: 0
  *              Failure: 1
- * 
+ *
  * Programmer:  Vailin Choi; April 2013
  *
  *-------------------------------------------------------------------------
  */
-unsigned 
+unsigned
 test_swmr_write_big(hbool_t newest_format)
 {
     hid_t fid = -1;			    /* File ID */
@@ -1991,11 +1991,11 @@ test_swmr_write_big(hbool_t newest_format)
             FAIL_STACK_ERROR;
 
         /* Close and remove the file */
-        if(H5Fclose(fid) < 0) 
+        if(H5Fclose(fid) < 0)
             FAIL_STACK_ERROR;
 
         /* Close the property list */
-        if(H5Pclose(fapl) < 0) 
+        if(H5Pclose(fapl) < 0)
             FAIL_STACK_ERROR;
 
         /* Pop API context */
@@ -2034,12 +2034,12 @@ error:
 
 /*-------------------------------------------------------------------------
  * Function:    accum_printf
- * 
+ *
  * Purpose:     Debug function to print some stats about the accumulator
- * 
+ *
  * Return:      Success: SUCCEED
  *              Failure: FAIL
- * 
+ *
  * Programmer:  Mike McGreevy
  *              October 7, 2010
  *
