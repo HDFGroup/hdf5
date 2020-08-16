@@ -901,7 +901,7 @@ tmpfile(void)
  *  link_info->trg_path must be freed out of this function
  *-------------------------------------------------------------------------*/
 int
-H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_t *link_info, hbool_t get_obj_type)
+H5tools_get_symlink_info(hid_t file_id, const char *linkpath, h5tool_link_info_t *link_info, hbool_t get_obj_type)
 {
     htri_t l_ret;
     H5O_info2_t trg_oinfo;
