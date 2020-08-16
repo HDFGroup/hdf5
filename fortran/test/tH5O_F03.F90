@@ -63,7 +63,7 @@ MODULE visit_cb
 
 CONTAINS
 
-! Compares the field values of a C h5O_info_t and a Fortran H5O_info_t.
+! Compares the field values of a C H5O_info_t and a Fortran H5O_info_t.
 
   INTEGER FUNCTION compare_h5o_info_t( oinfo_f, oinfo_c, field, full_f_field ) RESULT(status)
 
@@ -310,7 +310,7 @@ CONTAINS
 
     ENDIF
 
-    ! Check H5Oget_info_by_name_f; if partial field values where filled correctly
+    ! Check H5Oget_info_by_name_f; if partial field values were filled correctly
     CALL H5Oget_info_by_name_f(group_id, name2, oinfo_f, ierr);
     visit_obj_cb =  compare_h5o_info_t( oinfo_f, oinfo_c, op_data%field, .TRUE. )
     IF(visit_obj_cb.EQ.-1) RETURN
@@ -486,11 +486,11 @@ END SUBROUTINE test_h5o_refcount
 
 !****************************************************************
 !**
-!**  test_h5o_refcount(): Test H5O visit functions.
+!**  test_obj_visit(): Test H5O visit functions.
 !**
 !****************************************************************
 
-SUBROUTINE obj_visit(total_error)
+SUBROUTINE test_obj_visit(total_error)
 
   USE HDF5
   USE TH5_MISC
@@ -648,15 +648,15 @@ SUBROUTINE obj_visit(total_error)
   CALL h5fclose_f(fid, error)
   CALL check("h5fclose_f",error, total_error)
 
-END SUBROUTINE obj_visit
+END SUBROUTINE test_obj_visit
 
 !****************************************************************
 !**
-!**  test_h5o_refcount(): Test H5O info functions.
+!**  test_obj_info(): Test H5O info functions.
 !**
 !****************************************************************
 
-SUBROUTINE obj_info(total_error)
+SUBROUTINE test_obj_info(total_error)
 
   USE HDF5
   USE TH5_MISC
@@ -796,7 +796,7 @@ SUBROUTINE obj_info(total_error)
   CALL h5fclose_f(fid, error)
   CALL check("h5fclose_f", error, total_error)
 
-END SUBROUTINE obj_info
+END SUBROUTINE test_obj_info
 
 !-------------------------------------------------------------------------
 ! Function:    build_visit_file

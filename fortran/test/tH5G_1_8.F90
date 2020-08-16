@@ -669,7 +669,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
      INTEGER(SIZE_T) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value
 
 
-!     WRITE(*,*) "link creation (w/new group format)"
+     WRITE(*,*) "link creation (w/new group format)"
 
      !  Create a file
      CALL h5fcreate_f(FileName, H5F_ACC_TRUNC_F, file, error, H5P_DEFAULT_F, fapl)
@@ -1357,11 +1357,11 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
 
            ! Close the group creation property list
            CALL H5Pclose_f(gcpl_id, error)
-           CALL check("delete_by_idx.H5Gclose_f", error, total_error)
+           CALL check("delete_by_idx.H5Pclose_f", error, total_error)
 
            ! Close the file
            CALL H5Fclose_f(file_id, error)
-           CALL check("delete_by_idx.H5Gclose_f", error, total_error)
+           CALL check("delete_by_idx.H5Fclose_f", error, total_error)
 
            IF(cleanup) CALL h5_cleanup_f("file0", H5P_DEFAULT_F, error)
            CALL check("h5_cleanup_f", error, total_error)

@@ -542,7 +542,7 @@ h5ovisit_by_name_c(hid_t_f *loc_id,  _fcd object_name, size_t_f *namelen, int_f 
     HGOTO_DONE(FAIL);
 
   /*
-   * Call H5Ovisit
+   * Call H5Ovisit_by_name
    */
   func_ret_value = H5Ovisit_by_name2( (hid_t)*loc_id, c_object_name, (H5_index_t)*index_type, (H5_iter_order_t)*order,
                                       op, op_data, (unsigned)*fields, (hid_t)*lapl_id);

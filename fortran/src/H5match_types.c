@@ -153,7 +153,9 @@ int main(void)
 
   int FORTRAN_NUM_INTEGER_KINDS=H5_FORTRAN_NUM_INTEGER_KINDS;
   int H5_FORTRAN_NUM_REAL_KINDS;
+#if H5_FORTRAN_HAVE_C_LONG_DOUBLE!=0
   int found_long_double = 0;
+#endif
 
   /* Open target files */
   c_header = fopen(CFILE, "w");
@@ -414,7 +416,7 @@ int main(void)
     return -1;
   }
 
-  /* Need the buffer size for the fortran derive type 'hdset_reg_ref_t_f03'
+  /* Need the buffer size for the fortran derived type 'hdset_reg_ref_t_f03'
    * in order to be interoperable with C's structure, the C buffer size
    * H5R_DSET_REG_REF_BUF_SIZE is (sizeof(haddr_t)+4)
    */

@@ -264,7 +264,7 @@ CONTAINS
 !
 ! Fortran2003 Interface:
   SUBROUTINE h5eset_auto_f(printflag, hdferr, estack_id, func, client_data)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR
     INTEGER       , INTENT(IN)            :: printflag
     INTEGER       , INTENT(OUT)           :: hdferr
     INTEGER(HID_T), INTENT(IN) , OPTIONAL :: estack_id
