@@ -15,7 +15,7 @@
  *
  * Created:     H5MM.c
  *              Jul 10 1997
- *              Robb Matzke <matzke@llnl.gov>
+ *              Robb Matzke
  *
  * Purpose:     Memory management functions
  *

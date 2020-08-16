@@ -39,11 +39,8 @@
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5Lprivate.h"         /* Links                                    */
 #include "H5MFprivate.h"        /* File memory management                   */
-#ifdef H5O_ENABLE_BOGUS
 #include "H5MMprivate.h"        /* Memory management                        */
-#endif /* H5O_ENABLE_BOGUS */
 #include "H5Opkg.h"             /* Object headers                           */
-#include "H5SMprivate.h"        /* Shared object header messages            */
 
 
 /****************/
@@ -58,7 +55,7 @@
 /* User data for recursive traversal over objects from a group */
 typedef struct {
     hid_t       obj_id;         /* The ID for the starting group */
-    H5G_loc_t    *start_loc;     /* Location of starting group */
+    H5G_loc_t    *start_loc;    /* Location of starting group */
     H5SL_t     *visited;        /* Skip list for tracking visited nodes */
     H5O_iterate_t op;           /* Application callback */
     void       *op_data;        /* Application's op data */
@@ -98,36 +95,36 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
  * message.
  */
 const H5O_msg_class_t *const H5O_msg_class_g[] = {
-    H5O_MSG_NULL,        /*0x0000 Null                */
-    H5O_MSG_SDSPACE,        /*0x0001 Dataspace            */
-    H5O_MSG_LINFO,        /*0x0002 Link information        */
-    H5O_MSG_DTYPE,        /*0x0003 Datatype            */
-    H5O_MSG_FILL,           /*0x0004 Old data storage -- fill value */
-    H5O_MSG_FILL_NEW,        /*0x0005 New data storage -- fill value */
-    H5O_MSG_LINK,        /*0x0006 Link                 */
-    H5O_MSG_EFL,        /*0x0007 Data storage -- external data files */
-    H5O_MSG_LAYOUT,        /*0x0008 Data Layout            */
+    H5O_MSG_NULL,               /*0x0000 Null                            */
+    H5O_MSG_SDSPACE,            /*0x0001 Dataspace                       */
+    H5O_MSG_LINFO,              /*0x0002 Link information                */
+    H5O_MSG_DTYPE,              /*0x0003 Datatype                        */
+    H5O_MSG_FILL,               /*0x0004 Old data storage -- fill value  */
+    H5O_MSG_FILL_NEW,           /*0x0005 New data storage -- fill value  */
+    H5O_MSG_LINK,               /*0x0006 Link                            */
+    H5O_MSG_EFL,                /*0x0007 Data storage -- external data files */
+    H5O_MSG_LAYOUT,             /*0x0008 Data Layout                     */
 #ifdef H5O_ENABLE_BOGUS
-    H5O_MSG_BOGUS_VALID,    /*0x0009 "Bogus valid" (for testing)    */
+    H5O_MSG_BOGUS_VALID,        /*0x0009 "Bogus valid" (for testing)     */
 #else /* H5O_ENABLE_BOGUS */
-    NULL,            /*0x0009 "Bogus valid" (for testing)    */
+    NULL,                       /*0x0009 "Bogus valid" (for testing)     */
 #endif /* H5O_ENABLE_BOGUS */
-    H5O_MSG_GINFO,        /*0x000A Group information        */
-    H5O_MSG_PLINE,        /*0x000B Data storage -- filter pipeline */
-    H5O_MSG_ATTR,        /*0x000C Attribute            */
-    H5O_MSG_NAME,        /*0x000D Object name            */
-    H5O_MSG_MTIME,        /*0x000E Object modification date and time */
-    H5O_MSG_SHMESG,        /*0x000F File-wide shared message table */
-    H5O_MSG_CONT,        /*0x0010 Object header continuation    */
-    H5O_MSG_STAB,        /*0x0011 Symbol table            */
-    H5O_MSG_MTIME_NEW,        /*0x0012 New Object modification date and time */
-    H5O_MSG_BTREEK,        /*0x0013 Non-default v1 B-tree 'K' values */
-    H5O_MSG_DRVINFO,        /*0x0014 Driver info settings        */
-    H5O_MSG_AINFO,        /*0x0015 Attribute information        */
-    H5O_MSG_REFCOUNT,        /*0x0016 Object's ref. count        */
-    H5O_MSG_FSINFO,        /*0x0017 Free-space manager info        */
-    H5O_MSG_MDCI,               /*0x0018 Metadata cache image           */
-    H5O_MSG_UNKNOWN        /*0x0019 Placeholder for unknown message */
+    H5O_MSG_GINFO,              /*0x000A Group information               */
+    H5O_MSG_PLINE,              /*0x000B Data storage -- filter pipeline */
+    H5O_MSG_ATTR,               /*0x000C Attribute                       */
+    H5O_MSG_NAME,               /*0x000D Object name                     */
+    H5O_MSG_MTIME,              /*0x000E Object modification date and time */
+    H5O_MSG_SHMESG,             /*0x000F File-wide shared message table  */
+    H5O_MSG_CONT,               /*0x0010 Object header continuation      */
+    H5O_MSG_STAB,               /*0x0011 Symbol table                    */
+    H5O_MSG_MTIME_NEW,          /*0x0012 New Object modification date and time */
+    H5O_MSG_BTREEK,             /*0x0013 Non-default v1 B-tree 'K' values */
+    H5O_MSG_DRVINFO,            /*0x0014 Driver info settings            */
+    H5O_MSG_AINFO,              /*0x0015 Attribute information           */
+    H5O_MSG_REFCOUNT,           /*0x0016 Object's ref. count             */
+    H5O_MSG_FSINFO,             /*0x0017 Free-space manager info         */
+    H5O_MSG_MDCI,               /*0x0018 Metadata cache image            */
+    H5O_MSG_UNKNOWN             /*0x0019 Placeholder for unknown message */
 };
 
 /* Format version bounds for object header */
@@ -343,7 +340,6 @@ H5O__create_ohdr(H5F_t *f, hid_t ocpl_id)
     if(0 == (H5F_INTENT(f) & H5F_ACC_RDWR))
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "no write intent on file")
 
-    /* Make certain we allocate at least a reasonable size for the object header */
     oh = H5FL_CALLOC(H5O_t);
     if(NULL == oh)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -352,6 +348,7 @@ H5O__create_ohdr(H5F_t *f, hid_t ocpl_id)
     if(NULL == oc_plist)
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, NULL, "not a property list")
 
+    /* Get any object header status flags set by properties */
     if(H5P_DATASET_CREATE_DEFAULT == ocpl_id) {
         /* If the OCPL is the default DCPL, we can get the header flags from the
          * API context. Otherwise we have to call H5P_get */
@@ -416,11 +413,10 @@ H5O__apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t ini
     oh->swmr_write = !!(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE); /* strange casting for proper type */
 #ifdef H5O_ENABLE_BAD_MESG_COUNT
     /* Check whether the "bad message count" property is set */
-    if(H5P_exist_plist(oc_plist, H5O_BAD_MESG_COUNT_NAME) > 0) {
+    if(H5P_exist_plist(oc_plist, H5O_BAD_MESG_COUNT_NAME) > 0)
         /* Get bad message count flag from property list */
         if(H5P_get(oc_plist, H5O_BAD_MESG_COUNT_NAME, &oh->store_bad_mesg_count) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get bad message count flag")
-    }
 #endif /* H5O_ENABLE_BAD_MESG_COUNT */
 
     /* Create object header proxy if doing SWMR writes */
@@ -432,7 +428,6 @@ H5O__apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t ini
         oh->proxy = NULL;
     }
 
-    /* Set initial status flags */
     oc_plist = (H5P_genplist_t *)H5I_object(ocpl_id);
     if(NULL == oc_plist)
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a property list")
@@ -540,12 +535,11 @@ H5O__apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t ini
     loc_out->file = f;
     loc_out->addr = oh_addr;
 
-    /* Open it */
     if(H5O_open(loc_out) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object header")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5O__apply_ohdr() */
 
 
@@ -816,10 +810,9 @@ H5O_close(H5O_loc_t *loc, hbool_t *file_closed /*out*/)
 #ifdef H5O_DEBUG
     if(H5DEBUG(O)) {
         if(H5F_FILE_ID(loc->file)< 0 && 1 == H5F_NREFS(loc->file))
-            HDfprintf(H5DEBUG(O), "< %a auto %lu remaining\n",
-                loc->addr, (unsigned long)H5F_NOPEN_OBJS(loc->file));
-    else
-        HDfprintf(H5DEBUG(O), "< %a\n", loc->addr);
+            HDfprintf(H5DEBUG(O), "< %a auto %lu remaining\n", loc->addr, (unsigned long)H5F_NOPEN_OBJS(loc->file));
+        else
+            HDfprintf(H5DEBUG(O), "< %a\n", loc->addr);
     }
 #endif
 
@@ -844,15 +837,14 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5O__link_oh
  *
- * Purpose:    Adjust the link count for an open object header by adding
- *        ADJUST to the link count.
+ * Purpose:     Adjust the link count for an open object header by adding
+ *              ADJUST to the link count.
  *
- * Return:    Success:    New link count
+ * Return:      Success:    New link count
  *
- *        Failure:    Negative
+ *              Failure:    -1
  *
  * Programmer:    Robb Matzke
- *        matzke@llnl.gov
  *        Aug  5 1997
  *
  *-------------------------------------------------------------------------
@@ -875,14 +867,14 @@ H5O__link_oh(H5F_t *f, int adjust, H5O_t *oh, hbool_t *deleted)
         if(adjust < 0) {
             /* Check for too large of an adjustment */
             if((unsigned)(-adjust) > oh->nlink)
-                HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "link count would be negative")
+                HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, (-1), "link count would be negative")
 
             /* Adjust the link count for the object header */
             oh->nlink = (unsigned)((int)oh->nlink + adjust);
 
             /* Mark object header as dirty in cache */
             if(H5AC_mark_entry_dirty(oh) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, FAIL, "unable to mark object header as dirty")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, (-1), "unable to mark object header as dirty")
 
             /* Check if the object should be deleted */
             if(oh->nlink == 0) {
@@ -890,7 +882,7 @@ H5O__link_oh(H5F_t *f, int adjust, H5O_t *oh, hbool_t *deleted)
                 if(H5FO_opened(f, addr) != NULL) {
                     /* Flag the object to be deleted when it's closed */
                     if(H5FO_mark(f, addr, TRUE) < 0)
-                        HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't mark object for deletion")
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, (-1), "can't mark object for deletion")
                 } /* end if */
                 else {
                     /* Mark the object header for deletion */
@@ -905,7 +897,7 @@ H5O__link_oh(H5F_t *f, int adjust, H5O_t *oh, hbool_t *deleted)
                 if(H5FO_marked(f, addr)) {
                     /* Remove "delete me" flag on the object */
                     if(H5FO_mark(f, addr, FALSE) < 0)
-                        HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't mark object for deletion")
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, (-1), "can't mark object for deletion")
                 } /* end if */
             } /* end if */
 
@@ -914,7 +906,7 @@ H5O__link_oh(H5F_t *f, int adjust, H5O_t *oh, hbool_t *deleted)
 
             /* Mark object header as dirty in cache */
             if(H5AC_mark_entry_dirty(oh) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, FAIL, "unable to mark object header as dirty")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, (-1), "unable to mark object header as dirty")
         } /* end if */
 
         /* Check for operations on refcount message */
@@ -924,7 +916,7 @@ H5O__link_oh(H5F_t *f, int adjust, H5O_t *oh, hbool_t *deleted)
                 /* Check for removing refcount message */
                 if(oh->nlink <= 1) {
                     if(H5O__msg_remove_real(f, oh, H5O_MSG_REFCOUNT, H5O_ALL, NULL, NULL, TRUE) < 0)
-                        HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete refcount message")
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, (-1), "unable to delete refcount message")
                     oh->has_refcount_msg = FALSE;
                 } /* end if */
                 /* Update refcount message with new link count */
@@ -932,7 +924,7 @@ H5O__link_oh(H5F_t *f, int adjust, H5O_t *oh, hbool_t *deleted)
                     H5O_refcount_t refcount = oh->nlink;
 
                     if(H5O__msg_write_real(f, oh, H5O_MSG_REFCOUNT, H5O_MSG_FLAG_DONTSHARE, 0, &refcount) < 0)
-                        HGOTO_ERROR(H5E_OHDR, H5E_CANTUPDATE, FAIL, "unable to update refcount message")
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTUPDATE, (-1), "unable to update refcount message")
                 } /* end else */
             } /* end if */
             else {
@@ -941,7 +933,7 @@ H5O__link_oh(H5F_t *f, int adjust, H5O_t *oh, hbool_t *deleted)
                     H5O_refcount_t refcount = oh->nlink;
 
                     if(H5O__msg_append_real(f, oh, H5O_MSG_REFCOUNT, H5O_MSG_FLAG_DONTSHARE, 0, &refcount) < 0)
-                        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to create new refcount message")
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, (-1), "unable to create new refcount message")
                     oh->has_refcount_msg = TRUE;
                 } /* end if */
             } /* end else */
@@ -967,7 +959,6 @@ done:
  *        Failure:    Negative
  *
  * Programmer:    Robb Matzke
- *        matzke@llnl.gov
  *        Aug  5 1997
  *
  *-------------------------------------------------------------------------
@@ -1016,7 +1007,6 @@ done:
  *        Failure:    NULL
  *
  * Programmer:    Quincey Koziol
- *        koziol@ncsa.uiuc.edu
  *        Dec 31 2002
  *
  *-------------------------------------------------------------------------
@@ -1202,7 +1192,6 @@ done:
  *        Failure:    NULL
  *
  * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
  *        Jul 13 2008
  *
  *-------------------------------------------------------------------------
@@ -1249,7 +1238,6 @@ done:
  *        Failure:    Negative
  *
  * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
  *        Jul 13 2008
  *
  *-------------------------------------------------------------------------
@@ -1285,7 +1273,6 @@ done:
  *        Failure:    Negative
  *
  * Programmer:    Quincey Koziol
- *        koziol@ncsa.uiuc.edu
  *        Dec 31 2002
  *
  *-------------------------------------------------------------------------
@@ -1406,8 +1393,9 @@ H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force)
             chk_dirtied = TRUE;
         } /* end if */
         else {
-            /* XXX: For now, update access time & change fields in the object header */
-            /* (will need to add some code to update modification time appropriately) */
+            /* XXX: For now, update access time & change fields in the object header
+             * (will need to add some code to update modification time appropriately)
+             */
             oh->atime = oh->ctime = now;
 
             /* Mark object header as dirty in cache */
@@ -1480,7 +1468,6 @@ done:
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Quincey Koziol
- *              <koziol@ncsa.uiuc.edu>
  *              Tuesday, January 21, 2003
  *
  *-------------------------------------------------------------------------
@@ -1552,7 +1539,6 @@ done:
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Quincey Koziol
- *        koziol@ncsa.uiuc.edu
  *        Mar 19 2003
  *
  *-------------------------------------------------------------------------
@@ -1615,7 +1601,6 @@ done:
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Quincey Koziol
- *        koziol@ncsa.uiuc.edu
  *        Mar 19 2003
  *
  *-------------------------------------------------------------------------
@@ -1715,11 +1700,10 @@ H5O__obj_type_real(const H5O_t *oh, H5O_type_t *obj_type)
 
         /* Set type to "unknown" */
         *obj_type = H5O_TYPE_UNKNOWN;
-    } /* end if */
-    else {
+    }
+    else
         /* Set object type */
         *obj_type = obj_class->type;
-    } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__obj_type_real() */
@@ -1728,10 +1712,10 @@ H5O__obj_type_real(const H5O_t *oh, H5O_type_t *obj_type)
 /*-------------------------------------------------------------------------
  * Function:    H5O__obj_class
  *
- * Purpose:    Returns the class of object pointed to by `loc'.
+ * Purpose:     Returns the class of object pointed to by 'loc'.
  *
- * Return:    Success:    An object class
- *        Failure:    NULL
+ * Return:      Success:    An object class
+ *              Failure:    NULL
  *
  * Programmer:    Quincey Koziol
  *              Monday, November  6, 2006
@@ -1744,7 +1728,7 @@ H5O__obj_class(const H5O_loc_t *loc)
     H5O_t    *oh = NULL;                     /* Object header for location */
     const H5O_obj_class_t *ret_value = NULL;    /* Return value */
 
-    FUNC_ENTER_STATIC_TAG(loc->addr)
+    FUNC_ENTER_PACKAGE_TAG(loc->addr)
 
     /* Load the object header */
     if(NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))
@@ -1756,7 +1740,7 @@ H5O__obj_class(const H5O_loc_t *loc)
 
 done:
     if(oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O__obj_class() */
@@ -1795,7 +1779,7 @@ H5O__obj_class_real(const H5O_t *oh)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to determine object type")
         else if(isa)
             HGOTO_DONE(H5O_obj_class_g[i - 1])
-    } /* end for */
+    }
 
     if(0 == i)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to determine object type")
@@ -1937,7 +1921,7 @@ H5O_loc_copy(H5O_loc_t *dst, H5O_loc_t *src, H5_copy_depth_t depth)
  * Return:    Success:    Non-negative
  *            Failure:    Negative
  *
- * Programmer:	David Young
+ * Programmer:	Quincey Koziol
  *	        January 18, 2020
  *
  *-------------------------------------------------------------------------
@@ -2109,7 +2093,7 @@ H5O_get_hdr_info(const H5O_loc_t *loc, H5O_hdr_info_t *hdr)
 
 done:
     if(oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_get_hdr_info() */
@@ -2200,8 +2184,6 @@ H5O__get_hdr_info_real(const H5O_t *oh, H5O_hdr_info_t *hdr)
  * Function:    H5O_get_info
  *
  * Purpose:     Retrieve the information for an object
- *
- * Note:        Add a parameter "fields" to indicate selection of object info.
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -2556,10 +2538,10 @@ H5O_get_oh_addr(const H5O_t *oh)
 
 
 /*-------------------------------------------------------------------------
- * Function:   H5O_get_oh_flags
+ * Function:    H5O_get_oh_flags
  *
- * Programmer: Jacob Smith
- *             2018 August 17
+ * Programmer:  Jacob Smith
+ *              2018 August 17
  *
  *-------------------------------------------------------------------------
  */
@@ -2573,14 +2555,14 @@ H5O_get_oh_flags(const H5O_t *oh)
 
 
 /*-------------------------------------------------------------------------
- * Function:   H5O_get_oh_mtime
+ * Function:    H5O_get_oh_mtime
  *
- * Purpose:    Retrieve an object's modification time. Assumes that the
+ * Purpose:     Retrieve an object's modification time. Assumes that the
  *              caller has verified that accessing this variable is appropriate
  *              to the header in question.
  *
- * Programmer: Jacob Smith
- *             2018 August 17
+ * Programmer:  Jacob Smith
+ *              2018 August 17
  *
  *-------------------------------------------------------------------------
  */
@@ -2595,10 +2577,10 @@ H5O_get_oh_mtime(const H5O_t *oh)
 
 
 /*-------------------------------------------------------------------------
- * Function:   H5O_get_oh_version
+ * Function:    H5O_get_oh_version
  *
- * Programmer: Jacob Smith
- *             2018 August 17
+ * Programmer:  Jacob Smith
+ *              2018 August 17
  *
  *-------------------------------------------------------------------------
  */
@@ -2794,12 +2776,12 @@ done:
  * Note:        Add a parameter "fields" to indicate selection of object info.
  *
  * Return:      Success:    The return value of the first operator that
- *                returns non-zero, or zero if all members were
- *                processed with no operator returning non-zero.
+ *                          returns non-zero, or zero if all members were
+ *                          processed with no operator returning non-zero.
  *
  *              Failure:    Negative if something goes wrong within the
- *                library, or the negative value returned by one
- *                of the operators.
+ *                          library, or the negative value returned by one
+ *                          of the operators.
  *
  * Programmer:    Quincey Koziol
  *              November 24 2007
@@ -2817,7 +2799,7 @@ H5O__visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     H5O_loc_t   obj_oloc;       /* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
     H5O_info_t  oinfo;          /* Object info struct */
-    hid_t       obj_id = (-1);  /* ID of object */
+    hid_t       obj_id = H5I_INVALID_HID;  /* ID of object */
     herr_t      ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -2891,7 +2873,7 @@ H5O__visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
             /* Add to list of visited objects */
             if(H5SL_insert(udata.visited, obj_pos, obj_pos) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object node into visited list")
-        } /* end if */
+        }
 
         /* Call internal group visitation routine */
         if((ret_value = H5G_visit(obj_id, ".", idx_type, order, H5O__visit_cb, &udata)) < 0)
@@ -2902,9 +2884,10 @@ done:
     if(obj_id > 0) {
         if(H5I_dec_app_ref(obj_id) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close object")
-    } /* end if */
+    }
     else if(loc_found && H5G_loc_free(&obj_loc) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location")
+
     if(udata.visited)
         H5SL_destroy(udata.visited, H5O__free_visit_visited, NULL);
 
@@ -2920,7 +2903,6 @@ done:
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
  *        Jul 13 2008
  *
  *-------------------------------------------------------------------------
@@ -2956,7 +2938,6 @@ done:
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
  *        Jul 13 2008
  *
  *-------------------------------------------------------------------------
@@ -2993,7 +2974,6 @@ done:
  * Return:     Non-negative on success/Negative on failure
  *
  * Programmer: Quincey Koziol
- *             koziol@hdfgroup.org
  *             Oct 08 2010
  *
  *-------------------------------------------------------------------------
@@ -3059,7 +3039,6 @@ H5O_get_proxy(const H5O_t *oh)
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Quincey Koziol
- *        koziol@ncsa.uiuc.edu
  *        Jan 15 2003
  *
  *-------------------------------------------------------------------------

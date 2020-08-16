@@ -15,7 +15,7 @@
  *
  * Created:             H5Ofsinfo.c
  *                      Feb 2009
- *            Vailin Choi
+ *                      Vailin Choi
  *
  * Purpose:             File space info message.
  *
