@@ -4423,8 +4423,8 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
                     idx = u;
                 } /* end else */
 
-                tmp = HDmemcmp(dt1->shared->u.enumer.value+idx1[u]*base_size,
-                       dt2->shared->u.enumer.value+idx2[idx]*base_size,
+                tmp = HDmemcmp((uint8_t *)dt1->shared->u.enumer.value + idx1[u] * base_size,
+                       (uint8_t *)dt2->shared->u.enumer.value + idx2[idx] * base_size,
                        base_size);
                 if(tmp<0) HGOTO_DONE(-1);
                 if(tmp>0) HGOTO_DONE(1);
@@ -4868,14 +4868,14 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name,
         if(H5T_g.soft[i].conv.is_app) {
             if((H5T_g.soft[i].conv.u.app_func)(src_id, dst_id, &(path->cdata), (size_t)0, (size_t)0, (size_t)0, NULL, NULL, H5CX_get_dxpl()) < 0) {
                 HDmemset(&(path->cdata), 0, sizeof(H5T_cdata_t));
-                H5E_clear_stack(H5E_DEFAULT); /*ignore the error*/
+                H5E_clear_stack(NULL); /*ignore the error*/
                 path_init_error = TRUE;
             } /* end if */
         } /* end if */
         else
             if((H5T_g.soft[i].conv.u.lib_func)(src_id, dst_id, &(path->cdata), (size_t)0, (size_t)0, (size_t)0, NULL, NULL) < 0) {
                 HDmemset(&(path->cdata), 0, sizeof(H5T_cdata_t));
-                H5E_clear_stack(H5E_DEFAULT); /*ignore the error*/
+                H5E_clear_stack(NULL); /*ignore the error*/
                 path_init_error = TRUE;
             } /* end if */
 
@@ -5229,7 +5229,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5G_name_t *
-H5T_nameof(H5T_t *dt)
+H5T_nameof(const H5T_t *dt)
 {
     H5G_name_t *ret_value = NULL;
 
@@ -5466,7 +5466,7 @@ done:
  --------------------------------------------------------------------------
  */
 htri_t
-H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
+H5T_set_loc(H5T_t *dt, H5F_t *file, H5T_loc_t loc)
 {
     htri_t      changed;         /* Whether H5T_set_loc changed the type (even if the size didn't change) */
     htri_t      ret_value = 0;   /* Indicate that success, but no location change */
@@ -5490,7 +5490,7 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
                     old_size=dt->shared->parent->shared->size;
 
                     /* Mark the VL, compound or array type */
-                    if((changed=H5T_set_loc(dt->shared->parent,f,loc))<0)
+                    if((changed=H5T_set_loc(dt->shared->parent, file, loc))<0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location")
                     if(changed>0)
                         ret_value=changed;
@@ -5530,7 +5530,7 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
                             old_size = memb_type->shared->size;
 
                             /* Mark the VL, compound, enum or array type */
-                            if((changed = H5T_set_loc(memb_type,f,loc)) < 0)
+                            if((changed = H5T_set_loc(memb_type, file, loc)) < 0)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
                             if(changed > 0)
                                 ret_value = changed;
@@ -5564,14 +5564,14 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
                 /* Recurse if it's VL, compound, enum or array */
                 /* (If the force_conv flag is _not_ set, the type cannot change in size, so don't recurse) */
                 if(dt->shared->parent->shared->force_conv && H5T_IS_COMPLEX(dt->shared->parent->shared->type)) {
-                    if((changed = H5T_set_loc(dt->shared->parent,f,loc)) < 0)
+                    if((changed = H5T_set_loc(dt->shared->parent, file, loc)) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
                     if(changed > 0)
                         ret_value = changed;
                 } /* end if */
 
                 /* Mark this VL sequence */
-                if((changed = H5T__vlen_set_loc(dt, f, loc)) < 0)
+                if((changed = H5T__vlen_set_loc(dt, file, loc)) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
                 if(changed > 0)
                     ret_value = changed;
@@ -5772,9 +5772,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_upgrade_version_cb(H5T_t *dt, void *op_value)
+H5T__upgrade_version_cb(H5T_t *dt, void *op_value)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
     HDassert(dt);
@@ -5809,7 +5809,7 @@ H5T_upgrade_version_cb(H5T_t *dt, void *op_value)
     } /* end switch */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5T_upgrade_version_cb() */
+} /* end H5T__upgrade_version_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -5837,7 +5837,7 @@ H5T__upgrade_version(H5T_t *dt, unsigned new_version)
     HDassert(dt);
 
     /* Iterate over entire datatype, upgrading the version of components, if it's useful */
-    if(H5T__visit(dt, (H5T_VISIT_SIMPLE | H5T_VISIT_COMPLEX_LAST), H5T_upgrade_version_cb, &new_version) < 0)
+    if(H5T__visit(dt, (H5T_VISIT_SIMPLE | H5T_VISIT_COMPLEX_LAST), H5T__upgrade_version_cb, &new_version) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADITER, FAIL, "iteration to upgrade datatype encoding version failed")
 
 done:
@@ -5925,7 +5925,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5T_patch_vlen_file
  *
- * Purpose:     Patch the top-level file pointer contained in (dt->shared->u.vlen.f)
+ * Purpose:     Patch the top-level file pointer contained in (dt->shared->u.vlen.file)
  *              to point to file.  This is possible because
  *              the top-level file pointer can be closed out from under
  *              dt while dt is contained in the shared file's cache.

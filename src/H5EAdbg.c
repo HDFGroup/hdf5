@@ -295,7 +295,7 @@ CATCH
 
 END_FUNC(PKG)   /* end H5EA__iblock_debug() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5EA__sblock_debug
  *

@@ -13,9 +13,9 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:        H5B.c
- *            Jul 10 1997
- *            Robb Matzke <matzke@llnl.gov>
+ * Created:         H5B.c
+ *                  Jul 10 1997
+ *                  Robb Matzke
  *
  * Purpose:        Implements balanced, sibling-linked, N-ary trees
  *            capable of storing any type of data with unique key
@@ -205,7 +205,6 @@ H5FL_SEQ_DEFINE_STATIC(size_t);
  *         Failure:    Negative
  *
  * Programmer:    Robb Matzke
- *        matzke@llnl.gov
  *        Jun 23 1997
  *
  *-------------------------------------------------------------------------
@@ -271,7 +270,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_create() */        /*lint !e818 Can't make udata a pointer to const */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5B_find
  *
@@ -290,7 +289,6 @@ done:
  *              UDATA is undefined).
  *
  * Programmer:    Robb Matzke
- *        matzke@llnl.gov
  *        Jun 23 1997
  *
  *-------------------------------------------------------------------------
@@ -368,7 +366,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_find() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5B__split
  *
@@ -386,7 +384,6 @@ done:
  *              returned through the NEW_ADDR argument). Negative on failure.
  *
  * Programmer:    Robb Matzke
- *        matzke@llnl.gov
  *        Jul  3 1997
  *
  *-------------------------------------------------------------------------
@@ -532,7 +529,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B__split() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5B_insert
  *
@@ -541,7 +538,6 @@ done:
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Robb Matzke
- *        matzke@llnl.gov
  *        Jun 23 1997
  *
  *-------------------------------------------------------------------------
@@ -595,7 +591,7 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
     if((int)(my_ins = H5B__insert_helper(f, &bt_ud, type, lt_key,
             &lt_key_changed, md_key, udata, rt_key, &rt_key_changed,
             &split_bt_ud/*out*/)) < 0)
-    HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "unable to insert key")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "unable to insert key")
 
     /* Check if the root node split */
     if(H5B_INS_NOOP == my_ins) {
@@ -612,9 +608,9 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
 
     /* update left and right keys */
     if(!lt_key_changed)
-    H5MM_memcpy(lt_key, H5B_NKEY(bt_ud.bt,shared,0), type->sizeof_nkey);
+        H5MM_memcpy(lt_key, H5B_NKEY(bt_ud.bt,shared,0), type->sizeof_nkey);
     if(!rt_key_changed)
-    H5MM_memcpy(rt_key, H5B_NKEY(split_bt_ud.bt,shared,split_bt_ud.bt->nchildren), type->sizeof_nkey);
+        H5MM_memcpy(rt_key, H5B_NKEY(split_bt_ud.bt,shared,split_bt_ud.bt->nchildren), type->sizeof_nkey);
 
     /*
      * Copy the old root node to some other file location and make the new root
@@ -623,7 +619,7 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
      */
     H5_CHECK_OVERFLOW(shared->sizeof_rnode,size_t,hsize_t);
     if(HADDR_UNDEF == (old_root_addr = H5MF_alloc(f, H5FD_MEM_BTREE, (hsize_t)shared->sizeof_rnode)))
-    HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL, "unable to allocate file space to move root")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL, "unable to allocate file space to move root")
 
     /*
      * Move the node to the new location
@@ -636,12 +632,12 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
     /* Unprotect the old root so we can move it.  Also force it to be marked
      * dirty so it is written to the new location. */
     if(H5AC_unprotect(f, H5AC_BT, bt_ud.addr, bt_ud.bt, H5AC__DIRTIED_FLAG) < 0)
-    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release old root")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release old root")
     bt_ud.bt = NULL;  /* Make certain future references will be caught */
 
     /* Move the location of the old root on the disk */
     if(H5AC_move_entry(f, H5AC_BT, bt_ud.addr, old_root_addr) < 0)
-    HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to move B-tree root node")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to move B-tree root node")
     bt_ud.addr = old_root_addr;
 
     /* Update the split b-tree's left pointer to point to the new location */
@@ -699,7 +695,6 @@ done:
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Robb Matzke
- *        matzke@llnl.gov
  *        Jul  8 1997
  *
  *-------------------------------------------------------------------------
@@ -788,7 +783,6 @@ H5B__insert_child(H5B_t *bt, unsigned *bt_flags, unsigned idx,
  *        Failure:    H5B_INS_ERROR
  *
  * Programmer:    Robb Matzke
- *        matzke@llnl.gov
  *        Jul  9 1997
  *
  *-------------------------------------------------------------------------
@@ -838,7 +832,7 @@ H5B__insert_helper(H5F_t *f, H5B_ins_ud_t *bt_ud, const H5B_class_t *type,
 
     /* Get shared info for B-tree */
     if(NULL == (rc_shared = (type->get_shared)(f, udata)))
-    HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, H5B_INS_ERROR, "can't retrieve B-tree's shared ref. count object")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, H5B_INS_ERROR, "can't retrieve B-tree's shared ref. count object")
     shared = (H5B_shared_t *)H5UC_GET_OBJ(rc_shared);
     HDassert(shared);
 
@@ -1107,7 +1101,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_insert_helper() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5B__iterate_helper
  *
@@ -1117,7 +1111,6 @@ done:
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Robb Matzke
- *        matzke@llnl.gov
  *        Jun 23 1997
  *
  *-------------------------------------------------------------------------
@@ -1174,7 +1167,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B__iterate_helper() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5B_iterate
  *
@@ -1184,7 +1177,6 @@ done:
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Robb Matzke
- *        matzke@llnl.gov
  *        Jun 23 1997
  *
  *-------------------------------------------------------------------------
@@ -1213,7 +1205,7 @@ H5B_iterate(H5F_t *f, const H5B_class_t *type, haddr_t addr,
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_iterate() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5B__remove_helper
  *
@@ -1265,7 +1257,7 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level,
 
     /* Get shared info for B-tree */
     if(NULL == (rc_shared = (type->get_shared)(f, udata)))
-    HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, H5B_INS_ERROR, "can't retrieve B-tree's shared ref. count object")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, H5B_INS_ERROR, "can't retrieve B-tree's shared ref. count object")
     shared = (H5B_shared_t *)H5UC_GET_OBJ(rc_shared);
     HDassert(shared);
 
@@ -1277,7 +1269,7 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level,
     cache_udata.type = type;
     cache_udata.rc_shared = rc_shared;
     if(NULL == (bt = (H5B_t *)H5AC_protect(f, H5AC_BT, addr, &cache_udata, H5AC__NO_FLAGS_SET)))
-    HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, H5B_INS_ERROR, "unable to load B-tree node")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, H5B_INS_ERROR, "unable to load B-tree node")
 
     rt = bt->nchildren;
     while(lt < rt && cmp) {
@@ -1416,7 +1408,7 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level,
                 bt->nchildren = 0;
 
                 /* Delete the node from disk (via the metadata cache) */
-        bt_flags |= H5AC__DIRTIED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
+                bt_flags |= H5AC__DIRTIED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
                 H5_CHECK_OVERFLOW(shared->sizeof_rnode, size_t, hsize_t);
                 if(H5AC_unprotect(f, H5AC_BT, addr, bt, bt_flags | H5AC__DELETED_FLAG) < 0) {
                     bt = NULL;
@@ -1546,7 +1538,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B__remove_helper() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5B_remove
  *
@@ -1593,7 +1585,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_remove() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5B_delete
  *
@@ -1668,7 +1660,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_delete() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5B_shared_new
  *
@@ -1678,7 +1670,6 @@ done:
  *        Failure:    NULL
  *
  * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
  *        May 27 2008
  *
  *-------------------------------------------------------------------------
@@ -1742,7 +1733,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_shared_new() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5B_shared_free
  *
@@ -1774,7 +1765,7 @@ H5B_shared_free(void *_shared)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5B_shared_free() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5B__copy
  *
@@ -1785,7 +1776,6 @@ H5B_shared_free(void *_shared)
  *         Failure:    NULL
  *
  * Programmer:    Quincey Koziol
- *        koziol@ncsa.uiuc.edu
  *        Apr 18 2000
  *
  *-------------------------------------------------------------------------
@@ -1842,7 +1832,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B__copy() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5B__get_info_helper
  *
@@ -1851,7 +1841,6 @@ done:
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
  *        Jun  3 2008
  *
  *-------------------------------------------------------------------------
@@ -1884,7 +1873,7 @@ H5B__get_info_helper(H5F_t *f, const H5B_class_t *type, haddr_t addr,
 
     /* Get shared info for B-tree */
     if(NULL == (rc_shared = (type->get_shared)(f, info_udata->udata)))
-    HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree's shared ref. count object")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree's shared ref. count object")
     shared = (H5B_shared_t *)H5UC_GET_OBJ(rc_shared);
     HDassert(shared);
 
@@ -1896,7 +1885,7 @@ H5B__get_info_helper(H5F_t *f, const H5B_class_t *type, haddr_t addr,
     cache_udata.type = type;
     cache_udata.rc_shared = rc_shared;
     if(NULL == (bt = (H5B_t *)H5AC_protect(f, H5AC_BT, addr, &cache_udata, H5AC__READ_ONLY_FLAG)))
-    HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree node")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree node")
 
     /* Cache information from this node */
     left_child = bt->child[0];
@@ -1949,7 +1938,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B__get_info_helper() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5B_get_info
  *
@@ -2001,7 +1990,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_get_info() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5B_valid
  *
@@ -2055,7 +2044,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_valid() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5B__node_dest
  *
@@ -2065,7 +2054,6 @@ done:
  *              Failure:        FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar 26, 2008
  *
  *-------------------------------------------------------------------------
