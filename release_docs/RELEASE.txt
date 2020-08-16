@@ -342,6 +342,17 @@ Bug Fixes since HDF5-1.10.5 release
 
     Library
     -------
+    - Creation of dataset with optional filter
+
+      When the combination of type, space, etc doesn't work for filter
+      and the filter is optional, it was supposed to be skipped but it was
+      not skipped and the creation failed.
+
+      A fix is applied to allow the creation of a dataset in such
+      situation, as specified in the user documentation.
+
+      (BMR - 2020/8/13, HDFFV-10933)
+
     - Explicitly declared dlopen to use RTLD_LOCAL
 
       dlopen documentation states that if neither RTLD_GLOBAL nor
