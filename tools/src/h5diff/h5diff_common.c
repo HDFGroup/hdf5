@@ -69,6 +69,7 @@ static void check_options(diff_opt_t* opts)
     }
 }
 
+#if TRILABS-227
 /*-------------------------------------------------------------------------
  * Function:    parse_hsize_list
  *
@@ -184,7 +185,7 @@ parse_subset_params(const char *dset)
 
     return s;
 }
-
+#endif
 
 /*-------------------------------------------------------------------------
  * Function: parse_command_line
@@ -441,10 +442,13 @@ void parse_command_line(int argc, const char* argv[], const char** fname1, const
     /*
      * TRILABS-227 is complete except for an issue with printing indices
      * the following calls will enable subsetting
+    */
+#if TRILABS-227
     opts->sset[0] = parse_subset_params(*objname1);
 
     opts->sset[1] = parse_subset_params(*objname2);
-    */
+#endif
+
     H5TOOLS_ENDDEBUG("");
 }
 
