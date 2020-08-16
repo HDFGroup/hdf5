@@ -15,7 +15,7 @@
  *
  * Created:		H5Aint.c
  *			Dec 18 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Internal routines for managing attributes.
  *

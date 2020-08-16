@@ -212,7 +212,7 @@ done:
 static H5O_loc_t *
 H5O__dtype_get_oloc(hid_t obj_id)
 {
-    H5T_t       *type;                  /* Datatype opened */
+    H5T_t       *type = NULL;           /* Datatype opened */
     H5O_loc_t	*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_STATIC

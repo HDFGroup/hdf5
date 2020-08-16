@@ -223,7 +223,7 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
                 int    not_equal;
 
                 if(NULL == (ret_value = H5T_copy(dtype, H5T_COPY_TRANSIENT)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot copy reference type")
 
                 /* Decide if the data type is object or dataset region reference. */
                 if(NULL == (dt = (H5T_t *)H5I_object(H5T_STD_REF_OBJ_g)))
@@ -515,6 +515,13 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__get_native_type() */
 
+/* Disable warning for intentional identical branches here -QAK */
+/*
+ *       This pragma only needs to surround the "duplicated branches" in
+ *       the code below, but early (4.4.7, at least) gcc only allows
+ *       diagnostic pragmas to be toggled outside of functions.
+ */
+H5_GCC_DIAG_OFF(duplicated-branches)
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__get_native_integer
@@ -655,7 +662,15 @@ H5T__get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__get_native_integer() */
+H5_GCC_DIAG_ON(duplicated-branches)
 
+/* Disable warning for intentional identical branches here -QAK */
+/*
+ *       This pragma only needs to surround the "duplicated branches" in
+ *       the code below, but early (4.4.7, at least) gcc only allows
+ *       diagnostic pragmas to be toggled outside of functions.
+ */
+H5_GCC_DIAG_OFF(duplicated-branches)
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__get_native_float
@@ -780,7 +795,15 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__get_native_float() */
+H5_GCC_DIAG_ON(duplicated-branches)
 
+/* Disable warning for intentional identical branches here -QAK */
+/*
+ *       This pragma only needs to surround the "duplicated branches" in
+ *       the code below, but early (4.4.7, at least) gcc only allows
+ *       diagnostic pragmas to be toggled outside of functions.
+ */
+H5_GCC_DIAG_OFF(duplicated-branches)
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__get_native_bitfield
@@ -866,6 +889,7 @@ H5T__get_native_bitfield(size_t prec, H5T_direction_t direction,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__get_native_bitfield() */
+H5_GCC_DIAG_ON(duplicated-branches)
 
 
 /*-------------------------------------------------------------------------

@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Tuesday, August 10, 1999
  *
  * Purpose:     A driver which stores the HDF5 data in main memory  using
@@ -143,8 +143,8 @@ static herr_t H5FD__core_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, ha
             size_t size, const void *buf);
 static herr_t H5FD__core_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t H5FD__core_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t H5FD_core_lock(H5FD_t *_file, hbool_t rw);
-static herr_t H5FD_core_unlock(H5FD_t *_file);
+static herr_t H5FD__core_lock(H5FD_t *_file, hbool_t rw);
+static herr_t H5FD__core_unlock(H5FD_t *_file);
 
 static const H5FD_class_t H5FD_core_g = {
     "core",                     /* name                 */
@@ -176,8 +176,8 @@ static const H5FD_class_t H5FD_core_g = {
     H5FD__core_write,           /* write                */
     H5FD__core_flush,           /* flush                */
     H5FD__core_truncate,        /* truncate             */
-    H5FD_core_lock,             /* lock                 */
-    H5FD_core_unlock,           /* unlock               */
+    H5FD__core_lock,            /* lock                 */
+    H5FD__core_unlock,          /* unlock               */
     H5FD_FLMAP_DICHOTOMY        /* fl_map               */
 };
 
@@ -344,7 +344,7 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
     HDoff_t         offset      = (HDoff_t)addr;        /* Offset to write at */
     herr_t          ret_value   = SUCCEED;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(file);
 
@@ -439,8 +439,8 @@ done:
  * Purpose:     Initialize this driver by registering the driver with the
  *              library.
  *
- * Return:      Success:    The driver ID for the core driver.
- *              Failure:    Negative.
+ * Return:      Success:    The driver ID for the core driver
+ *              Failure:    H5I_INVALID_HID
  *
  * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
@@ -452,7 +452,7 @@ H5FD_core_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     if(H5I_VFL != H5I_get_type(H5FD_CORE_g))
         H5FD_CORE_g = H5FD_register(&H5FD_core_g, sizeof(H5FD_class_t), FALSE);
@@ -1505,7 +1505,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_core_lock
+ * Function:    H5FD__core_lock
  *
  * Purpose:     To place an advisory lock on a file.
  *		The lock type to apply depends on the parameter "rw":
@@ -1519,13 +1519,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_lock(H5FD_t *_file, hbool_t rw)
+H5FD__core_lock(H5FD_t *_file, hbool_t rw)
 {
     H5FD_core_t *file = (H5FD_core_t*)_file;    /* VFD file struct          */
     int lock_flags;                             /* file locking flags       */
     herr_t ret_value = SUCCEED;                 /* Return value             */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(file);
 
@@ -1551,11 +1551,11 @@ H5FD_core_lock(H5FD_t *_file, hbool_t rw)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_core_lock() */
+} /* end H5FD__core_lock() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_core_unlock
+ * Function:    H5FD__core_unlock
  *
  * Purpose:     To remove the existing lock on the file
  *
@@ -1566,12 +1566,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_unlock(H5FD_t *_file)
+H5FD__core_unlock(H5FD_t *_file)
 {
     H5FD_core_t *file = (H5FD_core_t*)_file;	/* VFD file struct */
     herr_t ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(file);
 
@@ -1589,5 +1589,5 @@ H5FD_core_unlock(H5FD_t *_file)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_core_unlock() */
+} /* end H5FD__core_unlock() */
 
