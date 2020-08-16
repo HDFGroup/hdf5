@@ -6693,6 +6693,8 @@ public class H5 implements java.io.Serializable {
      * @param fapl_id
      *            IN: File access property list identifier
      *
+     * @return indication if file locking is used.
+     *
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      *
@@ -6705,6 +6707,8 @@ public class H5 implements java.io.Serializable {
      *
      * @param fapl_id
      *            IN: File access property list identifier
+     *
+     * @return indication if file locking is ignored.
      *
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
