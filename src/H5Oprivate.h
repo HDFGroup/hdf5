@@ -15,7 +15,7 @@
  *
  * Created:		H5Oprivate.h
  *			Aug  5 1997
- *			Robb Matzke <matzke@llnl.gov>
+ *			Robb Matzke
  *
  * Purpose:		Object header private include file.
  *

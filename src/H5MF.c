@@ -15,7 +15,7 @@
  *
  * Created:             H5MF.c
  *                      Jul 11 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             File memory management functions.
  *
@@ -49,6 +49,11 @@
 
 #define H5MF_FSPACE_SHRINK      80              /* Percent of "normal" size to shrink serialized free space size */
 #define H5MF_FSPACE_EXPAND      120             /* Percent of "normal" size to expand serialized free space size */
+
+/* For non-paged aggregation: map allocation request type to tracked free-space type */
+/* F -- pointer to H5F_t; T -- H5FD_mem_t */
+#define H5MF_ALLOC_TO_FS_AGGR_TYPE(F, T)                  \
+        ((H5FD_MEM_DEFAULT == (F)->shared->fs_type_map[T]) ? (T) : (F)->shared->fs_type_map[T])
 
 /******************/
 /* Local Typedefs */
@@ -288,7 +293,6 @@ H5MF__alloc_to_fs_type(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size, H5F_mem_pa
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jan  8 2008
  *
  *-------------------------------------------------------------------------
@@ -368,7 +372,6 @@ done:
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jan  8 2008
  *
  *-------------------------------------------------------------------------
@@ -454,7 +457,6 @@ done:
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jan  8 2008
  *
  *-------------------------------------------------------------------------
@@ -613,7 +615,6 @@ done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5MF__close_fstype() */
 
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5MF__add_sect
@@ -770,7 +771,6 @@ done:
  *              Failure:        HADDR_UNDEF
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 11 1997
  *
  *-------------------------------------------------------------------------
@@ -1081,7 +1081,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 17 1997
  *
  *-------------------------------------------------------------------------
@@ -1455,7 +1454,6 @@ H5MF__sects_dump(f, stderr);
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Feb 14 2008
  *
  *-------------------------------------------------------------------------

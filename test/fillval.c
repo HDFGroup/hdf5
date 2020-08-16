@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <robb@arborea.spizella.com>
+ * Programmer:  Robb Matzke
  *              Thursday, October  1, 1998
  *
  * Purpose:    Tests dataset fill values.

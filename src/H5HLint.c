@@ -15,7 +15,7 @@
  *
  * Created:     H5HLint.c
  *              Oct 12 2008
- *              Quincey Koziol <koziol@hdfgroup.org>
+ *              Quincey Koziol
  *
  * Purpose:     Local heap internal routines.
  *

@@ -13,11 +13,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5Aint.c
- *			Dec 18 2006
- *			Quincey Koziol
+ * Created:        H5Aint.c
+ *                 Dec 18 2006
+ *                 Quincey Koziol
  *
- * Purpose:		Internal routines for managing attributes.
+ * Purpose:        Internal routines for managing attributes.
  *
  *-------------------------------------------------------------------------
  */
@@ -27,7 +27,7 @@
 /****************/
 
 #include "H5Amodule.h"          /* This source code file is part of the H5A module */
-#define H5O_FRIEND		/*suppress error about including H5Opkg	  */
+#define H5O_FRIEND        /*suppress error about including H5Opkg      */
 
 
 /***********/
@@ -2399,7 +2399,6 @@ done:
  *              Failure:        Negative
  *
  * Programmer:  Peter Cao
- *              xcao@hdfgroup.org
  *              July 20, 2007
  *
  *-------------------------------------------------------------------------
