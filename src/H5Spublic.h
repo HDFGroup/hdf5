@@ -529,7 +529,7 @@ H5_DLL htri_t H5Sextent_equal(hid_t sid1, hid_t sid2);
  *
  * \brief Determines the type of the dataspace selection
  *
- * \space_id
+ * \space_id{spaceid}
  *
  * \return Returns the dataspace selection type, a value of the enumerated
  *         datatype #H5S_sel_type, if successful. Valid return values are
@@ -604,7 +604,7 @@ H5_DLL herr_t H5Sselect_copy(hid_t dst_id, hid_t src_id);
  *
  * \brief Verifies that the selection is within the extent of the dataspace
  *
- * \space_id
+ * \space_id{spaceid}
  *
  * \return \htri_t
  *
@@ -621,7 +621,7 @@ H5_DLL htri_t H5Sselect_valid(hid_t spaceid);
  *
  * \brief Adjusts a selection by subtracting an offset
  *
- * \space_id
+ * \space_id{spaceid}
  * \param[in] offset  Offset to subtract
  *
  * \return \herr_t
@@ -671,7 +671,47 @@ H5_DLL herr_t H5Sselect_adjust(hid_t spaceid, const hssize_t *offset);
  */
 H5_DLL herr_t H5Sget_select_bounds(hid_t spaceid, hsize_t start[],
     hsize_t end[]);
+/*--------------------------------------------------------------------------*/
+/**\ingroup H5S
+ *
+ * \brief Checks if two selections are the same shape
+ *
+ * \space_id{space1_id}
+ * \space_id{space2_id}
+ *
+ * \return \htri_t
+ *
+ * \details H5Sselect_shape_same() checks to see if the current selection 
+ *          in the dataspaces are the same dimensionality and shape.
+ *
+ *          This is primarily used for reading the entire selection in 
+ *          one swoop.
+ *
+ * \since 1.12.0
+ *
+ */
 H5_DLL htri_t H5Sselect_shape_same(hid_t space1_id, hid_t space2_id);
+/*--------------------------------------------------------------------------*/
+/**\ingroup H5S
+ *
+ * \brief Checks if current selection intersects with a block
+ *
+ * \space_id
+ * \param[in] start  Starting coordinate of block
+ * \param[in] end    Opposite ("ending") coordinate of block
+ *
+ * \return \htri_t
+ *
+ * \details H5Sselect_intersect_block() checks to see if the current 
+ *          selection \p space_id in the dataspace intersects with the block 
+ *          specified by \p start and \p end.
+ *
+ * \note Assumes that \p start & \p end block bounds are inclusive, so 
+ *       \p start == \p end value is OK.
+ *
+ * \since 1.12.0
+ *
+ */
 H5_DLL htri_t H5Sselect_intersect_block(hid_t space_id, const hsize_t *start,
     const hsize_t *end);
 /*--------------------------------------------------------------------------*/
@@ -698,8 +738,140 @@ H5_DLL htri_t H5Sselect_intersect_block(hid_t space_id, const hsize_t *start,
  * \since 1.0.0
  */
 H5_DLL herr_t H5Soffset_simple(hid_t space_id, const hssize_t *offset);
+/*--------------------------------------------------------------------------*/
+/**\ingroup H5S
+ *
+ * \brief Selects an entire dataspace
+ *
+ * \space_id{spaceid}
+ *
+ * \return \herr_t
+ *
+ * \details H5Sselect_all() selects the entire extent of the dataspace 
+ *          \p dspace_id.
+ *
+ *          More specifically, H5Sselect_all() sets the selection type to 
+ *          #H5S_SEL_ALL, which specifies the entire dataspace anywhere it 
+ *          is applied.
+ *
+ * \since 1.0.0
+ *
+ */
 H5_DLL herr_t H5Sselect_all(hid_t spaceid);
+/*--------------------------------------------------------------------------*/
+/**\ingroup H5S
+ *
+ * \brief Resets the selection region to include no elements
+ *
+ * \space_id{spaceid}
+ *
+ * \return \herr_t
+ *
+ * \details H5Sselect_none() resets the selection region for the dataspace 
+ *          \p space_id to include no elements.
+ *      
+ * \since 1.0.0
+ *
+ */
 H5_DLL herr_t H5Sselect_none(hid_t spaceid);
+/*--------------------------------------------------------------------------*/
+/**\ingroup H5S
+ *
+ * \brief Selects array elements to be included in the selection for a 
+ *        dataspace
+ *
+ * \space_id
+ * \param[in] op  Operator specifying how the new selection is to be 
+ *                combined with the existing selection for the dataspace
+ * \param[in] num_elem  Number of elements to be selected
+ * \param[in] coord  A pointer to a buffer containing a serialized copy of 
+ *                   a 2-dimensional array of zero-based values specifying 
+ *                   the coordinates of the elements in the point selection
+ *
+ * \return \herr_t
+ *
+ * \details H5Sselect_elements() selects array elements to be included in 
+ *          the selection for the \p space_id dataspace. This is referred 
+ *          to as a point selection.
+ *
+ *          The number of elements selected is set in the \p num_elements 
+ *          parameter.
+ *
+ *          The \p coord parameter is a pointer to a buffer containing a 
+ *          serialized 2-dimensional array of size \p num_elements by the 
+ *          rank of the dataspace. The array lists dataset elements in the 
+ *          point selection; that is, it’s a list of of zero-based values 
+ *          specifying the coordinates in the dataset of the selected 
+ *          elements. The order of the element coordinates in the \p coord 
+ *          array specifies the order in which the array elements are 
+ *          iterated through when I/O is performed. Duplicate coordinate 
+ *          locations are not checked for. See below for examples of the 
+ *          mapping between the serialized contents of the buffer and the 
+ *          point selection array that it represents.
+ *
+ *          The selection operator \p op determines how the new selection 
+ *          is to be combined with the previously existing selection for 
+ *          the dataspace. The following operators are supported:
+ *
+ *          <table>
+ *           <tr>
+ *             <td>#H5S_SELECT_SET</td>
+ *             <td>Replaces the existing selection with the parameters from 
+ *                 this call. Overlapping blocks are not supported with this 
+ *                 operator. Adds the new selection to the existing selection.
+ *                 </td>
+ *           </tr>
+ *           <tr>
+ *             <td>#H5S_SELECT_APPEND</td>
+ *             <td>Adds the new selection following the last element of the 
+ *                 existing selection.</td>
+ *           </tr>
+ *           <tr>
+ *              <td>#H5S_SELECT_PREPEND</td>
+ *              <td>Adds the new selection preceding the first element of the 
+ *                  existing selection.</td>
+ *           </tr>
+ *          </table>
+ *
+ *          <b>Mapping the serialized \p coord buffer to a 2-dimensional
+ *          point selection array:</b>   
+ *          To illustrate the construction of the contents of the \p coord 
+ *          buffer, consider two simple examples: a selection of 5 points in 
+ *          a 1-dimensional array and a selection of 3 points in a 
+ *          4-dimensional array.
+ *
+ *          In the 1D case, we will be selecting five points and a 1D 
+ *          dataspace has rank 1, so the selection will be described in a 
+ *          5-by-1 array. To select the 1st, 14th, 17th, 23rd, 8th elements 
+ *          of the dataset, the selection array would be as follows 
+ *          (remembering that point coordinates are zero-based):
+ *          \n      0
+ *          \n     13
+ *          \n     16
+ *          \n     22
+ *          \n      7 
+ *
+ *          This point selection array will be serialized in the \p coord 
+ *          buffer as:
+ *          \n      0 13 16 22 7 
+ *
+ *          In the 4D case, we will be selecting three points and a 4D 
+ *          dataspace has rank 4, so the selection will be described in a 
+ *          3-by-4 array. To select the points (1,1,1,1), (14,6,12,18), and 
+ *          (8,22,30,22), the point selection array would be as follows:
+ *          \n      0  0  0  0
+ *          \n     13  5 11 17
+ *          \n      7 21 29 21
+ *
+ *          This point selection array will be serialized in the \p coord 
+ *          buffer as:
+ *          \n      0 0 0 0 13 5 11 17 7 21 29 21
+ *
+ * \version 1.6.4 C coord parameter type changed to \p const \p hsize_t.
+ * \version       Fortran coord parameter type changed to \p INTEGER(HSIZE_T).
+ * \since 1.0.0
+ *
+ */
 H5_DLL herr_t H5Sselect_elements(hid_t space_id, H5S_seloper_t op,
     size_t num_elem, const hsize_t *coord);
 H5_DLL hssize_t H5Sget_select_elem_npoints(hid_t spaceid);
