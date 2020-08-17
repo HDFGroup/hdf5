@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: 	Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer: 	Quincey Koziol
  *	       	Thursday, September 28, 2000
  *
  * Purpose:

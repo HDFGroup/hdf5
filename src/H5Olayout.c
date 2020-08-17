@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke <matzke@llnl.gov>
+/* Programmer:  Robb Matzke
  *              Wednesday, October  8, 1997
  *
  * Purpose:     Messages related to data layout.
@@ -967,7 +967,7 @@ H5O__layout_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
     const H5O_layout_t *layout_src = (const H5O_layout_t *)mesg_src;  /* Source layout */
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(cpy_info);

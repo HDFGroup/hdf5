@@ -234,8 +234,8 @@ typedef struct H5D_io_info_t {
 typedef struct H5D_chk_idx_info_t {
     H5F_t *f;                   /* File pointer for operation */
     const H5O_pline_t *pline;   /* I/O pipeline info */
-    H5O_layout_chunk_t *layout;           /* Chunk layout description */
-    H5O_storage_chunk_t *storage;         /* Chunk storage description */
+    H5O_layout_chunk_t *layout; /* Chunk layout description */
+    H5O_storage_chunk_t *storage; /* Chunk storage description */
 } H5D_chk_idx_info_t;
 
 /*
@@ -566,7 +566,6 @@ H5_DLL herr_t H5D__get_chunk_info_by_coord(const H5D_t *dset, const hsize_t *coo
 H5_DLL haddr_t H5D__get_offset(const H5D_t *dset);
 H5_DLL herr_t H5D__vlen_get_buf_size(H5D_t *dset, hid_t type_id, hid_t space_id, hsize_t *size);
 H5_DLL herr_t H5D__vlen_get_buf_size_gen(H5VL_object_t *vol_obj, hid_t type_id, hid_t space_id, hsize_t *size);
-H5_DLL herr_t H5D__check_filters(H5D_t *dataset);
 H5_DLL herr_t H5D__set_extent(H5D_t *dataset, const hsize_t *size, hbool_t do_append);
 H5_DLL herr_t H5D__flush_sieve_buf(H5D_t *dataset);
 H5_DLL herr_t H5D__flush_real(H5D_t *dataset);

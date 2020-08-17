@@ -1896,47 +1896,50 @@ out:
 }
 
 /*-------------------------------------------------------------------------
- * Function: H5DSis_scale
- *
- * Purpose: check if the dataset DID is a dimension scale
- *
- * Return: 1, is, 0, not, FAIL, error
- *
- * Programmer: Pedro Vicente
- *
- * Date: January 04, 2005
- *
- *-------------------------------------------------------------------------
- */
-htri_t
-H5DSis_scale(hid_t did)
-{
-    hid_t      tid = -1;   /* attribute type ID */
-    hid_t      aid = -1;   /* attribute ID */
-    herr_t     has_class;  /* has the "CLASS" attribute */
-    htri_t     is_ds;      /* boolean return value */
-    H5I_type_t it;           /* ID type */
-    char       *buf;         /* Name of attribute */
-    hsize_t    storage_size; /* Size of storage for attribute */
+* Function: H5DSis_scale
+*
+* Purpose: check if the dataset DID is a dimension scale
+*
+* Return: 1, is, 0, not, FAIL, error
+*
+* Programmer: pvn@ncsa.uiuc.edu
+*
+* Date: January 04, 2005
+*
+*-------------------------------------------------------------------------
+*/
 
-    /*-------------------------------------------------------------------------
+htri_t H5DSis_scale(hid_t did)
+{
+    hid_t      tid = -1;     /* attribute type ID */
+    hid_t      aid = -1;     /* attribute ID */
+    herr_t     attr_class;   /* has the "CLASS" attribute */
+    htri_t     is_ds = -1;   /* set to "not a dimension scale" */
+    H5I_type_t it;           /* type of identifier */
+    char       *buf = NULL;  /* buffer to read name of attribute */
+    size_t      string_size; /* size of storage for the attribute */
+    H5T_class_t type_class;
+    H5T_str_t   strpad;
+
+    /*------------------------------------------------------------------------
     * parameter checking
     *-------------------------------------------------------------------------
     */
     /* get ID type */
     if ((it = H5Iget_type(did)) < 0)
-        return FAIL;
+        goto out;
 
     if(H5I_DATASET != it)
-        return FAIL;
+        goto out;
 
     /* try to find the attribute "CLASS" on the dataset */
-    if((has_class = H5LT_find_attribute(did, "CLASS")) < 0)
-        return FAIL;
+    if((attr_class = H5LT_find_attribute(did, "CLASS")) < 0)
+        goto out;
 
-    if(has_class == 0)
+    if(attr_class == 0) {
         is_ds = 0;
-
+        goto out;
+    }
     else
     {
         if((aid = H5Aopen(did, "CLASS", H5P_DEFAULT)) < 0)
@@ -1945,19 +1948,33 @@ H5DSis_scale(hid_t did)
         if((tid = H5Aget_type(aid)) < 0)
             goto out;
 
-        /* check to make sure attribute is a string */
-        if(H5T_STRING != H5Tget_class(tid))
+        /* check to make sure attribute is a string; 
+           if not, then it is not dimension scale  */
+        if((type_class = H5Tget_class(tid)) < 0)
             goto out;
-
-        /* check to make sure string is null-terminated */
-        if(H5T_STR_NULLTERM != H5Tget_strpad(tid))
+        if(H5T_STRING != type_class) {
+            is_ds = 0;
             goto out;
-
-        /* allocate buffer large enough to hold string */
-        if((storage_size = H5Aget_storage_size(aid)) == 0)
+        }
+        /* check to make sure string is null-terminated; 
+           if not, then it is not dimension scale */
+        if((strpad = H5Tget_strpad(tid)) < 0 )
             goto out;
+        if(H5T_STR_NULLTERM != strpad) {
+            is_ds = 0;
+            goto out;
+        }
 
-        buf = (char*)HDmalloc( (size_t)storage_size * sizeof(char) + 1);
+        /* According to Spec string is ASCII and its size should be 16 to hold 
+           "DIMENSION_SCALE" string */
+        if((string_size = H5Tget_size(tid)) == 0)
+             goto out;
+        if(string_size != 16) {
+            is_ds = 0; 
+            goto out;
+        }
+
+        buf = (char*)HDmalloc((size_t)string_size * sizeof(char));
         if(buf == NULL)
             goto out;
 
@@ -1966,10 +1983,9 @@ H5DSis_scale(hid_t did)
             goto out;
 
         /* compare strings */
-        if(HDstrncmp(buf, DIMENSION_SCALE_CLASS, MIN(HDstrlen(DIMENSION_SCALE_CLASS),HDstrlen(buf)))==0)
+        if(HDstrncmp(buf, DIMENSION_SCALE_CLASS, 
+                     MIN(HDstrlen(DIMENSION_SCALE_CLASS),HDstrlen(buf)))==0)
             is_ds = 1;
-        else
-            is_ds = 0;
 
         HDfree(buf);
 
@@ -1978,20 +1994,16 @@ H5DSis_scale(hid_t did)
 
         if (H5Aclose(aid) < 0)
             goto out;
-
-
     }
-
-    return is_ds;
-
-    /* error zone */
 out:
-    H5E_BEGIN_TRY {
-        H5Aclose(aid);
-        H5Tclose(tid);
-    } H5E_END_TRY;
-    return FAIL;
-
+    if(is_ds < 0) {
+        HDfree(buf);
+        H5E_BEGIN_TRY {
+            H5Aclose(aid);
+            H5Tclose(tid);
+        } H5E_END_TRY;
+    }
+    return is_ds;
 }
 
 /*-------------------------------------------------------------------------

@@ -15,7 +15,7 @@
  *
  * Created:		H5Gcache.c
  *			Feb  5 2008
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Implement group metadata cache methods.
  *

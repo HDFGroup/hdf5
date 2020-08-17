@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Friday, March 27, 1998
  *
  * Purpose:	Operations on the global heap.  The global heap is the set of
@@ -763,7 +763,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HG_remove (H5F_t *f, H5HG_t *hobj)
+H5HG_remove(H5F_t *f, H5HG_t *hobj)
 {
     H5HG_heap_t *heap = NULL;
     uint8_t     *p = NULL, *obj_start = NULL;

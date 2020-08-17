@@ -349,9 +349,9 @@ New Features
       added to the libhdf5.settings file.
 
       Autotools:
-      
+
         An --enable-file-locking=(yes|no|best-effort) option has been added.
-      
+
         yes:          Use file locking.
         no:           Do not use file locking.
         best-effort:  Use file locking and ignore "disabled" errors.
@@ -699,6 +699,17 @@ New Features
 
     Tools:
     ------
+    - h5repack added options to control how external links are handled.
+
+      Currently h5repack preserves external links and cannot copy and merge
+      data from the external files. Two options, merge and prune, were added to
+      control how to merge data from an external link into the resulting file.
+       --merge             Follow external soft link recursively and merge data.
+       --prune             Do not follow external soft links and remove link.
+       --merge --prune     Follow external link, merge data and remove dangling link.
+
+      (ADB - 2020/08/05, HDFFV-9984)
+
     - h5repack was fixed to repack the reference attributes properly.
       The code line that checks if the update of reference inside a compound
       datatype is misplaced outside the code block loop that carries out the
@@ -742,7 +753,7 @@ New Features
 
     High-Level APIs:
     ---------------
-    -
+    - 
 
     C Packet Table API
     ------------------
@@ -765,6 +776,25 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - Creation of dataset with optional filter
+
+      When the combination of type, space, etc doesn't work for filter
+      and the filter is optional, it was supposed to be skipped but it was
+      not skipped and the creation failed.
+
+      Allowed the creation of the dataset in such situation.
+
+      (BMR - 2020/8/13, HDFFV-10933)
+
+    - Explicitly declared dlopen to use RTLD_LOCAL
+
+      dlopen documentation states that if neither RTLD_GLOBAL nor
+      RTLD_LOCAL are specified, then the default behavior is unspecified.
+      The default on linux is usually RTLD_LOCAL while macos will default
+      to RTLD_GLOBAL.
+
+      (ADB - 2020/08/12, HDFFV-11127)
+
     - Fixed issues CVE-2018-13870 and CVE-2018-13869
 
       When a buffer overflow occurred because a name length was corrupted
@@ -774,7 +804,7 @@ Bug Fixes since HDF5-1.10.3 release
       locations to prevent the crashes and h5dump now simply fails with an
       error message when this error condition occurs.
 
-      (BMR - 2020/7/22, HDFFV-11120 and HDFFV-11121)
+      (BMR - 2020/07/22, HDFFV-11120 and HDFFV-11121)
 
     - Fixed the segmentation fault when reading attributes with multiple threads
 
@@ -1203,7 +1233,11 @@ Bug Fixes since HDF5-1.10.3 release
 
     High-Level APIs:
     ------
-    -
+    - The H5DSis_scale function was updated to return "not a dimension scale" (0)
+      instead of failing (-1), when CLASS or DIMENSION_SCALE attributes are 
+      not written according to Dimension Scales Specification. 
+
+     (EIP - 2020/08/12, HDFFV-10436)
 
     Fortran High-Level APIs:
     ------

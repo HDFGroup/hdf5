@@ -116,16 +116,16 @@ typedef struct H5F_t H5F_t;
 /* Encode a 64-bit unsigned integer and its length into a variable-sized buffer */
 /* (Assumes that the high bits of the integer are zero) */
 #  define UINT64ENCODE_VARLEN(p, n) {                          \
-   uint64_t __n = (uint64_t)(n);                                  \
-   unsigned _s = H5VM_limit_enc_size(__n);                      \
-                                        \
-   *(p)++ = (uint8_t)_s;                              \
-   UINT64ENCODE_VAR(p, __n, _s);                              \
+   uint64_t __n = (uint64_t)(n);                               \
+   unsigned _s = H5VM_limit_enc_size(__n);                     \
+                                                               \
+   *(p)++ = (uint8_t)_s;                                       \
+   UINT64ENCODE_VAR(p, __n, _s);                               \
 }
 
 #  define H5_ENCODE_UNSIGNED(p, n) {                          \
-    HDcompile_assert(sizeof(unsigned) == sizeof(uint32_t));              \
-    UINT32ENCODE(p, n)                                  \
+    HDcompile_assert(sizeof(unsigned) == sizeof(uint32_t));   \
+    UINT32ENCODE(p, n)                                        \
 }
 
 /* Assumes the endianness of uint64_t is the same as double */
@@ -338,6 +338,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_SET_MIN_DSET_OHDR(F, V) ((F)->shared->crt_dset_min_ohdr_flag = (V))
 #define H5F_VOL_CLS(F)          ((F)->shared->vol_cls)
 #define H5F_VOL_OBJ(F)          ((F)->vol_obj)
+#define H5F_USE_FILE_LOCKING(F) ((F)->shared->use_file_locking)
 #else /* H5F_MODULE */
 #define H5F_LOW_BOUND(F)        (H5F_get_low_bound(F))
 #define H5F_HIGH_BOUND(F)       (H5F_get_high_bound(F))
@@ -400,6 +401,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_SET_MIN_DSET_OHDR(F, V) (H5F_set_min_dset_ohdr((F), (V)))
 #define H5F_VOL_CLS(F)          (H5F_get_vol_cls(F))
 #define H5F_VOL_OBJ(F)          (H5F_get_vol_obj(F))
+#define H5F_USE_FILE_LOCKING(F) (H5F_get_use_file_locking(F))
 #endif /* H5F_MODULE */
 
 
@@ -765,6 +767,7 @@ H5_DLL hbool_t H5F_get_min_dset_ohdr(const H5F_t *f);
 H5_DLL herr_t H5F_set_min_dset_ohdr(H5F_t *f, hbool_t minimize);
 H5_DLL const H5VL_class_t *H5F_get_vol_cls(const H5F_t *f);
 H5_DLL H5VL_object_t *H5F_get_vol_obj(const H5F_t *f);
+H5_DLL hbool_t H5F_get_file_locking(const H5F_t *f);
 
 /* Functions than retrieve values set/cached from the superblock/FCPL */
 H5_DLL haddr_t H5F_get_base_addr(const H5F_t *f);
