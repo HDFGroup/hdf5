@@ -25759,7 +25759,6 @@ done
       else
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using SZ_BufftoBuffCompress from libsz in $szlib_lib failed.  Szip not enabled." >&5
 $as_echo "Using SZ_BufftoBuffCompress from libsz in $szlib_lib failed.  Szip not enabled." >&6; }
-        HAVE_SZLIB_H="no"
       fi
     fi
 

@@ -1410,7 +1410,6 @@ case "X-$withval" in
                      [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_SZLIB])
       else
         AC_MSG_RESULT([Using SZ_BufftoBuffCompress from libsz in $szlib_lib failed.  Szip not enabled.])
-        HAVE_SZLIB_H="no"
       fi
     fi
 
