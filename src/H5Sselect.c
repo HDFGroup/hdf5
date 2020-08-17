@@ -126,30 +126,6 @@ H5S_select_offset(H5S_t *space, const hssize_t *offset)
 } /* end H5S_select_offset() */
 
 
-/*--------------------------------------------------------------------------*/
-/**\ingroup H5S
- *
- * \brief Sets the offset of a simple dataspace
- *
- * \space_id
- * \param[in] offset  The offset at which to position the selection
- *
- * \return \herr_t
- *
- * \details H5Soffset_simple() sets the offset of a simple dataspace
- *          \p space_id. The offset array must be the same number of
- *          elements as the number of dimensions for the dataspace. If the
- *          \p offset array is set to NULL, the offset for the dataspace is
- *          reset to 0.
- *
- *          This function allows the same shaped selection to be moved to
- *          different locations within a dataspace without requiring it to
- *          be redefined.
- *
- * \version 1.4.0 Fortran subroutine was introduced.
- * \since 1.0.0
- */
-
 /*--------------------------------------------------------------------------
  NAME
     H5Soffset_simple
@@ -193,24 +169,6 @@ done:
 } /* end H5Soffset_simple() */
 
 
-/*--------------------------------------------------------------------------*/
-/**\ingroup H5S
- *
- * \brief Copies a selection from one dataspace to another
- *
- * \space_id{dst_id}
- * \space_id{src_id}
- *
- * \return \herr_t
- *
- * \details H5Sselect_copy() copies all selection information (including
- *          offset) from the source dataspace \p src_id to the destination
- *          dataspace \p dst_id.
- *
- * \since 1.12.0
- *
- */
-
 /*--------------------------------------------------------------------------
  NAME
     H5Sselect_copy
@@ -417,25 +375,6 @@ H5S_select_serialize(const H5S_t *space, uint8_t **p)
 } /* end H5S_select_serialize() */
 
 
-/*--------------------------------------------------------------------------*/
-/**\ingroup H5S
- *
- * \brief Determines the number of elements in a dataspace selection
- *
- * \space_id{spaceid}
- *
- * \return Returns the number of elements in the selection if successful;
- *         otherwise returns a negative value.
- *
- * \details H5Sget_select_npoints() determines the number of elements in
- *          the current selection of a dataspace. It works with any
- *          selection type, and is the correct way to retrieve the number
- *          of elements in a selection.
- *
- * \version 1.4.0 Fortran subroutine introduced in this release.
- * \since 1.0.0
- */
-
 /*--------------------------------------------------------------------------
  NAME
     H5Sget_select_npoints
@@ -505,23 +444,6 @@ H5S_get_select_npoints(const H5S_t *space)
 } /* end H5S_get_select_npoints() */
 
 
-/*--------------------------------------------------------------------------*/
-/**\ingroup H5S
- *
- * \brief Verifies that the selection is within the extent of the dataspace
- *
- * \space_id
- *
- * \return \htri_t
- *
- * \details H5Sselect_valid() verifies that the selection for the dataspace
- *          \p space_id is within the extent of the dataspace if the current
- *          offset for the dataspace is used.
- *
- * \version 1.4.0 Fortran subroutine introduced in this release.
- * \since 1.0.0
- */
-
 /*--------------------------------------------------------------------------
  NAME
     H5Sselect_valid
@@ -671,42 +593,6 @@ done:
 } /* end H5S_select_deserialize() */
 
 
-/*--------------------------------------------------------------------------*/
-/**\ingroup H5S
- *
- * \brief Gets the bounding box containing the current selection
- *
- * \space_id{spaceid}
- * \param[out] start  Starting coordinates of the bounding box
- * \param[out] end    Ending coordinates of the bounding box, i.e., the
- *                    coordinates of the diagonally opposite corner
- *
- * \return \herr_t
- *
- * \details H5Sget_select_bounds() retrieves the coordinates of the bounding
- *          box containing the current selection and places them into
- *          user-supplied buffers.
- *
- *          The \p start and \p end buffers must be large enough to hold
- *          the dataspace rank number of coordinates.
- *
- *          The bounding box exactly contains the selection. I.e., if a
- *          2-dimensional element selection is currently defined as containing
- *          the points (4,5), (6,8), and (10,7), then the bounding box
- *          will be (4, 5), (10, 8).
- *
- *          The bounding box calculation includes the current offset of the
- *          selection within the dataspace extent.
- *
- *          Calling this function on a \a none selection will fail.
- *
- * \version 1.6.0 The \p start and \p end parameters changed from type
- *                hsize_t * to hssize_t *.
- *
- * \version 1.4.0 Fortran subroutine was introduced.
- * \since 1.2.0
- */
-
 /*--------------------------------------------------------------------------
  NAME
     H5Sget_select_bounds
@@ -1116,24 +1002,6 @@ H5S_select_adjust_s(H5S_t *space, const hssize_t *offset)
 } /* end H5S_select_adjust_s() */
 
 
-/*--------------------------------------------------------------------------*/
-/**\ingroup H5S
- *
- * \brief Adjusts a selection by subtracting an offset
- *
- * \space_id
- * \param[in] offset  Offset to subtract
- *
- * \return \herr_t
- *
- * \details H5Sselect_adjust() shifts a dataspace selection by a specified
- *          logical offset within the dataspace extent.
- *
- * \note This can be useful for VOL developers to implement chunked datasets.
- *
- * \since 1.12.0
- */
-
 /*--------------------------------------------------------------------------
  NAME
     H5Sselect_adjust
@@ -1819,44 +1687,6 @@ done:
 } /* end H5S_select_iterate() */
 
 
-/*--------------------------------------------------------------------------*/
-/**\ingroup H5S
- *
- * \brief Determines the type of the dataspace selection
- *
- * \space_id
- *
- * \return Returns the dataspace selection type, a value of the enumerated
- *         datatype #H5S_sel_type, if successful. Valid return values are
- *         as follows:
- *
- *         <table>
- *           <tr>
- *             <td>#H5S_SEL_NONE</td>
- *             <td>No selection is defined</td>
- *           </tr>
- *           <tr>
- *             <td>#H5S_SEL_POINTS</td>
- *             <td>A sequence of points is selected</td>
- *           </tr>
- *           <tr>
- *             <td>#H5S_SEL_HYPERSLABS</td>
- *             <td>A hyperslab or compound hyperslab is selected</td>
- *           </tr>
- *           <tr>
- *             <td>#H5S_SEL_ALL</td>
- *             <td>The entire dataset is selected</td>
- *           </tr>
- *         </table>
- *
- *         Otherwise returns a negative value.
- *
- * \details H5Sget_select_type() retrieves the type of selection currently
- *          defined for the dataspace \p space_id.
- *
- * \since 1.6.0
- */
-
 /*--------------------------------------------------------------------------
  NAME
     H5Sget_select_type
