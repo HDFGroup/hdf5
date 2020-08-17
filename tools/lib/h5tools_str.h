@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Bill Wendling <wendling@ncsa.uiuc.edu>
+ * Programmer:  Bill Wendling
  *              Monday, 19. February 2001
  */
 #ifndef H5TOOLS_STR_H__

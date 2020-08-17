@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@lbl.gov>
+ * Programmer:  Quincey Koziol
  *              Monday, February 19, 2018
  *
  * Purpose:

@@ -254,7 +254,6 @@ H5O_drvinfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_s
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar  1 2007
  *
  *-------------------------------------------------------------------------

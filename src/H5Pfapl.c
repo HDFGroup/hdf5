@@ -709,12 +709,6 @@ done:
  * Programmer:    Robb Matzke
  *              Tuesday, June  9, 1998
  *
- * Modifications:
- *
- *        Raymond Lu
- *        Tuesday, Oct 23, 2001
- *        Changed file access property list mechanism to the new
- *        generic property list.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1881,13 +1875,6 @@ done:
  * Programmer:    Quincey Koziol
  *        June, 1999
  *
- * Modifications:
- *
- *        Raymond Lu
- *         Tuesday, Oct 23, 2001
- *        Changed the file access list to the new generic property
- *        list.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1922,13 +1909,6 @@ done:
  *
  * Programmer:    Quincey Koziol
  *              June, 1999
- *
- * Modifications:
- *
- *        Raymond Lu
- *        Tuesday, Oct 23, 2001
- *        Changed the file access list to the new generic property
- *        list.
  *
  *-------------------------------------------------------------------------
  */
@@ -1965,8 +1945,6 @@ done:
  * Programmer:  Raymond Lu
  *              November, 2001
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2000,8 +1978,6 @@ done:
  *
  * Programmer:  Raymond Lu
  *              November, 2001
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2046,13 +2022,6 @@ done:
  * Programmer:    Quincey Koziol
  *              Friday, August 25, 2000
  *
- * Modifications:
- *
- *        Raymond Lu
- *        Tuesday, Oct 23, 2001
- *        Changed the file access list to the new generic property
- *        list.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2087,13 +2056,6 @@ done:
  *
  * Programmer:    Quincey Koziol
  *              Friday, August 29, 2000
- *
- * Modifications:
- *
- *        Raymond Lu
- *         Tuesday, Oct 23, 2001
- *        Changed the file access list to the new generic property
- *        list.
  *
  *-------------------------------------------------------------------------
  */
@@ -2141,13 +2103,6 @@ done:
  * Programmer:    Quincey Koziol
  *              Thursday, September 21, 2000
  *
- * Modifications:
- *
- *        Raymond Lu
- *         Tuesday, Oct 23, 2001
- *        Changed the file access list to the new generic property
- *        list.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2182,13 +2137,6 @@ done:
  *
  * Programmer:    Quincey Koziol
  *              Thursday, September 21, 2000
- *
- * Modifications:
- *
- *        Raymond Lu
- *         Tuesday, Oct 23, 2001
- *        Changed the file access list to the new generic property
- *        list.
  *
  *-------------------------------------------------------------------------
  */
@@ -2235,8 +2183,6 @@ done:
  * Programmer:    Quincey Koziol
  *              Wednesday, June 5, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2271,8 +2217,6 @@ done:
  *
  * Programmer:    Quincey Koziol
  *              Wednesday, June 5, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -4117,13 +4061,13 @@ H5Pget_metadata_read_attempts(hid_t plist_id, unsigned *attempts/*out*/)
         if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-    /* Get the # of read attempts set */
+        /* Get the # of read attempts set */
         if(H5P_get(plist, H5F_ACS_METADATA_READ_ATTEMPTS_NAME, attempts) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get the number of metadata read attempts")
 
-    /* If not set, return the default value */
-    if(*attempts == H5F_ACS_METADATA_READ_ATTEMPTS_DEF)    /* 0 */
-        *attempts = H5F_METADATA_READ_ATTEMPTS;
+        /* If not set, return the default value */
+        if(*attempts == H5F_ACS_METADATA_READ_ATTEMPTS_DEF)    /* 0 */
+            *attempts = H5F_METADATA_READ_ATTEMPTS;
     } /* end if */
 
 done:
@@ -4207,9 +4151,9 @@ H5Pget_object_flush_cb(hid_t plist_id, H5F_flush_cb_t *func, void **udata)
 
     /* Assign return value */
     if(func)
-    *func = flush_info.func;
+        *func = flush_info.func;
     if(udata)
-    *udata = flush_info.udata;
+        *udata = flush_info.udata;
 
 done:
     FUNC_LEAVE_API(ret_value)

@@ -3192,7 +3192,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 29 2006
  *
  *-------------------------------------------------------------------------

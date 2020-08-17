@@ -421,8 +421,8 @@ done:
  *              H5FD_MPIO_INDEPENDENT:
  *                  Use independent I/O access (the default).
  *
- *         H5FD_MPIO_COLLECTIVE:
- *            Use collective I/O access.
+ *              H5FD_MPIO_COLLECTIVE:
+ *                  Use collective I/O access.
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -441,6 +441,7 @@ H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iDt", dxpl_id, xfer_mode);
 
+    /* Check arguments */
     if(dxpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
     if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
@@ -456,7 +457,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_dxpl_mpio() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_dxpl_mpio
  *
@@ -499,8 +500,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_dxpl_mpio_collective_opt
  *
- * Purpose:    To set a flag to choose linked chunk I/O or multi-chunk I/O
- *        without involving decision-making inside HDF5
+ * Purpose:     To set a flag to choose linked chunk I/O or multi-chunk I/O
+ *              without involving decision-making inside HDF5
  *
  * Note:        The library will do linked chunk I/O or multi-chunk I/O without
  *              involving communications for decision-making process.
@@ -523,6 +524,7 @@ H5Pset_dxpl_mpio_collective_opt(hid_t dxpl_id, H5FD_mpio_collective_opt_t opt_mo
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iDc", dxpl_id, opt_mode);
 
+    /* Check arguments */
     if(dxpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
     if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
@@ -769,8 +771,6 @@ HDfprintf(stderr, "leaving H5FD_mpio_fapl_copy\n");
  *
  * Programmer:    Albert Cheng
  *              Jan  8, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1093,7 +1093,7 @@ done:
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_mpio_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -1125,7 +1125,7 @@ H5FD_mpio_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /* out 
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}
+} /* end H5FD_mpio_query() */
 
 
 /*-------------------------------------------------------------------------
@@ -1155,9 +1155,9 @@ H5FD_mpio_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     HDassert(H5FD_MPIO == file->pub.driver_id);
 
     FUNC_LEAVE_NOAPI(file->eoa)
-}
+} /* end H5FD_mpio_get_eoa() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_mpio_set_eoa
  *
@@ -1186,7 +1186,7 @@ H5FD_mpio_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
     file->eoa = addr;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}
+} /* end H5FD_mpio_set_eoa() */
 
 
 /*-------------------------------------------------------------------------
@@ -1227,7 +1227,7 @@ H5FD_mpio_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     HDassert(H5FD_MPIO == file->pub.driver_id);
 
     FUNC_LEAVE_NOAPI(file->eof)
-}
+} /* end H5FD_mpio_get_eof() */
 
 
 /*-------------------------------------------------------------------------
@@ -1257,20 +1257,18 @@ H5FD_mpio_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void** file_handl
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_mpio_get_handle() */
 
 
 /*-------------------------------------------------------------------------
- * Function:       H5FD_mpio_get_info
+ * Function:    H5FD_mpio_get_info
  *
- * Purpose:        Returns the file info of MPIO file driver.
+ * Purpose:     Returns the file info of MPIO file driver.
  *
- * Returns:        Non-negative if succeed or negative if fails.
+ * Returns:     Non-negative if succeed or negative if fails.
  *
- * Programmer:     John Mainzer
- *                 April 4, 2017
- *
- * Modifications:
+ * Programmer:  John Mainzer
+ *              April 4, 2017
  *
  *-------------------------------------------------------------------------
 */
@@ -1296,68 +1294,21 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD_mpio_read
  *
- * Purpose:    Reads SIZE bytes of data from FILE beginning at address ADDR
- *        into buffer BUF according to data transfer properties in
- *        DXPL_ID using potentially complex file and buffer types to
- *        effect the transfer.
+ * Purpose:     Reads SIZE bytes of data from FILE beginning at address ADDR
+ *              into buffer BUF according to data transfer properties in
+ *              DXPL_ID using potentially complex file and buffer types to
+ *              effect the transfer.
  *
- *        Reading past the end of the MPI file returns zeros instead of
- *        failing.  MPI is able to coalesce requests from different
- *        processes (collective or independent).
+ *              Reading past the end of the MPI file returns zeros instead of
+ *              failing.  MPI is able to coalesce requests from different
+ *              processes (collective or independent).
  *
- * Return:    Success:    Zero. Result is stored in caller-supplied
- *                buffer BUF.
+ * Return:      Success:    SUCCEED. Result is stored in caller-supplied
+ *                          buffer BUF.
  *
- *        Failure:    -1, Contents of buffer BUF are undefined.
+ *              Failure:    FAIL. Contents of buffer BUF are undefined.
  *
- * Programmer:    rky, 1998-01-30
- *
- * Modifications:
- *         Robb Matzke, 1998-02-18
- *        Added the ACCESS_PARMS argument.
- *
- *         rky, 1998-04-10
- *        Call independent or collective MPI read, based on
- *        ACCESS_PARMS.
- *
- *         Albert Cheng, 1998-06-01
- *        Added XFER_MODE to control independent or collective MPI
- *        read.
- *
- *         rky, 1998-08-16
- *        Use BTYPE, FTYPE, and DISP from access parms. The guts of
- *        H5FD_mpio_read and H5FD_mpio_write should be replaced by a
- *        single dual-purpose routine.
- *
- *         Robb Matzke, 1999-04-21
- *        Changed XFER_MODE to XFER_PARMS for all H5F_*_read()
- *        callbacks.
- *
- *         Robb Matzke, 1999-07-28
- *        The ADDR argument is passed by value.
- *
- *         Robb Matzke, 1999-08-06
- *        Modified to work with the virtual file layer.
- *
- *        Quincey Koziol,  2002-05-14
- *        Only call MPI_Get_count if we can use MPI_BYTE for the MPI type
- *              for the I/O transfer.  Someday we might include code to decode
- *              the MPI type used for more complicated transfers and call
- *              MPI_Get_count all the time.
- *
- *              Quincey Koziol - 2002/06/17
- *              Removed 'disp' parameter from H5FD_mpio_setup routine and use
- *              the address of the dataset in MPI_File_set_view() calls, as
- *              necessary.
- *
- *              Quincey Koziol - 2002/06/24
- *              Removed "lazy" MPI_File_set_view() calls, since they would fail
- *              if the first I/O was a collective I/O using MPI derived types
- *              and the next I/O was an independent I/O.
- *
- *              Quincey Koziol - 2003/10/22-31
- *              Restructured code massively, straightening out logic and finally
- *              getting the bytes_read stuff working.
+ * Programmer:  rky, 1998-01-30
  *
  *-------------------------------------------------------------------------
  */
@@ -1556,7 +1507,7 @@ done:
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_mpio_read() */
 
 
 

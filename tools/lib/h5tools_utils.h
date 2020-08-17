@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Bill Wendling <wendling@ncsa.uiuc.edu>
+ * Programmer:  Bill Wendling
  *              Tuesday, 6. March 2001
  *
  * Purpose:     Support functions for the various tools.

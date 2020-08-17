@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu <slu@hdfgroup.uiuc.edu>
+ * Programmer:  Raymond Lu
  *              Wednesday, 20 September 2006
  *
  * Purpose:  The Direct I/O file driver forces the data to be written to
@@ -389,8 +389,6 @@ done:
  * Programmer:  Raymond Lu
  *              Wednesday, 18 October 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -420,8 +418,6 @@ done:
  *
  * Programmer:  Raymond Lu
  *              Wednesday, 18 October 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -455,8 +451,6 @@ H5FD_direct_fapl_copy(const void *_old_fa)
  *
  * Programmer:  Raymond Lu
  *              Wednesday, 20 September 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -612,8 +606,6 @@ done:
  * Programmer:  Raymond Lu
  *              Wednesday, 20 September 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -647,8 +639,6 @@ done:
  *
  * Programmer:  Raymond Lu
  *              Thursday, 21 September 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -704,8 +694,6 @@ done:
  * Programmer:  Raymond Lu
  *              Thursday, 21 September 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -741,11 +729,6 @@ H5FD_direct_query(const H5FD_t H5_ATTR_UNUSED * _f, unsigned long *flags /* out 
  * Programmer:  Raymond Lu
  *              Wednesday, 20 September 2006
  *
- * Modifications:
- *              Raymond Lu
- *              21 Dec. 2006
- *              Added the parameter TYPE.  It's only used for MULTI driver.
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -772,11 +755,6 @@ H5FD_direct_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  *
  * Programmer:  Raymond Lu
  *              Wednesday, 20 September 2006
- *
- * Modifications:
- *              Raymond Lu
- *              21 Dec. 2006
- *              Added the parameter TYPE.  It's only used for MULTI driver.
  *
  *-------------------------------------------------------------------------
  */
@@ -809,8 +787,6 @@ H5FD_direct_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
  * Programmer:  Raymond Lu
  *              Wednesday, 20 September 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -833,8 +809,6 @@ H5FD_direct_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  *
  * Programmer:     Raymond Lu
  *                 21 September 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -869,8 +843,6 @@ done:
  *
  * Programmer:  Raymond Lu
  *              Thursday, 21 September 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1054,8 +1026,6 @@ done:
  *
  * Programmer:  Raymond Lu
  *              Thursday, 21 September 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

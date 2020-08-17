@@ -15,7 +15,7 @@
  *
  * Created:		H5Ocopy.c
  *			Nov  6 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Object copying routines.
  *
