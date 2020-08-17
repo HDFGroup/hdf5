@@ -451,7 +451,7 @@ New Features
 
     High-Level APIs:
     ---------------
-    -
+    - 
 
     C Packet Table API
     ------------------
@@ -767,7 +767,11 @@ Bug Fixes since HDF5-1.10.5 release
 
     High-Level APIs:
     ------
-    -
+    - The H5DSis_scale function was updated to return "not a dimension scale" (0)
+      instead of failing (-1), when CLASS or DIMENSION_SCALE attributes are 
+      not written according to Dimension Scales Specification. 
+
+     (EIP - 2020/08/12, HDFFV-10436)
 
     Fortran High-Level APIs:
     ------
