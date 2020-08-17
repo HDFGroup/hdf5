@@ -2248,7 +2248,7 @@ H5O_get_info(const H5O_loc_t *loc, H5O_info2_t *oinfo, unsigned fields)
 
         /* Set the object's reference count */
         oinfo->rc = oh->nlink;
-    } /* end if */
+    }
 
     /* Get time information, if requested */
     if(fields & H5O_INFO_TIME) {
@@ -2544,8 +2544,8 @@ H5O_get_oh_addr(const H5O_t *oh)
 /*-------------------------------------------------------------------------
  * Function:    H5O_get_oh_flags
  *
- * Programmer:    Jacob Smith
- *        2018 August 17
+ * Programmer:  Jacob Smith
+ *              2018 August 17
  *
  *-------------------------------------------------------------------------
  */
@@ -2561,12 +2561,12 @@ H5O_get_oh_flags(const H5O_t *oh)
 /*-------------------------------------------------------------------------
  * Function:    H5O_get_oh_mtime
  *
- * Purpose:    Retrieve an object's modification time. Assumes that the
+ * Purpose:     Retrieve an object's modification time. Assumes that the
  *              caller has verified that accessing this variable is appropriate
  *              to the header in question.
  *
- * Programmer:    Jacob Smith
- *        2018 August 17
+ * Programmer:  Jacob Smith
+ *              2018 August 17
  *
  *-------------------------------------------------------------------------
  */
@@ -2583,8 +2583,8 @@ H5O_get_oh_mtime(const H5O_t *oh)
 /*-------------------------------------------------------------------------
  * Function:    H5O_get_oh_version
  *
- * Programmer:    Jacob Smith
- *        2018 August 17
+ * Programmer:  Jacob Smith
+ *              2018 August 17
  *
  *-------------------------------------------------------------------------
  */

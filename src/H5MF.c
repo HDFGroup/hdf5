@@ -1553,11 +1553,11 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
     if(H5F_PAGED_AGGR(f)) {
         if((ret_value = H5MF__close_pagefs(f)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't close free-space managers for 'page' file space")
-    } /* end if */
+    }
     else {
         if((ret_value = H5MF__close_aggrfs(f)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't close free-space managers for 'aggr' file space")
-    } /* end else */
+    }
 
 done:
 #ifdef H5MF_ALLOC_DEBUG
@@ -2987,7 +2987,6 @@ done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* H5MF_settle_raw_data_fsm() */
 
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5MF_settle_meta_data_fsm()
@@ -3047,7 +3046,7 @@ done:
  *      3) Reduce the EOA to the extent possible, and make note
  *		   of the resulting value.  This value will be stored
  *		   in the fsinfo superblock extension message and be used
- *          in the subsequent file open.
+ *         in the subsequent file open.
  *
  *		4) Re-allocate space for any free space manager(s) that:
  *

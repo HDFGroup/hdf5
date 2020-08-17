@@ -242,7 +242,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_get_member_type
  *
- * Purpose:	Returns a copy of the data type of the specified member.
+ * Purpose:     Returns a copy of the data type of the specified member.
  *
  * Return:	Success:	A copy of the member datatype;
  *				modifying the returned datatype does not
@@ -268,7 +268,7 @@ H5T_get_member_type(const H5T_t *dt, unsigned membno)
 
     /* Copy datatype */
     if(NULL == (ret_value = H5T_copy(dt->shared->u.compnd.memb[membno].type, H5T_COPY_TRANSIENT)))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "unable to copy member datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "unable to copy member datatype")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -305,7 +305,7 @@ H5T__reopen_member_type(const H5T_t *dt, unsigned membno)
 
     /* Copy datatype, possibly re-opening it */
     if(NULL == (ret_value = H5T_copy_reopen(dt->shared->u.compnd.memb[membno].type)))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "unable to reopen member datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "unable to reopen member datatype")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -582,7 +582,7 @@ H5T__pack(const H5T_t *dt)
             for(i = 0, offset = 0; i < dt->shared->u.compnd.nmembs; i++) {
                 dt->shared->u.compnd.memb[i].offset = offset;
                 offset += dt->shared->u.compnd.memb[i].size;
-            } /* end for */
+            }
 
             /* Change total size */
             dt->shared->size = MAX(1, offset);

@@ -50,7 +50,6 @@
 /* Headers */
 /***********/
 #include "H5private.h"          /* Generic Functions                        */
-#include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Epkg.h"             /* Error handling                           */
 #include "H5FLprivate.h"        /* Free lists                               */
 #include "H5Iprivate.h"         /* IDs                                      */
@@ -514,9 +513,9 @@ done:
  *
  * Purpose:     Closes an error class.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              Friday, July 11, 2003
  *
  *-------------------------------------------------------------------------
@@ -1041,9 +1040,9 @@ done:
  * Purpose:     Replaces current stack with specified stack. This closes the
  *              stack ID also.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              Friday, July 15, 2003
  *
  *-------------------------------------------------------------------------
@@ -1147,9 +1146,9 @@ done:
  *
  * Purpose:     Closes an error stack.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              Friday, July 14, 2003
  *
  *-------------------------------------------------------------------------
@@ -1285,9 +1284,9 @@ H5E__get_num(const H5E_t *estack)
  *
  * Purpose:     Deletes some error messages from the top of error stack.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              Friday, July 16, 2003
  *
  *-------------------------------------------------------------------------
@@ -1340,9 +1339,9 @@ done:
  *              function name, file name, and error description strings must
  *              be statically allocated.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *		Monday, October 18, 1999
  *
  * Notes:       Basically a new public API wrapper around the H5E__push_stack
@@ -1442,9 +1441,9 @@ done:
  *
  * Purpose:     Clears the error stack for the specified error stack.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              Wednesday, July 16, 2003
  *
  *-------------------------------------------------------------------------
@@ -1487,9 +1486,9 @@ done:
  *              prints error messages. Users are encouraged to write their
  *              own more specific error handlers.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Friday, February 27, 1998
  *
  *-------------------------------------------------------------------------
@@ -1532,9 +1531,9 @@ done:
  * Purpose:     Walks the error stack for the current thread and calls some
  *              function for each error along the way.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Friday, February 27, 1998
  *
  *-------------------------------------------------------------------------
@@ -1582,7 +1581,7 @@ done:
  *              Either (or both) arguments may be null in which case the
  *              value is not returned.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Saturday, February 28, 1998
@@ -1640,7 +1639,7 @@ done:
  *              Automatic stack traversal is always in the H5E_WALK_DOWNWARD
  *              direction.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Friday, February 27, 1998
@@ -1699,7 +1698,7 @@ done:
  *              or the H5E_auto_t typedef.  The IS_STACK parameter is set
  *              to 1 for the first case and 0 for the latter case.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Wednesday, September  8, 2004
