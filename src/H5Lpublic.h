@@ -727,7 +727,8 @@ H5_DLL htri_t H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id);
  *          H5L_info2_t, which is described below and defined in H5Lpublic.h.
  *          This structure is returned in the buffer \p linfo.
  *          \code
- *          typedef struct { H5L_type_t type;   /* Type of link */
+ *          typedef struct {
+ *            H5L_type_t          type;         /* Type of link */
  *            hbool_t             corder_valid; /* Indicate if creation order is valid */
  *            int64_t             corder;       /* Creation order                 */
  *            H5T_cset_t          cset;         /* Character set of link name     */
@@ -813,7 +814,7 @@ H5_DLL herr_t H5Lget_info2(hid_t loc_id, const char *name,
  *            return the value of the first link; if \p n is 5, the function
  *            will return the value of the sixth link; etc.
  *
- *          For example, assume that \p idx_type, \p order, and \n are
+ *          For example, assume that \p idx_type, \p order, and \p n are
  *          #H5_INDEX_NAME, #H5_ITER_DEC, and 5, respectively. #H5_INDEX_NAME
  *          indicates that the links are accessed in lexicographic order by
  *          their names. #H5_ITER_DEC specifies that the list be traversed in
