@@ -38,7 +38,7 @@
 
 MODULE H5P
 
-  USE, INTRINSIC :: ISO_C_BINDING
+  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR
   USE H5GLOBAL
   USE H5fortkit
 
@@ -7929,7 +7929,7 @@ SUBROUTINE h5pget_virtual_filename_f(dcpl_id, index, name, hdferr, name_len)
 
   INTERFACE
      INTEGER(SIZE_T) FUNCTION h5pget_virtual_filename(dcpl_id, index, name, size) BIND(C, NAME='H5Pget_virtual_filename')
-       IMPORT :: HID_T, SIZE_T, C_PTR, C_CHAR
+       IMPORT :: HID_T, SIZE_T, C_PTR
          IMPLICIT NONE
        INTEGER(HID_T) , INTENT(IN), VALUE :: dcpl_id
        INTEGER(SIZE_T), INTENT(IN), VALUE :: index
@@ -7997,7 +7997,7 @@ SUBROUTINE h5pget_virtual_dsetname_f(dcpl_id, index, name, hdferr, name_len)
 
   INTERFACE
      INTEGER(SIZE_T) FUNCTION h5pget_virtual_dsetname(dcpl_id, index, name, size) BIND(C, NAME='H5Pget_virtual_dsetname')
-       IMPORT :: HID_T, SIZE_T, C_PTR, C_CHAR
+       IMPORT :: HID_T, SIZE_T, C_PTR
          IMPLICIT NONE
        INTEGER(HID_T) , INTENT(IN), VALUE :: dcpl_id
        INTEGER(SIZE_T), INTENT(IN), VALUE :: index
@@ -8018,7 +8018,6 @@ SUBROUTINE h5pget_virtual_dsetname_f(dcpl_id, index, name, hdferr, name_len)
      ELSE
         CALL HD5c2fstring(name,c_name,LEN(name))
      ENDIF
-
   ENDIF
 
 END SUBROUTINE h5pget_virtual_dsetname_f

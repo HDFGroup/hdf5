@@ -536,6 +536,7 @@ CONTAINS
     IF (flag .EQ. 0) status = .FALSE.
 
   END SUBROUTINE h5fis_hdf5_f
+
 !****s* H5F/h5fclose_f
 !
 ! NAME

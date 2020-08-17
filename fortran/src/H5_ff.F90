@@ -88,7 +88,7 @@ MODULE H5LIB
   !
   ! H5I flags declaration
   !
-  INTEGER, PARAMETER :: H5I_FLAGS_LEN = 7
+  INTEGER, PARAMETER :: H5I_FLAGS_LEN = 16
   INTEGER, DIMENSION(1:H5I_FLAGS_LEN) :: H5I_flags
   !
   ! H5L flags declaration
@@ -444,13 +444,22 @@ CONTAINS
     !
     ! H5I flags declaration
     !
-    H5I_FILE_F      = H5I_flags(1)
-    H5I_GROUP_F     = H5I_flags(2)
-    H5I_DATATYPE_F  = H5I_flags(3)
-    H5I_DATASPACE_F = H5I_flags(4)
-    H5I_DATASET_F   = H5I_flags(5)
-    H5I_ATTR_F      = H5I_flags(6)
-    H5I_BADID_F     = H5I_flags(7)
+    H5I_FILE_F        = H5I_flags(1)
+    H5I_GROUP_F       = H5I_flags(2)
+    H5I_DATATYPE_F    = H5I_flags(3)
+    H5I_DATASPACE_F   = H5I_flags(4)
+    H5I_DATASET_F     = H5I_flags(5)
+    H5I_ATTR_F        = H5I_flags(6)
+    H5I_BADID_F       = H5I_flags(7)
+    H5I_UNINIT_F      = H5I_flags(8)
+    H5I_VFL_F         = H5I_flags(9)
+    H5I_GENPROP_CLS_F = H5I_flags(10)
+    H5I_GENPROP_LST_F = H5I_flags(11)
+    H5I_ERROR_CLASS_F = H5I_flags(12)
+    H5I_ERROR_MSG_F   = H5I_flags(13)
+    H5I_ERROR_STACK_F = H5I_flags(14)
+    H5I_NTYPES_F      = H5I_flags(15)
+    H5I_INVALID_HID_F = H5I_flags(16)
     !
     ! H5L flags
     !

@@ -966,7 +966,7 @@ CONTAINS
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER(SIZE_T) , INTENT(IN)  :: namelen
          INTEGER(HID_T)  , INTENT(IN)  :: lapl_id_default
-         TYPE(C_PTR),VALUE             :: object_info
+         TYPE(C_PTR), VALUE            :: object_info
          INTEGER         , INTENT(IN)  :: fields
        END FUNCTION h5oget_info_by_name_c
     END INTERFACE
@@ -1010,7 +1010,7 @@ CONTAINS
 ! Fortran2003 Interface:
   SUBROUTINE h5oget_info_f(object_id, object_info, hdferr, fields)
 
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)            :: object_id
     TYPE(h5o_info_t), INTENT(OUT), TARGET   :: object_info
@@ -1072,7 +1072,7 @@ CONTAINS
   SUBROUTINE h5oget_info_by_idx_f(loc_id, group_name, index_field, order, n, &
        object_info, hdferr, lapl_id, fields)
 
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)            :: loc_id
     CHARACTER(LEN=*), INTENT(IN)            :: group_name

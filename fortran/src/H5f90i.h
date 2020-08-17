@@ -21,8 +21,7 @@
  */
 #include "H5f90i_gen.h"
 
-/* Define _fcd.  These are the same on every system
- * but UNICOS.
+/* Define _fcd.  These are the same on every system but UNICOS.
  */
 #define _fcdtocp(desc) (desc)
 

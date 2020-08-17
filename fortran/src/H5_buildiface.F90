@@ -47,7 +47,7 @@
 #include <H5config_f.inc>
 
 PROGRAM H5_buildiface
-  USE, INTRINSIC :: ISO_C_BINDING
+  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR, C_LOC
   IMPLICIT NONE
 
 ! These values are valid REAL KINDs (with corresponding C float) found during configure
@@ -135,7 +135,7 @@ PROGRAM H5_buildiface
 
   WRITE(11,'(A)') "MODULE H5_GEN"
 
-  WRITE(11,'(2X,A)') 'USE, INTRINSIC :: ISO_C_BINDING'
+  WRITE(11,'(2X,A)') 'USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_LOC'
   WRITE(11,'(2X,A)') 'USE H5GLOBAL'
 
   WRITE(11,'(2X,A)') 'USE H5A'
@@ -712,7 +712,6 @@ PROGRAM H5_buildiface
         WRITE(11,'(A)') '  SUBROUTINE h5dread_rkind_'//TRIM(ADJUSTL(chr2))&
              &//'_rank'//chr_rank(j)//'(dset_id, mem_type_id, buf, dims, hdferr, &'
         WRITE(11,'(A)') '       mem_space_id, file_space_id, xfer_prp)'
-        WRITE(11,'(A)') '    USE, INTRINSIC :: ISO_C_BINDING'
         WRITE(11,'(A)') '    IMPLICIT NONE'
         WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: dset_id'
         WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: mem_type_id'
@@ -752,7 +751,6 @@ PROGRAM H5_buildiface
         WRITE(11,'(A)') '  SUBROUTINE h5dread_ikind_'//TRIM(ADJUSTL(chr2))&
              &//'_rank'//chr_rank(j)//'(dset_id, mem_type_id, buf, dims, hdferr, &'
         WRITE(11,'(A)') '       mem_space_id, file_space_id, xfer_prp)'
-        WRITE(11,'(A)') '    USE, INTRINSIC :: ISO_C_BINDING'
         WRITE(11,'(A)') '    IMPLICIT NONE'
         WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: dset_id'
         WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: mem_type_id'
@@ -787,7 +785,6 @@ PROGRAM H5_buildiface
 ! Subroutine API
      WRITE(11,'(A)') '  SUBROUTINE h5dread_ckind_rank'//chr_rank(j)//'(dset_id, mem_type_id, buf, dims, hdferr, &'
      WRITE(11,'(A)') '       mem_space_id, file_space_id, xfer_prp)'
-     WRITE(11,'(A)') '    USE, INTRINSIC :: ISO_C_BINDING'
      WRITE(11,'(A)') '    IMPLICIT NONE'
      WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: dset_id'
      WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: mem_type_id'
@@ -827,7 +824,6 @@ PROGRAM H5_buildiface
         WRITE(11,'(A)') '  SUBROUTINE h5dwrite_rkind_'//TRIM(ADJUSTL(chr2))&
              &//'_rank'//chr_rank(j)//'(dset_id, mem_type_id, buf, dims, hdferr, &'
         WRITE(11,'(A)') '       mem_space_id, file_space_id, xfer_prp)'
-        WRITE(11,'(A)') '    USE, INTRINSIC :: ISO_C_BINDING'
         WRITE(11,'(A)') '    IMPLICIT NONE'
         WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: dset_id'
         WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: mem_type_id'
@@ -866,7 +862,6 @@ PROGRAM H5_buildiface
         WRITE(11,'(A)') '  SUBROUTINE h5dwrite_ikind_'//TRIM(ADJUSTL(chr2))&
              &//'_rank'//chr_rank(j)//'(dset_id, mem_type_id, buf, dims, hdferr, &'
         WRITE(11,'(A)') '       mem_space_id, file_space_id, xfer_prp)'
-        WRITE(11,'(A)') '    USE, INTRINSIC :: ISO_C_BINDING'
         WRITE(11,'(A)') '    IMPLICIT NONE'
         WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: dset_id'
         WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: mem_type_id'
@@ -900,7 +895,6 @@ PROGRAM H5_buildiface
 ! Subroutine API
      WRITE(11,'(A)') '  SUBROUTINE h5dwrite_ckind_rank'//chr_rank(j)//'(dset_id, mem_type_id, buf, dims, hdferr, &'
      WRITE(11,'(A)') '       mem_space_id, file_space_id, xfer_prp)'
-     WRITE(11,'(A)') '    USE, INTRINSIC :: ISO_C_BINDING'
      WRITE(11,'(A)') '    IMPLICIT NONE'
      WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: dset_id'
      WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: mem_type_id'
