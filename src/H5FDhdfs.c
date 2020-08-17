@@ -74,7 +74,7 @@ static hid_t H5FD_HDFS_g = 0;
 #define HDFS_STATS_POW(bin_i, out_ptr) {                       \
     unsigned long long donotshadowresult = 1;                  \
     unsigned           donotshadowindex  = 0;                  \
-    for (donotshadowindex = 0;                                 \
+    for(donotshadowindex = 0;                                  \
          donotshadowindex < (((bin_i) * HDFS_STATS_INTERVAL) + \
                               HDFS_STATS_START_POWER);         \
          donotshadowindex++)                                   \
@@ -118,8 +118,6 @@ static unsigned long long hdfs_stats_boundaries[HDFS_STATS_BIN_COUNT];
  *
  * Programmer: Jacob Smith
  *
- * Changes: None
- *
  ***************************************************************************/
 typedef struct {
     unsigned long long count;
@@ -148,8 +146,6 @@ typedef struct {
  *     Distributed File System (HDFS). Instantiated and populated via
  *     `H5FD_hdfs_handle_open()` and cleaned up via `H5FD_hdfs_handle_close()`.
  *
- *
- *
  * `magic` (unisgned long)
  *
  *     Number to indicate that this structure is of the promised
@@ -175,8 +171,6 @@ typedef struct {
  * Programmer: Jacob Smith
  *             May 2018
  *
- * Changes: None
- *
  ***************************************************************************
  */
 typedef struct {
@@ -198,7 +192,6 @@ typedef struct {
  * Programmer: Gerd Herber
  *             May 2018
  *
- * Changes:    None.
  *--------------------------------------------------------------------------
  */
 static hdfs_t *
@@ -326,7 +319,6 @@ done:
  * Programmer: Gerd Herber
  *             May 2018
  *
- * Changes:    None.
  *--------------------------------------------------------------------------
  */
 static herr_t
@@ -432,8 +424,6 @@ done:
  *
  * Programmer: Jacob Smith
  *
- * Changes: None.
- *
  ***************************************************************************
  */
 typedef struct H5FD_hdfs_t {
@@ -537,9 +527,6 @@ H5FL_DEFINE_STATIC(H5FD_hdfs_t);
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Changes:     Rename as appropriate for hdfs vfd.
- *              Jacob Smith 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -556,7 +543,6 @@ H5FD__init_package(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5FD__init_package() */
 
 
@@ -569,11 +555,7 @@ done:
  * Return:      Success:    The driver ID for the hdfs driver.
  *              Failure:    Negative
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
- * Changes:     Rename as appropriate for hdfs vfd.
- *              Jacob Smith 2018
+ * Programmer:  Jacob Smith, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -610,7 +592,6 @@ H5FD_hdfs_init(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* end H5FD_hdfs_init() */
 
 
@@ -623,9 +604,6 @@ done:
  *
  * Programmer:  Quincey Koziol
  *              Friday, Jan 30, 2004
- *
- * Changes:     Rename as appropriate for hdfs vfd.
- *              Jacob Smith 2018
  *
  *---------------------------------------------------------------------------
  */
@@ -657,9 +635,6 @@ H5FD_hdfs_term(void)
  *
  * Programmer:  John Mainzer
  *              9/10/17
- *
- * Changes:     Rename as appropriate for hdfs vfd.
- *              Jacob Smith 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -716,8 +691,6 @@ done:
  * Programmer:  Jacob Smith
  *              9/10/17
  *
- * Changes:     None.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -762,8 +735,6 @@ done:
  * Programmer:  John Mainzer
  *              9/10/17
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -806,7 +777,6 @@ H5Pget_fapl_hdfs(hid_t             fapl_id,
 
 done:
     FUNC_LEAVE_API(ret_value)
-
 } /* H5Pget_fapl_hdfs() */
 
 
@@ -822,8 +792,6 @@ done:
  *
  * Programmer:  John Mainzer
  *              9/8/17
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -869,8 +837,6 @@ done:
  * Programmer:  John Mainzer
  *              9/8/17
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -911,8 +877,6 @@ done:
  * Programmer:  John Mainzer
  *              9/8/17
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -931,7 +895,6 @@ H5FD_hdfs_fapl_free(void *_fa)
 } /* H5FD_hdfs_fapl_free() */
 
 #if HDFS_STATS
-
 /*----------------------------------------------------------------------------
  *
  * Function: hdfs_reset_stats()
@@ -950,8 +913,6 @@ H5FD_hdfs_fapl_free(void *_fa)
  *
  * Programmer: Jacob Smith
  *             2017-12-08
- *
- * Changes: None.
  *
  *----------------------------------------------------------------------------
  */
@@ -1011,8 +972,6 @@ done:
  *
  * Programmer: Jacob Smith
  *             2017-11-02
- *
- * Changes: None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1191,8 +1150,6 @@ done:
  *         - TODO: if stream is invalid? how can we check this?
  *
  * Programmer: Jacob Smith
- *
- * Changes: None.
  *
  *----------------------------------------------------------------------------
  */
@@ -1442,8 +1399,6 @@ done:
  * Programmer: Jacob Smith
  *             2017-11-02
  *
- * Changes: None.
- *
  *-------------------------------------------------------------------------
  */
 #ifdef H5_HAVE_LIBHDFS
@@ -1525,11 +1480,6 @@ done:
  *
  * Programmer: Gerd Herber
  *             May 2018
- *
- * Changes:
- *
- *     + Replace `if (ret_value == 0)` chain with `HGOTO_DONE` jumps.
- *         Jacob Smith 17 May 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -1650,8 +1600,6 @@ H5FD_hdfs_query(
  * Programmer: Jacob Smith
  *             2017-11-02
  *
- * Changes: None.
- *
  *-------------------------------------------------------------------------
  */
 #ifdef H5_HAVE_LIBHDFS
@@ -1705,8 +1653,6 @@ H5FD_hdfs_get_eoa(
  *
  * Programmer: Jacob Smith
  *             2017-11-03
- *
- * Changes: None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1824,8 +1770,6 @@ H5FD_hdfs_get_eof(
  * Programmer: Jacob Smith
  *             2017-11-02
  *
- * Changes: None.
- *
  *-------------------------------------------------------------------------
  */
 #ifdef H5_HAVE_LIBHDFS
@@ -1901,8 +1845,6 @@ done:
  *
  * Programmer: Jacob Smith
  *             2017-11-??
- *
- * Changes: None.
  *
  *-------------------------------------------------------------------------
  */
@@ -2032,8 +1974,6 @@ done:
  * Programmer: Jacob Smith
  *             2017-10-23
  *
- * Changes: None.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2079,8 +2019,6 @@ done:
  * Programmer: Jacob Smith
  *             2017-10-23
  *
- * Changes: None.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2124,8 +2062,6 @@ done:
  * Programmer: Jacob Smith
  *             2017-11-03
  *
- * Changes: None.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2153,8 +2089,6 @@ H5FD_hdfs_lock(
  *
  * Programmer: Jacob Smith
  *             2017-11-03
- *
- * Changes: None.
  *
  *-------------------------------------------------------------------------
  */

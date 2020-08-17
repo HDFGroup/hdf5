@@ -1683,7 +1683,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov  7 2006
  *
  *-------------------------------------------------------------------------

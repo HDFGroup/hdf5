@@ -63,7 +63,7 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5HF_tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id,
+static herr_t H5HF__tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id,
     H5HF_operator_t op, void *op_data);
 
 
@@ -231,7 +231,7 @@ H5HF_tiny_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5HF_tiny_op_real
+ * Function:    H5HF__tiny_op_real
  *
  * Purpose:     Internal routine to perform operation on 'tiny' object
  *
@@ -243,13 +243,13 @@ H5HF_tiny_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op,
+H5HF__tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op,
     void *op_data)
 {
     size_t enc_obj_size;                /* Encoded object size */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /*
      * Check arguments.
@@ -278,7 +278,7 @@ H5HF_tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_tiny_op_real() */
+} /* end H5HF__tiny_op_real() */
 
 
 /*-------------------------------------------------------------------------
@@ -308,7 +308,7 @@ H5HF_tiny_read(H5HF_hdr_t *hdr, const uint8_t *id, void *obj)
     HDassert(obj);
 
     /* Call the internal 'op' routine */
-    if(H5HF_tiny_op_real(hdr, id, H5HF_op_read, obj) < 0)
+    if(H5HF__tiny_op_real(hdr, id, H5HF_op_read, obj) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "unable to operate on heap object")
 
 done:
@@ -344,7 +344,7 @@ H5HF_tiny_op(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op,
     HDassert(op);
 
     /* Call the internal 'op' routine routine */
-    if(H5HF_tiny_op_real(hdr, id, op, op_data) < 0)
+    if(H5HF__tiny_op_real(hdr, id, op, op_data) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "unable to operate on heap object")
 
 done:

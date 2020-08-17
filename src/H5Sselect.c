@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.ued>
+/* Programmer:  Quincey Koziol
  *              Friday, May 29, 1998
  *
  * Purpose:	Dataspace selection functions.

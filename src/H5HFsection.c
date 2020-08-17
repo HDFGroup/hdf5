@@ -476,7 +476,6 @@ done:
  * Return:	Pointer to new section on success/NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 30 2006
  *
  *-------------------------------------------------------------------------
@@ -589,7 +588,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              May  8 2006
  *
  *-------------------------------------------------------------------------

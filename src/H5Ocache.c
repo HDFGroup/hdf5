@@ -15,7 +15,7 @@
  *
  * Created:		H5Ocache.c
  *			Sep 28 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Object header metadata cache virtual functions.
  *
@@ -1081,7 +1081,6 @@ done:
  *              Failure: FAIL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 12, 2008
  *
  *-------------------------------------------------------------------------
@@ -1300,7 +1299,6 @@ done:
  *              Failure: FAIL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 12, 2008
  *
  *-------------------------------------------------------------------------
@@ -1644,7 +1642,6 @@ done:
  *              Failure: FAIL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 12, 2008
  *
  *-------------------------------------------------------------------------

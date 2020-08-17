@@ -13,7 +13,7 @@
 /*
  * Read-Only S3 Virtual File Driver (VFD)
  *
- * Programmer: Jacob Smith <jake.smith@hdfgroup.org>
+ * Programmer: Jacob Smith
  *             2017-10-13
  *
  * Purpose:
@@ -304,7 +304,6 @@ H5FD__init_package(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* end H5FD__init_package() */
 
 
@@ -335,7 +334,7 @@ H5FD_ros3_init(void)
     HDfprintf(stdout, "H5FD_ros3_init() called.\n");
 #endif
 
-    if (H5I_VFL != H5I_get_type(H5FD_ROS3_g))
+    if(H5I_VFL != H5I_get_type(H5FD_ROS3_g))
         H5FD_ROS3_g = H5FD_register(&H5FD_ros3_g, sizeof(H5FD_class_t), FALSE);
 
 #if ROS3_STATS
@@ -343,6 +342,7 @@ H5FD_ros3_init(void)
      */
     for (bin_i = 0; bin_i < ROS3_STATS_BIN_COUNT; bin_i++) {
         unsigned long long value = 0;
+
         ROS3_STATS_POW(bin_i, &value)
         ros3_stats_boundaries[bin_i] = value;
     }
@@ -353,7 +353,6 @@ H5FD_ros3_init(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* end H5FD_ros3_init() */
 
 
@@ -498,8 +497,6 @@ done:
  * Programmer:  John Mainzer
  *              9/10/17
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -540,7 +537,6 @@ H5Pget_fapl_ros3(hid_t             fapl_id,
 
 done:
     FUNC_LEAVE_API(ret_value)
-
 } /* end H5Pget_fapl_ros3() */
 
 
@@ -556,8 +552,6 @@ done:
  *
  * Programmer:  John Mainzer
  *              9/8/17
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -605,8 +599,6 @@ done:
  * Programmer:  John Mainzer
  *              9/8/17
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -648,8 +640,6 @@ done:
  * Programmer:  John Mainzer
  *              9/8/17
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -668,7 +658,6 @@ H5FD_ros3_fapl_free(void *_fa)
 } /* end H5FD_ros3_fapl_free() */
 
 #if ROS3_STATS
-
 /*----------------------------------------------------------------------------
  *
  * Function: ros3_reset_stats()
@@ -721,9 +710,7 @@ ros3_reset_stats(H5FD_ros3_t *file)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-
 } /* end ros3_reset_stats() */
-
 #endif /* ROS3_STATS */
 
 

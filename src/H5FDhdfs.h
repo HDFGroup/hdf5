@@ -90,8 +90,6 @@ extern "C" {
  * Programmer: Jacob Smith
  *             2018-04-23
  *
- * Changes: None
- *
  ****************************************************************************/
 
 #define H5FD__CURR_HDFS_FAPL_T_VERSION 1
@@ -118,5 +116,4 @@ H5_DLL herr_t H5Pset_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa);
 #endif
 
 #endif /* ifndef H5FDhdfs_H */
-
 

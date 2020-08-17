@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:  Quincey Koziol
  *              Tuesday, June 16, 1998
  *
  * Purpose:	"All" selection dataspace I/O functions.

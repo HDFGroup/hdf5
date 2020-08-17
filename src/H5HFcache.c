@@ -15,7 +15,7 @@
  *
  * Created:		H5HFcache.c
  *			Feb 24 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Implement fractal heap metadata cache methods.
  *
@@ -255,7 +255,6 @@ done:
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 27 2006
  *
  *-------------------------------------------------------------------------
@@ -305,7 +304,6 @@ H5HF__dtable_decode(H5F_t *f, const uint8_t **pp, H5HF_dtable_t *dtable)
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 27 2006
  *
  *-------------------------------------------------------------------------
