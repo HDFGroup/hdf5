@@ -218,10 +218,6 @@ main(int argc, char **argv)
     if ((type = H5Tcopy(H5T_C_S1)) == badhid)
         errx(EXIT_FAILURE, "H5Tcopy");
 
-    /* Create the VL string datatype and a scalar dataspace */
-    if ((type = H5Tcopy(H5T_C_S1)) == badhid)
-        errx(EXIT_FAILURE, "H5Tcopy");
-
     if (!variable) {
         if (H5Tset_size(type, 32) < 0)
             errx(EXIT_FAILURE, "H5Tset_size");

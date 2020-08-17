@@ -142,12 +142,6 @@ main(int argc, char **argv)
 
     fid = H5Fopen("vfd_swmr_vlstr.h5", H5F_ACC_RDONLY, fapl);
 
-    /* Create the VL string datatype and a scalar dataspace, or a
-     * fixed-length string datatype and a simple dataspace.
-     */
-    if ((type = H5Tcopy(H5T_C_S1)) == badhid)
-        errx(EXIT_FAILURE, "H5Tcopy");
-
     /* Create the VL string datatype and a scalar dataspace */
     if ((type = H5Tcopy(H5T_C_S1)) == badhid)
         errx(EXIT_FAILURE, "H5Tcopy");
