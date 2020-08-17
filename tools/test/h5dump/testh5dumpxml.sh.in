@@ -262,36 +262,35 @@ TOOLTEST() {
     # Run test.
     TESTING $DUMPER $@
     (
-    cd $TESTDIR
-      $RUNSERIAL $DUMPER_BIN "$@"
+        cd $TESTDIR
+        $RUNSERIAL $DUMPER_BIN "$@"
     ) >$actual 2>$actual_err
 
-
    if [ ! -f $expect ]; then
-    # Create the expect file if it doesn't yet exist.
-    echo " CREATED"
-     cp $actual $expect
-     echo "    Expected result (*.xml) missing"
-     nerrors="`expr $nerrors + 1`"
+        # Create the expect file if it doesn't yet exist.
+        echo " CREATED"
+        cp $actual $expect
+        echo "    Expected result (*.xml) missing"
+        nerrors="`expr $nerrors + 1`"
    elif  $CMP $expect $actual; then
-      echo " PASSED"
+        echo " PASSED"
    else
-      echo "*FAILED*"
-      echo "    Expected result (*.xml) differs from actual result (*.out)"
-      nerrors="`expr $nerrors + 1`"
-      test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+        echo "*FAILED*"
+        echo "    Expected result (*.xml) differs from actual result (*.out)"
+        nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
    fi
 
    # Clean up output file
    if test -z "$HDF5_NOCLEANUP"; then
-      rm -f $actual $actual_err
+        rm -f $actual $actual_err
    fi
 }
 
 # Print a "SKIP" message
 SKIP() {
-         TESTING $DUMPER $@
-          echo  " -SKIP-"
+    TESTING $DUMPER $@
+    echo  " -SKIP-"
 }
 
 

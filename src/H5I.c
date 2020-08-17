@@ -1125,9 +1125,8 @@ H5I_is_file_object(hid_t id)
     /* Return TRUE if the ID is a file object (dataset, group, map, or committed
      * datatype), FALSE otherwise.
      */
-    if (H5I_DATASET == id_type || H5I_GROUP == id_type || H5I_MAP == id_type) {
+    if (H5I_DATASET == id_type || H5I_GROUP == id_type || H5I_MAP == id_type)
         ret_value = TRUE;
-    }
     else if (H5I_DATATYPE == id_type) {
 
         H5T_t *dt = NULL;
@@ -1137,9 +1136,8 @@ H5I_is_file_object(hid_t id)
 
         ret_value = H5T_is_named(dt);
     }
-    else {
+    else
         ret_value = FALSE;
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

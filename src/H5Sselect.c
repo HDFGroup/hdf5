@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.ued>
+/* Programmer:  Quincey Koziol
  *              Friday, May 29, 1998
  *
  * Purpose:	Dataspace selection functions.
@@ -56,9 +56,9 @@
 /********************/
 
 #ifdef LATER
-static herr_t H5S_select_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end);
-static htri_t H5S_select_iter_has_next_block(const H5S_sel_iter_t *iter);
-static herr_t H5S_select_iter_next_block(H5S_sel_iter_t *iter);
+static herr_t H5S__select_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end);
+static htri_t H5S__select_iter_has_next_block(const H5S_sel_iter_t *iter);
+static herr_t H5S__select_iter_next_block(H5S_sel_iter_t *iter);
 #endif /* LATER */
 
 
@@ -1233,11 +1233,11 @@ H5S_select_iter_coords(const H5S_sel_iter_t *sel_iter, hsize_t *coords)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_select_iter_block
+    H5S__select_iter_block
  PURPOSE
     Get the block of the current iterator position
  USAGE
-    herr_t H5S_select_iter_block(sel_iter,start,end)
+    herr_t H5S__select_iter_block(sel_iter,start,end)
         const H5S_sel_iter_t *sel_iter; IN: Selection iterator to query
         hsize_t *start;    OUT: Array to place iterator start block coordinates
         hsize_t *end;      OUT: Array to place iterator end block coordinates
@@ -1255,11 +1255,11 @@ H5S_select_iter_coords(const H5S_sel_iter_t *sel_iter, hsize_t *coords)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_select_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
+H5S__select_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
 {
     herr_t ret_value;         /* return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -1270,7 +1270,7 @@ H5S_select_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
     ret_value = (*iter->type->iter_block)(iter, start, end);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S_select_iter_block() */
+} /* end H5S__select_iter_block() */
 #endif /* LATER */
 
 
@@ -1314,11 +1314,11 @@ H5S_select_iter_nelmts(const H5S_sel_iter_t *sel_iter)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_select_iter_has_next_block
+    H5S__select_iter_has_next_block
  PURPOSE
     Check if there is another block available in the selection iterator
  USAGE
-    htri_t H5S_select_iter_has_next_block(sel_iter)
+    htri_t H5S__select_iter_has_next_block(sel_iter)
         const H5S_sel_iter_t *sel_iter; IN: Selection iterator to query
  RETURNS
     Non-negative on success, negative on failure.
@@ -1334,11 +1334,11 @@ H5S_select_iter_nelmts(const H5S_sel_iter_t *sel_iter)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static htri_t
-H5S_select_iter_has_next_block(const H5S_sel_iter_t *iter)
+H5S__select_iter_has_next_block(const H5S_sel_iter_t *iter)
 {
     herr_t ret_value;         /* return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -1347,7 +1347,7 @@ H5S_select_iter_has_next_block(const H5S_sel_iter_t *iter)
     ret_value = (*iter->type->iter_has_next_block)(iter);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S_select_iter_has_next_block() */
+} /* end H5S__select_iter_has_next_block() */
 #endif /* LATER */
 
 
@@ -1397,11 +1397,11 @@ H5S_select_iter_next(H5S_sel_iter_t *iter, size_t nelem)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_select_iter_next_block
+    H5S__select_iter_next_block
  PURPOSE
     Advance selection iterator to next block
  USAGE
-    herr_t H5S_select_iter_next_block(iter)
+    herr_t H5S__select_iter_next_block(iter)
         H5S_sel_iter_t *iter;   IN/OUT: Selection iterator to change
  RETURNS
     Non-negative on success, negative on failure.
@@ -1419,11 +1419,11 @@ H5S_select_iter_next(H5S_sel_iter_t *iter, size_t nelem)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_select_iter_next_block(H5S_sel_iter_t *iter)
+H5S__select_iter_next_block(H5S_sel_iter_t *iter)
 {
     herr_t ret_value;         /* return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -1432,7 +1432,7 @@ H5S_select_iter_next_block(H5S_sel_iter_t *iter)
     ret_value = (*iter->type->iter_next_block)(iter);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S_select_iter_next_block() */
+} /* end H5S__select_iter_next_block() */
 #endif /* LATER */
 
 

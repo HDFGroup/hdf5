@@ -15,7 +15,7 @@
  *
  * Created:             H5Fmpi.c
  *                      Jan 10 2008
- *                      Quincey Koziol <koziol@hdfgroup.org>
+ *                      Quincey Koziol
  *
  * Purpose:             MPI-related routines.
  *

@@ -19,8 +19,6 @@
  *
  * Purpose:     Public include file for cache functions.
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 #ifndef _H5Cpublic_H

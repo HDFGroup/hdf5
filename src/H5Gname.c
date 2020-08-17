@@ -81,14 +81,14 @@ typedef struct H5G_gnba_iter_t {
 /* Local Prototypes */
 /********************/
 
-static htri_t H5G_common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r);
-static H5RS_str_t *H5G_build_fullpath(const char *prefix, const char *name);
+static htri_t H5G__common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r);
+static H5RS_str_t *H5G__build_fullpath(const char *prefix, const char *name);
 #ifdef NOT_YET
-static H5RS_str_t *H5G_build_fullpath_refstr_refstr(const H5RS_str_t *prefix_r, const H5RS_str_t *name_r);
+static H5RS_str_t *H5G__build_fullpath_refstr_refstr(const H5RS_str_t *prefix_r, const H5RS_str_t *name_r);
 #endif /* NOT_YET */
-static herr_t H5G_name_move_path(H5RS_str_t **path_r_ptr,
+static herr_t H5G__name_move_path(H5RS_str_t **path_r_ptr,
     const char *full_suffix, const char *src_path, const char *dst_path);
-static int H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key);
+static int H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key);
 
 
 /*********************/
@@ -208,7 +208,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5G_common_path
+ * Function: H5G__common_path
  *
  * Purpose: Determine if one path is a valid prefix of another path
  *
@@ -222,14 +222,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5G_common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r)
+H5G__common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r)
 {
     const char *fullpath;       /* Pointer to actual fullpath string */
     const char *prefix;         /* Pointer to actual prefix string */
     size_t  nchars1,nchars2;    /* Number of characters in components */
     htri_t ret_value=FALSE;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Get component of each name */
     fullpath=H5RS_get_str(fullpath_r);
@@ -270,11 +270,11 @@ H5G_common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_common_path() */
+} /* end H5G__common_path() */
 
 
 /*-------------------------------------------------------------------------
- * Function: H5G_build_fullpath
+ * Function: H5G__build_fullpath
  *
  * Purpose: Build a full path from a prefix & base pair of strings
  *
@@ -287,7 +287,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5RS_str_t *
-H5G_build_fullpath(const char *prefix, const char *name)
+H5G__build_fullpath(const char *prefix, const char *name)
 {
     char *full_path;            /* Full user path built */
     size_t orig_path_len;       /* Original length of the path */
@@ -296,7 +296,7 @@ H5G_build_fullpath(const char *prefix, const char *name)
     unsigned need_sep;          /* Flag to indicate if separator is needed */
     H5RS_str_t *ret_value = NULL;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(prefix);
@@ -331,7 +331,7 @@ H5G_build_fullpath(const char *prefix, const char *name)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_build_fullpath() */
+} /* end H5G__build_fullpath() */
 
 
 /*-------------------------------------------------------------------------
@@ -363,7 +363,7 @@ H5G_build_fullpath_refstr_str(H5RS_str_t *prefix_r, const char *name)
     HDassert(prefix);
 
     /* Create reference counted string for path */
-    ret_value = H5G_build_fullpath(prefix, name);
+    ret_value = H5G__build_fullpath(prefix, name);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_build_fullpath_refstr_str() */
@@ -385,13 +385,13 @@ H5G_build_fullpath_refstr_str(H5RS_str_t *prefix_r, const char *name)
  *-------------------------------------------------------------------------
  */
 static H5RS_str_t *
-H5G_build_fullpath_refstr_refstr(const H5RS_str_t *prefix_r, const H5RS_str_t *name_r)
+H5G__build_fullpath_refstr_refstr(const H5RS_str_t *prefix_r, const H5RS_str_t *name_r)
 {
     const char *prefix;         /* Pointer to raw string of prefix */
     const char *name;           /* Pointer to raw string of name */
     H5RS_str_t *ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Get the pointer to the prefix */
     prefix = H5RS_get_str(prefix_r);
@@ -400,10 +400,10 @@ H5G_build_fullpath_refstr_refstr(const H5RS_str_t *prefix_r, const H5RS_str_t *n
     name = H5RS_get_str(name_r);
 
     /* Create reference counted string for path */
-    ret_value = H5G_build_fullpath(prefix, name);
+    ret_value = H5G__build_fullpath(prefix, name);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_build_fullpath_refstr_refstr() */
+} /* end H5G__build_fullpath_refstr_refstr() */
 #endif /* NOT_YET */
 
 
@@ -663,7 +663,7 @@ H5G_name_free(H5G_name_t *name)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5G_name_move_path
+ * Function:    H5G__name_move_path
  *
  * Purpose:     Update a user or canonical path after an object moves
  *
@@ -676,7 +676,7 @@ H5G_name_free(H5G_name_t *name)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_name_move_path(H5RS_str_t **path_r_ptr, const char *full_suffix, const char *src_path,
+H5G__name_move_path(H5RS_str_t **path_r_ptr, const char *full_suffix, const char *src_path,
     const char *dst_path)
 {
     const char *path;                   /* Path to update */
@@ -684,7 +684,7 @@ H5G_name_move_path(H5RS_str_t **path_r_ptr, const char *full_suffix, const char 
     size_t full_suffix_len;             /* Length of full suffix */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     HDassert(path_r_ptr && *path_r_ptr);
@@ -762,11 +762,11 @@ H5G_name_move_path(H5RS_str_t **path_r_ptr, const char *full_suffix, const char 
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_name_move_path() */
+} /* end H5G__name_move_path() */
 
 
 /*-------------------------------------------------------------------------
- * Function: H5G_name_replace_cb
+ * Function: H5G__name_replace_cb
  *
  * Purpose: H5I_iterate callback function to replace group entry names
  *
@@ -779,7 +779,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
+H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
 {
     const H5G_names_t *names = (const H5G_names_t *)key;        /* Get operation's information */
     H5O_loc_t *oloc;            /* Object location for object that the ID refers to */
@@ -788,7 +788,7 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
     hbool_t obj_in_child = FALSE;   /* Flag to indicate that the object is in the child mount hier. */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(obj_ptr);
 
@@ -908,7 +908,7 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
             else {
                 /* Check if the source is along the entry's path */
                 /* (But not actually the entry itself) */
-                if(H5G_common_path(obj_path->full_path_r, names->src_full_path_r) &&
+                if(H5G__common_path(obj_path->full_path_r, names->src_full_path_r) &&
                         H5RS_cmp(obj_path->full_path_r, names->src_full_path_r)) {
                     /* Hide the user path */
                     (obj_path->obj_hidden)++;
@@ -958,7 +958,7 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
             } /* end if */
             else {
                 /* Check if file being unmounted was hiding the object */
-                if(H5G_common_path(obj_path->full_path_r, names->src_full_path_r) &&
+                if(H5G__common_path(obj_path->full_path_r, names->src_full_path_r) &&
                         H5RS_cmp(obj_path->full_path_r, names->src_full_path_r)) {
                     /* Un-hide the user path */
                     (obj_path->obj_hidden)--;
@@ -972,7 +972,7 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
          */
         case H5G_NAME_DELETE:
             /* Check if the location being unlinked is in the path for the current object */
-            if(H5G_common_path(obj_path->full_path_r, names->src_full_path_r)) {
+            if(H5G__common_path(obj_path->full_path_r, names->src_full_path_r)) {
                 /* Free paths for object */
                 H5G_name_free(obj_path);
             } /* end if */
@@ -984,7 +984,7 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
          */
         case H5G_NAME_MOVE: /* Link move case, check for relative names case */
             /* Check if the src object moved is in the current object's path */
-            if(H5G_common_path(obj_path->full_path_r, names->src_full_path_r)) {
+            if(H5G__common_path(obj_path->full_path_r, names->src_full_path_r)) {
                 const char *full_path;      /* Full path of current object */
                 const char *full_suffix;    /* Suffix of full path, after src_path */
                 size_t full_suffix_len;     /* Length of suffix of full path after src_path*/
@@ -1013,7 +1013,7 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
 
                 /* Update the user path, if one exists */
                 if(obj_path->user_path_r)
-                    if(H5G_name_move_path(&(obj_path->user_path_r), full_suffix, src_path, dst_path) < 0)
+                    if(H5G__name_move_path(&(obj_path->user_path_r), full_suffix, src_path, dst_path) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_PATH, FAIL, "can't build user path name")
 
                 /* Build new full path */
@@ -1041,7 +1041,7 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5G_name_replace_cb() */
+} /* end H5G__name_replace_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -1167,17 +1167,17 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file,
 
             /* Search through group IDs */
             if(search_group)
-                if(H5I_iterate(H5I_GROUP, H5G_name_replace_cb, &names, FALSE) < 0)
+                if(H5I_iterate(H5I_GROUP, H5G__name_replace_cb, &names, FALSE) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over groups")
 
             /* Search through dataset IDs */
             if(search_dataset)
-                if(H5I_iterate(H5I_DATASET, H5G_name_replace_cb, &names, FALSE) < 0)
+                if(H5I_iterate(H5I_DATASET, H5G__name_replace_cb, &names, FALSE) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over datasets")
 
             /* Search through datatype IDs */
             if(search_datatype)
-                if(H5I_iterate(H5I_DATATYPE, H5G_name_replace_cb, &names, FALSE) < 0)
+                if(H5I_iterate(H5I_DATATYPE, H5G__name_replace_cb, &names, FALSE) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over datatypes")
         } /* end if */
     } /* end if */
@@ -1188,7 +1188,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5G_get_name_by_addr_cb
+ * Function:    H5G__get_name_by_addr_cb
  *
  * Purpose:     Callback for retrieving object's name by address
  *
@@ -1202,7 +1202,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info2_t *linfo,
+H5G__get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info2_t *linfo,
     void *_udata)
 {
     H5G_gnba_iter_t *udata = (H5G_gnba_iter_t *)_udata; /* User data for iteration */
@@ -1212,7 +1212,7 @@ H5G_get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info2_t *linfo,
     hbool_t     obj_found = FALSE;      /* Object at 'path' found */
     herr_t      ret_value = H5_ITER_CONT;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(path);
@@ -1262,7 +1262,7 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, H5_ITER_ERROR, "can't free location")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_get_name_by_addr_cb() */
+} /* end H5G__get_name_by_addr_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -1311,7 +1311,7 @@ H5G_get_name_by_addr(H5F_t *f, const H5O_loc_t *loc, char *name, size_t size)
         udata.path = NULL;
 
         /* Visit all the links in the file */
-        if((status = H5G_visit(&root_loc, "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5G_get_name_by_addr_cb, &udata)) < 0)
+        if((status = H5G_visit(&root_loc, "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5G__get_name_by_addr_cb, &udata)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_BADITER, (-1), "group traversal failed while looking for object name")
         else if(status > 0)
             found_obj = TRUE;

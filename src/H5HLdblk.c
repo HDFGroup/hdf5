@@ -15,7 +15,7 @@
  *
  * Created:     H5HLdblk.c
  *              Summer 2012
- *              Dana Robinson <derobins@hdfgroup.org>
+ *              Dana Robinson
  *
  * Purpose:     Data block routines for local heaps.
  *

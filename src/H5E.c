@@ -391,7 +391,7 @@ H5E__get_stack(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5E_free_class
+ * Function:    H5E__free_class
  *
  * Purpose:     Private function to free an error class.
  *
@@ -403,9 +403,9 @@ H5E__get_stack(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E_free_class(H5E_cls_t *cls)
+H5E__free_class(H5E_cls_t *cls)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
     HDassert(cls);
@@ -417,7 +417,7 @@ H5E_free_class(H5E_cls_t *cls)
     cls = H5FL_FREE(H5E_cls_t, cls);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5E_free_class() */
+} /* end H5E__free_class() */
 
 
 /*-------------------------------------------------------------------------
@@ -502,7 +502,7 @@ H5E__register_class(const char *cls_name, const char *lib_name, const char *vers
 
 done:
     if(!ret_value)
-        if(cls && H5E_free_class(cls) < 0)
+        if(cls && H5E__free_class(cls) < 0)
             HDONE_ERROR(H5E_ERROR, H5E_CANTRELEASE, NULL, "unable to free error class")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -572,7 +572,7 @@ H5E__unregister_class(H5E_cls_t *cls, void H5_ATTR_UNUSED **request)
         HGOTO_ERROR(H5E_ERROR, H5E_BADITER, FAIL, "unable to free all messages in this error class")
 
     /* Free error class structure */
-    if(H5E_free_class(cls) < 0)
+    if(H5E__free_class(cls) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTRELEASE, FAIL, "unable to free error class")
 
 done:

@@ -99,36 +99,36 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
  * message.
  */
 const H5O_msg_class_t *const H5O_msg_class_g[] = {
-    H5O_MSG_NULL,        /*0x0000 Null                */
-    H5O_MSG_SDSPACE,        /*0x0001 Dataspace            */
-    H5O_MSG_LINFO,        /*0x0002 Link information        */
-    H5O_MSG_DTYPE,        /*0x0003 Datatype            */
-    H5O_MSG_FILL,           /*0x0004 Old data storage -- fill value */
-    H5O_MSG_FILL_NEW,        /*0x0005 New data storage -- fill value */
-    H5O_MSG_LINK,        /*0x0006 Link                 */
-    H5O_MSG_EFL,        /*0x0007 Data storage -- external data files */
-    H5O_MSG_LAYOUT,        /*0x0008 Data Layout            */
+    H5O_MSG_NULL,               /*0x0000 Null                            */
+    H5O_MSG_SDSPACE,            /*0x0001 Dataspace                       */
+    H5O_MSG_LINFO,              /*0x0002 Link information                */
+    H5O_MSG_DTYPE,              /*0x0003 Datatype                        */
+    H5O_MSG_FILL,               /*0x0004 Old data storage -- fill value  */
+    H5O_MSG_FILL_NEW,           /*0x0005 New data storage -- fill value  */
+    H5O_MSG_LINK,               /*0x0006 Link                            */
+    H5O_MSG_EFL,                /*0x0007 Data storage -- external data files */
+    H5O_MSG_LAYOUT,             /*0x0008 Data Layout                     */
 #ifdef H5O_ENABLE_BOGUS
-    H5O_MSG_BOGUS_VALID,    /*0x0009 "Bogus valid" (for testing)    */
+    H5O_MSG_BOGUS_VALID,        /*0x0009 "Bogus valid" (for testing)     */
 #else /* H5O_ENABLE_BOGUS */
-    NULL,            /*0x0009 "Bogus valid" (for testing)    */
+    NULL,                       /*0x0009 "Bogus valid" (for testing)     */
 #endif /* H5O_ENABLE_BOGUS */
-    H5O_MSG_GINFO,        /*0x000A Group information        */
-    H5O_MSG_PLINE,        /*0x000B Data storage -- filter pipeline */
-    H5O_MSG_ATTR,        /*0x000C Attribute            */
-    H5O_MSG_NAME,        /*0x000D Object name            */
-    H5O_MSG_MTIME,        /*0x000E Object modification date and time */
-    H5O_MSG_SHMESG,        /*0x000F File-wide shared message table */
-    H5O_MSG_CONT,        /*0x0010 Object header continuation    */
-    H5O_MSG_STAB,        /*0x0011 Symbol table            */
-    H5O_MSG_MTIME_NEW,        /*0x0012 New Object modification date and time */
-    H5O_MSG_BTREEK,        /*0x0013 Non-default v1 B-tree 'K' values */
-    H5O_MSG_DRVINFO,        /*0x0014 Driver info settings        */
-    H5O_MSG_AINFO,        /*0x0015 Attribute information        */
-    H5O_MSG_REFCOUNT,        /*0x0016 Object's ref. count        */
-    H5O_MSG_FSINFO,        /*0x0017 Free-space manager info        */
-    H5O_MSG_MDCI,               /*0x0018 Metadata cache image           */
-    H5O_MSG_UNKNOWN        /*0x0019 Placeholder for unknown message */
+    H5O_MSG_GINFO,              /*0x000A Group information               */
+    H5O_MSG_PLINE,              /*0x000B Data storage -- filter pipeline */
+    H5O_MSG_ATTR,               /*0x000C Attribute                       */
+    H5O_MSG_NAME,               /*0x000D Object name                     */
+    H5O_MSG_MTIME,              /*0x000E Object modification date and time */
+    H5O_MSG_SHMESG,             /*0x000F File-wide shared message table  */
+    H5O_MSG_CONT,               /*0x0010 Object header continuation      */
+    H5O_MSG_STAB,               /*0x0011 Symbol table                    */
+    H5O_MSG_MTIME_NEW,          /*0x0012 New Object modification date and time */
+    H5O_MSG_BTREEK,             /*0x0013 Non-default v1 B-tree 'K' values */
+    H5O_MSG_DRVINFO,            /*0x0014 Driver info settings            */
+    H5O_MSG_AINFO,              /*0x0015 Attribute information           */
+    H5O_MSG_REFCOUNT,           /*0x0016 Object's ref. count             */
+    H5O_MSG_FSINFO,             /*0x0017 Free-space manager info         */
+    H5O_MSG_MDCI,               /*0x0018 Metadata cache image            */
+    H5O_MSG_UNKNOWN             /*0x0019 Placeholder for unknown message */
 };
 
 /* Format version bounds for object header */
@@ -219,7 +219,7 @@ H5O__init_package(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_set_version
+ * Function:    H5O__set_version
  *
  * Purpose:     Sets the correct version to encode the object header.
  *              Chooses the oldest version possible, unless the file's
@@ -233,12 +233,12 @@ H5O__init_package(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_set_version(H5F_t *f, H5O_t *oh, uint8_t oh_flags, hbool_t store_msg_crt_idx)
+H5O__set_version(H5F_t *f, H5O_t *oh, uint8_t oh_flags, hbool_t store_msg_crt_idx)
 {
     uint8_t version;            /* Message version */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* check arguments */
     HDassert(f);
@@ -262,7 +262,7 @@ H5O_set_version(H5F_t *f, H5O_t *oh, uint8_t oh_flags, hbool_t store_msg_crt_idx
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_set_version() */
+} /* end H5O__set_version() */
 
 
 /*-------------------------------------------------------------------------
@@ -280,16 +280,7 @@ done:
  *        Failure:    Negative
  *
  * Programmer:    Robb Matzke
- *        matzke@llnl.gov
  *        Aug  5 1997
- *
- * Changes:     2018 August 17
- *              Jacob Smith
- *              Refactor out the operations into two separate steps --
- *              preparation and application -- to facilitate overriding the
- *              library-default size allocated for the object header. This
- *              function is retained as a wrapper, to minimize changes to
- *              unaffected calling functions.
  *
  *-------------------------------------------------------------------------
  */
@@ -308,13 +299,13 @@ H5O_create(H5F_t *f, size_t size_hint, size_t initial_rc, hid_t ocpl_id, H5O_loc
     /* create object header in freelist
      * header version is set internally
      */
-    oh = H5O__create_ohdr(f, ocpl_id);
+    oh = H5O_create_ohdr(f, ocpl_id);
     if(NULL == oh)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "Can't instantiate object header")
 
     /* apply object header information to file
      */
-    if(H5O__apply_ohdr(f, oh, ocpl_id, size_hint, initial_rc, loc) < 0)
+    if(H5O_apply_ohdr(f, oh, ocpl_id, size_hint, initial_rc, loc) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "Can't apply object header to file")
 
 done:
@@ -326,7 +317,7 @@ done:
 
 
 /*-----------------------------------------------------------------------------
- * Function:   H5O__create_ohdr
+ * Function:   H5O_create_ohdr
  *
  * Purpose:    Create the object header, set version and flags.
  *
@@ -339,7 +330,7 @@ done:
  *-----------------------------------------------------------------------------
  */
 H5O_t *
-H5O__create_ohdr(H5F_t *f, hid_t ocpl_id)
+H5O_create_ohdr(H5F_t *f, hid_t ocpl_id)
 {
     H5P_genplist_t *oc_plist;
     H5O_t          *oh = NULL;        /* Object header in Freelist */
@@ -364,20 +355,18 @@ H5O__create_ohdr(H5F_t *f, hid_t ocpl_id)
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, NULL, "not a property list")
 
     /* Get any object header status flags set by properties */
-    if(H5P_DATASET_CREATE_DEFAULT == ocpl_id)
-    {
+    if(H5P_DATASET_CREATE_DEFAULT == ocpl_id) {
         /* If the OCPL is the default DCPL, we can get the header flags from the
          * API context. Otherwise we have to call H5P_get */
         if(H5CX_get_ohdr_flags(&oh_flags) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get object header flags")
     }
-    else
-    {
+    else {
         if(H5P_get(oc_plist, H5O_CRT_OHDR_FLAGS_NAME, &oh_flags) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get object header flags")
     }
 
-    if(H5O_set_version(f, oh, oh_flags, H5F_STORE_MSG_CRT_IDX(f)) < 0)
+    if(H5O__set_version(f, oh, oh_flags, H5F_STORE_MSG_CRT_IDX(f)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, NULL, "can't set version of object header")
 
     oh->flags = oh_flags;
@@ -389,11 +378,11 @@ done:
         HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, NULL, "can't delete object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5O__create_ohdr() */
+} /* H5O_create_ohdr() */
 
 
 /*-----------------------------------------------------------------------------
- * Function:   H5O__apply_ohdr
+ * Function:   H5O_apply_ohdr
  *
  * Purpose:    Initialize and set the object header in the file.
  *             Record some information at `loc_out`.
@@ -407,7 +396,7 @@ done:
  *-----------------------------------------------------------------------------
  */
 herr_t
-H5O__apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t initial_rc, H5O_loc_t *loc_out)
+H5O_apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t initial_rc, H5O_loc_t *loc_out)
 {
     haddr_t         oh_addr;
     size_t          oh_size;
@@ -564,7 +553,7 @@ H5O__apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t ini
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-} /* H5O__apply_ohdr() */
+} /* H5O_apply_ohdr() */
 
 
 /*-------------------------------------------------------------------------
@@ -664,7 +653,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_open_by_idx
+ * Function:    H5O__open_by_idx
  *
  * Purpose:     Internal routine to open an object by index within group
  *
@@ -677,7 +666,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5O_open_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
+H5O__open_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, H5I_type_t *opened_type)
 {
     H5G_loc_t   obj_loc;                /* Location used to open group */
@@ -686,7 +675,7 @@ H5O_open_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
     hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
     void *ret_value = NULL;             /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -712,11 +701,11 @@ done:
             HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "can't free location")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_open_by_idx() */
+} /* end H5O__open_by_idx() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_open_by_addr
+ * Function:    H5O__open_by_addr
  *
  * Purpose:     Internal routine to open an object by its address
  *
@@ -729,14 +718,14 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5O_open_by_addr(const H5G_loc_t *loc, haddr_t addr, H5I_type_t *opened_type)
+H5O__open_by_addr(const H5G_loc_t *loc, haddr_t addr, H5I_type_t *opened_type)
 {
     H5G_loc_t   obj_loc;                /* Location used to open group */
     H5G_name_t  obj_path;                /* Opened object group hier. path */
     H5O_loc_t   obj_oloc;                /* Opened object object location */
     void *ret_value = NULL;             /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -755,7 +744,7 @@ H5O_open_by_addr(const H5G_loc_t *loc, haddr_t addr, H5I_type_t *opened_type)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_open_by_addr() */
+} /* end H5O__open_by_addr() */
 
 
 /*-------------------------------------------------------------------------
@@ -869,7 +858,6 @@ done:
  *              Failure:    -1
  *
  * Programmer:    Robb Matzke
- *        matzke@llnl.gov
  *        Aug  5 1997
  *
  *-------------------------------------------------------------------------
@@ -984,7 +972,6 @@ done:
  *        Failure:    Negative
  *
  * Programmer:    Robb Matzke
- *        matzke@llnl.gov
  *        Aug  5 1997
  *
  *-------------------------------------------------------------------------
@@ -1033,7 +1020,6 @@ done:
  *        Failure:    NULL
  *
  * Programmer:    Quincey Koziol
- *        koziol@ncsa.uiuc.edu
  *        Dec 31 2002
  *
  *-------------------------------------------------------------------------
@@ -1219,7 +1205,6 @@ done:
  *        Failure:    NULL
  *
  * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
  *        Jul 13 2008
  *
  *-------------------------------------------------------------------------
@@ -1266,7 +1251,6 @@ done:
  *        Failure:    Negative
  *
  * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
  *        Jul 13 2008
  *
  *-------------------------------------------------------------------------
@@ -1302,7 +1286,6 @@ done:
  *        Failure:    Negative
  *
  * Programmer:    Quincey Koziol
- *        koziol@ncsa.uiuc.edu
  *        Dec 31 2002
  *
  *-------------------------------------------------------------------------
@@ -1498,7 +1481,6 @@ done:
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Quincey Koziol
- *              <koziol@ncsa.uiuc.edu>
  *              Tuesday, January 21, 2003
  *
  *-------------------------------------------------------------------------
@@ -1570,7 +1552,6 @@ done:
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Quincey Koziol
- *        koziol@ncsa.uiuc.edu
  *        Mar 19 2003
  *
  *-------------------------------------------------------------------------
@@ -1633,7 +1614,6 @@ done:
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Quincey Koziol
- *        koziol@ncsa.uiuc.edu
  *        Mar 19 2003
  *
  *-------------------------------------------------------------------------
@@ -1696,7 +1676,7 @@ H5O_obj_type(const H5O_loc_t *loc, H5O_type_t *obj_type)
 
 done:
     if(oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O_obj_type() */
@@ -1734,10 +1714,9 @@ H5O__obj_type_real(const H5O_t *oh, H5O_type_t *obj_type)
         /* Set type to "unknown" */
         *obj_type = H5O_TYPE_UNKNOWN;
     }
-    else {
+    else
         /* Set object type */
         *obj_type = obj_class->type;
-    }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__obj_type_real() */
@@ -1924,7 +1903,6 @@ H5O_loc_reset(H5O_loc_t *loc)
  *            Failure:    Negative
  *
  * Programmer:    Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Monday, September 19, 2005
  *
  *-------------------------------------------------------------------------
@@ -2132,7 +2110,7 @@ H5O_get_hdr_info(const H5O_loc_t *loc, H5O_hdr_info_t *hdr)
 
 done:
     if(oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_get_hdr_info() */
@@ -2943,7 +2921,6 @@ done:
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
  *        Jul 13 2008
  *
  *-------------------------------------------------------------------------
@@ -2979,7 +2956,6 @@ done:
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
  *        Jul 13 2008
  *
  *-------------------------------------------------------------------------
@@ -3016,7 +2992,6 @@ done:
  * Return:     Non-negative on success/Negative on failure
  *
  * Programmer: Quincey Koziol
- *             koziol@hdfgroup.org
  *             Oct 08 2010
  *
  *-------------------------------------------------------------------------
@@ -3082,7 +3057,6 @@ H5O_get_proxy(const H5O_t *oh)
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Quincey Koziol
- *        koziol@ncsa.uiuc.edu
  *        Jan 15 2003
  *
  *-------------------------------------------------------------------------
