@@ -2415,7 +2415,6 @@
 ./tools/test/h5diff/testfiles/h5diff_80.txt
 ./tools/test/h5diff/testfiles/h5diff_800.txt
 ./tools/test/h5diff/testfiles/h5diff_801.txt
-./tools/test/h5diff/testfiles/h5diff_830.txt
 ./tools/test/h5diff/testfiles/h5diff_90.txt
 ./tools/test/h5diff/testfiles/h5diff_100.txt
 ./tools/test/h5diff/testfiles/h5diff_101.txt
@@ -2747,6 +2746,7 @@
 ./tools/test/perform/build_h5perf_alone.sh
 ./tools/test/perform/build_h5perf_serial_alone.sh
 ./tools/test/perform/chunk.c
+./tools/test/perform/chunk_cache.c
 ./tools/test/perform/direct_write_perf.c
 ./tools/test/perform/gen_report.pl
 ./tools/test/perform/iopipe.c
