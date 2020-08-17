@@ -5590,7 +5590,7 @@ done:
  *              happens.  The code I have added should allow us to
  *              handle the situation under all but the worst conditions,
  *              but one can argue that we should just scream and die if 
- *              we ever detect the condidtion.
+ *              we ever detect the condition.
  *
  *                                                      -- JRM 10/13/07
  *

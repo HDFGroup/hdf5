@@ -458,7 +458,7 @@ H5C_construct_candidate_list__clean_cache(H5C_t * cache_ptr)
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
 
     /* As a sanity check, set space needed to the dirty_index_size.  This
-     * should be the sum total of the sizes of all the dirty entries in 
+     * should be the sum total of the sizes of all the dirty entries
      * in the metadata cache.  Note that if the slist is enabled, 
      * cache_ptr->slist_size should equal cache_ptr->dirty_index_size.
      */

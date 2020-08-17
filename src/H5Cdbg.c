@@ -272,7 +272,7 @@ H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name)
  * Programmer:  John Mainzer
  *              11/15/14
  *
- * Changes:     Updated function for the slist_enabled field in H6C_t.
+ * Changes:     Updated function for the slist_enabled field in H5C_t.
  *              Recall that to minimize slist overhead, the slist is 
  *              empty and not maintained if cache_ptr->slist_enabled is
  *              false.
