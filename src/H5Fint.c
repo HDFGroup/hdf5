@@ -1730,6 +1730,9 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
             set_flag = TRUE;
     } /* end else */
 
+    /* Set the file locking flag */
+    file->use_file_locking = use_file_locking;
+
     /* Check to see if both SWMR and cache image are requested.  Fail if so */
     if(H5C_cache_image_status(file, &ci_load, &ci_write) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get MDC cache image status")
@@ -3420,6 +3423,7 @@ H5F__start_swmr_write(H5F_t *f)
     H5G_name_t *obj_paths = NULL;   /* Group hierarchy path */
     size_t u;                       /* Local index variable */
     hbool_t setup = FALSE;          /* Boolean flag to indicate whether SWMR setting is enabled */
+    hbool_t use_file_locking = TRUE;/* Using file locks? */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -3531,6 +3535,12 @@ H5F__start_swmr_write(H5F_t *f)
 
     setup = TRUE;
 
+    /* Place an advisory lock on the file */
+    if(f->use_file_locking)
+        if(H5FD_lock(f->shared->lf, TRUE) < 0) {
+            HGOTO_ERROR(H5E_FILE, H5E_CANTLOCKFILE, FAIL, "unable to lock the file")
+        }
+
     /* Mark superblock as dirty */
     if(H5F_super_dirty(f) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
@@ -3547,10 +3557,6 @@ H5F__start_swmr_write(H5F_t *f)
     for(u = 0; u < grp_dset_count; u++)
         if(H5O_refresh_metadata_reopen(obj_ids[u], &obj_glocs[u], TRUE) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't refresh-close object")
-
-    /* Unlock the file */
-    if(H5FD_unlock(f->shared->lf) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to unlock the file")
 
 done:
     if(ret_value < 0 && setup) {
@@ -3579,6 +3585,11 @@ done:
         if(H5F_flush_tagged_metadata(f, H5AC__SUPERBLOCK_TAG) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush superblock")
     } /* end if */
+
+    /* Unlock the file */
+    if(f->use_file_locking)
+        if(H5FD_unlock(f->shared->lf) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock the file")
 
     /* Free memory */
     if(obj_ids)

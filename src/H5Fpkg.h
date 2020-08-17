@@ -373,6 +373,7 @@ struct H5F_t {
     hbool_t             closing;        /* File is in the process of being closed                       */
     struct H5F_t       *parent;         /* Parent file that this file is mounted to                     */
     unsigned            nmounts;        /* Number of children mounted to this file                      */
+    hbool_t             use_file_locking; /* Whether or not to use file locking */
 #ifdef H5_HAVE_PARALLEL
     H5P_coll_md_read_flag_t coll_md_read;  /* Do all metadata reads collectively */
     hbool_t             coll_md_write;  /* Do all metadata writes collectively */
