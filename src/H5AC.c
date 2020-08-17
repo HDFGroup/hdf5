@@ -140,8 +140,8 @@ static const H5AC_class_t *const H5AC_class_s[] = {
  *
  * Purpose:     Initialize the interface from some other layer.
  *
- * Return:      Success:    non-negative
- *              Failure:    negative
+ * Return:      Success:        non-negative
+ *              Failure:        negative
  *
  * Programmer:  Quincey Koziol
  *              Saturday, January 18, 2003
@@ -162,7 +162,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function     H5AC__init_package
+ * Function:    H5AC__init_package
  *
  * Purpose:     Initialize interface-specific information
  *
@@ -202,9 +202,9 @@ H5AC__init_package(void)
  *
  * Purpose:     Terminate this interface.
  *
- * Return:      Success:    Positive if anything was done that might
- *                affect other interfaces; zero otherwise.
- *              Failure:    Negative.
+ * Return:      Success:        Positive if anything was done that might
+ *                              affect other interfaces; zero otherwise.
+ *              Failure:        Negative.
  *
  * Programmer:  Quincey Koziol
  *              Thursday, July 18, 2002
@@ -281,7 +281,7 @@ herr_t
 H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_config_t * image_config_ptr)
 {
 #ifdef H5_HAVE_PARALLEL
-    char      prefix[H5C__PREFIX_LEN] = "";
+    char         prefix[H5C__PREFIX_LEN] = "";
     H5AC_aux_t * aux_ptr = NULL;
 #endif /* H5_HAVE_PARALLEL */
     struct H5C_cache_image_ctl_t int_ci_config = H5C__DEFAULT_CACHE_IMAGE_CTL;
@@ -468,6 +468,14 @@ done:
  * Programmer:  Robb Matzke
  *              Jul  9 1997
  *
+ * Changes:
+ *
+ *             In the parallel case, added code to setup the MDC slist 
+ *             before the call to H5AC__flush_entries() and take it down
+ *             afterwards.  
+ *             
+ *                                            JRM -- 7/29/20
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -493,58 +501,115 @@ H5AC_dest(H5F_t *f)
 #endif /* H5AC_DUMP_STATS_ON_CLOSE */
 
     /* Check if log messages are being emitted */
-    if(H5C_get_logging_status(f->shared->cache, &log_enabled, &curr_logging) < 0)
+    if(H5C_get_logging_status(f->shared->cache, 
+                              &log_enabled, &curr_logging) < 0)
+
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to get logging status")
-    if(log_enabled && curr_logging)
+    if(log_enabled && curr_logging) {
+
         if(H5C_log_write_destroy_cache_msg(f->shared->cache) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+
+            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, \
+                        "unable to emit log message")
+    }
+
     /* Tear down logging */
-    if(log_enabled)
+    if(log_enabled) {
+
         if(H5C_log_tear_down(f->shared->cache) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "mdc logging tear-down failed")
+
+            HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, \
+                        "mdc logging tear-down failed")
+    }
 
 #ifdef H5_HAVE_PARALLEL
+
     /* destroying the cache, so clear all collective entries */
     if(H5C_clear_coll_entries(f->shared->cache, FALSE) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_clear_coll_entries() failed")
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, \
+                    "H5C_clear_coll_entries() failed")
 
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(f->shared->cache);
-    if(aux_ptr)
+
+    if(aux_ptr) {
+
         /* Sanity check */
         HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
+    
 
-    /* If the file was opened R/W, attempt to flush all entries
-     * from rank 0 & Bcast clean list to other ranks.
-     *
-     * Must not flush in the R/O case, as this will trigger the
-     * free space manager settle routines.
-     */
-    if(H5F_ACC_RDWR & H5F_INTENT(f))
-        if(H5AC__flush_entries(f) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush")
+        /* If the file was opened R/W, attempt to flush all entries
+         * from rank 0 & Bcast clean list to other ranks.
+         *
+         * Must not flush in the R/O case, as this will trigger the
+         * free space manager settle routines.
+         *
+         * Must also enable the skip list before the call to 
+         * H5AC__flush_entries() and disable it afterwards, as the 
+         * skip list will be disabled after the previous flush.
+         *
+         * Note that H5C_dest() does slist setup and take down as well.
+         * Unfortunately, we can't do the setup and take down just once,
+         * as H5C_dest() is called directly in the test code.
+         *
+         * Fortunately, the cache should be clean or close to it at this
+         * point, so the overhead should be minimal.
+         */
+        if(H5F_ACC_RDWR & H5F_INTENT(f)) {
+
+            /* enable and load the slist */
+            if ( H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0 )
+
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                            "set slist enabled failed")
+
+            if(H5AC__flush_entries(f) < 0)
+
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush")
+
+            /* disable the slist -- should be empty */
+            if ( H5C_set_slist_enabled(f->shared->cache, FALSE, FALSE) < 0 )
+
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist failed")
+        }
+    }
 #endif /* H5_HAVE_PARALLEL */
 
     /* Destroy the cache */
     if(H5C_dest(f) < 0)
+
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't destroy cache")
+
     f->shared->cache = NULL;
 
 #ifdef H5_HAVE_PARALLEL
+
     if(aux_ptr != NULL) {
+
         if(aux_ptr->d_slist_ptr != NULL) {
+
             HDassert(H5SL_count(aux_ptr->d_slist_ptr) == 0);
             H5SL_close(aux_ptr->d_slist_ptr);
+
         } /* end if */
+
         if(aux_ptr->c_slist_ptr != NULL) {
+
             HDassert(H5SL_count(aux_ptr->c_slist_ptr) == 0);
             H5SL_close(aux_ptr->c_slist_ptr);
+
         } /* end if */
+
         if(aux_ptr->candidate_slist_ptr != NULL) {
+
             HDassert(H5SL_count(aux_ptr->candidate_slist_ptr) == 0);
             H5SL_close(aux_ptr->candidate_slist_ptr);
+
         } /* end if */
+
         aux_ptr->magic = 0;
         aux_ptr = H5FL_FREE(H5AC_aux_t, aux_ptr);
+
     } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
@@ -736,20 +801,20 @@ H5AC_get_entry_status(const H5F_t *f, haddr_t addr, unsigned *status)
 
     if(in_cache) {
         *status |= H5AC_ES__IN_CACHE;
-    if(is_dirty)
-        *status |= H5AC_ES__IS_DIRTY;
-    if(is_protected)
-        *status |= H5AC_ES__IS_PROTECTED;
-    if(is_pinned)
-        *status |= H5AC_ES__IS_PINNED;
-    if(is_corked)
-        *status |= H5AC_ES__IS_CORKED;
-    if(is_flush_dep_parent)
-        *status |= H5AC_ES__IS_FLUSH_DEP_PARENT;
-    if(is_flush_dep_child)
-        *status |= H5AC_ES__IS_FLUSH_DEP_CHILD;
-    if(image_is_up_to_date)
-        *status |= H5AC_ES__IMAGE_IS_UP_TO_DATE;
+        if(is_dirty)
+            *status |= H5AC_ES__IS_DIRTY;
+        if(is_protected)
+            *status |= H5AC_ES__IS_PROTECTED;
+        if(is_pinned)
+            *status |= H5AC_ES__IS_PINNED;
+        if(is_corked)
+            *status |= H5AC_ES__IS_CORKED;
+        if(is_flush_dep_parent)
+            *status |= H5AC_ES__IS_FLUSH_DEP_PARENT;
+        if(is_flush_dep_child)
+            *status |= H5AC_ES__IS_FLUSH_DEP_CHILD;
+        if(image_is_up_to_date)
+            *status |= H5AC_ES__IMAGE_IS_UP_TO_DATE;
     } /* end if */
     else
         *status = 0;
@@ -1200,6 +1265,109 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ *
+ * Function:    H5AC_prep_for_file_flush
+ *
+ * Purpose:     This function should be called just prior to the first 
+ *              call to H5AC_flush() during a file flush.
+ *
+ *              Its purpose is to handly any setup required prior to 
+ *              metadata cache flush.  
+ *
+ *              Initially, this means setting up the slist prior to the
+ *              flush.  We do this in a seperate call because 
+ *              H5F__flush_phase2() make repeated calls to H5AC_flush().
+ *              Handling this detail in separate calls allows us to avoid 
+ *              the overhead of setting up and taking down the skip list 
+ *              repeatedly.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              5/5/20
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_prep_for_file_flush(H5F_t *f)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->cache);
+
+    if ( H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist enabled failed")
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_prep_for_file_flush() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5AC_secure_from_file_flush
+ *
+ * Purpose:     This function should be called just after the last 
+ *              call to H5AC_flush() during a file flush.
+ *
+ *              Its purpose is to perform any necessary cleanup after the
+ *              metadata cache flush.
+ *
+ *              The objective of the call is to allow the metadata cache
+ *              to do any necessary necessary cleanup work after a cache 
+ *              flush.
+ *
+ *              Initially, this means taking down the slist after the
+ *              flush.  We do this in a seperate call because 
+ *              H5F__flush_phase2() make repeated calls to H5AC_flush().
+ *              Handling this detail in separate calls allows us to avoid 
+ *              the overhead of setting up and taking down the skip list 
+ *              repeatedly.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              5/5/20
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_secure_from_file_flush(H5F_t *f)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->cache);
+
+    if ( H5C_set_slist_enabled(f->shared->cache, FALSE, FALSE) < 0)
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist enabled failed")
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_secure_from_file_flush() */
+
+
+/*-------------------------------------------------------------------------
+ *
  * Function:    H5AC_create_flush_dependency()
  *
  * Purpose:     Create a flush dependency between two entries in the metadata
@@ -1508,8 +1676,8 @@ herr_t
 H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing,
     unsigned flags)
 {
-    hbool_t        dirtied;
-    hbool_t        deleted;
+    hbool_t             dirtied;
+    hbool_t             deleted;
 #ifdef H5_HAVE_PARALLEL
     H5AC_aux_t        * aux_ptr = NULL;
 #endif /* H5_HAVE_PARALLEL */
@@ -1530,14 +1698,14 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing,
     HDassert(((H5AC_info_t *)thing)->type == type);
 
     dirtied = (hbool_t)(((flags & H5AC__DIRTIED_FLAG) == H5AC__DIRTIED_FLAG) ||
-        (((H5AC_info_t *)thing)->dirtied));
+                (((H5AC_info_t *)thing)->dirtied));
     deleted = (hbool_t)((flags & H5C__DELETED_FLAG) == H5C__DELETED_FLAG);
 
     /* Check if the size changed out from underneath us, if we're not deleting
      *  the entry.
      */
     if(dirtied && !deleted) {
-        size_t        curr_size = 0;
+        size_t          curr_size = 0;
 
         if((type->image_len)(thing, &curr_size) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTGETSIZE, FAIL, "Can't get size of thing")
@@ -1624,7 +1792,7 @@ H5AC_get_cache_auto_resize_config(const H5AC_t *cache_ptr,
     if(internal_config.rpt_fcn == NULL)
         config_ptr->rpt_fcn_enabled = FALSE;
     else
-    config_ptr->rpt_fcn_enabled = TRUE;
+        config_ptr->rpt_fcn_enabled = TRUE;
     config_ptr->open_trace_file        = FALSE;
     config_ptr->close_trace_file       = FALSE;
     config_ptr->trace_file_name[0]     = '\0';
@@ -1913,7 +2081,7 @@ H5AC_validate_config(H5AC_cache_config_t *config_ptr)
 
     /* don't bother to test trace_file_name unless open_trace_file is TRUE */
     if(config_ptr->open_trace_file) {
-        size_t            name_len;
+        size_t           name_len;
 
         /* Can't really test the trace_file_name field without trying to
          * open the file, so we will content ourselves with a couple of
@@ -2034,9 +2202,9 @@ H5_ATTR_UNUSED
     *f, hbool_t *write_permitted_ptr)
 {
 #ifdef H5_HAVE_PARALLEL
-    H5AC_aux_t *    aux_ptr = NULL;
+    H5AC_aux_t *        aux_ptr = NULL;
 #endif /* H5_HAVE_PARALLEL */
-    hbool_t         write_permitted = TRUE;
+    hbool_t             write_permitted = TRUE;
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -2533,8 +2701,8 @@ H5AC_set_ring(H5AC_ring_t ring, H5AC_ring_t *orig_ring)
  *              Note that this function simply passes the call on to
  *              the metadata cache proper, and returns the result.
  *
- * Return:      Success:    Non-negative
- *              Failure:    Negative
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
  *
  * Programmer:  Quincey Koziol
  *              September 17, 2016
@@ -2669,4 +2837,3 @@ H5AC_get_mdc_image_info(H5AC_t *cache_ptr, haddr_t *image_addr, hsize_t *image_l
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_get_mdc_image_info() */
-
