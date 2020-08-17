@@ -260,16 +260,23 @@ H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name)
 
 
 /*-------------------------------------------------------------------------
+ *
  * Function:    H5C_dump_cache_skip_list
  *
  * Purpose:     Debugging routine that prints a summary of the contents of
- *		the skip list used by the metadata cache metadata cache to
- *		maintain an address sorted list of dirty entries.
+ *              the skip list used by the metadata cache metadata cache to
+ *              maintain an address sorted list of dirty entries.
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  John Mainzer
  *              11/15/14
+ *
+ * Changes:     Updated function for the slist_enabled field in H5C_t.
+ *              Recall that to minimize slist overhead, the slist is 
+ *              empty and not maintained if cache_ptr->slist_enabled is
+ *              false.
+ *                                             JRM -- 5/6/20
  *
  *-------------------------------------------------------------------------
  */
@@ -288,11 +295,16 @@ H5C_dump_cache_skip_list(H5C_t * cache_ptr, char * calling_fcn)
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(calling_fcn != NULL);
 
-    HDfprintf(stdout, "\n\nDumping metadata cache skip list from %s.\n", calling_fcn);
+    HDfprintf(stdout, "\n\nDumping metadata cache skip list from %s.\n", 
+              calling_fcn);
+    HDfprintf(stdout, " slist enabled = %d.\n", 
+              (int)(cache_ptr->slist_enabled));
     HDfprintf(stdout, "	slist len = %u.\n", cache_ptr->slist_len);
-    HDfprintf(stdout, "	slist size = %lld.\n", (long long)(cache_ptr->slist_size));
+    HDfprintf(stdout, "	slist size = %lld.\n", 
+              (long long)(cache_ptr->slist_size));
 
     if(cache_ptr->slist_len > 0) {
+
         /* If we get this far, all entries in the cache are listed in the
          * skip list -- scan the skip list generating the desired output.
          */
@@ -300,13 +312,20 @@ H5C_dump_cache_skip_list(H5C_t * cache_ptr, char * calling_fcn)
                   "Num:    Addr:               Len: Prot/Pind: Dirty: Type:\n");
 
         i = 0;
-        node_ptr = H5SL_first(cache_ptr->slist_ptr);
-        if(node_ptr != NULL)
-            entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
-        else
-            entry_ptr = NULL;
 
-        while(entry_ptr != NULL) {
+        node_ptr = H5SL_first(cache_ptr->slist_ptr);
+
+        if ( node_ptr != NULL ) {
+
+            entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
+
+        } else {
+
+            entry_ptr = NULL;
+        }
+
+        while ( entry_ptr != NULL ) {
+
             HDassert( entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC );
 
             HDfprintf(stdout,
@@ -323,19 +342,27 @@ H5C_dump_cache_skip_list(H5C_t * cache_ptr, char * calling_fcn)
                       node_ptr, H5SL_item(node_ptr));
 
             /* increment node_ptr before we delete its target */
+
             node_ptr = H5SL_next(node_ptr);
-            if(node_ptr != NULL)
+
+            if ( node_ptr != NULL ) {
+
                 entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
-            else
+
+            } else {
+
                 entry_ptr = NULL;
+            }
 
             i++;
+
         } /* end while */
     } /* end if */
 
     HDfprintf(stdout, "\n\n");
 
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* H5C_dump_cache_skip_list() */
 #endif /* NDEBUG */
 
