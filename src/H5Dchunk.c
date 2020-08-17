@@ -2651,6 +2651,8 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     H5D_storage_t ctg_store;            /* Chunk storage information as contiguous dataset */
     H5D_io_info_t cpt_io_info;          /* Compact I/O info object */
     H5D_storage_t cpt_store;            /* Chunk storage information as compact dataset */
+    hbool_t     ctg_init = FALSE;       /* Whether the contiguous I/O info is initialized */
+    hbool_t     cpt_init = FALSE;       /* Whether the compact I/O info is initialized */
     hbool_t     cpt_dirty;              /* Temporary placeholder for compact storage "dirty" flag */
     uint32_t    dst_accessed_bytes = 0; /* Total accessed size in a chunk */
     herr_t    ret_value = SUCCEED;    /* Return value        */
@@ -2663,27 +2665,11 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     HDassert(type_info);
     HDassert(fm);
 
-    /* Set up contiguous I/O info object */
-    H5MM_memcpy(&ctg_io_info, io_info, sizeof(ctg_io_info));
-    ctg_io_info.store = &ctg_store;
-    ctg_io_info.layout_ops = *H5D_LOPS_CONTIG;
-
-    /* Initialize temporary contiguous storage info */
-    H5_CHECKED_ASSIGN(ctg_store.contig.dset_size, hsize_t, io_info->dset->shared->layout.u.chunk.size, uint32_t);
-
-    /* Set up compact I/O info object */
-    H5MM_memcpy(&cpt_io_info, io_info, sizeof(cpt_io_info));
-    cpt_io_info.store = &cpt_store;
-    cpt_io_info.layout_ops = *H5D_LOPS_COMPACT;
-
-    /* Initialize temporary compact storage info */
-    cpt_store.compact.dirty = &cpt_dirty;
-
     /* Iterate through nodes in chunk skip list */
     chunk_node = H5D_CHUNK_GET_FIRST_NODE(fm);
     while(chunk_node) {
         H5D_chunk_info_t *chunk_info;   /* Chunk information */
-    H5D_chk_idx_info_t idx_info;    /* Chunked index info */
+        H5D_chk_idx_info_t idx_info;    /* Chunked index info */
         H5D_io_info_t *chk_io_info;     /* Pointer to I/O info object for this chunk */
         void *chunk;                    /* Pointer to locked chunk buffer */
         H5D_chunk_ud_t udata;        /* Index pass-through    */
@@ -2701,8 +2687,8 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
         HDassert((H5F_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length > 0) ||
                 (!H5F_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length == 0));
 
-    /* Set chunk's [scaled] coordinates */
-    io_info->store->chunk.scaled = chunk_info->scaled;
+        /* Set chunk's [scaled] coordinates */
+        io_info->store->chunk.scaled = chunk_info->scaled;
 
         /* Determine if we should use the chunk cache */
         if((cacheable = H5D__chunk_cacheable(io_info, udata.chunk_block.offset, TRUE)) < 0)
@@ -2719,7 +2705,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
             /* Determine if we will access all the data in the chunk */
             if(dst_accessed_bytes != ctg_store.contig.dset_size ||
                     (chunk_info->chunk_points * type_info->src_type_size) != ctg_store.contig.dset_size ||
-            fm->fsel_type == H5S_SEL_POINTS)
+                    fm->fsel_type == H5S_SEL_POINTS)
                 entire_chunk = FALSE;
 
             /* Lock the chunk into the cache */
@@ -2728,6 +2714,20 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 
             /* Set up the storage buffer information for this chunk */
             cpt_store.compact.buf = chunk;
+
+            /* Initialize the compact I/O info, if it isn't already */
+            if(!cpt_init) {
+                /* Set up compact I/O info object */
+                H5MM_memcpy(&cpt_io_info, io_info, sizeof(cpt_io_info));
+                cpt_io_info.store = &cpt_store;
+                cpt_io_info.layout_ops = *H5D_LOPS_COMPACT;
+
+                /* Initialize temporary compact storage info */
+                cpt_store.compact.dirty = &cpt_dirty;
+
+                /* Indicate compact I/O info ready */
+                cpt_init = TRUE;
+            } /* end if */
 
             /* Point I/O info at main I/O info for this chunk */
             chk_io_info = &cpt_io_info;
@@ -2761,6 +2761,20 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 
             /* No chunk cached */
             chunk = NULL;
+
+            /* Initialize the contigous I/O info, if it isn't already */
+            if(!ctg_init) {
+                /* Set up contiguous I/O info object */
+                H5MM_memcpy(&ctg_io_info, io_info, sizeof(ctg_io_info));
+                ctg_io_info.store = &ctg_store;
+                ctg_io_info.layout_ops = *H5D_LOPS_CONTIG;
+
+                /* Initialize temporary contiguous storage info */
+                H5_CHECKED_ASSIGN(ctg_store.contig.dset_size, hsize_t, io_info->dset->shared->layout.u.chunk.size, uint32_t);
+
+                /* Indicate contigous I/O info ready */
+                ctg_init = TRUE;
+            } /* end if */
 
             /* Point I/O info at temporary I/O info for this chunk */
             chk_io_info = &ctg_io_info;
