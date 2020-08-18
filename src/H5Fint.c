@@ -1730,9 +1730,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
             set_flag = TRUE;
     } /* end else */
 
-    /* Set the file locking flag */
-    file->use_file_locking = use_file_locking;
-
     /* Check to see if both SWMR and cache image are requested.  Fail if so */
     if(H5C_cache_image_status(file, &ci_load, &ci_write) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get MDC cache image status")
@@ -1745,6 +1742,15 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /* Short cuts */
     shared = file->shared;
     lf = shared->lf;
+
+    /* Set the file locking flag. If the file is already open, the file
+     * requested file locking flag must match that of the open file.
+     */
+    if(shared->nrefs == 1)
+        file->shared->use_file_locking = use_file_locking;
+    else if(shared->nrefs > 1)
+        if(file->shared->use_file_locking != use_file_locking)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file locking flag values don't match")
 
     /* Check if page buffering is enabled */
     if(H5P_get(a_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
@@ -3433,7 +3439,6 @@ H5F__start_swmr_write(H5F_t *f)
     H5G_name_t *obj_paths = NULL;   /* Group hierarchy path */
     size_t u;                       /* Local index variable */
     hbool_t setup = FALSE;          /* Boolean flag to indicate whether SWMR setting is enabled */
-    hbool_t use_file_locking = TRUE;/* Using file locks? */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -3546,7 +3551,7 @@ H5F__start_swmr_write(H5F_t *f)
     setup = TRUE;
 
     /* Place an advisory lock on the file */
-    if(f->use_file_locking)
+    if(H5F_USE_FILE_LOCKING(f))
         if(H5FD_lock(f->shared->lf, TRUE) < 0) {
             HGOTO_ERROR(H5E_FILE, H5E_CANTLOCKFILE, FAIL, "unable to lock the file")
         }
@@ -3597,7 +3602,7 @@ done:
     } /* end if */
 
     /* Unlock the file */
-    if(f->use_file_locking)
+    if(H5F_USE_FILE_LOCKING(f))
         if(H5FD_unlock(f->shared->lf) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock the file")
 

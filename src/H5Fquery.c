@@ -1302,3 +1302,24 @@ H5F_get_eoa_pre_fsm_fsalloc(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->eoa_pre_fsm_fsalloc)
 } /* end H5F_get_eoa_pre_fsm_fsalloc() */
 
+
+/*-------------------------------------------------------------------------
+ * Function: H5F_get_file_locking
+ *
+ * Purpose:  Get the file locking flag for the file
+ *
+ * Return:   TRUE/FALSE
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_get_file_locking(const H5F_t *f)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->use_file_locking)
+} /* end H5F_get_file_locking */
+
