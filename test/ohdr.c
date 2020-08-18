@@ -125,7 +125,11 @@ test_cont(char *filename, hid_t fapl)
         FAIL_STACK_ERROR
     if(1 != H5O_link(&oh_locB, 1))
         FAIL_STACK_ERROR
+    if(H5AC_prep_for_file_flush(f) < 0)
+        FAIL_STACK_ERROR
     if(H5AC_flush(f) < 0)
+        FAIL_STACK_ERROR
+    if(H5AC_secure_from_file_flush(f) < 0)
         FAIL_STACK_ERROR
     if(H5O__expunge_chunks_test(&oh_locA) < 0)
         FAIL_STACK_ERROR
@@ -1680,7 +1684,11 @@ main(void)
             FAIL_STACK_ERROR
         if(1 != H5O_link(&oh_loc, 1))
             FAIL_STACK_ERROR
+        if(H5AC_prep_for_file_flush(f) < 0)
+            FAIL_STACK_ERROR
         if(H5AC_flush(f) < 0)
+            FAIL_STACK_ERROR
+        if(H5AC_secure_from_file_flush(f) < 0)
             FAIL_STACK_ERROR
         if(H5AC_expunge_entry(f, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
             FAIL_STACK_ERROR
@@ -1697,7 +1705,11 @@ main(void)
         time_new = 33333333;
         if(H5O_msg_write(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new) < 0)
             FAIL_STACK_ERROR
+        if(H5AC_prep_for_file_flush(f) < 0)
+            FAIL_STACK_ERROR
         if(H5AC_flush(f) < 0)
+            FAIL_STACK_ERROR
+        if(H5AC_secure_from_file_flush(f) < 0)
             FAIL_STACK_ERROR
         if(H5AC_expunge_entry(f, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
             FAIL_STACK_ERROR
@@ -1728,7 +1740,11 @@ main(void)
             if(H5O_msg_create(&oh_loc, H5O_MTIME_ID, 0, 0, &time_new) < 0)
                 FAIL_STACK_ERROR
         } /* end for */
+        if(H5AC_prep_for_file_flush(f) < 0)
+            FAIL_STACK_ERROR
         if(H5AC_flush(f) < 0)
+            FAIL_STACK_ERROR
+        if(H5AC_secure_from_file_flush(f) < 0)
             FAIL_STACK_ERROR
         if(H5AC_expunge_entry(f, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
             FAIL_STACK_ERROR
@@ -1771,7 +1787,11 @@ main(void)
             time_new = (i + 1) * 1000 + 10;
             if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new) < 0)
                 FAIL_STACK_ERROR
+            if(H5AC_prep_for_file_flush(f) < 0)
+                FAIL_STACK_ERROR
             if(H5AC_flush(f) < 0)
+                FAIL_STACK_ERROR
+            if(H5AC_secure_from_file_flush(f) < 0)
                 FAIL_STACK_ERROR
             if(H5AC_expunge_entry(f, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
                 FAIL_STACK_ERROR
@@ -1801,7 +1821,11 @@ main(void)
         time_new = 22222222;
         if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, H5O_MSG_FLAG_CONSTANT, 0, &time_new) < 0)
             FAIL_STACK_ERROR
+        if(H5AC_prep_for_file_flush(f) < 0)
+            FAIL_STACK_ERROR
         if(H5AC_flush(f) < 0)
+            FAIL_STACK_ERROR
+        if(H5AC_secure_from_file_flush(f) < 0)
             FAIL_STACK_ERROR
         if(H5AC_expunge_entry(f, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
             FAIL_STACK_ERROR
