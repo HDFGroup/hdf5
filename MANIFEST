@@ -997,6 +997,15 @@
 ./test/be_extlink2.h5
 ./test/big.c
 ./test/bittests.c
+./test/bounds_ref_earliest_latest.h5
+./test/bounds_ref_latest_latest.h5
+./test/bounds_ref_v110_v110.h5
+./test/bounds_ref_v112_v112.h5
+./test/bounds_ref_v18_v18.h5
+./test/bounds_sel_earliest_latest.h5
+./test/bounds_sel_latest_latest.h5
+./test/bounds_sel_v110_v110.h5
+./test/bounds_sel_v112_v112.h5
 ./test/btree_idx_1_6.h5
 ./test/btree_idx_1_8.h5
 ./test/btree2.c
@@ -1218,6 +1227,7 @@
 ./test/use_common.c
 ./test/use_disable_mdc_flushes.c
 ./test/use.h
+./test/version_bounds_1_10.c
 ./test/vds.c
 ./test/vds_env.c
 ./test/vds_swmr.h
