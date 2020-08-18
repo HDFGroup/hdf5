@@ -123,6 +123,15 @@ set (HDF5_REFERENCE_TEST_FILES
     be_data.h5
     be_extlink1.h5
     be_extlink2.h5
+    bounds_ref_earliest_latest.h5
+    bounds_ref_latest_latest.h5
+    bounds_ref_v110_v110.h5
+    bounds_ref_v112_v112.h5
+    bounds_ref_v18_v18.h5
+    bounds_sel_earliest_latest.h5
+    bounds_sel_latest_latest.h5
+    bounds_sel_v110_v110.h5
+    bounds_sel_v112_v112.h5
     btree_idx_1_6.h5
     btree_idx_1_8.h5
     corrupt_stab_msg.h5

@@ -257,6 +257,7 @@ set (H5_TESTS
     swmr
     thread_id # special link
     timer
+    version_bounds_1_10
 )
 
 macro (ADD_H5_EXE file)
