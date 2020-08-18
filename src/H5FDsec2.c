@@ -58,10 +58,8 @@ typedef struct H5FD_sec2_t {
     int             fd;     /* the filesystem file descriptor   */
     haddr_t         eoa;    /* end of allocated region          */
     haddr_t         eof;    /* end of file; current file size   */
-#ifndef H5_HAVE_PREADWRITE
     haddr_t         pos;    /* current file I/O position        */
     H5FD_file_op_t  op;     /* last operation                   */
-#endif /* H5_HAVE_PREADWRITE */
     hbool_t         ignore_disabled_file_locks;
     char            filename[H5FD_MAX_FILENAME_LEN];    /* Copy of file name from open operation */
 #ifndef H5_HAVE_WIN32_API
@@ -91,7 +89,7 @@ typedef struct H5FD_sec2_t {
     DWORD           nFileIndexLow;
     DWORD           nFileIndexHigh;
     DWORD           dwVolumeSerialNumber;
-
+    
     HANDLE          hFile;      /* Native windows file handle */
 #endif  /* H5_HAVE_WIN32_API */
 
@@ -371,10 +369,8 @@ H5FD__sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
 
     file->fd = fd;
     H5_CHECKED_ASSIGN(file->eof, haddr_t, sb.st_size, h5_stat_size_t);
-#ifndef H5_HAVE_PREADWRITE
     file->pos = HADDR_UNDEF;
     file->op = OP_UNKNOWN;
-#endif /* H5_HAVE_PREADWRITE */
 #ifdef H5_HAVE_WIN32_API
     file->hFile = (HANDLE)_get_osfhandle(fd);
     if(INVALID_HANDLE_VALUE == file->hFile)
@@ -632,7 +628,7 @@ H5FD__sec2_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
  *              either the filesystem end-of-file or the HDF5 end-of-address
  *              markers.
  *
- * Return:      End of file address, the first address past the end of the
+ * Return:      End of file address, the first address past the end of the 
  *              "file", either the filesystem file or the HDF5 file.
  *
  * Programmer:  Robb Matzke
@@ -747,45 +743,39 @@ H5FD__sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
             bytes_read = HDread(file->fd, buf, bytes_in);
 #endif /* H5_HAVE_PREADWRITE */
         } while(-1 == bytes_read && EINTR == errno);
-
+        
         if(-1 == bytes_read) { /* error */
             int myerrno = errno;
             time_t mytime = HDtime(NULL);
 
-#ifndef H5_HAVE_PREADWRITE
             offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
-#endif /* H5_HAVE_PREADWRITE */
 
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', buf = %p, total read size = %llu, bytes this sub-read = %llu, bytes actually read = %llu, offset = %llu", HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_read, (unsigned long long)offset);
         } /* end if */
-
+        
         if(0 == bytes_read) {
             /* end of file but not end of format address space */
             HDmemset(buf, 0, size);
             break;
         } /* end if */
-
+        
         HDassert(bytes_read >= 0);
         HDassert((size_t)bytes_read <= size);
-
+        
         size -= (size_t)bytes_read;
         addr += (haddr_t)bytes_read;
         buf = (char *)buf + bytes_read;
     } /* end while */
 
-#ifndef H5_HAVE_PREADWRITE
     /* Update current position */
     file->pos = addr;
     file->op = OP_READ;
-#endif /* H5_HAVE_PREADWRITE */
 
 done:
     if(ret_value < 0) {
-#ifndef H5_HAVE_PREADWRITE
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
         file->op = OP_UNKNOWN;
-#endif /* H5_HAVE_PREADWRITE */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -837,7 +827,7 @@ H5FD__sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
      */
     while(size > 0) {
         h5_posix_io_t       bytes_in        = 0;    /* # of bytes to write  */
-        h5_posix_io_ret_t   bytes_wrote     = -1;   /* # of bytes written   */
+        h5_posix_io_ret_t   bytes_wrote     = -1;   /* # of bytes written   */ 
 
         /* Trying to write more bytes than the return type can handle is
          * undefined behavior in POSIX.
@@ -856,18 +846,16 @@ H5FD__sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
             bytes_wrote = HDwrite(file->fd, buf, bytes_in);
 #endif /* H5_HAVE_PREADWRITE */
         } while(-1 == bytes_wrote && EINTR == errno);
-
+        
         if(-1 == bytes_wrote) { /* error */
             int myerrno = errno;
             time_t mytime = HDtime(NULL);
 
-#ifndef H5_HAVE_PREADWRITE
             offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
-#endif /* H5_HAVE_PREADWRITE */
 
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', buf = %p, total write size = %llu, bytes this sub-write = %llu, bytes actually written = %llu, offset = %llu", HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_wrote, (unsigned long long)offset);
         } /* end if */
-
+        
         HDassert(bytes_wrote > 0);
         HDassert((size_t)bytes_wrote <= size);
 
@@ -876,24 +864,17 @@ H5FD__sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
         buf = (const char *)buf + bytes_wrote;
     } /* end while */
 
-#ifndef H5_HAVE_PREADWRITE
     /* Update current position and eof */
     file->pos = addr;
     file->op = OP_WRITE;
     if(file->pos > file->eof)
         file->eof = file->pos;
-#else /* H5_HAVE_PREADWRITE */
-    if(addr > file->eof)
-        file->eof = addr;
-#endif /* H5_HAVE_PREADWRITE */
 
 done:
     if(ret_value < 0) {
-#ifndef H5_HAVE_PREADWRITE
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
         file->op = OP_UNKNOWN;
-#endif /* H5_HAVE_PREADWRITE */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -959,11 +940,9 @@ H5FD__sec2_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
         /* Update the eof value */
         file->eof = file->eoa;
 
-#ifndef H5_HAVE_PREADWRITE
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
         file->op = OP_UNKNOWN;
-#endif /* H5_HAVE_PREADWRITE */
     } /* end if */
 
 done:
