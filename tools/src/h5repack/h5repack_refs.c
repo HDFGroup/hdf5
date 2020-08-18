@@ -537,7 +537,6 @@ static int copy_refs_attr(hid_t loc_in,
                KY 2020-02-10
             */
             is_ref_comp = (ref_comp_field_n > 0);
-
         }
 
 
