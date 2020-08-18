@@ -683,6 +683,8 @@ open_extensible_dset(state_t *s, unsigned int which)
 
     es = disable_estack();
     for (i = 0; i < tries; i++) {
+        struct timespec one_tenth = {.tv_sec = 0,
+                                     .tv_nsec = 1000000000L / 10}; 
 
         ds = H5Dopen(s->file[0], dname, s->dapl);
 
@@ -690,15 +692,17 @@ open_extensible_dset(state_t *s, unsigned int which)
             break;
 
         if (below_speed_limit(&last, &ival)) {
-            warnx("H5Dopen(, \"%s\", ) failed, %d retries remain",
+            warnx("H5Dopen(, \"%s\", ) transient failure, %d retries remain",
                 dname, tries - i - 1);
         }
+        while (nanosleep(&one_tenth, &one_tenth) == -1 && errno == EINTR)
+            ; // do nothing
     }
     restore_estack(es);
 
     if (i == tries) {
         errx(EXIT_FAILURE, "H5Dopen(, \"%s\", ) failed after %d tries",
-            dname, tries - i - 1);
+            dname, tries);
     }
 
     if ((ty = H5Dget_type(ds)) < 0)
