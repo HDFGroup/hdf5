@@ -11328,6 +11328,9 @@ test_bt2_hdr_fd(const char *env_h5_driver, hid_t fapl)
 
     TESTING("Version 2 B-tree chunk index header flush dependencies handled correctly");
 
+    /* Initialize struct */
+    HDmemset(&info, 0, sizeof(info));
+
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
