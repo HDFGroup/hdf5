@@ -1398,7 +1398,7 @@ done:
  *              To this end, I have made the following functional changes
  *              to this function.
  *
- *              If we are closing, and there is no backing store, this 
+ *              If we are closing, and there is no backing store, this
  *              function becomes a no-op.
  *
  *              If we are closing, and there is backing store, we set the
