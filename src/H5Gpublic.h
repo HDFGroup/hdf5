@@ -71,9 +71,79 @@ typedef struct H5G_info_t {
 extern "C" {
 #endif
 
+/* --------------------------------------------------------------------------*/
+/**\ingroup H5G
+ *
+ * \brief Creates a new group and links it into the file
+ *
+ * \fgdta_loc_id
+ * \param[in] name      Name of the group to create
+ * \lcpl_id
+ * \gcpl_id
+ * \gapl_id
+ *
+ * \return \hid_t{group}
+ *
+ * \details H5Gcreate2() creates a new group in a file. After a group
+ * has been created, links to datasets and to other groups can be added.
+ *
+ * The \p loc_id and \p name parameters specify where the group is
+ * located. \p loc_id may be a file, group, dataset, named datatype or
+ * attribute in the file. If an attribute, dataset, or named datatype is
+ * specified for \p loc_id then the group will be created at the location
+ * where the attribute, dataset, or named datatype is attached. \p name
+ * is the link to the group; \p name may be either an absolute path in
+ * the file (the links from the root group to the new group) or a relative
+ * path from \p loc_id (the link(s) from the group specified by \p loc_id
+ * to the new group).
+ *
+ * \p lcpl_id, \p gcpl_id, and \p gapl_id are property list
+ * identifiers. These property lists govern how the link to the group is
+ * created, how the group is created, and how the group can be accessed in
+ * the future, respectively. #H5P_DEFAULT can be passed in if the default
+ * properties are appropriate for these property lists. Currently, there
+ * are no APIs for the group access property list; use #H5P_DEFAULT.
+ *
+ * To conserve and release resources, the group should be closed when access
+ * is no longer required.
+ *
+ * \since 1.8.0
+ *
+ * \see H5Gopen2(), H5Gclose()
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL hid_t H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id,
     hid_t gcpl_id, hid_t gapl_id);
 H5_DLL hid_t H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id);
+/* --------------------------------------------------------------------------*/
+/**\ingroup H5G
+ *
+ * \brief Opens an existing group in a file
+ *
+ * \fgdta_loc_id
+ * \param[in] name      Name of the group to open
+ * \gapl_id
+ *
+ * \return \hid_t{group}
+ *
+ * \details H5Gopen2() opens an existing group, name, at the location
+ * specified by \p loc_id.
+ *
+ * With default settings, H5Gopen2() provides similar functionality to that
+ * provided by H5Gopen(). The only difference is that H5Gopen2() can provide
+ * a group access property list, \p gapl_id.
+ *
+ * H5Gopen2() returns a group identifier for the group that was opened. This
+ * group identifier should be released by calling H5Gclose() when it is no
+ * longer needed.
+ *
+ * \since 1.8.0
+ *
+ * \see H5Gcreate2(), H5Gclose()
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL hid_t H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id);
 H5_DLL hid_t H5Gget_create_plist(hid_t group_id);
 H5_DLL herr_t H5Gget_info(hid_t loc_id, H5G_info_t *ginfo);
@@ -82,6 +152,27 @@ H5_DLL herr_t H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *gi
 H5_DLL herr_t H5Gget_info_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, H5G_info_t *ginfo,
     hid_t lapl_id);
+/* --------------------------------------------------------------------------*/
+/**\ingroup H5G
+ *
+ * \brief Closes the specified group
+ *
+ * \group_id
+ *
+ * \return \herr_t
+ *
+ * \details H5Gclose() releases resources used by a group which was
+ * opened by H5Gcreate() or H5Gopen() After closing a group, \p group_id
+ * cannot be used again until another H5Gcreate() or H5Gopen() is called on it.
+ *
+ * Failure to release a group with this call will result in resource leaks.
+ *
+ * \since 1.8.0
+ *
+ * \see H5Gcreate2(), H5Gopen2()
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Gclose(hid_t group_id);
 H5_DLL herr_t H5Gflush(hid_t group_id);
 H5_DLL herr_t H5Grefresh(hid_t group_id);
