@@ -336,6 +336,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_EOA_PRE_FSM_FSALLOC(F) ((F)->shared->eoa_pre_fsm_fsalloc)
 #define H5F_GET_MIN_DSET_OHDR(F) ((F)->shared->crt_dset_min_ohdr_flag)
 #define H5F_SET_MIN_DSET_OHDR(F, V) ((F)->shared->crt_dset_min_ohdr_flag = (V))
+#define H5F_USE_FILE_LOCKING(F) ((F)->shared->use_file_locking)
 #else /* H5F_MODULE */
 #define H5F_LOW_BOUND(F)        (H5F_get_low_bound(F))
 #define H5F_HIGH_BOUND(F)       (H5F_get_high_bound(F))
@@ -397,6 +398,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_EOA_PRE_FSM_FSALLOC(F) (H5F_get_eoa_pre_fsm_fsalloc(F))
 #define H5F_GET_MIN_DSET_OHDR(F) (H5F_get_min_dset_ohdr(F))
 #define H5F_SET_MIN_DSET_OHDR(F, V) (H5F_set_min_dset_ohdr((F), (V)))
+#define H5F_USE_FILE_LOCKING(F) (H5F_get_use_file_locking(F))
 #endif /* H5F_MODULE */
 
 
@@ -756,6 +758,7 @@ H5_DLL hbool_t H5F_get_first_alloc_dealloc(const H5F_t *f);
 H5_DLL haddr_t H5F_get_eoa_pre_fsm_fsalloc(const H5F_t *f);
 H5_DLL hbool_t H5F_get_min_dset_ohdr(const H5F_t *f);
 H5_DLL herr_t H5F_set_min_dset_ohdr(H5F_t *f, hbool_t minimize);
+H5_DLL hbool_t H5F_get_file_locking(const H5F_t *f);
 
 /* Functions than retrieve values set/cached from the superblock/FCPL */
 H5_DLL haddr_t H5F_get_base_addr(const H5F_t *f);

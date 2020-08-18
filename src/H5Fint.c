@@ -1743,6 +1743,15 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     shared = file->shared;
     lf = shared->lf;
 
+    /* Set the file locking flag. If the file is already open, the file
+     * requested file locking flag must match that of the open file.
+     */
+    if(shared->nrefs == 1)
+        file->shared->use_file_locking = use_file_locking;
+    else if(shared->nrefs > 1)
+        if(file->shared->use_file_locking != use_file_locking)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file locking flag values don't match")
+
     /* Check if page buffering is enabled */
     if(H5P_get(a_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get page buffer size")
@@ -3541,6 +3550,12 @@ H5F__start_swmr_write(H5F_t *f)
 
     setup = TRUE;
 
+    /* Place an advisory lock on the file */
+    if(H5F_USE_FILE_LOCKING(f))
+        if(H5FD_lock(f->shared->lf, TRUE) < 0) {
+            HGOTO_ERROR(H5E_FILE, H5E_CANTLOCKFILE, FAIL, "unable to lock the file")
+        }
+
     /* Mark superblock as dirty */
     if(H5F_super_dirty(f) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
@@ -3557,10 +3572,6 @@ H5F__start_swmr_write(H5F_t *f)
     for(u = 0; u < grp_dset_count; u++)
         if(H5O_refresh_metadata_reopen(obj_ids[u], &obj_glocs[u], TRUE) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't refresh-close object")
-
-    /* Unlock the file */
-    if(H5FD_unlock(f->shared->lf) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to unlock the file")
 
 done:
     if(ret_value < 0 && setup) {
@@ -3589,6 +3600,11 @@ done:
         if(H5F_flush_tagged_metadata(f, H5AC__SUPERBLOCK_TAG) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush superblock")
     } /* end if */
+
+    /* Unlock the file */
+    if(H5F_USE_FILE_LOCKING(f))
+        if(H5FD_unlock(f->shared->lf) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock the file")
 
     /* Free memory */
     if(obj_ids)
