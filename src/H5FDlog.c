@@ -81,10 +81,8 @@ typedef struct H5FD_log_t {
     int             fd;     /* the unix file                    */
     haddr_t         eoa;    /* end of allocated region          */
     haddr_t         eof;    /* end of file; current file size   */
-#ifndef H5_HAVE_PREADWRITE
     haddr_t         pos;    /* current file I/O position        */
     H5FD_file_op_t  op;     /* last operation                   */
-#endif /* H5_HAVE_PREADWRITE */
     hbool_t         ignore_disabled_file_locks;
     char            filename[H5FD_MAX_FILENAME_LEN];    /* Copy of file name from open operation */
 #ifndef H5_HAVE_WIN32_API
@@ -573,10 +571,8 @@ H5FD__log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
     file->fd = fd;
     H5_CHECKED_ASSIGN(file->eof, haddr_t, sb.st_size, h5_stat_size_t);
-#ifndef H5_HAVE_PREADWRITE
     file->pos = HADDR_UNDEF;
     file->op = OP_UNKNOWN;
-#endif /* H5_HAVE_PREADWRITE */
 #ifdef H5_HAVE_WIN32_API
     file->hFile = (HANDLE)_get_osfhandle(fd);
     if(INVALID_HANDLE_VALUE == file->hFile)
@@ -1284,9 +1280,7 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
             int myerrno = errno;
             time_t mytime = HDtime(NULL);
 
-#ifndef H5_HAVE_PREADWRITE
             offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
-#endif /* H5_HAVE_PREADWRITE */
 
             if(file->fa.flags & H5FD_LOG_LOC_READ)
                 HDfprintf(file->logfp, "Error! Reading: %10a-%10a (%10Zu bytes)\n", orig_addr, (orig_addr + orig_size) - 1, orig_size);
@@ -1343,19 +1337,15 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
             HDfprintf(file->logfp, "\n");
     } /* end if */
 
-#ifndef H5_HAVE_PREADWRITE
     /* Update current position */
     file->pos = addr;
     file->op = OP_READ;
-#endif /* H5_HAVE_PREADWRITE */
 
 done:
     if(ret_value < 0) {
-#ifndef H5_HAVE_PREADWRITE
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
         file->op = OP_UNKNOWN;
-#endif /* H5_HAVE_PREADWRITE */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1499,9 +1489,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
             int myerrno = errno;
             time_t mytime = HDtime(NULL);
 
-#ifndef H5_HAVE_PREADWRITE
             offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
-#endif /* H5_HAVE_PREADWRITE */
 
             if(file->fa.flags & H5FD_LOG_LOC_WRITE)
                 HDfprintf(file->logfp, "Error! Writing: %10a-%10a (%10Zu bytes)\n", orig_addr, (orig_addr + orig_size) - 1, orig_size);
@@ -1553,24 +1541,17 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
              HDfprintf(file->logfp, "\n");
     } /* end if */
 
-#ifndef H5_HAVE_PREADWRITE
     /* Update current position and eof */
     file->pos = addr;
     file->op = OP_WRITE;
     if(file->pos > file->eof)
         file->eof = file->pos;
-#else /* H5_HAVE_PREADWRITE */
-    if(addr > file->eof)
-        file->eof = addr;
-#endif /* H5_HAVE_PREADWRITE */
 
 done:
     if(ret_value < 0) {
-#ifndef H5_HAVE_PREADWRITE
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
         file->op = OP_UNKNOWN;
-#endif /* H5_HAVE_PREADWRITE */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1675,11 +1656,9 @@ H5FD__log_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_
         /* Update the eof value */
         file->eof = file->eoa;
 
-#ifndef H5_HAVE_PREADWRITE
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
         file->op = OP_UNKNOWN;
-#endif /* H5_HAVE_PREADWRITE */
     } /* end if */
 
 done:

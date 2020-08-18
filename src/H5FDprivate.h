@@ -59,14 +59,12 @@ typedef struct H5FD_class_mpi_t {
 /* Library Private Typedefs */
 /****************************/
 
-#ifndef H5_HAVE_PREADWRITE
 /* File operations */
 typedef enum {
     OP_UNKNOWN = 0,             /* Unknown last file operation */
     OP_READ = 1,                /* Last file I/O operation was a read */
     OP_WRITE = 2                /* Last file I/O operation was a write */
 } H5FD_file_op_t;
-#endif /* H5_HAVE_PREADWRITE */
 
 
 /* Define structure to hold initial file image and other relevant information */
