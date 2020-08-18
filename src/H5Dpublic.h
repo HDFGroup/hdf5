@@ -347,12 +347,12 @@ H5_DLL herr_t H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation)
  * handle returned from opening the datatype. It is not persistent and its
  * value can be different from one HDF5 session to the next.
  *
- * \note H5T_EQUAL can be used to compare datatypes.
+ * \note H5Tequal() can be used to compare datatypes.
  *
- * \note HDF5 High Level APIs that may also be of interest are:
+ * \note HDF5 High-Level APIs that may also be of interest are:
  *
- * \note H5LT_DTYPE_TO_TEXT creates a text description of a datatype.  \note
- * H5LT_TEXT_TO_DTYPE creates an HDF5 datatype given a text description.
+ * \note H5LTdtype_to_text() creates a text description of a datatype.  \note
+ * H5LTtext_to_dtype() creates an HDF5 datatype given a text description.
  *
  * \see H5Tclose()
  *
@@ -447,7 +447,7 @@ H5_DLL herr_t H5Dfill(const void *fill, hid_t fill_type, void *buf,
  * + A call to H5Dset_extent affects the dataspace of a dataset. If a
  * dataspace handle was opened for a dataset prior to a call to H5Dset_extent()
  * then that dataspace handle will no longer reflect the correct dataspace
- * extent of the dataset. H5Dset_space() must be called (after closing the
+ * extent of the dataset. H5Dget_space() must be called (after closing the
  * previous handle) to obtain the current dataspace extent.
  *
  * \since 1.8.0
