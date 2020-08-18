@@ -4422,8 +4422,6 @@ test_file_lock_swmr_same(hid_t in_fapl)
     /* Set locking in the fapl */
     if((fapl = H5Pcopy(in_fapl)) < 0)
         FAIL_STACK_ERROR
-    if(H5Pset_file_locking(fapl, TRUE, TRUE) < 0)
-        FAIL_STACK_ERROR
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[1], fapl, filename, sizeof(filename));
