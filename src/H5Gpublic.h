@@ -162,8 +162,8 @@ H5_DLL herr_t H5Gget_info_by_idx(hid_t loc_id, const char *group_name,
  * \return \herr_t
  *
  * \details H5Gclose() releases resources used by a group which was
- * opened by H5Gcreate* or H5Gopen*. After closing a group, \p group_id
- * cannot be used again until another H5Gcreate* or H5Gopen* is called on it.
+ * opened by H5Gcreate() or H5Gopen() After closing a group, \p group_id
+ * cannot be used again until another H5Gcreate() or H5Gopen() is called on it.
  *
  * Failure to release a group with this call will result in resource leaks.
  *
