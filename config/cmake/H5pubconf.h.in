@@ -733,7 +733,7 @@
 #cmakedefine H5_USE_114_API_DEFAULT @H5_USE_114_API_DEFAULT@
 
 /* Define if the library will use file locking */
-#cmakedefine H5_FILE_LOCKING @H5_USE_FILE_LOCKING@
+#cmakedefine H5_USE_FILE_LOCKING @H5_USE_FILE_LOCKING@
 
 /* Define if a memory checking tool will be used on the library, to cause
    library to be very picky about memory operations and also disable the
