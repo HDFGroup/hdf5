@@ -47,6 +47,23 @@ New Features
 
     Configuration:
     -------------
+    - Disable memory sanity checks in the Autotools in release branches
+
+      The library can be configured to use internal memory sanity checking,
+      which replaces C API calls like malloc(3) and free(3) with our own calls
+      which add things like heap canaries. These canaries can cause problems
+      when external filter plugins reallocate canary-marked buffers.
+
+      For this reason, the default will be to not use the memory allocation
+      sanity check feature in release branches (e.g., hdf5_1_10_7).
+      Debug builds in development branches (e.g., develop, hdf5_1_10) will
+      still use them by default.
+
+      This change only affects Autotools debug builds. Non-debug autotools
+      builds and all CMake builds do not enable this feature by default.
+
+      (DER - 2020/08/19)
+
     - Add file locking configure and CMake options
 
       HDF5 1.10.0 introduced a file locking scheme, primarily to help
