@@ -1754,7 +1754,7 @@ Optional Features:
                           memory use and somewhat slower allocation. This
                           option is orthogonal to the
                           --enable-using-memchecker option. [default=yes if
-                          debug build, otherwise no]
+                          debug build in a development branch, otherwise no]
   --enable-parallel       Search for MPI-IO and MPI support files
   --enable-instrument     Enable library instrumentation of optimization
                           tracing (only used with parallel builds).
@@ -29374,11 +29374,7 @@ fi
 
 ## Set default
 if test "X-$MEMORYALLOCSANITYCHECK" = X- ; then
-  if test "X-$BUILD_MODE" = "X-debug" ; then
-    MEMORYALLOCSANITYCHECK=yes
-  else
     MEMORYALLOCSANITYCHECK=no
-  fi
 fi
 
 case "X-$MEMORYALLOCSANITYCHECK" in
