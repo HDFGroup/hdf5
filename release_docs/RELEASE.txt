@@ -346,6 +346,13 @@ Bug Fixes since HDF5-1.10.6 release
 
     Library
     -------
+    - Fixed use-of-uninitialized-value error
+
+      Appropriate initialization of local structs was added to remove the
+      use-of-uninitialized-value errors reported by MemorySanitizer.
+
+      (BMR - 2020/8/13, HDFFV-11101)
+
     - Creation of dataset with optional filter
 
       When the combination of type, space, etc doesn't work for filter
