@@ -5085,10 +5085,10 @@ done:
             HDONE_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set transfer mode")
 
     /* free things */
-    if(MPI_DATATYPE_NULL != file_type)
+    if(MPI_DATATYPE_NULL != file_type && MPI_BYTE != file_type)
         if(MPI_SUCCESS != (mpi_code = MPI_Type_free(&file_type)))
             HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
-    if(MPI_DATATYPE_NULL != mem_type)
+    if(MPI_DATATYPE_NULL != mem_type && MPI_BYTE != mem_type)
         if(MPI_SUCCESS != (mpi_code = MPI_Type_free(&mem_type)))
             HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
     H5MM_xfree(chunk_disp_array);
