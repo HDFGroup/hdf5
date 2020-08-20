@@ -256,6 +256,11 @@ New Features
       file locking parameters. The single API call sets both the "use file
       locking" flag and the "ignore disabled file locking" flag.
 
+      When opening a file multiple times without closing, the file MUST be
+      opened with the same file locking settings. Opening a file with different
+      file locking settings will fail (this is similar to the behavior of
+      H5Pset_fclose_degree()).
+
       See the configure option discussion for HDFFV-11092 (above) for more
       information on the file locking feature and how it's controlled.
 
