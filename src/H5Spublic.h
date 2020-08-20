@@ -306,7 +306,7 @@ H5_DLL herr_t H5Sclose(hid_t space_id);
  *          a data space description into binary form in a buffer. Using this
  *          binary form in the buffer, a data space object can be
  *          reconstructed with H5Sdecode() to return a new object handle
- *          (\p hid_t) for this data space.
+ *          (#hid_t) for this data space.
  *
  *          A preliminary H5Sencode2() call can be made to determine the
  *          size of the buffer needed. This value is returned in \p nalloc.
@@ -322,7 +322,7 @@ H5_DLL herr_t H5Sclose(hid_t space_id);
  *          H5Pset_libver_bounds()). If the \a libver_bounds property is missing,
  *          H5Sencode2() proceeds as if the \a libver_bounds property were set to
  *          (#H5F_LIBVER_EARLIEST, #H5F_LIBVER_LATEST). (Functionally,
- *          H5Sencode1() is identical to H5Sencode2() with libver_bounds set to
+ *          H5Sencode1() is identical to H5Sencode2() with \a libver_bounds set to
  *          (#H5F_LIBVER_EARLIEST, #H5F_LIBVER_LATEST).)
  *
  *          The types of data space that are addressed in this function are
@@ -332,9 +332,9 @@ H5_DLL herr_t H5Sclose(hid_t space_id);
  *          implemented in the library.
  *
  * \note Motivation: This function was introduced in HDF5-1.12 as part of the
- *       \a H5Sencode format change to enable 64-bit selection encodings and
+ *       H5Sencode() format change to enable 64-bit selection encodings and
  *       a dataspace selection that is tied to a file. See the New Features
- *       in HDF5 Release 1.12 as well as the H5Sencode / H5Sdecode Format Change RFC.
+ *       in HDF5 Release 1.12 as well as the H5Sencode() / H5Sdecode() Format Change RFC.
  *
  * \todo Fix the references.
  *
@@ -441,9 +441,10 @@ H5_DLL int H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[],
  * \return \htri_t
  *
  * \details H5Sis_simple() determines whether or not a dataspace is a simple
- *          dataspace. [Currently, all dataspace objects are simple 
- *          dataspaces; complex dataspace support will be added in the 
- *          future.]
+ *          dataspace.
+ *
+ * \note Currently, all dataspace objects are simple dataspaces; complex
+ *       dataspace support will be added in the future.
  *
  *  \version 1.4.0 Fortran subroutine was introduced.
  *  \since 1.0.0
@@ -667,7 +668,7 @@ H5_DLL herr_t H5Sselect_adjust(hid_t spaceid, const hssize_t *offset);
  *          Calling this function on a \a none selection will fail.
  *
  * \version 1.6.0 The \p start and \p end parameters changed from type
- *                hsize_t * to hssize_t *.
+ *                #hsize_t* to #hssize_t*.
  *
  * \version 1.4.0 Fortran subroutine was introduced.
  * \since 1.2.0
@@ -685,10 +686,10 @@ H5_DLL herr_t H5Sget_select_bounds(hid_t spaceid, hsize_t start[],
  *
  * \return \htri_t
  *
- * \details H5Sselect_shape_same() checks to see if the current selection 
+ * \details H5Sselect_shape_same() checks to see if the current selection
  *          in the dataspaces are the same dimensionality and shape.
  *
- *          This is primarily used for reading the entire selection in 
+ *          This is primarily used for reading the entire selection in
  *          one swoop.
  *
  * \since 1.12.0
@@ -706,11 +707,11 @@ H5_DLL htri_t H5Sselect_shape_same(hid_t space1_id, hid_t space2_id);
  *
  * \return \htri_t
  *
- * \details H5Sselect_intersect_block() checks to see if the current 
- *          selection \p space_id in the dataspace intersects with the block 
+ * \details H5Sselect_intersect_block() checks to see if the current
+ *          selection \p space_id in the dataspace intersects with the block
  *          specified by \p start and \p end.
  *
- * \note Assumes that \p start & \p end block bounds are inclusive, so 
+ * \note Assumes that \p start & \p end block bounds are inclusive, so
  *       \p start == \p end value is OK.
  *
  * \since 1.12.0
@@ -752,11 +753,11 @@ H5_DLL herr_t H5Soffset_simple(hid_t space_id, const hssize_t *offset);
  *
  * \return \herr_t
  *
- * \details H5Sselect_all() selects the entire extent of the dataspace 
+ * \details H5Sselect_all() selects the entire extent of the dataspace
  *          \p dspace_id.
  *
- *          More specifically, H5Sselect_all() sets the selection type to 
- *          #H5S_SEL_ALL, which specifies the entire dataspace anywhere it 
+ *          More specifically, H5Sselect_all() sets the selection type to
+ *          #H5S_SEL_ALL, which specifies the entire dataspace anywhere it
  *          is applied.
  *
  * \since 1.0.0
@@ -772,9 +773,9 @@ H5_DLL herr_t H5Sselect_all(hid_t spaceid);
  *
  * \return \herr_t
  *
- * \details H5Sselect_none() resets the selection region for the dataspace 
+ * \details H5Sselect_none() resets the selection region for the dataspace
  *          \p space_id to include no elements.
- *      
+ *
  * \since 1.0.0
  *
  */
@@ -782,98 +783,98 @@ H5_DLL herr_t H5Sselect_none(hid_t spaceid);
 /*--------------------------------------------------------------------------*/
 /**\ingroup H5S
  *
- * \brief Selects array elements to be included in the selection for a 
+ * \brief Selects array elements to be included in the selection for a
  *        dataspace
  *
  * \space_id
- * \param[in] op  Operator specifying how the new selection is to be 
+ * \param[in] op  Operator specifying how the new selection is to be
  *                combined with the existing selection for the dataspace
  * \param[in] num_elem  Number of elements to be selected
- * \param[in] coord  A pointer to a buffer containing a serialized copy of 
- *                   a 2-dimensional array of zero-based values specifying 
+ * \param[in] coord  A pointer to a buffer containing a serialized copy of
+ *                   a 2-dimensional array of zero-based values specifying
  *                   the coordinates of the elements in the point selection
  *
  * \return \herr_t
  *
- * \details H5Sselect_elements() selects array elements to be included in 
- *          the selection for the \p space_id dataspace. This is referred 
+ * \details H5Sselect_elements() selects array elements to be included in
+ *          the selection for the \p space_id dataspace. This is referred
  *          to as a point selection.
  *
- *          The number of elements selected is set in the \p num_elements 
+ *          The number of elements selected is set in the \p num_elements
  *          parameter.
  *
- *          The \p coord parameter is a pointer to a buffer containing a 
- *          serialized 2-dimensional array of size \p num_elements by the 
- *          rank of the dataspace. The array lists dataset elements in the 
- *          point selection; that is, it’s a list of of zero-based values 
- *          specifying the coordinates in the dataset of the selected 
- *          elements. The order of the element coordinates in the \p coord 
- *          array specifies the order in which the array elements are 
- *          iterated through when I/O is performed. Duplicate coordinate 
- *          locations are not checked for. See below for examples of the 
- *          mapping between the serialized contents of the buffer and the 
+ *          The \p coord parameter is a pointer to a buffer containing a
+ *          serialized 2-dimensional array of size \p num_elements by the
+ *          rank of the dataspace. The array lists dataset elements in the
+ *          point selection; that is, it’s a list of of zero-based values
+ *          specifying the coordinates in the dataset of the selected
+ *          elements. The order of the element coordinates in the \p coord
+ *          array specifies the order in which the array elements are
+ *          iterated through when I/O is performed. Duplicate coordinate
+ *          locations are not checked for. See below for examples of the
+ *          mapping between the serialized contents of the buffer and the
  *          point selection array that it represents.
  *
- *          The selection operator \p op determines how the new selection 
- *          is to be combined with the previously existing selection for 
+ *          The selection operator \p op determines how the new selection
+ *          is to be combined with the previously existing selection for
  *          the dataspace. The following operators are supported:
  *
  *          <table>
  *           <tr>
  *             <td>#H5S_SELECT_SET</td>
- *             <td>Replaces the existing selection with the parameters from 
- *                 this call. Overlapping blocks are not supported with this 
+ *             <td>Replaces the existing selection with the parameters from
+ *                 this call. Overlapping blocks are not supported with this
  *                 operator. Adds the new selection to the existing selection.
  *                 </td>
  *           </tr>
  *           <tr>
  *             <td>#H5S_SELECT_APPEND</td>
- *             <td>Adds the new selection following the last element of the 
+ *             <td>Adds the new selection following the last element of the
  *                 existing selection.</td>
  *           </tr>
  *           <tr>
  *              <td>#H5S_SELECT_PREPEND</td>
- *              <td>Adds the new selection preceding the first element of the 
+ *              <td>Adds the new selection preceding the first element of the
  *                  existing selection.</td>
  *           </tr>
  *          </table>
  *
  *          <b>Mapping the serialized \p coord buffer to a 2-dimensional
- *          point selection array:</b>   
- *          To illustrate the construction of the contents of the \p coord 
- *          buffer, consider two simple examples: a selection of 5 points in 
- *          a 1-dimensional array and a selection of 3 points in a 
+ *          point selection array:</b>
+ *          To illustrate the construction of the contents of the \p coord
+ *          buffer, consider two simple examples: a selection of 5 points in
+ *          a 1-dimensional array and a selection of 3 points in a
  *          4-dimensional array.
  *
- *          In the 1D case, we will be selecting five points and a 1D 
- *          dataspace has rank 1, so the selection will be described in a 
- *          5-by-1 array. To select the 1st, 14th, 17th, 23rd, 8th elements 
- *          of the dataset, the selection array would be as follows 
+ *          In the 1D case, we will be selecting five points and a 1D
+ *          dataspace has rank 1, so the selection will be described in a
+ *          5-by-1 array. To select the 1st, 14th, 17th, 23rd, 8th elements
+ *          of the dataset, the selection array would be as follows
  *          (remembering that point coordinates are zero-based):
  *          \n      0
  *          \n     13
  *          \n     16
  *          \n     22
- *          \n      7 
+ *          \n      7
  *
- *          This point selection array will be serialized in the \p coord 
+ *          This point selection array will be serialized in the \p coord
  *          buffer as:
- *          \n      0 13 16 22 7 
+ *          \n      0 13 16 22 7
  *
- *          In the 4D case, we will be selecting three points and a 4D 
- *          dataspace has rank 4, so the selection will be described in a 
- *          3-by-4 array. To select the points (1,1,1,1), (14,6,12,18), and 
+ *          In the 4D case, we will be selecting three points and a 4D
+ *          dataspace has rank 4, so the selection will be described in a
+ *          3-by-4 array. To select the points (1,1,1,1), (14,6,12,18), and
  *          (8,22,30,22), the point selection array would be as follows:
  *          \n      0  0  0  0
  *          \n     13  5 11 17
  *          \n      7 21 29 21
  *
- *          This point selection array will be serialized in the \p coord 
+ *          This point selection array will be serialized in the \p coord
  *          buffer as:
  *          \n      0 0 0 0 13 5 11 17 7 21 29 21
  *
- * \version 1.6.4 C coord parameter type changed to \p const \p hsize_t.
- * \version       Fortran coord parameter type changed to \p INTEGER(HSIZE_T).
+ * \version 1.6.4 C coord parameter type changed to \p const #hsize_t.
+ * \version 1.6.4 Fortran \p coord parameter type changed to \p INTEGER(HSIZE_T).
  * \since 1.0.0
  *
  */
@@ -886,20 +887,20 @@ H5_DLL herr_t H5Sselect_elements(hid_t space_id, H5S_seloper_t op,
  *
  * \space_id{spaceid}
  *
- * \return Returns the number of element points in the current dataspace 
+ * \return Returns the number of element points in the current dataspace
  *         selection if successful. Otherwise returns a negative value.
  *
- * \details H5Sget_select_elem_npoints() returns the number of element 
- *          points in the current dataspace selection, so that the element 
- *          points can be retrieved with H5Sget_select_elem_pointlist(). 
- *          (This is similar to the way that H5Sget_select_hyper_nblocks() 
- *          and H5Sget_select_hyper_blocklist() work with hyperslab 
+ * \details H5Sget_select_elem_npoints() returns the number of element
+ *          points in the current dataspace selection, so that the element
+ *          points can be retrieved with H5Sget_select_elem_pointlist().
+ *          (This is similar to the way that H5Sget_select_hyper_nblocks()
+ *          and H5Sget_select_hyper_blocklist() work with hyperslab
  *          selections.)
  *
- *          Coincidentally, H5Sget_select_npoints() and 
- *          H5Sget_select_elem_npoints() will always return the same value 
- *          when an element selection is queried, but 
- *          H5Sget_select_elem_npoints() does not work with other selection 
+ *          Coincidentally, H5Sget_select_npoints() and
+ *          H5Sget_select_elem_npoints() will always return the same value
+ *          when an element selection is queried, but
+ *          H5Sget_select_elem_npoints() does not work with other selection
  *          types.
  *
  * \since 1.2.0
@@ -914,28 +915,24 @@ H5_DLL hssize_t H5Sget_select_elem_npoints(hid_t spaceid);
  * \space_id{spaceid}
  * \param[in] startpoint  Element point to start with
  * \param[in] numpoints   Number of element points to get
- * \param[out] buf        List of element points selected 
+ * \param[out] buf        List of element points selected
  *
- * \details H5Sget_select_elem_pointlist() returns the list of element 
- *          points in the current dataspace selection \p space_id. Starting 
- *          with the \p startpoint in the list of points, \p numpoints 
- *          points are put into the user's buffer. If the user's buffer 
- *          fills up before \p numpoints points are inserted, the buffer 
+ * \details H5Sget_select_elem_pointlist() returns the list of element
+ *          points in the current dataspace selection \p space_id. Starting
+ *          with the \p startpoint in the list of points, \p numpoints
+ *          points are put into the user's buffer. If the user's buffer
+ *          fills up before \p numpoints points are inserted, the buffer
  *          will contain only as many points as fit.
  *
- *          The element point coordinates have the same dimensionality 
- *          (rank) as the dataspace they are located within. The list of 
- *          element points is formatted as follows:
- *
- *              <coordinate>, followed by
- *
- *              the next coordinate,
- *
- *              etc.
- *
+ *          The element point coordinates have the same dimensionality
+ *          (rank) as the dataspace they are located within. The list of
+ *          element points is formatted as follows:\n
+ *              \<coordinate\>, followed by\n
+ *              the next coordinate,\n
+ *              etc.\n
  *          until all of the selected element points have been listed.
  *
- *          The points are returned in the order they will be iterated 
+ *          The points are returned in the order they will be iterated
  *          through when the selection is read/written from/to disk.
  *
  * \since 1.2.0
@@ -1049,8 +1046,8 @@ H5_DLL herr_t H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint,
  *
  */
 H5_DLL herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op,
-    const hsize_t start[], const hsize_t _stride[], const hsize_t count[],
-    const hsize_t _block[]);
+    const hsize_t start[], const hsize_t stride[], const hsize_t count[],
+    const hsize_t block[]);
 /*--------------------------------------------------------------------------*/
 /**\ingroup H5S
  *
@@ -1071,7 +1068,7 @@ H5_DLL herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op,
  *          selection for the dataspace \p space_id, creating a new dataspace
  *          to return the generated selection.  If the current selection is
  *          not a hyperslab, it is freed and the hyperslab parameters passed
- *          in are combined with the H5S_SEL_ALL hyperslab (ie. a selection
+ *          in are combined with the #H5S_SEL_ALL hyperslab (ie. a selection
  *          composing the entire current extent). If either \p stride or
  *          \p block is NULL, then it will be set to \p 1.
  *
@@ -1188,10 +1185,10 @@ H5_DLL htri_t H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[],
  *
  * \space_id{spaceid}
  *
- * \return Returns the number of hyperslab blocks in the current dataspace 
+ * \return Returns the number of hyperslab blocks in the current dataspace
  *         selection if successful. Otherwise returns a negative value.
  *
- * \details H5Sget_select_hyper_nblocks() returns the number of hyperslab 
+ * \details H5Sget_select_hyper_nblocks() returns the number of hyperslab
  *          blocks in the current dataspace selection.
  *
  * \since 1.2.0
@@ -1210,26 +1207,21 @@ H5_DLL hssize_t H5Sget_select_hyper_nblocks(hid_t spaceid);
  *
  * \return \herr_t
  *
- * \details H5Sget_select_hyper_blocklist() returns a list of the hyperslab 
- *          blocks currently selected. Starting with the \p startblock-th block 
- *          in the list of blocks, \p numblocks blocks are put into the 
- *          user's buffer. If the user's buffer fills up before \p numblocks 
- *          blocks are inserted, the buffer will contain only as many blocks 
+ * \details H5Sget_select_hyper_blocklist() returns a list of the hyperslab
+ *          blocks currently selected. Starting with the \p startblock-th block
+ *          in the list of blocks, \p numblocks blocks are put into the
+ *          user's buffer. If the user's buffer fills up before \p numblocks
+ *          blocks are inserted, the buffer will contain only as many blocks
  *          as fit.
  *
- *          The block coordinates have the same dimensionality (rank) as the 
- *          dataspace they are located within. The list of blocks is 
- *          formatted as follows:
- *
- *              <"start" coordinate>, immediately followed by
- *
- *              <"opposite" corner coordinate>, followed by
- *
- *              the next "start" and "opposite" coordinates,
- *
- *              etc. until all of the selected blocks have been listed.
- *
- *          No guarantee of any order of the blocks is implied. 
+ *          The block coordinates have the same dimensionality (rank) as the
+ *          dataspace they are located within. The list of blocks is
+ *          formatted as follows:\n
+ *              \<"start" coordinate\>, immediately followed by\n
+ *              \<"opposite" corner coordinate\>, followed by\n
+ *              the next "start" and "opposite" coordinates,\n
+ *              etc. until all of the selected blocks have been listed.\n
+ *          No guarantee of any order of the blocks is implied.
  *
  * \since 1.2.0
  *
@@ -1239,20 +1231,20 @@ H5_DLL herr_t H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock,
 /*--------------------------------------------------------------------------*/
 /**\ingroup H5S
  *
- * \brief Projects the intersection of two source selections to a 
+ * \brief Projects the intersection of two source selections to a
  *        destination selection
  *
  * \space_id{src_space_id}
  * \space_id{dst_space_id}
  * \space_id{src_intersect_space_id}
  *
- * \return Returns a dataspace with a selection equal to the intersection of 
- *         \p src_intersect_space_id and \p src_space_id projected from 
+ * \return Returns a dataspace with a selection equal to the intersection of
+ *         \p src_intersect_space_id and \p src_space_id projected from
  *         \p src_space to \p dst_space on success, negative on failure.
  *
- * \details H5Sselect_project_intersection() computes the intersection 
- *          between two dataspace selections and projects that intersection 
- *          into a third selection.This can be useful for VOL developers to 
+ * \details H5Sselect_project_intersection() computes the intersection
+ *          between two dataspace selections and projects that intersection
+ *          into a third selection.This can be useful for VOL developers to
  *          implement chunked or virtual datasets.
  *
  * \since 1.12.0
@@ -1274,7 +1266,7 @@ H5_DLL hid_t H5Sselect_project_intersection(hid_t src_space_id,
  *
  * \hid_t{valid dataspace selection iterator}
  *
- * \details H5Ssel_iter_create() creates a selection iterator and initializes 
+ * \details H5Ssel_iter_create() creates a selection iterator and initializes
  *          it to start at the first element selected in the dataspace.
  *
  * \since 1.12.0
@@ -1284,12 +1276,12 @@ H5_DLL hid_t H5Ssel_iter_create(hid_t spaceid, size_t elmt_size, unsigned flags)
 /*--------------------------------------------------------------------------*/
 /**\ingroup H5S
  *
- * \brief Retrieves a list of offset / length sequences for the elements in 
+ * \brief Retrieves a list of offset / length sequences for the elements in
  *        an iterator
  *
  * \space_id{sel_iter_id}
  * \param[in]  maxseq   Maximum number of sequences to retrieve
- * \param[in]  maxbytes Maximum number of bytes to retrieve in sequences  
+ * \param[in]  maxbytes Maximum number of bytes to retrieve in sequences
  * \param[out] nseq     Number of sequences retrieved
  * \param[out] nbytes   Number of bytes retrieved, in all sequences
  * \param[out] off      Array of sequence offsets
@@ -1297,32 +1289,32 @@ H5_DLL hid_t H5Ssel_iter_create(hid_t spaceid, size_t elmt_size, unsigned flags)
  *
  * \return \herr_t
  *
- * \details H5Ssel_iter_get_seq_list() retrieves a list of offset / length 
- *          pairs (a list of "sequences") matching the selected elements for 
- *          an iterator \p sel_iter_id, according to the iteration order for 
+ * \details H5Ssel_iter_get_seq_list() retrieves a list of offset / length
+ *          pairs (a list of "sequences") matching the selected elements for
+ *          an iterator \p sel_iter_id, according to the iteration order for
  *          the iterator.  The lengths returned are in bytes, not elements.
  *
- *          Note that the iteration order for "all" and "hyperslab" 
- *          selections is row-major (i.e. "C-ordered"), but the iteration 
- *          order for "point" selections is "in order selected", unless the 
- *          #H5S_SEL_ITER_GET_SEQ_LIST_SORTED flag is passed to 
+ *          Note that the iteration order for "all" and "hyperslab"
+ *          selections is row-major (i.e. "C-ordered"), but the iteration
+ *          order for "point" selections is "in order selected", unless the
+ *          #H5S_SEL_ITER_GET_SEQ_LIST_SORTED flag is passed to
  *          H5Ssel_iter_create() for a point selection.
  *
- *          \p maxseq and \p maxbytes specify the most sequences or bytes 
- *          possible to place into the \p off and \p len arrays. \p *nseq and 
- *          \p *nbytes return the actual number of sequences and bytes put 
+ *          \p maxseq and \p maxbytes specify the most sequences or bytes
+ *          possible to place into the \p off and \p len arrays. \p nseq and
+ *          \p nbytes return the actual number of sequences and bytes put
  *          into the arrays.
  *
- *          Each call to H5Ssel_iter_get_seq_list() will retrieve the next 
+ *          Each call to H5Ssel_iter_get_seq_list() will retrieve the next
  *          set of sequences for the selection being iterated over.
  *
- *          The total number of bytes possible to retrieve from a selection 
- *          iterator is the \p elmt_size passed to H5Ssel_iter_create() 
- *          multiplied by the number of elements selected in the dataspace 
- *          the iterator was created from (which can be retrieved with 
- *          H5Sget_select_npoints().  When there are no further sequences of 
- *          elements to retrieve, calls to this routine will set \p *nseq 
- *          and \p *nbytes to zero.
+ *          The total number of bytes possible to retrieve from a selection
+ *          iterator is the \p elmt_size passed to H5Ssel_iter_create()
+ *          multiplied by the number of elements selected in the dataspace
+ *          the iterator was created from (which can be retrieved with
+ *          H5Sget_select_npoints().  When there are no further sequences of
+ *          elements to retrieve, calls to this routine will set \p nseq
+ *          and \p nbytes to zero.
  *
  * \since 1.12.0
  *
@@ -1338,7 +1330,7 @@ H5_DLL herr_t H5Ssel_iter_get_seq_list(hid_t sel_iter_id, size_t maxseq,
  *
  * \return \herr_t
  *
- * \details H5Ssel_iter_close() closes a dataspace selection iterator 
+ * \details H5Ssel_iter_close() closes a dataspace selection iterator
  *          specified by \p sel_iter_id, releasing its state.
  *
  * \since 1.12.0
@@ -1361,33 +1353,33 @@ H5_DLL herr_t H5Ssel_iter_close(hid_t sel_iter_id);
  *
  * \space_id{obj_id}
  * \param[in,out] buf     Buffer for the object to be encoded into;
- *                        If the provided buffer is NULL, only the size of 
- *                        buffer needed is returned through \p nalloc.   
+ *                        If the provided buffer is NULL, only the size of
+ *                        buffer needed is returned through \p nalloc.
  * \param[in,out] nalloc  The size of the allocated buffer
  *
  * \return \herr_t
  *
  * \deprecated Deprecated in favor of H5Sencode2()
  *
- * \details Given the data space identifier \p obj_id, H5Sencode1() converts 
- *          a data space description into binary form in a buffer. Using 
- *          this binary form in the buffer, a data space object can be 
- *          reconstructed using H5Sdecode() to return a new object handle 
+ * \details Given the data space identifier \p obj_id, H5Sencode1() converts
+ *          a data space description into binary form in a buffer. Using
+ *          this binary form in the buffer, a data space object can be
+ *          reconstructed using H5Sdecode() to return a new object handle
  *          (\p hid_t) for this data space.
  *
- *          A preliminary H5Sencode1() call can be made to find out the size 
- *          of the buffer needed. This value is returned as \p nalloc. That 
- *          value can then be assigned to \p nalloc for a second H5Sencode1() 
+ *          A preliminary H5Sencode1() call can be made to find out the size
+ *          of the buffer needed. This value is returned as \p nalloc. That
+ *          value can then be assigned to \p nalloc for a second H5Sencode1()
  *          call, which will retrieve the actual encoded object.
  *
- *          If the library finds out \p nalloc is not big enough for the 
- *          object, it simply returns the size of the buffer needed through 
+ *          If the library finds out \p nalloc is not big enough for the
+ *          object, it simply returns the size of the buffer needed through
  *          \p nalloc without encoding the provided buffer.
  *
- *          The types of data space addressed in this function are null, 
- *          scalar, and simple space. For a simple data space, the information 
- *          on the selection, for example, hyperslab selection, is also 
- *          encoded and decoded. A complex data space has not been 
+ *          The types of data space addressed in this function are null,
+ *          scalar, and simple space. For a simple data space, the information
+ *          on the selection, for example, hyperslab selection, is also
+ *          encoded and decoded. A complex data space has not been
  *          implemented in the library.
  *
  * \version 1.12.0 The function H5Sencode() was renamed H5Sencode1() and
