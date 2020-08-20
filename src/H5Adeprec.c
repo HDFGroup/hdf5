@@ -85,50 +85,33 @@
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 
-/* --------------------------------------------------------------------------*/
-/**\ingroup H5A
- *
- * \brief Creates an attribute attached to a specified object
- *
- * \fgdt_loc_id
- * \param[in] name    Name of attribute to locate and open
- * \type_id
- * \space_id
- * \acpl_id
- *
- * \return \hid_tv{attribute}
- *
- * \note The \p acpl parameters is currently not used; specify #H5P_DEFAULT.
- *
- * \deprecated Deprecated in favor of H5Acreate2()
- *
- * \details H5Acreate1() creates an attribute, \p name, which is attached
- *          to the object specified by the identifier \p loc_id.
- *
- *          The attribute name, \p name, must be unique for the object.
- *
- *          The attribute is created with the specified datatype and dataspace,
- *          \p type_id and \p space_id, which are created with the \ref H5T and
- *          \ref H5S interfaces, respectively.
- *
- *          If \p type_id is either a fixed-length or variable-length string,
- *          it is important to set the string length when defining the
- *          datatype. String datatypes are derived from #H5T_C_S1 (or
- *          #H5T_FORTRAN_S1 for Fortran), which defaults to 1 character in
- *          size. See H5Tset_size() and Creating variable-length string
- *          datatypes.
- *
- *          The attribute identifier returned by this function must be released
- *          with H5Aclose() resource leaks will develop.
- *
- * \since 1.8.0
- *
- * \version 1.8.0 The function H5Acreate() was renamed to H5Acreate1() and
- *          deprecated in this release.
- *
- * \see H5Aclose()
- *
- */
+/*--------------------------------------------------------------------------
+ NAME
+    H5Acreate1
+ PURPOSE
+    Creates an attribute on an object
+ USAGE
+    hid_t H5Acreate1(loc_id, name, type_id, space_id, acpl_id)
+        hid_t loc_id;       IN: Object (dataset or group) to be attached to
+        const char *name;   IN: Name of attribute to create
+        hid_t type_id;      IN: ID of datatype for attribute
+        hid_t space_id;     IN: ID of dataspace for attribute
+        hid_t acpl_id;      IN: ID of creation property list (currently not used)
+ RETURNS
+    Non-negative on success/H5I_INVALID_HID on failure
+
+ DESCRIPTION
+        This function creates an attribute which is attached to the object
+    specified with 'location_id'.  The name specified with 'name' for each
+    attribute for an object must be unique for that object.  The 'type_id'
+    and 'space_id' are created with the H5T and H5S interfaces respectively.
+    The attribute ID returned from this function must be released with H5Aclose
+    or resource leaks will develop.
+
+ NOTE
+    Deprecated in favor of H5Acreate2
+
+--------------------------------------------------------------------------*/
 hid_t
 H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	  hid_t acpl_id)
