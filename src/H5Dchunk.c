@@ -4957,7 +4957,7 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
     int         blocks, leftover, block_len; /* converted to int for MPI */
     MPI_Aint    *chunk_disp_array = NULL;
     int         *block_lens = NULL;
-    MPI_Datatype mem_type = MPI_DATATYPE_NULL, file_type = MPI_DATATYPE_NULL;
+    MPI_Datatype mem_type = MPI_BYTE, file_type = MPI_BYTE;
     H5FD_mpio_xfer_t prev_xfer_mode;    /* Previous data xfer mode */
     hbool_t     have_xfer_mode = FALSE; /* Whether the previous xffer mode has been retrieved */
     hbool_t     need_addr_sort = FALSE;
@@ -5049,11 +5049,6 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
         if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&mem_type)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
     } /* end if */
-    else {
-        /* Set up file & memory MPI types, to participate in collective write */
-        file_type = MPI_BYTE;
-        mem_type = MPI_BYTE;
-    } /* end else */
 
     /* Set MPI-IO VFD properties */
 
@@ -5085,10 +5080,10 @@ done:
             HDONE_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set transfer mode")
 
     /* free things */
-    if(MPI_DATATYPE_NULL != file_type && MPI_BYTE != file_type)
+    if(MPI_BYTE != file_type)
         if(MPI_SUCCESS != (mpi_code = MPI_Type_free(&file_type)))
             HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
-    if(MPI_DATATYPE_NULL != mem_type && MPI_BYTE != mem_type)
+    if(MPI_BYTE != mem_type)
         if(MPI_SUCCESS != (mpi_code = MPI_Type_free(&mem_type)))
             HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
     H5MM_xfree(chunk_disp_array);
