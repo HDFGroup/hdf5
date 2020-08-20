@@ -746,24 +746,6 @@ finish:
     return deduped;
 }
 
-/* Return `true` if a second H5FD_t identical to `file`
- * has an exclusive owner, `false` otherwise.
- */
-bool
-H5FD_has_conflict(H5FD_t *file)
-{
-    H5FD_t *item;
-
-    TAILQ_FOREACH(item, &all_vfds, link) {
-        // skip "self", skip unowned
-        if (item == file || item->exc_owner == NULL)
-            continue;
-        if (H5FDcmp(file, item) == 0)
-            return true;
-    }
-    return false;
-}
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_open
