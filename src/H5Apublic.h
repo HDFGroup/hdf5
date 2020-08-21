@@ -386,12 +386,177 @@ H5_DLL hid_t   H5Aget_space(hid_t attr_id);
  *
  */
 H5_DLL hid_t   H5Aget_type(hid_t attr_id);
+/*-------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Gets an attribute creation property list identifier
+ *
+ * \attr_id
+ *
+ * \return \hid_tv{attribute's creation property list}
+ *
+ * \details H5Aget_create_plist() returns an identifier for the attribute
+ *          creation property list associated with the attribute specified
+ *          by \p attr_id.
+ *
+ *          The creation property list identifier should be released with
+ *          H5Pclose().
+ *
+ * \since 1.8.0
+ *
+ */
 H5_DLL hid_t   H5Aget_create_plist(hid_t attr_id);
+/*-------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Gets an attribute name
+ *
+ * \attr_id
+ * \param[in]  buf_size  The size of the buffer to store the name in
+ * \param[out] buf       Buffer to store name in
+ *
+ * \return  Returns the length of the attribute's name, which may be longer
+ *          than \p buf_size, if successful. Otherwise returns a negative
+ *          value.
+ * 
+ * \details H5Aget_name() retrieves the name of an attribute specified by
+ *          the identifier, \p attr_id. Up to \p buf_size characters are
+ *          stored in \p buf followed by a \0 string terminator. If the
+ *          name of the attribute is longer than (\p buf_size -1), the
+ *          string terminator is stored in the last position of the buffer
+ *          to properly terminate the string.
+ *
+ *          If the user only wants to find out the size of this name, the
+ *          values 0 and NULL can be passed in for the parameters
+ *          \p bufsize and \p buf.
+ *
+ * \since 1.0.0
+ *
+ */
 H5_DLL ssize_t H5Aget_name(hid_t attr_id, size_t buf_size, char *buf);
+/*-------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Gets an attribute name, by attribute index position
+ *
+ * \fgdt_loc_id
+ * \param[in]  obj_name   Name of object to which attribute is attached,
+ *                        relative to location
+ * \param[in]  idx_type   Type of index
+ * \param[in]  order      Index traversal order
+ * \param[in]  n          Attribute’s position in index
+ * \param[out] name       Attribute name
+ * \param[in]  size       Size, in bytes, of attribute name
+ * \lapl_id
+ *
+ * \return Returns attribute name size, in bytes, if successful; 
+ *         otherwise returns a negative value.
+ *
+ * \details H5Aget_name_by_idx() retrieves the name of an attribute that is
+ *          attached to an object, which is specified by its location and
+ *          name, \p loc_id and \p obj_name, respectively. The attribute is
+ *          located by its index position, the size of the name is specified
+ *          in \p size, and the attribute name is returned in \p name.
+ *
+ *          If \p loc_id fully specifies the object to which the attribute
+ *          is attached, \p obj_name should be '.' (a dot).
+ *
+ *          The attribute is located by means of an index type, an index
+ *          traversal order, and a position in the index, \p idx_type,
+ *          \p order and \p n, respectively. These parameters and their
+ *          valid values are discussed in the description of H5Aiterate2().
+ *
+ *          If the attribute name’s size is unknown, the values 0 and NULL
+ *          can be passed in for the parameters \p size and \p name. The
+ *          function’s return value will provide the correct value for
+ *          \p size.
+ *
+ *          The link access property list, \p lapl_id, may provide
+ *          information regarding the properties of links required to access
+ *          the object, \p obj_name.
+ *
+ * \since 1.8.0
+ *
+ */ 
 H5_DLL ssize_t H5Aget_name_by_idx(hid_t loc_id, const char *obj_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     char *name /*out*/, size_t size, hid_t lapl_id);
+/*-------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Returns the amount of storage required for an attribute
+ *
+ * \attr_id
+ *
+ * \return Returns the amount of storage size allocated for the attribute;
+ *         otherwise returns 0 (zero).
+ *
+ * \details H5Aget_storage_size() returns the amount of storage that is
+ *          required for the specified attribute, \p attr_id.
+ *
+ * \since 1.6.0
+ *
+ */
 H5_DLL hsize_t H5Aget_storage_size(hid_t attr_id);
+/*-------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Retrieves attribute information, by attribute identifier
+ *
+ * \attr_id
+ * \param[out]  ainfo   Attribute information struct
+ *
+ * \return \herr_t
+ *
+ * \details H5Aget_info() retrieves attribute information, locating the
+ *          attribute with an attribute identifier, \p attr_id, which is
+ *          the identifier returned by H5Aopen() or H5Aopen_by_idx(). The
+ *          attribute information is returned in the \p ainfo struct.
+ *
+ *          The \p ainfo struct is defined as follows:
+ *
+ *          \code
+ *            typedef struct {
+ *                hbool_t             corder_valid;
+ *                H5O_msg_crt_idx_t   corder;
+ *                H5T_cset_t          cset;
+ *                hsize_t             data_size;
+ *            } H5A_info_t;
+ *          \endcode
+ *
+ *          \p corder_valid indicates whether the creation order data is
+ *           valid for this attribute. Note that if creation order is not
+ *           being tracked, no creation order data will be valid. Valid
+ *           values are \c TRUE and \c FALSE.
+ *
+ *           \p corder is a positive integer containing the creation
+ *           order of the attribute. This value is 0-based, so, for
+ *           example, the third attribute created will have a \p corder
+ *           value of 2.
+ *
+ *           \p cset indicates the character set used for the attribute’s
+ *           name; valid values are defined in H5Tpublic.h and include
+ *           the following:
+ *
+ *              <table>
+ *                 <tr>
+ *                   <td>#H5T_CSET_ASCII</td>
+ *                   <td>US ASCII</td>
+ *                 </tr>
+ *                 <tr>
+ *                   <td>#H5T_CSET_UTF8</td>
+ *                   <td>UTF-8 Unicode encoding</td>
+ *                 </tr>
+ *              </table>
+ *
+ *          This value is set with H5Pset_char_encoding().
+ *
+ *          \p data_size indicates the size, in the number of characters,
+ *          of the attribute.
+ *
+ * \since 1.8.0
+ *
+ */
 H5_DLL herr_t  H5Aget_info(hid_t attr_id, H5A_info_t *ainfo /*out*/);
 H5_DLL herr_t  H5Aget_info_by_name(hid_t loc_id, const char *obj_name,
     const char *attr_name, H5A_info_t *ainfo /*out*/, hid_t lapl_id);
