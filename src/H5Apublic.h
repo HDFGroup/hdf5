@@ -98,10 +98,10 @@ H5_DLL hid_t   H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id,
 /*--------------------------------------------------------------------------*/
 /**\ingroup H5A
  *
- * \brief  Creates an attribute attached to a specified object 
+ * \brief  Creates an attribute attached to a specified object
  *
  * \fgdt_loc_id
- * \param[in] obj_name  Name, relative to \p loc_id, of object that 
+ * \param[in] obj_name  Name, relative to \p loc_id, of object that
  *                      attribute is to be attached to
  * \param[in] attr_name Attribute name
  * \type_id
@@ -124,7 +124,7 @@ H5_DLL hid_t   H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id,
  *
  *          The attribute is created with the specified datatype and
  *          dataspace, \p type_id and \p space_id, which are created with
- *          the H5T and H5S interfaces respectively.
+ *          the \ref H5T and \ref H5S interfaces respectively.
  *
  *          The attribute creation and access property lists are currently
  *          unused, but will be used in the future for optional attribute
@@ -180,7 +180,7 @@ H5_DLL hid_t   H5Aopen(hid_t obj_id, const char *attr_name, hid_t aapl_id);
  * \brief Opens an attribute for an object by object name and attribute name
  *
  * \fgdt_loc_id
- * \param[in] obj_name   Name of object to which attribute is attached, 
+ * \param[in] obj_name   Name of object to which attribute is attached,
  *                       relative to \p loc_id
  * \param[in] attr_name  Name of attribute to open
  * \aapl_id
@@ -222,7 +222,7 @@ H5_DLL hid_t   H5Aopen_by_name(hid_t loc_id, const char *obj_name,
  * \brief Opens the nth attribute attached to an object
  *
  * \fgdt_loc_id
- * \param[in] obj_name  Name of object to which attribute is attached, 
+ * \param[in] obj_name  Name of object to which attribute is attached,
  *                      relative to location
  * \param[in] idx_type  Type of index
  * \param[in] order     Index traversal order
@@ -233,7 +233,7 @@ H5_DLL hid_t   H5Aopen_by_name(hid_t loc_id, const char *obj_name,
  * \return \hid_tv{attribute}
  *
  * \details H5Aopen_by_idx() opens an existing attribute that is attached
- *          to an object specified by location and name, \p loc_id and 
+ *          to an object specified by location and name, \p loc_id and
  *          \p obj_name, respectively. If \p loc_id fully specifies the
  *          object to which the attribute is attached, \p obj_name, should
  *          be  '.'  (a dot).
@@ -313,7 +313,7 @@ H5_DLL herr_t  H5Awrite(hid_t attr_id, hid_t type_id, const void *buf);
  *          entire attribute is read into \p buf from the file.
  *
  *          Datatype conversion takes place at the time of a read or write and
- *          is automatic. 
+ *          is automatic.
  *
  * \version 1.8.8  Fortran updated to Fortran2003.
  * \version 1.4.2  The \p dims parameter was added to the Fortran API in this
@@ -366,8 +366,8 @@ H5_DLL herr_t  H5Aclose(hid_t attr_id);
 H5_DLL hid_t   H5Aget_space(hid_t attr_id);
 /*-------------------------------------------------------------------------*/
 /**\ingroup H5A
- * 
- * \brief Gets an attribute datatype 
+ *
+ * \brief Gets an attribute datatype
  *
  * \attr_id
  *
@@ -492,4 +492,3 @@ H5_DLL herr_t  H5Aiterate1(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op,
 #endif
 
 #endif /* _H5Apublic_H */
-
