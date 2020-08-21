@@ -1208,6 +1208,24 @@ H5_DLL herr_t H5Lcreate_ud(hid_t link_loc_id, const char *link_name,
  *-------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Lregister(const H5L_class_t *cls);
+/**
+ * \ingroup H5L
+ *
+ * \brief Unregisters a class of user-defined links
+ *
+ * \param[in] id User-defined link class identifier
+ *
+ * \return \herr_t
+ *
+ * \details H5Lunregister() unregisters a class of user-defined links,
+ *          preventing them from being traversed, queried, moved, etc.
+ *
+ * \note A link class can be re-registered using H5Lregister().
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Lunregister(H5L_type_t id);
 /**
  * \ingroup H5L
