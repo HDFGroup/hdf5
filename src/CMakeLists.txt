@@ -223,6 +223,7 @@ set (H5FD_SOURCES
     ${HDF5_SRC_DIR}/H5FDhdfs.c
     ${HDF5_SRC_DIR}/H5FDint.c
     ${HDF5_SRC_DIR}/H5FDlog.c
+    ${HDF5_SRC_DIR}/H5FDmirror.c
     ${HDF5_SRC_DIR}/H5FDmpi.c
     ${HDF5_SRC_DIR}/H5FDmpio.c
     ${HDF5_SRC_DIR}/H5FDmulti.c
@@ -242,6 +243,7 @@ set (H5FD_HDRS
     ${HDF5_SRC_DIR}/H5FDfamily.h
     ${HDF5_SRC_DIR}/H5FDhdfs.h
     ${HDF5_SRC_DIR}/H5FDlog.h
+    ${HDF5_SRC_DIR}/H5FDmirror.h
     ${HDF5_SRC_DIR}/H5FDmpi.h
     ${HDF5_SRC_DIR}/H5FDmpio.h
     ${HDF5_SRC_DIR}/H5FDmulti.h
@@ -783,6 +785,7 @@ set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5FApkg.h
     ${HDF5_SRC_DIR}/H5FAprivate.h
 
+    ${HDF5_SRC_DIR}/H5FDmirror_priv.h
     ${HDF5_SRC_DIR}/H5FDpkg.h
     ${HDF5_SRC_DIR}/H5FDprivate.h
 
