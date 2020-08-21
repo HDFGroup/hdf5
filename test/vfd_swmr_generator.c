@@ -144,7 +144,7 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write,
             return -1;
 
         /* Allocate memory for the VFD SWMR configuration structure */
-        if((config = (H5F_vfd_swmr_config_t *)HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))) == NULL)
+        if((config = HDcalloc(1, sizeof(*config))) == NULL)
             return -1;
 
         config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
@@ -152,7 +152,7 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write,
         config->max_lag = 10;
         config->writer = TRUE;
         config->md_pages_reserved = 128; 
-        HDstrcpy(config->md_file_path, "my_md_file");
+        HDstrcpy(config->md_file_path, "generator-shadow");
 
         /* Enable VFD SWMR configuration in fapl */
         if(H5Pset_vfd_swmr_config(fapl, config) < 0)

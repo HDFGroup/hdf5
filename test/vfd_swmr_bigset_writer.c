@@ -1085,7 +1085,7 @@ main(int argc, char **argv)
         }
 
         fapl = vfd_swmr_create_fapl(s.writer, true, s.use_vfd_swmr,
-            "./metadata-%zu", i);
+            "./bigset-shadow-%zu", i);
 
         if (fapl < 0)
             errx(EXIT_FAILURE, "vfd_swmr_create_fapl");

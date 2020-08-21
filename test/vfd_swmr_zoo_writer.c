@@ -284,7 +284,7 @@ main(int argc, char **argv)
     if (argc > 0)
         errx(EXIT_FAILURE, "unexpected command-line arguments");
 
-    fapl = vfd_swmr_create_fapl(writer, true, use_vfd_swmr, "./shadow");
+    fapl = vfd_swmr_create_fapl(writer, true, use_vfd_swmr, "./zoo-shadow");
 
     if (use_vfd_swmr && H5Pget_vfd_swmr_config(fapl, &swmr_config) < 0)
         errx(EXIT_FAILURE, "H5Pget_vfd_swmr_config");

@@ -309,7 +309,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds,
         goto error;
 
     /* Allocate memory for the configuration structure */
-    if((config = (H5F_vfd_swmr_config_t *)HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))) == NULL)
+    if((config = HDcalloc(1, sizeof(*config))) == NULL)
         goto error;
 
     config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
@@ -317,7 +317,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds,
     config->max_lag = 5;
     config->writer = FALSE;
     config->md_pages_reserved = 128;
-    HDstrcpy(config->md_file_path, "./my_md_file");
+    HDstrcpy(config->md_file_path, "./rw-shadow");
 
     /* Enable VFD SWMR configuration */
     if(H5Pset_vfd_swmr_config(fapl, config) < 0)
