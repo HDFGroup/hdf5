@@ -418,7 +418,7 @@ H5_DLL hid_t   H5Aget_create_plist(hid_t attr_id);
  * \return  Returns the length of the attribute's name, which may be longer
  *          than \p buf_size, if successful. Otherwise returns a negative
  *          value.
- * 
+ *
  * \details H5Aget_name() retrieves the name of an attribute specified by
  *          the identifier, \p attr_id. Up to \p buf_size characters are
  *          stored in \p buf followed by a \0 string terminator. If the
@@ -449,7 +449,7 @@ H5_DLL ssize_t H5Aget_name(hid_t attr_id, size_t buf_size, char *buf);
  * \param[in]  size       Size, in bytes, of attribute name
  * \lapl_id
  *
- * \return Returns attribute name size, in bytes, if successful; 
+ * \return Returns attribute name size, in bytes, if successful;
  *         otherwise returns a negative value.
  *
  * \details H5Aget_name_by_idx() retrieves the name of an attribute that is
@@ -477,7 +477,7 @@ H5_DLL ssize_t H5Aget_name(hid_t attr_id, size_t buf_size, char *buf);
  *
  * \since 1.8.0
  *
- */ 
+ */
 H5_DLL ssize_t H5Aget_name_by_idx(hid_t loc_id, const char *obj_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     char *name /*out*/, size_t size, hid_t lapl_id);
@@ -525,30 +525,19 @@ H5_DLL hsize_t H5Aget_storage_size(hid_t attr_id);
  *          \endcode
  *
  *          \p corder_valid indicates whether the creation order data is
- *           valid for this attribute. Note that if creation order is not
- *           being tracked, no creation order data will be valid. Valid
- *           values are \c TRUE and \c FALSE.
+ *          valid for this attribute. Note that if creation order is not
+ *          being tracked, no creation order data will be valid. Valid
+ *          values are \c TRUE and \c FALSE.
  *
- *           \p corder is a positive integer containing the creation
- *           order of the attribute. This value is 0-based, so, for
- *           example, the third attribute created will have a \p corder
- *           value of 2.
+ *          \p corder is a positive integer containing the creation
+ *          order of the attribute. This value is 0-based, so, for
+ *          example, the third attribute created will have a \p corder
+ *          value of 2.
  *
- *           \p cset indicates the character set used for the attribute’s
- *           name; valid values are defined in H5Tpublic.h and include
- *           the following:
- *
- *              <table>
- *                 <tr>
- *                   <td>#H5T_CSET_ASCII</td>
- *                   <td>US ASCII</td>
- *                 </tr>
- *                 <tr>
- *                   <td>#H5T_CSET_UTF8</td>
- *                   <td>UTF-8 Unicode encoding</td>
- *                 </tr>
- *              </table>
- *
+ *          \p cset indicates the character set used for the attribute’s
+ *          name; valid values are defined in H5Tpublic.h and include
+ *          the following:
+ *          \csets
  *          This value is set with H5Pset_char_encoding().
  *
  *          \p data_size indicates the size, in the number of characters,
