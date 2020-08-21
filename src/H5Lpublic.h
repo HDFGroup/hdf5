@@ -1250,6 +1250,50 @@ H5_DLL herr_t H5Lunregister(H5L_type_t id);
 H5_DLL htri_t H5Lis_registered(H5L_type_t id);
 
 /* External link functions */
+/**
+ * \ingroup H5L
+ *
+ * \brief Decodes external link information
+ *
+ * \param[in] ext_linkval Buffer containing external link information
+ * \param[in] link_size Size, in bytes, of the \p ext_linkval buffer
+ * \param[out] flags External link flags, packed as a bitmap (\Emph{Reserved as
+ *                   a bitmap for flags; no flags are currently defined, so the
+ *                   only valid value * is 0.})
+ * \param[out] filename Returned filename \param[out] obj_path Returned
+ * object path, relative to \p filename
+ *
+ * \return \herr_t
+ *
+ * \details H5Lunpack_elink_val() decodes the external link information
+ *          returned by H5Lget_val() in the \p ext_linkval buffer.
+ *
+ *          \p ext_linkval should be the buffer set by H5Lget_val() and will
+ *          consist of two NULL-terminated strings, the filename and object
+ *          path, one after the other.
+ *
+ *          Given this buffer, H5Lunpack_elink_val() creates pointers to the
+ *          filename and object path within the buffer and returns them in
+ *          \p filename and \p obj_path, unless they are passed in as NULL.
+ *
+ *          H5Lunpack_elink_val() requires that \p ext_linkval contain a
+ *          concatenated pair of null-terminated strings, so use of this
+ *          function on a string that is not an external link \p udata buffer
+ *          may result in a segmentation fault. This failure can be avoided by
+ *          adhering to the following procedure:
+ *          <ol>
+ *            <li>Call H5Lget_info() to get the link type and the size of the
+ *                link value.<li>
+ *            <li>Verify that the link is an external link, i.e., that its link
+ *                type is #H5L_TYPE_EXTERNAL.</li>
+ *            <li>Call H5Lget_val() to get the link value.</li>
+ *            <li>Call H5Lunpack_elink_val() to unpack that value.</li>
+ *          </ol>
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Lunpack_elink_val(const void *ext_linkval/*in*/, size_t link_size,
    unsigned *flags, const char **filename/*out*/, const char **obj_path /*out*/);
 /**
