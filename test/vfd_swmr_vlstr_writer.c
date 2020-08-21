@@ -199,7 +199,7 @@ main(int argc, char **argv)
         errx(EXIT_FAILURE, "unexpected command-line arguments");
 
     fapl = vfd_swmr_create_fapl(true, sel == TEST_OOB, use_vfd_swmr,
-        "./shadow");
+        "./vlstr-shadow");
     if (fapl < 0)
         errx(EXIT_FAILURE, "vfd_swmr_create_fapl");
 
