@@ -144,7 +144,7 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write,
             return -1;
 
         /* Allocate memory for the VFD SWMR configuration structure */
-        if((config = (H5F_vfd_swmr_config_t *)HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))) == NULL)
+        if((config = HDcalloc(1, sizeof(*config))) == NULL)
             return -1;
 
         config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
