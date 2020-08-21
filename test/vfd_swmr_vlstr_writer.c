@@ -96,6 +96,7 @@ create_vl_dset(hid_t file, hid_t type, hid_t space, const char *name)
 }
 
 static void
+#ifndef H5C_COLLECT_CACHE_STATS
 print_cache_hits(H5C_t *cache)
 {
     int i;
@@ -106,6 +107,9 @@ print_cache_hits(H5C_t *cache)
     }
     dbgf(3, "\n");
 }
+#else
+print_cache_hits(H5C_t H5_ATTR_UNUSED *cache) { return; }
+#endif
 
 static void
 usage(const char *progname)
