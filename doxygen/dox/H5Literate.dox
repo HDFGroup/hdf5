@@ -15,4 +15,8 @@
  * \li Emulate Release 1.8 or 1.10 interface: H5Literate1()
  *
  *  \todo Fix the reference.
+ *
+ * \version 1.12.0 The function H5Literate() was renamed to H5Literate1() and
+ *          deprecated in this release. The macro H5Literate() and the
+ *          function H5Literate2() were introduced in this release.
  */

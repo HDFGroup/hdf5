@@ -963,6 +963,70 @@ H5_DLL ssize_t H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
  */
 H5_DLL herr_t H5Literate2(hid_t grp_id, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t *idx, H5L_iterate2_t op, void *op_data);
+/**
+ * \ingroup H5L
+ *
+ * \brief Iterates through links in a group
+ *
+ * \loc_id
+ * \param[in] group_name Group name
+ * \idx_type
+ * \order
+ * \param[in,out] idx_p teration position at which to start or position at
+ *                which an interrupted iteration may be restarted
+ * \op
+ * \op_data
+ * \lapl_id
+ * \return \success{The return value of the first operator that returns
+ *                  non-zero, or zero if all members were processed with no
+ *                  operator returning non-zero.}
+ * \return \failure{Negative if an error occurs in the library, or the negative
+ *                  value returned by one of the operators.}
+ *
+ * \details H5Literate_by_name2() iterates through the links in a group
+ *          specified by \p loc_id and \p group_name, in the order of the
+ *          specified index, \p idx_type, using a user-defined callback routine
+ *          \p op. H5Literate_by_name2() does not recursively follow links into
+ *          subgroups of the specified group.
+ *
+ *          \p idx_type specifies the index to be used. If the links have not
+ *          been indexed by the index type, they will first be sorted by that
+ *          index then the iteration will begin; if the links have been so
+ *          indexed, the sorting step will be unnecessary, so the iteration may
+ *          begin more quickly. Valid values include the following:
+ *          \indexes
+ *
+ *          \p order specifies the order in which objects are to be inspected
+ *          along the index specified in \p idx_type. Valid values include the
+ *          following:
+ *          \orders
+ *
+ *          \p idx_p allows an interrupted iteration to be resumed; it is
+ *          passed in by the application with a starting point and returned by
+ *          the library with the point at which the iteration stopped.
+ *
+ * \note H5Literate_by_name2() is not recursive. In particular, if a member of
+ *       \p group_name is found to be a group, call it \c subgroup_a,
+ *       H5Literate_by_name2() does not examine the members of \c subgroup_a.
+ *       When recursive iteration is required, the application must handle the
+ *       recursion, explicitly calling H5Literate_by_name2() on discovered
+ *       subgroups.
+ *
+ * \note H5Literate_by_name2() assumes that the membership of the group being
+ *       iterated over remains unchanged through the iteration; if any of the
+ *       links in the group change during the iteration, the function’s
+ *       behavior is undefined. Note, however, that objects pointed to by the
+ *       links can be modified.
+ *
+ * \note H5Literate_by_name2() is the same as H5Literate2(), except that
+ *       H5Literate2() always proceeds in alphanumeric order.
+ *
+ * \since 1.12.0
+ *
+ * \see H5Literate(), H5Lvisit()
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Literate_by_name2(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx,
     H5L_iterate2_t op, void *op_data, hid_t lapl_id);
@@ -976,8 +1040,195 @@ H5_DLL herr_t H5Lvisit_by_name2(hid_t loc_id, const char *group_name,
 H5_DLL herr_t H5Lcreate_ud(hid_t link_loc_id, const char *link_name,
     H5L_type_t link_type, const void *udata, size_t udata_size, hid_t lcpl_id,
     hid_t lapl_id);
+/**
+ * \ingroup H5L
+ *
+ * \brief Registers a user-defined link class or changes behavior of an
+ *        existing class
+ *
+ * \param[in] cls Pointer to a buffer containing the struct describing the
+ *            user-defined link class
+ *
+ * \return \herr_t
+ *
+ * \details H5Lregister() registers a class of user-defined links, or changes
+ *          the behavior of an existing class.
+ *
+ *          \p cls is a pointer to a buffer containing a copy of the
+ *          H5L_class_t struct. This struct is defined in H5Lpublic.h as
+ *          follows:
+ *          \code
+ *          typedef struct H5L_class_t {
+ *            int version;                    /* Version number of this struct  */
+ *            H5L_type_t class_id;            /* Link class identifier          */
+ *            const char *comment;            /* Comment for debugging          */
+ *            H5L_create_func_t create_func;  /* Callback during link creation  */
+ *            H5L_move_func_t move_func;      /* Callback after moving link     */
+ *            H5L_copy_func_t copy_func;      /* Callback after copying link    */
+ *            H5L_traverse_func_t trav_func;  /* The main traversal function    */
+ *            H5L_delete_func_t del_func;     /* Callback for link deletion     */
+ *            H5L_query_func_t query_func;    /* Callback for queries           */
+ *          } H5L_class_t;
+ *          \endcode
+ *
+ *          The class definition passed with \p cls must include at least the
+ *          following:
+ *          \li An H5L_class_t version (which should be #H5L_LINK_CLASS_T_VERS)
+ *          \li A link class identifier, \c class_id
+ *          \li A traversal function, \c trav_func
+ *
+ *          Remaining \c struct members are optional and may be passed as NULL.
+ *
+ *          The link class passed in \c class_id must be in the user-definable
+ *          range between #H5L_TYPE_UD_MIN and #H5L_TYPE_UD_MAX
+ *          (see the table below) and will override
+ *          any existing link class with that identifier.
+ *
+ *          As distributed, valid values of \c class_id used in HDF5 include
+ *          the following (defined in H5Lpublic.h):
+ *          \link_types
+ *
+ *          The hard and soft link class identifiers cannot be modified or
+ *          reassigned, but the external link class is implemented as an
+ *          example in the user-definable link class identifier range.
+ *          H5Lregister() is used to register additional link classes. It could
+ *          also be used to modify the behavior of the external link class,
+ *          though that is not recommended.
+ *
+ *          The following table summarizes existing link types and values and
+ *          the reserved and user-definable link class identifier value ranges.
+ *          <table>
+ *            <tr>
+ *              <th>Link class identifier or Value range</th>
+ *              <th>Description</th>
+ *              <th>Link class or label</th>
+ *            </tr>
+ *            <tr>
+ *              <td>0 to 63</td>
+ *              <td>Reserved range</td>
+ *              <td></td>
+ *            </tr>
+ *            <tr>
+ *              <td>64 to 255</td>
+ *              <td>User-definable range</td>
+ *              <td></td>
+ *            </tr>
+ *            <tr>
+ *              <td>64</td>
+ *              <td>Minimum user-defined value</td>
+ *              <td>#H5L_TYPE_UD_MIN</td>
+ *            </tr>
+ *            <tr>
+ *              <td>64</td>
+ *              <td>External link</td>
+ *              <td>#H5L_TYPE_EXTERNAL</td>
+ *            </tr>
+ *            <tr>
+ *              <td>255</td>
+ *              <td>Maximum user-defined value</td>
+ *              <td>#H5L_TYPE_UD_MAX</td>
+ *            </tr>
+ *            <tr>
+ *              <td>255</td>
+ *              <td>Maximum value</td>
+ *              <td>#H5L_TYPE_MAX</td>
+ *            </tr>
+ *            <tr>
+ *              <td>-1</td>
+ *              <td>Error</td>
+ *              <td>#H5L_TYPE_ERROR</td>
+ *            </tr>
+ *          </table>
+ *
+ *          Note that HDF5 internally registers user-defined link classes only
+ *          by the numeric value of the link class identifier. An application,
+ *          on the other hand, will generally use a name for a user-defined
+ *          class, if for no other purpose than as a variable name. Assume,
+ *          for example, that a complex link type is registered with the link
+ *          class identifier 73 and that the code includes the following
+ *          assignment:
+ *          \code
+ *          H5L_TYPE_COMPLEX_A = 73
+ *          \endcode
+ *          The application can refer to the link class with a term,
+ *          \c  H5L_TYPE_COMPLEX_A, that conveys meaning to a human reviewing
+ *          the code, while HDF5 recognizes it by the more cryptic numeric
+ *          identifier, 73.
+ *
+ * \attention Important details and considerations include the following:
+ *            \li If you plan to distribute files or software with a
+ *                user-defined link class, please contact the Help Desk at
+ *                The HDF Group to help prevent collisions between \c class_id
+ *                values. See below.
+ *            \li As distributed with HDF5, the external link class is
+ *                implemented as an example of a user-defined link class with
+ *                #H5L_TYPE_EXTERNAL equal to #H5L_TYPE_UD_MIN. \c class_id in
+ *                the H5L_class_t \c struct must not equal #H5L_TYPE_UD_MIN
+ *                unless you intend to overwrite or modify the behavior of
+ *                external links.
+ *            \li H5Lregister() can be used only with link class identifiers
+ *                in the user-definable range (see table above).
+ *            \li The hard and soft links defined by the HDF5 library,
+ *                #H5L_TYPE_HARD and #H5L_TYPE_SOFT, reside in the reserved
+ *                range below #H5L_TYPE_UD_MIN and cannot be redefined or
+ *                modified.
+ *            \li H5Lis_registered() can be used to determine whether a desired
+ *                link class identifier is available. \Emph{Note that this
+ *                function will tell you only whether the link class identifier
+ *                has been registered with the installed copy of HDF5; it
+ *                cannot tell you whether the link class has been registered
+ *                with The HDF Group.}
+ *            \li #H5L_TYPE_MAX is the maximum allowed value for a link type
+ *                identifier.
+ *            \li #H5L_TYPE_UD_MIN equals #H5L_TYPE_EXTERNAL.
+ *            \li #H5L_TYPE_UD_MAX equals #H5L_TYPE_MAX.
+ *            \li #H5L_TYPE_ERROR indicates that an error has occurred.
+ *
+ * \note \Bold{Registration with The HDF Group:}\n
+ *       There are sometimes reasons to take a broader approach to registering
+ *       a user-defined link class than just invoking H5Lregister(). For
+ *       example:
+ *       \li A user-defined link class is intended for use across an
+ *           organization, among collaborators, or across a community of users.
+ *       \li An application or library overlying HDF5 invokes a user-defined
+ *           link class that must be shipped with the software.
+ *       \li Files are distributed that make use of a user-defined link class.
+ *       \li Or simply, a specific user-defined link class is thought to be
+ *           widely useful.
+ *
+ *       In such cases, you are encouraged to register that link class with
+ *       The HDF Group's Helpdesk. The HDF Group maintains a registry of known
+ *       user-defined link classes and tracks the selected link class
+ *       identifiers. This registry is intended to reduce the risk of
+ *       collisions between \c class_id values and to help coordinate the use
+ *       of specialized link classes.
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Lregister(const H5L_class_t *cls);
 H5_DLL herr_t H5Lunregister(H5L_type_t id);
+/**
+ * \ingroup H5L
+ *
+ * \brief Determines whether a class of user-defined links is registered
+ *
+ * \param[in] id User-defined link class identifier
+ *
+ * \return \htri_t
+ *
+ * \details H5Lis_registered() tests whether a user-defined link class is
+ *          currently registered, either by the HDF5 library or by the user
+ *          through the use of H5Lregister().
+ *
+ * \note A link class must be registered to create new links of that type or to
+ *       traverse existing links of that type.
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL htri_t H5Lis_registered(H5L_type_t id);
 
 /* External link functions */
