@@ -1233,9 +1233,11 @@ H5F__cache_superblock_refresh(H5F_t *f, void * _thing, const void * _image,
          * Allow this.
          */
         UINT32DECODE(image, status_flags);
-        if ( ( status_flags != sblock->status_flags ) &&
-             ( status_flags != 0 ) )
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected status_flags")
+        if (status_flags != sblock->status_flags && status_flags != 0) {
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
+                "read status_flags %" PRIx32 " expected %" PRIx32,
+                status_flags, sblock->status_flags)
+        }
 
 	/*
          * If the superblock version # is greater than 0, read in the indexed
@@ -1308,9 +1310,11 @@ H5F__cache_superblock_refresh(H5F_t *f, void * _thing, const void * _image,
         /* If the file has closed, the status flags will be zero.
          * Allow this.
          */
-        if ( ( status_flags != sblock->status_flags ) &&
-             ( status_flags != 0 ) )
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected status_flags")
+        if (status_flags != sblock->status_flags && status_flags != 0) {
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
+                "read status_flags %" PRIx32 " expected %" PRIx32,
+                status_flags, sblock->status_flags)
+        }
 
 	/* Base, superblock extension, end of file & root group object 
          * header addresses 
