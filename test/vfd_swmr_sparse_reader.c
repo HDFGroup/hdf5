@@ -223,7 +223,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords,
     config->max_lag = 5;
     config->writer = FALSE;
     config->md_pages_reserved = 128;
-    HDstrcpy(config->md_file_path, "./my_md_file");
+    HDstrcpy(config->md_file_path, "./rw-shadow");
 
     /* Enable VFD SWMR configuration */
     if(H5Pset_vfd_swmr_config(fapl, config) < 0)
