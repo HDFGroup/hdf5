@@ -1030,13 +1030,232 @@ H5_DLL herr_t H5Literate2(hid_t grp_id, H5_index_t idx_type,
 H5_DLL herr_t H5Literate_by_name2(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx,
     H5L_iterate2_t op, void *op_data, hid_t lapl_id);
+/**
+ * \ingroup H5L
+ *
+ * \brief Recursively visits all links starting from a specified group
+ *
+ * \group_id{grp_id}
+ * \idx_type
+ * \order
+ * \op
+ * \op_data
+ * \return \success{The return value of the first operator that returns
+ *                  non-zero, or zero if all members were processed with no
+ *                  operator returning non-zero.}
+ * \return \failure{Negative if an error occurs in the library, or the negative
+ *                  value returned by one of the operators.}
+ *
+ * \details H5Lvisit2() is a recursive iteration function to visit all links in
+ *          and below a group in an HDF5 file, thus providing a mechanism for
+ *          an application to perform a common set of operations across all of
+ *          those links or a dynamically selected subset. For non-recursive
+ *          iteration across the members of a group, see H5Literate2().
+ *
+ *          The group serving as the root of the iteration is specified by its
+ *          group or file identifier, \p group_id.
+ *
+ *          Two parameters are used to establish the iteration: \p idx_type and
+ *          \p order.
+ *
+ *          \p idx_type specifies the index to be used. If the links have not
+ *          been indexed by the index type, they will first be sorted by that
+ *          index then the iteration will begin; if the links have been so
+ *          indexed, the sorting step will be unnecessary, so the iteration may
+ *          begin more quickly. Valid values include the following:
+ *          \indexes
+ *
+ *          Note that the index type passed in \p idx_type is a best effort
+ *          setting. If the application passes in a value indicating iteration
+ *          in creation order and a group is encountered that was not tracked
+ *          in creation order, that group will be iterated over in
+ *          lexicographic order by name, or name order. (Name order is the
+ *          native order used by the HDF5 library and is always available.)
+ *
+ *          \p order specifies the order in which objects are to be inspected
+ *          along the index specified in \p idx_type. Valid values include the
+ *          following:
+ *          \orders
+ *
+ *          \p op is a callback function of type \ref H5L_iterate2_t that is invoked
+ *          for each link encountered.
+ *          \code
+ *          typedef herr_t (*H5L_iterate2_t)(hid_t group, const char *name, const H5L_info2_t *info,  void *op_data);
+ *          \endcode
+ *
+ *          The \ref H5L_info2_t struct is defined (in H5Lpublic.h) as follows:
+ *          \code
+ *          typedef struct {
+ *            H5L_type_t          type;           /* Type of link          */
+ *            hbool_t             corder_valid;   /* Indicate if creation order is val */
+ *            int64_t             corder;         /* Creation order           */
+ *            H5T_cset_t          cset;           /* Character set of link name     */
+ *            union {
+ *              H5O_token_t     token;          /* Token of location that hard link points to */
+ *              size_t          val_size;       /* Size of a soft link or UD link value */
+ *            } u;
+ *          } H5L_info2_t;
+ *          \endcode
+ *
+ *          The possible return values from the callback function, and the
+ *          effect of each, are as follows:
+ *          \li Zero causes the visit iterator to continue, returning zero when
+ *              all group members have been processed.
+ *          \li  A positive value causes the visit iterator to immediately
+ *               return that positive value, indicating short-circuit success.
+ *          \li A negative value causes the visit iterator to immediately
+ *              return that value, indicating failure.
+ *
+ *          The H5Lvisit2() \p op_data parameter is a user-defined pointer to
+ *          the data required to process links in the course of the iteration.
+ *          This pointer is passed back to each step of the iteration in the
+ *          \p op callback function's \p op_data parameter.
+ *
+ *          H5Lvisit2() and H5Ovisit2() are companion functions: one for
+ *          examining and operating on links; the other for examining and
+ *          operating on the objects that those links point to. Both functions
+ *          ensure that by the time the function completes successfully, every
+ *          link or object below the specified point in the file has been
+ *          presented to the application for whatever processing the
+ *          application requires.
+ *
+ * \since 1.12.0
+ *
+ * \see H5Literate()
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Lvisit2(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
     H5L_iterate2_t op, void *op_data);
+/**
+ * \ingroup H5L
+ *
+ * \brief Iterates through links in a group
+ *
+ * \loc_id
+ * \param[in] group_name Group name
+ * \idx_type
+ * \order
+ * \op
+ * \op_data
+ * \lapl_id
+ *
+ * \return \herr_t
+ *
+ * \details H5Lvisit_by_name2() is a recursive iteration function to visit all
+ *          links in and below a group in an HDF5 file, thus providing a
+ *          mechanism for an application to perform a common set of operations
+ *          across all of those links or a dynamically selected subset. For
+ *          non-recursive iteration across the members of a group, see
+ *          H5Literate2().
+ *
+ *          The group serving as the root of the iteration is specified by the
+ *          \p loc_id / \p group_name parameter pair. \p loc_id specifies a
+ *          file or group; group_name specifies either a group in the file
+ *          (with an absolute name based in the file’s root group) or a group
+ *          relative to \p loc_id. If \p loc_id fully specifies the group that
+ *          is to serve as the root of the iteration, group_name should be '.'
+ *          (a dot). (Note that when \p loc_id fully specifies the the group
+ *          that is to serve as the root of the iteration, the user may wish to
+ *          consider using H5Lvisit2() instead of H5Lvisit_by_name2().)
+ *
+ *          Two parameters are used to establish the iteration: \p idx_type and
+ *          \p order.
+ *
+ *          \p idx_type specifies the index to be used. If the links have not
+ *          been indexed by the index type, they will first be sorted by that
+ *          index then the iteration will begin; if the links have been so
+ *          indexed, the sorting step will be unnecesary, so the iteration may
+ *          begin more quickly. Valid values include the following:
+ *          \indexes
+ *
+ *          Note that the index type passed in \p idx_type is a best effort
+ *          setting. If the application passes in a value indicating iteration
+ *          in creation order and a group is encountered that was not tracked
+ *          in creation order, that group will be iterated over in
+ *          lexicographic order by name, or name order. (Name order is the
+ *          native order used by the HDF5 library and is always available.)
+ *
+ *          \p order specifies the order in which objects are to be inspected
+ *          along the index specified in \p idx_type. Valid values include the
+ *          following:
+ *          \orders
+ *
+ *          The \p op callback function, the related \ref H5L_info2_t
+ *          \c struct, and the effect that the callback function's return value
+ *          has on the application are described in H5Lvisit2().
+ *
+ *          The H5Lvisit_by_name2() \p op_data parameter is a user-defined
+ *          pointer to the data required to process links in the course of the
+ *          iteration. This pointer is passed back to each step of the
+ *          iteration in the callback function's \p op_data parameter.
+ *
+ *          \p lapl_id is a link access property list. In the general case,
+ *          when default link access properties are acceptable, this can be
+ *          passed in as #H5P_DEFAULT. An example of a situation that requires
+ *          a non-default link access property list is when the link is an
+ *          external link; an external link may require that a link prefix be
+ *          set in a link access property list (see H5Pset_elink_prefix()).
+ *
+ *          H5Lvisit_by_name2() and H5Ovisit_by_name2() are companion
+ *          functions: one for examining and operating on links; the other for
+ *          examining and operating on the objects that those links point to.
+ *          Both functions ensure that by the time the function completes
+ *          successfully, every link or object below the specified point in the
+ *          file has been presented to the application for whatever processing
+ *          the application requires.
+ *
+ * \since 1.12.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Lvisit_by_name2(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, H5L_iterate2_t op,
     void *op_data, hid_t lapl_id);
 
 /* UD link functions */
+/**
+ * \ingroup H5L
+ *
+ * \brief Creates a link of a user-defined type
+ *
+ * \loc_id{link_loc_id}
+ * \param[in] link_name Link name
+ * \param[in] link_type User-defined link class
+ * \param[in] udata User-supplied link information
+ * \param[in] udata_size Size of udata buffer
+ * \lcpl_id
+ * \lapl_id
+ *
+ * \return \herr_t
+ *
+ * \details H5Lcreate_ud() creates a link of user-defined type \p link_type
+ *          named \p link_name at the location specified in \p link_loc_id with
+ *          user-specified data \p udata.
+ *
+ *          \p link_name is interpreted relative to \p link_loc_id.
+ *
+ *          Valid values for the link class of the new link, \p link_type,
+ *          include #H5L_TYPE_EXTERNAL and any user-defined link classes that
+ *          have been registered with the library. See H5Lregister() for
+ *          further information.
+ *
+ *          The format of the information pointed to by \p udata is defined by
+ *          the user. \p udata_size specifies the size of the \p udata buffer.
+ *          \p udata may be NULL if \p udata_size is zero (0).
+ *
+ *          The property lists specified by \p lcpl_id and \p lapl_id specify
+ *          properties used to create and access the link.
+ *
+ * \note The external link type, #H5L_TYPE_EXTERNAL, included in the HDF5
+ *       library distribution, is implemented as a user-defined link type. This
+ *       was done, in part, to provide a model for the implementation of other
+ *       user-defined links.
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Lcreate_ud(hid_t link_loc_id, const char *link_name,
     H5L_type_t link_type, const void *udata, size_t udata_size, hid_t lcpl_id,
     hid_t lapl_id);
