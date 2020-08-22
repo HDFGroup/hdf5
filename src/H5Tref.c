@@ -1221,7 +1221,6 @@ H5T__ref_reclaim(void *elem, const H5T_t *dt)
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_PACKAGE
-    H5T_REF_LOG_DEBUG("");
 
     /* Sanity checks */
     HDassert(elem);

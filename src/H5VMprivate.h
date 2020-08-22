@@ -164,8 +164,8 @@ H5VM_vector_reduce_product(unsigned n, const hsize_t *v)
 {
     hsize_t                  ret_value = 1;
 
-    /* Use FUNC_ENTER_STATIC_NOERR here to avoid performance issues */
-    FUNC_ENTER_STATIC_NOERR
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (n && !v) HGOTO_DONE(0)
     while (n--) ret_value *= *v++;
@@ -198,8 +198,8 @@ H5VM_vector_zerop_u(int n, const hsize_t *v)
 {
     htri_t      ret_value=TRUE;       /* Return value */
 
-    /* Use FUNC_ENTER_STATIC_NOERR here to avoid performance issues */
-    FUNC_ENTER_STATIC_NOERR
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (!v)
         HGOTO_DONE(TRUE)
@@ -235,8 +235,8 @@ H5VM_vector_zerop_s(int n, const hssize_t *v)
 {
     htri_t      ret_value=TRUE;       /* Return value */
 
-    /* Use FUNC_ENTER_STATIC_NOERR here to avoid performance issues */
-    FUNC_ENTER_STATIC_NOERR
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (!v)
         HGOTO_DONE(TRUE)
@@ -274,8 +274,8 @@ H5VM_vector_cmp_u(unsigned n, const hsize_t *v1, const hsize_t *v2)
 {
     int ret_value=0;    /* Return value */
 
-    /* Use FUNC_ENTER_STATIC_NOERR here to avoid performance issues */
-    FUNC_ENTER_STATIC_NOERR
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (v1 == v2) HGOTO_DONE(0)
     if (v1 == NULL) HGOTO_DONE(-1)
@@ -318,8 +318,8 @@ H5VM_vector_cmp_s(unsigned n, const hssize_t *v1, const hssize_t *v2)
 {
     int ret_value=0;    /* Return value */
 
-    /* Use FUNC_ENTER_STATIC_NOERR here to avoid performance issues */
-    FUNC_ENTER_STATIC_NOERR
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (v1 == v2) HGOTO_DONE(0)
     if (v1 == NULL) HGOTO_DONE(-1)
