@@ -1695,8 +1695,158 @@ typedef herr_t (*H5L_iterate1_t)(hid_t group, const char *name, const H5L_info1_
 
 
 /* Function prototypes */
+/**
+ * \ingroup H5L
+ *
+ * \brief Returns information about a link
+ *
+ * \fgdta_loc_id
+ * \param[in] name Link name
+ * \param[out] linfo Buffer in which link information is returned
+ * \lapl_id
+ *
+ * \return \herr_t
+ *
+ * \deprecated As of HDF5-1.12 this function has been deprecated in favor of
+ *             the function H5Lget_info2() or the macro H5Lget_info().
+ *
+ * \todo We need to get the location ID story straight!
+ *
+ * \details H5Lget_info1() returns information about the specified link through
+ *          the \p linfo argument.
+ *
+ *          The location identifier, \p loc_id, specifies the location of the
+ *          link. A link name, \p name, interpreted relative to \p loc_id,
+ *          specifies the link being queried.
+ *
+ *          \p lapl_id is the link access property list associated with the
+ *          link \p name. In the general case, when default link access
+ *          properties are acceptable, this can be passed in as #H5P_DEFAULT.
+ *          An example of a situation that requires a non-default link access
+ *          property list is when the link is an external link; an external
+ *          link may require that a link prefix be set in a link access
+ *          property list (see H5Pset_elink_prefix()).
+ *
+ *          H5Lget_info1() returns information about name in the data structure
+ *          \ref H5L_info1_t, which is described below and defined in
+ *          H5Lpublic.h. This structure is returned in the buffer \p linfo.
+ *          \code
+ *          typedef struct {
+ *            H5L_type_t     type;
+ *            hbool_t        corder_valid;
+ *            int64_t        corder;
+ *            H5T_cset_t     cset;
+ *            union {
+ *              haddr_t    address;
+ *              size_t     val_size;
+ *            } u;
+ *          } H5L_info1_t;
+ *          \endcode
+ *          In the above struct, type specifies the link class. Valid values
+ *          include the following:
+ *          \link_types
+ *          There will be additional valid values if user-defined links have
+ *          been registered.
+ *
+ *          \c corder specifies the link’s creation order position while
+ *          \c corder_valid indicates whether the value in \c corder is valid.
+ *
+ *          If \c corder_valid is \c TRUE, the value in \c corder is known to
+ *          be valid; if \c corder_valid is \c FALSE, the value in \c corder is
+ *          presumed to be invalid;
+ *
+ *          \c corder starts at zero (0) and is incremented by one (1) as new
+ *          links are created. But higher-numbered entries are not adjusted
+ *          when a lower-numbered link is deleted; the deleted link’s creation
+ *          order position is simply left vacant. In such situations, the value
+ *          of \c corder for the last link created will be larger than the
+ *          number of links remaining in the group.
+ *
+ *          \c cset specifies the character set in which the link name is
+ *          encoded. Valid values include the following:
+ *          \csets
+ *          This value is set with H5Pset_char_encoding().
+ *
+ *          \c address and \c val_size are returned for hard and symbolic
+ *          links, respectively. Symbolic links include soft and external links
+ *          and some user-defined links.
+ *
+ *          If the link is a hard link, \c address specifies the file address
+ *          that the link points to.
+ *
+ *          If the link is a symbolic link, \c val_size will be the length of
+ *          the link value, e.g., the length of the HDF5 path name with a null
+ *          terminator.
+ *
+ * \version 1.12.0 Function was deprecated.
+ * \version 1.8.2 Fortran subroutine added in this release.
+ * \version 1.8.4 Fortran subroutine syntax changed in this release.
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Lget_info1(hid_t loc_id, const char *name,
     H5L_info1_t *linfo /*out*/, hid_t lapl_id);
+/**
+ * \ingroup H5L
+ *
+ * \brief Retrieves metadata for a link in a group, according to the order
+ *        within a field or index
+ *
+ * \loc_id
+ * \param[in] group_name Group name
+ * \idx_type
+ * \order
+ * \param[in] n Link position for which to retrieve information
+ * \param[out] linfo Buffer in which link information is returned
+ * \lapl_id
+ *
+ * \return \herr_t
+ *
+ * \deprecated As of HDF5-1.12 this function has been deprecated in favor of
+ *             the function H5Lget_info_by_idx2() and the macro
+ *             H5Lget_info_by_idx().
+ *
+ * \details H5get_info_by_idx1() returns the metadata for a link in a group
+ *          according to a specified field or index and a specified order.
+ *
+ *          The link for which information is to be returned is specified by \p
+ *          idx_type, \p order, and \p n as follows:
+ *
+ *          - \p idx_type specifies the field by which the links in \p
+ *            group_name are ordered. The links may be indexed on this field,
+ *            in which case operations seeking specific links are likely to
+ *            complete more quickly.
+ *          - \p order specifies the order in which
+ *            the links are to be referenced for the purposes of this function.
+ *          - \p n specifies the position of the subject link. Note that this
+ *            count is zero-based; 0 (zero) indicates that the function will
+ *            return the value of the first link; if \p n is 5, the function
+ *            will return the value of the sixth link; etc.
+ *
+ *          For example, assume that \p idx_type, \p order, and \p n are
+ *          #H5_INDEX_NAME, #H5_ITER_DEC, and 5, respectively. #H5_INDEX_NAME
+ *          indicates that the links are accessed in lexicographic order by
+ *          their names. #H5_ITER_DEC specifies that the list be traversed in
+ *          reverse order, or in decremented order. And 5 specifies that this
+ *          call to the function will return the metadata for the 6th link
+ *          (\c n + 1) from the end.
+ *
+ *          See H5Literate1() for a list of valid values and further discussion
+ *          regarding \p idx_type and \p order.
+ *
+ *          If \p loc_id specifies the group in which the link resides,
+ *          \p group_name can be a dot (\c .).
+ *
+ * \version 1.12.0 Function was renamed to H5Lget_index_by_idx1() and deprecated.
+ * \version 1.8.4 Fortran subroutine syntax changed in this release.
+ * \version 1.8.2 Fortran subroutine added in this release.
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Lget_info_by_idx1(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     H5L_info1_t *linfo /*out*/, hid_t lapl_id);
