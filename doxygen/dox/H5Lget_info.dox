@@ -1,5 +1,5 @@
  /**
- * \ingroup H5L
+ * \ingroup LMGT
  * \def H5Lget_info()
  * H5Lget_info() is a macro that is mapped to either H5Lget_info1()
  * or H5Lget_info2() Such macros are provided to facilitate application

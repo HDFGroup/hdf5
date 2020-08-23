@@ -32,6 +32,13 @@
 /**\defgroup H5L H5L
  * \brief Link Interface
  * \todo Describe concisely what the functions in this module are about.
+ *
+ * \defgroup LMGT Link Management
+ * \ingroup H5L
+ * \defgroup TRAV Link Traversal
+ * \ingroup H5L
+ * \defgroup LMGTA Link Management (Advanced)
+ * \ingroup H5L
  */
 
 #endif /* _H5Lmodule_H */

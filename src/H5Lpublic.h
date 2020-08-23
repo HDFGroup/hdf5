@@ -180,7 +180,7 @@ typedef herr_t (*H5L_elink_traverse_t)(const char *parent_file_name,
 /*********************/
 
 /**
- * \ingroup H5L
+ * \ingroup LMGT
  *
  * \brief Moves a link within an HDF5 file
  *
@@ -240,7 +240,7 @@ typedef herr_t (*H5L_elink_traverse_t)(const char *parent_file_name,
 H5_DLL herr_t H5Lmove(hid_t src_loc, const char *src_name, hid_t dst_loc,
     const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
 /**
- * \ingroup H5L
+ * \ingroup LMGT
  *
  * \brief Creates an identical copy of a link with the same creation time and
  *        target.  The new link can have a different name and be in a different
@@ -301,7 +301,7 @@ H5_DLL herr_t H5Lmove(hid_t src_loc, const char *src_name, hid_t dst_loc,
 H5_DLL herr_t H5Lcopy(hid_t src_loc, const char *src_name, hid_t dst_loc,
     const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
 /**
- * \ingroup H5L
+ * \ingroup LMGT
  *
  * \brief Creates a hard link to an object
  *
@@ -352,7 +352,7 @@ H5_DLL herr_t H5Lcopy(hid_t src_loc, const char *src_name, hid_t dst_loc,
 H5_DLL herr_t H5Lcreate_hard(hid_t cur_loc, const char *cur_name,
     hid_t dst_loc, const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
 /**
- * \ingroup H5L
+ * \ingroup LMGT
  *
  * \brief Creates a soft link
  *
@@ -418,7 +418,7 @@ H5_DLL herr_t H5Lcreate_hard(hid_t cur_loc, const char *cur_name,
 H5_DLL herr_t H5Lcreate_soft(const char *link_target, hid_t link_loc_id,
     const char *link_name, hid_t lcpl_id, hid_t lapl_id);
 /**
- * \ingroup H5L
+ * \ingroup LMGT
  *
  * \brief Removes a link from a group
  *
@@ -458,7 +458,7 @@ H5_DLL herr_t H5Lcreate_soft(const char *link_target, hid_t link_loc_id,
  */
 H5_DLL herr_t H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id);
 /**
- * \ingroup H5L
+ * \ingroup LMGT
  *
  * \brief Removes the \Emph{n}-th link in a group
  *
@@ -489,7 +489,7 @@ H5_DLL herr_t H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id);
 H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id);
 /**
- * \ingroup H5L
+ * \ingroup LMGT
  *
  * \brief Returns the value of a link
  *
@@ -546,7 +546,7 @@ H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
 H5_DLL herr_t H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/,
     size_t size, hid_t lapl_id);
 /**
- * \ingroup H5L
+ * \ingroup LMGT
  *
  * \brief Retrieves value of the \Emph{n}-th link in a group, according to the order within an index
  *
@@ -606,7 +606,7 @@ H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     void *buf/*out*/, size_t size, hid_t lapl_id);
 /**
- * \ingroup H5L
+ * \ingroup LMGT
  *
  * \brief Determines whether a link with the specified name exists in a group
  *
@@ -695,7 +695,7 @@ H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name,
  */
 H5_DLL htri_t H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id);
 /**
- * \ingroup H5L
+ * \ingroup LMGT
  *
  * \brief Returns information about a link
  *
@@ -783,7 +783,7 @@ H5_DLL htri_t H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id);
 H5_DLL herr_t H5Lget_info2(hid_t loc_id, const char *name,
     H5L_info2_t *linfo /*out*/, hid_t lapl_id);
 /**
- * \ingroup H5L
+ * \ingroup LMGT
  *
  * \brief Retrieves metadata for a link in a group, according to the order
  *        within a field or index
@@ -840,7 +840,7 @@ H5_DLL herr_t H5Lget_info_by_idx2(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     H5L_info2_t *linfo /*out*/, hid_t lapl_id);
 /**
- * \ingroup H5L
+ * \ingroup LMGT
  *
  * \brief Retrieves name of the \Emph{n}-th link in a group, according to the
  *        order within a specified field or index
@@ -895,7 +895,7 @@ H5_DLL ssize_t H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     char *name /*out*/, size_t size, hid_t lapl_id);
 /**
- * \ingroup H5L
+ * \ingroup TRAV
  *
  * \brief Iterates over links in a group, with user callback routine,
  *        according to the order within an index.
@@ -964,7 +964,7 @@ H5_DLL ssize_t H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
 H5_DLL herr_t H5Literate2(hid_t grp_id, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t *idx, H5L_iterate2_t op, void *op_data);
 /**
- * \ingroup H5L
+ * \ingroup TRAV
  *
  * \brief Iterates through links in a group
  *
@@ -972,8 +972,9 @@ H5_DLL herr_t H5Literate2(hid_t grp_id, H5_index_t idx_type,
  * \param[in] group_name Group name
  * \idx_type
  * \order
- * \param[in,out] idx_p teration position at which to start or position at
- *                which an interrupted iteration may be restarted
+ * \param[in,out] idx_p iteration position at which to start (\Emph{IN}) or
+ *                position at which an interrupted iteration may be restarted
+ *                (\Emph{OUT})
  * \op
  * \op_data
  * \lapl_id
@@ -1031,7 +1032,7 @@ H5_DLL herr_t H5Literate_by_name2(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx,
     H5L_iterate2_t op, void *op_data, hid_t lapl_id);
 /**
- * \ingroup H5L
+ * \ingroup TRAV
  *
  * \brief Recursively visits all links starting from a specified group
  *
@@ -1128,9 +1129,9 @@ H5_DLL herr_t H5Literate_by_name2(hid_t loc_id, const char *group_name,
 H5_DLL herr_t H5Lvisit2(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
     H5L_iterate2_t op, void *op_data);
 /**
- * \ingroup H5L
+ * \ingroup TRAV
  *
- * \brief Iterates through links in a group
+ * \brief Recursively visits all links starting from a specified group
  *
  * \loc_id
  * \param[in] group_name Group name
@@ -1215,7 +1216,7 @@ H5_DLL herr_t H5Lvisit_by_name2(hid_t loc_id, const char *group_name,
 
 /* UD link functions */
 /**
- * \ingroup H5L
+ * \ingroup LMGT
  *
  * \brief Creates a link of a user-defined type
  *
@@ -1260,7 +1261,7 @@ H5_DLL herr_t H5Lcreate_ud(hid_t link_loc_id, const char *link_name,
     H5L_type_t link_type, const void *udata, size_t udata_size, hid_t lcpl_id,
     hid_t lapl_id);
 /**
- * \ingroup H5L
+ * \ingroup LMGTA
  *
  * \brief Registers a user-defined link class or changes behavior of an
  *        existing class
@@ -1428,7 +1429,7 @@ H5_DLL herr_t H5Lcreate_ud(hid_t link_loc_id, const char *link_name,
  */
 H5_DLL herr_t H5Lregister(const H5L_class_t *cls);
 /**
- * \ingroup H5L
+ * \ingroup LMGTA
  *
  * \brief Unregisters a class of user-defined links
  *
@@ -1447,7 +1448,7 @@ H5_DLL herr_t H5Lregister(const H5L_class_t *cls);
  */
 H5_DLL herr_t H5Lunregister(H5L_type_t id);
 /**
- * \ingroup H5L
+ * \ingroup LMGTA
  *
  * \brief Determines whether a class of user-defined links is registered
  *
@@ -1470,7 +1471,7 @@ H5_DLL htri_t H5Lis_registered(H5L_type_t id);
 
 /* External link functions */
 /**
- * \ingroup H5L
+ * \ingroup LMGT
  *
  * \brief Decodes external link information
  *
@@ -1516,7 +1517,7 @@ H5_DLL htri_t H5Lis_registered(H5L_type_t id);
 H5_DLL herr_t H5Lunpack_elink_val(const void *ext_linkval/*in*/, size_t link_size,
    unsigned *flags, const char **filename/*out*/, const char **obj_path /*out*/);
 /**
- * \ingroup H5L
+ * \ingroup LMGT
  *
  * \brief Creates an external link, a soft link to an object in a different file.
  *
@@ -1696,7 +1697,7 @@ typedef herr_t (*H5L_iterate1_t)(hid_t group, const char *name, const H5L_info1_
 
 /* Function prototypes */
 /**
- * \ingroup H5L
+ * \ingroup LMGT
  *
  * \brief Returns information about a link
  *
@@ -1789,7 +1790,7 @@ typedef herr_t (*H5L_iterate1_t)(hid_t group, const char *name, const H5L_info1_
 H5_DLL herr_t H5Lget_info1(hid_t loc_id, const char *name,
     H5L_info1_t *linfo /*out*/, hid_t lapl_id);
 /**
- * \ingroup H5L
+ * \ingroup LMGT
  *
  * \brief Retrieves metadata for a link in a group, according to the order
  *        within a field or index
@@ -1851,7 +1852,7 @@ H5_DLL herr_t H5Lget_info_by_idx1(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     H5L_info1_t *linfo /*out*/, hid_t lapl_id);
 /**
- * \ingroup H5L
+ * \ingroup TRAV
  *
  * \brief Iterates over links in a group, with user callback routine,
  *        according to the order within an index.
@@ -1922,11 +1923,277 @@ H5_DLL herr_t H5Lget_info_by_idx1(hid_t loc_id, const char *group_name,
  */
 H5_DLL herr_t H5Literate1(hid_t grp_id, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t *idx, H5L_iterate1_t op, void *op_data);
+/**
+ * \ingroup TRAV
+ *
+ * \brief Iterates through links in a group by its name
+ *
+ * \loc_id
+ * \param[in] group_name Group name
+ * \idx_type
+ * \order
+ * \param[in,out] idx iteration position at which to start (\Emph{IN}) or
+ *                position at which an interrupted iteration may be restarted
+ *                (\Emph{OUT})
+ * \op
+ * \op_data
+ * \lapl_id
+ *
+ * \return \success{The return value of the first operator that returns
+ *                  non-zero, or zero if all members were processed with no
+ *                  operator returning non-zero.}
+ * \return \failure{Negative if an error occurs in the library, or the negative
+ *                  value returned by one of the operators.}
+ *
+ * \deprecated As of HDF5-1.12 this function has been deprecated in favor of
+ *             the function H5Literate_by_name2() or the macro
+ *             H5Literate_by_name().
+ *
+ * \details H5Literate_by_name1() iterates through the links in a group
+ *          specified by \p loc_id and \p group_name, in the order of the
+ *          specified index, \p idx_type, using a user-defined callback routine
+ *          \p op. H5Literate_by_name1() does not recursively follow links into
+ *          subgroups of the specified group.
+ *
+ *          \p idx_type specifies the index to be used. If the links have not
+ *          been indexed by the index type, they will first be sorted by that
+ *          index then the iteration will begin; if the links have been so
+ *          indexed, the sorting step will be unnecessary, so the iteration may
+ *          begin more quickly. Valid values include the following:
+ *          \indexes
+ *
+ *          \p order specifies the order in which objects are to be inspected
+ *          along the index specified in \p idx_type. Valid values include the
+ *          following:
+ *          \orders
+ *
+ *          \p idx allows an interrupted iteration to be resumed; it is
+ *          passed in by the application with a starting point and returned by
+ *          the library with the point at which the iteration stopped.
+ *
+ * \note H5Literate_by_name1() is not recursive. In particular, if a member of
+ *       \p group_name is found to be a group, call it \c subgroup_a,
+ *       H5Literate_by_name1() does not examine the members of \c subgroup_a.
+ *       When recursive iteration is required, the application must handle the
+ *       recursion, explicitly calling H5Literate_by_name1() on discovered
+ *       subgroups.
+ *
+ * \note H5Literate_by_name1() assumes that the membership of the group being
+ *       iterated over remains unchanged through the iteration; if any of the
+ *       links in the group change during the iteration, the function’s
+ *       behavior is undefined. Note, however, that objects pointed to by the
+ *       links can be modified.
+ *
+ * \note H5Literate_by_name1() is the same as H5Giterate(), except that
+ *       H5Giterate() always proceeds in lexicographic order.
+ *
+ * \version 1.12.0 Function H5Literate_by_name() was renamed to
+ *                 H5Literate_by_name1() and deprecated.
+ * \version 1.8.8 Fortran subroutine added.
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Literate_by_name1(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx,
     H5L_iterate1_t op, void *op_data, hid_t lapl_id);
+/**
+ * \ingroup TRAV
+ *
+ * \brief Recursively visits all links starting from a specified group
+ *
+ * \group_id{grp_id}
+ * \idx_type
+ * \order
+ * \op
+ * \op_data
+ *
+ * \return \success{The return value of the first operator that returns
+ *                  non-zero, or zero if all members were processed with no
+ *                  operator returning non-zero.}
+ * \return \failure{Negative if an error occurs in the library, or the negative
+ *                  value returned by one of the operators.}
+ *
+ * \deprecated As of HDF5-1.12 this function has been deprecated in favor of
+ *             the function H5Lvisit2() or the macro H5Lvisit().
+ *
+ * \details H5Lvisit1() is a recursive iteration function to visit all links in
+ *          and below a group in an HDF5 file, thus providing a mechanism for
+ *          an application to perform a common set of operations across all of
+ *          those links or a dynamically selected subset. For non-recursive
+ *          iteration across the members of a group, see H5Literate1().
+ *
+ *          The group serving as the root of the iteration is specified by its
+ *          group or file identifier, \p group_id.
+ *
+ *          Two parameters are used to establish the iteration: \p idx_type and
+ *          \p order.
+ *
+ *          \p idx_type specifies the index to be used. If the links have not
+ *          been indexed by the index type, they will first be sorted by that
+ *          index then the iteration will begin; if the links have been so
+ *          indexed, the sorting step will be unnecessary, so the iteration may
+ *          begin more quickly. Valid values include the following:
+ *          \indexes
+ *
+ *          Note that the index type passed in \p idx_type is a best effort
+ *          setting. If the application passes in a value indicating iteration
+ *          in creation order and a group is encountered that was not tracked
+ *          in creation order, that group will be iterated over in
+ *          lexicographic order by name, or name order. (Name order is the
+ *          native order used by the HDF5 library and is always available.)
+ *
+ *          \p order specifies the order in which objects are to be inspected
+ *          along the index specified in \p idx_type. Valid values include the
+ *          following:
+ *          \orders
+ *
+ *          \p op is a callback function of type \ref H5L_iterate1_t that is invoked
+ *          for each link encountered.
+ *          \code
+ *          typedef herr_t (*H5L_iterate1_t)(hid_t group, const char *name, const H5L_info1_t *info,  void *op_data);
+ *          \endcode
+ *
+ *          The \ref H5L_info1_t struct is defined (in H5Lpublic.h) as follows:
+ *          \code
+ *          typedef struct {
+ *            H5L_type_t          type;         /* Type of link                */
+ *            hbool_t             corder_valid; /* Indicate if creation        */
+ *                                              /* order is valid              */
+ *            int64_t             corder;       /* Creation order              */
+ *            H5T_cset_t          cset;         /* Character set of link name  */
+ *            union {
+ *              haddr_t         address;        /* Address hard link points to */
+ *              size_t          val_size;       /* Size of a soft link         */
+ *                                              /* or UD link value */
+ *            } u;
+ *          } H5L_info1_t;
+ *          \endcode
+ *
+ *          The possible return values from the callback function, and the
+ *          effect of each, are as follows:
+ *          \li Zero causes the visit iterator to continue, returning zero when
+ *              all group members have been processed.
+ *          \li  A positive value causes the visit iterator to immediately
+ *               return that positive value, indicating short-circuit success.
+ *          \li A negative value causes the visit iterator to immediately
+ *              return that value, indicating failure.
+ *
+ *          The H5Lvisit1() \p op_data parameter is a user-defined pointer to
+ *          the data required to process links in the course of the iteration.
+ *          This pointer is passed back to each step of the iteration in the
+ *          \p op callback function's \p op_data parameter.
+ *
+ *          H5Lvisit1() and H5Ovisit1() are companion functions: one for
+ *          examining and operating on links; the other for examining and
+ *          operating on the objects that those links point to. Both functions
+ *          ensure that by the time the function completes successfully, every
+ *          link or object below the specified point in the file has been
+ *          presented to the application for whatever processing the
+ *          application requires.
+ *
+ * \version 1.12.0 Function was renamed from H5Lvisit() to H5Lvisit1() and
+ *                 deprecated.
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Lvisit1(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
     H5L_iterate1_t op, void *op_data);
+/**
+ * \ingroup TRAV
+ *
+ * \brief Recursively visits all links starting from a specified group
+ *
+ * \loc_id
+ * \param[in] group_name Group name
+ * \idx_type
+ * \order
+ * \op
+ * \op_data
+ * \lapl_id
+ *
+ * \return \success{The return value of the first operator that returns
+ *                  non-zero, or zero if all members were processed with no
+ *                  operator returning non-zero.}
+ * \return \failure{Negative if an error occurs in the library, or the negative
+ *                  value returned by one of the operators.}
+ *
+ * \deprecated As of HDF5-1.12 this function has been deprecated in favor of
+ *             the function H5Lvisit_by_name2() or the macro H5Lvisit_by_name().
+ *
+ * \details H5Lvisit_by_name1() is a recursive iteration function to visit all
+ *          links in and below a group in an HDF5 file, thus providing a
+ *          mechanism for an application to perform a common set of operations
+ *          across all of those links or a dynamically selected subset. For
+ *          non-recursive iteration across the members of a group, see
+ *          H5Literate1().
+ *
+ *          The group serving as the root of the iteration is specified by the
+ *          \p loc_id / \p group_name parameter pair. \p loc_id specifies a
+ *          file or group; group_name specifies either a group in the file
+ *          (with an absolute name based in the file’s root group) or a group
+ *          relative to \p loc_id. If \p loc_id fully specifies the group that
+ *          is to serve as the root of the iteration, group_name should be '.'
+ *          (a dot). (Note that when \p loc_id fully specifies the the group
+ *          that is to serve as the root of the iteration, the user may wish to
+ *          consider using H5Lvisit1() instead of H5Lvisit_by_name1().)
+ *
+ *          Two parameters are used to establish the iteration: \p idx_type and
+ *          \p order.
+ *
+ *          \p idx_type specifies the index to be used. If the links have not
+ *          been indexed by the index type, they will first be sorted by that
+ *          index then the iteration will begin; if the links have been so
+ *          indexed, the sorting step will be unnecesary, so the iteration may
+ *          begin more quickly. Valid values include the following:
+ *          \indexes
+ *
+ *          Note that the index type passed in \p idx_type is a best effort
+ *          setting. If the application passes in a value indicating iteration
+ *          in creation order and a group is encountered that was not tracked
+ *          in creation order, that group will be iterated over in
+ *          lexicographic order by name, or name order. (Name order is the
+ *          native order used by the HDF5 library and is always available.)
+ *
+ *          \p order specifies the order in which objects are to be inspected
+ *          along the index specified in \p idx_type. Valid values include the
+ *          following:
+ *          \orders
+ *
+ *          The \p op callback function, the related \ref H5L_info1_t
+ *          \c struct, and the effect that the callback function's return value
+ *          has on the application are described in H5Lvisit1().
+ *
+ *          The H5Lvisit_by_name1() \p op_data parameter is a user-defined
+ *          pointer to the data required to process links in the course of the
+ *          iteration. This pointer is passed back to each step of the
+ *          iteration in the callback function's \p op_data parameter.
+ *
+ *          \p lapl_id is a link access property list. In the general case,
+ *          when default link access properties are acceptable, this can be
+ *          passed in as #H5P_DEFAULT. An example of a situation that requires
+ *          a non-default link access property list is when the link is an
+ *          external link; an external link may require that a link prefix be
+ *          set in a link access property list (see H5Pset_elink_prefix()).
+ *
+ *          H5Lvisit_by_name1() and H5Ovisit_by_name1() are companion
+ *          functions: one for examining and operating on links; the other for
+ *          examining and operating on the objects that those links point to.
+ *          Both functions ensure that by the time the function completes
+ *          successfully, every link or object below the specified point in the
+ *          file has been presented to the application for whatever processing
+ *          the application requires.
+ *
+ * \version 1.12.0 Function renamed from H5Lvisit_by_name() to
+ *                 H5Lvisit_by_name1() and deprecated.
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Lvisit_by_name1(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, H5L_iterate1_t op,
     void *op_data, hid_t lapl_id);

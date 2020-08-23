@@ -1,5 +1,5 @@
  /**
- * \ingroup H5L
+ * \ingroup LMGT
  * \def H5Lget_info_by_idx()
  * H5Lget_info_by_idx() is a macro that is mapped to either H5Lget_info_by_idx1()
  * or H5Lget_info_by_idx2() Such macros are provided to facilitate application

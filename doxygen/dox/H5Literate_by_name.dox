@@ -1,5 +1,5 @@
 /**
- * \ingroup H5L
+ * \ingroup TRAV
  * \def H5Literate_by_name()
  * H5Literate_by_name() is a macro that is mapped to either
  * H5Literate_by_name1() or H5Literate_by_name2() Such macros are provided to

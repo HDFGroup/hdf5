@@ -1,5 +1,5 @@
 /**
- * \ingroup H5L
+ * \ingroup TRAV
  * \def H5Literate()
  * H5Literate() is a macro that is mapped to either H5Literate1() or
  * H5Literate2() Such macros are provided to facilitate application

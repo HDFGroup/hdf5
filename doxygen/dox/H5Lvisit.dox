@@ -1,5 +1,5 @@
 /**
- * \ingroup H5L
+ * \ingroup TRAV
  * \def H5Lvisit()
  * H5Lvisit() is a macro that is mapped to either H5Lvisit1() or
  * H5Lvisit2() Such macros are provided to facilitate application
