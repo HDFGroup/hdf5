@@ -1005,13 +1005,6 @@ test_set_configured_fapl(void)
     other_fa_t       wrong_fa = {0x432, 0xf82, 0x9093};
 #ifdef H5_HAVE_ROS3_VFD
     H5FD_ros3_fapl_t ros3_anon_fa = {1, FALSE, "", "", ""};
-    H5FD_ros3_fapl_t ros3_auth_fa = {
-        1,                            /* fapl version           */
-        TRUE,                         /* authenticate           */
-        "us-east-1",                  /* aws region             */
-        "12345677890abcdef",          /* simulate access key ID */
-        "oiwnerwe9u0234nJw0-aoj+dsf", /* simulate secret key    */
-    };
 #endif /* H5_HAVE_ROS3_VFD */
 #ifdef H5_HAVE_LIBHDFS
     H5FD_hdfs_fapl_t hdfs_fa = {
@@ -1178,10 +1171,12 @@ test_set_configured_fapl(void)
         vfd_info.info = C.conf_fa;
         vfd_info.name = C.vfdname;
         result = h5tools_get_fapl(H5P_DEFAULT, &vfd_info);
-        if (C.expected == 0)
+        if (C.expected == 0) {
             JSVERIFY( result, H5I_INVALID_HID, C.message)
-        else
+        }
+        else {
             JSVERIFY_NOT( result, H5I_INVALID_HID, C.message)
+        }
 
 #if UTIL_TEST_DEBUG
         HDfprintf(stderr, "after test\n"); fflush(stderr);
