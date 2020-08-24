@@ -371,6 +371,12 @@ Bug Fixes since HDF5-1.10.6 release
 
     Library
     -------
+    - Avoid setting up complex MPI types with 0-length vectors, which some
+        MPI implementations don't handle well.  (In particular, IBM
+        SpectrumScale MPI on the Summit system at ORNL)
+
+      (QAK - 2020/08/21)
+
     - Fixed use-of-uninitialized-value error
 
       Appropriate initialization of local structs was added to remove the
