@@ -709,6 +709,14 @@ H5_DLL herr_t H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf
 H5_DLL herr_t H5D__fill_refill_vl(H5D_fill_buf_info_t *fb_info, size_t nelmts);
 H5_DLL herr_t H5D__fill_term(H5D_fill_buf_info_t *fb_info);
 
+/* Streaming operations */
+H5_DLL herr_t H5D__stream_start(H5D_t *dset, hid_t dxpl_id, unsigned axis,
+    size_t extension, hid_t mem_type_id);
+H5_DLL herr_t H5D__stream_append(H5D_t *dset, const void *buf);
+H5_DLL herr_t H5D__stream_sequence(H5D_t *dset, void *buf);
+H5_DLL herr_t H5D__stream_is_streaming(const H5D_t *dset, hbool_t *is_streaming);
+H5_DLL herr_t H5D__stream_stop(H5D_t *dset);
+
 #ifdef H5_HAVE_PARALLEL
 
 #ifdef H5S_DEBUG

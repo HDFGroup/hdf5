@@ -168,9 +168,15 @@ H5_DLL herr_t H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id,
     hid_t dst_space_id, void *dst_buf);
 H5_DLL herr_t H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id,
     size_t dst_buf_size, void *dst_buf, H5D_gather_func_t op, void *op_data);
-H5_DLL herr_t H5Ddebug(hid_t dset_id);
+H5_DLL herr_t H5Dstream_start(hid_t dset_id, hid_t dxpl_id, unsigned axis,
+    size_t extension, hid_t mem_type_id);
+H5_DLL herr_t H5Dstream_append(hid_t dset_id, const void *buf);
+H5_DLL herr_t H5Dstream_sequence(hid_t dset_id, void *buf);
+H5_DLL herr_t H5Dis_streaming(hid_t dset_id, hbool_t *is_streaming);
+H5_DLL herr_t H5Dstream_stop(hid_t dset_id);
 
 /* Internal API routines */
+H5_DLL herr_t H5Ddebug(hid_t dset_id);
 H5_DLL herr_t H5Dformat_convert(hid_t dset_id);
 H5_DLL herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
 

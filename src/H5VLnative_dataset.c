@@ -377,7 +377,7 @@ done:
  */
 herr_t
 H5VL__native_dataset_optional(void *obj, H5VL_dataset_optional_t optional_type,
-    hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
+    hid_t dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
     H5D_t *dset = (H5D_t *)obj;         /* Dataset */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -615,6 +615,61 @@ H5VL__native_dataset_optional(void *obj, H5VL_dataset_optional_t optional_type,
                 /* Append the record/row/slice */
                 if(H5D__append(dset, axis, extension, memtype, buf) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't append to dataset")
+                break;
+            }
+
+        /* H5Dstream_start */
+        case H5VL_NATIVE_DATASET_STREAM_START:
+            {
+                unsigned axis = HDva_arg(arguments, unsigned);
+                size_t extension = HDva_arg(arguments, size_t);
+                hid_t mem_type_id = HDva_arg(arguments, hid_t);
+
+                /* Start streaming I/O mode on the dataset */
+                if(H5D__stream_start(dset, dxpl_id, axis, extension, mem_type_id) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't start streaming I/O mode on dataset")
+                break;
+            }
+
+        /* H5Dstream_append */
+        case H5VL_NATIVE_DATASET_STREAM_APPEND:
+            {
+                const void *buf = HDva_arg(arguments, const void *);
+
+                /* Streaming append operation to the dataset */
+                if(H5D__stream_append(dset, buf) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't append to dataset")
+                break;
+            }
+
+        /* H5Dstream_sequence */
+        case H5VL_NATIVE_DATASET_STREAM_SEQUENCE:
+            {
+                void *buf = HDva_arg(arguments, void *);
+
+                /* Streaming sequence operation from the dataset */
+                if(H5D__stream_sequence(dset, buf) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't sequence from dataset")
+                break;
+            }
+
+        /* H5Dis_streaming */
+        case H5VL_NATIVE_DATASET_STREAM_IS_STREAMING:
+            {
+                hbool_t *is_streaming = HDva_arg(arguments, hbool_t *);
+
+                /* Query streaming status for the dataset */
+                if(H5D__stream_is_streaming(dset, is_streaming) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query streaming status for dataset")
+                break;
+            }
+
+        /* H5Dstream_stop */
+        case H5VL_NATIVE_DATASET_STREAM_STOP:
+            {
+                /* Stop streaming I/O mode on the dataset */
+                if(H5D__stream_stop(dset) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't stop streaming I/O mode on dataset")
                 break;
             }
 

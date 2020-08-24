@@ -1135,3 +1135,257 @@ H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, unsigned *filte
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dget_chunk_info_by_coord() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dstream_start
+ *
+ * Purpose:     Begin streaming I/O on a dataset.
+ *
+ *              The 'extension' value is the # of elements to extend the
+ *              dataset's dataspace for each append operation (which also
+ *              writes data elements into that newly extended region of the
+ *              dataset).
+ *
+ *              For sequence operations, the 'extension' value determines the
+ *              # of elements along the 'axis' dimension that are read for
+ *              each operation.
+ *
+ *              For datasets that have a dataspace with rank > 1, append and
+ *              sequence operations will access hyperslabs along the 'axis'
+ *              dimension that cover the full dimension size of the other
+ *              dataspace dimensions.
+ *
+ * Note:        There is one "append-point" (which is always at the "end" of
+ *              the 'axis' dimension) and one "sequence-point" (which starts
+ *              at 0 for the 'axis' dimension and is incremented by 'extension'
+ *              elements with each sequence operation) for a dataset.  The
+ *              append-point and sequence-point are independent of each other.
+ *
+ * Note:        Append and sequence operations perform best when the 'axis'
+ *              is the "slowest changing" dimension of the dataset's dataspace
+ *              (i.e. when the 'axis' value is 0).  Other values for the 'axis'
+ *              will operate correctly but may not perform as well.
+ *
+ * Note:        Append and sequence operations perform best when the
+ *              'mem_type_id' is the same as the dataset's datatype.  Other
+ *              datatypes will operate correctly but may not perform as well.
+ *
+ * Note:        Streaming I/O is only curreently supported for datasets with
+ *              chunked layout.
+ *
+ * Developers:  Range checking the 'axis' value in this routine would be ideal,
+ *              but the dataset's dataspace would need to be retrieved from
+ *              VOL connector (see, e.g., H5Dget_space), so we sanity check
+ *              the other parameters here, but leave the range check of the
+ *              'axis' value to the VOL connector's callback.  Same with
+ *              checking whether 'mem_type_id" datatype element values can be
+ *              converted to elements of the dataset's datatype.
+ *
+ * Parameters:  hid_t dset_id;          IN/OUT: Dataset ID
+ *              hid_t dxpl_id;          IN: The dataset transfer property list
+ *                                          that will apply to all streaming
+ *                                          operations.
+ *              unsigned axis;          IN: The dataspace axis to stream along
+ *              size_t extension;       IN: The # of elements to operate on
+ *                                          with each streaming operation.
+ *              hid_t mem_type_id;      IN: The datatype of the elements in the
+ *                                          memory buffer for each streaming
+ *                                          operation.
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              August 22, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dstream_start(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
+    hid_t mem_type_id)
+{
+    H5VL_object_t *vol_obj;     /* Dataset for this operation */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "iiIuzi", dset_id, dxpl_id, axis, extension, mem_type_id);
+
+    /* Check arguments */
+    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+    if(NULL == H5I_object_verify(mem_type_id, H5I_DATATYPE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid ID for memory datatype")
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset transfer property list");
+
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
+
+    /* Issue the 'start streaming' VOL callback to the connector */
+    if(H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_STREAM_START, dxpl_id, H5_REQUEST_NULL, axis, extension, mem_type_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't start streamed I/O mode")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dstream_start() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dstream_append
+ *
+ * Purpose:     Append element(s) to a dataset in streamed I/O mode
+ *
+ * Parameters:  hid_t dset_id;          IN: Dataset ID
+ *              const void *buf;        IN: Buffer containing data elements
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              August 22, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dstream_append(hid_t dset_id, const void *buf)
+{
+    H5VL_object_t *vol_obj;     /* Dataset for this operation */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*x", dset_id, buf);
+
+    /* Check arguments */
+    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+    if(NULL == buf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer pointer")
+
+    /* Issue the 'streamed append' VOL callback to the connector */
+    if(H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_STREAM_APPEND, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, buf) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't append to dataset")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dstream_append() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dstream_sequence
+ *
+ * Purpose:     Read element(s) from a dataset in streamed I/O mode
+ *
+ * Parameters:  hid_t dset_id;    IN: Dataset ID
+ *              void *buf;        IN: Buffer containing data elements
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              August 22, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dstream_sequence(hid_t dset_id, void *buf)
+{
+    H5VL_object_t *vol_obj;     /* Dataset for this operation */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*x", dset_id, buf);
+
+    /* Check arguments */
+    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+    if(NULL == buf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer pointer")
+
+    /* Issue the 'streamed sequence' VOL callback to the connector */
+    if(H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_STREAM_SEQUENCE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, buf) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't sequence read from dataset")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dstream_sequence() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dis_streaming
+ *
+ * Purpose:     Query whether a dataset is in streaming I/O mode
+ *
+ * Parameters:  hid_t dset_id;          IN: Dataset ID
+ *              hbool_t *is_streaming;  OUT: Flag indicating whether dataset
+ *                                              is in streamed I/O mode (TRUE)
+ *                                              or not (FALSE)
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              August 22, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dis_streaming(hid_t dset_id, hbool_t *is_streaming)
+{
+    H5VL_object_t *vol_obj;     /* Dataset for this operation */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*b", dset_id, is_streaming);
+
+    /* Check arguments */
+    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+    if(NULL == is_streaming)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flag pointer")
+
+    /* Issue the 'is streaming' VOL callback to the connector */
+    if(H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_STREAM_IS_STREAMING, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, is_streaming) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query streaming status for dataset")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dis_streaming() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dstream_stop
+ *
+ * Purpose:     End streaming I/O on a dataset.
+ *
+ * Parameters:  hid_t dset_id;         IN/OUT: Dataset ID
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              August 22, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dstream_stop(hid_t dset_id)
+{
+    H5VL_object_t *vol_obj;     /* Dataset for this operation */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", dset_id);
+
+    /* Check arguments */
+    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+
+    /* Issue the 'stop streaming' VOL callback to the connector */
+    if(H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_STREAM_STOP, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't stop streamed I/O mode")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dstream_stop() */
+

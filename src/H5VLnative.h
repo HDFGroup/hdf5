@@ -50,6 +50,11 @@
 #define H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE       8   /* H5Dvlen_get_buf_size         */
 #define H5VL_NATIVE_DATASET_GET_OFFSET              9   /* H5Dget_offset                */
 #define H5VL_NATIVE_DATASET_APPEND                  10  /* H5Dappend                    */
+#define H5VL_NATIVE_DATASET_STREAM_START            11  /* H5Dstream_start              */
+#define H5VL_NATIVE_DATASET_STREAM_APPEND           12  /* H5Dstream_append             */
+#define H5VL_NATIVE_DATASET_STREAM_SEQUENCE         13  /* H5Dstream_sequence           */
+#define H5VL_NATIVE_DATASET_STREAM_IS_STREAMING     14  /* H5Dis_streaming              */
+#define H5VL_NATIVE_DATASET_STREAM_STOP             15  /* H5Dstream_stop               */
 
 /* Values for native VOL connector file optional VOL operations */
 #define H5VL_NATIVE_FILE_CLEAR_ELINK_CACHE             0   /* H5Fclear_elink_file_cache            */
