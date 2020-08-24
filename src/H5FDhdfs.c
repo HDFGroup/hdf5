@@ -20,6 +20,9 @@
  *             File System (HDFS).
  */
 
+/* This source code file is part of the H5FD driver module */
+#include "H5FDdrvr_module.h"
+
 #include "H5private.h"      /* Generic Functions        */
 #include "H5Eprivate.h"     /* Error handling           */
 #include "H5FDprivate.h"    /* File drivers             */
@@ -30,11 +33,19 @@
 
 #ifdef H5_HAVE_LIBHDFS
 
-/* This source code file is part of the H5FD driver module */
-#include "H5FDdrvr_module.h"
-
-/* HDFS routines */
-#include "hdfs.h"
+/* HDFS routines
+ * Have to turn off -Wstrict-prototypes as this header contains functions
+ * defined as foo() instead of foo(void), which triggers warnings that HDF5
+ * then interprets as errors.
+ * -Wundef isn't interpreted as an error by HDF5, but the header does do
+ *  some bad symbol interpretation that raises a warning that is out of our
+ *  control.
+ */
+H5_GCC_DIAG_OFF(strict-prototypes)
+H5_GCC_DIAG_OFF(undef)
+#include <hdfs.h>
+H5_GCC_DIAG_ON(strict-prototypes)
+H5_GCC_DIAG_ON(undef)
 
 /* toggle function call prints: 1 turns on */
 #define HDFS_DEBUG 0
@@ -369,12 +380,12 @@ done:
 hid_t
 H5FD_hdfs_init(void)
 {
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 #if HDFS_STATS
     unsigned int bin_i;
 #endif
+    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
 #if HDFS_DEBUG
     HDfprintf(stdout, "called %s.\n", FUNC);
