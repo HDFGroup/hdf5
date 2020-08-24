@@ -1088,8 +1088,8 @@ test_set_configured_fapl(void)
             "ros3",
             &ros3_anon_fa,
         },
-        {   "(ROS3) should fail: attempt to set DEFAULT fapl",
-            0,
+        {   "(ROS3) successful set (default fapl)",
+            1,
             UTIL_TEST_DEFAULT,
             "ros3",
             &ros3_anon_fa,
@@ -1123,8 +1123,8 @@ test_set_configured_fapl(void)
             "hdfs",
             &hdfs_fa,
         },
-        {   "(HDFS) should fail: attempt to set DEFAULT fapl",
-            0,
+        {   "(HDFS) successful set (default fapl)",
+            1,
             UTIL_TEST_DEFAULT,
             "hdfs",
             &hdfs_fa,
@@ -1151,10 +1151,6 @@ test_set_configured_fapl(void)
 
         fapl_id = H5I_INVALID_HID;
 
-#if UTIL_TEST_DEBUG
-        HDfprintf(stderr, "setup test %d\t%s\n", i, C.message); fflush(stderr);
-#endif /* UTIL_TEST_DEBUG */
-
         /* per-test setup */
         if (C.fapl_choice == UTIL_TEST_DEFAULT) {
             fapl_id = H5P_DEFAULT;
@@ -1163,14 +1159,14 @@ test_set_configured_fapl(void)
             FAIL_IF( fapl_id < 0 )
         }
 
-#if UTIL_TEST_DEBUG
-        HDfprintf(stderr, "before test\n"); fflush(stderr);
-#endif /* UTIL_TEST_DEBUG */
-
         /* test */
-        vfd_info.info = C.conf_fa;
-        vfd_info.name = C.vfdname;
-        result = h5tools_get_fapl(H5P_DEFAULT, &vfd_info);
+        if(!HDstrcmp("", C.vfdname))
+            result = h5tools_get_fapl(fapl_id, NULL);
+        else {
+            vfd_info.info = C.conf_fa;
+            vfd_info.name = C.vfdname;
+            result = h5tools_get_fapl(fapl_id, &vfd_info);
+        }
         if (C.expected == 0) {
             JSVERIFY( result, H5I_INVALID_HID, C.message)
         }
@@ -1178,25 +1174,12 @@ test_set_configured_fapl(void)
             JSVERIFY_NOT( result, H5I_INVALID_HID, C.message)
         }
 
-#if UTIL_TEST_DEBUG
-        HDfprintf(stderr, "after test\n"); fflush(stderr);
-#endif /* UTIL_TEST_DEBUG */
-
         /* per-test-teardown */
         if (fapl_id > 0) {
             FAIL_IF( FAIL == H5Pclose(fapl_id) )
         }
         fapl_id = H5I_INVALID_HID;
-
-#if UTIL_TEST_DEBUG
-        HDfprintf(stderr, "after cleanup\n"); fflush(stderr);
-#endif /* UTIL_TEST_DEBUG */
-
     }
-
-#if UTIL_TEST_DEBUG
-    HDfprintf(stderr, "after loop\n"); fflush(stderr);
-#endif /* UTIL_TEST_DEBUG */
 
     PASSED();
     return 0;
@@ -1206,19 +1189,12 @@ error :
      * CLEANUP *
      ***********/
 
-#if UTIL_TEST_DEBUG
-    HDfprintf(stderr, "ERROR\n"); fflush(stderr);
-#endif /* UTIL_TEST_DEBUG */
-
     if (fapl_id > 0) {
         (void)H5Pclose(fapl_id);
     }
 
     return 1;
 
-#undef UTIL_TEST_NOFAPL
-#undef UTIL_TEST_DEFAULT
-#undef UTIL_TEST_CREATE
 } /* test_set_configured_fapl */
 
 
