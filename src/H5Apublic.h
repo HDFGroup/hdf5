@@ -547,8 +547,80 @@ H5_DLL hsize_t H5Aget_storage_size(hid_t attr_id);
  *
  */
 H5_DLL herr_t  H5Aget_info(hid_t attr_id, H5A_info_t *ainfo /*out*/);
+/*-------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Retrieves attribute information, by attribute name
+ *
+ * \fgdt_loc_id
+ *
+ * \param[in] obj_name   Name of object to which attribute is attached,
+ *                       relative to location
+ * \param[in] attr_name  Attribute name
+ * \param[out] ainfo     Struct containing returned attribute information
+ * \lapl_id
+ *
+ * \return \herr_t
+ *
+ * \details H5Aget_info_by_name() retrieves information for an attribute,
+ *          \p attr_name, that is attached to an object specified by its
+ *          location and name, \p loc_id and \p obj_name, respectively.
+ *          The attribute information is returned in the \p ainfo struct.
+ *
+ *          If \p loc_id fully specifies the object to which the attribute
+ *          is attached, \p obj_name should be '.' (a dot).
+ *
+ *          The \p ainfo struct is described in H5Aget_info().
+ *
+ *          The link access property list, \p lapl_id, may provide
+ *          information regarding the properties of links required to
+ *          access the object, \p obj_name.
+ *
+ * \since 1.8.0
+ *
+ */
 H5_DLL herr_t  H5Aget_info_by_name(hid_t loc_id, const char *obj_name,
     const char *attr_name, H5A_info_t *ainfo /*out*/, hid_t lapl_id);
+/*-------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Retrieves attribute information by attribute index position
+ *
+ * \fgdt_loc_id
+ * \param[in]  obj_name  Name of object to which attribute is attached,
+ *                       relative to location
+ * \param[in]  idx_type  Type of index
+ * \param[in]  order     Index traversal order
+ * \param[in]  n         Attribute’s position in index
+ * \param[out] ainfo     Struct containing returned attribute information
+ * \lapl_id
+ *
+ * \return \herr_t
+ *
+ * \details H5Aget_info_by_idx() retrieves information for an attribute
+ *          that is attached to an object, which is specified by its
+ *          location and name, \p loc_id and \p obj_name, respectively.
+ *          The attribute is located by its index position and the attribute
+ *          information is returned in the \p ainfo struct.
+ *
+ *          If \p loc_id fully specifies the object to which the attribute
+ *          is attached, \p obj_name should be '.' (a dot).
+ *
+ *          The attribute is located by means of an index type, an index
+ *          traversal order, and a position in the index, \p idx_type,
+ *          \p order and \p n, respectively. These parameters and their
+ *          valid values are discussed in the description of H5Aiterate2().
+ *
+ *          The \p ainfo struct, which will contain the returned attribute
+ *          information, is described in H5Aget_info().
+ *
+ *          The link access property list, \p lapl_id, may provide
+ *          information regarding the properties of links required to access
+ *          the object, \p obj_name.
+ *
+ * \since 1.8.0
+ *
+ */
 H5_DLL herr_t  H5Aget_info_by_idx(hid_t loc_id, const char *obj_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     H5A_info_t *ainfo /*out*/, hid_t lapl_id);
