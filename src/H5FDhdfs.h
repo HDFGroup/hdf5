@@ -29,10 +29,6 @@
 #endif /* H5_HAVE_LIBHDFS */
 
 #ifdef H5_HAVE_LIBHDFS
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /****************************************************************************
  *
  * Structure: H5FD_hdfs_fapl_t
@@ -111,6 +107,10 @@ typedef struct H5FD_hdfs_fapl_t {
     char    kerberos_ticket_cache[H5FD__HDFS_KERB_CACHE_PATH_SPACE + 1];
     int32_t stream_buffer_size;
 } H5FD_hdfs_fapl_t;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 H5_DLL hid_t H5FD_hdfs_init(void);
 H5_DLL herr_t H5Pget_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa_out);
