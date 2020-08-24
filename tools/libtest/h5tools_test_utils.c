@@ -20,8 +20,6 @@
 #include "h5tools_utils.h"
 #include "h5test.h"
 
-#define UTIL_TEST_DEBUG 0
-
 #ifndef __js_test__
 
 #define __js_test__ 1L
@@ -357,9 +355,6 @@ if (HDstrcmp((actual), (expected)) != 0) {       \
 
 #endif /* __js_test__ */
 
-/* if > 0, be very verbose when performing tests */
-#define H5TOOLS_UTILS_TEST_DEBUG 0
-
 /******************/
 /* TEST FUNCTIONS */
 /******************/
@@ -367,25 +362,19 @@ if (HDstrcmp((actual), (expected)) != 0) {       \
 
 /*----------------------------------------------------------------------------
  *
- * Function: test_parse_tuple()
+ * Function:    test_parse_tuple()
  *
- * Purpose:
+ * Purpose:     Provide unit tests and specification for the `parse_tuple()`
+ *              function.
  *
- *     Provide unit tests and specification for the `parse_tuple()` function.
+ * Return:      SUCCEED/FAIL
  *
- * Return:
- *
- *     0   Tests passed.
- *     1   Tests failed.
- *
- * Programmer: Jacob Smith
- *             2017-11-11
- *
- * Changes: None.
+ * Programmer:  Jacob Smith
+ *              2017-11-11
  *
  *----------------------------------------------------------------------------
  */
-static unsigned
+static herr_t
 test_parse_tuple(void)
 {
     /*************************
@@ -522,10 +511,6 @@ test_parse_tuple(void)
 
     TESTING("arbitrary-count tuple parsing");
 
-#if H5TOOLS_UTILS_TEST_DEBUG > 0
-        show_progress = TRUE;
-#endif /* H5TOOLS_UTILS_TEST_DEBUG */
-
     /*********
      * TESTS *
      *********/
@@ -569,12 +554,8 @@ test_parse_tuple(void)
     return 0;
 
 error:
-    /***********
-     * CLEANUP *
-     ***********/
-
-    if (parsed != NULL) HDfree(parsed);
-    if (cpy    != NULL) HDfree(cpy);
+    HDfree(parsed);
+    HDfree(cpy);
 
     return 1;
 
@@ -583,21 +564,18 @@ error:
 
 /*----------------------------------------------------------------------------
  *
- * Function:   test_populate_ros3_fa()
+ * Function:    test_populate_ros3_fa()
  *
- * Purpose:    Verify behavior of `populate_ros3_fa()`
+ * Purpose:     Verify behavior of `populate_ros3_fa()`
  *
- * Return:     0 if test passes
- *             1 if failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer: Jacob Smith
- *             2017-11-13
- *
- * Changes:    None
+ * Programmer:  Jacob Smith
+ *              2017-11-13
  *
  *----------------------------------------------------------------------------
  */
-static unsigned
+static herr_t
 test_populate_ros3_fa(void)
 {
 #ifdef H5_HAVE_ROS3_VFD
@@ -621,10 +599,6 @@ test_populate_ros3_fa(void)
     HDfflush(stdout);
     return 0;
 #else
-#if H5TOOLS_UTILS_TEST_DEBUG > 0
-    show_progress = TRUE;
-#endif /* H5TOOLS_UTILS_TEST_DEBUG */
-
     HDassert(bad_version != H5FD_CURR_ROS3_FAPL_T_VERSION);
 
     /*********
@@ -943,14 +917,11 @@ test_populate_ros3_fa(void)
     }
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error :
-    /***********
-     * CLEANUP *
-     ***********/
 
-    return 1;
+    return FAIL;
 
 #endif /* H5_HAVE_ROS3_VFD */
 
@@ -959,21 +930,18 @@ error :
 
 /*----------------------------------------------------------------------------
  *
- * Function:   test_set_configured_fapl()
+ * Function:    test_set_configured_fapl()
  *
- * Purpose:    Verify `h5tools_get_fapl()` with ROS3 and HDFS VFDs
+ * Purpose:     Verify `h5tools_get_fapl()` with ROS3 and HDFS VFDs
  *
- * Return:     0 if test passes
- *             1 if failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer: Jacob Smith
- *             2018-07-12
- *
- * Changes:    None
+ * Programmer:  Jacob Smith
+ *              2018-07-12
  *
  *----------------------------------------------------------------------------
  */
-static unsigned
+static herr_t
 test_set_configured_fapl(void)
 {
 #define UTIL_TEST_NOFAPL 1
@@ -1001,7 +969,8 @@ test_set_configured_fapl(void)
      * TEST-LOCAL VARIABLES *
      ************************/
 
-    hid_t            fapl_id = H5I_INVALID_HID;
+    hid_t            in_fapl_id = H5I_INVALID_HID;
+    hid_t            out_fapl_id = H5I_INVALID_HID;
     other_fa_t       wrong_fa = {0x432, 0xf82, 0x9093};
 #ifdef H5_HAVE_ROS3_VFD
     H5FD_ros3_fapl_t ros3_anon_fa = {1, FALSE, "", "", ""};
@@ -1146,100 +1115,91 @@ test_set_configured_fapl(void)
 
     for (i = 0; i < n_cases; i++) {
         h5tools_vfd_info_t vfd_info;
-        hid_t result;
-        testcase C = cases[i];
+        testcase tc = cases[i];
 
-        fapl_id = H5I_INVALID_HID;
 
-        /* per-test setup */
-        if (C.fapl_choice == UTIL_TEST_DEFAULT) {
-            fapl_id = H5P_DEFAULT;
-        } else if (C.fapl_choice == UTIL_TEST_CREATE) {
-            fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-            FAIL_IF( fapl_id < 0 )
+        /* Setup */
+        if (tc.fapl_choice == UTIL_TEST_DEFAULT) {
+            in_fapl_id = H5P_DEFAULT;
         }
+        else if (tc.fapl_choice == UTIL_TEST_CREATE) {
+            if(H5I_INVALID_HID == (in_fapl_id = H5Pcreate(H5P_FILE_ACCESS)))
+                TEST_ERROR
+        }
+        else
+            in_fapl_id = H5I_INVALID_HID;
 
-        /* test */
-        if(!HDstrcmp("", C.vfdname))
-            result = h5tools_get_fapl(fapl_id, NULL);
+        /* Test */
+        if(!HDstrcmp("", tc.vfdname))
+            out_fapl_id = h5tools_get_fapl(in_fapl_id, NULL);
         else {
-            vfd_info.info = C.conf_fa;
-            vfd_info.name = C.vfdname;
-            result = h5tools_get_fapl(fapl_id, &vfd_info);
-        }
-        if (C.expected == 0) {
-            JSVERIFY( result, H5I_INVALID_HID, C.message)
-        }
-        else {
-            JSVERIFY_NOT( result, H5I_INVALID_HID, C.message)
+            vfd_info.info = tc.conf_fa;
+            vfd_info.name = tc.vfdname;
+            out_fapl_id = h5tools_get_fapl(in_fapl_id, &vfd_info);
         }
 
-        /* per-test-teardown */
-        if (fapl_id > 0) {
-            FAIL_IF( FAIL == H5Pclose(fapl_id) )
-        }
-        fapl_id = H5I_INVALID_HID;
+        /* Check */
+        if ((tc.expected == 0 && H5I_INVALID_HID != out_fapl_id) ||
+            (tc.expected == 1 && H5I_INVALID_HID == out_fapl_id))
+            FAIL_PUTS_ERROR(tc.message)
+
+        /* Close */
+        if (tc.fapl_choice == UTIL_TEST_CREATE && H5Pclose(in_fapl_id) < 0)
+            TEST_ERROR
+        if (out_fapl_id != H5I_INVALID_HID && H5Pclose(out_fapl_id) < 0)
+            TEST_ERROR
     }
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error :
-    /***********
-     * CLEANUP *
-     ***********/
 
-    if (fapl_id > 0) {
-        (void)H5Pclose(fapl_id);
-    }
+    H5E_BEGIN_TRY {
+        H5Pclose(in_fapl_id);
+        H5Pclose(out_fapl_id);
+    } H5E_END_TRY;
 
-    return 1;
-
+    return FAIL;
 } /* test_set_configured_fapl */
 
 
 /*----------------------------------------------------------------------------
  *
- * Function:   main()
+ * Function:    main()
  *
- * Purpose:    Run all test functions.
+ * Purpose:     Run all test functions
  *
- * Return:     0 iff all test pass
- *             1 iff any failures
+ * Return:      EXIT_FAILURE/EXIT_SUCCESS
  *
- * Programmer: Jacob Smith
- *             2017-11-10
- *
- * Changes:    None.
+ * Programmer:  Jacob Smith
+ *              2017-11-10
  *
  *----------------------------------------------------------------------------
  */
 int
 main(void)
 {
-    unsigned nerrors = 0;
+    int nerrors = 0;
 
-#ifdef _H5TEST_
-    h5reset(); /* h5test? */
-#endif /* _H5TEST_ */
+    h5_reset();
 
-    HDfprintf(stdout, "Testing h5tools_utils corpus.\n");
+    HDprintf("Testing tools VFD functionality.\n");
 
-    nerrors += test_parse_tuple();
-    nerrors += test_populate_ros3_fa();
-    nerrors += test_set_configured_fapl();
+    nerrors += test_parse_tuple() < 0           ? 1 : 0;
+    nerrors += test_populate_ros3_fa() < 0      ? 1 : 0;
+    nerrors += test_set_configured_fapl() < 0   ? 1 : 0;
 
-    if (nerrors > 0) {
-        HDfprintf(stdout, "***** %d h5tools_utils TEST%s FAILED! *****\n",
-                 nerrors,
-                 nerrors > 1 ? "S" : "");
-        nerrors = 1;
-    } else {
-        HDfprintf(stdout, "All h5tools_utils tests passed\n");
+    if(nerrors) {
+        HDprintf("***** %d tools VFD TEST%s FAILED! *****\n",
+            nerrors, nerrors > 1 ? "S" : "");
+        return EXIT_FAILURE;
     }
 
-    return (int)nerrors;
+    HDprintf("All tools VFD tests passed.\n");
 
-} /* main */
+    return EXIT_SUCCESS;
+
+} /* end main() */
 
 

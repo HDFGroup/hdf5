@@ -28,6 +28,6 @@ TEST_PROG=h5tools_test_utils
 check_PROGRAMS=$(TEST_PROG)
 
 # All programs depend on the hdf5 and h5tools libraries
-LDADD=$(LIBH5TOOLS) $(LIBHDF5)
+LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 
 include $(top_srcdir)/config/conclude.am
