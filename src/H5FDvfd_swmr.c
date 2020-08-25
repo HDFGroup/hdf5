@@ -508,6 +508,38 @@ H5FD_vfd_swmr_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_vfd_swmr_cmp() */
 
+/* Compare the already-opened VFD instance `_self` with the
+ * VFD instance `_other` newly-opened with file-access properties `fapl`
+ * and indicate whether the instances duplicate each other, if they conflict
+ * with each other, or if they are dissimilar.
+ *
+ * If `_self` duplicates `_other`, return `_self`.
+ *
+ * Return NULL on error, or if `_other` and `_self` refer to the same file
+ * but the file-access properties, `fapl`, conflict with the properties of
+ * `_self`.
+ *
+ * If `_other` neither duplicates nor conflicts with `_self`, then return
+ * `_other`.
+ *
+ * # Judging duplicate/conflicting/dissimilar VFD instances
+ *
+ * `_self` duplicates `_other` if `_other` is also an instance of SWMR
+ * class, the instances' lower files are equal under `H5FD_cmp()`, and
+ * the file-access properties of `_self` match `fapl`.
+ * The wildcard `fapl` value, `H5P_FILE_ACCESS_ANY_VFD`, matches all.
+ *
+ * `_self` also duplicates `_other` if `_other` is not a SWMR instance, but
+ * it equals the lower file of `_self` under `H5FD_cmp()`, and `fapl` is
+ * `H5P_FILE_ACCESS_ANY_VFD`.
+ *
+ * `_self` and `_other` conflict if both are SWMR instances referring to
+ * the same lower file, and their file-access properties differ.
+ *
+ * `_self` and `_other` conflict if `_other` is not a SWMR instance, it
+ * equals the lower file of `_self`, and `fapl` is not equal to
+ * `H5P_FILE_ACCESS_ANY_VFD`.
+ */
 static H5FD_t *
 H5FD_vfd_swmr_dedup(H5FD_t *_self, H5FD_t *_other, hid_t fapl)
 {

@@ -731,7 +731,7 @@ if test $nerrors -eq 0 ; then
     echo "VFD SWMR tests passed."
     if test $nsofterrors -ne 0 ; then
 	echo
-        echo "${nsofterrors} soft errors occurred.  That's safe to ignore."
+        echo "${nsofterrors} expected errors occurred.  Expected errors are ok."
     fi
     if test -z "$HDF5_NOCLEANUP"; then
         # delete the test directory
@@ -739,8 +739,9 @@ if test $nerrors -eq 0 ; then
     fi
     exit 0
 else
-    echo -n "VFD SWMR tests failed with $nerrors hard errors "
-    echo "and $nsofterrors soft errors."
+    echo -n "VFD SWMR tests failed with $nerrors unexpected errors "
+    echo "and $nsofterrors expected errors.  Expected errors are ok."
+    echo "Please report unexpected errors, they may indicate a bug."
     exit 1
 fi
 

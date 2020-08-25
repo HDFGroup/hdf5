@@ -679,9 +679,18 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-/* Return `other` if `self` has no de-duplication method.  Otherwise, return
- * `other` if it duplicates `self`, `self` if `other` does NOT duplicate it,
- * NULL if `other` conflicts with `self` or if there is an error.
+/* Helper routine for H5FD_deduplicate(): compare `self` and `other` using
+ * the deduplication method of `self`, if it has one; otherwise compare using
+ * `H5FDcmp()`.
+ *
+ * If `self` has no de-duplication method, compare `self` and `other`
+ * using `H5FDcmp()` and return `self` if they're equal and `other` if
+ * unequal.
+ *
+ * If `self` does have a de-duplication method, call it and return the
+ * method's result: `other` if it duplicates `self`, `self` if `other`
+ * does NOT duplicate it, NULL if `other` conflicts with `self` or if
+ * there is an error.
  *
  * Unlike H5FD_deduplicate(), this routine does not free `self` under any
  * circumstances.
@@ -700,11 +709,19 @@ H5FD_dedup(H5FD_t *self, H5FD_t *other, hid_t fapl)
     return other;
 }
 
-/* If any other open H5FD_t is functionally equivalent to `file` under
- * the given file-access properties, then return it and close `file`.
+/* Search the already-opened VFD instances for an instance similar to the
+ * instance `file` newly-opened using file-access properties given by `fapl`.
  *
- * If any other open H5FD_t is not equivalent to `file`, but its
- * operation would conflict with `file`, then return NULL and close `file`.
+ * If there is an already-open instance that is functionally
+ * identical to `file`, close `file` and return the already-open instance.
+ *
+ * If there is an already-open instance that conflicts with `file` because,
+ * for example, its file-access properties are incompatible with `fapl`'s
+ * or, for another example, it is under exclusive control by a third VFD
+ * instance, then close `file` and return `NULL`.
+ *
+ * Otherwise, return `file` to indicate that there are no identical or
+ * conflicting VFD instances already open.
  */
 H5FD_t *
 H5FD_deduplicate(H5FD_t *file, hid_t fapl)
