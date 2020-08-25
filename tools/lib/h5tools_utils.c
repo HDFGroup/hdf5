@@ -388,8 +388,6 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
  * Programmer: Jacob Smith
  *             2017-11-10
  *
- * Changes: None.
- *
  *****************************************************************************
  */
 herr_t
@@ -1087,7 +1085,6 @@ h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim,
 {
     const char  *ccred[3];
     unsigned     nelems     = 0;
-    char        *start      = NULL;
     char        *s3cred_src = NULL;
     char       **s3cred     = NULL;
     herr_t       ret_value  = SUCCEED;
@@ -1104,14 +1101,12 @@ h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim,
     ccred[1] = (const char *)s3cred[1];
     ccred[2] = (const char *)s3cred[2];
 
-    if (0 == h5tools_populate_ros3_fapl(fapl_config_out, ccred))
+    if (h5tools_populate_ros3_fapl(fapl_config_out, ccred) < 0)
         H5TOOLS_GOTO_ERROR(FAIL, "failed to populate S3 VFD FAPL config");
 
 done:
-    if (s3cred)
-        HDfree(s3cred);
-    if (s3cred_src)
-        HDfree(s3cred_src);
+    HDfree(s3cred);
+    HDfree(s3cred_src);
 
     return ret_value;
 }
@@ -1145,7 +1140,7 @@ done:
  *
  * Return:
  *
- *     0 (failure) if...
+ *     FAIL if...
  *         * Read-Only S3 VFD is not enabled.
  *         * NULL fapl pointer: (NULL, {...} )
  *         * Warning: In all cases below, fapl will be set as "default"
@@ -1162,7 +1157,7 @@ done:
  *                 * (&fa, {"...", "",    "...")
  *             * Any string would overflow allowed space in fapl definition.
  *     or
- *     1 (success)
+ *     SUCCEED
  *         * Sets components in fapl_t pointer, copying strings as appropriate.
  *         * "Default" fapl (valid version, authenticate->False, empty strings)
  *             * `values` pointer is NULL
@@ -1179,126 +1174,46 @@ done:
  *
  *----------------------------------------------------------------------------
  */
-int
-h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t  *fa,
-                           const char       **values)
+herr_t
+h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
 {
-    int show_progress = 0; /* set to 1 for debugging */
-    int ret_value     = 1; /* 1 for success, 0 for failure           */
-                           /* e.g.? if (!populate()) { then failed } */
+    herr_t ret_value     = SUCCEED;
 
-    if (show_progress) {
-        HDprintf("called h5tools_populate_ros3_fapl\n");
-    }
+    if (fa == NULL)
+        H5TOOLS_GOTO_ERROR(FAIL, "fa cannot be NULL");
 
-    if (fa == NULL) {
-        if (show_progress) {
-            HDprintf("  ERROR: null pointer to fapl_t\n");
-        }
-        ret_value = 0;
-        goto done;
-    }
-
-    if (show_progress) {
-        HDprintf("  preset fapl with default values\n");
-    }
     fa->version       = H5FD_CURR_ROS3_FAPL_T_VERSION;
     fa->authenticate  = FALSE;
     *(fa->aws_region) = '\0';
     *(fa->secret_id)  = '\0';
     *(fa->secret_key) = '\0';
 
-    /* sanity-check supplied values
-     */
+    /* Sanity checks */
     if (values != NULL) {
-        if (values[0] == NULL) {
-            if (show_progress) {
-                HDprintf("  ERROR: aws_region value cannot be NULL\n");
-            }
-            ret_value = 0;
-            goto done;
-        }
-        if (values[1] == NULL) {
-            if (show_progress) {
-                HDprintf("  ERROR: secret_id value cannot be NULL\n");
-            }
-            ret_value = 0;
-            goto done;
-        }
-        if (values[2] == NULL) {
-            if (show_progress) {
-                HDprintf("  ERROR: secret_key value cannot be NULL\n");
-            }
-            ret_value = 0;
-            goto done;
-        }
+        if (values[0] == NULL || values[1] == NULL || values[2] == NULL)
+            H5TOOLS_GOTO_ERROR(FAIL, "values data cannot be NULL");
 
         /* if region and ID are supplied (key optional), write to fapl...
          * fail if value would overflow
          */
-        if (*values[0] != '\0' &&
-            *values[1] != '\0')
-        {
-            if (HDstrlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN) {
-                if (show_progress) {
-                    HDprintf("  ERROR: aws_region value too long\n");
-                }
-                ret_value = 0;
-                goto done;
-            }
-            HDmemcpy(fa->aws_region,                     values[0],
-                     (HDstrlen(values[0]) + 1));
-            if (show_progress) {
-                HDprintf("  aws_region set\n");
-            }
+        if (*values[0] != '\0' && *values[1] != '\0') {
+            if (HDstrlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN)
+                H5TOOLS_GOTO_ERROR(FAIL, "can't exceed max region length");
+            HDmemcpy(fa->aws_region, values[0], (HDstrlen(values[0]) + 1));
 
+            if (HDstrlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN)
+                H5TOOLS_GOTO_ERROR(FAIL, "can't exceed max secret ID length");
+            HDmemcpy(fa->secret_id, values[1], (HDstrlen(values[1]) + 1));
 
-            if (HDstrlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN) {
-                if (show_progress) {
-                    HDprintf("  ERROR: secret_id value too long\n");
-                }
-                ret_value = 0;
-                goto done;
-            }
-            HDmemcpy(fa->secret_id,
-                     values[1],
-                     (HDstrlen(values[1]) + 1));
-            if (show_progress) {
-                HDprintf("  secret_id set\n");
-            }
-
-            if (HDstrlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN) {
-                if (show_progress) {
-                    HDprintf("  ERROR: secret_key value too long\n");
-                }
-                ret_value = 0;
-                goto done;
-            }
-            HDmemcpy(fa->secret_key,
-                     values[2],
-                     (HDstrlen(values[2]) + 1));
-            if (show_progress) {
-                HDprintf("  secret_key set\n");
-            }
+            if (HDstrlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN)
+                H5TOOLS_GOTO_ERROR(FAIL, "can't exceed max secret key length");
+            HDmemcpy(fa->secret_key, values[2], (HDstrlen(values[2]) + 1));
 
             fa->authenticate = TRUE;
-            if (show_progress) {
-                HDprintf("  set to authenticate\n");
-            }
-
-        } else if (*values[0] != '\0' ||
-                   *values[1] != '\0' ||
-                   *values[2] != '\0')
-        {
-            if (show_progress) {
-                HDprintf(
-                    "  ERROR: invalid assortment of empty/non-empty values\n"
-                );
-            }
-            ret_value = 0;
-            goto done;
         }
-    } /* values != NULL */
+        else if (*values[0] != '\0' || *values[1] != '\0' || *values[2] != '\0')
+            H5TOOLS_GOTO_ERROR(FAIL, "all values cannot be empty strings");
+    }
 
 done:
     return ret_value;
