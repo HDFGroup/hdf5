@@ -30,6 +30,16 @@ typedef struct {
     hsize_t             data_size;      /* Size of raw data		  */
 } H5A_info_t;
 
+/**
+ * \brief Prototype for H5Aiterate2() and H5Aiterate_by_name() operators
+ *
+ * \param[in] location_id  Location identifier for the group or dataset
+ *                         being iterated over
+ * \param[in] attr_name    Name of current object attribute
+ * \param[in] ainfo        The attribute's info struct
+ * \param[in,out] op_data  Pointer to the operator data passed in
+ *
+ */
 /* Typedef for H5Aiterate2() callbacks */
 typedef herr_t (*H5A_operator2_t)(hid_t location_id/*in*/,
     const char *attr_name/*in*/, const H5A_info_t *ainfo/*in*/, void *op_data/*in,out*/);
@@ -624,9 +634,140 @@ H5_DLL herr_t  H5Aget_info_by_name(hid_t loc_id, const char *obj_name,
 H5_DLL herr_t  H5Aget_info_by_idx(hid_t loc_id, const char *obj_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     H5A_info_t *ainfo /*out*/, hid_t lapl_id);
+/*-------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Renames an attribute
+ *
+ * \fgdt_loc_id
+ * \param[in] old_name   Name of the attribute to be changed
+ * \param[in] new_name   New name for the attribute
+ *
+ * \return \herr_t
+ *
+ * \details H5Arename() changes the name of the attribute located at
+ *          \p loc_id.
+ *
+ *          The old name, \p old_name, is changed to the new name,
+ *          \p new_name.
+ *
+ * \since 1.6.0
+ *
+ */
 H5_DLL herr_t  H5Arename(hid_t loc_id, const char *old_name, const char *new_name);
+/*-------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \fgdt_loc_id
+ * \param[in] obj_name      Name of object, relative to location, whose
+ *                          attribute is to be renamed
+ * \param[in] old_attr_name Prior attribute name
+ * \param[in] new_attr_name New attribute name
+ * \lapl_id
+ *
+ * \details H5Arename_by_name() changes the name of attribute that is
+ *          attached to the object specified by \p loc_id and \p obj_name.
+ *          The attribute named \p old_attr_name is renamed
+ *          \p new_attr_name.
+ *
+ *          The link access property list, \p lapl_id, may provide
+ *          information regarding the properties of links required to
+ *          access the object, \p obj_name.
+ *
+ * \since 1.8.0
+ *
+ */
 H5_DLL herr_t  H5Arename_by_name(hid_t loc_id, const char *obj_name,
     const char *old_attr_name, const char *new_attr_name, hid_t lapl_id);
+/*-------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Calls user-defined function for each attribute on an object
+ *
+ * \fgdt_loc_id
+ * \param[in]     idx_type Type of index
+ * \param[in]     order    Order in which to iterate over index
+ * \param[in,out] idx      Initial and returned offset within index
+ * \param[in]     op       User-defined function to pass each attribute to
+ * \param[in,out] op_data  User data to pass through to and to be returned
+ *                         by iterator operator function
+ *
+ * \return \herr_t
+ *       Further note that this function returns the return value of the
+ *       last operator if it was non-zero, which can be a negative value,
+ *       zero if all attributes were processed, or a positive value
+ *       indicating short-circuit success.
+ *
+ * \details H5Aiterate2() iterates over the attributes attached to a
+ *          dataset, named datatype, or group, as specified by \p loc_id.
+ *          For each attribute, user-provided data, \p op_data, with
+ *          additional information as defined below, is passed to a
+ *          user-defined function, \p op, which operates on that
+ *          attribute.
+ *
+ *          The order of the iteration and the attributes iterated over
+ *          are specified by three parameters: the index type,
+ *          \p idx_type; the order in which the index is to be traversed,
+ *          \p order; and the attribute’s position in the index, \p idx.
+ *
+ *          The type of index specified by \p idx_type can be one of the
+ *          following:
+ *
+ *          \indexes
+ *
+ *          The order in which the index is to be traversed, as specified
+ *          by \p order, can be one of the following:
+ *
+ *          \orders
+ *
+ *          The next attribute to be operated on is specified by \p idx,
+ *          a position in the index.
+ *
+ *          For example, if \p idx_type, \p order, and \p idx are set to
+ *          #H5_INDEX_NAME, #H5_ITER_INC, and 5, respectively, the attribute
+ *          in question is the fifth attribute from the beginning of the
+ *          alpha-numeric index of attribute names. If \p order were set to
+ *          #H5_ITER_DEC, it would be the fifth attribute from the end of
+ *          the index.
+ *
+ *          The parameter \p idx is passed in on an H5Aiterate2() call with
+ *          one value and may be returned with another value. The value
+ *          passed in identifies the parameter to be operated on first;
+ *          the value returned identifies the parameter to be operated on
+ *          in the next step of the iteration.
+ *
+ *          The #H5A_operator2_t prototype for the \p op parameter is as
+ *          follows:
+ *          \code
+ *             typedef herr_t (*H5A_operator2_t)( hid_t location_id,
+ *               const char *attr_name, const H5A_info_t *ainfo,
+ *               void *op_data)
+ *          \endcode
+ *          The operation receives the location identifier for the group or
+ *          dataset being iterated over, \p location_id; the name of the
+ *          current object attribute, \p attr_name; the attribute’s info
+ *          struct, \p ainfo; and a pointer to the operator data passed
+ *          into H5Aiterate2(), \p op_data.
+ *
+ *          Valid return values from an operator and the resulting
+ *          H5Aiterate2() and \p op behavior are as follows:
+ *
+ *          \li Zero causes the iterator to continue, returning zero when
+ *              all attributes have been processed.
+ *          \li A positive value causes the iterator to immediately return
+ *              that positive value, indicating short-circuit success. The
+ *              iterator can be restarted at the next attribute, as
+ *              indicated by the return value of \p idx.
+ *          \li A negative value causes the iterator to immediately return
+ *              that value, indicating failure. The iterator can be
+ *              restarted at the next attribute, as indicated by the return
+ *              value of \p idx.
+ *
+ * \note This function is also available through the H5Aiterate() macro.
+ *
+ * \since 1.8.0
+ *
+ */
 H5_DLL herr_t  H5Aiterate2(hid_t loc_id, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op, void *op_data);
 H5_DLL herr_t  H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
