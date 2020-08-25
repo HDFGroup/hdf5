@@ -568,7 +568,52 @@ H5_DLL herr_t H5Fclose(hid_t file_id);
  *-------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Fdelete(const char *filename, hid_t fapl_id);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Returns a file creation property list identifier
+ *
+ * \file_id
+ * \return \hid_t
+ *
+ * \details H5Fget_create_plist() returns the file creation property list
+ *          identifier identifying the creation properties used to create this
+ *          file. This function is useful for duplicating properties when
+ *          creating another file.
+ *
+ *          See "File Access Properties" in H5P: Property List Interface in
+ *          this reference manual and "File Access Properties" in The HDF5 File
+ *          chapter in the HDF5 User’s Guide for more information.
+ *
+ *          The creation property list identifier should be released with
+ *          H5Pclose().
+ *
+ * \todo Fix the references.
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL hid_t  H5Fget_create_plist(hid_t file_id);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Returns a file access property list identifier
+ *
+ * \file_id
+ * \return \hid_t
+ *
+ * \details H5Fget_access_plist() returns the file access property list
+ *          identifier of the specified file.
+ *
+ *          See "File Access Properties" in H5P: Property List Interface in
+ *          this reference manual and "File Access Properties" in The HDF5 File
+ *          chapter in the HDF5 User’s Guide for more information.
+ *
+ * \todo Fix the references.
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL hid_t  H5Fget_access_plist(hid_t file_id);
 H5_DLL herr_t H5Fget_intent(hid_t file_id, unsigned *intent);
 H5_DLL herr_t H5Fget_fileno(hid_t file_id, unsigned long *fileno);
@@ -579,6 +624,24 @@ H5_DLL herr_t H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist);
 H5_DLL herr_t H5Funmount(hid_t loc, const char *name);
 H5_DLL hssize_t H5Fget_freespace(hid_t file_id);
 H5_DLL herr_t H5Fget_filesize(hid_t file_id, hsize_t *size);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Retrieves the file's end-of-allocation (EOA)
+ *
+ * \file_id
+ * \param[out] eoa The file's EOA
+ *
+ * \return \herr_t
+ *
+ * \details H5Fget_eoa() retrieves the file's EOA and returns it in the
+ *          parameter eoa.
+ *
+ * \since 1.10.2
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fget_eoa(hid_t file_id, haddr_t *eoa);
 H5_DLL herr_t H5Fincrement_filesize(hid_t file_id, hsize_t increment);
 H5_DLL ssize_t H5Fget_file_image(hid_t file_id, void * buf_ptr, size_t buf_len);
@@ -635,6 +698,30 @@ H5_DLL herr_t H5Freset_page_buffering_stats(hid_t file_id);
 H5_DLL herr_t H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2],
     unsigned hits[2], unsigned misses[2], unsigned evictions[2], unsigned bypasses[2]);
 H5_DLL herr_t H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr, hsize_t *image_size);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Retrieves the setting for whether or not a file will create minimized
+ *        dataset object headers
+ *
+ * \file_id
+ * \param[out] minimize Flag indicating whether the library will or will not
+ *                      create minimized dataset object headers
+ *
+ * \return \herr_t
+ *
+ * \details H5Fget_dset_no_attrs_hint() retrieves the no dataset attributes
+ *          hint setting for the file specified by the file identifier \p
+ *          file_id. This setting is used to inform the library to create
+ *          minimized dataset object headers when #TRUE.
+ *
+ *          The setting's value is returned in the boolean pointer minimize.
+ *
+ * \since 1.10.5
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize);
 H5_DLL herr_t H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
 
