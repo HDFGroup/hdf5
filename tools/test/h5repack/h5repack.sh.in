@@ -678,6 +678,26 @@ VERIFY_INVALIDBOUNDS()
 } # end of VERIFY_INVALIDBOUNDS
 
 # -----------------------------------------------------------------------------
+# Expect h5diff to fail
+# Use only by VERIFY_EXTERNAL_CONSOLIDATION
+# -----------------------------------------------------------------------------
+DIFFFAIL()
+{
+    VERIFY h5diff unequal $@
+    (
+        cd $TESTDIR
+        $RUNSERIAL $H5DIFF_BIN -q  "$@"
+    )
+    RET=$?
+    if [ $RET == 0 ] ; then
+         echo "*FAILED*"
+         nerrors="`expr $nerrors + 1`"
+    else
+         echo " PASSED"
+    fi
+}
+
+# -----------------------------------------------------------------------------
 # Catchall test for repacking with external files
 # Loops over all (internally-listed) cases and applies the given arguments
 # to h5repack.
