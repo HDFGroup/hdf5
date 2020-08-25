@@ -137,28 +137,26 @@ dataset on three source datasets, each in a different HDF5 file.
 
 ## The VFD SWMR demos
 
-TBD: edit this section
-
-My repository containing the VFD SWMR
-demos is https://bitbucket.hdfgroup.org/scm/~dyoung/swmr-demo.git .
-They are the same two demos that were shown at the webinar.
+The VFD SWMR demos are in a [separate
+repository](https://bitbucket.hdfgroup.org/scm/~dyoung/swmr-demo.git).
 
 Before you build the demos, you will need to install the HDF5 library
-and utilities built from our VFD SWMR branch in your home directory
-somewhere.  In the ./configure step, I set the install directory using
-a --prefix=$HOME/path/for/library command-line option, but there may be
-another way.  Update the H5CC lines in the Makefiles with the path to
-h5cc.  Then you should be able to `make`, `make clean`, etc.
+and utilities built from the VFD SWMR branch in your home directory
+somewhere.  In the ./configure step, use the command-line option
+`--prefix=$HOME/path/for/library` to set the directory you prefer.
+In the demo Makefiles, update the `H5CC` variable with the path to
+the `h5cc` installed from the VFD SWMR branch.  Then you should be
+able to `make` and `make clean` the demos.
 
-Under gaussians/, two programs are built, `wgaussians` and `rgaussians`.
-If you start both from the same directory in different terminals, you
-should see the "bouncing 2-D Gaussian distributions" in the `rgaussians`
-terminal.
+Under `gaussians/`, two programs are built, `wgaussians` and
+`rgaussians`.  If you start both from the same directory in different
+terminals, you should see the "bouncing 2-D Gaussian distributions"
+in the `rgaussians` terminal.
 
-The creation-deletion (`credel`) demo is also run in two terminals.  The
-two command lines are given in `credel/README.md`.  You need to use the
-`h5ls` installed from the VFD SWMR branch, since only that version has the
-`--poll` option.
+The creation-deletion (`credel`) demo is also run in two terminals.
+The two command lines are given in `credel/README.md`.  You need
+to use the `h5ls` installed from the VFD SWMR branch, since only
+that version has the `--poll` option.
 
 # Developer tips
 
@@ -191,24 +189,26 @@ vfd_swmr_create_fapl(bool writer, bool only_meta_pages, bool use_vfd_swmr)
     H5F_vfd_swmr_config_t config;
     hid_t fapl;
 
-/**
- ** h5_fileaccess() is also a helper routine for the tests.
- ** In your program, you can replace the h5_fileaccess() call with a call to
- ** H5Pcreate(H5P_FILE_ACCESS).
- **/
+```
 
+`h5_fileaccess()` is also a helper routine for the tests.  In your
+program, you can replace the `h5_fileaccess()` call with a call to
+`H5Pcreate(H5P_FILE_ACCESS)`.
+
+```
     /* Create file access property list */
     if((fapl = h5_fileaccess()) < 0) {
         warnx("h5_fileaccess");
         return badhid;
     }
+```
 
-/**
- ** VFD SWMR has only been tested with the latest file format.  It may
- ** malfunction with older formats, we just don't know.  We force the
- ** latest version here.
- **/
 
+VFD SWMR has only been tested with the latest file format.  It may
+malfunction with older formats, we just don't know.  We force the
+latest version here.
+
+```
     /* FOR NOW: set to use latest format, the "old" parameter is not used */
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
         warnx("H5Pset_libver_bounds");
@@ -218,84 +218,86 @@ vfd_swmr_create_fapl(bool writer, bool only_meta_pages, bool use_vfd_swmr)
     /*
      * Set up to open the file with VFD SWMR configured.
      */
+```
 
-/**
- ** VFD SWMR relies on metadata reads and writes to go through the
- ** page buffer.  Note that the default page size is 4096 bytes.  This
- ** call sets the total page buffer size to 4096 bytes.  So we have
- ** effectively created a one-page page buffer!  That is adequate for
- ** testing, but it may not be best for your application.
- **
- ** If `only_meta_pages` is true, then the entire page buffer is
- ** dedicated to metadata.  That's fine for VFD SWMR.
- **
- ** NOTE WELL: when VFD SWMR is enabled, the meta-/raw-data pages proportion 
- ** set by H5Pset_page_buffer_size() does not actually control the
- ** pages reserved for raw data.  *All* pages are dedicated to buffering
- ** metadata.
- **/
+VFD SWMR relies on metadata reads and writes to go through the
+page buffer.  Note that the default page size is 4096 bytes.  This
+call sets the total page buffer size to 4096 bytes.  So we have
+effectively created a one-page page buffer!  That is adequate for
+testing, but it may not be best for your application.
 
+If `only_meta_pages` is true, then the entire page buffer is
+dedicated to metadata.  That's fine for VFD SWMR.
+
+*Note well*: when VFD SWMR is enabled, the meta-/raw-data pages proportion 
+set by `H5Pset_page_buffer_size()` does not actually control the
+pages reserved for raw data.  *All* pages are dedicated to buffering
+metadata.
+
+
+```
     /* Enable page buffering */
     if(H5Pset_page_buffer_size(fapl, 4096, only_meta_pages ? 100 : 0, 0) < 0) {
         warnx("H5Pset_page_buffer_size");
         return badhid;
     }
+```
 
-/**
- ** Add VFD SWMR-specific configuration to the file-access property list
- ** (`fapl`) using an H5Pset_vfd_swmr_config() call.
- **
- ** When VFD SWMR is enabled, changes to the HDF5 metadata accumulate in
- ** RAM until a configurable unit of time known as a *tick* has passed.
- ** At the end of each tick, a snapshot of the metadata at the end of
- ** the tick is "published"---that is, made visible to the readers.
- **
- ** The length of a *tick* is configurable in units of 100 milliseconds
- ** using the `tick_len` parameter.  Below, `tick_len` is set to `4` to
- ** select a tick length of 400ms.
- **
- ** A snapshot does not persist forever, but it expires after a number
- ** of ticks, given by the *maximum lag*, has passed.  Below, `max_lag`
- ** is set to `7` to select a maximum lag of 7 ticks.  After a snapshot
- ** has expired, the writer may overwrite it.
- **
- ** When a reader first enters the API, it starts to use, or "selects,"
- ** the metadata in the newest snapshot, and on every subsequent API
- ** entry, if a tick has passed since the last selection, and if new
- ** snapshots are available, then the reader selects the latest.
- **
- ** If a reader spends longer than `max_lag - 1` ticks (2400ms with
- ** the example configuration) inside the HDF5 API, then its snapshot
- ** may expire, resulting in undefined behavior.  When a snapshot
- ** expires while the reader is using it, we say that the writer has
- ** "overrun" the reader.  The writer cannot currently detect overruns.
- ** Frequently the reader will detect an overrun and force the program
- ** to exit with a diagnostic assertion failure.
- **
- ** The application tells VFD SWMR whether or not to configure for
- ** reading or writing a file by setting the `writer` parameter to
- ** `true` for writing or `false` for reading.
- **
- ** VFD SWMR snapshots are stored in a "shadow file" that is shared
- ** between writer and readers.  On a POSIX system, the shadow file
- ** may be placed on any *local* filesystem that the reader and writer
- ** share.  The `md_file_path` parameter tells where to put the shadow
- ** file.
- **
- ** The `md_pages_reserved` parameter tells how many pages to reserve
- ** at the beginning of the shadow file for the shadow-file header
- ** and the shadow index.  The header has an entire page to itself.
- ** The remaining `md_pages_reserved - 1` pages are reserved for the
- ** shadow index.  If the index grows larger than its initial
- ** allocation, then it will move to a new location in the shadow file,
- ** and the initial allocation will be reclaimed.  `md_pages_reserved`
- ** must be at least 2.
- **
- ** The `version` parameter tells what version of VFD SWMR configuration
- ** the parameter struct `config` contains.  For now, it should be
- ** initialized to `H5F__CURR_VFD_SWMR_CONFIG_VERSION`.
- **/
 
+Add VFD SWMR-specific configuration to the file-access property list
+(`fapl`) using an `H5Pset_vfd_swmr_config()` call.
+
+When VFD SWMR is enabled, changes to the HDF5 metadata accumulate in
+RAM until a configurable unit of time known as a *tick* has passed.
+At the end of each tick, a snapshot of the metadata at the end of
+the tick is "published"---that is, made visible to the readers.
+
+The length of a *tick* is configurable in units of 100 milliseconds
+using the `tick_len` parameter.  Below, `tick_len` is set to `4` to
+select a tick length of 400ms.
+
+A snapshot does not persist forever, but it expires after a number
+of ticks, given by the *maximum lag*, has passed.  Below, `max_lag`
+is set to `7` to select a maximum lag of 7 ticks.  After a snapshot
+has expired, the writer may overwrite it.
+
+When a reader first enters the API, it starts to use, or "selects,"
+the metadata in the newest snapshot, and on every subsequent API
+entry, if a tick has passed since the last selection, and if new
+snapshots are available, then the reader selects the latest.
+
+If a reader spends longer than `max_lag - 1` ticks (2400ms with
+the example configuration) inside the HDF5 API, then its snapshot
+may expire, resulting in undefined behavior.  When a snapshot
+expires while the reader is using it, we say that the writer has
+"overrun" the reader.  The writer cannot currently detect overruns.
+Frequently the reader will detect an overrun and force the program
+to exit with a diagnostic assertion failure.
+
+The application tells VFD SWMR whether or not to configure for
+reading or writing a file by setting the `writer` parameter to
+`true` for writing or `false` for reading.
+
+VFD SWMR snapshots are stored in a "shadow file" that is shared
+between writer and readers.  On a POSIX system, the shadow file
+may be placed on any *local* filesystem that the reader and writer
+share.  The `md_file_path` parameter tells where to put the shadow
+file.
+
+The `md_pages_reserved` parameter tells how many pages to reserve
+at the beginning of the shadow file for the shadow-file header
+and the shadow index.  The header has an entire page to itself.
+The remaining `md_pages_reserved - 1` pages are reserved for the
+shadow index.  If the index grows larger than its initial
+allocation, then it will move to a new location in the shadow file,
+and the initial allocation will be reclaimed.  `md_pages_reserved`
+must be at least 2.
+
+The `version` parameter tells what version of VFD SWMR configuration
+the parameter struct `config` contains.  For now, it should be
+initialized to `H5F__CURR_VFD_SWMR_CONFIG_VERSION`.
+
+```
     memset(&config, 0, sizeof(config));
 
     config.version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
@@ -319,8 +321,7 @@ vfd_swmr_create_fapl(bool writer, bool only_meta_pages, bool use_vfd_swmr)
 An application may want to use VFD SWMR to create, read, or write
 a virtual dataset.  Unfortunately, VDS does not work properly with
 VFD SWMR at this time.  In this section, we describe some workarounds
-that can be used with great care to make VDS and VFD SWMR operate
-simultaneously.
+that can be used with great care to make VDS and VFD SWMR cooperate.
 
 A virtual dataset, when it is read or written, will open files on
 an application's behalf in order to access the source datasets
