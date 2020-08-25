@@ -616,13 +616,131 @@ H5_DLL hid_t  H5Fget_create_plist(hid_t file_id);
  */
 H5_DLL hid_t  H5Fget_access_plist(hid_t file_id);
 H5_DLL herr_t H5Fget_intent(hid_t file_id, unsigned *intent);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Retrieves a file's file number that uniquely identifies an open file
+ *
+ * \file_id
+ * \param[out] fileno A buffer to hold the file number
+ *
+ * \return \herr_t
+ *
+ * \details H5Fget_fileno() retrieves a file number for a file specified by the
+ *          file identifier \p file_id and the pointer \p fnumber to the file
+ *          number.
+ *
+ * \since 1.12.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fget_fileno(hid_t file_id, unsigned long *fileno);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Returns the number of open object identifiers for an open file
+ *
+ * \file_id or #H5F_OBJ_ALL for all currently-open HDF5 files
+ * \param[in] types Type of object for which identifiers are to be returned
+ *
+ * \return Returns the number of open objects if successful; otherwise returns
+ *         a negative value.
+ *
+ * \details Given the identifier of an open file, file_id, and the desired
+ *          object types, types, H5Fget_obj_count() returns the number of open
+ *          object identifiers for the file.
+ *
+ *          To retrieve a count of open identifiers for open objects in all
+ *          HDF5 application files that are currently open, pass the value
+ *          #H5F_OBJ_ALL in \p file_id.
+ *
+ *          The types of objects to be counted are specified in types as
+ *          follows:
+ *          \obj_types
+ *
+ *          Multiple object types can be combined with the
+ *          logical \c OR operator (|). For example, the expression
+ *          \c (#H5F_OBJ_DATASET|#H5F_OBJ_GROUP) would call for datasets and
+ *          groups.
+ *
+ * \version 1.6.8, 1.8.2 C function return type changed to \c ssize_t.
+ * \version 1.6.5 #H5F_OBJ_LOCAL has been added as a qualifier on the types
+ *                of objects to be counted. #H5F_OBJ_LOCAL restricts the
+ *                search to objects opened through current file identifier.
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL ssize_t H5Fget_obj_count(hid_t file_id, unsigned types);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Returns a list of open object identifiers
+ *
+ * \file_id or #H5F_OBJ_ALL for all currently-open HDF5 files
+ * \param[in] types Type of object for which identifiers are to be returned
+ * \param[in] max_objs Maximum number of object identifiers to place into
+ *                     \p obj_id_list
+ * \param[out] obj_id_list Pointer to the returned buffer of open object
+ *                         identifiers
+ *
+ * \return Returns number of objects placed into \p obj_id_list if successful;
+ *         otherwise returns a negative value.
+ *
+ * \details Given the file identifier \p file_id and the type of objects to be
+ *          identified, types, H5Fget_obj_ids() returns the list of identifiers
+ *          for all open HDF5 objects fitting the specified criteria.
+ *
+ *          To retrieve identifiers for open objects in all HDF5 application
+ *          files that are currently open, pass the value #H5F_OBJ_ALL in
+ *          \p file_id.
+ *
+ *          The types of object identifiers to be retrieved are specified in
+ *          types using the codes listed for the same parameter in
+ *          H5Fget_obj_count().
+ *
+ *          To retrieve a count of open objects, use the H5Fget_obj_count()
+ *          function. This count can be used to set the \p max_objs parameter.
+ *
+ * \version 1.6.8, 1.8.2 C function return type changed to \c ssize_t and \p
+ *                       max_objs parameter datatype changed to \c size_t.
+ *
+ * \since 1.6.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL ssize_t H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *obj_id_list);
 H5_DLL herr_t H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void **file_handle);
 H5_DLL herr_t H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist);
 H5_DLL herr_t H5Funmount(hid_t loc, const char *name);
 H5_DLL hssize_t H5Fget_freespace(hid_t file_id);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Returns the size of an HDF5 file (in bytes)
+ *
+ * \file_id
+ * \param[out] size Size of the file, in bytes
+ *
+ * \return \herr_t
+ *
+ * \details H5Fget_filesize() returns the size of the HDF5 file specified by
+ *          \p file_id.
+ *
+ *          The returned size is that of the entire file, as opposed to only
+ *          the HDF5 portion of the file. I.e., size includes the user block,
+ *          if any, the HDF5 portion of the file, and any data that may have
+ *          been appended beyond the data written through the HDF5 library.
+ *
+ * \version 1.6.3 Fortran subroutine introduced in this release.
+ *
+ * \since 1.6.3
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fget_filesize(hid_t file_id, hsize_t *size);
 /**
  *-------------------------------------------------------------------------
@@ -644,6 +762,61 @@ H5_DLL herr_t H5Fget_filesize(hid_t file_id, hsize_t *size);
  */
 H5_DLL herr_t H5Fget_eoa(hid_t file_id, haddr_t *eoa);
 H5_DLL herr_t H5Fincrement_filesize(hid_t file_id, hsize_t increment);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Retrieves a copy of the image of an existing, open file
+ *
+ * \file_id
+ * \param[out] buf_ptr Pointer to the buffer into which the image of the
+ *                     HDF5 file is to be copied. If \p buf_ptr is NULL,
+ *                     no data will be copied but the function’s return value
+ *                     will still indicate the buffer size required (or a
+ *                     negative value on error).
+ * \param[out] buf_len Size of the supplied buffer
+ *
+ * \return ssize_t
+ *
+ * \details H5Fget_file_image() retrieves a copy of the image of an existing,
+ *          open file. This routine can be used with files opened using the
+ *          SEC2 (or POSIX), STDIO, and Core (or Memory) virtual file drivers
+ *          (VFDs).
+ *
+ *          If the return value of H5Fget_file_image() is a positive value, it
+ *          will be the length in bytes of the buffer required to store the
+ *          file image. So if the file size is unknown, it can be safely
+ *          determined with an initial H5Fget_file_image() call with buf_ptr
+ *          set to NULL. The file image can then be retrieved with a second
+ *          H5Fget_file_image() call with \p buf_len set to the initial call’s
+ *          return value.
+ *
+ *          While the current file size can also be retrieved with
+ *          H5Fget_filesize(), that call may produce a larger value than is
+ *          needed. The value returned by H5Fget_filesize() includes the user
+ *          block, if it exists, and any unallocated space at the end of the
+ *          file. It is safe in all situations to get the file size with
+ *          H5Fget_file_image() and it often produces a value that is more
+ *          appropriate for the size of a file image buffer.
+ *
+ * \note \Bold{Recommended Reading:} This function is part of the file image
+ *       operations feature set. It is highly recommended to study the guide
+ *       "HDF5 File Image Operations" before using this feature set.\n See the
+ *       "See Also" section below for links to other elements of HDF5 file
+ *       image operations. \todo Fix the references.
+ *
+ * \attention H5Pget_file_image() will fail, returning a negative value, if the
+ *            file is too large for the supplied buffer.
+ *
+ * \see H5LTopen_file_image(), H5Pset_file_image(), H5Pget_file_image(),
+ *      H5Pset_file_image_callbacks(), H5Pget_file_image_callbacks()
+ *
+ * \version 1.8.13 Fortran subroutine added in this release.
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL ssize_t H5Fget_file_image(hid_t file_id, void * buf_ptr, size_t buf_len);
 H5_DLL herr_t H5Fget_mdc_config(hid_t file_id,
                 H5AC_cache_config_t * config_ptr);
