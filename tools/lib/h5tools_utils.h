@@ -175,7 +175,7 @@ H5TOOLS_DLL int h5tools_getenv_update_hyperslab_bufsize(void);
 #ifdef H5_HAVE_ROS3_VFD
 H5TOOLS_DLL herr_t h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim,
     H5FD_ros3_fapl_t *fapl_config_out);
-H5TOOLS_DLL int h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values);
+H5TOOLS_DLL herr_t h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values);
 #endif /* H5_HAVE_ROS3_VFD */
 #ifdef H5_HAVE_LIBHDFS
 H5TOOLS_DLL herr_t h5tools_parse_hdfs_fapl_tuple(const char *tuple_str, int delim,

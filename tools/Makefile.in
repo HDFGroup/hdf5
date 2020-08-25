@@ -384,7 +384,7 @@ am__set_b = \
     *) \
       b='$*';; \
   esac
-DIST_SUBDIRS = lib src test
+DIST_SUBDIRS = lib src test libtest
 am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/bin/test-driver \
 	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am COPYING
@@ -745,7 +745,7 @@ TRACE = perl $(top_srcdir)/bin/trace
 # *.clog and *.clog2 are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
 @BUILD_TESTS_CONDITIONAL_FALSE@TESTSERIAL_DIR = 
-@BUILD_TESTS_CONDITIONAL_TRUE@TESTSERIAL_DIR = test
+@BUILD_TESTS_CONDITIONAL_TRUE@TESTSERIAL_DIR = test libtest
 CONFIG = ordered
 
 # All subdirectories
