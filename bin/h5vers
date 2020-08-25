@@ -100,8 +100,7 @@ sub setvers {
   $_[0] =~ s/^(\#\s*define\s+H5_VERS_SUBRELEASE\s+\")[^\"]*/$1$vers[3]/m;
   $_[0] =~ s/^(\#\s*define\s+H5_VERS_INFO\s+\")[^\"]*/
     sprintf("%sHDF5 library version: %d.%d.%d%s%s", $1, @vers[0,1,2],
-            $vers[3]?".":"", $vers[3])/me;
-#	    $vers[3]?"-":"", $vers[3])/me;
+	    $vers[3]?"-":"", $vers[3])/me;
 }
 
 sub usage {
@@ -214,7 +213,7 @@ my (@curver) = getvers $contents;
 # Determine the new version number.
 my @newver; #new version
 if ($set) {
-  if ($set =~ /(\d+)\.(\d+)\.(\d+)([-\.]([\da-zA-Z]\w*))?/) {
+  if ($set =~ /(\d+)\.(\d+)\.(\d+)(-([\da-zA-Z]\w*))?/) {
     @newver = ($1, $2, $3, $5);
   } elsif ($set =~ /(\d+)\D+(\d+)\D+(\d+)(\s*\(([a-zA-Z]\w*)\))?\D*$/) {
     @newver = ($1, $2, $3, $5);
@@ -311,7 +310,7 @@ if ($README) {
   close FILE;
   $contents[0] = sprintf("HDF5 version %d.%d.%d%s %s",
 			 @newver[0,1,2],
-			 $newver[3] eq "" ? "" : ".".$newver[3],
+			 $newver[3] eq "" ? "" : "-".$newver[3],
 			 "currently under development\n");
   open FILE, ">$README" or die "$README: $!\n";
   print FILE @contents;
@@ -325,7 +324,7 @@ if ($RELEASE) {
   close FILE;
   $contents[0] = sprintf("HDF5 version %d.%d.%d%s %s",
 			 @newver[0,1,2],
-			 $newver[3] eq "" ? "" : ".".$newver[3],
+			 $newver[3] eq "" ? "" : "-".$newver[3],
 			 "currently under development\n");
   open FILE, ">$RELEASE" or die "$RELEASE: $!\n";
   print FILE @contents;
@@ -338,7 +337,7 @@ if ($CPP_DOC_CONFIG) {
   my $sub_rel_ver_str = (
      $newver[3] eq "" 
      ? sprintf("%s", "") 
-     : sprintf("%s", ".".$newver[3].", currently under development")
+     : sprintf("%s", "-".$newver[3].", currently under development")
      );
   my $version_string = sprintf("\"%d.%d.%d%s%s\"",
                                @newver[0,1,2],
@@ -355,7 +354,7 @@ if ($HDF5CONFIGCMAKE) {
   my $sub_rel_ver_str = (
      $newver[3] eq "" 
      ? sprintf("\"%s\"", "") 
-     : sprintf("\"%s\"", ".".$newver[3])
+     : sprintf("\"%s\"", "-".$newver[3])
      );
   my $version_string = sprintf("\"%d.%d.%d\"", @newver[0,1,2]);
 
@@ -372,7 +371,7 @@ if ($H5_JAVA) {
   my $sub_rel_ver_str = (
      $newver[3] eq ""
      ? sprintf("\"%s\"", "")
-     : sprintf("\"%s\"", ".".$newver[3].", currently under development")
+     : sprintf("\"%s\"", "-".$newver[3].", currently under development")
      );
   my $version_string1 = sprintf("%d.%d.%d", @newver[0,1,2]);
   my $version_string2 = sprintf("%d, %d, %d", @newver[0,1,2]);
@@ -390,7 +389,7 @@ if ($TESTH5_JAVA) {
   my $sub_rel_ver_str = (
      $newver[3] eq ""
      ? sprintf("\"%s\"", "")
-     : sprintf("\"%s\"", ".".$newver[3].", currently under development")
+     : sprintf("\"%s\"", "-".$newver[3].", currently under development")
      );
   my $version_string1 = sprintf("%d, %d, %d", @newver[0,1,2]);
   my $version_string2 = sprintf("int majnum = %d, minnum = %d, relnum = %d", @newver[0,1,2]);
@@ -452,7 +451,7 @@ sub gen_configure {
     if ($contents[$i] =~ /^AC_INIT/) {
       $contents[$i] = sprintf("AC_INIT([$name], [%d.%d.%d%s], [help\@hdfgroup.org])\n",
                               @newver[0,1,2],
-                              $newver[3] eq "" ? "" : ".".$newver[3]);
+                              $newver[3] eq "" ? "" : "-".$newver[3]);
       last;
     }
   }
@@ -520,7 +519,7 @@ if ($verbose) {
 	 $newver[3] eq "" ? "" : " (".$newver[3].")");
 } else {
   printf("%d.%d.%d%s\n", @newver[0,1,2],
-	 $newver[3] eq "" ? "" : ".".$newver[3]);
+	 $newver[3] eq "" ? "" : "-".$newver[3]);
 }
 
 exit 0;
