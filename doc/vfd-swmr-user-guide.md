@@ -1,26 +1,36 @@
 # Welcome to VFD SWMR  
 
-Thank you for volunteering to test VFD SWMR.  VFD SMWR is a new feature
-of the HDF5 library that lets a process write data to an HDF5 file while
-one or more processes read the file.  Use cases range from monitoring
-data collection and/or steering experiments in progress to financial
-applications.
+Thank you for volunteering to test VFD SWMR.
+
+SWMR, which stands for Single Writer/Multiple Reader, is a feature
+of the HDF5 library that lets a process write data to an HDF5 file
+while one or more processes read the file.  Use cases range from
+monitoring data collection and/or steering experiments in progress
+to financial applications.
+
+The following diagram illustrates how SWMR works.
+
+<img src = SWMRdataflow.png width=400 />
+
 
 VFD SWMR is designed to be a more flexible, more modular,
-better-performing replacement for the existing SWMR feature.  VFD
-SWMR allows HDF5 objects (groups, datasets, attributes) to be
-created and destroyed in the course of a reader-writer session.  It
-compartmentalizes much of the SWMR functionality in a virtual-file
-driver (VFD), thus easing The HDF Group's software-maintenance burden.
-And it makes guarantees for the maximum time from write to availability
-of data for read, provided that the reading and writing systems and
-their interconnections can keep up with the data flow.
+better-performing replacement for the existing SWMR feature.
+
+* VFD SWMR allows HDF5 objects (groups, datasets, attributes) to be
+  created and destroyed in the course of a reader-writer session.
+* It compartmentalizes much of the SWMR functionality in a virtual-file
+  driver (VFD), thus easing The HDF Group's software-maintenance burden.
+* And it makes guarantees for the maximum time from write to availability
+  of data for read, provided that the reading and writing systems and
+  their interconnections can keep up with the data flow.
+
+For details on how VFD SWMR is implemented, see [LINK to RFC].
 
 # Quick start
 
-Follow these instructions to download, configure, and build the VFD SWMR
-project in a jiffy.  Then install the HDF5 library and utilites built
-by the VFD SWMR project.
+Follow these instructions to download, configure, and build the
+VFD SWMR project in a jiffy.  Then install the HDF5 library and
+utilites built by the VFD SWMR project.
 
 ## Download
 
@@ -101,15 +111,19 @@ To run a bigset test, I open a couple of terminal windows, one for the
 reader and one for the writer.  I change to the `test` directory under
 my build directory, and I run the writer in one window:
 
+```
 % ./vfd_swmr_bigset_writer -n 50 -d 2
+```
 
 and in the other window, I run the reader:
 
+```
 % ./vfd_swmr_bigset_reader -n 50 -d 2 -W
+```
 
 The writer will wait for a signal before it quits.  You may tap
 Control-C to make it quit.  If you don't want it to wait, then you can
-pass option flag -W.  (The reader accepts the same flag.)  Use the `-q`
+pass option flag `-W`.  (The reader accepts the same flag.)  Use the `-q`
 option to suppress the progress messages that the programs write to the
 standard error stream.
 
@@ -119,7 +133,7 @@ dataset with content in three source datasets in the same HDF5
 file.
 
 The `-M` option works like `-V`, only the writer creates the virtual
-dataset on three source datasets each in a different HDF5 file.
+dataset on three source datasets, each in a different HDF5 file.
 
 ## The VFD SWMR demos
 
