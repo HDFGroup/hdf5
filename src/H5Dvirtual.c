@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Neil Fortner <nfortne2@hdfgroup.org>
+ * Programmer:  Neil Fortner
  *              Wednesday, January 28, 2015
  *
  * Purpose:
@@ -2238,7 +2238,7 @@ H5D__virtual_is_data_cached(const H5D_shared_t *shared_dset)
     size_t i, j;                            /* Local index variables */
     hbool_t ret_value = FALSE;              /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
     HDassert(shared_dset);

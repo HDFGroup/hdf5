@@ -5404,7 +5404,7 @@ H5S__hyper_spans_shape_same_helper(const H5S_hyper_span_info_t *span_info1,
 {
     hbool_t ret_value = TRUE;   /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
     HDassert(span_info1);
@@ -7016,9 +7016,8 @@ H5S__hyper_adjust_s(H5S_t *space, const hssize_t *offset)
 {
     hbool_t non_zero_offset = FALSE;    /* Whether any offset is non-zero */
     unsigned u;                         /* Local index variable */
-    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
     HDassert(space);
@@ -7061,8 +7060,7 @@ H5S__hyper_adjust_s(H5S_t *space, const hssize_t *offset)
         } /* end if */
     }
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__hyper_adjust_s() */
 
 
@@ -9612,7 +9610,7 @@ H5S__hyper_regular_and_single_block(H5S_t *space, const hsize_t start[],
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(space);

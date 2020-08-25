@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+/* Programmer:  Quincey Koziol
  *
  * Purpose:	Generic Property Functions
  */
@@ -5604,7 +5604,7 @@ done:
  * Return:      Success:        Non-negative ID of property list.
  *              Failure:        H5I_INVALID_HID
  *
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:	Quincey Koziol
  *		April 22, 2014
  *
  *-------------------------------------------------------------------------
@@ -5632,7 +5632,7 @@ H5P_get_plist_id(const H5P_genplist_t *plist)
  * Return:      Success:        Non-NULL class of property list.
  *              Failure:        NULL
  *
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:	Quincey Koziol
  *		April 22, 2014
  *
  *-------------------------------------------------------------------------

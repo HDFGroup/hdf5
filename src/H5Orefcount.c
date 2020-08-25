@@ -15,7 +15,7 @@
  *
  * Created:             H5Orefcount.c
  *                      Mar 10 2007
- *                      Quincey Koziol <koziol@hdfgroup.org>
+ *                      Quincey Koziol
  *
  * Purpose:             Object ref. count messages.
  *
@@ -34,11 +34,11 @@
 /* PRIVATE PROTOTYPES */
 static void *H5O__refcount_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
     unsigned *ioflags, size_t p_size, const uint8_t *p);
-static herr_t H5O_refcount_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static void *H5O_refcount_copy(const void *_mesg, void *_dest);
-static size_t H5O_refcount_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static herr_t H5O__refcount_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static void *H5O__refcount_copy(const void *_mesg, void *_dest);
+static size_t H5O__refcount_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O__refcount_free(void *_mesg);
-static herr_t H5O_refcount_pre_copy_file(H5F_t *file_src, const void *mesg_src,
+static herr_t H5O__refcount_pre_copy_file(H5F_t *file_src, const void *mesg_src,
     hbool_t *deleted, const H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O__refcount_debug(H5F_t *f, const void *_mesg, FILE * stream,
     int indent, int fwidth);
@@ -50,16 +50,16 @@ const H5O_msg_class_t H5O_MSG_REFCOUNT[1] = {{
     sizeof(H5O_refcount_t),    	/*native message size           */
     0,				/* messages are sharable?       */
     H5O__refcount_decode,	/*decode message                */
-    H5O_refcount_encode,	/*encode message                */
-    H5O_refcount_copy,		/*copy the native value         */
-    H5O_refcount_size,		/*size of symbol table entry    */
+    H5O__refcount_encode,	/*encode message                */
+    H5O__refcount_copy,		/*copy the native value         */
+    H5O__refcount_size,		/*size of symbol table entry    */
     NULL,                   	/*default reset method          */
     H5O__refcount_free,	        /* free method			*/
     NULL,			/* file delete method		*/
     NULL,			/* link method			*/
     NULL, 			/*set share method		*/
     NULL,		    	/*can share method		*/
-    H5O_refcount_pre_copy_file,	/* pre copy native value to file */
+    H5O__refcount_pre_copy_file,/* pre copy native value to file */
     NULL,			/* copy native value to file    */
     NULL,			/* post copy native value to file */
     NULL,			/* get creation index		*/
@@ -83,7 +83,6 @@ H5FL_DEFINE_STATIC(H5O_refcount_t);
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar 10 2007
  *
  *-------------------------------------------------------------------------
@@ -125,24 +124,23 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_refcount_encode
+ * Function:    H5O__refcount_encode
  *
  * Purpose:     Encodes a message.
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar 10 2007
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_refcount_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__refcount_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_refcount_t   *refcount = (const H5O_refcount_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(f);
@@ -156,11 +154,11 @@ H5O_refcount_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shar
     UINT32ENCODE(p, *refcount);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_refcount_encode() */
+} /* end H5O__refcount_encode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_refcount_copy
+ * Function:    H5O__refcount_copy
  *
  * Purpose:     Copies a message from _MESG to _DEST, allocating _DEST if
  *              necessary.
@@ -169,19 +167,18 @@ H5O_refcount_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shar
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar 10 2007
  *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_refcount_copy(const void *_mesg, void *_dest)
+H5O__refcount_copy(const void *_mesg, void *_dest)
 {
     const H5O_refcount_t    *refcount = (const H5O_refcount_t *)_mesg;
     H5O_refcount_t          *dest = (H5O_refcount_t *) _dest;
     void                    *ret_value = NULL;  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(refcount);
@@ -196,11 +193,11 @@ H5O_refcount_copy(const void *_mesg, void *_dest)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_refcount_copy() */
+} /* end H5O__refcount_copy() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_refcount_size
+ * Function:    H5O__refcount_size
  *
  * Purpose:     Returns the size of the raw message in bytes not counting
  *              the message type or size fields, but only the data fields.
@@ -210,25 +207,24 @@ done:
  *              Failure:        zero
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar 10 2007
  *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_refcount_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
+H5O__refcount_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
     const void H5_ATTR_UNUSED *_mesg)
 {
-    size_t ret_value;   /* Return value */
+    size_t ret_value = 0;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Set return value */
     ret_value = 1                       /* Version */
                 + 4;                    /* Ref. count */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_refcount_size() */
+} /* end H5O__refcount_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -257,7 +253,7 @@ H5O__refcount_free(void *mesg)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_refcount_pre_copy_file
+ * Function:    H5O__refcount_pre_copy_file
  *
  * Purpose:     Perform any necessary actions before copying message between
  *              files.
@@ -271,10 +267,10 @@ H5O__refcount_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_refcount_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UNUSED *native_src,
+H5O__refcount_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UNUSED *native_src,
     hbool_t *deleted, const H5O_copy_t H5_ATTR_UNUSED *cpy_info, void H5_ATTR_UNUSED *udata)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(deleted);
@@ -286,7 +282,7 @@ H5O_refcount_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UN
     *deleted = TRUE;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_refcount_pre_copy_file() */
+} /* end H5O__refcount_pre_copy_file() */
 
 
 /*-------------------------------------------------------------------------
@@ -297,7 +293,6 @@ H5O_refcount_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UN
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar  6 2007
  *
  *-------------------------------------------------------------------------

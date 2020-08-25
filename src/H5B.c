@@ -15,7 +15,7 @@
  *
  * Created:		H5B.c
  *			Jul 10 1997
- *			Robb Matzke <matzke@llnl.gov>
+ *			Robb Matzke
  *
  * Purpose:		Implements balanced, sibling-linked, N-ary trees
  *			capable of storing any type of data with unique key
@@ -206,7 +206,6 @@ H5FL_SEQ_DEFINE_STATIC(size_t);
  * 		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Jun 23 1997
  *
  *-------------------------------------------------------------------------
@@ -291,7 +290,6 @@ done:
  *              UDATA is undefined).
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Jun 23 1997
  *
  *-------------------------------------------------------------------------
@@ -387,7 +385,6 @@ done:
  *              returned through the NEW_ADDR argument). Negative on failure.
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Jul  3 1997
  *
  *-------------------------------------------------------------------------
@@ -542,7 +539,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Jun 23 1997
  *
  *-------------------------------------------------------------------------
@@ -700,7 +696,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Jul  8 1997
  *
  *-------------------------------------------------------------------------
@@ -789,7 +784,6 @@ H5B__insert_child(H5B_t *bt, unsigned *bt_flags, unsigned idx,
  *		Failure:	H5B_INS_ERROR
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Jul  9 1997
  *
  *-------------------------------------------------------------------------
@@ -1118,7 +1112,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Jun 23 1997
  *
  *-------------------------------------------------------------------------
@@ -1185,7 +1178,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Jun 23 1997
  *
  *-------------------------------------------------------------------------
@@ -1679,7 +1671,6 @@ done:
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		May 27 2008
  *
  *-------------------------------------------------------------------------
@@ -1786,7 +1777,6 @@ H5B_shared_free(void *_shared)
  * 		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr 18 2000
  *
  *-------------------------------------------------------------------------
@@ -1852,7 +1842,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jun  3 2008
  *
  *-------------------------------------------------------------------------
@@ -2066,7 +2055,6 @@ done:
  *              Failure:        FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar 26, 2008
  *
  *-------------------------------------------------------------------------

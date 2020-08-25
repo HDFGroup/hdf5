@@ -15,7 +15,7 @@
  *
  * Created:		H5Pocpypl.c
  *			Mar 13 2006
- *			Peter Cao <xcao@ncsa.uiuc.edu>
+ *			Peter Cao
  *
  * Purpose:		Object copying property list class routines
  *

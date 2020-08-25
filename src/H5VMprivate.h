@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Robb Matzke <matzke@llnl.gov>
+ * Programmer: Robb Matzke
  *             Friday, October 10, 1997
  */
 #ifndef H5VMprivate_H
@@ -28,16 +28,16 @@ typedef herr_t (*H5VM_opvv_func_t)(hsize_t dst_off, hsize_t src_off,
     size_t len, void *udata);
 
 /* Vector comparison functions like Fortran66 comparison operators */
-#define H5VM_vector_eq_s(N,V1,V2) (H5VM_vector_cmp_s (N, V1, V2)==0)
-#define H5VM_vector_lt_s(N,V1,V2) (H5VM_vector_cmp_s (N, V1, V2)<0)
-#define H5VM_vector_gt_s(N,V1,V2) (H5VM_vector_cmp_s (N, V1, V2)>0)
-#define H5VM_vector_le_s(N,V1,V2) (H5VM_vector_cmp_s (N, V1, V2)<=0)
-#define H5VM_vector_ge_s(N,V1,V2) (H5VM_vector_cmp_s (N, V1, V2)>=0)
-#define H5VM_vector_eq_u(N,V1,V2) (H5VM_vector_cmp_u (N, V1, V2)==0)
-#define H5VM_vector_lt_u(N,V1,V2) (H5VM_vector_cmp_u (N, V1, V2)<0)
-#define H5VM_vector_gt_u(N,V1,V2) (H5VM_vector_cmp_u (N, V1, V2)>0)
-#define H5VM_vector_le_u(N,V1,V2) (H5VM_vector_cmp_u (N, V1, V2)<=0)
-#define H5VM_vector_ge_u(N,V1,V2) (H5VM_vector_cmp_u (N, V1, V2)>=0)
+#define H5VM_vector_eq_s(N,V1,V2) (H5VM_vector_cmp_s(N, V1, V2) == 0)
+#define H5VM_vector_lt_s(N,V1,V2) (H5VM_vector_cmp_s(N, V1, V2) < 0)
+#define H5VM_vector_gt_s(N,V1,V2) (H5VM_vector_cmp_s(N, V1, V2) > 0)
+#define H5VM_vector_le_s(N,V1,V2) (H5VM_vector_cmp_s(N, V1, V2) <= 0)
+#define H5VM_vector_ge_s(N,V1,V2) (H5VM_vector_cmp_s(N, V1, V2) >= 0)
+#define H5VM_vector_eq_u(N,V1,V2) (H5VM_vector_cmp_u(N, V1, V2) == 0)
+#define H5VM_vector_lt_u(N,V1,V2) (H5VM_vector_cmp_u(N, V1, V2) < 0)
+#define H5VM_vector_gt_u(N,V1,V2) (H5VM_vector_cmp_u(N, V1, V2) > 0)
+#define H5VM_vector_le_u(N,V1,V2) (H5VM_vector_cmp_u(N, V1, V2) <= 0)
+#define H5VM_vector_ge_u(N,V1,V2) (H5VM_vector_cmp_u(N, V1, V2) >= 0)
 
 /* Other functions */
 #define H5VM_vector_cpy(N,DST,SRC) {                                           \
@@ -146,14 +146,16 @@ H5_DLL ssize_t H5VM_memcpyvv(void *_dst,
  *              elements in an array and array dimensions are always of type
  *              size_t.
  *
+ * Note:        Although this routine is 'static' in this file, that's intended
+ *              only as an optimization and the naming (with a single underscore)
+ *              reflects its inclusion in a "private" header file.
+ *
  * Return:      Success:        Product of elements
  *
  *              Failure:        1 if N is zero
  *
  * Programmer:  Robb Matzke
  *              Friday, October 10, 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -177,6 +179,10 @@ done:
  *
  * Purpose:     Determines if all elements of a vector are zero.
  *
+ * Note:        Although this routine is 'static' in this file, that's intended
+ *              only as an optimization and the naming (with a single underscore)
+ *              reflects its inclusion in a "private" header file.
+ *
  * Return:      Success:        TRUE if all elements are zero,
  *                              FALSE otherwise
  *
@@ -184,8 +190,6 @@ done:
  *
  * Programmer:  Robb Matzke
  *              Friday, October 10, 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -212,6 +216,10 @@ done:
  *
  * Purpose:     Determines if all elements of a vector are zero.
  *
+ * Note:        Although this routine is 'static' in this file, that's intended
+ *              only as an optimization and the naming (with a single underscore)
+ *              reflects its inclusion in a "private" header file.
+ *
  * Return:      Success:        TRUE if all elements are zero,
  *                              FALSE otherwise
  *
@@ -219,8 +227,6 @@ done:
  *
  * Programmer:  Robb Matzke
  *              Friday, October 10, 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -248,6 +254,10 @@ done:
  * Purpose:     Compares two vectors of the same size and determines if V1 is
  *              lexicographically less than, equal, or greater than V2.
  *
+ * Note:        Although this routine is 'static' in this file, that's intended
+ *              only as an optimization and the naming (with a single underscore)
+ *              reflects its inclusion in a "private" header file.
+ *
  * Return:      Success:        -1 if V1 is less than V2
  *                              0 if they are equal
  *                              1 if V1 is greater than V2
@@ -257,12 +267,10 @@ done:
  * Programmer:  Robb Matzke
  *              Friday, October 10, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static H5_INLINE int H5_ATTR_UNUSED
-H5VM_vector_cmp_u (unsigned n, const hsize_t *v1, const hsize_t *v2)
+H5VM_vector_cmp_u(unsigned n, const hsize_t *v1, const hsize_t *v2)
 {
     int ret_value=0;    /* Return value */
 
@@ -290,6 +298,10 @@ done:
  * Purpose:     Compares two vectors of the same size and determines if V1 is
  *              lexicographically less than, equal, or greater than V2.
  *
+ * Note:        Although this routine is 'static' in this file, that's intended
+ *              only as an optimization and the naming (with a single underscore)
+ *              reflects its inclusion in a "private" header file.
+ *
  * Return:      Success:        -1 if V1 is less than V2
  *                              0 if they are equal
  *                              1 if V1 is greater than V2
@@ -299,12 +311,10 @@ done:
  * Programmer:	Robb Matzke
  *              Wednesday, April  8, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static H5_INLINE int H5_ATTR_UNUSED
-H5VM_vector_cmp_s (unsigned n, const hssize_t *v1, const hssize_t *v2)
+H5VM_vector_cmp_s(unsigned n, const hssize_t *v1, const hssize_t *v2)
 {
     int ret_value=0;    /* Return value */
 
@@ -331,12 +341,14 @@ done:
  *
  * Purpose:     Increments V1 by V2
  *
+ * Note:        Although this routine is 'static' in this file, that's intended
+ *              only as an optimization and the naming (with a single underscore)
+ *              reflects its inclusion in a "private" header file.
+ *
  * Return:      void
  *
  * Programmer:  Robb Matzke
  *              Monday, October 13, 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -379,6 +391,10 @@ static const unsigned char LogTable256[] =
  *
  *              The version on the web-site is for 32-bit quantities and this
  *              version has been extended for 64-bit quantities.
+ *
+ * Note:        Although this routine is 'static' in this file, that's intended
+ *              only as an optimization and the naming (with a single underscore)
+ *              reflects its inclusion in a "private" header file.
  *
  * Return:      log2(n) (always - no failure condition)
  *
@@ -428,6 +444,10 @@ static const unsigned MultiplyDeBruijnBitPosition[32] =
  *              This is from the "Bit Twiddling Hacks" at:
  *                  http://graphics.stanford.edu/~seander/bithacks.html#IntegerLogDeBruijn
  *
+ * Note:        Although this routine is 'static' in this file, that's intended
+ *              only as an optimization and the naming (with a single underscore)
+ *              reflects its inclusion in a "private" header file.
+ *
  * Return:      log2(n) (always - no failure condition)
  *
  * Programmer:  Quincey Koziol
@@ -449,6 +469,10 @@ H5VM_log2_of2(uint32_t n)
  * Function:	H5VM_power2up
  *
  * Purpose:	Round up a number to the next power of 2
+ *
+ * Note:        Although this routine is 'static' in this file, that's intended
+ *              only as an optimization and the naming (with a single underscore)
+ *              reflects its inclusion in a "private" header file.
  *
  * Return:	Return the number which is a power of 2
  *
@@ -477,6 +501,10 @@ H5VM_power2up(hsize_t n)
  *
  * Purpose:     Determine the # of bytes needed to encode values within a
  *              range from 0 to a given limit
+ *
+ * Note:        Although this routine is 'static' in this file, that's intended
+ *              only as an optimization and the naming (with a single underscore)
+ *              reflects its inclusion in a "private" header file.
  *
  * Return:      Number of bytes needed
  *
@@ -507,6 +535,10 @@ static const unsigned char H5VM_bit_clear_g[8] = {0x7F, 0xBF, 0xDF, 0xEF, 0xF7, 
  *              to bit offset 7 in the first byte's low-bit position, then to
  *              bit offset 8 in the second byte's high-bit position, etc.
  *
+ * Note:        Although this routine is 'static' in this file, that's intended
+ *              only as an optimization and the naming (with a single underscore)
+ *              reflects its inclusion in a "private" header file.
+ *
  * Return:      TRUE/FALSE
  *
  * Programmer:  Quincey Koziol
@@ -533,6 +565,10 @@ H5VM_bit_get(const unsigned char *buf, size_t offset)
  *              offset 0 in the first byte's high-bit position, proceeding down
  *              to bit offset 7 in the first byte's low-bit position, then to
  *              bit offset 8 in the second byte's high-bit position, etc.
+ *
+ * Note:        Although this routine is 'static' in this file, that's intended
+ *              only as an optimization and the naming (with a single underscore)
+ *              reflects its inclusion in a "private" header file.
  *
  * Return:      None
  *
