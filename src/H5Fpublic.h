@@ -97,7 +97,9 @@
 #define H5F_MPIO_DEBUG_KEY "H5F_mpio_debug_key"
 #endif /* H5_HAVE_PARALLEL */
 
-/** The difference between a single file and a set of mounted files */
+/**
+ * The difference between a single file and a set of mounted files
+ */
 typedef enum H5F_scope_t {
     H5F_SCOPE_LOCAL    = 0,    /**< specified file handle only        */
     H5F_SCOPE_GLOBAL   = 1     /**< entire virtual file            */
@@ -106,7 +108,8 @@ typedef enum H5F_scope_t {
 /** Unlimited file size for H5Pset_external() */
 #define H5F_UNLIMITED    ((hsize_t)(-1L))
 
-/** How does file close behave?
+/**
+ * How does file close behave?
  */
 typedef enum H5F_close_degree_t {
     H5F_CLOSE_DEFAULT   = 0, /**< Use the degree pre-defined by underlining VFL */
@@ -115,7 +118,9 @@ typedef enum H5F_close_degree_t {
     H5F_CLOSE_STRONG    = 3  /**< If there are opened objects, close them first, then close file */
 } H5F_close_degree_t;
 
-/** Current "global" information about file */
+/**
+ * Current "global" information about file
+ */
 typedef struct H5F_info2_t {
     struct {
     unsigned    version;    /**< Superblock version # */
@@ -134,7 +139,8 @@ typedef struct H5F_info2_t {
     } sohm;
 } H5F_info2_t;
 
-/** Types of allocation requests. The values larger than H5FD_MEM_DEFAULT
+/**
+ * Types of allocation requests. The values larger than #H5FD_MEM_DEFAULT
  * should not change other than adding new types to the end. These numbers
  * might appear in files.
  *
@@ -160,13 +166,17 @@ typedef enum H5F_mem_t {
     H5FD_MEM_NTYPES             /**< Sentinel value - must be last */
 } H5F_mem_t;
 
-/** Free space section information */
+/**
+ * Free space section information
+ */
 typedef struct H5F_sect_info_t {
     haddr_t             addr;   /**< Address of free space section */
     hsize_t             size;   /**< Size of free space section */
 } H5F_sect_info_t;
 
-/** Library's format versions */
+/**
+ * Library's format versions
+ */
 typedef enum H5F_libver_t {
     H5F_LIBVER_ERROR = -1,
     H5F_LIBVER_EARLIEST = 0,    /**< Use the earliest possible format for storing objects */
@@ -179,7 +189,9 @@ typedef enum H5F_libver_t {
 
 #define H5F_LIBVER_LATEST   H5F_LIBVER_V114
 
-/** File space handling strategy */
+/**
+ * File space handling strategy
+ */
 typedef enum H5F_fspace_strategy_t {
     H5F_FSPACE_STRATEGY_FSM_AGGR = 0,   /**< Mechanisms: free-space managers, aggregators, and virtual file drivers */
                                         /* This is the library default when not set */
@@ -209,7 +221,9 @@ typedef struct H5F_retry_info_t {
     uint32_t *retries[H5F_NUM_METADATA_READ_RETRY_TYPES];
 } H5F_retry_info_t;
 
-/* Callback for H5Pset_object_flush_cb() in a file access property list */
+/**
+ * Callback for H5Pset_object_flush_cb() in a file access property list
+ */
 typedef herr_t (*H5F_flush_cb_t)(hid_t object_id, void *udata);
 
 /*********************/
@@ -220,11 +234,14 @@ extern "C" {
 #endif
 
 H5_DLL htri_t H5Fis_accessible(const char *container_name, hid_t fapl_id);
-/** \example H5Fcreate.c
- *           After creating an HDF5 file with H5Fcreate(), we close it with
- *           H5Fclose().
+/**
+ * \example H5Fcreate.c
+ *          After creating an HDF5 file with H5Fcreate(), we close it with
+ *          H5Fclose().
  */
-/**\ingroup H5F
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
  *
  * \brief Creates an HDF5 file
  *
@@ -307,7 +324,9 @@ H5_DLL htri_t H5Fis_accessible(const char *container_name, hid_t fapl_id);
  */
 H5_DLL hid_t  H5Fcreate(const char *filename, unsigned flags,
                         hid_t create_plist, hid_t access_plist);
-/**\ingroup H5F
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
  *
  * \brief Opens an existing HDF5 file
  *
@@ -397,13 +416,74 @@ H5_DLL hid_t  H5Fcreate(const char *filename, unsigned flags,
  *-------------------------------------------------------------------------
  */
 H5_DLL hid_t  H5Fopen(const char *filename, unsigned flags, hid_t access_plist);
-H5_DLL hid_t  H5Freopen(hid_t file_id);
-H5_DLL herr_t H5Fflush(hid_t object_id, H5F_scope_t scope);
-/** \example H5Fclose.c
- *           After creating an HDF5 file with H5Fcreate(), we close it with
- *           H5Fclose().
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Returns a new identifier for a previously-opened HDF5 file
+ *
+ * \param[in] file_id Identifier of a file for which an additional identifier
+ *                    is required
+ *
+ * \return \hid_t
+ *
+ * \details H5Freopen() returns a new file identifier for an already-open HDF5
+ *          file, as specified by \p file_id. Both identifiers share caches and
+ *          other information. The only difference between the identifiers is
+ *          that the new identifier is not mounted anywhere and no files are
+ *          mounted on it.
+ *
+ *          The new file identifier should be closed by calling H5Fclose() when
+ *          it is no longer needed.
+ *
+ * \note Note that there is no circumstance under which H5Freopen() can
+ *       actually open a closed file; the file must already be open and have an
+ *       active \p file_id. E.g., one cannot close a file with H5Fclose() on
+ *       \p file_id then use H5Freopen() on \p file_id to reopen it.
+ *
+ *-------------------------------------------------------------------------
  */
-/**\ingroup H5F
+H5_DLL hid_t  H5Freopen(hid_t file_id);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Flushes all buffers associated with a file to storage
+ *
+ * \loc_id{object_id}
+ * \param[in] scope The scope of the flush action
+ *
+ * \return \herr_t
+ *
+ * \details H5Fflush() causes all buffers associated with a file to be
+ *          immediately flushed to storage without removing the data from the
+ *          cache.
+ *
+ *          \p object_id can be any object associated with the file, including
+ *          the file itself, a dataset, a group, an attribute, or a named
+ *          datatype.
+ *
+ *          \p scope specifies whether the scope of the flush action is
+ *          global or local. Valid values are as follows:
+ *          \scopes
+ *
+ * \attention HDF5 does not possess full control over buffering. H5Fflush()
+ *            flushes the internal HDF5 buffers then asks the operating system
+ *            (the OS) to flush the system buffers for the open files. After
+ *            that, the OS is responsible for ensuring that the data is
+ *            actually flushed to disk.
+ *
+ *-------------------------------------------------------------------------
+ */
+H5_DLL herr_t H5Fflush(hid_t object_id, H5F_scope_t scope);
+/**
+ * \example H5Fclose.c
+ *          After creating an HDF5 file with H5Fcreate(), we close it with
+ *          H5Fclose().
+ */
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
  *
  * \brief Terminates access to an HDF5 file
  *
@@ -447,8 +527,93 @@ H5_DLL herr_t H5Fflush(hid_t object_id, H5F_scope_t scope);
  *-------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Fclose(hid_t file_id);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Deletes an HDF5 file
+ *
+ * \param[in] filename Name of the file to delete
+ * \fapl_id
+ *
+ * \return \herr_t
+ *
+ * \details H5Fdelete() deletes an HDF5 file \p filename with a file access
+ *          property list \p fapl_id. The \p fapl_id should be configured with
+ *          the same VOL connector or VFD that was used to open the file.
+ *
+ *          This API was introduced for use with the Virtual Object Layer
+ *          (VOL). With the VOL, HDF5 "files" can map to arbitrary storage
+ *          schemes such as object stores and relational database tables. The
+ *          data created by these implementations may be inconvenient for a
+ *          user to remove without a detailed knowledge of the storage scheme.
+ *          H5Fdelete() gives VOL connector authors the ability to add
+ *          connector-specific delete code to their connectors so that users
+ *          can remove these "files" without detailed knowledge of the storage
+ *          scheme.
+ *
+ *          For a VOL connector, H5Fdelete() deletes the file in a way that
+ *          makes sense for the specified VOL connector.
+ *
+ *          For the native HDF5 connector, HDF5 files will be deleted via the
+ *          VFDs, each of which will have to be modified to delete the files it
+ *          creates.
+ *
+ *          For all implementations, H5Fdelete() will first check if the file
+ *          is an HDF5 file via H5Fis_accessible(). This is done to ensure that
+ *          H5Fdelete() cannot be used as an arbitrary file deletion call.
+ *
+ * \since 1.12.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fdelete(const char *filename, hid_t fapl_id);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Returns a file creation property list identifier
+ *
+ * \file_id
+ * \return \hid_t
+ *
+ * \details H5Fget_create_plist() returns the file creation property list
+ *          identifier identifying the creation properties used to create this
+ *          file. This function is useful for duplicating properties when
+ *          creating another file.
+ *
+ *          See "File Access Properties" in H5P: Property List Interface in
+ *          this reference manual and "File Access Properties" in The HDF5 File
+ *          chapter in the HDF5 User’s Guide for more information.
+ *
+ *          The creation property list identifier should be released with
+ *          H5Pclose().
+ *
+ * \todo Fix the references.
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL hid_t  H5Fget_create_plist(hid_t file_id);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Returns a file access property list identifier
+ *
+ * \file_id
+ * \return \hid_t
+ *
+ * \details H5Fget_access_plist() returns the file access property list
+ *          identifier of the specified file.
+ *
+ *          See "File Access Properties" in H5P: Property List Interface in
+ *          this reference manual and "File Access Properties" in The HDF5 File
+ *          chapter in the HDF5 User’s Guide for more information.
+ *
+ * \todo Fix the references.
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL hid_t  H5Fget_access_plist(hid_t file_id);
 H5_DLL herr_t H5Fget_intent(hid_t file_id, unsigned *intent);
 H5_DLL herr_t H5Fget_fileno(hid_t file_id, unsigned long *fileno);
@@ -459,6 +624,24 @@ H5_DLL herr_t H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist);
 H5_DLL herr_t H5Funmount(hid_t loc, const char *name);
 H5_DLL hssize_t H5Fget_freespace(hid_t file_id);
 H5_DLL herr_t H5Fget_filesize(hid_t file_id, hsize_t *size);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Retrieves the file's end-of-allocation (EOA)
+ *
+ * \file_id
+ * \param[out] eoa The file's EOA
+ *
+ * \return \herr_t
+ *
+ * \details H5Fget_eoa() retrieves the file's EOA and returns it in the
+ *          parameter eoa.
+ *
+ * \since 1.10.2
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fget_eoa(hid_t file_id, haddr_t *eoa);
 H5_DLL herr_t H5Fincrement_filesize(hid_t file_id, hsize_t increment);
 H5_DLL ssize_t H5Fget_file_image(hid_t file_id, void * buf_ptr, size_t buf_len);
@@ -479,6 +662,30 @@ H5_DLL herr_t H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *i
 H5_DLL herr_t H5Fstart_swmr_write(hid_t file_id);
 H5_DLL ssize_t H5Fget_free_sections(hid_t file_id, H5F_mem_t type,
     size_t nsects, H5F_sect_info_t *sect_info/*out*/);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Clears the external link open file cache
+ *
+ * \file_id
+ * \return \herr_t
+ *
+ * \details H5Fclear_elink_file_cache() evicts all the cached child files in
+ *          the specified file’s external file cache, causing them to be closed
+ *          if there is nothing else holding them open.
+ *
+ *          H5Fclear_elink_file_cache() does not close the cache itself;
+ *          subsequent external link traversals from the parent file will again
+ *          cache the target file. See H5Pset_elink_file_cache_size() for
+ *          information on closing the file cache.
+ *
+ * \see H5Pset_elink_file_cache_size(), H5Pget_elink_file_cache_size()
+ *
+ * \since 1.8.7
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fclear_elink_file_cache(hid_t file_id);
 H5_DLL herr_t H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t high);
 H5_DLL herr_t H5Fstart_mdc_logging(hid_t file_id);
@@ -491,6 +698,30 @@ H5_DLL herr_t H5Freset_page_buffering_stats(hid_t file_id);
 H5_DLL herr_t H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2],
     unsigned hits[2], unsigned misses[2], unsigned evictions[2], unsigned bypasses[2]);
 H5_DLL herr_t H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr, hsize_t *image_size);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Retrieves the setting for whether or not a file will create minimized
+ *        dataset object headers
+ *
+ * \file_id
+ * \param[out] minimize Flag indicating whether the library will or will not
+ *                      create minimized dataset object headers
+ *
+ * \return \herr_t
+ *
+ * \details H5Fget_dset_no_attrs_hint() retrieves the no dataset attributes
+ *          hint setting for the file specified by the file identifier \p
+ *          file_id. This setting is used to inform the library to create
+ *          minimized dataset object headers when #TRUE.
+ *
+ *          The setting's value is returned in the boolean pointer minimize.
+ *
+ * \since 1.10.5
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize);
 H5_DLL herr_t H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
 

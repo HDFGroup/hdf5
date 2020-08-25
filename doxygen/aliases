@@ -144,3 +144,4 @@ ALIASES += csets="<table><tr><td>#H5T_CSET_ASCII</td><td>US ASCII</td></tr><tr><
 ALIASES += indexes="<table><tr><td>#H5_INDEX_NAME</td><td>Lexicographic order on name</td></tr><tr><td>#H5_INDEX_CRT_ORDER</td><td>Index on creation order</td></tr></table>"
 ALIASES += link_types="<table><tr><td>#H5L_TYPE_HARD</td><td>Hard link</td></tr><tr><td>#H5L_TYPE_SOFT</td><td>Soft link</td></tr><tr><td>#H5L_TYPE_EXTERNAL</td><td>External link</td></tr><tr><td>#H5L_TYPE_ERROR</td><td>Error</td></tr></table>"
 ALIASES += orders="<table><tr><td>#H5_ITER_INC</td><td>Increasing order</td></tr><tr><td>#H5_ITER_DEC</td><td>Decreasing order</td></tr><tr><td>#H5_ITER_NATIVE</td><td>Fastest available order</td></tr></table>"
+ALIASES += scopes="<table><tr><td>#H5F_SCOPE_GLOBAL</td><td>Flushes the entire virtual file</td></tr><tr><td>#H5F_SCOPE_LOCAL</td><td>Flushes only the specified file</td></tr></table>"
