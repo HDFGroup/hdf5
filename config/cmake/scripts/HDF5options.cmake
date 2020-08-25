@@ -97,7 +97,6 @@ endif()
 #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_NO_PACKAGES:BOOL=ON")
 ### Create install package with external libraries (szip, zlib)
 set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_PACKAGE_EXTLIBS:BOOL=ON")
-set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_ROS3_VFD:BOOL=TRUE")
 
 #############################################################################################
 ### use a toolchain file
