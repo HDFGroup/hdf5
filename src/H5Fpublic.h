@@ -76,14 +76,14 @@
 #define H5F_ACC_DEFAULT (H5CHECK H5OPEN 0xffffu)    /*ignore setting on lapl     */
 
 /* Flags for H5Fget_obj_count() & H5Fget_obj_ids() calls */
-#define H5F_OBJ_FILE    (0x0001u)       /* File objects */
-#define H5F_OBJ_DATASET    (0x0002u)       /* Dataset objects */
-#define H5F_OBJ_GROUP    (0x0004u)       /* Group objects */
-#define H5F_OBJ_DATATYPE (0x0008u)      /* Named datatype objects */
-#define H5F_OBJ_ATTR    (0x0010u)       /* Attribute objects */
-#define H5F_OBJ_ALL     (H5F_OBJ_FILE|H5F_OBJ_DATASET|H5F_OBJ_GROUP|H5F_OBJ_DATATYPE|H5F_OBJ_ATTR)
-#define H5F_OBJ_LOCAL   (0x0020u)       /* Restrict search to objects opened through current file ID */
-                                        /* (as opposed to objects opened through any file ID accessing this file) */
+#define H5F_OBJ_FILE     (0x0001u)       /**< File objects */
+#define H5F_OBJ_DATASET  (0x0002u)       /**< Dataset objects */
+#define H5F_OBJ_GROUP    (0x0004u)       /**< Group objects */
+#define H5F_OBJ_DATATYPE (0x0008u)       /**< Named datatype objects */
+#define H5F_OBJ_ATTR     (0x0010u)       /**< Attribute objects */
+#define H5F_OBJ_ALL      (H5F_OBJ_FILE|H5F_OBJ_DATASET|H5F_OBJ_GROUP|H5F_OBJ_DATATYPE|H5F_OBJ_ATTR)
+#define H5F_OBJ_LOCAL    (0x0020u)       /**< Restrict search to objects opened through current file ID
+                                              (as opposed to objects opened through any file ID accessing this file) */
 
 #define H5F_FAMILY_DEFAULT (hsize_t)0
 
@@ -105,7 +105,9 @@ typedef enum H5F_scope_t {
     H5F_SCOPE_GLOBAL   = 1     /**< entire virtual file            */
 } H5F_scope_t;
 
-/** Unlimited file size for H5Pset_external() */
+/**
+ * Unlimited file size for H5Pset_external()
+ */
 #define H5F_UNLIMITED    ((hsize_t)(-1L))
 
 /**
@@ -233,6 +235,30 @@ typedef herr_t (*H5F_flush_cb_t)(hid_t object_id, void *udata);
 extern "C" {
 #endif
 
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Checks if a file can be opened with a given file access property
+ *        list
+ *
+ * \param[in] container_name Name of a file
+ * \fapl_id
+ *
+ * \return \htri_t
+ *
+ * \details H5Fis_accessible() checks if the file specified by \p
+ *          container_name can be opened with the file access property list
+ *          \p fapl_id.
+ *
+ * \note The H5Fis_accessible() function enables files to be checked with a
+ *       given file access property list, unlike H5Fis_hdf5(), which only uses
+ *       the default file driver when opening a file.
+ *
+ * \since 1.12.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL htri_t H5Fis_accessible(const char *container_name, hid_t fapl_id);
 /**
  * \example H5Fcreate.c
@@ -712,9 +738,110 @@ H5_DLL ssize_t H5Fget_obj_count(hid_t file_id, unsigned types);
  *-------------------------------------------------------------------------
  */
 H5_DLL ssize_t H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *obj_id_list);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Returns pointer to the file handle from the virtual file driver
+ *
+ * \file_id
+ * \fapl_id{fapl}
+ * \param[out] file_handle Pointer to the file handle being used by the
+ *                         low-level virtual file driver
+ *
+ * \return \herr_t
+ *
+ * \details Given the file identifier \p file_id and the file access property
+ *          list \p fapl_id, H5Fget_vfd_handle() returns a pointer to the file
+ *          handle from the low-level file driver currently being used by the
+ *          HDF5 library for file I/O.
+ *
+ * \note For most drivers, the value of \p fapl_id will be #H5P_DEFAULT. For
+ *       the \c FAMILY or \c MULTI drivers, this value should be defined
+ *       through the property list functions: H5Pset_family_offset() for the
+ *       \c FAMILY driver and H5Pset_multi_type() for the \c MULTI driver
+ *
+ * \since 1.6.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void **file_handle);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Mounts an HDF5 file
+ *
+ * \loc_id{loc}
+ * \param[in] name Name of the group onto which the file specified by \p child
+ *                 is to be mounted
+ * \param[in] plist File mount property list identifier. Pass #H5P_DEFAULT!
+ *
+ * \return \herr_t
+ *
+ * \details H5Fmount() mounts the file specified by \p child onto the object
+ *          specified by \p loc and \p name using the mount properties \p plist
+ *          If the object specified by \p loc is a dataset, named datatype or
+ *          attribute, then the file will be mounted at the location where the
+ *          attribute, dataset, or named datatype is attached.
+ *
+ * \note To date, no file mount properties have been defined in HDF5. The
+ *       proper value to pass for \p plist is #H5P_DEFAULT, indicating the
+ *       default file mount property list.
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Unounts an HDF5 file
+ *
+ * \loc_id{loc}
+ * \param[in] name Name of the mount point
+ *
+ * \return \herr_t
+ *
+ * \details Given a mount point, H5Funmount() dissociates the mount point's
+ *          file from the file mounted there. This function does not close
+ *          either file.
+ *
+ *          The mount point can be either the group in the parent or the root
+ *          group of the mounted file (both groups have the same name). If the
+ *          mount point was opened before the mount then it is the group in the
+ *          parent; if it was opened after the mount then it is the root group
+ *          of the child.
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Funmount(hid_t loc, const char *name);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Returns the amount of free space in a file (in bytes)
+ *
+ * \file_id
+ *
+ * \return Returns the amount of free space in the file if successful;
+ *         otherwise returns a negative value.
+ *
+ * \details Given the identifier of an open file, \p file_id,
+ *          H5Fget_freespace() returns the amount of space that is unused by
+ *          any objects in the file.
+ *
+ *          Currently, the HDF5 library only tracks free space in a file from a
+ *          file open or create until that file is closed, so this routine will
+ *          only report the free space that has been created during that
+ *          interval.
+ *
+ * \todo Fix the comment on FSM.
+ *
+ * \since 1.6.1
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL hssize_t H5Fget_freespace(hid_t file_id);
 /**
  *-------------------------------------------------------------------------
@@ -761,6 +888,26 @@ H5_DLL herr_t H5Fget_filesize(hid_t file_id, hsize_t *size);
  *-------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Fget_eoa(hid_t file_id, haddr_t *eoa);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Sets the file' EOA to the maximum of (EOA, EOF) + increment
+ *
+ * \file_id
+ * \param[in] increment The number of bytes to be added to the maximum of
+ *                      (EOA, EOF)
+ *
+ * \return \herr_t
+ *
+ * \details H5Fincrement_filesize() sets the file's EOA to the maximum of (EOA,
+ *          EOF) + \p increment. The EOA is the end-of-file address stored in
+ *          the file's superblock while EOF is the file's actual end-of-file.
+ *
+ * \since 1.10.2
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fincrement_filesize(hid_t file_id, hsize_t increment);
 /**
  *-------------------------------------------------------------------------
@@ -818,16 +965,41 @@ H5_DLL herr_t H5Fincrement_filesize(hid_t file_id, hsize_t increment);
  *-------------------------------------------------------------------------
  */
 H5_DLL ssize_t H5Fget_file_image(hid_t file_id, void * buf_ptr, size_t buf_len);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup MDC
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fget_mdc_config(hid_t file_id,
                 H5AC_cache_config_t * config_ptr);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup MDC
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fset_mdc_config(hid_t file_id,
                 H5AC_cache_config_t * config_ptr);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup MDC
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fget_mdc_hit_rate(hid_t file_id, double * hit_rate_ptr);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup MDC
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fget_mdc_size(hid_t file_id,
                               size_t * max_size_ptr,
                               size_t * min_clean_size_ptr,
                               size_t * cur_size_ptr,
                               int * cur_num_entries_ptr);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup MDC
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Freset_mdc_hit_rate_stats(hid_t file_id);
 H5_DLL ssize_t H5Fget_name(hid_t obj_id, char *name, size_t size);
 H5_DLL herr_t H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo);
@@ -861,8 +1033,23 @@ H5_DLL ssize_t H5Fget_free_sections(hid_t file_id, H5F_mem_t type,
  */
 H5_DLL herr_t H5Fclear_elink_file_cache(hid_t file_id);
 H5_DLL herr_t H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t high);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup MDC
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fstart_mdc_logging(hid_t file_id);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup MDC
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fstop_mdc_logging(hid_t file_id);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup MDC
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fget_mdc_logging_status(hid_t file_id,
                                         /*OUT*/ hbool_t *is_enabled,
                                         /*OUT*/ hbool_t *is_currently_logging);
@@ -870,6 +1057,11 @@ H5_DLL herr_t H5Fformat_convert(hid_t fid);
 H5_DLL herr_t H5Freset_page_buffering_stats(hid_t file_id);
 H5_DLL herr_t H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2],
     unsigned hits[2], unsigned misses[2], unsigned evictions[2], unsigned bypasses[2]);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup MDC
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr, hsize_t *image_size);
 /**
  *-------------------------------------------------------------------------
@@ -914,12 +1106,14 @@ H5_DLL herr_t H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag);
 
 /* Typedefs */
 
-/* Current "global" information about file */
+/**
+ * Current "global" information about file
+ */
 typedef struct H5F_info1_t {
-    hsize_t        super_ext_size;    /* Superblock extension size */
+    hsize_t        super_ext_size;    /**< Superblock extension size */
     struct {
-    hsize_t        hdr_size;       /* Shared object header message header size */
-    H5_ih_info_t    msgs_info;      /* Shared object header message index & heap size */
+    hsize_t        hdr_size;       /**< Shared object header message header size */
+    H5_ih_info_t    msgs_info;      /**< Shared object header message index & heap size */
     } sohm;
 } H5F_info1_t;
 
