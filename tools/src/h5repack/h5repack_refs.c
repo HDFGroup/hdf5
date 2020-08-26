@@ -534,7 +534,7 @@ static int copy_refs_attr(hid_t loc_in,
                ref_comp_field_n may be >0 for the next attribute, which may not be
                the reference type and will be accidently treated as the reference type.
                It will then cause the H5Acreate2 failed since that attribute is already created.
-               KY 2020-02-10
+               KY 2020-02-07
             */
             is_ref_comp = (ref_comp_field_n > 0);
         }
