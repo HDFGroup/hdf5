@@ -1026,7 +1026,7 @@ done:
  * Parameters:
  *              hid_t dset_id;          IN: Chunked dataset ID
  *              hid_t fspace_id;        IN: File dataspace ID
- *              hsize_t index;          IN: Index of written chunk
+ *              hsize_t chk_index;      IN: Index of written chunk
  *              hsize_t *offset         OUT: Logical position of the chunk’s
  *                                           first element in the dataspace
  *              unsigned *filter_mask   OUT: Mask for identifying the filters in use
