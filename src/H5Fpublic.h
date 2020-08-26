@@ -349,7 +349,7 @@ H5_DLL htri_t H5Fis_accessible(const char *container_name, hid_t fapl_id);
  *-------------------------------------------------------------------------
  */
 H5_DLL hid_t  H5Fcreate(const char *filename, unsigned flags,
-                        hid_t create_plist, hid_t access_plist);
+                        hid_t fcpl_id, hid_t fapl_id);
 /**
  *-------------------------------------------------------------------------
  * \ingroup H5F
@@ -441,7 +441,7 @@ H5_DLL hid_t  H5Fcreate(const char *filename, unsigned flags,
  *
  *-------------------------------------------------------------------------
  */
-H5_DLL hid_t  H5Fopen(const char *filename, unsigned flags, hid_t access_plist);
+H5_DLL hid_t  H5Fopen(const char *filename, unsigned flags, hid_t fapl_id);
 /**
  *-------------------------------------------------------------------------
  * \ingroup H5F
@@ -451,7 +451,7 @@ H5_DLL hid_t  H5Fopen(const char *filename, unsigned flags, hid_t access_plist);
  * \param[in] file_id Identifier of a file for which an additional identifier
  *                    is required
  *
- * \return \hid_t
+ * \return \hid_t{file}
  *
  * \details H5Freopen() returns a new file identifier for an already-open HDF5
  *          file, as specified by \p file_id. Both identifiers share caches and
@@ -601,7 +601,7 @@ H5_DLL herr_t H5Fdelete(const char *filename, hid_t fapl_id);
  * \brief Returns a file creation property list identifier
  *
  * \file_id
- * \return \hid_t
+ * \return \hid_t{file creation property list}
  *
  * \details H5Fget_create_plist() returns the file creation property list
  *          identifier identifying the creation properties used to create this
@@ -627,7 +627,7 @@ H5_DLL hid_t  H5Fget_create_plist(hid_t file_id);
  * \brief Returns a file access property list identifier
  *
  * \file_id
- * \return \hid_t
+ * \return \hid_t{file access property list}
  *
  * \details H5Fget_access_plist() returns the file access property list
  *          identifier of the specified file.
@@ -775,6 +775,7 @@ H5_DLL herr_t H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void **file_handle);
  * \loc_id{loc}
  * \param[in] name Name of the group onto which the file specified by \p child
  *                 is to be mounted
+ * \file_id{child}
  * \param[in] plist File mount property list identifier. Pass #H5P_DEFAULT!
  *
  * \return \herr_t
