@@ -283,6 +283,17 @@ New Features
 
       (DER - 2020/07/30, HDFFV-11092)
 
+    - Added new Fortran parameters:
+
+        H5F_LIBVER_ERROR_F
+        H5F_LIBVER_NBOUNDS_F
+        H5F_LIBVER_V18_F
+        H5F_LIBVER_V110_F
+
+    - Added new Fortran API: h5pget_libver_bounds_f
+
+      (MSB - 2020/02/11, HDFFV-11018)
+
     C++ Library:
     ------------
     - Add wrappers for H5Pset/get_file_locking() API calls

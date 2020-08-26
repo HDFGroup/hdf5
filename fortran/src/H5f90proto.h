@@ -448,7 +448,6 @@ H5_FCDLL int_f h5pset_attr_creation_order_c(hid_t_f *ocpl_id, int_f *crt_order_f
 H5_FCDLL int_f h5pset_shared_mesg_nindexes_c(hid_t_f *plist_id, int_f *nindexes );
 H5_FCDLL int_f h5pset_shared_mesg_index_c(hid_t_f *fcpl_id, int_f *index_num, int_f *mesg_type_flags, int_f *min_mesg_size);
 H5_FCDLL int_f h5pget_attr_creation_order_c(hid_t_f *ocpl_id, int_f *crt_order_flags);
-H5_FCDLL int_f h5pset_libver_bounds_c(hid_t_f *fapl_id, int_f *low, int_f *high);
 H5_FCDLL int_f h5pset_link_creation_order_c(hid_t_f *gcpl_id, int_f *crt_order_flags);
 H5_FCDLL int_f h5pget_link_phase_change_c(hid_t_f *gcpl_id, int_f *max_compact, int_f *min_dense );
 H5_FCDLL int_f h5pget_obj_track_times_c(hid_t_f *plist_id, int_f *flag);

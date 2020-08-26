@@ -443,7 +443,11 @@ h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
     h5f_flags[15] = (int_f)H5F_OBJ_ALL;
     h5f_flags[16] = (int_f)H5F_LIBVER_EARLIEST;
     h5f_flags[17] = (int_f)H5F_LIBVER_LATEST;
-    h5f_flags[18] = (int_f)H5F_UNLIMITED;
+    h5f_flags[18] = (int_f)H5F_LIBVER_ERROR;
+    h5f_flags[19] = (int_f)H5F_LIBVER_NBOUNDS;
+    h5f_flags[20] = (int_f)H5F_UNLIMITED;
+    h5f_flags[21] = (int_f)H5F_LIBVER_V18;
+    h5f_flags[22] = (int_f)H5F_LIBVER_V110;
 
 /*
  *  H5FD flags

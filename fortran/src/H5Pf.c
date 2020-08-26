@@ -4056,46 +4056,6 @@ h5pget_attr_creation_order_c(hid_t_f *ocpl_id, int_f *crt_order_flags)
   ret_value = 0;
   return ret_value;
 }
-/****if* H5Pf/h5pset_libver_bounds_c
- * NAME
- *  h5pset_libver_bounds_c
- * PURPOSE
- *  Calls H5Pset_libver_bounds
- *
- * INPUTS
- *
- *  fapl_id - File access property list identifier
- *  low - The earliest version of the library that will be used for writing objects.
- *  high - The latest version of the library that will be used for writing objects.
- * OUTPUTS
- *
- *
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  February 18, 2008
- * HISTORY
- *
- * SOURCE
-*/
-int_f
-h5pset_libver_bounds_c(hid_t_f *fapl_id, int_f *low, int_f *high )
-/******/
-{
-  int ret_value = -1;
-  herr_t ret;
-
-  /*
-   * Call H5Pset_libver_bounds function.
-   */
-  ret = H5Pset_libver_bounds( (hid_t)*fapl_id, (H5F_libver_t)*low, (H5F_libver_t)*high );
-  if (ret < 0) return ret_value;
-
-  ret_value = 0;
-  return ret_value;
-}
-
 /****if* H5Pf/h5pset_link_creation_order_c
  * NAME
  *  h5pset_link_creation_order_c
