@@ -57,6 +57,26 @@ typedef herr_t (*H5A_operator2_t)(hid_t location_id/*in*/,
 extern "C" {
 #endif
 
+/*-------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Closes the specified attribute
+ *
+ * \attr_id
+ *
+ * \return \herr_t
+ *
+ * \details H5Aclose() terminates access to the attribute specified by
+ *          \p attr_id by releasing the identifier.
+ *
+ * \attention Further use of a released attribute identifier is illegal; a
+ *            function using such an identifier will generate an error.
+ *
+ * \since 1.0.0
+ *
+ * \see H5Acreate(), H5Aopen()
+ */
+H5_DLL herr_t  H5Aclose(hid_t attr_id);
 /* --------------------------------------------------------------------------*/
 /**\ingroup H5A
  *
@@ -153,249 +173,6 @@ H5_DLL hid_t   H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id,
  */
 H5_DLL hid_t   H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t lapl_id);
-/*--------------------------------------------------------------------------*/
-/**\ingroup H5A
- *
- * \brief Opens an attribute for an object specified by object identifier and
- *        attribute name
- *
- * \fgdt_loc_id
- * \param[in]  attr_name    Name of attribute to open
- * \aapl_id
- *
- * \return \hid_tv{attribute}
- *
- * \details H5Aopen() opens an existing attribute, \p attr_name, that is
- *          attached to object specified by an object identifier, \p obj_id.
- *
- *          The attribute access property list, \p aapl_id, is currently unused
- *          and should be #H5P_DEFAULT.
- *
- *          This function, H5Aopen_by_idx() or H5Aopen_by_name() must be called
- *          before the attribute can be accessed for any further purpose,
- *          including reading, writing, or any modification.
- *
- *          The attribute identifier returned by this function must be released
- *          with H5Aclose() or resource leaks will develop.
- *
- * \since 1.8.0
- *
- * \see H5Aclose(), H5Acreate()
- */
-/*--------------------------------------------------------------------------*/
-H5_DLL hid_t   H5Aopen(hid_t obj_id, const char *attr_name, hid_t aapl_id);
-/*--------------------------------------------------------------------------*/
-/**\ingroup H5A
- *
- * \brief Opens an attribute for an object by object name and attribute name
- *
- * \fgdt_loc_id
- * \param[in] obj_name   Name of object to which attribute is attached,
- *                       relative to \p loc_id
- * \param[in] attr_name  Name of attribute to open
- * \aapl_id
- * \lapl_id
- *
- * \return \hid_tv{attribute}
- *
- * \details H5Aopen_by_name() opens an existing attribute, \p attr_name,
- *          that is attached to an object specified by location and name,
- *          \p loc_id and \p obj_name, respectively.
- *
- *          \p loc_id specifies a location from which the target object can
- *          be located and \p obj_name is an object name relative to
- *          \p loc_id. If \p loc_id fully specifies the object to which the
- *          attribute is attached, \p obj_name should be '.' (a dot).
- *
- *          The attribute access property list, \p aapl_id, is currently
- *          unused and should currently be #H5P_DEFAULT.
- *
- *          The link access property list, \p lapl_id, may provide
- *          information regarding the properties of links required to access
- *          the object, \p obj_name.
- *
- *          This function, H5Aopen(), or H5Aopen_by_idx() must be called
- *          before an attribute can be accessed for any further purpose,
- *          including reading, writing, or any modification.
- *
- *          The attribute identifier returned by this function must be
- *          released with H5Aclose() or resource leaks will develop.
- *
- * \since 1.8.0
- *
- */
-H5_DLL hid_t   H5Aopen_by_name(hid_t loc_id, const char *obj_name,
-    const char *attr_name, hid_t aapl_id, hid_t lapl_id);
-/*--------------------------------------------------------------------------*/
-/**\ingroup H5A
- *
- * \brief Opens the nth attribute attached to an object
- *
- * \fgdt_loc_id
- * \param[in] obj_name  Name of object to which attribute is attached,
- *                      relative to location
- * \param[in] idx_type  Type of index
- * \param[in] order     Index traversal order
- * \param[in] n         Attribute’s position in index
- * \aapl_id
- * \lapl_id
- *
- * \return \hid_tv{attribute}
- *
- * \details H5Aopen_by_idx() opens an existing attribute that is attached
- *          to an object specified by location and name, \p loc_id and
- *          \p obj_name, respectively. If \p loc_id fully specifies the
- *          object to which the attribute is attached, \p obj_name, should
- *          be  '.'  (a dot).
- *
- *          The attribute is identified by an index type, an index traversal
- *          order, and a position in the index, \p idx_type, \p order and
- *          \p n, respectively. These parameters and their valid values are
- *          discussed in the description of H5Aiterate2().
- *
- *          The attribute access property list, \p aapl_id, is currently
- *          unused and should currently be #H5P_DEFAULT.
- *
- *          The link access property list, \p lapl_id, may provide
- *          information regarding the properties of links required to access
- *          the object, \p obj_name.
- *
- *          This function, H5Aopen(), or H5Aopen_by_name() must be called
- *          before an attribute can be accessed for any further purpose,
- *          including reading, writing, or any modification.
- *
- *          The attribute identifier returned by this function must be
- *          released with H5Aclose() or resource leaks will develop.
- *
- * \since 1.8.0
- *
- */
-H5_DLL hid_t   H5Aopen_by_idx(hid_t loc_id, const char *obj_name,
-    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t aapl_id,
-    hid_t lapl_id);
-/*--------------------------------------------------------------------------*/
-/**\ingroup H5A
- *
- * \brief Writes data to an attribute
- *
- * \attr_id
- * \mem_type_id{dtype}
- * \param[out]  buf       Data to be written
- *
- * \return \herr_t
- *
- * \details H5Awrite() writes an attribute, specified with \p attr_id. The
- *          attribute's in-memory datatype is specified with \p dtype_id.
- *          The entire attribute is written from \p buf to the file.
- *
- *          If \p dtype_id is either a fixed-length or variable-length string,
- *          it is important to set the string length when defining the datatype.
- *          String datatypes are derived from #H5T_C_S1 (or #H5T_FORTRAN_S1 for
- *          Fortran codes), which defaults to 1 character in size.
- *          See H5Tset_size() and Creating variable-length string datatypes.
- *
- *          Datatype conversion takes place at the time of a read or write and
- *          is automatic.
- *
- * \version 1.8.8   Fortran updated to Fortran2003.
- * \version 1.4.2   Fortran \p dims parameter added in this release
- * \since 1.0.0
- * \see H5Aread()
- *
- * \todo prototype for H5Awrite/H5Aread does not match function
- */
-/*--------------------------------------------------------------------------*/
-H5_DLL herr_t  H5Awrite(hid_t attr_id, hid_t type_id, const void *buf);
-/*-------------------------------------------------------------------------- */
-
-/**\ingroup H5A
- *
- * \brief Reads the value of an attribute
- *
- * \attr_id
- * \mem_type_id{dtype_id}
- * \param[out] buf        Buffer for data to be read
- *
- * \return \herr_t
- *
- * \details H5Aread() reads an attribute, specified with \p attr_id. The
- *          attribute's in-memory datatype is specified with \p dtype_id. The
- *          entire attribute is read into \p buf from the file.
- *
- *          Datatype conversion takes place at the time of a read or write and
- *          is automatic.
- *
- * \version 1.8.8  Fortran updated to Fortran2003.
- * \version 1.4.2  The \p dims parameter was added to the Fortran API in this
- *                 release.
- * \since   1.0.0
- *
- * \see H5Awrite()
- *
-*/
-/*--------------------------------------------------------------------------*/
-H5_DLL herr_t  H5Aread(hid_t attr_id, hid_t type_id, void *buf);
-/*-------------------------------------------------------------------------*/
-/**\ingroup H5A
- *
- * \brief Closes the specified attribute
- *
- * \attr_id
- *
- * \return \herr_t
- *
- * \details H5Aclose() terminates access to the attribute specified by
- *          \p attr_id by releasing the identifier.
- *
- * \attention Further use of a released attribute identifier is illegal; a
- *            function using such an identifier will generate an error.
- *
- * \since 1.0.0
- *
- * \see H5Acreate(), H5Aopen()
- */
-/*-------------------------------------------------------------------------*/
-H5_DLL herr_t  H5Aclose(hid_t attr_id);
-/*-------------------------------------------------------------------------*/
-/**\ingroup H5A
- *
- * \brief Gets a copy of the dataspace for an attribute
- *
- * \attr_id
- *
- * \return \hid_tv{attribute dataspace}
- *
- * \details  H5Aget_space() retrieves a copy of the dataspace for an
- *           attribute. The dataspace identifier returned from this
- *           function must be released with H5Sclose() or resource leaks
- *           will develop.
- *
- * \since 1.0.0
- *
- */
-H5_DLL hid_t   H5Aget_space(hid_t attr_id);
-/*-------------------------------------------------------------------------*/
-/**\ingroup H5A
- *
- * \brief Gets an attribute datatype
- *
- * \attr_id
- *
- * \return \hid_t{datatype}
- *
- * \details H5Aget_type() retrieves a copy of the datatype for an attribute.
- *          The datatype is reopened if it is a named type before returning
- *          it to the application. The datatypes returned by this function
- *          are always read-only. If an error occurs when atomizing the
- *          return datatype, then the datatype is closed.
- *
- *          The datatype identifier returned from this function must be
- *          released with H5Tclose() or resource leaks will develop.
- *
- * \since 1.0.0
- *
- */
-H5_DLL hid_t   H5Aget_type(hid_t attr_id);
 /*-------------------------------------------------------------------------*/
 /**\ingroup H5A
  *
@@ -416,6 +193,132 @@ H5_DLL hid_t   H5Aget_type(hid_t attr_id);
  *
  */
 H5_DLL hid_t   H5Aget_create_plist(hid_t attr_id);
+/*-------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Retrieves attribute information, by attribute identifier
+ *
+ * \attr_id
+ * \param[out]  ainfo   Attribute information struct
+ *
+ * \return \herr_t
+ *
+ * \details H5Aget_info() retrieves attribute information, locating the
+ *          attribute with an attribute identifier, \p attr_id, which is
+ *          the identifier returned by H5Aopen() or H5Aopen_by_idx(). The
+ *          attribute information is returned in the \p ainfo struct.
+ *
+ *          The \p ainfo struct is defined as follows:
+ *
+ *          \code
+ *            typedef struct {
+ *                hbool_t             corder_valid;
+ *                H5O_msg_crt_idx_t   corder;
+ *                H5T_cset_t          cset;
+ *                hsize_t             data_size;
+ *            } H5A_info_t;
+ *          \endcode
+ *
+ *          \p corder_valid indicates whether the creation order data is
+ *          valid for this attribute. Note that if creation order is not
+ *          being tracked, no creation order data will be valid. Valid
+ *          values are \c TRUE and \c FALSE.
+ *
+ *          \p corder is a positive integer containing the creation
+ *          order of the attribute. This value is 0-based, so, for
+ *          example, the third attribute created will have a \p corder
+ *          value of 2.
+ *
+ *          \p cset indicates the character set used for the attribute’s
+ *          name; valid values are defined in H5Tpublic.h and include
+ *          the following:
+ *          \csets
+ *          This value is set with H5Pset_char_encoding().
+ *
+ *          \p data_size indicates the size, in the number of characters,
+ *          of the attribute.
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL herr_t  H5Aget_info(hid_t attr_id, H5A_info_t *ainfo /*out*/);
+/*-------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Retrieves attribute information by attribute index position
+ *
+ * \fgdt_loc_id
+ * \param[in]  obj_name  Name of object to which attribute is attached,
+ *                       relative to location
+ * \param[in]  idx_type  Type of index
+ * \param[in]  order     Index traversal order
+ * \param[in]  n         Attribute’s position in index
+ * \param[out] ainfo     Struct containing returned attribute information
+ * \lapl_id
+ *
+ * \return \herr_t
+ *
+ * \details H5Aget_info_by_idx() retrieves information for an attribute
+ *          that is attached to an object, which is specified by its
+ *          location and name, \p loc_id and \p obj_name, respectively.
+ *          The attribute is located by its index position and the attribute
+ *          information is returned in the \p ainfo struct.
+ *
+ *          If \p loc_id fully specifies the object to which the attribute
+ *          is attached, \p obj_name should be '.' (a dot).
+ *
+ *          The attribute is located by means of an index type, an index
+ *          traversal order, and a position in the index, \p idx_type,
+ *          \p order and \p n, respectively. These parameters and their
+ *          valid values are discussed in the description of H5Aiterate2().
+ *
+ *          The \p ainfo struct, which will contain the returned attribute
+ *          information, is described in H5Aget_info().
+ *
+ *          The link access property list, \p lapl_id, may provide
+ *          information regarding the properties of links required to access
+ *          the object, \p obj_name.
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL herr_t  H5Aget_info_by_idx(hid_t loc_id, const char *obj_name,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
+    H5A_info_t *ainfo /*out*/, hid_t lapl_id);
+/*-------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Retrieves attribute information, by attribute name
+ *
+ * \fgdt_loc_id
+ *
+ * \param[in] obj_name   Name of object to which attribute is attached,
+ *                       relative to location
+ * \param[in] attr_name  Attribute name
+ * \param[out] ainfo     Struct containing returned attribute information
+ * \lapl_id
+ *
+ * \return \herr_t
+ *
+ * \details H5Aget_info_by_name() retrieves information for an attribute,
+ *          \p attr_name, that is attached to an object specified by its
+ *          location and name, \p loc_id and \p obj_name, respectively.
+ *          The attribute information is returned in the \p ainfo struct.
+ *
+ *          If \p loc_id fully specifies the object to which the attribute
+ *          is attached, \p obj_name should be '.' (a dot).
+ *
+ *          The \p ainfo struct is described in H5Aget_info().
+ *
+ *          The link access property list, \p lapl_id, may provide
+ *          information regarding the properties of links required to
+ *          access the object, \p obj_name.
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL herr_t  H5Aget_info_by_name(hid_t loc_id, const char *obj_name,
+    const char *attr_name, H5A_info_t *ainfo /*out*/, hid_t lapl_id);
 /*-------------------------------------------------------------------------*/
 /**\ingroup H5A
  *
@@ -494,6 +397,24 @@ H5_DLL ssize_t H5Aget_name_by_idx(hid_t loc_id, const char *obj_name,
 /*-------------------------------------------------------------------------*/
 /**\ingroup H5A
  *
+ * \brief Gets a copy of the dataspace for an attribute
+ *
+ * \attr_id
+ *
+ * \return \hid_tv{attribute dataspace}
+ *
+ * \details  H5Aget_space() retrieves a copy of the dataspace for an
+ *           attribute. The dataspace identifier returned from this
+ *           function must be released with H5Sclose() or resource leaks
+ *           will develop.
+ *
+ * \since 1.0.0
+ *
+ */
+H5_DLL hid_t   H5Aget_space(hid_t attr_id);
+/*-------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
  * \brief Returns the amount of storage required for an attribute
  *
  * \attr_id
@@ -511,174 +432,25 @@ H5_DLL hsize_t H5Aget_storage_size(hid_t attr_id);
 /*-------------------------------------------------------------------------*/
 /**\ingroup H5A
  *
- * \brief Retrieves attribute information, by attribute identifier
+ * \brief Gets an attribute datatype
  *
  * \attr_id
- * \param[out]  ainfo   Attribute information struct
  *
- * \return \herr_t
+ * \return \hid_t{datatype}
  *
- * \details H5Aget_info() retrieves attribute information, locating the
- *          attribute with an attribute identifier, \p attr_id, which is
- *          the identifier returned by H5Aopen() or H5Aopen_by_idx(). The
- *          attribute information is returned in the \p ainfo struct.
+ * \details H5Aget_type() retrieves a copy of the datatype for an attribute.
+ *          The datatype is reopened if it is a named type before returning
+ *          it to the application. The datatypes returned by this function
+ *          are always read-only. If an error occurs when atomizing the
+ *          return datatype, then the datatype is closed.
  *
- *          The \p ainfo struct is defined as follows:
+ *          The datatype identifier returned from this function must be
+ *          released with H5Tclose() or resource leaks will develop.
  *
- *          \code
- *            typedef struct {
- *                hbool_t             corder_valid;
- *                H5O_msg_crt_idx_t   corder;
- *                H5T_cset_t          cset;
- *                hsize_t             data_size;
- *            } H5A_info_t;
- *          \endcode
- *
- *          \p corder_valid indicates whether the creation order data is
- *          valid for this attribute. Note that if creation order is not
- *          being tracked, no creation order data will be valid. Valid
- *          values are \c TRUE and \c FALSE.
- *
- *          \p corder is a positive integer containing the creation
- *          order of the attribute. This value is 0-based, so, for
- *          example, the third attribute created will have a \p corder
- *          value of 2.
- *
- *          \p cset indicates the character set used for the attribute’s
- *          name; valid values are defined in H5Tpublic.h and include
- *          the following:
- *          \csets
- *          This value is set with H5Pset_char_encoding().
- *
- *          \p data_size indicates the size, in the number of characters,
- *          of the attribute.
- *
- * \since 1.8.0
+ * \since 1.0.0
  *
  */
-H5_DLL herr_t  H5Aget_info(hid_t attr_id, H5A_info_t *ainfo /*out*/);
-/*-------------------------------------------------------------------------*/
-/**\ingroup H5A
- *
- * \brief Retrieves attribute information, by attribute name
- *
- * \fgdt_loc_id
- *
- * \param[in] obj_name   Name of object to which attribute is attached,
- *                       relative to location
- * \param[in] attr_name  Attribute name
- * \param[out] ainfo     Struct containing returned attribute information
- * \lapl_id
- *
- * \return \herr_t
- *
- * \details H5Aget_info_by_name() retrieves information for an attribute,
- *          \p attr_name, that is attached to an object specified by its
- *          location and name, \p loc_id and \p obj_name, respectively.
- *          The attribute information is returned in the \p ainfo struct.
- *
- *          If \p loc_id fully specifies the object to which the attribute
- *          is attached, \p obj_name should be '.' (a dot).
- *
- *          The \p ainfo struct is described in H5Aget_info().
- *
- *          The link access property list, \p lapl_id, may provide
- *          information regarding the properties of links required to
- *          access the object, \p obj_name.
- *
- * \since 1.8.0
- *
- */
-H5_DLL herr_t  H5Aget_info_by_name(hid_t loc_id, const char *obj_name,
-    const char *attr_name, H5A_info_t *ainfo /*out*/, hid_t lapl_id);
-/*-------------------------------------------------------------------------*/
-/**\ingroup H5A
- *
- * \brief Retrieves attribute information by attribute index position
- *
- * \fgdt_loc_id
- * \param[in]  obj_name  Name of object to which attribute is attached,
- *                       relative to location
- * \param[in]  idx_type  Type of index
- * \param[in]  order     Index traversal order
- * \param[in]  n         Attribute’s position in index
- * \param[out] ainfo     Struct containing returned attribute information
- * \lapl_id
- *
- * \return \herr_t
- *
- * \details H5Aget_info_by_idx() retrieves information for an attribute
- *          that is attached to an object, which is specified by its
- *          location and name, \p loc_id and \p obj_name, respectively.
- *          The attribute is located by its index position and the attribute
- *          information is returned in the \p ainfo struct.
- *
- *          If \p loc_id fully specifies the object to which the attribute
- *          is attached, \p obj_name should be '.' (a dot).
- *
- *          The attribute is located by means of an index type, an index
- *          traversal order, and a position in the index, \p idx_type,
- *          \p order and \p n, respectively. These parameters and their
- *          valid values are discussed in the description of H5Aiterate2().
- *
- *          The \p ainfo struct, which will contain the returned attribute
- *          information, is described in H5Aget_info().
- *
- *          The link access property list, \p lapl_id, may provide
- *          information regarding the properties of links required to access
- *          the object, \p obj_name.
- *
- * \since 1.8.0
- *
- */
-H5_DLL herr_t  H5Aget_info_by_idx(hid_t loc_id, const char *obj_name,
-    H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
-    H5A_info_t *ainfo /*out*/, hid_t lapl_id);
-/*-------------------------------------------------------------------------*/
-/**\ingroup H5A
- *
- * \brief Renames an attribute
- *
- * \fgdt_loc_id
- * \param[in] old_name   Name of the attribute to be changed
- * \param[in] new_name   New name for the attribute
- *
- * \return \herr_t
- *
- * \details H5Arename() changes the name of the attribute located at
- *          \p loc_id.
- *
- *          The old name, \p old_name, is changed to the new name,
- *          \p new_name.
- *
- * \since 1.6.0
- *
- */
-H5_DLL herr_t  H5Arename(hid_t loc_id, const char *old_name, const char *new_name);
-/*-------------------------------------------------------------------------*/
-/**\ingroup H5A
- *
- * \fgdt_loc_id
- * \param[in] obj_name      Name of object, relative to location, whose
- *                          attribute is to be renamed
- * \param[in] old_attr_name Prior attribute name
- * \param[in] new_attr_name New attribute name
- * \lapl_id
- *
- * \details H5Arename_by_name() changes the name of attribute that is
- *          attached to the object specified by \p loc_id and \p obj_name.
- *          The attribute named \p old_attr_name is renamed
- *          \p new_attr_name.
- *
- *          The link access property list, \p lapl_id, may provide
- *          information regarding the properties of links required to
- *          access the object, \p obj_name.
- *
- * \since 1.8.0
- *
- */
-H5_DLL herr_t  H5Arename_by_name(hid_t loc_id, const char *obj_name,
-    const char *old_attr_name, const char *new_attr_name, hid_t lapl_id);
+H5_DLL hid_t   H5Aget_type(hid_t attr_id);
 /*-------------------------------------------------------------------------*/
 /**\ingroup H5A
  *
@@ -770,6 +542,330 @@ H5_DLL herr_t  H5Arename_by_name(hid_t loc_id, const char *obj_name,
  */
 H5_DLL herr_t  H5Aiterate2(hid_t loc_id, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op, void *op_data);
+/*--------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Calls user-defined function for each attribute on an object
+ *
+ * \fgdt_loc_id
+ * \param[in] obj_name    Name of object, relative to location
+ * \param[in] idx_type    Type of index
+ * \param[in] order       Order in which to iterate over index
+ * \param[in,out] idx     Initial and returned offset within index
+ * \param[in] op          User-defined function to pass each attribute to
+ * \param[in,out] op_data User data to pass through to and to be returned
+ *                        by iterator operator function
+ * \lapl_id
+ *
+ * \return \herr_t
+ *         Further note that this function returns the return value of
+ *         the last operator if it was non-zero, which can be a negative
+ *         value, zero if all attributes were processed, or a positive value
+ *         indicating short-circuit success.
+ *
+ * \details H5Aiterate_by_name() iterates over the attributes attached
+ *          to the dataset or group specified with \p loc_id and \p obj_name.
+ *          For each attribute, user-provided data, \p op_data, with
+ *          additional information as defined below, is passed to a
+ *          user-defined function, \p op, which operates on that attribute.
+ *
+ *          If \p loc_id fully specifies the object to which these
+ *          attributes are attached, \p obj_name should be '.' (a dot).
+ *
+ *          The order of the iteration and the attributes iterated over
+ *          are specified by three parameters: the index type, \p idx_type;
+ *          the order in which the index is to be traversed, \p order;
+ *          and the attribute’s position in the index, \p idx.
+ *
+ *          The type of index specified by \p idx_type can be one of the
+ *          following:
+ *
+ *          \indexes
+ *
+ *          The order in which the index is to be traversed, as specified
+ *          by \p order, can be one of the following:
+ *
+ *          \orders
+ *
+ *          The next attribute to be operated on is specified by \p idx,
+ *          a position in the index.
+ *
+ *          For example, if \p idx_type, \p order, and \p idx are set to
+ *          #H5_INDEX_NAME, #H5_ITER_INC, and 5, respectively, the attribute
+ *          in question is the fifth attribute from the beginning of the
+ *          alpha-numeric index of attribute names. If \p order were set to
+ *          #H5_ITER_DEC, it would be the fifth attribute from the end of
+ *          the index.
+ *
+ *          The parameter \p idx is passed in on an H5Aiterate_by_name()
+ *          call with one value and may be returned with another value. The
+ *          value passed in identifies the parameter to be operated on first;
+ *          the value returned identifies the parameter to be operated on in
+ *          the next step of the iteration.
+ *
+ *          The #H5A_operator2_t prototype for the \p op parameter is as
+ *          follows:
+ *          \code
+ *          typedef herr_t (*H5A_operator2_t)( hid_t location_id,
+ *             const char *attr_name, const H5A_info_t *ainfo,
+ *             void *op_data)
+ *          \endcode
+ *          The operation receives the location identifier for the group or
+ *          dataset being iterated over, \p location_id; the name of the
+ *          current object attribute, \p attr_name; the attribute’s info
+ *          struct, \p ainfo; and a pointer to the operator data passed
+ *          into H5Aiterate_by_name(), \p op_data.
+ *
+ *          Valid return values from an operator and the resulting
+ *          H5Aiterate_by_name() and \p op behavior are as follows:
+ *
+ *          \li Zero causes the iterator to continue, returning zero when
+ *              all attributes have been processed.
+ *          \li A positive value causes the iterator to immediately return
+ *              that positive value, indicating short-circuit success.
+ *              The iterator can be restarted at the next attribute, as
+ *              indicated by the return value of \p idx.
+ *          \li A negative value causes the iterator to immediately return
+ *              that value, indicating failure. The iterator can be
+ *              restarted at the next attribute, as indicated by the return
+ *              value of \p idx.
+ *
+ *          The link access property list, \p lapl_id, may provide
+ *          information regarding the properties of links required to access
+ *          the object, \p obj_name.
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL herr_t  H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
+    H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op, void *op_data,
+    hid_t lapl_id);
+/*--------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Opens an attribute for an object specified by object identifier and
+ *        attribute name
+ *
+ * \fgdt_loc_id
+ * \param[in]  attr_name    Name of attribute to open
+ * \aapl_id
+ *
+ * \return \hid_tv{attribute}
+ *
+ * \details H5Aopen() opens an existing attribute, \p attr_name, that is
+ *          attached to object specified by an object identifier, \p obj_id.
+ *
+ *          The attribute access property list, \p aapl_id, is currently unused
+ *          and should be #H5P_DEFAULT.
+ *
+ *          This function, H5Aopen_by_idx() or H5Aopen_by_name() must be called
+ *          before the attribute can be accessed for any further purpose,
+ *          including reading, writing, or any modification.
+ *
+ *          The attribute identifier returned by this function must be released
+ *          with H5Aclose() or resource leaks will develop.
+ *
+ * \since 1.8.0
+ *
+ * \see H5Aclose(), H5Acreate()
+ */
+/*--------------------------------------------------------------------------*/
+H5_DLL hid_t   H5Aopen(hid_t obj_id, const char *attr_name, hid_t aapl_id);
+/*--------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Opens the nth attribute attached to an object
+ *
+ * \fgdt_loc_id
+ * \param[in] obj_name  Name of object to which attribute is attached,
+ *                      relative to location
+ * \param[in] idx_type  Type of index
+ * \param[in] order     Index traversal order
+ * \param[in] n         Attribute’s position in index
+ * \aapl_id
+ * \lapl_id
+ *
+ * \return \hid_tv{attribute}
+ *
+ * \details H5Aopen_by_idx() opens an existing attribute that is attached
+ *          to an object specified by location and name, \p loc_id and
+ *          \p obj_name, respectively. If \p loc_id fully specifies the
+ *          object to which the attribute is attached, \p obj_name, should
+ *          be  '.'  (a dot).
+ *
+ *          The attribute is identified by an index type, an index traversal
+ *          order, and a position in the index, \p idx_type, \p order and
+ *          \p n, respectively. These parameters and their valid values are
+ *          discussed in the description of H5Aiterate2().
+ *
+ *          The attribute access property list, \p aapl_id, is currently
+ *          unused and should currently be #H5P_DEFAULT.
+ *
+ *          The link access property list, \p lapl_id, may provide
+ *          information regarding the properties of links required to access
+ *          the object, \p obj_name.
+ *
+ *          This function, H5Aopen(), or H5Aopen_by_name() must be called
+ *          before an attribute can be accessed for any further purpose,
+ *          including reading, writing, or any modification.
+ *
+ *          The attribute identifier returned by this function must be
+ *          released with H5Aclose() or resource leaks will develop.
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL hid_t   H5Aopen_by_idx(hid_t loc_id, const char *obj_name,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t aapl_id,
+    hid_t lapl_id);
+/*--------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Opens an attribute for an object by object name and attribute name
+ *
+ * \fgdt_loc_id
+ * \param[in] obj_name   Name of object to which attribute is attached,
+ *                       relative to \p loc_id
+ * \param[in] attr_name  Name of attribute to open
+ * \aapl_id
+ * \lapl_id
+ *
+ * \return \hid_tv{attribute}
+ *
+ * \details H5Aopen_by_name() opens an existing attribute, \p attr_name,
+ *          that is attached to an object specified by location and name,
+ *          \p loc_id and \p obj_name, respectively.
+ *
+ *          \p loc_id specifies a location from which the target object can
+ *          be located and \p obj_name is an object name relative to
+ *          \p loc_id. If \p loc_id fully specifies the object to which the
+ *          attribute is attached, \p obj_name should be '.' (a dot).
+ *
+ *          The attribute access property list, \p aapl_id, is currently
+ *          unused and should currently be #H5P_DEFAULT.
+ *
+ *          The link access property list, \p lapl_id, may provide
+ *          information regarding the properties of links required to access
+ *          the object, \p obj_name.
+ *
+ *          This function, H5Aopen(), or H5Aopen_by_idx() must be called
+ *          before an attribute can be accessed for any further purpose,
+ *          including reading, writing, or any modification.
+ *
+ *          The attribute identifier returned by this function must be
+ *          released with H5Aclose() or resource leaks will develop.
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL hid_t   H5Aopen_by_name(hid_t loc_id, const char *obj_name,
+    const char *attr_name, hid_t aapl_id, hid_t lapl_id);
+/*-------------------------------------------------------------------------- */
+
+/**\ingroup H5A
+ *
+ * \brief Reads the value of an attribute
+ *
+ * \attr_id
+ * \mem_type_id{dtype_id}
+ * \param[out] buf        Buffer for data to be read
+ *
+ * \return \herr_t
+ *
+ * \details H5Aread() reads an attribute, specified with \p attr_id. The
+ *          attribute's in-memory datatype is specified with \p dtype_id. The
+ *          entire attribute is read into \p buf from the file.
+ *
+ *          Datatype conversion takes place at the time of a read or write and
+ *          is automatic.
+ *
+ * \version 1.8.8  Fortran updated to Fortran2003.
+ * \version 1.4.2  The \p dims parameter was added to the Fortran API in this
+ *                 release.
+ * \since   1.0.0
+ *
+ * \see H5Awrite()
+ *
+*/
+/*--------------------------------------------------------------------------*/
+H5_DLL herr_t  H5Aread(hid_t attr_id, hid_t type_id, void *buf);
+/*-------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Renames an attribute
+ *
+ * \fgdt_loc_id
+ * \param[in] old_name   Name of the attribute to be changed
+ * \param[in] new_name   New name for the attribute
+ *
+ * \return \herr_t
+ *
+ * \details H5Arename() changes the name of the attribute located at
+ *          \p loc_id.
+ *
+ *          The old name, \p old_name, is changed to the new name,
+ *          \p new_name.
+ *
+ * \since 1.6.0
+ *
+ */
+H5_DLL herr_t  H5Arename(hid_t loc_id, const char *old_name, const char *new_name);
+/*-------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \fgdt_loc_id
+ * \param[in] obj_name      Name of object, relative to location, whose
+ *                          attribute is to be renamed
+ * \param[in] old_attr_name Prior attribute name
+ * \param[in] new_attr_name New attribute name
+ * \lapl_id
+ *
+ * \details H5Arename_by_name() changes the name of attribute that is
+ *          attached to the object specified by \p loc_id and \p obj_name.
+ *          The attribute named \p old_attr_name is renamed
+ *          \p new_attr_name.
+ *
+ *          The link access property list, \p lapl_id, may provide
+ *          information regarding the properties of links required to
+ *          access the object, \p obj_name.
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL herr_t  H5Arename_by_name(hid_t loc_id, const char *obj_name,
+    const char *old_attr_name, const char *new_attr_name, hid_t lapl_id);
+/*--------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Writes data to an attribute
+ *
+ * \attr_id
+ * \mem_type_id{dtype}
+ * \param[out]  buf       Data to be written
+ *
+ * \return \herr_t
+ *
+ * \details H5Awrite() writes an attribute, specified with \p attr_id. The
+ *          attribute's in-memory datatype is specified with \p dtype_id.
+ *          The entire attribute is written from \p buf to the file.
+ *
+ *          If \p dtype_id is either a fixed-length or variable-length string,
+ *          it is important to set the string length when defining the datatype.
+ *          String datatypes are derived from #H5T_C_S1 (or #H5T_FORTRAN_S1 for
+ *          Fortran codes), which defaults to 1 character in size.
+ *          See H5Tset_size() and Creating variable-length string datatypes.
+ *
+ *          Datatype conversion takes place at the time of a read or write and
+ *          is automatic.
+ *
+ * \version 1.8.8   Fortran updated to Fortran2003.
+ * \version 1.4.2   Fortran \p dims parameter added in this release
+ * \since 1.0.0
+ * \see H5Aread()
+ *
+ * \todo prototype for H5Awrite/H5Aread does not match function
+ */
+H5_DLL herr_t  H5Awrite(hid_t attr_id, hid_t type_id, const void *buf);
 H5_DLL herr_t  H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op, void *op_data,
     hid_t lapd_id);
