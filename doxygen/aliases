@@ -130,13 +130,6 @@ ALIASES += plist_id="\param[in] plist_id Property list identifier"
 ALIASES += plist_id{1}="\param[in] \1 Property list identifier"
 
 ################################################################################
-# Versioning
-################################################################################
-
-ALIASES += c_fun_intro="The C function was introduced in this release."
-ALIASES += f_fun_intro="The Fortran subroutine was introduced in this release."
-
-################################################################################
 # The Usual Suspects
 ################################################################################
 
