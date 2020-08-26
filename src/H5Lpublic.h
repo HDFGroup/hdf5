@@ -511,7 +511,7 @@ H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
  *          \p size is the size of \p buf and should be the size of the link
  *          value being returned. This size value can be determined through a
  *          call to H5Lget_info(); it is returned in the \c val_size field of
- *          the \ref H5L_info \c struct.
+ *          the \ref H5L_info_t \c struct.
  *
  *          If \p size is smaller than the size of the returned value, then the
  *          string stored in \p buf will be truncated to \p size bytes. For

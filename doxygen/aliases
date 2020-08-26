@@ -130,6 +130,16 @@ ALIASES += plist_id="\param[in] plist_id Property list identifier"
 ALIASES += plist_id{1}="\param[in] \1 Property list identifier"
 
 ################################################################################
+# Objects
+################################################################################
+
+ALIASES += obj_id="\param[in] obj_id Object identifier"
+ALIASES += obj_id{1}="\param[in] \1 Object identifier"
+
+ALIASES += fgdta_obj_id="\obj_id. The identifier may be that of a file, group, dataset, named datatype, or attribute."
+ALIASES += fgdta_obj_id{1}="\obj_id{\1}. The identifier may be that of a file, group, dataset, named datatype, or attribute."
+
+################################################################################
 # The Usual Suspects
 ################################################################################
 
