@@ -1951,6 +1951,13 @@ H5D_close(H5D_t *dataset)
          */
         dataset->shared->closing = TRUE;
 
+        /* If in streaming I/O mode, release that info and reset the mode */
+        if(dataset->shared->is_streaming) {
+            if(H5D__stream_cleanup(dataset) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy streaming I/O information")
+            dataset->shared->is_streaming = FALSE;
+        } /* end if */
+
         /* Free cached information for each kind of dataset */
         switch(dataset->shared->layout.type) {
             case H5D_CONTIGUOUS:
@@ -3043,6 +3050,10 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size, hbool_t do_append)
     /* Check if we are allowed to modify this file */
     if(0 == (H5F_INTENT(dset->oloc.file) & H5F_ACC_RDWR))
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file")
+
+    /* Check if we are performing a regular 'set_extent' call when in streamed I/O mode */
+    if(dset->shared->is_streaming && !do_append)
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "can't set dataset extent when in streamed I/O mode")
 
     /* Check if we are allowed to modify the space; only datasets with chunked and external storage are allowed to be modified */
     if(H5D_COMPACT == dset->shared->layout.type)

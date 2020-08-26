@@ -467,6 +467,33 @@ struct H5D_shared_t {
     H5D_append_flush_t   append_flush;   /* Append flush property information */
     char                *extfile_prefix; /* expanded external file prefix */
     char                *vds_prefix;     /* expanded vds prefix */
+
+    /* Streaming I/O information */
+    hbool_t             is_streaming;   /* Whether dataset is in streamed I/O mode */
+    struct H5D_stream_info_t {      /* Cached information for streamed I/O operations */
+        /* Input parameters */
+        hid_t dxpl_id;              /* DXPL for all streamed I/O operations */
+        unsigned axis;              /* Axis to extend / sequence along */
+        size_t extension;           /* # of elements to extend / sequence for each operation */
+        hid_t mem_type_id;          /* Datatype ID for memory buffer */
+
+        /* Append Info */
+        struct {
+            H5S_t *file_space;      /* Copy of dataset dataspace */
+            H5S_t *mem_space;       /* Memory buffer dataspace */
+            hsize_t offset;         /* Current location of the "append point" */
+
+            /* Cached information */
+            hsize_t hyper_start[H5S_MAX_RANK];  /* Starting location for selection */
+            hsize_t hyper_count[H5S_MAX_RANK];  /* Size of hyperslab block for selection */
+        } append;
+
+        /* Append Info */
+        struct {
+            hsize_t offset;         /* Current location of the "sequence point" */
+        } sequence;
+    } stream;
+
 };
 
 struct H5D_t {
@@ -715,6 +742,7 @@ H5_DLL herr_t H5D__stream_start(H5D_t *dset, hid_t dxpl_id, unsigned axis,
 H5_DLL herr_t H5D__stream_append(H5D_t *dset, const void *buf);
 H5_DLL herr_t H5D__stream_sequence(H5D_t *dset, void *buf);
 H5_DLL herr_t H5D__stream_is_streaming(const H5D_t *dset, hbool_t *is_streaming);
+H5_DLL herr_t H5D__stream_cleanup(H5D_t *dset);
 H5_DLL herr_t H5D__stream_stop(H5D_t *dset);
 
 #ifdef H5_HAVE_PARALLEL

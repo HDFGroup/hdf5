@@ -1223,9 +1223,6 @@ H5Dstream_start(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset transfer property list");
 
-    /* Set DXPL for operation */
-    H5CX_set_dxpl(dxpl_id);
-
     /* Issue the 'start streaming' VOL callback to the connector */
     if(H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_STREAM_START, dxpl_id, H5_REQUEST_NULL, axis, extension, mem_type_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't start streamed I/O mode")

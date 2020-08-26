@@ -783,6 +783,10 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     /* check args */
     HDassert(dataset && dataset->oloc.file);
 
+    /* Check if we are performing a regular 'write' call when in streamed I/O mode */
+    if(dataset->shared->is_streaming && !do_append)
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "can't perform non-streamed I/O when in streamed I/O mode")
+
     /* All filters in the DCPL must have encoding enabled. */
     if(!dataset->shared->checked_filters) {
         if(H5Z_can_apply(dataset->shared->dcpl_id, dataset->shared->type_id) < 0)
