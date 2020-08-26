@@ -511,7 +511,7 @@ H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
  *          \p size is the size of \p buf and should be the size of the link
  *          value being returned. This size value can be determined through a
  *          call to H5Lget_info(); it is returned in the \c val_size field of
- *          the \ref H5L_info1_t or \ref H5L_info2_t struct.
+ *          the \ref H5L_info \c struct.
  *
  *          If \p size is smaller than the size of the returned value, then the
  *          string stored in \p buf will be truncated to \p size bytes. For
@@ -533,8 +533,8 @@ H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
  *
  *          This function should be used only after H5Lget_info() has been
  *          called to verify that \p name is a symbolic link. This can be
- *          deteremined from the \c link_type field of the \ref H5L_info1_t
- *          or \ref H5L_info2_t struct.
+ *          deteremined from the \c link_type field of the \ref H5L_info_t
+ *          \c struct.
  *
  * \note This function will fail if called on a hard link.
  *
@@ -586,8 +586,8 @@ H5_DLL herr_t H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/,
  *
  *          The size in bytes of link_val is specified in \p size. The size
  *          value can be determined through a call to H5Lget_info_by_idx(); it
- *          is returned in the \c val_size field of the \ref H5L_info1_t or
- *          \ref H5L_info2_t struct. If
+ *          is returned in the \c val_size field of the \ref H5L_info_t
+ *          \c struct. If
  *          size is smaller than the size of the returned value, then the
  *          string stored in link_val will be truncated to size bytes. For soft
  *          links, this means that the value will not be null terminated.
