@@ -522,6 +522,25 @@ H5VL__native_dataset_optional(void *obj, H5VL_dataset_optional_t optional_type, 
             break;
         }
 
+        case H5VL_NATIVE_DATASET_CHUNK_ITER:
+            { /* H5Dchunk_iter */
+                H5D_chunk_iter_op_t cb  = HDva_arg(arguments, H5D_chunk_iter_op_t);
+                void *op_data           = HDva_arg(arguments, void *);
+
+                HDassert(dset->shared);
+
+                /* Make sure the dataset is chunked */
+                if(H5D_CHUNKED != dset->shared->layout.type) {
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
+                }
+
+                /* Call private function */
+                if(H5D__chunk_iter(dset, cb, op_data) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't iterate over chunks")
+
+                break;
+            }
+
         case H5VL_NATIVE_DATASET_CHUNK_READ: { /* H5Dread_chunk */
             const hsize_t *offset  = HDva_arg(arguments, hsize_t *);
             uint32_t *     filters = HDva_arg(arguments, uint32_t *);
