@@ -116,6 +116,9 @@ typedef herr_t (*H5D_scatter_func_t)(const void **src_buf /*out*/, size_t *src_b
 /* Define the operator function pointer for H5Dgather() */
 typedef herr_t (*H5D_gather_func_t)(const void *dst_buf, size_t dst_buf_bytes_used, void *op_data);
 
+/* Define the operator function pointer for H5Dchunk_iter() */
+typedef int (*H5D_chunk_iter_op_t)(const hsize_t *offset, uint32_t filter_mask, haddr_t addr, uint32_t nbytes, void *op_data);
+
 /********************/
 /* Public Variables */
 /********************/
@@ -143,6 +146,7 @@ H5_DLL herr_t  H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *coord, u
                                           haddr_t *addr, hsize_t *size);
 H5_DLL herr_t  H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_idx, hsize_t *coord,
                                  unsigned *filter_mask, haddr_t *addr, hsize_t *size);
+H5_DLL herr_t H5Dchunk_iter(hid_t dset_id, H5D_chunk_iter_op_t cb, void *op_data);
 H5_DLL haddr_t H5Dget_offset(hid_t dset_id);
 H5_DLL herr_t  H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                        hid_t plist_id, void *buf /*out*/);
