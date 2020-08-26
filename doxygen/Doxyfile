@@ -852,7 +852,8 @@ INPUT_ENCODING         = UTF-8
 # C comment), *.py, *.pyw, *.f90, *.f95, *.f03, *.f08, *.f18, *.f, *.for, *.vhd,
 # *.vhdl, *.ucf, *.qsf and *.ice.
 
-FILE_PATTERNS          = *.h \
+FILE_PATTERNS          = H5*public.h \
+                         H5*module.h \
                          *.dox
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
