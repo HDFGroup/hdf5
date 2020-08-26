@@ -1217,7 +1217,17 @@ H5_DLL herr_t H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize);
 H5_DLL herr_t H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
 
 #ifdef H5_HAVE_PARALLEL
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup PH5F
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup PH5F
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag);
 #endif /* H5_HAVE_PARALLEL */
 

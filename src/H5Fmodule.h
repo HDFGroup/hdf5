@@ -36,6 +36,8 @@
  *
  * \defgroup MDC Metadata Cache
  * \ingroup H5F
+ * \defgroup PH5F Parallel
+ * \ingroup H5F
  * \defgroup SWMR Single Writer Multiple Readers
  * \ingroup H5F
  */
