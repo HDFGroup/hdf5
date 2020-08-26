@@ -176,6 +176,27 @@ H5_DLL hid_t   H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char 
 /*-------------------------------------------------------------------------*/
 /**\ingroup H5A
  *
+ * \brief Deletes an attribute from a specified location
+ *
+ * \fgdt_loc_id
+ * \param[in] attr_name  Name of the attribute to delete
+ *
+ * \return \herr_t
+ *
+ * \details H5Adelete() removes the attribute specified by its name,
+ *          \p attr_name, from a file, dataset, group, or named datatype.
+ *          This function should not be used when attribute identifiers
+ *          are open on \p loc_id as it may cause the internal indexes of
+ *          the attributes to change and future writes to the open
+ *          attributes to produce incorrect results.
+ *
+ * \since 1.0.0
+ *
+ */
+H5_DLL herr_t  H5Adelete(hid_t loc_id, const char *attr_name);
+/*-------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
  * \brief Gets an attribute creation property list identifier
  *
  * \attr_id
@@ -646,7 +667,7 @@ H5_DLL herr_t  H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t
  * \brief Opens an attribute for an object specified by object identifier and
  *        attribute name
  *
- * \fgdt_loc_id
+ * \fgdt_loc_id{obj_id}
  * \param[in]  attr_name    Name of attribute to open
  * \aapl_id
  *
@@ -788,7 +809,7 @@ H5_DLL hid_t   H5Aopen_by_name(hid_t loc_id, const char *obj_name,
  *
 */
 /*--------------------------------------------------------------------------*/
-H5_DLL herr_t  H5Aread(hid_t attr_id, hid_t type_id, void *buf);
+H5_DLL herr_t  H5Aread(hid_t attr_id, hid_t dtype_id, void *buf);
 /*-------------------------------------------------------------------------*/
 /**\ingroup H5A
  *
@@ -840,7 +861,7 @@ H5_DLL herr_t  H5Arename_by_name(hid_t loc_id, const char *obj_name,
  * \brief Writes data to an attribute
  *
  * \attr_id
- * \mem_type_id{dtype}
+ * \mem_type_id{dtype_id}
  * \param[out]  buf       Data to be written
  *
  * \return \herr_t
@@ -863,13 +884,8 @@ H5_DLL herr_t  H5Arename_by_name(hid_t loc_id, const char *obj_name,
  * \since 1.0.0
  * \see H5Aread()
  *
- * \todo prototype for H5Awrite/H5Aread does not match function
  */
-H5_DLL herr_t  H5Awrite(hid_t attr_id, hid_t type_id, const void *buf);
-H5_DLL herr_t  H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
-    H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op, void *op_data,
-    hid_t lapd_id);
-H5_DLL herr_t  H5Adelete(hid_t loc_id, const char *name);
+H5_DLL herr_t  H5Awrite(hid_t attr_id, hid_t dtype_id, const void *buf);
 H5_DLL herr_t  H5Adelete_by_name(hid_t loc_id, const char *obj_name,
     const char *attr_name, hid_t lapl_id);
 H5_DLL herr_t  H5Adelete_by_idx(hid_t loc_id, const char *obj_name,
