@@ -246,9 +246,9 @@ H5_DLL herr_t H5Lmove(hid_t src_loc, const char *src_name, hid_t dst_loc,
  *        target.  The new link can have a different name and be in a different
  *        location than the original.
  *
- * \fgdt_loc_id{src_loc_id}
+ * \fgdt_loc_id{src_loc}
  * \param[in] src_name   Name of the link to be copied
- * \fgdt_loc_id{dst_loc_id}
+ * \fgdt_loc_id{dst_loc}
  * \param[in] dst_name   Name to be assigned to the new copy
  * \lcpl_id
  * \lapl_id
@@ -511,7 +511,7 @@ H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
  *          \p size is the size of \p buf and should be the size of the link
  *          value being returned. This size value can be determined through a
  *          call to H5Lget_info(); it is returned in the \c val_size field of
- *          the #H5L_info_t struct.
+ *          the \ref H5L_info_t \c struct.
  *
  *          If \p size is smaller than the size of the returned value, then the
  *          string stored in \p buf will be truncated to \p size bytes. For
@@ -533,7 +533,8 @@ H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
  *
  *          This function should be used only after H5Lget_info() has been
  *          called to verify that \p name is a symbolic link. This can be
- *          deteremined from the \c link_type field of the #H5L_info_t struct.
+ *          deteremined from the \c link_type field of the \ref H5L_info_t
+ *          \c struct.
  *
  * \note This function will fail if called on a hard link.
  *
@@ -585,7 +586,8 @@ H5_DLL herr_t H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/,
  *
  *          The size in bytes of link_val is specified in \p size. The size
  *          value can be determined through a call to H5Lget_info_by_idx(); it
- *          is returned in the \c val_size field of the #H5L_info_t struct. If
+ *          is returned in the \c val_size field of the \ref H5L_info_t
+ *          \c struct. If
  *          size is smaller than the size of the returned value, then the
  *          string stored in link_val will be truncated to size bytes. For soft
  *          links, this means that the value will not be null terminated.
@@ -900,11 +902,11 @@ H5_DLL ssize_t H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
  * \brief Iterates over links in a group, with user callback routine,
  *        according to the order within an index.
  *
- * \group_id
+ * \group_id{grp_id}
  * \idx_type
  * \order
- * \param[in,out] idx_p    Pointer to an iteration index to allow
- *                         continuing a previous iteration
+ * \param[in,out] idx Pointer to an iteration index to allow
+ *                    continuing a previous iteration
  * \op
  * \op_data
  * \return \success{The return value of the first operator that returns
@@ -972,9 +974,9 @@ H5_DLL herr_t H5Literate2(hid_t grp_id, H5_index_t idx_type,
  * \param[in] group_name Group name
  * \idx_type
  * \order
- * \param[in,out] idx_p iteration position at which to start (\Emph{IN}) or
- *                position at which an interrupted iteration may be restarted
- *                (\Emph{OUT})
+ * \param[in,out] idx iteration position at which to start (\Emph{IN}) or
+ *                    position at which an interrupted iteration may be restarted
+ *                    (\Emph{OUT})
  * \op
  * \op_data
  * \lapl_id
@@ -1857,11 +1859,11 @@ H5_DLL herr_t H5Lget_info_by_idx1(hid_t loc_id, const char *group_name,
  * \brief Iterates over links in a group, with user callback routine,
  *        according to the order within an index.
  *
- * \group_id
+ * \group_id{grp_id}
  * \idx_type
  * \order
- * \param[in,out] idx_p    Pointer to an iteration index to allow
- *                         continuing a previous iteration
+ * \param[in,out] idx Pointer to an iteration index to allow
+ *                    continuing a previous iteration
  * \op
  * \op_data
  * \return \success{The return value of the first operator that returns

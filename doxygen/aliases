@@ -75,7 +75,7 @@ ALIASES += file_id{1}="\param[in] \1 File identifier"
 ALIASES += fapl_id="\param[in] fapl_id File access property list identifier"
 ALIASES += fapl_id{1}="\param[in] \1 File access property list identifier"
 
-ALIASES += fcpl_id="\param[in] fapl_id File creation property list identifier"
+ALIASES += fcpl_id="\param[in] fcpl_id File creation property list identifier"
 ALIASES += fcpl_id{1}="\param[in] \1 File creation property list identifier"
 
 ################################################################################
@@ -111,7 +111,7 @@ ALIASES += acpl_id{1}="\param[in] \1 Attribute creation property list identifier
 ALIASES += dapl_id="\param[in] dapl_id Dataset access property list identifier"
 ALIASES += dapl_id{1}="\param[in] \1 Dataset access property list identifier"
 
-ALIASES += dcpl_id="\param[in] dapl_id Dataset creation property list identifier"
+ALIASES += dcpl_id="\param[in] dcpl_id Dataset creation property list identifier"
 ALIASES += dcpl_id{1}="\param[in] \1 Dataset creation property list identifier"
 
 ALIASES += gapl_id="\param[in] gapl_id Group access property list identifier"
@@ -130,11 +130,14 @@ ALIASES += plist_id="\param[in] plist_id Property list identifier"
 ALIASES += plist_id{1}="\param[in] \1 Property list identifier"
 
 ################################################################################
-# Versioning
+# Objects
 ################################################################################
 
-ALIASES += c_fun_intro="The C function was introduced in this release."
-ALIASES += f_fun_intro="The Fortran subroutine was introduced in this release."
+ALIASES += obj_id="\param[in] obj_id Object identifier"
+ALIASES += obj_id{1}="\param[in] \1 Object identifier"
+
+ALIASES += fgdta_obj_id="\obj_id. The identifier may be that of a file, group, dataset, named datatype, or attribute."
+ALIASES += fgdta_obj_id{1}="\obj_id{\1}. The identifier may be that of a file, group, dataset, named datatype, or attribute."
 
 ################################################################################
 # The Usual Suspects

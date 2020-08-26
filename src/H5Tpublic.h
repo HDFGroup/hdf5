@@ -23,9 +23,10 @@
 
 #define HOFFSET(S,M)    (offsetof(S,M))
 
-/** These are the various classes of datatypes
- *  \internal If this goes over 16 types (0-15), the file format will need to
- *            change.
+/**
+ * These are the various classes of datatypes
+ * internal If this goes over 16 types (0-15), the file format will need to
+ *          change.
  */
 typedef enum H5T_class_t {
     H5T_NO_CLASS         = -1,  /**< error                                   */
@@ -44,7 +45,9 @@ typedef enum H5T_class_t {
     H5T_NCLASSES                /*this must be last                          */
 } H5T_class_t;
 
-/** Byte orders */
+/**
+ * Byte orders
+ */
 typedef enum H5T_order_t {
     H5T_ORDER_ERROR      = -1,  /**< error                                   */
     H5T_ORDER_LE         = 0,   /**< little endian                           */
@@ -55,7 +58,9 @@ typedef enum H5T_order_t {
     /*H5T_ORDER_NONE must be last */
 } H5T_order_t;
 
-/** Types of integer sign schemes */
+/**
+ * Types of integer sign schemes
+ */
 typedef enum H5T_sign_t {
     H5T_SGN_ERROR        = -1,  /**< error                                   */
     H5T_SGN_NONE         = 0,   /**< this is an unsigned type                */
@@ -64,7 +69,9 @@ typedef enum H5T_sign_t {
     H5T_NSGN             = 2    /*this must be last!                         */
 } H5T_sign_t;
 
-/** Floating-point normalization schemes */
+/**
+ * Floating-point normalization schemes
+ */
 typedef enum H5T_norm_t {
     H5T_NORM_ERROR       = -1,  /**< error                                   */
     H5T_NORM_IMPLIED     = 0,   /**< msb of mantissa isn't stored, always 1  */
@@ -73,7 +80,8 @@ typedef enum H5T_norm_t {
     /*H5T_NORM_NONE must be last */
 } H5T_norm_t;
 
-/** Character set to use for text strings.
+/**
+ * Character set to use for text strings.
  * \internal Do not change these values since they appear in HDF5 files!
  */
 typedef enum H5T_cset_t {
@@ -97,7 +105,8 @@ typedef enum H5T_cset_t {
 } H5T_cset_t;
 #define H5T_NCSET H5T_CSET_RESERVED_2    		/*Number of character sets actually defined  */
 
-/** Type of padding to use in character strings.
+/**
+ * Type of padding to use in character strings.
  * \internal  Do not change these values since they appear in HDF5 files!
  */
 typedef enum H5T_str_t {
@@ -121,7 +130,9 @@ typedef enum H5T_str_t {
 } H5T_str_t;
 #define H5T_NSTR H5T_STR_RESERVED_3		/*num H5T_str_t types actually defined	     */
 
-/** Type of padding to use in other atomic types */
+/**
+ * Type of padding to use in other atomic types
+ */
 typedef enum H5T_pad_t {
     H5T_PAD_ERROR        = -1,  /**< error                           */
     H5T_PAD_ZERO         = 0,   /**< always set to zero              */
@@ -131,21 +142,27 @@ typedef enum H5T_pad_t {
     H5T_NPAD             = 3    /*THIS MUST BE LAST                          */
 } H5T_pad_t;
 
-/** Commands sent to conversion functions */
+/**
+ * Commands sent to conversion functions
+ */
 typedef enum H5T_cmd_t {
     H5T_CONV_INIT	= 0,	/**< query and/or initialize private data	     */
     H5T_CONV_CONV	= 1, 	/**< convert data from source to dest datatype */
     H5T_CONV_FREE	= 2	/**< function is being removed from path	     */
 } H5T_cmd_t;
 
-/** How is the `bkg' buffer used by the conversion function? */
+/**
+ * How is the `bkg' buffer used by the conversion function?
+ */
 typedef enum H5T_bkg_t {
     H5T_BKG_NO		= 0, 	/**< background buffer is not needed, send NULL */
     H5T_BKG_TEMP	= 1,	/**< bkg buffer used as temp storage only       */
     H5T_BKG_YES		= 2	/**< init bkg buf with data before conversion   */
 } H5T_bkg_t;
 
-/** Type conversion client data */
+/**
+ * Type conversion client data
+ */
 typedef struct H5T_cdata_t {
     H5T_cmd_t		command;/**< what should the conversion function do?    */
     H5T_bkg_t		need_bkg;/**< is the background buffer needed?	     */
@@ -153,21 +170,27 @@ typedef struct H5T_cdata_t {
     void		*priv;	/**< private data				     */
 } H5T_cdata_t;
 
-/** Conversion function persistence */
+/**
+ * Conversion function persistence
+ */
 typedef enum H5T_pers_t {
     H5T_PERS_DONTCARE	= -1, 	/**< wild card				     */
     H5T_PERS_HARD	= 0,	/**< hard conversion function		     */
     H5T_PERS_SOFT	= 1 	/**< soft conversion function		     */
 } H5T_pers_t;
 
-/** The order to retrieve atomic native datatype */
+/**
+ * The order to retrieve atomic native datatype
+ */
 typedef enum H5T_direction_t {
     H5T_DIR_DEFAULT     = 0,    /**< default direction is inscendent        */
     H5T_DIR_ASCEND      = 1,    /**< in inscendent order                    */
     H5T_DIR_DESCEND     = 2     /**< in descendent order                    */
 } H5T_direction_t;
 
-/** The exception type passed into the conversion callback function */
+/**
+ * The exception type passed into the conversion callback function
+ */
 typedef enum H5T_conv_except_t {
     H5T_CONV_EXCEPT_RANGE_HI       = 0,   /**< source value is greater than destination's range */
     H5T_CONV_EXCEPT_RANGE_LOW      = 1,   /**< source value is less than destination's range    */
@@ -178,14 +201,17 @@ typedef enum H5T_conv_except_t {
     H5T_CONV_EXCEPT_NAN            = 6    /**< source value is NaN(floating number)             */
 } H5T_conv_except_t;
 
-/** The return value from conversion callback function H5T_conv_except_func_t() */
+/**
+ * The return value from conversion callback function H5T_conv_except_func_t()
+ */
 typedef enum H5T_conv_ret_t {
     H5T_CONV_ABORT      = -1,   /**< abort conversion                           */
     H5T_CONV_UNHANDLED  = 0,    /**< callback function failed to handle the exception      */
     H5T_CONV_HANDLED    = 1     /**< callback function handled the exception successfully  */
 } H5T_conv_ret_t;
 
-/** Variable Length Datatype struct in memory (This is only used for VL
+/**
+ * Variable Length Datatype struct in memory (This is only used for VL
  * sequences, not VL strings, which are stored in char *'s)
  */
 typedef struct {
@@ -194,11 +220,15 @@ typedef struct {
 } hvl_t;
 
 /* Variable Length String information */
-/** Indicate that a string is variable length (null-terminated in C, instead of fixed length) */
+/**
+ * Indicate that a string is variable length (null-terminated in C, instead of
+ * fixed length)
+ */
 #define H5T_VARIABLE    ((size_t)(-1))
 
 /* Opaque information */
-/** Maximum length of an opaque tag
+/**
+ * Maximum length of an opaque tag
  * \internal This could be raised without too much difficulty
  */
 #define H5T_OPAQUE_TAG_MAX      256
@@ -208,12 +238,15 @@ typedef struct {
 extern "C" {
 #endif
 
-/** All datatype conversion functions are... */
+/**
+ * All datatype conversion functions are...
+ */
 typedef herr_t (*H5T_conv_t) (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
       size_t nelmts, size_t buf_stride, size_t bkg_stride, void *buf,
       void *bkg, hid_t dset_xfer_plist);
 
-/** Exception handler.  If an exception like overflow happenes during conversion,
+/**
+ * Exception handler.  If an exception like overflow happenes during conversion,
  * this function is called if it's registered through H5Pset_type_conv_cb().
  */
 typedef H5T_conv_ret_t (*H5T_conv_except_func_t)(H5T_conv_except_t except_type,
@@ -231,19 +264,23 @@ typedef H5T_conv_ret_t (*H5T_conv_except_func_t)(H5T_conv_except_t except_type,
  * The IEEE floating point types in various byte orders.
  */
 
-/** \ingroup PDTF
+/**
+ * \ingroup PDTF
  * 32-bit big-endian IEEE floating-point numbers
  */
 #define H5T_IEEE_F32BE		(H5OPEN H5T_IEEE_F32BE_g)
-/** \ingroup PDTF
+/**
+ * \ingroup PDTF
  * 32-bit little-endian IEEE floating-point numbers
  */
 #define H5T_IEEE_F32LE		(H5OPEN H5T_IEEE_F32LE_g)
-/** \ingroup PDTF
+/**
+ * \ingroup PDTF
  * 64-bit big-endian IEEE floating-point numbers
  */
 #define H5T_IEEE_F64BE		(H5OPEN H5T_IEEE_F64BE_g)
-/** \ingroup PDTF
+/**
+ * \ingroup PDTF
  * 64-bit little-endian IEEE floating-point numbers
  */
 #define H5T_IEEE_F64LE		(H5OPEN H5T_IEEE_F64LE_g)
@@ -257,111 +294,138 @@ H5_DLLVAR hid_t H5T_IEEE_F64LE_g;
  * unsigned integers of various sizes and byte orders.
  */
 
-/** \ingroup PDTI
+/**
+ * \ingroup PDTI
  * 8-bit big-endian signed integers
  */
 #define H5T_STD_I8BE		(H5OPEN H5T_STD_I8BE_g)
-/** \ingroup PDTI
+/**
+ * \ingroup PDTI
  * 8-bit little-endian signed integers
  */
 #define H5T_STD_I8LE		(H5OPEN H5T_STD_I8LE_g)
-/** \ingroup PDTI
+/**
+ * \ingroup PDTI
  * 16-bit big-endian signed integers
  */
 #define H5T_STD_I16BE		(H5OPEN H5T_STD_I16BE_g)
-/** \ingroup PDTI
+/**
+ * \ingroup PDTI
  * 16-bit little-endian signed integers
  */
 #define H5T_STD_I16LE		(H5OPEN H5T_STD_I16LE_g)
-/** \ingroup PDTI
+/**
+ * \ingroup PDTI
  * 32-bit big-endian signed integers
  */
 #define H5T_STD_I32BE		(H5OPEN H5T_STD_I32BE_g)
-/** \ingroup PDTI
+/**
+ * \ingroup PDTI
  * 32-bit little-endian signed integers
  */
 #define H5T_STD_I32LE		(H5OPEN H5T_STD_I32LE_g)
-/** \ingroup PDTI
+/**
+ * \ingroup PDTI
  * 64-bit big-endian signed integers
  */
 #define H5T_STD_I64BE		(H5OPEN H5T_STD_I64BE_g)
-/** \ingroup PDTI
+/**
+ * \ingroup PDTI
  * 64-bit little-endian signed integers
  */
 #define H5T_STD_I64LE		(H5OPEN H5T_STD_I64LE_g)
-/** \ingroup PDTU
+/**
+ * \ingroup PDTU
  * 8-bit big-endian unsigned integers
  */
 #define H5T_STD_U8BE		(H5OPEN H5T_STD_U8BE_g)
-/** \ingroup PDTU
+/**
+ * \ingroup PDTU
  * 8-bit little-endian unsigned integers
  */
 #define H5T_STD_U8LE		(H5OPEN H5T_STD_U8LE_g)
-/** \ingroup PDTU
+/**
+ * \ingroup PDTU
  * 16-bit big-endian unsigned integers
  */
 #define H5T_STD_U16BE		(H5OPEN H5T_STD_U16BE_g)
-/** \ingroup PDTU
+/**
+ * \ingroup PDTU
  * 16-bit little-endian unsigned integers
  */
 #define H5T_STD_U16LE		(H5OPEN H5T_STD_U16LE_g)
-/** \ingroup PDTU
+/**
+ * \ingroup PDTU
  * 32-bit big-endian unsigned integers
  */
 #define H5T_STD_U32BE		(H5OPEN H5T_STD_U32BE_g)
-/** \ingroup PDTU
+/**
+ * \ingroup PDTU
  * 32-bit little-endian unsigned integers
  */
 #define H5T_STD_U32LE		(H5OPEN H5T_STD_U32LE_g)
-/** \ingroup PDTU
+/**
+ * \ingroup PDTU
  * 64-bit big-endian unsigned integers
  */
 #define H5T_STD_U64BE		(H5OPEN H5T_STD_U64BE_g)
-/** \ingroup PDTU
+/**
+ * \ingroup PDTU
  * 64-bit little-endian unsigned integers
  */
 #define H5T_STD_U64LE		(H5OPEN H5T_STD_U64LE_g)
-/** \ingroup PDTB
+/**
+ * \ingroup PDTB
  * 8-bit big-endian bitfield
  */
 #define H5T_STD_B8BE		(H5OPEN H5T_STD_B8BE_g)
-/** \ingroup PDTB
+/**
+ * \ingroup PDTB
  * 8-bit little-endian bitfield
  */
 #define H5T_STD_B8LE		(H5OPEN H5T_STD_B8LE_g)
-/** \ingroup PDTB
+/**
+ * \ingroup PDTB
  * 16-bit big-endian bitfield
  */
 #define H5T_STD_B16BE		(H5OPEN H5T_STD_B16BE_g)
-/** \ingroup PDTB
+/**
+ * \ingroup PDTB
  * 16-bit little-endian bitfield
  */
 #define H5T_STD_B16LE		(H5OPEN H5T_STD_B16LE_g)
-/** \ingroup PDTB
+/**
+ * \ingroup PDTB
  * 32-bit big-endian bitfield
  */
 #define H5T_STD_B32BE		(H5OPEN H5T_STD_B32BE_g)
-/** \ingroup PDTB
+/**
+ * \ingroup PDTB
  * 32-bit little-endian bitfield
  */
 #define H5T_STD_B32LE		(H5OPEN H5T_STD_B32LE_g)
-/** \ingroup PDTB
+/**
+ * \ingroup PDTB
  * 64-bit big-endian bitfield
  */
 #define H5T_STD_B64BE		(H5OPEN H5T_STD_B64BE_g)
-/** \ingroup PDTB
+/**
+ * \ingroup PDTB
  * 64-bit little-endian bitfield
  */
 #define H5T_STD_B64LE		(H5OPEN H5T_STD_B64LE_g)
-/** \ingroup PDTR
+/**
+ * \ingroup PDTR
  * Object reference
  */
 #define H5T_STD_REF_OBJ         (H5OPEN H5T_STD_REF_OBJ_g)
-/** \ingroup PDTR
+/**
+ * \ingroup PDTR
  * Dataset region reference
  */
 #define H5T_STD_REF_DSETREG     (H5OPEN H5T_STD_REF_DSETREG_g)
-/** \ingroup PDTR
+/**
+ * \ingroup PDTR
  * Generic reference
  */
 #define H5T_STD_REF             (H5OPEN H5T_STD_REF_g)
@@ -433,11 +497,13 @@ H5_DLLVAR hid_t H5T_FORTRAN_S1_g;
 #define H5T_INTEL_B16		H5T_STD_B16LE
 #define H5T_INTEL_B32		H5T_STD_B32LE
 #define H5T_INTEL_B64		H5T_STD_B64LE
-/** \ingroup PDTF
+/**
+ *  \ingroup PDTF
  * 32-bit little-endian IEEE floating-point numbers for Intel CPUs
  */
 #define H5T_INTEL_F32		H5T_IEEE_F32LE
-/** \ingroup PDTF
+/**
+ * \ingroup PDTF
  * 64-bit little-endian IEEE floating-point numbers for Intel CPUs
  */
 #define H5T_INTEL_F64		H5T_IEEE_F64LE
@@ -458,11 +524,13 @@ H5_DLLVAR hid_t H5T_FORTRAN_S1_g;
 #define H5T_ALPHA_B16		H5T_STD_B16LE
 #define H5T_ALPHA_B32		H5T_STD_B32LE
 #define H5T_ALPHA_B64		H5T_STD_B64LE
-/** \ingroup PDTF
+/**
+ * \ingroup PDTF
  * 32-bit little-endian IEEE floating-point numbers for DEC Alpha CPUs
  */
 #define H5T_ALPHA_F32		H5T_IEEE_F32LE
-/** \ingroup PDTF
+/**
+ * \ingroup PDTF
  * 64-bit little-endian IEEE floating-point numbers for DEC Alpha CPUs
  */
 #define H5T_ALPHA_F64		H5T_IEEE_F64LE
@@ -483,11 +551,13 @@ H5_DLLVAR hid_t H5T_FORTRAN_S1_g;
 #define H5T_MIPS_B16		H5T_STD_B16BE
 #define H5T_MIPS_B32		H5T_STD_B32BE
 #define H5T_MIPS_B64		H5T_STD_B64BE
-/** \ingroup PDTF
+/**
+ * \ingroup PDTF
  * 32-bit big-endian IEEE floating-point numbers for MIPS CPUs
  */
 #define H5T_MIPS_F32		H5T_IEEE_F32BE
-/** \ingroup PDTF
+/**
+ * \ingroup PDTF
  * 64-bit big-endian IEEE floating-point numbers for MIPS CPUs
  */
 #define H5T_MIPS_F64		H5T_IEEE_F64BE
@@ -495,11 +565,13 @@ H5_DLLVAR hid_t H5T_FORTRAN_S1_g;
 /*
  * The VAX floating point types (i.e. in VAX byte order)
  */
-/** \ingroup PDTF
+/**
+ * \ingroup PDTF
  * 32-bit VAX byte order floating-point numbers for OpenVMS on DEC Alpha CPUs
  */
 #define H5T_VAX_F32		(H5OPEN H5T_VAX_F32_g)
-/** \ingroup PDTF
+/**
+ * \ingroup PDTF
  * 64-bit VAX byte order floating-point numbers for OpenVMS on DEC Alpha CPUs
  */
 #define H5T_VAX_F64		(H5OPEN H5T_VAX_F64_g)
@@ -526,16 +598,19 @@ H5_DLLVAR hid_t H5T_VAX_F64_g;
 #define H5T_NATIVE_ULONG        (H5OPEN H5T_NATIVE_ULONG_g)
 #define H5T_NATIVE_LLONG        (H5OPEN H5T_NATIVE_LLONG_g)
 #define H5T_NATIVE_ULLONG       (H5OPEN H5T_NATIVE_ULLONG_g)
-/** \ingroup PDTF
+/**
+ * \ingroup PDTF
  *  \c float floating-point numbers per \c H5detect.c
  */
 #define H5T_NATIVE_FLOAT        (H5OPEN H5T_NATIVE_FLOAT_g)
-/** \ingroup PDTF
+/**
+ * \ingroup PDTF
  *  \c double floating-point numbers per H5detect()
  */
 #define H5T_NATIVE_DOUBLE       (H5OPEN H5T_NATIVE_DOUBLE_g)
 #if H5_SIZEOF_LONG_DOUBLE !=0
-/** \ingroup PDTF
+/**
+ * \ingroup PDTF
  *  \Code{long double} floating-point numbers per \c H5detect.c
  */
 #define H5T_NATIVE_LDOUBLE	(H5OPEN H5T_NATIVE_LDOUBLE_g)
@@ -632,7 +707,8 @@ H5_DLLVAR hid_t H5T_NATIVE_UINT_FAST64_g;
 /* Operations defined on all datatypes */
 
 /* ---------------------------------------------------------------------------*/
-/**\ingroup GTO
+/**
+ *\ingroup GTO
  *
  *\todo Original has a reference to “Creating variable-length string datatypes”.
  *\todo Create an example for H5Tcreate.
@@ -656,11 +732,11 @@ H5_DLLVAR hid_t H5T_NATIVE_UINT_FAST64_g;
  * Other datatypes, including integer and floating-point datatypes, are typically
  * created by using H5Tcopy to copy and modify a predefined datatype.
  *
- * When creating a variable-length string datatype, size must be #H5T_VARIABLE.
+ * When creating a variable-length string datatype, \p size must be #H5T_VARIABLE.
  *
- * When creating a fixed-length string datatype, size will be the length of
+ * When creating a fixed-length string datatype, \p size will be the length of
  * the string in bytes. The length of the string in characters will depend on i
- * the encoding used; see H5Pset_char_encoding.
+ * the encoding used; see H5Pset_char_encoding().
  *
  * ENUMs created with this function have a signed native integer base datatype.
  * Use H5Tenum_create if a different integer base datatype is required.
@@ -674,9 +750,10 @@ H5_DLLVAR hid_t H5T_NATIVE_UINT_FAST64_g;
  *
  * ------------------------------------------------------------------------
  */
-H5_DLL hid_t H5Tcreate(H5T_class_t type, size_t size);
+H5_DLL hid_t H5Tcreate(H5T_class_t class, size_t size);
 /* ---------------------------------------------------------------------------*/
-/**\ingroup GTO
+/**
+ * \ingroup GTO
  *
  *\todo H5Tcopy returns #H5I_INVALID_HID on fail; we will need to modify return
  *  macro to include H5I_INVALID_HID instead of "negative value".
@@ -691,12 +768,12 @@ H5_DLL hid_t H5Tcreate(H5T_class_t type, size_t size);
  * \details H5Tcopy copies an existing datatype. The returned type is always
  * transient and unlocked.
  *
- * The \p dtype_id argument can be either a datatype identifier, a predefined
+ * The \p obj_id argument can be either a datatype identifier, a predefined
  * datatype (defined in H5Tpublic.h), or a dataset identifier.
- * If \p dtype_id is a dataset identifier,this function returns a transient,
+ * If \p obj_id is a dataset identifier,this function returns a transient,
  * modifiable datatype which is a copy of the dataset's datatype.
  *
- * The datatype identifier should be released with H5Tclose or
+ * The datatype identifier should be released with H5Tclose() or
  * resource leak will occur.
  *
  * \since 1.2.0
@@ -705,7 +782,7 @@ H5_DLL hid_t H5Tcreate(H5T_class_t type, size_t size);
  *
  * -----------------------------------------------------------------------
  */
-H5_DLL hid_t H5Tcopy(hid_t type_id);
+H5_DLL hid_t H5Tcopy(hid_t obj_id);
 H5_DLL herr_t H5Tclose(hid_t type_id);
 H5_DLL htri_t H5Tequal(hid_t type1_id, hid_t type2_id);
 H5_DLL herr_t H5Tlock(hid_t type_id);
@@ -723,7 +800,8 @@ H5_DLL herr_t H5Trefresh(hid_t type_id);
 /* Operations defined on compound datatypes */
 
 /* ---------------------------------------------------------------------------*/
-/**\ingroup COMPOUND
+/**
+ * \ingroup COMPOUND
  *
  * \todo Create example for  H5Tinsert
  *
@@ -751,8 +829,8 @@ H5_DLL herr_t H5Trefresh(hid_t type_id);
  *
  *-------------------------------------------------------------------------
  */
-H5_DLL herr_t H5Tinsert(hid_t parent_id, const char *name, size_t offset,
-			 hid_t member_id);
+H5_DLL herr_t H5Tinsert(hid_t dtype_id, const char *name, size_t offset,
+			 hid_t field_id);
 H5_DLL herr_t H5Tpack(hid_t type_id);
 
 /* Operations defined on enumeration datatypes */
@@ -781,7 +859,8 @@ H5_DLL hid_t H5Tget_super(hid_t type);
 H5_DLL H5T_class_t H5Tget_class(hid_t type_id);
 H5_DLL htri_t H5Tdetect_class(hid_t type_id, H5T_class_t cls);
 /* ---------------------------------------------------------------------------*/
-/**\ingroup GTO
+/**
+ * \ingroup GTO
  *
  *\todo Original has a reference to “Creating variable-length string datatypes”.
  *\todo Create an example for H5Tget_size.
@@ -798,7 +877,7 @@ H5_DLL htri_t H5Tdetect_class(hid_t type_id, H5T_class_t cls);
  * datatype in bytes.
  *
  * For variable-length string datatypes the returned value is the size of the
- * pointer to the actual string, or \c sizeof(\c char \c*). This function does not
+ * pointer to the actual string, or \c sizeof(\c char \c *). This function does not
  * return the size of actual variable-length string data.
  *
  * For variable-length sequence datatypes (see H5Tvlen_create), the returned
@@ -840,9 +919,10 @@ H5_DLL hid_t H5Tget_native_type(hid_t type_id, H5T_direction_t direction);
 /* Setting property values */
 
 /* ---------------------------------------------------------------------------*/
-/**\ingroup GTO
+/**
+ * \ingroup GTO
  *
- *\todo Create an example for H5Tset_size.
+ *\todo Create an example for H5Tset_size().
  *\todo Original has a reference to “Creating variable-length string datatypes”.
  *
  * \brief Sets size for a datatype.
@@ -851,7 +931,7 @@ H5_DLL hid_t H5Tget_native_type(hid_t type_id, H5T_direction_t direction);
  *
  * \return \herr_t
  *
- * \details H5Tset_size  sets the total size in bytes, \psize, for a datatype.
+ * \details H5Tset_size() sets the total size in bytes, \p size, for a datatype.
  *
  * The parameter \p size must have a positive value, unless it is passed as
  * #H5T_VARIABLE and the datatype is a string datatype.

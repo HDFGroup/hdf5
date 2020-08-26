@@ -349,7 +349,7 @@ H5_DLL htri_t H5Fis_accessible(const char *container_name, hid_t fapl_id);
  *-------------------------------------------------------------------------
  */
 H5_DLL hid_t  H5Fcreate(const char *filename, unsigned flags,
-                        hid_t create_plist, hid_t access_plist);
+                        hid_t fcpl_id, hid_t fapl_id);
 /**
  *-------------------------------------------------------------------------
  * \ingroup H5F
@@ -441,7 +441,7 @@ H5_DLL hid_t  H5Fcreate(const char *filename, unsigned flags,
  *
  *-------------------------------------------------------------------------
  */
-H5_DLL hid_t  H5Fopen(const char *filename, unsigned flags, hid_t access_plist);
+H5_DLL hid_t  H5Fopen(const char *filename, unsigned flags, hid_t fapl_id);
 /**
  *-------------------------------------------------------------------------
  * \ingroup H5F
@@ -451,7 +451,7 @@ H5_DLL hid_t  H5Fopen(const char *filename, unsigned flags, hid_t access_plist);
  * \param[in] file_id Identifier of a file for which an additional identifier
  *                    is required
  *
- * \return \hid_t
+ * \return \hid_t{file}
  *
  * \details H5Freopen() returns a new file identifier for an already-open HDF5
  *          file, as specified by \p file_id. Both identifiers share caches and
@@ -601,7 +601,7 @@ H5_DLL herr_t H5Fdelete(const char *filename, hid_t fapl_id);
  * \brief Returns a file creation property list identifier
  *
  * \file_id
- * \return \hid_t
+ * \return \hid_t{file creation property list}
  *
  * \details H5Fget_create_plist() returns the file creation property list
  *          identifier identifying the creation properties used to create this
@@ -627,7 +627,7 @@ H5_DLL hid_t  H5Fget_create_plist(hid_t file_id);
  * \brief Returns a file access property list identifier
  *
  * \file_id
- * \return \hid_t
+ * \return \hid_t{file access property list}
  *
  * \details H5Fget_access_plist() returns the file access property list
  *          identifier of the specified file.
@@ -775,6 +775,7 @@ H5_DLL herr_t H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void **file_handle);
  * \loc_id{loc}
  * \param[in] name Name of the group onto which the file specified by \p child
  *                 is to be mounted
+ * \file_id{child}
  * \param[in] plist File mount property list identifier. Pass #H5P_DEFAULT!
  *
  * \return \herr_t
@@ -1001,9 +1002,129 @@ H5_DLL herr_t H5Fget_mdc_size(hid_t file_id,
  *-------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Freset_mdc_hit_rate_stats(hid_t file_id);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Retrieves name of file to which object belongs
+ *
+ * \obj_id
+ * \param[out] name Buffer for the file name
+ * \param[in] size Size, in bytes, of the \p name buffer
+ *
+ * \return Returns the length of the file name if successful; otherwise returns
+ *         a negative value.
+ *
+ * \details H5Fget_name() retrieves the name of the file to which the object \p
+ *          obj_id belongs. The object can be a file, group, dataset,
+ *          attribute, or named datatype.
+ *
+ *          Up to \p size characters of the file name are returned in \p name;
+ *          additional characters, if any, are not returned to the user
+ *          application.
+ *
+ *          If the length of the name, which determines the required value of
+ *          size, is unknown, a preliminary H5Fget_name() call can be made by
+ *          setting \p name to NULL. The return value of this call will be the
+ *          size of the file name; that value plus one (1) can then be assigned
+ *          to size for a second H5Fget_name() call, which will retrieve the
+ *          actual name. (The value passed in with the parameter \p size must
+ *          be one greater than size in bytes of the actual name in order to
+ *          accommodate the null terminator; if \p size is set to the exact
+ *          size of the name, the last byte passed back will contain the null
+ *          terminator and the last character will be missing from the name
+ *          passed back to the calling application.)
+ *
+ *          If an error occurs, the buffer pointed to by \p name is unchanged
+ *          and the function returns a negative value.
+ *
+ * \since 1.6.3
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL ssize_t H5Fget_name(hid_t obj_id, char *name, size_t size);
-H5_DLL herr_t H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Retrieves name of file to which object belongs
+ *
+ * \fgdta_obj_id
+ * \param[out] file_info Buffer for global file information
+ *
+ * \return \herr_t
+ *
+ * \details H5Fget_info2() returns global information for the file associated
+ *          with the object identifier \p obj_id in the H5F_info2_t \c struct
+ *          named \p file_info.
+ *
+ *          \p obj_id is an identifier for any object in the file of interest.
+ *
+ *          H5F_info2_t struct is defined in H5Fpublic.h as follows:
+ *          \code
+ *          typedef struct H5F_info2_t {
+ *            struct {
+ *              unsigned     vers;
+ *              hsize_t	     super_size;
+ *              hsize_t	     super_ext_size;
+ *            } super;
+ *            struct {
+ *              unsigned     vers;
+ *              hsize_t	     hdr_size;
+ *              hsize_t	     tot_space;
+ *            } free;
+ *            struct {
+ *              unsigned     vers;
+ *              hsize_t      hdr_size;
+ *              H5_ih_info_t msgs_info;
+ *            } sohm;
+ *          } H5F_info2_t;
+ *          \endcode
+ *
+ *          The \c super sub-struct contains the following information:
+ *          \li \c vers is the version number of the superblock.
+ *          \li \c  super_size is the size of the superblock.
+ *          \li \c super_ext_size is the size of the superblock extension.
+ *
+ *          The \c free sub-struct contains the following information:
+ *          \li vers is the version number of the free-space manager.
+ *          \li \c hdr_size is the size of the free-space manager header.
+ *          \li \c tot_space is the total amount of free space in the file.
+ *
+ *          The \c sohm sub-struct contains shared object header message
+ *          information as follows:
+ *          \li \c vers is the version number of the shared object header information.
+ *          \li \c hdr_size is the size of the shared object header message.
+ *          \li \c msgs_info is an H5_ih_info_t struct defined in H5public.h as
+ *              follows:
+ *              \code
+ *              typedef struct H5_ih_info_t {
+ *                hsize_t     index_size;
+ *                hsize_t     heap_size;
+ *              } H5_ih_info_t;
+ *              \endcode
+ *          \li \p index_size is the summed size of all the shared object
+ *              header indexes. Each index might be either a B-tree or
+ *              a list.
+ *          \li \p heap_size is the size of the heap.
+ *
+ *
+ * \since 1.10.0
+ *
+ *-------------------------------------------------------------------------
+ */
+H5_DLL herr_t H5Fget_info2(hid_t obj_id, H5F_info2_t *file_info);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup SWMR
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *info);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup SWMR
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fstart_swmr_write(hid_t file_id);
 H5_DLL ssize_t H5Fget_free_sections(hid_t file_id, H5F_mem_t type,
     size_t nsects, H5F_sect_info_t *sect_info/*out*/);
@@ -1053,6 +1174,11 @@ H5_DLL herr_t H5Fstop_mdc_logging(hid_t file_id);
 H5_DLL herr_t H5Fget_mdc_logging_status(hid_t file_id,
                                         /*OUT*/ hbool_t *is_enabled,
                                         /*OUT*/ hbool_t *is_currently_logging);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup SWMR
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fformat_convert(hid_t fid);
 H5_DLL herr_t H5Freset_page_buffering_stats(hid_t file_id);
 H5_DLL herr_t H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2],
@@ -1091,7 +1217,17 @@ H5_DLL herr_t H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize);
 H5_DLL herr_t H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
 
 #ifdef H5_HAVE_PARALLEL
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup PH5F
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup PH5F
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag);
 #endif /* H5_HAVE_PARALLEL */
 
