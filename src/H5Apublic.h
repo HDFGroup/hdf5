@@ -1118,7 +1118,7 @@ H5_DLL int     H5Aget_num_attrs(hid_t loc_id);
  *
  * \return \herr_t
  *
- * \deprecated This function is deprecated in favor of the function 
+ * \deprecated This function is deprecated in favor of the function
  *             H5Aiterate2().
  *
  * \details H5Aiterate1() iterates over the attributes of the object
@@ -1132,8 +1132,8 @@ H5_DLL int     H5Aget_num_attrs(hid_t loc_id);
  *          then all attributes are processed.
  *
  *          The prototype for #H5A_operator_t is:
- *          \code 
- *          typedef herr_t (*H5A_operator1_t)(hid_t loc_id, 
+ *          \code
+ *          typedef herr_t (*H5A_operator1_t)(hid_t loc_id,
  *              const char *attr_name, void *operator_data);
  *          \endcode
  *          The operation receives the identifier for the group, dataset
