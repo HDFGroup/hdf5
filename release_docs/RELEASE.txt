@@ -234,6 +234,24 @@ New Features
 
     Library:
     --------
+    - Add metadata cache optimization to reduce skip list usage
+
+      On file flush or close, the metadata cache attempts to write out
+      all dirty entries in increasing address order.  To do this, it needs
+      an address sorted list of metadata entries.  Further, since flushing
+      one metadata cache entry can dirty another, this list must support 
+      efficient insertion and deletion.
+
+      The metadata cache uses a skip list of all dirty entries for this 
+      purpose.  Before this release, this skip list was maintained at all 
+      times.  However, since profiling indicates that this imposes a 
+      significant cost, we now construct and maintain the skip list only 
+      when needed.  Specifically, we enable the skip list and load it with 
+      a list of all dirty entries in the metadata cache just before a flush, 
+      and disable it after the flush.
+
+      (JRM - 2020/08/17, HDFFV-11034)
+
     - Add BEST_EFFORT value to HDF5_USE_FILE_LOCKING environment variable
 
       This change adds a BEST_EFFORT to the TRUE/FALSE, 1/0 settings that
@@ -357,21 +375,6 @@ New Features
 
       (ADB - 2020/08/05, HDFFV-9984)
 
-    High-Level APIs:
-    ---------------
-    - 
-
-    C Packet Table API
-    ------------------
-    -
-
-    Internal header file
-    --------------------
-    -
-
-    Documentation
-    -------------
-    -
 
 Support for new platforms, languages and compilers.
 =======================================
@@ -439,6 +442,17 @@ Bug Fixes since HDF5-1.10.6 release
       before when reading dataset with variable length string datatype.
 
       (VC - 2020/07/13, HDFFV-11080)
+
+    -  Fixed issue CVE-2018-17438 
+
+      A division by zero was discovered in H5D__select_io() of H5Dselect.c.
+        https://security-tracker.debian.org/tracker/CVE-2018-17438
+
+      A check was added to protect against division by zero.  When such
+      situation occurs again, the normal HDF5 error handling will be invoked,
+      instead of segmentation fault.
+
+      (BMR, DER - 2020/07/09, HDFFV-10587)
 
     - Fixed CVE-2018-17435
 
@@ -599,12 +613,34 @@ Bug Fixes since HDF5-1.10.6 release
       (DER - 2020/07/27, HDFFV-11027)
 
 
-    Java Library:
-    ----------------
-    -
-
     Configuration
     -------------
+    - Stopped addition of szip header and include directory path for 
+      incompatible libsz
+
+      szlib.h is the same for both 32-bit and 64-bit szip, and the header file
+      and its path were added to the HDF5 binary even though the configure
+      check of a function in libsz later failed and szip compression was not
+      enabled.  The header file and include path are now added only when the 
+      libsz function passes the configure check.
+
+      (LRK - 2020/08/17, HDFFV-10830)
+
+    - Added -fsanitize=address autotools configure option for Clang compiler
+
+      Clang sanitizer options were also added for Clang compilers with CMake.
+
+      (LRK, 2020/08/05, HDFFV-10836)
+
+    - Updated testh5cc.sh.in for functions versioned in HDF5 1.10.
+
+      testh5cc.sh previously tested that the correct version of a function 
+      versioned in HDF5 1.6 or 1.8 was compiled when one of 
+      H5_NO_DEPRECATED_SYMBOLS or H5_USE_16_API_DEFAULT were defined.  This
+      test was extended for additional testing with H5_USE_18_API_DEFAULT. 
+
+      (LRK, 2020/06/22, HDFFV-11000)
+
     - Fixed CMake include properties for Fortran libraries
 
       Corrected the library properties for Fortran to use the
@@ -619,10 +655,6 @@ Bug Fixes since HDF5-1.10.6 release
       strings; v16, v18, v110.
 
       (ADB - 2019/08/12, HDFFV-10879)
-
-    Performance
-    -------------
-    -
 
     Fortran
     --------
@@ -704,21 +736,6 @@ Bug Fixes since HDF5-1.10.6 release
 
      (EIP - 2020/08/12, HDFFV-10436)
 
-    Fortran High-Level APIs:
-    ------
-    -
-
-    Documentation
-    -------------
-    -
-
-    F90 APIs
-    --------
-    -
-
-    C++ APIs
-    --------
-    -
 
     Testing
     -------
@@ -734,24 +751,27 @@ Bug Fixes since HDF5-1.10.6 release
 Supported Platforms
 ===================
 
-    Linux 2.6.32-696.16.1.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
-    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
-    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
-                                  IBM XL C/C++ V13.1
-                                  IBM XL Fortran V15.1
+    Linux 3.10.0-1127.10.1.el7    gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
+    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
+    (echidna)                     GNU Fortran (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
 
-    Linux 3.10.0-327.10.1.el7   GNU C (gcc), Fortran (gfortran), C++ (g++)
+    Linux 2.6.32-754.31.1.el6     IBM XL C/C++ V13.1
+    #1 SMP ppc64 GNU/Linux        IBM XL Fortran V15.1
+    (ostrich)
+
+    Linux 3.10.0-327.18.2.el7     GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
-    (kituo/moohan)                Version 4.8.5 20150623 (Red Hat 4.8.5-4)
-                                    Version 4.9.3, Version 5.2.0
+    (jelly/kituo/moohan)          Version 4.8.5 20150623 (Red Hat 4.8.5-4)
+                                    Version 4.9.3, Version 5.3.0, Version 6.3.0,
+                                    Version 7.2.0, Version 8.3.0, Version 9.1.0
                                   Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                   compilers:
                                      Version 17.0.0.098 Build 20160721
                                   MPICH 3.1.4 compiled with GCC 4.9.3
 
-    SunOS 5.11 32- and 64-bit     Sun C 5.12 SunOS_sparc
-    (emu)                         Sun Fortran 95 8.6 SunOS_sparc
-                                  Sun C++ 5.12 SunOS_sparc
+    SunOS 5.11 11.4.5.12.5.0      Sun C 5.15 SunOS_sparc 2017/05/30
+    32- and 64-bit                Studio 12.6 Fortran 95 8.8 SunOS_sparc 2017/05/30
+    (hedgehog)                    Sun C++ 5.15 SunOS_sparc 2017/05/30
 
     Windows 7 x64                 Visual Studio 2015 w/ Intel C, Fortran 2018 (cmake)
                                   Visual Studio 2015 w/ MSMPI 10 (cmake)
@@ -760,18 +780,9 @@ Supported Platforms
                                   Visual Studio 2017 w/ Intel Fortran 19 (cmake)
                                   Visual Studio 2019 w/ Intel Fortran 19 (cmake)
 
-    Mac OS X Yosemite 10.10.5     Apple clang/clang++ version 6.1 from Xcode 7.0
-    64-bit                        gfortran GNU Fortran (GCC) 4.9.2
-    (osx1010dev/osx1010test)      Intel icc/icpc/ifort version 15.0.3
-
-    Mac OS X El Capitan 10.11.6   Apple clang/clang++ version 7.3.0 from Xcode 7.3
-    64-bit                        gfortran GNU Fortran (GCC) 5.2.0
-    (osx1011dev/osx1011test)      Intel icc/icpc/ifort version 16.0.2
-
-    Mac OS Sierra 10.12.6         Apple LLVM version 8.1.0 (clang/clang++-802.0.42)
-    64-bit                        gfortran GNU Fortran (GCC) 7.1.0
-    (swallow/kite)                Intel icc/icpc/ifort version 17.0.2
-
+    macOS Mojave 10.14.6          Apple LLVM version 10.0.1 (clang-1001.0.46.4)
+    64-bit                        gfortran GNU Fortran (GCC) 6.3.0
+    (swallow)                     Intel icc/icpc/ifort version 19.0.4.233 20190416
 
 Tested Configuration Features Summary
 =====================================
@@ -796,10 +807,10 @@ Windows 7 Cygwin                        n        y/n    n        y    y     y
 Windows 7 x64 Cygwin                    n        y/n    n        y    y     y
 Windows 10                              y        y/y    n        y    y     y
 Windows 10 x64                          y        y/y    n        y    y     y
-Mac OS X Mavericks 10.9.5 64-bit        n        y/y    n        y    y     y
-Mac OS X Yosemite 10.10.5 64-bit        n        y/y    n        y    y     y
 Mac OS X El Capitan 10.11.6 64-bit      n        y/y    n        y    y     y
-Mac OS Sierra 10.12.6 64-bit            n        y/y    n        y    y     y
+MacOS Sierra 10.12.6 64-bit             n        y/y    n        y    y     y
+MacOS High Sierra 10.13.6 64-bit        n        y/y    n        y    y     y
+MacOS Mojave 10.14.6 64-bit             n        y/y    n        y    y     y
 CentOS 7.2 Linux 2.6.32 x86_64 PGI      n        y/y    n        y    y     y
 CentOS 7.2 Linux 2.6.32 x86_64 GNU      y        y/y    y        y    y     y
 CentOS 7.2 Linux 2.6.32 x86_64 Intel    n        y/y    n        y    y     y
@@ -816,10 +827,10 @@ Windows 7 Cygwin                           n       n         n         y
 Windows 7 x64 Cygwin                       n       n         n         y
 Windows 10                                 y       y         y         y
 Windows 10 x64                             y       y         y         y
-Mac OS X Mavericks 10.9.5 64-bit           y       n         y         y
-Mac OS X Yosemite 10.10.5 64-bit           y       n         y         y
 Mac OS X El Capitan 10.11.6 64-bit         y       n         y         y
-Mac OS Sierra 10.12.6 64-bit               y       n         y         y
+MacOS Sierra 10.12.6 64-bit                y       n         y         y
+MacOS High Sierra 10.13.6 64-bit           y       n         y         y
+MacOS Mojave 10.14.6 64-bit                y       n         y         y
 CentOS 7.2 Linux 2.6.32 x86_64 PGI         y       y         y         n
 CentOS 7.2 Linux 2.6.32 x86_64 GNU         y       y         y         y
 CentOS 7.2 Linux 2.6.32 x86_64 Intel       y       y         y         n
@@ -835,22 +846,20 @@ The following platforms are not supported but have been tested for this release.
 
     Linux 2.6.32-573.22.1.el6    GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
-    (mayll/platypus)                 Version 4.4.7 20120313
+    (platypus)                       Version 4.4.7 20120313
                                      Version 4.9.3, 5.3.0, 6.2.0
                                   PGI C, Fortran, C++ for 64-bit target on
                                   x86-64;
-                                     Version 17.10-0
-                                  Intel(R) C (icc), C++ (icpc), Fortran (icc)
-                                  compilers:
-                                     Version 17.0.4.196 Build 20170411
+                                     Version 19.10-0
                                   MPICH 3.1.4 compiled with GCC 4.9.3
 
     Linux 3.10.0-327.18.2.el7     GNU C (gcc) and C++ (g++) compilers
     #1 SMP x86_64 GNU/Linux          Version 4.8.5 20150623 (Red Hat 4.8.5-4)
     (jelly)                       with NAG Fortran Compiler Release 6.1(Tozai)
                                   GCC Version 7.1.0
-                                  OpenMPI 3.0.0-GCC-7.2.0-2.29,
-                                     3.1.0-GCC-7.2.0-2.29
+                                  OpenMPI 2.1.6-GCC-7.2.0-2.29,
+                                     3.1.3-GCC-7.2.0-2.29
+                                     4.0.0-GCC-7.2.0-2.29
                                   Intel(R) C (icc) and C++ (icpc) compilers
                                      Version 17.0.0.098 Build 20160721
                                   with NAG Fortran Compiler Release 6.1(Tozai)
@@ -859,14 +868,35 @@ The following platforms are not supported but have been tested for this release.
     #1 SMP x86_64 GNU/Linux
     (moohan)
 
-    Linux 2.6.32-573.18.1.el6.ppc64  MPICH mpich 3.1.4 compiled with
-    #1 SMP ppc64 GNU/Linux           IBM XL C/C++ for Linux, V13.1
-    (ostrich)                        and IBM XL Fortran for Linux, V15.1
+    Linux 2.6.32-754.31.1.el6     gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
+    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
+    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
+                                  IBM XL C/C++ V13.1
+                                  IBM XL Fortran V15.1
+                                  MPICH mpich 3.1.4 compiled with
+                                    IBM XL C/C++ for Linux, V13.1
+                                    and IBM XL Fortran for Linux, V15.1
 
-   Fedora30 5.3.11-200.fc30.x86_64
-   #1 SMP x86_64  GNU/Linux       GNU gcc (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
+    Fedora30 5.3.11-200.fc30.x86_64
+    #1 SMP x86_64  GNU/Linux      GNU gcc (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
                                   GNU Fortran (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
                                      (cmake and autotools)
+
+    Mac OS X El Capitan 10.11.6   Apple clang version 7.3.0 from Xcode 7.3
+    64-bit                        gfortran GNU Fortran (GCC) 5.2.0
+    (osx1011test)                 Intel icc/icpc/ifort version 16.0.2
+
+    macOS Sierra 10.12.6          Apple LLVM version 9.0.0 (clang-900.39.2)
+    64-bit                        gfortran GNU Fortran (GCC) 7.4.0
+    (kite)                        Intel icc/icpc/ifort version 17.0.2
+
+    macOS High Sierra 10.13.6     Apple LLVM version 10.0.0 (clang-1000.10.44.4)
+    64-bit                        gfortran GNU Fortran (GCC) 6.3.0
+    (bear)                        Intel icc/icpc/ifort version 19.0.4.233 20190416
+
+    SunOS 5.11 11.3               Sun C 5.15 SunOS_sparc
+    32- and 64-bit                Sun Fortran 95 8.8 SunOS_sparc
+    (emu)                         Sun C++ 5.15 SunOS_sparc
 
 
 Known Problems
