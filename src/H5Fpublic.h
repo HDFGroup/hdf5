@@ -641,6 +641,34 @@ H5_DLL hid_t  H5Fget_create_plist(hid_t file_id);
  *-------------------------------------------------------------------------
  */
 H5_DLL hid_t  H5Fget_access_plist(hid_t file_id);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Determines the read/write or read-only status of a file
+ *
+ * \file_id
+ * \param[out] intent Access mode flag as originally passed with H5Fopen()
+ *
+ * \return \herr_t
+ *
+ * \details Given the identifier of an open file, \p file_id, H5Fget_intent()
+ *          retrieves the intended access mode" flag passed with H5Fopen() when
+ *          the file was opened.
+ *
+ *          The value of the flag is returned in \p intent. Valid values are as
+ *          follows:
+ *          \file_access
+ *
+ * \note The function will not return an error if intent is NULL; it will
+ *       simply do nothing.
+ *
+ * \version 1.10.0 C function enhanced to work with SWMR functionality.
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fget_intent(hid_t file_id, unsigned *intent);
 /**
  *-------------------------------------------------------------------------
@@ -1126,6 +1154,64 @@ H5_DLL herr_t H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *i
  *-------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Fstart_swmr_write(hid_t file_id);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Retrieves free-space section information for a file
+ *
+ * \file_id
+ * \param[in] type The file memory allocation type
+ * \param[in] nsects The number of free-space sections
+ * \param[out] sect_info Array of instances of H5F_sect_info_t in which
+ *                       the free-space section information is to be returned
+ *
+ * \return Returns the number of free-space sections for the specified
+ *         free-space manager in the file; otherwise returns a negative value.
+ *
+ * \details H5Fget_free_sections() retrieves free-space section information for
+ *          the free-space manager with type that is associated with file
+ *          \p file_id. If type is #H5FD_MEM_DEFAULT, this routine retrieves
+ *          free-space section information for all the free-space managers in
+ *          the file.
+ *
+ *          Valid values for \p type are the following:
+ *          \mem_types
+ *
+ *          H5F_sect_info_t is defined as follows (in H5Fpublic.h):
+ *          \code
+ *          typedef struct H5F_sect_info_t {
+ *            haddr_t     addr;     /* address of the     */
+ *                                  /* free-space section */
+ *            hsize_t     size;     /* size of the        */
+ *                                  /* free-space section */
+ *          } H5F_sect_info_t;
+ *          \endcode
+ *
+ *          This routine retrieves free-space section information for \p nsects
+ *          sections or at most the maximum number of sections in the specified
+ *          free-space manager. If the number of sections is not known, a
+ *          preliminary H5Fget_free_sections() call can be made by setting \p
+ *          sect_info to NULL and the total number of free-space sections for
+ *          the specified free-space manager will be returned. Users can then
+ *          allocate space for entries in \p sect_info, each of which is
+ *          defined as an H5F_sect_info_t \c struct.
+ *
+ * \attention \Bold{Failure Modes:} This routine will fail when the following
+ *            is true:
+ *            \li The library fails to retrieve the file creation property list
+ *                associated with \p file_id.
+ *            \li If the parameter \p sect_info is non-null, but the parameter
+ *                \p nsects is equal to 0.
+ *            \li The library fails to retrieve free-space section information
+ *                for the file.
+ *
+ * \todo Fix the example!
+ *
+ * \since 1.10.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL ssize_t H5Fget_free_sections(hid_t file_id, H5F_mem_t type,
     size_t nsects, H5F_sect_info_t *sect_info/*out*/);
 /**
@@ -1153,6 +1239,30 @@ H5_DLL ssize_t H5Fget_free_sections(hid_t file_id, H5F_mem_t type,
  *-------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Fclear_elink_file_cache(hid_t file_id);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Enables the switch of version bounds setting for a file
+ *
+ * \file_id
+ * \param[in] low The earliest version of the library that will be used for
+ *                writing objects
+ * \param[in] high The latest version of the library that will be used for
+ *                 writing objects
+ *
+ * \return \herr_t
+ *
+ * \details H5Fset_libver_bounds() enables the switch of version bounds setting
+ *          for an open file associated with \p file_id.
+ *
+ *          For the parameters \p low and \p high, see the description for
+ *          H5Pset_libver_bounds().
+ *
+ * \since 1.10.2
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t high);
 /**
  *-------------------------------------------------------------------------
@@ -1180,7 +1290,53 @@ H5_DLL herr_t H5Fget_mdc_logging_status(hid_t file_id,
  *-------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Fformat_convert(hid_t fid);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Resets the page buffer statistics
+ *
+ * \file_id
+ *
+ * \return \herr_t
+ *
+ * \details H5Freset_page_buffering_stats() resets the page buffer statistics
+ *          for a specified file identifier \p file_id.
+ *
+ * \since 1.10.1
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Freset_page_buffering_stats(hid_t file_id);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Retrieves statistics about page access when it is enabled
+ *
+ * \file_id
+ * \param[out] accesses Two integer array for the number of metadata and raw
+ *                      data accesses to the page buffer
+ * \param[out] hits Two integer array for the number of metadata and raw data
+ *                  hits in the page buffer
+ * \param[out] misses Two integer array for the number of metadata and raw data
+ *                    misses in the page buffer
+ * \param[out] evictions Two integer array for the number of metadata and raw
+ *                       data evictions from the page buffer
+ * \param[out] bypasses Two integer array for the number of metadata and raw
+ *                      data accesses that bypass the page buffer
+ *
+ * \return \herr_t
+ *
+ * \details H5Fget_page_buffering_stats() retrieves page buffering statistics
+ *          such as the number of metadata and raw data accesses (\p accesses),
+ *          hits (\p hits), misses (\p misses), evictions (\p evictions), and
+ *          accesses that bypass the page buffer (\p bypasses).
+ *
+ * \since 1.10.1
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2],
     unsigned hits[2], unsigned misses[2], unsigned evictions[2], unsigned bypasses[2]);
 /**
@@ -1214,6 +1370,38 @@ H5_DLL herr_t H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr, hsize_t 
  *-------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Sets the flag to create minimized dataset object headers
+ *
+ * \file_id
+ * \param[in] minimize Flag indicating whether the library will or will not
+ *                     create minimized dataset object headers
+ *
+ * \return \herr_t
+ *
+ * \details H5Fset_dset_no_attrs_hint() sets the no dataset attributes hint
+ *          setting for the file specified by the file identifier \p file_id.
+ *          If the boolean flag \p minimize is set to #TRUE, then the library
+ *          will create minimized dataset object headers in the file.
+ *          \Bold{All} files that refer to the same file-on-disk will be
+ *          affected by the most recent setting, regardless of the file
+ *          identifier/handle (e.g., as returned by H5Fopen()). By setting the
+ *          \p minimize flag to #TRUE, the library expects that no attributes
+ *          will be added to the dataset - attributes can be added, but they
+ *          are appended with a continuation message, which can reduce
+ *          performance.
+ *
+ * \attention This setting interacts with H5Pset_dset_no_attrs_hint(): if
+ *            either is set to #TRUE, then the created dataset's object header
+ *            will be minimized.
+ *
+ * \since 1.10.5
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
 
 #ifdef H5_HAVE_PARALLEL
@@ -1255,9 +1443,101 @@ typedef struct H5F_info1_t {
 
 
 /* Function prototypes */
-H5_DLL herr_t H5Fget_info1(hid_t obj_id, H5F_info1_t *finfo);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Retrieves name of file to which object belongs
+ *
+ * \fgdta_obj_id
+ * \param[out] file_info Buffer for global file information
+ *
+ * \return \herr_t
+ *
+ * \deprecated This function has been renamed from H5Fget_info() and is
+ *             deprecated in favor of the macro #H5Fget_info or the function
+ *             H5Fget_info2().
+ *
+ * \details H5Fget_info1() returns global information for the file associated
+ *          with the object identifier \p obj_id in the H5F_info1_t \c struct
+ *          named \p file_info.
+ *
+ *          \p obj_id is an identifier for any object in the file of interest.
+ *
+ *          H5F_info1_t struct is defined in H5Fpublic.h as follows:
+ *          \code
+ *          typedef struct H5F_info2_t {
+ *            hsize_t        super_ext_size;
+ *            struct {
+ *              hsize_t      hdr_size;
+ *              H5_ih_info_t msgs_info;
+ *            } sohm;
+ *          } H5F_info1_t;
+ *          \endcode
+ *
+ *          \c super_ext_size is the size of the superblock extension.
+ *
+ *          The \c sohm sub-struct contains shared object header message
+ *          information as follows:
+ *          \li \c hdr_size is the size of the shared object header message.
+ *          \li \c msgs_info is an H5_ih_info_t struct defined in H5public.h as
+ *              follows:
+ *              \code
+ *              typedef struct H5_ih_info_t {
+ *                hsize_t     index_size;
+ *                hsize_t     heap_size;
+ *              } H5_ih_info_t;
+ *              \endcode
+ *
+ *          \li \p index_size is the summed size of all the shared object
+ *              header indexes. Each index might be either a B-tree or
+ *              a list.
+ *
+ * \version 1.10.0 C function H5Fget_info() renamed to H5Fget_info1() and
+ *                 deprecated in this release.
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
+H5_DLL herr_t H5Fget_info1(hid_t obj_id, H5F_info1_t *file_info);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Sets thelatest version of the library to be used for writing objects
+ *
+ * \file_id
+ * \param[in] latest_format Latest format flag
+ *
+ * \return \herr_t
+ *
+ * \deprecated When?
+ *
+ * \todo Fix me!
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Fset_latest_format(hid_t file_id, hbool_t latest_format);
-H5_DLL htri_t H5Fis_hdf5(const char *filename);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5F
+ *
+ * \brief Determines whether a file is in the HDF5 format
+ *
+ * \param[in] file_name File name
+ *
+ * \return \htri_t
+ *
+ * \deprecated When?
+ *
+ * \details H5Fis_hdf5() determines whether a file is in the HDF5 format.
+ *
+ * \todo Fix me!
+ *
+ *-------------------------------------------------------------------------
+ */
+H5_DLL htri_t H5Fis_hdf5(const char *file_name);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
