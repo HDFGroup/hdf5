@@ -6055,16 +6055,13 @@ error:
 
 } /* end test_file_lock_swmr_concur() */
 
-
-
 #endif /* !(defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID)) */
 
 /****************************************************************
 **
-**  test_file_lock_swmr_concur(): low-level file test routine.
-**    With the implementation of file locking, this test checks file
-**    open with different combinations of flags + SWMR flags.
-**    This is for concurrent access.
+**  test_file_locking():
+**    Tests various combinations of file locking flags and
+**    and environment variables.
 **
 *****************************************************************/
 static int
@@ -6241,6 +6238,79 @@ error:
 
 } /* end test_file_locking() */
 
+
+/****************************************************************
+**
+**  test_different_lock_flags():
+**    Tests opening a file multiple times with different lock
+**    flags.
+**
+*****************************************************************/
+static int
+test_different_lock_flags(hid_t in_fapl)
+{
+    hid_t fid1 = H5I_INVALID_HID;       /* File ID */
+    hid_t fid2 = H5I_INVALID_HID;       /* File ID */
+    hid_t fid3 = H5I_INVALID_HID;       /* File ID */
+    hid_t fapl_id = H5I_INVALID_HID;    /* File access property list */
+    char filename[NAME_BUF_SIZE];       /* File name */
+
+    TESTING("Using different lock flags")
+
+    /* Copy the incoming fapl */
+    if((fapl_id = H5Pcopy(in_fapl)) < 0)
+        TEST_ERROR
+
+    /* Set locking in the fapl */
+    if(H5Pset_file_locking(fapl_id, TRUE, TRUE) < 0)
+        TEST_ERROR
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[1], fapl_id, filename, sizeof(filename));
+
+    /* Create the test file */
+    if((fid1 = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        TEST_ERROR
+
+    /* Open the test file with the same flags (should pass) */
+    if((fid2 = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
+        TEST_ERROR
+
+    /* Unset locking in the fapl */
+    if(H5Pset_file_locking(fapl_id, FALSE, FALSE) < 0)
+        TEST_ERROR
+
+    /* Open the test file with different flags (should FAIL) */
+    H5E_BEGIN_TRY {
+        fid3 = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
+    } H5E_END_TRY;
+    if(H5I_INVALID_HID != fid3)
+        FAIL_PUTS_ERROR("Should not have been able to open a file with different locking flags")
+
+    /* Close the files */
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+    /* Close the copied property list */
+    if(H5Pclose(fapl_id) < 0)
+        TEST_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl_id);
+        H5Fclose(fid1);
+        H5Fclose(fid2);
+        H5Fclose(fid3);
+    } H5E_END_TRY;
+
+    return -1;
+} /* end test_different_lock_flags() */
 
 static int
 test_swmr_vfd_flag(void)
@@ -7179,8 +7249,12 @@ main(void)
     if(NULL == driver || !HDstrcmp(driver, "") || !HDstrcmp(driver, "sec2"))
         nerrors += test_swmr_vfd_flag();
 
-    /* This test changes the HDF5_USE_FILE_LOCKING environment variable
-     * so it should be run last.
+    /* Test multiple opens via different locking flags */
+    if (use_file_locking && file_locking_enabled)
+        nerrors += test_different_lock_flags(fapl);
+
+    /* These tests change the HDF5_USE_FILE_LOCKING environment variable
+     * so they should be run last.
      */
     if (use_file_locking && file_locking_enabled) {
         nerrors += test_file_locking(fapl, TRUE, TRUE);

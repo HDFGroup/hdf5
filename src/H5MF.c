@@ -2645,6 +2645,10 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
     HDassert(f->shared);
     HDassert(fsm_settled);
 
+    /* Initialize structs */
+    HDmemset(&fsinfo, 0, sizeof(fsinfo));
+    HDmemset(&fs_stat, 0, sizeof(fs_stat));
+
     /*
      * Only need to settle things if we are persisting free space and
      * the private property in f->shared->null_fsm_addr is not enabled.
