@@ -1658,6 +1658,7 @@ H5Dchunk_iter(hid_t dset_id, H5D_chunk_iter_op_t cb, void *op_data)
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "ix*x", dset_id, cb, op_data);
 
     /* Check arguments */
     if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
