@@ -1025,7 +1025,6 @@ H5C__collective_write(H5F_t *f)
 
     /* Get number of entries in collective write list */
     count = (int)H5SL_count(cache_ptr->coll_write_list);
-
     if(count > 0) {
         H5FD_mpio_xfer_t    xfer_mode = H5FD_MPIO_COLLECTIVE;
         H5SL_node_t         *node;
@@ -1060,7 +1059,6 @@ H5C__collective_write(H5F_t *f)
         node = H5SL_next(node);
         i = 1;
         while(node) {
-
             if(NULL == (entry_ptr = (H5C_cache_entry_t *)H5SL_item(node)))
                 HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, FAIL, "can't retrieve skip list item")
 
@@ -1077,18 +1075,14 @@ H5C__collective_write(H5F_t *f)
         /* Create memory MPI type */
         if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed(count, length_array, buf_array, MPI_BYTE, &btype)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
-
         btype_created = TRUE;
-
         if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&btype)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
 
         /* Create file MPI type */
         if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed(count, length_array, offset_array, MPI_BYTE, &ftype)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
-
         ftype_created = TRUE;
-
         if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&ftype)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
 
@@ -1103,10 +1097,8 @@ H5C__collective_write(H5F_t *f)
     } /* end if */
     else {
         MPI_Status mpi_stat;
-        MPI_File *mpi_fh_p;
+        MPI_File mpi_fh_p;
         MPI_File mpi_fh;
-        MPI_Info *info_p;
-        MPI_Info info;
 
 /* This should be rewritten to call H5F_block_write, with the correct
  *      buffer and file datatypes (null ones).  -QAK, 2018/02/21
@@ -1116,15 +1108,8 @@ H5C__collective_write(H5F_t *f)
 
         mpi_fh = *(MPI_File*)mpi_fh_p;
 
-        if(H5F_get_mpi_info(f, &info_p) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get mpi file info")
-
-        info = *info_p;
-
-        /* just to match up with the 1st MPI_File_set_view from
-         * H5FD_mpio_write()
-         */
-        if(MPI_SUCCESS != (mpi_code = MPI_File_set_view(mpi_fh, (MPI_Offset)0, MPI_BYTE, MPI_BYTE, "native", info)))
+        /* just to match up with the 1st MPI_File_set_view from H5FD_mpio_write() */
+        if(MPI_SUCCESS != (mpi_code = MPI_File_set_view(mpi_fh, (MPI_Offset)0, MPI_BYTE, MPI_BYTE, "native", MPI_INFO_NULL)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
 
         /* just to match up with MPI_File_write_at_all from H5FD_mpio_write() */
@@ -1132,10 +1117,8 @@ H5C__collective_write(H5F_t *f)
         if(MPI_SUCCESS != (mpi_code = MPI_File_write_at_all(mpi_fh, (MPI_Offset)0, NULL, 0, MPI_BYTE, &mpi_stat)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at_all failed", mpi_code)
 
-        /* just to match up with the 2nd MPI_File_set_view (reset) in
-         * H5FD_mpio_write()
-         */
-        if(MPI_SUCCESS != (mpi_code = MPI_File_set_view(mpi_fh, (MPI_Offset)0, MPI_BYTE, MPI_BYTE, "native", info)))
+        /* just to match up with the 2nd MPI_File_set_view (reset) in H5FD_mpio_write() */
+        if(MPI_SUCCESS != (mpi_code = MPI_File_set_view(mpi_fh, (MPI_Offset)0, MPI_BYTE, MPI_BYTE, "native", MPI_INFO_NULL)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
     } /* end else */
 
