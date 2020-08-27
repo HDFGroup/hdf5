@@ -43,6 +43,9 @@ static const char *FileHeader = "\n\
  */
 #undef NDEBUG
 #include "H5private.h"
+/* Do NOT use HDfprintf in this file as it is not linked with the library,
+ * which contains the H5system.c file in which the function is defined.
+ */
 #include "H5Tpublic.h"
 #include "H5Rpublic.h"
 

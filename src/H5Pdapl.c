@@ -37,7 +37,7 @@
 #include "H5Eprivate.h"       /* Error handling */
 #include "H5Fprivate.h"       /* Files */
 #include "H5Iprivate.h"       /* IDs */
-#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5MMprivate.h"      /* Memory management */
 #include "H5Ppkg.h"           /* Property lists */
 
 

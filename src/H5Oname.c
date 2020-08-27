@@ -97,9 +97,9 @@ H5O__name_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
 
     /* decode */
     if(NULL == (mesg = (H5O_name_t *)H5MM_calloc(sizeof(H5O_name_t))))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     if(NULL == (mesg->s = (char *)H5MM_strdup((const char *)p)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Set return value */
     ret_value = mesg;
@@ -172,7 +172,7 @@ H5O__name_copy(const void *_mesg, void *_dest)
     HDassert(mesg);
 
     if(!dest && NULL == (dest = (H5O_name_t *)H5MM_calloc(sizeof(H5O_name_t))))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* copy */
     *dest = *mesg;

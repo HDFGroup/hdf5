@@ -1197,3 +1197,4 @@ H5T_vlen_reclaim_elmt(void *elem, H5T_t *dt)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5T_vlen_reclaim_elmt() */
+
