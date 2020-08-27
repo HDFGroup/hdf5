@@ -41,6 +41,9 @@
 
 #endif
 
+#include <time.h>
+#include <pthread.h>
+
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_GDS_g = 0;
 
@@ -211,6 +214,13 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD__init_package() */
 
+// more precise timer
+static double gettime_ms(void) {
+  struct timespec t;
+  clock_gettime(CLOCK_MONOTONIC_RAW, &t);
+  return (t.tv_sec+t.tv_nsec*1e-9)*1000;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_gds_init
@@ -335,6 +345,8 @@ H5FD_gds_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     H5FD_t          *ret_value = NULL;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    // fprintf(stderr, "H5FD_gds_open()\n");
 
 #ifdef H5_HAVE_GDS_VFD
     status = cuFileDriverOpen();
@@ -472,6 +484,8 @@ H5FD_gds_close(H5FD_t *_file)
     herr_t      ret_value = SUCCEED;                /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    // fprintf(stderr, "H5FD_gds_close()\n");
 
 #ifdef H5_HAVE_GDS_VFD
     status = cuFileDriverClose();
@@ -759,11 +773,17 @@ H5FD_gds_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSE
     CUfileHandle_t cf_handle;
 #endif
 
+    double start_time, stop_time;
+    float total_time;
+    cudaEvent_t start, stop;
+
     H5FD_gds_t     *file       = (H5FD_gds_t *)_file;
     HDoff_t         offset      = (HDoff_t)addr;
     herr_t          ret_value   = SUCCEED;                  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    // fprintf(stderr, "H5FD_gds_read()\n");
 
     HDassert(file && file->pub.cls);
     HDassert(buf);
@@ -784,11 +804,36 @@ H5FD_gds_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSE
         fprintf(stderr, "cufile file handle register error\n");
       }
 
-      // writes device memory contents to a file
-      // TODO: skipped device memory registration using cuFileBufRegister
+      // registers device memory
+      status = cuFileBufRegister(buf, size, 0);
+      if (status.err != CU_FILE_SUCCESS) {
+        fprintf(stderr, "cufile buffer register failed\n");
+      }
+
+      cudaEventCreate(&start);
+      cudaEventCreate(&stop);
+      cudaEventRecord(start, 0);
+
+      //start_time = gettime_ms();
+
+      // read file content to device memory
       ret = cuFileRead(cf_handle, buf, size, offset, 0);
       if((size_t)ret < size) {
         fprintf(stderr, "cufile read error\n");
+      }
+
+      cudaEventRecord(stop, 0);
+      cudaEventSynchronize(stop);
+      cudaEventElapsedTime(&total_time, start, stop);
+
+      // stop_time = gettime_ms();
+      printf("cuFileRead: %lf ms\n", total_time);
+      // printf("cuFileRead: %lf ms\n", (stop_time - start_time));
+
+      // deregister device memory
+      status = cuFileBufDeregister(buf);
+      if (status.err != CU_FILE_SUCCESS) {
+        fprintf(stderr, "cufile buffer deregister failed\n");
       }
 
       // close file handle
@@ -871,6 +916,8 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_gds_read() */
 
+
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_gds_write
@@ -898,11 +945,16 @@ H5FD_gds_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
     CUfileHandle_t cf_handle;
 #endif
 
+    float total_time;
+    cudaEvent_t start, stop;
+
     H5FD_gds_t     *file       = (H5FD_gds_t *)_file;
     HDoff_t         offset      = (HDoff_t)addr;
     herr_t          ret_value   = SUCCEED;                  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    // fprintf(stderr, "H5FD_gds_write()\n");
 
     HDassert(file && file->pub.cls);
     HDassert(buf);
@@ -923,12 +975,27 @@ H5FD_gds_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
         fprintf(stderr, "cufile file handle register error\n");
       }
 
+      // registers device memory
+      status = cuFileBufRegister(buf, size, 0);
+      if (status.err != CU_FILE_SUCCESS) {
+        fprintf(stderr, "cufile buffer register failed\n");
+      }
+
+      cudaEventCreate(&start);
+      cudaEventCreate(&stop);
+      cudaEventRecord(start, 0);
+
       // writes device memory contents to a file
-      // TODO: skipped device memory registration using cuFileBufRegister
       ret = cuFileWrite(cf_handle, buf, size, offset, 0);
       if(ret < size) {
         fprintf(stderr, "cufile write error\n");
       }
+
+      cudaEventRecord(stop, 0);
+      cudaEventSynchronize(stop);
+      cudaEventElapsedTime(&total_time, start, stop);
+
+      printf("cuFileWrite: %lf ms\n", total_time);
 
       // close file handle
       cuFileHandleDeregister(cf_handle);
