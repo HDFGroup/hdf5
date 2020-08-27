@@ -234,9 +234,6 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
         case H5I_VFL:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of a virtual file driver (VFD)")
 
-        case H5I_SPACE_SEL_ITER:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of a dataspace selection iterator")
-
         case H5I_REFERENCE:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of reference")
 
