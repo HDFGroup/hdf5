@@ -197,6 +197,136 @@ H5_DLL herr_t  H5Adelete(hid_t loc_id, const char *attr_name);
 /*-------------------------------------------------------------------------*/
 /**\ingroup H5A
  *
+ * \brief Deletes an attribute from an object according to index order
+ *
+ * \fgdt_loc_id
+ * \param[in] obj_name Name of object, relative to location, from which
+ *                     attribute is to be removed
+ * \param[in] idx_type Type of index
+ * \param[in] order    Order in which to iterate over index
+ * \param[in] n        Offset within index
+ * \lapl_id
+ *
+ * \return \herr_t
+ *
+ * \details H5Adelete_by_idx() removes an attribute, specified by its
+ *          location in an index, from an object.
+ *
+ *          The object from which the attribute is to be removed is
+ *          specified by a location identifier and name, \p loc_id and
+ *          \p obj_name, respectively. If \p loc_id fully specifies the
+ *          object from which the attribute is to be removed, \p obj_name
+ *          should be '.' (a dot).
+ *
+ *          The attribute to be removed is specified by a position in an
+ *          index, \p n. The type of index is specified by \p idx_type and
+ *          may be #H5_INDEX_NAME, for an alpha-numeric index by name, or
+ *          #H5_INDEX_CRT_ORDER, for an index by creation order. The order
+ *          in which the index is to be traversed is specified by \p order
+ *          and may be #H5_ITER_INC (increment) for top-down iteration,
+ *          #H5_ITER_DEC (decrement) for bottom-up iteration, or
+ *          #H5_ITER_NATIVE, in which case HDF5 will iterate in the
+ *          fastest-available order. For example, if \p idx_type, \p order,
+ *          and \p n are set to #H5_INDEX_NAME, #H5_ITER_INC, and 5,
+ *          respectively, the fifth attribute by alpha-numeric order of
+ *          attribute names will be removed.
+ *
+ *          For a discussion of \p idx_type and \p order, the valid values
+ *          of those parameters, and the use of \p n, see the description
+ *          of H5Aiterate2().
+ *
+ *          The link access property list, \p lapl_id, may provide
+ *          information regarding the properties of links required to access
+ *          the object, \p obj_name.
+
+ * \since 1.8.0
+ *
+ */
+H5_DLL herr_t  H5Adelete_by_idx(hid_t loc_id, const char *obj_name,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id);
+/*-------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Removes an attribute from a specified location
+ *
+ * \fgdt_loc_id
+ * \param[in] obj_name  Name of object, relative to location, from which
+ *                      attribute is to be removed
+ * \param[in] attr_name Name of attribute to delete
+ * \lapl_id
+ *
+ * \return \herr_t
+ *
+ * \details H5Adelete_by_name() removes the attribute \p attr_name
+ *          from an object specified by location and name, \p loc_id and
+ *          \p obj_name, respectively.
+ *
+ *          If \p loc_id fully specifies the object from which the
+ *          attribute is to be removed, \p obj_name should be '.' (a dot).
+ *
+ *          The link access property list, \p lapl_id, may provide
+ *          information regarding the properties of links required to
+ *          access the object, \p obj_name.
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL herr_t  H5Adelete_by_name(hid_t loc_id, const char *obj_name,
+    const char *attr_name, hid_t lapl_id);
+/*-------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Determines whether an attribute with a given name exists on an
+ *        object
+ *
+ * \fgdt_loc_id{obj_id}
+ * \param[in] attr_name  Attribute name
+ *
+ * \return \htri_t
+ *
+ * \details H5Aexists() determines whether the attribute \p attr_name
+ *          exists on the object specified by \p obj_id.
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL htri_t H5Aexists(hid_t obj_id, const char *attr_name);
+/*-------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief  Determines whether an attribute with a given name exists on an
+ *         object
+ *
+ * \fgdt_loc_id{obj_id}
+ * \param[in] obj_name  Object name
+ * \param[in] attr_name Attribute name
+ * \lapl_id
+ *
+ * \return \htri_t
+ *
+ * \details H5Aexists_by_name() determines whether the attribute
+ *          \p attr_name exists on an object. That object is specified by
+ *          its location and name, \p loc_id and \p obj_name, respectively.
+ *
+ *          \p loc_id specifies a location in the file containing the object.
+ *          \p obj_name is the name of the object to which the attribute is
+ *          attached and can be a relative name, relative to \p loc_id,
+ *          or an absolute name, based in the root group of the file. If
+ *          \p loc_id fully specifies the object, \p obj_name should be '.'
+ *          (a dot).
+ *
+ *          The link access property list, \p lapl_id, may provide
+ *          information regarding the properties of links required to access
+ *          \p obj_name.
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL htri_t H5Aexists_by_name(hid_t obj_id, const char *obj_name,
+    const char *attr_name, hid_t lapl_id);
+/*-------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
  * \brief Gets an attribute creation property list identifier
  *
  * \attr_id
@@ -697,7 +827,7 @@ H5_DLL hid_t   H5Aopen(hid_t obj_id, const char *attr_name, hid_t aapl_id);
  *
  * \brief Opens the nth attribute attached to an object
  *
- * \fgdt_loc_id
+ * \loc_id
  * \param[in] obj_name  Name of object to which attribute is attached,
  *                      relative to location
  * \param[in] idx_type  Type of index
@@ -886,11 +1016,6 @@ H5_DLL herr_t  H5Arename_by_name(hid_t loc_id, const char *obj_name,
  *
  */
 H5_DLL herr_t  H5Awrite(hid_t attr_id, hid_t dtype_id, const void *buf);
-H5_DLL herr_t  H5Adelete_by_name(hid_t loc_id, const char *obj_name,
-    const char *attr_name, hid_t lapl_id);
-H5_DLL herr_t  H5Adelete_by_idx(hid_t loc_id, const char *obj_name,
-    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id);
-H5_DLL htri_t H5Aexists(hid_t obj_id, const char *attr_name);
 H5_DLL htri_t H5Aexists_by_name(hid_t obj_id, const char *obj_name,
     const char *attr_name, hid_t lapl_id);
 
@@ -958,11 +1083,133 @@ typedef herr_t (*H5A_operator1_t)(hid_t location_id/*in*/,
  */
 H5_DLL hid_t   H5Acreate1(hid_t loc_id, const char *name, hid_t type_id,
     hid_t space_id, hid_t acpl_id);
-H5_DLL hid_t   H5Aopen_name(hid_t loc_id, const char *name);
-H5_DLL hid_t   H5Aopen_idx(hid_t loc_id, unsigned idx);
+/* --------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Determines the number of attributes attached to an object
+ *
+ * \fgdt_loc_id
+ *
+ * \return Returns the number of attributes if successful; otherwise returns
+ *         a negative value.
+ *
+ * \deprecated This function is deprecated in favor of the functions
+ *             H5Oget_info(), H5Oget_info_by_name(), and H5Oget_info_by_idx().
+ *
+ * \details H5Aget_num_attrs() returns the number of attributes attached to
+ *          the object specified by its identifier, \p loc_id.
+ *
+ * \since 1.0.0
+ *
+ */
 H5_DLL int     H5Aget_num_attrs(hid_t loc_id);
+/* --------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Calls a user’s function for each attribute on an object
+ *
+ * \todo make prototype parameter match function (idx vs attr_num)
+ *
+ * \loc_id
+ * \param[in,out] idx     Starting (in) and ending (out) attribute index
+ * \param[in]     op      User's function to pass each attribute to
+ * \param[in,out] op_data User's data to pass through to iterator operator
+ *                        function
+ *
+ * \return \herr_t
+ *
+ * \deprecated This function is deprecated in favor of the function 
+ *             H5Aiterate2().
+ *
+ * \details H5Aiterate1() iterates over the attributes of the object
+ *          specified by its identifier, \p loc_id. The object can be a
+ *          group, dataset, or named datatype. For each attribute of the
+ *          object, the \p op_data and some additional information specified
+ *          below are passed to the operator function \p op. The iteration
+ *          begins with the attribute specified by its index, \p idx; the
+ *          index for the next attribute to be processed by the operator,
+ *          \p op, is returned in \p idx. If \p idx is the null pointer,
+ *          then all attributes are processed.
+ *
+ *          The prototype for #H5A_operator_t is:
+ *          \code 
+ *          typedef herr_t (*H5A_operator1_t)(hid_t loc_id, 
+ *              const char *attr_name, void *operator_data);
+ *          \endcode
+ *          The operation receives the identifier for the group, dataset
+ *          or named datatype being iterated over, \p loc_id, the name of
+ *          the current object attribute, \p attr_name, and the pointer to
+ *          the operator data passed in to H5Aiterate1(), \p op_data.
+ *
+ *          The return values from an operator are:
+ *
+ *          \li Zero causes the iterator to continue, returning zero when
+ *              all attributes have been processed.
+ *          \li Positive causes the iterator to immediately return that
+ *              positive value, indicating short-circuit success. The
+ *              iterator can be restarted at the next attribute.
+ *          \li Negative causes the iterator to immediately return that value,
+ *              indicating failure. The iterator can be restarted at the next
+ *              attribute.
+ *
+ * \version 1.8.0 The function \p H5Aiterate was renamed to H5Aiterate1()
+ *                and deprecated in this release.
+ *
+ * \since 1.0.0
+ *
+ */
 H5_DLL herr_t  H5Aiterate1(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op,
     void *op_data);
+/* --------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Opens the attribute specified by its index
+ *
+ * \loc_id
+ * \param[in] idx Index of the attribute to open
+ *
+ * \return \hid_tv{attribute}
+ *
+ * \deprecated This function is deprecated in favor of the function
+ *             H5Aopen_by_idx().
+ *
+ * \details H5Aopen_idx() opens an attribute which is attached to the
+ *          object specified with \p loc_id . The location object may be
+ *          either a group, dataset, or named datatype, all of which may
+ *          have any sort of attribute. The attribute specified by the index,
+ *          \p idx , indicates the attribute to access. The value of \p idx
+ *          is a 0-based, non-negative integer. The attribute identifier
+ *          returned from this function must be released with H5Aclose()
+ *          or resource leaks will develop.
+ *
+ * \since 1.0.0
+ *
+ */
+H5_DLL hid_t   H5Aopen_idx(hid_t loc_id, unsigned idx);
+/* --------------------------------------------------------------------------*/
+/**\ingroup H5A
+ *
+ * \brief Opens an attribute specified by name
+ *
+ * \loc_id
+ * \param[in] name Attribute name
+ *
+ * \return \hid_tv{attribute}
+ *
+ * \deprecated This function is deprecated in favor of the function
+ *             H5Aopen_by_name().
+ *
+ * \details H5Aopen_name() opens an attribute specified by its name,
+ *          \p name, which is attached to the object specified with
+ *          \p loc_id. The location object may be either a group, dataset,
+ *          or named datatype, which may have any sort of attribute. The
+ *          attribute identifier returned from this function must be
+ *          released with H5Aclose() or resource leaks will develop.
+ *
+ * \since 1.0.0
+ *
+ */
+H5_DLL hid_t   H5Aopen_name(hid_t loc_id, const char *name);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
