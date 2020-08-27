@@ -7305,7 +7305,6 @@ done:
             case H5I_ERROR_CLASS:
             case H5I_ERROR_MSG:
             case H5I_ERROR_STACK:
-            case H5I_SPACE_SEL_ITER:
             case H5I_NTYPES:
             default:
               return FAIL;
@@ -7394,7 +7393,6 @@ done:
             case H5I_ERROR_CLASS:
             case H5I_ERROR_MSG:
             case H5I_ERROR_STACK:
-            case H5I_SPACE_SEL_ITER:
             case H5I_NTYPES:
             default:
                 return FAIL;
