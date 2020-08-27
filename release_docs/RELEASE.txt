@@ -767,7 +767,8 @@ Supported Platforms
                                   Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                   compilers:
                                      Version 17.0.0.098 Build 20160721
-                                  MPICH 3.1.4 compiled with GCC 4.9.3
+                                  MPICH 3.3 compiled with GCC 7.2.0
+                                  OpenMPI 4.0.0 compiled with GCC 7.2.0
 
     SunOS 5.11 11.4.5.12.5.0      Sun C 5.15 SunOS_sparc 2017/05/30
     32- and 64-bit                Studio 12.6 Fortran 95 8.8 SunOS_sparc 2017/05/30
@@ -859,23 +860,17 @@ The following platforms are not supported but have been tested for this release.
                                   GCC Version 7.1.0
                                   OpenMPI 2.1.6-GCC-7.2.0-2.29,
                                      3.1.3-GCC-7.2.0-2.29
-                                     4.0.0-GCC-7.2.0-2.29
                                   Intel(R) C (icc) and C++ (icpc) compilers
                                      Version 17.0.0.098 Build 20160721
                                   with NAG Fortran Compiler Release 6.1(Tozai)
 
-    Linux 3.10.0-327.10.1.el7     MPICH 3.2 compiled with GCC 5.3.0
+    Linux 3.10.0-327.10.1.el7     MPICH 3.1.4 compiled with GCC 4.9.3
     #1 SMP x86_64 GNU/Linux
     (moohan)
 
     Linux 2.6.32-754.31.1.el6     gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
     #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
     (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
-                                  IBM XL C/C++ V13.1
-                                  IBM XL Fortran V15.1
-                                  MPICH mpich 3.1.4 compiled with
-                                    IBM XL C/C++ for Linux, V13.1
-                                    and IBM XL Fortran for Linux, V15.1
 
     Fedora30 5.3.11-200.fc30.x86_64
     #1 SMP x86_64  GNU/Linux      GNU gcc (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
@@ -919,24 +914,6 @@ Known Problems
 
     CPP ptable test fails on VS2017 with Intel compiler, JIRA issue: HDFFV-10628.
     This test will pass with VS2015 with Intel compiler.
-
-    Older MPI libraries such as OpenMPI 2.0.1 and MPICH 2.1.5 were tested
-    while attempting to resolve the Jira issue: HDFFV-10540.
-    The known problems of reading or writing > 2GBs when using MPI-2 was
-    partially resolved with the MPICH library. The proposed support recognizes
-    IO operations > 2GB and if the datatype is not a derived type, the library
-    breaks the IO into chunks which can be input or output with the existing
-    MPI 2 limitations, i.e. size reporting and function API size/count
-    arguments are restricted to be 32 bit integers.  For derived types larger
-    than 2GB, MPICH 2.1.5 fails while attempting to read or write data.
-    OpenMPI in contrast, implements MPI-3 APIs even in the older releases
-    and thus does not suffer from the 32 bit size limitation described here.
-    OpenMPI releases prior to v3.1.3 appear to have other datatype issues however,
-    e.g. within a single parallel test (testphdf5) the subtests (cdsetr, eidsetr)
-    report data verfication errors before eventually aborting.
-    The most recent versions of OpenMPI (v3.1.3 or newer) have evidently
-    resolved these isses and parallel HDF5 testing does not currently report
-    errors though occasional hangs have been observed.
 
     Known problems in previous releases can be found in the HISTORY*.txt files
     in the HDF5 source. Please report any new problems found to
