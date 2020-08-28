@@ -13,7 +13,7 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:	    H5Oattribute.c
+ * Created:     H5Oattribute.c
  *
  * Purpose:     Object header attribute routines.
  *

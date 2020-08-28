@@ -2277,7 +2277,7 @@ H5FS__sect_assert(const H5FS_t *fspace)
  *
  * Return:      TRUE/FALSE/FAIL
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *
  *-------------------------------------------------------------------------
  */

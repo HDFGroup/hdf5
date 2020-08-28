@@ -382,6 +382,40 @@ New Features
 
     Library:
     --------
+    - Remove HDFS VFD stubs
+
+      The original implementation of the HDFS VFD included non-functional
+      versions of the following public API calls when the HDFS VFD is
+      not built as a part of the HDF5 library:
+
+      * H5FD_hdfs_init()
+      * H5Pget_fapl_hdfs()
+      * H5Pset_fapl_hdfs()
+
+      They will remain present in HDF5 1.10 and HDF5 1.12 releases
+      for binary compatibility purposes but have been removed as of 1.14.0.
+
+      Note that this has nothing to do with the real HDFS VFD API calls
+      that are fully functional when the HDFS VFD is configured and built.
+
+      We simply changed:
+
+      #ifdef LIBHDFS
+        <real API call>
+      #else
+        <useless stub>
+      #endif
+
+      to:
+
+      #ifdef LIBHDFS
+        <real API call>
+      #endif
+
+      Which is how the other optional VFDs are handled.
+
+      (DER - 2020/08/27)
+
     - Add Mirror VFD
 
       Use TCP/IP sockets to perform write-only (W/O) file I/O on a remote
