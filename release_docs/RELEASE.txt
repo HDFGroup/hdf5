@@ -424,6 +424,21 @@ Bug Fixes since HDF5-1.10.6 release
 
       (BMR - 2020/7/31, HDFFV-11120 and HDFFV-11121)
 
+    - H5Sset_extent_none() sets the dataspace class to H5S_NO_CLASS which
+      causes asserts/errors when passed to other dataspace API calls.
+
+      H5S_NO_CLASS is an internal class value that should not have been
+      exposed via a public API call.
+
+      In debug builds of the library, this can cause asserts to trip. In
+      non-debug builds, it will produce normal library errors.
+
+      The new library behavior is for H5Sset_extent_none() to convert
+      the dataspace into one of type H5S_NULL, which is better handled
+      by the library and easier for developers to reason about.
+
+      (DER - 2020/07/27, HDFFV-11027)
+
     - Fixed the segmentation fault when reading attributes with multiple threads
 
       It was reported that the reading of attributes with variable length string
@@ -460,152 +475,10 @@ Bug Fixes since HDF5-1.10.6 release
 
       (BMR - 2020/6/19, HDFFV-10591)
 
-    - Improved peformance when creating a large number of small datasets by
-      retrieving default property values from the API context instead of doing
-      skip list searches.
-
-      (CJH - 2019/12/10, HDFFV-10658)
-
-    - Fixed user-created data access properties not existing in the property list
-      returned by H5Dget_access_plist. Thanks to Steven Varga for submitting a
-      reproducer and a patch.
-
-      (CJH - 2019/12/9, HDFFV-10934)
-
-    - Fixed a bug caused by bad tag value when condensing object header
-      messages
-
-      There was an assertion failure when moving meessages from running a
-      user test program with library release hdf5.1.10.4. It was because
-      the tag value (object header's address) was not set up when entering
-      the library routine H5O__chunk_update_idx(), which will eventually
-      verifies the metadata tag value when protecting the object header.
-
-      The problem was fixed by replacing FUNC_ENTER_PACKAGE in H5O__chunk_update_idx()
-      with FUNC_ENTER_PACKAGE_TAG(oh->cache_info.addr) to set up the metadata tag.
-
-      (VC - 2019/08/23, HDFFV-10873)
-
-    - Fixed the test failure from test_metadata_read_retry_info() in
-      test/swmr.c
-
-      The test failure is due to the incorrect number of bins returned for
-      retry info (info.nbins).  The # of bins expected for 101 read attempts
-      is 3 instead of 2.  The routine H5F_set_retries() in src/H5Fint.c
-      calculates the # of bins by first obtaining the log10 value for
-      (read attempts - 1).  For PGI/19, the log10 value for 100 read attempts
-      is 1.9999999999999998 instead of 2.00000.  When casting the log10 value
-      to unsigned later on, the decimal part is chopped off causing the test
-      failure.
-
-      This was fixed by obtaining the rounded integer value (HDceil) for the
-      log10 value of read attempts first before casting the result to unsigned.
-
-      (VC - 2019/8/14, HDFFV-10813)
-
-    - Fixed an issue where creating a file with non-default file space info
-      together with library high bound setting to H5F_LIBVER_V18.
-
-      When setting non-default file space info in fcpl via
-      H5Pset_file_space_strategy() and then creating a file with
-      both high and low library bounds set to
-      H5F_LIBVER_V18 in fapl, the library succeeds in creating the file.
-      File creation should fail because the feature of setting non-default
-      file space info does not exist in library release 1.8 or earlier.
-
-      This was fixed by setting and checking the proper version in the
-      file space info message based on the library low and high bounds
-      when creating and opening the HDF5 file.
-
-      (VC - 2019/6/25, HDFFV-10808)
-
-    - Fixed an issue where copying a version 1.8 dataset between files using
-      H5Ocopy fails due to an incompatible fill version
-
-      When using the HDF5 1.10.x H5Ocopy() API call to copy a version 1.8
-      dataset to a file created with both high and low library bounds set to
-      H5F_LIBVER_V18, the H5Ocopy() call will fail with the error stack indicating
-      that the fill value version is out of bounds.
-
-      This was fixed by changing the fill value message version to H5O_FILL_VERSION_3
-      (from H5O_FILL_VERSION_2) for H5F_LIBVER_V18.
-
-      (VC - 2019/6/14, HDFFV-10800)
-
-    - Fixed a bug that would cause an error or cause fill values to be
-      incorrectly read from a chunked dataset using the "single chunk" index if
-      the data was held in cache and there was no data on disk.
-
-      (NAF - 2019/03/06)
-
-    - Fixed a bug that could cause an error or cause fill values to be
-      incorrectly read from a dataset that was written to using H5Dwrite_chunk
-      if the dataset was not closed after writing.
-
-      (NAF - 2019/03/06, HDFFV-10716)
-
-    - Fixed memory leak in scale offset filter
-
-      In a special case where the MinBits is the same as the number of bits in
-      the datatype's precision, the filter's data buffer was not freed, causing
-      the memory usage to grow. In general the buffer was freed correctly.  The
-      Minbits are the minimal number of bits to store the data values.  Please
-      see the reference manual for H5Pset_scaleoffset for the detail.
-
-      (RL - 2019/3/4, HDFFV-10705)
-
-    - fcntl(2)-based file locking incorrectly passed the lock argument struct
-      instead of a pointer to the struct, causing errors on systems where
-      flock(2) is not available.
-
-      File locking is used when files are opened to enforce SWMR semantics. A
-      lock operation takes place on all file opens unless the
-      HDF5_USE_FILE_LOCKING environment variable is set to the string "FALSE".
-      flock(2) is preferentially used, with fcntl(2) locks as a backup if
-      flock(2) is unavailable on a system (if neither is available, the lock
-      operation fails). On these systems, the file lock will often fail, which
-      causes HDF5 to not open the file and report an error.
-
-      This bug only affects POSIX systems. Win32 builds on Windows use a no-op
-      locking call which always succeeds. Systems which exhibit this bug will
-      have H5_HAVE_FCNTL defined but not H5_HAVE_FLOCK in the configure output.
-
-      This bug affects HDF5 1.10.0 through 1.10.5.
-
-      fcntl(2)-based file locking now correctly passes the struct pointer.
-
-      (DER - 2019/08/27, HDFFV-10892)
-
-    - Inappropriate linking with deprecated MPI C++ libraries
-
-      HDF5 does not define *_SKIP_MPICXX in the public headers, so applications
-      can inadvertently wind up linking to the deprecated MPI C++ wrappers.
-
-      MPICH_SKIP_MPICXX and OMPI_SKIP_MPICXX have both been defined in H5public.h
-      so this should no longer be an issue. HDF5 makes no use of the deprecated
-      MPI C++ wrappers.
-
-      (DER - 2019/09/17, HDFFV-10893)
-
     - Don't allocate an empty (0-dimensioned) chunked dataset's chunk
       index, until the dataset's dimensions are increased.
 
       (QAK - 2020/05/07)
-
-    - H5Sset_extent_none() sets the dataspace class to H5S_NO_CLASS which
-      causes asserts/errors when passed to other dataspace API calls.
-
-      H5S_NO_CLASS is an internal class value that should not have been
-      exposed via a public API call.
-
-      In debug builds of the library, this can cause asserts to trip. In
-      non-debug builds, it will produce normal library errors.
-
-      The new library behavior is for H5Sset_extent_none() to convert
-      the dataspace into one of type H5S_NULL, which is better handled
-      by the library and easier for developers to reason about.
-
-      (DER - 2020/07/27, HDFFV-11027)
 
 
     Configuration
@@ -642,14 +515,6 @@ Bug Fixes since HDF5-1.10.6 release
       correct path for the Fortran module files.
 
       (ADB - 2020/02/04, HDFFV-11012)
-
-    - Correct option for default API version
-
-      CMake options for default API version are not mutually exclusive.
-      Change the multiple BOOL options to a single STRING option with the
-      strings; v16, v18, v110.
-
-      (ADB - 2019/08/12, HDFFV-10879)
 
     Fortran
     --------
@@ -713,14 +578,6 @@ Bug Fixes since HDF5-1.10.6 release
       code block.
 
       (KY -2020/02/10, HDFFV-11014)
-
-    - h5repack was fixed to repack datasets with external storage
-      to other types of storage.
-
-      New test added to repack files and verify the correct data using h5diff.
-
-      (JS - 2019/09/25, HDFFV-10408)
-      (ADB - 2019/10/02, HDFFV-10918)
 
 
     High-Level APIs:
