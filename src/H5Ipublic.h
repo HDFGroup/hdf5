@@ -544,10 +544,154 @@ H5_DLL int H5Idec_type_ref(H5I_type_t type);
  *-------------------------------------------------------------------------
  */
 H5_DLL int H5Iget_type_ref(H5I_type_t type);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5I
+ *
+ * \brief Finds the memory referred to by an ID within the given ID type such
+ *        that some criterion is satisfied
+ *
+ * \param[in] type The identifier of the type to be searched
+ * \param[in] func The function defining the search criteria
+ * \param[in] key A key for the search function
+ *
+ * \return Returns a pointer to the object which satisfies the search function
+ *         on success, NULL on failure.
+ *
+ * \details H5Isearch() searches through a given ID type to find an object that
+ *          satisfies the criteria defined by \p func. If such an object is
+ *          found, the pointer to the memory containing this object is
+ *          returned. Otherwise, NULL is returned. To do this, \p func is
+ *          called on every member of type \p type. The first member to satisfy
+ *          \p func is returned.
+ *
+ *          The \p type parameter is the identifier for the ID type which is to
+ *          be searched. This identifier must have been created by a call to
+ *          H5Iregister_type().
+ *
+ *          The parameter \p func is a function pointer to a function which
+ *          takes three parameters. The first parameter is a \c void* and will
+ *          be a pointer to the object to be tested. This is the same object
+ *          that was placed in storage using H5Iregister(). The second
+ *          parameter is a hid_t and is the ID of the object to be tested. The
+ *          last parameter is a \c void*. This is the \p key parameter and can
+ *          be used however the user finds helpful, or it can be ignored if it
+ *          is not needed. \p func returns 0 if the object it is testing does
+ *          not pass its criteria. A non-zero value should be returned if the
+ *          object does pass its criteria. H5I_search_func_t is defined in
+ *          H5Ipublic.h and is shown below.
+ *          \code
+ *          typedef int (*H5I_search_func_t)(void *obj, hid_t id, void *key);
+ *          \endcode
+ *          The \p key parameter will be passed to the search function as a
+ *          parameter. It can be used to further define the search at run-time.
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL void *H5Isearch(H5I_type_t type, H5I_search_func_t func, void *key);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5I
+ *
+ * \brief Calls a callback for each member of the identifier type specified
+ *
+ * \param[in] type The identifier type
+ * \param[in] op The callback function
+ * \param[in,out] op_data The data for the callback function
+ *
+ * \return The last value returned by \p op
+ *
+ * \details H5Iiterate() calls the callback function \p op for each member of
+ *          the identifier type \p type. The callback function type for \p op,
+ *          H5I_iterate_func_t, is defined in H5Ipublic.h as:
+ *          \code
+ *          typedef herr_t (*H5I_iterate_func_t)(hid_t id, void *udata);
+ *          \endcode
+ *
+ *          \p op takes as parameters the identifier and a pass through of
+ *          \p op_data, and returns an herr_t.
+ *
+ *          A positive return from op will cause the iteration to stop and
+ *          H5Iiterate() will return the value returned by \p op. A negative
+ *          return from \p op will cause the iteration to stop and H5Iiterate()
+ *          will return failure. A zero return from \p op will allow iteration
+ *          to continue, as long as there are other identifiers remaining in
+ *          type.
+ *
+ * \since 1.12.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Iiterate(H5I_type_t type, H5I_iterate_func_t op, void *op_data);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5I
+ *
+ * \brief Returns the number of identifiers in a given identifier type
+ *
+ * \param[in] type The identifier type
+ * \param[out] num_members Number of identifiers of the specified identifier type
+ *
+ * \return \herr_t
+ *
+ * \details H5Inmembers() returns the number of identifiers of the identifier
+ *          type specified in \p type.
+ *
+ *          The number of identifiers is returned in \p num_members. If no
+ *          identifiers of this type have been registered, the type does not
+ *          exist, or it has been destroyed, \p num_members is returned with
+ *          the value 0.
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Inmembers(H5I_type_t type, hsize_t *num_members);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5I
+ *
+ * \brief Determines whether an identifier type is registered
+ *
+ * \param[in] type Identifier type
+ *
+ * \return \htri_t
+ *
+ * \details H5Itype_exists() determines whether the given identifier type,
+ *          \p type, is registered with the library.
+ *
+ * \since 1.8.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL htri_t H5Itype_exists(H5I_type_t type);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5I
+ *
+ * \brief Determines whether an identifier is valid
+ *
+ * \obj_id{id}
+ *
+ * \return \htri_t
+ *
+ * \details H5Iis_valid() determines whether the identifier \p id is valid.
+ *
+ * \details Valid identifiers are those that have been obtained by an
+ *          application and can still be used to access the original target.
+ *          Examples of invalid identifiers include:
+ *          \li Out of range values: negative, for example
+ *          \li Previously-valid identifiers that have been released:
+ *              for example, a dataset identifier for which the dataset has
+ *              been closed
+ *
+ *          H5Iis_valid() can be used with any type of identifier: object
+ *          identifier, property list identifier, attribute identifier, error
+ *          message identifier, etc. When necessary, a call to H5Iget_type()
+ *          can determine the type of the object that \p id identifies.
+ *
+ * \since 1.8.3
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL htri_t H5Iis_valid(hid_t id);
 
 #ifdef __cplusplus
