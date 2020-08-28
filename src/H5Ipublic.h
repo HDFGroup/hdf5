@@ -21,7 +21,8 @@
 /* Public headers needed by this file */
 #include "H5public.h"
 
-/** Library type values.
+/**
+ * Library type values.
  * \internal Library type values.  Start with `1' instead of `0' because it
  *           makes the tracing output look better when hid_t values are large
  *           numbers. Change the TYPE_BITS in H5I.c if the MAXID gets larger
@@ -52,12 +53,18 @@ typedef enum H5I_type_t {
     H5I_NTYPES                  /**< number of library types, MUST BE LAST!    */
 } H5I_type_t;
 
-/** Type of atoms to return to users */
+/**
+ * Type of atoms to return to users
+ */
 typedef int64_t hid_t;
-/** The size of identifiers */
+/**
+ * The size of identifiers
+ */
 #define H5_SIZEOF_HID_T         H5_SIZEOF_INT64_T
 
-/** An invalid object ID. This is also negative for error return. */
+/**
+ * An invalid object ID. This is also negative for error return.
+ */
 #define H5I_INVALID_HID         (-1)
 
 /**
@@ -69,10 +76,14 @@ typedef int64_t hid_t;
  */
 typedef herr_t (*H5I_free_t)(void *);
 
-/** The type of a function to compare objects & keys */
+/**
+ * The type of a function to compare objects & keys
+ */
 typedef int (*H5I_search_func_t)(void *obj, hid_t id, void *key);
 
-/** The type of H5Iiterate() callback functions */
+/**
+ * The type of H5Iiterate() callback functions
+ */
 typedef herr_t (*H5I_iterate_func_t)(hid_t id, void *udata);
 
 #ifdef __cplusplus
@@ -81,9 +92,117 @@ extern "C" {
 
 /* Public API functions */
 
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5I
+ *
+ * \brief Registers an object under a type and returns an ID for it
+ *
+ * \param[in] type The identifier of the type of the new ID
+ * \param[in] object Pointer to object for which a new ID is created
+ *
+ * \return \hid_t{object}
+ *
+ * \details H5Iregister() allocates and returns a new ID for an object.
+ *
+ * \details The \p type parameter is the identifier for the ID type to which
+ *          this new ID will belong. This identifier must have been created by
+ *          a call to H5Iregister_type().
+ *
+ * \details The \p object parameter is a pointer to the memory which the new ID
+ *          will be a reference to. This pointer will be stored by the library
+ *          and returned via a call to H5Iobject_verify().
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL hid_t H5Iregister(H5I_type_t type, const void *object);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5I
+ *
+ * \brief Returns the object referenced by an ID
+ *
+ * \param[in] id ID to be dereferenced
+ * \param[in] id_type The identifier type
+
+ *
+ * \return Pointer to the object referenced by \p id on success, NULL on failure.
+ *
+ * \details H5Iobject_verify() returns a pointer to the memory referenced by id
+ *          after verifying that \p id is of type \p id_type. This function is
+ *          analogous to dereferencing a pointer in C with type checking.
+ *
+ * \note H5Iobject_verify() does not change the ID it is called on in any way
+ *       (as opposed to H5Iremove_verify(), which removes the ID from its
+ *       type’s hash table).
+ *
+ * \see H5Iregister()
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL void *H5Iobject_verify(hid_t id, H5I_type_t id_type);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5I
+ *
+ * \brief Removes an ID from its type
+ *
+ * \param[in] id The ID to be removed from its type
+ * \param[in] id_type The identifier type
+
+ *
+ * \return Returns a pointer to the memory referred to by \p id on success,
+ *         NULL on failure.
+ *
+ * \details H5Iremove_verify() first ensures that \p id belongs to \p id_type.
+ *          If so, it removes \p id from its type and returns the pointer
+ *          to the memory it referred to. This pointer is the same pointer that
+ *          was placed in storage by H5Iregister(). If id does not belong to
+ *          \p id_type, then NULL is returned.
+ *
+ *          The \p id parameter is the ID which is to be removed from its type.
+ *
+ *          The \p type parameter is the identifier for the ID type which \p id
+ *          is supposed to belong to. This identifier must have been created by
+ *          a call to H5Iregister_type().
+ *
+ * \note This function does NOT deallocate the memory that \p id refers to.
+ *       The pointer returned by H5Iregister() must be deallocated by the user
+ *       to avoid memory leaks.
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL void *H5Iremove_verify(hid_t id, H5I_type_t id_type);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5I
+ *
+ * \brief Retrieves the type of an object
+ *
+ * \obj_id{id}
+ *
+ * \return Returns the object type if successful; otherwise #H5I_BADID.
+ *
+ * \details H5Iget_type() retrieves the type of the object identified by
+ *          \p id.
+ *
+ *          Valid types returned by the function are:
+ *          \id_types
+ *
+ *          If no valid type can be determined or the identifier submitted is
+ *          invalid, the function returns #H5I_BADID.
+ *
+ *          This function is of particular use in determining the type of
+ *          object closing function (H5Dclose(), H5Gclose(), etc.) to call
+ *          after a call to H5Rdereference().
+ *
+ * \note Note that this function returns only the type of object that \p id
+ *       would identify if it were valid; it does not determine whether \p id
+ *       is valid identifier. Validity can be determined with a call to
+ *       H5Iis_valid().
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL H5I_type_t H5Iget_type(hid_t id);
 H5_DLL hid_t H5Iget_file_id(hid_t id);
 H5_DLL ssize_t H5Iget_name(hid_t id, char *name/*out*/, size_t size);
