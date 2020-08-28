@@ -204,16 +204,345 @@ H5_DLL void *H5Iremove_verify(hid_t id, H5I_type_t id_type);
  *-------------------------------------------------------------------------
  */
 H5_DLL H5I_type_t H5Iget_type(hid_t id);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5I
+ *
+ * \brief Retrieves an identifier for the file containing the specified object
+ *
+ * \obj_id{id}
+ *
+ * \return \hid_t{file}
+ *
+ * \details H5Iget_file_id() returns the identifier of the file associated with
+ *          the object referenced by \p id.
+ *
+ * \note Note that the HDF5 library permits an application to close a file
+ *       while objects within the file remain open. If the file containing the
+ *       object \p id is still open, H5Iget_file_id() will retrieve the
+ *       existing file identifier. If there is no existing file identifier for
+ *       the file, i.e., the file has been closed, H5Iget_file_id() will reopen
+ *       the file and return a new file identifier. In either case, the file
+ *       identifier must eventually be released using H5Fclose().
+ *
+ * \since 1.6.3
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL hid_t H5Iget_file_id(hid_t id);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5I
+ *
+ * \brief Retrieves a name of an object based on the object identifier
+ *
+ * \obj_id{id}
+ * \param[out] name A buffer for thename associated with the identifier
+ * \param[in] size The size of the \p name buffer; usually the size of
+ *                 the name in bytes plus 1 for a NULL terminator
+ *
+ * \return ssize_t
+ *
+ * \details H5Iget_name() retrieves a name for the object identified by \p id.
+ *
+ * \details Up to size characters of the name are returned in \p name;
+ *          additional characters, if any, are not returned to the user
+ *          application.
+ *
+ *          If the length of the name, which determines the required value of
+ *          \p size, is unknown, a preliminary H5Iget_name() call can be made.
+ *          The return value of this call will be the size in bytes of the
+ *          object name. That value, plus 1 for a NULL terminator, is then
+ *          assigned to size for a second H5Iget_name() call, which will
+ *          retrieve the actual name.
+ *
+ *          If the object identified by \p id is an attribute, as determined
+ *          via H5Iget_type(), H5Iget_name() retrieves the name of the object
+ *          to which that attribute is attached. To retrieve the name of the
+ *          attribute itself, use H5Aget_name().
+ *
+ *          If there is no name associated with the object identifier or if the
+ *          name is NULL, H5Iget_name() returns 0 (zero).
+ *
+ * \note Note that an object in an HDF5 file may have multiple paths if there
+ *       are multiple links pointing to it. This function may return any one of
+ *       these paths. When possible, H5Iget_name() returns the path with which
+ *       the object was opened.
+ *
+ * \since 1.6.0
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL ssize_t H5Iget_name(hid_t id, char *name/*out*/, size_t size);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5I
+ *
+ * \brief Increments the reference count for an object
+ *
+ * \obj_id{id}
+ *
+ * \return Returns a non-negative reference count of the object ID after
+ *         incrementing it if successful; otherwise a negative value is
+ *         returned.
+ *
+ * \details H5Iinc_ref() increments the reference count of the object
+ *          identified by \p id.
+ *
+ *          The reference count for an object ID is attached to the information
+ *          about an object in memory and has no relation to the number of
+ *          links to an object on disk.
+ *
+ *          The reference count for a newly created object will be 1. Reference
+ *          counts for objects may be explicitly modified with this function or
+ *          with H5Idec_ref(). When an object ID's reference count reaches
+ *          zero, the object will be closed. Calling an object ID's \c close
+ *          function decrements the reference count for the ID which normally
+ *          closes the object, but if the reference count for the ID has been
+ *          incremented with this function, the object will only be closed when
+ *          the reference count reaches zero with further calls to H5Idec_ref()
+ *          or the object ID's \c close function.
+ *
+ *          If the object ID was created by a collective parallel call (such as
+ *          H5Dcreate(), H5Gopen(), etc.), the reference count should be
+ *          modified by all the processes which have copies of the ID.
+ *          Generally this means that group, dataset, attribute, file and named
+ *          datatype IDs should be modified by all the processes and that all
+ *          other types of IDs are safe to modify by individual processes.
+ *
+ *          This function is of particular value when an application is
+ *          maintaining multiple copies of an object ID. The object ID can be
+ *          incremented when a copy is made. Each copy of the ID can then be
+ *          safely closed or decremented and the HDF5 object will be closed
+ *          when the reference count for that that object drops to zero.
+ *
+ * \since 1.6.2
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL int H5Iinc_ref(hid_t id);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5I
+ *
+ * \brief Decrements the reference count for an object
+ *
+ * \obj_id{id}
+ *
+ * \return Returns a non-negative reference count of the object ID after
+ *         decrementing it, if successful; otherwise a negative value is
+ *         returned.
+ *
+ * \details H5Idec_ref() decrements the reference count of the object
+ *          identified by \p id.
+ *
+ *          The reference count for an object ID is attached to the information
+ *          about an object in memory and has no relation to the number of
+ *          links to an object on disk.
+ *
+ *          The reference count for a newly created object will be 1. Reference
+ *          counts for objects may be explicitly modified with this function or
+ *          with H5Iinc_ref(). When an object identifier’s reference count
+ *          reaches zero, the object will be closed. Calling an object
+ *          identifier’s \c close function decrements the reference count for
+ *          the identifier which normally closes the object, but if the
+ *          reference count for the identifier has been incremented with
+ *          H5Iinc_ref(), the object will only be closed when the reference
+ *          count reaches zero with further calls to this function or the
+ *          object identifier’s \c close function.
+ *
+ *          If the object ID was created by a collective parallel call (such as
+ *          H5Dcreate(), H5Gopen(), etc.), the reference count should be
+ *          modified by all the processes which have copies of the ID.
+ *          Generally this means that group, dataset, attribute, file and named
+ *          datatype IDs should be modified by all the processes and that all
+ *          other types of IDs are safe to modify by individual processes.
+ *
+ *          This function is of particular value when an application is
+ *          maintaining multiple copies of an object ID. The object ID can be
+ *          incremented when a copy is made. Each copy of the ID can then be
+ *          safely closed or decremented and the HDF5 object will be closed
+ *          when the reference count for that that object drops to zero.
+ *
+ * \since 1.6.2
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL int H5Idec_ref(hid_t id);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5I
+ *
+ * \brief Retrieves the reference count for an object
+ *
+ * \obj_id{id}
+ *
+ * \return Returns a non-negative current reference count of the object
+ *         identifier if successful; otherwise a negative value is returned.
+ *
+ * \details H5Iget_ref() retrieves the reference count of the object identified
+ *          by \p id.
+ *
+ *          The reference count for an object identifier is attached to the
+ *          information about an object in memory and has no relation to the
+ *          number of links to an object on disk.
+ *
+ *          The function H5Iis_valid() is used to determine whether a specific
+ *          object identifier is valid.
+ *
+ * \since 1.6.2
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL int H5Iget_ref(hid_t id);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5I
+ *
+ * \brief Creates and returns a new ID type
+ *
+ * \param[in] hash_size Minimum hash table size (in entries) used to store IDs
+ *                      for the new type
+ * \param[in] reserved Number of reserved IDs for the new type
+ * \param[in] free_func Function used to deallocate space for a single ID
+ *
+ * \return Returns the type identifier on success, negative on failure.
+ *
+ * \details H5Iregister_type() allocates space for a new ID type and returns an
+ *          identifier for it.
+ *
+ *          The \p hash_size parameter indicates the minimum size of the hash
+ *          table used to store IDs in the new type.
+ *
+ *          The \p reserved parameter indicates the number of IDs in this new
+ *          type to be reserved. Reserved IDs are valid IDs which are not
+ *          associated with any storage within the library.
+ *
+ *          The \p free_func parameter is a function pointer to a function
+ *          which returns an herr_t and accepts a \c void*. The purpose of this
+ *          function is to deallocate memory for a single ID. It will be called
+ *          by H5Iclear_type() and H5Idestroy_type() on each ID. This function
+ *          is NOT called by H5Iremove_verify(). The \c void* will be the same
+ *          pointer which was passed in to the H5Iregister() function. The \p
+ *          free_func function should return 0 on success and -1 on failure.
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL H5I_type_t H5Iregister_type(size_t hash_size, unsigned reserved, H5I_free_t free_func);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5I
+ *
+ * \brief Deletes all identifiers of the given type
+ *
+ * \param[in] type Identifier of identifier type which is to be cleared of identifiers
+ * \param[in] force Whether or not to force deletion of all identifiers
+ *
+ * \return \herr_t
+ *
+ * \details H5Iclear_type() deletes all identifiers of the type identified by
+ *          the argument \p type.
+ *
+ *          The identifier type's free function is first called on all of these
+ *          identifiers to free their memory, then they are removed from the
+ *          type.
+ *
+ *          If the \p force flag is set to false, only those identifiers whose
+ *          reference counts are equal to 1 will be deleted, and all other
+ *          identifiers will be entirely unchanged. If the force flag is true,
+ *          all identifiers of this type will be deleted.
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Iclear_type(H5I_type_t type, hbool_t force);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5I
+ *
+ * \brief Removes an identifier type and all identifiers within that type
+ *
+ * \param[in] type Identifier of identifier type which is to be destroyed
+ *
+ * \return \herr_t
+ *
+ * \details H5Idestroy_type deletes an entire identifier type \p type. All
+ *          identifiers of this type are destroyed and no new identifiers of
+ *          this type can be registered.
+ *
+ *          The type’s free function is called on all of the identifiers which
+ *          are deleted by this function, freeing their memory. In addition,
+ *          all memory used by this type’s hash table is freed.
+ *
+ *          Since the H5I_type_t values of destroyed identifier types are
+ *          reused when new types are registered, it is a good idea to set the
+ *          variable holding the value of the destroyed type to #H5I_UNINIT.
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL herr_t H5Idestroy_type(H5I_type_t type);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5I
+ *
+ * \brief Increments the reference count on an ID type
+ *
+ * \param[in] type The identifier of the type whose reference count is to be incremented
+ *
+ * \return Returns the current reference count on success, negative on failure.
+ *
+ * \details H5Iinc_type_ref() increments the reference count on an ID type. The
+ *          reference count is used by the library to indicate when an ID type
+ *          can be destroyed.
+ *
+ *          The type parameter is the identifier for the ID type whose
+ *          reference count is to be incremented. This identifier must have
+ *          been created by a call to H5Iregister_type().
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL int H5Iinc_type_ref(H5I_type_t type);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5I
+ *
+ * \brief Decrements the reference count on an identifier type
+ *
+ * \param[in] type The identifier of the type whose reference count is to be decremented
+ *
+ * \return Returns the current reference count on success, negative on failure.
+ *
+ * \details H5Idec_type_ref() decrements the reference count on an identifier
+ *          type. The reference count is used by the library to indicate when
+ *          an identifier type can be destroyed. If the reference count reaches
+ *          zero, this function will destroy it.
+ *
+ *          The type parameter is the identifier for the identifier type whose
+ *          reference count is to be decremented. This identifier must have
+ *          been created by a call to H5Iregister_type().
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL int H5Idec_type_ref(H5I_type_t type);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5I
+ *
+ * \brief Retrieves the reference count on an ID type
+ *
+ * \param[in] type The identifier of the type whose reference count is to be retieved
+ *
+ * \return Returns the current reference count on success, negative on failure.
+ *
+ * \details H5Iget_type_ref() retrieves the reference count on an ID type. The
+ *          reference count is used by the library to indicate when an ID type
+ *          can be destroyed.
+ *
+ *          The type parameter is the identifier for the ID type whose
+ *          reference count is to be retrieved. This identifier must have been
+ *          created by a call to H5Iregister_type().
+ *
+ *-------------------------------------------------------------------------
+ */
 H5_DLL int H5Iget_type_ref(H5I_type_t type);
 H5_DLL void *H5Isearch(H5I_type_t type, H5I_search_func_t func, void *key);
 H5_DLL herr_t H5Iiterate(H5I_type_t type, H5I_iterate_func_t op, void *op_data);
