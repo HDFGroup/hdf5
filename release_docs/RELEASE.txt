@@ -33,7 +33,6 @@ If you have any questions or comments, please send them to the HDF Help Desk:
 CONTENTS
 
 - New Features
-- Support for new platforms and languages
 - Bug Fixes since HDF5-1.10.6
 - Supported Platforms
 - Tested Configuration Features Summary
@@ -375,10 +374,6 @@ New Features
 
       (ADB - 2020/08/05, HDFFV-9984)
 
-
-Support for new platforms, languages and compilers.
-=======================================
-    -
 
 Bug Fixes since HDF5-1.10.6 release
 ==================================
@@ -775,11 +770,11 @@ Supported Platforms
     (hedgehog)                    Sun C++ 5.15 SunOS_sparc 2017/05/30
 
     Windows 7 x64                 Visual Studio 2015 w/ Intel C, Fortran 2018 (cmake)
-                                  Visual Studio 2015 w/ MSMPI 10 (cmake)
 
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
                                   Visual Studio 2017 w/ Intel Fortran 19 (cmake)
                                   Visual Studio 2019 w/ Intel Fortran 19 (cmake)
+                                  Visual Studio 2019 w/ MSMPI 10.1 (cmake)
 
     macOS Mojave 10.14.6          Apple LLVM version 10.0.1 (clang-1001.0.46.4)
     64-bit                        gfortran GNU Fortran (GCC) 6.3.0
@@ -802,10 +797,7 @@ Platform                              C         F90/   F90      C++  zlib  SZIP
                                       parallel  F2003  parallel
 Solaris2.11 32-bit                      n        y/y    n        y    y     y
 Solaris2.11 64-bit                      n        y/n    n        y    y     y
-Windows 7                               y        y/y    n        y    y     y
 Windows 7 x64                           y        y/y    y        y    y     y
-Windows 7 Cygwin                        n        y/n    n        y    y     y
-Windows 7 x64 Cygwin                    n        y/n    n        y    y     y
 Windows 10                              y        y/y    n        y    y     y
 Windows 10 x64                          y        y/y    n        y    y     y
 Mac OS X El Capitan 10.11.6 64-bit      n        y/y    n        y    y     y
@@ -822,10 +814,7 @@ Platform                                 Shared  Shared    Shared    Thread-
                                          C libs  F90 libs  C++ libs  safe
 Solaris2.11 32-bit                         y       y         y         y
 Solaris2.11 64-bit                         y       y         y         y
-Windows 7                                  y       y         y         y
 Windows 7 x64                              y       y         y         y
-Windows 7 Cygwin                           n       n         n         y
-Windows 7 x64 Cygwin                       n       n         n         y
 Windows 10                                 y       y         y         y
 Windows 10 x64                             y       y         y         y
 Mac OS X El Capitan 10.11.6 64-bit         y       n         y         y
@@ -854,6 +843,10 @@ The following platforms are not supported but have been tested for this release.
                                      Version 19.10-0
                                   MPICH 3.1.4 compiled with GCC 4.9.3
 
+    Linux 2.6.32-754.31.1.el6     gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
+    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
+    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
+
     Linux 3.10.0-327.18.2.el7     GNU C (gcc) and C++ (g++) compilers
     #1 SMP x86_64 GNU/Linux          Version 4.8.5 20150623 (Red Hat 4.8.5-4)
     (jelly)                       with NAG Fortran Compiler Release 6.1(Tozai)
@@ -868,13 +861,27 @@ The following platforms are not supported but have been tested for this release.
     #1 SMP x86_64 GNU/Linux
     (moohan)
 
-    Linux 2.6.32-754.31.1.el6     gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
-    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
-    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
+    Linux-3.10.0-1127.0.0.1chaos  openmpi-4.0.0
+    #1 SMP x86_64 GNU/Linux           clang/3.9.0, 8.0.1
+    (quartz)                          gcc/7.3.0, 8.1.0
+                                      intel/16.0.4
 
-    Fedora30 5.3.11-200.fc30.x86_64
-    #1 SMP x86_64  GNU/Linux      GNU gcc (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
-                                  GNU Fortran (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
+    Linux-4.14.0-115.10.1.1       spectrum-mpi/rolling-release
+    #1 SMP ppc64le GNU/Linux          clang/coral-2018.08.08
+    (lassen)                          gcc/7.3.1
+                                      xl/2019.02.07
+
+    Linux-4.12.14-150.52-default  cray-mpich/7.7.10
+    #1 SMP x86_64 GNU/Linux           gcc/7.3.0, 8.2.0
+    (cori)                            intel/19.0.3
+
+    Linux-4.4.180-94.107-default  cray-mpich/7.7.6
+    # 1SMP x86_64 GNU/Linux           gcc/7.2.0, 8.2.0
+    (mutrino)                         intel/17.0.4, 18.0.2, 19.0.4
+
+    Fedora 32 5.7.15-200.fc32.x86_64  Clang version 10.0.0 (Fedora 10.0.0-2.fc32)
+    #1 SMP x86_64  GNU/Linux      GNU gcc (GCC) 10.2.1 20200723 (Red Hat 10.2.1-1)
+                                  GNU Fortran (GCC) 10.2.1 20200723 (Red Hat 10.2.1)
                                      (cmake and autotools)
 
     Mac OS X El Capitan 10.11.6   Apple clang version 7.3.0 from Xcode 7.3
@@ -906,14 +913,12 @@ Known Problems
     images, but since this is a collective operation, a deadlock is possible
     if one or more processes do not participate.
 
-    Three tests fail with OpenMPI 3.0.0/GCC-7.2.0-2.29:
+    Two tests fail attempting collective writes with OpenMPI 3.0.0/GCC-7.2.0-2.29:
         testphdf5 (ecdsetw, selnone, cchunk1, cchunk3, cchunk4, and actualio)
         t_shapesame (sscontig2)
-        t_pflush1/fails on exit
-    The first two tests fail attempting collective writes.
 
-    CPP ptable test fails on VS2017 with Intel compiler, JIRA issue: HDFFV-10628.
-    This test will pass with VS2015 with Intel compiler.
+    CPP ptable test fails on both VS2017 and VS2019 with Intel compiler, JIRA
+    issue: HDFFV-10628.  This test will pass with VS2015 with Intel compiler.
 
     Known problems in previous releases can be found in the HISTORY*.txt files
     in the HDF5 source. Please report any new problems found to
