@@ -33,6 +33,7 @@ If you have any questions or comments, please send them to the HDF Help Desk:
 CONTENTS
 
 - New Features
+- Support for new platforms and languages
 - Bug Fixes since HDF5-1.10.6
 - Supported Platforms
 - Tested Configuration Features Summary
@@ -374,6 +375,27 @@ New Features
 
       (ADB - 2020/08/05, HDFFV-9984)
 
+    High-Level APIs:
+    ---------------
+    - None 
+
+    C Packet Table API
+    ------------------
+    - None
+
+    Internal header file
+    --------------------
+    - None
+
+    Documentation
+    -------------
+    - None
+
+
+Support for new platforms, languages and compilers.
+=======================================
+    - None
+
 
 Bug Fixes since HDF5-1.10.6 release
 ==================================
@@ -480,7 +502,6 @@ Bug Fixes since HDF5-1.10.6 release
 
       (QAK - 2020/05/07)
 
-
     Configuration
     -------------
     - Stopped addition of szip header and include directory path for 
@@ -515,6 +536,14 @@ Bug Fixes since HDF5-1.10.6 release
       correct path for the Fortran module files.
 
       (ADB - 2020/02/04, HDFFV-11012)
+
+    Performance
+    -------------
+    - None
+
+    Java Library:
+    ----------------
+    - None
 
     Fortran
     --------
@@ -579,7 +608,6 @@ Bug Fixes since HDF5-1.10.6 release
 
       (KY -2020/02/10, HDFFV-11014)
 
-
     High-Level APIs:
     ------
     - The H5DSis_scale function was updated to return "not a dimension scale" (0)
@@ -588,6 +616,21 @@ Bug Fixes since HDF5-1.10.6 release
 
      (EIP - 2020/08/12, HDFFV-10436)
 
+    Fortran High-Level APIs:
+    ------
+    - None
+
+    Documentation
+    -------------
+    - None
+
+    F90 APIs
+    --------
+    - None
+
+    C++ APIs
+    --------
+    - None
 
     Testing
     -------
