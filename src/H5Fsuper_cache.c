@@ -1228,15 +1228,21 @@ H5F__cache_superblock_refresh(H5F_t *f, void * _thing, const void * _image,
         if ( snode_btree_k != sblock->btree_k[H5B_SNODE_ID] )
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected snode_btree_k")
 
-        /* File status flags (not really used yet) */
-        /* If the file has closed, the status flags will be zero.
-         * Allow this.
+        /* File status flags (not really used yet)
+         *
+         * If the file has closed by the writer, then the status flags will
+         * change to zero.  If the file was opened by the writer, then the
+         * status flags will change to
+         * H5F_SUPER_WRITE_ACCESS|H5F_SUPER_SWMR_WRITE_ACCESS.  Only those
+         * two transitions are allowed.
          */
         UINT32DECODE(image, status_flags);
-        if (status_flags != sblock->status_flags && status_flags != 0) {
+        if (status_flags != sblock->status_flags && status_flags != 0 &&
+            status_flags !=
+                (H5F_SUPER_WRITE_ACCESS|H5F_SUPER_SWMR_WRITE_ACCESS)) {
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
-                "read status_flags %" PRIx32 " expected %" PRIx32,
-                status_flags, sblock->status_flags)
+                "status_flags %" PRIx32 " unexpectedly changed to %" PRIx32,
+                sblock->status_flags, status_flags)
         }
 
 	/*
@@ -1307,13 +1313,18 @@ H5F__cache_superblock_refresh(H5F_t *f, void * _thing, const void * _image,
         /* File status flags (not really used yet) */
 	status_flags = *image++;
 
-        /* If the file has closed, the status flags will be zero.
-         * Allow this.
+        /* If the file has closed by the writer, then the status flags will
+         * change to zero.  If the file was opened by the writer, then the
+         * status flags will change to
+         * H5F_SUPER_WRITE_ACCESS|H5F_SUPER_SWMR_WRITE_ACCESS.  Only those
+         * two transitions are allowed.
          */
-        if (status_flags != sblock->status_flags && status_flags != 0) {
+        if (status_flags != sblock->status_flags && status_flags != 0 &&
+            status_flags !=
+                (H5F_SUPER_WRITE_ACCESS|H5F_SUPER_SWMR_WRITE_ACCESS)) {
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
-                "read status_flags %" PRIx32 " expected %" PRIx32,
-                status_flags, sblock->status_flags)
+                "status_flags %" PRIx32 " unexpectedly changed to %" PRIx32,
+                sblock->status_flags, status_flags)
         }
 
 	/* Base, superblock extension, end of file & root group object 
