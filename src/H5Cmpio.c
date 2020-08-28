@@ -930,6 +930,8 @@ H5C__collective_write(H5F_t *f)
     MPI_Datatype        ftype;
     hbool_t             ftype_created = FALSE;
     int                 mpi_code;
+    char                unused = 0;             /* Unused, except for non-NULL pointer value */
+    size_t              buf_count;
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
@@ -944,6 +946,10 @@ H5C__collective_write(H5F_t *f)
     if(H5CX_get_io_xfer_mode(&orig_xfer_mode) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
 
+    /* Set transfer mode */
+    if(H5CX_set_io_xfer_mode(H5FD_MPIO_COLLECTIVE) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set MPI-I/O transfer mode")
+
     /* Get number of entries in collective write list */
     count = (int)H5SL_count(cache_ptr->coll_write_list);
     if(count > 0) {
@@ -952,10 +958,6 @@ H5C__collective_write(H5F_t *f)
         H5C_cache_entry_t   *entry_ptr;
         void                *base_buf;
         int                 i;
-
-        /* Set new transfer mode */
-        if(H5CX_set_io_xfer_mode(xfer_mode) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set MPI-I/O transfer mode")
 
         /* Allocate arrays */
         if(NULL == (length_array = (int *)H5MM_malloc((size_t)count * sizeof(int))) )
@@ -1011,37 +1013,28 @@ H5C__collective_write(H5F_t *f)
         if(H5CX_set_mpi_coll_datatypes(btype, ftype) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set MPI-I/O properties")
 
-        /* Write data */
-        if(H5F_block_write(f, H5FD_MEM_DEFAULT, (haddr_t)0, (size_t)1, base_buf) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to write entries collectively")
-
+        /* MPI count to write */
+        buf_count = 1;
     } /* end if */
     else {
-        MPI_Status mpi_stat;
-        MPI_File mpi_fh_p;
-        MPI_File mpi_fh;
+        /* Pass trivial buf type, file type to the file driver */
+        btype = MPI_BYTE;
+        ftype = MPI_BYTE;
 
-/* This should be rewritten to call H5F_block_write, with the correct
- *      buffer and file datatypes (null ones).  -QAK, 2018/02/21
- */
-        if(H5F_get_mpi_handle(f, (MPI_File **)&mpi_fh_p) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't get mpi file handle")
+        /* Set non-NULL pointer for I/O operation */
+        base_buf = &unused;
 
-        mpi_fh = *(MPI_File*)mpi_fh_p;
-
-        /* just to match up with the 1st MPI_File_set_view from H5FD_mpio_write() */
-        if(MPI_SUCCESS != (mpi_code = MPI_File_set_view(mpi_fh, (MPI_Offset)0, MPI_BYTE, MPI_BYTE, "native", MPI_INFO_NULL)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
-
-        /* just to match up with MPI_File_write_at_all from H5FD_mpio_write() */
-        HDmemset(&mpi_stat, 0, sizeof(MPI_Status));
-        if(MPI_SUCCESS != (mpi_code = MPI_File_write_at_all(mpi_fh, (MPI_Offset)0, NULL, 0, MPI_BYTE, &mpi_stat)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at_all failed", mpi_code)
-
-        /* just to match up with the 2nd MPI_File_set_view (reset) in H5FD_mpio_write() */
-        if(MPI_SUCCESS != (mpi_code = MPI_File_set_view(mpi_fh, (MPI_Offset)0, MPI_BYTE, MPI_BYTE, "native", MPI_INFO_NULL)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
+        /* MPI count to write */
+        buf_count = 0;
     } /* end else */
+
+    /* Pass buf type, file type to the file driver */
+    if(H5CX_set_mpi_coll_datatypes(btype, ftype) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set MPI-I/O properties")
+
+    /* Write data */
+    if(H5F_block_write(f, H5FD_MEM_DEFAULT, (haddr_t)0, buf_count, base_buf) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_WRITEERROR, FAIL, "unable to write entries collectively")
 
 done:
     /* Free arrays */
