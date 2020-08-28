@@ -30,6 +30,35 @@
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5Tprivate.h"		/* Datatypes				*/
 
+/* Flags for selection iterators */
+#define H5S_SEL_ITER_GET_SEQ_LIST_SORTED 0x0001 /* Retrieve elements from iterator
+                                                 * in increasing offset order, for
+                                                 * each call to retrieve sequences.
+                                                 * Currently, this only applies to
+                                                 * point selections, as hyperslab
+                                                 * selections are always returned
+                                                 * in increasing offset order.
+                                                 *
+                                                 * Note that the order is only
+                                                 * increasing for each call to
+                                                 * get_seq_list, the next set of
+                                                 * sequences could start with an
+                                                 * earlier offset than the previous
+                                                 * one.
+                                                 */
+#define H5S_SEL_ITER_SHARE_WITH_DATASPACE 0x0002 /* Don't copy the dataspace
+                                                 * selection when creating the
+                                                 * selection iterator.
+                                                 *
+                                                 * This can improve performance
+                                                 * of creating the iterator, but
+                                                 * the dataspace _MUST_NOT_ be
+                                                 * modified or closed until the
+                                                 * selection iterator is closed
+                                                 * or the iterator's behavior
+                                                 * will be undefined.
+                                                 */
+
 /* Forward references of package typedefs */
 typedef struct H5S_extent_t H5S_extent_t;
 typedef struct H5S_pnt_node_t H5S_pnt_node_t;
