@@ -169,7 +169,7 @@ H5D__stream_append(H5D_t *dset, const void *buf)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
 
     /* Sanity checks */
     /* (Must be in streamed I/O mode) */
@@ -198,7 +198,7 @@ H5D__stream_append(H5D_t *dset, const void *buf)
 
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5D__stream_append() */
 
 
@@ -219,7 +219,7 @@ H5D__stream_sequence(H5D_t *dset, void *buf)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
 
     /* Sanity checks */
     /* (Must be in streamed I/O mode) */
@@ -229,7 +229,7 @@ H5D__stream_sequence(H5D_t *dset, void *buf)
     H5CX_set_dxpl(dset->shared->stream.dxpl_id);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5D__stream_sequence() */
 
 
@@ -329,12 +329,12 @@ H5D__stream_stop(H5D_t *dset)
     /* Sanity checks */
     /* (Must be in streamed I/O mode) */
 
-    /* Reset streamed I/O flag for dataset */
-    dset->shared->is_streaming = FALSE;
-
     /* Release any cached info */
     if(H5D__stream_cleanup(dset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy streaming I/O information")
+
+    /* Reset streamed I/O flag for dataset */
+    dset->shared->is_streaming = FALSE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
