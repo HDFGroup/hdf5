@@ -386,7 +386,7 @@ H5FD_vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id,
      * before there is any file I/O when opening a file VFD SWMR reader,
      * we need to be able to turn off sanity checking in the read function
      * until the page buffer is enabled.  This field exists for this
-     * purpose, and should be remove when it is no longer necessary.
+     * purpose, and should be removed when it is no longer necessary.
      *
      *                                            JRM -- 1/29/19
      */
