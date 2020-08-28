@@ -1011,6 +1011,7 @@ H5C__collective_write(H5F_t *f)
     hbool_t             ftype_created = FALSE;
     int                 mpi_code;
     char                unused = 0;             /* Unused, except for non-NULL pointer value */
+    size_t              buf_count;
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
@@ -1085,6 +1086,9 @@ H5C__collective_write(H5F_t *f)
         ftype_created = TRUE;
         if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&ftype)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+
+        /* MPI count to write */
+        buf_count = 1;
     } /* end if */
     else {
         /* Pass trivial buf type, file type to the file driver */
@@ -1093,6 +1097,9 @@ H5C__collective_write(H5F_t *f)
 
         /* Set non-NULL pointer for I/O operation */
         base_buf = &unused;
+
+        /* MPI count to write */
+        buf_count = 0;
     } /* end else */
 
     /* Pass buf type, file type to the file driver */
@@ -1100,7 +1107,7 @@ H5C__collective_write(H5F_t *f)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set MPI-I/O properties")
 
     /* Write data */
-    if(H5F_block_write(f, H5FD_MEM_DEFAULT, (haddr_t)0, (size_t)1, base_buf) < 0)
+    if(H5F_block_write(f, H5FD_MEM_DEFAULT, (haddr_t)0, buf_count, base_buf) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_WRITEERROR, FAIL, "unable to write entries collectively")
 
 done:
