@@ -234,6 +234,24 @@ New Features
 
     Library:
     --------
+    - Add metadata cache optimization to reduce skip list usage
+
+      On file flush or close, the metadata cache attempts to write out
+      all dirty entries in increasing address order.  To do this, it needs
+      an address sorted list of metadata entries.  Further, since flushing
+      one metadata cache entry can dirty another, this list must support 
+      efficient insertion and deletion.
+
+      The metadata cache uses a skip list of all dirty entries for this 
+      purpose.  Before this release, this skip list was maintained at all 
+      times.  However, since profiling indicates that this imposes a 
+      significant cost, we now construct and maintain the skip list only 
+      when needed.  Specifically, we enable the skip list and load it with 
+      a list of all dirty entries in the metadata cache just before a flush, 
+      and disable it after the flush.
+
+      (JRM - 2020/08/17, HDFFV-11034)
+
     - Add BEST_EFFORT value to HDF5_USE_FILE_LOCKING environment variable
 
       This change adds a BEST_EFFORT to the TRUE/FALSE, 1/0 settings that
@@ -359,23 +377,25 @@ New Features
 
     High-Level APIs:
     ---------------
-    - 
+    - None 
 
     C Packet Table API
     ------------------
-    -
+    - None
 
     Internal header file
     --------------------
-    -
+    - None
 
     Documentation
     -------------
-    -
+    - None
+
 
 Support for new platforms, languages and compilers.
 =======================================
-    -
+    - None
+
 
 Bug Fixes since HDF5-1.10.6 release
 ==================================
@@ -426,163 +446,6 @@ Bug Fixes since HDF5-1.10.6 release
 
       (BMR - 2020/7/31, HDFFV-11120 and HDFFV-11121)
 
-    - Fixed the segmentation fault when reading attributes with multiple threads
-
-      It was reported that the reading of attributes with variable length string
-      datatype will crash with segmentation fault particularly when the number 
-      of threads is high (>16 threads).  The problem was due to the file pointer 
-      that was set in the variable length string datatype for the attribute.  
-      That file pointer was already closed when the attribute was accessed.
-
-      The problem was fixed by setting the file pointer to the current opened 
-      file pointer when the attribute was accessed.  Similar patch up was done 
-      before when reading dataset with variable length string datatype.
-
-      (VC - 2020/07/13, HDFFV-11080)
-
-    - Fixed CVE-2018-17435
-
-      The tool h52gif produced a segfault when the size of an attribute message 
-      was corrupted and caused a buffer overflow.
-
-      The problem was fixed by verifying the attribute message's size against the 
-      buffer size before accessing the buffer.  h52gif was also fixed to display
-      the failure instead of silently exiting after the segfault was eliminated.
-
-      (BMR - 2020/6/19, HDFFV-10591)
-
-    - Improved peformance when creating a large number of small datasets by
-      retrieving default property values from the API context instead of doing
-      skip list searches.
-
-      (CJH - 2019/12/10, HDFFV-10658)
-
-    - Fixed user-created data access properties not existing in the property list
-      returned by H5Dget_access_plist. Thanks to Steven Varga for submitting a
-      reproducer and a patch.
-
-      (CJH - 2019/12/9, HDFFV-10934)
-
-    - Fixed a bug caused by bad tag value when condensing object header
-      messages
-
-      There was an assertion failure when moving meessages from running a
-      user test program with library release hdf5.1.10.4. It was because
-      the tag value (object header's address) was not set up when entering
-      the library routine H5O__chunk_update_idx(), which will eventually
-      verifies the metadata tag value when protecting the object header.
-
-      The problem was fixed by replacing FUNC_ENTER_PACKAGE in H5O__chunk_update_idx()
-      with FUNC_ENTER_PACKAGE_TAG(oh->cache_info.addr) to set up the metadata tag.
-
-      (VC - 2019/08/23, HDFFV-10873)
-
-    - Fixed the test failure from test_metadata_read_retry_info() in
-      test/swmr.c
-
-      The test failure is due to the incorrect number of bins returned for
-      retry info (info.nbins).  The # of bins expected for 101 read attempts
-      is 3 instead of 2.  The routine H5F_set_retries() in src/H5Fint.c
-      calculates the # of bins by first obtaining the log10 value for
-      (read attempts - 1).  For PGI/19, the log10 value for 100 read attempts
-      is 1.9999999999999998 instead of 2.00000.  When casting the log10 value
-      to unsigned later on, the decimal part is chopped off causing the test
-      failure.
-
-      This was fixed by obtaining the rounded integer value (HDceil) for the
-      log10 value of read attempts first before casting the result to unsigned.
-
-      (VC - 2019/8/14, HDFFV-10813)
-
-    - Fixed an issue where creating a file with non-default file space info
-      together with library high bound setting to H5F_LIBVER_V18.
-
-      When setting non-default file space info in fcpl via
-      H5Pset_file_space_strategy() and then creating a file with
-      both high and low library bounds set to
-      H5F_LIBVER_V18 in fapl, the library succeeds in creating the file.
-      File creation should fail because the feature of setting non-default
-      file space info does not exist in library release 1.8 or earlier.
-
-      This was fixed by setting and checking the proper version in the
-      file space info message based on the library low and high bounds
-      when creating and opening the HDF5 file.
-
-      (VC - 2019/6/25, HDFFV-10808)
-
-    - Fixed an issue where copying a version 1.8 dataset between files using
-      H5Ocopy fails due to an incompatible fill version
-
-      When using the HDF5 1.10.x H5Ocopy() API call to copy a version 1.8
-      dataset to a file created with both high and low library bounds set to
-      H5F_LIBVER_V18, the H5Ocopy() call will fail with the error stack indicating
-      that the fill value version is out of bounds.
-
-      This was fixed by changing the fill value message version to H5O_FILL_VERSION_3
-      (from H5O_FILL_VERSION_2) for H5F_LIBVER_V18.
-
-      (VC - 2019/6/14, HDFFV-10800)
-
-    - Fixed a bug that would cause an error or cause fill values to be
-      incorrectly read from a chunked dataset using the "single chunk" index if
-      the data was held in cache and there was no data on disk.
-
-      (NAF - 2019/03/06)
-
-    - Fixed a bug that could cause an error or cause fill values to be
-      incorrectly read from a dataset that was written to using H5Dwrite_chunk
-      if the dataset was not closed after writing.
-
-      (NAF - 2019/03/06, HDFFV-10716)
-
-    - Fixed memory leak in scale offset filter
-
-      In a special case where the MinBits is the same as the number of bits in
-      the datatype's precision, the filter's data buffer was not freed, causing
-      the memory usage to grow. In general the buffer was freed correctly.  The
-      Minbits are the minimal number of bits to store the data values.  Please
-      see the reference manual for H5Pset_scaleoffset for the detail.
-
-      (RL - 2019/3/4, HDFFV-10705)
-
-    - fcntl(2)-based file locking incorrectly passed the lock argument struct
-      instead of a pointer to the struct, causing errors on systems where
-      flock(2) is not available.
-
-      File locking is used when files are opened to enforce SWMR semantics. A
-      lock operation takes place on all file opens unless the
-      HDF5_USE_FILE_LOCKING environment variable is set to the string "FALSE".
-      flock(2) is preferentially used, with fcntl(2) locks as a backup if
-      flock(2) is unavailable on a system (if neither is available, the lock
-      operation fails). On these systems, the file lock will often fail, which
-      causes HDF5 to not open the file and report an error.
-
-      This bug only affects POSIX systems. Win32 builds on Windows use a no-op
-      locking call which always succeeds. Systems which exhibit this bug will
-      have H5_HAVE_FCNTL defined but not H5_HAVE_FLOCK in the configure output.
-
-      This bug affects HDF5 1.10.0 through 1.10.5.
-
-      fcntl(2)-based file locking now correctly passes the struct pointer.
-
-      (DER - 2019/08/27, HDFFV-10892)
-
-    - Inappropriate linking with deprecated MPI C++ libraries
-
-      HDF5 does not define *_SKIP_MPICXX in the public headers, so applications
-      can inadvertently wind up linking to the deprecated MPI C++ wrappers.
-
-      MPICH_SKIP_MPICXX and OMPI_SKIP_MPICXX have both been defined in H5public.h
-      so this should no longer be an issue. HDF5 makes no use of the deprecated
-      MPI C++ wrappers.
-
-      (DER - 2019/09/17, HDFFV-10893)
-
-    - Don't allocate an empty (0-dimensioned) chunked dataset's chunk
-      index, until the dataset's dimensions are increased.
-
-      (QAK - 2020/05/07)
-
     - H5Sset_extent_none() sets the dataspace class to H5S_NO_CLASS which
       causes asserts/errors when passed to other dataspace API calls.
 
@@ -598,13 +461,75 @@ Bug Fixes since HDF5-1.10.6 release
 
       (DER - 2020/07/27, HDFFV-11027)
 
+    - Fixed the segmentation fault when reading attributes with multiple threads
 
-    Java Library:
-    ----------------
-    -
+      It was reported that the reading of attributes with variable length string
+      datatype will crash with segmentation fault particularly when the number 
+      of threads is high (>16 threads).  The problem was due to the file pointer 
+      that was set in the variable length string datatype for the attribute.  
+      That file pointer was already closed when the attribute was accessed.
+
+      The problem was fixed by setting the file pointer to the current opened 
+      file pointer when the attribute was accessed.  Similar patch up was done 
+      before when reading dataset with variable length string datatype.
+
+      (VC - 2020/07/13, HDFFV-11080)
+
+    -  Fixed issue CVE-2018-17438 
+
+      A division by zero was discovered in H5D__select_io() of H5Dselect.c.
+        https://security-tracker.debian.org/tracker/CVE-2018-17438
+
+      A check was added to protect against division by zero.  When such
+      situation occurs again, the normal HDF5 error handling will be invoked,
+      instead of segmentation fault.
+
+      (BMR, DER - 2020/07/09, HDFFV-10587)
+
+    - Fixed CVE-2018-17435
+
+      The tool h52gif produced a segfault when the size of an attribute message 
+      was corrupted and caused a buffer overflow.
+
+      The problem was fixed by verifying the attribute message's size against the 
+      buffer size before accessing the buffer.  h52gif was also fixed to display
+      the failure instead of silently exiting after the segfault was eliminated.
+
+      (BMR - 2020/6/19, HDFFV-10591)
+
+    - Don't allocate an empty (0-dimensioned) chunked dataset's chunk
+      index, until the dataset's dimensions are increased.
+
+      (QAK - 2020/05/07)
 
     Configuration
     -------------
+    - Stopped addition of szip header and include directory path for 
+      incompatible libsz
+
+      szlib.h is the same for both 32-bit and 64-bit szip, and the header file
+      and its path were added to the HDF5 binary even though the configure
+      check of a function in libsz later failed and szip compression was not
+      enabled.  The header file and include path are now added only when the 
+      libsz function passes the configure check.
+
+      (LRK - 2020/08/17, HDFFV-10830)
+
+    - Added -fsanitize=address autotools configure option for Clang compiler
+
+      Clang sanitizer options were also added for Clang compilers with CMake.
+
+      (LRK, 2020/08/05, HDFFV-10836)
+
+    - Updated testh5cc.sh.in for functions versioned in HDF5 1.10.
+
+      testh5cc.sh previously tested that the correct version of a function 
+      versioned in HDF5 1.6 or 1.8 was compiled when one of 
+      H5_NO_DEPRECATED_SYMBOLS or H5_USE_16_API_DEFAULT were defined.  This
+      test was extended for additional testing with H5_USE_18_API_DEFAULT. 
+
+      (LRK, 2020/06/22, HDFFV-11000)
+
     - Fixed CMake include properties for Fortran libraries
 
       Corrected the library properties for Fortran to use the
@@ -612,17 +537,13 @@ Bug Fixes since HDF5-1.10.6 release
 
       (ADB - 2020/02/04, HDFFV-11012)
 
-    - Correct option for default API version
-
-      CMake options for default API version are not mutually exclusive.
-      Change the multiple BOOL options to a single STRING option with the
-      strings; v16, v18, v110.
-
-      (ADB - 2019/08/12, HDFFV-10879)
-
     Performance
     -------------
-    -
+    - None
+
+    Java Library:
+    ----------------
+    - None
 
     Fortran
     --------
@@ -687,15 +608,6 @@ Bug Fixes since HDF5-1.10.6 release
 
       (KY -2020/02/10, HDFFV-11014)
 
-    - h5repack was fixed to repack datasets with external storage
-      to other types of storage.
-
-      New test added to repack files and verify the correct data using h5diff.
-
-      (JS - 2019/09/25, HDFFV-10408)
-      (ADB - 2019/10/02, HDFFV-10918)
-
-
     High-Level APIs:
     ------
     - The H5DSis_scale function was updated to return "not a dimension scale" (0)
@@ -706,19 +618,19 @@ Bug Fixes since HDF5-1.10.6 release
 
     Fortran High-Level APIs:
     ------
-    -
+    - None
 
     Documentation
     -------------
-    -
+    - None
 
     F90 APIs
     --------
-    -
+    - None
 
     C++ APIs
     --------
-    -
+    - None
 
     Testing
     -------
@@ -734,44 +646,39 @@ Bug Fixes since HDF5-1.10.6 release
 Supported Platforms
 ===================
 
-    Linux 2.6.32-696.16.1.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
-    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
-    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
-                                  IBM XL C/C++ V13.1
-                                  IBM XL Fortran V15.1
+    Linux 3.10.0-1127.10.1.el7    gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
+    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
+    (echidna)                     GNU Fortran (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
 
-    Linux 3.10.0-327.10.1.el7   GNU C (gcc), Fortran (gfortran), C++ (g++)
+    Linux 2.6.32-754.31.1.el6     IBM XL C/C++ V13.1
+    #1 SMP ppc64 GNU/Linux        IBM XL Fortran V15.1
+    (ostrich)
+
+    Linux 3.10.0-327.18.2.el7     GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
-    (kituo/moohan)                Version 4.8.5 20150623 (Red Hat 4.8.5-4)
-                                    Version 4.9.3, Version 5.2.0
+    (jelly/kituo/moohan)          Version 4.8.5 20150623 (Red Hat 4.8.5-4)
+                                    Version 4.9.3, Version 5.3.0, Version 6.3.0,
+                                    Version 7.2.0, Version 8.3.0, Version 9.1.0
                                   Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                   compilers:
                                      Version 17.0.0.098 Build 20160721
-                                  MPICH 3.1.4 compiled with GCC 4.9.3
+                                  MPICH 3.3 compiled with GCC 7.2.0
+                                  OpenMPI 4.0.0 compiled with GCC 7.2.0
 
-    SunOS 5.11 32- and 64-bit     Sun C 5.12 SunOS_sparc
-    (emu)                         Sun Fortran 95 8.6 SunOS_sparc
-                                  Sun C++ 5.12 SunOS_sparc
+    SunOS 5.11 11.4.5.12.5.0      Sun C 5.15 SunOS_sparc 2017/05/30
+    32- and 64-bit                Studio 12.6 Fortran 95 8.8 SunOS_sparc 2017/05/30
+    (hedgehog)                    Sun C++ 5.15 SunOS_sparc 2017/05/30
 
     Windows 7 x64                 Visual Studio 2015 w/ Intel C, Fortran 2018 (cmake)
-                                  Visual Studio 2015 w/ MSMPI 10 (cmake)
 
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
                                   Visual Studio 2017 w/ Intel Fortran 19 (cmake)
                                   Visual Studio 2019 w/ Intel Fortran 19 (cmake)
+                                  Visual Studio 2019 w/ MSMPI 10.1 (cmake)
 
-    Mac OS X Yosemite 10.10.5     Apple clang/clang++ version 6.1 from Xcode 7.0
-    64-bit                        gfortran GNU Fortran (GCC) 4.9.2
-    (osx1010dev/osx1010test)      Intel icc/icpc/ifort version 15.0.3
-
-    Mac OS X El Capitan 10.11.6   Apple clang/clang++ version 7.3.0 from Xcode 7.3
-    64-bit                        gfortran GNU Fortran (GCC) 5.2.0
-    (osx1011dev/osx1011test)      Intel icc/icpc/ifort version 16.0.2
-
-    Mac OS Sierra 10.12.6         Apple LLVM version 8.1.0 (clang/clang++-802.0.42)
-    64-bit                        gfortran GNU Fortran (GCC) 7.1.0
-    (swallow/kite)                Intel icc/icpc/ifort version 17.0.2
-
+    macOS Mojave 10.14.6          Apple LLVM version 10.0.1 (clang-1001.0.46.4)
+    64-bit                        gfortran GNU Fortran (GCC) 6.3.0
+    (swallow)                     Intel icc/icpc/ifort version 19.0.4.233 20190416
 
 Tested Configuration Features Summary
 =====================================
@@ -790,16 +697,13 @@ Platform                              C         F90/   F90      C++  zlib  SZIP
                                       parallel  F2003  parallel
 Solaris2.11 32-bit                      n        y/y    n        y    y     y
 Solaris2.11 64-bit                      n        y/n    n        y    y     y
-Windows 7                               y        y/y    n        y    y     y
 Windows 7 x64                           y        y/y    y        y    y     y
-Windows 7 Cygwin                        n        y/n    n        y    y     y
-Windows 7 x64 Cygwin                    n        y/n    n        y    y     y
 Windows 10                              y        y/y    n        y    y     y
 Windows 10 x64                          y        y/y    n        y    y     y
-Mac OS X Mavericks 10.9.5 64-bit        n        y/y    n        y    y     y
-Mac OS X Yosemite 10.10.5 64-bit        n        y/y    n        y    y     y
 Mac OS X El Capitan 10.11.6 64-bit      n        y/y    n        y    y     y
-Mac OS Sierra 10.12.6 64-bit            n        y/y    n        y    y     y
+MacOS Sierra 10.12.6 64-bit             n        y/y    n        y    y     y
+MacOS High Sierra 10.13.6 64-bit        n        y/y    n        y    y     y
+MacOS Mojave 10.14.6 64-bit             n        y/y    n        y    y     y
 CentOS 7.2 Linux 2.6.32 x86_64 PGI      n        y/y    n        y    y     y
 CentOS 7.2 Linux 2.6.32 x86_64 GNU      y        y/y    y        y    y     y
 CentOS 7.2 Linux 2.6.32 x86_64 Intel    n        y/y    n        y    y     y
@@ -810,16 +714,13 @@ Platform                                 Shared  Shared    Shared    Thread-
                                          C libs  F90 libs  C++ libs  safe
 Solaris2.11 32-bit                         y       y         y         y
 Solaris2.11 64-bit                         y       y         y         y
-Windows 7                                  y       y         y         y
 Windows 7 x64                              y       y         y         y
-Windows 7 Cygwin                           n       n         n         y
-Windows 7 x64 Cygwin                       n       n         n         y
 Windows 10                                 y       y         y         y
 Windows 10 x64                             y       y         y         y
-Mac OS X Mavericks 10.9.5 64-bit           y       n         y         y
-Mac OS X Yosemite 10.10.5 64-bit           y       n         y         y
 Mac OS X El Capitan 10.11.6 64-bit         y       n         y         y
-Mac OS Sierra 10.12.6 64-bit               y       n         y         y
+MacOS Sierra 10.12.6 64-bit                y       n         y         y
+MacOS High Sierra 10.13.6 64-bit           y       n         y         y
+MacOS Mojave 10.14.6 64-bit                y       n         y         y
 CentOS 7.2 Linux 2.6.32 x86_64 PGI         y       y         y         n
 CentOS 7.2 Linux 2.6.32 x86_64 GNU         y       y         y         y
 CentOS 7.2 Linux 2.6.32 x86_64 Intel       y       y         y         n
@@ -835,38 +736,69 @@ The following platforms are not supported but have been tested for this release.
 
     Linux 2.6.32-573.22.1.el6    GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
-    (mayll/platypus)                 Version 4.4.7 20120313
+    (platypus)                       Version 4.4.7 20120313
                                      Version 4.9.3, 5.3.0, 6.2.0
                                   PGI C, Fortran, C++ for 64-bit target on
                                   x86-64;
-                                     Version 17.10-0
-                                  Intel(R) C (icc), C++ (icpc), Fortran (icc)
-                                  compilers:
-                                     Version 17.0.4.196 Build 20170411
+                                     Version 19.10-0
                                   MPICH 3.1.4 compiled with GCC 4.9.3
+
+    Linux 2.6.32-754.31.1.el6     gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
+    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
+    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
 
     Linux 3.10.0-327.18.2.el7     GNU C (gcc) and C++ (g++) compilers
     #1 SMP x86_64 GNU/Linux          Version 4.8.5 20150623 (Red Hat 4.8.5-4)
     (jelly)                       with NAG Fortran Compiler Release 6.1(Tozai)
                                   GCC Version 7.1.0
-                                  OpenMPI 3.0.0-GCC-7.2.0-2.29,
-                                     3.1.0-GCC-7.2.0-2.29
+                                  OpenMPI 2.1.6-GCC-7.2.0-2.29,
+                                     3.1.3-GCC-7.2.0-2.29
                                   Intel(R) C (icc) and C++ (icpc) compilers
                                      Version 17.0.0.098 Build 20160721
                                   with NAG Fortran Compiler Release 6.1(Tozai)
 
-    Linux 3.10.0-327.10.1.el7     MPICH 3.2 compiled with GCC 5.3.0
+    Linux 3.10.0-327.10.1.el7     MPICH 3.1.4 compiled with GCC 4.9.3
     #1 SMP x86_64 GNU/Linux
     (moohan)
 
-    Linux 2.6.32-573.18.1.el6.ppc64  MPICH mpich 3.1.4 compiled with
-    #1 SMP ppc64 GNU/Linux           IBM XL C/C++ for Linux, V13.1
-    (ostrich)                        and IBM XL Fortran for Linux, V15.1
+    Linux-3.10.0-1127.0.0.1chaos  openmpi-4.0.0
+    #1 SMP x86_64 GNU/Linux           clang/3.9.0, 8.0.1
+    (quartz)                          gcc/7.3.0, 8.1.0
+                                      intel/16.0.4
 
-   Fedora30 5.3.11-200.fc30.x86_64
-   #1 SMP x86_64  GNU/Linux       GNU gcc (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
-                                  GNU Fortran (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
+    Linux-4.14.0-115.10.1.1       spectrum-mpi/rolling-release
+    #1 SMP ppc64le GNU/Linux          clang/coral-2018.08.08
+    (lassen)                          gcc/7.3.1
+                                      xl/2019.02.07
+
+    Linux-4.12.14-150.52-default  cray-mpich/7.7.10
+    #1 SMP x86_64 GNU/Linux           gcc/7.3.0, 8.2.0
+    (cori)                            intel/19.0.3
+
+    Linux-4.4.180-94.107-default  cray-mpich/7.7.6
+    # 1SMP x86_64 GNU/Linux           gcc/7.2.0, 8.2.0
+    (mutrino)                         intel/17.0.4, 18.0.2, 19.0.4
+
+    Fedora 32 5.7.15-200.fc32.x86_64  Clang version 10.0.0 (Fedora 10.0.0-2.fc32)
+    #1 SMP x86_64  GNU/Linux      GNU gcc (GCC) 10.2.1 20200723 (Red Hat 10.2.1-1)
+                                  GNU Fortran (GCC) 10.2.1 20200723 (Red Hat 10.2.1)
                                      (cmake and autotools)
+
+    Mac OS X El Capitan 10.11.6   Apple clang version 7.3.0 from Xcode 7.3
+    64-bit                        gfortran GNU Fortran (GCC) 5.2.0
+    (osx1011test)                 Intel icc/icpc/ifort version 16.0.2
+
+    macOS Sierra 10.12.6          Apple LLVM version 9.0.0 (clang-900.39.2)
+    64-bit                        gfortran GNU Fortran (GCC) 7.4.0
+    (kite)                        Intel icc/icpc/ifort version 17.0.2
+
+    macOS High Sierra 10.13.6     Apple LLVM version 10.0.0 (clang-1000.10.44.4)
+    64-bit                        gfortran GNU Fortran (GCC) 6.3.0
+    (bear)                        Intel icc/icpc/ifort version 19.0.4.233 20190416
+
+    SunOS 5.11 11.3               Sun C 5.15 SunOS_sparc
+    32- and 64-bit                Sun Fortran 95 8.8 SunOS_sparc
+    (emu)                         Sun C++ 5.15 SunOS_sparc
 
 
 Known Problems
@@ -881,32 +813,12 @@ Known Problems
     images, but since this is a collective operation, a deadlock is possible
     if one or more processes do not participate.
 
-    Three tests fail with OpenMPI 3.0.0/GCC-7.2.0-2.29:
+    Two tests fail attempting collective writes with OpenMPI 3.0.0/GCC-7.2.0-2.29:
         testphdf5 (ecdsetw, selnone, cchunk1, cchunk3, cchunk4, and actualio)
         t_shapesame (sscontig2)
-        t_pflush1/fails on exit
-    The first two tests fail attempting collective writes.
 
-    CPP ptable test fails on VS2017 with Intel compiler, JIRA issue: HDFFV-10628.
-    This test will pass with VS2015 with Intel compiler.
-
-    Older MPI libraries such as OpenMPI 2.0.1 and MPICH 2.1.5 were tested
-    while attempting to resolve the Jira issue: HDFFV-10540.
-    The known problems of reading or writing > 2GBs when using MPI-2 was
-    partially resolved with the MPICH library. The proposed support recognizes
-    IO operations > 2GB and if the datatype is not a derived type, the library
-    breaks the IO into chunks which can be input or output with the existing
-    MPI 2 limitations, i.e. size reporting and function API size/count
-    arguments are restricted to be 32 bit integers.  For derived types larger
-    than 2GB, MPICH 2.1.5 fails while attempting to read or write data.
-    OpenMPI in contrast, implements MPI-3 APIs even in the older releases
-    and thus does not suffer from the 32 bit size limitation described here.
-    OpenMPI releases prior to v3.1.3 appear to have other datatype issues however,
-    e.g. within a single parallel test (testphdf5) the subtests (cdsetr, eidsetr)
-    report data verfication errors before eventually aborting.
-    The most recent versions of OpenMPI (v3.1.3 or newer) have evidently
-    resolved these isses and parallel HDF5 testing does not currently report
-    errors though occasional hangs have been observed.
+    CPP ptable test fails on both VS2017 and VS2019 with Intel compiler, JIRA
+    issue: HDFFV-10628.  This test will pass with VS2015 with Intel compiler.
 
     Known problems in previous releases can be found in the HISTORY*.txt files
     in the HDF5 source. Please report any new problems found to
