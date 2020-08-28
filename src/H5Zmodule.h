@@ -31,6 +31,8 @@
 
 /**
  * \defgroup H5Z H5Z
+ *
+ *
  * \brief Filter and Compression Interface
  *
  * \details The functions in this module let you configure filters that process
@@ -80,6 +82,18 @@
  *          with the HDF5 library.
  *
  * \todo Fix the reference.
+ *
+ * \defgroup H5ZPRE Predefined Filters
+ * \ingroup H5Z
+ * \defgroup FLETCHER32 Checksum Filter
+ * \ingroup H5ZPRE
+ * \defgroup SCALEOFFSET Scale-Offset Filter
+ * \ingroup H5ZPRE
+ * \defgroup SHUFFLE Shuffle Filter
+ * \ingroup H5ZPRE
+ * \defgroup SZIP Szip Filter
+ * \ingroup H5ZPRE
+ *
  */
 
 #endif /* _H5Zmodule_H */
