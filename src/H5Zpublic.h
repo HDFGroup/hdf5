@@ -528,8 +528,104 @@ typedef struct H5Z_class2_t {
  *
  */
 H5_DLL herr_t H5Zregister(const void *cls);
+/**
+ * \ingroup H5Z
+ *
+ * \brief Unregisters a filter.
+ *
+ * \param[in] id Identifier of the filter to be unregistered.
+ * \return \herr_t
+ *
+ * \details H5Zunregister() unregisters the filter specified in \p id.
+ *
+ * \details This function first iterates through all opened datasets and
+ *          groups. If an open object that uses this filter is found, the
+ *          function will fail with a message indicating that an object using
+ *          the filter is still open. All open files are then flushed to make
+ *          sure that all cached data that may use this filter are written out.
+ *
+ *          If the application is a parallel program, all processes that
+ *          participate in collective data write should call this function to
+ *          ensure that all data is flushed.
+ *
+ *          After a call to H5Zunregister(), the filter specified in filter
+ *          will no longer be available to the application.
+ *
+ * \version 1.8.12 Function modified to check for open objects using the
+ *                 filter.
+ * \since 1.6.0
+ */
 H5_DLL herr_t H5Zunregister(H5Z_filter_t id);
+/**
+ * \ingroup H5Z
+ *
+ * \brief Determines whether a filter is available
+ *
+ * \param[in] id Filter identifier
+ * \return \htri_t
+ *
+ * \details H5Zfilter_avail() determines whether the filter specified in \p id
+ *          is available to the application.
+ *
+ * \since 1.6.0
+ */
 H5_DLL htri_t H5Zfilter_avail(H5Z_filter_t id);
+/**
+ * \ingroup H5Z
+ *
+ * \brief Retrieves information about a filter
+ *
+ * \param[in] filter Filter identifier
+ * \param[out] filter_config_flags A bit field encoding the returned filter
+ *                                 information
+ * \return \herr_t
+ *
+ * \details H5Zget_filter_info() retrieves information about a filter. At
+ *          present, this means that the function retrieves a filter's
+ *          configuration flags, indicating whether the filter is configured to
+ *          decode data, to encode data, neither, or both.
+ *
+ *          If \p filter_config_flags is not set to NULL prior to the function
+ *          call, the returned parameter contains a bit field specifying the
+ *          available filter configuration. The configuration flag values can
+ *          then be determined through a series of bitwise AND operations, as
+ *          described below.
+ *
+ *          Valid filter configuration flags include the following:
+ *          <table>
+ *            <tr><td>#H5Z_FILTER_CONFIG_ENCODE_ENABLED</td>
+ *                <td>Encoding is enabled for this filter</td></tr>
+ *            <tr><td>#H5Z_FILTER_CONFIG_DECODE_ENABLED</td>
+ *                <td>Decoding is enabled for this filter</td></tr>
+ *          </table>
+ *
+ *          A bitwise AND of the returned \p filter_config_flags and a valid
+ *          filter configuration flag will reveal whether the related
+ *          configuration option is available. For example, if the value of
+ *          \code
+ *          H5Z_FILTER_CONFIG_ENCODE_ENABLED & filter_config_flags
+ *          \endcode
+ *          is true, i.e., greater than 0 (zero), the queried filter
+ *          is configured to encode data; if the value is #FALSE, i.e., equal to
+ *          0 (zero), the filter is not so configured.
+ *
+ *          If a filter is not encode-enabled, the corresponding \c H5Pset_*
+ *          function will return an error if the filter is added to a dataset
+ *          creation property list (which is required if the filter is to be
+ *          used to encode that dataset). For example, if the
+ *          #H5Z_FILTER_CONFIG_ENCODE_ENABLED flag is not returned for the SZIP
+ *          filter, #H5Z_FILTER_SZIP, a call to H5Pset_szip() will fail.
+ *
+ *          If a filter is not decode-enabled, the application will not be able
+ *          to read an existing file encoded with that filter.
+ *
+ *          This function should be called, and the returned \p
+ *          filter_config_flags analyzed, before calling any other function,
+ *          such as H5Pset_szip() , that might require a particular filter
+ *          configuration.
+ *
+ * \since 1.6.3
+ */
 H5_DLL herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
