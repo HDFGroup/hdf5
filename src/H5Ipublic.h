@@ -79,12 +79,16 @@ typedef herr_t (*H5I_free_t)(void *);
 /**
  * The type of a function to compare objects & keys
  */
+//! [H5I_search_func_t_snip]
 typedef int (*H5I_search_func_t)(void *obj, hid_t id, void *key);
+//! [H5I_search_func_t_snip]
 
 /**
  * The type of H5Iiterate() callback functions
  */
+//! [H5I_iterate_func_t_snip]
 typedef herr_t (*H5I_iterate_func_t)(hid_t id, void *udata);
+//! [H5I_iterate_func_t_snip]
 
 #ifdef __cplusplus
 extern "C" {
@@ -580,9 +584,7 @@ H5_DLL int H5Iget_type_ref(H5I_type_t type);
  *          not pass its criteria. A non-zero value should be returned if the
  *          object does pass its criteria. H5I_search_func_t is defined in
  *          H5Ipublic.h and is shown below.
- *          \code
- *          typedef int (*H5I_search_func_t)(void *obj, hid_t id, void *key);
- *          \endcode
+ *          \snippet this H5I_search_func_t_snip
  *          The \p key parameter will be passed to the search function as a
  *          parameter. It can be used to further define the search at run-time.
  *
@@ -604,10 +606,7 @@ H5_DLL void *H5Isearch(H5I_type_t type, H5I_search_func_t func, void *key);
  * \details H5Iiterate() calls the callback function \p op for each member of
  *          the identifier type \p type. The callback function type for \p op,
  *          H5I_iterate_func_t, is defined in H5Ipublic.h as:
- *          \code
- *          typedef herr_t (*H5I_iterate_func_t)(hid_t id, void *udata);
- *          \endcode
- *
+ *          \snippet this H5I_iterate_func_t_snip
  *          \p op takes as parameters the identifier and a pass through of
  *          \p op_data, and returns an herr_t.
  *
