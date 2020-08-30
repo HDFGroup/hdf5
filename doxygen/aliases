@@ -126,6 +126,9 @@ ALIASES += lapl_id{1}="\param[in] \1 Link access property list identifier"
 ALIASES += lcpl_id="\param[in] lcpl_id Link creation property list identifier"
 ALIASES += lcpl_id{1}="\param[in] \1 Link creation property list identifier"
 
+ALIASES += vipl_id="\param[in] vipl_id VOL initialization property list identifier"
+ALIASES += vipl_id{1}="\param[in] \1 vipl_id VOL initialization property list identifier"
+
 ALIASES += plist_id="\param[in] plist_id Property list identifier"
 ALIASES += plist_id{1}="\param[in] \1 Property list identifier"
 

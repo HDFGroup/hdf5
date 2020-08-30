@@ -124,7 +124,13 @@ extern "C" {
 #endif
 
 /* Token <--> address converters */
+/**
+ * \ingroup H5VLNAT
+ */
 H5_DLL herr_t H5VLnative_addr_to_token(hid_t loc_id, haddr_t addr, H5O_token_t *token);
+/**
+ * \ingroup H5VLNAT
+ */
 H5_DLL herr_t H5VLnative_token_to_addr(hid_t loc_id, H5O_token_t token, haddr_t *addr);
 
 /* Not really public but must be included here */
@@ -135,4 +141,3 @@ H5_DLL hid_t H5VL_native_register(void);
 #endif
 
 #endif /* _H5VLnative_H */
-

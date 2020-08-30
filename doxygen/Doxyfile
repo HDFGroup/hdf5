@@ -854,6 +854,9 @@ INPUT_ENCODING         = UTF-8
 
 FILE_PATTERNS          = H5*public.h \
                          H5*module.h \
+                         H5VLconnector.h \
+                         H5VLconnector_passthru.h \
+                         H5VLnative.h \
                          H5version.h \
                          *.dox
 
