@@ -268,7 +268,7 @@ done:
 static herr_t
 H5FD__swmr_reader_open(H5FD_vfd_swmr_t *file)
 {
-    h5_retry_t retry;                        /* retry state */
+    h5_retry_t retry;
     bool do_try;                             /* more tries remain */
     herr_t      ret_value = SUCCEED;
     FUNC_ENTER_STATIC
