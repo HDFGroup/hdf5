@@ -260,17 +260,15 @@ typedef herr_t (*H5F_flush_cb_t)(hid_t object_id, void *udata);
  *          is selected.
  *
  *      md_pages_reserved:
- *          An integer field indicating the number of pages reserved 
- *          at the head of the metadata file.  This value must be greater than 
- *          or equal to 1.  
- *          When the metadata file is created, the specified number of pages is 
- *          reserved at the head of the metadata file.  In the current
- *          implementation, the size of the metadata file header plus the 
- *          index is limited to this size.
- *          Further, in the POSIX case, when readers check for an updated index, 
- *          this check will start with a read of md_pages_reserved pages from
- *          the head of the metadata file.
- *         
+ *          The `md_pages_reserved` parameter tells how many pages to reserve
+ *          at the beginning of the shadow file for the shadow-file header
+ *          and the shadow index.  The header has an entire page to itself.
+ *          The remaining `md_pages_reserved - 1` pages are reserved for the
+ *          shadow index.  If the index grows larger than its initial
+ *          allocation, then it will move to a new location in the shadow file,
+ *          and the initial allocation will be reclaimed.  `md_pages_reserved`
+ *          must be at least 2.
+ *
  *      pb_expansion_threshold:
  *          An integer field indicating the threshold for the page buffer size.
  *          During a tick, the page buffer must expand as necessary to retain copies 

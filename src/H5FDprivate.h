@@ -157,6 +157,15 @@
  *              lower file and is therefore about to be removed from the
  *              metadata file
  *
+ * garbage: `true` if the entry is marked for garbage collection and is
+ *              thus invalid.
+ *
+ *              For n the number of entries, deleting an entry is O(n).
+ *              H5PB_dest() deletes all entries.  Instead of deleting
+ *              entries one-by-one at O(n^2) cost, H5PB_dest() marks
+ *              each disused entry for garbage collection and sweeps all
+ *              entries up before it is done.
+ *
  *----------------------------------------------------------------------------
  */
 typedef struct H5FD_vfd_swmr_idx_entry_t {

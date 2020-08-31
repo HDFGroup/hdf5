@@ -53,13 +53,21 @@ typedef struct H5FD_vfd_swmr_t {
     uint32_t api_elapsed_nslots;
     uint64_t *api_elapsed_ticks;            /* Histogram of ticks elapsed
                                              * inside the API (reader only).
+                                             * api_elapsed_ticks[elapsed] is
+                                             * the number of times `elapsed`
+                                             * ticks passed in an API call
+                                             * during the program lifetime.
                                              */
     hbool_t pb_configured;                      /* boolean flag set to TRUE   */
                                                 /* when the page buffer is    */
                                                 /* and to FALSE otherwise.    */
                                                 /* Used for sanity checking.  */
     H5F_vfd_swmr_config_t config;
-    bool writer;                            /* True iff configured to write. */
+    bool writer;                            /* True iff configured to write.
+                                             * All methods on a write-mode
+                                             * SWMR VFD instance are passed
+                                             * to the lower VFD instance.
+                                             */
 } H5FD_vfd_swmr_t;
 
 #define MAXADDR (((haddr_t)1<<(8*sizeof(HDoff_t)-1))-1)
