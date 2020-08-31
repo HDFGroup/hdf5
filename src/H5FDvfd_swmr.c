@@ -975,6 +975,9 @@ H5FD_vfd_swmr_write(H5FD_t *_file, H5FD_mem_t type,
 {
     H5FD_vfd_swmr_t     *file       = (H5FD_vfd_swmr_t *)_file;
 
+    /* This routine should only be called if the VFD instance is opened
+     * for writing.
+     */
     HDassert(file->writer);
 
     return H5FD_write(file->hdf5_file_lf, type, addr, size, buf);
@@ -997,12 +1000,8 @@ H5FD_vfd_swmr_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id,
 {
     H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file; /* VFD SWMR file struct */
 
-    /* The VFD SWMR vfd should only be used by the VFD SWMR reader,
-     * and thus this file should only be opened R/O.
-     *
-     * Thus this function should never be called and should return error
-     *
-     * For now, just assert FALSE.
+    /* This routine should only be called if the VFD instance is opened
+     * for writing.
      */
     HDassert(file->writer);
 
