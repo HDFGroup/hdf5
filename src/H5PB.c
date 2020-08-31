@@ -1310,7 +1310,6 @@ herr_t
 H5PB_remove_entries(H5F_shared_t *shared, haddr_t addr, hsize_t size)
 {
     H5PB_t *pb_ptr;
-    H5PB_entry_t *entry_ptr;
     herr_t ret_value = SUCCEED;
     metadata_section_t section[3] = {{0, 0, NULL}, {0, 0, NULL}, {0, 0, NULL}};
     int i;
