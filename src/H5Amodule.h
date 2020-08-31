@@ -31,7 +31,20 @@
 
 /**\defgroup H5A H5A
  * \brief Attribute Interface
- *  \todo Describe concisely what the functions in this module are about.
+ *
+ * \details The Attribute Interface, H5A, provides a mechanism for attaching
+ *          additional information to a dataset, group, or named datatype.
+ *
+ *          Attributes are accessed by opening the object that they are
+ *          attached to and are not independent objects. Typically an
+ *          attribute is small in size and contains user metadata about the
+ *          object that it is attached to.
+ *
+ *          Attributes look similar to HDF5 datasets in that they have a
+ *          datatype and dataspace. However, they do not support partial
+ *          I/O operations and cannot be compressed or extended.
+ *
+ *  \todo Describe concisely what the functions in this module are about;add image.
  */
 
 #endif /* _H5Amodule_H */

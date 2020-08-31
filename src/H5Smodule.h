@@ -31,6 +31,32 @@
 
 /**\defgroup H5S H5S
  * \brief Dataspace Interface
+ *
+ * \details The Dataspace Interface provides functions for creating and
+ *          working with dataspaces.
+ *
+ *          A dataspace describes the layout of a dataset’s data elements.
+ *          It can consist of:
+ *          \li  no elements (NULL)
+ *          \li  a single element (scalar), or
+ *          \li  a simple array.
+ *
+ *          A dataspace can have dimensions that are fixed (unchanging)
+ *          or unlimited, which means they can grow in size (i.e. they are
+ *          extendible).
+ *
+ *          There are two roles of a dataspace:
+ *
+ *          \li It contains the spatial information (logical layout) of a
+ *              dataset stored in a file. This includes the rank and dimensions
+ *              of a dataset, which are a permanent part of the dataset
+ *              definition.
+ *
+ *          \li It describes an application’s data buffers and data elements
+ *              participating in I/O. In other words, it can be used to
+ *              select a portion or subset of a dataset.
+ *
+ *
  * \todo Describe concisely what the functions in this module are about.
  */
 
