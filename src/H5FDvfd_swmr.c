@@ -50,7 +50,6 @@ typedef struct H5FD_vfd_swmr_t {
     H5FD_vfd_swmr_md_header md_header;          /* Metadata file header       */
     H5FD_vfd_swmr_md_index md_index;            /* Metadata file index        */
 
-    uint32_t api_elapsed_nslots;
     uint64_t *api_elapsed_ticks;            /* Histogram of ticks elapsed
                                              * inside the API (reader only).
                                              * api_elapsed_ticks[elapsed] is
@@ -58,6 +57,8 @@ typedef struct H5FD_vfd_swmr_t {
                                              * ticks passed in an API call
                                              * during the program lifetime.
                                              */
+    uint32_t api_elapsed_nbuckets;          /* Number of histogram buckets. */
+
     hbool_t pb_configured;                      /* boolean flag set to TRUE   */
                                                 /* when the page buffer is    */
                                                 /* and to FALSE otherwise.    */
@@ -268,10 +269,10 @@ H5FD__swmr_reader_open(H5FD_vfd_swmr_t *file)
     herr_t      ret_value = SUCCEED;
     FUNC_ENTER_STATIC
 
-    file->api_elapsed_nslots = file->config.max_lag + 1;
+    file->api_elapsed_nbuckets = file->config.max_lag + 1;
 
     file->api_elapsed_ticks =
-        calloc(file->api_elapsed_nslots, sizeof(*file->api_elapsed_ticks));
+        calloc(file->api_elapsed_nbuckets, sizeof(*file->api_elapsed_ticks));
 
     if (file->api_elapsed_ticks == NULL) {
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL,
@@ -423,7 +424,7 @@ swmr_reader_close(H5FD_vfd_swmr_t *file)
 
     if (file->api_elapsed_ticks != NULL) {
         uint32_t i;
-        for (i = 0; i < file->api_elapsed_nslots; i++) {
+        for (i = 0; i < file->api_elapsed_nbuckets; i++) {
             hlog_fast(swmr_stats,
                 "%s: %" PRIu32 " ticks elapsed in API %" PRIu64 " times",
                 __func__, i, file->api_elapsed_ticks[i]);
@@ -1636,12 +1637,15 @@ H5FD_vfd_swmr_set_pb_configured(H5FD_t *_file)
 
 }  /* H5FD_vfd_swmr_set_pb_configured() */
 
+/* In the histogram of ticks spent in API calls, increase the bucket
+ * for `elapsed` ticks by one.
+ */
 void
 H5FD_vfd_swmr_record_elapsed_ticks(H5FD_t *_file, uint64_t elapsed)
 {
     H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file;
 
-    uint32_t elapsed_idx = MIN(elapsed, file->api_elapsed_nslots);
+    uint32_t elapsed_idx = MIN(elapsed, file->api_elapsed_nbuckets);
 
     file->api_elapsed_ticks[elapsed_idx]++;
 }
