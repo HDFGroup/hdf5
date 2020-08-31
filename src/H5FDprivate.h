@@ -184,8 +184,8 @@ typedef struct H5FD_vfd_swmr_idx_entry_t {
 
 /*
  *  tick_num:       Sequence number of the current tick.
- *                  Initialized to zero on file creation/open, and incremented by the 
- *                  VFD SWMR writer at the end of each tick.
+ *                  Initialized to zero on file creation/open, and incremented
+ *                  by the VFD SWMR writer at the end of each tick.
  *  num_entries:    The number of entires in the index.
  *  entries:        The array of index entries
  */
