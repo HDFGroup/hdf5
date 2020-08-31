@@ -53,7 +53,7 @@ typedef struct eot_queue_entry {
     hbool_t     vfd_swmr_writer;
     uint64_t    tick_num;
     struct timespec end_of_tick;
-    struct H5F_t  *vfd_swmr_file; /* NOTE: for the time being use H5F_t instead H5F_file_t */
+    struct H5F_t  *vfd_swmr_file; /* NOTE: for the time being use H5F_t instead H5F_shared_t */
     TAILQ_ENTRY(eot_queue_entry) link;
 } eot_queue_entry_t;
 

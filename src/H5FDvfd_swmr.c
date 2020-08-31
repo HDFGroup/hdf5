@@ -50,16 +50,25 @@ typedef struct H5FD_vfd_swmr_t {
     H5FD_vfd_swmr_md_header md_header;          /* Metadata file header       */
     H5FD_vfd_swmr_md_index md_index;            /* Metadata file index        */
 
-    uint32_t api_elapsed_nslots;
     uint64_t *api_elapsed_ticks;            /* Histogram of ticks elapsed
                                              * inside the API (reader only).
+                                             * api_elapsed_ticks[elapsed] is
+                                             * the number of times `elapsed`
+                                             * ticks passed in an API call
+                                             * during the program lifetime.
                                              */
+    uint32_t api_elapsed_nbuckets;          /* Number of histogram buckets. */
+
     hbool_t pb_configured;                      /* boolean flag set to TRUE   */
                                                 /* when the page buffer is    */
                                                 /* and to FALSE otherwise.    */
                                                 /* Used for sanity checking.  */
     H5F_vfd_swmr_config_t config;
-    bool writer;                            /* True iff configured to write. */
+    bool writer;                            /* True iff configured to write.
+                                             * All methods on a write-mode
+                                             * SWMR VFD instance are passed
+                                             * to the lower VFD instance.
+                                             */
 } H5FD_vfd_swmr_t;
 
 #define MAXADDR (((haddr_t)1<<(8*sizeof(HDoff_t)-1))-1)
@@ -252,18 +261,22 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_fapl_vfd_swmr() */
 
+/* Perform the reader-only aspects of opening in VFD SWMR mode:
+ * initialize histogram of ticks spent in API calls, wait for the
+ * shadow file to appear, load the header and index.
+ */
 static herr_t
 H5FD__swmr_reader_open(H5FD_vfd_swmr_t *file)
 {
-    h5_retry_t retry;                        /* retry state */
+    h5_retry_t retry;
     bool do_try;                             /* more tries remain */
     herr_t      ret_value = SUCCEED;
     FUNC_ENTER_STATIC
 
-    file->api_elapsed_nslots = file->config.max_lag + 1;
+    file->api_elapsed_nbuckets = file->config.max_lag + 1;
 
     file->api_elapsed_ticks =
-        calloc(file->api_elapsed_nslots, sizeof(*file->api_elapsed_ticks));
+        calloc(file->api_elapsed_nbuckets, sizeof(*file->api_elapsed_ticks));
 
     if (file->api_elapsed_ticks == NULL) {
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL,
@@ -408,6 +421,10 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_vfd_swmr_open() */
 
+/* Perform the reader-only aspects of closing in VFD SWMR mode: optionally
+ * log and always release the histogram of ticks spent in API calls,
+ * close the shadow file, release the shadow index.
+ */
 static void
 swmr_reader_close(H5FD_vfd_swmr_t *file)
 {
@@ -415,7 +432,7 @@ swmr_reader_close(H5FD_vfd_swmr_t *file)
 
     if (file->api_elapsed_ticks != NULL) {
         uint32_t i;
-        for (i = 0; i < file->api_elapsed_nslots; i++) {
+        for (i = 0; i < file->api_elapsed_nbuckets; i++) {
             hlog_fast(swmr_stats,
                 "%s: %" PRIu32 " ticks elapsed in API %" PRIu64 " times",
                 __func__, i, file->api_elapsed_ticks[i]);
@@ -958,6 +975,9 @@ H5FD_vfd_swmr_write(H5FD_t *_file, H5FD_mem_t type,
 {
     H5FD_vfd_swmr_t     *file       = (H5FD_vfd_swmr_t *)_file;
 
+    /* This routine should only be called if the VFD instance is opened
+     * for writing.
+     */
     HDassert(file->writer);
 
     return H5FD_write(file->hdf5_file_lf, type, addr, size, buf);
@@ -980,12 +1000,8 @@ H5FD_vfd_swmr_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id,
 {
     H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file; /* VFD SWMR file struct */
 
-    /* The VFD SWMR vfd should only be used by the VFD SWMR reader,
-     * and thus this file should only be opened R/O.
-     *
-     * Thus this function should never be called and should return error
-     *
-     * For now, just assert FALSE.
+    /* This routine should only be called if the VFD instance is opened
+     * for writing.
      */
     HDassert(file->writer);
 
@@ -1628,12 +1644,15 @@ H5FD_vfd_swmr_set_pb_configured(H5FD_t *_file)
 
 }  /* H5FD_vfd_swmr_set_pb_configured() */
 
+/* In the histogram of ticks spent in API calls, increase the bucket
+ * for `elapsed` ticks by one.
+ */
 void
 H5FD_vfd_swmr_record_elapsed_ticks(H5FD_t *_file, uint64_t elapsed)
 {
     H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file;
 
-    uint32_t elapsed_idx = MIN(elapsed, file->api_elapsed_nslots);
+    uint32_t elapsed_idx = MIN(elapsed, file->api_elapsed_nbuckets);
 
     file->api_elapsed_ticks[elapsed_idx]++;
 }

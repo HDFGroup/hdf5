@@ -23,6 +23,24 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5HGpkg.h"		/* Global heaps				*/
 
+/* H5HG_trap() is an instrumentation point for the global heap.
+ * The H5HG_trap() result modifies the global heap's treatment of
+ * an unexpected condition that ordinarily would cause an
+ * HDassert() statement to abort the program.
+ *
+ * Currently, just one function, H5HG_read(), calls H5HG_trap(), using
+ * the `reason` string "out of bounds".
+ *
+ * Test programs such as test/vfd_swmr_vlstr_{reader,writer}.c provide
+ * their own H5HG_trap() implementation that overrides the one in the library.
+ *
+ * H5HG_trap() returns `true` if the caller should generate an error-stack
+ * entry and return an error code to the caller's caller. 
+ *
+ * H5HG_trap() returns `false` if the caller should blithely carry on;
+ * if NDEBUG is not #defined, then the caller will ordinarily abort the
+ * program in a subsequent HDassert() statement.
+ */
 bool
 H5HG_trap(const char *reason)
 {

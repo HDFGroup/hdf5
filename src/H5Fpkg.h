@@ -217,24 +217,14 @@ typedef struct H5F_mtab_t {
     H5F_mount_t		*child;	/* An array of mount records		*/
 } H5F_mtab_t;
 
-/* 
- *  VFD SWMR: Entry for the delayed free space release doubly linked list 
- *
- *  md_file_page_offset:    Unsigned 64-bit value containing the base address
- *                          of the metadata page, or multi page metadata entry
- *                          in the metadata file IN PAGES.
- *                          To obtain byte offset, multiply this value by the
- *                          page size.
- *  length:                 The length of the metadata page or multi page
- *                          metadata entry in BYTES.
- *  tick_num:               Sequence # of the current tick
- *  link:                   tailqueue linkage
+/* Deferred-free record for the shadow file: records a region of bytes in
+ * the shadow file to release after max_lag ticks.
  */
 typedef struct shadow_defree {
-    uint64_t offset;
-    uint32_t length;
-    uint64_t tick_num;                     
-    TAILQ_ENTRY(shadow_defree) link;
+    uint64_t offset;            // offset of the region in *bytes*
+    uint32_t length;            // length of the region in *bytes*
+    uint64_t tick_num;          // tick number when the free was deferred
+    TAILQ_ENTRY(shadow_defree) link;    // deferred-free queue linkage
 } shadow_defree_t;
 
 /* Structure specifically to store superblock. This was originally
@@ -256,17 +246,27 @@ typedef struct H5F_super_t {
     H5G_entry_t *root_ent;      /* Root group symbol table entry              */
 } H5F_super_t;
 
-/* VFD SWMR: deferred free on the lower VFD. */
+/* Deferred-free record for the lower file: records a region of bytes in
+ * the file below the SWMR VFD to release after a delay.
+ */
 typedef struct lower_defree {
-    SIMPLEQ_ENTRY(lower_defree) link;
-    H5FD_mem_t alloc_type;
-    haddr_t addr;
-    hsize_t size;
-    uint64_t free_after_tick;
+    SIMPLEQ_ENTRY(lower_defree) link;   // deferred-free queue linkage
+    H5FD_mem_t alloc_type;      // type with which the region was allocated
+    haddr_t addr;               // start of the region *in bytes*
+    hsize_t size;               // length of the region *in bytes*
+    uint64_t free_after_tick;   /* the region may be reused on tick
+                                 * free_after_tick + 1 at the earliest
+                                 */
 } lower_defree_t;
 
+/* Queue of deferred-free records (lower_defree_t) for the lower file, sorted
+ * head-to-tail in increasing `free_after_tick` order.
+ */
 typedef SIMPLEQ_HEAD(lower_defree_queue, lower_defree) lower_defree_queue_t;
 
+/* Queue of deferred-free records (shadow_defree_t) for the shadow file, sorted
+ * head-to-tail in increasing `tick_num` order.
+ */
 typedef TAILQ_HEAD(shadow_defree_queue, shadow_defree) shadow_defree_queue_t;
 
 /*
@@ -403,7 +403,9 @@ struct H5F_shared_t {
                                              * configuration from the
                                              * FAPL used to open the file 
                                              */
-    haddr_t writer_index_offset;
+    haddr_t writer_index_offset;            /* Current byte offset of the
+                                             * shadow index in the shadow file.
+                                             */
     hbool_t vfd_swmr;                       /* The file is opened with VFD 
                                              * SWMR configured or not
                                              */
@@ -413,7 +415,9 @@ struct H5F_shared_t {
     uint64_t tick_num;                      /* Number of the current tick */
     struct timespec end_of_tick;            /* End time of the current tick */
 
-    lower_defree_queue_t lower_defrees;    /* For use by VFD SWMR writers. */
+    lower_defree_queue_t lower_defrees;    /* Records of lower-file space
+                                            * awaiting reclamation.
+                                            */
     /* VFD SWMR metadata file index */
     H5FD_vfd_swmr_idx_entry_t * mdf_idx;    /* pointer to an array of instance
                                              * of H5FD_vfd_swmr_idx_entry_t of 

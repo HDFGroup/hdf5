@@ -446,8 +446,8 @@ Improvements to VFD SWMR may also alleviate the problem.
 
 ## Microsoft Windows 
 
-VFD SWMR does not support Microsoft Windows at this time.  We do plan to
-add support this year.
+VFD SWMR does not support Microsoft Windows at this time.  We are
+investigating to see when we can add Windows support.
 
 ## Supported filesystems
 

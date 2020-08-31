@@ -4083,15 +4083,15 @@ H5P__facc_vfd_swmr_config_dec(const void **_pp, void *_value)
 
     /* int */
     INT32DECODE(*pp, config->version);
-    INT32DECODE(*pp, config->tick_len);
-    INT32DECODE(*pp, config->max_lag);
+    UINT32DECODE(*pp, config->tick_len);
+    UINT32DECODE(*pp, config->max_lag);
 
     H5_DECODE_UNSIGNED(*pp, config->writer);
     H5_DECODE_UNSIGNED(*pp, config->flush_raw_data);
 
     /* int */
-    INT32DECODE(*pp, config->md_pages_reserved);
-    INT32DECODE(*pp, config->pb_expansion_threshold);
+    UINT32DECODE(*pp, config->md_pages_reserved);
+    UINT32DECODE(*pp, config->pb_expansion_threshold);
 
     HDstrcpy(config->md_file_path, (const char *)(*pp));
     *pp += H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1;

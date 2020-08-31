@@ -1956,6 +1956,7 @@ vfd_swmr_enlarge_shadow_index(H5F_t *f)
     old_mdf_idx = shared->mdf_idx;
     old_mdf_idx_len = shared->mdf_idx_len;
 
+    /* New length is double previous or UINT32_MAX, whichever is smaller. */
     if (UINT32_MAX - old_mdf_idx_len >= old_mdf_idx_len)
         new_mdf_idx_len = old_mdf_idx_len * 2;
     else
