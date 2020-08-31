@@ -261,6 +261,10 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_fapl_vfd_swmr() */
 
+/* Perform the reader-only aspects of opening in VFD SWMR mode:
+ * initialize histogram of ticks spent in API calls, wait for the
+ * shadow file to appear, load the header and index.
+ */
 static herr_t
 H5FD__swmr_reader_open(H5FD_vfd_swmr_t *file)
 {
@@ -417,6 +421,10 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_vfd_swmr_open() */
 
+/* Perform the reader-only aspects of closing in VFD SWMR mode: optionally
+ * log and always release the histogram of ticks spent in API calls,
+ * close the shadow file, release the shadow index.
+ */
 static void
 swmr_reader_close(H5FD_vfd_swmr_t *file)
 {
