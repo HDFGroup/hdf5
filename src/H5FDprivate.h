@@ -212,19 +212,31 @@ typedef struct H5FD_vfd_swmr_md_header {
         size_t index_length;
 } H5FD_vfd_swmr_md_header;
 
+/* Lookup the shadow-index entry corresponding to page number `target_page`
+ * in the HDF5 file and return it.  If there is no match, return NULL.
+ *
+ * The lookup is performed by binary search on the `nentries` shadow index
+ * entries at `idx`.  The entries must be sorted by their offset in the
+ * HDF5 file.  Each entry must have a unique HDF5 file offset.
+ *
+ * If `reuse_garbage` is true, then entries marked for garbage collection
+ * are eligible search results.  Return NULL if a matching entry is
+ * found, but the entry is marked for garbage collection and `reuse_garbage`
+ * is false.
+ */
 static inline H5FD_vfd_swmr_idx_entry_t *
 vfd_swmr_pageno_to_mdf_idx_entry(H5FD_vfd_swmr_idx_entry_t *idx,
-    uint32_t nindices, uint64_t target_page, bool reuse_garbage)
+    uint32_t nentries, uint64_t target_page, bool reuse_garbage)
 {
     uint32_t top;
     uint32_t bottom;
     uint32_t probe;
 
-    if (nindices < 1)
+    if (nentries < 1)
         return NULL;
 
     bottom = 0;
-    top = nindices;
+    top = nentries;
 
     do {
         probe = (top + bottom) / 2;
