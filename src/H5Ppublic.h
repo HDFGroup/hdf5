@@ -235,11 +235,29 @@ H5_DLLVAR hid_t H5P_LST_REFERENCE_ACCESS_ID_g;
 /*********************/
 
 /* Generic property list routines */
-H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name,
-    H5P_cls_create_func_t cls_create, void *create_data,
-    H5P_cls_copy_func_t cls_copy, void *copy_data,
-    H5P_cls_close_func_t cls_close, void *close_data);
-H5_DLL char *H5Pget_class_name(hid_t pclass_id);
+/*--------------------------------------------------------------------------*/
+/**\ingroup GPLO
+ *
+ * \brief Terminates access to a property list
+ *
+ * \plist_id
+ *
+ * \return \herr_t
+ *
+ * \details H5Pclose() terminates access to a property list. All property
+ *          lists should be closed when the application is finished
+ *          accessing them. This frees resources used by the property
+ *          list.
+ *
+ * \version 1.4.0 \f_fun_intro
+ * \since 1.0.0
+ *
+ * -------------------------------------------------------------------------
+ */
+H5_DLL herr_t H5Pclose(hid_t plist_id);
+H5_DLL herr_t H5Pclose_class(hid_t plist_id);
+H5_DLL hid_t H5Pcopy(hid_t plist_id);
+H5_DLL herr_t H5Pcopy_prop(hid_t dst_id, hid_t src_id, const char *name);
 /*--------------------------------------------------------------------------*/
 /**\ingroup GPLO
  *
@@ -366,53 +384,35 @@ H5_DLL char *H5Pget_class_name(hid_t pclass_id);
  * --------------------------------------------------------------------------
  */
 H5_DLL hid_t H5Pcreate(hid_t cls_id);
+H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name,
+    H5P_cls_create_func_t cls_create, void *create_data,
+    H5P_cls_copy_func_t cls_copy, void *copy_data,
+    H5P_cls_close_func_t cls_close, void *close_data);
+H5_DLL hid_t  H5Pdecode(const void *buf);
+H5_DLL herr_t H5Pencode2(hid_t plist_id, void *buf, size_t *nalloc, hid_t fapl_id);
+H5_DLL htri_t H5Pequal(hid_t id1, hid_t id2);
+H5_DLL htri_t H5Pexist(hid_t plist_id, const char *name);
+H5_DLL herr_t H5Pget(hid_t plist_id, const char *name, void * value);
+H5_DLL hid_t H5Pget_class(hid_t plist_id);
+H5_DLL char *H5Pget_class_name(hid_t pclass_id);
+H5_DLL hid_t H5Pget_class_parent(hid_t pclass_id);
+H5_DLL herr_t H5Pget_nprops(hid_t id, size_t *nprops);
+H5_DLL herr_t H5Pget_size(hid_t id, const char *name, size_t *size);
+H5_DLL herr_t H5Pinsert2(hid_t plist_id, const char *name, size_t size,
+    void *value, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
+    H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy,
+    H5P_prp_compare_func_t prp_cmp, H5P_prp_close_func_t prp_close);
+H5_DLL htri_t H5Pisa_class(hid_t plist_id, hid_t pclass_id);
+H5_DLL int H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func,
+            void *iter_data);
 H5_DLL herr_t H5Pregister2(hid_t cls_id, const char *name, size_t size,
     void *def_value, H5P_prp_create_func_t prp_create,
     H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
     H5P_prp_delete_func_t prp_del, H5P_prp_copy_func_t prp_copy,
     H5P_prp_compare_func_t prp_cmp, H5P_prp_close_func_t prp_close);
-H5_DLL herr_t H5Pinsert2(hid_t plist_id, const char *name, size_t size,
-    void *value, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
-    H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy,
-    H5P_prp_compare_func_t prp_cmp, H5P_prp_close_func_t prp_close);
-H5_DLL herr_t H5Pset(hid_t plist_id, const char *name, const void *value);
-H5_DLL htri_t H5Pexist(hid_t plist_id, const char *name);
-H5_DLL herr_t H5Pencode2(hid_t plist_id, void *buf, size_t *nalloc, hid_t fapl_id);
-H5_DLL hid_t  H5Pdecode(const void *buf);
-H5_DLL herr_t H5Pget_size(hid_t id, const char *name, size_t *size);
-H5_DLL herr_t H5Pget_nprops(hid_t id, size_t *nprops);
-H5_DLL hid_t H5Pget_class(hid_t plist_id);
-H5_DLL hid_t H5Pget_class_parent(hid_t pclass_id);
-H5_DLL herr_t H5Pget(hid_t plist_id, const char *name, void * value);
-H5_DLL htri_t H5Pequal(hid_t id1, hid_t id2);
-H5_DLL htri_t H5Pisa_class(hid_t plist_id, hid_t pclass_id);
-H5_DLL int H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func,
-            void *iter_data);
-H5_DLL herr_t H5Pcopy_prop(hid_t dst_id, hid_t src_id, const char *name);
 H5_DLL herr_t H5Premove(hid_t plist_id, const char *name);
+H5_DLL herr_t H5Pset(hid_t plist_id, const char *name, const void *value);
 H5_DLL herr_t H5Punregister(hid_t pclass_id, const char *name);
-H5_DLL herr_t H5Pclose_class(hid_t plist_id);
-/*--------------------------------------------------------------------------*/
-/**\ingroup GPLO
- *
- * \brief Terminates access to a property list
- *
- * \plist_id
- *
- * \return \herr_t
- *
- * \details H5Pclose() terminates access to a property list. All property
- *          lists should be closed when the application is finished
- *          accessing them. This frees resources used by the property
- *          list.
- *
- * \version 1.4.0 \f_fun_intro
- * \since 1.0.0
- *
- * -------------------------------------------------------------------------
- */
-H5_DLL herr_t H5Pclose(hid_t plist_id);
-H5_DLL hid_t H5Pcopy(hid_t plist_id);
 
 /* Object creation property list (OCPL) routines */
 H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dense);
