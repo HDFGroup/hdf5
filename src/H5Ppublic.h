@@ -249,15 +249,82 @@ H5_DLLVAR hid_t H5P_LST_REFERENCE_ACCESS_ID_g;
  *          accessing them. This frees resources used by the property
  *          list.
  *
- * \version 1.4.0 \f_fun_intro
  * \since 1.0.0
  *
  * -------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Pclose(hid_t plist_id);
+/*--------------------------------------------------------------------------*/
+/**\ingroup GPLOA
+ *
+ * \brief Closes an existing property list class
+ *
+ * \plist_id{class}
+ *
+ * \return \herr_t
+ *
+ * \details H5Pclose_class() removes a property list class from the library.
+ *          Existing property lists of this class will continue to exist,
+ *          but new ones are not able to be created.
+ *
+ * \since 1.4.0
+ *
+ */
 H5_DLL herr_t H5Pclose_class(hid_t plist_id);
+/*--------------------------------------------------------------------------*/
+/**\ingroup GPLO
+ *
+ * \brief Copies an existing property list to create a new property list
+ *
+ * \plist_id{plist_id}
+ *
+ * \return \hid_t{property list}
+ *
+ * \details H5Pcopy() copies an existing property list to create a new
+ *          property list. The new property list has the same properties
+ *          and values as the original property list.
+ *
+ * \since 1.0.0
+ *
+ */
 H5_DLL hid_t H5Pcopy(hid_t plist_id);
-H5_DLL herr_t H5Pcopy_prop(hid_t dst_id, hid_t src_id, const char *name);
+/*--------------------------------------------------------------------------*/
+/**\ingroup GPLOA
+ *
+ * \brief Copies a property from one list or class to another
+ *
+ * \plist_id{dst_id}
+ * \plist_id{src_id}
+ * \param[in] name Name of the property to copy
+ *
+ * \return \herr_t
+ *
+ * \details H5Pcopy_prop() copies a property from one property list or
+ *          class to another.
+ *
+ *          If a property is copied from one class to another, all the
+ *          property information will be first deleted from the destination
+ *          class and then the property information will be copied from the
+ *          source class into the destination class.
+ *
+ *          If a property is copied from one list to another, the property
+ *          will be first deleted from the destination list (generating a
+ *          call to the close callback for the property, if one exists)
+ *          and then the property is copied from the source list to the
+ *          destination list (generating a call to the copy callback for
+ *          the property, if one exists).
+ *
+ *          If the property does not exist in the class or list, this
+ *          call is equivalent to calling H5Pregister() or H5Pinsert() (for
+ *          a class or list, as appropriate) and the create callback will
+ *          be called in the case of the property being copied into a list
+ *          (if such a callback exists for the property).
+ *
+ * \since 1.6.0
+ *
+ */
+H5_DLL herr_t H5Pcopy_prop(hid_t dst_id, hid_t src_id, const
+char *name);
 /*--------------------------------------------------------------------------*/
 /**\ingroup GPLO
  *
@@ -377,7 +444,6 @@ H5_DLL herr_t H5Pcopy_prop(hid_t dst_id, hid_t src_id, const char *name);
  *                release: #H5P_DATASET_ACCESS, #H5P_GROUP_CREATE,
  *                #H5P_GROUP_ACCESS, #H5P_DATATYPE_CREATE,
  *                #H5P_DATATYPE_ACCESS, #H5P_ATTRIBUTE_CREATE
- * \version 1.4.0 \f_fun_intro
  *
  * \since 1.0.0
  *
@@ -415,47 +481,9 @@ H5_DLL herr_t H5Pset(hid_t plist_id, const char *name, const void *value);
 H5_DLL herr_t H5Punregister(hid_t pclass_id, const char *name);
 
 /* Object creation property list (OCPL) routines */
-H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dense);
-H5_DLL herr_t H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, unsigned *min_dense);
-H5_DLL herr_t H5Pset_attr_creation_order(hid_t plist_id, unsigned crt_order_flags);
+H5_DLL htri_t H5Pall_filters_avail(hid_t plist_id);
 H5_DLL herr_t H5Pget_attr_creation_order(hid_t plist_id, unsigned *crt_order_flags);
-H5_DLL herr_t H5Pset_obj_track_times(hid_t plist_id, hbool_t track_times);
-H5_DLL herr_t H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times);
-H5_DLL herr_t H5Pmodify_filter(hid_t plist_id, H5Z_filter_t filter,
-        unsigned int flags, size_t cd_nelmts,
-        const unsigned int cd_values[/*cd_nelmts*/]);
-H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter,
-        unsigned int flags, size_t cd_nelmts,
-        const unsigned int c_values[]);
-/*--------------------------------------------------------------------------*/
-/**\ingroup OCPL
- *
- * \brief Returns the number of filters in the pipeline
- *
- * \todo Signature for H5Pget_nfilters() is different in H5Pocpl.c than in
- *       H5Ppublic.h.
- *
- * \plist_id{plist}
- *
- * \return  Returns the number of filters in the pipeline if successful; 
- *          otherwise returns a negative value.
- *
- * \details H5Pget_nfilters() returns the number of filters defined in the 
- *          filter pipeline associated with the property list \p plist.
- *
- *          In each pipeline, the filters are numbered from 0 through N-1, 
- *          where N is the value returned by this function. During output to 
- *          the file, the filters are applied in increasing order; during 
- *          input from the file, they are applied in decreasing order.
- *
- *          H5Pget_nfilters() returns the number of filters in the pipeline, 
- *          including zero (0) if there are none.
- *
- * \since 1.0.0
- *
- *--------------------------------------------------------------------------
- */
-H5_DLL int H5Pget_nfilters(hid_t plist_id);
+H5_DLL herr_t H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, unsigned *min_dense);
 /*--------------------------------------------------------------------------*/
 /**\ingroup OCPL
  * 
@@ -530,8 +558,42 @@ H5_DLL herr_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t id,
        unsigned int *flags/*out*/, size_t *cd_nelmts/*out*/,
        unsigned cd_values[]/*out*/, size_t namelen, char name[]/*out*/,
        unsigned *filter_config/*out*/);
-H5_DLL htri_t H5Pall_filters_avail(hid_t plist_id);
+/*--------------------------------------------------------------------------*/
+/**\ingroup OCPL
+ *
+ * \brief Returns the number of filters in the pipeline
+ *
+ * \todo Signature for H5Pget_nfilters() is different in H5Pocpl.c than in
+ *       H5Ppublic.h.
+ *
+ * \plist_id{plist}
+ *
+ * \return  Returns the number of filters in the pipeline if successful; 
+ *          otherwise returns a negative value.
+ *
+ * \details H5Pget_nfilters() returns the number of filters defined in the 
+ *          filter pipeline associated with the property list \p plist.
+ *
+ *          In each pipeline, the filters are numbered from 0 through N-1, 
+ *          where N is the value returned by this function. During output to 
+ *          the file, the filters are applied in increasing order; during 
+ *          input from the file, they are applied in decreasing order.
+ *
+ *          H5Pget_nfilters() returns the number of filters in the pipeline, 
+ *          including zero (0) if there are none.
+ *
+ * \since 1.0.0
+ *
+ *--------------------------------------------------------------------------
+ */
+H5_DLL int H5Pget_nfilters(hid_t plist_id);
+H5_DLL herr_t H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times);
+H5_DLL herr_t H5Pmodify_filter(hid_t plist_id, H5Z_filter_t filter,
+        unsigned int flags, size_t cd_nelmts,
+        const unsigned int cd_values[/*cd_nelmts*/]);
 H5_DLL herr_t H5Premove_filter(hid_t plist_id, H5Z_filter_t filter);
+H5_DLL herr_t H5Pset_attr_creation_order(hid_t plist_id, unsigned crt_order_flags);
+H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dense);
 /*--------------------------------------------------------------------------*/
 /**\ingroup OCPL
  *
@@ -590,29 +652,33 @@ H5_DLL herr_t H5Premove_filter(hid_t plist_id, H5Z_filter_t filter);
  *--------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned aggression);
+H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter,
+        unsigned int flags, size_t cd_nelmts,
+        const unsigned int c_values[]);
 H5_DLL herr_t H5Pset_fletcher32(hid_t plist_id);
+H5_DLL herr_t H5Pset_obj_track_times(hid_t plist_id, hbool_t track_times);
 
 /* File creation property list (FCPL) routines */
-H5_DLL herr_t H5Pset_userblock(hid_t plist_id, hsize_t size);
+H5_DLL herr_t H5Pget_file_space_page_size(hid_t plist_id, hsize_t *fsp_size);
+H5_DLL herr_t H5Pget_file_space_strategy(hid_t plist_id, H5F_fspace_strategy_t *strategy, hbool_t *persist, hsize_t *threshold);
+H5_DLL herr_t H5Pget_istore_k(hid_t plist_id, unsigned *ik/*out*/);
+H5_DLL herr_t H5Pget_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned *mesg_type_flags, unsigned *min_mesg_size);
+H5_DLL herr_t H5Pget_shared_mesg_nindexes(hid_t plist_id, unsigned *nindexes);
+H5_DLL herr_t H5Pget_shared_mesg_phase_change(hid_t plist_id, unsigned *max_list, unsigned *min_btree);
 H5_DLL herr_t H5Pget_userblock(hid_t plist_id, hsize_t *size);
-H5_DLL herr_t H5Pset_sizes(hid_t plist_id, size_t sizeof_addr,
-       size_t sizeof_size);
 H5_DLL herr_t H5Pget_sizes(hid_t plist_id, size_t *sizeof_addr/*out*/,
        size_t *sizeof_size/*out*/);
-H5_DLL herr_t H5Pset_sym_k(hid_t plist_id, unsigned ik, unsigned lk);
 H5_DLL herr_t H5Pget_sym_k(hid_t plist_id, unsigned *ik/*out*/, unsigned *lk/*out*/);
-H5_DLL herr_t H5Pset_istore_k(hid_t plist_id, unsigned ik);
-H5_DLL herr_t H5Pget_istore_k(hid_t plist_id, unsigned *ik/*out*/);
-H5_DLL herr_t H5Pset_shared_mesg_nindexes(hid_t plist_id, unsigned nindexes);
-H5_DLL herr_t H5Pget_shared_mesg_nindexes(hid_t plist_id, unsigned *nindexes);
-H5_DLL herr_t H5Pset_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned mesg_type_flags, unsigned min_mesg_size);
-H5_DLL herr_t H5Pget_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned *mesg_type_flags, unsigned *min_mesg_size);
-H5_DLL herr_t H5Pset_shared_mesg_phase_change(hid_t plist_id, unsigned max_list, unsigned min_btree);
-H5_DLL herr_t H5Pget_shared_mesg_phase_change(hid_t plist_id, unsigned *max_list, unsigned *min_btree);
 H5_DLL herr_t H5Pset_file_space_strategy(hid_t plist_id, H5F_fspace_strategy_t strategy, hbool_t persist, hsize_t threshold);
-H5_DLL herr_t H5Pget_file_space_strategy(hid_t plist_id, H5F_fspace_strategy_t *strategy, hbool_t *persist, hsize_t *threshold);
 H5_DLL herr_t H5Pset_file_space_page_size(hid_t plist_id, hsize_t fsp_size);
-H5_DLL herr_t H5Pget_file_space_page_size(hid_t plist_id, hsize_t *fsp_size);
+H5_DLL herr_t H5Pset_istore_k(hid_t plist_id, unsigned ik);
+H5_DLL herr_t H5Pset_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned mesg_type_flags, unsigned min_mesg_size);
+H5_DLL herr_t H5Pset_shared_mesg_nindexes(hid_t plist_id, unsigned nindexes);
+H5_DLL herr_t H5Pset_shared_mesg_phase_change(hid_t plist_id, unsigned max_list, unsigned min_btree);
+H5_DLL herr_t H5Pset_sizes(hid_t plist_id, size_t sizeof_addr,
+       size_t sizeof_size);
+H5_DLL herr_t H5Pset_sym_k(hid_t plist_id, unsigned ik, unsigned lk);
+H5_DLL herr_t H5Pset_userblock(hid_t plist_id, hsize_t size);
 
 /* File access property list (FAPL) routines */
 H5_DLL herr_t H5Pset_alignment(hid_t fapl_id, hsize_t threshold,
