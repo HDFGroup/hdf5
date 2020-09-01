@@ -292,6 +292,7 @@ H5_GCC_DIAG_ON(long-long)
 #endif
 
 /** Common iteration orders */
+//! [H5_iter_order_t_snip]
 typedef enum {
     H5_ITER_UNKNOWN = -1,      /**< Unknown order */
     H5_ITER_INC,               /**< Increasing order */
@@ -299,6 +300,7 @@ typedef enum {
     H5_ITER_NATIVE,            /**< No particular order, whatever is fastest */
     H5_ITER_N                  /**< Number of iteration orders */
 } H5_iter_order_t;
+//! [H5_iter_order_t_snip]
 
 /* Iteration callback values */
 /* (Actually, any positive value will cause the iterator to stop and pass back
@@ -313,12 +315,14 @@ typedef enum {
  * Primarily used for "<do> <foo> by index" routines and for iterating over
  * links in groups/attributes on objects.
  */
+//! [H5_index_t_snip]
 typedef enum H5_index_t {
     H5_INDEX_UNKNOWN = -1,    /**< Unknown index type                */
     H5_INDEX_NAME,            /**< Index on names                    */
     H5_INDEX_CRT_ORDER,       /**< Index on creation order           */
     H5_INDEX_N                /**< Number of indices defined         */
 } H5_index_t;
+//! [H5_index_t_snip]
 
 /**
  * Storage info struct used by H5O_info_t and H5F_info_t
@@ -330,11 +334,13 @@ typedef struct H5_ih_info_t {
 } H5_ih_info_t;
 //! [H5_ih_info_t_snip]
 
-/* Tokens are unique and permanent identifiers that are
- * used to reference HDF5 objects in a container. */
-
-/** The maximum size allowed for tokens */
-#define H5O_MAX_TOKEN_SIZE      (16)    /* Allows for 128-bit tokens */
+/**
+ * The maximum size allowed for tokens
+ * \details Tokens are unique and permanent identifiers that are
+ *          used to reference HDF5 objects in a container. This allows
+ *          for 128-bit tokens
+ */
+#define H5O_MAX_TOKEN_SIZE      (16)
 
 /**
  * Type for object tokens
@@ -453,8 +459,173 @@ H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum,
  *          was built with the thread-safety feature enabled.
  */
 H5_DLL herr_t H5is_library_threadsafe(hbool_t *is_ts);
+/**
+ * \ingroup H5
+ * \brief Frees memory allocated by the HDF5 library
+ *
+ * \param[in] mem Buffer to be freed. Can be NULL
+ * \return \herr_t
+ *
+ * \details H5free_memory() frees memory that has been allocated by the caller
+ *          with H5allocate_memory() or by the HDF5 library on behalf of the
+ *          caller.
+ *
+ *          H5Tget_member_name() provides an example of memory allocation on
+ *          behalf of the caller: The function returns a buffer containing the
+ *          name of a compound datatype member. It is the caller’s
+ *          responsibility to eventually free that buffer with H5free_memory().
+ *
+ * \attention It is especially important to use this function to free memory
+ *            allocated by the library on Windows. The C standard library is
+ *            implemented in dynamic link libraries (DLLs) known as the C
+ *            run-time (CRT). Each version of Visual Studio comes with two CRT
+ *            DLLs (debug and release) and allocating and freeing across DLL
+ *            boundaries can cause resource leaks and subtle bugs due to heap
+ *            corruption.\n
+ *            Only use this function to free memory allocated by the HDF5
+ *            Library. It will generally not be safe to use this function to
+ *            free memory allocated by any other means.\n
+ *            Even when using this function, it is still best to ensure that
+ *            all components of a C application are built with the same version
+ *            of Visual Studio and build (debug or release) and thus linked
+ *            against the same CRT.
+ *
+ * \see H5allocate_memory(), H5resize_memory()
+ *
+ * \since 1.8.13
+ *
+ * \todo Fix the reference to \Emph{Freeing Memory Allocated by the HDF5 Library}
+ */
 H5_DLL herr_t H5free_memory(void *mem);
+/**
+ * \ingroup H5
+ * \brief Frees memory allocated by the HDF5 library
+ *
+ * \param[in] size The size in bytes of the buffer to be allocated
+ * \param[in] clear Flag whether the new buffer is to be initialized with 0
+ *
+ * \return On success, returns pointer to newly allocated buffer or returns
+ *         NULL if size is 0 (zero).\n
+ *         Returns NULL on failure.
+ *
+ * \details H5allocate_memory() allocates a memory buffer of size bytes that
+ *          will later be freed internally by the HDF5 library.
+ *
+ *          The boolean \p clear parameter specifies whether the buffer should
+ *          be initialized. If clear is #TRUE, all bits in the buffer are to be
+ *          set to 0 (zero); if clear is #FALSE, the buffer will not be
+ *          initialized.
+ *
+ *          This function is intended to have the semantics of malloc() and
+ *          calloc(). However, unlike malloc() and calloc() which allow for a
+ *          "special" pointer to be returned instead of NULL, this function
+ *          always returns NULL on failure or when size is set to 0 (zero).
+ *
+ * \note At this time, the only intended use for this function is to allocate
+ *       memory that will be returned to the library as a data buffer from a
+ *       third-party filter.
+ *
+ * \attention To avoid heap corruption, allocated memory should be freed using
+ *            the same library that initially allocated it. In most cases, the
+ *            HDF5 API uses resources that are allocated and freed either
+ *            entirely by the user or entirely by the library, so this is not a
+ *            problem. In rare cases, however, HDF5 API calls will free memory
+ *            that the user allocated. This function allows the user to safely
+ *            allocate this memory.\n
+ *            It is particularly important to use this function to allocate
+ *            memory in Microsoft Windows environments. In Windows, the C
+ *            standard library is implemented in dynamic link libraries (DLLs)
+ *            known as the C run-time (CRT). Each version of Visual Studio
+ *            comes with multiple versions of the CRT DLLs (debug, release, et
+ *            cetera) and allocating and freeing memory across DLL boundaries
+ *            can cause resource leaks and subtle bugs due to heap corruption.\n
+ *            Even when using this function, it is best where possible to
+ *            ensure that all components of a C application are built with the
+ *            same version of Visual Studio and configuration (Debug or
+ *            Release), and thus linked against the same CRT.\n
+ *            Use this function only to allocate memory inside third-party HDF5
+ *            filters. It will generally not be safe to use this function to
+ *            allocate memory for any other purpose.
+ *
+ * \see H5free_memory(), H5resize_memory()
+ *
+ * \since 1.8.15
+ *
+ */
 H5_DLL void *H5allocate_memory(size_t size, hbool_t clear);
+/**
+ * \ingroup H5
+ * \brief Resizes and, if required, re-allocates memory that will later be
+ *        freed internally by the HDF5 library
+ *
+ * \param[in] mem Pointer to a buffer to be resized. May be NULL
+ * \param[in] size New size of the buffer, in bytes
+
+ *
+ * \return On success, returns pointer to resized or reallocated buffer
+ *         or returns NULL if size is 0 (zero).\n
+ *         Returns NULL on failure.
+ *
+ * \details H5resize_memory() takes a pointer to an existing buffer and resizes
+ *          the buffer to match the value in \p size. If necessary, the buffer
+ *          is reallocated. If \p size is 0, the buffer is released.
+ *
+ *          The input buffer must either be NULL or have been allocated by
+ *          H5allocate_memory() since the input buffer may be freed by the
+ *          library.
+ *
+ *          For certain behaviors, the pointer \p mem may be passed in as NULL.
+ *
+ *          This function is intended to have the semantics of realloc():
+ *
+ *          <table>
+ *            <tr><td>\Code{H5resize_memory(buffer, size)}</td>
+ *                <td>Resizes buffer. Returns pointer to resized buffer.</td></tr>
+ *            <tr><td>\Code{H5resize_memory(NULL, size)}</td>
+ *                <td>Allocates memory using HDF5 Library allocator.
+ *                    Returns pointer to new buffer</td></tr>
+ *            <tr><td>\Code{H5resize_memory(buffer, 0)}</td>
+ *                <td>Frees memory using HDF5 Library allocator.
+ *                    Returns NULL.</td></tr>
+ *            <tr><td>\Code{H5resize_memory(NULL, 0)}</td>
+ *                <td>Returns NULL (undefined in C standard).</td></tr>
+ *          </table>
+ *
+ *          Unlike realloc(), which allows for a "special pointer to be
+ *          returned instead of NULL, this function always returns NULL on
+ *          failure or when size is 0 (zero).
+ *
+ * \note At this time, the only intended use for this function is to resize or
+ *       reallocate memory that will be returned to the library (and eventually
+ *       to the user) as a data buffer from a third-party HDF5 filter.
+ *
+ * \attention To avoid heap corruption, allocated memory should be freed using
+ *            the same library that initially allocated it. In most cases, the
+ *            HDF5 API uses resources that are allocated and freed either
+ *            entirely by the user or entirely by the library, so this is not a
+ *            problem. In rare cases, however, HDF5 API calls will free memory
+ *            that the user allocated. This function allows the user to safely
+ *            allocate this memory.\n
+ *            It is particularly important to use this function to resize
+ *            memory on Microsoft Windows systems. In Windows, the C standard
+ *            library is implemented in dynamic link libraries (DLLs) known as
+ *            the C run-time (CRT). Each version of Visual Studio comes with
+ *            multiple versions of the CRT DLLs (debug, release, et cetera) and
+ *            allocating and freeing memory across DLL boundaries can cause
+ *            resource leaks and subtle bugs due to heap corruption.\n
+ *            Even when using this function, it is still best to ensure that
+ *            all components of a C application are built with the same version
+ *            of Visual Studio and the same configuration (Debug or Release),
+ *            and thus linked against the same CRT.\n
+ *            Only use this function to resize memory inside third-party HDF5
+ *            filters. It will generally not be safe to use this function to
+ *            resize memory for any other purpose.
+ *
+ * \see H5allocate_memory(), H5free_memory()
+ *
+ * \since 1.8.15
+ *
+ */
 H5_DLL void *H5resize_memory(void *mem, size_t size);
 
 #ifdef __cplusplus
