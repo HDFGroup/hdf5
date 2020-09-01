@@ -22,6 +22,32 @@
 
 #define H5FD_GDS	(H5FD_gds_init())
 
+#define check_cudadrivercall(fn) \
+	do { \
+		CUresult res = fn; \
+		if (res != CUDA_SUCCESS) { \
+			const char *str = nullptr; \
+			cuGetErrorName(res, &str); \
+			fprintf(stderr, "cuda driver api call failed %d, %d : %s\n", fn, \
+				__LINE__, str); \
+			fprintf(stderr, "EXITING program!!!\n"); \
+			exit(1); \
+		} \
+	} while(0)
+
+#define check_cudaruntimecall(fn) \
+	do { \
+		cudaError_t res = fn; \
+		if (res != cudaSuccess) { \
+			const char *str = cudaGetErrorName(res); \
+			fprintf(stderr, "cuda runtime api call failed %d, %d : %s\n", fn, \
+				__LINE__, str); \
+			fprintf(stderr, "EXITING program!!!\n"); \
+			exit(1); \
+		} \
+	} while(0)
+
+/* Function prototypes */
 #ifdef __cplusplus
 extern "C" {
 #endif

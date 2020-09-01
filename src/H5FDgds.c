@@ -37,7 +37,6 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <cufile.h>
-#include "cufile_sample_utils.h"
 
 #endif
 
@@ -64,6 +63,7 @@ typedef struct H5FD_gds_t {
 
 #ifdef H5_HAVE_GDS_VFD
     int             cu_fd;  /* the filesystem file descriptor   */
+    int             num_io_threads; /* number of io threads for cufile */
 #endif
 
     haddr_t         eoa;    /* end of allocated region          */
@@ -214,12 +214,24 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD__init_package() */
 
-// more precise timer
-static double gettime_ms(void) {
+/////////// ns timer ////////////
+static struct timespec gettime_ms(void) {
   struct timespec t;
   clock_gettime(CLOCK_MONOTONIC_RAW, &t);
-  return (t.tv_sec+t.tv_nsec*1e-9)*1000;
+  return t;
 }
+
+static struct timespec timediff(struct timespec start, struct timespec stop) {
+  struct timespec t;
+  t.tv_sec = (stop.tv_sec - start.tv_sec);
+  t.tv_nsec = (stop.tv_nsec - start.tv_nsec);
+  return t;
+}
+
+static void timeprint(const char *msg, struct timespec t) {
+  printf("%s %ld us\n", msg, (t.tv_sec) * 1000000 + (t.tv_nsec) / 1000);
+}
+//////////////////////////////////////////////////////////////////////////
 
 
 /*-------------------------------------------------------------------------
@@ -333,6 +345,8 @@ H5FD_gds_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 #ifdef H5_HAVE_GDS_VFD
     CUfileError_t status;
     int cu_fd = -1;
+    // TODO: why does H5FD_gds_open get called twice?
+    static bool cu_file_driver_opened = false;
 #endif
 
     H5FD_gds_t     *file       = NULL;     /* gds VFD info            */
@@ -346,16 +360,20 @@ H5FD_gds_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    // fprintf(stderr, "H5FD_gds_open()\n");
 
 #ifdef H5_HAVE_GDS_VFD
-    status = cuFileDriverOpen();
-    if (status.err != CU_FILE_SUCCESS) {
-      fprintf(stderr, "cufile driver open error\n");
-      
-      // TODO:
-      //fprintf(stderr, "cufile driver open error: %s\n",
-      //  cuFileGetErrorString(status));
+    if(!cu_file_driver_opened) {
+      status = cuFileDriverOpen();
+
+      if (status.err == CU_FILE_SUCCESS) {
+        cu_file_driver_opened = true;
+      }
+      else {
+        fprintf(stderr, "cufile driver open error\n");
+        // TODO:
+        //fprintf(stderr, "cufile driver open error: %s\n",
+        //  cuFileGetErrorString(status));
+      }
     }
 #endif
     /* Sanity check on file offsets */
@@ -402,6 +420,9 @@ H5FD_gds_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     file->fd = fd;
 #ifdef H5_HAVE_GDS_VFD
     file->cu_fd = cu_fd;
+
+    // TODO: error checking for num_io_threads
+    H5Pget( fapl_id, "H5_GDS_VFD_IO_THREADS", &file->num_io_threads );
 #endif
     H5_CHECKED_ASSIGN(file->eof, haddr_t, sb.st_size, h5_stat_size_t);
     file->pos = HADDR_UNDEF;
@@ -744,6 +765,76 @@ int is_device_pointer (const void *ptr)
   return is_device_ptr;
 }
 
+#ifdef H5_HAVE_GDS_VFD
+typedef struct
+{
+  void *devPtr; // device address
+  int fd;
+  CUfileHandle_t cfr_handle; //cuFile Handle
+  off_t offset; // File offset
+  off_t devPtr_offset; // device address offset
+  size_t size; // Read/Write size
+} rd_thread_data_t;
+
+typedef struct
+{
+  const void *devPtr; // device address
+  int fd;
+  CUfileHandle_t cfr_handle; //cuFile Handle
+  off_t offset; // File offset
+  off_t devPtr_offset; // device address offset
+  size_t size; // Read/Write size
+} wr_thread_data_t;
+
+static void *read_thread_fn(void *data) {
+  ssize_t ret;
+  rd_thread_data_t *t = (rd_thread_data_t *)data;
+
+  // fprintf(stderr, "read thread -- ptr: %p, size: %lu, foffset: %ld, doffset: %ld\n",
+    // t->devPtr, t->size, t->offset, t->devPtr_offset);
+
+  ret = cuFileRead(t->cfr_handle, t->devPtr, t->size, t->offset, t->devPtr_offset);
+  assert(ret > 0);
+
+   // TODO: break up io sizes into smaller chunks
+
+  // fprintf(stderr, "read success thread -- ptr: %p, size: %lu, foffset: %ld, doffset: %ld\n",
+    // t->devPtr, t->size, t->offset, t->devPtr_offset);
+
+  return NULL;
+}
+
+static void *write_thread_fn(void *data) {
+  ssize_t ret;
+  wr_thread_data_t *t = (wr_thread_data_t *)data;
+
+  // cudaEvent_t start, stop;
+  // float total_time;
+
+  // fprintf(stderr, "wrt thread -- ptr: %p, size: %lu, foffset: %ld, doffset: %ld\n",
+    // t->devPtr, t->size, t->offset, t->devPtr_offset);
+
+  // cudaEventCreate(&start);
+  // cudaEventCreate(&stop);
+  // cudaEventRecord(start, 0);
+
+  ret = cuFileWrite(t->cfr_handle, t->devPtr, t->size, t->offset, t->devPtr_offset);
+  assert(ret > 0);
+
+  // cudaEventRecord(stop, 0);
+  // cudaEventSynchronize(stop);
+  // cudaEventElapsedTime(&total_time, start, stop);
+
+  // printf("cuFileWrite: %f ms\n", total_time);
+
+   // TODO: break up io sizes into smaller chunks
+  // printf("wrt success thread -- ptr: %p, size: %lu, foffset: %ld, doffset: %ld\n",
+    // t->devPtr, t->size, t->offset, t->devPtr_offset);
+
+  return NULL;
+}
+#endif
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_gds_read
@@ -766,24 +857,25 @@ H5FD_gds_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSE
     haddr_t addr, size_t size, void *buf /*out*/)
 {
 
+    H5FD_gds_t     *file       = (H5FD_gds_t *)_file;
+    HDoff_t         offset      = (HDoff_t)addr;
+    herr_t          ret_value   = SUCCEED;                  /* Return value */
+
 #ifdef H5_HAVE_GDS_VFD
     CUfileError_t status;
     ssize_t ret = -1;
     CUfileDescr_t cf_descr;
     CUfileHandle_t cf_handle;
+    struct timespec start_time, stop_time;
+
+    rd_thread_data_t *t;
+    pthread_t *thread;
+
+    ssize_t io_chunk;
+    ssize_t io_chunk_rem;
 #endif
 
-    double start_time, stop_time;
-    float total_time;
-    cudaEvent_t start, stop;
-
-    H5FD_gds_t     *file       = (H5FD_gds_t *)_file;
-    HDoff_t         offset      = (HDoff_t)addr;
-    herr_t          ret_value   = SUCCEED;                  /* Return value */
-
     FUNC_ENTER_NOAPI_NOINIT
-
-    // fprintf(stderr, "H5FD_gds_read()\n");
 
     HDassert(file && file->pub.cls);
     HDassert(buf);
@@ -810,25 +902,49 @@ H5FD_gds_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSE
         fprintf(stderr, "cufile buffer register failed\n");
       }
 
-      cudaEventCreate(&start);
-      cudaEventCreate(&stop);
-      cudaEventRecord(start, 0);
+      if( file->num_io_threads > 0 ) {
+        printf("\tH5Pset_gds_read using file->num_io_threads: %d\n", file->num_io_threads);
 
-      //start_time = gettime_ms();
+        t = (rd_thread_data_t *)malloc((unsigned)file->num_io_threads*sizeof(rd_thread_data_t));
+        thread = (pthread_t *)malloc((unsigned)file->num_io_threads*sizeof(pthread_t));
 
-      // read file content to device memory
-      ret = cuFileRead(cf_handle, buf, size, offset, 0);
-      if((size_t)ret < size) {
-        fprintf(stderr, "cufile read error\n");
+        // TODO: io_chunk must be a multiple of 4K
+
+        io_chunk = (unsigned)size / (unsigned)file->num_io_threads;
+        io_chunk_rem = (unsigned)size % (unsigned)file->num_io_threads;
+
+        for (int ii = 0; ii < file->num_io_threads; ii++) {
+          t[ii].devPtr = buf;
+          t[ii].cfr_handle = cf_handle;
+
+          t[ii].offset = (off_t)(offset + ii*io_chunk);
+          t[ii].devPtr_offset = (off_t)ii*io_chunk;
+          t[ii].size = (size_t)io_chunk;
+
+          if(ii == file->num_io_threads-1) {
+            t[ii].size = (size_t)(io_chunk + io_chunk_rem);
+          }
+        }
+
+        start_time = gettime_ms();
+        for (int ii = 0; ii < file->num_io_threads; ii++) {
+          pthread_create(&thread[ii], NULL, &read_thread_fn, &t[ii]);
+        }
+
+        for (int ii = 0; ii < file->num_io_threads; ii++) {
+          pthread_join(thread[ii], NULL);
+        }
+        stop_time = gettime_ms();
+        timeprint( "pthread_time:", timediff(start_time, stop_time) );
       }
+      else {
+        start_time = gettime_ms();
+        ret = cuFileRead(cf_handle, buf, size, offset, 0);
+        stop_time = gettime_ms();
+        assert(ret > 0);
 
-      cudaEventRecord(stop, 0);
-      cudaEventSynchronize(stop);
-      cudaEventElapsedTime(&total_time, start, stop);
-
-      // stop_time = gettime_ms();
-      printf("cuFileRead: %lf ms\n", total_time);
-      // printf("cuFileRead: %lf ms\n", (stop_time - start_time));
+        timeprint( "cuFileRead:", timediff(start_time, stop_time) );
+      }
 
       // deregister device memory
       status = cuFileBufDeregister(buf);
@@ -937,24 +1053,25 @@ static herr_t
 H5FD_gds_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id,
                 haddr_t addr, size_t size, const void *buf)
 {
+    H5FD_gds_t     *file       = (H5FD_gds_t *)_file;
+    HDoff_t         offset      = (HDoff_t)addr;
+    herr_t          ret_value   = SUCCEED;                  /* Return value */
 
 #ifdef H5_HAVE_GDS_VFD
     CUfileError_t status;
     ssize_t ret = -1;
     CUfileDescr_t cf_descr;
     CUfileHandle_t cf_handle;
+    struct timespec start_time, stop_time;
+
+    wr_thread_data_t *t;
+    pthread_t *thread;
+
+    ssize_t io_chunk;
+    ssize_t io_chunk_rem;
 #endif
 
-    float total_time;
-    cudaEvent_t start, stop;
-
-    H5FD_gds_t     *file       = (H5FD_gds_t *)_file;
-    HDoff_t         offset      = (HDoff_t)addr;
-    herr_t          ret_value   = SUCCEED;                  /* Return value */
-
     FUNC_ENTER_NOAPI_NOINIT
-
-    // fprintf(stderr, "H5FD_gds_write()\n");
 
     HDassert(file && file->pub.cls);
     HDassert(buf);
@@ -981,21 +1098,55 @@ H5FD_gds_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
         fprintf(stderr, "cufile buffer register failed\n");
       }
 
-      cudaEventCreate(&start);
-      cudaEventCreate(&stop);
-      cudaEventRecord(start, 0);
+      if( file->num_io_threads > 0 ) {
+        printf("\tH5Pset_gds_write using file->num_io_threads: %d\n", file->num_io_threads);
 
-      // writes device memory contents to a file
-      ret = cuFileWrite(cf_handle, buf, size, offset, 0);
-      if(ret < size) {
-        fprintf(stderr, "cufile write error\n");
+        t = (wr_thread_data_t *)malloc((unsigned)file->num_io_threads*sizeof(wr_thread_data_t));
+        thread = (pthread_t *)malloc((unsigned)file->num_io_threads*sizeof(pthread_t));
+
+        // TODO: io_chunk must be a multiple of 4K
+
+        io_chunk = (unsigned)size / (unsigned)file->num_io_threads;
+        io_chunk_rem = (unsigned)size % (unsigned)file->num_io_threads;
+
+        for (int ii = 0; ii < file->num_io_threads; ii++) {
+          t[ii].devPtr = buf;
+          t[ii].cfr_handle = cf_handle;
+
+          t[ii].offset = (off_t)(offset + ii*io_chunk);
+          t[ii].devPtr_offset = (off_t)ii*io_chunk;
+          t[ii].size = (size_t)io_chunk;
+
+          if(ii == file->num_io_threads-1) {
+            t[ii].size = (size_t)(io_chunk + io_chunk_rem);
+          }
+        }
+
+        start_time = gettime_ms();
+        for (int ii = 0; ii < file->num_io_threads; ii++) {
+          pthread_create(&thread[ii], NULL, &write_thread_fn, &t[ii]);
+        }
+
+        for (int ii = 0; ii < file->num_io_threads; ii++) {
+          pthread_join(thread[ii], NULL);
+        }
+        stop_time = gettime_ms();
+        timeprint( "pthread_time:", timediff(start_time, stop_time) );
+      }
+      else {
+        start_time = gettime_ms();
+        ret = cuFileWrite(cf_handle, buf, size, offset, 0);
+        stop_time = gettime_ms();
+        assert(ret > 0);
+
+        timeprint( "cuFileWrite:", timediff(start_time, stop_time) );
       }
 
-      cudaEventRecord(stop, 0);
-      cudaEventSynchronize(stop);
-      cudaEventElapsedTime(&total_time, start, stop);
-
-      printf("cuFileWrite: %lf ms\n", total_time);
+      // deregister device memory
+      status = cuFileBufDeregister(buf);
+      if (status.err != CU_FILE_SUCCESS) {
+        fprintf(stderr, "cufile buffer deregister failed\n");
+      }
 
       // close file handle
       cuFileHandleDeregister(cf_handle);
