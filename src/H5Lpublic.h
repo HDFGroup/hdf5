@@ -763,11 +763,7 @@ H5_DLL htri_t H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id);
  *          \c val_size is the size of a soft link or user defined link value.
  *          H5O_token_t is used in the VOL layer. It is defined in H5public.h
  *          as:
- *          \code
- *          typedef struct H5O_token_t {
- *            uint8_t __data[H5O_MAX_TOKEN_SIZE];
- *          } H5O_token_t;
- *          \endcode
+ *          \snippet H5public.h H5O_token_t_snip
  *
  *          If the link is a symbolic link, \c val_size will be the length of
  *          the link value, e.g., the length of the HDF5 path name with a null

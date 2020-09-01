@@ -334,11 +334,15 @@ typedef struct H5_ih_info_t {
 /** The maximum size allowed for tokens */
 #define H5O_MAX_TOKEN_SIZE      (16)    /* Allows for 128-bit tokens */
 
-/** Type for object tokens */
-/* (Hoisted here, since it's used by both the H5Lpublic.h and H5Opublic.h headers) */
+/**
+ * Type for object tokens
+ * \internal (Hoisted here, since it's used by both the
+ *            H5Lpublic.h and H5Opublic.h headers) */
+//! [H5O_token_t_snip]
 typedef struct H5O_token_t {
     uint8_t __data[H5O_MAX_TOKEN_SIZE];
 } H5O_token_t;
+//! [H5O_token_t_snip]
 
 /**
  * Allocation statistics info struct
