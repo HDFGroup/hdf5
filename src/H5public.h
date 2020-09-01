@@ -433,14 +433,165 @@ H5_DLL herr_t H5dont_atexit(void);
  *       application ends.
  */
 H5_DLL herr_t H5garbage_collect(void);
+/**
+ * \ingroup H5
+ * \brief Sets free-list size limits
+ *
+ * \param[in] reg_global_lim The cumulative limit, in bytes, on memory used for
+ *                           all regular free lists (Default: 1MB)
+ * \param[in] reg_list_lim The limit, in bytes, on memory used for each regular
+ *                         free list (Default: 64KB)
+ * \param[in] arr_global_lim The cumulative limit, in bytes, on memory used for
+ *                           all array free lists (Default: 4MB)
+ * \param[in] arr_list_lim The limit, in bytes, on memory used for each array
+ *                         free list (Default: 256KB)
+ * \param[in] blk_global_lim The cumulative limit, in bytes, on memory used for
+ *                           all block free lists and, separately, for all
+ *                           factory free lists (Default: 16MB)
+ * \param[in] blk_list_lim The limit, in bytes, on memory used for each block
+ *                         or factory free list (Default: 1MB)
+ * \return \herr_t
+ *
+ * \details H5set_free_list_limits() sets size limits on all types of free
+ *          lists. The HDF5 library uses free lists internally to manage
+ *          memory. The types of free lists used are as follows:
+ *          \li Regular free lists manage memory for single internal data
+ *              structures.
+ *          \li Array free lists manage memory for arrays of internal
+ *              data structures.
+ *          \li Block free lists manage memory for arbitrarily-sized blocks
+ *              of bytes.
+ *          \li Factory free lists manage memory for fixed-size blocks of
+ *              bytes.
+ *
+ *          The parameters specify global and per-list limits; for example, \p
+ *          reg_global_limit and \p reg_list_limit limit the accumulated size
+ *          of all regular free lists and the size of each individual regular
+ *          free list, respectively. Therefore, if an application sets a 1Mb
+ *          limit on each of the global lists, up to 4Mb of total storage might
+ *          be allocated, 1Mb for each of the regular, array, block, and
+ *          factory type lists.
+ *
+ *          The settings specified for block free lists are duplicated for
+ *          factory free lists. Therefore, increasing the global limit on block
+ *          free lists by x bytes will increase the potential free list memory
+ *          usage by 2x bytes.
+ *
+ *          Using a value of -1 for a limit means that no limit is set for the
+ *          specified type of free list.
+ *
+ * \version 1.8.3 Function changed in this release to set factory free list
+ *                memory limits.
+ *
+ * \since 1.6.0
+ */
 H5_DLL herr_t H5set_free_list_limits (int reg_global_lim, int reg_list_lim,
                 int arr_global_lim, int arr_list_lim, int blk_global_lim,
                 int blk_list_lim);
+/**
+ * \ingroup H5
+ * \brief Gets the current size of the free lists used to manage memory
+ *
+ * \param[out] reg_size The current size of all "regular" free list memory used
+ * \param[out] arr_size The current size of all "array" free list memory used
+ * \param[out] blk_size The current size of all "block" free list memory used
+ * \param[out] fac_size The current size of all "factory" free list memory used
+ * \return \herr_t
+ *
+ * \details H5get_free_list_sizes() obtains the current size of the different
+ *          kinds of free lists that the library uses to manage memory. The
+ *          free list sizes can be set with H5set_free_list_limits() and
+ *          garbage collected with H5garbage_collect(). These lists are global
+ *          for the entire library.
+ *
+ * \since 1.12.1
+ */
 H5_DLL herr_t H5get_free_list_sizes(size_t *reg_size, size_t *arr_size,
     size_t *blk_size, size_t *fac_size);
+/**
+ * \ingroup H5
+ * \brief Gets the memory allocation statistics for the library
+ *
+ * \param[out] stats Memory allocation statistics
+ * \return \herr_t
+ *
+ * \details H5get_alloc_stats() gets the memory allocation statistics for the
+ *          library, if the \c --enable-memory-alloc-sanity-check option was
+ *          given when building the library. Applications can check whether
+ *          this option was enabled detecting if the
+ *          \c H5_MEMORY_ALLOC_SANITY_CHECK macro is defined. This option is
+ *          enabled by default for debug builds of the library and disabled by
+ *          default for non-debug builds. If the option is not enabled, all the
+ *          values returned with be 0. These statistics are global for the
+ *          entire library, but do not include allocations from chunked dataset
+ *          I/O filters or non-native VOL connectors.
+ *
+ * \since 1.12.1
+ */
 H5_DLL herr_t H5get_alloc_stats(H5_alloc_stats_t *stats);
+/**
+ * \ingroup H5
+ * \brief Returns the HDF library release number
+ *
+ * \param[out] majnum The major version number of the library
+ * \param[out] minnum The minor version number of the library
+ * \param[out] relnum The release version number of the library
+ * \return \herr_t
+ *
+ * \details H5get_libversion() retrieves the major, minor, and release numbers
+ *          of the version of the HDF5 library which is linked to the
+ *          application.
+ *
+ */
 H5_DLL herr_t H5get_libversion(unsigned *majnum, unsigned *minnum,
                 unsigned *relnum);
+/**
+ * \ingroup H5
+ * \brief Verifies that HDF5 library versions are consistent
+ *
+ * \param[in] majnum HDF5 library major version number
+ * \param[in] minnum HDF5 library minor version number
+ * \param[in] relnum HDF5 library release number
+ * \return \herr_t
+ *
+ * \details H5check_version() verifies that the version of the HDF5 library
+ *          with which an application was compiled, as indicated by the passed
+ *          parameters, matches the version of the HDF5 library against which
+ *          the application is currently linked.
+ *
+ *          \p majnum is the major version number of the HDF library with which
+ *          the application was compiled, \p minnum is the minor version
+ *          number, and \p relnum is the release number. Consider the following
+ *          example:
+ *
+ *          An official HDF5 release is labelled as follows:
+ *          HDF5 Release \Code{\<majnum\>.\<minnum\>.\<relnum\>}\n
+ *          For example, in HDF5 Release 1.8.5:
+ *          \li 1 is the major version number, \p majnum.
+ *          \li 8 is the minor version number, \p minnum.
+ *          \li 5 is the release number, \p relnum.
+ *
+ *          As stated above, H5check_version() first verifies that the version
+ *          of the HDF5 library with which an application was compiled matches
+ *          the version of the HDF5 library against which the application is
+ *          currently linked. If this check fails, H5check_version() causes the
+ *          application to abort (by means of a standard C abort() call) and
+ *          prints information that is usually useful for debugging. This
+ *          precaution is is taken to avoid the risks of data corruption or
+ *          segmentation faults.
+ *
+ *          The most common cause of this failure is that an application was
+ *          compiled with one version of HDF5 and is dynamically linked with a
+ *          different version different version.
+ *
+ *          If the above test passes, H5check_version() proceeds to verify the
+ *          consistency of additional library version information. This is
+ *          designed to catch source code inconsistencies that do not normally
+ *          cause failures; if this check reveals an inconsistency, an
+ *          informational warning is printed but the application is allowed to
+ *          run.
+ *
+ */
 H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum,
                 unsigned relnum);
 /**
