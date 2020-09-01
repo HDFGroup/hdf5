@@ -30,22 +30,22 @@
  */
 
 /**
- * \ingroup H5VL
+ * \ingroup H5VLDEF
  * Invalid ID for VOL connector ID
  */
 #define H5_VOL_INVALID  (-1)
 /**
- * \ingroup H5VL
+ * \ingroup H5VLDEF
  * Native HDF5 file format VOL connector
  */
 #define H5_VOL_NATIVE   0
 /**
- * \ingroup H5VL
+ * \ingroup H5VLDEF
  * VOL connector IDs below this value are reserved for library use
  */
 #define H5_VOL_RESERVED 256
 /**
- * \ingroup H5VL
+ * \ingroup H5VLDEF
  * Maximum VOL connector ID
  */
 #define H5_VOL_MAX      65535
@@ -57,7 +57,7 @@
 
 
 /**
- * \ingroup H5VL
+ * \ingroup H5VLDEF
  *
  * \brief VOL connector identifiers.
  *
@@ -71,7 +71,7 @@ typedef int H5VL_class_value_t;
 //! [H5VL_class_value_t_snip]
 
 /**
- * \ingroup H5VL
+ * \ingroup H5VLDEF
  * \details Enum type for each VOL subclass
  *          (Used for various queries, etc)
  */
