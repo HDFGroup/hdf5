@@ -323,10 +323,12 @@ typedef enum H5_index_t {
 /**
  * Storage info struct used by H5O_info_t and H5F_info_t
  */
+//! [H5_ih_info_t_snip]
 typedef struct H5_ih_info_t {
-    hsize_t     index_size;     /* btree and/or list */
+    hsize_t     index_size;     /**< btree and/or list */
     hsize_t     heap_size;
 } H5_ih_info_t;
+//! [H5_ih_info_t_snip]
 
 /* Tokens are unique and permanent identifiers that are
  * used to reference HDF5 objects in a container. */
@@ -334,11 +336,15 @@ typedef struct H5_ih_info_t {
 /** The maximum size allowed for tokens */
 #define H5O_MAX_TOKEN_SIZE      (16)    /* Allows for 128-bit tokens */
 
-/** Type for object tokens */
-/* (Hoisted here, since it's used by both the H5Lpublic.h and H5Opublic.h headers) */
+/**
+ * Type for object tokens
+ * \internal (Hoisted here, since it's used by both the
+ *            H5Lpublic.h and H5Opublic.h headers) */
+//! [H5O_token_t_snip]
 typedef struct H5O_token_t {
     uint8_t __data[H5O_MAX_TOKEN_SIZE];
 } H5O_token_t;
+//! [H5O_token_t_snip]
 
 /**
  * Allocation statistics info struct

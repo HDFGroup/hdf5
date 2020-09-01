@@ -89,6 +89,7 @@ typedef enum {
 /**
  * \brief Information struct for links
  */
+//! [H5L_info2_t_snip]
 typedef struct {
     H5L_type_t          type;         /**< Type of link                   */
     hbool_t             corder_valid; /**< Indicate if creation order is valid */
@@ -99,6 +100,7 @@ typedef struct {
         size_t          val_size;     /**< Size of a soft link or user-defined link value */
     } u;
 } H5L_info2_t;
+//! [H5L_info2_t_snip]
 
 /* Callback prototypes for user-defined links */
 /**
@@ -141,6 +143,7 @@ typedef ssize_t (*H5L_query_func_t)(const char *link_name, const void *lnkdata,
  * "user-defined" link class. Users should populate the struct with callback
  * functions defined elsewhere.
  */
+//! [H5L_class_t_snip]
 typedef struct {
     int version;                    /**< Version number of this struct       */
     H5L_type_t id;                  /**< Link type ID                        */
@@ -152,14 +155,17 @@ typedef struct {
     H5L_delete_func_t del_func;     /**< Callback for link deletion          */
     H5L_query_func_t query_func;    /**< Callback for queries                */
 } H5L_class_t;
+//! [H5L_class_t_snip]
 
 /**
  * \brief Prototype for H5Literate2(), H5Literate_by_name2() operator
  *
  * The H5O_token_t version is used in the VOL layer and future public API calls.
  */
+//! [H5L_iterate2_t_snip]
 typedef herr_t (*H5L_iterate2_t)(hid_t group, const char *name, const H5L_info2_t *info,
     void *op_data);
+//! [H5L_iterate2_t_snip]
 
 /**
  * \brief Callback for external link traversal
@@ -728,18 +734,7 @@ H5_DLL htri_t H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id);
  *          H5Lget_info2() returns information about name in the data structure
  *          H5L_info2_t, which is described below and defined in H5Lpublic.h.
  *          This structure is returned in the buffer \p linfo.
- *          \code
- *          typedef struct {
- *            H5L_type_t          type;         /* Type of link */
- *            hbool_t             corder_valid; /* Indicate if creation order is valid */
- *            int64_t             corder;       /* Creation order                 */
- *            H5T_cset_t          cset;         /* Character set of link name     */
- *            union {
- *              H5O_token_t     token;          /* Token of location that hard link points to */
- *              size_t          val_size;       /* Size of a soft link or user-defined link value */
- *            } u;
- *          } H5L_info2_t;
- *          \endcode
+ *          \snippet this H5L_info2_t_snip
  *          In the above struct, \c type specifies the link class. Valid values
  *          include the following:
  *          \link_types
@@ -768,11 +763,7 @@ H5_DLL htri_t H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id);
  *          \c val_size is the size of a soft link or user defined link value.
  *          H5O_token_t is used in the VOL layer. It is defined in H5public.h
  *          as:
- *          \code
- *          typedef struct H5O_token_t {
- *            uint8_t __data[H5O_MAX_TOKEN_SIZE];
- *          } H5O_token_t;
- *          \endcode
+ *          \snippet H5public.h H5O_token_t_snip
  *
  *          If the link is a symbolic link, \c val_size will be the length of
  *          the link value, e.g., the length of the HDF5 path name with a null
@@ -1082,23 +1073,10 @@ H5_DLL herr_t H5Literate_by_name2(hid_t loc_id, const char *group_name,
  *
  *          \p op is a callback function of type \ref H5L_iterate2_t that is invoked
  *          for each link encountered.
- *          \code
- *          typedef herr_t (*H5L_iterate2_t)(hid_t group, const char *name, const H5L_info2_t *info,  void *op_data);
- *          \endcode
+ *          \snippet this H5L_iterate2_t_snip
  *
  *          The \ref H5L_info2_t struct is defined (in H5Lpublic.h) as follows:
- *          \code
- *          typedef struct {
- *            H5L_type_t          type;           /* Type of link          */
- *            hbool_t             corder_valid;   /* Indicate if creation order is val */
- *            int64_t             corder;         /* Creation order           */
- *            H5T_cset_t          cset;           /* Character set of link name     */
- *            union {
- *              H5O_token_t     token;          /* Token of location that hard link points to */
- *              size_t          val_size;       /* Size of a soft link or UD link value */
- *            } u;
- *          } H5L_info2_t;
- *          \endcode
+ *          \snippet this H5L_info2_t_snip
  *
  *          The possible return values from the callback function, and the
  *          effect of each, are as follows:
@@ -1279,19 +1257,7 @@ H5_DLL herr_t H5Lcreate_ud(hid_t link_loc_id, const char *link_name,
  *          \p cls is a pointer to a buffer containing a copy of the
  *          H5L_class_t struct. This struct is defined in H5Lpublic.h as
  *          follows:
- *          \code
- *          typedef struct H5L_class_t {
- *            int version;                    /* Version number of this struct  */
- *            H5L_type_t class_id;            /* Link class identifier          */
- *            const char *comment;            /* Comment for debugging          */
- *            H5L_create_func_t create_func;  /* Callback during link creation  */
- *            H5L_move_func_t move_func;      /* Callback after moving link     */
- *            H5L_copy_func_t copy_func;      /* Callback after copying link    */
- *            H5L_traverse_func_t trav_func;  /* The main traversal function    */
- *            H5L_delete_func_t del_func;     /* Callback for link deletion     */
- *            H5L_query_func_t query_func;    /* Callback for queries           */
- *          } H5L_class_t;
- *          \endcode
+ *          \snippet this H5L_class_t_snip
  *
  *          The class definition passed with \p cls must include at least the
  *          following:
@@ -1664,6 +1630,7 @@ H5_DLL herr_t H5Lcreate_external(const char *file_name, const char *obj_name,
 /* Typedefs */
 
 /** Information struct for link (for H5Lget_info1() / H5Lget_info_by_idx1()) */
+//! [H5L_info1_t_snip]
 typedef struct {
     H5L_type_t          type;           /**< Type of link                   */
     hbool_t             corder_valid;   /**< Indicate if creation order is valid */
@@ -1674,6 +1641,7 @@ typedef struct {
         size_t          val_size;       /**< Size of a soft link or UD link value */
     } u;
 } H5L_info1_t;
+//! [H5L_info1_t_snip]
 
 /** Callback during link traversal */
 typedef hid_t (*H5L_traverse_0_func_t)(const char *link_name, hid_t cur_group,
@@ -1693,9 +1661,10 @@ typedef struct {
 } H5L_class_0_t;
 
 /** Prototype for H5Literate1() / H5Literate_by_name1() operator */
+//! [H5L_iterate1_t_snip]
 typedef herr_t (*H5L_iterate1_t)(hid_t group, const char *name, const H5L_info1_t *info,
     void *op_data);
-
+//! [H5L_iterate1_t_snip]
 
 /* Function prototypes */
 /**
@@ -1733,18 +1702,7 @@ typedef herr_t (*H5L_iterate1_t)(hid_t group, const char *name, const H5L_info1_
  *          H5Lget_info1() returns information about name in the data structure
  *          \ref H5L_info1_t, which is described below and defined in
  *          H5Lpublic.h. This structure is returned in the buffer \p linfo.
- *          \code
- *          typedef struct {
- *            H5L_type_t     type;
- *            hbool_t        corder_valid;
- *            int64_t        corder;
- *            H5T_cset_t     cset;
- *            union {
- *              haddr_t    address;
- *              size_t     val_size;
- *            } u;
- *          } H5L_info1_t;
- *          \endcode
+ *          \snippet this H5L_info1_t_snip
  *          In the above struct, type specifies the link class. Valid values
  *          include the following:
  *          \link_types
@@ -2053,25 +2011,10 @@ H5_DLL herr_t H5Literate_by_name1(hid_t loc_id, const char *group_name,
  *
  *          \p op is a callback function of type \ref H5L_iterate1_t that is invoked
  *          for each link encountered.
- *          \code
- *          typedef herr_t (*H5L_iterate1_t)(hid_t group, const char *name, const H5L_info1_t *info,  void *op_data);
- *          \endcode
+ *          \snippet this H5L_iterate1_t_snip
  *
  *          The \ref H5L_info1_t struct is defined (in H5Lpublic.h) as follows:
- *          \code
- *          typedef struct {
- *            H5L_type_t          type;         /* Type of link                */
- *            hbool_t             corder_valid; /* Indicate if creation        */
- *                                              /* order is valid              */
- *            int64_t             corder;       /* Creation order              */
- *            H5T_cset_t          cset;         /* Character set of link name  */
- *            union {
- *              haddr_t         address;        /* Address hard link points to */
- *              size_t          val_size;       /* Size of a soft link         */
- *                                              /* or UD link value */
- *            } u;
- *          } H5L_info1_t;
- *          \endcode
+ *          \snippet this H5L_info1_t_snip
  *
  *          The possible return values from the callback function, and the
  *          effect of each, are as follows:
