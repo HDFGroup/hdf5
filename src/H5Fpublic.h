@@ -123,6 +123,7 @@ typedef enum H5F_close_degree_t {
 /**
  * Current "global" information about file
  */
+//! [H5F_info2_t_snip]
 typedef struct H5F_info2_t {
     struct {
     unsigned    version;    /**< Superblock version # */
@@ -140,6 +141,7 @@ typedef struct H5F_info2_t {
     H5_ih_info_t    msgs_info;      /**< Shared object header message index & heap size */
     } sohm;
 } H5F_info2_t;
+//! [H5F_info2_t_snip]
 
 /**
  * Types of allocation requests. The values larger than #H5FD_MEM_DEFAULT
@@ -171,10 +173,12 @@ typedef enum H5F_mem_t {
 /**
  * Free space section information
  */
+//! [H5F_sect_info_t_snip]
 typedef struct H5F_sect_info_t {
     haddr_t             addr;   /**< Address of free space section */
     hsize_t             size;   /**< Size of free space section */
 } H5F_sect_info_t;
+//! [H5F_sect_info_t_snip]
 
 /**
  * Library's format versions
@@ -1089,25 +1093,7 @@ H5_DLL ssize_t H5Fget_name(hid_t obj_id, char *name, size_t size);
  *          \p obj_id is an identifier for any object in the file of interest.
  *
  *          H5F_info2_t struct is defined in H5Fpublic.h as follows:
- *          \code
- *          typedef struct H5F_info2_t {
- *            struct {
- *              unsigned     vers;
- *              hsize_t	     super_size;
- *              hsize_t	     super_ext_size;
- *            } super;
- *            struct {
- *              unsigned     vers;
- *              hsize_t	     hdr_size;
- *              hsize_t	     tot_space;
- *            } free;
- *            struct {
- *              unsigned     vers;
- *              hsize_t      hdr_size;
- *              H5_ih_info_t msgs_info;
- *            } sohm;
- *          } H5F_info2_t;
- *          \endcode
+ *          \snippet this H5F_info2_t_snip
  *
  *          The \c super sub-struct contains the following information:
  *          \li \c vers is the version number of the superblock.
@@ -1124,13 +1110,7 @@ H5_DLL ssize_t H5Fget_name(hid_t obj_id, char *name, size_t size);
  *          \li \c vers is the version number of the shared object header information.
  *          \li \c hdr_size is the size of the shared object header message.
  *          \li \c msgs_info is an H5_ih_info_t struct defined in H5public.h as
- *              follows:
- *              \code
- *              typedef struct H5_ih_info_t {
- *                hsize_t     index_size;
- *                hsize_t     heap_size;
- *              } H5_ih_info_t;
- *              \endcode
+ *              follows: \snippet H5public.h H5_ih_info_t_snip
  *          \li \p index_size is the summed size of all the shared object
  *              header indexes. Each index might be either a B-tree or
  *              a list.
@@ -1179,14 +1159,7 @@ H5_DLL herr_t H5Fstart_swmr_write(hid_t file_id);
  *          \mem_types
  *
  *          H5F_sect_info_t is defined as follows (in H5Fpublic.h):
- *          \code
- *          typedef struct H5F_sect_info_t {
- *            haddr_t     addr;     /* address of the     */
- *                                  /* free-space section */
- *            hsize_t     size;     /* size of the        */
- *                                  /* free-space section */
- *          } H5F_sect_info_t;
- *          \endcode
+ *          \snippet this H5F_sect_info_t_snip
  *
  *          This routine retrieves free-space section information for \p nsects
  *          sections or at most the maximum number of sections in the specified
@@ -1433,6 +1406,7 @@ H5_DLL herr_t H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag);
 /**
  * Current "global" information about file
  */
+//! [H5F_info1_t_snip]
 typedef struct H5F_info1_t {
     hsize_t        super_ext_size;    /**< Superblock extension size */
     struct {
@@ -1440,7 +1414,7 @@ typedef struct H5F_info1_t {
     H5_ih_info_t    msgs_info;      /**< Shared object header message index & heap size */
     } sohm;
 } H5F_info1_t;
-
+//! [H5F_info1_t_snip]
 
 /* Function prototypes */
 /**
@@ -1465,15 +1439,7 @@ typedef struct H5F_info1_t {
  *          \p obj_id is an identifier for any object in the file of interest.
  *
  *          H5F_info1_t struct is defined in H5Fpublic.h as follows:
- *          \code
- *          typedef struct H5F_info2_t {
- *            hsize_t        super_ext_size;
- *            struct {
- *              hsize_t      hdr_size;
- *              H5_ih_info_t msgs_info;
- *            } sohm;
- *          } H5F_info1_t;
- *          \endcode
+ *          \snippet this H5F_info1_t_snip
  *
  *          \c super_ext_size is the size of the superblock extension.
  *
@@ -1481,13 +1447,7 @@ typedef struct H5F_info1_t {
  *          information as follows:
  *          \li \c hdr_size is the size of the shared object header message.
  *          \li \c msgs_info is an H5_ih_info_t struct defined in H5public.h as
- *              follows:
- *              \code
- *              typedef struct H5_ih_info_t {
- *                hsize_t     index_size;
- *                hsize_t     heap_size;
- *              } H5_ih_info_t;
- *              \endcode
+ *              follows: \snippet H5public.h H5_ih_info_t_snip
  *
  *          \li \p index_size is the summed size of all the shared object
  *              header indexes. Each index might be either a B-tree or
