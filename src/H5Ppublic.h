@@ -486,7 +486,7 @@ H5_DLL herr_t H5Pget_attr_creation_order(hid_t plist_id, unsigned *crt_order_fla
 H5_DLL herr_t H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, unsigned *min_dense);
 /*--------------------------------------------------------------------------*/
 /**\ingroup OCPL
- * 
+ *
  * \brief Returns information about a filter in a pipeline
  *
  * \todo Signature for H5Pget_filter2 is different in H5Pocpl.c than in
@@ -516,33 +516,33 @@ H5_DLL herr_t H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, un
  *         - #H5Z_FILTER_SCALEOFFSET Data compression filter, employing the
  *                                     scale-offset algorithm
  *
- * \details H5Pget_filter2() returns information about a filter specified by 
- *          its filter number, in a filter pipeline specified by the property 
+ * \details H5Pget_filter2() returns information about a filter specified by
+ *          its filter number, in a filter pipeline specified by the property
  *          list with which it is associated.
  *
  *          \p plist_id must be a dataset or group creation property list.
  *
- *          \p idx is a value between zero and N-1, as described in 
- *          H5Pget_nfilters(). The function will return a negative value if 
+ *          \p idx is a value between zero and N-1, as described in
+ *          H5Pget_nfilters(). The function will return a negative value if
  *          the filter number is out of range.
  *
- *          The structure of the \p flags argument is discussed in 
+ *          The structure of the \p flags argument is discussed in
  *          H5Pset_filter().
  *
- *          On input, \p cd_nelmts indicates the number of entries in the 
- *          \p cd_values array, as allocated by the caller; on return, 
+ *          On input, \p cd_nelmts indicates the number of entries in the
+ *          \p cd_values array, as allocated by the caller; on return,
  *          \p cd_nelmts contains the number of values defined by the filter.
  *
- *          If \p name is a pointer to an array of at least \p namelen bytes, 
- *          the filter name will be copied into that array. The name will be 
- *          null terminated if \p namelen is large enough. The filter name 
- *          returned will be the name appearing in the file, the name 
+ *          If \p name is a pointer to an array of at least \p namelen bytes,
+ *          the filter name will be copied into that array. The name will be
+ *          null terminated if \p namelen is large enough. The filter name
+ *          returned will be the name appearing in the file, the name
  *          registered for the filter, or an empty string.
  *
- *          \p filter_config is the bit field described in 
+ *          \p filter_config is the bit field described in
  *          H5Zget_filter_info().
  *
- * \version 1.8.5 Function extended to work with group creation property 
+ * \version 1.8.5 Function extended to work with group creation property
  *                lists.
  * \since 1.8.0
  *
@@ -568,18 +568,18 @@ H5_DLL herr_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t id,
  *
  * \plist_id{plist}
  *
- * \return  Returns the number of filters in the pipeline if successful; 
+ * \return  Returns the number of filters in the pipeline if successful;
  *          otherwise returns a negative value.
  *
- * \details H5Pget_nfilters() returns the number of filters defined in the 
+ * \details H5Pget_nfilters() returns the number of filters defined in the
  *          filter pipeline associated with the property list \p plist.
  *
- *          In each pipeline, the filters are numbered from 0 through N-1, 
- *          where N is the value returned by this function. During output to 
- *          the file, the filters are applied in increasing order; during 
+ *          In each pipeline, the filters are numbered from 0 through N-1,
+ *          where N is the value returned by this function. During output to
+ *          the file, the filters are applied in increasing order; during
  *          input from the file, they are applied in decreasing order.
  *
- *          H5Pget_nfilters() returns the number of filters in the pipeline, 
+ *          H5Pget_nfilters() returns the number of filters in the pipeline,
  *          including zero (0) if there are none.
  *
  * \since 1.0.0
@@ -605,21 +605,21 @@ H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, uns
  *
  * \return \herr_t
  *
- * \details H5Pset_deflate() sets the deflate compression method and the 
- *          compression level, \p level, for a dataset or group creation 
+ * \details H5Pset_deflate() sets the deflate compression method and the
+ *          compression level, \p level, for a dataset or group creation
  *          property list, \p plist_id.
  *
- *          The filter identifier set in the property list is 
+ *          The filter identifier set in the property list is
  *          #H5Z_FILTER_DEFLATE.
  *
- *          The compression level, \p level, is a value from zero to nine, 
- *          inclusive. A compression level of 0 (zero) indicates no 
- *          compression; compression improves but speed slows progressively 
+ *          The compression level, \p level, is a value from zero to nine,
+ *          inclusive. A compression level of 0 (zero) indicates no
+ *          compression; compression improves but speed slows progressively
  *          from levels 1 through 9:
  *
  *          <table>
  *            <tr>
- *              <th>Compression Level</th> 
+ *              <th>Compression Level</th>
  *              <th>Gzip Action</th>
  *            </tr>
  *            <tr>
@@ -628,23 +628,23 @@ H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, uns
  *            </tr>
  *            <tr>
  *              <td>1</td>
- *              <td>Best compression speed; least compression</td> 
- *            </tr> 
+ *              <td>Best compression speed; least compression</td>
+ *            </tr>
  *           <tr>
  *             <td>2 through 8</td>
  *             <td>Compression improves; speed degrades</td>
  *           </tr>
  *           <tr>
- *             <td>9</td> 
+ *             <td>9</td>
  *             <td>Best compression ratio; slowest speed</td>
  *           </tr>
  *          </table>
  *
- *          Note that setting the compression level to 0 (zero) does not turn 
- *          off use of the gzip filter; it simply sets the filter to perform 
+ *          Note that setting the compression level to 0 (zero) does not turn
+ *          off use of the gzip filter; it simply sets the filter to perform
  *          no compression as it processes the data.
  *
- *          HDF5 relies on GNU gzip for this compression. 
+ *          HDF5 relies on GNU gzip for this compression.
  *
  * \version 1.8.5 Function extended to work with group creation property lists.
  * \since 1.0.0
@@ -762,29 +762,29 @@ H5_DLL herr_t H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size, unsigned
  * \param[in] layout Type of storage layout for raw data
  *
  * \return \herr_t
- * \details H5Pset_layout() sets the type of storage used to store the raw 
- *          data for a dataset. This function is only valid for dataset 
+ * \details H5Pset_layout() sets the type of storage used to store the raw
+ *          data for a dataset. This function is only valid for dataset
  *          creation property lists.
  *
  *          Valid values for \p layout are:
- *           - #H5D_COMPACT: Store raw data in the dataset object header 
- *                           in file. This should only be used for datasets 
- *                           with small amounts of raw data. The raw data 
- *                           size limit is 64K (65520 bytes). Attempting 
- *                           to create a dataset with raw data larger than 
- *                           this limit will cause the H5Dcreate() call to 
+ *           - #H5D_COMPACT: Store raw data in the dataset object header
+ *                           in file. This should only be used for datasets
+ *                           with small amounts of raw data. The raw data
+ *                           size limit is 64K (65520 bytes). Attempting
+ *                           to create a dataset with raw data larger than
+ *                           this limit will cause the H5Dcreate() call to
  *                           fail.
- *           - #H5D_CONTIGUOUS: Store raw data separately from the object 
+ *           - #H5D_CONTIGUOUS: Store raw data separately from the object
  *                              header in one large chunk in the file.
- *           - #H5D_CHUNKED: Store raw data separately from the object header 
- *                           as chunks of data in separate locations in 
+ *           - #H5D_CHUNKED: Store raw data separately from the object header
+ *                           as chunks of data in separate locations in
  *                           the file.
- *           - #H5D_VIRTUAL: Draw raw data from multiple datasets in 
+ *           - #H5D_VIRTUAL: Draw raw data from multiple datasets in
  *                           different files.
  *
- *          Note that a compact storage layout may affect writing data to 
- *          the dataset with parallel applications. See the note in 
- *          H5Dwrite() documentation for details. 
+ *          Note that a compact storage layout may affect writing data to
+ *          the dataset with parallel applications. See the note in
+ *          H5Dwrite() documentation for details.
  * \version 1.10.0 #H5D_VIRTUAL added in this release.
  * \since 1.0.0
  *
@@ -798,28 +798,28 @@ H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
  *
  * \dcpl_id{plist_id}
  *
- * \return Returns the layout type (a non-negative value) of a dataset 
+ * \return Returns the layout type (a non-negative value) of a dataset
  *         creation property list if successful. Valid return values are:
- *         - #H5D_COMPACT: Raw data is stored in the object header in the 
+ *         - #H5D_COMPACT: Raw data is stored in the object header in the
  *                        file.
- *         - #H5D_CONTIGUOUS: Raw data is stored separately from the object 
+ *         - #H5D_CONTIGUOUS: Raw data is stored separately from the object
  *                           header in one contiguous chunk in the file.
- *         - #H5D_CHUNKED: Raw data is stored separately from the object 
- *                        header in chunks in separate locations in the 
+ *         - #H5D_CHUNKED: Raw data is stored separately from the object
+ *                        header in chunks in separate locations in the
  *                        file.
- *         - #H5D_VIRTUAL: Raw data is drawn from multiple datasets in 
+ *         - #H5D_VIRTUAL: Raw data is drawn from multiple datasets in
  *                        different files.
  * \return
  *         Otherwise, returns a negative value indicating failure.
  *
- * \details H5Pget_layout() returns the layout of the raw data for a 
- *          dataset. This function is only valid for dataset creation 
+ * \details H5Pget_layout() returns the layout of the raw data for a
+ *          dataset. This function is only valid for dataset creation
  *          property lists.
  *
- *          Note that a compact storage layout may affect writing data to 
- *          the dataset with parallel applications. See the H5Dwrite() 
+ *          Note that a compact storage layout may affect writing data to
+ *          the dataset with parallel applications. See the H5Dwrite()
  *          documentation for details.
- *         
+ * 
  * \version 1.10.0 #H5D_VIRTUAL and #H5D_VIRTUAL_F added in this release.
  *
  * \since 1.0.0
@@ -919,37 +919,37 @@ H5_DLL herr_t H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size,
  *
  * \dcpl_id{plist_id}
  * \param[in] options_mask A bit-mask conveying the desired SZIP options;
- *                         Valid values are #H5_SZIP_EC_OPTION_MASK and 
+ *                         Valid values are #H5_SZIP_EC_OPTION_MASK and
  *                         #H5_SZIP_NN_OPTION_MASK.
- * \param[in] pixels_per_block The number of pixels or data elements in each 
+ * \param[in] pixels_per_block The number of pixels or data elements in each
  *            data block
  *
  * \return \herr_t
  *
- * \details H5Pset_szip() sets an SZIP compression filter, #H5Z_FILTER_SZIP, 
- *          for a dataset. SZIP is a compression method designed for use with 
+ * \details H5Pset_szip() sets an SZIP compression filter, #H5Z_FILTER_SZIP,
+ *          for a dataset. SZIP is a compression method designed for use with
  *          scientific data.
  *
- *          Before proceeding, all users should review the “Limitations” 
+ *          Before proceeding, all users should review the “Limitations”
  *          section below.
  *
- *          Users familiar with SZIP outside the HDF5 context may benefit 
- *          from reviewing the Note “For Users Familiar with SZIP in Other 
+ *          Users familiar with SZIP outside the HDF5 context may benefit
+ *          from reviewing the Note “For Users Familiar with SZIP in Other
  *          Contexts” below.
  *
- *          In the text below, the term pixel refers to an HDF5 data element. 
- *          This terminology derives from SZIP compression's use with image 
+ *          In the text below, the term pixel refers to an HDF5 data element.
+ *          This terminology derives from SZIP compression's use with image
  *          data, where pixel referred to an image pixel.
  *
- *          The SZIP \p bits_per_pixel value (see Note, below) is automatically 
- *          set, based on the HDF5 datatype. SZIP can be used with atomic 
- *          datatypes that may have size of 8, 16, 32, or 64 bits. 
- *          Specifically, a dataset with a datatype that is 8-, 16-, 32-, or 
- *          64-bit signed or unsigned integer; char; or 32- or 64-bit float 
- *          can be compressed with SZIP. See Note, below, for further 
+ *          The SZIP \p bits_per_pixel value (see Note, below) is automatically
+ *          set, based on the HDF5 datatype. SZIP can be used with atomic
+ *          datatypes that may have size of 8, 16, 32, or 64 bits.
+ *          Specifically, a dataset with a datatype that is 8-, 16-, 32-, or
+ *          64-bit signed or unsigned integer; char; or 32- or 64-bit float
+ *          can be compressed with SZIP. See Note, below, for further
  *          discussion of the the SZIP \p bits_per_pixel setting.
  *
- *          SZIP options are passed in an options mask, \p options_mask, 
+ *          SZIP options are passed in an options mask, \p options_mask,
  *          as follows.
  *
  *          <table>
@@ -967,100 +967,100 @@ H5_DLL herr_t H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size,
  *            </tr>
  *           </table>
  *
- *           The following guidelines can be used in determining which 
+ *           The following guidelines can be used in determining which
  *           option to select:
  *
- *           - The entropy coding method, the EC option specified by 
- *             #H5_SZIP_EC_OPTION_MASK, is best suited for data that has been 
+ *           - The entropy coding method, the EC option specified by
+ *             #H5_SZIP_EC_OPTION_MASK, is best suited for data that has been
  *             processed. The EC method works best for small numbers.
- *           - The nearest neighbor coding method, the NN option specified 
- *             by #H5_SZIP_NN_OPTION_MASK, preprocesses the data then the 
+ *           - The nearest neighbor coding method, the NN option specified
+ *             by #H5_SZIP_NN_OPTION_MASK, preprocesses the data then the
  *             applies EC method as above.
  *
- *           Other factors may affect results, but the above criteria 
+ *           Other factors may affect results, but the above criteria
  *           provides a good starting point for optimizing data compression.
  *
- *           SZIP compresses data block by block, with a user-tunable block 
- *           size. This block size is passed in the parameter 
- *           \p pixels_per_block and must be even and not greater than 32, 
- *           with typical values being 8, 10, 16, or 32. This parameter 
- *           affects compression ratio; the more pixel values vary, the 
+ *           SZIP compresses data block by block, with a user-tunable block
+ *           size. This block size is passed in the parameter
+ *           \p pixels_per_block and must be even and not greater than 32,
+ *           with typical values being 8, 10, 16, or 32. This parameter
+ *           affects compression ratio; the more pixel values vary, the
  *           smaller this number should be to achieve better performance.
  *
- *           In HDF5, compression can be applied only to chunked datasets. 
- *           If \p pixels_per_block is bigger than the total number of 
- *           elements in a dataset chunk, H5Pset_szip() will succeed but 
- *           the subsequent call to H5Dcreate() will fail; the conflict 
+ *           In HDF5, compression can be applied only to chunked datasets.
+ *           If \p pixels_per_block is bigger than the total number of
+ *           elements in a dataset chunk, H5Pset_szip() will succeed but
+ *           the subsequent call to H5Dcreate() will fail; the conflict
  *           can be detected only when the property list is used.
  *
- *           To achieve optimal performance for SZIP compression, it is 
- *           recommended that a chunk's fastest-changing dimension be equal 
- *           to N times \p pixels_per_block where N is the maximum number of 
- *           blocks per scan line allowed by the SZIP library. In the 
+ *           To achieve optimal performance for SZIP compression, it is
+ *           recommended that a chunk's fastest-changing dimension be equal
+ *           to N times \p pixels_per_block where N is the maximum number of
+ *           blocks per scan line allowed by the SZIP library. In the
  *           current version of SZIP, N is set to 128.
  *
  *           SZIP compression is an optional HDF5 filter.
  *
  *           \b Limitations:
  *
- *           - SZIP compression cannot be applied to compound, array, 
- *             variable-length, enumeration, or any other user-defined 
- *             datatypes. If an SZIP filter is set in a dataset creation 
- *             property list used to create a dataset containing a 
- *             non-allowed datatype, the call to H5Dcreate() will fail; the 
+ *           - SZIP compression cannot be applied to compound, array,
+ *             variable-length, enumeration, or any other user-defined
+ *             datatypes. If an SZIP filter is set in a dataset creation
+ *             property list used to create a dataset containing a
+ *             non-allowed datatype, the call to H5Dcreate() will fail; the
  *             conflict can be detected only when the property list is used.
- *           - Users should be aware that there are factors that affect one’s 
+ *           - Users should be aware that there are factors that affect one’s
  *             rights and ability to use SZIP compression by reviewing the
- *             SZIP copyright notice.  
+ *             SZIP copyright notice.
  *
  * \note \b For \b Users \b Familiar \b with \b SZIP \b in \b Other \b Contexts:
  *
- * \note  The following notes are of interest primarily to those who have 
+ * \note  The following notes are of interest primarily to those who have
  *        used SZIP compression outside of the HDF5 context.
- *        In non-HDF5 applications, SZIP typically requires that the user 
+ *        In non-HDF5 applications, SZIP typically requires that the user
  *        application supply additional parameters:
- *        - \p pixels_in_object, the number of pixels in the object to 
+ *        - \p pixels_in_object, the number of pixels in the object to
  *          be compressed
  *        - \p bits_per_pixel, the number of bits per pixel
  *        - \p pixels_per_scanline, the number of pixels per scan line
  *
- * \note  These values need not be independently supplied in the HDF5 
- *        environment as they are derived from the datatype and dataspace, 
- *        which are already known. In particular, HDF5 sets 
- *        \p pixels_in_object to the number of elements in a chunk and 
- *        \p bits_per_pixel to the size of the element or pixel datatype. 
+ * \note  These values need not be independently supplied in the HDF5
+ *        environment as they are derived from the datatype and dataspace,
+ *        which are already known. In particular, HDF5 sets
+ *        \p pixels_in_object to the number of elements in a chunk and
+ *        \p bits_per_pixel to the size of the element or pixel datatype.
  *
  * \note  The following algorithm is used to set \p pixels_per_scanline:
- *        - If the size of a chunk's fastest-changing dimension, size, 
- *          is greater than 4K, set \p pixels_per_scanline to 128 times 
+ *        - If the size of a chunk's fastest-changing dimension, size,
+ *          is greater than 4K, set \p pixels_per_scanline to 128 times
  *          \p pixels_per_block.
- *        - If size is less than 4K but greater than \p pixels_per_block, 
- *          set \p pixels_per_scanline to the minimum of size and 128 
+ *        - If size is less than 4K but greater than \p pixels_per_block,
+ *          set \p pixels_per_scanline to the minimum of size and 128
  *          times \p pixels_per_block.
- *        - If size is less than \p pixels_per_block but greater than the 
- *          number elements in the chunk, set \p pixels_per_scanline to 
- *          the minimum of the number elements in the chunk and 128 times 
+ *        - If size is less than \p pixels_per_block but greater than the
+ *          number elements in the chunk, set \p pixels_per_scanline to
+ *          the minimum of the number elements in the chunk and 128 times
  *          \p pixels_per_block.
  *
- * \note  The HDF5 datatype may have precision that is less than the full 
- *        size of the data element, e.g., an 11-bit integer can be defined 
- *        using H5Tset_precision(). To a certain extent, SZIP can take 
+ * \note  The HDF5 datatype may have precision that is less than the full
+ *        size of the data element, e.g., an 11-bit integer can be defined
+ *        using H5Tset_precision(). To a certain extent, SZIP can take
  *        advantage of the precision of the datatype to improve compression:
- *        - If the HDF5 datatype size is 24-bit or less and the offset of 
- *          the bits in the HDF5 datatype is zero (see H5Tset_offset() or 
- *          H5Tget_offset()), the data is the in lowest N bits of the data 
- *          element. In this case, the SZIP \p bits_per_pixel is set to the 
+ *        - If the HDF5 datatype size is 24-bit or less and the offset of
+ *          the bits in the HDF5 datatype is zero (see H5Tset_offset() or
+ *          H5Tget_offset()), the data is the in lowest N bits of the data
+ *          element. In this case, the SZIP \p bits_per_pixel is set to the
  *          precision of the HDF5 datatype.
- *        - If the offset is not zero, the SZIP \p bits_per_pixel will be 
+ *        - If the offset is not zero, the SZIP \p bits_per_pixel will be
  *          set to the number of bits in the full size of the data element.
- *        - If the HDF5 datatype precision is 25-bit to 32-bit, the SZIP 
+ *        - If the HDF5 datatype precision is 25-bit to 32-bit, the SZIP
  *          \p bits_per_pixel will be set to 32.
- *        - If the HDF5 datatype precision is 33-bit to 64-bit, the SZIP 
+ *        - If the HDF5 datatype precision is 33-bit to 64-bit, the SZIP
  *          \p bits_per_pixel will be set to 64.
  *
  * \note HDF5 always modifies the options mask provided by the user to set up
- *       usage of RAW_OPTION_MASK, ALLOW_K13_OPTION_MASK, and one of 
- *       LSB_OPTION_MASK or MSB_OPTION_MASK, depending on endianness of the 
+ *       usage of RAW_OPTION_MASK, ALLOW_K13_OPTION_MASK, and one of
+ *       LSB_OPTION_MASK or MSB_OPTION_MASK, depending on endianness of the
  *       datatype.
  *
  * \since 1.6.0
@@ -1218,54 +1218,54 @@ H5_DLL herr_t H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc);
  *
  * \brief Returns information about a filter in a pipeline (DEPRECATED)
  *
- * \todo H5Pget_filter1() prototype does not match source in H5Pocpl.c. 
+ * \todo H5Pget_filter1() prototype does not match source in H5Pocpl.c.
  *       Also, it is not in a deprecated file. Is that okay?
  *
  * \plist_id{plist_id}
- * \param[in] idx Sequence number within the filter pipeline of the filter 
+ * \param[in] idx Sequence number within the filter pipeline of the filter
  *                for which information is sought
- * \param[out] flags Bit vector specifying certain general properties of 
+ * \param[out] flags Bit vector specifying certain general properties of
  *                the filter
  * \param[in,out] cd_nelmts Number of elements in \p cd_values
  * \param[out] cd_values Auxiliary data for the filter
  * \param[in] namelen Anticipated number of characters in \p name
  * \param[out] name Name of the filter
  *
- * \return Returns the filter identifier if successful;  Otherwise returns 
+ * \return Returns the filter identifier if successful;  Otherwise returns
  *         a negative value. See: #H5Z_filter_t
  *
- * \details H5Pget_filter1() returns information about a filter, specified 
- *          by its filter number, in a filter pipeline, specified by the 
+ * \details H5Pget_filter1() returns information about a filter, specified
+ *          by its filter number, in a filter pipeline, specified by the
  *          property list with which it is associated.
  *
  *          \p plist_id must be a dataset or group creation property list.
  *
- *          \p idx is a value between zero and N-1, as described in 
- *          H5Pget_nfilters(). The function will return a negative value 
+ *          \p idx is a value between zero and N-1, as described in
+ *          H5Pget_nfilters(). The function will return a negative value
  *          if the filter number is out of range.
  *
- *          The structure of the \p flags argument is discussed in 
+ *          The structure of the \p flags argument is discussed in
  *          H5Pset_filter().
  *
- *          On input, \p cd_nelmts indicates the number of entries in the 
+ *          On input, \p cd_nelmts indicates the number of entries in the
  *          \p cd_values array, as allocated by the caller; on return,
  *          \p cd_nelmts contains the number of values defined by the filter.
  *
- *          If \p name is a pointer to an array of at least \p namelen 
- *          bytes, the filter name will be copied into that array. The name 
- *          will be null terminated if \p namelen is large enough. The 
- *          filter name returned will be the name appearing in the file, the 
+ *          If \p name is a pointer to an array of at least \p namelen
+ *          bytes, the filter name will be copied into that array. The name
+ *          will be null terminated if \p namelen is large enough. The
+ *          filter name returned will be the name appearing in the file, the
  *          name registered for the filter, or an empty string.
  *
- * \version 1.8.5 Function extended to work with group creation property 
+ * \version 1.8.5 Function extended to work with group creation property
  *                lists.
  * \version 1.8.0 N-bit and scale-offset filters added.
- * \version 1.8.0 Function H5Pget_filter() renamed to H5Pget_filter1() and 
+ * \version 1.8.0 Function H5Pget_filter() renamed to H5Pget_filter1() and
  *                deprecated in this release.
  * \version 1.6.4 \p filter parameter type changed to unsigned.
  *
  *-------------------------------------------------------------------------
- */ 
+ */
 H5_DLL H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned filter,
     unsigned int *flags/*out*/, size_t *cd_nelmts/*out*/,
     unsigned cd_values[]/*out*/, size_t namelen, char name[]);
