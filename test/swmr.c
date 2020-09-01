@@ -91,7 +91,7 @@ static int test_file_lock_concur(hid_t fapl);
 static int test_file_lock_swmr_concur(hid_t fapl);
 
 /* Test file lock environment variable */
-static int test_file_lock_env_var(hid_t fapl);
+static int test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_override);
 
 /* Tests for SWMR VFD flag */
 static int test_swmr_vfd_flag(void);
@@ -4256,7 +4256,10 @@ test_file_lock_same(hid_t in_fapl)
     /* Output message about test being performed */
     TESTING("File open with different combinations of flags--single process access");
 
+    /* Set locking in the fapl */
     if((fapl = H5Pcopy(in_fapl)) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_file_locking(fapl, TRUE, TRUE) < 0)
         FAIL_STACK_ERROR
 
     /* Set the filename to use for this test (dependent on fapl) */
@@ -4416,7 +4419,7 @@ test_file_lock_swmr_same(hid_t in_fapl)
     /* Output message about test being performed */
     TESTING("File open with different combinations of flags + SWMR flags--single process access");
 
-    /* Get a copy of the parameter in_fapl */
+    /* Set locking in the fapl */
     if((fapl = H5Pcopy(in_fapl)) < 0)
         FAIL_STACK_ERROR
 
@@ -4726,7 +4729,10 @@ test_file_lock_concur(hid_t in_fapl)
     /* Output message about test being performed */
     TESTING("File open with different combinations of flags--concurrent access");
 
+    /* Set locking in the fapl */
     if((fapl = H5Pcopy(in_fapl)) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_file_locking(fapl, TRUE, TRUE) < 0)
         FAIL_STACK_ERROR
 
     /* Set the filename to use for this test (dependent on fapl) */
@@ -5102,7 +5108,10 @@ test_file_lock_swmr_concur(hid_t in_fapl)
     /* Output message about test being performed */
     TESTING("File open with different combintations of flags + SWMR flags--concurrent access");
 
+    /* Set locking in the fapl */
     if((fapl = H5Pcopy(in_fapl)) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_file_locking(fapl, TRUE, TRUE) < 0)
         FAIL_STACK_ERROR
 
     /* Set the filename to use for this test (dependent on fapl) */
@@ -5134,7 +5143,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
     if(childpid == 0) { /* Child process */
         hid_t child_fid;    /* File ID */
-    int child_notify = 0;
+        int child_notify = 0;
 
         /* Close unused write end for out_pdf */
         if(HDclose(out_pdf[1]) < 0)
@@ -5155,7 +5164,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         if(child_fid == FAIL)
             HDexit(EXIT_SUCCESS);
 
-    /* Close the pipe */
+        /* Close the pipe */
         if(HDclose(out_pdf[0]) < 0)
             HDexit(EXIT_FAILURE);
 
@@ -5205,13 +5214,13 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
     /* Fork child process */
     if((childpid = HDfork()) < 0)
-    FAIL_STACK_ERROR
+        FAIL_STACK_ERROR
 
     if(childpid == 0) { /* Child process */
         hid_t child_fid;    /* File ID */
-    int child_notify = 0;
+        int child_notify = 0;
 
-    /* Close unused write end for out_pdf */
+        /* Close unused write end for out_pdf */
         if(HDclose(out_pdf[1]) < 0)
             HDexit(EXIT_FAILURE);
 
@@ -5230,7 +5239,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         if(child_fid == FAIL)
             HDexit(EXIT_SUCCESS);
 
-    /* Close the pipe */
+        /* Close the pipe */
         if(HDclose(out_pdf[0]) < 0)
             HDexit(EXIT_FAILURE);
 
@@ -5243,7 +5252,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
     /* Open the test file */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
-    FAIL_STACK_ERROR
+        FAIL_STACK_ERROR
 
     /* Notify child process */
     notify = 1;
@@ -5256,7 +5265,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
     /* Wait for child process to complete */
     if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
-    FAIL_STACK_ERROR
+        FAIL_STACK_ERROR
 
     /* Check if child terminated normally */
     if(WIFEXITED(child_status)) {
@@ -5284,7 +5293,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
     if(childpid == 0) { /* Child process */
         hid_t child_fid;    /* File ID */
-    int child_notify = 0;
+        int child_notify = 0;
 
         /* Close unused write end for out_pdf */
         if(HDclose(out_pdf[1]) < 0)
@@ -5305,7 +5314,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         if(child_fid == FAIL)
             HDexit(EXIT_SUCCESS);
 
-    /* Close the pipe */
+        /* Close the pipe */
         if(HDclose(out_pdf[0]) < 0)
             HDexit(EXIT_FAILURE);
 
@@ -5354,11 +5363,11 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
     /* Fork child process */
     if((childpid = HDfork()) < 0)
-    FAIL_STACK_ERROR
+        FAIL_STACK_ERROR
 
     if(childpid == 0) { /* Child process */
         hid_t child_fid;    /* File ID */
-    int child_notify = 0;
+        int child_notify = 0;
 
         /* Close unused write end for out_pdf */
         if(HDclose(out_pdf[1]) < 0)
@@ -5379,7 +5388,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         if(child_fid == FAIL)
             HDexit(EXIT_SUCCESS);
 
-    /* Close the pipe */
+        /* Close the pipe */
         if(HDclose(out_pdf[0]) < 0)
             HDexit(EXIT_FAILURE);
 
@@ -5392,7 +5401,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
     /* Open the test file */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl)) < 0)
-    FAIL_STACK_ERROR
+        FAIL_STACK_ERROR
 
     /* Notify child process */
     notify = 1;
@@ -5405,7 +5414,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
     /* Wait for child process to complete */
     if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
-    FAIL_STACK_ERROR
+        FAIL_STACK_ERROR
 
     /* Check if child terminated normally */
     if(WIFEXITED(child_status)) {
@@ -5428,11 +5437,11 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
     /* Fork child process */
     if((childpid = HDfork()) < 0)
-    FAIL_STACK_ERROR
+        FAIL_STACK_ERROR
 
     if(childpid == 0) { /* Child process */
         hid_t child_fid;    /* File ID */
-    int child_notify = 0;
+        int child_notify = 0;
 
         /* Close unused write end for out_pdf */
         if(HDclose(out_pdf[1]) < 0)
@@ -5456,7 +5465,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
             HDexit(EXIT_SUCCESS);
         }
 
-    /* Close the pipe */
+        /* Close the pipe */
         if(HDclose(out_pdf[0]) < 0)
             HDexit(EXIT_FAILURE);
 
@@ -5469,7 +5478,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
     /* Open the test file */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl)) < 0)
-    FAIL_STACK_ERROR
+        FAIL_STACK_ERROR
 
     /* Notify child process */
     notify = 1;
@@ -5482,7 +5491,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
     /* Wait for child process to complete */
     if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
-    FAIL_STACK_ERROR
+        FAIL_STACK_ERROR
 
     /* Check if child terminated normally */
     if(WIFEXITED(child_status)) {
@@ -5509,7 +5518,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
     if(childpid == 0) { /* Child process */
         hid_t child_fid;    /* File ID */
-    int child_notify = 0;
+        int child_notify = 0;
 
         /* Close unused write end for out_pdf */
         if(HDclose(out_pdf[1]) < 0)
@@ -5530,7 +5539,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         if(child_fid == FAIL)
             HDexit(EXIT_SUCCESS);
 
-    /* Close the pipe */
+        /* Close the pipe */
         if(HDclose(out_pdf[0]) < 0)
             HDexit(EXIT_FAILURE);
 
@@ -5584,7 +5593,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
     if(childpid == 0) { /* Child process */
         hid_t child_fid;    /* File ID */
-    int child_notify = 0;
+        int child_notify = 0;
 
         /* Close unused write end for out_pdf */
         if(HDclose(out_pdf[1]) < 0)
@@ -5598,14 +5607,14 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Open the test file */
         H5E_BEGIN_TRY {
-            child_fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
+            child_fid = H5Fopen(filename, H5F_ACC_RDWR, fapl);
         } H5E_END_TRY;
 
         /* Should fail */
         if(child_fid == FAIL)
             HDexit(EXIT_SUCCESS);
 
-    /* Close the pipe */
+        /* Close the pipe */
         if(HDclose(out_pdf[0]) < 0)
             HDexit(EXIT_FAILURE);
 
@@ -5659,7 +5668,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
     if(childpid == 0) { /* Child process */
         hid_t child_fid;    /* File ID */
-    int child_notify = 0;
+        int child_notify = 0;
 
         /* Close unused write end for out_pdf */
         if(HDclose(out_pdf[1]) < 0)
@@ -5734,7 +5743,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
     if(childpid == 0) { /* Child process */
         hid_t child_fid;    /* File ID */
-    int child_notify = 0;
+        int child_notify = 0;
 
         /* Close unused write end for out_pdf */
         if(HDclose(out_pdf[1]) < 0)
@@ -5812,7 +5821,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
     if(childpid == 0) { /* Child process */
         hid_t child_fid;    /* File ID */
-    int child_notify = 0;
+        int child_notify = 0;
 
         /* Close unused write end for out_pdf */
         if(HDclose(out_pdf[1]) < 0)
@@ -5835,7 +5844,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
             HDexit(EXIT_SUCCESS);
         }
 
-    /* Close the pipe */
+        /* Close the pipe */
         if(HDclose(out_pdf[0]) < 0)
             HDexit(EXIT_FAILURE);
 
@@ -5889,7 +5898,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
     if(childpid == 0) { /* Child process */
         hid_t child_fid;    /* File ID */
-    int child_notify = 0;
+        int child_notify = 0;
 
         /* Close unused write end for out_pdf */
         if(HDclose(out_pdf[1]) < 0)
@@ -5910,7 +5919,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         if(child_fid == FAIL)
             HDexit(EXIT_SUCCESS);
 
-    /* Close the pipe */
+        /* Close the pipe */
         if(HDclose(out_pdf[0]) < 0)
             HDexit(EXIT_FAILURE);
 
@@ -5922,7 +5931,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Open the test file */
-    if((fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
         FAIL_STACK_ERROR
 
     /* Notify child process */
@@ -5964,7 +5973,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
     if(childpid == 0) { /* Child process */
         hid_t child_fid;    /* File ID */
-    int child_notify = 0;
+        int child_notify = 0;
 
         /* Close unused write end for out_pdf */
         if(HDclose(out_pdf[1]) < 0)
@@ -6046,20 +6055,17 @@ error:
 
 } /* end test_file_lock_swmr_concur() */
 
-
-
 #endif /* !(defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID)) */
 
 /****************************************************************
 **
-**  test_file_lock_swmr_concur(): low-level file test routine.
-**    With the implementation of file locking, this test checks file
-**    open with different combinations of flags + SWMR flags.
-**    This is for concurrent access.
+**  test_file_locking():
+**    Tests various combinations of file locking flags and
+**    and environment variables.
 **
 *****************************************************************/
 static int
-test_file_lock_env_var(hid_t in_fapl)
+test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_override)
 {
 #if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
     SKIPPED();
@@ -6074,17 +6080,39 @@ test_file_lock_env_var(hid_t in_fapl)
     int child_wait_option=0;        /* Options passed to waitpid */
     int out_pdf[2];
     int notify = 0;
+    int exit_status = 0;
+    herr_t ret;
 
+    if (turn_locking_on && env_var_override)
+        TESTING("File locking: ON w/ env var override")
+    else if (turn_locking_on && !env_var_override)
+        TESTING("File locking: ON")
+    else if (!turn_locking_on && env_var_override)
+        TESTING("File locking: OFF w/ env var override")
+    else
+        TESTING("File locking: OFF")
 
-    TESTING("File locking environment variable");
-
-
-    /* Set the environment variable */
-    if(HDsetenv("HDF5_USE_FILE_LOCKING", "FALSE", TRUE) < 0)
-        TEST_ERROR
-
+    /* Copy the incoming fapl */
     if((fapl = H5Pcopy(in_fapl)) < 0)
         TEST_ERROR
+
+    /* Set locking in the fapl */
+    if(H5Pset_file_locking(fapl, turn_locking_on ? TRUE : FALSE, TRUE) < 0)
+        TEST_ERROR
+
+    /* If requested, set the environment variable */
+    if (env_var_override) {
+        if(HDsetenv("HDF5_USE_FILE_LOCKING", turn_locking_on ? "FALSE" : "TRUE", TRUE) < 0)
+            TEST_ERROR
+        if(H5F__reparse_file_lock_variable_test() < 0)
+            TEST_ERROR
+    }
+    else {
+        if(HDsetenv("HDF5_USE_FILE_LOCKING", "", TRUE) < 0)
+            TEST_ERROR
+        if(H5F__reparse_file_lock_variable_test() < 0)
+            TEST_ERROR
+    }
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[1], fapl, filename, sizeof(filename));
@@ -6097,10 +6125,8 @@ test_file_lock_env_var(hid_t in_fapl)
     if(H5Fclose(fid) < 0)
         TEST_ERROR
 
-    /* Open a file for read-only and then read-write. This would
-     * normally fail due to the file locking scheme but should
-     * pass when the environment variable is set to disable file
-     * locking.
+    /* Open a file for read-only and then read-write. This will fail
+     * when the locking scheme is turned on.
      */
 
     /* Create 1 pipe */
@@ -6115,7 +6141,7 @@ test_file_lock_env_var(hid_t in_fapl)
 
         /* Child process */
 
-        hid_t child_fid;    /* File ID */
+        hid_t child_fid = H5I_INVALID_HID;  /* File ID */
         int child_notify = 0;
 
         /* Close unused write end for out_pdf */
@@ -6126,18 +6152,23 @@ test_file_lock_env_var(hid_t in_fapl)
         while(child_notify != 1) {
             if(HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
                 HDexit(EXIT_FAILURE);
-        } /* end while */
+        }
 
-        /* Open the test file */
-        if((child_fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-            TEST_ERROR
+        /* Open and close the test file */
+        H5E_BEGIN_TRY {
+            child_fid = H5Fopen(filename, H5F_ACC_RDWR, fapl);
+            ret = H5Fclose(child_fid);
+        } H5E_END_TRY; 
 
         /* Close the pipe */
         if(HDclose(out_pdf[0]) < 0)
             HDexit(EXIT_FAILURE);
 
-        HDexit(EXIT_SUCCESS);
-    } /* end if */
+        if(H5I_INVALID_HID == child_fid || FAIL == ret)
+            HDexit(EXIT_FAILURE);
+        else
+            HDexit(EXIT_SUCCESS);
+    } /* end child process work */
 
     /* close unused read end for out_pdf */
     if(HDclose(out_pdf[0]) < 0)
@@ -6160,13 +6191,26 @@ test_file_lock_env_var(hid_t in_fapl)
     if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
         TEST_ERROR
 
-    /* Check if child terminated normally */
-    if(WIFEXITED(child_status)) {
-        /* Check exit status of the child */
-        if(WEXITSTATUS(child_status) != 0)
-            TEST_ERROR
-    } /* end if */
+    /* Check exit status of the child */
+    if(WIFEXITED(child_status))
+        exit_status = WEXITSTATUS(child_status);
     else
+        TEST_ERROR
+
+    /* The child process should have passed or failed as follows:
+     *
+     * locks on:                            FAIL
+     * locks off:                           PASS
+     * locks on, env var override:          PASS
+     * locks off, env var override:         FAIL
+     */
+    if(turn_locking_on && !env_var_override && (0 == exit_status))
+        TEST_ERROR
+    else if(!turn_locking_on && !env_var_override && (0 != exit_status))
+        TEST_ERROR
+    else if(turn_locking_on && env_var_override && (0 != exit_status))
+        TEST_ERROR
+    else if(!turn_locking_on && env_var_override && (0 == exit_status))
         TEST_ERROR
 
     /* Close the file */
@@ -6192,8 +6236,81 @@ error:
 
 #endif /* !(defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID)) */
 
-} /* end test_file_lock_env_var() */
+} /* end test_file_locking() */
 
+
+/****************************************************************
+**
+**  test_different_lock_flags():
+**    Tests opening a file multiple times with different lock
+**    flags.
+**
+*****************************************************************/
+static int
+test_different_lock_flags(hid_t in_fapl)
+{
+    hid_t fid1 = H5I_INVALID_HID;       /* File ID */
+    hid_t fid2 = H5I_INVALID_HID;       /* File ID */
+    hid_t fid3 = H5I_INVALID_HID;       /* File ID */
+    hid_t fapl_id = H5I_INVALID_HID;    /* File access property list */
+    char filename[NAME_BUF_SIZE];       /* File name */
+
+    TESTING("Using different lock flags")
+
+    /* Copy the incoming fapl */
+    if((fapl_id = H5Pcopy(in_fapl)) < 0)
+        TEST_ERROR
+
+    /* Set locking in the fapl */
+    if(H5Pset_file_locking(fapl_id, TRUE, TRUE) < 0)
+        TEST_ERROR
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[1], fapl_id, filename, sizeof(filename));
+
+    /* Create the test file */
+    if((fid1 = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        TEST_ERROR
+
+    /* Open the test file with the same flags (should pass) */
+    if((fid2 = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
+        TEST_ERROR
+
+    /* Unset locking in the fapl */
+    if(H5Pset_file_locking(fapl_id, FALSE, FALSE) < 0)
+        TEST_ERROR
+
+    /* Open the test file with different flags (should FAIL) */
+    H5E_BEGIN_TRY {
+        fid3 = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
+    } H5E_END_TRY;
+    if(H5I_INVALID_HID != fid3)
+        FAIL_PUTS_ERROR("Should not have been able to open a file with different locking flags")
+
+    /* Close the files */
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+    /* Close the copied property list */
+    if(H5Pclose(fapl_id) < 0)
+        TEST_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl_id);
+        H5Fclose(fid1);
+        H5Fclose(fid2);
+        H5Fclose(fid3);
+    } H5E_END_TRY;
+
+    return -1;
+} /* end test_different_lock_flags() */
 
 static int
 test_swmr_vfd_flag(void)
@@ -7019,7 +7136,7 @@ error:
         H5Fclose(fid3);
     } H5E_END_TRY;
 
-    return -1;
+    return 1;
 
 } /* test_multiple_same() */
 
@@ -7036,6 +7153,7 @@ main(void)
     char *driver = NULL;    /* VFD string (from env variable) */
     char *lock_env_var = NULL; /* file locking env var pointer */
     hbool_t use_file_locking;   /* read from env var */
+    hbool_t file_locking_enabled = FALSE;   /* Checks if the file system supports locks */
 
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
@@ -7055,6 +7173,13 @@ main(void)
         use_file_locking = FALSE;
     else
         use_file_locking = TRUE;
+
+    /* Check if file locking is enabled on this file system */
+    if(use_file_locking)
+        if(h5_check_if_file_locking_enabled(&file_locking_enabled) < 0) {
+            HDprintf("Error when determining if file locks are enabled\n");
+            return EXIT_FAILURE;
+        }
 
     /* Set up */
     h5_reset();
@@ -7097,7 +7222,7 @@ main(void)
     nerrors += test_append_flush_dataset_fixed(fapl);
     nerrors += test_append_flush_dataset_multiple(fapl);
 
-    if(use_file_locking) {
+    if(use_file_locking && file_locking_enabled) {
         /*
          * Tests for:
          *   file open flags--single process access
@@ -7124,10 +7249,19 @@ main(void)
     if(NULL == driver || !HDstrcmp(driver, "") || !HDstrcmp(driver, "sec2"))
         nerrors += test_swmr_vfd_flag();
 
-    /* This test changes the HDF5_USE_FILE_LOCKING environment variable
-     * so it should be run last.
+    /* Test multiple opens via different locking flags */
+    if (use_file_locking && file_locking_enabled)
+        nerrors += test_different_lock_flags(fapl);
+
+    /* These tests change the HDF5_USE_FILE_LOCKING environment variable
+     * so they should be run last.
      */
-    nerrors += test_file_lock_env_var(fapl);
+    if (use_file_locking && file_locking_enabled) {
+        nerrors += test_file_locking(fapl, TRUE, TRUE);
+        nerrors += test_file_locking(fapl, TRUE, FALSE);
+        nerrors += test_file_locking(fapl, FALSE, TRUE);
+        nerrors += test_file_locking(fapl, FALSE, FALSE);
+    }
 
     if(nerrors)
         goto error;

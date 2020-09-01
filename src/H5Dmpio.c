@@ -1342,9 +1342,9 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_in
     HDassert(fm);
 
     /* Obtain the current rank of the process and the number of processes */
-    if ((mpi_rank = H5F_mpi_get_rank(io_info->dset->oloc.file)) < 0)
+    if((mpi_rank = H5F_mpi_get_rank(io_info->dset->oloc.file)) < 0)
         HGOTO_ERROR(H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi rank")
-    if ((mpi_size = H5F_mpi_get_size(io_info->dset->oloc.file)) < 0)
+    if((mpi_size = H5F_mpi_get_size(io_info->dset->oloc.file)) < 0)
         HGOTO_ERROR(H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi size")
 
     /* Set the actual-chunk-opt-mode property. */
@@ -1356,10 +1356,10 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_in
     H5CX_set_mpio_actual_io_mode(H5D_MPIO_CHUNK_COLLECTIVE);
 
     /* Build a list of selected chunks in the collective io operation */
-    if (H5D__construct_filtered_io_info_list(io_info, type_info, fm, &chunk_list, &chunk_list_num_entries) < 0)
+    if(H5D__construct_filtered_io_info_list(io_info, type_info, fm, &chunk_list, &chunk_list_num_entries) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "couldn't construct filtered I/O info list")
 
-    if (io_info->op_type == H5D_IO_OP_WRITE) { /* Filtered collective write */
+    if(io_info->op_type == H5D_IO_OP_WRITE) { /* Filtered collective write */
         H5D_chk_idx_info_t index_info;
         H5D_chunk_ud_t     udata;
         hsize_t            mpi_buf_count;
@@ -1379,15 +1379,15 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_in
          * updating each chunk with the data modifications from other processes,
          * then re-filtering the chunk.
          */
-        for (i = 0; i < chunk_list_num_entries; i++)
-            if (mpi_rank == chunk_list[i].owners.new_owner)
-                if (H5D__filtered_collective_chunk_entry_io(&chunk_list[i], io_info, type_info, fm) < 0)
+        for(i = 0; i < chunk_list_num_entries; i++)
+            if(mpi_rank == chunk_list[i].owners.new_owner)
+                if(H5D__filtered_collective_chunk_entry_io(&chunk_list[i], io_info, type_info, fm) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "couldn't process chunk entry")
 
         /* Gather the new chunk sizes to all processes for a collective reallocation
          * of the chunks in the file.
          */
-        if (H5D__mpio_array_gatherv(chunk_list, chunk_list_num_entries, sizeof(H5D_filtered_collective_io_info_t),
+        if(H5D__mpio_array_gatherv(chunk_list, chunk_list_num_entries, sizeof(H5D_filtered_collective_io_info_t),
                 (void **) &collective_chunk_list, &collective_chunk_list_num_entries, true, 0, io_info->comm, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGATHER, FAIL, "couldn't gather new chunk sizes")
 
@@ -1480,9 +1480,9 @@ done:
         H5MM_free(collective_chunk_list);
 
     /* Free the MPI buf and file types, if they were derived */
-    if (mem_type_is_derived && MPI_SUCCESS != (mpi_code = MPI_Type_free(&mem_type)))
+    if(mem_type_is_derived && MPI_SUCCESS != (mpi_code = MPI_Type_free(&mem_type)))
         HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
-    if (file_type_is_derived && MPI_SUCCESS != (mpi_code = MPI_Type_free(&file_type)))
+    if(file_type_is_derived && MPI_SUCCESS != (mpi_code = MPI_Type_free(&file_type)))
         HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1770,9 +1770,9 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
     HDassert(fm);
 
     /* Obtain the current rank of the process and the number of processes */
-    if ((mpi_rank = H5F_mpi_get_rank(io_info->dset->oloc.file)) < 0)
+    if((mpi_rank = H5F_mpi_get_rank(io_info->dset->oloc.file)) < 0)
         HGOTO_ERROR(H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi rank")
-    if ((mpi_size = H5F_mpi_get_size(io_info->dset->oloc.file)) < 0)
+    if((mpi_size = H5F_mpi_get_size(io_info->dset->oloc.file)) < 0)
         HGOTO_ERROR(H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi size")
 
     /* Set the actual chunk opt mode property */
@@ -1784,7 +1784,7 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
     H5CX_set_mpio_actual_io_mode(H5D_MPIO_CHUNK_COLLECTIVE);
 
     /* Build a list of selected chunks in the collective IO operation */
-    if (H5D__construct_filtered_io_info_list(io_info, type_info, fm, &chunk_list, &chunk_list_num_entries) < 0)
+    if(H5D__construct_filtered_io_info_list(io_info, type_info, fm, &chunk_list, &chunk_list_num_entries) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "couldn't construct filtered I/O info list")
 
     /* Set up contiguous I/O info object */
@@ -1799,9 +1799,9 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
     /* Set dataset storage for I/O info */
     io_info->store = &store;
 
-    if (io_info->op_type == H5D_IO_OP_READ) { /* Filtered collective read */
-        for (i = 0; i < chunk_list_num_entries; i++)
-            if (H5D__filtered_collective_chunk_entry_io(&chunk_list[i], io_info, type_info, fm) < 0)
+    if(io_info->op_type == H5D_IO_OP_READ) { /* Filtered collective read */
+        for(i = 0; i < chunk_list_num_entries; i++)
+            if(H5D__filtered_collective_chunk_entry_io(&chunk_list[i], io_info, type_info, fm) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "couldn't process chunk entry")
     } /* end if */
     else { /* Filtered collective write */
@@ -1852,14 +1852,14 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
             /* Check if this process has a chunk to work on for this iteration */
             hbool_t have_chunk_to_process = (i < chunk_list_num_entries) && (mpi_rank == chunk_list[i].owners.new_owner);
 
-            if (have_chunk_to_process)
-                if (H5D__filtered_collective_chunk_entry_io(&chunk_list[i], io_info, type_info, fm) < 0)
+            if(have_chunk_to_process)
+                if(H5D__filtered_collective_chunk_entry_io(&chunk_list[i], io_info, type_info, fm) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "couldn't process chunk entry")
 
             /* Gather the new chunk sizes to all processes for a collective re-allocation
              * of the chunks in the file
              */
-            if (H5D__mpio_array_gatherv(&chunk_list[i], have_chunk_to_process ? 1 : 0, sizeof(H5D_filtered_collective_io_info_t),
+            if(H5D__mpio_array_gatherv(&chunk_list[i], have_chunk_to_process ? 1 : 0, sizeof(H5D_filtered_collective_io_info_t),
                     (void **) &collective_chunk_list, &collective_chunk_list_num_entries, true, 0, io_info->comm, NULL) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGATHER, FAIL, "couldn't gather new chunk sizes")
 
@@ -3272,7 +3272,7 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
                     if(H5S_close(dataspace) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace")
                     dataspace = NULL;
-                } /* end if */
+                }
                 H5MM_free(chunk_entry->async_info.receive_buffer_array[i]);
             } /* end for */
 

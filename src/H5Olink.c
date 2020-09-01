@@ -15,7 +15,7 @@
  *
  * Created:             H5Olink.c
  *                      Aug 29 2005
- *                      Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *                      Quincey Koziol
  *
  * Purpose:             Link messages.
  *
@@ -40,12 +40,12 @@
 /* PRIVATE PROTOTYPES */
 static void *H5O__link_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
     unsigned *ioflags, size_t p_size, const uint8_t *p);
-static herr_t H5O_link_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static void *H5O_link_copy(const void *_mesg, void *_dest);
-static size_t H5O_link_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static herr_t H5O__link_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static void *H5O__link_copy(const void *_mesg, void *_dest);
+static size_t H5O__link_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O__link_reset(void *_mesg);
 static herr_t H5O__link_free(void *_mesg);
-static herr_t H5O_link_pre_copy_file(H5F_t *file_src, const void *mesg_src,
+static herr_t H5O__link_pre_copy_file(H5F_t *file_src, const void *mesg_src,
     hbool_t *deleted, const H5O_copy_t *cpy_info, void *udata);
 static void *H5O__link_copy_file(H5F_t *file_src, void *native_src,
     H5F_t *file_dst, hbool_t *recompute_size, unsigned *mesg_flags,
@@ -63,16 +63,16 @@ const H5O_msg_class_t H5O_MSG_LINK[1] = {{
     sizeof(H5O_link_t),     	/*native message size           */
     0,				/* messages are sharable?       */
     H5O__link_decode,        	/*decode message                */
-    H5O_link_encode,        	/*encode message                */
-    H5O_link_copy,          	/*copy the native value         */
-    H5O_link_size,          	/*size of symbol table entry    */
+    H5O__link_encode,        	/*encode message                */
+    H5O__link_copy,          	/*copy the native value         */
+    H5O__link_size,          	/*size of symbol table entry    */
     H5O__link_reset,		/* reset method			*/
     H5O__link_free,	        /* free method			*/
     H5O_link_delete,	       	/* file delete method		*/
     NULL,			/* link method			*/
     NULL, 			/*set share method		*/
     NULL,		    	/*can share method		*/
-    H5O_link_pre_copy_file,	/* pre copy native value to file */
+    H5O__link_pre_copy_file,	/* pre copy native value to file */
     H5O__link_copy_file,	/* copy native value to file    */
     H5O__link_post_copy_file,	/* post copy native value to file    */
     NULL,			/* get creation index		*/
@@ -111,7 +111,6 @@ H5FL_DEFINE_STATIC(H5O_link_t);
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 29 2005
  *
  *-------------------------------------------------------------------------
@@ -119,11 +118,12 @@ H5FL_DEFINE_STATIC(H5O_link_t);
 static void *
 H5O__link_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
-    size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+    size_t p_size, const uint8_t *p)
 {
     H5O_link_t          *lnk = NULL;    /* Pointer to link message */
     size_t              len = 0;        /* Length of a string in the message */
     unsigned char       link_flags;     /* Flags for encoding link info */
+    const uint8_t       *p_end = p + p_size;  /* End of the p buffer */
     void                *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_STATIC
@@ -199,6 +199,11 @@ H5O__link_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
     if(len == 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "invalid name length")
 
+    /* Make sure that length doesn't exceed buffer size, which could occur
+       when the file is corrupted */
+    if(p + len > p_end)
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "name length causes read past end of buffer")
+
     /* Get the link's name */
     if(NULL == (lnk->name = (char *)H5MM_malloc(len + 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -218,6 +223,12 @@ H5O__link_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
             UINT16DECODE(p, len)
             if(len == 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "invalid link length")
+
+            /* Make sure that length doesn't exceed buffer size, which could occur
+               when the file is corrupted */
+            if(p + len > p_end)
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "name length causes read past end of buffer")
+
             if(NULL == (lnk->u.soft.name = (char *)H5MM_malloc((size_t)len + 1)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
             H5MM_memcpy(lnk->u.soft.name, p, len);
@@ -238,6 +249,11 @@ H5O__link_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
             lnk->u.ud.size = len;
             if(len > 0)
             {
+                /* Make sure that length doesn't exceed buffer size, which could
+                   occur when the file is corrupted */
+                if(p + len > p_end)
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "name length causes read past end of buffer")
+
                 if(NULL == (lnk->u.ud.udata = H5MM_malloc((size_t)len)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
                 H5MM_memcpy(lnk->u.ud.udata, p, len);
@@ -267,26 +283,25 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_link_encode
+ * Function:    H5O__link_encode
  *
  * Purpose:     Encodes a link message.
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 29 2005
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_link_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__link_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_link_t    *lnk = (const H5O_link_t *) _mesg;
     uint64_t            len;            /* Length of a string in the message */
     unsigned char       link_flags;     /* Flags for encoding link info */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(f);
@@ -387,11 +402,11 @@ H5O_link_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, con
     } /* end switch */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_link_encode() */
+} /* end H5O__link_encode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_link_copy
+ * Function:    H5O__link_copy
  *
  * Purpose:     Copies a message from _MESG to _DEST, allocating _DEST if
  *              necessary.
@@ -401,19 +416,18 @@ H5O_link_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, con
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 29 2005
  *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_link_copy(const void *_mesg, void *_dest)
+H5O__link_copy(const void *_mesg, void *_dest)
 {
     const H5O_link_t    *lnk = (const H5O_link_t *) _mesg;
     H5O_link_t          *dest = (H5O_link_t *) _dest;
     void                *ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(lnk);
@@ -454,11 +468,11 @@ done:
         } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_link_copy() */
+} /* end H5O__link_copy() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_link_size
+ * Function:    H5O__link_size
  *
  * Purpose:     Returns the size of the raw message in bytes not counting
  *              the message type or size fields, but only the data fields.
@@ -469,20 +483,19 @@ done:
  *              Failure:        zero
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 29 2005
  *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_link_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
+H5O__link_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_link_t *lnk = (const H5O_link_t *)_mesg;
     uint64_t name_len;          /* Length of name */
     size_t name_size;           /* Size of encoded name length */
     size_t ret_value = 0;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
     HDcompile_assert(sizeof(uint64_t) >= sizeof(size_t));
@@ -531,7 +544,7 @@ H5O_link_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void 
     } /* end switch */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_link_size() */
+} /* end H5O__link_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -666,7 +679,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_link_pre_copy_file
+ * Function:    H5O__link_pre_copy_file
  *
  * Purpose:     Perform any necessary actions before copying message between
  *              files for link messages.
@@ -681,10 +694,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_link_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UNUSED *native_src,
+H5O__link_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UNUSED *native_src,
     hbool_t *deleted, const H5O_copy_t *cpy_info, void H5_ATTR_UNUSED *udata)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(deleted);
@@ -699,7 +712,7 @@ H5O_link_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UNUSED
         *deleted = TRUE;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_link_pre_copy_file() */
+} /* end H5O__link_pre_copy_file() */
 
 
 /*-------------------------------------------------------------------------
@@ -794,7 +807,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 29 2005
  *
  *-------------------------------------------------------------------------
@@ -806,7 +818,7 @@ H5O__link_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream,
     const H5O_link_t    *lnk = (const H5O_link_t *) _mesg;
     herr_t               ret_value = SUCCEED;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(f);

@@ -1708,10 +1708,10 @@ test_random_write(H5F_t *f)
 
     /* Choose random # seed */
     seed = (unsigned)HDtime(NULL);
-#ifdef QAK
+#if 0
 /* seed = (unsigned)1155438845; */
 HDfprintf(stderr, "Random # seed was: %u\n", seed);
-#endif /* QAK */
+#endif
     HDsrandom(seed);
 
     /* Allocate space for the segment length buffer */

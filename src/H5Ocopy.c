@@ -256,7 +256,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_copy
+ * Function:    H5O__copy
  *
  * Purpose:     Private version of H5Ocopy
  *
@@ -268,7 +268,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_copy(const H5G_loc_t *loc, const char *src_name, H5G_loc_t *dst_loc,
+H5O__copy(const H5G_loc_t *loc, const char *src_name, H5G_loc_t *dst_loc,
     const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id)
 {
     H5G_loc_t	src_loc;                /* Source object group location */
@@ -279,7 +279,7 @@ H5O_copy(const H5G_loc_t *loc, const char *src_name, H5G_loc_t *dst_loc,
     hbool_t     obj_open = FALSE;       /* Entry at 'name' found */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -319,7 +319,7 @@ done:
         HDONE_ERROR(H5E_OHDR, H5E_CLOSEERROR, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_copy() */
+} /* end H5O__copy() */
 
 
 /*-------------------------------------------------------------------------
@@ -1307,10 +1307,10 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_copy_search_comm_dt_attr_cb
+ * Function:    H5O__copy_search_comm_dt_attr_cb
  *
  * Purpose:     Callback for H5O_attr_iterate_real from
- *              H5O_copy_search_comm_dt_check.  Checks if the attribute's
+ *              H5O__copy_search_comm_dt_check.  Checks if the attribute's
  *              datatype is committed.  If it is, adds it to the merge
  *              committed dt skiplist present in udata if it does not match
  *              any already present.
@@ -1323,7 +1323,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_copy_search_comm_dt_attr_cb(const H5A_t *attr, void *_udata)
+H5O__copy_search_comm_dt_attr_cb(const H5A_t *attr, void *_udata)
 {
     H5O_copy_search_comm_dt_ud_t *udata = (H5O_copy_search_comm_dt_ud_t *)_udata;
     H5T_t       *dt = NULL;             /* Datatype */
@@ -1332,7 +1332,7 @@ H5O_copy_search_comm_dt_attr_cb(const H5A_t *attr, void *_udata)
     hbool_t     obj_inserted = FALSE;   /* Object inserted into skip list */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity checks */
     HDassert(attr);
@@ -1385,11 +1385,11 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_copy_search_comm_dt_attr_cb */
+} /* end H5O__copy_search_comm_dt_attr_cb */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_copy_search_comm_dt_check
+ * Function:    H5O__copy_search_comm_dt_check
  *
  * Purpose:     Check if the object at obj_oloc is or contains a reference
  *              to a committed datatype.  If it does, adds it to the merge
@@ -1404,7 +1404,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_copy_search_comm_dt_check(H5O_loc_t *obj_oloc,
+H5O__copy_search_comm_dt_check(H5O_loc_t *obj_oloc,
     H5O_copy_search_comm_dt_ud_t *udata)
 {
     H5O_copy_search_comm_dt_key_t *key = NULL; /* Skiplist key */
@@ -1414,7 +1414,7 @@ H5O_copy_search_comm_dt_check(H5O_loc_t *obj_oloc,
     const H5O_obj_class_t  *obj_class = NULL;       /* Type of object */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity checks */
     HDassert(obj_oloc);
@@ -1483,7 +1483,7 @@ H5O_copy_search_comm_dt_check(H5O_loc_t *obj_oloc,
 
     /* Search within attributes */
     attr_op.op_type = H5A_ATTR_OP_LIB;
-    attr_op.u.lib_op = H5O_copy_search_comm_dt_attr_cb;
+    attr_op.u.lib_op = H5O__copy_search_comm_dt_attr_cb;
     udata->obj_oloc.file = obj_oloc->file;
     udata->obj_oloc.addr = obj_oloc->addr;
     if(H5O_attr_iterate_real((hid_t)-1, obj_oloc, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, NULL, &attr_op, udata) < 0)
@@ -1504,7 +1504,7 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_copy_search_comm_dt_check */
+} /* end H5O__copy_search_comm_dt_check */
 
 
 /*-------------------------------------------------------------------------
@@ -1512,7 +1512,7 @@ done:
  *
  * Purpose:     H5G_visit callback to add committed datatypes to the merge
  *              committed dt skiplist.  Mostly a wrapper for
- *              H5O_copy_search_comm_dt_check.
+ *              H5O__copy_search_comm_dt_check.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1554,7 +1554,7 @@ H5O__copy_search_comm_dt_cb(hid_t H5_ATTR_UNUSED group, const char *name,
         obj_found = TRUE;
 
         /* Check object and add to skip list if appropriate */
-        if(H5O_copy_search_comm_dt_check(&obj_oloc, udata) < 0)
+        if(H5O__copy_search_comm_dt_check(&obj_oloc, udata) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5_ITER_ERROR, "can't check object")
     } /* end if */
 
@@ -1653,7 +1653,7 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src,
                     H5E_clear_stack(NULL);
                 else
                     /* Check object and add to skip list if appropriate */
-                    if(H5O_copy_search_comm_dt_check(&obj_oloc, &udata) < 0) {
+                    if(H5O__copy_search_comm_dt_check(&obj_oloc, &udata) < 0) {
                         if(H5G_loc_free(&obj_loc) < 0)
                             HERROR(H5E_OHDR, H5E_CANTRELEASE, "can't free location");
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't check object")

@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Friday, March 27, 1998
  *
  * Purpose:	Operations on the global heap.  The global heap is the set of
@@ -141,7 +141,7 @@ H5HG__create(H5F_t *f, size_t size)
     size_t	n;
     haddr_t	ret_value = HADDR_UNDEF;        /* Return value */
 
-    FUNC_ENTER_STATIC_TAG(H5AC__GLOBALHEAP_TAG)
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(f);
@@ -228,7 +228,7 @@ done:
         } /* end if */
     } /* end if */
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HG__create() */
 
 
@@ -763,7 +763,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HG_remove (H5F_t *f, H5HG_t *hobj)
+H5HG_remove(H5F_t *f, H5HG_t *hobj)
 {
     H5HG_heap_t *heap = NULL;
     uint8_t     *p = NULL, *obj_start = NULL;

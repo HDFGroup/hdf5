@@ -15,7 +15,7 @@
  *
  * Created:	H5Edeprec.c
  *		April 11 2007
- *		Quincey Koziol <koziol@hdfgroup.org>
+ *		Quincey Koziol
  *
  * Purpose:	Deprecated functions from the H5E interface.  These
  *              functions are here for compatibility purposes and may be
@@ -36,7 +36,6 @@
 /* Headers */
 /***********/
 #include "H5private.h"          /* Generic Functions                        */
-#include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Epkg.h"             /* Error handling                           */
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5MMprivate.h"        /* Memory management                        */
@@ -198,7 +197,7 @@ done:
  *              same parameter as the old function, in contrary to
  *              H5Epush2.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Raymond Lu
  *		Tuesday, Sep 16, 2003
@@ -230,7 +229,7 @@ done:
  * Purpose:     This function is for backward compatibility.
  *              Clears the error stack for the specified error stack.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Raymond Lu
  *              Wednesday, July 16, 2003
@@ -264,7 +263,7 @@ done:
  *              prints error messages.  Users are encouraged to write there
  *              own more specific error handlers.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Raymond Lu
  *              Sep 16, 2003
@@ -300,7 +299,7 @@ done:
  *              Walks the error stack for the current thread and calls some
  *              function for each error along the way.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Raymond Lu
  *              Sep 16, 2003
@@ -341,7 +340,7 @@ done:
  *              Either (or both) arguments may be null in which case the
  *              value is not returned.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Raymond Lu
  *              Sep 16, 2003
@@ -394,7 +393,7 @@ done:
  *              Automatic stack traversal is always in the H5E_WALK_DOWNWARD
  *              direction.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Raymond Lu
  *              Sep 16, 2003

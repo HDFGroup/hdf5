@@ -15,7 +15,7 @@
  *
  * Created:		H5EA.c
  *			Jun 17 2008
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Implements an "extensible array" for storing elements
  *                      in an array whose high bounds can extend and shrink.
@@ -124,7 +124,6 @@ H5FL_BLK_DEFINE(ea_native_elmt);
  *              NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@lbl.gov
  *		Oct 10 2016
  *
  *-------------------------------------------------------------------------
@@ -190,7 +189,6 @@ END_FUNC(STATIC)  /* end H5EA__new() */
  *              NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jun 17 2008
  *
  *-------------------------------------------------------------------------
@@ -241,7 +239,6 @@ END_FUNC(PRIV)  /* end H5EA_create() */
  *              NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 28 2008
  *
  *-------------------------------------------------------------------------
@@ -283,7 +280,6 @@ END_FUNC(PRIV)  /* end H5EA_open() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 21 2008
  *
  *-------------------------------------------------------------------------
@@ -314,7 +310,6 @@ END_FUNC(PRIV)  /* end H5EA_get_nelmts() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 21 2008
  *
  *-------------------------------------------------------------------------
@@ -347,7 +342,6 @@ END_FUNC(PRIV)  /* end H5EA_get_addr() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep  9 2008
  *
  *-------------------------------------------------------------------------
@@ -656,7 +650,6 @@ END_FUNC(STATIC)  /* end H5EA__lookup_elmt() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep  9 2008
  *
  *-------------------------------------------------------------------------
@@ -721,7 +714,6 @@ END_FUNC(PRIV)  /* end H5EA_set() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 11 2008
  *
  *-------------------------------------------------------------------------
@@ -786,7 +778,6 @@ END_FUNC(PRIV)  /* end H5EA_get() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		May 27 2009
  *
  *-------------------------------------------------------------------------
@@ -836,7 +827,6 @@ END_FUNC(PRIV)  /* end H5EA_depend() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 21 2008
  *
  *-------------------------------------------------------------------------
@@ -937,7 +927,6 @@ END_FUNC(PRIV)  /* end H5EA_close() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 28 2008
  *
  *-------------------------------------------------------------------------
