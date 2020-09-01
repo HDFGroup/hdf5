@@ -360,9 +360,72 @@ typedef struct H5_alloc_stats_t {
 } H5_alloc_stats_t;
 
 /* Functions in H5.c */
+/**
+ * \ingroup H5
+ * \brief Initializes the HDF5 library
+ * \return \herr_t
+ *
+ * \details H5open() initializes the HDF5 library.
+ *
+ * \details When the HDF5 library is used in a C application, the library is
+ *          automatically initialized when the first HDf5 function call is
+ *          issued. If one finds that an HDF5 library function is failing
+ *          inexplicably, H5open() can be called first. It is safe to call
+ *          H5open() before an application issues any other function calls to
+ *          the HDF5 library as there are no damaging side effects in calling
+ *          it more than once.
+ */
 H5_DLL herr_t H5open(void);
+/**
+ * \ingroup H5
+ * \brief Flushes all data to disk, closes all open objects, and releases memory
+ * \return \herr_t
+ *
+ * \details H5close() flushes all data to disk, closes all open HDF5 objects,
+ *          and cleans up all memory used by the HDF5 library. This function is
+ *          generally called when the application calls exit(), but may be
+ *          called earlier in the event of an emergency shutdown or out of a
+ *          desire to free all resources used by the HDF5 library.
+ */
 H5_DLL herr_t H5close(void);
+/**
+ * \ingroup H5
+ * \brief Instructs library not to install atexit() cleanup routine
+ * \return \herr_t
+ *
+ * \details H5dont_atexit() indicates to the library that an atexit() cleanup
+ *          routine should not be installed. The major purpose for using this
+ *          function is in situations where the library is dynamically linked
+ *          into an application and is un-linked from the application before
+ *          exit() gets called. In those situations, a routine installed with
+ *          atexit() would jump to a routine which was no longer in memory,
+ *          causing errors.
+ *
+ * \attention In order to be effective, this routine \Emph{must} be called
+ *            before any other HDF5 function calls, and must be called each
+ *            time the library is loaded/linked into the application (the first
+ *            time and after it's been un-loaded).
+ */
 H5_DLL herr_t H5dont_atexit(void);
+/**
+ * \ingroup H5
+ * \brief Garbage collects on all free-lists of all types
+ * \return \herr_t
+ *
+ * \details H5garbage_collect() walks through all garbage collection routines
+ *          of the library, freeing any unused memory.
+ *
+ *          It is not required that H5garbage_collect() be called at any
+ *          particular time; it is only necessary in certain situations where
+ *          the application has performed actions that cause the library to
+ *          allocate many objects. The application should call
+ *          H5garbage_collect() if it eventually releases those objects and
+ *          wants to reduce the memory used by the library from the peak usage
+ *          required.
+ *
+ * \note The library automatically garbage collects all the free lists when the
+ *       application ends.
+ */
 H5_DLL herr_t H5garbage_collect(void);
 H5_DLL herr_t H5set_free_list_limits (int reg_global_lim, int reg_list_lim,
                 int arr_global_lim, int arr_list_lim, int blk_global_lim,
@@ -374,6 +437,21 @@ H5_DLL herr_t H5get_libversion(unsigned *majnum, unsigned *minnum,
                 unsigned *relnum);
 H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum,
                 unsigned relnum);
+/**
+ * \ingroup H5
+ * \brief Determines whether the HDF5 library was built with the thread-safety
+ *        feature enabled
+ *
+ * \param[out] is_ts Boolean value indicating whether the library was built
+ *                   with thread-safety enabled
+ * \return \herr_t
+ *
+ * \details The HDF5 library, although not internally multi-threaded, can be
+ *          built with a thread-safety feature enabled that protects internal
+ *          data structures with a mutex. In certain circumstances, it may be
+ *          useful to determine, at run-time, whether the linked HDF5 library
+ *          was built with the thread-safety feature enabled.
+ */
 H5_DLL herr_t H5is_library_threadsafe(hbool_t *is_ts);
 H5_DLL herr_t H5free_memory(void *mem);
 H5_DLL void *H5allocate_memory(size_t size, hbool_t clear);
