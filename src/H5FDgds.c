@@ -868,6 +868,8 @@ H5FD_gds_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSE
     CUfileHandle_t cf_handle;
     struct timespec start_time, stop_time;
 
+    int io_threads = file->num_io_threads;
+
     rd_thread_data_t *t;
     pthread_t *thread;
 
@@ -902,18 +904,25 @@ H5FD_gds_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSE
         fprintf(stderr, "cufile buffer register failed\n");
       }
 
-      if( file->num_io_threads > 0 ) {
-        printf("\tH5Pset_gds_read using file->num_io_threads: %d\n", file->num_io_threads);
+      if( io_threads > 0 ) {
+        assert(size != 0);
 
-        t = (rd_thread_data_t *)malloc((unsigned)file->num_io_threads*sizeof(rd_thread_data_t));
-        thread = (pthread_t *)malloc((unsigned)file->num_io_threads*sizeof(pthread_t));
+        // make each thread access at least a page
+        if( (1 + (size-1)/4096) < (unsigned)io_threads ) {
+          io_threads = (int) (1 + ((size-1)/4096));
+        }
+
+        printf("\tH5Pset_gds_read using io_threads: %d\n", io_threads);
+
+        t = (rd_thread_data_t *)malloc((unsigned)io_threads*sizeof(rd_thread_data_t));
+        thread = (pthread_t *)malloc((unsigned)io_threads*sizeof(pthread_t));
 
         // TODO: io_chunk must be a multiple of 4K
 
-        io_chunk = (unsigned)size / (unsigned)file->num_io_threads;
-        io_chunk_rem = (unsigned)size % (unsigned)file->num_io_threads;
+        io_chunk = (unsigned)size / (unsigned)io_threads;
+        io_chunk_rem = (unsigned)size % (unsigned)io_threads;
 
-        for (int ii = 0; ii < file->num_io_threads; ii++) {
+        for (int ii = 0; ii < io_threads; ii++) {
           t[ii].devPtr = buf;
           t[ii].cfr_handle = cf_handle;
 
@@ -921,17 +930,17 @@ H5FD_gds_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSE
           t[ii].devPtr_offset = (off_t)ii*io_chunk;
           t[ii].size = (size_t)io_chunk;
 
-          if(ii == file->num_io_threads-1) {
+          if(ii == io_threads-1) {
             t[ii].size = (size_t)(io_chunk + io_chunk_rem);
           }
         }
 
         start_time = gettime_ms();
-        for (int ii = 0; ii < file->num_io_threads; ii++) {
+        for (int ii = 0; ii < io_threads; ii++) {
           pthread_create(&thread[ii], NULL, &read_thread_fn, &t[ii]);
         }
 
-        for (int ii = 0; ii < file->num_io_threads; ii++) {
+        for (int ii = 0; ii < io_threads; ii++) {
           pthread_join(thread[ii], NULL);
         }
         stop_time = gettime_ms();
@@ -1064,6 +1073,8 @@ H5FD_gds_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
     CUfileHandle_t cf_handle;
     struct timespec start_time, stop_time;
 
+    int io_threads = file->num_io_threads;
+
     wr_thread_data_t *t;
     pthread_t *thread;
 
@@ -1098,18 +1109,23 @@ H5FD_gds_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
         fprintf(stderr, "cufile buffer register failed\n");
       }
 
-      if( file->num_io_threads > 0 ) {
-        printf("\tH5Pset_gds_write using file->num_io_threads: %d\n", file->num_io_threads);
+      if( io_threads > 0 ) {
+        assert(size != 0);
 
-        t = (wr_thread_data_t *)malloc((unsigned)file->num_io_threads*sizeof(wr_thread_data_t));
-        thread = (pthread_t *)malloc((unsigned)file->num_io_threads*sizeof(pthread_t));
+        // make each thread access at least a page
+        if( (1 + (size-1)/4096) < (unsigned)io_threads ) {
+          io_threads = (int) (1 + ((size-1)/4096));
+        }
 
-        // TODO: io_chunk must be a multiple of 4K
+        printf("\tH5Pset_gds_write using io_threads: %d\n", io_threads);
 
-        io_chunk = (unsigned)size / (unsigned)file->num_io_threads;
-        io_chunk_rem = (unsigned)size % (unsigned)file->num_io_threads;
+        t = (wr_thread_data_t *)malloc((unsigned)io_threads*sizeof(wr_thread_data_t));
+        thread = (pthread_t *)malloc((unsigned)io_threads*sizeof(pthread_t));
 
-        for (int ii = 0; ii < file->num_io_threads; ii++) {
+        io_chunk = (unsigned)size / (unsigned)io_threads;
+        io_chunk_rem = (unsigned)size % (unsigned)io_threads;
+
+        for (int ii = 0; ii < io_threads; ii++) {
           t[ii].devPtr = buf;
           t[ii].cfr_handle = cf_handle;
 
@@ -1117,17 +1133,17 @@ H5FD_gds_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
           t[ii].devPtr_offset = (off_t)ii*io_chunk;
           t[ii].size = (size_t)io_chunk;
 
-          if(ii == file->num_io_threads-1) {
+          if(ii == io_threads-1) {
             t[ii].size = (size_t)(io_chunk + io_chunk_rem);
           }
         }
 
         start_time = gettime_ms();
-        for (int ii = 0; ii < file->num_io_threads; ii++) {
+        for (int ii = 0; ii < io_threads; ii++) {
           pthread_create(&thread[ii], NULL, &write_thread_fn, &t[ii]);
         }
 
-        for (int ii = 0; ii < file->num_io_threads; ii++) {
+        for (int ii = 0; ii < io_threads; ii++) {
           pthread_join(thread[ii], NULL);
         }
         stop_time = gettime_ms();
