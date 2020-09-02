@@ -1016,8 +1016,6 @@ H5_DLL herr_t  H5Arename_by_name(hid_t loc_id, const char *obj_name,
  *
  */
 H5_DLL herr_t  H5Awrite(hid_t attr_id, hid_t dtype_id, const void *buf);
-H5_DLL htri_t H5Aexists_by_name(hid_t obj_id, const char *obj_name,
-    const char *attr_name, hid_t lapl_id);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *
