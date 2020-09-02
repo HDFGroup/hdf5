@@ -60,11 +60,8 @@ configure script:
 ```
 % mkdir -p ../build/swmr
 % cd ../build/swmr
-% ../../swmr/configure CFLAGS="-g -O3"
+% ../../swmr/configure
 ```
-
-You don't have to provide the CFLAGS, but usually I want compiler
-optimizations, and I want debugging symbols.
 
 Build the project:
 
@@ -480,4 +477,4 @@ seconds.
 VFD SWMR is still under construction, so I think that you will find some
 bugs. Please do not hesitate to report them.
 
-TBD: email addresses here
+To contact the VFD SWMR developers, email vfdswmr@hdfgroup.org.
