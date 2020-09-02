@@ -450,10 +450,123 @@ char *name);
  * --------------------------------------------------------------------------
  */
 H5_DLL hid_t H5Pcreate(hid_t cls_id);
+/*--------------------------------------------------------------------------*/
+/**\ingroup GPLOA
+ *
+ * \brief Creates a new property list class
+ *
+ * \plist_id{parent}
+ * \param[in] name        Name of property list class to register
+ * \param[in] create      Callback routine called when a property list is
+ *                        created
+ * \param[in] create_data Pointer to user-defined class create data, to be
+ *                        passed along to class create callback
+ * \param[in] copy        Callback routine called when a property list is
+ *                        copied
+ * \param[in] copy_data   Pointer to user-defined class copy data, to be
+ *                        passed along to class copy callback
+ * \param[in] close       Callback routine called when a property list is
+ *                        being closed
+ * \param[in] close_data  Pointer to user-defined class close data, to be
+ *                        passed along to class close callback
+ *
+ * \return \hid_tv{property list class}
+ *
+ * \details H5Pcreate_class() registers a new property list class with the
+ *          library. The new property list class can inherit from an
+ *          existing property list class, \p parent, or may be derived
+ *          from the default “empty” class, NULL. New classes with
+ *          inherited properties from existing classes may not remove
+ *          those existing properties, only add or remove their own class
+ *          properties. Property list classes defined and supported in the
+ *          HDF5 library distribution are listed and briefly described in
+ *          H5Pcreate(). The \p create routine is called when a new property
+ *          list of this class is being created. The #H5P_cls_create_func_t
+ *          callback function is defined as follows:
+ *
+ *          \code
+ *          typedef herr_t(*H5P_cls_create_func_t)(hid_t prop_id, void *create_data);
+ *          \endcode
+ *
+ *          The parameters to this callback function are defined as follows:
+ *          <table>
+ *            <tr>
+ *              <td>hid_t prop_id</td>
+ *              <td>IN: The identifier of the property list being created</td>
+ *            </tr>
+ *            <tr>
+ *              <td>void * create_data</td>
+ *              <td>IN: User pointer to any class creation data required</td>
+ *            </tr>
+ *          </table>
+ *
+ *          The \p create routine is called after any registered
+ *          \p create function is called for each property value. If the
+ *          \p create routine returns a negative value, the new list is not
+ *          returned to the user and the property list creation routine returns
+ *          an error value.
+ *
+ *          The \p copy routine is called when an existing property
+ *          list of this class is copied. The #H5P_cls_copy_func_t callback
+ *          function is defined as follows:
+ *
+ *          \code
+ *          typedef herr_t(*H5P_cls_copy_func_t)(hid_t prop_id, void *copy_data);
+ *          \endcode
+ *
+ *          The parameters to this callback function are defined as follows:
+ *          <table>
+ *            <tr>
+ *              <td>hid_t prop_id</td>
+ *              <td>IN: The identifier of the property list created by copying</td>
+ *            </tr>
+ *            <tr>
+ *              <td>void * copy_data</td>
+ *              <td>IN: User pointer to any class copy data required</td>
+ *            </tr>
+ *          </table>
+ *
+ *          The \p copy routine is called after any registered \p copy function
+ *          is called for each property value. If the \p copy routine returns a
+ *          negative value, the new list is not returned to the user and the
+ *          property list \p copy routine returns an error value.
+ *
+ *           The \p close routine is called when a property list of this class
+ *           is being closed. The #H5P_cls_close_func_t callback function is
+ *           defined as follows:
+ *
+ *           \code
+ *           typedef herr_t(*H5P_cls_close_func_t)(hid_t prop_id, void *close_data);
+ *           \endcode
+ *
+ *           The parameters to this callback function are defined as follows:
+ *           <table>
+ *            <tr>
+ *              <td>hid_t prop_id</td>
+ *              <td>IN: The identifier of the property list being closed</td>
+ *            </tr>
+ *            <tr>
+ *              <td>void * close_data</td>
+ *              <td>IN: User pointer to any class close data required</td>
+ *            </tr>
+ *          </table>
+ *
+ *          The \p close routine is called before any registered \p close
+ *          function is called for each property value. If the \p close routine
+ *          returns a negative value, the property list close routine returns
+ *          an error value but the property list is still closed.
+ *
+ *          H5Pclose_class() can be used to release the property list class
+ *          identifier returned by this function so that resources leaks will
+ *          not develop.
+ *
+ * \since 1.4.0
+ *
+ */
 H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name,
-    H5P_cls_create_func_t cls_create, void *create_data,
-    H5P_cls_copy_func_t cls_copy, void *copy_data,
-    H5P_cls_close_func_t cls_close, void *close_data);
+    H5P_cls_create_func_t create, void *create_data,
+    H5P_cls_copy_func_t copy, void *copy_data,
+    H5P_cls_close_func_t close, void *close_data);
 H5_DLL hid_t  H5Pdecode(const void *buf);
 H5_DLL herr_t H5Pencode2(hid_t plist_id, void *buf, size_t *nalloc, hid_t fapl_id);
 H5_DLL htri_t H5Pequal(hid_t id1, hid_t id2);
@@ -819,7 +932,7 @@ H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
  *          Note that a compact storage layout may affect writing data to
  *          the dataset with parallel applications. See the H5Dwrite()
  *          documentation for details.
- * 
+ *
  * \version 1.10.0 #H5D_VIRTUAL and #H5D_VIRTUAL_F added in this release.
  *
  * \since 1.0.0
