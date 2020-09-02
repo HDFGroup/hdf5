@@ -168,9 +168,9 @@ H5_DLL hid_t H5Screate(H5S_class_t type);
 /**\ingroup H5S
  * \brief Creates a new simple dataspace and opens it for access
  *
- * \param[in] rank          Number of dimensions of dataspace
- * \param[in] current_dims  Array specifying the size of each dimension
- * \param[in] maximum_dims  Array specifying the maximum size of each dimension
+ * \param[in] rank    Number of dimensions of dataspace
+ * \param[in] dims    Array specifying the size of each dimension
+ * \param[in] maxdims Array specifying the maximum size of each dimension
  *
  * \return \hid_tv{dataspace}
  *
@@ -299,7 +299,7 @@ H5_DLL herr_t H5Sclose(hid_t space_id);
  *                         If the provided buffer is NULL, only the size
  *                         of buffer needed is returned through \p nalloc.
  * \param[in,out] nalloc   The size of the allocated buffer
- * \fapl_id
+ * \fapl_id{fapl}
  *
  * \return \herr_t
  * \details Given the data space identifier \p obj_id, H5Sencode2() converts
@@ -456,13 +456,13 @@ H5_DLL htri_t H5Sis_simple(hid_t space_id);
  *
  * \brief  Determines the current class of a dataspace
  *
- * \space_id{sid}
+ * \space_id
  *
  * \return Returns a dataspace class name if successful;
  *         otherwise #H5S_NO_CLASS (-1).
  *
  * \details H5Sget_simple_extent_type() determines the current class of a
- *          dataspace \p sid.
+ *          dataspace \p space_id.
  *
  * \version 1.4.0 Fortran subroutine was introduced.
  * \since 1.0.0
@@ -522,7 +522,7 @@ H5_DLL herr_t H5Sextent_copy(hid_t dst_id,hid_t src_id);
  * \since 1.8.0
  *
  */
-H5_DLL htri_t H5Sextent_equal(hid_t sid1, hid_t sid2);
+H5_DLL htri_t H5Sextent_equal(hid_t space1_id, hid_t space2_id);
 
 /* Operations on dataspace selections */
 /*--------------------------------------------------------------------------*/
@@ -1076,8 +1076,8 @@ H5_DLL herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op,
  *
  */
 H5_DLL hid_t H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op,
-    const hsize_t start[], const hsize_t _stride[], const hsize_t count[],
-    const hsize_t _block[]);
+    const hsize_t start[], const hsize_t stride[], const hsize_t count[],
+    const hsize_t block[]);
 /*--------------------------------------------------------------------------*/
 /**\ingroup H5S
  *
