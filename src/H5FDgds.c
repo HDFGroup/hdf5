@@ -917,8 +917,6 @@ H5FD_gds_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSE
         t = (rd_thread_data_t *)malloc((unsigned)io_threads*sizeof(rd_thread_data_t));
         thread = (pthread_t *)malloc((unsigned)io_threads*sizeof(pthread_t));
 
-        // TODO: io_chunk must be a multiple of 4K
-
         io_chunk = (unsigned)size / (unsigned)io_threads;
         io_chunk_rem = (unsigned)size % (unsigned)io_threads;
 
