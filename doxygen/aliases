@@ -114,6 +114,9 @@ ALIASES += dapl_id{1}="\param[in] \1 Dataset access property list identifier"
 ALIASES += dcpl_id="\param[in] dcpl_id Dataset creation property list identifier"
 ALIASES += dcpl_id{1}="\param[in] \1 Dataset creation property list identifier"
 
+ALIASES += dxpl_id="\param[in] dxpl_id Dataset transfer property list identifier"
+ALIASES += dxpl_id{1}="\param[in] \1 Dataset transfer property list identifier"
+
 ALIASES += gapl_id="\param[in] gapl_id Group access property list identifier"
 ALIASES += gapl_id{1}="\param[in] \1 Group access property list identifier"
 

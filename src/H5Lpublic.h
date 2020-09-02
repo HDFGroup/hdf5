@@ -85,6 +85,10 @@ typedef enum {
  * \brief Link ids at or above this value are "user-defined" link types.
  */
 #define H5L_TYPE_UD_MIN      H5L_TYPE_EXTERNAL
+/**
+ * \brief Maximum link id value for "user-defined" link types.
+ */
+#define H5L_TYPE_UD_MAX      H5L_TYPE_MAX
 
 /**
  * \brief Information struct for links
@@ -1610,7 +1614,6 @@ H5_DLL herr_t H5Lunpack_elink_val(const void *ext_linkval/*in*/, size_t link_siz
  * \see H5Lcreate_hard(), H5Lcreate_soft(), H5Lcreate_ud()
  *
  * \since 1.8.0
- *-------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Lcreate_external(const char *file_name, const char *obj_name,
     hid_t link_loc_id, const char *link_name, hid_t lcpl_id, hid_t lapl_id);

@@ -342,11 +342,7 @@ H5_DLL htri_t H5Fis_accessible(const char *container_name, hid_t fapl_id);
  *            Applications should avoid calling H5Fcreate() with an already
  *            opened file.
  *
- * \version 1.8.10 Removed #H5F_ACC_RDWR_F and #H5F_ACC_RDONLY_F from comments
- *                 for access_flag field in Fortran subroutine, and changed
- *                 “Possible values” to “Valid values”.
- * \version 1.4.0 Fortran API introduced in this release.
- * \version 1.0.0 C function introduced in this release.
+ * \since 1.0.0
  *
  * \see H5Fopen(), H5Fclose()
  *
@@ -1334,7 +1330,7 @@ H5_DLL herr_t H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr, hsize_t 
  * \details H5Fget_dset_no_attrs_hint() retrieves the no dataset attributes
  *          hint setting for the file specified by the file identifier \p
  *          file_id. This setting is used to inform the library to create
- *          minimized dataset object headers when #TRUE.
+ *          minimized dataset object headers when \c TRUE.
  *
  *          The setting's value is returned in the boolean pointer minimize.
  *
@@ -1357,18 +1353,18 @@ H5_DLL herr_t H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize);
  *
  * \details H5Fset_dset_no_attrs_hint() sets the no dataset attributes hint
  *          setting for the file specified by the file identifier \p file_id.
- *          If the boolean flag \p minimize is set to #TRUE, then the library
+ *          If the boolean flag \p minimize is set to \c TRUE, then the library
  *          will create minimized dataset object headers in the file.
  *          \Bold{All} files that refer to the same file-on-disk will be
  *          affected by the most recent setting, regardless of the file
  *          identifier/handle (e.g., as returned by H5Fopen()). By setting the
- *          \p minimize flag to #TRUE, the library expects that no attributes
+ *          \p minimize flag to \c TRUE, the library expects that no attributes
  *          will be added to the dataset - attributes can be added, but they
  *          are appended with a continuation message, which can reduce
  *          performance.
  *
  * \attention This setting interacts with H5Pset_dset_no_attrs_hint(): if
- *            either is set to #TRUE, then the created dataset's object header
+ *            either is set to \c TRUE, then the created dataset's object header
  *            will be minimized.
  *
  * \since 1.10.5

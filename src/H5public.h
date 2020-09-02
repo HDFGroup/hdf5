@@ -663,8 +663,8 @@ H5_DLL herr_t H5free_memory(void *mem);
  *          will later be freed internally by the HDF5 library.
  *
  *          The boolean \p clear parameter specifies whether the buffer should
- *          be initialized. If clear is #TRUE, all bits in the buffer are to be
- *          set to 0 (zero); if clear is #FALSE, the buffer will not be
+ *          be initialized. If clear is \c TRUE, all bits in the buffer are to be
+ *          set to 0 (zero); if clear is \c FALSE, the buffer will not be
  *          initialized.
  *
  *          This function is intended to have the semantics of malloc() and
