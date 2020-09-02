@@ -119,18 +119,23 @@ and in the other window, I run the reader:
 ```
 
 The writer will wait for a signal before it quits.  You may tap
-Control-C to make it quit.  If you don't want it to wait, then you can
-pass option flag `-W`.  (The reader accepts the same flag.)  Use the `-q`
-option to suppress the progress messages that the programs write to the
-standard error stream.
+Control-C to make it quit.
 
-When the writer is creating a dataset extensible in one dimension
-(`-d 1`), you can add the `-V` option flag to create a virtual
-dataset with content in three source datasets in the same HDF5
-file.
+The reader and writer programs support several command-line options:
 
-The `-M` option works like `-V`, only the writer creates the virtual
-dataset on three source datasets, each in a different HDF5 file.
+* `-h`: show program usage
+
+* `-W`: stop the program from waiting for a signal before it quits.
+
+* `-q`: suppress the progress messages that the programs write to the
+  standard error stream.
+
+* `-V`: create a virtual dataset with content in three source datasets
+  in the same HDF5 file---only available when the writer creates a
+  dataset extensible in one dimension (`-d 1`)
+
+* `-M`: like `-V`, the writer creates the virtual dataset on three
+   source datasets, but each source dataset is in a different HDF5 file.
 
 ## The VFD SWMR demos
 
