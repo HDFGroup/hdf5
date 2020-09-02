@@ -32,15 +32,17 @@
 /**\defgroup H5P H5P
  * \brief Property List Interface
  *
- * \details A property is a characteristic or feature of an HDF5
- *          object. There are default properties which handle the most
- *          common needs. These default properties can be modified using the
- *          HDF5 Property List Interface to take advantage of more powerful
- *          or unusual features of HDF5 objects.
+ * \details The HDF5 Property List Interface provides a mechanism to take
+ *          advantage of more powerful or unusual features in HDF5.
  *
- *          For example, the data storage layout property of a dataset is
- *          contiguous by default. For better performance, the layout can be
- *          modified to be chunked or chunked and compressed.
+ *          A property is a characteristic or feature of an HDF5 object.
+ *          HDF5 objects have default properties that handle the most
+ *          common needs.
+ *
+ *          These default properties can be modified using the HDF5 Property
+ *          List Interface. For example, the data storage layout property of
+ *          a dataset is contiguous by default. For better performance, the
+ *          layout can be modified to be chunked or chunked and compressed.
  *
  * \todo Describe concisely what the functions in this module are about.
  * \todo Clicking on "more" after "Property List Interface" at the top does not work
