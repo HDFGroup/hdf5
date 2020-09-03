@@ -921,6 +921,7 @@ H5C__collective_write(H5F_t *f)
 {
     H5AC_t              *cache_ptr;
     H5FD_mpio_xfer_t    orig_xfer_mode = H5FD_MPIO_COLLECTIVE;
+    void                *base_buf;
     int                 count;
     int                 *length_array = NULL;
     MPI_Aint            *buf_array = NULL;
@@ -953,10 +954,8 @@ H5C__collective_write(H5F_t *f)
     /* Get number of entries in collective write list */
     count = (int)H5SL_count(cache_ptr->coll_write_list);
     if(count > 0) {
-        H5FD_mpio_xfer_t    xfer_mode = H5FD_MPIO_COLLECTIVE;
         H5SL_node_t         *node;
         H5C_cache_entry_t   *entry_ptr;
-        void                *base_buf;
         int                 i;
 
         /* Allocate arrays */
@@ -1008,10 +1007,6 @@ H5C__collective_write(H5F_t *f)
         ftype_created = TRUE;
         if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&ftype)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
-
-        /* Pass buf type, file type to the file driver */
-        if(H5CX_set_mpi_coll_datatypes(btype, ftype) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set MPI-I/O properties")
 
         /* MPI count to write */
         buf_count = 1;
