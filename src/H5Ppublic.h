@@ -269,7 +269,7 @@ H5_DLL herr_t H5Pclose(hid_t plist_id);
  *
  * \brief Closes an existing property list class
  *
- * \plist_id{class}
+ * \plistcls_id{class}
  *
  * \return \herr_t
  *
@@ -287,7 +287,7 @@ H5_DLL herr_t H5Pclose_class(hid_t class);
  *
  * \brief Copies an existing property list to create a new property list
  *
- * \plist_id{plist_id}
+ * \plist_id
  *
  * \return \hid_t{property list}
  *
@@ -305,8 +305,8 @@ H5_DLL hid_t H5Pcopy(hid_t plist_id);
  *
  * \brief Copies a property from one list or class to another
  *
- * \plist_id{dst_id}
- * \plist_id{src_id}
+ * \param[in] dst_id Identifier of the destination property list or class
+ * \param[in] src_id Identifier of the source property list or class
  * \param[in] name Name of the property to copy
  *
  * \return \herr_t
@@ -343,7 +343,7 @@ char *name);
  *
  * \brief Creates a new property list as an instance of a property list class
  *
- * \param[in] cls_id The class of the property list to create.
+ * \plistcls_id{cls_id}
  *
  * \return \hid_t{property list}
  *
@@ -469,7 +469,7 @@ H5_DLL hid_t H5Pcreate(hid_t cls_id);
  *
  * \brief Creates a new property list class
  *
- * \plist_id{parent}
+ * \plistcls_id{parent}
  * \param[in] name        Name of property list class to register
  * \param[in] create      Callback routine called when a property list is
  *                        created
@@ -484,7 +484,7 @@ H5_DLL hid_t H5Pcreate(hid_t cls_id);
  * \param[in] close_data  Pointer to user-defined class close data, to be
  *                        passed along to class close callback
  *
- * \return \hid_tv{property list class}
+ * \return \hid_t{property list class}
  *
  * \details H5Pcreate_class() registers a new property list class with the
  *          library. The new property list class can inherit from an
@@ -572,11 +572,221 @@ H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name,
     H5P_cls_create_func_t create, void *create_data,
     H5P_cls_copy_func_t copy, void *copy_data,
     H5P_cls_close_func_t close, void *close_data);
+/*--------------------------------------------------------------------------*/
+/**\ingroup GPLO
+ *
+ * \brief Decodes property list received in a binary object buffer and
+ *        returns a new property list identifier
+ *
+ * \param[in] buf Buffer holding the encoded property list
+ *
+ * \return \hid_tv{object}
+ *
+ * \details Given a binary property list description in a buffer, H5Pdecode()
+ *          reconstructs the HDF5 property list and returns an identifier
+ *          for the new property list. The binary description of the property
+ *          list is encoded by H5Pencode().
+ *
+ *          The user is responsible for passing in the correct buffer.
+ *
+ *          The property list identifier returned by this function should be
+ *          released with H5Pclose() when the identifier is no longer needed
+ *          so that resource leaks will not develop.
+ *
+ * \note Some properties cannot be encoded and therefore will not be available
+ *       in the decoded property list. These properties are discussed in
+ *       H5Pencode().
+ *
+ * \since 1.10.0
+ *
+ */
 H5_DLL hid_t  H5Pdecode(const void *buf);
+/*--------------------------------------------------------------------------*/
+/**\ingroup GPLO
+ *
+ * \brief Encodes the property values in a property list into a binary
+ *        buffer
+ *
+ * \plist_id
+ * \param[out] buf    Buffer into which the property list will be encoded.
+ *                    If the provided buffer is NULL, the size of the
+ *                    buffer required is returned through \p nalloc; the
+ *                    function does nothing more.
+ * \param[out] nalloc The size of the required buffer
+ * \fapl_id
+ *
+ * \return \herr_t
+ *
+ * \details H5Pencode2() encodes the property list \p plist_id into the
+ *          binary buffer \p buf, according to the file format setting
+ *          specified by the file access property list \p fapl_id.
+ *
+ *          If the required buffer size is unknown, \p buf can be passed
+ *          in as NULL and the function will set the required buffer size
+ *          in \p nalloc. The buffer can then be created and the property
+ *          list encoded with a subsequent H5Pencode2() call.
+ *
+ *          If the buffer passed in is not big enough to hold the encoded
+ *          properties, the H5Pencode2() call can be expected to fail with
+ *          a segmentation fault.
+ *
+ *          The file access property list \p fapl_id is used to
+ *          control the encoding via the \a libver_bounds property
+ *          (see H5Pset_libver_bounds()). If the \a libver_bounds
+ *          property is missing, H5Pencode2() proceeds as if the \a
+ *          libver_bounds property were set to (#H5F_LIBVER_EARLIEST,
+ *          #H5F_LIBVER_LATEST). (Functionally, H5Pencode1() is identical to
+ *          H5Pencode2() with \a libver_bounds set to (#H5F_LIBVER_EARLIEST,
+ *          #H5F_LIBVER_LATEST).)
+ *          Properties that do not have encode callbacks will be skipped.
+ *          There is currently no mechanism to register an encode callback for
+ *          a user-defined property, so user-defined properties cannot currently
+ *          be encoded.
+ *
+ *          Some properties cannot be encoded, particularly properties that are
+ *          reliant on local context.
+ *
+ * \note \a Motivation:
+ *       This function was introduced in HDF5-1.12 as part of the \a H5Sencode
+ *       format change to enable 64-bit selection encodings and a dataspace
+ *       selection that is tied to a file.
+ *
+ * \since 1.12.0
+ *
+ */
 H5_DLL herr_t H5Pencode2(hid_t plist_id, void *buf, size_t *nalloc, hid_t fapl_id);
+/*--------------------------------------------------------------------------*/
+/**\ingroup GPLOA
+ *
+ * \brief Compares two property lists or classes for equality
+ *
+ * \param[in] id1 First property object to be compared
+ * \param[in] id2 Second property object to be compared
+ *
+ * \return \htri_t
+ *
+ * \details H5Pequal() compares two property lists or classes to determine
+ *          whether they are equal to one another.
+ *
+ *          Either both \p id1 and \p id2 must be property lists or both
+ *          must be classes; comparing a list to a class is an error.
+ *
+ * \since 1.4.0
+ *
+ */
 H5_DLL htri_t H5Pequal(hid_t id1, hid_t id2);
+/*--------------------------------------------------------------------------*/
+/**\ingroup GPLOA
+ *
+ * \brief Queries whether a property name exists in a property list or
+ *       class
+ *
+ * \param[in] plist_id   Identifier for the property list or class to query
+ * \param[in] name       Name of property to check for
+ *
+ * \return \htri_t
+ *
+ * \details  H5Pexist() determines whether a property exists within a
+ *           property list or class.
+ *
+ * \since 1.4.0
+ *
+ */
 H5_DLL htri_t H5Pexist(hid_t plist_id, const char *name);
+/*--------------------------------------------------------------------------*/
+/**\ingroup GPLOA
+ *
+ * \brief Queries the value of a property
+ *
+ * \plist_id
+ * \param[in]  name  Name of property to query
+ * \param[out] value Pointer to a location to which to copy the value of
+ *                   the property
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget() retrieves a copy of the value for a property in a
+ *          property list. If there is a \p get callback routine registered
+ *          for this property, the copy of the value of the property will
+ *          first be passed to that routine and any changes to the copy of
+ *          the value will be used when returning the property value from
+ *          this routine.
+ *
+ *          This routine may be called for zero-sized properties with the
+ *          \p value set to NULL. The \p get routine will be called with
+ *          a NULL value if the callback exists.
+ *
+ *          The property name must exist or this routine will fail.
+ *
+ *          If the \p get callback routine returns an error, \ value will
+ *          not be modified.
+ *
+ * \since 1.4.0
+ *
+ */
 H5_DLL herr_t H5Pget(hid_t plist_id, const char *name, void * value);
+/*--------------------------------------------------------------------------*/
+/**\ingroup GPLO
+ *
+ * \brief Returns the property list class identifier for a property list
+ *
+ * \plist_id
+ *
+ * \return \hid_t{property list class}
+ *
+ * \details H5Pget_class() returns the property list class identifier for
+ *          the property list identified by the \p plist_id parameter.
+ *
+ *          Note that H5Pget_class() returns a value of #hid_t type, an
+ *          internal HDF5 identifier, rather than directly returning a
+ *          property list class. That identifier can then be used with
+ *          either H5Pequal() or H5Pget_class_name() to determine which
+ *          predefined HDF5 property list class H5Pget_class() has returned.
+ *
+ *          A full list of valid predefined property list classes appears
+ *          in the description of H5Pcreate().
+ *
+ *          Determining the HDF5 property list class name with H5Pequal()
+ *          requires a series of H5Pequal() calls in an if-else sequence.
+ *          An iterative sequence of H5Pequal() calls can compare the
+ *          identifier returned by H5Pget_class() to members of the list of
+ *          valid property list class names. A pseudo-code snippet might
+ *          read as follows:
+ *
+ *          \code
+ *          plist_class_id = H5Pget_class (dsetA_plist);
+ *
+ *          if H5Pequal (plist_class_id, H5P_OBJECT_CREATE) = TRUE;
+ *              [ H5P_OBJECT_CREATE is the property list class    ]
+ *              [ returned by H5Pget_class.                        ]
+ *
+ *          else if H5Pequal (plist_class_id, H5P_DATASET_CREATE) = TRUE;
+ *              [ H5P_DATASET_CREATE is the property list class.  ]
+ *
+ *          else if H5Pequal (plist_class_id, H5P_DATASET_XFER) = TRUE;
+ *              [ H5P_DATASET_XFER is the property list class.    ]
+ *
+ *          .
+ *          .   [ Continuing the iteration until a match is found. ]
+ *          .
+ *          \endcode
+ *
+ *          H5Pget_class_name() returns the property list class name directly
+ *          as a string:
+ *
+ *          \code
+ *          plist_class_id = H5Pget_class (dsetA_plist);
+ *          plist_class_name = H5Pget_class_name (plist_class_id)
+ *          \endcode
+ *
+ *          Note that frequent use of H5Pget_class_name() can become a
+ *          performance problem in a high-performance environment. The
+ *          H5Pequal() approach is generally much faster.
+ *
+ * \version 1.6.0 Return type changed in this release.
+ * \since 1.0.0
+ *
+ */
 H5_DLL hid_t H5Pget_class(hid_t plist_id);
 H5_DLL char *H5Pget_class_name(hid_t pclass_id);
 H5_DLL hid_t H5Pget_class_parent(hid_t pclass_id);
