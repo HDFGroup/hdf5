@@ -448,8 +448,11 @@ Improvements to VFD SWMR may also alleviate the problem.
 
 ## Microsoft Windows 
 
-VFD SWMR does not support Microsoft Windows at this time.  We are
-investigating to see when we can add Windows support.
+VFD SWMR is not officially supported on Microsoft Windows at this time.  The
+feature should in theory work on Windows and NTFS, however it has not been
+tested as the existing VFD SWMR tests rely on shell scripts.  Note that Windows
+file shares are not supported as there is no write ordering guarantee (as with
+NFS, et al.).
 
 ## Supported filesystems
 
