@@ -94,7 +94,6 @@ static herr_t H5FD_mpio_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static int H5FD_mpio_mpi_rank(const H5FD_t *_file);
 static int H5FD_mpio_mpi_size(const H5FD_t *_file);
 static MPI_Comm H5FD_mpio_communicator(const H5FD_t *_file);
-static herr_t  H5FD_mpio_get_info(H5FD_t *_file, void** mpi_info);
 
 /* The MPIO file driver information */
 static const H5FD_class_mpi_t H5FD_mpio_g = {
@@ -135,7 +134,6 @@ static const H5FD_class_mpi_t H5FD_mpio_g = {
     H5FD_mpio_mpi_rank,                         /*get_rank              */
     H5FD_mpio_mpi_size,                         /*get_size              */
     H5FD_mpio_communicator,                     /*get_comm              */
-    H5FD_mpio_get_info                          /*get_info              */
 };
 
 #ifdef H5FDmpio_DEBUG
