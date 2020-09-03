@@ -133,7 +133,7 @@ static const H5FD_class_mpi_t H5FD_mpio_g = {
     },  /* End of superclass information */
     H5FD_mpio_mpi_rank,                         /*get_rank              */
     H5FD_mpio_mpi_size,                         /*get_size              */
-    H5FD_mpio_communicator,                     /*get_comm              */
+    H5FD_mpio_communicator                      /*get_comm              */
 };
 
 #ifdef H5FDmpio_DEBUG
