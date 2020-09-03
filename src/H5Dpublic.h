@@ -109,7 +109,7 @@ typedef herr_t (*H5D_append_cb_t)(hid_t dset_id, hsize_t *cur_dims, void *op_dat
 /** Define the operator function pointer for H5Diterate() */
 //! [H5D_operator_t_snip]
 typedef herr_t (*H5D_operator_t)(void *elem, hid_t type_id, unsigned ndim,
-				 const hsize_t *point, void *operator_data)
+				 const hsize_t *point, void *operator_data);
 //! [H5D_operator_t_snip]
 
 /** Define the operator function pointer for H5Dscatter() */
