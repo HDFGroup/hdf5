@@ -23,12 +23,14 @@
 #include "H5Tpublic.h"		/* Datatypes				*/
 
 /* Information struct for attribute (for H5Aget_info/H5Aget_info_by_idx) */
+//! [H5A_info_t_snip]
 typedef struct {
     hbool_t             corder_valid;   /* Indicate if creation order is valid */
     H5O_msg_crt_idx_t   corder;         /* Creation order                 */
     H5T_cset_t          cset;           /* Character set of attribute name */
     hsize_t             data_size;      /* Size of raw data		  */
 } H5A_info_t;
+//! [H5A_info_t_snip]
 
 /**
  * \brief Prototype for H5Aiterate2() and H5Aiterate_by_name() operators
@@ -41,9 +43,10 @@ typedef struct {
  *
  */
 /* Typedef for H5Aiterate2() callbacks */
+//! [H5A_operator2_t_snip]
 typedef herr_t (*H5A_operator2_t)(hid_t location_id/*in*/,
     const char *attr_name/*in*/, const H5A_info_t *ainfo/*in*/, void *op_data/*in,out*/);
-
+//! [H5A_operator2_t_snip]
 
 /********************/
 /* Public Variables */
@@ -58,7 +61,8 @@ extern "C" {
 #endif
 
 /*-------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Closes the specified attribute
  *
@@ -78,7 +82,8 @@ extern "C" {
  */
 H5_DLL herr_t  H5Aclose(hid_t attr_id);
 /* --------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Creates an attribute attached to a specified object
  *
@@ -126,7 +131,8 @@ H5_DLL herr_t  H5Aclose(hid_t attr_id);
 H5_DLL hid_t   H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id,
     hid_t space_id, hid_t acpl_id, hid_t aapl_id);
 /*--------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief  Creates an attribute attached to a specified object
  *
@@ -174,7 +180,8 @@ H5_DLL hid_t   H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id,
 H5_DLL hid_t   H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t lapl_id);
 /*-------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Deletes an attribute from a specified location
  *
@@ -195,7 +202,8 @@ H5_DLL hid_t   H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char 
  */
 H5_DLL herr_t  H5Adelete(hid_t loc_id, const char *attr_name);
 /*-------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Deletes an attribute from an object according to index order
  *
@@ -245,7 +253,8 @@ H5_DLL herr_t  H5Adelete(hid_t loc_id, const char *attr_name);
 H5_DLL herr_t  H5Adelete_by_idx(hid_t loc_id, const char *obj_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id);
 /*-------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Removes an attribute from a specified location
  *
@@ -274,7 +283,8 @@ H5_DLL herr_t  H5Adelete_by_idx(hid_t loc_id, const char *obj_name,
 H5_DLL herr_t  H5Adelete_by_name(hid_t loc_id, const char *obj_name,
     const char *attr_name, hid_t lapl_id);
 /*-------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Determines whether an attribute with a given name exists on an
  *        object
@@ -292,7 +302,8 @@ H5_DLL herr_t  H5Adelete_by_name(hid_t loc_id, const char *obj_name,
  */
 H5_DLL htri_t H5Aexists(hid_t obj_id, const char *attr_name);
 /*-------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief  Determines whether an attribute with a given name exists on an
  *         object
@@ -325,7 +336,8 @@ H5_DLL htri_t H5Aexists(hid_t obj_id, const char *attr_name);
 H5_DLL htri_t H5Aexists_by_name(hid_t obj_id, const char *obj_name,
     const char *attr_name, hid_t lapl_id);
 /*-------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Gets an attribute creation property list identifier
  *
@@ -345,7 +357,8 @@ H5_DLL htri_t H5Aexists_by_name(hid_t obj_id, const char *obj_name,
  */
 H5_DLL hid_t   H5Aget_create_plist(hid_t attr_id);
 /*-------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Retrieves attribute information, by attribute identifier
  *
@@ -360,15 +373,7 @@ H5_DLL hid_t   H5Aget_create_plist(hid_t attr_id);
  *          attribute information is returned in the \p ainfo struct.
  *
  *          The \p ainfo struct is defined as follows:
- *
- *          \code
- *            typedef struct {
- *                hbool_t             corder_valid;
- *                H5O_msg_crt_idx_t   corder;
- *                H5T_cset_t          cset;
- *                hsize_t             data_size;
- *            } H5A_info_t;
- *          \endcode
+ *          \snippet this H5A_info_t_snip
  *
  *          \p corder_valid indicates whether the creation order data is
  *          valid for this attribute. Note that if creation order is not
@@ -394,7 +399,8 @@ H5_DLL hid_t   H5Aget_create_plist(hid_t attr_id);
  */
 H5_DLL herr_t  H5Aget_info(hid_t attr_id, H5A_info_t *ainfo /*out*/);
 /*-------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Retrieves attribute information by attribute index position
  *
@@ -437,7 +443,8 @@ H5_DLL herr_t  H5Aget_info_by_idx(hid_t loc_id, const char *obj_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     H5A_info_t *ainfo /*out*/, hid_t lapl_id);
 /*-------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Retrieves attribute information, by attribute name
  *
@@ -471,7 +478,8 @@ H5_DLL herr_t  H5Aget_info_by_idx(hid_t loc_id, const char *obj_name,
 H5_DLL herr_t  H5Aget_info_by_name(hid_t loc_id, const char *obj_name,
     const char *attr_name, H5A_info_t *ainfo /*out*/, hid_t lapl_id);
 /*-------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Gets an attribute name
  *
@@ -499,7 +507,8 @@ H5_DLL herr_t  H5Aget_info_by_name(hid_t loc_id, const char *obj_name,
  */
 H5_DLL ssize_t H5Aget_name(hid_t attr_id, size_t buf_size, char *buf);
 /*-------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Gets an attribute name, by attribute index position
  *
@@ -546,7 +555,8 @@ H5_DLL ssize_t H5Aget_name_by_idx(hid_t loc_id, const char *obj_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     char *name /*out*/, size_t size, hid_t lapl_id);
 /*-------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Gets a copy of the dataspace for an attribute
  *
@@ -564,7 +574,8 @@ H5_DLL ssize_t H5Aget_name_by_idx(hid_t loc_id, const char *obj_name,
  */
 H5_DLL hid_t   H5Aget_space(hid_t attr_id);
 /*-------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Returns the amount of storage required for an attribute
  *
@@ -581,7 +592,8 @@ H5_DLL hid_t   H5Aget_space(hid_t attr_id);
  */
 H5_DLL hsize_t H5Aget_storage_size(hid_t attr_id);
 /*-------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Gets an attribute datatype
  *
@@ -603,7 +615,8 @@ H5_DLL hsize_t H5Aget_storage_size(hid_t attr_id);
  */
 H5_DLL hid_t   H5Aget_type(hid_t attr_id);
 /*-------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Calls user-defined function for each attribute on an object
  *
@@ -661,11 +674,7 @@ H5_DLL hid_t   H5Aget_type(hid_t attr_id);
  *
  *          The #H5A_operator2_t prototype for the \p op parameter is as
  *          follows:
- *          \code
- *             typedef herr_t (*H5A_operator2_t)( hid_t location_id,
- *               const char *attr_name, const H5A_info_t *ainfo,
- *               void *op_data)
- *          \endcode
+ *          \snippet this H5A_operator2_t_snip
  *          The operation receives the location identifier for the group or
  *          dataset being iterated over, \p location_id; the name of the
  *          current object attribute, \p attr_name; the attribute’s info
@@ -694,7 +703,8 @@ H5_DLL hid_t   H5Aget_type(hid_t attr_id);
 H5_DLL herr_t  H5Aiterate2(hid_t loc_id, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op, void *op_data);
 /*--------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Calls user-defined function for each attribute on an object
  *
@@ -756,11 +766,7 @@ H5_DLL herr_t  H5Aiterate2(hid_t loc_id, H5_index_t idx_type,
  *
  *          The #H5A_operator2_t prototype for the \p op parameter is as
  *          follows:
- *          \code
- *          typedef herr_t (*H5A_operator2_t)( hid_t location_id,
- *             const char *attr_name, const H5A_info_t *ainfo,
- *             void *op_data)
- *          \endcode
+ *          \snippet this H5A_operator2_t_snip
  *          The operation receives the location identifier for the group or
  *          dataset being iterated over, \p location_id; the name of the
  *          current object attribute, \p attr_name; the attribute’s info
@@ -792,7 +798,8 @@ H5_DLL herr_t  H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t
     H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op, void *op_data,
     hid_t lapl_id);
 /*--------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Opens an attribute for an object specified by object identifier and
  *        attribute name
@@ -823,7 +830,8 @@ H5_DLL herr_t  H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t
 /*--------------------------------------------------------------------------*/
 H5_DLL hid_t   H5Aopen(hid_t obj_id, const char *attr_name, hid_t aapl_id);
 /*--------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Opens the nth attribute attached to an object
  *
@@ -870,7 +878,8 @@ H5_DLL hid_t   H5Aopen_by_idx(hid_t loc_id, const char *obj_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t aapl_id,
     hid_t lapl_id);
 /*--------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Opens an attribute for an object by object name and attribute name
  *
@@ -913,7 +922,8 @@ H5_DLL hid_t   H5Aopen_by_name(hid_t loc_id, const char *obj_name,
     const char *attr_name, hid_t aapl_id, hid_t lapl_id);
 /*-------------------------------------------------------------------------- */
 
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Reads the value of an attribute
  *
@@ -941,7 +951,8 @@ H5_DLL hid_t   H5Aopen_by_name(hid_t loc_id, const char *obj_name,
 /*--------------------------------------------------------------------------*/
 H5_DLL herr_t  H5Aread(hid_t attr_id, hid_t dtype_id, void *buf);
 /*-------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Renames an attribute
  *
@@ -962,7 +973,8 @@ H5_DLL herr_t  H5Aread(hid_t attr_id, hid_t dtype_id, void *buf);
  */
 H5_DLL herr_t  H5Arename(hid_t loc_id, const char *old_name, const char *new_name);
 /*-------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \fgdt_loc_id
  * \param[in] obj_name      Name of object, relative to location, whose
@@ -986,7 +998,8 @@ H5_DLL herr_t  H5Arename(hid_t loc_id, const char *old_name, const char *new_nam
 H5_DLL herr_t  H5Arename_by_name(hid_t loc_id, const char *obj_name,
     const char *old_attr_name, const char *new_attr_name, hid_t lapl_id);
 /*--------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Writes data to an attribute
  *
@@ -1029,14 +1042,16 @@ H5_DLL herr_t  H5Awrite(hid_t attr_id, hid_t dtype_id, const void *buf);
 /* Typedefs */
 
 /* Typedef for H5Aiterate1() callbacks */
+//! [H5A_operator1_t_snip]
 typedef herr_t (*H5A_operator1_t)(hid_t location_id/*in*/,
     const char *attr_name/*in*/, void *operator_data/*in,out*/);
-
+//! [H5A_operator1_t_snip]
 
 /* Function prototypes */
 
 /* --------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Creates an attribute attached to a specified object
  *
@@ -1082,7 +1097,8 @@ typedef herr_t (*H5A_operator1_t)(hid_t location_id/*in*/,
 H5_DLL hid_t   H5Acreate1(hid_t loc_id, const char *name, hid_t type_id,
     hid_t space_id, hid_t acpl_id);
 /* --------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Determines the number of attributes attached to an object
  *
@@ -1102,7 +1118,8 @@ H5_DLL hid_t   H5Acreate1(hid_t loc_id, const char *name, hid_t type_id,
  */
 H5_DLL int     H5Aget_num_attrs(hid_t loc_id);
 /* --------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Calls a user’s function for each attribute on an object
  *
@@ -1130,10 +1147,7 @@ H5_DLL int     H5Aget_num_attrs(hid_t loc_id);
  *          then all attributes are processed.
  *
  *          The prototype for #H5A_operator_t is:
- *          \code
- *          typedef herr_t (*H5A_operator1_t)(hid_t loc_id,
- *              const char *attr_name, void *operator_data);
- *          \endcode
+ *          \snippet this H5A_operator1_t_snip
  *          The operation receives the identifier for the group, dataset
  *          or named datatype being iterated over, \p loc_id, the name of
  *          the current object attribute, \p attr_name, and the pointer to
@@ -1156,10 +1170,11 @@ H5_DLL int     H5Aget_num_attrs(hid_t loc_id);
  * \since 1.0.0
  *
  */
-H5_DLL herr_t  H5Aiterate1(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op,
+H5_DLL herr_t  H5Aiterate1(hid_t loc_id, unsigned *idx, H5A_operator1_t op,
     void *op_data);
 /* --------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Opens the attribute specified by its index
  *
@@ -1185,7 +1200,8 @@ H5_DLL herr_t  H5Aiterate1(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op,
  */
 H5_DLL hid_t   H5Aopen_idx(hid_t loc_id, unsigned idx);
 /* --------------------------------------------------------------------------*/
-/**\ingroup H5A
+/**
+ * \ingroup H5A
  *
  * \brief Opens an attribute specified by name
  *
