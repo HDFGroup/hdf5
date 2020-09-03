@@ -18,13 +18,14 @@ better-performing replacement for the existing SWMR feature.
 
 * VFD SWMR allows HDF5 objects (groups, datasets, attributes) to be
   created and destroyed in the course of a reader-writer session.
+  Creating objects is not possible using the existing SWMR feature.
 * It compartmentalizes much of the SWMR functionality in a virtual-file
   driver (VFD), thus easing The HDF Group's software-maintenance burden.
 * And it makes guarantees for the maximum time from write to availability
   of data for read, provided that the reading and writing systems and
   their interconnections can keep up with the data flow.
 
-For details on how VFD SWMR is implemented, see [LINK to RFC].
+For details on how VFD SWMR is implemented, see [TBD: LINK to RFC].
 
 # Quick start
 
