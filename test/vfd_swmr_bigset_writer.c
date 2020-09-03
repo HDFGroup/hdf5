@@ -11,6 +11,58 @@
  * help@hdfgroup.org.
  */
 
+/* This program performs "bigset" tests for VFD SWMR.  In VFD SWMR mode,
+ * he bigset tests exercise
+ *
+ * 1 the two major indices for extensible, chunked datasets: the extensible
+ *   array and the version-2 B-tree, with VFD SWMR active.
+ *
+ * 2 reading and writing virtual datasets with source datasets residing in
+ *   the same HDF5 file
+ *
+ * 3 virtual datasets with source datasets spread over a small number of
+ *   HDF5 files
+ *
+ * The program selects between two personalities, reader or writer, using
+ * the name it is invoked with (the last component of argv[0]).  Reader and
+ * writer should run simultaneously.
+ *
+ * The bigset tests use datasets extensible in one
+ * dimension to exercise the extensible array, and tests extensible in two dimensions to exercise the v2 B-tree.
+ *
+ * The writer opens an HDF5 file and creates `n` chunked datasets extensible in `1 <= d <= 2`
+ * dimensions and runs for `i` iterations.  The chunk size, `w` x `h`, is
+ * user-selectable, as are `d`, `i`, and `n`.  In each iteration, the writer extends
+ * each dataset by the width (or the width and height) of a chunk, and
+ * writes a test pattern to the dataset on chunk boundaries.
+ *
+ * The reader should be started with the same user-selectable parameters
+ * as the writer: iterations, number of datasets, chunk width and height,
+ * dimensions.
+ *
+ * The reader opens the same HDF5 file, reads and re-reads it until all
+ * `n` datasets appear, and then reads and re-reads the datasets until
+ * all iteration 0 data is available and contains the expected test pattern.
+ * The reader repeats for the iteration 1 data, iteration 2, and so on,
+ * until `i` iterations are complete.
+ *
+ * The reader reads datasets in chunk-sized units.  To challenge the
+ * chunk index a bit, the reader reads on a chunk boundary on even
+ * iterations and reads with a small offset from a chunk boundary on
+ * odd iterations.
+ *
+ * The writer adds an attribute to every `a`th dataset, where `a` is
+ * a user-selectable parameter.  The reader reads and verifies an
+ * attribute on every `a`th dataset.
+ *
+ * To help ensure that the reader and the writer are simultaneously
+ * reading and writing the HDF5 file, both reader and writer pause
+ * between each dataset written/verified (if there are at least as many
+ * iterations as datasets) or between each iteration (if there are
+ * fewer iterations than datasets).  The duration of the pause is
+ * user-selectable.
+ */
+
 #include <err.h>
 #include <libgen.h>
 #include <time.h> /* nanosleep(2) */
@@ -743,6 +795,32 @@ open_extensible_dset(state_t *s, unsigned int which)
     s->dataset[which] = ds;
 }
 
+/* Write or verify the dataset test pattern in the matrix `mat`.
+ * `mat` is a "subview" of the `which`th dataset with origin
+ * `(base.row, base.col)`.
+ *
+ * If `do_set` is true, write the pattern; otherwise, verify.
+ *
+ * The basic test pattern consists of increasing
+ * integers written in nested corners of the dataset
+ * starting at element (0, 0):
+ *
+ *  0
+ *
+ *  0  1
+ *  3  2
+ *
+ *  0  1  4
+ *  3  2  5
+ *  8  7  6
+ *
+ *  0  1  4  9
+ *  3  2  5 10
+ *  8  7  6 11
+ * 15 14 13 12
+ *
+ * In an actual pattern, the dataset number, `which`, is added to each integer.
+ */
 static void
 set_or_verify_matrix(mat_t *mat, unsigned int which, base_t base, bool do_set)
 {
@@ -929,7 +1007,7 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat,
             }
 
             /* Across the bottom, stopping before the last column to
-             * avoid re-writing the bottom-right chunk.
+             * avoid re-reading the bottom-right chunk.
              */
             base.row = last.row;
             for (base.col = ofs; base.col < last.col;
