@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke <matzke@llnl.gov>
+/* Programmer:  Robb Matzke
  *    Friday, October 30, 1998
  *
  * Purpose:  This file is included by all HDF5 library source files to
@@ -893,8 +893,8 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDflock
     /* NOTE: flock(2) is not present on all POSIX systems.
      * If it is not present, we try a flock() equivalent based on
-     * fcntl(2), then fall back to a function that always fails if
-     * it is not present at all (Windows uses a separate Wflock()
+     * fcntl(2), then fall back to a function that always succeeds
+     * if it is not present at all (Windows uses a separate Wflock()
      * function).
      */
     #if defined(H5_HAVE_FLOCK)
@@ -1522,6 +1522,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDstrtoull
     #define HDstrtoull(S,R,N)  strtoull(S,R,N)
 #endif /* HDstrtoul */
+#ifndef HDstrtoumax
+    #define HDstrtoumax(S,R,N)  strtoumax(S,R,N)
+#endif /* HDstrtoumax */
 #ifndef HDstrxfrm
     #define HDstrxfrm(X,Y,Z)  strxfrm(X,Y,Z)
 #endif /* HDstrxfrm */

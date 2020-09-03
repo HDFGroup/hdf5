@@ -15,7 +15,7 @@
  *
  * Created:     H5FAcache.c
  *		Jul  2 2009
- *		Quincey Koziol <koziol@hdfgroup.org>
+ *		Quincey Koziol
  *
  * Purpose:     Implement fixed array metadata cache methods.
  *
@@ -180,7 +180,6 @@ const H5AC_class_t H5AC_FARRAY_DBLK_PAGE[1] = {{
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 31, 2013
  *
  *-------------------------------------------------------------------------
@@ -246,7 +245,6 @@ END_FUNC(STATIC) 	/* end H5FA__cache_hdr_verify_chksum() */
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              August 12, 2013
  *
  *-------------------------------------------------------------------------
@@ -359,7 +357,6 @@ END_FUNC(STATIC)   /* end H5FA__cache_hdr_deserialize() */
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              August 12, 2013
  *
  *-------------------------------------------------------------------------
@@ -389,7 +386,6 @@ END_FUNC(STATIC)   /* end H5FA__cache_hdr_image_len() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              August 12, 2013
  *
  *-------------------------------------------------------------------------
@@ -527,7 +523,6 @@ END_FUNC(STATIC)   /* end H5FA__cache_hdr_notify() */
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              August 12, 2013
  *
  *-------------------------------------------------------------------------
@@ -556,7 +551,6 @@ END_FUNC(STATIC)   /* end H5FA__cache_hdr_free_icr() */
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              August 12, 2013
  *
  *-------------------------------------------------------------------------
@@ -644,7 +638,6 @@ END_FUNC(STATIC) 	/* end H5FA__cache_dblock_verify_chksum() */
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              August 14, 2013
  *
  *-------------------------------------------------------------------------
@@ -744,7 +737,6 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblock_deserialize() */
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              August 14, 2013
  *
  *-------------------------------------------------------------------------
@@ -777,7 +769,6 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblock_image_len() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              August 14, 2013
  *
  *-------------------------------------------------------------------------
@@ -924,7 +915,6 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblock_notify() */
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              August 14, 2013
  *
  *-------------------------------------------------------------------------
@@ -1001,7 +991,6 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblock_fsf_size() */
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              August 14, 2013
  *
  *-------------------------------------------------------------------------
@@ -1068,7 +1057,6 @@ END_FUNC(STATIC) 	/* end H5FA__cache_dblk_page_verify_chksum() */
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              August 14, 2013
  *
  *-------------------------------------------------------------------------
@@ -1141,7 +1129,6 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_deserialize() */
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              August 14, 2013
  *
  *-------------------------------------------------------------------------
@@ -1171,7 +1158,6 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_image_len() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              August 14, 2013
  *
  *-------------------------------------------------------------------------
@@ -1223,7 +1209,6 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_serialize() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@lbl.gov
  *		Oct 17 2016
  *
  *-------------------------------------------------------------------------
@@ -1286,7 +1271,6 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_notify() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              August 14, 2013
  *
  *-------------------------------------------------------------------------

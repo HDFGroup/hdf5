@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Robb Matzke <matzke@llnl.gov>
+ * Programmer: Robb Matzke
  *             Friday, September 19, 1997
  */
 
@@ -86,7 +86,6 @@ H5FL_BLK_EXTERN(str_buf);
  *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 18 1997
  *
  *-------------------------------------------------------------------------
@@ -128,7 +127,6 @@ done:
  *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 18 1997
  *
  *-------------------------------------------------------------------------
@@ -194,7 +192,6 @@ done:
  *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 18 1997
  *
  *-------------------------------------------------------------------------
@@ -234,7 +231,6 @@ done:
  *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 18 1997
  *
  *-------------------------------------------------------------------------
@@ -306,7 +302,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Pedro Vicente
- *              pvn@ncsa.uiuc.edu
  *              ???day, August ??, 2002
  *
  * Notes:       'depth' parameter determines how much of the group entry
@@ -385,7 +380,6 @@ H5G__ent_reset(H5G_entry_t *ent)
  *		Failure:	Negative
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Sep 20 2005
  *
  *-------------------------------------------------------------------------
@@ -530,7 +524,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug 29 1997
  *
  *-------------------------------------------------------------------------

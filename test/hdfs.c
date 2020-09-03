@@ -19,7 +19,7 @@
  *
  *     Demonstrates basic use cases and fapl interaction.
  *
- * Programmer: Jacob Smith <jake.smith@hdfgroup.org>
+ * Programmer: Jacob Smith
  *             2018-04-23
  */
 
@@ -30,7 +30,6 @@
 #ifdef H5_HAVE_LIBHDFS
 #define HDFS_TEST_DEBUG 0
 #define HDFS_TEST_MAX_BUF_SIZE 256
-#endif /* H5_HAVE_LIBHDFS */
 
 /*****************************************************************************
  *
@@ -373,11 +372,8 @@ if (strcmp((actual), (expected)) != 0) {       \
  * OTHER MACROS AND DEFINITIONS *
  ********************************/
 
-/* copied from src/hdfs.c
- */
-#ifdef H5_HAVE_LIBHDFS
+/* copied from src/hdfs.c */
 #define MAXADDR (((haddr_t)1<<(8*sizeof(HDoff_t)-1))-1)
-#endif /*  H5_HAVE_LIBHDFS */
 
 #define HDFS_NAMENODE_NAME_MAX_SIZE 128
 
@@ -385,12 +381,10 @@ if (strcmp((actual), (expected)) != 0) {       \
  * FILE-LOCAL GLOBAL VARIABLES *
  *******************************/
 
-#ifdef H5_HAVE_LIBHDFS
 static const char filename_missing[]    = "/tmp/missing.txt";
 static const char filename_bard[]       = "/tmp/t8.shakespeare.txt";
 static const char filename_raven[]      = "/tmp/Poe_Raven.txt";
 static const char filename_example_h5[] = "/tmp/t.h5";
-#endif /*  H5_HAVE_LIBHDFS */
 
 static H5FD_hdfs_fapl_t default_fa      = {
     1,    /* fa version */
@@ -400,6 +394,7 @@ static H5FD_hdfs_fapl_t default_fa      = {
     "",   /* kerberos path */
     1024, /* buffer size */
 };
+#endif /*  H5_HAVE_LIBHDFS */
 
 /******************
  * TEST FUNCTIONS *
@@ -430,6 +425,14 @@ static H5FD_hdfs_fapl_t default_fa      = {
 static int
 test_fapl_config_validation(void)
 {
+#ifndef H5_HAVE_LIBHDFS
+    TESTING("HDFS fapl configuration validation");
+    SKIPPED();
+    puts("    HDFS VFD is not enabled");
+    fflush(stdout);
+    return 0;
+
+#else
     /*********************
      * test-local macros *
      *********************/
@@ -605,6 +608,7 @@ error:
         } H5E_END_TRY;
     }
     return 1;
+#endif /* H5_HAVE_LIBHDFS */
 
 } /* end test_fapl_config_validation() */
 
@@ -631,6 +635,14 @@ error:
 static int
 test_hdfs_fapl(void)
 {
+#ifndef H5_HAVE_LIBHDFS
+    TESTING("HDFS fapl ");
+    SKIPPED();
+    puts("    HDFS VFD is not enabled");
+    fflush(stdout);
+    return 0;
+
+#else
     /************************
      * test-local variables *
      ************************/
@@ -682,6 +694,7 @@ error:
     } H5E_END_TRY;
 
     return 1;
+#endif /* H5_HAVE_LIBHDFS */
 
 } /* end test_hdfs_fapl() */
 
@@ -1724,6 +1737,7 @@ main(void)
      * commence tests *
      ******************/
 
+#ifdef H5_HAVE_LIBHDFS
     static char hdfs_namenode_name[HDFS_NAMENODE_NAME_MAX_SIZE] = "";
     const char *hdfs_namenode_name_env = NULL;
 
@@ -1737,6 +1751,7 @@ main(void)
                 hdfs_namenode_name_env,
                 HDFS_NAMENODE_NAME_MAX_SIZE);
     }
+#endif /* H5_HAVE_LIBHDFS */
 
     h5_reset();
 

@@ -31,7 +31,7 @@ size_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
  *
  * Purpose: generate files for h5diff testing
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 12, 2003
  *
@@ -8035,7 +8035,6 @@ void test_double_epsilon(const char *fname1, const char *fname2)
 {
     hid_t    fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID;
     hsize_t  dims1[2] = { 4, 7 };
-    hsize_t  dims2[2] = { 4, 7 };
     double   wdata[4][7];
     int i, j;
 

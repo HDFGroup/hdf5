@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:    Robb Matzke <matzke@llnl.gov>
+/* Programmer:    Robb Matzke
  *        Friday, October 10, 1997
  *
  * Purpose:    Hyperslab operations are rather complex, so this file

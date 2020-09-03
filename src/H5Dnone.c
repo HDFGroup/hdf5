@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer: 	Vailin Choi <vchoi@hdfgroup.org>
+/* Programmer: 	Vailin Choi
  *	       	September 2010
  *
  * Purpose:	Implicit (Non Index) chunked I/O functions.

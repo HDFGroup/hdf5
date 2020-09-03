@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer: 	Vailin Choi <vchoi@hdfgroup.org>
+/* Programmer: 	Vailin Choi
  *	       	May 2011; updated 10/2015
  *
  * Purpose:	Single Chunk I/O functions.

@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
-/* Programmer:  James Laird <jlaird@hdfgroup.org>
+/* Programmer:  James Laird
  *              Monday, January 29, 2007
  *
  * Purpose:	A message holding "implicitly shared object header message"
@@ -29,9 +29,9 @@
 
 static void  *H5O__shmesg_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
     unsigned *ioflags, size_t p_size, const uint8_t *p);
-static herr_t H5O_shmesg_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static void  *H5O_shmesg_copy(const void *_mesg, void *_dest);
-static size_t H5O_shmesg_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static herr_t H5O__shmesg_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static void  *H5O__shmesg_copy(const void *_mesg, void *_dest);
+static size_t H5O__shmesg_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O__shmesg_debug(H5F_t *f, const void *_mesg, FILE *stream,
     int indent, int fwidth);
 
@@ -42,9 +42,9 @@ const H5O_msg_class_t H5O_MSG_SHMESG[1] = {{
     sizeof(H5O_shmesg_table_t),	/*native message size                   */
     0,				/* messages are sharable?       */
     H5O__shmesg_decode,		/*decode message                        */
-    H5O_shmesg_encode,		/*encode message                        */
-    H5O_shmesg_copy,            /*copy the native value                 */
-    H5O_shmesg_size,		/*raw message size			*/
+    H5O__shmesg_encode,		/*encode message                        */
+    H5O__shmesg_copy,           /*copy the native value                 */
+    H5O__shmesg_size,		/*raw message size			*/
     NULL,                       /*free internal memory			*/
     NULL,                       /* free method				*/
     NULL,			/* file delete method			*/
@@ -105,7 +105,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_shmesg_encode
+ * Function:	H5O__shmesg_encode
  *
  * Purpose:	Encode a shared message table message.
  *
@@ -117,11 +117,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_shmesg_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__shmesg_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_shmesg_table_t *mesg = (const H5O_shmesg_table_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
     HDassert(f);
@@ -134,11 +134,11 @@ H5O_shmesg_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
     *p++ = (uint8_t)mesg->nindexes;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_shmesg_encode() */
+} /* end H5O__shmesg_encode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_shmesg_copy
+ * Function:	H5O__shmesg_copy
  *
  * Purpose:	Copies a message from _MESG to _DEST, allocating _DEST if
  *		necessary.
@@ -152,13 +152,13 @@ H5O_shmesg_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_shmesg_copy(const void *_mesg, void *_dest)
+H5O__shmesg_copy(const void *_mesg, void *_dest)
 {
     const H5O_shmesg_table_t	*mesg = (const H5O_shmesg_table_t *)_mesg;
     H5O_shmesg_table_t		*dest = (H5O_shmesg_table_t *)_dest;
     void			*ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(mesg);
@@ -174,11 +174,11 @@ H5O_shmesg_copy(const void *_mesg, void *_dest)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_shmesg_copy() */
+} /* end H5O__shmesg_copy() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_shmesg_size
+ * Function:	H5O__shmesg_size
  *
  * Purpose:	Returns the size of the raw message in bytes not counting the
  *		message type or size fields, but only the data fields.
@@ -192,11 +192,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_shmesg_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void H5_ATTR_UNUSED *_mesg)
+H5O__shmesg_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void H5_ATTR_UNUSED *_mesg)
 {
     size_t ret_value = 0;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
     HDassert(f);
@@ -206,7 +206,7 @@ H5O_shmesg_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const voi
 		1);                      /* Number of indexes */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_shmesg_size() */
+} /* end H5O__shmesg_size() */
 
 
 /*-------------------------------------------------------------------------

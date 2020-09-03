@@ -15,7 +15,7 @@
  *
  * Created:             H5Fmpi.c
  *                      Jan 10 2008
- *                      Quincey Koziol <koziol@hdfgroup.org>
+ *                      Quincey Koziol
  *
  * Purpose:             MPI-related routines.
  *
@@ -434,33 +434,5 @@ H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_mpi_retrieve_comm */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5F_get_mpi_info
- *
- * Purpose:     Retrieves MPI File info.
- *
- * Return:      Success:        The size (positive)
- *              Failure:        Negative
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_get_mpi_info(const H5F_t *f, MPI_Info **f_info)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    HDassert(f && f->shared);
-
-    /* Dispatch to driver */
-    if ((ret_value = H5FD_get_mpi_info(f->shared->lf, (void **)f_info)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get mpi file info")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_get_mpi_info() */
 #endif /* H5_HAVE_PARALLEL */
 

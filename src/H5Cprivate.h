@@ -20,8 +20,6 @@
  * Purpose:		Constants and typedefs available to the rest of the
  *			library.
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2243,7 +2241,6 @@ H5_DLL herr_t H5C_expunge_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr,
     unsigned flags);
 H5_DLL herr_t H5C_flush_cache(H5F_t *f, unsigned flags);
 H5_DLL herr_t H5C_flush_tagged_entries(H5F_t *f, haddr_t tag);
-H5_DLL herr_t H5C_force_cache_image_load(H5F_t * f);
 H5_DLL herr_t H5C_evict_tagged_entries(H5F_t *f, haddr_t tag, hbool_t match_global);
 H5_DLL herr_t H5C_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags);
 H5_DLL herr_t H5C_get_tag(const void *thing, /*OUT*/ haddr_t *tag);
@@ -2288,7 +2285,10 @@ H5_DLL herr_t H5C_resize_entry(void *thing, size_t new_size);
 H5_DLL herr_t H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_ptr);
 H5_DLL herr_t H5C_set_cache_image_config(const H5F_t *f, H5C_t *cache_ptr,
     H5C_cache_image_ctl_t *config_ptr);
-H5_DLL herr_t H5C_set_evictions_enabled(H5C_t *cache_ptr, hbool_t evictions_enabled);
+H5_DLL herr_t H5C_set_evictions_enabled(H5C_t *cache_ptr, 
+    hbool_t evictions_enabled);
+H5_DLL herr_t H5C_set_slist_enabled(H5C_t *cache_ptr, hbool_t slist_enabled,
+    hbool_t clear_slist);
 H5_DLL herr_t H5C_set_prefix(H5C_t *cache_ptr, char *prefix);
 H5_DLL herr_t H5C_stats(H5C_t *cache_ptr, const char *cache_name,
     hbool_t display_detailed_stats);
@@ -2336,12 +2336,9 @@ H5_DLL herr_t H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name);
 H5_DLL hbool_t H5C_get_serialization_in_progress(const H5C_t *cache_ptr);
 H5_DLL hbool_t H5C_cache_is_clean(const H5C_t *cache_ptr, H5C_ring_t inner_ring);
 H5_DLL herr_t H5C_dump_cache_skip_list(H5C_t *cache_ptr, char *calling_fcn);
-#ifdef H5_HAVE_PARALLEL
-H5_DLL herr_t H5C_dump_coll_write_list(H5C_t * cache_ptr, char * calling_fcn);
-#endif /* H5_HAVE_PARALLEL */
 H5_DLL herr_t H5C_get_entry_ptr_from_addr(H5C_t *cache_ptr, haddr_t addr,
     void **entry_ptr_ptr);
-H5_DLL herr_t H5C_flush_dependency_exists(H5C_t *cache_ptr, haddr_t parent_addr,
+H5_DLL herr_t H5C_flush_dependency_exists(H5C_t *cache_ptr, haddr_t parent_addr, 
     haddr_t child_addr, hbool_t *fd_exists_ptr);
 H5_DLL herr_t H5C_verify_entry_type(H5C_t *cache_ptr, haddr_t addr,
     const H5C_class_t *expected_type, hbool_t *in_cache_ptr,

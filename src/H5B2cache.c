@@ -15,7 +15,7 @@
  *
  * Created:     H5B2cache.c
  *              Jan 31 2005
- *              Quincey Koziol <koziol@hdfgroup.org>
+ *              Quincey Koziol
  *
  * Purpose:     Implement v2 B-tree metadata cache methods.
  *
@@ -171,7 +171,6 @@ const H5AC_class_t H5AC_BT2_LEAF[1] = {{
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              May 18, 2010
  *
  *-------------------------------------------------------------------------
@@ -240,7 +239,6 @@ H5B2__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 1 2005
  *
  *-------------------------------------------------------------------------
@@ -339,7 +337,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              May 20, 2010
  *
  *-------------------------------------------------------------------------
@@ -370,7 +367,6 @@ H5B2__cache_hdr_image_len(const void *_thing, size_t *image_len)
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 1 2005
  *
  *-------------------------------------------------------------------------
@@ -442,7 +438,6 @@ H5B2__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Neil Fortner
- *              nfortne2@hdfgroup.org
  *              Apr 24 2012
  *
  *-------------------------------------------------------------------------
@@ -530,7 +525,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Mike McGreevy
- *              mcgreevy@hdfgroup.org
  *              June 18, 2008
  *
  *-------------------------------------------------------------------------
@@ -562,7 +556,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              May 18, 2010
  *
  *-------------------------------------------------------------------------
@@ -637,7 +630,6 @@ H5B2__cache_int_verify_chksum(const void *_image, size_t H5_ATTR_UNUSED len, voi
  *              Failure:        NULL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 2 2005
  *
  *-------------------------------------------------------------------------
@@ -756,7 +748,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              May 20, 2010
  *
  *-------------------------------------------------------------------------
@@ -788,7 +779,6 @@ H5B2__cache_int_image_len(const void *_thing, size_t *image_len)
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 3 2005
  *
  *-------------------------------------------------------------------------
@@ -875,7 +865,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Neil Fortner
- *              nfortne2@hdfgroup.org
  *              Apr 25 2012
  *
  *-------------------------------------------------------------------------
@@ -886,7 +875,7 @@ H5B2__cache_int_notify(H5AC_notify_action_t action, void *_thing)
     H5B2_internal_t 	*internal = (H5B2_internal_t *)_thing;
     herr_t   		ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /*
      * Check arguments.
@@ -952,7 +941,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Mike McGreevy
- *              mcgreevy@hdfgroup.org
  *              June 18, 2008
  *
  *-------------------------------------------------------------------------
@@ -985,7 +973,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              May 18, 2010
  *
  *-------------------------------------------------------------------------
@@ -1060,7 +1047,6 @@ H5B2__cache_leaf_verify_chksum(const void *_image, size_t H5_ATTR_UNUSED len, vo
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 2 2005
  *
  *-------------------------------------------------------------------------
@@ -1159,7 +1145,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              May 20, 2010
  *
  *-------------------------------------------------------------------------
@@ -1191,7 +1176,6 @@ H5B2__cache_leaf_image_len(const void *_thing, size_t *image_len)
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 2 2005
  *
  *-------------------------------------------------------------------------
@@ -1264,7 +1248,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Neil Fortner
- *              nfortne2@hdfgroup.org
  *              Apr 25 2012
  *
  *-------------------------------------------------------------------------
@@ -1275,7 +1258,7 @@ H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *_thing)
     H5B2_leaf_t 	*leaf = (H5B2_leaf_t *)_thing;
     herr_t              ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /*
      * Check arguments.
@@ -1341,7 +1324,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Mike McGreevy
- *              mcgreevy@hdfgroup.org
  *              June 18, 2008
  *
  *-------------------------------------------------------------------------

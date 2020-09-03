@@ -13,11 +13,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5system.c
- *			Aug 21 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ * Created:     H5system.c
+ *              Aug 21 2006
+ *              Quincey Koziol
  *
- * Purpose:             System call wrapper implementations.
+ * Purpose:     System call wrapper implementations.
  *
  *-------------------------------------------------------------------------
  */
@@ -143,8 +143,6 @@ HDvasprintf(char **bufp, const char *fmt, va_list _ap)
  *
  * Programmer:  Robb Matzke
  *              Thursday, April  9, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -317,14 +315,14 @@ Pflock(int fd, int operation) {
  * Purpose:     Wrapper function for systems where no file locking is
  *              available.
  *
- * Return:      Failure:    -1 (always fails)
+ * Return:      0 (success)
  *
  *-------------------------------------------------------------------------
  */
 int H5_ATTR_CONST
 Nflock(int H5_ATTR_UNUSED fd, int H5_ATTR_UNUSED operation) {
-    /* just fail */
-    return -1;
+    /* just succeed */
+    return 0;
 } /* end Nflock() */
 
 

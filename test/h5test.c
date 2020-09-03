@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Thursday, November 19, 1998
  *
  * Purpose:  Provides support functions for most of the hdf5 tests cases.
@@ -2067,13 +2067,13 @@ h5_compare_file_bytes(char *f1name, char *f2name)
     int         ret_value = 0; /* for error handling */
 
     /* Open files for reading */
-    f1ptr = HDfopen(f1name, "r");
+    f1ptr = HDfopen(f1name, "rb");
     if (f1ptr == NULL) {
         HDfprintf(stderr, "Unable to fopen() %s\n", f1name);
         ret_value = -1;
         goto done;
     }
-    f2ptr = HDfopen(f2name, "r");
+    f2ptr = HDfopen(f2name, "rb");
     if (f2ptr == NULL) {
         HDfprintf(stderr, "Unable to fopen() %s\n", f2name);
         ret_value = -1;
@@ -2097,8 +2097,14 @@ h5_compare_file_bytes(char *f1name, char *f2name)
     HDrewind(f1ptr);
     HDrewind(f2ptr);
     for (ii = 0; ii < f1size; ii++) {
-        HDfread(&f1char, 1, 1, f1ptr);
-        HDfread(&f2char, 1, 1, f2ptr);
+        if(HDfread(&f1char, 1, 1, f1ptr) != 1) {
+            ret_value = -1;
+            goto done;
+        }
+        if(HDfread(&f2char, 1, 1, f2ptr) != 1) {
+            ret_value = -1;
+            goto done;
+        }
         if (f1char != f2char) {
             HDfprintf(stderr, "Mismatch @ 0x%" PRIXHSIZE ": 0x%X != 0x%X\n", ii, f1char, f2char);
             ret_value = -1;
@@ -2107,13 +2113,11 @@ h5_compare_file_bytes(char *f1name, char *f2name)
     }
 
 done:
-    if (f1ptr) {
+    if (f1ptr)
         HDfclose(f1ptr);
-    }
-    if (f2ptr) {
+    if (f2ptr)
         HDfclose(f2ptr);
-    }
-    return(ret_value);
+    return ret_value;
 } /* end h5_compare_file_bytes() */
 
 /*-------------------------------------------------------------------------
@@ -2196,7 +2200,7 @@ h5_duplicate_file_by_bytes(const char *orig, const char *dest)
 
     max_buf = 4096 * sizeof(char);
 
-    orig_ptr = HDfopen(orig, "r");
+    orig_ptr = HDfopen(orig, "rb");
     if (NULL == orig_ptr) {
         ret_value = -1;
         goto done;
@@ -2206,7 +2210,7 @@ h5_duplicate_file_by_bytes(const char *orig, const char *dest)
     fsize = (hsize_t)HDftell(orig_ptr);
     HDrewind(orig_ptr);
 
-    dest_ptr = HDfopen(dest, "w");
+    dest_ptr = HDfopen(dest, "wb");
     if (NULL == dest_ptr) {
         ret_value = -1;
         goto done;
@@ -2220,7 +2224,10 @@ h5_duplicate_file_by_bytes(const char *orig, const char *dest)
     }
 
     while (read_size > 0) {
-        HDfread(dup_buf, read_size, 1, orig_ptr); /* warning: no error-check */
+        if (HDfread(dup_buf, read_size, 1, orig_ptr) != 1) {
+            ret_value = -1;
+            goto done;
+        }
         HDfwrite(dup_buf, read_size, 1, dest_ptr);
         fsize -= read_size;
         read_size = MIN(fsize, max_buf);
@@ -2235,4 +2242,62 @@ done:
         HDfree(dup_buf);
     return ret_value;
 } /* end h5_duplicate_file_by_bytes() */
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_check_if_file_locking_enabled
+ *
+ * Purpose:     Checks if file locking is enabled on this file system.
+ *
+ * Return:      SUCCEED/FAIL
+ *              are_enabled will be FALSE if file locking is disabled on
+ *              the file system of if there were errors.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+h5_check_if_file_locking_enabled(hbool_t *is_enabled)
+{
+    const char *filename = "locking_test_file";
+    int pmode = O_RDWR | O_CREAT | O_TRUNC;
+    int fd = -1;
+
+    *is_enabled = TRUE;
+
+    if((fd = HDopen(filename, pmode, H5_POSIX_CREATE_MODE_RW)) < 0)
+        goto error;
+
+    /* Test HDflock() to see if it works */
+    if(HDflock(fd, LOCK_EX | LOCK_NB) < 0) {
+        if(ENOSYS == errno) {
+            /* When errno is set to ENOSYS, the file system does not support
+             * locking, so ignore it. This is most frequently used on
+             * Lustre. If we also want to check for disabled NFS locks
+             * we'll need to check for ENOLCK, too. That isn't done by
+             * default here since that could also represent an actual
+             * error condition.
+             */
+            errno = 0;
+            *is_enabled = FALSE;
+        }
+        else
+            goto error;
+    }
+    if(HDflock(fd, LOCK_UN) < 0)
+        goto error;
+
+    if(HDclose(fd) < 0)
+        goto error;
+    if(HDremove(filename) < 0)
+        goto error;
+
+    return SUCCEED;
+
+error:
+    *is_enabled = FALSE;
+    if (fd > -1) {
+        HDclose(fd);
+        HDremove(filename);
+    }
+    return FAIL;
+} /* end h5_check_if_file_locking_enabled() */
 

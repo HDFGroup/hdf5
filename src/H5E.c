@@ -50,7 +50,6 @@
 /* Headers */
 /***********/
 #include "H5private.h"          /* Generic Functions                        */
-#include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Epkg.h"             /* Error handling                           */
 #include "H5FLprivate.h"        /* Free lists                               */
 #include "H5Iprivate.h"         /* IDs                                      */
@@ -391,7 +390,7 @@ H5E__get_stack(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5E_free_class
+ * Function:    H5E__free_class
  *
  * Purpose:     Private function to free an error class.
  *
@@ -403,9 +402,9 @@ H5E__get_stack(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E_free_class(H5E_cls_t *cls)
+H5E__free_class(H5E_cls_t *cls)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
     HDassert(cls);
@@ -417,7 +416,7 @@ H5E_free_class(H5E_cls_t *cls)
     cls = H5FL_FREE(H5E_cls_t, cls);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5E_free_class() */
+} /* end H5E__free_class() */
 
 
 /*-------------------------------------------------------------------------
@@ -502,7 +501,7 @@ H5E__register_class(const char *cls_name, const char *lib_name, const char *vers
 
 done:
     if(!ret_value)
-        if(cls && H5E_free_class(cls) < 0)
+        if(cls && H5E__free_class(cls) < 0)
             HDONE_ERROR(H5E_ERROR, H5E_CANTRELEASE, NULL, "unable to free error class")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -514,9 +513,9 @@ done:
  *
  * Purpose:     Closes an error class.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              Friday, July 11, 2003
  *
  *-------------------------------------------------------------------------
@@ -572,7 +571,7 @@ H5E__unregister_class(H5E_cls_t *cls)
         HGOTO_ERROR(H5E_ERROR, H5E_BADITER, FAIL, "unable to free all messages in this error class")
 
     /* Free error class structure */
-    if(H5E_free_class(cls) < 0)
+    if(H5E__free_class(cls) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTRELEASE, FAIL, "unable to free error class")
 
 done:
@@ -1041,9 +1040,9 @@ done:
  * Purpose:     Replaces current stack with specified stack. This closes the
  *              stack ID also.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              Friday, July 15, 2003
  *
  *-------------------------------------------------------------------------
@@ -1147,9 +1146,9 @@ done:
  *
  * Purpose:     Closes an error stack.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              Friday, July 14, 2003
  *
  *-------------------------------------------------------------------------
@@ -1285,9 +1284,9 @@ H5E__get_num(const H5E_t *estack)
  *
  * Purpose:     Deletes some error messages from the top of error stack.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              Friday, July 16, 2003
  *
  *-------------------------------------------------------------------------
@@ -1340,9 +1339,9 @@ done:
  *              function name, file name, and error description strings must
  *              be statically allocated.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *		Monday, October 18, 1999
  *
  * Notes:       Basically a new public API wrapper around the H5E__push_stack
@@ -1411,9 +1410,9 @@ done:
  *
  * Purpose:     Clears the error stack for the specified error stack.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              Wednesday, July 16, 2003
  *
  *-------------------------------------------------------------------------
@@ -1456,9 +1455,9 @@ done:
  *              prints error messages. Users are encouraged to write their
  *              own more specific error handlers.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Friday, February 27, 1998
  *
  *-------------------------------------------------------------------------
@@ -1501,9 +1500,9 @@ done:
  * Purpose:     Walks the error stack for the current thread and calls some
  *              function for each error along the way.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Friday, February 27, 1998
  *
  *-------------------------------------------------------------------------
@@ -1551,7 +1550,7 @@ done:
  *              Either (or both) arguments may be null in which case the
  *              value is not returned.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Saturday, February 28, 1998
@@ -1609,7 +1608,7 @@ done:
  *              Automatic stack traversal is always in the H5E_WALK_DOWNWARD
  *              direction.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Friday, February 27, 1998
@@ -1668,7 +1667,7 @@ done:
  *              or the H5E_auto_t typedef.  The IS_STACK parameter is set
  *              to 1 for the first case and 0 for the latter case.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Wednesday, September  8, 2004

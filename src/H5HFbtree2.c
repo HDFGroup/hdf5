@@ -15,7 +15,7 @@
  *
  * Created:		H5HFbtree2.c
  *			Aug  7 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		v2 B-tree callbacks for "huge" object tracker
  *

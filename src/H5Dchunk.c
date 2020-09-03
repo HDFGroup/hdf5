@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:     Quincey Koziol <koziol@hdfgroup.org>
+/* Programmer:     Quincey Koziol
  *               Thursday, April 24, 2008
  *
  * Purpose:    Abstract indexed (chunked) I/O functions.  The logical
@@ -278,7 +278,7 @@ H5D__nonexistent_readvv(const H5D_io_info_t *io_info,
     size_t chunk_max_nseq, size_t *chunk_curr_seq, size_t chunk_len_arr[], hsize_t chunk_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
 
-/* format convert cb */
+/* Format convert cb */
 static int H5D__chunk_format_convert_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
 
 /* Helper routines */
@@ -300,9 +300,7 @@ static herr_t H5D__create_chunk_file_map_all(H5D_chunk_map_t *fm,
     const H5D_io_info_t *io_info);
 static herr_t H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm,
     const H5D_io_info_t *io_info);
-
 static herr_t H5D__create_chunk_mem_map_1d(const H5D_chunk_map_t *fm);
-
 static herr_t H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_file_cb(void *elem, const H5T_t *type, unsigned ndims,
     const hsize_t *coords, void *fm);
@@ -327,8 +325,8 @@ static herr_t H5D__chunk_collective_fill(const H5D_t *dset,
 static int H5D__chunk_cmp_addr(const void *addr1, const void *addr2);
 #endif /* H5_HAVE_PARALLEL */
 
-static int
-H5D__chunk_dump_index_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
+/* Debugging helper routine callback */
+static int H5D__chunk_dump_index_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
 
 /*********************/
 /* Package Variables */
@@ -999,7 +997,7 @@ H5D__chunk_init(H5F_t *f, const H5D_t * const dset, hid_t dapl_id)
             rdcc->scaled_dims[u] = (dset->shared->curr_dims[u] + dset->shared->layout.u.chunk.dim[u] - 1) /
                 dset->shared->layout.u.chunk.dim[u];
 
-            if( !(scaled_power2up = H5VM_power2up(rdcc->scaled_dims[u])) )
+            if(!(scaled_power2up = H5VM_power2up(rdcc->scaled_dims[u])))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get the next power of 2")
 
             /* Inital 'power2up' values for scaled dimensions */
@@ -2821,12 +2819,12 @@ H5D__chunk_flush(H5D_t *dset)
 
     /* Loop over all entries in the chunk cache */
     for(ent = rdcc->head; ent; ent = next) {
-    next = ent->next;
+        next = ent->next;
         if(H5D__chunk_flush_entry(dset, ent, FALSE) < 0)
             nerrors++;
     } /* end for */
     if(nerrors)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2970,7 +2968,7 @@ H5D_chunk_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
 
     /* Reset index structures */
     if((storage->ops->reset)(storage, reset_addr) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset chunk index info")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset chunk index info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2992,7 +2990,7 @@ done:
 static herr_t
 H5D__chunk_cinfo_cache_reset(H5D_chunk_cached_t *last)
 {
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
     HDassert(last);
@@ -3615,14 +3613,14 @@ H5D__chunk_cache_evict(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t flush)
 static herr_t
 H5D__chunk_cache_prune(const H5D_t *dset, size_t size)
 {
-    const H5D_rdcc_t    *rdcc = &(dset->shared->cache.chunk);
-    size_t        total = rdcc->nbytes_max;
-    const int        nmeth = 2;    /*number of methods        */
-    int                w[1];        /*weighting as an interval    */
-    H5D_rdcc_ent_t    *p[2], *cur;    /*list pointers            */
-    H5D_rdcc_ent_t    *n[2];        /*list next pointers        */
-    int        nerrors = 0;            /* Accumulated error count during preemptions */
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    const H5D_rdcc_t *rdcc = &(dset->shared->cache.chunk);
+    size_t          total = rdcc->nbytes_max;
+    const int       nmeth = 2;          /* Number of methods */
+    int             w[1];               /* Weighting as an interval */
+    H5D_rdcc_ent_t *p[2], *cur;         /* List pointers */
+    H5D_rdcc_ent_t *n[2];               /* List next pointers */
+    int             nerrors = 0;        /* Accumulated error count during preemptions */
+    herr_t          ret_value = SUCCEED;/* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -3643,62 +3641,62 @@ H5D__chunk_cache_prune(const H5D_t *dset, size_t size)
     while((p[0] || p[1]) && (rdcc->nbytes_used + size) > total) {
         int i;          /* Local index variable */
 
-    /* Introduce new pointers */
-    for(i = 0; i < nmeth - 1; i++)
+        /* Introduce new pointers */
+        for(i = 0; i < nmeth - 1; i++)
             if(0 == w[i])
                 p[i + 1] = rdcc->head;
 
-    /* Compute next value for each pointer */
-    for(i = 0; i < nmeth; i++)
+        /* Compute next value for each pointer */
+        for(i = 0; i < nmeth; i++)
             n[i] = p[i] ? p[i]->next : NULL;
 
-    /* Give each method a chance */
-    for(i = 0; i < nmeth && (rdcc->nbytes_used + size) > total; i++) {
-        if(0 == i && p[0] && !p[0]->locked &&
+        /* Give each method a chance */
+        for(i = 0; i < nmeth && (rdcc->nbytes_used + size) > total; i++) {
+            if(0 == i && p[0] && !p[0]->locked &&
                     ((0 == p[0]->rd_count && 0 == p[0]->wr_count) ||
-                     (0 == p[0]->rd_count && dset->shared->layout.u.chunk.size == p[0]->wr_count) ||
-                     (dset->shared->layout.u.chunk.size == p[0]->rd_count && 0 == p[0]->wr_count))) {
-        /*
-        * Method 0: Preempt entries that have been completely written
-        * and/or completely read but not entries that are partially
-        * written or partially read.
-        */
-        cur = p[0];
-        } else if(1 == i && p[1] && !p[1]->locked) {
-        /*
-        * Method 1: Preempt the entry without regard to
-        * considerations other than being locked.  This is the last
-        * resort preemption.
-        */
-        cur = p[1];
-        } else {
-        /* Nothing to preempt at this point */
-        cur = NULL;
-        }
+                    (0 == p[0]->rd_count && dset->shared->layout.u.chunk.size == p[0]->wr_count) ||
+                    (dset->shared->layout.u.chunk.size == p[0]->rd_count && 0 == p[0]->wr_count))) {
+                /*
+                * Method 0: Preempt entries that have been completely written
+                * and/or completely read but not entries that are partially
+                * written or partially read.
+                */
+                cur = p[0];
+            } else if(1 == i && p[1] && !p[1]->locked) {
+                /*
+                * Method 1: Preempt the entry without regard to
+                * considerations other than being locked.  This is the last
+                * resort preemption.
+                */
+                cur = p[1];
+            } else {
+                /* Nothing to preempt at this point */
+                cur = NULL;
+            }
 
-        if(cur) {
+            if(cur) {
                 int j;          /* Local index variable */
 
-        for(j = 0; j < nmeth; j++) {
-            if(p[j] == cur)
+                for(j = 0; j < nmeth; j++) {
+                    if(p[j] == cur)
                         p[j] = NULL;
-            if(n[j] == cur)
+                    if(n[j] == cur)
                         n[j] = cur->next;
-        } /* end for */
-        if(H5D__chunk_cache_evict(dset, cur, TRUE) < 0)
+                } /* end for */
+                if(H5D__chunk_cache_evict(dset, cur, TRUE) < 0)
                     nerrors++;
-        } /* end if */
-    } /* end for */
+            } /* end if */
+        } /* end for */
 
-    /* Advance pointers */
-    for(i = 0; i < nmeth; i++)
+        /* Advance pointers */
+        for(i = 0; i < nmeth; i++)
             p[i] = n[i];
-    for(i = 0; i < nmeth - 1; i++)
+        for(i = 0; i < nmeth - 1; i++)
             w[i] -= 1;
     } /* end while */
 
     if(nerrors)
-    HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to preempt one or more raw data cache entry")
+        HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to preempt one or more raw data cache entry")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4347,7 +4345,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
     hbool_t     unfilt_edge_chunk_dim[H5O_LAYOUT_NDIMS]; /* Whether there are unfiltered edge chunks at the edge of each dimension */
     hsize_t     edge_chunk_scaled[H5O_LAYOUT_NDIMS]; /* Offset of the unfiltered edge chunks at the edge of each dimension */
     unsigned    nunfilt_edge_chunk_dims = 0; /* Number of dimensions on an edge */
-    const H5O_storage_chunk_t *sc = &(layout->storage.u.chunk);
+    H5O_storage_chunk_t *sc = &(layout->storage.u.chunk);       /* Convenience variable */
     herr_t    ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -4556,9 +4554,8 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
 #ifndef NDEBUG
             /* None of the chunks should be allocated */
-            if(H5D_CHUNK_IDX_NONE != sc->idx_type) {
+            if(H5D_CHUNK_IDX_NONE != sc->idx_type)
                 HDassert(!H5F_addr_defined(udata.chunk_block.offset));
-            }
 
             /* Make sure the chunk is really in the dataset and outside the
              * original dimensions */
@@ -4957,7 +4954,7 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
     int         blocks, leftover, block_len; /* converted to int for MPI */
     MPI_Aint    *chunk_disp_array = NULL;
     int         *block_lens = NULL;
-    MPI_Datatype mem_type, file_type;
+    MPI_Datatype mem_type = MPI_BYTE, file_type = MPI_BYTE;
     H5FD_mpio_xfer_t prev_xfer_mode;    /* Previous data xfer mode */
     hbool_t     have_xfer_mode = FALSE; /* Whether the previous xffer mode has been retrieved */
     hbool_t     need_addr_sort = FALSE;
@@ -4983,9 +4980,9 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Resulted in division by zero")
     num_blocks = (size_t)(chunk_info->num_io / (size_t)mpi_size); /* value should be the same on all procs */
 
-    /* after evenly distributing the blocks between processes, are
-       there any leftover blocks for each individual process
-       (round-robin) */
+    /* After evenly distributing the blocks between processes, are there any
+     * leftover blocks for each individual process (round-robin)?
+     */
     leftover_blocks = (size_t)(chunk_info->num_io % (size_t)mpi_size);
 
     /* Cast values to types needed by MPI */
@@ -4993,58 +4990,62 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
     H5_CHECKED_ASSIGN(leftover, int, leftover_blocks, size_t);
     H5_CHECKED_ASSIGN(block_len, int,  chunk_size, size_t);
 
-    /* Allocate buffers */
-    /* (MSC - should not need block_lens if MPI_type_create_hindexed_block is working) */
-    if(NULL == (block_lens = (int *)H5MM_malloc((size_t)(blocks + 1) * sizeof(int))))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk lengths buffer")
-    if(NULL == (chunk_disp_array = (MPI_Aint *)H5MM_malloc((size_t)(blocks + 1) * sizeof(MPI_Aint))))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk file displacement buffer")
+    /* Check if we have any chunks to write on this rank */
+    if(num_blocks > 0 || (leftover && leftover > mpi_rank)) {
+        /* Allocate buffers */
+        /* (MSC - should not need block_lens if MPI_type_create_hindexed_block is working) */
+        if(NULL == (block_lens = (int *)H5MM_malloc((size_t)(blocks + 1) * sizeof(int))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk lengths buffer")
+        if(NULL == (chunk_disp_array = (MPI_Aint *)H5MM_malloc((size_t)(blocks + 1) * sizeof(MPI_Aint))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk file displacement buffer")
 
-    for(i = 0 ; i < blocks ; i++) {
-        /* store the chunk address as an MPI_Aint */
-        chunk_disp_array[i] = (MPI_Aint)(chunk_info->addr[i + mpi_rank*blocks]);
+        for(i = 0 ; i < blocks ; i++) {
+            /* store the chunk address as an MPI_Aint */
+            chunk_disp_array[i] = (MPI_Aint)(chunk_info->addr[i + (mpi_rank * blocks)]);
 
-        /* MSC - should not need this if MPI_type_create_hindexed_block is working */
-        block_lens[i] = block_len;
+            /* MSC - should not need this if MPI_type_create_hindexed_block is working */
+            block_lens[i] = block_len;
 
-        /* make sure that the addresses in the datatype are
-           monotonically non decreasing */
-        if(i && (chunk_disp_array[i] < chunk_disp_array[i - 1]))
-            need_addr_sort = TRUE;
-    } /* end for */
+            /* Make sure that the addresses in the datatype are
+             * monotonically non-decreasing
+             */
+            if(i && (chunk_disp_array[i] < chunk_disp_array[i - 1]))
+                need_addr_sort = TRUE;
+        } /* end for */
 
-    /* calculate if there are any leftover blocks after evenly
-       distributing. If there are, then round robin the distribution
-       to processes 0 -> leftover. */
-    if(leftover && leftover > mpi_rank) {
-        chunk_disp_array[blocks] = (MPI_Aint)chunk_info->addr[blocks*mpi_size + mpi_rank];
-        if(blocks && (chunk_disp_array[blocks] < chunk_disp_array[blocks - 1]))
-            need_addr_sort = TRUE;
-        block_lens[blocks] = block_len;
-        blocks++;
-    }
+        /* Calculate if there are any leftover blocks after evenly
+         * distributing. If there are, then round-robin the distribution
+         * to processes 0 -> leftover.
+         */
+        if(leftover && leftover > mpi_rank) {
+            chunk_disp_array[blocks] = (MPI_Aint)chunk_info->addr[(blocks * mpi_size) + mpi_rank];
+            if(blocks && (chunk_disp_array[blocks] < chunk_disp_array[blocks - 1]))
+                need_addr_sort = TRUE;
+            block_lens[blocks] = block_len;
+            blocks++;
+        }
 
-    /*
-     * Ensure that the blocks are sorted in monotonically non-decreasing
-     * order of offset in the file.
-     */
-    if(need_addr_sort)
-        HDqsort(chunk_disp_array, blocks, sizeof(MPI_Aint), H5D__chunk_cmp_addr);
+        /* Ensure that the blocks are sorted in monotonically non-decreasing
+         * order of offset in the file.
+         */
+        if(need_addr_sort)
+            HDqsort(chunk_disp_array, blocks, sizeof(MPI_Aint), H5D__chunk_cmp_addr);
 
-    /* MSC - should use this if MPI_type_create_hindexed block is working:
-     * mpi_code = MPI_Type_create_hindexed_block(blocks, block_len, chunk_disp_array, MPI_BYTE, &file_type);
-     */
-    mpi_code = MPI_Type_create_hindexed(blocks, block_lens, chunk_disp_array, MPI_BYTE, &file_type);
-    if(mpi_code != MPI_SUCCESS)
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
-    if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&file_type)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+        /* MSC - should use this if MPI_type_create_hindexed block is working:
+         * mpi_code = MPI_Type_create_hindexed_block(blocks, block_len, chunk_disp_array, MPI_BYTE, &file_type);
+         */
+        mpi_code = MPI_Type_create_hindexed(blocks, block_lens, chunk_disp_array, MPI_BYTE, &file_type);
+        if(mpi_code != MPI_SUCCESS)
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
+        if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&file_type)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
 
-    mpi_code = MPI_Type_create_hvector(blocks, block_len, 0, MPI_BYTE, &mem_type);
-    if(mpi_code != MPI_SUCCESS)
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
-    if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&mem_type)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+        mpi_code = MPI_Type_create_hvector(blocks, block_len, 0, MPI_BYTE, &mem_type);
+        if(mpi_code != MPI_SUCCESS)
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
+        if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&mem_type)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+    } /* end if */
 
     /* Set MPI-IO VFD properties */
 
@@ -5076,10 +5077,12 @@ done:
             HDONE_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set transfer mode")
 
     /* free things */
-    if(MPI_SUCCESS != (mpi_code = MPI_Type_free(&file_type)))
-        HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
-    if(MPI_SUCCESS != (mpi_code = MPI_Type_free(&mem_type)))
-        HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+    if(MPI_BYTE != file_type)
+        if(MPI_SUCCESS != (mpi_code = MPI_Type_free(&file_type)))
+            HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+    if(MPI_BYTE != mem_type)
+        if(MPI_SUCCESS != (mpi_code = MPI_Type_free(&mem_type)))
+            HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
     H5MM_xfree(chunk_disp_array);
     H5MM_xfree(block_lens);
 
@@ -5126,8 +5129,8 @@ H5D__chunk_cmp_addr(const void *addr1, const void *addr2)
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Pedro Vicente, pvn@ncsa.uiuc.edu
- *         March 26, 2002
+ * Programmer:    Pedro Vicente
+ *              March 26, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -5252,7 +5255,7 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer:    Pedro Vicente
  * Algorithm:    Robb Matzke
  *         March 27, 2002
  *
@@ -5405,13 +5408,13 @@ H5D__chunk_prune_by_extent(H5D_t *dset, const hsize_t *old_dim)
     elmts_per_chunk = 1;
     for(u = 0; u < space_ndims; u++) {
         elmts_per_chunk *= layout->u.chunk.dim[u];
-    chunk_dim[u] = layout->u.chunk.dim[u];
-    shrunk_dim[u] = (space_dim[u] < old_dim[u]);
+        chunk_dim[u] = layout->u.chunk.dim[u];
+        shrunk_dim[u] = (space_dim[u] < old_dim[u]);
     } /* end for */
 
     /* Create a dataspace for a chunk & set the extent */
     if(NULL == (chunk_space = H5S_create_simple(space_ndims, chunk_dim, NULL)))
-    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
 
     /* Reset hyperslab start array */
     /* (hyperslabs will always start from origin) */
@@ -5599,7 +5602,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, const hsize_t *old_dim)
                 /* Remove the chunk from disk, if present */
                 if(H5F_addr_defined(chk_udata.chunk_block.offset)) {
                     /* Update the offset in idx_udata */
-            idx_udata.scaled = udata.common.scaled;
+                    idx_udata.scaled = udata.common.scaled;
 
                     /* Remove the chunk from disk */
                     if((sc->ops->remove)(&idx_info, &idx_udata) < 0)
@@ -5989,7 +5992,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     if(pline && pline->nused) {
         must_filter = TRUE;
         if((udata->common.layout->flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS) &&
-            H5D__chunk_is_partial_edge_chunk(udata->dset_ndims, udata->common.layout->dim, chunk_rec->scaled, udata->dset_dims))
+                H5D__chunk_is_partial_edge_chunk(udata->dset_ndims, udata->common.layout->dim, chunk_rec->scaled, udata->dset_dims))
             must_filter = FALSE;
     }
 
@@ -6932,9 +6935,9 @@ H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old
         } /* end else */
     } /* end if */
     else {
-    HDassert(!H5F_addr_defined(new_chunk->offset));
-    HDassert(new_chunk->length == idx_info->layout->size);
-    alloc_chunk = TRUE;
+        HDassert(!H5F_addr_defined(new_chunk->offset));
+        HDassert(new_chunk->length == idx_info->layout->size);
+        alloc_chunk = TRUE;
     }  /* end else */
 
     /* Actually allocate space for the chunk in the file */

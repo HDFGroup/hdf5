@@ -15,7 +15,7 @@
  *
  * Created:		H5Odbg.c
  *			Nov 17 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Object header debugging routines.
  *
@@ -84,7 +84,6 @@
  * Return:      SUCCEED (Doesn't fail, just crashes)
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Oct 17 2006
  *
  *-------------------------------------------------------------------------
@@ -236,7 +235,6 @@ H5O__assert(const H5O_t *oh)
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 13 2003
  *
  *-------------------------------------------------------------------------
@@ -277,7 +275,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug  6 1997
  *
  *-------------------------------------------------------------------------
@@ -544,7 +541,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug  6 1997
  *
  *-------------------------------------------------------------------------

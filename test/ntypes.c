@@ -2675,7 +2675,7 @@ error:
  * Return: Success: 0
  *  Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *  September 3, 2004
  *
  * Modifications:
