@@ -1021,7 +1021,7 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat,
             verify_dset_attribute(ds, which, step);
     }
 
-    *stepp = last_step;
+    *stepp = step;
 
 out:
     if (H5Sclose(filespace) < 0)
@@ -1196,19 +1196,33 @@ main(int argc, char **argv)
                 nanosleep(&s.update_interval, NULL);
         }
     } else {
+        unsigned *nextstep = calloc(s.ndatasets, sizeof(*nextstep));
+        unsigned finished_step;
+
+        if (nextstep == NULL)
+            err(EXIT_FAILURE, "could not allocate `nextstep` array");
+
         for (which = s.ndatasets; which > 0; which--)
             open_extensible_dset(&s, which - 1);
 
-        for (step = 0; hang_back + step < s.nsteps;) {
+        do {
+            finished_step = UINT_MAX;   /* the greatest step finished on
+                                         * *all* datasets
+                                         */
+
             for (which = s.ndatasets; which-- > 0; ) {
-                dbgf(2, "step %d which %d\n", step, which);
-                verify_extensible_dset(&s, which, mat, &step);
+                dbgf(2, "step %d which %d\n", nextstep[which], which);
+                verify_extensible_dset(&s, which, mat, &nextstep[which]);
+                if (nextstep[which] < finished_step)
+                    finished_step = nextstep[which];
                 if (s.ndatasets <= s.nsteps)
                     nanosleep(&s.update_interval, NULL);
             }
             if (s.ndatasets > s.nsteps)
                 nanosleep(&s.update_interval, NULL);
-        }
+        } while (hang_back + finished_step < s.nsteps);
+
+        free(nextstep);
     }
 
     for (which = 0; which < s.ndatasets; which++)
