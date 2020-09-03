@@ -143,6 +143,12 @@ Bug Fixes since HDF5-1.12.0 release
 ==================================
     Library
     -------
+    - Fix bug and simplify collective metadata write operation when some ranks
+        have no entries to contribute.  This fixes parallel regression test
+        failures with IBM SpectrumScale MPI on the Summit system at ORNL.
+
+      (QAK - 2020/09/02)
+
     - Avoid setting up complex MPI types with 0-length vectors, which some
         MPI implementations don't handle well.  (In particular, IBM
         SpectrumScale MPI on the Summit system at ORNL)
