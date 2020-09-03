@@ -113,10 +113,18 @@ extern "C" {
 
 
 /* Define property list class callback function pointer types */
+//! [H5P_cls_create_func_t_snip]
 typedef herr_t (*H5P_cls_create_func_t)(hid_t prop_id, void *create_data);
+//! [H5P_cls_create_func_t_snip]
+
+//! [H5P_cls_copy_func_t_snip]
 typedef herr_t (*H5P_cls_copy_func_t)(hid_t new_prop_id, hid_t old_prop_id,
                                       void *copy_data);
+//! [H5P_cls_copy_func_t_snip]
+
+//! [H5P_cls_close_func_t_snip]
 typedef herr_t (*H5P_cls_close_func_t)(hid_t prop_id, void *close_data);
+//! [H5P_cls_close_func_t_snip]
 
 /* Define property list callback function pointer types */
 typedef herr_t (*H5P_prp_cb1_t)(const char *name, size_t size, void *value);
@@ -236,7 +244,8 @@ H5_DLLVAR hid_t H5P_LST_REFERENCE_ACCESS_ID_g;
 
 /* Generic property list routines */
 /*--------------------------------------------------------------------------*/
-/**\ingroup GPLO
+/**
+ * \ingroup GPLO
  *
  * \brief Terminates access to a property list
  *
@@ -255,7 +264,8 @@ H5_DLLVAR hid_t H5P_LST_REFERENCE_ACCESS_ID_g;
  */
 H5_DLL herr_t H5Pclose(hid_t plist_id);
 /*--------------------------------------------------------------------------*/
-/**\ingroup GPLOA
+/**
+ * \ingroup GPLOA
  *
  * \brief Closes an existing property list class
  *
@@ -270,9 +280,10 @@ H5_DLL herr_t H5Pclose(hid_t plist_id);
  * \since 1.4.0
  *
  */
-H5_DLL herr_t H5Pclose_class(hid_t plist_id);
+H5_DLL herr_t H5Pclose_class(hid_t class);
 /*--------------------------------------------------------------------------*/
-/**\ingroup GPLO
+/**
+ * \ingroup GPLO
  *
  * \brief Copies an existing property list to create a new property list
  *
@@ -289,7 +300,8 @@ H5_DLL herr_t H5Pclose_class(hid_t plist_id);
  */
 H5_DLL hid_t H5Pcopy(hid_t plist_id);
 /*--------------------------------------------------------------------------*/
-/**\ingroup GPLOA
+/**
+ * \ingroup GPLOA
  *
  * \brief Copies a property from one list or class to another
  *
@@ -326,7 +338,8 @@ H5_DLL hid_t H5Pcopy(hid_t plist_id);
 H5_DLL herr_t H5Pcopy_prop(hid_t dst_id, hid_t src_id, const
 char *name);
 /*--------------------------------------------------------------------------*/
-/**\ingroup GPLO
+/**
+ * \ingroup GPLO
  *
  * \brief Creates a new property list as an instance of a property list class
  *
@@ -451,7 +464,8 @@ char *name);
  */
 H5_DLL hid_t H5Pcreate(hid_t cls_id);
 /*--------------------------------------------------------------------------*/
-/**\ingroup GPLOA
+/**
+ * \ingroup GPLOA
  *
  * \brief Creates a new property list class
  *
@@ -483,19 +497,16 @@ H5_DLL hid_t H5Pcreate(hid_t cls_id);
  *          H5Pcreate(). The \p create routine is called when a new property
  *          list of this class is being created. The #H5P_cls_create_func_t
  *          callback function is defined as follows:
- *
- *          \code
- *          typedef herr_t(*H5P_cls_create_func_t)(hid_t prop_id, void *create_data);
- *          \endcode
+ *          \snippet this H5P_cls_create_func_t_snip
  *
  *          The parameters to this callback function are defined as follows:
  *          <table>
  *            <tr>
- *              <td>hid_t prop_id</td>
+ *              <td>\ref hid_t \c prop_id</td>
  *              <td>IN: The identifier of the property list being created</td>
  *            </tr>
  *            <tr>
- *              <td>void * create_data</td>
+ *              <td>\Code{void * create_data}</td>
  *              <td>IN: User pointer to any class creation data required</td>
  *            </tr>
  *          </table>
@@ -509,19 +520,16 @@ H5_DLL hid_t H5Pcreate(hid_t cls_id);
  *          The \p copy routine is called when an existing property
  *          list of this class is copied. The #H5P_cls_copy_func_t callback
  *          function is defined as follows:
- *
- *          \code
- *          typedef herr_t(*H5P_cls_copy_func_t)(hid_t prop_id, void *copy_data);
- *          \endcode
+ *          \snippet this H5P_cls_copy_func_t_snip
  *
  *          The parameters to this callback function are defined as follows:
  *          <table>
  *            <tr>
- *              <td>hid_t prop_id</td>
+ *              <td>\ref hid_t \c prop_id</td>
  *              <td>IN: The identifier of the property list created by copying</td>
  *            </tr>
  *            <tr>
- *              <td>void * copy_data</td>
+ *              <td>\Code{void * copy_data}</td>
  *              <td>IN: User pointer to any class copy data required</td>
  *            </tr>
  *          </table>
@@ -534,19 +542,16 @@ H5_DLL hid_t H5Pcreate(hid_t cls_id);
  *           The \p close routine is called when a property list of this class
  *           is being closed. The #H5P_cls_close_func_t callback function is
  *           defined as follows:
- *
- *           \code
- *           typedef herr_t(*H5P_cls_close_func_t)(hid_t prop_id, void *close_data);
- *           \endcode
+ *           \snippet this H5P_cls_close_func_t_snip
  *
  *           The parameters to this callback function are defined as follows:
  *           <table>
  *            <tr>
- *              <td>hid_t prop_id</td>
+ *              <td>\ref hid_t \c prop_id</td>
  *              <td>IN: The identifier of the property list being closed</td>
  *            </tr>
  *            <tr>
- *              <td>void * close_data</td>
+ *              <td>\Code{void * close_data}</td>
  *              <td>IN: User pointer to any class close data required</td>
  *            </tr>
  *          </table>
@@ -598,7 +603,8 @@ H5_DLL htri_t H5Pall_filters_avail(hid_t plist_id);
 H5_DLL herr_t H5Pget_attr_creation_order(hid_t plist_id, unsigned *crt_order_flags);
 H5_DLL herr_t H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, unsigned *min_dense);
 /*--------------------------------------------------------------------------*/
-/**\ingroup OCPL
+/**
+ * \ingroup OCPL
  *
  * \brief Returns information about a filter in a pipeline
  *
@@ -661,7 +667,7 @@ H5_DLL herr_t H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, un
  *
  *--------------------------------------------------------------------------
  */
-H5_DLL H5Z_filter_t H5Pget_filter2(hid_t plist_id, unsigned filter,
+H5_DLL H5Z_filter_t H5Pget_filter2(hid_t plist_id, unsigned idx,
        unsigned int *flags/*out*/,
        size_t *cd_nelmts/*out*/,
        unsigned cd_values[]/*out*/,
@@ -672,20 +678,21 @@ H5_DLL herr_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t id,
        unsigned cd_values[]/*out*/, size_t namelen, char name[]/*out*/,
        unsigned *filter_config/*out*/);
 /*--------------------------------------------------------------------------*/
-/**\ingroup OCPL
+/**
+ * \ingroup OCPL
  *
  * \brief Returns the number of filters in the pipeline
  *
  * \todo Signature for H5Pget_nfilters() is different in H5Pocpl.c than in
  *       H5Ppublic.h.
  *
- * \plist_id{plist}
+ * \plist_id
  *
  * \return  Returns the number of filters in the pipeline if successful;
  *          otherwise returns a negative value.
  *
  * \details H5Pget_nfilters() returns the number of filters defined in the
- *          filter pipeline associated with the property list \p plist.
+ *          filter pipeline associated with the property list \p plist_id.
  *
  *          In each pipeline, the filters are numbered from 0 through N-1,
  *          where N is the value returned by this function. During output to
@@ -708,12 +715,13 @@ H5_DLL herr_t H5Premove_filter(hid_t plist_id, H5Z_filter_t filter);
 H5_DLL herr_t H5Pset_attr_creation_order(hid_t plist_id, unsigned crt_order_flags);
 H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dense);
 /*--------------------------------------------------------------------------*/
-/**\ingroup OCPL
+/**
+ * \ingroup OCPL
  *
  * \brief Sets deflate (GNU gzip) compression method and compression level
  *
  * \todo H5Pset_deflate prototype does not match source code
- * \plist_id{plist_id}
+ * \plist_id
  * \param[in] level Compression level
  *
  * \return \herr_t
@@ -764,7 +772,7 @@ H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, uns
  *
  *--------------------------------------------------------------------------
  */
-H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned aggression);
+H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
 H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter,
         unsigned int flags, size_t cd_nelmts,
         const unsigned int c_values[]);
@@ -867,7 +875,8 @@ H5_DLL herr_t H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size, unsigned
 
 /* Dataset creation property list (DCPL) routines */
 /*--------------------------------------------------------------------------*/
-/**\ingroup DCPL
+/**
+ * \ingroup DCPL
  *
  * \brief Sets the type of storage used to store the raw data for a dataset
  *
@@ -905,7 +914,8 @@ H5_DLL herr_t H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size, unsigned
  */
 H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
 /*--------------------------------------------------------------------------*/
-/**\ingroup DCPL
+/**
+ * \ingroup DCPL
  *
  * \brief Returns the layout of the raw data for a dataset
  *
@@ -933,7 +943,7 @@ H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
  *          the dataset with parallel applications. See the H5Dwrite()
  *          documentation for details.
  *
- * \version 1.10.0 #H5D_VIRTUAL and #H5D_VIRTUAL_F added in this release.
+ * \version 1.10.0 #H5D_VIRTUAL added in this release.
  *
  * \since 1.0.0
  *
@@ -941,7 +951,8 @@ H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
  */
 H5_DLL H5D_layout_t H5Pget_layout(hid_t plist_id);
 /*--------------------------------------------------------------------------*/
-/**\ingroup DCPL
+/**
+ * \ingroup DCPL
  *
  * \brief Sets the size of the chunks used to store a chunked layout
  *        dataset
@@ -985,14 +996,15 @@ H5_DLL H5D_layout_t H5Pget_layout(hid_t plist_id);
  */
 H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/]);
 /*--------------------------------------------------------------------------*/
-/**\ingroup DCPL
+/**
+ * \ingroup DCPL
  *
  * \brief Retrieves the size of chunks for the raw data of a chunked
  *        layout dataset
  *
  * \dcpl_id{plist_id}
  * \param[in]  max_ndims Size of the \p dims array
- * \param[out] dims Array to store the chunk dimensions
+ * \param[out] dim Array to store the chunk dimensions
  *
  * \return Returns chunk dimensionality if successful;
  *         otherwise returns a negative value.
@@ -1000,7 +1012,7 @@ H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*
  * \details H5Pget_chunk() retrieves the size of chunks for the raw data
  *          of a chunked layout dataset. This function is only valid for
  *          dataset creation property lists. At most, \p max_ndims elements
- *          of \p dims will be initialized.
+ *          of \p dim will be initialized.
  *
  * \since 1.0.0
  *
@@ -1026,7 +1038,8 @@ H5_DLL herr_t H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size,
           hsize_t *size/*out*/);
 /* Dataset creation property list (DCPL) routines */
 /*--------------------------------------------------------------------------*/
-/**\ingroup DCPL
+/**
+ * \ingroup DCPL
  *
  * \brief Sets up use of the SZIP compression filter
  *
@@ -1327,7 +1340,8 @@ H5_DLL herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size,
     H5P_prp_close_func_t prp_close);
 H5_DLL herr_t H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc);
 /*--------------------------------------------------------------------------*/
-/**\ingroup OCPL
+/**
+ * \ingroup OCPL
  *
  * \brief Returns information about a filter in a pipeline (DEPRECATED)
  *
@@ -1379,7 +1393,7 @@ H5_DLL herr_t H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc);
  *
  *-------------------------------------------------------------------------
  */
-H5_DLL H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned filter,
+H5_DLL H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned idx,
     unsigned int *flags/*out*/, size_t *cd_nelmts/*out*/,
     unsigned cd_values[]/*out*/, size_t namelen, char name[]);
 H5_DLL herr_t H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id,
