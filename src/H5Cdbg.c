@@ -334,7 +334,7 @@ H5C_dump_cache_skip_list(H5C_t * cache_ptr, char * calling_fcn)
                entry_ptr->type->name);
 
             HDfprintf(stdout, "		node_ptr = %p, item = %p\n",
-                      node_ptr, H5SL_item(node_ptr));
+                      (void *)node_ptr, H5SL_item(node_ptr));
 
             /* increment node_ptr before we delete its target */
 
