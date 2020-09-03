@@ -135,6 +135,9 @@ ALIASES += vipl_id{1}="\param[in] \1 vipl_id VOL initialization property list id
 ALIASES += plist_id="\param[in] plist_id Property list identifier"
 ALIASES += plist_id{1}="\param[in] \1 Property list identifier"
 
+ALIASES += plistcls_id="\param[in] plist_id Property list class identifier"
+ALIASES += plistcls_id{1}="\param[in] \1 Property list class identifier"
+
 ################################################################################
 # Objects
 ################################################################################
