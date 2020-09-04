@@ -35,15 +35,15 @@ The contents of this directory are:
                   h5cc, h5c++, and h5fc compile scripts found
                   in the installed bin directory.
 
-These binaries were built with the ZLIB and SZIP (version 2.1, Encoder 
-ENABLED) external libraries which are included in the lib directory for 
-convenience.
+These binaries were built with the ZLIB and Libaec, an unrestricted open-source 
+replacement for SZIP (version 1.0.4, EncoderENABLED) external libraries which 
+are included in the lib directory for convenience.
 
-The official ZLIB and SZIP pages are at:
+The official ZLIB and Libaec pages are at:
 
-   ZLIB: http://www.zlib.net/
-       http://www.zlib.net/zlib_license.html
-   SZIP: http://hdfgroup.org/doc_resource/SZIP/
+   ZLIB: https://git.savannah.gnu.org/cgit/gzip.git/
+       https://git.savannah.gnu.org/cgit/gzip.git/tree/COPYING
+   Libaec: 
        https://gitlab.dkrz.de/k202009/libaec/-/blob/master/Copyright.txt
 
 ";
