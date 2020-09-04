@@ -28,23 +28,23 @@ The contents of this directory are:
     bin/        - Directory containing HDF5 pre-compiled utilities
     include/    - Directory containing HDF5 include files
     lib/        - Directory containing HDF5 libraries and settings
-    share/      - Directory containing example code in C, C++, and 
-                  Fortran using HDF5 and HDF5 HL library APIs. The 
-                  shell scripts provided with these examples will 
-                  compile and run them, and will also test the 
+    share/      - Directory containing example code in C, C++, and
+                  Fortran using HDF5 and HDF5 HL library APIs. The
+                  shell scripts provided with these examples will
+                  compile and run them, and will also test the
                   h5cc, h5c++, and h5fc compile scripts found
                   in the installed bin directory.
 
-These binaries were built with the ZLIB and Libaec, an unrestricted open-source 
-replacement for SZIP (version 1.0.4, EncoderENABLED) external libraries which 
-are included in the lib directory for convenience.
+These binaries were built with the ZLIB and SZIP/Libaec external libraries
+for convenience.  Libaec is an unrestricted open-source replacement for SZIP
+(version 1.0.4, Encoder ENABLED).
 
-The official ZLIB and Libaec pages are at:
+The official ZLIB and SZIP/Libaec pages are at:
 
-   ZLIB: https://git.savannah.gnu.org/cgit/gzip.git/
-       https://git.savannah.gnu.org/cgit/gzip.git/tree/COPYING
-   Libaec: 
-       https://gitlab.dkrz.de/k202009/libaec/-/blob/master/Copyright.txt
+    ZLIB: https://git.savannah.gnu.org/cgit/gzip.git/
+        https://git.savannah.gnu.org/cgit/gzip.git/tree/COPYING
+    SZIP/Libaec: https://gitlab.dkrz.de/k202009/libaec 
+        https://gitlab.dkrz.de/k202009/libaec/-/blob/master/Copyright.txt
 
 ";
 

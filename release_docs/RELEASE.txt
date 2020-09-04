@@ -22,11 +22,11 @@ The official HDF5 releases can be obtained from:
 
      HDF5 binaries provided are fully tested with ZLIB and the free
      Open Source SZIP successor Libaec (with BSD license).  
-     The official ZLIB and Libaec pages are at:
+     The official ZLIB and SZIP/Libaec pages are at:
 
         ZLIB: http://www.zlib.net/
             http://www.zlib.net/zlib_license.html
-        Libaec: https://gitlab.dkrz.de/k202009/libaec
+        SZIP/Libaec: https://gitlab.dkrz.de/k202009/libaec
             https://gitlab.dkrz.de/k202009/libaec/-/blob/master/Copyright.txt
 
 Changes from Release to Release and New Features in the HDF5-1.10.x release series
