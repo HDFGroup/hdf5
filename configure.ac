@@ -1386,7 +1386,7 @@ if test -n "$CUFILE_DIR"; then
 
   if test x$ENABLE_CUDA = xyes; then
     GDS_VFD=yes
-    AC_DEFINE([HAVE_GDS_VFD], [1], [Define if support for gds (cufile) is enabled])
+    AC_DEFINE([GDS_SUPPORT], [1], [Define if support for gds (cufile) is enabled])
   else
     GDS_VFD=no
     AC_MSG_ERROR([GDS VFD was requested but missing cuda path, verify --with-cuda=])

@@ -32,7 +32,7 @@
 #include "H5MMprivate.h"    /* Memory management        */
 #include "H5Pprivate.h"     /* Property lists           */
 
-#ifdef H5_HAVE_GDS_VFD
+#ifdef H5_GDS_SUPPORT
 
 #include <cuda.h>
 #include <cuda_runtime.h>
@@ -61,7 +61,7 @@ typedef struct H5FD_gds_t {
     H5FD_t          pub;    /* public stuff, must be first      */
     int             fd;     /* the filesystem file descriptor   */
 
-#ifdef H5_HAVE_GDS_VFD
+#ifdef H5_GDS_SUPPORT
     int             cu_fd;  /* the filesystem file descriptor   */
     int             num_io_threads; /* number of io threads for cufile */
 #endif
@@ -342,7 +342,7 @@ static H5FD_t *
 H5FD_gds_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
 
-#ifdef H5_HAVE_GDS_VFD
+#ifdef H5_GDS_SUPPORT
     CUfileError_t status;
     int cu_fd = -1;
     // TODO: why does H5FD_gds_open get called twice?
@@ -361,7 +361,7 @@ H5FD_gds_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     FUNC_ENTER_NOAPI_NOINIT
 
 
-#ifdef H5_HAVE_GDS_VFD
+#ifdef H5_GDS_SUPPORT
     if(!cu_file_driver_opened) {
       status = cuFileDriverOpen();
 
@@ -402,7 +402,7 @@ H5FD_gds_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', errno = %d, error message = '%s', flags = %x, o_flags = %x", name, myerrno, HDstrerror(myerrno), flags, (unsigned)o_flags);
     } /* end if */
 
-#ifdef H5_HAVE_GDS_VFD
+#ifdef H5_GDS_SUPPORT
     cu_fd = open(name, O_CREAT | O_RDWR | O_DIRECT, 0664);
     if(cu_fd == -1) {
       fprintf(stderr, "cufile file open error\n");
@@ -418,7 +418,7 @@ H5FD_gds_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct")
 
     file->fd = fd;
-#ifdef H5_HAVE_GDS_VFD
+#ifdef H5_GDS_SUPPORT
     file->cu_fd = cu_fd;
 
     // TODO: error checking for num_io_threads
@@ -497,7 +497,7 @@ static herr_t
 H5FD_gds_close(H5FD_t *_file)
 {
 
-#ifdef H5_HAVE_GDS_VFD
+#ifdef H5_GDS_SUPPORT
     CUfileError_t status;
 #endif
 
@@ -508,7 +508,7 @@ H5FD_gds_close(H5FD_t *_file)
 
     // fprintf(stderr, "H5FD_gds_close()\n");
 
-#ifdef H5_HAVE_GDS_VFD
+#ifdef H5_GDS_SUPPORT
     status = cuFileDriverClose();
     // TODO:
     if (status.err != CU_FILE_SUCCESS) {
@@ -527,7 +527,7 @@ H5FD_gds_close(H5FD_t *_file)
     if(HDclose(file->fd) < 0)
         HSYS_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
-#ifdef H5_HAVE_GDS_VFD
+#ifdef H5_GDS_SUPPORT
     if(close(file->cu_fd) < 0) {
       fprintf(stderr, "cufile file close error\n");
     }
@@ -765,7 +765,7 @@ int is_device_pointer (const void *ptr)
   return is_device_ptr;
 }
 
-#ifdef H5_HAVE_GDS_VFD
+#ifdef H5_GDS_SUPPORT
 typedef struct
 {
   void *devPtr; // device address
@@ -861,7 +861,7 @@ H5FD_gds_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSE
     HDoff_t         offset      = (HDoff_t)addr;
     herr_t          ret_value   = SUCCEED;                  /* Return value */
 
-#ifdef H5_HAVE_GDS_VFD
+#ifdef H5_GDS_SUPPORT
     CUfileError_t status;
     ssize_t ret = -1;
     CUfileDescr_t cf_descr;
@@ -888,7 +888,7 @@ H5FD_gds_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSE
     if(REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu", (unsigned long long)addr)
 
-#ifdef H5_HAVE_GDS_VFD
+#ifdef H5_GDS_SUPPORT
     if(is_device_pointer(buf)) {
       memset((void *)&cf_descr, 0, sizeof(CUfileDescr_t));
       cf_descr.handle.fd = file->cu_fd;
@@ -1025,7 +1025,7 @@ H5FD_gds_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSE
       /* Update current position */
       file->pos = addr;
       file->op = OP_READ;
-#ifdef H5_HAVE_GDS_VFD
+#ifdef H5_GDS_SUPPORT
     }
 #endif
 
@@ -1064,7 +1064,7 @@ H5FD_gds_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
     HDoff_t         offset      = (HDoff_t)addr;
     herr_t          ret_value   = SUCCEED;                  /* Return value */
 
-#ifdef H5_HAVE_GDS_VFD
+#ifdef H5_GDS_SUPPORT
     CUfileError_t status;
     ssize_t ret = -1;
     CUfileDescr_t cf_descr;
@@ -1091,7 +1091,7 @@ H5FD_gds_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
     if(REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size = %llu", (unsigned long long)addr, (unsigned long long)size)
 
-#ifdef H5_HAVE_GDS_VFD
+#ifdef H5_GDS_SUPPORT
     if(is_device_pointer(buf)) {
       memset((void *)&cf_descr, 0, sizeof(CUfileDescr_t));
       cf_descr.handle.fd = file->cu_fd;
@@ -1224,7 +1224,7 @@ H5FD_gds_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
       file->op = OP_WRITE;
       if(file->pos > file->eof)
         file->eof = file->pos;
-#ifdef H5_HAVE_GDS_VFD
+#ifdef H5_GDS_SUPPORT
     }
 #endif
 
