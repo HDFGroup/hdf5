@@ -35,9 +35,9 @@ The contents of this directory are:
                   h5cc, h5c++, and h5fc compile scripts found
                   in the installed bin directory.
 
-These binaries were built with the ZLIB and SZIP/Libaec external libraries
-for convenience.  Libaec is an unrestricted open-source replacement for SZIP
-(version 1.0.4, Encoder ENABLED).
+These binaries were built with the external libraries ZLIB and SZIP/Libaec 
+(version 1.0.4, Encoder ENABLED) which are included in the lib directory for
+convenience.  Libaec is an unrestricted open-source replacement for SZIP.
 
 The official ZLIB and SZIP/Libaec pages are at:
 
