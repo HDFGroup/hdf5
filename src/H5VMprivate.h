@@ -19,9 +19,9 @@
 #define H5VMprivate_H
 
 /* Private headers needed by this file */
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5private.h"        /* Generic Functions            */
+#include "H5Eprivate.h"        /* Error handling              */
+#include "H5MMprivate.h"    /* Memory management            */
 
 /* Vector-Vector sequence operation callback */
 typedef herr_t (*H5VM_opvv_func_t)(hsize_t dst_off, hsize_t src_off,
@@ -41,7 +41,7 @@ typedef herr_t (*H5VM_opvv_func_t)(hsize_t dst_off, hsize_t src_off,
 
 /* Other functions */
 #define H5VM_vector_cpy(N,DST,SRC) {                                           \
-    HDassert(sizeof(*(DST))==sizeof(*(SRC)));				                  \
+    HDassert(sizeof(*(DST))==sizeof(*(SRC)));                                  \
     if (SRC) H5MM_memcpy (DST, SRC, (N)*sizeof(*(DST)));                         \
     else HDmemset (DST, 0, (N)*sizeof(*(DST)));                               \
 }
@@ -85,32 +85,32 @@ typedef herr_t (*H5VM_opvv_func_t)(hsize_t dst_off, hsize_t src_off,
 #define H5VM_ZERO        NULL
 
 H5_DLL hsize_t H5VM_hyper_stride(unsigned n, const hsize_t *size,
-				 const hsize_t *total_size,
-				 const hsize_t *offset,
-				 hsize_t *stride);
+                const hsize_t *total_size,
+                const hsize_t *offset,
+                hsize_t *stride);
 H5_DLL htri_t H5VM_hyper_eq(unsigned n, const hsize_t *offset1,
-			    const hsize_t *size1, const hsize_t *offset2,
-			    const hsize_t *size2);
+                const hsize_t *size1, const hsize_t *offset2,
+                const hsize_t *size2);
 H5_DLL herr_t H5VM_hyper_fill(unsigned n, const hsize_t *_size,
-			      const hsize_t *total_size,
-			      const hsize_t *offset, void *_dst,
-			      unsigned fill_value);
+                const hsize_t *total_size,
+                const hsize_t *offset, void *_dst,
+                unsigned fill_value);
 H5_DLL herr_t H5VM_hyper_copy(unsigned n, const hsize_t *size,
-			      const hsize_t *dst_total_size,
-			      const hsize_t *dst_offset, void *_dst,
-			      const hsize_t *src_total_size,
-			      const hsize_t *src_offset, const void *_src);
+                const hsize_t *dst_total_size,
+                const hsize_t *dst_offset, void *_dst,
+                const hsize_t *src_total_size,
+                const hsize_t *src_offset, const void *_src);
 H5_DLL herr_t H5VM_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size,
-			       const hsize_t *stride, void *_dst,
-			       unsigned fill_value);
+                const hsize_t *stride, void *_dst,
+                unsigned fill_value);
 H5_DLL herr_t H5VM_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *_size,
-			       const hsize_t *dst_stride, void *_dst,
-			       const hsize_t *src_stride, const void *_src);
+                const hsize_t *dst_stride, void *_dst,
+                const hsize_t *src_stride, const void *_src);
 H5_DLL herr_t H5VM_stride_copy_s(unsigned n, hsize_t elmt_size, const hsize_t *_size,
-			       const hssize_t *dst_stride, void *_dst,
-			       const hssize_t *src_stride, const void *_src);
+                const hssize_t *dst_stride, void *_dst,
+                const hssize_t *src_stride, const void *_src);
 H5_DLL herr_t H5VM_array_fill(void *_dst, const void *src, size_t size,
-			      size_t count);
+                size_t count);
 H5_DLL herr_t H5VM_array_down(unsigned n, const hsize_t *total_size,
     hsize_t *down);
 H5_DLL hsize_t H5VM_array_offset_pre(unsigned n,
@@ -204,7 +204,7 @@ H5VM_vector_zerop_u(int n, const hsize_t *v)
     if (!v)
         HGOTO_DONE(TRUE)
     while (n--)
-	if (*v++)
+    if (*v++)
             HGOTO_DONE(FALSE)
 
 done:
@@ -241,7 +241,7 @@ H5VM_vector_zerop_s(int n, const hssize_t *v)
     if (!v)
         HGOTO_DONE(TRUE)
     while (n--)
-	if (*v++)
+    if (*v++)
             HGOTO_DONE(FALSE)
 
 done:
@@ -291,9 +291,9 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5VM_vector_cmp_s
+ * Function:    H5VM_vector_cmp_s
  *
  * Purpose:     Compares two vectors of the same size and determines if V1 is
  *              lexicographically less than, equal, or greater than V2.
@@ -308,7 +308,7 @@ done:
  *
  *              Failure:        0 if N is zero
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Wednesday, April  8, 1998
  *
  *-------------------------------------------------------------------------
@@ -335,7 +335,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5VM_vector_inc
  *
@@ -361,6 +361,7 @@ H5VM_vector_inc(int n, hsize_t *v1, const hsize_t *v2)
 /* Lookup table for general log2(n) routine */
 static const unsigned char LogTable256[] =
 {
+    /* clang-clang-format off */
     0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3,
     4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
@@ -377,9 +378,10 @@ static const unsigned char LogTable256[] =
     7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
     7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
     7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7
+    /* clang-clang-format on */
 };
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5VM_log2_gen
  *
@@ -432,7 +434,7 @@ static const unsigned MultiplyDeBruijnBitPosition[32] =
         31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9
 };
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5VM_log2_of2
  *
@@ -464,19 +466,19 @@ H5VM_log2_of2(uint32_t n)
     return(MultiplyDeBruijnBitPosition[(n * (uint32_t)0x077CB531UL) >> 27]);
 } /* H5VM_log2_of2() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5VM_power2up
+ * Function:    H5VM_power2up
  *
- * Purpose:	Round up a number to the next power of 2
+ * Purpose:    Round up a number to the next power of 2
  *
  * Note:        Although this routine is 'static' in this file, that's intended
  *              only as an optimization and the naming (with a single underscore)
  *              reflects its inclusion in a "private" header file.
  *
- * Return:	Return the number which is a power of 2
+ * Return:    Return the number which is a power of 2
  *
- * Programmer:	Vailin Choi; Nov 2014
+ * Programmer:    Vailin Choi; Nov 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -495,7 +497,7 @@ H5VM_power2up(hsize_t n)
     return(ret_value);
 } /* H5VM_power2up */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5VM_limit_enc_size
  *
@@ -522,15 +524,15 @@ H5VM_limit_enc_size(uint64_t limit)
 static const unsigned char H5VM_bit_set_g[8] = {0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01};
 static const unsigned char H5VM_bit_clear_g[8] = {0x7F, 0xBF, 0xDF, 0xEF, 0xF7, 0xFB, 0xFD, 0xFE};
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5VM_bit_get
  *
  * Purpose:     Determine the value of the n'th bit in a buffer.
  *
- * Note:	No range checking on <offset> is performed!
+ * Note:    No range checking on <offset> is performed!
  *
- * Note #2:	Bits are sequentially stored in the buffer, starting with bit
+ * Note #2:    Bits are sequentially stored in the buffer, starting with bit
  *              offset 0 in the first byte's high-bit position, proceeding down
  *              to bit offset 7 in the first byte's low-bit position, then to
  *              bit offset 8 in the second byte's high-bit position, etc.
@@ -553,15 +555,15 @@ H5VM_bit_get(const unsigned char *buf, size_t offset)
     return (hbool_t)((buf[offset / 8] & (H5VM_bit_set_g[offset % 8])) ? TRUE : FALSE);
 } /* end H5VM_bit_get() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5VM_bit_set
  *
  * Purpose:     Set/reset the n'th bit in a buffer.
  *
- * Note:	No range checking on <offset> is performed!
+ * Note:    No range checking on <offset> is performed!
  *
- * Note #2:	Bits are sequentially stored in the buffer, starting with bit
+ * Note #2:    Bits are sequentially stored in the buffer, starting with bit
  *              offset 0 in the first byte's high-bit position, proceeding down
  *              to bit offset 7 in the first byte's low-bit position, then to
  *              bit offset 8 in the second byte's high-bit position, etc.

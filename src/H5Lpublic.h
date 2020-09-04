@@ -25,10 +25,10 @@
 #define _H5Lpublic_H
 
 /* Public headers needed by this file */
-#include "H5public.h"		/* Generic Functions			*/
-#include "H5Ipublic.h"		/* IDs			  		*/
-#include "H5Opublic.h"		/* Object Headers			*/
-#include "H5Tpublic.h"		/* Datatypes				*/
+#include "H5public.h"        /* Generic Functions            */
+#include "H5Ipublic.h"        /* IDs                      */
+#include "H5Opublic.h"        /* Object Headers            */
+#include "H5Tpublic.h"        /* Datatypes                */
 
 /*****************/
 /* Public Macros */
@@ -65,10 +65,12 @@ typedef enum {
     H5L_TYPE_HARD = 0,          /* Hard link id                 */
     H5L_TYPE_SOFT = 1,          /* Soft link id                 */
     H5L_TYPE_EXTERNAL = 64,     /* External link id             */
-    H5L_TYPE_MAX = 255	        /* Maximum link type id         */
+    H5L_TYPE_MAX = 255            /* Maximum link type id         */
 } H5L_type_t;
-#define H5L_TYPE_BUILTIN_MAX H5L_TYPE_SOFT      /* Maximum value link value for "built-in" link types */
-#define H5L_TYPE_UD_MIN      H5L_TYPE_EXTERNAL  /* Link ids at or above this value are "user-defined" link types. */
+/* Maximum value link value for "built-in" link types */
+#define H5L_TYPE_BUILTIN_MAX H5L_TYPE_SOFT
+/* Link ids at or above this value are "user-defined" link types. */
+#define H5L_TYPE_UD_MIN      H5L_TYPE_EXTERNAL
 
 /* Information struct for link (for H5Lget_info2/H5Lget_info_by_idx2)
  * H5O_token_t version used in VOL layer and future public API calls

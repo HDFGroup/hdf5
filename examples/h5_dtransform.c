@@ -36,29 +36,31 @@
 #define ROWS    12
 #define COLS    18
 
+/* clang-format off */
 const float windchillF[ROWS][COLS] =
-    {   {36.0, 31.0, 25.0, 19.0, 13.0, 7.0, 1.0, -5.0, -11.0, -16.0, -22.0, -28.0, -34.0, -40.0, -46.0, -52.0, -57.0, -63.0 },
-        {34.0, 27.0, 21.0, 15.0, 9.0, 3.0, -4.0, -10.0, -16.0, -22.0, -28.0, -35.0, -41.0, -47.0, -53.0, -59.0, -66.0, -72.0 } ,
-        {32.0, 25.0, 19.0, 13.0, 6.0, 0.0, -7.0, -13.0, -19.0, -26.0, -32.0, -39.0, -45.0, -51.0, -58.0, -64.0, -71.0, -77.0 },
-        {30.0, 24.0, 17.0, 11.0, 4.0, -2.0, -9.0, -15.0, -22.0, -29.0, -35.0, -42.0, -48.0, -55.0, -61.0, -68.0, -74.0, -81.0 },
-        {29.0, 23.0, 16.0, 9.0, 3.0, -4.0, -11.0, -17.0, -24.0, -31.0, -37.0, -44.0, -51.0, -58.0, -64.0, -71.0, -78.0, -84.0 },
-        {28.0, 22.0, 15.0, 8.0, 1.0, -5.0, -12.0, -19.0, -26.0, -33.0, -39.0, -46.0, -53.0, -60.0, -67.0, -73.0, -80.0, -87.0 },
-        {28.0, 21.0, 14.0, 7.0, 0.0, -7.0, -14.0, -21.0, -27.0, -34.0, -41.0, -48.0, -55.0, -62.0, -69.0, -76.0, -82.0, -89.0 },
-        {27.0, 20.0, 13.0, 6.0, -1.0, -8.0, -15.0, -22.0, -29.0, -36.0, -43.0, -50.0, -57.0, -64.0, -71.0, -78.0, -84.0, -91.0 },
-        {26.0, 19.0, 12.0, 5.0, -2.0, -9.0, -16.0, -23.0, -30.0, -37.0, -44.0, -51.0, -58.0, -65.0, -72.0, -79.0, -86.0, -93.0 },
+    {   {36.0, 31.0, 25.0, 19.0, 13.0, 7.0,   1.0,  -5.0,  -11.0, -16.0, -22.0, -28.0, -34.0, -40.0, -46.0, -52.0, -57.0, -63.0},
+        {34.0, 27.0, 21.0, 15.0, 9.0,  3.0,  -4.0,  -10.0, -16.0, -22.0, -28.0, -35.0, -41.0, -47.0, -53.0, -59.0, -66.0, -72.0},
+        {32.0, 25.0, 19.0, 13.0, 6.0,  0.0,  -7.0,  -13.0, -19.0, -26.0, -32.0, -39.0, -45.0, -51.0, -58.0, -64.0, -71.0, -77.0},
+        {30.0, 24.0, 17.0, 11.0, 4.0, -2.0,  -9.0,  -15.0, -22.0, -29.0, -35.0, -42.0, -48.0, -55.0, -61.0, -68.0, -74.0, -81.0},
+        {29.0, 23.0, 16.0, 9.0,  3.0, -4.0,  -11.0, -17.0, -24.0, -31.0, -37.0, -44.0, -51.0, -58.0, -64.0, -71.0, -78.0, -84.0},
+        {28.0, 22.0, 15.0, 8.0,  1.0, -5.0,  -12.0, -19.0, -26.0, -33.0, -39.0, -46.0, -53.0, -60.0, -67.0, -73.0, -80.0, -87.0},
+        {28.0, 21.0, 14.0, 7.0,  0.0, -7.0,  -14.0, -21.0, -27.0, -34.0, -41.0, -48.0, -55.0, -62.0, -69.0, -76.0, -82.0, -89.0},
+        {27.0, 20.0, 13.0, 6.0, -1.0, -8.0,  -15.0, -22.0, -29.0, -36.0, -43.0, -50.0, -57.0, -64.0, -71.0, -78.0, -84.0, -91.0},
+        {26.0, 19.0, 12.0, 5.0, -2.0, -9.0,  -16.0, -23.0, -30.0, -37.0, -44.0, -51.0, -58.0, -65.0, -72.0, -79.0, -86.0, -93.0},
         {26.0, 19.0, 12.0, 4.0, -3.0, -10.0, -17.0, -24.0, -31.0, -38.0, -45.0, -52.0, -60.0, -67.0, -74.0, -81.0, -88.0, -95.0},
         {25.0, 18.0, 11.0, 4.0, -3.0, -11.0, -18.0, -25.0, -32.0, -39.0, -46.0, -54.0, -61.0, -68.0, -75.0, -82.0, -89.0, -97.0},
         {25.0, 17.0, 10.0, 3.0, -4.0, -11.0, -19.0, -26.0, -33.0, -40.0, -48.0, -55.0, -62.0, -69.0, -76.0, -84.0, -91.0, -98.0}
     };
+/* clang-format on */
 
-#define PRINT(array)				\
-{						\
-    for(i=0; i<ROWS; i++)			\
-    {						\
-	for(j=0; j<COLS; j++)			\
-	    printf("%6.2f ", array[i][j]);	\
-	printf("\n");				\
-    }						\
+#define PRINT(array)                \
+{                        \
+    for(i=0; i<ROWS; i++)            \
+    {                        \
+    for(j=0; j<COLS; j++)            \
+        printf("%6.2f ", array[i][j]);    \
+    printf("\n");                \
+    }                        \
 }
 
 
@@ -71,12 +73,12 @@ main (void)
     hid_t       dataspace;   /* handles */
     hsize_t     dimsf[2];              /* dataset dimensions */
     herr_t      status;
-    hid_t	dxpl_id_f_to_c, dxpl_id_c_to_f;	/* data transform handles */
+    hid_t    dxpl_id_f_to_c, dxpl_id_c_to_f;    /* data transform handles */
     const char* f_to_c = "(5/9.0)*(x-32)";
     const char* c_to_f =  "(9/5.0)*x + 32";
-    char*	transform;
-    float	windchillC[ROWS][COLS];
-    int 	i,j, transform_size;
+    char*    transform;
+    float    windchillC[ROWS][COLS];
+    int     i,j, transform_size;
 
     /*
      * Create a new file using H5F_ACC_TRUNC access,
@@ -110,7 +112,7 @@ main (void)
      * Write the data to the dataset using default transfer properties (ie, no transform set)
      */
     status = H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
-		      H5P_DEFAULT, windchillF);
+            H5P_DEFAULT, windchillF);
 
     /* Create the dataset transfer property list */
     dxpl_id_f_to_c = H5Pcreate(H5P_DATASET_XFER);
@@ -131,7 +133,7 @@ main (void)
      * Write the data to the dataset with the f_to_c transform set
      */
     status = H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
-		      dxpl_id_f_to_c, windchillF);
+            dxpl_id_f_to_c, windchillF);
 
     /* Read out the data with the default transfer list (ie, no transform set) */
     H5Dread(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, windchillC);
@@ -154,7 +156,7 @@ main (void)
      * Write the data to the dataset using the f_to_c transform
      */
     status = H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
-		      dxpl_id_f_to_c, windchillF);
+            dxpl_id_f_to_c, windchillF);
 
     /* Read the data with the c_to_f data transform */
     H5Dread(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillC);

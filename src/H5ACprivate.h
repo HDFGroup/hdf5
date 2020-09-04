@@ -13,12 +13,12 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5ACprivate.h
- *			Jul  9 1997
- *			Robb Matzke
+ * Created:   H5ACprivate.h
+ *            Jul  9 1997
+ *            Robb Matzke
  *
- * Purpose:		Constants and typedefs available to the rest of the
- *			library.
+ * Purpose:   Constants and typedefs available to the rest of the
+ *            library.
  *
  *-------------------------------------------------------------------------
  */
@@ -26,14 +26,14 @@
 #ifndef _H5ACprivate_H
 #define _H5ACprivate_H
 
-#include "H5ACpublic.h"		/*public prototypes			*/
+#include "H5ACpublic.h"        /*public prototypes            */
 
 /* Pivate headers needed by this header */
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Cprivate.h"		/* Cache				*/
-#include "H5Fprivate.h"		/* File access				*/
-#include "H5Pprivate.h"		/* Property lists			*/
-#include "H5SLprivate.h"        /* Skip lists 				*/
+#include "H5private.h"        /* Generic Functions            */
+#include "H5Cprivate.h"        /* Cache                */
+#include "H5Fprivate.h"        /* File access                */
+#include "H5Pprivate.h"        /* Property lists            */
+#include "H5SLprivate.h"        /* Skip lists                 */
 
 /* Global metadata tag values */
 #define H5AC__INVALID_TAG      (haddr_t)0
@@ -75,7 +75,7 @@ typedef enum {
     H5AC_DRVRINFO_ID,           /* (26) driver info block (supplements superblock)  */
     H5AC_EPOCH_MARKER_ID,       /* (27) epoch marker - always internal to cache     */
     H5AC_PROXY_ENTRY_ID,        /* (28) cache entry proxy                           */
-    H5AC_PREFETCHED_ENTRY_ID, 	/* (29) prefetched entry - always internal to cache */
+    H5AC_PREFETCHED_ENTRY_ID,     /* (29) prefetched entry - always internal to cache */
     H5AC_NTYPES                 /* Number of types, must be last                    */
 } H5AC_type_t;
 
@@ -90,29 +90,29 @@ typedef enum {
  *
  * NOTE: test/cache plays games with the f->shared->cache, and thus
  *       setting H5AC_DUMP_STATS_ON_CLOSE will generate constant,
- *	 irrelevant data when run with that test program.  See
- * 	 comments on setup_cache() / takedown_cache() in test/cache_common.c.
+ *     irrelevant data when run with that test program.  See
+ *      comments on setup_cache() / takedown_cache() in test/cache_common.c.
  *       for details.
  *
- *	 If you need to dump stats at file close in test/cache.c,
- *	 use the dump_stats parameter to takedown_cache(), or call
- *	 H5C_stats() directly.
- *					JRM -- 4/12/15
+ *     If you need to dump stats at file close in test/cache.c,
+ *     use the dump_stats parameter to takedown_cache(), or call
+ *     H5C_stats() directly.
+ *                    JRM -- 4/12/15
  *
  * Added the H5AC_DUMP_IMAGE_STATS_ON_CLOSE #define, which works much
  * the same way as H5AC_DUMP_STATS_ON_CLOSE.  However, the set of stats
  * displayed is much smaller, and directed purely at the cache image feature.
  *
- *					JRM -- 11/1/15
+ *                    JRM -- 11/1/15
  */
 #if H5C_COLLECT_CACHE_STATS
 
-#define H5AC_DUMP_STATS_ON_CLOSE	0
+#define H5AC_DUMP_STATS_ON_CLOSE    0
 #define H5AC_DUMP_IMAGE_STATS_ON_CLOSE  0
 
 #else /* H5C_COLLECT_CACHE_STATS */
 
-#define H5AC_DUMP_STATS_ON_CLOSE	0
+#define H5AC_DUMP_STATS_ON_CLOSE    0
 #define H5AC_DUMP_IMAGE_STATS_ON_CLOSE  0
 
 #endif /* H5C_COLLECT_CACHE_STATS */
@@ -121,8 +121,8 @@ typedef enum {
  * At present, these are the same as those given in H5Cprivate.h.
  */
 
-#define H5AC__DEFAULT_MAX_CACHE_SIZE	H5C__DEFAULT_MAX_CACHE_SIZE
-#define H5AC__DEFAULT_MIN_CLEAN_SIZE	H5C__DEFAULT_MIN_CLEAN_SIZE
+#define H5AC__DEFAULT_MAX_CACHE_SIZE    H5C__DEFAULT_MAX_CACHE_SIZE
+#define H5AC__DEFAULT_MIN_CLEAN_SIZE    H5C__DEFAULT_MIN_CLEAN_SIZE
 
 /* Check if we are sanity checking tagging */
 #if H5C_DO_TAGGING_SANITY_CHECKS
@@ -132,18 +132,18 @@ typedef enum {
 #endif
 
 /*
- * Class methods pertaining to caching.	 Each type of cached object will
+ * Class methods pertaining to caching.     Each type of cached object will
  * have a constant variable with permanent life-span that describes how
  * to cache the object.
  */
 
-#define H5AC__SERIALIZE_RESIZED_FLAG	H5C__SERIALIZE_RESIZED_FLAG
-#define H5AC__SERIALIZE_MOVED_FLAG	H5C__SERIALIZE_MOVED_FLAG
+#define H5AC__SERIALIZE_RESIZED_FLAG    H5C__SERIALIZE_RESIZED_FLAG
+#define H5AC__SERIALIZE_MOVED_FLAG    H5C__SERIALIZE_MOVED_FLAG
 
 /* Cork actions: cork/uncork/get cork status of an object */
-#define H5AC__SET_CORK             	H5C__SET_CORK
-#define H5AC__UNCORK             	H5C__UNCORK
-#define H5AC__GET_CORKED             	H5C__GET_CORKED
+#define H5AC__SET_CORK                 H5C__SET_CORK
+#define H5AC__UNCORK                 H5C__UNCORK
+#define H5AC__GET_CORKED                 H5C__GET_CORKED
 
 /* Aliases for the "ring" type and values */
 typedef H5C_ring_t       H5AC_ring_t;
@@ -159,7 +159,7 @@ typedef H5C_ring_t       H5AC_ring_t;
 typedef H5C_notify_action_t     H5AC_notify_action_t;
 #define H5AC_NOTIFY_ACTION_AFTER_INSERT H5C_NOTIFY_ACTION_AFTER_INSERT
 #define H5AC_NOTIFY_ACTION_AFTER_LOAD   H5C_NOTIFY_ACTION_AFTER_LOAD
-#define H5AC_NOTIFY_ACTION_AFTER_FLUSH	H5C_NOTIFY_ACTION_AFTER_FLUSH
+#define H5AC_NOTIFY_ACTION_AFTER_FLUSH    H5C_NOTIFY_ACTION_AFTER_FLUSH
 #define H5AC_NOTIFY_ACTION_BEFORE_EVICT H5C_NOTIFY_ACTION_BEFORE_EVICT
 #define H5AC_NOTIFY_ACTION_ENTRY_DIRTIED H5C_NOTIFY_ACTION_ENTRY_DIRTIED
 #define H5AC_NOTIFY_ACTION_ENTRY_CLEANED H5C_NOTIFY_ACTION_ENTRY_CLEANED
@@ -168,36 +168,36 @@ typedef H5C_notify_action_t     H5AC_notify_action_t;
 #define H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED H5C_NOTIFY_ACTION_CHILD_UNSERIALIZED
 #define H5AC_NOTIFY_ACTION_CHILD_SERIALIZED H5C_NOTIFY_ACTION_CHILD_SERIALIZED
 
-#define H5AC__CLASS_NO_FLAGS_SET 	H5C__CLASS_NO_FLAGS_SET
+#define H5AC__CLASS_NO_FLAGS_SET     H5C__CLASS_NO_FLAGS_SET
 #define H5AC__CLASS_SPECULATIVE_LOAD_FLAG H5C__CLASS_SPECULATIVE_LOAD_FLAG
 
 /* The following flags should only appear in test code */
 #define H5AC__CLASS_SKIP_READS              H5C__CLASS_SKIP_READS
 #define H5AC__CLASS_SKIP_WRITES             H5C__CLASS_SKIP_WRITES
 
-typedef H5C_get_initial_load_size_func_t	H5AC_get_initial_load_size_func_t;
-typedef H5C_get_final_load_size_func_t	H5AC_get_final_load_size_func_t;
-typedef H5C_verify_chksum_func_t	H5AC_verify_chksum_func_t;
-typedef H5C_deserialize_func_t		H5AC_deserialize_func_t;
-typedef H5C_image_len_func_t		H5AC_image_len_func_t;
+typedef H5C_get_initial_load_size_func_t    H5AC_get_initial_load_size_func_t;
+typedef H5C_get_final_load_size_func_t    H5AC_get_final_load_size_func_t;
+typedef H5C_verify_chksum_func_t    H5AC_verify_chksum_func_t;
+typedef H5C_deserialize_func_t        H5AC_deserialize_func_t;
+typedef H5C_image_len_func_t        H5AC_image_len_func_t;
 
 #define H5AC__SERIALIZE_NO_FLAGS_SET    H5C__SERIALIZE_NO_FLAGS_SET
 #define H5AC__SERIALIZE_RESIZED_FLAG    H5C__SERIALIZE_RESIZED_FLAG
 #define H5AC__SERIALIZE_MOVED_FLAG      H5C__SERIALIZE_MOVED_FLAG
 
-typedef H5C_pre_serialize_func_t	H5AC_pre_serialize_func_t;
-typedef H5C_serialize_func_t		H5AC_serialize_func_t;
-typedef H5C_notify_func_t		H5AC_notify_func_t;
-typedef H5C_free_icr_func_t		H5AC_free_icr_func_t;
-typedef H5C_get_fsf_size_t		H5AC_get_fsf_size_t;
+typedef H5C_pre_serialize_func_t    H5AC_pre_serialize_func_t;
+typedef H5C_serialize_func_t        H5AC_serialize_func_t;
+typedef H5C_notify_func_t        H5AC_notify_func_t;
+typedef H5C_free_icr_func_t        H5AC_free_icr_func_t;
+typedef H5C_get_fsf_size_t        H5AC_get_fsf_size_t;
 
-typedef H5C_class_t			H5AC_class_t;
+typedef H5C_class_t            H5AC_class_t;
 
 /* Cache entry info */
-typedef H5C_cache_entry_t		H5AC_info_t;
+typedef H5C_cache_entry_t        H5AC_info_t;
 
 /* Typedef for metadata cache (defined in H5Cpkg.h) */
-typedef H5C_t	H5AC_t;
+typedef H5C_t    H5AC_t;
 
 /* Metadata cache proxy entry type */
 typedef struct H5AC_proxy_entry_t {
@@ -223,6 +223,7 @@ typedef struct H5AC_proxy_entry_t {
 #define H5AC__DEFAULT_METADATA_WRITE_STRATEGY   \
                                 H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED
 
+/* clang-format off */
 #ifdef H5_HAVE_PARALLEL
 #define H5AC__DEFAULT_CACHE_CONFIG                                            \
 {                                                                             \
@@ -255,9 +256,9 @@ typedef struct H5AC_proxy_entry_t {
   /* int         epochs_before_eviction = */ 3,                               \
   /* hbool_t     apply_empty_reserve    = */ TRUE,                            \
   /* double      empty_reserve          = */ 0.1f,                            \
-  /* size_t	 dirty_bytes_threshold  = */ (256 * 1024),                    \
-  /* int	metadata_write_strategy = */                                  \
-				       H5AC__DEFAULT_METADATA_WRITE_STRATEGY  \
+  /* size_t     dirty_bytes_threshold  = */ (256 * 1024),                    \
+  /* int    metadata_write_strategy = */                                  \
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY  \
 }
 #else /* H5_HAVE_PARALLEL */
 #define H5AC__DEFAULT_CACHE_CONFIG                                            \
@@ -291,9 +292,9 @@ typedef struct H5AC_proxy_entry_t {
   /* int         epochs_before_eviction = */ 3,                               \
   /* hbool_t     apply_empty_reserve    = */ TRUE,                            \
   /* double      empty_reserve          = */ 0.1f,                            \
-  /* size_t	 dirty_bytes_threshold  = */ (256 * 1024),                    \
-  /* int	metadata_write_strategy = */                                  \
-				       H5AC__DEFAULT_METADATA_WRITE_STRATEGY  \
+  /* size_t     dirty_bytes_threshold  = */ (256 * 1024),                    \
+  /* int    metadata_write_strategy = */                                  \
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY  \
 }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -304,6 +305,7 @@ typedef struct H5AC_proxy_entry_t {
    /* hbool_t save_resize_status = */ FALSE,                                 \
    /* int32_t entry_ageout       = */ H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE  \
 }
+/* clang-format on */
 /*
  * Library prototypes.
  */
@@ -313,21 +315,21 @@ typedef struct H5AC_proxy_entry_t {
  * the equivalent flags from H5Cprivate.h.
  */
 
-#define H5AC__NO_FLAGS_SET		  H5C__NO_FLAGS_SET
-#define H5AC__SET_FLUSH_MARKER_FLAG	  H5C__SET_FLUSH_MARKER_FLAG
-#define H5AC__DELETED_FLAG		  H5C__DELETED_FLAG
-#define H5AC__DIRTIED_FLAG		  H5C__DIRTIED_FLAG
-#define H5AC__PIN_ENTRY_FLAG		  H5C__PIN_ENTRY_FLAG
-#define H5AC__UNPIN_ENTRY_FLAG		  H5C__UNPIN_ENTRY_FLAG
-#define H5AC__FLUSH_INVALIDATE_FLAG	  H5C__FLUSH_INVALIDATE_FLAG
-#define H5AC__FLUSH_CLEAR_ONLY_FLAG	  H5C__FLUSH_CLEAR_ONLY_FLAG
+#define H5AC__NO_FLAGS_SET          H5C__NO_FLAGS_SET
+#define H5AC__SET_FLUSH_MARKER_FLAG      H5C__SET_FLUSH_MARKER_FLAG
+#define H5AC__DELETED_FLAG          H5C__DELETED_FLAG
+#define H5AC__DIRTIED_FLAG          H5C__DIRTIED_FLAG
+#define H5AC__PIN_ENTRY_FLAG          H5C__PIN_ENTRY_FLAG
+#define H5AC__UNPIN_ENTRY_FLAG          H5C__UNPIN_ENTRY_FLAG
+#define H5AC__FLUSH_INVALIDATE_FLAG      H5C__FLUSH_INVALIDATE_FLAG
+#define H5AC__FLUSH_CLEAR_ONLY_FLAG      H5C__FLUSH_CLEAR_ONLY_FLAG
 #define H5AC__FLUSH_MARKED_ENTRIES_FLAG   H5C__FLUSH_MARKED_ENTRIES_FLAG
 #define H5AC__FLUSH_IGNORE_PROTECTED_FLAG H5C__FLUSH_IGNORE_PROTECTED_FLAG
-#define H5AC__READ_ONLY_FLAG		  H5C__READ_ONLY_FLAG
-#define H5AC__FREE_FILE_SPACE_FLAG	  H5C__FREE_FILE_SPACE_FLAG
+#define H5AC__READ_ONLY_FLAG          H5C__READ_ONLY_FLAG
+#define H5AC__FREE_FILE_SPACE_FLAG      H5C__FREE_FILE_SPACE_FLAG
 #define H5AC__TAKE_OWNERSHIP_FLAG         H5C__TAKE_OWNERSHIP_FLAG
-#define H5AC__FLUSH_LAST_FLAG		  H5C__FLUSH_LAST_FLAG
-#define H5AC__FLUSH_COLLECTIVELY_FLAG	  H5C__FLUSH_COLLECTIVELY_FLAG
+#define H5AC__FLUSH_LAST_FLAG          H5C__FLUSH_LAST_FLAG
+#define H5AC__FLUSH_COLLECTIVELY_FLAG      H5C__FLUSH_COLLECTIVELY_FLAG
 
 
 /* #defines of flags used to report entry status in the
