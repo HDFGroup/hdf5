@@ -190,7 +190,7 @@ typedef herr_t (*H5L_elink_traverse_t)(const char *parent_file_name,
 /*********************/
 
 /**
- * \ingroup LMGT
+ * \ingroup H5L
  *
  * \brief Moves a link within an HDF5 file
  *
@@ -250,7 +250,7 @@ typedef herr_t (*H5L_elink_traverse_t)(const char *parent_file_name,
 H5_DLL herr_t H5Lmove(hid_t src_loc, const char *src_name, hid_t dst_loc,
     const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
 /**
- * \ingroup LMGT
+ * \ingroup H5L
  *
  * \brief Creates an identical copy of a link with the same creation time and
  *        target.  The new link can have a different name and be in a different
@@ -311,7 +311,7 @@ H5_DLL herr_t H5Lmove(hid_t src_loc, const char *src_name, hid_t dst_loc,
 H5_DLL herr_t H5Lcopy(hid_t src_loc, const char *src_name, hid_t dst_loc,
     const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
 /**
- * \ingroup LMGT
+ * \ingroup H5L
  *
  * \brief Creates a hard link to an object
  *
@@ -362,7 +362,7 @@ H5_DLL herr_t H5Lcopy(hid_t src_loc, const char *src_name, hid_t dst_loc,
 H5_DLL herr_t H5Lcreate_hard(hid_t cur_loc, const char *cur_name,
     hid_t dst_loc, const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
 /**
- * \ingroup LMGT
+ * \ingroup H5L
  *
  * \brief Creates a soft link
  *
@@ -428,7 +428,7 @@ H5_DLL herr_t H5Lcreate_hard(hid_t cur_loc, const char *cur_name,
 H5_DLL herr_t H5Lcreate_soft(const char *link_target, hid_t link_loc_id,
     const char *link_name, hid_t lcpl_id, hid_t lapl_id);
 /**
- * \ingroup LMGT
+ * \ingroup H5L
  *
  * \brief Removes a link from a group
  *
@@ -468,7 +468,7 @@ H5_DLL herr_t H5Lcreate_soft(const char *link_target, hid_t link_loc_id,
  */
 H5_DLL herr_t H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id);
 /**
- * \ingroup LMGT
+ * \ingroup H5L
  *
  * \brief Removes the \Emph{n}-th link in a group
  *
@@ -499,7 +499,7 @@ H5_DLL herr_t H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id);
 H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id);
 /**
- * \ingroup LMGT
+ * \ingroup H5L
  *
  * \brief Returns the value of a link
  *
@@ -557,7 +557,7 @@ H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
 H5_DLL herr_t H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/,
     size_t size, hid_t lapl_id);
 /**
- * \ingroup LMGT
+ * \ingroup H5L
  *
  * \brief Retrieves value of the \Emph{n}-th link in a group, according to the order within an index
  *
@@ -618,7 +618,7 @@ H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     void *buf/*out*/, size_t size, hid_t lapl_id);
 /**
- * \ingroup LMGT
+ * \ingroup H5L
  *
  * \brief Determines whether a link with the specified name exists in a group
  *
@@ -707,7 +707,7 @@ H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name,
  */
 H5_DLL htri_t H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id);
 /**
- * \ingroup LMGT
+ * \ingroup H5L
  *
  * \brief Returns information about a link
  *
@@ -780,7 +780,7 @@ H5_DLL htri_t H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id);
 H5_DLL herr_t H5Lget_info2(hid_t loc_id, const char *name,
     H5L_info2_t *linfo /*out*/, hid_t lapl_id);
 /**
- * \ingroup LMGT
+ * \ingroup H5L
  *
  * \brief Retrieves metadata for a link in a group, according to the order
  *        within a field or index
@@ -837,7 +837,7 @@ H5_DLL herr_t H5Lget_info_by_idx2(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     H5L_info2_t *linfo /*out*/, hid_t lapl_id);
 /**
- * \ingroup LMGT
+ * \ingroup H5L
  *
  * \brief Retrieves name of the \Emph{n}-th link in a group, according to the
  *        order within a specified field or index
@@ -1200,7 +1200,7 @@ H5_DLL herr_t H5Lvisit_by_name2(hid_t loc_id, const char *group_name,
 
 /* UD link functions */
 /**
- * \ingroup LMGT
+ * \ingroup H5L
  *
  * \brief Creates a link of a user-defined type
  *
@@ -1245,7 +1245,7 @@ H5_DLL herr_t H5Lcreate_ud(hid_t link_loc_id, const char *link_name,
     H5L_type_t link_type, const void *udata, size_t udata_size, hid_t lcpl_id,
     hid_t lapl_id);
 /**
- * \ingroup LMGTA
+ * \ingroup H5LA
  *
  * \brief Registers a user-defined link class or changes behavior of an
  *        existing class
@@ -1401,7 +1401,7 @@ H5_DLL herr_t H5Lcreate_ud(hid_t link_loc_id, const char *link_name,
  */
 H5_DLL herr_t H5Lregister(const H5L_class_t *cls);
 /**
- * \ingroup LMGTA
+ * \ingroup H5LA
  *
  * \brief Unregisters a class of user-defined links
  *
@@ -1420,7 +1420,7 @@ H5_DLL herr_t H5Lregister(const H5L_class_t *cls);
  */
 H5_DLL herr_t H5Lunregister(H5L_type_t id);
 /**
- * \ingroup LMGTA
+ * \ingroup H5LA
  *
  * \brief Determines whether a class of user-defined links is registered
  *
@@ -1443,7 +1443,7 @@ H5_DLL htri_t H5Lis_registered(H5L_type_t id);
 
 /* External link functions */
 /**
- * \ingroup LMGT
+ * \ingroup H5L
  *
  * \brief Decodes external link information
  *
@@ -1489,7 +1489,7 @@ H5_DLL htri_t H5Lis_registered(H5L_type_t id);
 H5_DLL herr_t H5Lunpack_elink_val(const void *ext_linkval/*in*/, size_t link_size,
    unsigned *flags, const char **filename/*out*/, const char **obj_path /*out*/);
 /**
- * \ingroup LMGT
+ * \ingroup H5L
  *
  * \brief Creates an external link, a soft link to an object in a different file.
  *
@@ -1671,7 +1671,7 @@ typedef herr_t (*H5L_iterate1_t)(hid_t group, const char *name, const H5L_info1_
 
 /* Function prototypes */
 /**
- * \ingroup LMGT
+ * \ingroup H5L
  *
  * \brief Returns information about a link
  *
@@ -1753,7 +1753,7 @@ typedef herr_t (*H5L_iterate1_t)(hid_t group, const char *name, const H5L_info1_
 H5_DLL herr_t H5Lget_info1(hid_t loc_id, const char *name,
     H5L_info1_t *linfo /*out*/, hid_t lapl_id);
 /**
- * \ingroup LMGT
+ * \ingroup H5L
  *
  * \brief Retrieves metadata for a link in a group, according to the order
  *        within a field or index
