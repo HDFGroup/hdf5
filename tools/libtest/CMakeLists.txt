@@ -16,6 +16,13 @@ else ()
 endif ()
 set_target_properties (h5tools_test_utils PROPERTIES FOLDER tools)
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_H5TOOLS_TEST_SRC_FORMAT h5tools_test_utils)
+endif ()
+
 if (HDF5_TEST_TOOLS AND HDF5_TEST_SERIAL)
   include (CMakeTests.cmake)
 endif ()
