@@ -64,6 +64,7 @@ typedef struct H5FD_gds_t {
 #ifdef H5_GDS_SUPPORT
     int             cu_fd;  /* the filesystem file descriptor   */
     int             num_io_threads; /* number of io threads for cufile */
+    size_t          io_block_size; /* io block size or cufile */
 #endif
 
     haddr_t         eoa;    /* end of allocated region          */
@@ -423,6 +424,7 @@ H5FD_gds_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
     // TODO: error checking for num_io_threads
     H5Pget( fapl_id, "H5_GDS_VFD_IO_THREADS", &file->num_io_threads );
+    H5Pget( fapl_id, "H5_GDS_VFD_IO_BLOCK_SIZE", &file->io_block_size );
 #endif
     H5_CHECKED_ASSIGN(file->eof, haddr_t, sb.st_size, h5_stat_size_t);
     file->pos = HADDR_UNDEF;
@@ -773,6 +775,7 @@ typedef struct
   CUfileHandle_t cfr_handle; //cuFile Handle
   off_t offset; // File offset
   off_t devPtr_offset; // device address offset
+  size_t block_size; // I/O chunk size
   size_t size; // Read/Write size
 } rd_thread_data_t;
 
@@ -783,6 +786,7 @@ typedef struct
   CUfileHandle_t cfr_handle; //cuFile Handle
   off_t offset; // File offset
   off_t devPtr_offset; // device address offset
+  size_t block_size; // I/O chunk size
   size_t size; // Read/Write size
 } wr_thread_data_t;
 
@@ -793,10 +797,19 @@ static void *read_thread_fn(void *data) {
   // fprintf(stderr, "read thread -- ptr: %p, size: %lu, foffset: %ld, doffset: %ld\n",
     // t->devPtr, t->size, t->offset, t->devPtr_offset);
 
-  ret = cuFileRead(t->cfr_handle, t->devPtr, t->size, t->offset, t->devPtr_offset);
-  assert(ret > 0);
-
-   // TODO: break up io sizes into smaller chunks
+  while( t->size > 0 ) {
+    if(t->size > t->block_size) {
+      ret = cuFileRead(t->cfr_handle, t->devPtr, t->block_size, t->offset, t->devPtr_offset);
+      t->offset += t->block_size;
+      t->devPtr_offset += t->block_size;
+      t->size -= t->block_size;
+    }
+    else {
+      ret = cuFileRead(t->cfr_handle, t->devPtr, t->size, t->offset, t->devPtr_offset);
+      t->size = 0;
+    }
+    assert(ret > 0);
+  }
 
   // fprintf(stderr, "read success thread -- ptr: %p, size: %lu, foffset: %ld, doffset: %ld\n",
     // t->devPtr, t->size, t->offset, t->devPtr_offset);
@@ -818,8 +831,19 @@ static void *write_thread_fn(void *data) {
   // cudaEventCreate(&stop);
   // cudaEventRecord(start, 0);
 
-  ret = cuFileWrite(t->cfr_handle, t->devPtr, t->size, t->offset, t->devPtr_offset);
-  assert(ret > 0);
+  while( t->size > 0 ) {
+    if(t->size > t->block_size) {
+      ret = cuFileWrite(t->cfr_handle, t->devPtr, t->block_size, t->offset, t->devPtr_offset);
+      t->offset += t->block_size;
+      t->devPtr_offset += t->block_size;
+      t->size -= t->block_size;
+    }
+    else {
+      ret = cuFileWrite(t->cfr_handle, t->devPtr, t->size, t->offset, t->devPtr_offset);
+      t->size = 0;
+    }
+    assert(ret > 0);
+  }
 
   // cudaEventRecord(stop, 0);
   // cudaEventSynchronize(stop);
@@ -827,7 +851,6 @@ static void *write_thread_fn(void *data) {
 
   // printf("cuFileWrite: %f ms\n", total_time);
 
-   // TODO: break up io sizes into smaller chunks
   // printf("wrt success thread -- ptr: %p, size: %lu, foffset: %ld, doffset: %ld\n",
     // t->devPtr, t->size, t->offset, t->devPtr_offset);
 
@@ -869,6 +892,7 @@ H5FD_gds_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSE
     struct timespec start_time, stop_time;
 
     int io_threads = file->num_io_threads;
+    int block_size = file->io_block_size;
 
     rd_thread_data_t *t;
     pthread_t *thread;
@@ -907,12 +931,13 @@ H5FD_gds_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSE
       if( io_threads > 0 ) {
         assert(size != 0);
 
-        // make each thread access at least a page
+        // make each thread access at least a 4K page
         if( (1 + (size-1)/4096) < (unsigned)io_threads ) {
           io_threads = (int) (1 + ((size-1)/4096));
         }
 
         printf("\tH5Pset_gds_read using io_threads: %d\n", io_threads);
+        printf("\tH5Pset_gds_read using io_block_size: %d\n", block_size);
 
         t = (rd_thread_data_t *)malloc((unsigned)io_threads*sizeof(rd_thread_data_t));
         thread = (pthread_t *)malloc((unsigned)io_threads*sizeof(pthread_t));
@@ -927,6 +952,7 @@ H5FD_gds_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSE
           t[ii].offset = (off_t)(offset + ii*io_chunk);
           t[ii].devPtr_offset = (off_t)ii*io_chunk;
           t[ii].size = (size_t)io_chunk;
+          t[ii].block_size = block_size;
 
           if(ii == io_threads-1) {
             t[ii].size = (size_t)(io_chunk + io_chunk_rem);
@@ -1072,6 +1098,7 @@ H5FD_gds_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
     struct timespec start_time, stop_time;
 
     int io_threads = file->num_io_threads;
+    int block_size = file->io_block_size;
 
     wr_thread_data_t *t;
     pthread_t *thread;
@@ -1110,12 +1137,14 @@ H5FD_gds_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
       if( io_threads > 0 ) {
         assert(size != 0);
 
-        // make each thread access at least a page
+        // make each thread access at least a 4K page
         if( (1 + (size-1)/4096) < (unsigned)io_threads ) {
           io_threads = (int) (1 + ((size-1)/4096));
         }
 
         printf("\tH5Pset_gds_write using io_threads: %d\n", io_threads);
+        printf("\tH5Pset_gds_write using io_block_size: %d\n", block_size);
+
 
         t = (wr_thread_data_t *)malloc((unsigned)io_threads*sizeof(wr_thread_data_t));
         thread = (pthread_t *)malloc((unsigned)io_threads*sizeof(pthread_t));
@@ -1130,6 +1159,7 @@ H5FD_gds_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
           t[ii].offset = (off_t)(offset + ii*io_chunk);
           t[ii].devPtr_offset = (off_t)ii*io_chunk;
           t[ii].size = (size_t)io_chunk;
+          t[ii].block_size = block_size;
 
           if(ii == io_threads-1) {
             t[ii].size = (size_t)(io_chunk + io_chunk_rem);
