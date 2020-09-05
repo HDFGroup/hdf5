@@ -163,12 +163,14 @@ typedef enum H5T_bkg_t {
 /**
  * Type conversion client data
  */
+//! [H5T_cdata_t_snip]
 typedef struct H5T_cdata_t {
     H5T_cmd_t		command;/**< what should the conversion function do?    */
     H5T_bkg_t		need_bkg;/**< is the background buffer needed?	     */
     hbool_t		recalc;	/**< recalculate private data		     */
     void		*priv;	/**< private data				     */
 } H5T_cdata_t;
+//! [H5T_cdata_t_snip]
 
 /**
  * Conversion function persistence
@@ -241,9 +243,11 @@ extern "C" {
 /**
  * All datatype conversion functions are...
  */
+//! [H5T_conv_t_snip]
 typedef herr_t (*H5T_conv_t) (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
       size_t nelmts, size_t buf_stride, size_t bkg_stride, void *buf,
       void *bkg, hid_t dset_xfer_plist);
+//! [H5T_conv_t_snip]
 
 /**
  * Exception handler.  If an exception like overflow happenes during conversion,
@@ -1134,6 +1138,42 @@ H5_DLL herr_t H5Tenum_valueof(hid_t type, const char *name,
 			      void *value/*out*/);
 
 /* Operations defined on variable-length datatypes */
+/**
+ * \ingroup VLEN
+ *
+ * \brief Creates a new variable-length array datatype
+ *
+ * \type_id{base_id}, the element type of the datatype to create
+ *
+ * \return \hid_t{datatype}
+ *
+ * \details H5Tvlen_create() creates a new one-dimensional array datatype of
+ *          variable-length (VL) with the base datatype \p base_id.
+ *
+ *          This one-dimensional array often represents a data sequence of the
+ *          base datatype, such as characters for character sequences or vertex
+ *          coordinates for polygon lists. The base type specified for the VL
+ *          datatype can be any HDF5 datatype, including another VL datatype, a
+ *          compound datatype, or an atomic datatype.
+ *
+ *          When necessary, use H5Tget_super() to determine the base type of
+ *          the VL datatype.
+ *
+ *          The datatype identifier returned from this function should be
+ *          released with H5Tclose() or resource leaks will result. Under
+ *          certain circumstances, H5Dvlen_reclaim() must also be used.
+ *
+ * \attention H5Tvlen_create() cannot be used to create a variable-length
+ *            string datatype. H5Tvlen_create() called with a string or
+ *            character base type creates a variable-length sequence of strings
+ *            (a variable-length, 1-dimensional array), with each element of
+ *            the array being of the string or character base type.\n
+ *            To create a variable-length string datatype, see "Creating
+ *            variable-length string datatypes."
+ *
+ * \todo Fix the reference.
+ *
+ */
 H5_DLL hid_t H5Tvlen_create(hid_t base_id);
 
 /* Operations defined on array datatypes */
@@ -1143,7 +1183,45 @@ H5_DLL int H5Tget_array_ndims(hid_t type_id);
 H5_DLL int H5Tget_array_dims2(hid_t type_id, hsize_t dims[]);
 
 /* Operations defined on opaque datatypes */
+/**
+ * \ingroup OPAQUE
+ *
+ * \brief Tags an opaque datatype
+ *
+ * \type_id{type} of an opaque datatype
+ * \param[in] tag Descriptive ASCII string with which the opaque datatype is
+ *                to be tagged
+ *
+ * \return \herr_t
+ *
+ * \details H5Tset_tag() tags an opaque datatype \p type with a descriptive
+ *          ASCII identifier, \p tag.
+ *
+ *          \p tag is intended to provide a concise description; the maximum
+ *          size is hard-coded in the HDF5 library as 256 bytes
+ *          (#H5T_OPAQUE_TAG_MAX).
+ *
+ * \version 1.6.5 The #H5T_OPAQUE_TAG_MAX macro constant, specifying the
+ *                maximum size of an opaque datatype tag, was added in
+ *                H5Tpublic.h.
+ */
 H5_DLL herr_t H5Tset_tag(hid_t type, const char *tag);
+/**
+ * \ingroup OPAQUE
+ *
+ * \brief Gets the tag associated with an opaque datatype
+ *
+ * \type_id{type} of an opaque datatype
+ *
+ * \return Returns a pointer to an allocated string if successful; otherwise
+ *         returns NULL.
+ *
+ * \details H5Tget_tag() returns the tag associated with the opaque datatype
+ *         \p type.
+ *
+ * \attention The tag is returned via a pointer to an allocated string, which
+ *            the caller must free.
+ */
 H5_DLL char *H5Tget_tag(hid_t type);
 
 /* Querying property values */
@@ -1172,7 +1250,7 @@ H5_DLL htri_t H5Tdetect_class(hid_t type_id, H5T_class_t cls);
  * pointer to the actual string, or \c sizeof(\c char \c *). This function does not
  * return the size of actual variable-length string data.
  *
- * For variable-length sequence datatypes (see H5Tvlen_create), the returned
+ * For variable-length sequence datatypes (see H5Tvlen_create()), the returned
  * value is the size of the \p hvl_t struct, or \c sizeof(\p hvl_t). The \p hvl_t
  * struct contains a pointer to the actual data and a size value.
  * This function does not return the size of actual variable-length sequence data.
@@ -1209,8 +1287,6 @@ H5_DLL htri_t H5Tis_variable_str(hid_t type_id);
 H5_DLL hid_t H5Tget_native_type(hid_t type_id, H5T_direction_t direction);
 
 /* Setting property values */
-
-/* ---------------------------------------------------------------------------*/
 /**
  * \ingroup GTO
  *
@@ -1271,14 +1347,195 @@ H5_DLL herr_t H5Tset_cset(hid_t type_id, H5T_cset_t cset);
 H5_DLL herr_t H5Tset_strpad(hid_t type_id, H5T_str_t strpad);
 
 /* Type conversion database */
+/**
+ * \ingroup CONV
+ *
+ * \brief Registers a datatype conversion function
+ *
+ * \param[in] pers Conversion function type
+ * \param[in] name Name displayed in diagnostic output
+ * \type_id{src_id} of source datatype
+ * \type_id{dst_id} of destination datatype
+ * \param[in] func Function to convert between source and destination datatypes
+ *
+ * \return \herr_t
+ *
+ * \details H5Tregister() registers a hard or soft conversion function for a
+ *          datatype conversion path. The parameter \p pers indicates whether a
+ *          conversion function is hard (#H5T_PERS_HARD) or soft
+ *          (#H5T_PERS_SOFT). User-defined functions employing compiler casting
+ *          are designated as \Emph{hard}; other user-defined conversion
+ *          functions registered with the HDF5 library (with H5Tregister() )
+ *          are designated as \Emph{soft}. The HDF5 library also has its own
+ *          hard and soft conversion functions.
+ *
+ *          A conversion path can have only one hard function. When type is
+ *          #H5T_PERS_HARD, \p func replaces any previous hard function.
+ *
+ *          When type is #H5T_PERS_SOFT, H5Tregister() adds the function to the
+ *          end of the master soft list and replaces the soft function in all
+ *          applicable existing conversion paths. Soft functions are used when
+ *          determining which conversion function is appropriate for this path.
+ *
+ *          The \p name is used only for debugging and should be a short
+ *          identifier for the function.
+ *
+ *          The path is specified by the source and destination datatypes \p
+ *          src_id and \p dst_id. For soft conversion functions, only the class
+ *          of these types is important.
+ *
+ *          The type of the conversion function pointer is declared as:
+ *          \snippet this H5T_conv_t_snip
+ *
+ *          The \ref H5T_cdata_t \c struct is declared as:
+ *          \snippet this H5T_cdata_t_snip
+ *
+ * \since 1.6.3 The following change occurred in the \ref H5T_conv_t function:
+ *              the \c nelmts parameter type changed to size_t.
+ *
+ */
 H5_DLL herr_t H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id,
 			   hid_t dst_id, H5T_conv_t func);
+/**
+ * \ingroup CONV
+ *
+ * \brief Removes a conversion function
+ *
+ * \param[in] pers Conversion function type
+ * \param[in] name Name displayed in diagnostic output
+ * \type_id{src_id} of source datatype
+ * \type_id{dst_id} of destination datatype
+ * \param[in] func Function to convert between source and destination datatypes
+ *
+ * \return \herr_t
+ *
+ * \details H5Tunregister() removes a conversion function matching criteria
+ *          such as soft or hard conversion, source and destination types, and
+ *          the conversion function.
+ *
+ *          If a user is trying to remove a conversion function he registered,
+ *          all parameters can be used. If he is trying to remove a library’s
+ *          default conversion function, there is no guarantee the \p name and
+ *          \p func parameters will match the user’s chosen values. Passing in
+ *          some values may cause this function to fail. A good practice is to
+ *          pass in NULL as their values.
+ *
+ *          All parameters are optional. The missing parameters will be used to
+ *          generalize the search criteria.
+ *
+ *          The conversion function pointer type declaration is described in
+ *          H5Tregister().
+ *
+ * \since 1.6.3 The following change occurred in the \ref H5T_conv_t function:
+ *              the \c nelmts parameter type changed to size_t.
+ *
+ */
 H5_DLL herr_t H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id,
 			     hid_t dst_id, H5T_conv_t func);
+/**
+ * \ingroup CONV
+ *
+ * \brief Finds a conversion function
+ *
+ * \type_id{src_id} of source datatype
+ * \type_id{dst_id} of destination datatype
+ * \param[out] pcdata Pointer to type conversion data
+ *
+ * \return Returns a pointer to a suitable conversion function if successful.
+ *         Otherwise returns NULL.
+ *
+ * \details H5Tfind() finds a conversion function that can handle a conversion
+ *          from type \p src_id to type \p dst_id. The \p pcdata argument is a
+ *          pointer to a pointer to type conversion data which was created and
+ *          initialized by the soft type conversion function of this path when
+ *          the conversion function was installed on the path.
+ *
+ */
 H5_DLL H5T_conv_t H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata);
+/**
+ * \ingroup CONV
+ *
+ * \brief Check whether the library’s default conversion is hard conversion
+ *
+ * \type_id{src_id} of source datatype
+ * \type_id{dst_id} of destination datatype
+ *
+ * \return \htri_t
+ *
+ * \details H5Tcompiler_conv() determines whether the library’s conversion
+ *          function from type \p src_id to type \p dst_id is a compiler (hard)
+ *          conversion or not. A compiler conversion uses compiler’s casting; a
+ *          library (soft) conversion uses the library’s own conversion
+ *          function.
+ *
+ * \since 1.8.0
+ *
+ */
 H5_DLL htri_t H5Tcompiler_conv(hid_t src_id, hid_t dst_id);
+/**
+ * \ingroup CONV
+ *
+ * \brief Converts data from one specified datatype to another
+ *
+ * \type_id{src_id} of source datatype
+ * \type_id{dst_id} of destination datatype
+ * \param[in] nelmts Size of array \p buf
+ * \param[in,out] buf Array containing pre- and post-conversion values
+ * \param[in] background Optional background buffer
+ * \dxpl_id{plist_id}
+ *
+ * \return \herr_t
+ *
+ * \note H5Tconvert() will not resize the buffer \p buf; it must be large
+ *       enough to hold the larger of the input and output data.
+ *
+ * \details H5Tconvert() converts \p nelmts elements from a source datatype,
+ *          specified by \p src_id, to a destination datatype, \p dst_id. The
+ *          source elements are packed in \p buf and on return the destination
+ *          elements will be packed in \p buf. That is, the conversion is
+ *          performed in place.
+ *
+ *          The optional background buffer is for use with compound datatypes.
+ *          It is an array of \p nelmts values for the destination datatype
+ *          which can then be merged with the converted values to recreate the
+ *          compound datatype. For instance, background might be an array of
+ *          structs with the \c a and \c b fields already initialized and the
+ *          conversion of buf supplies the \c c and \c d field values.
+ *
+ *          The parameter plist_id contains the dataset transfer property list
+ *          identifier which is passed to the conversion functions. As of
+ *          Release 1.2, this parameter is only used to pass along the
+ *          variable-length datatype custom allocation information.
+ *
+ * \version 1.6.3 \p nelmts parameter type changed to size_t.
+ * \version 1.4.0 \p nelmts parameter type changed to \ref hsize_t.
+ *
+ */
+
 H5_DLL herr_t H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts,
 			  void *buf, void *background, hid_t plist_id);
+/**
+ * \ingroup VLEN
+ *
+ * \brief Reclaims the variable length (VL) datatype memory buffers
+ *
+ * \type_id
+ * \space_id
+ * \dxpl_id{plist_id} used to create the buffer
+ * \param[in] buf Pointer to the buffer to be reclaimed
+ *
+ * \return \herr_t
+ *
+ * \details H5Treclaim() reclaims memory buffers created to store VL datatypes.
+ *          It only frees the variable length data in the selection defined in
+ *          the dataspace specified by \p space_id. The dataset transfer
+ *          property list \p plist_id is required to find the correct
+ *          allocation and/or free methods for the variable-length data in the
+ *          buffer.
+ *
+ * \since 1.12.0
+ *
+ */
 H5_DLL herr_t H5Treclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
