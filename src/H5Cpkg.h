@@ -26,6 +26,9 @@
  *        reason why this file was created.
  */
 
+/* clang-format off */
+/* Maintain current format by disabling format for this file */
+
 #if !(defined H5C_FRIEND || defined H5C_MODULE)
 #error "Do not include this file outside the H5C package!"
 #endif
@@ -169,7 +172,6 @@
 
 #if H5C_DO_SANITY_CHECKS
 
-/* clang-format off */
 #define H5C__DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, Size, fv) \
 if ( ( (head_ptr) == NULL ) ||                                               \
      ( (tail_ptr) == NULL ) ||                                               \
@@ -247,7 +249,6 @@ if ( ( (new_size) > (dll_size) ) ||                                            \
      ( ( (dll_len) == 1 ) && ( (new_size) != (dll_size) ) ) ) {                \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "DLL post size update SC failed") \
 }
-/* clang-format on */
 
 #else /* H5C_DO_SANITY_CHECKS */
 
@@ -336,7 +337,6 @@ if ( ( (new_size) > (dll_size) ) ||                                            \
 
 #if H5C_DO_SANITY_CHECKS
 
-/* clang-format off */
 #define H5C__AUX_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv) \
 if ( ( (hd_ptr) == NULL ) ||                                                   \
      ( (tail_ptr) == NULL ) ||                                                 \
@@ -398,7 +398,6 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
    ) {                                                                         \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "AUX DLL pre insert SC failed")   \
 }
-/* clang-format on */
 
 #else /* H5C_DO_SANITY_CHECKS */
 
@@ -475,7 +474,6 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 
 #if H5C_DO_SANITY_CHECKS
 
-/* clang-format off */
 #define H5C__IL_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv) \
 if ( ( (hd_ptr) == NULL ) ||                                                  \
      ( (tail_ptr) == NULL ) ||                                                \
@@ -538,7 +536,6 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
     HDassert(0 && "IL DLL sanity check failed");                           \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "IL DLL sanity check failed") \
 }
-/* clang-format on */
 
 #else /* H5C_DO_SANITY_CHECKS */
 
@@ -619,7 +616,6 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
 
 #if H5C_COLLECT_CACHE_STATS
 
-/* clang-format off */
 #define H5C__UPDATE_MAX_INDEX_SIZE_STATS(cache_ptr)                        \
         if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size )       \
             (cache_ptr)->max_index_size = (cache_ptr)->index_size;         \
@@ -631,7 +627,6 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
                 (cache_ptr)->max_dirty_index_size )                        \
             (cache_ptr)->max_dirty_index_size =                            \
                 (cache_ptr)->dirty_index_size;
-/* clang-format on */
 
 #define H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr) \
     (((cache_ptr)->dirty_pins)[(entry_ptr)->type->id])++;
@@ -755,7 +750,6 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
     ((entry_ptr)->flushes)++;                                     \
 }
 
-/* clang-format off */
 #define H5C__UPDATE_STATS_FOR_EVICTION(cache_ptr, entry_ptr, take_ownership) \
 {                                                                            \
     if ( take_ownership )                                                    \
@@ -922,7 +916,6 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
     if ( (cache_ptr)->pl_size > (cache_ptr)->max_pl_size )                  \
         (cache_ptr)->max_pl_size = (cache_ptr)->pl_size;                    \
 }
-/* clang-format on */
 
 #define H5C__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr)      \
 {                                                            \
@@ -1006,7 +999,6 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
 
 #if H5C_DO_SANITY_CHECKS
 
-/* clang-format off */
 #define H5C__PRE_HT_INSERT_SC(cache_ptr, entry_ptr, fail_val)           \
 if ( ( (cache_ptr) == NULL ) ||                                         \
      ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||                      \
@@ -1318,7 +1310,6 @@ if ( ( (cache_ptr)->index_size !=                                           \
     HDassert(FALSE);                                                        \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "post HT update for entry dirty SC failed") \
 }
-/* clang-format on */
 
 #else /* H5C_DO_SANITY_CHECKS */
 
@@ -1341,7 +1332,6 @@ if ( ( (cache_ptr)->index_size !=                                           \
 #endif /* H5C_DO_SANITY_CHECKS */
 
 
-/* clang-format off */
 #define H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, fail_val)                 \
 {                                                                            \
     int k;                                                                   \
@@ -1523,7 +1513,6 @@ if ( ( (cache_ptr)->index_size !=                                           \
     H5C__POST_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size,        \
                                       entry_ptr)                            \
 }
-/* clang-format on */
 
 
 /**************************************************************************
@@ -2806,7 +2795,6 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-/* clang-format off */
 #define H5C__UPDATE_RP_FOR_MOVE(cache_ptr, entry_ptr, was_dirty, fail_val) \
 {                                                                            \
     HDassert( (cache_ptr) );                                                 \
@@ -2913,7 +2901,6 @@ if ( ( (cache_ptr)->index_size !=                                           \
             /* End modified LRU specific code. */                            \
         }                                                                    \
 } /* H5C__UPDATE_RP_FOR_MOVE */
-/* clang-format on */
 
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
@@ -2952,7 +2939,6 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-/* clang-format off */
 #define H5C__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, entry_ptr, new_size)    \
 {                                                                         \
     HDassert( (cache_ptr) );                                              \
@@ -3051,7 +3037,6 @@ if ( ( (cache_ptr)->index_size !=                                           \
     }                                                                     \
                                                                           \
 } /* H5C__UPDATE_RP_FOR_SIZE_CHANGE */
- /* clang-format on */
 
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
@@ -3087,7 +3072,6 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
- /* clang-format off */
 #define H5C__UPDATE_RP_FOR_UNPIN(cache_ptr, entry_ptr, fail_val)       \
 {                                                                      \
     HDassert( (cache_ptr) );                                           \
@@ -3174,7 +3158,6 @@ if ( ( (cache_ptr)->index_size !=                                           \
         /* End modified LRU specific code. */                          \
                                                                        \
 } /* H5C__UPDATE_RP_FOR_UNPIN */
- /* clang-format off */
 
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
@@ -3225,7 +3208,6 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
- /* clang-format off */
 #define H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, fail_val)       \
 {                                                                          \
     HDassert( (cache_ptr) );                                               \
@@ -3321,7 +3303,6 @@ if ( ( (cache_ptr)->index_size !=                                           \
         /* End modified LRU specific code. */                              \
     }                                                                      \
 } /* H5C__UPDATE_RP_FOR_UNPROTECT */
- /* clang-format on */
 
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
@@ -3329,7 +3310,6 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #if H5C_DO_SANITY_CHECKS
 
- /* clang-format off */
 #define H5C__COLL_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv) \
 if ( ( (hd_ptr) == NULL ) ||                                                   \
      ( (tail_ptr) == NULL ) ||                                                 \
@@ -3394,7 +3374,6 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
     HDassert(0 && "COLL DLL pre insert SC failed");                            \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "COLL DLL pre insert SC failed")  \
 }
- /* clang-format on */
 
 #else /* H5C_DO_SANITY_CHECKS */
 
@@ -3485,7 +3464,6 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
  *-------------------------------------------------------------------------
  */
 
- /* clang-format off */
 #define H5C__INSERT_IN_COLL_LIST(cache_ptr, entry_ptr, fail_val)        \
 {                                                                       \
     HDassert( (cache_ptr) );                                            \
@@ -3501,7 +3479,6 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
                           (fail_val))                                   \
                                                                         \
 } /* H5C__INSERT_IN_COLL_LIST */
- /* clang-format on */
 
 
 /*-------------------------------------------------------------------------
@@ -3517,7 +3494,6 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
  *-------------------------------------------------------------------------
  */
 
- /* clang-format off */
 #define H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, fail_val)      \
 {                                                                       \
     HDassert( (cache_ptr) );                                            \
@@ -3533,7 +3509,6 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
                          (fail_val))                                    \
                                                                         \
 } /* H5C__REMOVE_FROM_COLL_LIST */
- /* clang-format on */
 
 
 /*-------------------------------------------------------------------------
@@ -3549,7 +3524,6 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
  *-------------------------------------------------------------------------
  */
 
- /* clang-format off */
 #define H5C__MOVE_TO_TOP_IN_COLL_LIST(cache_ptr, entry_ptr, fail_val)   \
 {                                                                       \
     HDassert( (cache_ptr) );                                            \
@@ -3570,7 +3544,6 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
                           (fail_val))                                   \
                                                                         \
 } /* H5C__MOVE_TO_TOP_IN_COLL_LIST */
- /* clang-format on */
 #endif /* H5_HAVE_PARALLEL */
 
 
@@ -5118,4 +5091,5 @@ H5_DLL herr_t H5C__verify_cork_tag_test(hid_t fid, H5O_token_t tag_token, hbool_
 #endif /* H5C_TESTING */
 
 #endif /* _H5Cpkg_H */
+/* clang-format on */
 
