@@ -123,7 +123,7 @@ typedef herr_t (*H5D_scatter_func_t)(const void **src_buf/*out*/,
 //! [H5D_gather_func_t_snip]
 typedef herr_t (*H5D_gather_func_t)(const void *dst_buf,
                                     size_t dst_buf_bytes_used, void *op_data);
-//! [H5D_gather_func_t_snip]
+//!< [H5D_gather_func_t_snip]
 
 
 /********************/
@@ -156,24 +156,25 @@ extern "C" {
  * \details H5Dcreate2() creates a new dataset named \p name at
  *          the location specified by \p loc_id, and associates constant
  *          and initial persistent properties with that dataset, including
- *          \p dtype_id, the datatype of each data element as stored
- *          in the file; \p space_id, the dataspace of the dataset; and
- *          other initial properties as defined in the dataset creation
- *          property and access property lists, \p dcpl_id and \p dapl_id,
+ *          the datatype \p dtype_id, the dataspace \p space_id, and
+ *          other properties as specified by the dataset creation property
+ *          list \p dcpl_id and the access property list \p dapl_id,
  *          respectively. Once created, the dataset is opened for access.
  *
- *          \p loc_id may be a file, group, dataset, named datatype,
+ *          \p loc_id may specify a file, group, dataset, named datatype,
  *          or attribute.  If an attribute, dataset, or named datatype is
- *          specified for \p loc_id then the dataset will be created at
- *          the location where the attribute, dataset, or named datatype
- *          is attached. \p name may be either an absolute path in the
- *          file or a relative path from \p loc_id naming the dataset.
+ *          specified then the dataset will be created at the location
+ *          where the attribute, dataset, or named datatype is attached.
  *
- *          If \p dtype_id is either a fixed-length or variable-length
- *          string, it is important to set the string length when defining
- *          the datatype. String datatypes are derived from #H5T_C_S1
- *          (or #H5T_FORTRAN_S1 for Fortran codes), which defaults to 1
- *          character in size.
+ *          \p name may be either an absolute path in the file or a relative
+ *          path from \p loc_id naming the dataset.
+ *
+ *          \p dtype_id specifies the datatype of each data element as stored
+ *          in the file.  If \p dtype_id is either a fixed-length or
+ *          variable-length string, it is important to set the string length
+ *          when defining the datatype. String datatypes are derived from
+ *          #H5T_C_S1 (or #H5T_FORTRAN_S1 for Fortran codes), which defaults
+ *          to 1 character in size.
  *
  *          If \p dtype_id is a committed datatype, and if the file location
  *          associated with the committed datatype is different from the
@@ -208,7 +209,8 @@ H5_DLL hid_t H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id,
 /**
  * \ingroup H5D
  *
- * \brief Creates a new dataset and links it into the file
+ * \brief Creates a dataset in a file without linking it into the file
+ *        structure
  *
  * \fgdta_loc_id
  * \type_id
@@ -221,11 +223,10 @@ H5_DLL hid_t H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id,
  * \details H5Dcreate_anon() creates a dataset in the file specified
  *          by \p loc_id.
  *
- *          \p loc_id may be a file, group, dataset, named datatype or
- *          attribute.  If an attribute, dataset, or named datatype is
- *          specified for \p loc_id then the dataset will be created
- *          at the location where the attribute, dataset, or named
- *          datatype is attached.
+ *          \p loc_id may specify a file, group, dataset, named datatype,
+ *          or attribute.  If an attribute, dataset, or named datatype is
+ *          specified then the dataset will be created at the location
+ *          where the attribute, dataset, or named datatype is attached.
  *
  *          The dataset’s datatype and dataspace are specified by
  *          \p type_id and \p space_id, respectively. These are the
@@ -233,20 +234,18 @@ H5_DLL hid_t H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id,
  *          the file, which may differ from the datatype and dataspace
  *          in application memory.
  *
- *          Dataset creation properties are specified in the dataset
- *          creation property list \p dcpl_id. Dataset access
- *          properties are specified in the dataset access property
- *          list \p dapl_id.
+ *          Dataset creation property list and dataset access creation
+ *          property list are specified by \p dcpl_id and \p dapl_id.
  *
  *          H5Dcreate_anon() returns a new dataset identifier. Using
  *          this identifier, the new dataset must be linked into the
  *          HDF5 file structure with H5Olink() or it will be deleted
  *          from the file when the file is closed.
  *
- *          See H5Dcreate() for further details and considerations on
- *          the use of H5Dcreate() and H5Dcreate_anon().
+ *          See H5Dcreate2() for further details and considerations on
+ *          the use of H5Dcreate2() and H5Dcreate_anon().
  *
- *          The differences between this function and H5Dcreate() are
+ *          The differences between this function and H5Dcreate2() are
  *          as follows:
  *          \li H5Dcreate_anon() explicitly includes a dataset access property
  *          list. H5Dcreate() always uses default dataset access properties.
@@ -282,11 +281,12 @@ H5_DLL hid_t H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id,
  *
  * \details H5Dopen2() opens the existing dataset specified
  *          by a location identifier and name, \p loc_id and \p name,
- *          respectively. \p loc_id may be a file, group, dataset, named
- *          datatype, or attribute.  If an attribute, dataset, or named
- *          datatype is specified for \p loc_id then the dataset will be
- *          opened at the location where the attribute, dataset, or named
- *          datatype is attached.
+ *          respectively.
+ *
+ *          \p loc_id may specify a file, group, dataset, named datatype,
+ *          or attribute.  If an attribute, dataset, or named datatype is
+ *          specified then the dataset will be opened at the location
+ *          where the attribute, dataset, or named datatype is attached.
  *
  *          The dataset access property list, \p dapl_id, provides
  *          information regarding access to the dataset.
@@ -422,14 +422,14 @@ H5_DLL hid_t H5Dget_create_plist(hid_t dset_id);
  *
  * \details H5Dget_access_plist() returns a copy of the
  *          dataset access property list used to open the specified
- *          dataset. Modifications to the returned property list will
- *          have no effect on the dataset it was retrieved from.
+ *          dataset, \p dset_id. Modifications to the returned property
+ *          list will have no effect on the dataset it was retrieved from.
  *
  *          The chunk cache parameters in the returned property lists will
- *          be those used by the dataset, \p dset_id. If the properties
- *          in the file access property list were used to determine the
- *          dataset's chunk cache configuration, then those properties will
- *          be present in the returned dataset access property list. If
+ *          be those used by the dataset. If the properties in the file
+ *          access property list were used to determine the dataset's
+ *          chunk cache configuration, then those properties will be
+ *          present in the returned dataset access property list. If
  *          the dataset does not use a chunked layout, then the chunk
  *          cache properties will be set to the default. The chunk cache
  *          properties in the returned list are considered to be “set”,
@@ -539,10 +539,13 @@ H5_DLL herr_t H5Dget_chunk_storage_size(hid_t dset_id, const hsize_t *offset, hs
  *          fspace_id is #H5S_ALL, the function will retrieve the total
  *          number of chunks stored for the dataset.
  *
+ *          \p fspace_id specifies the file dataspace selection.  It is
+ *          intended to take #H5S_ALL for specifying the current selection.
+ *
  *          \note Please be aware that this function currently does not
  *          support non-trivial selections, thus \p fspace_id has no
  *          effect. Also, the implementation does not handle the #H5S_ALL
- *          macro as an oversight.  As a workaround, application can get
+ *          macro correctly.  As a workaround, application can get
  *          the dataspace for the dataset using H5Dget_space() and pass that
  *          in for \p fspace_id.  This will be fixed in coming releases.
  *
@@ -578,14 +581,6 @@ H5_DLL herr_t H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks
  *          equal to the dataset’s rank. Each element is the logical
  *          position of the chunk’s first element in a dimension.
  *
- *          \note Please be aware that in the HDF5-1.10.5 release,
- *          the file space identifier does not (yet) support non-trivial
- *          selections. The implementation also does not currently support
- *          the #H5S_ALL macro.  As a workaround, get the dataspace for the
- *          dataset (H5Dget_space()), select all elements in the dataspace
- *          (H5Sselect_all()) and pass that in for \p fspace_id.  NULL can
- *          be passed in for any OUT parameters.
- *
  * \since 1.10.5
  *
  *-------------------------------------------------------------------------
@@ -598,10 +593,9 @@ H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, u
  * \brief Retrieves information about a chunk specified by its index
  *
  * \dset_id
- * \param[in]  fspace_id   File dataspace selection identifier; H5S_ALL if the
- * selection is the current extent of the dataset (See Note below)
+ * \param[in]  fspace_id   File dataspace selection identifier (See Note below)
  * \param[in]  chk_idx   Index of the chunk
- * \param[out]  offset   Coordinates of the chunk
+ * \param[out] offset   Coordinates of the chunk
  * \param[out] filter_mask Indicating filters used with the chunk when written
  * \param[out] addr Chunk address in the file
  * \param[out] size Chunk size in bytes, 0 if chunk doesn’t exist
@@ -615,7 +609,7 @@ H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, u
  *          chunks in the selection specified by fspace_id. If the queried
  *          chunk does not exist in the file, the size will be set to 0 and
  *          address to #HADDR_UNDEF. The value pointed to by filter_mask will
- *          not be modified. NULL can be passed in for any OUT parameters.
+ *          not be modified. NULL can be passed in for any \p out parameters.
  *
  *          \p chk_idx is the chunk index in the selection. Index value
  *          may have a value of 0 up to the number of chunks stored in
@@ -625,10 +619,13 @@ H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, u
  *          \note As of 1.10.5, the dataspace intersection is not yet
  *          supported, hence, the index is of all the written chunks.
  *
+ *          \p fspace_id specifies the file dataspace selection.  It is
+ *          intended to take #H5S_ALL for specifying the current selection.
+ *
  *          \note Please be aware that this function currently does not
  *          support non-trivial selections, thus \p fspace_id has no
  *          effect. Also, the implementation does not handle the #H5S_ALL
- *          macro as an oversight.  As a workaround, application can get
+ *          macro correctly.  As a workaround, application can get
  *          the dataspace for the dataset using H5Dget_space() and pass that
  *          in for \p fspace_id.  This will be fixed in coming releases.
  *
@@ -645,7 +642,7 @@ H5_DLL herr_t H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_idx,
  *
  * \dset_id
  *
- * \return Returns the offset in bytes; otherwise returns #HADDR_UNDEF,
+ * \return Returns the offset in bytes; otherwise, returns #HADDR_UNDEF,
  *         a negative value.
  *
  * \details H5Dget_offset() returns the address in the file of
@@ -1091,7 +1088,7 @@ H5_DLL herr_t H5Dvlen_get_buf_size(hid_t dset_id, hid_t type_id, hid_t space_id,
  * \param[in] buf_type_id   Datatype of dataspace elements to be filled
  * \space_id
  *
- * \return \hid_t{dataset creation property list}
+ * \return \herr_t
  *
  * \details H5Dfill() fills the dataspace selection in memory, \p space_id,
  *          with the fill value specified in \p fill. If \p fill is NULL,
@@ -1201,7 +1198,7 @@ H5_DLL herr_t H5Dset_extent(hid_t dset_id, const hsize_t size[]);
  *          the data from the cache.
  *
  *          \note HDF5 does not possess full control over buffering.
- *          H5D_FLUSH flushes the internal HDF5 buffers and then asks the
+ *          H5Dflush() flushes the internal HDF5 buffers and then asks the
  *          operating system (the OS) to flush the system buffers for the
  *          open files. After that, the OS is responsible for ensuring
  *          that the data is actually flushed to disk.
@@ -1311,10 +1308,10 @@ H5_DLL herr_t H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id,
  * \param[in]  src_space_id  Dataspace identifier for the source buffer
  * \param[in]  src_buf   Source buffer which the data will be gathered from
  * \param[in]  type_id   Datatype identifier for the source
- * \param[in]  dst_buf_size   Size in bytes of dst_buf
+ * \param[in]  dst_buf_size   Size in bytes of \p dst_buf
  * \param[out] dst_buf   Destination buffer for the gathered data
  * \param[in]  op   Callback function which handles the gathered data
- * \param[in]  op_data   User-defined pointer to data required by op
+ * \param[in]  op_data   User-defined pointer to data required by \p op
  *
  * \return \herr_t
  *
@@ -1335,42 +1332,42 @@ H5_DLL herr_t H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id,
  *          the element size.
  *
  *          The data is gathered into \p dst_buf, which needs to be large
- *          enough to hold all the data if the callback function op is
+ *          enough to hold all the data if the callback function \p op is
  *          not provided.
  *
  *          \p op is a callback function which handles the gathered data.
- *          It is optional if dst_buf is large enough to hold all of the
+ *          It is optional if \p dst_buf is large enough to hold all of the
  *          gathered data; required otherwise.
  *
  *          If no callback function is provided, H5Dgather() simply gathers
- *          the data into dst_buf and returns. If a callback function is
+ *          the data into \p dst_buf and returns. If a callback function is
  *          provided, H5Dgather() repeatedly gathers up to \p dst_buf_size
- *          bytes op to process the serialized data. The prototype of the
+ *          bytes to process the serialized data. The prototype of the
  *          callback function \p op is as follows (as defined in the source
  *          code file H5Dpublic.h):
  *          \snippet this H5D_gather_func_t_snip
- *          The parameters of this callback function have the following
- *          values or meanings:
+ *          The parameters of this callback function are described in the
+ *          table below.
  *          <table>
  *          <tr><td>\c dst_buf</td>
  *              <td>Pointer to the destination buffer which has been filled
  *                  with the next set of elements gathered. This will always be
- *                  identical to the dst_buf passed to H5Dgather().</td></tr>
+ *                  identical to the \p dst_buf passed to H5Dgather().</td></tr>
  *          <tr><td>\c dst_buf_bytes_used</td>
- *              <td>Pointer to the number of valid bytes in \c dst_buf.
+ *              <td>Pointer to the number of valid bytes in \p dst_buf.
  *                  This number must be a multiple of the datatype
  *                  size.</td></tr>
  *          <tr><td>\c op_data</td>
                 <td>User-defined pointer to data required by the callback
- *                  function; a pass-through of the \c op_data pointer
+ *                  function; a pass-through of the \p op_data pointer
  *                  provided with the H5Dgather() function call.</td></tr>
  *          </table>
- *          The callback function should process, store, or otherwise
- *          make use of the data returned in dst_buf before it returns,
+ *          The callback function should process, store, or otherwise,
+ *          make use of the data returned in \p dst_buf before it returns,
  *          because the buffer will be overwritten unless it is the last
  *          call to the callback. This function will be repeatedly called
  *          until all gathered elements have been passed to the callback
- *          in dst_buf. The callback function should return zero (0)
+ *          in \p dst_buf. The callback function should return zero (0)
  *          to indicate success, and a negative value to indicate failure.
  *
  * \since 1.10.2
