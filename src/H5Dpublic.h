@@ -673,7 +673,7 @@ H5_DLL haddr_t H5Dget_offset(hid_t dset_id);
  * \details H5Dread() reads a dataset, specified by its identifier
  *          \p dset_id, from the file into an application memory buffer \p
  *          buf. Data transfer properties are defined by the argument \p
- *          xfer_plist_id. The memory datatype of the (partial) dataset
+ *          dxpl_id. The memory datatype of the (partial) dataset
  *          is identified by the identifier \p mem_type_id. The part
  *          of the dataset to read is defined by \p mem_space_id and \p
  *          file_space_id.
@@ -734,7 +734,7 @@ H5_DLL haddr_t H5Dget_offset(hid_t dset_id);
  *          dataspace must match the number of elements selected in the
  *          file dataspace.
  *
- *          \p xfer_plist_id can be the constant #H5P_DEFAULT. in which
+ *          \p dxpl_id can be the constant #H5P_DEFAULT. in which
  *          case the default data transfer properties are used.
  *
  *
@@ -760,7 +760,7 @@ H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
  * \details H5Dwrite() writes a (partial) dataset, specified by
  *          its identifier \p dset_id, from the application memory buffer \p
  *          buf into the file. Data transfer properties are defined by the
- *          argument \p xfer_plist_id. The memory datatype of the (partial)
+ *          argument \p dxpl_id. The memory datatype of the (partial)
  *          dataset is identified by the identifier \p mem_type_id. The
  *          part of the dataset to write is defined by \p mem_space_id
  *          and \p file_space_id.
@@ -826,7 +826,7 @@ H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
  *          dataspace must match the number of elements selected in the
  *          file dataspace.
  *
- *          \p xfer_plist_id can be the constant #H5P_DEFAULT. in which
+ *          \p dxpl_id can be the constant #H5P_DEFAULT. in which
  *          case the default data transfer properties are used.
  *
  *          Writing to a dataset will fail if the HDF5 file was not opened
