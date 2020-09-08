@@ -1425,14 +1425,22 @@ H5F__dest(H5F_t *f, hbool_t flush)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
-        /* A VFD SWMR reader may still have a metadata index at this stage.
-         * If so, free it.
+        /* A VFD SWMR reader may still have metadata indexes at this stage.
+         * If so, free them.
          */
-        if (f->shared->vfd_swmr && f->shared->mdf_idx != NULL) {
-            HDfree(f->shared->mdf_idx);
-            f->shared->mdf_idx = NULL;
-            f->shared->mdf_idx_len = 0;
+        if (f->shared->vfd_swmr) {
+            if (f->shared->mdf_idx != NULL) {
+                H5MM_xfree(f->shared->mdf_idx);
+                f->shared->mdf_idx = NULL;
+                f->shared->mdf_idx_len = 0;
+            }
+            if (f->shared->old_mdf_idx != NULL) {
+                H5MM_xfree(f->shared->old_mdf_idx);
+                f->shared->old_mdf_idx = NULL;
+                f->shared->old_mdf_idx_len = 0;
+            }
         }
+
 
         /* Free mount table */
         f->shared->mtab.child = (H5F_mount_t *)H5MM_xfree(f->shared->mtab.child);
