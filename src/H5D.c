@@ -443,6 +443,22 @@ done:
 } /* end H5Dget_type() */
 
 
+/*-------------------------------------------------------------------------
+ * Function:    H5Dget_create_plist
+ *
+ * Purpose:     Returns a copy of the dataset creation property list.
+ *
+ * Return:      Success:    ID for a copy of the dataset creation
+ *                          property list.  The template should be
+ *                          released by calling H5P_close().
+ *
+ *              Failure:    H5I_INVALID_HID
+ *
+ * Programmer:  Robb Matzke
+ *              Tuesday, February  3, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
 hid_t
 H5Dget_create_plist(hid_t dset_id)
 {
