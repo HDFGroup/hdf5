@@ -1923,7 +1923,7 @@ H5F__vfd_swmr_create_index(H5F_shared_t *shared)
 
     HDassert(entries_in_index > 0);
 
-    index = HDcalloc(entries_in_index, sizeof(index[0]));
+    index = H5MM_calloc(entries_in_index * sizeof(index[0]));
 
     if (index == NULL) {
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,

@@ -88,8 +88,8 @@ check_dataset(hid_t fid, hbool_t verbose, FILE *verbose_file,
     int fill_count = 0;         /* # of times fill value (0) was read
                                  * instead of the expected value.
                                  */
-    hid_t dsid;                 /* Dataset ID */
-    hid_t file_sid;             /* Dataset's space ID */
+    hid_t dsid = H5I_INVALID_HID;                   /* Dataset ID */
+    hid_t file_sid = H5I_INVALID_HID;               /* Dataset's space ID */
     hssize_t snpoints;          /* Number of elements in dataset */
     hsize_t start[2] = {0, 0}, count[2] = {1, 1};   /* Hyperslab selection values */
 
@@ -237,9 +237,9 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file,
     time_t curr_time;           /* Current time */
     symbol_info_t **sym_com = NULL;     /* Pointers to array of common dataset IDs */
     symbol_info_t **sym_rand = NULL;    /* Pointers to array of random dataset IDs */
-    hid_t mem_sid;              /* Memory dataspace ID */
-    hid_t fid;                  /* SWMR test file ID */
-    hid_t fapl;                 /* file access property list */
+    hid_t mem_sid = H5I_INVALID_HID;    /* Memory dataspace ID */
+    hid_t fid = H5I_INVALID_HID;        /* SWMR test file ID */
+    hid_t fapl = H5I_INVALID_HID;       /* file access property list */
     symbol_t record;            /* The record to read from the dataset */
     unsigned v;                 /* Local index variable */
     hbool_t use_log_vfd = FALSE;    /* Use the log VFD (set this manually) */
@@ -671,6 +671,10 @@ int main(int argc, const char *argv[])
         HDfprintf(stderr, "READER: Error closing symbol datatype!\n");
         HDexit(1);
     } /* end if */
+
+    /* Close the output file */
+    if(verbose)
+        HDfclose(verbose_file);
 
     return 0;
 }
