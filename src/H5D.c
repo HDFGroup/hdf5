@@ -848,9 +848,6 @@ H5D__read_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
 
-    /* Set DXPL for operation */
-    H5CX_set_dxpl(dxpl_id);
-
     /* Get the event set and set up request token pointer for operation */
     if(H5ES_NONE != es_id) {
         /* Get event set */
@@ -1010,9 +1007,6 @@ H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *fil
         if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dxpl_id is not a dataset transfer property list ID")
 
-    /* Set DXPL for operation */
-    H5CX_set_dxpl(dxpl_id);
-
     /* Read the raw chunk */
     if(H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_CHUNK_READ, dxpl_id, H5_REQUEST_NULL, offset, filters, buf) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read unprocessed chunk data")
@@ -1059,9 +1053,6 @@ H5D__write_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     else
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
-
-    /* Set DXPL for operation */
-    H5CX_set_dxpl(dxpl_id);
 
     /* Get the event set and set up request token pointer for operation */
     if(H5ES_NONE != es_id) {
@@ -1228,9 +1219,6 @@ H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *of
     else
         if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dxpl_id is not a dataset transfer property list ID")
-
-    /* Set DXPL for operation */
-    H5CX_set_dxpl(dxpl_id);
 
     /* Write chunk */
     if(H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_CHUNK_WRITE, dxpl_id, H5_REQUEST_NULL, filters, offset, data_size_32, buf) < 0)

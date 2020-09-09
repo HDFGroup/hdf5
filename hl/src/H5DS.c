@@ -1896,19 +1896,18 @@ out:
 }
 
 /*-------------------------------------------------------------------------
-* Function: H5DSis_scale
-*
-* Purpose: check if the dataset DID is a dimension scale
-*
-* Return: 1, is, 0, not, FAIL, error
-*
-* Programmer: pvn@ncsa.uiuc.edu
-*
-* Date: January 04, 2005
-*
-*-------------------------------------------------------------------------
-*/
-
+ * Function: H5DSis_scale
+ *
+ * Purpose: check if the dataset DID is a dimension scale
+ *
+ * Return: 1, is, 0, not, FAIL, error
+ *
+ * Programmer: Pedro Vicente
+ *
+ * Date: January 04, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
 htri_t H5DSis_scale(hid_t did)
 {
     hid_t      tid = -1;     /* attribute type ID */

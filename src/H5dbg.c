@@ -13,11 +13,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5dbg.c
- *			Mar  4 2006
- *			Quincey Koziol
+ * Created:         H5dbg.c
+ *                  Mar  4 2006
+ *                  Quincey Koziol
  *
- * Purpose:		Generic debugging routines
+ * Purpose:         Generic debugging routines
  *
  *-------------------------------------------------------------------------
  */
@@ -29,7 +29,7 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
+#include "H5private.h"        /* Generic Functions            */
 
 /****************/
 /* Local Macros */
@@ -63,14 +63,14 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5_buffer_dump
+ * Function:    H5_buffer_dump
  *
- * Purpose:	Dumps a buffer of memory in an octal dump form
+ * Purpose:     Dumps a buffer of memory in an octal dump form
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Mar  4 2006
+ * Programmer:  Quincey Koziol
+ *              Mar  4 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -78,7 +78,7 @@ herr_t
 H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf,
     const uint8_t *marker, size_t buf_offset, size_t buf_size)
 {
-    size_t	u, v;                   /* Local index variable */
+    size_t    u, v;                   /* Local index variable */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -95,47 +95,50 @@ H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf,
      * Print the buffer in a VMS-style octal dump.
      */
     HDfprintf(stream, "%*sData follows (`__' indicates free region)...\n",
-	    indent, "");
+        indent, "");
     for(u = 0; u < buf_size; u += 16) {
-        uint8_t		c;
+        uint8_t        c;
 
-	HDfprintf(stream, "%*s %8d: ", indent, "", u + buf_offset);
+        HDfprintf(stream, "%*s %8d: ", indent, "", u + buf_offset);
 
         /* Print the hex values */
-	for(v = 0; v < 16; v++) {
-	    if(u + v < buf_size) {
-		if(marker[u + v])
-		    HDfprintf(stream, "__ ");
-		else {
-		    c = buf[buf_offset + u + v];
-		    HDfprintf(stream, "%02x ", c);
-		} /* end else */
-	    } /* end if */
+        for(v = 0; v < 16; v++) {
+            if(u + v < buf_size) {
+                if(marker[u + v])
+                    HDfprintf(stream, "__ ");
+                else {
+                    c = buf[buf_offset + u + v];
+                    HDfprintf(stream, "%02x ", c);
+                } /* end else */
+            } /* end if */
             else
-		HDfprintf(stream, "   ");
-	    if(7 == v)
-		HDfputc(' ', stream);
-	} /* end for */
+                HDfprintf(stream, "   ");
+
+            if(7 == v)
+                HDfputc(' ', stream);
+        } /* end for */
         HDfputc(' ', stream);
 
         /* Print the character values */
-	for(v = 0; v < 16; v++) {
-	    if(u + v < buf_size) {
-		if(marker[u + v])
-		    HDfputc(' ', stream);
-		else {
-		    c = buf[buf_offset + u + v];
-		    if(HDisprint(c))
-			HDfputc(c, stream);
-		    else
-			HDfputc('.', stream);
-		} /* end else */
-	    } /* end if */
-	    if(7 == v)
-		HDfputc(' ', stream);
-	} /* end for */
+        for(v = 0; v < 16; v++) {
+            if(u + v < buf_size) {
+                if(marker[u + v])
+                    HDfputc(' ', stream);
+                else {
+                    c = buf[buf_offset + u + v];
 
-	HDfputc('\n', stream);
+                    if(HDisprint(c))
+                        HDfputc(c, stream);
+                    else
+                        HDfputc('.', stream);
+                } /* end else */
+            } /* end if */
+
+            if(7 == v)
+                HDfputc(' ', stream);
+        } /* end for */
+
+        HDfputc('\n', stream);
     } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

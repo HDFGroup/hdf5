@@ -58,7 +58,7 @@ struct H5S_t;
 /* How to copy a datatype */
 typedef enum H5T_copy_t {
     H5T_COPY_TRANSIENT,
-    H5T_COPY_ALL,
+    H5T_COPY_ALL
 } H5T_copy_t;
 
 /* Location of datatype information */

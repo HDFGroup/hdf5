@@ -11,10 +11,10 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:	Robb Matzke
- *		Friday, July 24, 1998
+/* Programmer:      Robb Matzke
+ *                  Friday, July 24, 1998
  *
- * Purpose:	The object modification time message.
+ * Purpose:         The object modification time message.
  */
 
 #include "H5Omodule.h"          /* This source code file is part of the H5O module */
