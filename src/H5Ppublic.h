@@ -788,9 +788,213 @@ H5_DLL herr_t H5Pget(hid_t plist_id, const char *name, void * value);
  *
  */
 H5_DLL hid_t H5Pget_class(hid_t plist_id);
+/*--------------------------------------------------------------------------*/
+/**
+ * \ingroup GPLOA
+ *
+ * \brief Retrieves the name of a class
+ *
+ * \plistcls_id{pclass_id}
+ *
+ * \return Returns a pointer to an allocated string containing the class
+ *         name if successful, and NULL if not successful.
+ *
+ * \details H5Pget_class_name() retrieves the name of a generic property
+ *          list class. The pointer to the name must be freed by the user
+ *          with a call to H5free_memory() after each successful call.
+ *
+ *          <table>
+ *           <tr>
+ *            <th>Class Name (class identifier) Returned</th>
+ *            <th>Property List Class</th>
+ *            <th>Expanded Name of the Property List Class</th>
+ *            <th>The Class Identifier Used with H5Pcreate</th>
+ *            <th>Comments</th>
+ *           </tr>
+ *           <tr>
+ *            <td>attribute create</td>
+ *            <td>acpl</td>
+ *            <td>Attribute Creation Property List</td>
+ *            <td>H5P_ATTRIBUTE_CREATE</td>
+ *            <td> </td>
+ *           </tr>
+ *           <tr>
+ *            <td>dataset access</td>
+ *            <td>dapl</td>
+ *            <td>Dataset Access Property List</td>
+ *            <td>H5P_DATASET_ACCESS</td>
+ *            <td> </td>
+ *           </tr>
+ *           <tr>
+ *            <td>dataset create</td>
+ *            <td>dcpl</td>
+ *            <td>Dataset Creation Property List</td>
+ *            <td>H5P_DATASET_CREATE</td>
+ *            <td> </td>
+ *           </tr>
+ *           <tr>
+ *            <td>data transfer</td>
+ *            <td>dxpl</td>
+ *            <td>Data Transfer Property List</td>
+ *            <td>H5P_DATASET_XFER</td>
+ *            <td> </td>
+ *           </tr>
+ *           <tr>
+ *            <td>datatype access</td>
+ *            <td> </td>
+ *            <td> </td>
+ *            <td>H5P_DATATYPE_ACCESS</td>
+ *            <td>This class can be created, but there are no properties
+ *                in the class currently.
+ *            </td>
+ *           </tr>
+ *           <tr>
+ *            <td>datatype create</td>
+ *            <td> </td>
+ *            <td> </td>
+ *            <td>H5P_DATATYPE_CREATE</td>
+ *            <td>This class can be created, but there
+ *                are no properties in the class currently.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>file access</td>
+ *            <td>fapl</td>
+ *            <td>File Access Property List</td>
+ *            <td>H5P_FILE_ACCESS</td>
+ *            <td> </td>
+ *           </tr>
+ *           <tr>
+ *            <td>file create</td>
+ *            <td>fcpl</td>
+ *            <td>File Creation Property List</td>
+ *            <td>H5P_FILE_CREATE</td>	 
+ *            <td> </td>
+ *           </tr>
+ *           <tr>
+ *            <td>file mount</td>
+ *            <td>fmpl</td>
+ *            <td>File Mount Property List</td>
+ *            <td>H5P_FILE_MOUNT</td>
+ *            <td> </td>	 
+ *           </tr>
+ *           <tr>
+ *            <td>group access</td>
+ *            <td> </td>
+ *            <td> </td>
+ *            <td>H5P_GROUP_ACCESS</td>
+ *            <td>This class can be created, but there
+ *                are no properties in the class currently.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>group create</td>
+ *            <td>gcpl</td>
+ *            <td>Group Creation Property List</td>
+ *            <td>H5P_GROUP_CREATE</td>
+ *            <td> </td>	 
+ *           </tr>
+ *           <tr>
+ *             <td>link access</td>
+ *             <td>lapl</td>
+ *             <td>Link Access Property List</td>
+ *             <td>H5P_LINK_ACCESS</td>
+ *             <td> </td> 
+ *           </tr>
+ *           <tr>
+ *            <td>link create</td>
+ *            <td>lcpl</td>
+ *            <td>Link Creation Property List</td>
+ *            <td>H5P_LINK_CREATE</td>
+ *            <td> </td>	 
+ *           </tr>
+ *           <tr>
+ *            <td>object copy</td>
+ *            <td>ocpypl</td>
+ *            <td>Object Copy Property List</td>
+ *            <td>H5P_OBJECT_COPY</td>
+ *            <td> </td>
+ *           </tr>
+ *           <tr>
+ *            <td>object create</td>
+ *            <td>ocpl</td>
+ *            <td>Object Creation Property List</td>
+ *            <td>H5P_OBJECT_CREATE</td>
+ *            <td> </td>
+ *           </tr>
+ *           <tr>
+ *            <td>string create</td>
+ *            <td>strcpl</td>
+ *            <td>String Creation Property List</td>
+ *            <td>H5P_STRING_CREATE</td>
+ *            <td> </td>
+ *           </tr>
+ *          </table>
+ *
+ * \since 1.4.0
+ *
+ */
 H5_DLL char *H5Pget_class_name(hid_t pclass_id);
+/*--------------------------------------------------------------------------*/
+/**
+ * \ingroup GPLOA
+ *
+ * \brief Retrieves the parent class of a property class
+ *
+ * \plistcls_id{pclass_id}
+ *
+ * \return \hid_t{parent class object}
+ *
+ * \details H5Pget_class_parent() retrieves an identifier for the parent
+ *          class of a property class.
+ *
+ * \since 1.4.0
+ *
+ */
 H5_DLL hid_t H5Pget_class_parent(hid_t pclass_id);
+/*--------------------------------------------------------------------------*/
+/**
+ * \ingroup GPLOA
+ *
+ * \brief  Queries the number of properties in a property list or class
+ *
+ * \param[in]  id     Identifier for property object to query
+ * \param[out] nprops Number of properties in object  
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_nprops() retrieves the number of properties in a
+ *          property list or property list class.
+ *
+ *          If \p id is a property list identifier, the current number of
+ *          properties in the list is returned in \p nprops.
+ *
+ *          If \p id is a property list class identifier, the number of
+ *          registered properties in the class is returned in \p nprops.
+ *
+ * \since 1.4.0
+ *
+ */
 H5_DLL herr_t H5Pget_nprops(hid_t id, size_t *nprops);
+/*--------------------------------------------------------------------------*/
+/**
+ * \ingroup GPLOA
+ *
+ * \brief Queries the size of a property value in bytes
+ *
+ * \param[in]  id   Identifier of property object to query
+ * \param[in]  name Name of property to query
+ * \param[out] size Size of property in bytes
+ *
+ * \return  \herr_t
+ *
+ * \details H5Pget_size() retrieves the size of a property's value in
+ *          bytes. This function operates on both property lists and
+ *          property classes.
+ *
+ *          Zero-sized properties are allowed and return 0.
+ *
+ * \since 1.4.0
+ *
+ */
 H5_DLL herr_t H5Pget_size(hid_t id, const char *name, size_t *size);
 H5_DLL herr_t H5Pinsert2(hid_t plist_id, const char *name, size_t size,
     void *value, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
