@@ -230,53 +230,6 @@ H5_DLL herr_t H5Gflush(hid_t group_id);
  *-------------------------------------------------------------------------
  * \ingroup H5G
  *
- * \brief Retrieves comment from an object
- *
- * \fgdt_loc_id
- * \param[in] name    Name of the object whose comment is to be retrieved
- * \param[in] bufsize Size of \p buf
- * \param[out] buf    Buffer for the comment
- *
- * \return Returns the number of characters in the comment, if successful;
- *         otherwise, returns a negative value.
- *
- * \details H5Gget_comment() retrieves the comment for the the object
- *          specified by \p loc_id and name. The comment is returned in the
- *          buffer \p comment.
- *
- *          \p loc_id can specify any object in the file. \p name can be
- *          one of the following:
- *          \li The name of the object relative to loc_id 
- *          \li An absolute name of the object, starting from /,
- *              the file’s root group
- *          \li A dot (.), if loc_id fully specifies the object
- *
- *          H5Gget_comment() returns the number of characters in
- *          the comment, counting the null terminator, if successful.
- *          The value returned may be larger than \p bufsize.
- *
- *          At most bufsize characters, including a null terminator, are
- *          returned in comment. The returned value is not null terminated
- *          if the comment is longer than the supplied buffer. If the
- *          size of the comment is unknown, a preliminary H5Gget_comment()
- *          call will return the size of the comment, including space for
- *          the null terminator.
- *
- *          If an object does not have a comment, an empty string is
- *          returned in comment.
- *
- * \version 1.8.0 The function H5Gget_comment() was deprecated in this
- *                release, in favor of H5Oget_comment().
- * \since 1.8.0
- *
- */
-H5_DLL int H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize,
-    char *buf);
-
-/**
- *-------------------------------------------------------------------------
- * \ingroup H5G
- *
  * \brief Gets a group creation property list identifier
  *
  * \group_id
@@ -441,73 +394,6 @@ H5_DLL herr_t H5Gget_info_by_idx(hid_t loc_id, const char *group_name,
  */
 H5_DLL herr_t H5Gget_info_by_name(hid_t loc_id, const char *name,
     H5G_info_t *ginfo, hid_t lapl_id);
-
-/**
- *-------------------------------------------------------------------------
- * \ingroup H5G
- *
- * \brief Retrieves the name of the object that the symbolic link points to
- *
- * \loc_id
- * \param[in] name Symbolic link to the object whose name is to be returned
- * \param[in] size Size of \p buf
- * \param[out] buf Buffer to hold the name of the object being sought
- *
- * \return Returns a non-negative value if successful. Otherwise, returns
- *         a negative value.
- *
- * \details H5Gget_linkval() returns size characters of the
- *          name of the object that the symbolic link \p name points to.
- *
- *          The parameter \p loc_id is a file or group identifier.
- *
- *          The parameter \p name must be a symbolic link pointing to the
- *          desired object and must be defined relative to \p loc_id.
- *
- *          If \p size is smaller than the size of the returned object
- *          name, then the name stored in the buffer value will not be
- *          null terminated.
- *
- *          This function fails if \p name is not a symbolic link. The
- *          presence of a symbolic link can be tested by passing zero for
- *          \p size and NULL for \p value.
- *
- *          This function should be used only after H5Lget_info1() (or
- *          the deprecated function H5Gget_objinfo()) has been called to
- *          verify that \p name is a symbolic link.
- *
- * \version 1.8.0 The function H5Gget_linkval() was deprecated in this
- *                release, in favor of H5Lget_val().
- * \since?
- *
- */
-H5_DLL herr_t H5Gget_linkval(hid_t loc_id, const char *name, size_t size,
-    char *buf/*out*/);
-
-/**
- *-------------------------------------------------------------------------
- * \ingroup H5G
- *
- * \brief Returns number of objects in the group
- *
- * \loc_id
- * \param[out] num_objs Number of objects in the group
- *
- * \return \herr_t
- *
- * \details H5Gget_num_objs() returns number of objects in
- *          a group specified by its identifier \p loc_id. If a file
- *          identifier is passed in, then the number of objects in the
- *          root group is returned.
- *
- * \version 1.8.0 The function H5Gget_num_objs() was deprecated in this
- *                release, in favor of H5Gget_info().
- * \since 1.6.0
- *
- */
-H5_DLL herr_t H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs);
-
-TOPP
 
 /**
  *-------------------------------------------------------------------------
@@ -693,242 +579,19 @@ H5_DLL hid_t H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint);
  *-------------------------------------------------------------------------
  * \ingroup H5G
  *
- * \brief Opens an existing group for modification
- *
- * \loc_id
- * \param[in] name Name of the group to open
- *
- * \return \herr_t
- *
- * \deprecated As of HDF5-1.8.0, this function has been deprecated in favor
- *             of the function H5Gopen2() and the macro H5Gopen().
- *
- * \details H5Gopen1() opens an existing group with the specified \p name
- *          at the specified location, \p loc_id.
- *
- *          H5Gopen1()  returns a group identifier for the group that was
- *          opened. This group identifier should be released by calling
- *          H5Gclose() when it is no longer needed.
- *
- * \version 1.8.0 Function was renamed to H5Gopen1() and deprecated.
- * \version 1.4.0 Fortran function introduced in this release
- *
- * \since 1.0.0
- *
- */
-H5_DLL hid_t H5Gopen1(hid_t loc_id, const char *name);
-
-/**
- *-------------------------------------------------------------------------
- * \ingroup H5G
- *
- * \brief Creates a link between two existing objects
- *
- * \param[in] cur_loc_id File or group identifier
- * \param[in] type       Link type
- * \param[in] cur_name   Current name
- * \param[in] new_name   New name to link to
- *
- * \return \herr_t
- *
- * \deprecated As of HDF5-1.8.0, this function has been deprecated in favor
- *             of the functions H5Lcreate_hard() and H5Lcreate_soft().
- *
- * \details H5Glink() creates a new name for an object that has some current
- *          name, possibly one of many names it currently has.
- *
- *          If link_type is #H5G_LINK_HARD, then current_name must specify
- *          the name of an existing object and both names are interpreted
- *          relative to \p cur_loc_id, which is either a file identifier or
- *          a group identifier.
- *
- *          If \p link_type is #H5G_LINK_SOFT, then \p current_name can
- *          be anything and is interpreted at lookup time relative to the
- *          group which contains the final component of \p new_name. For
- *          instance, if \p current_name is <tt>./foo</tt>, \p new_name is
- *          <tt>./x/y/bar</tt>, and a request is made for <tt>./x/y/bar</tt>,
- *          then the actual object looked up is <tt>./x/y/./foo</tt>.
- *
- * \version 1.8.0 The function H5Glink() was deprecated in this release
- *
- * \since?
- *
- */
-H5_DLL herr_t H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name,
-    const char *new_name);
-
-/**
- *-------------------------------------------------------------------------
- * \ingroup H5G
- *
- * \brief Creates a link between two existing objects
- *
- * \param[in] cur_loc_id The file or group identifier for the original object
- * \param[in] cur_name Current name
- * \param[in] type     Link type
- * \param[in] new_loc_id The file or group identifier for the new link
- * \param[in] new_name New name
- *
- * \return \herr_t
- *
- * \deprecated As of HDF5-1.8.0, this function has been deprecated in favor
- *             of the functions H5Lcreate_hard() and H5Lcreate_soft().
- *
- * \details H5Glink() creates a new name for an object that has some current
- *          name, possibly one of many names it currently has.
- *
- *          If \p link_type is H5G_LINK_HARD, then current_name must specify
- *          the name of an existing object. In this case, \p current_name
- *          and \p new_name are interpreted relative to \p curr_loc_id
- *          and \p new_loc_id, respectively, which are either file or
- *          group identifiers.
- *
- *          If \p link_type is #H5G_LINK_SOFT, then \p current_name can
- *          be anything and is interpreted at lookup time relative to the
- *          group which contains the final component of \p new_name. For
- *          instance, if \p current_name is <tt>./foo</tt>, \p new_name is
- *          <tt>./x/y/bar</tt>, and a request is made for <tt>./x/y/bar</tt>,
- *          then the actual object looked up is <tt>./x/y/./foo</tt>.
- *
- * \version 1.8.0 The function H5Glink() was deprecated in this release
- *
- * \since?
- *
- */
-H5_DLL herr_t H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
-    hid_t new_loc_id, const char *new_name);
-
-/**
- *-------------------------------------------------------------------------
- * \ingroup H5G
- *
- * \brief Renames an object within an HDF5 file
- *
- * \param[in] src_loc_id The file or group identifier for the original object
- * \param[in] src_name   Object's original name
- * \param[in] dst_name   Object's new name
- *
- * \return \herr_t
- *
- * \details H5Gmove() renames an object within an HDF5 file. The
- *          original name, \p src_name, is unlinked from the group graph
- *          and the new name, \p dst_name, is inserted as an atomic
- *          operation. Both names are interpreted relative to \p loc_id,
- *          which is either a file or a group identifier.
- *
- * \attention
- *          Exercise care in moving groups as it is possible to render
- *          data in a file inaccessible with H5Gmove(). See The Group
- *          Interface in the HDF5 User's Guide.
- *
- * \version 1.8.0 The function H5Gmove() was deprecated in this release,
- *                in favor of H5Lmove().
- * \since?
- *
- */
-H5_DLL herr_t H5Gmove(hid_t src_loc_id, const char *src_name,
-    const char *dst_name);
-
-/**
- *-------------------------------------------------------------------------
- * \ingroup H5G
- *
- * \brief Renames an object within an HDF5 file
- *
- * \param[in] src_loc_id Original file or group identifier
- * \param[in] src_name   Object's original name
- * \param[in] dst_loc_id Destination file or group identifier
- * \param[in] dst_name   Object's new name
- *
- * \return \herr_t
- *
- * \details H5Gmove2() renames an object within an HDF5
- *          file. The original name, \p src_name, is unlinked from the
- *          group graph and the new name, \p dst_name, is inserted as an
- *          atomic operation.
- *
- *          \p src_name and \p dst_name are interpreted relative to \p
- *          src_loc_id and \p dst_loc_id, respectively, which are either
- *          file or group identifiers.
- *
- * \attention
- *          Exercise care in moving groups as it is possible to render
- *          data in a file inaccessible with H5G_MOVE2. See The Group
- *          Interface in the HDF5 User's Guide.
- *
- * \version 1.8.0 The function H5Gmove2() was deprecated in this release,
- *                in favor of H5Lmove().
- * \since?
- *
- */
-H5_DLL herr_t H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
-    const char *dst_name);
-
-/**
- *-------------------------------------------------------------------------
- * \ingroup H5G
- *
- * \brief Removes the link to an object from a group
- *
- * \loc_id
- * \param[in] name Name of the object to unlink
- *
- * \return \herr_t
- *
- * \version 1.8.0 The function H5Gunlink() was deprecated in this release,
- *                in favor of H5Ldelete().
- *
- * \details H5Gunlink() removes the object specified by \p name
- *          from the group graph and decrements the link count for the
- *          object to which name points. This action eliminates any
- *          association between name and the object to which name pointed.
- *
- *          Object headers keep track of how many hard links refer to an
- *          object; when the link count reaches zero, the object can be
- *          removed from the file. Objects which are open are not removed
- *          until all identifiers to the object are closed.
- *
- *          If the link count reaches zero, all file space associated
- *          with the object will be released, i.e., identified in memory
- *          as freespace. If any object identifier is open for the object,
- *          the space will not be released until after the object identifier
- *          is closed.
- *
- *          Note that space identified as freespace is available for
- *          re-use only as long as the file remains open; once a file has
- *          been closed, the HDF5 library loses track of freespace. See
- *          “Freespace Management” in the HDF5 User's Guide for
- *          further details.
- *
- * \attention
- *          Exercise care in unlinking groups as it is possible to render
- *          data in a file inaccessible with H5Gunlink(). See The Group
- *          Interface in the HDF5 User's Guide.
- *
- * \version 1.8.0 The function H5Gunlink() was deprecated in this release,
- *                in favor of H5Ldelete().
- * \since?
- *
- * \see H5Gcreate2(), H5Gopen2()
- *
- */
-H5_DLL herr_t H5Gunlink(hid_t loc_id, const char *name);
-
-/**
- *-------------------------------------------------------------------------
- * \ingroup H5G
- *
- * \brief Sets comment for specified object
+ * \brief Retrieves comment from an object
  *
  * \fgdt_loc_id
- * \param[in] name Name of the object whose comment is to be set or reset
- * \param[in] comment The new comment
+ * \param[in] name    Name of the object whose comment is to be retrieved
+ * \param[in] bufsize Size of \p buf
+ * \param[out] buf    Buffer for the comment
  *
- * \return \herr_t
+ * \return Returns the number of characters in the comment, if successful;
+ *         otherwise, returns a negative value.
  *
- * \details H5Gset_comment() sets the comment for the object
- *          specified by \p loc_id and \p name to \p comment. Any previously
- *          existing comment will be overwritten.
+ * \details H5Gget_comment() retrieves the comment for the the object
+ *          specified by \p loc_id and name. The comment is returned in the
+ *          buffer \p comment.
  *
  *          \p loc_id can specify any object in the file. \p name can be
  *          one of the following:
@@ -937,89 +600,92 @@ H5_DLL herr_t H5Gunlink(hid_t loc_id, const char *name);
  *              the file’s root group
  *          \li A dot (.), if loc_id fully specifies the object
  *
- *          If comment is the empty string or a null pointer, the comment
- *          message will be removed from the object.  Comments should be
- *          relatively short, null-terminated, ASCII strings.
+ *          H5Gget_comment() returns the number of characters in
+ *          the comment, counting the null terminator, if successful.
+ *          The value returned may be larger than \p bufsize.
  *
- *          Comments can be attached to any object that has an object
- *          header, e.g., datasets, groups, and named datatypes, but not
- *          symbolic links.
+ *          At most bufsize characters, including a null terminator, are
+ *          returned in comment. The returned value is not null terminated
+ *          if the comment is longer than the supplied buffer. If the
+ *          size of the comment is unknown, a preliminary H5Gget_comment()
+ *          call will return the size of the comment, including space for
+ *          the null terminator.
  *
- * \version 1.8.0 The function H5Gset_comment() was deprecated in this
- *                release, in favor of H5Oset_comment().
- * \since?
+ *          If an object does not have a comment, an empty string is
+ *          returned in comment.
+ *
+ * \version 1.8.0 The function H5Gget_comment() was deprecated in this
+ *                release, in favor of H5Oget_comment().
+ * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Gset_comment(hid_t loc_id, const char *name, const char *comment);
+H5_DLL int H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize,
+    char *buf);
 
 /**
  *-------------------------------------------------------------------------
  * \ingroup H5G
  *
- * \brief Iterates an operation over the entries of a group
+ * \brief Retrieves the name of the object that the symbolic link points to
  *
- * \fgdt_loc_id
- * \param[in]     name Group over which the iteration is performed
- * \param[in,out] idx  Location at which to begin the iteration
- * \param[in]     op   Operation to be performed on an object at each iteration
- * \param[in,out] op_data Data associated with the operation
+ * \loc_id
+ * \param[in] name Symbolic link to the object whose name is to be returned
+ * \param[in] size Size of \p buf
+ * \param[out] buf Buffer to hold the name of the object being sought
  *
- * \return Returns the return value of the last operator or zero if all group
- *         members were processed. Otherwise returns a negative value when
- *         failure occurs.
+ * \return Returns a non-negative value if successful. Otherwise, returns
+ *         a negative value.
  *
- * \details H5Giterate() iterates over the members of the group \p name in
- *          the file or group specified with \p loc_id.
- *          
- *          For each object in the group, the \p op_data and some
- *          additional information, specified below, are passed to the \p op
- *          function. The iteration begins with the \p idx'th object in the
- *          group and the next element to be processed by the operator is
- *          returned in \p idx. If \p idx is NULL, then the iterator starts
- *          at the first group member; since no stopping point is returned
- *          in this case, the iterator cannot be restarted if one of the
- *          calls to its operator returns non-zero. H5Giterate() does not
- *          recursively follow links into subgroups of the specified group.
- *          
- *          The prototype for H5G_iterate_t is:
- *          
- *          \snippet this H5G_iterate_t_snip
- *          
- *          The operator function receives the group identifier for the
- *          group being iterated over, \p loc_id, the name of the current
- *          object within the group, \p name, and the pointer to the
- *          operator data passed in to H5Giterate(), \p op_data.
- *          
- *          The return values from an operator are:
- *          
- *          \li Zero causes the iterator to continue, returning zero when
- *              all group members have been processed.
- *          \li Positive causes the iterator to immediately return that
- *              positive value, indicating short-circuit success. The iterator
- *              can be restarted at the next group member.
- *          \li Negative causes the iterator to immediately return that value,
- *              indicating failure. The iterator can be restarted at the next
- *              group member.
+ * \details H5Gget_linkval() returns size characters of the
+ *          name of the object that the symbolic link \p name points to.
  *
- *          H5Giterate() assumes that the membership of the group identified
- *          by \p name remains unchanged throughout the iteration. If
- *          the membership changes during the iteration, the function's
- *          behavior is undefined.
+ *          The parameter \p loc_id is a file or group identifier.
  *
- *          H5Giterate() is not recursive. For example, if a member
- *          of \p name is found to be a group, call it \p subgroup_a,
- *          H5Giterate() does not examine the members of \p subgroup_a. When
- *          recursive iteration is required, the application must handle
- *          the recursion, explicitly calling H5Giterate() on discovered
- *          subgroups.
+ *          The parameter \p name must be a symbolic link pointing to the
+ *          desired object and must be defined relative to \p loc_id.
  *
- * \version 1.8.0 The function H5Giterate() was deprecated in this
- *                release, in favor of H5Literate1().
+ *          If \p size is smaller than the size of the returned object
+ *          name, then the name stored in the buffer value will not be
+ *          null terminated.
+ *
+ *          This function fails if \p name is not a symbolic link. The
+ *          presence of a symbolic link can be tested by passing zero for
+ *          \p size and NULL for \p value.
+ *
+ *          This function should be used only after H5Lget_info1() (or
+ *          the deprecated function H5Gget_objinfo()) has been called to
+ *          verify that \p name is a symbolic link.
+ *
+ * \version 1.8.0 The function H5Gget_linkval() was deprecated in this
+ *                release, in favor of H5Lget_val().
  * \since?
  *
  */
-H5_DLL herr_t H5Giterate(hid_t loc_id, const char *name, int *idx,
-        H5G_iterate_t op, void *op_data);
+H5_DLL herr_t H5Gget_linkval(hid_t loc_id, const char *name, size_t size,
+    char *buf/*out*/);
+
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5G
+ *
+ * \brief Returns number of objects in the group
+ *
+ * \loc_id
+ * \param[out] num_objs Number of objects in the group
+ *
+ * \return \herr_t
+ *
+ * \details H5Gget_num_objs() returns number of objects in
+ *          a group specified by its identifier \p loc_id. If a file
+ *          identifier is passed in, then the number of objects in the
+ *          root group is returned.
+ *
+ * \version 1.8.0 The function H5Gget_num_objs() was deprecated in this
+ *                release, in favor of H5Gget_info().
+ * \since 1.6.0
+ *
+ */
+H5_DLL herr_t H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs);
 
 /**
  *-------------------------------------------------------------------------
@@ -1220,6 +886,338 @@ H5_DLL ssize_t H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char* name,
  *
  */
 H5_DLL H5G_obj_t H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx);
+
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5G
+ *
+ * \brief Iterates an operation over the entries of a group
+ *
+ * \fgdt_loc_id
+ * \param[in]     name Group over which the iteration is performed
+ * \param[in,out] idx  Location at which to begin the iteration
+ * \param[in]     op   Operation to be performed on an object at each iteration
+ * \param[in,out] op_data Data associated with the operation
+ *
+ * \return Returns the return value of the last operator or zero if all group
+ *         members were processed. Otherwise returns a negative value when
+ *         failure occurs.
+ *
+ * \details H5Giterate() iterates over the members of the group \p name in
+ *          the file or group specified with \p loc_id.
+ *          
+ *          For each object in the group, the \p op_data and some
+ *          additional information, specified below, are passed to the \p op
+ *          function. The iteration begins with the \p idx'th object in the
+ *          group and the next element to be processed by the operator is
+ *          returned in \p idx. If \p idx is NULL, then the iterator starts
+ *          at the first group member; since no stopping point is returned
+ *          in this case, the iterator cannot be restarted if one of the
+ *          calls to its operator returns non-zero. H5Giterate() does not
+ *          recursively follow links into subgroups of the specified group.
+ *          
+ *          The prototype for H5G_iterate_t is:
+ *          
+ *          \snippet this H5G_iterate_t_snip
+ *          
+ *          The operator function receives the group identifier for the
+ *          group being iterated over, \p loc_id, the name of the current
+ *          object within the group, \p name, and the pointer to the
+ *          operator data passed in to H5Giterate(), \p op_data.
+ *          
+ *          The return values from an operator are:
+ *          
+ *          \li Zero causes the iterator to continue, returning zero when
+ *              all group members have been processed.
+ *          \li Positive causes the iterator to immediately return that
+ *              positive value, indicating short-circuit success. The iterator
+ *              can be restarted at the next group member.
+ *          \li Negative causes the iterator to immediately return that value,
+ *              indicating failure. The iterator can be restarted at the next
+ *              group member.
+ *
+ *          H5Giterate() assumes that the membership of the group identified
+ *          by \p name remains unchanged throughout the iteration. If
+ *          the membership changes during the iteration, the function's
+ *          behavior is undefined.
+ *
+ *          H5Giterate() is not recursive. For example, if a member
+ *          of \p name is found to be a group, call it \p subgroup_a,
+ *          H5Giterate() does not examine the members of \p subgroup_a. When
+ *          recursive iteration is required, the application must handle
+ *          the recursion, explicitly calling H5Giterate() on discovered
+ *          subgroups.
+ *
+ * \version 1.8.0 The function H5Giterate() was deprecated in this
+ *                release, in favor of H5Literate1().
+ * \since?
+ *
+ */
+H5_DLL herr_t H5Giterate(hid_t loc_id, const char *name, int *idx,
+        H5G_iterate_t op, void *op_data);
+
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5G
+ *
+ * \brief Creates a link between two existing objects
+ *
+ * \param[in] cur_loc_id File or group identifier
+ * \param[in] type       Link type
+ * \param[in] cur_name   Current name
+ * \param[in] new_name   New name to link to
+ *
+ * \return \herr_t
+ *
+ * \deprecated As of HDF5-1.8.0, this function has been deprecated in favor
+ *             of the functions H5Lcreate_hard() and H5Lcreate_soft().
+ *
+ * \details H5Glink() creates a new name for an object that has some current
+ *          name, possibly one of many names it currently has.
+ *
+ *          If link_type is #H5G_LINK_HARD, then current_name must specify
+ *          the name of an existing object and both names are interpreted
+ *          relative to \p cur_loc_id, which is either a file identifier or
+ *          a group identifier.
+ *
+ *          If \p link_type is #H5G_LINK_SOFT, then \p current_name can
+ *          be anything and is interpreted at lookup time relative to the
+ *          group which contains the final component of \p new_name. For
+ *          instance, if \p current_name is <tt>./foo</tt>, \p new_name is
+ *          <tt>./x/y/bar</tt>, and a request is made for <tt>./x/y/bar</tt>,
+ *          then the actual object looked up is <tt>./x/y/./foo</tt>.
+ *
+ * \version 1.8.0 The function H5Glink() was deprecated in this release
+ *
+ * \since?
+ *
+ */
+H5_DLL herr_t H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name,
+    const char *new_name);
+
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5G
+ *
+ * \brief Creates a link between two existing objects
+ *
+ * \param[in] cur_loc_id The file or group identifier for the original object
+ * \param[in] cur_name Current name
+ * \param[in] type     Link type
+ * \param[in] new_loc_id The file or group identifier for the new link
+ * \param[in] new_name New name
+ *
+ * \return \herr_t
+ *
+ * \deprecated As of HDF5-1.8.0, this function has been deprecated in favor
+ *             of the functions H5Lcreate_hard() and H5Lcreate_soft().
+ *
+ * \details H5Glink2() creates a new name for an object that has some current
+ *          name, possibly one of many names it currently has.
+ *
+ *          If \p link_type is H5G_LINK_HARD, then current_name must specify
+ *          the name of an existing object. In this case, \p current_name
+ *          and \p new_name are interpreted relative to \p curr_loc_id
+ *          and \p new_loc_id, respectively, which are either file or
+ *          group identifiers.
+ *
+ *          If \p link_type is #H5G_LINK_SOFT, then \p current_name can
+ *          be anything and is interpreted at lookup time relative to the
+ *          group which contains the final component of \p new_name. For
+ *          instance, if \p current_name is <tt>./foo</tt>, \p new_name is
+ *          <tt>./x/y/bar</tt>, and a request is made for <tt>./x/y/bar</tt>,
+ *          then the actual object looked up is <tt>./x/y/./foo</tt>.
+ *
+ * \version 1.8.0 The function H5Glink() was deprecated in this release
+ *
+ * \since?
+ *
+ */
+H5_DLL herr_t H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
+    hid_t new_loc_id, const char *new_name);
+
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5G
+ *
+ * \brief Renames an object within an HDF5 file
+ *
+ * \param[in] src_loc_id The file or group identifier for the original object
+ * \param[in] src_name   Object's original name
+ * \param[in] dst_name   Object's new name
+ *
+ * \return \herr_t
+ *
+ * \details H5Gmove() renames an object within an HDF5 file. The
+ *          original name, \p src_name, is unlinked from the group graph
+ *          and the new name, \p dst_name, is inserted as an atomic
+ *          operation. Both names are interpreted relative to \p loc_id,
+ *          which is either a file or a group identifier.
+ *
+ * \attention
+ *          Exercise care in moving groups as it is possible to render
+ *          data in a file inaccessible with H5Gmove(). See The Group
+ *          Interface in the HDF5 User's Guide.
+ *
+ * \version 1.8.0 The function H5Gmove() was deprecated in this release,
+ *                in favor of H5Lmove().
+ * \since?
+ *
+ */
+H5_DLL herr_t H5Gmove(hid_t src_loc_id, const char *src_name,
+    const char *dst_name);
+
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5G
+ *
+ * \brief Renames an object within an HDF5 file
+ *
+ * \param[in] src_loc_id Original file or group identifier
+ * \param[in] src_name   Object's original name
+ * \param[in] dst_loc_id Destination file or group identifier
+ * \param[in] dst_name   Object's new name
+ *
+ * \return \herr_t
+ *
+ * \details H5Gmove2() renames an object within an HDF5
+ *          file. The original name, \p src_name, is unlinked from the
+ *          group graph and the new name, \p dst_name, is inserted as an
+ *          atomic operation.
+ *
+ *          \p src_name and \p dst_name are interpreted relative to \p
+ *          src_loc_id and \p dst_loc_id, respectively, which are either
+ *          file or group identifiers.
+ *
+ * \attention
+ *          Exercise care in moving groups as it is possible to render
+ *          data in a file inaccessible with H5G_MOVE2. See The Group
+ *          Interface in the HDF5 User's Guide.
+ *
+ * \version 1.8.0 The function H5Gmove2() was deprecated in this release,
+ *                in favor of H5Lmove().
+ * \since?
+ *
+ */
+H5_DLL herr_t H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
+    const char *dst_name);
+
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5G
+ *
+ * \brief Opens an existing group for modification
+ *
+ * \loc_id
+ * \param[in] name Name of the group to open
+ *
+ * \return \herr_t
+ *
+ * \deprecated As of HDF5-1.8.0, this function has been deprecated in favor
+ *             of the function H5Gopen2() and the macro H5Gopen().
+ *
+ * \details H5Gopen1() opens an existing group with the specified \p name
+ *          at the specified location, \p loc_id.
+ *
+ *          H5Gopen1()  returns a group identifier for the group that was
+ *          opened. This group identifier should be released by calling
+ *          H5Gclose() when it is no longer needed.
+ *
+ * \version 1.8.0 Function was renamed to H5Gopen1() and deprecated.
+ * \version 1.4.0 Fortran function introduced in this release
+ *
+ * \since 1.0.0
+ *
+ */
+H5_DLL hid_t H5Gopen1(hid_t loc_id, const char *name);
+
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5G
+ *
+ * \brief Sets comment for specified object
+ *
+ * \fgdt_loc_id
+ * \param[in] name Name of the object whose comment is to be set or reset
+ * \param[in] comment The new comment
+ *
+ * \return \herr_t
+ *
+ * \details H5Gset_comment() sets the comment for the object
+ *          specified by \p loc_id and \p name to \p comment. Any previously
+ *          existing comment will be overwritten.
+ *
+ *          \p loc_id can specify any object in the file. \p name can be
+ *          one of the following:
+ *          \li The name of the object relative to loc_id 
+ *          \li An absolute name of the object, starting from /,
+ *              the file’s root group
+ *          \li A dot (.), if loc_id fully specifies the object
+ *
+ *          If comment is the empty string or a null pointer, the comment
+ *          message will be removed from the object.  Comments should be
+ *          relatively short, null-terminated, ASCII strings.
+ *
+ *          Comments can be attached to any object that has an object
+ *          header, e.g., datasets, groups, and named datatypes, but not
+ *          symbolic links.
+ *
+ * \version 1.8.0 The function H5Gset_comment() was deprecated in this
+ *                release, in favor of H5Oset_comment().
+ * \since?
+ *
+ */
+H5_DLL herr_t H5Gset_comment(hid_t loc_id, const char *name, const char *comment);
+
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup H5G
+ *
+ * \brief Removes the link to an object from a group
+ *
+ * \loc_id
+ * \param[in] name Name of the object to unlink
+ *
+ * \return \herr_t
+ *
+ * \version 1.8.0 The function H5Gunlink() was deprecated in this release,
+ *                in favor of H5Ldelete().
+ *
+ * \details H5Gunlink() removes the object specified by \p name
+ *          from the group graph and decrements the link count for the
+ *          object to which name points. This action eliminates any
+ *          association between name and the object to which name pointed.
+ *
+ *          Object headers keep track of how many hard links refer to an
+ *          object; when the link count reaches zero, the object can be
+ *          removed from the file. Objects which are open are not removed
+ *          until all identifiers to the object are closed.
+ *
+ *          If the link count reaches zero, all file space associated
+ *          with the object will be released, i.e., identified in memory
+ *          as freespace. If any object identifier is open for the object,
+ *          the space will not be released until after the object identifier
+ *          is closed.
+ *
+ *          Note that space identified as freespace is available for
+ *          re-use only as long as the file remains open; once a file has
+ *          been closed, the HDF5 library loses track of freespace. See
+ *          “Freespace Management” in the HDF5 User's Guide for
+ *          further details.
+ *
+ * \attention
+ *          Exercise care in unlinking groups as it is possible to render
+ *          data in a file inaccessible with H5Gunlink(). See The Group
+ *          Interface in the HDF5 User's Guide.
+ *
+ * \version 1.8.0 The function H5Gunlink() was deprecated in this release,
+ *                in favor of H5Ldelete().
+ * \since?
+ *
+ * \see H5Gcreate2(), H5Gopen2()
+ *
+ */
+H5_DLL herr_t H5Gunlink(hid_t loc_id, const char *name);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
