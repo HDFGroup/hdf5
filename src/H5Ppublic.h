@@ -1217,7 +1217,7 @@ H5_DLL herr_t H5Pget_size(hid_t id, const char *name, size_t *size);
  *            <td>IN: The value of the second property to compare</td>
  *           </tr>
  *           <tr>
- *            <td>\Code{\ref size_t size}</td>
+ *            <td>\Code{size_t size}</td>
  *            <td>IN: The size of the property in bytes</td>
  *           </tr>
  *          </table>
@@ -2116,9 +2116,50 @@ H5_DLL herr_t H5Pget_istore_k(hid_t plist_id, unsigned *ik/*out*/);
 H5_DLL herr_t H5Pget_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned *mesg_type_flags, unsigned *min_mesg_size);
 H5_DLL herr_t H5Pget_shared_mesg_nindexes(hid_t plist_id, unsigned *nindexes);
 H5_DLL herr_t H5Pget_shared_mesg_phase_change(hid_t plist_id, unsigned *max_list, unsigned *min_btree);
-H5_DLL herr_t H5Pget_userblock(hid_t plist_id, hsize_t *size);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup FCPL
+ *
+ * \brief Retrieves the size of the offsets and lengths used in an HDF5
+ *        file
+ *
+ * \fcpl_id{plist_id}
+ * \param[out] sizeof_addr Pointer to location to return offset size in
+ *             bytes
+ * \param[out] sizeof_size Pointer to location to return length size in
+ *             bytes
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_sizes() retrieves the size of the offsets and lengths
+ *          used in an HDF5 file. This function is only valid for file
+ *          creation property lists.
+ *
+ * \since  1.0.0
+ *
+ */
 H5_DLL herr_t H5Pget_sizes(hid_t plist_id, size_t *sizeof_addr/*out*/,
        size_t *sizeof_size/*out*/);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup FCPL
+ *
+ * \brief Retrieves the size of a user block
+ *
+ * \fcpl_id{plist_id}
+ * \param[out] size  Pointer to location to return user-block size
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_userblock() retrieves the size of a user block in a
+ *          file creation property list.
+ *
+ * \since 1.0.0
+ *
+ */
+H5_DLL herr_t H5Pget_userblock(hid_t plist_id, hsize_t *size);
 H5_DLL herr_t H5Pget_sym_k(hid_t plist_id, unsigned *ik/*out*/, unsigned *lk/*out*/);
 H5_DLL herr_t H5Pset_file_space_strategy(hid_t plist_id, H5F_fspace_strategy_t strategy, hbool_t persist, hsize_t threshold);
 H5_DLL herr_t H5Pset_file_space_page_size(hid_t plist_id, hsize_t fsp_size);
@@ -2126,20 +2167,302 @@ H5_DLL herr_t H5Pset_istore_k(hid_t plist_id, unsigned ik);
 H5_DLL herr_t H5Pset_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned mesg_type_flags, unsigned min_mesg_size);
 H5_DLL herr_t H5Pset_shared_mesg_nindexes(hid_t plist_id, unsigned nindexes);
 H5_DLL herr_t H5Pset_shared_mesg_phase_change(hid_t plist_id, unsigned max_list, unsigned min_btree);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup FCPL
+ *
+ * \brief Sets the byte size of the offsets and lengths used to address
+ *        objects in an HDF5 file
+ *
+ * \fcpl_id{plist_id}
+ * \param[in] sizeof_addr Size of an object offset in bytes
+ * \param[in] sizeof_size Size of an object length in bytes
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_sizes() sets the byte size of the offsets and lengths
+ *          used to address objects in an HDF5 file. This function is only
+ *          valid for file creation property lists. Passing in a value
+ *          of 0 for one of the parameters retains the current value. The
+ *          default value for both values is the same as sizeof(hsize_t)
+ *          in the library (normally 8 bytes). Valid values currently
+ *          are 2, 4, 8 and 16.
+ *
+ * \since 1.0.0
+ *
+ */
 H5_DLL herr_t H5Pset_sizes(hid_t plist_id, size_t sizeof_addr,
        size_t sizeof_size);
 H5_DLL herr_t H5Pset_sym_k(hid_t plist_id, unsigned ik, unsigned lk);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup FCPL
+ *
+ * \brief Sets user block size
+ *
+ * \fcpl_id{plist_id}
+ * \param[in] size Size of the user-block in bytes
+ *
+ * \return  \herr_t
+ *
+ * \details H5Pset_userblock() sets the user block size of a file creation
+ *          property list. The default user block size is 0; it may be set
+ *          to any power of 2 equal to 512 or greater (512, 1024, 2048, etc.).
+ *
+ * \since 1.0.0
+ *
+ */
 H5_DLL herr_t H5Pset_userblock(hid_t plist_id, hsize_t size);
 
 /* File access property list (FAPL) routines */
-H5_DLL herr_t H5Pset_alignment(hid_t fapl_id, hsize_t threshold,
-    hsize_t alignment);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup FAPL
+ *
+ * \brief Retrieves the current settings for alignment properties from a
+ *        file access property list
+ *
+ * \fapl_id
+ * \param[out] threshold Pointer to location of return threshold value
+ * \param[out] alignment Pointer to location of return alignment value
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_alignment() retrieves the current settings for
+ *          alignment properties from a file access property list. The
+ *          \p threshold and/or \p alignment pointers may be null
+ *          pointers (NULL).
+ *
+ * \since 1.0.0
+ *
+ */
 H5_DLL herr_t H5Pget_alignment(hid_t fapl_id, hsize_t *threshold/*out*/,
     hsize_t *alignment/*out*/);
-H5_DLL herr_t H5Pset_driver(hid_t plist_id, hid_t driver_id,
-        const void *driver_info);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup FAPL
+ *
+ * \brief Queries the raw data chunk cache parameters
+ *
+ * \fapl_id{plist_id}
+ * \param[in,out] mdc_nelmts  <i>No longer used</i>
+ * \param[in,out] rdcc_nslots Number of elements (objects) in the raw data
+ *                            chunk cache
+ * \param[in,out] rdcc_nbytes Total size of the raw data chunk cache, in
+ *                            bytes
+ * \param[in,out] rdcc_w0     Preemption policy
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_cache() retrieves the maximum possible number of
+ *          elements in the raw data chunk cache, the maximum possible
+ *          number of bytes in the raw data chunk cache, and the
+ *          preemption policy value.
+ *
+ *          Any (or all) arguments may be null pointers, in which case
+ *          the corresponding datum is not returned.
+ *
+ *          Note that the \p mdc_nelmts parameter is no longer used.
+ *
+ * \version 1.8.0 Use of the \p mdc_nelmts parameter discontinued.
+ *                Metadata cache configuration is managed with
+ *                H5Pset_mdc_config() and H5Pget_mdc_config()
+ * \version 1.6.0 The \p rdcc_nbytes and \p rdcc_nslots parameters changed
+ *                from type int to size_t.
+ *
+ * \since 1.0.0
+ *
+ */
+H5_DLL herr_t H5Pget_cache(hid_t plist_id,
+       int *mdc_nelmts, /* out */
+       size_t *rdcc_nslots/*out*/,
+       size_t *rdcc_nbytes/*out*/, double *rdcc_w0);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup FAPL
+ *
+ * \brief Returns low-lever driver identifier
+ *
+ * \plist_id
+ *
+ * \return \hid_t{low level driver}
+ *
+ * \details H5Pget_driver() returns the identifier of the low-level file
+ *          driver associated with the file access property list or
+ *          data transfer property list \p plist_id.
+ *
+ *          Valid driver identifiers distributed with HDF5 are listed and
+ *          described in the following table.
+ *
+ *          <table>
+ *           <tr>
+ *            <th>Driver Name</th>
+ *            <th>Driver Identifier</th>
+ *            <th>Description</th>
+ *            <th>Related Function</th>
+ *           </tr>
+ *           <tr>
+ *            <td>POSIX</td>
+ *            <td>#H5FD_SEC2</td>
+ *            <td>This driver uses POSIX file-system functions like read and
+ *                write to perform I/O to a single, permanent file on local disk
+ *                with no system buffering. This driver is POSIX-compliant and is
+ *                the default file driver for all systems.</td>
+ *            <td>H5Pset_fapl_sec2()</td>
+ *           </tr>
+ *           <tr>
+ *            <td>Direct</td>
+ *            <td>#H5FD_DIRECT</td>
+ *            <td>This is the #H5FD_SEC2 driver except data is written to or
+ *                read from the file synchronously without being cached by the
+ *                system.</td>
+ *            <td>H5Pset_fapl_direct()</td>
+ *           </tr>
+ *           <tr>
+ *            <td>Log</td>
+ *            <td>#H5FD_LOG</td>
+ *            <td>This is the #H5FD_SEC2 driver with logging capabilities.</td>
+ *            <td>H5Pset_fapl_log()</td>
+ *           </tr>
+ *           <tr>
+ *            <td>Windows</td>
+ *            <td>#H5FD_WINDOWS</td>
+ *            <td>This driver was modified in HDF5-1.8.8 to be a wrapper of the
+ *                POSIX driver, #H5FD_SEC2. This change should not affect user
+ *                applications.</td>
+ *            <td>H5Pset_fapl_windows()</td>
+ *           </tr>
+ *           <tr>
+ *            <td>STDIO</td>
+ *            <td>#H5FD_STDIO</td>
+ *            <td>This driver uses functions from the standard C stdio.h to
+ *                perform I/O to a single, permanent file on local disk with
+ *                additional system buffering.</td>
+ *            <td>H5Pset_fapl_stdio()</td>
+ *           </tr>
+ *           <tr>
+ *            <td>Memory</td>
+ *            <td>#H5FD_CORE</td>
+ *            <td>With this driver, an application can work with a file in
+ *                memory for faster reads and writes. File contents are kept in
+ *                memory until the file is closed. At closing, the memory version
+ *                of the file can be written back to disk or abandoned.</td>
+ *            <td>H5Pset_fapl_core()</td>
+ *           </tr>
+ *           <tr>
+ *            <td>Family</td>
+ *            <td>#H5FD_FAMILY</td>
+ *            <td>With this driver, the HDF5 file’s address space is partitioned
+ *                into pieces and sent to separate storage files using an
+ *                underlying driver of the user’s choice. This driver is for
+ *                systems that do not support files larger than 2 gigabytes.</td>
+ *            <td>H5Pset_fapl_family()</td>
+ *           </tr>
+ *           <tr>
+ *            <td>Multi</td>
+ *            <td>#H5FD_MULTI</td>
+ *            <td>With this driver, data can be stored in multiple files
+ *                according to the type of the data. I/O might work better if
+ *                data is stored in separate files based on the type of data.
+ *                The Split driver is a special case of this driver.</td>
+ *            <td>H5Pset_fapl_multi()</td>
+ *           </tr>
+ *           <tr>
+ *            <td>Parallel</td>
+ *            <td>#H5FD_MPIO</td>
+ *            <td>This is the standard HDF5 file driver for parallel file systems.
+ *                This driver uses the MPI standard for both communication and
+ *                file I/O.</td>
+ *            <td>H5Pset_fapl_mpio()</td>
+ *           </tr>
+ *           <tr>
+ *            <td>Parallel POSIX</td>
+ *            <td>H5FD_MPIPOSIX</td>
+ *            <td>This driver is no longer available.</td>
+ *            <td></td>
+ *           </tr>
+ *           <tr>
+ *            <td>Stream</td>
+ *            <td>H5FD_STREAM</td>
+ *            <td>This driver is no longer available.</td>
+ *            <td></td>
+ *           </tr>
+ *          </table>
+ *
+ *          This list does not include custom drivers that might be defined and
+ *          registered by a user.
+ *
+ *          The returned driver identifier is only valid as long as the file driver
+ *          remains registered.
+ *
+ *
+ * \since 1.4.0
+ *
+ */
 H5_DLL hid_t H5Pget_driver(hid_t plist_id);
 H5_DLL const void *H5Pget_driver_info(hid_t plist_id);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup FAPL
+ *
+ * \brief Returns the file close degree
+ *
+ * \fapl_id
+ * \param[out] degree Pointer to a location to which to return the file
+ *                    close degree property, the value of \p degree
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_fclose_degree() returns the current setting of the file
+ *          close degree property \p degree in the file access property
+ *          list \p fapl_id. The value of \p degree determines how
+ *          aggressively H5Fclose() deals with objects within a file that
+ *          remain open when H5Fclose() is called to close that file.
+ *
+ * \since 1.6.0
+ *
+ */
+H5_DLL herr_t H5Pget_fclose_degree(hid_t fapl_id, H5F_close_degree_t *degree);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup FAPL
+ *
+ * \brief Retrieves library version bounds settings that indirectly control
+ *        the format versions used when creating objects
+ *
+ * \fapl_id{plist_id}
+ * \param[out] low  The earliest version of the library that will be used
+ *                  for writing objects
+ * \param[out] high The latest version of the library that will be used for
+ *                  writing objects
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_libver_bounds() retrieves the lower and upper bounds on
+ *          the HDF5 library release versions that indirectly determine the
+ *          object format versions used when creating objects in the file.
+ *
+ *          This property is retrieved from the file access property list
+ *          specified by the parameter \p fapl_id.
+ *
+ *          The value returned in the parameters \p low and \p high is one
+ *          of the enumerated values in the #H5F_libver_t struct, which is
+ *          defined in H5Fpublic.h.
+ *
+ * \version 1.10.2 Add #H5F_LIBVER_V18 to the enumerated defines in
+ *                 #H5F_libver_t
+ * \since 1.8.0
+ *
+ */
+H5_DLL herr_t H5Pget_libver_bounds(hid_t plist_id, H5F_libver_t *low,
+    H5F_libver_t *high);
 H5_DLL herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info);
 H5_DLL herr_t H5Pget_vol_id(hid_t plist_id, hid_t *vol_id);
 H5_DLL herr_t H5Pget_vol_info(hid_t plist_id, void **vol_info);
@@ -2147,31 +2470,385 @@ H5_DLL herr_t H5Pset_family_offset(hid_t fapl_id, hsize_t offset);
 H5_DLL herr_t H5Pget_family_offset(hid_t fapl_id, hsize_t *offset);
 H5_DLL herr_t H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type);
 H5_DLL herr_t H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup FAPL
+ *
+ * \brief Sets alignment properties of a file access property list
+ *
+ * \fapl_id
+ * \param[in] threshold Threshold value. Note that setting the threshold
+ *                      value to 0 (zero) has the effect of a special case,
+ *                      forcing everything to be aligned
+ * \param[in] alignment Alignment value
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_alignment() sets the alignment properties of a
+ *          file access property list so that any file object greater
+ *          than or equal in size to \p threshold bytes will be aligned
+ *          on an address which is a multiple of \p alignment. The
+ *          addresses are relative to the end of the user block; the
+ *          alignment is calculated by subtracting the user block size
+ *          from the absolute file address and then adjusting the address
+ *          to be a multiple of \p alignment.
+ *
+ *          Default values for \p threshold and \p alignment are one,
+ *          implying no alignment. Generally the default values will
+ *          result in the best performance for single-process access to
+ *          the file. For MPI IO and other parallel systems, choose an
+ *          alignment which is a multiple of the disk block size.
+ *
+ *          If the file space handling strategy is set to
+ *          #H5F_FSPACE_STRATEGY_PAGE, then the alignment set via this
+ *          routine is ignored. The file space handling strategy is set
+ *          by H5Pset_file_space_strategy().
+ *
+ * \since 1.0.0
+ *
+ */
+H5_DLL herr_t H5Pset_alignment(hid_t fapl_id, hsize_t threshold,
+    hsize_t alignment);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup FAPL
+ *
+ * \brief Sets the raw data chunk cache parameters
+ *
+ * \fapl_id{plist_id}
+ * \param[in] mdc_nelmts No longer used; any value passed is ignored
+ * \param[in] rdcc_nslots The number of chunk slots in the raw data chunk
+ *                        cache for this dataset. Increasing this value
+ *                        reduces the number of cache collisions, but
+ *                        slightly increases the memory used. Due to the
+ *                        hashing strategy, this value should ideally be a
+ *                        prime number. As a rule of thumb, this value
+ *                        should be at least 10 times the number of chunks
+ *                        that can fit in \p rdcc_nbytes bytes. For
+ *                        maximum performance, this value should be set
+ *                        approximately 100 times that number of chunks.
+ *                        The default value is 521.
+ * \param[in] rdcc_nbytes Total size of the raw data chunk cache in bytes.
+ *                        The default size is 1 MB per dataset.
+ * \param[in] rdcc_w0     The chunk preemption policy for all datasets.
+ *                        This must be between 0 and 1 inclusive and
+ *                        indicates the weighting according to which chunks
+ *                        which have been fully read or written are
+ *                        penalized when determining which chunks to flush
+ *                        from cache. A value of 0 means fully read or
+ *                        written chunks are treated no differently than
+ *                        other chunks (the preemption is strictly LRU)
+ *                        while a value of 1 means fully read or written
+ *                        chunks are always preempted before other chunks.
+ *                        If your application only reads or writes data once,
+ *                        this can be safely set to 1. Otherwise, this should
+ *                        be set lower depending on how often you re-read or
+ *                        re-write the same data. The default value is 0.75.
+ *                        If the value passed is #H5D_CHUNK_CACHE_W0_DEFAULT,
+ *                        then the property will not be set on the dataset
+ *                        access property list, and the parameter will come
+ *                        from the file access property list.
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_cache() sets the number of elements, the total number of
+ *          bytes, and the preemption policy value for all datasets in a file
+ *          on the file’s file access property list.
+ *
+ *          The raw data chunk cache inserts chunks into the cache by first
+ *          computing a hash value using the address of a chunk and then by
+ *          using that hash value as the chunk’s index into the table of
+ *          cached chunks. In other words, the size of this hash table and the
+ *          number of possible hash values is determined by the \p rdcc_nslots
+ *          parameter. If a different chunk in the cache has the same hash value,
+ *          a collision will occur, which will reduce efficiency. If inserting
+ *          the chunk into the cache would cause the cache to be too big, then
+ *          the cache will be pruned according to the \p rdcc_w0 parameter.
+ *
+ *          The \p mdc_nelmts parameter is no longer used; any value passed
+ *          in that parameter will be ignored.
+ *
+ * \note \b Motivation: Setting raw data chunk cache parameters
+ *       can be done with H5Pset_cache(), H5Pset_chunk_cache(),
+ *       or a combination of both. H5Pset_cache() is used to
+ *       adjust the chunk cache parameters for all datasets via
+ *       a global setting for the file, and H5Pset_chunk_cache()
+ *       is used to adjust the chunk cache parameters for
+ *       individual datasets. When both are used, parameters
+ *       set with H5Pset_chunk_cache() will override any parameters
+ *       set with H5Pset_cache().
+ *
+ * \note Optimum chunk cache parameters may vary widely depending
+ *       on different data layout and access patterns. For datasets
+ *       with low performance requirements for example, changing
+ *       the cache settings can save memory.
+ *
+ * \note Note: Raw dataset chunk caching is not currently
+ *       supported when using the MPI I/O and MPI POSIX file drivers
+ *       in read/write mode; see H5Pset_fapl_mpio() and
+ *       H5Pset_fapl_mpiposix(), respectively. When using one of these
+ *       file drivers, all calls to H5Dread() and H5Dwrite() will access
+ *       the disk directly, and H5Pset_cache() will have no effect on
+ *       performance.
+ *
+ * \note Raw dataset chunk caching is supported when these drivers are
+ *       used in read-only mode.
+ *
+ * \todo Check on H5Pset_fapl_mpio() and H5Pset_fapl_mpiposix().
+ *
+ * \version 1.8.0 The use of the \p mdc_nelmts parameter was discontinued.
+ *                Metadata cache configuration is managed with
+ *                H5Pset_mdc_config() and H5Pget_mdc_config().
+ * \version 1.6.0 The \p rdcc_nbytes and \p rdcc_nelmts parameters
+ *                changed from type int to size_t.
+ * \since 1.0.0
+ *
+ */
 H5_DLL herr_t H5Pset_cache(hid_t plist_id, int mdc_nelmts,
        size_t rdcc_nslots, size_t rdcc_nbytes,
        double rdcc_w0);
-H5_DLL herr_t H5Pget_cache(hid_t plist_id,
-       int *mdc_nelmts, /* out */
-       size_t *rdcc_nslots/*out*/,
-       size_t *rdcc_nbytes/*out*/, double *rdcc_w0);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup FAPL
+ *
+ * \brief Sets a file driver
+ *
+ * \plist_id
+ * \param[in] driver_id   The new driver identifier
+ * \param[in] driver_info Optional struct containing driver properties
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_driver() sets the file driver, driver_id, for a file
+ *          access or data transfer property list, \p plist_id, and
+ *          supplies an optional struct containing the driver-specific
+ *          properties, \p driver_info.
+ *
+ *          The driver properties will be copied into the property list
+ *          and the reference count on the driver will be incremented,
+ *          allowing the caller to close the driver identifier but still
+ *          use the property list.
+ *
+ * \version 1.8.2 Function publicized in this release; previous releases
+ *                described this function only in the virtual file driver
+ *                documentation.
+ *
+ */
+H5_DLL herr_t H5Pset_driver(hid_t plist_id, hid_t driver_id,
+        const void *driver_info);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup FAPL
+ *
+ * \brief Sets the file close degree
+ *
+ * \fapl_id
+ * \param[in] degree Pointer to a location containing the file close
+ *           degree property, the value of \p degree
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_fclose_degree() sets the file close degree property
+ *          \p degree in the file access property list \p fapl_id.
+ *
+ *          The value of \p degree determines how aggressively
+ *          H5Fclose() deals with objects within a file that remain open
+ *          when H5Fclose() is called to close that file. \p degree can
+ *          have any one of four valid values:
+ *
+ *          <table>
+ *           <tr>
+ *            <th>Degree name</th>
+ *            <th>H5Fclose behavior with no open object in file</th>
+ *            <th>H5Fclose behavior with open object(s) in file</th>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5F_CLOSE_WEAK</td>
+ *            <td>Actual file is closed.</td>
+ *            <td>Access to file identifier is terminated; actual file
+ *                close is delayed until all objects in file are closed
+ *            </td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5F_CLOSE_SEMI</td>
+ *            <td>Actual file is closed.</td>
+ *            <td>Function returns FAILURE</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5F_CLOSE_STRONG</td>
+ *            <td>Actual file is closed.</td>
+ *            <td>All open objects remaining in the file are closed then
+ *                file is closed</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5F_CLOSE_DEFAULT</td>
+ *            <td>The VFL driver chooses the behavior. Currently, all VFL
+ *            drivers set this value to #H5F_CLOSE_WEAK, except for the
+ *            MPI-I/O driver, which sets it to #H5F_CLOSE_SEMI.</td>
+ *            <td></td>
+ *           </tr>
+ *
+ *          </table>
+ * \warning If a file is opened multiple times without being closed, each
+ *          open operation must use the same file close degree setting.
+ *          For example, if a file is already open with #H5F_CLOSE_WEAK,
+ *          an H5Fopen() call with #H5F_CLOSE_STRONG will fail.
+ *
+ * \since 1.6.0
+ *
+ */
+H5_DLL herr_t H5Pset_fclose_degree(hid_t fapl_id, H5F_close_degree_t degree);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup FAPL
+ *
+ * \brief Controls the range of library release versions used when creating
+ *        objects in a file
+ *
+ * \fapl_id{plist_id}
+ * \param[in] low  The earliest version of the library that will be used
+ *                 for writing objects
+ * \param[in] high The latest version of the library that will be used for
+ *                 writing objects
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_libver_bounds() controls the range of library release
+ *          versions that will be used when creating objects in a file.
+ *          The object format versions are determined indirectly from the
+ *          library release versions specified in the call.
+ *
+ *          This property is set in the file access property list
+ *          specified by the parameter \p fapl_id.
+ *
+ *          The parameter \p low sets the earliest possible format
+ *          versions that the library will use when creating objects in
+ *          the file.  Note that earliest possible is different from
+ *          earliest, as some features introduced in library versions
+ *          later than 1.0.0 resulted in updates to object formats.
+ *          The parameter \p high sets the latest format versions that
+ *          the library will be allowed to use when creating objects in
+ *          the file.
+ *
+ *          The parameters \p low and \p high must be one of the
+ *          enumerated values in the #H5F_libver_t struct, which is
+ *          defined in H5Fpublic.h.
+ *
+ *          The macro #H5F_LIBVER_LATEST is aliased to the highest
+ *          enumerated value in #H5F_libver_t, indicating that this is
+ *          currently the latest format available.
+ *
+ *          The library supports the following five pairs of
+ *          (\p low, \p high) combinations as derived from the values
+ *          in #H5F_libver_t:
+ *
+ *          <table>
+ *           <tr>
+ *            <th>Value of \p low and \p high</th>
+ *            <th>Result</th>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_EARLIEST<br />
+ *                \p high=#H5F_LIBVER_V18</td>
+ *            <td>
+ *              \li The library will create objects with the earliest
+ *                  possible format versions.
+ *              \li The library will allow objects to be created with the
+ *                  latest format versions available to library release 1.8.x.
+ *              \li API calls that create objects or features that are
+ *                  available to versions of the library greater than 1.8.x
+ *                  release will fail.
+ *             </td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_EARLIEST<br />
+ *                \p high=#H5F_LIBVER_V110</td>
+ *            <td>
+ *             \li The library will create objects with the earliest possible
+ *                 format versions.
+ *             \li The library will allow objects to be created with the latest
+ *                 format versions available to library release 1.10.x.
+ *                 Since 1.10.x is also #H5F_LIBVER_LATEST, there is no upper
+ *                 limit on the format versions to use.  For example, if a newer
+ *                 format version is required to support a feature e.g. virtual
+ *                 dataset, this setting will allow the object to be created.
+ *             \li This is the library default setting and provides the greatest
+ *                 format compatibility.
+ *            </td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V18<br />
+ *                \p high=#H5F_LIBVER_V18</td>
+ *            <td>
+ *             \li The library will create objects with the latest format versions
+ *                 available to library release 1.8.x.
+ *             \li API calls that create objects or features that are available
+ *                 to versions of the library greater than 1.8.x release will fail.
+ *             \li Earlier versions of the library may not be able to access
+ *                 objects created with this setting.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V18<br />
+ *                \p high=#H5F_LIBVER_V110</td>
+ *            <td>
+ *              \li The library will create objects with the latest format versions
+ *                  available to library release 1.8.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release 1.10.x.
+ *                  Since 1.10.x is also #H5F_LIBVER_LATEST, there is no upper limit
+ *                  on the format versions to use.  For example, if a newer format
+ *                  version is required to support a feature e.g. virtual dataset,
+ *                  this setting will allow the object to be created.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V110<br />
+ *                \p high=#H5F_LIBVER_V110
+ *             </td>
+ *             <td>
+ *              \li The library will create objects with the latest format versions
+ *                  available to library release 1.10.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release 1.10.x.
+ *                  Since 1.10.x is also #H5F_LIBVER_LATEST, there is no upper limit
+ *                  on the format versions to use. For example, if a newer format
+ *                  version is required to support a feature e.g. virtual dataset,
+ *                  this setting will allow the object to be created.
+ *              \li This setting allows users to take advantage of the latest
+ *                  features and performance enhancements in the library. However,
+ *                  objects written with this setting may be accessible to a smaller
+ *                  range of library versions than would be the case if low is set
+ *                  to #H5F_LIBVER_EARLIEST.
+ *              \li Earlier versions of the library may not be able to access objects created with this setting.
+ *            </td>
+ *           </tr>
+ *          </table>
+ *
+ * \version 1.10.2 #H5F_LIBVER_V18 added to the enumerated defines in #H5F_libver_t.
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL herr_t H5Pset_libver_bounds(hid_t plist_id, H5F_libver_t low,
+    H5F_libver_t high);
 H5_DLL herr_t H5Pset_mdc_config(hid_t    plist_id,
        H5AC_cache_config_t * config_ptr);
 H5_DLL herr_t H5Pget_mdc_config(hid_t     plist_id,
        H5AC_cache_config_t * config_ptr);    /* out */
 H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
 H5_DLL herr_t H5Pget_gc_references(hid_t fapl_id, unsigned *gc_ref/*out*/);
-H5_DLL herr_t H5Pset_fclose_degree(hid_t fapl_id, H5F_close_degree_t degree);
-H5_DLL herr_t H5Pget_fclose_degree(hid_t fapl_id, H5F_close_degree_t *degree);
 H5_DLL herr_t H5Pset_meta_block_size(hid_t fapl_id, hsize_t size);
 H5_DLL herr_t H5Pget_meta_block_size(hid_t fapl_id, hsize_t *size/*out*/);
 H5_DLL herr_t H5Pset_sieve_buf_size(hid_t fapl_id, size_t size);
 H5_DLL herr_t H5Pget_sieve_buf_size(hid_t fapl_id, size_t *size/*out*/);
 H5_DLL herr_t H5Pset_small_data_block_size(hid_t fapl_id, hsize_t size);
 H5_DLL herr_t H5Pget_small_data_block_size(hid_t fapl_id, hsize_t *size/*out*/);
-H5_DLL herr_t H5Pset_libver_bounds(hid_t plist_id, H5F_libver_t low,
-    H5F_libver_t high);
-H5_DLL herr_t H5Pget_libver_bounds(hid_t plist_id, H5F_libver_t *low,
-    H5F_libver_t *high);
 H5_DLL herr_t H5Pset_elink_file_cache_size(hid_t plist_id, unsigned efc_size);
 H5_DLL herr_t H5Pget_elink_file_cache_size(hid_t plist_id, unsigned *efc_size);
 H5_DLL herr_t H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len);
