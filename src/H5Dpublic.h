@@ -1008,11 +1008,9 @@ H5_DLL herr_t H5Dread_chunk(hid_t dset_id, hid_t dxpl_id,
  *          in the memory buffer \p buf, executing the callback function
  *          \p op once for each such data element.
  *
- *          The protoype of the callback function \p op is as follows
+ *          The prototype of the callback function \p op is as follows
  *          (as defined in the source code file H5Lpublic.h):
- *
  *          \snippet this H5D_operator_t_snip
- *
  *          The parameters of this callback function are:
  *
  *          <table>

@@ -167,12 +167,12 @@ typedef herr_t (*H5E_auto2_t)(hid_t estack, void *client_data);
  *
  * \return \herr_t
  *
- * \details H5Eauto_is_v2() determines whether the error auto reporting function
- *          for the error stack \p estack_id conforms to the H5E_auto2_t version
- *          or the H5E_auto1_t version.
+ * \details H5Eauto_is_v2() determines whether the error auto reporting
+ *          function for the error stack \p estack_id conforms to the
+ *          H5E_auto2_t version or the H5E_auto1_t version.
  *
- *          \p is_stack is set to 1 if the error stack conforms to H5E_auto2_t and
- *           0 if it conforms to H5E_auto1_t.
+ *          \p is_stack is set to 1 if the error stack conforms to H5E_auto2_t
+ *          and 0 if it conforms to H5E_auto1_t.
  *
  * \since 1.8.0
  *

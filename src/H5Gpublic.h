@@ -265,14 +265,7 @@ H5_DLL hid_t H5Gget_create_plist(hid_t group_id);
  *
  * \snippet this H5G_info_t_snip
  * Possible values of \p storage_type are:
- *          <table>
- *          <tr><td>\c H5G_STORAGE_TYPE_COMPACT</td>
- *              <td>Compact storage</td></tr>
- *          <tr><td>\c H5G_STORAGE_TYPE_DENSE</td>
- *              <td>Indexed storage</td></tr>
- *          <tr><td>\c H5G_STORAGE_TYPE_SYMBOL_TABLE</td>
- *              <td>Symbol tables, the original HDF5 structure</td></tr>
- *          </table>
+ * \storage_type
  *
  * \since 1.8.0
  *
@@ -315,31 +308,11 @@ H5_DLL herr_t H5Gget_info(hid_t loc_id, H5G_info_t *ginfo);
  *          If \p loc_id specifies the group containing the group for
  *          which information is queried, \p group_name can be a dot (.).
  *
- *          Valid values for index_type are as follows:
- *
- *          <table>
- *          <tr><td>\c H5_INDEX_NAME</td>
- *              <td>An alpha-numeric index by group name </td></tr>
- *          <tr><td>\c H5_INDEX_CRT_ORDER</td>
- *              <td>An index by creation order </td></tr>
- *          </table>
- *
+ *          Valid values for \p index_type are as follows:
+ * \indexes
  *          The order in which the index is to be examined, as specified
- *          by order, can be one of the following:
- *
- *          <table>
- *          <tr><td>\c H5_ITER_INC</td>
- *              <td>The count is from beginning of the index, i.e., top-down.
- *                  </td></tr>
- *          <tr><td>\c H5_ITER_DEC</td>
- *              <td>The count is from the end of the index, i.e., bottom-up.
- *                  </td></tr>
- *          <tr><td>\c ndim</td>
- *              <td>HDF5 counts through the index in the fastest-available
- *                  order. No information is provided as to the order, but
- *                  HDF5 ensures that no element in the index will be
- *                  overlooked.</td></tr>
- *          </table>
+ *          by \p order, can be one of the following:
+ * \orders
  *
  * \since 1.8.0
  *
@@ -375,14 +348,7 @@ H5_DLL herr_t H5Gget_info_by_idx(hid_t loc_id, const char *group_name,
  *
  * \snippet this H5G_info_t_snip
  * Possible values of \p storage_type are:
- *          <table>
- *          <tr><td>\c H5G_STORAGE_TYPE_COMPACT</td>
- *              <td>Compact storage</td></tr>
- *          <tr><td>\c H5G_STORAGE_TYPE_DENSE</td>
- *              <td>Indexed storage</td></tr>
- *          <tr><td>\c H5G_STORAGE_TYPE_SYMBOL_TABLE</td>
- *              <td>Symbol tables, the original HDF5 structure</td></tr>
- *          </table>
+ * \storage_type
  *
  * \since 1.8.0
  *
@@ -839,25 +805,24 @@ H5_DLL ssize_t H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char* name,
  *-------------------------------------------------------------------------
  * \ingroup H5G
  *
- * \brief Closes the specified group
+ * \brief Returns the type of an object specified by an index
  *
  * \fgdta_loc_id
  * \param[in] idx      Transient index identifying object
  *
- * \return \herr_t
+ * \return Returns the type of the object if successful. Otherwise returns
+ *         a negative value.
  *
- * \details H5Gget_objtype_by_idx() returns the type of the
- *          object specified by the index \p idx in the group \p loc_id.
- *
- *          The group is specified by a group identifier \p loc_id. A
- *          file identifier may also be passed in for \p loc_id; which
+ * \details H5Gget_objtype_by_idx() returns the type of the object
+ *          specified by the index \p idx in the group \p loc_id. A file
+ *          identifier may also be passed in for \p loc_id; which
  *          indicates the file's root group.
  *
  *          \p idx is the transient index used to iterate through the
  *          objects in the group. This parameter is described in more
  *          detail in the discussion of H5Gget_objname_by_idx.
  *
- *          The object type is returned as the function return value:
+ *          The object type is returned as one of the following values:
  *
  *          <table>
  *          <tr><td>\c H5G_GROUP</td>
