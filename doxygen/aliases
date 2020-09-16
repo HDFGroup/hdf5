@@ -98,6 +98,9 @@ ALIASES += fgdt_loc_id{1}="\loc_id{\1}. The identifier may be that of a file, gr
 ALIASES += fgdta_loc_id="\loc_id. The identifier may be that of a file, group, dataset, named datatype, or attribute."
 ALIASES += fgdta_loc_id{1}="\loc_id{\1}. The identifier may be that of a file, group, dataset, named datatype, or attribute."
 
+ALIASES += fg_loc_id="\loc_id. The identifier may be that of a file or group."
+ALIASES += fg_loc_id{1}="\loc_id{\1}. The identifier may be that of a file or group."
+
 ################################################################################
 # Property lists
 ################################################################################
@@ -147,6 +150,13 @@ ALIASES += obj_id{1}="\param[in] \1 Object identifier"
 
 ALIASES += fgdta_obj_id="\obj_id. The identifier may be that of a file, group, dataset, named datatype, or attribute."
 ALIASES += fgdta_obj_id{1}="\obj_id{\1}. The identifier may be that of a file, group, dataset, named datatype, or attribute."
+
+################################################################################
+# Others
+################################################################################
+
+ALIASES += estack_id="\param[in] estack_id Error stack identifier"
+ALIASES += estack_id{1}="\param[in] \1 Error stack identifier"
 
 ################################################################################
 # The Usual Suspects

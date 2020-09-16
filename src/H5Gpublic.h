@@ -50,11 +50,8 @@ typedef enum H5G_storage_type_t {
     H5G_STORAGE_TYPE_DENSE 		/* Links are stored in fractal heap & indexed with v2 B-tree */
 } H5G_storage_type_t;
 
-/**
- * \brief Information struct for group (for
- *        H5Gget_info/H5Gget_info_by_name/H5Gget_info_by_idx)
- */
-//! [H5G_info_t_snip]
+/** Information of struct H5G_info_t */
+//![H5G_info_t_snip]
 typedef struct H5G_info_t {
     H5G_storage_type_t 	storage_type;	/* Type of storage for links in group */
     hsize_t 	nlinks;		            /* Number of links in group */

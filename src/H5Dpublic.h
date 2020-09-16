@@ -1378,7 +1378,7 @@ H5_DLL herr_t H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id,
  *                  This number must be a multiple of the datatype
  *                  size.</td></tr>
  *          <tr><td>\c op_data</td>
-                <td>User-defined pointer to data required by the callback
+ *              <td>User-defined pointer to data required by the callback
  *                  function; a pass-through of the \p op_data pointer
  *                  provided with the H5Dgather() function call.</td></tr>
  *          </table>
