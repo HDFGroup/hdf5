@@ -507,6 +507,9 @@ H5_DLL hid_t H5Pcreate(hid_t cls_id);
  *          H5Pcreate(). The \p create routine is called when a new property
  *          list of this class is being created. The #H5P_cls_create_func_t
  *          callback function is defined as follows:
+ *
+ *          \todo fix snippets to work, when you click on them.
+ *
  *          \snippet this H5P_cls_create_func_t_snip
  *
  *          The parameters to this callback function are defined as follows:
@@ -1772,10 +1775,10 @@ H5_DLL htri_t H5Pall_filters_avail(hid_t plist_id);
  * \details H5Pget_attr_creation_order() retrieves the settings for
  *          tracking and indexing attribute creation order on an object.
  *
- *          \p plist_id is a dataset or group creation property list
- *          identifier. The term \p ocpl, for object creation property
- *          list, is used when different types of objects may be
- *          involved.
+ *          \p plist_id is an object creation property list (\p ocpl),
+ *          as it can be a dataset or group creation property list
+ *          identifier. The term \p ocpl is used when different types
+ *          of objects may be involved.
  *
  *          \p crt_order_flags returns flags with the following meanings:
  *
@@ -1799,6 +1802,43 @@ H5_DLL htri_t H5Pall_filters_avail(hid_t plist_id);
  *
  */
 H5_DLL herr_t H5Pget_attr_creation_order(hid_t plist_id, unsigned *crt_order_flags);
+/**
+ *--------------------------------------------------------------------------
+ *
+ * \ingroup OCPL
+ *
+ * \brief Retrieves attribute storage phase change thresholds
+ *
+ * \plist_id
+ * \param[out] max_compact Maximum number of attributes to be stored in
+ *                         compact storage (Default: 8)
+ * \param[out] min_dense   Minimum number of attributes to be stored in
+ *                         dense storage (Default: 6)
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_attr_phase_change() retrieves threshold values for
+ *          attribute storage on an object. These thresholds determine the
+ *          point at which attribute storage changes from compact storage
+ *          (i.e., storage in the object header) to dense storage (i.e.,
+ *          storage in a heap and indexed with a B-tree).
+ *
+ *          In the general case, attributes are initially kept in compact
+ *          storage. When the number of attributes exceeds \p max_compact,
+ *          attribute storage switches to dense storage. If the number of
+ *          attributes subsequently falls below \p min_dense, the
+ *          attributes are returned to compact storage.
+ *
+ *          If \p max_compact is set to 0 (zero), dense storage always used.
+ *
+ *          \p plist_id is an object creation property list (\p ocpl), as it
+ *          can be a dataset or group creation property list identifier.
+ *          The term \p ocpl is used when different types of objects may be
+ *          involved.
+ *
+ * \since 1.8.0
+ *
+ */
 H5_DLL herr_t H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, unsigned *min_dense);
 /**
  *--------------------------------------------------------------------------
@@ -1872,7 +1912,64 @@ H5_DLL H5Z_filter_t H5Pget_filter2(hid_t plist_id, unsigned idx,
        unsigned cd_values[]/*out*/,
        size_t namelen, char name[],
        unsigned *filter_config /*out*/);
-H5_DLL herr_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t id,
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup OCPL
+ *
+ * \brief Returns information about the specified filter
+ *
+ * \plist_id
+ * \param[in]     filter_id     Filter identifier
+ * \param[out]    flags         Bit vector specifying certain general
+ *                              properties of the filter
+ * \param[in,out] cd_nelmts     Number of elements in \p cd_values
+ * \param[out]    cd_values[]   Auxiliary data for the filter
+ * \param[in]     namelen       Length of filter name and number of
+ *                              elements in \p name
+ * \param[out]    name[]        Name of filter
+ * \param[out]    filter_config Bit field, as described in
+ *                              H5Zget_filter_info()
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_filter_by_id2() returns information about the filter
+ *          specified in \p filter_id, a filter identifier.
+ *
+ *          \p plist_id must be a dataset or group creation property list
+ *          and \p filter_id must be in the associated filter pipeline.
+ *
+ *          The \p filter_id and \p flags parameters are used in the same
+ *          manner as described in the discussion of H5Pset_filter().
+ *
+ *          Aside from the fact that they are used for output, the
+ *          parameters \p cd_nelmts and \p cd_values[] are used in the same
+ *          manner as described in the discussion of H5Pset_filter(). On
+ *          input, the \p cd_nelmts parameter indicates the number of
+ *          entries in the \p cd_values[] array allocated by the calling
+ *          program; on exit it contains the number of values defined by
+ *          the filter.
+ *
+ *          On input, the \p namelen parameter indicates the number of
+ *          characters allocated for the filter name by the calling program
+ *          in the array \p name[]. On exit \p name[] contains the name of the
+ *          filter with one character of the name in each element of the
+ *          array.
+ *
+ *          \p filter_config is the bit field described in
+ *          H5Zget_filter_info().
+ *
+ *          If the filter specified in \p filter_id is not set for the
+ *          property list, an error will be returned and
+ *          H5Pget_filter_by_id2() will fail.
+ *
+ * \version 1.8.5 Function extended to work with group creation property
+ *                lists.
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL herr_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t filter_id,
        unsigned int *flags/*out*/, size_t *cd_nelmts/*out*/,
        unsigned cd_values[]/*out*/, size_t namelen, char name[]/*out*/,
        unsigned *filter_config/*out*/);
@@ -1906,7 +2003,41 @@ H5_DLL herr_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t id,
  *--------------------------------------------------------------------------
  */
 H5_DLL int H5Pget_nfilters(hid_t plist_id);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup OCPL
+ *
+ * \brief Determines whether times associated with an object
+ *       are being recorded
+ *
+ * \plist_id
+ * \param[out] track_times Boolean value, 1 (TRUE) or 0 (FALSE),
+ *             specifying whether object times are being recorded
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_obj_track_times() queries the object creation property
+ *          list, \p plist_id, to determine whether object times are being
+ *          recorded.
+ *
+ *          If \p track_times is returned as 1, times are being recorded;
+ *          if \p track_times is returned as 0, times are not being
+ *          recorded.
+ *
+ *          Time data can be retrieved with H5Oget_info(), which will return
+ *          it in the #H5O_info_t struct.
+ *
+ *          If times are not tracked, they will be reported as follows
+ *          when queried: 12:00 AM UDT, Jan. 1, 1970
+ *
+ *          See H5Pset_obj_track_times() for further discussion.
+ *
+ * \since 1.8.0
+ *
+ */
 H5_DLL herr_t H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times);
+
 H5_DLL herr_t H5Pmodify_filter(hid_t plist_id, H5Z_filter_t filter,
         unsigned int flags, size_t cd_nelmts,
         const unsigned int cd_values[/*cd_nelmts*/]);
