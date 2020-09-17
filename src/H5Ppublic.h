@@ -2883,42 +2883,283 @@ H5_DLL herr_t H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size, unsigned
 /* Dataset creation property list (DCPL) routines */
 /**
  *-------------------------------------------------------------------------
+ *
  * \ingroup DCPL
  *
- * \brief Sets the type of storage used to store the raw data for a dataset
+ * \brief Determines whether fill value is defined
  *
- * \dcpl_id{plist_id}
- * \param[in] layout Type of storage layout for raw data
+ * \dcpl_id{plist}
+ * \param[out] status Status of fill value in property list
  *
  * \return \herr_t
- * \details H5Pset_layout() sets the type of storage used to store the raw
- *          data for a dataset. This function is only valid for dataset
- *          creation property lists.
  *
- *          Valid values for \p layout are:
- *           - #H5D_COMPACT: Store raw data in the dataset object header
- *                           in file. This should only be used for datasets
- *                           with small amounts of raw data. The raw data
- *                           size limit is 64K (65520 bytes). Attempting
- *                           to create a dataset with raw data larger than
- *                           this limit will cause the H5Dcreate() call to
- *                           fail.
- *           - #H5D_CONTIGUOUS: Store raw data separately from the object
- *                              header in one large chunk in the file.
- *           - #H5D_CHUNKED: Store raw data separately from the object header
- *                           as chunks of data in separate locations in
- *                           the file.
- *           - #H5D_VIRTUAL: Draw raw data from multiple datasets in
- *                           different files.
+ * \details H5Pfill_value_defined() determines whether a fill value is
+ *          defined in the dataset creation property list \p plist. Valid
+ *          values returned in status are as follows:
  *
- *          Note that a compact storage layout may affect writing data to
- *          the dataset with parallel applications. See the note in
- *          H5Dwrite() documentation for details.
- * \version 1.10.0 #H5D_VIRTUAL added in this release.
+ *          <table>
+ *           <tr>
+ *            <td>#H5D_FILL_VALUE_UNDEFINED</td>
+ *            <td>Fill value is undefined.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5D_FILL_VALUE_DEFAULT</td>
+ *            <td>Fill value is the library default.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5D_FILL_VALUE_USER_DEFINED</td>
+ *            <td>Fill value is defined by the application.</td>
+ *           </tr>
+ *          </table>
+ *
+ * \since 1.6.0
+ *
+ */
+H5_DLL herr_t H5Pfill_value_defined(hid_t plist, H5D_fill_value_t *status);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Retrieves the timing for storage space allocation
+ *
+ * \dcpl_id{plist_id}
+ * \param[out] alloc_time The timing setting for allocating dataset
+ *                        storage space
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_alloc_time() retrieves the timing for allocating storage
+ *          space for a dataset's raw data. This property is set in the
+ *          dataset creation property list \p plist_id. The timing setting
+ *          is returned in \p alloc_time as one of the following values:
+ *
+ *          <table>
+ *           <tr>
+ *            <td>#H5D_ALLOC_TIME_DEFAULT</td>
+ *            <td>Uses the default allocation time, based on the dataset
+ *                storage method. <br />See the \p alloc_time description in
+ *                H5Pset_alloc_time() for default allocation times for
+ *                various storage methods.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5D_ALLOC_TIME_EARLY</td>
+ *            <td>All space is allocated when the dataset is created.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5D_ALLOC_TIME_INCR</td>
+ *            <td>Space is allocated incrementally as data is written
+ *                to the dataset.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5D_ALLOC_TIME_LATE</td>
+ *            <td>All space is allocated when data is first written to
+ *                the dataset.</td>
+ *           </tr>
+ *          </table>
+ *
+ * \note H5Pget_alloc_time() is designed to work in concert with the
+ *       dataset fill value and fill value write time properties, set
+ *       with the functions H5Pget_fill_value() and H5Pget_fill_time().
+ *
+ * \since 1.6.0
+ *
+ */
+H5_DLL herr_t H5Pget_alloc_time(hid_t plist_id, H5D_alloc_time_t
+    *alloc_time/*out*/);
+/**
+ *-------------------------------------------------------------------------
+ * \ingroup DCPL
+ *
+ * \brief Retrieves the size of chunks for the raw data of a chunked
+ *        layout dataset
+ *
+ * \dcpl_id{plist_id}
+ * \param[in]  max_ndims Size of the \p dims array
+ * \param[out] dim Array to store the chunk dimensions
+ *
+ * \return Returns chunk dimensionality if successful;
+ *         otherwise returns a negative value.
+ *
+ * \details H5Pget_chunk() retrieves the size of chunks for the raw data
+ *          of a chunked layout dataset. This function is only valid for
+ *          dataset creation property lists. At most, \p max_ndims elements
+ *          of \p dim will be initialized.
+ *
  * \since 1.0.0
  *
  */
-H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
+H5_DLL int H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Retrieves the edge chunk option setting from a dataset creation
+ *        property list
+ *
+ * \dcpl_id{plist_id}
+ * \param[out] opts  Edge chunk option flag. Valid values are described in
+ *                   H5Pset_chunk_opts(). The option status can be
+ *                   retrieved using the bitwise AND operator ( & ). For
+ *                   example, the expression
+ *                   (opts&#H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS) will
+ *                   evaluate to #H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS if
+ *                   that option has been enabled. Otherwise, it will
+ *                   evaluate to 0 (zero).
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_chunk_opts() retrieves the edge chunk option setting
+ *          stored in the dataset creation property list \p plist_id.
+ *
+ * \since 1.10.0
+ *
+ */
+H5_DLL herr_t H5Pget_chunk_opts(hid_t plist_id, unsigned *opts);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Returns information about an external file
+ *
+ * \dcpl_id{plist_id}
+ * \param[in]  idx       External file index
+ * \param[in]  name_size Maximum length of \p name array
+ * \param[out] name      Name of the external file
+ * \param[out] offset    Pointer to a location to return an offset value
+ * \param[out] size      Pointer to a location to return the size of the
+ *                       external file data
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_external() returns information about an external file.
+ *          The external file is specified by its index, \p idx, which
+ *          is a number from zero to N-1, where N is the value returned
+ *          by H5Pget_external_count(). At most \p name_size characters
+ *          are copied into the \p name array. If the external file name
+ *          is longer than \p name_size with the null terminator, the
+ *          return value is not null terminated (similar to strncpy()).
+ *
+ *          If \p name_size is zero or \p name is the null pointer, the
+ *          external file name is not returned. If \p offset or \p size
+ *          are null pointers then the corresponding information is not
+ *          returned.
+ *
+ * \version 1.6.4 \p idx parameter type changed to unsigned.
+ * \since 1.0.0
+ *
+ */
+H5_DLL herr_t H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size,
+          char *name/*out*/, off_t *offset/*out*/,
+          hsize_t *size/*out*/);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Returns the number of external files for a dataset
+ *
+ * \dcpl_id{plist_id}
+ *
+ * \return Returns the number of external files if successful; otherwise
+ *         returns a negative value.
+ *
+ * \details H5Pget_external_count() returns the number of external files
+ *          for the specified dataset.
+ *
+ * \since 1.0.0
+ *
+ */
+H5_DLL int H5Pget_external_count(hid_t plist_id);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Retrieves the time when fill values are written to a dataset
+ *
+ * \dcpl_id{plist_id}
+ * \param[out] fill_time Setting for the timing of writing fill values to
+ *                       the dataset
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_fill_time() examines the dataset creation property list
+ *          \p plist_id to determine when fill values are to be written to
+ *          a dataset. Valid values returned in \p fill_time are as
+ *          follows:
+ *
+ *          <table>
+ *           <tr>
+ *            <td>#H5D_FILL_TIME_IFSET</td>
+ *            <td>Fill values are written to the dataset when storage
+ *                space is allocated only if there is a user-defined fill
+ *                value, i.e., one set with H5Pset_fill_value(). (Default)
+ *             </td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5D_FILL_TIME_ALLOC</td>
+ *            <td>Fill values are written to the dataset when storage
+ *                space is allocated.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5D_FILL_TIME_NEVER</td>
+ *            <td>Fill values are never written to the dataset.</td>
+ *           </tr>
+ *          </table>
+ *
+ * \note H5Pget_fill_time() is designed to work in coordination with the
+ *       dataset fill value and dataset storage allocation time properties,
+ *       retrieved with the functions H5Pget_fill_value() and
+ *       H5Pget_alloc_time().
+ *
+ * \since 1.6.0
+ *
+ */
+H5_DLL herr_t H5Pget_fill_time(hid_t plist_id, H5D_fill_time_t
+    *fill_time/*out*/);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Retrieves a dataset fill value
+ *
+ * \dcpl_id{plist_id}
+ * \param[in]  type_id Datatype identifier for the value passed via
+ *                     \p value
+ * \param[out] value   Pointer to buffer to contain the returned
+ *                     fill value
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_fill_value() returns the dataset fill value defined in
+ *          the dataset creation property list \p plist_id. The fill value
+ *          is returned through the \p value pointer and will be converted
+ *          to the datatype specified  by \p type_id. This datatype may
+ *          differ from the fill value datatype in the property list, but
+ *          the HDF5 library must be able to convert between the two
+ *          datatypes.
+ *
+ *          If the fill value is undefined, i.e., set to NULL in the
+ *          property list, H5Pget_fill_value() will return an error.
+ *          H5Pfill_value_defined() should be used to check for this
+ *          condition before H5Pget_fill_value() is called.
+ *
+ *          Memory must be allocated by the calling application.
+ *
+ * \note H5Pget_fill_value() is designed to coordinate with the dataset
+ *       storage allocation time and fill value write time properties,
+ *       which can be retrieved with the functions H5Pget_alloc_time()
+ *       and H5Pget_fill_time(), respectively.
+ *
+ * \since 1.0.0
+ *
+ */
+H5_DLL herr_t H5Pget_fill_value(hid_t plist_id, hid_t type_id,
+     void *value/*out*/);
 /**
  *-------------------------------------------------------------------------
  * \ingroup DCPL
@@ -2955,6 +3196,75 @@ H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
  *
  */
 H5_DLL H5D_layout_t H5Pget_layout(hid_t plist_id);
+
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Gets the number of mappings for the virtual dataset
+ *
+ * \dcpl_id
+ * \param[out] count The number of mappings
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_virtual_count() gets the number of mappings for a
+ *          virtual dataset that has the creation property list specified
+ *          by \p dcpl_id.
+ *
+ * \virtual
+ *
+ * \since 1.10.0
+ *
+ */
+H5_DLL herr_t H5Pget_virtual_count(hid_t dcpl_id, size_t *count/*out*/);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Gets the name of a source dataset used in the mapping
+ *
+ * \dcpl_id
+ * \param[in]  index Mapping index. The value of \p index is 0 (zero) or
+ *                   greater and less than \p count 
+ *                   (0 ≤ \p index < \p count), where \p count is the
+ *                   number of mappings returned by H5Pget_virtual_count().
+ * \param[out] name  A buffer containing the name of the source dataset
+ * \param[in]  size  The size, in bytes, of the name buffer. Must be the
+ *                   size of the dataset name in bytes plus 1 for a NULL
+ *                   terminator
+ *
+ * \return Returns the length of the dataset name if successful;
+ *         otherwise returns a negative value.
+ *
+ * \details H5Pget_virtual_dsetname() takes the dataset creation property
+ *          list for the virtual dataset, \p dcpl_id, the mapping index,
+ *          \p index, the size of the dataset name for a source dataset,
+ *          \p size, and retrieves the name of the source dataset used in
+ *          the mapping.
+ *
+ *          Up to \p size characters of the dataset name are returned in
+ *          \p name; additional characters, if any, are not returned to
+ *          the user application.
+ *
+ *          If the length of the dataset name, which determines the
+ *          required value of \p size, is unknown, a preliminary call
+ *          to H5Pget_virtual_dsetname() with the last two parameters
+ *          set to NULL and zero respectively can be made. The return
+ *          value of this call will be the size in bytes of the dataset
+ *          name. That value, plus 1 for a NULL terminator, must then be
+ *          assigned to \p size for a second H5Pget_virtual_dsetname()
+ *          call, which will retrieve the actual dataset name.
+ *
+ * \virtual
+ *
+ * \since 1.10.0
+ *
+ */
+H5_DLL ssize_t H5Pget_virtual_dsetname(hid_t dcpl_id, size_t index,
+    char *name/*out*/, size_t size);
 /**
  *-------------------------------------------------------------------------
  * \ingroup DCPL
@@ -3003,42 +3313,50 @@ H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*
  *-------------------------------------------------------------------------
  * \ingroup DCPL
  *
- * \brief Retrieves the size of chunks for the raw data of a chunked
- *        layout dataset
+ * \brief Sets the type of storage used to store the raw data for a dataset
  *
  * \dcpl_id{plist_id}
- * \param[in]  max_ndims Size of the \p dims array
- * \param[out] dim Array to store the chunk dimensions
+ * \param[in] layout Type of storage layout for raw data
  *
- * \return Returns chunk dimensionality if successful;
- *         otherwise returns a negative value.
+ * \return \herr_t
+ * \details H5Pset_layout() sets the type of storage used to store the raw
+ *          data for a dataset. This function is only valid for dataset
+ *          creation property lists.
  *
- * \details H5Pget_chunk() retrieves the size of chunks for the raw data
- *          of a chunked layout dataset. This function is only valid for
- *          dataset creation property lists. At most, \p max_ndims elements
- *          of \p dim will be initialized.
+ *          Valid values for \p layout are:
+ *           - #H5D_COMPACT: Store raw data in the dataset object header
+ *                           in file. This should only be used for datasets
+ *                           with small amounts of raw data. The raw data
+ *                           size limit is 64K (65520 bytes). Attempting
+ *                           to create a dataset with raw data larger than
+ *                           this limit will cause the H5Dcreate() call to
+ *                           fail.
+ *           - #H5D_CONTIGUOUS: Store raw data separately from the object
+ *                              header in one large chunk in the file.
+ *           - #H5D_CHUNKED: Store raw data separately from the object header
+ *                           as chunks of data in separate locations in
+ *                           the file.
+ *           - #H5D_VIRTUAL: Draw raw data from multiple datasets in
+ *                           different files.
  *
+ *          Note that a compact storage layout may affect writing data to
+ *          the dataset with parallel applications. See the note in
+ *          H5Dwrite() documentation for details.
+ * \version 1.10.0 #H5D_VIRTUAL added in this release.
  * \since 1.0.0
  *
  */
-H5_DLL int H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/);
+H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
 H5_DLL herr_t H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id,
     const char *src_file_name, const char *src_dset_name, hid_t src_space_id);
-H5_DLL herr_t H5Pget_virtual_count(hid_t dcpl_id, size_t *count/*out*/);
 H5_DLL hid_t H5Pget_virtual_vspace(hid_t dcpl_id, size_t index);
 H5_DLL hid_t H5Pget_virtual_srcspace(hid_t dcpl_id, size_t index);
 H5_DLL ssize_t H5Pget_virtual_filename(hid_t dcpl_id, size_t index,
     char *name/*out*/, size_t size);
-H5_DLL ssize_t H5Pget_virtual_dsetname(hid_t dcpl_id, size_t index,
-    char *name/*out*/, size_t size);
 H5_DLL herr_t H5Pset_external(hid_t plist_id, const char *name, off_t offset,
           hsize_t size);
 H5_DLL herr_t H5Pset_chunk_opts(hid_t plist_id, unsigned opts);
-H5_DLL herr_t H5Pget_chunk_opts(hid_t plist_id, unsigned *opts);
-H5_DLL int H5Pget_external_count(hid_t plist_id);
-H5_DLL herr_t H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size,
-          char *name/*out*/, off_t *offset/*out*/,
-          hsize_t *size/*out*/);
+
 /* Dataset creation property list (DCPL) routines */
 /**
  *-------------------------------------------------------------------------
@@ -3202,16 +3520,9 @@ H5_DLL herr_t H5Pset_nbit(hid_t plist_id);
 H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type, int scale_factor);
 H5_DLL herr_t H5Pset_fill_value(hid_t plist_id, hid_t type_id,
      const void *value);
-H5_DLL herr_t H5Pget_fill_value(hid_t plist_id, hid_t type_id,
-     void *value/*out*/);
-H5_DLL herr_t H5Pfill_value_defined(hid_t plist, H5D_fill_value_t *status);
 H5_DLL herr_t H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t
     alloc_time);
-H5_DLL herr_t H5Pget_alloc_time(hid_t plist_id, H5D_alloc_time_t
-    *alloc_time/*out*/);
 H5_DLL herr_t H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time);
-H5_DLL herr_t H5Pget_fill_time(hid_t plist_id, H5D_fill_time_t
-    *fill_time/*out*/);
 H5_DLL herr_t H5Pget_dset_no_attrs_hint(hid_t dcpl_id, hbool_t *minimize);
 H5_DLL herr_t H5Pset_dset_no_attrs_hint(hid_t dcpl_id, hbool_t minimize);
 
