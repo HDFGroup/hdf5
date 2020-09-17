@@ -27,6 +27,8 @@ const char *FILENAMES[] = {
         NULL
 };
 
+static struct timespec lastmsgtime = {.tv_sec = 0, .tv_nsec = 0};
+
 /* local utility function declarations */
 static void create_datasets(hid_t file_id, int min_dset, int max_dset);
 static void delete_datasets(hid_t file_id, int min_dset, int max_dset);
@@ -4819,9 +4821,9 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
 
     /* 3) Construct a "zoo" in the above group, and validate it. */
     if ( pass )
-        pass = create_zoo(file_id, process_group_name,
+        pass = create_zoo(file_id, process_group_name, &lastmsgtime,
             (zoo_config_t){.proc_num = min_group, .skip_varlen = false,
-                           .skip_compact = false});
+                           .skip_compact = false, .msgival = {0, 0}});
 
 #if H5C_COLLECT_CACHE_STATS
     if ( pass ) {
@@ -4893,9 +4895,9 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
 
         /* 6) Validate the "zoo" created in the previous file open. */
         if ( pass ) {
-            pass = validate_zoo(file_id, process_group_name,
+            pass = validate_zoo(file_id, process_group_name, &lastmsgtime,
                 (zoo_config_t){.proc_num = max_group, .skip_varlen = false,
-                               .skip_compact = false});
+                               .skip_compact = false, .msgival = {0, 0}});
         }
 
 #if H5C_COLLECT_CACHE_STATS
@@ -4937,9 +4939,9 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
 
     /* 8) Construct a "zoo" in the above group, and validate it. */
         if ( pass ) {
-            pass = create_zoo(file_id, process_group_name,
+            pass = create_zoo(file_id, process_group_name, &lastmsgtime,
                 (zoo_config_t){.proc_num = max_group, .skip_varlen = false,
-                               .skip_compact = false});
+                               .skip_compact = false, .msgival = {0, 0}});
         }
 
         if ( show_progress )
@@ -5001,9 +5003,9 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     i = min_group;
     while(pass && i <= max_group) {
         HDsprintf(process_group_name, "/process_%d", i);
-        pass = validate_zoo(file_id, process_group_name,
+        pass = validate_zoo(file_id, process_group_name, &lastmsgtime,
             (zoo_config_t){.proc_num = i++, .skip_varlen = false,
-                           .skip_compact = false});
+                           .skip_compact = false, .msgival = {0, 0}});
     }
 
 #if H5C_COLLECT_CACHE_STATS
@@ -5056,9 +5058,9 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     while ( ( pass ) && ( i <= max_group ) ) {
 
         HDsprintf(process_group_name, "/process_%d", i);
-        pass = validate_zoo(file_id, process_group_name,
+        pass = validate_zoo(file_id, process_group_name, &lastmsgtime,
             (zoo_config_t){.proc_num = i++, .skip_varlen = false,
-                           .skip_compact = false});
+                           .skip_compact = false, .msgival = {0, 0}});
     }
 
 #if H5C_COLLECT_CACHE_STATS
@@ -5122,9 +5124,9 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     i = min_group;
     while ( ( pass ) && ( i <= max_group ) ) {
         HDsprintf(process_group_name, "/process_%d", i);
-        pass = validate_zoo(file_id, process_group_name,
+        pass = validate_zoo(file_id, process_group_name, &lastmsgtime,
             (zoo_config_t){.proc_num = i++, .skip_varlen = false,
-                           .skip_compact = false});
+                           .skip_compact = false, .msgival = {0, 0}});
     }
 
 #if H5C_COLLECT_CACHE_STATS
