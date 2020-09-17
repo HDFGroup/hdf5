@@ -11,13 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*-------------------------------------------------------------------------
- *
- * Created:     swmr_common.c
- *
- * Purpose:     Utility functions for the SWMR test code.
- *
- *-------------------------------------------------------------------------
+/*
+ * Utility functions for the VFD SWMR tests.
  */
 
 /***********/
@@ -46,6 +41,9 @@ evsnprintf(char *buf, size_t bufsz, const char *fmt, va_list ap)
         errx(EXIT_FAILURE, "%s: buffer too small", __func__);
 }
 
+/* Like snprintf(3), but abort the program with an error message on
+ * `stderr` if the buffer is too small or some other error occurs.
+ */
 void
 esnprintf(char *buf, size_t bufsz, const char *fmt, ...)
 {
@@ -69,6 +67,9 @@ dbgf(int level, const char *fmt, ...)
     va_end(ap);
 }
 
+/* Disable HDF5 error-stack printing and return the previous state
+ * of error-stack printing.
+ */
 estack_state_t
 disable_estack(void)
 {
@@ -79,6 +80,7 @@ disable_estack(void)
     return es;
 }
 
+/* Return the current state of HDF5 error-stack printing. */
 estack_state_t
 estack_get_state(void)
 {
@@ -89,12 +91,16 @@ estack_get_state(void)
     return es;
 }
 
+/* Restore HDF5 error-stack printing to a state returned previously by
+ * `disable_estack` or `estack_get_state`.
+ */
 void
 restore_estack(estack_state_t es)
 {
     (void)H5Eset_auto(H5E_DEFAULT, es.efunc, es.edata);
 }
 
+/* Store the signal mask at `oldset` and then block all signals. */
 void
 block_signals(sigset_t *oldset)
 {
@@ -109,6 +115,7 @@ block_signals(sigset_t *oldset)
         err(EXIT_FAILURE, "%s.%d: sigprocmask", __func__, __LINE__);
 }
 
+/* Restore the signal mask in `oldset`. */
 void
 restore_signals(sigset_t *oldset)
 {
@@ -133,6 +140,11 @@ strsignal(int signum)
 }
 #endif
 
+/* Wait for any signal to occur and then return.  Wake periodically
+ * during the wait to perform API calls: in this way, the
+ * VFD SWMR tick number advances and recent changes do not languish
+ * in HDF5 library buffers where readers cannot see them.
+ */
 void
 await_signal(hid_t fid)
 {
@@ -178,6 +190,9 @@ await_signal(hid_t fid)
     }
 }
 
+/* Perform common VFD SWMR configuration on the file-access property list:
+ * configure page buffering, set reasonable VFD SWMR defaults.
+ */
 hid_t
 vfd_swmr_create_fapl(bool writer, bool only_meta_pages, bool use_vfd_swmr,
     const char *mdfile_fmtstr, ...)
