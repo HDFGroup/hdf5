@@ -21,12 +21,16 @@ typedef struct _zoo_config {
     bool skip_compact;
     bool skip_varlen;
     unsigned max_pause_msecs;
+    struct timespec msgival;    /* minimum interval between warning-message
+                                 * repetitions
+                                 */
 } zoo_config_t;
 
-bool create_zoo(hid_t, const char *, zoo_config_t);
-bool validate_zoo(hid_t, const char *, zoo_config_t);
-bool delete_zoo(hid_t, const char *, zoo_config_t);
-bool validate_deleted_zoo(hid_t, const char *, zoo_config_t);
+bool create_zoo(hid_t, const char *, struct timespec *, zoo_config_t);
+bool validate_zoo(hid_t, const char *, struct timespec *, zoo_config_t);
+bool delete_zoo(hid_t, const char *, struct timespec *, zoo_config_t);
+bool validate_deleted_zoo(hid_t, const char *, struct timespec *,
+    zoo_config_t);
 
 bool ns_grp_0(hid_t fid, const char *group_name);
 bool vrfy_ns_grp_0(hid_t fid, const char *group_name);

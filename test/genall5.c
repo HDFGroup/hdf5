@@ -22,6 +22,7 @@
 #include <err.h>
 
 #include "cache_common.h"
+#include "vfd_swmr_common.h"    /* for below_speed_limit() */
 #include "genall5.h"
 
 #define DSET_DIMS (1024 * 1024)
@@ -2720,8 +2721,8 @@ random_pause(unsigned int max_pause_msecs)
  */
 
 static bool
-tend_zoo(hid_t fid, const char *base_path, zoo_config_t config,
-    const phase_t *phase, size_t nphases)
+tend_zoo(hid_t fid, const char *base_path, struct timespec *lastmsgtime,
+    zoo_config_t config, const phase_t *phase, size_t nphases)
 {
     char full_path[1024];
     int i, nwritten;
@@ -2753,8 +2754,15 @@ tend_zoo(hid_t fid, const char *base_path, zoo_config_t config,
         random_pause(config.max_pause_msecs);
     }
 out:
-    if (!ok)
-        warnx("%s: %s", __func__, failure_mssg);
+    if (!ok) {
+        if (strcmp(failure_mssg, last_failure_mssg) != 0)
+            *lastmsgtime = (struct timespec){.tv_sec = 0, .tv_nsec = 0};
+
+        if (below_speed_limit(lastmsgtime, &config.msgival)) {
+            last_failure_mssg = failure_mssg;
+            warnx("%s: %s", __func__, failure_mssg);
+        }
+    }
     return ok;
 }
 
@@ -2780,11 +2788,12 @@ out:
  */
 
 bool
-create_zoo(hid_t fid, const char *base_path, zoo_config_t config)
+create_zoo(hid_t fid, const char *base_path, struct timespec *lastmsgtime,
+    zoo_config_t config)
 {
     const phase_t phase[] = {PHASE_CREATE, PHASE_VALIDATE};
 
-    return tend_zoo(fid, base_path, config, phase, NELMTS(phase));
+    return tend_zoo(fid, base_path, lastmsgtime, config, phase, NELMTS(phase));
 }
 
 /*-------------------------------------------------------------------------
@@ -2807,26 +2816,29 @@ create_zoo(hid_t fid, const char *base_path, zoo_config_t config)
  */
 
 bool
-validate_zoo(hid_t fid, const char *base_path, zoo_config_t config)
+validate_zoo(hid_t fid, const char *base_path, struct timespec *lastmsgtime,
+    zoo_config_t config)
 {
     const phase_t phase[] = {PHASE_VALIDATE};
 
-    return tend_zoo(fid, base_path, config, phase, NELMTS(phase));
+    return tend_zoo(fid, base_path, lastmsgtime, config, phase, NELMTS(phase));
 }
 
 bool
-delete_zoo(hid_t fid, const char *base_path, zoo_config_t config)
+delete_zoo(hid_t fid, const char *base_path, struct timespec *lastmsgtime,
+    zoo_config_t config)
 {
     const phase_t phase[] = {PHASE_DELETE};
 
-    return tend_zoo(fid, base_path, config, phase, NELMTS(phase));
+    return tend_zoo(fid, base_path, lastmsgtime, config, phase, NELMTS(phase));
 }
 
 bool
-validate_deleted_zoo(hid_t fid, const char *base_path, zoo_config_t config)
+validate_deleted_zoo(hid_t fid, const char *base_path,
+    struct timespec *lastmsgtime, zoo_config_t config)
 {
     const phase_t phase[] = {PHASE_VALIDATE_DELETION};
 
-    return tend_zoo(fid, base_path, config, phase, NELMTS(phase));
+    return tend_zoo(fid, base_path, lastmsgtime, config, phase, NELMTS(phase));
 }
 

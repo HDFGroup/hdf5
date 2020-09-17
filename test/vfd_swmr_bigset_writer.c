@@ -694,30 +694,6 @@ close_extensible_dset(state_t *s, unsigned int which)
     }
 }
 
-static bool
-below_speed_limit(struct timespec *last, const struct timespec *ival)
-{
-    struct timespec now;
-    bool result;
-
-    assert(0 <= last->tv_nsec && last->tv_nsec < 1000000000L);
-    assert(0 <= ival->tv_nsec && ival->tv_nsec < 1000000000L);
-
-    if (clock_gettime(CLOCK_MONOTONIC, &now) == -1)
-        err(EXIT_FAILURE, "%s: clock_gettime", __func__);
-
-    if (now.tv_sec - last->tv_sec > ival->tv_sec)
-        result = true;
-    else if (now.tv_sec - last->tv_sec < ival->tv_sec)
-        return false;
-    else
-        result = (now.tv_nsec - last->tv_nsec > ival->tv_nsec);
-
-    *last = now;
-
-    return result;
-}
-
 static void
 open_extensible_dset(state_t *s, unsigned int which)
 {

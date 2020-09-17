@@ -215,7 +215,9 @@ main(int argc, char **argv)
         , .skip_compact = false
         , .skip_varlen = true
         , .max_pause_msecs = 0
+        , .msgival = {.tv_sec = 5, .tv_nsec = 0}
     };
+    struct timespec lastmsgtime = {.tv_sec = 0, .tv_nsec = 0};
     bool wait_for_signal;
     int ch;
     char vector[8];
@@ -346,7 +348,7 @@ main(int argc, char **argv)
 
         ostate = initstate(seed, vector, _arraycount(vector));
 
-        if (!create_zoo(fid, ".", config))
+        if (!create_zoo(fid, ".", &lastmsgtime, config))
             errx(EXIT_FAILURE, "create_zoo didn't pass self-check");
 
         /* Avoid deadlock: flush the file before waiting for the reader's
@@ -361,18 +363,18 @@ main(int argc, char **argv)
         if (step != 'b')
             errx(EXIT_FAILURE, "expected 'b' read '%c'", step);
 
-        if (!delete_zoo(fid, ".", config))
+        if (!delete_zoo(fid, ".", &lastmsgtime, config))
             errx(EXIT_FAILURE, "delete_zoo failed");
         (void)setstate(ostate);
     } else {
         dbgf(2, "Reading zoo...\n");
 
-        while (!validate_zoo(fid, ".", config))
+        while (!validate_zoo(fid, ".", &lastmsgtime, config))
             ;
 
         if (write(STDOUT_FILENO, &step, sizeof(step)) == -1)
             err(EXIT_FAILURE, "write");
-        while (!validate_deleted_zoo(fid, ".", config))
+        while (!validate_deleted_zoo(fid, ".", &lastmsgtime, config))
             ;
     }
     restore_estack(es);
