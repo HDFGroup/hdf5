@@ -204,7 +204,7 @@ main(void)
     if(h5_verify_cached_stabs(FILENAME, fapl) < 0) TEST_ERROR
 
     /* Pop API context */
-    if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
+    if(api_ctx_pushed && H5CX_pop(FALSE) < 0) FAIL_STACK_ERROR
     api_ctx_pushed = FALSE;
 
     HDputs("All local heap tests passed.");
@@ -218,7 +218,7 @@ main(void)
         H5Fclose(file);
     } H5E_END_TRY;
 
-    if(api_ctx_pushed) H5CX_pop();
+    if(api_ctx_pushed) H5CX_pop(FALSE);
 
     return EXIT_FAILURE;
 }

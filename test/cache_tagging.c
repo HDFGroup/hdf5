@@ -3891,7 +3891,7 @@ check_invalid_tag_application(void)
     if ( H5HL_unprotect(lheap) < 0 ) TEST_ERROR;
 
     /* Pop API context */
-    if(api_ctx_pushed && H5CX_pop() < 0) TEST_ERROR
+    if(api_ctx_pushed && H5CX_pop(FALSE) < 0) TEST_ERROR
     api_ctx_pushed = FALSE;
 
     /* Close open objects and file */
@@ -3908,7 +3908,7 @@ check_invalid_tag_application(void)
 
 #if H5C_DO_TAGGING_SANITY_CHECKS
 error:
-    if(api_ctx_pushed) H5CX_pop();
+    if(api_ctx_pushed) H5CX_pop(FALSE);
 
     return 1;
 #endif /* H5C_DO_TAGGING_SANITY_CHECKS */

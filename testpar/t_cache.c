@@ -4554,7 +4554,7 @@ take_down_cache(hid_t fid, H5C_t * cache_ptr)
     }
 
     /* Pop API context */
-    H5CX_pop();
+    H5CX_pop(FALSE);
 
     if ( success ) {
 

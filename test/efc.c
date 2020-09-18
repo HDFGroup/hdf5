@@ -2954,7 +2954,7 @@ main(void)
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl_id) < 0 ? 1 : 0);
 
     /* Pop API context */
-    if(api_ctx_pushed && H5CX_pop() < 0)
+    if(api_ctx_pushed && H5CX_pop(FALSE) < 0)
         FAIL_STACK_ERROR
     api_ctx_pushed = FALSE;
 
@@ -2979,7 +2979,7 @@ error:
     } H5E_END_TRY
 
     if(api_ctx_pushed)
-        H5CX_pop();
+        H5CX_pop(FALSE);
 
     for(i = 0; i < N_FILENAMES; i++) {
         HDfree(filename[i]);

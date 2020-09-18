@@ -796,7 +796,7 @@ done:
     if(fid > 0) H5Fclose(fid);
 
     /* Pop API context */
-    if(api_ctx_pushed) H5CX_pop();
+    if(api_ctx_pushed) H5CX_pop(FALSE);
 
     H5Eset_auto2(H5E_DEFAULT, func, edata);
 

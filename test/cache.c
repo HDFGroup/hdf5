@@ -36963,7 +36963,7 @@ takedown_cache(H5F_t * file_ptr,
         }
 
         /* Pop API context */
-        H5CX_pop();
+        H5CX_pop(FALSE);
 
         if ( ( ! try_core_file_driver ) || ( core_file_driver_failed ) ) {
 

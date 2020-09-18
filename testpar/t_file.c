@@ -282,7 +282,7 @@ test_page_buffer_access(void)
         VRFY((ret>=0), "H5Pclose succeeded");
 
         /* Pop API context */
-        if(api_ctx_pushed) { ret = H5CX_pop(); VRFY((ret == 0), "H5CX_pop()"); api_ctx_pushed = FALSE; }
+        if(api_ctx_pushed) { ret = H5CX_pop(FALSE); VRFY((ret == 0), "H5CX_pop()"); api_ctx_pushed = FALSE; }
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
@@ -412,7 +412,7 @@ test_page_buffer_access(void)
     VRFY((ret>=0), "H5Pclose succeeded");
 
     /* Pop API context */
-    if(api_ctx_pushed) { ret = H5CX_pop(); VRFY((ret == 0), "H5CX_pop()"); api_ctx_pushed = FALSE; }
+    if(api_ctx_pushed) { ret = H5CX_pop(FALSE); VRFY((ret == 0), "H5CX_pop()"); api_ctx_pushed = FALSE; }
 
     HDfree(data);
     data = NULL;
@@ -568,7 +568,7 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
     VRFY((ret == 0), "");
 
     /* Pop API context */
-    if(api_ctx_pushed) { ret = H5CX_pop(); VRFY((ret == 0), "H5CX_pop()"); api_ctx_pushed = FALSE; }
+    if(api_ctx_pushed) { ret = H5CX_pop(FALSE); VRFY((ret == 0), "H5CX_pop()"); api_ctx_pushed = FALSE; }
 
     MPI_Barrier(MPI_COMM_WORLD);
     HDfree(data_array);
@@ -728,7 +728,7 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy,
     VRFY((ret == 0), "");
 
     /* Pop API context */
-    if(api_ctx_pushed) { ret = H5CX_pop(); VRFY((ret == 0), "H5CX_pop()"); api_ctx_pushed = FALSE; }
+    if(api_ctx_pushed) { ret = H5CX_pop(FALSE); VRFY((ret == 0), "H5CX_pop()"); api_ctx_pushed = FALSE; }
 
     HDfree(data_array);
 
