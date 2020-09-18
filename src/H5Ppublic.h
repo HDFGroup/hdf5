@@ -3022,6 +3022,31 @@ H5_DLL herr_t H5Pget_chunk_opts(hid_t plist_id, unsigned *opts);
  *
  * \ingroup DCPL
  *
+ * \brief Retrieves the setting for whether or not to create minimized
+ *        dataset object headers
+ *
+ * \dcpl_id
+ * \param[out] minimize  Flag indicating whether the library will or will
+ *                       not create minimized dataset object headers
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_dset_no_attrs_hint() retrieves the
+ *          <i>no dataset attributes</i> hint setting for the dataset
+ *          creation property list \p dcpl_id. This setting is used to
+ *          inform the library to create minimized dataset object headers
+ *          when TRUE. The setting value is returned in the boolean pointer
+ *          \p minimize.
+ *
+ * \since 1.10.5
+ *
+ */
+H5_DLL herr_t H5Pget_dset_no_attrs_hint(hid_t dcpl_id, hbool_t *minimize);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
  * \brief Returns information about an external file
  *
  * \dcpl_id{plist_id}
@@ -3228,7 +3253,7 @@ H5_DLL herr_t H5Pget_virtual_count(hid_t dcpl_id, size_t *count/*out*/);
  *
  * \dcpl_id
  * \param[in]  index Mapping index. The value of \p index is 0 (zero) or
- *                   greater and less than \p count 
+ *                   greater and less than \p count
  *                   (0 ≤ \p index < \p count), where \p count is the
  *                   number of mappings returned by H5Pget_virtual_count().
  * \param[out] name  A buffer containing the name of the source dataset
@@ -3265,6 +3290,168 @@ H5_DLL herr_t H5Pget_virtual_count(hid_t dcpl_id, size_t *count/*out*/);
  */
 H5_DLL ssize_t H5Pget_virtual_dsetname(hid_t dcpl_id, size_t index,
     char *name/*out*/, size_t size);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Gets the filename of a source dataset used in the mapping
+ *
+ * \dcpl_id
+ * \param[in]  index Mapping index. The value of \p index is 0 (zero) or
+ *                   greater and less than \p count
+ *                   (0 ≤ \p index < \p count), where \p count is the
+ *                   number of mappings returned by H5Pget_virtual_count().
+ * \param[out] name  A buffer containing the name of the file containing
+ *                   the source dataset
+ * \param[in]  size  The size, in bytes, of the name buffer. Must be the
+ *                   size of the filename in bytes plus 1 for a NULL
+ *                   terminator
+ *
+ * \return Returns the length of the filename if successful; otherwise
+ *         returns a negative value.
+ *
+ * \details H5Pget_virtual_filename() takes the dataset creation property
+ *          list for the virtual dataset, \p dcpl_id, the mapping index,
+ *          \p index, the size of the filename for a source dataset,
+ *          \p size, and retrieves the name of the file for a source dataset
+ *          used in the mapping.
+ *
+ *          Up to \p size characters of the filename are returned in
+ *          \p name; additional characters, if any, are not returned to
+ *          the user application.
+ *
+ *          If the length of the filename, which determines the required
+ *          value of \p size, is unknown, a preliminary call to
+ *          H5Pget_virtual_filename() with the last two parameters set
+ *          to NULL and zero respectively can be made. The return value
+ *          of this call will be the size in bytes of the filename. That
+ *          value, plus 1 for a NULL terminator, must then be assigned to
+ *          \p size for a second H5Pget_virtual_filename() call, which
+ *          will retrieve the actual filename.
+ *
+ * \virtual
+ *
+ * \since 1.10.0
+ *
+ */
+H5_DLL ssize_t H5Pget_virtual_filename(hid_t dcpl_id, size_t index,
+    char *name/*out*/, size_t size);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Gets a dataspace identifier for the selection within the source
+ *        dataset used in the mapping
+ *
+ * \dcpl_id
+ * \param[in] index Mapping index. The value of \p index is 0 (zero) or
+ *                  greater and less than \p count
+ *                  (0 ≤ \p index < \p count), where \p count is the number
+ *                  of mappings returned by H5Pget_virtual_count().
+ *
+ * \return \hid_t{valid dataspace identifier}
+ *
+ * \details H5Pget_virtual_srcspace() takes the dataset creation property
+ *          list for the virtual dataset, \p dcpl_id, and the mapping
+ *          index, \p index, and returns a dataspace identifier for the
+ *          selection within the source dataset used in the mapping.
+ *
+ * \virtual
+ *
+ * \since 1.10.0
+ *
+ */
+H5_DLL hid_t H5Pget_virtual_srcspace(hid_t dcpl_id, size_t index);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Gets a dataspace identifier for the selection within the virtual
+ *        dataset used in the mapping
+ *
+ * \dcpl_id
+ * \param[in] index Mapping index. The value of \p index is 0 (zero) or
+ *                  greater and less than \p count
+ *                  (0 ≤ \p index < \p count), where \p count is the number
+ *                  of mappings returned by H5Pget_virtual_count()
+ *
+ * \return \hid_t{valid dataspace identifier}
+ *
+ * \details H5Pget_virtual_vspace() takes the dataset creation property
+ *          list for the virtual dataset, \p dcpl_id, and the mapping
+ *          index, \p index, and returns a dataspace identifier for the
+ *          selection within the virtual dataset used in the mapping.
+ *
+ * \virtual
+ *
+ * \since 1.10.0
+ *
+ */
+H5_DLL hid_t H5Pget_virtual_vspace(hid_t dcpl_id, size_t index);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Sets the timing for storage space allocation
+ *
+ * \dcpl_id{plist_id}
+ * \param[in] alloc_time When to allocate dataset storage space
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_alloc_time() sets up the timing for the allocation of
+ *          storage space for a dataset's raw data. This property is set
+ *          in the dataset creation property list \p plist_id. Timing is
+ *          specified in \p alloc_time with one of the following values:
+ *
+ *          <table>
+ *           <tr>
+ *            <td>#H5D_ALLOC_TIME_DEFAULT</td>
+ *            <td>Allocate dataset storage space at the default time<br />
+ *                (Defaults differ by storage method.)</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5D_ALLOC_TIME_EARLY</td>
+ *            <td>Allocate all space when the dataset is created<br />
+ *            (Default for compact datasets.)</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5D_ALLOC_TIME_INCR</td>
+ *            <td>Allocate space incrementally, as data is written to
+ *                the dataset<br />(Default for chunked storage datasets.)
+ *
+ *                \li Chunked datasets: Storage space allocation for each
+ *                    chunk is deferred until data is written to the chunk.
+ *                \li Contiguous datasets: Incremental storage space
+ *                    allocation for contiguous data is treated as late
+ *                    allocation.
+ *                \li Compact datasets: Incremental allocation is not
+ *                    allowed with compact datasets; H5Pset_alloc_time()
+ *                    will return an error.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5D_ALLOC_TIME_LATE</td>
+ *            <td>Allocate all space when data is first written to the
+ *                dataset<br />
+ *                (Default for contiguous datasets.)</td>
+ *           </tr>
+ *          </table>
+ *
+ * \note H5Pset_alloc_time() is designed to work in concert with the
+ *       dataset fill value and fill value write time properties, set
+ *       with the functions H5Pset_fill_value() and H5Pset_fill_time().
+ *
+ * \note See H5Dcreate() for further cross-references.
+ *
+ * \since 1.6.0
+ *
+ */
+H5_DLL herr_t H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t
+    alloc_time);
 /**
  *-------------------------------------------------------------------------
  * \ingroup DCPL
@@ -3349,10 +3536,6 @@ H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*
 H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
 H5_DLL herr_t H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id,
     const char *src_file_name, const char *src_dset_name, hid_t src_space_id);
-H5_DLL hid_t H5Pget_virtual_vspace(hid_t dcpl_id, size_t index);
-H5_DLL hid_t H5Pget_virtual_srcspace(hid_t dcpl_id, size_t index);
-H5_DLL ssize_t H5Pget_virtual_filename(hid_t dcpl_id, size_t index,
-    char *name/*out*/, size_t size);
 H5_DLL herr_t H5Pset_external(hid_t plist_id, const char *name, off_t offset,
           hsize_t size);
 H5_DLL herr_t H5Pset_chunk_opts(hid_t plist_id, unsigned opts);
@@ -3520,8 +3703,6 @@ H5_DLL herr_t H5Pset_nbit(hid_t plist_id);
 H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type, int scale_factor);
 H5_DLL herr_t H5Pset_fill_value(hid_t plist_id, hid_t type_id,
      const void *value);
-H5_DLL herr_t H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t
-    alloc_time);
 H5_DLL herr_t H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time);
 H5_DLL herr_t H5Pget_dset_no_attrs_hint(hid_t dcpl_id, hbool_t *minimize);
 H5_DLL herr_t H5Pset_dset_no_attrs_hint(hid_t dcpl_id, hbool_t minimize);
