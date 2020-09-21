@@ -28,7 +28,7 @@ see a consistent view of HDF5 file metadata,
 This design allowed us to implement VFD SWMR with only minor 
 modifications to the HDF5 library above metadata cache and page 
 buffer.  As a result, not only is VFD SWMR more modular and 
-easier to maintain, it is also almost "full SWMW" -- that is it 
+easier to maintain, it is also almost "full SWMR" -- that is it 
 allows use of almost all HDF5 capabilities by VFD SWMR writers,
 with results that become visible to the VFD SWMR readers.
 
@@ -80,16 +80,13 @@ utilities built by the VFD SWMR project.
 
 ## Download
 
-The latest source code here for VFD SWMR is found on the `multi`
-branch of [the VFD SWMR
-repository](https://bitbucket.hdfgroup.org/scm/~dyoung/vchoi_fork.git).
-
-Clone the repository in a new directory, then switch to the VFD SWMR branch:
+Clone the HDF5 repository in a new directory, then switch to the 
+features/vfd_swmr_alpa_1 branch as follows:
 
 ```
-% git clone https://bitbucket.hdfgroup.org/scm/~dyoung/vchoi_fork.git swmr
+% git clone https://mainzer@bitbucket.hdfgroup.org/scm/hdffv/hdf5.git swmr
 % cd swmr
-% git checkout multi
+% git checkout features/vfd_swmr_alpha_1
 ```
 
 ## Build
@@ -121,7 +118,7 @@ SWMR works correctly on your system.  To test the library, utilities, run
 If the tests don't pass, please let the developers know!
 
 Note that due to reader and writer process drifting out of sync, you 
-likely see several messages such as:
+are likely to see several messages such as:
 
 ```
     vfd_swmr_zoo_reader: tend_zoo: vrfy_ns_grp_c: H5Gopen2() failed
@@ -131,9 +128,9 @@ or
     vfd_swmr_zoo_reader: tend_zoo: H5Lexists unexpectedly true.
 ```
 
-These are expected.  In addition, there will be expected errors 
-in the variable length data tests until we are able to re-implement
-variable length data storage in HDF5.
+These are expected transient failues.  In addition, there will be 
+expected errors in the variable length data tests until we are able 
+to re-implement variable length data storage in HDF5.
 
 # Sample programs
 
@@ -568,7 +565,7 @@ seconds.
 # Reporting bugs
 
 VFD SWMR is still under development, so we expect that you will encounter 
-bugs.  Please report them, along with performance or design issues you 
+bugs.  Please report them, along with any performance or design issues you 
 encounter.
 
 To contact the VFD SWMR developers, email vfdswmr@hdfgroup.org.
