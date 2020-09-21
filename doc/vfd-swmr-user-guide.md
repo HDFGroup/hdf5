@@ -8,52 +8,88 @@ while one or more processes read the file.  Use cases range from
 monitoring data collection and/or steering experiments in progress
 to financial applications.
 
-The following diagram illustrates how SWMR works.
+The following diagram illustrates the original version of SWMR.
 
 <img src = SWMRdataflow.png width=400 />
 
+The original version of SWMR functions by ordering metadata writes to
+the HDF5 file so as to always maintain a consistent view of metadata
+in the HDF5 file -- which requires SWMR specific modifications to 
+all code that maintains on disk metadata.
 
-VFD SWMR is designed to be a more flexible, more modular,
-better-performing replacement for the existing SWMR feature.
+VFD SWMR is designed to be a more maintainable and more modular 
+replacement for the existing SWMR feature.  It functions by taking 
+regular snapshots of HDF5 file metadata on the writer side, and using 
+a specialized virtual file driver (VFD) on the reader side to 
+intercept metadata read requests and satisfy them from the 
+snapshots where appropriate -- thus assuring that the readers 
+see a consistent view of HDF5 file metadata,
 
-* VFD SWMR allows HDF5 objects (groups, datasets, attributes) to be
-  created and destroyed in the course of a reader-writer session.
-  Creating objects is not possible using the existing SWMR feature.
-* It compartmentalizes much of the SWMR functionality in a virtual-file
-  driver (VFD), thus easing The HDF Group's software-maintenance burden.
-* And it makes guarantees for the maximum time from write to availability
-  of data for read, provided that the reading and writing systems and
-  their interconnections can keep up with the data flow.
+This design allowed us to implement VFD SWMR with only minor 
+modifications to the HDF5 library above metadata cache and page 
+buffer.  As a result, not only is VFD SWMR more modular and 
+easier to maintain, it is also almost "full SWMR" -- that is it 
+allows use of almost all HDF5 capabilities by VFD SWMR writers,
+with results that become visible to the VFD SWMR readers.
 
-For details on how VFD SWMR is implemented, see [TBD: LINK to RFC].
+In particular, VFD SWMR allows the writer to create and delete 
+both groups and datasets, and to create and delete attributes on 
+both groups and datasets while operating in VFD SWMR mode -- 
+which is not possible in the original SWMR.  
+
+We say that VFD SWMR is almost "full SWMR" because there are a 
+few limitations -- most notably:
+
+* The current implementation of variable length data in datasets
+  is fundamentally incompatible with VFD SWMR, as it stores variable 
+  length data as metadata.  This shouldn't be a major issue, as the 
+  current implementation of variable length data has very poor performance, 
+  and thus is not suitable for most SWMR applications.  A new 
+  implementation of variable length data is in the works, and should 
+  offer both better performance and be compatible with VFD SWMR.
+  However, there is no ETA for delivery.  Variable length attributes 
+  on datasets and groups should work, but are currently un-tested.
+
+* At present the Virtual Data Set (VDS) feature is not 
+  well integrated with VFD SWMR.  While we have a work around that
+  allowed us to test for more fundamental issues (sse below), a proper 
+  solution is on hold pending the availability of the original developer.
+
+* VFD SWMR is only tested with, and should only be used with 
+  the latest HDF5 file format.  Theoretically, there is no functional
+  reason why it will not work with earlier versions of the file format.  
+  However, it is possible to construct very large pieces of metadata 
+  in early versions of the HDF5 file format, which has the potential to 
+  cause major performance issues.
+
+Due to its regular snapshots of metadata, VFD SWMR provides guarantees 
+on the maximum time from write to visibility to the readers -- with 
+the provisos that the underlying file system is fast enough, that 
+the writer makes HDF5 library API calls with sufficient regularity, and 
+that both reader and writer avoid long running HDF5 API calls.
+
+For further details on VFD SWMR design and implementation, see 
+VFD_SWMR_RFC_200916.pdf or VFD_SWMR_RFC_200916.docx in the 
+doc directory.
 
 # Quick start
 
 Follow these instructions to download, configure, and build the
-VFD SWMR project in a jiffy.  Then install the HDF5 library and
-utilites built by the VFD SWMR project.
+VFD SWMR project in a jiffy.  Then install the HDF5 library and
+utilities built by the VFD SWMR project.
 
 ## Download
 
-The latest source code here for VFD SWMR is found on the `multi`
-branch of [the VFD SWMR
-repository](https://bitbucket.hdfgroup.org/scm/~dyoung/vchoi_fork.git).
-
-Clone the repository in a new directory, then switch to the VFD SWMR branch:
+Clone the HDF5 repository in a new directory, then switch to the 
+features/vfd_swmr_alpa_1 branch as follows:
 
 ```
-% git clone https://bitbucket.hdfgroup.org/scm/~dyoung/vchoi_fork.git swmr
+% git clone https://@bitbucket.hdfgroup.org/scm/hdffv/hdf5.git swmr
 % cd swmr
-% git checkout multi
+% git checkout feature/vfd_swmr_alpha_1
 ```
 
 ## Build
-
-Setup for autotools:
-
-```
-% sh ./autogen.sh
-```
 
 Create a build directory, change to that directory, and run the
 configure script:
@@ -81,6 +117,21 @@ SWMR works correctly on your system.  To test the library, utilities, run
 
 If the tests don't pass, please let the developers know!
 
+Note that due to reader and writer process drifting out of sync, you 
+are likely to see several messages such as:
+
+```
+    vfd_swmr_zoo_reader: tend_zoo: vrfy_ns_grp_c: H5Gopen2() failed
+```
+or 
+```
+    vfd_swmr_zoo_reader: tend_zoo: H5Lexists unexpectedly true.
+```
+
+These are expected transient failues.  In addition, there will be 
+expected errors in the variable length data tests until we are able 
+to re-implement variable length data storage in HDF5.
+
 # Sample programs
 
 ## Extensible datasets
@@ -105,15 +156,15 @@ command-line parameters as the "bigset" writer.  The reader and writer
 may run concurrently; the reader "polls" the content until it is just
 shy of complete, given the number of steps expected.
 
-To run a bigset test, I open a couple of terminal windows, one for the
-reader and one for the writer.  I change to the `test` directory under
-my build directory, and I run the writer in one window:
+To run a bigset test, open a couple of terminal windows, one for the
+reader and one for the writer.  cd to the `test` directory under
+my build directory, and run the writer in one window:
 
 ```
 % ./vfd_swmr_bigset_writer -n 50 -d 2
 ```
 
-and in the other window, I run the reader:
+and in the other window, run the reader:
 
 ```
 % ./vfd_swmr_bigset_reader -n 50 -d 2 -W
@@ -154,7 +205,8 @@ able to `make` and `make clean` the demos.
 Under `gaussians/`, two programs are built, `wgaussians` and
 `rgaussians`.  If you start both from the same directory in different
 terminals, you should see the "bouncing 2-D Gaussian distributions"
-in the `rgaussians` terminal.
+in the `rgaussians` terminal.  This demo uses curses, so you may need
+to install the curses developers library to build.
 
 The creation-deletion (`credel`) demo is also run in two terminals.
 The two command lines are given in `credel/README.md`.  You need
@@ -273,7 +325,7 @@ If a reader spends longer than `max_lag - 1` ticks (2400ms with
 the example configuration) inside the HDF5 API, then its snapshot
 may expire, resulting in undefined behavior.  When a snapshot
 expires while the reader is using it, we say that the writer has
-"overrun" the reader.  The writer cannot currently detect overruns.
+"overrun" the reader.  The writer cannot detect overruns.
 Frequently the reader will detect an overrun and force the program
 to exit with a diagnostic assertion failure.
 
@@ -281,18 +333,18 @@ The application tells VFD SWMR whether or not to configure for
 reading or writing a file by setting the `writer` parameter to
 `true` for writing or `false` for reading.
 
-VFD SWMR snapshots are stored in a "shadow file" that is shared
-between writer and readers.  On a POSIX system, the shadow file
+VFD SWMR snapshots are stored in a "metadata file" that is shared
+between writer and readers.  On a POSIX system, the metadata file
 may be placed on any *local* filesystem that the reader and writer
-share.  The `md_file_path` parameter tells where to put the shadow
+share.  The `md_file_path` parameter tells where to put the metadata
 file.
 
 The `md_pages_reserved` parameter tells how many pages to reserve
-at the beginning of the shadow file for the shadow-file header
-and the shadow index.  The header has an entire page to itself.
+at the beginning of the metadata file for the metadata-file header
+and the metadata index.  The header has an entire page to itself.
 The remaining `md_pages_reserved - 1` pages are reserved for the
-shadow index.  If the index grows larger than its initial
-allocation, then it will move to a new location in the shadow file,
+metadata index.  If the index grows larger than its initial
+allocation, then it will move to a new location in the metadata file,
 and the initial allocation will be reclaimed.  `md_pages_reserved`
 must be at least 2.
 
@@ -332,8 +384,8 @@ inside.  If a virtual dataset resides on file `v.h5`, and one of
 its source datasets resides on a second file, `s1.h5`, then the
 virtual dataset will try to open `s1.h5` using the same file-access
 properties as `v.h5`.  Thus, if `v.h5` is open with VFD SWMR with
-shadow file `v.shadow`, then the virtual dataset will try to open
-`s1.h5` with the same shadow file, which will fail.
+metadata file `v.shadow`, then the virtual dataset will try to open
+`s1.h5` with the same metadata file, which will fail.
 
 Suppose that `v.h5` is *not* open with VFD SWMR, but it was opened
 with default file-access properties.  Then the virtual dataset will
@@ -343,42 +395,46 @@ helpful to the application that wants to use VFD SWMR to read or
 write source datasets.
 
 To use VFD SWMR with VDS, an application should *pre-open* each file
-using its preferred file-access properties, including independent shadow
+using its preferred file-access properties, including independent metadata
 filenames for each source file.  As long as the virtual dataset remains
 in use, the application should leave each of the pre-opened files open.
 In this way the library, when it tries to open the source files, will
 always find them already open and re-use the already-open files with the
 file-access properties established on first open.
 
-## Pushing HDF5 content to reader visibility
+## Pushing HDF5 raw data to reader visibility
 
-With VFD SWMR, ordinarily it should not be necessary to call
-H5Fflush().  In fact, when VFD SWMR is active, calling H5Fflush()
-may slow down your program considerably because the call will not
-return until after `max_lag` ticks have passed.
+At present, VFD SWMR is hard coded to flush raw data at the end of 
+each tick.  While this imposes additional overhead, it simplifies testing, 
+and is probably desirable for applications that do not require the best
+possible raw data throughput.  We plan to upgrade our tests and make this 
+user configurable in the first production release.
 
-A writer can make its last changes to an HDF5 file visible to all
-readers immediately using the new call, `H5Fvfd_swmr_end_tick()`.
-A writer should use `H5Fvfd_swmr_end_tick()` carefully: by calling
-it more frequently than once a tick, a writer may corrupt a reader's
-view of the HDF5 file.
+With the currently hard coded flush of raw data at the end of each tick, 
+it should not be necessary to call H5Fflush().  In fact, when VFD SWMR is 
+active, H5Fflush() may require up to 'max_lag' ticks to complete due to 
+metadata consistency issues.
 
-When VFD SWMR is enabled, raw data is not cached in the page buffer.  On
-each tick, the content of chunk caches and other unwritten raw data is
-flushed directly to the HDF5 file, so that raw data is always available
-before the HDF5 structural metadata that describes it.
+Instead, a writer can make its last changes to HDF5 file visible to all
+readers immediately using the new call, `H5Fvfd_swmr_end_tick()`.  Note
+that this call should be used sparingly, as it terminates the current 
+tick early, thus effectively reducing 'max_lag'.  Repeated calls in 
+quick succession can force a reader to overrun 'max_lag', and 
+read stale metadata.
+
+When the flush of raw data at end of tick is disabled (not possible at present), 
+the `H5Fvfd_swmr_end_tick()` call will make the writers current view of metadata
+visible to the reader -- which may refer to raw data that hasn't been written to 
+the HDF5 file yet.
 
 ## Reading up-to-date content
 
-The HDF Group (THG) expects that in one class of VFD SWMR application,
-instruments on a particle accelerator will continuously generate
-2-dimensional data frames and add them to HDF5 datasets while an
-experiment is ongoing.  The datasets will be written to an HDF5
-file opened in VFD SWMR mode.  Experimenters will monitor a real-time
-display of the datasets while the experiment takes place.  A second
-program, possibly running on a second computer, will generate the
-display.  The second program will open the HDF5 file in VFD SWMR
-mode, too.
+One expected use case for VFD SWMR involves an experiment in which instruments 
+continuously generate 2-dimensional data frames.  These data frames are recorded 
+in datasets in a HDF5 file that has been opened in VFD SWMR writer mode.  In this 
+use case, the HDF5 file is opened in VFD SWMR reader mode by a second program 
+that generates a real time display of the data as it is being collected -- thus 
+allowing the experimenters to steer the experiment.
 
 THG developed a demonstration program for class of application,
 and we have some advice based on that experience. 
@@ -405,6 +461,8 @@ SWMR's clock across both of the calls.  The
 `H5Fvfd_swmr_disable_end_of_tick()` call takes a file identifier
 and stops new snapshots from being taken on the given file until
 `H5Fvfd_swmr_enable_end_of_tick()` is called on the same file.
+Needless to say, end of tick processing should only be disabled
+briefly.
 
 # Known issues
 
@@ -442,10 +500,12 @@ and read back like this,
 may produce either an error return from `H5Dread` (`ret < 0`) or
 a `NULL` pointer (`data == NULL`).
 
-Planned improvements to the HDF5 *global heap* may alleviate this
-problem.  There is no schedule for those improvements.
-
-Improvements to VFD SWMR may also alleviate the problem.
+As discussed above, this is caused by a fundamental incompatibility 
+between the current variable length data implementation in HDF5, which 
+stores variable length data as metadata.  It is possible we may be able 
+to mitigate the issue, but the most likely solution is the planned 
+re-implementation of variable length data that is currently in the planning
+stage.  Unfortunately, we have no ETA for this re-implementation.
 
 ## Iteration
 
@@ -478,11 +538,12 @@ NFS, et al.).
 ## Supported filesystems
 
 A VFD SWMR writer and readers share a couple of files, the HDF5 (`.h5`)
-file and the shadow file.  VFD SWMR relies on writes to the files to
-take effect in the order described in the POSIX documentation for
-`read(2)` and `write(2)` system calls.  If the VFD SWMR readers and the
-writer run on the same POSIX host, this ordering should take effect,
-regardless of the underlying filesystem.
+file and the metadata file -- which is used to communicate snapshots of 
+the HDF5 file metadata from the writer to the readers.  VFD SWMR relies 
+on writes to the metadata file to take effect in the order described in 
+the POSIX documentation for `read(2)` and `write(2)` system calls.  If 
+the VFD SWMR readers and the writer run on the same POSIX host, this 
+ordering should take effect, regardless of the underlying filesystem. 
 
 If the VFD SWMR reader and the writer run on *different* hosts, then
 the write-ordering rules depend on the shared filesystem.  VFD SWMR is
@@ -503,7 +564,8 @@ seconds.
 
 # Reporting bugs
 
-VFD SWMR is still under construction, so I think that you will find some
-bugs. Please do not hesitate to report them.
+VFD SWMR is still under development, so we expect that you will encounter 
+bugs.  Please report them, along with any performance or design issues you 
+encounter.
 
 To contact the VFD SWMR developers, email vfdswmr@hdfgroup.org.
