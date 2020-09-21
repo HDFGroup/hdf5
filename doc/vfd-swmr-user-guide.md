@@ -84,9 +84,9 @@ Clone the HDF5 repository in a new directory, then switch to the
 features/vfd_swmr_alpa_1 branch as follows:
 
 ```
-% git clone https://mainzer@bitbucket.hdfgroup.org/scm/hdffv/hdf5.git swmr
+% git clone https://@bitbucket.hdfgroup.org/scm/hdffv/hdf5.git swmr
 % cd swmr
-% git checkout features/vfd_swmr_alpha_1
+% git checkout feature/vfd_swmr_alpha_1
 ```
 
 ## Build
