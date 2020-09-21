@@ -1371,26 +1371,26 @@ H5_DLL int H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func,
  * \brief Registers a permanent property with a property list class
  *
  * \plistcls_id{cls_id}
- * \param[in] name     Name of property to register
- * \param[in] size     Size of property in bytes
- * \param[in] default  Default value for property in newly created
- *                     property lists
- * \param[in] create   Callback routine called when a property list is
- *                     being created and the property value will be
- *                     initialized
- * \param[in] set      Callback routine called before a new value is copied
- *                     into the property's value
- * \param[in] get      Callback routine called when a property value is
- *                     retrieved from the property
- * \param[in] delete   Callback routine called when a property is deleted
- *                     from a property list
- * \param[in] copy     Callback routine called when a property is copied
- *                     from a property list
- * \param[in] compare  Callback routine called when a property is compared
- *                     with another property list
- * \param[in] close    Callback routine called when a property list is
- *                     being closed and the property value will be
- *                     disposed of
+ * \param[in] name       Name of property to register
+ * \param[in] size       Size of property in bytes
+ * \param[in] def_value  Default value for property in newly created
+ *                       property lists
+ * \param[in] create     Callback routine called when a property list is
+ *                       being created and the property value will be
+ *                       initialized
+ * \param[in] set        Callback routine called before a new value is
+ *                       copied into the property's value
+ * \param[in] get        Callback routine called when a property value is
+ *                       retrieved from the property
+ * \param[in] delete     Callback routine called when a property is deleted
+ *                       from a property list
+ * \param[in] copy       Callback routine called when a property is copied
+ *                       from a property list
+ * \param[in] compare    Callback routine called when a property is compared
+ *                       with another property list
+ * \param[in] close      Callback routine called when a property list is
+ *                       being closed and the property value will be
+ *                       disposed of
  *
  * \return  \herr_t
  *
@@ -3498,6 +3498,77 @@ H5_DLL herr_t H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t
 H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/]);
 /**
  *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Sets the edge chunk option in a dataset creation property list
+ *
+ * \dcpl_id{plist_id}
+ * \param[in] opts Edge chunk option flag. Valid values are:
+ *                 \li #H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS
+ *                     When enabled, filters are not applied to partial
+ *                     edge chunks. When disabled, partial edge chunks are
+ *                     filtered. Enabling this option will improve
+ *                     performance when appending to the dataset and, when
+ *                     compression filters are used, prevent reallocation
+ *                     of these chunks. Datasets created with this option
+ *                     enabled will be inaccessible with HDF5 library
+ *                     versions before Release 1.10. Default: \e Disabled
+ *                 \li 0 (zero) Disables option; partial edge chunks
+ *                     will be compressed.
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_chunk_opts() sets the edge chunk option in the
+ *          dataset creation property list \p dcpl_id.
+ *
+ *          The available option is detailed in the parameters section.
+ *          Only chunks that are not completely filled by the dataset’s
+ *          dataspace are affected by this option. Such chunks are
+ *          referred to as partial edge chunks.
+ *
+ * \note \b Motivation: H5Pset_chunk_opts() is used to specify storage
+ *       options for chunks on the edge of a dataset’s dataspace. This
+ *       capability allows the user to tune performance in cases where
+ *       the dataset size may not be a multiple of the chunk size and
+ *       the handling of partial edge chunks can impact performance.
+ *
+ * \since 1.10.0
+ *
+ */
+H5_DLL herr_t H5Pset_chunk_opts(hid_t plist_id, unsigned opts);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Sets the flag to create minimized dataset object headers
+ *
+ * \dcpl_id
+ * \param[in] minimize Flag for indicating whether or not a dataset's
+ *                     object header will be minimized
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_dset_no_attrs_hint() sets the no dataset attributes
+ *          hint setting for the dataset creation property list \p dcpl_id.
+ *          Datasets created with the dataset creation property list
+ *          \p dcpl_id will have their object headers minimized if the
+ *          boolean flag \p minimize is set to TRUE. By setting \p minimize
+ *          to TRUE, the library expects that no attributes will be added
+ *          to the dataset. Attributes can be added, but they are appended
+ *          with a continuation message, which can reduce performance.
+ *
+ *          This setting interacts with H5Fset_dset_no_attrs_hint(): if
+ *          either is set to TRUE, then the created dataset's object header
+ *          will be minimized.
+ *
+ * \since 1.10.5
+ *
+ */
+H5_DLL herr_t H5Pset_dset_no_attrs_hint(hid_t dcpl_id, hbool_t minimize);
+/**
+ *-------------------------------------------------------------------------
  * \ingroup DCPL
  *
  * \brief Sets the type of storage used to store the raw data for a dataset
@@ -3538,9 +3609,6 @@ H5_DLL herr_t H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id,
     const char *src_file_name, const char *src_dset_name, hid_t src_space_id);
 H5_DLL herr_t H5Pset_external(hid_t plist_id, const char *name, off_t offset,
           hsize_t size);
-H5_DLL herr_t H5Pset_chunk_opts(hid_t plist_id, unsigned opts);
-
-/* Dataset creation property list (DCPL) routines */
 /**
  *-------------------------------------------------------------------------
  * \ingroup DCPL
@@ -3704,7 +3772,6 @@ H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type,
 H5_DLL herr_t H5Pset_fill_value(hid_t plist_id, hid_t type_id,
      const void *value);
 H5_DLL herr_t H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time);
-H5_DLL herr_t H5Pset_dset_no_attrs_hint(hid_t dcpl_id, hbool_t minimize);
 
 /* Dataset access property list (DAPL) routines */
 H5_DLL herr_t H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots,
