@@ -15,6 +15,7 @@ ALIASES += failure{1}="\Bold{Failure:} \1"
 
 ALIASES += herr_t="Returns a non-negative value if successful; otherwise returns a negative value."
 ALIASES += hid_t{1}="Returns a \1 identifier if successful; otherwise returns #H5I_INVALID_HID. "
+ALIASES += hid_ti{1}="Returns an \1 identifier if successful; otherwise returns #H5I_INVALID_HID. "
 ALIASES += hid_tv{1}="Returns an \1 identifier if successful; otherwise returns a negative value. "
 ALIASES += htri_t="Returns zero (false), a positive (true) or a negative (failure) value."
 
@@ -147,9 +148,11 @@ ALIASES += plistcls_id{1}="\param[in] \1 Property list class identifier"
 
 ALIASES += obj_id="\param[in] obj_id Object identifier"
 ALIASES += obj_id{1}="\param[in] \1 Object identifier"
+ALIASES += loc_obj_id{1}="\param[in] \1 Location identifier of object"
 
 ALIASES += fgdta_obj_id="\obj_id. The identifier may be that of a file, group, dataset, named datatype, or attribute."
 ALIASES += fgdta_obj_id{1}="\obj_id{\1}. The identifier may be that of a file, group, dataset, named datatype, or attribute."
+ALIASES += fgdta_loc_obj_id{1}="\loc_obj_id{\1}. The identifier may be that of a file, group, dataset, named datatype, or attribute."
 
 ################################################################################
 # Others
@@ -173,3 +176,4 @@ ALIASES += orders="<table><tr><td>#H5_ITER_INC</td><td>Increasing order</td></tr
 ALIASES += scopes="<table><tr><td>#H5F_SCOPE_GLOBAL</td><td>Flushes the entire virtual file</td></tr><tr><td>#H5F_SCOPE_LOCAL</td><td>Flushes only the specified file</td></tr></table>"
 ALIASES += storage_type="<table><tr><td>#H5G_STORAGE_TYPE_COMPACT</td><td>Compact storage</td></tr><tr><td>#H5G_STORAGE_TYPE_DENSE</td><td>Indexed storage</td></tr><tr><td>#H5G_STORAGE_TYPE_SYMBOL_TABLE</td><td>Symbol tables, the original HDF5 structure</td></tr></table>"
 ALIASES += virtual=" \see Supporting Functions: \li H5Pget_layout() \li H5Pset_layout() \li H5Sget_regular_hyperslab() \li H5Sis_regular_hyperslab() \li H5Sselect_hyperslab() \see VDS Functions: \li H5Pget_virtual_count() \li H5Pget_virtual_dsetname() \li H5Pget_virtual_filename() \li H5Pget_virtual_prefix() \li H5Pget_virtual_printf_gap() \li H5Pget_virtual_srcspace() \li H5Pget_virtual_view() \li H5Pget_virtual_vspace() \li H5Pset_virtual \li H5Pset_virtual_prefix() \li H5Pset_virtual_printf_gap() \li H5Pset_virtual_view()"
+ALIASES += obj_info_fields="<table><tr><th>Flag</th><th>Purpose</th></tr><tr><td>#H5O_INFO_BASIC</td><td>Fill in the fileno, addr, type, and rc fields</td></tr><tr> <td>#H5O_INFO_TIME</td><td>Fill in the atime, mtime, ctime, and btime fields</td></tr><tr> <td>#H5O_INFO_NUM_ATTRS</td> <td>Fill in the num_attrs field</td></tr><tr><td>#H5O_INFO_HDR</td><td>Fill in the num_attrs field</td></tr><tr><td>#H5O_INFO_META_SIZE</td><td>Fill in the meta_size field</td></tr><tr><td>#H5O_INFO_ALL</td><td>#H5O_INFO_BASIC | #H5O_INFO_TIME | #H5O_INFO_NUM_ATTRS | #H5O_INFO_HDR | #H5O_INFO_META_SIZE</td></tr></table>"
