@@ -382,6 +382,16 @@ New Features
 
     Library:
     --------
+    - Add new public function H5Ssel_iter_reset
+
+      This function resets a dataspace selection iterator back to an
+      initial state so that it may be used for iteration once more.
+      This can be useful when needing to iterate over a selection
+      multiple times without having to repeatedly create/destroy
+      a selection iterator for that dataspace selection.
+
+      (JTH - 2020/09/18)
+
     - Remove HDFS VFD stubs
 
       The original implementation of the HDFS VFD included non-functional
