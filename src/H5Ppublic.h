@@ -1649,7 +1649,7 @@ H5_DLL int H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func,
  *
  */
 H5_DLL herr_t H5Pregister2(hid_t cls_id, const char *name, size_t size,
-    void *default, H5P_prp_create_func_t create,
+    void *def_value, H5P_prp_create_func_t create,
     H5P_prp_set_func_t set, H5P_prp_get_func_t get,
     H5P_prp_delete_func_t delete, H5P_prp_copy_func_t copy,
     H5P_prp_compare_func_t compare, H5P_prp_close_func_t close);
@@ -3704,7 +3704,6 @@ H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type,
 H5_DLL herr_t H5Pset_fill_value(hid_t plist_id, hid_t type_id,
      const void *value);
 H5_DLL herr_t H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time);
-H5_DLL herr_t H5Pget_dset_no_attrs_hint(hid_t dcpl_id, hbool_t *minimize);
 H5_DLL herr_t H5Pset_dset_no_attrs_hint(hid_t dcpl_id, hbool_t minimize);
 
 /* Dataset access property list (DAPL) routines */
