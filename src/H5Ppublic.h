@@ -3569,6 +3569,98 @@ H5_DLL herr_t H5Pset_chunk_opts(hid_t plist_id, unsigned opts);
 H5_DLL herr_t H5Pset_dset_no_attrs_hint(hid_t dcpl_id, hbool_t minimize);
 /**
  *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Adds an external file to the list of external files
+ *
+ * \dcpl_id{plist_id}
+ * \param[in] name   Name of an external file
+ * \param[in] offset Offset, in bytes, from the beginning of the file to
+ *                   the location in the file where the data starts
+ * \param[in] size   Number of bytes reserved in the file for the data
+ *
+ * \return \herr_t
+ *
+ * \details The first call to H5Pset_external() sets the external
+ *          storage property in the property list, thus designating that
+ *          the dataset will be stored in one or more non-HDF5 file(s)
+ *          external to the HDF5 file. This call also adds the file
+ *          \p name as the first file in the list of external files.
+ *          Subsequent calls to the function add the named file as the
+ *          next file in the list.
+ *
+ *          If a dataset is split across multiple files, then the files
+ *          should be defined in order. The total size of the dataset is
+ *          the sum of the \p size arguments for all the external files.
+ *          If the total size is larger than the size of a dataset then
+ *          the dataset can be extended (provided the data space also
+ *          allows the extending).
+ *
+ *         The \p size argument specifies the number of bytes reserved
+ *         for data in the external file. If \p size is set to
+ *         #H5F_UNLIMITED, the external file can be of unlimited size
+ *         and no more files can be added to the external files list.
+ *         If \p size is set to 0 (zero), no external file will actually
+ *         be created.
+ *
+ *         All of the external files for a given dataset must be specified
+ *         with H5Pset_external() before H5Dcreate() is called to create
+ *         the dataset. If one these files does not exist on the system
+ *         when H5Dwrite() is called to write data to it, the library
+ *         will create the file.
+ *
+ * \since 1.0.0
+ *
+ */
+H5_DLL herr_t H5Pset_external(hid_t plist_id, const char *name, off_t offset,
+          hsize_t size);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Sets the time when fill values are written to a dataset
+ *
+ * \dcpl_id{plist_id}
+ * \param[in] fill_time When to write fill values to a dataset
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_fill_time() sets up the timing for writing fill values
+ *          to a dataset. This property is set in the dataset creation
+ *          property list \p plist_id. Timing is specified in \p fill_time
+ *          with one of the following values:
+ *
+ *          <table>
+ *           <tr>
+ *            <td>#H5D_FILL_TIME_IFSET</td>
+ *            <td>Write fill values to the dataset when storage space is
+ *                allocated only if there is a user-defined fill value,
+ *                i.e.,one set with H5Pset_fill_value(). (Default)</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5D_FILL_TIME_ALLOC</td>
+ *            <td>Write fill values to the dataset when storage space is
+ *                allocated.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5D_FILL_TIME_NEVER</td>
+ *            <td>Never write fill values to the dataset.</td>
+ *           </tr>
+ *          </table>
+ *
+ * \note H5Pset_fill_time() is designed for coordination with the dataset
+ *      fill value and dataset storage allocation time properties, set
+ *      with the functions H5Pset_fill_value() and H5Pset_alloc_time().
+ *      See H5Dcreate() for further cross-references.
+ *
+ * \since 1.6.0
+ *
+ */
+H5_DLL herr_t H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time);
+/**
+ *-------------------------------------------------------------------------
  * \ingroup DCPL
  *
  * \brief Sets the type of storage used to store the raw data for a dataset
@@ -3607,8 +3699,6 @@ H5_DLL herr_t H5Pset_dset_no_attrs_hint(hid_t dcpl_id, hbool_t minimize);
 H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
 H5_DLL herr_t H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id,
     const char *src_file_name, const char *src_dset_name, hid_t src_space_id);
-H5_DLL herr_t H5Pset_external(hid_t plist_id, const char *name, off_t offset,
-          hsize_t size);
 /**
  *-------------------------------------------------------------------------
  * \ingroup DCPL
@@ -3771,7 +3861,6 @@ H5_DLL herr_t H5Pset_nbit(hid_t plist_id);
 H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type, int scale_factor);
 H5_DLL herr_t H5Pset_fill_value(hid_t plist_id, hid_t type_id,
      const void *value);
-H5_DLL herr_t H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time);
 
 /* Dataset access property list (DAPL) routines */
 H5_DLL herr_t H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots,
