@@ -568,4 +568,4 @@ VFD SWMR is still under development, so we expect that you will encounter
 bugs.  Please report them, along with any performance or design issues you 
 encounter.
 
-To contact the VFD SWMR developers, email vfdswmr@hdfgroup.org.
+To contact the VFD SWMR developers, email swmr@forum.hdfgroup.org. 
