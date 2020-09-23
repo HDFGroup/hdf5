@@ -3153,6 +3153,10 @@ H5Ssel_iter_reset(hid_t sel_iter_id, hid_t space_id)
     if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace")
 
+    /* Call selection type-specific release routine */
+    if(H5S_SELECT_ITER_RELEASE(sel_iter) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "problem releasing a selection iterator's type-specific info")
+
     /* Simply re-initialize iterator */
     if(H5S_select_iter_init(sel_iter, space, sel_iter->elmt_size, sel_iter->flags) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to re-initialize selection iterator")
