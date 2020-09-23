@@ -2100,9 +2100,100 @@ H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, uns
  * \version 1.8.5 Function extended to work with group creation property lists.
  * \since 1.0.0
  *
- *--------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup OCPL
+ *
+ * \brief Adds a filter to the filter pipeline
+ *
+ * \param[in] plist_id  Dataset or group creation property list identifier
+ * \param[in] filter    Filter identifier for the filter to be added to the
+ *                      pipeline
+ * \param[in] flags     Bit vector specifying certain general properties of
+ *                      the filter
+ * \param[in] cd_nelmts Number of elements in \p c_values
+ * \param[in] c_values  Auxiliary data for the filter
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_filter() adds the specified \p filter identifier and
+ *          corresponding properties to the end of an output filter
+ *          pipeline.
+ *          \p plist_id must be either a dataset creation property list or
+ *          group creation property list identifier. If \p plist_id is a
+ *          dataset creation property list identifier, the filter is added
+ *          to the raw data filter pipeline.
+ *
+ *          If \p plist_id is a group creation property list identifier,
+ *          the filter is added to the link filter pipeline, which filters
+ *          the fractal heap used to store most of the link metadata in
+ *          certain types of groups. The only predefined filters that can
+ *          be set in a group creation property list are the gzip filter
+ *          (#H5Z_FILTER_DEFLATE) and the Fletcher32 error detection filter
+ *          (#H5Z_FILTER_FLETCHER32).
+ *
+ *          The array \p c_values contains \p cd_nelmts integers which are
+ *          auxiliary data for the filter. The integer values will be
+ *          stored in the dataset object header as part of the filter
+ *          information.
+ *
+ *          The \p flags argument is a bit vector with the following
+ *          fields specifying certain general properties of the filter:
+ *
+ *          <table>
+ *           <tr>
+ *            <td>#H5Z_FLAG_OPTIONAL</td>
+ *            <td>If this bit is set then the filter is optional. If the
+ *                filter fails (see below) during an H5Dwrite() operation
+ *                then the filter is just excluded from the pipeline for
+ *                the chunk for which it failed; the filter will not
+ *                participate in the pipeline during an H5Dread() of the
+ *                chunk. This is commonly used for compression filters:
+ *                if the filter result would be larger than the input,
+ *                then the compression filter returns failure and the
+ *                uncompressed data is stored in the file.<br /><br />
+ *                This flag should not be set for the Fletcher32 checksum
+ *                filter as it will bypass the checksum filter without
+ *                reporting checksum errors to an application.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5Z_FLAG_MANDATORY</td>
+ *            <td>If the filter is required, that is, set to mandatory,
+ *                and the filter fails, the library’s behavior depends
+ *                on whether the chunk cache is in use:
+ *                \li If the chunk cache is enabled, data chunks will
+ *                    be flushed to the file during H5Dclose() and the
+ *                    library will return the failure in H5Dclose().
+ *                \li When the chunk cache is disabled or not big enough,
+ *                    or the chunk is being evicted from the cache, the
+ *                    failure will happen during H5Dwrite().
+ *
+ *                In each case, the library will still write to the file
+ *                all data chunks that were processed by the filter
+ *                before the failure occurred.<br /><br />
+ *                For example, assume that an application creates a
+ *                dataset of four chunks, the chunk cache is enabled and
+ *                is big enough to hold all four chunks, and the filter
+ *                fails when it tries to write the fourth chunk. The
+ *                actual flush of the chunks will happen during
+ *                H5Dclose(), not H5Dwrite(). By the time H5Dclose()
+ *                fails, the first three chunks will have been written
+ *                to the file. Even though H5Dclose() fails, all the
+ *                resources will be released and the file can be closed
+ *                properly. <br /><br />
+ *                If, however, the filter fails on the second chunk, only
+ *                the first chunk will be written to the file as nothing
+ *                further can be written once the filter fails.</td>
+ *           </tr>
+ *          </table>
+ * \todo NOT FINISHED with this function
+ * \version 1.8.5 Function applied to group creation property lists.
+ * \since 1.6.0
+ *
+ */
 H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter,
         unsigned int flags, size_t cd_nelmts,
         const unsigned int c_values[]);
@@ -3661,6 +3752,95 @@ H5_DLL herr_t H5Pset_external(hid_t plist_id, const char *name, off_t offset,
 H5_DLL herr_t H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time);
 /**
  *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Sets the fill value for a dataset
+ *
+ * \dcpl_id{plist_id}
+ * \param[in] type_id Datatype of \p value
+ * \param[in] value Pointer to buffer containing value to use as
+ *            fill value
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_fill_value() sets the fill value for a dataset in the
+ *          dataset creation property list. \p value is interpreted as
+ *          being of datatype \p type_id. This datatype may differ from
+ *          that of the dataset, but the HDF5 library must be able to
+ *          convert \p value to the dataset datatype when the dataset is
+ *          created.
+ *
+ *          The default fill value is 0 (zero), which is interpreted
+ *          according to the actual dataset datatype.
+ *
+ *          Setting \p value to NULL indicates that the fill value is to
+ *          be undefined.
+ *
+ * \note Applications sometimes write data only to portions of an allocated
+ *       dataset. It is often useful in such cases to fill the unused space
+ *       with a known fill value. This function allows the user application
+ *       to set that fill value; the functions H5Dfill() and
+ *       H5Pset_fill_time(), respectively, provide the ability to apply the
+ *       fill value on demand or to set up its automatic application.
+ *
+ * \note A fill value should be defined so that it is appropriate for the
+ *       application. While the HDF5 default fill value is 0 (zero), it is
+ *       often appropriate to use another value. It might be useful, for
+ *       example, to use a value that is known to be impossible for the
+ *       application to legitimately generate.
+ *
+ * \note H5Pset_fill_value() is designed to work in concert with
+ *       H5Pset_alloc_time() and H5Pset_fill_time(). H5Pset_alloc_time()
+ *       and H5Pset_fill_time() govern the timing of dataset storage
+ *       allocation and fill value write operations and can be important in
+ *       tuning application performance.
+ *
+ * \note See H5Dcreate() for further cross-references.
+ *
+ * \since 1.0.0
+ *
+ */
+H5_DLL herr_t H5Pset_fill_value(hid_t plist_id, hid_t type_id,
+     const void *value);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DCPL
+ *
+ * \brief Sets up use of the shuffle filter
+ *
+ * \dcpl_id{plist_id}
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_shuffle() sets the shuffle filter, #H5Z_FILTER_SHUFFLE,
+ *          in the dataset creation property list \p plist_id. The shuffle
+ *          filter de-interlaces a block of data by reordering the bytes.
+ *          All the bytes from one consistent byte position of each data
+ *          element are placed together in one block; all bytes from a
+ *          second consistent byte position of each data element are placed
+ *          together a second block; etc. For example, given three data
+ *          elements of a 4-byte datatype stored as 012301230123, shuffling
+ *          will re-order data as 000111222333. This can be a valuable step
+ *          in an effective compression algorithm because the bytes in each
+ *          byte position are often closely related to each other and
+ *          putting them together can increase the compression ratio.
+ *
+ *          As implied above, the primary value of the shuffle filter lies
+ *          in its coordinated use with a compression filter; it does not
+ *          provide data compression when used alone. When the shuffle
+ *          filter is applied to a dataset immediately prior to the use of
+ *          a compression filter, the compression ratio achieved is often
+ *          superior to that achieved by the use of a compression filter
+ *          without the shuffle filter.
+ *
+ * \since 1.6.0
+ *
+ */
+H5_DLL herr_t H5Pset_shuffle(hid_t plist_id);
+/**
+ *-------------------------------------------------------------------------
  * \ingroup DCPL
  *
  * \brief Sets the type of storage used to store the raw data for a dataset
@@ -3856,31 +4036,181 @@ H5_DLL herr_t H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id,
  *--------------------------------------------------------------------------
  */
 H5_DLL herr_t H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels_per_block);
-H5_DLL herr_t H5Pset_shuffle(hid_t plist_id);
 H5_DLL herr_t H5Pset_nbit(hid_t plist_id);
 H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type, int scale_factor);
-H5_DLL herr_t H5Pset_fill_value(hid_t plist_id, hid_t type_id,
-     const void *value);
 
 /* Dataset access property list (DAPL) routines */
-H5_DLL herr_t H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots,
-       size_t rdcc_nbytes, double rdcc_w0);
+H5_DLL herr_t H5Pget_append_flush(hid_t plist_id, unsigned dims,
+    hsize_t boundary[], H5D_append_cb_t *func, void **udata);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DAPL
+ *
+ * \brief Retrieves the raw data chunk cache parameters
+ *
+ * \dapl_id
+ * \param[out] rdcc_nslots Number of chunk slots in the raw data chunk
+ *                         cache hash table
+ * \param[out] rdcc_nbytes Total size of the raw data chunk cache, in
+ *                         bytes
+ * \param[out] rdcc_w0     Preemption policy
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_chunk_cache() retrieves the number of chunk slots in
+ *          the raw data chunk cache hash table, the maximum possible
+ *          number of bytes in the raw data chunk cache, and the
+ *          preemption policy value.
+ *
+ *          These values are retrieved from a dataset access property
+ *          list. If the values have not been set on the property list,
+ *          then values returned will be the corresponding values from
+ *          a default file access property list.
+ *
+ *          Any (or all) pointer arguments may be null pointers, in which
+ *          case the corresponding data is not returned.
+ *
+ * \since 1.8.3
+ *
+ */
 H5_DLL herr_t H5Pget_chunk_cache(hid_t dapl_id,
        size_t *rdcc_nslots/*out*/,
        size_t *rdcc_nbytes/*out*/,
        double *rdcc_w0/*out*/);
-H5_DLL herr_t H5Pset_virtual_view(hid_t plist_id, H5D_vds_view_t view);
-H5_DLL herr_t H5Pget_virtual_view(hid_t plist_id, H5D_vds_view_t *view);
-H5_DLL herr_t H5Pset_virtual_printf_gap(hid_t plist_id, hsize_t gap_size);
-H5_DLL herr_t H5Pget_virtual_printf_gap(hid_t plist_id, hsize_t *gap_size);
-H5_DLL herr_t H5Pset_virtual_prefix(hid_t dapl_id, const char* prefix);
+H5_DLL ssize_t H5Pget_efile_prefix(hid_t dapl_id, char* prefix /*out*/, size_t size);
 H5_DLL ssize_t H5Pget_virtual_prefix(hid_t dapl_id, char* prefix /*out*/, size_t size);
+H5_DLL herr_t H5Pget_virtual_printf_gap(hid_t plist_id, hsize_t *gap_size);
+H5_DLL herr_t H5Pget_virtual_view(hid_t plist_id, H5D_vds_view_t *view);
 H5_DLL herr_t H5Pset_append_flush(hid_t plist_id, unsigned ndims,
     const hsize_t boundary[], H5D_append_cb_t func, void *udata);
-H5_DLL herr_t H5Pget_append_flush(hid_t plist_id, unsigned dims,
-    hsize_t boundary[], H5D_append_cb_t *func, void **udata);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DAPL
+ *
+ * \brief Sets the raw data chunk cache parameters
+ *
+ * \dapl_id
+ * \param[in] rdcc_nslots The number of chunk slots in the raw data chunk
+ *                        cache for this dataset. Increasing this value
+ *                        reduces the number of cache collisions, but
+ *                        slightly increases the memory used. Due to the
+ *                        hashing strategy, this value should ideally be a
+ *                        prime number. As a rule of thumb, this value
+ *                        should be at least 10 times the number of chunks
+ *                        that can fit in \p rdcc_nbytes bytes. For maximum
+ *                        performance, this value should be set
+ *                        approximately 100 times that number of chunks.
+ *                        The default value is 521. If the value passed is
+ *                        #H5D_CHUNK_CACHE_NSLOTS_DEFAULT, then the
+ *                        property will not be set on \p dapl_id and the
+ *                        parameter will come from the file access
+ *                        property list used to open the file.
+ * \param[in] rdcc_nbytes The total size of the raw data chunk cache for
+ *                        this dataset. In most cases increasing this
+ *                        number will improve performance, as long as
+ *                        you have enough free memory.
+ *                        The default size is 1 MB. If the value passed is
+ *                        #H5D_CHUNK_CACHE_NBYTES_DEFAULT, then the
+ *                        property will not be set on \p dapl_id and the
+ *                        parameter will come from the file access
+ *                        property list.
+ * \param[in] rdcc_w0     The chunk preemption policy for this dataset.
+ *                        This must be between 0 and 1 inclusive and
+ *                        indicates the weighting according to which chunks
+ *                        which have been fully read or written are
+ *                        penalized when determining which chunks to flush
+ *                        from cache. A value of 0 means fully read or
+ *                        written chunks are treated no differently than
+ *                        other chunks (the preemption is strictly LRU)
+ *                        while a value of 1 means fully read or written
+ *                        chunks are always preempted before other chunks.
+ *                        If your application only reads or writes data
+ *                        once, this can be safely set to 1. Otherwise,
+ *                        this should be set lower, depending on how often
+ *                        you re-read or re-write the same data.
+ *                        The default value is 0.75. If the value passed is
+ *                        #H5D_CHUNK_CACHE_W0_DEFAULT, then the property
+ *                        will not be set on \p dapl_id and the parameter
+ *                        will come from the file access property list.
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_chunk_cache() sets the number of elements, the total
+ *          number of bytes, and the preemption policy value in the raw
+ *          data chunk cache on a dataset access property list. After
+ *          calling this function, the values set in the property list
+ *          will override the values in the file's file access property
+ *          list.
+ *
+ *          The raw data chunk cache inserts chunks into the cache
+ *          by first computing a hash value using the address of a chunk,
+ *          then using that hash value as the chunk's index into the table
+ *          of cached chunks. The size of this hash table, i.e., and the
+ *          number of possible hash values, is determined by the
+ *          \p rdcc_nslots parameter. If a different chunk in the cache
+ *          has the same hash value, this causes a collision, which
+ *          reduces efficiency. If inserting the chunk into cache would
+ *          cause the cache to be too big, then the cache is pruned
+ *          according to the \p rdcc_w0 parameter.
+ *
+ * \note \b Motivation: H5Pset_chunk_cache() is used to adjust the chunk
+ *       cache parameters on a per-dataset basis, as opposed to a global
+ *       setting for the file using H5Pset_cache(). The optimum chunk
+ *       cache parameters may vary widely with different data layout and
+ *       access patterns, so for optimal performance they must be set
+ *       individually for each dataset. It may also be beneficial to
+ *       reduce the size of the chunk cache for datasets whose
+ *       performance is not important in order to save memory space.
+ *
+ * \note \b Example \b Usage: The following code sets the chunk cache to
+ *       use a hash table with 12421 elements and a maximum size of
+ *       16 MB, while using the preemption policy specified for the
+ *       entire file:
+ *       \Code{
+ *       H5Pset_chunk_cache(dapl_id, 12421, 16*1024*1024,
+ *            H5D_CHUNK_CACHE_W0_DEFAULT);}
+ *
+ * \note \b Usage \b Notes: The chunk cache size is a property for
+ *       accessing a dataset and is not stored with a dataset or a
+ *       file. To guarantee the same chunk cache settings each time
+ *       the dataset is opened, call H5Dopen() with a dataset access
+ *       property list where the chunk cache size is set by calling
+ *       H5Pset_chunk_cache() for that property list. The property
+ *       list can be used for multiple accesses in the same
+ *       application.
+ *
+ * \note For files where the same chunk cache size will be
+ *       appropriate for all or most datasets, H5Pset_cache() can
+ *       be called with a file access property list to set the
+ *       chunk cache size for accessing all datasets in the file.
+ *
+ * \note Both methods can be used in combination, in which case
+ *       the chunk cache size set by H5Pset_cache() will apply
+ *       except for specific datasets where H5Dopen() is called
+ *       with dataset property list with the chunk cache size
+ *       set by H5Pset_chunk_cache().
+ *
+ * \note In the absence of any cache settings, H5Dopen() will
+ *       by default create a 1 MB chunk cache for the opened
+ *       dataset. If this size happens to be appropriate, no
+ *       call will be needed to either function to set the
+ *       chunk cache size.
+ *
+ * \note It is also possible that a change in access pattern
+ *       for later access to a dataset will change the
+ *       appropriate chunk cache size.
+ *
+ * \since 1.8.3
+ *
+ */
+H5_DLL herr_t H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots,
+       size_t rdcc_nbytes, double rdcc_w0);
 H5_DLL herr_t H5Pset_efile_prefix(hid_t dapl_id, const char* prefix);
-H5_DLL ssize_t H5Pget_efile_prefix(hid_t dapl_id, char* prefix /*out*/, size_t size);
+H5_DLL herr_t H5Pset_virtual_prefix(hid_t dapl_id, const char* prefix);
+H5_DLL herr_t H5Pset_virtual_printf_gap(hid_t plist_id, hsize_t gap_size);
+H5_DLL herr_t H5Pset_virtual_view(hid_t plist_id, H5D_vds_view_t view);
 
 /* Dataset xfer property list (DXPL) routines */
 H5_DLL herr_t H5Pset_data_transform(hid_t plist_id, const char* expression);
@@ -3919,29 +4249,313 @@ H5_DLL herr_t H5Pget_mpio_actual_io_mode(hid_t plist_id, H5D_mpio_actual_io_mode
 H5_DLL herr_t H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no_collective_cause, uint32_t *global_no_collective_cause);
 #endif /* H5_HAVE_PARALLEL */
 
-/* Link creation property list (LCPL) routines */
-H5_DLL herr_t H5Pset_create_intermediate_group(hid_t plist_id, unsigned crt_intmd);
+/* Link creation (LCPL) and String Creation (STRCPL) property list routines */
+
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup ALCAPL
+ *
+ * \brief  Retrieves the character encoding used to create a link or
+ *         attribute name
+ *
+ * \param[in]  plist_id  Link creation or attribute creation property list
+ *                       identifier
+ * \param[out] encoding  String encoding character set
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_char_encoding() retrieves the character encoding used
+ *          to encode link or attribute names that are created with the
+ *          property list \p plist_id.
+ *
+ *          Valid values for \p encoding are defined in H5Tpublic.h and
+ *          include the following:
+ *
+ * \csets
+ *
+ * \note H5Pget_char_encoding() retrieves the character set used for an
+ *       HDF5 link or attribute name while H5Tget_cset() retrieves the
+ *       character set used in a character or string datatype.
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL herr_t H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding /*out*/);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup ALCAPL
+ *
+ * \brief Determines whether property is set to enable creating missing
+ *        intermediate groups
+ *
+ * \lcpl_id{plist_id}
+ * \param[out] crt_intmd Flag specifying whether to create intermediate
+ *                       groups upon creation of an object
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_create_intermediate_group() determines whether the link
+ *          creation property list \p plist_id is set to allow functions
+ *          that create objects in groups different from the current
+ *          working group to create intermediate groups that may be
+ *          missing in the path of a new or moved object.
+ *
+ *          Functions that create objects in or move objects to a group
+ *          other than the current working group make use of this
+ *          property. H5Gcreate_anon() and H5Lmove() are examples of such
+ *          functions.
+ *
+ *          If \p crt_intmd is positive, missing intermediate groups will
+ *          be created; if \p crt_intmd is non-positive, missing intermediate
+ *          groups will not be created.
+ *
+ * \since 1.8.0
+ *
+ */
 H5_DLL herr_t H5Pget_create_intermediate_group(hid_t plist_id, unsigned *crt_intmd /*out*/);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup ALCAPL
+ *
+ * \brief Sets the character encoding used to encode link and attribute
+ *        names
+ *
+ * \param[in] plist_id Link creation or attribute creation property list
+ *                     identifier
+ * \param[in] encoding String encoding character set
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_char_encoding() sets the character encoding used for
+ *          the names of links (which provide the names by which objects
+ *          are referenced) or attributes created with the property list
+ *          \p plist_id.
+ *
+ *           Valid values for encoding include the following:
+ * \csets
+ * \details For example, if the character set for the property list
+ *          \p plist_id is set to #H5T_CSET_UTF8, link names pointing to
+ *          objects created with the link creation property list
+ *          \p plist_id will be encoded using the UTF-8 character set.
+ *          Similarly, names of attributes created with the attribute
+ *          creation property list \p plist_id will be encoded as UTF-8.
+ *
+ *          ASCII and UTF-8 Unicode are the only currently supported
+ *          character encodings. Extended ASCII encodings (for example,
+ *          ISO 8859) are not supported. This encoding policy is not
+ *          enforced by the HDF5 library. Using encodings other than
+ *          ASCII and UTF-8 can lead to compatibility and usability
+ *          problems.
+ *
+ * \note H5Pset_char_encoding() sets the character set used for an
+ *       HDF5 link or attribute name while H5Tset_cset() sets the
+ *       character set used in a character or string datatype.
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL herr_t H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup ALCAPL
+ *
+ * \brief Specifies in property list whether to create missing
+ *        intermediate groups
+ *
+ * \lcpl_id{plist_id}
+ * \param[in] crt_intmd Flag specifying whether to create intermediate
+ *                      groups upon the creation of an object
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_create_intermediate_group()
+ *
+ * \since
+ *
+ */
+H5_DLL herr_t H5Pset_create_intermediate_group(hid_t plist_id, unsigned crt_intmd);
 
 /* Group creation property list (GCPL) routines */
-H5_DLL herr_t H5Pset_local_heap_size_hint(hid_t plist_id, size_t size_hint);
-H5_DLL herr_t H5Pget_local_heap_size_hint(hid_t plist_id, size_t *size_hint /*out*/);
-H5_DLL herr_t H5Pset_link_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dense);
-H5_DLL herr_t H5Pget_link_phase_change(hid_t plist_id, unsigned *max_compact /*out*/, unsigned *min_dense /*out*/);
-H5_DLL herr_t H5Pset_est_link_info(hid_t plist_id, unsigned est_num_entries, unsigned est_name_len);
 H5_DLL herr_t H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries /* out */, unsigned *est_name_len /* out */);
-H5_DLL herr_t H5Pset_link_creation_order(hid_t plist_id, unsigned crt_order_flags);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup GCPL
+ *
+ * \brief Queries whether link creation order is tracked and/or indexed in
+ *        a group
+ *
+ * \param[in]  plist_id         Group or file creation property list
+ *                              identifier
+ * \param[out] crt_order_flags  Creation order flag(s)
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_link_creation_order() queries the group or file creation
+ *          property list, \p plist_id, and returns a flag indicating whether
+ *          link creation order is tracked and/or indexed in a group.
+ *
+ *          See H5Pset_link_creation_order() for a list of valid creation
+ *          order flags, as passed in \p crt_order_flags, and their
+ *          meanings.
+ *
+ * \since 1.8.0
+ *
+ */
 H5_DLL herr_t H5Pget_link_creation_order(hid_t plist_id, unsigned *crt_order_flags /* out */);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup GCPL
+ *
+ * \brief Queries the settings for conversion between compact and dense
+ *        groups
+ *
+ * \gcpl_id{plist_id}
+ * \param[out] max_compact Maximum number of links for compact storage
+ * \param[out] min_dense   Minimum number of links for dense storage
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_link_phase_change() queries the maximum number of
+ *          entries for a compact group and the minimum number of links
+ *          to require before converting a group to a dense form.
+ *
+ *          In the compact format, links are stored as messages in the
+ *          group’s header. In the dense format, links are stored in a
+ *          fractal heap and indexed with a version 2 B-tree.
+ *
+ *          \p max_compact is the maximum number of links to store as
+ *          header messages in the group header before converting the
+ *          group to the dense format. Groups that are in the compact
+ *          format and exceed this number of links are automatically
+ *          converted to the dense format.
+ *
+ *          \p min_dense is the minimum number of links to store in the
+ *          dense format. Groups which are in dense format and in which
+ *          the number of links falls below this number are automatically
+ *          converted back to the compact format.
+ *
+ *          In the compact format, links are stored as messages in the
+ *          group’s header. In the dense format, links are stored in a
+ *          fractal heap and indexed with a version 2 B-tree.
+ *
+ *          See H5Pset_link_phase_change() for a discussion of
+ *          traditional, compact, and dense group storage.
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL herr_t H5Pget_link_phase_change(hid_t plist_id, unsigned *max_compact /*out*/, unsigned *min_dense /*out*/);
+H5_DLL herr_t H5Pget_local_heap_size_hint(hid_t plist_id, size_t *size_hint /*out*/);
+H5_DLL herr_t H5Pset_est_link_info(hid_t plist_id, unsigned est_num_entries, unsigned est_name_len);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup GCPL
+ *
+ * \brief Sets creation order tracking and indexing for links in a group
+ *
+ * \param[in]  plist_id        Group or file creation property list
+ *                             identifier
+ * \param[out] crt_order_flags Creation order flag(s)
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_link_creation_order() sets flags for tracking and
+ *          indexing links on creation order in groups created with the
+ *          group (or file) creation property list \p plist_id.
+ *
+ *          \p crt_order_flags contains flags with the following meanings:
+ *
+ *          <table>
+ *           <tr>
+ *            <td>#H5P_CRT_ORDER_TRACKED</td>
+ *            <td>Link creation order is tracked but not necessarily
+ *                indexed</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5P_CRT_ORDER_INDEXED</td>
+ *            <td>Link creation order is indexed (requires
+ *                #H5P_CRT_ORDER_TRACKED)</td>
+ *           </tr>
+ *          </table>
+ *
+ *          The default behavior is that links are tracked and indexed by
+ *          name, and link creation order is neither tracked nor indexed.
+ *          The name is always the primary index for links in a group.
+ *
+ *          H5Pset_link_creation_order() can be used to set link creation
+ *          order tracking, or to set link creation order tracking and
+ *          indexing.
+ *
+ *          If (#H5P_CRT_ORDER_TRACKED | #H5P_CRT_ORDER_INDEXED) is
+ *          specified for \p crt_order_flags, then links will be tracked
+ *          and indexed by creation order. The creation order is added as
+ *          a secondary index and enables faster queries and iterations
+ *          by creation order.
+ *
+ *          If just #H5P_CRT_ORDER_TRACKED is specified for
+ *          \p crt_order_flags, then links will be tracked by creation
+ *          order, but not indexed by creation order. Queries and iterations
+ *          by creation order will work but will be much slower for large
+ *          groups than if #H5P_CRT_ORDER_INDEXED had been included.
+ *
+ * \note If a creation order index is to be built, it must be specified in
+ *       the group creation property list. HDF5 currently provides no
+ *       mechanism to turn on link creation order tracking at group
+ *       creation time and to build the index later.
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL herr_t H5Pset_link_creation_order(hid_t plist_id, unsigned crt_order_flags);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup GCPL
+ *
+ * \brief Sets the parameters for conversion between compact and dense
+ *        groups
+ *
+ * \gcpl_id{plist_id}
+ * \param[in] max_compact Maximum number of links for compact storage
+ *                        (\a Default: 8)
+ * \param[in] min_dense   Minimum number of links for dense storage
+ *                        (\a Default: 6)
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_link_phase_change() sets the maximum number of entries
+ *          for a compact group and the minimum number of links to allow
+ *          before converting a dense group back to the compact format.
+ *
+ *          \p max_compact is the maximum number of links to store as
+ *          header messages in the group header before converting the
+ *          group to the dense format. Groups that are in compact format
+ *          and which exceed this number of links are automatically
+ *          converted to dense format.
+ *
+ *          \p min_dense is the minimum number of links to store in the
+ *          dense format. Groups which are in dense format and in which
+ *          the number of links falls below this threshold are
+ *          automatically converted to compact format.
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL herr_t H5Pset_link_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dense);
+H5_DLL herr_t H5Pset_local_heap_size_hint(hid_t plist_id, size_t size_hint);
 
 /* Map access property list (MAPL) routines */
 #ifdef H5_HAVE_MAP_API
 H5_DLL herr_t H5Pset_map_iterate_hints(hid_t mapl_id, size_t key_prefetch_size, size_t key_alloc_size);
 H5_DLL herr_t H5Pget_map_iterate_hints(hid_t mapl_id, size_t *key_prefetch_size /*out*/, size_t *key_alloc_size /*out*/);
 #endif /*  H5_HAVE_MAP_API */
-
-/* String creation property list (STRCPL) routines */
-H5_DLL herr_t H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding);
-H5_DLL herr_t H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding /*out*/);
 
 /* Link access property list (LAPL) routines */
 H5_DLL herr_t H5Pset_nlinks(hid_t plist_id, size_t nlinks);
