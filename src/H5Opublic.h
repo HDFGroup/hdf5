@@ -198,7 +198,7 @@ extern "C" {
  *
  * \brief Opens an object in an HDF5 file by location identifier and path name.
  *
- * \fgdta_loc_id
+ * \fgdta_loc_obj_id{loc_id}
  * \param[in] name Path to the object; relative to \p loc_id
  * \lapl_id
  *
@@ -217,8 +217,8 @@ extern "C" {
  *          the type of that object can be determined by means of an H5Iget_type() call.
  *
  *          \p loc_id may be a file, group, dataset, named datatype, or attribute.
- *          If an attribute, dataset, or named datatype is specified for \p loc_id then the object
- *          will be opened at the location where the attribute, dataset, or named datatype is attached.
+ *          If an attribute is specified for \p loc_id then the object where the 
+ *          attribute is attached will be accessed.
  *
  *          \p name must be the path to that object relative to \p loc_id.
  *
@@ -229,7 +229,7 @@ extern "C" {
  *          When it is no longer needed, the opened object should be closed with
  *          H5Oclose(), H5Gclose(), H5Tclose(), or H5Dclose().
  *
- * \todo Check H5Gopen(), H5Topen(), and H5Dopen() will be highlighted when those macros are defined;
+ * \todo Check I split history into version and since
  *
  * \version 1.8.1 Fortran subroutine introduced in this release.
  *
@@ -245,7 +245,7 @@ H5_DLL hid_t H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id);
  *
  * \brief Opens an object in an HDF5 file using its VOL independent token
  *
- * \fgdta_loc_id
+ * \fgdta_loc_obj_id{loc_id}
  * \param[in] token Object token
  *
  * \return \hid_ti{object}
@@ -269,7 +269,7 @@ H5_DLL hid_t H5Oopen_by_token(hid_t loc_id, H5O_token_t token);
  *
  * \brief Opens the nth object in a group
  *
- * \fgdta_loc_id
+ * \fgdta_loc_obj_id{loc_id}
  * \param[in] group_name Name of group, relative to \p loc_id, in which object is located
  * \idx_type
  * \order
@@ -312,6 +312,8 @@ H5_DLL hid_t H5Oopen_by_token(hid_t loc_id, H5O_token_t token);
  *          resource leaks will not develop.  H5Oclose() can be used to close groups, datasets,
  *          or committed datatypes.
  *
+ * \todo Check I split history into version and since
+ *
  * \version 1.8.1 Fortran subroutine introduced in this release.
  *
  * \since 1.8.0
@@ -327,7 +329,7 @@ H5_DLL hid_t H5Oopen_by_idx(hid_t loc_id, const char *group_name,
  *
  * \brief Determines whether a link resolves to an actual object.
  *
- * \fgdta_loc_id
+ * \fgdta_loc_obj_id{loc_id}
  * \param[in] name The name of the link to check
  * \lapl_id
  *
@@ -408,6 +410,8 @@ H5_DLL hid_t H5Oopen_by_idx(hid_t loc_id, const char *group_name,
  *          function description, provides a step-by-step description of
  *          that verification process.
  *
+ * \todo Check I split history into version and since
+ *
  * \version 1.8.11 Fortran subroutine introduced in this release.
  *
  * \since 1.8.5
@@ -448,6 +452,9 @@ H5_DLL htri_t H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id);
  *          The \ref H5O_type_t \c enum indicates the object type and 
  *          is defined in H5Opublic.h as follows:
  *          \snippet this H5O_type_t_snip
+ *      
+ *          Note that the object retrieved as indicated by \p loc_id
+ *          refers only to the types specified by \ref H5O_type_t.
  *
  *          The \p fields parameter contains flags to determine which fields will be filled in 
  *          the \ref H5O_info2_t \c struct returned in \p oinfo. 
@@ -471,9 +478,6 @@ H5_DLL htri_t H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id);
  *       property list via H5Pset_mdc_config(). A smaller sized cache
  *       will force metadata entries to be evicted from the cache,
  *       thus freeing the memory associated with the entries.
- *
- * \todo Check parameter loc_id description
- * \todo Check: there is a note about obj_id of H5O_type_t that I remove
  *
  * \since 1.12.0
  *
@@ -520,6 +524,9 @@ H5_DLL herr_t H5Oget_info3(hid_t loc_id, H5O_info2_t *oinfo, unsigned fields);
  *          is defined in H5Opublic.h as follows:
  *          \snippet this H5O_type_t_snip
  *
+ *          Note that the object retrieved as indicated by \p loc_id
+ *          refers only to the types specified by \ref H5O_type_t.
+ *
  *          The \p fields parameter contains flags to determine which fields will be filled in 
  *          the \ref H5O_info2_t \c struct returned in \p oinfo. 
  *          These flags are defined in the H5Opublic.h file:
@@ -532,9 +539,6 @@ H5_DLL herr_t H5Oget_info3(hid_t loc_id, H5O_info2_t *oinfo, unsigned fields);
  * \par Example
  *      An example snippet from test/vol.c:
  *      \snippet vol.c H5Oget_info_by_name3_snip
- *
- * \todo Check parameter loc_id description
- * \todo Check: there is a note about obj_id of H5O_type_t that I remove
  *
  * \since 1.12.0
  *
@@ -597,6 +601,9 @@ H5_DLL herr_t H5Oget_info_by_name3(hid_t loc_id, const char *name, H5O_info2_t *
  *          is defined in H5Opublic.h as follows:
  *          \snippet this H5O_type_t_snip
  *
+ *          Note that the object retrieved as indicated by \p loc_id
+ *          refers only to the types specified by \ref H5O_type_t.
+ *
  *          The \p fields parameter contains flags to determine which fields will be filled in 
  *          the \ref H5O_info2_t \c struct returned in \p oinfo. 
  *          These flags are defined in the H5Opublic.h file:
@@ -609,10 +616,7 @@ H5_DLL herr_t H5Oget_info_by_name3(hid_t loc_id, const char *name, H5O_info2_t *
  *      An example snippet from test/titerate.c:
  *      \snippet titerate.c H5Oget_info_by_idx3_snip
  *
- * \todo Check parameter loc_id description
- * \todo Check: there is a note about obj_id of H5O_type_t that I remove; 
  * \todo Check: I modify description for several parameters
- *
  *
  * \since 1.12.0
  *
@@ -678,7 +682,7 @@ H5_DLL herr_t H5Oget_native_info_by_idx(hid_t loc_id, const char *group_name,
  *      hid_t gid  = H5Gcreate_anon(file_id, H5P_DEFAULT, H5P_DEFAULT);
  *
  *      //Links group into file structure.
- *      status = H5Olink(obj_id, file_id, "/A/B01/C", lcpl_id, H5P_DEFAULT);
+ *      status = H5Olink(gid, file_id, "/A/B01/C", lcpl_id, H5P_DEFAULT);
  *
  * \endcode
  *
@@ -689,6 +693,9 @@ H5_DLL herr_t H5Oget_native_info_by_idx(hid_t loc_id, const char *group_name,
  *      is to be retained in the file; without an H5O_LINK call,
  *      the object will not be linked into the HDF5 file structure
  *      and will be deleted when the file is closed.
+ *
+ * \todo Correction in the example code
+ * \todo Check I split history into version and since
  *
  * \version 1.8.1 Fortran subroutine introduced in this release.
  *
@@ -766,6 +773,7 @@ H5_DLL herr_t H5Oincr_refcount(hid_t object_id);
  *          or <b><em>file corruption</em></b>.
  *
  * \todo Check reference user's guide; check H5O_info_t 
+ * \todo Check I split history into version and since
  *
  * \version 1.8.11 Fortran subroutine introduced in this release.
  *
@@ -785,7 +793,7 @@ H5_DLL herr_t H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
  *
  * \brief Sets comment for specified object
  *
- * \fgdta_obj_id
+ * \fgdta_loc_obj_id{obj_id}
  * \param[in] comment The new comment
  *
  * \return \herr_t
@@ -794,7 +802,7 @@ H5_DLL herr_t H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
  *          to the contents of \p comment. Any previously existing comment
  *          is overwritten.
  *
- *          The target object is specified by an identifier, \p object_id.
+ *          The target object is specified by an identifier, \p obj_id.
  *          If \p comment is the empty string or a null pointer, any existing
  *          comment message is removed from the object.
  *
@@ -809,7 +817,7 @@ H5_DLL herr_t H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
  *          and not to the attribute itself.
  *
  * \todo Check: portal says deprecated but src is not; 
- * \todo Check: check object_id to be consistent all across H5O
+ * \todo Check I split history into version and since
  *
  * \version 1.8.11 Fortran subroutine introduced in this release.  
  *
@@ -825,7 +833,7 @@ H5_DLL herr_t H5Oset_comment(hid_t obj_id, const char *comment);
  *
  * \brief Sets comment for specified object
  *
- * \fgdta_obj_id
+ * \fgdta_loc_obj_id{loc_id}
  * \param[in] name Name of the object whose comment is to be set or reset
  * \param[in] comment The new comment
  * \lapl_id
@@ -862,7 +870,7 @@ H5_DLL herr_t H5Oset_comment(hid_t obj_id, const char *comment);
  *          links to access an object.
  *
  * \todo Check: portal says deprecated but src is not; 
- * \todo Check: check object_id to be consistent all across H5O
+ * \todo Check I split history into version and since
  *
  * \version 1.8.11 Fortran subroutine introduced in this release.  
  *
@@ -880,7 +888,7 @@ H5_DLL herr_t H5Oset_comment_by_name(hid_t loc_id, const char *name,
  *
  * \brief Retrieves comment for specified object
  *
- * \fgdta_obj_id
+ * \fgdta_loc_obj_id{obj_id}
  * \param[out] comment The comment
  * \param[in] bufsize Anticipated required size of the comment buffer
  *
@@ -907,7 +915,7 @@ H5_DLL herr_t H5Oset_comment_by_name(hid_t loc_id, const char *name,
  *          If an object does not have a comment, the empty string is
  *          returned in \p comment.
  *
- * \todo Check: object_id to be consistent all across H5O
+ * \todo Check I split history into version and since
  *
  * \version 1.8.11 Fortran subroutine introduced in this release.  
  *
@@ -1004,7 +1012,7 @@ typedef herr_t (*H5O_iterate1_t)(hid_t obj, const char *name, const H5O_info1_t 
  *
  * \brief Opens an object using its address within an HDF5 file.
  *
- * \fgdta_loc_id
+ * \fgdta_loc_obj_id{loc_id}
  * \param[in] addr Object's address in the file
  *
  * \return \hid_tv{object}
@@ -1044,6 +1052,7 @@ typedef herr_t (*H5O_iterate1_t)(hid_t obj, const char *name, const H5O_info1_t 
  *
  * \todo Check detail: reference to the the user guide; 
  * \todo Check detail: correction: H5L_infolinfo_t struct; warning: correction: H5Lget_linkinfo
+ * \todo Check I split history into version and since
  *
  * \version 1.8.4 Fortran subroutine added in this release.
  *
@@ -1086,6 +1095,9 @@ H5_DLL hid_t H5Oopen_by_addr(hid_t loc_id, haddr_t addr);
  *          is defined in H5Opublic.h as follows:
  *          \snippet this H5O_type_t_snip
  *
+ *          Note that the object retrieved as indicated by \p loc_id
+ *          refers only to the types specified by \ref H5O_type_t.
+ *
  *          An \ref H5O_hdr_info_t \c struct holds object header metadata and is 
  *          defined in H5Opublic.h as follows:
  *          \snippet this H5O_hdr_info_t_snip
@@ -1108,8 +1120,6 @@ H5_DLL hid_t H5Oopen_by_addr(hid_t loc_id, haddr_t addr);
  *       will force metadata entries to be evicted from the cache,
  *       thus freeing the memory associated with the entries.
  *
- * \todo Check parameter loc_id description
- * \todo Check: there is a note of obj_id type H5O_type_t that I remove
  * \todo Check H5O_VERSION_1 and H5O_VERSION_2: highlighted?
  *
  * \par Version
@@ -1183,7 +1193,6 @@ H5_DLL herr_t H5Oget_info1(hid_t loc_id, H5O_info1_t *oinfo);
  *          The link access property list, \p lapl_id, is not currently used;
  *          it should be passed in as #H5P_DEFAULT.
  *
- * \todo Check parameter loc_id description;
  * \todo Check: exchange history 1.8.8 and 1.8.0
  *
  * \par Version
@@ -1259,7 +1268,6 @@ H5_DLL herr_t H5Oget_info_by_name1(hid_t loc_id, const char *name, H5O_info1_t *
  *          The link access property list, \c lapl_id, is not currently used; 
  *          it should be passed in as #H5P_DEFAULT.
  *
- * \todo Check parameter loc_id description
  * \todo Check: I modify description for several parameters
  *
  *
@@ -1327,8 +1335,6 @@ H5_DLL herr_t H5Oget_info_by_idx1(hid_t loc_id, const char *group_name,
  *       property list via H5Pset_mdc_config(). A smaller sized cache
  *       will force metadata entries to be evicted from the cache,
  *       thus freeing the memory associated with the entries.
- *
- * \todo Check: version and since; Check parameter loc_id description
  *
  * \since 1.10.3
  *
@@ -1422,7 +1428,6 @@ H5_DLL herr_t H5Oget_info_by_name2(hid_t loc_id, const char *name, H5O_info1_t *
  *          The link access property list, \c lapl_id, is not currently used; 
  *          it should be passed in as #H5P_DEFAULT.
  *
- * \todo Check parameter loc_id description
  * \todo Check: I modify description for several parameters
  *
  *
