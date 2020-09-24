@@ -530,14 +530,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Oget_info3(hid_t loc_id, H5O_info2_t *oinfo, unsigned fields)
+H5Oget_info3(hid_t loc_id, H5O_info2_t *oinfo/*out*/, unsigned fields)
 {
     H5VL_object_t *vol_obj;             /* Object of loc_id */
     H5VL_loc_params_t   loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*xIu", loc_id, oinfo, fields);
+    H5TRACE3("e", "ixIu", loc_id, oinfo, fields);
 
     /* Check args */
     if(!oinfo)
@@ -576,14 +576,14 @@ done:
  */
 herr_t
 H5Oget_info_by_name3(hid_t loc_id, const char *name,
-    H5O_info2_t *oinfo, unsigned fields, hid_t lapl_id)
+    H5O_info2_t *oinfo/*out*/, unsigned fields, hid_t lapl_id)
 {
     H5VL_object_t *vol_obj;             /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*s*xIui", loc_id, name, oinfo, fields, lapl_id);
+    H5TRACE5("e", "i*sxIui", loc_id, name, oinfo, fields, lapl_id);
 
     /* Check args */
     if(!name)
@@ -634,14 +634,15 @@ done:
  */
 herr_t
 H5Oget_info_by_idx3(hid_t loc_id, const char *group_name, H5_index_t idx_type,
-    H5_iter_order_t order, hsize_t n, H5O_info2_t *oinfo, unsigned fields, hid_t lapl_id)
+    H5_iter_order_t order, hsize_t n, H5O_info2_t *oinfo/*out*/, unsigned fields,
+    hid_t lapl_id)
 {
     H5VL_object_t *vol_obj;             /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "i*sIiIoh*xIui", loc_id, group_name, idx_type, order, n, oinfo,
+    H5TRACE8("e", "i*sIiIohxIui", loc_id, group_name, idx_type, order, n, oinfo,
              fields, lapl_id);
 
     /* Check args */
@@ -694,14 +695,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Oget_native_info(hid_t loc_id, H5O_native_info_t *oinfo, unsigned fields)
+H5Oget_native_info(hid_t loc_id, H5O_native_info_t *oinfo/*out*/, unsigned fields)
 {
     H5VL_object_t *vol_obj;             /* Object of loc_id */
     H5VL_loc_params_t   loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*xIu", loc_id, oinfo, fields);
+    H5TRACE3("e", "ixIu", loc_id, oinfo, fields);
 
     /* Check args */
     if(!oinfo)
@@ -739,15 +740,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Oget_native_info_by_name(hid_t loc_id, const char *name, H5O_native_info_t *oinfo,
-    unsigned fields, hid_t lapl_id)
+H5Oget_native_info_by_name(hid_t loc_id, const char *name,
+    H5O_native_info_t *oinfo/*out*/, unsigned fields, hid_t lapl_id)
 {
     H5VL_object_t *vol_obj;             /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*s*xIui", loc_id, name, oinfo, fields, lapl_id);
+    H5TRACE5("e", "i*sxIui", loc_id, name, oinfo, fields, lapl_id);
 
     /* Check args */
     if(!name)
@@ -798,14 +799,15 @@ done:
  */
 herr_t
 H5Oget_native_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
-    H5_iter_order_t order, hsize_t n, H5O_native_info_t *oinfo, unsigned fields, hid_t lapl_id)
+    H5_iter_order_t order, hsize_t n, H5O_native_info_t *oinfo/*out*/,
+    unsigned fields, hid_t lapl_id)
 {
     H5VL_object_t *vol_obj;             /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "i*sIiIoh*xIui", loc_id, group_name, idx_type, order, n, oinfo,
+    H5TRACE8("e", "i*sIiIohxIui", loc_id, group_name, idx_type, order, n, oinfo,
              fields, lapl_id);
 
     /* Check args */
@@ -965,14 +967,14 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Oget_comment(hid_t obj_id, char *comment, size_t bufsize)
+H5Oget_comment(hid_t obj_id, char *comment/*out*/, size_t bufsize)
 {
     H5VL_object_t *vol_obj;             /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     ssize_t     ret_value = -1;         /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE3("Zs", "i*sz", obj_id, comment, bufsize);
+    H5TRACE3("Zs", "ixz", obj_id, comment, bufsize);
 
     /* Get the object */
     if(NULL == (vol_obj = H5VL_vol_object(obj_id)))
@@ -1008,15 +1010,15 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comment, size_t bufsize,
-    hid_t lapl_id)
+H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comment/*out*/,
+    size_t bufsize, hid_t lapl_id)
 {
     H5VL_object_t *vol_obj;             /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     ssize_t     ret_value = -1;         /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE5("Zs", "i*s*szi", loc_id, name, comment, bufsize, lapl_id);
+    H5TRACE5("Zs", "i*sxzi", loc_id, name, comment, bufsize, lapl_id);
 
     /* Check args */
     if(!name || !*name)
@@ -1089,7 +1091,7 @@ H5Ovisit3(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
     herr_t              ret_value;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "iIiIox*xIu", obj_id, idx_type, order, op, op_data, fields);
+    H5TRACE6("e", "iIiIoOI*xIu", obj_id, idx_type, order, op, op_data, fields);
 
     /* Check args */
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
@@ -1162,7 +1164,7 @@ H5Ovisit_by_name3(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     herr_t              ret_value;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "i*sIiIox*xIui", loc_id, obj_name, idx_type, order, op, op_data,
+    H5TRACE8("e", "i*sIiIoOI*xIui", loc_id, obj_name, idx_type, order, op, op_data,
              fields, lapl_id);
 
     /* Check args */

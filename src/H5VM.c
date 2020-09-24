@@ -33,15 +33,12 @@ typedef struct H5VM_memcpy_ud_t {
 #define H5VM_HYPER_NDIMS H5O_LAYOUT_NDIMS
 
 /* Local prototypes */
-static void
-H5VM__stride_optimize1(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
-		     const hsize_t *size, hsize_t *stride1);
-static void
-H5VM__stride_optimize2(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
-		     const hsize_t *size, hsize_t *stride1, hsize_t *stride2);
+static void H5VM__stride_optimize1(unsigned *np/*in,out*/,
+    hsize_t *elmt_size/*in,out*/, const hsize_t *size, hsize_t *stride1);
+static void H5VM__stride_optimize2(unsigned *np/*in,out*/,
+    hsize_t *elmt_size/*in,out*/, const hsize_t *size, hsize_t *stride1, hsize_t *stride2);
 #ifdef LATER
-static void
-H5VM__stride_copy2(hsize_t nelmts, hsize_t elmt_size,
+static void H5VM__stride_copy2(hsize_t nelmts, hsize_t elmt_size,
      unsigned dst_n, const hsize_t *dst_size, const ssize_t *dst_stride, void *_dst,
      unsigned src_n, const hsize_t *src_size, const ssize_t *src_stride, const void *_src);
 #endif /* LATER */
@@ -464,12 +461,8 @@ H5VM_hyper_fill(unsigned n, const hsize_t *_size,
  */
 herr_t
 H5VM_hyper_copy(unsigned n, const hsize_t *_size,
-
-	       /*destination*/
 	       const hsize_t *dst_size, const hsize_t *dst_offset,
 	       void *_dst,
-
-	       /*source*/
 	       const hsize_t *src_size, const hsize_t *src_offset,
 	       const void *_src)
 {
@@ -817,13 +810,9 @@ H5VM_stride_copy_s(unsigned n, hsize_t elmt_size, const hsize_t *size,
  */
 static void
 H5VM__stride_copy2(hsize_t nelmts, hsize_t elmt_size,
-
-		 /* destination */
 		 unsigned dst_n, const hsize_t *dst_size,
 		 const hsize_t *dst_stride,
 		 void *_dst,
-
-		 /* source */
 		 unsigned src_n, const hsize_t *src_size,
 		 const hsize_t *src_stride,
 		 const void *_src)

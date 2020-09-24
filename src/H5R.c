@@ -730,7 +730,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *obj_type)
+H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *obj_type/*out*/)
 {
     hid_t loc_id;                       /* Reference location ID */
     H5VL_object_t *vol_obj = NULL;      /* Object of loc_id */
@@ -739,7 +739,7 @@ H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *obj_type)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "*Rri*Ot", ref_ptr, rapl_id, obj_type);
+    H5TRACE3("e", "*Rrix", ref_ptr, rapl_id, obj_type);
 
     /* Check args */
     if(ref_ptr == NULL)
@@ -790,13 +790,13 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Rget_file_name(const H5R_ref_t *ref_ptr, char *buf, size_t size)
+H5Rget_file_name(const H5R_ref_t *ref_ptr, char *buf/*out*/, size_t size)
 {
     hid_t loc_id;       /* Reference location ID */
     ssize_t ret_value;  /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE3("Zs", "*Rr*sz", ref_ptr, buf, size);
+    H5TRACE3("Zs", "*Rrxz", ref_ptr, buf, size);
 
     /* Check args */
     if(ref_ptr == NULL)
@@ -839,7 +839,7 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *buf, size_t size)
+H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *buf/*out*/, size_t size)
 {
     hid_t loc_id;                       /* Reference location ID */
     H5VL_object_t *vol_obj = NULL;      /* Object of loc_id */
@@ -848,7 +848,7 @@ H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *buf, size_t size)
     ssize_t ret_value = 0;              /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE4("Zs", "*Rri*sz", ref_ptr, rapl_id, buf, size);
+    H5TRACE4("Zs", "*Rrixz", ref_ptr, rapl_id, buf, size);
 
     /* Check args */
     if(ref_ptr == NULL)
@@ -898,12 +898,12 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Rget_attr_name(const H5R_ref_t *ref_ptr, char *buf, size_t size)
+H5Rget_attr_name(const H5R_ref_t *ref_ptr, char *buf/*out*/, size_t size)
 {
     ssize_t ret_value;  /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE3("Zs", "*Rr*sz", ref_ptr, buf, size);
+    H5TRACE3("Zs", "*Rrxz", ref_ptr, buf, size);
 
     /* Check args */
     if(ref_ptr == NULL)

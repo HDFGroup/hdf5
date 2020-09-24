@@ -587,13 +587,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5get_free_list_sizes(size_t *reg_size, size_t *arr_size, size_t *blk_size,
-    size_t *fac_size)
+H5get_free_list_sizes(size_t *reg_size/*out*/, size_t *arr_size/*out*/,
+    size_t *blk_size/*out*/, size_t *fac_size/*out*/)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "*z*z*z*z", reg_size, arr_size, blk_size, fac_size);
+    H5TRACE4("e", "xxxx", reg_size, arr_size, blk_size, fac_size);
 
     /* Call the free list function to actually get the sizes */
     if(H5FL_get_free_list_sizes(reg_size, arr_size, blk_size, fac_size) < 0)
@@ -629,12 +629,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5get_alloc_stats(H5_alloc_stats_t *stats)
+H5get_alloc_stats(H5_alloc_stats_t *stats/*out*/)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "*x", stats);
+    H5TRACE1("e", "x", stats);
 
     /* Call the internal allocation stat routine to get the values */
     if(H5MM_get_alloc_stats(stats) < 0)
@@ -784,12 +784,12 @@ static int H5__mpi_delete_cb(MPI_Comm H5_ATTR_UNUSED comm, int H5_ATTR_UNUSED ke
  *-------------------------------------------------------------------------
  */
 herr_t
-H5get_libversion(unsigned *majnum, unsigned *minnum, unsigned *relnum)
+H5get_libversion(unsigned *majnum/*out*/, unsigned *minnum/*out*/, unsigned *relnum/*out*/)
 {
     herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "*Iu*Iu*Iu", majnum, minnum, relnum);
+    H5TRACE3("e", "xxx", majnum, minnum, relnum);
 
     /* Set the version information */
     if (majnum) *majnum = H5_VERS_MAJOR;

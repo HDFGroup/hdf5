@@ -441,6 +441,14 @@ set (H5MP_HDRS
 )
 IDE_GENERATED_PROPERTIES ("H5MP" "${H5MP_HDRS}" "${H5MP_SOURCES}" )
 
+set (H5MS_SOURCES
+    ${HDF5_SRC_DIR}/H5MS.c
+)
+set (H5MS_HDRS
+)
+IDE_GENERATED_PROPERTIES ("H5MS" "${H5MS_HDRS}" "${H5MS_SOURCES}" )
+
+
 set (H5O_SOURCES
     ${HDF5_SRC_DIR}/H5O.c
     ${HDF5_SRC_DIR}/H5Oainfo.c
@@ -887,6 +895,8 @@ set (H5_PRIVATE_HEADERS
 
     ${HDF5_SRC_DIR}/H5MPpkg.h
     ${HDF5_SRC_DIR}/H5MPprivate.h
+
+    ${HDF5_SRC_DIR}/H5MSprivate.h
 
     ${HDF5_SRC_DIR}/H5Opkg.h
     ${HDF5_SRC_DIR}/H5Oprivate.h

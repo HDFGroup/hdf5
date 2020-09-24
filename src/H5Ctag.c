@@ -905,7 +905,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_get_tag(const void *thing, haddr_t *tag /*OUT*/)
+H5C_get_tag(const void *thing, haddr_t *tag/*out*/)
 {
     const H5C_cache_entry_t *entry = (const H5C_cache_entry_t *)thing;  /* Pointer to cache entry */
 

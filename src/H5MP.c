@@ -202,7 +202,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5MP_malloc (H5MP_pool_t *mp, size_t request)
+H5MP_malloc(H5MP_pool_t *mp, size_t request)
 {
     H5MP_page_t *alloc_page = NULL; /* Page to allocate space from */
     H5MP_page_blk_t *alloc_free;    /* Pointer to free space in page */

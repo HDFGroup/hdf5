@@ -988,7 +988,7 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Pget_data_transform(hid_t plist_id, char *expression /*out*/, size_t size)
+H5Pget_data_transform(hid_t plist_id, char *expression/*out*/, size_t size)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     H5Z_data_xform_t *data_xform_prop = NULL;    /* New data xform property */
@@ -1307,7 +1307,7 @@ H5Pset_filter_callback(hid_t plist_id, H5Z_filter_func_t func, void *op_data)
     H5Z_cb_t            cb_struct;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ix*x", plist_id, func, op_data);
+    H5TRACE3("e", "iZF*x", plist_id, func, op_data);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
@@ -1347,7 +1347,7 @@ H5Pset_type_conv_cb(hid_t plist_id, H5T_conv_except_func_t op, void *operate_dat
     H5T_conv_cb_t       cb_struct;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ix*x", plist_id, op, operate_data);
+    H5TRACE3("e", "iTE*x", plist_id, op, operate_data);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
@@ -1380,14 +1380,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_type_conv_cb(hid_t plist_id, H5T_conv_except_func_t *op, void **operate_data)
+H5Pget_type_conv_cb(hid_t plist_id, H5T_conv_except_func_t *op/*out*/,
+    void **operate_data/*out*/)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     H5T_conv_cb_t       cb_struct;
     herr_t              ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*x**x", plist_id, op, operate_data);
+    H5TRACE3("e", "ixx", plist_id, op, operate_data);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
@@ -1579,7 +1580,7 @@ H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc_func,
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "ix*xx*x", plist_id, alloc_func, alloc_info, free_func,
+    H5TRACE5("e", "iMa*xMf*x", plist_id, alloc_func, alloc_info, free_func,
              free_info);
 
     /* Check arguments */
@@ -1954,13 +1955,14 @@ H5P__dxfr_mpio_chunk_opt_hard_dec(const void **_pp, void *_value)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_mpio_actual_chunk_opt_mode(hid_t plist_id, H5D_mpio_actual_chunk_opt_mode_t *actual_chunk_opt_mode)
+H5Pget_mpio_actual_chunk_opt_mode(hid_t plist_id,
+    H5D_mpio_actual_chunk_opt_mode_t *actual_chunk_opt_mode/*out*/)
 {
     H5P_genplist_t     *plist;
     herr_t ret_value = SUCCEED;   /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Do", plist_id, actual_chunk_opt_mode);
+    H5TRACE2("e", "ix", plist_id, actual_chunk_opt_mode);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
@@ -1990,13 +1992,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_mpio_actual_io_mode(hid_t plist_id, H5D_mpio_actual_io_mode_t *actual_io_mode)
+H5Pget_mpio_actual_io_mode(hid_t plist_id,
+    H5D_mpio_actual_io_mode_t *actual_io_mode/*out*/)
 {
     H5P_genplist_t     *plist;
     herr_t ret_value = SUCCEED;   /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Di", plist_id, actual_io_mode);
+    H5TRACE2("e", "ix", plist_id, actual_io_mode);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
@@ -2024,13 +2027,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no_collective_cause, uint32_t *global_no_collective_cause)
+H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no_collective_cause/*out*/,
+    uint32_t *global_no_collective_cause/*out*/)
 {
     H5P_genplist_t     *plist;
     herr_t ret_value = SUCCEED;   /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*Iu*Iu", plist_id, local_no_collective_cause,
+    H5TRACE3("e", "ixx", plist_id, local_no_collective_cause,
              global_no_collective_cause);
 
     /* Get the plist structure */

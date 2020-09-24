@@ -12,23 +12,21 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5ESprivate.h
- *			Apr  6 2020
+ * Created:		H5MSprivate.h
+ *			Sept 18 2020
  *			Quincey Koziol
  *
- * Purpose:		Private header for library accessible event set routines.
+ * Purpose:		Private header for managed string routines
  *
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5ESprivate_H
-#define _H5ESprivate_H
+#ifndef _H5MSprivate_H
+#define _H5MSprivate_H
 
 /* Include package's public header */
-#include "H5ESpublic.h"         /* Event Sets                  */
 
 /* Private headers needed by this file */
-#include "H5VLprivate.h"        /* Virtual Object Layer        */
 
 
 /**************************/
@@ -40,8 +38,13 @@
 /* Library Private Typedefs */
 /****************************/
 
-/* Typedef for event set objects */
-typedef struct H5ES_t H5ES_t;
+/* Typedef for managed string objects */
+typedef struct H5MS_t {
+    size_t len;         /* Current length of the string */
+    size_t max;         /* Size of allocated buffer */
+    char *s;            /* Pointer to buffer / beginning of string */
+    char *end;          /* Pointer to terminating NUL character at the end of the string */
+} H5MS_t;
 
 
 /*****************************/
@@ -52,10 +55,9 @@ typedef struct H5ES_t H5ES_t;
 /***************************************/
 /* Library-private Function Prototypes */
 /***************************************/
-herr_t H5ES_insert(H5ES_t *es, H5VL_object_t *request);
-herr_t H5ES_insert_new(H5ES_t *es, H5VL_object_t *request, const char *caller,
-    const char *caller_args, ...);
+herr_t H5MS_asprintf_cat(H5MS_t *ms, const char *fmt, ...);
+herr_t H5MS_acat(H5MS_t *ms, const char *s);
+herr_t H5MS_aputc(H5MS_t *ms, int c);
 
-
-#endif /* _H5ESprivate_H */
+#endif /* _H5MSprivate_H */
 

@@ -48,7 +48,7 @@
  */
 herr_t
 H5Tget_fields(hid_t type_id, size_t *spos/*out*/, size_t *epos/*out*/,
-size_t *esize/*out*/, size_t *mpos/*out*/, size_t *msize/*out*/)
+    size_t *esize/*out*/, size_t *mpos/*out*/, size_t *msize/*out*/)
 {
     H5T_t	*dt;                    /* Datatype */
     herr_t      ret_value = SUCCEED;    /* Return value */

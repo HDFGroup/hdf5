@@ -14,7 +14,7 @@
  *
  * Created:		H5ES.c
  *			Apr  6 2020
- *			Quincey Koziol <koziol@lbl.gov>
+ *			Quincey Koziol
  *
  * Purpose:		Implements an "event set" for managing asynchronous
  *                      operations.
@@ -126,13 +126,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ESget_count(hid_t es_id, size_t *count)
+H5ESget_count(hid_t es_id, size_t *count/*out*/)
 {
     H5ES_t *es;                         /* Event set */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*z", es_id, count);
+    H5TRACE2("e", "ix", es_id, count);
 
     /* Check arguments */
     if(NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))

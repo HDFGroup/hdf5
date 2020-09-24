@@ -686,7 +686,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_copy_object(hid_t plist_id, unsigned *cpy_option /*out*/)
+H5Pget_copy_object(hid_t plist_id, unsigned *cpy_option/*out*/)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED; /* return value */
@@ -847,7 +847,7 @@ H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, void *op_data)
     herr_t ret_value = SUCCEED; 	/* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ix*x", plist_id, func, op_data);
+    H5TRACE3("e", "iOs*x", plist_id, func, op_data);
 
     /* Check if the callback function is NULL and the user data is non-NULL.
      * This is almost certainly an error as the user data will not be used. */
@@ -889,14 +889,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func, void **op_data)
+H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func/*out*/,
+    void **op_data/*out*/)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     H5O_mcdt_cb_info_t cb_info;	/* Callback info struct */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*x**x", plist_id, func, op_data);
+    H5TRACE3("e", "ixx", plist_id, func, op_data);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))

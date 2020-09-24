@@ -640,13 +640,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Mget_count(hid_t map_id, hsize_t *count, hid_t dxpl_id)
+H5Mget_count(hid_t map_id, hsize_t *count/*out*/, hid_t dxpl_id)
 {
     H5VL_object_t  *vol_obj;                        /* Map structure    */
     herr_t          ret_value = SUCCEED;            /* Return value         */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("e", "i*hi", map_id, count, dxpl_id);
+    H5TRACE3("e", "ixi", map_id, count, dxpl_id);
 
     /* Check args */
     if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))
@@ -876,7 +876,7 @@ H5Miterate(hid_t map_id, hsize_t *idx, hid_t key_mem_type_id, H5M_iterate_t op,
     herr_t                  ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "i*hix*xi", map_id, idx, key_mem_type_id, op, op_data, dxpl_id);
+    H5TRACE6("e", "i*hiMI*xi", map_id, idx, key_mem_type_id, op, op_data, dxpl_id);
 
     /* Check arguments */
     if (key_mem_type_id < 0)
@@ -952,7 +952,7 @@ H5Miterate_by_name(hid_t loc_id, const char *map_name, hsize_t *idx,
     herr_t                  ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "i*s*hix*xii", loc_id, map_name, idx, key_mem_type_id, op,
+    H5TRACE8("e", "i*s*hiMI*xii", loc_id, map_name, idx, key_mem_type_id, op,
              op_data, dxpl_id, lapl_id);
 
     /* Check arguments */

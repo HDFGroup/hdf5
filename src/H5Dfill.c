@@ -116,7 +116,8 @@ H5FL_EXTERN(H5S_sel_iter_t);
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Dfill(const void *fill, hid_t fill_type_id, void *buf, hid_t buf_type_id, hid_t space_id)
+H5Dfill(const void *fill, hid_t fill_type_id, void *buf, hid_t buf_type_id,
+    hid_t space_id)
 {
     H5S_t *space;               /* Dataspace */
     H5T_t *fill_type;           /* Fill-value datatype */

@@ -829,6 +829,8 @@
 ./src/H5MPpkg.h
 ./src/H5MPprivate.h
 ./src/H5MPtest.c
+./src/H5MS.c
+./src/H5MSprivate.h
 ./src/H5O.c
 ./src/H5Oainfo.c
 ./src/H5Oalloc.c

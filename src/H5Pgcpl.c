@@ -203,7 +203,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_local_heap_size_hint(hid_t plist_id, size_t *size_hint /*out*/)
+H5Pget_local_heap_size_hint(hid_t plist_id, size_t *size_hint/*out*/)
 {
     herr_t ret_value = SUCCEED;   /* return value */
 
@@ -304,7 +304,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_link_phase_change(hid_t plist_id, unsigned *max_compact /*out*/, unsigned *min_dense /*out*/)
+H5Pget_link_phase_change(hid_t plist_id, unsigned *max_compact/*out*/,
+    unsigned *min_dense/*out*/)
 {
     herr_t ret_value = SUCCEED;   /* return value */
 
@@ -408,7 +409,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries /*out*/, unsigned *est_name_len /*out*/)
+H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries/*out*/,
+    unsigned *est_name_len/*out*/)
 {
     herr_t ret_value = SUCCEED;   /* return value */
 
@@ -498,7 +500,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_link_creation_order(hid_t plist_id, unsigned *crt_order_flags /*out*/)
+H5Pget_link_creation_order(hid_t plist_id, unsigned *crt_order_flags/*out*/)
 {
     herr_t ret_value = SUCCEED;   /* return value */
 

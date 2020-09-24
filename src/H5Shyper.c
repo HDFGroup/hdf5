@@ -4781,13 +4781,13 @@ H5S__get_select_hyper_blocklist(H5S_t *space, hsize_t startblock,
 --------------------------------------------------------------------------*/
 herr_t
 H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock,
-    hsize_t numblocks, hsize_t buf[/*numblocks*/])
+    hsize_t numblocks, hsize_t buf[/*numblocks*/]/*out*/)
 {
     H5S_t *space;               /* Dataspace to modify selection of */
     herr_t ret_value;           /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "ihh*[a2]h", spaceid, startblock, numblocks, buf);
+    H5TRACE4("e", "ihhx", spaceid, startblock, numblocks, buf);
 
     /* Check args */
     if(buf == NULL)
@@ -10831,7 +10831,8 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata) {
+H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata)
+{
     H5S_hyper_span_info_t *copied_span_info = NULL; /* Temporary span info pointer */
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -12280,15 +12281,15 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[], hsize_t stride[],
-    hsize_t count[], hsize_t block[])
+H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[]/*out*/, hsize_t stride[]/*out*/,
+    hsize_t count[]/*out*/, hsize_t block[]/*out*/)
 {
     H5S_t *space;               /* Dataspace to query */
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*h*h*h*h", spaceid, start, stride, count, block);
+    H5TRACE5("e", "ixxxx", spaceid, start, stride, count, block);
 
     /* Check args */
     if(NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))

@@ -1598,13 +1598,13 @@ H5S__get_select_elem_pointlist(const H5S_t *space, hsize_t startpoint, hsize_t n
 --------------------------------------------------------------------------*/
 herr_t
 H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint,
-    hsize_t numpoints, hsize_t buf[/*numpoints*/])
+    hsize_t numpoints, hsize_t buf[/*numpoints*/]/*out*/)
 {
     H5S_t *space;               /* Dataspace to modify selection of */
     herr_t ret_value;           /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "ihh*[a2]h", spaceid, startpoint, numpoints, buf);
+    H5TRACE4("e", "ihhx", spaceid, startpoint, numpoints, buf);
 
     /* Check args */
     if(NULL == buf)

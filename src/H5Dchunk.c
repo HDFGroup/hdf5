@@ -273,8 +273,7 @@ static int H5D__get_chunk_info_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata
 static int H5D__get_chunk_info_by_coord_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
 
 /* "Nonexistent" layout operation callback */
-static ssize_t
-H5D__nonexistent_readvv(const H5D_io_info_t *io_info,
+static ssize_t H5D__nonexistent_readvv(const H5D_io_info_t *io_info,
     size_t chunk_max_nseq, size_t *chunk_curr_seq, size_t chunk_len_arr[], hsize_t chunk_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
 

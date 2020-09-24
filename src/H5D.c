@@ -49,12 +49,15 @@
 
 /* Helper routines for sync/async API calls */
 static hid_t H5D__create_api_common(hid_t loc_id, const char *name, hid_t type_id,
-    hid_t space_id, hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id, hid_t es_id);
+    hid_t space_id, hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id, hid_t es_id,
+    const char *caller);
 static herr_t H5D__read_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-    hid_t file_space_id, hid_t dxpl_id, void *buf, hid_t es_id);
+    hid_t file_space_id, hid_t dxpl_id, void *buf, hid_t es_id,
+    const char *caller);
 static herr_t H5D__write_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-    hid_t file_space_id, hid_t dxpl_id, const void *buf, hid_t es_id);
-static herr_t H5D__close_api_common(hid_t dset_id, hid_t es_id);
+    hid_t file_space_id, hid_t dxpl_id, const void *buf, hid_t es_id,
+    const char *caller);
+static herr_t H5D__close_api_common(hid_t dset_id, hid_t es_id, const char *caller);
 
 
 /*********************/
@@ -91,7 +94,8 @@ H5FL_BLK_EXTERN(type_conv);
  */
 static hid_t
 H5D__create_api_common(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
-    hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id, hid_t es_id)
+    hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id, hid_t es_id,
+    const char *caller)
 {
     void *dset = NULL;                  /* New dataset's info */
     H5ES_t *es = NULL;                  /* Event set for the operation              */
@@ -168,7 +172,7 @@ H5D__create_api_common(hid_t loc_id, const char *name, hid_t type_id, hid_t spac
         } /* end if */
 
         /* Add token to event set */
-        if(H5ES_insert(es, token_obj) < 0)
+        if(H5ES_insert_new(es, token_obj, H5ARG_TRACE9(caller, "i*siiiiii*s", loc_id, name, type_id, space_id, lcpl_id, dcpl_id, dapl_id, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "can't insert token into event set")
         token_obj = NULL;
     } /* end if */
@@ -226,7 +230,7 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
              dapl_id);
 
     /* Create the dataset synchronously */
-    if((ret_value = H5D__create_api_common(loc_id, name, type_id, space_id, lcpl_id, dcpl_id, dapl_id, H5ES_NONE)) < 0)
+    if((ret_value = H5D__create_api_common(loc_id, name, type_id, space_id, lcpl_id, dcpl_id, dapl_id, H5ES_NONE, FUNC)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, H5I_INVALID_HID, "unable to synchronously create dataset")
 
 done:
@@ -255,7 +259,7 @@ H5Dcreate_async(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
              dapl_id, es_id);
 
     /* Create the dataset asynchronously */
-    if((ret_value = H5D__create_api_common(loc_id, name, type_id, space_id, lcpl_id, dcpl_id, dapl_id, es_id)) < 0)
+    if((ret_value = H5D__create_api_common(loc_id, name, type_id, space_id, lcpl_id, dcpl_id, dapl_id, es_id, FUNC)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, H5I_INVALID_HID, "unable to asynchronously create dataset")
 
 done:
@@ -418,7 +422,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__close_api_common(hid_t dset_id, hid_t es_id)
+H5D__close_api_common(hid_t dset_id, hid_t es_id, const char *caller)
 {
     H5ES_t *es = NULL;                  /* Event set for the operation */
     void *token = NULL, **token_ptr;    /* Request token for async operation */
@@ -470,7 +474,7 @@ H5D__close_api_common(hid_t dset_id, hid_t es_id)
         } /* end if */
 
         /* Add token to event set */
-        if(H5ES_insert(es, token_obj) < 0)
+        if(H5ES_insert_new(es, token_obj, H5ARG_TRACE3(caller, "ii*s", dset_id, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
         if(H5VL_conn_dec_rc(connector) < 0) {
@@ -512,7 +516,7 @@ H5Dclose(hid_t dset_id)
     H5TRACE1("e", "i", dset_id);
 
     /* Synchronously close the dataset ID */
-    if(H5D__close_api_common(dset_id, H5ES_NONE) < 0)
+    if(H5D__close_api_common(dset_id, H5ES_NONE, FUNC) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "synchronous dataset close failed")
 
 done:
@@ -538,7 +542,7 @@ H5Dclose_async(hid_t dset_id, hid_t es_id)
     H5TRACE2("e", "ii", dset_id, es_id);
 
     /* Asynchronously close the dataset ID */
-    if(H5D__close_api_common(dset_id, es_id) < 0)
+    if(H5D__close_api_common(dset_id, es_id, FUNC) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "asynchronous dataset close failed")
 
 done:
@@ -591,13 +595,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation)
+H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation/*out*/)
 {
     H5VL_object_t  *vol_obj = NULL;                    /* Dataset structure    */
     herr_t          ret_value = SUCCEED;            /* Return value         */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Ds", dset_id, allocation);
+    H5TRACE2("e", "ix", dset_id, allocation);
 
     /* Check args */
     if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
@@ -821,7 +825,8 @@ done:
  */
 static herr_t
 H5D__read_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-    hid_t file_space_id, hid_t dxpl_id, void *buf, hid_t es_id)
+    hid_t file_space_id, hid_t dxpl_id, void *buf, hid_t es_id,
+    const char *caller)
 {
     H5VL_object_t *vol_obj = NULL;      /* Dataset VOL object */
     H5ES_t *es = NULL;                  /* Event set for the operation */
@@ -875,7 +880,7 @@ H5D__read_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         } /* end if */
 
         /* Add token to event set */
-        if(H5ES_insert(es, token_obj) < 0)
+        if(H5ES_insert_new(es, token_obj, H5ARG_TRACE8(caller, "iiiii*xi*s", dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "can't insert token into event set")
     } /* end if */
 
@@ -929,7 +934,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
              dxpl_id, buf);
 
     /* Read the data */
-    if(H5D__read_api_common(dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, H5ES_NONE) < 0)
+    if(H5D__read_api_common(dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, H5ES_NONE, FUNC) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't synchronously read data")
 
 done:
@@ -960,7 +965,7 @@ H5Dread_async(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
              dxpl_id, buf, es_id);
 
     /* Read the data */
-    if(H5D__read_api_common(dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, es_id) < 0)
+    if(H5D__read_api_common(dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, es_id, FUNC) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't asynchronously read data")
 
 done:
@@ -1027,7 +1032,8 @@ done:
  */
 static herr_t
 H5D__write_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-    hid_t file_space_id, hid_t dxpl_id, const void *buf, hid_t es_id)
+    hid_t file_space_id, hid_t dxpl_id, const void *buf, hid_t es_id,
+    const char *caller)
 {
     H5ES_t *es = NULL;                  /* Event set for the operation */
     void *token = NULL, **token_ptr;    /* Request token for async operation */
@@ -1081,7 +1087,7 @@ H5D__write_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         } /* end if */
 
         /* Add token to event set */
-        if(H5ES_insert(es, token_obj) < 0)
+        if(H5ES_insert_new(es, token_obj, H5ARG_TRACE8(caller, "iiiii*xi*s", dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "can't insert token into event set")
     } /* end if */
 
@@ -1136,7 +1142,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
              dxpl_id, buf);
 
     /* Write the data */
-    if(H5D__write_api_common(dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, H5ES_NONE) < 0)
+    if(H5D__write_api_common(dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, H5ES_NONE, FUNC) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't synchronously write data")
 
 done:
@@ -1167,7 +1173,7 @@ H5Dwrite_async(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
              dxpl_id, buf, es_id);
 
     /* Write the data */
-    if(H5D__write_api_common(dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, es_id) < 0)
+    if(H5D__write_api_common(dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, es_id, FUNC) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't asynchronously write data")
 
 done:
@@ -1298,7 +1304,7 @@ H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op,
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "*xiix*x", buf, type_id, space_id, op, operator_data);
+    H5TRACE5("e", "*xiiDO*x", buf, type_id, space_id, op, operator_data);
 
     /* Check args */
     if(NULL == op)
@@ -1342,14 +1348,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id, hsize_t *size)
+H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
+    hsize_t *size/*out*/)
 {
     H5VL_object_t *vol_obj;     /* Dataset for this operation */
     hbool_t supported;          /* Whether 'get vlen buf size' operation is supported by VOL connector */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iii*h", dataset_id, type_id, space_id, size);
+    H5TRACE4("e", "iiix", dataset_id, type_id, space_id, size);
 
     /* Check args */
     if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(dataset_id)))
@@ -1583,13 +1590,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dget_chunk_index_type(hid_t dset_id, H5D_chunk_index_t *idx_type)
+H5Dget_chunk_index_type(hid_t dset_id, H5D_chunk_index_t *idx_type/*out*/)
 {
     H5VL_object_t  *vol_obj;                   /* Dataset for this operation   */
     herr_t          ret_value = SUCCEED;    /* Return value                 */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Dk", dset_id, idx_type);
+    H5TRACE2("e", "ix", dset_id, idx_type);
 
     /* Check args */
     if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
@@ -1622,13 +1629,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dget_chunk_storage_size(hid_t dset_id, const hsize_t *offset, hsize_t *chunk_nbytes)
+H5Dget_chunk_storage_size(hid_t dset_id, const hsize_t *offset,
+    hsize_t *chunk_nbytes/*out*/)
 {
     H5VL_object_t  *vol_obj;                   /* Dataset for this operation   */
     herr_t          ret_value = SUCCEED;    /* Return value                 */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*h*h", dset_id, offset, chunk_nbytes);
+    H5TRACE3("e", "i*hx", dset_id, offset, chunk_nbytes);
 
     /* Check arguments */
     if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
@@ -1669,13 +1677,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks)
+H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks/*out*/)
 {
     H5VL_object_t  *vol_obj = NULL;     /* Dataset for this operation */
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ii*h", dset_id, fspace_id, nchunks);
+    H5TRACE3("e", "iix", dset_id, fspace_id, nchunks);
 
     /* Check arguments */
     if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
@@ -1715,15 +1723,17 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_index, hsize_t *offset, unsigned *filter_mask, haddr_t *addr, hsize_t *size)
+H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_index,
+    hsize_t *offset/*out*/, unsigned *filter_mask/*out*/, haddr_t *addr/*out*/,
+    hsize_t *size/*out*/)
 {
     H5VL_object_t *vol_obj = NULL;     /* Dataset for this operation */
     hsize_t        nchunks = 0;
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "iih*h*Iu*a*h", dset_id, fspace_id, chk_index, offset,
-             filter_mask, addr, size);
+    H5TRACE7("e", "iihxxxx", dset_id, fspace_id, chk_index, offset, filter_mask,
+             addr, size);
 
     /* Check arguments */
     if(NULL == offset && NULL == filter_mask && NULL == addr && NULL == size)
@@ -1770,13 +1780,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, unsigned *filter_mask, haddr_t *addr, hsize_t *size)
+H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset,
+    unsigned *filter_mask/*out*/, haddr_t *addr/*out*/, hsize_t *size/*out*/)
 {
     H5VL_object_t  *vol_obj = NULL;     /* Dataset for this operation */
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*h*Iu*a*h", dset_id, offset, filter_mask, addr, size);
+    H5TRACE5("e", "i*hxxx", dset_id, offset, filter_mask, addr, size);
 
     /* Check arguments */
     if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))

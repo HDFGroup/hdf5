@@ -188,6 +188,12 @@ typedef signed long long    hssize_t;
 H5_GCC_DIAG_ON(long-long)
 #       define H5_SIZEOF_HSIZE_T H5_SIZEOF_LONG_LONG
 #       define H5_SIZEOF_HSSIZE_T H5_SIZEOF_LONG_LONG
+#define PRIdHSIZE   PRId64
+#define PRIiHSIZE   PRIi64
+#define PRIoHSIZE   PRIo64
+#define PRIuHSIZE   PRIu64
+#define PRIxHSIZE   PRIx64
+#define PRIXHSIZE   PRIX64
 #else
 #   error "nothing appropriate for hsize_t"
 #endif
@@ -221,14 +227,27 @@ H5_GCC_DIAG_ON(long-long)
 #   error "nothing appropriate for haddr_t"
 #endif
 #if H5_SIZEOF_HADDR_T == H5_SIZEOF_INT
-#   define H5_PRINTF_HADDR_FMT  "%u"
+#   define PRIXHADDR  "X"
+#   define PRIoHADDR  "o"
+#   define PRIuHADDR  "u"
+#   define PRIxHADDR  "x"
+#   define PRIXHADDR  "X"
 #elif H5_SIZEOF_HADDR_T == H5_SIZEOF_LONG
-#   define H5_PRINTF_HADDR_FMT  "%lu"
+#   define PRIXHADDR  "lX"
+#   define PRIoHADDR  "lo"
+#   define PRIuHADDR  "lu"
+#   define PRIxHADDR  "lx"
+#   define PRIXHADDR  "lX"
 #elif H5_SIZEOF_HADDR_T == H5_SIZEOF_LONG_LONG
-#   define H5_PRINTF_HADDR_FMT  "%" H5_PRINTF_LL_WIDTH "u"
+#   define PRIXHADDR  H5_PRINTF_LL_WIDTH "X"
+#   define PRIoHADDR  H5_PRINTF_LL_WIDTH "o"
+#   define PRIuHADDR  H5_PRINTF_LL_WIDTH "u"
+#   define PRIxHADDR  H5_PRINTF_LL_WIDTH "x"
+#   define PRIXHADDR  H5_PRINTF_LL_WIDTH "X"
 #else
-#   error "nothing appropriate for H5_PRINTF_HADDR_FMT"
+#   error "nothing appropriate for PRI.HADDR"
 #endif
+#define H5_PRINTF_HADDR_FMT  "%" PRIuHADDR
 #define HADDR_MAX       (HADDR_UNDEF-1)
 
 /* uint32_t type is used for creation order field for messages.  It may be

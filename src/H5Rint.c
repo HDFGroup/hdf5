@@ -95,7 +95,8 @@
       HDfflush(stdout);                                         \
   } while (0)
 static const char *
-H5R__print_token(const H5O_token_t token) {
+H5R__print_token(const H5O_token_t token)
+{
     static char string[64];
 
     /* Print the raw token. */

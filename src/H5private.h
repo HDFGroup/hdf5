@@ -1992,7 +1992,37 @@ extern char H5libhdf5_settings[]; /* embedded library information */
 #define H5TRACE_RETURN(V)                                       /*void*/
 #endif /* H5_DEBUG_API */
 
+/* Argument tracing macros (defined all the time) */
+#define H5ARG_TRACE0(C,T)                                                                                   \
+    C,T
+#define H5ARG_TRACE1(C,T,A0)                                                                                \
+    C,T,#A0,A0
+#define H5ARG_TRACE2(C,T,A0,A1)                                                                             \
+    C,T,#A0,A0,#A1,A1
+#define H5ARG_TRACE3(C,T,A0,A1,A2)                                                                          \
+    C,T,#A0,A0,#A1,A1,#A2,A2
+#define H5ARG_TRACE4(C,T,A0,A1,A2,A3)                                                                       \
+    C,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3
+#define H5ARG_TRACE5(C,T,A0,A1,A2,A3,A4)                                                                    \
+    C,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,#A4,A4
+#define H5ARG_TRACE6(C,T,A0,A1,A2,A3,A4,A5)                                                                 \
+    C,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,#A4,A4,#A5,A5
+#define H5ARG_TRACE7(C,T,A0,A1,A2,A3,A4,A5,A6)                                                              \
+    C,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,#A4,A4,#A5,A5,#A6,A6
+#define H5ARG_TRACE8(C,T,A0,A1,A2,A3,A4,A5,A6,A7)                                                           \
+    C,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,#A4,A4,#A5,A5,#A6,A6,#A7,A7
+#define H5ARG_TRACE9(C,T,A0,A1,A2,A3,A4,A5,A6,A7,A8)                                                        \
+    C,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,#A4,A4,#A5,A5,#A6,A6,#A7,A7,#A8,A8
+#define H5ARG_TRACE10(C,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9)                                                    \
+    C,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,#A4,A4,#A5,A5,#A6,A6,#A7,A7,#A8,A8,#A9,A9
+#define H5ARG_TRACE11(C,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10)                                                \
+    C,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,#A4,A4,#A5,A5,#A6,A6,#A7,A7,#A8,A8,#A9,A9,#A10,A10
+#define H5ARG_TRACE12(C,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11)                                            \
+    C,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,#A4,A4,#A5,A5,#A6,A6,#A7,A7,#A8,A8,#A9,A9,#A10,A10,#A11,A11
+
+struct H5MS_t;
 H5_DLL double H5_trace(const double *calltime, const char *func, const char *type, ...);
+H5_DLL herr_t H5_trace_args(struct H5MS_t *ms, const char *type, va_list ap);
 
 
 /*-------------------------------------------------------------------------

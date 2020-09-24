@@ -289,7 +289,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_register (const H5Z_class2_t *cls)
+H5Z_register(const H5Z_class2_t *cls)
 {
     size_t    i;
     herr_t    ret_value = SUCCEED;       /* Return value */
@@ -587,7 +587,7 @@ done:
  */
 static int
 H5Z__flush_file_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id,
-    void *key H5_ATTR_PARALLEL_USED)
+    void H5_ATTR_PARALLEL_USED *key)
 {
     H5F_t          *f           = (H5F_t *)obj_ptr;     /* File object for operations */
 #ifdef H5_HAVE_PARALLEL
@@ -1690,12 +1690,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags)
+H5Zget_filter_info(H5Z_filter_t filter, unsigned *filter_config_flags/*out*/)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "Zf*Iu", filter, filter_config_flags);
+    H5TRACE2("e", "Zfx", filter, filter_config_flags);
 
     /* Get the filter info */
     if (H5Z_get_filter_info(filter, filter_config_flags) < 0)

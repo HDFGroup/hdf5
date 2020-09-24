@@ -1335,25 +1335,25 @@ H5FD__mirror_fapl_free(void *_fa)
  * Function:    H5Pget_fapl_mirror
  *
  * Purpose:     Get the configuration information for this fapl.
- *              Data is memcopied into the fa_out pointer.
+ *              Data is memcopied into the fa_dst pointer.
  *
  * Return:      SUCCEED/FAIL
  * -------------------------------------------------------------------------
  */
 herr_t
-H5Pget_fapl_mirror(hid_t fapl_id, H5FD_mirror_fapl_t *fa_out)
+H5Pget_fapl_mirror(hid_t fapl_id, H5FD_mirror_fapl_t *fa_dst/*out*/)
 {
-    const H5FD_mirror_fapl_t *fa        = NULL;
+    const H5FD_mirror_fapl_t *fa_src    = NULL;
     H5P_genplist_t           *plist     = NULL;
     herr_t                    ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", fapl_id, fa_out);
+    H5TRACE2("e", "ix", fapl_id, fa_dst);
 
     LOG_OP_CALL(FUNC);
 
-    if(NULL == fa_out)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "fa_out is NULL");
+    if(NULL == fa_dst)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "fa_dst is NULL");
 
     plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS);
     if(NULL == plist)
@@ -1361,13 +1361,13 @@ H5Pget_fapl_mirror(hid_t fapl_id, H5FD_mirror_fapl_t *fa_out)
     if(H5P_peek_driver(plist) != H5FD_MIRROR)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
 
-    fa = (const H5FD_mirror_fapl_t *)H5P_peek_driver_info(plist);
-    if(NULL == fa)
+    fa_src = (const H5FD_mirror_fapl_t *)H5P_peek_driver_info(plist);
+    if(NULL == fa_src)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
 
-    HDassert(fa->magic == H5FD_MIRROR_FAPL_MAGIC); /* sanity check */
+    HDassert(fa_src->magic == H5FD_MIRROR_FAPL_MAGIC); /* sanity check */
 
-    HDmemcpy(fa_out, fa, sizeof(H5FD_mirror_fapl_t));
+    HDmemcpy(fa_dst, fa_src, sizeof(H5FD_mirror_fapl_t));
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -1390,7 +1390,7 @@ H5Pset_fapl_mirror(hid_t fapl_id, H5FD_mirror_fapl_t *fa)
     herr_t ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", fapl_id, fa);
+    H5TRACE2("e", "i*#", fapl_id, fa);
 
     LOG_OP_CALL(FUNC);
 
