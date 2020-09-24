@@ -1,0 +1,42 @@
+# Lines starting with '#' are comments.
+# Each line is a file pattern followed by one or more owners.
+
+# These owners will be the default owners for everything in the repo.
+*       @lrknox
+
+# Order is important. The last matching pattern has the most precedence.
+# So if a pull request only touches javascript files, only these owners
+# will be requested to review.
+*.cmake           @byrnHDF
+CMakeLists.txt    @byrnHDF
+CMakeTests.*      @byrnHDF
+
+/bin/             @lrknox @derobins @byrnHDF
+
+/c++/             bmribler@hdfgroup.org
+
+/config/          @lrknox @derobins @byrnHDF
+
+/doc/             @gnuoyd mainzer@hdfgroup.org
+
+/examples/        @lrknox @derobins bljones@hdfgroup.org
+
+/fortran/         @brtnfld @epourmal
+
+/hl/              bmribler@hdfgroup.org
+
+/java/            @jhendersonHDF @byrnHDF
+
+/m4/              @lrknox @derobins
+
+/release_docs/    @lrknox bljones@hdfgroup.org @byrnHDF
+
+/src/             @jhendersonHDF @derobins @fortnern @qkoziol @soumagne @vchoi-hdfgroup mainzer@hdfgroup.org
+
+/test/            @jhendersonHDF @derobins @fortnern @qkoziol @soumagne @vchoi-hdfgroup mainzer@hdfgroup.org
+
+/testpar/         @jhendersonHDF @rawarren mainzer@hdfgroup.org
+
+/tools/           @byrnHDF
+
+/utils/           @lrknox @byrnHDF

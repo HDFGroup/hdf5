@@ -34,6 +34,7 @@
 ./configure.ac
 
 ./clang-format
+./.github/CODEOWNERS  _DO_NOT_DISTRIBUTE_
 ./.github/workflows/clang-format-check.yml  _DO_NOT_DISTRIBUTE_
 ./.github/workflows/main.yml  _DO_NOT_DISTRIBUTE_
 ./.github/workflows/pr-check.yml  _DO_NOT_DISTRIBUTE_
