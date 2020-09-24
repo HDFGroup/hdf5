@@ -33,7 +33,7 @@
 ./autogen.sh
 ./configure.ac
 
-./clang-format
+./.clang-format
 ./.github/CODEOWNERS  _DO_NOT_DISTRIBUTE_
 ./.github/workflows/clang-format-check.yml  _DO_NOT_DISTRIBUTE_
 ./.github/workflows/main.yml  _DO_NOT_DISTRIBUTE_
@@ -3615,6 +3615,7 @@
 
 # CMake-specific Sanitizer Scripts
 ./config/sanitizer/code-coverage.cmake
+./config/sanitizer/formatting.cmake
 ./config/sanitizer/sanitizers.cmake
 ./config/sanitizer/tools.cmake
 ./config/sanitizer/LICENSE
