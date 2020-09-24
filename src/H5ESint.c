@@ -320,6 +320,7 @@ HDfprintf(stderr, "%s: caller = '%s', caller_args = '%s'\n", FUNC, caller, calle
     H5_trace_args(&ms, caller_args, ap);
     HDva_end(ap);
     HDfprintf(stderr, "%s: arg string = '%s'\n", FUNC, ms.s);
+    HDfree(ms.s);
 }
 
     /* Allocate space for new event */

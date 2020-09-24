@@ -3945,6 +3945,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     } /* end else */
     HDfputs(ms.s, out);
     HDfflush(out);
+    HDfree(ms.s);
 
     if(H5_debug_g.ttimes)
         return function_times.elapsed;
