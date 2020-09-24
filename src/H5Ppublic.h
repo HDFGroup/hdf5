@@ -2122,6 +2122,7 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
  * \details H5Pset_filter() adds the specified \p filter identifier and
  *          corresponding properties to the end of an output filter
  *          pipeline.
+ *
  *          \p plist_id must be either a dataset creation property list or
  *          group creation property list identifier. If \p plist_id is a
  *          dataset creation property list identifier, the filter is added
@@ -2189,7 +2190,179 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
  *                further can be written once the filter fails.</td>
  *           </tr>
  *          </table>
- * \todo NOT FINISHED with this function
+ *          The \p filter parameter specifies the filter to be set. Valid
+ *          pre-defined filter identifiers are as follows:
+ *
+ *          <table>
+ *           <tr>
+ *            <td>#H5Z_FILTER_DEFLATE</td>
+ *            <td>Data compression filter, employing the gzip
+ *                algorithm</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5Z_FILTER_SHUFFLE</td>
+ *            <td>Data shuffling filter</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5Z_FILTER_FLETCHER32</td>
+ *            <td>Error detection filter, employing the Fletcher32
+ *                checksum algorithm</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5Z_FILTER_SZIP</td>
+ *            <td>Data compression filter, employing the SZIP
+ *                algorithm</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5Z_FILTER_NBIT</td>
+ *            <td>Data compression filter, employing the N-Bit
+ *                algorithm</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5Z_FILTER_SCALEOFFSET</td>
+ *            <td>Data compression filter, employing the scale-offset
+ *                algorithm</td>
+ *           </tr>
+ *          </table>
+ *          Also see H5Pset_edc_check() and H5Pset_filter_callback().
+ *
+ * \note When a non-empty filter pipeline is used with a group creation
+ *       property list, the group will be created with the new group file
+ *       format. The filters will come into play only when dense storage
+ *       is used (see H5Pset_link_phase_change()) and will be applied to
+ *       the group’s fractal heap. The fractal heap will contain most of
+ *       the the group’s link metadata, including link names.
+ *
+ * \note When working with group creation property lists, if you are
+ *       adding a filter that is not in HDF5’s set of predefined filters,
+ *       i.e., a user-defined or third-party filter, you must first
+ *       determine that the filter will work for a group. See the
+ *       discussion of the set local and can apply callback functions
+ *       in H5Zregister().
+ *
+ * \note If multiple filters are set for a property list, they will be
+ *       applied to each chunk of raw data for datasets or each block
+ *       of the fractal heap for groups in the order in which they were
+ *       set.
+ *
+ * \note Filters can be applied only to chunked datasets; they cannot be
+ *       used with other dataset storage methods, such as contiguous,
+ *       compact, or external datasets.
+ *
+ * \note Dataset elements of variable-length and dataset region
+ *       reference datatypes are stored in separate structures in the
+ *       file called heaps. Filters cannot currently be applied to
+ *       these heaps.
+ *
+ * \note <b>Filter Behavior in HDF5:</b><br />
+ *       Filters can be inserted into the HDF5 pipeline to perform
+ *       functions such as compression and conversion. As such, they are
+ *       a very flexible aspect of HDF5; for example, a user-defined
+ *       filter could provide encryption for an HDF5 dataset.
+ *
+ * \note A filter can be declared as either required or optional.
+ *       Required is the default status; optional status must be
+ *       explicitly declared.
+ *
+ * \note A required filter that fails or is not defined causes an
+ *       entire output operation to fail; if it was applied when the
+ *       data was written, such a filter will cause an input operation
+ *       to fail.
+ *
+ * \note The following table summarizes required filter behavior.
+ *          <table>
+ *           <tr>
+ *            <th></th>
+ *            <th>Required FILTER_X not available</th>
+ *            <th>FILTER_X available</th>
+ *           </tr>
+ *           <tr>
+ *            <td>H5Pset_<FILTER_X></td>
+ *            <td>Will fail.</td>
+ *            <td>Will succeed.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>H5Dwrite with FILTER_X set</td>
+ *            <td>Will fail.</td>
+ *            <td>Will succeed; FILTER_X will be applied to
+ *                the data.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>H5Dread with FILTER_X set</td>
+ *            <td>Will fail.</td>
+ *            <td>Will succeed.</td>
+ *           </tr>
+ *          </table>
+ * \note An optional filter can be set for an HDF5 dataset even when
+ *       the filter is not available. Such a filter can then be
+ *       applied to the dataset when it becomes available on the
+ *       original system or when the file containing the dataset is
+ *       processed on a system on which it is available.
+ *
+ * \note A filter can be declared as optional through the use of the
+ *       #H5Z_FLAG_OPTIONAL flag with H5Pset_filter().
+ *
+ * \note Consider a situation where one is creating files that will
+ *       normally be used only on systems where the optional (and
+ *       fictional) filter FILTER_Z is routinely available. One can
+ *       create those files on system A, which lacks FILTER_Z, create
+ *       chunked datasets in the files with FILTER_Z defined in the
+ *       dataset creation property list, and even write data to those
+ *       datasets. The dataset object header will indicate that FILTER_Z
+ *       has been associated with this dataset. But since system A does
+ *       not have FILTER_Z, dataset chunks will be written without it
+ *       being applied.
+ *
+ * \note HDF5 has a mechanism for determining whether chunks are
+ *       actually written with the filters specified in the object
+ *       header, so while the filter remains unavailable, system A will
+ *       be able to read the data. Once the file is moved to system B,
+ *       where FILTER_Z is available, HDF5 will apply FILTER_Z to any
+ *       data rewritten or new data written in these datasets. Dataset
+ *       chunks that have been written on system B will then be
+ *       unreadable on system A; chunks that have not been re-written
+ *       since being written on system A will remain readable on system
+ *       A. All chunks will be readable on system B.
+ *
+ * \note The following table summarizes optional filter behavior.
+ *          <table>
+ *           <tr>
+ *            <th></th>
+ *            <th>FILTER_Z not available</th>
+ *            <th>FILTER_Z available<br /> with encode and decode</th>
+ *            <th>FILTER_Z available decode only</th>
+ *           </tr>
+ *           <tr>
+ *            <td>H5Pset_<FILTER_Z></td>
+ *            <td>Will succeed.</td>
+ *            <td>Will succeed.</td>
+ *            <td>Will succeed.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>H5Dread with FILTER_Z set</td>
+ *            <td>Will succeed if FILTER_Z has not actually<br />
+ *                been applied to data.</td>
+ *            <td>Will succeed.</td>
+ *            <td>Will succeed.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>H5Dwrite with FILTER_Z set</td>
+ *            <td>Will succeed;<br />
+ *                FILTER_Z will not be applied to the data.</td>
+ *            <td>Will succeed;<br />
+ *            FILTER_Z will be applied to the data.</td>
+ *            <td>Will succeed;<br />
+ *            FILTER_Z will not be applied to the data.</td>
+ *           </tr>
+ *          </table>
+ * \note The above principles apply generally in the use of HDF5
+ *       optional filters insofar as HDF5 does as much as possible to
+ *       complete an operation when an optional filter is unavailable.
+ *       (The SZIP filter is an exception to this rule; see H5Pset_szip()
+ *       for details.)
+ *
+ * \todo Removed several references to links to documentation
+ *
  * \version 1.8.5 Function applied to group creation property lists.
  * \since 1.6.0
  *
@@ -2197,7 +2370,81 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
 H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter,
         unsigned int flags, size_t cd_nelmts,
         const unsigned int c_values[]);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup OCPL
+ *
+ * \brief Sets up use of the Fletcher32 checksum filter
+ *
+ * \param[in] plist_id Dataset or group creation property list identifier
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_fletcher32() sets the Fletcher32 checksum filter in the
+ *          dataset or group creation property list \p plist_id.
+ *
+ * \attention The Fletcher32 EDC checksum filter was added in HDF5 Release
+ *            1.6.0. In the original implementation, however, the checksum
+ *            value was calculated incorrectly on little-endian systems.
+ *            The error was fixed in HDF5 Release 1.6.3.
+ *
+ * \attention As a result of this fix, an HDF5 library of Release 1.6.0
+ *            through Release 1.6.2 cannot read a dataset created or written
+ *            with Release 1.6.3 or later if the dataset was created with
+ *            the checksum filter and the filter is enabled in the reading
+ *            library. (Libraries of Release 1.6.3 and later understand the
+ *            earlier error and compensate appropriately.)
+ *
+ * \attention \b Work-around: An HDF5 library of Release 1.6.2 or earlier
+ *            will be able to read a dataset created or written with the
+ *            checksum filter by an HDF5 library of Release 1.6.3 or later
+ *            if the checksum filter is disabled for the read operation.
+ *            This can be accomplished via a call to H5Pset_edc_check()
+ *            with the value #H5Z_DISABLE_EDC in the second parameter.
+ *            This has the obvious drawback that the application will be
+ *            unable to verify the checksum, but the data does remain
+ *            accessible.
+ *
+ * \version 1.8.5 Function extended to work with group creation property
+ *                lists.
+ * \version 1.6.3 Error in checksum calculation on little-endian systems
+ *                corrected in this release.
+ * \since 1.6.0
+ *
+ */
 H5_DLL herr_t H5Pset_fletcher32(hid_t plist_id);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup OCPL
+ *
+ * \brief Sets the recording of times associated with an object
+ *
+ * \param[in] plist_id    Object creation property list identifier
+ * \param[in] track_times Boolean value, 1 or 0, specifying whether object
+ *                        times are to be tracked
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_obj_track_times() sets a property in the object creation
+ *          property list, \p plist_id, that governs the recording of times
+ *          associated with an object.
+ *
+ *          If \p track_times is set to 1, time data will be recorded. If
+ *          \p track_times is set to 0, time data will not be recorded.
+ *
+ *          Time data can be retrieved with H5Oget_info(), which will
+ *          return it in the #H5O_info_t struct.
+ *
+ *          If times are not tracked, they will be reported as follows when queried:
+ *            \Code{ 12:00 AM UDT, Jan. 1, 1970}
+ *
+ *          That date and time are commonly used to represent the beginning of the UNIX epoch.
+ *
+ * \since 1.8.0
+ *
+ */
 H5_DLL herr_t H5Pset_obj_track_times(hid_t plist_id, hbool_t track_times);
 
 /* File creation property list (FCPL) routines */
@@ -2377,6 +2624,47 @@ H5_DLL herr_t H5Pget_cache(hid_t plist_id,
  *
  * \ingroup FAPL
  *
+ * \brief Gets information about the write tracking feature used by
+ *        the core VFD
+ *
+ * \fapl_id
+ * \param[out] is_enabled Whether the feature is enabled
+ * \param[out] page_size  Size, in bytes, of write aggregation pages
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_core_write_tracking() retrieves information about the
+ *          write tracking feature used by the core VFD.
+ *
+ *          When a file is created or opened for writing using the core
+ *          virtual file driver (VFD) with the backing store option turned
+ *          on, the VFD can be configured to track changes to the file
+ *          and only write out the modified bytes. To avoid a large number
+ *          of small writes, the changes can be aggregated into pages of
+ *          a user-specified size. The core VFD is also known as the
+ *          memory VFD. The driver identifier is #H5FD_CORE.
+ *
+ * \note This function is only for use with the core VFD and must be used
+ *       after the call to H5Pset_fapl_core(). It is an error to use this
+ *       function with any other VFD.
+ *
+ * \note This function only applies to the backing store write operation
+ *       which typically occurs when the file is flushed or closed. This
+ *       function has no relationship to the increment parameter passed
+ *       to H5Pset_fapl_core().
+ *
+ * \note For optimum performance, the \p page_size parameter should be
+ *       a power of two.
+ *
+ * \since 1.8.13
+ *
+ */
+H5_DLL herr_t H5Pget_core_write_tracking(hid_t fapl_id, hbool_t *is_enabled, size_t *page_size);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup FAPL
+ *
  * \brief Returns low-lever driver identifier
  *
  * \plist_id
@@ -2466,9 +2754,9 @@ H5_DLL herr_t H5Pget_cache(hid_t plist_id,
  *           <tr>
  *            <td>Parallel</td>
  *            <td>#H5FD_MPIO</td>
- *            <td>This is the standard HDF5 file driver for parallel file systems.
- *                This driver uses the MPI standard for both communication and
- *                file I/O.</td>
+ *            <td>This is the standard HDF5 file driver for parallel file
+ *                systems. This driver uses the MPI standard for both
+ *                communication and file I/O.</td>
  *            <td>H5Pset_fapl_mpio()</td>
  *           </tr>
  *           <tr>
@@ -2485,18 +2773,83 @@ H5_DLL herr_t H5Pget_cache(hid_t plist_id,
  *           </tr>
  *          </table>
  *
- *          This list does not include custom drivers that might be defined and
- *          registered by a user.
+ *          This list does not include custom drivers that might be
+ *          defined and registered by a user.
  *
- *          The returned driver identifier is only valid as long as the file driver
- *          remains registered.
+ *          The returned driver identifier is only valid as long as the
+ *          file driver remains registered.
  *
  *
  * \since 1.4.0
  *
  */
 H5_DLL hid_t H5Pget_driver(hid_t plist_id);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup FAPL
+ *
+ * \brief Returns a pointer to file driver information
+ *
+ * \param[in] plist_id File access or data transfer property list
+ *                     identifier
+ *
+ * \return Returns a pointer to a struct containing low-level driver
+ *         information. Otherwise returns NULL. NULL is also returned if
+ *         no driver-specific properties have been registered. No error
+ *         is pushed on the stack in this case.
+ *
+ * \details H5Pget_driver_info() returns a pointer to file driver-specific
+ *          information for the low-level driver associated with the file
+ *          access or data transfer property list \p plist_id.
+ *
+ *          The pointer returned by this function points to an “uncopied”
+ *          struct. Driver-specific versions of that struct are defined
+ *          for each low-level driver in the relevant source code file
+ *          H5FD*.c. For example, the struct used for the MULTI driver is
+ *          #H5FD_multi_fapl_t defined in H5FDmulti.c.
+ *
+ *          If no driver-specific properties have been registered,
+ *          H5Pget_driver_info() returns NULL.
+ *
+ * \note H5Pget_driver_info() and H5Pset_driver() are used only when
+ *       creating a virtual file driver (VFD) in the virtual file
+ *       layer (VFL).
+ *
+ * \version 1.10.1 Return value was changed from void * to const void *.
+ * \version 1.8.2 Function publicized in this release; previous releases
+ *                described this function only in the virtual file driver
+ *                documentation.
+ *
+ */
 H5_DLL const void *H5Pget_driver_info(hid_t plist_id);
+H5_DLL herr_t H5Pget_elink_file_cache_size(hid_t plist_id, unsigned *efc_size);
+H5_DLL herr_t H5Pget_evict_on_close(hid_t fapl_id, hbool_t *evict_on_close);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup FAPL
+ *
+ * \brief Retrieves a data offset from the file access property list
+ *
+ * \fapl_id
+ * \param[out] offset Offset in bytes within the HDF5 file
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_family_offset() retrieves the value of offset from the
+ *          file access property list \p fapl_id so that the user
+ *          application can retrieve a file handle for low-level access to
+ *          a particular member of a family of files. The file handle is
+ *          retrieved with a separate call to H5Fget_vfd_handle() (or,
+ *          in special circumstances, to H5FDget_vfd_handle()).
+ *
+ * \todo References the VFL documentation.
+ *
+ * \since 1.6.0
+ *
+ */
+H5_DLL herr_t H5Pget_family_offset(hid_t fapl_id, hsize_t *offset);
 /**
  *-------------------------------------------------------------------------
  *
@@ -2520,6 +2873,33 @@ H5_DLL const void *H5Pget_driver_info(hid_t plist_id);
  *
  */
 H5_DLL herr_t H5Pget_fclose_degree(hid_t fapl_id, H5F_close_degree_t *degree);
+H5_DLL herr_t H5Pget_file_image(hid_t fapl_id, void **buf_ptr_ptr, size_t *buf_len_ptr);
+H5_DLL herr_t H5Pget_file_image_callbacks(hid_t fapl_id,
+       H5FD_file_image_callbacks_t *callbacks_ptr);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup FAPL
+ *
+ * \brief Returns garbage collecting references setting
+ *
+ * \fapl_id
+ * \param[out] gc_ref Flag returning the state of reference garbage
+ *                    collection. A returned value of 1 indicates that
+ *                    garbage collection is on while 0 indicates that
+ *                    garbage collection is off.
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_gc_references() returns the current setting for the
+ *          garbage collection references property from the specified
+ *          file access property list. The garbage collection references
+ *          property is set by H5Pset_gc_references().
+ *
+ * \since 1.2.0
+ *
+ */
+H5_DLL herr_t H5Pget_gc_references(hid_t fapl_id, unsigned *gc_ref/*out*/);
 /**
  *-------------------------------------------------------------------------
  *
@@ -2554,13 +2934,53 @@ H5_DLL herr_t H5Pget_fclose_degree(hid_t fapl_id, H5F_close_degree_t *degree);
  */
 H5_DLL herr_t H5Pget_libver_bounds(hid_t plist_id, H5F_libver_t *low,
     H5F_libver_t *high);
-H5_DLL herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info);
+H5_DLL herr_t H5Pget_mdc_config(hid_t     plist_id,
+       H5AC_cache_config_t * config_ptr);    /* out */
+H5_DLL herr_t H5Pget_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr /*out*/);
+H5_DLL herr_t H5Pget_mdc_log_options(hid_t plist_id, hbool_t *is_enabled, char *location, size_t *location_size, hbool_t *start_on_access);
+H5_DLL herr_t H5Pget_meta_block_size(hid_t fapl_id, hsize_t *size/*out*/);
+H5_DLL herr_t H5Pget_metadata_read_attempts(hid_t plist_id, unsigned *attempts);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup FAPL
+ *
+ * \brief Retrieves type of data property for MULTI driver
+ *
+ * \param[in]  fapl_id File access property list or data transfer property
+ *                     list identifier
+ * \param[out] type    Type of data
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_multi_type() retrieves the type of data setting from
+ *          the file access or data transfer property list \p fapl_id.
+ *          This enables a user application to specify the type of data
+ *          the application wishes to access so that the application can
+ *          retrieve a file handle for low-level access to the particular
+ *          member of a set of MULTI files in which that type of data is
+ *          stored. The file handle is retrieved with a separate call to
+ *          H5Fget_vfd_handle() (or, in special circumstances, to
+ *          H5FDget_vfd_handle(); see the Virtual File Layer documentation
+ *          for more information.
+ *
+ *          The type of data returned in \p type will be one of those
+ *          listed in the discussion of the \p type parameter in the the
+ *          description of the function H5Pset_multi_type().
+ *
+ *          Use of this function is only appropriate for an HDF5 file
+ *          written as a set of files with the MULTI file driver.
+ *
+ * \since 1.6.0
+ *
+ */
+H5_DLL herr_t H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type);
+H5_DLL herr_t H5Pget_object_flush_cb(hid_t plist_id, H5F_flush_cb_t *func, void **udata);
+H5_DLL herr_t H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size, unsigned *min_meta_per, unsigned *min_raw_per);
+H5_DLL herr_t H5Pget_sieve_buf_size(hid_t fapl_id, size_t *size/*out*/);
+H5_DLL herr_t H5Pget_small_data_block_size(hid_t fapl_id, hsize_t *size/*out*/);
 H5_DLL herr_t H5Pget_vol_id(hid_t plist_id, hid_t *vol_id);
 H5_DLL herr_t H5Pget_vol_info(hid_t plist_id, void **vol_info);
-H5_DLL herr_t H5Pset_family_offset(hid_t fapl_id, hsize_t offset);
-H5_DLL herr_t H5Pget_family_offset(hid_t fapl_id, hsize_t *offset);
-H5_DLL herr_t H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type);
-H5_DLL herr_t H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type);
 /**
  *-------------------------------------------------------------------------
  *
@@ -2700,6 +3120,7 @@ H5_DLL herr_t H5Pset_alignment(hid_t fapl_id, hsize_t threshold,
 H5_DLL herr_t H5Pset_cache(hid_t plist_id, int mdc_nelmts,
        size_t rdcc_nslots, size_t rdcc_nbytes,
        double rdcc_w0);
+H5_DLL herr_t H5Pset_core_write_tracking(hid_t fapl_id, hbool_t is_enabled, size_t page_size);
 /**
  *-------------------------------------------------------------------------
  *
@@ -2730,6 +3151,7 @@ H5_DLL herr_t H5Pset_cache(hid_t plist_id, int mdc_nelmts,
  */
 H5_DLL herr_t H5Pset_driver(hid_t plist_id, hid_t driver_id,
         const void *driver_info);
+H5_DLL herr_t H5Pset_family_offset(hid_t fapl_id, hsize_t offset);
 /**
  *-------------------------------------------------------------------------
  *
@@ -2930,34 +3352,19 @@ H5_DLL herr_t H5Pset_libver_bounds(hid_t plist_id, H5F_libver_t low,
     H5F_libver_t high);
 H5_DLL herr_t H5Pset_mdc_config(hid_t    plist_id,
        H5AC_cache_config_t * config_ptr);
-H5_DLL herr_t H5Pget_mdc_config(hid_t     plist_id,
-       H5AC_cache_config_t * config_ptr);    /* out */
 H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
-H5_DLL herr_t H5Pget_gc_references(hid_t fapl_id, unsigned *gc_ref/*out*/);
 H5_DLL herr_t H5Pset_meta_block_size(hid_t fapl_id, hsize_t size);
-H5_DLL herr_t H5Pget_meta_block_size(hid_t fapl_id, hsize_t *size/*out*/);
 H5_DLL herr_t H5Pset_sieve_buf_size(hid_t fapl_id, size_t size);
-H5_DLL herr_t H5Pget_sieve_buf_size(hid_t fapl_id, size_t *size/*out*/);
 H5_DLL herr_t H5Pset_small_data_block_size(hid_t fapl_id, hsize_t size);
-H5_DLL herr_t H5Pget_small_data_block_size(hid_t fapl_id, hsize_t *size/*out*/);
 H5_DLL herr_t H5Pset_elink_file_cache_size(hid_t plist_id, unsigned efc_size);
-H5_DLL herr_t H5Pget_elink_file_cache_size(hid_t plist_id, unsigned *efc_size);
 H5_DLL herr_t H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len);
-H5_DLL herr_t H5Pget_file_image(hid_t fapl_id, void **buf_ptr_ptr, size_t *buf_len_ptr);
 H5_DLL herr_t H5Pset_file_image_callbacks(hid_t fapl_id,
        H5FD_file_image_callbacks_t *callbacks_ptr);
-H5_DLL herr_t H5Pget_file_image_callbacks(hid_t fapl_id,
-       H5FD_file_image_callbacks_t *callbacks_ptr);
-H5_DLL herr_t H5Pset_core_write_tracking(hid_t fapl_id, hbool_t is_enabled, size_t page_size);
-H5_DLL herr_t H5Pget_core_write_tracking(hid_t fapl_id, hbool_t *is_enabled, size_t *page_size);
 H5_DLL herr_t H5Pset_metadata_read_attempts(hid_t plist_id, unsigned attempts);
-H5_DLL herr_t H5Pget_metadata_read_attempts(hid_t plist_id, unsigned *attempts);
 H5_DLL herr_t H5Pset_object_flush_cb(hid_t plist_id, H5F_flush_cb_t func, void *udata);
-H5_DLL herr_t H5Pget_object_flush_cb(hid_t plist_id, H5F_flush_cb_t *func, void **udata);
 H5_DLL herr_t H5Pset_mdc_log_options(hid_t plist_id, hbool_t is_enabled, const char *location, hbool_t start_on_access);
-H5_DLL herr_t H5Pget_mdc_log_options(hid_t plist_id, hbool_t *is_enabled, char *location, size_t *location_size, hbool_t *start_on_access);
 H5_DLL herr_t H5Pset_evict_on_close(hid_t fapl_id, hbool_t evict_on_close);
-H5_DLL herr_t H5Pget_evict_on_close(hid_t fapl_id, hbool_t *evict_on_close);
+
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5Pset_all_coll_metadata_ops(hid_t plist_id, hbool_t is_collective);
 H5_DLL herr_t H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collective);
@@ -2966,10 +3373,11 @@ H5_DLL herr_t H5Pget_coll_metadata_write(hid_t plist_id, hbool_t *is_collective)
 H5_DLL herr_t H5Pget_mpi_params(hid_t fapl_id, MPI_Comm *comm, MPI_Info *info);
 H5_DLL herr_t H5Pset_mpi_params(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
 #endif /* H5_HAVE_PARALLEL */
+
 H5_DLL herr_t H5Pset_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr);
-H5_DLL herr_t H5Pget_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr /*out*/);
 H5_DLL herr_t H5Pset_page_buffer_size(hid_t plist_id, size_t buf_size, unsigned min_meta_per, unsigned min_raw_per);
-H5_DLL herr_t H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size, unsigned *min_meta_per, unsigned *min_raw_per);
+H5_DLL herr_t H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type);
+H5_DLL herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info);
 
 /* Dataset creation property list (DCPL) routines */
 /**
