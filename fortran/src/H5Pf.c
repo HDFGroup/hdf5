@@ -3869,8 +3869,9 @@ DONE:
  *
  * INPUTS
  *  ocpl_id        - Object (dataset or group) creation property list identifier
- *  Outputs      max_compact     - Maximum number of attributes to be stored in compact storage
- *  min_dense       - Minimum number of attributes to be stored in dense storage
+ * OUTPUTS
+ *  max_compact    - Maximum number of attributes to be stored in compact storage
+ *  min_dense      - Minimum number of attributes to be stored in dense storage
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -3909,8 +3910,9 @@ h5pget_attr_phase_change_c(hid_t_f *ocpl_id, int_f *max_compact, int_f *min_dens
  *  Calls H5Ppset_attr_creation_order
  *
  * INPUTS
- *  ocpl_id        - Object (dataset or group) creation property list identifier
- *  Outputs      crt_order_flags - Flags specifying whether to track and index attribute creation order
+ *  ocpl_id         - Object (dataset or group) creation property list identifier
+ * OUTPUTS
+ *  crt_order_flags - Flags specifying whether to track and index attribute creation order
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -4071,7 +4073,7 @@ h5pget_attr_creation_order_c(hid_t_f *ocpl_id, int_f *crt_order_flags)
  *  Calls H5Pset_link_creation_order
  *
  * INPUTS
- *  gcpl_id        - Group creation property list identifier
+ *  gcpl_id         - Group creation property list identifier
  *  crt_order_flags - Creation order flag(s)
  * OUTPUTS
  *
@@ -4108,8 +4110,9 @@ h5pset_link_creation_order_c(hid_t_f *gcpl_id, int_f *crt_order_flags )
  *
  * INPUTS
  *  gcpl_id      - Group creation property list identifier
- *  Outputs      max_compact     - Maximum number of attributes to be stored in compact storage
- *  min_dense       - Minimum number of attributes to be stored in dense storage
+ * OUTPUTS
+ *  max_compact  - Maximum number of attributes to be stored in compact storage
+ *  min_dense    - Minimum number of attributes to be stored in dense storage
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -4230,10 +4233,10 @@ h5pset_obj_track_times_c(hid_t_f *plist_id, int_f *flag)
  *
  * INPUTS
  *
- *        lcpl_id - Link creation property list identifier
+ *  lcpl_id - Link creation property list identifier
  *  crt_intermed_group - crt_intermed_group specifying whether
- *  to create intermediate groups upon the
- *  creation of an object
+ *                       to create intermediate groups upon the
+ *                       creation of an object
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -4487,7 +4490,7 @@ h5pget_copy_object_c(hid_t_f *ocp_plist_id, int_f *copy_options)
  * RETURNS
  *
  *  Success:  0
- *        Failure: -1
+ *  Failure: -1
  *
  * AUTHOR
  *  M. Scot Breitenfeld
@@ -4549,7 +4552,7 @@ done:
  * RETURNS
  *
  *  Success:  0
- *        Failure: -1
+ *  Failure: -1
  *
  * AUTHOR
  *  M. Scot Breitenfeld
@@ -4598,7 +4601,7 @@ done:
  * RETURNS
  *
  *  Success:  0
- *        Failure: -1
+ *  Failure: -1
  *
  * AUTHOR
  *  M. Scot Breitenfeld
@@ -4640,7 +4643,7 @@ h5pget_local_heap_size_hint_c(hid_t_f *gcpl_id, size_t_f *size_hint)
  * RETURNS
  *
  *  Success:  0
- *        Failure: -1
+ *  Failure: -1
  *
  * AUTHOR
  *  M. Scot Breitenfeld
@@ -4685,7 +4688,7 @@ h5pget_est_link_info_c(hid_t_f *gcpl_id, int_f *est_num_entries, int_f *est_name
  * RETURNS
  *
  *  Success:  0
- *        Failure: -1
+ *  Failure: -1
  *
  * AUTHOR
  *  M. Scot Breitenfeld
@@ -4725,7 +4728,7 @@ h5pset_local_heap_size_hint_c(hid_t_f *gcpl_id, size_t_f *size_hint)
  * RETURNS
  *
  *  Success:  0
- *        Failure: -1
+ *  Failure: -1
  *
  * AUTHOR
  *  M. Scot Breitenfeld
@@ -4795,7 +4798,7 @@ h5pset_link_phase_change_c(hid_t_f *gcpl_id, int_f *max_compact, int_f *min_dens
  *
  * INPUTS
  *
- *  fapl_id      - File access property list identifier
+ *  fapl_id    - File access property list identifier
  *  alignment  - Required memory alignment boundary
  *  block_size - File system block size
  *  cbuf_size  - Copy buffer size
@@ -4841,7 +4844,7 @@ h5pset_fapl_direct_c(hid_t_f H5_ATTR_UNUSED *fapl_id, size_t_f H5_ATTR_UNUSED *a
  *
  * INPUTS
  *
- *  fapl_id      - File access property list identifier
+ *  fapl_id    - File access property list identifier
  * OUTPUTS
  *
  *  alignment  - Required memory alignment boundary
@@ -4894,8 +4897,8 @@ h5pget_fapl_direct_c(hid_t_f H5_ATTR_UNUSED *fapl_id, size_t_f H5_ATTR_UNUSED *a
  *
  * INPUTS
  *  ocpl_id        - Object (dataset or group) creation property list identifier
- *  max_compact     - Maximum number of attributes to be stored in compact storage
- *  min_dense       - Minimum number of attributes to be stored in dense storage
+ *  max_compact    - Maximum number of attributes to be stored in compact storage
+ *  min_dense      - Minimum number of attributes to be stored in dense storage
  * OUTPUTS
  *
  * RETURNS
@@ -5075,7 +5078,7 @@ h5pget_nlinks_c(hid_t_f *lapl_id, size_t_f *nlinks)
  *
  * INPUTS
  *
- *        lcpl_id - Link creation property list identifier
+ *  lcpl_id - Link creation property list identifier
  *  crt_intermed_group - Specifying whether to create intermediate groups upon
  *  the creation of an object
  * RETURNS
@@ -5111,7 +5114,8 @@ h5pget_create_inter_group_c(hid_t_f *lcpl_id, int_f *crt_intermed_group)
  *  Name:        h5pset_chunk_cache_c
  *  Purpose:     Calls H5Pset_chunk_cache
  *
- *  Inputs:    dapl_id            - Link creation property list identifier
+ *  Inputs:
+ *  dapl_id            - Link creation property list identifier
  *  rdcc_nslots        -
  *  rdcc_nbytes        -
  *  rdcc_w0            -
@@ -5141,7 +5145,8 @@ h5pset_chunk_cache_c(hid_t_f *dapl_id, size_t_f *rdcc_nslots, size_t_f *rdcc_nby
  *  Name:        h5pget_chunk_cache_c
  *  Purpose:     Calls H5Pget_chunk_cache
  *
- *  Inputs:    dapl_id            - Link creation property list identifier
+ *  Inputs:
+ *  dapl_id            - Link creation property list identifier
  *  Outputs:
  *  rdcc_nslots        -
  *  rdcc_nbytes        -

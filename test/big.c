@@ -102,11 +102,11 @@ static hsize_t values_used[WRT_N];
  *
  * Purpose:    Create a random long long value.
  *         Ensures that a write at this value doesn't overlap any
- *        previous write.
+ *         previous write.
  *
  * Return:    Success:    Random value
  *
- *        Failure:    Random value which overlaps another write
+ *            Failure:    Random value which overlaps another write
  *
  * Programmer:    Robb Matzke
  *              Tuesday, November 24, 1998
@@ -152,12 +152,12 @@ randll(hsize_t limit, int current_index)
  * Function:    is_sparse
  *
  * Purpose:    Determines if the file system of the current working
- *        directory supports holes.
+ *             directory supports holes.
  *
  * Return:    Success:    Non-zero if holes are supported; zero
  *                otherwise.
  *
- *        Failure:    zero
+ *            Failure:    zero
  *
  * Programmer:    Robb Matzke
  *              Wednesday, July 15, 1998
@@ -190,12 +190,12 @@ is_sparse(void)
  * Function:    supports_big
  *
  * Purpose:    Determines if the file system of the current working
- *        directory supports big files.
+ *             directory supports big files.
  *
  * Return:    Success:    Non-zero if big files are supported; zero
  *                otherwise.
  *
- *        Failure:    zero
+ *            Failure:    zero
  *
  * Programmer:    Raymond Lu
  *              Wednesday, April 18, 2007
@@ -266,7 +266,7 @@ error:
  *
  * Return:    Success:    Non-zero
  *
- *        Failure:    zero
+ *            Failure:    zero
  *
  * Programmer:    Robb Matzke
  *              Thursday, August  6, 1998
@@ -332,14 +332,14 @@ H5_GCC_DIAG_ON("format-nonliteral")
  *
  * Return:    Success:    0
  *
- *        Failure:    >0
+ *            Failure:    >0
  *
  * Programmer:    Robb Matzke
  *              Wednesday, April  8, 1998
  *
  * Modifications:
  *     Robb Matzke, 15 Jul 1998
- *    Addresses are written to the file DNAME instead of stdout.
+ *     Addresses are written to the file DNAME instead of stdout.
  *
  *-------------------------------------------------------------------------
  */
@@ -476,7 +476,7 @@ error:
  *
  * Return:    Success:    0
  *
- *         Failure:    >0
+ *            Failure:    >0
  *
  * Programmer:    Robb Matzke
  *              Friday, April 10, 1998
@@ -739,7 +739,7 @@ error:
  *
  * Return:    Success:
  *
- *        Failure:
+ *            Failure:
  *
  * Programmer:    Robb Matzke
  *              Friday, April 10, 1998

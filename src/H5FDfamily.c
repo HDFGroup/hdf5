@@ -237,7 +237,7 @@ H5FD__family_term(void)
  *
  * Return:    Success:    Non-negative
  *
- *        Failure:    Negative
+ *            Failure:    Negative
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
@@ -280,11 +280,11 @@ done:
  * Function:    H5Pget_fapl_family
  *
  * Purpose:    Returns information about the family file access property
- *        list though the function arguments.
+ *             list though the function arguments.
  *
  * Return:    Success:    Non-negative
  *
- *        Failure:    Negative
+ *            Failure:    Negative
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
@@ -324,11 +324,11 @@ done:
  * Function:    H5FD__family_fapl_get
  *
  * Purpose:    Gets a file access property list which could be used to
- *        create an identical file.
+ *             create an identical file.
  *
  * Return:    Success:    Ptr to new file access property list.
  *
- *        Failure:    NULL
+ *            Failure:    NULL
  *
  * Programmer:    Robb Matzke
  *              Friday, August 13, 1999
@@ -372,7 +372,7 @@ done:
  *
  * Return:    Success:    Ptr to a new property list
  *
- *        Failure:    NULL
+ *            Failure:    NULL
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
@@ -425,7 +425,7 @@ done:
  *
  * Return:    Success:    0
  *
- *        Failure:    -1
+ *            Failure:    -1
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
@@ -457,7 +457,7 @@ done:
  *
  * Return:    Success:    The super block driver data size.
  *
- *        Failure:    never fails
+ *            Failure:    never fails
  *
  * Programmer:    Raymond Lu
  *              Tuesday, May 10, 2005
@@ -486,7 +486,7 @@ H5FD__family_sb_size(H5FD_t H5_ATTR_UNUSED *_file)
  *
  * Return:    Success:    0
  *
- *        Failure:    -1
+ *            Failure:    -1
  *
  * Programmer:    Raymond Lu
  *              Tuesday, May 10, 2005
@@ -521,7 +521,7 @@ H5FD__family_sb_encode(H5FD_t *_file, char *name/*out*/, unsigned char *buf/*out
 /*-------------------------------------------------------------------------
  * Function:    H5FD__family_sb_decode
  *
- * Purpose:    This function has 2 separate purpose.  One is to decodes the
+ * Purpose:     This function has 2 separate purpose.  One is to decodes the
  *              superblock information for this driver. The NAME argument is
  *              the eight-character (plus null termination) name stored in i
  *              the file.  The FILE argument is updated according to the
@@ -529,7 +529,7 @@ H5FD__family_sb_encode(H5FD_t *_file, char *name/*out*/, unsigned char *buf/*out
  *
  * Return:    Success:    0
  *
- *        Failure:    -1
+ *            Failure:    -1
  *
  * Programmer:    Raymond Lu
  *              Tuesday, May 10, 2005
@@ -582,7 +582,7 @@ done:
  *                public fields will be initialized by the
  *                caller, which is always H5FD_open().
  *
- *        Failure:    NULL
+ *            Failure:    NULL
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
@@ -756,7 +756,7 @@ H5_GCC_DIAG_ON("format-nonliteral")
  *
  * Return:    Success:    Non-negative
  *
- *        Failure:    Negative with as many members closed as
+ *            Failure:    Negative with as many members closed as
  *                possible. The only subsequent operation
  *                permitted on the file is a close operation.
  *
@@ -809,7 +809,7 @@ H5FD__family_close(H5FD_t *_file)
  *
  * Return:    Success:    like strcmp()
  *
- *        Failure:    never fails (arguments were checked by the
+ *            Failure:    never fails (arguments were checked by the
  *                caller).
  *
  * Programmer:    Robb Matzke
@@ -842,7 +842,7 @@ H5FD__family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
  *              (listed in H5FDpublic.h)
  *
  * Return:    Success:    non-negative
- *        Failure:    negative
+ *            Failure:    negative
  *
  * Programmer:    Quincey Koziol
  *              Friday, August 25, 2000
@@ -882,7 +882,7 @@ H5FD__family_query(const H5FD_t * _file, unsigned long *flags /* out */)
  *
  * Return:    Success:    The end-of-address-marker
  *
- *        Failure:    HADDR_UNDEF
+ *            Failure:    HADDR_UNDEF
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
@@ -907,7 +907,7 @@ H5FD__family_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  *
  * Return:    Success:    0
  *
- *        Failure:    -1
+ *            Failure:    -1
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
@@ -1000,7 +1000,7 @@ H5_GCC_DIAG_ON("format-nonliteral")
  *                the end of the family of files or the current
  *                EOA, whichever is larger.
  *
- *        Failure:          HADDR_UNDEF
+ *            Failure:          HADDR_UNDEF
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
@@ -1096,7 +1096,7 @@ done:
  * Return:    Success:    Zero. Result is stored in caller-supplied
  *                buffer BUF.
  *
- *        Failure:    -1, contents of buffer BUF are undefined.
+ *            Failure:    -1, contents of buffer BUF are undefined.
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
@@ -1163,7 +1163,7 @@ done:
  *
  * Return:    Success:    Zero
  *
- *        Failure:    -1
+ *            Failure:    -1
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
@@ -1227,7 +1227,7 @@ done:
  * Purpose:    Flushes all family members.
  *
  * Return:    Success:    0
- *        Failure:    -1, as many files flushed as possible.
+ *            Failure:    -1, as many files flushed as possible.
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
@@ -1262,7 +1262,7 @@ done:
  *
  * Return:    Success:    0
  *
- *        Failure:    -1, as many files truncated as possible.
+ *            Failure:    -1, as many files truncated as possible.
  *
  * Programmer:    Quincey Koziol
  *              Saturday, February 23, 2008

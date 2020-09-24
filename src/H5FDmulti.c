@@ -43,10 +43,10 @@
                                         \
     memset(SEEN, 0, sizeof SEEN);                                \
     for (ITER=H5FD_MEM_SUPER; ITER<H5FD_MEM_NTYPES; ITER=(H5FD_mem_t)(ITER+1)) {  \
-    LOOPVAR = MAP[ITER];                          \
-    if (H5FD_MEM_DEFAULT==LOOPVAR) LOOPVAR=ITER;              \
-    assert(LOOPVAR>0 && LOOPVAR<H5FD_MEM_NTYPES);                  \
-    if (SEEN[LOOPVAR]++) continue;                          \
+        LOOPVAR = MAP[ITER];                          \
+        if (H5FD_MEM_DEFAULT==LOOPVAR) LOOPVAR=ITER;              \
+        assert(LOOPVAR>0 && LOOPVAR<H5FD_MEM_NTYPES);                  \
+        if (SEEN[LOOPVAR]++) continue;                          \
 
 /* Need two front-ends, since they are nested sometimes */
 #define UNIQUE_MEMBERS(MAP, LOOPVAR)                                          \
@@ -72,7 +72,7 @@ typedef struct H5FD_multi_fapl_t {
     hid_t       memb_fapl[H5FD_MEM_NTYPES];     /*member access properties      */
     char        *memb_name[H5FD_MEM_NTYPES];    /*name generators               */
     haddr_t     memb_addr[H5FD_MEM_NTYPES];     /*starting addr per member      */
-    hbool_t     relax;                          /*less stringent error checking    */
+    hbool_t     relax;                          /*less stringent error checking */
 } H5FD_multi_fapl_t;
 
 /*
@@ -181,7 +181,7 @@ static const H5FD_class_t H5FD_multi_g = {
  *
  * Return:    Success:    Ptr to new copy of string
  *
- *        Failure:    NULL
+ *            Failure:    NULL
  *
  * Programmer:    Robb Matzke
  *              Friday, August 13, 1999
@@ -235,7 +235,7 @@ H5FD_multi_init(void)
 /*---------------------------------------------------------------------------
  * Function:    H5FD_multi_term
  *
- * Purpose:    Shut down the VFD
+ * Purpose:     Shut down the VFD
  *
  * Returns:     Non-negative on success or negative on failure
  *
@@ -263,7 +263,7 @@ H5FD_multi_term(void)
  *
  * Return:    Success:    0
  *
- *        Failure:    -1
+ *            Failure:    -1
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August 11, 1999
@@ -371,7 +371,7 @@ H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id,
  *        memb_map:    The default member map has the value
  *                H5FD_MEM_DEFAULT for each element.
  *
- *         memb_fapl:    The value H5P_DEFAULT for each element.
+ *        memb_fapl:    The value H5P_DEFAULT for each element.
  *
  *        memb_name:    The string `%s-X.h5' where `X' is one of the
  *                letters `s' (H5FD_MEM_SUPER),
@@ -379,26 +379,26 @@ H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id,
  *                 `g' (H5FD_MEM_GHEAP), 'l' (H5FD_MEM_LHEAP),
  *                 `o' (H5FD_MEM_OHDR).
  *
- *         memb_addr:    The value HADDR_UNDEF for each element.
+ *        memb_addr:    The value HADDR_UNDEF for each element.
  *
  *
  * Example:    To set up a multi file access property list which partitions
  *        data into meta and raw files each being 1/2 of the address
  *        space one would say:
  *
- *             H5FD_mem_t mt, memb_map[H5FD_MEM_NTYPES];
+ *            H5FD_mem_t mt, memb_map[H5FD_MEM_NTYPES];
  *            hid_t memb_fapl[H5FD_MEM_NTYPES];
  *            const char *memb[H5FD_MEM_NTYPES];
  *            haddr_t memb_addr[H5FD_MEM_NTYPES];
  *
- *             // The mapping...
- *             for (mt=0; mt<H5FD_MEM_NTYPES; mt++) {
+ *            // The mapping...
+ *            for (mt=0; mt<H5FD_MEM_NTYPES; mt++) {
  *                memb_map[mt] = H5FD_MEM_SUPER;
  *            }
- *             memb_map[H5FD_MEM_DRAW] = H5FD_MEM_DRAW;
+ *            memb_map[H5FD_MEM_DRAW] = H5FD_MEM_DRAW;
  *
- *             // Member information
- *             memb_fapl[H5FD_MEM_SUPER] = H5P_DEFAULT;
+ *            // Member information
+ *            memb_fapl[H5FD_MEM_SUPER] = H5P_DEFAULT;
  *            memb_name[H5FD_MEM_SUPER] = "%s.meta";
  *            memb_addr[H5FD_MEM_SUPER] = 0;
  *
@@ -406,14 +406,14 @@ H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id,
  *            memb_name[H5FD_MEM_DRAW] = "%s.raw";
  *            memb_addr[H5FD_MEM_DRAW] = HADDR_MAX/2;
  *
- *             hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
+ *            hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
  *            H5Pset_fapl_multi(fapl, memb_map, memb_fapl,
  *                              memb_name, memb_addr, TRUE);
  *
  *
  * Return:    Success:    Non-negative
  *
- *        Failure:    Negative
+ *            Failure:    Negative
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
@@ -516,7 +516,7 @@ H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map,
  *
  * Return:    Success:    Non-negative
  *
- *        Failure:    Negative
+ *            Failure:    Negative
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
@@ -576,11 +576,11 @@ H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map/*out*/,
  * Function:    H5FD_multi_sb_size
  *
  * Purpose:    Returns the size of the private information to be stored in
- *        the superblock.
+ *             the superblock.
  *
  * Return:    Success:    The super block driver data size.
  *
- *        Failure:    never fails
+ *            Failure:    never fails
  *
  * Programmer:    Robb Matzke
  *              Monday, August 16, 1999
@@ -631,7 +631,7 @@ H5FD_multi_sb_size(H5FD_t *_file)
  *
  * Return:    Success:    0
  *
- *        Failure:    -1
+ *            Failure:    -1
  *
  * Programmer:    Robb Matzke
  *              Monday, August 16, 1999
@@ -712,7 +712,7 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name/*out*/,
  *
  * Return:    Success:    0
  *
- *        Failure:    -1
+ *            Failure:    -1
  *
  * Programmer:    Robb Matzke
  *              Monday, August 16, 1999
@@ -850,7 +850,7 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
  * Return:    Success:    Ptr to new file access property list with all
  *                members copied from the file struct.
  *
- *        Failure:    NULL
+ *            Failure:    NULL
  *
  * Programmer:    Robb Matzke
  *              Friday, August 13, 1999
@@ -876,7 +876,7 @@ H5FD_multi_fapl_get(H5FD_t *_file)
  *
  * Return:    Success:    Ptr to a new property list
  *
- *        Failure:    NULL
+ *            Failure:    NULL
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
@@ -935,7 +935,7 @@ H5FD_multi_fapl_copy(const void *_old_fa)
  *
  * Return:    Success:    0
  *
- *        Failure:    -1
+ *            Failure:    -1
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
@@ -973,7 +973,7 @@ H5FD_multi_fapl_free(void *_fa)
  *                public fields will be initialized by the
  *                caller, which is always H5FD_open().
  *
- *        Failure:    NULL
+ *            Failure:    NULL
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
@@ -1068,7 +1068,7 @@ error:
  *
  * Return:    Success:    Non-negative
  *
- *        Failure:    Negative with as many members closed as
+ *            Failure:    Negative with as many members closed as
  *                possible. The only subsequent operation
  *                permitted on the file is a close operation.
  *
@@ -1123,8 +1123,7 @@ H5FD_multi_close(H5FD_t *_file)
  *
  * Return:    Success:    like strcmp()
  *
- *        Failure:    never fails (arguments were checked by the
- *                caller).
+ *            Failure:    never fails (arguments were checked by th caller).
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
@@ -1169,7 +1168,7 @@ H5FD_multi_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
  *
  * Return:    Success:    non-negative
  *
- *        Failure:    negative
+ *            Failure:    negative
  *
  * Programmer:    Quincey Koziol
  *              Tuesday, September 26, 2000
@@ -1201,7 +1200,7 @@ H5FD_multi_query(const H5FD_t *_f, unsigned long *flags /* out */)
  * Purpose:    Retrieve the memory type mapping for this file
  *
  * Return:    Success:    non-negative
- *        Failure:    negative
+ *            Failure:    negative
  *
  * Programmer:    Quincey Koziol
  *              Tuesday, October  9, 2008
@@ -1229,7 +1228,7 @@ H5FD_multi_get_type_map(const H5FD_t *_file, H5FD_mem_t *type_map)
  *
  * Return:    Success:    The end-of-address-marker
  *
- *        Failure:    HADDR_UNDEF
+ *            Failure:    HADDR_UNDEF
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
@@ -1321,7 +1320,7 @@ H5FD_multi_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
  *
  * Return:    Success:    0
  *
- *        Failure:    -1
+ *            Failure:    -1
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
@@ -1383,7 +1382,7 @@ H5FD_multi_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
  *                the end of the multi of files or the current
  *                EOA, whichever is larger.
  *
- *        Failure:          HADDR_UNDEF
+ *            Failure:          HADDR_UNDEF
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
@@ -1433,26 +1432,26 @@ H5FD_multi_get_eof(const H5FD_t *_file, H5FD_mem_t type)
         if(H5FD_MEM_DEFAULT == mmt)
             mmt = type;
 
-    if(file->memb[mmt]) {
+        if(file->memb[mmt]) {
             /* Retrieve EOF */
             H5E_BEGIN_TRY {
             eof = H5FDget_eof(file->memb[mmt], mmt);
             } H5E_END_TRY;
 
-        if(HADDR_UNDEF == eof)
+            if(HADDR_UNDEF == eof)
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file has unknown eof", HADDR_UNDEF)
-        if(eof > 0)
+            if(eof > 0)
                 eof += file->fa.memb_addr[mmt];
-    } else if(file->fa.relax) {
-        /*
-        * The member is not open yet (maybe it doesn't exist). Make the
-        * best guess about the end-of-file.
-        */
-        eof = file->memb_next[mmt];
-        assert(HADDR_UNDEF != eof);
-    } else {
+        } else if(file->fa.relax) {
+            /*
+             * The member is not open yet (maybe it doesn't exist). Make the
+             * best guess about the end-of-file.
+             */
+            eof = file->memb_next[mmt];
+            assert(HADDR_UNDEF != eof);
+        } else {
             H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "bad eof", HADDR_UNDEF)
-    }
+        }
     }
     return eof;
 }
@@ -1496,7 +1495,7 @@ H5FD_multi_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
  *
  * Return:    Success:    Address of new memory
  *
- *        Failure:    HADDR_UNDEF
+ *            Failure:    HADDR_UNDEF
  *
  * Programmer:    Robb Matzke
  *              Thursday, August 12, 1999
@@ -1551,7 +1550,7 @@ H5FD_multi_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
  *
  * Return:    Success:    0
  *
- *        Failure:    -1
+ *            Failure:    -1
  *
  * Programmer:    Robb Matzke
  *              Thursday, August 12, 1999
@@ -1586,7 +1585,7 @@ H5FD_multi_free(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsi
  * Return:    Success:    Zero. Result is stored in caller-supplied
  *                buffer BUF.
  *
- *        Failure:    -1, contents of buffer BUF are undefined.
+ *            Failure:    -1, contents of buffer BUF are undefined.
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
@@ -1634,7 +1633,7 @@ H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
  *
  * Return:    Success:    Zero
  *
- *        Failure:    -1
+ *            Failure:    -1
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
@@ -1680,7 +1679,7 @@ H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
  *
  * Return:    Success:    0
  *
- *        Failure:    -1, as many files flushed as possible.
+ *            Failure:    -1, as many files flushed as possible.
  *
  * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
@@ -1751,7 +1750,7 @@ H5FD_multi_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
  * Purpose:    Truncates all multi members.
  *
  * Return:    Success:    0
- *        Failure:    -1, as many files truncated as possible.
+ *            Failure:    -1, as many files truncated as possible.
  *
  * Programmer:    Quincey Koziol
  *              Thursday, January 31, 2008
@@ -1794,7 +1793,7 @@ H5FD_multi_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
  *        member files that are locked before error is encountered.
  *
  * Return:    Success:    0
- *        Failure:    -1
+ *            Failure:    -1
  *
  * Programmer:    Vailin Choi; March 2015
  *
@@ -1851,7 +1850,7 @@ H5FD_multi_lock(H5FD_t *_file, hbool_t rw)
  *        encountered.
  *
  * Return:    Success:    0
- *        Failure:    -1
+ *            Failure:    -1
  *
  * Programmer:    Vailin Choi; March 2015
  *
@@ -1888,7 +1887,7 @@ H5FD_multi_unlock(H5FD_t *_file)
  *
  * Return:    Success:    0
  *
- *        Failure:    -1
+ *            Failure:    -1
  *
  * Programmer:    Robb Matzke
  *              Monday, August 23, 1999
@@ -1929,7 +1928,7 @@ compute_next(H5FD_multi_t *file)
  *
  * Return:    Success:    0
  *
- *        Failure:    -1
+ *            Failure:    -1
  *
  * Programmer:    Robb Matzke
  *              Monday, August 23, 1999

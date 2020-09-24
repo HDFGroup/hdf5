@@ -127,9 +127,9 @@ image_malloc(size_t size, H5FD_file_image_op_t file_image_op, void *_udata)
             udata->fapl_image_size = udata->app_image_size;
             return_value = udata->fapl_image_ptr;
             udata->fapl_ref_count++;
-        break;
+            break;
 
-    case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY:
+        case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY:
             if (udata->fapl_image_ptr == NULL)
                 goto out;
             if (udata->fapl_image_size != size)
@@ -139,7 +139,7 @@ image_malloc(size_t size, H5FD_file_image_op_t file_image_op, void *_udata)
 
             return_value = udata->fapl_image_ptr;
             udata->fapl_ref_count++;
-        break;
+            break;
 
         case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET:
             goto out;
@@ -160,16 +160,16 @@ image_malloc(size_t size, H5FD_file_image_op_t file_image_op, void *_udata)
                 goto out;
 
             udata->vfd_image_ptr = udata->fapl_image_ptr;
-        udata->vfd_image_size = size;
+            udata->vfd_image_size = size;
             udata->vfd_ref_count++;
             return_value = udata->vfd_image_ptr;
             break;
 
-    /* added unused labels to shut the compiler up */
-    case H5FD_FILE_IMAGE_OP_NO_OP:
-    case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE:
-    case H5FD_FILE_IMAGE_OP_FILE_RESIZE:
-    case H5FD_FILE_IMAGE_OP_FILE_CLOSE:
+        /* added unused labels to shut the compiler up */
+        case H5FD_FILE_IMAGE_OP_NO_OP:
+        case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE:
+        case H5FD_FILE_IMAGE_OP_FILE_RESIZE:
+        case H5FD_FILE_IMAGE_OP_FILE_CLOSE:
         default:
             goto out;
     } /* end switch */
@@ -251,11 +251,11 @@ image_memcpy(void *dest, const void *src, size_t size, H5FD_file_image_op_t file
                 goto out;
             break;
 
-    /* added unused labels to shut the compiler up */
-    case H5FD_FILE_IMAGE_OP_NO_OP:
-    case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE:
-    case H5FD_FILE_IMAGE_OP_FILE_RESIZE:
-    case H5FD_FILE_IMAGE_OP_FILE_CLOSE:
+        /* added unused labels to shut the compiler up */
+        case H5FD_FILE_IMAGE_OP_NO_OP:
+        case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE:
+        case H5FD_FILE_IMAGE_OP_FILE_RESIZE:
+        case H5FD_FILE_IMAGE_OP_FILE_CLOSE:
         default:
             goto out;
     } /* end switch */
@@ -351,7 +351,7 @@ image_free(void *ptr, H5FD_file_image_op_t file_image_op, void *_udata)
 
     switch(file_image_op) {
         case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE:
-        if (udata->fapl_image_ptr != ptr)
+            if (udata->fapl_image_ptr != ptr)
                 goto out;
             if (udata->fapl_ref_count == 0)
                 goto out;
@@ -386,14 +386,14 @@ image_free(void *ptr, H5FD_file_image_op_t file_image_op, void *_udata)
             } /* end if */
             break;
 
-    /* added unused labels to keep the compiler quite */
-    case H5FD_FILE_IMAGE_OP_NO_OP:
-    case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET:
-    case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY:
-    case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET:
-    case H5FD_FILE_IMAGE_OP_FILE_OPEN:
-    case H5FD_FILE_IMAGE_OP_FILE_RESIZE:
-    default:
+        /* added unused labels to keep the compiler quite */
+        case H5FD_FILE_IMAGE_OP_NO_OP:
+        case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET:
+        case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY:
+        case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET:
+        case H5FD_FILE_IMAGE_OP_FILE_OPEN:
+        case H5FD_FILE_IMAGE_OP_FILE_RESIZE:
+        default:
             goto out;
     } /* end switch */
 
@@ -2297,13 +2297,13 @@ realloc_and_append(hbool_t _no_user_buf, size_t *len, char *buf, const char *str
        * extend past the allocated buffer; if it does then truncate the string
        */
       if(size_str < *len - 1) {
-    if( size_str + size_str_to_add < *len - 1) {
-    HDstrncat(buf, str_to_add, size_str_to_add);
-    } else {
-    HDstrncat(buf, str_to_add, (*len - 1) - size_str);
-    }
+          if( size_str + size_str_to_add < *len - 1) {
+              HDstrncat(buf, str_to_add, size_str_to_add);
+          } else {
+              HDstrncat(buf, str_to_add, (*len - 1) - size_str);
+          }
       } else {
-    buf[*len-1] = '\0'; /* buffer is full, null terminate */
+         buf[*len-1] = '\0'; /* buffer is full, null terminate */
       }
     }
 
@@ -3062,15 +3062,15 @@ next:
             HDsnprintf(dt_str, *slen, "H5T_NO_CLASS");
             break;
         case H5T_REFERENCE:
-        if (H5Tequal(dtype, H5T_STD_REF_DSETREG) == TRUE) {
-        HDsnprintf(dt_str, *slen, " H5T_REFERENCE { H5T_STD_REF_DSETREG }");
-        }
-        else {
-        HDsnprintf(dt_str, *slen, " H5T_REFERENCE { H5T_STD_REF_OBJECT }");
-        }
-        break;
+            if (H5Tequal(dtype, H5T_STD_REF_DSETREG) == TRUE) {
+                HDsnprintf(dt_str, *slen, " H5T_REFERENCE { H5T_STD_REF_DSETREG }");
+            }
+            else {
+                HDsnprintf(dt_str, *slen, " H5T_REFERENCE { H5T_STD_REF_OBJECT }");
+            }
+            break;
         case H5T_NCLASSES:
-        break;
+            break;
         default:
             HDsnprintf(dt_str, *slen, "unknown data type");
     }
@@ -3812,11 +3812,11 @@ H5LTpath_valid(hid_t loc_id, const char *path, hbool_t check_object_valid)
        ret_value = link_exists;
        /* Determine if link resolves to an actual object for check_object_valid TRUE */
        if(check_object_valid == TRUE && link_exists == TRUE) {
-    if((obj_exists = H5Oexists_by_name(loc_id, tmp_path, H5P_DEFAULT)) < 0) {
-    ret_value = FAIL;
-    } else {
-    ret_value = obj_exists;
-    }
+         if((obj_exists = H5Oexists_by_name(loc_id, tmp_path, H5P_DEFAULT)) < 0) {
+           ret_value = FAIL;
+         } else {
+           ret_value = obj_exists;
+         }
        }
      }
 

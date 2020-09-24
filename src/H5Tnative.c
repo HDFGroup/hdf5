@@ -720,22 +720,22 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
     if(direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {
         if(size<=sizeof(float)) {
             match=H5T_NATIVE_FLOAT_MATCH_FLOAT;
-        native_size = sizeof(float);
+            native_size = sizeof(float);
         }
         else if(size<=sizeof(double)) {
             match=H5T_NATIVE_FLOAT_MATCH_DOUBLE;
-        native_size = sizeof(double);
+            native_size = sizeof(double);
         }
 #if H5_SIZEOF_LONG_DOUBLE !=0
         else if(size<=sizeof(long double)) {
             match=H5T_NATIVE_FLOAT_MATCH_LDOUBLE;
-        native_size = sizeof(long double);
+            native_size = sizeof(long double);
         }
 #endif
         else {   /* If not match, return the biggest datatype */
 #if H5_SIZEOF_LONG_DOUBLE !=0
             match=H5T_NATIVE_FLOAT_MATCH_LDOUBLE;
-        native_size = sizeof(long double);
+            native_size = sizeof(long double);
 #else
             match=H5T_NATIVE_FLOAT_MATCH_DOUBLE;
             native_size = sizeof(double);
@@ -745,25 +745,25 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
 #if H5_SIZEOF_LONG_DOUBLE !=0
         if(size>sizeof(double)) {
             match=H5T_NATIVE_FLOAT_MATCH_LDOUBLE;
-        native_size = sizeof(long double);
+            native_size = sizeof(long double);
         }
         else if(size>sizeof(float)) {
             match=H5T_NATIVE_FLOAT_MATCH_DOUBLE;
-        native_size = sizeof(double);
+            native_size = sizeof(double);
         }
         else {
             match=H5T_NATIVE_FLOAT_MATCH_FLOAT;
-        native_size = sizeof(float);
-    }
+            native_size = sizeof(float);
+        }
 #else
         if(size>sizeof(float)) {
             match=H5T_NATIVE_FLOAT_MATCH_DOUBLE;
-        native_size = sizeof(double);
+            native_size = sizeof(double);
         }
         else {
             match=H5T_NATIVE_FLOAT_MATCH_FLOAT;
-        native_size = sizeof(float);
-    }
+            native_size = sizeof(float);
+        }
 #endif
     }
 
@@ -910,7 +910,7 @@ H5_GCC_DIAG_ON("duplicated-branches")
  *
  * Return:    Success:        Non-negative value.
  *
- *        Failure:        Negative value.
+ *            Failure:        Negative value.
  *
  * Programmer:    Raymond Lu
  *        December  10, 2002

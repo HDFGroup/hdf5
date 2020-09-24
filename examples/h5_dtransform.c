@@ -57,9 +57,9 @@ const float windchillF[ROWS][COLS] =
 {                        \
     for(i=0; i<ROWS; i++)            \
     {                        \
-    for(j=0; j<COLS; j++)            \
-        printf("%6.2f ", array[i][j]);    \
-    printf("\n");                \
+        for(j=0; j<COLS; j++)            \
+            printf("%6.2f ", array[i][j]);    \
+        printf("\n");                \
     }                        \
 }
 

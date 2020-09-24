@@ -29,11 +29,11 @@
 #include "H5ACpublic.h"        /*public prototypes            */
 
 /* Pivate headers needed by this header */
-#include "H5private.h"        /* Generic Functions            */
+#include "H5private.h"         /* Generic Functions            */
 #include "H5Cprivate.h"        /* Cache                */
 #include "H5Fprivate.h"        /* File access                */
 #include "H5Pprivate.h"        /* Property lists            */
-#include "H5SLprivate.h"        /* Skip lists                 */
+#include "H5SLprivate.h"       /* Skip lists                 */
 
 /* Global metadata tag values */
 #define H5AC__INVALID_TAG      (haddr_t)0
@@ -75,7 +75,7 @@ typedef enum {
     H5AC_DRVRINFO_ID,           /* (26) driver info block (supplements superblock)  */
     H5AC_EPOCH_MARKER_ID,       /* (27) epoch marker - always internal to cache     */
     H5AC_PROXY_ENTRY_ID,        /* (28) cache entry proxy                           */
-    H5AC_PREFETCHED_ENTRY_ID,     /* (29) prefetched entry - always internal to cache */
+    H5AC_PREFETCHED_ENTRY_ID,   /* (29) prefetched entry - always internal to cache */
     H5AC_NTYPES                 /* Number of types, must be last                    */
 } H5AC_type_t;
 
@@ -90,8 +90,8 @@ typedef enum {
  *
  * NOTE: test/cache plays games with the f->shared->cache, and thus
  *       setting H5AC_DUMP_STATS_ON_CLOSE will generate constant,
- *     irrelevant data when run with that test program.  See
- *      comments on setup_cache() / takedown_cache() in test/cache_common.c.
+ *       irrelevant data when run with that test program.  See
+ *       comments on setup_cache() / takedown_cache() in test/cache_common.c.
  *       for details.
  *
  *     If you need to dump stats at file close in test/cache.c,
@@ -132,7 +132,7 @@ typedef enum {
 #endif
 
 /*
- * Class methods pertaining to caching.     Each type of cached object will
+ * Class methods pertaining to caching. Each type of cached object will
  * have a constant variable with permanent life-span that describes how
  * to cache the object.
  */
@@ -256,8 +256,8 @@ typedef struct H5AC_proxy_entry_t {
   /* int         epochs_before_eviction = */ 3,                               \
   /* hbool_t     apply_empty_reserve    = */ TRUE,                            \
   /* double      empty_reserve          = */ 0.1f,                            \
-  /* size_t     dirty_bytes_threshold  = */ (256 * 1024),                    \
-  /* int    metadata_write_strategy = */                                  \
+  /* size_t      dirty_bytes_threshold  = */ (256 * 1024),                    \
+  /* int         metadata_write_strategy = */                                  \
                     H5AC__DEFAULT_METADATA_WRITE_STRATEGY  \
 }
 #else /* H5_HAVE_PARALLEL */
@@ -292,8 +292,8 @@ typedef struct H5AC_proxy_entry_t {
   /* int         epochs_before_eviction = */ 3,                               \
   /* hbool_t     apply_empty_reserve    = */ TRUE,                            \
   /* double      empty_reserve          = */ 0.1f,                            \
-  /* size_t     dirty_bytes_threshold  = */ (256 * 1024),                    \
-  /* int    metadata_write_strategy = */                                  \
+  /* size_t      dirty_bytes_threshold  = */ (256 * 1024),                    \
+  /* int         metadata_write_strategy = */                                  \
                     H5AC__DEFAULT_METADATA_WRITE_STRATEGY  \
 }
 #endif /* H5_HAVE_PARALLEL */

@@ -204,7 +204,7 @@ H5VM_vector_zerop_u(int n, const hsize_t *v)
     if (!v)
         HGOTO_DONE(TRUE)
     while (n--)
-    if (*v++)
+        if (*v++)
             HGOTO_DONE(FALSE)
 
 done:
@@ -241,7 +241,7 @@ H5VM_vector_zerop_s(int n, const hssize_t *v)
     if (!v)
         HGOTO_DONE(TRUE)
     while (n--)
-    if (*v++)
+        if (*v++)
             HGOTO_DONE(FALSE)
 
 done:
@@ -530,9 +530,9 @@ static const unsigned char H5VM_bit_clear_g[8] = {0x7F, 0xBF, 0xDF, 0xEF, 0xF7, 
  *
  * Purpose:     Determine the value of the n'th bit in a buffer.
  *
- * Note:    No range checking on <offset> is performed!
+ * Note:        No range checking on <offset> is performed!
  *
- * Note #2:    Bits are sequentially stored in the buffer, starting with bit
+ * Note #2:     Bits are sequentially stored in the buffer, starting with bit
  *              offset 0 in the first byte's high-bit position, proceeding down
  *              to bit offset 7 in the first byte's low-bit position, then to
  *              bit offset 8 in the second byte's high-bit position, etc.
@@ -561,9 +561,9 @@ H5VM_bit_get(const unsigned char *buf, size_t offset)
  *
  * Purpose:     Set/reset the n'th bit in a buffer.
  *
- * Note:    No range checking on <offset> is performed!
+ * Note:        No range checking on <offset> is performed!
  *
- * Note #2:    Bits are sequentially stored in the buffer, starting with bit
+ * Note #2:     Bits are sequentially stored in the buffer, starting with bit
  *              offset 0 in the first byte's high-bit position, proceeding down
  *              to bit offset 7 in the first byte's low-bit position, then to
  *              bit offset 8 in the second byte's high-bit position, etc.
