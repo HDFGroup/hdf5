@@ -15,8 +15,16 @@ if (BUILD_SHARED_LIBS)
   target_link_libraries (${H5LS_TOOL_PLUGIN_LIB_TARGET} PRIVATE ${HDF5_TEST_LIBSH_TARGET})
   H5_SET_LIB_OPTIONS (${H5LS_TOOL_PLUGIN_LIB_TARGET} ${H5LS_TOOL_PLUGIN_LIB_NAME} SHARED "LIB")
 
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_TOOLS_TEST_H5LS_PLUGIN_FORMAT ${H5LS_TOOL_PLUGIN_LIB_TARGET})
+  endif ()
+
   # make plugins dir
   file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/plugins")
+
   #-----------------------------------------------------------------------------
   # Copy plugin library to a plugins folder
   #-----------------------------------------------------------------------------

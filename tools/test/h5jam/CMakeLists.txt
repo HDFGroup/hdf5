@@ -11,6 +11,13 @@ if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
   target_link_libraries (h5jamgentest PRIVATE ${HDF5_LIB_TARGET})
   set_target_properties (h5jamgentest PROPERTIES FOLDER generator/tools)
 
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_TOOLS_TEST_H5JAM_FORMAT h5jamgentest)
+  endif ()
+
   #add_test (NAME h5jamgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5jamgentest>)
 endif ()
 
@@ -35,6 +42,14 @@ else ()
   target_link_libraries (tellub PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
 endif ()
 set_target_properties (tellub PROPERTIES FOLDER tools)
+
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TOOLS_TEST_H5JAM_getub_FORMAT getub)
+  clang_format (HDF5_TOOLS_TEST_H5JAM_tellub_FORMAT tellub)
+endif ()
 
 if (HDF5_TEST_TOOLS AND HDF5_TEST_SERIAL)
   include (CMakeTests.cmake)
