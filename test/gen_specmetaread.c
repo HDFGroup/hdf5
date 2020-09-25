@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:  Quincey Koziol
  *              Thursday, October  8, 2009
  *
  * Purpose:	Create a file with a dataset who's raw data immediately follows
@@ -23,9 +23,8 @@
  *      the library on the trunk as of when this file is checked in.
  */
 
-#include <assert.h>
 
-#include "testhdf5.h"
+#include "h5test.h"
 
 #define FILENAME        "specmetaread.h5"
 #define DIM             10

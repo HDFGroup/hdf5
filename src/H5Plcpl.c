@@ -64,7 +64,7 @@
 /********************/
 
 /* Property class callbacks */
-static herr_t H5P_lcrt_reg_prop(H5P_genclass_t *pclass);
+static herr_t H5P__lcrt_reg_prop(H5P_genclass_t *pclass);
 
 
 /*********************/
@@ -80,7 +80,7 @@ const H5P_libclass_t H5P_CLS_LCRT[1] = {{
     &H5P_CLS_LINK_CREATE_g,	/* Pointer to class             */
     &H5P_CLS_LINK_CREATE_ID_g,	/* Pointer to class ID          */
     &H5P_LST_LINK_CREATE_ID_g,	/* Pointer to default property list ID */
-    H5P_lcrt_reg_prop,		/* Default property registration routine */
+    H5P__lcrt_reg_prop,		/* Default property registration routine */
 
     NULL,		        /* Class creation callback      */
     NULL,		        /* Class creation callback info */
@@ -106,7 +106,7 @@ static const unsigned H5L_def_intmd_group_g = H5L_CRT_INTERMEDIATE_GROUP_DEF;   
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_lcrt_reg_prop
+ * Function:    H5P__lcrt_reg_prop
  *
  * Purpose:     Register the dataset creation property list class's properties
  *
@@ -116,12 +116,12 @@ static const unsigned H5L_def_intmd_group_g = H5L_CRT_INTERMEDIATE_GROUP_DEF;   
  *              October 31, 2006
  *-------------------------------------------------------------------------
  */
-herr_t
-H5P_lcrt_reg_prop(H5P_genclass_t *pclass)
+static herr_t
+H5P__lcrt_reg_prop(H5P_genclass_t *pclass)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* Register create intermediate groups property */
     if(H5P__register_real(pclass, H5L_CRT_INTERMEDIATE_GROUP_NAME, H5L_CRT_INTERMEDIATE_GROUP_SIZE, &H5L_def_intmd_group_g,
@@ -131,7 +131,7 @@ H5P_lcrt_reg_prop(H5P_genclass_t *pclass)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_lcrt_reg_prop() */
+} /* end H5P__lcrt_reg_prop() */
 
 
 /*-------------------------------------------------------------------------

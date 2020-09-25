@@ -98,7 +98,7 @@ int main () {
 
     for (i=0; i<numfilt; i++) {
        nelmts = 0;
-       filter_type = H5Pget_filter2 (plist_id, 0, &flags, &nelmts, NULL, 0, NULL,
+       filter_type = H5Pget_filter2 (plist_id, i, &flags, &nelmts, NULL, 0, NULL,
                      &filter_info);
        printf ("Filter Type: ");
        switch (filter_type) {

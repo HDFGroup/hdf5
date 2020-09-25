@@ -19,6 +19,7 @@
  */
 #include "hdf5.h"
 #include "H5private.h"
+#include "h5test.h"
 
 #define FILENAME    "chunk_cache_perf.h5"
 
@@ -79,18 +80,6 @@ counter (unsigned H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
 }
 
 /*---------------------------------------------------------------------------*/
-static double retrieve_time(void)
-{
-#ifdef H5_HAVE_GETTIMEOFDAY
-    struct timeval t;
-    HDgettimeofday(&t, NULL);
-    return ((double)t.tv_sec + (double)t.tv_usec / 1000000);
-#else
-    return 0.0;
-#endif
-}
-
-/*---------------------------------------------------------------------------*/
 static void
 cleanup (void)
 {
@@ -110,8 +99,7 @@ static int create_dset1(hid_t file)
     hid_t        dcpl = H5I_INVALID_HID;
     hsize_t      dims[RANK]  = {DSET1_DIM1, DSET1_DIM2};
     hsize_t      chunk_dims[RANK] = {CHUNK1_DIM1, CHUNK1_DIM2};
-    int          data[DSET1_DIM1][DSET1_DIM2];    /* data for writing */
-    int          i, j;
+    int          **data;                /* data for writing */
 
     /* Create the data space. */
     if((dataspace = H5Screate_simple (RANK, dims, NULL)) < 0)
@@ -135,9 +123,10 @@ static int create_dset1(hid_t file)
                           H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         goto error;
 
-    for (i = 0; i < DSET1_DIM1; i++)
-        for (j = 0; j < DSET1_DIM2; j++)
-            data[i][j] = i+j;
+    /* Create & fill array */
+    H5TEST_ALLOCATE_2D_ARRAY(data,  int,  DSET1_DIM1, DSET1_DIM2);
+    H5TEST_FILL_2D_ARRAY(data, int, DSET1_DIM1, DSET1_DIM2);
+
 
     /* Write data to dataset */
     if(H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
@@ -171,17 +160,16 @@ static int create_dset2(hid_t file)
     hid_t        dcpl = H5I_INVALID_HID;
     hsize_t      dims[RANK]  = {DSET2_DIM1, DSET2_DIM2};
     hsize_t      chunk_dims[RANK] = {CHUNK2_DIM1, CHUNK2_DIM2};
-    int          data[DSET2_DIM1][DSET2_DIM2];    /* data for writing */
-    int          i, j;
+    int          **data;                /* data for writing */
 
     /* Create the data space. */
-    if((dataspace = H5Screate_simple (RANK, dims, NULL)) < 0)
+    if((dataspace = H5Screate_simple(RANK, dims, NULL)) < 0)
         goto error;
 
     /* Modify dataset creation properties, i.e. enable chunking  */
-    if((dcpl = H5Pcreate (H5P_DATASET_CREATE)) < 0)
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto error;
-    if(H5Pset_chunk (dcpl, RANK, chunk_dims) < 0)
+    if(H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
         goto error;
 
     /* Set the dummy filter simply for counting the number of bytes being read into the memory */
@@ -191,35 +179,35 @@ static int create_dset2(hid_t file)
         goto error;
 
     /* Create a new dataset within the file using chunk creation properties.  */
-    if((dataset = H5Dcreate2 (file, DSET2_NAME, H5T_NATIVE_INT, dataspace,
+    if((dataset = H5Dcreate2(file, DSET2_NAME, H5T_NATIVE_INT, dataspace,
                           H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         goto error;
 
-    for (i = 0; i < DSET2_DIM1; i++)
-        for (j = 0; j < DSET2_DIM2; j++)
-            data[i][j] = i+j;
+    /* Create & fill array */
+    H5TEST_ALLOCATE_2D_ARRAY(data,  int,  DSET2_DIM1, DSET2_DIM2);
+    H5TEST_FILL_2D_ARRAY(data, int, DSET2_DIM1, DSET2_DIM2);
 
     /* Write data to dataset */
-    if(H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-                       H5P_DEFAULT, data) < 0)
+    if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
         goto error;
 
     /* Close resources */
-    H5Dclose (dataset);
-    H5Pclose (dcpl);
-    H5Sclose (dataspace);
+    H5Dclose(dataset);
+    H5Pclose(dcpl);
+    H5Sclose(dataspace);
 
     return 0;
 
 error:
     H5E_BEGIN_TRY {
-        H5Dclose (dataset);
-        H5Pclose (dcpl);
-        H5Sclose (dataspace);
+        H5Dclose(dataset);
+        H5Pclose(dcpl);
+        H5Sclose(dataspace);
     } H5E_END_TRY;
 
     return 1;
 }
+
 /*---------------------------------------------------------------------------
  *      Check the performance of the chunk cache when partial chunks exist
  *      along the dataset dimensions.
@@ -253,7 +241,7 @@ static int check_partial_chunks_perf(hid_t file)
 
     nbytes_global = 0;
 
-    start_t = retrieve_time();
+    start_t = H5_get_time();
 
     /* Read the data row by row */
     for(i = 0; i < DSET1_DIM1; i++) {
@@ -267,13 +255,12 @@ static int check_partial_chunks_perf(hid_t file)
             goto error;
     }
 
-    end_t = retrieve_time();
+    end_t = H5_get_time();
 
-#ifdef H5_HAVE_GETTIMEOFDAY
-    printf("1. Partial chunks: total read time is %lf; number of bytes being read from file is %lu\n", (end_t -start_t), nbytes_global);
-#else
-    printf("1. Partial chunks: no total read time because gettimeofday() is not available; number of bytes being read from file is %lu\n", nbytes_global);
-#endif
+    if((end_t - start_t) > (double)0.0f)
+        printf("1. Partial chunks: total read time is %lf; number of bytes being read from file is %lu\n", (end_t -start_t), nbytes_global);
+    else
+        printf("1. Partial chunks: no total read time because timer is not available; number of bytes being read from file is %lu\n", nbytes_global);
 
     H5Dclose (dataset);
     H5Sclose (filespace);
@@ -328,7 +315,7 @@ static int check_hash_value_perf(hid_t file)
 
     nbytes_global = 0;
 
-    start_t = retrieve_time();
+    start_t = H5_get_time();
 
     /* Read the data column by column */
     for(i = 0; i < DSET2_DIM2; i++) {
@@ -342,13 +329,12 @@ static int check_hash_value_perf(hid_t file)
             goto error;
     }
 
-    end_t = retrieve_time();
+    end_t = H5_get_time();
 
-#ifdef H5_HAVE_GETTIMEOFDAY
-    printf("2. Hash value: total read time is %lf; number of bytes being read from file is %lu\n", (end_t -start_t), nbytes_global);
-#else
-    printf("2. Hash value: no total read time because gettimeofday() is not available; number of bytes being read from file is %lu\n", nbytes_global);
-#endif
+    if((end_t - start_t) > (double)0.0f)
+        printf("2. Hash value: total read time is %lf; number of bytes being read from file is %lu\n", (end_t -start_t), nbytes_global);
+    else
+        printf("2. Hash value: no total read time because timer is not available; number of bytes being read from file is %lu\n", nbytes_global);
 
     H5Dclose (dataset);
     H5Sclose (filespace);

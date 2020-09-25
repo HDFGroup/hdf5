@@ -15,7 +15,7 @@
  *
  * Created:		H5ACprivate.h
  *			Jul  9 1997
- *			Robb Matzke <matzke@llnl.gov>
+ *			Robb Matzke
  *
  * Purpose:		Constants and typedefs available to the rest of the
  *			library.
@@ -387,6 +387,8 @@ H5_DLL herr_t H5AC_insert_entry(H5F_t *f, const H5AC_class_t *type,
     haddr_t addr, void *thing, unsigned int flags);
 H5_DLL herr_t H5AC_pin_protected_entry(void *thing);
 H5_DLL herr_t H5AC_prep_for_file_close(H5F_t *f);
+H5_DLL herr_t H5AC_prep_for_file_flush(H5F_t *f);
+H5_DLL herr_t H5AC_secure_from_file_flush(H5F_t *f);
 H5_DLL herr_t H5AC_create_flush_dependency(void *parent_thing, void *child_thing);
 H5_DLL void * H5AC_protect(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
     void *udata, unsigned flags);

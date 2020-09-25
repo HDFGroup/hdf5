@@ -11,11 +11,6 @@
  * help@hdfgroup.org.                                                        *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "H5LTprivate.h"
 
 /* For Lex and Yacc */
@@ -504,7 +499,7 @@ static herr_t H5LT_get_attribute_mem(hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Quincey Koziol, koziol@hdfgroup.org
+* Programmer: Quincey Koziol
 *
 * Date: October 10, 2007
 *
@@ -570,7 +565,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: March 19, 2001
 *
@@ -599,7 +594,7 @@ herr_t H5LTmake_dataset( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 14, 2001
 *
@@ -628,7 +623,7 @@ herr_t H5LTmake_dataset_char( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 14, 2001
 *
@@ -657,7 +652,7 @@ herr_t H5LTmake_dataset_short( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 14, 2001
 *
@@ -688,7 +683,7 @@ herr_t H5LTmake_dataset_int( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 14, 2001
 *
@@ -717,7 +712,7 @@ herr_t H5LTmake_dataset_long( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 14, 2001
 *
@@ -748,7 +743,7 @@ herr_t H5LTmake_dataset_float( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 14, 2001
 *
@@ -778,7 +773,7 @@ herr_t H5LTmake_dataset_double( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: October 05, 2004
 *
@@ -970,7 +965,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Quincey Koziol, koziol@hdfgroup.org
+* Programmer: Quincey Koziol
 *
 * Date: October 8, 2007
 *
@@ -1012,7 +1007,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: June 13, 2001
 *
@@ -1035,7 +1030,7 @@ herr_t H5LTread_dataset(hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 5, 2001
 *
@@ -1056,7 +1051,7 @@ herr_t H5LTread_dataset_char( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 5, 2001
 *
@@ -1077,7 +1072,7 @@ herr_t H5LTread_dataset_short( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 5, 2001
 *
@@ -1098,7 +1093,7 @@ herr_t H5LTread_dataset_int( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 5, 2001
 *
@@ -1119,7 +1114,7 @@ herr_t H5LTread_dataset_long( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 5, 2001
 *
@@ -1141,7 +1136,7 @@ herr_t H5LTread_dataset_float( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 5, 2001
 *
@@ -1163,7 +1158,7 @@ herr_t H5LTread_dataset_double( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: October 05, 2004
 *
@@ -1216,7 +1211,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 4, 2001
 *
@@ -1272,7 +1267,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 4, 2001
 *  Modified: February 28, 2006: checked for NULL parameters
@@ -1348,7 +1343,7 @@ out:
 *
 * Purpose: operator function used by H5LTfind_dataset
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: June 21, 2001
 *
@@ -1392,7 +1387,7 @@ find_dataset(hid_t loc_id, const char *name, const H5L_info2_t *linfo, void *op_
 * Purpose:  Inquires if a dataset named dset_name exists attached
 *           to the object loc_id.
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: July 15, 2001
 *
@@ -1436,7 +1431,7 @@ H5_GCC_DIAG_ON(cast-qual)
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: July 23, 2001
 *
@@ -1534,7 +1529,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: July 25, 2001
 *
@@ -1613,7 +1608,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 7, 2001
 *
@@ -1643,7 +1638,7 @@ herr_t H5LTset_attribute_char( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: March 8, 2004
 *
@@ -1674,7 +1669,7 @@ herr_t H5LTset_attribute_uchar( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 7, 2001
 *
@@ -1705,7 +1700,7 @@ herr_t H5LTset_attribute_short( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: March 8, 2004
 *
@@ -1736,7 +1731,7 @@ herr_t H5LTset_attribute_ushort( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 7, 2001
 *
@@ -1767,7 +1762,7 @@ herr_t H5LTset_attribute_int( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: March 8, 2004
 *
@@ -1799,7 +1794,7 @@ herr_t H5LTset_attribute_uint( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 7, 2001
 *
@@ -1829,7 +1824,7 @@ herr_t H5LTset_attribute_long( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Elena Pourmal, epourmal@ncsa.uiuc.edu
+* Programmer: Elena Pourmal
 *
 * Date: June 17, 2005
 *
@@ -1861,7 +1856,7 @@ herr_t H5LTset_attribute_long_long( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: March 8, 2004
 *
@@ -1893,7 +1888,7 @@ herr_t H5LTset_attribute_ulong( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: July 25, 2001
 *
@@ -1926,7 +1921,7 @@ herr_t H5LTset_attribute_float( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 7, 2001
 *
@@ -1957,7 +1952,7 @@ herr_t H5LTset_attribute_double( hid_t loc_id,
 *
 * Purpose: operator function used by H5LT_find_attribute
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: June 21, 2001
 *
@@ -1998,7 +1993,7 @@ find_attr(hid_t loc_id, const char *name, const H5A_info_t *ainfo,
 * Purpose: Inquires if an attribute named attr_name exists attached to
 *          the object loc_id.
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: May 17, 2006
 *
@@ -2020,7 +2015,7 @@ herr_t H5LTfind_attribute( hid_t loc_id, const char* attr_name )
 *
 * Purpose: Inquires if an attribute named attr_name exists attached to the object loc_id.
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: June 21, 2001
 *
@@ -2059,7 +2054,7 @@ H5_GCC_DIAG_ON(cast-qual)
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 4, 2001
 *
@@ -2129,7 +2124,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 4, 2001
 *
@@ -2215,7 +2210,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Raymond Lu, slu@ncsa.uiuc.edu
+* Programmer: Raymond Lu
 *
 * Date: October 6, 2004
 *
@@ -2265,7 +2260,7 @@ out:
 *
 * Return:      void
 *
-* Programmer:  Raymond Lu, songyulu@hdfgroup.org
+* Programmer:  Raymond Lu
 *
 * Date:        29 September 2011
 *
@@ -2325,7 +2320,7 @@ out:
 *
 * Return:      void
 *
-* Programmer:  Raymond Lu, slu@ncsa.uiuc.edu
+* Programmer:  Raymond Lu
 *
 * Date:        December 6, 2005
 *
@@ -2489,7 +2484,7 @@ out:
 *
 * Return:      Success: 0, Failure: -1
 *
-* Programmer:  Raymond Lu, slu@ncsa.uiuc.edu
+* Programmer:  Raymond Lu
 *
 * Date:        December 6, 2005
 *
@@ -2536,7 +2531,7 @@ out:
 *
 * Return:      Success: 0, Failure: -1
 *
-* Programmer:  Raymond Lu, slu@ncsa.uiuc.edu
+* Programmer:  Raymond Lu
 *
 * Date:        December 20, 2005
 *
@@ -3101,7 +3096,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 19, 2002
 *
@@ -3153,7 +3148,7 @@ herr_t H5LTget_attribute_string( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 19, 2002
 *
@@ -3182,7 +3177,7 @@ herr_t H5LTget_attribute_char( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: March 8, 2004
 *
@@ -3213,7 +3208,7 @@ herr_t H5LTget_attribute_uchar( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 19, 2002
 *
@@ -3242,7 +3237,7 @@ herr_t H5LTget_attribute_short( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: March 8, 2004
 *
@@ -3273,7 +3268,7 @@ herr_t H5LTget_attribute_ushort( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 19, 2002
 *
@@ -3302,7 +3297,7 @@ herr_t H5LTget_attribute_int( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: March 8, 2004
 *
@@ -3333,7 +3328,7 @@ herr_t H5LTget_attribute_uint( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 19, 2002
 *
@@ -3362,7 +3357,7 @@ herr_t H5LTget_attribute_long( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Elena Pourmal, epourmal@ncsa.uiuc.edu
+* Programmer: Elena Pourmal
 *
 * Date: June 17, 2005
 *
@@ -3392,7 +3387,7 @@ herr_t H5LTget_attribute_long_long( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: March 8, 2004
 *
@@ -3422,7 +3417,7 @@ herr_t H5LTget_attribute_ulong( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 19, 2002
 *
@@ -3454,7 +3449,7 @@ herr_t H5LTget_attribute_float( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 19, 2002
 *
@@ -3486,7 +3481,7 @@ herr_t H5LTget_attribute_double( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 19, 2002
 *
@@ -3525,7 +3520,7 @@ herr_t H5LTget_attribute( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 19, 2002
 *
@@ -3589,7 +3584,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 19, 2002
 *
@@ -3639,7 +3634,7 @@ out:
 *
 * Return: FAIL on error, SUCCESS on success
 *
-* Programmer: pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: January 04, 2005
 *

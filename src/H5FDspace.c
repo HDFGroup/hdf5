@@ -15,7 +15,7 @@
  *
  * Created:		H5FDspace.c
  *			Jan  3 2008
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Space allocation routines for the file driver code.
  *
@@ -84,7 +84,7 @@ H5FL_DEFINE(H5FD_free_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_extend
+ * Function:    H5FD__extend
  *
  * Purpose:     Extend the EOA space of a file.
  *
@@ -99,12 +99,12 @@ H5FL_DEFINE(H5FD_free_t);
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_extend(H5FD_t *file, H5FD_mem_t type, hsize_t size)
+H5FD__extend(H5FD_t *file, H5FD_mem_t type, hsize_t size)
 {
     haddr_t eoa;                /* Address of end-of-allocated space */
     haddr_t ret_value = HADDR_UNDEF;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(file);
@@ -129,7 +129,7 @@ H5FD_extend(H5FD_t *file, H5FD_mem_t type, hsize_t size)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_extend() */
+} /* end H5FD__extend() */
 
 
 /*-------------------------------------------------------------------------
@@ -203,7 +203,7 @@ HDfprintf(stderr, "%s: type = %u, size = %Hu\n", FUNC, (unsigned)type, size);
             HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF, "driver allocation request failed")
     } /* end if */
     else {
-        ret_value = H5FD_extend(file, type, size + extra);
+        ret_value = H5FD__extend(file, type, size + extra);
         if(!H5F_addr_defined(ret_value))
             HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF, "driver eoa update request failed")
     } /* end else */
@@ -439,7 +439,7 @@ H5FD_try_extend(H5FD_t *file, H5FD_mem_t type, H5F_t *f, haddr_t blk_end, hsize_
     /* Check if the block is exactly at the end of the file */
     if(H5F_addr_eq(blk_end, eoa)) {
         /* Extend the object by extending the underlying file */
-        if(HADDR_UNDEF == H5FD_extend(file, type, extra_requested))
+        if(HADDR_UNDEF == H5FD__extend(file, type, extra_requested))
             HGOTO_ERROR(H5E_VFL, H5E_CANTEXTEND, FAIL, "driver extend request failed")
 
         /* Mark EOA info dirty in cache, so change will get encoded */

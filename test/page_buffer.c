@@ -384,7 +384,6 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-
 static unsigned
 test_args(hid_t orig_fapl, const char *env_h5_drvr)
 {

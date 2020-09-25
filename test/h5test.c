@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Thursday, November 19, 1998
  *
  * Purpose:  Provides support functions for most of the hdf5 tests cases.
@@ -2057,23 +2057,23 @@ h5_get_version_string(H5F_libver_t libver)
 int
 h5_compare_file_bytes(char *f1name, char *f2name)
 {
-    FILE    *f1ptr = NULL;  /* two file pointers */
-    FILE    *f2ptr = NULL;
-    hsize_t  f1size = 0; /* size of the files */
-    hsize_t  f2size = 0;
-    char     f1char = 0; /* one char from each file */
-    char     f2char = 0;
-    hsize_t  ii = 0;
-    int      ret_value = 0; /* for error handling */
+    FILE       *f1ptr = NULL;  /* two file pointers */
+    FILE       *f2ptr = NULL;
+    off_t       f1size = 0;    /* size of the files */
+    off_t       f2size = 0;
+    char        f1char = 0;    /* one char from each file */
+    char        f2char = 0;
+    off_t       ii = 0;
+    int         ret_value = 0; /* for error handling */
 
     /* Open files for reading */
-    f1ptr = fopen(f1name, "r");
+    f1ptr = HDfopen(f1name, "rb");
     if (f1ptr == NULL) {
         HDfprintf(stderr, "Unable to fopen() %s\n", f1name);
         ret_value = -1;
         goto done;
     }
-    f2ptr = fopen(f2name, "r");
+    f2ptr = HDfopen(f2name, "rb");
     if (f2ptr == NULL) {
         HDfprintf(stderr, "Unable to fopen() %s\n", f2name);
         ret_value = -1;
@@ -2081,11 +2081,11 @@ h5_compare_file_bytes(char *f1name, char *f2name)
     }
 
     /* Get the file sizes and verify that they equal */
-    fseek(f1ptr , 0 , SEEK_END);
-    f1size = ftell(f1ptr);
+    HDfseek(f1ptr , 0 , SEEK_END);
+    f1size = HDftell(f1ptr);
 
-    fseek(f2ptr , 0 , SEEK_END);
-    f2size = ftell(f2ptr);
+    HDfseek(f2ptr , 0 , SEEK_END);
+    f2size = HDftell(f2ptr);
 
     if (f1size != f2size) {
         HDfprintf(stderr, "Files differ in size, %llu vs. %llu\n", f1size, f2size);
@@ -2094,11 +2094,17 @@ h5_compare_file_bytes(char *f1name, char *f2name)
     }
 
     /* Compare each byte and fail if a difference is found */
-    rewind(f1ptr);
-    rewind(f2ptr);
+    HDrewind(f1ptr);
+    HDrewind(f2ptr);
     for (ii = 0; ii < f1size; ii++) {
-        fread(&f1char, 1, 1, f1ptr);
-        fread(&f2char, 1, 1, f2ptr);
+        if(HDfread(&f1char, 1, 1, f1ptr) != 1) {
+            ret_value = -1;
+            goto done;
+        }
+        if(HDfread(&f2char, 1, 1, f2ptr) != 1) {
+            ret_value = -1;
+            goto done;
+        }
         if (f1char != f2char) {
             HDfprintf(stderr, "Mismatch @ 0x%llX: 0x%X != 0x%X\n", ii, f1char, f2char);
             ret_value = -1;
@@ -2107,13 +2113,11 @@ h5_compare_file_bytes(char *f1name, char *f2name)
     }
 
 done:
-    if (f1ptr) {
-        fclose(f1ptr);
-    }
-    if (f2ptr) {
-        fclose(f2ptr);
-    }
-    return(ret_value);
+    if (f1ptr)
+        HDfclose(f1ptr);
+    if (f2ptr)
+        HDfclose(f2ptr);
+    return ret_value;
 } /* end h5_compare_file_bytes() */
 
 /*-------------------------------------------------------------------------
@@ -2168,4 +2172,132 @@ const char *H5_get_srcdir(void)
     else
         return(NULL);
 } /* end H5_get_srcdir() */
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_duplicate_file_by_bytes
+ *
+ * Purpose:     Duplicate a file byte-for-byte at filename/path 'orig'
+ *              to a new (or replaced) file at 'dest'.
+ *
+ * Return:      Success:  0, completed successfully
+ *              Failure: -1
+ *
+ * Programmer:  Jake Smith
+ *              24 June 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+h5_duplicate_file_by_bytes(const char *orig, const char *dest)
+{
+    FILE *orig_ptr = NULL;
+    FILE *dest_ptr = NULL;
+    hsize_t fsize = 0;
+    hsize_t read_size = 0;
+    hsize_t max_buf = 0;
+    void *dup_buf = NULL;
+    int ret_value = 0;
+
+    max_buf = 4096 * sizeof(char);
+
+    orig_ptr = HDfopen(orig, "rb");
+    if (NULL == orig_ptr) {
+        ret_value = -1;
+        goto done;
+    }
+
+    HDfseek(orig_ptr , 0 , SEEK_END);
+    fsize = (hsize_t)HDftell(orig_ptr);
+    HDrewind(orig_ptr);
+
+    dest_ptr = HDfopen(dest, "wb");
+    if (NULL == dest_ptr) {
+        ret_value = -1;
+        goto done;
+    }
+
+    read_size = MIN(fsize, max_buf);
+    dup_buf = HDmalloc(read_size);
+    if (NULL == dup_buf) {
+        ret_value = -1;
+        goto done;
+    }
+
+    while (read_size > 0) {
+        if (HDfread(dup_buf, read_size, 1, orig_ptr) != 1) {
+            ret_value = -1;
+            goto done;
+        }
+        HDfwrite(dup_buf, read_size, 1, dest_ptr);
+        fsize -= read_size;
+        read_size = MIN(fsize, max_buf);
+    }
+
+done:
+    if (orig_ptr != NULL)
+        HDfclose(orig_ptr);
+    if (dest_ptr != NULL)
+        HDfclose(dest_ptr);
+    if (dup_buf != NULL)
+        HDfree(dup_buf);
+    return ret_value;
+} /* end h5_duplicate_file_by_bytes() */
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_check_if_file_locking_enabled
+ *
+ * Purpose:     Checks if file locking is enabled on this file system.
+ *
+ * Return:      SUCCEED/FAIL
+ *              are_enabled will be FALSE if file locking is disabled on
+ *              the file system of if there were errors.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+h5_check_if_file_locking_enabled(hbool_t *is_enabled)
+{
+    const char *filename = "locking_test_file";
+    int pmode = O_RDWR | O_CREAT | O_TRUNC;
+    int fd = -1;
+
+    *is_enabled = TRUE;
+
+    if((fd = HDopen(filename, pmode, H5_POSIX_CREATE_MODE_RW)) < 0)
+        goto error;
+
+    /* Test HDflock() to see if it works */
+    if(HDflock(fd, LOCK_EX | LOCK_NB) < 0) {
+        if(ENOSYS == errno) {
+            /* When errno is set to ENOSYS, the file system does not support
+             * locking, so ignore it. This is most frequently used on
+             * Lustre. If we also want to check for disabled NFS locks
+             * we'll need to check for ENOLCK, too. That isn't done by
+             * default here since that could also represent an actual
+             * error condition.
+             */
+            errno = 0;
+            *is_enabled = FALSE;
+        }
+        else
+            goto error;
+    }
+    if(HDflock(fd, LOCK_UN) < 0)
+        goto error;
+
+    if(HDclose(fd) < 0)
+        goto error;
+    if(HDremove(filename) < 0)
+        goto error;
+
+    return SUCCEED;
+
+error:
+    *is_enabled = FALSE;
+    if (fd > -1) {
+        HDclose(fd);
+        HDremove(filename);
+    }
+    return FAIL;
+} /* end h5_check_if_file_locking_enabled() */
 

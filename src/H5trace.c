@@ -15,7 +15,7 @@
  *
  * Created:     H5trace.c
  *              Aug 21 2006
- *              Quincey Koziol <koziol@hdfgroup.org>
+ *              Quincey Koziol
  *
  * Purpose:     Internal code for tracing API calls
  *
@@ -127,8 +127,11 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     hssize_t            i;
     void                *vp = NULL;
     FILE                *out = H5_debug_g.trace;
-    H5_timer_t          event_time;
-    static H5_timer_t   first_time = {0.0F, 0.0F, 0.0F};
+    static hbool_t      is_first_invocation = TRUE;
+    H5_timer_t          function_timer;
+    H5_timevals_t       function_times;
+    static H5_timer_t   running_timer;
+    H5_timevals_t       running_times;
     static int          current_depth = 0;
     static int          last_call_depth = 0;
 
@@ -154,13 +157,18 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
         } /* end else */
     } /* end if */
 
-    /* Get time for event */
-    if(H5_DBL_ABS_EQUAL(first_time.etime, (double)0.0f))
-        H5_timer_begin(&first_time);
-    if(H5_debug_g.ttimes)
-        H5_timer_begin(&event_time);
-    else
-        HDmemset(&event_time, 0, sizeof event_time);
+    /* Get time for event if the trace times flag is set */
+    if(is_first_invocation && H5_debug_g.ttimes) {
+        /* start the library-wide timer */
+        is_first_invocation = FALSE;
+        H5_timer_init(&running_timer);
+        H5_timer_start(&running_timer);
+    } /* end if */
+    if(H5_debug_g.ttimes) {
+        /* start the timer for this function */
+        H5_timer_init(&function_timer);
+        H5_timer_start(&function_timer);
+    } /* end if */
 
     /* Print the first part of the line.  This is the indication of the
      * nesting depth followed by the function name and either start of
@@ -176,7 +184,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
             if(H5_debug_g.ttimes) {
                 char tmp[320];
 
-                HDsprintf(tmp, "%.6f", event_time.etime-first_time.etime);
+                H5_timer_get_times(function_timer, &function_times);
+                H5_timer_get_times(running_timer, &running_times);
+                HDsprintf(tmp, "%.6f", (function_times.elapsed - running_times.elapsed));
                 HDfprintf(out, " %*s ", (int)HDstrlen(tmp), "");
             } /* end if */
             for(i = 0; i < current_depth; i++)
@@ -191,8 +201,11 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     else {
         if(current_depth>last_call_depth)
             HDfputs(" = <delayed>\n", out);
-        if(H5_debug_g.ttimes)
-            HDfprintf(out, "@%.6f ", event_time.etime - first_time.etime);
+        if(H5_debug_g.ttimes) {
+            H5_timer_get_times(function_timer, &function_times);
+            H5_timer_get_times(running_timer, &running_times);
+            HDfprintf(out, "@%.6f ", (function_times.elapsed - running_times.elapsed));
+        } /* end if */
         for(i = 0; i < current_depth; i++)
             HDfputc('+', out);
         HDfprintf(out, "%*s%s(", 2*current_depth, "", func);
@@ -298,7 +311,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'a':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -751,7 +764,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         break;
 
                     default:
-                       HDfprintf (out, "BADTYPE(D%c)", type[1]);
+                       HDfprintf(out, "BADTYPE(D%c)", type[1]);
                         goto error;
                 } /* end switch */
                 break;
@@ -1136,7 +1149,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 's':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -1213,7 +1226,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         break;
 
                     default:
-                        HDfprintf (out, "BADTYPE(H%c)", type[1]);
+                        HDfprintf(out, "BADTYPE(H%c)", type[1]);
                         goto error;
                 } /* end switch */
                 break;
@@ -1401,7 +1414,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 break;
 
                             case H5I_NTYPES:
-                                HDfprintf (out, "%ld (ntypes - error)", (long)obj);
+                                HDfprintf(out, "%ld (ntypes - error)", (long)obj);
                                 break;
 
                             default:
@@ -1505,7 +1518,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         else {
                             int is = HDva_arg(ap, int);
 
-                            HDfprintf (out, "%d", is);
+                            HDfprintf(out, "%d", is);
                             asize[argno] = is;
                         } /* end else */
                         break;
@@ -1625,7 +1638,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         break;
 
                     default:
-                        HDfprintf (out, "BADTYPE(I%c)", type[1]);
+                        HDfprintf(out, "BADTYPE(I%c)", type[1]);
                         goto error;
                 } /* end switch */
                 break;
@@ -1651,7 +1664,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'l':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -1795,7 +1808,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                 else {
                     off_t offset = HDva_arg(ap, off_t);
 
-                    HDfprintf (out, "%ld", (long)offset);
+                    HDfprintf(out, "%ld", (long)offset);
                 } /* end else */
                 break;
 
@@ -2504,7 +2517,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         break;
 
                     default:
-                        HDfprintf (out, "BADTYPE(T%c)", type[1]);
+                        HDfprintf(out, "BADTYPE(T%c)", type[1]);
                         goto error;
                 } /* end switch */
                 break;
@@ -2520,9 +2533,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     htri_t tri_var = HDva_arg (ap, htri_t);
 
                     if(tri_var>0)
-                        HDfprintf (out, "TRUE");
+                        HDfprintf(out, "TRUE");
                     else if(!tri_var)
-                        HDfprintf (out, "FALSE");
+                        HDfprintf(out, "FALSE");
                     else
                         HDfprintf(out, "FAIL(%d)", (int)tri_var);
                 } /* end else */
@@ -2579,7 +2592,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         break;
 
                     default:
-                        HDfprintf (out, "BADTYPE(U%c)", type[1]);
+                        HDfprintf(out, "BADTYPE(U%c)", type[1]);
                         goto error;
                 } /* end switch */
                 break;
@@ -2589,7 +2602,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'a':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -2625,7 +2638,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'A':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -2643,7 +2656,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'b':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -2673,7 +2686,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'B':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -2703,7 +2716,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'C':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -2720,7 +2733,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'c':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -2756,7 +2769,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'd':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -2783,7 +2796,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'e':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -2807,7 +2820,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'f':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -2831,7 +2844,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'g':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -2873,7 +2886,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'h':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -2912,7 +2925,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'i':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -2936,7 +2949,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'j':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -2960,7 +2973,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'k':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -2987,7 +3000,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'l':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -3014,7 +3027,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'L':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -3038,7 +3051,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'm':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -3065,7 +3078,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'n':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -3095,7 +3108,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'o':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -3131,7 +3144,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'r':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -3158,7 +3171,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 's':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -3181,7 +3194,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'S':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -3238,7 +3251,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 't':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -3286,7 +3299,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'u':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -3304,7 +3317,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'v':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -3409,7 +3422,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'w':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -3435,7 +3448,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'x':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -3453,7 +3466,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'y':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -3489,7 +3502,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     case 'z':
                         if(ptr) {
                             if(vp)
-                                HDfprintf (out, "0x%p", vp);
+                                HDfprintf(out, "0x%p", vp);
                             else
                                 HDfprintf(out, "NULL");
                         } /* end if */
@@ -3686,9 +3699,12 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     } /* end for */
 
     /* Display event time for return */
-    if(returning && H5_debug_g.ttimes)
-        HDfprintf(out, " @%.6f [dt=%.6f]", (event_time.etime - first_time.etime),
-                (event_time.etime - *returning));
+    if(returning && H5_debug_g.ttimes) {
+        H5_timer_get_times(function_timer, &function_times);
+        H5_timer_get_times(running_timer, &running_times);
+        HDfprintf(out, " @%.6f [dt=%.6f]", (function_times.elapsed - running_times.elapsed),
+                (function_times.elapsed - *returning));
+    } /* end if */
 
 error:
     HDva_end(ap);
@@ -3696,10 +3712,13 @@ error:
         HDfprintf(out, ";\n");
     else {
         last_call_depth = current_depth++;
-        HDfprintf (out, ")");
+        HDfprintf(out, ")");
     } /* end else */
     HDfflush(out);
 
-    return event_time.etime;
+    if(H5_debug_g.ttimes)
+        return function_times.elapsed;
+    else
+        return 0.0F;
 } /* end H5_trace() */
 

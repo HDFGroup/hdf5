@@ -30,16 +30,16 @@
 /* Test Defines */
 /* ============ */
 
-#define FILENAME "tagging_test.h5"
-#define FILENAME2 "tagging_ext_test.h5"
-#define GROUPNAME "Group"
+#define FILENAME      "tagging_test.h5"
+#define FILENAME2     "tagging_ext_test.h5"
+#define GROUPNAME     "Group"
 #define GROUPNAMEPATH "/Group"
 #define GROUPNAMECOPY "GroupCopy"
-#define ATTRNAME "Attribute 1"
-#define ATTRNAME3 "Attribute 3"
-#define DATASETNAME "Dataset"
-#define DATASETNAME2 "Dataset2"
-#define LINKNAME "Link"
+#define ATTRNAME      "Attribute 1"
+#define ATTRNAME3     "Attribute 3"
+#define DATASETNAME   "Dataset"
+#define DATASETNAME2  "Dataset2"
+#define LINKNAME      "Link"
 #define RANK 2
 #define DIMS 32
 
@@ -348,10 +348,19 @@ evict_entries(hid_t fid)
     /* Mark all entries investigated */
     mark_all_entries_investigated(fid);
 
+    /* setup the skip list prior to calling H5C_flush_cache() */
+    if ( H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0 )
+        TEST_ERROR;
+
     /* Evict all we can from the cache to examine full tag creation tree */
-        /* This function will likely return failure since the root group
-         * is still protected. Thus, don't check its return value. */
+    /* This function will likely return failure since the root group
+     * is still protected. Thus, don't check its return value. 
+     */
     H5C_flush_cache(f, H5C__FLUSH_INVALIDATE_FLAG);
+
+    /* shutdown the slist -- allow it to be non-empty */
+    if ( H5C_set_slist_enabled(f->shared->cache, FALSE, TRUE) < 0 )
+        TEST_ERROR;
 
     return 0;
 

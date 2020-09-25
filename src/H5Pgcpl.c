@@ -15,7 +15,7 @@
  *
  * Created:		H5Pgcpl.c
  *			August 29 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Group creation property list class routines
  *

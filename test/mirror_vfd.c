@@ -28,6 +28,8 @@
 
 #ifdef H5_HAVE_MIRROR_VFD
 
+#include "H5FDmirror_priv.h"    /* Private header for the mirror VFD */
+
 /* For future consideration, IP address and port number might be
  * environment variables?
  */

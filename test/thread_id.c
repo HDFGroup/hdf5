@@ -25,6 +25,8 @@
  */
 #include "testhdf5.h"
 
+#if defined(H5_HAVE_THREADSAFE) && !defined(H5_HAVE_WIN_THREADS)
+
 static void my_errx(int, const char *, ...) H5_ATTR_FORMAT(printf, 2, 3);
 
 static void
@@ -39,8 +41,6 @@ my_errx(int code, const char *fmt, ...)
     (void)HDfputc('\n', stderr);
     HDexit(code);
 }
-
-#if defined(H5_HAVE_THREADSAFE) && !defined(H5_HAVE_WIN_THREADS)
 
 #if defined(H5_HAVE_DARWIN)
 

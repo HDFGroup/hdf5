@@ -1150,12 +1150,13 @@ AC_CHECK_HEADERS([stdbool.h])
 AC_CHECK_HEADERS([netdb.h netinet/in.h arpa/inet.h])
 
 ## Darwin
-AC_CHECK_HEADERS([mach/mach_time.h])
-## Also need to detect Darwin for pubconf
+AC_SUBST([H5_IS_DARWIN])
+H5_IS_DARWIN="no"
 case $host_os in
   darwin*)
     AC_DEFINE([HAVE_DARWIN], [1], [Define if Darwin or Mac OS X])
-  ;;
+    H5_IS_DARWIN="yes"
+    ;;
 esac
 
 ## Windows
@@ -1248,6 +1249,7 @@ case "$host_cpu-$host_vendor-$host_os" in
     ## VFD on Linux systems.
     H5_CPPFLAGS="-D_GNU_SOURCE $H5_CPPFLAGS"
     ;;
+
 esac
 
 ## Need to add the AM_ and H5_ into CFLAGS/CPPFLAGS to make them visible
@@ -1592,18 +1594,21 @@ case "X-$withval" in
       AM_CPPFLAGS="$AM_CPPFLAGS -I$szlib_inc"
     fi
 
-    AC_CHECK_HEADERS([szlib.h],
-                     [HAVE_SZLIB_H="yes"],
-                     [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_SZLIB])
-
     if test -n "$szlib_lib"; then
       LDFLAGS="$LDFLAGS -L$szlib_lib"
       AM_LDFLAGS="$AM_LDFLAGS -L$szlib_lib"
     fi
 
-    if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
+    if test "x$HAVE_SZLIB" = "xyes"; then
       AC_CHECK_LIB([sz], [SZ_BufftoBuffCompress],,
-                   [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SZLIB])
+                   [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SZLIB])
+      if test -n "$HAVE_SZLIB"; then
+        AC_CHECK_HEADERS([szlib.h],
+                         [HAVE_SZLIB_H="yes"],
+                         [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_SZLIB])
+      else
+        AC_MSG_RESULT([Using SZ_BufftoBuffCompress from libsz in $szlib_lib failed.  Szip not enabled.])
+      fi
     fi
 
     if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
@@ -2309,6 +2314,56 @@ case "X-$OPTIMIZATION" in
     AC_MSG_RESULT([$OPTIMIZATION])
     ;;
 esac
+
+## ----------------------------------------------------------------------
+## Check if file locking should be used
+##
+AC_MSG_CHECKING([enable file locking])
+AC_ARG_ENABLE([file-locking],
+              [AS_HELP_STRING([--enable-file-locking=(yes|no|best-effort)],
+                              [Sets the default for whether or not to use file
+                               locking when opening files. Can be overridden
+                               with the HDF5_USE_FILE_LOCKING environment variable
+                               and the H5Pset_file_locking() API call.
+                               best-effort attempts to use file locking but does
+                               not fail when file locks have been disabled on
+                               the file system (useful with Lustre).
+                               [default=best-effort]
+                               ])],
+              [DESIRED_FILE_LOCKING=$enableval])
+
+## Set defaults
+if test "X-$DESIRED_FILE_LOCKING" = X- ; then
+  DESIRED_FILE_LOCKING=best-effort
+fi
+
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
+AC_SUBST([DESIRED_FILE_LOCKING])
+AC_SUBST([USE_FILE_LOCKING])
+AC_SUBST([IGNORE_DISABLED_FILE_LOCKS])
+
+case "X-$DESIRED_FILE_LOCKING" in
+  X-best-effort)
+      AC_MSG_RESULT([best-effort])
+      AC_DEFINE([USE_FILE_LOCKING], [1],
+                [Define if the library will use file locking])
+      AC_DEFINE([IGNORE_DISABLED_FILE_LOCKS], [1],
+                [Define if the library will ignore file locks when disabled])
+    ;;
+  X-yes)
+      AC_MSG_RESULT([yes])
+      AC_DEFINE([USE_FILE_LOCKING], [1],
+                [Define if the library will use file locking])
+    ;;
+  X-no)
+      AC_MSG_RESULT([no])
+    ;;
+  *)
+      AC_MSG_ERROR([Unrecognized value: $USE_FILE_LOCKING])
+    ;;
+esac
+
 
 ## ----------------------------------------------------------------------
 ## Enable/disable internal package-level debugging output

@@ -15,7 +15,7 @@
  *
  * Created:		H5Glink.c
  *			Nov 13 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Functions for handling links in groups.
  *
@@ -63,10 +63,10 @@
 /* Local Prototypes */
 /********************/
 
-static int H5G_link_cmp_name_inc(const void *lnk1, const void *lnk2);
-static int H5G_link_cmp_name_dec(const void *lnk1, const void *lnk2);
-static int H5G_link_cmp_corder_inc(const void *lnk1, const void *lnk2);
-static int H5G_link_cmp_corder_dec(const void *lnk1, const void *lnk2);
+static int H5G__link_cmp_name_inc(const void *lnk1, const void *lnk2);
+static int H5G__link_cmp_name_dec(const void *lnk1, const void *lnk2);
+static int H5G__link_cmp_corder_inc(const void *lnk1, const void *lnk2);
+static int H5G__link_cmp_corder_dec(const void *lnk1, const void *lnk2);
 
 
 /*********************/
@@ -86,7 +86,7 @@ static int H5G_link_cmp_corder_dec(const void *lnk1, const void *lnk2);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_link_cmp_name_inc
+ * Function:	H5G__link_cmp_name_inc
  *
  * Purpose:	Callback routine for comparing two link names, in
  *              increasing alphabetic order
@@ -98,22 +98,21 @@ static int H5G_link_cmp_corder_dec(const void *lnk1, const void *lnk2);
  *              (i.e. same as strcmp())
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep  5 2005
  *
  *-------------------------------------------------------------------------
  */
 static int
-H5G_link_cmp_name_inc(const void *lnk1, const void *lnk2)
+H5G__link_cmp_name_inc(const void *lnk1, const void *lnk2)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     FUNC_LEAVE_NOAPI(HDstrcmp(((const H5O_link_t *)lnk1)->name, ((const H5O_link_t *)lnk2)->name))
-} /* end H5G_link_cmp_name_inc() */
+} /* end H5G__link_cmp_name_inc() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_link_cmp_name_dec
+ * Function:	H5G__link_cmp_name_dec
  *
  * Purpose:	Callback routine for comparing two link names, in
  *              decreasing alphabetic order
@@ -125,22 +124,21 @@ H5G_link_cmp_name_inc(const void *lnk1, const void *lnk2)
  *              (i.e. opposite strcmp())
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep 25 2006
  *
  *-------------------------------------------------------------------------
  */
 static int
-H5G_link_cmp_name_dec(const void *lnk1, const void *lnk2)
+H5G__link_cmp_name_dec(const void *lnk1, const void *lnk2)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     FUNC_LEAVE_NOAPI(HDstrcmp(((const H5O_link_t *)lnk2)->name, ((const H5O_link_t *)lnk1)->name))
-} /* end H5G_link_cmp_name_dec() */
+} /* end H5G__link_cmp_name_dec() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_link_cmp_corder_inc
+ * Function:	H5G__link_cmp_corder_inc
  *
  * Purpose:	Callback routine for comparing two link creation orders, in
  *              increasing order
@@ -151,17 +149,16 @@ H5G_link_cmp_name_dec(const void *lnk1, const void *lnk2)
  *              as equal, their order in the sorted array is undefined.
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov  6 2006
  *
  *-------------------------------------------------------------------------
  */
 static int
-H5G_link_cmp_corder_inc(const void *lnk1, const void *lnk2)
+H5G__link_cmp_corder_inc(const void *lnk1, const void *lnk2)
 {
     int ret_value = -1;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     if(((const H5O_link_t *)lnk1)->corder < ((const H5O_link_t *)lnk2)->corder)
         ret_value = -1;
@@ -171,11 +168,11 @@ H5G_link_cmp_corder_inc(const void *lnk1, const void *lnk2)
         ret_value = 0;
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_link_cmp_corder_inc() */
+} /* end H5G__link_cmp_corder_inc() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_link_cmp_corder_dec
+ * Function:	H5G__link_cmp_corder_dec
  *
  * Purpose:	Callback routine for comparing two link creation orders, in
  *              decreasing order
@@ -186,17 +183,16 @@ H5G_link_cmp_corder_inc(const void *lnk1, const void *lnk2)
  *              as equal, their order in the sorted array is undefined.
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov  6 2006
  *
  *-------------------------------------------------------------------------
  */
 static int
-H5G_link_cmp_corder_dec(const void *lnk1, const void *lnk2)
+H5G__link_cmp_corder_dec(const void *lnk1, const void *lnk2)
 {
     int ret_value = -1;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     if(((const H5O_link_t *)lnk1)->corder < ((const H5O_link_t *)lnk2)->corder)
         ret_value = 1;
@@ -206,7 +202,7 @@ H5G_link_cmp_corder_dec(const void *lnk1, const void *lnk2)
         ret_value = 0;
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_link_cmp_corder_dec() */
+} /* end H5G__link_cmp_corder_dec() */
 
 
 /*-------------------------------------------------------------------------
@@ -217,7 +213,6 @@ H5G_link_cmp_corder_dec(const void *lnk1, const void *lnk2)
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 16 2006
  *
  *-------------------------------------------------------------------------
@@ -439,18 +434,18 @@ H5G__link_sort_table(H5G_link_table_t *ltable, H5_index_t idx_type,
     /* Pick appropriate sorting routine */
     if(idx_type == H5_INDEX_NAME) {
         if(order == H5_ITER_INC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_name_inc);
+            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_name_inc);
         else if(order == H5_ITER_DEC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_name_dec);
+            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_name_dec);
         else
             HDassert(order == H5_ITER_NATIVE);
     } /* end if */
     else {
         HDassert(idx_type == H5_INDEX_CRT_ORDER);
         if(order == H5_ITER_INC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_corder_inc);
+            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_corder_inc);
         else if(order == H5_ITER_DEC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_corder_dec);
+            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_corder_dec);
         else
             HDassert(order == H5_ITER_NATIVE);
     } /* end else */
@@ -561,7 +556,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov 13 2006
  *
  *-------------------------------------------------------------------------

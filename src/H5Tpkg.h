@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Robb Matzke <matzke@llnl.gov>
+ * Programmer:	Robb Matzke
  *		Monday, December  8, 1997
  *
  * Purpose:	This file contains declarations which are visible only within
@@ -49,7 +49,7 @@
 #define H5T_NAMELEN		32
 
 /* Macro to ease detecting "complex" datatypes (i.e. those with base types or fields) */
-#define H5T_IS_COMPLEX(t)       ((t) == H5T_COMPOUND || (t) == H5T_ENUM || (t) == H5T_VLEN || (t) == H5T_ARRAY)
+#define H5T_IS_COMPLEX(t)       ((t) == H5T_COMPOUND || (t) == H5T_ENUM || (t) == H5T_VLEN || (t) == H5T_ARRAY || (t) == H5T_REFERENCE)
 
 /* Macro to ease detecting fixed "string" datatypes */
 #define H5T_IS_FIXED_STRING(dt) (H5T_STRING == (dt)->type)
@@ -152,7 +152,7 @@
 struct H5T_stats_t {
     unsigned	ncalls;			/*num calls to conversion function   */
     hsize_t	nelmts;			/*total data points converted	     */
-    H5_timer_t	timer;			/*total time for conversion	     */
+    H5_timevals_t times;		/*total time for conversion	     */
 };
 
 /* Library internal datatype conversion functions are... */
@@ -1179,6 +1179,7 @@ H5_DLL void H5T__bit_neg(uint8_t *buf, size_t start, size_t size);
 
 /* VL functions */
 H5_DLL H5T_t * H5T__vlen_create(const H5T_t *base);
+H5_DLL herr_t H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info);
 H5_DLL htri_t H5T__vlen_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc);
 
 /* Array functions */
@@ -1187,6 +1188,7 @@ H5_DLL int    H5T__get_array_ndims(const H5T_t *dt);
 H5_DLL int    H5T__get_array_dims(const H5T_t *dt, hsize_t dims[]);
 
 /* Reference functions */
+H5_DLL herr_t H5T__ref_reclaim(void *elem, const H5T_t *dt);
 H5_DLL htri_t H5T__ref_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc);
 
 /* Compound functions */

@@ -246,7 +246,7 @@ static hbool_t H5P_dcrt_def_layout_init_g = FALSE;
 static herr_t
 H5P__dcrt_reg_prop(H5P_genclass_t *pclass)
 {
-    herr_t  ret_value   = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -421,13 +421,13 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
             for(u = 0; u < layout->storage.u.virt.list_nused; u++) {
                 /* Source file name */
                 tmp_size = HDstrlen(layout->storage.u.virt.list[u].source_file_name) + (size_t)1;
-                (void)H5MM_memcpy(*pp, layout->storage.u.virt.list[u].source_file_name, tmp_size);
+                H5MM_memcpy(*pp, layout->storage.u.virt.list[u].source_file_name, tmp_size);
                 *pp += tmp_size;
                 *size += tmp_size;
 
                 /* Source dataset name */
                 tmp_size = HDstrlen(layout->storage.u.virt.list[u].source_dset_name) + (size_t)1;
-                (void)H5MM_memcpy(*pp, layout->storage.u.virt.list[u].source_dset_name, tmp_size);
+                H5MM_memcpy(*pp, layout->storage.u.virt.list[u].source_dset_name, tmp_size);
                 *pp += tmp_size;
                 *size += tmp_size;
 
@@ -597,14 +597,14 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
                         tmp_size = HDstrlen((const char *)*pp) + 1;
                         if(NULL == (tmp_layout.storage.u.virt.list[u].source_file_name = (char *)H5MM_malloc(tmp_size)))
                             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "unable to allocate memory for source file name")
-                        (void)H5MM_memcpy(tmp_layout.storage.u.virt.list[u].source_file_name, *pp, tmp_size);
+                        H5MM_memcpy(tmp_layout.storage.u.virt.list[u].source_file_name, *pp, tmp_size);
                         *pp += tmp_size;
 
                         /* Source dataset name */
                         tmp_size = HDstrlen((const char *)*pp) + 1;
                         if(NULL == (tmp_layout.storage.u.virt.list[u].source_dset_name = (char *)H5MM_malloc(tmp_size)))
                             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "unable to allocate memory for source dataset name")
-                        (void)H5MM_memcpy(tmp_layout.storage.u.virt.list[u].source_dset_name, *pp, tmp_size);
+                        H5MM_memcpy(tmp_layout.storage.u.virt.list[u].source_dset_name, *pp, tmp_size);
                         *pp += tmp_size;
 
                         /* Source selection */
@@ -1847,13 +1847,6 @@ H5P__init_def_layout(void)
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
  *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for
- *              generic property list.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1928,13 +1921,6 @@ done:
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
  *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and get property for
- *              generic property list.
- *
  *-------------------------------------------------------------------------
  */
 H5D_layout_t
@@ -1977,13 +1963,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
- *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for
- *              generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -2059,13 +2038,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
- *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for
- *              generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -2375,7 +2347,7 @@ H5Pget_virtual_vspace(hid_t dcpl_id, size_t idx)
 
     /* Get the virtual space */
     if(idx >= layout.storage.u.virt.list_nused)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid idx (out of range)")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid index (out of range)")
     HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
     if(NULL == (space = H5S_copy(layout.storage.u.virt.list[idx].source_dset.virtual_select, FALSE, TRUE)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy virtual selection")
@@ -2431,9 +2403,9 @@ H5Pget_virtual_srcspace(hid_t dcpl_id, size_t idx)
     if(H5D_VIRTUAL != layout.type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a virtual storage layout")
 
-    /* Check idx */
+    /* Check index */
     if(idx >= layout.storage.u.virt.list_nused)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid idx (out of range)")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid index (out of range)")
     HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
 
     /* Attempt to open source dataset and patch extent if extent status is not
@@ -2537,7 +2509,7 @@ H5Pget_virtual_filename(hid_t dcpl_id, size_t idx, char *name/*out*/,
 
     /* Get the virtual filename */
     if(idx >= layout.storage.u.virt.list_nused)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid idx (out of range)")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid index (out of range)")
     HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
     HDassert(layout.storage.u.virt.list[idx].source_file_name);
     if(name && (size > 0))
@@ -2600,7 +2572,7 @@ H5Pget_virtual_dsetname(hid_t dcpl_id, size_t idx, char *name/*out*/,
 
     /* Get the virtual filename */
     if(idx >= layout.storage.u.virt.list_nused)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid idx (out of range)")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid index (out of range)")
     HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
     HDassert(layout.storage.u.virt.list[idx].source_dset_name);
     if(name && (size > 0))
@@ -2828,13 +2800,6 @@ done:
  * Programmer:	Robb Matzke
  *              Tuesday, March  3, 1998
  *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for
- *              generic property list.
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -2884,13 +2849,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *              Tuesday, March  3, 1998
- *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and get property for
- *              generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -3013,8 +2971,6 @@ done:
  * Programmer:	Kent Yang
  *              Wednesday, November 13, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3057,9 +3013,6 @@ done:
  *
  * Programmer:  Xiaowen Wu
  *              Wednesday, December 22, 2004
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -3119,9 +3072,6 @@ done:
  *
  * Programmer:  Xiaowen Wu
  *              Thursday, April 14, 2005
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -3526,9 +3476,6 @@ done:
  * Programmer:	Raymond Lu
  * 		Wednesday, January 16, 2002
  *
- * Modifications:
- *
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3709,9 +3656,6 @@ done:
  * Programmer:  Raymond Lu
  *              Wednesday, January 16, 2002
  *
- * Modifications:
- *
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3760,8 +3704,6 @@ done:
  * Programmer: Jacob Smith
  *             2018 August 14
  *
- * Modifications: None.
- *
  *-----------------------------------------------------------------------------
  */
 herr_t
@@ -3806,8 +3748,6 @@ done:
  *
  * Programmer: Jacob Smith
  *             2018 August 14
- *
- * Modifications: None.
  *
  *-----------------------------------------------------------------------------
  */

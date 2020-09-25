@@ -15,7 +15,7 @@
  *
  * Created:		H5Oalloc.c
  *			Nov 17 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Object header allocation routines.
  *
@@ -105,7 +105,6 @@ H5FL_EXTERN(H5O_cont_t);
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Oct 17 2006
  *
  *-------------------------------------------------------------------------
@@ -231,7 +230,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Oct 17 2006
  *
  *-------------------------------------------------------------------------
@@ -332,7 +330,6 @@ H5O__eliminate_gap(H5O_t *oh, hbool_t *chk_dirtied, H5O_mesg_t *mesg,
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Oct 22 2006
  *
  *-------------------------------------------------------------------------
@@ -440,7 +437,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Nov 21 2005
  *
  *-------------------------------------------------------------------------
@@ -729,7 +725,6 @@ done:
  *              Failure:        Negative
  *
  * Programmer:  Quincey Koziol
- *              koziol@lbl.gov
  *              Oct 21 2016
  *
  *-------------------------------------------------------------------------
@@ -878,7 +873,6 @@ H5O__alloc_find_best_nonnull(const H5F_t *f, const H5O_t *oh, size_t *size,
  *              Failure:        Negative
  *
  * Programmer:  Quincey Koziol
- *              koziol@lbl.gov
  *              Oct 21 2016
  *
  *-------------------------------------------------------------------------
@@ -1157,7 +1151,6 @@ done:
  *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug  7 1997
  *
  *-------------------------------------------------------------------------
@@ -1208,7 +1201,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@lbl.gov
  *              Oct 21 2016
  *
  *-------------------------------------------------------------------------
@@ -1283,7 +1275,6 @@ H5O__alloc_find_best_null(const H5O_t *oh, size_t size, size_t *mesg_idx)
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug  6 1997
  *
  *-------------------------------------------------------------------------
@@ -1369,7 +1360,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Oct 22 2006
  *
  *-------------------------------------------------------------------------
@@ -1607,7 +1597,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Oct 17 2005
  *
  *-------------------------------------------------------------------------
@@ -1958,7 +1947,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Oct 10 2005
  *
  *-------------------------------------------------------------------------
@@ -2101,7 +2089,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Oct 17 2005
  *
  *-------------------------------------------------------------------------
@@ -2286,7 +2273,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Oct  4 2005
  *
  *-------------------------------------------------------------------------
@@ -2347,7 +2333,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Neil Fortner
- *		nfortne2@hdfgroup.org
  *		Oct 20 2008
  *
  *-------------------------------------------------------------------------

@@ -34,7 +34,7 @@ herr_t H5IM_get_palette(hid_t loc_id,
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes
  *
  * Date: May 10, 2005
  *
@@ -127,7 +127,7 @@ herr_t H5IMmake_image_8bitf(hid_t loc_id,
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes
  *
  * Date: May 10, 2005
  *
@@ -244,7 +244,7 @@ herr_t H5IMmake_image_24bitf(hid_t loc_id,
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes
  *
  * Date: May 10, 2005
  *
@@ -302,7 +302,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes
  *
  * Date: May 10, 2005
  *
@@ -395,7 +395,7 @@ herr_t H5IMmake_palettef(hid_t loc_id,
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes
  *
  * Date: May 10, 2005
  *
@@ -434,7 +434,7 @@ herr_t H5IMget_palettef(hid_t loc_id,
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes
  *
  * Date: May 10, 2005
  *

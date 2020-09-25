@@ -15,7 +15,7 @@
  *
  * Created:		H5Ocache.c
  *			Sep 28 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Object header metadata cache virtual functions.
  *
@@ -84,8 +84,7 @@ static herr_t H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing);
 static herr_t H5O__cache_chk_free_icr(void *thing);
 
 /* Prefix routines */
-static herr_t H5O__prefix_deserialize(const uint8_t *image,
-    H5O_cache_ud_t *udata);
+static herr_t H5O__prefix_deserialize(const uint8_t *image, H5O_cache_ud_t *udata);
 
 /* Chunk routines */
 static herr_t H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len,
@@ -294,7 +293,7 @@ H5O__cache_verify_chksum(const void *_image, size_t len, void *_udata)
  *
  *		Note that the object header is read with with a speculative read.
  *		If the initial read is too small, make note of this fact and return
- *     		without error.  H5C_load_entry() will note the size discrepency
+ *     		without error.  H5C__load_entry() will note the size discrepency
  *		and retry the deserialize operation with the correct size read.
  *
  * Return:      Success:        Pointer to in core representation
@@ -1081,7 +1080,6 @@ done:
  *              Failure: FAIL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 12, 2008
  *
  *-------------------------------------------------------------------------
@@ -1300,7 +1298,6 @@ done:
  *              Failure: FAIL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 12, 2008
  *
  *-------------------------------------------------------------------------
@@ -1644,7 +1641,6 @@ done:
  *              Failure: FAIL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 12, 2008
  *
  *-------------------------------------------------------------------------
