@@ -4961,29 +4961,613 @@ H5_DLL herr_t H5Pset_local_heap_size_hint(hid_t plist_id, size_t size_hint);
 
 /* Map access property list (MAPL) routines */
 #ifdef H5_HAVE_MAP_API
-H5_DLL herr_t H5Pset_map_iterate_hints(hid_t mapl_id, size_t key_prefetch_size, size_t key_alloc_size);
 H5_DLL herr_t H5Pget_map_iterate_hints(hid_t mapl_id, size_t *key_prefetch_size /*out*/, size_t *key_alloc_size /*out*/);
+H5_DLL herr_t H5Pset_map_iterate_hints(hid_t mapl_id, size_t key_prefetch_size, size_t key_alloc_size);CC_RDWR - Files opened through external links will be opened with write access
+
+H5F_ACC_RDONLY - Files opened through external links will be opened with read-only access
+
+
 #endif /*  H5_HAVE_MAP_API */
 
 /* Link access property list (LAPL) routines */
-H5_DLL herr_t H5Pset_nlinks(hid_t plist_id, size_t nlinks);
-H5_DLL herr_t H5Pget_nlinks(hid_t plist_id, size_t *nlinks);
-H5_DLL herr_t H5Pset_elink_prefix(hid_t plist_id, const char *prefix);
-H5_DLL ssize_t H5Pget_elink_prefix(hid_t plist_id, char *prefix, size_t size);
-H5_DLL hid_t H5Pget_elink_fapl(hid_t lapl_id);
-H5_DLL herr_t H5Pset_elink_fapl(hid_t lapl_id, hid_t fapl_id);
-H5_DLL herr_t H5Pset_elink_acc_flags(hid_t lapl_id, unsigned flags);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup LAPL
+ *
+ * \brief Retrieves the external link traversal file access flag from the
+ *        specified link access property list
+ *
+ * \lapl_id
+ * \param[out] flags File access flag for link traversal
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_elink_acc_flags() retrieves the file access flag used
+ *          to open an external link target file from the specified link
+ *          access property list.
+ *
+ *          Valid values for \p flags include:
+ *          \li #H5F_ACC_RDWR - Files opened through external links will
+ *                             be opened with write access
+ *          \li #H5F_ACC_RDONLY - Files opened through external links will
+ *                               be opened with read-only access
+ *          \li #H5F_ACC_DEFAULT - Files opened through external links will
+ *                                be opened with the same access flag as
+ *                                the parent file
+ *
+ *          The value returned, if it is not #H5F_ACC_DEFAULT, will
+ *          override the default access flag, which is the access flag
+ *          used to open the parent file.
+ *
+ * \note <b>Example Usage:</b>
+ *       The following code retrieves the external link access flag
+ *       settings on the link access property list \p lapl_id into a
+ *       local variable:
+ *       <pre>
+ *         unsigned acc_flags;
+ *         status = H5Pget_elink_acc_flags(lapl_id, &acc_flags);
+ *       </pre>
+ *
+ * \since 1.8.3
+ *
+ */
 H5_DLL herr_t H5Pget_elink_acc_flags(hid_t lapl_id, unsigned *flags);
-H5_DLL herr_t H5Pset_elink_cb(hid_t lapl_id, H5L_elink_traverse_t func, void *op_data);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup LAPL
+ *
+ * \brief Retrieves the external link traversal callback function from the
+ *        specified link access property list
+ *
+ * \lapl_id
+ * \param[out] func    User-defined external link traversal callback
+ *                     function
+ * \param[out] op_data User-defined input data for the callback function
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_elink_cb() retrieves the user-defined external link
+ *          traversal callback function defined in the specified link
+ *          access property list.
+ *
+ *          The callback function may adjust the file access property
+ *          list and file access flag to use when opening a file through
+ *          an external link. The callback will be executed by the HDF5
+ *          library immediately before opening the target file.
+ *
+ * \note <b>Failure Modes:</b> H5Pget_elink_cb() will fail if the link
+ *       access property list identifier, lapl_id, is invalid.
+ *
+ * \note An invalid function pointer or data pointer, \p func or
+ *       \p op_data respectively, may cause a segmentation fault or an
+ *       invalid memory access.
+ *
+ * \note <b>Example Usage:</b> The following code retrieves the external
+ *       link callback settings on the link access property list
+ *       \p lapl_id into local variables:
+ *       <pre>
+ *       H5L_elink_traverse_t elink_callback_func;
+ *       void *elink_callback_udata;
+ *       status = H5Pget_elink_cb (lapl_id, &elink_callback_func,
+ *                                 &elink_callback_udata);
+ *       </pre>
+ *
+ * \since 1.8.3
+ *
+ */
 H5_DLL herr_t H5Pget_elink_cb(hid_t lapl_id, H5L_elink_traverse_t *func, void **op_data);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup LAPL
+ *
+ * \brief Retrieves the file access property list identifier associated
+ *        with the link access property list
+ *
+ * \lapl_id
+ *
+ * \return \hid_t{file access property list}
+ *
+ * \details H5Pget_elink_fapl() retrieves the file access property list
+ *          identifier that is set for the link access property list
+ *          identifier, \p lapl_id. The library uses this file access
+ *          property list identifier to open the target file for the
+ *          external link access. When no such identifier is set, this
+ *          routine returns #H5P_DEFAULT.
+ *
+ * \see H5Pset_elink_fapl() and H5Lcreate_external().
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL hid_t H5Pget_elink_fapl(hid_t lapl_id);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup LAPL
+ *
+ * \brief Retrieves prefix applied to external link paths
+ *
+ * \lapl_id{plist_id}
+ * \param[out] prefix Prefix applied to external link paths
+ * \param[in]  size   Size of prefix, including null terminator
+ *
+ * \return If successful, returns a non-negative value specifying the size
+ *         in bytes of the prefix without the NULL terminator; otherwise
+ *         returns a negative value.
+ *
+ * \details H5Pget_elink_prefix() retrieves the prefix applied to the
+ *          path of any external links traversed.
+ *
+ *          When an external link is traversed, the prefix is retrieved
+ *          from the link access property list \p plist_id, returned in
+ *          the user-allocated buffer pointed to by \p prefix, and
+ *          prepended to the filename stored in the external link.
+ *
+ *          The size in bytes of the prefix, including the NULL terminator,
+ *          is specified in \p size. If size is unknown, a preliminary
+ *          H5Pget_elink_prefix() call with the pointer \p prefix set to
+ *          NULL will return the size of the prefix without the NULL
+ *          terminator.
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL ssize_t H5Pget_elink_prefix(hid_t plist_id, char *prefix, size_t size);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup LAPL
+ *
+ * \brief Retrieves the maximum number of link traversals
+ *
+ * \lapl_id{plist_id}
+ * \param[out] nlinks Maximum number of links to traverse
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_nlinks() retrieves the maximum number of soft or
+ *          user-defined link traversals allowed, \p nlinks, before the
+ *          library assumes it has found a cycle and aborts the traversal.
+ *          This value is retrieved from the link access property list
+ *          \p plist_id.
+ *
+ *          The limit on the number of soft or user-defined link traversals
+ *          is designed to terminate link traversal if one or more links
+ *          form a cycle. User control is provided because some files may
+ *          have legitimate paths formed of large numbers of soft or
+ *          user-defined links. This property can be used to allow
+ *          traversal of as many links as desired.
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL herr_t H5Pget_nlinks(hid_t plist_id, size_t *nlinks);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup LAPL
+ *
+ * \brief Sets the external link traversal file access flag in a link
+ *        access property list
+ *
+ * \lapl_id
+ * \param[in] flags The access flag for external link traversal
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_elink_acc_flags() specifies the file access flag to use
+ *          to open the target file of an external link. This allows
+ *          read-only access of files reached through an external link in
+ *          a file opened with write access, or vice-versa.
+ *
+ *          The library will normally use the file access flag used to
+ *          open the parent file as the file access flag for the target
+ *          file. This function provides a way to override that behavior.
+ *
+ *          Valid values for \p flags include:
+ *          \li #H5F_ACC_RDWR - Causes files opened through external links
+ *               to be opened with write access
+ *          \li #H5F_ACC_RDONLY - Causes files opened through external
+ *              links to be opened with read-only access
+ *          \li #H5F_ACC_DEFAULT - Removes any external link file access
+ *              flag setting from \p lapl_id, causing the file access flag
+ *              setting to be taken from the parent file
+ *
+ *          The external link traversal callback function set by
+ *          H5Pset_elink_cb() can override the setting from
+ *          H5Pset_elink_acc_flags().
+ *
+ * \note <b>Motivation:</b> H5Pset_elink_acc_flags() is used to adjust the
+ *       file access flag used to open files reached through external links.
+ *       This may be useful to, for example, prevent modifying files
+ *       accessed through an external link. Otherwise, the target file is
+ *       opened with whatever flag was used to open the parent.
+ *
+ * \note <b>Example Usage:</b> The following code sets the link access
+ *       property list \p lapl_id to open external link target files with
+ *       read-only access:
+ *        <pre>
+ *         status = H5Pset_elink_acc_flags(lapl_id, H5F_ACC_RDONLY);
+ *        </pre>
+ *
+ * \since 1.8.3
+ *
+ */
+H5_DLL herr_t H5Pset_elink_acc_flags(hid_t lapl_id, unsigned flags);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup LAPL
+ *
+ * \brief Sets the external link traversal callback function in a link
+ *        access property list
+ *
+ * \lapl_id
+ * \param[in] func    User-defined external link traversal callback
+ *                    function
+ * \param[in] op_data User-defined input data for the callback function
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_elink_cb() sets a user-defined external link traversal
+ *          callback function in the link access property list \p lapl_id.
+ *          The callback function \p func must conform to the prototype
+ *          specified in #H5L_elink_traverse_t.
+ *
+ *          The callback function may adjust the file access property
+ *          list and file access flags to use when opening a file through
+ *          an external link. The callback will be executed by the HDF5
+ *          library immediately before opening the target file.
+ *
+ *          The callback will be made after the file access property list
+ *          set by H5Pset_elink_fapl() and the file access flag set by
+ *          H5Pset_elink_acc_flags() are applied, so changes made by this
+ *          callback function will take precedence.
+ *
+ * \attention A file close degree property setting (H5Pset_fclose_degree())
+ *            in this callback function or an associated property list will
+ *            be ignored. A file opened by means of traversing an external
+ *            link is always opened with the weak file close degree
+ *            property setting, #H5F_CLOSE_WEAK.
+ *
+ * \note <b>Motivation:</b> H5Pset_elink_cb() is used to specify a
+ *       callback function that is executed by the HDF5 library when
+ *       traversing an external link. This provides a mechanism to set
+ *       specific access permissions, modify the file access property
+ *       list, modify the parent or target file, or take any other
+ *       user-defined action. This callback function is used in
+ *       situations where the HDF5 library's default behavior is not
+ *       suitable.
+ *
+ * \note <b>Failure Modes:</b> H5Pset_elink_cb() will fail if the link
+ *       access property list identifier, \p lapl_id, is invalid or if
+ *       the function pointer, func, is NULL.
+ *
+ * \note An invalid function pointer, \p func, will cause a segmentation
+ *       fault or other failure when an attempt is subsequently made to
+ *       traverse an external link.
+ *
+ * \note <b>Examples Usage:</b>
+ *       This example defines a callback function that prints the name
+ *       of the target file every time an external link is followed, and
+ *       sets this callback function on \p lapl_id.
+ *       <pre>
+ *          herr_t elink_callback(const char *parent_file_name, const char
+ *                 *parent_group_name, const char *child_file_name, const char
+ *                 *child_object_name, unsigned *acc_flags, hid_t fapl_id, void *op_data) {
+ *              puts(child_file_name);
+ *              return 0;
+ *          }
+ *          int main(void) {
+ *              hid_t lapl_id = H5Pcreate(H5P_LINK_ACCESS);
+ *              H5Pset_elink_cb(lapl_id, elink_callback, NULL);
+ *                ...
+ *          }
+ *          </pre>
+ *
+ *
+ * \todo Add Programming Note for C++ Developers Using C Functions
+ *
+ *
+ * \since 1.8.3
+ *
+ */
+H5_DLL herr_t H5Pset_elink_cb(hid_t lapl_id, H5L_elink_traverse_t func, void *op_data);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup LAPL
+ *
+ * \brief Sets a file access property list for use in accessing a file
+ *        pointed to by an external link
+ *
+ * \lapl_id
+ * \fapl_id
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_elink_fapl() sets the file access property list,
+ *          \p fapl_id, to be used when accessing the target file of an
+ *          external link associated with \p lapl_id.
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL herr_t H5Pset_elink_fapl(hid_t lapl_id, hid_t fapl_id);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup LAPL
+ *
+ * \brief Sets prefix to be applied to external link paths
+ *
+ * \lapl_id{plist_id}
+ * \param[in] prefix Prefix to be applied to external link paths
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_elink_prefix() sets the prefix to be applied to the
+ *          path of any external links traversed. The prefix is prepended
+ *          to the filename stored in the external link.
+ *
+ *          The prefix is specified in the user-allocated buffer \p prefix
+ *          and set in the link access property list \p plist_id. The buffer
+ *          should not be freed until the property list has been closed.
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL herr_t H5Pset_elink_prefix(hid_t plist_id, const char *prefix);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup LAPL
+ *
+ * \brief Sets maximum number of soft or user-defined link traversals
+ *
+ * \lapl_id{plist_id}
+ * \param[in] nlinks Maximum number of links to traverse
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_nlinks() sets the maximum number of soft or user-defined
+ *          link traversals allowed, \p nlinks, before the library assumes
+ *          it has found a cycle and aborts the traversal. This value is
+ *          set in the link access property list \p plist_id.
+ *
+ *          The limit on the number of soft or user-defined link traversals
+ *          is designed to terminate link traversal if one or more links
+ *          form a cycle. User control is provided because some files may
+ *          have legitimate paths formed of large numbers of soft or
+ *          user-defined links. This property can be used to allow
+ *          traversal of as many links as desired.
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL herr_t H5Pset_nlinks(hid_t plist_id, size_t nlinks);
 
 /* Object copy property list (OCPYPL) routines */
-H5_DLL herr_t H5Pset_copy_object(hid_t plist_id, unsigned crt_intmd);
-H5_DLL herr_t H5Pget_copy_object(hid_t plist_id, unsigned *crt_intmd /*out*/);
+
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup OCPPL
+ *
+ * \brief Adds a path to the list of paths that will be searched in the
+ *        destination file for a matching committed datatype
+ *
+ * \param[in] plist_id Object copy property list identifier
+ * \param[in] path     The path to be added
+ *
+ * \return \herr_t
+ *
+ * \details H5Padd_merge_committed_dtype_path() adds a path, \p path,
+ *          which points to a committed datatype, to the current list of
+ *          suggested paths stored in the object copy property list
+ *          \p plist_id. The search as described in the next paragraph is
+ *          effective only if the #H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG is
+ *          enabled in the object copy property list via
+ *          H5Pset_copy_object().
+ *
+ *          When copying a committed datatype, a dataset with a committed
+ *          datatype, or an object with an attribute of a committed
+ *          datatype, the default behavior of H5Ocopy() is to search for
+ *          a matching committed datatype:
+ *          <ol>
+ *          <li> First search the list of suggested paths in the object
+ *               copy property list.</li>
+ *          <li> Then, if no match has been found, search all the committed
+ *               datatypes in the destination file.
+ *          </ol>
+ *          The default Step 2 in this search process can be changed by
+ *          setting a callback function (see H5Pset_mcdt_search_cb()).
+ *
+ *          Two datatypes are determined equal if their descriptions are
+ *          identical, in a manner similar to H5Tequal(). If either
+ *          committed datatype has one or more attributes, then all
+ *          attributes must be present in both committed datatypes and they
+ *          must be identical. Two attributes are considered identical if
+ *          their datatype description, dataspace, and raw data values are
+ *          the same. However, if an attribute uses a committed datatype,
+ *          that committed datatype’s attributes will not be compared.
+ *
+ *          If a match is found, H5Ocopy() will perform the following in
+ *          the destination file:
+ *          \li For a committed datatype, the library will create a hard
+ *              link to the found datatype.
+ *          \li For a dataset that uses a committed datatype, the library
+ *              will modify the copied dataset to use the found committed
+ *              datatype as its datatype.
+ *          \li For an object with an attribute of a committed datatype,
+ *              the library will modify the copied object’s attribute to
+ *              use the found committed datatype as its datatype.
+ *
+ *          If no match is found, H5Ocopy() will perform the following in
+ *          the destination file:
+ *          \li For a committed datatype, the library will copy it as it
+ *              would any other object, creating a named committed
+ *              datatype at the destination. That is, the library will
+ *              create a committed datatype that is accessible in the
+ *              file by a unique path.
+ *          \li For a dataset that uses a committed datatype, the
+ *              library will copy the datatype as an anonymous
+ *              committed datatype and use that as the dataset’s
+ *              datatype.
+ *          \li For an object with an attribute of a committed datatype,
+ *              the library will copy the datatype as an anonymous
+ *              committed datatype and use that as the attribute’s
+ *              datatype.
+ *
+ * \note \b Motivation: H5Padd_merge_committed_dtype_path() provides a
+ *       means to override the default behavior of H5Ocopy() when
+ *       #H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG is set in an object
+ *       copy property list.
+ *       H5Padd_merge_committed_dtype_path() is the mechanism for
+ *       suggesting search paths where H5Ocopy() will look for a
+ *       matching committed datatype. This can be substantially
+ *       faster than the default approach of searching the entire
+ *       destination file for a match.
+ *
+ * \note <b>Failure Modes:</b>
+ *       H5Padd_merge_committed_dtype_path() will fail if the object
+ *       copy property list is invalid.
+ *       It will also fail if there is insufficient memory when
+ *       duplicating path.
+ *
+ * \note <b>Example Usage:</b>
+ *       This example adds two paths to the object copy property list.
+ *       H5Ocopy() will search the two suggested paths for a match
+ *       before searching all the committed datatypes in the
+ *       destination file.
+ *       <pre>
+ *       int main(void) {
+ *           hid_t ocpypl_id = H5Pcreate(H5P_OBJECT_COPY);
+ *           /* Enable the merging committed datatype feature */
+ *            H5Pset_copy_object(ocpypl_id,
+ *                         H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG);
+ *           /* Add a path to a committed datatype */
+ *            H5Padd_merge_committed_dtype_path(ocpypl_id,
+ *                                      "/group/committed_dtypeA");
+ *           /* Add a path to a dataset with committed datatype */
+ *            H5Padd_merge_committed_dtype_path(ocpypl_id,
+ *                                      "/group2/committed_dset");
+ *           /* Does the copy */
+ *            H5Ocopy(...ocpypl_id...);
+ *            ...
+ *            ...
+ *        }
+ *        </pre>
+ * \see
+ *    \li H5Ocopy()
+ *    \li #H5O_mcdt_search_cb_t
+ *    \li H5Padd_merge_committed_dtype_path()
+ *    \li H5Pfree_merge_committed_dtype_paths()
+ *    \li H5Pget_mcdt_search_cb()
+ *    \li H5Pset_copy_object()
+ *    \li H5Pset_mcdt_search_cb()
+ *
+ * \todo missing link to "Copying Committed Datatypes with H5Ocopy - A
+ *       comprehensive discussion of copying committed datatypes (PDF)
+ *       in Advanced Topics in HDF5
+ *
+ * \since 1.8.9
+ *
+ */
 H5_DLL herr_t H5Padd_merge_committed_dtype_path(hid_t plist_id, const char *path);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup OCPYPL
+ *
+ * \brief
+ *
+ * \param[in]
+ * \param[out]
+ *
+ * \return
+ *
+ * \details
+ *
+ * \since
+ *
+ */
 H5_DLL herr_t H5Pfree_merge_committed_dtype_paths(hid_t plist_id);
-H5_DLL herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, void *op_data);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup OCPYPL
+ *
+ * \brief
+ *
+ * \param[in]
+ * \param[out]
+ *
+ * \return
+ *
+ * \details
+ *
+ * \since
+ *
+ */
+H5_DLL herr_t H5Pget_copy_object(hid_t plist_id, unsigned *crt_intmd /*out*/);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup OCPYPL
+ *
+ * \brief
+ *
+ * \param[in]
+ * \param[out]
+ *
+ * \return
+ *
+ * \details
+ *
+ * \since
+ *
+ */
 H5_DLL herr_t H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func, void **op_data);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup OCPYPL
+ *
+ * \brief
+ *
+ * \param[in]
+ * \param[out]
+ *
+ * \return
+ *
+ * \details
+ *
+ * \since
+ *
+ */
+H5_DLL herr_t H5Pset_copy_object(hid_t plist_id, unsigned crt_intmd);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup
+ *
+ * \brief OCPYPL
+ *
+ * \param[in]
+ * \param[out]
+ *
+ * \return
+ *
+ * \details
+ *
+ * \since
+ *
+ */
+H5_DLL herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, void *op_data);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *
