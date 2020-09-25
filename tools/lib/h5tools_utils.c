@@ -48,7 +48,6 @@ hsize_t H5TOOLS_BUFSIZE = ( 32 * 1024 * 1024);  /* 32 MB */
 
 /* ``parallel_print'' variables */
 unsigned char  g_Parallel = 0;  /*0 for serial, 1 for parallel */
-unsigned char  g_CollectInfoOnly = 0;
 char     outBuff[OUTBUFF_SIZE];
 unsigned outBuffOffset;
 FILE*    overflow_file = NULL;

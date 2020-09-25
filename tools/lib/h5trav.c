@@ -15,9 +15,6 @@
 #include "h5trav.h"
 #include "h5tools.h"
 #include "H5private.h"
-#ifdef H5_HAVE_PARALLEL
-#include "h5tools_utils.h"
-#endif
 
 /*-------------------------------------------------------------------------
  * local typedefs
@@ -182,10 +179,8 @@ static herr_t
 traverse_cb(hid_t loc_id, const char *path, const H5L_info2_t *linfo,
     void *_udata)
 {
-    herr_t ret_value = SUCCEED;
     trav_ud_traverse_t *udata = (trav_ud_traverse_t *)_udata;     /* User data */
     char *new_name = NULL;
-
     const char *full_name;
     const char *already_visited = NULL; /* Whether the link/object was already visited */
 
@@ -206,18 +201,6 @@ traverse_cb(hid_t loc_id, const char *path, const H5L_info2_t *linfo,
     else
         full_name = path;
 
-#ifdef H5_HAVE_PARALLEL
-    if(linfo->type == H5L_TYPE_EXTERNAL) {
-	h5tool_link_info_t lnk_info;
-        if ((ret_value = H5tools_get_symlink_info(loc_id, path, &lnk_info, FALSE)) < 0) {
-	    puts("H5tools_get_symlink_info failed!");
-	}
-	else if (ret_value == 0) {
-	    puts("Dangling link?");
-	}
-	printf("Visiting external link: %s\n", path);
-    }
-#endif
     /* Perform the correct action for different types of links */
     if(linfo->type == H5L_TYPE_HARD) {
         H5O_info2_t oinfo;

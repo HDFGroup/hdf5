@@ -14915,8 +14915,8 @@ test_sel_iter(void)
 {
     hid_t       sid;            /* Dataspace ID */
     hid_t       iter_id;        /* Dataspace selection iterator ID */
-    hsize_t    dims1[] = {6, 12};  /* 2-D Dataspace dimensions */
-    hsize_t    coord1[POINT1_NPOINTS][2]; /* Coordinates for point selection */
+    hsize_t     dims1[] = {6, 12};  /* 2-D Dataspace dimensions */
+    hsize_t     coord1[POINT1_NPOINTS][2]; /* Coordinates for point selection */
     hsize_t     start[2];       /* Hyperslab start */
     hsize_t     stride[2];      /* Hyperslab stride */
     hsize_t     count[2];       /* Hyperslab block count */
@@ -14928,7 +14928,7 @@ test_sel_iter(void)
     H5S_sel_type sel_type;      /* Selection type */
     unsigned    sel_share;      /* Whether to share selection with dataspace */
     unsigned    sel_iter_flags; /* Flags for selection iterator creation */
-    herr_t    ret;        /* Generic return value    */
+    herr_t      ret;            /* Generic return value    */
 
     /* Output message about test being performed */
     MESSAGE(6, ("Testing Dataspace Selection Iterators\n"));

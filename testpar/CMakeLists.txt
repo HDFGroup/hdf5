@@ -74,9 +74,10 @@ set (H5P_TESTS
     t_init_term
     t_shapesame
     t_filters_parallel
-    t_2Gio
 	t_subfile_openclose
 	t_subfile_readwrite
+	t_subfile_bench
+#	t_subfile_bench_hdf
 )
 
 foreach (h5_testp ${H5P_TESTS})

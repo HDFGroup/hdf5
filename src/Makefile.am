@@ -207,7 +207,7 @@ $(top_srcdir)/src/H5overflow.h: $(top_srcdir)/src/H5overflow.txt
 
 trace: $(libhdf5_la_SOURCES)
 	@for dep in $? dummy; do                                          \
-	 if test $$dep != "dummy" -a -n "$(PERL)"; then                      \
+	 if test $$dep != "dummy" -a -n "$(PERL)"; then                   \
 	  case "$$dep" in                                                 \
 	   *.c)                                                           \
 	    $(TRACE) $$dep;                                               \

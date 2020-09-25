@@ -48,6 +48,9 @@ static int mpi_size_g, mpi_rank_g;
 hsize_t space_dim1 = SPACE_DIM1 * 256; // 4096
 hsize_t space_dim2 = SPACE_DIM2;
 
+extern void 
+set_verbose_flag(int subfile_rank, int new_value);
+
 static void coll_chunktest(const char* filename, int chunk_factor, int select_factor,
                            int api_option, int file_selection, int mem_selection, int mode);
 
@@ -494,7 +497,6 @@ dataset_big_write(void)
     size_t num_points;
     B_DATATYPE * wdata;
 
-
     /* allocate memory for data buffer */
     wdata = (B_DATATYPE *)HDmalloc(bigcount*sizeof(B_DATATYPE));
     VRFY_G((wdata != NULL), "wdata malloc succeeded");
@@ -516,7 +518,7 @@ dataset_big_write(void)
     /* Each process takes a slabs of rows. */
     if (mpi_rank_g == 0)
         HDprintf("\nTesting Dataset1 write by ROW\n");
-    /* Create a large dataset */
+    /* Create a large dataset - global dims as follows:: */
     dims[0] = bigcount;
     dims[1] = (hsize_t)mpi_size_g;
 
@@ -528,6 +530,7 @@ dataset_big_write(void)
 
     block[0] = dims[0]/(hsize_t)mpi_size_g;
     block[1] = dims[1];
+	printf("[%d] block[0] = %lld block[1] = %lld\n", mpi_rank_g, block[0], block[1]);
     stride[0] = block[0];
     stride[1] = block[1];
     count[0] = 1;
@@ -776,6 +779,7 @@ dataset_big_write(void)
     VRFY_G((ret >= 0), "H5Dclose1 succeeded");
 
     HDfree(wdata);
+
     H5Fclose(fid);
 }
 
@@ -1922,6 +1926,8 @@ do_express_test(int world_mpi_rank)
 int main(int argc, char **argv)
 {
     int ExpressMode = 0;
+	int mpi_provides, require = MPI_THREAD_MULTIPLE;
+
     hsize_t newsize = 1048576;
     /* Set the bigio processing limit to be 'newsize' bytes */
     hsize_t oldsize = H5_mpi_set_bigio_count(newsize);
@@ -1934,8 +1940,10 @@ int main(int argc, char **argv)
     if (newsize != oldsize) {
        bigcount = newsize * 2;
     }
-
-    MPI_Init(&argc, &argv);
+    if ( (MPI_Init_thread(&argc, &argv, require, &mpi_provides)) != MPI_SUCCESS) {
+       HDfprintf(stderr, "FATAL: Unable to initialize MPI\n");
+       HDexit(EXIT_FAILURE);
+	}
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size_g);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank_g);
 
@@ -1945,13 +1953,15 @@ int main(int argc, char **argv)
      * calls.  By then, MPI calls may not work.
      */
     if (H5dont_atexit() < 0){
-    HDprintf("Failed to turn off atexit processing. Continue.\n");
+       HDprintf("Failed to turn off atexit processing. Continue.\n");
     };
 
     /* set alarm. */
     ALARM_ON;
 
     ExpressMode = do_express_test(mpi_rank_g);
+
+	set_verbose_flag(0, 1);
 
     dataset_big_write();
     MPI_Barrier(MPI_COMM_WORLD);
@@ -1976,9 +1986,10 @@ int main(int argc, char **argv)
     /* turn off alarm */
     ALARM_OFF;
 
+#if 0
     if (mpi_rank_g == 0)
         HDremove(FILENAME[0]);
-
+#endif
     /* close HDF5 library */
     H5close();
 

@@ -66,9 +66,25 @@ extern "C" {
 #endif
 
 H5_DLL hid_t H5FD_subfiling_init(void);
-H5_DLL herr_t H5Pget_fapl_subfiling(hid_t fapl_id, 
-    H5FD_subfiling_fapl_t *fa_out);
+H5_DLL herr_t H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_fapl_t *fa_out);
 H5_DLL herr_t H5Pset_fapl_subfiling(hid_t fapl_id,  H5FD_subfiling_fapl_t *fa);
+H5_DLL herr_t H5FD__get_file_ino(const char *name, uint64_t *st_ino);
+H5_DLL herr_t H5FD__dataset_write_contiguous(hid_t h5_file_id, haddr_t dataset_baseAddr, size_t dtype_extent,
+											 int mpi_rank, int mpi_size, void *_dset, hid_t mem_type_id, hid_t mem_space_id,
+											 hid_t file_space_id, hid_t plist_id, const void *buf);
+H5_DLL herr_t H5FD__dataset_read_contiguous(hid_t h5_file_id, haddr_t dataset_baseAddr, size_t dtype_extent, 
+											int mpi_rank, int mpi_size, void *_dset, hid_t mem_type_id, hid_t mem_space_id,
+											hid_t file_space_id, hid_t plist_id, void *buf);
+
+/* Copied from:: H5FDsubfile_private.h */
+H5_DLL int sf_open_subfiles(hid_t context_id, char *filename, char *prefix, int flags);
+H5_DLL int sf_close_subfiles(hid_t context_id);
+H5_DLL int sf_read_independent(hid_t sf_fid, int64_t offset, int64_t elements, int dtype_extent, void *data);
+H5_DLL int sf_write_independent(hid_t sf_fid, int64_t offset, int64_t elements, int dtype_extent, const void *data);
+H5_DLL herr_t sf_read_vector(hid_t h5_fid, hssize_t count, hsize_t addrs[], hsize_t sizes[], void *bufs[] /* out */);
+H5_DLL herr_t sf_write_vector(hid_t h5_fid, hssize_t count, hsize_t addrs[], hsize_t sizes[], void *bufs[] /* in */);
+H5_DLL int sf_truncate(hid_t h5_fid, haddr_t addr);
+
 
 #ifdef __cplusplus
 }

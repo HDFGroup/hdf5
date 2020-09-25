@@ -243,6 +243,7 @@ set (H5FD_SOURCES
     ${HDF5_SRC_DIR}/H5FDstdio.c
     ${HDF5_SRC_DIR}/H5FDtest.c
     ${HDF5_SRC_DIR}/H5FDwindows.c
+    ${HDF5_SRC_DIR}/H5FDsubfiling.c
     ${HDF5_SRC_DIR}/H5FDsubfile.c
     ${HDF5_SRC_DIR}/H5FDsubfile_threads.c
     ${HDF5_SRC_DIR}/H5FDsubfile_mpi.c
@@ -265,6 +266,7 @@ set (H5FD_HDRS
     ${HDF5_SRC_DIR}/H5FDsplitter.h
     ${HDF5_SRC_DIR}/H5FDstdio.h
     ${HDF5_SRC_DIR}/H5FDwindows.h
+    ${HDF5_SRC_DIR}/H5FDsubfiling.h
     ${HDF5_SRC_DIR}/H5FDsubfile_public.h
     ${HDF5_SRC_DIR}/mercury/mercury_thread.h
 	${HDF5_SRC_DIR}/mercury/mercury_thread_mutex.h

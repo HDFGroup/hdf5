@@ -23,23 +23,30 @@
  *          application to the same file).
  */
 
+#define H5S_FRIEND	        /*suppress error about including H5Spkg	  */
 #include "H5FDdrvr_module.h" /* This source code file is part of the H5FD driver module */
 
-
 #include "H5private.h"      /* Generic Functions        */
+#include "H5Dprivate.h"		/* Dataset stuff            */
 #include "H5Eprivate.h"     /* Error handling           */
 #include "H5Fprivate.h"     /* File access              */
+#include "H5CXprivate.h"    /* API contexts, etc.       */
 #include "H5FDprivate.h"    /* File drivers             */
 #include "H5FDsubfiling.h"  /* Subfiling file driver    */
 #include "H5FLprivate.h"    /* Free Lists               */
 #include "H5Iprivate.h"     /* IDs                      */
 #include "H5MMprivate.h"    /* Memory management        */
 #include "H5Pprivate.h"     /* Property lists           */
+#include "H5Spkg.h"			/* For selections and creation of subfiling vectors */
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_SUBFILING_g = 0;
 
-
+/* These are used for the creation of read or write vectors */
+static hssize_t sf_vlen = -1;
+static hsize_t  *sf_offsets = NULL;
+static hsize_t  *sf_sizes = NULL;
+static void    **sf_bufs = NULL;
 
 
 /* The description of a file belonging to this driver. The 'eoa' and 'eof'
@@ -104,6 +111,11 @@ typedef struct H5FD_subfiling_t {
     haddr_t         pos;    /* current file I/O position        */
     H5FD_file_op_t  op;     /* last operation                   */
     char            filename[H5FD_MAX_FILENAME_LEN];    /* Copy of file name from open operation */
+	MPI_Info        info;
+	MPI_Comm        comm;
+	int             mpi_size;
+	int             mpi_rank;
+
 #ifndef H5_HAVE_WIN32_API
     /* On most systems the combination of device and i-node number uniquely
      * identify a file.  Note that Cygwin, MinGW and other Windows POSIX
@@ -186,14 +198,28 @@ static herr_t H5FD_subfiling_read(H5FD_t *_file, H5FD_mem_t type,
     hid_t fapl_id, haddr_t addr, size_t size, void *buf);
 static herr_t H5FD_subfiling_write(H5FD_t *_file, H5FD_mem_t type, 
     hid_t fapl_id, haddr_t addr, size_t size, const void *buf);
+
+static herr_t H5FD__subfiling_read_vector(H5FD_t *file, hid_t dxpl_id,
+     uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[], 
+     void *bufs[] /* out */);
+static herr_t H5FD__subfiling_write_vector(H5FD_t *file, hid_t dxpl_id,
+    uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
+    void *bufs[] /* in */);
+
 static herr_t H5FD_subfiling_truncate(H5FD_t *_file, hid_t dxpl_id, 
     hbool_t closing);
 static herr_t H5FD_subfiling_lock(H5FD_t *_file, hbool_t rw);
 static herr_t H5FD_subfiling_unlock(H5FD_t *_file);
 
 static herr_t  H5FD_subfiling_validate_config(const H5FD_subfiling_fapl_t * fa);
+static int  H5FD_subfiling_mpi_rank(const H5FD_t *_file);
+static int H5FD_subfiling_mpi_size(const H5FD_t *_file);
+static MPI_Comm H5FD_subfiling_communicator(const H5FD_t *_file);
+static herr_t H5FD_subfiling_get_info(H5FD_t *_file, void **mpi_info);
 
-static const H5FD_class_t H5FD_subfiling_g = {
+
+static const H5FD_class_mpi_t H5FD_subfiling_g = {
+	{
     "subfiling",                   /* name                 */
     MAXADDR,                       /* maxaddr              */
     H5F_CLOSE_WEAK,                /* fc_degree            */
@@ -221,13 +247,18 @@ static const H5FD_class_t H5FD_subfiling_g = {
     H5FD_subfiling_get_handle,     /* get_handle           */
     H5FD_subfiling_read,           /* read                 */
     H5FD_subfiling_write,          /* write                */
-    NULL,                          /* read_vector          */
-    NULL,                          /* write_vector         */
+    H5FD__subfiling_read_vector,   /* read_vector          */
+    H5FD__subfiling_write_vector,  /* write_vector         */
     NULL,                          /* flush                */
     H5FD_subfiling_truncate,       /* truncate             */
     H5FD_subfiling_lock,           /* lock                 */
     H5FD_subfiling_unlock,         /* unlock               */
     H5FD_FLMAP_DICHOTOMY           /* fl_map               */
+	},
+	H5FD_subfiling_mpi_rank,
+	H5FD_subfiling_mpi_size,
+	H5FD_subfiling_communicator,
+	H5FD_subfiling_get_info
 };
 
 /* Declare a free list to manage the H5FD_subfiling_t struct */
@@ -605,19 +636,23 @@ H5FD_subfiling_fapl_free(void *_fa)
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
-H5FD_subfiling_open(const char *name, unsigned flags, hid_t fapl_id, 
-    haddr_t maxaddr)
+H5FD_subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
     H5FD_subfiling_t     *file       = NULL;     /* subfiling VFD info        */
-    int                  fd          = -1;       /* File descriptor          */
-    int                  o_flags;                /* Flags for open() call    */
+    int                   fd          = -1;       /* File descriptor          */
+    int                   o_flags;                /* Flags for open() call    */
+    int                   mpi_enabled = 0;
+	int                   mpi_provides = -1;
+    int                   my_rank;
 #ifdef H5_HAVE_WIN32_API
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
 #endif
     h5_stat_t             sb;
     H5FD_subfiling_fapl_t fa;
     H5FD_t               *ret_value = NULL;          /* Return value */
-
+    char                 *dir_path = NULL;
+    char                  file_prefix[H5FD_MAX_FILENAME_LEN];
+    hid_t                 h5_file_id;
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check on file offsets */
@@ -644,14 +679,34 @@ H5FD_subfiling_open(const char *name, unsigned flags, hid_t fapl_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "can't get property list")
     }
 
+    if (MPI_Initialized(&mpi_enabled) == MPI_SUCCESS) {
+		MPI_Query_thread(&mpi_provides);
+		MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+	}
+
     /* Open the file */
     if((fd = HDopen(name, o_flags, H5_POSIX_CREATE_MODE_RW)) < 0) {
         int myerrno = errno;
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', errno = %d, error message = '%s', flags = %x, o_flags = %x", name, myerrno, HDstrerror(myerrno), flags, (unsigned)o_flags);
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
+	    "unable to open file: name = '%s', errno = %d, error message = '%s', flags = %x, o_flags = %x",
+                    name, myerrno, HDstrerror(myerrno), flags, (unsigned)o_flags);
     } /* end if */
 
-    if(HDfstat(fd, &sb) < 0)
-        HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file")
+	/* Avoid doing an addtional file stat on every MPI rank.
+	 * By default the file open will stat the directory...
+	 * We can be a bit more efficient by having rank 0 broadcast
+	 * the stat buffer.
+	 */
+#if 0
+	if (mpi_enabled && (my_rank == 0)) {
+		int sb_size = sizeof(sb);
+
+		MPI_Bcast(&sb, sb_size, MPI_BYTE, 0, MPI_COMM_WORLD);
+	}				
+#else
+	if(HDfstat(fd, &sb) < 0)
+		HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file")
+#endif
 
     /* Create the new file struct */
     if(NULL == (file = H5FL_CALLOC(H5FD_subfiling_t)))
@@ -701,6 +756,32 @@ H5FD_subfiling_open(const char *name, unsigned flags, hid_t fapl_id,
                 HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get property of changing family to single")
     } /* end if */
 
+    /* Use a FILE_id which is consistent/constant across multiple MPI ranks */
+    h5_file_id = (hid_t)file->inode;
+    dir_path = strrchr(file->filename,'/');
+    if (dir_path) {
+        *dir_path = '\0';
+        strcpy(file_prefix, file->filename);
+        *dir_path = '/';
+        dir_path = file_prefix;
+    }
+
+	/* Only open subfiling if we've enabled MPI */
+	if (mpi_enabled &&
+		(mpi_provides == MPI_THREAD_MULTIPLE) &&
+		(sf_open_subfiles(h5_file_id, file->filename, dir_path, o_flags ) < 0)) {
+	        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't open subfiling files")
+            MPI_Comm_dup(MPI_COMM_WORLD, &file->comm);
+			MPI_Comm_rank(MPI_COMM_WORLD,&file->mpi_rank);
+			MPI_Comm_size(MPI_COMM_WORLD,&file->mpi_size);
+			file->info = MPI_INFO_NULL;
+	}
+	else {
+            /* MPI isn't avail, so neither is subfiling...
+             * In would be advantageous to replace subfiling parallel
+             * subfiling with serial..
+             */
+    }
     /* Set return value */
     ret_value = (H5FD_t*)file;
 
@@ -734,13 +815,20 @@ H5FD_subfiling_close(H5FD_t *_file)
 {
     H5FD_subfiling_t *file = (H5FD_subfiling_t *)_file;
     herr_t      ret_value = SUCCEED;                /* Return value */
+    int         mpi_enabled = 0;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(file);
 
-    /* Close the underlying file */
+    if (MPI_Initialized(&mpi_enabled) == MPI_SUCCESS) {
+        /* Prepare to close the actual subfiles */
+        hid_t h5_fid = (hid_t)file->inode;
+        if (mpi_enabled && (sf_close_subfiles(h5_fid) < 0))
+            HSYS_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "sf_close_subfiles returned and error")
+    }
+    /* Close the underlying HDF file */
     if(HDclose(file->fd) < 0)
         HSYS_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
@@ -822,7 +910,7 @@ done:
 static herr_t
 H5FD_subfiling_query(const H5FD_t *_file, unsigned long *flags /* out */)
 {
-    const H5FD_subfiling_t	*file = (const H5FD_subfiling_t *)_file;    /* subfiling VFD info */
+    const H5FD_subfiling_t  *file = (const H5FD_subfiling_t *)_file;    /* subfiling VFD info */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -841,8 +929,9 @@ H5FD_subfiling_query(const H5FD_t *_file, unsigned long *flags /* out */)
         *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;    /* OK to aggregate "small" raw data allocations                     */
         *flags |= H5FD_FEAT_POSIX_COMPAT_HANDLE;    /* get_handle callback returns a POSIX file descriptor              */
         *flags |= H5FD_FEAT_SUPPORTS_SWMR_IO;       /* VFD supports the single-writer/multiple-readers (SWMR) pattern   */
-        *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE; /* VFD creates a file which can be opened with the default VFD      */
-
+#if 0
+		*flags |= H5FD_FEAT_HAS_MPI;				/* FIXME:: for experimentation only... */
+#endif
         /* Check for flags that are set by h5repart */
         if(file && file->fam_to_single)
             *flags |= H5FD_FEAT_IGNORE_DRVRINFO; /* Ignore the driver info when file is opened (which eliminates it) */
@@ -869,7 +958,7 @@ H5FD_subfiling_query(const H5FD_t *_file, unsigned long *flags /* out */)
 static haddr_t
 H5FD_subfiling_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
-    const H5FD_subfiling_t	*file = (const H5FD_subfiling_t *)_file;
+    const H5FD_subfiling_t  *file = (const H5FD_subfiling_t *)_file;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -894,7 +983,7 @@ H5FD_subfiling_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 static herr_t
 H5FD_subfiling_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
 {
-    H5FD_subfiling_t	*file = (H5FD_subfiling_t *)_file;
+    H5FD_subfiling_t    *file = (H5FD_subfiling_t *)_file;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -982,8 +1071,9 @@ H5FD_subfiling_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type,
     hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, size_t size, void *buf /*out*/)
 {
     H5FD_subfiling_t *file       = (H5FD_subfiling_t *)_file;
-    HDoff_t          offset      = (HDoff_t)addr;
     herr_t           ret_value   = SUCCEED;                  /* Return value */
+    hbool_t          addrs_cooked = FALSE;
+    int              mpi_enabled = 0;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -996,62 +1086,19 @@ H5FD_subfiling_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type,
     if(REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu", (unsigned long long)addr)
 
-#ifndef H5_HAVE_PREADWRITE
-    /* Seek to the correct location (if we don't have pread) */
-    if(addr != file->pos || OP_READ != file->op) {
-        if(HDlseek(file->fd, (HDoff_t)addr, SEEK_SET) < 0)
-            HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
+    addr += _file->base_addr;
+    addrs_cooked = TRUE;        /* Follow the example of read_vector (see H5FDint.c) */
+
+    if (MPI_Initialized(&mpi_enabled) == MPI_SUCCESS) {
+        hid_t h5_fid = (hid_t)file->inode;
+        if (mpi_enabled && (sf_read_independent(h5_fid, (int64_t)addr, (int64_t)size, 1, buf) < 0))
+            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "subfile read failed")
     }
-#endif /* H5_HAVE_PREADWRITE */
+    addr += (haddr_t)size;
 
-    /* Read data, being careful of interrupted system calls, partial results,
-     * and the end of the file.
-     */
-    while(size > 0) {
-
-        h5_posix_io_t       bytes_in        = 0;    /* # of bytes to read       */
-        h5_posix_io_ret_t   bytes_read      = -1;   /* # of bytes actually read */
-
-        /* Trying to read more bytes than the return type can handle is
-         * undefined behavior in POSIX.
-         */
-        if(size > H5_POSIX_MAX_IO_BYTES)
-            bytes_in = H5_POSIX_MAX_IO_BYTES;
-        else
-            bytes_in = (h5_posix_io_t)size;
-
-        do {
-#ifdef H5_HAVE_PREADWRITE
-            bytes_read = HDpread(file->fd, buf, bytes_in, offset);
-            if(bytes_read > 0)
-                offset += bytes_read;
-#else
-            bytes_read = HDread(file->fd, buf, bytes_in);
-#endif /* H5_HAVE_PREADWRITE */
-        } while(-1 == bytes_read && EINTR == errno);
-
-        if(-1 == bytes_read) { /* error */
-            int myerrno = errno;
-            time_t mytime = HDtime(NULL);
-
-            offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
-
-            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', buf = %p, total read size = %llu, bytes this sub-read = %llu, bytes actually read = %llu, offset = %llu", HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_read, (unsigned long long)offset);
-        } /* end if */
-
-        if(0 == bytes_read) {
-            /* end of file but not end of format address space */
-            HDmemset(buf, 0, size);
-            break;
-        } /* end if */
-
-        HDassert(bytes_read >= 0);
-        HDassert((size_t)bytes_read <= size);
-
-        size -= (size_t)bytes_read;
-        addr += (haddr_t)bytes_read;
-        buf = (char *)buf + bytes_read;
-    } /* end while */
+    if ( addrs_cooked ) {
+        addr -= _file->base_addr;
+    }
 
     /* Update current position */
     file->pos = addr;
@@ -1087,8 +1134,9 @@ H5FD_subfiling_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type,
     hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, size_t size, const void *buf)
 {
     H5FD_subfiling_t *file       = (H5FD_subfiling_t *)_file;
-    HDoff_t          offset      = (HDoff_t)addr;
     herr_t           ret_value   = SUCCEED;                  /* Return value */
+    hbool_t          addrs_cooked = FALSE;
+    int              mpi_enabled = 0;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1101,56 +1149,20 @@ H5FD_subfiling_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type,
     if(REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size = %llu", (unsigned long long)addr, (unsigned long long)size)
 
-#ifndef H5_HAVE_PREADWRITE
-    /* Seek to the correct location (if we don't have pwrite) */
-    if(addr != file->pos || OP_WRITE != file->op) {
-        if(HDlseek(file->fd, (HDoff_t)addr, SEEK_SET) < 0)
-            HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
+    addr += _file->base_addr;
+    addrs_cooked = TRUE;      /* Follow the example of read_vector (see H5FDint.c) */
+
+    if (MPI_Initialized(&mpi_enabled) == MPI_SUCCESS) {
+        hid_t h5_fid = (hid_t)file->inode;
+        if (mpi_enabled && (sf_write_independent(h5_fid, (int64_t)addr, (int64_t)size, 1, buf) < 0)) 
+            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "subfile write failed")
     }
-#endif /* H5_HAVE_PREADWRITE */
 
-    /* Write the data, being careful of interrupted system calls and partial
-     * results
-     */
-    while(size > 0) {
+    addr += (haddr_t)size;    /* Point to the end of the current IO */
 
-        h5_posix_io_t       bytes_in        = 0;    /* # of bytes to write  */
-        h5_posix_io_ret_t   bytes_wrote     = -1;   /* # of bytes written   */
-
-        /* Trying to write more bytes than the return type can handle is
-         * undefined behavior in POSIX.
-         */
-        if(size > H5_POSIX_MAX_IO_BYTES)
-            bytes_in = H5_POSIX_MAX_IO_BYTES;
-        else
-            bytes_in = (h5_posix_io_t)size;
-
-        do {
-#ifdef H5_HAVE_PREADWRITE
-            bytes_wrote = HDpwrite(file->fd, buf, bytes_in, offset);
-            if(bytes_wrote > 0)
-                offset += bytes_wrote;
-#else
-            bytes_wrote = HDwrite(file->fd, buf, bytes_in);
-#endif /* H5_HAVE_PREADWRITE */
-        } while(-1 == bytes_wrote && EINTR == errno);
-
-        if(-1 == bytes_wrote) { /* error */
-            int myerrno = errno;
-            time_t mytime = HDtime(NULL);
-
-            offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
-
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', buf = %p, total write size = %llu, bytes this sub-write = %llu, bytes actually written = %llu, offset = %llu", HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_wrote, (unsigned long long)offset);
-        } /* end if */
-
-        HDassert(bytes_wrote > 0);
-        HDassert((size_t)bytes_wrote <= size);
-
-        size -= (size_t)bytes_wrote;
-        addr += (haddr_t)bytes_wrote;
-        buf = (const char *)buf + bytes_wrote;
-    } /* end while */
+    if ( addrs_cooked ) {
+        addr -= _file->base_addr;
+    }
 
     /* Update current position and eof */
     file->pos = addr;
@@ -1168,12 +1180,165 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_subfiling_write() */
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FDsubfile__read_vector  (internal function)
+ *
+ * Purpose:     Perform count reads from the specified file at the offsets
+ *              provided in the addrs array, with the lengths and memory
+ *              types provided in the sizes and types arrays.  Data read
+ *              is returned in the buffers provided in the bufs array.
+ *
+ *              All reads are done according to the data transfer property
+ *              list dxpl_id (which may be the constant H5P_DEFAULT).
+ *
+ * Return:      Success:    SUCCEED
+ *                          All reads have completed successfully, and
+ *                          the results havce been into the supplied
+ *                          buffers.
+ *
+ *              Failure:    FAIL
+ *                          The contents of supplied buffers are undefined.
+ *
+ * Programmer:  JRM -- 6/10/20
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__subfiling_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count,
+                H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
+                void *bufs[] /* out */)
+{
+    H5FD_subfiling_t *file = (H5FD_subfiling_t *)_file;
+    herr_t          ret_value = SUCCEED;    /* Return value             */
+    hid_t           h5_fid;
+
+    FUNC_ENTER_STATIC
+
+    /* Check arguments
+     * RAW - Do we really need to check arguments once again?
+     * These have already been checked in H5FD_subfiling_read_vector (see below)!
+     */
+    if(!file)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+
+    if((!types) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "types parameter can't be NULL if count is positive")
+
+    if((!addrs) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addrs parameter can't be NULL if count is positive")
+
+    if((!sizes) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes parameter can't be NULL if count is positive")
+
+    if((!bufs) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive")
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if(H5P_DEFAULT == dxpl_id) {
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    } else {
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+    }
+
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
+    h5_fid = (hid_t)file->inode;
+    if(sf_read_vector(h5_fid, count, (hsize_t *)addrs, (hsize_t *)sizes, bufs) != SUCCEED)
+        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file vector write request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FDsubfile__write_vector  (internal function)
+ *
+ * Purpose:     Perform count writes to the specified file at the offsets
+ *              provided in the addrs array. Lengths and memory
+ *              types provided in the sizes and types arrays.  Data to be
+ *              written is referenced by the bufs array.
+ *
+ *              All writes are done according to the data transfer property
+ *              list dxpl_id (which may be the constant H5P_DEFAULT).
+ *
+ * Return:      Success:    SUCCEED
+ *                          All writes have completed successfully.
+ *
+ *              Failure:    FAIL
+ *                          An internal error was encountered, e.g the
+ *                          input arguments are not valid, or the actual
+ *                          subfiling writes have failed for some reason.
+ *
+ * Programmer:  JRM -- 6/10/20
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__subfiling_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count,
+                 H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
+                 void *bufs[] /* in */)
+{
+    H5FD_subfiling_t *file = (H5FD_subfiling_t *)_file;
+    herr_t          ret_value = SUCCEED;    /* Return value             */
+    hid_t           h5_fid;
+
+    FUNC_ENTER_STATIC
+
+    HDassert(file != NULL); /* sanity check */
+	
+    /* Check arguments
+     * RAW - Do we really need to check arguments once again?
+     * These have already been checked in H5FD_subfiling_write_vector (see below)!
+     */
+    if(!file)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+
+    if((!types) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "types parameter can't be NULL if count is positive")
+
+    if((!addrs) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addrs parameter can't be NULL if count is positive")
+
+    if((!sizes) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes parameter can't be NULL if count is positive")
+
+    if((!bufs) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive")
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if(H5P_DEFAULT == dxpl_id) {
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    } else {
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+    }
+
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
+    h5_fid = (hid_t)file->inode;
+    if(sf_write_vector(h5_fid, count, (hsize_t *)addrs, (hsize_t *)sizes, bufs) != SUCCEED)
+        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file vector write request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FDsubfile__write_vector() */
+
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_subfiling_truncate
  *
- * Purpose:     Makes sure that the true file size is the same (or larger)
- *              than the end-of-address.
+ * Purpose:     Makes sure that the true file size is the same as
+ *              the end-of-allocation.
  *
  * Return:      SUCCEED/FAIL
  *
@@ -1183,11 +1348,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, 
+H5FD_subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id,
     hbool_t H5_ATTR_UNUSED closing)
 {
     H5FD_subfiling_t *file = (H5FD_subfiling_t *)_file;
     herr_t ret_value = SUCCEED;                 /* Return value */
+    int mpi_enabled = 0;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1195,6 +1361,11 @@ H5FD_subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id,
 
     /* Extend the file to make sure it's large enough */
     if(!H5F_addr_eq(file->eoa, file->eof)) {
+        if (MPI_Initialized(&mpi_enabled) == MPI_SUCCESS) {
+        hid_t  h5_fid = (hid_t)file->inode;
+        if (mpi_enabled && (sf_truncate(h5_fid, file->eof) < 0))
+            HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
+    }
 #ifdef H5_HAVE_WIN32_API
         LARGE_INTEGER   li;         /* 64-bit (union) integer for SetFilePointer() call */
         DWORD           dwPtrLow;   /* Low-order pointer bits from SetFilePointer()
@@ -1243,9 +1414,9 @@ done:
  * Function:    H5FD_subfiling_lock
  *
  * Purpose:     To place an advisory lock on a file.
- *		The lock type to apply depends on the parameter "rw":
- *			TRUE--opens for write: an exclusive lock
- *			FALSE--opens for read: a shared lock
+ *      The lock type to apply depends on the parameter "rw":
+ *          TRUE--opens for write: an exclusive lock
+ *          FALSE--opens for read: a shared lock
  *
  * Return:      SUCCEED/FAIL
  *
@@ -1311,4 +1482,569 @@ H5FD_subfiling_unlock(H5FD_t *_file)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_subfiling_unlock() */
+
+herr_t
+H5FD__get_file_ino(const char *name, uint64_t *st_ino)
+{
+    herr_t ret_value = SUCCEED;  /* Return value */
+    h5_stat_t  sb;
+
+    FUNC_ENTER_PACKAGE
+
+    if(HDstat(name, &sb) < 0)
+        HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to fstat file")
+		
+	*st_ino = sb.st_ino;
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+static
+herr_t create_simple_vector( hid_t file_space_id, void *memDataBuf, haddr_t addrBase, hssize_t elements, size_t type_extent, hssize_t *vlen, hsize_t **_offsets, hsize_t **_blocklens, void ***_bufs )
+{
+	int n_dims = H5Sget_simple_extent_ndims(file_space_id);
+	hsize_t *offsets = *_offsets;
+	hsize_t *blocklens = *_blocklens;
+	void   **bufs = *_bufs;
+	void *nextBuf = memDataBuf;
+
+	assert(vlen);
+	assert(_offsets);
+	assert(_blocklens);
+	assert(_bufs);
+
+	if (n_dims > 0) {
+		hsize_t simple_dims[n_dims];
+		hsize_t stride[n_dims];
+		if (H5Sget_simple_extent_dims(file_space_id, simple_dims, stride) < 0) {
+			puts("H5Sget_simple_extent_dims returned an error");
+			return -1;
+		}
+
+		if (*vlen < 0) {
+			offsets = (hsize_t *)malloc((sizeof(haddr_t)));
+			assert(offsets);
+
+			blocklens = (hsize_t *)malloc((sizeof(hsize_t)));
+			assert(blocklens);
+
+			bufs = (void **)malloc((sizeof(void **)));
+			assert(bufs);
+		}
+		bufs[0] = nextBuf;
+		offsets[0] = addrBase;
+		blocklens[0] = (hsize_t )((hsize_t)elements * type_extent);
+
+		if (*vlen < 0) {
+			*_offsets = offsets;
+			*_blocklens = blocklens;
+			*_bufs = bufs;
+		}
+		*vlen = 1;
+		return 0;
+	}
+	return -1;
+}
+
+
+static
+herr_t create_vector_from_hyperslab( hid_t file_space_id, void *memDataBuf, haddr_t addrBase, size_t type_extent, hssize_t *vlen, hsize_t **_offsets, hsize_t **_blocklens, void ***_bufs )
+{
+    herr_t ret_value = SUCCEED;
+	hssize_t k, n_blocks = H5Sget_select_hyper_nblocks(file_space_id);
+
+	void *nextBuf = memDataBuf;
+
+	hsize_t stride[H5S_MAX_RANK];
+	hsize_t count[H5S_MAX_RANK];
+
+	hsize_t *strides = stride;
+	hsize_t *counts = count;
+
+	hsize_t *offsets = *_offsets;
+	hsize_t *blocklens = *_blocklens;
+	void   **bufs = *_bufs;
+
+	assert(vlen);
+	assert(_offsets);
+	assert(_blocklens);
+	assert(_bufs);
+	assert(n_blocks > 0);
+
+	if (n_blocks > H5S_MAX_RANK) {
+		/* Allocate a temp for the H5Sget_regular_hyperslab function call */
+		if ((strides = (hsize_t *)malloc((size_t)n_blocks * sizeof(hsize_t))) == NULL) {
+			perror("unable to allocate storage for vector creation");
+			return -1;
+		}
+		if ((counts = (hsize_t *)malloc((size_t)n_blocks * sizeof(hsize_t))) == NULL) {
+			perror("unable to allocate storage for vector creation");
+			return -1;
+		}
+	}
+
+	/* Allocate storage for the vector elements */
+	if (*vlen < n_blocks) {
+		if (offsets) {
+			offsets = (hsize_t *)realloc(offsets, ((size_t)n_blocks * sizeof(haddr_t)));
+		} else {
+			offsets = (hsize_t *)malloc(((size_t)n_blocks * sizeof(haddr_t)));
+		}
+		assert(offsets);
+		if (blocklens) {
+			blocklens = (hsize_t *)realloc(blocklens, ((size_t)n_blocks * sizeof(hsize_t)));
+		} else {
+			blocklens = (hsize_t *)malloc(((size_t)n_blocks * sizeof(hsize_t)));
+		}
+		assert(blocklens);
+		if (bufs) {
+			bufs = (void **)realloc(bufs, ((size_t)n_blocks * sizeof(void **)));
+		} else {
+			bufs = (void **)malloc(((size_t)n_blocks * sizeof(void **)));
+		}
+		assert(bufs);
+		*vlen = n_blocks;
+	}
+	/* Fill vector elements */
+	if ((ret_value = H5Sget_regular_hyperslab(file_space_id, offsets, strides, counts, blocklens)) < 0) {
+		puts("H5Sget_regular_hyperslab failed");
+		return -1;
+	}
+
+	for(k=0; k < n_blocks; k++) {
+		bufs[k] = nextBuf;
+		offsets[k] *= type_extent;
+		offsets[k] += addrBase;
+		blocklens[k] *= type_extent;
+		nextBuf += (strides[k] * type_extent);
+	}
+	if (strides != stride)
+		free(strides);
+	if (counts != count)
+		free(counts);
+
+	*_offsets = offsets;
+	*_blocklens = blocklens;
+	*_bufs = bufs;
+
+	return ret_value;
+}
+
+
+static
+herr_t check_dims(int ndims, hsize_t *mem_dims, hsize_t *file_dims, int *diff_index)
+{
+	int i;
+    herr_t ret_value = SUCCEED;
+	for(i=0; i < ndims; i++) {
+		if (mem_dims[i] != file_dims[i]) {
+			*diff_index = i;
+			return 0;
+		}
+	}
+	/* ndims +1 == no differences */
+	*diff_index = i;
+	return ret_value;
+}
+
+static
+haddr_t get_data_offset(int mpi_rank, int mpi_size, size_t dtype_extent, const H5S_t *mem_space, const H5S_t *file_space)
+{
+	haddr_t this_base = 0;
+	return this_base;
+}
+
+
+
+static
+haddr_t get_base_offset(int mpi_rank, int mpi_size, hid_t mem_space_id, hid_t file_space_id)
+{
+	haddr_t this_base = 0;
+	int n_dims;
+	int is_simple = H5Sis_simple(file_space_id);
+	/* The 'is_simple' variable is actually a tri value type:  
+	 *  -1 == failed 
+	 *   0 == NOT_SIMPLE
+	 *   1 == SIMPLE
+	 */
+	if (is_simple > 0) {
+		n_dims = H5Sget_simple_extent_ndims(mem_space_id);
+		if (n_dims > 0) {
+			hsize_t mem_stride[n_dims];
+			hsize_t mem_dims[n_dims];
+			hsize_t file_stride[n_dims];
+			hsize_t file_dims[n_dims];
+			hsize_t total_size;
+			if (H5Sget_simple_extent_dims(mem_space_id, mem_dims, mem_stride) < 0)
+				puts("H5Sget_simple_extent_dims returned an error");
+			if (H5Sget_simple_extent_dims(file_space_id, file_dims, file_stride) < 0)
+				puts("H5Sget_simple_extent_dims returned an error");
+
+			if (n_dims == 1) {
+				if ((total_size = mem_dims[0] * (hsize_t)mpi_size) == file_dims[0]) {
+					this_base = (mem_dims[0] * (hsize_t)mpi_rank);
+				}
+			}
+			else {
+				int diff_index = -1;
+				if (check_dims(n_dims, mem_dims, file_dims, &diff_index) < 0)
+					puts("check_dims returned an error");
+				if ((total_size = mem_dims[diff_index] * (hsize_t)mpi_size) == file_dims[diff_index]) {
+					this_base = (mem_dims[diff_index] * (hsize_t)mpi_rank);
+				}
+			}
+		}
+	}
+
+	return this_base;
+}
+
+
+
+herr_t
+H5FD__dataset_write_contiguous(hid_t h5_file_id, haddr_t dataset_baseAddr, size_t dtype_extent,
+							   int mpi_rank, int mpi_size, void *_dset, hid_t mem_type_id,
+							   hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, const void *buf)
+{
+	H5D_t *dset = (H5D_t *)_dset;
+    herr_t ret_value = SUCCEED;  /* Return value */
+    hssize_t num_elem_file = -1, num_elem_mem = -1;
+	H5S_sel_type sel_type;
+	hsize_t mem_nelem, file_nelem;
+	const H5S_t *mem_space;
+	const H5S_t *file_space;
+
+    FUNC_ENTER_PACKAGE
+
+    if((num_elem_file = H5Sget_select_npoints(file_space_id)) < 0)
+        puts("can't get number of points in file selection");
+    if((num_elem_mem = H5Sget_select_npoints(mem_space_id)) < 0)
+        puts("can't get number of points in memory selection");
+
+    if(num_elem_file != num_elem_mem)
+		puts("number of elements selected in file and memory dataspaces is different");
+		
+	if (H5S_get_validated_dataspace(mem_space_id, &mem_space) < 0) {
+		puts("could not get a validated dataspace from mem_space_id");
+	}
+	else mem_nelem = mem_space->extent.nelem;
+	if (H5S_get_validated_dataspace(file_space_id, &file_space) < 0) {
+		puts("could not get a validated dataspace from file_space_id");
+	}
+	else file_nelem = file_space->extent.nelem;
+
+	if (num_elem_file > 0) {
+		sel_type = H5Sget_select_type(file_space_id);
+		switch (sel_type) {
+		case H5S_SEL_NONE:
+			// printf("[%d] H5S_SEL_NONE\n", mpi_rank);
+			break;
+		case H5S_SEL_POINTS:
+		{
+			haddr_t rank_baseAddr;
+			rank_baseAddr = get_base_offset(mpi_rank, mpi_size, mem_space_id, file_space_id);
+			rank_baseAddr += dataset_baseAddr;
+			// printf("[%d] H5S_SEL_POINTS - num_elem_file: %lld: UNSUPPORTED (for now)\n", mpi_rank, num_elem_file);
+			ret_value = -1;
+			goto done;
+
+			break;
+		}
+		case H5S_SEL_HYPERSLABS:
+		{
+			int status;
+			haddr_t rank_baseAddr;
+#if 0
+			rank_baseAddr = get_data_offset(mpi_rank, mpi_size, dtype_extent, mem_space, file_space);
+
+#else		
+			rank_baseAddr = get_base_offset(mpi_rank, mpi_size, mem_space_id, file_space_id);
+			rank_baseAddr += dataset_baseAddr;
+#endif
+			// printf("[%d] H5S_SEL_HYPERSLABS, file_offset = %lld\n", mpi_rank, rank_baseAddr );
+			if ((status = H5Sis_regular_hyperslab(file_space_id)) < 0) {
+				puts("H5Sis_regular_hyperslab returned an error");
+				ret_value = -1;
+				goto done;
+			}
+			if (status > 0) {
+				hssize_t previous_vlen = sf_vlen;
+				if ((mem_space->extent.rank == 1)) {
+					if (sf_offsets == NULL)
+						sf_offsets = (hsize_t *)malloc(sizeof(hsize_t));
+					if (sf_sizes == NULL)
+						sf_sizes = (hsize_t *)malloc(sizeof(hsize_t));
+					if (sf_bufs == NULL)
+						sf_bufs = (void **)malloc(sizeof(void *));
+					sf_vlen = 1;
+					assert(sf_offsets);
+					assert(sf_sizes);
+					assert(sf_bufs);
+
+					sf_offsets[0] = rank_baseAddr;
+					sf_sizes[0] = num_elem_mem * dtype_extent;
+					sf_bufs[0] = buf;
+				}
+				else if (create_vector_from_hyperslab(file_space_id, buf, rank_baseAddr, dtype_extent,
+												 &sf_vlen, &sf_offsets, &sf_sizes, &sf_bufs) < 0) {
+					puts("Unable to create vectors");
+					ret_value = -1;
+					goto done;
+				}
+				ret_value = sf_write_vector(h5_file_id, sf_vlen, sf_offsets, sf_sizes, sf_bufs);
+
+				/* Possibly restore the sf_vlen value to accurately reflect the malloc sizes */
+				if (sf_vlen < previous_vlen)
+					sf_vlen = previous_vlen;
+			}
+			break;
+		}
+		case H5S_SEL_ALL:
+		{
+			int status;
+			haddr_t rank_baseAddr;
+			rank_baseAddr = get_base_offset(mpi_rank, mpi_size, mem_space_id, file_space_id);
+			rank_baseAddr += dataset_baseAddr;
+			// printf("[%d] H5S_SEL_ALL\n", mpi_rank);
+			status = H5Sis_simple(file_space_id);
+			if (status > 0) {
+				if (create_simple_vector(file_space_id, buf, rank_baseAddr, num_elem_mem,
+										 dtype_extent, &sf_vlen, &sf_offsets, &sf_sizes, &sf_bufs) < 0) {
+					puts("Unable to create simple vectors");
+					goto done;
+				}
+				ret_value = sf_write_vector(h5_file_id, sf_vlen, sf_offsets, sf_sizes, sf_bufs);
+			}
+			break;
+		}
+		default:
+			printf("[%d] UNSUPPORTED selection type\n", mpi_rank);
+			ret_value = -1;
+		} /* END switch (sel_type) */
+
+	} /* if (num_elem_file > 0) */
+	
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+herr_t
+H5FD__dataset_read_contiguous(hid_t h5_file_id, haddr_t dataset_baseAddr, size_t dtype_extent,
+							  int mpi_rank, int mpi_size, void *_dset, hid_t mem_type_id,
+							  hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, void *buf)
+{
+	H5FD_t *dset = (H5FD_t *)_dset;	
+    herr_t ret_value = SUCCEED;  /* Return value */
+    hssize_t num_elem_file = -1, num_elem_mem = -1;
+	H5S_sel_type sel_type;
+
+    FUNC_ENTER_PACKAGE
+    if((num_elem_file = H5Sget_select_npoints(file_space_id)) < 0)
+        puts("can't get number of points in file selection");
+    if((num_elem_mem = H5Sget_select_npoints(mem_space_id)) < 0)
+        puts("can't get number of points in memory selection");
+
+    if(num_elem_file != num_elem_mem)
+		puts("number of elements selected in file and memory dataspaces is different");
+		
+	if (num_elem_file > 0) {
+		sel_type = H5Sget_select_type(file_space_id);
+		switch (sel_type) {
+		case H5S_SEL_NONE:
+			// printf("[%d] H5S_SEL_NONE\n", mpi_rank);
+			break;
+		case H5S_SEL_POINTS:
+		{
+			int status;
+			haddr_t rank_baseAddr;
+			rank_baseAddr = get_base_offset(mpi_rank, mpi_size, mem_space_id, file_space_id);
+			rank_baseAddr += dataset_baseAddr;
+			// printf("[%d] H5S_SEL_POINTS - num_elem_file: %lld: UNSUPPORTED (for now)\n", mpi_rank, num_elem_file);
+			ret_value = -1;
+			goto done;
+
+			break;
+		}
+		case H5S_SEL_HYPERSLABS:
+		{
+			int status;
+			haddr_t rank_baseAddr;
+			const H5S_t *mem_space;
+			const H5S_t *file_space;
+			rank_baseAddr = get_base_offset(mpi_rank, mpi_size, mem_space_id, file_space_id);
+			rank_baseAddr += dataset_baseAddr;
+			if (H5S_get_validated_dataspace(mem_space_id, &mem_space) < 0) {
+				puts("could not get a validated dataspace from mem_space_id");
+			}
+			if (H5S_get_validated_dataspace(file_space_id, &file_space) < 0) {
+				puts("could not get a validated dataspace from file_space_id");
+			}
+			
+			// printf("[%d] H5S_SEL_HYPERSLABS, file_offset = %lld\n", mpi_rank, rank_baseAddr );
+			if ((status = H5Sis_regular_hyperslab(file_space_id)) < 0) {
+				puts("H5Sis_regular_hyperslab returned an error");
+				ret_value = -1;
+				goto done;
+			}
+			if (status > 0) {
+				hssize_t previous_vlen = sf_vlen;
+				if (mem_space->extent.rank == 1) {
+					if (sf_offsets == NULL)
+						sf_offsets = (hsize_t *)malloc(sizeof(hsize_t));
+					if (sf_sizes == NULL)
+						sf_sizes = (hsize_t *)malloc(sizeof(hsize_t));
+					if (sf_bufs == NULL)
+						sf_bufs = (void **)malloc(sizeof(void *));
+					sf_vlen = 1;
+					assert(sf_offsets);
+					assert(sf_sizes);
+					assert(sf_bufs);
+
+					sf_offsets[0] = rank_baseAddr;
+					sf_sizes[0] = num_elem_mem * dtype_extent;
+					sf_bufs[0] = buf;
+				}
+				else if (create_vector_from_hyperslab(file_space_id, buf, rank_baseAddr, dtype_extent,
+												 &sf_vlen, &sf_offsets, &sf_sizes, &sf_bufs) < 0) {
+					puts("Unable to create vectors");
+					ret_value = -1;
+					goto done;
+				}
+				ret_value = sf_read_vector(h5_file_id, sf_vlen, sf_offsets, sf_sizes, sf_bufs);
+
+				/* Possibly restore the sf_vlen value to accurately reflect the malloc sizes */
+				if (sf_vlen < previous_vlen)
+					sf_vlen = previous_vlen;
+			}
+			break;
+		}
+		case H5S_SEL_ALL:
+		{
+			int status;
+			haddr_t rank_baseAddr;
+			rank_baseAddr = get_base_offset(mpi_rank, mpi_size, mem_space_id, file_space_id);
+			rank_baseAddr += dataset_baseAddr;
+			// printf("[%d] H5S_SEL_ALL\n", mpi_rank);
+			status = H5Sis_simple(file_space_id);
+			if (status > 0) {
+				if (create_simple_vector(file_space_id, buf, rank_baseAddr, num_elem_mem,
+										 dtype_extent, &sf_vlen, &sf_offsets, &sf_sizes, &sf_bufs) < 0) {
+					puts("Unable to create simple vectors");
+					goto done;
+				}
+				ret_value = sf_read_vector(h5_file_id, sf_vlen, sf_offsets, sf_sizes, sf_bufs);
+			}
+			break;
+		}
+		default:
+			printf("[%d] UNSUPPORTED selection type\n", mpi_rank);
+			ret_value = -1;
+		} /* END switch (sel_type) */
+
+	} /* if (num_elem_file > 0) */
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+}
+
+static int
+H5FD_subfiling_mpi_rank(const H5FD_t *_file)
+{
+    const H5FD_subfiling_t   *file = (const H5FD_subfiling_t*)_file;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity checks */
+    HDassert(file);
+
+    FUNC_LEAVE_NOAPI(file->mpi_rank)
+} /* end H5FD__mpio_mpi_rank() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_subfiling_mpi_size
+ *
+ * Purpose:     Returns the number of MPI processes
+ *
+ * Return:      Success: non-negative
+ *              Failure: negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Thursday, May 16, 2002
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5FD_subfiling_mpi_size(const H5FD_t *_file)
+{
+    const H5FD_subfiling_t   *file = (const H5FD_subfiling_t*)_file;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity checks */
+    HDassert(file);
+
+    FUNC_LEAVE_NOAPI(file->mpi_size)
+} /* end H5FD__subfiling_mpi_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_subfiling_communicator
+ *
+ * Purpose:     Returns the MPI communicator for the file.
+ *
+ * Return:      Success:    The communicator
+ *              Failure:    Can't fail
+ *
+ * Programmer:  Robb Matzke
+ *              Monday, August  9, 1999
+ *
+ *-------------------------------------------------------------------------
+ */
+static MPI_Comm
+H5FD_subfiling_communicator(const H5FD_t *_file)
+{
+    const H5FD_subfiling_t   *file = (const H5FD_subfiling_t*)_file;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity checks */
+    HDassert(file);
+
+    FUNC_LEAVE_NOAPI(file->comm)
+} /* end H5FD__subfiling_communicator() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5FD_subfiling_get_info
+ *
+ * Purpose:        Returns the file info of SUBFILING file driver.
+ *
+ * Returns:        Non-negative if succeed or negative if fails.
+ *
+ * Programmer:     John Mainzer
+ *                 April 4, 2017
+ *
+ *-------------------------------------------------------------------------
+*/
+static herr_t
+H5FD_subfiling_get_info(H5FD_t *_file, void **mpi_info)
+{
+    H5FD_subfiling_t *file = (H5FD_subfiling_t *)_file;
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    if(!mpi_info)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mpi info not valid")
+
+    *mpi_info = &(file->info);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FD__subfiling_get_info() */
 

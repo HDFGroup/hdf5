@@ -32,7 +32,6 @@ extern "C" {
 
 H5TOOLS_DLLVAR int g_nTasks;
 H5TOOLS_DLLVAR unsigned char g_Parallel;
-H5TOOLS_DLLVAR unsigned char g_CollectInfoOnly;
 H5TOOLS_DLLVAR char outBuff[];
 H5TOOLS_DLLVAR unsigned outBuffOffset;
 H5TOOLS_DLLVAR FILE *overflow_file;

@@ -986,7 +986,7 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
     H5TOOLS_DEBUG("groups traversed - errstat:%d", opts->err_stat);
 
 #ifdef H5_HAVE_PARALLEL
-    if(g_Parallel && !g_CollectInfoOnly) {
+    if(g_Parallel) {
         int i;
 
         if((HDstrlen(fname1) > MAX_FILENAME) || (HDstrlen(fname2) > MAX_FILENAME)) {
@@ -1001,11 +1001,6 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
         for(i = 1; i < g_nTasks; i++)
             MPI_Send(filenames, (MAX_FILENAME * 2), MPI_CHAR, i, MPI_TAG_PARALLEL, MPI_COMM_WORLD);
     } /* end if */
-	else if (g_CollectInfoOnly) {
-		build_match_list (obj1fullname, info1_lp, obj2fullname, info2_lp, &match_list, opts);
-
-	}
-
 #endif
 
     H5TOOLS_DEBUG("build_match_list next - errstat:%d", opts->err_stat);

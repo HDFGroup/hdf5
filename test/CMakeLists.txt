@@ -145,6 +145,7 @@ if (BUILD_SHARED_LIBS)
   #-----------------------------------------------------------------------------
   set (VOL_PLUGIN_LIBS
       null_vol_connector
+      h5subfiling_vol
   )
 
   foreach (vol_lib ${VOL_PLUGIN_LIBS})

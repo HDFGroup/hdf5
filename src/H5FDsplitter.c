@@ -156,8 +156,8 @@ static const H5FD_class_t H5FD_splitter_g = {
     H5FD__splitter_get_handle,   /* get_handle           */
     H5FD__splitter_read,         /* read                 */
     H5FD__splitter_write,        /* write                */
-    NULL,                       /* read_vector          */
-    NULL,                       /* write_vector         */
+    NULL,                        /* read_vector          */
+    NULL,                        /* write_vector         */
     H5FD__splitter_flush,        /* flush                */
     H5FD__splitter_truncate,     /* truncate             */
     H5FD__splitter_lock,         /* lock                 */
