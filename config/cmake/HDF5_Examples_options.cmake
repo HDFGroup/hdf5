@@ -18,6 +18,7 @@
 ####         HDF_BUILD_CXX:BOOL=OFF                                                       ###
 ####         HDF_BUILD_FORTRAN:BOOL=OFF                                                   ###
 ####         HDF_BUILD_JAVA:BOOL=OFF                                                      ###
+####         HDF_BUILD_FILTERS:BOOL=OFF                                                   ###
 ####         BUILD_TESTING:BOOL=OFF                                                       ###
 ####         HDF_ENABLE_PARALLEL:BOOL=OFF                                                 ###
 ####         HDF_ENABLE_THREADSAFE:BOOL=OFF                                               ###
@@ -40,6 +41,9 @@
 
 ### enable JAVA builds
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_BUILD_JAVA:BOOL=ON")
+
+### enable FILTERS builds
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_BUILD_FILTERS:BOOL=ON")
 
 #############################################################################################
 ### enable parallel program builds
