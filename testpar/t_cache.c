@@ -1943,7 +1943,7 @@ serve_total_writes_request(struct mssg_t * mssg_ptr)
 
         if ( success ) {
 
-            HDfprintf(stdout, "%d request total writes %ld.\n",
+            HDfprintf(stdout, "%d request total writes %d.\n",
                       (int)(mssg_ptr->src),
                       total_writes);
 
@@ -4892,7 +4892,7 @@ verify_total_reads(int expected_total_reads)
             success = FALSE;
             if ( verbose ) {
                 HDfprintf(stdout,
-                    "%d:%s: reported/expected total reads mismatch (%d/%d).\n",
+                    "%d:%s: reported/expected total reads mismatch (%ld/%d).\n",
                     world_mpi_rank, FUNC,
                     reported_total_reads, expected_total_reads);
 
