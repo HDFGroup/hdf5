@@ -638,7 +638,7 @@ H5C_def_auto_resize_rpt_fcn(H5C_t * cache_ptr,
                       (cache_ptr->resize_ctl).lower_hr_threshold);
 
             HDfprintf(stdout,
-                    "%scache size increased from (%u/%u) to (%u/%u).\n",
+                    "%scache size increased from (%zu/%zu) to (%zu/%zu).\n",
                     cache_ptr->prefix,
                     old_max_cache_size,
                     old_min_clean_size,
