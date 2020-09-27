@@ -48,6 +48,15 @@ New Features
 
     Configuration:
     -------------
+    - CMake option to build the HDF filter plugins project as an external project
+
+      The HDF filter plugins project is a collection of registered compression
+      filters that can be dynamically loaded when needed to access data stored
+      in a hdf5 file. This CMake-only option allows the plugins to be distributed
+      with the hdf5 library and tools. Like the options for szip and zlib, either
+      a tgz file or a git repository can be specified for the source.
+
+      (ADB - 2020/09/27, OESS-98)
 
     - Added CMake option to format source files
 
@@ -807,7 +816,7 @@ New Features
 
     High-Level APIs:
     ---------------
-    - 
+    -
 
     C Packet Table API
     ------------------
@@ -1288,8 +1297,8 @@ Bug Fixes since HDF5-1.10.3 release
     High-Level APIs:
     ------
     - The H5DSis_scale function was updated to return "not a dimension scale" (0)
-      instead of failing (-1), when CLASS or DIMENSION_SCALE attributes are 
-      not written according to Dimension Scales Specification. 
+      instead of failing (-1), when CLASS or DIMENSION_SCALE attributes are
+      not written according to Dimension Scales Specification.
 
      (EIP - 2020/08/12, HDFFV-10436)
 
