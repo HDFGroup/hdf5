@@ -103,7 +103,6 @@ HDvasprintf(char **bufp, const char *fmt, va_list _ap)
 }
 #endif
 
-
 /*-------------------------------------------------------------------------
  * Function:  HDstrtoll
  *
@@ -228,7 +227,7 @@ HDstrtoll(const char *s, const char **rest, int base)
     return acc;
 } /* end HDstrtoll() */
 #endif
-
+
 /*-------------------------------------------------------------------------
  * Function:  HDrand/HDsrand
  *
@@ -263,8 +262,8 @@ void HDsrand(unsigned int seed)
 }
 #endif /* H5_HAVE_RAND_R */
 
-
-
+
+
 /*-------------------------------------------------------------------------
  * Function:    Pflock
  *
@@ -308,7 +307,7 @@ Pflock(int fd, int operation) {
 } /* end Pflock() */
 #endif /* H5_HAVE_FCNTL */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    Nflock
  *
@@ -325,7 +324,7 @@ Nflock(int H5_ATTR_UNUSED fd, int H5_ATTR_UNUSED operation) {
     return 0;
 } /* end Nflock() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5_make_time
  *
@@ -410,7 +409,7 @@ done:
 /* Offset between 1/1/1601 and 1/1/1970 in 100 nanosecond units */
 #define _W32_FT_OFFSET (116444736000000000ULL)
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  Wgettimeofday
  *
@@ -462,7 +461,7 @@ Wgettimeofday(struct timeval *tv, struct timezone *tz)
   return 0;
 } /* end Wgettimeofday() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    Wsetenv
  *
@@ -501,7 +500,7 @@ Wsetenv(const char *name, const char *value, int overwrite)
 #pragma comment(lib, "advapi32.lib")
 #endif
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5_get_win32_times
  *
@@ -580,7 +579,7 @@ H5_get_win32_times(H5_timevals_t *tvs /*in,out*/)
 #define WloginBuffer_count 256
 static char Wlogin_buffer[WloginBuffer_count];
 
-
+
 char*
 Wgetlogin(void)
 {
@@ -618,7 +617,7 @@ int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap)
     return count;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    Wflock
  *
@@ -686,7 +685,7 @@ Wnanosleep(const struct timespec *req, struct timespec *rem)
 
 } /* end Wnanosleep() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    Wllround, Wllroundf, Wlround, Wlroundf, Wround, Wroundf
  *
@@ -864,7 +863,7 @@ done:
 
 #endif /* H5_HAVE_WIN32_API */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5_build_extpath
  *
@@ -984,7 +983,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_build_extpath() */
 
-
+
 /*--------------------------------------------------------------------------
  * Function:    H5_combine_path
  *
@@ -1059,7 +1058,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_combine_path() */
 
-
+
 /*--------------------------------------------------------------------------
  * Function:    H5_nanosleep
  *
@@ -1091,7 +1090,7 @@ H5_nanosleep(uint64_t nanosec)
 
 #define H5_WIN32_ENV_VAR_BUFFER_SIZE    32767
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5_expand_windows_env_vars()
  *

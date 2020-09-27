@@ -81,12 +81,11 @@ extern "C" {
  */
 /* These pragmas are only implemented usefully in gcc 4.6+ */
 #if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 406
-    #define H5_GCC_DIAG_STR(s) #s
-    #define H5_GCC_DIAG_JOINSTR(x,y) H5_GCC_DIAG_STR(x ## y)
-    #define H5_GCC_DIAG_DO_PRAGMA(x) _Pragma (#x)
-    #define H5_GCC_DIAG_PRAGMA(x) H5_GCC_DIAG_DO_PRAGMA(GCC diagnostic x)
+    #define H5_GCC_DIAG_JOINSTR(x, y) x y
+    #define H5_GCC_DIAG_DO_PRAGMA(x)  _Pragma(#x)
+    #define H5_GCC_DIAG_PRAGMA(x)     H5_GCC_DIAG_DO_PRAGMA(GCC diagnostic x)
 
-    #define H5_GCC_DIAG_OFF(x) H5_GCC_DIAG_PRAGMA(push) H5_GCC_DIAG_PRAGMA(ignored H5_GCC_DIAG_JOINSTR(-W,x))
+    #define H5_GCC_DIAG_OFF(x) H5_GCC_DIAG_PRAGMA(push) H5_GCC_DIAG_PRAGMA(ignored H5_GCC_DIAG_JOINSTR("-W",x))
     #define H5_GCC_DIAG_ON(x) H5_GCC_DIAG_PRAGMA(pop)
 #else
     #define H5_GCC_DIAG_OFF(x)

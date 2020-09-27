@@ -28,6 +28,17 @@ if (BUILD_SHARED_LIBS)
   set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} h5stat-shared)
 endif ()
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_H5STAT_SRC_FORMAT h5stat)
+  else ()
+    clang_format (HDF5_H5STAT_SRC_FORMAT h5stat-shared)
+  endif ()
+endif ()
+
 ##############################################################################
 ##############################################################################
 ###           I N S T A L L A T I O N                                      ###

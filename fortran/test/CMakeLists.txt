@@ -42,7 +42,7 @@ endif ()
 # Add Test Lib
 #-----------------------------------------------------------------------------
 if (NOT BUILD_SHARED_LIBS)
-  add_library (${HDF5_F90_C_TEST_LIB_TARGET} STATIC t.c)
+  add_library (${HDF5_F90_C_TEST_LIB_TARGET} STATIC t.c t.h)
   set_source_files_properties (t.c PROPERTIES LANGUAGE C)
   target_include_directories (${HDF5_F90_C_TEST_LIB_TARGET}
       PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
@@ -60,7 +60,7 @@ if (NOT BUILD_SHARED_LIBS)
       LINKER_LANGUAGE C
   )
 else ()
-  add_library (${HDF5_F90_C_TEST_LIBSH_TARGET} SHARED t.c)
+  add_library (${HDF5_F90_C_TEST_LIBSH_TARGET} SHARED t.c t.h)
   target_include_directories (${HDF5_F90_C_TEST_LIBSH_TARGET}
       PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
       INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
@@ -77,6 +77,17 @@ else ()
       FOLDER libraries/test/fortran
       LINKER_LANGUAGE C
   )
+endif ()
+
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT BUILD_SHARED_LIBS)
+    clang_format (HDF5_FORTRAN_TESTS_FORMAT ${HDF5_F90_C_TEST_LIB_TARGET})
+  else ()
+    clang_format (HDF5_FORTRAN_TESTS_FORMAT ${HDF5_F90_C_TEST_LIBSH_TARGET})
+  endif ()
 endif ()
 
 if (NOT BUILD_SHARED_LIBS)

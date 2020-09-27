@@ -40,6 +40,17 @@ if (BUILD_SHARED_LIBS)
   )
 endif ()
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_HL_TOOLS_GIF2H5_FORMAT gif2h5)
+  else ()
+    clang_format (HDF5_HL_TOOLS_GIF2H5_FORMAT gif2h5-shared)
+  endif ()
+endif ()
+
 #-- Add h52gif program
 set (hdf2gif_SOURCES
     ${HDF5_HL_TOOLS_GIF2H5_SOURCE_DIR}/hdf2gif.c
@@ -71,6 +82,17 @@ if (BUILD_SHARED_LIBS)
   )
 endif ()
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_HL_TOOLS_H52GIF_FORMAT h52gif)
+  else ()
+    clang_format (HDF5_HL_TOOLS_H52GIF_FORMAT h52gif-shared)
+  endif ()
+endif ()
+
 if (BUILD_TESTING AND HDF5_TEST_SERIAL)
   # --------------------------------------------------------------------
   # This executable can generate the actual test files - Currently not
@@ -83,6 +105,13 @@ if (BUILD_TESTING AND HDF5_TEST_SERIAL)
       TARGET_C_PROPERTIES (hl_h52gifgentest STATIC)
       target_link_libraries (hl_h52gifgentest PRIVATE ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET})
       set_target_properties (hl_h52gifgentest PROPERTIES FOLDER generator/tools/hl)
+
+      #-----------------------------------------------------------------------------
+      # Add Target to clang-format
+      #-----------------------------------------------------------------------------
+      if (HDF5_ENABLE_FORMATTERS)
+        clang_format (HDF5_HL_TOOLS_hl_h52gifgentest_FORMAT hl_h52gifgentest)
+      endif ()
 
 #      add_test (NAME hl_h52gifgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:hl_h52gifgentest>)
   endif ()

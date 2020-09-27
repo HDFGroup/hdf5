@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2018 by George Cave - gcave@stablecoder.ca
+# Copyright (C) 2018-2020 by George Cave - gcave@stablecoder.ca
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -29,7 +29,7 @@ endmacro()
 # used as the options set.
 macro(include_what_you_use)
   if(IWYU AND IWYU_EXE)
-    set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "${IWYU_EXE};${IWYU_STRING}")
+    set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE ${IWYU_EXE} ${ARGN})
   endif()
 endmacro()
 
@@ -37,11 +37,12 @@ endmacro()
 # options set.
 macro(cppcheck)
   if(CPPCHECK AND CPPCHECK_EXE)
-    set(CMAKE_CXX_CPPCHECK "${CPPCHECK_EXE};${CPPCHECK_STRING}")
+    set(CMAKE_CXX_CPPCHECK ${CPPCHECK_EXE} ${ARGN})
   endif()
 endmacro()
 
 find_program(CLANG_TIDY_EXE NAMES "clang-tidy")
+mark_as_advanced(FORCE CLANG_TIDY_EXE)
 if(CLANG_TIDY_EXE)
   message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
   if(NOT CLANG_TIDY)
@@ -63,6 +64,7 @@ else()
 endif()
 
 find_program(IWYU_EXE NAMES "include-what-you-use")
+mark_as_advanced(FORCE IWYU_EXE)
 if(IWYU_EXE)
   message(STATUS "include-what-you-use found: ${IWYU_EXE}")
   if(NOT IWYU)
@@ -85,6 +87,7 @@ else()
 endif()
 
 find_program(CPPCHECK_EXE NAMES "cppcheck")
+mark_as_advanced(FORCE CPPCHECK_EXE)
 if(CPPCHECK_EXE)
   message(STATUS "cppcheck found: ${CPPCHECK_EXE}")
   if(CPPECHECK)

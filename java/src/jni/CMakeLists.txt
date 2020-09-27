@@ -45,6 +45,7 @@ set (HDF5_JAVA_JNI_CHDRS
     ${HDF5_JAVA_JNI_SOURCE_DIR}/h5fImp.h
     ${HDF5_JAVA_JNI_SOURCE_DIR}/h5gImp.h
     ${HDF5_JAVA_JNI_SOURCE_DIR}/h5iImp.h
+    ${HDF5_JAVA_JNI_SOURCE_DIR}/h5Imp.h
     ${HDF5_JAVA_JNI_SOURCE_DIR}/h5jni.h
     ${HDF5_JAVA_JNI_SOURCE_DIR}/h5lImp.h
     ${HDF5_JAVA_JNI_SOURCE_DIR}/h5oImp.h
@@ -85,6 +86,13 @@ target_link_libraries (${HDF5_JAVA_JNI_LIB_TARGET} PUBLIC ${HDF5_LIBSH_TARGET})
 set_target_properties (${HDF5_JAVA_JNI_LIB_TARGET} PROPERTIES FOLDER libraries/jni)
 SET_GLOBAL_VARIABLE (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_JAVA_JNI_LIB_TARGET}")
 H5_SET_LIB_OPTIONS (${HDF5_JAVA_JNI_LIB_TARGET} ${HDF5_JAVA_JNI_LIB_NAME} SHARED "JAVA")
+
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_JNI_SRC_FORMAT ${HDF5_JAVA_JNI_LIB_TARGET})
+endif ()
 
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects
