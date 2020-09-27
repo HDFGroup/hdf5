@@ -77,7 +77,7 @@ static unsigned int     H5PL_plugin_control_mask_g = H5PL_ALL_PLUGIN;
 static hbool_t          H5PL_allow_plugins_g = TRUE;
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5PL__get_plugin_control_mask
  *
@@ -104,7 +104,7 @@ H5PL__get_plugin_control_mask(unsigned int *mask /*out*/)
 
 } /* end H5PL__get_plugin_control_mask() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5PL__set_plugin_control_mask
  *
@@ -133,7 +133,7 @@ H5PL__set_plugin_control_mask(unsigned int mask)
 
 } /* end H5PL__set_plugin_control_mask() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5PL__init_package
  *
@@ -174,7 +174,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__init_package() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5PL_term_package
  *
@@ -219,7 +219,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL_term_package() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5PL_load
  *
@@ -281,7 +281,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL_load() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5PL__open
  *
@@ -304,7 +304,7 @@ done:
  *       get_plugin_info function pointer, but early (4.4.7, at least) gcc
  *       only allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF(pedantic)
+H5_GCC_DIAG_OFF("pedantic")
 herr_t
 H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key,
     hbool_t *success, const void **plugin_info)
@@ -416,9 +416,9 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__open() */
-H5_GCC_DIAG_ON(pedantic)
+H5_GCC_DIAG_ON("pedantic")
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5PL__close
  *

@@ -37,6 +37,13 @@ foreach (example ${examples})
     target_link_libraries (hl_ex_${example} PRIVATE ${HDF5_HL_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   endif ()
   set_target_properties (hl_ex_${example} PROPERTIES FOLDER examples/hl)
+
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_HL_EXAMPLES_${example}_FORMAT hl_ex_${example})
+  endif ()
 endforeach ()
 
 if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)

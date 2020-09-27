@@ -28,6 +28,17 @@ if (BUILD_SHARED_LIBS)
   set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} h5watch-shared)
 endif ()
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_HL_TOOLS_H5WATCH_FORMAT h5watch)
+  else ()
+    clang_format (HDF5_HL_TOOLS_H5WATCH_FORMAT h5watch-shared)
+  endif ()
+endif ()
+
 if (BUILD_TESTING AND HDF5_TEST_SWMR AND HDF5_TEST_SERIAL)
   #-- Add swmr_check_compat_vfd program
   set (hl_swmr_check_compat_vfd_SOURCES
@@ -45,6 +56,13 @@ if (BUILD_TESTING AND HDF5_TEST_SWMR AND HDF5_TEST_SERIAL)
   endif ()
   set_target_properties (hl_swmr_check_compat_vfd PROPERTIES FOLDER tools/hl)
 
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_HL_TOOLS_H5WATCH_hl_swmr_check_compat_vfd_FORMAT hl_swmr_check_compat_vfd)
+  endif ()
+
   #-- Add extend_dset program
   set (extend_dset_SOURCES
       ${HDF5_HL_TOOLS_H5WATCH_SOURCE_DIR}/extend_dset.c
@@ -61,6 +79,13 @@ if (BUILD_TESTING AND HDF5_TEST_SWMR AND HDF5_TEST_SERIAL)
   endif ()
   set_target_properties (extend_dset PROPERTIES FOLDER tools/hl)
 
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_HL_TOOLS_H5WATCH_extend_dset_FORMAT extend_dset)
+  endif ()
+
   add_executable (h5watchgentest ${HDF5_HL_TOOLS_H5WATCH_SOURCE_DIR}/h5watchgentest.c)
   target_compile_options(h5watchgentest PRIVATE "${HDF5_CMAKE_C_FLAGS}")
   target_include_directories (h5watchgentest PRIVATE "${HDF5_HL_SRC_DIR}/src;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
@@ -72,6 +97,13 @@ if (BUILD_TESTING AND HDF5_TEST_SWMR AND HDF5_TEST_SERIAL)
     target_link_libraries (h5watchgentest PRIVATE ${HDF5_HL_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   endif ()
   set_target_properties (h5watchgentest PROPERTIES FOLDER generator/tools/hl)
+
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_HL_TOOLS_H5WATCH_h5watchgentest_FORMAT h5watchgentest)
+  endif ()
 
   if (HDF5_TEST_TOOLS)
     include (CMakeTests.cmake)

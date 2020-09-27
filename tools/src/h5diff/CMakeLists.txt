@@ -8,6 +8,7 @@ if (NOT ONLY_SHARED_LIBS)
   add_executable (h5diff
       ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_common.c
       ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_main.c
+      ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_common.h
   )
   target_include_directories (h5diff PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   target_compile_options(h5diff PRIVATE "${HDF5_CMAKE_C_FLAGS}")
@@ -23,6 +24,7 @@ if (BUILD_SHARED_LIBS)
   add_executable (h5diff-shared
       ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_common.c
       ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_main.c
+      ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_common.h
   )
   target_include_directories (h5diff-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   target_compile_options(h5diff-shared PRIVATE "${HDF5_CMAKE_C_FLAGS}")
@@ -33,6 +35,17 @@ if (BUILD_SHARED_LIBS)
   set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5diff-shared")
 
   set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} h5diff-shared)
+endif ()
+
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_H5DIFF_SRC_FORMAT h5diff)
+  else ()
+    clang_format (HDF5_H5DIFF_SRC_FORMAT h5diff-shared)
+  endif ()
 endif ()
 
 if (H5_HAVE_PARALLEL)
