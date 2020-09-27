@@ -1192,6 +1192,7 @@ read__independent(int n_io_concentrators, hid_t context_id, int64_t offset,
     int64_t      ioc_read_datasize[n_io_concentrators];
     int64_t      ioc_read_offset[n_io_concentrators];
     MPI_Datatype ioc_read_type[n_io_concentrators];
+	useconds_t   delay = 50;
 
     subfiling_context_t *sf_context = get_subfiling_object(context_id);
     assert(sf_context != NULL);
@@ -1229,22 +1230,12 @@ read__independent(int n_io_concentrators, hid_t context_id, int64_t offset,
 
 #ifndef NDEBUG
         if (sf_verbose_flag) {
-#if 0
-            if (sf_logfile) {
-                fprintf(sf_logfile,
-                    "[%d %s] Requesting %ld read bytes from IOC(%d): "
-                    "sourceOffset=%ld subfile_offset=%ld\n",
-                    sf_world_rank, __func__, msg[0], io_concentrator[ioc],
-						sourceOffset, msg[1]);
-            }
-#else
 			fprintf(stdout,
                     "[%d %s] Requesting %ld read bytes from IOC(%d): "
                     "sourceOffset=%ld subfile_offset=%ld\n",
                     sf_world_rank, __func__, msg[0], io_concentrator[ioc],
 					sourceOffset, msg[1]);
 			fflush(stdout);
-#endif
         }
 #endif
 
@@ -1299,22 +1290,12 @@ read__independent(int n_io_concentrators, hid_t context_id, int64_t offset,
         for (i = 0; i < ready; i++) {
 #ifndef NDEBUG
             if (sf_verbose_flag) {
-#if 0
-                if (sf_logfile) {
-                    fprintf(sf_logfile,
-                        "[%d] READ bytes(%ld) of data from ioc_concentrator %d "
-                        "complete\n",
-                        sf_world_rank, ioc_read_datasize[indices[i]],
-                        indices[i]);
-                }
-#else
 				fprintf(stdout,
                         "[%d] READ bytes(%ld) of data from ioc_concentrator %d "
                         "complete\n",
                         sf_world_rank, ioc_read_datasize[indices[i]],
                         indices[i]);
 				fflush(stdout);
-#endif
             }
 #endif
             if (ioc_read_type[indices[i]] != MPI_BYTE) {
@@ -1322,6 +1303,8 @@ read__independent(int n_io_concentrators, hid_t context_id, int64_t offset,
             }
             n_waiting--;
         }
+		if (n_waiting)
+			usleep(delay);
     }
     return status;
 }
@@ -1455,10 +1438,11 @@ write__independent(int n_io_concentrators, hid_t context_id, int64_t offset,
     int64_t      ioc_write_datasize[n_io_concentrators];
     int64_t      ioc_write_offset[n_io_concentrators];
     MPI_Datatype ioc_write_type[n_io_concentrators];
-
+	useconds_t   delay = 50;
     subfiling_context_t *sf_context = get_subfiling_object(context_id);
     int                  i, target, ioc, n_waiting = 0, status = 0;
     int                  errors = 0;
+
 
     io_concentrator = sf_context->topology->io_concentrator;
 
@@ -1516,22 +1500,12 @@ write__independent(int n_io_concentrators, hid_t context_id, int64_t offset,
 #ifndef NDEBUG
 		if (sf_verbose_flag)
 		{
-#if 0
-			if (sf_logfile) {
-				fprintf(sf_logfile,
-						"[%d %s]: write_dest[ioc(%d), "
-						"sourceOffset=%ld, datasize=%ld, foffset=%ld]\n",
-						sf_world_rank, __func__, ioc, sourceOffset,
-						ioc_write_datasize[ioc], ioc_write_offset[ioc]);
-			}
-#else
 			fprintf(stdout,
 					"[%d %s]: write_dest[ioc(%d), "
 					"sourceOffset=%ld, datasize=%ld, foffset=%ld]\n",
 					sf_world_rank, __func__, ioc, sourceOffset,
 					ioc_write_datasize[ioc], ioc_write_offset[ioc]);
 			fflush(stdout);
-#endif
 		}
 #endif
 
@@ -1619,7 +1593,6 @@ write__independent(int n_io_concentrators, hid_t context_id, int64_t offset,
             fflush(stdout);
             errors++;
         }
-
         for (i = 0; i < ready; i++) {
             /* One of the Issend calls has completed
              * If we used a derived type to send data, then should free
@@ -1630,6 +1603,8 @@ write__independent(int n_io_concentrators, hid_t context_id, int64_t offset,
             }
             n_waiting--;
         }
+		if (n_waiting)
+			usleep(delay);
     }
     if (errors)
         return -1;
@@ -2041,9 +2016,6 @@ sf_open_subfiles(hid_t fid, char *filename, char *prefix, int flags)
         puts("H5FDsubfiling_init failed!");
         return -1;
     }
-#if 0
-	printf("[%d %s]\n", sf_world_rank, __func__);
-#endif
 
     sf_context = get_subfiling_object(context_id);
     assert(sf_context != NULL);
@@ -2194,11 +2166,6 @@ ioc_main(int64_t context_id)
 	sf_close_file_count = 0;  
 	sf_ops_after_first_close = 0;
 
-#if 0
-	printf("Starting IOC! mpi_rank=%d\n", sf_world_rank);
-	fflush(stdout);
-#endif
-
     while (!sf_shutdown_flag || sf_work_pending) {
         flag = 0;
         ret = MPI_Iprobe(
@@ -2220,29 +2187,6 @@ ioc_main(int64_t context_id)
                     MPI_BYTE, source, tag, context->sf_msg_comm, &msg_status);
             }
             if (ret == MPI_SUCCESS) {
-#if 0
-				if (tag == OPEN_OP) {
-					sf_open_file_count++;
-					printf("source=%d: sf_open_file_count = %d\n", source, sf_open_file_count);
-					fflush(stdout);
-				}
-				else if (tag == CLOSE_OP) {
-					sf_close_file_count++;
-					printf("source=%d: sf_close_file_count = %d\n", source, sf_close_file_count);
-					fflush(stdout);
-				}
-				else {
-					printf("ioc(0): tag=%d\n", tag);
-					fflush(stdout);
-					if (sf_close_file_count) {
-						sf_ops_after_first_close++;
-						if (sf_close_file_count == sf_world_size) {
-							printf("op=%d from source(%d) after file close! sf_open_file_count=%d\n", tag, source, sf_open_file_count);
-							fflush(stdout);
-						}
-					}
-				}
-#endif
                 if (msg) {
                     msg->source = source;
                     msg->subfile_rank = subfile_rank;
@@ -2620,14 +2564,9 @@ queue_file_open(
         }
     }
 #endif
-#if 0
-	printf("[ioc(%d) %s]\n", subfile_rank, __func__);
-	fflush(stdout);
-#endif
     errors = subfiling_open_file(msg, sf_subfile_prefix, subfile_rank, flags);
 	// open_count = atomic_load(&sf_file_refcount);
 
-#if 1
 	ret = MPI_Send(&errors, 1, MPI_INT, source, COMPLETED, comm);
 	if (ret != MPI_SUCCESS) {
 		printf("[ioc(%d)] MPI_Send FILE_OPEN, COMPLETED to source(%d) FAILED\n",
@@ -2635,21 +2574,7 @@ queue_file_open(
 		fflush(stdout);
 		errors++;
 	}
-#else
-	if (open_count == sf_world_size) {
-		int i, k = (sf_world_rank +1);
-		for (i=0; i < sf_world_size; i++, k++) {
-			source = k % sf_world_size;
-			ret = MPI_Send(&errors, 1, MPI_INT, source, COMPLETED, comm);
-			if (ret != MPI_SUCCESS) {
-				printf("[ioc(%d)] MPI_Send FILE_OPEN, COMPLETED to source(%d) FAILED\n",
-					   subfile_rank, source);
-				fflush(stdout);
-				errors++;
-			}
-		}	
-    }
-#endif
+
     if (errors) {
 #ifndef NDEBUG
         if (sf_verbose_flag) {

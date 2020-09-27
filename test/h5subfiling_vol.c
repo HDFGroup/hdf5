@@ -1884,11 +1884,6 @@ H5VL_subfiling_file_create(const char *name, unsigned flags, hid_t fcpl_id,
 	void *ret_value = NULL;
     void *under = NULL;
 
-#if 0
-	file_create_count++;
-	printf("%s: count=%d\n", __func__, file_create_count);
-	fflush(stdout);
-#endif
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
     printf("------- SUBFILING VOL FILE Create\n");
 #endif
@@ -2008,11 +2003,6 @@ H5VL_subfiling_file_open(const char *name, unsigned flags, hid_t fapl_id,
 	void *ret_value = NULL;
     void *under = NULL;
 	
-#if 0
-	file_open_count++;
-	printf("%s: count=%d\n", __func__, file_open_count);
-	fflush(stdout);
-#endif	
 #ifdef ENABLE_EXT_PASSTHRU_LOGGING
     printf("------- SUBFILING VOL FILE Open\n");
 #endif
@@ -2328,11 +2318,7 @@ H5VL_subfiling_file_close(void *_file, hid_t dxpl_id, void **req)
     H5VL_subfiling_file_t *subfiling_file = (H5VL_subfiling_file_t *)o->obj.item.file;
     int mpi_enabled = 0;
     herr_t ret_value;
-#if 0
-	file_close_count++;
-	printf("%s: count=%d\n", __func__, file_close_count);
-	fflush(stdout);
-#endif
+
 	if (file_create_count > 0) {
 		if (file_create_count != file_close_count)
 			puts("mismatched file_create_count and file_close_count");

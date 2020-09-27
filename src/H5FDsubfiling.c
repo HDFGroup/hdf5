@@ -697,16 +697,8 @@ H5FD_subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t max
 	 * We can be a bit more efficient by having rank 0 broadcast
 	 * the stat buffer.
 	 */
-#if 0
-	if (mpi_enabled && (my_rank == 0)) {
-		int sb_size = sizeof(sb);
-
-		MPI_Bcast(&sb, sb_size, MPI_BYTE, 0, MPI_COMM_WORLD);
-	}				
-#else
 	if(HDfstat(fd, &sb) < 0)
 		HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file")
-#endif
 
     /* Create the new file struct */
     if(NULL == (file = H5FL_CALLOC(H5FD_subfiling_t)))
@@ -929,9 +921,6 @@ H5FD_subfiling_query(const H5FD_t *_file, unsigned long *flags /* out */)
         *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;    /* OK to aggregate "small" raw data allocations                     */
         *flags |= H5FD_FEAT_POSIX_COMPAT_HANDLE;    /* get_handle callback returns a POSIX file descriptor              */
         *flags |= H5FD_FEAT_SUPPORTS_SWMR_IO;       /* VFD supports the single-writer/multiple-readers (SWMR) pattern   */
-#if 0
-		*flags |= H5FD_FEAT_HAS_MPI;				/* FIXME:: for experimentation only... */
-#endif
         /* Check for flags that are set by h5repart */
         if(file && file->fam_to_single)
             *flags |= H5FD_FEAT_IGNORE_DRVRINFO; /* Ignore the driver info when file is opened (which eliminates it) */
@@ -1755,13 +1744,9 @@ H5FD__dataset_write_contiguous(hid_t h5_file_id, haddr_t dataset_baseAddr, size_
 		{
 			int status;
 			haddr_t rank_baseAddr;
-#if 0
-			rank_baseAddr = get_data_offset(mpi_rank, mpi_size, dtype_extent, mem_space, file_space);
-
-#else		
 			rank_baseAddr = get_base_offset(mpi_rank, mpi_size, mem_space_id, file_space_id);
 			rank_baseAddr += dataset_baseAddr;
-#endif
+
 			// printf("[%d] H5S_SEL_HYPERSLABS, file_offset = %lld\n", mpi_rank, rank_baseAddr );
 			if ((status = H5Sis_regular_hyperslab(file_space_id)) < 0) {
 				puts("H5Sis_regular_hyperslab returned an error");
