@@ -1361,7 +1361,7 @@ reset_server_counters(void)
         success = FALSE;
         nerrors++;
         if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: actual/total reads mismatch (%ld/%ld).\n",
+            HDfprintf(stdout, "%d:%s: actual/total reads mismatch (%ld/%d).\n",
                       world_mpi_rank, FUNC,
                       actual_total_reads, total_reads);
         }
@@ -1372,7 +1372,7 @@ reset_server_counters(void)
         success = FALSE;
         nerrors++;
         if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: actual/total writes mismatch (%ld/%ld).\n",
+            HDfprintf(stdout, "%d:%s: actual/total writes mismatch (%ld/%d).\n",
                       world_mpi_rank, FUNC,
                       actual_total_writes, total_writes);
         }
@@ -1586,8 +1586,9 @@ serve_read_request(struct mssg_t * mssg_ptr)
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: addr lookup failed for %a.\n",
-                          world_mpi_rank, FUNC, target_addr);
+                HDfprintf(stdout,
+                    "%d:%s: addr lookup failed for %" PRIuHADDR ".\n",
+                    world_mpi_rank, FUNC, target_addr);
             }
         } else if ( data[target_index].len != mssg_ptr->len ) {
 
@@ -1595,7 +1596,7 @@ serve_read_request(struct mssg_t * mssg_ptr)
             success = FALSE;
             if ( verbose ) {
                 HDfprintf(stdout,
-                          "%d:%s: data[i].len = %Zu != mssg->len = %d.\n",
+                          "%d:%s: data[i].len = %zu != mssg->len = %d.\n",
                            world_mpi_rank, FUNC,
                            data[target_index].len, mssg_ptr->len);
             }
@@ -1605,7 +1606,8 @@ serve_read_request(struct mssg_t * mssg_ptr)
             success = FALSE;
             if ( verbose ) {
                 HDfprintf(stdout,
-                  "%d:%s: proc %d read invalid entry. idx/base_addr = %d/%a.\n",
+                  "%d:%s: proc %d read invalid entry. "
+                  "idx/base_addr = %d/%" PRIuHADDR ".\n",
                          world_mpi_rank, FUNC,
                          mssg_ptr->src,
             target_index,
@@ -1790,8 +1792,9 @@ serve_write_request(struct mssg_t * mssg_ptr)
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: addr lookup failed for %a.\n",
-                          world_mpi_rank, FUNC, target_addr);
+                HDfprintf(stdout,
+                   "%d:%s: addr lookup failed for %" PRIuHADDR ".\n",
+                   world_mpi_rank, FUNC, target_addr);
             }
         } else if ( data[target_index].len != mssg_ptr->len ) {
 
@@ -1799,7 +1802,7 @@ serve_write_request(struct mssg_t * mssg_ptr)
             success = FALSE;
             if ( verbose ) {
                 HDfprintf(stdout,
-                          "%d:%s: data[i].len = %Zu != mssg->len = %d.\n",
+                          "%d:%s: data[i].len = %zu != mssg->len = %d.\n",
                           world_mpi_rank, FUNC,
                           data[target_index].len, mssg_ptr->len);
             }
@@ -1940,13 +1943,13 @@ serve_total_writes_request(struct mssg_t * mssg_ptr)
 
         if ( success ) {
 
-            HDfprintf(stdout, "%d request total writes %ld.\n",
+            HDfprintf(stdout, "%d request total writes %d.\n",
                       (int)(mssg_ptr->src),
                       total_writes);
 
         } else {
 
-            HDfprintf(stdout, "%d request total writes %ld -- FAILED.\n",
+            HDfprintf(stdout, "%d request total writes %d -- FAILED.\n",
                       (int)(mssg_ptr->src),
                       total_writes);
 
@@ -2019,13 +2022,13 @@ serve_total_reads_request(struct mssg_t * mssg_ptr)
 
         if ( success ) {
 
-            HDfprintf(stdout, "%d request total reads %ld.\n",
+            HDfprintf(stdout, "%d request total reads %d.\n",
                       (int)(mssg_ptr->src),
                       total_reads);
 
         } else {
 
-            HDfprintf(stdout, "%d request total reads %ld -- FAILED.\n",
+            HDfprintf(stdout, "%d request total reads %d -- FAILED.\n",
                       (int)(mssg_ptr->src),
                       total_reads);
 
@@ -2087,8 +2090,9 @@ serve_entry_writes_request(struct mssg_t * mssg_ptr)
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: addr lookup failed for %a.\n",
-                          world_mpi_rank, FUNC, target_addr);
+                HDfprintf(stdout,
+                    "%d:%s: addr lookup failed for %" PRIuHADDR ".\n",
+                    world_mpi_rank, FUNC, target_addr);
             }
         } else {
 
@@ -2184,8 +2188,9 @@ serve_entry_reads_request(struct mssg_t * mssg_ptr)
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: addr lookup failed for %a.\n",
-                          world_mpi_rank, FUNC, target_addr);
+                HDfprintf(stdout,
+                    "%d:%s: addr lookup failed for %" PRIuHADDR ".\n",
+                    world_mpi_rank, FUNC, target_addr);
             }
         } else {
 
@@ -2708,10 +2713,10 @@ datum_notify(H5C_notify_action_t action, void *thing)
                 HDfprintf(stdout,
                 "%d:%s: mssg.base_addr != entry_ptr->base_addr.\n",
                 world_mpi_rank, FUNC);
-                HDfprintf(stdout, "%d:%s: mssg.base_addr = %a.\n",
+                HDfprintf(stdout, "%d:%s: mssg.base_addr = %" PRIuHADDR ".\n",
                     world_mpi_rank, FUNC, mssg.base_addr);
                 HDfprintf(stdout,
-                                  "%d:%s: entry_ptr->base_addr = %a.\n",
+                    "%d:%s: entry_ptr->base_addr = %" PRIuHADDR ".\n",
                     world_mpi_rank, FUNC,
                                    entry_ptr->base_addr);
                     }
@@ -2721,7 +2726,7 @@ datum_notify(H5C_notify_action_t action, void *thing)
                 HDfprintf(stdout,
                                   "%d:%s: mssg.len != entry_ptr->len.\n",
                     world_mpi_rank, FUNC);
-                HDfprintf(stdout, "%d:%s: mssg.len = %a.\n",
+                HDfprintf(stdout, "%d:%s: mssg.len = %" PRIuHADDR ".\n",
                     world_mpi_rank, FUNC, mssg.len);
                     }
 
@@ -4679,8 +4684,9 @@ verify_entry_reads(haddr_t addr,
             success = FALSE;
             if ( verbose ) {
                 HDfprintf(stdout,
-                    "%d:%s: rep/exp entry 0x%llx reads mismatch (%ld/%ld).\n",
-                    world_mpi_rank, FUNC, (long long)addr,
+                    "%d:%s: rep/exp entry 0x%" PRIxHADDR
+                    " reads mismatch (%d/%d).\n",
+                    world_mpi_rank, FUNC, addr,
                     reported_entry_reads, expected_entry_reads);
             }
         }
@@ -4786,7 +4792,7 @@ verify_entry_writes(haddr_t addr,
             success = FALSE;
             if ( verbose ) {
                 HDfprintf(stdout,
-                    "%d:%s: rep/exp entry 0x%llx writes mismatch (%ld/%ld).\n",
+                    "%d:%s: rep/exp entry 0x%llx writes mismatch (%d/%d).\n",
                     world_mpi_rank, FUNC, (long long)addr,
                     reported_entry_writes, expected_entry_writes);
             }
@@ -4886,7 +4892,7 @@ verify_total_reads(int expected_total_reads)
             success = FALSE;
             if ( verbose ) {
                 HDfprintf(stdout,
-                    "%d:%s: reported/expected total reads mismatch (%ld/%ld).\n",
+                    "%d:%s: reported/expected total reads mismatch (%ld/%d).\n",
                     world_mpi_rank, FUNC,
                     reported_total_reads, expected_total_reads);
 
@@ -7094,12 +7100,12 @@ trace_file_check(int metadata_write_strategy)
                     if(verbose) {
                         HDfprintf(stdout, "%d:%s: Unexpected data in trace file line %d.\n", world_mpi_rank, FUNC, i);
                         if(expected_line_len == 0) {
-                            HDfprintf(stdout, "%d:%s: expected = \"%s\" %d\n", world_mpi_rank, FUNC, "<EMPTY>", expected_line_len);
-                            HDfprintf(stdout, "%d:%s: actual   = \"%s\" %d\n", world_mpi_rank, FUNC, buffer, actual_line_len);
+                            HDfprintf(stdout, "%d:%s: expected = \"%s\" %zu\n", world_mpi_rank, FUNC, "<EMPTY>", expected_line_len);
+                            HDfprintf(stdout, "%d:%s: actual   = \"%s\" %zu\n", world_mpi_rank, FUNC, buffer, actual_line_len);
                         }
                         if(actual_line_len == 0) {
-                            HDfprintf(stdout, "%d:%s: expected = \"%s\" %d\n", world_mpi_rank, FUNC, (*expected_output)[i], expected_line_len);
-                            HDfprintf(stdout, "%d:%s: actual   = \"%s\" %d\n", world_mpi_rank, FUNC, "<EMPTY>", actual_line_len);
+                            HDfprintf(stdout, "%d:%s: expected = \"%s\" %zu\n", world_mpi_rank, FUNC, (*expected_output)[i], expected_line_len);
+                            HDfprintf(stdout, "%d:%s: actual   = \"%s\" %zu\n", world_mpi_rank, FUNC, "<EMPTY>", actual_line_len);
                         }
                     }
                     HDfprintf(stdout, "BADNESS BADNESS BADNESS\n");
@@ -7112,8 +7118,8 @@ trace_file_check(int metadata_write_strategy)
                     nerrors++;
                     if(verbose) {
                         HDfprintf(stdout, "%d:%s: Unexpected data in trace file line %d.\n", world_mpi_rank, FUNC, i);
-                        HDfprintf(stdout, "%d:%s: expected = \"%s\" %d\n", world_mpi_rank, FUNC, (*expected_output)[i], expected_line_len);
-                        HDfprintf(stdout, "%d:%s: actual   = \"%s\" %d\n", world_mpi_rank, FUNC, buffer, actual_line_len);
+                        HDfprintf(stdout, "%d:%s: expected = \"%s\" %zu\n", world_mpi_rank, FUNC, (*expected_output)[i], expected_line_len);
+                        HDfprintf(stdout, "%d:%s: actual   = \"%s\" %zu\n", world_mpi_rank, FUNC, buffer, actual_line_len);
                     }
                 }
             }

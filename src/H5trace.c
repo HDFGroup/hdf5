@@ -419,7 +419,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             H5MS_acat(ms, " {");
                             for(i = 0; i < asize[asize_idx]; i++)
-                                H5MS_asprintf_cat(ms, "%s%Zu", (i ? ", " : ""), p[i]);
+                                H5MS_asprintf_cat(ms, "%s%zu", (i ? ", " : ""), p[i]);
                             H5MS_acat(ms, "}");
                         } /* end if */
                         break;
@@ -432,7 +432,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                                 H5MS_acat(ms, " {");
                                 for(i = 0; i < asize[asize_idx]; i++)
-                                    H5MS_asprintf_cat(ms, "%s%Zd", (i ? ", " : ""), p[i]);
+                                    H5MS_asprintf_cat(ms, "%s%zd", (i ? ", " : ""), p[i]);
                                 H5MS_acat(ms, "}");
                             } /* end if */
                         } /* end if */
@@ -475,6 +475,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                             } /* end block */
                             break;
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
                         case 'o':   /* H5A_operator1_t */
                             {
                                 H5A_operator1_t aop1 = (H5A_operator1_t)HDva_arg(ap, H5A_operator1_t);
@@ -482,6 +483,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                                 H5MS_asprintf_cat(ms, "%p", aop1);
                             } /* end block */
                             break;
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
                         case 'O':   /* H5A_operator2_t */
                             {
@@ -1064,6 +1066,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                 case 'E':
                     switch(type[1]) {
+#ifndef H5_NO_DEPRECATED_SYMBOLS
                         case 'a':   /* H5E_auto1_t */
                             {
                                 H5E_auto1_t eauto1 = (H5E_auto1_t)HDva_arg(ap, H5E_auto1_t);
@@ -1071,6 +1074,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                                 H5MS_asprintf_cat(ms, "%p", eauto1);
                             } /* end block */
                             break;
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
                         case 'A':   /* H5E_auto2_t */
                             {
@@ -1104,7 +1108,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                             {
                                 H5E_error2_t *error = HDva_arg(ap, H5E_error2_t *);
 
-                                H5MS_asprintf_cat(ms, "%p", error);
+                                H5MS_asprintf_cat(ms, "%p", (void *)error);
                             } /* end block */
                             break;
 
@@ -1425,7 +1429,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                             {
                                 H5G_stat_t *statbuf = HDva_arg(ap, H5G_stat_t*);
 
-                                H5MS_asprintf_cat(ms, "%p", statbuf);
+                                H5MS_asprintf_cat(ms, "%p", (void *)statbuf);
                             } /* end block */
                             break;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
@@ -1876,6 +1880,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                 case 'L':
                     switch(type[1]) {
+#ifndef H5_NO_DEPRECATED_SYMBOLS
                         case 'i':   /* H5L_iterate1_t */
                             {
                                 H5L_iterate1_t liter = (H5L_iterate1_t)HDva_arg(ap, H5L_iterate1_t);
@@ -1883,6 +1888,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                                 H5MS_asprintf_cat(ms, "%p", liter);
                             } /* end block */
                             break;
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
                         case 'I':   /* H5L_iterate2_t */
                             {
@@ -2049,6 +2055,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                 case 'O':
                     switch(type[1]) {
+#ifndef H5_NO_DEPRECATED_SYMBOLS
                         case 'i':   /* H5O_iterate1_t */
                             {
                                 H5O_iterate1_t oiter = (H5O_iterate1_t)HDva_arg(ap, H5O_iterate1_t);
@@ -2056,6 +2063,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                                 H5MS_asprintf_cat(ms, "%p", oiter);
                             } /* end block */
                             break;
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
                         case 'I':   /* H5O_iterate2_t */
                             {
@@ -3674,7 +3682,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                     {
                         size_t size = HDva_arg(ap, size_t);
 
-                        H5MS_asprintf_cat(ms, "%Zu", size);
+                        H5MS_asprintf_cat(ms, "%zu", size);
                         asize[argno] = (hssize_t)size;
                     } /* end block */
                     break;
@@ -3705,11 +3713,11 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                             } /* end block */
                             break;
 
-                        case 'c':       /* H5Z_class_t */
+                        case 'c':       /* H5Z_class2_t */
                             {
                                 H5Z_class2_t *filter = HDva_arg(ap, H5Z_class2_t*);
 
-                                H5MS_asprintf_cat(ms, "%p", filter);
+                                H5MS_asprintf_cat(ms, "%p", (void *)filter);
                             } /* end block  */
                             break;
 
@@ -3761,7 +3769,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                             {
                                 ssize_t ssize = HDva_arg(ap, ssize_t);
 
-                                H5MS_asprintf_cat(ms, "%Zd", ssize);
+                                H5MS_asprintf_cat(ms, "%zd", ssize);
                                 asize[argno] = (hssize_t)ssize;
                             } /* end block */
                             break;

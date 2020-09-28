@@ -402,7 +402,7 @@ H5HF__man_dblock_new(H5HF_hdr_t *hdr, size_t request,
 
         /* Check for skipping over blocks */
         if(min_dblock_size > next_size) {
-HDfprintf(stderr, "%s: Skipping direct block sizes not supported, min_dblock_size = %Zu, next_size = %Zu\n", FUNC, min_dblock_size, next_size);
+HDfprintf(stderr, "%s: Skipping direct block sizes not supported, min_dblock_size = %zu, next_size = %zu\n", FUNC, min_dblock_size, next_size);
 HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "skipping direct block sizes not supported yet")
         } /* end if */
 

@@ -1291,7 +1291,7 @@ H5FD_s3comms_s3r_read(s3r_t   *handle,
         if(rangebytesstr == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, FAIL, "could not malloc range format string.");
         ret = HDsnprintf(rangebytesstr, (S3COMMS_MAX_RANGE_STRING_SIZE),
-                       "bytes="H5_PRINTF_HADDR_FMT"-"H5_PRINTF_HADDR_FMT,
+                       "bytes=%" PRIuHADDR "-%" PRIuHADDR,
                        offset, offset + len - 1);
         if(ret <= 0 || ret >= S3COMMS_MAX_RANGE_STRING_SIZE)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to format HTTP Range value");
@@ -1300,7 +1300,7 @@ H5FD_s3comms_s3r_read(s3r_t   *handle,
         if(rangebytesstr == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, FAIL, "could not malloc range format string.");
         ret = HDsnprintf(rangebytesstr, (S3COMMS_MAX_RANGE_STRING_SIZE),
-                      "bytes="H5_PRINTF_HADDR_FMT"-", offset);
+                      "bytes=%" PRIuHADDR "-", offset);
         if(ret <= 0 || ret >= S3COMMS_MAX_RANGE_STRING_SIZE)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to format HTTP Range value");
     }

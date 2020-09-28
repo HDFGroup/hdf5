@@ -786,17 +786,16 @@ H5C_mark_entries_as_clean(H5F_t *  f,
         if(entry_ptr == NULL) {
 #if H5C_DO_SANITY_CHECKS
             HDfprintf(stdout,
-                  "H5C_mark_entries_as_clean: entry[%u] = %a not in cache.\n",
-                      u,
-                      addr);
+                "H5C_mark_entries_as_clean: entry[%u] = %" PRIuHADDR
+                " not in cache.\n", u, addr);
 #endif /* H5C_DO_SANITY_CHECKS */
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Listed entry not in cache?!?!?")
         } /* end if */
         else if(!entry_ptr->is_dirty) {
 #if H5C_DO_SANITY_CHECKS
             HDfprintf(stdout,
-                      "H5C_mark_entries_as_clean: entry %a is not dirty!?!\n",
-                      addr);
+               "H5C_mark_entries_as_clean: entry %" PRIuHADDR
+               " is not dirty!?!\n", addr);
 #endif /* H5C_DO_SANITY_CHECKS */
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Listed entry not dirty?!?!?")
         } /* end else-if */

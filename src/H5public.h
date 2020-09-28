@@ -176,48 +176,94 @@ typedef long long ssize_t;
 #endif
 #endif
 
+/* int64_t type is used for creation order field for links.  It may be
+ * defined in Posix.1g, otherwise it is defined here.
+ */
+#if H5_SIZEOF_INT64_T>=8
+#elif H5_SIZEOF_INT>=8
+    typedef int int64_t;
+#   undef H5_SIZEOF_INT64_T
+#   define H5_SIZEOF_INT64_T H5_SIZEOF_INT
+#elif H5_SIZEOF_LONG>=8
+    typedef long int64_t;
+#   undef H5_SIZEOF_INT64_T
+#   define H5_SIZEOF_INT64_T H5_SIZEOF_LONG
+#elif H5_SIZEOF_LONG_LONG>=8
+    typedef long long int64_t;
+#   undef H5_SIZEOF_INT64_T
+#   define H5_SIZEOF_INT64_T H5_SIZEOF_LONG_LONG
+#else
+#   error "nothing appropriate for int64_t"
+#endif
+
+/* uint64_t type is used for fields for H5O_info_t.  It may be
+ * defined in Posix.1g, otherwise it is defined here.
+ */
+#if H5_SIZEOF_UINT64_T>=8
+#ifndef UINT64_MAX
+#define UINT64_MAX ((uint64_t)-1)
+#endif
+#elif H5_SIZEOF_INT>=8
+    typedef unsigned uint64_t;
+#   define UINT64_MAX UINT_MAX
+#   undef H5_SIZEOF_UINT64_T
+#   define H5_SIZEOF_UINT64_T H5_SIZEOF_INT
+#elif H5_SIZEOF_LONG>=8
+    typedef unsigned long uint64_t;
+#   define UINT64_MAX ULONG_MAX
+#   undef H5_SIZEOF_UINT64_T
+#   define H5_SIZEOF_UINT64_T H5_SIZEOF_LONG
+#elif H5_SIZEOF_LONG_LONG>=8
+    typedef unsigned long long uint64_t;
+#   define UINT64_MAX ULLONG_MAX
+#   undef H5_SIZEOF_UINT64_T
+#   define H5_SIZEOF_UINT64_T H5_SIZEOF_LONG_LONG
+#else
+#   error "nothing appropriate for uint64_t"
+#endif
+
 /*
- * The sizes of file objects have their own types defined here, use a 64-bit
- * type.
+ * The sizes of file objects have their own types defined here, use a minimum
+ * 64-bit type.
  */
 #if H5_SIZEOF_LONG_LONG >= 8
 H5_GCC_DIAG_OFF("long-long")
 typedef unsigned long long  hsize_t;
 typedef signed long long    hssize_t;
 H5_GCC_DIAG_ON("long-long")
-#       define H5_SIZEOF_HSIZE_T H5_SIZEOF_LONG_LONG
-#       define H5_SIZEOF_HSSIZE_T H5_SIZEOF_LONG_LONG
 #define PRIdHSIZE   PRId64
 #define PRIiHSIZE   PRIi64
 #define PRIoHSIZE   PRIo64
 #define PRIuHSIZE   PRIu64
 #define PRIxHSIZE   PRIx64
 #define PRIXHSIZE   PRIX64
+#define H5_SIZEOF_HSIZE_T   H5_SIZEOF_UINT64_T
+#define H5_SIZEOF_HSSIZE_T  H5_SIZEOF_INT64_T
+#define HSIZE_UNDEF         UINT64_MAX
 #else
 #   error "nothing appropriate for hsize_t"
 #endif
-#define HSIZE_UNDEF             ((hsize_t)(hssize_t)(-1))
 
 /*
  * File addresses have their own types.
  */
 #if H5_SIZEOF_INT >= 8
     typedef unsigned                haddr_t;
-#   define HADDR_UNDEF              ((haddr_t)(-1))
+#   define HADDR_UNDEF              UINT_MAX
 #   define H5_SIZEOF_HADDR_T        H5_SIZEOF_INT
 #   ifdef H5_HAVE_PARALLEL
 #       define HADDR_AS_MPI_TYPE    MPI_UNSIGNED
 #   endif  /* H5_HAVE_PARALLEL */
 #elif H5_SIZEOF_LONG >= 8
     typedef unsigned long           haddr_t;
-#   define HADDR_UNDEF              ((haddr_t)(long)(-1))
+#   define HADDR_UNDEF              ULONG_MAX
 #   define H5_SIZEOF_HADDR_T        H5_SIZEOF_LONG
 #   ifdef H5_HAVE_PARALLEL
 #       define HADDR_AS_MPI_TYPE    MPI_UNSIGNED_LONG
 #   endif  /* H5_HAVE_PARALLEL */
 #elif H5_SIZEOF_LONG_LONG >= 8
     typedef unsigned long long      haddr_t;
-#   define HADDR_UNDEF              ((haddr_t)(long long)(-1))
+#   define HADDR_UNDEF              ULLONG_MAX
 #   define H5_SIZEOF_HADDR_T        H5_SIZEOF_LONG_LONG
 #   ifdef H5_HAVE_PARALLEL
 #       define HADDR_AS_MPI_TYPE    MPI_LONG_LONG_INT
@@ -267,46 +313,6 @@ H5_GCC_DIAG_ON("long-long")
 #   define H5_SIZEOF_UINT32_T H5_SIZEOF_LONG
 #else
 #   error "nothing appropriate for uint32_t"
-#endif
-
-/* int64_t type is used for creation order field for links.  It may be
- * defined in Posix.1g, otherwise it is defined here.
- */
-#if H5_SIZEOF_INT64_T>=8
-#elif H5_SIZEOF_INT>=8
-    typedef int int64_t;
-#   undef H5_SIZEOF_INT64_T
-#   define H5_SIZEOF_INT64_T H5_SIZEOF_INT
-#elif H5_SIZEOF_LONG>=8
-    typedef long int64_t;
-#   undef H5_SIZEOF_INT64_T
-#   define H5_SIZEOF_INT64_T H5_SIZEOF_LONG
-#elif H5_SIZEOF_LONG_LONG>=8
-    typedef long long int64_t;
-#   undef H5_SIZEOF_INT64_T
-#   define H5_SIZEOF_INT64_T H5_SIZEOF_LONG_LONG
-#else
-#   error "nothing appropriate for int64_t"
-#endif
-
-/* uint64_t type is used for fields for H5O_info_t.  It may be
- * defined in Posix.1g, otherwise it is defined here.
- */
-#if H5_SIZEOF_UINT64_T>=8
-#elif H5_SIZEOF_INT>=8
-    typedef unsigned uint64_t;
-#   undef H5_SIZEOF_UINT64_T
-#   define H5_SIZEOF_UINT64_T H5_SIZEOF_INT
-#elif H5_SIZEOF_LONG>=8
-    typedef unsigned long uint64_t;
-#   undef H5_SIZEOF_UINT64_T
-#   define H5_SIZEOF_UINT64_T H5_SIZEOF_LONG
-#elif H5_SIZEOF_LONG_LONG>=8
-    typedef unsigned long long uint64_t;
-#   undef H5_SIZEOF_UINT64_T
-#   define H5_SIZEOF_UINT64_T H5_SIZEOF_LONG_LONG
-#else
-#   error "nothing appropriate for uint64_t"
 #endif
 
 /* Common iteration orders */
