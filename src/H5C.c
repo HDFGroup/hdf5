@@ -79,16 +79,16 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"        /* Generic Functions            */
-#include "H5Cpkg.h"        /* Cache                */
-#include "H5CXprivate.h"        /* API Contexts                         */
-#include "H5Eprivate.h"        /* Error handling              */
-#include "H5Fpkg.h"        /* Files                */
-#include "H5FLprivate.h"    /* Free Lists                           */
-#include "H5Iprivate.h"        /* IDs                      */
-#include "H5MFprivate.h"    /* File memory management        */
-#include "H5MMprivate.h"    /* Memory management            */
-#include "H5Pprivate.h"         /* Property lists                       */
+#include "H5private.h"        /* Generic Functions */
+#include "H5Cpkg.h"        /* Cache */
+#include "H5CXprivate.h"        /* API Contexts */
+#include "H5Eprivate.h"        /* Error handling */
+#include "H5Fpkg.h"        /* Files */
+#include "H5FLprivate.h"    /* Free Lists */
+#include "H5Iprivate.h"        /* IDs */
+#include "H5MFprivate.h"    /* File memory management */
+#include "H5MMprivate.h"    /* Memory management */
+#include "H5Pprivate.h"         /* Property lists */
 
 
 /****************/
@@ -556,7 +556,7 @@ H5C_def_auto_resize_rpt_fcn(H5C_t * cache_ptr,
                       (cache_ptr->resize_ctl).lower_hr_threshold);
 
             HDfprintf(stdout,
-                    "%s    cache size increased from (%Zu/%Zu) to (%Zu/%Zu).\n",
+                    "%scache size increased from (%Zu/%Zu) to (%Zu/%Zu).\n",
                     cache_ptr->prefix,
                     old_max_cache_size,
                     old_min_clean_size,
@@ -1706,7 +1706,7 @@ done:
  * Function:    H5C_mark_entry_unserialized
  *
  * Purpose:    Mark a pinned or protected entry as unserialized.  The target
- *        entry MUST be either pinned or protected, and MAY be both.
+ *             entry MUST be either pinned or protected, and MAY be both.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1751,7 +1751,7 @@ done:
  * Function:    H5C_mark_entry_serialized
  *
  * Purpose:    Mark a pinned entry as serialized.  The target entry MUST be
- *        pinned.
+ *             pinned.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -2095,7 +2095,7 @@ done:
  * Function:    H5C_pin_protected_entry()
  *
  * Purpose:    Pin a protected cache entry.  The entry must be protected
- *         at the time of call, and must be unpinned.
+ *             at the time of call, and must be unpinned.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -2450,7 +2450,7 @@ H5C_protect(H5F_t *        f,
          *   *******************************************
          *
          * Set the flush_last field
-    * of the newly loaded entry before inserting it into the
+         * of the newly loaded entry before inserting it into the
          * index.  Must do this, as the index tracked the number of
          * entries with the flush_last field set, but assumes that
          * the field will not change after insertion into the index.
@@ -2544,10 +2544,10 @@ H5C_protect(H5F_t *        f,
             /* check to see if the cache is now oversized due to the cache
              * size reduction.  If it is, try to evict enough entries to
              * bring the cache size down to the current maximum cache size.
-        *
-        * Also, if the min_clean_size requirement is not met, we
-        * should also call H5C__make_space_in_cache() to bring us
-        * into complience.
+             *
+             * Also, if the min_clean_size requirement is not met, we
+             * should also call H5C__make_space_in_cache() to bring us
+             * into complience.
              */
 
             if(cache_ptr->index_size >= cache_ptr->max_cache_size)
@@ -2883,7 +2883,7 @@ done:
  * Function:    H5C_unpin_entry()
  *
  * Purpose:    Unpin a cache entry.  The entry can be either protected or
- *         unprotected at the time of call, but must be pinned.
+ *             unprotected at the time of call, but must be pinned.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -3366,7 +3366,7 @@ done:
  * Function:    H5C_validate_resize_config()
  *
  * Purpose:    Run a sanity check on the specified sections of the
- *        provided instance of struct H5C_auto_size_ctl_t.
+ *             provided instance of struct H5C_auto_size_ctl_t.
  *
  *        Do nothing and return SUCCEED if no errors are detected,
  *        and flag an error and return FAIL otherwise.
@@ -3525,11 +3525,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5C_create_flush_dependency()
  *
- * Purpose:    Initiates a parent<->child entry flush dependency.  The parent
+ * Purpose:     Initiates a parent<->child entry flush dependency.  The parent
  *              entry must be pinned or protected at the time of call, and must
  *              have all dependencies removed before the cache can shut down.
  *
- * Note:    Flush dependencies in the cache indicate that a child entry
+ * Note:        Flush dependencies in the cache indicate that a child entry
  *              must be flushed to the file before its parent.  (This is
  *              currently used to implement Single-Writer/Multiple-Reader (SWMR)
  *              I/O access for data structures in the file).
@@ -3669,7 +3669,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5C_destroy_flush_dependency()
  *
- * Purpose:    Terminates a parent<-> child entry flush dependency.  The
+ * Purpose:     Terminates a parent<-> child entry flush dependency.  The
  *              parent entry must be pinned.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -3791,7 +3791,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5C__pin_entry_from_client()
  *
- * Purpose:    Internal routine to pin a cache entry from a client action.
+ * Purpose:     Internal routine to pin a cache entry from a client action.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -3840,7 +3840,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5C__unpin_entry_real()
  *
- * Purpose:    Internal routine to unpin a cache entry.
+ * Purpose:     Internal routine to unpin a cache entry.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -3886,7 +3886,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5C__unpin_entry_from_client()
  *
- * Purpose:    Internal routine to unpin a cache entry from a client action.
+ * Purpose:     Internal routine to unpin a cache entry from a client action.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -4180,7 +4180,7 @@ H5C__auto_adjust_cache_size(H5F_t *f, hbool_t write_permitted)
          *
          *     ( 0 <= new_min_clean_size ).
          *
-    * by definition.
+         * by definition.
          */
         HDassert( new_min_clean_size <= new_max_cache_size );
         HDassert( (cache_ptr->resize_ctl).min_size <= new_max_cache_size );
@@ -4447,8 +4447,8 @@ done:
  *
  * Purpose:     Evict clean entries in the cache that haven't
  *        been accessed for at least
- *              (cache_ptr->resize_ctl).epochs_before_eviction epochs,
- *          and flush dirty entries that haven't been accessed for
+ *        (cache_ptr->resize_ctl).epochs_before_eviction epochs,
+ *        and flush dirty entries that haven't been accessed for
  *        that amount of time.
  *
  *        Depending on configuration, the function will either
@@ -4583,7 +4583,7 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *f, hbool_t write_permitte
                           || (prev_ptr->is_protected)
                           || (prev_ptr->is_pinned)) {
                     /* Something has happened to the LRU -- start over
-            * from the tail.
+                     * from the tail.
                      */
                     restart_scan = FALSE;
                     entry_ptr = cache_ptr->LRU_tail_ptr;
@@ -4642,10 +4642,10 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *f, hbool_t write_permitte
 
             /* just skip the entry if it is dirty, as we can't do
              * anything with it now since we can't write.
-        *
-        * Since all entries are clean, serialize() will not be called,
-        * and thus we needn't test to see if the LRU has been changed
-        * out from under us.
+             *
+             * Since all entries are clean, serialize() will not be called,
+             * and thus we needn't test to see if the LRU has been changed
+             * out from under us.
              */
             entry_ptr = prev_ptr;
         } /* end while */
@@ -4735,7 +4735,7 @@ done:
  * Function:    H5C__autoadjust__ageout__remove_all_markers
  *
  * Purpose:     Remove all epoch markers from the LRU list and mark them
- *        as inactive.
+ *              as inactive.
  *
  * Return:      SUCCEED on success/FAIL on failure.
  *
@@ -5000,9 +5000,9 @@ H5C__flash_increase_cache_size(H5C_t * cache_ptr,
         }
 
         /* note that we don't cycle the epoch markers.  We can
-    * argue either way as to whether we should, but for now
-    * we don't.
-    */
+         * argue either way as to whether we should, but for now
+         * we don't.
+         */
 
         if ( (cache_ptr->resize_ctl).rpt_fcn != NULL ) {
 
@@ -6948,7 +6948,7 @@ H5C__make_space_in_cache(H5F_t *f, size_t space_needed, hbool_t    write_permitt
                     }
 #endif /* H5C_COLLECT_CACHE_STATS */
 
-            /* reset entries_removed_counter and
+                    /* reset entries_removed_counter and
                      * last_entry_removed_ptr prior to the call to
                      * H5C__flush_single_entry() so that we can spot
                      * unexpected removals of entries from the cache,
@@ -7008,12 +7008,12 @@ H5C__make_space_in_cache(H5F_t *f, size_t space_needed, hbool_t    write_permitt
 
         if ( didnt_flush_entry ) {
 
-            /* epoch markers don't get flushed, and we don't touch
+                    /* epoch markers don't get flushed, and we don't touch
                      * entries that are in the process of being flushed.
                      * Hence no need for sanity checks, as we haven't
                      * flushed anything.  Thus just set entry_ptr to prev_ptr
                      * and go on.
-            */
+                     */
                     entry_ptr = prev_ptr;
 
         } else if ( ( restart_scan )
@@ -8338,7 +8338,7 @@ done:
  *
  * Purpose:     Serialize an entry and generate its image.
  *
- * Note:    This may cause the entry to be re-sized and/or moved in
+ * Note:        This may cause the entry to be re-sized and/or moved in
  *              the cache.
  *
  *              As we will not update the metadata cache's data structures

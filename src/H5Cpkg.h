@@ -26,6 +26,9 @@
  *        reason why this file was created.
  */
 
+/* clang-format off */
+/* Maintain current format by disabling format for this file */
+
 #if !(defined H5C_FRIEND || defined H5C_MODULE)
 #error "Do not include this file outside the H5C package!"
 #endif
@@ -1654,8 +1657,8 @@ if ( ( (cache_ptr)->index_size !=                                           \
  * Function:    H5C__REMOVE_ENTRY_FROM_SLIST
  *
  * Purpose:     Remove the specified instance of H5C_cache_entry_t from the
- *        index skip list in the specified instance of H5C_t.  Update
- *        the associated length and size fields.
+ *              index skip list in the specified instance of H5C_t.  Update
+ *              the associated length and size fields.
  *
  * Return:      N/A
  *
@@ -1743,7 +1746,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
  * Function:    H5C__UPDATE_SLIST_FOR_SIZE_CHANGE
  *
  * Purpose:     Update cache_ptr->slist_size for a change in the size of
- *        and entry in the slist.
+ *              and entry in the slist.
  *
  * Return:      N/A
  *
@@ -3723,10 +3726,11 @@ typedef struct H5C_tag_info_t {
  *        one.
  *
  * entry_watched_for_removal:    Pointer to an instance of H5C_cache_entry_t
- *        which contains the 'next' entry for an iteration.  Removing
+ *              which contains the 'next' entry for an iteration.  Removing
  *              this entry must trigger a rescan of the iteration, so each
  *              entry removed from the cache is compared against this pointer
- *              and the pointer is reset to NULL if the watched entry is removed.
+ *              and the pointer is reset to NULL if the watched entry is
+ *              removed.
  *              (This functions similarly to a "dead man's switch")
  *
  *
@@ -4925,4 +4929,5 @@ H5_DLL herr_t H5C__verify_cork_tag_test(hid_t fid, H5O_token_t tag_token, hbool_
 #endif /* H5C_TESTING */
 
 #endif /* _H5Cpkg_H */
+/* clang-format on */
 
