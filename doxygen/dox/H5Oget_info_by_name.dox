@@ -18,6 +18,7 @@
  *          Specific compile-time compatibility flags and the resulting
  *          mappings are as follows:
  *
+ * \par
  * <table>
  *  <tr>
  *      <th>Compatibility setting</th>
@@ -45,6 +46,10 @@
  *
  * \par Version
  * <table>
+ * <tr>
+ *      <th>Release</th>
+ *      <th>Change</th>
+ * </tr>
  *  <tr>
  *      <td>1.12.0</td>
  *      <td>The macro #H5Oget_info_by_name and function \ref H5Oget_info_by_name3() were added
