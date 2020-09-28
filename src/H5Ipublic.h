@@ -53,6 +53,12 @@ typedef enum H5I_type_t {
 
 /* Type of atoms to return to users */
 typedef int64_t hid_t;
+
+#define PRIdHID PRId64
+#define PRIxHID PRIx64
+#define PRIXHID PRIX64
+#define PRIoHID PRIo64
+
 #define H5_SIZEOF_HID_T         H5_SIZEOF_INT64_T
 
 /* An invalid object ID. This is also negative for error return. */

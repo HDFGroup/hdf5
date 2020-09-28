@@ -317,7 +317,7 @@ int main(int argc, char **argv)
         VRFY((ret >= 0), "H5Dwrite dataset1 succeeded", !H5FATAL);
 
 
-       if (ret < 0) HDfprintf(stderr, "node %d, read error, loc = %Ld: %s\n",
+       if (ret < 0) HDfprintf(stderr, "node %d, read error, loc = %" PRId64 ": %s\n",
                     mynod, mynod*opt_block, strerror(myerrno));
 
         /* if the user wanted to check correctness, compare the write
@@ -440,7 +440,7 @@ parse_args(int argc, char **argv)
                         opt_threshold = (hsize_t)HDatoi(p + 1);
                 }
                 HDfprintf(stdout,
-                    "alignment/threshold=%Hu/%Hu\n",
+                    "alignment/threshold=%" PRIuHSIZE "/%" PRIuHSIZE "\n",
                      opt_alignment, opt_threshold);
                 break;
             case '2': /* use 2-files, i.e., split file driver */

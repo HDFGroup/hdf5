@@ -291,13 +291,12 @@ H5C_dump_cache_skip_list(H5C_t * cache_ptr, char * calling_fcn)
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(calling_fcn != NULL);
 
-    HDfprintf(stdout, "\n\nDumping metadata cache skip list from %s.\n", 
+    HDfprintf(stdout, "\n\nDumping metadata cache skip list from %s.\n",
               calling_fcn);
-    HDfprintf(stdout, " slist enabled = %d.\n", 
-              (int)(cache_ptr->slist_enabled));
-    HDfprintf(stdout, "	slist len = %u.\n", cache_ptr->slist_len);
-    HDfprintf(stdout, "	slist size = %lld.\n", 
-              (long long)(cache_ptr->slist_size));
+    HDfprintf(stdout, " slist %s.\n", 
+              cache_ptr->slist_enabled ? "enabled" : "disabled");
+    HDfprintf(stdout, "	slist len = %" PRIu32 ".\n", cache_ptr->slist_len);
+    HDfprintf(stdout, "	slist size = %zu.\n", cache_ptr->slist_size);
 
     if(cache_ptr->slist_len > 0) {
 
@@ -335,7 +334,7 @@ H5C_dump_cache_skip_list(H5C_t * cache_ptr, char * calling_fcn)
                entry_ptr->type->name);
 
             HDfprintf(stdout, "		node_ptr = %p, item = %p\n",
-                      node_ptr, H5SL_item(node_ptr));
+                      (void *)node_ptr, H5SL_item(node_ptr));
 
             /* increment node_ptr before we delete its target */
 
@@ -728,7 +727,7 @@ H5C_stats(H5C_t * cache_ptr,
               (long long)(cache_ptr->index_scan_restarts));
 
     HDfprintf(stdout,
-	    "%s  cache image creations/reads/loads/size = %d / %d /%d / %Hu\n",
+	    "%s  cache image creations/reads/loads/size = %d / %d /%d / %" PRIuHSIZE "\n",
               cache_ptr->prefix,
               cache_ptr->images_created,
               cache_ptr->images_read,

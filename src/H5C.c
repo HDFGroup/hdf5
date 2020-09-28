@@ -638,7 +638,7 @@ H5C_def_auto_resize_rpt_fcn(H5C_t * cache_ptr,
                       (cache_ptr->resize_ctl).lower_hr_threshold);
 
             HDfprintf(stdout,
-                    "%scache size increased from (%Zu/%Zu) to (%Zu/%Zu).\n",
+                    "%scache size increased from (%zu/%zu) to (%zu/%zu).\n",
                     cache_ptr->prefix,
                     old_max_cache_size,
                     old_min_clean_size,
@@ -650,13 +650,13 @@ H5C_def_auto_resize_rpt_fcn(H5C_t * cache_ptr,
             HDassert( old_max_cache_size < new_max_cache_size );
 
             HDfprintf(stdout,
-                    "%sflash cache resize(%d) -- size threshold = %Zu.\n",
+                    "%sflash cache resize(%d) -- size threshold = %zu.\n",
                     cache_ptr->prefix,
                     (int)((cache_ptr->resize_ctl).flash_incr_mode),
                     cache_ptr->flash_size_increase_threshold);
 
             HDfprintf(stdout,
-                  "%s cache size increased from (%Zu/%Zu) to (%Zu/%Zu).\n",
+                  "%s cache size increased from (%zu/%zu) to (%zu/%zu).\n",
                    cache_ptr->prefix,
                    old_max_cache_size,
                    old_min_clean_size,
@@ -712,7 +712,7 @@ H5C_def_auto_resize_rpt_fcn(H5C_t * cache_ptr,
             }
 
             HDfprintf(stdout,
-                      "%s    cache size decreased from (%Zu/%Zu) to (%Zu/%Zu).\n",
+                      "%s    cache size decreased from (%zu/%zu) to (%zu/%zu).\n",
                       cache_ptr->prefix,
                       old_max_cache_size,
                       old_min_clean_size,
@@ -997,7 +997,7 @@ H5C_dest(H5F_t * f)
     if ( cache_ptr->get_entry_ptr_from_addr_counter > 0 ) {
 
         HDfprintf(stdout,
-                 "*** %ld calls to H5C_get_entry_ptr_from_add(). ***\n",
+                 "*** %" PRId64 " calls to H5C_get_entry_ptr_from_add(). ***\n",
                  cache_ptr->get_entry_ptr_from_addr_counter);
     }
 #endif /* H5C_DO_SANITY_CHECKS */

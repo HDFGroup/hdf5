@@ -206,7 +206,7 @@ doprint(hid_t did, hsize_t *start, hsize_t *block, int rank)
     info.dset_format =  "DSET-%s ";
     info.dset_hidefileno = 0;
 
-    info.obj_format = "-%lu:"H5_PRINTF_HADDR_FMT;
+    info.obj_format = "-%lu:%" PRIuHADDR;
     info.obj_hidefileno = 0;
 
     info.dset_blockformat_pre = "%sBlk%lu: ";
@@ -364,7 +364,7 @@ monitor_dataset(hid_t fid, char *dsetname)
         if(i != ndims) {
             /* Printing changes in dimension sizes */
             for(u = 0; u < ndims; u++) {
-                HDfprintf(stdout, "dimension %u: %Hu->%Hu", (unsigned)u, prev_dims[u], cur_dims[u]);
+                HDfprintf(stdout, "dimension %d: %" PRIuHSIZE "->%" PRIuHSIZE "", u, prev_dims[u], cur_dims[u]);
                 if(cur_dims[u] > prev_dims[u])
                     HDfprintf(stdout, " (increases)\n");
                 else if(cur_dims[u] < prev_dims[u])
