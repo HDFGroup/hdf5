@@ -5481,90 +5481,312 @@ H5_DLL herr_t H5Padd_merge_committed_dtype_path(hid_t plist_id, const char *path
 /**
  *-------------------------------------------------------------------------
  *
- * \ingroup OCPYPL
+ * \ingroup OCPPL
  *
- * \brief
+ * \brief Clears the list of paths stored in the object copy property list
  *
- * \param[in]
- * \param[out]
+ * \param[in] plist_id Object copy property list identifier
  *
- * \return
+ * \return \herr_t
  *
- * \details
+ * \details H5Pfree_merge_committed_dtype_paths() clears the suggested
+ *          paths stored in the object copy property list \p plist_id.
+ *          These are the suggested paths previously set with
+ *          H5Padd_merge_committed_dtype_path().
  *
- * \since
+ * \note \b Failure \b Modes: H5Pfree_merge_committed_dtype_paths() will
+ *       fail if the object copy property list is invalid.
+ *
+ * \note \b Example \b Usage: This example adds a suggested path to the
+ *       object copy property list, does the copy, clears the list, and
+ *       then adds a new suggested path to the list for another copy.
+ *       <pre>
+ *       int main(void) {
+ *           hid_t ocpypl_id = H5Pcreate(H5P_OBJECT_COPY);
+ *           /* Enable the merging committed datatype feature. */
+ *           H5Pset_copy_object(ocpypl_id,
+ *                              H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG);
+ *           /* Add a path to search for a matching committed datatype. */
+ *           H5Padd_merge_committed_dtype_path(ocpypl_id,
+ *                                             "/group/committed_dtypeA");
+ *           /* Do the copy. */
+ *           H5Ocopy(...ocpypl_id...);
+ *           ...
+ *           ...
+ *           /* Free the previous suggested path. */
+ *           H5Pfree_merge_committed_dtype_paths(ocpypl_id);
+ *           /* Add a path to search for a matching committed datatype. */
+ *           H5Padd_merge_committed_dtype_path(ocpypl_id,
+ *                                           "/group2/committed_dtypeB");
+ *           /* Do the copy. */
+ *           H5Ocopy(...ocpypl_id...);
+ *           ...
+ *           ...
+ *        }
+ *       </pre>
+ *
+ * \see
+ *    \li H5Ocopy()
+ *    \li #H5O_mcdt_search_cb_t
+ *    \li H5Padd_merge_committed_dtype_path()
+ *    \li H5Pfree_merge_committed_dtype_paths()
+ *    \li H5Pget_mcdt_search_cb()
+ *    \li H5Pset_copy_object()
+ *    \li H5Pset_mcdt_search_cb()
+ *
+ * \since 1.8.9
  *
  */
 H5_DLL herr_t H5Pfree_merge_committed_dtype_paths(hid_t plist_id);
 /**
  *-------------------------------------------------------------------------
  *
- * \ingroup OCPYPL
+ * \ingroup OCPPL
  *
- * \brief
+ * \brief Retrieves the properties to be used when an object is copied
  *
- * \param[in]
- * \param[out]
+ * \param[in]  plist_id     Object copy property list identifier
+ * \param[out] copy_options Copy option(s) set in the object copy property
+ *                          list
  *
- * \return
+ * \return \herr_t
  *
- * \details
+ * \details H5Pget_copy_object() retrieves the properties currently
+ *          specified in the object copy property list \p plist_id, which
+ *          will be invoked when a new copy is made of an existing object.
  *
- * \since
+ *          \p copy_options is a bit map indicating the flags, or
+ *          properties, governing object copying that are set in the
+ *          property list \p plist_id.
+ *
+ *          The available flags are described in H5Pset_copy_object().
+ *
+ * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Pget_copy_object(hid_t plist_id, unsigned *crt_intmd /*out*/);
+H5_DLL herr_t H5Pget_copy_object(hid_t plist_id, unsigned *copy_options /*out*/);
 /**
  *-------------------------------------------------------------------------
  *
- * \ingroup OCPYPL
+ * \ingroup OCPPL
  *
- * \brief
+ * \brief Retrieves the callback function from the specified object copy
+ *        property list
  *
- * \param[in]
- * \param[out]
+ * \param[in]  plist_id     Object copy property list identifier
+ * \param[out] func         User-defined callback function
+ * \param[out] op_data      User-defined input data for the callback
+ *                          function
  *
- * \return
+ * \return \herr_t
  *
- * \details
+ * \details H5Pget_mcdt_search_cb() retrieves the user-defined callback
+ *          function and the user data that are set via
+ *          H5Pset_mcdt_search_cb() in the object copy property list
+ *          \p plist_id.
  *
- * \since
+ *          The callback function will be returned in the parameter \p func
+ *          and the user data will be returned in the parameter \p op_data.
+ *
+ *          H5Pget_mcdt_search_cb() will fail if the object copy property
+ *          list is invalid.
+ *
+ * \see
+ *    \li H5Ocopy()
+ *    \li #H5O_mcdt_search_cb_t
+ *    \li H5Padd_merge_committed_dtype_path()
+ *    \li H5Pfree_merge_committed_dtype_paths()
+ *    \li H5Pget_mcdt_search_cb()
+ *    \li H5Pset_copy_object()
+ *    \li H5Pset_mcdt_search_cb()
+ *
+ * \since 1.8.9
  *
  */
 H5_DLL herr_t H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func, void **op_data);
 /**
  *-------------------------------------------------------------------------
  *
- * \ingroup OCPYPL
+ * \ingroup OCPPL
  *
- * \brief
+ * \brief Sets properties to be used when an object is copied
  *
- * \param[in]
- * \param[out]
+ * \param[in]  plist_id     Object copy property list identifier
+ * \param[out] copy_options Copy option(s) to be set
  *
- * \return
+ * \return \herr_t
  *
- * \details
+ * \details H5Pset_copy_object() sets properties in the object copy
+ *          property list \p plist_id. When an existing object is copied,
+ *          that property list will determine how the new copy is created.
  *
- * \since
+ *          The following flags are available for use in an object copy
+ *          property list:
+ *
+ *          <table>
+ *           <tr>
+ *            <td>#H5O_COPY_SHALLOW_HIERARCHY_FLAG</td>
+ *            <td>Copy only immediate members of a group<br />
+ *                <em>Default behavior, without flag:</em> Recursively
+ *                copy all objects in and below the group.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5O_COPY_EXPAND_SOFT_LINK_FLAG</td>
+ *            <td>Expand soft links into new objects<br />
+ *                <em>Default behavior, without flag:</em> Copy soft
+ *                links as they are.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5O_COPY_EXPAND_EXT_LINK_FLAG</td>
+ *            <td>Expand external link into new objects<br />
+ *                <em>Default behavior, without flag:</em> Copy external
+ *                    links as they are.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5O_COPY_EXPAND_REFERENCE_FLAG</td>
+ *            <td>Copy objects that are pointed to by references and
+ *                update reference values in destination file<br />
+ *                <em>Default behavior, without flag:</em> Set reference
+ *                    values in destination file to zero (0)</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5O_COPY_WITHOUT_ATTR_FLAG</td>
+ *            <td>Copy object without copying attributes<br />
+ *                <em>Default behavior, without flag:</em> Copy object
+ *                    with all its attributes</td>
+ *           </tr>
+ *           <tr>
+ *            <td>#H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG</td>
+ *            <td>Use a matching committed datatype in the destination
+ *                file when copying a committed datatype, a dataset with
+ *                a committed datatype, or an object with an attribute
+ *                of committed datatype <br />
+ *                <em>Default behavior without flag:</em>
+ *
+ *                \li A committed datatype in the source will be copied to
+ *                    the destination as a committed datatype.
+ *                \li If a dataset in the source uses a committed
+ *                    datatype or an object in the source has an attribute
+ *                    of a committed datatype, that committed datatype will
+ *                    be written to the destination as an anonymous
+ *                    committed datatype.
+ *                    If copied in a single H5Ocopy() operation, objects
+ *                    that share a committed datatype in the source will
+ *                    share an anonymous committed dataype in the
+ *                    destination copy. Subsequent H5Ocopy() operations,
+ *                    however, will be unaware of prior anonymous committed
+ *                    dataypes and will create new ones.
+ *
+ *                    See the “See Also” section immediately below for
+ *                    functions related to the use of this flag.</td>
+ *           </tr>
+ *          </table>
+ *
+ * \see
+ *    Functions and a callback function used to tune committed datatype
+ *    copying behavior:
+ *    \li #H5O_mcdt_search_cb_t
+ *    \li H5Padd_merge_committed_dtype_path()
+ *    \li H5Pfree_merge_committed_dtype_paths()
+ *    \li H5Pget_mcdt_search_cb()
+ *    \li H5Pset_copy_object()
+ *    \li H5Pset_mcdt_search_cb()
+ *
+ * \version 1.8.9 #H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG added in this release.
+ *
+ * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Pset_copy_object(hid_t plist_id, unsigned crt_intmd);
+H5_DLL herr_t H5Pset_copy_object(hid_t plist_id, unsigned copy_options);
 /**
  *-------------------------------------------------------------------------
  *
- * \ingroup
+ * \ingroup OCPPL
  *
- * \brief OCPYPL
+ * \brief Sets the callback function that H5Ocopy() will invoke before
+ *        searching the entire destination file for a matching committed
+ *        datatype
  *
- * \param[in]
- * \param[out]
+ * \param[in] plist_id Object copy property list identifier
+ * \param[in] func     User-defined callback function
+ * \param[in] op_data  User-defined input data for the callback function
  *
- * \return
+ * \return \herr_t
  *
- * \details
+ * \details H5Pset_mcdt_search_cb() allows an application to set a
+ *          callback function, \p func, that will be invoked before
+ *          searching the destination file for a matching committed
+ *          datatype. The default, global search process is described in
+ *          H5Padd_merge_committed_dtype_path().
  *
- * \since
+ *          The callback function must conform to the #H5O_mcdt_search_cb_t
+ *          prototype and will return an instruction for one of the
+ *          following actions:
+ *
+ *          \li Continue the search for a matching committed datatype in
+ *              the destination file.
+ *          \li Discontinue the search for a matching committed datatype.
+ *              H5Ocopy() will then apply the default behavior of creating
+ *              an anonymous committed datatype.
+ *          \li Abort the copy operation and exit H5Ocopy().
+ *
+ * \warning If the callback function return value causes H5Ocopy() to
+ *          abort, the destination file may be left in an inconsistent or
+ *          corrupted state.
+ *
+ * \note \b Motivation: H5Pset_mcdt_search_cb() provides the means to
+ *       define a callback function. An application can then use that
+ *       callback to take an additional action before the default search
+ *       of all committed datatypes in the destination file or to take an
+ *       action that replaces the default search. This mechanism is
+ *       intended to improve performance when the global search might
+ *       take a long time.
+ *
+ * \note \b Failure \b Mode: H5Pset_mcdt_search_cb() will fail if the
+ *       object copy property list is invalid.
+ *
+ * \note \b Example \b Usage: This example defines a callback function in
+ *       the object copy property list.
+ *       <pre>
+ *       /* The user-defined callback function */
+ *       static H5O_mcdt_search_ret_t
+ *       mcdt_search_cb(void *_udata)
+ *       {
+ *          H5O_mcdt_search_ret_t action = *((H5O_mcdt_search_ret_t *)_udata);
+ *          return(action);
+ *       }
+ *       int main(void) {
+ *           hid_t ocpypl_id = H5Pcreate(H5P_OBJECT_COPY);
+ *           /* Enable the merging committed datatype feature. */
+ *           H5Pset_copy_object(ocpypl_id,
+ *                              H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG);
+ *           /* Add a path to search for a matching committed datatype. */
+ *           H5Padd_merge_committed_dtype_path(ocpypl_id,
+ *                                             "/group/committed_dtypeA");
+ *          /*
+ *           * Set the callback function to discontinue the global search
+ *           * if H5Ocopy cannot find a matching committed datatype from the
+ *           * above suggested path.
+ *          */
+ *           action = H5O_MCDT_SEARCH_STOP;
+ *           H5Pset_mcdt_search_cb(ocpypl_id, mcdt_search_cb, &action);
+ *           H5Ocopy(...ocpypl_id...);
+ *           ...
+ *           ...
+ *        }
+ *        </pre>
+ * \see
+ *    \li H5Ocopy()
+ *    \li #H5O_mcdt_search_cb_t
+ *    \li H5Padd_merge_committed_dtype_path()
+ *    \li H5Pfree_merge_committed_dtype_paths()
+ *    \li H5Pget_mcdt_search_cb()
+ *    \li H5Pset_copy_object()
+ *    \li H5Pset_mcdt_search_cb()
+ *
+ * \todo Programming Note for C++ Developers Using C Functions:
+ *
+ * \since 1.8.9
  *
  */
 H5_DLL herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, void *op_data);
