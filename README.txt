@@ -20,8 +20,8 @@ PURPOSE of cu_dev
 ------------------
 
 The motivation of cu_dev is to interface with Nvidia's GPUDirect Storage (GDS)
-API through a HDF5 VFD. You need to configure hdf5 with both --with-cuda and 
---with-gds to make GDS VFD work.
+API through a HDF5 VFD. You need to configure the hdf5 build with both 
+--with-cuda and --with-gds to enable the GDS VFD.
 
 DOCUMENTATION
 -------------
