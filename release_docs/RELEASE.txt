@@ -52,9 +52,15 @@ New Features
 
       The HDF filter plugins project is a collection of registered compression
       filters that can be dynamically loaded when needed to access data stored
-      in a hdf5 file. This CMake-only option allows the plugins to be distributed
-      with the hdf5 library and tools. Like the options for szip and zlib, either
-      a tgz file or a git repository can be specified for the source.
+      in a hdf5 file. This CMake-only option allows the plugins to be built and
+      distributed with the hdf5 library and tools. Like the options for szip and
+      zlib, either a tgz file or a git repository can be specified for the source.
+
+      The necessary options are (see the INSTALL_CMake.txt file):
+          HDF5_ENABLE_PLUGIN_SUPPORT
+          PLUGIN_TGZ_NAME or PLUGIN_GIT_URL
+      There are more options necessary for various filters and the plugin project
+      documents should be referenced.
 
       (ADB - 2020/09/27, OESS-98)
 
