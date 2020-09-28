@@ -11,11 +11,6 @@
  * help@hdfgroup.org.                                                        *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "H5LTprivate.h"
 
 /* For Lex and Yacc */
@@ -63,17 +58,17 @@ size_t  indent = 0;
 
 /* Data structure to pass application data to callbacks. */
 typedef struct {
-    void *app_image_ptr;	/* Pointer to application buffer */
-    size_t app_image_size;	/* Size of application buffer */
-    void *fapl_image_ptr;	/* Pointer to FAPL buffer */
-    size_t fapl_image_size;	/* Size of FAPL buffer */
-    int fapl_ref_count;		/* Reference counter for FAPL buffer */
-    void *vfd_image_ptr;	/* Pointer to VFD buffer */
-    size_t vfd_image_size;	/* Size of VFD buffer */
-    int vfd_ref_count;		/* Reference counter for VFD buffer */
-    unsigned flags;		/* Flags indicate how the file image will */
+    void *app_image_ptr;    /* Pointer to application buffer */
+    size_t app_image_size;    /* Size of application buffer */
+    void *fapl_image_ptr;    /* Pointer to FAPL buffer */
+    size_t fapl_image_size;    /* Size of FAPL buffer */
+    int fapl_ref_count;        /* Reference counter for FAPL buffer */
+    void *vfd_image_ptr;    /* Pointer to VFD buffer */
+    size_t vfd_image_size;    /* Size of VFD buffer */
+    int vfd_ref_count;        /* Reference counter for VFD buffer */
+    unsigned flags;        /* Flags indicate how the file image will */
                                 /* be open */
-    int ref_count;		/* Reference counter on udata struct */
+    int ref_count;        /* Reference counter on udata struct */
 } H5LT_file_image_ud_t;
 
 /* callbacks prototypes for file image ops */
@@ -86,7 +81,7 @@ static herr_t udata_free(void *udata);
 
 /* Definition of callbacks for file image operations. */
 
-
+
 /*-------------------------------------------------------------------------
 * Function: image_malloc
 *
@@ -132,9 +127,9 @@ image_malloc(size_t size, H5FD_file_image_op_t file_image_op, void *_udata)
             udata->fapl_image_size = udata->app_image_size;
             return_value = udata->fapl_image_ptr;
             udata->fapl_ref_count++;
-	    break;
+            break;
 
-	case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY:
+        case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY:
             if (udata->fapl_image_ptr == NULL)
                 goto out;
             if (udata->fapl_image_size != size)
@@ -144,7 +139,7 @@ image_malloc(size_t size, H5FD_file_image_op_t file_image_op, void *_udata)
 
             return_value = udata->fapl_image_ptr;
             udata->fapl_ref_count++;
-	    break;
+            break;
 
         case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET:
             goto out;
@@ -165,16 +160,16 @@ image_malloc(size_t size, H5FD_file_image_op_t file_image_op, void *_udata)
                 goto out;
 
             udata->vfd_image_ptr = udata->fapl_image_ptr;
- 	    udata->vfd_image_size = size;
+            udata->vfd_image_size = size;
             udata->vfd_ref_count++;
             return_value = udata->vfd_image_ptr;
             break;
 
-	/* added unused labels to shut the compiler up */
-	case H5FD_FILE_IMAGE_OP_NO_OP:
-	case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE:
-	case H5FD_FILE_IMAGE_OP_FILE_RESIZE:
-	case H5FD_FILE_IMAGE_OP_FILE_CLOSE:
+        /* added unused labels to shut the compiler up */
+        case H5FD_FILE_IMAGE_OP_NO_OP:
+        case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE:
+        case H5FD_FILE_IMAGE_OP_FILE_RESIZE:
+        case H5FD_FILE_IMAGE_OP_FILE_CLOSE:
         default:
             goto out;
     } /* end switch */
@@ -185,7 +180,7 @@ out:
     return NULL;
 } /* end image_malloc() */
 
-
+
 /*-------------------------------------------------------------------------
 * Function: image_memcpy
 *
@@ -256,11 +251,11 @@ image_memcpy(void *dest, const void *src, size_t size, H5FD_file_image_op_t file
                 goto out;
             break;
 
-	/* added unused labels to shut the compiler up */
-	case H5FD_FILE_IMAGE_OP_NO_OP:
-	case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE:
-	case H5FD_FILE_IMAGE_OP_FILE_RESIZE:
-	case H5FD_FILE_IMAGE_OP_FILE_CLOSE:
+        /* added unused labels to shut the compiler up */
+        case H5FD_FILE_IMAGE_OP_NO_OP:
+        case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE:
+        case H5FD_FILE_IMAGE_OP_FILE_RESIZE:
+        case H5FD_FILE_IMAGE_OP_FILE_CLOSE:
         default:
             goto out;
     } /* end switch */
@@ -271,7 +266,7 @@ out:
     return NULL;
 } /* end image_memcpy() */
 
-
+
 /*-------------------------------------------------------------------------
 * Function: image_realloc
 *
@@ -356,7 +351,7 @@ image_free(void *ptr, H5FD_file_image_op_t file_image_op, void *_udata)
 
     switch(file_image_op) {
         case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE:
-	    if (udata->fapl_image_ptr != ptr)
+            if (udata->fapl_image_ptr != ptr)
                 goto out;
             if (udata->fapl_ref_count == 0)
                 goto out;
@@ -391,14 +386,14 @@ image_free(void *ptr, H5FD_file_image_op_t file_image_op, void *_udata)
             } /* end if */
             break;
 
-	/* added unused labels to keep the compiler quite */
-	case H5FD_FILE_IMAGE_OP_NO_OP:
-	case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET:
-	case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY:
-	case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET:
-	case H5FD_FILE_IMAGE_OP_FILE_OPEN:
-	case H5FD_FILE_IMAGE_OP_FILE_RESIZE:
-	default:
+        /* added unused labels to keep the compiler quite */
+        case H5FD_FILE_IMAGE_OP_NO_OP:
+        case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET:
+        case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY:
+        case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET:
+        case H5FD_FILE_IMAGE_OP_FILE_OPEN:
+        case H5FD_FILE_IMAGE_OP_FILE_RESIZE:
+        default:
             goto out;
     } /* end switch */
 
@@ -408,7 +403,7 @@ out:
     return(FAIL);
 } /* end image_free() */
 
-
+
 /*-------------------------------------------------------------------------
 * Function: udata_copy
 *
@@ -504,7 +499,7 @@ static herr_t H5LT_get_attribute_mem(hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Quincey Koziol, koziol@hdfgroup.org
+* Programmer: Quincey Koziol
 *
 * Date: October 10, 2007
 *
@@ -570,7 +565,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: March 19, 2001
 *
@@ -599,7 +594,7 @@ herr_t H5LTmake_dataset( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 14, 2001
 *
@@ -628,7 +623,7 @@ herr_t H5LTmake_dataset_char( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 14, 2001
 *
@@ -657,7 +652,7 @@ herr_t H5LTmake_dataset_short( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 14, 2001
 *
@@ -688,7 +683,7 @@ herr_t H5LTmake_dataset_int( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 14, 2001
 *
@@ -717,7 +712,7 @@ herr_t H5LTmake_dataset_long( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 14, 2001
 *
@@ -748,7 +743,7 @@ herr_t H5LTmake_dataset_float( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 14, 2001
 *
@@ -778,7 +773,7 @@ herr_t H5LTmake_dataset_double( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: October 05, 2004
 *
@@ -848,7 +843,7 @@ out:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
 * Function: H5LTopen_file_image
 *
@@ -864,9 +859,9 @@ out:
 */
 hid_t H5LTopen_file_image(void *buf_ptr, size_t buf_size, unsigned flags)
 {
-    hid_t		        fapl=-1, file_id=-1;    /* HDF5 identifiers */
+    hid_t                fapl=-1, file_id=-1;    /* HDF5 identifiers */
     unsigned            file_open_flags;        /* Flags for image open */
-    char                file_name[64];	        /* Filename buffer */
+    char                file_name[64];            /* Filename buffer */
     size_t              alloc_incr;             /* Buffer allocation increment */
     size_t              min_incr = 65536;       /* Minimum buffer increment */
     double              buf_prcnt = 0.1f;       /* Percentage of buffer size to set
@@ -903,7 +898,7 @@ hid_t H5LTopen_file_image(void *buf_ptr, size_t buf_size, unsigned flags)
 
     /* Set callbacks for file image ops ONLY if the file image is NOT copied */
     if (flags & H5LT_FILE_IMAGE_DONT_COPY) {
-        H5LT_file_image_ud_t *udata;	/* Pointer to udata structure */
+        H5LT_file_image_ud_t *udata;    /* Pointer to udata structure */
 
         /* Allocate buffer to communicate user data to callbacks */
         if (NULL == (udata = (H5LT_file_image_ud_t *)HDmalloc(sizeof(H5LT_file_image_ud_t))))
@@ -970,7 +965,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Quincey Koziol, koziol@hdfgroup.org
+* Programmer: Quincey Koziol
 *
 * Date: October 8, 2007
 *
@@ -1012,7 +1007,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: June 13, 2001
 *
@@ -1035,7 +1030,7 @@ herr_t H5LTread_dataset(hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 5, 2001
 *
@@ -1056,7 +1051,7 @@ herr_t H5LTread_dataset_char( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 5, 2001
 *
@@ -1077,7 +1072,7 @@ herr_t H5LTread_dataset_short( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 5, 2001
 *
@@ -1098,7 +1093,7 @@ herr_t H5LTread_dataset_int( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 5, 2001
 *
@@ -1119,7 +1114,7 @@ herr_t H5LTread_dataset_long( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 5, 2001
 *
@@ -1141,7 +1136,7 @@ herr_t H5LTread_dataset_float( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 5, 2001
 *
@@ -1163,7 +1158,7 @@ herr_t H5LTread_dataset_double( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: October 05, 2004
 *
@@ -1216,7 +1211,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 4, 2001
 *
@@ -1272,7 +1267,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 4, 2001
 *  Modified: February 28, 2006: checked for NULL parameters
@@ -1348,7 +1343,7 @@ out:
 *
 * Purpose: operator function used by H5LTfind_dataset
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: June 21, 2001
 *
@@ -1392,7 +1387,7 @@ find_dataset(hid_t loc_id, const char *name, const H5L_info2_t *linfo, void *op_
 * Purpose:  Inquires if a dataset named dset_name exists attached
 *           to the object loc_id.
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: July 15, 2001
 *
@@ -1412,13 +1407,13 @@ find_dataset(hid_t loc_id, const char *name, const H5L_info2_t *linfo, void *op_
  * modify the op_data buffer (i.e.: dset_name) during the traversal, and the
  * library never modifies that buffer.
  */
-H5_GCC_DIAG_OFF(cast-qual)
+H5_GCC_DIAG_OFF("cast-qual")
 herr_t
 H5LTfind_dataset( hid_t loc_id, const char *dset_name )
 {
     return H5Literate2(loc_id, H5_INDEX_NAME, H5_ITER_INC, 0, find_dataset, (void *)dset_name);
 }
-H5_GCC_DIAG_ON(cast-qual)
+H5_GCC_DIAG_ON("cast-qual")
 
 /*-------------------------------------------------------------------------
 *
@@ -1436,7 +1431,7 @@ H5_GCC_DIAG_ON(cast-qual)
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: July 23, 2001
 *
@@ -1534,7 +1529,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: July 25, 2001
 *
@@ -1613,7 +1608,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 7, 2001
 *
@@ -1643,7 +1638,7 @@ herr_t H5LTset_attribute_char( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: March 8, 2004
 *
@@ -1674,7 +1669,7 @@ herr_t H5LTset_attribute_uchar( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 7, 2001
 *
@@ -1705,7 +1700,7 @@ herr_t H5LTset_attribute_short( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: March 8, 2004
 *
@@ -1736,7 +1731,7 @@ herr_t H5LTset_attribute_ushort( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 7, 2001
 *
@@ -1767,7 +1762,7 @@ herr_t H5LTset_attribute_int( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: March 8, 2004
 *
@@ -1799,7 +1794,7 @@ herr_t H5LTset_attribute_uint( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 7, 2001
 *
@@ -1829,7 +1824,7 @@ herr_t H5LTset_attribute_long( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Elena Pourmal, epourmal@ncsa.uiuc.edu
+* Programmer: Elena Pourmal
 *
 * Date: June 17, 2005
 *
@@ -1861,7 +1856,7 @@ herr_t H5LTset_attribute_long_long( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: March 8, 2004
 *
@@ -1893,7 +1888,7 @@ herr_t H5LTset_attribute_ulong( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: July 25, 2001
 *
@@ -1926,7 +1921,7 @@ herr_t H5LTset_attribute_float( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 7, 2001
 *
@@ -1957,7 +1952,7 @@ herr_t H5LTset_attribute_double( hid_t loc_id,
 *
 * Purpose: operator function used by H5LT_find_attribute
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: June 21, 2001
 *
@@ -1998,7 +1993,7 @@ find_attr(hid_t loc_id, const char *name, const H5A_info_t *ainfo,
 * Purpose: Inquires if an attribute named attr_name exists attached to
 *          the object loc_id.
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: May 17, 2006
 *
@@ -2020,7 +2015,7 @@ herr_t H5LTfind_attribute( hid_t loc_id, const char* attr_name )
 *
 * Purpose: Inquires if an attribute named attr_name exists attached to the object loc_id.
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: June 21, 2001
 *
@@ -2043,13 +2038,13 @@ herr_t H5LTfind_attribute( hid_t loc_id, const char* attr_name )
  * modify the op_data buffer (i.e.: attr_name) during the traversal, and the
  * library never modifies that buffer.
  */
-H5_GCC_DIAG_OFF(cast-qual)
+H5_GCC_DIAG_OFF("cast-qual")
 herr_t
 H5LT_find_attribute( hid_t loc_id, const char* attr_name )
 {
     return H5Aiterate2(loc_id, H5_INDEX_NAME, H5_ITER_INC, NULL, find_attr, (void *)attr_name);
 }
-H5_GCC_DIAG_ON(cast-qual)
+H5_GCC_DIAG_ON("cast-qual")
 
 
 /*-------------------------------------------------------------------------
@@ -2059,7 +2054,7 @@ H5_GCC_DIAG_ON(cast-qual)
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 4, 2001
 *
@@ -2129,7 +2124,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 4, 2001
 *
@@ -2215,7 +2210,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Raymond Lu, slu@ncsa.uiuc.edu
+* Programmer: Raymond Lu
 *
 * Date: October 6, 2004
 *
@@ -2265,7 +2260,7 @@ out:
 *
 * Return:      void
 *
-* Programmer:  Raymond Lu, songyulu@hdfgroup.org
+* Programmer:  Raymond Lu
 *
 * Date:        29 September 2011
 *
@@ -2302,13 +2297,13 @@ realloc_and_append(hbool_t _no_user_buf, size_t *len, char *buf, const char *str
        * extend past the allocated buffer; if it does then truncate the string
        */
       if(size_str < *len - 1) {
-	if( size_str + size_str_to_add < *len - 1) {
-	  HDstrncat(buf, str_to_add, size_str_to_add);
-	} else {
-	  HDstrncat(buf, str_to_add, (*len - 1) - size_str);
-	}
+          if( size_str + size_str_to_add < *len - 1) {
+              HDstrncat(buf, str_to_add, size_str_to_add);
+          } else {
+              HDstrncat(buf, str_to_add, (*len - 1) - size_str);
+          }
       } else {
-	buf[*len-1] = '\0'; /* buffer is full, null terminate */
+         buf[*len-1] = '\0'; /* buffer is full, null terminate */
       }
     }
 
@@ -2325,7 +2320,7 @@ out:
 *
 * Return:      void
 *
-* Programmer:  Raymond Lu, slu@ncsa.uiuc.edu
+* Programmer:  Raymond Lu
 *
 * Date:        December 6, 2005
 *
@@ -2489,7 +2484,7 @@ out:
 *
 * Return:      Success: 0, Failure: -1
 *
-* Programmer:  Raymond Lu, slu@ncsa.uiuc.edu
+* Programmer:  Raymond Lu
 *
 * Date:        December 6, 2005
 *
@@ -2536,7 +2531,7 @@ out:
 *
 * Return:      Success: 0, Failure: -1
 *
-* Programmer:  Raymond Lu, slu@ncsa.uiuc.edu
+* Programmer:  Raymond Lu
 *
 * Date:        December 20, 2005
 *
@@ -3067,15 +3062,15 @@ next:
             HDsnprintf(dt_str, *slen, "H5T_NO_CLASS");
             break;
         case H5T_REFERENCE:
-	    if (H5Tequal(dtype, H5T_STD_REF_DSETREG) == TRUE) {
-	      HDsnprintf(dt_str, *slen, " H5T_REFERENCE { H5T_STD_REF_DSETREG }");
-	    }
-	    else {
-	      HDsnprintf(dt_str, *slen, " H5T_REFERENCE { H5T_STD_REF_OBJECT }");
-	    }
-	    break;
+            if (H5Tequal(dtype, H5T_STD_REF_DSETREG) == TRUE) {
+                HDsnprintf(dt_str, *slen, " H5T_REFERENCE { H5T_STD_REF_DSETREG }");
+            }
+            else {
+                HDsnprintf(dt_str, *slen, " H5T_REFERENCE { H5T_STD_REF_OBJECT }");
+            }
+            break;
         case H5T_NCLASSES:
-	    break;
+            break;
         default:
             HDsnprintf(dt_str, *slen, "unknown data type");
     }
@@ -3101,7 +3096,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 19, 2002
 *
@@ -3153,7 +3148,7 @@ herr_t H5LTget_attribute_string( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 19, 2002
 *
@@ -3182,7 +3177,7 @@ herr_t H5LTget_attribute_char( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: March 8, 2004
 *
@@ -3213,7 +3208,7 @@ herr_t H5LTget_attribute_uchar( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 19, 2002
 *
@@ -3242,7 +3237,7 @@ herr_t H5LTget_attribute_short( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: March 8, 2004
 *
@@ -3273,7 +3268,7 @@ herr_t H5LTget_attribute_ushort( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 19, 2002
 *
@@ -3302,7 +3297,7 @@ herr_t H5LTget_attribute_int( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: March 8, 2004
 *
@@ -3333,7 +3328,7 @@ herr_t H5LTget_attribute_uint( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 19, 2002
 *
@@ -3362,7 +3357,7 @@ herr_t H5LTget_attribute_long( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Elena Pourmal, epourmal@ncsa.uiuc.edu
+* Programmer: Elena Pourmal
 *
 * Date: June 17, 2005
 *
@@ -3392,7 +3387,7 @@ herr_t H5LTget_attribute_long_long( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: March 8, 2004
 *
@@ -3422,7 +3417,7 @@ herr_t H5LTget_attribute_ulong( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 19, 2002
 *
@@ -3454,7 +3449,7 @@ herr_t H5LTget_attribute_float( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 19, 2002
 *
@@ -3486,7 +3481,7 @@ herr_t H5LTget_attribute_double( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 19, 2002
 *
@@ -3525,7 +3520,7 @@ herr_t H5LTget_attribute( hid_t loc_id,
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 19, 2002
 *
@@ -3589,7 +3584,7 @@ out:
 *
 * Return: Success: 0, Failure: -1
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: September 19, 2002
 *
@@ -3631,7 +3626,7 @@ out:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
 * Function: H5LT_set_attribute_string
 *
@@ -3639,7 +3634,7 @@ out:
 *
 * Return: FAIL on error, SUCCESS on success
 *
-* Programmer: pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: January 04, 2005
 *
@@ -3751,12 +3746,12 @@ H5LTpath_valid(hid_t loc_id, const char *path, hbool_t check_object_valid)
      if(HDstrncmp(path, ".", path_length) == 0) {
        if(check_object_valid) {
          obj_exists = H5Oexists_by_name(loc_id, path, H5P_DEFAULT);
-	 ret_value = obj_exists;
-	 goto done;
+    ret_value = obj_exists;
+    goto done;
        } else {
-	 ret_value = TRUE; /* Since the object is the identifier itself,
-			    * we can only check if loc_id is a valid type */
-	 goto done;
+    ret_value = TRUE; /* Since the object is the identifier itself,
+                * we can only check if loc_id is a valid type */
+    goto done;
        }
      }
 
@@ -3780,20 +3775,20 @@ H5LTpath_valid(hid_t loc_id, const char *path, hbool_t check_object_valid)
 
        obj_exists = FALSE;
        if((link_exists = H5Lexists(loc_id, tmp_path, H5P_DEFAULT)) < 0) {
-	 ret_value = FAIL;
-	 goto done;
+    ret_value = FAIL;
+    goto done;
        }
 
        /* If target link does not exist then no reason to
         *  continue checking the path */
        if(link_exists != TRUE) {
-	 ret_value = FALSE;
-	 goto done;
+    ret_value = FALSE;
+    goto done;
        }
 
        /* Determine if link resolves to an actual object */
        if((obj_exists = H5Oexists_by_name(loc_id, tmp_path, H5P_DEFAULT)) < 0) {
-	 ret_value = FAIL;
+    ret_value = FAIL;
          goto done;
        }
 
@@ -3817,11 +3812,11 @@ H5LTpath_valid(hid_t loc_id, const char *path, hbool_t check_object_valid)
        ret_value = link_exists;
        /* Determine if link resolves to an actual object for check_object_valid TRUE */
        if(check_object_valid == TRUE && link_exists == TRUE) {
-	 if((obj_exists = H5Oexists_by_name(loc_id, tmp_path, H5P_DEFAULT)) < 0) {
-	   ret_value = FAIL;
-	 } else {
-	   ret_value = obj_exists;
-	 }
+         if((obj_exists = H5Oexists_by_name(loc_id, tmp_path, H5P_DEFAULT)) < 0) {
+           ret_value = FAIL;
+         } else {
+           ret_value = obj_exists;
+         }
        }
      }
 

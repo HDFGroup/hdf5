@@ -1517,7 +1517,7 @@ typedef off_t               h5_stat_size_t;
 #endif /* HDstrtoul */
 #ifndef HDstrtoumax
     #define HDstrtoumax(S,R,N)  strtoumax(S,R,N)
-#endif /* HDstrtoul */
+#endif /* HDstrtoumax */
 #ifndef HDstrxfrm
     #define HDstrxfrm(X,Y,Z)  strxfrm(X,Y,Z)
 #endif /* HDstrxfrm */

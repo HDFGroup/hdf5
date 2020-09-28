@@ -28146,7 +28146,6 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
  * Return:    void
  *
  * Programmer:    Mike McGreevy
- *              <mamcgree@hdfgroup.org>
  *              12/16/08
  *
  * Modifications:
@@ -28174,6 +28173,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     /* Set up the expected array. This is used to maintain a table of the
      * expected status of every entry used in this test.
      */
+    /* clang-format off */
     struct expected_entry_status expected[150] =
     {
       /* entry        entry            in    at main                                                flush dep flush dep child flush   flush       flush */
@@ -28329,6 +28329,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
       { HUGE_ENTRY_TYPE, 148,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
       { HUGE_ENTRY_TYPE, 149,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE}
     };
+    /* clang-format on */
 
     pass = TRUE;
 
@@ -29008,16 +29009,19 @@ check_flush_deps(unsigned paged)
     test_entry_t *base_addr;            /* Base address of entries for test */
     int entry_type = PICO_ENTRY_TYPE;   /* Use very small entry size (size of entries doesn't matter) */
     unsigned u;                         /* Local index variable */
+
+    /* clang-format off */
     struct expected_entry_status expected[5] =
     {
-      /* entry            entry        in    at main                                                        flush dep flush dep child flush   flush       flush */
-      /* type:        index:    size:        cache:    addr:    dirty:    prot:    pinned:    dsrlzd:    srlzd:    dest:  par type[]: par idx[]: dep npart: dep nchd: dep ndirty chd: order:    corked: */
+      /* entry        entry     in              at main   flush    dep       flush     dep       child     flush     flush       flush */
+      /* type:        index:   size:            cache:    addr:    dirty:    prot:     pinned:   dsrlzd:   srlzd:    dest:  par type[]: par idx[]: dep npart: dep nchd: dep ndirty chd:       order: corked: */
       { PICO_ENTRY_TYPE, 0,    PICO_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
       { PICO_ENTRY_TYPE, 1,    PICO_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
       { PICO_ENTRY_TYPE, 2,    PICO_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
       { PICO_ENTRY_TYPE, 3,    PICO_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
       { PICO_ENTRY_TYPE, 4,    PICO_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE}
     };
+    /* clang-format on */
 
     if(paged)
         TESTING("flush dependencies (paged aggregation)")
@@ -30970,6 +30974,8 @@ check_flush_deps_order(unsigned paged)
     H5C_t * cache_ptr = NULL;           /* Metadata cache for this test */
     int entry_type = PICO_ENTRY_TYPE;   /* Use very small entry size (size of entries doesn't matter) */
     unsigned u;                         /* Local index variable */
+    unsigned flush_order;       /* Index for tracking flush order */
+    /* clang-format off */
     struct expected_entry_status expected[5] =
     {
       /* entry            entry        in    at main                                                        flush dep flush dep child flush   flush       flush */
@@ -30980,7 +30986,7 @@ check_flush_deps_order(unsigned paged)
       { PICO_ENTRY_TYPE, 3,    PICO_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
       { PICO_ENTRY_TYPE, 4,    PICO_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE}
     };
-    unsigned flush_order;       /* Index for tracking flush order */
+    /* clang-format on */
 
     if(paged)
         TESTING("flush dependencies flush order (paged aggregation)")
@@ -33543,6 +33549,7 @@ check_notify_cb(unsigned paged)
     test_entry_t * entry_ptr;           /* Cache entry to examine/manipulate */
     int entry_type = NOTIFY_ENTRY_TYPE;   /* Use entry w/notify callback (size of entries doesn't matter) */
     unsigned u;                         /* Local index variable */
+    /* clang-format off */
     struct expected_entry_status expected[5] =
     {
       /* entry            entry           in     at main                                               flush dep flush dep child flush   flush       flush */
@@ -33553,6 +33560,7 @@ check_notify_cb(unsigned paged)
       { NOTIFY_ENTRY_TYPE, 3,    NOTIFY_ENTRY_SIZE, FALSE, TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
       { NOTIFY_ENTRY_TYPE, 4,    NOTIFY_ENTRY_SIZE, FALSE, TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE}
     };
+    /* clang-format on */
 
     if(paged)
         TESTING("'notify' callback (paged)")
@@ -33759,6 +33767,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
     /* Set up the expected array. This is used to maintain a table of the
      * expected status of every entry used in this test.
      */
+    /* clang-format off */
     struct expected_entry_status expected[150] =
     {
       /* entry            entry        in    at main                                                flush dep flush dep child flush   flush       flush */
@@ -33914,6 +33923,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
       { HUGE_ENTRY_TYPE, 148,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
       { HUGE_ENTRY_TYPE, 149,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE}
     } ;
+    /* clang-format on */
 
     pass = TRUE;
 
@@ -34585,6 +34595,7 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t * file_ptr)
     H5C_t *        cache_ptr = file_ptr->shared->cache;
     int           i;
     herr_t       result;
+    /* clang-format off */
     struct expected_entry_status expected[36] =
     {
       /* the expected array is used to maintain a table of the expected status of every
@@ -34599,6 +34610,7 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t * file_ptr)
       { HUGE_ENTRY_TYPE,     2,    HUGE_ENTRY_SIZE,     TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,  {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
       { HUGE_ENTRY_TYPE,     3,    HUGE_ENTRY_SIZE,     TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,  {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE}
     };
+    /* clang-format on */
 
     if(pass) {
 
@@ -34814,6 +34826,7 @@ cedds__H5C_make_space_in_cache(H5F_t * file_ptr)
     const int       num_huge_entries = 4;
     const int       num_monster_entries = 32;
     herr_t       result;
+    /* clang-format off */
     struct expected_entry_status expected[36] =
     {
       /* the expected array is used to maintain a table of the expected status of every
@@ -34860,6 +34873,7 @@ cedds__H5C_make_space_in_cache(H5F_t * file_ptr)
       { MONSTER_ENTRY_TYPE,    30,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
       { MONSTER_ENTRY_TYPE,    31,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
     };
+    /* clang-format on */
 
     if(pass) {
 
@@ -35193,6 +35207,7 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * file_ptr)
     H5C_t *        cache_ptr = file_ptr->shared->cache;
     int           i;
     herr_t       result;
+    /* clang-format off */
     struct expected_entry_status expected[36] =
     {
       /* the expected array is used to maintain a table of the expected status of every
@@ -35235,6 +35250,7 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * file_ptr)
       { MONSTER_ENTRY_TYPE,    30,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
       { MONSTER_ENTRY_TYPE,    31,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
     };
+    /* clang-format on */
     H5C_auto_size_ctl_t saved_auto_size_ctl;
     H5C_auto_size_ctl_t test_auto_size_ctl =
     {
@@ -35669,6 +35685,7 @@ cedds__H5C_flush_invalidate_cache__bucket_scan(H5F_t * file_ptr)
     test_entry_t *             entry_ptr;
     test_entry_t *             base_addr = NULL;
     struct H5C_cache_entry_t * scan_ptr;
+    /* clang-format off */
     struct expected_entry_status expected[5] =
     {
       /* the expected array is used to maintain a table of the expected status of every
@@ -35684,6 +35701,7 @@ cedds__H5C_flush_invalidate_cache__bucket_scan(H5F_t * file_ptr)
       { MONSTER_ENTRY_TYPE,     24,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,      {-1,0,0,0,0,0,0,0},                 {-1,0,0,0,0,0,0,0}, 0, 0, 0, -1, FALSE},
       { MONSTER_ENTRY_TYPE,     31,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,         {MONSTER_ENTRY_TYPE,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0},  1, 0, 0, -1, FALSE},
     };
+    /* clang-format on */
 
     if(pass) {
 

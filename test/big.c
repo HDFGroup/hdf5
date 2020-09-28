@@ -12,10 +12,10 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Wednesday, April  8, 1998
- * Modified:	Albert Cheng <acheng@hdfgroup.org>
- * 		September 11, 2010
+ * Modified:    Albert Cheng
+ *         September 11, 2010
  */
 /*
  * The purpose of this test is to verify if a virtual file driver can handle:
@@ -53,20 +53,20 @@
  */
 #include "h5test.h"
 
-#define DNAME		"big.data"
+#define DNAME        "big.data"
 
-#define WRT_N		50
-#define WRT_SIZE	4*1024
-#define FAMILY_SIZE	1024*1024*1024
+#define WRT_N        50
+#define WRT_SIZE    4*1024
+#define FAMILY_SIZE    1024*1024*1024
 
 #define GB (HDoff_t)0x40000000L
 
-#define MAX_TRIES	100
+#define MAX_TRIES    100
 
 #if H5_SIZEOF_LONG_LONG >= 8
-#   define GB8LL	((unsigned long long)8*1024*1024*1024)
+#   define GB8LL    ((unsigned long long)8*1024*1024*1024)
 #else
-#   define GB8LL	0	/*cannot do the test*/
+#   define GB8LL    0    /*cannot do the test*/
 #endif
 
 /* Define Small, Large, Extra Large, Huge File which
@@ -96,19 +96,19 @@ static int test_family(hid_t fapl);
 /* Array used to record all addresses at which data has been written */
 /* so far.  Used to prevent overlapping writes. */
 static hsize_t values_used[WRT_N];
-
+
 /*-------------------------------------------------------------------------
- * Function:	randll
+ * Function:    randll
  *
- * Purpose:	Create a random long long value.
- * 		Ensures that a write at this value doesn't overlap any
- *		previous write.
+ * Purpose:    Create a random long long value.
+ *         Ensures that a write at this value doesn't overlap any
+ *         previous write.
  *
- * Return:	Success:	Random value
+ * Return:    Success:    Random value
  *
- *		Failure:	Random value which overlaps another write
+ *            Failure:    Random value which overlaps another write
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Tuesday, November 24, 1998
  *
  * Modifications:
@@ -118,10 +118,10 @@ static hsize_t values_used[WRT_N];
 static hsize_t
 randll(hsize_t limit, int current_index)
 {
-    hsize_t	acc = 0;
-    int 	overlap = 1;
-    int 	i;
-    int 	tries = 0;
+    hsize_t    acc = 0;
+    int     overlap = 1;
+    int     i;
+    int     tries = 0;
 
     /* Generate up to MAX_TRIES random numbers until one of them */
     /* does not overlap with any previous writes */
@@ -147,19 +147,19 @@ randll(hsize_t limit, int current_index)
     return acc;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	is_sparse
+ * Function:    is_sparse
  *
- * Purpose:	Determines if the file system of the current working
- *		directory supports holes.
+ * Purpose:    Determines if the file system of the current working
+ *             directory supports holes.
  *
- * Return:	Success:	Non-zero if holes are supported; zero
- *				otherwise.
+ * Return:    Success:    Non-zero if holes are supported; zero
+ *                otherwise.
  *
- *		Failure:	zero
+ *            Failure:    zero
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Wednesday, July 15, 1998
  *
  * Modifications:
@@ -169,8 +169,8 @@ randll(hsize_t limit, int current_index)
 static int
 is_sparse(void)
 {
-    int		fd;
-    h5_stat_t	sb;
+    int        fd;
+    h5_stat_t    sb;
 
     if ((fd = HDopen("x.h5", O_RDWR|O_TRUNC|O_CREAT, H5_POSIX_CREATE_MODE_RW)) < 0) return 0;
     if (HDlseek(fd, (off_t)(1024*1024), SEEK_SET)!=1024*1024) return 0;
@@ -185,19 +185,19 @@ is_sparse(void)
 #endif
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	supports_big
+ * Function:    supports_big
  *
- * Purpose:	Determines if the file system of the current working
- *		directory supports big files.
+ * Purpose:    Determines if the file system of the current working
+ *             directory supports big files.
  *
- * Return:	Success:	Non-zero if big files are supported; zero
- *				otherwise.
+ * Return:    Success:    Non-zero if big files are supported; zero
+ *                otherwise.
  *
- *		Failure:	zero
+ *            Failure:    zero
  *
- * Programmer:	Raymond Lu
+ * Programmer:    Raymond Lu
  *              Wednesday, April 18, 2007
  *
  * Modifications:
@@ -207,7 +207,7 @@ is_sparse(void)
 static fsizes_t
 supports_big(void)
 {
-    int		fd = -1;
+    int        fd = -1;
     fsizes_t    fsize = NO_FILE;
 
     if((fd=HDopen("y.h5", O_RDWR|O_TRUNC|O_CREAT, H5_POSIX_CREATE_MODE_RW)) < 0)
@@ -256,19 +256,19 @@ error:
     return fsize;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	enough_room
+ * Function:    enough_room
  *
- * Purpose:	Tries to create a bunch of sparse files to see if quotas will
- *		get in the way.  Some systems also have problems opening
- *		enough files and we'll check that too.
+ * Purpose:    Tries to create a bunch of sparse files to see if quotas will
+ *        get in the way.  Some systems also have problems opening
+ *        enough files and we'll check that too.
  *
- * Return:	Success:	Non-zero
+ * Return:    Success:    Non-zero
  *
- *		Failure:	zero
+ *            Failure:    zero
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Thursday, August  6, 1998
  *
  * Modifications:
@@ -281,14 +281,14 @@ error:
  *      'name' in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF(format-nonliteral)
+H5_GCC_DIAG_OFF("format-nonliteral")
 static int
 enough_room(hid_t fapl)
 {
-    int		ret_value=0;
-    int		fd[68];
-    size_t	i, size = (size_t)1 << 30;
-    char	filename[1024], name[1024];
+    int        ret_value=0;
+    int        fd[68];
+    size_t    i, size = (size_t)1 << 30;
+    char    filename[1024], name[1024];
 
     /* Initialize file descriptors */
     for (i=0; i<NELMTS(fd); i++) fd[i] = -1;
@@ -322,38 +322,38 @@ done:
 
     return ret_value;
 }
-H5_GCC_DIAG_ON(format-nonliteral)
+H5_GCC_DIAG_ON("format-nonliteral")
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	writer
+ * Function:    writer
  *
- * Purpose:	Creates a *big* dataset.
+ * Purpose:    Creates a *big* dataset.
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	>0
+ *            Failure:    >0
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Wednesday, April  8, 1998
  *
  * Modifications:
- * 	Robb Matzke, 15 Jul 1998
- *	Addresses are written to the file DNAME instead of stdout.
+ *     Robb Matzke, 15 Jul 1998
+ *     Addresses are written to the file DNAME instead of stdout.
  *
  *-------------------------------------------------------------------------
  */
 static int
 writer (char* filename, hid_t fapl, fsizes_t testsize, int wrt_n)
 {
-    hsize_t	size1[4] = {8, 1024, 1024, 1024};
-    hsize_t	size2[1] = {GB8LL};
-    hsize_t	hs_start[1];
-    hsize_t	hs_size[1];
-    hid_t	file=-1, space1=-1, space2=-1, mem_space=-1, d1=-1, d2=-1;
-    int		*buf = (int*)HDmalloc (sizeof(int) * WRT_SIZE);
-    int		i, j;
-    FILE	*out = HDfopen(DNAME, "w");
+    hsize_t    size1[4] = {8, 1024, 1024, 1024};
+    hsize_t    size2[1] = {GB8LL};
+    hsize_t    hs_start[1];
+    hsize_t    hs_size[1];
+    hid_t    file=-1, space1=-1, space2=-1, mem_space=-1, d1=-1, d2=-1;
+    int        *buf = (int*)HDmalloc (sizeof(int) * WRT_SIZE);
+    int        i, j;
+    FILE    *out = HDfopen(DNAME, "w");
     hid_t       dcpl;
 
     switch(testsize){
@@ -431,7 +431,7 @@ writer (char* filename, hid_t fapl, fsizes_t testsize, int wrt_n)
     hs_size[0] = WRT_SIZE;
     if ((mem_space = H5Screate_simple (1, hs_size, hs_size)) < 0) goto error;
     for (i=0; i<wrt_n; i++) {
-	/* start position must be at least hs_size from the end */
+    /* start position must be at least hs_size from the end */
         hs_start[0] = randll (size2[0]-hs_size[0], i);
         HDfprintf (out, "#%03d 0x%016Hx\n", i, hs_start[0]);
         if (H5Sselect_hyperslab (space2, H5S_SELECT_SET, hs_start, NULL,
@@ -468,17 +468,17 @@ error:
     return 1;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	reader
+ * Function:    reader
  *
- * Purpose:	Reads some data from random locations in the dataset.
+ * Purpose:    Reads some data from random locations in the dataset.
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- * 		Failure:	>0
+ *            Failure:    >0
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Friday, April 10, 1998
  *
  * Modifications:
@@ -488,13 +488,13 @@ error:
 static int
 reader(char *filename, hid_t fapl)
 {
-    FILE	*script = NULL;
-    hid_t	file = -1, mspace = -1, fspace = -1, d2 = -1;
-    char	ln[128], *s;
-    hsize_t	hs_offset[1];
-    hsize_t	hs_size[1] = {WRT_SIZE};
-    int		*buf = (int *)HDmalloc(sizeof(int) * WRT_SIZE);
-    int		i, j, zero, wrong, nerrors = 0;
+    FILE    *script = NULL;
+    hid_t    file = -1, mspace = -1, fspace = -1, d2 = -1;
+    char    ln[128], *s;
+    hsize_t    hs_offset[1];
+    hsize_t    hs_size[1] = {WRT_SIZE};
+    int        *buf = (int *)HDmalloc(sizeof(int) * WRT_SIZE);
+    int        i, j, zero, wrong, nerrors = 0;
 
     /* Open script file */
     script = HDfopen(DNAME, "r");
@@ -566,15 +566,15 @@ error:
 }
 
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	usage
+ * Function:    usage
  *
- * Purpose:	Print command usage
+ * Purpose:    Print command usage
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	Albert Chent
+ * Programmer:    Albert Chent
  *              Mar 28, 2002
  *
  * Modifications:
@@ -601,8 +601,8 @@ usage(void)
 static int
 test_sec2(hid_t fapl)
 {
-    char	filename[1024];
-    fsizes_t	testsize;
+    char    filename[1024];
+    fsizes_t    testsize;
 
     testsize = supports_big();
     if(testsize == NO_FILE) {
@@ -636,8 +636,8 @@ error:
 static int
 test_stdio(hid_t fapl)
 {
-    char	filename[1024];
-    fsizes_t	testsize;
+    char    filename[1024];
+    fsizes_t    testsize;
 
     testsize = supports_big();
     if(testsize == NO_FILE) {
@@ -675,7 +675,7 @@ error:
 static int
 test_family(hid_t fapl)
 {
-    char	filename[1024];
+    char    filename[1024];
 
     /* Test huge file with the family driver */
     HDputs("Testing big file with the Family Driver ");
@@ -731,24 +731,24 @@ error:
     return 1;
 } /* end test_family() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
  * Purpose:
  *
- * Return:	Success:
+ * Return:    Success:
  *
- *		Failure:
+ *            Failure:
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Friday, April 10, 1998
  *
  * Modifications:
- *		Albert Cheng, 2002/03/28
- *		Added command option -fsize.
- *		Albert Cheng, 2002/04/19
- *		Added command option -c.
+ *        Albert Cheng, 2002/03/28
+ *        Added command option -fsize.
+ *        Albert Cheng, 2002/04/19
+ *        Added command option -c.
  *
  *              Raymond Lu, 2007/05/25
  *              Added similar tests for SEC2 and STDIO drivers.

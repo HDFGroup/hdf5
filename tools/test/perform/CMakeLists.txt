@@ -20,6 +20,13 @@ else ()
 endif ()
 set_target_properties (h5perf_serial PROPERTIES FOLDER perform)
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TOOLS_TEST_PERFORM_h5perf_serial_FORMAT h5perf_serial)
+endif ()
+
 if (HDF5_BUILD_PERFORM_STANDALONE)
   #-- Adding test for h5perf_serial_alone - io_timer.c includes
   set (h5perf_serial_alone_SOURCES
@@ -38,9 +45,14 @@ if (HDF5_BUILD_PERFORM_STANDALONE)
     target_link_libraries (h5perf_serial_alone PRIVATE ${HDF5_LIBSH_TARGET} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>")
   endif ()
   set_target_properties (h5perf_serial_alone PROPERTIES FOLDER perform)
-  set_property (TARGET h5perf_serial_alone
-      APPEND PROPERTY COMPILE_DEFINITIONS STANDALONE
-  )
+  set_property (TARGET h5perf_serial_alone APPEND PROPERTY COMPILE_DEFINITIONS STANDALONE)
+
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_TOOLS_TEST_PERFORM_h5perf_serial_alone_FORMAT h5perf_serial_alone)
+  endif ()
 endif ()
 
 #-- Adding test for chunk
@@ -58,6 +70,13 @@ else ()
 endif ()
 set_target_properties (chunk PROPERTIES FOLDER perform)
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TOOLS_TEST_PERFORM_chunk_FORMAT chunk)
+endif ()
+
 #-- Adding test for iopipe
 set (iopipe_SOURCES
     ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/iopipe.c
@@ -72,6 +91,13 @@ else ()
   target_link_libraries (iopipe PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
 endif ()
 set_target_properties (iopipe PROPERTIES FOLDER perform)
+
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TOOLS_TEST_PERFORM_iopipe_FORMAT iopipe)
+endif ()
 
 #-- Adding test for chunk_cache
 set (chunk_cache_SOURCES
@@ -88,6 +114,13 @@ else ()
 endif ()
 set_target_properties (chunk_cache PROPERTIES FOLDER perform)
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TOOLS_TEST_PERFORM_chunk_cache_FORMAT chunk_cache)
+endif ()
+
 #-- Adding test for overhead
 set (overhead_SOURCES
     ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/overhead.c
@@ -102,6 +135,13 @@ else ()
   target_link_libraries (overhead PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
 endif ()
 set_target_properties (overhead PROPERTIES FOLDER perform)
+
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TOOLS_TEST_PERFORM_overhead_FORMAT overhead)
+endif ()
 
 #-- Adding test for perf_meta
 set (perf_meta_SOURCES
@@ -118,6 +158,13 @@ else ()
 endif ()
 set_target_properties (perf_meta PROPERTIES FOLDER perform)
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TOOLS_TEST_PERFORM_perf_meta_FORMAT perf_meta)
+endif ()
+
 #-- Adding test for zip_perf
 set (zip_perf_SOURCES
     ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/zip_perf.c
@@ -133,22 +180,36 @@ else ()
 endif ()
 set_target_properties (zip_perf PROPERTIES FOLDER perform)
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TOOLS_TEST_PERFORM_zip_perf_FORMAT zip_perf)
+endif ()
+
 if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL)
   if (UNIX)
-      #-- Adding test for perf - only on unix systems
-      set (perf_SOURCES
-          ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/perf.c
-      )
-      add_executable (perf ${perf_SOURCES})
-      target_include_directories (perf PRIVATE "${HDF5_TEST_SRC_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-      if (NOT BUILD_SHARED_LIBS)
-        TARGET_C_PROPERTIES (perf STATIC)
-        target_link_libraries (perf PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
-      else ()
-        TARGET_C_PROPERTIES (perf SHARED)
-        target_link_libraries (perf PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
-      endif ()
-      set_target_properties (perf PROPERTIES FOLDER perform)
+    #-- Adding test for perf - only on unix systems
+    set (perf_SOURCES
+        ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/perf.c
+    )
+    add_executable (perf ${perf_SOURCES})
+    target_include_directories (perf PRIVATE "${HDF5_TEST_SRC_DIR};${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+    if (NOT BUILD_SHARED_LIBS)
+      TARGET_C_PROPERTIES (perf STATIC)
+      target_link_libraries (perf PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
+    else ()
+      TARGET_C_PROPERTIES (perf SHARED)
+      target_link_libraries (perf PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+    endif ()
+    set_target_properties (perf PROPERTIES FOLDER perform)
+
+    #-----------------------------------------------------------------------------
+    # Add Target to clang-format
+    #-----------------------------------------------------------------------------
+    if (HDF5_ENABLE_FORMATTERS)
+      clang_format (HDF5_TOOLS_TEST_PERFORM_perf_FORMAT perf)
+    endif ()
   endif ()
 
   #-- Adding test for h5perf
@@ -166,6 +227,13 @@ if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL)
     target_link_libraries (h5perf PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   endif ()
   set_target_properties (h5perf PROPERTIES FOLDER perform)
+
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_TOOLS_TEST_PERFORM_h5perf_FORMAT h5perf)
+  endif ()
 
   if (HDF5_BUILD_PERFORM_STANDALONE)
     #-- Adding test for h5perf
@@ -188,6 +256,13 @@ if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL)
     set_property (TARGET h5perf_alone
         APPEND PROPERTY COMPILE_DEFINITIONS STANDALONE
     )
+
+    #-----------------------------------------------------------------------------
+    # Add Target to clang-format
+    #-----------------------------------------------------------------------------
+    if (HDF5_ENABLE_FORMATTERS)
+      clang_format (HDF5_TOOLS_TEST_PERFORM_h5perf_alone_FORMAT h5perf_alone)
+    endif ()
   endif ()
 endif ()
 

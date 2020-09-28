@@ -1,0 +1,62 @@
+---
+Language:        Cpp
+BasedOnStyle:  LLVM
+AlignConsecutiveMacros: true
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlwaysBreakAfterReturnType: AllDefinitions
+BraceWrapping:
+  AfterFunction:   true
+  BeforeCatch:     true
+  BeforeElse:      true
+BreakBeforeBraces: Stroustrup
+BreakAfterJavaFieldAnnotations: true
+BreakStringLiterals: true
+ColumnLimit:     110
+IncludeCategories:
+  - Regex:           '^"(llvm|llvm-c|clang|clang-c)/'
+    Priority:        3
+    SortPriority:    0
+  - Regex:           '^(<|"(gtest|gmock|isl|json)/)'
+    Priority:        4
+    SortPriority:    0
+  - Regex:           '.*'
+    Priority:        0
+    SortPriority:    0
+  - Regex:           '^H5*.*'
+    Priority:        1
+    SortPriority:    0
+  - Regex:           'private.*'
+    Priority:        2
+    SortPriority:    0
+IncludeIsMainRegex: '(public)?$'
+IndentCaseLabels: true
+IndentGotoLabels: false
+IndentWidth:     4
+ObjCBlockIndentWidth: 4
+ReflowComments:  true
+SortIncludes:    false
+StatementMacros:
+  - FUNC_ENTER_API
+  - FUNC_LEAVE_API
+  - FUNC_ENTER_NOAPI_NOINIT_NOERR
+  - FUNC_LEAVE_NOAPI
+  - H5_BEGIN_TAG
+  - HGOTO_DONE_TAG
+  - H5_END_TAG
+  - HSYS_DONE_ERROR
+  - HSYS_GOTO_ERROR
+  - HDONE_ERROR
+  - HERROR
+  - H5_LEAVE
+  - H5E_PRINTF
+  - H5E_THROW
+  - HGOTO_DONE
+  - HGOTO_ERROR
+  - HMPI_ERROR
+  - HMPI_DONE_ERROR
+  - HMPI_GOTO_ERROR
+  - H5_GCC_DIAG_OFF
+  - H5_GCC_DIAG_ON
+...
+

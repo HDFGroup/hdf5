@@ -26,28 +26,28 @@
  * it via H5public.h.  The #ifndef _H5public_H guard above would
  * prevent repeated include.
  */
-#include "H5pubconf.h"        /*from configure                             */
+#include "H5pubconf.h"          /* From configure */
 
 /* API Version macro wrapper definitions */
 #include "H5version.h"
 
 #ifdef H5_HAVE_FEATURES_H
-#include <features.h>           /*for setting POSIX, BSD, etc. compatibility */
+#include <features.h>           /* For setting POSIX, BSD, etc. compatibility */
 #endif
 #ifdef H5_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #ifdef H5_STDC_HEADERS
-#   include <limits.h>      /*for H5T_NATIVE_CHAR defn in H5Tpublic.h    */
-#   include <stdarg.h>      /*for variadic functions in H5VLpublic.h     */
+#   include <limits.h>          /* For H5T_NATIVE_CHAR defn in H5Tpublic.h  */
+#   include <stdarg.h>          /* For variadic functions in H5VLpublic.h   */
 #endif
 #ifndef __cplusplus
 # ifdef H5_HAVE_STDINT_H
-#   include <stdint.h>        /*for C9x types                     */
+#   include <stdint.h>          /* For C9x types */
 # endif
 #else
 # ifdef H5_HAVE_STDINT_H_CXX
-#   include <stdint.h>        /*for C9x types    when include from C++         */
+#   include <stdint.h>          /* For C9x types (when included from C++) */
 # endif
 #endif
 #ifdef H5_HAVE_INTTYPES_H
@@ -61,7 +61,7 @@
 #   define MPICH_SKIP_MPICXX 1
 #   define OMPI_SKIP_MPICXX 1
 #   include <mpi.h>
-#ifndef MPI_FILE_NULL        /*MPIO may be defined in mpi.h already       */
+#ifndef MPI_FILE_NULL           /* MPIO may be defined in mpi.h already */
 #   include <mpio.h>
 #endif
 #endif
@@ -81,12 +81,11 @@ extern "C" {
  */
 /* These pragmas are only implemented usefully in gcc 4.6+ */
 #if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 406
-    #define H5_GCC_DIAG_STR(s) #s
-    #define H5_GCC_DIAG_JOINSTR(x,y) H5_GCC_DIAG_STR(x ## y)
-    #define H5_GCC_DIAG_DO_PRAGMA(x) _Pragma (#x)
-    #define H5_GCC_DIAG_PRAGMA(x) H5_GCC_DIAG_DO_PRAGMA(GCC diagnostic x)
+    #define H5_GCC_DIAG_JOINSTR(x, y) x y
+    #define H5_GCC_DIAG_DO_PRAGMA(x)  _Pragma(#x)
+    #define H5_GCC_DIAG_PRAGMA(x)     H5_GCC_DIAG_DO_PRAGMA(GCC diagnostic x)
 
-    #define H5_GCC_DIAG_OFF(x) H5_GCC_DIAG_PRAGMA(push) H5_GCC_DIAG_PRAGMA(ignored H5_GCC_DIAG_JOINSTR(-W,x))
+    #define H5_GCC_DIAG_OFF(x) H5_GCC_DIAG_PRAGMA(push) H5_GCC_DIAG_PRAGMA(ignored H5_GCC_DIAG_JOINSTR("-W",x))
     #define H5_GCC_DIAG_ON(x) H5_GCC_DIAG_PRAGMA(pop)
 #else
     #define H5_GCC_DIAG_OFF(x)
@@ -122,8 +121,8 @@ extern "C" {
  * The negative failure value is most commonly -1, but don't bet on it.  The
  * proper way to detect failure is something like:
  *
- *     if((dset = H5Dopen2(file, name)) < 0)
- *        fprintf(stderr, "unable to open the requested dataset\n");
+ *  if((dset = H5Dopen2(file, name)) < 0)
+ *      fprintf(stderr, "unable to open the requested dataset\n");
  */
 typedef int herr_t;
 
@@ -135,13 +134,13 @@ typedef int herr_t;
  * (false), positive (true), or negative (failure). The proper way to test
  * for truth from a htri_t function is:
  *
- *     if ((retval = H5Tcommitted(type))>0) {
- *        printf("data type is committed\n");
- *    } else if (!retval) {
- *         printf("data type is not committed\n");
- *    } else {
- *         printf("error determining whether data type is committed\n");
- *    }
+ *  if ((retval = H5Tcommitted(type)) > 0) {
+ *      printf("data type is committed\n");
+ *  } else if (!retval) {
+ *      printf("data type is not committed\n");
+ *  } else {
+ *      printf("error determining whether data type is committed\n");
+ *  }
  */
 #ifdef H5_HAVE_STDBOOL_H
   #include <stdbool.h>
@@ -182,10 +181,10 @@ typedef long long ssize_t;
  * type.
  */
 #if H5_SIZEOF_LONG_LONG >= 8
-H5_GCC_DIAG_OFF(long-long)
+H5_GCC_DIAG_OFF("long-long")
 typedef unsigned long long  hsize_t;
 typedef signed long long    hssize_t;
-H5_GCC_DIAG_ON(long-long)
+H5_GCC_DIAG_ON("long-long")
 #       define H5_SIZEOF_HSIZE_T H5_SIZEOF_LONG_LONG
 #       define H5_SIZEOF_HSSIZE_T H5_SIZEOF_LONG_LONG
 #else

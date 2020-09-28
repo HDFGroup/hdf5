@@ -46,6 +46,19 @@ if (BUILD_SHARED_LIBS)
   )
 endif ()
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_H5JAM_SRC_FORMAT h5jam)
+    clang_format (HDF5_H5UNJAM_SRC_FORMAT h5unjam)
+  else ()
+    clang_format (HDF5_H5JAM_SRC_FORMAT h5jam-shared)
+    clang_format (HDF5_H5UNJAM_SRC_FORMAT h5unjam-shared)
+  endif ()
+endif ()
+
 ##############################################################################
 ##############################################################################
 ###           I N S T A L L A T I O N                                      ###

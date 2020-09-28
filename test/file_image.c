@@ -67,7 +67,7 @@ typedef struct {
     H5FD_file_image_op_t free_src;
 } udata_t;
 
-
+
 /******************************************************************************
  * Function:    test_properties
  *
@@ -162,7 +162,7 @@ error:
     return retval;
 } /* end test_properties() */
 
-
+
 /******************************************************************************
  * Function:    malloc_cb
  *
@@ -185,7 +185,7 @@ malloc_cb(size_t size, H5FD_file_image_op_t op, void *udata)
     return HDmalloc(size);
 }
 
-
+
 /******************************************************************************
  * Function:    memcpy_cb
  *
@@ -208,7 +208,7 @@ memcpy_cb(void *dest, const void *src, size_t size, H5FD_file_image_op_t op, voi
     return HDmemcpy(dest, src, size);
 }
 
-
+
 /******************************************************************************
  * Function:    realloc_cb
  *
@@ -231,7 +231,7 @@ realloc_cb(void *ptr, size_t size, H5FD_file_image_op_t op, void *udata)
     return HDrealloc(ptr,size);
 }
 
-
+
 /******************************************************************************
  * Function:    free_cb
  *
@@ -253,7 +253,7 @@ free_cb(void *ptr, H5FD_file_image_op_t op, void *udata)
     return(SUCCEED);
 }
 
-
+
 /******************************************************************************
  * Function:    udata_copy_cb
  *
@@ -277,7 +277,7 @@ udata_copy_cb(void *udata)
     return udata;
 }
 
-
+
 /******************************************************************************
  * Function:    udata_free_cb
  *
@@ -301,7 +301,7 @@ udata_free_cb(void *udata)
     return(SUCCEED);
 }
 
-
+
 /******************************************************************************
  * Function:    reset_udata
  *
@@ -320,7 +320,7 @@ reset_udata(udata_t *u)
     u->malloc_src = u->memcpy_src = u->realloc_src = u->free_src = H5FD_FILE_IMAGE_OP_NO_OP;
 }
 
-
+
 /******************************************************************************
  * Function:    test_callbacks
  *
@@ -509,7 +509,7 @@ error:
     return 1;
 } /* test_callbacks() */
 
-
+
 /******************************************************************************
  * Function:    test_core
  *
@@ -657,7 +657,7 @@ error:
     return 1;
 } /* end test_core() */
 
-
+
 /******************************************************************************
  * Function:    test_get_file_image
  *
@@ -678,11 +678,11 @@ error:
  *      'member_file_name' in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF(format-nonliteral)
+H5_GCC_DIAG_OFF("format-nonliteral")
 static int
 test_get_file_image(const char * test_banner,
                     const int file_name_num,
-		    hid_t fapl,
+            hid_t fapl,
                     hbool_t user)
 {
     char file_name[1024] = "\0";
@@ -783,7 +783,7 @@ test_get_file_image(const char * test_banner,
         ssize_t member_size;
         ssize_t size_remaining;
 
-	/*
+    /*
          * Modifications need to be made to accommodate userblock when
          * H5Fget_file_image() works for family driver
          */
@@ -855,7 +855,7 @@ test_get_file_image(const char * test_banner,
          * the remainder of the file is all '\0's.
          */
         file_size = (ssize_t)stat_buf.st_size;
-	if(user) {
+    if(user) {
             VERIFY(file_size > USERBLOCK_SIZE, "file size !> userblock size.");
             file_size -= USERBLOCK_SIZE;
         }
@@ -873,7 +873,7 @@ test_get_file_image(const char * test_banner,
         fd = HDopen(file_name, O_RDONLY);
         VERIFY(fd >= 0, "HDopen() failed.");
 
-	if(user) {
+    if(user) {
             HDoff_t off;
 
             /* Position at userblock */
@@ -945,9 +945,9 @@ test_get_file_image(const char * test_banner,
 error:
     return 1;
 } /* end test_get_file_image() */
-H5_GCC_DIAG_ON(format-nonliteral)
+H5_GCC_DIAG_ON("format-nonliteral")
 
-
+
 /******************************************************************************
  * Function:    test_get_file_image_error_rejection
  *
@@ -1335,28 +1335,28 @@ main(void)
     /* Perform tests with/without user block */
     for(user = FALSE; user <= TRUE; user++) {
 
-	/* test H5Fget_file_image() with sec2 driver */
-	fapl = H5Pcreate(H5P_FILE_ACCESS);
-	if(H5Pset_fapl_sec2(fapl) < 0)
-	    errors++;
-	else
-	    errors += test_get_file_image("H5Fget_file_image() with sec2 driver",
+    /* test H5Fget_file_image() with sec2 driver */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    if(H5Pset_fapl_sec2(fapl) < 0)
+        errors++;
+    else
+        errors += test_get_file_image("H5Fget_file_image() with sec2 driver",
                                       0, fapl, user);
 
-	/* test H5Fget_file_image() with stdio driver */
-	fapl = H5Pcreate(H5P_FILE_ACCESS);
-	if(H5Pset_fapl_stdio(fapl) < 0)
-	    errors++;
-	else
-	    errors += test_get_file_image("H5Fget_file_image() with stdio driver",
+    /* test H5Fget_file_image() with stdio driver */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    if(H5Pset_fapl_stdio(fapl) < 0)
+        errors++;
+    else
+        errors += test_get_file_image("H5Fget_file_image() with stdio driver",
                                       1, fapl, user);
 
-	/* test H5Fget_file_image() with core driver */
-	fapl = H5Pcreate(H5P_FILE_ACCESS);
-	if(H5Pset_fapl_core(fapl, (size_t)(64 *1024), TRUE) < 0)
-	    errors++;
-	else
-	    errors += test_get_file_image("H5Fget_file_image() with core driver",
+    /* test H5Fget_file_image() with core driver */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    if(H5Pset_fapl_core(fapl, (size_t)(64 *1024), TRUE) < 0)
+        errors++;
+    else
+        errors += test_get_file_image("H5Fget_file_image() with core driver",
                                       2, fapl, user);
 
      } /* end for */
