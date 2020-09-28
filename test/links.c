@@ -628,6 +628,8 @@ cklinks(hid_t fapl, hbool_t new_format)
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
     if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) FAIL_STACK_ERROR
 
+//! [H5Otoken_cmp_snip]
+
     /* Hard link */
     if(H5Oget_info_by_name3(file, "d1", &oinfo1, H5O_INFO_BASIC, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if(H5Oget_info_by_name3(file, "grp1/hard", &oinfo2, H5O_INFO_BASIC, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
@@ -637,6 +639,9 @@ cklinks(hid_t fapl, hbool_t new_format)
         TEST_ERROR
     } /* end if */
     if(H5Otoken_cmp(file, &oinfo1.token, &oinfo2.token, &token_cmp) < 0) FAIL_STACK_ERROR
+
+//! [H5Otoken_cmp_snip]
+
     if(token_cmp) {
         H5_FAILED();
         HDputs("    Hard link test failed. Link seems not to point to the ");
@@ -12990,10 +12995,14 @@ obj_visit(hid_t fapl, hbool_t new_format)
     /* Construct "interesting" file to visit */
     if((fid = build_visit_file(fapl)) < 0) TEST_ERROR
 
+//! [H5Ovisit3_snip]
+
     /* Visit all the objects reachable from the root group (with file ID) */
     udata.idx = 0;
     udata.info = new_format ? ovisit0_new : ovisit0_old;
     if(H5Ovisit3(fid, H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5O_INFO_BASIC) < 0) FAIL_STACK_ERROR
+
+//! [H5Ovisit3_snip]
 
     /* Visit all the objects reachable from the root group (with group ID) */
     if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -13054,10 +13063,14 @@ obj_visit_by_name(hid_t fapl, hbool_t new_format)
     /* Construct "interesting" file to visit */
     if((fid = build_visit_file(fapl)) < 0) TEST_ERROR
 
+//! [H5Ovisit_by_name3_snip]
+
     /* Visit all the objects reachable from the root group (with file ID) */
     udata.idx = 0;
     udata.info = new_format ? ovisit0_new : ovisit0_old;
     if(H5Ovisit_by_name3(fid, "/", H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5O_INFO_BASIC, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+//! [H5Ovisit_by_name3_snip]
 
     /* Visit all the objects reachable from the root group (with group ID) */
     if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
