@@ -435,7 +435,7 @@ set (${HDF_PREFIX}_H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: 
 ENABLE_LANGUAGE (C)
 
 if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-include (CheckCSourceRuns)
+  include (CheckCSourceRuns)
 else ()
 #-----------------------------------------------------------------------------
 # The provided CMake C macros don't provide a general compile/run function

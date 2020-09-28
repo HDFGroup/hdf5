@@ -171,7 +171,7 @@ public class TestH5S {
         try {
             H5.H5Sset_extent_none(H5sid);
             read_type = H5.H5Sget_simple_extent_type(H5sid);
-            assertTrue("H5.H5Sget_simple_extent_type: "+read_type, HDF5Constants.H5S_NO_CLASS == read_type);
+            assertTrue("H5.H5Sget_simple_extent_type: "+read_type, HDF5Constants.H5S_NULL == read_type);
         }
         catch (Throwable err) {
             err.printStackTrace();

@@ -263,9 +263,6 @@ H5_DLL herr_t H5O__attr_remove(const H5O_loc_t *loc, const char *name);
 H5_DLL herr_t H5O__attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n);
 H5_DLL htri_t H5O__attr_exists(const H5O_loc_t *loc, const char *name);
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-H5_DLL int H5O__attr_count(const H5O_loc_t *loc);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
 H5_DLL H5A_t *H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_size,
     H5O_copy_t *cpy_info);
 H5_DLL herr_t H5A__attr_post_copy_file(const H5O_loc_t *src_oloc, const H5A_t *mesg_src,

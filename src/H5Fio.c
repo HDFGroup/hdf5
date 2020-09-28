@@ -15,7 +15,7 @@
  *
  * Created:             H5Fio.c
  *                      Jan 10 2008
- *                      Quincey Koziol <koziol@hdfgroup.org>
+ *                      Quincey Koziol
  *
  * Purpose:             File I/O routines.
  *
@@ -86,7 +86,6 @@
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Jul 10 1997
  *
  *-------------------------------------------------------------------------
@@ -130,7 +129,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Jul 10 1997
  *
  *-------------------------------------------------------------------------
@@ -175,7 +173,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Jul 10 1997
  *
  *-------------------------------------------------------------------------
@@ -220,7 +217,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Jul 10 1997
  *
  *-------------------------------------------------------------------------

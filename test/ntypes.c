@@ -12,10 +12,10 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Raymond Lu
+ * Programmer:    Raymond Lu
  *              October 14, 2001
  *
- * Purpose:	Tests the H5Tget_native_type function.
+ * Purpose:    Tests the H5Tget_native_type function.
  */
 
 #include "h5test.h"
@@ -30,23 +30,23 @@ const char *FILENAME[] = {
 #define DIM3    20
 
 
-int	ipoints2[DIM0][DIM1], icheck2[DIM0][DIM1];
-short	spoints2[DIM0][DIM1], scheck2[DIM0][DIM1];
-int	ipoints3[DIM0][DIM1][5], icheck3[DIM0][DIM1][5];
+int    ipoints2[DIM0][DIM1], icheck2[DIM0][DIM1];
+short    spoints2[DIM0][DIM1], scheck2[DIM0][DIM1];
+int    ipoints3[DIM0][DIM1][5], icheck3[DIM0][DIM1][5];
 
-#define DSET_ATOMIC_NAME_1	"atomic_type_1"
-#define DSET_ATOMIC_NAME_2	"atomic_type_2"
-#define DSET_ATOMIC_NAME_3	"atomic_type_3"
-#define DSET_ATOMIC_NAME_4	"atomic_type_4"
-#define DSET_ATOMIC_NAME_5	"atomic_type_5"
+#define DSET_ATOMIC_NAME_1    "atomic_type_1"
+#define DSET_ATOMIC_NAME_2    "atomic_type_2"
+#define DSET_ATOMIC_NAME_3    "atomic_type_3"
+#define DSET_ATOMIC_NAME_4    "atomic_type_4"
+#define DSET_ATOMIC_NAME_5    "atomic_type_5"
 #define DSET_COMPOUND_NAME      "compound_type"
 #define DSET_COMPOUND_NAME_2    "compound_type_2"
 #define DSET_COMPOUND_NAME_3    "compound_type_3"
 #define DSET_COMPOUND_NAME_4    "compound_type_4"
-#define DSET_ENUM_NAME	        "enum_type"
-#define DSET_ARRAY_NAME	        "array_type"
-#define DSET_ARRAY2_NAME	"array_type_2"
-#define DSET_VL_NAME	        "vl_type"
+#define DSET_ENUM_NAME            "enum_type"
+#define DSET_ARRAY_NAME            "array_type"
+#define DSET_ARRAY2_NAME    "array_type_2"
+#define DSET_VL_NAME            "vl_type"
 #define DSET_VLSTR_NAME         "vlstr_type"
 #define DSET_STR_NAME           "str_type"
 #define DSET_OPAQUE_NAME        "opaque_type"
@@ -55,23 +55,23 @@ int	ipoints3[DIM0][DIM1][5], icheck3[DIM0][DIM1][5];
 
 #define SPACE1_DIM1             4
 #define SPACE1_RANK             1
-#define SPACE2_RANK	        2
-#define SPACE2_DIM1	        10
-#define SPACE2_DIM2	        10
+#define SPACE2_RANK            2
+#define SPACE2_DIM1            10
+#define SPACE2_DIM2            10
 #define BITFIELD_ENUMB          8
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_atomic_dtype
+ * Function:    test_atomic_dtype
  *
- * Purpose:	Test H5Tget_native_type for atomic datatype
+ * Purpose:    Test H5Tget_native_type for atomic datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -80,10 +80,10 @@ int	ipoints3[DIM0][DIM1][5], icheck3[DIM0][DIM1][5];
 static herr_t
 test_atomic_dtype(hid_t file)
 {
-    hid_t	dataset = -1, space = -1;
+    hid_t    dataset = -1, space = -1;
     hid_t       dtype = -1, native_type = -1;
-    int		i, j, n;
-    hsize_t	dims[2];
+    int        i, j, n;
+    hsize_t    dims[2];
     void       *tmp = NULL;
 
     TESTING("atomic datatype");
@@ -273,18 +273,18 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_compound_dtype2
+ * Function:    test_compound_dtype2
  *
- * Purpose:	Test H5Tget_native_type for compound datatype
+ * Purpose:    Test H5Tget_native_type for compound datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -304,13 +304,13 @@ test_compound_dtype2(hid_t file)
         s2              st;
         unsigned long long       l;
     } s1;
-    hid_t	dataset = -1, space = -1;
+    hid_t    dataset = -1, space = -1;
     hid_t       dtype = -1, native_type = -1, tid = -1, tid2 = -1, tid_m = -1,
                 tid_m2 = -1, mem_id = -1, nest_mem_id = -1;
-    int		i, j, n;
-    hsize_t	dims[2];
+    int        i, j, n;
+    hsize_t    dims[2];
     s1         *temp_point = NULL, *temp_check = NULL;
-    s1 	       *points = NULL, *check = NULL;
+    s1            *points = NULL, *check = NULL;
     void       *tmp = NULL, *bkg = NULL;
 
     TESTING("nested compound datatype");
@@ -572,18 +572,18 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_compound_dtype
+ * Function:    test_compound_dtype
  *
- * Purpose:	Test H5Tget_native_type for compound datatype
+ * Purpose:    Test H5Tget_native_type for compound datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -597,10 +597,10 @@ test_compound_dtype(hid_t file)
         unsigned int    i;
         long long       l;
     } s1;
-    hid_t	dataset = -1, space = -1;
+    hid_t    dataset = -1, space = -1;
     hid_t       dtype = -1, native_type = -1, tid = -1, tid2 = -1, mem_id = -1;
-    int		i, j, n;
-    hsize_t	dims[2];
+    int        i, j, n;
+    hsize_t    dims[2];
     s1         *temp_point = NULL;
     s1         *temp_check = NULL;
     s1         *points = NULL;
@@ -772,18 +772,18 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_compound_dtype3
+ * Function:    test_compound_dtype3
  *
- * Purpose:	Test H5Tget_native_type for compound datatype
+ * Purpose:    Test H5Tget_native_type for compound datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -797,14 +797,14 @@ test_compound_dtype3(hid_t file)
         int             a[5];
         long long       l;
     } s1;
-    hid_t	dataset = -1, space = -1;
+    hid_t    dataset = -1, space = -1;
     hid_t       dtype = -1, native_type = -1, tid = -1, tid2 = -1, tid_m = -1,
                 tid_m2 = -1, mem_id = -1, nest_mem_id = -1;
     hsize_t     array_dims[1] = {5};
-    int		i, j, k, n;
-    hsize_t	dims[2];
+    int        i, j, k, n;
+    hsize_t    dims[2];
     s1         *temp_point = NULL, *temp_check = NULL;
-    s1 	       *points = NULL, *check = NULL;
+    s1            *points = NULL, *check = NULL;
     void       *tmp = NULL, *bkg = NULL;
 
     TESTING("compound datatype with array as field");
@@ -997,18 +997,18 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_compound_opaque
+ * Function:    test_compound_opaque
  *
- * Purpose:	Test H5Tget_native_type for compound datatype with opaque field
+ * Purpose:    Test H5Tget_native_type for compound datatype with opaque field
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Quincey Koziol
- *		January 31, 2004
+ * Programmer:    Quincey Koziol
+ *        January 31, 2004
  *
  * Modifications:
  *
@@ -1022,13 +1022,13 @@ test_compound_opaque(hid_t file)
         unsigned char   o[5];
         long long       l;
     } s1;
-    hid_t	dataset = -1, space = -1;
+    hid_t    dataset = -1, space = -1;
     hid_t       dtype = -1, native_type = -1, tid = -1, tid2 = -1, tid_m = -1,
                 mem_id = -1;
-    int		i, j, k, n;
-    hsize_t	dims[2];
+    int        i, j, k, n;
+    hsize_t    dims[2];
     s1         *temp_point = NULL, *temp_check = NULL;
-    s1 	       *points = NULL, *check = NULL;
+    s1            *points = NULL, *check = NULL;
     void       *tmp = NULL, *bkg = NULL;
 
     TESTING("compound datatype with opaque field");
@@ -1209,18 +1209,18 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_enum_dtype
+ * Function:    test_enum_dtype
  *
- * Purpose:	Test H5Tget_native_type for enumerate datatype
+ * Purpose:    Test H5Tget_native_type for enumerate datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -1229,10 +1229,10 @@ error:
 static herr_t
 test_enum_dtype(hid_t file)
 {
-    hid_t	dataset = -1, space = -1;
+    hid_t    dataset = -1, space = -1;
     hid_t       tid = -1, tid_m = -1, dtype = -1, native_type = -1;
-    int		i, j, n;
-    hsize_t	dims[2];
+    int        i, j, n;
+    hsize_t    dims[2];
     void        *tmp = NULL;
     short        colors[8];
     unsigned char sub_colors[16];
@@ -1351,18 +1351,18 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_array_dtype
+ * Function:    test_array_dtype
  *
- * Purpose:	Test H5Tget_native_type for array datatype
+ * Purpose:    Test H5Tget_native_type for array datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -1376,12 +1376,12 @@ test_array_dtype(hid_t file)
         int     i;
         long long l;
     } s1;
-    hid_t	dataset = -1, space = -1;
+    hid_t    dataset = -1, space = -1;
     hid_t       dtype = -1, native_type = -1, tid = -1, tid2 = -1, tid3 = -1, tid_m = -1;
-    int		i, j, k, n;
-    hsize_t	space_dims[2], array_dims[1]={5};
+    int        i, j, k, n;
+    hsize_t    space_dims[2], array_dims[1]={5};
     s1         *temp_point = NULL, *temp_check = NULL;
-    s1 	       *points = NULL, *check = NULL;
+    s1            *points = NULL, *check = NULL;
     void       *tmp = NULL;
 
     TESTING("array of compound datatype");
@@ -1518,18 +1518,18 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_array_dtype2
+ * Function:    test_array_dtype2
  *
- * Purpose:	Test H5Tget_native_type for array datatype
+ * Purpose:    Test H5Tget_native_type for array datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -1538,10 +1538,10 @@ error:
 static herr_t
 test_array_dtype2(hid_t file)
 {
-    hid_t	dataset = -1, space = -1;
+    hid_t    dataset = -1, space = -1;
     hid_t       dtype = -1, native_type = -1, tid = -1, tid_m = -1;
-    int		i, j, k, n;
-    hsize_t	space_dims[2], array_dims[1] = {5};
+    int        i, j, k, n;
+    hsize_t    space_dims[2], array_dims[1] = {5};
     void       *tmp = NULL;
 
     TESTING("array of atomic datatype");
@@ -1641,18 +1641,18 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_vl_dtype
+ * Function:    test_vl_dtype
  *
- * Purpose:	Test H5Tget_native_type for variable length datatype
+ * Purpose:    Test H5Tget_native_type for variable length datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -1664,10 +1664,10 @@ test_vl_dtype(hid_t file)
     hvl_t       wdata[SPACE1_DIM1];   /* Information to write */
     hvl_t       rdata[SPACE1_DIM1];   /* Information read in */
     hvl_t       *t1, *t2;             /* Temporary pointer to VL information */
-    hsize_t	dims1[] = {SPACE1_DIM1};
-    hid_t	dataset = -1, space = -1;
+    hsize_t    dims1[] = {SPACE1_DIM1};
+    hid_t    dataset = -1, space = -1;
     hid_t       dtype = -1, native_type = -1, nat_super_type = -1, tid = -1, tid2 = -1, tid_m = -1, tid_m2 = -1;
-    size_t	i, j, k;
+    size_t    i, j, k;
     void      **tmp = NULL;
 
     TESTING("variable length datatype");
@@ -1825,18 +1825,18 @@ error:
     return -1;
 } /* end test_vl_type() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_vlstr_dtype
+ * Function:    test_vlstr_dtype
  *
- * Purpose:	Test H5Tget_native_type for variable length string datatype
+ * Purpose:    Test H5Tget_native_type for variable length string datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -1845,18 +1845,19 @@ error:
 static herr_t
 test_vlstr_dtype(hid_t file)
 {
+    /* Information to write */
     const char *wdata[SPACE1_DIM1]= {
             "Four score and seven years ago our forefathers brought forth on this continent a new nation,",
             "conceived in liberty and dedicated to the proposition that all men are created equal.",
             "Now we are engaged in a great civil war,",
             "testing whether that nation or any nation so conceived and so dedicated can long endure."
-    };                                  /* Information to write */
+    };
     char       *rdata[SPACE1_DIM1];     /* Information read in */
     hbool_t     rdata_alloc = FALSE;    /* Whether the read data is allocated */
-    hid_t	dataset = -1;	        /* Dataset ID			*/
-    hid_t	sid1 = -1;              /* Dataspace ID			*/
-    hid_t	tid1 = -1, dtype = -1, native_type = -1;     /* Datatype ID			*/
-    hsize_t	dims1[] = {SPACE1_DIM1};
+    hid_t    dataset = -1;            /* Dataset ID            */
+    hid_t    sid1 = -1;              /* Dataspace ID            */
+    hid_t    tid1 = -1, dtype = -1, native_type = -1;     /* Datatype ID            */
+    hsize_t    dims1[] = {SPACE1_DIM1};
     unsigned    i;                          /* counting variable */
 
     /* Output message about test being performed */
@@ -1951,18 +1952,18 @@ error:
     return -1;
 } /* end test_vlstr_dtype() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_str_dtype
+ * Function:    test_str_dtype
  *
- * Purpose:	Test H5Tget_native_type for fixed-length string datatype
+ * Purpose:    Test H5Tget_native_type for fixed-length string datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -1978,10 +1979,10 @@ test_str_dtype(hid_t file)
             "4th"
     };                              /* Information to write */
     char        rdata[SPACE1_DIM1][4];  /* Information read in */
-    hid_t	dataset = -1;	    /* Dataset ID			*/
-    hid_t	sid1 = -1;          /* Dataspace ID			*/
-    hid_t	tid1 = -1, dtype = -1, native_type = -1; /* Datatype ID			*/
-    hsize_t	dims1[] = {SPACE1_DIM1};
+    hid_t    dataset = -1;        /* Dataset ID            */
+    hid_t    sid1 = -1;          /* Dataspace ID            */
+    hid_t    tid1 = -1, dtype = -1, native_type = -1; /* Datatype ID            */
+    hsize_t    dims1[] = {SPACE1_DIM1};
     unsigned    i;                      /* counting variable */
 
     /* Output message about test being performed */
@@ -2063,18 +2064,18 @@ error:
     return -1;
 } /* end test_str_dtype() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_refer_dtype
+ * Function:    test_refer_dtype
  *
- * Purpose:	Test H5Tget_native_type for reference datatype
+ * Purpose:    Test H5Tget_native_type for reference datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -2090,11 +2091,11 @@ test_refer_dtype(hid_t file)
         float c;
     } s1_t;
 
-    hid_t	dataset = -1;   /* Dataset ID			*/
-    hid_t	group = -1;     /* Group ID             */
-    hid_t	sid1 = -1;      /* Dataspace ID			*/
-    hid_t	tid1 = -1, dtype = -1, native_type = -1;       /* Datatype ID	*/
-    hsize_t	dims1[] = {1};
+    hid_t    dataset = -1;   /* Dataset ID            */
+    hid_t    group = -1;     /* Group ID             */
+    hid_t    sid1 = -1;      /* Dataspace ID            */
+    hid_t    tid1 = -1, dtype = -1, native_type = -1;       /* Datatype ID    */
+    hsize_t    dims1[] = {1};
     H5O_type_t  obj_type;       /* Object type */
     hobj_ref_t *wbuf = NULL,    /* buffer to write to disk */
                *rbuf = NULL;    /* buffer read from disk */
@@ -2233,18 +2234,18 @@ error:
     return -1;
 }   /* test_refer_dtype() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_refer_dtype2
+ * Function:    test_refer_dtype2
  *
- * Purpose:	Test H5Tget_native_type for reference
+ * Purpose:    Test H5Tget_native_type for reference
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -2253,10 +2254,10 @@ error:
 static herr_t
 test_refer_dtype2(hid_t file)
 {
-    hid_t           dset1 = -1,      /* Dataset ID			*/
+    hid_t           dset1 = -1,      /* Dataset ID            */
                     dset2 = -1;      /* Dereferenced dataset ID */
-    hid_t           sid1 = -1,       /* Dataspace ID	#1		*/
-                    sid2 = -1;       /* Dataspace ID	#2		*/
+    hid_t           sid1 = -1,       /* Dataspace ID    #1        */
+                    sid2 = -1;       /* Dataspace ID    #2        */
     hid_t           dtype = -1, native_type = -1;
     hsize_t         dims1[] = { 1 }, dims2[] = { SPACE2_DIM1, SPACE2_DIM2 };
     hsize_t         start[SPACE2_RANK];     /* Starting location of hyperslab */
@@ -2447,18 +2448,18 @@ error:
     return -1;
 }   /* test_refer_dtype2() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_opaque_dtype
+ * Function:    test_opaque_dtype
  *
- * Purpose:	Test H5Tget_native_type for opaque datatype
+ * Purpose:    Test H5Tget_native_type for opaque datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -2467,11 +2468,11 @@ error:
 static herr_t
 test_opaque_dtype(hid_t file)
 {
-    hid_t	     type = -1, space = -1, dset = -1;
+    hid_t         type = -1, space = -1, dset = -1;
     hid_t            dataset = -1, dtype = -1, native_type = -1;
     size_t           i;
     unsigned char    wbuf[32], rbuf[32];
-    hsize_t	     nelmts;
+    hsize_t         nelmts;
 
     TESTING("opaque datatype");
 
@@ -2533,18 +2534,18 @@ error:
     return -1;
 } /* test_opaque_dtype */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_bitfield_dtype
+ * Function:    test_bitfield_dtype
  *
- * Purpose:	Test H5Tget_native_type for bitfield datatype
+ * Purpose:    Test H5Tget_native_type for bitfield datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *              Raymond Lu
@@ -2556,14 +2557,14 @@ error:
 static herr_t
 test_bitfield_dtype(hid_t file)
 {
-    hid_t		type=-1, space=-1, dset1=-1, dset2=-1;
+    hid_t        type=-1, space=-1, dset1=-1, dset2=-1;
     hid_t               dataset1=-1, dataset2=-1, dtype=-1, native_type=-1;
-    size_t		ntype_size, i;
-    unsigned char  	wbuf[BITFIELD_ENUMB*sizeof(int)];
+    size_t        ntype_size, i;
+    unsigned char      wbuf[BITFIELD_ENUMB*sizeof(int)];
     unsigned char       *p=NULL;
     void                *rbuf = NULL;
     unsigned int        intw[BITFIELD_ENUMB], intr[BITFIELD_ENUMB];
-    hsize_t		nelmts;
+    hsize_t        nelmts;
 
     TESTING("bitfield datatype");
 
@@ -2665,7 +2666,7 @@ error:
     return -1;
 } /* test_bitfield_dtype */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_ninteger
  *
@@ -2675,7 +2676,7 @@ error:
  * Return: Success: 0
  *  Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *  September 3, 2004
  *
  * Modifications:
@@ -2845,14 +2846,14 @@ error:
     return -1;
 } /* end test_ninteger() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	Test H5Tget_native_type for different datatype
+ * Purpose:    Test H5Tget_native_type for different datatype
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -2861,9 +2862,9 @@ error:
 int
 main(void)
 {
-    hid_t	file, fapl;
-    int		nerrors = 0;
-    char	filename[1024];
+    hid_t    file, fapl;
+    int        nerrors = 0;
+    char    filename[1024];
 
     h5_reset();
     fapl = h5_fileaccess();
@@ -2872,21 +2873,21 @@ main(void)
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         goto error;
 
-    nerrors += test_atomic_dtype(file) < 0 	? 1 : 0;
-    nerrors += test_compound_dtype(file) < 0 	? 1 : 0;
-    nerrors += test_compound_dtype2(file) < 0 	? 1 : 0;
-    nerrors += test_compound_dtype3(file) < 0 	? 1 : 0;
-    nerrors += test_compound_opaque(file) < 0 	? 1 : 0;
-    nerrors += test_enum_dtype(file) < 0 	? 1 : 0;
-    nerrors += test_array_dtype(file) < 0 	? 1 : 0;
-    nerrors += test_array_dtype2(file) < 0 	? 1 : 0;
-    nerrors += test_vl_dtype(file) < 0 	        ? 1 : 0;
-    nerrors += test_vlstr_dtype(file) < 0 	? 1 : 0;
+    nerrors += test_atomic_dtype(file) < 0     ? 1 : 0;
+    nerrors += test_compound_dtype(file) < 0     ? 1 : 0;
+    nerrors += test_compound_dtype2(file) < 0     ? 1 : 0;
+    nerrors += test_compound_dtype3(file) < 0     ? 1 : 0;
+    nerrors += test_compound_opaque(file) < 0     ? 1 : 0;
+    nerrors += test_enum_dtype(file) < 0     ? 1 : 0;
+    nerrors += test_array_dtype(file) < 0     ? 1 : 0;
+    nerrors += test_array_dtype2(file) < 0     ? 1 : 0;
+    nerrors += test_vl_dtype(file) < 0             ? 1 : 0;
+    nerrors += test_vlstr_dtype(file) < 0     ? 1 : 0;
     nerrors += test_str_dtype(file) < 0         ? 1 : 0;
-    nerrors += test_refer_dtype(file) < 0 	? 1 : 0;
-    nerrors += test_refer_dtype2(file) < 0 	? 1 : 0;
-    nerrors += test_opaque_dtype(file) < 0 	? 1 : 0;
-    nerrors += test_bitfield_dtype(file) < 0 	? 1 : 0;
+    nerrors += test_refer_dtype(file) < 0     ? 1 : 0;
+    nerrors += test_refer_dtype2(file) < 0     ? 1 : 0;
+    nerrors += test_opaque_dtype(file) < 0     ? 1 : 0;
+    nerrors += test_bitfield_dtype(file) < 0     ? 1 : 0;
     nerrors += test_ninteger() < 0              ? 1 : 0;
 
     if(H5Fclose(file) < 0)

@@ -13,11 +13,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:        H5Tdbg.c
- *            Jul 19 2007
- *            Quincey Koziol <koziol@hdfgroup.org>
+ * Created:         H5Tdbg.c
+ *                  Jul 19 2007
+ *                  Quincey Koziol
  *
- * Purpose:        Dump debugging information about a datatype
+ * Purpose:         Dump debugging information about a datatype
  *
  *-------------------------------------------------------------------------
  */
@@ -72,7 +72,7 @@
 /*******************/
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5T__print_stats
  *
@@ -137,7 +137,7 @@ H5T__print_stats(H5T_path_t H5_ATTR_UNUSED * path, int H5_ATTR_UNUSED * nprint/*
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T__print_stats() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5T_debug
  *

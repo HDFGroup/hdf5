@@ -11,10 +11,10 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:	Robb Matzke <matzke@llnl.gov>
- *		Friday, July 24, 1998
+/* Programmer:      Robb Matzke
+ *                  Friday, July 24, 1998
  *
- * Purpose:	The object modification time message.
+ * Purpose:         The object modification time message.
  */
 
 #include "H5Omodule.h"          /* This source code file is part of the H5O module */
@@ -29,14 +29,14 @@
 
 static void *H5O__mtime_new_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
     unsigned *ioflags, size_t p_size, const uint8_t *p);
-static herr_t H5O_mtime_new_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static size_t H5O_mtime_new_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static herr_t H5O__mtime_new_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static size_t H5O__mtime_new_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 
 static void *H5O__mtime_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
     unsigned *ioflags, size_t p_size, const uint8_t *p);
-static herr_t H5O_mtime_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static void *H5O_mtime_copy(const void *_mesg, void *_dest);
-static size_t H5O_mtime_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static herr_t H5O__mtime_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static void *H5O__mtime_copy(const void *_mesg, void *_dest);
+static size_t H5O__mtime_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O__mtime_free(void *_mesg);
 static herr_t H5O__mtime_debug(H5F_t *f, const void *_mesg, FILE *stream,
     int indent, int fwidth);
@@ -48,9 +48,9 @@ const H5O_msg_class_t H5O_MSG_MTIME[1] = {{
     sizeof(time_t),		/*native message size		*/
     0,				/* messages are sharable?       */
     H5O__mtime_decode,		/*decode message		*/
-    H5O_mtime_encode,		/*encode message		*/
-    H5O_mtime_copy,		/*copy the native value		*/
-    H5O_mtime_size,		/*raw message size		*/
+    H5O__mtime_encode,		/*encode message		*/
+    H5O__mtime_copy,		/*copy the native value		*/
+    H5O__mtime_size,		/*raw message size		*/
     NULL,			/* reset method			*/
     H5O__mtime_free,		/* free method			*/
     NULL,		        /* file delete method		*/
@@ -73,9 +73,9 @@ const H5O_msg_class_t H5O_MSG_MTIME_NEW[1] = {{
     sizeof(time_t),		/*native message size		*/
     0,				/* messages are sharable?       */
     H5O__mtime_new_decode,	/*decode message		*/
-    H5O_mtime_new_encode,	/*encode message		*/
-    H5O_mtime_copy,		/*copy the native value		*/
-    H5O_mtime_new_size,		/*raw message size		*/
+    H5O__mtime_new_encode,	/*encode message		*/
+    H5O__mtime_copy,		/*copy the native value		*/
+    H5O__mtime_new_size,	/*raw message size		*/
     NULL,			/* reset method			*/
     H5O__mtime_free,		/* free method			*/
     NULL,		        /* file delete method		*/
@@ -111,7 +111,6 @@ H5FL_DEFINE(time_t);
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Jan  3 2002
  *
  *-------------------------------------------------------------------------
@@ -168,7 +167,6 @@ done:
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Jul 24 1998
  *
  *-------------------------------------------------------------------------
@@ -220,24 +218,23 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_mtime_new_encode
+ * Function:	H5O__mtime_new_encode
  *
  * Purpose:	Encodes a new modification time message.
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Jan  3 2002
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_mtime_new_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__mtime_new_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const time_t	*mesg = (const time_t *) _mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(f);
@@ -256,31 +253,28 @@ H5O_mtime_new_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sha
     UINT32ENCODE(p, *mesg);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_mtime_new_encode() */
+} /* end H5O__mtime_new_encode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_mtime_encode
+ * Function:	H5O__mtime_encode
  *
  * Purpose:	Encodes a modification time message.
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Jul 24 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_mtime_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__mtime_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const time_t	*mesg = (const time_t *) _mesg;
     struct tm		*tm;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(f);
@@ -290,15 +284,15 @@ H5O_mtime_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
     /* encode */
     tm = HDgmtime(mesg);
     HDsprintf((char*)p, "%04d%02d%02d%02d%02d%02d",
-      1900+tm->tm_year, 1+tm->tm_mon, tm->tm_mday,
-      tm->tm_hour, tm->tm_min, tm->tm_sec);
+        1900+tm->tm_year, 1+tm->tm_mon, tm->tm_mday,
+        tm->tm_hour, tm->tm_min, tm->tm_sec);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}
+} /* end H5O__mtime_encode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_mtime_copy
+ * Function:	H5O__mtime_copy
  *
  * Purpose:	Copies a message from _MESG to _DEST, allocating _DEST if
  *		necessary.
@@ -308,25 +302,22 @@ H5O_mtime_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Jul 24 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_mtime_copy(const void *_mesg, void *_dest)
+H5O__mtime_copy(const void *_mesg, void *_dest)
 {
     const time_t	*mesg = (const time_t *) _mesg;
     time_t		*dest = (time_t *) _dest;
     void                *ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(mesg);
-    if (!dest && NULL==(dest = H5FL_MALLOC(time_t)))
+    if(!dest && NULL == (dest = H5FL_MALLOC(time_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* copy */
@@ -337,11 +328,11 @@ H5O_mtime_copy(const void *_mesg, void *_dest)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5O__mtime_copy() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_mtime_new_size
+ * Function:	H5O__mtime_new_size
  *
  * Purpose:	Returns the size of the raw message in bytes not
  *		counting the message type or size fields, but only the data
@@ -353,28 +344,25 @@ done:
  *		Failure:	0
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Jan  3 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_mtime_new_size(const H5F_t H5_ATTR_UNUSED * f, hbool_t H5_ATTR_UNUSED disable_shared, const void H5_ATTR_UNUSED * mesg)
+H5O__mtime_new_size(const H5F_t H5_ATTR_UNUSED * f, hbool_t H5_ATTR_UNUSED disable_shared, const void H5_ATTR_UNUSED * mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(f);
     HDassert(mesg);
 
     FUNC_LEAVE_NOAPI(8)
-} /* end H5O_mtime_new_size() */
+} /* end H5O__mtime_new_size() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_mtime_size
+ * Function:	H5O__mtime_size
  *
  * Purpose:	Returns the size of the raw message in bytes not
  *		counting the message type or size fields, but only the data
@@ -386,24 +374,21 @@ H5O_mtime_new_size(const H5F_t H5_ATTR_UNUSED * f, hbool_t H5_ATTR_UNUSED disabl
  *		Failure:	0
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Jul 14 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_mtime_size(const H5F_t H5_ATTR_UNUSED * f, hbool_t H5_ATTR_UNUSED disable_shared, const void H5_ATTR_UNUSED * mesg)
+H5O__mtime_size(const H5F_t H5_ATTR_UNUSED * f, hbool_t H5_ATTR_UNUSED disable_shared, const void H5_ATTR_UNUSED * mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(f);
     HDassert(mesg);
 
     FUNC_LEAVE_NOAPI(16)
-}
+} /* end H5O__mtime_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -439,7 +424,6 @@ H5O__mtime_free(void *mesg)
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Jul 24 1998
  *
  *-------------------------------------------------------------------------

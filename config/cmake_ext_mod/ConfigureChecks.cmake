@@ -679,4 +679,3 @@ endif ()
 # the cache value is set in it's config file)
 #
 set (${HDF_PREFIX}_CONVERT_DENORMAL_FLOAT 1)
-

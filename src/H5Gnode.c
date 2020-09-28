@@ -15,7 +15,7 @@
  *
  * Created:	    H5Gnode.c
  *              Jun 26 1997
- *              Robb Matzke <matzke@llnl.gov>
+ *              Robb Matzke
  *
  * Purpose:     Functions for handling symbol table nodes.  A
  *              symbol table node is a small collection of symbol
@@ -75,21 +75,21 @@ typedef struct H5G_node_key_t {
 /********************/
 
 /* B-tree callbacks */
-static H5UC_t *H5G_node_get_shared(const H5F_t *f, const void *_udata);
+static H5UC_t *H5G__node_get_shared(const H5F_t *f, const void *_udata);
 static herr_t H5G__node_create(H5F_t *f, H5B_ins_t op, void *_lt_key,
     void *_udata, void *_rt_key, haddr_t *addr_p/*out*/);
-static int H5G_node_cmp2(void *_lt_key, void *_udata, void *_rt_key);
-static int H5G_node_cmp3(void *_lt_key, void *_udata, void *_rt_key);
-static htri_t H5G_node_found(H5F_t *f, haddr_t addr, const void *_lt_key,
+static int H5G__node_cmp2(void *_lt_key, void *_udata, void *_rt_key);
+static int H5G__node_cmp3(void *_lt_key, void *_udata, void *_rt_key);
+static htri_t H5G__node_found(H5F_t *f, haddr_t addr, const void *_lt_key,
     void *_udata);
 static H5B_ins_t H5G__node_insert(H5F_t *f, haddr_t addr, void *_lt_key,
     hbool_t *lt_key_changed, void *_md_key, void *_udata, void *_rt_key,
 	hbool_t *rt_key_changed, haddr_t *new_node_p/*out*/);
-static H5B_ins_t H5G_node_remove(H5F_t *f, haddr_t addr, void *lt_key,
+static H5B_ins_t H5G__node_remove(H5F_t *f, haddr_t addr, void *lt_key,
     hbool_t *lt_key_changed, void *udata, void *rt_key, hbool_t *rt_key_changed);
-static herr_t H5G_node_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key);
-static herr_t H5G_node_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key);
-static herr_t H5G_node_debug_key(FILE *stream, int indent, int fwidth,
+static herr_t H5G__node_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key);
+static herr_t H5G__node_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key);
+static herr_t H5G__node_debug_key(FILE *stream, int indent, int fwidth,
     const void *key, const void *udata);
 
 
@@ -101,19 +101,19 @@ static herr_t H5G_node_debug_key(FILE *stream, int indent, int fwidth,
 H5B_class_t H5B_SNODE[1] = {{
     H5B_SNODE_ID,               /*id            */
     sizeof(H5G_node_key_t),     /*sizeof_nkey   */
-    H5G_node_get_shared,        /*get_shared    */
+    H5G__node_get_shared,       /*get_shared    */
     H5G__node_create,           /*new           */
-    H5G_node_cmp2,              /*cmp2          */
-    H5G_node_cmp3,              /*cmp3          */
-    H5G_node_found,             /*found	        */
+    H5G__node_cmp2,             /*cmp2          */
+    H5G__node_cmp3,             /*cmp3          */
+    H5G__node_found,            /*found	        */
     H5G__node_insert,           /*insert        */
     TRUE,                       /*follow min branch?    */
     TRUE,                       /*follow max branch?    */
     H5B_RIGHT,                  /*critical key  */
-    H5G_node_remove,            /*remove        */
-    H5G_node_decode_key,        /*decode        */
-    H5G_node_encode_key,        /*encode        */
-    H5G_node_debug_key          /*debug         */
+    H5G__node_remove,           /*remove        */
+    H5G__node_decode_key,       /*decode        */
+    H5G__node_encode_key,       /*encode        */
+    H5G__node_debug_key         /*debug         */
 }};
 
 /* Declare a free list to manage the H5G_node_t struct */
@@ -134,7 +134,7 @@ H5FL_SEQ_DEFINE(H5G_entry_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5G_node_get_shared
+ * Function:    H5G__node_get_shared
  *
  * Purpose:     Returns the shared B-tree info for the specified UDATA.
  *
@@ -145,41 +145,38 @@ H5FL_SEQ_DEFINE(H5G_entry_t);
  * Programmer:  Robb Matzke
  *              Wednesday, October  8, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static H5UC_t *
-H5G_node_get_shared(const H5F_t *f, const void H5_ATTR_UNUSED *_udata)
+H5G__node_get_shared(const H5F_t *f, const void H5_ATTR_UNUSED *_udata)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(f);
 
     /* Return the pointer to the ref-count object */
     FUNC_LEAVE_NOAPI(H5F_GRP_BTREE_SHARED(f))
-} /* end H5G_node_get_shared() */
+} /* end H5G__node_get_shared() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5G_node_decode_key
+ * Function:    H5G__node_decode_key
  *
  * Purpose:     Decodes a raw key into a native key.
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul  8 1997
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key)
+H5G__node_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key)
 {
     H5G_node_key_t  *key = (H5G_node_key_t *) _key;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(shared);
     HDassert(raw);
@@ -188,28 +185,27 @@ H5G_node_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key)
     H5F_DECODE_LENGTH_LEN(raw, key->offset, shared->sizeof_len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5G_node_decode_key() */
+} /* end H5G__node_decode_key() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_node_encode_key
+ * Function:	H5G__node_encode_key
  *
  * Purpose:     Encodes a native key into a raw key.
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul  8 1997
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key)
+H5G__node_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key)
 {
     const H5G_node_key_t *key = (const H5G_node_key_t *) _key;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(shared);
     HDassert(raw);
@@ -218,11 +214,11 @@ H5G_node_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key)
     H5F_ENCODE_LENGTH_LEN(raw, key->offset, shared->sizeof_len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5G_node_encode_key() */
+} /* end H5G__node_encode_key() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5G_node_debug_key
+ * Function:    H5G__node_debug_key
  *
  * Purpose:     Prints a key.
  *
@@ -234,13 +230,13 @@ H5G_node_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_debug_key(FILE *stream, int indent, int fwidth, const void *_key,
+H5G__node_debug_key(FILE *stream, int indent, int fwidth, const void *_key,
     const void *_udata)
 {
     const H5G_node_key_t    *key = (const H5G_node_key_t *) _key;
     const H5G_bt_common_t   *udata = (const H5G_bt_common_t *) _udata;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(key);
 
@@ -259,7 +255,7 @@ H5G_node_debug_key(FILE *stream, int indent, int fwidth, const void *_key,
         HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Cannot get name; heap address not specified\n");
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5G_node_debug_key() */
+} /* end H5G__node_debug_key() */
 
 
 /*-------------------------------------------------------------------------
@@ -270,7 +266,6 @@ H5G_node_debug_key(FILE *stream, int indent, int fwidth, const void *_key,
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Jan 15 2003
  *
  *-------------------------------------------------------------------------
@@ -310,7 +305,6 @@ H5G__node_free(H5G_node_t *sym)
  *          Failure:    Negative
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jun 23 1997
  *
  *-------------------------------------------------------------------------
@@ -367,7 +361,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_node_cmp2
+ * Function:	H5G__node_cmp2
  *
  * Purpose:	Compares two keys from a B-tree node (LT_KEY and RT_KEY).
  *          The UDATA pointer supplies extra data not contained in the
@@ -382,15 +376,12 @@ done:
  *          Failure:    FAIL (same as LT_KEY<RT_KEY)
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jun 23 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_cmp2(void *_lt_key, void *_udata, void *_rt_key)
+H5G__node_cmp2(void *_lt_key, void *_udata, void *_rt_key)
 {
     H5G_bt_common_t     *udata = (H5G_bt_common_t *) _udata;
     H5G_node_key_t      *lt_key = (H5G_node_key_t *) _lt_key;
@@ -398,7 +389,7 @@ H5G_node_cmp2(void *_lt_key, void *_udata, void *_rt_key)
     const char          *s1, *s2;
     int                 ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity checks */
     HDassert(udata && udata->heap);
@@ -416,11 +407,11 @@ H5G_node_cmp2(void *_lt_key, void *_udata, void *_rt_key)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5G_node_cmp2() */
+} /* H5G__node_cmp2() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_node_cmp3
+ * Function:	H5G__node_cmp3
  *
  * Purpose:	Compares two keys from a B-tree node (LT_KEY and RT_KEY)
  *          against another key (not necessarily the same type)
@@ -439,15 +430,12 @@ done:
  *          Failure:    FAIL (same as UDATA < LT_KEY)
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jun 23 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_cmp3(void *_lt_key, void *_udata, void *_rt_key)
+H5G__node_cmp3(void *_lt_key, void *_udata, void *_rt_key)
 {
     H5G_bt_common_t *udata = (H5G_bt_common_t *) _udata;
     H5G_node_key_t  *lt_key = (H5G_node_key_t *) _lt_key;
@@ -455,7 +443,7 @@ H5G_node_cmp3(void *_lt_key, void *_udata, void *_rt_key)
     const char      *s;
     herr_t          ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity checks */
     HDassert(udata && udata->heap);
@@ -477,11 +465,11 @@ H5G_node_cmp3(void *_lt_key, void *_udata, void *_rt_key)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_node_cmp3() */
+} /* end H5G__node_cmp3() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5G_node_found
+ * Function:    H5G__node_found
  *
  * Purpose:     The B-tree search engine has found the symbol table node
  *              which contains the requested symbol if the symbol exists.
@@ -501,13 +489,12 @@ done:
  *              Failure:    Negative if not found.
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jun 23 1997
  *
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5G_node_found(H5F_t *f, haddr_t addr, const void H5_ATTR_UNUSED *_lt_key,
+H5G__node_found(H5F_t *f, haddr_t addr, const void H5_ATTR_UNUSED *_lt_key,
     void *_udata)
 {
     H5G_bt_lkp_t    *udata = (H5G_bt_lkp_t *)_udata;
@@ -517,7 +504,7 @@ H5G_node_found(H5F_t *f, haddr_t addr, const void H5_ATTR_UNUSED *_lt_key,
     const char      *s;
     htri_t          ret_value = TRUE;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /*
      * Check arguments.
@@ -561,7 +548,7 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to release symbol table node")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_node_found() */
+} /* end H5G__node_found() */
 
 
 /*-------------------------------------------------------------------------
@@ -591,7 +578,6 @@ done:
  *              Failure:    H5B_INS_ERROR, NEW_NODE_P might not be initialized.
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jun 24 1997
  *
  *-------------------------------------------------------------------------
@@ -734,7 +720,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5G_node_remove
+ * Function:    H5G__node_remove
  *
  * Purpose: The B-tree removal engine has found the symbol table node
  *          which should contain the name which is being removed.  This
@@ -762,7 +748,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5B_ins_t
-H5G_node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key/*in,out*/,
+H5G__node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key/*in,out*/,
     hbool_t H5_ATTR_UNUSED *lt_key_changed/*out*/,
     void *_udata/*in,out*/, void *_rt_key/*in,out*/,
     hbool_t *rt_key_changed/*out*/)
@@ -775,7 +761,7 @@ H5G_node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key/*in,
     int             cmp = 1;
     H5B_ins_t       ret_value = H5B_INS_ERROR;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     HDassert(f);
@@ -940,7 +926,7 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTUNPROTECT, H5B_INS_ERROR, "unable to release symbol table node")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_node_remove() */
+} /* end H5G__node_remove() */
 
 
 /*-------------------------------------------------------------------------
@@ -951,7 +937,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jun 24 1997
  *
  *-------------------------------------------------------------------------
@@ -1368,7 +1353,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Nov 19 2006
  *
  *-------------------------------------------------------------------------
@@ -1475,7 +1459,6 @@ H5G__node_iterate_size(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key,
  * Return:      0(zero) on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug  4 1997
  *
  *-------------------------------------------------------------------------

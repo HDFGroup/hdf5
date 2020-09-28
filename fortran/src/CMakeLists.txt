@@ -40,7 +40,7 @@ set (Fortran_COMPILER_ID CMAKE_Fortran_COMPILER_ID)
 #-----------------------------------------------------------------------------
 
 add_executable (H5_buildiface ${HDF5_F90_SRC_SOURCE_DIR}/H5_buildiface.F90)
-target_include_directories (H5_buildiface PRIVATE "${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR}")
+target_include_directories (H5_buildiface PRIVATE "${HDF5_SRC_BINARY_DIR};${HDF5_F90_BINARY_DIR}")
 #if (BUILD_SHARED_LIBS)
 #  target_compile_definitions(H5_buildiface PRIVATE $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/MT>)
 #endif ()
@@ -71,7 +71,7 @@ add_executable (H5match_types
     ${HDF5_F90_BINARY_DIR}/H5fort_type_defines.h
     ${HDF5_F90_SRC_SOURCE_DIR}/H5match_types.c
 )
-target_include_directories (H5match_types PRIVATE "${HDF5_BINARY_DIR};${HDF5_SRC_DIR};${HDF5_F90_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+target_include_directories (H5match_types PRIVATE "${HDF5_SRC_BINARY_DIR};${HDF5_SRC_DIR};${HDF5_F90_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 
 add_custom_command (
     OUTPUT ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h
@@ -145,7 +145,7 @@ set (f90CStub_C_SHHDRS
 if (NOT ONLY_SHARED_LIBS)
   add_library (${HDF5_F90_C_LIB_TARGET} STATIC ${f90CStub_C_SOURCES} ${f90CStub_C_HDRS})
   target_include_directories (${HDF5_F90_C_LIB_TARGET}
-      PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
+      PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
       INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
   )
   target_compile_options(${HDF5_F90_C_LIB_TARGET} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
@@ -163,7 +163,7 @@ endif ()
 if (BUILD_SHARED_LIBS)
   add_library (${HDF5_F90_C_LIBSH_TARGET} SHARED ${f90CStub_C_SOURCES} ${f90CStub_C_SHHDRS})
   target_include_directories (${HDF5_F90_C_LIBSH_TARGET}
-      PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
+      PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
       INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
   )
   target_compile_options(${HDF5_F90_C_LIBSH_TARGET} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
@@ -177,6 +177,29 @@ if (BUILD_SHARED_LIBS)
       LINKER_LANGUAGE C
   )
   set (install_targets ${install_targets} ${HDF5_F90_C_LIBSH_TARGET})
+endif ()
+
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_F90_C_SRC_FORMAT
+        ${HDF5_F90_C_LIB_TARGET}
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5match_types.c
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90.h
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90i.h
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90proto.h
+    )
+  else ()
+    clang_format (HDF5_F90_C_SRC_FORMAT
+        ${HDF5_F90_C_LIBSH_TARGET}
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5match_types.c
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90.h
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90i.h
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90proto.h
+    )
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -412,6 +435,16 @@ if (NOT ONLY_SHARED_LIBS)
       COMPONENT
           fortheaders
   )
+  if (HDF5_INSTALL_MOD_FORTRAN MATCHES "STATIC")
+    install (
+        FILES
+            ${mod_files}
+        DESTINATION
+            ${HDF5_INSTALL_INCLUDE_DIR}
+        COMPONENT
+            fortheaders
+    )
+  endif ()
 endif ()
 
 if (BUILD_SHARED_LIBS)
@@ -445,6 +478,16 @@ if (BUILD_SHARED_LIBS)
       COMPONENT
           fortheaders
   )
+  if (HDF5_INSTALL_MOD_FORTRAN MATCHES "SHARED")
+    install (
+        FILES
+            ${modsh_files}
+        DESTINATION
+            ${HDF5_INSTALL_INCLUDE_DIR}
+        COMPONENT
+            fortheaders
+    )
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------

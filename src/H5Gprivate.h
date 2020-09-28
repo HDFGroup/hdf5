@@ -15,7 +15,7 @@
  *
  * Created:             H5Gprivate.h
  *                      Jul 11 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             Library-visible declarations.
  *
@@ -61,6 +61,7 @@
 /* Definitions for link info settings */
 #define H5G_CRT_LINK_INFO_NAME                  "link info"
 #define H5G_CRT_LINK_INFO_SIZE                  sizeof(H5O_linfo_t)
+/* clang-format off */
 #define H5G_CRT_LINK_INFO_DEF                   {H5G_CRT_LINFO_TRACK_CORDER, \
                                                     H5G_CRT_LINFO_INDEX_CORDER, \
                                                     H5G_CRT_LINFO_MAX_CORDER, \
@@ -69,6 +70,7 @@
                                                     H5G_CRT_LINFO_LINK_FHEAP_ADDR, \
                                                     H5G_CRT_LINFO_NAME_BT2_ADDR \
                                                 }
+/* clang-format on */
 
 /* Defaults for group info values */
 #define H5G_CRT_GINFO_LHEAP_SIZE_HINT           0
@@ -82,6 +84,7 @@
 /* Definitions for group info settings */
 #define H5G_CRT_GROUP_INFO_NAME                 "group info"
 #define H5G_CRT_GROUP_INFO_SIZE                 sizeof(H5O_ginfo_t)
+/* clang-format off */
 #define H5G_CRT_GROUP_INFO_DEF                  {H5G_CRT_GINFO_LHEAP_SIZE_HINT, \
                                                     H5G_CRT_GINFO_STORE_LINK_PHASE_CHANGE, \
                                                     H5G_CRT_GINFO_MAX_COMPACT, \
@@ -90,6 +93,7 @@
                                                     H5G_CRT_GINFO_EST_NUM_ENTRIES, \
                                                     H5G_CRT_GINFO_EST_NAME_LEN \
                                                 }
+/* clang-format on */
 
 /* If the module using this macro is allowed access to the private variables, access them directly */
 #ifdef H5G_MODULE

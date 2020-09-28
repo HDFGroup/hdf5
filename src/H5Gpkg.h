@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Robb Matzke <matzke@llnl.gov>
+ * Programmer: Robb Matzke
  *             Thursday, September 18, 1997
  *
  * Purpose:     This file contains declarations which are visible
@@ -47,7 +47,7 @@
 /* Size of a symbol table node on disk */
 #define H5G_NODE_SIZE(f)     (                                                \
     /* General metadata fields */                                             \
-    H5_SIZEOF_MAGIC                                                           \
+    H5_SIZEOF_MAGIC /*magic number */                                         \
     + 1         /* Version */                                                 \
     + 1         /* Reserved */                                                \
     + 2         /* Number of symbols */                                       \

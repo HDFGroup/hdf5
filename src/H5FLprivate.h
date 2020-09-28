@@ -15,11 +15,9 @@
  *
  * Created:		H5FLprivate.h
  *			Mar 23 2000
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Private non-prototype header.
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

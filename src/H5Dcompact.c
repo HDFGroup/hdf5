@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu <slu@ncsa.uiuc.edu>
+ * Programmer:  Raymond Lu
  *              August 5, 2002
  *
  * Purpose:     Compact dataset I/O functions.  These routines are similar

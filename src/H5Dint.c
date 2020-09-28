@@ -97,6 +97,7 @@ static herr_t H5D__vlen_get_buf_size_cb(void *elem, hid_t type_id, unsigned ndim
     const hsize_t *point, void *op_data);
 static herr_t H5D__vlen_get_buf_size_gen_cb(void *elem, hid_t type_id, unsigned ndim,
     const hsize_t *point, void *op_data);
+static herr_t H5D__check_filters(H5D_t *dataset);
 
 
 /*********************/
@@ -133,10 +134,10 @@ H5FL_EXTERN(H5D_chunk_info_t);
 H5FL_BLK_EXTERN(type_conv);
 
 /* Disable warning for intentional identical branches here -QAK */
-H5_GCC_DIAG_OFF(larger-than=)
+H5_GCC_DIAG_OFF("larger-than=")
 /* Define a static "default" dataset structure to use to initialize new datasets */
 static H5D_shared_t H5D_def_dset;
-H5_GCC_DIAG_ON(larger-than=)
+H5_GCC_DIAG_ON("larger-than=")
 
 /* Dataset ID class */
 static const H5I_class_t H5I_DATASET_CLS[1] = {{
@@ -154,7 +155,7 @@ static hbool_t H5D_top_package_initialize_s = FALSE;
 static const char *H5D_prefix_ext_env = NULL;
 static const char *H5D_prefix_vds_env = NULL;
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D_init
  *
@@ -177,7 +178,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_init() */
 
-
+
 /*--------------------------------------------------------------------------
 NAME
     H5D__init_package -- Initialize interface-specific information
@@ -240,7 +241,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__init_package() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D_top_term_package
  *
@@ -294,7 +295,7 @@ H5D_top_term_package(void)
     FUNC_LEAVE_NOAPI(n)
 } /* end H5D_top_term_package() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D_term_package
  *
@@ -331,7 +332,7 @@ H5D_term_package(void)
     FUNC_LEAVE_NOAPI(n)
 } /* end H5D_term_package() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__close_cb
  *
@@ -368,7 +369,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__close_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D__create_named
  *
@@ -421,7 +422,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__create_named() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__get_space_status
  *
@@ -494,7 +495,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__get_space_status() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D__new
  *
@@ -565,7 +566,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__new() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D__init_type
  *
@@ -640,7 +641,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__init_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D__cache_dataspace_info
  *
@@ -671,7 +672,7 @@ H5D__cache_dataspace_info(const H5D_t *dset)
     for(u = 0; u < dset->shared->ndims; u++) {
         hsize_t scaled_power2up;    /* Scaled value, rounded to next power of 2 */
 
-        if( !(scaled_power2up = H5VM_power2up(dset->shared->curr_dims[u])) )
+        if(!(scaled_power2up = H5VM_power2up(dset->shared->curr_dims[u])))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get the next power of 2")
         dset->shared->curr_power2up[u] = scaled_power2up;
     }
@@ -680,7 +681,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__cache_dataspace_info() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D__init_space
  *
@@ -723,7 +724,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__init_space() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:   H5D__use_minimized_dset_headers
  *
@@ -761,7 +762,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5D__use_minimized_dset_headers */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:   H5D__calculate_minimium_header_size
  *
@@ -881,7 +882,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5D__calculate_minimum_header_size */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:   H5D__prepare_minimized_oh
  *
@@ -908,7 +909,7 @@ H5D__prepare_minimized_oh(H5F_t *file, H5D_t *dset, H5O_loc_t *oloc)
     HDassert(dset);
     HDassert(oloc);
 
-    oh = H5O__create_ohdr(file, dset->shared->dcpl_id);
+    oh = H5O_create_ohdr(file, dset->shared->dcpl_id);
     if(NULL == oh)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "can't instantiate object header")
 
@@ -917,14 +918,14 @@ H5D__prepare_minimized_oh(H5F_t *file, H5D_t *dset, H5O_loc_t *oloc)
        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "computed header size is invalid")
 
     /* Special allocation of space for compact datsets is handled by the call here. */
-    if(H5O__apply_ohdr(file, oh, dset->shared->dcpl_id, ohdr_size, (size_t)1, oloc) == FAIL)
+    if(H5O_apply_ohdr(file, oh, dset->shared->dcpl_id, ohdr_size, (size_t)1, oloc) == FAIL)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "can't apply object header to file")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5D__prepare_minimized_oh */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D__update_oh_info
  *
@@ -1022,7 +1023,8 @@ H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id)
     if(TRUE == use_minimized_header) {
         if(H5D__prepare_minimized_oh(file, dset, oloc) == FAIL)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create minimized dataset object header")
-    } else {
+    } /* end if */
+    else {
         /* Add the dataset's raw data size to the size of the header, if the
          * raw data will be stored as compact
          */
@@ -1129,7 +1131,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__update_oh_info() */
 
-
+
 
 /*--------------------------------------------------------------------------
  * Function:    H5D__build_file_prefix
@@ -1211,7 +1213,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__build_file_prefix() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__create
  *
@@ -1297,18 +1299,24 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
 
     /* Check if the dataset has a non-default DCPL & get important values, if so */
     if(new_dset->shared->dcpl_id != H5P_DATASET_CREATE_DEFAULT) {
-        H5O_layout_t    *layout;        /* Dataset's layout information */
-        H5O_pline_t     *pline;         /* Dataset's I/O pipeline information */
-        H5O_fill_t      *fill;          /* Dataset's fill value info */
-        H5O_efl_t       *efl;           /* Dataset's external file list info */
+        H5O_layout_t *layout;        /* Dataset's layout information */
+        H5O_pline_t  *pline;         /* Dataset's I/O pipeline information */
+        H5O_fill_t   *fill;          /* Dataset's fill value info */
+        H5O_efl_t    *efl;           /* Dataset's external file list info */
+        htri_t       ignore_filters = FALSE; /* Ignore optional filters or not */
 
-        /* Check if the filters in the DCPL can be applied to this dataset */
-        if(H5Z_can_apply(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "I/O filters can't operate on this dataset")
+        if((ignore_filters = H5Z_ignore_filters(new_dset->shared->dcpl_id, dt, space))<0)
+            HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "H5Z_has_optional_filter() failed")
 
-        /* Make the "set local" filter callbacks for this dataset */
-        if(H5Z_set_local(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set local filter parameters")
+        if(FALSE == ignore_filters) {
+            /* Check if the filters in the DCPL can be applied to this dataset */
+            if(H5Z_can_apply(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "I/O filters can't operate on this dataset")
+
+            /* Make the "set local" filter callbacks for this dataset */
+            if(H5Z_set_local(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set local filter parameters")
+        } /* ignore_filters */
 
         /* Get new dataset's property list object */
         if(NULL == (dc_plist = (H5P_genplist_t *)H5I_object(new_dset->shared->dcpl_id)))
@@ -1332,9 +1340,11 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't retrieve external file list")
         efl_copied = TRUE;
 
-        /* Check that chunked layout is used if filters are enabled */
-        if(pline->nused > 0 && H5D_CHUNKED != layout->type)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "filters can only be used with chunked layout")
+        if(FALSE == ignore_filters) {
+            /* Check that chunked layout is used if filters are enabled */
+            if(pline->nused > 0 && H5D_CHUNKED != layout->type)
+                HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "filters can only be used with chunked layout")
+        }
 
         /* Check if the alloc_time is the default and error out */
         if(fill->alloc_time == H5D_ALLOC_TIME_DEFAULT)
@@ -1461,7 +1471,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__create() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__open_name
  *
@@ -1519,7 +1529,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__open_name() */
 
-
+
 /*
  *-------------------------------------------------------------------------
  * Function: H5D_open
@@ -1654,7 +1664,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_open() */
 
-
+
 /*
  *-------------------------------------------------------------------------
  * Function: H5D__flush_append_setup
@@ -1729,7 +1739,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__append_flush_setup() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D__open_oid
  *
@@ -1899,7 +1909,7 @@ done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5D__open_oid() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D_close
  *
@@ -2104,7 +2114,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_close() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D_mult_refresh_close
  *
@@ -2184,7 +2194,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_mult_refresh_close() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D_mult_refresh_reopen
  *
@@ -2231,7 +2241,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_mult_refresh_reopen() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D_oloc
  *
@@ -2250,7 +2260,7 @@ H5D_oloc(H5D_t *dataset)
     FUNC_LEAVE_NOAPI(dataset ? &(dataset->oloc) : (H5O_loc_t *)NULL)
 } /* end H5D_oloc() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D_nameof
  *
@@ -2269,7 +2279,7 @@ H5D_nameof(const H5D_t *dataset)
     FUNC_LEAVE_NOAPI(dataset ? &(dataset->path) : NULL)
 } /* end H5D_nameof() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D__alloc_storage
  *
@@ -2435,7 +2445,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__alloc_storage() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D__init_storage
  *
@@ -2507,7 +2517,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__init_storage() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D__get_storage_size
  *
@@ -2562,7 +2572,7 @@ done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5D__get_storage_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__get_offset
  *
@@ -2609,7 +2619,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__get_offset() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D__vlen_get_buf_size_alloc
  *
@@ -2647,7 +2657,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__vlen_get_buf_size_alloc() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D__vlen_get_buf_size_cb
  *
@@ -2683,7 +2693,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__vlen_get_buf_size_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__vlen_get_buf_size
  *
@@ -2782,7 +2792,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__vlen_get_buf_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D__vlen_get_buf_size_gen_cb
  *
@@ -2838,7 +2848,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__vlen_get_buf_size_gen_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__vlen_get_buf_size_gen
  *
@@ -2951,7 +2961,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__vlen_get_buf_size_gen() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D__check_filters
  *
@@ -2960,13 +2970,13 @@ done:
  * Return:   Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5D__check_filters(H5D_t *dataset)
 {
     H5O_fill_t *fill;                   /* Dataset's fill value */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(dataset);
@@ -3001,7 +3011,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__check_filters() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D__set_extent
  *
@@ -3185,7 +3195,7 @@ done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5D__set_extent() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D__flush_sieve_buf
  *
@@ -3222,7 +3232,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__flush_sieve_buf() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D__flush_real
  *
@@ -3253,7 +3263,7 @@ done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5D__flush_real() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D__flush
  *
@@ -3286,7 +3296,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__flush() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D__format_convert
  *
@@ -3437,7 +3447,7 @@ done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5D__format_convert() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D__mark
  *
@@ -3498,7 +3508,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__mark() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D__flush_all_cb
  *
@@ -3531,7 +3541,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__flush_all_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D_flush_all
  *
@@ -3559,7 +3569,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_flush_all() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D_get_create_plist
  *
@@ -3736,7 +3746,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_get_create_plist() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D_get_access_plist
  *
@@ -3833,7 +3843,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_get_access_plist() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D__get_space
  *
@@ -3873,7 +3883,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__get_space() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D__get_type
  *
@@ -3929,7 +3939,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__get_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5D__refresh
  *

@@ -236,7 +236,7 @@ string (REGEX REPLACE ".*#define[ \t]+H5_VERS_MINOR[ \t]+([0-9]*).*$"
     "\\1" H5_VERS_MINOR ${_h5public_h_contents})
 string (REGEX REPLACE ".*#define[ \t]+H5_VERS_RELEASE[ \t]+([0-9]*).*$"
     "\\1" H5_VERS_RELEASE ${_h5public_h_contents})
-string (REGEX REPLACE ".*#define[ \t]+H5_VERS_SUBRELEASE[ \t]+\"([0-9A-Za-z._]*)\".*$"
+string (REGEX REPLACE ".*#define[ \t]+H5_VERS_SUBRELEASE[ \t]+\"([0-9A-Za-z._\-]*)\".*$"
     "\\1" H5_VERS_SUBRELEASE ${_h5public_h_contents})
 #message (STATUS "VERSION: ${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}-${H5_VERS_SUBRELEASE}")
 
@@ -339,9 +339,11 @@ set (HDF5_PACKAGE_VERSION "${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}"
 set (HDF5_PACKAGE_VERSION_MAJOR "${H5_VERS_MAJOR}.${H5_VERS_MINOR}")
 set (HDF5_PACKAGE_VERSION_MINOR "${H5_VERS_RELEASE}")
 if (H5_VERS_SUBRELEASE)
-  set (HDF5_PACKAGE_VERSION_STRING "${HDF5_PACKAGE_VERSION}-${H5_VERS_SUBRELEASE}")
+  set (HDF5_PACKAGE_VERSION_STRING "${HDF5_PACKAGE_VERSION}.${H5_VERS_SUBRELEASE}")
+  set (HDF5_RELEASE_VERSION_STRING "${HDF5_PACKAGE_VERSION}-${H5_VERS_SUBRELEASE}")
 else ()
   set (HDF5_PACKAGE_VERSION_STRING "${HDF5_PACKAGE_VERSION}")
+  set (HDF5_RELEASE_VERSION_STRING "${HDF5_PACKAGE_VERSION}")
 endif ()
 set (HDF5_LIB_PACKAGE_SOVERSION "${H5_LIB_SOVERS_MAJOR}.${H5_LIB_SOVERS_RELEASE}.${H5_LIB_SOVERS_MINOR}")
 set (HDF5_LIB_PACKAGE_SOVERSION_MAJOR "${H5_LIB_SOVERS_MAJOR}")
@@ -407,6 +409,7 @@ include (${HDF_RESOURCES_EXT_DIR}/HDFMacros.cmake)
 HDF_DIR_PATHS(${HDF5_PACKAGE_NAME})
 
 include (${HDF_RESOURCES_EXT_DIR}/HDFLibMacros.cmake)
+include (${HDF_RESOURCES_DIR}/HDF5PluginMacros.cmake)
 include (${HDF_RESOURCES_DIR}/HDF5Macros.cmake)
 
 #-----------------------------------------------------------------------------
@@ -494,6 +497,9 @@ if (HDF5_ENABLE_ANALYZER_TOOLS)
 endif ()
 if (HDF5_ENABLE_SANITIZERS)
   include (${HDF5_SOURCE_DIR}/config/sanitizer/sanitizers.cmake)
+endif ()
+if (HDF5_ENABLE_FORMATTERS)
+  include (${HDF5_SOURCE_DIR}/config/sanitizer/formatting.cmake)
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -831,6 +837,17 @@ endif ()
 #-----------------------------------------------------------------------------
 add_subdirectory (src)
 
+#-----------------------------------------------------------------------------
+# Include filter plugins
+#-----------------------------------------------------------------------------
+include (CMakePlugins.cmake)
+
+if (HDF5_PACKAGE_EXTLIBS AND NOT HDF5_NO_PACKAGES)
+  if (HDF5_ENABLE_PLUGIN_SUPPORT AND PLUGIN_FOUND)
+    PACKAGE_PLUGIN_LIBRARY (${HDF5_ALLOW_EXTERNAL_SUPPORT})
+  endif ()
+endif ()
+
 if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
   if (ZLIB_FOUND AND ZLIB_USE_EXTERNAL)
     if (NOT ONLY_SHARED_LIBS)
@@ -846,6 +863,11 @@ if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MAT
     endif ()
     if (BUILD_SHARED_LIBS)
       add_dependencies (${HDF5_LIBSH_TARGET} SZIP)
+    endif ()
+  endif ()
+  if (PLUGIN_FOUND AND PLUGIN_USE_EXTERNAL)
+    if (BUILD_SHARED_LIBS)
+      add_dependencies (PLUGIN ${HDF5_LIBSH_TARGET})
     endif ()
   endif ()
 endif ()
@@ -995,6 +1017,17 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
       endif ()
     endif ()
 
+    #option (HDF5_INSTALL_MOD_FORTRAN "Copy FORTRAN mod files to include directory (NO SHARED STATIC)" "NO")
+    set (HDF5_INSTALL_MOD_FORTRAN "SHARED" CACHE STRING "Copy FORTRAN mod files to include directory (NO SHARED STATIC)")
+    set_property (CACHE HDF5_INSTALL_MOD_FORTRAN PROPERTY STRINGS NO SHARED STATIC)
+    if (NOT HDF5_INSTALL_MOD_FORTRAN MATCHES "NO")
+      if (NOT BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)
+        set (HDF5_INSTALL_MOD_FORTRAN "STATIC")
+      elseif (BUILD_SHARED_LIBS AND NOT BUILD_STATIC_LIBS)
+        set (HDF5_INSTALL_MOD_FORTRAN "SHARED")
+      endif ()
+    endif ()
+
     add_subdirectory (fortran)
     if (HDF5_BUILD_HL_LIB)
       if (EXISTS "${HDF5_SOURCE_DIR}/hl/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl/fortran")
@@ -1059,7 +1092,7 @@ endif ()
 #-----------------------------------------------------------------------------
 # Generate the H5pubconf.h file containing user settings needed by compilation
 #-----------------------------------------------------------------------------
-configure_file (${HDF_RESOURCES_DIR}/H5pubconf.h.in ${HDF5_BINARY_DIR}/H5pubconf.h @ONLY)
+configure_file (${HDF_RESOURCES_DIR}/H5pubconf.h.in ${HDF5_SRC_BINARY_DIR}/H5pubconf.h @ONLY)
 
 #-----------------------------------------------------------------------------
 # Options for use by cross compiling and toolchains

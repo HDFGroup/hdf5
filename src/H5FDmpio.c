@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
  *
  * Purpose:     This is the MPI-2 I/O driver.
@@ -91,7 +91,6 @@ static herr_t H5FD__mpio_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
 static int H5FD__mpio_mpi_rank(const H5FD_t *_file);
 static int H5FD__mpio_mpi_size(const H5FD_t *_file);
 static MPI_Comm H5FD__mpio_communicator(const H5FD_t *_file);
-static herr_t H5FD__mpio_get_info(H5FD_t *_file, void** mpi_info);
 
 /* The MPIO file driver information */
 static const H5FD_class_mpi_t H5FD_mpio_g = {
@@ -131,8 +130,7 @@ static const H5FD_class_mpi_t H5FD_mpio_g = {
     },  /* End of superclass information */
     H5FD__mpio_mpi_rank,                        /*get_rank              */
     H5FD__mpio_mpi_size,                        /*get_size              */
-    H5FD__mpio_communicator,                    /*get_comm              */
-    H5FD__mpio_get_info                         /*get_info              */
+    H5FD__mpio_communicator                     /*get_comm              */
 };
 
 #ifdef H5FDmpio_DEBUG

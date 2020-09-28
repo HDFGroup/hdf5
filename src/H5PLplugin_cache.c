@@ -93,7 +93,7 @@ static unsigned int     H5PL_num_plugins_g = 0;
 static unsigned int     H5PL_cache_capacity_g = 0;
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5PL__create_plugin_cache
  *
@@ -130,7 +130,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__create_plugin_cache() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5PL__close_plugin_cache
  *
@@ -170,7 +170,7 @@ H5PL__close_plugin_cache(hbool_t *already_closed /*out*/)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__close_plugin_cache() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5PL__expand_cache
  *
@@ -205,7 +205,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__expand_cache() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5PL__add_plugin
  *
@@ -238,7 +238,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__add_plugin() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5PL__find_plugin_in_cache
  *
@@ -253,7 +253,7 @@ done:
 /* See the other use of H5PL_GET_LIB_FUNC() for an explanation
  * for why we disable -Wpedantic here.
  */
-H5_GCC_DIAG_OFF(pedantic)
+H5_GCC_DIAG_OFF("pedantic")
 herr_t
 H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *found, const void **plugin_info)
 {
@@ -302,5 +302,5 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__find_plugin_in_cache() */
-H5_GCC_DIAG_ON(pedantic)
+H5_GCC_DIAG_ON("pedantic")
 
