@@ -784,8 +784,10 @@ h5str_sprintf
                     if (NULL == (this_str = (char *) HDmalloc(27)))
                         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
+                    H5_GCC_DIAG_OFF("format-overflow")
                     if (HDsprintf(this_str, "%Lf", tmp_ldouble) < 0)
                         H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                    H5_GCC_DIAG_ON("format-overflow")
 
                     break;
                 }
