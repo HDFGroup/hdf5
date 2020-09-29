@@ -231,12 +231,12 @@ H5_GCC_DIAG_OFF("long-long")
 typedef unsigned long long  hsize_t;
 typedef signed long long    hssize_t;
 H5_GCC_DIAG_ON("long-long")
-#define PRIdHSIZE   PRId64
-#define PRIiHSIZE   PRIi64
-#define PRIoHSIZE   PRIo64
-#define PRIuHSIZE   PRIu64
-#define PRIxHSIZE   PRIx64
-#define PRIXHSIZE   PRIX64
+#define PRIdHSIZE   H5_PRINTF_LL_WIDTH "d"
+#define PRIiHSIZE   H5_PRINTF_LL_WIDTH "i"
+#define PRIoHSIZE   H5_PRINTF_LL_WIDTH "o"
+#define PRIuHSIZE   H5_PRINTF_LL_WIDTH "u"
+#define PRIxHSIZE   H5_PRINTF_LL_WIDTH "x"
+#define PRIXHSIZE   H5_PRINTF_LL_WIDTH "X"
 #define H5_SIZEOF_HSIZE_T   H5_SIZEOF_UINT64_T
 #define H5_SIZEOF_HSSIZE_T  H5_SIZEOF_INT64_T
 #define HSIZE_UNDEF         UINT64_MAX
@@ -254,6 +254,11 @@ H5_GCC_DIAG_ON("long-long")
 #   ifdef H5_HAVE_PARALLEL
 #       define HADDR_AS_MPI_TYPE    MPI_UNSIGNED
 #   endif  /* H5_HAVE_PARALLEL */
+#   define PRIdHADDR  "d"
+#   define PRIoHADDR  "o"
+#   define PRIuHADDR  "u"
+#   define PRIxHADDR  "x"
+#   define PRIXHADDR  "X"
 #elif H5_SIZEOF_LONG >= 8
     typedef unsigned long           haddr_t;
 #   define HADDR_UNDEF              ULONG_MAX
@@ -261,6 +266,11 @@ H5_GCC_DIAG_ON("long-long")
 #   ifdef H5_HAVE_PARALLEL
 #       define HADDR_AS_MPI_TYPE    MPI_UNSIGNED_LONG
 #   endif  /* H5_HAVE_PARALLEL */
+#   define PRIdHADDR  "ld"
+#   define PRIoHADDR  "lo"
+#   define PRIuHADDR  "lu"
+#   define PRIxHADDR  "lx"
+#   define PRIXHADDR  "lX"
 #elif H5_SIZEOF_LONG_LONG >= 8
     typedef unsigned long long      haddr_t;
 #   define HADDR_UNDEF              ULLONG_MAX
@@ -268,29 +278,13 @@ H5_GCC_DIAG_ON("long-long")
 #   ifdef H5_HAVE_PARALLEL
 #       define HADDR_AS_MPI_TYPE    MPI_LONG_LONG_INT
 #   endif  /* H5_HAVE_PARALLEL */
-#else
-#   error "nothing appropriate for haddr_t"
-#endif
-#if H5_SIZEOF_HADDR_T == H5_SIZEOF_INT
-#   define PRIXHADDR  "X"
-#   define PRIoHADDR  "o"
-#   define PRIuHADDR  "u"
-#   define PRIxHADDR  "x"
-#   define PRIXHADDR  "X"
-#elif H5_SIZEOF_HADDR_T == H5_SIZEOF_LONG
-#   define PRIXHADDR  "lX"
-#   define PRIoHADDR  "lo"
-#   define PRIuHADDR  "lu"
-#   define PRIxHADDR  "lx"
-#   define PRIXHADDR  "lX"
-#elif H5_SIZEOF_HADDR_T == H5_SIZEOF_LONG_LONG
-#   define PRIXHADDR  H5_PRINTF_LL_WIDTH "X"
+#   define PRIdHADDR  H5_PRINTF_LL_WIDTH "d"
 #   define PRIoHADDR  H5_PRINTF_LL_WIDTH "o"
 #   define PRIuHADDR  H5_PRINTF_LL_WIDTH "u"
 #   define PRIxHADDR  H5_PRINTF_LL_WIDTH "x"
 #   define PRIXHADDR  H5_PRINTF_LL_WIDTH "X"
 #else
-#   error "nothing appropriate for PRI.HADDR"
+#   error "nothing appropriate for haddr_t"
 #endif
 #define H5_PRINTF_HADDR_FMT  "%" PRIuHADDR
 #define HADDR_MAX       (HADDR_UNDEF-1)

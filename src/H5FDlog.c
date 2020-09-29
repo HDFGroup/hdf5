@@ -954,7 +954,7 @@ H5FD__log_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hs
         } /* end if */
 
         if(file->fa.flags & H5FD_LOG_ALLOC)
-            HDfprintf(file->logfp, "%10" PRIuHADDR "-%10" PRIuHADDR " (%10" PRIuHSIZE " bytes) (%s) Allocated\n", addr, (addr + size) - 1, size, flavors[type]);
+            HDfprintf(file->logfp, "%10" PRIuHADDR "-%10" PRIuHADDR " (%10" PRIuHSIZE " bytes) (%s) Allocated\n", addr, (haddr_t)((addr + size) - 1), size, flavors[type]);
     } /* end if */
 
     /* Set return value */
@@ -994,7 +994,7 @@ H5FD__log_free(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id,
 
         /* Log the file memory freed */
         if(file->fa.flags & H5FD_LOG_FREE)
-            HDfprintf(file->logfp, "%10" PRIuHADDR "-%10" PRIuHADDR " (%10" PRIuHSIZE " bytes) (%s) Freed\n", addr, (addr + size) - 1, size, flavors[type]);
+            HDfprintf(file->logfp, "%10" PRIuHADDR "-%10" PRIuHADDR " (%10" PRIuHSIZE " bytes) (%s) Freed\n", addr, (haddr_t)((addr + size) - 1), size, flavors[type]);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

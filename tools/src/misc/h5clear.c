@@ -361,7 +361,7 @@ main (int argc, const char *argv[])
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
         }
-        HDfprintf(stdout, "EOA is %" PRIuHADDR "; EOF is %" PRIuHADDR " \n", eoa, st.st_size);
+        HDfprintf(stdout, "EOA is %" PRIuHADDR "; EOF is %" PRIuHADDR " \n", eoa, (haddr_t)st.st_size);
     }
 
     /* --increment option */
