@@ -4486,6 +4486,47 @@ H5_DLL herr_t H5Pget_chunk_cache(hid_t dapl_id,
        size_t *rdcc_nslots/*out*/,
        size_t *rdcc_nbytes/*out*/,
        double *rdcc_w0/*out*/);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DAPL
+ *
+ * \brief Retrieves the prefix for external raw data storage files as set
+ *        in the dataset access property list
+ *
+ * \dapl_id
+ * \param[in,out] prefix Dataset external storage prefix in UTF-8 or
+ *                       ASCII (\em Path and \em filename must be ASCII
+ *                       on Windows systems.)
+ * \param[in]     size   Size of prefix buffer in bytes
+ *
+ * \return Returns the size of \p prefix and the prefix string will be
+ *         stored in \p prefix if successful.
+ *         Otherwise returns a negative value and the contents of \p prefix
+ *         will be undefined.
+ *
+ * \details H5Pget_efile_prefix() retrieves the file system path prefix
+ *          for locating external files associated with a dataset that
+ *          uses external storage. This will be the value set with
+ *          H5Pset_efile_prefix() or the HDF5 library’s default.
+ *
+ *          The value of \p size is the size in bytes of the prefix,
+ *          including the NULL terminator. If the size is unknown, a
+ *          preliminary H5Pget_elink_prefix() call with the pointer
+ *          \p prefix set to NULL will return the size of the prefix
+ *          without the NULL terminator.
+ *
+ *          The \p prefix buffer must be allocated by the caller. In a
+ *          call that retrieves the actual prefix, that buffer must be
+ *          of the size specified in \p size.
+ *
+ * \note See H5Pset_efile_prefix() for a more complete description of
+ *       file location behavior and for notes on the use of the
+ *       HDF5_EXTFILE_PREFIX environment variable.
+ *
+ * \since 1.10.0, 1.8.17
+ *
+ */
 H5_DLL ssize_t H5Pget_efile_prefix(hid_t dapl_id, char* prefix /*out*/, size_t size);
 H5_DLL ssize_t H5Pget_virtual_prefix(hid_t dapl_id, char* prefix /*out*/, size_t size);
 H5_DLL herr_t H5Pget_virtual_printf_gap(hid_t plist_id, hsize_t *gap_size);
@@ -4615,42 +4656,183 @@ H5_DLL herr_t H5Pset_append_flush(hid_t plist_id, unsigned ndims,
  */
 H5_DLL herr_t H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots,
        size_t rdcc_nbytes, double rdcc_w0);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DAPL
+ *
+ * \brief Sets the external dataset storage file prefix in the dataset
+ *        access property list
+ *
+ * \dapl_id
+ * \param[in] prefix Dataset external storage prefix in UTF-8 or ASCII
+ *           (<em>Path and filename must be ASCII on Windows systems.</em>)
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_efile_prefix() sets the prefix used to locate raw data
+ *          files for a dataset that uses external storage. This prefix
+ *          can provide either an absolute path or a relative path to the
+ *          external files.
+ *
+ *          H5Pset_efile_prefix() is used in conjunction with
+ *          H5Pset_external() to control the behavior of the HDF5 library
+ *          when searching for the raw data files associated with a dataset
+ *          that uses external storage:
+ *
+ *          \li The default behavior of the library is to search for the
+ *              dataset’s external storage raw data files in the same
+ *              directory as the HDF5 file which contains the dataset.
+ *          \li If the prefix is set to an absolute path, the target
+ *              directory will be searched for the dataset’s external
+ *              storage raw data files.
+ *          \li If the prefix is set to a relative path, the target
+ *              directory, relative to the current working directory, will
+ *              be searched for the dataset’s external storage raw data
+ *              files.
+ *          \li If the prefix is set to a relative path that begins with
+ *              the special token ${ORIGIN}, that directory, relative to
+ *              the HDF5 file containing the dataset, will be searched for
+ *              the dataset’s external storage raw data files.
+ *
+ *           The HDF5_EXTFILE_PREFIX environment variable can be used to
+ *           override the above behavior (the environment variable
+ *           supersedes the API call). Setting the variable to a path
+ *           string and calling H5Dcreate() or H5Dopen() is the equivalent
+ *           of calling H5Pset_efile_prefix() and calling the same create
+ *           or open function. The environment variable is checked at the
+ *           time of the create or open action and copied so it can be
+ *           safely changed after the H5Dcreate() or H5Dopen() call.
+ *
+ *           Calling H5Pset_efile_prefix() with \p prefix set to NULL or
+ *           the empty string returns the search path to the default. The
+ *           result would be the same as if H5Pset_efile_prefix() had never
+ *           been called.
+ *
+ * \note If the external file prefix is not an absolute path and the HDF5
+ *       file is moved, the external storage files will also need to be
+ *       moved so they can be accessed at the new location.
+ *
+ *       As stated above, the use of the HDF5_EXTFILE_PREFIX environment
+ *       variable overrides any property list setting.
+ *       H5Pset_efile_prefix() and H5Pget_efile_prefix(), being property
+ *       functions, set and retrieve only the property list setting; they
+ *       are unaware of the environment variable.
+ *
+ *       On Windows, the prefix must be an ASCII string since the Windows
+ *       standard C library’s I/O functions cannot handle UTF-8 file names.
+ *
+ * \since 1.10.0, 1.8.17
+ *
+ */
 H5_DLL herr_t H5Pset_efile_prefix(hid_t dapl_id, const char* prefix);
 H5_DLL herr_t H5Pset_virtual_prefix(hid_t dapl_id, const char* prefix);
 H5_DLL herr_t H5Pset_virtual_printf_gap(hid_t plist_id, hsize_t gap_size);
 H5_DLL herr_t H5Pset_virtual_view(hid_t plist_id, H5D_vds_view_t view);
 
 /* Dataset xfer property list (DXPL) routines */
-H5_DLL herr_t H5Pset_data_transform(hid_t plist_id, const char* expression);
-H5_DLL ssize_t H5Pget_data_transform(hid_t plist_id, char* expression /*out*/, size_t size);
-H5_DLL herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv,
-        void *bkg);
-H5_DLL size_t H5Pget_buffer(hid_t plist_id, void **tconv/*out*/,
-        void **bkg/*out*/);
-H5_DLL herr_t H5Pset_preserve(hid_t plist_id, hbool_t status);
-H5_DLL int H5Pget_preserve(hid_t plist_id);
-H5_DLL herr_t H5Pset_edc_check(hid_t plist_id, H5Z_EDC_t check);
-H5_DLL H5Z_EDC_t H5Pget_edc_check(hid_t plist_id);
-H5_DLL herr_t H5Pset_filter_callback(hid_t plist_id, H5Z_filter_func_t func,
-                                     void* op_data);
-H5_DLL herr_t H5Pset_btree_ratios(hid_t plist_id, double left, double middle,
-       double right);
 H5_DLL herr_t H5Pget_btree_ratios(hid_t plist_id, double *left/*out*/,
        double *middle/*out*/,
        double *right/*out*/);
-H5_DLL herr_t H5Pset_vlen_mem_manager(hid_t plist_id,
-                                       H5MM_allocate_t alloc_func,
-                                       void *alloc_info, H5MM_free_t free_func,
-                                       void *free_info);
+H5_DLL size_t H5Pget_buffer(hid_t plist_id, void **tconv/*out*/,
+        void **bkg/*out*/);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DXPL
+ *
+ * \brief Retrieves a data transform expression
+ *
+ * \param[in]  plist_id   Identifier of the property list or class
+ * \param[out] expression Pointer to memory where the transform expression
+ *                        will be copied
+ * \param[in]  size       Number of bytes of the transform expression to copy to
+ *
+ * \return Returns the size of the transform expression if successful;
+ *         otherwise returns a negative value.
+ *
+ * \details H5Pget_data_transform() retrieves the data transform
+ *          expression previously set in the dataset transfer property
+ *          list \p plist_id by H5Pset_data_transform().
+ *
+ *          H5Pget_data_transform() can be used to both retrieve the
+ *          transform expression and to query its size.
+ *
+ *          If \p expression is non-NULL, up to \p size bytes of the data
+ *          transform expression are written to the buffer. If
+ *          \p expression is NULL, \p size is ignored and the function
+ *          does not write anything to the buffer. The function always
+ *          returns the size of the data transform expression.
+ *
+ *          If 0 is returned for the size of the expression, no data
+ *          transform expression exists for the property list.
+ *
+ *          If an error occurs, the buffer pointed to by \p expression is
+ *          unchanged and the function returns a negative value.
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL ssize_t H5Pget_data_transform(hid_t plist_id, char* expression /*out*/, size_t size);
+H5_DLL H5Z_EDC_t H5Pget_edc_check(hid_t plist_id);
+H5_DLL herr_t H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size/*out*/);
+H5_DLL int H5Pget_preserve(hid_t plist_id);
+H5_DLL herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, void** operate_data);
 H5_DLL herr_t H5Pget_vlen_mem_manager(hid_t plist_id,
                                        H5MM_allocate_t *alloc_func,
                                        void **alloc_info,
                                        H5MM_free_t *free_func,
                                        void **free_info);
+H5_DLL herr_t H5Pset_btree_ratios(hid_t plist_id, double left, double middle,
+       double right);
+H5_DLL herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv,
+        void *bkg);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DXPL
+ *
+ * \brief Sets a data transform expression
+ *
+ * \param[in] plist_id   Identifier of the property list or class
+ * \param[in] expression Pointer to the null-terminated data transform
+ *                       expression
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_data_transform() sets the data transform to be used for
+ *          reading and writing data. This function operates on the dataset
+ *          transfer property list \p plist_id.
+ *
+ *          The \p expression parameter is a string containing an algebraic
+ *          expression, such as (5/9.0)*(x-32) or x*(x-5). When a dataset
+ *          is read or written with this property list, the transform
+ *          expression is applied with the x being replaced by the values
+ *          in the dataset. When reading data, the values in the file are
+ *          not changed and the transformed data is returned to the user.
+ *
+ *          Data transforms can only be applied to integer or
+ *          floating-point datasets. Order of operations is obeyed and
+ *          the only supported operations are +, -, *, and /. Parentheses
+ *          can be nested arbitrarily and can be used to change precedence.
+ *          When writing data back to the dataset, the transformed data is
+ *          written to the file and there is no way to recover the original
+ *          values to which the transform was applied.
+ *
+ * \since 1.8.0
+ *
+ */
+H5_DLL herr_t H5Pset_data_transform(hid_t plist_id, const char* expression);
+H5_DLL herr_t H5Pset_edc_check(hid_t plist_id, H5Z_EDC_t check);
+H5_DLL herr_t H5Pset_filter_callback(hid_t plist_id, H5Z_filter_func_t func,
+                                     void* op_data);
 H5_DLL herr_t H5Pset_hyper_vector_size(hid_t fapl_id, size_t size);
-H5_DLL herr_t H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size/*out*/);
+H5_DLL herr_t H5Pset_preserve(hid_t plist_id, hbool_t status);
 H5_DLL herr_t H5Pset_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t op, void* operate_data);
-H5_DLL herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, void** operate_data);
+H5_DLL herr_t H5Pset_vlen_mem_manager(hid_t plist_id,
+                                       H5MM_allocate_t alloc_func,
+                                       void *alloc_info, H5MM_free_t free_func,
+                                       void *free_info);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5Pget_mpio_actual_chunk_opt_mode(hid_t plist_id, H5D_mpio_actual_chunk_opt_mode_t *actual_chunk_opt_mode);
 H5_DLL herr_t H5Pget_mpio_actual_io_mode(hid_t plist_id, H5D_mpio_actual_io_mode_t *actual_io_mode);
@@ -5422,6 +5604,11 @@ H5_DLL herr_t H5Pset_nlinks(hid_t plist_id, size_t nlinks);
  *              committed datatype and use that as the attribute’s
  *              datatype.
  *
+ * \attention H5Padd_merge_committed_dtype_path() will fail if the object
+ *            copy property list is invalid.
+ *            It will also fail if there is insufficient memory when
+ *            duplicating \p path.
+ *
  * \note \b Motivation: H5Padd_merge_committed_dtype_path() provides a
  *       means to override the default behavior of H5Ocopy() when
  *       #H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG is set in an object
@@ -5432,35 +5619,6 @@ H5_DLL herr_t H5Pset_nlinks(hid_t plist_id, size_t nlinks);
  *       faster than the default approach of searching the entire
  *       destination file for a match.
  *
- * \note <b>Failure Modes:</b>
- *       H5Padd_merge_committed_dtype_path() will fail if the object
- *       copy property list is invalid.
- *       It will also fail if there is insufficient memory when
- *       duplicating path.
- *
- * \note <b>Example Usage:</b>
- *       This example adds two paths to the object copy property list.
- *       H5Ocopy() will search the two suggested paths for a match
- *       before searching all the committed datatypes in the
- *       destination file.
- *       <pre>
- *       int main(void) {
- *           hid_t ocpypl_id = H5Pcreate(H5P_OBJECT_COPY);
- *           /* Enable the merging committed datatype feature */
- *            H5Pset_copy_object(ocpypl_id,
- *                         H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG);
- *           /* Add a path to a committed datatype */
- *            H5Padd_merge_committed_dtype_path(ocpypl_id,
- *                                      "/group/committed_dtypeA");
- *           /* Add a path to a dataset with committed datatype */
- *            H5Padd_merge_committed_dtype_path(ocpypl_id,
- *                                      "/group2/committed_dset");
- *           /* Does the copy */
- *            H5Ocopy(...ocpypl_id...);
- *            ...
- *            ...
- *        }
- *        </pre>
  * \see
  *    \li H5Ocopy()
  *    \li #H5O_mcdt_search_cb_t
@@ -5470,6 +5628,7 @@ H5_DLL herr_t H5Pset_nlinks(hid_t plist_id, size_t nlinks);
  *    \li H5Pset_copy_object()
  *    \li H5Pset_mcdt_search_cb()
  *
+ * \todo Removed Example Usage.
  * \todo missing link to "Copying Committed Datatypes with H5Ocopy - A
  *       comprehensive discussion of copying committed datatypes (PDF)
  *       in Advanced Topics in HDF5
@@ -5494,36 +5653,10 @@ H5_DLL herr_t H5Padd_merge_committed_dtype_path(hid_t plist_id, const char *path
  *          These are the suggested paths previously set with
  *          H5Padd_merge_committed_dtype_path().
  *
- * \note \b Failure \b Modes: H5Pfree_merge_committed_dtype_paths() will
- *       fail if the object copy property list is invalid.
+ * \attention H5Pfree_merge_committed_dtype_paths() will fail if the
+ *            object copy property list is invalid.
  *
- * \note \b Example \b Usage: This example adds a suggested path to the
- *       object copy property list, does the copy, clears the list, and
- *       then adds a new suggested path to the list for another copy.
- *       <pre>
- *       int main(void) {
- *           hid_t ocpypl_id = H5Pcreate(H5P_OBJECT_COPY);
- *           /* Enable the merging committed datatype feature. */
- *           H5Pset_copy_object(ocpypl_id,
- *                              H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG);
- *           /* Add a path to search for a matching committed datatype. */
- *           H5Padd_merge_committed_dtype_path(ocpypl_id,
- *                                             "/group/committed_dtypeA");
- *           /* Do the copy. */
- *           H5Ocopy(...ocpypl_id...);
- *           ...
- *           ...
- *           /* Free the previous suggested path. */
- *           H5Pfree_merge_committed_dtype_paths(ocpypl_id);
- *           /* Add a path to search for a matching committed datatype. */
- *           H5Padd_merge_committed_dtype_path(ocpypl_id,
- *                                           "/group2/committed_dtypeB");
- *           /* Do the copy. */
- *           H5Ocopy(...ocpypl_id...);
- *           ...
- *           ...
- *        }
- *       </pre>
+ * \todo Removed Example Usage.
  *
  * \see
  *    \li H5Ocopy()
@@ -5575,7 +5708,7 @@ H5_DLL herr_t H5Pget_copy_object(hid_t plist_id, unsigned *copy_options /*out*/)
  *
  * \param[in]  plist_id     Object copy property list identifier
  * \param[out] func         User-defined callback function
- * \param[out] op_data      User-defined input data for the callback
+ * \param[out] op_data      User-defined data for the callback
  *                          function
  *
  * \return \herr_t
@@ -5588,8 +5721,8 @@ H5_DLL herr_t H5Pget_copy_object(hid_t plist_id, unsigned *copy_options /*out*/)
  *          The callback function will be returned in the parameter \p func
  *          and the user data will be returned in the parameter \p op_data.
  *
- *          H5Pget_mcdt_search_cb() will fail if the object copy property
- *          list is invalid.
+ * \attention H5Pget_mcdt_search_cb() will fail if the object copy property
+ *            list is invalid.
  *
  * \see
  *    \li H5Ocopy()
@@ -5599,6 +5732,8 @@ H5_DLL herr_t H5Pget_copy_object(hid_t plist_id, unsigned *copy_options /*out*/)
  *    \li H5Pget_mcdt_search_cb()
  *    \li H5Pset_copy_object()
  *    \li H5Pset_mcdt_search_cb()
+ *
+ * \todo Link to Copying Committed Datatypes with H5Ocopy was removed.
  *
  * \since 1.8.9
  *
@@ -5692,6 +5827,7 @@ H5_DLL herr_t H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func, 
  *    \li H5Pset_copy_object()
  *    \li H5Pset_mcdt_search_cb()
  *
+ * \todo Link to Copying Committed Datatypes with H5Ocopy was removed.
  * \version 1.8.9 #H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG added in this release.
  *
  * \since 1.8.0
@@ -5730,6 +5866,9 @@ H5_DLL herr_t H5Pset_copy_object(hid_t plist_id, unsigned copy_options);
  *              an anonymous committed datatype.
  *          \li Abort the copy operation and exit H5Ocopy().
  *
+ * \attention H5Pset_mcdt_search_cb() will fail if the
+ *            object copy property list is invalid.
+ *
  * \warning If the callback function return value causes H5Ocopy() to
  *          abort, the destination file may be left in an inconsistent or
  *          corrupted state.
@@ -5742,39 +5881,7 @@ H5_DLL herr_t H5Pset_copy_object(hid_t plist_id, unsigned copy_options);
  *       intended to improve performance when the global search might
  *       take a long time.
  *
- * \note \b Failure \b Mode: H5Pset_mcdt_search_cb() will fail if the
- *       object copy property list is invalid.
- *
- * \note \b Example \b Usage: This example defines a callback function in
- *       the object copy property list.
- *       <pre>
- *       /* The user-defined callback function */
- *       static H5O_mcdt_search_ret_t
- *       mcdt_search_cb(void *_udata)
- *       {
- *          H5O_mcdt_search_ret_t action = *((H5O_mcdt_search_ret_t *)_udata);
- *          return(action);
- *       }
- *       int main(void) {
- *           hid_t ocpypl_id = H5Pcreate(H5P_OBJECT_COPY);
- *           /* Enable the merging committed datatype feature. */
- *           H5Pset_copy_object(ocpypl_id,
- *                              H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG);
- *           /* Add a path to search for a matching committed datatype. */
- *           H5Padd_merge_committed_dtype_path(ocpypl_id,
- *                                             "/group/committed_dtypeA");
- *          /*
- *           * Set the callback function to discontinue the global search
- *           * if H5Ocopy cannot find a matching committed datatype from the
- *           * above suggested path.
- *          */
- *           action = H5O_MCDT_SEARCH_STOP;
- *           H5Pset_mcdt_search_cb(ocpypl_id, mcdt_search_cb, &action);
- *           H5Ocopy(...ocpypl_id...);
- *           ...
- *           ...
- *        }
- *        </pre>
+ * \todo Removed Example Usage.
  * \see
  *    \li H5Ocopy()
  *    \li #H5O_mcdt_search_cb_t
@@ -5784,6 +5891,7 @@ H5_DLL herr_t H5Pset_copy_object(hid_t plist_id, unsigned copy_options);
  *    \li H5Pset_copy_object()
  *    \li H5Pset_mcdt_search_cb()
  *
+ * \todo Link removed to "Copying Committed Datatypes with H5Ocopy" in Advanced Topics in HDF5
  * \todo Programming Note for C++ Developers Using C Functions:
  *
  * \since 1.8.9
