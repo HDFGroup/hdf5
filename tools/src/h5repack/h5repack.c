@@ -711,7 +711,7 @@ check_options(pack_opt_t *options)
     }
 
     if (options->ublock_filename == NULL && options->ublock_size != 0)
-        H5TOOLS_GOTO_ERROR((-1), "file name missing for user block", options->ublock_filename);
+        H5TOOLS_GOTO_ERROR((-1), "file name missing for user block");
 
     /*------------------------------------------------------------------------
      * Verify alignment options; threshold is zero default but alignment not

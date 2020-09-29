@@ -50,7 +50,6 @@
 /* Headers */
 /***********/
 #include "H5private.h"          /* Generic Functions                        */
-#include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Epkg.h"             /* Error handling                           */
 #include "H5FLprivate.h"        /* Free lists                               */
 #include "H5Iprivate.h"         /* IDs                                      */
@@ -514,9 +513,9 @@ done:
  *
  * Purpose:     Closes an error class.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              Friday, July 11, 2003
  *
  *-------------------------------------------------------------------------
@@ -1041,9 +1040,9 @@ done:
  * Purpose:     Replaces current stack with specified stack. This closes the
  *              stack ID also.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              Friday, July 15, 2003
  *
  *-------------------------------------------------------------------------
@@ -1147,9 +1146,9 @@ done:
  *
  * Purpose:     Closes an error stack.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              Friday, July 14, 2003
  *
  *-------------------------------------------------------------------------
@@ -1285,9 +1284,9 @@ H5E__get_num(const H5E_t *estack)
  *
  * Purpose:     Deletes some error messages from the top of error stack.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              Friday, July 16, 2003
  *
  *-------------------------------------------------------------------------
@@ -1340,9 +1339,9 @@ done:
  *              function name, file name, and error description strings must
  *              be statically allocated.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *		Monday, October 18, 1999
  *
  * Notes:       Basically a new public API wrapper around the H5E__push_stack
@@ -1356,10 +1355,6 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line,
 {
     va_list     ap;             /* Varargs info */
     H5E_t       *estack;        /* Pointer to error stack to modify */
-#ifndef H5_HAVE_VASPRINTF
-    int         tmp_len;        /* Current size of description buffer */
-    int         desc_len;       /* Actual length of description when formatted */
-#endif /* H5_HAVE_VASPRINTF */
     char        *tmp = NULL;      /* Buffer to place formatted description in */
     hbool_t     va_started = FALSE; /* Whether the variable argument list is open */
     herr_t	ret_value=SUCCEED;      /* Return value */
@@ -1389,31 +1384,9 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line,
     HDva_start(ap, fmt);
     va_started = TRUE;
 
-#ifdef H5_HAVE_VASPRINTF
     /* Use the vasprintf() routine, since it does what we're trying to do below */
     if(HDvasprintf(&tmp, fmt, ap) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-#else /* H5_HAVE_VASPRINTF */
-    /* Allocate space for the formatted description buffer */
-    tmp_len = 128;
-    if(NULL == (tmp = H5MM_malloc((size_t)tmp_len)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-    /* If the description doesn't fit into the initial buffer size, allocate more space and try again */
-    while((desc_len = HDvsnprintf(tmp, (size_t)tmp_len, fmt, ap)) > (tmp_len - 1)) {
-        /* shutdown & restart the va_list */
-        HDva_end(ap);
-        HDva_start(ap, fmt);
-
-        /* Release the previous description, it's too small */
-        H5MM_xfree(tmp);
-
-        /* Allocate a description of the appropriate length */
-        tmp_len = desc_len + 1;
-        if(NULL == (tmp = H5MM_malloc((size_t)tmp_len)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    } /* end while */
-#endif /* H5_HAVE_VASPRINTF */
 
     /* Push the error on the stack */
     if(H5E__push_stack(estack, file, func, line, cls_id, maj_id, min_id, tmp) < 0)
@@ -1422,16 +1395,11 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line,
 done:
     if(va_started)
         HDva_end(ap);
-#ifdef H5_HAVE_VASPRINTF
     /* Memory was allocated with HDvasprintf so it needs to be freed
      * with HDfree
      */
     if(tmp)
         HDfree(tmp);
-#else /* H5_HAVE_VASPRINTF */
-    if(tmp)
-        H5MM_xfree(tmp);
-#endif /* H5_HAVE_VASPRINTF */
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Epush2() */
@@ -1442,9 +1410,9 @@ done:
  *
  * Purpose:     Clears the error stack for the specified error stack.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              Wednesday, July 16, 2003
  *
  *-------------------------------------------------------------------------
@@ -1487,9 +1455,9 @@ done:
  *              prints error messages. Users are encouraged to write their
  *              own more specific error handlers.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Friday, February 27, 1998
  *
  *-------------------------------------------------------------------------
@@ -1532,9 +1500,9 @@ done:
  * Purpose:     Walks the error stack for the current thread and calls some
  *              function for each error along the way.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Friday, February 27, 1998
  *
  *-------------------------------------------------------------------------
@@ -1582,7 +1550,7 @@ done:
  *              Either (or both) arguments may be null in which case the
  *              value is not returned.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Saturday, February 28, 1998
@@ -1640,7 +1608,7 @@ done:
  *              Automatic stack traversal is always in the H5E_WALK_DOWNWARD
  *              direction.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Friday, February 27, 1998
@@ -1699,7 +1667,7 @@ done:
  *              or the H5E_auto_t typedef.  The IS_STACK parameter is set
  *              to 1 for the first case and 0 for the latter case.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Wednesday, September  8, 2004

@@ -197,14 +197,19 @@ if (!(condition)) {            \
  *
  *----------------------------------------------------------------------------
  */
+static inline void
+jserr_long(long expected, long actual, const char *reason)
+{
+    if (reason != NULL) {
+        HDprintf("%s\n", reason);
+    } else {
+        HDprintf("  ! Expected %ld\n  ! Actual   %ld\n", expected, actual);
+    }
+}
+
 #define JSERR_LONG(expected, actual, reason) {           \
     JSFAILED_AT()                                        \
-    if (reason!= NULL) {                                 \
-        HDprintf("%s\n", (reason));                      \
-    } else {                                             \
-        HDprintf("  ! Expected %ld\n  ! Actual   %ld\n", \
-                  (long)(expected), (long)(actual));     \
-    }                                                    \
+    jserr_long((long)(expected), (long)(actual), (reason));     \
 }
 
 
@@ -236,17 +241,20 @@ if (!(condition)) {            \
  *
  *----------------------------------------------------------------------------
  */
-#define JSERR_STR(expected, actual, reason) {           \
-    JSFAILED_AT()                                       \
-    if ((reason) != NULL) {                             \
-        HDprintf("%s\n", (reason));                     \
-    } else {                                            \
-        HDprintf("!!! Expected:\n%s\n!!!Actual:\n%s\n", \
-                 (expected), (actual));                 \
-    }                                                   \
+static inline void
+jserr_str(const char *expected, const char *actual, const char *reason)
+{
+    if (reason != NULL) {
+        HDprintf("%s\n", reason);
+    } else {
+        HDprintf("!!! Expected:\n%s\n!!!Actual:\n%s\n", expected, actual);
+    }
 }
 
-
+#define JSERR_STR(expected, actual, reason) {           \
+    JSFAILED_AT()                                       \
+    jserr_str((expected), (actual), (reason));          \
+}
 
 #ifdef JSVERIFY_EXP_ACT
 
@@ -1594,7 +1602,8 @@ test_cmp(void)
 
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
     FAIL_IF( 0 > fapl_id )
-    JSVERIFY( SUCCEED, H5Pset_fapl_ros3(fapl_id, &restricted_access_fa), NULL )
+    JSVERIFY( SUCCEED, H5Pset_fapl_ros3(fapl_id, &restricted_access_fa),
+        NULL )
 
     fd_raven = H5FDopen(
             url_text_public,

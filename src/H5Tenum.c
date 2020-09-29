@@ -191,17 +191,17 @@ H5T__enum_insert(const H5T_t *dt, const char *name, const void *value)
 
     /* The name and value had better not already exist */
     for(i = 0; i < dt->shared->u.enumer.nmembs; i++) {
-	if(!HDstrcmp(dt->shared->u.enumer.name[i], name))
+        if(!HDstrcmp(dt->shared->u.enumer.name[i], name))
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "name redefinition")
-	if(!HDmemcmp((uint8_t *)dt->shared->u.enumer.value + (i * dt->shared->size), value, dt->shared->size))
+        if(!HDmemcmp((uint8_t *)dt->shared->u.enumer.value + (i * dt->shared->size), value, dt->shared->size))
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "value redefinition")
-    } /* end for */
+    }
 
     /* Increase table sizes */
     if(dt->shared->u.enumer.nmembs >= dt->shared->u.enumer.nalloc) {
         char	**names;
         uint8_t	*values;
-	unsigned n = MAX(32, 2*dt->shared->u.enumer.nalloc);
+        unsigned n = MAX(32, 2*dt->shared->u.enumer.nalloc);
 
 	if(NULL == (names = (char **)H5MM_realloc(dt->shared->u.enumer.name, n * sizeof(char *))))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
@@ -211,7 +211,7 @@ H5T__enum_insert(const H5T_t *dt, const char *name, const void *value)
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 	dt->shared->u.enumer.value = values;
 	dt->shared->u.enumer.nalloc = n;
-    } /* end for */
+    }
 
     /* Insert new member at end of member arrays */
     dt->shared->u.enumer.sorted = H5T_SORT_NONE;

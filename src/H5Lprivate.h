@@ -22,8 +22,8 @@
 #include "H5Lpublic.h"
 
 /* Private headers needed by this file */
-#include "H5Gprivate.h"		/* Groups				*/
-#include "H5Oprivate.h"		/* Object headers			*/
+#include "H5Gprivate.h"        /* Groups                */
+#include "H5Oprivate.h"        /* Object headers            */
 
 
 /**************************/
@@ -37,11 +37,16 @@
 #define H5L_CRT_INTERMEDIATE_GROUP_NAME         "intermediate_group" /* Create intermediate groups flag */
 
 /* ========  Link access property names ======== */
-#define H5L_ACS_NLINKS_NAME        "max soft links"         /* Number of soft links to traverse */
-#define H5L_ACS_ELINK_PREFIX_NAME  "external link prefix"   /* External link prefix */
-#define H5L_ACS_ELINK_FAPL_NAME    "external link fapl"     /* file access property list for external link access */
-#define H5L_ACS_ELINK_FLAGS_NAME   "external link flags"    /* file access flags for external link traversal */
-#define H5L_ACS_ELINK_CB_NAME      "external link callback" /*  callback function for external link traversal */
+/* Number of soft links to traverse */
+#define H5L_ACS_NLINKS_NAME        "max soft links"
+/* External link prefix */
+#define H5L_ACS_ELINK_PREFIX_NAME  "external link prefix"
+/* file access property list for external link access */
+#define H5L_ACS_ELINK_FAPL_NAME    "external link fapl"
+/* file access flags for external link traversal */
+#define H5L_ACS_ELINK_FLAGS_NAME   "external link flags"
+/*  callback function for external link traversal */
+#define H5L_ACS_ELINK_CB_NAME      "external link callback"
 
 
 /****************************/

@@ -238,7 +238,7 @@ H5O__shmesg_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream,
 
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Version:", mesg->version);
-    HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR " (rel)\n", indent, "", fwidth,
 	      "Shared message table address:", mesg->addr);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Number of indexes:", mesg->nindexes);

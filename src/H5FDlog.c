@@ -756,13 +756,13 @@ H5FD__log_close(H5FD_t *_file)
             addr = 1;
             while(addr < file->eoa) {
                 if(file->nwrite[addr] != last_val) {
-                    HDfprintf(file->logfp, "\tAddr %10a-%10a (%10lu bytes) written to %3d times\n", last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
+                    HDfprintf(file->logfp, "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) written to %3d times\n", last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
                     last_val = file->nwrite[addr];
                     last_addr = addr;
                 } /* end if */
                 addr++;
             } /* end while */
-            HDfprintf(file->logfp, "\tAddr %10a-%10a (%10lu bytes) written to %3d times\n", last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
+            HDfprintf(file->logfp, "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) written to %3d times\n", last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
         } /* end if */
 
         /* Dump the read I/O information */
@@ -773,13 +773,13 @@ H5FD__log_close(H5FD_t *_file)
             addr = 1;
             while(addr < file->eoa) {
                 if(file->nread[addr] != last_val) {
-                    HDfprintf(file->logfp, "\tAddr %10a-%10a (%10lu bytes) read from %3d times\n", last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
+                    HDfprintf(file->logfp, "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) read from %3d times\n", last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
                     last_val = file->nread[addr];
                     last_addr = addr;
                 } /* end if */
                 addr++;
             } /* end while */
-            HDfprintf(file->logfp, "\tAddr %10a-%10a (%10lu bytes) read from %3d times\n", last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
+            HDfprintf(file->logfp, "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) read from %3d times\n", last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
         } /* end if */
 
         /* Dump the I/O flavor information */
@@ -790,13 +790,13 @@ H5FD__log_close(H5FD_t *_file)
             addr = 1;
             while(addr < file->eoa) {
                 if(file->flavor[addr] != last_val) {
-                    HDfprintf(file->logfp, "\tAddr %10a-%10a (%10lu bytes) flavor is %s\n", last_addr, (addr - 1), (unsigned long)(addr - last_addr), flavors[last_val]);
+                    HDfprintf(file->logfp, "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) flavor is %s\n", last_addr, (addr - 1), (unsigned long)(addr - last_addr), flavors[last_val]);
                     last_val = file->flavor[addr];
                     last_addr = addr;
                 } /* end if */
                 addr++;
             } /* end while */
-            HDfprintf(file->logfp, "\tAddr %10a-%10a (%10lu bytes) flavor is %s\n", last_addr, (addr - 1), (unsigned long)(addr - last_addr), flavors[last_val]);
+            HDfprintf(file->logfp, "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) flavor is %s\n", last_addr, (addr - 1), (unsigned long)(addr - last_addr), flavors[last_val]);
         } /* end if */
 
         /* Free the logging information */
@@ -954,7 +954,7 @@ H5FD__log_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hs
         } /* end if */
 
         if(file->fa.flags & H5FD_LOG_ALLOC)
-            HDfprintf(file->logfp, "%10a-%10a (%10Hu bytes) (%s) Allocated\n", addr, (addr + size) - 1, size, flavors[type]);
+            HDfprintf(file->logfp, "%10" PRIuHADDR "-%10" PRIuHADDR " (%10" PRIuHSIZE " bytes) (%s) Allocated\n", addr, (addr + size) - 1, size, flavors[type]);
     } /* end if */
 
     /* Set return value */
@@ -994,7 +994,7 @@ H5FD__log_free(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id,
 
         /* Log the file memory freed */
         if(file->fa.flags & H5FD_LOG_FREE)
-            HDfprintf(file->logfp, "%10a-%10a (%10Hu bytes) (%s) Freed\n", addr, (addr + size) - 1, size, flavors[type]);
+            HDfprintf(file->logfp, "%10" PRIuHADDR "-%10" PRIuHADDR " (%10" PRIuHSIZE " bytes) (%s) Freed\n", addr, (addr + size) - 1, size, flavors[type]);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1062,7 +1062,7 @@ H5FD__log_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
 
             /* Log the extension like an allocation */
             if(file->fa.flags & H5FD_LOG_ALLOC)
-                HDfprintf(file->logfp, "%10a-%10a (%10Hu bytes) (%s) Allocated\n", file->eoa, addr, size, flavors[type]);
+                HDfprintf(file->logfp, "%10" PRIuHADDR "-%10" PRIuHADDR " (%10" PRIuHSIZE " bytes) (%s) Allocated\n", file->eoa, addr, size, flavors[type]);
         } /* end if */
 
         /* Check for decreasing file size */
@@ -1078,7 +1078,7 @@ H5FD__log_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
 
             /* Log the shrink like a free */
             if(file->fa.flags & H5FD_LOG_FREE)
-                HDfprintf(file->logfp, "%10a-%10a (%10Hu bytes) (%s) Freed\n", file->eoa, addr, size, flavors[type]);
+                HDfprintf(file->logfp, "%10" PRIuHADDR "-%10" PRIuHADDR " (%10" PRIuHSIZE " bytes) (%s) Freed\n", file->eoa, addr, size, flavors[type]);
         } /* end if */
     } /* end if */
 
@@ -1230,7 +1230,7 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
 
         /* Emit log string if we're tracking individual seek events. */
         if(file->fa.flags & H5FD_LOG_LOC_SEEK) {
-            HDfprintf(file->logfp, "Seek: From %10a To %10a", file->pos, addr);
+            HDfprintf(file->logfp, "Seek: From %10" PRIuHADDR " To %10" PRIuHADDR, file->pos, addr);
 
             /* Add the seek time, if we're tracking that.
              * Note that the seek time is NOT emitted for when just H5FD_LOG_TIME_SEEK
@@ -1283,7 +1283,7 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
             offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
 
             if(file->fa.flags & H5FD_LOG_LOC_READ)
-                HDfprintf(file->logfp, "Error! Reading: %10a-%10a (%10Zu bytes)\n", orig_addr, (orig_addr + orig_size) - 1, orig_size);
+                HDfprintf(file->logfp, "Error! Reading: %10" PRIuHADDR "-%10" PRIuHADDR " (%10zu bytes)\n", orig_addr, (orig_addr + orig_size) - 1, orig_size);
 
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', buf = %p, total read size = %llu, bytes this sub-read = %llu, bytes actually read = %llu, offset = %llu", HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_read, (unsigned long long)offset);
         } /* end if */
@@ -1319,7 +1319,7 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
 
     /* Log information about the read */
     if(file->fa.flags & H5FD_LOG_LOC_READ) {
-        HDfprintf(file->logfp, "%10a-%10a (%10Zu bytes) (%s) Read", orig_addr, (orig_addr + orig_size) - 1, orig_size, flavors[type]);
+        HDfprintf(file->logfp, "%10" PRIuHADDR "-%10" PRIuHADDR " (%10zu bytes) (%s) Read", orig_addr, (orig_addr + orig_size) - 1, orig_size, flavors[type]);
 
         /* Verify that we are reading in the type of data we allocated in this location */
         if(file->flavor) {
@@ -1439,7 +1439,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
 
         /* Emit log string if we're tracking individual seek events. */
         if(file->fa.flags & H5FD_LOG_LOC_SEEK) {
-            HDfprintf(file->logfp, "Seek: From %10a To %10a", file->pos, addr);
+            HDfprintf(file->logfp, "Seek: From %10" PRIuHADDR " To %10" PRIuHADDR, file->pos, addr);
 
             /* Add the seek time, if we're tracking that.
              * Note that the seek time is NOT emitted for when just H5FD_LOG_TIME_SEEK
@@ -1492,7 +1492,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
             offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
 
             if(file->fa.flags & H5FD_LOG_LOC_WRITE)
-                HDfprintf(file->logfp, "Error! Writing: %10a-%10a (%10Zu bytes)\n", orig_addr, (orig_addr + orig_size) - 1, orig_size);
+                HDfprintf(file->logfp, "Error! Writing: %10" PRIuHADDR "-%10" PRIuHADDR " (%10zu bytes)\n", orig_addr, (orig_addr + orig_size) - 1, orig_size);
 
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', buf = %p, total write size = %llu, bytes this sub-write = %llu, bytes actually written = %llu, offset = %llu", HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_wrote, (unsigned long long)offset);
         } /* end if */
@@ -1521,7 +1521,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
 
     /* Log information about the write */
     if(file->fa.flags & H5FD_LOG_LOC_WRITE) {
-        HDfprintf(file->logfp, "%10a-%10a (%10Zu bytes) (%s) Written", orig_addr, (orig_addr + orig_size) - 1, orig_size, flavors[type]);
+        HDfprintf(file->logfp, "%10" PRIuHADDR "-%10" PRIuHADDR " (%10zu bytes) (%s) Written", orig_addr, (orig_addr + orig_size) - 1, orig_size, flavors[type]);
 
         /* Check if this is the first write into a "default" section, grabbed by the metadata agregation algorithm */
         if(file->fa.flags & H5FD_LOG_FLAVOR) {
@@ -1641,7 +1641,7 @@ H5FD__log_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_
 
         /* Emit log string if we're tracking individual truncate events. */
         if(file->fa.flags & H5FD_LOG_TRUNCATE) {
-            HDfprintf(file->logfp, "Truncate: To %10a", file->eoa);
+            HDfprintf(file->logfp, "Truncate: To %10" PRIuHADDR, file->eoa);
 
             /* Add the truncate time, if we're tracking that.
              * Note that the truncate time is NOT emitted for when just H5FD_LOG_TIME_TRUNCATE

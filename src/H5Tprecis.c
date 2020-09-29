@@ -97,7 +97,7 @@ H5T_get_precision(const H5T_t *dt)
     while(dt->shared->parent)
         dt = dt->shared->parent;
     if(!H5T_IS_ATOMIC(dt->shared))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, 0, "operation not defined for specified datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, 0, "operation not defined for specified datatype")
 
     /* Precision */
     ret_value = dt->shared->u.atomic.prec;
@@ -208,8 +208,8 @@ H5T__set_precision(const H5T_t *dt, size_t prec)
     HDassert(!(H5T_ENUM==dt->shared->type && 0==dt->shared->u.enumer.nmembs));
 
     if (dt->shared->parent) {
-	if (H5T__set_precision(dt->shared->parent, prec)<0)
-	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to set precision for base type")
+        if (H5T__set_precision(dt->shared->parent, prec)<0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to set precision for base type")
 
         /* Adjust size of datatype appropriately */
         if(dt->shared->type==H5T_ARRAY)
@@ -218,18 +218,18 @@ H5T__set_precision(const H5T_t *dt, size_t prec)
             dt->shared->size = dt->shared->parent->shared->size;
     } else {
         if (H5T_IS_ATOMIC(dt->shared)) {
-	    /* Adjust the offset and size */
-	    offset = dt->shared->u.atomic.offset;
-	    size = dt->shared->size;
-	    if (prec > 8*size)
+            /* Adjust the offset and size */
+            offset = dt->shared->u.atomic.offset;
+            size = dt->shared->size;
+            if (prec > 8*size)
                 offset = 0;
-	    else if (offset+prec > 8 * size)
+            else if (offset+prec > 8 * size)
                 offset = 8 * size - prec;
-	    if (prec > 8*size)
+            if (prec > 8*size)
                 size = (prec+7) / 8;
 
-	    /* Check that things are still kosher */
-	    switch (dt->shared->type) {
+            /* Check that things are still kosher */
+            switch (dt->shared->type) {
                 case H5T_INTEGER:
                 case H5T_TIME:
                 case H5T_BITFIELD:
@@ -261,11 +261,11 @@ H5T__set_precision(const H5T_t *dt, size_t prec)
                     HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "operation not defined for datatype class")
 	    } /* end switch */
 
-	    /* Commit */
-	    dt->shared->size = size;
+            /* Commit */
+            dt->shared->size = size;
             dt->shared->u.atomic.offset = offset;
             dt->shared->u.atomic.prec = prec;
-	} /* end if */
+        } /* end if */
         else
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for specified datatype")
     } /* end else */

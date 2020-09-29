@@ -48,6 +48,31 @@ New Features
 
     Configuration:
     -------------
+    - CMake option to build the HDF filter plugins project as an external project
+
+      The HDF filter plugins project is a collection of registered compression
+      filters that can be dynamically loaded when needed to access data stored
+      in a hdf5 file. This CMake-only option allows the plugins to be built and
+      distributed with the hdf5 library and tools. Like the options for szip and
+      zlib, either a tgz file or a git repository can be specified for the source.
+
+      The necessary options are (see the INSTALL_CMake.txt file):
+          HDF5_ENABLE_PLUGIN_SUPPORT
+          PLUGIN_TGZ_NAME or PLUGIN_GIT_URL
+      There are more options necessary for various filters and the plugin project
+      documents should be referenced.
+
+      (ADB - 2020/09/27, OESS-98)
+
+    - Added CMake option to format source files
+
+      HDF5_ENABLE_FORMATTERS option will enable creation of targets using the
+      pattern - HDF5_*_SRC_FORMAT - where * corresponds to the source folder
+      or tool folder. All sources can be formatted by executing the format target;
+         make format
+
+      (ADB - 2020/08/24)
+
     - CMake option to link the generated Fortran MOD files into the include
       directory.
 
@@ -382,6 +407,50 @@ New Features
 
     Library:
     --------
+    - Add new public function H5Ssel_iter_reset
+
+      This function resets a dataspace selection iterator back to an
+      initial state so that it may be used for iteration once more.
+      This can be useful when needing to iterate over a selection
+      multiple times without having to repeatedly create/destroy
+      a selection iterator for that dataspace selection.
+
+      (JTH - 2020/09/18)
+
+    - Remove HDFS VFD stubs
+
+      The original implementation of the HDFS VFD included non-functional
+      versions of the following public API calls when the HDFS VFD is
+      not built as a part of the HDF5 library:
+
+      * H5FD_hdfs_init()
+      * H5Pget_fapl_hdfs()
+      * H5Pset_fapl_hdfs()
+
+      They will remain present in HDF5 1.10 and HDF5 1.12 releases
+      for binary compatibility purposes but have been removed as of 1.14.0.
+
+      Note that this has nothing to do with the real HDFS VFD API calls
+      that are fully functional when the HDFS VFD is configured and built.
+
+      We simply changed:
+
+      #ifdef LIBHDFS
+        <real API call>
+      #else
+        <useless stub>
+      #endif
+
+      to:
+
+      #ifdef LIBHDFS
+        <real API call>
+      #endif
+
+      Which is how the other optional VFDs are handled.
+
+      (DER - 2020/08/27)
+
     - Add Mirror VFD
 
       Use TCP/IP sockets to perform write-only (W/O) file I/O on a remote
@@ -753,7 +822,7 @@ New Features
 
     High-Level APIs:
     ---------------
-    - 
+    -
 
     C Packet Table API
     ------------------
@@ -1234,8 +1303,8 @@ Bug Fixes since HDF5-1.10.3 release
     High-Level APIs:
     ------
     - The H5DSis_scale function was updated to return "not a dimension scale" (0)
-      instead of failing (-1), when CLASS or DIMENSION_SCALE attributes are 
-      not written according to Dimension Scales Specification. 
+      instead of failing (-1), when CLASS or DIMENSION_SCALE attributes are
+      not written according to Dimension Scales Specification.
 
      (EIP - 2020/08/12, HDFFV-10436)
 

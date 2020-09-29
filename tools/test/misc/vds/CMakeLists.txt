@@ -1,9 +1,9 @@
 cmake_minimum_required (VERSION 3.12)
 project (HDF5_TOOLS_TEST_MISC_VDS C)
 
-MACRO (ADD_H5_GENERATOR genfile)
+macro (ADD_H5_GENERATOR genfile)
   add_executable (${genfile} ${HDF5_TOOLS_TEST_MISC_VDS_SOURCE_DIR}/${genfile}.c)
-  target_include_directories (${genfile} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (${genfile} PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   if (NOT ONLY_SHARED_LIBS)
     TARGET_C_PROPERTIES (${genfile} STATIC)
     target_link_libraries (${genfile} PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
@@ -12,7 +12,14 @@ MACRO (ADD_H5_GENERATOR genfile)
     target_link_libraries (${genfile} PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   endif ()
   set_target_properties (${genfile} PROPERTIES FOLDER generator/tools)
-ENDMACRO ()
+
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_TOOLS_TEST_MISC_VDS_${genfile}_FORMAT ${genfile})
+  endif ()
+endmacro ()
 
 # generator executables
 set (H5_GENERATORS

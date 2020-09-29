@@ -246,6 +246,7 @@ typedef struct H5F_t H5F_t;
     (p) += 8;                                      \
 }
 
+/* clang-format off */
 /* Address-related macros */
 #define H5F_addr_overflow(X,Z)    (HADDR_UNDEF==(X) ||                      \
                 HADDR_UNDEF==(X)+(haddr_t)(Z) ||                            \
@@ -274,6 +275,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_addr_pow2(N)    ((haddr_t)1<<(N))
 #define H5F_addr_overlap(O1,L1,O2,L2) (((O1) < (O2) && ((O1) + (L1)) > (O2)) || \
                                  ((O1) >= (O2) && (O1) < ((O2) + (L2))))
+/* clang-format on */
 
 /* If the module using this macro is allowed access to the private variables, access them directly */
 #ifdef H5F_MODULE
@@ -469,9 +471,11 @@ typedef struct H5F_t H5F_t;
 #define H5F_CRT_ADDR_BYTE_NUM_NAME   "addr_byte_num"    /* Byte number in an address            */
 #define H5F_CRT_OBJ_BYTE_NUM_NAME    "obj_byte_num"     /* Byte number for object size          */
 #define H5F_CRT_SUPER_VERS_NAME      "super_version"    /* Version number of the superblock     */
-#define H5F_CRT_SHMSG_NINDEXES_NAME  "num_shmsg_indexes" /* Number of shared object header message indexes */
+/* Number of shared object header message indexes */
+#define H5F_CRT_SHMSG_NINDEXES_NAME  "num_shmsg_indexes"
 #define H5F_CRT_SHMSG_INDEX_TYPES_NAME "shmsg_message_types" /* Types of message in each index */
-#define H5F_CRT_SHMSG_INDEX_MINSIZE_NAME "shmsg_message_minsize" /* Minimum size of messages in each index */
+/* Minimum size of messages in each index */
+#define H5F_CRT_SHMSG_INDEX_MINSIZE_NAME "shmsg_message_minsize"
 #define H5F_CRT_SHMSG_LIST_MAX_NAME  "shmsg_list_max"   /* Shared message list maximum size */
 #define H5F_CRT_SHMSG_BTREE_MIN_NAME "shmsg_btree_min"  /* Shared message B-tree minimum size */
 #define H5F_CRT_FILE_SPACE_STRATEGY_NAME "file_space_strategy"  /* File space handling strategy */
@@ -866,7 +870,6 @@ H5_DLL MPI_Comm H5F_mpi_get_comm(const H5F_t *f);
 H5_DLL int H5F_shared_mpi_get_size(const H5F_shared_t *f_sh);
 H5_DLL int H5F_mpi_get_size(const H5F_t *f);
 H5_DLL herr_t H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm);
-H5_DLL herr_t H5F_get_mpi_info(const H5F_t *f, MPI_Info **f_info);
 H5_DLL herr_t H5F_get_mpi_atomicity(H5F_t *file, hbool_t *flag);
 H5_DLL herr_t H5F_set_mpi_atomicity(H5F_t *file, hbool_t flag);
 #endif /* H5_HAVE_PARALLEL */

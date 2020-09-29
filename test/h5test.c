@@ -203,7 +203,7 @@ h5_clean_files(const char *base_name[], hid_t fapl)
  *      sub_filename in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF(format-nonliteral)
+H5_GCC_DIAG_OFF("format-nonliteral")
 void
 h5_delete_test_file(const char *base_name, hid_t fapl)
 {
@@ -253,7 +253,7 @@ h5_delete_test_file(const char *base_name, hid_t fapl)
 
     return;
 } /* end h5_delete_test_file() */
-H5_GCC_DIAG_ON(format-nonliteral)
+H5_GCC_DIAG_ON("format-nonliteral")
 
 
 /*-------------------------------------------------------------------------
@@ -1362,7 +1362,7 @@ h5_dump_info_object(MPI_Info info)
  *      temp in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF(format-nonliteral)
+H5_GCC_DIAG_OFF("format-nonliteral")
 h5_stat_size_t
 h5_get_file_size(const char *filename, hid_t fapl)
 {
@@ -1464,7 +1464,7 @@ h5_get_file_size(const char *filename, hid_t fapl)
 
     return(-1);
 } /* end get_file_size() */
-H5_GCC_DIAG_ON(format-nonliteral)
+H5_GCC_DIAG_ON("format-nonliteral")
 
 /*
  * This routine is designed to provide equivalent functionality to 'printf'
@@ -2088,7 +2088,7 @@ h5_compare_file_bytes(char *f1name, char *f2name)
     f2size = HDftell(f2ptr);
 
     if (f1size != f2size) {
-        HDfprintf(stderr, "Files differ in size, %llu vs. %llu\n", f1size, f2size);
+        HDfprintf(stderr, "Files differ in size, %" PRIuHSIZE " vs. %" PRIuHSIZE "\n", f1size, f2size);
         ret_value = -1;
         goto done;
     }
@@ -2106,7 +2106,7 @@ h5_compare_file_bytes(char *f1name, char *f2name)
             goto done;
         }
         if (f1char != f2char) {
-            HDfprintf(stderr, "Mismatch @ 0x%llX: 0x%X != 0x%X\n", ii, f1char, f2char);
+            HDfprintf(stderr, "Mismatch @ 0x%" PRIXHSIZE ": 0x%X != 0x%X\n", ii, f1char, f2char);
             ret_value = -1;
             goto done;
         }

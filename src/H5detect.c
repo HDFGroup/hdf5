@@ -43,13 +43,16 @@ static const char *FileHeader = "\n\
  */
 #undef NDEBUG
 #include "H5private.h"
+/* Do NOT use HDfprintf in this file as it is not linked with the library,
+ * which contains the H5system.c file in which the function is defined.
+ */
 #include "H5Tpublic.h"
 #include "H5Rpublic.h"
 
 /* Disable warning about cast increasing the alignment of the target type,
  * that's _exactly_ what this code is probing.  -QAK
  */
-H5_GCC_DIAG_OFF(cast-align)
+H5_GCC_DIAG_OFF("cast-align")
 
 #if defined(__has_attribute)
 # if __has_attribute(no_sanitize_address)
@@ -117,9 +120,9 @@ typedef struct malign_t {
 FILE       *rawoutstream = NULL;
 
 /* global variables types detection code */
-H5_GCC_DIAG_OFF(larger-than=)
+H5_GCC_DIAG_OFF("larger-than=")
 static detected_t d_g[MAXDETECT];
-H5_GCC_DIAG_ON(larger-than=)
+H5_GCC_DIAG_ON("larger-than=")
 static malign_t m_g[MAXDETECT];
 static volatile int nd_g = 0, na_g = 0;
 
@@ -155,7 +158,7 @@ static H5JMP_BUF jbuf_g;
 #endif
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    precision
  *
@@ -208,7 +211,7 @@ precision (detected_t *d)
     }
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    DETECT_I/DETECT_BYTE
  *
@@ -263,7 +266,7 @@ precision (detected_t *d)
     DETECT_I_BYTE_CORE(TYPE,VAR,INFO,TYPE)                                    \
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    DETECT_F
  *
@@ -302,10 +305,10 @@ precision (detected_t *d)
         for(_byte_mask = (unsigned char)1; _byte_mask; _byte_mask = (unsigned char) (_byte_mask << 1)) {    \
             _buf1[_i] ^= _byte_mask;                                          \
             HDmemcpy((void *)&_v2, (const void *)_buf1, sizeof(TYPE));        \
-            H5_GCC_DIAG_OFF(float-equal)                                      \
+            H5_GCC_DIAG_OFF("float-equal")                                      \
             if(_v1 != _v2)                                                    \
                 _pad_mask[_i] |= _byte_mask;                                  \
-            H5_GCC_DIAG_ON(float-equal)                                       \
+            H5_GCC_DIAG_ON("float-equal")                                       \
             _buf1[_i] ^= _byte_mask;                                          \
         } /* end for */                                                       \
                                                                               \
@@ -360,7 +363,7 @@ precision (detected_t *d)
     }                                                                         \
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    DETECT_M
  *
@@ -411,10 +414,10 @@ precision (detected_t *d)
         else /* Little-Endian */                          \
             HDmemcpy(_buf+align_g[_ano]+(INFO.offset/8),((char *)&_val)+(INFO.offset/8),(size_t)(INFO.precision/8)); \
         _val2 = *((TYPE*)(_buf+align_g[_ano]));                      \
-        H5_GCC_DIAG_OFF(float-equal)                          \
+        H5_GCC_DIAG_OFF("float-equal")                          \
         if(_val!=_val2)                                  \
             H5LONGJMP(jbuf_g, 1);                              \
-        H5_GCC_DIAG_ON(float-equal)                           \
+        H5_GCC_DIAG_ON("float-equal")                           \
         /* End Cray Check */                              \
         (INFO.align)=align_g[_ano];                          \
     } else {                                      \
@@ -435,7 +438,7 @@ precision (detected_t *d)
 
 
 #if defined(H5LONGJMP) && defined(H5_HAVE_SIGNAL)
-
+
 /*-------------------------------------------------------------------------
  * Function:    sigsegv_handler
  *
@@ -468,7 +471,7 @@ sigsegv_handler(int H5_ATTR_UNUSED signo)
 
 
 #if defined(H5LONGJMP) && defined(H5_HAVE_SIGNAL)
-
+
 /*-------------------------------------------------------------------------
  * Function:    sigbus_handler
  *
@@ -501,7 +504,7 @@ sigbus_handler(int H5_ATTR_UNUSED signo)
 
 
 #if defined(H5LONGJMP) && defined(H5_HAVE_SIGNAL)
-
+
 /*-------------------------------------------------------------------------
  * Function:    sigill_handler
  *
@@ -532,7 +535,7 @@ sigill_handler(int H5_ATTR_UNUSED signo)
 }
 #endif
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    print_results
  *
@@ -811,7 +814,7 @@ done:\n\
     fprintf(rawoutstream, "/* sigill_handler called: %d times */\n", sigill_handler_called_g);
 } /* end print_results() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    iprint
  *
@@ -901,7 +904,7 @@ iprint(detected_t *d)
 
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    byte_cmp
  *
@@ -928,7 +931,7 @@ byte_cmp(int n, const void *_a, const void *_b, const unsigned char *pad_mask)
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    bit_cmp
  *
@@ -969,7 +972,7 @@ bit_cmp(unsigned int nbytes, int *perm, void *_a, void *_b,
     return 0;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    fix_order
  *
@@ -1037,7 +1040,7 @@ fix_order(int n, int last, int *perm, const char **mesg)
     }
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    imp_bit
  *
@@ -1091,7 +1094,7 @@ imp_bit(unsigned int n, int *perm, void *_a, void *_b, const unsigned char *pad_
     return (a[perm[major]] >> minor) & 0x01 ? 0 : 1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  find_bias
  *
@@ -1122,7 +1125,7 @@ find_bias(unsigned int epos, unsigned int esize, int *perm, void *_a)
     return bias;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    print_header
  *
@@ -1263,7 +1266,7 @@ bit.\n";
 
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    detect_C89_integers
  *
@@ -1285,7 +1288,7 @@ detect_C89_integers(void)
     DETECT_I(unsigned long,    ULONG,        d_g[nd_g]); nd_g++;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    detect_C89_floats
  *
@@ -1301,7 +1304,7 @@ detect_C89_floats(void)
     DETECT_F(double,    DOUBLE,     d_g[nd_g]); nd_g++;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    detect_C99_integers8
  *
@@ -1357,7 +1360,7 @@ detect_C99_integers8(void)
 #endif
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    detect_C99_integers16
  *
@@ -1389,7 +1392,7 @@ detect_C99_integers16(void)
 #endif
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    detect_C99_integers32
  *
@@ -1421,7 +1424,7 @@ detect_C99_integers32(void)
 #endif
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    detect_C99_integers64
  *
@@ -1467,7 +1470,7 @@ detect_C99_integers64(void)
 #endif
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    detect_C99_integers
  *
@@ -1487,7 +1490,7 @@ detect_C99_integers(void)
     detect_C99_integers64();
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    detect_C99_floats
  *
@@ -1512,7 +1515,7 @@ detect_C99_floats(void)
 #endif
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    detect_alignments
  *
@@ -1590,7 +1593,7 @@ static int verify_signal_handlers(int signum, void (*handler)(int))
 }
 #endif
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -1682,4 +1685,4 @@ main(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
-H5_GCC_DIAG_ON(cast-align)
+H5_GCC_DIAG_ON("cast-align")

@@ -234,9 +234,10 @@ if (!(condition)) {            \
  *----------------------------------------------------------------------------
  */
 #define JSERR_STR(expected, actual, reason) {           \
+    const char *_reason = reason;                       \
     JSFAILED_AT()                                       \
-    if ((reason) != NULL) {                             \
-        HDprintf("%s\n", (reason));                     \
+    if (_reason != NULL) {                              \
+        HDprintf("%s\n", _reason);                      \
     } else {                                            \
         HDprintf("!!! Expected:\n%s\n!!!Actual:\n%s\n", \
                  (expected), (actual));                 \

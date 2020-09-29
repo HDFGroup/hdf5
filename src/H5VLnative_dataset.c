@@ -18,6 +18,7 @@
 #define H5D_FRIEND              /* Suppress error about including H5Dpkg    */
 
 #include "H5private.h"          /* Generic Functions                        */
+#include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Dpkg.h"             /* Datasets                                 */
 #include "H5Eprivate.h"         /* Error handling                           */
 #include "H5Fprivate.h"         /* Files                                    */
@@ -142,7 +143,7 @@ done:
  */
 herr_t
 H5VL__native_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id,
-    hid_t file_space_id, hid_t H5_ATTR_UNUSED dxpl_id, void *buf,
+    hid_t file_space_id, hid_t dxpl_id, void *buf,
     void H5_ATTR_UNUSED **req)
 {
     H5D_t         *dset = (H5D_t *)obj;
@@ -161,6 +162,9 @@ H5VL__native_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not get a validated dataspace from mem_space_id")
     if(H5S_get_validated_dataspace(file_space_id, &file_space) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not get a validated dataspace from file_space_id")
+
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
 
     /* Read raw data */
     if(H5D__read(dset, mem_type_id, mem_space, file_space, buf/*out*/) < 0)
@@ -182,7 +186,7 @@ done:
  */
 herr_t
 H5VL__native_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id,
-    hid_t file_space_id, hid_t H5_ATTR_UNUSED dxpl_id, const void *buf,
+    hid_t file_space_id, hid_t dxpl_id, const void *buf,
     void H5_ATTR_UNUSED **req)
 {
     H5D_t           *dset = (H5D_t *)obj;
@@ -201,6 +205,9 @@ H5VL__native_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not get a validated dataspace from mem_space_id")
     if(H5S_get_validated_dataspace(file_space_id, &file_space) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not get a validated dataspace from file_space_id")
+
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
 
     /* Write the data */
     if(H5D__write(dset, mem_type_id, mem_space, file_space, buf, FALSE) < 0)
@@ -386,6 +393,9 @@ H5VL__native_dataset_optional(void *obj, H5VL_dataset_optional_t optional_type,
 
     /* Sanity checks */
     HDassert(dset);
+
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
 
     switch(optional_type) {
         case H5VL_NATIVE_DATASET_FORMAT_CONVERT:

@@ -84,6 +84,10 @@ endmacro ()
 #-------------------------------------------------------------------------------
 macro (EXTERNAL_SZIP_LIBRARY compress_type encoding)
   if (${compress_type} MATCHES "GIT")
+#    FetchContent_Declare (SZIP
+#        GIT_REPOSITORY ${SZIP_URL}
+#        GIT_TAG ${SZIP_BRANCH}
+#    )
     EXTERNALPROJECT_ADD (SZIP
         GIT_REPOSITORY ${SZIP_URL}
         GIT_TAG ${SZIP_BRANCH}
@@ -104,6 +108,10 @@ macro (EXTERNAL_SZIP_LIBRARY compress_type encoding)
             -DPACKAGE_NAMESPACE=${HDF_PACKAGE_NAMESPACE}
     )
   elseif (${compress_type} MATCHES "TGZ")
+#    FetchContent_Declare (SZIP
+#        URL ${SZIP_URL}
+#        URL_HASH ""
+#    )
     EXTERNALPROJECT_ADD (SZIP
         URL ${SZIP_URL}
         URL_MD5 ""
@@ -125,7 +133,12 @@ macro (EXTERNAL_SZIP_LIBRARY compress_type encoding)
     )
   endif ()
   externalproject_get_property (SZIP BINARY_DIR SOURCE_DIR)
-
+#  FetchContent_GetProperties(SZIP)
+#  if(NOT SZIP_POPULATED)
+#    FetchContent_Populate(SZIP)
+#    add_subdirectory(${szip_SOURCE_DIR} ${szip_BINARY_DIR})
+#  endif()
+#
 ##include (${BINARY_DIR}/${SZ_PACKAGE_NAME}${HDF_PACKAGE_EXT}-targets.cmake)
 # Create imported target szip-static
   if (USE_LIBAEC)

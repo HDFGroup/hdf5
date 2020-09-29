@@ -587,7 +587,7 @@ H5O_open(H5O_loc_t *loc)
 
 #ifdef H5O_DEBUG
     if(H5DEBUG(O))
-        HDfprintf(H5DEBUG(O), "> %a\n", loc->addr);
+        HDfprintf(H5DEBUG(O), "> %" PRIuHADDR "\n", loc->addr);
 #endif
 
     /* Turn off the variable for holding file or increment open-lock counters */
@@ -823,9 +823,9 @@ H5O_close(H5O_loc_t *loc, hbool_t *file_closed /*out*/)
 #ifdef H5O_DEBUG
     if(H5DEBUG(O)) {
         if(FALSE == H5F_ID_EXISTS(loc->file) && 1 == H5F_NREFS(loc->file))
-            HDfprintf(H5DEBUG(O), "< %a auto %lu remaining\n", loc->addr, (unsigned long)H5F_NOPEN_OBJS(loc->file));
+            HDfprintf(H5DEBUG(O), "< %" PRIuHADDR " auto %lu remaining\n", loc->addr, (unsigned long)H5F_NOPEN_OBJS(loc->file));
         else
-            HDfprintf(H5DEBUG(O), "< %a\n", loc->addr);
+            HDfprintf(H5DEBUG(O), "< %" PRIuHADDR "\n", loc->addr);
     }
 #endif
 
@@ -2248,7 +2248,7 @@ H5O_get_info(const H5O_loc_t *loc, H5O_info2_t *oinfo, unsigned fields)
 
         /* Set the object's reference count */
         oinfo->rc = oh->nlink;
-    } /* end if */
+    }
 
     /* Get time information, if requested */
     if(fields & H5O_INFO_TIME) {
@@ -2544,8 +2544,8 @@ H5O_get_oh_addr(const H5O_t *oh)
 /*-------------------------------------------------------------------------
  * Function:    H5O_get_oh_flags
  *
- * Programmer:    Jacob Smith
- *        2018 August 17
+ * Programmer:  Jacob Smith
+ *              2018 August 17
  *
  *-------------------------------------------------------------------------
  */
@@ -2561,12 +2561,12 @@ H5O_get_oh_flags(const H5O_t *oh)
 /*-------------------------------------------------------------------------
  * Function:    H5O_get_oh_mtime
  *
- * Purpose:    Retrieve an object's modification time. Assumes that the
+ * Purpose:     Retrieve an object's modification time. Assumes that the
  *              caller has verified that accessing this variable is appropriate
  *              to the header in question.
  *
- * Programmer:    Jacob Smith
- *        2018 August 17
+ * Programmer:  Jacob Smith
+ *              2018 August 17
  *
  *-------------------------------------------------------------------------
  */
@@ -2583,8 +2583,8 @@ H5O_get_oh_mtime(const H5O_t *oh)
 /*-------------------------------------------------------------------------
  * Function:    H5O_get_oh_version
  *
- * Programmer:    Jacob Smith
- *        2018 August 17
+ * Programmer:  Jacob Smith
+ *              2018 August 17
  *
  *-------------------------------------------------------------------------
  */

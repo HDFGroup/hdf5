@@ -785,7 +785,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
 
     /* Allocate data verification buffer */
     if(NULL == (buffer2 = (char *)malloc(linear_buf_size))) {
-        HDfprintf(stderr, "malloc for data verification buffer size (%Zu) failed\n", linear_buf_size);
+        HDfprintf(stderr, "malloc for data verification buffer size (%zu) failed\n", linear_buf_size);
         GOTOERROR(FAIL);
     } /* end if */
 
@@ -1268,7 +1268,7 @@ done:
  *      'temp' in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF(format-nonliteral)
+H5_GCC_DIAG_OFF("format-nonliteral")
 static void
 do_cleanupfile(iotype iot, char *filename)
 {
@@ -1330,5 +1330,5 @@ do_cleanupfile(iotype iot, char *filename)
         }
     }
 }
-H5_GCC_DIAG_ON(format-nonliteral)
+H5_GCC_DIAG_ON("format-nonliteral")
 
