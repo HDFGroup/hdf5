@@ -20,6 +20,7 @@ set (TEST_LIB_SOURCES
 
 set (TEST_LIB_HEADERS
     ${HDF5_TEST_SOURCE_DIR}/h5test.h
+    ${HDF5_TEST_SOURCE_DIR}/H5srcdir.h
     ${HDF5_TEST_SOURCE_DIR}/cache_common.h
     ${HDF5_TEST_SOURCE_DIR}/external_common.h
     ${HDF5_TEST_SOURCE_DIR}/external_fname.h
@@ -29,7 +30,7 @@ set (TEST_LIB_HEADERS
 if (NOT ONLY_SHARED_LIBS)
   add_library (${HDF5_TEST_LIB_TARGET} STATIC ${TEST_LIB_SOURCES} ${TEST_LIB_HEADERS})
   target_include_directories (${HDF5_TEST_LIB_TARGET}
-      PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_TEST_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
+      PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};${HDF5_TEST_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
       INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
   )
   target_compile_options(${HDF5_TEST_LIB_TARGET} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
@@ -48,7 +49,7 @@ endif ()
 if (BUILD_SHARED_LIBS)
   add_library (${HDF5_TEST_LIBSH_TARGET} SHARED ${TEST_LIB_SOURCES} ${TEST_LIB_HEADERS})
   target_include_directories (${HDF5_TEST_LIBSH_TARGET}
-      PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_TEST_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
+      PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};${HDF5_TEST_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
       INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
   )
   target_compile_options(${HDF5_TEST_LIBSH_TARGET} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
@@ -63,6 +64,17 @@ if (BUILD_SHARED_LIBS)
   endif ()
   H5_SET_LIB_OPTIONS (${HDF5_TEST_LIBSH_TARGET} ${HDF5_TEST_LIB_NAME} SHARED "LIB")
   set_target_properties (${HDF5_TEST_LIBSH_TARGET} PROPERTIES FOLDER libraries/test)
+endif ()
+
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_TEST_SRC_FORMAT ${HDF5_TEST_LIB_TARGET})
+  else ()
+    clang_format (HDF5_TEST_SRC_FORMAT ${HDF5_TEST_LIBSH_TARGET})
+  endif ()
 endif ()
 
 #################################################################################
@@ -91,11 +103,18 @@ if (BUILD_SHARED_LIBS)
     set (HDF5_TEST_PLUGIN_TARGET            ${HDF5_TEST_PLUGIN_CORENAME})
 
     add_library (${HDF5_TEST_PLUGIN_TARGET} SHARED ${HDF5_TEST_SOURCE_DIR}/${plugin_name}.c)
-    target_include_directories (${HDF5_TEST_PLUGIN_TARGET} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+    target_include_directories (${HDF5_TEST_PLUGIN_TARGET} PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
     TARGET_C_PROPERTIES (${HDF5_TEST_PLUGIN_TARGET} SHARED)
     target_link_libraries (${HDF5_TEST_PLUGIN_TARGET} PUBLIC ${HDF5_TEST_LIBSH_TARGET})
     H5_SET_LIB_OPTIONS (${HDF5_TEST_PLUGIN_TARGET} ${HDF5_TEST_PLUGIN_NAME} SHARED "LIB")
     set_target_properties (${HDF5_TEST_PLUGIN_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN)
+
+    #-----------------------------------------------------------------------------
+    # Add Target to clang-format
+    #-----------------------------------------------------------------------------
+    if (HDF5_ENABLE_FORMATTERS)
+      clang_format (HDF5_TEST_${HDF5_TEST_PLUGIN_TARGET}_FORMAT ${HDF5_TEST_PLUGIN_TARGET})
+    endif ()
 
     #-----------------------------------------------------------------------------
     # Copy the filter plugin to a plugins folder
@@ -116,11 +135,18 @@ if (BUILD_SHARED_LIBS)
     set (HDF5_TEST_PLUGIN_TARGET            ${HDF5_TEST_PLUGIN_CORENAME})
 
     add_library (${HDF5_TEST_PLUGIN_TARGET} SHARED ${HDF5_TEST_SOURCE_DIR}/${plugin_name}.c)
-    target_include_directories (${HDF5_TEST_PLUGIN_TARGET} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+    target_include_directories (${HDF5_TEST_PLUGIN_TARGET} PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
     TARGET_C_PROPERTIES (${HDF5_TEST_PLUGIN_TARGET} SHARED)
     target_link_libraries (${HDF5_TEST_PLUGIN_TARGET} PUBLIC ${HDF5_TEST_LIBSH_TARGET})
     H5_SET_LIB_OPTIONS (${HDF5_TEST_PLUGIN_TARGET} ${HDF5_TEST_PLUGIN_NAME} SHARED "LIB")
     set_target_properties (${HDF5_TEST_PLUGIN_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN)
+
+    #-----------------------------------------------------------------------------
+    # Add Target to clang-format
+    #-----------------------------------------------------------------------------
+    if (HDF5_ENABLE_FORMATTERS)
+      clang_format (HDF5_TEST_${HDF5_TEST_PLUGIN_TARGET}_FORMAT ${HDF5_TEST_PLUGIN_TARGET})
+    endif ()
 
     #-----------------------------------------------------------------------------
     # Copy the filter plugin to a plugins folder
@@ -153,11 +179,18 @@ if (BUILD_SHARED_LIBS)
     set (HDF5_VOL_PLUGIN_LIB_TARGET             ${HDF5_VOL_PLUGIN_LIB_CORENAME})
 
     add_library (${HDF5_VOL_PLUGIN_LIB_TARGET} SHARED ${HDF5_TEST_SOURCE_DIR}/${vol_lib}.c)
-    target_include_directories (${HDF5_VOL_PLUGIN_LIB_TARGET} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+    target_include_directories (${HDF5_VOL_PLUGIN_LIB_TARGET} PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
     TARGET_C_PROPERTIES (${HDF5_VOL_PLUGIN_LIB_TARGET} SHARED)
     target_link_libraries (${HDF5_VOL_PLUGIN_LIB_TARGET} PUBLIC ${HDF5_TEST_LIBSH_TARGET})
     H5_SET_LIB_OPTIONS (${HDF5_VOL_PLUGIN_LIB_TARGET} ${HDF5_VOL_PLUGIN_LIB_NAME} SHARED "LIB")
     set_target_properties (${HDF5_VOL_PLUGIN_LIB_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN)
+
+    #-----------------------------------------------------------------------------
+    # Add Target to clang-format
+    #-----------------------------------------------------------------------------
+    if (HDF5_ENABLE_FORMATTERS)
+      clang_format (HDF5_TEST_${HDF5_VOL_PLUGIN_LIB_TARGET}_FORMAT ${HDF5_VOL_PLUGIN_LIB_TARGET})
+    endif ()
 
     #-----------------------------------------------------------------------------
     # Copy VOL plugin to a plugins folder
@@ -178,6 +211,7 @@ endif ()
 #################################################################################
 
 set (testhdf5_SOURCES
+    ${HDF5_TEST_SOURCE_DIR}/testhdf5.h
     ${HDF5_TEST_SOURCE_DIR}/testhdf5.c
     ${HDF5_TEST_SOURCE_DIR}/tarray.c
     ${HDF5_TEST_SOURCE_DIR}/tattr.c
@@ -217,6 +251,7 @@ set(mirror_vfd_SOURCES
 )
 
 set (ttsafe_SOURCES
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe.h
     ${HDF5_TEST_SOURCE_DIR}/ttsafe.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_dcreate.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_error.c
@@ -301,7 +336,7 @@ set (H5_TESTS
 
 macro (ADD_H5_EXE file)
   add_executable (${file} ${HDF5_TEST_SOURCE_DIR}/${file}.c)
-  target_include_directories (${file} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_TEST_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (${file} PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};${HDF5_TEST_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   target_compile_options(${file} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
   if (NOT BUILD_SHARED_LIBS)
     TARGET_C_PROPERTIES (${file} STATIC)
@@ -311,6 +346,13 @@ macro (ADD_H5_EXE file)
     target_link_libraries (${file} PRIVATE ${HDF5_TEST_LIBSH_TARGET})
   endif ()
   set_target_properties (${file} PROPERTIES FOLDER test)
+
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_TEST_${file}_FORMAT ${file})
+  endif ()
 endmacro ()
 
 set (H5_TESTS_MULTIPLE
@@ -336,7 +378,7 @@ endforeach ()
 #-- Adding test for chunk_info
 add_executable (chunk_info ${HDF5_TEST_SOURCE_DIR}/chunk_info.c)
 target_compile_options(chunk_info PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-target_include_directories (chunk_info PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_TEST_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+target_include_directories (chunk_info PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};${HDF5_TEST_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 if (NOT BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (chunk_info STATIC)
   target_link_libraries (chunk_info PRIVATE ${HDF5_TEST_LIB_TARGET} ${LINK_COMP_LIBS})
@@ -346,10 +388,17 @@ else ()
 endif ()
 set_target_properties (chunk_info PROPERTIES FOLDER test)
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TEST_SRC_chunk_info_FORMAT chunk_info)
+endif ()
+
 #-- Adding test for direct_chunk
 add_executable (direct_chunk ${HDF5_TEST_SOURCE_DIR}/direct_chunk.c)
 target_compile_options(direct_chunk PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-target_include_directories (direct_chunk PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_TEST_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+target_include_directories (direct_chunk PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};${HDF5_TEST_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 if (NOT BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (direct_chunk STATIC)
   target_link_libraries (direct_chunk PRIVATE ${HDF5_TEST_LIB_TARGET} ${LINK_COMP_LIBS})
@@ -359,12 +408,18 @@ else ()
 endif ()
 set_target_properties (direct_chunk PROPERTIES FOLDER test)
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TEST_direct_chunk_FORMAT direct_chunk)
+endif ()
 
 ######### Special handling for multiple sources #############
 #-- Adding test for testhdf5
 add_executable (testhdf5 ${testhdf5_SOURCES})
 target_compile_options(testhdf5 PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-target_include_directories (testhdf5 PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+target_include_directories (testhdf5 PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 if (NOT BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (testhdf5 STATIC)
   target_link_libraries (testhdf5 PRIVATE ${HDF5_TEST_LIB_TARGET})
@@ -374,10 +429,17 @@ else ()
 endif ()
 set_target_properties (testhdf5 PROPERTIES FOLDER test)
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TEST_testhdf5_FORMAT testhdf5)
+endif ()
+
 #-- Adding test for cache_image
 add_executable (cache_image ${cache_image_SOURCES})
 target_compile_options(cache_image PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-target_include_directories (cache_image PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+target_include_directories (cache_image PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 if (NOT BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (cache_image STATIC)
   target_link_libraries (cache_image PRIVATE ${HDF5_TEST_LIB_TARGET})
@@ -387,10 +449,17 @@ else ()
 endif ()
 set_target_properties (cache_image PROPERTIES FOLDER test)
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TEST_cache_image_FORMAT cache_image)
+endif ()
+
 #-- Adding test for ttsafe
 add_executable (ttsafe ${ttsafe_SOURCES})
 target_compile_options(ttsafe PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-target_include_directories (ttsafe PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+target_include_directories (ttsafe PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 if (NOT BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (ttsafe STATIC)
   target_link_libraries (ttsafe PRIVATE ${HDF5_TEST_LIB_TARGET})
@@ -405,11 +474,18 @@ else ()
 endif ()
 set_target_properties (ttsafe PROPERTIES FOLDER test)
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TEST_ttsafe_FORMAT ttsafe)
+endif ()
+
 ######### Special handling for extra link lib of threads #############
 #-- Adding test for thread_id
 add_executable (thread_id ${HDF5_TEST_SOURCE_DIR}/thread_id.c)
 target_compile_options(thread_id PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-target_include_directories (thread_id PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+target_include_directories (thread_id PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 if (NOT BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (thread_id STATIC)
   target_link_libraries (thread_id PRIVATE ${HDF5_TEST_LIB_TARGET})
@@ -424,9 +500,16 @@ else ()
 endif ()
 set_target_properties (thread_id PROPERTIES FOLDER test)
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TEST_thread_id_FORMAT thread_id)
+endif ()
+
 #-- Adding test for mirror_vfd
 add_executable (mirror_vfd ${mirror_vfd_SOURCES})
-target_include_directories (mirror_vfd PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+target_include_directories (mirror_vfd PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 if (NOT BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (mirror_vfd STATIC)
   target_link_libraries (mirror_vfd PRIVATE ${HDF5_TEST_LIB_TARGET})
@@ -435,6 +518,13 @@ else ()
   target_link_libraries (mirror_vfd PRIVATE ${HDF5_TEST_LIBSH_TARGET})
 endif ()
 set_target_properties (mirror_vfd PROPERTIES FOLDER test)
+
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TEST_mirror_vfd_FORMAT mirror_vfd)
+endif ()
 
 ##############################################################################
 ###           A D D I T I O N A L   T E S T S                              ###
@@ -496,8 +586,29 @@ set (H5_VDS_SWMR_TESTS
     vds_swmr_writer
 )
 
+macro (ADD_H5_VDS_EXE file)
+  add_executable (${file} ${HDF5_TEST_SOURCE_DIR}/${file}.c ${HDF5_TEST_SOURCE_DIR}/vds_swmr.h)
+  target_include_directories (${file} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_TEST_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_compile_options(${file} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
+  if (NOT BUILD_SHARED_LIBS)
+    TARGET_C_PROPERTIES (${file} STATIC)
+    target_link_libraries (${file} PRIVATE ${HDF5_TEST_LIB_TARGET})
+  else ()
+    TARGET_C_PROPERTIES (${file} SHARED)
+    target_link_libraries (${file} PRIVATE ${HDF5_TEST_LIBSH_TARGET})
+  endif ()
+  set_target_properties (${file} PROPERTIES FOLDER test)
+
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_TEST_${file}_FORMAT ${file})
+  endif ()
+endmacro ()
+
 foreach (h5_test ${H5_VDS_SWMR_TESTS})
-  ADD_H5_EXE(${h5_test})
+  ADD_H5_VDS_EXE(${h5_test})
 endforeach ()
 
 #-- Adding test for accum_swmr_reader
@@ -505,7 +616,7 @@ endforeach ()
 #   and it can't be renamed (i.e., no <foo>-shared).
 add_executable (accum_swmr_reader ${HDF5_TEST_SOURCE_DIR}/accum_swmr_reader.c)
 target_compile_options(accum_swmr_reader PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-target_include_directories (accum_swmr_reader PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+target_include_directories (accum_swmr_reader PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 if (NOT BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (accum_swmr_reader STATIC)
   target_link_libraries (accum_swmr_reader PRIVATE ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
@@ -515,6 +626,13 @@ else ()
 endif ()
 set_target_properties (accum_swmr_reader PROPERTIES FOLDER test)
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TEST_accum_swmr_reader_FORMAT accum_swmr_reader)
+endif ()
+
 #-- Set accum dependencies
 set_target_properties (accum PROPERTIES DEPENDS accum_swmr_reader)
 
@@ -523,25 +641,39 @@ set_target_properties (accum PROPERTIES DEPENDS accum_swmr_reader)
 ##############################################################################
 if (BUILD_SHARED_LIBS)
   add_executable (filter_plugin ${HDF5_TEST_SOURCE_DIR}/filter_plugin.c)
-  target_include_directories (filter_plugin PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (filter_plugin PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (filter_plugin SHARED)
   target_link_libraries (filter_plugin PRIVATE ${HDF5_TEST_LIBSH_TARGET})
   set_target_properties (filter_plugin PROPERTIES FOLDER test)
 
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_TEST_filter_plugin_FORMAT filter_plugin)
+  endif ()
+
   add_executable (vol_plugin ${HDF5_TEST_SOURCE_DIR}/vol_plugin.c)
-  target_include_directories (vol_plugin PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (vol_plugin PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (vol_plugin SHARED)
   target_link_libraries (vol_plugin PRIVATE ${HDF5_TEST_LIBSH_TARGET})
   set_target_properties (vol_plugin PROPERTIES FOLDER test)
+
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_TEST_vol_plugin_FORMAT vol_plugin)
+  endif ()
 endif ()
 
 ##############################################################################
 ###    U S E  C A S E S  T E S T S
 ##############################################################################
-set (use_append_chunk_SOURCES ${HDF5_TEST_SOURCE_DIR}/use_append_chunk.c ${HDF5_TEST_SOURCE_DIR}/use_common.c)
+set (use_append_chunk_SOURCES ${HDF5_TEST_SOURCE_DIR}/use_append_chunk.c ${HDF5_TEST_SOURCE_DIR}/use_common.c ${HDF5_TEST_SOURCE_DIR}/use.h)
 add_executable (use_append_chunk ${use_append_chunk_SOURCES})
 target_compile_options(use_append_chunk PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-target_include_directories (use_append_chunk PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+target_include_directories (use_append_chunk PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 if (NOT BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (use_append_chunk STATIC)
   target_link_libraries (use_append_chunk PRIVATE ${HDF5_TEST_LIB_TARGET})
@@ -551,10 +683,37 @@ else ()
 endif ()
 set_target_properties (use_append_chunk PROPERTIES FOLDER test)
 
-set (use_append_mchunks_SOURCES ${HDF5_TEST_SOURCE_DIR}/use_append_mchunks.c ${HDF5_TEST_SOURCE_DIR}/use_common.c)
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TEST_use_append_chunk_FORMAT use_append_chunk)
+endif ()
+
+set (use_append_chunk_mirror_SOURCES ${HDF5_TEST_SOURCE_DIR}/use_append_chunk_mirror.c ${HDF5_TEST_SOURCE_DIR}/use_common.c ${HDF5_TEST_SOURCE_DIR}/use.h)
+add_executable (use_append_chunk_mirror ${use_append_chunk_mirror_SOURCES})
+target_compile_options(use_append_chunk_mirror PRIVATE "${HDF5_CMAKE_C_FLAGS}")
+target_include_directories (use_append_chunk_mirror PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+if (NOT BUILD_SHARED_LIBS)
+  TARGET_C_PROPERTIES (use_append_chunk_mirror STATIC)
+  target_link_libraries (use_append_chunk_mirror PRIVATE ${HDF5_TEST_LIB_TARGET})
+else ()
+  TARGET_C_PROPERTIES (use_append_chunk_mirror SHARED)
+  target_link_libraries (use_append_chunk_mirror PRIVATE ${HDF5_TEST_LIBSH_TARGET})
+endif ()
+set_target_properties (use_append_chunk_mirror PROPERTIES FOLDER test)
+
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TEST_use_append_chunk_mirror_FORMAT use_append_chunk_mirror)
+endif ()
+
+set (use_append_mchunks_SOURCES ${HDF5_TEST_SOURCE_DIR}/use_append_mchunks.c ${HDF5_TEST_SOURCE_DIR}/use_common.c ${HDF5_TEST_SOURCE_DIR}/use.h)
 add_executable (use_append_mchunks ${use_append_mchunks_SOURCES})
 target_compile_options(use_append_mchunks PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-target_include_directories (use_append_mchunks PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+target_include_directories (use_append_mchunks PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 if (NOT BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (use_append_mchunks STATIC)
   target_link_libraries (use_append_mchunks PRIVATE ${HDF5_TEST_LIB_TARGET})
@@ -564,10 +723,17 @@ else ()
 endif ()
 set_target_properties (use_append_mchunks PROPERTIES FOLDER test)
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TEST_use_append_mchunks_FORMAT use_append_mchunks)
+endif ()
+
 set (use_disable_mdc_flushes_SOURCES ${HDF5_TEST_SOURCE_DIR}/use_disable_mdc_flushes.c)
 add_executable (use_disable_mdc_flushes ${use_disable_mdc_flushes_SOURCES})
 target_compile_options(use_disable_mdc_flushes PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-target_include_directories (use_disable_mdc_flushes PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+target_include_directories (use_disable_mdc_flushes PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 if (NOT BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (use_disable_mdc_flushes STATIC)
   target_link_libraries (use_disable_mdc_flushes PRIVATE ${HDF5_TEST_LIB_TARGET})
@@ -576,6 +742,13 @@ else ()
   target_link_libraries (use_disable_mdc_flushes PRIVATE ${HDF5_TEST_LIBSH_TARGET})
 endif ()
 set_target_properties (use_disable_mdc_flushes PROPERTIES FOLDER test)
+
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TEST_use_disable_mdc_flushes_FORMAT use_disable_mdc_flushes)
+endif ()
 
 if (HDF5_TEST_SERIAL)
   include (CMakeTests.cmake)

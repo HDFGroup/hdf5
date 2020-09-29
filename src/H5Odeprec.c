@@ -13,7 +13,7 @@
 
 /*-------------------------------------------------------------------------
  *
- * Purpose:	Deprecated functions from the H5O interface.  These
+ * Purpose:     Deprecated functions from the H5O interface.  These
  *              functions are here for compatibility purposes and may be
  *              removed in the future.  Applications should switch to the
  *              newer APIs.

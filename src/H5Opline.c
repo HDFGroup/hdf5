@@ -12,8 +12,8 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:    Robb Matzke
- *                Wednesday, April 15, 1998
+ * Programmer:  Robb Matzke
+ *              Wednesday, April 15, 1998
  *
  * Purpose:     Data filter pipeline message.
  */
@@ -655,7 +655,7 @@ H5O__pline_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream,
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %Zu/%Zu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %zu/%zu\n", indent, "", fwidth,
         "Number of filters:",
         pline->nused,
         pline->nalloc);
@@ -664,7 +664,7 @@ H5O__pline_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream,
     for(i = 0; i < pline->nused; i++) {
         char        name[32];
 
-        HDsnprintf(name, sizeof(name), "Filter at position %u", (unsigned)i);
+        HDsnprintf(name, sizeof(name), "Filter at position %zu", i);
         HDfprintf(stream, "%*s%-*s\n", indent, "", fwidth, name);
         HDfprintf(stream, "%*s%-*s 0x%04x\n", indent + 3, "", MAX(0, fwidth - 3),
             "Filter identification:",
@@ -679,7 +679,7 @@ H5O__pline_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream,
         HDfprintf(stream, "%*s%-*s 0x%04x\n", indent + 3, "", MAX(0, fwidth - 3),
             "Flags:",
             pline->filter[i].flags);
-        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", MAX(0, fwidth - 3),
+        HDfprintf(stream, "%*s%-*s %zu\n", indent + 3, "", MAX(0, fwidth - 3),
             "Num CD values:",
             pline->filter[i].cd_nelmts);
 

@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <robb@arborea.spizella.com>
+ * Programmer:  Robb Matzke
  *              Thursday, October  1, 1998
  *
  * Purpose:    Tests dataset fill values.
@@ -805,7 +805,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
         if(fill_time!=H5D_FILL_TIME_NEVER && val_rd!=fillval) {
             H5_FAILED();
                 HDfprintf(stdout, "%u: Value read was not a fill value.\n", (unsigned)__LINE__);
-            HDfprintf(stdout,"    Elmt={%Hu,%Hu,%Hu,%Hu,%Hu}, read: %u, "
+            HDfprintf(stdout,"    Elmt={%" PRIuHSIZE ",%" PRIuHSIZE ",%" PRIuHSIZE ",%" PRIuHSIZE ",%" PRIuHSIZE "}, read: %u, "
             "Fill value: %u\n",
             hs_offset[0], hs_offset[1],
             hs_offset[2], hs_offset[3],
@@ -822,7 +822,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
                     rd_c.z != fill_c.z)) {
                 H5_FAILED();
                 HDfprintf(stdout, "%u: Value read was not a fill value.\n", (unsigned)__LINE__);
-                HDfprintf(stdout,"    Elmt={%Hu,%Hu,%Hu,%Hu,%Hu}, read: %f, %d, %f, %c"
+                HDfprintf(stdout,"    Elmt={%" PRIuHSIZE ",%" PRIuHSIZE ",%" PRIuHSIZE ",%" PRIuHSIZE ",%" PRIuHSIZE "}, read: %f, %d, %f, %c"
                        "Fill value: %f, %d, %f, %c\n",
                        hs_offset[0], hs_offset[1],
                        hs_offset[2], hs_offset[3],
@@ -862,7 +862,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
                 if(buf[u] != fillval) {
                     H5_FAILED();
                     HDfprintf(stdout, "%u: Value read was not a fill value.\n", (unsigned)__LINE__);
-                    HDfprintf(stdout,"    Elmt={%Hu, %Hu, %Hu, %Hu, %Hu}, read: %u, "
+                    HDfprintf(stdout,"    Elmt={%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE "}, read: %u, "
                            "Fill value: %u\n",
                            hs_offset[0], hs_offset[1],
                            hs_offset[2], hs_offset[3],
@@ -889,7 +889,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
                         !H5_DBL_ABS_EQUAL(buf_c[u].y, fill_c.y) || buf_c[u].z != fill_c.z) {
                     H5_FAILED();
                     HDfprintf(stdout, "%u: Value read was not a fill value.\n", (unsigned)__LINE__);
-                    HDfprintf(stdout,"    Elmt={%Hu, %Hu, %Hu, %Hu, %Hu}, read: %f, %d, %f, %c"
+                    HDfprintf(stdout,"    Elmt={%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE "}, read: %f, %d, %f, %c"
                             "Fill value: %f, %d, %f, %c\n",
                             hs_offset[0], hs_offset[1],
                             hs_offset[2], hs_offset[3],
@@ -1284,7 +1284,7 @@ test_extend_verify_integer(unsigned lineno, const hsize_t *offset,
     /* Verify value */
     if(*test_val != *compare_val) {
         HDfprintf(stdout, "%u: Value read was not expected.\n", lineno);
-        HDfprintf(stdout,"    Elmt = {%Hu, %Hu, %Hu, %Hu, %Hu}, read: %d, "
+        HDfprintf(stdout,"    Elmt = {%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE "}, read: %d, "
                 "expected: %d\n",
                 offset[0], offset[1],
                 offset[2], offset[3],
@@ -1380,7 +1380,7 @@ test_extend_verify_cmpd_vl(unsigned lineno, const hsize_t *offset,
             HDstrcmp(test_val->b, compare_val->b) ||
             (test_val->y != compare_val->y)) {
         HDfprintf(stdout, "%u: Value read was not expected.\n", lineno);
-        HDfprintf(stdout,"    Elmt = {%Hu, %Hu, %Hu, %Hu, %Hu}, read: {%d, '%s', '%s', %d} "
+        HDfprintf(stdout,"    Elmt = {%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE "}, read: {%d, '%s', '%s', %d} "
                 "expected: {%d, '%s', '%s', %d}\n",
                 offset[0], offset[1], offset[2], offset[3], offset[4],
                 test_val->x, test_val->a, test_val->b, test_val->y,

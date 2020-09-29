@@ -834,7 +834,7 @@ H5O__link_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream,
                   (lnk->type >= H5L_TYPE_UD_MIN ? "User-defined" : "Unknown")))));
 
     if(lnk->corder_valid)
-        HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+        HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
                   "Creation Order:", lnk->corder);
 
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
@@ -846,7 +846,7 @@ H5O__link_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream,
     /* Display link-specific information */
     switch(lnk->type) {
         case H5L_TYPE_HARD:
-            HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
                       "Object address:", lnk->u.hard.addr);
             break;
 
@@ -864,12 +864,13 @@ H5O__link_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream,
                     const char *objname = (const char *)lnk->u.ud.udata + (HDstrlen((const char *)lnk->u.ud.udata) + 1);
 
                     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-                              "External File Name:", lnk->u.ud.udata);
+                              "External File Name:",
+                              (const char *)lnk->u.ud.udata);
                     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                               "External Object Name:", objname);
                 } /* end if */
                 else {
-                    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+                    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
                               "User-Defined Link Size:", lnk->u.ud.size);
                 } /* end else */
             } /* end if */

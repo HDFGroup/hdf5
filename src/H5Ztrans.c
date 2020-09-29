@@ -571,10 +571,10 @@ H5Z__xform_destroy_parse_tree(H5Z_node *tree)
     FUNC_ENTER_STATIC_NOERR
 
     if(tree) {
-	H5Z__xform_destroy_parse_tree(tree->lchild);
-	H5Z__xform_destroy_parse_tree(tree->rchild);
-	H5MM_xfree(tree);
-	tree = NULL;
+        H5Z__xform_destroy_parse_tree(tree->lchild);
+        H5Z__xform_destroy_parse_tree(tree->rchild);
+        H5MM_xfree(tree);
+        tree = NULL;
     }
 
     FUNC_LEAVE_NOAPI_VOID
