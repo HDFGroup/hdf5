@@ -95,7 +95,7 @@ typedef struct H5VL_subfiling_file_t {
     hid_t                     fcpl_id;
     hid_t                     fapl_id;
     MPI_Comm                  comm;
-    MPI_Info                  info;
+    H5VL_subfiling_info_t    *info;
     int                       my_rank;
     int                       num_procs;
     int                       nobjs;
@@ -1927,6 +1927,7 @@ H5VL_subfiling_file_create(const char *name, unsigned flags, hid_t fcpl_id,
 		memset(subfiling_file, 0, sizeof(H5VL_subfiling_file_t));
 		file->obj.item.type = H5I_FILE;
 		file->obj.item.file = subfiling_file;
+		file->info = info;
 
         /* Check for async request */
         if(req && *req)
