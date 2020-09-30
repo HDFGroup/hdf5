@@ -3720,7 +3720,6 @@ H5_DLL herr_t H5Pget_fill_value(hid_t plist_id, hid_t type_id,
  *
  */
 H5_DLL H5D_layout_t H5Pget_layout(hid_t plist_id);
-
 /**
  *-------------------------------------------------------------------------
  *
@@ -4528,10 +4527,176 @@ H5_DLL herr_t H5Pget_chunk_cache(hid_t dapl_id,
  *
  */
 H5_DLL ssize_t H5Pget_efile_prefix(hid_t dapl_id, char* prefix /*out*/, size_t size);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DAPL
+ *
+ * \brief Retrieves prefix applied to VDS source file paths
+ *
+ * \dapl_id
+ * \param[out] prefix Prefix applied to VDS source file paths
+ * \param[in]  size   Size of prefix, including null terminator
+ *
+ * \return If successful, returns a non-negative value specifying the size
+ *         in bytes of the prefix without the NULL terminator; otherwise
+ *         returns a negative value.
+ *
+ * \details H5Pget_virtual_prefix() retrieves the prefix applied to the
+ *          path of any VDS source files traversed.
+ *
+ *          When an VDS source file is traversed, the prefix is retrieved
+ *          from the dataset access property list \p dapl_id, returned
+ *          in the user-allocated buffer pointed to by \p prefix, and
+ *          prepended to the filename stored in the VDS virtual file, set
+ *          with H5Pset_virtual().
+ *
+ *          The size in bytes of the prefix, including the NULL terminator,
+ *          is specified in \p size. If \p size is unknown, a preliminary
+ *          H5Pget_virtual_prefix() call with the pointer \p prefix set to
+ *          NULL will return the size of the prefix without the NULL
+ *          terminator.
+ *
+ * \virtual
+ *
+ * \since 1.10.2
+ *
+ */
 H5_DLL ssize_t H5Pget_virtual_prefix(hid_t dapl_id, char* prefix /*out*/, size_t size);
-H5_DLL herr_t H5Pget_virtual_printf_gap(hid_t plist_id, hsize_t *gap_size);
-H5_DLL herr_t H5Pget_virtual_view(hid_t plist_id, H5D_vds_view_t *view);
-H5_DLL herr_t H5Pset_append_flush(hid_t plist_id, unsigned ndims,
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DAPL
+ *
+ * \brief Retrieves prefix applied to VDS source file paths
+ *
+ * \dapl_id
+ * \param[out] gap_size Maximum number of the files and/or datasets
+ *                      allowed to be missing for determining the extent
+ *                      of an unlimited virtual dataset with printf-style
+ *                      mappings. (\em Default: 0)
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_virtual_printf_gap() returns the maximum number of
+ *          missing printf-style files and/or datasets for determining the
+ *          extent of an unlimited virtual dataaset, \p gap_size, using
+ *          the access property list for the virtual dataset, \p dapl_id.
+ *
+ * The default library value for gap_size is 0 (zero).
+ *
+ * \since 1.10.0
+ *
+ */
+H5_DLL herr_t H5Pget_virtual_printf_gap(hid_t dapl_id, hsize_t *gap_size);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DAPL
+ *
+ * \brief Retrieves the view of a virtual dataset accessed with
+ *        \p dapl_id
+ *
+ * \dapl_id
+ * \param[out] view The flag specifying the view of the virtual dataset.
+ *                  Valid values are:
+ *                  \li #H5D_VDS_FIRST_MISSING
+ *                  \li #H5D_VDS_LAST_AVAILABLE
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_virtual_view() takes the virtual dataset access property
+ *          list, \p dapl_id, and retrieves the flag, \p view, set by the
+ *          H5Pset_virtual_view() call.
+ *
+ * \virtual
+ *
+ * \since 1.10.0
+ *
+ */
+H5_DLL herr_t H5Pget_virtual_view(hid_t dapl_id, H5D_vds_view_t *view);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DAPL
+ *
+ * \brief Sets two actions to perform when the size of a dataset’s
+ *        dimension being appended reaches a specified boundary
+ *
+ * \dapl_id
+ * \param[in] ndims    The number of elements for boundary
+ * \param[in] boundary The dimension sizes used to determine the boundary
+ * \param[in] func     The user-defined callback function
+ * \param[in] udata    The user-defined input data
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_append_flush() sets the following two actions to
+ *          perform for a dataset associated with the dataset access
+ *          property list \p dapl_id:
+ *
+ *          \li Call the callback function \p func set in the property
+ *              list
+ *          \li Flush the dataset associated with the dataset access
+ *              property list
+ *
+ *          When a user is appending data to a dataset via H5DOappend()
+ *          and the dataset’s newly extended dimension size hits a
+ *          specified boundary, the library will perform the first action
+ *          listed above. Upon return from the callback function, the
+ *          library will then perform the second action listed above and
+ *          return to the user. If no boundary is hit or set, the two
+ *          actions above are not invoked.
+ *
+ *          The specified boundary is indicated by the parameter
+ *          \p boundary. It is a 1-dimensional array with \p ndims
+ *          elements, which should be the same as the rank of the
+ *          dataset’s dataspace. While appending to a dataset along a
+ *          particular dimension index via H5DOappend(), the library
+ *          determines a boundary is reached when the resulting dimension
+ *          size is divisible by \p boundary[index]. A zero value for
+ *          \p boundary[index] indicates no boundary is set for that
+ *          dimension index.
+ *
+ *          The setting of this property will apply only for a chunked
+ *          dataset with an extendible dataspace. A dataspace is extendible
+ *          when it is defined with either one of the following:
+ *
+ *          \li A dataspace with fixed current and maximum dimension sizes
+ *          \li A dataspace with at least one unlimited dimension for its
+ *              maximum dimension size
+ *
+ *          When creating or opening a chunked dataset, the library will
+ *          check whether the boundary as specified in the access property
+ *          list is set up properly. The library will fail the dataset
+ *          create or open if the following conditions are true:
+ *
+ *          \li \p ndims, the number of elements for boundary, is not the
+ *              same as the rank of the dataset’s dataspace.
+ *          \li A non-zero boundary value is specified for a non-extendible
+ *          dimension.
+ *
+ *          The callback function \p func must conform to the following
+ *          prototype:
+ *          \Code{typedef herr_t (#H5D_append_cb_t)(hid_t dataset_id,
+ *                                    hsize_t *cur_dims, void *user_data)}
+ *
+ *          The parameters of the callback function, per the above
+ *          prototype, are defined as follows:
+ *
+ *          \li \p dataset_id is the dataset identifier.
+ *          \li \p cur_dims is the dataset’s current dimension sizes when
+ *              a boundary is hit.
+ *          \li \p user_data is the user-defined input data.
+ *
+ * \todo Example Usage was removed and should be added back.
+ * \todo Adding snippet for H5D_append_cb_t_snip did not work.
+ * \todo H5DOappend() not found
+ *
+ * \since 1.10.0
+ *
+ */
+H5_DLL herr_t H5Pset_append_flush(hid_t dapl_id, unsigned ndims,
     const hsize_t boundary[], H5D_append_cb_t func, void *udata);
 /**
  *-------------------------------------------------------------------------
@@ -4726,9 +4891,118 @@ H5_DLL herr_t H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots,
  *
  */
 H5_DLL herr_t H5Pset_efile_prefix(hid_t dapl_id, const char* prefix);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DAPL
+ *
+ * \brief Sets prefix to be applied to VDS source file paths
+ *
+ * \dapl_id
+ * \param[in] prefix Prefix to be applied to VDS source file paths
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_virtual_prefix() sets the prefix to be applied to the
+ *          path of any VDS source files traversed. The prefix is prepended
+ *          to the filename stored in the VDS virtual file, set with
+ *          H5Pset_virtual().
+ *
+ *          The prefix is specified in the user-allocated buffer \p prefix
+ *          and set in the dataset access property list \p dapl_id. The
+ *          buffer should not be freed until the property list has been
+ *          closed.
+ *
+ * \virtual
+ *
+ * \since 1.10.2
+ *
+ */
 H5_DLL herr_t H5Pset_virtual_prefix(hid_t dapl_id, const char* prefix);
-H5_DLL herr_t H5Pset_virtual_printf_gap(hid_t plist_id, hsize_t gap_size);
-H5_DLL herr_t H5Pset_virtual_view(hid_t plist_id, H5D_vds_view_t view);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DAPL
+ *
+ * \brief Sets the maximum number of missing source files and/or datasets
+ *        with the printf-style names when getting the extent of an
+ *        unlimited virtual dataset
+ *
+ * \dapl_id
+ * \param[in] gap_size Maximum number of files and/or datasets allowed to
+ *                     be missing for determining the extent of an
+ *                     unlimited virtual dataset with printf-style
+ *                     mappings (<em>Default value</em>: 0)
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_virtual_printf_gap() sets the access property list for
+ *          the virtual dataset, \p dapl_id, to instruct the library to
+ *          stop looking for the mapped data stored in the files and/or
+ *          datasets with the printf-style names after not finding
+ *          \p gap_size files and/or datasets. The found source files and
+ *          datasets will determine the extent of the unlimited virtual
+ *          dataset with the printf-style mappings.
+ *
+ *          Consider the following examples where the regularly spaced
+ *          blocks of a virtual dataset are mapped to datasets with the
+ *          names d-1, d-2, d-3, ..., d-N, ... :
+ *
+ *          \li If the dataset d-2 is missing and \p gap_size is set to 0,
+ *              then the virtual dataset will contain only data found
+ *              in d-1.
+ *          \li If d-2 and d-3 are missing and \p gap_size is set to 2,
+ *              then the virtual dataset will contain the data from
+ *              d-1, d-3, ..., d-N, ... .  The blocks that are mapped to
+ *              d-2 and d-3 will be filled according to the virtual
+ *              dataset’s fill value setting.
+ *
+ * \virtual
+ *
+ * \since 1.10.0
+ *
+ */
+H5_DLL herr_t H5Pset_virtual_printf_gap(hid_t dapl_id, hsize_t gap_size);
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DAPL
+ *
+ * \brief Sets the view of the virtual dataset (VDS) to include or exclude
+ *        missing mapped elements
+ *
+ * \dapl_id
+ * \param[in] view Flag specifying the extent of the data to be included
+ *                 in the view. Valid values are:
+ *                 \li #H5D_VDS_FIRST_MISSING: View includes all data
+ *                     before the first missing mapped data
+ *                 \li #H5D_VDS_LAST_AVAILABLE View includes all
+ *                     available mapped data
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_virtual_view() takes the access property list for the
+ *          virtual dataset, \p dapl_id, and the flag, \p view, and sets
+ *          the VDS view according to the flag value.
+ *
+ *          If \p view is set to #H5D_VDS_FIRST_MISSING, the view includes
+ *          all data before the first missing mapped data. This setting
+ *          provides a view containing only the continuous data starting
+ *          with the dataset’s first data element. Any break in
+ *          continuity terminates the view.
+ *
+ *          If \p view is set to #H5D_VDS_LAST_AVAILABLE, the view
+ *          includes all available mapped data.
+ *
+ *          Missing mapped data is filled with the fill value set in the
+ *          VDS creation property list.
+ *
+ * \virtual
+ *
+ * \since 1.10.0
+ *
+ */
+H5_DLL herr_t H5Pset_virtual_view(hid_t dapl_id, H5D_vds_view_t view);
 
 /* Dataset xfer property list (DXPL) routines */
 H5_DLL herr_t H5Pget_btree_ratios(hid_t plist_id, double *left/*out*/,
