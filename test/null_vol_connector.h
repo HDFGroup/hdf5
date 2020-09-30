@@ -18,8 +18,7 @@
 #ifndef _null_vol_connector_H
 #define _null_vol_connector_H
 
-#define NULL_VOL_CONNECTOR_VALUE    ((H5VL_class_value_t)160)
-#define NULL_VOL_CONNECTOR_NAME     "null_vol_connector"
+#define NULL_VOL_CONNECTOR_VALUE ((H5VL_class_value_t)160)
+#define NULL_VOL_CONNECTOR_NAME  "null_vol_connector"
 
 #endif /* _null_vol_connector_H */
-

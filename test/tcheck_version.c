@@ -29,17 +29,17 @@
 
 #include "h5test.h"
 
-#define    progname    "tcheck_version"
+#define progname "tcheck_version"
 
 /* prototypes */
 void showhelp(void);
 void parse(int ac, char **av);
-void abort_intercept (int H5_ATTR_UNUSED sig);
+void abort_intercept(int H5_ATTR_UNUSED sig);
 
 /* global variables */
-unsigned    major = H5_VERS_MAJOR;
-unsigned    minor = H5_VERS_MINOR;
-unsigned    release = H5_VERS_RELEASE;
+unsigned major   = H5_VERS_MAJOR;
+unsigned minor   = H5_VERS_MINOR;
+unsigned release = H5_VERS_RELEASE;
 
 void
 showhelp(void)
@@ -53,43 +53,43 @@ showhelp(void)
     HDprintf("\t\t\tr for Release number (%d)\n", H5_VERS_RELEASE);
 }
 
-
 void
 parse(int ac, char **av)
 {
     char *pt;
 
-    while (--ac > 0){
-    pt = *(++av);
-    if (*pt != '-') {
-        HDfprintf(stderr, "Unknown option(%s). Aborted.\n", *av);
-        HDexit(EXIT_FAILURE);
-    }else{
-        switch(*(++pt)) {
-        case 't':     /* option -t */
-            switch(*(++pt)) {
-            case 'M':
-                major++;
-                break;
-            case 'm':
-                minor++;
-                break;
-            case 'r':
-                release++;
-                break;
-            default:
-                HDfprintf(stderr, "Unknown -v parameter (%s). Aborted.\n", *av);
-                HDexit(EXIT_FAILURE);
-            }
-            break;
-        case 'h':    /* help page */
-            showhelp();
-            HDexit(EXIT_SUCCESS);
-        default:
+    while (--ac > 0) {
+        pt = *(++av);
+        if (*pt != '-') {
             HDfprintf(stderr, "Unknown option(%s). Aborted.\n", *av);
             HDexit(EXIT_FAILURE);
         }
-    }
+        else {
+            switch (*(++pt)) {
+                case 't': /* option -t */
+                    switch (*(++pt)) {
+                        case 'M':
+                            major++;
+                            break;
+                        case 'm':
+                            minor++;
+                            break;
+                        case 'r':
+                            release++;
+                            break;
+                        default:
+                            HDfprintf(stderr, "Unknown -v parameter (%s). Aborted.\n", *av);
+                            HDexit(EXIT_FAILURE);
+                    }
+                    break;
+                case 'h': /* help page */
+                    showhelp();
+                    HDexit(EXIT_SUCCESS);
+                default:
+                    HDfprintf(stderr, "Unknown option(%s). Aborted.\n", *av);
+                    HDexit(EXIT_FAILURE);
+            }
+        }
     }
 }
 
@@ -103,7 +103,7 @@ parse(int ac, char **av)
  * This tries to eliminate those side effects.
  */
 H5_ATTR_NORETURN void
-abort_intercept (int H5_ATTR_UNUSED sig)
+abort_intercept(int H5_ATTR_UNUSED sig)
 {
     HDexit(6);
 }

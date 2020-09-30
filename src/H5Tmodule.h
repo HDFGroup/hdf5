@@ -25,9 +25,8 @@
  *      reporting macros.
  */
 #define H5T_MODULE
-#define H5_MY_PKG       H5T
-#define H5_MY_PKG_ERR   H5E_DATATYPE
-#define H5_MY_PKG_INIT  YES
+#define H5_MY_PKG      H5T
+#define H5_MY_PKG_ERR  H5E_DATATYPE
+#define H5_MY_PKG_INIT YES
 
 #endif /* _H5Tmodule_H */
-

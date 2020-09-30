@@ -271,10 +271,3 @@ const unsigned char pal_rgb[256*3] = {
         127,0,0
 };
 /* clang-format on */
-
-
-
-
-
-
-
