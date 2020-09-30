@@ -26,9 +26,8 @@ extern "C" {
 #include <stdlib.h>
 #include "h5jni.h"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmissing-prototypes"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
+H5_GCC_DIAG_OFF("missing-prototypes")
+H5_GCC_DIAG_OFF("unused-parameter")
 
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5_1QUARTER_1HADDR_1MAX(JNIEnv *env, jclass cls) { return (hsize_t)HADDR_MAX/4; }
@@ -353,8 +352,7 @@ JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5E_1WRITEERROR(JNIEnv *env, jclass cls) { return H5E_WRITEERROR; }
 
 /* Java does not have unsigned native types */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
+H5_GCC_DIAG_OFF("sign-conversion")
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5F_1ACC_1CREAT(JNIEnv *env, jclass cls) { return H5F_ACC_CREAT; }
 JNIEXPORT jint JNICALL
@@ -371,7 +369,7 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5F_1ACC_1SWMR_1READ(JNIEnv *env, jclass cls) { return H5F_ACC_SWMR_READ; }
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5F_1ACC_1SWMR_1WRITE(JNIEnv *env, jclass cls) { return H5F_ACC_SWMR_WRITE; }
-#pragma GCC diagnostic pop
+H5_GCC_DIAG_ON("sign-conversion")
 
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5F_1CLOSE_1DEFAULT(JNIEnv *env, jclass cls) { return H5F_CLOSE_DEFAULT; }
@@ -1337,7 +1335,8 @@ Java_hdf_hdf5lib_HDF5Constants_H5Z_1SCALEOFFSET_1USER_1NPARMS(JNIEnv *env, jclas
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5Z_1FILTER_1ALL(JNIEnv *env, jclass cls) { return H5Z_FILTER_ALL; }
 
-#pragma GCC diagnostic pop
+H5_GCC_DIAG_ON("missing-prototypes")
+H5_GCC_DIAG_ON("unused-parameter")
 
 #ifdef __cplusplus
 } /* end extern "C" */

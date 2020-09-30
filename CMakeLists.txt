@@ -497,6 +497,9 @@ endif ()
 if (HDF5_ENABLE_SANITIZERS)
   include (${HDF5_SOURCE_DIR}/config/sanitizer/sanitizers.cmake)
 endif ()
+if (HDF5_ENABLE_FORMATTERS)
+  include (${HDF5_SOURCE_DIR}/config/sanitizer/formatting.cmake)
+endif ()
 
 #-----------------------------------------------------------------------------
 # Option to use code coverage

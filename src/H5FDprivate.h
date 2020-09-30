@@ -22,13 +22,13 @@
 #include "H5FDpublic.h"
 
 /* Private headers needed by this file */
-#include "H5Pprivate.h"		/* Property lists			*/
+#include "H5Pprivate.h"        /* Property lists            */
 
 /*
  * The MPI drivers are needed because there are
  * places where we check for things that aren't handled by these drivers.
  */
-#include "H5FDmpi.h"            /* MPI-based file drivers		*/
+#include "H5FDmpi.h"            /* MPI-based file drivers        */
 
 
 /**************************/
@@ -75,16 +75,16 @@ typedef struct {
 
 /* Define default file image info */
 #define H5FD_DEFAULT_FILE_IMAGE_INFO { \
-    /* file image buffer */ NULL,       \
-    /* buffer size */       0,          \
+    NULL, /* file image buffer */       \
+    0,    /* buffer size */             \
     { /* Callbacks */                   \
-        /* image_malloc */      NULL,   \
-        /* image_memcpy */      NULL,   \
-        /* image_realloc */     NULL,   \
-        /* image_free */        NULL,   \
-        /* udata_copy */        NULL,   \
-        /* udata_free */        NULL,   \
-        /* udata */             NULL,   \
+        NULL, /* image_malloc */        \
+        NULL, /* image_memcpy */        \
+        NULL, /* image_realloc */       \
+        NULL, /* image_free */          \
+        NULL, /* udata_copy */          \
+        NULL, /* udata_free */          \
+        NULL, /* udata */               \
     }                                   \
 }
 
@@ -97,8 +97,8 @@ typedef struct {
 #ifdef H5_HAVE_PARALLEL
 /* MPIO-specific file access properties */
 typedef struct H5FD_mpio_fapl_t {
-    MPI_Comm		comm;		/*communicator			*/
-    MPI_Info		info;		/*file information		*/
+    MPI_Comm        comm;        /*communicator            */
+    MPI_Info        info;        /*file information        */
 } H5FD_mpio_fapl_t;
 #endif /* H5_HAVE_PARALLEL */
 
@@ -125,7 +125,7 @@ H5_DLL void *H5FD_fapl_get(H5FD_t *file);
 H5_DLL herr_t H5FD_free_driver_info(hid_t driver_id, const void *driver_info);
 H5_DLL hid_t H5FD_register(const void *cls, size_t size, hbool_t app_ref);
 H5_DLL H5FD_t *H5FD_open(const char *name, unsigned flags, hid_t fapl_id,
-		  haddr_t maxaddr);
+        haddr_t maxaddr);
 H5_DLL herr_t H5FD_close(H5FD_t *file);
 H5_DLL int H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2);
 H5_DLL herr_t H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags/*out*/);
@@ -160,7 +160,7 @@ H5_DLL herr_t H5FD_set_paged_aggr(H5FD_t *file, hbool_t paged);
 H5_DLL haddr_t H5FD_mpi_MPIOff_to_haddr(MPI_Offset mpi_off);
 H5_DLL herr_t H5FD_mpi_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off/*out*/);
 H5_DLL herr_t H5FD_mpi_comm_info_dup(MPI_Comm comm, MPI_Info info,
-				MPI_Comm *comm_new, MPI_Info *info_new);
+                MPI_Comm *comm_new, MPI_Info *info_new);
 H5_DLL herr_t H5FD_mpi_comm_info_free(MPI_Comm *comm, MPI_Info *info);
 #ifdef NOT_YET
 H5_DLL herr_t H5FD_mpio_wait_for_left_neighbor(H5FD_t *file);

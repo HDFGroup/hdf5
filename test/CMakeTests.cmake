@@ -993,6 +993,13 @@ if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
     TARGET_C_PROPERTIES (${genfile} STATIC)
     target_link_libraries (${genfile} PRIVATE ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
     set_target_properties (${genfile} PROPERTIES FOLDER generator/test)
+
+    #-----------------------------------------------------------------------------
+    # Add Target to clang-format
+    #-----------------------------------------------------------------------------
+    if (HDF5_ENABLE_FORMATTERS)
+      clang_format (HDF5_TEST_${genfile}_FORMAT ${genfile})
+    endif ()
   endmacro ()
 
   # generator executables

@@ -30,7 +30,7 @@
 #include "H5MFprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5FSprivate.h"	/* File free space                      */
+#include "H5FSprivate.h"    /* File free space                      */
 
 
 /**************************/
@@ -51,9 +51,12 @@
 
 /* Free-space section types for file */
 /* (values stored in free space data structures in file) */
-#define H5MF_FSPACE_SECT_SIMPLE     0   /* For non-paged aggregation: section is a range of actual bytes in file */
-#define H5MF_FSPACE_SECT_SMALL      1   /* For paged aggregation: "small" meta/raw data section which is < fsp_size) */
-#define H5MF_FSPACE_SECT_LARGE      2   /* For paged aggregation: "large" Section which is >= fsp_size) */
+/* For non-paged aggregation: section is a range of actual bytes in file */
+#define H5MF_FSPACE_SECT_SIMPLE     0
+/* For paged aggregation: "small" meta/raw data section which is < fsp_size) */
+#define H5MF_FSPACE_SECT_SMALL      1
+/* For paged aggregation: "large" Section which is >= fsp_size) */
+#define H5MF_FSPACE_SECT_LARGE      2
 
 /* Get section class type based on size */
 #define H5MF_SECT_CLASS_TYPE(F, S)                          \
@@ -155,7 +158,7 @@ typedef struct H5MF_fs_t {
     H5F_fs_state_t *fs_state;
     haddr_t *fs_addr;
     H5FS_t **fs_man;
-    hsize_t     align_thres;	/* Threshold for alignment              */
+    hsize_t     align_thres;    /* Threshold for alignment              */
     hsize_t     alignment;      /* Alignment                            */
 } H5MF_fs_t;
 

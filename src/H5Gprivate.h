@@ -29,9 +29,9 @@
 #include "H5Gpublic.h"
 
 /* Private headers needed by this file */
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Bprivate.h"		/* B-trees				*/
-#include "H5Fprivate.h"		/* File access				*/
+#include "H5private.h"        /* Generic Functions            */
+#include "H5Bprivate.h"        /* B-trees                */
+#include "H5Fprivate.h"        /* File access                */
 #include "H5RSprivate.h"        /* Reference-counted strings            */
 
 /*
@@ -42,7 +42,7 @@
    ((sizeof_size) +             /*offset of name into heap              */    \
     (sizeof_addr) +             /*address of object header              */    \
     4 +                         /*entry type                            */    \
-    4 +				/*reserved				*/    \
+    4 +                /*reserved                */    \
     H5G_SIZEOF_SCRATCH)         /*scratch pad space                     */
 #define H5G_SIZEOF_ENTRY_FILE(F)                                              \
     H5G_SIZEOF_ENTRY(H5F_SIZEOF_ADDR(F), H5F_SIZEOF_SIZE(F))
@@ -61,6 +61,7 @@
 /* Definitions for link info settings */
 #define H5G_CRT_LINK_INFO_NAME                  "link info"
 #define H5G_CRT_LINK_INFO_SIZE                  sizeof(H5O_linfo_t)
+/* clang-format off */
 #define H5G_CRT_LINK_INFO_DEF                   {H5G_CRT_LINFO_TRACK_CORDER, \
                                                     H5G_CRT_LINFO_INDEX_CORDER, \
                                                     H5G_CRT_LINFO_MAX_CORDER, \
@@ -69,6 +70,7 @@
                                                     H5G_CRT_LINFO_LINK_FHEAP_ADDR, \
                                                     H5G_CRT_LINFO_NAME_BT2_ADDR \
                                                 }
+/* clang-format on */
 
 /* Defaults for group info values */
 #define H5G_CRT_GINFO_LHEAP_SIZE_HINT           0
@@ -82,6 +84,7 @@
 /* Definitions for group info settings */
 #define H5G_CRT_GROUP_INFO_NAME                 "group info"
 #define H5G_CRT_GROUP_INFO_SIZE                 sizeof(H5O_ginfo_t)
+/* clang-format off */
 #define H5G_CRT_GROUP_INFO_DEF                  {H5G_CRT_GINFO_LHEAP_SIZE_HINT, \
                                                     H5G_CRT_GINFO_STORE_LINK_PHASE_CHANGE, \
                                                     H5G_CRT_GINFO_MAX_COMPACT, \
@@ -90,6 +93,7 @@
                                                     H5G_CRT_GINFO_EST_NUM_ENTRIES, \
                                                     H5G_CRT_GINFO_EST_NAME_LEN \
                                                 }
+/* clang-format on */
 
 /* If the module using this macro is allowed access to the private variables, access them directly */
 #ifdef H5G_MODULE
@@ -103,12 +107,12 @@
  * a symbolic link or a mount point.  The normal operation is to follow the
  * symbolic link or mount point and return information about its target.
  */
-#define H5G_TARGET_NORMAL	0x0000
-#define H5G_TARGET_SLINK	0x0001
-#define H5G_TARGET_MOUNT	0x0002
-#define H5G_TARGET_UDLINK	0x0004
-#define H5G_TARGET_EXISTS	0x0008
-#define H5G_CRT_INTMD_GROUP	0x0010
+#define H5G_TARGET_NORMAL    0x0000
+#define H5G_TARGET_SLINK    0x0001
+#define H5G_TARGET_MOUNT    0x0002
+#define H5G_TARGET_UDLINK    0x0004
+#define H5G_TARGET_EXISTS    0x0008
+#define H5G_CRT_INTMD_GROUP    0x0010
 
 /* Type of operation being performed for call to H5G_name_replace() */
 typedef enum {

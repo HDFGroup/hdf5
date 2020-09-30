@@ -677,7 +677,7 @@ error:
  *      'member_file_name' in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF(format-nonliteral)
+H5_GCC_DIAG_OFF("format-nonliteral")
 static int
 test_get_file_image(const char * test_banner,
                     const int file_name_num,
@@ -782,7 +782,7 @@ test_get_file_image(const char * test_banner,
         ssize_t member_size;
         ssize_t size_remaining;
 
-	/*
+    /*
          * Modifications need to be made to accommodate userblock when
          * H5Fget_file_image() works for family driver
          */
@@ -944,7 +944,7 @@ test_get_file_image(const char * test_banner,
 error:
     return 1;
 } /* end test_get_file_image() */
-H5_GCC_DIAG_ON(format-nonliteral)
+H5_GCC_DIAG_ON("format-nonliteral")
 
 
 /******************************************************************************

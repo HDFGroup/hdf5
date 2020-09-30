@@ -180,6 +180,29 @@ if (BUILD_SHARED_LIBS)
 endif ()
 
 #-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_F90_C_SRC_FORMAT
+        ${HDF5_F90_C_LIB_TARGET}
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5match_types.c
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90.h
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90i.h
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90proto.h
+    )
+  else ()
+    clang_format (HDF5_F90_C_SRC_FORMAT
+        ${HDF5_F90_C_LIBSH_TARGET}
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5match_types.c
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90.h
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90i.h
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90proto.h
+    )
+  endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
 # Fortran Modules
 #-----------------------------------------------------------------------------
 set (f90_F_GEN_SOURCES

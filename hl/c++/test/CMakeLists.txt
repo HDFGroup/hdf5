@@ -25,6 +25,13 @@ else ()
 endif ()
 set_target_properties (hl_ptableTest PROPERTIES FOLDER test/hl/cpp)
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_HL_CPP_TEST_FORMAT hl_ptableTest)
+endif ()
+
 if (HDF5_TEST_CPP AND HDF5_TEST_SERIAL)
   include (CMakeTests.cmake)
 endif ()

@@ -30,12 +30,12 @@
 #include "H5Gprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5B2private.h"	/* v2 B-trees				*/
-#include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5HFprivate.h"	/* Fractal heaps			*/
-#include "H5HLprivate.h"	/* Local Heaps				*/
-#include "H5Oprivate.h"		/* Object headers		  	*/
-#include "H5SLprivate.h"	/* Skip lists				*/
+#include "H5B2private.h"    /* v2 B-trees                */
+#include "H5FLprivate.h"    /* Free Lists                           */
+#include "H5HFprivate.h"    /* Fractal heaps            */
+#include "H5HLprivate.h"    /* Local Heaps                */
+#include "H5Oprivate.h"        /* Object headers              */
+#include "H5SLprivate.h"    /* Skip lists                */
 
 /**************************/
 /* Package Private Macros */
@@ -47,7 +47,7 @@
 /* Size of a symbol table node on disk */
 #define H5G_NODE_SIZE(f)     (                                                \
     /* General metadata fields */                                             \
-    H5_SIZEOF_MAGIC                                                           \
+    H5_SIZEOF_MAGIC /*magic number */                                         \
     + 1         /* Version */                                                 \
     + 1         /* Reserved */                                                \
     + 2         /* Number of symbols */                                       \
@@ -68,10 +68,10 @@
  * symbol table entry.
  */
 typedef enum H5G_cache_type_t {
-    H5G_CACHED_ERROR	= -1, 	/*force enum to be signed		     */
+    H5G_CACHED_ERROR    = -1,     /*force enum to be signed             */
     H5G_NOTHING_CACHED  = 0,    /*nothing is cached, must be 0               */
     H5G_CACHED_STAB     = 1,    /*symbol table, `stab'                       */
-    H5G_CACHED_SLINK	= 2, 	/*symbolic link				     */
+    H5G_CACHED_SLINK    = 2,     /*symbolic link                     */
 
     H5G_NCACHED                 /*THIS MUST BE LAST                          */
 } H5G_cache_type_t;
@@ -90,7 +90,7 @@ typedef union H5G_cache_t {
     } stab;
 
     struct {
-	size_t	lval_offset;		/*link value offset		     */
+    size_t    lval_offset;        /*link value offset             */
     } slink;
 } H5G_cache_t;
 
@@ -159,7 +159,7 @@ typedef struct {
 typedef struct H5G_bt_common_t {
     /* downward */
     const char  *name;                  /*points to temporary memory         */
-    H5HL_t *heap;                       /*symbol table heap		     */
+    H5HL_t *heap;                       /*symbol table heap             */
 } H5G_bt_common_t;
 
 /*
@@ -206,13 +206,13 @@ typedef struct H5G_bt_lkp_t {
  */
 typedef struct H5G_bt_it_it_t {
     /* downward */
-    H5HL_t      *heap;          /*symbol table heap 			     */
-    hsize_t	skip;		/*initial entries to skip		     */
-    H5G_lib_iterate_t op;	/*iteration operator			     */
-    void	*op_data;	/*user-defined operator data		     */
+    H5HL_t      *heap;          /*symbol table heap                  */
+    hsize_t    skip;        /*initial entries to skip             */
+    H5G_lib_iterate_t op;    /*iteration operator                 */
+    void    *op_data;    /*user-defined operator data             */
 
     /* upward */
-    hsize_t	*final_ent;	/*final entry looked at                      */
+    hsize_t    *final_ent;    /*final entry looked at                      */
 } H5G_bt_it_it_t;
 
 /* Data passed through B-tree iteration for copying copy symbol table content */
@@ -394,9 +394,9 @@ H5_DLL void H5G__ent_copy(H5G_entry_t *dst, const H5G_entry_t *src,
             H5_copy_depth_t depth);
 H5_DLL void H5G__ent_reset(H5G_entry_t *ent);
 H5_DLL herr_t H5G__ent_decode_vec(const H5F_t *f, const uint8_t **pp,
-				  const uint8_t *p_end, H5G_entry_t *ent, unsigned n);
+                const uint8_t *p_end, H5G_entry_t *ent, unsigned n);
 H5_DLL herr_t H5G__ent_encode_vec(const H5F_t *f, uint8_t **pp,
-				  const H5G_entry_t *ent, unsigned n);
+                const H5G_entry_t *ent, unsigned n);
 H5_DLL herr_t H5G__ent_convert(H5F_t *f, H5HL_t *heap, const char *name,
     const H5O_link_t *lnk, H5O_type_t obj_type, const void *crt_info,
     H5G_entry_t *ent);
@@ -406,15 +406,15 @@ H5_DLL herr_t H5G__ent_debug(const H5G_entry_t *ent, FILE * stream, int indent,
 /* Functions that understand symbol table nodes */
 H5_DLL herr_t H5G__node_init(H5F_t *f);
 H5_DLL int H5G__node_iterate(H5F_t *f, const void *_lt_key, haddr_t addr,
-		     const void *_rt_key, void *_udata);
+            const void *_rt_key, void *_udata);
 H5_DLL int H5G__node_sumup(H5F_t *f, const void *_lt_key, haddr_t addr,
-		     const void *_rt_key, void *_udata);
+            const void *_rt_key, void *_udata);
 H5_DLL int H5G__node_by_idx(H5F_t *f, const void *_lt_key, haddr_t addr,
-		     const void *_rt_key, void *_udata);
+            const void *_rt_key, void *_udata);
 H5_DLL int H5G__node_copy(H5F_t *f, const void *_lt_key, haddr_t addr,
-		     const void *_rt_key, void *_udata);
+            const void *_rt_key, void *_udata);
 H5_DLL int H5G__node_build_table(H5F_t *f, const void *_lt_key, haddr_t addr,
-		     const void *_rt_key, void *_udata);
+            const void *_rt_key, void *_udata);
 H5_DLL herr_t H5G__node_iterate_size(H5F_t *f, const void *_lt_key, haddr_t addr,
                      const void *_rt_key, void *_udata);
 H5_DLL herr_t H5G__node_free(H5G_node_t *sym);
