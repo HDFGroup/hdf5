@@ -762,7 +762,7 @@ void usage(void)
  PRINTVALSTREAM(rawoutstream, "       symbolic links are compared.).\n");
  PRINTVALSTREAM(rawoutstream, "\n");
  /*
-  * TRILABS-227 is complete except for an issue with printing indices
+  * TRILABS_227 is complete except for an issue with printing indices
   * the following will be needed for subsetting
  PRINTVALSTREAM(rawoutstream, " Subsetting options:\n");
  PRINTVALSTREAM(rawoutstream, "  Subsetting is available by using the fcompact form of subsetting, as follows:\n");
