@@ -75,6 +75,8 @@ main(void) {
    wbuf = (hobj_ref_t *)malloc(sizeof(hobj_ref_t) * 2);
    rbuf = (hobj_ref_t *)malloc(sizeof(hobj_ref_t) * 2);
 
+//! [H5Rcreate_snip]
+
    /*
     *  Create references to the group "A" and dataset "B"
     *  and store them in the wbuf.
@@ -82,6 +84,7 @@ main(void) {
    H5Rcreate(&wbuf[0], fid, "A", H5R_OBJECT, (hid_t)-1);
    H5Rcreate(&wbuf[1], fid, "B", H5R_OBJECT, (hid_t)-1);
 
+//! [H5Rcreate_snip]
    /*
     *  Write dataset R using default transfer properties.
     */
@@ -109,6 +112,8 @@ main(void) {
    /*
     *  Open and read dataset "R".
     */
+//! [H5Rget_obj_type2_snip]
+
    did_r  = H5Dopen2(fid, "R", H5P_DEFAULT);
    status = H5Dread(did_r, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
 
@@ -116,6 +121,9 @@ main(void) {
     * Find the type of referenced objects.
     */
     status = H5Rget_obj_type2(did_r, H5R_OBJECT, &rbuf[0], &obj_type);
+
+//! [H5Rget_obj_type2_snip]
+
     if(obj_type == H5O_TYPE_GROUP)
         printf("First dereferenced object is a group. \n");
 
