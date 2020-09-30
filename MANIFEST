@@ -33,7 +33,11 @@
 ./autogen.sh
 ./configure.ac
 
+./.clang-format
+./.github/CODEOWNERS  _DO_NOT_DISTRIBUTE_
+./.github/workflows/clang-format-check.yml  _DO_NOT_DISTRIBUTE_
 ./.github/workflows/main.yml  _DO_NOT_DISTRIBUTE_
+./.github/workflows/pr-check.yml  _DO_NOT_DISTRIBUTE_
 
 ./m4/aclocal_cxx.m4
 ./m4/aclocal_fc.m4
@@ -71,6 +75,8 @@
 ./bin/deploy
 ./bin/distdep
 ./bin/errors              _DO_NOT_DISTRIBUTE_
+./bin/format_source
+./bin/format_source_patch
 ./bin/genparser
 ./bin/gcov_script            _DO_NOT_DISTRIBUTE_
 ./bin/h5cc.in
@@ -3527,6 +3533,7 @@
 
 # CMake-specific Sanitizer Scripts
 ./config/sanitizer/code-coverage.cmake
+./config/sanitizer/formatting.cmake
 ./config/sanitizer/sanitizers.cmake
 ./config/sanitizer/tools.cmake
 ./config/sanitizer/LICENSE

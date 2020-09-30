@@ -12,10 +12,10 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Raymond Lu
+ * Programmer:    Raymond Lu
  *              October 14, 2001
  *
- * Purpose:	Tests the H5Tget_native_type function.
+ * Purpose:    Tests the H5Tget_native_type function.
  */
 
 #include "h5test.h"
@@ -62,16 +62,16 @@ int	ipoints3[DIM0][DIM1][5], icheck3[DIM0][DIM1][5];
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_atomic_dtype
+ * Function:    test_atomic_dtype
  *
- * Purpose:	Test H5Tget_native_type for atomic datatype
+ * Purpose:    Test H5Tget_native_type for atomic datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -275,16 +275,16 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_compound_dtype2
+ * Function:    test_compound_dtype2
  *
- * Purpose:	Test H5Tget_native_type for compound datatype
+ * Purpose:    Test H5Tget_native_type for compound datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -1845,12 +1845,13 @@ error:
 static herr_t
 test_vlstr_dtype(hid_t file)
 {
+    /* Information to write */
     const char *wdata[SPACE1_DIM1]= {
             "Four score and seven years ago our forefathers brought forth on this continent a new nation,",
             "conceived in liberty and dedicated to the proposition that all men are created equal.",
             "Now we are engaged in a great civil war,",
             "testing whether that nation or any nation so conceived and so dedicated can long endure."
-    };                                  /* Information to write */
+    };
     char       *rdata[SPACE1_DIM1];     /* Information read in */
     hbool_t     rdata_alloc = FALSE;    /* Whether the read data is allocated */
     hid_t	dataset = -1;	        /* Dataset ID			*/

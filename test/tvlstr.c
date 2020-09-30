@@ -108,12 +108,14 @@ void test_vlstr_free_custom(void *_mem, void *info)
 static void
 test_vlstrings_basic(void)
 {
+    /* Information to write */
     const char *wdata[SPACE1_DIM1]= {
         "Four score and seven years ago our forefathers brought forth on this continent a new nation,",
         "conceived in liberty and dedicated to the proposition that all men are created equal.",
         "Now we are engaged in a great civil war,",
         "testing whether that nation or any nation so conceived and so dedicated can long endure."
-        };   /* Information to write */
+        };
+
     char *rdata[SPACE1_DIM1];   /* Information read in */
     char *wdata2;
     hid_t dataspace, dataset2;
@@ -861,12 +863,11 @@ static void test_write_same_element(void)
     hid_t   file1, dataset1;
     hid_t   mspace, fspace, dtype;
     hsize_t fdim[] = {SPACE1_DIM1};
-    char *val[SPACE1_DIM1] = {"But", "reuniting", "is a", "great joy"};
+    const char *wdata[SPACE1_DIM1] = {"Parting", "is such a", "sweet", "sorrow."};
+    const char *val[SPACE1_DIM1] = {"But", "reuniting", "is a", "great joy"};
     hsize_t marray[] = {NUMP};
     hsize_t coord[SPACE1_RANK][NUMP];
     herr_t ret;
-
-    char *wdata[SPACE1_DIM1] = {"Parting", "is such a", "sweet", "sorrow."};
 
     file1 = H5Fcreate(DATAFILE3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file1, FAIL, "H5Fcreate");

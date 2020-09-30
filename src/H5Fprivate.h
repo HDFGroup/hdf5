@@ -115,16 +115,16 @@ typedef struct H5F_t H5F_t;
 /* Encode a 64-bit unsigned integer and its length into a variable-sized buffer */
 /* (Assumes that the high bits of the integer are zero) */
 #  define UINT64ENCODE_VARLEN(p, n) {                          \
-   uint64_t __n = (uint64_t)(n);                                  \
-   unsigned _s = H5VM_limit_enc_size(__n);                      \
-                                        \
-   *(p)++ = (uint8_t)_s;                              \
-   UINT64ENCODE_VAR(p, __n, _s);                              \
+   uint64_t __n = (uint64_t)(n);                               \
+   unsigned _s = H5VM_limit_enc_size(__n);                     \
+                                                               \
+   *(p)++ = (uint8_t)_s;                                       \
+   UINT64ENCODE_VAR(p, __n, _s);                               \
 }
 
 #  define H5_ENCODE_UNSIGNED(p, n) {                          \
-    HDcompile_assert(sizeof(unsigned) == sizeof(uint32_t));              \
-    UINT32ENCODE(p, n)                                  \
+    HDcompile_assert(sizeof(unsigned) == sizeof(uint32_t));   \
+    UINT32ENCODE(p, n)                                        \
 }
 
 /* Assumes the endianness of uint64_t is the same as double */
@@ -168,8 +168,8 @@ typedef struct H5F_t H5F_t;
                    ((*(p) & (unsigned)0x80) ? (unsigned)(~0xffffffff) : (unsigned)0x0))); (p)++; \
 }
 
-#  define UINT32DECODE(p, i) {                              \
-   (i)    =  (uint32_t)(*(p) & 0xff);       (p)++;                  \
+#  define UINT32DECODE(p, i) {                                     \
+   (i)  =  (uint32_t)(*(p) & 0xff);       (p)++;                   \
    (i) |= ((uint32_t)(*(p) & 0xff) <<  8); (p)++;                  \
    (i) |= ((uint32_t)(*(p) & 0xff) << 16); (p)++;                  \
    (i) |= ((uint32_t)(*(p) & 0xff) << 24); (p)++;                  \
@@ -245,34 +245,36 @@ typedef struct H5F_t H5F_t;
     (p) += 8;                                      \
 }
 
+/* clang-format off */
 /* Address-related macros */
-#define H5F_addr_overflow(X,Z)    (HADDR_UNDEF==(X) ||                  \
-                HADDR_UNDEF==(X)+(haddr_t)(Z) ||          \
+#define H5F_addr_overflow(X,Z)    (HADDR_UNDEF==(X) ||                      \
+                HADDR_UNDEF==(X)+(haddr_t)(Z) ||                            \
                 (X)+(haddr_t)(Z)<(X))
 #define H5F_addr_defined(X)    ((X)!=HADDR_UNDEF)
 /* The H5F_addr_eq() macro guarantees that Y is not HADDR_UNDEF by making
  * certain that X is not HADDR_UNDEF and then checking that X equals Y
  */
-#define H5F_addr_eq(X,Y)    ((X)!=HADDR_UNDEF &&                  \
+#define H5F_addr_eq(X,Y)    ((X)!=HADDR_UNDEF &&                            \
                 (X)==(Y))
 #define H5F_addr_ne(X,Y)    (!H5F_addr_eq((X),(Y)))
-#define H5F_addr_lt(X,Y)     ((X)!=HADDR_UNDEF &&                  \
-                (Y)!=HADDR_UNDEF &&                  \
+#define H5F_addr_lt(X,Y)     ((X)!=HADDR_UNDEF &&                           \
+                (Y)!=HADDR_UNDEF &&                                         \
                 (X)<(Y))
-#define H5F_addr_le(X,Y)    ((X)!=HADDR_UNDEF &&                  \
-                (Y)!=HADDR_UNDEF &&                  \
+#define H5F_addr_le(X,Y)    ((X)!=HADDR_UNDEF &&                            \
+                (Y)!=HADDR_UNDEF &&                                         \
                 (X)<=(Y))
-#define H5F_addr_gt(X,Y)    ((X)!=HADDR_UNDEF &&                  \
-                (Y)!=HADDR_UNDEF &&                  \
+#define H5F_addr_gt(X,Y)    ((X)!=HADDR_UNDEF &&                            \
+                (Y)!=HADDR_UNDEF &&                                         \
                 (X)>(Y))
-#define H5F_addr_ge(X,Y)    ((X)!=HADDR_UNDEF &&                  \
-                (Y)!=HADDR_UNDEF &&                  \
+#define H5F_addr_ge(X,Y)    ((X)!=HADDR_UNDEF &&                            \
+                (Y)!=HADDR_UNDEF &&                                         \
                 (X)>=(Y))
-#define H5F_addr_cmp(X,Y)    (H5F_addr_eq((X), (Y)) ? 0 :              \
+#define H5F_addr_cmp(X,Y)    (H5F_addr_eq((X), (Y)) ? 0 :                   \
                 (H5F_addr_lt((X), (Y)) ? -1 : 1))
 #define H5F_addr_pow2(N)    ((haddr_t)1<<(N))
 #define H5F_addr_overlap(O1,L1,O2,L2) (((O1) < (O2) && ((O1) + (L1)) > (O2)) || \
                                  ((O1) >= (O2) && (O1) < ((O2) + (L2))))
+/* clang-format on */
 
 /* If the module using this macro is allowed access to the private variables, access them directly */
 #ifdef H5F_MODULE
@@ -466,9 +468,11 @@ typedef struct H5F_t H5F_t;
 #define H5F_CRT_ADDR_BYTE_NUM_NAME   "addr_byte_num"    /* Byte number in an address            */
 #define H5F_CRT_OBJ_BYTE_NUM_NAME    "obj_byte_num"     /* Byte number for object size          */
 #define H5F_CRT_SUPER_VERS_NAME      "super_version"    /* Version number of the superblock     */
-#define H5F_CRT_SHMSG_NINDEXES_NAME  "num_shmsg_indexes" /* Number of shared object header message indexes */
+/* Number of shared object header message indexes */
+#define H5F_CRT_SHMSG_NINDEXES_NAME  "num_shmsg_indexes"
 #define H5F_CRT_SHMSG_INDEX_TYPES_NAME "shmsg_message_types" /* Types of message in each index */
-#define H5F_CRT_SHMSG_INDEX_MINSIZE_NAME "shmsg_message_minsize" /* Minimum size of messages in each index */
+/* Minimum size of messages in each index */
+#define H5F_CRT_SHMSG_INDEX_MINSIZE_NAME "shmsg_message_minsize"
 #define H5F_CRT_SHMSG_LIST_MAX_NAME  "shmsg_list_max"   /* Shared message list maximum size */
 #define H5F_CRT_SHMSG_BTREE_MIN_NAME "shmsg_btree_min"  /* Shared message B-tree minimum size */
 #define H5F_CRT_FILE_SPACE_STRATEGY_NAME "file_space_strategy"  /* File space handling strategy */

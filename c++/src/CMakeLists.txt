@@ -129,6 +129,17 @@ if (BUILD_SHARED_LIBS)
 endif ()
 
 #-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_CPP_SRC_FORMAT ${HDF5_CPP_LIB_TARGET})
+  else ()
+    clang_format (HDF5_CPP_SRC_FORMAT ${HDF5_CPP_LIBSH_TARGET})
+  endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
 # Add file(s) to CMake Install
 #-----------------------------------------------------------------------------
 install (

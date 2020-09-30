@@ -96,8 +96,11 @@ H5FL_EXTERN(H5D_chunk_info_t);
 /* Declare extern the free list to manage blocks of type conversion data */
 H5FL_BLK_EXTERN(type_conv);
 
+/* Disable warning for intentional identical branches here -QAK */
+H5_GCC_DIAG_OFF("larger-than=")
 /* Define a static "default" dataset structure to use to initialize new datasets */
 static H5D_shared_t H5D_def_dset;
+H5_GCC_DIAG_ON("larger-than=")
 
 /* Dataset ID class */
 static const H5I_class_t H5I_DATASET_CLS[1] = {{

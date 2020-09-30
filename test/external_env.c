@@ -52,7 +52,6 @@ test_path_env(hid_t fapl)
     hid_t    dapl = -1;          /* dataset access property list         */
     hid_t    dset = -1;          /* dataset                              */
     size_t    i;                  /* miscellaneous counters               */
-    char    cwdpath[1024];        /* working directory                    */
     char    filename[1024];        /* file name                            */
     int        part[PART_SIZE];    /* raw data buffer (partial)            */
     int     whole[TOTAL_SIZE];  /* raw data buffer (total)              */
@@ -72,8 +71,6 @@ test_path_env(hid_t fapl)
     /* Create the dataset */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR
-    if(NULL == HDgetcwd(cwdpath, sizeof(cwdpath)))
-        TEST_ERROR
     for(i = 0; i < N_EXT_FILES; i++) {
         HDsnprintf(filename, sizeof(filename), "extern_env_%dr.raw", (int) i + 1);
         if(H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
