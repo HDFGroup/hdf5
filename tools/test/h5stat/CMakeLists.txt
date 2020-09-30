@@ -11,6 +11,13 @@ if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
   target_link_libraries (h5stat_gentest PRIVATE ${HDF5_LIB_TARGET})
   set_target_properties (h5stat_gentest PROPERTIES FOLDER generator/tools)
 
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_TOOLS_TEST_H5STAT_FORMAT h5stat_gentest)
+  endif ()
+
   #add_test (NAME h5stat_gentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat_gentest>)
 endif ()
 

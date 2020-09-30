@@ -12,8 +12,8 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:    Robb Matzke
- *                Wednesday, April 15, 1998
+ * Programmer:  Robb Matzke
+ *              Wednesday, April 15, 1998
  *
  * Purpose:     Data filter pipeline message.
  */

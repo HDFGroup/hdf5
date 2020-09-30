@@ -37,6 +37,13 @@ macro (HL_ADD_EXE hl_name)
     )
   endif ()
   set_target_properties (hl_${hl_name} PROPERTIES FOLDER test/hl)
+
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_HL_TEST_${hl_name}_FORMAT hl_${hl_name})
+  endif ()
 endmacro ()
 
 HL_ADD_EXE (test_lite)
@@ -69,6 +76,13 @@ else ()
 endif ()
 set_target_properties (hl_test_packet PROPERTIES FOLDER test/hl)
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_HL_TEST_hl_test_packet_FORMAT hl_test_packet)
+endif ()
+
 # --------------------------------------------------------------------
 # This executable is used to generate test files for the test_ds test.
 # It should only be run during development when new test files are needed
@@ -85,6 +99,13 @@ if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
   )
   set_target_properties (hl_gen_test_ds PROPERTIES FOLDER test/hl/gen)
 
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_HL_TEST_hl_gen_test_ds_FORMAT hl_gen_test_ds)
+  endif ()
+
   add_executable (hl_gen_test_ld gen_test_ld.c)
   target_compile_options(hl_gen_test_ld PRIVATE "${HDF5_CMAKE_C_FLAGS}")
   target_include_directories (hl_gen_test_ld PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
@@ -95,6 +116,13 @@ if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
       ${HDF5_LIB_TARGET}
   )
   set_target_properties (hl_gen_test_ld PROPERTIES FOLDER test/hl/gen)
+
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_HL_TEST_hl_gen_test_ld_FORMAT hl_gen_test_ld)
+  endif ()
 endif ()
 
 if (HDF5_TEST_SERIAL)

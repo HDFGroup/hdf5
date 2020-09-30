@@ -1090,6 +1090,7 @@ H5FD__core_query(const H5FD_t * _file, unsigned long *flags /* out */)
 
     FUNC_ENTER_STATIC_NOERR
 
+    /* clang-format off */
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
         *flags = 0;
@@ -1106,6 +1107,7 @@ H5FD__core_query(const H5FD_t * _file, unsigned long *flags /* out */)
             *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE;     /* VFD creates a file which can be opened with the default VFD      */
         }
     } /* end if */
+    /* clang-format on */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD__core_query() */
@@ -1275,7 +1277,7 @@ static herr_t
 H5FD__core_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
         size_t size, void *buf/*out*/)
 {
-    H5FD_core_t	*file = (H5FD_core_t*)_file;
+    H5FD_core_t    *file = (H5FD_core_t*)_file;
     herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1484,7 +1486,7 @@ done:
  *              If we are not closing, we realloc the buffer to size equal
  *              to the smallest multiple of the allocation increment that
  *              equals or exceeds the eoa and set the eof accordingly.
- *              Note that we no longer truncate	the backing store to the
+ *              Note that we no longer truncate    the backing store to the
  *              new eof if applicable.
  *                                                                  -- JRM
  *
@@ -1584,9 +1586,9 @@ done:
  * Function:    H5FD__core_lock
  *
  * Purpose:     To place an advisory lock on a file.
- *		The lock type to apply depends on the parameter "rw":
- *			TRUE--opens for write: an exclusive lock
- *			FALSE--opens for read: a shared lock
+ *        The lock type to apply depends on the parameter "rw":
+ *            TRUE--opens for write: an exclusive lock
+ *            FALSE--opens for read: a shared lock
  *
  * Return:      SUCCEED/FAIL
  *
@@ -1640,7 +1642,7 @@ done:
 static herr_t
 H5FD__core_unlock(H5FD_t *_file)
 {
-    H5FD_core_t *file = (H5FD_core_t*)_file;	/* VFD file struct */
+    H5FD_core_t *file = (H5FD_core_t*)_file;    /* VFD file struct */
     herr_t ret_value = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1653,7 +1655,7 @@ H5FD__core_unlock(H5FD_t *_file)
                 HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "file locking disabled on this file system (use HDF5_USE_FILE_LOCKING environment variable to override)")
             else
                 HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to unlock file")
-        } /* end if */
+        }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

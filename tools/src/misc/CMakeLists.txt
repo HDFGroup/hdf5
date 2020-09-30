@@ -86,6 +86,23 @@ if (BUILD_SHARED_LIBS)
   )
 endif ()
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_H5DEBUG_SRC_FORMAT h5debug)
+    clang_format (HDF5_H5REPART_SRC_FORMAT h5repart)
+    clang_format (HDF5_H5MKGRP_SRC_FORMAT h5mkgrp)
+    clang_format (HDF5_H5CLEAR_SRC_FORMAT h5clear)
+  else ()
+    clang_format (HDF5_H5DEBUG_SRC_FORMAT h5debug-shared)
+    clang_format (HDF5_H5REPART_SRC_FORMAT h5repart-shared)
+    clang_format (HDF5_H5MKGRP_SRC_FORMAT h5mkgrp-shared)
+    clang_format (HDF5_H5CLEAR_SRC_FORMAT h5clear-shared)
+  endif ()
+endif ()
+
 ##############################################################################
 ##############################################################################
 ###           I N S T A L L A T I O N                                      ###
