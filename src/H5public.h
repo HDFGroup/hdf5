@@ -291,8 +291,9 @@ H5_GCC_DIAG_ON(long-long)
 #   error "nothing appropriate for uint64_t"
 #endif
 
-/** Common iteration orders */
 //! [H5_iter_order_t_snip]
+
+/* Common iteration orders */
 typedef enum {
     H5_ITER_UNKNOWN = -1,      /**< Unknown order */
     H5_ITER_INC,               /**< Increasing order */
@@ -300,6 +301,7 @@ typedef enum {
     H5_ITER_NATIVE,            /**< No particular order, whatever is fastest */
     H5_ITER_N                  /**< Number of iteration orders */
 } H5_iter_order_t;
+
 //! [H5_iter_order_t_snip]
 
 /* Iteration callback values */
@@ -310,18 +312,20 @@ typedef enum {
 #define H5_ITER_CONT    (0)
 #define H5_ITER_STOP    (1)
 
-/**
+//! [H5_index_t_snip]
+
+/*
  * The types of indices on links in groups/attributes on objects.
  * Primarily used for "<do> <foo> by index" routines and for iterating over
  * links in groups/attributes on objects.
  */
-//! [H5_index_t_snip]
 typedef enum H5_index_t {
     H5_INDEX_UNKNOWN = -1,    /**< Unknown index type                */
     H5_INDEX_NAME,            /**< Index on names                    */
     H5_INDEX_CRT_ORDER,       /**< Index on creation order           */
     H5_INDEX_N                /**< Number of indices defined         */
 } H5_index_t;
+
 //! [H5_index_t_snip]
 
 /**
@@ -342,14 +346,16 @@ typedef struct H5_ih_info_t {
  */
 #define H5O_MAX_TOKEN_SIZE      (16)
 
+//! [H5O_token_t_snip]
+
 /**
- * Type for object tokens
  * \internal (Hoisted here, since it's used by both the
  *            H5Lpublic.h and H5Opublic.h headers) */
-//! [H5O_token_t_snip]
+/* Type for object tokens */
 typedef struct H5O_token_t {
     uint8_t __data[H5O_MAX_TOKEN_SIZE];
 } H5O_token_t;
+
 //! [H5O_token_t_snip]
 
 /**
