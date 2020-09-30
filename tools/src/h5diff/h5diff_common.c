@@ -75,7 +75,7 @@ static void check_options(diff_opt_t* opts)
     }
 }
 
-#if TRILABS-227
+#if TRILABS_227
 /*-------------------------------------------------------------------------
  * Function:    parse_hsize_list
  *
@@ -478,10 +478,10 @@ void parse_command_line(int argc, const char* argv[], const char** fname1, const
     H5TOOLS_DEBUG("objname2 = %s", *objname2);
 
     /*
-     * TRILABS-227 is complete except for an issue with printing indices
+     * TRILABS_227 is complete except for an issue with printing indices
      * the following calls will enable subsetting
     */
-#if TRILABS-227
+#if TRILABS_227
     opts->sset[0] = parse_subset_params(*objname1);
 
     opts->sset[1] = parse_subset_params(*objname2);
@@ -762,7 +762,7 @@ void usage(void)
  PRINTVALSTREAM(rawoutstream, "       symbolic links are compared.).\n");
  PRINTVALSTREAM(rawoutstream, "\n");
  /*
-  * TRILABS-227 is complete except for an issue with printing indices
+  * TRILABS_227 is complete except for an issue with printing indices
   * the following will be needed for subsetting
  PRINTVALSTREAM(rawoutstream, " Subsetting options:\n");
  PRINTVALSTREAM(rawoutstream, "  Subsetting is available by using the fcompact form of subsetting, as follows:\n");
