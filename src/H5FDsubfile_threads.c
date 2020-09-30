@@ -102,7 +102,9 @@ int
 initialize_ioc_threads(subfiling_context_t *sf_context)
 {
     int      status;
+	unsigned int thread_pool_count = HG_TEST_NUM_THREADS_DEFAULT;
     int64_t *context_id = (int64_t *) malloc(sizeof(int64_t));
+	char    *envValue;
     assert(context_id != NULL);
     /* Initialize the main IOC thread input argument.
      * Each IOC request will utilize this context_id which is
@@ -127,8 +129,16 @@ initialize_ioc_threads(subfiling_context_t *sf_context)
         goto err_exit;
     }
 
+	/* Allow experimentation with the number of helper threads */
+	if ((envValue = getenv("IOC_THREAD_POOL_COUNT")) != NULL) {
+		int value_check = atoi(envValue);
+		if (value_check > 0) {
+			thread_pool_count = (unsigned int)value_check;
+		}
+	}
+
     /* Initialize a thread pool for the IO Concentrator to use */
-    status = hg_thread_pool_init(HG_TEST_NUM_THREADS_DEFAULT, &ioc_thread_pool);
+    status = hg_thread_pool_init(thread_pool_count, &ioc_thread_pool);
     if (status) {
         puts("hg_thread_pool_init failed");
         goto err_exit;

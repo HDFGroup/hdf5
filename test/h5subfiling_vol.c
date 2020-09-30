@@ -1927,7 +1927,7 @@ H5VL_subfiling_file_create(const char *name, unsigned flags, hid_t fcpl_id,
 		memset(subfiling_file, 0, sizeof(H5VL_subfiling_file_t));
 		file->obj.item.type = H5I_FILE;
 		file->obj.item.file = subfiling_file;
-		file->info = info;
+		subfiling_file->info = info;
 
         /* Check for async request */
         if(req && *req)
