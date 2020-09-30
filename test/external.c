@@ -23,7 +23,7 @@
 #define AEF_EXNAME_MAX_LEN 12 /* string buffer size for external file name */
                               /* used in __add_external_files()            */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    files_have_same_contents
  *
@@ -86,7 +86,7 @@ out:
     return ret;
 } /* end files_have_same_contents() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_non_extendible
  *
@@ -185,7 +185,7 @@ test_non_extendible(hid_t file)
     return 1;
 } /* end test_non_extendible() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_too_small
  *
@@ -240,7 +240,7 @@ test_too_small(hid_t file)
     return 1;
 } /* end test_too_small() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_large_enough_current_eventual
  *
@@ -292,7 +292,7 @@ error:
     return 1;
 } /* end test_large_enough_current_eventual() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_large_enough_current_not_eventual
  *
@@ -346,7 +346,7 @@ test_large_enough_current_not_eventual(hid_t file)
     return 1;
 } /* end test_large_enough_current_not_eventual() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_unlimited
  *
@@ -433,7 +433,7 @@ test_unlimited(hid_t file)
     return 1;
 } /* end test_unlimited() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    __add_external_files
  *
@@ -483,7 +483,7 @@ __add_external_files(
     return 0;
 } /* end __add_external_files() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_multiple_files
  *
@@ -562,7 +562,7 @@ error:
     return 1;
 } /* end test_multiple_files() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_add_to_unlimited
  *
@@ -613,7 +613,7 @@ test_add_to_unlimited(void)
     return 1;
 } /* end test_add_to_unlimited() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_overflow
  *
@@ -659,7 +659,7 @@ test_overflow(void)
     return 1;
 } /* end test_overflow() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_read_file_set
  *
@@ -777,7 +777,7 @@ test_read_file_set(hid_t fapl)
     return 1;
 } /* end test_read_file_set() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_write_file_set
  *
@@ -898,7 +898,7 @@ test_write_file_set(hid_t fapl)
     return 1;
 } /* end test_write_file_set() */
 
- 
+
  /*-------------------------------------------------------------------------
  * Function:    test_path_absolute
  *
@@ -925,7 +925,7 @@ test_path_absolute(hid_t fapl)
     hid_t   dset = -1;          /* dataset                              */
     size_t  i = 0;              /* miscellaneous counter                */
     char    cwdpath[1024];      /* working directory                    */
-    char    filename[1024];     /* file name                            */
+    char    filename[1088];     /* file name                            */
     int     part[PART_SIZE];    /* raw data buffer (partial)            */
     int     whole[TOTAL_SIZE];  /* raw data buffer (total)              */
     hsize_t cur_size;           /* current data space size              */
@@ -990,7 +990,7 @@ error:
     return 1;
 } /* end test_path_absolute() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_path_relative
  *
@@ -1014,7 +1014,6 @@ test_path_relative(hid_t fapl)
     hid_t   space = -1;         /* data space                           */
     hid_t   dset = -1;          /* dataset                              */
     size_t  i = 0;              /* miscellaneous counters               */
-    char    cwdpath[1024];      /* working directory                    */
     char    filename[1024];     /* file name                            */
     int     part[PART_SIZE];    /* raw data buffer (partial)            */
     int     whole[TOTAL_SIZE];  /* raw data buffer (total)              */
@@ -1039,8 +1038,6 @@ test_path_relative(hid_t fapl)
     /* Create the dataset */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR
-    if(NULL == HDgetcwd(cwdpath, sizeof(cwdpath)))
-        TEST_ERROR
     for (i = 0; i < N_EXT_FILES; i++) {
         HDsnprintf(filename, sizeof(filename), "extern_%dr.raw", (int)i + 1);
         if(H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
@@ -1078,7 +1075,7 @@ error:
     return 1;
 } /* end test_path_relative() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_path_relative_cwd
  *
@@ -1108,7 +1105,6 @@ test_path_relative_cwd(hid_t fapl)
     hid_t   dset2 = -1;         /* dataset, opened a second time        */
     hid_t   dset3 = -1;         /* dataset, opened with different prefix    */
     size_t  i = 0;              /* miscellaneous counters               */
-    char    cwdpath[1024];      /* working directory                    */
     char    filename[1024];     /* file name                            */
     int     part[PART_SIZE];    /* raw data buffer (partial)            */
     int     whole[TOTAL_SIZE];  /* raw data buffer (total)              */
@@ -1134,8 +1130,6 @@ test_path_relative_cwd(hid_t fapl)
     /* Create the dataset */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR
-    if(NULL == HDgetcwd(cwdpath, sizeof(cwdpath)))
-        TEST_ERROR
     for(i = 0; i < N_EXT_FILES; i++) {
         HDsnprintf(filename, sizeof(filename), "..%sextern_%dr.raw", H5_DIR_SEPS, (int)i + 1);
         if(H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
@@ -1238,7 +1232,7 @@ error:
     return 1;
 } /* end test_path_relative_cwd() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_h5d_get_access_plist
  *
@@ -1337,7 +1331,7 @@ test_h5d_get_access_plist(hid_t fapl_id)
     return 1;
 } /* end test_h5d_get_access_plist() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
