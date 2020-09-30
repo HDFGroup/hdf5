@@ -54,9 +54,14 @@ main(void) {
     H5Sclose(space1);
     H5Fclose(file1);
 
+//! [H5Rcreate_object_snip]
+
     /* Create reference to dataset1 in "refer_extern1.h5" */
     file1 = H5Fopen(H5FILE_NAME1, H5F_ACC_RDONLY, H5P_DEFAULT);
     H5Rcreate_object(file1, "dataset1", H5P_DEFAULT, &ref_buf[0]);
+
+//! [H5Rcreate_object_snip]
+
     H5Fclose(file1);
 
     /* Store reference in dataset in separate file "refer_extern2.h5" */
@@ -81,10 +86,15 @@ main(void) {
     assert(H5Rget_type((const H5R_ref_t *)&ref_buf[0]) == H5R_OBJECT2);
     H5Rget_obj_type3((const H5R_ref_t *)&ref_buf[0], H5P_DEFAULT, &obj_type);
     assert(obj_type == H5O_TYPE_DATASET);
+
+//! [H5Rdestroy_snip]
+
     dset1 = H5Ropen_object((const H5R_ref_t *)&ref_buf[0], H5P_DEFAULT, H5P_DEFAULT);
     H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_buf);
     H5Dclose(dset1);
     H5Rdestroy(&ref_buf[0]);
+
+//! [H5Rdestroy_snip]
 
     for (i = 0; i < BUF_SIZE; i++)
         assert(dset_buf[i] == i);
