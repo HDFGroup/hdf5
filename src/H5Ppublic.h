@@ -4447,7 +4447,42 @@ H5_DLL herr_t H5Pset_nbit(hid_t plist_id);
 H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type, int scale_factor);
 
 /* Dataset access property list (DAPL) routines */
-H5_DLL herr_t H5Pget_append_flush(hid_t plist_id, unsigned dims,
+/**
+ *-------------------------------------------------------------------------
+ *
+ * \ingroup DAPL
+ *
+ * \brief Retrieves the values of the append property that is set up in
+ *        the dataset access property list
+ *
+ * \dapl_id
+ * \param[in] dims     The number of elements for \p boundary
+ * \param[in] boundary The dimension sizes used to determine the boundary
+ * \param[in] func     The user-defined callback function
+ * \param[in] udata    The user-defined input data
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_append_flush() obtains the following information
+ *          from the dataset access property list, \p dapl_id.
+ *
+ *          \p boundary consists of the sizes set up in the access
+ *          property list that are used to determine when a dataset
+ *          dimension size hits the boundary. Only at most \p dims
+ *          boundary sizes are retrieved, and \p dims will not exceed
+ *          the corresponding value that is set in the property list.
+ *
+ *          \p func is the user-defined callback function to invoke when
+ *          a dataset’s appended dimension size reaches a boundary and
+ *          \p udata is the user-defined input data for the callback
+ *          function.
+ *
+ * \todo Example Usage was removed and needs to be re-added
+ *
+ * \since 1.10.0
+ *
+ */
+H5_DLL herr_t H5Pget_append_flush(hid_t dapl_id, unsigned dims,
     hsize_t boundary[], H5D_append_cb_t *func, void **udata);
 /**
  *-------------------------------------------------------------------------
