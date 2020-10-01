@@ -25,10 +25,9 @@
 
 #include "h5test.h"
 
-#define TESTFILE   "tsupern.h5"
-#define ISTORE_IK  64
+#define TESTFILE  "tsupern.h5"
+#define ISTORE_IK 64
 
-
 /*-------------------------------------------------------------------------
  * Function:	main
  *
@@ -47,33 +46,32 @@
 int
 main(void)
 {
-    hid_t       file;           /* File IDs for old & new files */
-    hid_t       fcpl;           /* File creation property list */
-    herr_t      H5_ATTR_NDEBUG_UNUSED ret;
+    hid_t                        file; /* File IDs for old & new files */
+    hid_t                        fcpl; /* File creation property list */
+    herr_t H5_ATTR_NDEBUG_UNUSED ret;
 
     /* Create a file creation property list */
     fcpl = H5Pcreate(H5P_FILE_CREATE);
-    assert(fcpl>=0);
+    assert(fcpl >= 0);
 
-    ret=H5Pset_istore_k(fcpl,ISTORE_IK);
-    assert(ret>=0);
+    ret = H5Pset_istore_k(fcpl, ISTORE_IK);
+    assert(ret >= 0);
 
     /* Creating a file with the non-default file creation property list should
      * create a version 1 superblock
      */
 
     /* Create file with custom file creation property list */
-    file= H5Fcreate(TESTFILE, H5F_ACC_TRUNC , fcpl, H5P_DEFAULT);
-    assert(file>=0);
+    file = H5Fcreate(TESTFILE, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT);
+    assert(file >= 0);
 
     /* Close FCPL */
-    ret=H5Pclose(fcpl);
-    assert(ret>=0);
+    ret = H5Pclose(fcpl);
+    assert(ret >= 0);
 
     /* Close file */
-    ret=H5Fclose(file);
-    assert(ret>=0);
+    ret = H5Fclose(file);
+    assert(ret >= 0);
 
     return 0;
 }
-
