@@ -42,9 +42,12 @@ static hg_thread_t       ioc_thread;
 #ifndef HG_TEST_NUM_THREADS_DEFAULT
 #    define HG_TEST_NUM_THREADS_DEFAULT 4
 #endif
-#define POOL_CONCURRENT_MAX 256
+/* Could this be the reason that benchmarks hang for sizes > 256 ??? */
+// #define POOL_CONCURRENT_MAX 256
+// #define POOL_CONCURRENT_MAX 131072
 
-static struct hg_thread_work pool_request[POOL_CONCURRENT_MAX];
+static int pool_concurrent_max = 0;
+static struct hg_thread_work *pool_request = NULL;
 
 /*-------------------------------------------------------------------------
  * Function:    local ioc_thread_main
@@ -104,6 +107,8 @@ initialize_ioc_threads(subfiling_context_t *sf_context)
     int      status;
 	unsigned int thread_pool_count = HG_TEST_NUM_THREADS_DEFAULT;
     int64_t *context_id = (int64_t *) malloc(sizeof(int64_t));
+	int      world_size = sf_context->topology->world_size;
+	size_t   alloc_size = ((size_t)world_size * sizeof(struct hg_thread_work));
 	char    *envValue;
     assert(context_id != NULL);
     /* Initialize the main IOC thread input argument.
@@ -113,6 +118,16 @@ initialize_ioc_threads(subfiling_context_t *sf_context)
      * correct file contexts.
      */
     context_id[0] = sf_context->sf_context_id;
+
+	if (pool_request == NULL) {
+		if ((pool_request = (struct hg_thread_work *)malloc(alloc_size)) == NULL) {
+			perror("malloc error");
+			return -1;
+		}
+		else pool_concurrent_max = world_size;
+	}
+
+	memset(pool_request, 0, alloc_size);
 
     /* Initialize a couple of mutex variables that are used
      * during IO concentrator operations to serialize
@@ -285,7 +300,7 @@ tpool_add_work(sf_work_request_t *work)
 {
     static int work_index = 0;
     hg_thread_mutex_lock(&ioc_mutex);
-    if (work_index == POOL_CONCURRENT_MAX)
+    if (work_index == pool_concurrent_max)
         work_index = 0;
     pool_request[work_index].func = handle_work_request;
     pool_request[work_index].args = work;

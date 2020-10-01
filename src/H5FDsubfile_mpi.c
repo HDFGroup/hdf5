@@ -806,8 +806,8 @@ record_fid_to_subfile(hid_t fid, hid_t subfile_context_id, int *next_index)
     }
     if (index == sf_file_map_size) {
         int i;
-        sf_open_file_map = reallocarray(sf_open_file_map,
-            (size_t)(sf_file_map_size * 2), sizeof(file_map_to_context_t));
+        sf_open_file_map = realloc(sf_open_file_map,
+		   ((size_t)(sf_file_map_size * 2) * sizeof(file_map_to_context_t)));
         if (sf_open_file_map == NULL) {
             perror("realloc");
             return FAIL;
