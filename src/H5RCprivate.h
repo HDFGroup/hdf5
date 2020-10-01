@@ -38,24 +38,22 @@ typedef herr_t (*H5RC_free_func_t)(void *o);
 
 /* Typedef for reference counted objects */
 typedef struct H5RC_t {
-    void *o;            /* Object to be reference counted */
-    size_t n;           /* Reference count of number of pointers sharing object */
+    void *           o;         /* Object to be reference counted */
+    size_t           n;         /* Reference count of number of pointers sharing object */
     H5RC_free_func_t free_func; /* Function to free object */
 } H5RC_t;
 
 /**********/
 /* Macros */
 /**********/
-#define H5RC_INC(rc)            ((rc)->n++)
-#define H5RC_DEC(rc)            (H5RC_decr(rc))
-#define H5RC_GET_OBJ(rc)        ((rc)->o)
+#define H5RC_INC(rc)     ((rc)->n++)
+#define H5RC_DEC(rc)     (H5RC_decr(rc))
+#define H5RC_GET_OBJ(rc) ((rc)->o)
 
 /********************/
 /* Private routines */
 /********************/
 H5_DLL H5RC_t *H5RC_create(void *s, H5RC_free_func_t free_func);
-H5_DLL herr_t H5RC_decr(H5RC_t *rc);
+H5_DLL herr_t  H5RC_decr(H5RC_t *rc);
 
 #endif /* _H5RSprivate_H */
-
-

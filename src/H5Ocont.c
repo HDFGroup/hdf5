@@ -25,53 +25,51 @@
  *-------------------------------------------------------------------------
  */
 
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#define H5O_PACKAGE /*suppress error about including H5Opkg	  */
 
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FLprivate.h"	/* Free Lists				*/
-#include "H5MFprivate.h"	/* File memory management		*/
-#include "H5Opkg.h"             /* Object headers			*/
-
+#include "H5private.h"   /* Generic Functions			*/
+#include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5FLprivate.h" /* Free Lists				*/
+#include "H5MFprivate.h" /* File memory management		*/
+#include "H5Opkg.h"      /* Object headers			*/
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_cont_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
-    unsigned mesg_flags, unsigned *ioflags, size_t p_size, const uint8_t *p);
+static void * H5O_cont_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
+                              size_t p_size, const uint8_t *p);
 static herr_t H5O_cont_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static size_t H5O_cont_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O_cont_free(void *mesg);
 static herr_t H5O_cont_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg);
-static herr_t H5O_cont_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
-			     int indent, int fwidth);
+static herr_t H5O_cont_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream, int indent,
+                             int fwidth);
 
 /* This message derives from H5O message class */
 const H5O_msg_class_t H5O_MSG_CONT[1] = {{
-    H5O_CONT_ID,            	/*message id number             */
-    "hdr continuation",     	/*message name for debugging    */
-    sizeof(H5O_cont_t),     	/*native message size           */
-    0,				/* messages are sharable?       */
-    H5O_cont_decode,        	/*decode message                */
-    H5O_cont_encode,        	/*encode message                */
-    NULL,                   	/*no copy method                */
-    H5O_cont_size,          	/*size of header continuation   */
-    NULL,                   	/*reset method			*/
-    H5O_cont_free,	        /* free method			*/
-    H5O_cont_delete,		/* file delete method		*/
-    NULL,			/* link method			*/
-    NULL,			/*set share method		*/
-    NULL,		    	/*can share method		*/
-    NULL,			/* pre copy native value to file */
-    NULL,			/* copy native value to file    */
-    NULL, 		 	/* post copy native value to file    */
-    NULL,			/* get creation index		*/
-    NULL,			/* set creation index		*/
-    H5O_cont_debug         	/*debugging                     */
+    H5O_CONT_ID,        /*message id number             */
+    "hdr continuation", /*message name for debugging    */
+    sizeof(H5O_cont_t), /*native message size           */
+    0,                  /* messages are sharable?       */
+    H5O_cont_decode,    /*decode message                */
+    H5O_cont_encode,    /*encode message                */
+    NULL,               /*no copy method                */
+    H5O_cont_size,      /*size of header continuation   */
+    NULL,               /*reset method			*/
+    H5O_cont_free,      /* free method			*/
+    H5O_cont_delete,    /* file delete method		*/
+    NULL,               /* link method			*/
+    NULL,               /*set share method		*/
+    NULL,               /*can share method		*/
+    NULL,               /* pre copy native value to file */
+    NULL,               /* copy native value to file    */
+    NULL,               /* post copy native value to file    */
+    NULL,               /* get creation index		*/
+    NULL,               /* set creation index		*/
+    H5O_cont_debug      /*debugging                     */
 }};
 
 /* Declare the free list for H5O_cont_t's */
 H5FL_DEFINE(H5O_cont_t);
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5O_cont_decode
  *
@@ -89,11 +87,11 @@ H5FL_DEFINE(H5O_cont_t);
  */
 static void *
 H5O_cont_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
-    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
-    size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+                unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
+                size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
-    H5O_cont_t             *cont = NULL;
-    void                   *ret_value;
+    H5O_cont_t *cont = NULL;
+    void *      ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -102,8 +100,8 @@ H5O_cont_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *op
     HDassert(p);
 
     /* Allocate space for the message */
-    if(NULL == (cont = H5FL_MALLOC(H5O_cont_t)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    if (NULL == (cont = H5FL_MALLOC(H5O_cont_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Decode */
     H5F_addr_decode(f, &p, &(cont->addr));
@@ -117,7 +115,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_cont_decode() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5O_cont_encode
  *
@@ -134,7 +131,7 @@ done:
 static herr_t
 H5O_cont_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
-    const H5O_cont_t       *cont = (const H5O_cont_t *) _mesg;
+    const H5O_cont_t *cont = (const H5O_cont_t *)_mesg;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -152,7 +149,6 @@ H5O_cont_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, con
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_cont_encode() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5O_cont_size
  *
@@ -173,18 +169,17 @@ H5O_cont_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, con
 static size_t
 H5O_cont_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void H5_ATTR_UNUSED *_mesg)
 {
-    size_t ret_value;   /* Return value */
+    size_t ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Set return value */
-    ret_value = (size_t)(H5F_SIZEOF_ADDR(f) +    /* Continuation header address */
-                H5F_SIZEOF_SIZE(f));     /* Continuation header length */
+    ret_value = (size_t)(H5F_SIZEOF_ADDR(f) + /* Continuation header address */
+                         H5F_SIZEOF_SIZE(f)); /* Continuation header length */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_cont_size() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5O_cont_free
  *
@@ -209,7 +204,6 @@ H5O_cont_free(void *mesg)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_cont_free() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5O_cont_delete
  *
@@ -225,8 +219,8 @@ H5O_cont_free(void *mesg)
 static herr_t
 H5O_cont_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
 {
-    H5O_cont_t *mesg = (H5O_cont_t *) _mesg;
-    herr_t ret_value = SUCCEED;   /* Return value */
+    H5O_cont_t *mesg      = (H5O_cont_t *)_mesg;
+    herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -236,14 +230,13 @@ H5O_cont_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
 
     /* Notify the cache that the chunk has been deleted */
     /* (releases the space for the chunk) */
-    if(H5O_chunk_delete(f, dxpl_id, open_oh, mesg->chunkno) < 0)
+    if (H5O_chunk_delete(f, dxpl_id, open_oh, mesg->chunkno) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to remove chunk from cache")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_cont_delete() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5O_cont_debug
  *
@@ -260,10 +253,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_cont_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void *_mesg, FILE * stream,
-	       int indent, int fwidth)
+H5O_cont_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void *_mesg, FILE *stream,
+               int indent, int fwidth)
 {
-    const H5O_cont_t       *cont = (const H5O_cont_t *) _mesg;
+    const H5O_cont_t *cont = (const H5O_cont_t *)_mesg;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -274,15 +267,11 @@ H5O_cont_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-	      "Continuation address:", cont->addr);
+    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Continuation address:", cont->addr);
 
     HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-	      "Continuation size in bytes:",
-	      (unsigned long) (cont->size));
-    HDfprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
-	      "Points to chunk number:",
-	      (int) (cont->chunkno));
+              "Continuation size in bytes:", (unsigned long)(cont->size));
+    HDfprintf(stream, "%*s%-*s %d\n", indent, "", fwidth, "Points to chunk number:", (int)(cont->chunkno));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_cont_debug() */

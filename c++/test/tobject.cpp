@@ -26,27 +26,27 @@ using std::cerr;
 using std::endl;
 
 #include <string>
-#include "H5Cpp.h"      // C++ API header file
+#include "H5Cpp.h" // C++ API header file
 using namespace H5;
 
 #include "h5test.h"
-#include "h5cpputil.h"  // C++ utilility header file
+#include "h5cpputil.h" // C++ utilility header file
 
-const H5std_string      FILE_OBJECTS("tobjects.h5");
-const H5std_string      FILE_OBJHDR("tobject_header.h5");
-const H5std_string      GROUP1("Top Group");
-const H5std_string      GROUP1_PATH("/Top Group");
-const H5std_string      GROUP1_1("Sub-Group 1.1");
-const H5std_string      GROUP1_1_PATH("/Top Group/Sub-Group 1.1");
-const H5std_string      GROUP1_2("Sub-Group 1.2");
-const H5std_string      GROUP1_2_PATH("/Top Group/Sub-Group 1.2");
-const H5std_string      DSET_DEFAULT_NAME("default");
-const H5std_string      DSET_IN_FILE("Dataset in File");
-const H5std_string      DSET_IN_FILE_PATH("/Dataset in File");
-const H5std_string      DSET_IN_GRP1("Dataset in Group 1");
-const H5std_string      DSET_IN_GRP1_PATH("/Top Group/Dataset in Group 1");
-const H5std_string      DSET_IN_GRP1_2("Dataset in Group 1.2");
-const H5std_string      DSET_IN_GRP1_2_PATH("/Top Group/Sub-Group 1.2/Dataset in Group 1.2");
+const H5std_string FILE_OBJECTS("tobjects.h5");
+const H5std_string FILE_OBJHDR("tobject_header.h5");
+const H5std_string GROUP1("Top Group");
+const H5std_string GROUP1_PATH("/Top Group");
+const H5std_string GROUP1_1("Sub-Group 1.1");
+const H5std_string GROUP1_1_PATH("/Top Group/Sub-Group 1.1");
+const H5std_string GROUP1_2("Sub-Group 1.2");
+const H5std_string GROUP1_2_PATH("/Top Group/Sub-Group 1.2");
+const H5std_string DSET_DEFAULT_NAME("default");
+const H5std_string DSET_IN_FILE("Dataset in File");
+const H5std_string DSET_IN_FILE_PATH("/Dataset in File");
+const H5std_string DSET_IN_GRP1("Dataset in Group 1");
+const H5std_string DSET_IN_GRP1_PATH("/Top Group/Dataset in Group 1");
+const H5std_string DSET_IN_GRP1_2("Dataset in Group 1.2");
+const H5std_string DSET_IN_GRP1_2_PATH("/Top Group/Sub-Group 1.2/Dataset in Group 1.2");
 
 /*-------------------------------------------------------------------------
  * Function:    test_get_objname
@@ -61,7 +61,8 @@ const H5std_string      DSET_IN_GRP1_2_PATH("/Top Group/Sub-Group 1.2/Dataset in
  *
  *-------------------------------------------------------------------------
  */
-static void test_get_objname()
+static void
+test_get_objname()
 {
     SUBTEST("H5Object::getObjName on Groups and Datasets");
 
@@ -70,7 +71,7 @@ static void test_get_objname()
         H5File file(FILE_OBJECTS, H5F_ACC_TRUNC);
 
         // Create a top group and 2 subgroups
-        Group grp1 = file.createGroup(GROUP1, 0);
+        Group grp1   = file.createGroup(GROUP1, 0);
         Group grp1_1 = grp1.createGroup(GROUP1_1, 0);
         Group grp1_2 = grp1.createGroup(GROUP1_2, 0);
 
@@ -79,10 +80,9 @@ static void test_get_objname()
         try {
             grp1_2 = grp1.createGroup(GROUP1_2, 0);
         }
-        catch (GroupIException& E)
-        {} // do nothing, exception expected
-        catch (Exception& E)
-        {
+        catch (GroupIException &E) {
+        } // do nothing, exception expected
+        catch (Exception &E) {
             cerr << "Exception should have been caught by the previous catch" << endl;
             issue_fail_msg("test_get_objname", __LINE__, __FILE__);
         }
@@ -94,27 +94,24 @@ static void test_get_objname()
         ssize_t name_len = grp1.getObjName(NULL);
 
         // Random length is 4
-        if (name_len > 4)
-        {
-            char* grp1_name = new char[5];
-            name_len = grp1.getObjName(grp1_name, 5);
-            verify_val((const char*)grp1_name, "/Top", "Group::getObjName", __LINE__, __FILE__);
-            delete []grp1_name;
+        if (name_len > 4) {
+            char *grp1_name = new char[5];
+            name_len        = grp1.getObjName(grp1_name, 5);
+            verify_val((const char *)grp1_name, "/Top", "Group::getObjName", __LINE__, __FILE__);
+            delete[] grp1_name;
         }
 
         // Create a data space
-        hsize_t     dims[2];
+        hsize_t dims[2];
         dims[0] = 2;
         dims[1] = 5;
-        DataSpace space (2, dims, NULL);
+        DataSpace space(2, dims, NULL);
 
         // Create a dataset in the file
-        DataSet dsinfile = file.createDataSet(DSET_IN_FILE,
-                         PredType::NATIVE_DOUBLE, space);
+        DataSet dsinfile = file.createDataSet(DSET_IN_FILE, PredType::NATIVE_DOUBLE, space);
 
         // Create a dataset in the group
-        DataSet dsingrp = grp1.createDataSet(DSET_IN_GRP1,
-                         PredType::NATIVE_INT, space);
+        DataSet dsingrp = grp1.createDataSet(DSET_IN_GRP1, PredType::NATIVE_INT, space);
 
         // Get and verify the name of each dataset, using
         // H5std_string getObjName() and
@@ -141,21 +138,20 @@ static void test_get_objname()
 
         // Reopen that same dataset then check the name again with another
         // overload: ssize_t getObjName(H5std_string& obj_name, size_t len = 0)
-        dsingrp = grp1_2.openDataSet(DSET_IN_GRP1_2);
+        dsingrp  = grp1_2.openDataSet(DSET_IN_GRP1_2);
         name_len = dsingrp.getObjName(ds_name);
         verify_val(ds_name, DSET_IN_GRP1_2_PATH, "DataSet::getObjName", __LINE__, __FILE__);
 
         // Everything will be closed as they go out of scope
 
         PASSED();
-    }   // try block
+    } // try block
 
     // catch all other exceptions
-    catch (Exception& E)
-    {
+    catch (Exception &E) {
         issue_fail_msg("test_get_objname", __LINE__, __FILE__);
     }
-}   // test_get_objname
+} // test_get_objname
 
 /*-------------------------------------------------------------------------
  * Function:    test_get_objname_ontypes
@@ -170,7 +166,8 @@ static void test_get_objname()
  *
  *-------------------------------------------------------------------------
  */
-static void test_get_objname_ontypes()
+static void
+test_get_objname_ontypes()
 {
     SUBTEST("H5Object::getObjName on Committed Datatypes");
 
@@ -179,7 +176,7 @@ static void test_get_objname_ontypes()
         H5File file(FILE_OBJECTS, H5F_ACC_RDWR);
 
         // Create a group
-        Group grp = file.createGroup ("typetests");
+        Group grp = file.createGroup("typetests");
 
         // Create a datatype and save it
         IntType inttype(PredType::STD_B8LE);
@@ -222,7 +219,8 @@ static void test_get_objname_ontypes()
         // Name this datatype
         new_int_type.commit(grp, "IntType NATIVE_INT");
         ssize_t name_len = new_int_type.getObjName(type_name); // default len
-        verify_val(name_len, (ssize_t)HDstrlen("/typetests/IntType NATIVE_INT"), "DataType::getObjName", __LINE__, __FILE__);
+        verify_val(name_len, (ssize_t)HDstrlen("/typetests/IntType NATIVE_INT"), "DataType::getObjName",
+                   __LINE__, __FILE__);
         verify_val(type_name, "/typetests/IntType NATIVE_INT", "DataType::getObjName", __LINE__, __FILE__);
 
         // Close everything or they can be closed when objects go out of scope
@@ -234,11 +232,10 @@ static void test_get_objname_ontypes()
         PASSED();
     } // end top try block
 
-    catch (Exception& E)
-    {
+    catch (Exception &E) {
         issue_fail_msg("test_get_objname_ontypes", __LINE__, __FILE__);
     }
-}   // test_get_objname_ontypes
+} // test_get_objname_ontypes
 
 /*-------------------------------------------------------------------------
  * Function:    test_get_objtype
@@ -253,7 +250,8 @@ static void test_get_objname_ontypes()
  *
  *-------------------------------------------------------------------------
  */
-static void test_get_objtype()
+static void
+test_get_objtype()
 {
     SUBTEST("H5File::childObjType and H5Group::childObjType");
 
@@ -294,14 +292,13 @@ static void test_get_objtype()
         // Everything will be closed as they go out of scope
 
         PASSED();
-    }   // try block
+    } // try block
 
     // catch all other exceptions
-    catch (Exception& E)
-    {
+    catch (Exception &E) {
         issue_fail_msg("test_get_objtype", __LINE__, __FILE__);
     }
-}   // test_get_objtype
+} // test_get_objtype
 
 /*-------------------------------------------------------------------------
  * Function:    test_open_object_header
@@ -323,9 +320,10 @@ const H5std_string DSETNAME("dataset");
 #define RANK 2
 #define DIM0 5
 #define DIM1 10
-static void test_open_object_header()
+static void
+test_open_object_header()
 {
-    hsize_t     dims[2];
+    hsize_t dims[2];
 
     // Output message about test being performed
     SUBTEST("H5Location::openObjId and H5Location::closeObjId");
@@ -348,7 +346,7 @@ static void test_open_object_header()
         dims[0] = DIM0;
         dims[1] = DIM1;
         DataSpace dspace(RANK, dims);
-        DataSet dset(file1.createDataSet(DSETNAME, PredType::NATIVE_INT, dspace));
+        DataSet   dset(file1.createDataSet(DSETNAME, PredType::NATIVE_INT, dspace));
 
         // Create a dataset in the group
         DataSet dsingrp(grp.createDataSet(DSET_IN_GRP1, PredType::NATIVE_INT, dspace));
@@ -358,9 +356,9 @@ static void test_open_object_header()
         dspace.close();
 
         // Now make sure that openObjId can open all three types of objects
-        hid_t obj_grp = file1.openObjId(GROUPNAME);
+        hid_t obj_grp   = file1.openObjId(GROUPNAME);
         hid_t obj_dtype = file1.openObjId(DTYPENAME);
-        hid_t obj_dset = file1.openObjId(DSETNAME);
+        hid_t obj_dset  = file1.openObjId(DSETNAME);
 
         // Make sure that each is the right kind of ID
         H5I_type_t id_type = IdComponent::getHDFObjType(obj_grp);
@@ -372,7 +370,7 @@ static void test_open_object_header()
 
         /* Do something more complex with each of the IDs to make sure */
 
-        Group grp2(obj_grp);
+        Group   grp2(obj_grp);
         hsize_t num_objs = grp2.getNumObjs();
         verify_val(num_objs, 2, "H5Gget_info", __LINE__, __FILE__);
 
@@ -381,7 +379,7 @@ static void test_open_object_header()
 
         // Do a few things using the dset object identifier
         dset.setId(obj_dset);
-        dspace = dset.getSpace();
+        dspace         = dset.getSpace();
         bool is_simple = dspace.isSimple();
         verify_val(is_simple, true, "isSimple", __LINE__, __FILE__);
         dspace.close();
@@ -413,26 +411,23 @@ static void test_open_object_header()
         try {
             Group grp3 = dsingrp.openObjId(NOGROUPNAME);
         }
-        catch (DataSetIException& E)
-        {} // do nothing, exception expected and caught correctly
-        catch (Exception& E)
-        {
+        catch (DataSetIException &E) {
+        } // do nothing, exception expected and caught correctly
+        catch (Exception &E) {
             cerr << "Exception should have been caught by the previous catch" << endl;
             issue_fail_msg("test_get_objname", __LINE__, __FILE__);
         }
 
         PASSED();
-    }   // end of try block
+    } // end of try block
     // catch invalid action exception
-    catch (InvalidActionException& E)
-    {
+    catch (InvalidActionException &E) {
         cerr << " in InvalidActionException" << endl;
         cerr << " *FAILED*" << endl;
         cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
     }
     // catch all other exceptions
-    catch (Exception& E)
-    {
+    catch (Exception &E) {
         issue_fail_msg("test_file_name()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } /* test_open_object_header() */
@@ -449,7 +444,8 @@ static void test_open_object_header()
  *
  *-------------------------------------------------------------------------
  */
-static void test_is_valid()
+static void
+test_is_valid()
 {
     SUBTEST("IdComponent::isValid");
 
@@ -458,8 +454,8 @@ static void test_is_valid()
         IntType int1(PredType::NATIVE_INT);
 
         // Check that the ID is valid
-        hid_t int1_id = int1.getId();
-        bool is_valid = IdComponent::isValid(int1_id);
+        hid_t int1_id  = int1.getId();
+        bool  is_valid = IdComponent::isValid(int1_id);
         verify_val(is_valid, true, "IdComponent::isValid", __LINE__, __FILE__);
 
         // Create another datatype
@@ -479,14 +475,13 @@ static void test_is_valid()
         verify_val(is_valid, false, "IdComponent::isValid", __LINE__, __FILE__);
 
         PASSED();
-    }   // try block
+    } // try block
 
     // catch all other exceptions
-    catch (Exception& E)
-    {
+    catch (Exception &E) {
         issue_fail_msg("test_get_objtype", __LINE__, __FILE__, E.getCDetailMsg());
     }
-}   // test_is_valid
+} // test_is_valid
 
 /*-------------------------------------------------------------------------
  * Function:    test_objects
@@ -501,19 +496,19 @@ static void test_is_valid()
  *
  *-------------------------------------------------------------------------
  */
-extern "C"
-void test_object()
+extern "C" void
+test_object()
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing Object Functions\n"));
 
-    test_get_objname();    // Test get object name from groups/datasets
+    test_get_objname();         // Test get object name from groups/datasets
     test_get_objname_ontypes(); // Test get object name from types
-    test_get_objtype();    // Test get object type
-    test_is_valid();       // Test validating IDs
-    test_open_object_header();    // Test object header functions (H5O)
+    test_get_objtype();         // Test get object type
+    test_is_valid();            // Test validating IDs
+    test_open_object_header();  // Test object header functions (H5O)
 
-}   // test_objects
+} // test_objects
 
 /*-------------------------------------------------------------------------
  * Function:    cleanup_objects
@@ -526,8 +521,8 @@ void test_object()
  *
  *-------------------------------------------------------------------------
  */
-extern "C"
-void cleanup_object()
+extern "C" void
+cleanup_object()
 {
     HDremove(FILE_OBJECTS.c_str());
 } // cleanup_objects

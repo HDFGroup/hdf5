@@ -23,39 +23,43 @@ namespace H5 {
 */
 // Inheritance: StrCreatPropList -> PropList -> IdComponent
 class H5_DLLCPP LinkCreatPropList : public StrCreatPropList {
-   public:
-        ///\brief Default link creation property list.
-        static const LinkCreatPropList& DEFAULT;
+  public:
+    ///\brief Default link creation property list.
+    static const LinkCreatPropList &DEFAULT;
 
-        // Creates a link creation property list.
-        LinkCreatPropList();
+    // Creates a link creation property list.
+    LinkCreatPropList();
 
-        ///\brief Returns this class name.
-        virtual H5std_string fromClass () const { return("LinkCreatPropList"); }
+    ///\brief Returns this class name.
+    virtual H5std_string
+    fromClass() const
+    {
+        return ("LinkCreatPropList");
+    }
 
-        // Copy constructor: same as the original LinkCreatPropList.
-        LinkCreatPropList(const LinkCreatPropList& original);
+    // Copy constructor: same as the original LinkCreatPropList.
+    LinkCreatPropList(const LinkCreatPropList &original);
 
-        // Creates a copy of an existing link creation property list
-        // using the property list id.
-        LinkCreatPropList(const hid_t lcpl_id);
+    // Creates a copy of an existing link creation property list
+    // using the property list id.
+    LinkCreatPropList(const hid_t lcpl_id);
 
-        // Noop destructor
-        virtual ~LinkCreatPropList();
+    // Noop destructor
+    virtual ~LinkCreatPropList();
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-        // Deletes the global constant, should only be used by the library
-        static void deleteConstants();
+    // Deletes the global constant, should only be used by the library
+    static void deleteConstants();
 
-    private:
-        static LinkCreatPropList* DEFAULT_;
+  private:
+    static LinkCreatPropList *DEFAULT_;
 
-        // Creates the global constant, should only be used by the library
-        static LinkCreatPropList* getConstant();
+    // Creates the global constant, should only be used by the library
+    static LinkCreatPropList *getConstant();
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
-}; // end of LinkCreatPropList
+};     // end of LinkCreatPropList
 
 } // namespace H5
 

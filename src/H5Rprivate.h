@@ -25,5 +25,4 @@
 
 /* Private functions */
 
-#endif  /* _H5Rprivate_H */
-
+#endif /* _H5Rprivate_H */

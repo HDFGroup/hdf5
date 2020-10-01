@@ -21,23 +21,19 @@
 #include "H5PLpublic.h"
 
 /* Private headers needed by this file */
-#include "H5private.h"          /* Generic Functions                    */
-
+#include "H5private.h" /* Generic Functions                    */
 
 /**************************/
 /* Library Private Macros */
 /**************************/
 
-
 /****************************/
 /* Library Private Typedefs */
 /****************************/
 
-
 /*****************************/
 /* Library-private Variables */
 /*****************************/
-
 
 /***************************************/
 /* Library-private Function Prototypes */
@@ -47,4 +43,3 @@
 H5_DLL const void *H5PL_load(H5PL_type_t plugin_type, int type_id);
 
 #endif /* _H5PLprivate_H */
-

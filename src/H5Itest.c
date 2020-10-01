@@ -21,46 +21,38 @@
 /* Module Setup */
 /****************/
 
-#define H5I_PACKAGE		/*suppress error about including H5Ipkg	  */
-#define H5I_TESTING		/*suppress warning about H5I testing funcs*/
-
+#define H5I_PACKAGE /*suppress error about including H5Ipkg	  */
+#define H5I_TESTING /*suppress warning about H5I testing funcs*/
 
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"        /* Metadata cache                       */
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Gprivate.h"		/* Groups				*/
-#include "H5Ipkg.h"		/* IDs			  		*/
-
+#include "H5private.h"   /* Generic Functions			*/
+#include "H5ACprivate.h" /* Metadata cache                       */
+#include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5Gprivate.h"  /* Groups				*/
+#include "H5Ipkg.h"      /* IDs			  		*/
 
 /****************/
 /* Local Macros */
 /****************/
 
-
 /******************/
 /* Local Typedefs */
 /******************/
-
 
 /********************/
 /* Local Prototypes */
 /********************/
 
-
 /*********************/
 /* Package Variables */
 /*********************/
-
 
 /*******************/
 /* Local Variables */
 /*******************/
 
-
-
 /*-------------------------------------------------------------------------
  * Function: H5I_get_name_test
  *
@@ -75,22 +67,21 @@
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5I_get_name_test(hid_t id, char *name/*out*/, size_t size, hbool_t *cached)
+H5I_get_name_test(hid_t id, char *name /*out*/, size_t size, hbool_t *cached)
 {
-    H5G_loc_t     loc;          /* Object location */
-    ssize_t       ret_value;    /* Return value */
+    H5G_loc_t loc;       /* Object location */
+    ssize_t   ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Get object location */
-    if(H5G_loc(id, &loc) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object location")
+    if (H5G_loc(id, &loc) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object location")
 
     /* Call internal group routine to retrieve object's name */
-    if((ret_value = H5G_get_name(&loc, name, size, cached, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object name")
+    if ((ret_value = H5G_get_name(&loc, name, size, cached, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object name")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_get_name_test() */
-

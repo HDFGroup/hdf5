@@ -22,18 +22,16 @@
 
 #include "H5Ipublic.h"
 
-#define H5FD_FAMILY	(H5FD_family_init())
+#define H5FD_FAMILY (H5FD_family_init())
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-H5_DLL hid_t H5FD_family_init(void);
-H5_DLL void H5FD_family_term(void);
-H5_DLL herr_t H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size,
-			  hid_t memb_fapl_id);
-H5_DLL herr_t H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size/*out*/,
-			  hid_t *memb_fapl_id/*out*/);
+H5_DLL hid_t  H5FD_family_init(void);
+H5_DLL void   H5FD_family_term(void);
+H5_DLL herr_t H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size, hid_t memb_fapl_id);
+H5_DLL herr_t H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size /*out*/, hid_t *memb_fapl_id /*out*/);
 
 #ifdef __cplusplus
 }

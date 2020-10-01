@@ -16,18 +16,16 @@
  *      the datatype string padding for the H5T interface.
  */
 
-#define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
+#define H5T_PACKAGE /*suppress error about including H5Tpkg	  */
 
 /* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5T_init_strpad_interface
+#define H5_INTERFACE_INIT_FUNC H5T_init_strpad_interface
 
+#include "H5private.h"  /* Generic Functions			*/
+#include "H5Eprivate.h" /* Error handling		  	*/
+#include "H5Iprivate.h" /* IDs			  		*/
+#include "H5Tpkg.h"     /* Datatypes				*/
 
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5Tpkg.h"		/* Datatypes				*/
-
-
 /*--------------------------------------------------------------------------
 NAME
    H5T_init_strpad_interface -- Initialize interface-specific information
@@ -49,7 +47,6 @@ H5T_init_strpad_interface(void)
     FUNC_LEAVE_NOAPI(H5T_init())
 } /* H5T_init_strpad_interface() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_strpad
  *
@@ -74,22 +71,22 @@ H5T_init_strpad_interface(void)
 H5T_str_t
 H5Tget_strpad(hid_t type_id)
 {
-    H5T_t	*dt = NULL;
-    H5T_str_t	ret_value;
+    H5T_t *   dt = NULL;
+    H5T_str_t ret_value;
 
     FUNC_ENTER_API(H5T_STR_ERROR)
     H5TRACE1("Tz", "i", type_id);
 
     /* Check args */
-    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_STR_ERROR, "not a datatype")
+    if (NULL == (dt = H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_STR_ERROR, "not a datatype")
     while (dt->shared->parent && !H5T_IS_STRING(dt->shared))
-        dt = dt->shared->parent;  /*defer to parent*/
+        dt = dt->shared->parent; /*defer to parent*/
     if (!H5T_IS_STRING(dt->shared))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, H5T_STR_ERROR, "operation not defined for datatype class")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, H5T_STR_ERROR, "operation not defined for datatype class")
 
     /* result */
-    if(H5T_IS_FIXED_STRING(dt->shared))
+    if (H5T_IS_FIXED_STRING(dt->shared))
         ret_value = dt->shared->u.atomic.u.s.pad;
     else
         ret_value = dt->shared->u.vlen.pad;
@@ -98,7 +95,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5Tset_strpad
  *
@@ -131,26 +127,26 @@ done:
 herr_t
 H5Tset_strpad(hid_t type_id, H5T_str_t strpad)
 {
-    H5T_t	*dt = NULL;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5T_t *dt        = NULL;
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iTz", type_id, strpad);
 
     /* Check args */
-    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
-    if (H5T_STATE_TRANSIENT!=dt->shared->state)
-	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "datatype is read-only")
+    if (NULL == (dt = H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    if (H5T_STATE_TRANSIENT != dt->shared->state)
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "datatype is read-only")
     if (strpad < H5T_STR_NULLTERM || strpad >= H5T_NSTR)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal string pad type")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal string pad type")
     while (dt->shared->parent && !H5T_IS_STRING(dt->shared))
-        dt = dt->shared->parent;  /*defer to parent*/
+        dt = dt->shared->parent; /*defer to parent*/
     if (!H5T_IS_STRING(dt->shared))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for datatype class")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for datatype class")
 
     /* Commit */
-    if(H5T_IS_FIXED_STRING(dt->shared))
+    if (H5T_IS_FIXED_STRING(dt->shared))
         dt->shared->u.atomic.u.s.pad = strpad;
     else
         dt->shared->u.vlen.pad = strpad;
@@ -158,4 +154,3 @@ H5Tset_strpad(hid_t type_id, H5T_str_t strpad)
 done:
     FUNC_LEAVE_API(ret_value)
 }
-

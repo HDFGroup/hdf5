@@ -20,62 +20,51 @@
 /* Module Setup */
 /****************/
 
-#define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
+#define H5T_PACKAGE /*suppress error about including H5Tpkg	  */
 
 /* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5T_init_array_interface
-
+#define H5_INTERFACE_INIT_FUNC H5T_init_array_interface
 
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling			*/
-#include "H5Iprivate.h"		/* IDs					*/
-#include "H5Tpkg.h"		/* Datatypes				*/
-
+#include "H5private.h"  /* Generic Functions			*/
+#include "H5Eprivate.h" /* Error handling			*/
+#include "H5Iprivate.h" /* IDs					*/
+#include "H5Tpkg.h"     /* Datatypes				*/
 
 /****************/
 /* Local Macros */
 /****************/
 
-
 /******************/
 /* Local Typedefs */
 /******************/
-
 
 /********************/
 /* Package Typedefs */
 /********************/
 
-
 /********************/
 /* Local Prototypes */
 /********************/
-
 
 /*********************/
 /* Public Variables */
 /*********************/
 
-
 /*********************/
 /* Package Variables */
 /*********************/
-
 
 /*****************************/
 /* Library Private Variables */
 /*****************************/
 
-
 /*******************/
 /* Local Variables */
 /*******************/
 
-
-
 /*--------------------------------------------------------------------------
 NAME
    H5T_init_array_interface -- Initialize interface-specific information
@@ -97,7 +86,6 @@ H5T_init_array_interface(void)
     FUNC_LEAVE_NOAPI(H5T_init())
 } /* H5T_init_array_interface() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5Tarray_create2
  *
@@ -120,43 +108,42 @@ H5T_init_array_interface(void)
 hid_t
 H5Tarray_create2(hid_t base_id, unsigned ndims, const hsize_t dim[/* ndims */])
 {
-    H5T_t	*base;		/* base datatype	*/
-    H5T_t	*dt = NULL;	/* new array datatype	*/
-    unsigned    u;              /* local index variable */
-    hid_t	ret_value;	/* return value	*/
+    H5T_t *  base;      /* base datatype	*/
+    H5T_t *  dt = NULL; /* new array datatype	*/
+    unsigned u;         /* local index variable */
+    hid_t    ret_value; /* return value	*/
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("i", "iIu*h", base_id, ndims, dim);
 
     /* Check args */
-    if(ndims < 1 || ndims > H5S_MAX_RANK)
+    if (ndims < 1 || ndims > H5S_MAX_RANK)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid dimensionality")
-    if(!dim)
+    if (!dim)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no dimensions specified")
-    for(u = 0; u < ndims; u++)
-        if(!(dim[u] > 0))
+    for (u = 0; u < ndims; u++)
+        if (!(dim[u] > 0))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "zero-sized dimension specified")
-    if(NULL == (base = (H5T_t *)H5I_object_verify(base_id, H5I_DATATYPE)))
+    if (NULL == (base = (H5T_t *)H5I_object_verify(base_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype")
 
     /* Create the array datatype */
-    if(NULL == (dt = H5T__array_create(base, ndims, dim)))
+    if (NULL == (dt = H5T__array_create(base, ndims, dim)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to create datatype")
 
     /* Atomize the type */
-    if((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
+    if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype")
 
 done:
-    if(ret_value < 0) {
-        if(dt && H5T_close(dt) < 0)
+    if (ret_value < 0) {
+        if (dt && H5T_close(dt) < 0)
             HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't release datatype")
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
-}   /* end H5Tarray_create2() */
+} /* end H5Tarray_create2() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5T__array_create
  *
@@ -177,8 +164,8 @@ done:
 H5T_t *
 H5T__array_create(H5T_t *base, unsigned ndims, const hsize_t dim[/* ndims */])
 {
-    H5T_t	*ret_value;	/* new array data type	*/
-    unsigned    u;              /* local index variable */
+    H5T_t *  ret_value; /* new array data type	*/
+    unsigned u;         /* local index variable */
 
     FUNC_ENTER_PACKAGE
 
@@ -187,19 +174,19 @@ H5T__array_create(H5T_t *base, unsigned ndims, const hsize_t dim[/* ndims */])
     HDassert(dim);
 
     /* Build new type */
-    if(NULL == (ret_value = H5T__alloc()))
+    if (NULL == (ret_value = H5T__alloc()))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     ret_value->shared->type = H5T_ARRAY;
 
     /* Copy the base type of the array */
-    if(NULL == (ret_value->shared->parent = H5T_copy(base, H5T_COPY_ALL)))
+    if (NULL == (ret_value->shared->parent = H5T_copy(base, H5T_COPY_ALL)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "unable to copy base datatype")
 
     /* Set the array parameters */
     ret_value->shared->u.array.ndims = ndims;
 
     /* Copy the array dimensions & compute the # of elements in the array */
-    for(u = 0, ret_value->shared->u.array.nelem = 1; u < ndims; u++) {
+    for (u = 0, ret_value->shared->u.array.nelem = 1; u < ndims; u++) {
         H5_CHECKED_ASSIGN(ret_value->shared->u.array.dim[u], size_t, dim[u], hsize_t);
         ret_value->shared->u.array.nelem *= (size_t)dim[u];
     } /* end for */
@@ -208,7 +195,7 @@ H5T__array_create(H5T_t *base, unsigned ndims, const hsize_t dim[/* ndims */])
     ret_value->shared->size = ret_value->shared->parent->shared->size * ret_value->shared->u.array.nelem;
 
     /* Set the "force conversion" flag if the base datatype indicates */
-    if(base->shared->force_conv == TRUE)
+    if (base->shared->force_conv == TRUE)
         ret_value->shared->force_conv = TRUE;
 
     /* Array datatypes need a later version of the datatype object header message */
@@ -216,9 +203,8 @@ H5T__array_create(H5T_t *base, unsigned ndims, const hsize_t dim[/* ndims */])
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* end H5T__array_create */
+} /* end H5T__array_create */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_array_ndims
  *
@@ -235,16 +221,16 @@ done:
 int
 H5Tget_array_ndims(hid_t type_id)
 {
-    H5T_t *dt;		    /* pointer to array datatype	*/
-    int	ret_value;	    /* return value			*/
+    H5T_t *dt;        /* pointer to array datatype	*/
+    int    ret_value; /* return value			*/
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("Is", "i", type_id);
 
     /* Check args */
-    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id,H5I_DATATYPE)))
+    if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object")
-    if(dt->shared->type != H5T_ARRAY)
+    if (dt->shared->type != H5T_ARRAY)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an array datatype")
 
     /* Retrieve the number of dimensions */
@@ -252,9 +238,8 @@ H5Tget_array_ndims(hid_t type_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-}   /* end H5Tget_array_ndims */
+} /* end H5Tget_array_ndims */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5T__get_array_ndims
  *
@@ -279,9 +264,8 @@ H5T__get_array_ndims(const H5T_t *dt)
 
     /* Retrieve the number of dimensions */
     FUNC_LEAVE_NOAPI((int)dt->shared->u.array.ndims)
-}   /* end H5T__get_array_ndims */
+} /* end H5T__get_array_ndims */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_array_dims2
  *
@@ -298,26 +282,25 @@ H5T__get_array_ndims(const H5T_t *dt)
 int
 H5Tget_array_dims2(hid_t type_id, hsize_t dims[])
 {
-    H5T_t *dt;		/* pointer to array data type	*/
-    int	ret_value;	/* return value			*/
+    H5T_t *dt;        /* pointer to array data type	*/
+    int    ret_value; /* return value			*/
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("Is", "i*h", type_id, dims);
 
     /* Check args */
-    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id,H5I_DATATYPE)))
+    if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object")
-    if(dt->shared->type != H5T_ARRAY)
+    if (dt->shared->type != H5T_ARRAY)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an array datatype")
 
     /* Retrieve the sizes of the dimensions */
-    if((ret_value = H5T__get_array_dims(dt, dims)) < 0)
+    if ((ret_value = H5T__get_array_dims(dt, dims)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to get dimension sizes")
 done:
     FUNC_LEAVE_API(ret_value)
-}   /* end H5Tget_array_dims2() */
+} /* end H5Tget_array_dims2() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5T__get_array_dims
  *
@@ -335,7 +318,7 @@ done:
 int
 H5T__get_array_dims(const H5T_t *dt, hsize_t dims[])
 {
-    unsigned u;         /* Local index variable */
+    unsigned u; /* Local index variable */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -343,16 +326,16 @@ H5T__get_array_dims(const H5T_t *dt, hsize_t dims[])
     HDassert(dt->shared->type == H5T_ARRAY);
 
     /* Retrieve the sizes of the dimensions */
-    if(dims)
-        for(u = 0; u < dt->shared->u.array.ndims; u++)
+    if (dims)
+        for (u = 0; u < dt->shared->u.array.ndims; u++)
             dims[u] = dt->shared->u.array.dim[u];
 
     /* Pass along the array rank as the return value */
     FUNC_LEAVE_NOAPI((int)dt->shared->u.array.ndims)
-}   /* end H5T__get_array_dims */
+} /* end H5T__get_array_dims */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Tarray_create1
  *
@@ -374,45 +357,44 @@ H5T__get_array_dims(const H5T_t *dt, hsize_t dims[])
  */
 hid_t
 H5Tarray_create1(hid_t base_id, int ndims, const hsize_t dim[/* ndims */],
-    const int H5_ATTR_UNUSED perm[/* ndims */])
+                 const int H5_ATTR_UNUSED perm[/* ndims */])
 {
-    H5T_t	*base;		/* base datatype	*/
-    H5T_t	*dt = NULL;	/* new array datatype	*/
-    unsigned    u;              /* local index variable */
-    hid_t	ret_value;	/* return value	*/
+    H5T_t *  base;      /* base datatype	*/
+    H5T_t *  dt = NULL; /* new array datatype	*/
+    unsigned u;         /* local index variable */
+    hid_t    ret_value; /* return value	*/
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("i", "iIs*h*Is", base_id, ndims, dim, perm);
 
     /* Check args */
-    if(ndims < 1 || ndims > H5S_MAX_RANK)
+    if (ndims < 1 || ndims > H5S_MAX_RANK)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid dimensionality")
-    if(!dim)
+    if (!dim)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no dimensions specified")
-    for(u = 0; u < (unsigned)ndims; u++)
-        if(!(dim[u] > 0))
+    for (u = 0; u < (unsigned)ndims; u++)
+        if (!(dim[u] > 0))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "zero-sized dimension specified")
-    if(NULL == (base = (H5T_t *)H5I_object_verify(base_id, H5I_DATATYPE)))
+    if (NULL == (base = (H5T_t *)H5I_object_verify(base_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype")
 
     /* Create the array datatype */
-    if(NULL == (dt = H5T__array_create(base, (unsigned)ndims, dim)))
+    if (NULL == (dt = H5T__array_create(base, (unsigned)ndims, dim)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to create datatype")
 
     /* Atomize the type */
-    if((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
+    if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype")
 
 done:
-    if(ret_value < 0) {
-        if(dt && H5T_close(dt) < 0)
+    if (ret_value < 0) {
+        if (dt && H5T_close(dt) < 0)
             HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't release datatype")
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
-}   /* end H5Tarray_create1() */
+} /* end H5Tarray_create1() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_array_dims1
  *
@@ -429,24 +411,23 @@ done:
 int
 H5Tget_array_dims1(hid_t type_id, hsize_t dims[], int H5_ATTR_UNUSED perm[])
 {
-    H5T_t *dt;		/* Array datatype to query	*/
-    int	ret_value;	/* return value			*/
+    H5T_t *dt;        /* Array datatype to query	*/
+    int    ret_value; /* return value			*/
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("Is", "i*h*Is", type_id, dims, perm);
 
     /* Check args */
-    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+    if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object")
-    if(dt->shared->type != H5T_ARRAY)
+    if (dt->shared->type != H5T_ARRAY)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an array datatype")
 
     /* Retrieve the sizes of the dimensions */
-    if((ret_value = H5T__get_array_dims(dt, dims)) < 0)
+    if ((ret_value = H5T__get_array_dims(dt, dims)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to get dimension sizes")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}   /* end H5Tget_array_dims1() */
+} /* end H5Tget_array_dims1() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-

@@ -11,7 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 #include "H5private.h"
 #include "h5tools.h"
 #include "h5tools_utils.h"
@@ -23,28 +22,22 @@
 int d_status = EXIT_SUCCESS;
 
 /* command-line options: short and long-named parameters */
-static const char *s_opts = "hlpvV";
-static struct long_options l_opts[] = {
-    { "help", no_arg, 'h' },
-    { "latest", no_arg, 'l' },
-    { "parents", no_arg, 'p' },
-    { "verbose", no_arg, 'v' },
-    { "version", no_arg, 'V' },
-    { NULL, 0, '\0' }
-};
+static const char *        s_opts   = "hlpvV";
+static struct long_options l_opts[] = {{"help", no_arg, 'h'},    {"latest", no_arg, 'l'},
+                                       {"parents", no_arg, 'p'}, {"verbose", no_arg, 'v'},
+                                       {"version", no_arg, 'V'}, {NULL, 0, '\0'}};
 
 /* Command line parameter settings */
 typedef struct {
-    char *fname;                /* File name to operate on */
-    hbool_t latest;             /* Whether file should use latest format versions */
-    hbool_t verbose;            /* Whether output should be verbose */
-    hbool_t parents;            /* Whether to create intermediate groups */
-    size_t ngroups;             /* Number of groups to create */
-    char **groups;              /* Pointer to array of group names */
+    char *  fname;   /* File name to operate on */
+    hbool_t latest;  /* Whether file should use latest format versions */
+    hbool_t verbose; /* Whether output should be verbose */
+    hbool_t parents; /* Whether to create intermediate groups */
+    size_t  ngroups; /* Number of groups to create */
+    char ** groups;  /* Pointer to array of group names */
 } param_t;
-param_t params;             /* Command line parameter settings */
+param_t params; /* Command line parameter settings */
 
-
 /*-------------------------------------------------------------------------
  * Function:    leave
  *
@@ -62,17 +55,16 @@ leave(int ret)
     size_t curr_group;
 
     if (params.fname)
-        HDfree (params.fname);
+        HDfree(params.fname);
     if (params.ngroups) {
-        for(curr_group = 0; curr_group < params.ngroups; curr_group++)
-            HDfree (params.groups[curr_group]);
-        HDfree (params.groups);
+        for (curr_group = 0; curr_group < params.ngroups; curr_group++)
+            HDfree(params.groups[curr_group]);
+        HDfree(params.groups);
     }
     h5tools_close();
     HDexit(ret);
 } /* end leave() */
 
-
 /*-------------------------------------------------------------------------
  * Function: usage
  *
@@ -97,7 +89,6 @@ usage: h5mkgrp [OPTIONS] FILE GROUP...\n\
       -V, --version      Print version number and exit\n");
 } /* end usage() */
 
-
 /*-------------------------------------------------------------------------
  * Function: parse_command_line
  *
@@ -113,18 +104,18 @@ usage: h5mkgrp [OPTIONS] FILE GROUP...\n\
 static int
 parse_command_line(int argc, const char *argv[], param_t *parms)
 {
-    int opt;            /* Option from command line */
-    size_t curr_group;  /* Current group name to copy */
+    int    opt;        /* Option from command line */
+    size_t curr_group; /* Current group name to copy */
 
     /* Check for empty command line */
-    if(argc == 1) {
+    if (argc == 1) {
         usage();
         leave(EXIT_SUCCESS);
     } /* end if */
 
     /* Parse command line options */
-    while((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
-        switch((char)opt) {
+    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
+        switch ((char)opt) {
             /* Display 'help' */
             case 'h':
                 usage();
@@ -157,10 +148,10 @@ parse_command_line(int argc, const char *argv[], param_t *parms)
                 usage();
                 leave(EXIT_FAILURE);
         } /* end switch */
-    } /* end while */
+    }     /* end while */
 
     /* Check for file name to be processed */
-    if(argc <= opt_ind) {
+    if (argc <= opt_ind) {
         error_msg("missing file name\n");
         usage();
         leave(EXIT_FAILURE);
@@ -171,7 +162,7 @@ parse_command_line(int argc, const char *argv[], param_t *parms)
     opt_ind++;
 
     /* Check for group(s) to be created */
-    if(argc <= opt_ind) {
+    if (argc <= opt_ind) {
         error_msg("missing group name(s)\n");
         usage();
         leave(EXIT_FAILURE);
@@ -179,29 +170,28 @@ parse_command_line(int argc, const char *argv[], param_t *parms)
 
     /* Allocate space for the group name pointers */
     parms->ngroups = (size_t)(argc - opt_ind);
-    parms->groups = (char **)HDmalloc(parms->ngroups * sizeof(char *));
+    parms->groups  = (char **)HDmalloc(parms->ngroups * sizeof(char *));
 
     /* Retrieve the group names */
     curr_group = 0;
-    while(opt_ind < argc) {
+    while (opt_ind < argc) {
         parms->groups[curr_group] = HDstrdup(argv[opt_ind]);
         curr_group++;
         opt_ind++;
     } /* end while */
 
 #ifdef QAK
-HDfprintf(stderr, "parms->parents = %t\n", parms->parents);
-HDfprintf(stderr, "parms->verbose = %t\n", parms->verbose);
-HDfprintf(stderr, "parms->fname = '%s'\n", parms->fname);
-HDfprintf(stderr, "parms->ngroups = %Zu\n", parms->ngroups);
-for(curr_group = 0; curr_group < parms->ngroups; curr_group++)
-    HDfprintf(stderr, "parms->group[%Zu] = '%s'\n", curr_group, parms->groups[curr_group]);
+    HDfprintf(stderr, "parms->parents = %t\n", parms->parents);
+    HDfprintf(stderr, "parms->verbose = %t\n", parms->verbose);
+    HDfprintf(stderr, "parms->fname = '%s'\n", parms->fname);
+    HDfprintf(stderr, "parms->ngroups = %Zu\n", parms->ngroups);
+    for (curr_group = 0; curr_group < parms->ngroups; curr_group++)
+        HDfprintf(stderr, "parms->group[%Zu] = '%s'\n", curr_group, parms->groups[curr_group]);
 #endif /* QAK */
 
-    return(0);
+    return (0);
 } /* parse_command_line() */
 
-
 /*-------------------------------------------------------------------------
  * Function: main
  *
@@ -214,10 +204,10 @@ for(curr_group = 0; curr_group < parms->ngroups; curr_group++)
 int
 main(int argc, const char *argv[])
 {
-    hid_t fid;                  /* HDF5 file ID */
-    hid_t fapl_id;              /* File access property list ID */
-    hid_t lcpl_id;              /* Link creation property list ID */
-    size_t curr_group;          /* Current group to create */
+    hid_t  fid;        /* HDF5 file ID */
+    hid_t  fapl_id;    /* File access property list ID */
+    hid_t  lcpl_id;    /* Link creation property list ID */
+    size_t curr_group; /* Current group to create */
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
@@ -230,27 +220,27 @@ main(int argc, const char *argv[])
 
     /* Parse command line */
     HDmemset(&params, 0, sizeof(params));
-    if(parse_command_line(argc, argv, &params) < 0) {
+    if (parse_command_line(argc, argv, &params) < 0) {
         error_msg("unable to parse command line arguments\n");
         leave(EXIT_FAILURE);
     } /* end if */
 
     /* Create file access property list */
-    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
         error_msg("Could not create file access property list\n");
         leave(EXIT_FAILURE);
     } /* end if */
 
     /* Check for creating groups with new format version */
-    if(params.latest) {
+    if (params.latest) {
         /* Set the "use the latest version of the format" bounds */
-        if(H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
+        if (H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
             error_msg("Could not set property for using latest version of the format\n");
             leave(EXIT_FAILURE);
         } /* end if */
 
         /* Display some output if requested */
-        if(params.verbose)
+        if (params.verbose)
             HDprintf("%s: Creating groups with latest version of the format\n", h5tools_getprogname());
     } /* end if */
 
@@ -259,73 +249,72 @@ main(int argc, const char *argv[])
 
     /* If we couldn't open an existing file, try creating file */
     /* (use "EXCL" instead of "TRUNC", so we don't blow away existing non-HDF5 file) */
-    if(fid < 0)
+    if (fid < 0)
         fid = H5Fcreate(params.fname, H5F_ACC_EXCL, H5P_DEFAULT, fapl_id);
 
     /* Test for error in opening file */
-    if(fid < 0) {
+    if (fid < 0) {
         error_msg("Could not open output file '%s'\n", params.fname);
         leave(EXIT_FAILURE);
     } /* end if */
 
     /* Create link creation property list */
-    if((lcpl_id = H5Pcreate(H5P_LINK_CREATE)) < 0) {
+    if ((lcpl_id = H5Pcreate(H5P_LINK_CREATE)) < 0) {
         error_msg("Could not create link creation property list\n");
         leave(EXIT_FAILURE);
     } /* end if */
 
     /* Check for creating intermediate groups */
-    if(params.parents) {
+    if (params.parents) {
         /* Set the intermediate group creation property */
-        if(H5Pset_create_intermediate_group(lcpl_id, TRUE) < 0) {
+        if (H5Pset_create_intermediate_group(lcpl_id, TRUE) < 0) {
             error_msg("Could not set property for creating parent groups\n");
             leave(EXIT_FAILURE);
         } /* end if */
 
         /* Display some output if requested */
-        if(params.verbose)
+        if (params.verbose)
             HDprintf("%s: Creating parent groups\n", h5tools_getprogname());
     } /* end if */
 
     /* Loop over creating requested groups */
-    for(curr_group = 0; curr_group < params.ngroups; curr_group++) {
-        hid_t gid;              /* Group ID */
+    for (curr_group = 0; curr_group < params.ngroups; curr_group++) {
+        hid_t gid; /* Group ID */
 
         /* Attempt to create a group */
-        if((gid = H5Gcreate2(fid, params.groups[curr_group], lcpl_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        if ((gid = H5Gcreate2(fid, params.groups[curr_group], lcpl_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
             error_msg("Could not create group '%s'\n", params.groups[curr_group]);
             leave(EXIT_FAILURE);
         } /* end if */
 
         /* Close the group */
-        if(H5Gclose(gid) < 0) {
+        if (H5Gclose(gid) < 0) {
             error_msg("Could not close group '%s'??\n", params.groups[curr_group]);
             leave(EXIT_FAILURE);
         } /* end if */
 
         /* Display some output if requested */
-        if(params.verbose)
+        if (params.verbose)
             HDprintf("%s: created group '%s'\n", h5tools_getprogname(), params.groups[curr_group]);
     } /* end for */
 
     /* Close link creation property list */
-    if(H5Pclose(lcpl_id) < 0) {
+    if (H5Pclose(lcpl_id) < 0) {
         error_msg("Could not close link creation property list\n");
         leave(EXIT_FAILURE);
     } /* end if */
 
     /* Close file */
-    if(H5Fclose(fid) < 0) {
+    if (H5Fclose(fid) < 0) {
         error_msg("Could not close output file '%s'??\n", params.fname);
         leave(EXIT_FAILURE);
     } /* end if */
 
     /* Close file access property list */
-    if(H5Pclose(fapl_id) < 0) {
+    if (H5Pclose(fapl_id) < 0) {
         error_msg("Could not close file access property list\n");
         leave(EXIT_FAILURE);
     } /* end if */
 
     leave(EXIT_SUCCESS);
 } /* end main() */
-

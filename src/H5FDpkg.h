@@ -27,39 +27,33 @@
 #define _H5FDpkg_H
 
 /* Get package's private header */
-#include "H5FDprivate.h"	/* File drivers				*/
+#include "H5FDprivate.h" /* File drivers				*/
 
 /* Other private headers needed by this file */
-#include "H5FLprivate.h"	/* Free lists                           */
+#include "H5FLprivate.h" /* Free lists                           */
 
 /**************************/
 /* Package Private Macros */
 /**************************/
 
-
 /****************************/
 /* Package Private Typedefs */
 /****************************/
-
 
 /*****************************/
 /* Package Private Variables */
 /*****************************/
 
-
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-H5_DLL herr_t H5FD_init(void);
-H5_DLL haddr_t H5FD_alloc_real(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type,
-    hsize_t size, haddr_t *align_addr, hsize_t *align_size);
-H5_DLL herr_t H5FD_free_real(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type,
-    haddr_t addr, hsize_t size);
-
+H5_DLL herr_t  H5FD_init(void);
+H5_DLL haddr_t H5FD_alloc_real(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, hsize_t size,
+                               haddr_t *align_addr, hsize_t *align_size);
+H5_DLL herr_t  H5FD_free_real(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr, hsize_t size);
 
 /* Testing routines */
 #ifdef H5FD_TESTING
 #endif /* H5FD_TESTING */
 
 #endif /* _H5FDpkg_H */
-

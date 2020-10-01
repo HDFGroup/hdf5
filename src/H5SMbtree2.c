@@ -15,61 +15,56 @@
 /* Module Setup */
 /****************/
 
-#define H5O_PACKAGE		/*suppress error about including H5Opkg 	  */
-#define H5SM_PACKAGE		/*suppress error about including H5SMpkg	  */
-
+#define H5O_PACKAGE  /*suppress error about including H5Opkg 	  */
+#define H5SM_PACKAGE /*suppress error about including H5SMpkg	  */
 
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Opkg.h"             /* Object Headers                       */
-#include "H5SMpkg.h"            /* Shared object header messages        */
-
+#include "H5private.h"  /* Generic Functions			*/
+#include "H5Eprivate.h" /* Error handling		  	*/
+#include "H5Opkg.h"     /* Object Headers                       */
+#include "H5SMpkg.h"    /* Shared object header messages        */
 
 /****************/
 /* Local Macros */
 /****************/
 
-
 /******************/
 /* Local Typedefs */
 /******************/
-
 
 /********************/
 /* Local Prototypes */
 /********************/
 
 /* v2 B-tree callbacks */
-static void *H5SM_bt2_crt_context(void *udata);
+static void * H5SM_bt2_crt_context(void *udata);
 static herr_t H5SM_bt2_dst_context(void *ctx);
 static herr_t H5SM_bt2_store(void *native, const void *udata);
-static herr_t H5SM_bt2_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
-    int indent, int fwidth, const void *record, const void *_udata);
-static void *H5SM_bt2_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t addr);
-
+static herr_t H5SM_bt2_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id, int indent, int fwidth,
+                             const void *record, const void *_udata);
+static void * H5SM_bt2_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 
 /*****************************/
 /* Library Private Variables */
 /*****************************/
 /* v2 B-tree class for SOHM indexes*/
-const H5B2_class_t H5SM_INDEX[1]={{   /* B-tree class information */
-    H5B2_SOHM_INDEX_ID,               /* Type of B-tree */
-    "H5B2_SOHM_INDEX_ID",             /* Name of B-tree class */
-    sizeof(H5SM_sohm_t),              /* Size of native record */
-    H5SM_bt2_crt_context,             /* Create client callback context */
-    H5SM_bt2_dst_context,             /* Destroy client callback context */
-    H5SM_bt2_store,                   /* Record storage callback */
-    H5SM_message_compare,             /* Record comparison callback */
-    H5SM_message_encode,              /* Record encoding callback */
-    H5SM_message_decode,              /* Record decoding callback */
-    H5SM_bt2_debug,                   /* Record debugging callback */
-    H5SM_bt2_crt_dbg_context,	      /* Create debugging context */
-    H5SM_bt2_dst_context 	      /* Destroy debugging context */
+const H5B2_class_t H5SM_INDEX[1] = {{
+    /* B-tree class information */
+    H5B2_SOHM_INDEX_ID,       /* Type of B-tree */
+    "H5B2_SOHM_INDEX_ID",     /* Name of B-tree class */
+    sizeof(H5SM_sohm_t),      /* Size of native record */
+    H5SM_bt2_crt_context,     /* Create client callback context */
+    H5SM_bt2_dst_context,     /* Destroy client callback context */
+    H5SM_bt2_store,           /* Record storage callback */
+    H5SM_message_compare,     /* Record comparison callback */
+    H5SM_message_encode,      /* Record encoding callback */
+    H5SM_message_decode,      /* Record decoding callback */
+    H5SM_bt2_debug,           /* Record debugging callback */
+    H5SM_bt2_crt_dbg_context, /* Create debugging context */
+    H5SM_bt2_dst_context      /* Destroy debugging context */
 }};
-
 
 /*******************/
 /* Local Variables */
@@ -78,8 +73,6 @@ const H5B2_class_t H5SM_INDEX[1]={{   /* B-tree class information */
 /* Declare a free list to manage the H5SM_bt2_ctx_t struct */
 H5FL_DEFINE_STATIC(H5SM_bt2_ctx_t);
 
-
-
 /*-------------------------------------------------------------------------
  * Function:	H5SM_bt2_crt_context
  *
@@ -96,9 +89,9 @@ H5FL_DEFINE_STATIC(H5SM_bt2_ctx_t);
 static void *
 H5SM_bt2_crt_context(void *_f)
 {
-    H5F_t *f = (H5F_t *)_f;     /* User data for building callback context */
-    H5SM_bt2_ctx_t *ctx;        /* Callback context structure */
-    void *ret_value;            /* Return value */
+    H5F_t *         f = (H5F_t *)_f; /* User data for building callback context */
+    H5SM_bt2_ctx_t *ctx;             /* Callback context structure */
+    void *          ret_value;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -106,7 +99,7 @@ H5SM_bt2_crt_context(void *_f)
     HDassert(f);
 
     /* Allocate callback context */
-    if(NULL == (ctx = H5FL_MALLOC(H5SM_bt2_ctx_t)))
+    if (NULL == (ctx = H5FL_MALLOC(H5SM_bt2_ctx_t)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "can't allocate callback context")
 
     /* Determine the size of addresses & lengths in the file */
@@ -119,7 +112,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5SM_bt2_crt_context() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5SM_bt2_dst_context
  *
@@ -136,7 +128,7 @@ done:
 static herr_t
 H5SM_bt2_dst_context(void *_ctx)
 {
-    H5SM_bt2_ctx_t *ctx = (H5SM_bt2_ctx_t *)_ctx;       /* Callback context structure */
+    H5SM_bt2_ctx_t *ctx = (H5SM_bt2_ctx_t *)_ctx; /* Callback context structure */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -149,7 +141,6 @@ H5SM_bt2_dst_context(void *_ctx)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5SM_bt2_dst_context() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5SM_bt2_store
  *
@@ -178,7 +169,6 @@ H5SM_bt2_store(void *native, const void *udata)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM_bt2_store */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5SM_bt2_debug
  *
@@ -193,28 +183,27 @@ H5SM_bt2_store(void *native, const void *udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM_bt2_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
-    int indent, int fwidth, const void *record, const void H5_ATTR_UNUSED *_udata)
+H5SM_bt2_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, int indent,
+               int fwidth, const void *record, const void H5_ATTR_UNUSED *_udata)
 {
     const H5SM_sohm_t *sohm = (const H5SM_sohm_t *)record;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(sohm->location == H5SM_IN_HEAP)
+    if (sohm->location == H5SM_IN_HEAP)
         HDfprintf(stream, "%*s%-*s {%a, %lo, %Hx}\n", indent, "", fwidth,
-            "Shared Message in heap:",
-            sohm->u.heap_loc.fheap_id, sohm->hash, sohm->u.heap_loc.ref_count);
+                  "Shared Message in heap:", sohm->u.heap_loc.fheap_id, sohm->hash,
+                  sohm->u.heap_loc.ref_count);
     else {
         HDassert(sohm->location == H5SM_IN_OH);
         HDfprintf(stream, "%*s%-*s {%a, %lo, %Hx, %Hx}\n", indent, "", fwidth,
-            "Shared Message in OH:",
-            sohm->u.mesg_loc.oh_addr, sohm->hash, sohm->msg_type_id, sohm->u.mesg_loc.index);
+                  "Shared Message in OH:", sohm->u.mesg_loc.oh_addr, sohm->hash, sohm->msg_type_id,
+                  sohm->u.mesg_loc.index);
     } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM_bt2_debug */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5SM_bt2_crt_dbg_context
  *
@@ -231,8 +220,8 @@ H5SM_bt2_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED
 static void *
 H5SM_bt2_crt_dbg_context(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t H5_ATTR_UNUSED addr)
 {
-    H5SM_bt2_ctx_t *ctx;        /* Callback context structure */
-    void *ret_value;            /* Return value */
+    H5SM_bt2_ctx_t *ctx;       /* Callback context structure */
+    void *          ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -240,7 +229,7 @@ H5SM_bt2_crt_dbg_context(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t H5_ATTR
     HDassert(f);
 
     /* Allocate callback context */
-    if(NULL == (ctx = H5FL_MALLOC(H5SM_bt2_ctx_t)))
+    if (NULL == (ctx = H5FL_MALLOC(H5SM_bt2_ctx_t)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "can't allocate callback context")
 
     /* Determine the size of addresses & lengths in the file */
@@ -253,7 +242,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5SM_bt2_crt_dbg_context() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5SM_bt2_convert_to_list_op
  *
@@ -271,11 +259,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5SM_bt2_convert_to_list_op(const void * record, void *op_data)
+H5SM_bt2_convert_to_list_op(const void *record, void *op_data)
 {
     const H5SM_sohm_t *message = (const H5SM_sohm_t *)record;
-    const H5SM_list_t *list = (const H5SM_list_t *)op_data;
-    size_t mesg_idx;            /* Index of message to modify */
+    const H5SM_list_t *list    = (const H5SM_list_t *)op_data;
+    size_t             mesg_idx; /* Index of message to modify */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -294,4 +282,3 @@ H5SM_bt2_convert_to_list_op(const void * record, void *op_data)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM_bt2_convert_to_list_op() */
-

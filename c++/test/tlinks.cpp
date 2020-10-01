@@ -26,10 +26,10 @@ using std::cerr;
 using std::endl;
 
 #include <string>
-#include "H5Cpp.h"      // C++ API header file
+#include "H5Cpp.h" // C++ API header file
 using namespace H5;
 
-#include "h5cpputil.h"  // C++ test utilility header file
+#include "h5cpputil.h" // C++ test utilility header file
 
 // A lot of the definition inherited from C test links.c is left here until
 // the H5L API is implemented and tests are completed - BMR 10/19/2009
@@ -46,7 +46,7 @@ using namespace H5;
 //#include "H5Lprivate.h"   // Links
 
 /* File for external link test.  Created with gen_udlinks.c */
-#define LINKED_FILE  "be_extlink2.h5"
+#define LINKED_FILE "be_extlink2.h5"
 
 #if 0
 const char *FILENAME[] = {
@@ -100,31 +100,31 @@ const char *FILENAME[] = {
 
 #endif // 0
 
-#define TMPDIR          "tmp"
+#define TMPDIR "tmp"
 
-#define FAMILY_SIZE     1024
-#define CORE_INCREMENT  1024
-#define NUM400          400
+#define FAMILY_SIZE    1024
+#define CORE_INCREMENT 1024
+#define NUM400         400
 
 /* do not do check_all_closed() for "ext*" files and "tmp/ext*" */
-#define EXTSTOP         12
+#define EXTSTOP 12
 
-#define LINK_BUF_SIZE   1024
-#define NAME_BUF_SIZE   1024
-#define MAX_NAME_LEN    ((64*1024)+1024)
+#define LINK_BUF_SIZE 1024
+#define NAME_BUF_SIZE 1024
+#define MAX_NAME_LEN  ((64 * 1024) + 1024)
 
 /* Link type IDs */
-#define UD_HARD_TYPE    201
-#define UD_CB_TYPE      H5L_TYPE_MAX
-#define UD_PLIST_TYPE   128
-#define UD_CBFAIL_TYPE  UD_PLIST_TYPE
-#define UD_ERROR_TYPE   189
-#define UD_BAD_TYPE1    H5L_TYPE_HARD
-#define UD_BAD_TYPE2    (H5L_TYPE_UD_MIN - 5)
-#define UD_BAD_VERS     (H5L_LINK_CLASS_T_VERS + 1)
+#define UD_HARD_TYPE   201
+#define UD_CB_TYPE     H5L_TYPE_MAX
+#define UD_PLIST_TYPE  128
+#define UD_CBFAIL_TYPE UD_PLIST_TYPE
+#define UD_ERROR_TYPE  189
+#define UD_BAD_TYPE1   H5L_TYPE_HARD
+#define UD_BAD_TYPE2   (H5L_TYPE_UD_MIN - 5)
+#define UD_BAD_VERS    (H5L_LINK_CLASS_T_VERS + 1)
 
-#define DEST_PROP_NAME      "destination_group"
-#define REREG_TARGET_NAME   "rereg_target"
+#define DEST_PROP_NAME    "destination_group"
+#define REREG_TARGET_NAME "rereg_target"
 
 #define UD_CB_LINK_NAME     "ud_callback_link"
 #define NEW_UD_CB_LINK_NAME "ud_callback_link2"
@@ -134,31 +134,31 @@ const char *FILENAME[] = {
 #define LE_FILENAME "le_extlink1.h5"
 #define BE_FILENAME "be_extlink1.h5"
 
-#define ELINK_CB_FAM_SIZE (hsize_t) 100
+#define ELINK_CB_FAM_SIZE (hsize_t)100
 
 #define H5L_DIM1 100
 #define H5L_DIM2 100
 
 /* Creation order macros */
-#define CORDER_GROUP_NAME       "corder_group"
-#define CORDER_SOFT_GROUP_NAME  "corder_soft_group"
-#define CORDER_NLINKS           18
-#define CORDER_ITER_STOP        3
-#define CORDER_EST_ENTRY_LEN    9
+#define CORDER_GROUP_NAME      "corder_group"
+#define CORDER_SOFT_GROUP_NAME "corder_soft_group"
+#define CORDER_NLINKS          18
+#define CORDER_ITER_STOP       3
+#define CORDER_EST_ENTRY_LEN   9
 
 /* Timestamp macros */
-#define TIMESTAMP_GROUP_1       "timestamp1"
-#define TIMESTAMP_GROUP_2       "timestamp2"
+#define TIMESTAMP_GROUP_1 "timestamp1"
+#define TIMESTAMP_GROUP_2 "timestamp2"
 
 /* Link iteration struct */
 typedef struct {
-    H5_iter_order_t order;      /* Direction of iteration */
-    unsigned ncalled;           /* # of times callback is entered */
-    unsigned nskipped;          /* # of links skipped */
-    int stop;                   /* # of iterations to stop after */
-    int64_t curr;               /* Current creation order value */
-    size_t max_visit;           /* Size of "visited link" flag array */
-    hbool_t *visited;           /* Pointer to array of "visited link" flags */
+    H5_iter_order_t order;     /* Direction of iteration */
+    unsigned        ncalled;   /* # of times callback is entered */
+    unsigned        nskipped;  /* # of links skipped */
+    int             stop;      /* # of iterations to stop after */
+    int64_t         curr;      /* Current creation order value */
+    size_t          max_visit; /* Size of "visited link" flag array */
+    hbool_t *       visited;   /* Pointer to array of "visited link" flags */
 } link_iter_info_t;
 
 #if 0
@@ -312,14 +312,8 @@ typedef struct {
 } ovisit_ud_t;
 #endif
 
-static const char *FILENAME[] = {
-    "link0",
-    "link1.h5",
-    "link2.h5",
-    NULL
-};
+static const char *FILENAME[] = {"link0", "link1.h5", "link2.h5", NULL};
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_basic_links
  *
@@ -332,17 +326,17 @@ static const char *FILENAME[] = {
  *
  *-------------------------------------------------------------------------
  */
-static void test_basic_links(hid_t fapl_id, hbool_t new_format)
+static void
+test_basic_links(hid_t fapl_id, hbool_t new_format)
 {
     hsize_t size[1] = {1};
-    char filename[NAME_BUF_SIZE];
+    char    filename[NAME_BUF_SIZE];
 
     // Use the file access template id to create a file access prop. list.
     FileAccPropList fapl(fapl_id);
 
-    try
-    {
-        if(new_format)
+    try {
+        if (new_format)
             SUBTEST("Link creation (w/new group format)")
         else
             SUBTEST("Link creation")
@@ -351,7 +345,7 @@ static void test_basic_links(hid_t fapl_id, hbool_t new_format)
         H5File file(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
 
         // Create simple dataspace
-        DataSpace scalar (1, size, size);
+        DataSpace scalar(1, size, size);
 
         // Create a group then close it by letting the object go out of scope
         {
@@ -367,25 +361,19 @@ static void test_basic_links(hid_t fapl_id, hbool_t new_format)
 
         // Because these are not implemented in the C++ API yet, they are
         // used so CommonFG::getLinkval can be tested.
-        if(H5Lcreate_hard(
-                file_id, "dset1", H5L_SAME_LOC, "grp1/hard1",
-                H5P_DEFAULT, H5P_DEFAULT) < 0)
+        if (H5Lcreate_hard(file_id, "dset1", H5L_SAME_LOC, "grp1/hard1", H5P_DEFAULT, H5P_DEFAULT) < 0)
             throw Exception("test_basic_links", "H5Lcreate_hard failed");
 
         // Create a symbolic link
-        if(H5Lcreate_soft(
-                "/dset1", file_id, "grp1/soft", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        if (H5Lcreate_soft("/dset1", file_id, "grp1/soft", H5P_DEFAULT, H5P_DEFAULT) < 0)
             throw Exception("test_basic_links", "H5Lcreate_soft failed");
 
         // Create a symbolic link to something that doesn't exist
-        if(H5Lcreate_soft(
-                "foobar", file_id, "grp1/dangle", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        if (H5Lcreate_soft("foobar", file_id, "grp1/dangle", H5P_DEFAULT, H5P_DEFAULT) < 0)
             throw Exception("test_basic_links", "H5Lcreate_soft failed");
 
         // Create a recursive symbolic link
-        if(H5Lcreate_soft(
-                "/grp1/recursive", file_id, "/grp1/recursive",
-                H5P_DEFAULT, H5P_DEFAULT) < 0)
+        if (H5Lcreate_soft("/grp1/recursive", file_id, "/grp1/recursive", H5P_DEFAULT, H5P_DEFAULT) < 0)
             throw Exception("test_basic_links", "H5Lcreate_soft failed");
 
         // Verify link values before closing the file
@@ -400,21 +388,19 @@ static void test_basic_links(hid_t fapl_id, hbool_t new_format)
         verify_val(reclink_val, "/grp1/recursive", "H5File::getLinkval grp1/recursive", __LINE__, __FILE__);
 
     } // end of try block
-    catch (Exception& E)
-    {
+    catch (Exception &E) {
         issue_fail_msg("test_basic_links()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
     // Open the file and check on the links in it
-    try
-    {
+    try {
         // Open the file above
         H5File file(filename, H5F_ACC_RDWR, FileCreatPropList::DEFAULT, fapl);
 
         // Verify link existence
-        if(file.nameExists("dset1", LinkAccPropList::DEFAULT) != TRUE)
+        if (file.nameExists("dset1", LinkAccPropList::DEFAULT) != TRUE)
             throw InvalidActionException("H5File::nameExists", "dset1 doesn't exist");
-        if(file.nameExists("grp1/soft", LinkAccPropList::DEFAULT) != TRUE)
+        if (file.nameExists("grp1/soft", LinkAccPropList::DEFAULT) != TRUE)
             throw InvalidActionException("H5File::nameExists", "grp1/soft doesn't exist");
 
         // Verify link values
@@ -426,12 +412,11 @@ static void test_basic_links(hid_t fapl_id, hbool_t new_format)
 
         PASSED();
     } // end of try block
-    catch (Exception& E)
-    {
+    catch (Exception &E) {
         issue_fail_msg("test_basic_links()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } // test_basic_links
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_lcpl
  *
@@ -449,16 +434,15 @@ static void
 test_lcpl(hid_t fapl_id, hbool_t new_format)
 {
     H5L_info_t linfo;
-    char filename[1024];
-    hsize_t dims[2];
+    char       filename[1024];
+    hsize_t    dims[2];
 
-    if(new_format)
+    if (new_format)
         SUBTEST("Link creation property lists (w/new group format)")
     else
         SUBTEST("Link creation property lists")
 
-    try
-    {
+    try {
         FileAccPropList fapl(fapl_id);
 
         // Create a new file.
@@ -471,7 +455,7 @@ test_lcpl(hid_t fapl_id, hbool_t new_format)
 
         // Check that its character encoding is the default.
         linfo = file.getLinkInfo(GROUP1NAME);
-        if(linfo.cset != H5T_CSET_ASCII)
+        if (linfo.cset != H5T_CSET_ASCII)
             throw InvalidActionException("H5Lget_info", "Character encoding is not default");
 
         // Create and commit a datatype with the default LCPL.
@@ -486,7 +470,7 @@ test_lcpl(hid_t fapl_id, hbool_t new_format)
         // Create a simple dataspace.
         dims[0] = H5L_DIM1;
         dims[1] = H5L_DIM2;
-        DataSpace dspace(2 ,dims);
+        DataSpace dspace(2, dims);
 
         // Create a dataset using the default LCPL.
         DataSet dset(file.createDataSet("/dataset", PredType::NATIVE_INT, dspace));
@@ -510,12 +494,11 @@ test_lcpl(hid_t fapl_id, hbool_t new_format)
 
         PASSED();
     } // end of try block
-    catch (Exception& E)
-    {
+    catch (Exception &E) {
         issue_fail_msg("test_lcpl()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } // end test_lcpl()
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_move
  *
@@ -529,15 +512,14 @@ test_lcpl(hid_t fapl_id, hbool_t new_format)
 static void
 test_move(hid_t fapl_id, hbool_t new_format)
 {
-    char   filename[1024];
+    char filename[1024];
 
-    if(new_format)
+    if (new_format)
         SUBTEST("Group::moveLink (w/new group format)")
     else
         SUBTEST("Group::moveLink")
 
-    try
-    {
+    try {
         FileAccPropList fapl(fapl_id);
 
         // Create two new files
@@ -560,15 +542,16 @@ test_move(hid_t fapl_id, hbool_t new_format)
             grp_1.moveLink("group_move", file_b, "group_new_name");
 
             // Should throw an exception but didn't
-    	    H5_FAILED();
-	        cerr << "    Group group_move should not be moved across files" << endl;
-        } catch (Exception& E) {
+            H5_FAILED();
+            cerr << "    Group group_move should not be moved across files" << endl;
+        }
+        catch (Exception &E) {
             // expected
         }
 
         // Move a soft link across files, should succeed
         grp_2.moveLink("soft", file_b, "soft_new_name");
-        if(file_b.nameExists("soft_new_name") != TRUE)
+        if (file_b.nameExists("soft_new_name") != TRUE)
             throw InvalidActionException("H5File::nameExists", "grp1/soft doesn't exist");
 
         // Move a group across groups in the same file while renaming it
@@ -583,9 +566,10 @@ test_move(hid_t fapl_id, hbool_t new_format)
             moved_grp = grp_1.openGroup("group_move");
 
             // Should throw an exception but didn't
-    	    H5_FAILED();
-	        cerr << "    Group group_move should not be in original location" << endl;
-        } catch (Exception& E) {
+            H5_FAILED();
+            cerr << "    Group group_move should not be in original location" << endl;
+        }
+        catch (Exception &E) {
             // expected
         }
 
@@ -617,46 +601,49 @@ test_move(hid_t fapl_id, hbool_t new_format)
             moved_grp = grp_1.openGroup("group_newer_name");
             moved_grp.close();
 
-    	    H5_FAILED(); // Should throw an exception but didn't
-	        cerr << "    Group group_newer_name should not be in GROUP1NAME" << endl;
-        } catch (Exception& E) {
+            H5_FAILED(); // Should throw an exception but didn't
+            cerr << "    Group group_newer_name should not be in GROUP1NAME" << endl;
+        }
+        catch (Exception &E) {
             // expected
         }
         try {
             moved_grp = grp_2.openGroup("group_newer_name");
             moved_grp.close();
 
-    	    H5_FAILED(); // Should throw an exception but didn't
-	        cerr << "    Group group_newer_name should not be in GROUP2NAME" << endl;
-        } catch (Exception& E) {
+            H5_FAILED(); // Should throw an exception but didn't
+            cerr << "    Group group_newer_name should not be in GROUP2NAME" << endl;
+        }
+        catch (Exception &E) {
             // expected
         }
         try {
             moved_grp = grp_2.openGroup("group_new_name");
             moved_grp.close();
 
-    	    H5_FAILED(); // Should throw an exception but didn't
-	        cerr << "    Group group_new_name should not be in GROUP2NAME" << endl;
-        } catch (Exception& E) {
+            H5_FAILED(); // Should throw an exception but didn't
+            cerr << "    Group group_new_name should not be in GROUP2NAME" << endl;
+        }
+        catch (Exception &E) {
             // expected
         }
         try {
             moved_grp = grp_1.openGroup("group_copy");
             moved_grp.close();
 
-    	    H5_FAILED(); // Should throw an exception but didn't
-	        cerr << "    Group group_copy should not be in GROUP1NAME" << endl;
-        } catch (Exception& E) {
+            H5_FAILED(); // Should throw an exception but didn't
+            cerr << "    Group group_copy should not be in GROUP1NAME" << endl;
+        }
+        catch (Exception &E) {
             // expected
         }
         PASSED();
     } // end of try block
-    catch (Exception& E)
-    {
+    catch (Exception &E) {
         issue_fail_msg("test_move()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } // test_move
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy
  *
@@ -667,17 +654,17 @@ test_move(hid_t fapl_id, hbool_t new_format)
  * May 2018
  *-------------------------------------------------------------------------
  */
-static void test_copy(hid_t fapl_id, hbool_t new_format)
+static void
+test_copy(hid_t fapl_id, hbool_t new_format)
 {
     char filename[1024];
 
-    if(new_format)
+    if (new_format)
         SUBTEST("Group::copyLink (w/new group format)")
     else
         SUBTEST("Group::copyLink")
 
-    try
-    {
+    try {
         // Create two new files
         h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
         H5File file_a(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl_id);
@@ -696,7 +683,8 @@ static void test_copy(hid_t fapl_id, hbool_t new_format)
         // Copy a group across files, should fail
         try {
             grp_1.copyLink("group_copy", file_b, "group_new_name");
-        } catch (Exception& E) {
+        }
+        catch (Exception &E) {
             // expected
         }
 
@@ -766,9 +754,10 @@ static void test_copy(hid_t fapl_id, hbool_t new_format)
             moved_grp = grp_2.openGroup("group_newer_name");
             moved_grp.close();
 
-    	    H5_FAILED(); // Should throw an exception but didn't
-	        cerr << "    Group group_newer_name should not be in GROUP2NAME" << endl;
-        } catch (Exception& E) {
+            H5_FAILED(); // Should throw an exception but didn't
+            cerr << "    Group group_newer_name should not be in GROUP2NAME" << endl;
+        }
+        catch (Exception &E) {
             // expected
         }
 
@@ -778,20 +767,20 @@ static void test_copy(hid_t fapl_id, hbool_t new_format)
             moved_grp = grp_1.openGroup("group_copy");
             moved_grp.close();
 
-    	    H5_FAILED(); // Should throw an exception but didn't
-	        cerr << "    Group group_copy should not be in GROUP1NAME" << endl;
-        } catch (Exception& E) {
+            H5_FAILED(); // Should throw an exception but didn't
+            cerr << "    Group group_copy should not be in GROUP1NAME" << endl;
+        }
+        catch (Exception &E) {
             // expected
         }
 
         PASSED();
     } // end of try block
-    catch (Exception& E)
-    {
+    catch (Exception &E) {
         issue_fail_msg("test_copy()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } // test_copy
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_num_links
  *
@@ -803,17 +792,17 @@ static void test_copy(hid_t fapl_id, hbool_t new_format)
  * March, 2017
  *-------------------------------------------------------------------------
  */
-static void test_num_links(hid_t fapl_id, hbool_t new_format)
+static void
+test_num_links(hid_t fapl_id, hbool_t new_format)
 {
     char filename[NAME_BUF_SIZE];
 
-    if(new_format)
+    if (new_format)
         SUBTEST("Setting number of links (w/new group format)")
     else
         SUBTEST("Setting number of links")
 
-    try
-    {
+    try {
         // Use the file access template id to create a file access prop. list.
         FileAccPropList fapl(fapl_id);
 
@@ -821,7 +810,7 @@ static void test_num_links(hid_t fapl_id, hbool_t new_format)
         H5File file(filename, H5F_ACC_RDWR, FileCreatPropList::DEFAULT, fapl);
 
         LinkAccPropList lapl;
-        size_t nlinks = 5;
+        size_t          nlinks = 5;
         lapl.setNumLinks(nlinks);
 
         // Read it back and verify
@@ -830,12 +819,11 @@ static void test_num_links(hid_t fapl_id, hbool_t new_format)
 
         PASSED();
     } // end of try block
-    catch (Exception& E)
-    {
+    catch (Exception &E) {
         issue_fail_msg("test_num_links()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } // test_num_links
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_links
  *
@@ -848,38 +836,36 @@ static void test_num_links(hid_t fapl_id, hbool_t new_format)
  *
  *-------------------------------------------------------------------------
  */
-extern "C"
-void test_links()
+extern "C" void
+test_links()
 {
-    hid_t fapl_id, fapl2_id;    // File access property lists
-    hbool_t new_format;         // Whether to use the new format or not
+    hid_t       fapl_id, fapl2_id; // File access property lists
+    hbool_t     new_format;        // Whether to use the new format or not
     const char *envval;
 
     envval = HDgetenv("HDF5_DRIVER");
-    if(envval == NULL)
+    if (envval == NULL)
         envval = "nomatch";
 
     fapl_id = h5_fileaccess();
 
     // Output message about test being performed
     MESSAGE(5, ("Testing Various Links\n"));
-    try
-    {
+    try {
         /* Copy the file access property list */
-        if((fapl2_id = H5Pcopy(fapl_id)) < 0)
+        if ((fapl2_id = H5Pcopy(fapl_id)) < 0)
             throw Exception("test_links", "H5Pcopy failed");
 
         /* Set the "use the latest version of the format" bounds for creating objects in the file */
-        if(H5Pset_libver_bounds(fapl2_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        throw Exception("test_links", "H5Pset_libver_bounds failed");
+        if (H5Pset_libver_bounds(fapl2_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+            throw Exception("test_links", "H5Pset_libver_bounds failed");
 
         /* Loop over using new group format */
-        for(new_format = FALSE; new_format <= TRUE; new_format++)
-        {
+        for (new_format = FALSE; new_format <= TRUE; new_format++) {
             hid_t my_fapl_id;
 
             /* Check for FAPL to use */
-            if(new_format)
+            if (new_format)
                 my_fapl_id = fapl2_id;
             else
                 my_fapl_id = fapl_id;
@@ -975,7 +961,7 @@ void test_links()
         /* Keep this test last, it's testing files that are used above */
         /* do not do this for files used by external link tests */
         nerrors += check_all_closed(my_fapl, new_format, EXTSTOP) < 0 ? 1 : 0;
-#endif // 0
+#endif    // 0
         } /* end for */
 
 #if 0
@@ -1012,16 +998,14 @@ void test_links()
         h5_clean_files(FILENAME, fapl_id);
 
         /* Test that external links can be used after a library reset.  MUST be
-        * called last so the reset doesn't interfere with the property lists.  This
-        * routine will delete its own file. */
+         * called last so the reset doesn't interfere with the property lists.  This
+         * routine will delete its own file. */
         /* nerrors += external_reset_register() < 0 ? 1 : 0;
- */
+         */
     }
-    catch (Exception& E)
-    {
+    catch (Exception &E) {
         issue_fail_msg("test_links()", __LINE__, __FILE__, E.getCDetailMsg());
     }
-
 }
 
 /*-------------------------------------------------------------------------
@@ -1036,9 +1020,8 @@ void test_links()
  *
  *-------------------------------------------------------------------------
  */
-extern "C"
-void cleanup_links()
+extern "C" void
+cleanup_links()
 {
     HDremove(FILENAME[0]);
 }
-

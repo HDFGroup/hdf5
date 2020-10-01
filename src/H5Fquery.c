@@ -26,54 +26,44 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
-
+#define H5F_PACKAGE /*suppress error about including H5Fpkg	  */
 
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"             /* File access				*/
-#include "H5FDprivate.h"	/* File drivers				*/
-
+#include "H5private.h"   /* Generic Functions			*/
+#include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5Fpkg.h"      /* File access				*/
+#include "H5FDprivate.h" /* File drivers				*/
 
 /****************/
 /* Local Macros */
 /****************/
 
-
 /******************/
 /* Local Typedefs */
 /******************/
-
 
 /********************/
 /* Package Typedefs */
 /********************/
 
-
 /********************/
 /* Local Prototypes */
 /********************/
-
 
 /*********************/
 /* Package Variables */
 /*********************/
 
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
-
 
 /*******************/
 /* Local Variables */
 /*******************/
 
-
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_get_intent
  *
@@ -99,7 +89,6 @@ H5F_get_intent(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->flags)
 } /* end H5F_get_intent() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_get_open_name
  *
@@ -125,7 +114,6 @@ H5F_get_open_name(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->open_name)
 } /* end H5F_get_open_name() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_get_actual_name
  *
@@ -151,13 +139,12 @@ H5F_get_actual_name(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->actual_name)
 } /* end H5F_get_actual_name() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_get_extpath
  *
  * Purpose:	Retrieve the file's 'extpath' flags
- *		This is used by H5L_extern_traverse() and H5D_build_extfile_prefix() to retrieve the main file's location
- *		when searching the target file.
+ *		This is used by H5L_extern_traverse() and H5D_build_extfile_prefix() to retrieve the main file's
+ *location when searching the target file.
  *
  * Return:	'extpath' on success/abort on failure (shouldn't fail)
  *
@@ -177,7 +164,6 @@ H5F_get_extpath(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->extpath)
 } /* end H5F_get_extpath() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_get_shared
  *
@@ -200,7 +186,6 @@ H5F_get_shared(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared)
 } /* end H5F_get_shared() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_same_shared
  *
@@ -226,7 +211,6 @@ H5F_same_shared(const H5F_t *f1, const H5F_t *f2)
     FUNC_LEAVE_NOAPI(f1->shared == f2->shared)
 } /* end H5F_same_shared() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_get_nopen_objs
  *
@@ -249,7 +233,6 @@ H5F_get_nopen_objs(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->nopen_objs)
 } /* end H5F_get_nopen_objs() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_get_file_id
  *
@@ -272,7 +255,6 @@ H5F_get_file_id(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->file_id)
 } /* end H5F_get_file_id() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_get_parent
  *
@@ -295,7 +277,6 @@ H5F_get_parent(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->parent)
 } /* end H5F_get_parent() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_get_nmounts
  *
@@ -318,7 +299,6 @@ H5F_get_nmounts(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->nmounts)
 } /* end H5F_get_nmounts() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_get_fcpl
  *
@@ -346,7 +326,6 @@ H5F_get_fcpl(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->fcpl_id)
 } /* end H5F_get_fcpl() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_sizeof_addr
  *
@@ -373,7 +352,6 @@ H5F_sizeof_addr(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->sizeof_addr)
 } /* end H5F_sizeof_addr() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_sizeof_size
  *
@@ -400,7 +378,6 @@ H5F_sizeof_size(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->sizeof_size)
 } /* H5F_sizeof_size() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_get_sohm_addr
  *
@@ -424,7 +401,6 @@ H5F_get_sohm_addr(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->sohm_addr)
 } /* end H5F_get_sohm_addr() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_get_sohm_vers
  *
@@ -448,7 +424,6 @@ H5F_get_sohm_vers(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->sohm_vers)
 } /* end H5F_get_sohm_vers() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_get_sohm_nindexes
  *
@@ -472,7 +447,6 @@ H5F_get_sohm_nindexes(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->sohm_nindexes)
 } /* end H5F_get_sohm_nindexes() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_sym_leaf_k
  *
@@ -504,7 +478,6 @@ H5F_sym_leaf_k(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->sblock->sym_leaf_k)
 } /* end H5F_sym_leaf_k() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_Kvalue
  *
@@ -537,7 +510,6 @@ H5F_Kvalue(const H5F_t *f, const H5B_class_t *type)
     FUNC_LEAVE_NOAPI(f->shared->sblock->btree_k[type->id])
 } /* end H5F_Kvalue() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_get_nrefs
  *
@@ -561,7 +533,6 @@ H5F_get_nrefs(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->nrefs)
 } /* end H5F_get_nrefs() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_rdcc_nslots
  *
@@ -592,7 +563,6 @@ H5F_rdcc_nslots(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->rdcc_nslots)
 } /* end H5F_rdcc_nelmts() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_rdcc_nbytes
  *
@@ -623,7 +593,6 @@ H5F_rdcc_nbytes(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->rdcc_nbytes)
 } /* end H5F_rdcc_nbytes() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_rdcc_w0
  *
@@ -654,7 +623,6 @@ H5F_rdcc_w0(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->rdcc_w0)
 } /* end H5F_rdcc_w0() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_get_base_addr
  *
@@ -682,7 +650,6 @@ H5F_get_base_addr(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->sblock->base_addr)
 } /* end H5F_get_base_addr() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_grp_btree_shared
  *
@@ -713,7 +680,6 @@ H5F_grp_btree_shared(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->grp_btree_shared)
 } /* end H5F_grp_btree_shared() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_sieve_buf_size
  *
@@ -744,7 +710,6 @@ H5F_sieve_buf_size(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->sieve_buf_size)
 } /* end H5F_sieve_buf_size() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_gc_ref
  *
@@ -775,7 +740,6 @@ H5F_gc_ref(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->gc_ref)
 } /* end H5F_gc_ref() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_use_latest_format
  *
@@ -804,7 +768,6 @@ H5F_use_latest_format(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->latest_format)
 } /* end H5F_use_latest_format() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_get_fc_degree
  *
@@ -832,7 +795,6 @@ H5F_get_fc_degree(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->fc_degree)
 } /* end H5F_get_fc_degree() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_store_msg_crt_idx
  *
@@ -860,7 +822,6 @@ H5F_store_msg_crt_idx(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->store_msg_crt_idx)
 } /* end H5F_store_msg_crt_idx() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_has_feature
  *
@@ -884,10 +845,9 @@ H5F_has_feature(const H5F_t *f, unsigned feature)
     HDassert(f);
     HDassert(f->shared);
 
-    FUNC_LEAVE_NOAPI((hbool_t)(f->shared->lf->feature_flags&feature))
+    FUNC_LEAVE_NOAPI((hbool_t)(f->shared->lf->feature_flags & feature))
 } /* end H5F_has_feature() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_get_driver_id
  *
@@ -915,7 +875,6 @@ H5F_get_driver_id(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->lf->driver_id)
 } /* end H5F_get_driver_id() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_get_fileno
  *
@@ -933,7 +892,7 @@ H5F_get_driver_id(const H5F_t *f)
 herr_t
 H5F_get_fileno(const H5F_t *f, unsigned long *filenum)
 {
-    herr_t	ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -943,14 +902,13 @@ H5F_get_fileno(const H5F_t *f, unsigned long *filenum)
     HDassert(filenum);
 
     /* Retrieve the file's serial number */
-    if(H5FD_get_fileno(f->shared->lf, filenum) < 0)
-	HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, FAIL, "can't retrieve fileno")
+    if (H5FD_get_fileno(f->shared->lf, filenum) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, FAIL, "can't retrieve fileno")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_fileno() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_get_eoa
  *
@@ -966,7 +924,7 @@ done:
 haddr_t
 H5F_get_eoa(const H5F_t *f, H5FD_mem_t type)
 {
-    haddr_t	ret_value;
+    haddr_t ret_value;
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
 
@@ -974,14 +932,13 @@ H5F_get_eoa(const H5F_t *f, H5FD_mem_t type)
     HDassert(f->shared);
 
     /* Dispatch to driver */
-    if(HADDR_UNDEF == (ret_value = H5FD_get_eoa(f->shared->lf, type)))
-	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed")
+    if (HADDR_UNDEF == (ret_value = H5FD_get_eoa(f->shared->lf, type)))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_eoa() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5F_get_vfd_handle
  *
@@ -999,7 +956,7 @@ done:
 herr_t
 H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void **file_handle)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1008,14 +965,13 @@ H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void **file_handle)
     HDassert(file_handle);
 
     /* Get the VFD handle */
-    if(H5FD_get_vfd_handle(file->shared->lf, fapl, file_handle) < 0)
+    if (H5FD_get_vfd_handle(file->shared->lf, fapl, file_handle) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file handle for file driver")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_vfd_handle() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_is_tmp_addr
  *
@@ -1043,7 +999,6 @@ H5F_is_tmp_addr(const H5F_t *f, haddr_t addr)
     FUNC_LEAVE_NOAPI(H5F_addr_le(f->shared->tmp_addr, addr))
 } /* end H5F_is_tmp_addr() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_use_tmp_space
  *
@@ -1070,4 +1025,3 @@ H5F_use_tmp_space(const H5F_t *f)
 
     FUNC_LEAVE_NOAPI(f->shared->use_tmp_space)
 } /* end H5F_use_tmp_space() */
-

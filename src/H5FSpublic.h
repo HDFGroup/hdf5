@@ -49,4 +49,3 @@ extern "C" {
 #endif
 
 #endif /* _H5FSpublic_H */
-

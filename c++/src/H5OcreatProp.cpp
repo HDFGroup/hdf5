@@ -28,7 +28,7 @@ namespace H5 {
 // in "H5PredType.cpp" for information.
 
 // Initialize a pointer for the constant
-ObjCreatPropList* ObjCreatPropList::DEFAULT_ = 0;
+ObjCreatPropList *ObjCreatPropList::DEFAULT_ = 0;
 
 //--------------------------------------------------------------------------
 // Function:    ObjCreatPropList::getConstant
@@ -41,13 +41,13 @@ ObjCreatPropList* ObjCreatPropList::DEFAULT_ = 0;
 //              happen.
 // Programmer   Binh-Minh Ribler - 2015
 //--------------------------------------------------------------------------
-ObjCreatPropList* ObjCreatPropList::getConstant()
+ObjCreatPropList *
+ObjCreatPropList::getConstant()
 {
     // Tell the C library not to clean up, H5Library::termH5cpp will call
     // H5close - more dependency if use H5Library::dontAtExit()
-    if (!IdComponent::H5dontAtexit_called)
-    {
-        (void) H5dont_atexit();
+    if (!IdComponent::H5dontAtexit_called) {
+        (void)H5dont_atexit();
         IdComponent::H5dontAtexit_called = true;
     }
 
@@ -56,8 +56,9 @@ ObjCreatPropList* ObjCreatPropList::getConstant()
     if (DEFAULT_ == 0)
         DEFAULT_ = new ObjCreatPropList(H5P_OBJECT_CREATE);
     else
-        throw PropListIException("ObjCreatPropList::getConstant", "ObjCreatPropList::getConstant is being invoked on an allocated DEFAULT_");
-    return(DEFAULT_);
+        throw PropListIException("ObjCreatPropList::getConstant",
+                                 "ObjCreatPropList::getConstant is being invoked on an allocated DEFAULT_");
+    return (DEFAULT_);
 }
 
 //--------------------------------------------------------------------------
@@ -67,7 +68,8 @@ ObjCreatPropList* ObjCreatPropList::getConstant()
 // exception    H5::PropListIException
 // Programmer   Binh-Minh Ribler - 2015
 //--------------------------------------------------------------------------
-void ObjCreatPropList::deleteConstants()
+void
+ObjCreatPropList::deleteConstants()
 {
     if (DEFAULT_ != 0)
         delete DEFAULT_;
@@ -76,7 +78,7 @@ void ObjCreatPropList::deleteConstants()
 //--------------------------------------------------------------------------
 // Purpose:     Constant for default property
 //--------------------------------------------------------------------------
-const ObjCreatPropList& ObjCreatPropList::DEFAULT = *getConstant();
+const ObjCreatPropList &ObjCreatPropList::DEFAULT = *getConstant();
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
@@ -93,7 +95,7 @@ ObjCreatPropList::ObjCreatPropList() : PropList(H5P_OBJECT_CREATE) {}
 ///\param       original - IN: ObjCreatPropList instance to copy
 // Programmer:  Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-ObjCreatPropList::ObjCreatPropList(const ObjCreatPropList& original) : PropList(original) {}
+ObjCreatPropList::ObjCreatPropList(const ObjCreatPropList &original) : PropList(original) {}
 
 //--------------------------------------------------------------------------
 // Function:    ObjCreatPropList overloaded constructor
@@ -118,11 +120,11 @@ ObjCreatPropList::ObjCreatPropList(const hid_t plist_id) : PropList(plist_id) {}
 /// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetAttrPhaseChange
 // Programmer:  Binh-Minh Ribler - September 2015
 //--------------------------------------------------------------------------
-void ObjCreatPropList::setAttrPhaseChange(unsigned max_compact, unsigned min_dense) const
+void
+ObjCreatPropList::setAttrPhaseChange(unsigned max_compact, unsigned min_dense) const
 {
     herr_t ret_value = H5Pset_attr_phase_change(id, max_compact, min_dense);
-    if (ret_value < 0)
-    {
+    if (ret_value < 0) {
         throw PropListIException("ObjCreatPropList::setAttrPhaseChange", "H5Pset_attr_phase_change failed");
     }
 }
@@ -142,12 +144,12 @@ void ObjCreatPropList::setAttrPhaseChange(unsigned max_compact, unsigned min_den
 /// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-GetAttrPhaseChange
 // Programmer:  Binh-Minh Ribler - September 2015
 //--------------------------------------------------------------------------
-void ObjCreatPropList::getAttrPhaseChange(unsigned& max_compact, unsigned& min_dense) const
+void
+ObjCreatPropList::getAttrPhaseChange(unsigned &max_compact, unsigned &min_dense) const
 {
     herr_t ret_value;
     ret_value = H5Pget_attr_phase_change(id, &max_compact, &min_dense);
-    if (ret_value < 0)
-    {
+    if (ret_value < 0) {
         throw PropListIException("ObjCreatPropList::getAttrPhaseChange", "H5Pget_attr_phase_change failed");
     }
 }
@@ -171,11 +173,11 @@ void ObjCreatPropList::getAttrPhaseChange(unsigned& max_compact, unsigned& min_d
 /// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetAttrCreationOrder
 // Programmer:  Binh-Minh Ribler - September 2015
 //--------------------------------------------------------------------------
-void ObjCreatPropList::setAttrCrtOrder(unsigned crt_order_flags) const
+void
+ObjCreatPropList::setAttrCrtOrder(unsigned crt_order_flags) const
 {
     herr_t ret_value = H5Pset_attr_creation_order(id, crt_order_flags);
-    if (ret_value < 0)
-    {
+    if (ret_value < 0) {
         throw PropListIException("ObjCreatPropList::setAttrCrtOrder", "H5Pset_attr_creation_order failed");
     }
 }
@@ -193,16 +195,16 @@ void ObjCreatPropList::setAttrCrtOrder(unsigned crt_order_flags) const
 /// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-GetAttrCreationOrder
 // Programmer:  Binh-Minh Ribler - September 2015
 //--------------------------------------------------------------------------
-unsigned ObjCreatPropList::getAttrCrtOrder() const
+unsigned
+ObjCreatPropList::getAttrCrtOrder() const
 {
-    herr_t ret_value;
+    herr_t   ret_value;
     unsigned crt_order_flags = 0;
-    ret_value = H5Pget_attr_creation_order(id, &crt_order_flags);
-    if (ret_value < 0)
-    {
+    ret_value                = H5Pget_attr_creation_order(id, &crt_order_flags);
+    if (ret_value < 0) {
         throw PropListIException("ObjCreatPropList::getAttrCrtOrder", "H5Pget_attr_creation_order failed");
     }
-    return(crt_order_flags);
+    return (crt_order_flags);
 }
 
 //--------------------------------------------------------------------------
@@ -212,4 +214,4 @@ unsigned ObjCreatPropList::getAttrCrtOrder() const
 //--------------------------------------------------------------------------
 ObjCreatPropList::~ObjCreatPropList() {}
 
-} // end namespace
+} // namespace H5

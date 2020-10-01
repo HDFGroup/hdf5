@@ -27,34 +27,34 @@
 #include "hdf5.h"
 #include <assert.h>
 
-#define NULLFILE   "tnullspace.h5"
-#define NULLDATASET  "null_dataset"
-#define NULLATTR   "null_attribute"
+#define NULLFILE    "tnullspace.h5"
+#define NULLDATASET "null_dataset"
+#define NULLATTR    "null_attribute"
 
 int
 main(void)
 {
-    hid_t fid;          /* File ID */
-    hid_t gid;          /* Group ID */
-    hid_t sid;          /* Dataspace ID */
-    hid_t did;          /* Dataset ID */
-    hid_t attr;         /* Attribute ID */
-    herr_t ret;         /* Generic return value */
+    hid_t  fid;  /* File ID */
+    hid_t  gid;  /* Group ID */
+    hid_t  sid;  /* Dataspace ID */
+    hid_t  did;  /* Dataset ID */
+    hid_t  attr; /* Attribute ID */
+    herr_t ret;  /* Generic return value */
 
     /* Create the file */
     fid = H5Fcreate(NULLFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    assert(fid>0);
+    assert(fid > 0);
 
     sid = H5Screate(H5S_NULL);
-    assert(sid>0);
+    assert(sid > 0);
 
     /* Create dataset */
     did = H5Dcreate2(fid, NULLDATASET, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    assert(did>0);
+    assert(did > 0);
 
     /* Close the dataset */
     ret = H5Dclose(did);
-    assert(ret>=0);
+    assert(ret >= 0);
 
     /* Open the root group */
     gid = H5Gopen2(fid, "/", H5P_DEFAULT);
@@ -66,21 +66,19 @@ main(void)
 
     /* Close attribute */
     ret = H5Aclose(attr);
-    assert(ret>=0);
+    assert(ret >= 0);
 
     /* Close the group */
     ret = H5Gclose(gid);
-    assert(ret>=0);
+    assert(ret >= 0);
 
     /* Close the dataspace */
     ret = H5Sclose(sid);
-    assert(ret>=0);
+    assert(ret >= 0);
 
     /* Close the file */
     ret = H5Fclose(fid);
-    assert(ret>=0);
+    assert(ret >= 0);
 
     return 0;
 }
-
-

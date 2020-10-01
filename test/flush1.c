@@ -23,14 +23,9 @@
  */
 #include "h5test.h"
 
-const char *FILENAME[] = {
-    "flush",
-    "noflush",
-    "noflush_extend",
-    NULL
-};
+const char *FILENAME[] = {"flush", "noflush", "noflush_extend", NULL};
 
-static double    the_data[100][100];
+static double the_data[100][100];
 
 /*-------------------------------------------------------------------------
  * Function:    create_file
@@ -48,45 +43,45 @@ static double    the_data[100][100];
 static hid_t
 create_file(const char *filename, hid_t fapl_id)
 {
-    hid_t   fid = -1;               /* file ID                          */
+    hid_t   fid = -1; /* file ID                          */
     hid_t   dcpl, space, dset, groups, grp;
     hsize_t ds_size[2] = {100, 100};
     hsize_t ch_size[2] = {5, 5};
     size_t  i, j;
 
-    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         STACK_ERROR
 
     /* Create a chunked dataset */
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR
-    if(H5Pset_chunk(dcpl, 2, ch_size) < 0)
+    if (H5Pset_chunk(dcpl, 2, ch_size) < 0)
         FAIL_STACK_ERROR
-    if((space = H5Screate_simple(2, ds_size, NULL)) < 0)
+    if ((space = H5Screate_simple(2, ds_size, NULL)) < 0)
         FAIL_STACK_ERROR
-    if((dset = H5Dcreate2(fid, "dset", H5T_NATIVE_FLOAT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((dset = H5Dcreate2(fid, "dset", H5T_NATIVE_FLOAT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
     /* Write some data */
-    for(i = 0; i < ds_size[0]; i++)
-    /*
-    * The extra cast in the following statement is a bug workaround
-    * for the Win32 version 5.0 compiler.
-    * 1998-11-06 ptl
-    */
-        for(j = 0; j < (size_t)ds_size[1]; j++)
-            the_data[i][j] = (double)(hssize_t)i/(hssize_t)(j+1);
-    if(H5Dwrite(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT, the_data) < 0)
+    for (i = 0; i < ds_size[0]; i++)
+        /*
+         * The extra cast in the following statement is a bug workaround
+         * for the Win32 version 5.0 compiler.
+         * 1998-11-06 ptl
+         */
+        for (j = 0; j < (size_t)ds_size[1]; j++)
+            the_data[i][j] = (double)(hssize_t)i / (hssize_t)(j + 1);
+    if (H5Dwrite(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT, the_data) < 0)
         FAIL_STACK_ERROR
 
     /* Create some groups */
-    if((groups = H5Gcreate2(fid, "some_groups", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((groups = H5Gcreate2(fid, "some_groups", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
-    for(i = 0; i < 100; i++) {
+    for (i = 0; i < 100; i++) {
         HDsprintf(filename, "grp%02u", (unsigned)i);
-        if((grp = H5Gcreate2(groups, filename, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        if ((grp = H5Gcreate2(groups, filename, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR
-        if(H5Gclose(grp) < 0)
+        if (H5Gclose(grp) < 0)
             FAIL_STACK_ERROR
     } /* end for */
 
@@ -95,7 +90,6 @@ create_file(const char *filename, hid_t fapl_id)
 error:
     HD_exit(1);
 }
-
 
 /*-------------------------------------------------------------------------
  * Function:    extend_file
@@ -116,41 +110,40 @@ error:
 static hid_t
 extend_file(hid_t file)
 {
-    hid_t      dcpl, space, dset;
-    hsize_t    ds_size[2] = {100, 100};
-    hsize_t    ch_size[2] = {5, 5};
-    size_t     i, j;
+    hid_t   dcpl, space, dset;
+    hsize_t ds_size[2] = {100, 100};
+    hsize_t ch_size[2] = {5, 5};
+    size_t  i, j;
 
     /* Create a chunked dataset */
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto error;
-    if(H5Pset_chunk(dcpl, 2, ch_size) < 0)
+    if (H5Pset_chunk(dcpl, 2, ch_size) < 0)
         goto error;
-    if((space = H5Screate_simple(2, ds_size, NULL)) < 0)
+    if ((space = H5Screate_simple(2, ds_size, NULL)) < 0)
         goto error;
-    if((dset = H5Dcreate2(file, "dset2", H5T_NATIVE_FLOAT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((dset = H5Dcreate2(file, "dset2", H5T_NATIVE_FLOAT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
+        0)
         goto error;
 
     /* Write some data */
-    for (i=0; i<ds_size[0]; i++) {
+    for (i = 0; i < ds_size[0]; i++) {
         /*
-        * The extra cast in the following statement is a bug workaround
-        * for the Win32 version 5.0 compiler.
-        * 1998-11-06 ptl
-        */
-        for (j=0; j<(size_t)ds_size[1]; j++) {
-            the_data[i][j] = (double)(hssize_t)i/(hssize_t)(j+1);
+         * The extra cast in the following statement is a bug workaround
+         * for the Win32 version 5.0 compiler.
+         * 1998-11-06 ptl
+         */
+        for (j = 0; j < (size_t)ds_size[1]; j++) {
+            the_data[i][j] = (double)(hssize_t)i / (hssize_t)(j + 1);
         }
     }
     if (H5Dwrite(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT, the_data) < 0)
         goto error;
 
-
     return file;
 
 error:
-        HD_exit(1);
-
+    HD_exit(1);
 }
 
 /*-------------------------------------------------------------------------
@@ -177,14 +170,13 @@ error:
 int
 main(void)
 {
-    hid_t   fid = -1;           /* file ID                                  */
-    hid_t   fapl_id = -1;       /* file access proplist ID                  */
-    char    filename[1024];     /* filename                                 */
+    hid_t fid     = -1;   /* file ID                                  */
+    hid_t fapl_id = -1;   /* file access proplist ID                  */
+    char  filename[1024]; /* filename                                 */
 
     h5_reset();
-    if((fapl_id = h5_fileaccess()) < 0)
+    if ((fapl_id = h5_fileaccess()) < 0)
         TEST_ERROR
-
 
     /*************************************************/
     /* NOTE: Not closing the file ID is intentional! */
@@ -195,27 +187,28 @@ main(void)
 
     /* Create the file */
     h5_fixname(FILENAME[0], fapl_id, filename, sizeof(filename));
-    if((fid = create_file(filename, fapl_id)) < 0)
+    if ((fid = create_file(filename, fapl_id)) < 0)
         TEST_ERROR
-    if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
+    if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
         FAIL_STACK_ERROR
     PASSED();
 
     /* Create a file which will not be flushed */
     TESTING("H5Fflush (part1 without flush)");
     h5_fixname(FILENAME[2], fapl_id, filename, sizeof(filename));
-    if((fid = create_file(filename, fapl_id)) < 0)
+    if ((fid = create_file(filename, fapl_id)) < 0)
         TEST_ERROR
     PASSED();
 
     /* Flush and exit without closing the library */
-    if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0) goto error;
+    if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
+        goto error;
     /* Add a bit to the file and don't flush the new part */
     extend_file(fid);
 
     /* Create the other file which will not be flushed */
     h5_fixname(FILENAME[1], fapl_id, filename, sizeof(filename));
-    if((fid = create_file(filename, fapl_id)) < 0)
+    if ((fid = create_file(filename, fapl_id)) < 0)
         TEST_ERROR
     PASSED();
 
@@ -224,17 +217,15 @@ main(void)
     HDfflush(stderr);
 
     /* DO NOT CLOSE FILE ID! */
-    if(H5Pclose(fapl_id) < 0)
+    if (H5Pclose(fapl_id) < 0)
         STACK_ERROR
 
     /* _exit() is necessary since we want a hard close of the library */
     HD_exit(EXIT_SUCCESS);
 
 error:
-    H5E_BEGIN_TRY {
-        H5Pclose(fapl_id);
-    } H5E_END_TRY;
+    H5E_BEGIN_TRY { H5Pclose(fapl_id); }
+    H5E_END_TRY;
 
     HDexit(EXIT_FAILURE);
 } /* end main() */
-

@@ -19,7 +19,7 @@
 #define _H5PLpkg_H
 
 /* Include private header file */
-#include "H5PLprivate.h"          /* Filter functions                */
+#include "H5PLprivate.h" /* Filter functions                */
 
 /* Other private headers needed by this file */
 
@@ -27,22 +27,18 @@
 /* Package Private Macros */
 /**************************/
 
-#define H5PL_MAX_PATH_NUM       16
-
+#define H5PL_MAX_PATH_NUM 16
 
 /****************************/
 /* Package Private Typedefs */
 /****************************/
 
-
 /*****************************/
 /* Package Private Variables */
 /*****************************/
-
 
 /******************************/
 /* Package Private Prototypes */
 /******************************/
 
 #endif /* _H5PLpkg_H */
-

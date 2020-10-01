@@ -3565,4 +3565,3 @@ if ( (cache_ptr)->index_size !=                                             \
 
 #endif /* _H5Cpkg_H */
 /* clang-format on */
-

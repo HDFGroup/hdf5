@@ -22,35 +22,39 @@ namespace H5 {
 
 // Inheritance: PropList -> IdComponent
 class H5_DLLCPP StrCreatPropList : public PropList {
-   public:
-        // There is no StrCreatPropList::DEFAULT;
+  public:
+    // There is no StrCreatPropList::DEFAULT;
 
-        // Returns this class name.
-        virtual H5std_string fromClass () const { return("StrCreatPropList"); }
+    // Returns this class name.
+    virtual H5std_string
+    fromClass() const
+    {
+        return ("StrCreatPropList");
+    }
 
-        // Sets the character encoding of the string.
-        void setCharEncoding(H5T_cset_t encoding) const;
+    // Sets the character encoding of the string.
+    void setCharEncoding(H5T_cset_t encoding) const;
 
-        // Gets the character encoding of the string.
-        H5T_cset_t getCharEncoding() const;
+    // Gets the character encoding of the string.
+    H5T_cset_t getCharEncoding() const;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-    protected:
-        // Creates a link creation property list.
-        StrCreatPropList();
+  protected:
+    // Creates a link creation property list.
+    StrCreatPropList();
 
-        // Copy constructor: same as the original StrCreatPropList.
-        StrCreatPropList(const StrCreatPropList& original);
+    // Copy constructor: same as the original StrCreatPropList.
+    StrCreatPropList(const StrCreatPropList &original);
 
-        // Creates a copy of an existing link creation property list
-        // using the property list id.
-        StrCreatPropList(const hid_t plist_id);
+    // Creates a copy of an existing link creation property list
+    // using the property list id.
+    StrCreatPropList(const hid_t plist_id);
 
-        // Noop destructor
-        virtual ~StrCreatPropList() {};
+    // Noop destructor
+    virtual ~StrCreatPropList(){};
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
-}; // end of StrCreatPropList
+};     // end of StrCreatPropList
 
 } // namespace H5
 

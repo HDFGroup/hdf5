@@ -28,7 +28,7 @@ namespace H5 {
 // in "H5PredType.cpp" for information.
 
 // Initialize a pointer for the constant
-AttrCreatPropList* AttrCreatPropList::DEFAULT_ = 0;
+AttrCreatPropList *AttrCreatPropList::DEFAULT_ = 0;
 
 //--------------------------------------------------------------------------
 // Function:    AttrCreatPropList::getConstant
@@ -41,13 +41,13 @@ AttrCreatPropList* AttrCreatPropList::DEFAULT_ = 0;
 //              happen.
 // May 2018
 //--------------------------------------------------------------------------
-AttrCreatPropList* AttrCreatPropList::getConstant()
+AttrCreatPropList *
+AttrCreatPropList::getConstant()
 {
     // Tell the C library not to clean up, H5Library::termH5cpp will call
     // H5close - more dependency if use H5Library::dontAtExit()
-    if (!IdComponent::H5dontAtexit_called)
-     {
-        (void) H5dont_atexit();
+    if (!IdComponent::H5dontAtexit_called) {
+        (void)H5dont_atexit();
         IdComponent::H5dontAtexit_called = true;
     }
 
@@ -56,8 +56,9 @@ AttrCreatPropList* AttrCreatPropList::getConstant()
     if (DEFAULT_ == 0)
         DEFAULT_ = new AttrCreatPropList(H5P_ATTRIBUTE_CREATE);
     else
-        throw PropListIException("AttrCreatPropList::getConstant", "AttrCreatPropList::getConstant is being invoked on an allocated DEFAULT_");
-    return(DEFAULT_);
+        throw PropListIException("AttrCreatPropList::getConstant",
+                                 "AttrCreatPropList::getConstant is being invoked on an allocated DEFAULT_");
+    return (DEFAULT_);
 }
 
 //--------------------------------------------------------------------------
@@ -67,7 +68,8 @@ AttrCreatPropList* AttrCreatPropList::getConstant()
 // exception    H5::PropListIException
 // May 2018
 //--------------------------------------------------------------------------
-void AttrCreatPropList::deleteConstants()
+void
+AttrCreatPropList::deleteConstants()
 {
     if (DEFAULT_ != 0)
         delete DEFAULT_;
@@ -76,7 +78,7 @@ void AttrCreatPropList::deleteConstants()
 //--------------------------------------------------------------------------
 // Purpose:     Constant for default link creation property
 //--------------------------------------------------------------------------
-const AttrCreatPropList& AttrCreatPropList::DEFAULT = *getConstant();
+const AttrCreatPropList &AttrCreatPropList::DEFAULT = *getConstant();
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
@@ -93,7 +95,7 @@ AttrCreatPropList::AttrCreatPropList() : StrCreatPropList(H5P_ATTRIBUTE_CREATE) 
 ///\param       original - IN: AttrCreatPropList instance to copy
 // May 2018
 //--------------------------------------------------------------------------
-AttrCreatPropList::AttrCreatPropList(const AttrCreatPropList& original) : StrCreatPropList(original) {}
+AttrCreatPropList::AttrCreatPropList(const AttrCreatPropList &original) : StrCreatPropList(original) {}
 
 //--------------------------------------------------------------------------
 // Function:    AttrCreatPropList overloaded constructor
@@ -110,4 +112,4 @@ AttrCreatPropList::AttrCreatPropList(const hid_t plist_id) : StrCreatPropList(pl
 //--------------------------------------------------------------------------
 AttrCreatPropList::~AttrCreatPropList() {}
 
-} // end namespace
+} // namespace H5

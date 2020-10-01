@@ -26,58 +26,48 @@
 /* Module Setup */
 /****************/
 
-#define H5FD_PACKAGE		/*suppress error about including H5FDpkg  */
+#define H5FD_PACKAGE /*suppress error about including H5FDpkg  */
 
 /* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5FD_int_init_interface
-
+#define H5_INTERFACE_INIT_FUNC H5FD_int_init_interface
 
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fprivate.h"         /* File access				*/
-#include "H5FDpkg.h"		/* File Drivers				*/
-#include "H5Iprivate.h"		/* IDs			  		*/
-
+#include "H5private.h"  /* Generic Functions			*/
+#include "H5Eprivate.h" /* Error handling		  	*/
+#include "H5Fprivate.h" /* File access				*/
+#include "H5FDpkg.h"    /* File Drivers				*/
+#include "H5Iprivate.h" /* IDs			  		*/
 
 /****************/
 /* Local Macros */
 /****************/
 
-
 /******************/
 /* Local Typedefs */
 /******************/
-
 
 /********************/
 /* Package Typedefs */
 /********************/
 
-
 /********************/
 /* Local Prototypes */
 /********************/
-
 
 /*********************/
 /* Package Variables */
 /*********************/
 
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
-
 
 /*******************/
 /* Local Variables */
 /*******************/
 
-
-
 /*--------------------------------------------------------------------------
 NAME
    H5FD_int_init_interface -- Initialize interface-specific information
@@ -99,7 +89,6 @@ H5FD_int_init_interface(void)
     FUNC_LEAVE_NOAPI(H5FD_init())
 } /* H5FD_int_init_interface() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_locate_signature
  *
@@ -118,17 +107,18 @@ H5FD_int_init_interface(void)
 herr_t
 H5FD_locate_signature(H5FD_t *file, const H5P_genplist_t *dxpl, haddr_t *sig_addr)
 {
-    haddr_t         addr, eoa;
-    uint8_t         buf[H5F_SIGNATURE_LEN];
-    unsigned        n, maxpow;
-    herr_t          ret_value = SUCCEED; /* Return value */
+    haddr_t  addr, eoa;
+    uint8_t  buf[H5F_SIGNATURE_LEN];
+    unsigned n, maxpow;
+    herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Find the least N such that 2^N is larger than the file size */
-    if(HADDR_UNDEF == (addr = H5FD_get_eof(file)) || HADDR_UNDEF == (eoa = H5FD_get_eoa(file, H5FD_MEM_SUPER)))
+    if (HADDR_UNDEF == (addr = H5FD_get_eof(file)) ||
+        HADDR_UNDEF == (eoa = H5FD_get_eoa(file, H5FD_MEM_SUPER)))
         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to obtain EOF/EOA value")
-    for(maxpow = 0; addr; maxpow++)
+    for (maxpow = 0; addr; maxpow++)
         addr >>= 1;
     maxpow = MAX(maxpow, 9);
 
@@ -136,13 +126,13 @@ H5FD_locate_signature(H5FD_t *file, const H5P_genplist_t *dxpl, haddr_t *sig_add
      * Search for the file signature at format address zero followed by
      * powers of two larger than 9.
      */
-    for(n = 8; n < maxpow; n++) {
+    for (n = 8; n < maxpow; n++) {
         addr = (8 == n) ? 0 : (haddr_t)1 << n;
-        if(H5FD_set_eoa(file, H5FD_MEM_SUPER, addr + H5F_SIGNATURE_LEN) < 0)
+        if (H5FD_set_eoa(file, H5FD_MEM_SUPER, addr + H5F_SIGNATURE_LEN) < 0)
             HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to set EOA value for file signature")
-        if(H5FD_read(file, dxpl, H5FD_MEM_SUPER, addr, (size_t)H5F_SIGNATURE_LEN, buf) < 0)
+        if (H5FD_read(file, dxpl, H5FD_MEM_SUPER, addr, (size_t)H5F_SIGNATURE_LEN, buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to read file signature")
-        if(!HDmemcmp(buf, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN))
+        if (!HDmemcmp(buf, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN))
             break;
     } /* end for */
 
@@ -150,8 +140,8 @@ H5FD_locate_signature(H5FD_t *file, const H5P_genplist_t *dxpl, haddr_t *sig_add
      * If the signature was not found then reset the EOA value and return
      * HADDR_UNDEF.
      */
-    if(n >= maxpow) {
-        if(H5FD_set_eoa(file, H5FD_MEM_SUPER, eoa) < 0)
+    if (n >= maxpow) {
+        if (H5FD_set_eoa(file, H5FD_MEM_SUPER, eoa) < 0)
             HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to reset EOA value")
         *sig_addr = HADDR_UNDEF;
     } /* end if */
@@ -163,7 +153,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_locate_signature() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5FD_read
  *
@@ -178,11 +167,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_read(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t addr,
-    size_t size, void *buf/*out*/)
+H5FD_read(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t addr, size_t size,
+          void *buf /*out*/)
 {
-    haddr_t     eoa = HADDR_UNDEF;
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    haddr_t eoa       = HADDR_UNDEF;
+    herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -194,25 +183,25 @@ H5FD_read(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t add
     /* Do not return early for Parallel mode since the I/O could be a */
     /* collective transfer. */
     /* The no-op case */
-    if(0 == size)
+    if (0 == size)
         HGOTO_DONE(SUCCEED)
 #endif /* H5_HAVE_PARALLEL */
 
-    if(HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
-	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
-    if((addr + file->base_addr + size) > eoa)
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size=%llu, eoa=%llu", 
-                    (unsigned long long)(addr+ file->base_addr), (unsigned long long)size, (unsigned long long)eoa)
+    if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
+    if ((addr + file->base_addr + size) > eoa)
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size=%llu, eoa=%llu",
+                    (unsigned long long)(addr + file->base_addr), (unsigned long long)size,
+                    (unsigned long long)eoa)
 
     /* Dispatch to driver */
-    if((file->cls->read)(file, type, H5P_PLIST_ID(dxpl), addr + file->base_addr, size, buf) < 0)
+    if ((file->cls->read)(file, type, H5P_PLIST_ID(dxpl), addr + file->base_addr, size, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_read() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5FD_write
  *
@@ -227,11 +216,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_write(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t addr,
-    size_t size, const void *buf)
+H5FD_write(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t addr, size_t size,
+           const void *buf)
 {
-    haddr_t     eoa = HADDR_UNDEF;
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    haddr_t eoa       = HADDR_UNDEF;
+    herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -243,25 +232,25 @@ H5FD_write(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t ad
     /* Do not return early for Parallel mode since the I/O could be a */
     /* collective transfer. */
     /* The no-op case */
-    if(0 == size)
+    if (0 == size)
         HGOTO_DONE(SUCCEED)
 #endif /* H5_HAVE_PARALLEL */
 
-    if(HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
-	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
-    if((addr + file->base_addr + size) > eoa)
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size=%llu, eoa=%llu", 
-                    (unsigned long long)(addr+ file->base_addr), (unsigned long long)size, (unsigned long long)eoa)
+    if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
+    if ((addr + file->base_addr + size) > eoa)
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size=%llu, eoa=%llu",
+                    (unsigned long long)(addr + file->base_addr), (unsigned long long)size,
+                    (unsigned long long)eoa)
 
     /* Dispatch to driver */
-    if((file->cls->write)(file, type, H5P_PLIST_ID(dxpl), addr + file->base_addr, size, buf) < 0)
+    if ((file->cls->write)(file, type, H5P_PLIST_ID(dxpl), addr + file->base_addr, size, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_write() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5FD_set_eoa
  *
@@ -283,7 +272,7 @@ done:
 herr_t
 H5FD_set_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t addr)
 {
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -291,14 +280,13 @@ H5FD_set_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t addr)
     HDassert(H5F_addr_defined(addr) && addr <= file->maxaddr);
 
     /* Dispatch to driver, convert to absolute address */
-    if((file->cls->set_eoa)(file, type, addr + file->base_addr) < 0)
-	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver set_eoa request failed")
+    if ((file->cls->set_eoa)(file, type, addr + file->base_addr) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver set_eoa request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_set_eoa() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5FD_get_eoa
  *
@@ -320,15 +308,15 @@ done:
 haddr_t
 H5FD_get_eoa(const H5FD_t *file, H5FD_mem_t type)
 {
-    haddr_t	ret_value;
+    haddr_t ret_value;
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
 
     HDassert(file && file->cls);
 
     /* Dispatch to driver */
-    if(HADDR_UNDEF == (ret_value = (file->cls->get_eoa)(file, type)))
-	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed")
+    if (HADDR_UNDEF == (ret_value = (file->cls->get_eoa)(file, type)))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed")
 
     /* Adjust for base address in file (convert to relative address) */
     ret_value -= file->base_addr;
@@ -337,7 +325,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_get_eoa() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5FD_get_eof
  *
@@ -362,19 +349,19 @@ done:
 haddr_t
 H5FD_get_eof(const H5FD_t *file)
 {
-    haddr_t	ret_value;
+    haddr_t ret_value;
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
 
     HDassert(file && file->cls);
 
     /* Dispatch to driver */
-    if(file->cls->get_eof) {
-	if(HADDR_UNDEF == (ret_value = (file->cls->get_eof)(file)))
-	    HGOTO_ERROR(H5E_VFL, H5E_CANTGET, HADDR_UNDEF, "driver get_eof request failed")
+    if (file->cls->get_eof) {
+        if (HADDR_UNDEF == (ret_value = (file->cls->get_eof)(file)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, HADDR_UNDEF, "driver get_eof request failed")
     } /* end if */
     else
-	ret_value = file->maxaddr;
+        ret_value = file->maxaddr;
 
     /* Adjust for base address in file (convert to relative address)  */
     ret_value -= file->base_addr;
@@ -382,4 +369,3 @@ H5FD_get_eof(const H5FD_t *file)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_get_eof() */
-
