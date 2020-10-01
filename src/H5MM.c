@@ -22,20 +22,17 @@
  *-------------------------------------------------------------------------
  */
 
-
 /****************/
 /* Module Setup */
 /****************/
 
-
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5private.h"   /* Generic Functions			*/
+#include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5MMprivate.h" /* Memory management			*/
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5MM_malloc
  *
@@ -46,7 +43,7 @@
  *              difficult to check as a return value. This is still
  *              considered an error condition since allocations of zero
  *              bytes usually indicate problems.
- *  
+ *
  * Return:      Success:    Pointer to new memory
  *              Failure:    NULL
  *
@@ -65,7 +62,7 @@ H5MM_malloc(size_t size)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(size)
+    if (size)
         ret_value = HDmalloc(size);
     else
         ret_value = NULL;
@@ -73,7 +70,6 @@ H5MM_malloc(size_t size)
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5MM_malloc() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5MM_calloc
  *
@@ -105,7 +101,7 @@ H5MM_calloc(size_t size)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(size)
+    if (size)
         ret_value = HDcalloc((size_t)1, size);
     else
         ret_value = NULL;
@@ -113,7 +109,6 @@ H5MM_calloc(size_t size)
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5MM_calloc() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5MM_realloc
  *
@@ -146,7 +141,7 @@ H5MM_realloc(void *mem, size_t size)
 
     HDassert(mem || size);
 
-    if(NULL == mem && 0 == size) {  
+    if (NULL == mem && 0 == size) {
         /* Not defined in the standard, return NULL */
         ret_value = NULL;
     }
@@ -154,14 +149,13 @@ H5MM_realloc(void *mem, size_t size)
         ret_value = HDrealloc(mem, size);
 
         /* Some platforms do not return NULL if size is zero. */
-        if(0 == size)
+        if (0 == size)
             ret_value = NULL;
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_realloc() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5MM_xstrdup
  *
@@ -178,12 +172,12 @@ H5MM_realloc(void *mem, size_t size)
 char *
 H5MM_xstrdup(const char *s)
 {
-    char    *ret_value = NULL;
+    char *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
 
-    if(s) {
-        if(NULL == (ret_value = (char *)H5MM_malloc(HDstrlen(s) + 1)))
+    if (s) {
+        if (NULL == (ret_value = (char *)H5MM_malloc(HDstrlen(s) + 1)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
         HDstrcpy(ret_value, s);
     } /* end if */
@@ -192,7 +186,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_xstrdup() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5MM_strdup
  *
@@ -216,9 +209,9 @@ H5MM_strdup(const char *s)
 
     FUNC_ENTER_NOAPI(NULL)
 
-    if(!s)
+    if (!s)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "null string")
-    if(NULL == (ret_value = (char *)H5MM_malloc(HDstrlen(s) + 1)))
+    if (NULL == (ret_value = (char *)H5MM_malloc(HDstrlen(s) + 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     HDstrcpy(ret_value, s);
 
@@ -226,7 +219,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_strdup() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5MM_xfree
  *
@@ -250,7 +242,7 @@ H5MM_xfree(void *mem)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(mem)
+    if (mem)
         HDfree(mem);
 
     FUNC_LEAVE_NOAPI(NULL);

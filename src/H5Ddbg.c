@@ -15,51 +15,43 @@
 /* Module Setup */
 /****************/
 
-#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
+#define H5D_PACKAGE /*suppress error about including H5Dpkg	  */
 
 /* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5D__init_dbg_interface
-
+#define H5_INTERFACE_INIT_FUNC H5D__init_dbg_interface
 
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Dpkg.h"		/* Datasets 				*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Iprivate.h"		/* IDs			  		*/
-
+#include "H5private.h"  /* Generic Functions			*/
+#include "H5Dpkg.h"     /* Datasets 				*/
+#include "H5Eprivate.h" /* Error handling		  	*/
+#include "H5Iprivate.h" /* IDs			  		*/
 
 /****************/
 /* Local Macros */
 /****************/
 
-
 /******************/
 /* Local Typedefs */
 /******************/
-
 
 /********************/
 /* Local Prototypes */
 /********************/
 
-
 /*********************/
 /* Package Variables */
 /*********************/
-
 
 /*****************************/
 /* Library Private Variables */
 /*****************************/
 
-
 /*******************/
 /* Local Variables */
 /*******************/
 
-
 /*--------------------------------------------------------------------------
 NAME
    H5D__init_dbg_interface -- Initialize interface-specific information
@@ -80,7 +72,6 @@ H5D__init_dbg_interface(void)
     FUNC_LEAVE_NOAPI(H5D_init())
 } /* H5D__init_dbg_interface() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5Ddebug
  *
@@ -99,23 +90,22 @@ H5D__init_dbg_interface(void)
 herr_t
 H5Ddebug(hid_t dset_id)
 {
-    H5D_t	*dset;                  /* Dataset to debug */
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5D_t *dset;                /* Dataset to debug */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", dset_id);
 
     /* Check args */
-    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+    if (NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     /* Print B-tree information */
-    if(H5D_CHUNKED == dset->shared->layout.type)
-	(void)H5D__chunk_dump_index(dset, H5AC_ind_dxpl_id, stdout);
-    else if(H5D_CONTIGUOUS == dset->shared->layout.type)
-	HDfprintf(stdout, "    %-10s %a\n", "Address:", dset->shared->layout.storage.u.contig.addr);
+    if (H5D_CHUNKED == dset->shared->layout.type)
+        (void)H5D__chunk_dump_index(dset, H5AC_ind_dxpl_id, stdout);
+    else if (H5D_CONTIGUOUS == dset->shared->layout.type)
+        HDfprintf(stdout, "    %-10s %a\n", "Address:", dset->shared->layout.storage.u.contig.addr);
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ddebug() */
-

@@ -23,39 +23,43 @@ namespace H5 {
 */
 // Inheritance: StrCreatPropList -> PropList -> IdComponent
 class H5_DLLCPP AttrCreatPropList : public StrCreatPropList {
-   public:
-        ///\brief Default attribute creation property list.
-        static const AttrCreatPropList& DEFAULT;
+  public:
+    ///\brief Default attribute creation property list.
+    static const AttrCreatPropList &DEFAULT;
 
-        // Creates a attribute creation property list.
-        AttrCreatPropList();
+    // Creates a attribute creation property list.
+    AttrCreatPropList();
 
-        ///\brief Returns this class name.
-        virtual H5std_string fromClass () const { return("AttrCreatPropList"); }
+    ///\brief Returns this class name.
+    virtual H5std_string
+    fromClass() const
+    {
+        return ("AttrCreatPropList");
+    }
 
-        // Copy constructor: same as the original AttrCreatPropList.
-        AttrCreatPropList(const AttrCreatPropList& original);
+    // Copy constructor: same as the original AttrCreatPropList.
+    AttrCreatPropList(const AttrCreatPropList &original);
 
-        // Creates a copy of an existing attribute creation property list
-        // using the property list id.
-        AttrCreatPropList(const hid_t acpl_id);
+    // Creates a copy of an existing attribute creation property list
+    // using the property list id.
+    AttrCreatPropList(const hid_t acpl_id);
 
-        // Noop destructor
-        virtual ~AttrCreatPropList();
+    // Noop destructor
+    virtual ~AttrCreatPropList();
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-        // Deletes the global constant, should only be used by the library
-        static void deleteConstants();
+    // Deletes the global constant, should only be used by the library
+    static void deleteConstants();
 
-    private:
-        static AttrCreatPropList* DEFAULT_;
+  private:
+    static AttrCreatPropList *DEFAULT_;
 
-        // Creates the global constant, should only be used by the library
-        static AttrCreatPropList* getConstant();
+    // Creates the global constant, should only be used by the library
+    static AttrCreatPropList *getConstant();
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
-}; // end of AttrCreatPropList
+};     // end of AttrCreatPropList
 
 } // namespace H5
 

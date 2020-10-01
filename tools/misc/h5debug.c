@@ -21,36 +21,35 @@
  *
  *-------------------------------------------------------------------------
  */
-#define H5A_PACKAGE     /*suppress error about including H5Apkg  */
-#define H5B2_PACKAGE    /*suppress error about including H5B2pkg */
-#define H5B2_TESTING    /*suppress warning about H5B2 testing funcs*/
-#define H5D_PACKAGE     /*suppress error about including H5Dpkg  */
-#define H5F_PACKAGE     /*suppress error about including H5Fpkg  */
-#define H5G_PACKAGE     /*suppress error about including H5Gpkg  */
-#define H5HF_PACKAGE    /*suppress error about including H5HFpkg */
-#define H5O_PACKAGE     /*suppress error about including H5Opkg  */
-#define H5SM_PACKAGE    /*suppress error about including H5SMpkg */
+#define H5A_PACKAGE  /*suppress error about including H5Apkg  */
+#define H5B2_PACKAGE /*suppress error about including H5B2pkg */
+#define H5B2_TESTING /*suppress warning about H5B2 testing funcs*/
+#define H5D_PACKAGE  /*suppress error about including H5Dpkg  */
+#define H5F_PACKAGE  /*suppress error about including H5Fpkg  */
+#define H5G_PACKAGE  /*suppress error about including H5Gpkg  */
+#define H5HF_PACKAGE /*suppress error about including H5HFpkg */
+#define H5O_PACKAGE  /*suppress error about including H5Opkg  */
+#define H5SM_PACKAGE /*suppress error about including H5SMpkg */
 
-#include "H5private.h"  /* Generic Functions    */
-#include "H5Apkg.h"     /* Attributes           */
-#include "H5B2pkg.h"    /* v2 B-trees           */
-#include "H5Dpkg.h"     /* Datasets             */
-#include "H5Eprivate.h" /* Error handling       */
-#include "H5Fpkg.h"     /* File access          */
+#include "H5private.h"   /* Generic Functions    */
+#include "H5Apkg.h"      /* Attributes           */
+#include "H5B2pkg.h"     /* v2 B-trees           */
+#include "H5Dpkg.h"      /* Datasets             */
+#include "H5Eprivate.h"  /* Error handling       */
+#include "H5Fpkg.h"      /* File access          */
 #include "H5FSprivate.h" /* Free space manager  */
-#include "H5Gpkg.h"     /* Groups               */
-#include "H5HFpkg.h"    /* Fractal heaps        */
+#include "H5Gpkg.h"      /* Groups               */
+#include "H5HFpkg.h"     /* Fractal heaps        */
 #include "H5HGprivate.h" /* Global Heaps        */
-#include "H5Iprivate.h" /* IDs                  */
-#include "H5Opkg.h"     /* Object headers       */
-#include "H5SMpkg.h"    /* Implicitly shared messages    */
+#include "H5Iprivate.h"  /* IDs                  */
+#include "H5Opkg.h"      /* Object headers       */
+#include "H5SMpkg.h"     /* Implicitly shared messages    */
 
 /* File drivers */
 #include "H5FDfamily.h"
 
-#define INDENT  3
-#define VCOL    50
-
+#define INDENT 3
+#define VCOL   50
 
 /*-------------------------------------------------------------------------
  * Function:    get_H5B2_class
@@ -70,58 +69,57 @@
 static const H5B2_class_t *
 get_H5B2_class(const uint8_t *sig)
 {
-    H5B2_subid_t subtype = (H5B2_subid_t)sig[H5_SIZEOF_MAGIC + 1];
+    H5B2_subid_t        subtype = (H5B2_subid_t)sig[H5_SIZEOF_MAGIC + 1];
     const H5B2_class_t *cls;
 
-    switch(subtype) {
-    case H5B2_TEST_ID:
-        cls = H5B2_TEST;
-        break;
+    switch (subtype) {
+        case H5B2_TEST_ID:
+            cls = H5B2_TEST;
+            break;
 
-    case H5B2_FHEAP_HUGE_INDIR_ID:
-        cls = H5HF_HUGE_BT2_INDIR;
-        break;
+        case H5B2_FHEAP_HUGE_INDIR_ID:
+            cls = H5HF_HUGE_BT2_INDIR;
+            break;
 
-    case H5B2_FHEAP_HUGE_FILT_INDIR_ID:
-        cls = H5HF_HUGE_BT2_FILT_INDIR;
-        break;
+        case H5B2_FHEAP_HUGE_FILT_INDIR_ID:
+            cls = H5HF_HUGE_BT2_FILT_INDIR;
+            break;
 
-    case H5B2_FHEAP_HUGE_DIR_ID:
-        cls = H5HF_HUGE_BT2_DIR;
-        break;
+        case H5B2_FHEAP_HUGE_DIR_ID:
+            cls = H5HF_HUGE_BT2_DIR;
+            break;
 
-    case H5B2_FHEAP_HUGE_FILT_DIR_ID:
-        cls = H5HF_HUGE_BT2_FILT_DIR;
-        break;
+        case H5B2_FHEAP_HUGE_FILT_DIR_ID:
+            cls = H5HF_HUGE_BT2_FILT_DIR;
+            break;
 
-    case H5B2_GRP_DENSE_NAME_ID:
-        cls = H5G_BT2_NAME;
-        break;
+        case H5B2_GRP_DENSE_NAME_ID:
+            cls = H5G_BT2_NAME;
+            break;
 
-    case H5B2_GRP_DENSE_CORDER_ID:
-        cls = H5G_BT2_CORDER;
-        break;
+        case H5B2_GRP_DENSE_CORDER_ID:
+            cls = H5G_BT2_CORDER;
+            break;
 
-    case H5B2_SOHM_INDEX_ID:
-        cls = H5SM_INDEX;
-        break;
+        case H5B2_SOHM_INDEX_ID:
+            cls = H5SM_INDEX;
+            break;
 
-    case H5B2_ATTR_DENSE_NAME_ID:
-        cls = H5A_BT2_NAME;
-        break;
+        case H5B2_ATTR_DENSE_NAME_ID:
+            cls = H5A_BT2_NAME;
+            break;
 
-    case H5B2_ATTR_DENSE_CORDER_ID:
-        cls = H5A_BT2_CORDER;
-        break;
+        case H5B2_ATTR_DENSE_CORDER_ID:
+            cls = H5A_BT2_CORDER;
+            break;
 
         default:
             HDfprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
             HDexit(4);
     } /* end switch */
 
-    return(cls);
+    return (cls);
 } /* end get_H5B2_class() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -141,22 +139,22 @@ get_H5B2_class(const uint8_t *sig)
 int
 main(int argc, char *argv[])
 {
-    hid_t  fid, fapl, dxpl;
-    H5F_t       *f;
+    hid_t       fid, fapl, dxpl;
+    H5F_t *     f;
     haddr_t     addr = 0, extra = 0, extra2 = 0, extra3 = 0, extra4 = 0;
     uint8_t     sig[H5F_SIGNATURE_LEN];
     size_t      u;
     H5E_auto2_t func;
-    void       *edata;
+    void *      edata;
     herr_t      status = SUCCEED;
 
-    if(argc == 1) {
+    if (argc == 1) {
         HDfprintf(stderr, "Usage: %s filename [signature-addr [extra]]\n", argv[0]);
         HDexit(1);
     } /* end if */
 
     /* Initialize the library */
-    if(H5open() < 0) {
+    if (H5open() < 0) {
         HDfprintf(stderr, "cannot initialize the library\n");
         HDexit(1);
     } /* end if */
@@ -168,24 +166,24 @@ main(int argc, char *argv[])
     /*
      * Open the file and get the file descriptor.
      */
-    if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0) {
+    if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0) {
         HDfprintf(stderr, "cannot create dataset transfer property list\n");
         HDexit(1);
     } /* end if */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
+    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
         HDfprintf(stderr, "cannot create file access property list\n");
         HDexit(1);
     } /* end if */
-    if(HDstrchr(argv[1], '%'))
-        if(H5Pset_fapl_family (fapl, (hsize_t)0, H5P_DEFAULT) < 0) {
+    if (HDstrchr(argv[1], '%'))
+        if (H5Pset_fapl_family(fapl, (hsize_t)0, H5P_DEFAULT) < 0) {
             HDfprintf(stderr, "cannot set file access property list\n");
             HDexit(1);
         }
-    if((fid = H5Fopen(argv[1], H5F_ACC_RDONLY, fapl)) < 0) {
+    if ((fid = H5Fopen(argv[1], H5F_ACC_RDONLY, fapl)) < 0) {
         HDfprintf(stderr, "cannot open file\n");
         HDexit(1);
     } /* end if */
-    if(NULL == (f = (H5F_t *)H5I_object(fid))) {
+    if (NULL == (f = (H5F_t *)H5I_object(fid))) {
         HDfprintf(stderr, "cannot obtain H5F_t pointer\n");
         HDexit(2);
     } /* end if */
@@ -193,61 +191,59 @@ main(int argc, char *argv[])
     /*
      * Parse command arguments.
      */
-    if(argc > 2)
+    if (argc > 2)
         addr = (haddr_t)HDstrtoll(argv[2], NULL, 0);
-    if(argc > 3)
+    if (argc > 3)
         extra = (haddr_t)HDstrtoll(argv[3], NULL, 0);
-    if(argc > 4)
+    if (argc > 4)
         extra2 = (haddr_t)HDstrtoll(argv[4], NULL, 0);
-    if(argc > 5)
+    if (argc > 5)
         extra3 = (haddr_t)HDstrtoll(argv[5], NULL, 0);
-    if(argc > 6)
+    if (argc > 6)
         extra4 = (haddr_t)HDstrtoll(argv[6], NULL, 0);
 
     /*
      * Read the signature at the specified file position.
      */
     HDfprintf(stdout, "Reading signature at address %a (rel)\n", addr);
-    if(H5F_block_read(f, H5FD_MEM_SUPER, addr, sizeof(sig), dxpl, sig) < 0) {
+    if (H5F_block_read(f, H5FD_MEM_SUPER, addr, sizeof(sig), dxpl, sig) < 0) {
         HDfprintf(stderr, "cannot read signature\n");
         HDexit(3);
     }
-    if(!HDmemcmp(sig, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN)) {
+    if (!HDmemcmp(sig, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN)) {
         /*
          * Debug the file's super block.
          */
         status = H5F_debug(f, stdout, 0, VCOL);
-
-    } else if(!HDmemcmp(sig, H5HL_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    }
+    else if (!HDmemcmp(sig, H5HL_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug a local heap.
          */
         status = H5HL_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
-
     }
-    else if(!HDmemcmp (sig, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    else if (!HDmemcmp(sig, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug a global heap collection.
          */
         status = H5HG_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
-
     }
-    else if(!HDmemcmp(sig, H5G_NODE_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    else if (!HDmemcmp(sig, H5G_NODE_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug a symbol table node.
          */
 
         /* Check for extra parameters */
-        if(extra == 0) {
-            HDfprintf(stderr, "\nWarning: Providing the group's local heap address will give more information\n");
+        if (extra == 0) {
+            HDfprintf(stderr,
+                      "\nWarning: Providing the group's local heap address will give more information\n");
             HDfprintf(stderr, "Symbol table node usage:\n");
             HDfprintf(stderr, "\th5debug <filename> <Symbol table node address> <address of local heap>\n\n");
         } /* end if */
 
         status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
-
     }
-    else if(!HDmemcmp(sig, H5B_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    else if (!HDmemcmp(sig, H5B_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug a B-tree.  B-trees are debugged through the B-tree
          * subclass.  The subclass identifier is the byte immediately
@@ -256,30 +252,36 @@ main(int argc, char *argv[])
         H5B_subid_t subtype = (H5B_subid_t)sig[H5_SIZEOF_MAGIC];
         unsigned    ndims;
 
-        switch(subtype) {
-        case H5B_SNODE_ID:
-            /* Check for extra parameters */
-            if(extra == 0) {
-                HDfprintf(stderr, "\nWarning: Providing the group's local heap address will give more information\n");
-                HDfprintf(stderr, "B-tree symbol table node usage:\n");
-                HDfprintf(stderr, "\th5debug <filename> <B-tree node address> <address of local heap>\n\n");
-                HDexit(4);
-            } /* end if */
+        switch (subtype) {
+            case H5B_SNODE_ID:
+                /* Check for extra parameters */
+                if (extra == 0) {
+                    HDfprintf(
+                        stderr,
+                        "\nWarning: Providing the group's local heap address will give more information\n");
+                    HDfprintf(stderr, "B-tree symbol table node usage:\n");
+                    HDfprintf(stderr,
+                              "\th5debug <filename> <B-tree node address> <address of local heap>\n\n");
+                    HDexit(4);
+                } /* end if */
 
-            status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
-            break;
+                status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
+                break;
 
-        case H5B_CHUNK_ID:
-            /* Check for extra parameters */
-            if(extra == 0) {
-                HDfprintf(stderr, "ERROR: Need number of dimensions of chunk in order to dump chunk B-tree node\n");
-                HDfprintf(stderr, "B-tree chunked storage node usage:\n");
-                HDfprintf(stderr, "\th5debug <filename> <B-tree node address> <# of dimensions> <slowest chunk dim>...<fastest chunk dim>\n");
-                HDexit(4);
-            } /* end if */
+            case H5B_CHUNK_ID:
+                /* Check for extra parameters */
+                if (extra == 0) {
+                    HDfprintf(
+                        stderr,
+                        "ERROR: Need number of dimensions of chunk in order to dump chunk B-tree node\n");
+                    HDfprintf(stderr, "B-tree chunked storage node usage:\n");
+                    HDfprintf(stderr, "\th5debug <filename> <B-tree node address> <# of dimensions> <slowest "
+                                      "chunk dim>...<fastest chunk dim>\n");
+                    HDexit(4);
+                } /* end if */
 
-            /* Build array of chunk dimensions */
-            ndims = (unsigned)extra;
+                /* Build array of chunk dimensions */
+                ndims  = (unsigned)extra;
                 status = H5D_btree_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, ndims);
                 break;
 
@@ -287,9 +289,8 @@ main(int argc, char *argv[])
                 HDfprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
                 HDexit(4);
         }
-
     }
-    else if(!HDmemcmp(sig, H5B2_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    else if (!HDmemcmp(sig, H5B2_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug a v2 B-tree header.
          */
@@ -297,9 +298,8 @@ main(int argc, char *argv[])
         HDassert(cls);
 
         status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, (haddr_t)extra);
-
     }
-    else if(!HDmemcmp(sig, H5B2_INT_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    else if (!HDmemcmp(sig, H5B2_INT_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug a v2 B-tree internal node.
          */
@@ -307,18 +307,21 @@ main(int argc, char *argv[])
         HDassert(cls);
 
         /* Check for enough valid parameters */
-        if(extra == 0 || extra2 == 0 || extra3 == 0) {
-            HDfprintf(stderr, "ERROR: Need v2 B-tree header address and the node's number of records and depth in order to dump internal node\n");
-            HDfprintf(stderr, "NOTE: Leaf nodes are depth 0, the internal nodes above them are depth 1, etc.\n");
+        if (extra == 0 || extra2 == 0 || extra3 == 0) {
+            HDfprintf(stderr, "ERROR: Need v2 B-tree header address and the node's number of records and "
+                              "depth in order to dump internal node\n");
+            HDfprintf(stderr,
+                      "NOTE: Leaf nodes are depth 0, the internal nodes above them are depth 1, etc.\n");
             HDfprintf(stderr, "v2 B-tree internal node usage:\n");
-            HDfprintf(stderr, "\th5debug <filename> <internal node address> <v2 B-tree header address> <number of records> <depth>\n");
+            HDfprintf(stderr, "\th5debug <filename> <internal node address> <v2 B-tree header address> "
+                              "<number of records> <depth>\n");
             HDexit(4);
         } /* end if */
 
-        status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, (unsigned)extra3, (haddr_t)extra4);
-
+        status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra,
+                                (unsigned)extra2, (unsigned)extra3, (haddr_t)extra4);
     }
-    else if(!HDmemcmp(sig, H5B2_LEAF_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    else if (!HDmemcmp(sig, H5B2_LEAF_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug a v2 B-tree leaf node.
          */
@@ -326,118 +329,127 @@ main(int argc, char *argv[])
         HDassert(cls);
 
         /* Check for enough valid parameters */
-        if(extra == 0 || extra2 == 0) {
-            HDfprintf(stderr, "ERROR: Need v2 B-tree header address and number of records in order to dump leaf node\n");
+        if (extra == 0 || extra2 == 0) {
+            HDfprintf(
+                stderr,
+                "ERROR: Need v2 B-tree header address and number of records in order to dump leaf node\n");
             HDfprintf(stderr, "v2 B-tree leaf node usage:\n");
-            HDfprintf(stderr, "\th5debug <filename> <leaf node address> <v2 B-tree header address> <number of records>\n");
+            HDfprintf(
+                stderr,
+                "\th5debug <filename> <leaf node address> <v2 B-tree header address> <number of records>\n");
             HDexit(4);
         } /* end if */
 
-        status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, (haddr_t)extra3);
-
+        status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra,
+                                 (unsigned)extra2, (haddr_t)extra3);
     }
-    else if(!HDmemcmp(sig, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    else if (!HDmemcmp(sig, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug a fractal heap header.
          */
         status = H5HF_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
-
     }
-    else if(!HDmemcmp(sig, H5HF_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    else if (!HDmemcmp(sig, H5HF_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug a fractal heap direct block.
          */
 
         /* Check for enough valid parameters */
-        if(extra == 0 || extra2 == 0) {
-            HDfprintf(stderr, "ERROR: Need fractal heap header address and size of direct block in order to dump direct block\n");
+        if (extra == 0 || extra2 == 0) {
+            HDfprintf(stderr, "ERROR: Need fractal heap header address and size of direct block in order to "
+                              "dump direct block\n");
             HDfprintf(stderr, "Fractal heap direct block usage:\n");
-            HDfprintf(stderr, "\th5debug <filename> <direct block address> <heap header address> <size of direct block>\n");
+            HDfprintf(
+                stderr,
+                "\th5debug <filename> <direct block address> <heap header address> <size of direct block>\n");
             HDexit(4);
         } /* end if */
 
         status = H5HF_dblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra, (size_t)extra2);
-
     }
-    else if(!HDmemcmp(sig, H5HF_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    else if (!HDmemcmp(sig, H5HF_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug a fractal heap indirect block.
          */
 
         /* Check for enough valid parameters */
-        if(extra == 0 || extra2 == 0) {
-            HDfprintf(stderr, "ERROR: Need fractal heap header address and number of rows in order to dump indirect block\n");
+        if (extra == 0 || extra2 == 0) {
+            HDfprintf(stderr, "ERROR: Need fractal heap header address and number of rows in order to dump "
+                              "indirect block\n");
             HDfprintf(stderr, "Fractal heap indirect block usage:\n");
-            HDfprintf(stderr, "\th5debug <filename> <indirect block address> <heap header address> <number of rows>\n");
+            HDfprintf(
+                stderr,
+                "\th5debug <filename> <indirect block address> <heap header address> <number of rows>\n");
             HDexit(4);
         } /* end if */
 
-        status = H5HF_iblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra, (unsigned)extra2);
-
+        status =
+            H5HF_iblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra, (unsigned)extra2);
     }
-    else if(!HDmemcmp(sig, H5FS_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    else if (!HDmemcmp(sig, H5FS_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug a free space header.
          */
 
         status = H5FS_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
-
     }
-    else if(!HDmemcmp(sig, H5FS_SINFO_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    else if (!HDmemcmp(sig, H5FS_SINFO_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug free space serialized sections.
          */
 
         /* Check for enough valid parameters */
-        if(extra == 0 || extra2 == 0) {
-            HDfprintf(stderr, "ERROR: Need free space header address and client address in order to dump serialized sections\n");
+        if (extra == 0 || extra2 == 0) {
+            HDfprintf(stderr, "ERROR: Need free space header address and client address in order to dump "
+                              "serialized sections\n");
             HDfprintf(stderr, "Free space serialized sections usage:\n");
-            HDfprintf(stderr, "\th5debug <filename> <serialized sections address> <free space header address> <client address>\n");
+            HDfprintf(stderr, "\th5debug <filename> <serialized sections address> <free space header "
+                              "address> <client address>\n");
             HDexit(4);
         } /* end if */
 
         status = H5FS_sects_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra, extra2);
-
     }
-    else if(!HDmemcmp(sig, H5SM_TABLE_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    else if (!HDmemcmp(sig, H5SM_TABLE_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug shared message master table.
          */
 
-        status = H5SM_table_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, (unsigned) UFAIL, (unsigned) UFAIL);
-
+        status = H5SM_table_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, (unsigned)UFAIL,
+                                  (unsigned)UFAIL);
     }
-    else if(!HDmemcmp(sig, H5SM_LIST_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    else if (!HDmemcmp(sig, H5SM_LIST_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug shared message list index.
          */
 
         /* Check for enough valid parameters */
-        if(extra2 == 0) {
-            HDfprintf(stderr, "ERROR: Need list format version and number of messages in order to shared message list\n");
+        if (extra2 == 0) {
+            HDfprintf(
+                stderr,
+                "ERROR: Need list format version and number of messages in order to shared message list\n");
             HDfprintf(stderr, "Shared message list usage:\n");
-            HDfprintf(stderr, "\th5debug <filename> <shared message list address> <list format version> <number of mesages in list>\n");
+            HDfprintf(stderr, "\th5debug <filename> <shared message list address> <list format version> "
+                              "<number of mesages in list>\n");
             HDexit(4);
         } /* end if */
 
-        status = H5SM_list_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, (unsigned) extra, (size_t) extra2);
-
+        status = H5SM_list_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, (unsigned)extra,
+                                 (size_t)extra2);
     }
-    else if(!HDmemcmp(sig, H5EA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    else if (!HDmemcmp(sig, H5EA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug v2 object header (which have signatures).
          */
 
         status = H5O_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
-
     }
-    else if(sig[0] == H5O_VERSION_1) {
+    else if (sig[0] == H5O_VERSION_1) {
         /*
          * This could be a v1 object header.  Since they don't have a signature
          * it's a somewhat "ify" detection.
          */
         status = H5O_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
-
     }
     else {
         /*
@@ -461,7 +473,7 @@ main(int argc, char *argv[])
     } /* end else */
 
     /* Check for an error when dumping information */
-    if(status < 0) {
+    if (status < 0) {
         HDfprintf(stderr, "An error occurred!\n");
         H5Eprint2(H5E_DEFAULT, stderr);
         HDexit(5);
@@ -475,4 +487,3 @@ main(int argc, char *argv[])
 
     return 0;
 } /* main() */
-

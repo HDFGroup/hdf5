@@ -11,7 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 #ifndef _H5f90i_H
 #define _H5f90i_H
 
@@ -26,7 +25,7 @@
  */
 #define _fcdtocp(desc) (desc)
 
-#if (defined (UNICOS) || defined (_UNICOS)) && !defined(__crayx1)
+#if (defined(UNICOS) || defined(_UNICOS)) && !defined(__crayx1)
 
 #include <fortran.h>
 
@@ -34,7 +33,7 @@
 
 #else
 
-typedef char              *_fcd;
+typedef char *_fcd;
 
 #endif
 

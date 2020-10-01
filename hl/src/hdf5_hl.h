@@ -28,4 +28,3 @@
 #include "H5PTpublic.h" /* table */
 
 #endif /*H5_INCLUDE_HL*/
-

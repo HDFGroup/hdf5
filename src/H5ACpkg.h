@@ -34,15 +34,13 @@
 #define _H5ACpkg_H
 
 /* Get package's private header */
-#include "H5ACprivate.h"	/* Metadata cache			*/
-
+#include "H5ACprivate.h" /* Metadata cache			*/
 
 /* Get needed headers */
-#include "H5Cprivate.h"         /* Cache                                */
-#include "H5SLprivate.h"        /* Skip lists */
+#include "H5Cprivate.h"  /* Cache                                */
+#include "H5SLprivate.h" /* Skip lists */
 
-
-#define H5AC_DEBUG_DIRTY_BYTES_CREATION	0
+#define H5AC_DEBUG_DIRTY_BYTES_CREATION 0
 
 #ifdef H5_HAVE_PARALLEL
 
@@ -50,8 +48,8 @@
  * at a sync point.
  */
 
-#define H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN		0
-#define H5AC_SYNC_POINT_OP__FLUSH_CACHE			1
+#define H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN 0
+#define H5AC_SYNC_POINT_OP__FLUSH_CACHE        1
 
 #endif /* H5_HAVE_PARALLEL */
 
@@ -62,12 +60,9 @@
  *-------------------------------------------------------------------------
  */
 
-#define H5AC__MIN_DIRTY_BYTES_THRESHOLD		(int32_t) \
-						(H5C__MIN_MAX_CACHE_SIZE / 2)
-#define H5AC__DEFAULT_DIRTY_BYTES_THRESHOLD	(256 * 1024)
-#define H5AC__MAX_DIRTY_BYTES_THRESHOLD   	(int32_t) \
-						(H5C__MAX_MAX_CACHE_SIZE / 4)
-
+#define H5AC__MIN_DIRTY_BYTES_THRESHOLD     (int32_t)(H5C__MIN_MAX_CACHE_SIZE / 2)
+#define H5AC__DEFAULT_DIRTY_BYTES_THRESHOLD (256 * 1024)
+#define H5AC__MAX_DIRTY_BYTES_THRESHOLD     (int32_t)(H5C__MAX_MAX_CACHE_SIZE / 4)
 
 /****************************************************************************
  *
@@ -172,10 +167,10 @@
  *		broadcast.  This field is reset to zero after each such
  *		broadcast.
  *
- * metadata_write_strategy: Integer code indicating how we will be 
- *		writing the metadata.  In the first incarnation of 
+ * metadata_write_strategy: Integer code indicating how we will be
+ *		writing the metadata.  In the first incarnation of
  *		this code, all writes were done from process 0.  This
- *		field exists to facilitate experiments with other 
+ *		field exists to facilitate experiments with other
  *		strategies.
  *
  * dirty_bytes_propagations: This field only exists when the
@@ -229,7 +224,7 @@
  *
  * Things have changed a bit since the following four fields were defined.
  * If metadata_write_strategy is H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY,
- * all comments hold as before -- with the caviate that pending further 
+ * all comments hold as before -- with the caviate that pending further
  * coding, the process 0 metadata cache is forbidden to flush entries outside
  * of a sync point.
  *
@@ -312,77 +307,74 @@
  *              needed.
  *
  *		Note: This field has been extended for use by all processes
- *		      with the addition of support for the distributed 
- *		      metadata write strategy.        
+ *		      with the addition of support for the distributed
+ *		      metadata write strategy.
  *                                                     JRM -- 5/9/10
  *
  * sync_point_done:  In the parallel test bed, it is necessary to verify
  *		that the expected writes, and only the expected writes,
  *		have taken place at the end of each sync point.
  *
- *		The sync_point_done callback allows t_cache to perform 
- *		this verification.  The field is set to NULL when the 
+ *		The sync_point_done callback allows t_cache to perform
+ *		this verification.  The field is set to NULL when the
  *		callback is not needed.
  *
  ****************************************************************************/
 
 #ifdef H5_HAVE_PARALLEL
 
-#define H5AC__H5AC_AUX_T_MAGIC        (unsigned)0x00D0A01
+#define H5AC__H5AC_AUX_T_MAGIC (unsigned)0x00D0A01
 
-typedef struct H5AC_aux_t
-{
-    uint32_t	magic;
+typedef struct H5AC_aux_t {
+    uint32_t magic;
 
-    MPI_Comm	mpi_comm;
+    MPI_Comm mpi_comm;
 
-    int		mpi_rank;
+    int mpi_rank;
 
-    int		mpi_size;
+    int mpi_size;
 
-    hbool_t	write_permitted;
+    hbool_t write_permitted;
 
-    int32_t	dirty_bytes_threshold;
+    int32_t dirty_bytes_threshold;
 
-    int32_t	dirty_bytes;
+    int32_t dirty_bytes;
 
-    int32_t	metadata_write_strategy;
+    int32_t metadata_write_strategy;
 
 #if H5AC_DEBUG_DIRTY_BYTES_CREATION
 
-    int32_t	dirty_bytes_propagations;
+    int32_t dirty_bytes_propagations;
 
-    int32_t     unprotect_dirty_bytes;
-    int32_t     unprotect_dirty_bytes_updates;
+    int32_t unprotect_dirty_bytes;
+    int32_t unprotect_dirty_bytes_updates;
 
-    int32_t     insert_dirty_bytes;
-    int32_t     insert_dirty_bytes_updates;
+    int32_t insert_dirty_bytes;
+    int32_t insert_dirty_bytes_updates;
 
-    int32_t     move_dirty_bytes;
-    int32_t     move_dirty_bytes_updates;
+    int32_t move_dirty_bytes;
+    int32_t move_dirty_bytes_updates;
 
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
 
-    H5SL_t *	d_slist_ptr;
+    H5SL_t *d_slist_ptr;
 
-    int32_t	d_slist_len;
+    int32_t d_slist_len;
 
-    H5SL_t *	c_slist_ptr;
+    H5SL_t *c_slist_ptr;
 
-    int32_t	c_slist_len;
+    int32_t c_slist_len;
 
-    H5SL_t *	candidate_slist_ptr;
+    H5SL_t *candidate_slist_ptr;
 
-    int32_t	candidate_slist_len;
+    int32_t candidate_slist_len;
 
-    void	(* write_done)(void);
+    void (*write_done)(void);
 
-    void	(* sync_point_done)(int num_writes, 
-                                    haddr_t * written_entries_tbl);
+    void (*sync_point_done)(int num_writes, haddr_t *written_entries_tbl);
 
 } H5AC_aux_t; /* struct H5AC_aux_t */
 
 #endif /* H5_HAVE_PARALLEL */
 
 #endif /* _H5ACpkg_H */
-

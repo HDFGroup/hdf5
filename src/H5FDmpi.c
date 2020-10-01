@@ -19,17 +19,15 @@
  *
  */
 
-
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fprivate.h"		/* File access				*/
-#include "H5FDprivate.h"	/* File drivers				*/
-#include "H5FDmpi.h"            /* Common MPI file driver		*/
-#include "H5Pprivate.h"		/* Property lists			*/
+#include "H5private.h"   /* Generic Functions			*/
+#include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5Fprivate.h"  /* File access				*/
+#include "H5FDprivate.h" /* File drivers				*/
+#include "H5FDmpi.h"     /* Common MPI file driver		*/
+#include "H5Pprivate.h"  /* Property lists			*/
 
 #ifdef H5_HAVE_PARALLEL
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5FD_mpi_get_rank
  *
@@ -51,24 +49,23 @@ H5FD_mpi_get_rank(const H5FD_t *file)
 {
     const H5FD_class_mpi_t *cls;
 
-    int	ret_value;
+    int ret_value;
 
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(file);
     cls = (const H5FD_class_mpi_t *)(file->cls);
     HDassert(cls);
-    HDassert(cls->get_rank);        /* All MPI drivers must implement this */
+    HDassert(cls->get_rank); /* All MPI drivers must implement this */
 
     /* Dispatch to driver */
-    if ((ret_value=(cls->get_rank)(file))<0)
+    if ((ret_value = (cls->get_rank)(file)) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_rank request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_mpi_get_rank() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5FD_mpi_get_size
  *
@@ -89,24 +86,23 @@ int
 H5FD_mpi_get_size(const H5FD_t *file)
 {
     const H5FD_class_mpi_t *cls;
-    int	ret_value;
+    int                     ret_value;
 
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(file);
     cls = (const H5FD_class_mpi_t *)(file->cls);
     HDassert(cls);
-    HDassert(cls->get_size);        /* All MPI drivers must implement this */
+    HDassert(cls->get_size); /* All MPI drivers must implement this */
 
     /* Dispatch to driver */
-    if ((ret_value=(cls->get_size)(file))<0)
+    if ((ret_value = (cls->get_size)(file)) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_size request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_mpi_get_size() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5FD_mpi_get_comm
  *
@@ -127,24 +123,23 @@ MPI_Comm
 H5FD_mpi_get_comm(const H5FD_t *file)
 {
     const H5FD_class_mpi_t *cls;
-    MPI_Comm	ret_value;
+    MPI_Comm                ret_value;
 
     FUNC_ENTER_NOAPI(MPI_COMM_NULL)
 
     HDassert(file);
     cls = (const H5FD_class_mpi_t *)(file->cls);
     HDassert(cls);
-    HDassert(cls->get_comm);        /* All MPI drivers must implement this */
+    HDassert(cls->get_comm); /* All MPI drivers must implement this */
 
     /* Dispatch to driver */
-    if ((ret_value=(cls->get_comm)(file))==MPI_COMM_NULL)
+    if ((ret_value = (cls->get_comm)(file)) == MPI_COMM_NULL)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, MPI_COMM_NULL, "driver get_comm request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_mpi_get_comm() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_mpi_MPIOff_to_haddr
  *
@@ -170,19 +165,18 @@ done:
 haddr_t
 H5FD_mpi_MPIOff_to_haddr(MPI_Offset mpi_off)
 {
-    haddr_t ret_value=HADDR_UNDEF;
+    haddr_t ret_value = HADDR_UNDEF;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (mpi_off != (MPI_Offset)(haddr_t)mpi_off)
-        ret_value=HADDR_UNDEF;
+        ret_value = HADDR_UNDEF;
     else
-        ret_value=(haddr_t)mpi_off;
+        ret_value = (haddr_t)mpi_off;
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_mpi_haddr_to_MPIOff
  *
@@ -209,9 +203,9 @@ H5FD_mpi_MPIOff_to_haddr(MPI_Offset mpi_off)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_mpi_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off/*out*/)
+H5FD_mpi_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off /*out*/)
 {
-    herr_t ret_value=FAIL;
+    herr_t ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -221,14 +215,13 @@ H5FD_mpi_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off/*out*/)
     *mpi_off = (MPI_Offset)addr;
 
     if (addr != (haddr_t)((MPI_Offset)addr))
-        ret_value=FAIL;
+        ret_value = FAIL;
     else
-        ret_value=SUCCEED;
+        ret_value = SUCCEED;
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_mpi_comm_info_dup
  *
@@ -252,28 +245,29 @@ H5FD_mpi_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off/*out*/)
 herr_t
 H5FD_mpi_comm_info_dup(MPI_Comm comm, MPI_Info info, MPI_Comm *comm_new, MPI_Info *info_new)
 {
-    herr_t	ret_value=SUCCEED;
-    MPI_Comm	comm_dup=MPI_COMM_NULL;
-    MPI_Info	info_dup=MPI_INFO_NULL;
-    int		mpi_code;
+    herr_t   ret_value = SUCCEED;
+    MPI_Comm comm_dup  = MPI_COMM_NULL;
+    MPI_Info info_dup  = MPI_INFO_NULL;
+    int      mpi_code;
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
     if (MPI_COMM_NULL == comm)
-	HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "not a valid argument")
+        HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "not a valid argument")
     if (!comm_new || !info_new)
-	HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "bad pointers")
+        HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "bad pointers")
 
     /* Dup them.  Using temporary variables for error recovery cleanup. */
-    if (MPI_SUCCESS != (mpi_code=MPI_Comm_dup(comm, &comm_dup)))
-	HMPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code)
-    if (MPI_INFO_NULL != info){
-	if (MPI_SUCCESS != (mpi_code=MPI_Info_dup(info, &info_dup)))
-	    HMPI_GOTO_ERROR(FAIL, "MPI_Info_dup failed", mpi_code)
-    }else{
-	/* No dup, just copy it. */
-	info_dup = info;
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_dup(comm, &comm_dup)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code)
+    if (MPI_INFO_NULL != info) {
+        if (MPI_SUCCESS != (mpi_code = MPI_Info_dup(info, &info_dup)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Info_dup failed", mpi_code)
+    }
+    else {
+        /* No dup, just copy it. */
+        info_dup = info;
     }
 
     /* copy them to the return arguments */
@@ -281,18 +275,17 @@ H5FD_mpi_comm_info_dup(MPI_Comm comm, MPI_Info info, MPI_Comm *comm_new, MPI_Inf
     *info_new = info_dup;
 
 done:
-    if (FAIL == ret_value){
-	/* need to free anything created here */
-	if (MPI_COMM_NULL != comm_dup)
-	    MPI_Comm_free(&comm_dup);
-	if (MPI_INFO_NULL != info_dup)
-	    MPI_Info_free(&info_dup);
+    if (FAIL == ret_value) {
+        /* need to free anything created here */
+        if (MPI_COMM_NULL != comm_dup)
+            MPI_Comm_free(&comm_dup);
+        if (MPI_INFO_NULL != info_dup)
+            MPI_Info_free(&info_dup);
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_mpi_comm_info_free
  *
@@ -315,25 +308,25 @@ done:
 herr_t
 H5FD_mpi_comm_info_free(MPI_Comm *comm, MPI_Info *info)
 {
-    herr_t      ret_value=SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
     if (!comm || !info)
-	HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "not a valid argument")
+        HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "not a valid argument")
 
     if (MPI_COMM_NULL != *comm)
-	MPI_Comm_free(comm);
+        MPI_Comm_free(comm);
     if (MPI_INFO_NULL != *info)
-	MPI_Info_free(info);
+        MPI_Info_free(info);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
 #ifdef NOT_YET
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5FD_mpio_wait_for_left_neighbor
  *
@@ -363,24 +356,24 @@ done:
 herr_t
 H5FD_mpio_wait_for_left_neighbor(H5FD_t *_file)
 {
-    H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
-    char msgbuf[1];
-    MPI_Status rcvstat;
-    int		mpi_code;		/* mpi return code */
-    herr_t      ret_value=SUCCEED;      /* Return value */
+    H5FD_mpio_t *file = (H5FD_mpio_t *)_file;
+    char         msgbuf[1];
+    MPI_Status   rcvstat;
+    int          mpi_code;            /* mpi return code */
+    herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(file);
-    HDassert(H5FD_MPIO==file->pub.driver_id);
+    HDassert(H5FD_MPIO == file->pub.driver_id);
 
     /* Portably initialize MPI status variable */
-    HDmemset(&rcvstat,0,sizeof(MPI_Status));
+    HDmemset(&rcvstat, 0, sizeof(MPI_Status));
 
     /* p0 has no left neighbor; all other procs wait for msg */
     if (file->mpi_rank != 0) {
-        if (MPI_SUCCESS != (mpi_code=MPI_Recv( &msgbuf, 1, MPI_CHAR,
-			file->mpi_rank-1, MPI_ANY_TAG, file->comm, &rcvstat )))
+        if (MPI_SUCCESS != (mpi_code = MPI_Recv(&msgbuf, 1, MPI_CHAR, file->mpi_rank - 1, MPI_ANY_TAG,
+                                                file->comm, &rcvstat)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mpi_code)
     }
 
@@ -388,7 +381,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5FD_mpio_signal_right_neighbor
  *
@@ -418,18 +410,19 @@ done:
 herr_t
 H5FD_mpio_signal_right_neighbor(H5FD_t *_file)
 {
-    H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
-    char msgbuf[1];
-    int		mpi_code;		/* mpi return code */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5FD_mpio_t *file = (H5FD_mpio_t *)_file;
+    char         msgbuf[1];
+    int          mpi_code;            /* mpi return code */
+    herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(file);
-    HDassert(H5FD_MPIO==file->pub.driver_id);
+    HDassert(H5FD_MPIO == file->pub.driver_id);
 
-    if(file->mpi_rank != (file->mpi_size - 1))
-        if(MPI_SUCCESS != (mpi_code=MPI_Send(&msgbuf, 0/*empty msg*/, MPI_CHAR, file->mpi_rank + 1, 0, file->comm)))
+    if (file->mpi_rank != (file->mpi_size - 1))
+        if (MPI_SUCCESS !=
+            (mpi_code = MPI_Send(&msgbuf, 0 /*empty msg*/, MPI_CHAR, file->mpi_rank + 1, 0, file->comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mpi_code)
 
 done:
@@ -437,7 +430,6 @@ done:
 }
 #endif /* NOT_YET */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5FD_mpi_setup_collective
  *
@@ -466,21 +458,21 @@ done:
 herr_t
 H5FD_mpi_setup_collective(hid_t dxpl_id, MPI_Datatype *btype, MPI_Datatype *ftype)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
-    if(NULL == (plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
+    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dataset transfer list")
 
     /* Set buffer MPI type */
-    if(H5P_set(plist, H5FD_MPI_XFER_MEM_MPI_TYPE_NAME, btype) < 0)
+    if (H5P_set(plist, H5FD_MPI_XFER_MEM_MPI_TYPE_NAME, btype) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI-I/O property")
 
     /* Set File MPI type */
-    if(H5P_set(plist, H5FD_MPI_XFER_FILE_MPI_TYPE_NAME, ftype) < 0)
+    if (H5P_set(plist, H5FD_MPI_XFER_FILE_MPI_TYPE_NAME, ftype) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI-I/O property")
 
 done:

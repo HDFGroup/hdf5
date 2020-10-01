@@ -29,7 +29,7 @@
 /* Private headers needed by this file */
 #include "H5private.h"
 
-#define H5MM_free(Z)	HDfree(Z)
+#define H5MM_free(Z) HDfree(Z)
 
 /*
  * Library prototypes...
@@ -42,4 +42,3 @@ H5_DLL char *H5MM_strdup(const char *s);
 H5_DLL void *H5MM_xfree(void *mem);
 
 #endif /* _H5MMprivate_H */
-

@@ -11,20 +11,18 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#define H5F_PACKAGE /*suppress error about including H5Fpkg	  */
 
 /* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5F_init_fake_interface
-
+#define H5_INTERFACE_INIT_FUNC H5F_init_fake_interface
 
 /* Packages needed by this file... */
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"             /* File access				*/
+#include "H5private.h"  /* Generic Functions			*/
+#include "H5Eprivate.h" /* Error handling		  	*/
+#include "H5Fpkg.h"     /* File access				*/
 
 /* PRIVATE PROTOTYPES */
 
-
 /*--------------------------------------------------------------------------
 NAME
    H5F_init_fake_interface -- Initialize interface-specific information
@@ -46,7 +44,6 @@ H5F_init_fake_interface(void)
     FUNC_LEAVE_NOAPI(H5F_init())
 } /* H5F_init_fake_interface() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5F_fake_alloc
  *
@@ -67,19 +64,19 @@ H5F_init_fake_interface(void)
 H5F_t *
 H5F_fake_alloc(uint8_t sizeof_size)
 {
-    H5F_t *f = NULL;            /* Pointer to fake file struct */
-    H5F_t *ret_value;           /* Return value */
+    H5F_t *f = NULL;  /* Pointer to fake file struct */
+    H5F_t *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
     /* Allocate faked file struct */
-    if(NULL == (f = H5FL_CALLOC(H5F_t)))
-	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate top file structure")
-    if(NULL == (f->shared = H5FL_CALLOC(H5F_file_t)))
-	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate shared file structure")
+    if (NULL == (f = H5FL_CALLOC(H5F_t)))
+        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate top file structure")
+    if (NULL == (f->shared = H5FL_CALLOC(H5F_file_t)))
+        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate shared file structure")
 
     /* Only set fields necessary for clients */
-    if(sizeof_size == 0)
+    if (sizeof_size == 0)
         f->shared->sizeof_size = H5F_OBJ_SIZE_SIZE;
     else
         f->shared->sizeof_size = sizeof_size;
@@ -88,13 +85,12 @@ H5F_fake_alloc(uint8_t sizeof_size)
     ret_value = f;
 
 done:
-    if(!ret_value)
+    if (!ret_value)
         H5F_fake_free(f);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_fake_alloc() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5F_fake_free
  *
@@ -115,13 +111,12 @@ H5F_fake_free(H5F_t *f)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Free faked file struct */
-    if(f) {
+    if (f) {
         /* Destroy shared file struct */
-        if(f->shared)
+        if (f->shared)
             f->shared = H5FL_FREE(H5F_file_t, f->shared);
         f = H5FL_FREE(H5F_t, f);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5F_fake_free() */
-

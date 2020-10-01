@@ -14,9 +14,8 @@
 #include <string>
 
 #include <iostream>
-    using std::cerr;
-    using std::endl;
-
+using std::cerr;
+using std::endl;
 
 #include "H5Include.h"
 #include "H5Exception.h"
@@ -43,7 +42,7 @@ StrCreatPropList::StrCreatPropList() : PropList(H5P_STRING_CREATE) {}
 ///\param       original - IN: StrCreatPropList instance to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-StrCreatPropList::StrCreatPropList(const StrCreatPropList& original) : PropList(original) {}
+StrCreatPropList::StrCreatPropList(const StrCreatPropList &original) : PropList(original) {}
 
 //--------------------------------------------------------------------------
 // Function:    StrCreatPropList overloaded constructor
@@ -62,12 +61,12 @@ StrCreatPropList::StrCreatPropList(const hid_t plist_id) : PropList(plist_id) {}
 ///\exception   H5::PropListIException
 // March 2018
 //--------------------------------------------------------------------------
-void StrCreatPropList::setCharEncoding(H5T_cset_t encoding) const
+void
+StrCreatPropList::setCharEncoding(H5T_cset_t encoding) const
 {
     herr_t ret_value = H5Pset_char_encoding(id, encoding);
     // Throw exception if H5Pset_char_encoding returns failure
-    if (ret_value < 0)
-    {
+    if (ret_value < 0) {
         throw PropListIException("StrCreatPropList::setCharEncoding", "H5Pset_char_encoding failed");
     }
 }
@@ -78,16 +77,16 @@ void StrCreatPropList::setCharEncoding(H5T_cset_t encoding) const
 ///\exception   H5::PropListIException
 // March 2018
 //--------------------------------------------------------------------------
-H5T_cset_t StrCreatPropList::getCharEncoding() const
+H5T_cset_t
+StrCreatPropList::getCharEncoding() const
 {
     H5T_cset_t encoding;
-    herr_t ret_value = H5Pget_char_encoding(id, &encoding);
+    herr_t     ret_value = H5Pget_char_encoding(id, &encoding);
     // Throw exception if H5Pget_char_encoding returns failure
-    if (ret_value < 0)
-    {
+    if (ret_value < 0) {
         throw PropListIException("StrCreatPropList::getCharEncoding", "H5Pget_char_encoding failed");
     }
-    return(encoding);
+    return (encoding);
 }
 
-} // end namespace
+} // namespace H5

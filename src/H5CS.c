@@ -25,10 +25,9 @@
  *
  */
 
-
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5CSprivate.h"	/* Function stack			*/
-#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5private.h"   /* Generic Functions			*/
+#include "H5CSprivate.h" /* Function stack			*/
+#include "H5MMprivate.h" /* Memory management			*/
 
 #ifdef H5_HAVE_CODESTACK
 
@@ -43,17 +42,16 @@
  * by "H5CS_t *fstack =".
  */
 static H5CS_t *H5CS_get_stack(void);
-#define H5CS_get_my_stack()  H5CS_get_stack()
+#define H5CS_get_my_stack() H5CS_get_stack()
 #else /* H5_HAVE_THREADSAFE */
 /*
  * The function stack.  Eventually we'll have some sort of global table so each
  * thread has it's own stack.  The stacks will be created on demand when the
  * thread first calls H5CS_push().  */
-H5CS_t		H5CS_stack_g[1];
-#define H5CS_get_my_stack()	(H5CS_stack_g+0)
+H5CS_t H5CS_stack_g[1];
+#define H5CS_get_my_stack() (H5CS_stack_g + 0)
 #endif /* H5_HAVE_THREADSAFE */
 
-
 #ifdef H5_HAVE_THREADSAFE
 /*-------------------------------------------------------------------------
  * Function:	H5CS_get_stack
@@ -83,14 +81,16 @@ H5CS_get_stack(void)
     if (!fstack) {
         /* No associated value with current thread - create one */
 #ifdef H5_HAVE_WIN_THREADS
-        fstack = (H5CS_t *)LocalAlloc(LPTR, sizeof(H5CS_t)); /* Win32 has to use LocalAlloc to match the LocalFree in DllMain */
+        fstack = (H5CS_t *)LocalAlloc(
+            LPTR, sizeof(H5CS_t)); /* Win32 has to use LocalAlloc to match the LocalFree in DllMain */
 #else
-        fstack = (H5CS_t *)HDmalloc(sizeof(H5CS_t)); /* Don't use H5MM_malloc() here, it causes infinite recursion */
+        fstack = (H5CS_t *)HDmalloc(
+            sizeof(H5CS_t)); /* Don't use H5MM_malloc() here, it causes infinite recursion */
 #endif /* H5_HAVE_WIN_THREADS */
         HDassert(fstack);
 
         /* Set the thread-specific info */
-        fstack->nused=0;
+        fstack->nused = 0;
 
         /* (It's not necessary to release this in this API, it is
          *      released by the "key destructor" set up in the H5TS
@@ -101,9 +101,8 @@ H5CS_get_stack(void)
 
     FUNC_LEAVE_NOAPI_NOFS(fstack);
 } /* end H5CS_get_stack() */
-#endif  /* H5_HAVE_THREADSAFE */
+#endif /* H5_HAVE_THREADSAFE */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5CS_print_stack
  *
@@ -121,8 +120,8 @@ H5CS_get_stack(void)
 herr_t
 H5CS_print_stack(const H5CS_t *fstack, FILE *stream)
 {
-    const int	indent = 2;             /* Indention level */
-    int         i;                      /* Local index ariable */
+    const int indent = 2; /* Indention level */
+    int       i;          /* Local index ariable */
 
     /* Don't push this function on the function stack... :-) */
     FUNC_ENTER_NOAPI_NOERR_NOFS
@@ -134,24 +133,23 @@ H5CS_print_stack(const H5CS_t *fstack, FILE *stream)
     if (!stream)
         stream = stderr;
 
-    HDfprintf (stream, "HDF5-DIAG: Function stack from %s ", H5_lib_vers_info_g);
+    HDfprintf(stream, "HDF5-DIAG: Function stack from %s ", H5_lib_vers_info_g);
     /* try show the process or thread id in multiple processes cases*/
 #ifdef H5_HAVE_THREADSAFE
-    HDfprintf (stream, "thread %lu.", HDpthread_self_ulong());
+    HDfprintf(stream, "thread %lu.", HDpthread_self_ulong());
 #else  /* H5_HAVE_THREADSAFE */
-    HDfprintf (stream, "thread 0.");
-#endif  /* H5_HAVE_THREADSAFE */
-    if (fstack && fstack->nused>0)
-        HDfprintf (stream, "  Back trace follows.");
-    HDfputc ('\n', stream);
+    HDfprintf(stream, "thread 0.");
+#endif /* H5_HAVE_THREADSAFE */
+    if (fstack && fstack->nused > 0)
+        HDfprintf(stream, "  Back trace follows.");
+    HDfputc('\n', stream);
 
-    for (i=fstack->nused-1; i>=0; --i)
+    for (i = fstack->nused - 1; i >= 0; --i)
         HDfprintf(stream, "%*s#%03d: Routine: %s\n", indent, "", i, fstack->slot[i]);
 
     FUNC_LEAVE_NOAPI_NOFS(SUCCEED);
 } /* end H5CS_print_stack() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5CS_print
  *
@@ -169,7 +167,7 @@ H5CS_print_stack(const H5CS_t *fstack, FILE *stream)
 herr_t
 H5CS_print(FILE *stream)
 {
-    H5CS_t	*fstack = H5CS_get_my_stack (); /* Get the correct function stack */
+    H5CS_t *fstack = H5CS_get_my_stack(); /* Get the correct function stack */
 
     /* Don't push this function on the function stack... :-) */
     FUNC_ENTER_NOAPI_NOERR_NOFS
@@ -182,7 +180,6 @@ H5CS_print(FILE *stream)
     FUNC_LEAVE_NOAPI_NOFS(SUCCEED);
 } /* end H5CS_print() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5CS_push
  *
@@ -201,7 +198,7 @@ H5CS_print(FILE *stream)
 herr_t
 H5CS_push(const char *func_name)
 {
-    H5CS_t	*fstack = H5CS_get_my_stack ();
+    H5CS_t *fstack = H5CS_get_my_stack();
 
     /* Don't push this function on the function stack... :-) */
     FUNC_ENTER_NOAPI_NOERR_NOFS
@@ -213,14 +210,13 @@ H5CS_push(const char *func_name)
     /*
      * Push the function if there's room.  Otherwise just increment count
      */
-    if (fstack->nused<H5CS_NSLOTS)
-	fstack->slot[fstack->nused] = func_name;
+    if (fstack->nused < H5CS_NSLOTS)
+        fstack->slot[fstack->nused] = func_name;
     fstack->nused++;
 
     FUNC_LEAVE_NOAPI_NOFS(SUCCEED);
 } /* end H5CS_push() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5CS_pop
  *
@@ -238,14 +234,14 @@ H5CS_push(const char *func_name)
 herr_t
 H5CS_pop(void)
 {
-    H5CS_t	*fstack = H5CS_get_my_stack ();
+    H5CS_t *fstack = H5CS_get_my_stack();
 
     /* Don't push this function on the function stack... :-) */
     FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
     HDassert(fstack);
-    HDassert(fstack->nused>0);
+    HDassert(fstack->nused > 0);
 
     /* Pop the function. */
     fstack->nused--;
@@ -253,7 +249,6 @@ H5CS_pop(void)
     FUNC_LEAVE_NOAPI_NOFS(SUCCEED);
 } /* end H5CS_pop() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5CS_copy_stack
  *
@@ -271,8 +266,8 @@ H5CS_pop(void)
 herr_t
 H5CS_copy_stack(H5CS_t *new_stack)
 {
-    H5CS_t	*old_stack = H5CS_get_my_stack ();
-    unsigned    u;                      /* Local index variable */
+    H5CS_t * old_stack = H5CS_get_my_stack();
+    unsigned u; /* Local index variable */
 
     /* Don't push this function on the function stack... :-) */
     FUNC_ENTER_NOAPI_NOERR_NOFS
@@ -281,14 +276,13 @@ H5CS_copy_stack(H5CS_t *new_stack)
     HDassert(old_stack);
 
     /* Copy old stack to new one, duplicating the strings */
-    for(u = 0; u < old_stack->nused; u++)
+    for (u = 0; u < old_stack->nused; u++)
         new_stack->slot[u] = H5MM_strdup(old_stack->slot[u]);
     new_stack->nused = old_stack->nused;
 
     FUNC_LEAVE_NOAPI_NOFS(SUCCEED);
 } /* end H5CS_copy_stack() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5CS_close_stack
  *
@@ -306,7 +300,7 @@ H5CS_copy_stack(H5CS_t *new_stack)
 herr_t
 H5CS_close_stack(H5CS_t *stack)
 {
-    unsigned    u;                      /* Local index variable */
+    unsigned u; /* Local index variable */
 
     /* Don't push this function on the function stack... :-) */
     FUNC_ENTER_NOAPI_NOERR_NOFS
@@ -315,11 +309,10 @@ H5CS_close_stack(H5CS_t *stack)
     HDassert(stack);
 
     /* Free strings on stack */
-    for(u = 0; u < stack->nused; u++)
+    for (u = 0; u < stack->nused; u++)
         stack->slot[u] = H5MM_xfree((void *)stack->slot[u]);
 
     FUNC_LEAVE_NOAPI_NOFS(SUCCEED);
 } /* end H5CS_close_stack() */
 
 #endif /* H5_HAVE_CODESTACK */
-

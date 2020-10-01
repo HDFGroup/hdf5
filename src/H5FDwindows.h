@@ -24,7 +24,7 @@
 #include "H5Ipublic.h"
 #include "H5FDsec2.h"
 
-#define H5FD_WINDOWS	(H5FD_windows_init())
+#define H5FD_WINDOWS (H5FD_windows_init())
 
 #ifdef __cplusplus
 extern "C" {
