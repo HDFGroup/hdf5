@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Tuesday, March  3, 1998
  *
  * Purpose:	Tests datasets stored in external raw files.
@@ -1068,8 +1068,7 @@ test_path_relative(hid_t fapl)
     hid_t	dcpl = -1;          /* dataset creation properties          */
     hid_t	space = -1;         /* data space                           */
     hid_t	dset = -1;          /* dataset                              */
-    size_t	i;                  /* miscellaneous counters               */
-    char	cwdpath[1024];      /* working directory                    */
+    size_t  i = 0;              /* miscellaneous counters               */
     char	filename[1024];     /* file name                            */
     int	    part[PART_SIZE];    /* raw data buffer (partial)            */
     int     whole[TOTAL_SIZE];  /* raw data buffer (total)              */
@@ -1094,8 +1093,6 @@ test_path_relative(hid_t fapl)
     /* Create the dataset */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR
-    if(NULL == HDgetcwd(cwdpath, sizeof(cwdpath)))
-        TEST_ERROR
     for (i = 0; i < N_EXT_FILES; i++) {
         HDsnprintf(filename, sizeof(filename), "extern_%dr.raw", (int)i + 1);
         if(H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
@@ -1162,8 +1159,7 @@ test_path_relative_cwd(hid_t fapl)
     hid_t	dset = -1;          /* dataset                              */
     hid_t	dset2 = -1;         /* dataset, opened a second time        */
     hid_t	dset3 = -1;         /* dataset, opened with different prefix    */
-    size_t	i;                  /* miscellaneous counters               */
-    char	cwdpath[1024];      /* working directory                    */
+    size_t  i = 0;              /* miscellaneous counters               */
     char	filename[1024];     /* file name                            */
     int	    part[PART_SIZE];    /* raw data buffer (partial)            */
     int     whole[TOTAL_SIZE];  /* raw data buffer (total)              */
@@ -1189,8 +1185,6 @@ test_path_relative_cwd(hid_t fapl)
     /* Create the dataset */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR
-    if(NULL == HDgetcwd(cwdpath, sizeof(cwdpath)))
-        TEST_ERROR
     for(i = 0; i < N_EXT_FILES; i++) {
         HDsnprintf(filename, sizeof(filename), "..%sextern_%dr.raw", H5_DIR_SEPS, (int)i + 1);
         if(H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
@@ -1325,7 +1319,7 @@ test_path_env(hid_t fapl)
     hid_t	dset = -1;          /* dataset                              */
     size_t	i;                  /* miscellaneous counters               */
     char	cwdpath[1024];		/* working directory                    */
-    char	filename[1024];		/* file name                            */
+    char	filename[1088];		/* file name                            */
     int	    part[PART_SIZE];    /* raw data buffer (partial)            */
     int     whole[TOTAL_SIZE];  /* raw data buffer (total)              */
     hsize_t	cur_size;           /* current data space size              */

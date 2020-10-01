@@ -40,7 +40,11 @@
 ./configure
 ./configure.ac
 
+./.clang-format
+./.github/CODEOWNERS  _DO_NOT_DISTRIBUTE_
+./.github/workflows/clang-format-check.yml  _DO_NOT_DISTRIBUTE_
 ./.github/workflows/main.yml  _DO_NOT_DISTRIBUTE_
+./.github/workflows/pr-check.yml  _DO_NOT_DISTRIBUTE_
 
 ./bin/COPYING
 ./bin/bbrelease       _DO_NOT_DISTRIBUTE_
@@ -61,6 +65,8 @@
 ./bin/deploy
 ./bin/distdep
 ./bin/errors                 _DO_NOT_DISTRIBUTE_
+./bin/format_source
+./bin/format_source_patch
 ./bin/gcov_script            _DO_NOT_DISTRIBUTE_
 ./bin/genparser              _DO_NOT_DISTRIBUTE_
 ./bin/h5cc.in
@@ -2571,6 +2577,7 @@
 
 # CMake-specific Sanitizer Scripts
 ./config/sanitizer/code-coverage.cmake
+./config/sanitizer/formatting.cmake
 ./config/sanitizer/sanitizers.cmake
 ./config/sanitizer/tools.cmake
 ./config/sanitizer/LICENSE

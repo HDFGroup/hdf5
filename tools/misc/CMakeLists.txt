@@ -68,6 +68,21 @@ if (BUILD_SHARED_LIBS)
   )
 endif ()
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_H5DEBUG_SRC_FORMAT h5debug)
+    clang_format (HDF5_H5REPART_SRC_FORMAT h5repart)
+    clang_format (HDF5_H5MKGRP_SRC_FORMAT h5mkgrp)
+  else ()
+    clang_format (HDF5_H5DEBUG_SRC_FORMAT h5debug-shared)
+    clang_format (HDF5_H5REPART_SRC_FORMAT h5repart-shared)
+    clang_format (HDF5_H5MKGRP_SRC_FORMAT h5mkgrp-shared)
+  endif ()
+endif ()
+
 if (BUILD_TESTING)
   # --------------------------------------------------------------------
   # Add the misc test executables
@@ -79,6 +94,13 @@ if (BUILD_TESTING)
     target_link_libraries (h5repart_gentest PRIVATE ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
     set_target_properties (h5repart_gentest PROPERTIES FOLDER generator/tools)
     #add_test (NAME h5repart_gentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repart_gentest>)
+
+    #-----------------------------------------------------------------------------
+    # Add Target to clang-format
+    #-----------------------------------------------------------------------------
+    if (HDF5_ENABLE_FORMATTERS)
+      clang_format (HDF5_TOOLS_TEST_MISC_h5repart_gentest_FORMAT h5repart_gentest)
+    endif ()
   endif ()
 
   add_executable (h5repart_test ${HDF5_TOOLS_MISC_SOURCE_DIR}/repart_test.c)
@@ -91,6 +113,13 @@ if (BUILD_TESTING)
     target_link_libraries (h5repart_test PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   endif ()
   set_target_properties (h5repart_test PROPERTIES FOLDER tools)
+
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_TOOLS_TEST_MISC_h5repart_test_FORMAT h5repart_test)
+  endif ()
 
   if (HDF5_TEST_SERIAL)
     include (CMakeTestsRepart.cmake)

@@ -12,12 +12,12 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
- *		Tuesday, January 8, 2008
+ * Programmer:  Quincey Koziol
+ *              Tuesday, January 8, 2008
  *
- * Purpose:	This file contains declarations which are visible only within
- *		the H5MF package.  Source files outside the H5MF package should
- *		include H5MFprivate.h instead.
+ * Purpose:     This file contains declarations which are visible only within
+ *              the H5MF package.  Source files outside the H5MF package should
+ *              include H5MFprivate.h instead.
  */
 #ifndef H5MF_PACKAGE
 #error "Do not include this file outside the H5MF package!"
@@ -30,7 +30,7 @@
 #include "H5MFprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5FSprivate.h"	/* File free space                      */
+#include "H5FSprivate.h"    /* File free space                      */
 
 
 /**************************/

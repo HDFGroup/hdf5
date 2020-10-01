@@ -18,6 +18,8 @@ set (TEST_LIB_SOURCES
 
 set (TEST_LIB_HEADERS
     ${HDF5_TEST_SOURCE_DIR}/h5test.h
+    ${HDF5_TEST_SOURCE_DIR}/H5srcdir.h
+    ${HDF5_TEST_SOURCE_DIR}/cache_common.h
 )
 
 if (NOT ONLY_SHARED_LIBS)
@@ -59,6 +61,17 @@ if (BUILD_SHARED_LIBS)
   set_target_properties (${HDF5_TEST_LIBSH_TARGET} PROPERTIES FOLDER libraries/test)
 endif ()
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_TEST_SRC_FORMAT ${HDF5_TEST_LIB_TARGET})
+  else ()
+    clang_format (HDF5_TEST_SRC_FORMAT ${HDF5_TEST_LIBSH_TARGET})
+  endif ()
+endif ()
+
 #################################################################################
 # If filter plugin tests can be tested
 #################################################################################
@@ -92,6 +105,13 @@ if (BUILD_SHARED_LIBS)
     set_target_properties (${HDF5_TEST_PLUGIN_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN)
 
     #-----------------------------------------------------------------------------
+    # Add Target to clang-format
+    #-----------------------------------------------------------------------------
+    if (HDF5_ENABLE_FORMATTERS)
+      clang_format (HDF5_TEST_${HDF5_TEST_PLUGIN_TARGET}_FORMAT ${HDF5_TEST_PLUGIN_TARGET})
+    endif ()
+
+    #-----------------------------------------------------------------------------
     # Copy the filter plugin to a plugins folder
     #-----------------------------------------------------------------------------
     add_custom_command (
@@ -117,6 +137,13 @@ if (BUILD_SHARED_LIBS)
     set_target_properties (${HDF5_TEST_PLUGIN_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN)
 
     #-----------------------------------------------------------------------------
+    # Add Target to clang-format
+    #-----------------------------------------------------------------------------
+    if (HDF5_ENABLE_FORMATTERS)
+      clang_format (HDF5_TEST_${HDF5_TEST_PLUGIN_TARGET}_FORMAT ${HDF5_TEST_PLUGIN_TARGET})
+    endif ()
+
+    #-----------------------------------------------------------------------------
     # Copy the filter plugin to a plugins folder
     #-----------------------------------------------------------------------------
     add_custom_command (
@@ -135,6 +162,7 @@ endif ()
 #################################################################################
 
 set (testhdf5_SOURCES
+    ${HDF5_TEST_SOURCE_DIR}/testhdf5.h
     ${HDF5_TEST_SOURCE_DIR}/testhdf5.c
     ${HDF5_TEST_SOURCE_DIR}/tarray.c
     ${HDF5_TEST_SOURCE_DIR}/tattr.c
@@ -164,6 +192,7 @@ set (testhdf5_SOURCES
 )
 
 set (ttsafe_SOURCES
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe.h
     ${HDF5_TEST_SOURCE_DIR}/ttsafe.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_dcreate.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_error.c
@@ -236,6 +265,13 @@ macro (ADD_H5_EXE file)
     target_link_libraries (${file} PRIVATE ${HDF5_TEST_LIBSH_TARGET})
   endif ()
   set_target_properties (${file} PROPERTIES FOLDER test)
+
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_TEST_${file}_FORMAT ${file})
+  endif ()
 endmacro ()
 
 set (H5_TESTS_MULTIPLE
@@ -270,6 +306,13 @@ else ()
 endif ()
 set_target_properties (testhdf5 PROPERTIES FOLDER test)
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TEST_testhdf5_FORMAT testhdf5)
+endif ()
+
 #-- Adding test for cache
 add_executable (cache ${HDF5_TEST_SOURCE_DIR}/cache.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
 target_compile_options(cache PRIVATE "${HDF5_CMAKE_C_FLAGS}")
@@ -283,6 +326,13 @@ else ()
 endif ()
 set_target_properties (cache PROPERTIES FOLDER test)
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TEST_cache_FORMAT cache)
+endif ()
+
 #-- Adding test for cache_api
 add_executable (cache_api ${HDF5_TEST_SOURCE_DIR}/cache_api.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
 target_compile_options(cache_api PRIVATE "${HDF5_CMAKE_C_FLAGS}")
@@ -295,6 +345,13 @@ else ()
   target_link_libraries (cache_api PRIVATE ${HDF5_TEST_LIBSH_TARGET})
 endif ()
 set_target_properties (cache_api PROPERTIES FOLDER test)
+
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TEST_cache_api_FORMAT cache_api)
+endif ()
 
 #-- Adding test for ttsafe
 add_executable (ttsafe ${ttsafe_SOURCES})
@@ -313,6 +370,13 @@ else ()
   target_link_libraries (ttsafe PRIVATE ${HDF5_TEST_LIBSH_TARGET} $<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:Threads::Threads>)
 endif ()
 set_target_properties (ttsafe PROPERTIES FOLDER test)
+
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TEST_ttsafe_FORMAT ttsafe)
+endif ()
 
 ##############################################################################
 ###           A D D I T I O N A L   T E S T S                              ###
@@ -351,6 +415,13 @@ if (BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (filter_plugin SHARED)
   target_link_libraries (filter_plugin PRIVATE ${HDF5_TEST_LIBSH_TARGET})
   set_target_properties (filter_plugin PROPERTIES FOLDER test)
+
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_TEST_filter_plugin_FORMAT filter_plugin)
+  endif ()
 endif ()
 
 if (HDF5_TEST_SERIAL)

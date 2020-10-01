@@ -46,6 +46,19 @@ if (BUILD_SHARED_LIBS)
   )
 endif ()
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_H5JAM_SRC_FORMAT h5jam)
+    clang_format (HDF5_H5UNJAM_SRC_FORMAT h5unjam)
+  else ()
+    clang_format (HDF5_H5JAM_SRC_FORMAT h5jam-shared)
+    clang_format (HDF5_H5UNJAM_SRC_FORMAT h5unjam-shared)
+  endif ()
+endif ()
+
 if (BUILD_TESTING)
   # --------------------------------------------------------------------
   # Add the h5jam test executables
@@ -56,6 +69,13 @@ if (BUILD_TESTING)
     TARGET_C_PROPERTIES (h5jamgentest STATIC)
     target_link_libraries (h5jamgentest PRIVATE ${HDF5_LIB_TARGET})
     set_target_properties (h5jamgentest PROPERTIES FOLDER generator/tools)
+
+    #-----------------------------------------------------------------------------
+    # Add Target to clang-format
+    #-----------------------------------------------------------------------------
+    if (HDF5_ENABLE_FORMATTERS)
+      clang_format (HDF5_TOOLS_TEST_H5JAM_FORMAT h5jamgentest)
+    endif ()
 
     #add_test (NAME h5jamgentest COMMAND $<TARGET_FILE:h5jamgentest>)
   endif ()
@@ -81,6 +101,14 @@ if (BUILD_TESTING)
     target_link_libraries (tellub PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   endif ()
   set_target_properties (tellub PROPERTIES FOLDER tools)
+
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_TOOLS_TEST_H5JAM_getub_FORMAT getub)
+    clang_format (HDF5_TOOLS_TEST_H5JAM_tellub_FORMAT tellub)
+  endif ()
 
   if (HDF5_TEST_TOOLS AND HDF5_TEST_SERIAL)
     include (CMakeTests.cmake)

@@ -43,11 +43,16 @@ static const char *FileHeader = "\n\
  */
 #undef NDEBUG
 #include "H5private.h"
-/* Do NOT use  in this file as it is not linked with the library,
+/* Do NOT use HDfprintf in this file as it is not linked with the library,
  * which contains the H5system.c file in which the function is defined.
  */
 #include "H5Tpublic.h"
 #include "H5Rpublic.h"
+
+/* Disable warning about cast increasing the alignment of the target type,
+ * that's _exactly_ what this code is probing.  -QAK
+ */
+H5_GCC_DIAG_OFF("cast-align")
 
 #if defined(__has_attribute)
 # if __has_attribute(no_sanitize_address)
@@ -115,9 +120,9 @@ typedef struct malign_t {
 FILE       *rawoutstream = NULL;
 
 /* global variables types detection code */
-H5_GCC_DIAG_OFF(larger-than=)
+H5_GCC_DIAG_OFF("larger-than=")
 static detected_t d_g[MAXDETECT];
-H5_GCC_DIAG_ON(larger-than=)
+H5_GCC_DIAG_ON("larger-than=")
 static malign_t m_g[MAXDETECT];
 static volatile int nd_g = 0, na_g = 0;
 
@@ -319,10 +324,10 @@ precision (detected_t *d)
         for(_byte_mask = (unsigned char)1; _byte_mask; _byte_mask = (unsigned char) (_byte_mask << 1)) {    \
             _buf1[_i] ^= _byte_mask;                                          \
             HDmemcpy((void *)&_v2, (const void *)_buf1, sizeof(TYPE));        \
-            H5_GCC_DIAG_OFF(float-equal)                                      \
+            H5_GCC_DIAG_OFF("float-equal")                                      \
             if(_v1 != _v2)                                                    \
                 _pad_mask[_i] |= _byte_mask;                                  \
-            H5_GCC_DIAG_ON(float-equal)                                       \
+            H5_GCC_DIAG_ON("float-equal")                                       \
             _buf1[_i] ^= _byte_mask;                                          \
         } /* end for */                                                       \
                                                                               \
@@ -429,10 +434,10 @@ precision (detected_t *d)
         else /* Little-Endian */                          \
             HDmemcpy(_buf+align_g[_ano]+(INFO.offset/8),((char *)&_val)+(INFO.offset/8),(size_t)(INFO.precision/8)); \
         _val2 = *((TYPE*)(_buf+align_g[_ano]));                      \
-        H5_GCC_DIAG_OFF(float-equal)                          \
+        H5_GCC_DIAG_OFF("float-equal")                          \
         if(_val!=_val2)                                  \
             H5LONGJMP(jbuf_g, 1);                              \
-        H5_GCC_DIAG_ON(float-equal)                           \
+        H5_GCC_DIAG_ON("float-equal")                           \
         /* End Cray Check */                              \
         (INFO.align)=align_g[_ano];                          \
     } else {                                      \
@@ -810,7 +815,7 @@ done:\n\
 #ifdef H5_HAVE_SIGLONGJMP
     fprintf(rawoutstream, "/* siglongjmp() support: yes */\n");
 #else
-    (rawoutstream, "/* siglongjmp() support: no */\n");
+    fprintf(rawoutstream, "/* siglongjmp() support: no */\n");
 #endif
 #ifdef H5_HAVE_SIGPROCMASK
     fprintf(rawoutstream, "/* sigprocmask() support: yes */\n");
@@ -908,7 +913,7 @@ iprint(detected_t *d)
      * Alignment
      */
     if(0 == d->align) {
-        (rawoutstream, "    * Alignment: NOT CALCULATED\n");
+        fprintf(rawoutstream, "    * Alignment: NOT CALCULATED\n");
     }
     else if(1 == d->align) {
         fprintf(rawoutstream, "    * Alignment: none\n");
@@ -1253,7 +1258,7 @@ bit.\n";
     if(pwd || real_name[0] || host_name[0]) {
         fprintf(rawoutstream, " *\t\t\t");
         if(real_name[0])
-            (rawoutstream, "%s <", real_name);
+            fprintf(rawoutstream, "%s <", real_name);
 #ifdef H5_HAVE_GETPWUID
         if(pwd) HDfputs(pwd->pw_name, rawoutstream);
 #endif
@@ -1705,3 +1710,4 @@ main(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
+H5_GCC_DIAG_ON("cast-align")

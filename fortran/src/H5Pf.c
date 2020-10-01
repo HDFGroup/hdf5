@@ -3800,7 +3800,10 @@ nh5pset_family_offset_c ( hid_t_f *prp_id , hsize_t_f *offset)
 */
 
 int_f
-/*nh5pset_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _fcd memb_name, int_f *len, int_f *lenmax, haddr_t_f *memb_addr, int_f *flag) */
+/*
+ * nh5pset_fapl_multi_c(hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _fcd memb_name,
+ * int_f *len, int_f *lenmax, haddr_t_f *memb_addr, int_f *flag)
+ */
 nh5pset_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _fcd memb_name, int_f *len, int_f *lenmax, real_f *memb_addr, int_f *flag)
 /******/
 {

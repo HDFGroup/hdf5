@@ -855,6 +855,16 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* NOTE: We turn off -Wpedantic in gcc to quiet a warning about converting
+ *       object pointers to function pointers, which is undefined in ANSI C.
+ *       This is basically unavoidable due to the nature of dlsym() and *is*
+ *       defined in POSIX, so it's fine.
+ *
+ *       This pragma only needs to surround the assignment of the
+ *       get_plugin_info function pointer, but early (4.4.7, at least) gcc
+ *       only allows diagnostic pragmas to be toggled outside of functions.
+ */
+H5_GCC_DIAG_OFF("pedantic")
 static htri_t
 H5PL__open(H5PL_type_t pl_type, char *libname, int pl_id, const void **pl_info)
 {
@@ -973,6 +983,7 @@ H5PL__search_table(H5PL_type_t plugin_type, int type_id, const void **info)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__search_table() */
+H5_GCC_DIAG_ON("pedantic")
 
 
 /*-------------------------------------------------------------------------

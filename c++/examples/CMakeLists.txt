@@ -48,6 +48,13 @@ foreach (example ${examples})
     endif ()
   endif ()
   set_target_properties (cpp_ex_${example} PROPERTIES FOLDER examples/cpp)
+
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_CPP_EXAMPLES_${example}_FORMAT cpp_ex_${example})
+  endif ()
 endforeach ()
 
 foreach (example ${tutr_examples})
@@ -66,6 +73,13 @@ foreach (example ${tutr_examples})
     endif ()
   endif ()
   set_target_properties (cpp_ex_${example} PROPERTIES FOLDER examples/cpp)
+
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_CPP_EXAMPLES_${example}_FORMAT cpp_ex_${example})
+  endif ()
 endforeach ()
 
 if (BUILD_TESTING AND HDF5_TEST_CPP AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)

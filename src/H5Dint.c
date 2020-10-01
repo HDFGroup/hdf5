@@ -15,23 +15,23 @@
 /* Module Setup */
 /****************/
 
-#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
+#define H5D_PACKAGE        /*suppress error about including H5Dpkg      */
 
 /* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5D__init_interface
+#define H5_INTERFACE_INIT_FUNC    H5D__init_interface
 
 
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Dpkg.h"		/* Datasets 				*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FLprivate.h"	/* Free Lists                           */
+#include "H5private.h"        /* Generic Functions            */
+#include "H5Dpkg.h"        /* Datasets                 */
+#include "H5Eprivate.h"        /* Error handling              */
+#include "H5FLprivate.h"    /* Free Lists                           */
 #include "H5FOprivate.h"        /* File objects                         */
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5Lprivate.h"		/* Links		  		*/
-#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Iprivate.h"        /* IDs                      */
+#include "H5Lprivate.h"        /* Links                  */
+#include "H5MMprivate.h"    /* Memory management            */
 
 
 /****************/
@@ -106,29 +106,32 @@ H5FL_EXTERN(H5D_chunk_info_t);
 /* Declare extern the free list to manage blocks of type conversion data */
 H5FL_BLK_EXTERN(type_conv);
 
+/* Disable warning for intentional identical branches here -QAK */
+H5_GCC_DIAG_OFF("larger-than=")
 /* Define a static "default" dataset structure to use to initialize new datasets */
 static H5D_shared_t H5D_def_dset;
+H5_GCC_DIAG_ON("larger-than=")
 
 /* Dataset ID class */
 static const H5I_class_t H5I_DATASET_CLS[1] = {{
-    H5I_DATASET,		/* ID class value */
-    H5I_CLASS_REUSE_IDS,	/* Class flags */
-    0,				/* # of reserved IDs for class */
+    H5I_DATASET,        /* ID class value */
+    H5I_CLASS_REUSE_IDS,    /* Class flags */
+    0,                /* # of reserved IDs for class */
     (H5I_free_t)H5D_close       /* Callback routine for closing objects of this class */
 }};
 
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D_init
+ * Function:    H5D_init
  *
- * Purpose:	Initialize the interface from some other layer.
+ * Purpose:    Initialize the interface from some other layer.
  *
- * Return:	Success:	non-negative
+ * Return:    Success:    non-negative
  *
- *		Failure:	negative
+ *        Failure:    negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Saturday, March 4, 2000
  *
  *-------------------------------------------------------------------------
@@ -145,7 +148,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_init() */
 
-
+
 /*--------------------------------------------------------------------------
 NAME
    H5D__init_interface -- Initialize interface-specific information
@@ -205,18 +208,18 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__init_interface() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D_term_interface
+ * Function:    H5D_term_interface
  *
- * Purpose:	Terminate this interface.
+ * Purpose:    Terminate this interface.
  *
- * Return:	Success:	Positive if anything was done that might
- *				affect other interfaces; zero otherwise.
+ * Return:    Success:    Positive if anything was done that might
+ *                affect other interfaces; zero otherwise.
  *
- * 		Failure:	Negative.
+ *         Failure:    Negative.
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Friday, November 20, 1998
  *
  *-------------------------------------------------------------------------
@@ -224,12 +227,12 @@ done:
 int
 H5D_term_interface(void)
 {
-    int	n = 0;
+    int    n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
-	if(H5I_nmembers(H5I_DATASET) > 0) {
+    if(H5I_nmembers(H5I_DATASET) > 0) {
             /* The dataset API uses the "force" flag set to true because it
              * is using the "file objects" (H5FO) API functions to track open
              * objects in the file.  Using the H5FO code means that dataset
@@ -252,9 +255,9 @@ H5D_term_interface(void)
              *
              * QAK - 5/13/03
              */
-	    (void)H5I_clear_type(H5I_DATASET, TRUE, FALSE);
+        (void)H5I_clear_type(H5I_DATASET, TRUE, FALSE);
             n++; /*H5I*/
-	} /* end if */
+    } /* end if */
         else {
             /* Close public interface */
             n += H5D__term_pub_interface();
@@ -262,19 +265,19 @@ H5D_term_interface(void)
             /* Close deprecated interface */
             n += H5D__term_deprec_interface();
 
-	    /* Destroy the dataset object id group */
-	    (void)H5I_dec_type_ref(H5I_DATASET);
+        /* Destroy the dataset object id group */
+        (void)H5I_dec_type_ref(H5I_DATASET);
             n++; /*H5I*/
 
-	    /* Mark closed */
-	    H5_interface_initialize_g = 0;
-	} /* end else */
+        /* Mark closed */
+        H5_interface_initialize_g = 0;
+    } /* end else */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5D_term_interface() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5D__get_dxpl_cache_real
@@ -357,7 +360,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5D__get_dxpl_cache_real() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5D__get_dxpl_cache
@@ -401,18 +404,18 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5D__get_dxpl_cache() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D__create_named
+ * Function:    H5D__create_named
  *
- * Purpose:	Internal routine to create a new dataset.
+ * Purpose:    Internal routine to create a new dataset.
  *
- * Return:	Success:	Non-NULL, pointer to new dataset object.
+ * Return:    Success:    Non-NULL, pointer to new dataset object.
  *
- *		Failure:	NULL
+ *        Failure:    NULL
  *
- * Programmer:	Quincey Koziol
- *		Thursday, April 5, 2007
+ * Programmer:    Quincey Koziol
+ *        Thursday, April 5, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -423,7 +426,7 @@ H5D__create_named(const H5G_loc_t *loc, const char *name, hid_t type_id,
 {
     H5O_obj_create_t ocrt_info;         /* Information for object creation */
     H5D_obj_create_t dcrt_info;         /* Information for dataset creation */
-    H5D_t	   *ret_value;          /* Return value */
+    H5D_t       *ret_value;          /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -460,7 +463,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__create_named() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__get_space_status
  *
@@ -528,18 +531,18 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__get_space_status() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D__new
+ * Function:    H5D__new
  *
- * Purpose:	Creates a new, empty dataset structure
+ * Purpose:    Creates a new, empty dataset structure
  *
- * Return:	Success:	Pointer to a new dataset descriptor.
+ * Return:    Success:    Pointer to a new dataset descriptor.
  *
- *		Failure:	NULL
+ *        Failure:    NULL
  *
- * Programmer:	Quincey Koziol
- *		Monday, October 12, 1998
+ * Programmer:    Quincey Koziol
+ *        Monday, October 12, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -604,18 +607,18 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__new() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D__init_type
+ * Function:    H5D__init_type
  *
- * Purpose:	Copy a datatype for a dataset's use, performing all the
+ * Purpose:    Copy a datatype for a dataset's use, performing all the
  *              necessary adjustments, etc.
  *
- * Return:	Success:    SUCCEED
- *		Failure:    FAIL
+ * Return:    Success:    SUCCEED
+ *        Failure:    FAIL
  *
- * Programmer:	Quincey Koziol
- *		Thursday, June 24, 2004
+ * Programmer:    Quincey Koziol
+ *        Thursday, June 24, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -651,8 +654,8 @@ H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
         if((dset->shared->type = H5T_copy(type, H5T_COPY_ALL)) == NULL)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy datatype")
 
-	/* Convert a datatype (if committed) to a transient type if the committed datatype's file
-	   location is different from the file location where the dataset will be created */
+    /* Convert a datatype (if committed) to a transient type if the committed datatype's file
+    location is different from the file location where the dataset will be created */
         if(H5T_convert_committed_datatype(dset->shared->type, file) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't get shared datatype info")
 
@@ -666,8 +669,8 @@ H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set latest version of datatype")
 
         /* Get a datatype ID for the dataset's datatype */
-	if((dset->shared->type_id = H5I_register(H5I_DATATYPE, dset->shared->type, FALSE)) < 0)
-	    HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register type")
+    if((dset->shared->type_id = H5I_register(H5I_DATATYPE, dset->shared->type, FALSE)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register type")
     } /* end if */
     /* Not a custom datatype, just use it directly */
     else {
@@ -683,18 +686,18 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__init_type() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D__init_space
+ * Function:    H5D__init_space
  *
- * Purpose:	Copy a dataspace for a dataset's use, performing all the
+ * Purpose:    Copy a dataspace for a dataset's use, performing all the
  *              necessary adjustments, etc.
  *
- * Return:	Success:    SUCCEED
- *		Failure:    FAIL
+ * Return:    Success:    SUCCEED
+ *        Failure:    FAIL
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, July 24, 2007
+ * Programmer:    Quincey Koziol
+ *        Tuesday, July 24, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -731,17 +734,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__init_space() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D__update_oh_info
+ * Function:    H5D__update_oh_info
  *
- * Purpose:	Create and fill object header for dataset
+ * Purpose:    Create and fill object header for dataset
  *
- * Return:	Success:    SUCCEED
- *		Failure:    FAIL
+ * Return:    Success:    SUCCEED
+ *        Failure:    FAIL
  *
- * Programmer:	Bill Wendling
- *		Thursday, October 31, 2002
+ * Programmer:    Bill Wendling
+ *        Thursday, October 31, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -754,8 +757,8 @@ H5D__update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, hid_t dapl_id)
     H5O_layout_t       *layout;         /* Dataset's layout information */
     H5T_t              *type;           /* Dataset's datatype */
     hbool_t             use_latest_format;      /* Flag indicating the newest file format should be used */
-    H5O_fill_t		*fill_prop;     /* Pointer to dataset's fill value information */
-    H5D_fill_value_t	fill_status;    /* Fill value status */
+    H5O_fill_t        *fill_prop;     /* Pointer to dataset's fill value information */
+    H5D_fill_value_t    fill_status;    /* Fill value status */
     hbool_t             fill_changed = FALSE;      /* Flag indicating the fill value was changed */
     hbool_t             layout_init = FALSE;    /* Flag to indicate that chunk information was initialized */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -801,9 +804,9 @@ H5D__update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, hid_t dapl_id)
         if(fill_prop->buf && fill_prop->size > 0 && H5O_fill_convert(fill_prop, type, &fill_changed, dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to convert fill value to dataset type")
 
-	fill_prop->fill_defined = TRUE;
+    fill_prop->fill_defined = TRUE;
     } else if(fill_status == H5D_FILL_VALUE_UNDEFINED) {
- 	fill_prop->fill_defined = FALSE;
+    fill_prop->fill_defined = FALSE;
     } else
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to determine if fill value is defined")
 
@@ -928,7 +931,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__update_oh_info() */
 
-
+
 /*--------------------------------------------------------------------------
  * Function:    H5D_build_extfile_prefix
  *
@@ -953,7 +956,7 @@ H5D_build_extfile_prefix(const H5D_t *dset, hid_t dapl_id, char **extfile_prefix
     hbool_t         free_prefix = FALSE;  /* Did the library allocate memory for prefix?    */
     H5P_genplist_t  *plist = NULL;        /* Property list pointer                          */
     herr_t          ret_value = SUCCEED;  /* Return value                                   */
-    
+
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -993,7 +996,7 @@ H5D_build_extfile_prefix(const H5D_t *dset, hid_t dapl_id, char **extfile_prefix
             extpath_len = HDstrlen(extpath);
             prefix_len = HDstrlen(prefix);
             extfile_prefix_len = extpath_len + prefix_len - HDstrlen("${ORIGIN}") + 1;
-        
+
             if(NULL == (*extfile_prefix = (char *)H5MM_malloc(extfile_prefix_len)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate buffer")
             HDsnprintf(*extfile_prefix, extfile_prefix_len, "%s%s", extpath, prefix + HDstrlen("${ORIGIN}"));
@@ -1010,24 +1013,24 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_build_extfile_prefix() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D__create
+ * Function:    H5D__create
  *
- * Purpose:	Creates a new dataset with name NAME in file F and associates
- *		with it a datatype TYPE for each element as stored in the
- *		file, dimensionality information or dataspace SPACE, and
- *		other miscellaneous properties CREATE_PARMS.  All arguments
- *		are deep-copied before being associated with the new dataset,
- *		so the caller is free to subsequently modify them without
- *		affecting the dataset.
+ * Purpose:    Creates a new dataset with name NAME in file F and associates
+ *        with it a datatype TYPE for each element as stored in the
+ *        file, dimensionality information or dataspace SPACE, and
+ *        other miscellaneous properties CREATE_PARMS.  All arguments
+ *        are deep-copied before being associated with the new dataset,
+ *        so the caller is free to subsequently modify them without
+ *        affecting the dataset.
  *
- * Return:	Success:	Pointer to a new dataset
+ * Return:    Success:    Pointer to a new dataset
  *
- *		Failure:	NULL
+ *        Failure:    NULL
  *
- * Programmer:	Robb Matzke
- *		Thursday, December  4, 1997
+ * Programmer:    Robb Matzke
+ *        Thursday, December  4, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -1036,12 +1039,12 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     hid_t dapl_id, hid_t dxpl_id)
 {
     const H5T_t         *type;                  /* Datatype for dataset */
-    H5D_t		*new_dset = NULL;
-    H5P_genplist_t 	*dc_plist = NULL;       /* New Property list */
+    H5D_t        *new_dset = NULL;
+    H5P_genplist_t     *dc_plist = NULL;       /* New Property list */
     hbool_t             has_vl_type = FALSE;    /* Flag to indicate a VL-type for dataset */
     hbool_t             layout_init = FALSE;    /* Flag to indicate that chunk information was initialized */
     H5G_loc_t           dset_loc;               /* Dataset location */
-    H5D_t		*ret_value;             /* Return value */
+    H5D_t        *ret_value;             /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1227,19 +1230,19 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__create() */
 
-
+
 /*
  *-------------------------------------------------------------------------
- * Function:	H5D_open
+ * Function:    H5D_open
  *
- * Purpose:	Checks if dataset is already open, or opens a dataset for
+ * Purpose:    Checks if dataset is already open, or opens a dataset for
  *              access.
  *
- * Return:	Success:	Dataset ID
- *		Failure:	FAIL
+ * Return:    Success:    Dataset ID
+ *        Failure:    FAIL
  *
- * Programmer:	Quincey Koziol
- *		Friday, December 20, 2002
+ * Programmer:    Quincey Koziol
+ *        Friday, December 20, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -1349,16 +1352,16 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_open() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D__open_oid
+ * Function:    H5D__open_oid
  *
- * Purpose:	Opens a dataset for access.
+ * Purpose:    Opens a dataset for access.
  *
- * Return:	Dataset pointer on success, NULL on failure
+ * Return:    Dataset pointer on success, NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Monday, October 12, 1998
+ * Programmer:    Quincey Koziol
+ *        Monday, October 12, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1369,8 +1372,8 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
     H5O_fill_t *fill_prop;              /* Pointer to dataset's fill value info */
     unsigned alloc_time_state;          /* Allocation time state */
     htri_t msg_exists;                  /* Whether a particular type of message exists */
-    hbool_t layout_init = FALSE;    	/* Flag to indicate that chunk information was initialized */
-    herr_t ret_value = SUCCEED;		/* Return value */
+    hbool_t layout_init = FALSE;        /* Flag to indicate that chunk information was initialized */
+    herr_t ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1421,7 +1424,7 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve message")
     } /* end if */
     else {
-	/* For backward compatibility, try to retrieve the old fill value message */
+    /* For backward compatibility, try to retrieve the old fill value message */
         if((msg_exists = H5O_msg_exists(&(dataset->oloc), H5O_FILL_ID, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if message exists")
         if(msg_exists) {
@@ -1485,7 +1488,7 @@ done:
         if(H5F_addr_defined(dataset->oloc.addr) && H5O_close(&(dataset->oloc)) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release object header")
         if(dataset->shared) {
-	    if(dataset->shared->layout.type == H5D_CHUNKED && layout_init)
+        if(dataset->shared->layout.type == H5D_CHUNKED && layout_init)
                 if(H5D__chunk_dest(dataset->oloc.file, dxpl_id, dataset) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy chunk cache")
             if(dataset->shared->space && H5S_close(dataset->shared->space) < 0)
@@ -1506,18 +1509,18 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__open_oid() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D_close
+ * Function:    H5D_close
  *
- * Purpose:	Insures that all data has been saved to the file, closes the
- *		dataset object header, and frees all resources used by the
- *		descriptor.
+ * Purpose:    Insures that all data has been saved to the file, closes the
+ *        dataset object header, and frees all resources used by the
+ *        descriptor.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Thursday, December  4, 1997
+ * Programmer:    Robb Matzke
+ *        Thursday, December  4, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -1576,7 +1579,7 @@ H5D_close(H5D_t *dataset)
                     dataset->shared->cache.chunk.single_chunk_info = NULL;
                 } /* end if */
 
-                /* Flush and destroy chunks in the cache. Continue to close even if 
+                /* Flush and destroy chunks in the cache. Continue to close even if
                  * it fails. */
                 if(H5D__chunk_dest(dataset->oloc.file, H5AC_dxpl_id, dataset) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy chunk cache")
@@ -1654,22 +1657,22 @@ H5D_close(H5D_t *dataset)
 
     /* Check if anything failed in the middle... */
     if(free_failed)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "couldn't free a component of the dataset, but the dataset was freed anyway.")
+    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "couldn't free a component of the dataset, but the dataset was freed anyway.")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_close() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D_oloc
+ * Function:    H5D_oloc
  *
- * Purpose:	Returns a pointer to the object location for a dataset.
+ * Purpose:    Returns a pointer to the object location for a dataset.
  *
- * Return:	Success:	Ptr to location
- *		Failure:	NULL
+ * Return:    Success:    Ptr to location
+ *        Failure:    NULL
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Friday, April 24, 1998
  *
  *-------------------------------------------------------------------------
@@ -1683,16 +1686,16 @@ H5D_oloc(H5D_t *dataset)
     FUNC_LEAVE_NOAPI(dataset ? &(dataset->oloc) : (H5O_loc_t *)NULL)
 } /* end H5D_oloc() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D_nameof
+ * Function:    H5D_nameof
  *
- * Purpose:	Returns a pointer to the group hier. path for a dataset.
+ * Purpose:    Returns a pointer to the group hier. path for a dataset.
  *
- * Return:	Success:	Ptr to entry
- *		Failure:	NULL
+ * Return:    Success:    Ptr to entry
+ *        Failure:    NULL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Monday, September 12, 2005
  *
  *-------------------------------------------------------------------------
@@ -1706,17 +1709,17 @@ H5D_nameof(H5D_t *dataset)
     FUNC_LEAVE_NOAPI(dataset ? &(dataset->path) : (H5G_name_t *)NULL)
 } /* end H5D_nameof() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D_typeof
+ * Function:    H5D_typeof
  *
- * Purpose:	Returns a pointer to the dataset's datatype.  The datatype
- *		is not copied.
+ * Purpose:    Returns a pointer to the dataset's datatype.  The datatype
+ *        is not copied.
  *
- * Return:	Success:	Ptr to the dataset's datatype, uncopied.
- *		Failure:	NULL
+ * Return:    Success:    Ptr to the dataset's datatype, uncopied.
+ *        Failure:    NULL
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Thursday, June  4, 1998
  *
  *-------------------------------------------------------------------------
@@ -1734,15 +1737,15 @@ H5D_typeof(const H5D_t *dset)
     FUNC_LEAVE_NOAPI(dset->shared->type)
 } /* end H5D_typeof() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D__alloc_storage
+ * Function:    H5D__alloc_storage
  *
- * Purpose:	Allocate storage for the raw data of a dataset.
+ * Purpose:    Allocate storage for the raw data of a dataset.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Friday, January 16, 1998
  *
  *-------------------------------------------------------------------------
@@ -1805,19 +1808,19 @@ H5D__alloc_storage(const H5D_t *dset, hid_t dxpl_id, H5D_time_alloc_t time_alloc
                 } /* end if */
 
                 /* If space allocation is set to 'early' and we are extending
-		 * the dataset, indicate that space should be allocated, so the
+        * the dataset, indicate that space should be allocated, so the
                  * B-tree gets expanded. -QAK
                  */
-		if(dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY
+        if(dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY
                         && time_alloc == H5D_ALLOC_EXTEND)
-		    must_init_space = TRUE;
+            must_init_space = TRUE;
                 break;
 
             case H5D_COMPACT:
                 /* Check if space is already allocated */
                 if(NULL == layout->storage.u.compact.buf) {
-                    /* Reserve space in layout header message for the entire array. 
-                     * Starting from the 1.8.7 release, we allow dataspace to have 
+                    /* Reserve space in layout header message for the entire array.
+                     * Starting from the 1.8.7 release, we allow dataspace to have
                      * zero dimension size.  So the storage size can be zero.
                      * SLU 2011/4/4 */
                     if(layout->storage.u.compact.size > 0) {
@@ -1862,7 +1865,7 @@ H5D__alloc_storage(const H5D_t *dset, hid_t dxpl_id, H5D_time_alloc_t time_alloc
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value")
             } /* end if */
             else {
-                H5D_fill_value_t	fill_status;    /* The fill value status */
+                H5D_fill_value_t    fill_status;    /* The fill value status */
 
                 /* Check the dataset's fill-value status */
                 if(H5P_is_fill_value_defined(&dset->shared->dcpl_cache.fill, &fill_status) < 0)
@@ -1895,17 +1898,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__alloc_storage() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D__init_storage
+ * Function:    H5D__init_storage
  *
- * Purpose:	Initialize the data for a new dataset.  If a selection is
- *		defined for SPACE then initialize only that part of the
- *		dataset.
+ * Purpose:    Initialize the data for a new dataset.  If a selection is
+ *        defined for SPACE then initialize only that part of the
+ *        dataset.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Monday, October  5, 1998
  *
  *-------------------------------------------------------------------------
@@ -1914,7 +1917,7 @@ static herr_t
 H5D__init_storage(const H5D_t *dset, hbool_t full_overwrite, hsize_t old_dim[],
     hid_t dxpl_id)
 {
-    herr_t		ret_value = SUCCEED;    /* Return value */
+    herr_t        ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1968,16 +1971,16 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__init_storage() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D__get_storage_size
+ * Function:    H5D__get_storage_size
  *
- * Purpose:	Determines how much space has been reserved to store the raw
- *		data of a dataset.
+ * Purpose:    Determines how much space has been reserved to store the raw
+ *        data of a dataset.
  *
- * Return:	Non-negative on success, negative on failure
+ * Return:    Non-negative on success, negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Wednesday, April 21, 1999
  *
  *-------------------------------------------------------------------------
@@ -1985,7 +1988,7 @@ done:
 herr_t
 H5D__get_storage_size(H5D_t *dset, hid_t dxpl_id, hsize_t *storage_size)
 {
-    herr_t	ret_value = SUCCEED;    /* Return value */
+    herr_t    ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2021,16 +2024,16 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__get_storage_size() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D__get_offset
+ * Function:    H5D__get_offset
  *
- * Purpose:	Private function for H5D__get_offset.  Returns the address
+ * Purpose:    Private function for H5D__get_offset.  Returns the address
  *              of dataset in file.
  *
- * Return:	Success:        the address of dataset
+ * Return:    Success:        the address of dataset
  *
- *		Failure:	HADDR_UNDEF
+ *        Failure:    HADDR_UNDEF
  *
  * Programmer:  Raymond Lu
  *              November 6, 2002
@@ -2040,7 +2043,7 @@ done:
 haddr_t
 H5D__get_offset(const H5D_t *dset)
 {
-    haddr_t	ret_value = HADDR_UNDEF;
+    haddr_t    ret_value = HADDR_UNDEF;
 
     FUNC_ENTER_PACKAGE
 
@@ -2069,18 +2072,18 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__get_offset() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D_vlen_reclaim
+ * Function:    H5D_vlen_reclaim
  *
- * Purpose:	Frees the buffers allocated for storing variable-length data
+ * Purpose:    Frees the buffers allocated for storing variable-length data
  *      in memory.  Only frees the VL data in the selection defined in the
  *      dataspace.  The dataset transfer property list is required to find the
  *      correct allocation/free methods for the VL data in the buffer.
  *
- * Return:	Non-negative on success, negative on failure
+ * Return:    Non-negative on success, negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, November 22, 2005
  *
  *-------------------------------------------------------------------------
@@ -2120,18 +2123,18 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5D_vlen_reclaim() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D__vlen_get_buf_size_alloc
+ * Function:    H5D__vlen_get_buf_size_alloc
  *
- * Purpose:	This routine makes certain there is enough space in the temporary
+ * Purpose:    This routine makes certain there is enough space in the temporary
  *      buffer for the new data to read in.  All the VL data read in is actually
  *      placed in this buffer, overwriting the previous data.  Needless to say,
  *      this data is not actually usable.
  *
- * Return:	Non-negative on success, negative on failure
+ * Return:    Non-negative on success, negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, August 17, 1999
  *
  *-------------------------------------------------------------------------
@@ -2154,11 +2157,11 @@ H5D__vlen_get_buf_size_alloc(size_t size, void *info)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__vlen_get_buf_size_alloc() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D__vlen_get_buf_size
+ * Function:    H5D__vlen_get_buf_size
  *
- * Purpose:	This routine checks the number of bytes required to store a single
+ * Purpose:    This routine checks the number of bytes required to store a single
  *      element from a dataset in memory, creating a selection with just the
  *      single element selected to read in the element and using a custom memory
  *      allocator for any VL data encountered.
@@ -2173,9 +2176,9 @@ H5D__vlen_get_buf_size_alloc(size_t size, void *info)
  *      Kinda kludgy, but easier than the other method of trying to figure out
  *      the sizes without actually reading the data in... - QAK
  *
- * Return:	Non-negative on success, negative on failure
+ * Return:    Non-negative on success, negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, August 17, 1999
  *
  *-------------------------------------------------------------------------
@@ -2213,16 +2216,16 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__vlen_get_buf_size() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D__check_filters
+ * Function:    H5D__check_filters
  *
- * Purpose:	Check if the filters have be initialized for the dataset
+ * Purpose:    Check if the filters have be initialized for the dataset
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, October 11, 2007
+ * Programmer:    Quincey Koziol
+ *        Thursday, October 11, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -2267,14 +2270,14 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__check_filters() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D__set_extent
+ * Function:    H5D__set_extent
  *
- * Purpose:	Based on H5D_extend, allows change to a lower dimension,
- *		calls H5S_set_extent and H5D__chunk_prune_by_extent instead
+ * Purpose:    Based on H5D_extend, allows change to a lower dimension,
+ *        calls H5S_set_extent and H5D__chunk_prune_by_extent instead
  *
- * Return:	Non-negative on success, negative on failure
+ * Return:    Non-negative on success, negative on failure
  *
  * Programmer:  Pedro Vicente, pvn@ncsa.uiuc.edu
  *              April 9, 2002
@@ -2375,14 +2378,14 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__set_extent() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__flush_sieve_buf
  *
  * Purpose:     Flush any dataset sieve buffer info cached in memory
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
  * Programmer:  Quincey Koziol
  *              July 27, 2009
@@ -2416,14 +2419,14 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__flush_sieve_buf() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__flush_real
  *
  * Purpose:     Flush any dataset information cached in memory
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
  * Programmer:  Quincey Koziol
  *              December 6, 2007
@@ -2487,14 +2490,14 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__flush_real() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__mark
  *
  * Purpose:     Mark some aspect of a dataset as dirty
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
  * Programmer:  Quincey Koziol
  *              July 4, 2008
@@ -2521,14 +2524,14 @@ H5D__mark(const H5D_t *dataset, hid_t H5_ATTR_UNUSED dxpl_id, unsigned flags)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__mark() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__flush_cb
  *
  * Purpose:     Flush any dataset information cached in memory
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
  * Programmer:  Quincey Koziol
  *              November 8, 2007
@@ -2558,14 +2561,14 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__flush_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D_flush
  *
  * Purpose:     Flush any dataset information cached in memory
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
  * Programmer:  Ray Lu
  *              August 14, 2002
@@ -2595,20 +2598,20 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_flush() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D_get_create_plist
+ * Function:    H5D_get_create_plist
  *
- * Purpose:	Private function for H5Dget_create_plist
+ * Purpose:    Private function for H5Dget_create_plist
  *
- * Return:	Success:	ID for a copy of the dataset creation
- *				property list.  The template should be
- *				released by calling H5P_close().
+ * Return:    Success:    ID for a copy of the dataset creation
+ *                property list.  The template should be
+ *                released by calling H5P_close().
  *
- *		Failure:	FAIL
+ *        Failure:    FAIL
  *
- * Programmer:	Robb Matzke
- *		Tuesday, February  3, 1998
+ * Programmer:    Robb Matzke
+ *        Tuesday, February  3, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -2618,8 +2621,8 @@ H5D_get_create_plist(H5D_t *dset)
     H5P_genplist_t      *dcpl_plist;            /* Dataset's DCPL */
     H5P_genplist_t      *new_plist;             /* Copy of dataset's DCPL */
     H5O_fill_t          copied_fill;            /* Fill value to tweak */
-    hid_t		new_dcpl_id = FAIL;
-    hid_t		ret_value;              /* Return value */
+    hid_t        new_dcpl_id = FAIL;
+    hid_t        ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2712,19 +2715,19 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_get_create_plist() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D_get_access_plist
+ * Function:    H5D_get_access_plist
  *
- * Purpose:	Returns a copy of the dataset access property list.
+ * Purpose:    Returns a copy of the dataset access property list.
  *
- * Return:	Success:	ID for a copy of the dataset access
- *				property list. 
+ * Return:    Success:    ID for a copy of the dataset access
+ *                property list.
  *
- *		Failure:	FAIL
+ *        Failure:    FAIL
  *
- * Programmer:	Mohamad Chaarawi
- *		March, 2012
+ * Programmer:    Mohamad Chaarawi
+ *        March, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -2794,25 +2797,25 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_get_access_plist() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D_get_space
+ * Function:    H5D_get_space
  *
- * Purpose:	Returns and ID for the dataspace of the dataset.
+ * Purpose:    Returns and ID for the dataspace of the dataset.
  *
- * Return:	Success:	ID for dataspace
+ * Return:    Success:    ID for dataspace
  *
- *		Failure:	FAIL
+ *        Failure:    FAIL
  *
- * Programmer:	Mohamad Chaarawi
- *		March, 2012
+ * Programmer:    Mohamad Chaarawi
+ *        March, 2012
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5D_get_space(H5D_t *dset)
 {
-    H5S_t	*space = NULL;
+    H5S_t    *space = NULL;
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2834,25 +2837,25 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_get_space() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D_get_type
+ * Function:    H5D_get_type
  *
- * Purpose:	Returns and ID for the datatype of the dataset.
+ * Purpose:    Returns and ID for the datatype of the dataset.
  *
- * Return:	Success:	ID for datatype
+ * Return:    Success:    ID for datatype
  *
- *		Failure:	FAIL
+ *        Failure:    FAIL
  *
- * Programmer:	Mohamad Chaarawi
- *		March, 2012
+ * Programmer:    Mohamad Chaarawi
+ *        March, 2012
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5D_get_type(H5D_t *dset)
 {
-    H5T_t	*dt = NULL;
+    H5T_t    *dt = NULL;
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT

@@ -26,10 +26,12 @@ set (H5_TOOLS_LIB_HDRS
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5trav.h
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools.h
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools_dump.h
+    ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools_error.h
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools_utils.h
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools_str.h
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools_ref.h
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5diff.h
+    ${HDF5_TOOLS_LIB_SOURCE_DIR}/io_timer.h
 )
 
 if (NOT ONLY_SHARED_LIBS)
@@ -73,6 +75,17 @@ if (BUILD_SHARED_LIBS)
   H5_SET_LIB_OPTIONS (${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_TOOLS_LIB_NAME} SHARED "TOOLS")
   set_target_properties (${HDF5_TOOLS_LIBSH_TARGET} PROPERTIES FOLDER libraries/tools)
   set (install_targets ${install_targets} ${HDF5_TOOLS_LIBSH_TARGET})
+endif ()
+
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_TOOLS_SRC_FORMAT ${HDF5_TOOLS_LIB_TARGET})
+  else ()
+    clang_format (HDF5_TOOLS_SRC_FORMAT ${HDF5_TOOLS_LIBSH_TARGET})
+  endif ()
 endif ()
 
 ##############################################################################

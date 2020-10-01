@@ -28,6 +28,17 @@ if (BUILD_SHARED_LIBS)
   set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} h5stat-shared)
 endif ()
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_H5STAT_SRC_FORMAT h5stat)
+  else ()
+    clang_format (HDF5_H5STAT_SRC_FORMAT h5stat-shared)
+  endif ()
+endif ()
+
 if (BUILD_TESTING)
   # --------------------------------------------------------------------
   # Add the h5stat test executables
@@ -38,6 +49,13 @@ if (BUILD_TESTING)
     TARGET_C_PROPERTIES (h5stat_gentest STATIC)
     target_link_libraries (h5stat_gentest PRIVATE ${HDF5_LIB_TARGET})
     set_target_properties (h5stat_gentest PROPERTIES FOLDER generator/tools)
+
+    #-----------------------------------------------------------------------------
+    # Add Target to clang-format
+    #-----------------------------------------------------------------------------
+    if (HDF5_ENABLE_FORMATTERS)
+      clang_format (HDF5_TOOLS_TEST_H5STAT_FORMAT h5stat_gentest)
+    endif ()
 
     #add_test (NAME h5stat_gentest COMMAND $<TARGET_FILE:h5stat_gentest>)
   endif ()

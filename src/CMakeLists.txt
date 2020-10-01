@@ -704,6 +704,7 @@ set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5Lpkg.h
     ${HDF5_SRC_DIR}/H5Lprivate.h
 
+    ${HDF5_SRC_DIR}/H5MFpkg.h
     ${HDF5_SRC_DIR}/H5MFprivate.h
 
     ${HDF5_SRC_DIR}/H5MMprivate.h
@@ -916,6 +917,13 @@ else ()
   endif ()
 endif ()
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_SRC_DETECT_FORMAT ${HDF5_SRC_DIR}/H5detect.c)
+endif ()
+
 add_executable (H5make_libsettings ${HDF5_SRC_DIR}/H5make_libsettings.c)
 target_include_directories (H5make_libsettings PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 target_compile_definitions(H5make_libsettings PUBLIC ${HDF_EXTRA_C_FLAGS} ${HDF_EXTRA_FLAGS})
@@ -924,6 +932,13 @@ target_link_libraries (H5make_libsettings
     PRIVATE "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>" $<$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:MinGW>>:ws2_32.lib>
     PRIVATE $<$<PLATFORM_ID:Emscripten>:"-O0">
 )
+
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_SRC_LIBSETTINGS_FORMAT H5make_libsettings)
+endif ()
 
 add_custom_command (
     OUTPUT ${HDF5_BINARY_DIR}/H5lib_settings.c
@@ -1024,6 +1039,17 @@ if (BUILD_SHARED_LIBS)
   add_dependencies (${HDF5_LIBSH_TARGET} gen_${HDF5_LIBSH_TARGET})
 
   set (install_targets ${install_targets} ${HDF5_LIBSH_TARGET})
+endif ()
+
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_SRC_FORMAT ${HDF5_LIB_TARGET})
+  else ()
+    clang_format (HDF5_SRC_FORMAT ${HDF5_LIBSH_TARGET})
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------

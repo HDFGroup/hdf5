@@ -4,6 +4,7 @@ project (HDF5_TOOLS_H5REPACK C)
 # --------------------------------------------------------------------
 # Add h5Repack executables
 # --------------------------------------------------------------------
+# These are the same files used by the h5repack tool
 set (REPACK_COMMON_SOURCES
     ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack_copy.c
     ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack_filters.c
@@ -12,6 +13,7 @@ set (REPACK_COMMON_SOURCES
     ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack_refs.c
     ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack_verify.c
     ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack.c
+    ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack.h
 )
 
 if (NOT ONLY_SHARED_LIBS)
@@ -36,6 +38,17 @@ if (BUILD_SHARED_LIBS)
   set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5repack-shared")
 
   set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} h5repack-shared)
+endif ()
+
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_H5REPACK_SRC_FORMAT h5repack)
+  else ()
+    clang_format (HDF5_H5REPACK_SRC_FORMAT h5repack-shared)
+  endif ()
 endif ()
 
 # --------------------------------------------------------------------
@@ -91,6 +104,14 @@ if (BUILD_TESTING)
     target_link_libraries (${H5REPACK_TOOL_PLUGIN_LIB_VTARGET} PRIVATE ${HDF5_TEST_LIBSH_TARGET})
     H5_SET_LIB_OPTIONS (${H5REPACK_TOOL_PLUGIN_LIB_VTARGET} ${H5REPACK_TOOL_PLUGIN_LIB_VNAME} SHARED "LIB")
 
+    #-----------------------------------------------------------------------------
+    # Add Target to clang-format
+    #-----------------------------------------------------------------------------
+    if (HDF5_ENABLE_FORMATTERS)
+      clang_format (HDF5_TOOLS_TEST_H5REPACK_PLUGIN_FORMAT ${H5REPACK_TOOL_PLUGIN_LIB_TARGET})
+      clang_format (HDF5_TOOLS_TEST_H5REPACK_VPLUGIN_FORMAT ${H5REPACK_TOOL_PLUGIN_LIB_VTARGET})
+    endif ()
+
     # make plugins dir
     file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/plugins")
     #-----------------------------------------------------------------------------
@@ -123,6 +144,13 @@ if (BUILD_TESTING)
     TARGET_C_PROPERTIES (h5repackgentest STATIC)
     target_link_libraries (h5repackgentest PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
     set_target_properties (h5repackgentest PROPERTIES FOLDER generator/tools)
+
+    #-----------------------------------------------------------------------------
+    # Add Target to clang-format
+    #-----------------------------------------------------------------------------
+    if (HDF5_ENABLE_FORMATTERS)
+      clang_format (HDF5_TOOLS_TEST_H5REPACK_FORMAT h5repackgentest)
+    endif ()
 
     #add_test (NAME h5repackgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repackgentest>)
   endif ()

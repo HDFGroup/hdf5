@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Monday, July 26, 1999
  */
 #ifndef _H5FDprivate_H
@@ -75,16 +75,16 @@ typedef struct {
 
 /* Define default file image info */
 #define H5FD_DEFAULT_FILE_IMAGE_INFO { \
-    /* file image buffer */ NULL,       \
-    /* buffer size */       0,          \
+    NULL, /* file image buffer */       \
+    0,    /* buffer size */             \
     { /* Callbacks */                   \
-        /* image_malloc */      NULL,   \
-        /* image_memcpy */      NULL,   \
-        /* image_realloc */     NULL,   \
-        /* image_free */        NULL,   \
-        /* udata_copy */        NULL,   \
-        /* udata_free */        NULL,   \
-        /* udata */             NULL,   \
+        NULL, /* image_malloc */        \
+        NULL, /* image_memcpy */        \
+        NULL, /* image_realloc */       \
+        NULL, /* image_free */          \
+        NULL, /* udata_copy */          \
+        NULL, /* udata_free */          \
+        NULL, /* udata */               \
     }                                   \
 }
 

@@ -37,6 +37,13 @@ macro (HL_ADD_EXE hl_name)
     )
   endif ()
   set_target_properties (hl_${hl_name} PROPERTIES FOLDER test/hl)
+
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_HL_TEST_${hl_name}_FORMAT hl_${hl_name})
+  endif ()
 endmacro ()
 
 macro (HL_ADD_ZEXE hl_name)
@@ -61,6 +68,13 @@ macro (HL_ADD_ZEXE hl_name)
     )
   endif ()
   set_target_properties (hl_${hl_name} PROPERTIES FOLDER test/hl)
+
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_HL_TEST_${hl_name}_FORMAT hl_${hl_name})
+  endif ()
 endmacro ()
 
 HL_ADD_EXE (test_ds)
@@ -90,6 +104,13 @@ else ()
 endif ()
 set_target_properties (hl_test_packet PROPERTIES FOLDER test/hl)
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_HL_TEST_hl_test_packet_FORMAT hl_test_packet)
+endif ()
+
 # --------------------------------------------------------------------
 # This executable is used to generate test files for the test_ds test.
 # It should only be run during development when new test files are needed
@@ -105,6 +126,13 @@ if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
       ${HDF5_LIB_TARGET}
   )
   set_target_properties (hl_gen_test_ds PROPERTIES FOLDER test/hl/gen)
+
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_HL_TEST_hl_gen_test_ds_FORMAT hl_gen_test_ds)
+  endif ()
 endif ()
 
 if (HDF5_TEST_SERIAL)

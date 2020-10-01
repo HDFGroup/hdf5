@@ -26,31 +26,32 @@
  * it via H5public.h.  The #ifndef _H5public_H guard above would
  * prevent repeated include.
  */
-#include "H5pubconf.h"        /*from configure                             */
+#include "H5pubconf.h"          /* From configure */
 
 /* API Version macro wrapper definitions */
 #include "H5version.h"
 
 #ifdef H5_HAVE_FEATURES_H
-#include <features.h>           /*for setting POSIX, BSD, etc. compatibility */
+#include <features.h>           /* For setting POSIX, BSD, etc. compatibility */
 #endif
 #ifdef H5_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #ifdef H5_STDC_HEADERS
-#   include <limits.h>        /*for H5T_NATIVE_CHAR defn in H5Tpublic.h    */
+#   include <limits.h>          /* For H5T_NATIVE_CHAR defn in H5Tpublic.h  */
+#   include <stdarg.h>          /* For variadic functions in H5VLpublic.h   */
 #endif
 #ifndef __cplusplus
 # ifdef H5_HAVE_STDINT_H
-#   include <stdint.h>        /*for C9x types                     */
+#   include <stdint.h>          /* For C9x types */
 # endif
 #else
 # ifdef H5_HAVE_STDINT_H_CXX
-#   include <stdint.h>        /*for C9x types    when include from C++         */
+#   include <stdint.h>          /* For C9x types (when included from C++) */
 # endif
 #endif
 #ifdef H5_HAVE_INTTYPES_H
-#   include <inttypes.h>        /* For uint64_t on some platforms            */
+#   include <inttypes.h>        /* C99/POSIX.1 header for uint64_t, PRIu64 */
 #endif
 #ifdef H5_HAVE_STDDEF_H
 #   include <stddef.h>
@@ -60,7 +61,7 @@
 #   define MPICH_SKIP_MPICXX 1
 #   define OMPI_SKIP_MPICXX 1
 #   include <mpi.h>
-#ifndef MPI_FILE_NULL        /*MPIO may be defined in mpi.h already       */
+#ifndef MPI_FILE_NULL           /* MPIO may be defined in mpi.h already */
 #   include <mpio.h>
 #endif
 #endif
@@ -80,12 +81,11 @@ extern "C" {
  */
 /* These pragmas are only implemented usefully in gcc 4.6+ */
 #if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 406
-    #define H5_GCC_DIAG_STR(s) #s
-    #define H5_GCC_DIAG_JOINSTR(x,y) H5_GCC_DIAG_STR(x ## y)
-    #define H5_GCC_DIAG_DO_PRAGMA(x) _Pragma (#x)
-    #define H5_GCC_DIAG_PRAGMA(x) H5_GCC_DIAG_DO_PRAGMA(GCC diagnostic x)
+    #define H5_GCC_DIAG_JOINSTR(x, y) x y
+    #define H5_GCC_DIAG_DO_PRAGMA(x)  _Pragma(#x)
+    #define H5_GCC_DIAG_PRAGMA(x)     H5_GCC_DIAG_DO_PRAGMA(GCC diagnostic x)
 
-    #define H5_GCC_DIAG_OFF(x) H5_GCC_DIAG_PRAGMA(push) H5_GCC_DIAG_PRAGMA(ignored H5_GCC_DIAG_JOINSTR(-W,x))
+    #define H5_GCC_DIAG_OFF(x) H5_GCC_DIAG_PRAGMA(push) H5_GCC_DIAG_PRAGMA(ignored H5_GCC_DIAG_JOINSTR("-W",x))
     #define H5_GCC_DIAG_ON(x) H5_GCC_DIAG_PRAGMA(pop)
 #else
     #define H5_GCC_DIAG_OFF(x)
@@ -93,9 +93,9 @@ extern "C" {
 #endif
 
 /* Version numbers TAB char must surround the H5_VERS_xxx number */
-#define H5_VERS_MAJOR	1	/* For major interface/format changes           */
-#define H5_VERS_MINOR	8	/* For minor interface/format changes           */
-#define H5_VERS_RELEASE	22	/* For tweaks, bug-fixes, or development     */
+#define H5_VERS_MAJOR    1    /* For major interface/format changes           */
+#define H5_VERS_MINOR    8    /* For minor interface/format changes           */
+#define H5_VERS_RELEASE    22    /* For tweaks, bug-fixes, or development     */
 #define H5_VERS_SUBRELEASE "snap11"    /* For pre-releases like snap0       */
                 /* Empty string for real releases.           */
 #define H5_VERS_INFO    "HDF5 library version: 1.8.22-snap11"      /* Full version string */
@@ -117,12 +117,12 @@ extern "C" {
 /*
  * Status return values.  Failed integer functions in HDF5 result almost
  * always in a negative value (unsigned failing functions sometimes return
- * zero for failure) while successfull return is non-negative (often zero).
+ * zero for failure) while successful return is non-negative (often zero).
  * The negative failure value is most commonly -1, but don't bet on it.  The
  * proper way to detect failure is something like:
  *
- *     if((dset = H5Dopen2(file, name)) < 0)
- *        fprintf(stderr, "unable to open the requested dataset\n");
+ *  if((dset = H5Dopen2(file, name)) < 0)
+ *      fprintf(stderr, "unable to open the requested dataset\n");
  */
 typedef int herr_t;
 
@@ -134,13 +134,13 @@ typedef int herr_t;
  * (false), positive (true), or negative (failure). The proper way to test
  * for truth from a htri_t function is:
  *
- *     if ((retval = H5Tcommitted(type))>0) {
- *        printf("data type is committed\n");
- *    } else if (!retval) {
- *         printf("data type is not committed\n");
- *    } else {
- *         printf("error determining whether data type is committed\n");
- *    }
+ *  if ((retval = H5Tcommitted(type)) > 0) {
+ *      printf("data type is committed\n");
+ *  } else if (!retval) {
+ *      printf("data type is not committed\n");
+ *  } else {
+ *      printf("error determining whether data type is committed\n");
+ *  }
  */
 typedef unsigned int hbool_t;
 typedef int htri_t;
@@ -168,10 +168,10 @@ typedef long long ssize_t;
  * type.
  */
 #if H5_SIZEOF_LONG_LONG >= 8
-H5_GCC_DIAG_OFF(long-long)
-typedef unsigned long long     hsize_t;
+H5_GCC_DIAG_OFF("long-long")
+typedef unsigned long long  hsize_t;
 typedef signed long long    hssize_t;
-H5_GCC_DIAG_ON(long-long)
+H5_GCC_DIAG_ON("long-long")
 #       define H5_SIZEOF_HSIZE_T H5_SIZEOF_LONG_LONG
 #       define H5_SIZEOF_HSSIZE_T H5_SIZEOF_LONG_LONG
 #else
@@ -293,7 +293,7 @@ typedef enum {
 } H5_iter_order_t;
 
 /* Iteration callback values */
-/* (Actually, any postive value will cause the iterator to stop and pass back
+/* (Actually, any positive value will cause the iterator to stop and pass back
  *      that positive value to the function that called the iterator)
  */
 #define H5_ITER_ERROR   (-1)
@@ -306,10 +306,10 @@ typedef enum {
  * links in groups/attributes on objects.
  */
 typedef enum H5_index_t {
-    H5_INDEX_UNKNOWN = -1,    /* Unknown index type            */
-    H5_INDEX_NAME,        /* Index on names             */
-    H5_INDEX_CRT_ORDER,        /* Index on creation order         */
-    H5_INDEX_N            /* Number of indices defined         */
+    H5_INDEX_UNKNOWN = -1,      /* Unknown index type                   */
+    H5_INDEX_NAME,              /* Index on names                       */
+    H5_INDEX_CRT_ORDER,         /* Index on creation order              */
+    H5_INDEX_N                  /* Number of indices defined            */
 } H5_index_t;
 
 /*
