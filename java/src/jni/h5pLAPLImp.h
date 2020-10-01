@@ -25,18 +25,14 @@ extern "C" {
  * Method:    H5Pset_nlinks
  * Signature: (JJ)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1nlinks
-(JNIEnv *, jclass, jlong, jlong);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pset_1nlinks(JNIEnv *, jclass, jlong, jlong);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pget_nlinks
  * Signature: (J)J
  */
-JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1nlinks
-(JNIEnv *, jclass, jlong);
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5_H5Pget_1nlinks(JNIEnv *, jclass, jlong);
 
 /*
  * TODO: H5Pset_elink_cb
@@ -51,54 +47,42 @@ Java_hdf_hdf5lib_H5_H5Pget_1nlinks
  * Method:    H5Pset_elink_prefix
  * Signature: (JLjava/lang/String;)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1elink_1prefix
-(JNIEnv *, jclass, jlong, jstring);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pset_1elink_1prefix(JNIEnv *, jclass, jlong, jstring);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pget_elink_prefix
  * Signature: (J[Ljava/lang/String;)J
  */
-JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1elink_1prefix
-(JNIEnv *, jclass, jlong, jobjectArray);
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5_H5Pget_1elink_1prefix(JNIEnv *, jclass, jlong, jobjectArray);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pset_elink_fapl
  * Signature: (JJ)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1elink_1fapl
-(JNIEnv *, jclass, jlong, jlong);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pset_1elink_1fapl(JNIEnv *, jclass, jlong, jlong);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    _H5Pget_elink_fapl
  * Signature: (J)J
  */
-JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Pget_1elink_1fapl
-(JNIEnv *, jclass, jlong);
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Pget_1elink_1fapl(JNIEnv *, jclass, jlong);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pset_elink_acc_flags
  * Signature: (JI)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1elink_1acc_1flags
-(JNIEnv *, jclass, jlong, jint);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pset_1elink_1acc_1flags(JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pget_elink_acc_flags
  * Signature: (J)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1elink_1acc_1flags
-(JNIEnv *, jclass, jlong);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pget_1elink_1acc_1flags(JNIEnv *, jclass, jlong);
 
 #ifdef __cplusplus
 } /* end extern "C" */

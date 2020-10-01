@@ -24,45 +24,36 @@
 #define _H5VLpkg_H
 
 /* Get package's private header */
-#include "H5VLprivate.h"        /* Generic Functions                    */
+#include "H5VLprivate.h" /* Generic Functions                    */
 
 /* Other private headers needed by this file */
-
 
 /**************************/
 /* Package Private Macros */
 /**************************/
 
-
 /****************************/
 /* Package Private Typedefs */
 /****************************/
-
 
 /*****************************/
 /* Package Private Variables */
 /*****************************/
 
-
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-H5_DLL hid_t H5VL__register_connector(const H5VL_class_t *cls, hbool_t app_ref,
-    hid_t vipl_id);
-H5_DLL hid_t H5VL__register_connector_by_name(const char *name, hbool_t app_ref,
-    hid_t vipl_id);
-H5_DLL hid_t H5VL__register_connector_by_value(H5VL_class_value_t value,
-    hbool_t app_ref, hid_t vipl_id);
-H5_DLL htri_t H5VL__is_connector_registered_by_name(const char *name);
-H5_DLL htri_t H5VL__is_connector_registered_by_value(H5VL_class_value_t value);
-H5_DLL hid_t H5VL__get_connector_id(hid_t obj_id, hbool_t is_api);
-H5_DLL hid_t H5VL__get_connector_id_by_name(const char *name, hbool_t is_api);
-H5_DLL hid_t H5VL__get_connector_id_by_value(H5VL_class_value_t value, hbool_t is_api);
-H5_DLL hid_t H5VL__peek_connector_id_by_name(const char *name);
-H5_DLL hid_t H5VL__peek_connector_id_by_value(H5VL_class_value_t value);
-H5_DLL herr_t H5VL__connector_str_to_info(const char *str, hid_t connector_id,
-    void **info);
-H5_DLL ssize_t H5VL__get_connector_name(hid_t id, char *name/*out*/, size_t size);
+H5_DLL hid_t   H5VL__register_connector(const H5VL_class_t *cls, hbool_t app_ref, hid_t vipl_id);
+H5_DLL hid_t   H5VL__register_connector_by_name(const char *name, hbool_t app_ref, hid_t vipl_id);
+H5_DLL hid_t   H5VL__register_connector_by_value(H5VL_class_value_t value, hbool_t app_ref, hid_t vipl_id);
+H5_DLL htri_t  H5VL__is_connector_registered_by_name(const char *name);
+H5_DLL htri_t  H5VL__is_connector_registered_by_value(H5VL_class_value_t value);
+H5_DLL hid_t   H5VL__get_connector_id(hid_t obj_id, hbool_t is_api);
+H5_DLL hid_t   H5VL__get_connector_id_by_name(const char *name, hbool_t is_api);
+H5_DLL hid_t   H5VL__get_connector_id_by_value(H5VL_class_value_t value, hbool_t is_api);
+H5_DLL hid_t   H5VL__peek_connector_id_by_name(const char *name);
+H5_DLL hid_t   H5VL__peek_connector_id_by_value(H5VL_class_value_t value);
+H5_DLL herr_t  H5VL__connector_str_to_info(const char *str, hid_t connector_id, void **info);
+H5_DLL ssize_t H5VL__get_connector_name(hid_t id, char *name /*out*/, size_t size);
 
 #endif /* _H5VLpkg_H */
-

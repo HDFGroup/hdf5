@@ -26,11 +26,10 @@
 /* A similar collection of files is used for the tests that
  * perform file I/O.
  */
-#define N_EXT_FILES         4
-#define PART_SIZE           25
-#define TOTAL_SIZE          100
-#define GARBAGE_PER_FILE    10
-
+#define N_EXT_FILES      4
+#define PART_SIZE        25
+#define TOTAL_SIZE       100
+#define GARBAGE_PER_FILE 10
 
 #ifdef __cplusplus
 extern "C" {

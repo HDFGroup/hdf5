@@ -4930,4 +4930,3 @@ H5_DLL herr_t H5C__verify_cork_tag_test(hid_t fid, H5O_token_t tag_token, hbool_
 
 #endif /* _H5Cpkg_H */
 /* clang-format on */
-
