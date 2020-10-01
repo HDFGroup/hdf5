@@ -5094,4 +5094,3 @@ H5_DLL herr_t H5C__verify_cork_tag_test(hid_t fid, haddr_t tag, hbool_t status);
 
 #endif /* _H5Cpkg_H */
 /* clang-format on */
-

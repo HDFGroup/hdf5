@@ -51,14 +51,14 @@ extern "C" {
  *      IP address string of "Mirror Server" remote host.
  * ---------------------------------------------------------------------------
  */
-#define H5FD_MIRROR_FAPL_MAGIC 0xF8DD514C
+#define H5FD_MIRROR_FAPL_MAGIC          0xF8DD514C
 #define H5FD_MIRROR_CURR_FAPL_T_VERSION 1
-#define H5FD_MIRROR_MAX_IP_LEN 32
+#define H5FD_MIRROR_MAX_IP_LEN          32
 typedef struct H5FD_mirror_fapl_t {
     uint32_t magic;
     uint32_t version;
-    int     handshake_port;
-    char    remote_ip[H5FD_MIRROR_MAX_IP_LEN + 1];
+    int      handshake_port;
+    char     remote_ip[H5FD_MIRROR_MAX_IP_LEN + 1];
 } H5FD_mirror_fapl_t;
 
 H5_DLL hid_t  H5FD_mirror_init(void);
@@ -76,4 +76,3 @@ H5_DLL herr_t H5Pset_fapl_mirror(hid_t fapl_id, H5FD_mirror_fapl_t *fa);
 #endif /* H5_HAVE_MIRROR_VFD */
 
 #endif /* H5FDmirror_H */
-

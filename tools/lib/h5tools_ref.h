@@ -33,4 +33,3 @@ H5TOOLS_DLL int         term_ref_path_table(void);
 #endif
 
 #endif
-

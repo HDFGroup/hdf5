@@ -33,8 +33,8 @@
 
 #include "hdf5.h"
 
-#define ROWS    12
-#define COLS    18
+#define ROWS 12
+#define COLS 18
 
 /* clang-format off */
 const float windchillF[ROWS][COLS] =
@@ -53,32 +53,28 @@ const float windchillF[ROWS][COLS] =
     };
 /* clang-format on */
 
-#define PRINT(array)                \
-{                        \
-    for(i=0; i<ROWS; i++)            \
-    {                        \
-        for(j=0; j<COLS; j++)            \
-            printf("%6.2f ", array[i][j]);    \
-        printf("\n");                \
-    }                        \
-}
-
-
-
+#define PRINT(array)                                                                                         \
+    {                                                                                                        \
+        for (i = 0; i < ROWS; i++) {                                                                         \
+            for (j = 0; j < COLS; j++)                                                                       \
+                printf("%6.2f ", array[i][j]);                                                               \
+            printf("\n");                                                                                    \
+        }                                                                                                    \
+    }
 
 int
-main (void)
+main(void)
 {
-    hid_t       file, dataset;         /* file and dataset handles */
-    hid_t       dataspace;   /* handles */
-    hsize_t     dimsf[2];              /* dataset dimensions */
+    hid_t       file, dataset; /* file and dataset handles */
+    hid_t       dataspace;     /* handles */
+    hsize_t     dimsf[2];      /* dataset dimensions */
     herr_t      status;
-    hid_t    dxpl_id_f_to_c, dxpl_id_c_to_f;    /* data transform handles */
-    const char* f_to_c = "(5/9.0)*(x-32)";
-    const char* c_to_f =  "(9/5.0)*x + 32";
-    char*    transform;
-    float    windchillC[ROWS][COLS];
-    int     i,j, transform_size;
+    hid_t       dxpl_id_f_to_c, dxpl_id_c_to_f; /* data transform handles */
+    const char *f_to_c = "(5/9.0)*(x-32)";
+    const char *c_to_f = "(9/5.0)*x + 32";
+    char *      transform;
+    float       windchillC[ROWS][COLS];
+    int         i, j, transform_size;
 
     /*
      * Create a new file using H5F_ACC_TRUNC access,
@@ -91,28 +87,25 @@ main (void)
      * Describe the size of the array and create the data space for fixed
      * size dataset.
      */
-    dimsf[0] = ROWS;
-    dimsf[1] = COLS;
+    dimsf[0]  = ROWS;
+    dimsf[1]  = COLS;
     dataspace = H5Screate_simple(2, dimsf, NULL);
 
     /*
      * Create a new dataset within the file using defined dataspace and
      * datatype and default dataset creation properties.
      */
-    dataset = H5Dcreate2(file, "data_no_trans", H5T_NATIVE_FLOAT, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dataset =
+        H5Dcreate2(file, "data_no_trans", H5T_NATIVE_FLOAT, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     printf("\nOriginal Data: \n");
 
     PRINT(windchillF);
 
-
-
-
-/****************  PART 1 **************/
+    /****************  PART 1 **************/
     /*
      * Write the data to the dataset using default transfer properties (ie, no transform set)
      */
-    status = H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
-            H5P_DEFAULT, windchillF);
+    status = H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, windchillF);
 
     /* Create the dataset transfer property list */
     dxpl_id_f_to_c = H5Pcreate(H5P_DATASET_XFER);
@@ -127,13 +120,11 @@ main (void)
     printf("\nData with no write transform, but a read transform: \n");
     PRINT(windchillC);
 
-
-/****************  PART 2 **************/
+    /****************  PART 2 **************/
     /*
      * Write the data to the dataset with the f_to_c transform set
      */
-    status = H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
-            dxpl_id_f_to_c, windchillF);
+    status = H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_f_to_c, windchillF);
 
     /* Read out the data with the default transfer list (ie, no transform set) */
     H5Dread(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, windchillC);
@@ -142,8 +133,7 @@ main (void)
     printf("\nData with write transform, but no read transform: \n");
     PRINT(windchillC);
 
-/************** PART 3 ***************/
-
+    /************** PART 3 ***************/
 
     /* Create the dataset transfer property list */
     dxpl_id_c_to_f = H5Pcreate(H5P_DATASET_XFER);
@@ -151,12 +141,10 @@ main (void)
     /* Set the data transform to be used on the read*/
     H5Pset_data_transform(dxpl_id_c_to_f, c_to_f);
 
-
     /*
      * Write the data to the dataset using the f_to_c transform
      */
-    status = H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
-            dxpl_id_f_to_c, windchillF);
+    status = H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_f_to_c, windchillF);
 
     /* Read the data with the c_to_f data transform */
     H5Dread(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillC);
@@ -165,10 +153,10 @@ main (void)
     printf("\nData with both read and write data transform: \n");
     PRINT(windchillC);
 
-/************** PART 4 **************/
+    /************** PART 4 **************/
     transform_size = H5Pget_data_transform(dxpl_id_f_to_c, NULL, 0);
-    transform = (char*) malloc(transform_size+1);
-    H5Pget_data_transform(dxpl_id_f_to_c, transform, transform_size+1);
+    transform      = (char *)malloc(transform_size + 1);
+    H5Pget_data_transform(dxpl_id_f_to_c, transform, transform_size + 1);
 
     printf("\nTransform string (from dxpl_id_f_to_c) is: %s\n", transform);
 

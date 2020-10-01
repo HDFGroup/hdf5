@@ -69,25 +69,25 @@ static options_t UC_opts; /* Use Case Options */
  * Return: 0 succeed; -1 fail.
  */
 int
-setup_parameters(int argc, char * const argv[], options_t * opts)
+setup_parameters(int argc, char *const argv[], options_t *opts)
 {
     /* use case defaults */
     HDmemset(opts, 0, sizeof(options_t));
-    opts->chunksize = Chunksize_DFT;
-    opts->use_swmr = 1; /* use swmr open */
-    opts->iterations = 1;
+    opts->chunksize   = Chunksize_DFT;
+    opts->use_swmr    = 1; /* use swmr open */
+    opts->iterations  = 1;
     opts->chunkplanes = 1;
-    opts->progname = USE_APPEND_MCHUNKS_PROGNAME;
-    opts->fapl_id = H5I_INVALID_HID;
+    opts->progname    = USE_APPEND_MCHUNKS_PROGNAME;
+    opts->fapl_id     = H5I_INVALID_HID;
 
     if (parse_option(argc, argv, opts) < 0) {
-        return(-1);
+        return (-1);
     }
 
     opts->chunkdims[0] = (hsize_t)opts->chunkplanes;
     opts->chunkdims[1] = opts->chunkdims[2] = (hsize_t)opts->chunksize;
 
-    opts->dims[0] = 0;
+    opts->dims[0]     = 0;
     opts->max_dims[0] = H5S_UNLIMITED;
     opts->dims[1] = opts->dims[2] = opts->max_dims[1] = opts->max_dims[2] = 2 * (hsize_t)opts->chunksize;
 
@@ -95,9 +95,8 @@ setup_parameters(int argc, char * const argv[], options_t * opts)
         opts->nplanes = 2 * (hsize_t)opts->chunksize;
 
     show_parameters(opts);
-    return(0);
+    return (0);
 } /* end setup_parameters() */
-
 
 /* Overall Algorithm:
  * Parse options from user;
@@ -109,15 +108,15 @@ setup_parameters(int argc, char * const argv[], options_t * opts)
 int
 main(int argc, char *argv[])
 {
-    pid_t childpid=0;
-    pid_t mypid, tmppid;
-    int child_status;
-    int child_wait_option=0;
-    int ret_value = 0;
-    int child_ret_value;
+    pid_t   childpid = 0;
+    pid_t   mypid, tmppid;
+    int     child_status;
+    int     child_wait_option = 0;
+    int     ret_value         = 0;
+    int     child_ret_value;
     hbool_t send_wait = 0;
-    hid_t fapl = -1;        /* File access property list */
-    hid_t fid = -1;         /* File ID */
+    hid_t   fapl      = -1; /* File access property list */
+    hid_t   fid       = -1; /* File ID */
 
     if (setup_parameters(argc, argv, &UC_opts) < 0) {
         Hgoto_error(1);
@@ -150,7 +149,8 @@ main(int argc, char *argv[])
         if (create_uc_file(&UC_opts) < 0) {
             HDfprintf(stderr, "***encounter error\n");
             Hgoto_error(1);
-        } else {
+        }
+        else {
             HDprintf("File created.\n");
         }
         /* Close FAPL to prevent issues with forking later */
@@ -164,7 +164,7 @@ main(int argc, char *argv[])
     /* ============ */
     /* Fork process */
     /* ============ */
-    if (UC_opts.launch==UC_READWRITE) {
+    if (UC_opts.launch == UC_READWRITE) {
         if ((childpid = fork()) < 0) {
             perror("fork");
             Hgoto_error(1);
@@ -214,7 +214,8 @@ main(int argc, char *argv[])
         }
     }
 
-    if ((fid = H5Fopen(UC_opts.filename, H5F_ACC_RDWR | (UC_opts.use_swmr ? H5F_ACC_SWMR_WRITE : 0), fapl)) < 0) {
+    if ((fid = H5Fopen(UC_opts.filename, H5F_ACC_RDWR | (UC_opts.use_swmr ? H5F_ACC_SWMR_WRITE : 0), fapl)) <
+        0) {
         HDfprintf(stderr, "H5Fopen failed\n");
         Hgoto_error(1);
     }
@@ -244,12 +245,12 @@ main(int argc, char *argv[])
         }
 
         if (WIFEXITED(child_status)) {
-            if ((child_ret_value=WEXITSTATUS(child_status)) != 0) {
-                HDprintf("%d: child process exited with non-zero code (%d)\n",
-                    mypid, child_ret_value);
+            if ((child_ret_value = WEXITSTATUS(child_status)) != 0) {
+                HDprintf("%d: child process exited with non-zero code (%d)\n", mypid, child_ret_value);
                 Hgoto_error(1);
             }
-        } else {
+        }
+        else {
             HDprintf("%d: child process terminated abnormally\n", mypid);
             Hgoto_error(2);
         }
@@ -258,11 +259,12 @@ main(int argc, char *argv[])
 done:
     if (ret_value != 0) {
         HDprintf("Error(s) encountered\n");
-    } else {
+    }
+    else {
         HDprintf("All passed\n");
     }
 
-    return(ret_value);
+    return (ret_value);
 } /* end main() */
 
 #else /* H5_HAVE_FORK */
@@ -275,4 +277,3 @@ main(void)
 } /* end main() */
 
 #endif /* H5_HAVE_FORK */
-
