@@ -28668,6 +28668,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
     /* Set up the expected array. This is used to maintain a table of the
      * expected status of every entry used in this test.
      */
+    /* clang-format off */
     struct expected_entry_status expected[150] =
     {
       /* entry        entry            in    at main                                                       */
@@ -28823,6 +28824,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
       { HUGE_ENTRY_TYPE, 148,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
       { HUGE_ENTRY_TYPE, 149,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE }
     };
+    /* clang-format on */
 
     pass = TRUE;
 

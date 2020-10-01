@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Tuesday, August 10, 1999
  *
  * Purpose:     A driver which stores the HDF5 data in main memory  using
@@ -82,7 +82,7 @@ typedef struct H5FD_core_t {
     DWORD           nFileIndexLow;
     DWORD           nFileIndexHigh;
     DWORD           dwVolumeSerialNumber;
-    
+
     HANDLE          hFile;      /* Native windows file handle */
 #endif /* H5_HAVE_WIN32_API */
     hbool_t dirty;                              /* changes not saved?       */
@@ -177,7 +177,7 @@ static const H5FD_class_t H5FD_core_g = {
 /* Define a free list to manage the region type */
 H5FL_DEFINE(H5FD_core_region_t);
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_core_add_dirty_region
  *
@@ -308,7 +308,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_core_add_dirty_region() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_core_destroy_dirty_list
  *
@@ -350,7 +350,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_core_destroy_dirty_list() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_core_write_to_bstore
  *
@@ -419,7 +419,7 @@ done:
 
 } /* end H5FD_core_write_to_bstore() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_core_init_interface
  *
@@ -438,7 +438,7 @@ H5FD_core_init_interface(void)
     FUNC_LEAVE_NOAPI(H5FD_core_init())
 } /* H5FD_core_init_interface() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_core_init
  *
@@ -470,7 +470,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
+
 /*---------------------------------------------------------------------------
  * Function:    H5FD_core_term
  *
@@ -494,7 +494,7 @@ H5FD_core_term(void)
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5FD_core_term() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_fapl_core
  *
@@ -532,7 +532,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_fapl_core
  *
@@ -571,7 +571,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_core_fapl_get
  *
@@ -608,7 +608,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_core_open
  *
@@ -672,9 +672,9 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     if((file_image_info.buffer != NULL) && !(H5F_ACC_CREAT & flags)) {
         if(HDopen(name, o_flags, 0666) >= 0)
             HGOTO_ERROR(H5E_FILE, H5E_FILEEXISTS, NULL, "file already exists")
-        
+
         /* If backing store is requested, create and stat the file
-         * Note: We are forcing the O_CREAT flag here, even though this is 
+         * Note: We are forcing the O_CREAT flag here, even though this is
          * technically an open.
          */
         if(fa->backing_store) {
@@ -771,13 +771,13 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
                 /* Read in existing data, being careful of interrupted system calls,
                  * partial results, and the end of the file.
                  */
-                
+
                 uint8_t *mem = file->mem; /* memory pointer for writes */
-                
+
                 while(size > 0) {
                     h5_posix_io_t       bytes_in        = 0;    /* # of bytes to read       */
                     h5_posix_io_ret_t   bytes_read      = -1;   /* # of bytes actually read */
-                    
+
                     /* Trying to read more bytes than the return type can handle is
                      * undefined behavior in POSIX.
                      */
@@ -785,11 +785,11 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
                         bytes_in = H5_POSIX_MAX_IO_BYTES;
                     else
                         bytes_in = (h5_posix_io_t)size;
-                    
+
                     do {
                         bytes_read = HDread(file->fd, mem, bytes_in);
                     } while(-1 == bytes_read && EINTR == errno);
-                    
+
                     if(-1 == bytes_read) { /* error */
                         int myerrno = errno;
                         time_t mytime = HDtime(NULL);
@@ -797,10 +797,10 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
                         HGOTO_ERROR(H5E_IO, H5E_READERROR, NULL, "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', file->mem = %p, total read size = %llu, bytes this sub-read = %llu, bytes actually read = %llu, offset = %llu", HDctime(&mytime), file->name, file->fd, myerrno, HDstrerror(myerrno), file->mem, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_read, (unsigned long long)myoffset);
                     } /* end if */
-                    
+
                     HDassert(bytes_read >= 0);
                     HDassert((size_t)bytes_read <= size);
-                    
+
                     mem += bytes_read;
                     size -= (size_t)bytes_read;
                 } /* end while */
@@ -827,7 +827,7 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
          * on open (when not read-only).
          */
         /* Only use write tracking if the file is open for writing */
-        use_write_tracking = 
+        use_write_tracking =
             TRUE == write_tracking_flag         /* user asked for write tracking */
             && !(o_flags & O_RDONLY)            /* file is open for writing (i.e. not read-only) */
             && file->bstore_page_size != 0;     /* page size is not zero */
@@ -857,7 +857,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_core_open() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_core_close
  *
@@ -908,7 +908,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_core_close() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_core_cmp
  *
@@ -987,7 +987,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_core_cmp() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_core_query
  *
@@ -1008,6 +1008,7 @@ H5FD_core_query(const H5FD_t * _file, unsigned long *flags /* out */)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
+    /* clang-format off */
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
         *flags = 0;
@@ -1022,11 +1023,12 @@ H5FD_core_query(const H5FD_t * _file, unsigned long *flags /* out */)
         if(file && file->fd >= 0 && file->backing_store)
             *flags |= H5FD_FEAT_POSIX_COMPAT_HANDLE; /* VFD handle is POSIX I/O call compatible */
     } /* end if */
+    /* clang-format on */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_core_query() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_core_get_eoa
  *
@@ -1051,7 +1053,7 @@ H5FD_core_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     FUNC_LEAVE_NOAPI(file->eoa)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_core_set_eoa
  *
@@ -1083,7 +1085,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_core_set_eoa() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_core_get_eof
  *
@@ -1110,7 +1112,7 @@ H5FD_core_get_eof(const H5FD_t *_file)
     FUNC_LEAVE_NOAPI(MAX(file->eof, file->eoa))
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5FD_core_get_handle
  *
@@ -1170,7 +1172,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_core_get_handle() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_core_read
  *
@@ -1233,7 +1235,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_core_write
  *
@@ -1315,7 +1317,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_core_write() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_core_flush
  *
@@ -1363,11 +1365,11 @@ HDfprintf(stderr, "(%llu, %llu : %lu)\n", item->start, item->end, size);
                     if(H5FD_core_write_to_bstore(file, item->start, size) != SUCCEED)
                         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "unable to write to backing store")
                 } /* end if */
-                
+
                 item = H5FL_FREE(H5FD_core_region_t, item);
             } /* end while */
 
- 
+
 #ifdef DER
 HDfprintf(stderr, "EOF: %llu\n", file->eof);
 HDfprintf(stderr, "EOA: %llu\n", file->eoa);
@@ -1390,7 +1392,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_core_truncate
  *
@@ -1398,24 +1400,24 @@ done:
  *              than the end-of-address.
  *
  *              Addendum -- 12/2/11
- *              For file images opened with the core file driver, it is 
+ *              For file images opened with the core file driver, it is
  *              necessary that we avoid reallocating the core file driver's
  *              buffer uneccessarily.
  *
  *              To this end, I have made the following functional changes
- *              to this function.  
+ *              to this function.
  *
- *              If we are closing, and there is no backing store, this 
+ *              If we are closing, and there is no backing store, this
  *              function becomes a no-op.
  *
  *              If we are closing, and there is backing store, we set the
- *              eof to equal the eoa, and truncate the backing store to 
+ *              eof to equal the eoa, and truncate the backing store to
  *              the new eof
  *
- *              If we are not closing, we realloc the buffer to size equal 
- *              to the smallest multiple of the allocation increment that 
- *              equals or exceeds the eoa and set the eof accordingly.  
- *              Note that we no longer truncate	the backing store to the 
+ *              If we are not closing, we realloc the buffer to size equal
+ *              to the smallest multiple of the allocation increment that
+ *              equals or exceeds the eoa and set the eof accordingly.
+ *              Note that we no longer truncate    the backing store to the
  *              new eof if applicable.
  *                                                                  -- JRM
  *

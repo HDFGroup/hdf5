@@ -16,18 +16,18 @@
  *      a "native" datatype for the H5T interface.
  */
 
-#define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
+#define H5T_PACKAGE        /*suppress error about including H5Tpkg      */
 
 /* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5T_init_native_interface
+#define H5_INTERFACE_INIT_FUNC    H5T_init_native_interface
 
 
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5Pprivate.h"		/* Property lists			*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Tpkg.h"		/* Datatypes				*/
+#include "H5private.h"        /* Generic Functions            */
+#include "H5Eprivate.h"        /* Error handling              */
+#include "H5Iprivate.h"        /* IDs                      */
+#include "H5Pprivate.h"        /* Property lists            */
+#include "H5MMprivate.h"    /* Memory management            */
+#include "H5Tpkg.h"        /* Datatypes                */
 
 /* Static local functions */
 static H5T_t *H5T_get_native_type(H5T_t *dt, H5T_direction_t direction,
@@ -41,7 +41,7 @@ static H5T_t* H5T_get_native_bitfield(size_t prec, H5T_direction_t direction,
 static herr_t H5T_cmp_offset(size_t *comp_size, size_t *offset, size_t elem_size,
                          size_t nelems, size_t align, size_t *struct_align);
 
-
+
 /*--------------------------------------------------------------------------
 NAME
    H5T_init_native_interface -- Initialize interface-specific information
@@ -63,7 +63,7 @@ H5T_init_native_interface(void)
     FUNC_LEAVE_NOAPI(H5T_init())
 } /* H5T_init_native_interface() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Tget_native_type
  *
@@ -130,7 +130,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5T_get_native_type
  *
@@ -353,7 +353,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
 
         case H5T_ENUM:
             {
-                H5T_path_t *tpath;	/* Type conversion info	*/
+                H5T_path_t *tpath;    /* Type conversion info    */
                 hid_t       super_type_id, nat_super_type_id;
 
                 /* Don't need to do anything special for alignment, offset since the ENUM type usually is integer. */
@@ -538,7 +538,14 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_get_native_type() */
 
-
+/* Disable warning for intentional identical branches here -QAK */
+/*
+ *       This pragma only needs to surround the "duplicated branches" in
+ *       the code below, but early (4.4.7, at least) gcc only allows
+ *       diagnostic pragmas to be toggled outside of functions.
+ */
+H5_GCC_DIAG_OFF("duplicated-branches")
+
 /*-------------------------------------------------------------------------
  * Function:    H5T_get_native_integer
  *
@@ -678,8 +685,16 @@ H5T_get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_get_native_integer() */
+H5_GCC_DIAG_ON("duplicated-branches")
 
-
+/* Disable warning for intentional identical branches here -QAK */
+/*
+ *       This pragma only needs to surround the "duplicated branches" in
+ *       the code below, but early (4.4.7, at least) gcc only allows
+ *       diagnostic pragmas to be toggled outside of functions.
+ */
+H5_GCC_DIAG_OFF("duplicated-branches")
+
 /*-------------------------------------------------------------------------
  * Function:    H5T_get_native_float
  *
@@ -700,7 +715,7 @@ H5T_get_native_float(size_t size, H5T_direction_t direction, size_t *struct_alig
     H5T_t       *dt=NULL;       /* Appropriate native datatype to copy */
     hid_t       tid=(-1);       /* Datatype ID of appropriate native datatype */
     size_t      align=0;        /* Alignment necessary for native datatype */
-    size_t 	native_size=0;  /* Datatype size of the native type */
+    size_t     native_size=0;  /* Datatype size of the native type */
     enum match_type {           /* The different kinds of floating point types we can match */
         H5T_NATIVE_FLOAT_MATCH_FLOAT,
         H5T_NATIVE_FLOAT_MATCH_DOUBLE,
@@ -718,50 +733,50 @@ H5T_get_native_float(size_t size, H5T_direction_t direction, size_t *struct_alig
     if(direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {
         if(size<=sizeof(float)) {
             match=H5T_NATIVE_FLOAT_MATCH_FLOAT;
-	    native_size = sizeof(float);
+        native_size = sizeof(float);
         }
         else if(size<=sizeof(double)) {
             match=H5T_NATIVE_FLOAT_MATCH_DOUBLE;
-	    native_size = sizeof(double);
+        native_size = sizeof(double);
         }
 #if H5_SIZEOF_LONG_DOUBLE !=0
         else if(size<=sizeof(long double)) {
             match=H5T_NATIVE_FLOAT_MATCH_LDOUBLE;
-	    native_size = sizeof(long double);
+        native_size = sizeof(long double);
         }
 #endif
         else {   /* If not match, return the biggest datatype */
 #if H5_SIZEOF_LONG_DOUBLE !=0
             match=H5T_NATIVE_FLOAT_MATCH_LDOUBLE;
-	    native_size = sizeof(long double);
+        native_size = sizeof(long double);
 #else
             match=H5T_NATIVE_FLOAT_MATCH_DOUBLE;
             native_size = sizeof(double);
 #endif
-	}
+    }
     } else {
 #if H5_SIZEOF_LONG_DOUBLE !=0
         if(size>sizeof(double)) {
             match=H5T_NATIVE_FLOAT_MATCH_LDOUBLE;
-	    native_size = sizeof(long double);
+        native_size = sizeof(long double);
         }
         else if(size>sizeof(float)) {
             match=H5T_NATIVE_FLOAT_MATCH_DOUBLE;
-	    native_size = sizeof(double);
+        native_size = sizeof(double);
         }
         else {
             match=H5T_NATIVE_FLOAT_MATCH_FLOAT;
-	    native_size = sizeof(float);
-	}
+        native_size = sizeof(float);
+    }
 #else
         if(size>sizeof(float)) {
             match=H5T_NATIVE_FLOAT_MATCH_DOUBLE;
-	    native_size = sizeof(double);
+        native_size = sizeof(double);
         }
         else {
             match=H5T_NATIVE_FLOAT_MATCH_FLOAT;
-	    native_size = sizeof(float);
-	}
+        native_size = sizeof(float);
+    }
 #endif
     }
 
@@ -801,9 +816,17 @@ H5T_get_native_float(size_t size, H5T_direction_t direction, size_t *struct_alig
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5T_get_native_float() */
+H5_GCC_DIAG_ON("duplicated-branches")
 
-
+/* Disable warning for intentional identical branches here -QAK */
+/*
+ *       This pragma only needs to surround the "duplicated branches" in
+ *       the code below, but early (4.4.7, at least) gcc only allows
+ *       diagnostic pragmas to be toggled outside of functions.
+ */
+H5_GCC_DIAG_OFF("duplicated-branches")
+
 /*-------------------------------------------------------------------------
  * Function:    H5T_get_native_bitfield
  *
@@ -887,22 +910,23 @@ H5T_get_native_bitfield(size_t prec, H5T_direction_t direction, size_t *struct_a
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5T_get_native_bitfield() */
+H5_GCC_DIAG_ON("duplicated-branches")
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5T_cmp_offset
+ * Function:    H5T_cmp_offset
  *
- * Purpose:	This function is only for convenience.  It computes the
+ * Purpose:    This function is only for convenience.  It computes the
  *              compound type size, offset of the member being considered
  *              and the alignment for the whole compound type.
  *
- * Return:	Success:        Non-negative value.
+ * Return:    Success:        Non-negative value.
  *
- *		Failure:        Negative value.
+ *        Failure:        Negative value.
  *
- * Programmer:	Raymond Lu
- *		December  10, 2002
+ * Programmer:    Raymond Lu
+ *        December  10, 2002
  *
  *-------------------------------------------------------------------------
  */

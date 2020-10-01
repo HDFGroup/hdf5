@@ -22,7 +22,7 @@ set (HDF5_HL_F90_C_SOURCES
 )
 set_source_files_properties (${HDF5_HL_F90_C_SOURCES} PROPERTIES LANGUAGE C)
 
-set (HDF5_HL_F90_HEADERS ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5LTf90proto.h)
+set (HDF5_HL_F90_HEADERS ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5LTf90proto.h ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5IMcc.h)
 
 if (NOT ONLY_SHARED_LIBS)
   add_library (${HDF5_HL_F90_C_LIB_TARGET} STATIC ${HDF5_HL_F90_C_SOURCES} ${HDF5_HL_F90_HEADERS})
@@ -58,6 +58,17 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
       LINKER_LANGUAGE C
   )
   set (install_targets ${install_targets} ${HDF5_HL_F90_C_LIBSH_TARGET})
+endif ()
+
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_HL_F90_C_SRC_FORMAT ${HDF5_HL_F90_C_LIB_TARGET})
+  else ()
+    clang_format (HDF5_HL_F90_C_SRC_FORMAT ${HDF5_HL_F90_C_LIBSH_TARGET})
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------

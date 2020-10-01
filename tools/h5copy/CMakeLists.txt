@@ -28,6 +28,17 @@ if (BUILD_SHARED_LIBS)
   set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} h5copy-shared)
 endif ()
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_H5COPY_SRC_FORMAT h5copy)
+  else ()
+    clang_format (HDF5_H5COPY_SRC_FORMAT h5copy-shared)
+  endif ()
+endif ()
+
 if (BUILD_TESTING)
   if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
     add_executable (h5copygentest ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/h5copygentest.c)
@@ -35,6 +46,13 @@ if (BUILD_TESTING)
     TARGET_C_PROPERTIES (h5copygentest STATIC)
     target_link_libraries (h5copygentest PRIVATE ${HDF5_LIB_TARGET})
     set_target_properties (h5copygentest PROPERTIES FOLDER generator/tools)
+
+    #-----------------------------------------------------------------------------
+    # Add Target to clang-format
+    #-----------------------------------------------------------------------------
+    if (HDF5_ENABLE_FORMATTERS)
+      clang_format (HDF5_TOOLS_TEST_H5COPY_FORMAT h5copygentest)
+    endif ()
 
     #add_test (NAME h5copygentest COMMAND $<TARGET_FILE:h5copygentest>)
   endif ()
@@ -52,6 +70,13 @@ if (BUILD_TESTING)
     TARGET_C_PROPERTIES (${H5COPY_TOOL_PLUGIN_LIB_TARGET} SHARED)
     target_link_libraries (${H5COPY_TOOL_PLUGIN_LIB_TARGET} PRIVATE ${HDF5_TEST_LIBSH_TARGET})
     H5_SET_LIB_OPTIONS (${H5COPY_TOOL_PLUGIN_LIB_TARGET} ${H5COPY_TOOL_PLUGIN_LIB_NAME} SHARED "LIB")
+
+    #-----------------------------------------------------------------------------
+    # Add Target to clang-format
+    #-----------------------------------------------------------------------------
+    if (HDF5_ENABLE_FORMATTERS)
+      clang_format (HDF5_TOOLS_TEST_H5COPY_PLUGIN_FORMAT ${H5COPY_TOOL_PLUGIN_LIB_TARGET})
+    endif ()
 
     # make plugins dir
     file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/plugins")

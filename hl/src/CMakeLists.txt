@@ -28,6 +28,12 @@ set (HL_HEADERS
 
 set (HL_PRIVATE_HEADERS
     ${HDF5_HL_SRC_SOURCE_DIR}/H5LTparse.h
+    ${HDF5_HL_SRC_SOURCE_DIR}/H5DSprivate.h
+    ${HDF5_HL_SRC_SOURCE_DIR}/H5IMprivate.h
+    ${HDF5_HL_SRC_SOURCE_DIR}/H5PTprivate.h
+    ${HDF5_HL_SRC_SOURCE_DIR}/H5HLprivate2.h
+    ${HDF5_HL_SRC_SOURCE_DIR}/H5LTprivate.h
+    ${HDF5_HL_SRC_SOURCE_DIR}/H5TBprivate.h
 )
 
 if (NOT ONLY_SHARED_LIBS)
@@ -59,6 +65,17 @@ if (BUILD_SHARED_LIBS)
   set_target_properties (${HDF5_HL_LIBSH_TARGET} PROPERTIES FOLDER libraries/hl)
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_HL_LIBSH_TARGET}")
   set (install_targets ${install_targets} ${HDF5_HL_LIBSH_TARGET})
+endif ()
+
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_HL_SRC_FORMAT ${HDF5_HL_LIB_TARGET})
+  else ()
+    clang_format (HDF5_HL_SRC_FORMAT ${HDF5_HL_LIBSH_TARGET})
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------

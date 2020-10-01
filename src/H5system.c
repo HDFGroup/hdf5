@@ -13,11 +13,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:    H5system.c
- *      Aug 21 2006
- *      Quincey Koziol <koziol@hdfgroup.org>
+ * Created:     H5system.c
+ *              Aug 21 2006
+ *              Quincey Koziol
  *
- * Purpose:    System call wrapper implementations.
+ * Purpose:     System call wrapper implementations.
  *
  *-------------------------------------------------------------------------
  */
@@ -30,10 +30,10 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"        /* Generic Functions            */
-#include "H5Eprivate.h"        /* Error handling              */
-#include "H5Fprivate.h"        /* File access                */
-#include "H5MMprivate.h"    /* Memory management            */
+#include "H5private.h"      /* Generic Functions        */
+#include "H5Eprivate.h"     /* Error handling           */
+#include "H5Fprivate.h"     /* File access              */
+#include "H5MMprivate.h"    /* Memory management        */
 
 
 /****************/
@@ -73,7 +73,7 @@
 /* Track whether tzset routine was called */
 static hbool_t H5_ntzset = FALSE;
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  HDfprintf
  *
@@ -105,8 +105,7 @@ static hbool_t H5_ntzset = FALSE;
  *      format_templ in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+H5_GCC_DIAG_OFF("format-nonliteral")
 int
 HDfprintf(FILE *stream, const char *fmt, ...)
 {
@@ -432,9 +431,8 @@ HDfprintf(FILE *stream, const char *fmt, ...)
     HDva_end(ap);
     return nout;
 } /* end HDfprintf() */
-#pragma GCC diagnostic pop
+H5_GCC_DIAG_ON("format-nonliteral")
 
-
 /*-------------------------------------------------------------------------
  * Function:  HDstrtoll
  *
@@ -474,8 +472,6 @@ HDfprintf(FILE *stream, const char *fmt, ...)
  *
  * Programmer:  Robb Matzke
  *              Thursday, April  9, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -561,7 +557,7 @@ HDstrtoll(const char *s, const char **rest, int base)
     return acc;
 } /* end HDstrtoll() */
 #endif
-
+
 /*-------------------------------------------------------------------------
  * Function:  HDrand/HDsrand
  *
@@ -597,7 +593,7 @@ void HDsrand(unsigned int seed)
 #endif /* H5_HAVE_RAND_R */
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5_make_time
  *
@@ -682,7 +678,7 @@ done:
 /* Offset between 1/1/1601 and 1/1/1970 in 100 nanosecond units */
 #define _W32_FT_OFFSET (116444736000000000ULL)
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  Wgettimeofday
  *
@@ -734,7 +730,7 @@ Wgettimeofday(struct timeval *tv, struct timezone *tz)
   return 0;
 } /* end Wgettimeofday() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    Wsetenv
  *
@@ -777,7 +773,7 @@ Wsetenv(const char *name, const char *value, int overwrite)
 static char Wlogin_buffer[WloginBuffer_count];
 
 char*
-Wgetlogin()
+Wgetlogin(void)
 {
 
 #ifdef H5_HAVE_WINSOCK2_H
@@ -832,7 +828,7 @@ Wnanosleep(const struct timespec *req, struct timespec *rem)
 
 } /* end Wnanosleep() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    Wllround, Wllroundf, Wlround, Wlroundf, Wround, Wroundf
  *
@@ -1010,7 +1006,7 @@ done:
 
 #endif /* H5_HAVE_WIN32_API */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5_build_extpath
  *
@@ -1130,7 +1126,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_build_extpath() */
 
-
+
 /*--------------------------------------------------------------------------
  * Function:    H5_combine_path
  *
@@ -1205,7 +1201,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_combine_path() */
 
-
+
 /*--------------------------------------------------------------------------
  * Function:    H5_nanosleep
  *
@@ -1233,7 +1229,7 @@ H5_nanosleep(uint64_t nanosec)
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5_nanosleep() */
 
-
+
 /*--------------------------------------------------------------------------
  * Function:    H5_get_time
  *
@@ -1269,7 +1265,7 @@ H5_get_time(void)
 
 #define H5_WIN32_ENV_VAR_BUFFER_SIZE    32767
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5_expand_windows_env_vars()
  *

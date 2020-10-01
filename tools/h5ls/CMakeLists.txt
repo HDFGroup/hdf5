@@ -30,6 +30,17 @@ if (BUILD_SHARED_LIBS)
   set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} h5ls-shared)
 endif ()
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_H5LS_SRC_FORMAT h5ls)
+  else ()
+    clang_format (HDF5_H5LS_SRC_FORMAT h5ls-shared)
+  endif ()
+endif ()
+
 if (BUILD_TESTING)
   #-----------------------------------------------------------------------------
   # If plugin library tests can be tested
@@ -45,8 +56,16 @@ if (BUILD_TESTING)
     target_link_libraries (${H5LS_TOOL_PLUGIN_LIB_TARGET} PRIVATE ${HDF5_TEST_LIBSH_TARGET})
     H5_SET_LIB_OPTIONS (${H5LS_TOOL_PLUGIN_LIB_TARGET} ${H5LS_TOOL_PLUGIN_LIB_NAME} SHARED "LIB")
 
+    #-----------------------------------------------------------------------------
+    # Add Target to clang-format
+    #-----------------------------------------------------------------------------
+    if (HDF5_ENABLE_FORMATTERS)
+      clang_format (HDF5_TOOLS_TEST_H5LS_PLUGIN_FORMAT ${H5LS_TOOL_PLUGIN_LIB_TARGET})
+    endif ()
+
     # make plugins dir
     file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/plugins")
+
     #-----------------------------------------------------------------------------
     # Copy plugin library to a plugins folder
     #-----------------------------------------------------------------------------

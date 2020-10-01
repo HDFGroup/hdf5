@@ -36,7 +36,7 @@ set (CPP_TEST_SOURCES
 set (srcdir ${CMAKE_CURRENT_SOURCE_DIR})
 configure_file (${HDF5_CPP_TEST_SOURCE_DIR}/H5srcdir_str.h.in H5srcdir_str.h  @ONLY)
 
-add_executable (cpp_testhdf5 ${CPP_TEST_SOURCES} )
+add_executable (cpp_testhdf5 ${CPP_TEST_SOURCES} ${HDF5_CPP_TEST_SOURCE_DIR}/h5cpputil.h)
 target_include_directories (cpp_testhdf5 PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_TEST_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 target_compile_options(cpp_testhdf5 PRIVATE "${HDF5_CMAKE_CXX_FLAGS}")
 target_compile_definitions(cpp_testhdf5
@@ -55,6 +55,13 @@ else ()
   endif ()
 endif ()
 set_target_properties (cpp_testhdf5 PROPERTIES FOLDER test/cpp)
+
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_CPP_TEST_cpp_testhdf5_FORMAT cpp_testhdf5)
+endif ()
 
 if (HDF5_TEST_CPP AND HDF5_TEST_SERIAL)
   include (CMakeTests.cmake)
