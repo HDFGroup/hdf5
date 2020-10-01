@@ -105,11 +105,11 @@ int
 initialize_ioc_threads(subfiling_context_t *sf_context)
 {
     int      status;
-	unsigned int thread_pool_count = HG_TEST_NUM_THREADS_DEFAULT;
+    unsigned int thread_pool_count = HG_TEST_NUM_THREADS_DEFAULT;
     int64_t *context_id = (int64_t *) malloc(sizeof(int64_t));
-	int      world_size = sf_context->topology->world_size;
-	size_t   alloc_size = ((size_t)world_size * sizeof(struct hg_thread_work));
-	char    *envValue;
+    int      world_size = sf_context->topology->world_size;
+    size_t   alloc_size = ((size_t)world_size * sizeof(struct hg_thread_work));
+    char    *envValue;
     assert(context_id != NULL);
     /* Initialize the main IOC thread input argument.
      * Each IOC request will utilize this context_id which is
@@ -119,15 +119,15 @@ initialize_ioc_threads(subfiling_context_t *sf_context)
      */
     context_id[0] = sf_context->sf_context_id;
 
-	if (pool_request == NULL) {
-		if ((pool_request = (struct hg_thread_work *)malloc(alloc_size)) == NULL) {
-			perror("malloc error");
-			return -1;
-		}
-		else pool_concurrent_max = world_size;
-	}
+    if (pool_request == NULL) {
+        if ((pool_request = (struct hg_thread_work *)malloc(alloc_size)) == NULL) {
+            perror("malloc error");
+            return -1;
+        }
+        else pool_concurrent_max = world_size;
+    }
 
-	memset(pool_request, 0, alloc_size);
+    memset(pool_request, 0, alloc_size);
 
     /* Initialize a couple of mutex variables that are used
      * during IO concentrator operations to serialize
@@ -144,13 +144,13 @@ initialize_ioc_threads(subfiling_context_t *sf_context)
         goto err_exit;
     }
 
-	/* Allow experimentation with the number of helper threads */
-	if ((envValue = getenv("IOC_THREAD_POOL_COUNT")) != NULL) {
-		int value_check = atoi(envValue);
-		if (value_check > 0) {
-			thread_pool_count = (unsigned int)value_check;
-		}
-	}
+    /* Allow experimentation with the number of helper threads */
+    if ((envValue = getenv("IOC_THREAD_POOL_COUNT")) != NULL) {
+        int value_check = atoi(envValue);
+        if (value_check > 0) {
+            thread_pool_count = (unsigned int)value_check;
+        }
+    }
 
     /* Initialize a thread pool for the IO Concentrator to use */
     status = hg_thread_pool_init(thread_pool_count, &ioc_thread_pool);
