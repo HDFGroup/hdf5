@@ -25,9 +25,8 @@
  *      reporting macros.
  */
 #define H5Z_MODULE
-#define H5_MY_PKG       H5Z
-#define H5_MY_PKG_ERR   H5E_PLINE
-#define H5_MY_PKG_INIT  YES
+#define H5_MY_PKG      H5Z
+#define H5_MY_PKG_ERR  H5E_PLINE
+#define H5_MY_PKG_INIT YES
 
 #endif /* _H5Zmodule_H */
-

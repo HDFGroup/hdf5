@@ -19,7 +19,7 @@
 #define _H5Zpkg_H
 
 /* Include private header file */
-#include "H5Zprivate.h"          /* Filter functions                */
+#include "H5Zprivate.h" /* Filter functions                */
 
 /********************/
 /* Internal filters */
@@ -55,4 +55,3 @@ H5_DLLVAR H5Z_class2_t H5Z_SZIP[1];
 H5_DLL herr_t H5Z__unregister(H5Z_filter_t filter_id);
 
 #endif /* _H5Zpkg_H */
-

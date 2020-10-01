@@ -55,45 +55,51 @@
 #define CHK_DIM1 50
 #define CHK_DIM2 50
 
-static herr_t gen_earliest_latest(void)
+static herr_t
+gen_earliest_latest(void)
 {
-    hid_t   fid = -1;      /* File ID */
-    hid_t   fapl = -1;     /* File access property list ID */
-    hid_t   fcpl = -1;     /* File creation property list ID */
-    hid_t   dcpl = -1;     /* Dataset creation property list ID */
-    hid_t   space = -1;    /* Dataspace ID */
-    hid_t   dset = -1;     /* Dataset ID */
-    float  *buf = NULL;    /* Buffer for writing data */
-    float  *bufp = NULL;   /* Pointer to data buffer */
-    hsize_t dims[RANK] = {DIM1, DIM2}; /* Dimensions */
+    hid_t   fid              = -1;                   /* File ID */
+    hid_t   fapl             = -1;                   /* File access property list ID */
+    hid_t   fcpl             = -1;                   /* File creation property list ID */
+    hid_t   dcpl             = -1;                   /* Dataset creation property list ID */
+    hid_t   space            = -1;                   /* Dataspace ID */
+    hid_t   dset             = -1;                   /* Dataset ID */
+    float * buf              = NULL;                 /* Buffer for writing data */
+    float * bufp             = NULL;                 /* Pointer to data buffer */
+    hsize_t dims[RANK]       = {DIM1, DIM2};         /* Dimensions */
     hsize_t chunk_dims[RANK] = {CHK_DIM1, CHK_DIM2}; /* Dimensions of chunk */
     int     i, j;
     herr_t  ret = SUCCEED; /* Generic return value */
 
     /* Create file creation property list */
-    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0) TEST_ERROR;
+    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        TEST_ERROR;
 
     /* Create file access property list */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) TEST_ERROR;
+    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
 
     /* Set the "use the earliest/latest version of the format" bounds
        for creating objects in the file */
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST) < 0)
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST) < 0)
         TEST_ERROR;
 
     /* Create file */
-    if((fid = H5Fcreate(FILENAME_E_L, H5F_ACC_TRUNC, fcpl, fapl)) <0)
+    if ((fid = H5Fcreate(FILENAME_E_L, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
         TEST_ERROR;
 
     /* Close file property lists */
-    if(H5Pclose(fapl) < 0) TEST_ERROR;
-    if(H5Pclose(fcpl) < 0) TEST_ERROR;
+    if (H5Pclose(fapl) < 0)
+        TEST_ERROR;
+    if (H5Pclose(fcpl) < 0)
+        TEST_ERROR;
 
     /*
      * Add a chunked dataset with layout version 3 (default)
      */
     buf = (float *)HDmalloc((size_t)DIM1 * (size_t)DIM2 * sizeof(float));
-    if (buf == NULL) TEST_ERROR;
+    if (buf == NULL)
+        TEST_ERROR;
 
     /* Fill sample data */
     bufp = buf;
@@ -102,59 +108,75 @@ static herr_t gen_earliest_latest(void)
             *bufp = 100.0F;
 
     /* Create the dataspace */
-    if((space = H5Screate_simple(RANK, dims, NULL)) < 0) TEST_ERROR;
+    if ((space = H5Screate_simple(RANK, dims, NULL)) < 0)
+        TEST_ERROR;
 
     /* Create the dataset creation property list */
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
 
     /* Set up for chunked data */
-    if(H5Pset_chunk(dcpl, 2, chunk_dims) < 0) TEST_ERROR;
+    if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
+        TEST_ERROR;
 
     /* Create and write the dataset */
     dset = H5Dcreate2(fid, "DS_chunked_layout_3", H5T_NATIVE_FLOAT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
-    if (dset < 0) TEST_ERROR;
+    if (dset < 0)
+        TEST_ERROR;
 
     ret = H5Dwrite(dset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
-    if (ret < 0) TEST_ERROR;
+    if (ret < 0)
+        TEST_ERROR;
 
     /* Close property list and dataset, will reuse dataspace */
-    if(H5Pclose(dcpl) < 0) TEST_ERROR;
-    if(H5Dclose(dset) < 0) TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
 
     /*
      * Add a chunked dataset with layout version 4 (H5Pset_chunk_opts)
      */
 
     /* Create the dataset creation property list */
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
 
     /* Set up for chunked data */
-    if(H5Pset_chunk(dcpl, 2, chunk_dims) < 0) TEST_ERROR;
+    if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
+        TEST_ERROR;
 
     /* Disable partial chunk filters, triggers layout version 4 */
-    if(H5Pset_chunk_opts(dcpl, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS) < 0)
+    if (H5Pset_chunk_opts(dcpl, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS) < 0)
         TEST_ERROR;
 
     /* Create and write the dataset */
     dset = H5Dcreate2(fid, "DS_chunked_layout_4", H5T_NATIVE_FLOAT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
-    if (dset < 0) TEST_ERROR;
+    if (dset < 0)
+        TEST_ERROR;
     ret = H5Dwrite(dset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
-    if (ret < 0) TEST_ERROR;
+    if (ret < 0)
+        TEST_ERROR;
 
     /* Release allocated buffer */
     HDfree(buf);
     bufp = buf = NULL;
 
     /* Close everything */
-    if(H5Pclose(dcpl) < 0) TEST_ERROR;
-    if(H5Dclose(dset) < 0) TEST_ERROR;
-    if(H5Sclose(space) < 0) TEST_ERROR;
-    if(H5Fclose(fid) < 0) TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    if (H5Sclose(space) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
 
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Dclose(dset);
         H5Sclose(space);
         H5Pclose(dcpl);
@@ -162,7 +184,8 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
         HDfree(buf);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
     return FAIL;
 } /* gen_earliest_latest */
 
@@ -176,46 +199,52 @@ error:
  * Return: SUCCEED/FAIL
  *
  ***********************************************************************/
-static herr_t gen_earliest_v18(void)
+static herr_t
+gen_earliest_v18(void)
 {
-    hid_t   fid = -1;      /* File ID */
-    hid_t   fapl = -1;     /* File access property list ID */
-    hid_t   fcpl = -1;     /* File creation property list ID */
-    hid_t   dcpl = -1;     /* Dataset creation property list ID */
-    hid_t   space = -1;    /* Dataspace ID */
-    hid_t   dset = -1;     /* Dataset ID */
-    float  *buf = NULL;    /* Buffer for writing data */
-    float  *bufp = NULL;   /* Pointer to data buffer */
-    hsize_t dims[RANK] = {DIM1, DIM2}; /* Dimensions */
+    hid_t   fid              = -1;                   /* File ID */
+    hid_t   fapl             = -1;                   /* File access property list ID */
+    hid_t   fcpl             = -1;                   /* File creation property list ID */
+    hid_t   dcpl             = -1;                   /* Dataset creation property list ID */
+    hid_t   space            = -1;                   /* Dataspace ID */
+    hid_t   dset             = -1;                   /* Dataset ID */
+    float * buf              = NULL;                 /* Buffer for writing data */
+    float * bufp             = NULL;                 /* Pointer to data buffer */
+    hsize_t dims[RANK]       = {DIM1, DIM2};         /* Dimensions */
     hsize_t chunk_dims[RANK] = {CHK_DIM1, CHK_DIM2}; /* Dimensions of chunk */
     int     i, j;
     herr_t  ret = SUCCEED; /* Generic return value */
 
     /* Create file creation property list */
-    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0) TEST_ERROR;
+    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        TEST_ERROR;
 
     /* Create file access property list */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) TEST_ERROR;
+    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
 
     /* Set the "use the earliest/v18 version of the format" bounds
        for creating objects in the file */
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_V18) < 0)
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_V18) < 0)
         TEST_ERROR;
 
     /* Create file */
-    if((fid = H5Fcreate(FILENAME_E_18, H5F_ACC_TRUNC, fcpl, fapl)) <0)
+    if ((fid = H5Fcreate(FILENAME_E_18, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
         TEST_ERROR;
 
     /* Close file property lists */
-    if(H5Pclose(fapl) < 0) TEST_ERROR;
-    if(H5Pclose(fcpl) < 0) TEST_ERROR;
+    if (H5Pclose(fapl) < 0)
+        TEST_ERROR;
+    if (H5Pclose(fcpl) < 0)
+        TEST_ERROR;
 
     /*
      * Add a chunked dataset with layout version 3 (default)
      */
 
     buf = (float *)HDmalloc((size_t)DIM1 * (size_t)DIM2 * sizeof(float));
-    if (buf == NULL) TEST_ERROR;
+    if (buf == NULL)
+        TEST_ERROR;
 
     /* Fill sample data */
     bufp = buf;
@@ -224,35 +253,45 @@ static herr_t gen_earliest_v18(void)
             *bufp = 100.0F;
 
     /* Create the dataspace */
-    if((space = H5Screate_simple(RANK, dims, NULL)) < 0) TEST_ERROR;
+    if ((space = H5Screate_simple(RANK, dims, NULL)) < 0)
+        TEST_ERROR;
 
     /* Create the dataset creation property list */
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
 
     /* Set up for chunked data */
-    if(H5Pset_chunk(dcpl, 2, chunk_dims) < 0) TEST_ERROR;
+    if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
+        TEST_ERROR;
 
     /* Create and write the dataset */
     dset = H5Dcreate2(fid, "DS_chunked_layout_3", H5T_NATIVE_FLOAT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
-    if (dset < 0) TEST_ERROR;
+    if (dset < 0)
+        TEST_ERROR;
 
     ret = H5Dwrite(dset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
-    if (ret < 0) TEST_ERROR;
+    if (ret < 0)
+        TEST_ERROR;
 
     /* Release allocated buffer */
     HDfree(buf);
     bufp = buf = NULL;
 
     /* Close everything */
-    if(H5Pclose(dcpl) < 0) TEST_ERROR;
-    if(H5Dclose(dset) < 0) TEST_ERROR;
-    if(H5Sclose(space) < 0) TEST_ERROR;
-    if(H5Fclose(fid) < 0) TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    if (H5Sclose(space) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
 
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Dclose(dset);
         H5Sclose(space);
         H5Pclose(dcpl);
@@ -260,7 +299,8 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
         HDfree(buf);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
     return FAIL;
 } /* gen_earliest_v18 */
 
@@ -278,38 +318,42 @@ error:
  * Return: SUCCEED/FAIL
  *
  ***********************************************************************/
-static herr_t gen_latest_latest(void)
+static herr_t
+gen_latest_latest(void)
 {
-    hid_t   fid = -1;      /* File ID */
-    hid_t   fapl = -1;     /* File access property list ID */
-    hid_t   dcpl = -1;     /* Dataset creation property list ID */
-    hid_t   space = -1;    /* Dataspace ID */
-    hid_t   dset = -1;     /* Dataset ID */
-    float  *buf = NULL;    /* Buffer for writing data */
-    float  *bufp = NULL;   /* Pointer to data buffer */
-    hsize_t dims[RANK] = {DIM1, DIM2}; /* Dimensions */
+    hid_t   fid              = -1;                   /* File ID */
+    hid_t   fapl             = -1;                   /* File access property list ID */
+    hid_t   dcpl             = -1;                   /* Dataset creation property list ID */
+    hid_t   space            = -1;                   /* Dataspace ID */
+    hid_t   dset             = -1;                   /* Dataset ID */
+    float * buf              = NULL;                 /* Buffer for writing data */
+    float * bufp             = NULL;                 /* Pointer to data buffer */
+    hsize_t dims[RANK]       = {DIM1, DIM2};         /* Dimensions */
     hsize_t chunk_dims[RANK] = {CHK_DIM1, CHK_DIM2}; /* Dimensions of chunk */
     int     i, j;
     herr_t  ret = SUCCEED; /* Generic return value */
 
     /* Create file access property list */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) TEST_ERROR;
+    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
 
     /* Set the "use the latest/latest version of the format" bounds
        for creating objects in the file */
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
         TEST_ERROR;
 
     /* Create the file with version 3 superblock */
     fid = H5Fcreate(FILENAME_L_L, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
-    if (fid < 0) TEST_ERROR;
+    if (fid < 0)
+        TEST_ERROR;
 
     /*
      * Add a chunked dataset with layout version 4 (H5Pset_chunk_opts)
      */
 
     buf = (float *)HDmalloc((size_t)DIM1 * (size_t)DIM2 * sizeof(float));
-    if (buf == NULL) TEST_ERROR;
+    if (buf == NULL)
+        TEST_ERROR;
 
     /* Fill sample data */
     bufp = buf;
@@ -318,44 +362,55 @@ static herr_t gen_latest_latest(void)
             *bufp = 100.0F;
 
     /* Create the dataspace */
-    if((space = H5Screate_simple(RANK, dims, NULL)) < 0) TEST_ERROR;
+    if ((space = H5Screate_simple(RANK, dims, NULL)) < 0)
+        TEST_ERROR;
 
     /* Create the dataset creation property list */
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
 
     /* Set up for chunked data */
-    if(H5Pset_chunk(dcpl, 2, chunk_dims) < 0) TEST_ERROR;
+    if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
+        TEST_ERROR;
 
     /* Disable partial chunk filters, triggers layout version 4 */
-    if(H5Pset_chunk_opts(dcpl, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS) < 0)
+    if (H5Pset_chunk_opts(dcpl, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS) < 0)
         TEST_ERROR;
 
     /* Create and write the dataset */
     dset = H5Dcreate2(fid, "DS_chunked_layout_4", H5T_NATIVE_FLOAT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
-    if (dset < 0) TEST_ERROR;
+    if (dset < 0)
+        TEST_ERROR;
     ret = H5Dwrite(dset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
-    if (ret < 0) TEST_ERROR;
+    if (ret < 0)
+        TEST_ERROR;
 
     /* Release allocated buffer */
     HDfree(buf);
     bufp = buf = NULL;
 
     /* Close everything */
-    if(H5Pclose(dcpl) < 0) TEST_ERROR;
-    if(H5Dclose(dset) < 0) TEST_ERROR;
-    if(H5Sclose(space) < 0) TEST_ERROR;
-    if(H5Fclose(fid) < 0) TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    if (H5Sclose(space) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
 
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Dclose(dset);
         H5Sclose(space);
         H5Pclose(dcpl);
         H5Fclose(fid);
         HDfree(buf);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
     return FAIL;
 } /* gen_latest_latest */
 
@@ -371,46 +426,52 @@ error:
  * Return: SUCCEED/FAIL
  *
  ***********************************************************************/
-static herr_t gen_v18_latest(void)
+static herr_t
+gen_v18_latest(void)
 {
-    hid_t   fid = -1;      /* File ID */
-    hid_t   fapl = -1;     /* File access property list ID */
-    hid_t   fcpl = -1;     /* File creation property list ID */
-    hid_t   dcpl = -1;     /* Dataset creation property list ID */
-    hid_t   space = -1;    /* Dataspace ID */
-    hid_t   dset = -1;     /* Dataset ID */
-    float  *buf = NULL;    /* Buffer for writing data */
-    float  *bufp = NULL;   /* Pointer to data buffer */
-    hsize_t dims[RANK] = {DIM1, DIM2}; /* Dimensions */
+    hid_t   fid              = -1;                   /* File ID */
+    hid_t   fapl             = -1;                   /* File access property list ID */
+    hid_t   fcpl             = -1;                   /* File creation property list ID */
+    hid_t   dcpl             = -1;                   /* Dataset creation property list ID */
+    hid_t   space            = -1;                   /* Dataspace ID */
+    hid_t   dset             = -1;                   /* Dataset ID */
+    float * buf              = NULL;                 /* Buffer for writing data */
+    float * bufp             = NULL;                 /* Pointer to data buffer */
+    hsize_t dims[RANK]       = {DIM1, DIM2};         /* Dimensions */
     hsize_t chunk_dims[RANK] = {CHK_DIM1, CHK_DIM2}; /* Dimensions of chunk */
     int     i, j;
     herr_t  ret = SUCCEED; /* Generic return value */
 
     /* Create file creation property list */
-    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0) TEST_ERROR;
+    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        TEST_ERROR;
 
     /* Create file access property list */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) TEST_ERROR;
+    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
 
     /* Set the "use the v18/latest version of the format" bounds
        for creating objects in the file, also trigger version 2 superblock */
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_V18, H5F_LIBVER_LATEST) < 0)
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_V18, H5F_LIBVER_LATEST) < 0)
         TEST_ERROR;
 
     /* Create file */
-    if((fid = H5Fcreate(FILENAME_18_L, H5F_ACC_TRUNC, fcpl, fapl)) <0)
+    if ((fid = H5Fcreate(FILENAME_18_L, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
         TEST_ERROR;
 
     /* Close file property lists */
-    if(H5Pclose(fapl) < 0) TEST_ERROR;
-    if(H5Pclose(fcpl) < 0) TEST_ERROR;
+    if (H5Pclose(fapl) < 0)
+        TEST_ERROR;
+    if (H5Pclose(fcpl) < 0)
+        TEST_ERROR;
 
     /*
      * Add a chunked dataset with layout version 3 (default)
      */
 
     buf = (float *)HDmalloc((size_t)DIM1 * (size_t)DIM2 * sizeof(float));
-    if (buf == NULL) TEST_ERROR;
+    if (buf == NULL)
+        TEST_ERROR;
 
     /* Fill sample data */
     bufp = buf;
@@ -419,34 +480,44 @@ static herr_t gen_v18_latest(void)
             *bufp = 100.0F;
 
     /* Create the dataspace */
-    if((space = H5Screate_simple(RANK, dims, NULL)) < 0) TEST_ERROR;
+    if ((space = H5Screate_simple(RANK, dims, NULL)) < 0)
+        TEST_ERROR;
 
     /* Create the dataset creation property list */
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
 
     /* Set up for chunked data */
-    if(H5Pset_chunk(dcpl, 2, chunk_dims) < 0) TEST_ERROR;
+    if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
+        TEST_ERROR;
 
     /* Create and write the dataset */
     dset = H5Dcreate2(fid, "DS_chunked_layout_3", H5T_NATIVE_FLOAT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
-    if (dset < 0) TEST_ERROR;
+    if (dset < 0)
+        TEST_ERROR;
     ret = H5Dwrite(dset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
-    if (ret < 0) TEST_ERROR;
+    if (ret < 0)
+        TEST_ERROR;
 
     /* Release allocated buffer */
     HDfree(buf);
     bufp = buf = NULL;
 
     /* Close property list and dataset, will reuse dataspace */
-    if(H5Pclose(dcpl) < 0) TEST_ERROR;
-    if(H5Dclose(dset) < 0) TEST_ERROR;
-    if(H5Sclose(space) < 0) TEST_ERROR;
-    if(H5Fclose(fid) < 0) TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    if (H5Sclose(space) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
 
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Dclose(dset);
         H5Sclose(space);
         H5Pclose(dcpl);
@@ -454,7 +525,8 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
         HDfree(buf);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
     return FAIL;
 } /* gen_v18_latest */
 
@@ -469,46 +541,52 @@ error:
  * Return: SUCCEED/FAIL
  *
  ***********************************************************************/
-static herr_t gen_v18_v18(void)
+static herr_t
+gen_v18_v18(void)
 {
-    hid_t   fid = -1;      /* File ID */
-    hid_t   fapl = -1;     /* File access property list ID */
-    hid_t   fcpl = -1;     /* File creation property list ID */
-    hid_t   dcpl = -1;     /* Dataset creation property list ID */
-    hid_t   space = -1;    /* Dataspace ID */
-    hid_t   dset = -1;     /* Dataset ID */
-    float  *buf = NULL;    /* Buffer for writing data */
-    float  *bufp = NULL;   /* Pointer to data buffer */
-    hsize_t dims[RANK] = {DIM1, DIM2}; /* Dimensions */
+    hid_t   fid              = -1;                   /* File ID */
+    hid_t   fapl             = -1;                   /* File access property list ID */
+    hid_t   fcpl             = -1;                   /* File creation property list ID */
+    hid_t   dcpl             = -1;                   /* Dataset creation property list ID */
+    hid_t   space            = -1;                   /* Dataspace ID */
+    hid_t   dset             = -1;                   /* Dataset ID */
+    float * buf              = NULL;                 /* Buffer for writing data */
+    float * bufp             = NULL;                 /* Pointer to data buffer */
+    hsize_t dims[RANK]       = {DIM1, DIM2};         /* Dimensions */
     hsize_t chunk_dims[RANK] = {CHK_DIM1, CHK_DIM2}; /* Dimensions of chunk */
     int     i, j;
     herr_t  ret = SUCCEED; /* Generic return value */
 
     /* Create file creation property list */
-    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0) TEST_ERROR;
+    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        TEST_ERROR;
 
     /* Create file access property list */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) TEST_ERROR;
+    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
 
     /* Set the "use the v18 version of the format" bounds
        for creating objects in the file */
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_V18, H5F_LIBVER_V18) < 0)
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_V18, H5F_LIBVER_V18) < 0)
         TEST_ERROR;
 
     /* Create file */
-    if((fid = H5Fcreate(FILENAME_18_18, H5F_ACC_TRUNC, fcpl, fapl)) <0)
+    if ((fid = H5Fcreate(FILENAME_18_18, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
         TEST_ERROR;
 
     /* Close file property lists */
-    if(H5Pclose(fapl) < 0) TEST_ERROR;
-    if(H5Pclose(fcpl) < 0) TEST_ERROR;
+    if (H5Pclose(fapl) < 0)
+        TEST_ERROR;
+    if (H5Pclose(fcpl) < 0)
+        TEST_ERROR;
 
     /*
      * Add a chunked dataset with layout version 3 (default)
      */
 
     buf = (float *)HDmalloc((size_t)DIM1 * (size_t)DIM2 * sizeof(float));
-    if (buf == NULL) TEST_ERROR;
+    if (buf == NULL)
+        TEST_ERROR;
 
     /* Fill sample data */
     bufp = buf;
@@ -517,36 +595,45 @@ static herr_t gen_v18_v18(void)
             *bufp = 100.0F;
 
     /* Create the dataspace */
-    if((space = H5Screate_simple(RANK, dims, NULL)) < 0) TEST_ERROR;
+    if ((space = H5Screate_simple(RANK, dims, NULL)) < 0)
+        TEST_ERROR;
 
     /* Create the dataset creation property list */
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
 
     /* Set up for chunked data */
-    if(H5Pset_chunk(dcpl, 2, chunk_dims) < 0) TEST_ERROR;
+    if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
+        TEST_ERROR;
 
     /* Create and write the dataset */
     dset = H5Dcreate2(fid, "DS_chunked_layout_3", H5T_NATIVE_FLOAT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
-    if (dset < 0) TEST_ERROR;
+    if (dset < 0)
+        TEST_ERROR;
     ret = H5Dwrite(dset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
-    if (ret < 0) TEST_ERROR;
+    if (ret < 0)
+        TEST_ERROR;
 
     /* Close property list and dataset, will reuse dataspace */
-    if(H5Pclose(dcpl) < 0) TEST_ERROR;
-    if(H5Dclose(dset) < 0) TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
 
     /* Close the file, then reopen it with the latest version */
-    if(H5Fclose(fid) < 0) TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
 
     /* Create file access property list */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) TEST_ERROR;
+    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
 
     /* Set the "use the v18/latest version of the format" bounds
        for creating a layout version 4 object in the file */
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_V18, H5F_LIBVER_LATEST) < 0)
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_V18, H5F_LIBVER_LATEST) < 0)
         TEST_ERROR;
 
-    if((fid = H5Fopen(FILENAME_18_18, H5F_ACC_RDWR, fapl)) < 0)
+    if ((fid = H5Fopen(FILENAME_18_18, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR;
 
     /*
@@ -554,35 +641,45 @@ static herr_t gen_v18_v18(void)
      */
 
     /* Create the dataset creation property list */
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
 
     /* Set up for chunked data */
-    if(H5Pset_chunk(dcpl, 2, chunk_dims) < 0) TEST_ERROR;
+    if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
+        TEST_ERROR;
 
     /* Disable partial chunk filters */
-    if(H5Pset_chunk_opts(dcpl, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS) < 0)
+    if (H5Pset_chunk_opts(dcpl, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS) < 0)
         TEST_ERROR;
 
     /* Create and write the dataset */
     dset = H5Dcreate2(fid, "DS_chunked_layout_4", H5T_NATIVE_FLOAT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
-    if (dset < 0) TEST_ERROR;
+    if (dset < 0)
+        TEST_ERROR;
     ret = H5Dwrite(dset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
-    if (ret < 0) TEST_ERROR;
+    if (ret < 0)
+        TEST_ERROR;
 
     /* Release allocated buffer */
     HDfree(buf);
     bufp = buf = NULL;
 
     /* Close everything */
-    if(H5Pclose(dcpl) < 0) TEST_ERROR;
-    if(H5Pclose(fapl) < 0) TEST_ERROR;
-    if(H5Dclose(dset) < 0) TEST_ERROR;
-    if(H5Sclose(space) < 0) TEST_ERROR;
-    if(H5Fclose(fid) < 0) TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    if (H5Pclose(fapl) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    if (H5Sclose(space) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Dclose(dset);
         H5Sclose(space);
         H5Pclose(dcpl);
@@ -590,30 +687,36 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
         HDfree(buf);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
     return FAIL;
 } /* gen_v18_v18 */
 
-int main(void)
+int
+main(void)
 {
     /* Generate file bounds_earliest_latest.h5 */
-    if (gen_earliest_latest() < 0) TEST_ERROR;
+    if (gen_earliest_latest() < 0)
+        TEST_ERROR;
 
     /* Generate file bounds_earliest_v18.h5 */
-    if (gen_earliest_v18() < 0) TEST_ERROR;
+    if (gen_earliest_v18() < 0)
+        TEST_ERROR;
 
     /* Generate file bounds_latest_latest.h5 */
-    if (gen_latest_latest() < 0) TEST_ERROR;
+    if (gen_latest_latest() < 0)
+        TEST_ERROR;
 
     /* Generate file bounds_v18_latest.h5 */
-    if (gen_v18_latest() < 0) TEST_ERROR;
+    if (gen_v18_latest() < 0)
+        TEST_ERROR;
 
     /* Generate file bounds_v18_v18.h5 */
-    if (gen_v18_v18() < 0) TEST_ERROR;
+    if (gen_v18_v18() < 0)
+        TEST_ERROR;
 
     return EXIT_SUCCESS;
 
 error:
     return EXIT_FAILURE;
 }
-

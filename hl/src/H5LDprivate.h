@@ -26,7 +26,7 @@
 typedef struct H5LD_memb_t {
     size_t tot_offset;
     size_t last_tsize;
-    hid_t last_tid;
+    hid_t  last_tid;
     char **names;
 } H5LD_memb_t;
 
@@ -44,11 +44,10 @@ extern "C" {
  * Decide to do #3 at this point of time after some discussion.
  */
 H5_HLDLL void H5LD_clean_vector(H5LD_memb_t *listv[]);
-H5_HLDLL int H5LD_construct_vector(char *fields, H5LD_memb_t *listv[], hid_t par_tid);
+H5_HLDLL int  H5LD_construct_vector(char *fields, H5LD_memb_t *listv[], hid_t par_tid);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* end _H5LDprivate_H */
-

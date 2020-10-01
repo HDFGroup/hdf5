@@ -21,13 +21,11 @@
 #include "H5PLpublic.h"
 
 /* Private headers needed by this file */
-#include "H5private.h"          /* Generic Functions                    */
-
+#include "H5private.h" /* Generic Functions                    */
 
 /**************************/
 /* Library Private Macros */
 /**************************/
-
 
 /****************************/
 /* Library Private Typedefs */
@@ -35,14 +33,12 @@
 
 /* The key that will be used to find the plugin */
 typedef union H5PL_key_t {
-    int         id;         /* filters      */
+    int id; /* filters      */
 } H5PL_key_t;
-
 
 /*****************************/
 /* Library-private Variables */
 /*****************************/
-
 
 /***************************************/
 /* Library-private Function Prototypes */
@@ -52,4 +48,3 @@ typedef union H5PL_key_t {
 H5_DLL const void *H5PL_load(H5PL_type_t plugin_type, H5PL_key_t key);
 
 #endif /* _H5PLprivate_H */
-
