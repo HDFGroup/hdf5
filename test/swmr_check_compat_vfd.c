@@ -20,11 +20,10 @@
 #include "h5test.h"
 
 /* This file needs to access the file driver testing code */
-#define H5FD_FRIEND     /*suppress error about including H5FDpkg            */
+#define H5FD_FRIEND /*suppress error about including H5FDpkg            */
 #define H5FD_TESTING
-#include "H5FDpkg.h"    /* File drivers                                     */
+#include "H5FDpkg.h" /* File drivers                                     */
 
-
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -46,7 +45,7 @@ main(void)
 
     driver = HDgetenv("HDF5_DRIVER");
 
-    if(H5FD__supports_swmr_test(driver))
+    if (H5FD__supports_swmr_test(driver))
         return EXIT_SUCCESS;
     else
         return EXIT_FAILURE;

@@ -7,7 +7,7 @@ main(int argc, char **argv)
     hid_t     fid;
     hid_t     did;
     hid_t     sid;
-    int i;
+    int       i;
 
     if ((fid = H5Fcreate("HDFFV-10992.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         HDfprintf(stderr, "H5Fcreate failed\n");

@@ -25,18 +25,14 @@ extern "C" {
  * Method:    H5Pset_char_encoding
  * Signature: (JI)V
  */
-JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1char_1encoding
-(JNIEnv *, jclass, jlong, jint);
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Pset_1char_1encoding(JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pget_char_encoding
  * Signature: (J)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1char_1encoding
-(JNIEnv *, jclass, jlong);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pget_1char_1encoding(JNIEnv *, jclass, jlong);
 
 #ifdef __cplusplus
 } /* end extern "C" */

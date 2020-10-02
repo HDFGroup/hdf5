@@ -28,21 +28,26 @@
  ******************************************/
 
 /* All datasets are 3D */
-#define RANK                3
+#define RANK 3
 
 /* Lengths of string identifiers (file, dataset names, etc.) */
-#define NAME_LEN            32
+#define NAME_LEN 32
 
 /* Compression level */
-#define COMPRESSION_LEVEL   7
+#define COMPRESSION_LEVEL 7
 
 /* Booleans */
-#define TRUE 1
+#define TRUE  1
 #define FALSE 0
 
 /* Testing macros */
-#define AT()        printf ("   at %s:%d in %s()...\n", __FILE__, __LINE__, FUNC);
-#define UC_ERROR    {puts("*ERROR*"); fflush(stdout); AT(); goto error;}
+#define AT() printf("   at %s:%d in %s()...\n", __FILE__, __LINE__, FUNC);
+#define UC_ERROR                                                                                             \
+    {                                                                                                        \
+        puts("*ERROR*");                                                                                     \
+        fflush(stdout);                                                                                      \
+        AT();                                                                                                \
+        goto error;                                                                                          \
+    }
 
 #endif /* USE_CASE_COMMON_H */
-

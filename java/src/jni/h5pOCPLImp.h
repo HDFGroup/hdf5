@@ -25,72 +25,57 @@ extern "C" {
  * Method:    H5Pset_create_intermediate_group
  * Signature: (JZ)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1create_1intermediate_1group
-(JNIEnv *, jclass, jlong, jboolean);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pset_1create_1intermediate_1group(JNIEnv *, jclass, jlong,
+                                                                               jboolean);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pget_create_intermediate_group
  * Signature: (J)Z
  */
-JNIEXPORT jboolean JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1create_1intermediate_1group
-(JNIEnv *, jclass, jlong);
+JNIEXPORT jboolean JNICALL Java_hdf_hdf5lib_H5_H5Pget_1create_1intermediate_1group(JNIEnv *, jclass, jlong);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pset_obj_track_times
  * Signature: (JZ)V
  */
-JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1obj_1track_1times
-(JNIEnv *, jclass, jlong, jboolean);
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Pset_1obj_1track_1times(JNIEnv *, jclass, jlong, jboolean);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pget_obj_track_times
  * Signature: (J)Z
  */
-JNIEXPORT jboolean JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1obj_1track_1times
-(JNIEnv *, jclass, jlong);
+JNIEXPORT jboolean JNICALL Java_hdf_hdf5lib_H5_H5Pget_1obj_1track_1times(JNIEnv *, jclass, jlong);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pset_attr_phase_change
  * Signature: (JII)V
  */
-JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1attr_1phase_1change
-(JNIEnv *, jclass, jlong, jint, jint);
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Pset_1attr_1phase_1change(JNIEnv *, jclass, jlong, jint, jint);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pget_attr_phase_change
  * Signature: (J[I)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1attr_1phase_1change
-(JNIEnv *, jclass, jlong, jintArray);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pget_1attr_1phase_1change(JNIEnv *, jclass, jlong, jintArray);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pset_attr_creation_order
  * Signature: (JI)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1attr_1creation_1order
-(JNIEnv *, jclass, jlong, jint);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pset_1attr_1creation_1order(JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pget_attr_creation_order
  * Signature: (J)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1attr_1creation_1order
-(JNIEnv *, jclass, jlong);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pget_1attr_1creation_1order(JNIEnv *, jclass, jlong);
 
 #ifdef __cplusplus
 } /* end extern "C" */

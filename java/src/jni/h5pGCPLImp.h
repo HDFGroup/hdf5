@@ -25,72 +25,56 @@ extern "C" {
  * Method:    H5Pset_local_heap_size_hint
  * Signature: (JJ)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1local_1heap_1size_1hint
-(JNIEnv *, jclass, jlong, jlong);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pset_1local_1heap_1size_1hint(JNIEnv *, jclass, jlong, jlong);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pget_local_heap_size_hint
  * Signature: (J)J
  */
-JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1local_1heap_1size_1hint
-(JNIEnv *, jclass, jlong);
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5_H5Pget_1local_1heap_1size_1hint(JNIEnv *, jclass, jlong);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pset_link_creation_order
  * Signature: (JI)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1link_1creation_1order
-(JNIEnv *, jclass, jlong, jint);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pset_1link_1creation_1order(JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pget_link_creation_order
  * Signature: (J)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1link_1creation_1order
-(JNIEnv *, jclass, jlong);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pget_1link_1creation_1order(JNIEnv *, jclass, jlong);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pset_est_link_info
  * Signature: (JII)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1est_1link_1info
-(JNIEnv *, jclass, jlong, jint, jint);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pset_1est_1link_1info(JNIEnv *, jclass, jlong, jint, jint);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pget_est_link_info
  * Signature: (J[I)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1est_1link_1info
-(JNIEnv *, jclass, jlong, jintArray);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pget_1est_1link_1info(JNIEnv *, jclass, jlong, jintArray);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pset_link_phase_change
  * Signature: (JII)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1link_1phase_1change
-(JNIEnv *, jclass, jlong, jint, jint);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pset_1link_1phase_1change(JNIEnv *, jclass, jlong, jint, jint);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pget_link_phase_change
  * Signature: (J[I)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1link_1phase_1change
-(JNIEnv *, jclass, jlong, jintArray);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pget_1link_1phase_1change(JNIEnv *, jclass, jlong, jintArray);
 
 #ifdef __cplusplus
 } /* end extern "C" */
