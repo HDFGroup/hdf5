@@ -15,7 +15,7 @@ usage: h5dump [OPTIONS] files
      --s3-cred=<cred>     Supply S3 authentication information to "ros3" vfd.
                           <cred> :: "(<aws-region>,<access-id>,<access-key>)"
                           If absent or <cred> -> "(,,)", no authentication.
-                          Has no effect is filedriver is not `ros3'.
+                          Has no effect if filedriver is not `ros3'.
      --hdfs-attrs=<attrs> Supply configuration information for HDFS file access.
                           For use with "--filedriver=hdfs"
                           <attrs> :: (<namenode name>,<namenode port>,
