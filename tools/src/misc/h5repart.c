@@ -64,10 +64,10 @@ usage(const char *progname)
                       "(windows or sec2)\n");
     HDfprintf(stderr, "   SRC    The name of the source file\n");
     HDfprintf(stderr, "   DST    The name of the destination files\n");
-    HDfprintf(stderr, "Sizes may be suffixed with `g' for GB, `m' for MB or "
-                      "`k' for kB.\n");
+    HDfprintf(stderr, "Sizes may be suffixed with 'g' for GB, 'm' for MB or "
+                      "'k' for kB.\n");
     HDfprintf(stderr, "File family names include an integer printf "
-                      "format such as `%%d'\n");
+                      "format such as '%%d'\n");
     HDexit(EXIT_FAILURE);
 }
 
