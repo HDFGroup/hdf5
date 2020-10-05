@@ -669,8 +669,10 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
                             HDstrerror(errno))
 
             /* If it is a directory, skip it */
-            if (S_ISDIR(my_stat.st_mode))
+            if (S_ISDIR(my_stat.st_mode)) {
+                path = (char *)H5MM_xfree(path);
                 continue;
+            }
 
             /* attempt to open the dynamic library as a filter library */
             if (H5PL__open(path, search_params->type, search_params->key, found, plugin_info) < 0)
