@@ -223,20 +223,20 @@ typedef unsigned long long uint64_t;
  */
 #if H5_SIZEOF_LONG_LONG >= 8
 H5_GCC_DIAG_OFF("long-long")
-typedef unsigned long long  hsize_t;
-typedef signed long long    hssize_t;
+typedef unsigned long long hsize_t;
+typedef signed long long   hssize_t;
 H5_GCC_DIAG_ON("long-long")
-#define PRIdHSIZE   H5_PRINTF_LL_WIDTH "d"
-#define PRIiHSIZE   H5_PRINTF_LL_WIDTH "i"
-#define PRIoHSIZE   H5_PRINTF_LL_WIDTH "o"
-#define PRIuHSIZE   H5_PRINTF_LL_WIDTH "u"
-#define PRIxHSIZE   H5_PRINTF_LL_WIDTH "x"
-#define PRIXHSIZE   H5_PRINTF_LL_WIDTH "X"
-#define H5_SIZEOF_HSIZE_T   H5_SIZEOF_UINT64_T
-#define H5_SIZEOF_HSSIZE_T  H5_SIZEOF_INT64_T
-#define HSIZE_UNDEF         UINT64_MAX
+#define PRIdHSIZE          H5_PRINTF_LL_WIDTH "d"
+#define PRIiHSIZE          H5_PRINTF_LL_WIDTH "i"
+#define PRIoHSIZE          H5_PRINTF_LL_WIDTH "o"
+#define PRIuHSIZE          H5_PRINTF_LL_WIDTH "u"
+#define PRIxHSIZE          H5_PRINTF_LL_WIDTH "x"
+#define PRIXHSIZE          H5_PRINTF_LL_WIDTH "X"
+#define H5_SIZEOF_HSIZE_T  H5_SIZEOF_UINT64_T
+#define H5_SIZEOF_HSSIZE_T H5_SIZEOF_INT64_T
+#define HSIZE_UNDEF        UINT64_MAX
 #else
-#   error "nothing appropriate for hsize_t"
+#error "nothing appropriate for hsize_t"
 #endif
 
 /*
