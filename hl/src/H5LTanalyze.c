@@ -2156,11 +2156,7 @@ H5LTyy_scan_buffer(char *base, yy_size_t size)
  *       H5LTyy_scan_bytes() instead.
  */
 YY_BUFFER_STATE
-H5LTyy_scan_string(yyconst char *yystr)
-{
-
-    return H5LTyy_scan_bytes(yystr, strlen(yystr));
-}
+H5LTyy_scan_string(yyconst char *yystr) { return H5LTyy_scan_bytes(yystr, strlen(yystr)); }
 
 /** Setup the input buffer state to scan the given bytes. The next call to H5LTyylex() will
  * scan from a @e copy of @a bytes.

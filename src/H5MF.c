@@ -1124,7 +1124,7 @@ H5MF_close(H5F_t *f, hid_t dxpl_id)
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
             HDfprintf(stderr, "%s: Before deleting free space manager\n", FUNC);
-#endif      /* H5MF_ALLOC_DEBUG_MORE */
+#endif /* H5MF_ALLOC_DEBUG_MORE */
             /* Delete free space manager for this type */
             if (H5FS_delete(f, dxpl_id, tmp_fs_addr) < 0)
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "can't delete free space manager")
