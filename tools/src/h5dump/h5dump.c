@@ -250,7 +250,7 @@ usage(const char *prog)
                    "                          <cred> :: \"(<aws-region>,<access-id>,<access-key>)\"\n");
     PRINTVALSTREAM(rawoutstream,
                    "                          If absent or <cred> -> \"(,,)\", no authentication.\n");
-    PRINTVALSTREAM(rawoutstream, "                          Has no effect is filedriver is not `ros3'.\n");
+    PRINTVALSTREAM(rawoutstream, "                          Has no effect if filedriver is not \"ros3\".\n");
     PRINTVALSTREAM(rawoutstream,
                    "     --hdfs-attrs=<attrs> Supply configuration information for HDFS file access.\n");
     PRINTVALSTREAM(rawoutstream, "                          For use with \"--filedriver=hdfs\"\n");
@@ -323,7 +323,7 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "     -X S, --xml-ns=S     (XML Schema) Use qualified names n the XML\n");
     PRINTVALSTREAM(rawoutstream, "                          \":\": no namespace, default: \"hdf5:\"\n");
     PRINTVALSTREAM(rawoutstream,
-                   "                          E.g., to dump a file called `-f', use h5dump -- -f\n");
+                   "                          E.g., to dump a file called \"-f\", use h5dump -- -f\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "--------------- Subsetting Options ---------------\n");
     PRINTVALSTREAM(rawoutstream, " Subsetting is available by using the following options with a dataset\n");
@@ -1117,7 +1117,7 @@ parse_start:
 
             case 'M':
                 if (!last_was_dset) {
-                    error_msg("option `-%c' can only be used after --dataset option\n", opt);
+                    error_msg("option \"-%c\" can only be used after --dataset option\n", opt);
                     goto error;
                 }
                 if (parse_mask_list(opt_arg) != SUCCEED) {
@@ -1190,7 +1190,7 @@ parse_start:
                 struct subset_t *s;
 
                 if (!last_was_dset) {
-                    error_msg("option `-%c' can only be used after --dataset option\n", opt);
+                    error_msg("option \"-%c\" can only be used after --dataset option\n", opt);
                     goto error;
                 }
 
