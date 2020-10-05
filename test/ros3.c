@@ -20,7 +20,7 @@
  *
  *     Demonstrates basic use cases and fapl/dxpl interaction.
  *
- * Programmer: Jacob Smith <jake.smith@hdfgroup.org>
+ * Programmer: Jacob Smith
  *             2017-10-11
  */
 

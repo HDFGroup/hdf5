@@ -832,11 +832,11 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     hsize_t *  coords;                                     /* Coordinate buffer */
     hsize_t    low[SPACE2_RANK];                           /* Selection bounds */
     hsize_t    high[SPACE2_RANK];                          /* Selection bounds */
-    H5R_ref_t *wbuf,                                       /* buffer to write to disk */
-        *rbuf;                                             /* buffer read from disk */
+    H5R_ref_t *wbuf     = NULL,                            /* buffer to write to disk */
+        *rbuf           = NULL;                            /* buffer read from disk */
     H5R_ref_t nvrbuf[3] = {{{{0}}}, {{{101}}}, {{{255}}}}; /* buffer with non-valid refs */
-    uint8_t * dwbuf,                                       /* Buffer for writing numeric data to disk */
-        *drbuf;                                            /* Buffer for reading numeric data from disk */
+    uint8_t * dwbuf     = NULL,                            /* Buffer for writing numeric data to disk */
+        *drbuf          = NULL;                            /* Buffer for reading numeric data from disk */
     uint8_t *  tu8;                                        /* Temporary pointer to uint8 data */
     H5O_type_t obj_type;                                   /* Type of object */
     int        i, j;                                       /* Counters */
@@ -1246,13 +1246,14 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
             ret = H5Rdestroy(&rbuf[j]);
             CHECK(ret, FAIL, "H5Rdestroy");
         }
-
-        /* Free memory buffers */
-        HDfree(wbuf);
-        HDfree(rbuf);
-        HDfree(dwbuf);
-        HDfree(drbuf);
     }
+
+    /* Free memory buffers */
+    HDfree(wbuf);
+    HDfree(rbuf);
+    HDfree(dwbuf);
+    HDfree(drbuf);
+
 } /* test_reference_region() */
 
 /****************************************************************
@@ -1285,10 +1286,10 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
     hsize_t *  coords;                              /* Coordinate buffer */
     hsize_t    low[SPACE3_RANK];                    /* Selection bounds */
     hsize_t    high[SPACE3_RANK];                   /* Selection bounds */
-    H5R_ref_t *wbuf,                                /* buffer to write to disk */
-        *rbuf;                                      /* buffer read from disk */
-    uint8_t *dwbuf,                                 /* Buffer for writing numeric data to disk */
-        *drbuf;                                     /* Buffer for reading numeric data from disk */
+    H5R_ref_t *wbuf = NULL,                         /* buffer to write to disk */
+        *rbuf       = NULL;                         /* buffer read from disk */
+    uint8_t *dwbuf  = NULL,                         /* Buffer for writing numeric data to disk */
+        *drbuf      = NULL;                         /* Buffer for reading numeric data from disk */
     uint8_t *  tu8;                                 /* Temporary pointer to uint8 data */
     H5O_type_t obj_type;                            /* Object type */
     int        i;                                   /* Counter */
@@ -1586,13 +1587,14 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
             ret = H5Rdestroy(&rbuf[i]);
             CHECK(ret, FAIL, "H5Rdestroy");
         }
-
-        /* Free memory buffers */
-        HDfree(wbuf);
-        HDfree(rbuf);
-        HDfree(dwbuf);
-        HDfree(drbuf);
     }
+
+    /* Free memory buffers */
+    HDfree(wbuf);
+    HDfree(rbuf);
+    HDfree(dwbuf);
+    HDfree(drbuf);
+
 } /* test_reference_region_1D() */
 
 /****************************************************************
@@ -2429,10 +2431,10 @@ test_reference_compat_conv(void)
     hsize_t          count[SPACE2_RANK];  /* Element count of hyperslab */
     hsize_t          block[SPACE2_RANK];  /* Block size of hyperslab  */
     hsize_t          coord1[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
-    hobj_ref_t *     wbuf_obj;                            /* Buffer to write to disk  */
-    H5R_ref_t *      rbuf_obj;                            /* Buffer read from disk    */
-    hdset_reg_ref_t *wbuf_reg;                            /* Buffer to write to disk  */
-    H5R_ref_t *      rbuf_reg;                            /* Buffer read from disk    */
+    hobj_ref_t *     wbuf_obj = NULL;                     /* Buffer to write to disk  */
+    H5R_ref_t *      rbuf_obj = NULL;                     /* Buffer read from disk    */
+    hdset_reg_ref_t *wbuf_reg = NULL;                     /* Buffer to write to disk  */
+    H5R_ref_t *      rbuf_reg = NULL;                     /* Buffer read from disk    */
     H5O_type_t       obj_type;                            /* Object type              */
     herr_t           ret;                                 /* Generic return value     */
     unsigned int     i;                                   /* Counter                  */

@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Tuesday, December  9, 1997
  *
  * Purpose:     Tests the datatype interface (H5T)
@@ -134,16 +134,13 @@ static int    opaque_funcs(void);
 /*-------------------------------------------------------------------------
  * Function:    reset_hdf5
  *
- * Purpose:    Reset the hdf5 library.  This causes statistics to be printed
- *        and counters to be reset.
+ * Purpose:     Reset the hdf5 library.  This causes statistics to be printed
+ *              and counters to be reset.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, November 16, 1998
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -175,14 +172,10 @@ reset_hdf5(void)
  * Purpose:     Test type classes
  *
  * Return:      Success:        0
- *
  *              Failure:        number of errors
  *
  * Programmer:  Robb Matzke
  *              Tuesday, December  9, 1997
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -299,14 +292,10 @@ error:
  * Purpose:     Are we able to copy a datatype?
  *
  * Return:      Success:        0
- *
  *              Failure:        number of errors
  *
  * Programmer:  Robb Matzke
  *              Tuesday, December  9, 1997
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -345,7 +334,6 @@ error:
  *              in nested types)
  *
  * Return:      Success:        0
- *
  *              Failure:        number of errors
  *
  * Programmer:  Quincey Koziol
@@ -575,14 +563,10 @@ error:
  * Purpose:     Tests various things about compound datatypes.
  *
  * Return:      Success:        0
- *
  *              Failure:        number of errors
  *
  * Programmer:  Robb Matzke
  *              Wednesday, January  7, 1998
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -722,19 +706,15 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_compound_2
  *
- * Purpose:    Tests a compound type conversion where the source and
- *        destination are the same except for the order of the
- *        elements.
+ * Purpose:     Tests a compound type conversion where the source and
+ *              destination are the same except for the order of the
+ *              elements.
  *
- * Return:    Success:    0
+ * Return:      Success:    0
+ *              Failure:    number of errors
  *
- *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, June 17, 1999
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -846,19 +826,15 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_compound_3
  *
- * Purpose:    Tests compound conversions where the source and destination
- *        are the same except the destination is missing a couple
- *        members which appear in the source.
+ * Purpose:     Tests compound conversions where the source and destination
+ *              are the same except the destination is missing a couple
+ *              members which appear in the source.
  *
- * Return:    Success:    0
+ * Return:      Success:    0
+ *              Failure:    number of errors
  *
- *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, June 17, 1999
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -966,19 +942,15 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_compound_4
  *
- * Purpose:    Tests compound conversions when the destination has the same
- *        fields as the source but one or more of the fields are
- *        smaller.
+ * Purpose:     Tests compound conversions when the destination has the same
+ *              fields as the source but one or more of the fields are
+ *              smaller.
  *
- * Return:    Success:    0
+ * Return:      Success:    0
+ *              Failure:    number of errors
  *
- *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, June 17, 1999
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1093,20 +1065,16 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_compound_5
  *
- * Purpose:    Many versions of HDF5 have a bug in the optimized compound
+ * Purpose:     Many versions of HDF5 have a bug in the optimized compound
  *              datatype conversion function, H5T_conv_struct_opt(), which
  *              is triggered when the top-level type contains a struct
  *              which must undergo a conversion.
  *
- * Return:    Success:    0
+ * Return:      Success:    0
+ *              Failure:    number of errors
  *
- *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, June 17, 1999
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1192,19 +1160,15 @@ test_compound_5(void)
 /*-------------------------------------------------------------------------
  * Function:    test_compound_6
  *
- * Purpose:    Tests compound conversions when the destination has the same
- *        fields as the source but one or more of the fields are
- *        larger.
+ * Purpose:     Tests compound conversions when the destination has the same
+ *              fields as the source but one or more of the fields are
+ *              larger.
  *
- * Return:    Success:    0
+ * Return:      Success:    0
+ *              Failure:    number of errors
  *
- *        Failure:    number of errors
- *
- * Programmer:    Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Wednesday, December 13, 2000
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1302,15 +1266,14 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_compound_7
  *
- * Purpose:    Tests inserting fields into compound datatypes when the field
+ * Purpose:     Tests inserting fields into compound datatypes when the field
  *              overlaps the end of the compound datatype.  Also, tests
  *              increasing compound type size.
  *
- * Return:    Success:    0
+ * Return:      Success:    0
+ *              Failure:    number of errors
  *
- *        Failure:    number of errors
- *
- * Programmer:    Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, December 18, 2001
  *
  * Modifications:
@@ -1726,9 +1689,6 @@ error:
  *
  * Programmer:  Raymond Lu
  *              Wednesday, June 9, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -5194,17 +5154,13 @@ test_conv_enum_2(void)
 /*-------------------------------------------------------------------------
  * Function:    test_conv_bitfield
  *
- * Purpose:    Test bitfield conversions.
+ * Purpose:     Test bitfield conversions.
  *
- * Return:    Success:    0
+ * Return:      Success:    0
+ *              Failure:    number of errors
  *
- *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, May 20, 1999
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -5294,18 +5250,14 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_bitfield_funcs
  *
- * Purpose:    Test some datatype functions that are and aren't supposed
+ * Purpose:     Test some datatype functions that are and aren't supposed
  *              work for bitfield type.
  *
- * Return:    Success:    0
+ * Return:      Success:    0
+ *              Failure:    number of errors
  *
- *        Failure:    number of errors
- *
- * Programmer:    Raymond Lu
+ * Programmer:  Raymond Lu
  *              Wednesday, April 5, 2006
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -5424,17 +5376,13 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    convert_opaque
  *
- * Purpose:    A fake opaque conversion functions
+ * Purpose:     A fake opaque conversion functions
  *
- * Return:    Success:    0
+ * Return:      Success:    0
+ *              Failure:    -1
  *
- *        Failure:    -1
- *
- * Programmer:    Robb Matzke
+ * Programmer:  Robb Matzke
  *              Friday, June  4, 1999
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -5451,17 +5399,13 @@ convert_opaque(hid_t H5_ATTR_UNUSED st, hid_t H5_ATTR_UNUSED dt, H5T_cdata_t *cd
 /*-------------------------------------------------------------------------
  * Function:    test_opaque
  *
- * Purpose:    Driver function to test opaque datatypes
+ * Purpose:     Driver function to test opaque datatypes
  *
- * Return:    Success:    0
+ * Return:      Success:    0
+ *              Failure:    number of errors
  *
- *        Failure:    number of errors
- *
- * Programmer:    Raymond Lu
+ * Programmer:  Raymond Lu
  *              June 2, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -5493,15 +5437,13 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    opaque_check
  *
- * Purpose:    Test opaque datatypes
+ * Purpose:     Test opaque datatypes
  *
- * Return:    Success:    0
+ * Return:      Success:    0
+ *              Failure:    number of errors
  *
- *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, May 20, 1999
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -5570,12 +5512,12 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    opaque_long
  *
- * Purpose:    Test named (committed) opaque datatypes w/very long tags
+ * Purpose:     Test named (committed) opaque datatypes w/very long tags
  *
- * Return:    Success:    0
- *        Failure:    number of errors
+ * Return:      Success:    0
+ *              Failure:    number of errors
  *
- * Programmer:    Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, June 14, 2005
  *
  *-------------------------------------------------------------------------
@@ -5624,18 +5566,14 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    opaque_funcs
  *
- * Purpose:    Test some type functions that are and aren't supposed to
+ * Purpose:     Test some type functions that are and aren't supposed to
  *              work with opaque type.
  *
- * Return:    Success:    0
+ * Return:      Success:    0
+ *              Failure:    number of errors
  *
- *        Failure:    number of errors
- *
- * Programmer:    Raymond Lu
+ * Programmer:  Raymond Lu
  *              Wednesday, April 5, 2006
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -7082,18 +7020,14 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_named_indirect_reopen
  *
- * Purpose:    Tests that open named datatypes can be reopened indirectly
+ * Purpose:     Tests that open named datatypes can be reopened indirectly
  *              through H5Dget_type without causing problems.
  *
- * Return:    Success:    0
+ * Return:      Success:    0
+ *              Failure:    number of errors
  *
- *        Failure:    number of errors
- *
- * Programmer:    Neil Fortner
+ * Programmer:  Neil Fortner
  *              Thursday, June 4, 2009
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -7778,12 +7712,12 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_deprec
  *
- * Purpose:    Tests deprecated API routines for datatypes.
+ * Purpose:     Tests deprecated API routines for datatypes.
  *
- * Return:    Success:    0
- *        Failure:    number of errors
+ * Return:      Success:    0
+ *              Failure:    number of errors
  *
- * Programmer:    Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, September 27, 2007
  *
  *-------------------------------------------------------------------------
@@ -7937,13 +7871,13 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_utf_ascii_conv
  *
- * Purpose:    Make sure the library doesn't conversion strings between
+ * Purpose:     Make sure the library doesn't conversion strings between
  *              ASCII and UTF8.
  *
- * Return:    Success:    0
- *        Failure:    number of errors
+ * Return:      Success:    0
+ *              Failure:    number of errors
  *
- * Programmer:    Raymond Lu
+ * Programmer:  Raymond Lu
  *              10 November 2011
  *-------------------------------------------------------------------------
  */
@@ -8589,9 +8523,6 @@ error:
  *
  * Programmer:  Robb Matzke
  *              Tuesday, December  9, 1997
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int

@@ -3292,8 +3292,6 @@ make_layout2(hid_t loc_id)
     if (make_dset(loc_id, CHUNKED_S_FIX, s_sid, chunked_dcpl, s_buf[0]) < 0)
         goto error;
 
-    HDfree(s_buf);
-
     ret_value = 0;
 
 error:

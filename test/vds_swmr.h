@@ -94,6 +94,4 @@ H5TEST_DLLVAR char VDS_FILE_NAME[NAME_LEN];
 /* Dataset names */
 H5TEST_DLLVAR char SOURCE_DSET_PATH[NAME_LEN];
 H5TEST_DLLVAR char VDS_DSET_NAME[NAME_LEN];
-
-/* Fill values */
 #endif /* VDS_SWMR_H */

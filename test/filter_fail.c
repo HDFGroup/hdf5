@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu <songyulu@hdfgroup.org>
+ * Programmer:  Raymond Lu
  *              7 September 2010
  *
  * Purpose:     Make sure dataset, file, and library can close properly when a
