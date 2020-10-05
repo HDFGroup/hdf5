@@ -15,7 +15,7 @@
  *
  * Created:             H5Fquery.c
  *                      Jan 10 2008
- *                      Quincey Koziol <koziol@hdfgroup.org>
+ *                      Quincey Koziol
  *
  * Purpose:             File structure query routines.
  *
@@ -26,15 +26,15 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE /*suppress error about including H5Fpkg	  */
+#define H5F_PACKAGE /*suppress error about including H5Fpkg      */
 
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Fpkg.h"      /* File access				*/
-#include "H5FDprivate.h" /* File drivers				*/
+#include "H5private.h"   /* Generic Functions          */
+#include "H5Eprivate.h"  /* Error handling             */
+#include "H5Fpkg.h"      /* File access                */
+#include "H5FDprivate.h" /* File drivers               */
 
 /****************/
 /* Local Macros */
@@ -65,16 +65,16 @@
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_intent
+ * Function:  H5F_get_intent
  *
- * Purpose:	Quick and dirty routine to retrieve the file's 'intent' flags
- *          (Mainly added to stop non-file routines from poking about in the
- *          H5F_t data structure)
+ * Purpose:   Quick and dirty routine to retrieve the file's 'intent' flags
+ *            (Mainly added to stop non-file routines from poking about in the
+ *            H5F_t data structure)
  *
- * Return:	'intent' on success/abort on failure (shouldn't fail)
+ * Return:    'intent' on success/abort on failure (shouldn't fail)
  *
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
- *		September 29, 2000
+ * Programmer:    Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *        September 29, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -90,15 +90,15 @@ H5F_get_intent(const H5F_t *f)
 } /* end H5F_get_intent() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_open_name
+ * Function:  H5F_get_open_name
  *
- * Purpose:	Retrieve the name used to open a file.
+ * Purpose:   Retrieve the name used to open a file.
  *
- * Return:	Success:	The name of the file.
- * 		Failure:	? (should not happen)
+ * Return:    Success:    The name of the file.
+ *            Failure:    ? (should not happen)
  *
- * Programmer:	Neil Fortner
- *		December 15 2008
+ * Programmer:    Neil Fortner
+ *        December 15 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -115,15 +115,15 @@ H5F_get_open_name(const H5F_t *f)
 } /* end H5F_get_open_name() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_actual_name
+ * Function:  H5F_get_actual_name
  *
- * Purpose:	Retrieve the actual name of a file, after resolving symlinks, etc.
+ * Purpose:   Retrieve the actual name of a file, after resolving symlinks, etc.
  *
- * Return:	Success:	The name of the file.
- * 		Failure:	? (should not happen)
+ * Return:    Success:    The name of the file.
+ *            Failure:    ? (should not happen)
  *
- * Programmer:	Quincey Koziol
- *		November 25 2009
+ * Programmer:    Quincey Koziol
+ *        November 25 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -140,15 +140,16 @@ H5F_get_actual_name(const H5F_t *f)
 } /* end H5F_get_actual_name() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_extpath
+ * Function:  H5F_get_extpath
  *
- * Purpose:	Retrieve the file's 'extpath' flags
- *		This is used by H5L_extern_traverse() and H5D_build_extfile_prefix() to retrieve the main
- *file's location when searching the target file.
+ * Purpose:   Retrieve the file's 'extpath' flags
+ *            This is used by H5L_extern_traverse() and
+ *            H5D_build_extfile_prefix() to retrieve the main file's location
+ *            when searching the target file.
  *
- * Return:	'extpath' on success/abort on failure (shouldn't fail)
+ * Return:    'extpath' on success/abort on failure (shouldn't fail)
  *
- * Programmer:	Vailin Choi, April 2, 2008
+ * Programmer:    Vailin Choi, April 2, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -165,13 +166,13 @@ H5F_get_extpath(const H5F_t *f)
 } /* end H5F_get_extpath() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_shared
+ * Function:  H5F_get_shared
  *
- * Purpose:	Retrieve the file's 'shared' pointer
+ * Purpose:   Retrieve the file's 'shared' pointer
  *
- * Return:	'shared' on success/abort on failure (shouldn't fail)
+ * Return:    'shared' on success/abort on failure (shouldn't fail)
  *
- * Programmer:	Quincey Koziol, July 20, 2011
+ * Programmer:    Quincey Koziol, July 20, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -187,13 +188,13 @@ H5F_get_shared(const H5F_t *f)
 } /* end H5F_get_shared() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_same_shared
+ * Function:  H5F_same_shared
  *
- * Purpose:	Determine if two files have the same shared file pointer
+ * Purpose:   Determine if two files have the same shared file pointer
  *
- * Return:	TRUE/FALSE on success/abort on failure (shouldn't fail)
+ * Return:    TRUE/FALSE on success/abort on failure (shouldn't fail)
  *
- * Programmer:	Quincey Koziol, July 19, 2011
+ * Programmer:    Quincey Koziol, July 19, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -212,13 +213,13 @@ H5F_same_shared(const H5F_t *f1, const H5F_t *f2)
 } /* end H5F_same_shared() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_nopen_objs
+ * Function:  H5F_get_nopen_objs
  *
- * Purpose:	Retrieve the file's 'nopen_objs' value
+ * Purpose:   Retrieve the file's 'nopen_objs' value
  *
- * Return:	'nopen_objs' on success/abort on failure (shouldn't fail)
+ * Return:    'nopen_objs' on success/abort on failure (shouldn't fail)
  *
- * Programmer:	Quincey Koziol, July 20, 2011
+ * Programmer:    Quincey Koziol, July 20, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -234,13 +235,13 @@ H5F_get_nopen_objs(const H5F_t *f)
 } /* end H5F_get_nopen_objs() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_file_id
+ * Function:  H5F_get_file_id
  *
- * Purpose:	Retrieve the file's 'file_id' value
+ * Purpose:   Retrieve the file's 'file_id' value
  *
- * Return:	'file_id' on success/abort on failure (shouldn't fail)
+ * Return:    'file_id' on success/abort on failure (shouldn't fail)
  *
- * Programmer:	Quincey Koziol, July 20, 2011
+ * Programmer:    Quincey Koziol, July 20, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -256,13 +257,13 @@ H5F_get_file_id(const H5F_t *f)
 } /* end H5F_get_file_id() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_parent
+ * Function:  H5F_get_parent
  *
- * Purpose:	Retrieve the file's 'parent' pointer
+ * Purpose:   Retrieve the file's 'parent' pointer
  *
- * Return:	'parent' on success/abort on failure (shouldn't fail)
+ * Return:    'parent' on success/abort on failure (shouldn't fail)
  *
- * Programmer:	Quincey Koziol, July 19, 2011
+ * Programmer:    Quincey Koziol, July 19, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -278,13 +279,13 @@ H5F_get_parent(const H5F_t *f)
 } /* end H5F_get_parent() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_nmounts
+ * Function:  H5F_get_nmounts
  *
- * Purpose:	Retrieve the file's 'nmounts' value
+ * Purpose:   Retrieve the file's 'nmounts' value
  *
- * Return:	'nmounts' on success/abort on failure (shouldn't fail)
+ * Return:    'nmounts' on success/abort on failure (shouldn't fail)
  *
- * Programmer:	Quincey Koziol, July 20, 2011
+ * Programmer:    Quincey Koziol, July 20, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -300,17 +301,16 @@ H5F_get_nmounts(const H5F_t *f)
 } /* end H5F_get_nmounts() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_fcpl
+ * Function:  H5F_get_fcpl
  *
- * Purpose:	Retrieve the value of a file's FCPL.
+ * Purpose:   Retrieve the value of a file's FCPL.
  *
- * Return:	Success:	The FCPL for the file.
+ * Return:    Success:    The FCPL for the file.
+ *            Failure:    ? (should not happen)
  *
- * 		Failure:	? (should not happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		May 25 2005
+ * Programmer:    Quincey Koziol
+ *        koziol@ncsa.uiuc.edu
+ *        May 25 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -327,16 +327,16 @@ H5F_get_fcpl(const H5F_t *f)
 } /* end H5F_get_fcpl() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_sizeof_addr
+ * Function:  H5F_sizeof_addr
  *
- * Purpose:	Quick and dirty routine to retrieve the size of the file's size_t
- *          (Mainly added to stop non-file routines from poking about in the
- *          H5F_t data structure)
+ * Purpose:   Quick and dirty routine to retrieve the size of the file's size_t
+ *            (Mainly added to stop non-file routines from poking about in the
+ *            H5F_t data structure)
  *
- * Return:	'sizeof_addr' on success/abort on failure (shouldn't fail)
+ * Return:    'sizeof_addr' on success/abort on failure (shouldn't fail)
  *
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
- *		September 29, 2000
+ * Programmer:    Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *        September 29, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -353,16 +353,16 @@ H5F_sizeof_addr(const H5F_t *f)
 } /* end H5F_sizeof_addr() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_sizeof_size
+ * Function:  H5F_sizeof_size
  *
- * Purpose:	Quick and dirty routine to retrieve the size of the file's off_t
- *          (Mainly added to stop non-file routines from poking about in the
- *          H5F_t data structure)
+ * Purpose:   Quick and dirty routine to retrieve the size of the file's off_t
+ *            (Mainly added to stop non-file routines from poking about in the
+ *            H5F_t data structure)
  *
- * Return:	'sizeof_size' on success/abort on failure (shouldn't fail)
+ * Return:    'sizeof_size' on success/abort on failure (shouldn't fail)
  *
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
- *		September 29, 2000
+ * Programmer:    Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *        September 29, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -379,13 +379,13 @@ H5F_sizeof_size(const H5F_t *f)
 } /* H5F_sizeof_size() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_sohm_addr
+ * Function:  H5F_get_sohm_addr
  *
- * Purpose:	Retrieve the file's 'sohm_addr' value
+ * Purpose:   Retrieve the file's 'sohm_addr' value
  *
- * Return:	'sohm_addr' on success/abort on failure (shouldn't fail)
+ * Return:    'sohm_addr' on success/abort on failure (shouldn't fail)
  *
- * Programmer:	Quincey Koziol, July 20, 2011
+ * Programmer:    Quincey Koziol, July 20, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -402,13 +402,13 @@ H5F_get_sohm_addr(const H5F_t *f)
 } /* end H5F_get_sohm_addr() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_sohm_vers
+ * Function:  H5F_get_sohm_vers
  *
- * Purpose:	Retrieve the file's 'sohm_vers' value
+ * Purpose:   Retrieve the file's 'sohm_vers' value
  *
- * Return:	'sohm_vers' on success/abort on failure (shouldn't fail)
+ * Return:    'sohm_vers' on success/abort on failure (shouldn't fail)
  *
- * Programmer:	Quincey Koziol, July 20, 2011
+ * Programmer:    Quincey Koziol, July 20, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -425,13 +425,13 @@ H5F_get_sohm_vers(const H5F_t *f)
 } /* end H5F_get_sohm_vers() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_sohm_nindexes
+ * Function:  H5F_get_sohm_nindexes
  *
- * Purpose:	Retrieve the file's 'sohm_nindexes' value
+ * Purpose:   Retrieve the file's 'sohm_nindexes' value
  *
- * Return:	'sohm_nindexes' on success/abort on failure (shouldn't fail)
+ * Return:    'sohm_nindexes' on success/abort on failure (shouldn't fail)
  *
- * Programmer:	Quincey Koziol, July 20, 2011
+ * Programmer:    Quincey Koziol, July 20, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -448,20 +448,18 @@ H5F_get_sohm_nindexes(const H5F_t *f)
 } /* end H5F_get_sohm_nindexes() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_sym_leaf_k
+ * Function:  H5F_sym_leaf_k
  *
- * Purpose:	Replaced a macro to retrieve the symbol table leaf size,
- *              now that the generic properties are being used to store
- *              the values.
+ * Purpose:   Replaced a macro to retrieve the symbol table leaf size,
+ *            now that the generic properties are being used to store
+ *            the values.
  *
- * Return:	Success:	Non-negative, and the symbol table leaf size is
- *                              returned.
+ * Return:    Success:    Non-negative, and the symbol table leaf size is returned.
+ *            Failure:    Negative (should not happen)
  *
- * 		Failure:	Negative (should not happen)
- *
- * Programmer:	Raymond Lu
- *		slu@ncsa.uiuc.edu
- *		Oct 14 2001
+ * Programmer:    Raymond Lu
+ *        slu@ncsa.uiuc.edu
+ *        Oct 14 2001
  *
  *-------------------------------------------------------------------------
  */
@@ -479,20 +477,18 @@ H5F_sym_leaf_k(const H5F_t *f)
 } /* end H5F_sym_leaf_k() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_Kvalue
+ * Function:  H5F_Kvalue
  *
- * Purpose:	Replaced a macro to retrieve a B-tree key value for a certain
- *              type, now that the generic properties are being used to store
- *              the B-tree values.
+ * Purpose:   Replaced a macro to retrieve a B-tree key value for a certain
+ *            type, now that the generic properties are being used to store
+ *            the B-tree values.
  *
- * Return:	Success:	Non-negative, and the B-tree key value is
- *                              returned.
+ * Return:    Success:    Non-negative, and the B-tree key value is returned.
+ *            Failure:    Negative (should not happen)
  *
- * 		Failure:	Negative (should not happen)
- *
- * Programmer:	Raymond Lu
- *		slu@ncsa.uiuc.edu
- *		Oct 14 2001
+ * Programmer:    Raymond Lu
+ *        slu@ncsa.uiuc.edu
+ *        Oct 14 2001
  *
  *-------------------------------------------------------------------------
  */
@@ -511,13 +507,13 @@ H5F_Kvalue(const H5F_t *f, const H5B_class_t *type)
 } /* end H5F_Kvalue() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_nrefs
+ * Function:  H5F_get_nrefs
  *
- * Purpose:	Retrieve the file's 'nrefs' value
+ * Purpose:   Retrieve the file's 'nrefs' value
  *
- * Return:	'nrefs' on success/abort on failure (shouldn't fail)
+ * Return:    'nrefs' on success/abort on failure (shouldn't fail)
  *
- * Programmer:	Quincey Koziol, July 20, 2011
+ * Programmer:    Quincey Koziol, July 20, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -534,20 +530,19 @@ H5F_get_nrefs(const H5F_t *f)
 } /* end H5F_get_nrefs() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_rdcc_nslots
+ * Function:  H5F_rdcc_nslots
  *
- * Purpose:	Replaced a macro to retrieve the raw data cache number of slots,
- *              now that the generic properties are being used to store
- *              the values.
+ * Purpose:   Replaced a macro to retrieve the raw data cache number of slots,
+ *            now that the generic properties are being used to store
+ *            the values.
  *
- * Return:	Success:	Non-negative, and the raw data cache number of
+ * Return:    Success:    Non-negative, and the raw data cache number of
  *                              of slots is returned.
+ *            Failure:    Negative (should not happen)
  *
- * 		Failure:	Negative (should not happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Jun  1 2004
+ * Programmer:    Quincey Koziol
+ *        koziol@ncsa.uiuc.edu
+ *        Jun  1 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -564,20 +559,19 @@ H5F_rdcc_nslots(const H5F_t *f)
 } /* end H5F_rdcc_nelmts() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_rdcc_nbytes
+ * Function:  H5F_rdcc_nbytes
  *
- * Purpose:	Replaced a macro to retrieve the raw data cache number of bytes,
- *              now that the generic properties are being used to store
- *              the values.
+ * Purpose:   Replaced a macro to retrieve the raw data cache number of bytes,
+ *            now that the generic properties are being used to store
+ *            the values.
  *
- * Return:	Success:	Non-negative, and the raw data cache number of
+ * Return:    Success:    Non-negative, and the raw data cache number of
  *                              of bytes is returned.
+ *            Failure:    Negative (should not happen)
  *
- * 		Failure:	Negative (should not happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Jun  1 2004
+ * Programmer:    Quincey Koziol
+ *        koziol@ncsa.uiuc.edu
+ *        Jun  1 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -594,20 +588,18 @@ H5F_rdcc_nbytes(const H5F_t *f)
 } /* end H5F_rdcc_nbytes() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_rdcc_w0
+ * Function:  H5F_rdcc_w0
  *
- * Purpose:	Replaced a macro to retrieve the raw data cache 'w0' value
- *              now that the generic properties are being used to store
- *              the values.
+ * Purpose:   Replaced a macro to retrieve the raw data cache 'w0' value
+ *            now that the generic properties are being used to store
+ *            the values.
  *
- * Return:	Success:	Non-negative, and the raw data cache 'w0' value
- *                              is returned.
+ * Return:    Success:    Non-negative, and the raw data cache 'w0' value is returned.
+ *            Failure:    Negative (should not happen)
  *
- * 		Failure:	Negative (should not happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Jun  2 2004
+ * Programmer:    Quincey Koziol
+ *        koziol@ncsa.uiuc.edu
+ *        Jun  2 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -624,16 +616,16 @@ H5F_rdcc_w0(const H5F_t *f)
 } /* end H5F_rdcc_w0() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_base_addr
+ * Function:  H5F_get_base_addr
  *
- * Purpose:	Quick and dirty routine to retrieve the file's 'base_addr' value
- *          (Mainly added to stop non-file routines from poking about in the
- *          H5F_t data structure)
+ * Purpose:   Quick and dirty routine to retrieve the file's 'base_addr' value
+ *            (Mainly added to stop non-file routines from poking about in the
+ *            H5F_t data structure)
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu <slu@ncsa.uiuc.edu>
- *		December 20, 2002
+ * Programmer:    Raymond Lu <slu@ncsa.uiuc.edu>
+ *        December 20, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -651,20 +643,18 @@ H5F_get_base_addr(const H5F_t *f)
 } /* end H5F_get_base_addr() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_grp_btree_shared
+ * Function:  H5F_grp_btree_shared
  *
- * Purpose:	Replaced a macro to retrieve the shared B-tree node info
- *              now that the generic properties are being used to store
- *              the values.
+ * Purpose:   Replaced a macro to retrieve the shared B-tree node info
+ *            now that the generic properties are being used to store
+ *            the values.
  *
- * Return:	Success:	Non-void, and the shared B-tree node info
- *                              is returned.
+ * Return:    Success:    Non-void, and the shared B-tree node info is returned.
+ *            Failure:    void (should not happen)
  *
- * 		Failure:	void (should not happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Jul  5 2004
+ * Programmer:    Quincey Koziol
+ *        koziol@ncsa.uiuc.edu
+ *        Jul  5 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -681,20 +671,18 @@ H5F_grp_btree_shared(const H5F_t *f)
 } /* end H5F_grp_btree_shared() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_sieve_buf_size
+ * Function:  H5F_sieve_buf_size
  *
- * Purpose:	Replaced a macro to retrieve the dataset sieve buffer size
- *              now that the generic properties are being used to store
- *              the values.
+ * Purpose:   Replaced a macro to retrieve the dataset sieve buffer size
+ *            now that the generic properties are being used to store
+ *            the values.
  *
- * Return:	Success:	Non-void, and the dataset sieve buffer size
- *                              is returned.
+ * Return:    Success:    Non-void, and the dataset sieve buffer size is returned.
+ *            Failure:    void (should not happen)
  *
- * 		Failure:	void (should not happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Jul  8 2005
+ * Programmer:    Quincey Koziol
+ *        koziol@ncsa.uiuc.edu
+ *        Jul  8 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -711,20 +699,18 @@ H5F_sieve_buf_size(const H5F_t *f)
 } /* end H5F_sieve_buf_size() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_gc_ref
+ * Function:  H5F_gc_ref
  *
- * Purpose:	Replaced a macro to retrieve the "garbage collect
- *              references flag" now that the generic properties are being used
- *              to store the values.
+ * Purpose:   Replaced a macro to retrieve the "garbage collect
+ *            references flag" now that the generic properties are being used
+ *            to store the values.
  *
- * Return:	Success:	The "garbage collect references flag"
- *                              is returned.
+ * Return:    Success:    The "garbage collect references flag" is returned.
+ *            Failure:    (should not happen)
  *
- * 		Failure:	(should not happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Jul  8 2005
+ * Programmer:    Quincey Koziol
+ *        koziol@ncsa.uiuc.edu
+ *        Jul  8 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -741,18 +727,17 @@ H5F_gc_ref(const H5F_t *f)
 } /* end H5F_gc_ref() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_use_latest_format
+ * Function:  H5F_use_latest_format
  *
- * Purpose:	Retrieve the 'use the latest version of the format' flag for
- *              the file.
+ * Purpose:   Retrieve the 'use the latest version of the format' flag for
+ *            the file.
  *
- * Return:	Success:	Non-negative, the 'use the latest format' flag
+ * Return:    Success:    Non-negative, the 'use the latest format' flag
+ *            Failure:    (can't happen)
  *
- * 		Failure:	(can't happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Oct  2 2006
+ * Programmer:    Quincey Koziol
+ *        koziol@hdfgroup.org
+ *        Oct  2 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -769,17 +754,16 @@ H5F_use_latest_format(const H5F_t *f)
 } /* end H5F_use_latest_format() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_fc_degree
+ * Function:  H5F_get_fc_degree
  *
- * Purpose:	Retrieve the 'file close degree' for the file.
+ * Purpose:   Retrieve the 'file close degree' for the file.
  *
- * Return:	Success:	Non-negative, the 'file close degree'
+ * Return:    Success:    Non-negative, the 'file close degree'
+ *            Failure:    (can't happen)
  *
- * 		Failure:	(can't happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Mar  5 2007
+ * Programmer:    Quincey Koziol
+ *        koziol@hdfgroup.org
+ *        Mar  5 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -796,17 +780,16 @@ H5F_get_fc_degree(const H5F_t *f)
 } /* end H5F_get_fc_degree() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_store_msg_crt_idx
+ * Function:  H5F_store_msg_crt_idx
  *
- * Purpose:	Retrieve the 'store message creation index' flag for the file.
+ * Purpose:   Retrieve the 'store message creation index' flag for the file.
  *
- * Return:	Success:	Non-negative, the 'store message creation index' flag
+ * Return:    Success:    Non-negative, the 'store message creation index' flag
+ *            Failure:    (can't happen)
  *
- * 		Failure:	(can't happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Mar  6 2007
+ * Programmer:    Quincey Koziol
+ *        koziol@hdfgroup.org
+ *        Mar  6 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -823,16 +806,16 @@ H5F_store_msg_crt_idx(const H5F_t *f)
 } /* end H5F_store_msg_crt_idx() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_has_feature
+ * Function:  H5F_has_feature
  *
- * Purpose:	Check if a file has a particular feature enabled
+ * Purpose:   Check if a file has a particular feature enabled
  *
- * Return:	Success:	Non-negative - TRUE or FALSE
- * 		Failure:	Negative (should not happen)
+ * Return:    Success:    Non-negative - TRUE or FALSE
+ *            Failure:    Negative (should not happen)
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		May 31 2004
+ * Programmer:    Quincey Koziol
+ *        koziol@ncsa.uiuc.edu
+ *        May 31 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -849,16 +832,16 @@ H5F_has_feature(const H5F_t *f, unsigned feature)
 } /* end H5F_has_feature() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_driver_id
+ * Function:  H5F_get_driver_id
  *
- * Purpose:	Quick and dirty routine to retrieve the file's 'driver_id' value
- *          (Mainly added to stop non-file routines from poking about in the
- *          H5F_t data structure)
+ * Purpose:   Quick and dirty routine to retrieve the file's 'driver_id' value
+ *            (Mainly added to stop non-file routines from poking about in the
+ *            H5F_t data structure)
  *
- * Return:	'driver_id' on success/abort on failure (shouldn't fail)
+ * Return:    'driver_id' on success/abort on failure (shouldn't fail)
  *
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
- *		October 10, 2000
+ * Programmer:    Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *        October 10, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -876,16 +859,16 @@ H5F_get_driver_id(const H5F_t *f)
 } /* end H5F_get_driver_id() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_fileno
+ * Function:  H5F_get_fileno
  *
- * Purpose:	Quick and dirty routine to retrieve the file's 'fileno' value
- *          (Mainly added to stop non-file routines from poking about in the
- *          H5F_t data structure)
+ * Purpose:   Quick and dirty routine to retrieve the file's 'fileno' value
+ *            (Mainly added to stop non-file routines from poking about in the
+ *            H5F_t data structure)
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
- *		March 27, 2002
+ * Programmer:    Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *        March 27, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -910,14 +893,14 @@ done:
 } /* end H5F_get_fileno() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_eoa
+ * Function:  H5F_get_eoa
  *
- * Purpose:	Quick and dirty routine to retrieve the file's 'eoa' value
+ * Purpose:   Quick and dirty routine to retrieve the file's 'eoa' value
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
- *		June 1, 2004
+ * Programmer:    Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *        June 1, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -940,13 +923,13 @@ done:
 } /* end H5F_get_eoa() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_get_vfd_handle
+ * Function:  H5F_get_vfd_handle
  *
- * Purpose:     Returns a pointer to the file handle of the low-level file
- *              driver.  This is the private function for H5Fget_vfd_handle.
+ * Purpose:   Returns a pointer to the file handle of the low-level file
+ *            driver.  This is the private function for H5Fget_vfd_handle.
  *
- * Return:      Success:        Non-negative.
- *              Failure:        negative.
+ * Return:    Success:        Non-negative.
+ *            Failure:        negative.
  *
  * Programmer:  Raymond Lu
  *              Sep. 16, 2002
@@ -973,17 +956,17 @@ done:
 } /* end H5F_get_vfd_handle() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_is_tmp_addr
+ * Function:  H5F_is_tmp_addr
  *
- * Purpose:	Quick and dirty routine to determine if an address is in
- *		the 'temporary' file space.
- *          (Mainly added to stop non-file routines from poking about in the
- *          H5F_t data structure)
+ * Purpose:   Quick and dirty routine to determine if an address is in
+ *            the 'temporary' file space.
+ *            (Mainly added to stop non-file routines from poking about in the
+ *            H5F_t data structure)
  *
- * Return:	TRUE/FALSE on success/abort on failure (shouldn't fail)
+ * Return:    TRUE/FALSE on success/abort on failure (shouldn't fail)
  *
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
- *		June 11, 2009
+ * Programmer:    Quincey Koziol <koziol@hdfgroup.org>
+ *        June 11, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1000,17 +983,17 @@ H5F_is_tmp_addr(const H5F_t *f, haddr_t addr)
 } /* end H5F_is_tmp_addr() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_use_tmp_space
+ * Function:  H5F_use_tmp_space
  *
- * Purpose:	Quick and dirty routine to determine if using temporary
- *		file space is allowed for this file.
- *          (Mainly added to stop non-file routines from poking about in the
- *          H5F_t data structure)
+ * Purpose:   Quick and dirty routine to determine if using temporary
+ *            file space is allowed for this file.
+ *            (Mainly added to stop non-file routines from poking about in the
+ *            H5F_t data structure)
  *
- * Return:	TRUE/FALSE on success/abort on failure (shouldn't fail)
+ * Return:    TRUE/FALSE on success/abort on failure (shouldn't fail)
  *
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
- *		July  1, 2009
+ * Programmer:    Quincey Koziol <koziol@hdfgroup.org>
+ *        July  1, 2009
  *
  *-------------------------------------------------------------------------
  */
