@@ -428,7 +428,7 @@ H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t H5_ATTR_UNUSED addr,
                     break;
 
                 case 2: /* 4 byte size */
-                        /* use <= 2**32 -1 to stay within 4 bytes integer range */
+                    /* use <= 2**32 -1 to stay within 4 bytes integer range */
                     HDassert(chunk0_size <= 4294967295UL);
                     UINT32ENCODE(p, chunk0_size);
                     break;

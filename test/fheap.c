@@ -75,8 +75,9 @@
 #define IBLOCK_MAX_DROWS(fh, pos)                                                                            \
     H5HF_get_iblock_max_drows_test(fh, pos) /* Max. # of direct block rows in a indirect block */
 #define DBLOCK_SIZE(fh, r) H5HF_get_dblock_size_test(fh, r) /* Size of a direct block in a given row */
-#define DBLOCK_FREE(fh, r) H5HF_get_dblock_free_test(fh, r) /* Free space in a direct block of a given row   \
-                                                             */
+#define DBLOCK_FREE(fh, r)                                                                                   \
+    H5HF_get_dblock_free_test(fh, r) /* Free space in a direct block of a given row                          \
+                                      */
 
 const char *FILENAME[] = {"fheap", NULL};
 

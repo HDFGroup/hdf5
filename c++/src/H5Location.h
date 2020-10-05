@@ -200,9 +200,9 @@ class H5_DLLCPP H5Location : public IdComponent {
     // PropList is currently not used, so always be default.
     // Deprecated
     // virtual Attribute createAttribute(const char* name, const DataType& type, const DataSpace& space, const
-    // PropList& create_plist = PropList::DEFAULT) const; virtual Attribute createAttribute(const H5std_string&
-    // name, const DataType& type, const DataSpace& space, const PropList& create_plist = PropList::DEFAULT)
-    // const;
+    // PropList& create_plist = PropList::DEFAULT) const; virtual Attribute createAttribute(const
+    // H5std_string& name, const DataType& type, const DataSpace& space, const PropList& create_plist =
+    // PropList::DEFAULT) const;
 
     // Given its name, opens the attribute that belongs to an object at
     // this location.
