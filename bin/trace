@@ -363,7 +363,7 @@ sub rewrite_func ($$$$$) {
 
       # Append argument
       $trace .= "$_";
-      $len += length;     # Add 2, for ', '
+      $len += length;     # Add length of appended argument name
     }
 
     # Append final ');' for macro
