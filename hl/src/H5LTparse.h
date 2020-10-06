@@ -35,8 +35,8 @@
    especially those whose name start with YY_ or yy_.  They are
    private implementation details that can be changed or removed.  */
 
-#ifndef YY_H5LTYY_SRC_H5LTPARSE_H_INCLUDED
-# define YY_H5LTYY_SRC_H5LTPARSE_H_INCLUDED
+#ifndef YY_H5LTYY_HL_SRC_H5LTPARSE_H_INCLUDED
+# define YY_H5LTYY_HL_SRC_H5LTPARSE_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -118,13 +118,13 @@ extern int H5LTyydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 72 "src/H5LTparse.y"
+#line 72 "hl/src/H5LTparse.y"
 
     int     ival;         /*for integer token*/
     char    *sval;        /*for name string*/
     hid_t   hid;          /*for hid_t token*/
 
-#line 128 "src/H5LTparse.h"
+#line 128 "hl/src/H5LTparse.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -137,4 +137,4 @@ extern YYSTYPE H5LTyylval;
 
 int H5LTyyparse (void);
 
-#endif /* !YY_H5LTYY_SRC_H5LTPARSE_H_INCLUDED  */
+#endif /* !YY_H5LTYY_HL_SRC_H5LTPARSE_H_INCLUDED  */

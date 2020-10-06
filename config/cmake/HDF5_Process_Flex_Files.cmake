@@ -35,21 +35,29 @@ if (FILE_PARSE)
   # will simply ignore them, but we want to avoid those warnings.
     file (READ ${FILE_PARSE}.c TEST_STREAM)
     file (WRITE ${FILE_PARSE}.c "
-#if __GNUC__ >= 4 && __GNUC_MINOR__ >=2\n
+#if defined __GNUC__
+#if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 402\n
 #pragma GCC diagnostic ignored \"-Wconversion\"\n
 #pragma GCC diagnostic ignored \"-Wimplicit-function-declaration\"\n
 #pragma GCC diagnostic ignored \"-Wlarger-than=\"\n
 #pragma GCC diagnostic ignored \"-Wmissing-prototypes\"\n
 #pragma GCC diagnostic ignored \"-Wnested-externs\"\n
 #pragma GCC diagnostic ignored \"-Wold-style-definition\"\n
+#pragma GCC diagnostic ignored \"-Wredundant-decls\"\n
 #pragma GCC diagnostic ignored \"-Wsign-compare\"\n
 #pragma GCC diagnostic ignored \"-Wsign-conversion\"\n
+#pragma GCC diagnostic ignored \"-Wstrict-overflow\"\n
 #pragma GCC diagnostic ignored \"-Wstrict-prototypes\"\n
+#pragma GCC diagnostic ignored \"-Wsuggest-attribute=const\"\n
+#pragma GCC diagnostic ignored \"-Wsuggest-attribute=pure\"\n
 #pragma GCC diagnostic ignored \"-Wswitch-default\"\n
 #pragma GCC diagnostic ignored \"-Wunused-function\"\n
 #pragma GCC diagnostic ignored \"-Wunused-macros\"\n
 #pragma GCC diagnostic ignored \"-Wunused-parameter\"\n
-#pragma GCC diagnostic ignored \"-Wredundant-decls\"\n
+#endif\n
+#if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 600\n
+#pragma GCC diagnostic ignored "-Wnull-dereference"\"\n
+#endif\n
 #elif defined __SUNPRO_CC\n
 #pragma disable_warn\n
 #elif defined _MSC_VER\n
@@ -69,21 +77,29 @@ if (FILE_ANALYZE)
   # will simply ignore them, but we want to avoid those warnings.
     file (READ ${GEN_DIR}/${FILE_ANALYZE} TEST_STREAM)
     file (WRITE ${FILE_ANALYZE} "
-#if __GNUC__ >= 4 && __GNUC_MINOR__ >=2\n
+#if defined __GNUC__
+#if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 402\n
 #pragma GCC diagnostic ignored \"-Wconversion\"\n
 #pragma GCC diagnostic ignored \"-Wimplicit-function-declaration\"\n
 #pragma GCC diagnostic ignored \"-Wlarger-than=\"\n
 #pragma GCC diagnostic ignored \"-Wmissing-prototypes\"\n
 #pragma GCC diagnostic ignored \"-Wnested-externs\"\n
 #pragma GCC diagnostic ignored \"-Wold-style-definition\"\n
+#pragma GCC diagnostic ignored \"-Wredundant-decls\"\n
 #pragma GCC diagnostic ignored \"-Wsign-compare\"\n
 #pragma GCC diagnostic ignored \"-Wsign-conversion\"\n
+#pragma GCC diagnostic ignored \"-Wstrict-overflow\"\n
 #pragma GCC diagnostic ignored \"-Wstrict-prototypes\"\n
+#pragma GCC diagnostic ignored \"-Wsuggest-attribute=const\"\n
+#pragma GCC diagnostic ignored \"-Wsuggest-attribute=pure\"\n
 #pragma GCC diagnostic ignored \"-Wswitch-default\"\n
 #pragma GCC diagnostic ignored \"-Wunused-function\"\n
 #pragma GCC diagnostic ignored \"-Wunused-macros\"\n
 #pragma GCC diagnostic ignored \"-Wunused-parameter\"\n
-#pragma GCC diagnostic ignored \"-Wredundant-decls\"\n
+#endif\n
+#if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 600\n
+#pragma GCC diagnostic ignored "-Wnull-dereference"\"\n
+#endif\n
 #elif defined __SUNPRO_CC\n
 #pragma disable_warn\n
 #elif defined _MSC_VER\n
