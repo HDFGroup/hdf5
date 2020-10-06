@@ -8,7 +8,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Run clang-format style check for C programs.
-      uses: DoozyX/clang-format-lint-action@v0.8
+      uses: DoozyX/clang-format-lint-action@v0.10
       with:
         source: '.'
         extensions: 'c,h,cpp,hpp'
