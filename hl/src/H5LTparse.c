@@ -1,4 +1,5 @@
-#if defined            __GNUC__ && 402 <= __GNUC__ * 100 + __GNUC_MINOR__
+#if defined(__GNUC__)
+#if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 402
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
 #pragma GCC diagnostic ignored "-Wlarger-than="
@@ -10,12 +11,17 @@
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Wstrict-overflow"
 #pragma GCC diagnostic ignored "-Wstrict-prototypes"
+#pragma GCC diagnostic ignored "-Wsuggest-attribute=const"
 #pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"
 #pragma GCC diagnostic ignored "-Wswitch-default"
 #pragma GCC diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic ignored "-Wunused-macros"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-#elif defined          __SUNPRO_CC
+#endif
+#if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 600
+#pragma GCC diagnostic ignored "-Wnull-dereference"
+#endif
+#elif defined __SUNPRO_CC
 #pragma disable_warn
 #elif defined _MSC_VER
 #pragma warning(push, 1)
