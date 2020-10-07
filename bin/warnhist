@@ -15,7 +15,7 @@ use warnings;
 # http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
 # access to either file, you may request a copy from help@hdfgroup.org.
 #
-# Quincey Koziol, koziol@hdfgroup.org
+# Quincey Koziol
 #  9 Aug 2013
 #
 # Purpose: Given an input file containing the output from a build of the
