@@ -95,8 +95,8 @@ jobs:
       if:  matrix.os == 'windows-latest'
       run: |
         # Set these env vars so cmake picks the correct compiler
-        echo "::set-env name=CXX::cl.exe"
-        echo "::set-env name=CC::cl.exe"
+        echo "CXX=cl.exe" >> $GITHUB_ENV
+        echo "CC=cl.exe" >> $GITHUB_ENV
     
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - name: Get Sources
