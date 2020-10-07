@@ -39,14 +39,14 @@ USAGE()
 {
 cat << EOF
 Usage: $0 -d <dir> [--docver BRANCHNAME] [-h] [--nocheck] [--private] <methods> ...
-   -d DIR               The name of the directory where the releas(es) should be
-                        placed.
+   -d DIR   The name of the directory where the releas(es) should be
+                placed.
    --docver BRANCHNAME  This is added for 1.8 and beyond to get the correct
                         version of documentation files from the hdf5docs
                         repository.  BRANCHNAME for v1.8 should be hdf5_1_8.
-   -h                   print the help page.
-   --nocheck            Ignore errors in MANIFEST file.
-   --private            Make a private release with today's date in version information.
+   -h           print the help page.
+   --nocheck    Ignore errors in MANIFEST file.
+   --private    Make a private release with today's date in version information.
 
 This must be run at the top level of the source directory.
 The other command-line options are the names of the programs to use
@@ -149,8 +149,8 @@ tar2zip()
     find $ztmpdir/$version | \
         while read inf; do \
             if file $inf | grep "$inf\: .*text" > /dev/null 2>&1 ; then \
-            unix2dos -q -k $inf; \
-            fi \
+                unix2dos -q -k $inf; \
+            fi\
         done
     # step 3: make zipball
     # -9 maximum compression
@@ -248,7 +248,7 @@ tar2cmakezip()
         while read inf; do \
             if file $inf | grep "$inf\: .*text" > /dev/null 2>&1 ; then \
                 unix2dos -q -k $inf; \
-            fi \
+            fi\
         done
 
     # step 3: make zipball
@@ -442,7 +442,7 @@ check=yes
 release_date=`date +%F`
 today=`date +%Y%m%d`
 pmode='no'
-tmpdir="../#release_tmp.$$"    # tmp work directory
+tmpdir="../#release_tmp.$$"     # tmp work directory
 DOC_URL=https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5doc.git
 CPPLUS_RM_NAME=cpplus_RM
 MAINT_MODE_ENABLED=""
@@ -597,17 +597,17 @@ for comp in $methods; do
     case $comp in
         tar)
             cp -p $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.tar
-            (cd $DEST; md5sum $HDF5_VERS.tar >> $MD5file) 
+            (cd $DEST; md5sum $HDF5_VERS.tar >> $MD5file)
             ;;
         gzip)
             test "$verbose" && echo "   Running gzip..." 1>&2
             gzip -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.gz
-            (cd $DEST; md5sum $HDF5_VERS.tar.gz >> $MD5file) 
+            (cd $DEST; md5sum $HDF5_VERS.tar.gz >> $MD5file)
             ;;
         cmake-tgz)
             test "$verbose" && echo "   Creating CMake tar.gz file..." 1>&2
             tar2cmaketgz $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/CMake-$HDF5_VERS.tar.gz 1>&2
-            (cd $DEST; md5sum CMake-$HDF5_VERS.tar.gz >> $MD5file) 
+            (cd $DEST; md5sum CMake-$HDF5_VERS.tar.gz >> $MD5file)
             ;;
         hpc-cmake-tgz)
             test "$verbose" && echo "   Creating HPC-CMake tar.gz file..." 1>&2
@@ -617,12 +617,12 @@ for comp in $methods; do
         bzip2)
             test "$verbose" && echo "   Running bzip2..." 1>&2
             bzip2 -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.bz2
-            (cd $DEST; md5sum $HDF5_VERS.tar.bz2 >> $MD5file) 
+            (cd $DEST; md5sum $HDF5_VERS.tar.bz2 >> $MD5file)
             ;;
         zip)
             test "$verbose" && echo "   Creating zip ball..." 1>&2
             tar2zip $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.zip 1>&2
-            (cd $DEST; md5sum $HDF5_VERS.zip >> $MD5file) 
+            (cd $DEST; md5sum $HDF5_VERS.zip >> $MD5file)
             ;;
         cmake-zip)
             test "$verbose" && echo "   Creating CMake-zip ball..." 1>&2
