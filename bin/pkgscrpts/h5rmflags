@@ -12,11 +12,9 @@
 # help@hdfgroup.org.
 #
 
-## This script wasextracted from h5redeploy to find hdf5 compile scripts and 
-## remove build paths from hdf5 compile scripts.  Script is intended to be 
-## called from the make18xxTarFiles.pl script, so it could be stripped of options.
-## Actions are predetermined and written in this script instead of in a command
-## file.
+## Remove paths to libraries used to build HDF5 when packaging HDF5
+## binaries.
+## For help page, use "h5rmflags -help"
 
 # Constants definitions
 EXIT_SUCCESS=0
