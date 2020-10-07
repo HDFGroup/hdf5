@@ -7,36 +7,36 @@
 # Order is important. The last matching pattern has the most precedence.
 # So if a pull request only touches javascript files, only these owners
 # will be requested to review.
-*.cmake           @byrnHDF
-CMakeLists.txt    @byrnHDF
-CMakeTests.*      @byrnHDF
+*.cmake           @byrnHDF @derobins
+CMakeLists.txt    @byrnHDF @derobins
+CMakeTests.*      @byrnHDF @derobins
 
-/bin/             @lrknox @derobins @byrnHDF
+/bin/             @lrknox @derobins @qkoziol
 
-/c++/             bmribler@hdfgroup.org
+/c++/             @bmribler @byrnHDF
 
-/config/          @lrknox @derobins @byrnHDF
+/config/          @lrknox @derobins @qkoziol @byrnHDF
 
-/doc/             @gnuoyd mainzer@hdfgroup.org
+/doc/             @gnuoyd @jrmainzer
 
-/examples/        @lrknox @derobins bljones@hdfgroup.org
+/examples/        @lrknox @derobins @bljhdf
 
 /fortran/         @brtnfld @epourmal
 
-/hl/              bmribler@hdfgroup.org
+/hl/              @bmribler @byrnHDF
 
 /java/            @jhendersonHDF @byrnHDF
 
 /m4/              @lrknox @derobins
 
-/release_docs/    @lrknox bljones@hdfgroup.org @byrnHDF
+/release_docs/    @lrknox @bljhdf @byrnHDF
 
-/src/             @jhendersonHDF @derobins @fortnern @qkoziol @soumagne @vchoi-hdfgroup mainzer@hdfgroup.org
+/src/             @jhendersonHDF @derobins @fortnern @qkoziol @soumagne @vchoi-hdfgroup @jrmainzer
 
-/test/            @jhendersonHDF @derobins @fortnern @qkoziol @soumagne @vchoi-hdfgroup mainzer@hdfgroup.org
+/test/            @jhendersonHDF @derobins @fortnern @qkoziol @soumagne @vchoi-hdfgroup @jrmainzer
 
-/testpar/         @jhendersonHDF @rawarren mainzer@hdfgroup.org
+/testpar/         @jhendersonHDF @rawarren @jrmainzer @qkoziol
 
-/tools/           @byrnHDF
+/tools/           @byrnHDF @bmribler
 
 /utils/           @lrknox @byrnHDF
