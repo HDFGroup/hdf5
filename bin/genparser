@@ -200,8 +200,8 @@ if [ "$verbose" = true ] ; then
 fi
 ${HDF5_FLEX} --nounistd -PH5LTyy -o ${path_to_hl_src}/H5LTanalyze.c ${path_to_hl_src}/H5LTanalyze.l
 
-# fix H5LTparse.c to declare H5LTyyparse return type as an hid_t
-# instead of int.  Currently the generated function H5LTyyparse is
+# fix H5LTparse.c and H5LTlparse.h to declare H5LTyyparse return type as an
+# hid_t instead of int.  Currently the generated function H5LTyyparse is
 # generated with a return value of type int, which is a mapping to the
 # flex yyparse function.  The return value in the HL library should be
 # an hid_t.
@@ -211,6 +211,9 @@ ${HDF5_FLEX} --nounistd -PH5LTyy -o ${path_to_hl_src}/H5LTanalyze.c ${path_to_hl
 perl -0777 -pi -e 's/int yyparse/hid_t yyparse/igs' ${path_to_hl_src}/H5LTparse.c
 perl -0777 -pi -e 's/int\nyyparse/hid_t\nyyparse/igs' ${path_to_hl_src}/H5LTparse.c
 perl -0777 -pi -e 's/int H5LTyyparse/hid_t H5LTyyparse/igs' ${path_to_hl_src}/H5LTparse.c
+perl -0777 -pi -e 's/int yyparse/hid_t yyparse/igs' ${path_to_hl_src}/H5LTparse.h
+perl -0777 -pi -e 's/int\nyyparse/hid_t\nyyparse/igs' ${path_to_hl_src}/H5LTparse.h
+perl -0777 -pi -e 's/int H5LTyyparse/hid_t H5LTyyparse/igs' ${path_to_hl_src}/H5LTparse.h
 
 # Add code that disables warnings in the flex/bison-generated code.
 #
