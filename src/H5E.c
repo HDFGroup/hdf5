@@ -89,6 +89,7 @@ static H5E_t  *H5E__get_current_stack(void);
 static herr_t  H5E__set_current_stack(H5E_t *estack);
 static herr_t  H5E__close_stack(H5E_t *err_stack, void **request);
 static ssize_t H5E__get_num(const H5E_t *err_stack);
+static herr_t  H5E__append_stack(H5E_t *dst_estack, const H5E_t *src_stack);
 
 
 /*********************/
@@ -1349,6 +1350,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+H5_ATTR_FORMAT(printf, 8, 9)
 herr_t
 H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line,
         hid_t cls_id, hid_t maj_id, hid_t min_id, const char *fmt, ...)
@@ -1702,4 +1704,114 @@ H5Eauto_is_v2(hid_t estack_id, unsigned *is_stack)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Eauto_is_v2() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Eappend_stack
+ *
+ * Purpose:     Appends one error stack to another, optionally closing the
+ *              source stack.
+ *
+ * Return:      Non-negative value on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, October 7, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Eappend_stack(hid_t dst_stack_id, hid_t src_stack_id,
+    hbool_t close_source_stack)
+{
+    H5E_t *dst_stack, *src_stack;        /* Error stacks */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    /* Don't clear the error stack! :-) */
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+    if(NULL == (dst_stack = (H5E_t *)H5I_object_verify(dst_stack_id, H5I_ERROR_STACK)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dst_stack_id not a error stack ID")
+    if(NULL == (src_stack = (H5E_t *)H5I_object_verify(src_stack_id, H5I_ERROR_STACK)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "src_stack_id not a error stack ID")
+
+    /* Append the source stack to the destination stack */
+    if(H5E__append_stack(dst_stack, src_stack) < 0)
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTAPPEND, FAIL, "can't append stack")
+
+    /* Close source error stack, if requested */
+    if(close_source_stack)
+        /* Decrement the counter on the error stack.  It will be freed if the
+         * count reaches zero.
+         */
+        if(H5I_dec_app_ref(src_stack_id) < 0)
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on source error stack")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Eappend_stack() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5E__append_stack
+ *
+ * Purpose:     Private function to append error stacks.
+ *
+ * Return:      Non-negative value on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, October 7, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5E__append_stack(H5E_t *dst_stack, const H5E_t *src_stack)
+{
+    unsigned u;                         /* Local index variable */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(dst_stack);
+    HDassert(src_stack);
+
+    /* Copy the errors from the source stack to the destination stack */
+    for(u = 0; u < src_stack->nused; u++) {
+        const H5E_error2_t *src_error;  /* Pointers to source error on stack */
+        H5E_error2_t *dst_error;        /* Pointers to destination error on stack */
+
+        /* Get pointers into the current error stack location */
+        src_error = &(src_stack->slot[u]);
+        dst_error = &(dst_stack->slot[dst_stack->nused]);
+
+        /* Increment the IDs to indicate that they are used in this stack */
+        if(H5I_inc_ref(src_error->cls_id, FALSE) < 0)
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "unable to increment ref count on error class")
+        dst_error->cls_id = src_error->cls_id;
+        if(H5I_inc_ref(src_error->maj_num, FALSE) < 0)
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "unable to increment ref count on error message")
+        dst_error->maj_num = src_error->maj_num;
+        if(H5I_inc_ref(src_error->min_num, FALSE) < 0)
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "unable to increment ref count on error message")
+        dst_error->min_num = src_error->min_num;
+        if(NULL == (dst_error->func_name = H5MM_xstrdup(src_error->func_name)))
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTALLOC, FAIL, "memory allocation failed")
+        if(NULL == (dst_error->file_name = H5MM_xstrdup(src_error->file_name)))
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTALLOC, FAIL, "memory allocation failed")
+        dst_error->line = src_error->line;
+        if(NULL == (dst_error->desc = H5MM_xstrdup(src_error->desc)))
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTALLOC, FAIL, "memory allocation failed")
+
+        /* Increment # of errors in destination stack */
+        dst_stack->nused++;
+
+        /* Check for destination stack full */
+        if(dst_stack->nused >= H5E_NSLOTS)
+            break;
+    } /* end for */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5E__append_stack() */
 
