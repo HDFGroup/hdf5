@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:  Quincey Koziol
  *              Tuesday, July 15, 2003
  *
  * Purpose:	Create a file which will have the newer superblock format.
@@ -29,17 +29,14 @@
 #define ISTORE_IK 64
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	Create a file with a new version (>0) of the superblock
+ * Purpose:     Create a file with a new version (>0) of the superblock
  *
- * Return:	Success:
- *		Failure:
+ * Return:      EXIT_SUCCESS
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, July 15, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

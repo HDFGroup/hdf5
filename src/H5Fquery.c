@@ -200,8 +200,8 @@ H5F_get_actual_name(const H5F_t *f)
  * Function: H5F_get_extpath
  *
  * Purpose:  Retrieve the file's 'extpath' flags
- *           This is used by H5L_extern_traverse() and H5D_build_file_prefix() to retrieve the main file's
- *location when searching the target file.
+ *           This is used by H5L_extern_traverse() and H5D_build_file_prefix()
+ *           to retrieve the main file's location when searching the target file.
  *
  * Return:   'extpath' on success/abort on failure (shouldn't fail)
  *-------------------------------------------------------------------------
@@ -1228,8 +1228,8 @@ H5F_get_null_fsm_addr(const H5F_t *f)
  *
  * Return:   VOL class pointer for file, can't fail
  *
- * Programmer:	Quincey Koziol
- *		Saturday, August 17, 2019
+ * Programmer:    Quincey Koziol
+ *        Saturday, August 17, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -1271,8 +1271,8 @@ H5F_get_vol_obj(const H5F_t *f)
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:	Quincey Koziol
- *		Saturday, August 17, 2019
+ * Programmer:    Quincey Koziol
+ *        Saturday, August 17, 2019
  *
  *-------------------------------------------------------------------------
  */

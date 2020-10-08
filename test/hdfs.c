@@ -19,7 +19,7 @@
  *
  *     Demonstrates basic use cases and fapl interaction.
  *
- * Programmer: Jacob Smith <jake.smith@hdfgroup.org>
+ * Programmer: Jacob Smith
  *             2018-04-23
  */
 
@@ -230,9 +230,10 @@
  */
 #define JSERR_STR(expected, actual, reason)                                                                  \
     {                                                                                                        \
+        const char *_reason = reason;                                                                        \
         JSFAILED_AT()                                                                                        \
-        if ((reason) != NULL) {                                                                              \
-            HDprintf("%s\n", (reason));                                                                      \
+        if (_reason != NULL) {                                                                               \
+            HDprintf("%s\n", _reason);                                                                       \
         }                                                                                                    \
         else {                                                                                               \
             HDprintf("!!! Expected:\n%s\n!!!Actual:\n%s\n", (expected), (actual));                           \
