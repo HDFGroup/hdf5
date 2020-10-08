@@ -82,15 +82,15 @@
  */
 BEGIN_FUNC(PRIV, NOERR, herr_t, SUCCEED, -, H5EA_get_stats(const H5EA_t *ea, H5EA_stat_t *stats))
 
-/* Local variables */
+    /* Local variables */
 
-/*
- * Check arguments.
- */
-HDassert(ea);
-HDassert(stats);
+    /*
+     * Check arguments.
+     */
+    HDassert(ea);
+    HDassert(stats);
 
-/* Copy extensible array statistics */
-H5MM_memcpy(stats, &ea->hdr->stats, sizeof(ea->hdr->stats));
+    /* Copy extensible array statistics */
+    H5MM_memcpy(stats, &ea->hdr->stats, sizeof(ea->hdr->stats));
 
 END_FUNC(PRIV) /* end H5EA_get_stats() */

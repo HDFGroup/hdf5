@@ -114,20 +114,20 @@ H5FL_DEFINE_STATIC(H5FA__test_ctx_t);
  */
 BEGIN_FUNC(STATIC, ERR, void *, NULL, NULL, H5FA__test_crt_context(void H5_ATTR_UNUSED *udata))
 
-/* Local variables */
-H5FA__test_ctx_t *ctx; /* Context for callbacks */
+    /* Local variables */
+    H5FA__test_ctx_t *ctx; /* Context for callbacks */
 
-/* Allocate new context structure */
-if (NULL == (ctx = H5FL_MALLOC(H5FA__test_ctx_t)))
-    H5E_THROW(H5E_CANTALLOC, "can't allocate fixed array client callback context")
+    /* Allocate new context structure */
+    if (NULL == (ctx = H5FL_MALLOC(H5FA__test_ctx_t)))
+        H5E_THROW(H5E_CANTALLOC, "can't allocate fixed array client callback context")
 
-/* Initialize the context */
-ctx->bogus = H5FA__TEST_BOGUS_VAL;
+    /* Initialize the context */
+    ctx->bogus = H5FA__TEST_BOGUS_VAL;
 
-/* Set return value */
-ret_value = ctx;
+    /* Set return value */
+    ret_value = ctx;
 
-CATCH
+    CATCH
 
 END_FUNC(STATIC) /* end H5FA__test_crt_context() */
 
@@ -145,14 +145,14 @@ END_FUNC(STATIC) /* end H5FA__test_crt_context() */
  */
 BEGIN_FUNC(STATIC, NOERR, herr_t, SUCCEED, -, H5FA__test_dst_context(void *_ctx))
 
-/* Local variables */
-H5FA__test_ctx_t *ctx = (H5FA__test_ctx_t *)_ctx; /* Callback context to destroy */
+    /* Local variables */
+    H5FA__test_ctx_t *ctx = (H5FA__test_ctx_t *)_ctx; /* Callback context to destroy */
 
-/* Sanity checks */
-HDassert(H5FA__TEST_BOGUS_VAL == ctx->bogus);
+    /* Sanity checks */
+    HDassert(H5FA__TEST_BOGUS_VAL == ctx->bogus);
 
-/* Release context structure */
-ctx = H5FL_FREE(H5FA__test_ctx_t, ctx);
+    /* Release context structure */
+    ctx = H5FL_FREE(H5FA__test_ctx_t, ctx);
 
 END_FUNC(STATIC) /* end H5FA__test_dst_context() */
 
@@ -170,14 +170,14 @@ END_FUNC(STATIC) /* end H5FA__test_dst_context() */
  */
 BEGIN_FUNC(STATIC, NOERR, herr_t, SUCCEED, -, H5FA__test_fill(void *nat_blk, size_t nelmts))
 
-/* Local variables */
-uint64_t fill_val = H5FA_TEST_FILL; /* Value to fill elements with */
+    /* Local variables */
+    uint64_t fill_val = H5FA_TEST_FILL; /* Value to fill elements with */
 
-/* Sanity checks */
-HDassert(nat_blk);
-HDassert(nelmts);
+    /* Sanity checks */
+    HDassert(nat_blk);
+    HDassert(nelmts);
 
-H5VM_array_fill(nat_blk, &fill_val, sizeof(uint64_t), nelmts);
+    H5VM_array_fill(nat_blk, &fill_val, sizeof(uint64_t), nelmts);
 
 END_FUNC(STATIC) /* end H5FA__test_fill() */
 
@@ -198,28 +198,28 @@ BEGIN_FUNC(STATIC, NOERR, herr_t, SUCCEED, -,
 
 /* Local variables */
 #ifndef NDEBUG
-H5FA__test_ctx_t *ctx = (H5FA__test_ctx_t *)_ctx; /* Callback context to destroy */
-#endif                                            /* NDEBUG */
-const uint64_t *elmt = (const uint64_t *)_elmt;   /* Convenience pointer to native elements */
+    H5FA__test_ctx_t *ctx = (H5FA__test_ctx_t *)_ctx; /* Callback context to destroy */
+#endif                                                /* NDEBUG */
+    const uint64_t *elmt = (const uint64_t *)_elmt;   /* Convenience pointer to native elements */
 
-/* Sanity checks */
-HDassert(raw);
-HDassert(elmt);
-HDassert(nelmts);
-HDassert(H5FA__TEST_BOGUS_VAL == ctx->bogus);
+    /* Sanity checks */
+    HDassert(raw);
+    HDassert(elmt);
+    HDassert(nelmts);
+    HDassert(H5FA__TEST_BOGUS_VAL == ctx->bogus);
 
-/* Encode native elements into raw elements */
-while (nelmts) {
-    /* Encode element */
-    /* (advances 'raw' pointer) */
-    UINT64ENCODE(raw, *elmt);
+    /* Encode native elements into raw elements */
+    while (nelmts) {
+        /* Encode element */
+        /* (advances 'raw' pointer) */
+        UINT64ENCODE(raw, *elmt);
 
-    /* Advance native element pointer */
-    elmt++;
+        /* Advance native element pointer */
+        elmt++;
 
-    /* Decrement # of elements to encode */
-    nelmts--;
-} /* end while */
+        /* Decrement # of elements to encode */
+        nelmts--;
+    } /* end while */
 
 END_FUNC(STATIC) /* end H5FA__test_encode() */
 
@@ -240,29 +240,29 @@ BEGIN_FUNC(STATIC, NOERR, herr_t, SUCCEED, -,
 
 /* Local variables */
 #ifndef NDEBUG
-H5FA__test_ctx_t *ctx = (H5FA__test_ctx_t *)_ctx; /* Callback context to destroy */
-#endif                                            /* NDEBUG */
-uint64_t *     elmt = (uint64_t *)_elmt;          /* Convenience pointer to native elements */
-const uint8_t *raw  = (const uint8_t *)_raw;      /* Convenience pointer to raw elements */
+    H5FA__test_ctx_t *ctx = (H5FA__test_ctx_t *)_ctx; /* Callback context to destroy */
+#endif                                                /* NDEBUG */
+    uint64_t *     elmt = (uint64_t *)_elmt;          /* Convenience pointer to native elements */
+    const uint8_t *raw  = (const uint8_t *)_raw;      /* Convenience pointer to raw elements */
 
-/* Sanity checks */
-HDassert(raw);
-HDassert(elmt);
-HDassert(nelmts);
-HDassert(H5FA__TEST_BOGUS_VAL == ctx->bogus);
+    /* Sanity checks */
+    HDassert(raw);
+    HDassert(elmt);
+    HDassert(nelmts);
+    HDassert(H5FA__TEST_BOGUS_VAL == ctx->bogus);
 
-/* Decode raw elements into native elements */
-while (nelmts) {
-    /* Decode element */
-    /* (advances 'raw' pointer) */
-    UINT64DECODE(raw, *elmt);
+    /* Decode raw elements into native elements */
+    while (nelmts) {
+        /* Decode element */
+        /* (advances 'raw' pointer) */
+        UINT64DECODE(raw, *elmt);
 
-    /* Advance native element pointer */
-    elmt++;
+        /* Advance native element pointer */
+        elmt++;
 
-    /* Decrement # of elements to decode */
-    nelmts--;
-} /* end while */
+        /* Decrement # of elements to decode */
+        nelmts--;
+    } /* end while */
 
 END_FUNC(STATIC) /* end H5FA__test_decode() */
 
@@ -281,17 +281,17 @@ END_FUNC(STATIC) /* end H5FA__test_decode() */
 BEGIN_FUNC(STATIC, NOERR, herr_t, SUCCEED, -,
            H5FA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt))
 
-/* Local variables */
-char temp_str[128]; /* Temporary string, for formatting */
+    /* Local variables */
+    char temp_str[128]; /* Temporary string, for formatting */
 
-/* Sanity checks */
-HDassert(stream);
-HDassert(elmt);
+    /* Sanity checks */
+    HDassert(stream);
+    HDassert(elmt);
 
-/* Print element */
-HDsprintf(temp_str, "Element #%llu:", (unsigned long long)idx);
-HDfprintf(stream, "%*s%-*s %llu\n", indent, "", fwidth, temp_str,
-          (unsigned long long)*(const uint64_t *)elmt);
+    /* Print element */
+    HDsprintf(temp_str, "Element #%llu:", (unsigned long long)idx);
+    HDfprintf(stream, "%*s%-*s %llu\n", indent, "", fwidth, temp_str,
+              (unsigned long long)*(const uint64_t *)elmt);
 
 END_FUNC(STATIC) /* end H5FA__test_debug() */
 
@@ -311,20 +311,20 @@ END_FUNC(STATIC) /* end H5FA__test_debug() */
 BEGIN_FUNC(STATIC, ERR, void *, NULL, NULL,
            H5FA__test_crt_dbg_context(H5F_t H5_ATTR_UNUSED *f, haddr_t H5_ATTR_UNUSED obj_addr))
 
-/* Local variables */
-H5FA__test_ctx_t *ctx; /* Context for callbacks */
+    /* Local variables */
+    H5FA__test_ctx_t *ctx; /* Context for callbacks */
 
-/* Allocate new context structure */
-if (NULL == (ctx = H5FL_MALLOC(H5FA__test_ctx_t)))
-    H5E_THROW(H5E_CANTALLOC, "can't allocate fixed array client callback context")
+    /* Allocate new context structure */
+    if (NULL == (ctx = H5FL_MALLOC(H5FA__test_ctx_t)))
+        H5E_THROW(H5E_CANTALLOC, "can't allocate fixed array client callback context")
 
-/* Initialize the context */
-ctx->bogus = H5FA__TEST_BOGUS_VAL;
+    /* Initialize the context */
+    ctx->bogus = H5FA__TEST_BOGUS_VAL;
 
-/* Set return value */
-ret_value = ctx;
+    /* Set return value */
+    ret_value = ctx;
 
-CATCH
+    CATCH
 
 END_FUNC(STATIC) /* end H5FA__test_crt_dbg_context() */
 
@@ -342,13 +342,13 @@ END_FUNC(STATIC) /* end H5FA__test_crt_dbg_context() */
  */
 BEGIN_FUNC(PKG, NOERR, herr_t, SUCCEED, -, H5FA__get_cparam_test(const H5FA_t *fa, H5FA_create_t *cparam))
 
-/* Check arguments. */
-HDassert(fa);
-HDassert(cparam);
+    /* Check arguments. */
+    HDassert(fa);
+    HDassert(cparam);
 
-/* Get fixed array creation parameters */
-cparam->raw_elmt_size = fa->hdr->cparam.raw_elmt_size;
-cparam->nelmts        = fa->hdr->cparam.nelmts;
+    /* Get fixed array creation parameters */
+    cparam->raw_elmt_size = fa->hdr->cparam.raw_elmt_size;
+    cparam->nelmts        = fa->hdr->cparam.nelmts;
 
 END_FUNC(PKG) /* end H5FA__get_cparam_test() */
 
@@ -367,16 +367,16 @@ END_FUNC(PKG) /* end H5FA__get_cparam_test() */
 BEGIN_FUNC(PKG, ERRCATCH, int, 0, -,
            H5FA__cmp_cparam_test(const H5FA_create_t *cparam1, const H5FA_create_t *cparam2))
 
-/* Check arguments. */
-HDassert(cparam1);
-HDassert(cparam2);
+    /* Check arguments. */
+    HDassert(cparam1);
+    HDassert(cparam2);
 
-/* Compare creation parameters for array */
-if (cparam1->raw_elmt_size < cparam2->raw_elmt_size)
-    H5_LEAVE(-1)
-else if (cparam1->raw_elmt_size > cparam2->raw_elmt_size)
-    H5_LEAVE(1)
+    /* Compare creation parameters for array */
+    if (cparam1->raw_elmt_size < cparam2->raw_elmt_size)
+        H5_LEAVE(-1)
+    else if (cparam1->raw_elmt_size > cparam2->raw_elmt_size)
+        H5_LEAVE(1)
 
-CATCH
+    CATCH
 
 END_FUNC(PKG) /* end H5FA__cmp_cparam_test() */

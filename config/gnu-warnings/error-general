@@ -59,7 +59,7 @@
 #     jni/h5util.c
 #       -Werror=format(-overflow)
 #
--Wformat
+-Werror=format
 #
 #
 #Examples and tests do not use the same set of extensive warning flags as libraries
