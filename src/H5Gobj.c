@@ -370,7 +370,7 @@ H5G__obj_compact_to_dense_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, voi
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_obj_compact_to_dense_cb() */
+} /* end H5G__obj_compact_to_dense_cb() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5G__obj_stab_to_new_cb

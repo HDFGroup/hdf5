@@ -68,8 +68,6 @@ typedef struct {
 /* Local Prototypes */
 /********************/
 
-static herr_t H5F__close_cb(H5VL_object_t *file_vol_obj);
-
 /* Callback for getting object counts in a file */
 static int H5F__get_all_count_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *key);
 
@@ -79,9 +77,6 @@ static int H5F__get_all_ids_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void 
 /*********************/
 /* Package Variables */
 /*********************/
-
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /*****************************/
 /* Library Private Variables */
@@ -96,146 +91,6 @@ H5FL_EXTERN(H5VL_t);
 
 /* Declare a free list to manage the H5VL_object_t struct */
 H5FL_EXTERN(H5VL_object_t);
-
-/* File ID class */
-static const H5I_class_t H5I_FILE_CLS[1] = {{
-    H5I_FILE,                 /* ID class value */
-    0,                        /* Class flags */
-    0,                        /* # of reserved IDs for class */
-    (H5I_free_t)H5F__close_cb /* Callback routine for closing objects of this class */
-}};
-
-/*-------------------------------------------------------------------------
- * Function: H5F_init
- *
- * Purpose:  Initialize the interface from some other layer.
- *
- * Return:   Success:    non-negative
- *
- *           Failure:    negative
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_init(void)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-    /* FUNC_ENTER() does all the work */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_init() */
-
-/*--------------------------------------------------------------------------
-NAME
-   H5F__init_package -- Initialize interface-specific information
-USAGE
-    herr_t H5F__init_package()
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.
-
---------------------------------------------------------------------------*/
-herr_t
-H5F__init_package(void)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /*
-     * Initialize the atom group for the file IDs.
-     */
-    if (H5I_register_type(H5I_FILE_CLS) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to initialize interface")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F__init_package() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5F_term_package
- *
- * Purpose:     Terminate this interface: free all memory and reset global
- *              variables to their initial values.  Release all ID groups
- *              associated with this interface.
- *
- * Return:      Success:    Positive if anything was done that might
- *                          have affected other interfaces;
- *                          zero otherwise.
- *
- *              Failure:    Never fails
- *
- *-------------------------------------------------------------------------
- */
-int
-H5F_term_package(void)
-{
-    int n = 0;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    if (H5_PKG_INIT_VAR) {
-        if (H5I_nmembers(H5I_FILE) > 0) {
-            (void)H5I_clear_type(H5I_FILE, FALSE, FALSE);
-            n++; /*H5I*/
-        }        /* end if */
-        else {
-            /* Make certain we've cleaned up all the shared file objects */
-            H5F_sfile_assert_num(0);
-
-            /* Destroy the file object id group */
-            n += (H5I_dec_type_ref(H5I_FILE) > 0);
-
-            /* Mark closed */
-            if (0 == n)
-                H5_PKG_INIT_VAR = FALSE;
-        } /* end else */
-    }     /* end if */
-
-    FUNC_LEAVE_NOAPI(n)
-} /* end H5F_term_package() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5F__close_cb
- *
- * Purpose:     Closes a file or causes the close operation to be pended.
- *              This function is called from the API and gets called
- *              by H5Fclose->H5I_dec_ref->H5F__close_cb when H5I_dec_ref()
- *              decrements the file ID reference count to zero.  The file ID
- *              is removed from the H5I_FILE group by H5I_dec_ref() just
- *              before H5F__close_cb() is called. If there are open object
- *              headers then the close is pended by moving the file to the
- *              H5I_FILE_CLOSING ID group (the f->closing contains the ID
- *              assigned to file).
- *
- * Return:      SUCCEED/FAIL
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5F__close_cb(H5VL_object_t *file_vol_obj)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Sanity check */
-    HDassert(file_vol_obj);
-
-    /* Close the file */
-    if (H5VL_file_close(file_vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
-
-    /* Free the VOL object */
-    if (H5VL_free_object(file_vol_obj) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F__close_cb() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_create_plist

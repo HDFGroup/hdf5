@@ -131,12 +131,13 @@ point_set(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[], s
                     }
 
     if (VERBOSE_MED) {
-        HDprintf("start[]=(%lu, %lu), count[]=(%lu, %lu), stride[]=(%lu, %lu), block[]=(%lu, %lu), total "
-                 "datapoints=%lu\n",
-                 (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
-                 (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
-                 (unsigned long)block[0], (unsigned long)block[1],
-                 (unsigned long)(block[0] * block[1] * count[0] * count[1]));
+        HDprintf("start[]=(%" PRIuHSIZE ", %" PRIuHSIZE "), "
+                 "count[]=(%" PRIuHSIZE ", %" PRIuHSIZE "), "
+                 "stride[]=(%" PRIuHSIZE ", %" PRIuHSIZE "), "
+                 "block[]=(%" PRIuHSIZE ", %" PRIuHSIZE "), "
+                 "total datapoints=%" PRIuHSIZE "\n",
+                 start[0], start[1], count[0], count[1], stride[0], stride[1], block[0], block[1],
+                 block[0] * block[1] * count[0] * count[1]);
         k = 0;
         for (i = 0; i < num_points; i++) {
             HDprintf("(%d, %d)\n", (int)coords[k], (int)coords[k + 1]);
@@ -157,15 +158,15 @@ dataset_print(hsize_t start[], hsize_t block[], B_DATATYPE *dataset)
     /* print the column heading */
     HDprintf("%-8s", "Cols:");
     for (j = 0; j < block[1]; j++) {
-        HDprintf("%3lu ", (unsigned long)(start[1] + j));
+        HDprintf("%3" PRIuHSIZE " ", start[1] + j);
     }
     HDprintf("\n");
 
     /* print the slab data */
     for (i = 0; i < block[0]; i++) {
-        HDprintf("Row %2lu: ", (unsigned long)(i + start[0]));
+        HDprintf("Row %2" PRIuHSIZE ": ", i + start[0]);
         for (j = 0; j < block[1]; j++) {
-            HDprintf("%llu ", *dataptr++);
+            HDprintf("%" PRIuHSIZE " ", *dataptr++);
         }
         HDprintf("\n");
     }
@@ -184,10 +185,11 @@ verify_data(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[],
     /* print it if VERBOSE_MED */
     if (VERBOSE_MED) {
         HDprintf("verify_data dumping:::\n");
-        HDprintf("start(%lu, %lu), count(%lu, %lu), stride(%lu, %lu), block(%lu, %lu)\n",
-                 (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
-                 (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
-                 (unsigned long)block[0], (unsigned long)block[1]);
+        HDprintf("start(%" PRIuHSIZE ", %" PRIuHSIZE "), "
+                 "count(%" PRIuHSIZE ", %" PRIuHSIZE "), "
+                 "stride(%" PRIuHSIZE ", %" PRIuHSIZE "), "
+                 "block(%" PRIuHSIZE ", %" PRIuHSIZE ")\n",
+                 start[0], start[1], count[0], count[1], stride[0], stride[1], block[0], block[1]);
         HDprintf("original values:\n");
         dataset_print(start, block, original);
         HDprintf("compared values:\n");
@@ -199,9 +201,10 @@ verify_data(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[],
         for (j = 0; j < block[1]; j++) {
             if (*dataset != *original) {
                 if (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED) {
-                    HDprintf("Dataset Verify failed at [%lu][%lu](row %lu, col %lu): expect %llu, got %llu\n",
-                             (unsigned long)i, (unsigned long)j, (unsigned long)(i + start[0]),
-                             (unsigned long)(j + start[1]), *(original), *(dataset));
+                    HDprintf("Dataset Verify failed at [%" PRIuHSIZE "][%" PRIuHSIZE "]"
+                             "(row %" PRIuHSIZE ", col %" PRIuHSIZE "): "
+                             "expect %" PRIuHSIZE ", got %" PRIuHSIZE "\n",
+                             i, j, i + start[0], j + start[1], *(original), *(dataset));
                 }
                 dataset++;
                 original++;

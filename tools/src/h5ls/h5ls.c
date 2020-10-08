@@ -95,8 +95,8 @@ static h5tool_format_t ls_dataformat = {
 
     0, /*skip_first */
 
-    0,                           /*obj_hidefileno */
-    "-%lu:" H5_PRINTF_HADDR_FMT, /*obj_format */
+    0,                  /*obj_hidefileno */
+    "-%lu:%" PRIuHADDR, /*obj_format */
 
     0,            /*dset_hidefileno */
     "DSET-%s ",   /*dset_format */
@@ -965,7 +965,7 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
                 /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
                  *strangely, unless use another pointer "copy".*/
                 copy = value + i * dst_size;
-                h5tools_str_append(buffer, "%" H5_PRINTF_LL_WIDTH "d", *((long long *)((void *)copy)));
+                h5tools_str_append(buffer, "%lld", *((long long *)((void *)copy)));
             }
         }
 
@@ -1908,10 +1908,9 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
                             print_string(&buffer, f_name, TRUE);
                         }
                         else {
-                            h5tools_str_append(&buffer,
-                                               "        #%03d %10" H5_PRINTF_LL_WIDTH
-                                               "u %10" H5_PRINTF_LL_WIDTH "u %10" H5_PRINTF_LL_WIDTH "u ",
-                                               i, total, (hsize_t)f_offset, f_size);
+                            h5tools_str_append(
+                                &buffer, "        #%03d %10" PRIuHSIZE " %10" PRIuHSIZE " %10" PRIuHSIZE " ",
+                                i, total, (hsize_t)f_offset, f_size);
                             print_string(&buffer, f_name, TRUE);
                         }
                         h5tools_str_append(&buffer, "\n");

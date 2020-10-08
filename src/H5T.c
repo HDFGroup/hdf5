@@ -5819,10 +5819,12 @@ H5T_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 
             case H5T_VLEN: /* Recurse on the VL information if it's VL, compound or array, then free VL
                               sequence */
-                /* Recurse if it's VL, compound, enum or array */
+                /* Recurse if it's VL, compound, enum or array (ignore references here so that we can encode
+                 * them as part of the same blob)*/
                 /* (If the force_conv flag is _not_ set, the type cannot change in size, so don't recurse) */
                 if (dt->shared->parent->shared->force_conv &&
-                    H5T_IS_COMPLEX(dt->shared->parent->shared->type)) {
+                    H5T_IS_COMPLEX(dt->shared->parent->shared->type) &&
+                    (dt->shared->parent->shared->type != H5T_REFERENCE)) {
                     if ((changed = H5T_set_loc(dt->shared->parent, file, loc)) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
                     if (changed > 0)

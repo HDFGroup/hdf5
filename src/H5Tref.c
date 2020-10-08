@@ -40,6 +40,22 @@
 #define H5T_REF_OBJ_DISK_SIZE(f)     (H5F_SIZEOF_ADDR(f))
 #define H5T_REF_DSETREG_DISK_SIZE(f) (H5HG_HEAP_ID_SIZE(f))
 
+/* Debug */
+// #define H5T_REF_DEBUG
+#ifdef H5T_REF_DEBUG
+#define H5T_REF_LOG_DEBUG(...)                                                                               \
+    do {                                                                                                     \
+        HDfprintf(stdout, " # %s(): ", __func__);                                                            \
+        HDfprintf(stdout, __VA_ARGS__);                                                                      \
+        HDfprintf(stdout, "\n");                                                                             \
+        HDfflush(stdout);                                                                                    \
+    } while (0)
+#else
+#define H5T_REF_LOG_DEBUG(...)                                                                               \
+    do {                                                                                                     \
+    } while (0)
+#endif
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -145,6 +161,7 @@ H5T__ref_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
     htri_t ret_value = FALSE; /* Indicate success, but no location change */
 
     FUNC_ENTER_PACKAGE
+    H5T_REF_LOG_DEBUG("loc=%d", (int)loc);
 
     HDassert(dt);
     /* f is NULL when loc == H5T_LOC_MEMORY */
@@ -331,6 +348,7 @@ H5T__ref_mem_isnull(const H5VL_object_t H5_ATTR_UNUSED *src_file, const void *sr
     herr_t              ret_value               = SUCCEED;
 
     FUNC_ENTER_STATIC_NOERR
+    H5T_REF_LOG_DEBUG("");
 
     /* Check parameters */
     HDassert(src_buf);
@@ -356,6 +374,7 @@ H5T__ref_mem_setnull(H5VL_object_t H5_ATTR_UNUSED *dst_file, void *dst_buf, H5_A
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC_NOERR
+    H5T_REF_LOG_DEBUG("");
 
     HDmemset(dst_buf, 0, H5T_REF_MEM_SIZE);
 
@@ -383,6 +402,7 @@ H5T__ref_mem_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf
     size_t   ret_value = 0; /* Return value */
 
     FUNC_ENTER_STATIC
+    H5T_REF_LOG_DEBUG("");
 
     /* Sanity check */
     HDassert(src_buf);
@@ -483,6 +503,7 @@ H5T__ref_mem_read(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf, s
     herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
+    H5T_REF_LOG_DEBUG("");
 
     /* Sanity check */
     HDassert(src_buf);
@@ -571,6 +592,7 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
+    H5T_REF_LOG_DEBUG("");
 
     /* Sanity check */
     HDassert(src_buf);
@@ -678,6 +700,7 @@ H5T__ref_disk_isnull(const H5VL_object_t *src_file, const void *src_buf, hbool_t
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
+    H5T_REF_LOG_DEBUG("");
 
     /* Check parameters */
     HDassert(src_file);
@@ -720,6 +743,7 @@ H5T__ref_disk_setnull(H5VL_object_t *dst_file, void *dst_buf, void *bg_buf)
     herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
+    H5T_REF_LOG_DEBUG("");
 
     HDassert(dst_file);
     HDassert(dst_buf);
@@ -768,6 +792,7 @@ H5T__ref_disk_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_bu
     size_t         ret_value = 0;
 
     FUNC_ENTER_STATIC
+    H5T_REF_LOG_DEBUG("");
 
     HDassert(src_buf);
 
@@ -816,6 +841,7 @@ H5T__ref_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t H5_ATTR_
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
+    H5T_REF_LOG_DEBUG("");
 
     HDassert(src_file);
     HDassert(src_buf);
@@ -861,6 +887,7 @@ H5T__ref_disk_write(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
     herr_t         ret_value     = SUCCEED;
 
     FUNC_ENTER_STATIC
+    H5T_REF_LOG_DEBUG("");
 
     HDassert(src_buf);
     HDassert(src_size);
@@ -919,6 +946,7 @@ H5T__ref_obj_disk_isnull(const H5VL_object_t *src_file, const void *src_buf, hbo
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
+    H5T_REF_LOG_DEBUG("");
 
     /* Check parameters */
     HDassert(src_file);
@@ -970,6 +998,7 @@ H5T__ref_obj_disk_getsize(H5VL_object_t *src_file, const void H5_ATTR_UNUSED *sr
     size_t ret_value = 0;
 
     FUNC_ENTER_STATIC
+    H5T_REF_LOG_DEBUG("");
 
     HDassert(src_file);
     HDassert(src_buf);
@@ -1016,6 +1045,7 @@ H5T__ref_obj_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t src_
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
+    H5T_REF_LOG_DEBUG("");
 
     HDassert(src_file);
     HDassert(src_buf);
@@ -1068,6 +1098,7 @@ H5T__ref_dsetreg_disk_isnull(const H5VL_object_t *src_file, const void *src_buf,
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
+    H5T_REF_LOG_DEBUG("");
 
     /* Check parameters */
     HDassert(src_file);
@@ -1122,6 +1153,7 @@ H5T__ref_dsetreg_disk_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file, const void
 #else
     FUNC_ENTER_STATIC_NOERR
 #endif
+    H5T_REF_LOG_DEBUG("");
 
     HDassert(src_buf);
 
@@ -1170,6 +1202,7 @@ H5T__ref_dsetreg_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t 
     herr_t                 ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
+    H5T_REF_LOG_DEBUG("");
 
     HDassert(src_file);
     HDassert(src_buf);
@@ -1219,6 +1252,7 @@ H5T__ref_reclaim(void *elem, const H5T_t *dt)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
+    H5T_REF_LOG_DEBUG("");
 
     /* Sanity checks */
     HDassert(elem);

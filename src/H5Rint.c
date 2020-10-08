@@ -89,7 +89,6 @@
     } while (0)
 
 /* Debug */
-//#define H5R_DEBUG
 #ifdef H5R_DEBUG
 #define H5R_LOG_DEBUG(...)                                                                                   \
     do {                                                                                                     \
@@ -807,7 +806,7 @@ H5R__set_obj_token(H5R_ref_priv_t *ref, const H5O_token_t *obj_token, size_t tok
     HDassert(token_size);
     HDassert(token_size <= H5O_MAX_TOKEN_SIZE);
 
-    H5MM_memcpy(&ref->info.obj.token, obj_token, sizeof(H5O_token_t));
+    H5MM_memcpy(&ref->info.obj.token, obj_token, token_size);
     HDassert(token_size <= 255);
     ref->token_size = (uint8_t)token_size;
 

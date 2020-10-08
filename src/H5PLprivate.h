@@ -21,8 +21,8 @@
 #include "H5PLpublic.h"
 
 /* Private headers needed by this file */
-#include "H5private.h"   /* Generic Functions            */
-#include "H5VLprivate.h" /* Virtual Object Layer         */
+#include "H5private.h"   /* Generic Functions                    */
+#include "H5VLprivate.h" /* Virtual Object Layer                 */
 
 /**************************/
 /* Library Private Macros */

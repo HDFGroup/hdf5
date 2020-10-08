@@ -5575,7 +5575,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT); }
+        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDWR, fapl); }
         H5E_END_TRY;
 
         /* Should fail */
@@ -5900,7 +5900,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Open the test file */
-    if ((fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+    if ((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
         FAIL_STACK_ERROR
 
     /* Notify child process */
@@ -6092,7 +6092,7 @@ test_file_lock_env_var(hid_t in_fapl)
 
         /* Child process */
 
-        hid_t child_fid; /* File ID */
+        hid_t child_fid    = H5I_INVALID_HID; /* File ID */
         int   child_notify = 0;
 
         /* Close unused write end for out_pdf */
@@ -6103,7 +6103,7 @@ test_file_lock_env_var(hid_t in_fapl)
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
                 HDexit(EXIT_FAILURE);
-        } /* end while */
+        }
 
         /* Open the test file */
         if ((child_fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
@@ -7013,7 +7013,7 @@ error:
     }
     H5E_END_TRY;
 
-    return -1;
+    return 1;
 
 } /* test_multiple_same() */
 

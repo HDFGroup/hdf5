@@ -14,8 +14,8 @@
 /*
  * Programmer: John Mainzer -- 10/12/04
  *
- * Purpose:    This file contains declarations which are normally visible
- *             only within the H5C package.
+ * Purpose:     This file contains declarations which are normally visible
+ *              only within the H5C package.
  *
  *        Source files outside the H5C package should include
  *        H5Cprivate.h instead.
@@ -50,9 +50,11 @@
 /* Number of epoch markers active */
 #define H5C__MAX_EPOCH_MARKERS                  10
 
+
 /* Cache configuration settings */
 #define H5C__HASH_TABLE_LEN     (64 * 1024) /* must be a power of 2 */
 #define H5C__H5C_T_MAGIC    0x005CAC0E
+
 
 /* Initial allocated size of the "flush_dep_parent" array */
 #define H5C_FLUSH_DEP_PARENT_INIT 8
@@ -1575,11 +1577,16 @@ if ( ( (cache_ptr)->index_size !=                                           \
  */
 
 #if H5C_DO_SLIST_SANITY_CHECKS
+
 #define ENTRY_IN_SLIST(cache_ptr, entry_ptr) \
     H5C_entry_in_skip_list((cache_ptr), (entry_ptr))
+
 #else /* H5C_DO_SLIST_SANITY_CHECKS */
+
 #define ENTRY_IN_SLIST(cache_ptr, entry_ptr) FALSE
+
 #endif /* H5C_DO_SLIST_SANITY_CHECKS */
+
 
 #if H5C_DO_SANITY_CHECKS
 
@@ -1738,6 +1745,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
     ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) -= (entry_ptr)->size; \
     (entry_ptr)->in_slist = FALSE;                                          \
 } /* H5C__REMOVE_ENTRY_FROM_SLIST */
+
 #endif /* H5C_DO_SANITY_CHECKS */
 
 
@@ -1754,24 +1762,24 @@ if ( ( (cache_ptr)->index_size !=                                           \
  *
  * Modifications:
  *
- *        JRM -- 8/27/06
- *        Added the H5C_DO_SANITY_CHECKS version of the macro.
+ *              JRM -- 8/27/06
+ *              Added the H5C_DO_SANITY_CHECKS version of the macro.
  *
- *        This version maintains the slist_size_increase field
- *        that are used in sanity checks in the flush routines.
+ *              This version maintains the slist_size_increase field
+ *              that are used in sanity checks in the flush routines.
  *
- *        All this is needed as the fractal heap needs to be
- *        able to dirty, resize and/or move entries during the
- *        flush.
+ *              All this is needed as the fractal heap needs to be
+ *              able to dirty, resize and/or move entries during the
+ *              flush.
  *
- *        JRM -- 12/13/14
- *        Note that we do not set cache_ptr->slist_changed to TRUE
- *        in this case, as the structure of the slist is not
- *        modified.
+ *              JRM -- 12/13/14
+ *              Note that we do not set cache_ptr->slist_changed to TRUE
+ *              in this case, as the structure of the slist is not
+ *              modified.
  *
- *        JRM -- 9/1/15
- *        Added code to maintain the cache_ptr->slist_ring_len
- *        and cache_ptr->slist_ring_size arrays.
+ *              JRM -- 9/1/15
+ *              Added code to maintain the cache_ptr->slist_ring_len
+ *              and cache_ptr->slist_ring_size arrays.
  *
  *-------------------------------------------------------------------------
  */
@@ -4653,6 +4661,7 @@ typedef struct H5C_tag_info_t {
  *              NDEBUG is not #defined.
  *
  ****************************************************************************/
+
 struct H5C_t {
     uint32_t            magic;
     hbool_t            flush_in_progress;
@@ -4668,7 +4677,7 @@ struct H5C_t {
     hbool_t            evictions_enabled;
     hbool_t            close_warning_received;
 
-    /* Fields for maintaining [hash table] index of entries */
+    /* Fields for maintaining the [hash table] index of entries */
     uint32_t                    index_len;
     size_t                      index_size;
     uint32_t            index_ring_len[H5C_RING_NTYPES];
@@ -4886,7 +4895,8 @@ struct H5C_t {
 #ifndef NDEBUG
     int64_t                     get_entry_ptr_from_addr_counter;
 #endif /* NDEBUG */
-};
+
+}; /* H5C_t */
 
 /* Define typedef for tagged cache entry iteration callbacks */
 typedef int (*H5C_tag_iter_cb_t)(H5C_cache_entry_t *entry, void *ctx);

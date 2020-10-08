@@ -11,11 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
-#include <setjmp.h>
 #include "h5hltest.h"
 #include "H5srcdir.h"
 #include "H5LDpublic.h"

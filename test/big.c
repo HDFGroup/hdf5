@@ -429,7 +429,7 @@ writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n)
     for (i = 0; i < wrt_n; i++) {
         /* start position must be at least hs_size from the end */
         hs_start[0] = randll(size2[0] - hs_size[0], i);
-        HDfprintf(out, "#%03d 0x%016Hx\n", i, hs_start[0]);
+        HDfprintf(out, "#%03d 0x%016" PRIxHSIZE "\n", i, hs_start[0]);
         if (H5Sselect_hyperslab(space2, H5S_SELECT_SET, hs_start, NULL, hs_size, NULL) < 0)
             goto error;
         for (j = 0; j < WRT_SIZE; j++) {
@@ -524,7 +524,7 @@ reader(char *filename, hid_t fapl)
             break;
         i            = (int)HDstrtol(ln + 1, &s, 10);
         hs_offset[0] = HDstrtoull(s, NULL, 0);
-        HDfprintf(stdout, "#%03d 0x%016Hx%47s", i, hs_offset[0], "");
+        HDfprintf(stdout, "#%03d 0x%016" PRIxHSIZE "%47s", i, hs_offset[0], "");
         HDfflush(stdout);
 
         if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0)
@@ -605,7 +605,7 @@ usage(void)
               "\t-c\tFile system Checking skipped.  Caution: this test generates\n"
               "\t\tmany big files and may fill up the file system.\n"
               "\t-fsize\tChange family size default to <fsize> where <fsize> is\n"
-              "\t\ta positive float point number.  Default value is %Hu.\n"
+              "\t\ta positive float point number.  Default value is %" PRIuHSIZE ".\n"
               "Examples:\n"
               "\tbig -fsize 2.1e9 \t# test with file size just under 2GB\n"
               "\tbig -fsize 2.2e9 \t# test with file size just above 2GB\n"

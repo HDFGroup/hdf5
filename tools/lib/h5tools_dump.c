@@ -81,8 +81,8 @@ h5tool_format_t h5tools_dataformat = {
 
     1, /*skip_first */
 
-    1,                       /*obj_hidefileno */
-    " " H5_PRINTF_HADDR_FMT, /*obj_format */
+    1,              /*obj_hidefileno */
+    " %" PRIuHADDR, /*obj_format */
 
     1,             /*dset_hidefileno */
     "DATASET %s ", /*dset_format */
@@ -3331,7 +3331,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                     if (HADDR_UNDEF == ioffset)
                         h5tools_str_append(&buffer, "OFFSET HADDR_UNDEF");
                     else
-                        h5tools_str_append(&buffer, "OFFSET " H5_PRINTF_HADDR_FMT, ioffset);
+                        h5tools_str_append(&buffer, "OFFSET %" PRIuHADDR, ioffset);
                     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0,
                                            (hsize_t)0);
                 }

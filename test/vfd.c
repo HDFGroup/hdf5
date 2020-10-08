@@ -3336,7 +3336,7 @@ main(void)
     nerrors += test_stdio() < 0 ? 1 : 0;
     nerrors += test_windows() < 0 ? 1 : 0;
     nerrors += test_ros3() < 0 ? 1 : 0;
-/*    nerrors += test_splitter() < 0 ? 1 : 0; */
+    /*    nerrors += test_splitter() < 0 ? 1 : 0; */
 
     if (nerrors) {
         HDprintf("***** %d Virtual File Driver TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
