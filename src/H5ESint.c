@@ -29,29 +29,25 @@
 /* Module Setup */
 /****************/
 
-#include "H5ESmodule.h"         /* This source code file is part of the H5ES module */
-
+#include "H5ESmodule.h" /* This source code file is part of the H5ES module */
 
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5ESpkg.h"            /* Event Sets                           */
-#include "H5FLprivate.h"        /* Free Lists                           */
-#include "H5Iprivate.h"         /* IDs                                  */
-#include "H5MSprivate.h"        /* Managed strings                      */
-
+#include "H5private.h"   /* Generic Functions			*/
+#include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5ESpkg.h"     /* Event Sets                           */
+#include "H5FLprivate.h" /* Free Lists                           */
+#include "H5Iprivate.h"  /* IDs                                  */
+#include "H5MSprivate.h" /* Managed strings                      */
 
 /****************/
 /* Local Macros */
 /****************/
 
-
 /******************/
 /* Local Typedefs */
 /******************/
-
 
 /********************/
 /* Package Typedefs */
@@ -59,17 +55,15 @@
 
 /* Typedef for event nodes */
 struct H5ES_event_t {
-    H5VL_object_t *request;             /* Request token for event */
-    struct H5ES_event_t *prev, *next;   /* Previous and next event nodes */
+    H5VL_object_t *      request;     /* Request token for event */
+    struct H5ES_event_t *prev, *next; /* Previous and next event nodes */
 };
-
 
 /********************/
 /* Local Prototypes */
 /********************/
 static herr_t H5ES__close_cb(void *es, void **request_token);
 static herr_t H5ES__remove(H5ES_t *es, const H5ES_event_t *ev);
-
 
 /*********************/
 /* Package Variables */
@@ -78,11 +72,9 @@ static herr_t H5ES__remove(H5ES_t *es, const H5ES_event_t *ev);
 /* Package initialization variable */
 hbool_t H5_PKG_INIT_VAR = FALSE;
 
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
-
 
 /*******************/
 /* Local Variables */
@@ -90,10 +82,10 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /* Event Set ID class */
 static const H5I_class_t H5I_EVENTSET_CLS[1] = {{
-    H5I_EVENTSET,               /* ID class value */
-    0,                          /* Class flags */
-    0,                          /* # of reserved IDs for class */
-    (H5I_free_t)H5ES__close_cb  /* Callback routine for closing objects of this class */
+    H5I_EVENTSET,              /* ID class value */
+    0,                         /* Class flags */
+    0,                         /* # of reserved IDs for class */
+    (H5I_free_t)H5ES__close_cb /* Callback routine for closing objects of this class */
 }};
 
 /* Declare a static free list to manage H5ES_t structs */
@@ -102,8 +94,6 @@ H5FL_DEFINE_STATIC(H5ES_t);
 /* Declare a static free list to manage H5ES_event_t structs */
 H5FL_DEFINE_STATIC(H5ES_event_t);
 
-
-
 /*-------------------------------------------------------------------------
  * Function:    H5ES__init_package
  *
@@ -119,19 +109,18 @@ H5FL_DEFINE_STATIC(H5ES_event_t);
 herr_t
 H5ES__init_package(void)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Initialize the ID group for the event set IDs */
-    if(H5I_register_type(H5I_EVENTSET_CLS) < 0)
+    if (H5I_register_type(H5I_EVENTSET_CLS) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES__init_package() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5ES_term_package
  *
@@ -149,23 +138,22 @@ done:
 int
 H5ES_term_package(void)
 {
-    int    n = 0;
+    int n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(H5_PKG_INIT_VAR) {
+    if (H5_PKG_INIT_VAR) {
         /* Destroy the event set ID group */
         n += (H5I_dec_type_ref(H5I_EVENTSET) > 0);
 
         /* Mark closed */
-        if(0 == n)
+        if (0 == n)
             H5_PKG_INIT_VAR = FALSE;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5ES_term_package() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5ES__close_cb
  *
@@ -181,8 +169,8 @@ H5ES_term_package(void)
 static herr_t
 H5ES__close_cb(void *_es, void H5_ATTR_UNUSED **rt)
 {
-    H5ES_t *es = (H5ES_t *)_es;         /* The event set to close */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5ES_t *es        = (H5ES_t *)_es; /* The event set to close */
+    herr_t  ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -190,14 +178,13 @@ H5ES__close_cb(void *_es, void H5_ATTR_UNUSED **rt)
     HDassert(es);
 
     /* Close the event set object */
-    if(H5ES__close(es) < 0)
+    if (H5ES__close(es) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CLOSEERROR, FAIL, "unable to close event set");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES__close_cb() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5ES__create
  *
@@ -214,27 +201,26 @@ done:
 H5ES_t *
 H5ES__create(void)
 {
-    H5ES_t *es = NULL;          /* Pointer to event set */
-    H5ES_t *ret_value = NULL;   /* Return value */
+    H5ES_t *es        = NULL; /* Pointer to event set */
+    H5ES_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Allocate space for new event set */
-    if(NULL == (es = H5FL_CALLOC(H5ES_t)))
+    if (NULL == (es = H5FL_CALLOC(H5ES_t)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, NULL, "can't allocate event set object")
 
     /* Set the return value */
     ret_value = es;
 
 done:
-    if(!ret_value)
-        if(es && H5ES__close(es) < 0)
+    if (!ret_value)
+        if (es && H5ES__close(es) < 0)
             HDONE_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, NULL, "unable to free event set")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES__create() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5ES_insert
  *
@@ -250,8 +236,8 @@ done:
 herr_t
 H5ES_insert(H5ES_t *es, H5VL_object_t *request)
 {
-    H5ES_event_t *ev;                   /* Event for request */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5ES_event_t *ev;                  /* Event for request */
+    herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -260,19 +246,19 @@ H5ES_insert(H5ES_t *es, H5VL_object_t *request)
     HDassert(request);
 
     /* Allocate space for new event */
-    if(NULL == (ev = H5FL_CALLOC(H5ES_event_t)))
+    if (NULL == (ev = H5FL_CALLOC(H5ES_event_t)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't allocate event object")
 
     /* Set request for event */
     ev->request = request;
 
     /* Append event onto the event set's list */
-    if(NULL == es->tail)
+    if (NULL == es->tail)
         es->head = es->tail = ev;
     else {
-        ev->prev = es->tail;
+        ev->prev       = es->tail;
         es->tail->next = ev;
-        es->tail = ev;
+        es->tail       = ev;
     } /* end else */
 
     /* Increment the # of events in set */
@@ -282,7 +268,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES_insert() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5ES_insert_new
  *
@@ -296,12 +281,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES_insert_new(H5ES_t *es, H5VL_object_t *request, const char *caller,
-    const char *caller_args, ...)
+H5ES_insert_new(H5ES_t *es, H5VL_object_t *request, const char *caller, const char *caller_args, ...)
 {
-    H5ES_event_t *ev;                   /* Event for request */
-    //va_list ap;                         /* varargs for caller */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5ES_event_t *ev; /* Event for request */
+    // va_list ap;                         /* varargs for caller */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -310,48 +294,47 @@ H5ES_insert_new(H5ES_t *es, H5VL_object_t *request, const char *caller,
     HDassert(request);
     HDassert(caller);
     HDassert(caller_args);
-HDfprintf(stderr, "%s: caller = '%s', caller_args = '%s'\n", FUNC, caller, caller_args);
-{
-    H5MS_t ms;
-    va_list ap;
+    HDfprintf(stderr, "%s: caller = '%s', caller_args = '%s'\n", FUNC, caller, caller_args);
+    {
+        H5MS_t  ms;
+        va_list ap;
 
-    ms.s = NULL;
-    HDva_start(ap, caller_args);
-    H5_trace_args(&ms, caller_args, ap);
-    HDva_end(ap);
-    HDfprintf(stderr, "%s: arg string = '%s'\n", FUNC, ms.s);
-    HDfree(ms.s);
-}
+        ms.s = NULL;
+        HDva_start(ap, caller_args);
+        H5_trace_args(&ms, caller_args, ap);
+        HDva_end(ap);
+        HDfprintf(stderr, "%s: arg string = '%s'\n", FUNC, ms.s);
+        HDfree(ms.s);
+    }
 
     /* Allocate space for new event */
-    if(NULL == (ev = H5FL_CALLOC(H5ES_event_t)))
+    if (NULL == (ev = H5FL_CALLOC(H5ES_event_t)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't allocate event object")
 
     /* Set request for event */
     ev->request = request;
 
     /* Parse the caller's information */
-    //HDva_start(ap, caller_args);
+    // HDva_start(ap, caller_args);
 
     /* Append event onto the event set's list */
-    if(NULL == es->tail)
+    if (NULL == es->tail)
         es->head = es->tail = ev;
     else {
-        ev->prev = es->tail;
+        ev->prev       = es->tail;
         es->tail->next = ev;
-        es->tail = ev;
+        es->tail       = ev;
     } /* end else */
 
     /* Increment the # of events in set */
     es->count++;
 
 done:
-    //HDva_end(ap);
+    // HDva_end(ap);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES_insert() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5ES__test
  *
@@ -367,8 +350,8 @@ done:
 herr_t
 H5ES__test(const H5ES_t *es, H5ES_status_t *status)
 {
-    const H5ES_event_t *ev;             /* Event to check */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    const H5ES_event_t *ev;                  /* Event to check */
+    herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -378,20 +361,20 @@ H5ES__test(const H5ES_t *es, H5ES_status_t *status)
 
     /* Iterate over the events in the set, testing them for completion */
     ev = es->head;
-    if(ev) {
+    if (ev) {
         /* If there are events in the event set, assume that they are in progress */
         *status = H5ES_STATUS_IN_PROGRESS;
 
         /* Iterate over events */
-        while(ev) {
-            H5ES_status_t ev_status = H5ES_STATUS_SUCCEED;      /* Status from event's operation */
+        while (ev) {
+            H5ES_status_t ev_status = H5ES_STATUS_SUCCEED; /* Status from event's operation */
 
             /* Test the request (i.e. wait for 0 time) */
-            if(H5VL_request_wait(ev->request, 0, &ev_status) < 0)
+            if (H5VL_request_wait(ev->request, 0, &ev_status) < 0)
                 HGOTO_ERROR(H5E_EVENTSET, H5E_CANTWAIT, FAIL, "unable to test operation")
 
             /* Check for status values that indicate we should break out of the loop */
-            if(ev_status == H5ES_STATUS_FAIL || ev_status == H5ES_STATUS_CANCELED) {
+            if (ev_status == H5ES_STATUS_FAIL || ev_status == H5ES_STATUS_CANCELED) {
                 *status = ev_status;
                 break;
             } /* end if */
@@ -399,7 +382,7 @@ H5ES__test(const H5ES_t *es, H5ES_status_t *status)
             /* Advance to next node */
             ev = ev->next;
         } /* end while */
-    } /* end if */
+    }     /* end if */
     else
         /* If no operations in event set, assume they have successfully completed */
         *status = H5ES_STATUS_SUCCEED;
@@ -408,7 +391,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES__test() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5ES__remove
  *
@@ -432,13 +414,13 @@ H5ES__remove(H5ES_t *es, const H5ES_event_t *ev)
     HDassert(ev);
 
     /* Stitch event out of list */
-    if(ev == es->head)
+    if (ev == es->head)
         es->head = ev->next;
-    if(NULL != ev->next)
+    if (NULL != ev->next)
         ev->next->prev = ev->next;
-    if(NULL != ev->prev)
+    if (NULL != ev->prev)
         ev->prev->next = ev->next;
-    if(NULL == es->head)
+    if (NULL == es->head)
         es->tail = NULL;
 
     /* Decrement the # of events in set */
@@ -447,7 +429,6 @@ H5ES__remove(H5ES_t *es, const H5ES_event_t *ev)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5ES__remove() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5ES__wait
  *
@@ -467,8 +448,8 @@ herr_t
 H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status)
 {
     H5ES_event_t *ev;                   /* Event to operate on */
-    hbool_t early_exit = FALSE;         /* Whether the loop exited early */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    hbool_t       early_exit = FALSE;   /* Whether the loop exited early */
+    herr_t        ret_value  = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -477,31 +458,31 @@ H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status)
 
     /* Iterate over the events in the set, waiting for them to complete */
     ev = es->head;
-    while(ev) {
-        H5ES_event_t *tmp;              /* Temporary event */
-        H5ES_status_t ev_status;        /* Status from event's operation */
+    while (ev) {
+        H5ES_event_t *tmp;       /* Temporary event */
+        H5ES_status_t ev_status; /* Status from event's operation */
 
         /* Get pointer to next node, so we can free this one */
         tmp = ev->next;
 
         /* Wait on the request */
-        if(H5VL_request_wait(ev->request, timeout, &ev_status) < 0)
+        if (H5VL_request_wait(ev->request, timeout, &ev_status) < 0)
             HGOTO_ERROR(H5E_EVENTSET, H5E_CANTWAIT, FAIL, "unable to wait for operation")
 
         /* Check for non-success status values that indicate we should break out of the loop */
-        if(ev_status != H5ES_STATUS_SUCCEED) {
-            if(status)
+        if (ev_status != H5ES_STATUS_SUCCEED) {
+            if (status)
                 *status = ev_status;
             early_exit = TRUE;
             break;
         } /* end if */
 
         /* Free the request */
-        if(H5VL_request_free(ev->request) < 0)
+        if (H5VL_request_free(ev->request) < 0)
             HGOTO_ERROR(H5E_EVENTSET, H5E_CANTFREE, FAIL, "unable to free request")
 
         /* Free request VOL object */
-        if(H5VL_free_object(ev->request) < 0)
+        if (H5VL_free_object(ev->request) < 0)
             HGOTO_ERROR(H5E_EVENTSET, H5E_CANTFREE, FAIL, "unable to free VOL object")
 
         /* Remove the event node from the event set */
@@ -515,14 +496,13 @@ H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status)
     } /* end while */
 
     /* Check for all operations completed */
-    if(!early_exit && status)
+    if (!early_exit && status)
         *status = H5ES_STATUS_SUCCEED;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES__wait() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5ES__close
  *
@@ -538,7 +518,7 @@ done:
 herr_t
 H5ES__close(H5ES_t *es)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -546,7 +526,7 @@ H5ES__close(H5ES_t *es)
     HDassert(es);
 
     /* Wait on operations in the set to complete */
-    if(H5ES__wait(es, H5ES_WAIT_FOREVER, NULL) < 0)
+    if (H5ES__wait(es, H5ES_WAIT_FOREVER, NULL) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTWAIT, FAIL, "can't wait on operations")
 
     /* Release the event set */
@@ -555,4 +535,3 @@ H5ES__close(H5ES_t *es)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES__close() */
-

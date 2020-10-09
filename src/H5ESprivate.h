@@ -25,16 +25,14 @@
 #define _H5ESprivate_H
 
 /* Include package's public header */
-#include "H5ESpublic.h"         /* Event Sets                  */
+#include "H5ESpublic.h" /* Event Sets                  */
 
 /* Private headers needed by this file */
-#include "H5VLprivate.h"        /* Virtual Object Layer        */
-
+#include "H5VLprivate.h" /* Virtual Object Layer        */
 
 /**************************/
 /* Library Private Macros */
 /**************************/
-
 
 /****************************/
 /* Library Private Typedefs */
@@ -43,19 +41,14 @@
 /* Typedef for event set objects */
 typedef struct H5ES_t H5ES_t;
 
-
 /*****************************/
 /* Library-private Variables */
 /*****************************/
-
 
 /***************************************/
 /* Library-private Function Prototypes */
 /***************************************/
 herr_t H5ES_insert(H5ES_t *es, H5VL_object_t *request);
-herr_t H5ES_insert_new(H5ES_t *es, H5VL_object_t *request, const char *caller,
-    const char *caller_args, ...);
-
+herr_t H5ES_insert_new(H5ES_t *es, H5VL_object_t *request, const char *caller, const char *caller_args, ...);
 
 #endif /* _H5ESprivate_H */
-

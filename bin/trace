@@ -197,6 +197,14 @@ $Source = "";
                "H5VL_loc_params_t"          => "#",
               );
 
+
+##############################################################################
+# Maximum length of H5TRACE macro line
+# If the ColumnLimit in .clang-format is changed, this value will need to be updated
+#
+my $max_trace_macro_line_len = 110;
+
+
 ##############################################################################
 # Print an error message.
 #
@@ -283,7 +291,7 @@ sub rewrite_func ($$$$$$$$) {
 
   # Parse arguments
   if ($args eq "void") {
-    $trace = "H5TRACE0(\"$rettype\",\"\");\n";
+    $trace = "H5TRACE0(\"$rettype\", \"\");\n";
     $argtrace = "H5ARG_TRACE0(\"\")";
   } else {
     # Split arguments.  First convert `/*in,out*/' to get rid of the
@@ -332,21 +340,37 @@ sub rewrite_func ($$$$$$$$) {
         }
       }
     }
+
+    # Compose the trace macro
     $trace = "H5TRACE" . scalar(@arg_str) . "(\"$rettype\", \"";
     $argtrace = "H5ARG_TRACE" . scalar(@arg_str) . "(caller, \"";
     $trace .= join("", @arg_str) . "\"";
     $argtrace .= join("", @arg_str) . "\"";
-    my $len = 4 + length $trace;
+    my $len = 4 + length $trace;        # Add 4, for indenting the line
     for (@arg_name) {
-      if ($len + length >= 77) {
-        $trace .= ",\n             $_";
-        $len = 13 + length;
+      # Wrap lines that will be longer than the limit, after ');' is added
+      if ($len + length >= ($max_trace_macro_line_len - 2)) {
+        # Wrap line, with indention
+        $trace .= ",\n             ";
+        $len = 13;              # Set to 13, for indention
+
+        # Indent an extra space to account for extra digit in 'H5TRACE' macro
+        if (scalar(@arg_str) >= 10) {
+          $trace .= " ";
+          $len++;
+        }
       } else {
-        $trace .= ", $_";
-        $len += 1 + length;
+        $trace .= ", ";
+        $len += 2;     # Add 2, for ', '
       }
+
+      # Append argument
+      $trace .= "$_";
       $argtrace .= ", $_";
+      $len += length;     # Add length of appended argument name
     }
+
+    # Append final ');' for macro
     $trace .= ");\n";
     $argtrace .= ")";
   }

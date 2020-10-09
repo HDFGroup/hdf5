@@ -23,9 +23,9 @@
 #define H5FDhdfs_H
 
 #ifdef H5_HAVE_LIBHDFS
-#define H5FD_HDFS       (H5FD_hdfs_init())
+#define H5FD_HDFS (H5FD_hdfs_init())
 #else /* H5_HAVE_LIBHDFS */
-#define H5FD_HDFS       (-1)
+#define H5FD_HDFS (-1)
 #endif /* H5_HAVE_LIBHDFS */
 
 #ifdef H5_HAVE_LIBHDFS
@@ -99,8 +99,8 @@ extern "C" {
 
 #define H5FD__CURR_HDFS_FAPL_T_VERSION 1
 
-#define H5FD__HDFS_NODE_NAME_SPACE 128
-#define H5FD__HDFS_USER_NAME_SPACE 128
+#define H5FD__HDFS_NODE_NAME_SPACE       128
+#define H5FD__HDFS_USER_NAME_SPACE       128
 #define H5FD__HDFS_KERB_CACHE_PATH_SPACE 128
 
 typedef struct H5FD_hdfs_fapl_t {
@@ -112,7 +112,7 @@ typedef struct H5FD_hdfs_fapl_t {
     int32_t stream_buffer_size;
 } H5FD_hdfs_fapl_t;
 
-H5_DLL hid_t H5FD_hdfs_init(void);
+H5_DLL hid_t  H5FD_hdfs_init(void);
 H5_DLL herr_t H5Pget_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa_out);
 H5_DLL herr_t H5Pset_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa);
 
@@ -122,4 +122,3 @@ H5_DLL herr_t H5Pset_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa);
 #endif /* H5_HAVE_LIBHDFS */
 
 #endif /* ifndef H5FDhdfs_H */
-

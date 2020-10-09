@@ -18,22 +18,21 @@
 #define _nb_vol_conn_H
 
 /* Public headers needed by this file */
-#include "H5VLpublic.h"        /* Virtual Object Layer                 */
+#include "H5VLpublic.h" /* Virtual Object Layer                 */
 
 /* Identifier for the non-blocking VOL connector */
-#define H5VL_NONBLOCK	(H5VL_nonblock_register())
+#define H5VL_NONBLOCK (H5VL_nonblock_register())
 
 /* Characteristics of the non-blocking VOL connector */
-#define H5VL_NONBLOCK_NAME        "non_block"
-#define H5VL_NONBLOCK_VALUE       506           /* VOL connector ID */
-#define H5VL_NONBLOCK_VERSION     0
+#define H5VL_NONBLOCK_NAME    "non_block"
+#define H5VL_NONBLOCK_VALUE   506 /* VOL connector ID */
+#define H5VL_NONBLOCK_VERSION 0
 
 /* Non-blocking VOL connector info */
 typedef struct H5VL_nonblock_info_t {
-    hid_t under_vol_id;         /* VOL ID for under VOL */
-    void *under_vol_info;       /* VOL info for under VOL */
+    hid_t under_vol_id;   /* VOL ID for under VOL */
+    void *under_vol_info; /* VOL info for under VOL */
 } H5VL_nonblock_info_t;
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,4 +45,3 @@ H5_DLL hid_t H5VL_nonblock_register(void);
 #endif
 
 #endif /* _nb_vol_conn_H */
-

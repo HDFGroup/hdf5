@@ -21,69 +21,62 @@
 #include "H5Cpp.h"
 using namespace H5;
 
-const H5std_string      FILE_NAME( "h5tutr_dset.h5" );
-const H5std_string      DATASET_NAME( "dset" );
-const H5std_string      ATTR_NAME( "Units" );
+const H5std_string FILE_NAME("h5tutr_dset.h5");
+const H5std_string DATASET_NAME("dset");
+const H5std_string ATTR_NAME("Units");
 
-const int       DIM1 = 2;
+const int DIM1 = 2;
 
-int main (void)
+int
+main(void)
 {
-   int attr_data[2] = { 100, 200};
-   hsize_t dims[1] = { DIM1 };
+    int     attr_data[2] = {100, 200};
+    hsize_t dims[1]      = {DIM1};
 
-
-   // Try block to detect exceptions raised by any of the calls inside it
-   try
-   {
+    // Try block to detect exceptions raised by any of the calls inside it
+    try {
         // Turn off the auto-printing when failure occurs so that we can
         // handle the errors appropriately
         Exception::dontPrint();
 
         // Open an existing file and dataset.
-        H5File file( FILE_NAME, H5F_ACC_RDWR );
-        DataSet dataset = file.openDataSet( DATASET_NAME );
+        H5File  file(FILE_NAME, H5F_ACC_RDWR);
+        DataSet dataset = file.openDataSet(DATASET_NAME);
 
         // Create the data space for the attribute.
-        DataSpace attr_dataspace = DataSpace (1, dims );
+        DataSpace attr_dataspace = DataSpace(1, dims);
 
         // Create a dataset attribute.
-        Attribute attribute = dataset.createAttribute( ATTR_NAME, PredType::STD_I32BE,
-                                                  attr_dataspace);
+        Attribute attribute = dataset.createAttribute(ATTR_NAME, PredType::STD_I32BE, attr_dataspace);
 
         // Write the attribute data.
-        attribute.write( PredType::NATIVE_INT, attr_data);
+        attribute.write(PredType::NATIVE_INT, attr_data);
 
-   }  // end of try block
+    } // end of try block
 
-   // catch failure caused by the H5File operations
-   catch( DataSpaceIException error )
-   {
+    // catch failure caused by the H5File operations
+    catch (DataSpaceIException error) {
         error.printErrorStack();
         return -1;
-   }
+    }
 
-   // catch failure caused by the H5File operations
-   catch( AttributeIException error )
-   {
+    // catch failure caused by the H5File operations
+    catch (AttributeIException error) {
         error.printErrorStack();
         return -1;
-   }
+    }
 
-   // catch failure caused by the H5File operations
-   catch( FileIException error )
-   {
+    // catch failure caused by the H5File operations
+    catch (FileIException error) {
         error.printErrorStack();
         return -1;
-   }
+    }
 
-   // catch failure caused by the DataSet operations
-   catch( DataSetIException error )
-   {
+    // catch failure caused by the DataSet operations
+    catch (DataSetIException error) {
         error.printErrorStack();
         return -1;
-   }
+    }
 
-   return 0;  // successfully terminated
+    return 0; // successfully terminated
 }
-

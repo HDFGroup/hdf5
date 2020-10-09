@@ -26,18 +26,14 @@ extern "C" {
  * Method:    H5Zunregister
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Zunregister
-  (JNIEnv *, jclass, jint);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Zunregister(JNIEnv *, jclass, jint);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Zfilter_avail
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Zfilter_1avail
-  (JNIEnv *, jclass, jint);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Zfilter_1avail(JNIEnv *, jclass, jint);
 
 /*
  * Class:     hdf_hdf5lib_H5
@@ -45,9 +41,7 @@ Java_hdf_hdf5lib_H5_H5Zfilter_1avail
  * Signature: (I)I
  */
 
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Zget_1filter_1info
-  (JNIEnv *, jclass, jint);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Zget_1filter_1info(JNIEnv *, jclass, jint);
 
 #ifdef __cplusplus
 } /* end extern "C" */

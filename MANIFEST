@@ -3464,7 +3464,6 @@
 ./config/cmake/HDFCompilerFlags.cmake
 ./config/cmake/HDFCXXCompilerFlags.cmake
 ./config/cmake/HDFFortranCompilerFlags.cmake
-./config/cmake/HDF5_Process_Flex_Files.cmake
 ./config/cmake/HDF5Macros.cmake
 ./config/cmake/HDF5PluginMacros.cmake
 ./config/cmake/HDF5UseFortran.cmake

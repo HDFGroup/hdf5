@@ -18,23 +18,19 @@
 #define _H5TSpublic_H
 
 /* Public headers needed by this file */
-#include "H5public.h"           /* Generic Functions                    */
-
+#include "H5public.h" /* Generic Functions                    */
 
 /*****************/
 /* Public Macros */
 /*****************/
 
-
 /*******************/
 /* Public Typedefs */
 /*******************/
 
-
 /********************/
 /* Public Variables */
 /********************/
-
 
 /*********************/
 /* Public Prototypes */
@@ -54,4 +50,3 @@ H5_DLL herr_t H5TSmutex_get_attempt_count(unsigned int *count);
 #endif
 
 #endif /* _H5TSpublic_H */
-

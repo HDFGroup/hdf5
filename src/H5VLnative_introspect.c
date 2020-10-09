@@ -15,9 +15,9 @@
  *
  */
 
-#include "H5private.h"          /* Generic Functions                        */
-#include "H5Eprivate.h"         /* Error handling                           */
-#include "H5VLprivate.h"        /* Virtual Object Layer                     */
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5VLprivate.h" /* Virtual Object Layer                     */
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
 
@@ -25,7 +25,6 @@
  *      it can return the address of the staticly declared class struct.
  */
 
-
 /*---------------------------------------------------------------------------
  * Function:    H5VL__native_introspect_opt_query
  *
@@ -37,7 +36,7 @@
  */
 herr_t
 H5VL__native_introspect_opt_query(void H5_ATTR_UNUSED *obj, H5VL_subclass_t H5_ATTR_UNUSED cls,
-    int H5_ATTR_UNUSED opt_type, hbool_t *supported)
+                                  int H5_ATTR_UNUSED opt_type, hbool_t *supported)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -49,4 +48,3 @@ H5VL__native_introspect_opt_query(void H5_ATTR_UNUSED *obj, H5VL_subclass_t H5_A
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL__native_introspect_opt_query() */
-

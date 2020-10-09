@@ -26,81 +26,63 @@ extern "C" {
  * Method:    H5PLset_loading_state
  * Signature: (I)V
  */
-JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5PLset_1loading_1state
-  (JNIEnv *, jclass, jint);
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5PLset_1loading_1state(JNIEnv *, jclass, jint);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5PLget_loading_state
  * Signature: (V)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5PLget_1loading_1state
-  (JNIEnv *, jclass);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5PLget_1loading_1state(JNIEnv *, jclass);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5PLappend
  * Signature: (Ljava/lang/String;)V
  */
-JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5PLappend
-  (JNIEnv *, jclass, jobjectArray);
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5PLappend(JNIEnv *, jclass, jobjectArray);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5PLprepend
  * Signature: (Ljava/lang/String;)V
  */
-JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5PLprepend
-  (JNIEnv *, jclass, jobjectArray);
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5PLprepend(JNIEnv *, jclass, jobjectArray);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5PLreplace
  * Signature: (Ljava/lang/String;I)V
  */
-JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5PLreplace
-  (JNIEnv *, jclass, jobjectArray, jint);
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5PLreplace(JNIEnv *, jclass, jobjectArray, jint);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5PLinsert
  * Signature: (Ljava/lang/String;I)V
  */
-JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5PLinsert
-  (JNIEnv *, jclass, jobjectArray, jint);
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5PLinsert(JNIEnv *, jclass, jobjectArray, jint);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5PLremove
  * Signature: (I)V
  */
-JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5PLremove
-  (JNIEnv *, jclass, jint);
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5PLremove(JNIEnv *, jclass, jint);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5PLget
  * Signature: (I)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL
-Java_hdf_hdf5lib_H5_H5PLget
-  (JNIEnv *, jclass, jint);
+JNIEXPORT jstring JNICALL Java_hdf_hdf5lib_H5_H5PLget(JNIEnv *, jclass, jint);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5PLsize
  * Signature: (V)I
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5PLsize
-  (JNIEnv *, jclass);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5PLsize(JNIEnv *, jclass);
 
 #ifdef __cplusplus
 } /* end extern "C" */

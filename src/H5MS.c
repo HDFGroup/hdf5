@@ -26,16 +26,14 @@
 /* Module Setup */
 /****************/
 
-#include "H5ESmodule.h"         /* This source code file is part of the H5ES module */
-
+#include "H5ESmodule.h" /* This source code file is part of the H5ES module */
 
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5MSprivate.h"        /* Managed strings                      */
-
+#include "H5private.h"   /* Generic Functions			*/
+#include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5MSprivate.h" /* Managed strings                      */
 
 /****************/
 /* Local Macros */
@@ -44,38 +42,30 @@
 /* Initial buffer size to allocate */
 #define H5MS_ALLOC_SIZE 256
 
-
 /******************/
 /* Local Typedefs */
 /******************/
-
 
 /********************/
 /* Package Typedefs */
 /********************/
 
-
 /********************/
 /* Local Prototypes */
 /********************/
-
 
 /*********************/
 /* Package Variables */
 /*********************/
 
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
-
 
 /*******************/
 /* Local Variables */
 /*******************/
 
-
-
 /*-------------------------------------------------------------------------
  * Function:    H5MS_asprintf_cat
  *
@@ -96,12 +86,12 @@
  *      format_templ in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF(format-nonliteral)
+H5_GCC_DIAG_OFF(format - nonliteral)
 herr_t
 H5MS_asprintf_cat(H5MS_t *ms, const char *fmt, ...)
 {
     va_list args1, args2;
-    size_t out_len;
+    size_t  out_len;
 
     /* FUNC_ENTER() should not be called */
 
@@ -110,7 +100,7 @@ H5MS_asprintf_cat(H5MS_t *ms, const char *fmt, ...)
     HDassert(fmt);
 
     /* Allocate the underlying string, if necessary */
-    if(NULL == ms->s) {
+    if (NULL == ms->s) {
         ms->max = H5MS_ALLOC_SIZE;
         ms->len = 0;
         ms->s = ms->end = HDmalloc(H5MS_ALLOC_SIZE);
@@ -121,9 +111,9 @@ H5MS_asprintf_cat(H5MS_t *ms, const char *fmt, ...)
     /* Attempt to write formatted output into the managed string */
     HDva_start(args1, fmt);
     HDva_copy(args2, args1);
-    while((out_len = (size_t)HDvsnprintf(ms->end, (ms->max - ms->len), fmt, args1)) >= (ms->max - ms->len)) {
+    while ((out_len = (size_t)HDvsnprintf(ms->end, (ms->max - ms->len), fmt, args1)) >= (ms->max - ms->len)) {
         /* Allocate a large enough buffer */
-        while(out_len >= (ms->max - ms->len))
+        while (out_len >= (ms->max - ms->len))
             ms->max *= 2;
         ms->s = HDrealloc(ms->s, ms->max);
         HDassert(ms->s);
@@ -144,9 +134,8 @@ H5MS_asprintf_cat(H5MS_t *ms, const char *fmt, ...)
 
     return SUCCEED;
 } /* end H5MS_asprintf_cat() */
-H5_GCC_DIAG_ON(format-nonliteral)
+H5_GCC_DIAG_ON(format - nonliteral)
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5MS_acat
  *
@@ -170,7 +159,7 @@ H5MS_acat(H5MS_t *ms, const char *s)
     HDassert(s);
 
     /* Allocate the underlying string, if necessary */
-    if(NULL == ms->s) {
+    if (NULL == ms->s) {
         ms->max = H5MS_ALLOC_SIZE;
         ms->len = 0;
         ms->s = ms->end = HDmalloc(H5MS_ALLOC_SIZE);
@@ -179,10 +168,10 @@ H5MS_acat(H5MS_t *ms, const char *s)
     } /* end if */
 
     /* Concatenate the provided string on to the managed string */
-    if(*s) {
+    if (*s) {
         do {
             /* Increase the managed string's buffer size if necessary */
-            if((ms->len + 1) >= ms->max) {
+            if ((ms->len + 1) >= ms->max) {
                 ms->max *= 2;
                 ms->s = HDrealloc(ms->s, ms->max);
                 HDassert(ms->s);
@@ -192,14 +181,13 @@ H5MS_acat(H5MS_t *ms, const char *s)
             /* Append the current character */
             *ms->end++ = *s++;
             ms->len++;
-        } while(*s);
+        } while (*s);
         *ms->end = '\0';
     } /* end if */
 
     return SUCCEED;
 } /* end H5MS_acat() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5MS_aputc
  *
@@ -223,7 +211,7 @@ H5MS_aputc(H5MS_t *ms, int c)
     HDassert(c);
 
     /* Allocate the underlying string, if necessary */
-    if(NULL == ms->s) {
+    if (NULL == ms->s) {
         ms->max = H5MS_ALLOC_SIZE;
         ms->len = 0;
         ms->s = ms->end = HDmalloc(H5MS_ALLOC_SIZE);
@@ -232,7 +220,7 @@ H5MS_aputc(H5MS_t *ms, int c)
     } /* end if */
 
     /* Increase the managed string's buffer size if necessary */
-    if((ms->len + 1) >= ms->max) {
+    if ((ms->len + 1) >= ms->max) {
         ms->max *= 2;
         ms->s = HDrealloc(ms->s, ms->max);
         HDassert(ms->s);
@@ -246,5 +234,3 @@ H5MS_aputc(H5MS_t *ms, int c)
 
     return SUCCEED;
 } /* end H5MS_aputc() */
-
-

@@ -28,11 +28,9 @@
 
 /* Private headers needed by this file */
 
-
 /**************************/
 /* Library Private Macros */
 /**************************/
-
 
 /****************************/
 /* Library Private Typedefs */
@@ -40,17 +38,15 @@
 
 /* Typedef for managed string objects */
 typedef struct H5MS_t {
-    size_t len;         /* Current length of the string */
-    size_t max;         /* Size of allocated buffer */
-    char *s;            /* Pointer to buffer / beginning of string */
-    char *end;          /* Pointer to terminating NUL character at the end of the string */
+    size_t len; /* Current length of the string */
+    size_t max; /* Size of allocated buffer */
+    char * s;   /* Pointer to buffer / beginning of string */
+    char * end; /* Pointer to terminating NUL character at the end of the string */
 } H5MS_t;
-
 
 /*****************************/
 /* Library-private Variables */
 /*****************************/
-
 
 /***************************************/
 /* Library-private Function Prototypes */
@@ -60,4 +56,3 @@ herr_t H5MS_acat(H5MS_t *ms, const char *s);
 herr_t H5MS_aputc(H5MS_t *ms, int c);
 
 #endif /* _H5MSprivate_H */
-

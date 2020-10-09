@@ -18,19 +18,17 @@
 #define _H5ESpublic_H
 
 /* Public headers needed by this file */
-#include "H5public.h"           /* Generic Functions                    */
+#include "H5public.h" /* Generic Functions                    */
 
 /*****************/
 /* Public Macros */
 /*****************/
 
 /* Default value for "no event set" / synchronous execution */
-#define H5ES_NONE               (hid_t)0
-
+#define H5ES_NONE (hid_t)0
 
 /* "Wait forever" timeout value */
-#define H5ES_WAIT_FOREVER       (UINT64_MAX)
-
+#define H5ES_WAIT_FOREVER (UINT64_MAX)
 
 /*******************/
 /* Public Typedefs */
@@ -38,17 +36,15 @@
 
 /* Asynchronous operation status */
 typedef enum H5ES_status_t {
-    H5ES_STATUS_IN_PROGRESS,   /* Operation has not yet completed                       */
-    H5ES_STATUS_SUCCEED,       /* Operation has completed, successfully                 */
-    H5ES_STATUS_FAIL,          /* Operation has completed, but failed                   */
-    H5ES_STATUS_CANCELED       /* Operation has not completed and was canceled          */
+    H5ES_STATUS_IN_PROGRESS, /* Operation has not yet completed                       */
+    H5ES_STATUS_SUCCEED,     /* Operation has completed, successfully                 */
+    H5ES_STATUS_FAIL,        /* Operation has completed, but failed                   */
+    H5ES_STATUS_CANCELED     /* Operation has not completed and was canceled          */
 } H5ES_status_t;
-
 
 /********************/
 /* Public Variables */
 /********************/
-
 
 /*********************/
 /* Public Prototypes */
@@ -58,7 +54,7 @@ typedef enum H5ES_status_t {
 extern "C" {
 #endif
 
-hid_t H5EScreate(void);
+hid_t  H5EScreate(void);
 herr_t H5ESget_count(hid_t es_id, size_t *count);
 herr_t H5EStest(hid_t es_id, H5ES_status_t *status);
 herr_t H5ESwait(hid_t es_id, uint64_t timeout, H5ES_status_t *status);
@@ -70,4 +66,3 @@ herr_t H5ESclose(hid_t es_id);
 #endif
 
 #endif /* _H5ESpublic_H */
-
