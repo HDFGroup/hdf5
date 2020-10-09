@@ -721,9 +721,11 @@ deserialize(const void *image, size_t H5_ATTR_NDEBUG_UNUSED len, void *udata, hb
         else {
             if ((*(((const char *)image) + 2)) != (char)(idx & 0xFF)) {
                 HDfprintf(stdout, "type = %d, idx = %d, addr = 0x%lx.\n", type, idx, (long)addr);
-                HDfprintf(stdout, "*image = 0x%x 0x%x 0x%x\n", (int)(*((const char *)image)),
-                          (int)(*(((const char *)image) + 1)), (int)(*(((const char *)image) + 2)));
-                HDfprintf(stdout, "expected *image = 0x%x\n", (int)(idx & 0xFF), (int)((idx & 0xFF00) >> 8));
+                HDfprintf(stdout, "*image = 0x%" PRIx8 " 0x%" PRIx8 " 0x%" PRIx8 "\n",
+                          (*((const uint8_t *)image)), (*(((const uint8_t *)image) + 1)),
+                          (*(((const uint8_t *)image) + 2)));
+                HDfprintf(stdout, "expected *image = 0x%02" PRIx32 "%02" PRIx32 "\n", (uint32_t)idx & 0xFF,
+                          (((uint32_t)idx & 0xFF00) >> 8));
             } /* end if */
             HDassert((*((const char *)image)) == (char)(type & 0xFF));
             HDassert((*(((const char *)image) + 1)) == (char)((idx & 0xFF00) >> 8));
@@ -2747,7 +2749,7 @@ expunge_entry(H5F_t *file_ptr, int32_t type, int32_t idx)
  * Function:    flush_cache()
  *
  * Purpose:    Flush the specified cache, destroying all entries if
-                requested.  If requested, dump stats first.
+ *             requested.  If requested, dump stats first.
  *
  * Return:    void
  *
@@ -2790,6 +2792,7 @@ flush_cache(H5F_t *file_ptr, hbool_t destroy_entries, hbool_t dump_stats, hbool_
                   (cache_ptr->clean_index_size != 0) || (cache_ptr->dirty_index_size != 0))) {
 
             if (verbose) {
+
                 HDfprintf(stdout, "%s: unexpected il/is/cis/dis = %lld/%lld/%lld/%lld.\n", FUNC,
                           (long long)(cache_ptr->index_len), (long long)(cache_ptr->index_size),
                           (long long)(cache_ptr->clean_index_size), (long long)(cache_ptr->dirty_index_size));
@@ -3533,8 +3536,8 @@ unprotect_entry(H5F_t *file_ptr, int32_t type, int32_t idx, unsigned int flags)
  * Function:    row_major_scan_forward()
  *
  * Purpose:    Do a sequence of inserts, protects, unprotects, moves,
- *        destroys while scanning through the set of entries.  If
- *        pass is false on entry, do nothing.
+ *             destroys while scanning through the set of entries.  If
+ *             pass is false on entry, do nothing.
  *
  * Return:    void
  *

@@ -103,8 +103,11 @@ H5FL_EXTERN(H5S_extent_t);
         with the decoded information
  USAGE
     void *H5O__attr_decode(f, mesg_flags, p)
-        H5F_t *f;               IN: pointer to the HDF5 file struct
-        unsigned mesg_flags;    IN: Message flags to influence decoding
+        H5F_t    *f;            IN: pointer to the HDF5 file struct
+        H5O_t    *open_oh;      IN: pointer to the object header
+        unsigned mesg_flags;    IN: message flags to influence decoding
+        unsigned *ioflags;      IN/OUT: flags for decoding
+        size_t   p_size;        IN: size of buffer *p
         const uint8_t *p;       IN: the raw information buffer
  RETURNS
     Pointer to the new message in native order on success, NULL on failure
@@ -115,7 +118,7 @@ H5FL_EXTERN(H5S_extent_t);
 --------------------------------------------------------------------------*/
 static void *
 H5O__attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, unsigned *ioflags,
-                 size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+                 size_t p_size, const uint8_t *p)
 {
     H5A_t *       attr = NULL;
     H5S_extent_t *extent;           /*extent dimensionality information  */
@@ -833,8 +836,9 @@ H5O__attr_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidt
             break;
     } /* end switch */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Character Set of Name:", s);
-    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth, "Object opened:", mesg->obj_opened);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Object:", mesg->oloc.addr);
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+              "Object opened:", mesg->obj_opened ? "TRUE" : "FALSE");
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Object:", mesg->oloc.addr);
 
     /* Check for attribute creation order index on the attribute */
     if (mesg->shared->crt_idx != H5O_MAX_CRT_ORDER_IDX)

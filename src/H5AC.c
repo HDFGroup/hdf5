@@ -131,8 +131,8 @@ static const H5AC_class_t *const H5AC_class_s[] = {
  *
  * Purpose:     Initialize the interface from some other layer.
  *
- * Return:      Success:    non-negative
- *              Failure:    negative
+ * Return:      Success:        non-negative
+ *              Failure:        negative
  *
  * Programmer:  Quincey Koziol
  *              Saturday, January 18, 2003
@@ -152,7 +152,7 @@ done:
 } /* end H5AC_init() */
 
 /*-------------------------------------------------------------------------
- * Function     H5AC__init_package
+ * Function:    H5AC__init_package
  *
  * Purpose:     Initialize interface-specific information
  *
@@ -191,9 +191,9 @@ H5AC__init_package(void)
  *
  * Purpose:     Terminate this interface.
  *
- * Return:      Success:    Positive if anything was done that might
- *                affect other interfaces; zero otherwise.
- *              Failure:    Negative.
+ * Return:      Success:        Positive if anything was done that might
+ *                              affect other interfaces; zero otherwise.
+ *              Failure:        Negative.
  *
  * Programmer:  Quincey Koziol
  *              Thursday, July 18, 2002
@@ -475,18 +475,23 @@ H5AC_dest(H5F_t *f)
 
     /* Check if log messages are being emitted */
     if (H5C_get_logging_status(f->shared->cache, &log_enabled, &curr_logging) < 0)
+
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to get logging status")
     if (log_enabled && curr_logging)
         if (H5C_log_write_destroy_cache_msg(f->shared->cache) < 0)
+
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
     /* Tear down logging */
     if (log_enabled)
         if (H5C_log_tear_down(f->shared->cache) < 0)
+
             HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "mdc logging tear-down failed")
 
 #ifdef H5_HAVE_PARALLEL
+
     /* destroying the cache, so clear all collective entries */
     if (H5C_clear_coll_entries(f->shared->cache, FALSE) < 0)
+
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_clear_coll_entries() failed")
 
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(f->shared->cache);
@@ -507,25 +512,39 @@ H5AC_dest(H5F_t *f)
 
     /* Destroy the cache */
     if (H5C_dest(f) < 0)
+
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't destroy cache")
+
     f->shared->cache = NULL;
 
 #ifdef H5_HAVE_PARALLEL
+
     if (aux_ptr != NULL) {
+
         if (aux_ptr->d_slist_ptr != NULL) {
+
             HDassert(H5SL_count(aux_ptr->d_slist_ptr) == 0);
             H5SL_close(aux_ptr->d_slist_ptr);
+
         } /* end if */
+
         if (aux_ptr->c_slist_ptr != NULL) {
+
             HDassert(H5SL_count(aux_ptr->c_slist_ptr) == 0);
             H5SL_close(aux_ptr->c_slist_ptr);
+
         } /* end if */
+
         if (aux_ptr->candidate_slist_ptr != NULL) {
+
             HDassert(H5SL_count(aux_ptr->candidate_slist_ptr) == 0);
             H5SL_close(aux_ptr->candidate_slist_ptr);
+
         } /* end if */
+
         aux_ptr->magic = 0;
         aux_ptr        = H5FL_FREE(H5AC_aux_t, aux_ptr);
+
     }  /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
@@ -2461,8 +2480,8 @@ H5AC_set_ring(H5AC_ring_t ring, H5AC_ring_t *orig_ring)
  *              Note that this function simply passes the call on to
  *              the metadata cache proper, and returns the result.
  *
- * Return:      Success:    Non-negative
- *              Failure:    Negative
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
  *
  * Programmer:  Quincey Koziol
  *              September 17, 2016

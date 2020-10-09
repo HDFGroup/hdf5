@@ -178,20 +178,20 @@ check_stats(const H5FA_t *fa, const farray_state_t *state)
 
     /* Compare information */
     if (farray_stats.hdr_size != state->hdr_size) {
-        HDfprintf(stdout, "farray_stats.hdr_size = %Hu, state->hdr_size = %Hu\n", farray_stats.hdr_size,
-                  state->hdr_size);
+        HDfprintf(stdout, "farray_stats.hdr_size = %" PRIuHSIZE ", state->hdr_size = %" PRIuHSIZE "\n",
+                  farray_stats.hdr_size, state->hdr_size);
         TEST_ERROR
     }
 
     if (farray_stats.dblk_size != state->dblk_size) {
-        HDfprintf(stdout, "farray_stats.dblk_size = %Hu, state->dblk_size = %Hu\n", farray_stats.dblk_size,
-                  state->dblk_size);
+        HDfprintf(stdout, "farray_stats.dblk_size = %" PRIuHSIZE ", state->dblk_size = %" PRIuHSIZE "\n",
+                  farray_stats.dblk_size, state->dblk_size);
         TEST_ERROR
     }
 
     if (farray_stats.nelmts != state->nelmts) {
-        HDfprintf(stdout, "farray_stats.nelmts = %Hu, state->nelmts = %Hu\n", farray_stats.nelmts,
-                  state->nelmts);
+        HDfprintf(stdout, "farray_stats.nelmts = %" PRIuHSIZE ", state->nelmts = %" PRIuHSIZE "\n",
+                  farray_stats.nelmts, state->nelmts);
         TEST_ERROR
     }
 

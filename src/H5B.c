@@ -13,9 +13,9 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5B.c
- *			Jul 10 1997
- *			Robb Matzke
+ * Created:         H5B.c
+ *                  Jul 10 1997
+ *                  Robb Matzke
  *
  * Purpose:		Implements balanced, sibling-linked, N-ary trees
  *			capable of storing any type of data with unique key

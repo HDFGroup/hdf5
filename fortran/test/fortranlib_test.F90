@@ -183,7 +183,7 @@ PROGRAM fortranlibtest
   CALL write_test_status(ret_total_error, ' Multi file driver test', total_error)
 
   ret_total_error = 0
-  CALL test_chunk_cache (cleanup, ret_total_error)
+  CALL test_chunk_cache(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Dataset chunk cache configuration', total_error)
 
 !

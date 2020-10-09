@@ -5184,7 +5184,7 @@ test_conv_bitfield(void)
         goto error;
     if (buf[0] != 0xAA || buf[1] != 0xAA || buf[2] != 0 || buf[3] != 0) {
         H5_FAILED();
-        printf("    s=0xaaaa, d=0x%02x%02x%02x%02x (test 1)\n", buf[3], buf[2], buf[1], buf[0]);
+        HDprintf("    s=0xaaaa, d=0x%02x%02x%02x%02x (test 1)\n", buf[3], buf[2], buf[1], buf[0]);
         goto error;
     }
 
@@ -5205,7 +5205,7 @@ test_conv_bitfield(void)
         goto error;
     if (buf[0] != 0 || buf[1] != 0xA8 || buf[2] != 0x2A || buf[3] != 0) {
         H5_FAILED();
-        printf("    s=0x2AA8 d=0x%02x%02x%02x%02x (test 2)\n", buf[3], buf[2], buf[1], buf[0]);
+        HDprintf("    s=0x2AA8 d=0x%02x%02x%02x%02x (test 2)\n", buf[3], buf[2], buf[1], buf[0]);
         goto error;
     }
 
@@ -5221,7 +5221,7 @@ test_conv_bitfield(void)
         goto error;
     if (buf[0] != 0xff || buf[1] != 0xAB || buf[2] != 0xEA || buf[3] != 0xff) {
         H5_FAILED();
-        printf("    s=0x2AA8 d=0x%02x%02x%02x%02x (test 3)\n", buf[3], buf[2], buf[1], buf[0]);
+        HDprintf("    s=0x2AA8 d=0x%02x%02x%02x%02x (test 3)\n", buf[3], buf[2], buf[1], buf[0]);
         goto error;
     }
 
@@ -5475,7 +5475,7 @@ opaque_check(int tag_it)
     H5E_END_TRY;
     if (status >= 0) {
         H5_FAILED();
-        printf("    opaque conversion should have failed but succeeded\n");
+        HDprintf("    opaque conversion should have failed but succeeded\n");
         goto error;
     }
 
@@ -5488,7 +5488,7 @@ opaque_check(int tag_it)
         goto error;
     if (saved + 1 != num_opaque_conversions_g) {
         H5_FAILED();
-        printf("    unexpected number of opaque conversions\n");
+        HDprintf("    unexpected number of opaque conversions\n");
         goto error;
     }
 
@@ -8529,7 +8529,7 @@ int
 main(void)
 {
     long  nerrors = 0;
-    hid_t fapl    = -1;
+    hid_t fapl    = H5I_INVALID_HID;
 
     /* Set the random # seed */
     HDsrandom((unsigned)HDtime(NULL));
@@ -8538,7 +8538,7 @@ main(void)
     fapl = h5_fileaccess();
 
     if (ALIGNMENT)
-        printf("Testing non-aligned conversions (ALIGNMENT=%d)....\n", ALIGNMENT);
+        HDprintf("Testing non-aligned conversions (ALIGNMENT=%d)....\n", ALIGNMENT);
 
     /* Do the tests */
     nerrors += test_classes();

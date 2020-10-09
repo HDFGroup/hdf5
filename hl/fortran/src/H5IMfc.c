@@ -24,7 +24,7 @@
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: October 05, 2004
  *
@@ -79,7 +79,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: October 05, 2004
  *
@@ -129,7 +129,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: October 05, 2004
  *
@@ -192,7 +192,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: October 05, 2004
  *
@@ -269,7 +269,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: October 06, 2004
  *
@@ -315,7 +315,7 @@ h5imis_image_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name)
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: October 06, 2004
  *
@@ -365,7 +365,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: October 06, 2004
  *
@@ -425,7 +425,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: October 06, 2004
  *
@@ -485,7 +485,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: October 06 2004
  *
@@ -541,7 +541,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: October 06 2004
  *
@@ -600,7 +600,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: October 06 2004
  *
@@ -653,7 +653,7 @@ done:
  *
  * Return: true, false, fail
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: October 06, 2004
  *

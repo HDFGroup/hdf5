@@ -335,8 +335,9 @@ verify_selected_chunks(hid_t dset, hid_t plist, hsize_t *start, hsize_t *end)
 
             /* Verify that read chunk is the same as the corresponding written one */
             if (HDmemcmp(expected_buf[chk_index], read_buf, CHUNK_NX * CHUNK_NY) != 0) {
-                HDfprintf(stderr, "Read chunk differs from written chunk at offset (%d,%d)\n", offset[0],
-                          offset[1]);
+                HDfprintf(stderr,
+                          "Read chunk differs from written chunk at offset (%" PRIuHSIZE ",%" PRIuHSIZE ")\n",
+                          offset[0], offset[1]);
                 return FAIL;
             }
         }
@@ -709,7 +710,8 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     /* Verify that the number of chunks is NUM_CHUNKS */
     if (H5Dget_num_chunks(dset, dspace, &nchunks) < 0)
         TEST_ERROR
-    VERIFY(nchunks, NUM_CHUNKS, "H5Dget_num_chunks, number of chunks");
+    if (nchunks != NUM_CHUNKS)
+        TEST_ERROR
 
     /* Attempt to get info of a chunk from an empty dataset, verify the
        returned address and size in the case of H5D_ALLOC_TIME_EARLY */
@@ -718,11 +720,12 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     ret = H5Dget_chunk_info(dset, dspace, chk_index, out_offset, &read_flt_msk, &addr, &size);
     if (ret < 0)
         TEST_ERROR
+
     /* Because of H5D_ALLOC_TIME_EARLY, addr cannot be HADDR_UNDEF and size not 0 */
     if (addr == HADDR_UNDEF)
-        FAIL_PUTS_ERROR(MSG_CHK_ADDR);
+        TEST_ERROR
     if (size == EMPTY_CHK_SIZE)
-        FAIL_PUTS_ERROR(MSG_CHK_SIZE);
+        TEST_ERROR
 
     chk_index = 10;
     reinit_vars(&read_flt_msk, &addr, &size);
@@ -731,9 +734,9 @@ test_get_chunk_info_highest_v18(hid_t fapl)
         TEST_ERROR
     /* Because of H5D_ALLOC_TIME_EARLY, addr cannot be HADDR_UNDEF and size not 0 */
     if (addr == HADDR_UNDEF)
-        FAIL_PUTS_ERROR(MSG_CHK_ADDR);
+        TEST_ERROR
     if (size == EMPTY_CHK_SIZE)
-        FAIL_PUTS_ERROR(MSG_CHK_SIZE);
+        TEST_ERROR
 
     /* Attempt to get info of a chunk given its coords from an empty dataset,
        verify the returned address and size */
@@ -743,9 +746,9 @@ test_get_chunk_info_highest_v18(hid_t fapl)
         TEST_ERROR
     /* Because of H5D_ALLOC_TIME_EARLY, addr cannot be HADDR_UNDEF and size not 0 */
     if (addr == HADDR_UNDEF)
-        FAIL_PUTS_ERROR(MSG_CHK_ADDR);
+        TEST_ERROR
     if (size == 0)
-        FAIL_PUTS_ERROR(MSG_CHK_SIZE);
+        TEST_ERROR
 
     if (H5Dclose(dset) < 0)
         TEST_ERROR
@@ -855,7 +858,8 @@ test_chunk_info_single_chunk(const char *filename, hid_t fapl)
     /* Get the number of chunks and verify that no chunk has been written */
     if (H5Dget_num_chunks(dset, dspace, &nchunks) < 0)
         TEST_ERROR
-    VERIFY(nchunks, NO_CHUNK_WRITTEN, "H5Dget_num_chunks, number of chunks");
+    if (nchunks != NO_CHUNK_WRITTEN)
+        TEST_ERROR
 
     /* Initialize the array of chunk data for the single chunk */
     for (ii = 0; ii < NX; ii++)
@@ -869,7 +873,8 @@ test_chunk_info_single_chunk(const char *filename, hid_t fapl)
     /* Get and verify that one chunk had been written */
     if (H5Dget_num_chunks(dset, dspace, &nchunks) < 0)
         TEST_ERROR
-    VERIFY(nchunks, ONE_CHUNK_WRITTEN, "H5Dget_num_chunks, number of chunks");
+    if (nchunks != ONE_CHUNK_WRITTEN)
+        TEST_ERROR
 
     /* Offset of the only chunk */
     offset[0] = 0;
@@ -2061,8 +2066,7 @@ error:
  *
  * Purpose:     Tests functions related to chunk information
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:  Binh-Minh Ribler
  *              November 5, 2018
@@ -2094,18 +2098,18 @@ main(void)
     nerrors += test_flt_msk_with_skip_compress(fapl) < 0 ? 1 : 0;
 
     if (nerrors)
-        TEST_ERROR
+        goto error;
 
     HDprintf("All chunk query tests passed.\n");
 
     h5_cleanup(FILENAME, fapl);
 
-    return SUCCEED;
+    return EXIT_SUCCESS;
 
 error:
     nerrors = MAX(1, nerrors);
     HDprintf("***** %d QUERY CHUNK INFO TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
-    return FAIL;
+    return EXIT_FAILURE;
 }
 
 /****************************************************************************

@@ -11,9 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
 #include "H5DSprivate.h"
 #include "H5LTprivate.h"
 #include "H5IMprivate.h"
@@ -34,17 +31,12 @@ static hid_t  H5DS_get_REFLIST_type(void);
  *
  * Return: Success: SUCCEED, Failure: FAIL
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: January 04, 2005
  *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5DSset_scale(hid_t dsid, const char *dimname)
 {
@@ -105,17 +97,12 @@ H5DSset_scale(hid_t dsid, const char *dimname)
  *           If DSID is not a Dimension Scale
  *           If DID is a Dimension Scale (A Dimension Scale cannot have scales)
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: December 20, 2004
  *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
 {
@@ -558,19 +545,12 @@ out:
  * Note that a scale may be associated with more than dimension of the same dataset.
  * If so, the detach operation only deletes one of the associations, for DID.
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: December 20, 2004
  *
- * Comments:
- *
- * Modifications: Function didn't delete DIMENSION_LIST attribute, when
- *                all dimension scales were detached from a dataset; added.
- *                                                           2010/05/13 EIP
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx)
 {
@@ -944,17 +924,12 @@ out:
  *           If DSID is not a Dimension Scale
  *           If DID is a Dimension Scale (A Dimension Scale cannot have scales)
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: February 18, 2005
  *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 htri_t
 H5DSis_attached(hid_t did, hid_t dsid, unsigned int idx)
 {
@@ -1263,17 +1238,12 @@ out:
  *       C. Negative causes the iterator to immediately return that value,
  *           indicating failure.
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: January 31, 2005
  *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5DSiterate_scales(hid_t did, unsigned int dim, int *ds_idx, H5DS_iterate_t visitor, void *visitor_data)
 {
@@ -1433,17 +1403,12 @@ out:
  *
  * Return: Success: SUCCEED, Failure: FAIL
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: January 11, 2005
  *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5DSset_label(hid_t did, unsigned int idx, const char *label)
 {
@@ -1459,6 +1424,9 @@ H5DSset_label(hid_t did, unsigned int idx, const char *label)
         char **      buf;       /* discarding the 'const' qualifier in the free */
         char const **const_buf; /* buf calls */
     } u;
+
+    HDmemset(&u, 0, sizeof(u));
+
     /*-------------------------------------------------------------------------
      * parameter checking
      *-------------------------------------------------------------------------
@@ -1638,15 +1606,9 @@ out:
  *
  * Return: 0 if no label found, size of label if found, Failure: FAIL
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: January 11, 2005
- *
- * Comments:
- *
- * Modifications:
- *     JIRA HDFFV-7673: Added a check to see if the label name exists,
- *     if not then returns zero. July 30, 2011. MSB
  *
  *-------------------------------------------------------------------------
  */
@@ -1793,19 +1755,12 @@ out:
  *
  * Return: size of name if found, zero if not found,  Failure: FAIL
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: January 04, 2005
  *
- * Comments:
- *
- * Modifications:
- *  The size of the name returned should not include the NULL termination
- *  in its value so as to be consistent with other HDF5 APIs.
- *
  *-------------------------------------------------------------------------
  */
-
 ssize_t
 H5DSget_scale_name(hid_t did, char *name, size_t size)
 {
@@ -1917,17 +1872,12 @@ out:
  *
  * Return: 1, is, 0, not, FAIL, error
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: January 04, 2005
  *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 htri_t
 H5DSis_scale(hid_t did)
 {
@@ -1939,7 +1889,7 @@ H5DSis_scale(hid_t did)
     char *     buf;          /* Name of attribute */
     hsize_t    storage_size; /* Size of storage for attribute */
 
-    /*-------------------------------------------------------------------------
+    /*------------------------------------------------------------------------
      * parameter checking
      *-------------------------------------------------------------------------
      */
@@ -2021,17 +1971,12 @@ out:
  *   Success: number of scales
  *   Failure: FAIL
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: January 13, 2005
  *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 int
 H5DSget_num_scales(hid_t did, unsigned int idx)
 {
@@ -2144,17 +2089,12 @@ out:
  *
  * Return: true, false, fail
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: March 19, 2005
  *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 static herr_t
 H5DS_is_reserved(hid_t did)
 {
@@ -2235,17 +2175,12 @@ out:
  *
  * Return: Type identifier on success and negative on failure
  *
- * Programmer: epourmal@hdfgroup.org
+ * Programmer: Elena Pourmal
  *
  * Date: May 22, 2010
  *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 static hid_t
 H5DS_get_REFLIST_type(void)
 {
