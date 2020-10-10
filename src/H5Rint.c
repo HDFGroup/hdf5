@@ -89,7 +89,6 @@
     } while (0)
 
 /* Debug */
-// #define H5R_DEBUG
 #ifdef H5R_DEBUG
 #define H5R_LOG_DEBUG(...)                                                                                   \
     do {                                                                                                     \
