@@ -76,42 +76,16 @@
 /* Static function declarations */
 static herr_t     H5E__set_default_auto(H5E_t *stk);
 static H5E_cls_t *H5E__register_class(const char *cls_name, const char *lib_name, const char *version);
-<<<<<<< HEAD
 static herr_t     H5E__unregister_class(H5E_cls_t *cls, void **request);
 static ssize_t    H5E__get_class_name(const H5E_cls_t *cls, char *name, size_t size);
 static int        H5E__close_msg_cb(void *obj_ptr, hid_t obj_id, void *udata);
 static herr_t     H5E__close_msg(H5E_msg_t *err, void **request);
-||||||| 29ab58b58d
-static herr_t  H5E__unregister_class(H5E_cls_t *cls);
-static ssize_t H5E__get_class_name(const H5E_cls_t *cls, char *name, size_t size);
-static int     H5E__close_msg_cb(void *obj_ptr, hid_t obj_id, void *udata);
-static herr_t  H5E__close_msg(H5E_msg_t *err);
-=======
-static herr_t  H5E__unregister_class(H5E_cls_t *cls);
-static ssize_t H5E__get_class_name(const H5E_cls_t *cls, char *name, size_t size);
-static int     H5E__close_msg_cb(void *obj_ptr, hid_t obj_id, void *udata);
-static herr_t  H5E__close_msg(H5E_msg_t *err);
->>>>>>> origin/develop
 static H5E_msg_t *H5E__create_msg(H5E_cls_t *cls, H5E_type_t msg_type, const char *msg);
-<<<<<<< HEAD
 static H5E_t *    H5E__get_current_stack(void);
 static herr_t     H5E__set_current_stack(H5E_t *estack);
 static herr_t     H5E__close_stack(H5E_t *err_stack, void **request);
 static ssize_t    H5E__get_num(const H5E_t *err_stack);
 static herr_t     H5E__append_stack(H5E_t *dst_estack, const H5E_t *src_stack);
-
-||||||| 29ab58b58d
-static H5E_t * H5E__get_current_stack(void);
-static herr_t  H5E__set_current_stack(H5E_t *estack);
-static herr_t  H5E__close_stack(H5E_t *err_stack);
-static ssize_t H5E__get_num(const H5E_t *err_stack);
-
-=======
-static H5E_t * H5E__get_current_stack(void);
-static herr_t  H5E__set_current_stack(H5E_t *estack);
-static herr_t  H5E__close_stack(H5E_t *err_stack);
-static ssize_t H5E__get_num(const H5E_t *err_stack);
->>>>>>> origin/develop
 
 /*********************/
 /* Package Variables */
@@ -686,16 +660,8 @@ H5E__close_msg_cb(void *obj_ptr, hid_t obj_id, void *udata)
     HDassert(err_msg);
 
     /* Close the message if it is in the class being closed */
-<<<<<<< HEAD
     if (err_msg->cls == cls) {
         if (H5E__close_msg(err_msg, NULL) < 0)
-||||||| 29ab58b58d
-    if (err_msg->cls == cls) {
-        if (H5E__close_msg(err_msg) < 0)
-=======
-    if (err_msg->cls == cls) {
-        if (H5E__close_msg(err_msg) < 0)
->>>>>>> origin/develop
             HGOTO_ERROR(H5E_ERROR, H5E_CANTCLOSEOBJ, H5_ITER_ERROR, "unable to close error message")
         if (NULL == H5I_remove(obj_id))
             HGOTO_ERROR(H5E_ERROR, H5E_CANTREMOVE, H5_ITER_ERROR, "unable to remove error message")
@@ -850,16 +816,8 @@ H5E__create_msg(H5E_cls_t *cls, H5E_type_t msg_type, const char *msg_str)
     ret_value = msg;
 
 done:
-<<<<<<< HEAD
     if (!ret_value)
         if (msg && H5E__close_msg(msg, NULL) < 0)
-||||||| 29ab58b58d
-    if (!ret_value)
-        if (msg && H5E__close_msg(msg) < 0)
-=======
-    if (!ret_value)
-        if (msg && H5E__close_msg(msg) < 0)
->>>>>>> origin/develop
             HDONE_ERROR(H5E_ERROR, H5E_CANTCLOSEOBJ, NULL, "unable to close error message")
 
     FUNC_LEAVE_NOAPI(ret_value)

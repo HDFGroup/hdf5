@@ -148,7 +148,7 @@ H5D__create_api_common(hid_t loc_id, const char *name, hid_t type_id, hid_t spac
     /* Create the dataset */
     if (NULL == (dset = H5VL_dataset_create(vol_obj, &loc_params, name, lcpl_id, type_id, space_id, dcpl_id,
                                             dapl_id, H5P_DATASET_XFER_DEFAULT, token_ptr)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "unable to create dataset")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, H5I_INVALID_HID, "unable to create dataset")
 
     /* If there's an event set and a token was created, add the token to it */
     if (H5ES_NONE != es_id && NULL != token) {
@@ -161,7 +161,8 @@ H5D__create_api_common(hid_t loc_id, const char *name, hid_t type_id, hid_t spac
 
         /* Add token to event set */
         if (H5ES_insert_new(es, token_obj,
-                            H5ARG_TRACE9(caller, "i*siiiiii*s", loc_id, name, type_id, space_id, lcpl_id, dcpl_id, dapl_id, es_id, caller)) < 0)
+                            H5ARG_TRACE9(caller, "i*siiiiii*s", loc_id, name, type_id, space_id, lcpl_id,
+                                         dcpl_id, dapl_id, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "can't insert token into event set")
         token_obj = NULL;
     } /* end if */
@@ -861,7 +862,8 @@ H5D__read_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t
 
         /* Add token to event set */
         if (H5ES_insert_new(es, token_obj,
-                            H5ARG_TRACE8(caller, "iiiii*xi*s", dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, es_id, caller)) < 0)
+                            H5ARG_TRACE8(caller, "iiiii*xi*s", dset_id, mem_type_id, mem_space_id,
+                                         file_space_id, dxpl_id, buf, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "can't insert token into event set")
     } /* end if */
 
@@ -1062,7 +1064,8 @@ H5D__write_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_
 
         /* Add token to event set */
         if (H5ES_insert_new(es, token_obj,
-                            H5ARG_TRACE8(caller, "iiiii*xi*s", dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, es_id, caller)) < 0)
+                            H5ARG_TRACE8(caller, "iiiii*xi*s", dset_id, mem_type_id, mem_space_id,
+                                         file_space_id, dxpl_id, buf, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "can't insert token into event set")
     } /* end if */
 

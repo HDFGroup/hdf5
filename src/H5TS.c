@@ -169,10 +169,10 @@ H5TS_tid_destructor(void *_v)
         return;
 
     /* TBD use an atomic CAS */
-    pthread_mutex_lock(&H5TS_tid_mtx);
+    HDpthread_mutex_lock(&H5TS_tid_mtx);
     tid->next          = H5TS_tid_next_free;
     H5TS_tid_next_free = tid;
-    pthread_mutex_unlock(&H5TS_tid_mtx);
+    HDpthread_mutex_unlock(&H5TS_tid_mtx);
 }
 
 /*--------------------------------------------------------------------------
@@ -192,8 +192,8 @@ H5TS_tid_destructor(void *_v)
 static void
 H5TS_tid_init(void)
 {
-    pthread_mutex_init(&H5TS_tid_mtx, NULL);
-    pthread_key_create(&H5TS_tid_key, H5TS_tid_destructor);
+    HDpthread_mutex_init(&H5TS_tid_mtx, NULL);
+    HDpthread_key_create(&H5TS_tid_key, H5TS_tid_destructor);
 }
 
 /*--------------------------------------------------------------------------
@@ -223,7 +223,7 @@ H5TS_tid_init(void)
 uint64_t
 H5TS_thread_id(void)
 {
-    H5TS_tid_t *tid = pthread_getspecific(H5TS_tid_key);
+    H5TS_tid_t *tid = HDpthread_getspecific(H5TS_tid_key);
     H5TS_tid_t  proto_tid;
 
     /* An ID is already assigned. */
@@ -237,20 +237,19 @@ H5TS_thread_id(void)
      * point `tid` at `proto_tid` if we need to allocate some
      * memory.
      */
-    pthread_mutex_lock(&H5TS_tid_mtx);
+    HDpthread_mutex_lock(&H5TS_tid_mtx);
     if ((tid = H5TS_tid_next_free) != NULL)
         H5TS_tid_next_free = tid->next;
     else if (H5TS_tid_next_id != UINT64_MAX) {
         tid     = &proto_tid;
         tid->id = ++H5TS_tid_next_id;
     }
-    pthread_mutex_unlock(&H5TS_tid_mtx);
+    HDpthread_mutex_unlock(&H5TS_tid_mtx);
 
     /* If a prototype ID record was established, copy it to the heap. */
-    if (tid == &proto_tid) {
+    if (tid == &proto_tid)
         if ((tid = HDmalloc(sizeof(*tid))) != NULL)
             *tid = proto_tid;
-    }
 
     if (tid == NULL)
         return 0;
@@ -259,7 +258,7 @@ H5TS_thread_id(void)
      * to it.
      */
     tid->next = NULL;
-    if (pthread_setspecific(H5TS_tid_key, tid) != 0) {
+    if (HDpthread_setspecific(H5TS_tid_key, tid) != 0) {
         H5TS_tid_destructor(tid);
         return 0;
     }
@@ -286,7 +285,6 @@ H5TS_thread_id(void)
  *
  *--------------------------------------------------------------------------
  */
-#ifndef H5_HAVE_WIN_THREADS
 void
 H5TS_pthread_first_thread_init(void)
 {
@@ -406,13 +404,12 @@ H5TS__mutex_acquire(H5TS_mutex_t *mutex, hbool_t *acquired)
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TSmutex_acquire(hbool_t *acquired)
-{
+H5TSmutex_acquire(hbool_t *acquired){
     FUNC_ENTER_API_NAMECHECK_ONLY
-    /*NO TRACE*/
+        /*NO TRACE*/
 
-    FUNC_LEAVE_API_NAMECHECK_ONLY(H5TS__mutex_acquire(&H5_g.init_lock, acquired))
-} /* end H5TSmutex_acquire() */
+        FUNC_LEAVE_API_NAMECHECK_ONLY(H5TS__mutex_acquire(&H5_g.init_lock, acquired))}
+/* end H5TSmutex_acquire() */
 
 /*--------------------------------------------------------------------------
  * NAME
