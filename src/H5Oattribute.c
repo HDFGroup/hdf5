@@ -462,47 +462,46 @@ H5O__attr_open_by_name(const H5O_loc_t *loc, const char *name)
     /* If found the attribute is already opened, make a copy of it to share the
      * object information.  If not, open attribute as a new object
      */
-    // Tang: commented out below code so that async attr open works properly
-    /* if((found_open_attr = H5O__attr_find_opened_attr(loc, &exist_attr, name)) < 0) */
-    /*     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "failed in finding opened attribute") */
-    /* else if(found_open_attr == TRUE) { */
-    /*     if(NULL == (opened_attr = H5A__copy(NULL, exist_attr))) */
-    /*         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "can't copy existing attribute") */
-    /* } /1* end else if *1/ */
-    /* else { */
-    /* Check for attributes in dense storage */
-    if (H5F_addr_defined(ainfo.fheap_addr)) {
-        /* Open attribute with dense storage */
-        if (NULL == (opened_attr = H5A__dense_open(loc->file, &ainfo, name)))
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "can't open attribute")
-    } /* end if */
+    if ((found_open_attr = H5O__attr_find_opened_attr(loc, &exist_attr, name)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "failed in finding opened attribute")
+    else if (found_open_attr == TRUE) {
+        if (NULL == (opened_attr = H5A__copy(NULL, exist_attr)))
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "can't copy existing attribute")
+    } /* end else if */
     else {
-        H5O_iter_opn_t      udata; /* User data for callback */
-        H5O_mesg_operator_t op;    /* Wrapper for operator */
+        /* Check for attributes in dense storage */
+        if (H5F_addr_defined(ainfo.fheap_addr)) {
+            /* Open attribute with dense storage */
+            if (NULL == (opened_attr = H5A__dense_open(loc->file, &ainfo, name)))
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "can't open attribute")
+        } /* end if */
+        else {
+            H5O_iter_opn_t      udata; /* User data for callback */
+            H5O_mesg_operator_t op;    /* Wrapper for operator */
 
-        /* Set up user data for callback */
-        udata.name = name;
-        udata.attr = NULL;
+            /* Set up user data for callback */
+            udata.name = name;
+            udata.attr = NULL;
 
-        /* Iterate over attributes, to locate correct one to open */
-        op.op_type  = H5O_MESG_OP_LIB;
-        op.u.lib_op = H5O__attr_open_cb;
-        if (H5O__msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, &op, &udata) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "error updating attribute")
+            /* Iterate over attributes, to locate correct one to open */
+            op.op_type  = H5O_MESG_OP_LIB;
+            op.u.lib_op = H5O__attr_open_cb;
+            if (H5O__msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, &op, &udata) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "error updating attribute")
 
-        /* Check that we found the attribute */
-        if (!udata.attr)
-            HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, NULL, "can't locate attribute: '%s'", name)
+            /* Check that we found the attribute */
+            if (!udata.attr)
+                HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, NULL, "can't locate attribute: '%s'", name)
 
-        /* Get attribute opened from object header */
-        HDassert(udata.attr);
-        opened_attr = udata.attr;
+            /* Get attribute opened from object header */
+            HDassert(udata.attr);
+            opened_attr = udata.attr;
+        } /* end else */
+
+        /* Mark datatype as being on disk now */
+        if (H5T_set_loc(opened_attr->shared->dt, H5F_VOL_OBJ(loc->file), H5T_LOC_DISK) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "invalid datatype location")
     } /* end else */
-
-    /* Mark datatype as being on disk now */
-    if (H5T_set_loc(opened_attr->shared->dt, H5F_VOL_OBJ(loc->file), H5T_LOC_DISK) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "invalid datatype location")
-    /* } /1* end else *1/ */
 
     /* Set return value */
     ret_value = opened_attr;
