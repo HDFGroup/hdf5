@@ -105,9 +105,9 @@ static herr_t H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned 
  *
  *              We construct the table as follows.  Let:
  *
- *                  n = num_candidates / mpi_size;
+ *                      n = num_candidates / mpi_size;
  *
- *                  m = num_candidates % mpi_size;
+ *                      m = num_candidates % mpi_size;
  *
  *              Now allocate an array of integers of length mpi_size + 1,
  *              and call this array candidate_assignment_table.
@@ -127,10 +127,10 @@ static herr_t H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned 
  *              Once the table is constructed, we determine the first and
  *              last entry this process is to flush as follows:
  *
- *                  first_entry_to_flush = candidate_assignment_table[mpi_rank]
+ *              first_entry_to_flush = candidate_assignment_table[mpi_rank]
  *
  *              last_entry_to_flush =
- *                  candidate_assignment_table[mpi_rank + 1] - 1;
+ *                      candidate_assignment_table[mpi_rank + 1] - 1;
  *
  *              With these values determined, we simply scan through the
  *              candidate list, marking all entries in the range
@@ -172,12 +172,15 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     unsigned           entries_to_clear[H5C_RING_NTYPES];
     haddr_t            addr;
     H5C_cache_entry_t *entry_ptr = NULL;
+
 #if H5C_DO_SANITY_CHECKS
     haddr_t last_addr;
 #endif /* H5C_DO_SANITY_CHECKS */
+
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
     char tbl_buf[1024];
-#endif                            /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
+#endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
+
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
@@ -397,6 +400,7 @@ done:
 } /* H5C_apply_candidate_list() */
 
 /*-------------------------------------------------------------------------
+ *
  * Function:    H5C_construct_candidate_list__clean_cache
  *
  * Purpose:     Construct the list of entries that should be flushed to
@@ -439,6 +443,7 @@ H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr)
     HDassert(cache_ptr->slist_len <= (cache_ptr->dLRU_list_len + cache_ptr->pel_len));
 
     if (space_needed > 0) { /* we have work to do */
+
         H5C_cache_entry_t *entry_ptr;
         unsigned           nominated_entries_count = 0;
         size_t             nominated_entries_size  = 0;
@@ -450,8 +455,11 @@ H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr)
          * entries to free up the necessary space.
          */
         entry_ptr = cache_ptr->dLRU_tail_ptr;
-        while ((nominated_entries_size < space_needed) && (nominated_entries_count < cache_ptr->slist_len) &&
+
+        while ((nominated_entries_size < space_needed) &&
+               ((!cache_ptr->slist_enabled) || (nominated_entries_count < cache_ptr->slist_len)) &&
                (entry_ptr != NULL)) {
+
             HDassert(!(entry_ptr->is_protected));
             HDassert(!(entry_ptr->is_read_only));
             HDassert(entry_ptr->ro_ref_count == 0);
@@ -459,13 +467,17 @@ H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr)
             HDassert(entry_ptr->in_slist);
 
             nominated_addr = entry_ptr->addr;
+
             if (H5AC_add_candidate((H5AC_t *)cache_ptr, nominated_addr) < 0)
+
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_add_candidate() failed")
 
             nominated_entries_size += entry_ptr->size;
             nominated_entries_count++;
             entry_ptr = entry_ptr->aux_prev;
+
         } /* end while */
+
         HDassert(entry_ptr == NULL);
 
         /* it is possible that there are some dirty entries on the
@@ -474,7 +486,9 @@ H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr)
         entry_ptr = cache_ptr->pel_head_ptr;
         while ((nominated_entries_size < space_needed) && (nominated_entries_count < cache_ptr->slist_len) &&
                (entry_ptr != NULL)) {
+
             if (entry_ptr->is_dirty) {
+
                 HDassert(!(entry_ptr->is_protected));
                 HDassert(!(entry_ptr->is_read_only));
                 HDassert(entry_ptr->ro_ref_count == 0);
@@ -482,22 +496,29 @@ H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr)
                 HDassert(entry_ptr->in_slist);
 
                 nominated_addr = entry_ptr->addr;
+
                 if (H5AC_add_candidate((H5AC_t *)cache_ptr, nominated_addr) < 0)
+
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_add_candidate() failed")
 
                 nominated_entries_size += entry_ptr->size;
                 nominated_entries_count++;
+
             } /* end if */
 
             entry_ptr = entry_ptr->next;
+
         } /* end while */
 
         HDassert(nominated_entries_count == cache_ptr->slist_len);
         HDassert(nominated_entries_size == space_needed);
+
     } /* end if */
 
 done:
+
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* H5C_construct_candidate_list__clean_cache() */
 
 /*-------------------------------------------------------------------------
@@ -533,6 +554,7 @@ H5C_construct_candidate_list__min_clean(H5C_t *cache_ptr)
      * cache back within its min clean constraints.
      */
     if (cache_ptr->max_cache_size > cache_ptr->index_size) {
+
         if (((cache_ptr->max_cache_size - cache_ptr->index_size) + cache_ptr->cLRU_list_size) >=
             cache_ptr->min_clean_size)
             space_needed = 0;
@@ -548,6 +570,7 @@ H5C_construct_candidate_list__min_clean(H5C_t *cache_ptr)
     } /* end else */
 
     if (space_needed > 0) { /* we have work to do */
+
         H5C_cache_entry_t *entry_ptr;
         unsigned           nominated_entries_count = 0;
         size_t             nominated_entries_size  = 0;
@@ -560,6 +583,7 @@ H5C_construct_candidate_list__min_clean(H5C_t *cache_ptr)
         entry_ptr = cache_ptr->dLRU_tail_ptr;
         while ((nominated_entries_size < space_needed) && (nominated_entries_count < cache_ptr->slist_len) &&
                (entry_ptr != NULL) && (!entry_ptr->flush_me_last)) {
+
             haddr_t nominated_addr;
 
             HDassert(!(entry_ptr->is_protected));
@@ -569,12 +593,15 @@ H5C_construct_candidate_list__min_clean(H5C_t *cache_ptr)
             HDassert(entry_ptr->in_slist);
 
             nominated_addr = entry_ptr->addr;
+
             if (H5AC_add_candidate((H5AC_t *)cache_ptr, nominated_addr) < 0)
+
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_add_candidate() failed")
 
             nominated_entries_size += entry_ptr->size;
             nominated_entries_count++;
             entry_ptr = entry_ptr->aux_prev;
+
         } /* end while */
         HDassert(nominated_entries_count <= cache_ptr->slist_len);
         HDassert(nominated_entries_size >= space_needed);
@@ -679,13 +706,14 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
 
         if (entry_ptr == NULL) {
 #if H5C_DO_SANITY_CHECKS
-            HDfprintf(stdout, "H5C_mark_entries_as_clean: entry[%u] = %a not in cache.\n", u, addr);
+            HDfprintf(stdout, "H5C_mark_entries_as_clean: entry[%u] = %" PRIuHADDR " not in cache.\n", u,
+                      addr);
 #endif /* H5C_DO_SANITY_CHECKS */
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Listed entry not in cache?!?!?")
         } /* end if */
         else if (!entry_ptr->is_dirty) {
 #if H5C_DO_SANITY_CHECKS
-            HDfprintf(stdout, "H5C_mark_entries_as_clean: entry %a is not dirty!?!\n", addr);
+            HDfprintf(stdout, "H5C_mark_entries_as_clean: entry %" PRIuHADDR " is not dirty!?!\n", addr);
 #endif /* H5C_DO_SANITY_CHECKS */
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Listed entry not dirty?!?!?")
         } /* end else-if */
@@ -737,7 +765,7 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
      * of the pre_serialize / serialize routines, this may
      * cease to be the case -- requiring a review of this
      * point.
-     *                    JRM -- 4/7/15
+     *                                  JRM -- 4/7/15
      */
     entries_cleared  = 0;
     entries_examined = 0;

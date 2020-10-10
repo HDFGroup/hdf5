@@ -93,8 +93,8 @@ static h5tool_format_t xml_dataformat = {
 
     1, /*skip_first */
 
-    1,                       /*obj_hidefileno */
-    " " H5_PRINTF_HADDR_FMT, /*obj_format */
+    1,              /*obj_hidefileno */
+    " %" PRIuHADDR, /*obj_format */
 
     1,             /*dset_hidefileno */
     "DATASET %s ", /*dset_format */

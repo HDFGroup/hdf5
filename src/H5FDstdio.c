@@ -235,6 +235,7 @@ H5FD_stdio_init(void)
 
     if (H5I_VFL != H5Iget_type(H5FD_STDIO_g))
         H5FD_STDIO_g = H5FDregister(&H5FD_stdio_g);
+
     return H5FD_STDIO_g;
 } /* end H5FD_stdio_init() */
 
@@ -314,7 +315,7 @@ H5Pset_fapl_stdio(hid_t fapl_id)
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
-H5FD_stdio_open(const char *name, unsigned flags, hid_t /*UNUSED*/ fapl_id, haddr_t maxaddr)
+H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
     FILE *             f            = NULL;
     unsigned           write_access = 0; /* File opened with write access? */

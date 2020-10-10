@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu <slu@ncsa.uiuc.edu>
+ * Programmer:  Raymond Lu
  *              Thursday, March 23, 2006
  *
  * Purpose:     Check if floating-point data created on big-endian and

@@ -345,7 +345,8 @@ evict_entries(hid_t fid)
 
     /* Evict all we can from the cache to examine full tag creation tree */
     /* This function will likely return failure since the root group
-     * is still protected. Thus, don't check its return value. */
+     * is still protected. Thus, don't check its return value.
+     */
     H5C_flush_cache(f, H5C__FLUSH_INVALIDATE_FLAG);
 
     return 0;

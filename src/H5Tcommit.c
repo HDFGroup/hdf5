@@ -84,7 +84,10 @@ H5FL_EXTERN(H5VL_object_t);
  * Purpose:     Save a transient datatype to a file and turn the type handle
  *              into a "named", immutable type.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              April 5, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -248,7 +251,10 @@ done:
  * Note:        The datatype access property list is unused currently, but
  *              is checked for sanity anyway.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Peter Cao
+ *              May 17, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -479,7 +485,10 @@ done:
  *
  * Purpose:     Determines if a datatype is committed or not.
  *
- * Return:      TRUE/FALSE/FAIL
+ * Return:      TRUE/FALSE/Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, June  4, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -510,7 +519,7 @@ done:
  *		ADJUST to the link count.
  *
  * Return:	Success:	New link count
- *		Failure:	Negative
+ *		Failure:	-1
  *
  * Programmer:	Quincey Koziol
  *              Friday, September 26, 2003
@@ -544,6 +553,9 @@ done:
  * Return:      Success:    Object ID of the named datatype
  *
  *              Failure:    H5I_INVALID_HID
+ *
+ * Programmer:	James Laird
+ *              Thursday July 27, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -607,6 +619,9 @@ done:
  *                          released by calling H5Pclose().
  *
  *              Failure:    H5I_INVALID_HID
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, November 28, 2006
  *
  *-------------------------------------------------------------------------
  */

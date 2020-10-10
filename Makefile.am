@@ -190,10 +190,10 @@ trace:
 # Run tests with different Virtual File Drivers.
 # Currently, only invoke check-vfd in the test directory.
 check-vfd:
-	for d in src utils test; do                                 \
-	  if test $$d != .; then                                       \
-	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;          \
-	  fi;                                                          \
+	for d in src utils test; do                                     \
+	  if test $$d != .; then                                        \
+	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;           \
+	  fi;                                                           \
 	done
 
 # Run tests with different passthrough Virtual Object Layer Connectors.

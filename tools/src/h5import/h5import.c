@@ -946,7 +946,7 @@ readFloatData(FILE *strm, struct Input *in)
  *
  * Return: 0, ok, -1 no
  *
- * Programmer: Pedro Vicente, pvn@hdfgroup.org
+ * Programmer: Pedro Vicente
  *
  * Date: July, 26, 2007
  *

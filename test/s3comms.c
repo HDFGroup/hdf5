@@ -15,7 +15,7 @@
  *
  * Purpose:    Unit tests for the S3 Communications (s3comms) module.
  *
- * Programmer: Jacob Smith <jake.smith@hdfgroup.org>
+ * Programmer: Jacob Smith
  *             2017-10-11
  */
 
@@ -181,15 +181,21 @@
  *
  *----------------------------------------------------------------------------
  */
+static inline void
+jserr_long(long expected, long actual, const char *reason)
+{
+    if (reason != NULL) {
+        HDprintf("%s\n", reason);
+    }
+    else {
+        HDprintf("  ! Expected %ld\n  ! Actual   %ld\n", expected, actual);
+    }
+}
+
 #define JSERR_LONG(expected, actual, reason)                                                                 \
     {                                                                                                        \
         JSFAILED_AT()                                                                                        \
-        if (reason != NULL) {                                                                                \
-            HDprintf("%s\n", (reason));                                                                      \
-        }                                                                                                    \
-        else {                                                                                               \
-            HDprintf("  ! Expected %ld\n  ! Actual   %ld\n", (long)(expected), (long)(actual));              \
-        }                                                                                                    \
+        jserr_long((long)(expected), (long)(actual), reason);                                                \
     }
 
 /*----------------------------------------------------------------------------
@@ -220,15 +226,21 @@
  *
  *----------------------------------------------------------------------------
  */
+static inline void
+jserr_str(const char *expected, const char *actual, const char *reason)
+{
+    if (reason != NULL) {
+        HDprintf("%s\n", reason);
+    }
+    else {
+        HDprintf("!!! Expected:\n%s\n!!!Actual:\n%s\n", expected, actual);
+    }
+}
+
 #define JSERR_STR(expected, actual, reason)                                                                  \
     {                                                                                                        \
         JSFAILED_AT()                                                                                        \
-        if ((reason) != NULL) {                                                                              \
-            HDprintf("%s\n", (reason));                                                                      \
-        }                                                                                                    \
-        else {                                                                                               \
-            HDprintf("!!! Expected:\n%s\n!!!Actual:\n%s\n", (expected), (actual));                           \
-        }                                                                                                    \
+        jserr_str((expected), (actual), (reason));                                                           \
     }
 
 #ifdef JSVERIFY_EXP_ACT
@@ -2218,7 +2230,7 @@ test_signing_key(void)
                  NULL)
 
         JSVERIFY(0, strncmp((const char *)cases[i].exp, (const char *)key, SHA256_DIGEST_LENGTH),
-                 cases[i].exp)
+                 (const char *)cases[i].exp)
 
         free(key);
         key = NULL;

@@ -28,6 +28,11 @@
 #define H5FD_HDFS (-1)
 #endif /* H5_HAVE_LIBHDFS */
 
+#ifdef H5_HAVE_LIBHDFS
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /****************************************************************************
  *
  * Structure: H5FD_hdfs_fapl_t
@@ -107,10 +112,6 @@ typedef struct H5FD_hdfs_fapl_t {
     int32_t stream_buffer_size;
 } H5FD_hdfs_fapl_t;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 H5_DLL hid_t  H5FD_hdfs_init(void);
 H5_DLL herr_t H5Pget_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa_out);
 H5_DLL herr_t H5Pset_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa);
@@ -118,5 +119,6 @@ H5_DLL herr_t H5Pset_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa);
 #ifdef __cplusplus
 }
 #endif
+#endif /* H5_HAVE_LIBHDFS */
 
 #endif /* ifndef H5FDhdfs_H */

@@ -2770,17 +2770,17 @@ write_permitted_check(int
 /*-------------------------------------------------------------------------
  * Function:    check_insert_entry()
  *
- * Purpose:    Verify that H5C_insert_entry behaves as expected.
- *        Test the behaviour with different flags.
+ * Purpose:     Verify that H5C_insert_entry behaves as expected.
+ *              Test the behaviour with different flags.
  *
- *        This test was added primarily to test basic insert
- *        pinned entry functionallity, but I through in explicit
- *        tests for other functionallity that is tested implicitly
- *        elsewhere.
+ *              This test was added primarily to test basic insert
+ *              pinned entry functionallity, but I through in explicit
+ *              tests for other functionallity that is tested implicitly
+ *              elsewhere.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              8/10/06
  *
  * Modifications:
@@ -3137,14 +3137,15 @@ check_flush_cache(unsigned paged)
 } /* check_flush_cache() */
 
 /*-------------------------------------------------------------------------
+ *
  * Function:    check_flush_cache__empty_cache()
  *
- * Purpose:    Verify that flush_cache behaves as expected with an empty
+ * Purpose :    Verify that flush_cache behaves as expected with an empty
  *              cache.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              1/12/05
  *
  * Modifications:
@@ -4425,11 +4426,11 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
 /*-------------------------------------------------------------------------
  * Function:    check_flush_cache__multi_entry_test()
  *
- * Purpose:    Run a multi entry flush cache test.
+ * Purpose :    Run a multi entry flush cache test.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              1/13/05
  *
  * Modifications:
@@ -4453,7 +4454,7 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
     /* This gets used a lot, so lets leave it in. */
 
     HDfprintf(stdout, "check_flush_cache__multi_entry_test: test %d\n",
-        test_num);
+              test_num);
 #endif /* JRM */
 
     if (cache_ptr == NULL) {
@@ -4478,6 +4479,7 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
 
     u = 0;
     while (pass && (u < spec_size)) {
+
         if (((unsigned)spec[u].entry_num != u) || (spec[u].entry_type < 0) ||
             (spec[u].entry_type >= NUMBER_OF_ENTRY_TYPES) || (spec[u].entry_index < 0) ||
             (spec[u].entry_index > max_indices[spec[u].entry_type])) {
@@ -4492,6 +4494,7 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
 
     u = 0;
     while (pass && (u < spec_size)) {
+
         if (spec[u].insert_flag) {
 
             insert_entry(file_ptr, spec[u].entry_type, spec[u].entry_index, spec[u].flags);
@@ -4587,6 +4590,7 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
 
     u = 0;
     while (pass && (u < spec_size)) {
+
         base_addr = entries[spec[u].entry_type];
         entry_ptr = &(base_addr[spec[u].entry_index]);
 
@@ -4602,13 +4606,14 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
 } /* check_flush_cache__multi_entry_test() */
 
 /*-------------------------------------------------------------------------
+ *
  * Function:    check_flush_cache__pe_multi_entry_test()
  *
- * Purpose:    Run a multi entry flush cache test.
+ * Purpose:     Run a multi entry flush cache test.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              4/5/06
  *
  * Modifications:
@@ -4658,6 +4663,7 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
 
     u = 0;
     while (pass && (u < spec_size)) {
+
         if (((unsigned)spec[u].entry_num != u) || (spec[u].entry_type < 0) ||
             (spec[u].entry_type >= NUMBER_OF_ENTRY_TYPES) || (spec[u].entry_index < 0) ||
             (spec[u].entry_index > max_indices[spec[u].entry_type]) || (spec[u].num_pins < 0) ||
@@ -4687,6 +4693,7 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
         total_entry_size += entry_sizes[spec[u].entry_type];
 
         for (j = 0; j < spec[u].num_pins; j++) {
+
             create_pinned_entry_dependency(file_ptr, spec[u].entry_type, spec[u].entry_index,
                                            spec[u].pin_type[j], spec[u].pin_idx[j]);
         }
@@ -4709,6 +4716,7 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
 
     u = 0;
     while (pass && (u < spec_size)) {
+
         base_addr = entries[spec[u].entry_type];
         entry_ptr = &(base_addr[spec[u].entry_index]);
 
@@ -4773,6 +4781,7 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
 
     u = 0;
     while (pass && (u < spec_size)) {
+
         base_addr = entries[spec[u].entry_type];
         entry_ptr = &(base_addr[spec[u].entry_index]);
 
@@ -7987,12 +7996,12 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
 /*-------------------------------------------------------------------------
  * Function:    check_flush_cache__flush_op_test()
  *
- * Purpose:    Run a flush op flush cache test.  Of the nature of
- *         flush operations, this is a multi-entry test.
+ * Purpose:     Run a flush op flush cache test.  Of the nature of
+ *              flush operations, this is a multi-entry test.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              9/3/06
  *
  * Modifications:
@@ -8042,6 +8051,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
     i = 0;
     while (pass && (i < spec_size)) {
+
         if ((spec[i].entry_num != i) || (spec[i].entry_type < 0) ||
             (spec[i].entry_type >= NUMBER_OF_ENTRY_TYPES) || (spec[i].entry_index < 0) ||
             (spec[i].entry_index > max_indices[spec[i].entry_type]) || (spec[i].num_pins < 0) ||
@@ -8057,6 +8067,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
     i = 0;
     while (pass && (i < check_size)) {
+
         if ((check[i].entry_num != i) || (check[i].entry_type < 0) ||
             (check[i].entry_type >= NUMBER_OF_ENTRY_TYPES) || (check[i].entry_index < 0) ||
             (check[i].entry_index > max_indices[check[i].entry_type]) ||
@@ -8084,6 +8095,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
     i = 0;
     while (pass && (i < spec_size)) {
+
         if (spec[i].insert_flag) {
 
             insert_entry(file_ptr, spec[i].entry_type, spec[i].entry_index, spec[i].flags);
@@ -8104,6 +8116,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
         }
 
         for (j = 0; j < spec[i].num_flush_ops; j++) {
+
             add_flush_op(spec[i].entry_type, spec[i].entry_index, spec[i].flush_ops[j].op_code,
                          spec[i].flush_ops[j].type, spec[i].flush_ops[j].idx, spec[i].flush_ops[j].flag,
                          spec[i].flush_ops[j].size, spec[i].flush_ops[j].order_ptr);
@@ -8139,6 +8152,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
     i = 0;
     while (pass && (i < spec_size)) {
+
         base_addr = entries[spec[i].entry_type];
         entry_ptr = &(base_addr[spec[i].entry_index]);
 
@@ -8172,6 +8186,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
         i = 0;
         while (pass && (i < check_size)) {
+
             if (check[i].in_cache != entry_in_cache(cache_ptr, check[i].entry_type, check[i].entry_index)) {
 
                 pass = FALSE;
@@ -8315,6 +8330,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
     i = 0;
     while (pass && (i < spec_size)) {
+
         base_addr = entries[spec[i].entry_type];
         entry_ptr = &(base_addr[spec[i].entry_index]);
 
@@ -8329,6 +8345,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
     i = 0;
     while (pass && (i < check_size)) {
+
         base_addr = entries[check[i].entry_type];
         entry_ptr = &(base_addr[check[i].entry_index]);
 
@@ -8348,14 +8365,14 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 /*-------------------------------------------------------------------------
  * Function:    check_flush_cache__flush_op_eviction_test()
  *
- * Purpose:    Verify that flush operations work as expected when an
+ * Purpose:     Verify that flush operations work as expected when an
  *              entry is evicted.
  *
  *              Do nothing if pass is FALSE on entry.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              10/3/06
  *
  * Modifications:
@@ -12124,11 +12141,11 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
 /*-------------------------------------------------------------------------
  * Function:    check_flush_cache__single_entry_test()
  *
- * Purpose:    Run a single entry flush cache test.
+ * Purpose:     Run a single entry flush cache test.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              1/12/05
  *
  * Modifications:
@@ -12194,11 +12211,13 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "flush with flags 0x%x failed in single entry test #%d.",
                        flush_flags, test_num);
+
             failure_mssg = msg;
         }
         else if ((entry_ptr->deserialized != expected_deserialized) ||
                  (entry_ptr->serialized != expected_serialized) ||
                  (entry_ptr->destroyed != expected_destroyed)) {
+
 #if 0 /* This is useful debugging code -- lets keep it for a while */
 
             HDfprintf(stdout,
@@ -12260,11 +12279,11 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
 /*-------------------------------------------------------------------------
  * Function:    check_flush_cache__pinned_single_entry_test()
  *
- * Purpose:    Run a pinned single entry flush cache test.
+ * Purpose:     Run a pinned single entry flush cache test.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              3/28/06
  *
  * Modifications:
@@ -12357,6 +12376,7 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
         else if ((entry_ptr->deserialized != expected_deserialized) ||
                  (entry_ptr->serialized != expected_serialized) ||
                  (entry_ptr->destroyed != expected_destroyed)) {
+
 #if 0 /* this is useful debugging code -- keep it around */
             HDfprintf(stdout,
               "desrlzd = %d(%d), srlzd = %d(%d), dest = %d(%d)\n",
@@ -13686,12 +13706,12 @@ check_pin_protected_entry(unsigned paged)
 /*-------------------------------------------------------------------------
  * Function:    check_resize_entry()
  *
- * Purpose:    Verify that H5C_resize_entry() and H5C_unprotect() resize
- *         entries as expected.
+ * Purpose:     Verify that H5C_resize_entry() and H5C_unprotect() resize
+ *              entries as expected.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              7/7/06
  *
  *-------------------------------------------------------------------------
@@ -14125,6 +14145,7 @@ check_resize_entry(unsigned paged)
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 8.");
             failure_mssg = msg;
         }
+
         base_addr  = entries[LARGE_ENTRY_TYPE];
         entry_ptr  = &(base_addr[3]);
         entry_size = LARGE_ENTRY_SIZE;
@@ -14536,12 +14557,12 @@ check_resize_entry(unsigned paged)
 /*-------------------------------------------------------------------------
  * Function:    check_evictions_enabled()
  *
- * Purpose:    Verify that H5C_get_evictions_enabled() and
- *         H5C_set_evictions_enabled() functions perform as expected.
+ * Purpose:     Verify that H5C_get_evictions_enabled() and
+ *              H5C_set_evictions_enabled() functions perform as expected.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              8/2/07
  *
  * Modifications:
@@ -15174,12 +15195,12 @@ check_evictions_enabled(unsigned paged)
 /*-------------------------------------------------------------------------
  * Function:    check_flush_protected_err()
  *
- * Purpose:    Verify that an attempt to flush the cache when it contains
- *        a protected entry will generate an error.
+ * Purpose:     Verify that an attempt to flush the cache when it contains
+ *              a protected entry will generate an error.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              6/24/04
  *
  * Modifications:
@@ -16292,12 +16313,12 @@ check_move_entry_errs(unsigned paged)
 /*-------------------------------------------------------------------------
  * Function:    check_resize_entry_errs()
  *
- * Purpose:    Verify that invalid calls to H5C_resize_entry()
- *         generates errors as expected.
+ * Purpose:     Verify that invalid calls to H5C_resize_entry()
+ *              generates errors as expected.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              7/7/06
  *
  *-------------------------------------------------------------------------
@@ -29797,7 +29818,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    check_flush_deps_order()
  *
- * Purpose:    Verify that the order that entries with flush dependencies
+ * Purpose:     Verify that the order that entries with flush dependencies
  *              is correct
  *
  * Return:    0 on success, non-zero on failure
@@ -33578,25 +33599,26 @@ check_entry_deletions_during_scans(unsigned paged)
 } /* check_entry_deletions_during_scans() */
 
 /*-------------------------------------------------------------------------
+ *
  * Function:    cedds__expunge_dirty_entry_in_flush_test()
  *
- * Purpose:    Verify that H5C_flush_cache() can handle the removal of
- *        a dirty entry from the cache during its scan of the
- *        skip list.
+ * Purpose:     Verify that H5C_flush_cache() can handle the removal of
+ *              a dirty entry from the cache during its scan of the
+ *              skip list.
  *
- *        Do this by setting up a full cache, with the last entry
- *        on the LRU being both dirty and having a flush operation
- *        that deletes the second to last entry on the LRU.  Then
- *        flush the cache, triggering the flush of the last
- *        item, and thereby the deletion of the second to last item.
+ *              Do this by setting up a full cache, with the last entry
+ *              on the LRU being both dirty and having a flush operation
+ *              that deletes the second to last entry on the LRU.  Then
+ *              flush the cache, triggering the flush of the last
+ *              item, and thereby the deletion of the second to last item.
  *
- *        H5C_flush_cache() should handle this deletion gracefully.
+ *              H5C_flush_cache() should handle this deletion gracefully.
  *
  *              Do nothing if pass is FALSE on entry.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              4/4/15
  *
  * Modifications:
@@ -33710,15 +33732,15 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t *file_ptr)
          * are in cache with the following characteristics:
          *
          *         in
-         * entry:    cache?    size:    dirty?    pinned?    pins:    flush operations:
+         * entry:  cache?   size:  dirty?  pinned?    pins:    flush operations:
          *
-         * (HET, 0)     Y    16 KB    Y    N    -    expunge (HET 1)
+         * (HET, 0)    Y    16 KB    Y       N          -      expunge (HET 1)
          *
-         * (HET, 1)    Y    16 KB    Y    N    -    -
+         * (HET, 1)    Y    16 KB    Y       N          -      -
          *
-         * (HET, 2)    Y    16 KB    Y    N    -    -
+         * (HET, 2)    Y    16 KB    Y       N          -      -
          *
-         * (HET, 3)    Y    16 KB    Y    N    -    -
+         * (HET, 3)    Y    16 KB    Y       N          -      -
          *
          * Recall that in this test bed, flush operations are excuted the
          * first time the associated entry is flushed, and are then
@@ -33793,25 +33815,25 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t *file_ptr)
 /*-------------------------------------------------------------------------
  * Function:    cedds__H5C_make_space_in_cache()
  *
- * Purpose:    Verify that H5C__make_space_in_cache() can handle the
- *        removal from the cache of the next item in its reverse scan
- *        of the LRU list.
+ * Purpose:     Verify that H5C__make_space_in_cache() can handle the
+ *              removal from the cache of the next item in its reverse scan
+ *              of the LRU list.
  *
- *        Do this by setting up a full cache, with the last entry
- *        on the LRU being both dirty and having a flush operation
- *        that deleted the second to last entry on the LRU.  Then
- *        load an additional entry, triggering the flush of the last
- *        item, and thereby the deletion of the second to last item.
+ *              Do this by setting up a full cache, with the last entry
+ *              on the LRU being both dirty and having a flush operation
+ *              that deleted the second to last entry on the LRU.  Then
+ *              load an additional entry, triggering the flush of the last
+ *              item, and thereby the deletion of the second to last item.
  *
- *        H5C__make_space_in_cache() should detect this deletion, and
- *        restart its scan of the LRU from the tail, instead of
- *        examining the now deleted next item up on the LRU.
+ *              H5C__make_space_in_cache() should detect this deletion, and
+ *              restart its scan of the LRU from the tail, instead of
+ *              examining the now deleted next item up on the LRU.
  *
  *              Do nothing if pass is FALSE on entry.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              4/4/15
  *
  * Modifications:
@@ -34154,25 +34176,25 @@ cedds__H5C_make_space_in_cache(H5F_t *file_ptr)
 /*-------------------------------------------------------------------------
  * Function:    cedds__H5C__autoadjust__ageout__evict_aged_out_entries()
  *
- * Purpose:    Verify that H5C__autoadjust__ageout__evict_aged_out_entries()
- *        can handle the removal from the cache of the next item in
- *        its reverse scan of the LRU list.
+ * Purpose:     Verify that H5C__autoadjust__ageout__evict_aged_out_entries()
+ *              can handle the removal from the cache of the next item in
+ *              its reverse scan of the LRU list.
  *
- *        Do this by setting up a full cache, with the last entry
- *        on the LRU being both dirty and having a flush operation
- *        that deletes the second to last entry on the LRU.  Then
- *        access the first item in the LRU repeatedly until the
- *        item, and thereby the deletion of the second to last item.
+ *              Do this by setting up a full cache, with the last entry
+ *              on the LRU being both dirty and having a flush operation
+ *              that deletes the second to last entry on the LRU.  Then
+ *              access the first item in the LRU repeatedly until the
+ *              item, and thereby the deletion of the second to last item.
  *
- *        H5C__make_space_in_cache() should detect this deletion, and
- *        restart its scan of the LRU from the tail, instead of
- *        examining the now deleted next item up on the LRU.
+ *              H5C__make_space_in_cache() should detect this deletion, and
+ *              restart its scan of the LRU from the tail, instead of
+ *              examining the now deleted next item up on the LRU.
  *
  *              Do nothing if pass is FALSE on entry.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              4/4/15
  *
  * Modifications:
@@ -34552,86 +34574,86 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *file_ptr)
 /*-------------------------------------------------------------------------
  * Function:    cedds__H5C_flush_invalidate_cache__bucket_scan()
  *
- * Purpose:    Note:      We now use the index list when we scan the
- *            contents of the metadata cache, so in principal,
- *            this test is obsolete.  However, even using the
- *            index list, restarts are possible, and must be
- *            handled gracefully.
+ * Purpose:     Note:      We now use the index list when we scan the
+ *              contents of the metadata cache, so in principal,
+ *              this test is obsolete.  However, even using the
+ *              index list, restarts are possible, and must be
+ *              handled gracefully.
  *
- *            As it turns out, this test triggers index list
- *            scan restarts, and thus with minor changes is
- *            still a useful test.
+ *              As it turns out, this test triggers index list
+ *              scan restarts, and thus with minor changes is
+ *              still a useful test.
  *
- *            For this reason, with the exception of changing
- *            to check the index_scan_restart stat instead of
- *            hash bucket restarts, I'm leaving the test
- *            alone.  If and when it starts to fail due to
- *            other changes, we can re-work it to test
- *            index list scan restarts explicitly.
+ *              For this reason, with the exception of changing
+ *              to check the index_scan_restart stat instead of
+ *              hash bucket restarts, I'm leaving the test
+ *              alone.  If and when it starts to fail due to
+ *              other changes, we can re-work it to test
+ *              index list scan restarts explicitly.
  *
- *                        JRM -- 11/2/16
+ *                                        JRM -- 11/2/16
  *
- *        Verify that H5C_flush_invalidate_cache() can handle
- *        the removal from the cache of the next item in
- *        its scans of hash buckets.
+ *              Verify that H5C_flush_invalidate_cache() can handle
+ *              the removal from the cache of the next item in
+ *              its scans of hash buckets.
  *
- *        !!!!!!!!!!WARNING !!!!!!!!!!
+ *              !!!!!!!!!!WARNING !!!!!!!!!!
  *
- *        This test may fail to function correctly if the hash
- *        table size or hash function is altered.
+ *              This test may fail to function correctly if the hash
+ *              table size or hash function is altered.
  *
- *        To setup the test, this function depends on the fact that
- *        H5C_flush_invalidate_cache() does alternating scans of the
- *        slist and the index.  If this changes, the test will likely
- *        also cease to function correctly.
+ *              To setup the test, this function depends on the fact that
+ *              H5C_flush_invalidate_cache() does alternating scans of the
+ *              slist and the index.  If this changes, the test will likely
+ *              also cease to function correctly.
  *
- *        The test relies on a known hash function and hash table
- *        size to select a set of test entries that will all hash
- *        to the same hash bucket -- call it the test hash bucket.
- *        It also relies on known behavior of the cache to place
- *        the entries in the test bucket in a known order.
+ *              The test relies on a known hash function and hash table
+ *              size to select a set of test entries that will all hash
+ *              to the same hash bucket -- call it the test hash bucket.
+ *              It also relies on known behavior of the cache to place
+ *              the entries in the test bucket in a known order.
  *
- *        To avoid pre-mature flushes of the entries in the
- *        test hash bucket, all entries are initially clean,
- *        with the exception of the first entry which is dirty.
- *        It avoids premature flushing by being the parent in
- *        a flush dependency.  The first entry in the test bucket
- *        also has a flush op which expunges the second entry --
- *        setting up the failure.
+ *              To avoid pre-mature flushes of the entries in the
+ *              test hash bucket, all entries are initially clean,
+ *              with the exception of the first entry which is dirty.
+ *              It avoids premature flushing by being the parent in
+ *              a flush dependency.  The first entry in the test bucket
+ *              also has a flush op which expunges the second entry --
+ *              setting up the failure.
  *
- *        An additional dirty entry is added (which must hash
- *        to a different bucket, and must have a higher address
- *        than at least the first entry in the test hash bucket.
- *        This entry is the child in a flush dependency with the
- *        first entry in the above hash bucket, and contains
- *        a flush op to destroy this flush dependency.
+ *              An additional dirty entry is added (which must hash
+ *              to a different bucket, and must have a higher address
+ *              than at least the first entry in the test hash bucket.
+ *              This entry is the child in a flush dependency with the
+ *              first entry in the above hash bucket, and contains
+ *              a flush op to destroy this flush dependency.
  *
- *        Since the first entry in the test hash bucket has a lower
- *        address that the other dirty entry, the scan of the
- *        slist encounters it first, and passes over it because
- *        it has a flush dependency height of 1.
+ *              Since the first entry in the test hash bucket has a lower
+ *              address that the other dirty entry, the scan of the
+ *              slist encounters it first, and passes over it because
+ *              it has a flush dependency height of 1.
  *
- *        The scan then encounters the second dirty entry and flushes
- *        it -- causing it to destroy the flush dependency and thus
- *        reducing the flush dependency height of the first entry in
- *        the test hash bucket to zero.
+ *              The scan then encounters the second dirty entry and flushes
+ *              it -- causing it to destroy the flush dependency and thus
+ *              reducing the flush dependency height of the first entry in
+ *              the test hash bucket to zero.
  *
- *        After completing a scan of the slist,
- *        H5C_flush_invalidate_cache() then scans the index,
- *        flushing all entries of flush dependency height zero.
+ *              After completing a scan of the slist,
+ *              H5C_flush_invalidate_cache() then scans the index,
+ *              flushing all entries of flush dependency height zero.
  *
- *        This sets up the potential error when the first entry
- *        in the test hash bucket is flushed -- expunging the
- *        second entry as a side effect.  If
- *        H5C_flush_invalidate_cache() fails to detect this,
- *        it will attempt to continue its scan of the bucket with
- *        an entry that has been deleted from the cache.
+ *              This sets up the potential error when the first entry
+ *              in the test hash bucket is flushed -- expunging the
+ *              second entry as a side effect.  If
+ *              H5C_flush_invalidate_cache() fails to detect this,
+ *              it will attempt to continue its scan of the bucket with
+ *              an entry that has been deleted from the cache.
  *
  *              Do nothing if pass is FALSE on entry.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              4/9/15
  *
  * Modifications:
@@ -35009,21 +35031,21 @@ check_stats(unsigned paged)
 /*-------------------------------------------------------------------------
  * Function:    check_stats__smoke_check_1()
  *
- * Purpose:    Test to see if the statistics collection code is working
- *        more or less as expected.  Do this by performing a number
- *        of operations in the cache, and checking to verify that
- *        they result in the expected statistics.
+ * Purpose:     Test to see if the statistics collection code is working
+ *              more or less as expected.  Do this by performing a number
+ *              of operations in the cache, and checking to verify that
+ *              they result in the expected statistics.
  *
- *        Note that this function is not intended to be a full test
- *        of the statistics collection facility -- only a cursory
- *        check that will serve as a place holder until more complete
- *        tests are implemented.
+ *              Note that this function is not intended to be a full test
+ *              of the statistics collection facility -- only a cursory
+ *              check that will serve as a place holder until more complete
+ *              tests are implemented.
  *
  *              Do nothing if pass is FALSE on entry.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              4/22/15
  *
  * Modifications:

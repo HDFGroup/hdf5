@@ -83,29 +83,29 @@ H5FL_DEFINE_STATIC(H5HL_t);
 BEGIN_FUNC(PKG, ERR, H5HL_t *, NULL, NULL,
            H5HL__new(size_t sizeof_size, size_t sizeof_addr, size_t prfx_size))
 
-H5HL_t *heap = NULL; /* New local heap */
+    H5HL_t *heap = NULL; /* New local heap */
 
-/* check arguments */
-HDassert(sizeof_size > 0);
-HDassert(sizeof_addr > 0);
-HDassert(prfx_size > 0);
+    /* check arguments */
+    HDassert(sizeof_size > 0);
+    HDassert(sizeof_addr > 0);
+    HDassert(prfx_size > 0);
 
-/* Allocate new local heap structure */
-if (NULL == (heap = H5FL_CALLOC(H5HL_t)))
-    H5E_THROW(H5E_CANTALLOC, "memory allocation failed");
+    /* Allocate new local heap structure */
+    if (NULL == (heap = H5FL_CALLOC(H5HL_t)))
+        H5E_THROW(H5E_CANTALLOC, "memory allocation failed");
 
-/* Initialize non-zero fields */
-heap->sizeof_size = sizeof_size;
-heap->sizeof_addr = sizeof_addr;
-heap->prfx_size   = prfx_size;
+    /* Initialize non-zero fields */
+    heap->sizeof_size = sizeof_size;
+    heap->sizeof_addr = sizeof_addr;
+    heap->prfx_size   = prfx_size;
 
-/* Set the return value */
-ret_value = heap;
+    /* Set the return value */
+    ret_value = heap;
 
-CATCH
-if (!ret_value && heap != NULL)
-    if (NULL == (heap = H5FL_FREE(H5HL_t, heap)))
-        H5E_THROW(H5E_CANTFREE, "can't free heap memory");
+    CATCH
+    if (!ret_value && heap != NULL)
+        if (NULL == (heap = H5FL_FREE(H5HL_t, heap)))
+            H5E_THROW(H5E_CANTFREE, "can't free heap memory");
 
 END_FUNC(PKG) /* end H5HL__new() */
 
@@ -123,11 +123,11 @@ END_FUNC(PKG) /* end H5HL__new() */
  */
 BEGIN_FUNC(PKG, NOERR, herr_t, SUCCEED, -, H5HL__inc_rc(H5HL_t *heap))
 
-/* check arguments */
-HDassert(heap);
+    /* check arguments */
+    HDassert(heap);
 
-/* Increment heap's ref. count */
-heap->rc++;
+    /* Increment heap's ref. count */
+    heap->rc++;
 
 END_FUNC(PKG) /* end H5HL__inc_rc() */
 
@@ -145,16 +145,16 @@ END_FUNC(PKG) /* end H5HL__inc_rc() */
  */
 BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL, H5HL__dec_rc(H5HL_t *heap))
 
-/* check arguments */
-HDassert(heap);
+    /* check arguments */
+    HDassert(heap);
 
-/* Decrement heap's ref. count */
-heap->rc--;
+    /* Decrement heap's ref. count */
+    heap->rc--;
 
-CATCH
-/* Check if we should destroy the heap */
-if (heap->rc == 0 && FAIL == H5HL__dest(heap))
-    H5E_THROW(H5E_CANTFREE, "unable to destroy local heap");
+    CATCH
+    /* Check if we should destroy the heap */
+    if (heap->rc == 0 && FAIL == H5HL__dest(heap))
+        H5E_THROW(H5E_CANTFREE, "unable to destroy local heap");
 
 END_FUNC(PKG) /* end H5HL__dec_rc() */
 
@@ -172,29 +172,29 @@ END_FUNC(PKG) /* end H5HL__dec_rc() */
  */
 BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL, H5HL__dest(H5HL_t *heap))
 
-/* check arguments */
-HDassert(heap);
+    /* check arguments */
+    HDassert(heap);
 
-/* Verify that node is unused */
-HDassert(heap->prots == 0);
-HDassert(heap->rc == 0);
-HDassert(heap->prfx == NULL);
-HDassert(heap->dblk == NULL);
+    /* Verify that node is unused */
+    HDassert(heap->prots == 0);
+    HDassert(heap->rc == 0);
+    HDassert(heap->prfx == NULL);
+    HDassert(heap->dblk == NULL);
 
-CATCH
-if (heap->dblk_image)
-    if (NULL != (heap->dblk_image = H5FL_BLK_FREE(lheap_chunk, heap->dblk_image)))
-        H5E_THROW(H5E_CANTFREE, "unable to free local heap data block image");
-while (heap->freelist) {
-    H5HL_free_t *fl;
+    CATCH
+    if (heap->dblk_image)
+        if (NULL != (heap->dblk_image = H5FL_BLK_FREE(lheap_chunk, heap->dblk_image)))
+            H5E_THROW(H5E_CANTFREE, "unable to free local heap data block image");
+    while (heap->freelist) {
+        H5HL_free_t *fl;
 
-    fl             = heap->freelist;
-    heap->freelist = fl->next;
-    if (NULL != (fl = H5FL_FREE(H5HL_free_t, fl)))
-        H5E_THROW(H5E_CANTFREE, "unable to free local heap free list");
-} /* end while */
+        fl             = heap->freelist;
+        heap->freelist = fl->next;
+        if (NULL != (fl = H5FL_FREE(H5HL_free_t, fl)))
+            H5E_THROW(H5E_CANTFREE, "unable to free local heap free list");
+    } /* end while */
 
-if (NULL != (heap = H5FL_FREE(H5HL_t, heap)))
-    H5E_THROW(H5E_CANTFREE, "unable to free local heap");
+    if (NULL != (heap = H5FL_FREE(H5HL_t, heap)))
+        H5E_THROW(H5E_CANTFREE, "unable to free local heap");
 
 END_FUNC(PKG) /* end H5HL__dest() */

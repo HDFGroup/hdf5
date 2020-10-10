@@ -689,7 +689,7 @@ DIFFFAIL()
         $RUNSERIAL $H5DIFF_BIN -q  "$@"
     )
     RET=$?
-    if [ $RET == 0 ] ; then
+    if [ $RET -eq 0 ] ; then
          echo "*FAILED*"
          nerrors="`expr $nerrors + 1`"
     else

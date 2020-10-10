@@ -23,11 +23,6 @@
 #include <hdf5.h>
 #include "H5LTparse.h"
 
-/* Turn off suggest const & malloc attribute warnings in gcc */
-#if defined __GNUC__ && 402 <= __GNUC__ * 100 + __GNUC_MINOR__
-#pragma GCC diagnostic ignored "-Wsuggest-attribute=const"
-#endif 
-
 int my_yyinput(char *, int);
 #undef YY_INPUT
 #define YY_INPUT(b, r, ms) (r=my_yyinput(b, ms))
@@ -124,9 +119,9 @@ STRSIZE          {return token(STRSIZE_TOKEN);}
 STRPAD           {return token(STRPAD_TOKEN);}
 CSET             {return token(CSET_TOKEN);}
 CTYPE            {return token(CTYPE_TOKEN);}
-H5T_STR_NULLTERM {return token(H5T_STR_NULLTERM_TOKEN);} 
-H5T_STR_NULLPAD  {return token(H5T_STR_NULLPAD_TOKEN);} 
-H5T_STR_SPACEPAD {return token(H5T_STR_SPACEPAD_TOKEN);} 
+H5T_STR_NULLTERM {return token(H5T_STR_NULLTERM_TOKEN);}
+H5T_STR_NULLPAD  {return token(H5T_STR_NULLPAD_TOKEN);}
+H5T_STR_SPACEPAD {return token(H5T_STR_SPACEPAD_TOKEN);}
 H5T_CSET_ASCII   {return token(H5T_CSET_ASCII_TOKEN);}
 H5T_CSET_UTF8    {return token(H5T_CSET_UTF8_TOKEN);}
 H5T_C_S1         {return token(H5T_C_S1_TOKEN);}
@@ -142,19 +137,19 @@ H5T_OPAQUE       {return token(H5T_OPAQUE_TOKEN);}
 OPQ_SIZE         {return token(OPQ_SIZE_TOKEN);}
 OPQ_TAG          {return token(OPQ_TAG_TOKEN);}
 
-[0-9]+           {    
-                        if( is_str_size || (is_enum && is_enum_memb) || 
+[0-9]+           {
+                        if( is_str_size || (is_enum && is_enum_memb) ||
                             is_opq_size || (asindex>-1 && arr_stack[asindex].is_dim) ||
                             (csindex>-1 && cmpd_stack[csindex].is_field) ) {
                             H5LTyylval.ival = atoi(yytext);
-                            return NUMBER; 
+                            return NUMBER;
                         } else
                             REJECT;
                  }
 
 "\""             {
                     /*if it's first quote, and is a compound field name or an enum symbol*/
-                    if((is_opq_tag || is_enum || (csindex>-1 && cmpd_stack[csindex].is_field)) 
+                    if((is_opq_tag || is_enum || (csindex>-1 && cmpd_stack[csindex].is_field))
                         && first_quote) {
                         first_quote = 0;
                         BEGIN TAG_STRING;
@@ -171,7 +166,7 @@ OPQ_TAG          {return token(OPQ_TAG_TOKEN);}
                     BEGIN INITIAL;
                     return STRING;
                  }
-                 
+
 "{"              {return token('{');}
 "}"              {return token('}');}
 "["              {return token('[');}
@@ -185,8 +180,8 @@ OPQ_TAG          {return token(OPQ_TAG_TOKEN);}
 int my_yyinput(char *buf, int max_size)
 {
    int ret;
-    
-   memcpy(buf, myinput, input_len); 
+
+   memcpy(buf, myinput, input_len);
    ret = (int)input_len;
    return ret;
 }

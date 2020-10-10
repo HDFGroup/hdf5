@@ -261,7 +261,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                 else {
                     haddr_t addr = HDva_arg(ap, haddr_t);
 
-                    HDfprintf(out, "%a", addr);
+                    HDfprintf(out, "%" PRIuHADDR, addr);
                 } /* end else */
                 break;
 
@@ -825,7 +825,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         else {
                             H5E_error2_t *error = HDva_arg(ap, H5E_error2_t *);
 
-                            HDfprintf(out, "0x%p", error);
+                            HDfprintf(out, "0x%p", (void *)error);
                         } /* end else */
                         break;
 
@@ -1153,7 +1153,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         else {
                             H5G_stat_t *statbuf = HDva_arg(ap, H5G_stat_t *);
 
-                            HDfprintf(out, "0x%p", statbuf);
+                            HDfprintf(out, "0x%p", (void *)statbuf);
                         }
                         break;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
@@ -1176,7 +1176,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 if (H5S_UNLIMITED == p[i])
                                     HDfprintf(out, "%sH5S_UNLIMITED", (i ? ", " : ""));
                                 else
-                                    HDfprintf(out, "%s%Hu", (i ? ", " : ""), p[i]);
+                                    HDfprintf(out, "%s%" PRIuHSIZE, (i ? ", " : ""), p[i]);
                             } /* end for */
                             HDfprintf(out, "}");
                         } /* end if */
@@ -1190,7 +1190,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     if (H5S_UNLIMITED == hsize)
                         HDfprintf(out, "H5S_UNLIMITED");
                     else {
-                        HDfprintf(out, "%Hu", hsize);
+                        HDfprintf(out, "%" PRIuHSIZE, hsize);
                         asize[argno] = (hssize_t)hsize;
                     } /* end else */
                 }     /* end else */
@@ -1207,7 +1207,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
                                     HDfprintf(out, " {");
                                     for (i = 0; i < asize[asize_idx]; i++)
-                                        HDfprintf(out, "%s%Hd", (i ? ", " : ""), p[i]);
+                                        HDfprintf(out, "%s%" PRIdHSIZE, (i ? ", " : ""), p[i]);
                                     HDfprintf(out, "}");
                                 } /* end if */
                             }     /* end if */
@@ -1217,7 +1217,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         else {
                             hssize_t hssize = HDva_arg(ap, hssize_t);
 
-                            HDfprintf(out, "%Hd", hssize);
+                            HDfprintf(out, "%" PRIdHSIZE, hssize);
                             asize[argno] = (hssize_t)hssize;
                         } /* end else */
                         break;
@@ -1896,7 +1896,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         else {
                             hobj_ref_t ref = HDva_arg(ap, hobj_ref_t);
 
-                            HDfprintf(out, "Reference Object=%a", ref);
+                            HDfprintf(out, "Reference Object=%" PRIuHADDR, ref);
                         } /* end else */
                         break;
 
@@ -3560,7 +3560,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
                             HDfprintf(out, " {");
                             for (i = 0; i < asize[asize_idx]; i++)
-                                HDfprintf(out, "%s%Zu", (i ? ", " : ""), p[i]);
+                                HDfprintf(out, "%s%zu", (i ? ", " : ""), p[i]);
                             HDfprintf(out, "}");
                         } /* end if */
                     }     /* end if */
@@ -3570,7 +3570,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                 else {
                     size_t size = HDva_arg(ap, size_t);
 
-                    HDfprintf(out, "%Zu", size);
+                    HDfprintf(out, "%zu", size);
                     asize[argno] = (hssize_t)size;
                 } /* end else */
                 break;
@@ -3617,7 +3617,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         else {
                             H5Z_class2_t *filter = HDva_arg(ap, H5Z_class2_t *);
 
-                            HDfprintf(out, "0x%p", filter);
+                            HDfprintf(out, "0x%p", (void *)filter);
                         } /* end else */
                         break;
 
@@ -3666,7 +3666,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
                                     HDfprintf(out, " {");
                                     for (i = 0; i < asize[asize_idx]; i++)
-                                        HDfprintf(out, "%s%Zd", (i ? ", " : ""), p[i]);
+                                        HDfprintf(out, "%s%zd", (i ? ", " : ""), p[i]);
                                     HDfprintf(out, "}");
                                 } /* end if */
                             }     /* end if */
@@ -3676,7 +3676,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         else {
                             ssize_t ssize = HDva_arg(ap, ssize_t);
 
-                            HDfprintf(out, "%Zd", ssize);
+                            HDfprintf(out, "%zd", ssize);
                             asize[argno] = (hssize_t)ssize;
                         } /* end else */
                         break;

@@ -578,8 +578,9 @@ MpioTest2G(MPI_Comm comm)
     MPI_Comm_rank(comm, &mpi_rank);
 
     if (mpi_rank == 0) {
-        HDprintf("Using %d process on dataset shape [%llu, %llu, %llu]\n", mpi_size, shape[0], shape[1],
-                 shape[2]);
+        HDprintf("Using %d process on dataset shape "
+                 "[%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE "]\n",
+                 mpi_size, shape[0], shape[1], shape[2]);
     }
 
     /*
@@ -606,7 +607,7 @@ MpioTest2G(MPI_Comm comm)
         tot_size_bytes *= shape[i];
     }
     if (mpi_rank == 0) {
-        HDprintf("Dataset of %llu bytes\n", tot_size_bytes);
+        HDprintf("Dataset of %zu bytes\n", tot_size_bytes);
     }
     filespace = H5Screate_simple(3, shape, NULL);
     VRFY((filespace >= 0), "H5Screate_simple succeeded");
@@ -681,7 +682,7 @@ MpioTest2G(MPI_Comm comm)
     H5Fclose(file_id);
 
     free(data);
-    HDprintf("Proc %d - MpioTest2G test succeeded\n", mpi_rank, data_size_bytes);
+    HDprintf("Proc %d - MpioTest2G test succeeded\n", mpi_rank);
 
     if (mpi_rank == 0)
         HDremove(FILENAME[1]);

@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Tuesday, November 24, 1998
  */
 
@@ -184,7 +184,7 @@ error:
  *
  *         Failure:    number of errors
  *
- * Programmer:  Robb Matzke <matzke@llnl.gov> 2002-03-28
+ * Programmer:  Robb Matzke 2002-03-28
  *
  * Modifications:
  *-------------------------------------------------------------------------

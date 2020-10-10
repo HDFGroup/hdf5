@@ -35,7 +35,7 @@
 #include "H5FDdrvr_module.h" /* This source code file is part of the H5FD driver module */
 
 #include "H5private.h"   /* Generic Functions            */
-#include "H5CXprivate.h" /* API Contexts                 */
+#include "H5CXprivate.h" /* API Contexts                         */
 #include "H5Eprivate.h"  /* Error handling              */
 #include "H5Fprivate.h"  /* File access                */
 #include "H5FDprivate.h" /* File drivers                */
@@ -313,7 +313,7 @@ done:
  * Function:    H5FD__family_fapl_get
  *
  * Purpose:    Gets a file access property list which could be used to
- *        create an identical file.
+ *             create an identical file.
  *
  * Return:    Success:    Ptr to new file access property list.
  *

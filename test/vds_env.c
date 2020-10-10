@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Neil Fortner <nfortne2@hdfgroup.org>
+ * Programmer:  Neil Fortner
  *              Monday, February 16, 2015
  *
  * Purpose:     Tests datasets with virtual layout.

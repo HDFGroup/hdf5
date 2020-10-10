@@ -13,12 +13,12 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:        H5Cprivate.h
+ * Created:   H5Cprivate.h
  *            6/3/04
  *            John Mainzer
  *
- * Purpose:        Constants and typedefs available to the rest of the
- *             library.
+ * Purpose:   Constants and typedefs available to the rest of the
+ *            library.
  *
  *-------------------------------------------------------------------------
  */
@@ -26,11 +26,11 @@
 #ifndef _H5Cprivate_H
 #define _H5Cprivate_H
 
-#include "H5Cpublic.h" /* public prototypes                */
+#include "H5Cpublic.h" /* public prototypes            */
 
 /* Private headers needed by this header */
 #include "H5private.h"  /* Generic Functions            */
-#include "H5Fprivate.h" /* File access                */
+#include "H5Fprivate.h" /* File access                  */
 
 /**************************/
 /* Library Private Macros */

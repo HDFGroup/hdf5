@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:    Robb Matzke <matzke@llnl.gov>
+/* Programmer:    Robb Matzke
  *        Friday, October 10, 1997
  *
  * Purpose:    Hyperslab operations are rather complex, so this file
@@ -1117,8 +1117,8 @@ test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
         /* Check computed coordinates */
         for (v = 0; v < ARRAY_OFFSET_NDIMS; v++)
             if (coords[v] != new_coords[v]) {
-                HDfprintf(stderr, "coords[%u]=%Hu, new_coords[%u]=%Hu\n", (unsigned)v, coords[v], (unsigned)v,
-                          new_coords[v]);
+                HDfprintf(stderr, "coords[%zu]=%" PRIuHSIZE ", new_coords[%zu]=%" PRIuHSIZE "\n", v,
+                          coords[v], v, new_coords[v]);
                 TEST_ERROR;
             } /* end if */
     }         /* end for */
