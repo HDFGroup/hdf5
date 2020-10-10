@@ -457,7 +457,7 @@ H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr)
         entry_ptr = cache_ptr->dLRU_tail_ptr;
 
         while ((nominated_entries_size < space_needed) &&
-               ((!cache_ptr->slist_enabled) || (nominated_entries_count < cache_ptr->slist_len)) &&
+               (nominated_entries_count < cache_ptr->slist_len) &&
                (entry_ptr != NULL)) {
 
             HDassert(!(entry_ptr->is_protected));

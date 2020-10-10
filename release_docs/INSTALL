@@ -354,7 +354,7 @@ CONTENTS
         `--enable-build-mode=debug'; to compile with optimizations
         (the default for supported public releases),
         say `--enable-build-mode=production'. For a 'clean slate' configuration
-        with optimization disabled and nothing turned on, 
+        with optimization disabled and nothing turned on,
         say `--enable-build-mode=clean'. On some systems the
         library can also be compiled for profiling with gprof by saying
         `--enable-profiling'.
