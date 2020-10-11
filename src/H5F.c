@@ -70,9 +70,10 @@ static int H5F__get_all_ids_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void 
 
 /* Helper routines for sync/async API calls */
 static hid_t  H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
-                                     hid_t es_id);
-static hid_t  H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, hid_t es_id);
-static herr_t H5F__close_api_common(hid_t file_id, hid_t es_id);
+                                     hid_t es_id, const char *caller);
+static hid_t  H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, hid_t es_id,
+                                     const char *caller);
+static herr_t H5F__close_api_common(hid_t file_id, hid_t es_id, const char *caller);
 
 /*********************/
 /* Package Variables */
@@ -463,7 +464,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t es_id)
+H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t es_id,
+                                     const char *caller)
 {
     H5F_t *               new_file = NULL;               /* File struct for new file                 */
     H5P_genplist_t *      plist;                         /* Property list pointer                    */
@@ -557,7 +559,7 @@ H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id, hid_
         } /* end if */
 
         /* Add token to event set */
-        if (H5ES_insert(es, token_obj) < 0)
+        if (H5ES_insert(es, token_obj, H5ARG_TRACE6(caller, "*sIuiii*s", filename, flags, fcpl_id, fapl_id, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, FAIL, "can't insert token into event set")
         token_obj = NULL;
     } /* end if */
@@ -586,7 +588,7 @@ H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id, hid_
             } /* end if */
 
             /* Add token to event set */
-            if (H5ES_insert(es, token_obj) < 0)
+            if (H5ES_insert(es, token_obj, H5ARG_TRACE6(caller, "*sIuiii*s", filename, flags, fcpl_id, fapl_id, es_id, caller)) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, FAIL, "can't insert token into event set")
             token_obj = NULL;
         } /* end if */
@@ -634,7 +636,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     H5TRACE4("i", "*sIuii", filename, flags, fcpl_id, fapl_id);
 
     /* Create the file synchronously */
-    if ((ret_value = H5F__create_api_common(filename, flags, fcpl_id, fapl_id, H5ES_NONE)) < 0)
+    if ((ret_value = H5F__create_api_common(filename, flags, fcpl_id, fapl_id, H5ES_NONE, FUNC)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, H5I_INVALID_HID, "unable to synchronously create file")
 
 done:
@@ -661,7 +663,7 @@ H5Fcreate_async(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_
     H5TRACE5("i", "*sIuiii", filename, flags, fcpl_id, fapl_id, es_id);
 
     /* Create the file, possibly asynchronously */
-    if ((ret_value = H5F__create_api_common(filename, flags, fcpl_id, fapl_id, es_id)) < 0)
+    if ((ret_value = H5F__create_api_common(filename, flags, fcpl_id, fapl_id, es_id, FUNC)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, H5I_INVALID_HID, "unable to asynchronously create file")
 
 done:
@@ -680,7 +682,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, hid_t es_id)
+H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, hid_t es_id,
+                                     const char *caller)
 {
     H5F_t *               new_file = NULL;               /* File struct for new file                 */
     H5P_genplist_t *      plist;                         /* Property list pointer                    */
@@ -762,7 +765,7 @@ H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, hid_t 
         } /* end if */
 
         /* Add token to event set */
-        if (H5ES_insert(es, token_obj) < 0)
+        if (H5ES_insert(es, token_obj, H5ARG_TRACE5(caller, "*sIuii*s", filename, flags, fapl_id, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, FAIL, "can't insert token into event set")
         token_obj = NULL;
     } /* end if */
@@ -791,7 +794,7 @@ H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, hid_t 
             } /* end if */
 
             /* Add token to event set */
-            if (H5ES_insert(es, token_obj) < 0)
+            if (H5ES_insert(es, token_obj, H5ARG_TRACE5(caller, "*sIuii*s", filename, flags, fapl_id, es_id, caller)) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, FAIL, "can't insert token into event set")
         } /* end if */
     }     /* end if */
@@ -832,7 +835,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     H5TRACE3("i", "*sIui", filename, flags, fapl_id);
 
     /* Open the file synchronously */
-    if ((ret_value = H5F__open_api_common(filename, flags, fapl_id, H5ES_NONE)) < 0)
+    if ((ret_value = H5F__open_api_common(filename, flags, fapl_id, H5ES_NONE, FUNC)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to synchronously open file")
 
 done:
@@ -860,7 +863,7 @@ H5Fopen_async(const char *filename, unsigned flags, hid_t fapl_id, hid_t es_id)
     H5TRACE4("i", "*sIuii", filename, flags, fapl_id, es_id);
 
     /* Open the file, possibly asynchronously */
-    if ((ret_value = H5F__open_api_common(filename, flags, fapl_id, es_id)) < 0)
+    if ((ret_value = H5F__open_api_common(filename, flags, fapl_id, es_id, FUNC)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to asynchronously open file")
 
 done:
@@ -917,7 +920,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F__close_api_common(hid_t file_id, hid_t es_id)
+H5F__close_api_common(hid_t file_id, hid_t es_id, const char *caller)
 {
     H5ES_t *       es        = NULL;              /* Event set for the operation */
     void *         token     = NULL, **token_ptr; /* Request token for async operation */
@@ -969,7 +972,7 @@ H5F__close_api_common(hid_t file_id, hid_t es_id)
         } /* end if */
 
         /* Add token to event set */
-        if (H5ES_insert(es, token_obj) < 0)
+        if (H5ES_insert(es, token_obj, H5ARG_TRACE3(caller, "ii*s", file_id, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
         if (H5VL_conn_dec_rc(connector) < 0) {
@@ -1013,7 +1016,7 @@ H5Fclose(hid_t file_id)
     H5TRACE1("e", "i", file_id);
 
     /* Synchronously close the file ID */
-    if (H5F__close_api_common(file_id, H5ES_NONE) < 0)
+    if (H5F__close_api_common(file_id, H5ES_NONE, FUNC) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "synchronous file close failed")
 
 done:
@@ -1038,7 +1041,7 @@ H5Fclose_async(hid_t file_id, hid_t es_id)
     H5TRACE2("e", "ii", file_id, es_id);
 
     /* Close the file ID */
-    if (H5F__close_api_common(file_id, es_id) < 0)
+    if (H5F__close_api_common(file_id, es_id, FUNC) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "asynchronous file close failed")
 
 done:

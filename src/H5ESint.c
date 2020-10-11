@@ -234,54 +234,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES_insert(H5ES_t *es, H5VL_object_t *request)
-{
-    H5ES_event_t *ev;                  /* Event for request */
-    herr_t        ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity check */
-    HDassert(es);
-    HDassert(request);
-
-    /* Allocate space for new event */
-    if (NULL == (ev = H5FL_CALLOC(H5ES_event_t)))
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't allocate event object")
-
-    /* Set request for event */
-    ev->request = request;
-
-    /* Append event onto the event set's list */
-    if (NULL == es->tail)
-        es->head = es->tail = ev;
-    else {
-        ev->prev       = es->tail;
-        es->tail->next = ev;
-        es->tail       = ev;
-    } /* end else */
-
-    /* Increment the # of events in set */
-    es->count++;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5ES_insert() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5ES_insert_new
- *
- * Purpose:     Insert a request token into an event set
- *
- * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *	        Wednesday, April 8, 2020
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5ES_insert_new(H5ES_t *es, H5VL_object_t *request, const char *caller, const char *caller_args, ...)
+H5ES_insert(H5ES_t *es, H5VL_object_t *request, const char *caller, const char *caller_args, ...)
 {
     H5ES_event_t *ev; /* Event for request */
     // va_list ap;                         /* varargs for caller */
@@ -294,18 +247,18 @@ H5ES_insert_new(H5ES_t *es, H5VL_object_t *request, const char *caller, const ch
     HDassert(request);
     HDassert(caller);
     HDassert(caller_args);
-    HDfprintf(stderr, "%s: caller = '%s', caller_args = '%s'\n", FUNC, caller, caller_args);
-    {
-        H5MS_t  ms;
-        va_list ap;
+HDfprintf(stderr, "%s: caller = '%s', caller_args = '%s'\n", FUNC, caller, caller_args);
+{
+    H5MS_t  ms;
+    va_list ap;
 
-        ms.s = NULL;
-        HDva_start(ap, caller_args);
-        H5_trace_args(&ms, caller_args, ap);
-        HDva_end(ap);
-        HDfprintf(stderr, "%s: arg string = '%s'\n", FUNC, ms.s);
-        HDfree(ms.s);
-    }
+    ms.s = NULL;
+    HDva_start(ap, caller_args);
+    H5_trace_args(&ms, caller_args, ap);
+    HDva_end(ap);
+    HDfprintf(stderr, "%s: arg string = '%s'\n", FUNC, ms.s);
+    HDfree(ms.s);
+}
 
     /* Allocate space for new event */
     if (NULL == (ev = H5FL_CALLOC(H5ES_event_t)))

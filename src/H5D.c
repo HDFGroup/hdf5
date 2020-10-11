@@ -160,7 +160,7 @@ H5D__create_api_common(hid_t loc_id, const char *name, hid_t type_id, hid_t spac
         } /* end if */
 
         /* Add token to event set */
-        if (H5ES_insert_new(es, token_obj,
+        if (H5ES_insert(es, token_obj,
                             H5ARG_TRACE9(caller, "i*siiiiii*s", loc_id, name, type_id, space_id, lcpl_id,
                                          dcpl_id, dapl_id, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "can't insert token into event set")
@@ -460,7 +460,7 @@ H5D__close_api_common(hid_t dset_id, hid_t es_id, const char *caller)
         } /* end if */
 
         /* Add token to event set */
-        if (H5ES_insert_new(es, token_obj, H5ARG_TRACE3(caller, "ii*s", dset_id, es_id, caller)) < 0)
+        if (H5ES_insert(es, token_obj, H5ARG_TRACE3(caller, "ii*s", dset_id, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
         if (H5VL_conn_dec_rc(connector) < 0) {
@@ -861,7 +861,7 @@ H5D__read_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t
         } /* end if */
 
         /* Add token to event set */
-        if (H5ES_insert_new(es, token_obj,
+        if (H5ES_insert(es, token_obj,
                             H5ARG_TRACE8(caller, "iiiii*xi*s", dset_id, mem_type_id, mem_space_id,
                                          file_space_id, dxpl_id, buf, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "can't insert token into event set")
@@ -1063,7 +1063,7 @@ H5D__write_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_
         } /* end if */
 
         /* Add token to event set */
-        if (H5ES_insert_new(es, token_obj,
+        if (H5ES_insert(es, token_obj,
                             H5ARG_TRACE8(caller, "iiiii*xi*s", dset_id, mem_type_id, mem_space_id,
                                          file_space_id, dxpl_id, buf, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "can't insert token into event set")

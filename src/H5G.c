@@ -107,8 +107,8 @@
 
 /* Helper routines for sync/async API calls */
 static hid_t  H5G__create_api_common(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
-                                     hid_t gapl_id, hid_t es_id);
-static herr_t H5G__close_api_common(hid_t group_id, hid_t es_id);
+                                     hid_t gapl_id, hid_t es_id, const char *caller);
+static herr_t H5G__close_api_common(hid_t group_id, hid_t es_id, const char *caller);
 
 /* Group close callback */
 static herr_t H5G__close_cb(H5VL_object_t *grp_vol_obj, void **request);
@@ -316,7 +316,7 @@ done:
  */
 static hid_t
 H5G__create_api_common(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id,
-                       hid_t es_id)
+                       hid_t es_id, const char *caller)
 {
     void *            grp       = NULL;              /* Structure for new group */
     H5ES_t *          es        = NULL;              /* Event set for the operation              */
@@ -389,7 +389,7 @@ H5G__create_api_common(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl
         } /* end if */
 
         /* Add token to event set */
-        if (H5ES_insert(es, token_obj) < 0)
+        if (H5ES_insert(es, token_obj, H5ARG_TRACE7(caller, "i*siiii*s", loc_id, name, lcpl_id, gcpl_id, gapl_id, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
         token_obj = NULL;
     } /* end if */
@@ -441,7 +441,7 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t g
     H5TRACE5("i", "i*siii", loc_id, name, lcpl_id, gcpl_id, gapl_id);
 
     /* Create the group synchronously */
-    if ((ret_value = H5G__create_api_common(loc_id, name, lcpl_id, gcpl_id, gapl_id, H5ES_NONE)) < 0)
+    if ((ret_value = H5G__create_api_common(loc_id, name, lcpl_id, gcpl_id, gapl_id, H5ES_NONE, FUNC)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, H5I_INVALID_HID, "unable to synchronously create group")
 
 done:
@@ -467,7 +467,7 @@ H5Gcreate_async(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hi
     H5TRACE6("i", "i*siiii", loc_id, name, lcpl_id, gcpl_id, gapl_id, es_id);
 
     /* Create the group asynchronously */
-    if ((ret_value = H5G__create_api_common(loc_id, name, lcpl_id, gcpl_id, gapl_id, es_id)) < 0)
+    if ((ret_value = H5G__create_api_common(loc_id, name, lcpl_id, gcpl_id, gapl_id, es_id, FUNC)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, H5I_INVALID_HID, "unable to asynchronously create group")
 
 done:
@@ -810,7 +810,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G__close_api_common(hid_t group_id, hid_t es_id)
+H5G__close_api_common(hid_t group_id, hid_t es_id, const char *caller)
 {
     H5ES_t *       es        = NULL;              /* Event set for the operation */
     void *         token     = NULL, **token_ptr; /* Request token for async operation */
@@ -862,7 +862,7 @@ H5G__close_api_common(hid_t group_id, hid_t es_id)
         } /* end if */
 
         /* Add token to event set */
-        if (H5ES_insert(es, token_obj) < 0)
+        if (H5ES_insert(es, token_obj, H5ARG_TRACE3(caller, "ii*s", group_id, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
         if (H5VL_conn_dec_rc(connector) < 0) {
@@ -902,7 +902,7 @@ H5Gclose(hid_t group_id)
     H5TRACE1("e", "i", group_id);
 
     /* Synchronously close the group ID */
-    if (H5G__close_api_common(group_id, H5ES_NONE) < 0)
+    if (H5G__close_api_common(group_id, H5ES_NONE, FUNC) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "synchronous group close failed")
 
 done:
@@ -927,7 +927,7 @@ H5Gclose_async(hid_t group_id, hid_t es_id)
     H5TRACE2("e", "ii", group_id, es_id);
 
     /* Asynchronously close the group ID */
-    if (H5G__close_api_common(group_id, es_id) < 0)
+    if (H5G__close_api_common(group_id, es_id, FUNC) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "asynchronous group close failed")
 
 done:

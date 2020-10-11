@@ -51,9 +51,10 @@
 
 /* Helper routines for sync/async API calls */
 static hid_t  H5A__create_api_common(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
-                                     hid_t acpl_id, hid_t aapl_id, hid_t es_id);
-static herr_t H5A__write_api_common(hid_t attr_id, hid_t dtype_id, const void *buf, hid_t es_id);
-static herr_t H5A__close_api_common(hid_t attr_id, hid_t es_id);
+                                     hid_t acpl_id, hid_t aapl_id, hid_t es_id, const char *caller);
+static herr_t H5A__write_api_common(hid_t attr_id, hid_t dtype_id, const void *buf, hid_t es_id,
+                                     const char *caller);
+static herr_t H5A__close_api_common(hid_t attr_id, hid_t es_id, const char *caller);
 
 /*********************/
 /* Package Variables */
@@ -79,7 +80,7 @@ static herr_t H5A__close_api_common(hid_t attr_id, hid_t es_id);
  */
 static hid_t
 H5A__create_api_common(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id,
-                       hid_t aapl_id, hid_t es_id)
+                       hid_t aapl_id, hid_t es_id, const char *caller)
 {
     void *            attr      = NULL;              /* Attribute created */
     H5ES_t *          es        = NULL;              /* Event set for the operation */
@@ -143,7 +144,7 @@ H5A__create_api_common(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t
         } /* end if */
 
         /* Add token to event set */
-        if (H5ES_insert(es, token_obj) < 0)
+        if (H5ES_insert(es, token_obj, H5ARG_TRACE8(caller, "i*siiiii*s", loc_id, attr_name, type_id, space_id, acpl_id, aapl_id, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
         token_obj = NULL;
     } /* end if */
@@ -207,7 +208,7 @@ H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id, h
 
     /* Create the attribute synchronously */
     if ((ret_value =
-             H5A__create_api_common(loc_id, attr_name, type_id, space_id, acpl_id, aapl_id, H5ES_NONE)) < 0)
+             H5A__create_api_common(loc_id, attr_name, type_id, space_id, acpl_id, aapl_id, H5ES_NONE, FUNC)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, H5I_INVALID_HID, "unable to synchronously create attribute")
 
 done:
@@ -234,7 +235,7 @@ H5Acreate_async(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_
     H5TRACE7("i", "i*siiiii", loc_id, attr_name, type_id, space_id, acpl_id, aapl_id, es_id);
 
     /* Create the attribute asynchronously */
-    if ((ret_value = H5A__create_api_common(loc_id, attr_name, type_id, space_id, acpl_id, aapl_id, es_id)) <
+    if ((ret_value = H5A__create_api_common(loc_id, attr_name, type_id, space_id, acpl_id, aapl_id, es_id, FUNC)) <
         0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, H5I_INVALID_HID, "unable to asynchronously create attribute")
 
@@ -564,7 +565,8 @@ done:
     Non-negative on success/Negative on failure
 --------------------------------------------------------------------------*/
 static herr_t
-H5A__write_api_common(hid_t attr_id, hid_t type_id, const void *buf, hid_t es_id)
+H5A__write_api_common(hid_t attr_id, hid_t type_id, const void *buf, hid_t es_id,
+                                     const char *caller)
 {
     H5ES_t *       es        = NULL;              /* Event set for the operation */
     void *         token     = NULL, **token_ptr; /* Request token for async operation */
@@ -613,7 +615,7 @@ H5A__write_api_common(hid_t attr_id, hid_t type_id, const void *buf, hid_t es_id
         } /* end if */
 
         /* Add token to event set */
-        if (H5ES_insert(es, token_obj) < 0)
+        if (H5ES_insert(es, token_obj, H5ARG_TRACE5(caller, "ii*xi*s", attr_id, type_id, buf, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
     } /* end if */
 
@@ -650,7 +652,7 @@ H5Awrite(hid_t attr_id, hid_t dtype_id, const void *buf)
     H5TRACE3("e", "ii*x", attr_id, dtype_id, buf);
 
     /* Synchronously write the data */
-    if (H5A__write_api_common(attr_id, dtype_id, buf, H5ES_NONE) < 0)
+    if (H5A__write_api_common(attr_id, dtype_id, buf, H5ES_NONE, FUNC) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "can't synchronously write data")
 
 done:
@@ -674,7 +676,7 @@ H5Awrite_async(hid_t attr_id, hid_t dtype_id, const void *buf, hid_t es_id)
     H5TRACE4("e", "ii*xi", attr_id, dtype_id, buf, es_id);
 
     /* Asynchronously write the data */
-    if (H5A__write_api_common(attr_id, dtype_id, buf, es_id) < 0)
+    if (H5A__write_api_common(attr_id, dtype_id, buf, es_id, FUNC) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "can't asynchronously write data")
 
 done:
@@ -1623,7 +1625,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A__close_api_common(hid_t attr_id, hid_t es_id)
+H5A__close_api_common(hid_t attr_id, hid_t es_id, const char *caller)
 {
     H5ES_t *       es        = NULL;              /* Event set for the operation */
     void *         token     = NULL, **token_ptr; /* Request token for async operation */
@@ -1673,7 +1675,7 @@ H5A__close_api_common(hid_t attr_id, hid_t es_id)
         } /* end if */
 
         /* Add token to event set */
-        if (H5ES_insert(es, token_obj) < 0)
+        if (H5ES_insert(es, token_obj, H5ARG_TRACE3(caller, "ii*s", attr_id, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
         if (H5VL_conn_dec_rc(connector) < 0) {
@@ -1714,7 +1716,7 @@ H5Aclose(hid_t attr_id)
     H5TRACE1("e", "i", attr_id);
 
     /* Synchronously close the attribute ID */
-    if (H5A__close_api_common(attr_id, H5ES_NONE) < 0)
+    if (H5A__close_api_common(attr_id, H5ES_NONE, FUNC) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, FAIL, "synchronous attribute close failed")
 
 done:
@@ -1739,7 +1741,7 @@ H5Aclose_async(hid_t attr_id, hid_t es_id)
     H5TRACE2("e", "ii", attr_id, es_id);
 
     /* Asynchronously close the attribute ID */
-    if (H5A__close_api_common(attr_id, es_id) < 0)
+    if (H5A__close_api_common(attr_id, es_id, FUNC) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, FAIL, "asynchronous attribute close failed")
 
 done:
