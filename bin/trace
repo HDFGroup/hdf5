@@ -445,7 +445,7 @@ sub rewrite_func ($$$$$$$$) {
           }
 
           # Replace / update H5ARG_TRACE macro.
-          $body =~ s/(H5ARG_TRACE(\d+\s*\(.*?\))?)/"$argtrace"/es;
+          $body =~ s/(H5ARG_TRACE(\d+\s*\(.*?\))?)/"$argtrace"/esg;
       }
 
     #Increment # of non-API routines modified
