@@ -39,6 +39,7 @@
 #include "H5ESpkg.h"     /* Event Sets                           */
 #include "H5FLprivate.h" /* Free Lists                           */
 #include "H5Iprivate.h"  /* IDs                                  */
+#include "H5MMprivate.h" /* Memory management                    */
 #include "H5RSprivate.h" /* Reference-counted strings            */
 
 /****************/
@@ -56,6 +57,8 @@
 /* Typedef for event nodes */
 struct H5ES_event_t {
     H5VL_object_t *      request;     /* Request token for event */
+    const char *api_name;               /* Name of API routine for event */
+    const char *api_args;               /* Arguments to API routine */
     struct H5ES_event_t *prev, *next; /* Previous and next event nodes */
 };
 
@@ -236,8 +239,13 @@ done:
 herr_t
 H5ES_insert(H5ES_t *es, H5VL_object_t *request, const char *caller, const char *caller_args, ...)
 {
-    H5ES_event_t *ev; /* Event for request */
-    // va_list ap;                         /* varargs for caller */
+    H5ES_event_t *ev = NULL;    /* Event for request */
+    H5RS_str_t *rs = NULL;      /* Ref-counted string to compose formatted argument string in */
+    char modified_args[64];     /* Buffer to modify caller args in */
+    size_t arg_len;             /* Length of caller args string */
+    const char *s;              /* Pointer to internal string from ref-counted string */
+    va_list ap;                 /* Varargs for caller */
+    hbool_t arg_started = FALSE;   /* Whether the va_list has been started */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -247,18 +255,6 @@ H5ES_insert(H5ES_t *es, H5VL_object_t *request, const char *caller, const char *
     HDassert(request);
     HDassert(caller);
     HDassert(caller_args);
-HDfprintf(stderr, "%s: caller = '%s', caller_args = '%s'\n", FUNC, caller, caller_args);
-{
-    H5RS_str_t *rs;
-    va_list ap;
-
-    rs = H5RS_create(NULL);
-    HDva_start(ap, caller_args);
-    H5_trace_args(rs, caller_args, ap);
-    HDva_end(ap);
-    HDfprintf(stderr, "%s: arg string = '%s'\n", FUNC, H5RS_get_str(rs));
-    H5RS_decr(rs);
-}
 
     /* Allocate space for new event */
     if (NULL == (ev = H5FL_CALLOC(H5ES_event_t)))
@@ -267,8 +263,29 @@ HDfprintf(stderr, "%s: caller = '%s', caller_args = '%s'\n", FUNC, caller, calle
     /* Set request for event */
     ev->request = request;
 
-    /* Parse the caller's information */
-    // HDva_start(ap, caller_args);
+    /* Copy the API routine's name */
+    if(NULL == (ev->api_name = H5MM_strdup(caller)))
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy API routine name")
+
+    /* Create the string for the API routine's arguments */
+    if(NULL == (rs = H5RS_create(NULL)))
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't allocate ref-counted string")
+
+    /* Duplicate the caller args, so it can be modified safely */
+    arg_len = HDstrlen(caller_args);
+    HDassert(arg_len < sizeof(modified_args));
+    HDstrcpy(modified_args, caller_args);
+    modified_args[arg_len - 2] = '\0';  /* Remove final "*s" from string, which is the caller routine name */
+
+    /* Copy the string for the API routine's arguments */
+    HDva_start(ap, caller_args);
+    arg_started = TRUE;
+    if(H5_trace_args(rs, modified_args, ap) < 0)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTSET, FAIL, "can't create formatted API arguments")
+    if(NULL == (s = H5RS_get_str(rs)))
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL, "can't get pointer to formatted API arguments")
+    if(NULL == (ev->api_args = H5MM_strdup(s)))
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy API routine name")
 
     /* Append event onto the event set's list */
     if (NULL == es->tail)
@@ -283,7 +300,19 @@ HDfprintf(stderr, "%s: caller = '%s', caller_args = '%s'\n", FUNC, caller, calle
     es->count++;
 
 done:
-    // HDva_end(ap);
+    /* Clean up */
+    if(arg_started)
+        HDva_end(ap);
+    if(rs)
+        H5RS_decr(rs);
+    if(ret_value < 0)
+        if(ev) {
+            if(ev->api_name)
+                H5MM_xfree_const(ev->api_name);
+            if(ev->api_args)
+                H5MM_xfree_const(ev->api_args);
+            H5FL_FREE(H5ES_event_t, ev);
+        } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES_insert() */
@@ -442,6 +471,9 @@ H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status)
         H5ES__remove(es, ev);
 
         /* Free the event node */
+HDfprintf(stderr, "%s: releasing event for '%s', with args '%s'\n", FUNC, ev->api_name, ev->api_args);
+        H5MM_xfree_const(ev->api_name);
+        H5MM_xfree_const(ev->api_args);
         H5FL_FREE(H5ES_event_t, ev);
 
         /* Advance to next node */
