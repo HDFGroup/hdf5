@@ -835,8 +835,6 @@
 ./src/H5MPpkg.h
 ./src/H5MPprivate.h
 ./src/H5MPtest.c
-./src/H5MS.c
-./src/H5MSprivate.h
 ./src/H5O.c
 ./src/H5Oainfo.c
 ./src/H5Oalloc.c
@@ -924,9 +922,8 @@
 ./src/H5Rpkg.h
 ./src/H5Rprivate.h
 ./src/H5Rpublic.h
-./src/H5UC.c
-./src/H5UCprivate.h
 ./src/H5RS.c
+./src/H5RSmodule.h
 ./src/H5RSprivate.h
 ./src/H5S.c
 ./src/H5Sall.c
@@ -986,6 +983,8 @@
 ./src/H5TS.c
 ./src/H5TSprivate.h
 ./src/H5TSpublic.h
+./src/H5UC.c
+./src/H5UCprivate.h
 ./src/H5VL.c
 ./src/H5VLcallback.c
 ./src/H5VLconnector.h

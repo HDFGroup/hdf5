@@ -38,7 +38,7 @@
 #include "H5Ipkg.h"      /* IDs                                      */
 #include "H5Mpublic.h"   /* Maps                                     */
 #include "H5MMprivate.h" /* Memory management                        */
-#include "H5MSprivate.h" /* Managed strings                          */
+#include "H5RSprivate.h" /* Reference-counted strings                */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
 #ifdef H5_HAVE_PARALLEL
@@ -61,9 +61,9 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5_trace_args_bool(H5MS_t *ms, hbool_t val);
-static herr_t H5_trace_args_cset(H5MS_t *ms, H5T_cset_t cset);
-static herr_t H5_trace_args_close_degree(H5MS_t *ms, H5F_close_degree_t degree);
+static herr_t H5_trace_args_bool(H5RS_str_t *rs, hbool_t val);
+static herr_t H5_trace_args_cset(H5RS_str_t *rs, H5T_cset_t cset);
+static herr_t H5_trace_args_close_degree(H5RS_str_t *rs, H5F_close_degree_t degree);
 
 /*********************/
 /* Package Variables */
@@ -91,16 +91,16 @@ static herr_t H5_trace_args_close_degree(H5MS_t *ms, H5F_close_degree_t degree);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5_trace_args_bool(H5MS_t *ms, hbool_t val)
+H5_trace_args_bool(H5RS_str_t *rs, hbool_t val)
 {
     /* FUNC_ENTER() should not be called */
 
     if (TRUE == val)
-        H5MS_acat(ms, "TRUE");
+        H5RS_acat(rs, "TRUE");
     else if (!val)
-        H5MS_acat(ms, "FALSE");
+        H5RS_acat(rs, "FALSE");
     else
-        H5MS_asprintf_cat(ms, "TRUE(%u)", (unsigned)val);
+        H5RS_asprintf_cat(rs, "TRUE(%u)", (unsigned)val);
 
     return SUCCEED;
 } /* end H5_trace_args_bool() */
@@ -119,21 +119,21 @@ H5_trace_args_bool(H5MS_t *ms, hbool_t val)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5_trace_args_cset(H5MS_t *ms, H5T_cset_t cset)
+H5_trace_args_cset(H5RS_str_t *rs, H5T_cset_t cset)
 {
     /* FUNC_ENTER() should not be called */
 
     switch (cset) {
         case H5T_CSET_ERROR:
-            H5MS_acat(ms, "H5T_CSET_ERROR");
+            H5RS_acat(rs, "H5T_CSET_ERROR");
             break;
 
         case H5T_CSET_ASCII:
-            H5MS_acat(ms, "H5T_CSET_ASCII");
+            H5RS_acat(rs, "H5T_CSET_ASCII");
             break;
 
         case H5T_CSET_UTF8:
-            H5MS_acat(ms, "H5T_CSET_UTF8");
+            H5RS_acat(rs, "H5T_CSET_UTF8");
             break;
 
         case H5T_CSET_RESERVED_2:
@@ -150,11 +150,11 @@ H5_trace_args_cset(H5MS_t *ms, H5T_cset_t cset)
         case H5T_CSET_RESERVED_13:
         case H5T_CSET_RESERVED_14:
         case H5T_CSET_RESERVED_15:
-            H5MS_asprintf_cat(ms, "H5T_CSET_RESERVED_%ld", (long)cset);
+            H5RS_asprintf_cat(rs, "H5T_CSET_RESERVED_%ld", (long)cset);
             break;
 
         default:
-            H5MS_asprintf_cat(ms, "%ld", (long)cset);
+            H5RS_asprintf_cat(rs, "%ld", (long)cset);
             break;
     } /* end switch */
 
@@ -175,29 +175,29 @@ H5_trace_args_cset(H5MS_t *ms, H5T_cset_t cset)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5_trace_args_close_degree(H5MS_t *ms, H5F_close_degree_t degree)
+H5_trace_args_close_degree(H5RS_str_t *rs, H5F_close_degree_t degree)
 {
     /* FUNC_ENTER() should not be called */
 
     switch (degree) {
         case H5F_CLOSE_DEFAULT:
-            H5MS_acat(ms, "H5F_CLOSE_DEFAULT");
+            H5RS_acat(rs, "H5F_CLOSE_DEFAULT");
             break;
 
         case H5F_CLOSE_WEAK:
-            H5MS_acat(ms, "H5F_CLOSE_WEAK");
+            H5RS_acat(rs, "H5F_CLOSE_WEAK");
             break;
 
         case H5F_CLOSE_SEMI:
-            H5MS_acat(ms, "H5F_CLOSE_SEMI");
+            H5RS_acat(rs, "H5F_CLOSE_SEMI");
             break;
 
         case H5F_CLOSE_STRONG:
-            H5MS_acat(ms, "H5F_CLOSE_STRONG");
+            H5RS_acat(rs, "H5F_CLOSE_STRONG");
             break;
 
         default:
-            H5MS_asprintf_cat(ms, "%ld", (long)degree);
+            H5RS_asprintf_cat(rs, "%ld", (long)degree);
             break;
     } /* end switch */
 
@@ -233,7 +233,7 @@ H5_trace_args_close_degree(H5MS_t *ms, H5F_close_degree_t degree)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
+H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 {
     const char *argname;
     int         argno = 0, ptr, asize_idx;
@@ -280,7 +280,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
          */
         argname = HDva_arg(ap, char *);
         if (argname)
-            H5MS_asprintf_cat(ms, "%s%s=", argno ? ", " : "", argname);
+            H5RS_asprintf_cat(rs, "%s%s=", argno ? ", " : "", argname);
         else
             argname = "";
 
@@ -290,62 +290,62 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
             if (vp) {
                 switch (type[0]) {
                     case 'h': /* hsize_t */
-                        H5MS_asprintf_cat(ms, "%p", vp);
+                        H5RS_asprintf_cat(rs, "%p", vp);
                         if (asize_idx >= 0 && asize[asize_idx] >= 0) {
                             hsize_t *p = (hsize_t *)vp;
 
-                            H5MS_acat(ms, " {");
+                            H5RS_acat(rs, " {");
                             for (i = 0; i < asize[asize_idx]; i++) {
                                 if (H5S_UNLIMITED == p[i])
-                                    H5MS_asprintf_cat(ms, "%sH5S_UNLIMITED", (i ? ", " : ""));
+                                    H5RS_asprintf_cat(rs, "%sH5S_UNLIMITED", (i ? ", " : ""));
                                 else
-                                    H5MS_asprintf_cat(ms, "%s%" PRIuHSIZE, (i ? ", " : ""), p[i]);
+                                    H5RS_asprintf_cat(rs, "%s%" PRIuHSIZE, (i ? ", " : ""), p[i]);
                             } /* end for */
-                            H5MS_acat(ms, "}");
+                            H5RS_acat(rs, "}");
                         } /* end if */
                         break;
 
                     case 'H':
                         if ('s' == type[1]) { /* hssize_t */
-                            H5MS_asprintf_cat(ms, "%p", vp);
+                            H5RS_asprintf_cat(rs, "%p", vp);
                             if (asize_idx >= 0 && asize[asize_idx] >= 0) {
                                 hssize_t *p = (hssize_t *)vp;
 
-                                H5MS_acat(ms, " {");
+                                H5RS_acat(rs, " {");
                                 for (i = 0; i < asize[asize_idx]; i++)
-                                    H5MS_asprintf_cat(ms, "%s%" PRIdHSIZE, (i ? ", " : ""), p[i]);
-                                H5MS_acat(ms, "}");
+                                    H5RS_asprintf_cat(rs, "%s%" PRIdHSIZE, (i ? ", " : ""), p[i]);
+                                H5RS_acat(rs, "}");
                             } /* end if */
                         }     /* end if */
                         else
-                            H5MS_asprintf_cat(ms, "%p", vp);
+                            H5RS_asprintf_cat(rs, "%p", vp);
                         break;
 
                     case 'I':
                         if ('s' == type[1]) { /* int / int32_t */
-                            H5MS_asprintf_cat(ms, "%p", vp);
+                            H5RS_asprintf_cat(rs, "%p", vp);
                             if (asize_idx >= 0 && asize[asize_idx] >= 0) {
                                 int *p = (int *)vp;
 
-                                H5MS_acat(ms, " {");
+                                H5RS_acat(rs, " {");
                                 for (i = 0; i < asize[asize_idx]; i++)
-                                    H5MS_asprintf_cat(ms, "%s%d", (i ? ", " : ""), p[i]);
-                                H5MS_acat(ms, "}");
+                                    H5RS_asprintf_cat(rs, "%s%d", (i ? ", " : ""), p[i]);
+                                H5RS_acat(rs, "}");
                             }                      /* end if */
                         }                          /* end if */
                         else if ('u' == type[1]) { /* unsigned / uint32_t */
-                            H5MS_asprintf_cat(ms, "%p", vp);
+                            H5RS_asprintf_cat(rs, "%p", vp);
                             if (asize_idx >= 0 && asize[asize_idx] >= 0) {
                                 unsigned *p = (unsigned *)vp;
 
-                                H5MS_acat(ms, " {");
+                                H5RS_acat(rs, " {");
                                 for (i = 0; i < asize[asize_idx]; i++)
-                                    H5MS_asprintf_cat(ms, "%s%u", i ? ", " : "", p[i]);
-                                H5MS_acat(ms, "}");
+                                    H5RS_asprintf_cat(rs, "%s%u", i ? ", " : "", p[i]);
+                                H5RS_acat(rs, "}");
                             } /* end if */
                         }     /* end else-if */
                         else
-                            H5MS_asprintf_cat(ms, "%p", vp);
+                            H5RS_asprintf_cat(rs, "%p", vp);
                         break;
 
                     case 's': /* char* */
@@ -353,88 +353,88 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                          *      to strings have 2 or more.
                          */
                         if (ptr > 1)
-                            H5MS_asprintf_cat(ms, "%p", vp);
+                            H5RS_asprintf_cat(rs, "%p", vp);
                         else
-                            H5MS_asprintf_cat(ms, "\"%s\"", (const char *)vp);
+                            H5RS_asprintf_cat(rs, "\"%s\"", (const char *)vp);
                         break;
 
                     case 'U':
                         if ('l' == type[1]) { /* unsigned long */
-                            H5MS_asprintf_cat(ms, "%p", vp);
+                            H5RS_asprintf_cat(rs, "%p", vp);
                             if (asize_idx >= 0 && asize[asize_idx] >= 0) {
                                 unsigned long *p = (unsigned long *)vp;
 
-                                H5MS_acat(ms, " {");
+                                H5RS_acat(rs, " {");
                                 for (i = 0; i < asize[asize_idx]; i++)
-                                    H5MS_asprintf_cat(ms, "%s%lu", i ? ", " : "", p[i]);
-                                H5MS_acat(ms, "}");
+                                    H5RS_asprintf_cat(rs, "%s%lu", i ? ", " : "", p[i]);
+                                H5RS_acat(rs, "}");
                             }                      /* end if */
                         }                          /* end if */
                         else if ('L' == type[1]) { /* unsigned long long / uint64_t */
-                            H5MS_asprintf_cat(ms, "%p", vp);
+                            H5RS_asprintf_cat(rs, "%p", vp);
                             if (asize_idx >= 0 && asize[asize_idx] >= 0) {
                                 unsigned long long *p = (unsigned long long *)vp;
 
-                                H5MS_acat(ms, " {");
+                                H5RS_acat(rs, " {");
                                 for (i = 0; i < asize[asize_idx]; i++)
-                                    H5MS_asprintf_cat(ms, "%s%llu", i ? ", " : "", p[i]);
-                                H5MS_acat(ms, "}");
+                                    H5RS_asprintf_cat(rs, "%s%llu", i ? ", " : "", p[i]);
+                                H5RS_acat(rs, "}");
                             } /* end if */
                         }     /* end else-if */
                         else
-                            H5MS_asprintf_cat(ms, "%p", vp);
+                            H5RS_asprintf_cat(rs, "%p", vp);
                         break;
 
                     case 'x': /* void */
-                        H5MS_asprintf_cat(ms, "%p", vp);
+                        H5RS_asprintf_cat(rs, "%p", vp);
                         if (asize_idx >= 0 && asize[asize_idx] >= 0) {
                             void **p = (void **)vp;
 
-                            H5MS_acat(ms, " {");
+                            H5RS_acat(rs, " {");
                             for (i = 0; i < asize[asize_idx]; i++) {
                                 if (p[i])
-                                    H5MS_asprintf_cat(ms, "%s%p", (i ? ", " : ""), p[i]);
+                                    H5RS_asprintf_cat(rs, "%s%p", (i ? ", " : ""), p[i]);
                                 else
-                                    H5MS_asprintf_cat(ms, "%sNULL", (i ? ", " : ""));
+                                    H5RS_asprintf_cat(rs, "%sNULL", (i ? ", " : ""));
                             } /* end for */
-                            H5MS_acat(ms, "}");
+                            H5RS_acat(rs, "}");
                         } /* end if */
                         break;
 
                     case 'z': /* size_t */
-                        H5MS_asprintf_cat(ms, "%p", vp);
+                        H5RS_asprintf_cat(rs, "%p", vp);
                         if (asize_idx >= 0 && asize[asize_idx] >= 0) {
                             size_t *p = (size_t *)vp;
 
-                            H5MS_acat(ms, " {");
+                            H5RS_acat(rs, " {");
                             for (i = 0; i < asize[asize_idx]; i++)
-                                H5MS_asprintf_cat(ms, "%s%zu", (i ? ", " : ""), p[i]);
-                            H5MS_acat(ms, "}");
+                                H5RS_asprintf_cat(rs, "%s%zu", (i ? ", " : ""), p[i]);
+                            H5RS_acat(rs, "}");
                         } /* end if */
                         break;
 
                     case 'Z':
                         if ('s' == type[1]) { /* ssize_t */
-                            H5MS_asprintf_cat(ms, "%p", vp);
+                            H5RS_asprintf_cat(rs, "%p", vp);
                             if (asize_idx >= 0 && asize[asize_idx] >= 0) {
                                 ssize_t *p = (ssize_t *)vp;
 
-                                H5MS_acat(ms, " {");
+                                H5RS_acat(rs, " {");
                                 for (i = 0; i < asize[asize_idx]; i++)
-                                    H5MS_asprintf_cat(ms, "%s%zd", (i ? ", " : ""), p[i]);
-                                H5MS_acat(ms, "}");
+                                    H5RS_asprintf_cat(rs, "%s%zd", (i ? ", " : ""), p[i]);
+                                H5RS_acat(rs, "}");
                             } /* end if */
                         }     /* end if */
                         else
-                            H5MS_asprintf_cat(ms, "%p", vp);
+                            H5RS_asprintf_cat(rs, "%p", vp);
                         break;
 
                     default:
-                        H5MS_asprintf_cat(ms, "%p", vp);
+                        H5RS_asprintf_cat(rs, "%p", vp);
                 } /* end switch */
             }     /* end if */
             else
-                H5MS_acat(ms, "NULL");
+                H5RS_acat(rs, "NULL");
         } /* end if */
         /* A value */
         else {
@@ -444,9 +444,9 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                     haddr_t addr = HDva_arg(ap, haddr_t);
 
                     if (H5F_addr_defined(addr))
-                        H5MS_asprintf_cat(ms, "%" PRIuHADDR, addr);
+                        H5RS_asprintf_cat(rs, "%" PRIuHADDR, addr);
                     else
-                        H5MS_acat(ms, "UNDEF");
+                        H5RS_acat(rs, "UNDEF");
                 } /* end block */
                 break;
 
@@ -456,11 +456,11 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5A_info_t ainfo = HDva_arg(ap, H5A_info_t);
 
-                            H5MS_acat(ms, "{");
-                            H5_trace_args_bool(ms, ainfo.corder_valid);
-                            H5MS_asprintf_cat(ms, ", %u, ", ainfo.corder);
-                            H5_trace_args_cset(ms, ainfo.cset);
-                            H5MS_asprintf_cat(ms, "%" PRIuHSIZE "}", ainfo.data_size);
+                            H5RS_acat(rs, "{");
+                            H5_trace_args_bool(rs, ainfo.corder_valid);
+                            H5RS_asprintf_cat(rs, ", %u, ", ainfo.corder);
+                            H5_trace_args_cset(rs, ainfo.cset);
+                            H5RS_asprintf_cat(rs, "%" PRIuHSIZE "}", ainfo.data_size);
                         } /* end block */
                         break;
 
@@ -469,7 +469,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5A_operator1_t aop1 = (H5A_operator1_t)HDva_arg(ap, H5A_operator1_t);
 
-                            H5MS_asprintf_cat(ms, "%p", aop1);
+                            H5RS_asprintf_cat(rs, "%p", (void *)aop1);
                         } /* end block */
                         break;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
@@ -478,12 +478,12 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5A_operator2_t aop2 = (H5A_operator2_t)HDva_arg(ap, H5A_operator2_t);
 
-                            H5MS_asprintf_cat(ms, "%p", aop2);
+                            H5RS_asprintf_cat(rs, "%p", (void *)aop2);
                         } /* end block */
                         break;
 
                         default:
-                            H5MS_asprintf_cat(ms, "BADTYPE(A%c)", type[1]);
+                            H5RS_asprintf_cat(rs, "BADTYPE(A%c)", type[1]);
                             goto error;
                     } /* end switch */
                     break;
@@ -493,7 +493,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                     /* Can't pass hbool_t to HDva_arg() */
                     hbool_t bool_var = (hbool_t)HDva_arg(ap, int);
 
-                    H5_trace_args_bool(ms, bool_var);
+                    H5_trace_args_bool(rs, bool_var);
                 } /* end block */
                 break;
 
@@ -503,84 +503,84 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5AC_cache_config_t cc = HDva_arg(ap, H5AC_cache_config_t);
 
-                            H5MS_asprintf_cat(ms, "{%d, ", cc.version);
-                            H5_trace_args_bool(ms, cc.rpt_fcn_enabled);
-                            H5MS_acat(ms, ", ");
-                            H5_trace_args_bool(ms, cc.open_trace_file);
-                            H5MS_acat(ms, ", ");
-                            H5_trace_args_bool(ms, cc.close_trace_file);
-                            H5MS_asprintf_cat(ms, ", '%s', ", cc.trace_file_name);
-                            H5MS_acat(ms, ", ");
-                            H5_trace_args_bool(ms, cc.evictions_enabled);
-                            H5MS_acat(ms, ", ");
-                            H5_trace_args_bool(ms, cc.set_initial_size);
-                            H5MS_asprintf_cat(ms, ", %zu, ", cc.initial_size);
-                            H5MS_asprintf_cat(ms, "%f, ", cc.min_clean_fraction);
-                            H5MS_asprintf_cat(ms, "%zu, ", cc.max_size);
-                            H5MS_asprintf_cat(ms, "%zu, ", cc.min_size);
-                            H5MS_asprintf_cat(ms, "%ld, ", cc.epoch_length);
+                            H5RS_asprintf_cat(rs, "{%d, ", cc.version);
+                            H5_trace_args_bool(rs, cc.rpt_fcn_enabled);
+                            H5RS_acat(rs, ", ");
+                            H5_trace_args_bool(rs, cc.open_trace_file);
+                            H5RS_acat(rs, ", ");
+                            H5_trace_args_bool(rs, cc.close_trace_file);
+                            H5RS_asprintf_cat(rs, ", '%s', ", cc.trace_file_name);
+                            H5RS_acat(rs, ", ");
+                            H5_trace_args_bool(rs, cc.evictions_enabled);
+                            H5RS_acat(rs, ", ");
+                            H5_trace_args_bool(rs, cc.set_initial_size);
+                            H5RS_asprintf_cat(rs, ", %zu, ", cc.initial_size);
+                            H5RS_asprintf_cat(rs, "%f, ", cc.min_clean_fraction);
+                            H5RS_asprintf_cat(rs, "%zu, ", cc.max_size);
+                            H5RS_asprintf_cat(rs, "%zu, ", cc.min_size);
+                            H5RS_asprintf_cat(rs, "%ld, ", cc.epoch_length);
                             switch (cc.incr_mode) {
                                 case H5C_incr__off:
-                                    H5MS_acat(ms, "H5C_incr__off");
+                                    H5RS_acat(rs, "H5C_incr__off");
                                     break;
 
                                 case H5C_incr__threshold:
-                                    H5MS_acat(ms, "H5C_incr__threshold");
+                                    H5RS_acat(rs, "H5C_incr__threshold");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)cc.incr_mode);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)cc.incr_mode);
                                     break;
                             } /* end switch */
-                            H5MS_asprintf_cat(ms, ", %f, ", cc.lower_hr_threshold);
-                            H5MS_asprintf_cat(ms, "%f, ", cc.increment);
-                            H5_trace_args_bool(ms, cc.apply_max_increment);
-                            H5MS_asprintf_cat(ms, ", %zu, ", cc.max_increment);
+                            H5RS_asprintf_cat(rs, ", %f, ", cc.lower_hr_threshold);
+                            H5RS_asprintf_cat(rs, "%f, ", cc.increment);
+                            H5_trace_args_bool(rs, cc.apply_max_increment);
+                            H5RS_asprintf_cat(rs, ", %zu, ", cc.max_increment);
                             switch (cc.flash_incr_mode) {
                                 case H5C_flash_incr__off:
-                                    H5MS_acat(ms, "H5C_flash_incr__off");
+                                    H5RS_acat(rs, "H5C_flash_incr__off");
                                     break;
 
                                 case H5C_flash_incr__add_space:
-                                    H5MS_acat(ms, "H5C_flash_incr__add_space");
+                                    H5RS_acat(rs, "H5C_flash_incr__add_space");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)cc.flash_incr_mode);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)cc.flash_incr_mode);
                                     break;
                             } /* end switch */
-                            H5MS_asprintf_cat(ms, ", %f, ", cc.flash_multiple);
-                            H5MS_asprintf_cat(ms, "%f, ", cc.flash_threshold);
+                            H5RS_asprintf_cat(rs, ", %f, ", cc.flash_multiple);
+                            H5RS_asprintf_cat(rs, "%f, ", cc.flash_threshold);
                             switch (cc.decr_mode) {
                                 case H5C_decr__off:
-                                    H5MS_acat(ms, "H5C_decr__off");
+                                    H5RS_acat(rs, "H5C_decr__off");
                                     break;
 
                                 case H5C_decr__threshold:
-                                    H5MS_acat(ms, "H5C_decr__threshold");
+                                    H5RS_acat(rs, "H5C_decr__threshold");
                                     break;
 
                                 case H5C_decr__age_out:
-                                    H5MS_acat(ms, "H5C_decr__age_out");
+                                    H5RS_acat(rs, "H5C_decr__age_out");
                                     break;
 
                                 case H5C_decr__age_out_with_threshold:
-                                    H5MS_acat(ms, "H5C_decr__age_out_with_threshold");
+                                    H5RS_acat(rs, "H5C_decr__age_out_with_threshold");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)cc.decr_mode);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)cc.decr_mode);
                                     break;
                             } /* end switch */
-                            H5MS_asprintf_cat(ms, ", %f, ", cc.upper_hr_threshold);
-                            H5MS_asprintf_cat(ms, "%f, ", cc.decrement);
-                            H5_trace_args_bool(ms, cc.apply_max_decrement);
-                            H5MS_asprintf_cat(ms, ", %zu, ", cc.max_decrement);
-                            H5MS_asprintf_cat(ms, "%d, ", cc.epochs_before_eviction);
-                            H5_trace_args_bool(ms, cc.apply_empty_reserve);
-                            H5MS_asprintf_cat(ms, ", %f, ", cc.empty_reserve);
-                            H5MS_asprintf_cat(ms, "%zu, ", cc.dirty_bytes_threshold);
-                            H5MS_asprintf_cat(ms, "%d}", cc.metadata_write_strategy);
+                            H5RS_asprintf_cat(rs, ", %f, ", cc.upper_hr_threshold);
+                            H5RS_asprintf_cat(rs, "%f, ", cc.decrement);
+                            H5_trace_args_bool(rs, cc.apply_max_decrement);
+                            H5RS_asprintf_cat(rs, ", %zu, ", cc.max_decrement);
+                            H5RS_asprintf_cat(rs, "%d, ", cc.epochs_before_eviction);
+                            H5_trace_args_bool(rs, cc.apply_empty_reserve);
+                            H5RS_asprintf_cat(rs, ", %f, ", cc.empty_reserve);
+                            H5RS_asprintf_cat(rs, "%zu, ", cc.dirty_bytes_threshold);
+                            H5RS_asprintf_cat(rs, "%d}", cc.metadata_write_strategy);
                         } /* end block */
                         break;
 
@@ -588,17 +588,17 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5AC_cache_image_config_t cic = HDva_arg(ap, H5AC_cache_image_config_t);
 
-                            H5MS_asprintf_cat(ms, "{%d, ", cic.version);
-                            H5_trace_args_bool(ms, cic.generate_image);
-                            H5MS_acat(ms, ", ");
-                            H5_trace_args_bool(ms, cic.save_resize_status);
-                            H5MS_acat(ms, ", ");
-                            H5MS_asprintf_cat(ms, "%d}", cic.entry_ageout);
+                            H5RS_asprintf_cat(rs, "{%d, ", cic.version);
+                            H5_trace_args_bool(rs, cic.generate_image);
+                            H5RS_acat(rs, ", ");
+                            H5_trace_args_bool(rs, cic.save_resize_status);
+                            H5RS_acat(rs, ", ");
+                            H5RS_asprintf_cat(rs, "%d}", cic.entry_ageout);
                         } /* end block */
                         break;
 
                         default:
-                            H5MS_asprintf_cat(ms, "BADTYPE(C%c)", type[1]);
+                            H5RS_asprintf_cat(rs, "BADTYPE(C%c)", type[1]);
                             goto error;
                     } /* end switch */
                     break;
@@ -607,7 +607,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                 {
                     double dbl = HDva_arg(ap, double);
 
-                    H5MS_asprintf_cat(ms, "%g", dbl);
+                    H5RS_asprintf_cat(rs, "%g", dbl);
                 } /* end block */
                 break;
 
@@ -619,27 +619,27 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (alloc_time) {
                                 case H5D_ALLOC_TIME_ERROR:
-                                    H5MS_acat(ms, "H5D_ALLOC_TIME_ERROR");
+                                    H5RS_acat(rs, "H5D_ALLOC_TIME_ERROR");
                                     break;
 
                                 case H5D_ALLOC_TIME_DEFAULT:
-                                    H5MS_acat(ms, "H5D_ALLOC_TIME_DEFAULT");
+                                    H5RS_acat(rs, "H5D_ALLOC_TIME_DEFAULT");
                                     break;
 
                                 case H5D_ALLOC_TIME_EARLY:
-                                    H5MS_acat(ms, "H5D_ALLOC_TIME_EARLY");
+                                    H5RS_acat(rs, "H5D_ALLOC_TIME_EARLY");
                                     break;
 
                                 case H5D_ALLOC_TIME_LATE:
-                                    H5MS_acat(ms, "H5D_ALLOC_TIME_LATE");
+                                    H5RS_acat(rs, "H5D_ALLOC_TIME_LATE");
                                     break;
 
                                 case H5D_ALLOC_TIME_INCR:
-                                    H5MS_acat(ms, "H5D_ALLOC_TIME_INCR");
+                                    H5RS_acat(rs, "H5D_ALLOC_TIME_INCR");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)alloc_time);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)alloc_time);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -649,7 +649,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5D_append_cb_t dapp = (H5D_append_cb_t)HDva_arg(ap, H5D_append_cb_t);
 
-                            H5MS_asprintf_cat(ms, "%p", dapp);
+                            H5RS_asprintf_cat(rs, "%p", (void *)dapp);
                         } /* end block */
                         break;
 
@@ -659,15 +659,15 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (opt) {
                                 case H5FD_MPIO_COLLECTIVE_IO:
-                                    H5MS_acat(ms, "H5FD_MPIO_COLLECTIVE_IO");
+                                    H5RS_acat(rs, "H5FD_MPIO_COLLECTIVE_IO");
                                     break;
 
                                 case H5FD_MPIO_INDIVIDUAL_IO:
-                                    H5MS_acat(ms, "H5FD_MPIO_INDIVIDUAL_IO");
+                                    H5RS_acat(rs, "H5FD_MPIO_INDIVIDUAL_IO");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)opt);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)opt);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -679,23 +679,23 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (fill_time) {
                                 case H5D_FILL_TIME_ERROR:
-                                    H5MS_acat(ms, "H5D_FILL_TIME_ERROR");
+                                    H5RS_acat(rs, "H5D_FILL_TIME_ERROR");
                                     break;
 
                                 case H5D_FILL_TIME_ALLOC:
-                                    H5MS_acat(ms, "H5D_FILL_TIME_ALLOC");
+                                    H5RS_acat(rs, "H5D_FILL_TIME_ALLOC");
                                     break;
 
                                 case H5D_FILL_TIME_NEVER:
-                                    H5MS_acat(ms, "H5D_FILL_TIME_NEVER");
+                                    H5RS_acat(rs, "H5D_FILL_TIME_NEVER");
                                     break;
 
                                 case H5D_FILL_TIME_IFSET:
-                                    H5MS_acat(ms, "H5D_FILL_TIME_IFSET");
+                                    H5RS_acat(rs, "H5D_FILL_TIME_IFSET");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)fill_time);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)fill_time);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -707,23 +707,23 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (fill_value) {
                                 case H5D_FILL_VALUE_ERROR:
-                                    H5MS_acat(ms, "H5D_FILL_VALUE_ERROR");
+                                    H5RS_acat(rs, "H5D_FILL_VALUE_ERROR");
                                     break;
 
                                 case H5D_FILL_VALUE_UNDEFINED:
-                                    H5MS_acat(ms, "H5D_FILL_VALUE_UNDEFINED");
+                                    H5RS_acat(rs, "H5D_FILL_VALUE_UNDEFINED");
                                     break;
 
                                 case H5D_FILL_VALUE_DEFAULT:
-                                    H5MS_acat(ms, "H5D_FILL_VALUE_DEFAULT");
+                                    H5RS_acat(rs, "H5D_FILL_VALUE_DEFAULT");
                                     break;
 
                                 case H5D_FILL_VALUE_USER_DEFINED:
-                                    H5MS_acat(ms, "H5D_FILL_VALUE_USER_DEFINED");
+                                    H5RS_acat(rs, "H5D_FILL_VALUE_USER_DEFINED");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)fill_value);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)fill_value);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -733,7 +733,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5D_gather_func_t gop = (H5D_gather_func_t)HDva_arg(ap, H5D_gather_func_t);
 
-                            H5MS_asprintf_cat(ms, "%p", gop);
+                            H5RS_asprintf_cat(rs, "%p", (void *)gop);
                         } /* end block */
                         break;
 
@@ -743,19 +743,19 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (opt) {
                                 case H5FD_MPIO_CHUNK_DEFAULT:
-                                    H5MS_acat(ms, "H5FD_MPIO_CHUNK_DEFAULT");
+                                    H5RS_acat(rs, "H5FD_MPIO_CHUNK_DEFAULT");
                                     break;
 
                                 case H5FD_MPIO_CHUNK_ONE_IO:
-                                    H5MS_acat(ms, "H5FD_MPIO_CHUNK_ONE_IO");
+                                    H5RS_acat(rs, "H5FD_MPIO_CHUNK_ONE_IO");
                                     break;
 
                                 case H5FD_MPIO_CHUNK_MULTI_IO:
-                                    H5MS_acat(ms, "H5FD_MPIO_CHUNK_MULTI_IO");
+                                    H5RS_acat(rs, "H5FD_MPIO_CHUNK_MULTI_IO");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)opt);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)opt);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -768,27 +768,27 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (actual_io_mode) {
                                 case H5D_MPIO_NO_COLLECTIVE:
-                                    H5MS_acat(ms, "H5D_MPIO_NO_COLLECTIVE");
+                                    H5RS_acat(rs, "H5D_MPIO_NO_COLLECTIVE");
                                     break;
 
                                 case H5D_MPIO_CHUNK_INDEPENDENT:
-                                    H5MS_acat(ms, "H5D_MPIO_CHUNK_INDEPENDENT");
+                                    H5RS_acat(rs, "H5D_MPIO_CHUNK_INDEPENDENT");
                                     break;
 
                                 case H5D_MPIO_CHUNK_COLLECTIVE:
-                                    H5MS_acat(ms, "H5D_MPIO_CHUNK_COLLECTIVE");
+                                    H5RS_acat(rs, "H5D_MPIO_CHUNK_COLLECTIVE");
                                     break;
 
                                 case H5D_MPIO_CHUNK_MIXED:
-                                    H5MS_acat(ms, "H5D_MPIO_CHUNK_MIXED");
+                                    H5RS_acat(rs, "H5D_MPIO_CHUNK_MIXED");
                                     break;
 
                                 case H5D_MPIO_CONTIGUOUS_COLLECTIVE:
-                                    H5MS_acat(ms, "H5D_MPIO_CONTIGUOUS_COLLECTIVE");
+                                    H5RS_acat(rs, "H5D_MPIO_CONTIGUOUS_COLLECTIVE");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)actual_io_mode);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)actual_io_mode);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -798,13 +798,13 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5FD_file_image_callbacks_t ficb = HDva_arg(ap, H5FD_file_image_callbacks_t);
 
-                            H5MS_asprintf_cat(ms, "{%p, ", ficb.image_malloc);
-                            H5MS_asprintf_cat(ms, "%p, ", ficb.image_memcpy);
-                            H5MS_asprintf_cat(ms, "%p, ", ficb.image_realloc);
-                            H5MS_asprintf_cat(ms, "%p, ", ficb.image_free);
-                            H5MS_asprintf_cat(ms, "%p, ", ficb.udata_copy);
-                            H5MS_asprintf_cat(ms, "%p, ", ficb.udata_free);
-                            H5MS_asprintf_cat(ms, "%p}", ficb.udata);
+                            H5RS_asprintf_cat(rs, "{%p, ", (void *)ficb.image_malloc);
+                            H5RS_asprintf_cat(rs, "%p, ", (void *)ficb.image_memcpy);
+                            H5RS_asprintf_cat(rs, "%p, ", (void *)ficb.image_realloc);
+                            H5RS_asprintf_cat(rs, "%p, ", (void *)ficb.image_free);
+                            H5RS_asprintf_cat(rs, "%p, ", (void *)ficb.udata_copy);
+                            H5RS_asprintf_cat(rs, "%p, ", (void *)ficb.udata_free);
+                            H5RS_asprintf_cat(rs, "%p}", ficb.udata);
                         } /* end block */
                         break;
 
@@ -814,35 +814,35 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (idx) {
                                 case H5D_CHUNK_IDX_BTREE:
-                                    H5MS_acat(ms, "H5D_CHUNK_IDX_BTREE");
+                                    H5RS_acat(rs, "H5D_CHUNK_IDX_BTREE");
                                     break;
 
                                 case H5D_CHUNK_IDX_NONE:
-                                    H5MS_acat(ms, "H5D_CHUNK_IDX_NONE");
+                                    H5RS_acat(rs, "H5D_CHUNK_IDX_NONE");
                                     break;
 
                                 case H5D_CHUNK_IDX_FARRAY:
-                                    H5MS_acat(ms, "H5D_CHUNK_IDX_FARRAY");
+                                    H5RS_acat(rs, "H5D_CHUNK_IDX_FARRAY");
                                     break;
 
                                 case H5D_CHUNK_IDX_EARRAY:
-                                    H5MS_acat(ms, "H5D_CHUNK_IDX_EARRAY");
+                                    H5RS_acat(rs, "H5D_CHUNK_IDX_EARRAY");
                                     break;
 
                                 case H5D_CHUNK_IDX_BT2:
-                                    H5MS_acat(ms, "H5D_CHUNK_IDX_BT2");
+                                    H5RS_acat(rs, "H5D_CHUNK_IDX_BT2");
                                     break;
 
                                 case H5D_CHUNK_IDX_SINGLE:
-                                    H5MS_acat(ms, "H5D_CHUNK_IDX_SINGLE");
+                                    H5RS_acat(rs, "H5D_CHUNK_IDX_SINGLE");
                                     break;
 
                                 case H5D_CHUNK_IDX_NTYPES:
-                                    H5MS_acat(ms, "ERROR: H5D_CHUNK_IDX_NTYPES (invalid value)");
+                                    H5RS_acat(rs, "ERROR: H5D_CHUNK_IDX_NTYPES (invalid value)");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "UNKNOWN VALUE: %ld", (long)idx);
+                                    H5RS_asprintf_cat(rs, "UNKNOWN VALUE: %ld", (long)idx);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -854,31 +854,31 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (layout) {
                                 case H5D_LAYOUT_ERROR:
-                                    H5MS_acat(ms, "H5D_LAYOUT_ERROR");
+                                    H5RS_acat(rs, "H5D_LAYOUT_ERROR");
                                     break;
 
                                 case H5D_COMPACT:
-                                    H5MS_acat(ms, "H5D_COMPACT");
+                                    H5RS_acat(rs, "H5D_COMPACT");
                                     break;
 
                                 case H5D_CONTIGUOUS:
-                                    H5MS_acat(ms, "H5D_CONTIGUOUS");
+                                    H5RS_acat(rs, "H5D_CONTIGUOUS");
                                     break;
 
                                 case H5D_CHUNKED:
-                                    H5MS_acat(ms, "H5D_CHUNKED");
+                                    H5RS_acat(rs, "H5D_CHUNKED");
                                     break;
 
                                 case H5D_VIRTUAL:
-                                    H5MS_acat(ms, "H5D_VIRTUAL");
+                                    H5RS_acat(rs, "H5D_VIRTUAL");
                                     break;
 
                                 case H5D_NLAYOUTS:
-                                    H5MS_acat(ms, "H5D_NLAYOUTS");
+                                    H5RS_acat(rs, "H5D_NLAYOUTS");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)layout);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)layout);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -892,43 +892,43 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             /* Check for all bit-flags which might be set */
                             if (nocol_cause_mode & H5D_MPIO_COLLECTIVE) {
-                                H5MS_acat(ms, "H5D_MPIO_COLLECTIVE");
+                                H5RS_acat(rs, "H5D_MPIO_COLLECTIVE");
                                 flag_already_displayed = TRUE;
                             } /* end if */
                             if (nocol_cause_mode & H5D_MPIO_SET_INDEPENDENT) {
-                                H5MS_asprintf_cat(ms, "%sH5D_MPIO_SET_INDEPENDENT",
+                                H5RS_asprintf_cat(rs, "%sH5D_MPIO_SET_INDEPENDENT",
                                                   flag_already_displayed ? " | " : "");
                                 flag_already_displayed = TRUE;
                             } /* end if */
                             if (nocol_cause_mode & H5D_MPIO_DATATYPE_CONVERSION) {
-                                H5MS_asprintf_cat(ms, "%sH5D_MPIO_DATATYPE_CONVERSION",
+                                H5RS_asprintf_cat(rs, "%sH5D_MPIO_DATATYPE_CONVERSION",
                                                   flag_already_displayed ? " | " : "");
                                 flag_already_displayed = TRUE;
                             } /* end if */
                             if (nocol_cause_mode & H5D_MPIO_DATA_TRANSFORMS) {
-                                H5MS_asprintf_cat(ms, "%sH5D_MPIO_DATA_TRANSFORMS",
+                                H5RS_asprintf_cat(rs, "%sH5D_MPIO_DATA_TRANSFORMS",
                                                   flag_already_displayed ? " | " : "");
                                 flag_already_displayed = TRUE;
                             } /* end if */
                             if (nocol_cause_mode & H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED) {
-                                H5MS_asprintf_cat(ms, "%sH5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED",
+                                H5RS_asprintf_cat(rs, "%sH5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED",
                                                   flag_already_displayed ? " | " : "");
                                 flag_already_displayed = TRUE;
                             } /* end if */
                             if (nocol_cause_mode & H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES) {
-                                H5MS_asprintf_cat(ms, "%sH5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES",
+                                H5RS_asprintf_cat(rs, "%sH5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES",
                                                   flag_already_displayed ? " | " : "");
                                 flag_already_displayed = TRUE;
                             } /* end if */
                             if (nocol_cause_mode & H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET) {
-                                H5MS_asprintf_cat(ms, "%sH5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET",
+                                H5RS_asprintf_cat(rs, "%sH5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET",
                                                   flag_already_displayed ? " | " : "");
                                 flag_already_displayed = TRUE;
                             } /* end if */
 
                             /* Display '<none>' if there's no flags set */
                             if (!flag_already_displayed)
-                                H5MS_acat(ms, "<none>");
+                                H5RS_acat(rs, "<none>");
                         } /* end block */
                         break;
 
@@ -939,19 +939,19 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (chunk_opt_mode) {
                                 case H5D_MPIO_NO_CHUNK_OPTIMIZATION:
-                                    H5MS_acat(ms, "H5D_MPIO_NO_CHUNK_OPTIMIZATION");
+                                    H5RS_acat(rs, "H5D_MPIO_NO_CHUNK_OPTIMIZATION");
                                     break;
 
                                 case H5D_MPIO_LINK_CHUNK:
-                                    H5MS_acat(ms, "H5D_MPIO_LINK_CHUNK");
+                                    H5RS_acat(rs, "H5D_MPIO_LINK_CHUNK");
                                     break;
 
                                 case H5D_MPIO_MULTI_CHUNK:
-                                    H5MS_acat(ms, "H5D_MPIO_MULTI_CHUNK");
+                                    H5RS_acat(rs, "H5D_MPIO_MULTI_CHUNK");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)chunk_opt_mode);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)chunk_opt_mode);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -961,7 +961,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5D_operator_t dop = (H5D_operator_t)HDva_arg(ap, H5D_operator_t);
 
-                            H5MS_asprintf_cat(ms, "%p", dop);
+                            H5RS_asprintf_cat(rs, "%p", (void *)dop);
                         } /* end block */
                         break;
 
@@ -971,23 +971,23 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (space_status) {
                                 case H5D_SPACE_STATUS_NOT_ALLOCATED:
-                                    H5MS_acat(ms, "H5D_SPACE_STATUS_NOT_ALLOCATED");
+                                    H5RS_acat(rs, "H5D_SPACE_STATUS_NOT_ALLOCATED");
                                     break;
 
                                 case H5D_SPACE_STATUS_PART_ALLOCATED:
-                                    H5MS_acat(ms, "H5D_SPACE_STATUS_PART_ALLOCATED");
+                                    H5RS_acat(rs, "H5D_SPACE_STATUS_PART_ALLOCATED");
                                     break;
 
                                 case H5D_SPACE_STATUS_ALLOCATED:
-                                    H5MS_acat(ms, "H5D_SPACE_STATUS_ALLOCATED");
+                                    H5RS_acat(rs, "H5D_SPACE_STATUS_ALLOCATED");
                                     break;
 
                                 case H5D_SPACE_STATUS_ERROR:
-                                    H5MS_acat(ms, "H5D_SPACE_STATUS_ERROR");
+                                    H5RS_acat(rs, "H5D_SPACE_STATUS_ERROR");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)space_status);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)space_status);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -997,7 +997,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5D_scatter_func_t sop = (H5D_scatter_func_t)HDva_arg(ap, H5D_scatter_func_t);
 
-                            H5MS_asprintf_cat(ms, "%p", sop);
+                            H5RS_asprintf_cat(rs, "%p", (void *)sop);
                         } /* end block */
                         break;
 
@@ -1007,15 +1007,15 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (transfer) {
                                 case H5FD_MPIO_INDEPENDENT:
-                                    H5MS_acat(ms, "H5FD_MPIO_INDEPENDENT");
+                                    H5RS_acat(rs, "H5FD_MPIO_INDEPENDENT");
                                     break;
 
                                 case H5FD_MPIO_COLLECTIVE:
-                                    H5MS_acat(ms, "H5FD_MPIO_COLLECTIVE");
+                                    H5RS_acat(rs, "H5FD_MPIO_COLLECTIVE");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)transfer);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)transfer);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -1027,26 +1027,26 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (view) {
                                 case H5D_VDS_ERROR:
-                                    H5MS_acat(ms, "H5D_VDS_ERROR");
+                                    H5RS_acat(rs, "H5D_VDS_ERROR");
                                     break;
 
                                 case H5D_VDS_FIRST_MISSING:
-                                    H5MS_acat(ms, "H5D_VDS_FIRST_MISSING");
+                                    H5RS_acat(rs, "H5D_VDS_FIRST_MISSING");
                                     break;
 
                                 case H5D_VDS_LAST_AVAILABLE:
-                                    H5MS_acat(ms, "H5D_VDS_LAST_AVAILABLE");
+                                    H5RS_acat(rs, "H5D_VDS_LAST_AVAILABLE");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)view);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)view);
                                     break;
                             } /* end switch */
                         }     /* end block */
                         break;
 
                         default:
-                            H5MS_asprintf_cat(ms, "BADTYPE(D%c)", type[1]);
+                            H5RS_asprintf_cat(rs, "BADTYPE(D%c)", type[1]);
                             goto error;
                     } /* end switch */
                     break;
@@ -1056,9 +1056,9 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                     herr_t status = HDva_arg(ap, herr_t);
 
                     if (status >= 0)
-                        H5MS_acat(ms, "SUCCEED");
+                        H5RS_acat(rs, "SUCCEED");
                     else
-                        H5MS_acat(ms, "FAIL");
+                        H5RS_acat(rs, "FAIL");
                 } /* end block */
                 break;
 
@@ -1069,7 +1069,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5E_auto1_t eauto1 = (H5E_auto1_t)HDva_arg(ap, H5E_auto1_t);
 
-                            H5MS_asprintf_cat(ms, "%p", eauto1);
+                            H5RS_asprintf_cat(rs, "%p", (void *)eauto1);
                         } /* end block */
                         break;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
@@ -1078,7 +1078,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5E_auto2_t eauto2 = (H5E_auto2_t)HDva_arg(ap, H5E_auto2_t);
 
-                            H5MS_asprintf_cat(ms, "%p", eauto2);
+                            H5RS_asprintf_cat(rs, "%p", (void *)eauto2);
                         } /* end block */
                         break;
 
@@ -1088,15 +1088,15 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (direction) {
                                 case H5E_WALK_UPWARD:
-                                    H5MS_acat(ms, "H5E_WALK_UPWARD");
+                                    H5RS_acat(rs, "H5E_WALK_UPWARD");
                                     break;
 
                                 case H5E_WALK_DOWNWARD:
-                                    H5MS_acat(ms, "H5E_WALK_DOWNWARD");
+                                    H5RS_acat(rs, "H5E_WALK_DOWNWARD");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)direction);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)direction);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -1106,7 +1106,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5E_error2_t *error = HDva_arg(ap, H5E_error2_t *);
 
-                            H5MS_asprintf_cat(ms, "%p", (void *)error);
+                            H5RS_asprintf_cat(rs, "%p", (void *)error);
                         } /* end block */
                         break;
 
@@ -1116,23 +1116,23 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (status) {
                                 case H5ES_STATUS_IN_PROGRESS:
-                                    H5MS_acat(ms, "H5ES_STATUS_IN_PROGRESS");
+                                    H5RS_acat(rs, "H5ES_STATUS_IN_PROGRESS");
                                     break;
 
                                 case H5ES_STATUS_SUCCEED:
-                                    H5MS_acat(ms, "H5ES_STATUS_SUCCEED");
+                                    H5RS_acat(rs, "H5ES_STATUS_SUCCEED");
                                     break;
 
                                 case H5ES_STATUS_FAIL:
-                                    H5MS_acat(ms, "H5ES_STATUS_FAIL");
+                                    H5RS_acat(rs, "H5ES_STATUS_FAIL");
                                     break;
 
                                 case H5ES_STATUS_CANCELED:
-                                    H5MS_acat(ms, "H5ES_STATUS_CANCELED");
+                                    H5RS_acat(rs, "H5ES_STATUS_CANCELED");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)status);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)status);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -1144,22 +1144,22 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (etype) {
                                 case H5E_MAJOR:
-                                    H5MS_acat(ms, "H5E_MAJOR");
+                                    H5RS_acat(rs, "H5E_MAJOR");
                                     break;
 
                                 case H5E_MINOR:
-                                    H5MS_acat(ms, "H5E_MINOR");
+                                    H5RS_acat(rs, "H5E_MINOR");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)etype);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)etype);
                                     break;
                             } /* end switch */
                         }     /* end block */
                         break;
 
                         default:
-                            H5MS_asprintf_cat(ms, "BADTYPE(E%c)", type[1]);
+                            H5RS_asprintf_cat(rs, "BADTYPE(E%c)", type[1]);
                             goto error;
                     } /* end switch */
                     break;
@@ -1170,9 +1170,9 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5FD_class_t cls = HDva_arg(ap, H5FD_class_t);
 
-                            H5MS_asprintf_cat(ms, "{'%s', " H5_PRINTF_HADDR_FMT ", ", cls.name, cls.maxaddr);
-                            H5_trace_args_close_degree(ms, cls.fc_degree);
-                            H5MS_acat(ms, ", ...}");
+                            H5RS_asprintf_cat(rs, "{'%s', " H5_PRINTF_HADDR_FMT ", ", cls.name, cls.maxaddr);
+                            H5_trace_args_close_degree(rs, cls.fc_degree);
+                            H5RS_acat(rs, ", ...}");
                         } /* end block */
                         break;
 
@@ -1180,7 +1180,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5F_close_degree_t degree = (H5F_close_degree_t)HDva_arg(ap, int);
 
-                            H5_trace_args_close_degree(ms, degree);
+                            H5_trace_args_close_degree(rs, degree);
                         } /* end block */
                         break;
 
@@ -1190,24 +1190,24 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (fs_strategy) {
                                 case H5F_FSPACE_STRATEGY_FSM_AGGR:
-                                    H5MS_acat(ms, "H5F_FSPACE_STRATEGY_FSM_AGGR");
+                                    H5RS_acat(rs, "H5F_FSPACE_STRATEGY_FSM_AGGR");
                                     break;
 
                                 case H5F_FSPACE_STRATEGY_PAGE:
-                                    H5MS_acat(ms, "H5F_FSPACE_STRATEGY_PAGE");
+                                    H5RS_acat(rs, "H5F_FSPACE_STRATEGY_PAGE");
                                     break;
 
                                 case H5F_FSPACE_STRATEGY_AGGR:
-                                    H5MS_acat(ms, "H5F_FSPACE_STRATEGY_AGGR");
+                                    H5RS_acat(rs, "H5F_FSPACE_STRATEGY_AGGR");
                                     break;
 
                                 case H5F_FSPACE_STRATEGY_NONE:
-                                    H5MS_acat(ms, "H5F_FSPACE_STRATEGY_NONE");
+                                    H5RS_acat(rs, "H5F_FSPACE_STRATEGY_NONE");
                                     break;
 
                                 case H5F_FSPACE_STRATEGY_NTYPES:
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)fs_strategy);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)fs_strategy);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -1217,7 +1217,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5F_flush_cb_t fflsh = (H5F_flush_cb_t)HDva_arg(ap, H5F_flush_cb_t);
 
-                            H5MS_asprintf_cat(ms, "%p", fflsh);
+                            H5RS_asprintf_cat(rs, "%p", (void *)fflsh);
                         } /* end block */
                         break;
 
@@ -1225,12 +1225,12 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5F_info2_t fi2 = HDva_arg(ap, H5F_info2_t);
 
-                            H5MS_asprintf_cat(ms, "{{%u, %" PRIuHSIZE ", %" PRIuHSIZE "}, ",
+                            H5RS_asprintf_cat(rs, "{{%u, %" PRIuHSIZE ", %" PRIuHSIZE "}, ",
                                               fi2.super.version, fi2.super.super_size,
                                               fi2.super.super_ext_size);
-                            H5MS_asprintf_cat(ms, "{%u, %" PRIuHSIZE ", %" PRIuHSIZE "}, ", fi2.free.version,
+                            H5RS_asprintf_cat(rs, "{%u, %" PRIuHSIZE ", %" PRIuHSIZE "}, ", fi2.free.version,
                                               fi2.free.meta_size, fi2.free.tot_space);
-                            H5MS_asprintf_cat(ms, "{%u, %" PRIuHSIZE ", {%" PRIuHSIZE ", %" PRIuHSIZE "}}}",
+                            H5RS_asprintf_cat(rs, "{%u, %" PRIuHSIZE ", {%" PRIuHSIZE ", %" PRIuHSIZE "}}}",
                                               fi2.sohm.version, fi2.sohm.hdr_size,
                                               fi2.sohm.msgs_info.index_size, fi2.sohm.msgs_info.heap_size);
                         } /* end block */
@@ -1242,40 +1242,40 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (mem_type) {
                                 case H5FD_MEM_NOLIST:
-                                    H5MS_acat(ms, "H5FD_MEM_NOLIST");
+                                    H5RS_acat(rs, "H5FD_MEM_NOLIST");
                                     break;
 
                                 case H5FD_MEM_DEFAULT:
-                                    H5MS_acat(ms, "H5FD_MEM_DEFAULT");
+                                    H5RS_acat(rs, "H5FD_MEM_DEFAULT");
                                     break;
 
                                 case H5FD_MEM_SUPER:
-                                    H5MS_acat(ms, "H5FD_MEM_SUPER");
+                                    H5RS_acat(rs, "H5FD_MEM_SUPER");
                                     break;
 
                                 case H5FD_MEM_BTREE:
-                                    H5MS_acat(ms, "H5FD_MEM_BTREE");
+                                    H5RS_acat(rs, "H5FD_MEM_BTREE");
                                     break;
 
                                 case H5FD_MEM_DRAW:
-                                    H5MS_acat(ms, "H5FD_MEM_DRAW");
+                                    H5RS_acat(rs, "H5FD_MEM_DRAW");
                                     break;
 
                                 case H5FD_MEM_GHEAP:
-                                    H5MS_acat(ms, "H5FD_MEM_GHEAP");
+                                    H5RS_acat(rs, "H5FD_MEM_GHEAP");
                                     break;
 
                                 case H5FD_MEM_LHEAP:
-                                    H5MS_acat(ms, "H5FD_MEM_LHEAP");
+                                    H5RS_acat(rs, "H5FD_MEM_LHEAP");
                                     break;
 
                                 case H5FD_MEM_OHDR:
-                                    H5MS_acat(ms, "H5FD_MEM_OHDR");
+                                    H5RS_acat(rs, "H5FD_MEM_OHDR");
                                     break;
 
                                 case H5FD_MEM_NTYPES:
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)mem_type);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)mem_type);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -1287,15 +1287,15 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (scope) {
                                 case H5F_SCOPE_LOCAL:
-                                    H5MS_acat(ms, "H5F_SCOPE_LOCAL");
+                                    H5RS_acat(rs, "H5F_SCOPE_LOCAL");
                                     break;
 
                                 case H5F_SCOPE_GLOBAL:
-                                    H5MS_acat(ms, "H5F_SCOPE_GLOBAL");
+                                    H5RS_acat(rs, "H5F_SCOPE_GLOBAL");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)scope);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)scope);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -1307,28 +1307,28 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (fspace_type) {
                                 case H5F_FILE_SPACE_DEFAULT:
-                                    H5MS_acat(ms, "H5F_FILE_SPACE_DEFAULT");
+                                    H5RS_acat(rs, "H5F_FILE_SPACE_DEFAULT");
                                     break;
 
                                 case H5F_FILE_SPACE_ALL_PERSIST:
-                                    H5MS_acat(ms, "H5F_FILE_SPACE_ALL_PERSIST");
+                                    H5RS_acat(rs, "H5F_FILE_SPACE_ALL_PERSIST");
                                     break;
 
                                 case H5F_FILE_SPACE_ALL:
-                                    H5MS_acat(ms, "H5F_FILE_SPACE_ALL");
+                                    H5RS_acat(rs, "H5F_FILE_SPACE_ALL");
                                     break;
 
                                 case H5F_FILE_SPACE_AGGR_VFD:
-                                    H5MS_acat(ms, "H5F_FILE_SPACE_AGGR_VFD");
+                                    H5RS_acat(rs, "H5F_FILE_SPACE_AGGR_VFD");
                                     break;
 
                                 case H5F_FILE_SPACE_VFD:
-                                    H5MS_acat(ms, "H5F_FILE_SPACE_VFD");
+                                    H5RS_acat(rs, "H5F_FILE_SPACE_VFD");
                                     break;
 
                                 case H5F_FILE_SPACE_NTYPES:
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)fspace_type);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)fspace_type);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -1340,37 +1340,37 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (libver_vers) {
                                 case H5F_LIBVER_EARLIEST:
-                                    H5MS_acat(ms, "H5F_LIBVER_EARLIEST");
+                                    H5RS_acat(rs, "H5F_LIBVER_EARLIEST");
                                     break;
 
                                 case H5F_LIBVER_V18:
-                                    H5MS_acat(ms, "H5F_LIBVER_V18");
+                                    H5RS_acat(rs, "H5F_LIBVER_V18");
                                     break;
 
                                 case H5F_LIBVER_V110:
-                                    H5MS_acat(ms, "H5F_LIBVER_V110");
+                                    H5RS_acat(rs, "H5F_LIBVER_V110");
                                     break;
 
                                 case H5F_LIBVER_V112:
-                                    H5MS_acat(ms, "H5F_LIBVER_V112");
+                                    H5RS_acat(rs, "H5F_LIBVER_V112");
                                     break;
 
                                 case H5F_LIBVER_V114:
                                     HDcompile_assert(H5F_LIBVER_LATEST == H5F_LIBVER_V114);
-                                    H5MS_acat(ms, "H5F_LIBVER_LATEST");
+                                    H5RS_acat(rs, "H5F_LIBVER_LATEST");
                                     break;
 
                                 case H5F_LIBVER_ERROR:
                                 case H5F_LIBVER_NBOUNDS:
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)libver_vers);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)libver_vers);
                                     break;
                             } /* end switch */
                         }     /* end block */
                         break;
 
                         default:
-                            H5MS_asprintf_cat(ms, "BADTYPE(F%c)", type[1]);
+                            H5RS_asprintf_cat(rs, "BADTYPE(F%c)", type[1]);
                             goto error;
                     } /* end switch */
                     break;
@@ -1382,7 +1382,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5G_iterate_t git = (H5G_iterate_t)HDva_arg(ap, H5G_iterate_t);
 
-                            H5MS_asprintf_cat(ms, "%p", git);
+                            H5RS_asprintf_cat(rs, "%p", (void *)git);
                         } /* end block */
                         break;
 
@@ -1392,37 +1392,37 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (obj_type) {
                                 case H5G_UNKNOWN:
-                                    H5MS_acat(ms, "H5G_UNKNOWN");
+                                    H5RS_acat(rs, "H5G_UNKNOWN");
                                     break;
 
                                 case H5G_GROUP:
-                                    H5MS_acat(ms, "H5G_GROUP");
+                                    H5RS_acat(rs, "H5G_GROUP");
                                     break;
 
                                 case H5G_DATASET:
-                                    H5MS_acat(ms, "H5G_DATASET");
+                                    H5RS_acat(rs, "H5G_DATASET");
                                     break;
 
                                 case H5G_TYPE:
-                                    H5MS_acat(ms, "H5G_TYPE");
+                                    H5RS_acat(rs, "H5G_TYPE");
                                     break;
 
                                 case H5G_LINK:
-                                    H5MS_acat(ms, "H5G_LINK");
+                                    H5RS_acat(rs, "H5G_LINK");
                                     break;
 
                                 case H5G_UDLINK:
-                                    H5MS_acat(ms, "H5G_UDLINK");
+                                    H5RS_acat(rs, "H5G_UDLINK");
                                     break;
 
                                 case H5G_RESERVED_5:
                                 case H5G_RESERVED_6:
                                 case H5G_RESERVED_7:
-                                    H5MS_asprintf_cat(ms, "H5G_RESERVED(%ld)", (long)obj_type);
+                                    H5RS_asprintf_cat(rs, "H5G_RESERVED(%ld)", (long)obj_type);
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)obj_type);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)obj_type);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -1432,13 +1432,13 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5G_stat_t *statbuf = HDva_arg(ap, H5G_stat_t *);
 
-                            H5MS_asprintf_cat(ms, "%p", (void *)statbuf);
+                            H5RS_asprintf_cat(rs, "%p", (void *)statbuf);
                         } /* end block */
                         break;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
                         default:
-                            H5MS_asprintf_cat(ms, "BADTYPE(G%c)", type[1]);
+                            H5RS_asprintf_cat(rs, "BADTYPE(G%c)", type[1]);
                             goto error;
                     } /* end switch */
                     break;
@@ -1448,9 +1448,9 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                     hsize_t hsize = HDva_arg(ap, hsize_t);
 
                     if (H5S_UNLIMITED == hsize)
-                        H5MS_acat(ms, "H5S_UNLIMITED");
+                        H5RS_acat(rs, "H5S_UNLIMITED");
                     else {
-                        H5MS_asprintf_cat(ms, "%" PRIuHSIZE, hsize);
+                        H5RS_asprintf_cat(rs, "%" PRIuHSIZE, hsize);
                         asize[argno] = (hssize_t)hsize;
                     } /* end else */
                 }     /* end block */
@@ -1462,7 +1462,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5_alloc_stats_t stats = HDva_arg(ap, H5_alloc_stats_t);
 
-                            H5MS_asprintf_cat(ms, "{%llu, %zu, %zu, %zu, %zu, %zu, %zu}",
+                            H5RS_asprintf_cat(rs, "{%llu, %zu, %zu, %zu, %zu, %zu, %zu}",
                                               stats.total_alloc_bytes, stats.curr_alloc_bytes,
                                               stats.peak_alloc_bytes, stats.max_block_size,
                                               stats.total_alloc_blocks_count, stats.curr_alloc_blocks_count,
@@ -1474,13 +1474,13 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             hssize_t hssize = HDva_arg(ap, hssize_t);
 
-                            H5MS_asprintf_cat(ms, "%" PRIdHSIZE, hssize);
+                            H5RS_asprintf_cat(rs, "%" PRIdHSIZE, hssize);
                             asize[argno] = (hssize_t)hssize;
                         } /* end block */
                         break;
 
                         default:
-                            H5MS_asprintf_cat(ms, "BADTYPE(H%c)", type[1]);
+                            H5RS_asprintf_cat(rs, "BADTYPE(H%c)", type[1]);
                             goto error;
                     } /* end switch */
                     break;
@@ -1490,122 +1490,122 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                     hid_t obj = HDva_arg(ap, hid_t);
 
                     if (H5P_DEFAULT == obj)
-                        H5MS_acat(ms, "H5P_DEFAULT");
+                        H5RS_acat(rs, "H5P_DEFAULT");
                     else if (obj < 0)
-                        H5MS_acat(ms, "FAIL");
+                        H5RS_acat(rs, "FAIL");
                     else {
                         switch (H5I_TYPE(obj)) { /* Use internal H5I macro instead of function call */
                             case H5I_UNINIT:
-                                H5MS_asprintf_cat(ms, "0x%0llx (uninit - error)", (unsigned long long)obj);
+                                H5RS_asprintf_cat(rs, "0x%0llx (uninit - error)", (unsigned long long)obj);
                                 break;
 
                             case H5I_BADID:
-                                H5MS_asprintf_cat(ms, "0x%0llx (badid - error)", (unsigned long long)obj);
+                                H5RS_asprintf_cat(rs, "0x%0llx (badid - error)", (unsigned long long)obj);
                                 break;
 
                             case H5I_FILE:
-                                H5MS_asprintf_cat(ms, "0x%0llx (file)", (unsigned long long)obj);
+                                H5RS_asprintf_cat(rs, "0x%0llx (file)", (unsigned long long)obj);
                                 break;
 
                             case H5I_GROUP:
-                                H5MS_asprintf_cat(ms, "0x%0llx (group)", (unsigned long long)obj);
+                                H5RS_asprintf_cat(rs, "0x%0llx (group)", (unsigned long long)obj);
                                 break;
 
                             case H5I_DATATYPE:
                                 if (obj == H5T_NATIVE_SCHAR_g)
-                                    H5MS_acat(ms, "H5T_NATIVE_SCHAR");
+                                    H5RS_acat(rs, "H5T_NATIVE_SCHAR");
                                 else if (obj == H5T_NATIVE_UCHAR_g)
-                                    H5MS_acat(ms, "H5T_NATIVE_UCHAR");
+                                    H5RS_acat(rs, "H5T_NATIVE_UCHAR");
                                 else if (obj == H5T_NATIVE_SHORT_g)
-                                    H5MS_acat(ms, "H5T_NATIVE_SHORT");
+                                    H5RS_acat(rs, "H5T_NATIVE_SHORT");
                                 else if (obj == H5T_NATIVE_USHORT_g)
-                                    H5MS_acat(ms, "H5T_NATIVE_USHORT");
+                                    H5RS_acat(rs, "H5T_NATIVE_USHORT");
                                 else if (obj == H5T_NATIVE_INT_g)
-                                    H5MS_acat(ms, "H5T_NATIVE_INT");
+                                    H5RS_acat(rs, "H5T_NATIVE_INT");
                                 else if (obj == H5T_NATIVE_UINT_g)
-                                    H5MS_acat(ms, "H5T_NATIVE_UINT");
+                                    H5RS_acat(rs, "H5T_NATIVE_UINT");
                                 else if (obj == H5T_NATIVE_LONG_g)
-                                    H5MS_acat(ms, "H5T_NATIVE_LONG");
+                                    H5RS_acat(rs, "H5T_NATIVE_LONG");
                                 else if (obj == H5T_NATIVE_ULONG_g)
-                                    H5MS_acat(ms, "H5T_NATIVE_ULONG");
+                                    H5RS_acat(rs, "H5T_NATIVE_ULONG");
                                 else if (obj == H5T_NATIVE_LLONG_g)
-                                    H5MS_acat(ms, "H5T_NATIVE_LLONG");
+                                    H5RS_acat(rs, "H5T_NATIVE_LLONG");
                                 else if (obj == H5T_NATIVE_ULLONG_g)
-                                    H5MS_acat(ms, "H5T_NATIVE_ULLONG");
+                                    H5RS_acat(rs, "H5T_NATIVE_ULLONG");
                                 else if (obj == H5T_NATIVE_FLOAT_g)
-                                    H5MS_acat(ms, "H5T_NATIVE_FLOAT");
+                                    H5RS_acat(rs, "H5T_NATIVE_FLOAT");
                                 else if (obj == H5T_NATIVE_DOUBLE_g)
-                                    H5MS_acat(ms, "H5T_NATIVE_DOUBLE");
+                                    H5RS_acat(rs, "H5T_NATIVE_DOUBLE");
 #if H5_SIZEOF_LONG_DOUBLE != 0
                                 else if (obj == H5T_NATIVE_LDOUBLE_g)
-                                    H5MS_acat(ms, "H5T_NATIVE_LDOUBLE");
+                                    H5RS_acat(rs, "H5T_NATIVE_LDOUBLE");
 #endif
                                 else if (obj == H5T_IEEE_F32BE_g)
-                                    H5MS_acat(ms, "H5T_IEEE_F32BE");
+                                    H5RS_acat(rs, "H5T_IEEE_F32BE");
                                 else if (obj == H5T_IEEE_F32LE_g)
-                                    H5MS_acat(ms, "H5T_IEEE_F32LE");
+                                    H5RS_acat(rs, "H5T_IEEE_F32LE");
                                 else if (obj == H5T_IEEE_F64BE_g)
-                                    H5MS_acat(ms, "H5T_IEEE_F64BE");
+                                    H5RS_acat(rs, "H5T_IEEE_F64BE");
                                 else if (obj == H5T_IEEE_F64LE_g)
-                                    H5MS_acat(ms, "H5T_IEEE_F64LE");
+                                    H5RS_acat(rs, "H5T_IEEE_F64LE");
                                 else if (obj == H5T_STD_I8BE_g)
-                                    H5MS_acat(ms, "H5T_STD_I8BE");
+                                    H5RS_acat(rs, "H5T_STD_I8BE");
                                 else if (obj == H5T_STD_I8LE_g)
-                                    H5MS_acat(ms, "H5T_STD_I8LE");
+                                    H5RS_acat(rs, "H5T_STD_I8LE");
                                 else if (obj == H5T_STD_I16BE_g)
-                                    H5MS_acat(ms, "H5T_STD_I16BE");
+                                    H5RS_acat(rs, "H5T_STD_I16BE");
                                 else if (obj == H5T_STD_I16LE_g)
-                                    H5MS_acat(ms, "H5T_STD_I16LE");
+                                    H5RS_acat(rs, "H5T_STD_I16LE");
                                 else if (obj == H5T_STD_I32BE_g)
-                                    H5MS_acat(ms, "H5T_STD_I32BE");
+                                    H5RS_acat(rs, "H5T_STD_I32BE");
                                 else if (obj == H5T_STD_I32LE_g)
-                                    H5MS_acat(ms, "H5T_STD_I32LE");
+                                    H5RS_acat(rs, "H5T_STD_I32LE");
                                 else if (obj == H5T_STD_I64BE_g)
-                                    H5MS_acat(ms, "H5T_STD_I64BE");
+                                    H5RS_acat(rs, "H5T_STD_I64BE");
                                 else if (obj == H5T_STD_I64LE_g)
-                                    H5MS_acat(ms, "H5T_STD_I64LE");
+                                    H5RS_acat(rs, "H5T_STD_I64LE");
                                 else if (obj == H5T_STD_U8BE_g)
-                                    H5MS_acat(ms, "H5T_STD_U8BE");
+                                    H5RS_acat(rs, "H5T_STD_U8BE");
                                 else if (obj == H5T_STD_U8LE_g)
-                                    H5MS_acat(ms, "H5T_STD_U8LE");
+                                    H5RS_acat(rs, "H5T_STD_U8LE");
                                 else if (obj == H5T_STD_U16BE_g)
-                                    H5MS_acat(ms, "H5T_STD_U16BE");
+                                    H5RS_acat(rs, "H5T_STD_U16BE");
                                 else if (obj == H5T_STD_U16LE_g)
-                                    H5MS_acat(ms, "H5T_STD_U16LE");
+                                    H5RS_acat(rs, "H5T_STD_U16LE");
                                 else if (obj == H5T_STD_U32BE_g)
-                                    H5MS_acat(ms, "H5T_STD_U32BE");
+                                    H5RS_acat(rs, "H5T_STD_U32BE");
                                 else if (obj == H5T_STD_U32LE_g)
-                                    H5MS_acat(ms, "H5T_STD_U32LE");
+                                    H5RS_acat(rs, "H5T_STD_U32LE");
                                 else if (obj == H5T_STD_U64BE_g)
-                                    H5MS_acat(ms, "H5T_STD_U64BE");
+                                    H5RS_acat(rs, "H5T_STD_U64BE");
                                 else if (obj == H5T_STD_U64LE_g)
-                                    H5MS_acat(ms, "H5T_STD_U64LE");
+                                    H5RS_acat(rs, "H5T_STD_U64LE");
                                 else if (obj == H5T_STD_B8BE_g)
-                                    H5MS_acat(ms, "H5T_STD_B8BE");
+                                    H5RS_acat(rs, "H5T_STD_B8BE");
                                 else if (obj == H5T_STD_B8LE_g)
-                                    H5MS_acat(ms, "H5T_STD_B8LE");
+                                    H5RS_acat(rs, "H5T_STD_B8LE");
                                 else if (obj == H5T_STD_B16BE_g)
-                                    H5MS_acat(ms, "H5T_STD_B16BE");
+                                    H5RS_acat(rs, "H5T_STD_B16BE");
                                 else if (obj == H5T_STD_B16LE_g)
-                                    H5MS_acat(ms, "H5T_STD_B16LE");
+                                    H5RS_acat(rs, "H5T_STD_B16LE");
                                 else if (obj == H5T_STD_B32BE_g)
-                                    H5MS_acat(ms, "H5T_STD_B32BE");
+                                    H5RS_acat(rs, "H5T_STD_B32BE");
                                 else if (obj == H5T_STD_B32LE_g)
-                                    H5MS_acat(ms, "H5T_STD_B32LE");
+                                    H5RS_acat(rs, "H5T_STD_B32LE");
                                 else if (obj == H5T_STD_B64BE_g)
-                                    H5MS_acat(ms, "H5T_STD_B64BE");
+                                    H5RS_acat(rs, "H5T_STD_B64BE");
                                 else if (obj == H5T_STD_B64LE_g)
-                                    H5MS_acat(ms, "H5T_STD_B64LE");
+                                    H5RS_acat(rs, "H5T_STD_B64LE");
                                 else if (obj == H5T_C_S1_g)
-                                    H5MS_acat(ms, "H5T_C_S1");
+                                    H5RS_acat(rs, "H5T_C_S1");
                                 else if (obj == H5T_FORTRAN_S1_g)
-                                    H5MS_acat(ms, "H5T_FORTRAN_S1");
+                                    H5RS_acat(rs, "H5T_FORTRAN_S1");
                                 else
-                                    H5MS_asprintf_cat(ms, "0x%0llx (dtype)", (unsigned long long)obj);
+                                    H5RS_asprintf_cat(rs, "0x%0llx (dtype)", (unsigned long long)obj);
                                 break;
 
                             case H5I_DATASPACE:
-                                H5MS_asprintf_cat(ms, "0x%0llx (dspace)", (unsigned long long)obj);
+                                H5RS_asprintf_cat(rs, "0x%0llx (dspace)", (unsigned long long)obj);
                                 /* Save the rank of simple dataspaces for arrays */
                                 /* This may generate recursive call to the library... -QAK */
                                 {
@@ -1618,60 +1618,60 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                                 break;
 
                             case H5I_DATASET:
-                                H5MS_asprintf_cat(ms, "0x%0llx (dset)", (unsigned long long)obj);
+                                H5RS_asprintf_cat(rs, "0x%0llx (dset)", (unsigned long long)obj);
                                 break;
 
                             case H5I_ATTR:
-                                H5MS_asprintf_cat(ms, "0x%0llx (attr)", (unsigned long long)obj);
+                                H5RS_asprintf_cat(rs, "0x%0llx (attr)", (unsigned long long)obj);
                                 break;
 
                             case H5I_MAP:
-                                H5MS_asprintf_cat(ms, "0x%0llx (map)", (unsigned long long)obj);
+                                H5RS_asprintf_cat(rs, "0x%0llx (map)", (unsigned long long)obj);
                                 break;
 
                             case H5I_VFL:
-                                H5MS_asprintf_cat(ms, "0x%0llx (file driver)", (unsigned long long)obj);
+                                H5RS_asprintf_cat(rs, "0x%0llx (file driver)", (unsigned long long)obj);
                                 break;
 
                             case H5I_VOL:
-                                H5MS_asprintf_cat(ms, "0x%0llx (VOL plugin)", (unsigned long long)obj);
+                                H5RS_asprintf_cat(rs, "0x%0llx (VOL plugin)", (unsigned long long)obj);
                                 break;
 
                             case H5I_GENPROP_CLS:
-                                H5MS_asprintf_cat(ms, "0x%0llx (genprop class)", (unsigned long long)obj);
+                                H5RS_asprintf_cat(rs, "0x%0llx (genprop class)", (unsigned long long)obj);
                                 break;
 
                             case H5I_GENPROP_LST:
-                                H5MS_asprintf_cat(ms, "0x%0llx (genprop list)", (unsigned long long)obj);
+                                H5RS_asprintf_cat(rs, "0x%0llx (genprop list)", (unsigned long long)obj);
                                 break;
 
                             case H5I_ERROR_CLASS:
-                                H5MS_asprintf_cat(ms, "0x%0llx (err class)", (unsigned long long)obj);
+                                H5RS_asprintf_cat(rs, "0x%0llx (err class)", (unsigned long long)obj);
                                 break;
 
                             case H5I_ERROR_MSG:
-                                H5MS_asprintf_cat(ms, "0x%0llx (err msg)", (unsigned long long)obj);
+                                H5RS_asprintf_cat(rs, "0x%0llx (err msg)", (unsigned long long)obj);
                                 break;
 
                             case H5I_ERROR_STACK:
-                                H5MS_asprintf_cat(ms, "0x%0llx (err stack)", (unsigned long long)obj);
+                                H5RS_asprintf_cat(rs, "0x%0llx (err stack)", (unsigned long long)obj);
                                 break;
 
                             case H5I_SPACE_SEL_ITER:
-                                H5MS_asprintf_cat(ms, "0x%0llx (dataspace selection iterator)",
+                                H5RS_asprintf_cat(rs, "0x%0llx (dataspace selection iterator)",
                                                   (unsigned long long)obj);
                                 break;
 
                             case H5I_EVENTSET:
-                                H5MS_asprintf_cat(ms, "0x%0llx (event set)", (unsigned long long)obj);
+                                H5RS_asprintf_cat(rs, "0x%0llx (event set)", (unsigned long long)obj);
                                 break;
 
                             case H5I_NTYPES:
-                                H5MS_asprintf_cat(ms, "0x%0llx (ntypes - error)", (unsigned long long)obj);
+                                H5RS_asprintf_cat(rs, "0x%0llx (ntypes - error)", (unsigned long long)obj);
                                 break;
 
                             default:
-                                H5MS_asprintf_cat(ms, "0x%0llx (unknown class)", (unsigned long long)obj);
+                                H5RS_asprintf_cat(rs, "0x%0llx (unknown class)", (unsigned long long)obj);
                                 break;
                         } /* end switch */
                     }     /* end else */
@@ -1684,7 +1684,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5I_free_t ifree = (H5I_free_t)HDva_arg(ap, H5I_free_t);
 
-                            H5MS_asprintf_cat(ms, "%p", ifree);
+                            H5RS_asprintf_cat(rs, "%p", (void *)ifree);
                         } /* end block */
                         break;
 
@@ -1694,23 +1694,23 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (idx_type) {
                                 case H5_INDEX_UNKNOWN:
-                                    H5MS_acat(ms, "H5_INDEX_UNKNOWN");
+                                    H5RS_acat(rs, "H5_INDEX_UNKNOWN");
                                     break;
 
                                 case H5_INDEX_NAME:
-                                    H5MS_acat(ms, "H5_INDEX_NAME");
+                                    H5RS_acat(rs, "H5_INDEX_NAME");
                                     break;
 
                                 case H5_INDEX_CRT_ORDER:
-                                    H5MS_acat(ms, "H5_INDEX_CRT_ORDER");
+                                    H5RS_acat(rs, "H5_INDEX_CRT_ORDER");
                                     break;
 
                                 case H5_INDEX_N:
-                                    H5MS_acat(ms, "H5_INDEX_N");
+                                    H5RS_acat(rs, "H5_INDEX_N");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)idx_type);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)idx_type);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -1720,7 +1720,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5I_iterate_func_t iiter = (H5I_iterate_func_t)HDva_arg(ap, H5I_iterate_func_t);
 
-                            H5MS_asprintf_cat(ms, "%p", iiter);
+                            H5RS_asprintf_cat(rs, "%p", (void *)iiter);
                         } /* end block */
                         break;
 
@@ -1730,27 +1730,27 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (order) {
                                 case H5_ITER_UNKNOWN:
-                                    H5MS_acat(ms, "H5_ITER_UNKNOWN");
+                                    H5RS_acat(rs, "H5_ITER_UNKNOWN");
                                     break;
 
                                 case H5_ITER_INC:
-                                    H5MS_acat(ms, "H5_ITER_INC");
+                                    H5RS_acat(rs, "H5_ITER_INC");
                                     break;
 
                                 case H5_ITER_DEC:
-                                    H5MS_acat(ms, "H5_ITER_DEC");
+                                    H5RS_acat(rs, "H5_ITER_DEC");
                                     break;
 
                                 case H5_ITER_NATIVE:
-                                    H5MS_acat(ms, "H5_ITER_NATIVE");
+                                    H5RS_acat(rs, "H5_ITER_NATIVE");
                                     break;
 
                                 case H5_ITER_N:
-                                    H5MS_acat(ms, "H5_ITER_N");
+                                    H5RS_acat(rs, "H5_ITER_N");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)order);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)order);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -1760,7 +1760,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             int is = HDva_arg(ap, int);
 
-                            H5MS_asprintf_cat(ms, "%d", is);
+                            H5RS_asprintf_cat(rs, "%d", is);
                             asize[argno] = is;
                         } /* end block */
                         break;
@@ -1769,7 +1769,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5I_search_func_t isearch = (H5I_search_func_t)HDva_arg(ap, H5I_search_func_t);
 
-                            H5MS_asprintf_cat(ms, "%p", isearch);
+                            H5RS_asprintf_cat(rs, "%p", (void *)isearch);
                         } /* end block */
                         break;
 
@@ -1779,83 +1779,83 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (id_type) {
                                 case H5I_UNINIT:
-                                    H5MS_acat(ms, "H5I_UNINIT");
+                                    H5RS_acat(rs, "H5I_UNINIT");
                                     break;
 
                                 case H5I_BADID:
-                                    H5MS_acat(ms, "H5I_BADID");
+                                    H5RS_acat(rs, "H5I_BADID");
                                     break;
 
                                 case H5I_FILE:
-                                    H5MS_acat(ms, "H5I_FILE");
+                                    H5RS_acat(rs, "H5I_FILE");
                                     break;
 
                                 case H5I_GROUP:
-                                    H5MS_acat(ms, "H5I_GROUP");
+                                    H5RS_acat(rs, "H5I_GROUP");
                                     break;
 
                                 case H5I_DATATYPE:
-                                    H5MS_acat(ms, "H5I_DATATYPE");
+                                    H5RS_acat(rs, "H5I_DATATYPE");
                                     break;
 
                                 case H5I_DATASPACE:
-                                    H5MS_acat(ms, "H5I_DATASPACE");
+                                    H5RS_acat(rs, "H5I_DATASPACE");
                                     break;
 
                                 case H5I_DATASET:
-                                    H5MS_acat(ms, "H5I_DATASET");
+                                    H5RS_acat(rs, "H5I_DATASET");
                                     break;
 
                                 case H5I_ATTR:
-                                    H5MS_acat(ms, "H5I_ATTR");
+                                    H5RS_acat(rs, "H5I_ATTR");
                                     break;
 
                                 case H5I_MAP:
-                                    H5MS_acat(ms, "H5I_MAP");
+                                    H5RS_acat(rs, "H5I_MAP");
                                     break;
 
                                 case H5I_VFL:
-                                    H5MS_acat(ms, "H5I_VFL");
+                                    H5RS_acat(rs, "H5I_VFL");
                                     break;
 
                                 case H5I_VOL:
-                                    H5MS_acat(ms, "H5I_VOL");
+                                    H5RS_acat(rs, "H5I_VOL");
                                     break;
 
                                 case H5I_GENPROP_CLS:
-                                    H5MS_acat(ms, "H5I_GENPROP_CLS");
+                                    H5RS_acat(rs, "H5I_GENPROP_CLS");
                                     break;
 
                                 case H5I_GENPROP_LST:
-                                    H5MS_acat(ms, "H5I_GENPROP_LST");
+                                    H5RS_acat(rs, "H5I_GENPROP_LST");
                                     break;
 
                                 case H5I_ERROR_CLASS:
-                                    H5MS_acat(ms, "H5I_ERROR_CLASS");
+                                    H5RS_acat(rs, "H5I_ERROR_CLASS");
                                     break;
 
                                 case H5I_ERROR_MSG:
-                                    H5MS_acat(ms, "H5I_ERROR_MSG");
+                                    H5RS_acat(rs, "H5I_ERROR_MSG");
                                     break;
 
                                 case H5I_ERROR_STACK:
-                                    H5MS_acat(ms, "H5I_ERROR_STACK");
+                                    H5RS_acat(rs, "H5I_ERROR_STACK");
                                     break;
 
                                 case H5I_SPACE_SEL_ITER:
-                                    H5MS_acat(ms, "H5I_SPACE_SEL_ITER");
+                                    H5RS_acat(rs, "H5I_SPACE_SEL_ITER");
                                     break;
 
                                 case H5I_EVENTSET:
-                                    H5MS_acat(ms, "H5I_EVENTSET");
+                                    H5RS_acat(rs, "H5I_EVENTSET");
                                     break;
 
                                 case H5I_NTYPES:
-                                    H5MS_acat(ms, "H5I_NTYPES");
+                                    H5RS_acat(rs, "H5I_NTYPES");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)id_type);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)id_type);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -1865,13 +1865,13 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             unsigned iu = HDva_arg(ap, unsigned);
 
-                            H5MS_asprintf_cat(ms, "%u", iu);
+                            H5RS_asprintf_cat(rs, "%u", iu);
                             asize[argno] = iu;
                         } /* end block */
                         break;
 
                         default:
-                            H5MS_asprintf_cat(ms, "BADTYPE(I%c)", type[1]);
+                            H5RS_asprintf_cat(rs, "BADTYPE(I%c)", type[1]);
                             goto error;
                     } /* end switch */
                     break;
@@ -1882,7 +1882,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                     int         j;
 
                     for (j = 0; j < H5O_MAX_TOKEN_SIZE; j++)
-                        H5MS_asprintf_cat(ms, "%02x", token.__data[j]);
+                        H5RS_asprintf_cat(rs, "%02x", token.__data[j]);
                 } /* end block */
                 break;
 
@@ -1893,7 +1893,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5L_iterate1_t liter = (H5L_iterate1_t)HDva_arg(ap, H5L_iterate1_t);
 
-                            H5MS_asprintf_cat(ms, "%p", liter);
+                            H5RS_asprintf_cat(rs, "%p", (void *)liter);
                         } /* end block */
                         break;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
@@ -1902,7 +1902,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5L_iterate2_t liter = (H5L_iterate2_t)HDva_arg(ap, H5L_iterate2_t);
 
-                            H5MS_asprintf_cat(ms, "%p", liter);
+                            H5RS_asprintf_cat(rs, "%p", (void *)liter);
                         } /* end block */
                         break;
 
@@ -1912,27 +1912,27 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (link_type) {
                                 case H5L_TYPE_ERROR:
-                                    H5MS_acat(ms, "H5L_TYPE_ERROR");
+                                    H5RS_acat(rs, "H5L_TYPE_ERROR");
                                     break;
 
                                 case H5L_TYPE_HARD:
-                                    H5MS_acat(ms, "H5L_TYPE_HARD");
+                                    H5RS_acat(rs, "H5L_TYPE_HARD");
                                     break;
 
                                 case H5L_TYPE_SOFT:
-                                    H5MS_acat(ms, "H5L_TYPE_SOFT");
+                                    H5RS_acat(rs, "H5L_TYPE_SOFT");
                                     break;
 
                                 case H5L_TYPE_EXTERNAL:
-                                    H5MS_acat(ms, "H5L_TYPE_EXTERNAL");
+                                    H5RS_acat(rs, "H5L_TYPE_EXTERNAL");
                                     break;
 
                                 case H5L_TYPE_MAX:
-                                    H5MS_acat(ms, "H5L_TYPE_MAX");
+                                    H5RS_acat(rs, "H5L_TYPE_MAX");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)link_type);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)link_type);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -1943,12 +1943,12 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                             H5L_elink_traverse_t elt =
                                 (H5L_elink_traverse_t)HDva_arg(ap, H5L_elink_traverse_t);
 
-                            H5MS_asprintf_cat(ms, "%p", elt);
+                            H5RS_asprintf_cat(rs, "%p", (void *)elt);
                         } /* end block */
                         break;
 
                         default:
-                            H5MS_asprintf_cat(ms, "BADTYPE(G%c)", type[1]);
+                            H5RS_asprintf_cat(rs, "BADTYPE(G%c)", type[1]);
                             goto error;
                     } /* end switch */
                     break;
@@ -1959,7 +1959,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5MM_allocate_t afunc = (H5MM_allocate_t)HDva_arg(ap, H5MM_allocate_t);
 
-                            H5MS_asprintf_cat(ms, "%p", afunc);
+                            H5RS_asprintf_cat(rs, "%p", (void *)afunc);
                         } /* end block */
                         break;
 
@@ -1968,7 +1968,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             MPI_Comm comm = HDva_arg(ap, MPI_Comm);
 
-                            H5MS_asprintf_cat(ms, "%ld", (long)comm);
+                            H5RS_asprintf_cat(rs, "%ld", (long)comm);
                         } /* end block */
                         break;
 #endif /* H5_HAVE_PARALLEL */
@@ -1977,7 +1977,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5MM_free_t ffunc = (H5MM_free_t)HDva_arg(ap, H5MM_free_t);
 
-                            H5MS_asprintf_cat(ms, "%p", ffunc);
+                            H5RS_asprintf_cat(rs, "%p", (void *)ffunc);
                         } /* end block */
                         break;
 
@@ -1986,7 +1986,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             MPI_Info info = HDva_arg(ap, MPI_Info);
 
-                            H5MS_asprintf_cat(ms, "%ld", (long)info);
+                            H5RS_asprintf_cat(rs, "%ld", (long)info);
                         } /* end block */
                         break;
 #endif /* H5_HAVE_PARALLEL */
@@ -1996,7 +1996,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5M_iterate_t miter = (H5M_iterate_t)HDva_arg(ap, H5M_iterate_t);
 
-                            H5MS_asprintf_cat(ms, "%p", miter);
+                            H5RS_asprintf_cat(rs, "%p", (void *)miter);
                         } /* end block */
                         break;
 #endif /* H5_HAVE_MAP_API */
@@ -2007,43 +2007,43 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (mt) {
                                 case H5FD_MEM_NOLIST:
-                                    H5MS_acat(ms, "H5FD_MEM_NOLIST");
+                                    H5RS_acat(rs, "H5FD_MEM_NOLIST");
                                     break;
 
                                 case H5FD_MEM_DEFAULT:
-                                    H5MS_acat(ms, "H5FD_MEM_DEFAULT");
+                                    H5RS_acat(rs, "H5FD_MEM_DEFAULT");
                                     break;
 
                                 case H5FD_MEM_SUPER:
-                                    H5MS_acat(ms, "H5FD_MEM_SUPER");
+                                    H5RS_acat(rs, "H5FD_MEM_SUPER");
                                     break;
 
                                 case H5FD_MEM_BTREE:
-                                    H5MS_acat(ms, "H5FD_MEM_BTREE");
+                                    H5RS_acat(rs, "H5FD_MEM_BTREE");
                                     break;
 
                                 case H5FD_MEM_DRAW:
-                                    H5MS_acat(ms, "H5FD_MEM_DRAW");
+                                    H5RS_acat(rs, "H5FD_MEM_DRAW");
                                     break;
 
                                 case H5FD_MEM_GHEAP:
-                                    H5MS_acat(ms, "H5FD_MEM_GHEAP");
+                                    H5RS_acat(rs, "H5FD_MEM_GHEAP");
                                     break;
 
                                 case H5FD_MEM_LHEAP:
-                                    H5MS_acat(ms, "H5FD_MEM_LHEAP");
+                                    H5RS_acat(rs, "H5FD_MEM_LHEAP");
                                     break;
 
                                 case H5FD_MEM_OHDR:
-                                    H5MS_acat(ms, "H5FD_MEM_OHDR");
+                                    H5RS_acat(rs, "H5FD_MEM_OHDR");
                                     break;
 
                                 case H5FD_MEM_NTYPES:
-                                    H5MS_acat(ms, "H5FD_MEM_NTYPES");
+                                    H5RS_acat(rs, "H5FD_MEM_NTYPES");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)mt);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)mt);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -2058,7 +2058,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                 {
                     off_t offset = HDva_arg(ap, off_t);
 
-                    H5MS_asprintf_cat(ms, "%ld", (long)offset);
+                    H5RS_asprintf_cat(rs, "%ld", (long)offset);
                 } /* end block */
                 break;
 
@@ -2069,7 +2069,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5O_iterate1_t oiter = (H5O_iterate1_t)HDva_arg(ap, H5O_iterate1_t);
 
-                            H5MS_asprintf_cat(ms, "%p", oiter);
+                            H5RS_asprintf_cat(rs, "%p", (void *)oiter);
                         } /* end block */
                         break;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
@@ -2078,7 +2078,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5O_iterate2_t oiter2 = (H5O_iterate2_t)HDva_arg(ap, H5O_iterate2_t);
 
-                            H5MS_asprintf_cat(ms, "%p", oiter2);
+                            H5RS_asprintf_cat(rs, "%p", (void *)oiter2);
                         } /* end block */
                         break;
 
@@ -2087,7 +2087,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                             H5O_mcdt_search_cb_t osrch =
                                 (H5O_mcdt_search_cb_t)HDva_arg(ap, H5O_mcdt_search_cb_t);
 
-                            H5MS_asprintf_cat(ms, "%p", osrch);
+                            H5RS_asprintf_cat(rs, "%p", (void *)osrch);
                         } /* end block */
                         break;
 
@@ -2097,38 +2097,38 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (objtype) {
                                 case H5O_TYPE_UNKNOWN:
-                                    H5MS_acat(ms, "H5O_TYPE_UNKNOWN");
+                                    H5RS_acat(rs, "H5O_TYPE_UNKNOWN");
                                     break;
 
                                 case H5O_TYPE_GROUP:
-                                    H5MS_acat(ms, "H5O_TYPE_GROUP");
+                                    H5RS_acat(rs, "H5O_TYPE_GROUP");
                                     break;
 
                                 case H5O_TYPE_DATASET:
-                                    H5MS_acat(ms, "H5O_TYPE_DATASET");
+                                    H5RS_acat(rs, "H5O_TYPE_DATASET");
                                     break;
 
                                 case H5O_TYPE_NAMED_DATATYPE:
-                                    H5MS_acat(ms, "H5O_TYPE_NAMED_DATATYPE");
+                                    H5RS_acat(rs, "H5O_TYPE_NAMED_DATATYPE");
                                     break;
 
                                 case H5O_TYPE_MAP:
-                                    H5MS_acat(ms, "H5O_TYPE_MAP");
+                                    H5RS_acat(rs, "H5O_TYPE_MAP");
                                     break;
 
                                 case H5O_TYPE_NTYPES:
-                                    H5MS_acat(ms, "H5O_TYPE_NTYPES");
+                                    H5RS_acat(rs, "H5O_TYPE_NTYPES");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "BADTYPE(%ld)", (long)objtype);
+                                    H5RS_asprintf_cat(rs, "BADTYPE(%ld)", (long)objtype);
                                     break;
                             } /* end switch */
                         }     /* end block */
                         break;
 
                         default:
-                            H5MS_asprintf_cat(ms, "BADTYPE(S%c)", type[1]);
+                            H5RS_asprintf_cat(rs, "BADTYPE(S%c)", type[1]);
                             goto error;
                     } /* end switch */
                     break;
@@ -2143,11 +2143,11 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                     /* (This may generate recursive call to the library... -QAK) */
                     if (NULL != (pclass = (H5P_genclass_t *)H5I_object(pclass_id)) &&
                         NULL != (class_name = H5P_get_class_name(pclass))) {
-                        H5MS_asprintf_cat(ms, "%s", class_name);
+                        H5RS_asprintf_cat(rs, "%s", class_name);
                         H5MM_xfree(class_name);
                     } /* end if */
                     else
-                        H5MS_asprintf_cat(ms, "%ld", (long)pclass_id);
+                        H5RS_asprintf_cat(rs, "%ld", (long)pclass_id);
                 } /* end block */
                 break;
 
@@ -2158,7 +2158,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                             H5P_cls_create_func_t pcls_crt =
                                 (H5P_cls_create_func_t)HDva_arg(ap, H5P_cls_create_func_t);
 
-                            H5MS_asprintf_cat(ms, "%p", pcls_crt);
+                            H5RS_asprintf_cat(rs, "%p", (void *)pcls_crt);
                         } /* end block */
                         break;
 
@@ -2167,7 +2167,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                             H5P_prp_create_func_t prp_crt =
                                 (H5P_prp_create_func_t)HDva_arg(ap, H5P_prp_create_func_t);
 
-                            H5MS_asprintf_cat(ms, "%p", prp_crt);
+                            H5RS_asprintf_cat(rs, "%p", (void *)prp_crt);
                         } /* end block */
                         break;
 
@@ -2176,7 +2176,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                             H5P_prp_delete_func_t prp_del =
                                 (H5P_prp_delete_func_t)HDva_arg(ap, H5P_prp_delete_func_t);
 
-                            H5MS_asprintf_cat(ms, "%p", prp_del);
+                            H5RS_asprintf_cat(rs, "%p", (void *)prp_del);
                         } /* end block */
                         break;
 
@@ -2184,7 +2184,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5P_prp_get_func_t prp_get = (H5P_prp_get_func_t)HDva_arg(ap, H5P_prp_get_func_t);
 
-                            H5MS_asprintf_cat(ms, "%p", prp_get);
+                            H5RS_asprintf_cat(rs, "%p", (void *)prp_get);
                         } /* end block */
                         break;
 
@@ -2192,7 +2192,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5P_iterate_t piter = (H5P_iterate_t)HDva_arg(ap, H5P_iterate_t);
 
-                            H5MS_asprintf_cat(ms, "%p", piter);
+                            H5RS_asprintf_cat(rs, "%p", (void *)piter);
                         } /* end block */
                         break;
 
@@ -2201,7 +2201,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                             H5P_cls_close_func_t pcls_cls =
                                 (H5P_cls_close_func_t)HDva_arg(ap, H5P_cls_close_func_t);
 
-                            H5MS_asprintf_cat(ms, "%p", pcls_cls);
+                            H5RS_asprintf_cat(rs, "%p", (void *)pcls_cls);
                         } /* end block */
                         break;
 
@@ -2210,7 +2210,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                             H5P_prp_close_func_t prp_cls =
                                 (H5P_prp_close_func_t)HDva_arg(ap, H5P_prp_close_func_t);
 
-                            H5MS_asprintf_cat(ms, "%p", prp_cls);
+                            H5RS_asprintf_cat(rs, "%p", (void *)prp_cls);
                         } /* end block */
                         break;
 
@@ -2219,7 +2219,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                             H5P_prp_compare_func_t prp_cmp =
                                 (H5P_prp_compare_func_t)HDva_arg(ap, H5P_prp_compare_func_t);
 
-                            H5MS_asprintf_cat(ms, "%p", prp_cmp);
+                            H5RS_asprintf_cat(rs, "%p", (void *)prp_cmp);
                         } /* end block */
                         break;
 
@@ -2228,7 +2228,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                             H5P_cls_copy_func_t pcls_cpy =
                                 (H5P_cls_copy_func_t)HDva_arg(ap, H5P_cls_copy_func_t);
 
-                            H5MS_asprintf_cat(ms, "%p", pcls_cpy);
+                            H5RS_asprintf_cat(rs, "%p", (void *)pcls_cpy);
                         } /* end block */
                         break;
 
@@ -2237,7 +2237,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                             H5P_prp_copy_func_t prp_cpy =
                                 (H5P_prp_copy_func_t)HDva_arg(ap, H5P_prp_copy_func_t);
 
-                            H5MS_asprintf_cat(ms, "%p", prp_cpy);
+                            H5RS_asprintf_cat(rs, "%p", (void *)prp_cpy);
                         } /* end block */
                         break;
 
@@ -2245,12 +2245,12 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5P_prp_set_func_t prp_set = (H5P_prp_set_func_t)HDva_arg(ap, H5P_prp_set_func_t);
 
-                            H5MS_asprintf_cat(ms, "%p", prp_set);
+                            H5RS_asprintf_cat(rs, "%p", (void *)prp_set);
                         } /* end block */
                         break;
 
                         default:
-                            H5MS_asprintf_cat(ms, "BADTYPE(P%c)", type[1]);
+                            H5RS_asprintf_cat(rs, "BADTYPE(P%c)", type[1]);
                             goto error;
                     } /* end switch */
                     break;
@@ -2260,7 +2260,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         case 'd': /* hdset_reg_ref_t */
                         {
                             /* Note! region references are array types */
-                            H5MS_acat(ms, "Reference Region");
+                            H5RS_acat(rs, "Reference Region");
                             goto error;
                         } /* end block */
                         break;
@@ -2269,14 +2269,14 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             hobj_ref_t ref = HDva_arg(ap, hobj_ref_t);
 
-                            H5MS_asprintf_cat(ms, "Reference Object=%" PRIuHADDR, ref);
+                            H5RS_asprintf_cat(rs, "Reference Object=%" PRIuHADDR, ref);
                         } /* end block */
                         break;
 
                         case 'r': /* H5R_ref_t */
                         {
                             /* Note! reference types are opaque types */
-                            H5MS_acat(ms, "Reference Opaque");
+                            H5RS_acat(rs, "Reference Opaque");
                             goto error;
                         } /* end block */
                         break;
@@ -2287,42 +2287,42 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (reftype) {
                                 case H5R_BADTYPE:
-                                    H5MS_acat(ms, "H5R_BADTYPE");
+                                    H5RS_acat(rs, "H5R_BADTYPE");
                                     break;
 
                                 case H5R_OBJECT1:
-                                    H5MS_acat(ms, "H5R_OBJECT1");
+                                    H5RS_acat(rs, "H5R_OBJECT1");
                                     break;
 
                                 case H5R_DATASET_REGION1:
-                                    H5MS_acat(ms, "H5R_DATASET_REGION1");
+                                    H5RS_acat(rs, "H5R_DATASET_REGION1");
                                     break;
 
                                 case H5R_OBJECT2:
-                                    H5MS_acat(ms, "H5R_OBJECT2");
+                                    H5RS_acat(rs, "H5R_OBJECT2");
                                     break;
 
                                 case H5R_DATASET_REGION2:
-                                    H5MS_acat(ms, "H5R_DATASET_REGION2");
+                                    H5RS_acat(rs, "H5R_DATASET_REGION2");
                                     break;
 
                                 case H5R_ATTR:
-                                    H5MS_acat(ms, "H5R_ATTR");
+                                    H5RS_acat(rs, "H5R_ATTR");
                                     break;
 
                                 case H5R_MAXTYPE:
-                                    H5MS_acat(ms, "H5R_MAXTYPE");
+                                    H5RS_acat(rs, "H5R_MAXTYPE");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "BADTYPE(%ld)", (long)reftype);
+                                    H5RS_asprintf_cat(rs, "BADTYPE(%ld)", (long)reftype);
                                     break;
                             } /* end switch */
                         }     /* end block */
                         break;
 
                         default:
-                            H5MS_asprintf_cat(ms, "BADTYPE(S%c)", type[1]);
+                            H5RS_asprintf_cat(rs, "BADTYPE(S%c)", type[1]);
                             goto error;
                     } /* end switch */
                     break;
@@ -2335,23 +2335,23 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (cls) {
                                 case H5S_NO_CLASS:
-                                    H5MS_acat(ms, "H5S_NO_CLASS");
+                                    H5RS_acat(rs, "H5S_NO_CLASS");
                                     break;
 
                                 case H5S_SCALAR:
-                                    H5MS_acat(ms, "H5S_SCALAR");
+                                    H5RS_acat(rs, "H5S_SCALAR");
                                     break;
 
                                 case H5S_SIMPLE:
-                                    H5MS_acat(ms, "H5S_SIMPLE");
+                                    H5RS_acat(rs, "H5S_SIMPLE");
                                     break;
 
                                 case H5S_NULL:
-                                    H5MS_acat(ms, "H5S_NULL");
+                                    H5RS_acat(rs, "H5S_NULL");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)cls);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)cls);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -2363,47 +2363,47 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (so) {
                                 case H5S_SELECT_NOOP:
-                                    H5MS_acat(ms, "H5S_NOOP");
+                                    H5RS_acat(rs, "H5S_NOOP");
                                     break;
 
                                 case H5S_SELECT_SET:
-                                    H5MS_acat(ms, "H5S_SELECT_SET");
+                                    H5RS_acat(rs, "H5S_SELECT_SET");
                                     break;
 
                                 case H5S_SELECT_OR:
-                                    H5MS_acat(ms, "H5S_SELECT_OR");
+                                    H5RS_acat(rs, "H5S_SELECT_OR");
                                     break;
 
                                 case H5S_SELECT_AND:
-                                    H5MS_acat(ms, "H5S_SELECT_AND");
+                                    H5RS_acat(rs, "H5S_SELECT_AND");
                                     break;
 
                                 case H5S_SELECT_XOR:
-                                    H5MS_acat(ms, "H5S_SELECT_XOR");
+                                    H5RS_acat(rs, "H5S_SELECT_XOR");
                                     break;
 
                                 case H5S_SELECT_NOTB:
-                                    H5MS_acat(ms, "H5S_SELECT_NOTB");
+                                    H5RS_acat(rs, "H5S_SELECT_NOTB");
                                     break;
 
                                 case H5S_SELECT_NOTA:
-                                    H5MS_acat(ms, "H5S_SELECT_NOTA");
+                                    H5RS_acat(rs, "H5S_SELECT_NOTA");
                                     break;
 
                                 case H5S_SELECT_APPEND:
-                                    H5MS_acat(ms, "H5S_SELECT_APPEND");
+                                    H5RS_acat(rs, "H5S_SELECT_APPEND");
                                     break;
 
                                 case H5S_SELECT_PREPEND:
-                                    H5MS_acat(ms, "H5S_SELECT_PREPEND");
+                                    H5RS_acat(rs, "H5S_SELECT_PREPEND");
                                     break;
 
                                 case H5S_SELECT_INVALID:
-                                    H5MS_acat(ms, "H5S_SELECT_INVALID");
+                                    H5RS_acat(rs, "H5S_SELECT_INVALID");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)so);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)so);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -2415,38 +2415,38 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (st) {
                                 case H5S_SEL_ERROR:
-                                    H5MS_acat(ms, "H5S_SEL_ERROR");
+                                    H5RS_acat(rs, "H5S_SEL_ERROR");
                                     break;
 
                                 case H5S_SEL_NONE:
-                                    H5MS_acat(ms, "H5S_SEL_NONE");
+                                    H5RS_acat(rs, "H5S_SEL_NONE");
                                     break;
 
                                 case H5S_SEL_POINTS:
-                                    H5MS_acat(ms, "H5S_SEL_POINTS");
+                                    H5RS_acat(rs, "H5S_SEL_POINTS");
                                     break;
 
                                 case H5S_SEL_HYPERSLABS:
-                                    H5MS_acat(ms, "H5S_SEL_HYPERSLABS");
+                                    H5RS_acat(rs, "H5S_SEL_HYPERSLABS");
                                     break;
 
                                 case H5S_SEL_ALL:
-                                    H5MS_acat(ms, "H5S_SEL_ALL");
+                                    H5RS_acat(rs, "H5S_SEL_ALL");
                                     break;
 
                                 case H5S_SEL_N:
-                                    H5MS_acat(ms, "H5S_SEL_N");
+                                    H5RS_acat(rs, "H5S_SEL_N");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)st);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)st);
                                     break;
                             } /* end switch */
                         }     /* end block */
                         break;
 
                         default:
-                            H5MS_asprintf_cat(ms, "BADTYPE(S%c)", type[1]);
+                            H5RS_asprintf_cat(rs, "BADTYPE(S%c)", type[1]);
                             goto error;
                     } /* end switch */
                     break;
@@ -2456,11 +2456,11 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                     htri_t tri_var = HDva_arg(ap, htri_t);
 
                     if (tri_var > 0)
-                        H5MS_acat(ms, "TRUE");
+                        H5RS_acat(rs, "TRUE");
                     else if (!tri_var)
-                        H5MS_acat(ms, "FALSE");
+                        H5RS_acat(rs, "FALSE");
                     else
-                        H5MS_asprintf_cat(ms, "FAIL(%d)", (int)tri_var);
+                        H5RS_asprintf_cat(rs, "FAIL(%d)", (int)tri_var);
                 } /* end block */
                 break;
 
@@ -2470,7 +2470,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5T_cset_t cset = (H5T_cset_t)HDva_arg(ap, int);
 
-                            H5_trace_args_cset(ms, cset);
+                            H5_trace_args_cset(rs, cset);
                         } /* end block */
                         break;
 
@@ -2478,7 +2478,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5T_conv_t tconv = (H5T_conv_t)HDva_arg(ap, H5T_conv_t);
 
-                            H5MS_asprintf_cat(ms, "%p", tconv);
+                            H5RS_asprintf_cat(rs, "%p", (void *)tconv);
                         } /* end block */
                         break;
 
@@ -2488,19 +2488,19 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (direct) {
                                 case H5T_DIR_DEFAULT:
-                                    H5MS_acat(ms, "H5T_DIR_DEFAULT");
+                                    H5RS_acat(rs, "H5T_DIR_DEFAULT");
                                     break;
 
                                 case H5T_DIR_ASCEND:
-                                    H5MS_acat(ms, "H5T_DIR_ASCEND");
+                                    H5RS_acat(rs, "H5T_DIR_ASCEND");
                                     break;
 
                                 case H5T_DIR_DESCEND:
-                                    H5MS_acat(ms, "H5T_DIR_DESCEND");
+                                    H5RS_acat(rs, "H5T_DIR_DESCEND");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)direct);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)direct);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -2512,19 +2512,19 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (pers) {
                                 case H5T_PERS_DONTCARE:
-                                    H5MS_acat(ms, "H5T_PERS_DONTCARE");
+                                    H5RS_acat(rs, "H5T_PERS_DONTCARE");
                                     break;
 
                                 case H5T_PERS_SOFT:
-                                    H5MS_acat(ms, "H5T_PERS_SOFT");
+                                    H5RS_acat(rs, "H5T_PERS_SOFT");
                                     break;
 
                                 case H5T_PERS_HARD:
-                                    H5MS_acat(ms, "H5T_PERS_HARD");
+                                    H5RS_acat(rs, "H5T_PERS_HARD");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)pers);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)pers);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -2535,7 +2535,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                             H5T_conv_except_func_t conv_ex =
                                 (H5T_conv_except_func_t)HDva_arg(ap, H5T_conv_except_func_t);
 
-                            H5MS_asprintf_cat(ms, "%p", conv_ex);
+                            H5RS_asprintf_cat(rs, "%p", (void *)conv_ex);
                         } /* end block */
                         break;
 
@@ -2545,23 +2545,23 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (norm) {
                                 case H5T_NORM_ERROR:
-                                    H5MS_acat(ms, "H5T_NORM_ERROR");
+                                    H5RS_acat(rs, "H5T_NORM_ERROR");
                                     break;
 
                                 case H5T_NORM_IMPLIED:
-                                    H5MS_acat(ms, "H5T_NORM_IMPLIED");
+                                    H5RS_acat(rs, "H5T_NORM_IMPLIED");
                                     break;
 
                                 case H5T_NORM_MSBSET:
-                                    H5MS_acat(ms, "H5T_NORM_MSBSET");
+                                    H5RS_acat(rs, "H5T_NORM_MSBSET");
                                     break;
 
                                 case H5T_NORM_NONE:
-                                    H5MS_acat(ms, "H5T_NORM_NONE");
+                                    H5RS_acat(rs, "H5T_NORM_NONE");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)norm);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)norm);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -2573,31 +2573,31 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (order) {
                                 case H5T_ORDER_ERROR:
-                                    H5MS_acat(ms, "H5T_ORDER_ERROR");
+                                    H5RS_acat(rs, "H5T_ORDER_ERROR");
                                     break;
 
                                 case H5T_ORDER_LE:
-                                    H5MS_acat(ms, "H5T_ORDER_LE");
+                                    H5RS_acat(rs, "H5T_ORDER_LE");
                                     break;
 
                                 case H5T_ORDER_BE:
-                                    H5MS_acat(ms, "H5T_ORDER_BE");
+                                    H5RS_acat(rs, "H5T_ORDER_BE");
                                     break;
 
                                 case H5T_ORDER_VAX:
-                                    H5MS_acat(ms, "H5T_ORDER_VAX");
+                                    H5RS_acat(rs, "H5T_ORDER_VAX");
                                     break;
 
                                 case H5T_ORDER_MIXED:
-                                    H5MS_acat(ms, "H5T_ORDER_MIXED");
+                                    H5RS_acat(rs, "H5T_ORDER_MIXED");
                                     break;
 
                                 case H5T_ORDER_NONE:
-                                    H5MS_acat(ms, "H5T_ORDER_NONE");
+                                    H5RS_acat(rs, "H5T_ORDER_NONE");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)order);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)order);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -2609,27 +2609,27 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (pad) {
                                 case H5T_PAD_ERROR:
-                                    H5MS_acat(ms, "H5T_PAD_ERROR");
+                                    H5RS_acat(rs, "H5T_PAD_ERROR");
                                     break;
 
                                 case H5T_PAD_ZERO:
-                                    H5MS_acat(ms, "H5T_PAD_ZERO");
+                                    H5RS_acat(rs, "H5T_PAD_ZERO");
                                     break;
 
                                 case H5T_PAD_ONE:
-                                    H5MS_acat(ms, "H5T_PAD_ONE");
+                                    H5RS_acat(rs, "H5T_PAD_ONE");
                                     break;
 
                                 case H5T_PAD_BACKGROUND:
-                                    H5MS_acat(ms, "H5T_PAD_BACKGROUND");
+                                    H5RS_acat(rs, "H5T_PAD_BACKGROUND");
                                     break;
 
                                 case H5T_NPAD:
-                                    H5MS_acat(ms, "H5T_NPAD");
+                                    H5RS_acat(rs, "H5T_NPAD");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)pad);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)pad);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -2641,23 +2641,23 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (sign) {
                                 case H5T_SGN_ERROR:
-                                    H5MS_acat(ms, "H5T_SGN_ERROR");
+                                    H5RS_acat(rs, "H5T_SGN_ERROR");
                                     break;
 
                                 case H5T_SGN_NONE:
-                                    H5MS_acat(ms, "H5T_SGN_NONE");
+                                    H5RS_acat(rs, "H5T_SGN_NONE");
                                     break;
 
                                 case H5T_SGN_2:
-                                    H5MS_acat(ms, "H5T_SGN_2");
+                                    H5RS_acat(rs, "H5T_SGN_2");
                                     break;
 
                                 case H5T_NSGN:
-                                    H5MS_acat(ms, "H5T_NSGN");
+                                    H5RS_acat(rs, "H5T_NSGN");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)sign);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)sign);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -2669,59 +2669,59 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (type_class) {
                                 case H5T_NO_CLASS:
-                                    H5MS_acat(ms, "H5T_NO_CLASS");
+                                    H5RS_acat(rs, "H5T_NO_CLASS");
                                     break;
 
                                 case H5T_INTEGER:
-                                    H5MS_acat(ms, "H5T_INTEGER");
+                                    H5RS_acat(rs, "H5T_INTEGER");
                                     break;
 
                                 case H5T_FLOAT:
-                                    H5MS_acat(ms, "H5T_FLOAT");
+                                    H5RS_acat(rs, "H5T_FLOAT");
                                     break;
 
                                 case H5T_TIME:
-                                    H5MS_acat(ms, "H5T_TIME");
+                                    H5RS_acat(rs, "H5T_TIME");
                                     break;
 
                                 case H5T_STRING:
-                                    H5MS_acat(ms, "H5T_STRING");
+                                    H5RS_acat(rs, "H5T_STRING");
                                     break;
 
                                 case H5T_BITFIELD:
-                                    H5MS_acat(ms, "H5T_BITFIELD");
+                                    H5RS_acat(rs, "H5T_BITFIELD");
                                     break;
 
                                 case H5T_OPAQUE:
-                                    H5MS_acat(ms, "H5T_OPAQUE");
+                                    H5RS_acat(rs, "H5T_OPAQUE");
                                     break;
 
                                 case H5T_COMPOUND:
-                                    H5MS_acat(ms, "H5T_COMPOUND");
+                                    H5RS_acat(rs, "H5T_COMPOUND");
                                     break;
 
                                 case H5T_REFERENCE:
-                                    H5MS_acat(ms, "H5T_REFERENCE");
+                                    H5RS_acat(rs, "H5T_REFERENCE");
                                     break;
 
                                 case H5T_ENUM:
-                                    H5MS_acat(ms, "H5T_ENUM");
+                                    H5RS_acat(rs, "H5T_ENUM");
                                     break;
 
                                 case H5T_VLEN:
-                                    H5MS_acat(ms, "H5T_VLEN");
+                                    H5RS_acat(rs, "H5T_VLEN");
                                     break;
 
                                 case H5T_ARRAY:
-                                    H5MS_acat(ms, "H5T_ARRAY");
+                                    H5RS_acat(rs, "H5T_ARRAY");
                                     break;
 
                                 case H5T_NCLASSES:
-                                    H5MS_acat(ms, "H5T_NCLASSES");
+                                    H5RS_acat(rs, "H5T_NCLASSES");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)type_class);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)type_class);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -2733,19 +2733,19 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (str) {
                                 case H5T_STR_ERROR:
-                                    H5MS_acat(ms, "H5T_STR_ERROR");
+                                    H5RS_acat(rs, "H5T_STR_ERROR");
                                     break;
 
                                 case H5T_STR_NULLTERM:
-                                    H5MS_acat(ms, "H5T_STR_NULLTERM");
+                                    H5RS_acat(rs, "H5T_STR_NULLTERM");
                                     break;
 
                                 case H5T_STR_NULLPAD:
-                                    H5MS_acat(ms, "H5T_STR_NULLPAD");
+                                    H5RS_acat(rs, "H5T_STR_NULLPAD");
                                     break;
 
                                 case H5T_STR_SPACEPAD:
-                                    H5MS_acat(ms, "H5T_STR_SPACEPAD");
+                                    H5RS_acat(rs, "H5T_STR_SPACEPAD");
                                     break;
 
                                 case H5T_STR_RESERVED_3:
@@ -2761,18 +2761,18 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                                 case H5T_STR_RESERVED_13:
                                 case H5T_STR_RESERVED_14:
                                 case H5T_STR_RESERVED_15:
-                                    H5MS_asprintf_cat(ms, "H5T_STR_RESERVED(%ld)", (long)str);
+                                    H5RS_asprintf_cat(rs, "H5T_STR_RESERVED(%ld)", (long)str);
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)str);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)str);
                                     break;
                             } /* end switch */
                         }     /* end block */
                         break;
 
                         default:
-                            H5MS_asprintf_cat(ms, "BADTYPE(T%c)", type[1]);
+                            H5RS_asprintf_cat(rs, "BADTYPE(T%c)", type[1]);
                             goto error;
                     } /* end switch */
                     break;
@@ -2783,7 +2783,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             unsigned long iul = HDva_arg(ap, unsigned long);
 
-                            H5MS_asprintf_cat(ms, "%lu", iul);
+                            H5RS_asprintf_cat(rs, "%lu", iul);
                             asize[argno] = (hssize_t)iul;
                         } /* end block */
                         break;
@@ -2792,13 +2792,13 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             unsigned long long iull = HDva_arg(ap, unsigned long long);
 
-                            H5MS_asprintf_cat(ms, "%llu", iull);
+                            H5RS_asprintf_cat(rs, "%llu", iull);
                             asize[argno] = (hssize_t)iull;
                         } /* end block */
                         break;
 
                         default:
-                            H5MS_asprintf_cat(ms, "BADTYPE(U%c)", type[1]);
+                            H5RS_asprintf_cat(rs, "BADTYPE(U%c)", type[1]);
                             goto error;
                     } /* end switch */
                     break;
@@ -2811,31 +2811,31 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (get) {
                                 case H5VL_ATTR_GET_SPACE:
-                                    H5MS_acat(ms, "H5VL_ATTR_GET_SPACE");
+                                    H5RS_acat(rs, "H5VL_ATTR_GET_SPACE");
                                     break;
 
                                 case H5VL_ATTR_GET_TYPE:
-                                    H5MS_acat(ms, "H5VL_ATTR_GET_TYPE");
+                                    H5RS_acat(rs, "H5VL_ATTR_GET_TYPE");
                                     break;
 
                                 case H5VL_ATTR_GET_ACPL:
-                                    H5MS_acat(ms, "H5VL_ATTR_GET_ACPL");
+                                    H5RS_acat(rs, "H5VL_ATTR_GET_ACPL");
                                     break;
 
                                 case H5VL_ATTR_GET_NAME:
-                                    H5MS_acat(ms, "H5VL_ATTR_GET_NAME");
+                                    H5RS_acat(rs, "H5VL_ATTR_GET_NAME");
                                     break;
 
                                 case H5VL_ATTR_GET_STORAGE_SIZE:
-                                    H5MS_acat(ms, "H5VL_ATTR_GET_STORAGE_SIZE");
+                                    H5RS_acat(rs, "H5VL_ATTR_GET_STORAGE_SIZE");
                                     break;
 
                                 case H5VL_ATTR_GET_INFO:
-                                    H5MS_acat(ms, "H5VL_ATTR_GET_INFO");
+                                    H5RS_acat(rs, "H5VL_ATTR_GET_INFO");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)get);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)get);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -2845,7 +2845,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5VL_blob_optional_t optional = (H5VL_blob_optional_t)HDva_arg(ap, int);
 
-                            H5MS_asprintf_cat(ms, "%ld", (long)optional);
+                            H5RS_asprintf_cat(rs, "%ld", (long)optional);
                         } /* end block */
                         break;
 
@@ -2855,23 +2855,23 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (specific) {
                                 case H5VL_ATTR_DELETE:
-                                    H5MS_acat(ms, "H5VL_ATTR_DELETE");
+                                    H5RS_acat(rs, "H5VL_ATTR_DELETE");
                                     break;
 
                                 case H5VL_ATTR_EXISTS:
-                                    H5MS_acat(ms, "H5VL_ATTR_EXISTS");
+                                    H5RS_acat(rs, "H5VL_ATTR_EXISTS");
                                     break;
 
                                 case H5VL_ATTR_ITER:
-                                    H5MS_acat(ms, "H5VL_ATTR_ITER");
+                                    H5RS_acat(rs, "H5VL_ATTR_ITER");
                                     break;
 
                                 case H5VL_ATTR_RENAME:
-                                    H5MS_acat(ms, "H5VL_ATTR_RENAME");
+                                    H5RS_acat(rs, "H5VL_ATTR_RENAME");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)specific);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)specific);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -2883,23 +2883,23 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (specific) {
                                 case H5VL_BLOB_DELETE:
-                                    H5MS_acat(ms, "H5VL_BLOB_DELETE");
+                                    H5RS_acat(rs, "H5VL_BLOB_DELETE");
                                     break;
 
                                 case H5VL_BLOB_GETSIZE:
-                                    H5MS_acat(ms, "H5VL_BLOB_GETSIZE");
+                                    H5RS_acat(rs, "H5VL_BLOB_GETSIZE");
                                     break;
 
                                 case H5VL_BLOB_ISNULL:
-                                    H5MS_acat(ms, "H5VL_BLOB_ISNULL");
+                                    H5RS_acat(rs, "H5VL_BLOB_ISNULL");
                                     break;
 
                                 case H5VL_BLOB_SETNULL:
-                                    H5MS_acat(ms, "H5VL_BLOB_SETNULL");
+                                    H5RS_acat(rs, "H5VL_BLOB_SETNULL");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)specific);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)specific);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -2911,31 +2911,31 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (get) {
                                 case H5VL_DATASET_GET_SPACE:
-                                    H5MS_acat(ms, "H5VL_DATASET_GET_SPACE");
+                                    H5RS_acat(rs, "H5VL_DATASET_GET_SPACE");
                                     break;
 
                                 case H5VL_DATASET_GET_SPACE_STATUS:
-                                    H5MS_acat(ms, "H5VL_DATASET_GET_SPACE_STATUS");
+                                    H5RS_acat(rs, "H5VL_DATASET_GET_SPACE_STATUS");
                                     break;
 
                                 case H5VL_DATASET_GET_TYPE:
-                                    H5MS_acat(ms, "H5VL_DATASET_GET_TYPE");
+                                    H5RS_acat(rs, "H5VL_DATASET_GET_TYPE");
                                     break;
 
                                 case H5VL_DATASET_GET_DCPL:
-                                    H5MS_acat(ms, "H5VL_DATASET_GET_DCPL");
+                                    H5RS_acat(rs, "H5VL_DATASET_GET_DCPL");
                                     break;
 
                                 case H5VL_DATASET_GET_DAPL:
-                                    H5MS_acat(ms, "H5VL_DATASET_GET_DAPL");
+                                    H5RS_acat(rs, "H5VL_DATASET_GET_DAPL");
                                     break;
 
                                 case H5VL_DATASET_GET_STORAGE_SIZE:
-                                    H5MS_acat(ms, "H5VL_DATASET_GET_STORAGE_SIZE");
+                                    H5RS_acat(rs, "H5VL_DATASET_GET_STORAGE_SIZE");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)get);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)get);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -2947,9 +2947,9 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                                 (H5VL_class_value_t)HDva_arg(ap, H5VL_class_value_t);
 
                             if (H5_VOL_NATIVE == class_val)
-                                H5MS_acat(ms, "H5_VOL_NATIVE");
+                                H5RS_acat(rs, "H5_VOL_NATIVE");
                             else
-                                H5MS_asprintf_cat(ms, "%ld", (long)class_val);
+                                H5RS_asprintf_cat(rs, "%ld", (long)class_val);
                         } /* end block */
                         break;
 
@@ -2959,23 +2959,23 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (specific) {
                                 case H5VL_DATASET_SET_EXTENT:
-                                    H5MS_acat(ms, "H5VL_DATASET_SET_EXTENT");
+                                    H5RS_acat(rs, "H5VL_DATASET_SET_EXTENT");
                                     break;
 
                                 case H5VL_DATASET_FLUSH:
-                                    H5MS_acat(ms, "H5VL_DATASET_FLUSH");
+                                    H5RS_acat(rs, "H5VL_DATASET_FLUSH");
                                     break;
 
                                 case H5VL_DATASET_REFRESH:
-                                    H5MS_acat(ms, "H5VL_DATASET_REFRESH");
+                                    H5RS_acat(rs, "H5VL_DATASET_REFRESH");
                                     break;
 
                                 case H5VL_DATASET_WAIT:
-                                    H5MS_acat(ms, "H5VL_DATASET_WAIT");
+                                    H5RS_acat(rs, "H5VL_DATASET_WAIT");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)specific);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)specific);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -2987,15 +2987,15 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (get) {
                                 case H5VL_DATATYPE_GET_BINARY:
-                                    H5MS_acat(ms, "H5VL_DATATYPE_GET_BINARY");
+                                    H5RS_acat(rs, "H5VL_DATATYPE_GET_BINARY");
                                     break;
 
                                 case H5VL_DATATYPE_GET_TCPL:
-                                    H5MS_acat(ms, "H5VL_DATATYPE_GET_TCPL");
+                                    H5RS_acat(rs, "H5VL_DATATYPE_GET_TCPL");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)get);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)get);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -3007,15 +3007,15 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (specific) {
                                 case H5VL_DATATYPE_FLUSH:
-                                    H5MS_acat(ms, "H5VL_DATATYPE_FLUSH");
+                                    H5RS_acat(rs, "H5VL_DATATYPE_FLUSH");
                                     break;
 
                                 case H5VL_DATATYPE_REFRESH:
-                                    H5MS_acat(ms, "H5VL_DATATYPE_REFRESH");
+                                    H5RS_acat(rs, "H5VL_DATATYPE_REFRESH");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)specific);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)specific);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -3027,39 +3027,39 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (get) {
                                 case H5VL_FILE_GET_CONT_INFO:
-                                    H5MS_acat(ms, "H5VL_FILE_GET_CONT_INFO");
+                                    H5RS_acat(rs, "H5VL_FILE_GET_CONT_INFO");
                                     break;
 
                                 case H5VL_FILE_GET_FAPL:
-                                    H5MS_acat(ms, "H5VL_FILE_GET_FAPL");
+                                    H5RS_acat(rs, "H5VL_FILE_GET_FAPL");
                                     break;
 
                                 case H5VL_FILE_GET_FCPL:
-                                    H5MS_acat(ms, "H5VL_FILE_GET_FCPL");
+                                    H5RS_acat(rs, "H5VL_FILE_GET_FCPL");
                                     break;
 
                                 case H5VL_FILE_GET_FILENO:
-                                    H5MS_acat(ms, "H5VL_FILE_GET_FILENO");
+                                    H5RS_acat(rs, "H5VL_FILE_GET_FILENO");
                                     break;
 
                                 case H5VL_FILE_GET_INTENT:
-                                    H5MS_acat(ms, "H5VL_FILE_GET_INTENT");
+                                    H5RS_acat(rs, "H5VL_FILE_GET_INTENT");
                                     break;
 
                                 case H5VL_FILE_GET_NAME:
-                                    H5MS_acat(ms, "H5VL_FILE_GET_NAME");
+                                    H5RS_acat(rs, "H5VL_FILE_GET_NAME");
                                     break;
 
                                 case H5VL_FILE_GET_OBJ_COUNT:
-                                    H5MS_acat(ms, "H5VL_FILE_GET_OBJ_COUNT");
+                                    H5RS_acat(rs, "H5VL_FILE_GET_OBJ_COUNT");
                                     break;
 
                                 case H5VL_FILE_GET_OBJ_IDS:
-                                    H5MS_acat(ms, "H5VL_FILE_GET_OBJ_IDS");
+                                    H5RS_acat(rs, "H5VL_FILE_GET_OBJ_IDS");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)get);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)get);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -3071,39 +3071,39 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (specific) {
                                 case H5VL_FILE_FLUSH:
-                                    H5MS_acat(ms, "H5VL_FILE_FLUSH");
+                                    H5RS_acat(rs, "H5VL_FILE_FLUSH");
                                     break;
 
                                 case H5VL_FILE_REOPEN:
-                                    H5MS_acat(ms, "H5VL_FILE_REOPEN");
+                                    H5RS_acat(rs, "H5VL_FILE_REOPEN");
                                     break;
 
                                 case H5VL_FILE_MOUNT:
-                                    H5MS_acat(ms, "H5VL_FILE_MOUNT");
+                                    H5RS_acat(rs, "H5VL_FILE_MOUNT");
                                     break;
 
                                 case H5VL_FILE_UNMOUNT:
-                                    H5MS_acat(ms, "H5VL_FILE_UNMOUNT");
+                                    H5RS_acat(rs, "H5VL_FILE_UNMOUNT");
                                     break;
 
                                 case H5VL_FILE_IS_ACCESSIBLE:
-                                    H5MS_acat(ms, "H5VL_FILE_IS_ACCESSIBLE");
+                                    H5RS_acat(rs, "H5VL_FILE_IS_ACCESSIBLE");
                                     break;
 
                                 case H5VL_FILE_DELETE:
-                                    H5MS_acat(ms, "H5VL_FILE_DELETE");
+                                    H5RS_acat(rs, "H5VL_FILE_DELETE");
                                     break;
 
                                 case H5VL_FILE_IS_EQUAL:
-                                    H5MS_acat(ms, "H5VL_FILE_IS_EQUAL");
+                                    H5RS_acat(rs, "H5VL_FILE_IS_EQUAL");
                                     break;
 
                                 case H5VL_FILE_WAIT:
-                                    H5MS_acat(ms, "H5VL_FILE_WAIT");
+                                    H5RS_acat(rs, "H5VL_FILE_WAIT");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)specific);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)specific);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -3115,15 +3115,15 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (get) {
                                 case H5VL_GROUP_GET_GCPL:
-                                    H5MS_acat(ms, "H5VL_GROUP_GET_GCPL");
+                                    H5RS_acat(rs, "H5VL_GROUP_GET_GCPL");
                                     break;
 
                                 case H5VL_GROUP_GET_INFO:
-                                    H5MS_acat(ms, "H5VL_GROUP_GET_INFO");
+                                    H5RS_acat(rs, "H5VL_GROUP_GET_INFO");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)get);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)get);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -3135,15 +3135,15 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (specific) {
                                 case H5VL_GROUP_FLUSH:
-                                    H5MS_acat(ms, "H5VL_GROUP_FLUSH");
+                                    H5RS_acat(rs, "H5VL_GROUP_FLUSH");
                                     break;
 
                                 case H5VL_GROUP_REFRESH:
-                                    H5MS_acat(ms, "H5VL_GROUP_REFRESH");
+                                    H5RS_acat(rs, "H5VL_GROUP_REFRESH");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)specific);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)specific);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -3155,19 +3155,19 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (create) {
                                 case H5VL_LINK_CREATE_HARD:
-                                    H5MS_acat(ms, "H5VL_LINK_CREATE_HARD");
+                                    H5RS_acat(rs, "H5VL_LINK_CREATE_HARD");
                                     break;
 
                                 case H5VL_LINK_CREATE_SOFT:
-                                    H5MS_acat(ms, "H5VL_LINK_CREATE_SOFT");
+                                    H5RS_acat(rs, "H5VL_LINK_CREATE_SOFT");
                                     break;
 
                                 case H5VL_LINK_CREATE_UD:
-                                    H5MS_acat(ms, "H5VL_LINK_CREATE_UD");
+                                    H5RS_acat(rs, "H5VL_LINK_CREATE_UD");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)create);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)create);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -3179,19 +3179,19 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (get) {
                                 case H5VL_LINK_GET_INFO:
-                                    H5MS_acat(ms, "H5VL_LINK_GET_INFO");
+                                    H5RS_acat(rs, "H5VL_LINK_GET_INFO");
                                     break;
 
                                 case H5VL_LINK_GET_NAME:
-                                    H5MS_acat(ms, "H5VL_LINK_GET_NAME");
+                                    H5RS_acat(rs, "H5VL_LINK_GET_NAME");
                                     break;
 
                                 case H5VL_LINK_GET_VAL:
-                                    H5MS_acat(ms, "H5VL_LINK_GET_VAL");
+                                    H5RS_acat(rs, "H5VL_LINK_GET_VAL");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)get);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)get);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -3203,15 +3203,15 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (get) {
                                 case H5VL_GET_CONN_LVL_CURR:
-                                    H5MS_acat(ms, "H5VL_GET_CONN_LVL_CURR");
+                                    H5RS_acat(rs, "H5VL_GET_CONN_LVL_CURR");
                                     break;
 
                                 case H5VL_GET_CONN_LVL_TERM:
-                                    H5MS_acat(ms, "H5VL_GET_CONN_LVL_TERM");
+                                    H5RS_acat(rs, "H5VL_GET_CONN_LVL_TERM");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)get);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)get);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -3223,19 +3223,19 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (specific) {
                                 case H5VL_LINK_DELETE:
-                                    H5MS_acat(ms, "H5VL_LINK_DELETE");
+                                    H5RS_acat(rs, "H5VL_LINK_DELETE");
                                     break;
 
                                 case H5VL_LINK_EXISTS:
-                                    H5MS_acat(ms, "H5VL_LINK_EXISTS");
+                                    H5RS_acat(rs, "H5VL_LINK_EXISTS");
                                     break;
 
                                 case H5VL_LINK_ITER:
-                                    H5MS_acat(ms, "H5VL_LINK_ITER");
+                                    H5RS_acat(rs, "H5VL_LINK_ITER");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)specific);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)specific);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -3247,23 +3247,23 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (get) {
                                 case H5VL_OBJECT_GET_FILE:
-                                    H5MS_acat(ms, "H5VL_OBJECT_GET_FILE");
+                                    H5RS_acat(rs, "H5VL_OBJECT_GET_FILE");
                                     break;
 
                                 case H5VL_OBJECT_GET_NAME:
-                                    H5MS_acat(ms, "H5VL_OBJECT_GET_NAME");
+                                    H5RS_acat(rs, "H5VL_OBJECT_GET_NAME");
                                     break;
 
                                 case H5VL_OBJECT_GET_TYPE:
-                                    H5MS_acat(ms, "H5VL_OBJECT_GET_TYPE");
+                                    H5RS_acat(rs, "H5VL_OBJECT_GET_TYPE");
                                     break;
 
                                 case H5VL_OBJECT_GET_INFO:
-                                    H5MS_acat(ms, "H5VL_OBJECT_GET_INFO");
+                                    H5RS_acat(rs, "H5VL_OBJECT_GET_INFO");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)get);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)get);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -3274,7 +3274,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                             H5VL_request_notify_t vlrnot =
                                 (H5VL_request_notify_t)HDva_arg(ap, H5VL_request_notify_t);
 
-                            H5MS_asprintf_cat(ms, "%p", vlrnot);
+                            H5RS_asprintf_cat(rs, "%p", (void *)vlrnot);
                         } /* end block */
                         break;
 
@@ -3284,31 +3284,31 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (specific) {
                                 case H5VL_OBJECT_CHANGE_REF_COUNT:
-                                    H5MS_acat(ms, "H5VL_OBJECT_CHANGE_REF_COUNT");
+                                    H5RS_acat(rs, "H5VL_OBJECT_CHANGE_REF_COUNT");
                                     break;
 
                                 case H5VL_OBJECT_EXISTS:
-                                    H5MS_acat(ms, "H5VL_OBJECT_EXISTS");
+                                    H5RS_acat(rs, "H5VL_OBJECT_EXISTS");
                                     break;
 
                                 case H5VL_OBJECT_LOOKUP:
-                                    H5MS_acat(ms, "H5VL_OBJECT_LOOKUP");
+                                    H5RS_acat(rs, "H5VL_OBJECT_LOOKUP");
                                     break;
 
                                 case H5VL_OBJECT_VISIT:
-                                    H5MS_acat(ms, "H5VL_OBJECT_VISIT");
+                                    H5RS_acat(rs, "H5VL_OBJECT_VISIT");
                                     break;
 
                                 case H5VL_OBJECT_FLUSH:
-                                    H5MS_acat(ms, "H5VL_OBJECT_FLUSH");
+                                    H5RS_acat(rs, "H5VL_OBJECT_FLUSH");
                                     break;
 
                                 case H5VL_OBJECT_REFRESH:
-                                    H5MS_acat(ms, "H5VL_OBJECT_REFRESH");
+                                    H5RS_acat(rs, "H5VL_OBJECT_REFRESH");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)specific);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)specific);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -3320,19 +3320,19 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (specific) {
                                 case H5VL_REQUEST_WAITANY:
-                                    H5MS_acat(ms, "H5VL_REQUEST_WAITANY");
+                                    H5RS_acat(rs, "H5VL_REQUEST_WAITANY");
                                     break;
 
                                 case H5VL_REQUEST_WAITSOME:
-                                    H5MS_acat(ms, "H5VL_REQUEST_WAITSOME");
+                                    H5RS_acat(rs, "H5VL_REQUEST_WAITSOME");
                                     break;
 
                                 case H5VL_REQUEST_WAITALL:
-                                    H5MS_acat(ms, "H5VL_REQUEST_WAITALL");
+                                    H5RS_acat(rs, "H5VL_REQUEST_WAITALL");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)specific);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)specific);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -3345,12 +3345,12 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                             switch (optional) {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
                                 case H5VL_NATIVE_ATTR_ITERATE_OLD:
-                                    H5MS_acat(ms, "H5VL_NATIVE_ATTR_ITERATE_OLD");
+                                    H5RS_acat(rs, "H5VL_NATIVE_ATTR_ITERATE_OLD");
                                     break;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)optional);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)optional);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -3362,59 +3362,59 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (subclass) {
                                 case H5VL_SUBCLS_NONE:
-                                    H5MS_acat(ms, "H5VL_SUBCLS_NONE");
+                                    H5RS_acat(rs, "H5VL_SUBCLS_NONE");
                                     break;
 
                                 case H5VL_SUBCLS_INFO:
-                                    H5MS_acat(ms, "H5VL_SUBCLS_INFO");
+                                    H5RS_acat(rs, "H5VL_SUBCLS_INFO");
                                     break;
 
                                 case H5VL_SUBCLS_WRAP:
-                                    H5MS_acat(ms, "H5VL_SUBCLS_WRAP");
+                                    H5RS_acat(rs, "H5VL_SUBCLS_WRAP");
                                     break;
 
                                 case H5VL_SUBCLS_ATTR:
-                                    H5MS_acat(ms, "H5VL_SUBCLS_ATTR");
+                                    H5RS_acat(rs, "H5VL_SUBCLS_ATTR");
                                     break;
 
                                 case H5VL_SUBCLS_DATASET:
-                                    H5MS_acat(ms, "H5VL_SUBCLS_DATASET");
+                                    H5RS_acat(rs, "H5VL_SUBCLS_DATASET");
                                     break;
 
                                 case H5VL_SUBCLS_DATATYPE:
-                                    H5MS_acat(ms, "H5VL_SUBCLS_DATATYPE");
+                                    H5RS_acat(rs, "H5VL_SUBCLS_DATATYPE");
                                     break;
 
                                 case H5VL_SUBCLS_FILE:
-                                    H5MS_acat(ms, "H5VL_SUBCLS_FILE");
+                                    H5RS_acat(rs, "H5VL_SUBCLS_FILE");
                                     break;
 
                                 case H5VL_SUBCLS_GROUP:
-                                    H5MS_acat(ms, "H5VL_SUBCLS_GROUP");
+                                    H5RS_acat(rs, "H5VL_SUBCLS_GROUP");
                                     break;
 
                                 case H5VL_SUBCLS_LINK:
-                                    H5MS_acat(ms, "H5VL_SUBCLS_LINK");
+                                    H5RS_acat(rs, "H5VL_SUBCLS_LINK");
                                     break;
 
                                 case H5VL_SUBCLS_OBJECT:
-                                    H5MS_acat(ms, "H5VL_SUBCLS_OBJECT");
+                                    H5RS_acat(rs, "H5VL_SUBCLS_OBJECT");
                                     break;
 
                                 case H5VL_SUBCLS_REQUEST:
-                                    H5MS_acat(ms, "H5VL_SUBCLS_REQUEST");
+                                    H5RS_acat(rs, "H5VL_SUBCLS_REQUEST");
                                     break;
 
                                 case H5VL_SUBCLS_BLOB:
-                                    H5MS_acat(ms, "H5VL_SUBCLS_BLOB");
+                                    H5RS_acat(rs, "H5VL_SUBCLS_BLOB");
                                     break;
 
                                 case H5VL_SUBCLS_TOKEN:
-                                    H5MS_acat(ms, "H5VL_SUBCLS_TOKEN");
+                                    H5RS_acat(rs, "H5VL_SUBCLS_TOKEN");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)subclass);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)subclass);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -3426,47 +3426,47 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (optional) {
                                 case H5VL_NATIVE_DATASET_FORMAT_CONVERT:
-                                    H5MS_acat(ms, "H5VL_NATIVE_DATASET_FORMAT_CONVERT");
+                                    H5RS_acat(rs, "H5VL_NATIVE_DATASET_FORMAT_CONVERT");
                                     break;
 
                                 case H5VL_NATIVE_DATASET_GET_CHUNK_INDEX_TYPE:
-                                    H5MS_acat(ms, "H5VL_NATIVE_DATASET_GET_CHUNK_INDEX_TYPE");
+                                    H5RS_acat(rs, "H5VL_NATIVE_DATASET_GET_CHUNK_INDEX_TYPE");
                                     break;
 
                                 case H5VL_NATIVE_DATASET_GET_CHUNK_STORAGE_SIZE:
-                                    H5MS_acat(ms, "H5VL_NATIVE_DATASET_GET_CHUNK_STORAGE_SIZE");
+                                    H5RS_acat(rs, "H5VL_NATIVE_DATASET_GET_CHUNK_STORAGE_SIZE");
                                     break;
 
                                 case H5VL_NATIVE_DATASET_GET_NUM_CHUNKS:
-                                    H5MS_acat(ms, "H5VL_NATIVE_DATASET_GET_NUM_CHUNKS");
+                                    H5RS_acat(rs, "H5VL_NATIVE_DATASET_GET_NUM_CHUNKS");
                                     break;
 
                                 case H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_IDX:
-                                    H5MS_acat(ms, "H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_IDX");
+                                    H5RS_acat(rs, "H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_IDX");
                                     break;
 
                                 case H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_COORD:
-                                    H5MS_acat(ms, "H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_COORD");
+                                    H5RS_acat(rs, "H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_COORD");
                                     break;
 
                                 case H5VL_NATIVE_DATASET_CHUNK_READ:
-                                    H5MS_acat(ms, "H5VL_NATIVE_DATASET_CHUNK_READ");
+                                    H5RS_acat(rs, "H5VL_NATIVE_DATASET_CHUNK_READ");
                                     break;
 
                                 case H5VL_NATIVE_DATASET_CHUNK_WRITE:
-                                    H5MS_acat(ms, "H5VL_NATIVE_DATASET_CHUNK_WRITE");
+                                    H5RS_acat(rs, "H5VL_NATIVE_DATASET_CHUNK_WRITE");
                                     break;
 
                                 case H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE:
-                                    H5MS_acat(ms, "H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE");
+                                    H5RS_acat(rs, "H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE");
                                     break;
 
                                 case H5VL_NATIVE_DATASET_GET_OFFSET:
-                                    H5MS_acat(ms, "H5VL_NATIVE_DATASET_GET_OFFSET");
+                                    H5RS_acat(rs, "H5VL_NATIVE_DATASET_GET_OFFSET");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)optional);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)optional);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -3476,7 +3476,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5VL_datatype_optional_t optional = (H5VL_datatype_optional_t)HDva_arg(ap, int);
 
-                            H5MS_asprintf_cat(ms, "%ld", (long)optional);
+                            H5RS_asprintf_cat(rs, "%ld", (long)optional);
                         } /* end block */
                         break;
 
@@ -3486,123 +3486,123 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (optional) {
                                 case H5VL_NATIVE_FILE_CLEAR_ELINK_CACHE:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_CLEAR_ELINK_CACHE");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_CLEAR_ELINK_CACHE");
                                     break;
 
                                 case H5VL_NATIVE_FILE_GET_FILE_IMAGE:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_GET_FILE_IMAGE");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_GET_FILE_IMAGE");
                                     break;
 
                                 case H5VL_NATIVE_FILE_GET_FREE_SECTIONS:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_GET_FREE_SECTIONS");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_GET_FREE_SECTIONS");
                                     break;
 
                                 case H5VL_NATIVE_FILE_GET_FREE_SPACE:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_GET_FREE_SPACE");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_GET_FREE_SPACE");
                                     break;
 
                                 case H5VL_NATIVE_FILE_GET_INFO:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_GET_INFO");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_GET_INFO");
                                     break;
 
                                 case H5VL_NATIVE_FILE_GET_MDC_CONF:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_GET_MDC_CONF");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_GET_MDC_CONF");
                                     break;
 
                                 case H5VL_NATIVE_FILE_GET_MDC_HR:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_GET_MDC_HR");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_GET_MDC_HR");
                                     break;
 
                                 case H5VL_NATIVE_FILE_GET_MDC_SIZE:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_GET_MDC_SIZE");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_GET_MDC_SIZE");
                                     break;
 
                                 case H5VL_NATIVE_FILE_GET_SIZE:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_GET_SIZE");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_GET_SIZE");
                                     break;
 
                                 case H5VL_NATIVE_FILE_GET_VFD_HANDLE:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_GET_VFD_HANDLE");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_GET_VFD_HANDLE");
                                     break;
 
                                 case H5VL_NATIVE_FILE_RESET_MDC_HIT_RATE:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_RESET_MDC_HIT_RATE");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_RESET_MDC_HIT_RATE");
                                     break;
 
                                 case H5VL_NATIVE_FILE_SET_MDC_CONFIG:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_SET_MDC_CONFIG");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_SET_MDC_CONFIG");
                                     break;
 
                                 case H5VL_NATIVE_FILE_GET_METADATA_READ_RETRY_INFO:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_GET_METADATA_READ_RETRY_INFO");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_GET_METADATA_READ_RETRY_INFO");
                                     break;
 
                                 case H5VL_NATIVE_FILE_START_SWMR_WRITE:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_START_SWMR_WRITE");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_START_SWMR_WRITE");
                                     break;
 
                                 case H5VL_NATIVE_FILE_START_MDC_LOGGING:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_START_MDC_LOGGING");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_START_MDC_LOGGING");
                                     break;
 
                                 case H5VL_NATIVE_FILE_STOP_MDC_LOGGING:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_STOP_MDC_LOGGING");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_STOP_MDC_LOGGING");
                                     break;
 
                                 case H5VL_NATIVE_FILE_GET_MDC_LOGGING_STATUS:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_GET_MDC_LOGGING_STATUS");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_GET_MDC_LOGGING_STATUS");
                                     break;
 
                                 case H5VL_NATIVE_FILE_FORMAT_CONVERT:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_FORMAT_CONVERT");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_FORMAT_CONVERT");
                                     break;
 
                                 case H5VL_NATIVE_FILE_RESET_PAGE_BUFFERING_STATS:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_RESET_PAGE_BUFFERING_STATS");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_RESET_PAGE_BUFFERING_STATS");
                                     break;
 
                                 case H5VL_NATIVE_FILE_GET_PAGE_BUFFERING_STATS:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_GET_PAGE_BUFFERING_STATS");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_GET_PAGE_BUFFERING_STATS");
                                     break;
 
                                 case H5VL_NATIVE_FILE_GET_MDC_IMAGE_INFO:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_GET_MDC_IMAGE_INFO");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_GET_MDC_IMAGE_INFO");
                                     break;
 
                                 case H5VL_NATIVE_FILE_GET_EOA:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_GET_EOA");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_GET_EOA");
                                     break;
 
                                 case H5VL_NATIVE_FILE_INCR_FILESIZE:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_INCR_FILESIZE");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_INCR_FILESIZE");
                                     break;
 
                                 case H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS");
                                     break;
 
                                 case H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG");
                                     break;
 
                                 case H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG");
                                     break;
 
                                 case H5VL_NATIVE_FILE_GET_MPI_ATOMICITY:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_GET_MPI_ATOMICITY");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_GET_MPI_ATOMICITY");
                                     break;
 
                                 case H5VL_NATIVE_FILE_SET_MPI_ATOMICITY:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_SET_MPI_ATOMICITY");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_SET_MPI_ATOMICITY");
                                     break;
 
                                 case H5VL_NATIVE_FILE_POST_OPEN:
-                                    H5MS_acat(ms, "H5VL_NATIVE_FILE_POST_OPEN");
+                                    H5RS_acat(rs, "H5VL_NATIVE_FILE_POST_OPEN");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)optional);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)optional);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -3615,16 +3615,16 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                             switch (optional) {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
                                 case H5VL_NATIVE_GROUP_ITERATE_OLD:
-                                    H5MS_acat(ms, "H5VL_NATIVE_GROUP_ITERATE_OLD");
+                                    H5RS_acat(rs, "H5VL_NATIVE_GROUP_ITERATE_OLD");
                                     break;
 
                                 case H5VL_NATIVE_GROUP_GET_OBJINFO:
-                                    H5MS_acat(ms, "H5VL_NATIVE_GROUP_GET_OBJINFO");
+                                    H5RS_acat(rs, "H5VL_NATIVE_GROUP_GET_OBJINFO");
                                     break;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)optional);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)optional);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -3634,7 +3634,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5VL_link_optional_t optional = (H5VL_link_optional_t)HDva_arg(ap, int);
 
-                            H5MS_asprintf_cat(ms, "%ld", (long)optional);
+                            H5RS_asprintf_cat(rs, "%ld", (long)optional);
                         } /* end block */
                         break;
 
@@ -3644,31 +3644,31 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (optional) {
                                 case H5VL_NATIVE_OBJECT_GET_COMMENT:
-                                    H5MS_acat(ms, "H5VL_NATIVE_OBJECT_GET_COMMENT");
+                                    H5RS_acat(rs, "H5VL_NATIVE_OBJECT_GET_COMMENT");
                                     break;
 
                                 case H5VL_NATIVE_OBJECT_SET_COMMENT:
-                                    H5MS_acat(ms, "H5VL_NATIVE_OBJECT_SET_COMMENT");
+                                    H5RS_acat(rs, "H5VL_NATIVE_OBJECT_SET_COMMENT");
                                     break;
 
                                 case H5VL_NATIVE_OBJECT_DISABLE_MDC_FLUSHES:
-                                    H5MS_acat(ms, "H5VL_NATIVE_OBJECT_DISABLE_MDC_FLUSHES");
+                                    H5RS_acat(rs, "H5VL_NATIVE_OBJECT_DISABLE_MDC_FLUSHES");
                                     break;
 
                                 case H5VL_NATIVE_OBJECT_ENABLE_MDC_FLUSHES:
-                                    H5MS_acat(ms, "H5VL_NATIVE_OBJECT_ENABLE_MDC_FLUSHES");
+                                    H5RS_acat(rs, "H5VL_NATIVE_OBJECT_ENABLE_MDC_FLUSHES");
                                     break;
 
                                 case H5VL_NATIVE_OBJECT_ARE_MDC_FLUSHES_DISABLED:
-                                    H5MS_acat(ms, "H5VL_NATIVE_OBJECT_ARE_MDC_FLUSHES_DISABLED");
+                                    H5RS_acat(rs, "H5VL_NATIVE_OBJECT_ARE_MDC_FLUSHES_DISABLED");
                                     break;
 
                                 case H5VL_NATIVE_OBJECT_GET_NATIVE_INFO:
-                                    H5MS_acat(ms, "H5VL_NATIVE_OBJECT_GET_NATIVE_INFO");
+                                    H5RS_acat(rs, "H5VL_NATIVE_OBJECT_GET_NATIVE_INFO");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)optional);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)optional);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -3678,12 +3678,12 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5VL_request_optional_t optional = (H5VL_request_optional_t)HDva_arg(ap, int);
 
-                            H5MS_asprintf_cat(ms, "%ld", (long)optional);
+                            H5RS_asprintf_cat(rs, "%ld", (long)optional);
                         } /* end block */
                         break;
 
                         default:
-                            H5MS_asprintf_cat(ms, "BADTYPE(Z%c)", type[1]);
+                            H5RS_asprintf_cat(rs, "BADTYPE(Z%c)", type[1]);
                             goto error;
                     } /* end switch */
                     break;
@@ -3692,16 +3692,16 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                     vp = HDva_arg(ap, void *);
 
                     if (vp)
-                        H5MS_asprintf_cat(ms, "%p", vp);
+                        H5RS_asprintf_cat(rs, "%p", vp);
                     else
-                        H5MS_acat(ms, "NULL");
+                        H5RS_acat(rs, "NULL");
                 } /* end block */
                 break;
 
                 case 'z': {
                     size_t size = HDva_arg(ap, size_t);
 
-                    H5MS_asprintf_cat(ms, "%zu", size);
+                    H5RS_asprintf_cat(rs, "%zu", size);
                     asize[argno] = (hssize_t)size;
                 } /* end block */
                 break;
@@ -3714,19 +3714,19 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
 
                             switch (scale_type) {
                                 case H5Z_SO_FLOAT_DSCALE:
-                                    H5MS_acat(ms, "H5Z_SO_FLOAT_DSCALE");
+                                    H5RS_acat(rs, "H5Z_SO_FLOAT_DSCALE");
                                     break;
 
                                 case H5Z_SO_FLOAT_ESCALE:
-                                    H5MS_acat(ms, "H5Z_SO_FLOAT_ESCALE");
+                                    H5RS_acat(rs, "H5Z_SO_FLOAT_ESCALE");
                                     break;
 
                                 case H5Z_SO_INT:
-                                    H5MS_acat(ms, "H5Z_SO_INT");
+                                    H5RS_acat(rs, "H5Z_SO_INT");
                                     break;
 
                                 default:
-                                    H5MS_asprintf_cat(ms, "%ld", (long)scale_type);
+                                    H5RS_asprintf_cat(rs, "%ld", (long)scale_type);
                                     break;
                             } /* end switch */
                         }     /* end block */
@@ -3736,7 +3736,7 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5Z_class2_t *filter = HDva_arg(ap, H5Z_class2_t *);
 
-                            H5MS_asprintf_cat(ms, "%p", (void *)filter);
+                            H5RS_asprintf_cat(rs, "%p", (void *)filter);
                         } /* end block  */
                         break;
 
@@ -3745,11 +3745,11 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                             H5Z_EDC_t edc = (H5Z_EDC_t)HDva_arg(ap, int);
 
                             if (H5Z_DISABLE_EDC == edc)
-                                H5MS_acat(ms, "H5Z_DISABLE_EDC");
+                                H5RS_acat(rs, "H5Z_DISABLE_EDC");
                             else if (H5Z_ENABLE_EDC == edc)
-                                H5MS_acat(ms, "H5Z_ENABLE_EDC");
+                                H5RS_acat(rs, "H5Z_ENABLE_EDC");
                             else
-                                H5MS_asprintf_cat(ms, "%ld", (long)edc);
+                                H5RS_asprintf_cat(rs, "%ld", (long)edc);
                         } /* end block */
                         break;
 
@@ -3758,21 +3758,21 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                             H5Z_filter_t id = HDva_arg(ap, H5Z_filter_t);
 
                             if (H5Z_FILTER_NONE == id)
-                                H5MS_acat(ms, "H5Z_FILTER_NONE");
+                                H5RS_acat(rs, "H5Z_FILTER_NONE");
                             else if (H5Z_FILTER_DEFLATE == id)
-                                H5MS_acat(ms, "H5Z_FILTER_DEFLATE");
+                                H5RS_acat(rs, "H5Z_FILTER_DEFLATE");
                             else if (H5Z_FILTER_SHUFFLE == id)
-                                H5MS_acat(ms, "H5Z_FILTER_SHUFFLE");
+                                H5RS_acat(rs, "H5Z_FILTER_SHUFFLE");
                             else if (H5Z_FILTER_FLETCHER32 == id)
-                                H5MS_acat(ms, "H5Z_FILTER_FLETCHER32");
+                                H5RS_acat(rs, "H5Z_FILTER_FLETCHER32");
                             else if (H5Z_FILTER_SZIP == id)
-                                H5MS_acat(ms, "H5Z_FILTER_SZIP");
+                                H5RS_acat(rs, "H5Z_FILTER_SZIP");
                             else if (H5Z_FILTER_NBIT == id)
-                                H5MS_acat(ms, "H5Z_FILTER_NBIT");
+                                H5RS_acat(rs, "H5Z_FILTER_NBIT");
                             else if (H5Z_FILTER_SCALEOFFSET == id)
-                                H5MS_acat(ms, "H5Z_FILTER_SCALEOFFSET");
+                                H5RS_acat(rs, "H5Z_FILTER_SCALEOFFSET");
                             else
-                                H5MS_asprintf_cat(ms, "%ld", (long)id);
+                                H5RS_asprintf_cat(rs, "%ld", (long)id);
                         } /* end block */
                         break;
 
@@ -3780,37 +3780,37 @@ H5_trace_args(H5MS_t *ms, const char *type, va_list ap)
                         {
                             H5Z_filter_func_t ffunc = (H5Z_filter_func_t)HDva_arg(ap, H5Z_filter_func_t);
 
-                            H5MS_asprintf_cat(ms, "%p", ffunc);
+                            H5RS_asprintf_cat(rs, "%p", (void *)ffunc);
                         } /* end block */
                         break;
 
                         case 's': {
                             ssize_t ssize = HDva_arg(ap, ssize_t);
 
-                            H5MS_asprintf_cat(ms, "%zd", ssize);
+                            H5RS_asprintf_cat(rs, "%zd", ssize);
                             asize[argno] = (hssize_t)ssize;
                         } /* end block */
                         break;
 
                         default:
-                            H5MS_asprintf_cat(ms, "BADTYPE(Z%c)", type[1]);
+                            H5RS_asprintf_cat(rs, "BADTYPE(Z%c)", type[1]);
                             goto error;
                     } /* end switch */
                     break;
 
                 case '#':
-                    H5MS_acat(ms, "Unsupported type slipped through!");
+                    H5RS_acat(rs, "Unsupported type slipped through!");
                     break;
 
                 case '!':
-                    H5MS_acat(ms, "Unknown type slipped through!");
+                    H5RS_acat(rs, "Unknown type slipped through!");
                     break;
 
                 default:
                     if (HDisupper(type[0]))
-                        H5MS_asprintf_cat(ms, "BADTYPE(%c%c)", type[0], type[1]);
+                        H5RS_asprintf_cat(rs, "BADTYPE(%c%c)", type[0], type[1]);
                     else
-                        H5MS_asprintf_cat(ms, "BADTYPE(%c)", type[0]);
+                        H5RS_asprintf_cat(rs, "BADTYPE(%c)", type[0]);
                     goto error;
             } /* end switch */
         }     /* end else */
@@ -3860,7 +3860,7 @@ double
 H5_trace(const double *returning, const char *func, const char *type, ...)
 {
     va_list           ap;
-    H5MS_t            ms;
+    H5RS_str_t        *rs = NULL;
     hssize_t          i;
     FILE *            out                 = H5_debug_g.trace;
     static hbool_t    is_first_invocation = TRUE;
@@ -3905,8 +3905,8 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
         H5_timer_start(&function_timer);
     } /* end if */
 
-    /* Initialize the managed string */
-    ms.s = NULL;
+    /* Create the ref-counted string */
+    rs = H5RS_create(NULL);
 
     /* Print the first part of the line.  This is the indication of the
      * nesting depth followed by the function name and either start of
@@ -3925,52 +3925,52 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                 H5_timer_get_times(function_timer, &function_times);
                 H5_timer_get_times(running_timer, &running_times);
                 HDsprintf(tmp, "%.6f", (function_times.elapsed - running_times.elapsed));
-                H5MS_asprintf_cat(&ms, " %*s ", (int)HDstrlen(tmp), "");
+                H5RS_asprintf_cat(rs, " %*s ", (int)HDstrlen(tmp), "");
             } /* end if */
             for (i = 0; i < current_depth; i++)
-                H5MS_aputc(&ms, '+');
-            H5MS_asprintf_cat(&ms, "%*s%s = ", 2 * current_depth, "", func);
+                H5RS_aputc(rs, '+');
+            H5RS_asprintf_cat(rs, "%*s%s = ", 2 * current_depth, "", func);
         } /* end if */
         else
             /* Continue current line with return value */
-            H5MS_acat(&ms, " = ");
+            H5RS_acat(rs, " = ");
     } /* end if */
     else {
         if (current_depth > last_call_depth)
-            H5MS_acat(&ms, " = <delayed>\n");
+            H5RS_acat(rs, " = <delayed>\n");
         if (H5_debug_g.ttimes) {
             H5_timer_get_times(function_timer, &function_times);
             H5_timer_get_times(running_timer, &running_times);
-            H5MS_asprintf_cat(&ms, "@%.6f ", (function_times.elapsed - running_times.elapsed));
+            H5RS_asprintf_cat(rs, "@%.6f ", (function_times.elapsed - running_times.elapsed));
         } /* end if */
         for (i = 0; i < current_depth; i++)
-            H5MS_aputc(&ms, '+');
-        H5MS_asprintf_cat(&ms, "%*s%s(", 2 * current_depth, "", func);
+            H5RS_aputc(rs, '+');
+        H5RS_asprintf_cat(rs, "%*s%s(", 2 * current_depth, "", func);
     } /* end else */
 
     /* Format arguments into the managed string */
     HDva_start(ap, type);
-    H5_trace_args(&ms, type, ap);
+    H5_trace_args(rs, type, ap);
     HDva_end(ap);
 
     /* Display event time for return */
     if (returning && H5_debug_g.ttimes) {
         H5_timer_get_times(function_timer, &function_times);
         H5_timer_get_times(running_timer, &running_times);
-        H5MS_asprintf_cat(&ms, " @%.6f [dt=%.6f]", (function_times.elapsed - running_times.elapsed),
+        H5RS_asprintf_cat(rs, " @%.6f [dt=%.6f]", (function_times.elapsed - running_times.elapsed),
                           (function_times.elapsed - *returning));
     } /* end if */
 
     /* Display generated string */
     if (returning)
-        H5MS_acat(&ms, ";\n");
+        H5RS_acat(rs, ";\n");
     else {
         last_call_depth = current_depth++;
-        H5MS_acat(&ms, ")");
+        H5RS_acat(rs, ")");
     } /* end else */
-    HDfputs(ms.s, out);
+    HDfputs(H5RS_get_str(rs), out);
     HDfflush(out);
-    HDfree(ms.s);
+    H5RS_decr(rs);
 
     if (H5_debug_g.ttimes)
         return function_times.elapsed;

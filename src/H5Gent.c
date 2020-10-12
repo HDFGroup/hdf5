@@ -53,9 +53,6 @@
 /* Package Variables */
 /*********************/
 
-/* Declare extern the PQ free list for the wrapped strings */
-H5FL_BLK_EXTERN(str_buf);
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/

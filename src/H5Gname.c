@@ -79,9 +79,6 @@ typedef struct H5G_gnba_iter_t {
 
 static htri_t      H5G__common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r);
 static H5RS_str_t *H5G__build_fullpath(const char *prefix, const char *name);
-#ifdef NOT_YET
-static H5RS_str_t *H5G__build_fullpath_refstr_refstr(const H5RS_str_t *prefix_r, const H5RS_str_t *name_r);
-#endif /* NOT_YET */
 static herr_t H5G__name_move_path(H5RS_str_t **path_r_ptr, const char *full_suffix, const char *src_path,
                                   const char *dst_path);
 static int    H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key);
@@ -89,9 +86,6 @@ static int    H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key);
 /*********************/
 /* Package Variables */
 /*********************/
-
-/* Declare extern the PQ free list for the wrapped strings */
-H5FL_BLK_EXTERN(str_buf);
 
 /*****************************/
 /* Library Private Variables */
@@ -277,11 +271,6 @@ done:
 static H5RS_str_t *
 H5G__build_fullpath(const char *prefix, const char *name)
 {
-    char *      full_path;        /* Full user path built */
-    size_t      orig_path_len;    /* Original length of the path */
-    size_t      path_len;         /* Length of the path */
-    size_t      name_len;         /* Length of the name */
-    unsigned    need_sep;         /* Flag to indicate if separator is needed */
     H5RS_str_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -290,32 +279,12 @@ H5G__build_fullpath(const char *prefix, const char *name)
     HDassert(prefix);
     HDassert(name);
 
-    /* Get the length of the prefix */
-    orig_path_len = path_len = HDstrlen(prefix);
-
-    /* Determine if there is a trailing separator in the name */
-    if (prefix[path_len - 1] == '/')
-        need_sep = 0;
-    else
-        need_sep = 1;
-
-    /* Add in the length needed for the '/' separator and the relative path */
-    name_len = HDstrlen(name);
-    path_len += name_len + need_sep;
-
-    /* Allocate space for the path */
-    if (NULL == (full_path = (char *)H5FL_BLK_MALLOC(str_buf, path_len + 1)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
-    /* Build full path */
-    HDstrncpy(full_path, prefix, orig_path_len + 1);
-    if (need_sep)
-        HDstrncat(full_path, "/", (size_t)1);
-    HDstrncat(full_path, name, name_len);
-
-    /* Create reference counted string for path */
-    if (NULL == (ret_value = H5RS_own(full_path)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    /* Create full path */
+    if (NULL == (ret_value = H5RS_create(prefix)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, NULL, "can't create ref-counted string")
+    if (prefix[HDstrlen(prefix) - 1] != '/')
+        H5RS_aputc(ret_value, '/');     /* Add separator, if the prefix doesn't end in one */
+    H5RS_acat(ret_value, name);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -354,44 +323,6 @@ H5G_build_fullpath_refstr_str(H5RS_str_t *prefix_r, const char *name)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_build_fullpath_refstr_str() */
-
-#ifdef NOT_YET
-
-/*-------------------------------------------------------------------------
- * Function: H5G_name_build_refstr_refstr
- *
- * Purpose: Build a full path from a prefix & base pair of reference counted
- *              strings
- *
- * Return: Pointer to reference counted string on success, NULL on error
- *
- * Programmer: Quincey Koziol
- *
- * Date: August 19, 2005
- *
- *-------------------------------------------------------------------------
- */
-static H5RS_str_t *
-H5G__build_fullpath_refstr_refstr(const H5RS_str_t *prefix_r, const H5RS_str_t *name_r)
-{
-    const char *prefix;    /* Pointer to raw string of prefix */
-    const char *name;      /* Pointer to raw string of name */
-    H5RS_str_t *ret_value; /* Return value */
-
-    FUNC_ENTER_STATIC_NOERR
-
-    /* Get the pointer to the prefix */
-    prefix = H5RS_get_str(prefix_r);
-
-    /* Get the pointer to the raw src user path */
-    name = H5RS_get_str(name_r);
-
-    /* Create reference counted string for path */
-    ret_value = H5G__build_fullpath(prefix, name);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G__build_fullpath_refstr_refstr() */
-#endif /* NOT_YET */
 
 /*-------------------------------------------------------------------------
  * Function:    H5G__name_init
@@ -681,27 +612,23 @@ H5G__name_move_path(H5RS_str_t **path_r_ptr, const char *full_suffix, const char
     path_len        = HDstrlen(path);
     if (full_suffix_len < path_len) {
         const char *dst_suffix;        /* Destination suffix that changes */
-        size_t      dst_suffix_len;    /* Length of destination suffix */
         const char *src_suffix;        /* Source suffix that changes */
         size_t      path_prefix_len;   /* Length of path prefix */
         const char *path_prefix2;      /* 2nd prefix for path */
         size_t      path_prefix2_len;  /* Length of 2nd path prefix */
-        const char *common_prefix;     /* Common prefix for src & dst paths */
         size_t      common_prefix_len; /* Length of common prefix */
-        char *      new_path;          /* Pointer to new path */
-        size_t      new_path_len;      /* Length of new path */
+        H5RS_str_t *rs;                /* Ref-counted string for new path */
 
-        /* Compute path prefix before full suffix*/
+        /* Compute path prefix before full suffix */
         path_prefix_len = path_len - full_suffix_len;
 
         /* Determine the common prefix for src & dst paths */
-        common_prefix     = src_path;
         common_prefix_len = 0;
         /* Find first character that is different */
         while (*(src_path + common_prefix_len) == *(dst_path + common_prefix_len))
             common_prefix_len++;
         /* Back up to previous '/' */
-        while (*(common_prefix + common_prefix_len) != '/')
+        while (*(src_path + common_prefix_len) != '/')
             common_prefix_len--;
         /* Include '/' */
         common_prefix_len++;
@@ -711,32 +638,27 @@ H5G__name_move_path(H5RS_str_t **path_r_ptr, const char *full_suffix, const char
 
         /* Determine destination suffix */
         dst_suffix     = dst_path + (common_prefix_len - 1);
-        dst_suffix_len = HDstrlen(dst_suffix);
 
-        /* Compute path prefix before src suffix*/
+        /* Compute path prefix before src suffix */
         path_prefix2     = path;
         path_prefix2_len = path_prefix_len - HDstrlen(src_suffix);
 
-        /* Allocate space for the new path */
-        new_path_len = path_prefix2_len + dst_suffix_len + full_suffix_len;
-        if (NULL == (new_path = (char *)H5FL_BLK_MALLOC(str_buf, new_path_len + 1)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        /* Allocate new ref-counted string */
+        if (NULL == (rs = H5RS_create(NULL)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "can't create ref-counted string")
 
         /* Create the new path */
-        if (path_prefix2_len > 0) {
-            HDstrncpy(new_path, path_prefix2, path_prefix2_len + 1);
-            HDstrncpy(new_path + path_prefix2_len, dst_suffix, dst_suffix_len + 1);
-        } /* end if */
-        else
-            HDstrncpy(new_path, dst_suffix, dst_suffix_len + 1);
+        if (path_prefix2_len > 0)
+            H5RS_ancat(rs, path_prefix2, path_prefix2_len);
+        H5RS_acat(rs, dst_suffix);
         if (full_suffix_len > 0)
-            HDstrncat(new_path, full_suffix, full_suffix_len);
+            H5RS_acat(rs, full_suffix);
 
         /* Release previous path */
         H5RS_decr(*path_r_ptr);
 
         /* Take ownership of the new full path */
-        *path_r_ptr = H5RS_own(new_path);
+        *path_r_ptr = rs;
     } /* end if */
 
 done:
@@ -854,33 +776,24 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
         case H5G_NAME_MOUNT:
             /* Check if object is in child mount hier. */
             if (obj_in_child) {
-                const char *full_path;     /* Full path of current object */
-                const char *src_path;      /* Full path of source object */
-                size_t      src_path_len;  /* Length of source full path */
-                char *      new_full_path; /* New full path of object */
-                size_t      new_full_len;  /* Length of new full path */
+                const char *full_path;  /* Full path of current object */
+                const char *src_path;   /* Full path of source object */
+                H5RS_str_t *rs;         /* Ref-counted string for new path */
 
                 /* Get pointers to paths of interest */
                 full_path    = H5RS_get_str(obj_path->full_path_r);
                 src_path     = H5RS_get_str(names->src_full_path_r);
-                src_path_len = HDstrlen(src_path);
 
-                /* Build new full path */
-
-                /* Allocate space for the new full path */
-                new_full_len = src_path_len + HDstrlen(full_path);
-                if (NULL == (new_full_path = (char *)H5FL_BLK_MALLOC(str_buf, new_full_len + 1)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-                /* Create the new full path */
-                HDstrncpy(new_full_path, src_path, src_path_len + 1);
-                HDstrncat(new_full_path, full_path, new_full_len);
+                /* Create new full path */
+                if (NULL == (rs = H5RS_create(src_path)))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "can't create ref-counted string")
+                H5RS_acat(rs, full_path);
 
                 /* Release previous full path */
                 H5RS_decr(obj_path->full_path_r);
 
                 /* Take ownership of the new full path */
-                obj_path->full_path_r = H5RS_own(new_full_path);
+                obj_path->full_path_r = rs;
             } /* end if */
             /* Object must be in parent mount file hier. */
             else {
@@ -902,9 +815,8 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
             if (obj_in_child) {
                 const char *full_path;       /* Full path of current object */
                 const char *full_suffix;     /* Full path after source path */
-                size_t      full_suffix_len; /* Length of full path after source path */
                 const char *src_path;        /* Full path of source object */
-                char *      new_full_path;   /* New full path of object */
+                H5RS_str_t *rs;         /* Ref-counted string for new path */
 
                 /* Get pointers to paths of interest */
                 full_path = H5RS_get_str(obj_path->full_path_r);
@@ -912,24 +824,19 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
 
                 /* Construct full path suffix */
                 full_suffix     = full_path + HDstrlen(src_path);
-                full_suffix_len = HDstrlen(full_suffix);
 
-                /* Build new full path */
-
-                /* Create the new full path */
-                if (NULL == (new_full_path = (char *)H5FL_BLK_MALLOC(str_buf, full_suffix_len + 1)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-                HDstrncpy(new_full_path, full_suffix, full_suffix_len + 1);
+                /* Create new full path suffix */
+                if (NULL == (rs = H5RS_create(full_suffix)))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "can't create ref-counted string")
 
                 /* Release previous full path */
                 H5RS_decr(obj_path->full_path_r);
 
                 /* Take ownership of the new full path */
-                obj_path->full_path_r = H5RS_own(new_full_path);
+                obj_path->full_path_r = rs;
 
                 /* Check if the object's user path should be invalidated */
-                if (obj_path->user_path_r &&
-                    HDstrlen(new_full_path) < (size_t)H5RS_len(obj_path->user_path_r)) {
+                if (obj_path->user_path_r && H5RS_len(rs) < H5RS_len(obj_path->user_path_r)) {
                     /* Free user path */
                     H5RS_decr(obj_path->user_path_r);
                     obj_path->user_path_r = NULL;
@@ -938,7 +845,7 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
             else {
                 /* Check if file being unmounted was hiding the object */
                 if (H5G__common_path(obj_path->full_path_r, names->src_full_path_r) &&
-                    H5RS_cmp(obj_path->full_path_r, names->src_full_path_r)) {
+                        H5RS_cmp(obj_path->full_path_r, names->src_full_path_r)) {
                     /* Un-hide the user path */
                     (obj_path->obj_hidden)--;
                 } /* end if */
@@ -966,12 +873,9 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
             if (H5G__common_path(obj_path->full_path_r, names->src_full_path_r)) {
                 const char *full_path;       /* Full path of current object */
                 const char *full_suffix;     /* Suffix of full path, after src_path */
-                size_t      full_suffix_len; /* Length of suffix of full path after src_path*/
-                char *      new_full_path;   /* New full path of object */
-                size_t      new_full_len;    /* Length of new full path */
                 const char *src_path;        /* Full path of source object */
                 const char *dst_path;        /* Full path of destination object */
-                size_t      dst_path_len;    /* Length of destination's full path */
+                H5RS_str_t *rs;              /* Ref-counted string for new path */
 
                 /* Sanity check */
                 HDassert(names->dst_full_path_r);
@@ -980,7 +884,6 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
                 full_path    = H5RS_get_str(obj_path->full_path_r);
                 src_path     = H5RS_get_str(names->src_full_path_r);
                 dst_path     = H5RS_get_str(names->dst_full_path_r);
-                dst_path_len = HDstrlen(dst_path);
 
                 /* Make certain that the source and destination names are full (not relative) paths */
                 HDassert(*src_path == '/');
@@ -988,29 +891,22 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
 
                 /* Get pointer to "full suffix" */
                 full_suffix     = full_path + HDstrlen(src_path);
-                full_suffix_len = HDstrlen(full_suffix);
 
                 /* Update the user path, if one exists */
                 if (obj_path->user_path_r)
                     if (H5G__name_move_path(&(obj_path->user_path_r), full_suffix, src_path, dst_path) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_PATH, FAIL, "can't build user path name")
 
-                /* Build new full path */
-
-                /* Allocate space for the new full path */
-                new_full_len = dst_path_len + full_suffix_len;
-                if (NULL == (new_full_path = (char *)H5FL_BLK_MALLOC(str_buf, new_full_len + 1)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-                /* Create the new full path */
-                HDstrncpy(new_full_path, dst_path, dst_path_len + 1);
-                HDstrncat(new_full_path, full_suffix, full_suffix_len);
+                /* Create new full path */
+                if (NULL == (rs = H5RS_create(dst_path)))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "can't create ref-counted string")
+                H5RS_acat(rs, full_suffix);
 
                 /* Release previous full path */
                 H5RS_decr(obj_path->full_path_r);
 
                 /* Take ownership of the new full path */
-                obj_path->full_path_r = H5RS_own(new_full_path);
+                obj_path->full_path_r = rs;
             } /* end if */
             break;
 

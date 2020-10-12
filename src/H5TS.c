@@ -404,7 +404,8 @@ H5TS__mutex_acquire(H5TS_mutex_t *mutex, hbool_t *acquired)
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TSmutex_acquire(hbool_t *acquired){
+H5TSmutex_acquire(hbool_t *acquired)
+{
     FUNC_ENTER_API_NAMECHECK_ONLY
         /*NO TRACE*/
 

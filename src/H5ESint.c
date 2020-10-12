@@ -34,12 +34,12 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5private.h"   /* Generic Functions			 */
+#include "H5Eprivate.h"  /* Error handling		  	 */
 #include "H5ESpkg.h"     /* Event Sets                           */
 #include "H5FLprivate.h" /* Free Lists                           */
 #include "H5Iprivate.h"  /* IDs                                  */
-#include "H5MSprivate.h" /* Managed strings                      */
+#include "H5RSprivate.h" /* Reference-counted strings            */
 
 /****************/
 /* Local Macros */
@@ -249,15 +249,15 @@ H5ES_insert(H5ES_t *es, H5VL_object_t *request, const char *caller, const char *
     HDassert(caller_args);
 HDfprintf(stderr, "%s: caller = '%s', caller_args = '%s'\n", FUNC, caller, caller_args);
 {
-    H5MS_t  ms;
+    H5RS_str_t *rs;
     va_list ap;
 
-    ms.s = NULL;
+    rs = H5RS_create(NULL);
     HDva_start(ap, caller_args);
-    H5_trace_args(&ms, caller_args, ap);
+    H5_trace_args(rs, caller_args, ap);
     HDva_end(ap);
-    HDfprintf(stderr, "%s: arg string = '%s'\n", FUNC, ms.s);
-    HDfree(ms.s);
+    HDfprintf(stderr, "%s: arg string = '%s'\n", FUNC, H5RS_get_str(rs));
+    H5RS_decr(rs);
 }
 
     /* Allocate space for new event */

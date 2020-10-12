@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@lbl.gov>
+ * Programmer:	Quincey Koziol
  *		Monday, April  6, 2020
  *
  * Purpose:	This file contains declarations which define macros for the
