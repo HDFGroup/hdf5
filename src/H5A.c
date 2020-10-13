@@ -83,9 +83,8 @@ H5A__create_api_common(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t
                        hid_t aapl_id, hid_t es_id, const char *caller)
 {
     void *            attr      = NULL;              /* Attribute created */
-    H5ES_t *          es        = NULL;              /* Event set for the operation */
-    void *            token     = NULL, **token_ptr; /* Request token for async operation */
-    H5VL_object_t *   token_obj = NULL;              /* Async token VOL object */
+    void *            token     = NULL;         /* Request token for async operation        */
+    void **token_ptr = H5_REQUEST_NULL;         /* Pointer to request token for async operation        */
     H5VL_object_t *   vol_obj   = NULL;              /* object of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
@@ -116,18 +115,9 @@ H5A__create_api_common(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t
     loc_params.type     = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
 
-    /* Get the event set and set up request token pointer for operation */
-    if (H5ES_NONE != es_id) {
-        /* Get event set */
-        if (NULL == (es = (H5ES_t *)H5I_object_verify(es_id, H5I_EVENTSET)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an event set")
-
-        /* Point at token for operation to set up */
-        token_ptr = &token;
-    } /* end if */
-    else
-        /* Synchronous operation */
-        token_ptr = H5_REQUEST_NULL;
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token;     /* Point at token for VOL connector to set up */
 
     /* Create the attribute */
     if (NULL == (attr = H5VL_attr_create(vol_obj, &loc_params, attr_name, type_id, space_id, acpl_id, aapl_id,
@@ -135,19 +125,10 @@ H5A__create_api_common(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to create attribute")
 
     /* If there's an event set and a token was created, add the token to it */
-    if (H5ES_NONE != es_id && NULL != token) {
-        /* Create vol object for token */
-        if (NULL == (token_obj = H5VL_create_object(token, vol_obj->connector))) {
-            if (H5VL_request_free(token) < 0)
-                HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't free request")
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't create vol object for request token")
-        } /* end if */
-
+    if (H5ES_NONE != es_id && NULL != token)
         /* Add token to event set */
-        if (H5ES_insert(es, token_obj, H5ARG_TRACE8(caller, "i*siiiii*s", loc_id, attr_name, type_id, space_id, acpl_id, aapl_id, es_id, caller)) < 0)
+        if (H5ES_insert(es_id, vol_obj, token, H5ARG_TRACE8(caller, "i*siiiii*s", loc_id, attr_name, type_id, space_id, acpl_id, aapl_id, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
-        token_obj = NULL;
-    } /* end if */
 
     /* Register the new attribute and get an ID for it */
     if ((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
@@ -155,12 +136,9 @@ H5A__create_api_common(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t
 
 done:
     /* Cleanup on failure */
-    if (H5I_INVALID_HID == ret_value) {
+    if (H5I_INVALID_HID == ret_value)
         if (attr && H5VL_attr_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close attribute")
-        if (token_obj && H5VL_free_object(token_obj) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't free request token")
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__create_api_common() */
@@ -568,9 +546,8 @@ static herr_t
 H5A__write_api_common(hid_t attr_id, hid_t type_id, const void *buf, hid_t es_id,
                                      const char *caller)
 {
-    H5ES_t *       es        = NULL;              /* Event set for the operation */
-    void *         token     = NULL, **token_ptr; /* Request token for async operation */
-    H5VL_object_t *token_obj = NULL;              /* Async token VOL object */
+    void *            token     = NULL;         /* Request token for async operation        */
+    void **token_ptr = H5_REQUEST_NULL;         /* Pointer to request token for async operation        */
     H5VL_object_t *vol_obj   = NULL;              /* Attribute VOL object */
     herr_t         ret_value = SUCCEED;           /* Return value */
 
@@ -588,42 +565,21 @@ H5A__write_api_common(hid_t attr_id, hid_t type_id, const void *buf, hid_t es_id
     if (H5CX_set_loc(attr_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set collective metadata read")
 
-    /* Get the event set and set up request token pointer for operation */
-    if (H5ES_NONE != es_id) {
-        /* Get event set */
-        if (NULL == (es = (H5ES_t *)H5I_object_verify(es_id, H5I_EVENTSET)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an event set")
-
-        /* Point at token for operation to set up */
-        token_ptr = &token;
-    } /* end if */
-    else
-        /* Synchronous operation */
-        token_ptr = H5_REQUEST_NULL;
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token;     /* Point at token for VOL connector to set up */
 
     /* Write the attribute data */
     if (H5VL_attr_write(vol_obj, type_id, buf, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "unable to write attribute")
 
     /* If there's an event set and a token was created, add the token to it */
-    if (H5ES_NONE != es_id && NULL != token) {
-        /* Create vol object for token */
-        if (NULL == (token_obj = H5VL_create_object(token, vol_obj->connector))) {
-            if (H5VL_request_free(token) < 0)
-                HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't free request")
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't create vol object for request token")
-        } /* end if */
-
+    if (H5ES_NONE != es_id && NULL != token)
         /* Add token to event set */
-        if (H5ES_insert(es, token_obj, H5ARG_TRACE5(caller, "ii*xi*s", attr_id, type_id, buf, es_id, caller)) < 0)
+        if (H5ES_insert(es_id, vol_obj, token, H5ARG_TRACE5(caller, "ii*xi*s", attr_id, type_id, buf, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
-    } /* end if */
 
 done:
-    if (ret_value < 0 && token_obj)
-        if (H5VL_free_object(token_obj) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't free request token")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__write_api_common() */
 
@@ -1627,9 +1583,9 @@ done:
 static herr_t
 H5A__close_api_common(hid_t attr_id, hid_t es_id, const char *caller)
 {
-    H5ES_t *       es        = NULL;              /* Event set for the operation */
-    void *         token     = NULL, **token_ptr; /* Request token for async operation */
-    H5VL_object_t *token_obj = NULL;              /* Async token VOL object */
+    void *         token     = NULL;    /* Request token for async operation        */
+    void **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    H5VL_object_t *vol_obj   = NULL;    /* VOL object of Attr_id */
     H5VL_t *       connector = NULL;              /* VOL connector */
     herr_t         ret_value = SUCCEED;           /* Return value */
 
@@ -1639,59 +1595,34 @@ H5A__close_api_common(hid_t attr_id, hid_t es_id, const char *caller)
     if (H5I_ATTR != H5I_get_type(attr_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a attribute ID")
 
-    /* Get the event set and set up request token pointer for operation */
+    /* Get attribute object's connector */
+    if (NULL == (vol_obj = H5VL_vol_object(attr_id)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get VOL object for attribute")
+
+    /* Prepare for possible asynchronous operation */
     if (H5ES_NONE != es_id) {
-        H5VL_object_t *vol_obj = NULL;
-
-        /* Get event set */
-        if (NULL == (es = (H5ES_t *)H5I_object_verify(es_id, H5I_EVENTSET)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an event set")
-
-        /* Get attribute object's connector and increate its rc, so it doesn't get
-         * closed if closing the dataset closes the file */
-        if (NULL == (vol_obj = H5VL_vol_object(attr_id)))
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get VOL object for attribute")
+        /* Increase connector's refcount, so it doesn't get closed if closing
+         * the attribute closes the file */
         connector = vol_obj->connector;
         H5VL_conn_inc_rc(connector);
 
         /* Point at token for operation to set up */
         token_ptr = &token;
     } /* end if */
-    else
-        /* Synchronous operation */
-        token_ptr = H5_REQUEST_NULL;
 
     /* Decrement references to that atom (and close it) */
     if (H5I_dec_app_ref_async(attr_id, token_ptr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "can't close attribute")
 
     /* If there's an event set and a token was created, add the token to it */
-    if (H5ES_NONE != es_id && NULL != token) {
-        /* Create vol object for token */
-        if (NULL == (token_obj = H5VL_create_object(token, connector))) {
-            if (H5VL_request_free(token) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "can't free request")
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't create vol object for request token")
-        } /* end if */
-
+    if (H5ES_NONE != es_id && NULL != token)
         /* Add token to event set */
-        if (H5ES_insert(es, token_obj, H5ARG_TRACE3(caller, "ii*s", attr_id, es_id, caller)) < 0)
+        if (H5ES_insert(es_id, vol_obj, token, H5ARG_TRACE3(caller, "ii*s", attr_id, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
-        if (H5VL_conn_dec_rc(connector) < 0) {
-            connector = NULL;
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
-        } /* end if */
-        connector = NULL;
-    } /* end if */
-
 done:
-    if (ret_value < 0) {
-        if (token_obj && H5VL_free_object(token_obj) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't free request token")
-        if (connector && H5VL_conn_dec_rc(connector) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
-    } /* end if */
+    if (connector && H5VL_conn_dec_rc(connector) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__close_api_common() */

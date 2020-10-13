@@ -237,8 +237,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES_insert(H5ES_t *es, H5VL_object_t *request, const char *caller, const char *caller_args, ...)
+H5ES_insert(hid_t es_id, H5VL_object_t *vol_obj, void *token, const char *caller,
+    const char *caller_args, ...)
 {
+    H5ES_t *es = NULL;          /* Event set for the operation */
+    H5VL_object_t *request = NULL;         /* Async request token VOL object */
     H5ES_event_t *ev = NULL;    /* Event for request */
     H5RS_str_t *rs = NULL;      /* Ref-counted string to compose formatted argument string in */
     char modified_args[64];     /* Buffer to modify caller args in */
@@ -251,10 +254,21 @@ H5ES_insert(H5ES_t *es, H5VL_object_t *request, const char *caller, const char *
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(es);
-    HDassert(request);
+    HDassert(vol_obj);
+    HDassert(token);
     HDassert(caller);
     HDassert(caller_args);
+
+    /* Get event set */
+    if (NULL == (es = (H5ES_t *)H5I_object_verify(es_id, H5I_EVENTSET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an event set")
+
+    /* Create vol object for token */
+    if (NULL == (request = H5VL_create_object(token, vol_obj->connector))) {
+        if (H5VL_request_free(token) < 0)
+            HDONE_ERROR(H5E_EVENTSET, H5E_CANTFREE, FAIL, "can't free request")
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTINIT, FAIL, "can't create vol object for request token")
+    } /* end if */
 
     /* Allocate space for new event */
     if (NULL == (ev = H5FL_CALLOC(H5ES_event_t)))
@@ -305,7 +319,9 @@ done:
         HDva_end(ap);
     if(rs)
         H5RS_decr(rs);
-    if(ret_value < 0)
+
+    /* Release resources on error */
+    if(ret_value < 0) {
         if(ev) {
             if(ev->api_name)
                 H5MM_xfree_const(ev->api_name);
@@ -313,6 +329,9 @@ done:
                 H5MM_xfree_const(ev->api_args);
             H5FL_FREE(H5ES_event_t, ev);
         } /* end if */
+        if (request && H5VL_free_object(request) < 0)
+            HDONE_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, FAIL, "can't free request token")
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES_insert() */

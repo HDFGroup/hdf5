@@ -319,9 +319,8 @@ H5G__create_api_common(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl
                        hid_t es_id, const char *caller)
 {
     void *            grp       = NULL;              /* Structure for new group */
-    H5ES_t *          es        = NULL;              /* Event set for the operation              */
-    void *            token     = NULL, **token_ptr; /* Request token for async operation        */
-    H5VL_object_t *   token_obj = NULL;              /* Async token VOL object */
+    void *            token     = NULL;         /* Request token for async operation        */
+    void **token_ptr = H5_REQUEST_NULL;         /* Pointer to request token for async operation        */
     H5VL_object_t *   vol_obj   = NULL;              /* object of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
@@ -361,18 +360,9 @@ H5G__create_api_common(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl
     loc_params.type     = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
 
-    /* Get the event set and set up request token pointer for operation */
-    if (H5ES_NONE != es_id) {
-        /* Get event set */
-        if (NULL == (es = (H5ES_t *)H5I_object_verify(es_id, H5I_EVENTSET)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an event set")
-
-        /* Point at token for operation to set up */
-        token_ptr = &token;
-    } /* end if */
-    else
-        /* Synchronous operation */
-        token_ptr = H5_REQUEST_NULL;
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token;     /* Point at token for VOL connector to set up */
 
     /* Create the group */
     if (NULL == (grp = H5VL_group_create(vol_obj, &loc_params, name, lcpl_id, gcpl_id, gapl_id,
@@ -380,31 +370,19 @@ H5G__create_api_common(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5I_INVALID_HID, "unable to create group")
 
     /* If there's an event set and a token was created, add the token to it */
-    if (H5ES_NONE != es_id && NULL != token) {
-        /* Create vol object for token */
-        if (NULL == (token_obj = H5VL_create_object(token, vol_obj->connector))) {
-            if (H5VL_request_free(token) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "can't free request")
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create vol object for request token")
-        } /* end if */
-
+    if (H5ES_NONE != es_id && NULL != token)
         /* Add token to event set */
-        if (H5ES_insert(es, token_obj, H5ARG_TRACE7(caller, "i*siiii*s", loc_id, name, lcpl_id, gcpl_id, gapl_id, es_id, caller)) < 0)
+        if (H5ES_insert(es_id, vol_obj, token, H5ARG_TRACE7(caller, "i*siiii*s", loc_id, name, lcpl_id, gcpl_id, gapl_id, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
-        token_obj = NULL;
-    } /* end if */
 
     /* Get an atom for the group */
     if ((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize group handle")
 
 done:
-    if (H5I_INVALID_HID == ret_value) {
+    if (H5I_INVALID_HID == ret_value)
         if (grp && H5VL_group_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group")
-        if (token_obj && H5VL_free_object(token_obj) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "can't free request token")
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__create_api_common() */
@@ -812,9 +790,9 @@ done:
 static herr_t
 H5G__close_api_common(hid_t group_id, hid_t es_id, const char *caller)
 {
-    H5ES_t *       es        = NULL;              /* Event set for the operation */
-    void *         token     = NULL, **token_ptr; /* Request token for async operation */
-    H5VL_object_t *token_obj = NULL;              /* Async token VOL object */
+    void *         token     = NULL;    /* Request token for async operation        */
+    void **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    H5VL_object_t *vol_obj   = NULL;    /* VOL object of file_id */
     H5VL_t *       connector = NULL;              /* VOL connector */
     herr_t         ret_value = SUCCEED;           /* Return value                     */
 
@@ -824,27 +802,20 @@ H5G__close_api_common(hid_t group_id, hid_t es_id, const char *caller)
     if (H5I_GROUP != H5I_get_type(group_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group ID")
 
-    /* Get the event set and set up request token pointer for operation */
+    /* Get group object's connector */
+    if (NULL == (vol_obj = H5VL_vol_object(group_id)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get VOL object for group")
+
+    /* Prepare for possible asynchronous operation */
     if (H5ES_NONE != es_id) {
-        H5VL_object_t *vol_obj = NULL;
-
-        /* Get event set */
-        if (NULL == (es = (H5ES_t *)H5I_object_verify(es_id, H5I_EVENTSET)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an event set")
-
-        /* Get group object's connector and increate its rc, so it doesn't get
-         * closed if closing the group closes the file */
-        if (NULL == (vol_obj = H5VL_vol_object(group_id)))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get VOL object for group")
+        /* Increase connector's refcount, so it doesn't get closed if closing
+         * the group closes the file */
         connector = vol_obj->connector;
         H5VL_conn_inc_rc(connector);
 
         /* Point at token for operation to set up */
         token_ptr = &token;
     } /* end if */
-    else
-        /* Synchronous operation */
-        token_ptr = H5_REQUEST_NULL;
 
     /* Decrement the counter on the group atom. It will be freed if the count
      * reaches zero.
@@ -853,32 +824,14 @@ H5G__close_api_common(hid_t group_id, hid_t es_id, const char *caller)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "decrementing group ID failed")
 
     /* If there's an event set and a token was created, add the token to it */
-    if (H5ES_NONE != es_id && NULL != token) {
-        /* Create vol object for token */
-        if (NULL == (token_obj = H5VL_create_object(token, connector))) {
-            if (H5VL_request_free(token) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "can't free request")
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create vol object for request token")
-        } /* end if */
-
+    if (H5ES_NONE != es_id && NULL != token)
         /* Add token to event set */
-        if (H5ES_insert(es, token_obj, H5ARG_TRACE3(caller, "ii*s", group_id, es_id, caller)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
-
-        if (H5VL_conn_dec_rc(connector) < 0) {
-            connector = NULL;
-            HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
-        } /* end if */
-        connector = NULL;
-    } /* end if */
+        if (H5ES_insert(es_id, vol_obj, token, H5ARG_TRACE3(caller, "ii*s", group_id, es_id, caller)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
-    if (ret_value < 0) {
-        if (token_obj && H5VL_free_object(token_obj) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "can't free request token")
-        if (connector && H5VL_conn_dec_rc(connector) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
-    } /* end if */
+    if (connector && H5VL_conn_dec_rc(connector) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__close_api_common() */
