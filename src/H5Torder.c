@@ -116,7 +116,7 @@ H5Tget_order(hid_t type_id)
 
     /* Get order */
     if (H5T_ORDER_ERROR == (ret_value = H5T_get_order(dt)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, H5T_ORDER_ERROR, "cant't get order for specified datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, H5T_ORDER_ERROR, "can't get order for specified datatype")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -210,7 +210,7 @@ done:
 herr_t
 H5Tset_order(hid_t type_id, H5T_order_t order)
 {
-    H5T_t *dt;                  /* Datatype to modify */
+    H5T_t *dt        = NULL;    /* Datatype to modify */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)

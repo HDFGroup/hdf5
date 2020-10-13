@@ -52,9 +52,6 @@
  *
  *****************************************************************************/
 
-#ifndef H5FDs3comms_H
-#define H5FDs3comms_H
-
 #include "H5private.h" /* Generic Functions        */
 
 #ifdef H5_HAVE_ROS3_VFD
@@ -563,5 +560,3 @@ H5_DLL herr_t H5FD_s3comms_uriencode(char *dest, const char *s, size_t s_len, hb
 #endif
 
 #endif /* H5_HAVE_ROS3_VFD */
-
-#endif /* ifndef H5FDs3comms_H */

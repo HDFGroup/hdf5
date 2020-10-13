@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:	Quincey Koziol
  *		Friday, January 19, 2007
  *
  * Purpose:	This file contains inline definitions for "generic" routines
@@ -48,7 +48,7 @@ static H5_INLINE void *
 H5O_SHARED_DECODE(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                   size_t p_size, const uint8_t *p)
 {
-    void *ret_value; /* Return value */
+    void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -163,7 +163,7 @@ H5O_SHARED_SIZE(const H5F_t *f, hbool_t disable_shared, const void *_mesg)
 {
     const H5O_shared_t *sh_mesg =
         (const H5O_shared_t *)_mesg; /* Pointer to shared message portion of actual message */
-    size_t ret_value;                /* Return value */
+    size_t ret_value = 0;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -316,8 +316,8 @@ static H5_INLINE void *
 H5O_SHARED_COPY_FILE(H5F_t *file_src, void *_native_src, H5F_t *file_dst, hbool_t *recompute_size,
                      unsigned *mesg_flags, H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id)
 {
-    void *dst_mesg = NULL; /* Destination message */
-    void *ret_value;       /* Return value */
+    void *dst_mesg  = NULL; /* Destination message */
+    void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

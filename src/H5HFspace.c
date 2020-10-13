@@ -15,7 +15,7 @@
  *
  * Created:		H5HFspace.c
  *			May  2 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Space allocation routines for fractal heaps.
  *
@@ -80,13 +80,7 @@
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May  2 2006
- *
- * Modifications:
- *	Vailin Choi, July 29th, 2008
- *	  Pass values of alignment and threshold to FS_create() and FS_open()
- *	  for handling alignment.
  *
  *-------------------------------------------------------------------------
  */
@@ -147,7 +141,6 @@ done:
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 15 2006
  *
  *-------------------------------------------------------------------------
@@ -189,11 +182,9 @@ done:
  * Purpose:	Attempt to find space in a fractal heap
  *
  * Return:	Success:	non-negative
- *
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May  2 2006
  *
  *-------------------------------------------------------------------------
@@ -242,7 +233,6 @@ done:
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Feb 24 2012
  *
  *-------------------------------------------------------------------------
@@ -287,7 +277,6 @@ done:
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Feb 23 2012
  *
  *-------------------------------------------------------------------------
@@ -326,7 +315,6 @@ done:
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Feb 24 2012
  *
  *-------------------------------------------------------------------------
@@ -379,7 +367,6 @@ done:
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Feb 24 2012
  *
  *-------------------------------------------------------------------------
@@ -418,7 +405,6 @@ done:
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		August 14 2007
  *
  *-------------------------------------------------------------------------
@@ -462,7 +448,6 @@ done:
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July 24 2006
  *
  *-------------------------------------------------------------------------
@@ -499,7 +484,6 @@ done:
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May  2 2006
  *
  *-------------------------------------------------------------------------
@@ -523,9 +507,6 @@ H5HF_space_close(H5HF_hdr_t *hdr, hid_t dxpl_id)
         /* Retrieve the number of sections for this heap */
         if (H5FS_sect_stats(hdr->fspace, NULL, &nsects) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCOUNT, FAIL, "can't query free space section count")
-#ifdef QAK
-        HDfprintf(stderr, "%s: nsects = %Hu\n", FUNC, nsects);
-#endif /* QAK */
 
         /* Close the free space for the heap */
         if (H5FS_close(hdr->f, dxpl_id, hdr->fspace) < 0)
@@ -553,7 +534,6 @@ done:
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Aug  7 2006
  *
  *-------------------------------------------------------------------------
@@ -588,7 +568,6 @@ done:
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July 10 2006
  *
  *-------------------------------------------------------------------------
@@ -599,9 +578,6 @@ H5HF_space_sect_change_class(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
-#ifdef QAK
-    HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
 
     /*
      * Check arguments.

@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu <slu@hdfgroup.uiuc.edu>
+ * Programmer:  Raymond Lu
  *              Wednesday, 20 September 2006
  *
  * Purpose:  The Direct I/O file driver forces the data to be written to

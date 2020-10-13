@@ -12,10 +12,10 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:  Quincey Koziol
  *              Tuesday, June 16, 1998
  *
- * Purpose:	"All" selection data space I/O functions.
+ * Purpose:	"All" selection dataspace I/O functions.
  */
 
 #define H5S_PACKAGE /*suppress error about including H5Spkg	  */
@@ -98,12 +98,10 @@ static const H5S_sel_iter_class_t H5S_sel_iter_all[1] = {{
  *
  * Purpose:	Initializes iteration information for "all" selection.
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:	Non-negative on success, negative on failure.
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, June 16, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -135,12 +133,10 @@ H5S_all_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
  * Purpose:	Retrieve the current coordinates of iterator for current
  *              selection
  *
- * Return:	non-negative on success, negative on failure
+ * Return:	Non-negative on success, negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, April 22, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -169,12 +165,10 @@ done:
  * Purpose:	Retrieve the current block of iterator for current
  *              selection
  *
- * Return:	non-negative on success, negative on failure
+ * Return:	Non-negative on success, negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Monday, June 2, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -208,12 +202,10 @@ H5S_all_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
  *
  * Purpose:	Return number of elements left to process in iterator
  *
- * Return:	non-negative number of elements on success, zero on failure
+ * Return:	Non-negative number of elements on success, zero on failure
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, June 16, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -423,7 +415,7 @@ H5S_all_copy(H5S_t *dst, const H5S_t H5_ATTR_UNUSED *src, hbool_t H5_ATTR_UNUSED
     TRUE if the selection fits within the extent, FALSE if it does not and
         Negative on an error.
  DESCRIPTION
-    Determines if the current selection at the current offet fits within the
+    Determines if the current selection at the current offset fits within the
     extent for the dataspace.  Offset is irrelevant for this type of selection.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -787,7 +779,7 @@ H5S_all_project_scalar(const H5S_t H5_ATTR_UNUSED *space, hsize_t *offset)
  * Purpose:	Projects an 'all' selection onto/into a simple dataspace
  *              of a different rank
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:	Non-negative on success, negative on failure.
  *
  * Programmer:	Quincey Koziol
  *              Sunday, July 18, 2010
@@ -885,7 +877,7 @@ H5Sselect_all(hid_t spaceid)
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
     /* Call internal routine to do the work */
     if (H5S_select_all(space, TRUE) < 0)

@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke <matzke@llnl.gov>
+/* Programmer:  Robb Matzke
  *    Friday, October 30, 1998
  *
  * Purpose:  This file is included by all HDF5 library source files to
@@ -885,7 +885,7 @@ typedef off_t       h5_stat_size_t;
 #endif /* HDgetgroups */
 #ifndef HDgethostname
 #define HDgethostname(N, L) gethostname(N, L)
-#endif /* HDgetlogin */
+#endif /* HDgethostname */
 #ifndef HDgetlogin
 #define HDgetlogin() getlogin()
 #endif /* HDgetlogin */
@@ -910,6 +910,7 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDgets
 #define HDgets(S) gets(S)
 #endif /* HDgets */
+
 #ifndef HDgettimeofday
 #define HDgettimeofday(S, P) gettimeofday(S, P)
 #endif /* HDgettimeofday */
@@ -1823,11 +1824,10 @@ H5_DLL double H5_trace(const double *calltime, const char *func, const char *typ
 /* global library version information string */
 extern char H5_lib_vers_info_g[];
 
+#include "H5TSprivate.h"
+
 /* Lock headers */
 #ifdef H5_HAVE_THREADSAFE
-
-/* Include required thread-safety header */
-#include "H5TSprivate.h"
 
 /* replacement structure for original global variable */
 typedef struct H5_api_struct {

@@ -11,24 +11,24 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke <matzke@llnl.gov>
+/* Programmer:  Robb Matzke
  *              Wednesday, September 30, 1998
  *
- * Purpose:	The fill message indicates a bit pattern to use for
- *		uninitialized data points of a dataset.
+ * Purpose:    The fill message indicates a bit pattern to use for
+ *        uninitialized data points of a dataset.
  */
 
 #define H5O_PACKAGE /*suppress error about including H5Opkg	  */
 
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Dprivate.h"  /* Datasets				*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5FLprivate.h" /* Free Lists				*/
-#include "H5Iprivate.h"  /* IDs			  		*/
-#include "H5MMprivate.h" /* Memory management			*/
-#include "H5Opkg.h"      /* Object headers			*/
-#include "H5Pprivate.h"  /* Property lists			*/
-#include "H5Sprivate.h"  /* Dataspaces				*/
+#include "H5private.h"   /* Generic Functions    */
+#include "H5Dprivate.h"  /* Datasets                */
+#include "H5Eprivate.h"  /* Error handling       */
+#include "H5FLprivate.h" /* Free Lists           */
+#include "H5Iprivate.h"  /* IDs                  */
+#include "H5MMprivate.h" /* Memory management    */
+#include "H5Opkg.h"      /* Object headers       */
+#include "H5Pprivate.h"  /* Property lists       */
+#include "H5Sprivate.h"  /* Dataspaces           */
 
 static void * H5O_fill_old_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned mesg_flags,
                                   unsigned *ioflags, size_t p_size, const uint8_t *p);
@@ -167,14 +167,14 @@ H5FL_DEFINE(H5O_fill_t);
 H5FL_BLK_EXTERN(type_conv);
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_fill_new_decode
+ * Function:    H5O_fill_new_decode
  *
- * Purpose:	Decode a new fill value message.  The new fill value
- * 		message is fill value plus space allocation time and
- * 		fill value writing time and whether fill value is defined.
+ * Purpose:    Decode a new fill value message.  The new fill value
+ *          message is fill value plus space allocation time and
+ *          fill value writing time and whether fill value is defined.
  *
- * Return:	Success:	Ptr to new message in native struct.
- *		Failure:	NULL
+ * Return:    Success:    Ptr to new message in native struct.
+ *          Failure:    NULL
  *
  * Programmer:  Raymond Lu
  *              Feb 26, 2002
@@ -186,8 +186,8 @@ H5O_fill_new_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t
                     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
                     size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
-    H5O_fill_t *fill = NULL;
-    void *      ret_value;
+    H5O_fill_t *fill      = NULL;
+    void *      ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -344,13 +344,13 @@ done:
 } /* end H5O_fill_old_decode() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_fill_new_encode
+ * Function:    H5O_fill_new_encode
  *
- * Purpose:	Encode a new fill value message.  The new fill value
- *              message is fill value plus space allocation time and
- *              fill value writing time and whether fill value is defined.
+ * Purpose:    Encode a new fill value message.  The new fill value
+ *          message is fill value plus space allocation time and
+ *          fill value writing time and whether fill value is defined.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:  Raymond Lu
  *              Feb 26, 2002
@@ -472,15 +472,15 @@ H5O_fill_old_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
 } /* end H5O_fill_old_encode() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_fill_copy
+ * Function:    H5O_fill_copy
  *
- * Purpose:	Copies a message from _MESG to _DEST, allocating _DEST if
- *		necessary.  The new fill value message is fill value plus
- *		space allocation time and fill value writing time and
- *		whether fill value is defined.
+ * Purpose:    Copies a message from _MESG to _DEST, allocating _DEST if
+ *        necessary.  The new fill value message is fill value plus
+ *        space allocation time and fill value writing time and
+ *        whether fill value is defined.
  *
- * Return:	Success:	Ptr to _DEST
- *		Failure:	NULL
+ * Return:    Success:    Ptr to _DEST
+ *            Failure:    NULL
  *
  * Programmer:  Raymond Lu
  *              Feb 26, 2002
@@ -590,16 +590,16 @@ done:
 } /* end H5O_fill_copy() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_fill_new_size
+ * Function:    H5O_fill_new_size
  *
- * Purpose:	Returns the size of the raw message in bytes not counting the
- *		message type or size fields, but only the data fields.  This
- *		function doesn't take into account alignment.  The new fill
- *		value message is fill value plus space allocation time and
- *              fill value writing time and whether fill value is defined.
+ * Purpose:    Returns the size of the raw message in bytes not counting the
+ *          message type or size fields, but only the data fields.  This
+ *          function doesn't take into account alignment.  The new fill
+ *          value message is fill value plus space allocation time and
+ *          fill value writing time and whether fill value is defined.
  *
- * Return:	Success:	Message data size in bytes w/o alignment.
- *		Failure:	0
+ * Return:    Success:    Message data size in bytes w/o alignment.
+ *          Failure:    0
  *
  * Programmer:  Raymond Lu
  *              Feb 26, 2002
@@ -624,15 +624,15 @@ H5O_fill_new_size(const H5F_t H5_ATTR_UNUSED *f, const void *_fill)
                     1 + /* Fill value write time */
                     1;  /* Fill value defined    */
         if (fill->fill_defined)
-            ret_value += 4 +                                        /* Fill value size	 */
-                         (fill->size > 0 ? (size_t)fill->size : 0); /* Size of fill value	 */
+            ret_value += 4 +                                        /* Fill value size     */
+                         (fill->size > 0 ? (size_t)fill->size : 0); /* Size of fill value     */
     }                                                               /* end if */
     else {
         ret_value = 1 + /* Version number        */
                     1;  /* Status flags          */
         if (fill->size > 0)
-            ret_value += 4 +                 /* Fill value size	 */
-                         (size_t)fill->size; /* Size of fill value	 */
+            ret_value += 4 +                 /* Fill value size     */
+                         (size_t)fill->size; /* Size of fill value     */
     }                                        /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -666,13 +666,13 @@ H5O_fill_old_size(const H5F_t H5_ATTR_UNUSED *f, const void *_fill)
 } /* end H5O_fill_old_size() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_fill_reset_dyn
+ * Function:    H5O_fill_reset_dyn
  *
- * Purpose:	Resets dynamic fill value fields
+ * Purpose:    Resets dynamic fill value fields
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Monday, January 22, 2007
  *
  *-------------------------------------------------------------------------
@@ -731,13 +731,13 @@ done:
 } /* end H5O_fill_reset_dyn() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_fill_reset
+ * Function:    H5O_fill_reset
  *
- * Purpose:	Resets a message to an initial state.
+ * Purpose:    Resets a message to an initial state.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Thursday, October  1, 1998
  *
  *-------------------------------------------------------------------------
@@ -763,13 +763,13 @@ H5O_fill_reset(void *_fill)
 } /* end H5O_fill_reset() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_fill_free
+ * Function:    H5O_fill_free
  *
- * Purpose:	Frees the message
+ * Purpose:    Frees the message
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, December 5, 2002
  *
  *-------------------------------------------------------------------------
@@ -787,13 +787,13 @@ H5O_fill_free(void *fill)
 } /* end H5O_fill_free() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_fill_debug
+ * Function:    H5O_fill_debug
  *
- * Purpose:	Prints debugging info for the message.
+ * Purpose:     Prints debugging info for the message.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, October  1, 1998
  *
  *-------------------------------------------------------------------------
@@ -887,16 +887,16 @@ H5O_fill_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void
 } /* end H5O_fill_debug() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_fill_convert
+ * Function:    H5O_fill_convert
  *
- * Purpose:	Convert a fill value from whatever data type it currently has
- *		to the specified dataset type.  The `type' field of the fill
- *		value struct will be set to NULL to indicate that it has the
- *		same type as the dataset.
+ * Purpose:    Convert a fill value from whatever data type it currently has
+ *          to the specified dataset type.  The `type' field of the fill
+ *          value struct will be set to NULL to indicate that it has the
+ *          same type as the dataset.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Thursday, October  1, 1998
  *
  *-------------------------------------------------------------------------
@@ -904,9 +904,9 @@ H5O_fill_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void
 herr_t
 H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, hbool_t *fill_changed, hid_t dxpl_id)
 {
-    H5T_path_t *tpath;                    /* Type conversion info	*/
-    void *      buf = NULL, *bkg = NULL;  /* Conversion buffers	*/
-    hid_t       src_id = -1, dst_id = -1; /* Datatype identifiers	*/
+    H5T_path_t *tpath;                    /* Type conversion info    */
+    void *      buf = NULL, *bkg = NULL;  /* Conversion buffers    */
+    hid_t       src_id = -1, dst_id = -1; /* Datatype identifiers    */
     herr_t      ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -993,7 +993,7 @@ done:
  *
  * Purpose:     Set the encoding for a fill value to the latest version.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
  *              Tuesday, July 24, 2007

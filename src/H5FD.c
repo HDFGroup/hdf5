@@ -12,14 +12,11 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
- *              Monday, July 26, 1999
- *
- * Purpose:    The Virtual File Layer as described in documentation.
- *              This is the greatest common denominator for all types of
- *              storage access whether a file, memory, network, etc. This
- *              layer usually just dispatches the request to an actual
- *              file driver layer.
+ * Purpose: The Virtual File Layer as described in documentation.
+ *          This is the greatest common denominator for all types of
+ *          storage access whether a file, memory, network, etc. This
+ *          layer usually just dispatches the request to an actual
+ *          file driver layer.
  */
 
 /****************/

@@ -13,11 +13,9 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5Pdcpl.c
- *			February 26 1998
- *			Robb Matzke <matzke@llnl.gov>
+ * Created:     H5Pdcpl.c
  *
- * Purpose:		Dataset creation property list class routines
+ * Purpose:     Dataset creation property list class routines
  *
  *-------------------------------------------------------------------------
  */
@@ -783,13 +781,6 @@ H5P__init_def_layout(void)
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
  *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for
- *              generic property list.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -859,13 +850,6 @@ done:
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
  *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and get property for
- *              generic property list.
- *
  *-------------------------------------------------------------------------
  */
 H5D_layout_t
@@ -907,13 +891,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
- *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for
- *              generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -988,13 +965,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
- *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for
- *              generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -1127,13 +1097,6 @@ done:
  * Programmer:	Robb Matzke
  *              Tuesday, March  3, 1998
  *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for
- *              generic property list.
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -1182,13 +1145,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *              Tuesday, March  3, 1998
- *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and get property for
- *              generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -1309,8 +1265,6 @@ done:
  * Programmer:	Kent Yang
  *              Wednesday, November 13, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1352,9 +1306,6 @@ done:
  *
  * Programmer:  Xiaowen Wu
  *              Wednesday, December 22, 2004
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -1414,9 +1365,6 @@ done:
  * Programmer:  Xiaowen Wu
  *              Thursday, April 14, 2005
  *
- * Modifications:
- *
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1470,7 +1418,7 @@ done:
  * Function:	H5Pset_fill_value
  *
  * Purpose:	Set the fill value for a dataset creation property list. The
- *		VALUE is interpretted as being of type TYPE, which need not
+ *		VALUE is interpreted as being of type TYPE, which need not
  *		be the same type as the dataset but the library must be able
  *		to convert VALUE to the dataset type when the dataset is
  *		created.  If VALUE is NULL, it will be interpreted as
@@ -1480,13 +1428,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *              Thursday, October  1, 1998
- *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for
- *              generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -1822,9 +1763,6 @@ done:
  * Programmer:	Raymond Lu
  * 		Wednesday, January 16, 2002
  *
- * Modifications:
- *
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1997,9 +1935,6 @@ done:
  *
  * Programmer:  Raymond Lu
  *              Wednesday, January 16, 2002
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */

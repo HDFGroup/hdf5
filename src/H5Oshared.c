@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Robb Matzke <matzke@llnl.gov>
+ * Programmer:	Robb Matzke
  *		Wednesday, April  1, 1998
  *
  * Purpose:	Functions that operate on a shared message.  The shared
@@ -90,7 +90,6 @@
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep 24 2003
  *
  *-------------------------------------------------------------------------
@@ -205,7 +204,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep 26 2003
  *
  *-------------------------------------------------------------------------
@@ -301,9 +299,9 @@ void *
 H5O_shared_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned *ioflags, const uint8_t *buf,
                   const H5O_msg_class_t *type)
 {
-    H5O_shared_t sh_mesg;   /* Shared message info */
-    unsigned     version;   /* Shared message version */
-    void *       ret_value; /* Return value */
+    H5O_shared_t sh_mesg;          /* Shared message info */
+    unsigned     version;          /* Shared message version */
+    void *       ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -428,7 +426,6 @@ H5O_shared_encode(const H5F_t *f, uint8_t *buf /*out*/, const H5O_shared_t *sh_m
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep 26 2003
  *
  *-------------------------------------------------------------------------
@@ -464,7 +461,7 @@ H5O_set_shared(H5O_shared_t *dst, const H5O_shared_t *src)
 size_t
 H5O_shared_size(const H5F_t *f, const H5O_shared_t *sh_mesg)
 {
-    size_t ret_value; /* Return value */
+    size_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -560,8 +557,7 @@ done:
  *
  * Purpose:     Copies a message from _MESG to _DEST in file
  *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
  *              January 22, 2007
@@ -618,17 +614,16 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5O_shared_post_copy_file
  *
- * Purpose:     Delate a shared message and replace with a new one.
+ * Purpose:     Delete a shared message and replace with a new one.
  *              The function is needed at cases such as coping a shared reg_ref attribute.
  *              When a shared reg_ref attribute is copied from one file to
  *              another, the values in file need to be replaced. The only way
  *              to complish that is to delete the old message and write the
  *              new message with the correct values.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Peter Cao
- *              xcao@hdfgroup.org
  *              May 24 2007
  *
  *-------------------------------------------------------------------------

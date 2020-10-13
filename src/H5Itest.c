@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@hdfgoup.org>
+/* Programmer:  Quincey Koziol
  *              Tuesday, July 27, 2010
  *
  * Purpose:	ID testing functions.
@@ -54,14 +54,14 @@
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function: H5I_get_name_test
+ * Function:    H5I_get_name_test
  *
- * Purpose: Testing version of H5Iget_name()
+ * Purpose:     Testing version of H5Iget_name()
  *
- * Return: Success: The length of name.
- *         Failure: -1
+ * Return:      Success: The length of name.
+ *              Failure: -1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, July 27, 2010
  *
  *-------------------------------------------------------------------------

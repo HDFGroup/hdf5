@@ -15,7 +15,7 @@
  *
  * Created:     H5B2cache.c
  *              Jan 31 2005
- *              Quincey Koziol <koziol@hdfgroup.org>
+ *              Quincey Koziol
  *
  * Purpose:     Implement v2 B-tree metadata cache methods.
  *
@@ -132,7 +132,6 @@ const H5AC_class_t H5AC_BT2_LEAF[1] = {{
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 1 2005
  *
  *-------------------------------------------------------------------------
@@ -254,7 +253,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 1 2005
  *
  *-------------------------------------------------------------------------
@@ -468,7 +466,6 @@ H5B2__cache_hdr_size(const H5F_t H5_ATTR_UNUSED *f, const H5B2_hdr_t *hdr, size_
  *              Failure:        NULL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 2 2005
  *
  *-------------------------------------------------------------------------
@@ -604,7 +601,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 3 2005
  *
  *-------------------------------------------------------------------------
@@ -760,9 +756,7 @@ H5B2__cache_internal_clear(H5F_t *f, H5B2_internal_t *internal, hbool_t destroy)
 
     FUNC_ENTER_STATIC
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments */
     HDassert(internal);
 
     /* Reset the dirty flag.  */
@@ -816,7 +810,6 @@ H5B2__cache_internal_size(const H5F_t H5_ATTR_UNUSED *f, const H5B2_internal_t *
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 2 2005
  *
  *-------------------------------------------------------------------------
@@ -1009,7 +1002,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 2 2005
  *
  *-------------------------------------------------------------------------

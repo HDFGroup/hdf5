@@ -15,7 +15,7 @@
  *
  * Created:             H5Orefcount.c
  *                      Mar 10 2007
- *                      Quincey Koziol <koziol@hdfgroup.org>
+ *                      Quincey Koziol
  *
  * Purpose:             Object ref. count messages.
  *
@@ -80,7 +80,6 @@ H5FL_DEFINE_STATIC(H5O_refcount_t);
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar 10 2007
  *
  *-------------------------------------------------------------------------
@@ -128,7 +127,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar 10 2007
  *
  *-------------------------------------------------------------------------
@@ -165,7 +163,6 @@ H5O_refcount_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shar
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar 10 2007
  *
  *-------------------------------------------------------------------------
@@ -173,9 +170,9 @@ H5O_refcount_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shar
 static void *
 H5O_refcount_copy(const void *_mesg, void *_dest)
 {
-    const H5O_refcount_t *refcount = (const H5O_refcount_t *)_mesg;
-    H5O_refcount_t *      dest     = (H5O_refcount_t *)_dest;
-    void *                ret_value; /* Return value */
+    const H5O_refcount_t *refcount  = (const H5O_refcount_t *)_mesg;
+    H5O_refcount_t *      dest      = (H5O_refcount_t *)_dest;
+    void *                ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -205,7 +202,6 @@ done:
  *              Failure:        zero
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar 10 2007
  *
  *-------------------------------------------------------------------------
@@ -228,7 +224,7 @@ H5O_refcount_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_
 /*-------------------------------------------------------------------------
  * Function:	H5O_refcount_free
  *
- * Purpose:	Free's the message
+ * Purpose:	Frees the message
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -290,7 +286,6 @@ H5O_refcount_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UN
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar  6 2007
  *
  *-------------------------------------------------------------------------

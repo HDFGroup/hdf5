@@ -200,21 +200,22 @@ H5PL__init_interface(void)
 } /* end H5PL__init_interface() */
 
 /*-------------------------------------------------------------------------
- * Function: H5PLset_loading_state
+ * Function:    H5PLset_loading_state
  *
- * Purpose: Control the loading of dynamic plugin types.
+ * Purpose:     Control the loading of dynamic plugin types.
  *
- * This function will not allow plugin types if the pathname from the HDF5_PLUGIN_PRELOAD
- * environment variable is set to the special "::" string.
+ *              This function will not allow plugin types if the pathname from the HDF5_PLUGIN_PRELOAD
+ *              environment variable is set to the special "::" string.
  *
- * plugin bit = 0, will prevent the use of that dynamic plugin type.
- * plugin bit = 1, will allow the use of that dynamic plugin type.
+ *              plugin bit = 0, will prevent the use of that dynamic plugin type.
+ *              plugin bit = 1, will allow the use of that dynamic plugin type.
  *
- * H5PL_TYPE_FILTER changes just dynamic filters
- * A H5PL_ALL_PLUGIN will enable all dynamic plugin types
- * A zero value will disable all dynamic plugin types
+ *              H5PL_TYPE_FILTER changes just dynamic filters
+ *              A H5PL_ALL_PLUGIN will enable all dynamic plugin types
+ *              A zero value will disable all dynamic plugin types
  *
- * Return: Non-negative or success
+ * Return:      Success:    Non-negative
+ *              Failture:   Negative
  *
  *-------------------------------------------------------------------------
  */
@@ -241,14 +242,17 @@ done:
 } /* end H5PLset_loading_state() */
 
 /*-------------------------------------------------------------------------
- * Function: H5PLget_loading_state
+ * Function:    H5PLget_loading_state
  *
- * Purpose: Query state of the loading of dynamic plugin types.
+ * Purpose:     Query state of the loading of dynamic plugin types.
  *
- * This function will return the state of the global flag.
+ *              This function will return the state of the global flag.
  *
- * Return: Zero if all plugin types are disabled, negative if all
- * plugin types are enabled, positive if one or more of the plugin types are enabled.
+ *              Zero if all plugin types are disabled, negative if all
+ *              plugin types are enabled, positive if one or more of the plugin types are enabled.
+ *
+ * Return:      Success:    Non-negative
+ *              Failture:   Negative
  *
  *-------------------------------------------------------------------------
  */
@@ -389,11 +393,12 @@ done:
 } /* end H5PL_load() */
 
 /*-------------------------------------------------------------------------
- * Function: H5PLappend
+ * Function:    H5PLappend
  *
- * Purpose: Insert a plugin path at the end of the list.
+ * Purpose:     Insert a plugin search path at the end of the list.
  *
- * Return: Non-negative or success.
+ * Return:      Success:    Non-negative
+ *              Failture:   Negative
  *
  *-------------------------------------------------------------------------
  */
@@ -422,11 +427,12 @@ done:
 } /* end H5PLappend() */
 
 /*-------------------------------------------------------------------------
- * Function: H5PLprepend
+ * Function:    H5PLprepend
  *
- * Purpose: Insert a plugin path at the beginning of the list.
+ * Purpose:     Insert a plugin search path at the beginning of the list.
  *
- * Return: Non-negative or success.
+ * Return:      Success:    Non-negative
+ *              Failture:   Negative
  *
  *-------------------------------------------------------------------------
  */
@@ -458,11 +464,12 @@ done:
 } /* end H5PLprepend() */
 
 /*-------------------------------------------------------------------------
- * Function: H5PLreplace
+ * Function:    H5PLreplace
  *
- * Purpose: Replace the path at the specified index.
+ * Purpose:     Replace the path at the specified index. The path at the
+ *              index must exist.
  *
- * Return: Non-negative or success.
+ * Return:      Non-negative or success.
  *
  *-------------------------------------------------------------------------
  */
@@ -492,11 +499,13 @@ done:
 } /* end H5PLreplace() */
 
 /*-------------------------------------------------------------------------
- * Function: H5PLinsert
+ * Function:    H5PLinsert
  *
- * Purpose: Insert a plugin path at the specified index, moving other paths after the index.
+ * Purpose:     Insert a plugin search path at the specified index, moving
+ *              other paths after the index.
  *
- * Return: Non-negative or success.
+ * Return:      Success:    Non-negative
+ *              Failture:   Negative
  *
  *-------------------------------------------------------------------------
  */
@@ -530,11 +539,13 @@ done:
 } /* end H5PLinsert() */
 
 /*-------------------------------------------------------------------------
- * Function: H5PLremove
+ * Function:    H5PLremove
  *
- * Purpose: Remove the plugin path at the specifed index and compacting the list.
+ * Purpose:     Remove the plugin path at the specifed index and compact
+ *              the list.
  *
- * Return: Non-negative or success.
+ * Return:      Success:    Non-negative
+ *              Failture:   Negative
  *
  *-------------------------------------------------------------------------
  */
@@ -564,20 +575,26 @@ done:
 } /* end H5PLremove() */
 
 /*-------------------------------------------------------------------------
- * Function: H5PLget
+ * Function:    H5PLget
  *
- * Purpose: Query the plugin path at the specified index.
+ * Purpose:     Query the plugin path at a specified index.
  *
- * Return: Success: The length of path.
+ *  If 'path_buf' is non-NULL then up to 'buf_size' bytes will be written into
+ *  that buffer and the length of the path name will be returned.
  *
- *  If `pathname' is non-NULL then write up to `size' bytes into that
- *  buffer and always return the length of the pathname.
- *  Otherwise `size' is ignored and the function does not store the pathname,
- *  just returning the number of characters required to store the pathname.
- *  If an error occurs then the buffer pointed to by `pathname' (NULL or non-NULL)
- *  is unchanged and the function returns a negative value.
- *  If a zero is returned for the name's length, then there is no pathname
- *  associated with the index.
+ *  If 'path_buf' is NULL, this function will simply return the number of
+ *  characters required to store the path name, ignoring 'path_buf' and
+ *  'buf_size'
+ *
+ *  If an error occurs then the buffer pointed to by 'path_buf'
+ *  (NULL or non-NULL) will be unchanged and the function will return a
+ *  negative value.
+ *
+ *  If a zero is returned for the name's length, then there is no path name
+ *  associated with the index and the 'path_buf' buffer will be unchanged.
+ *
+ * Return:  Success:    The length of path
+ *          Failure:    A negative value
  *
  *-------------------------------------------------------------------------
  */
@@ -611,11 +628,11 @@ done:
 } /* end H5PLget() */
 
 /*-------------------------------------------------------------------------
- * Function: H5PLsize
+ * Function:    H5PLsize
  *
- * Purpose: Query the size of the current list of plugin paths.
+ * Purpose:     Query the size of the current list of plugin paths.
  *
- * Return: Plugin path size
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */

@@ -11,10 +11,10 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:	Robb Matzke <matzke@llnl.gov>
- *		Friday, July 24, 1998
+/* Programmer:      Robb Matzke
+ *                  Friday, July 24, 1998
  *
- * Purpose:	The object modification time message.
+ * Purpose:         The object modification time message.
  */
 
 #define H5O_PACKAGE /*suppress error about including H5Opkg	  */
@@ -99,18 +99,20 @@ static hbool_t ntzset = FALSE;
 H5FL_DEFINE(time_t);
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_mtime_new_decode
+ * Function:    H5O_mtime_new_decode
  *
- * Purpose:	Decode a new modification time message and return a pointer to a
- *		new time_t value.
+ * Purpose:     Decode a new modification time message and return a pointer to
+ *              a new time_t value.
  *
- * Return:	Success:	Ptr to new message in native struct.
+ *              The new modification time message format was added due to the
+ *              performance overhead of the old format.
  *
- *		Failure:	NULL
+ * Return:    Success:    Ptr to new message in native struct.
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Jan  3 2002
+ *        Failure:    NULL
+ *
+ * Programmer:    Quincey Koziol
+ *        Jan  3 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -152,18 +154,20 @@ done:
 } /* end H5O_mtime_new_decode() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_mtime_decode
+ * Function:    H5O_mtime_decode
  *
- * Purpose:	Decode a modification time message and return a pointer to a
- *		new time_t value.
+ * Purpose:     Decode a modification time message and return a pointer to a
+ *              new time_t value.
  *
- * Return:	Success:	Ptr to new message in native struct.
+ *              The new modification time message format was added due to the
+ *              performance overhead of the old format.
  *
- *		Failure:	NULL
+ * Return:    Success:    Ptr to new message in native struct.
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 24 1998
+ *        Failure:    NULL
+ *
+ * Programmer:    Robb Matzke
+ *        Jul 24 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -173,8 +177,8 @@ H5O_mtime_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5
                  size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
     time_t *  mesg, the_time;
-    int       i;
     struct tm tm;
+    int       i;                /* Local index variable */
     void *    ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -213,15 +217,14 @@ done:
 } /* end H5O_mtime_decode() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_mtime_new_encode
+ * Function:    H5O_mtime_new_encode
  *
- * Purpose:	Encodes a new modification time message.
+ * Purpose:    Encodes a new modification time message.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Jan  3 2002
+ * Programmer:    Quincey Koziol
+ *        Jan  3 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -253,17 +256,14 @@ H5O_mtime_new_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sha
 } /* end H5O_mtime_new_encode() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_mtime_encode
+ * Function:    H5O_mtime_encode
  *
- * Purpose:	Encodes a modification time message.
+ * Purpose:    Encodes a modification time message.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 24 1998
- *
- * Modifications:
+ * Programmer:    Robb Matzke
+ *        Jul 24 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -290,20 +290,17 @@ H5O_mtime_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_mtime_copy
+ * Function:    H5O_mtime_copy
  *
- * Purpose:	Copies a message from _MESG to _DEST, allocating _DEST if
- *		necessary.
+ * Purpose:    Copies a message from _MESG to _DEST, allocating _DEST if
+ *        necessary.
  *
- * Return:	Success:	Ptr to _DEST
+ * Return:    Success:    Ptr to _DEST
  *
- *		Failure:	NULL
+ *        Failure:    NULL
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 24 1998
- *
- * Modifications:
+ * Programmer:    Robb Matzke
+ *        Jul 24 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -332,22 +329,19 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_mtime_new_size
+ * Function:    H5O_mtime_new_size
  *
- * Purpose:	Returns the size of the raw message in bytes not
- *		counting the message type or size fields, but only the data
- *		fields.	 This function doesn't take into account
- *		alignment.
+ * Purpose:    Returns the size of the raw message in bytes not
+ *        counting the message type or size fields, but only the data
+ *        fields.     This function doesn't take into account
+ *        alignment.
  *
- * Return:	Success:	Message data size in bytes w/o alignment.
+ * Return:    Success:    Message data size in bytes w/o alignment.
  *
- *		Failure:	0
+ *        Failure:    0
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Jan  3 2002
- *
- * Modifications:
+ * Programmer:    Quincey Koziol
+ *        Jan  3 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -365,22 +359,19 @@ H5O_mtime_new_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable
 } /* end H5O_mtime_new_size() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_mtime_size
+ * Function:    H5O_mtime_size
  *
- * Purpose:	Returns the size of the raw message in bytes not
- *		counting the message type or size fields, but only the data
- *		fields.	 This function doesn't take into account
- *		alignment.
+ * Purpose:    Returns the size of the raw message in bytes not
+ *        counting the message type or size fields, but only the data
+ *        fields.     This function doesn't take into account
+ *        alignment.
  *
- * Return:	Success:	Message data size in bytes w/o alignment.
+ * Return:    Success:    Message data size in bytes w/o alignment.
  *
- *		Failure:	0
+ *        Failure:    0
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 14 1998
- *
- * Modifications:
+ * Programmer:    Robb Matzke
+ *        Jul 14 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -398,7 +389,7 @@ H5O_mtime_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sha
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_mtime_reset
+ * Function:    H5O_mtime_reset
  *
  * Purpose:	Frees resources within a modification time message, but doesn't free
  *		the message itself.
@@ -421,13 +412,13 @@ H5O_mtime_reset(void H5_ATTR_UNUSED *_mesg)
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_mtime_free
+ * Function:    H5O_mtime_free
  *
- * Purpose:	Frees the message
+ * Purpose:    Frees the message
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, March 30, 2000
  *
  *-------------------------------------------------------------------------
@@ -445,15 +436,14 @@ H5O_mtime_free(void *mesg)
 } /* end H5O_mtime_free() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_mtime_debug
+ * Function:    H5O_mtime_debug
  *
- * Purpose:	Prints debugging info for the message.
+ * Purpose:    Prints debugging info for the message.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 24 1998
+ * Programmer:    Robb Matzke
+ *        Jul 24 1998
  *
  *-------------------------------------------------------------------------
  */

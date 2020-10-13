@@ -15,7 +15,7 @@
  *
  * Created:		H5Oalloc.c
  *			Nov 17 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Object header allocation routines.
  *
@@ -91,7 +91,6 @@ H5FL_EXTERN(H5O_cont_t);
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Oct 17 2006
  *
  *-------------------------------------------------------------------------
@@ -217,7 +216,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Oct 17 2006
  *
  *-------------------------------------------------------------------------
@@ -315,7 +313,6 @@ H5O_eliminate_gap(H5O_t *oh, hbool_t *chk_dirtied, H5O_mesg_t *mesg, uint8_t *ga
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Oct 22 2006
  *
  *-------------------------------------------------------------------------
@@ -425,7 +422,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Nov 21 2005
  *
  *-------------------------------------------------------------------------
@@ -500,7 +496,7 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno, siz
     uint8_t *          old_image;                 /* Old address of chunk's image in memory */
     size_t             old_size;                  /* Old size of chunk */
     htri_t             was_extended;              /* If chunk can be extended */
-    size_t             extend_msg;                /* Index of null message to extend */
+    size_t             extend_msg        = 0;     /* Index of null message to extend */
     hbool_t            extended_msg      = FALSE; /* Whether an existing message was extended */
     uint8_t            new_size_flags    = 0;     /* New chunk #0 size flags */
     hbool_t            adjust_size_flags = FALSE; /* Whether to adjust the chunk #0 size flags */
@@ -719,7 +715,6 @@ done:
  *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug  7 1997
  *
  *-------------------------------------------------------------------------
@@ -1103,7 +1098,6 @@ done:
  *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug  6 1997
  *
  *-------------------------------------------------------------------------
@@ -1187,7 +1181,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Oct 22 2006
  *
  *-------------------------------------------------------------------------
@@ -1436,7 +1429,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Oct 17 2005
  *
  *-------------------------------------------------------------------------
@@ -1754,7 +1746,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Oct 10 2005
  *
  *-------------------------------------------------------------------------
@@ -1895,7 +1886,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Oct 17 2005
  *
  *-------------------------------------------------------------------------
@@ -2084,13 +2074,7 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Oct  4 2005
- *
- * Modifications:
- *   Feb. 2009: Vailin Choi
- *      Add 2 more parameters to H5O_move_msgs_forward() for moving
- *	messages forward into "continuation" message
  *
  *-------------------------------------------------------------------------
  */
@@ -2149,7 +2133,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Neil Fortner
- *		nfortne2@hdfgroup.org
  *		Oct 20 2008
  *
  *-------------------------------------------------------------------------

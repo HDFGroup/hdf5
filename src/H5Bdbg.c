@@ -13,11 +13,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5Bdbg.c
- *			Dec 11 2008
- *			Quincey Koziol <koziol@hdfgroup.org>
+ * Created:         H5Bdbg.c
+ *                  Dec 11 2008
+ *                  Quincey Koziol
  *
- * Purpose:		Debugging routines for B-link tree package.
+ * Purpose:         Debugging routines for B-link tree package.
  *
  *-------------------------------------------------------------------------
  */
@@ -37,15 +37,14 @@
 #include "H5MMprivate.h" /* Memory management			*/
 
 /*-------------------------------------------------------------------------
- * Function:	H5B_debug
+ * Function:    H5B_debug
  *
- * Purpose:	Prints debugging info about a B-tree.
+ * Purpose:     Prints debugging info about a B-tree.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Aug  4 1997
+ * Programmer:  Robb Matzke
+ *              Aug  4 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -134,16 +133,16 @@ done:
 } /* end H5B_debug() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5B_assert
+ * Function:    H5B_assert
  *
- * Purpose:	Verifies that the tree is structured correctly.
+ * Purpose:     Verifies that the tree is structured correctly.
  *
- * Return:	Success:	SUCCEED
+ * Return:      Success:    SUCCEED
  *
- *		Failure:	aborts if something is wrong.
+ *              Failure:    aborts if something is wrong.
  *
- * Programmer:	Robb Matzke
- *		Tuesday, November  4, 1997
+ * Programmer:  Robb Matzke
+ *              Tuesday, November  4, 1997
  *
  *-------------------------------------------------------------------------
  */

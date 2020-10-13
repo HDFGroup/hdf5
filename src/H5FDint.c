@@ -13,11 +13,9 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5FDint.c
- *			Jan 17 2008
- *			Quincey Koziol <koziol@hdfgroup.org>
+ * Created:     H5FDint.c
  *
- * Purpose:		Internal routine for VFD operations
+ * Purpose:     Internal routine for VFD operations
  *
  *-------------------------------------------------------------------------
  */

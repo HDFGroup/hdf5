@@ -12,10 +12,10 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:  Quincey Koziol
  *              Thursday, June 18, 1998
  *
- * Purpose:	Hyperslab selection data space I/O functions.
+ * Purpose:     Hyperslab selection dataspace I/O functions.
  */
 
 #define H5S_PACKAGE /*suppress error about including H5Spkg	  */

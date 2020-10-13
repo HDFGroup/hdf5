@@ -112,9 +112,9 @@ H5O_sdspace_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED 
                    size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
     H5S_extent_t *sdim = NULL; /* New extent dimensionality structure */
-    void *        ret_value;
-    unsigned      i; /* local counting variable */
     unsigned      flags, version;
+    unsigned      i;                /* Local counting variable */
+    void *        ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -295,9 +295,9 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 static void *
 H5O_sdspace_copy(const void *_mesg, void *_dest)
 {
-    const H5S_extent_t *mesg = (const H5S_extent_t *)_mesg;
-    H5S_extent_t *      dest = (H5S_extent_t *)_dest;
-    void *              ret_value; /* Return value */
+    const H5S_extent_t *mesg      = (const H5S_extent_t *)_mesg;
+    H5S_extent_t *      dest      = (H5S_extent_t *)_dest;
+    void *              ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -377,8 +377,6 @@ H5O_sdspace_size(const H5F_t *f, const void *_mesg)
  * Programmer:	Robb Matzke
  *              Thursday, April 30, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -396,7 +394,7 @@ H5O_sdspace_reset(void *_mesg)
 /*-------------------------------------------------------------------------
  * Function:	H5O_sdsdpace_free
  *
- * Purpose:	Free's the message
+ * Purpose:	Frees the message
  *
  * Return:	Non-negative on success/Negative on failure
  *

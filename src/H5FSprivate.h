@@ -13,11 +13,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5FSprivate.h
- *			May  2 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Created:     H5FSprivate.h
+ *              May  2 2006
+ *              Quincey Koziol
  *
- * Purpose:		Private header for library accessible file free space routines.
+ * Purpose:     Private header for library accessible file free space routines.
  *
  *-------------------------------------------------------------------------
  */

@@ -15,7 +15,7 @@
  *
  * Created:		H5Pdxpl.c
  *			March 16 1998
- *			Robb Matzke <matzke@llnl.gov>
+ *			Robb Matzke
  *
  * Purpose:		Data transfer property list class routines
  *
@@ -441,7 +441,7 @@ done:
  *
  * Return: Success: SUCCEED, Failure: FAIL
  *
- * Programmer: Leon Arber larber@uiuc.edu
+ * Programmer: Leon Arber
  *
  * Date: April 9, 2004
  *
@@ -473,7 +473,7 @@ done:
  *
  * Return: Success: SUCCEED, Failure: FAIL
  *
- * Programmer: Leon Arber larber@uiuc.edu
+ * Programmer: Leon Arber
  *
  * Date: April 9, 2004
  *
@@ -487,8 +487,10 @@ H5P__dxfr_xform_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size
 
     FUNC_ENTER_STATIC
 
+    /* Sanity check */
     HDassert(value);
 
+    /* Make copy of data transform */
     if (H5Z_xform_copy((H5Z_data_xform_t **)value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "error copying the data transform info")
 
@@ -562,7 +564,7 @@ done:
  *
  * Return: Success: SUCCEED, Failure: FAIL
  *
- * Programmer: Leon Arber larber@uiuc.edu
+ * Programmer: Leon Arber
  *
  * Date: April 9, 2004
  *
@@ -632,10 +634,9 @@ H5Pset_data_transform(hid_t plist_id, const char *expression)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "Error setting data transform expression")
 
 done:
-    if (ret_value < 0) {
+    if (ret_value < 0)
         if (data_xform_prop && H5Z_xform_destroy(data_xform_prop) < 0)
             HDONE_ERROR(H5E_PLINE, H5E_CLOSEERROR, FAIL, "unable to release data transform expression")
-    } /* end if */
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_data_transform() */
@@ -688,6 +689,7 @@ H5Pget_data_transform(hid_t plist_id, char *expression /*out*/, size_t size)
     if (NULL == (pexp = H5Z_xform_extract_xform_str(data_xform_prop)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to retrieve transform expression")
 
+    /* Copy into application buffer */
     len = HDstrlen(pexp);
     if (expression) {
         HDstrncpy(expression, pexp, MIN(len + 1, size));
@@ -713,7 +715,7 @@ done:
  *		for the type conversion buffer and background buffer and
  *		optionally supply pointers to application-allocated buffers.
  *		If the buffer size is smaller than the entire amount of data
- *		being transfered between application and file, and a type
+ *		being transferred between application and file, and a type
  *		conversion buffer or background buffer is required then
  *		strip mining will be used.
  *
@@ -969,8 +971,6 @@ done:
  * Programmer:	Raymond Lu
  *              Jan 14, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1010,8 +1010,6 @@ done:
  * Programmer:	Raymond Lu
  *              April 15, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1050,8 +1048,6 @@ done:
  *
  * Programmer:	Raymond Lu
  *              April 15, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1492,5 +1488,4 @@ H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no_collective_ca
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_mpio_no_collective_cause() */
-
 #endif /* H5_HAVE_PARALLEL */

@@ -855,7 +855,7 @@ done:
 static htri_t
 H5SM_can_share_common(const H5F_t *f, unsigned type_id, const void *mesg)
 {
-    htri_t ret_value; /* Return value */
+    htri_t ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1651,7 +1651,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov  7 2006
  *
  *-------------------------------------------------------------------------
@@ -2241,10 +2240,6 @@ done:
  * Programmer:	James Laird
  *              Wednesday, February 21, 2006
  *
- * Modifications:
- *      Vailin Choi; September 2011
- *      Change "oh_modified" from boolean to unsigned
- *      (See H5Oprivate.h for possible flags)
  *-------------------------------------------------------------------------
  */
 static herr_t

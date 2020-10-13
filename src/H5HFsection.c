@@ -12,10 +12,10 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:  Quincey Koziol
  *              Monday, May  1, 2006
  *
- * Purpose:	Free space section routines for fractal heaps.
+ * Purpose:     Free space section routines for fractal heaps
  *
  */
 
@@ -372,8 +372,8 @@ done:
 static H5HF_free_section_t *
 H5HF_sect_node_new(unsigned sect_type, haddr_t sect_addr, hsize_t sect_size, H5FS_section_state_t sect_state)
 {
-    H5HF_free_section_t *new_sect;  /* New section */
-    H5HF_free_section_t *ret_value; /* Return value */
+    H5HF_free_section_t *new_sect;         /* New section */
+    H5HF_free_section_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -444,7 +444,6 @@ done:
  * Return:	Pointer to new section on success/NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 30 2006
  *
  *-------------------------------------------------------------------------
@@ -452,8 +451,8 @@ done:
 H5HF_free_section_t *
 H5HF_sect_single_new(hsize_t sect_off, size_t sect_size, H5HF_indirect_t *parent, unsigned par_entry)
 {
-    H5HF_free_section_t *sect = NULL; /* 'Single' free space section to add */
-    H5HF_free_section_t *ret_value;   /* Return value */
+    H5HF_free_section_t *sect      = NULL; /* 'Single' free space section to add */
+    H5HF_free_section_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -496,7 +495,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		October 24 2006
  *
  *-------------------------------------------------------------------------
@@ -551,15 +549,14 @@ done:
 } /* end H5HF_sect_single_locate_parent() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_sect_single_revive
+ * Function:    H5HF_sect_single_revive
  *
- * Purpose:	Update the memory information for a 'single' free section
+ * Purpose:     Update the memory information for a 'single' free section
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		May  8 2006
+ * Programmer:  Quincey Koziol
+ *              May  8 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -598,15 +595,14 @@ done:
 } /* end H5HF_sect_single_revive() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_sect_single_dblock_info
+ * Function:    H5HF_sect_single_dblock_info
  *
- * Purpose:	Retrieve the direct block information for a single section
+ * Purpose:     Retrieve the direct block information for a single section
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		October 24 2006
+ * Programmer:  Quincey Koziol
+ *              October 24 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -653,7 +649,6 @@ H5HF_sect_single_dblock_info(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 31 2006
  *
  *-------------------------------------------------------------------------
@@ -1097,11 +1092,10 @@ H5HF_sect_single_free(H5FS_section_info_t *_sect)
     HDassert(sect);
 
     /* Check for live reference to an indirect block */
-    if (sect->sect_info.state == H5FS_SECT_LIVE) {
+    if (sect->sect_info.state == H5FS_SECT_LIVE)
         /* Get parent indirect block, if there was one */
         if (sect->u.single.parent)
             parent = sect->u.single.parent;
-    } /* end if */
 
     /* Release the section */
     if (H5HF_sect_node_free(sect, parent) < 0)
@@ -1216,8 +1210,8 @@ static H5HF_free_section_t *
 H5HF_sect_row_create(haddr_t sect_off, hsize_t sect_size, hbool_t is_first, unsigned row, unsigned col,
                      unsigned nentries, H5HF_free_section_t *under_sect)
 {
-    H5HF_free_section_t *sect = NULL; /* 'Row' section created */
-    H5HF_free_section_t *ret_value;   /* Return value */
+    H5HF_free_section_t *sect      = NULL; /* 'Row' section created */
+    H5HF_free_section_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1255,7 +1249,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July  6 2006
  *
  *-------------------------------------------------------------------------
@@ -1302,7 +1295,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July  6 2006
  *
  *-------------------------------------------------------------------------
@@ -1341,7 +1333,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July  6 2006
  *
  *-------------------------------------------------------------------------
@@ -1415,7 +1406,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July 10 2006
  *
  *-------------------------------------------------------------------------
@@ -1456,7 +1446,6 @@ done:
  * Return:	Pointer to indirect block on success/NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July  9 2006
  *
  *-------------------------------------------------------------------------
@@ -1620,8 +1609,8 @@ static H5FS_section_info_t *
 H5HF_sect_row_deserialize(const H5FS_section_class_t *cls, hid_t dxpl_id, const uint8_t *buf,
                           haddr_t sect_addr, hsize_t sect_size, unsigned *des_flags)
 {
-    H5HF_hdr_t *         hdr;       /* Fractal heap header */
-    H5FS_section_info_t *ret_value; /* Return value */
+    H5HF_hdr_t *         hdr;              /* Fractal heap header */
+    H5FS_section_info_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -2025,7 +2014,6 @@ H5HF_sect_row_debug(const H5FS_section_info_t *_sect, FILE *stream, int indent, 
  * Return:	Offset of indirect block in "heap space" (can't fail)
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July  6 2006
  *
  *-------------------------------------------------------------------------
@@ -2056,7 +2044,6 @@ H5HF_sect_indirect_iblock_off(const H5HF_free_section_t *sect)
  * Return:	Pointer to the top indirect section (can't fail)
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July  6 2006
  *
  *-------------------------------------------------------------------------
@@ -2159,7 +2146,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July  6 2006
  *
  *-------------------------------------------------------------------------
@@ -2228,7 +2214,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July  6 2006
  *
  *-------------------------------------------------------------------------
@@ -2291,7 +2276,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July  6 2006
  *
  *-------------------------------------------------------------------------
@@ -2548,7 +2532,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July  3 2006
  *
  *-------------------------------------------------------------------------
@@ -2625,7 +2608,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July  6 2006
  *
  *-------------------------------------------------------------------------
@@ -2676,7 +2658,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July  3 2006
  *
  *-------------------------------------------------------------------------
@@ -2743,7 +2724,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July 10 2006
  *
  *-------------------------------------------------------------------------
@@ -2802,7 +2782,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July 10 2006
  *
  *-------------------------------------------------------------------------
@@ -3074,7 +3053,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July 10 2006
  *
  *-------------------------------------------------------------------------
@@ -3312,7 +3290,6 @@ done:
  * Return:	Non-negative (TRUE/FALSE) on success/<can't fail>
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July 17 2006
  *
  *-------------------------------------------------------------------------
@@ -3346,7 +3323,6 @@ H5HF_sect_indirect_is_first(H5HF_free_section_t *sect)
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July 10 2006
  *
  *-------------------------------------------------------------------------
@@ -3397,7 +3373,6 @@ done:
  * Return:	Pointer to indirect block on success/NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		July  9 2006
  *
  *-------------------------------------------------------------------------
@@ -3850,7 +3825,6 @@ done:
  * Purpose:	Deserialize a buffer into a "live" indirect section
  *
  * Return:	Success:	non-negative
- *
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
@@ -3953,11 +3927,10 @@ H5HF_sect_indirect_free(H5HF_free_section_t *sect)
     sect->u.indirect.indir_ents = (H5HF_free_section_t **)H5MM_xfree(sect->u.indirect.indir_ents);
 
     /* Check for live reference to an indirect block */
-    if (sect->sect_info.state == H5FS_SECT_LIVE) {
+    if (sect->sect_info.state == H5FS_SECT_LIVE)
         /* Get indirect block, if there was one */
         if (sect->u.indirect.u.iblock)
             iblock = sect->u.indirect.u.iblock;
-    } /* end if */
 
     /* Release the sections */
     if (H5HF_sect_node_free(sect, iblock) < 0)

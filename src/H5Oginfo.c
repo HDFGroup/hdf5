@@ -15,7 +15,7 @@
  *
  * Created:             H5Oginfo.c
  *                      Aug 23 2005
- *                      Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *                      Quincey Koziol
  *
  * Purpose:             Group Information messages.
  *
@@ -85,7 +85,6 @@ H5FL_DEFINE_STATIC(H5O_ginfo_t);
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 30 2005
  *
  *-------------------------------------------------------------------------
@@ -95,9 +94,9 @@ H5O_ginfo_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5
                  unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
                  size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
-    H5O_ginfo_t * ginfo = NULL; /* Pointer to group information message */
-    unsigned char flags;        /* Flags for encoding group info */
-    void *        ret_value;    /* Return value */
+    H5O_ginfo_t * ginfo = NULL;     /* Pointer to group information message */
+    unsigned char flags;            /* Flags for encoding group info */
+    void *        ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -158,7 +157,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 30 2005
  *
  *-------------------------------------------------------------------------
@@ -210,7 +208,6 @@ H5O_ginfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 30 2005
  *
  *-------------------------------------------------------------------------
@@ -218,9 +215,9 @@ H5O_ginfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
 static void *
 H5O_ginfo_copy(const void *_mesg, void *_dest)
 {
-    const H5O_ginfo_t *ginfo = (const H5O_ginfo_t *)_mesg;
-    H5O_ginfo_t *      dest  = (H5O_ginfo_t *)_dest;
-    void *             ret_value; /* Return value */
+    const H5O_ginfo_t *ginfo     = (const H5O_ginfo_t *)_mesg;
+    H5O_ginfo_t *      dest      = (H5O_ginfo_t *)_dest;
+    void *             ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -251,7 +248,6 @@ done:
  *              Failure:        zero
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 30 2005
  *
  *-------------------------------------------------------------------------
@@ -259,8 +255,8 @@ done:
 static size_t
 H5O_ginfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
-    const H5O_ginfo_t *ginfo = (const H5O_ginfo_t *)_mesg;
-    size_t             ret_value; /* Return value */
+    const H5O_ginfo_t *ginfo     = (const H5O_ginfo_t *)_mesg;
+    size_t             ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -282,7 +278,7 @@ H5O_ginfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sha
 /*-------------------------------------------------------------------------
  * Function:	H5O_ginfo_free
  *
- * Purpose:	Free's the message
+ * Purpose:	Frees the message
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -311,7 +307,6 @@ H5O_ginfo_free(void *mesg)
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 30 2005
  *
  *-------------------------------------------------------------------------

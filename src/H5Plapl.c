@@ -15,7 +15,7 @@
  *
  * Created:		H5Plapl.c
  *			July 14 2006
- *			James Laird <jlaird@ncsa.uiuc.edu>
+ *			James Laird
  *
  * Purpose:		Link access property list class routines
  *
@@ -139,10 +139,6 @@ const H5P_libclass_t H5P_CLS_LACC[1] = {{
  * Programmer:  Quincey Koziol
  *              October 31, 2006
  *
- * Modifications:
- *	Vailin Choi, Sept. 12th 2008
- *	Register the setting of file access property list for link access
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -193,13 +189,13 @@ done:
 /*--------------------------------------------------------------------------
  * Function:	H5P_lacc_elink_fapl_del
  *
- * Purpose:	Close the FAPL for link access
+ * Purpose:     Close the FAPL for link access
  *
- * Return:	Success:	Non-negative
- * 		Failure:	Negative
+ * Return:      Success:        Non-negative
+ * 	            Failure:        Negative
  *
- * Programmer:	Vailin Choi
- *		Tuesday, Sept 23, 2008
+ * Programmer:  Vailin Choi
+ *	            Tuesday, Sept 23, 2008
  *
  *--------------------------------------------------------------------------
  */
@@ -213,11 +209,14 @@ H5P_lacc_elink_fapl_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED 
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Sanity check */
     HDassert(value);
 
+    /* Get the FAPL ID */
     l_fapl_id = (*(const hid_t *)value);
 
-    if ((l_fapl_id > H5P_DEFAULT) && (H5I_dec_ref(l_fapl_id) < 0))
+    /* Close the FAPL */
+    if (l_fapl_id != H5P_DEFAULT && H5I_dec_ref(l_fapl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to close atom for file access property list")
 
 done:
@@ -227,13 +226,13 @@ done:
 /*--------------------------------------------------------------------------
  * Function:	H5P_lacc_elink_fapl_copy
  *
- * Purpose:	Copy the FAPL for link access
+ * Purpose:     Copy the FAPL for link access
  *
- * Return:	Success:	Non-negative
- * 		Failure:	Negative
+ * Return:      Success:        Non-negative
+ * 	            Failure:        Negative
  *
- * Programmer:	Vailin Choi
- *		Tuesday, Sept 23, 2008
+ * Programmer:  Vailin Choi
+ *	            Tuesday, Sept 23, 2008
  *
  *--------------------------------------------------------------------------
  */
@@ -246,11 +245,14 @@ H5P_lacc_elink_fapl_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED 
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Sanity check */
     HDassert(value);
 
+    /* Get the FAPL ID */
     l_fapl_id = (*(const hid_t *)value);
 
-    if (l_fapl_id > H5P_DEFAULT) {
+    /* Duplicate the FAPL, if it's non-default */
+    if (l_fapl_id != H5P_DEFAULT) {
         H5P_genplist_t *l_fapl_plist;
 
         if (NULL == (l_fapl_plist = (H5P_genplist_t *)H5P_object_verify(l_fapl_id, H5P_FILE_ACCESS)))
@@ -317,13 +319,13 @@ done:
 /*--------------------------------------------------------------------------
  * Function:	H5P_lacc_elink_fapl_close
  *
- * Purpose:	Close the FAPL for link access
+ * Purpose:     Close the FAPL for link access
  *
- * Return:	Success:	Non-negative
- * 		Failure:	Negative
+ * Return:      Success:        Non-negative
+ * 	            Failure:        Negative
  *
- * Programmer:	Vailin Choi
- *		Tuesday, Sept 23, 2008
+ * Programmer:  Vailin Choi
+ *	            Tuesday, Sept 23, 2008
  *
  *---------------------------------------------------------------------------
  */
@@ -336,9 +338,13 @@ H5P_lacc_elink_fapl_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* Sanity check */
     HDassert(value);
 
+    /* Get the FAPL ID */
     l_fapl_id = (*(const hid_t *)value);
+
+    /* Close the FAPL */
     if ((l_fapl_id > H5P_DEFAULT) && (H5I_dec_ref(l_fapl_id) < 0))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to close atom for file access property list")
 
@@ -742,7 +748,7 @@ done:
  *              external link.  This should be either H5F_ACC_RDONLY or
  *              H5F_ACC_RDWR, or H5F_ACC_DEFAULT to unset the value.
  *
- * Return:  Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Neil Fortner
  *              Tuesday, December 9, 2008
@@ -780,7 +786,7 @@ done:
  * Purpose:     Gets the file access flags to be used when traversing an
  *              external link.
  *
- * Return:  Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Neil Fortner
  *              Tuesday, December 9, 2008
@@ -816,7 +822,7 @@ done:
  *              external link.  This should be either H5F_ACC_RDONLY or
  *              H5F_ACC_RDWR.
  *
- * Return:  Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Neil Fortner
  *              Tuesday, December 15, 2008
@@ -860,7 +866,7 @@ done:
  * Purpose:     Gets the file access flags to be used when traversing an
  *              external link.
  *
- * Return:  Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Neil Fortner
  *              Tuesday, December 15, 2008
@@ -887,7 +893,6 @@ H5Pget_elink_cb(hid_t lapl_id, H5L_elink_traverse_t *func, void **op_data)
 
     if (func)
         *func = cb_info.func;
-
     if (op_data)
         *op_data = cb_info.user_data;
 

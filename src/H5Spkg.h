@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:	Quincey Koziol
  *		Thursday, September 28, 2000
  *
  * Purpose:	This file contains declarations which are visible only within
@@ -26,6 +26,7 @@
 #ifndef _H5Spkg_H
 #define _H5Spkg_H
 
+/* Get package's private header */
 #include "H5Sprivate.h"
 
 /* Flags to indicate special dataspace features are active */
@@ -38,7 +39,7 @@
 
 /* Version for point selection info */
 #define H5S_POINT_VERSION_1      1
-#define H5S_POINT_VERSION_LATEST H5S_HYPER_VERSION_1
+#define H5S_POINT_VERSION_LATEST H5S_POINT_VERSION_1
 
 /* Versions for H5S_SEL_NONE selection info */
 #define H5S_NONE_VERSION_1      1
@@ -84,6 +85,7 @@ struct H5S_extent_t {
 /*
  * Dataspace selection information
  */
+
 /* Node in point selection list (typedef'd in H5Sprivate.h) */
 struct H5S_pnt_node_t {
     hsize_t *              pnt;  /* Pointer to a selected point */

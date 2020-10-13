@@ -15,7 +15,7 @@
  *
  * Created:             H5Fio.c
  *                      Jan 10 2008
- *                      Quincey Koziol <koziol@hdfgroup.org>
+ *                      Quincey Koziol
  *
  * Purpose:             File I/O routines.
  *
@@ -75,7 +75,6 @@
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Jul 10 1997
  *
  *-------------------------------------------------------------------------
@@ -88,6 +87,7 @@ H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, hid_t
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Sanity checks */
     HDassert(f);
     HDassert(f->shared);
     HDassert(buf);
@@ -120,7 +120,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Jul 10 1997
  *
  *-------------------------------------------------------------------------
@@ -132,10 +131,8 @@ H5F_block_write(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, hid_
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
-#ifdef QAK
-    HDfprintf(stderr, "%s: write to addr = %a, size = %Zu\n", FUNC, addr, size);
-#endif /* QAK */
 
+    /* Sanity checks */
     HDassert(f);
     HDassert(f->shared);
     HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);

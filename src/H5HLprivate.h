@@ -13,13 +13,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5HLprivate.h
- *			Jul 16 1997
- *			Robb Matzke <matzke@llnl.gov>
+ * Created:         H5HLprivate.h
+ *                  Jul 16 1997
+ *                  Robb Matzke
  *
- * Purpose:
- *
- * Modifications:
+ * Purpose:         Private declarations for the H5HL (local heap) package.
  *
  *-------------------------------------------------------------------------
  */
@@ -30,23 +28,23 @@
 #include "H5HLpublic.h"
 
 /* Private headers needed by this file. */
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5ACprivate.h" /* Metadata cache			*/
-#include "H5Fprivate.h"  /* File access				*/
+#include "H5private.h"   /* Generic Functions                */
+#include "H5ACprivate.h" /* Metadata cache                   */
+#include "H5Fprivate.h"  /* File access                      */
 
 /*
  * Feature: Define H5HL_DEBUG on the compiler command line if you want to
- *	    diagnostic messages from this layer.
+ *          enable diagnostic messages from this layer.
  */
 #ifdef NDEBUG
 #undef H5HL_DEBUG
 #endif
 
-#define H5HL_ALIGN(X) ((((unsigned)X) + 7) & (unsigned)(~0x07)) /*align on 8-byte boundary	*/
+#define H5HL_ALIGN(X) ((((unsigned)X) + 7) & (unsigned)(~0x07)) /* align on 8-byte boundary   */
 
 #define H5HL_SIZEOF_FREE(F)                                                                                  \
-    H5HL_ALIGN(H5F_SIZEOF_SIZE(F) + /*ptr to next free block	*/                                              \
-               H5F_SIZEOF_SIZE(F))  /*size of this free block	*/
+    H5HL_ALIGN(H5F_SIZEOF_SIZE(F) + /* ptr to next free block   */                                           \
+               H5F_SIZEOF_SIZE(F))  /* size of this free block  */
 
 /****************************/
 /* Library Private Typedefs */
@@ -56,7 +54,7 @@
 typedef struct H5HL_t H5HL_t;
 
 /*
- * Library prototypes...
+ * Library prototypes
  */
 H5_DLL herr_t H5HL_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, haddr_t *addr /*out*/);
 H5_DLL H5HL_t *H5HL_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5AC_protect_t rw);

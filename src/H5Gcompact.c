@@ -15,7 +15,7 @@
  *
  * Created:		H5Gcompact.c
  *			Sep  5 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Functions for handling compact storage.
  *
@@ -64,15 +64,14 @@ static herr_t H5G_compact_build_table(const H5O_loc_t *oloc, hid_t dxpl_id, cons
                                       H5_index_t idx_type, H5_iter_order_t order, H5G_link_table_t *ltable);
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_compact_build_table_cb
+ * Function:    H5G_compact_build_table_cb
  *
- * Purpose:	Callback routine for searching 'link' messages for a particular
+ * Purpose:     Callback routine for searching 'link' messages for a particular
  *              name.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep  5 2005
  *
  *-------------------------------------------------------------------------
@@ -173,7 +172,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep  6 2005
  *
  *-------------------------------------------------------------------------
@@ -257,7 +255,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep  5 2005
  *
  *-------------------------------------------------------------------------
@@ -423,15 +420,14 @@ done:
 } /* end H5G__compact_iterate() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_compact_lookup_cb
+ * Function:    H5G_compact_lookup_cb
  *
- * Purpose:	Callback routine for searching 'link' messages for a particular
+ * Purpose:     Callback routine for searching 'link' messages for a particular
  *              name & gettting object location for it
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep 20 2005
  *
  *-------------------------------------------------------------------------
@@ -476,7 +472,6 @@ done:
  * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep 20 2005
  *
  *-------------------------------------------------------------------------
@@ -521,7 +516,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov  6 2006
  *
  *-------------------------------------------------------------------------

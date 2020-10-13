@@ -550,9 +550,9 @@ done:
 hid_t
 H5Rdereference(hid_t id, H5R_type_t ref_type, const void *_ref)
 {
-    H5G_loc_t loc;         /* Group location */
-    H5F_t *   file = NULL; /* File object */
-    hid_t     ret_value;
+    H5G_loc_t loc;                         /* Group location */
+    H5F_t *   file      = NULL;            /* File object */
+    hid_t     ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("i", "iRt*x", id, ref_type, _ref);
@@ -665,7 +665,7 @@ done:
         void *ref;        IN: Reference to open.
 
  RETURNS
-    Valid ID on success, Negative on failure
+    Valid ID on success, H5I_INVALID_HID on failure
  DESCRIPTION
     Given a reference to some object, creates a copy of the dataset pointed
     to's dataspace and defines a selection in the copy which is the region
@@ -678,28 +678,28 @@ done:
 hid_t
 H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
 {
-    H5G_loc_t loc;          /* Object's group location */
-    H5S_t *   space = NULL; /* Dataspace object */
-    hid_t     ret_value;
+    H5G_loc_t loc;                         /* Object's group location */
+    H5S_t *   space     = NULL;            /* Dataspace object */
+    hid_t     ret_value = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "iRt*x", id, ref_type, ref);
 
     /* Check args */
     if (H5G_loc(id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a location")
     if (ref_type != H5R_DATASET_REGION)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid reference type")
     if (ref == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid reference pointer")
 
     /* Get the dataspace with the correct region selected */
     if ((space = H5R_get_region(loc.oloc->file, H5AC_ind_dxpl_id, ref)) == NULL)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create dataspace")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, H5I_INVALID_HID, "unable to create dataspace")
 
     /* Atomize */
     if ((ret_value = H5I_register(H5I_DATASPACE, space, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace atom")
 
 done:
     FUNC_LEAVE_API(ret_value)

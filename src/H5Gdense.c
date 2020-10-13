@@ -15,7 +15,7 @@
  *
  * Created:		H5Gdense.c
  *			Sep  9 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Routines for operating on "dense" link storage for a
  *                      group in a file.
@@ -250,7 +250,6 @@ typedef struct {
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep  9 2006
  *
  *-------------------------------------------------------------------------
@@ -294,17 +293,11 @@ H5G__dense_create(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, const H5O_pline_t
     /* Retrieve the heap's address in the file */
     if (H5HF_get_heap_addr(fheap, &(linfo->fheap_addr)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get fractal heap address")
-#ifdef QAK
-    HDfprintf(stderr, "%s: linfo->fheap_addr = %a\n", FUNC, linfo->fheap_addr);
-#endif /* QAK */
 
     /* Retrieve the heap's ID length in the file */
     if (H5HF_get_id_len(fheap, &fheap_id_len) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGETSIZE, FAIL, "can't get fractal heap ID length")
     HDassert(fheap_id_len == H5G_DENSE_FHEAP_ID_LEN);
-#ifdef QAK
-    HDfprintf(stderr, "%s: fheap_id_len = %Zu\n", FUNC, fheap_id_len);
-#endif /* QAK */
 
     /* Create the name index v2 B-tree */
     HDmemset(&bt2_cparam, 0, sizeof(bt2_cparam));
@@ -320,9 +313,6 @@ H5G__dense_create(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, const H5O_pline_t
     /* Retrieve the v2 B-tree's address in the file */
     if (H5B2_get_addr(bt2_name, &(linfo->name_bt2_addr)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get v2 B-tree address for name index")
-#ifdef QAK
-    HDfprintf(stderr, "%s: linfo->name_bt2_addr = %a\n", FUNC, linfo->name_bt2_addr);
-#endif /* QAK */
 
     /* Check if we should create a creation order index v2 B-tree */
     if (linfo->index_corder) {
@@ -340,10 +330,7 @@ H5G__dense_create(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, const H5O_pline_t
         /* Retrieve the v2 B-tree's address in the file */
         if (H5B2_get_addr(bt2_corder, &(linfo->corder_bt2_addr)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get v2 B-tree address for creation order index")
-#ifdef QAK
-        HDfprintf(stderr, "%s: linfo->corder_bt2_addr = %a\n", FUNC, linfo->corder_bt2_addr);
-#endif /* QAK */
-    }  /* end if */
+    } /* end if */
 
 done:
     /* Close the open objects */
@@ -365,7 +352,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 11 2006
  *
  *-------------------------------------------------------------------------
@@ -391,18 +377,10 @@ H5G__dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo, const H5O_l
     HDassert(f);
     HDassert(linfo);
     HDassert(lnk);
-#ifdef QAK
-    HDfprintf(stderr, "%s: linfo->fheap_addr = %a\n", FUNC, linfo->fheap_addr);
-    HDfprintf(stderr, "%s: linfo->name_bt2_addr = %a\n", FUNC, linfo->name_bt2_addr);
-#endif /* QAK */
 
     /* Find out the size of buffer needed for serialized link */
     if ((link_size = H5O_msg_raw_size(f, H5O_LINK_ID, FALSE, lnk)) == 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGETSIZE, FAIL, "can't get link size")
-#ifdef QAK
-    HDfprintf(stderr, "%s: HDstrlen(lnk->name) = %Zu, link_size = %Zu\n", FUNC, HDstrlen(lnk->name),
-              link_size);
-#endif /* QAK */
 
     /* Wrap the local buffer for serialized link */
     if (NULL == (wb = H5WB_wrap(link_buf, sizeof(link_buf))))
@@ -477,7 +455,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 11 2006
  *
  *-------------------------------------------------------------------------
@@ -513,7 +490,6 @@ done:
  * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 11 2006
  *
  *-------------------------------------------------------------------------
@@ -576,7 +552,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov  7 2006
  *
  *-------------------------------------------------------------------------
@@ -615,7 +590,6 @@ done:
  * Return:	H5_ITER_ERROR/H5_ITER_CONT/H5_ITER_STOP
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov  7 2006
  *
  *-------------------------------------------------------------------------
@@ -654,7 +628,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov  7 2006
  *
  *-------------------------------------------------------------------------
@@ -764,7 +737,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sept 25 2006
  *
  *-------------------------------------------------------------------------
@@ -863,7 +835,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 11 2006
  *
  *-------------------------------------------------------------------------
@@ -899,7 +870,6 @@ done:
  * Return:	H5_ITER_ERROR/H5_ITER_CONT/H5_ITER_STOP
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 11 2006
  *
  *-------------------------------------------------------------------------
@@ -955,7 +925,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 11 2006
  *
  *-------------------------------------------------------------------------
@@ -1072,7 +1041,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 19 2006
  *
  *-------------------------------------------------------------------------
@@ -1116,7 +1084,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 19 2006
  *
  *-------------------------------------------------------------------------
@@ -1159,7 +1126,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 19 2006
  *
  *-------------------------------------------------------------------------
@@ -1276,7 +1242,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 12 2006
  *
  *-------------------------------------------------------------------------
@@ -1342,7 +1307,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 12 2006
  *
  *-------------------------------------------------------------------------
@@ -1386,7 +1350,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 12 2006
  *
  *-------------------------------------------------------------------------
@@ -1452,7 +1415,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov 15 2006
  *
  *-------------------------------------------------------------------------
@@ -1484,7 +1446,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov 15 2006
  *
  *-------------------------------------------------------------------------
@@ -1595,7 +1556,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov 14 2006
  *
  *-------------------------------------------------------------------------
@@ -1704,7 +1664,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 12 2006
  *
  *-------------------------------------------------------------------------
@@ -1799,7 +1758,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 19 2006
  *
  *-------------------------------------------------------------------------

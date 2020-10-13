@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
  *
  * Purpose: The POSIX unbuffered file driver using only the HDF5 public
@@ -782,7 +782,6 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
      * results
      */
     while (size > 0) {
-
         h5_posix_io_t     bytes_in    = 0;  /* # of bytes to write  */
         h5_posix_io_ret_t bytes_wrote = -1; /* # of bytes written   */
 

@@ -15,7 +15,7 @@
  *
  * Created:		H5Gtraverse.c
  *			Sep 13 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Functions for traversing group hierarchy
  *
@@ -372,7 +372,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov 20 2006
  *
  *-------------------------------------------------------------------------
@@ -457,7 +456,6 @@ done:
  *				resolved.
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug 11 1997
  *
  *-------------------------------------------------------------------------
@@ -807,7 +805,6 @@ done:
  *				traversed.
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep 13 2005
  *
  *-------------------------------------------------------------------------

@@ -15,7 +15,7 @@
  *
  * Created:             H5HLpublic.h
  *                      Jul 16 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             Public declarations for the H5HL (local heap) package.
  *

@@ -15,7 +15,7 @@
  *
  * Created:		H5Ocopy.c
  *			Nov  6 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Object copying routines.
  *
@@ -295,13 +295,6 @@ done:
  *
  * Programmer:  Peter Cao
  *              May 30, 2005
- *
- * Modifications:
- *	Vailin Choi; Feb 2012
- *	Bug fix for HDFFV-7853
- *	When the object is opened, call the object's flush class action
- *	to ensure that cached data is flushed so that H5Ocopy will get
- *	the correct data.
  *
  *-------------------------------------------------------------------------
  */
@@ -1507,10 +1500,6 @@ done:
  * Programmer:  Neil Fortner
  *              Nov 3 2011
  *
- * Modifications:
- *	Vailin Choi; August 2012
- *	Use H5O_obj_class to get object type instead of
- *	H5O_get_info(...TRUE....) saving time in traversing metadata.
  *-------------------------------------------------------------------------
  */
 static herr_t

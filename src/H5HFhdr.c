@@ -15,7 +15,7 @@
  *
  * Created:		H5HFhdr.c
  *			Apr 10 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Heap header routines for fractal heaps.
  *
@@ -45,13 +45,13 @@
 /* Limit on the size of the max. direct block size */
 /* (This is limited to 32-bits currently, because I think it's unlikely to
  *      need to be larger, the 32-bit limit for H5VM_log2_of2(n), and
- *      some offsets/sizes are encoded with a maxiumum of 32-bits  - QAK)
+ *      some offsets/sizes are encoded with a maximum of 32-bits  - QAK)
  */
 #define H5HF_MAX_DIRECT_SIZE_LIMIT ((hsize_t)2 * 1024 * 1024 * 1024)
 
 /* Limit on the width of the doubling table */
 /* (This is limited to 16-bits currently, because I think it's unlikely to
- *      need to be larger, and its encoded with a maxiumum of 16-bits  - QAK)
+ *      need to be larger, and its encoded with a maximum of 16-bits  - QAK)
  */
 #define H5HF_WIDTH_LIMIT (64 * 1024)
 #endif /* NDEBUG */
@@ -91,7 +91,6 @@ H5FL_DEFINE_STATIC(H5HF_hdr_t);
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 21 2006
  *
  *-------------------------------------------------------------------------
@@ -99,8 +98,8 @@ H5FL_DEFINE_STATIC(H5HF_hdr_t);
 H5HF_hdr_t *
 H5HF_hdr_alloc(H5F_t *f)
 {
-    H5HF_hdr_t *hdr = NULL; /* Shared fractal heap header */
-    H5HF_hdr_t *ret_value;  /* Return value */
+    H5HF_hdr_t *hdr       = NULL; /* Shared fractal heap header */
+    H5HF_hdr_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -134,7 +133,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 21 2006
  *
  *-------------------------------------------------------------------------
@@ -186,7 +184,6 @@ H5HF_hdr_compute_free_space(H5HF_hdr_t *hdr, unsigned iblock_row)
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 12 2006
  *
  *-------------------------------------------------------------------------
@@ -224,7 +221,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 12 2006
  *
  *-------------------------------------------------------------------------
@@ -279,7 +275,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 21 2006
  *
  *-------------------------------------------------------------------------
@@ -316,7 +311,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 21 2006
  *
  *-------------------------------------------------------------------------
@@ -324,9 +318,9 @@ done:
 haddr_t
 H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
 {
-    H5HF_hdr_t *hdr = NULL;      /* The new fractal heap header information */
-    size_t      dblock_overhead; /* Direct block's overhead */
-    haddr_t     ret_value;       /* Return value */
+    H5HF_hdr_t *hdr = NULL;              /* The new fractal heap header information */
+    size_t      dblock_overhead;         /* Direct block's overhead */
+    haddr_t     ret_value = HADDR_UNDEF; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -515,7 +509,6 @@ done:
  * Return:	Pointer to indirect block on success, NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		May  5 2010
  *
  *-------------------------------------------------------------------------
@@ -523,9 +516,9 @@ done:
 H5HF_hdr_t *
 H5HF_hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5AC_protect_t rw)
 {
-    H5HF_hdr_cache_ud_t cache_udata; /* User-data for callback */
-    H5HF_hdr_t *        hdr;         /* Fractal heap header */
-    H5HF_hdr_t *        ret_value;   /* Return value */
+    H5HF_hdr_cache_ud_t cache_udata;      /* User-data for callback */
+    H5HF_hdr_t *        hdr;              /* Fractal heap header */
+    H5HF_hdr_t *        ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -562,7 +555,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 27 2006
  *
  *-------------------------------------------------------------------------
@@ -597,7 +589,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 27 2006
  *
  *-------------------------------------------------------------------------
@@ -635,7 +626,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Oct  1 2006
  *
  *-------------------------------------------------------------------------
@@ -662,7 +652,6 @@ H5HF_hdr_fuse_incr(H5HF_hdr_t *hdr)
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Oct  1 2006
  *
  *-------------------------------------------------------------------------
@@ -690,7 +679,6 @@ H5HF_hdr_fuse_decr(H5HF_hdr_t *hdr)
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 27 2006
  *
  *-------------------------------------------------------------------------
@@ -727,7 +715,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May  9 2006
  *
  *-------------------------------------------------------------------------
@@ -764,7 +751,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr 10 2006
  *
  *-------------------------------------------------------------------------
@@ -803,7 +789,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 23 2006
  *
  *-------------------------------------------------------------------------
@@ -833,7 +818,6 @@ H5HF_hdr_inc_alloc(H5HF_hdr_t *hdr, size_t alloc_size)
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 30 2006
  *
  *-------------------------------------------------------------------------
@@ -870,7 +854,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 31 2006
  *
  *-------------------------------------------------------------------------
@@ -906,7 +889,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr  3 2006
  *
  *-------------------------------------------------------------------------
@@ -958,7 +940,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 14 2006
  *
  *-------------------------------------------------------------------------
@@ -1153,7 +1134,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 23 2006
  *
  *-------------------------------------------------------------------------
@@ -1192,7 +1172,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 31 2006
  *
  *-------------------------------------------------------------------------
@@ -1344,7 +1323,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 17 2006
  *
  *-------------------------------------------------------------------------
@@ -1391,7 +1369,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Oct 27 2009
  *
  *-------------------------------------------------------------------------
@@ -1432,7 +1409,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jan  5 2007
  *
  *-------------------------------------------------------------------------

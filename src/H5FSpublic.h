@@ -15,7 +15,7 @@
  *
  * Created:             H5FSpublic.h
  *                      May  2 2006
- *                      Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *                      Quincey Koziol
  *
  * Purpose:             Public declarations for the file free space package.
  *

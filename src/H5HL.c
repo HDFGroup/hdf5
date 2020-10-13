@@ -13,12 +13,12 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5HL.c
- *			Jul 16 1997
- *			Robb Matzke <matzke@llnl.gov>
+ * Created:         H5HL.c
+ *                  Jul 16 1997
+ *                  Robb Matzke
  *
- * Purpose:		Heap functions for the local heaps used by symbol
- *			tables to store names (among other things).
+ * Purpose:         Heap functions for the local heaps used by symbol
+ *                  tables to store names (among other things).
  *
  *-------------------------------------------------------------------------
  */
@@ -32,11 +32,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Fprivate.h"  /* File access				*/
-#include "H5HLpkg.h"     /* Local Heaps				*/
-#include "H5MFprivate.h" /* File memory management		*/
+#include "H5private.h"   /* Generic Functions        */
+#include "H5Eprivate.h"  /* Error handling           */
+#include "H5Fprivate.h"  /* File access              */
+#include "H5HLpkg.h"     /* Local Heaps              */
+#include "H5MFprivate.h" /* File memory management   */
 
 /****************/
 /* Local Macros */
@@ -78,23 +78,21 @@ H5FL_BLK_DEFINE(lheap_chunk);
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_create
+ * Function:    H5HL_create
  *
- * Purpose:	Creates a new heap data structure on disk and caches it
- *		in memory.  SIZE_HINT is a hint for the initial size of the
- *		data area of the heap.	If size hint is invalid then a
- *		reasonable (but probably not optimal) size will be chosen.
- *		If the heap ever has to grow, then REALLOC_HINT is the
- *		minimum amount by which the heap will grow.
+ * Purpose:     Creates a new heap data structure on disk and caches it
+ *              in memory.  SIZE_HINT is a hint for the initial size of the
+ *              data area of the heap.  If size hint is invalid then a
+ *              reasonable (but probably not optimal) size will be chosen.
+ *              If the heap ever has to grow, then REALLOC_HINT is the
+ *              minimum amount by which the heap will grow.
  *
- * Return:	Success:	Non-negative. The file address of new heap is
- *				returned through the ADDR argument.
+ * Return:      Success:    SUCCEED. The file address of new heap is
+ *                          returned through the ADDR argument.
+ *              Failure:    FAIL.  addr_p will be HADDR_UNDEF.
  *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 16 1997
+ * Programmer:  Robb Matzke
+ *              Jul 16 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -188,7 +186,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Oct 12 2008
  *
  *-------------------------------------------------------------------------
@@ -296,11 +293,9 @@ done:
  * Purpose:     Go through the heap's freelist and determine if we can
  *              eliminate the free blocks at the tail of the buffer.
  *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Bill Wendling
- *              wendling@ncsa.uiuc.edu
  *              Sept. 16, 2003
  *
  *-------------------------------------------------------------------------
@@ -420,7 +415,6 @@ done:
  *              Failure:    NULL
  *
  * Programmer:  Bill Wendling
- *              wendling@ncsa.uiuc.edu
  *              Sept. 17, 2003
  *
  *-------------------------------------------------------------------------
@@ -506,13 +500,12 @@ done:
  * Function:    H5HL_offset_into
  *
  * Purpose:     Called directly after the call to H5HL_protect so that
- *              a pointer to the object in the heap can be got.
+ *              a pointer to the object in the heap can be obtained.
  *
  * Return:      Success:    Valid pointer.
- *              Failure:    NULL
+ *              Failure:    Can't fail
  *
  * Programmer:  Bill Wendling
- *              wendling@ncsa.uiuc.edu
  *              Sept. 17, 2003
  *
  *-------------------------------------------------------------------------
@@ -539,11 +532,9 @@ done:
  *
  * Purpose:     Unprotect the data retrieved by the H5HL_protect call.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Bill Wendling
- *              wendling@ncsa.uiuc.edu
  *              Sept. 17, 2003
  *
  *-------------------------------------------------------------------------
@@ -585,16 +576,15 @@ done:
 } /* end H5HL_unprotect() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_remove_free
+ * Function:    H5HL_remove_free
  *
- * Purpose:	Removes free list element FL from the specified heap and
- *		frees it.
+ * Purpose:     Removes free list element FL from the specified heap and
+ *              frees it.
  *
- * Return:	NULL
+ * Return:      NULL
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 17 1997
+ * Programmer:  Robb Matzke
+ *              Jul 17 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -615,16 +605,14 @@ H5HL_remove_free(H5HL_t *heap, H5HL_free_t *fl)
 } /* end H5HL_remove_free() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_dirty
+ * Function:    H5HL_dirty
  *
- * Purpose:	Mark heap as dirty
+ * Purpose:     Mark heap as dirty
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Oct 12 2008
+ * Programmer:  Quincey Koziol
+ *              Oct 12 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -657,16 +645,15 @@ done:
 } /* end H5HL_dirty() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_insert
+ * Function:    H5HL_insert
  *
- * Purpose:	Inserts a new item into the heap.
+ * Purpose:     Inserts a new item into the heap.
  *
- * Return:	Success:	Offset of new item within heap.
- *		Failure:	UFAIL
+ * Return:      Success:    Offset of new item within heap.
+ *              Failure:    UFAIL
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 17 1997
+ * Programmer:  Robb Matzke
+ *              Jul 17 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -865,26 +852,25 @@ done:
 } /* H5HL_insert() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_remove
+ * Function:    H5HL_remove
  *
- * Purpose:	Removes an object or part of an object from the heap at
- *		address ADDR of file F.	 The object (or part) to remove
- *		begins at byte OFFSET from the beginning of the heap and
- *		continues for SIZE bytes.
+ * Purpose:     Removes an object or part of an object from the heap at
+ *              address ADDR of file F.	 The object (or part) to remove
+ *              begins at byte OFFSET from the beginning of the heap and
+ *              continues for SIZE bytes.
  *
- *		Once part of an object is removed, one must not attempt
- *		to access that part.  Removing the beginning of an object
- *		results in the object OFFSET increasing by the amount
- *		truncated.  Removing the end of an object results in
- *		object truncation.  Removing the middle of an object results
- *		in two separate objects, one at the original offset and
- *		one at the first offset past the removed portion.
+ *              Once part of an object is removed, one must not attempt
+ *              to access that part.  Removing the beginning of an object
+ *              results in the object OFFSET increasing by the amount
+ *              truncated.  Removing the end of an object results in
+ *              object truncation.  Removing the middle of an object results
+ *              in two separate objects, one at the original offset and
+ *              one at the first offset past the removed portion.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 16 1997
+ * Programmer:  Robb Matzke
+ *              Jul 16 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -1017,15 +1003,14 @@ done:
 } /* end H5HL_remove() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_delete
+ * Function:    H5HL_delete
  *
- * Purpose:	Deletes a local heap from disk, freeing disk space used.
+ * Purpose:     Deletes a local heap from disk, freeing disk space used.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Mar 22 2003
+ * Programmer:  Quincey Koziol
+ *              Mar 22 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1095,15 +1080,14 @@ done:
 } /* end H5HL_delete() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_get_size
+ * Function:    H5HL_get_size
  *
- * Purpose:	Retrieves the current size of a heap
+ * Purpose:     Retrieves the current size of a heap
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Nov  7 2005
+ * Programmer:  Quincey Koziol
+ *              Nov  7 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1152,7 +1136,7 @@ done:
  * Purpose:     Compute the size in bytes of the specified instance of
  *              H5HL_t via H5HL_size()
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Vailin Choi
  *              June 19 2007

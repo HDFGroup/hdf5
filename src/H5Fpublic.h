@@ -88,9 +88,9 @@ typedef enum H5F_scope_t {
  * H5F_CLOSE_DEFAULT - Use the degree pre-defined by underlining VFL
  * H5F_CLOSE_WEAK    - file closes only after all opened objects are closed
  * H5F_CLOSE_SEMI    - if no opened objects, file is close; otherwise, file
-                       close fails
+            close fails
  * H5F_CLOSE_STRONG  - if there are opened objects, close them first, then
-                       close file
+            close file
  */
 typedef enum H5F_close_degree_t {
     H5F_CLOSE_DEFAULT = 0,

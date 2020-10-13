@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer: Quincey Koziol
  *	       Thursday, March 23, 2000
  *
  * Purpose: Manage priority queues of free-lists (of blocks of bytes).
@@ -180,8 +180,6 @@ H5FL_init_interface(void)
  * Programmer:	Quincey Koziol
  *              Tuesday, August 1, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -217,8 +215,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Friday, March 24, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -267,8 +263,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Friday, March 24, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -354,8 +348,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Friday, March 24, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -430,8 +422,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Monday, December 23, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -466,8 +456,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, July 25, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -636,8 +624,6 @@ H5FL_reg_term(void)
  * Programmer:	Quincey Koziol
  *		Thursday, March  23, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static H5FL_blk_node_t *
@@ -696,8 +682,6 @@ H5FL_blk_find_list(H5FL_blk_node_t **head, size_t size)
  * Programmer:	Quincey Koziol
  *		Thursday, March  23, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static H5FL_blk_node_t *
@@ -746,8 +730,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Saturday, March 25, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -788,8 +770,6 @@ done:
  * Programmer:	Quincey Koziol
  *		Monday, December 16, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -827,8 +807,6 @@ done:
  * Programmer:	Quincey Koziol
  *		Thursday, March  23, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -862,7 +840,6 @@ H5FL_blk_malloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS)
 
         /* Decrement the amount of global "block" free list memory in use */
         H5FL_blk_gc_head.mem_freed -= size;
-
     } /* end if */
     /* No free list available, or there are no nodes on the list, allocate a new node to give to the user */
     else {
@@ -918,8 +895,6 @@ done:
  * Programmer:	Quincey Koziol
  *		Monday, December 23, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -957,8 +932,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *		Thursday, March  23, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1063,8 +1036,6 @@ done:
  * Programmer:	Quincey Koziol
  *		Thursday, March  23, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1137,8 +1108,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Thursday, March 23, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1199,8 +1168,6 @@ H5FL_blk_gc_list(H5FL_blk_head_t *head)
  *
  * Programmer:	Quincey Koziol
  *              Saturday, March 25, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1303,8 +1270,6 @@ H5FL_blk_term(void)
  * Programmer:	Quincey Koziol
  *              Saturday, March 25, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1353,8 +1318,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Friday, March 24, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1434,8 +1397,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Saturday, March 25, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1508,8 +1469,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Monday, December 23, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1544,8 +1503,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Saturday, March 25, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1607,8 +1564,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Tuesday, July 25, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1667,8 +1622,6 @@ H5FL_arr_gc_list(H5FL_arr_head_t *head)
  *
  * Programmer:	Quincey Koziol
  *              Saturday, March 25, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1772,8 +1725,6 @@ H5FL_arr_term(void)
  * Programmer:	Quincey Koziol
  *              Saturday, April 3, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1807,8 +1758,6 @@ H5FL_seq_free(H5FL_seq_head_t *head, void *obj)
  * Programmer:	Quincey Koziol
  *              Saturday, April 3, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1840,8 +1789,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Saturday, April 3, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1872,8 +1819,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Saturday, April 3, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2187,8 +2132,6 @@ done:
  * Programmer:	Neil Fortner
  *              Friday, December 19, 2008
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2236,8 +2179,6 @@ H5FL_fac_gc_list(H5FL_fac_head_t *head)
  *
  * Programmer:	Neil Fortner
  *              Friday, December 19, 2008
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2344,8 +2285,6 @@ done:
  * Programmer:	Neil Fortner
  *              Friday, December 19, 2008
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2389,8 +2328,6 @@ H5FL_fac_term_all(void)
  *
  * Programmer:	Quincey Koziol
  *              Friday, March 24, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+/* Programmer:  Quincey Koziol
  *              Monday, October 17, 2005
  *
  * Purpose:	Group testing functions.
@@ -71,7 +71,7 @@
     htri_t H5G__is_empty_test(gid)
         hid_t gid;              IN: group to check
  RETURNS
-    Non-negative TRUE/FALSE on success, negative on failure
+    TRUE/FALSE on success, FAIL on failure
  DESCRIPTION
     Checks to see if the group has no link messages and no symbol table message
     and no "dense" link storage
@@ -184,7 +184,7 @@ done:
         hid_t gid;              IN: group to check
         unsigned *nmsgs;        OUT: # of link messages in header
  RETURNS
-    Non-negative TRUE/FALSE on success, negative on failure
+    TRUE/FALSE on success, FAIL on failure
  DESCRIPTION
     Checks to see if the group has link messages and how many.
  GLOBAL VARIABLES
@@ -242,7 +242,7 @@ done:
     htri_t H5G__has_stab_test(gid)
         hid_t gid;              IN: group to check
  RETURNS
-    Non-negative TRUE/FALSE on success, negative on failure
+    TRUE/FALSE on success, FAIL on failure
  DESCRIPTION
     Checks to see if the group has a symbol table message.
  GLOBAL VARIABLES
@@ -290,7 +290,7 @@ done:
     htri_t H5G__is_new_dense_test(gid)
         hid_t gid;              IN: group to check
  RETURNS
-    Non-negative TRUE/FALSE on success, negative on failure
+    TRUE/FALSE on success, FAIL on failure
  DESCRIPTION
     Checks to see if the group is in the "new" format for groups (link messages/
     fractal heap+v2 B-tree) and if it is in "dense" storage form (ie. it has
@@ -359,7 +359,7 @@ done:
         hsize_t *name_count;    OUT: Number of links in name index
         hsize_t *corder_count;  OUT: Number of links in creation order index
  RETURNS
-    Non-negative on success, negative on failure
+    SUCCEED/FAIL
  DESCRIPTION
     Currently, just retrieves the number of links in each index and returns
     them.
@@ -437,7 +437,7 @@ done:
         hid_t gid;              IN: group to check
         size_t *lheap_size;     OUT: Size of local heap
  RETURNS
-    Non-negative on success, negative on failure
+    SUCCEED/FAIL
  DESCRIPTION
     Checks the size of the local heap for a group
  GLOBAL VARIABLES
@@ -484,7 +484,7 @@ done:
         size_t *user_path_len;  OUT: Size of user path
         unsigned *obj_hidden;   OUT: Whether object is hidden
  RETURNS
-    Non-negative on success, negative on failure
+    SUCCEED/FAIL
  DESCRIPTION
     Retrieves the user path for an ID.  A zero for the length is returned in
     the case of no user path.
@@ -578,8 +578,7 @@ done:
  *              the provided group's object header, and check that the
  *              addresses are valid.
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Neil Fortner
  *	        Mar  31, 2009
@@ -633,7 +632,7 @@ done:
  *              group with a symbol table, and that that information is
  *              correct.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      H5_ITER_STOP/H5_ITER_CONT/H5_ITER_ERROR
  *
  * Programmer:  Neil Fortner
  *              Apr 8, 2011
@@ -696,7 +695,7 @@ H5G_verify_cached_stabs_test_cb(H5F_t *f, hid_t dxpl_id, const void H5_ATTR_UNUS
                 (sn->entry[i].cache.stab.heap_addr != stab.heap_addr))
                 HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, H5_ITER_ERROR,
                             "cached symbol table information is incorrect")
-        } /* end if */
+        }
         else if (sn->entry[i].type == H5G_CACHED_STAB)
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, H5_ITER_ERROR, "nonexistent STAB message is cached")
 
@@ -732,7 +731,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Neil Fortner
- *              nfortne2@hdfgroup.org
  *              April 6 2011
  *
  *-------------------------------------------------------------------------

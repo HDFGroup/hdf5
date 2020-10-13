@@ -99,32 +99,33 @@ H5Tget_native_type(hid_t type_id, H5T_direction_t direction)
     size_t comp_size = 0;    /* Compound datatype's size */
     hid_t  ret_value;        /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE2("i", "iTd", type_id, direction);
 
-    /* check argument */
+    /* Check arguments */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
-
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a data type")
     if (direction != H5T_DIR_DEFAULT && direction != H5T_DIR_ASCEND && direction != H5T_DIR_DESCEND)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not valid direction value")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not valid direction value")
 
+    /* Get the native type */
     if ((new_dt = H5T_get_native_type(dt, direction, NULL, NULL, &comp_size)) == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot retrieve native type")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "cannot retrieve native type")
 
+    /* Get an ID for the new type */
     if ((ret_value = H5I_register(H5I_DATATYPE, new_dt, TRUE)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register data type")
 
 done:
     /* Error cleanup */
-    if (ret_value < 0) {
+    if (H5I_INVALID_HID == ret_value) {
         if (new_dt)
             if (H5T_close(new_dt) < 0)
-                HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+                HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release datatype")
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Tget_native_type() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5T_get_native_type
@@ -163,7 +164,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
     int         snmemb;                /* Number of members in compound & enum types */
     unsigned    nmemb = 0;             /* Number of members in compound & enum types */
     unsigned    u;                     /* Local index variable */
-    H5T_t *     ret_value;             /* Return value */
+    H5T_t *     ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -945,7 +946,7 @@ H5_GCC_DIAG_ON("duplicated-branches")
  *
  * Return:    Success:        Non-negative value.
  *
- *        Failure:        Negative value.
+ *            Failure:        Negative value.
  *
  * Programmer:    Raymond Lu
  *        December  10, 2002

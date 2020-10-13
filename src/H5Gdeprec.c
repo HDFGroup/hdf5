@@ -15,7 +15,7 @@
  *
  * Created:	H5Gdeprec.c
  *		June 21 2006
- *		James Laird <jlaird@ncsa.uiuc.edu>
+ *		James Laird
  *
  * Purpose:	Deprecated functions from the H5G interface.  These
  *              functions are here for compatibility purposes and may be
@@ -311,10 +311,9 @@ H5Gopen1(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
 
 done:
-    if (ret_value < 0) {
+    if (ret_value < 0)
         if (grp && H5G_close(grp) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
-    } /* end if */
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gopen1() */
@@ -709,29 +708,26 @@ done:
 } /* end H5Gget_comment() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Giterate
+ * Function:    H5Giterate
  *
- * Purpose:	Iterates over the entries of a group.  The LOC_ID and NAME
- *		identify the group over which to iterate and IDX indicates
- *		where to start iterating (zero means at the beginning).	 The
- *		OPERATOR is called for each member and the iteration
- *		continues until the operator returns non-zero or all members
- *		are processed. The operator is passed a group ID for the
- *		group being iterated, a member name, and OP_DATA for each
- *		member.
+ * Purpose:     Iterates over the entries of a group.  The LOC_ID and NAME
+ *              identify the group over which to iterate and IDX indicates
+ *              where to start iterating (zero means at the beginning).	 The
+ *              OPERATOR is called for each member and the iteration
+ *              continues until the operator returns non-zero or all members
+ *              are processed. The operator is passed a group ID for the
+ *              group being iterated, a member name, and OP_DATA for each
+ *              member.
  *
- * Note:	Deprecated in favor of H5Literate
+ * NOTE:        Deprecated in favor of H5Literate
  *
- * Return:	Success:	The return value of the first operator that
- *				returns non-zero, or zero if all members were
- *				processed with no operator returning non-zero.
+ * Return:      Success:    The return value of the first operator that
+ *                          returns non-zero, or zero if all members were
+ *                          processed with no operator returning non-zero.
  *
- *		Failure:	Negative if something goes wrong within the
- *				library, or the negative value returned by one
- *				of the operators.
- *
- * Programmer:	Robb Matzke
- *		Monday, March 23, 1998
+ *              Failure:    Negative if something goes wrong within the
+ *                          library, or the negative value returned by one
+ *                          of the operators.
  *
  *-------------------------------------------------------------------------
  */

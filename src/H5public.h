@@ -91,7 +91,7 @@ extern "C" {
 #define H5_GCC_DIAG_ON(x)
 #endif
 
-/* Version numbers TAB char must surround the H5_VERS_xxx number */
+/* Version numbers */
 #define H5_VERS_MAJOR      1                               /* For major interface/format changes           */
 #define H5_VERS_MINOR      8                               /* For minor interface/format changes           */
 #define H5_VERS_RELEASE    22                              /* For tweaks, bug-fixes, or development     */
@@ -223,11 +223,11 @@ typedef unsigned long long haddr_t;
  */
 #if H5_SIZEOF_UINT32_T >= 4
 #elif H5_SIZEOF_SHORT >= 4
-typedef short    uint32_t;
+typedef short         uint32_t;
 #undef H5_SIZEOF_UINT32_T
 #define H5_SIZEOF_UINT32_T H5_SIZEOF_SHORT
 #elif H5_SIZEOF_INT >= 4
-typedef unsigned int  uint32_t;
+typedef unsigned int       uint32_t;
 #undef H5_SIZEOF_UINT32_T
 #define H5_SIZEOF_UINT32_T H5_SIZEOF_INT
 #elif H5_SIZEOF_LONG >= 4
@@ -243,11 +243,11 @@ typedef unsigned long      uint32_t;
  */
 #if H5_SIZEOF_INT64_T >= 8
 #elif H5_SIZEOF_INT >= 8
-typedef int      int64_t;
+typedef int           int64_t;
 #undef H5_SIZEOF_INT64_T
 #define H5_SIZEOF_INT64_T H5_SIZEOF_INT
 #elif H5_SIZEOF_LONG >= 8
-typedef long          int64_t;
+typedef long               int64_t;
 #undef H5_SIZEOF_INT64_T
 #define H5_SIZEOF_INT64_T H5_SIZEOF_LONG
 #elif H5_SIZEOF_LONG_LONG >= 8
@@ -263,11 +263,11 @@ typedef long long          int64_t;
  */
 #if H5_SIZEOF_UINT64_T >= 8
 #elif H5_SIZEOF_INT >= 8
-typedef unsigned uint64_t;
+typedef unsigned      uint64_t;
 #undef H5_SIZEOF_UINT64_T
 #define H5_SIZEOF_UINT64_T H5_SIZEOF_INT
 #elif H5_SIZEOF_LONG >= 8
-typedef unsigned long uint64_t;
+typedef unsigned long      uint64_t;
 #undef H5_SIZEOF_UINT64_T
 #define H5_SIZEOF_UINT64_T H5_SIZEOF_LONG
 #elif H5_SIZEOF_LONG_LONG >= 8

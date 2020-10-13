@@ -15,7 +15,7 @@
  *
  * Created:		H5Gbtree2.c
  *			Sep  9 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		v2 B-tree callbacks for indexing fields on links
  *
@@ -142,7 +142,6 @@ const H5B2_class_t H5G_BT2_CORDER[1] = {{
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 11 2006
  *
  *-------------------------------------------------------------------------
@@ -403,18 +402,6 @@ H5G_dense_btree2_corder_compare(const void *_bt2_udata, const void *_bt2_rec, in
     HDassert(bt2_udata);
     HDassert(bt2_rec);
 
-#ifdef QAK
-    {
-        unsigned u;
-
-        HDfprintf(stderr, "%s: bt2_udata->corder = %Hd\n", "H5G_dense_btree2_corder_compare",
-                  (hsize_t)bt2_udata->corder);
-        HDfprintf(stderr, "%s: bt2_rec = {%Hu, ", "H5G_dense_btree2_corder_compare",
-                  (hsize_t)bt2_rec->corder);
-        for (u = 0; u < H5G_DENSE_FHEAP_ID_LEN; u++)
-            HDfprintf(stderr, "%02x%s", bt2_rec->id[u], (u < (H5G_DENSE_FHEAP_ID_LEN - 1) ? " " : "}\n"));
-    }
-#endif /* QAK */
     /* Check creation order value */
     if (bt2_udata->corder < bt2_rec->corder)
         *result = -1;

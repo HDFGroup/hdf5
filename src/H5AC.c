@@ -15,7 +15,7 @@
  *
  * Created:             H5AC.c
  *                      Jul  9 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             Functions in this file implement a cache for
  *                      things which exist on disk.  All "things" associated
@@ -175,7 +175,7 @@ static herr_t H5AC_run_sync_point(H5F_t *f, hid_t dxpl_id, int sync_point_op);
  *
  *        Failure:    negative
  *
- * Programmer:    Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, January 18, 2003
  *
  *-------------------------------------------------------------------------
@@ -195,11 +195,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5AC_init_interface
  *
- * Purpose:    Initialize interface-specific information
+ * Purpose:     Initialize interface-specific information
  *
- * Return:    Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, July 18, 2002
  *
  *-------------------------------------------------------------------------
@@ -272,7 +272,7 @@ done:
  *
  *         Failure:    Negative.
  *
- * Programmer:    Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, July 18, 2002
  *
  *-------------------------------------------------------------------------
@@ -350,7 +350,6 @@ static const char *H5AC_entry_type_names[H5AC_NTYPES] = {
  *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul  9 1997
  *
  *-------------------------------------------------------------------------
@@ -366,6 +365,7 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr)
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Check arguments */
     HDassert(f);
     HDassert(NULL == f->shared->cache);
     HDassert(config_ptr != NULL);
@@ -488,13 +488,10 @@ done:
         if (aux_ptr != NULL) {
             if (aux_ptr->d_slist_ptr != NULL)
                 H5SL_close(aux_ptr->d_slist_ptr);
-
             if (aux_ptr->c_slist_ptr != NULL)
                 H5SL_close(aux_ptr->c_slist_ptr);
-
             if (aux_ptr->candidate_slist_ptr != NULL)
                 H5SL_close(aux_ptr->candidate_slist_ptr);
-
             aux_ptr->magic = 0;
             aux_ptr        = H5FL_FREE(H5AC_aux_t, aux_ptr);
         } /* end if */
@@ -514,7 +511,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul  9 1997
  *
  *-------------------------------------------------------------------------
@@ -569,6 +565,7 @@ H5AC_dest(H5F_t *f, hid_t dxpl_id)
             H5SL_close(aux_ptr->candidate_slist_ptr);
         aux_ptr->magic = 0;
         aux_ptr        = H5FL_FREE(H5AC_aux_t, aux_ptr);
+
     }  /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
@@ -649,19 +646,18 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5AC_flush
  *
- * Purpose:    Flush (and possibly destroy) the metadata cache associated
- *        with the specified file.
+ * Purpose:     Flush (and possibly destroy) the metadata cache associated
+ *              with the specified file.
  *
- *        If the cache contains protected entries, the function will
- *        fail, as protected entries cannot be flushed.  However
- *        all unprotected entries should be flushed before the
- *        function returns failure.
+ *              If the cache contains protected entries, the function will
+ *              fail, as protected entries cannot be flushed.  However
+ *              all unprotected entries should be flushed before the
+ *              function returns failure.
  *
  * Return:      Non-negative on success/Negative on failure if there was a
  *              request to flush all items and something was protected.
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul  9 1997
  *
  *-------------------------------------------------------------------------
@@ -713,15 +709,15 @@ done:
  * Function:    H5AC_get_entry_status
  *
  * Purpose:     Given a file address, determine whether the metadata
- *         cache contains an entry at that location.  If it does,
- *         also determine whether the entry is dirty, protected,
- *         pinned, etc. and return that information to the caller
- *         in *status_ptr.
+ *              cache contains an entry at that location.  If it does,
+ *              also determine whether the entry is dirty, protected,
+ *              pinned, etc. and return that information to the caller
+ *              in *status.
  *
- *         If the specified entry doesn't exist, set *status_ptr
- *         to zero.
+ *              If the specified entry doesn't exist, set *status_ptr
+ *              to zero.
  *
- *         On error, the value of *status_ptr is undefined.
+ *              On error, the value of *status is undefined.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -775,7 +771,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul  9 1997
  *
  *-------------------------------------------------------------------------
@@ -862,8 +857,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5AC_mark_entry_dirty
  *
- * Purpose:    Mark a pinned or protected entry as dirty.  The target
- *         entry MUST be either pinned, protected, or both.
+ * Purpose:     Mark a pinned or protected entry as dirty.  The target
+ *              entry MUST be either pinned, protected, or both.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -932,7 +927,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul  9 1997
  *
  *-------------------------------------------------------------------------
@@ -1002,7 +996,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5AC_pin_protected_entry()
  *
- * Purpose:    Pin a protected cache entry.  The entry must be protected
+ * Purpose:     Pin a protected cache entry.  The entry must be protected
  *              at the time of call, and must be unpinned.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -1304,7 +1298,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Sep  2 1997
  *
  *-------------------------------------------------------------------------
@@ -1628,9 +1621,7 @@ H5AC_get_cache_auto_resize_config(const H5AC_t *cache_ptr, H5AC_cache_config_t *
 #endif /* H5_HAVE_PARALLEL */
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5AC_get_cache_auto_resize_config() */
 
 /*-------------------------------------------------------------------------
@@ -1663,9 +1654,7 @@ H5AC_get_cache_size(H5AC_t *cache_ptr, size_t *max_size_ptr, size_t *min_clean_s
     }
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5AC_get_cache_size() */
 
 /*-------------------------------------------------------------------------
@@ -1722,9 +1711,7 @@ H5AC_reset_cache_hit_rate_stats(H5AC_t *cache_ptr)
     }
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5AC_reset_cache_hit_rate_stats() */
 
 /*-------------------------------------------------------------------------
@@ -1868,16 +1855,16 @@ done:
  * Function:    H5AC_validate_config()
  *
  * Purpose:     Run a sanity check on the contents of the supplied
- *        instance of H5AC_cache_config_t.
+ *              instance of H5AC_cache_config_t.
  *
  *              Do nothing and return SUCCEED if no errors are detected,
  *              and flag an error and return FAIL otherwise.
  *
- *        At present, this function operates by packing the data
- *        from the instance of H5AC_cache_config_t into an instance
- *        of H5C_auto_size_ctl_t, and then calling
- *        H5C_validate_resize_config().  As H5AC_cache_config_t and
- *        H5C_auto_size_ctl_t diverge, we may have to change this.
+ *              At present, this function operates by packing the data
+ *              from the instance of H5AC_cache_config_t into an instance
+ *              of H5C_auto_size_ctl_t, and then calling
+ *              H5C_validate_resize_config().  As H5AC_cache_config_t and
+ *              H5C_auto_size_ctl_t diverge, we may have to change this.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -2476,13 +2463,13 @@ done:
  * Function:    H5AC_check_if_write_permitted
  *
  * Purpose:     Determine if a write is permitted under the current
- *        circumstances, and set *write_permitted_ptr accordingly.
- *        As a general rule it is, but when we are running in parallel
- *        mode with collective I/O, we must ensure that a read cannot
- *        cause a write.
+ *              circumstances, and set *write_permitted_ptr accordingly.
+ *              As a general rule it is, but when we are running in parallel
+ *              mode with collective I/O, we must ensure that a read cannot
+ *              cause a write.
  *
- *        In the event of failure, the value of *write_permitted_ptr
- *        is undefined.
+ *              In the event of failure, the value of *write_permitted_ptr
+ *              is undefined.
  *
  * Return:      Non-negative on success/Negative on failure.
  *
@@ -2747,12 +2734,12 @@ done:
  * Function:    H5AC_ext_config_2_int_config()
  *
  * Purpose:     Utility function to translate an instance of
- *        H5AC_cache_config_t to an instance of H5C_auto_size_ctl_t.
+ *              H5AC_cache_config_t to an instance of H5C_auto_size_ctl_t.
  *
- *        Places translation in *int_conf_ptr and returns SUCCEED
- *        if successful.  Returns FAIL on failure.
+ *              Places translation in *int_conf_ptr and returns SUCCEED
+ *              if successful.  Returns FAIL on failure.
  *
- *        Does only minimal sanity checking.
+ *              Does only minimal sanity checking.
  *
  * Return:      Non-negative on success/Negative on failure
  *

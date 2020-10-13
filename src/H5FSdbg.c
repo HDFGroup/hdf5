@@ -13,11 +13,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5FSdbg.c
- *			May  9 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Created:     H5FSdbg.c
+ *              May  9 2006
+ *              Quincey Koziol
  *
- * Purpose:		Dump debugging information about a free space manager
+ * Purpose:     Dump debugging information about a free space manager
  *
  *-------------------------------------------------------------------------
  */
@@ -33,11 +33,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5FSpkg.h"     /* File free space			*/
-#include "H5HFprivate.h" /* Fractal heaps			*/
-#include "H5MFprivate.h" /* File memory management		*/
+#include "H5private.h"   /* Generic Functions                            */
+#include "H5Eprivate.h"  /* Error handling                               */
+#include "H5FSpkg.h"     /* File free space                              */
+#include "H5HFprivate.h" /* Fractal heaps                                */
+#include "H5MFprivate.h" /* File memory management                       */
 
 /****************/
 /* Local Macros */
@@ -68,19 +68,14 @@
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_debug
+ * Function:    H5FS_debug
  *
- * Purpose:	Prints debugging info about a free space manager.
+ * Purpose:     Prints debugging info about a free space manager.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		May  9 2006
- *
- * Modifications:
- *	Vailin Choi, July 29th, 2008
- *	  Add H5FS_CLIENT_FILE_ID for File Memory Management
+ * Programmer:  Quincey Koziol
+ *              May  9 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -153,15 +148,14 @@ done:
 } /* end H5FS_debug() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_sect_debug
+ * Function:    H5FS_sect_debug
  *
- * Purpose:	Prints debugging info about a free space section.
+ * Purpose:     Prints debugging info about a free space section.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		May 30 2006
+ * Programmer:  Quincey Koziol
+ *              May 30 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -191,15 +185,14 @@ done:
 } /* end H5FS_sect_debug() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_sects_debug
+ * Function:    H5FS_sects_debug
  *
- * Purpose:	Prints debugging info about the free space sections.
+ * Purpose:     Prints debugging info about the free space sections.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		May  9 2006
+ * Programmer:  Quincey Koziol
+ *              May  9 2006
  *
  *-------------------------------------------------------------------------
  */

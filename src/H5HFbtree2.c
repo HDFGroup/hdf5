@@ -15,7 +15,7 @@
  *
  * Created:		H5HFbtree2.c
  *			Aug  7 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		v2 B-tree callbacks for "huge" object tracker
  *
@@ -781,10 +781,6 @@ H5HF_huge_bt2_dir_compare(const void *_rec1, const void *_rec2, int *result)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-#ifdef QAK
-    HDfprintf(stderr, "%s: rec1 = {%a, %Hu}\n", "H5HF_huge_bt2_dir_compare", rec1->addr, rec1->len);
-    HDfprintf(stderr, "%s: rec2 = {%a, %Hu}\n", "H5HF_huge_bt2_dir_compare", rec2->addr, rec2->len);
-#endif /* QAK */
     if (rec1->addr < rec2->addr)
         *result = -1;
     else if (rec1->addr > rec2->addr)
@@ -906,13 +902,6 @@ H5HF_huge_bt2_filt_dir_found(const void *nrecord, void *op_data)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-#ifdef QAK
-    HDfprintf(stderr, "%s: nrecord = {%a, %Hu, %x, %Hu}\n", "H5HF_huge_bt2_filt_dir_found",
-              ((const H5HF_huge_bt2_filt_dir_rec_t *)nrecord)->addr,
-              ((const H5HF_huge_bt2_filt_dir_rec_t *)nrecord)->len,
-              ((const H5HF_huge_bt2_filt_dir_rec_t *)nrecord)->filter_mask,
-              ((const H5HF_huge_bt2_filt_dir_rec_t *)nrecord)->obj_size);
-#endif /* QAK */
     *(H5HF_huge_bt2_filt_dir_rec_t *)op_data = *(const H5HF_huge_bt2_filt_dir_rec_t *)nrecord;
 
     FUNC_LEAVE_NOAPI(SUCCEED)

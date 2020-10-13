@@ -13,11 +13,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5Pdapl.c
+ * Created:        H5Pdapl.c
  *              October 27, 2008
- *              Neil Fortner <nfortne2@hdfgroup.org>
+ *              Neil Fortner
  *
- * Purpose:		Dataset access property list class routines
+ * Purpose:        Dataset access property list class routines
  *
  *-------------------------------------------------------------------------
  */
@@ -127,9 +127,6 @@ static const char *H5D_def_efile_prefix_g =
  *              properties
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              October 27, 2008
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -175,7 +172,6 @@ done:
  *              for a property list
  *
  * Return:      SUCCEED/FAIL
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -200,7 +196,6 @@ H5P__dapl_efile_pref_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
  *              from a property list
  *
  * Return:      SUCCEED/FAIL
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -224,7 +219,6 @@ H5P__dapl_efile_pref_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
  * Purpose:     Frees memory used to store the external file prefix string
  *
  * Return:      SUCCEED (Can't fail)
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -246,7 +240,6 @@ H5P__dapl_efile_pref_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
  * Purpose:     Creates a copy of the external file prefix string
  *
  * Return:      SUCCEED/FAIL
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -269,7 +262,6 @@ H5P__dapl_efile_pref_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED
  *                 compared.
  *
  * Return:         zero if VALUE1 and VALUE2 are equal, non zero otherwise.
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -298,7 +290,6 @@ done:
  * Purpose:     Frees memory used to store the external file prefix string
  *
  * Return:      SUCCEED/FAIL
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -314,33 +305,27 @@ H5P__dapl_efile_pref_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSE
 } /* end H5P__dapl_efile_pref_close() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_chunk_cache
+ * Function:    H5Pset_chunk_cache
  *
- * Purpose:	Set the number of objects in the meta data cache and the
- *		maximum number of chunks and bytes in the raw data chunk cache.
- *      Once set, these values will override the values in the file access
- *      property list.  Each of thhese values can be individually unset
- *      (or not set at all) by passing the macros:
- *      H5D_CHUNK_CACHE_NCHUNKS_DEFAULT,
- *      H5D_CHUNK_CACHE_NSLOTS_DEFAULT, and/or
- *      H5D_CHUNK_CACHE_W0_DEFAULT
- *      as appropriate.
+ * Purpose:    Set the number of objects in the meta data cache and the
+ *        maximum number of chunks and bytes in the raw data chunk cache.
+ *        Once set, these values will override the values in the file access
+ *        property list.  Each of thhese values can be individually unset
+ *        (or not set at all) by passing the macros:
+ *        H5D_CHUNK_CACHE_NCHUNKS_DEFAULT,
+ *        H5D_CHUNK_CACHE_NSLOTS_DEFAULT, and/or
+ *        H5D_CHUNK_CACHE_W0_DEFAULT
+ *        as appropriate.
  *
- * 		The RDCC_W0 value should be between 0 and 1 inclusive and
- *		indicates how much chunks that have been fully read or fully
- *		written are favored for preemption.  A value of zero means
- *		fully read or written chunks are treated no differently than
- *		other chunks (the preemption is strictly LRU) while a value
- *		of one means fully read chunks are always preempted before
- *		other chunks.
+ *        The RDCC_W0 value should be between 0 and 1 inclusive and
+ *        indicates how much chunks that have been fully read or fully
+ *        written are favored for preemption.  A value of zero means
+ *        fully read or written chunks are treated no differently than
+ *        other chunks (the preemption is strictly LRU) while a value
+ *        of one means fully read chunks are always preempted before
+ *        other chunks.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Neil Fortner
- *              Monday, October 27, 2008
- *
- * Modifications:
- *
+ * Return:    Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -376,23 +361,17 @@ done:
 } /* end H5Pset_chunk_cache() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_chunk_cache
+ * Function: H5Pget_chunk_cache
  *
- * Purpose:	Retrieves the maximum possible number of elements in the meta
- *		data cache and the maximum possible number of elements and
- *		bytes and the RDCC_W0 value in the raw data chunk cache.  Any
- *		(or all) arguments may be null pointers in which case the
- *		corresponding datum is not returned.  If these properties have
- *      not been set on this property list, the default values for a
- *      file access property list are returned.
+ * Purpose:  Retrieves the maximum possible number of elements in the meta
+ *        data cache and the maximum possible number of elements and
+ *        bytes and the RDCC_W0 value in the raw data chunk cache.  Any
+ *        (or all) arguments may be null pointers in which case the
+ *        corresponding datum is not returned.  If these properties have
+ *        not been set on this property list, the default values for a
+ *        file access property list are returned.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Neil Fortner
- *              Monday, October 27, 2008
- *
- * Modifications:
- *
+ * Return:  Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -455,8 +434,7 @@ done:
  *              This property can be overwritten by the environment variable
  *              HDF5_EXTFILE_PREFIX.
  *
- * Return:	Non-negative on success/Negative on failure
- *
+ * Return:      Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -481,15 +459,13 @@ done:
 } /* end H5Pset_efile_prefix() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5Pget_efile_prefix
+ * Function: H5Pget_efile_prefix
  *
- * Purpose:	Gets the prefix to be used for any external files.
+ * Purpose:  Gets the prefix to be used for any external files.
+ *           If the pointer is not NULL, it points to a user-allocated
+ *           buffer.
  *
- *              If the pointer is not NULL, it points to a user-allocated
- *              buffer.
- *
- * Return:	Non-negative on success/Negative on failure
- *
+ * Return:   Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 ssize_t

@@ -15,7 +15,7 @@
  *
  * Created:             H5Ostab.c
  *                      Aug  6 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             Symbol table messages.
  *
@@ -86,7 +86,6 @@ H5FL_DEFINE_STATIC(H5O_stab_t);
  *              Failure:        NULL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug  6 1997
  *
  *-------------------------------------------------------------------------
@@ -96,8 +95,8 @@ H5O_stab_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *op
                 unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
                 size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
-    H5O_stab_t *stab = NULL;
-    void *      ret_value; /* Return value */
+    H5O_stab_t *stab      = NULL;
+    void *      ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -115,10 +114,9 @@ H5O_stab_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *op
     ret_value = stab;
 
 done:
-    if (ret_value == NULL) {
+    if (ret_value == NULL)
         if (stab != NULL)
             stab = H5FL_FREE(H5O_stab_t, stab);
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_stab_decode() */
@@ -131,7 +129,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug  6 1997
  *
  *-------------------------------------------------------------------------
@@ -166,7 +163,6 @@ H5O_stab_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, con
  *              Failure:        NULL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug  6 1997
  *
  *-------------------------------------------------------------------------
@@ -174,9 +170,9 @@ H5O_stab_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, con
 static void *
 H5O_stab_copy(const void *_mesg, void *_dest)
 {
-    const H5O_stab_t *stab = (const H5O_stab_t *)_mesg;
-    H5O_stab_t *      dest = (H5O_stab_t *)_dest;
-    void *            ret_value; /* Return value */
+    const H5O_stab_t *stab      = (const H5O_stab_t *)_mesg;
+    H5O_stab_t *      dest      = (H5O_stab_t *)_dest;
+    void *            ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -207,7 +203,6 @@ done:
  *              Failure:        zero
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug  6 1997
  *
  *-------------------------------------------------------------------------
@@ -215,7 +210,7 @@ done:
 static size_t
 H5O_stab_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void H5_ATTR_UNUSED *_mesg)
 {
-    size_t ret_value; /* Return value */
+    size_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -234,8 +229,6 @@ H5O_stab_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void 
  *
  * Programmer:	Quincey Koziol
  *              Thursday, March 30, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -304,8 +297,8 @@ H5O_stab_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst, hbool_t H
     H5O_stab_t *        stab_src = (H5O_stab_t *)native_src;
     H5O_stab_t *        stab_dst = NULL;
     H5G_copy_file_ud_t *udata    = (H5G_copy_file_ud_t *)_udata;
-    size_t              size_hint; /* Local heap initial size */
-    void *              ret_value; /* Return value */
+    size_t              size_hint;        /* Local heap initial size */
+    void *              ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -398,10 +391,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug  6 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

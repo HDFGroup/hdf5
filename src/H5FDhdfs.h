@@ -22,11 +22,11 @@
 #ifndef H5FDhdfs_H
 #define H5FDhdfs_H
 
+#ifdef H5_HAVE_LIBHDFS
 #define H5FD_HDFS (H5FD_hdfs_init())
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#else /* H5_HAVE_LIBHDFS */
+#define H5FD_HDFS (-1)
+#endif /* H5_HAVE_LIBHDFS */
 
 /****************************************************************************
  *
@@ -90,8 +90,6 @@ extern "C" {
  * Programmer: Jacob Smith
  *             2018-04-23
  *
- * Changes: None
- *
  ****************************************************************************/
 
 #define H5FD__CURR_HDFS_FAPL_T_VERSION 1
@@ -108,6 +106,10 @@ typedef struct H5FD_hdfs_fapl_t {
     char    kerberos_ticket_cache[H5FD__HDFS_KERB_CACHE_PATH_SPACE + 1];
     int32_t stream_buffer_size;
 } H5FD_hdfs_fapl_t;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 H5_DLL hid_t  H5FD_hdfs_init(void);
 H5_DLL void   H5FD_hdfs_term(void);

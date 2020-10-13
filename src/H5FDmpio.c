@@ -12,10 +12,10 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
  *
- * Purpose:  This is the MPI-2 I/O driver.
+ * Purpose:     This is the MPI-2 I/O driver.
  *
  */
 

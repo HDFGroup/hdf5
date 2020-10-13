@@ -13,11 +13,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5HLcache.c
- *			Feb  5 2008
- *			Quincey Koziol <koziol@hdfgroup.org>
+ * Created:     H5HLcache.c
+ *              Feb  5 2008
+ *              Quincey Koziol
  *
- * Purpose:		Implement local heap metadata cache methods.
+ * Purpose:     Implement local heap metadata cache methods.
  *
  *-------------------------------------------------------------------------
  */
@@ -43,10 +43,11 @@
 
 #define H5HL_VERSION 0 /* Local heap collection version    */
 
-/* Set the local heap size to speculatively read in */
-/* (needs to be more than the local heap prefix size to work at all and
+/* Set the local heap size to speculatively read in
+ *      (needs to be more than the local heap prefix size to work at all and
  *      should be larger than the default local heap size to save the
- *      extra I/O operations) */
+ *      extra I/O operations)
+ */
 #define H5HL_SPEC_READ_SIZE 512
 
 /******************/
@@ -114,7 +115,6 @@ const H5AC_class_t H5AC_LHEAP_DBLK[1] = {{
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Oct 12 2008
  *
  *-------------------------------------------------------------------------
@@ -177,16 +177,14 @@ done:
 } /* end H5HL_fl_deserialize() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_fl_serialize
+ * Function:    H5HL_fl_serialize
  *
- * Purpose:	Serialize the free list for a heap data block
+ * Purpose:     Serialize the free list for a heap data block
  *
- * Return:	Success:	SUCCESS
- *		Failure:	FAIL
+ * Return:      Nothing (void)
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Oct 12 2008
+ * Programmer:  Quincey Koziol
+ *              Oct 12 2008
  *
  *-------------------------------------------------------------------------
  */

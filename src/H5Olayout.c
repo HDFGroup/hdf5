@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke <matzke@llnl.gov>
+/* Programmer:  Robb Matzke
  *              Wednesday, October  8, 1997
  *
  * Purpose:     Messages related to data layout.
@@ -94,7 +94,7 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
 {
     H5O_layout_t *mesg = NULL;
     unsigned      u;
-    void *        ret_value; /* Return value */
+    void *        ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -366,9 +366,9 @@ done:
 static void *
 H5O_layout_copy(const void *_mesg, void *_dest)
 {
-    const H5O_layout_t *mesg = (const H5O_layout_t *)_mesg;
-    H5O_layout_t *      dest = (H5O_layout_t *)_dest;
-    void *              ret_value; /* Return value */
+    const H5O_layout_t *mesg      = (const H5O_layout_t *)_mesg;
+    H5O_layout_t *      dest      = (H5O_layout_t *)_dest;
+    void *              ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -443,14 +443,14 @@ H5O_layout_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const voi
 } /* end H5O_layout_size() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_layout_reset
+ * Function:    H5O__layout_reset
  *
- * Purpose:	Frees resources within a data type message, but doesn't free
- *		the message itself.
+ * Purpose:     Frees resources within a data type message, but doesn't free
+ *              the message itself.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Friday, September 13, 2002
  *
  *-------------------------------------------------------------------------

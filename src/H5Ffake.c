@@ -56,7 +56,6 @@ H5F_init_fake_interface(void)
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Oct  2, 2006
  *
  *-------------------------------------------------------------------------
@@ -100,7 +99,6 @@ done:
  *		Failure:	negative
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Oct  2, 2006
  *
  *-------------------------------------------------------------------------

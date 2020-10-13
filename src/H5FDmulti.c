@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:    Robb Matzke <matzke@llnl.gov>
+ * Programmer:    Robb Matzke
  *        Monday, November 10, 1997
  *
  * Purpose:    Implements a file driver which dispatches I/O requests to

@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer: Robb Matzke <matzke@llnl.gov>
+/* Programmer: Robb Matzke
  *	       Friday, September 19, 1997
  *
  */
@@ -118,7 +118,6 @@ typedef struct H5G_bt_it_lbi_t {
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Nov  7 2005
  *
  *-------------------------------------------------------------------------
@@ -184,7 +183,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug  1 1997
  *
  *-------------------------------------------------------------------------
@@ -241,7 +239,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@uiuc.edu
  *		Nov  7 2005
  *
  *-------------------------------------------------------------------------
@@ -295,7 +292,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug  1 1997
  *
  *-------------------------------------------------------------------------
@@ -446,8 +442,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Thursday, March 20, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -509,10 +503,10 @@ herr_t
 H5G__stab_iterate(const H5O_loc_t *oloc, hid_t dxpl_id, H5_iter_order_t order, hsize_t skip,
                   hsize_t *last_lnk, H5G_lib_iterate_t op, void *op_data)
 {
-    H5HL_t *         heap = NULL;        /* Local heap for group */
-    H5O_stab_t       stab;               /* Info about symbol table */
-    H5G_link_table_t ltable = {0, NULL}; /* Link table */
-    herr_t           ret_value;          /* Return value */
+    H5HL_t *         heap = NULL;           /* Local heap for group */
+    H5O_stab_t       stab;                  /* Info about symbol table */
+    H5G_link_table_t ltable    = {0, NULL}; /* Link table */
+    herr_t           ret_value = FAIL;      /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -731,7 +725,7 @@ H5G__stab_get_name_by_idx(const H5O_loc_t *oloc, H5_iter_order_t order, hsize_t 
     H5O_stab_t       stab;                /* Info about local heap & B-tree */
     H5G_bt_it_gnbi_t udata;               /* Iteration information */
     hbool_t          udata_valid = FALSE; /* Whether iteration information is valid */
-    ssize_t          ret_value;           /* Return value */
+    ssize_t          ret_value   = -1;    /* Return value */
 
     /* Portably clear udata struct (before FUNC_ENTER) */
     HDmemset(&udata, 0, sizeof(udata));
@@ -839,7 +833,6 @@ done:
  * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep 20 2005
  *
  *-------------------------------------------------------------------------
@@ -847,11 +840,11 @@ done:
 htri_t
 H5G__stab_lookup(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk, hid_t dxpl_id)
 {
-    H5HL_t *          heap = NULL; /* Pointer to local heap */
-    H5G_bt_lkp_t      bt_udata;    /* Data to pass through B-tree	*/
-    H5G_stab_fnd_ud_t udata;       /* 'User data' to give to callback */
-    H5O_stab_t        stab;        /* Symbol table message		*/
-    htri_t            ret_value;   /* Return value */
+    H5HL_t *          heap = NULL;      /* Pointer to local heap */
+    H5G_bt_lkp_t      bt_udata;         /* Data to pass through B-tree	*/
+    H5G_stab_fnd_ud_t udata;            /* 'User data' to give to callback */
+    H5O_stab_t        stab;             /* Symbol table message		*/
+    htri_t            ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -939,7 +932,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov  7 2006
  *
  *-------------------------------------------------------------------------
@@ -1022,7 +1014,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Neil Fortner
- *		nfortne2@hdfgroup.org
  *		Mar 17, 2009
  *
  *-------------------------------------------------------------------------

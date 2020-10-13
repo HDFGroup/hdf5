@@ -95,7 +95,6 @@ static herr_t H5O_copy_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t idx, cons
  *          Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *          koziol@hdfgroup.org
  *          Dec  1 2006
  *
  *-------------------------------------------------------------------------
@@ -142,7 +141,6 @@ done:
  *          Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *          koziol@ncsa.uiuc.edu
  *          Dec 31 2002
  *
  *-------------------------------------------------------------------------
@@ -184,7 +182,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec  8 2006
  *
  *-------------------------------------------------------------------------
@@ -226,7 +223,7 @@ done:
  * Purpose:	Modifies an existing message or creates a new message.
  *
  *              The UPDATE_FLAGS argument are flags that allow the caller
- *              to skip updating the modification time or reseting the message
+ *              to skip updating the modification time or resetting the message
  *              data.  This is useful when several calls to H5O_msg_write will be
  *              made in a sequence.
  *
@@ -235,7 +232,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug  6 1997
  *
  *-------------------------------------------------------------------------
@@ -282,7 +278,7 @@ done:
  * Purpose:	Modifies an existing message or creates a new message.
  *
  *              The UPDATE_FLAGS argument are flags that allow the caller
- *              to skip updating the modification time or reseting the message
+ *              to skip updating the modification time or resetting the message
  *              data.  This is useful when several calls to H5O_msg_write will be
  *              made in a sequence.
  *
@@ -290,7 +286,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec  6 2007
  *
  *-------------------------------------------------------------------------
@@ -328,7 +323,7 @@ done:
  * Purpose:	Modifies an existing message or creates a new message.
  *
  *              The UPDATE_FLAGS argument are flags that allow the caller
- *              to skip updating the modification time or reseting the message
+ *              to skip updating the modification time or resetting the message
  *              data.  This is useful when several calls to H5O_msg_write will be
  *              made in a sequence.
  *
@@ -337,7 +332,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug  6 1997
  *
  *-------------------------------------------------------------------------
@@ -438,7 +432,6 @@ done:
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug  6 1997
  *
  *-------------------------------------------------------------------------
@@ -446,8 +439,8 @@ done:
 void *
 H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg, hid_t dxpl_id)
 {
-    H5O_t *oh = NULL; /* Object header to use */
-    void * ret_value; /* Return value */
+    H5O_t *oh        = NULL; /* Object header to use */
+    void * ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -490,7 +483,6 @@ done:
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug  6 1997
  *
  *-------------------------------------------------------------------------
@@ -546,7 +538,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug 12 1997
  *
  *-------------------------------------------------------------------------
@@ -582,7 +573,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug 12 1997
  *
  *-------------------------------------------------------------------------
@@ -628,8 +618,8 @@ done:
 void *
 H5O_msg_free(unsigned type_id, void *mesg)
 {
-    const H5O_msg_class_t *type;      /* Actual H5O class type for the ID */
-    void *                 ret_value; /* Return value */
+    const H5O_msg_class_t *type;             /* Actual H5O class type for the ID */
+    void *                 ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -677,7 +667,6 @@ H5O_msg_free_mesg(H5O_mesg_t *mesg)
  *		pointer.
  *
  * Return:	Success:	NULL
- *
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
@@ -722,8 +711,8 @@ H5O_msg_free_real(const H5O_msg_class_t *type, void *msg_native)
 void *
 H5O_msg_copy(unsigned type_id, const void *mesg, void *dst)
 {
-    const H5O_msg_class_t *type;      /* Actual H5O class type for the ID */
-    void *                 ret_value; /* Return value */
+    const H5O_msg_class_t *type;             /* Actual H5O class type for the ID */
+    void *                 ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -759,10 +748,10 @@ done:
 int
 H5O_msg_count(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
 {
-    H5O_t *                oh = NULL; /* Object header to operate on */
-    const H5O_msg_class_t *type;      /* Actual H5O class type for the ID */
-    unsigned               msg_count; /* Message count */
-    int                    ret_value; /* Return value */
+    H5O_t *                oh = NULL;        /* Object header to operate on */
+    const H5O_msg_class_t *type;             /* Actual H5O class type for the ID */
+    unsigned               msg_count;        /* Message count */
+    int                    ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -807,8 +796,8 @@ done:
 unsigned
 H5O_msg_count_real(const H5O_t *oh, const H5O_msg_class_t *type)
 {
-    unsigned u;         /* Local index variable */
-    unsigned ret_value; /* Return value */
+    unsigned u;             /* Local index variable */
+    unsigned ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -845,8 +834,8 @@ H5O_msg_count_real(const H5O_t *oh, const H5O_msg_class_t *type)
 htri_t
 H5O_msg_exists(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
 {
-    H5O_t *oh = NULL; /* Object header for location */
-    htri_t ret_value; /* Return value */
+    H5O_t *oh        = NULL; /* Object header for location */
+    htri_t ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -925,7 +914,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug 28 1997
  *
  *-------------------------------------------------------------------------
@@ -975,7 +963,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep  6 2005
  *
  *-------------------------------------------------------------------------
@@ -1024,13 +1011,8 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep  6 2005
  *
- * Modifications:
- *	Vailin Choi; Sept 2011
- *	Indicate that the object header is modified and might possibly need
- *	to condense messages in the object header
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1094,7 +1076,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug 28 1997
  *
  *-------------------------------------------------------------------------
@@ -1151,7 +1132,6 @@ done:
  *      object headers were processed.
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Nov 19 2004
  *
  * Description:
@@ -1216,7 +1196,6 @@ done:
  *      object headers were processed.
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep  6 2005
  *
  * Description:
@@ -1234,12 +1213,6 @@ done:
  *          value, indicating short-circuit success.
  *      C. Negative causes the iterator to immediately return that value,
  *          indicating failure.
- *
- * Modifications:
- *	Vailin Choi; September 2011
- *	Change "oh_modified" from boolean to unsigned so as to know:
- *	1) object header is just modified
- *	2) object header is modified and possibly need to condense messages there
  *
  *-------------------------------------------------------------------------
  */
@@ -1321,7 +1294,6 @@ done:
  * Return:	Size of message on success, 0 on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 13 2003
  *
  *-------------------------------------------------------------------------
@@ -1362,7 +1334,6 @@ done:
  * Return:	Size of message on success, 0 on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep  6 2005
  *
  *-------------------------------------------------------------------------
@@ -1423,7 +1394,6 @@ done:
  * Return:	Size of message on success, 0 on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Mar  7 2007
  *
  *-------------------------------------------------------------------------
@@ -1556,7 +1526,6 @@ H5O_msg_can_share_in_ohdr(unsigned type_id)
  *              Object is not shared:    FALSE
  *
  * Programmer:  James Laird
- *              jlaird@ncsa.uiuc.edu
  *              April 5 2006
  *
  *-------------------------------------------------------------------------
@@ -1600,7 +1569,6 @@ H5O_msg_is_shared(unsigned type_id, const void *mesg)
  *		Failure:	Negative
  *
  * Programmer:	James Laird
- *		jlaird@hdfgroup.org
  *		November 1 2006
  *
  *-------------------------------------------------------------------------
@@ -1650,7 +1618,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	James Laird
- *		jlaird@hdfgroup.org
  *		Oct 17 2006
  *
  *-------------------------------------------------------------------------
@@ -1719,7 +1686,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5O_msg_encode
  *
- * Purpose:	Encode an object(data type and simple data space only)
+ * Purpose:	Encode an object(data type and simple dataspace only)
  *              description into a buffer.
  *
  * Return:	Success:	Non-negative
@@ -1727,7 +1694,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Raymond Lu
- *		slu@ncsa.uiuc.edu
  *		July 13, 2004
  *
  *-------------------------------------------------------------------------
@@ -1765,13 +1731,7 @@ done:
  *		Failure:	NULL
  *
  * Programmer:	Raymond Lu
- *		slu@ncsa.uiuc.edu
  *		July 14, 2004
- *
- * Modifications: Neil Fortner
- *              Feb 4 2009
- *              Added open_oh parameter.  This parameter is optional and
- *              contains this message's protected object header
  *
  *-------------------------------------------------------------------------
  */
@@ -1779,9 +1739,9 @@ void *
 H5O_msg_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned type_id, size_t buf_size,
                const unsigned char *buf)
 {
-    const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
-    void *                 ret_value;   /* Return value */
-    unsigned               ioflags = 0; /* Flags for decode routine */
+    const H5O_msg_class_t *type;             /* Actual H5O class type for the ID */
+    unsigned               ioflags   = 0;    /* Flags for decode routine */
+    void *                 ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1822,7 +1782,7 @@ H5O_msg_copy_file(const H5O_msg_class_t *type, H5F_t *file_src, void *native_src
                   hbool_t *recompute_size, unsigned *mesg_flags, H5O_copy_t *cpy_info, void *udata,
                   hid_t dxpl_id)
 {
-    void *ret_value;
+    void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -2032,7 +1992,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		September 26 2003
  *
  *-------------------------------------------------------------------------
@@ -2072,7 +2031,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		May 14 2007
  *
  *-------------------------------------------------------------------------
@@ -2172,7 +2130,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Nov 21 2005
  *
  *-------------------------------------------------------------------------
@@ -2220,7 +2177,6 @@ done:
  *		Failure:	<0
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Apr 22 2010
  *
  *-------------------------------------------------------------------------
@@ -2274,7 +2230,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Apr 22 2010
  *
  *-------------------------------------------------------------------------
@@ -2331,7 +2286,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Apr 22 2010
  *
  *-------------------------------------------------------------------------

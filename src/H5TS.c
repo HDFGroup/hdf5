@@ -249,7 +249,10 @@ H5TS_cancel_count_inc(void)
     if (!cancel_counter) {
         /*
          * First time thread calls library - create new counter and associate
-         * with key
+         * with key.
+         *
+         * Don't use H5MM calls here since the destructor has to use HDfree in
+         * order to avoid codestack calls.
          */
         cancel_counter = (H5TS_cancel_t *)H5MM_calloc(sizeof(H5TS_cancel_t));
 
@@ -408,7 +411,6 @@ H5TS_win32_process_exit(void)
 
     /* Clean up per-process thread local storage */
     TlsFree(H5TS_errstk_key_g);
-
 #ifdef H5_HAVE_CODESTACK
     TlsFree(H5TS_funcstk_key_g);
 #endif /* H5_HAVE_CODESTACK */

@@ -11,11 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer: Quincey Koziol <koziol@hdfgroup.org>
- *             Thursday, September 13, 2007
- *
- * Purpose:     This file contains declarations which are visible
+/* Purpose:     This file contains declarations which are visible
  *              only within the H5R package. Source files outside the
  *              H5R package should include H5Rprivate.h instead.
  */

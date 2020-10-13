@@ -11,6 +11,17 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*-------------------------------------------------------------------------
+ *
+ * Created:		H5SMcache.c
+ *			Nov 13 2006
+ *			James Laird <jlaird@hdfgroup.org>
+ *
+ * Purpose:		Implement shared message metadata cache methods.
+ *
+ *-------------------------------------------------------------------------
+ */
+
 /****************/
 /* Module Setup */
 /****************/
@@ -62,6 +73,7 @@ static herr_t H5SM_list_size(const H5F_t *f, const H5SM_list_t H5_ATTR_UNUSED *l
 /*********************/
 /* Package Variables */
 /*********************/
+
 /* H5SM inherits cache-like properties from H5AC */
 const H5AC_class_t H5AC_SOHM_TABLE[1] = {{
     H5AC_SOHM_TABLE_ID,

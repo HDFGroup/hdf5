@@ -15,7 +15,7 @@
  *
  * Created:             H5Olinfo.c
  *                      Aug 23 2005
- *                      Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *                      Quincey Koziol
  *
  * Purpose:             Link Information messages.
  *
@@ -102,7 +102,6 @@ H5FL_DEFINE_STATIC(H5O_linfo_t);
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 23 2005
  *
  *-------------------------------------------------------------------------
@@ -177,7 +176,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 23 2005
  *
  *-------------------------------------------------------------------------
@@ -232,7 +230,6 @@ H5O_linfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 23 2005
  *
  *-------------------------------------------------------------------------
@@ -272,7 +269,6 @@ done:
  *              Failure:        zero
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 23 2005
  *
  *-------------------------------------------------------------------------
@@ -433,7 +429,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sept 26 2006
  *
  *-------------------------------------------------------------------------
@@ -534,7 +529,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Aug 23 2005
  *
  *-------------------------------------------------------------------------

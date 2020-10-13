@@ -16,17 +16,17 @@
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC H5Z_init_interface
 
-#include "H5private.h"   /* Generic Functions */
-#include "H5Dprivate.h"  /* Dataset functions */
-#include "H5Eprivate.h"  /* Error handling */
-#include "H5Fprivate.h"  /* File */
-#include "H5Iprivate.h"  /* IDs */
-#include "H5MMprivate.h" /* Memory management */
-#include "H5Oprivate.h"  /* Object headers */
-#include "H5Pprivate.h"  /* Property lists */
-#include "H5PLprivate.h" /* Plugins */
+#include "H5private.h"   /* Generic Functions   */
+#include "H5Dprivate.h"  /* Dataset functions   */
+#include "H5Eprivate.h"  /* Error handling      */
+#include "H5Fprivate.h"  /* File                */
+#include "H5Iprivate.h"  /* IDs                 */
+#include "H5MMprivate.h" /* Memory management   */
+#include "H5Oprivate.h"  /* Object headers      */
+#include "H5Pprivate.h"  /* Property lists      */
+#include "H5PLprivate.h" /* Plugins             */
 #include "H5Sprivate.h"  /* Dataspace functions */
-#include "H5Zpkg.h"      /* Data filters */
+#include "H5Zpkg.h"      /* Data filters        */
 
 #ifdef H5_HAVE_SZLIB_H
 #include "szlib.h"
@@ -143,7 +143,7 @@ H5Z_term_interface(void)
                                   "Errors", "User", "System", "Elapsed", "Bandwidth");
                         HDfprintf(H5DEBUG(Z), "   %-16s %10s %10s %8s %8s %8s %10s\n", "------", "-----",
                                   "------", "----", "------", "-------", "---------");
-                    }
+                    } /* end if */
 
                     /* Truncate the comment to fit in the field */
                     HDstrncpy(comment, H5Z_table_g[i].name, sizeof comment);
@@ -257,7 +257,7 @@ done:
  * Function: H5Z_register
  *
  * Purpose:  Same as the public version except this one allows filters
- *           to be set for predefined method numbers <H5Z_FILTER_RESERVED
+ *           to be set for predefined method numbers < H5Z_FILTER_RESERVED
  *
  * Return:   Non-negative on success
  *           Negative on failure
@@ -316,12 +316,12 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function: H5Zunregister
+ * Function:    H5Zunregister
  *
- * Purpose:  This function unregisters a filter.
+ * Purpose:     This function unregisters a filter.
  *
- * Return:   Non-negative on success
- *           Negative on failure
+ * Return:      Non-negative on success
+ *              Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -347,20 +347,20 @@ done:
 } /* end H5Zunregister() */
 
 /*-------------------------------------------------------------------------
- * Function: H5Z_unregister
+ * Function:    H5Z_unregister
  *
- * Purpose:  Same as the public version except this one allows filters
- *           to be unset for predefined method numbers <H5Z_FILTER_RESERVED
+ * Purpose:     Same as the public version except this one allows filters
+ *               to be unset for predefined method numbers <H5Z_FILTER_RESERVED
  *
- * Return:   Non-negative on success
- *           Negative on failure
+ * Return:      SUCCEED/FAIL
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Z_unregister(H5Z_filter_t filter_id)
 {
-    size_t       filter_index; /* Local index variable for filter */
-    H5Z_object_t object;
+    size_t       filter_index;        /* Local index variable for filter */
+    H5Z_object_t object;              /* Object to pass to callbacks */
     herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -415,12 +415,14 @@ done:
 } /* end H5Z_unregister() */
 
 /*-------------------------------------------------------------------------
- * Function: H5Z__check_unregister
+ * Function:    H5Z__check_unregister
  *
- * Purpose: Check if an object uses the filter to be unregistered.
+ * Purpose:     Check if an object uses the filter to be unregistered.
  *
- * Return:  TRUE if the object uses the filter.
- *          FALSE if not, NEGATIVE on error.
+ * Return:      TRUE if the object uses the filter
+ *              FALSE if not
+ *              NEGATIVE on error
+ *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -444,18 +446,16 @@ done:
 } /* end H5Z__check_unregister() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z__check_unregister_group_cb
+ * Function:    H5Z__check_unregister_group_cb
  *
- * Purpose:	The callback function for H5Z_unregister. It iterates
+ * Purpose:     The callback function for H5Z_unregister. It iterates
  *              through all opened objects.  If the object is a dataset
  *              or a group and it uses the filter to be unregistered, the
  *              function returns TRUE.
  *
- * Return:      TRUE if the object uses the filter.
- *              FALSE otherwise.
- *
- * Programmer:  Raymond Lu
- *              6 May 2013
+ * Return:      TRUE if the object uses the filter
+ *              FALSE if not
+ *              NEGATIVE on error
  *
  *-------------------------------------------------------------------------
  */
@@ -485,7 +485,7 @@ H5Z__check_unregister_group_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void 
     if (filter_in_pline) {
         object->found = TRUE;
         ret_value     = TRUE;
-    } /* end if */
+    }
 
 done:
     if (ocpl_id > 0)
@@ -496,18 +496,16 @@ done:
 } /* end H5Z__check_unregister_group_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z__check_unregister_dset_cb
+ * Function:    H5Z__check_unregister_dset_cb
  *
- * Purpose:	The callback function for H5Z_unregister. It iterates
+ * Purpose:     The callback function for H5Z_unregister. It iterates
  *              through all opened objects.  If the object is a dataset
  *              or a group and it uses the filter to be unregistered, the
  *              function returns TRUE.
  *
- * Return:      TRUE if the object uses the filter.
- *              FALSE otherwise.
- *
- * Programmer:  Raymond Lu
- *              6 May 2013
+ * Return:      TRUE if the object uses the filter
+ *              FALSE if not
+ *              NEGATIVE on error
  *
  *-------------------------------------------------------------------------
  */
@@ -537,7 +535,7 @@ H5Z__check_unregister_dset_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *
     if (filter_in_pline) {
         object->found = TRUE;
         ret_value     = TRUE;
-    } /* end if */
+    }
 
 done:
     if (ocpl_id > 0)
@@ -548,17 +546,13 @@ done:
 } /* end H5Z__check_unregister_dset_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z__flush_file_cb
+ * Function:    H5Z__flush_file_cb
  *
- * Purpose:	The callback function for H5Z_unregister. It iterates
+ * Purpose:     The callback function for H5Z_unregister. It iterates
  *              through all opened files and flush them.
  *
- * Return:      FALSE if finishes flushing and moves on
- *              FAIL if there is an error
- *
- * Programmer:  Raymond Lu
- *              6 May 2013
- *
+ * Return:      NON-NEGATIVE if finishes flushing and moves on
+ *              NEGATIVE if there is an error
  *-------------------------------------------------------------------------
  */
 static int
@@ -568,6 +562,7 @@ H5Z__flush_file_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void H5_ATTR_UNUS
 
     FUNC_ENTER_STATIC
 
+    /* Sanity checks */
     HDassert(obj_ptr);
 
     /* Call the flush routine for mounted file hierarchies. Do a global flush
@@ -582,17 +577,11 @@ done:
 } /* end H5Z__flush_file_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Zfilter_avail
+ * Function: H5Zfilter_avail
  *
- * Purpose:	Check if a filter is available
+ * Purpose:  Check if a filter is available
  *
- * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, November 14, 2002
- *
- * Modifications:
- *
+ * Return:   Non-negative (TRUE/FALSE) on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -615,15 +604,11 @@ done:
 } /* end H5Zfilter_avail() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_filter_avail
+ * Function: H5Z_filter_avail
  *
- * Purpose:	Private function to check if a filter is available
+ * Purpose:  Private function to check if a filter is available
  *
- * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *              13 February 2013
- *
+ * Return:   Non-negative (TRUE/FALSE) on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -650,21 +635,16 @@ done:
 } /* end H5Z_filter_avail() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_prelude_callback
+ * Function: H5Z_prelude_callback
  *
- * Purpose:	Makes a dataset creation "prelude" callback for the "can_apply"
- *              or "set_local" routines.
+ * Purpose:  Makes a dataset creation "prelude" callback for the "can_apply"
+ *           or "set_local" routines.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:   Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Friday, April 4, 2003
- *
- * Notes:
- *              The chunk dimensions are used to create a dataspace, instead
- *              of passing in the dataset's dataspace, since the chunk
- *              dimensions are what the I/O filter will actually see
- *
+ * Notes:    The chunk dimensions are used to create a dataspace, instead
+ *           of passing in the dataset's dataspace, since the chunk
+ *           dimensions are what the I/O filter will actually see
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -736,21 +716,16 @@ done:
 } /* end H5Z_prelude_callback() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_prepare_prelude_callback_dcpl
+ * Function: H5Z_prepare_prelude_callback_dcpl
  *
- * Purpose:	Prepares to make a dataset creation "prelude" callback
- *              for the "can_apply" or "set_local" routines.
+ * Purpose:  Prepares to make a dataset creation "prelude" callback
+ *           for the "can_apply" or "set_local" routines.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:   Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Friday, April 4, 2003
- *
- * Notes:
- *              The chunk dimensions are used to create a dataspace, instead
- *              of passing in the dataset's dataspace, since the chunk
- *              dimensions are what the I/O filter will actually see
- *
+ * Notes:    The chunk dimensions are used to create a dataspace, instead
+ *           of passing in the dataset's dataspace, since the chunk
+ *           dimensions are what the I/O filter will actually see
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -801,14 +776,14 @@ H5Z_prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type
                 if ((space_id = H5I_register(H5I_DATASPACE, space, FALSE)) < 0) {
                     (void)H5S_close(space);
                     HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
-                } /* end if */
+                }
 
                 /* Make the callbacks */
                 if (H5Z_prelude_callback(&dcpl_pline, dcpl_id, type_id, space_id, prelude_type) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply filter")
-            } /* end if */
-        }     /* end if */
-    }         /* end if */
+            }
+        }
+    }
 
 done:
     if (space_id > 0 && H5I_dec_ref(space_id) < 0)
@@ -818,22 +793,18 @@ done:
 } /* end H5Z_prepare_prelude_callback_dcpl() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_can_apply
+ * Function: H5Z_can_apply
  *
- * Purpose:	Checks if all the filters defined in the dataset creation
- *              property list can be applied to a particular combination of
- *              datatype and dataspace for a dataset.
+ * Purpose:  Checks if all the filters defined in the dataset creation
+ *           property list can be applied to a particular combination of
+ *           datatype and dataspace for a dataset.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:   Non-negative on success
+ *           Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, April 3, 2003
- *
- * Notes:
- *              The chunk dimensions are used to create a dataspace, instead
- *              of passing in the dataset's dataspace, since the chunk
- *              dimensions are what the I/O filter will actually see
- *
+ * Notes:    The chunk dimensions are used to create a dataspace, instead
+ *           of passing in the dataset's dataspace, since the chunk
+ *           dimensions are what the I/O filter will actually see
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -852,22 +823,18 @@ done:
 } /* end H5Z_can_apply() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_set_local
+ * Function: H5Z_set_local
  *
- * Purpose:	Makes callbacks to modify dataset creation list property
- *              settings for filters on a new dataset, based on the datatype
- *              and dataspace of that dataset (chunk).
+ * Purpose:  Makes callbacks to modify dataset creation list property
+ *           settings for filters on a new dataset, based on the datatype
+ *           and dataspace of that dataset (chunk).
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:   Non-negative on success
+ *           Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Friday, April 4, 2003
- *
- * Notes:
- *              The chunk dimensions are used to create a dataspace, instead
- *              of passing in the dataset's dataspace, since the chunk
- *              dimensions are what the I/O filter will actually see
- *
+ * Notes:    The chunk dimensions are used to create a dataspace, instead
+ *           of passing in the dataset's dataspace, since the chunk
+ *           dimensions are what the I/O filter will actually see
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -886,17 +853,14 @@ done:
 } /* end H5Z_set_local() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_can_apply_direct
+ * Function: H5Z_can_apply_direct
  *
- * Purpose:	Checks if all the filters defined in the pipeline can be
- *              applied to an opaque byte stream (currently only a group).
- *              The pipeline is assumed to have at least one filter.
+ * Purpose:  Checks if all the filters defined in the pipeline can be
+ *           applied to an opaque byte stream (currently only a group).
+ *           The pipeline is assumed to have at least one filter.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Neil Fortner
- *              Tuesday, September 22, 2009
- *
+ * Return:   Non-negative on success
+ *           Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -917,22 +881,18 @@ done:
 } /* end H5Z_can_apply_direct() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_set_local_direct
+ * Function: H5Z_set_local_direct
  *
- * Purpose:	Makes callbacks to modify local settings for filters on a
- *              new opaque object.  The pipeline is assumed to have at
- *              least one filter.
+ * Purpose:  Makes callbacks to modify local settings for filters on a
+ *           new opaque object.  The pipeline is assumed to have at
+ *           least one filter.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:   Non-negative on success
+ *           Negative on failure
  *
- * Programmer:	Neil Fortner
- *              Tuesday, September 22, 2009
- *
- * Notes:
- *              This callback will almost certainly not do anything
- *              useful, other than to make certain that the filter will
- *              accept opque data.
- *
+ * Notes:    This callback will almost certainly not do anything
+ *           useful, other than to make certain that the filter will
+ *           accept opaque data.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -953,17 +913,12 @@ done:
 } /* end H5Z_set_local_direct() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_modify
+ * Function:   H5Z_modify
  *
- * Purpose:	Modify filter parameters for specified pipeline.
+ * Purpose:    Modify filter parameters for specified pipeline.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Friday, April  5, 2003
- *
- * Modifications:
- *
+ * Return:   Non-negative on success
+ *           Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1022,17 +977,12 @@ done:
 } /* end H5Z_modify() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_append
+ * Function: H5Z_append
  *
- * Purpose:	Append another filter to the specified pipeline.
+ * Purpose:  Append another filter to the specified pipeline.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Tuesday, August  4, 1998
- *
- * Modifications:
- *
+ * Return:   Non-negative on success
+ *           Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1125,19 +1075,13 @@ done:
 } /* end H5Z_append() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_find_idx
+ * Function: H5Z__find_idx
  *
- * Purpose:	Given a filter ID return the offset in the global array
- *              that holds all the registered filters.
+ * Purpose:  Given a filter ID return the offset in the global array
+ *           that holds all the registered filters.
  *
- * Return:	Success:	Non-negative index of entry in global filter table.
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Friday, April  5, 2003
- *
- * Modifications:
- *
+ * Return:   Success:    Non-negative index of entry in global filter table.
+ *           Failure:    Negative
  *-------------------------------------------------------------------------
  */
 static int
@@ -1157,21 +1101,13 @@ done:
 } /* end H5Z_find_idx() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_find
+ * Function: H5Z_find
  *
- * Purpose:	Given a filter ID return a pointer to a global struct that
- *		defines the filter.
+ * Purpose:  Given a filter ID return a pointer to a global struct that
+ *           defines the filter.
  *
- * Return:	Success:	Ptr to entry in global filter table.
- *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *              Wednesday, August  5, 1998
- *
- * Modifications:
- *              Use H5Z_find_idx now
- *              Quincey Koziol, April  5, 2003
- *
+ * Return:   Success:    Ptr to entry in global filter table.
+ *           Failure:    NULL
  *-------------------------------------------------------------------------
  */
 H5Z_class2_t *
@@ -1194,31 +1130,26 @@ done:
 } /* H5Z_find() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_pipeline
+ * Function: H5Z_pipeline
  *
- * Purpose:	Process data through the filter pipeline.  The FLAGS argument
- *		is the filter invocation flags (definition flags come from
- *		the PLINE->filter[].flags).  The filters are processed in
- *		definition order unless the H5Z_FLAG_REVERSE is set.  The
- *		FILTER_MASK is a bit-mask to indicate which filters to skip
- *		and on exit will indicate which filters failed.  Each
- *		filter has an index number in the pipeline and that index
- *		number is the filter's bit in the FILTER_MASK.  NBYTES is the
- *		number of bytes of data to filter and on exit should be the
- *		number of resulting bytes while BUF_SIZE holds the total
- *		allocated size of the buffer, which is pointed to BUF.
+ * Purpose:  Process data through the filter pipeline.  The FLAGS argument
+ *           is the filter invocation flags (definition flags come from
+ *           the PLINE->filter[].flags).  The filters are processed in
+ *           definition order unless the H5Z_FLAG_REVERSE is set.  The
+ *           FILTER_MASK is a bit-mask to indicate which filters to skip
+ *           and on exit will indicate which filters failed.  Each
+ *           filter has an index number in the pipeline and that index
+ *           number is the filter's bit in the FILTER_MASK.  NBYTES is the
+ *           number of bytes of data to filter and on exit should be the
+ *           number of resulting bytes while BUF_SIZE holds the total
+ *           allocated size of the buffer, which is pointed to BUF.
  *
- *		If the buffer must grow during processing of the pipeline
- *		then the pipeline function should free the original buffer
- *		and return a fresh buffer, adjusting BUF_SIZE accordingly.
+ *           If the buffer must grow during processing of the pipeline
+ *           then the pipeline function should free the original buffer
+ *           and return a fresh buffer, adjusting BUF_SIZE accordingly.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Tuesday, August  4, 1998
- *
- * Modifications:
- *
+ * Return:   Non-negative on success
+ *           Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1226,7 +1157,8 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
              H5Z_cb_t cb_struct, size_t *nbytes /*in,out*/, size_t *buf_size /*in,out*/,
              void **buf /*in,out*/)
 {
-    size_t        i, idx, new_nbytes;
+    size_t        idx;
+    size_t        new_nbytes;
     int           fclass_idx;    /* Index of filter class in global table */
     H5Z_class2_t *fclass = NULL; /* Filter class pointer */
 #ifdef H5Z_DEBUG
@@ -1235,6 +1167,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
 #endif
     unsigned failed = 0;
     unsigned tmp_flags;
+    size_t   i;
     herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1249,10 +1182,9 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
     if (pline && (flags & H5Z_FLAG_REVERSE)) { /* Read */
         for (i = pline->nused; i > 0; --i) {
             idx = i - 1;
-
             if (*filter_mask & ((unsigned)1 << idx)) {
                 failed |= (unsigned)1 << idx;
-                continue; /*filter excluded*/
+                continue; /* filter excluded */
             }
 
             /* If the filter isn't registered and the application doesn't
@@ -1275,7 +1207,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                      * and registered */
                     if ((fclass_idx = H5Z_find_idx(pline->filter[idx].id)) < 0)
                         issue_error = TRUE;
-                } /* end if */
+                }
                 else
                     issue_error = TRUE;
 
@@ -1289,14 +1221,16 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                     else
                         HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL,
                                     "required filter (name unavailable) is not registered")
-                } /* end if */
-            }     /* end if */
+                }
+            } /* end if */
 
             fclass = &H5Z_table_g[fclass_idx];
+
 #ifdef H5Z_DEBUG
             fstats = &H5Z_stat_table_g[fclass_idx];
             H5_timer_begin(&timer);
 #endif
+
             tmp_flags = flags | (pline->filter[idx].flags);
             tmp_flags |= (edc_read == H5Z_DISABLE_EDC) ? H5Z_FLAG_SKIP_EDC : 0;
             new_nbytes = (fclass->filter)(tmp_flags, pline->filter[idx].cd_nelmts,
@@ -1319,16 +1253,15 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                 failed |= (unsigned)1 << idx;
                 H5E_clear_stack(NULL);
             }
-            else {
+            else
                 *nbytes = new_nbytes;
-            }
         }
     }
     else if (pline) { /* Write */
         for (idx = 0; idx < pline->nused; idx++) {
             if (*filter_mask & ((unsigned)1 << idx)) {
                 failed |= (unsigned)1 << idx;
-                continue; /*filter excluded*/
+                continue; /* filter excluded */
             }
             if ((fclass_idx = H5Z_find_idx(pline->filter[idx].id)) < 0) {
                 /* Check if filter is optional -- If it isn't, then error */
@@ -1337,21 +1270,26 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
 
                 failed |= (unsigned)1 << idx;
                 H5E_clear_stack(NULL);
-                continue; /*filter excluded*/
-            }
+                continue; /* filter excluded */
+            }             /* end if */
+
             fclass = &H5Z_table_g[fclass_idx];
+
 #ifdef H5Z_DEBUG
             fstats = &H5Z_stat_table_g[fclass_idx];
             H5_timer_begin(&timer);
 #endif
+
             new_nbytes = (fclass->filter)(flags | (pline->filter[idx].flags), pline->filter[idx].cd_nelmts,
                                           pline->filter[idx].cd_values, *nbytes, buf_size, buf);
+
 #ifdef H5Z_DEBUG
             H5_timer_end(&(fstats->stats[0].timer), &timer);
             fstats->stats[0].total += MAX(*nbytes, new_nbytes);
             if (0 == new_nbytes)
                 fstats->stats[0].errors += *nbytes;
 #endif
+
             if (0 == new_nbytes) {
                 if (0 == (pline->filter[idx].flags & H5Z_FLAG_OPTIONAL)) {
                     if ((cb_struct.func && (H5Z_CB_FAIL == cb_struct.func(pline->filter[idx].id, *buf,
@@ -1361,14 +1299,12 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
 
                     *nbytes = *buf_size;
                 }
-
                 failed |= (unsigned)1 << idx;
                 H5E_clear_stack(NULL);
             }
-            else {
+            else
                 *nbytes = new_nbytes;
-            }
-        }
+        } /* end for */
     }
 
     *filter_mask = failed;
@@ -1378,24 +1314,19 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_filter_info
+ * Function: H5Z_filter_info
  *
- * Purpose:	Get pointer to filter info for pipeline
+ * Purpose:  Get pointer to filter info for pipeline
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Friday, April  5, 2003
- *
- * Modifications:
- *
+ * Return:   Non-negative on success
+ *           Negative on failure
  *-------------------------------------------------------------------------
  */
 H5Z_filter_info_t *
 H5Z_filter_info(const H5O_pline_t *pline, H5Z_filter_t filter)
 {
-    size_t             idx;       /* Index of filter in pipeline */
-    H5Z_filter_info_t *ret_value; /* Return value */
+    size_t             idx;              /* Index of filter in pipeline */
+    H5Z_filter_info_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1419,20 +1350,14 @@ done:
 } /* end H5Z_filter_info() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_filter_in_pline
+ * Function: H5Z_filter_in_pline
  *
- * Purpose:	Check wheter a filter is in the filter pipeline using the
- *              filter ID.  This function is very similar to H5Z_filter_info
+ * Purpose:  Check wheter a filter is in the filter pipeline using the
+ *           filter ID.  This function is very similar to H5Z_filter_info
  *
- * Return:	TRUE   - found filter
- *              FALSE  - not found
- *              FAIL   - error
- *
- * Programmer:	Raymond Lu
- *              26 April 2013
- *
- * Modifications:
- *
+ * Return:   TRUE   - found filter
+ *           FALSE  - not found
+ *           FAIL   - error
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -1460,18 +1385,13 @@ done:
 } /* end H5Z_filter_in_pline() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_all_filters_avail
+ * Function: H5Z_all_filters_avail
  *
- * Purpose:	Verify that all the filters in a pipeline are currently
- *              available (i.e. registered)
+ * Purpose:  Verify that all the filters in a pipeline are currently
+ *           available (i.e. registered)
  *
- * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, April  8, 2003
- *
- * Modifications:
- *
+ * Return:   Non-negative (TRUE/FALSE) on success
+ *           Negative on failure
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -1487,7 +1407,6 @@ H5Z_all_filters_avail(const H5O_pline_t *pline)
 
     /* Iterate through all the filters in pipeline */
     for (i = 0; i < pline->nused; i++) {
-
         /* Look for each filter in the list of registered filters */
         for (j = 0; j < H5Z_table_used_g; j++)
             if (H5Z_table_g[j].id == pline->filter[i].id)
@@ -1505,16 +1424,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function: H5Z_delete
  *
- * Purpose: Delete filter FILTER from pipeline PLINE;
- *  deletes all filters if FILTER is H5Z_FILTER_NONE
+ * Purpose:  Delete filter FILTER from pipeline PLINE;
+ *           deletes all filters if FILTER is H5Z_FILTER_NONE
  *
- * Return: Non-negative on success/Negative on failure
- *
- * Programmer: Pedro Vicente
- *              Monday, January 26, 2004
- *
- * Modifications:
- *
+ * Return:   Non-negative on success
+ *           Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1536,7 +1450,7 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter)
     if (H5Z_FILTER_ALL == filter) {
         if (H5O_msg_reset(H5O_PLINE_ID, pline) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFREE, FAIL, "can't release pipeline info")
-    } /* end if */
+    }
     /* Delete filter */
     else {
         size_t  idx;           /* Index of filter in pipeline */
@@ -1547,7 +1461,7 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter)
             if (pline->filter[idx].id == filter) {
                 found = TRUE;
                 break;
-            } /* end if */
+            }
 
         /* filter was not found in the pipeline */
         if (!found)
@@ -1572,8 +1486,8 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter)
                     pline->filter[idx].name = pline->filter[idx]._name;
                 if (pline->filter[idx].cd_nelmts <= H5Z_COMMON_CD_VALUES)
                     pline->filter[idx].cd_values = pline->filter[idx]._cd_values;
-            } /* end for */
-        }     /* end if */
+            }
+        }
 
         /* Decrement number of used filters */
         pline->nused--;
@@ -1589,14 +1503,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function: H5Zget_filter_info
  *
- * Purpose: Gets information about a pipeline data filter and stores it
- *          in filter_config_flags.
+ * Purpose:  Gets information about a pipeline data filter and stores it
+ *           in filter_config_flags.
  *
- * Return: zero on success / negative on failure
- *
- * Programmer: James Laird and Nat Furrer
- *              Monday, June 7, 2004
- *
+ * Return:   zero on success
+ *           negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1618,14 +1529,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function: H5Z_get_filter_info
  *
- * Purpose: Gets information about a pipeline data filter and stores it
- *          in filter_config_flags.
+ * Purpose:  Gets information about a pipeline data filter and stores it
+ *           in filter_config_flags.
  *
- * Return: zero on success / negative on failure
- *
- * Programmer: Quincey Koziol
- *             Saturday, May 11, 2013
- *
+ * Return:   zero on success
+ *           negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t

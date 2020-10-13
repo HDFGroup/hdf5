@@ -233,7 +233,6 @@ done:
  *              Failure:        FAIL
  *
  * Programmer:  Bill Wendling
- *              wendling@ncsa.uiuc.edu
  *              Sept 12, 2003
  *
  *-------------------------------------------------------------------------
@@ -308,7 +307,6 @@ done:
  *              Failure:        FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Sept 15, 2003
  *
  *-------------------------------------------------------------------------

@@ -15,7 +15,7 @@
  *
  * Created:             H5Fmpi.c
  *                      Jan 10 2008
- *                      Quincey Koziol <koziol@hdfgroup.org>
+ *                      Quincey Koziol
  *
  * Purpose:             MPI-related routines.
  *
@@ -68,51 +68,47 @@
 #ifdef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_mpi_get_rank
+ * Function:    H5F_mpi_get_rank
  *
- * Purpose:	Retrieves the rank of an MPI process.
+ * Purpose:     Retrieves the rank of an MPI process.
  *
- * Return:	Success:	The rank (non-negative)
+ * Return:      Success:    The rank (non-negative)
  *
- *		Failure:	Negative
+ *              Failure:    Negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Friday, January 30, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 int
 H5F_mpi_get_rank(const H5F_t *f)
 {
-    int ret_value;
+    int ret_value = -1;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI((-1))
 
     HDassert(f && f->shared);
 
     /* Dispatch to driver */
     if ((ret_value = H5FD_mpi_get_rank(f->shared->lf)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_rank request failed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "driver get_rank request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_mpi_get_rank() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_mpi_get_comm
+ * Function:    H5F_mpi_get_comm
  *
- * Purpose:	Retrieves the file's communicator
+ * Purpose:     Retrieves the file's communicator
  *
- * Return:	Success:	The communicator (non-negative)
+ * Return:      Success:    The communicator (non-negative)
  *
- *		Failure:	Negative
+ *              Failure:    Negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Friday, January 30, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -145,8 +141,6 @@ done:
  * Programmer:  John Mainzer
  *              Friday, May 6, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -167,16 +161,11 @@ done:
 } /* end H5F_mpi_get_size() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Fset_mpi_atomicity
+ * Function:    H5Fset_mpi_atomicity
  *
- * Purpose:	Sets the atomicity mode
+ * Purpose:     Private call to set the atomicity mode
  *
- * Return:	Success:	Non-negative
- *
- * 		Failure:	Negative
- *
- * Programmer:	Mohamad Chaarawi
- *		Feb 14, 2012
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -197,25 +186,24 @@ H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag)
     if (!H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI))
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect VFL driver, does not support MPI atomicity mode")
 
-    /* set atomicity value */
+    /* Set atomicity value */
     if (H5FD_set_mpio_atomicity(file->shared->lf, flag) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set atomicity flag")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Fset_mpi_atomicity() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Fget_mpi_atomicity
+ * Function:    H5Fget_mpi_atomicity
  *
- * Purpose:	Returns the atomicity mode
+ * Purpose:     Returns the atomicity mode
  *
- * Return:	Success:	Non-negative
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *
- * 		Failure:	Negative
- *
- * Programmer:	Mohamad Chaarawi
- *		Feb 14, 2012
+ * Programmer:  Mohamad Chaarawi
+ *              Feb 14, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -236,7 +224,7 @@ H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag)
     if (!H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI))
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect VFL driver, does not support MPI atomicity mode")
 
-    /* get atomicity value */
+    /* Get atomicity value */
     if (H5FD_get_mpio_atomicity(file->shared->lf, flag) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get atomicity flag")
 

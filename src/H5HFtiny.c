@@ -13,11 +13,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5HFtiny.c
- *			Aug 14 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ * Created:     H5HFtiny.c
+ *              Aug 14 2006
+ *              Quincey Koziol
  *
- * Purpose:		Routines for "tiny" objects in fractal heap
+ * Purpose:     Routines for "tiny" objects in fractal heap
  *
  *-------------------------------------------------------------------------
  */
@@ -72,15 +72,14 @@ static herr_t H5HF_tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operato
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_tiny_init
+ * Function:    H5HF_tiny_init
  *
- * Purpose:	Initialize information for tracking 'tiny' objects
+ * Purpose:     Initialize information for tracking 'tiny' objects
  *
- * Return:	SUCCEED/FAIL
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Aug 14 2006
+ * Programmer:  Quincey Koziol
+ *              Aug 14 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -118,15 +117,14 @@ H5HF_tiny_init(H5HF_hdr_t *hdr)
 } /* end H5HF_tiny_init() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_tiny_insert
+ * Function:    H5HF_tiny_insert
  *
- * Purpose:	Pack a 'tiny' object in a heap ID
+ * Purpose:     Pack a 'tiny' object in a heap ID
  *
- * Return:	SUCCEED/FAIL
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Aug 14 2006
+ * Programmer:  Quincey Koziol
+ *              Aug 14 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -138,9 +136,6 @@ H5HF_tiny_insert(H5HF_hdr_t *hdr, size_t obj_size, const void *obj, void *_id)
     herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
-#ifdef QAK
-    HDfprintf(stderr, "%s: obj_size = %Zu\n", FUNC, obj_size);
-#endif /* QAK */
 
     /*
      * Check arguments.
@@ -180,15 +175,14 @@ done:
 } /* end H5HF_tiny_insert() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_tiny_get_obj_len
+ * Function:    H5HF_tiny_get_obj_len
  *
- * Purpose:	Get the size of a 'tiny' object in a fractal heap
+ * Purpose:     Get the size of a 'tiny' object in a fractal heap
  *
- * Return:	SUCCEED/FAIL
+ * Return:      SUCCEED (Can't fail)
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Aug 14 2006
+ * Programmer:  Quincey Koziol
+ *              Aug 14 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -222,15 +216,14 @@ H5HF_tiny_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
 } /* end H5HF_tiny_get_obj_len() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_tiny_op_real
+ * Function:    H5HF_tiny_op_real
  *
- * Purpose:	Internal routine to perform operation on 'tiny' object
+ * Purpose:     Internal routine to perform operation on 'tiny' object
  *
- * Return:	SUCCEED/FAIL
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Sep 11 2006
+ * Programmer:  Quincey Koziol
+ *              Sep 11 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -281,15 +274,14 @@ done:
 } /* end H5HF_tiny_op_real() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_tiny_read
+ * Function:    H5HF_tiny_read
  *
- * Purpose:	Read a 'tiny' object from the heap
+ * Purpose:     Read a 'tiny' object from the heap
  *
- * Return:	SUCCEED/FAIL
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Aug  8 2006
+ * Programmer:  Quincey Koziol
+ *              Aug  8 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -316,15 +308,14 @@ done:
 } /* end H5HF_tiny_read() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_tiny_op
+ * Function:    H5HF_tiny_op
  *
- * Purpose:	Operate directly on a 'tiny' object
+ * Purpose:     Operate directly on a 'tiny' object
  *
- * Return:	SUCCEED/FAIL
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Sept 11 2006
+ * Programmer:  Quincey Koziol
+ *              Sept 11 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -351,15 +342,14 @@ done:
 } /* end H5HF_tiny_op() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_tiny_remove
+ * Function:    H5HF_tiny_remove
  *
- * Purpose:	Remove a 'tiny' object from the heap statistics
+ * Purpose:     Remove a 'tiny' object from the heap statistics
  *
- * Return:	SUCCEED/FAIL
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Aug 14 2006
+ * Programmer:  Quincey Koziol
+ *              Aug 14 2006
  *
  *-------------------------------------------------------------------------
  */

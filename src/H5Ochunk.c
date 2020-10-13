@@ -15,7 +15,7 @@
  *
  * Created:		H5Ochunk.c
  *			Jul 13 2008
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Object header chunk routines.
  *
@@ -67,15 +67,13 @@ H5FL_DEFINE(H5O_chunk_proxy_t);
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_chunk_add
+ * Function:    H5O_chunk_add
  *
- * Purpose:	Add new chunk for object header to metadata cache
+ * Purpose:     Add new chunk for object header to metadata cache
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jul 13 2008
  *
  *-------------------------------------------------------------------------
@@ -120,15 +118,13 @@ done:
 } /* end H5O_chunk_add() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_chunk_protect
+ * Function:    H5O_chunk_protect
  *
- * Purpose:	Protect an object header chunk for modifications
+ * Purpose:     Protect an object header chunk for modifications
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jul 17 2008
  *
  *-------------------------------------------------------------------------
@@ -137,7 +133,7 @@ H5O_chunk_proxy_t *
 H5O_chunk_protect(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
 {
     H5O_chunk_proxy_t *chk_proxy = NULL; /* Proxy for protected chunk */
-    H5O_chunk_proxy_t *ret_value;        /* Return value */
+    H5O_chunk_proxy_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -194,15 +190,13 @@ done:
 } /* end H5O_chunk_protect() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_chunk_unprotect
+ * Function:    H5O_chunk_unprotect
  *
- * Purpose:	Unprotect an object header chunk after modifications
+ * Purpose:     Unprotect an object header chunk after modifications
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jul 17 2008
  *
  *-------------------------------------------------------------------------
@@ -246,15 +240,13 @@ done:
 } /* end H5O_chunk_unprotect() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_chunk_resize
+ * Function:    H5O_chunk_resize
  *
- * Purpose:	Resize an object header chunk
+ * Purpose:     Resize an object header chunk
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		May  6 2010
  *
  *-------------------------------------------------------------------------
@@ -287,15 +279,13 @@ done:
 } /* end H5O_chunk_resize() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_chunk_update_idx
+ * Function:    H5O_chunk_update_idx
  *
- * Purpose:	Update the chunk index for a chunk proxy
+ * Purpose:     Update the chunk index for a chunk proxy
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jul 13 2008
  *
  *-------------------------------------------------------------------------
@@ -339,15 +329,13 @@ done:
 } /* end H5O_chunk_update_idx() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_chunk_delete
+ * Function:    H5O_chunk_delete
  *
- * Purpose:	Notify metadata cache that a chunk has been deleted
+ * Purpose:     Notify metadata cache that a chunk has been deleted
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jul 13 2008
  *
  *-------------------------------------------------------------------------

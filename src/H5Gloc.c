@@ -15,7 +15,7 @@
  *
  * Created:		H5Gloc.c
  *			Sep 13 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Functions for working with group "locations"
  *
@@ -129,15 +129,11 @@ static herr_t H5G_loc_get_comment_cb(H5G_loc_t *grp_loc, const char *name, const
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_loc
+ * Function:    H5G_loc
  *
- * Purpose:	Given an object ID return a location for the object.
+ * Purpose:     Given an object ID return a location for the object.
  *
- * Return:	Success:	Group pointer.
- *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, September 13, 2005
+ * Returns:     SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -642,13 +638,13 @@ done:
 } /* end H5G_loc_exists() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_loc_info_cb
+ * Function:    H5G__loc_info_cb
  *
- * Purpose:	Callback for retrieving object info for an object in a group
+ * Purpose:     Callback for retrieving object info for an object in a group
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, November 23, 2006
  *
  *-------------------------------------------------------------------------
@@ -680,9 +676,9 @@ done:
 } /* end H5G_loc_info_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_loc_info
+ * Function:    H5G_loc_info
  *
- * Purpose:	Retrieve the information for an object from a group location
+ * Purpose:     Retrieve the information for an object from a group location
  *              and path to that object
  *
  * Return:	Non-negative on success/Negative on failure

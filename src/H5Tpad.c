@@ -59,10 +59,6 @@ H5T_init_pad_interface(void)
  * Programmer:	Robb Matzke
  *		Friday, January	 9, 1998
  *
- * Modifications:
- * 	Robb Matzke, 22 Dec 1998
- *	Also works with derived data types.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -101,10 +97,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Friday, January	 9, 1998
- *
- * Modifications:
- *	Robb Matzke, 22 Dec 1998
- *	Also works with derived data types.
  *
  *-------------------------------------------------------------------------
  */

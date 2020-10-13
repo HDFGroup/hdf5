@@ -15,7 +15,7 @@
  *
  * Created:		H5B2int.c
  *			Feb 27 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Internal routines for managing v2 B-trees.
  *
@@ -119,7 +119,6 @@ H5FL_SEQ_EXTERN(H5B2_node_info_t);
  *              record to locate is greater than all records to search).
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  3 2005
  *
  *-------------------------------------------------------------------------
@@ -162,7 +161,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 28 2006
  *
  *-------------------------------------------------------------------------
@@ -362,7 +360,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  3 2005
  *
  *-------------------------------------------------------------------------
@@ -446,7 +443,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  9 2005
  *
  *-------------------------------------------------------------------------
@@ -704,7 +700,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  9 2005
  *
  *-------------------------------------------------------------------------
@@ -1059,52 +1054,6 @@ H5B2_redistribute3(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth, H5B2_internal
     /* Mark parent as dirty */
     *internal_flags_ptr |= H5AC__DIRTIED_FLAG;
 
-#ifdef QAK
-    {
-        unsigned u;
-
-        HDfprintf(stderr, "%s: Internal records:\n", FUNC);
-        for (u = 0; u < internal->nrec; u++) {
-            HDfprintf(stderr, "%s: u = %u\n", FUNC, u);
-            (hdr->cls->debug)(stderr, hdr->f, dxpl_id, 3, 4, H5B2_INT_NREC(internal, hdr, u), NULL);
-        } /* end for */
-
-        HDfprintf(stderr, "%s: Left Child records:\n", FUNC);
-        for (u = 0; u < *left_nrec; u++) {
-            HDfprintf(stderr, "%s: u = %u\n", FUNC, u);
-            (hdr->cls->debug)(stderr, hdr->f, dxpl_id, 3, 4, H5B2_NAT_NREC(left_native, hdr, u), NULL);
-        } /* end for */
-
-        HDfprintf(stderr, "%s: Middle Child records:\n", FUNC);
-        for (u = 0; u < *middle_nrec; u++) {
-            HDfprintf(stderr, "%s: u = %u\n", FUNC, u);
-            (hdr->cls->debug)(stderr, hdr->f, dxpl_id, 3, 4, H5B2_NAT_NREC(middle_native, hdr, u), NULL);
-        } /* end for */
-
-        HDfprintf(stderr, "%s: Right Child records:\n", FUNC);
-        for (u = 0; u < *right_nrec; u++) {
-            HDfprintf(stderr, "%s: u = %u\n", FUNC, u);
-            (hdr->cls->debug)(stderr, hdr->f, dxpl_id, 3, 4, H5B2_NAT_NREC(right_native, hdr, u), NULL);
-        } /* end for */
-
-        for (u = 0; u < internal->nrec + 1; u++)
-            HDfprintf(stderr, "%s: internal->node_ptrs[%u] = (%Hu/%u/%a)\n", FUNC, u,
-                      internal->node_ptrs[u].all_nrec, internal->node_ptrs[u].node_nrec,
-                      internal->node_ptrs[u].addr);
-        if (depth > 1) {
-            for (u = 0; u < *left_nrec + 1; u++)
-                HDfprintf(stderr, "%s: left_node_ptr[%u] = (%Hu/%u/%a)\n", FUNC, u,
-                          left_node_ptrs[u].all_nrec, left_node_ptrs[u].node_nrec, left_node_ptrs[u].addr);
-            for (u = 0; u < *middle_nrec + 1; u++)
-                HDfprintf(stderr, "%s: middle_node_ptr[%u] = (%Hu/%u/%a)\n", FUNC, u,
-                          middle_node_ptrs[u].all_nrec, middle_node_ptrs[u].node_nrec,
-                          middle_node_ptrs[u].addr);
-            for (u = 0; u < *right_nrec + 1; u++)
-                HDfprintf(stderr, "%s: right_node_ptr[%u] = (%Hu/%u/%a)\n", FUNC, u,
-                          right_node_ptrs[u].all_nrec, right_node_ptrs[u].node_nrec, right_node_ptrs[u].addr);
-        } /* end if */
-    }
-#endif /* QAK */
 #ifdef H5B2_DEBUG
     H5B2_assert_internal((hsize_t)0, hdr, internal);
     if (depth > 1) {
@@ -1149,7 +1098,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar  4 2005
  *
  *-------------------------------------------------------------------------
@@ -1316,7 +1264,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar  4 2005
  *
  *-------------------------------------------------------------------------
@@ -2152,7 +2099,6 @@ done:
  * Return:	Value from callback, non-negative on success, negative on error
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 11 2005
  *
  *-------------------------------------------------------------------------
@@ -3148,7 +3094,6 @@ done:
  * Return:	Value from callback, non-negative on success, negative on error
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar  9 2005
  *
  *-------------------------------------------------------------------------

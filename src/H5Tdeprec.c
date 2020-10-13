@@ -15,7 +15,7 @@
  *
  * Created:	H5Tdeprec.c
  *		April 5 2007
- *		Quincey Koziol <koziol@hdfgroup.org>
+ *		Quincey Koziol
  *
  * Purpose:	Deprecated functions from the H5T interface.  These
  *              functions are here for compatibility purposes and may be
@@ -169,7 +169,7 @@ done:
  *
  * Return:	Success:	Object ID of the named datatype.
  *
- *		Failure:	Negative
+ *		Failure:	H5I_INVALID_HID
  *
  * Programmer:	Robb Matzke
  *              Monday, June  1, 1998
@@ -187,16 +187,16 @@ H5Topen1(hid_t loc_id, const char *name)
     H5G_loc_t  type_loc;                     /* Group object for datatype */
     hbool_t    obj_found = FALSE;            /* Object at 'name' found */
     hid_t      dxpl_id   = H5AC_ind_dxpl_id; /* dxpl to use to open datatype */
-    hid_t      ret_value = FAIL;
+    hid_t      ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE2("i", "i*s", loc_id, name);
 
     /* Check args */
     if (H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a location")
     if (!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no name")
 
     /* Set up datatype location to fill in */
     type_loc.oloc = &oloc;
@@ -208,25 +208,25 @@ H5Topen1(hid_t loc_id, const char *name)
      * from it.
      */
     if (H5G_loc_find(&loc, name, &type_loc /*out*/, H5P_DEFAULT, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "not found")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, H5I_INVALID_HID, "not found")
     obj_found = TRUE;
 
     /* Check that the object found is the correct type */
     if (H5O_obj_type(&oloc, &obj_type, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get object type")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, H5I_INVALID_HID, "can't get object type")
     if (obj_type != H5O_TYPE_NAMED_DATATYPE)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a named datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, H5I_INVALID_HID, "not a named datatype")
 
     /* Open it */
     if ((type = H5T_open(&type_loc, dxpl_id)) == NULL)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to open named datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open named datatype")
 
     /* Register the type and return the ID */
     if ((ret_value = H5I_register(H5I_DATATYPE, type, TRUE)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register named datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register named datatype")
 
 done:
-    if (ret_value < 0) {
+    if (H5I_INVALID_HID == ret_value) {
         if (type != NULL)
             H5T_close(type);
         else {

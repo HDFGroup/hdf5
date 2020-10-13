@@ -15,7 +15,7 @@
  *
  * Created:		H5Ocache.c
  *			Sep 28 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Object header metadata cache virtual functions.
  *
@@ -137,7 +137,6 @@ H5FL_SEQ_DEFINE(H5O_cont_t);
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug  5 1997
  *
  *-------------------------------------------------------------------------
@@ -352,7 +351,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug  5 1997
  *
  *-------------------------------------------------------------------------
@@ -499,7 +497,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Jan 15 2003
  *
  *-------------------------------------------------------------------------
@@ -545,7 +542,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 20 2003
  *
  * Changes:	In the parallel case, there is the possibility that the
@@ -660,7 +656,6 @@ H5O_size(const H5F_t H5_ATTR_UNUSED *f, const H5O_t *oh, size_t *size_ptr)
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jul 12 2008
  *
  *-------------------------------------------------------------------------
@@ -758,7 +753,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jul 12 2008
  *
  *-------------------------------------------------------------------------
@@ -808,7 +802,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 12, 2008
  *
  *-------------------------------------------------------------------------
@@ -856,7 +849,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 12, 2008
  *
  * Changes:	In the parallel case, there is the possibility that the
@@ -933,7 +925,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 12, 2008
  *
  *-------------------------------------------------------------------------
@@ -963,7 +954,6 @@ H5O_cache_chk_size(const H5F_t H5_ATTR_UNUSED *f, const H5O_chunk_proxy_t *chk_p
  *              Failure: FAIL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 12, 2008
  *
  *-------------------------------------------------------------------------
@@ -1010,7 +1000,6 @@ done:
  *              Failure: FAIL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 12, 2008
  *
  *-------------------------------------------------------------------------
@@ -1362,7 +1351,6 @@ done:
  *              Failure: FAIL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 12, 2008
  *
  *-------------------------------------------------------------------------
@@ -1429,7 +1417,6 @@ done:
  *              Failure: FAIL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 13, 2008
  *
  *-------------------------------------------------------------------------

@@ -244,7 +244,7 @@ done:
     if (NULL == ret_value)
         if (attr) {
             if (attr->shared) {
-                /* Free any dynamicly allocated items */
+                /* Free any dynamically allocated items */
                 if (H5A_free(attr) < 0)
                     HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, NULL, "can't release attribute info")
 
@@ -384,7 +384,7 @@ done:
 static void *
 H5O_attr_copy(const void *_src, void *_dst)
 {
-    void *ret_value; /* Return value */
+    void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

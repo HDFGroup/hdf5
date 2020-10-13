@@ -13,11 +13,9 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:	H5Rdeprec.c
- *		September 13 2007
- *		Quincey Koziol <koziol@hdfgroup.org>
+ * Created:     H5Rdeprec.c
  *
- * Purpose:	Deprecated functions from the H5R interface.  These
+ * Purpose:     Deprecated functions from the H5R interface.  These
  *              functions are here for compatibility purposes and may be
  *              removed in the future.  Applications should switch to the
  *              newer APIs.

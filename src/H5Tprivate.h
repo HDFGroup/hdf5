@@ -24,9 +24,9 @@
 #include "H5MMpublic.h" /* Memory management                    */
 
 /* Private headers needed by this file */
-#include "H5private.h"  /* Generic Functions            */
-#include "H5Gprivate.h" /* Groups                   */
-#include "H5Rprivate.h" /* References                */
+#include "H5private.h"  /* Generic Functions                        */
+#include "H5Gprivate.h" /* Groups                                   */
+#include "H5Rprivate.h" /* References                               */
 
 /* Macro for size of temporary buffers to contain a single element */
 #define H5T_ELEM_BUF_SIZE 256
@@ -94,7 +94,7 @@ typedef struct H5T_subset_info_t {
 /* Forward declarations for prototype arguments */
 struct H5O_t;
 
-/* The native endianess of the platform */
+/* The native endianness of the platform */
 H5_DLLVAR H5T_order_t H5T_native_order_g;
 
 /* Private functions */

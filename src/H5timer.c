@@ -12,12 +12,11 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
- *
  * Created:		H5timer.c
  *			Aug 21 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
- * Purpose:		Internal 'timer' routines & support routines.
+ * Purpose:             Internal, platform-independent 'timer' support routines.
  *
  *-------------------------------------------------------------------------
  */
@@ -253,7 +252,7 @@ H5_now(void)
         now = now_tv.tv_sec;
     }
 #else  /* H5_HAVE_GETTIMEOFDAY */
-    now          = HDtime(NULL);
+    now = HDtime(NULL);
 #endif /* H5_HAVE_GETTIMEOFDAY */
 
     return (now);

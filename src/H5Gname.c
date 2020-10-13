@@ -15,7 +15,7 @@
  *
  * Created:		H5Gname.c
  *			Sep 12 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Functions for handling group hierarchy paths.
  *
@@ -114,7 +114,6 @@ H5FL_BLK_EXTERN(str_buf);
  *		Failure:	Ptr to the null terminator of NAME.
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug 11 1997
  *
  *-------------------------------------------------------------------------
@@ -151,10 +150,10 @@ H5G__component(const char *name, size_t *size_p)
 char *
 H5G_normalize(const char *name)
 {
-    char *   norm;       /* Pointer to the normalized string */
-    size_t   s, d;       /* Positions within the strings */
-    unsigned last_slash; /* Flag to indicate last character was a slash */
-    char *   ret_value;  /* Return value */
+    char *   norm;             /* Pointer to the normalized string */
+    size_t   s, d;             /* Positions within the strings */
+    unsigned last_slash;       /* Flag to indicate last character was a slash */
+    char *   ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -205,7 +204,7 @@ done:
  * Return: TRUE for valid prefix, FALSE for not a valid prefix, FAIL
  *              on error
  *
- * Programmer: Quincey Koziol, koziol@ncsa.uiuc.edu
+ * Programmer: Quincey Koziol
  *
  * Date: September 24, 2002
  *
@@ -269,7 +268,7 @@ done:
  *
  * Return: Pointer to reference counted string on success, NULL on error
  *
- * Programmer: Quincey Koziol, koziol@ncsa.uiuc.edu
+ * Programmer: Quincey Koziol
  *
  * Date: August 19, 2005
  *
@@ -278,12 +277,12 @@ done:
 static H5RS_str_t *
 H5G_build_fullpath(const char *prefix, const char *name)
 {
-    char *      full_path;     /* Full user path built */
-    size_t      orig_path_len; /* Original length of the path */
-    size_t      path_len;      /* Length of the path */
-    size_t      name_len;      /* Length of the name */
-    unsigned    need_sep;      /* Flag to indicate if separator is needed */
-    H5RS_str_t *ret_value;     /* Return value */
+    char *      full_path;        /* Full user path built */
+    size_t      orig_path_len;    /* Original length of the path */
+    size_t      path_len;         /* Length of the path */
+    size_t      name_len;         /* Length of the name */
+    unsigned    need_sep;         /* Flag to indicate if separator is needed */
+    H5RS_str_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -330,7 +329,7 @@ done:
  * Return:	Success:	Non-NULL, combined path
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol, koziol@ncsa.uiuc.edu
+ * Programmer:	Quincey Koziol
  *              Tuesday, October 11, 2005
  *
  *-------------------------------------------------------------------------
@@ -338,8 +337,8 @@ done:
 H5RS_str_t *
 H5G_build_fullpath_refstr_str(H5RS_str_t *prefix_r, const char *name)
 {
-    const char *prefix; /* Pointer to raw string for path */
-    H5RS_str_t *ret_value;
+    const char *prefix;           /* Pointer to raw string for path */
+    H5RS_str_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -366,7 +365,7 @@ H5G_build_fullpath_refstr_str(H5RS_str_t *prefix_r, const char *name)
  *
  * Return: Pointer to reference counted string on success, NULL on error
  *
- * Programmer: Quincey Koziol, koziol@ncsa.uiuc.edu
+ * Programmer: Quincey Koziol
  *
  * Date: August 19, 2005
  *
@@ -433,7 +432,7 @@ H5G__name_init(H5G_name_t *name, const char *path)
  * Return:	Success:	Non-negative
  *		Failure:	Negative
  *
- * Programmer:	Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer:	Pedro Vicente
  *              Thursday, August 22, 2002
  *
  *-------------------------------------------------------------------------
@@ -536,18 +535,14 @@ H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5_copy_depth_t depth)
  * Programmer:	Quincey Koziol
  *              Tuesday, December 13, 2005
  *
- * Modifications: Leon Arber
- * 		  Oct. 18, 2006
- * 		  Added functionality to get the name for a reference.
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
 H5G_get_name(const H5G_loc_t *loc, char *name /*out*/, size_t size, hbool_t *cached, hid_t lapl_id,
              hid_t dxpl_id)
 {
-    ssize_t len = 0;   /* Length of object's name */
-    ssize_t ret_value; /* Return value */
+    ssize_t len       = 0;  /* Length of object's name */
+    ssize_t ret_value = -1; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -633,7 +628,7 @@ H5G_name_reset(H5G_name_t *name)
  *
  * Return:	Success
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: August 22, 2002
  *
@@ -768,7 +763,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: June 5, 2002
  *
@@ -1047,7 +1042,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: June 11, 2002
  *
@@ -1135,7 +1130,7 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file, H5RS
         else {
             /* We pass NULL as link pointer when we need to search all IDs */
             search_group = search_dataset = search_datatype = TRUE;
-        } /* end else */
+        }
 
         /* Check if we need to operate on the objects affected */
         if (search_group || search_dataset || search_datatype) {
@@ -1179,11 +1174,11 @@ done:
  * Purpose:     Callback for retrieving object's name by address
  *
  * Return:      Positive if path is for object desired
- * 		0 if not correct object
- * 		negative on failure.
+ * 	            0 if not correct object
+ * 	            negative on failure.
  *
  * Programmer:	Quincey Koziol
- *		November 4 2007
+ *              November 4 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1246,10 +1241,11 @@ done:
  *
  * Purpose:     Tries to figure out the path to an object from it's address
  *
- * Return:      returns size of path name, and copies it into buffer
- * 		pointed to by name if that buffer is big enough.
- * 		0 if it cannot find the path
- * 		negative on failure.
+ * Return:      Success:    Returns size of path name, and copies it into buffer
+ *                          pointed to by name if that buffer is big enough.
+ *                          0 if it cannot find the path
+ *
+ *              Failure:    -1
  *
  * Programmer:	Quincey Koziol
  *		November 4 2007
@@ -1259,11 +1255,11 @@ done:
 ssize_t
 H5G_get_name_by_addr(hid_t file, hid_t lapl_id, hid_t dxpl_id, const H5O_loc_t *loc, char *name, size_t size)
 {
-    H5G_gnba_iter_t udata;             /* User data for iteration */
-    H5G_loc_t       root_loc;          /* Root group's location */
-    hbool_t         found_obj = FALSE; /* If we found the object */
-    herr_t          status;            /* Status from iteration */
-    ssize_t         ret_value;         /* Return value */
+    H5G_gnba_iter_t udata;             /* User data for iteration  */
+    H5G_loc_t       root_loc;          /* Root group's location    */
+    hbool_t         found_obj = FALSE; /* If we found the object   */
+    herr_t          status;            /* Status from iteration    */
+    ssize_t         ret_value = -1;    /* Return value             */
 
     /* Portably clear udata struct (before FUNC_ENTER) */
     HDmemset(&udata, 0, sizeof(udata));

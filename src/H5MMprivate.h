@@ -15,7 +15,7 @@
  *
  * Created:             H5MMprivate.h
  *                      Jul 10 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             Private header for memory management.
  *

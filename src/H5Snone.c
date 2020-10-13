@@ -12,10 +12,10 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:  Quincey Koziol
  *              Tuesday, November 10, 1998
  *
- * Purpose:	"None" selection data space I/O functions.
+ * Purpose:	"None" selection dataspace I/O functions.
  */
 
 #define H5S_PACKAGE /*suppress error about including H5Spkg	  */
@@ -95,16 +95,14 @@ static const H5S_sel_iter_class_t H5S_sel_iter_none[1] = {{
 }};
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_none_iter_init
+ * Function:    H5S_none_iter_init
  *
- * Purpose:	Initializes iteration information for "none" selection.
+ * Purpose:     Initializes iteration information for "none" selection.
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:      Non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, June 16, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -124,17 +122,15 @@ H5S_none_iter_init(H5S_sel_iter_t *iter, const H5S_t H5_ATTR_UNUSED *space)
 } /* H5S_none_iter_init() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_none_iter_coords
+ * Function:    H5S_none_iter_coords
  *
- * Purpose:	Retrieve the current coordinates of iterator for current
+ * Purpose:     Retrieve the current coordinates of iterator for current
  *              selection
  *
- * Return:	non-negative on success, negative on failure
+ * Return:      Non-negative on success, negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, April 22, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -151,17 +147,15 @@ H5S_none_iter_coords(const H5S_sel_iter_t H5_ATTR_UNUSED *iter, hsize_t H5_ATTR_
 } /* H5S_none_iter_coords() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_none_iter_block
+ * Function:    H5S_none_iter_block
  *
- * Purpose:	Retrieve the current block of iterator for current
+ * Purpose:     Retrieve the current block of iterator for current
  *              selection
  *
- * Return:	non-negative on success, negative on failure
+ * Return:      Non-negative on success, negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, June 2, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -180,16 +174,14 @@ H5S_none_iter_block(const H5S_sel_iter_t H5_ATTR_UNUSED *iter, hsize_t H5_ATTR_U
 } /* H5S_none_iter_block() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_none_iter_nelmts
+ * Function:    H5S_none_iter_nelmts
  *
- * Purpose:	Return number of elements left to process in iterator
+ * Purpose:     Return number of elements left to process in iterator
  *
- * Return:	non-negative number of elements on success, zero on failure
+ * Return:      Non-negative number of elements on success, zero on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, June 16, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -392,7 +384,7 @@ H5S_none_copy(H5S_t *dst, const H5S_t H5_ATTR_UNUSED *src, hbool_t H5_ATTR_UNUSE
     TRUE if the selection fits within the extent, FALSE if it does not and
         Negative on an error.
  DESCRIPTION
-    Determines if the current selection at the current offet fits within the
+    Determines if the current selection at the current offset fits within the
     extent for the dataspace.  Offset is irrelevant for this type of selection.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -708,11 +700,11 @@ H5S_none_adjust_u(H5S_t H5_ATTR_UNUSED *space, const hsize_t H5_ATTR_UNUSED *off
 } /* H5S_none_adjust_u() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_none_project_scalar
+ * Function:    H5S_none_project_scalar
  *
- * Purpose:	Projects a 'none' selection into a scalar dataspace
+ * Purpose:     Projects a 'none' selection into a scalar dataspace
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:      Non-negative on success, negative on failure.
  *
  * Programmer:	Quincey Koziol
  *              Sunday, July 18, 2010
@@ -732,14 +724,14 @@ H5S_none_project_scalar(const H5S_t H5_ATTR_UNUSED *space, hsize_t H5_ATTR_UNUSE
 } /* H5S_none_project_scalar() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_none_project_simple
+ * Function:    H5S_none_project_simple
  *
- * Purpose:	Projects an 'none' selection onto/into a simple dataspace
+ * Purpose:     Projects an 'none' selection onto/into a simple dataspace
  *              of a different rank
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:      Non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Sunday, July 18, 2010
  *
  *-------------------------------------------------------------------------
@@ -833,7 +825,7 @@ H5Sselect_none(hid_t spaceid)
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
     /* Change to "none" selection */
     if (H5S_select_none(space) < 0)

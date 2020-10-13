@@ -15,7 +15,7 @@
  *
  * Created:		H5Ftest.c
  *			Jan  3 2007
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		File testing routines.
  *
@@ -72,15 +72,14 @@
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_sohm_mesg_count_test
+ * Function:    H5F_get_sohm_mesg_count_test
  *
  * Purpose:     Retrieve the number of shared messages of a given type in a file
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Jan  3, 2007
+ * Programmer:  Quincey Koziol
+ *              Jan  3, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -105,15 +104,14 @@ done:
 } /* end H5F_get_sohm_mesg_count_test() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_check_cached_stab_test
+ * Function:    H5F_check_cached_stab_test
  *
  * Purpose:     Check that a file's superblock contains a cached symbol
  *              table entry, that the entry matches that in the root
  *              group's object header, and check that the addresses are
  *              valid.
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Neil Fortner
  *	        Mar  31, 2009
@@ -141,12 +139,11 @@ done:
 } /* end H5F_check_cached_stab_test() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_maxaddr_test
+ * Function:    H5F_get_maxaddr_test
  *
  * Purpose:     Retrieve the maximum address for a file
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *	        Jun 10, 2009

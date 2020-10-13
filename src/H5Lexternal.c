@@ -21,7 +21,7 @@
 #include "H5ACprivate.h" /* Metadata cache                       */
 #include "H5Eprivate.h"  /* Error handling                       */
 #include "H5Gpkg.h"      /* Groups                               */
-#include "H5Iprivate.h"  /* IDs					*/
+#include "H5Iprivate.h"  /* IDs                                  */
 #include "H5Lpkg.h"      /* Links                                */
 #include "H5MMprivate.h" /* Memory management                    */
 #include "H5Opublic.h"   /* File objects                         */
@@ -148,7 +148,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5L_extern_traverse
  *
- * Purpose:	Default traversal function for external links. This can
+ * Purpose:    Default traversal function for external links. This can
  *              be overridden using H5Lregister().
  *
  *              Given a filename and path packed into the link udata,
@@ -159,7 +159,7 @@ done:
  *
  * Return:	ID of the opened object on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:    James Laird
  *              Monday, July 10, 2006
  * Modifications:
  *		Vailin Choi, April 2, 2008

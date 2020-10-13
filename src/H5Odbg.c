@@ -15,7 +15,7 @@
  *
  * Created:		H5Odbg.c
  *			Nov 17 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Object header debugging routines.
  *
@@ -76,7 +76,6 @@
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Oct 17 2006
  *
  *-------------------------------------------------------------------------
@@ -232,10 +231,7 @@ H5O_assert(const H5O_t *oh)
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 13 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -275,13 +271,8 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug  6 1997
  *
- * Modifications:
- *   Feb. 2009: Vailin Choi
- *	Fixed bug in the accumulation of chunk_total
- *	Used the appropriate flag when printing creation order tracked/indexed
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -496,7 +487,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug  6 1997
  *
  *-------------------------------------------------------------------------

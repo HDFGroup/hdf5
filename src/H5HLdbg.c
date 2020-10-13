@@ -11,10 +11,10 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+/* Programmer:  Quincey Koziol
  *              Wednesday, July 9, 2003
  *
- * Purpose:	Local Heap object debugging functions.
+ * Purpose:     Local Heap object debugging functions.
  */
 #define H5HL_PACKAGE /* Suppress error about including H5HLpkg */
 
@@ -25,24 +25,14 @@
 #include "H5MMprivate.h" /* Memory management			*/
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_debug
+ * Function:    H5HL_debug
  *
- * Purpose:	Prints debugging information about a heap.
+ * Purpose:     Prints debugging information about a heap.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Aug  1 1997
- *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- *              John Mainzer, 6/17/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
+ * Programmer:  Robb Matzke
+ *              Aug  1 1997
  *
  *-------------------------------------------------------------------------
  */

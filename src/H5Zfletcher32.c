@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu<slu@ncsa.uiuc.edu>
+ * Programmer:  Raymond Lu
  *              Jan 3, 2003
  */
 
@@ -53,20 +53,8 @@ const H5Z_class2_t H5Z_FLETCHER32[1] = {{
  * Programmer:	Raymond Lu
  *              Jan 3, 2003
  *
- * Modifications:
- *              Raymond Lu
- *              July 8, 2005
- *              There was a bug in the calculating code of the Fletcher32
- *              checksum in the library before v1.6.3.  The checksum
- *              value wasn't consistent between big-endian and little-endian
- *              systems.  This bug was fixed in Release 1.6.3.  However,
- *              after fixing the bug, the checksum value is no longer the
- *              same as before on little-endian system.  We'll check both
- *              the correct checksum and the wrong checksum to be consistent
- *              with Release 1.6.2 and before.
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static size_t
 H5Z_filter_fletcher32(unsigned flags, size_t H5_ATTR_UNUSED cd_nelmts,
                       const unsigned H5_ATTR_UNUSED cd_values[], size_t nbytes, size_t *buf_size, void **buf)
@@ -77,7 +65,7 @@ H5Z_filter_fletcher32(unsigned flags, size_t H5_ATTR_UNUSED cd_nelmts,
     uint32_t       reversed_fletcher; /* Possible wrong checksum value */
     uint8_t        c[4];
     uint8_t        tmp;
-    size_t         ret_value; /* Return value */
+    size_t         ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI(0)
 

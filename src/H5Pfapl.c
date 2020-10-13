@@ -13,11 +13,9 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5Pfapl.c
- *			February 26 1998
- *			Robb Matzke <matzke@llnl.gov>
+ * Created:        H5Pfapl.c
  *
- * Purpose:		File access property list class routines
+ * Purpose:        File access property list class routines
  *
  *-------------------------------------------------------------------------
  */
@@ -40,11 +38,11 @@
 #include "H5MMprivate.h" /* Memory Management                    */
 #include "H5Ppkg.h"      /* Property lists		  	*/
 
-/* Includes needed to set as default file driver */
-#include "H5FDsec2.h"  /* Posix unbuffered I/O	file driver	*/
-#include "H5FDstdio.h" /* Standard C buffered I/O		*/
+/* Includes needed to set default file driver */
+#include "H5FDsec2.h"  /* POSIX unbuffered I/O                     */
+#include "H5FDstdio.h" /* Standard C buffered I/O                  */
 #ifdef H5_HAVE_WINDOWS
-#include "H5FDwindows.h" /* Windows buffered I/O                 */
+#include "H5FDwindows.h" /* Win32 I/O                                */
 #endif
 
 /****************/
@@ -505,33 +503,27 @@ done:
 } /* end H5P_facc_close() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_alignment
+ * Function:    H5Pset_alignment
  *
- * Purpose:	Sets the alignment properties of a file access property list
- *		so that any file object >= THRESHOLD bytes will be aligned on
- *		an address which is a multiple of ALIGNMENT.  The addresses
- *		are relative to the end of the user block; the alignment is
- *		calculated by subtracting the user block size from the
- *		absolute file address and then adjusting the address to be a
- *		multiple of ALIGNMENT.
+ * Purpose:    Sets the alignment properties of a file access property list
+ *        so that any file object >= THRESHOLD bytes will be aligned on
+ *        an address which is a multiple of ALIGNMENT.  The addresses
+ *        are relative to the end of the user block; the alignment is
+ *        calculated by subtracting the user block size from the
+ *        absolute file address and then adjusting the address to be a
+ *        multiple of ALIGNMENT.
  *
- *		Default values for THRESHOLD and ALIGNMENT are one, implying
- *		no alignment.  Generally the default values will result in
- *		the best performance for single-process access to the file.
- *		For MPI-IO and other parallel systems, choose an alignment
- *		which is a multiple of the disk block size.
+ *        Default values for THRESHOLD and ALIGNMENT are one, implying
+ *        no alignment.  Generally the default values will result in
+ *        the best performance for single-process access to the file.
+ *        For MPI-IO and other parallel systems, choose an alignment
+ *        which is a multiple of the disk block size.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Tuesday, June  9, 1998
  *
- * Modifications:
- *
- *		Raymond Lu
- *		Tuesday, Oct 23, 2001
- *		Changed file access property list mechanism to the new
- *		generic property list.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -562,15 +554,15 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_alignment
+ * Function:    H5Pget_alignment
  *
- * Purpose:	Returns the current settings for alignment properties from a
- *		file access property list.  The THRESHOLD and/or ALIGNMENT
- *		pointers may be null pointers.
+ * Purpose:    Returns the current settings for alignment properties from a
+ *        file access property list.  The THRESHOLD and/or ALIGNMENT
+ *        pointers may be null pointers.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Tuesday, June  9, 1998
  *
  *-------------------------------------------------------------------------
@@ -601,20 +593,20 @@ done:
 } /* end H5Pget_alignment() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5P_set_driver
+ * Function:    H5P_set_driver
  *
- * Purpose:	Set the file driver (DRIVER_ID) for a file access
- *		property list (PLIST_ID) and supply an optional
- *		struct containing the driver-specific properites
- *		(DRIVER_INFO).  The driver properties will be copied into the
- *		property list and the reference count on the driver will be
- *		incremented, allowing the caller to close the driver ID but
- *		still use the property list.
+ * Purpose:    Set the file driver (DRIVER_ID) for a file access
+ *        property list (PLIST_ID) and supply an optional
+ *        struct containing the driver-specific properites
+ *        (DRIVER_INFO).  The driver properties will be copied into the
+ *        property list and the reference count on the driver will be
+ *        incremented, allowing the caller to close the driver ID but
+ *        still use the property list.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Tuesday, August  3, 1999
  *
  *-------------------------------------------------------------------------
@@ -654,20 +646,20 @@ done:
 } /* end H5P_set_driver() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_driver
+ * Function:    H5Pset_driver
  *
- * Purpose:	Set the file driver (DRIVER_ID) for a file access
- *		property list (PLIST_ID) and supply an optional
- *		struct containing the driver-specific properites
- *		(DRIVER_INFO).  The driver properties will be copied into the
- *		property list and the reference count on the driver will be
- *		incremented, allowing the caller to close the driver ID but
- *		still use the property list.
+ * Purpose:    Set the file driver (DRIVER_ID) for a file access
+ *        property list (PLIST_ID) and supply an optional
+ *        struct containing the driver-specific properites
+ *        (DRIVER_INFO).  The driver properties will be copied into the
+ *        property list and the reference count on the driver will be
+ *        incremented, allowing the caller to close the driver ID but
+ *        still use the property list.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Tuesday, August  3, 1999
  *
  *-------------------------------------------------------------------------
@@ -698,18 +690,18 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5P_get_driver
  *
- * Purpose:	Return the ID of the low-level file driver.  PLIST_ID should
- *		be a file access property list.
+ * Purpose:    Return the ID of the low-level file driver.  PLIST_ID should
+ *        be a file access property list.
  *
- * Return:	Success:	A low-level driver ID which is the same ID
- *				used when the driver was set for the property
- *				list. The driver ID is only valid as long as
- *				the file driver remains registered.
+ * Return:    Success:    A low-level driver ID which is the same ID
+ *                used when the driver was set for the property
+ *                list. The driver ID is only valid as long as
+ *                the file driver remains registered.
  *
- *		Failure:	Negative
+ *        Failure:    Negative
  *
- * Programmer:	Robb Matzke
- *		Thursday, February 26, 1998
+ * Programmer:    Robb Matzke
+ *        Thursday, February 26, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -736,20 +728,22 @@ done:
 } /* end H5P_get_driver() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_driver
+ * Function:    H5Pget_driver
  *
- * Purpose:	Return the ID of the low-level file driver.  PLIST_ID should
- *		be a file access property list.
+ * Purpose:    Return the ID of the low-level file driver.  PLIST_ID should
+ *        be a file access property list.
  *
- * Return:	Success:	A low-level driver ID which is the same ID
- *				used when the driver was set for the property
- *				list. The driver ID is only valid as long as
- *				the file driver remains registered.
+ * Note:    The ID returned should not be closed.
  *
- *		Failure:	Negative
+ * Return:    Success:    A low-level driver ID which is the same ID
+ *                used when the driver was set for the property
+ *                list. The driver ID is only valid as long as
+ *                the file driver remains registered.
  *
- * Programmer:	Robb Matzke
- *		Thursday, February 26, 1998
+ *        Failure:    Negative
+ *
+ * Programmer:    Robb Matzke
+ *        Thursday, February 26, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -776,18 +770,18 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5P_get_driver_info
  *
- * Purpose:	Returns a pointer directly to the file driver-specific
- *		information of a file access.
+ * Purpose:    Returns a pointer directly to the file driver-specific
+ *        information of a file access.
  *
- * Return:	Success:	Ptr to *uncopied* driver specific data
- *				structure if any.
+ * Return:    Success:    Ptr to *uncopied* driver specific data
+ *                structure if any.
  *
- *		Failure:	NULL. Null is also returned if the driver has
- *				not registered any driver-specific properties
- *				although no error is pushed on the stack in
- *				this case.
+ *        Failure:    NULL. Null is also returned if the driver has
+ *                not registered any driver-specific properties
+ *                although no error is pushed on the stack in
+ *                this case.
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
  *
  *-------------------------------------------------------------------------
@@ -812,20 +806,20 @@ done:
 } /* end H5P_get_driver_info() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_driver_info
+ * Function:    H5Pget_driver_info
  *
- * Purpose:	Returns a pointer directly to the file driver-specific
- *		information of a file access.
+ * Purpose:    Returns a pointer directly to the file driver-specific
+ *        information of a file access.
  *
- * Return:	Success:	Ptr to *uncopied* driver specific data
- *				structure if any.
+ * Return:    Success:    Ptr to *uncopied* driver specific data
+ *                structure if any.
  *
- *		Failure:	NULL. Null is also returned if the driver has
- *				not registered any driver-specific properties
- *				although no error is pushed on the stack in
- *				this case.
+ *        Failure:    NULL. Null is also returned if the driver has
+ *                not registered any driver-specific properties
+ *                although no error is pushed on the stack in
+ *                this case.
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Wednesday, August  4, 1999
  *
  *-------------------------------------------------------------------------
@@ -1007,23 +1001,23 @@ done:
 } /* end H5Pget_multi_type() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_cache
+ * Function:    H5Pset_cache
  *
- * Purpose:	Set the number of objects in the meta data cache and the
- *		maximum number of chunks and bytes in the raw data chunk
- *		cache.
+ * Purpose:    Set the number of objects in the meta data cache and the
+ *        maximum number of chunks and bytes in the raw data chunk
+ *        cache.
  *
- * 		The RDCC_W0 value should be between 0 and 1 inclusive and
- *		indicates how much chunks that have been fully read or fully
- *		written are favored for preemption.  A value of zero means
- *		fully read or written chunks are treated no differently than
- *		other chunks (the preemption is strictly LRU) while a value
- *		of one means fully read chunks are always preempted before
- *		other chunks.
+ *         The RDCC_W0 value should be between 0 and 1 inclusive and
+ *        indicates how much chunks that have been fully read or fully
+ *        written are favored for preemption.  A value of zero means
+ *        fully read or written chunks are treated no differently than
+ *        other chunks (the preemption is strictly LRU) while a value
+ *        of one means fully read chunks are always preempted before
+ *        other chunks.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Tuesday, May 19, 1998
  *
  *-------------------------------------------------------------------------
@@ -1060,17 +1054,17 @@ done:
 } /* end H5Pset_cache() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_cache
+ * Function:    H5Pget_cache
  *
- * Purpose:	Retrieves the maximum possible number of elements in the meta
- *		data cache and the maximum possible number of elements and
- *		bytes and the RDCC_W0 value in the raw data chunk cache.  Any
- *		(or all) arguments may be null pointers in which case the
- *		corresponding datum is not returned.
+ * Purpose:    Retrieves the maximum possible number of elements in the meta
+ *        data cache and the maximum possible number of elements and
+ *        bytes and the RDCC_W0 value in the raw data chunk cache.  Any
+ *        (or all) arguments may be null pointers in which case the
+ *        corresponding datum is not returned.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Tuesday, May 19, 1998
  *
  *-------------------------------------------------------------------------
@@ -1152,18 +1146,18 @@ done:
 } /* H5Pset_mdc_config() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_mdc_config
+ * Function:    H5Pget_mdc_config
  *
- * Purpose:	Retrieve the metadata cache initial resize configuration
- *		from the target FAPL.
+ * Purpose:    Retrieve the metadata cache initial resize configuration
+ *        from the target FAPL.
  *
- *		Observe that the function will fail if config_ptr is
- *		NULL, or if config_ptr->version specifies an unknown
- *		version of H5AC_cache_config_t.
+ *        Observe that the function will fail if config_ptr is
+ *        NULL, or if config_ptr->version specifies an unknown
+ *        version of H5AC_cache_config_t.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	J. Mainzer
+ * Programmer:    J. Mainzer
  *              Thursday, April 7, 2005
  *
  *-------------------------------------------------------------------------
@@ -1189,7 +1183,7 @@ H5Pget_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown config version.")
 
     /* If we ever support multiple versions of H5AC_cache_config_t, we
-     * will have to get the cannonical version here, and then translate
+     * will have to get the canonical version here, and then translate
      * to the version of the structure supplied.
      */
 
@@ -1202,33 +1196,26 @@ done:
 } /* H5Pget_mdc_config() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_gc_references
+ * Function:    H5Pset_gc_references
  *
- * Purpose:	Sets the flag for garbage collecting references for the file.
- *		Dataset region references (and other reference types
- *		probably) use space in the file heap.  If garbage collection
- *		is on and the user passes in an uninitialized value in a
- *		reference structure, the heap might get corrupted.  When
- *		garbage collection is off however and the user re-uses a
- *		reference, the previous heap block will be orphaned and not
- *		returned to the free heap space.  When garbage collection is
- *		on, the user must initialize the reference structures to 0 or
- *		risk heap corruption.
+ * Purpose:    Sets the flag for garbage collecting references for the file.
+ *        Dataset region references (and other reference types
+ *        probably) use space in the file heap.  If garbage collection
+ *        is on and the user passes in an uninitialized value in a
+ *        reference structure, the heap might get corrupted.  When
+ *        garbage collection is off however and the user re-uses a
+ *        reference, the previous heap block will be orphaned and not
+ *        returned to the free heap space.  When garbage collection is
+ *        on, the user must initialize the reference structures to 0 or
+ *        risk heap corruption.
  *
- *		Default value for garbage collecting references is off, just
- *		to be on the safe side.
+ *        Default value for garbage collecting references is off, just
+ *        to be on the safe side.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		June, 1999
- *
- * Modifications:
- *
- *		Raymond Lu
- * 		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property
- *		list.
+ * Programmer:    Quincey Koziol
+ *        June, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1254,22 +1241,15 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_gc_references
+ * Function:    H5Pget_gc_references
  *
- * Purpose:	Returns the current setting for the garbage collection
- *		references property from a file access property list.
+ * Purpose:    Returns the current setting for the garbage collection
+ *        references property from a file access property list.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              June, 1999
- *
- * Modifications:
- *
- *		Raymond Lu
- *		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property
- *		list.
  *
  *-------------------------------------------------------------------------
  */
@@ -1305,8 +1285,6 @@ done:
  * Programmer:  Raymond Lu
  *              November, 2001
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1340,8 +1318,6 @@ done:
  * Programmer:  Raymond Lu
  *              November, 2001
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1365,31 +1341,24 @@ done:
 } /* end H5Pget_fclose_degree() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_meta_block_size
+ * Function:    H5Pset_meta_block_size
  *
- * Purpose:	Sets the minimum size of metadata block allocations when
+ * Purpose:    Sets the minimum size of metadata block allocations when
  *      the H5FD_FEAT_AGGREGATE_METADATA is set by a VFL driver.
  *      Each "raw" metadata block is allocated to be this size and then
  *      specific pieces of metadata (object headers, local heaps, B-trees, etc)
  *      are sub-allocated from this block.
  *
- *		The default value is set to 2048 (bytes), indicating that metadata
+ *        The default value is set to 2048 (bytes), indicating that metadata
  *      will be attempted to be bunched together in (at least) 2K blocks in
  *      the file.  Setting the value to 0 with this API function will
  *      turn off the metadata aggregation, even if the VFL driver attempts to
  *      use that strategy.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, August 25, 2000
- *
- * Modifications:
- *
- *		Raymond Lu
- *		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property
- *		list.
  *
  *-------------------------------------------------------------------------
  */
@@ -1415,22 +1384,15 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_meta_block_size
+ * Function:    H5Pget_meta_block_size
  *
- * Purpose:	Returns the current settings for the metadata block allocation
+ * Purpose:    Returns the current settings for the metadata block allocation
  *      property from a file access property list.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, August 29, 2000
- *
- * Modifications:
- *
- *		Raymond Lu
- * 		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property
- *		list.
  *
  *-------------------------------------------------------------------------
  */
@@ -1458,31 +1420,24 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_sieve_buf_size
+ * Function:    H5Pset_sieve_buf_size
  *
- * Purpose:	Sets the maximum size of the data seive buffer used for file
+ * Purpose:    Sets the maximum size of the data seive buffer used for file
  *      drivers which are capable of using data sieving.  The data sieve
  *      buffer is used when performing I/O on datasets in the file.  Using a
  *      buffer which is large anough to hold several pieces of the dataset
  *      being read in for hyperslab selections boosts performance by quite a
  *      bit.
  *
- *		The default value is set to 64KB, indicating that file I/O for raw data
+ *        The default value is set to 64KB, indicating that file I/O for raw data
  *      reads and writes will occur in at least 64KB blocks.
  *      Setting the value to 0 with this API function will turn off the
  *      data sieving, even if the VFL driver attempts to use that strategy.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, September 21, 2000
- *
- * Modifications:
- *
- *		Raymond Lu
- * 		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property
- *		list.
  *
  *-------------------------------------------------------------------------
  */
@@ -1508,22 +1463,15 @@ done:
 } /* end H5Pset_sieve_buf_size() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_sieve_buf_size
+ * Function:    H5Pget_sieve_buf_size
  *
- * Purpose:	Returns the current settings for the data sieve buffer size
+ * Purpose:    Returns the current settings for the data sieve buffer size
  *      property from a file access property list.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, September 21, 2000
- *
- * Modifications:
- *
- *		Raymond Lu
- * 		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property
- *		list.
  *
  *-------------------------------------------------------------------------
  */
@@ -1550,26 +1498,24 @@ done:
 } /* end H5Pget_sieve_buf_size() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_small_data_block_size
+ * Function:    H5Pset_small_data_block_size
  *
- * Purpose:	Sets the minimum size of "small" raw data block allocations
+ * Purpose:    Sets the minimum size of "small" raw data block allocations
  *      when the H5FD_FEAT_AGGREGATE_SMALLDATA is set by a VFL driver.
  *      Each "small" raw data block is allocated to be this size and then
  *      pieces of raw data which are small enough to fit are sub-allocated from
  *      this block.
  *
- *	The default value is set to 2048 (bytes), indicating that raw data
+ *    The default value is set to 2048 (bytes), indicating that raw data
  *      smaller than this value will be attempted to be bunched together in (at
  *      least) 2K blocks in the file.  Setting the value to 0 with this API
  *      function will turn off the "small" raw data aggregation, even if the
  *      VFL driver attempts to use that strategy.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Wednesday, June 5, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1595,17 +1541,15 @@ done:
 } /* end H5Pset_small_data_block_size() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_small_data_block_size
+ * Function:    H5Pget_small_data_block_size
  *
- * Purpose:	Returns the current settings for the "small" raw data block
+ * Purpose:    Returns the current settings for the "small" raw data block
  *      allocation property from a file access property list.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Wednesday, June 5, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1633,9 +1577,9 @@ done:
 } /* end H5Pget_small_data_block_size() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_libver_bounds
+ * Function:    H5Pset_libver_bounds
  *
- * Purpose:	Indicates which versions of the file format the library should
+ * Purpose:    Indicates which versions of the file format the library should
  *      use when creating objects.  LOW is the earliest version of the HDF5
  *      library that is guaranteed to be able to access the objects created
  *      (the format of some objects in an HDF5 file may not have changed between
@@ -1692,7 +1636,7 @@ done:
  *              necessary to represent features used.
  *              (This is the "make certain to take advantage of <new feature>
  *              in the file format" use case (maybe <new feature> is smaller
- *              or scales better than an ealier version, which would otherwise
+ *              or scales better than an earlier version, which would otherwise
  *              be used))
  *
  *         LOW = H5F_FORMAT_1_2_0, HIGH = H5F_FORMAT_1_6_0 => creates objects
@@ -1749,14 +1693,14 @@ done:
 } /* end H5Pset_libver_bounds() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_libver_bounds
+ * Function:    H5Pget_libver_bounds
  *
- * Purpose:	Returns the current settings for the library version format bounds
- *      from a file access property list.
+ * Purpose:     Returns the current settings for the library version format bounds
+ *              from a file access property list.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, January 3, 2008
  *
  *-------------------------------------------------------------------------
@@ -1890,7 +1834,7 @@ H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len)
 
     /* validate parameters */
     if (!(((buf_ptr == NULL) && (buf_len == 0)) || ((buf_ptr != NULL) && (buf_len > 0))))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "inconsistant buf_ptr and buf_len")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "inconsistent buf_ptr and buf_len")
 
     /* Get the plist structure */
     if (NULL == (fapl = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
@@ -1950,23 +1894,23 @@ done:
  * Function: H5Pget_file_image
  *
  * Purpose:     If the file image exists and buf_ptr_ptr is not NULL,
- *		allocate a buffer of the correct size, copy the image into
- *		the new buffer, and return the buffer to the caller in
- *		*buf_ptr_ptr.  Do this using the file image callbacks
- *		if defined.
+ *        allocate a buffer of the correct size, copy the image into
+ *        the new buffer, and return the buffer to the caller in
+ *        *buf_ptr_ptr.  Do this using the file image callbacks
+ *        if defined.
  *
- *		NB: It is the responsibility of the caller to free the
- *		buffer whose address is returned in *buf_ptr_ptr.  Do
- *		this using free if the file image callbacks are not
- *		defined, or with whatever method is appropriate if
- *		the callbacks are defined.
+ *        NB: It is the responsibility of the caller to free the
+ *        buffer whose address is returned in *buf_ptr_ptr.  Do
+ *        this using free if the file image callbacks are not
+ *        defined, or with whatever method is appropriate if
+ *        the callbacks are defined.
  *
  *              If buf_ptr_ptr is not NULL, and no image exists, set
- *		*buf_ptr_ptr to NULL.
+ *        *buf_ptr_ptr to NULL.
  *
- *		If buf_len_ptr is not NULL, set *buf_len_ptr equal
- *		to the length of the file image if it exists, and
- *		to 0 if it does not.
+ *        If buf_len_ptr is not NULL, set *buf_len_ptr equal
+ *        to the length of the file image if it exists, and
+ *        to 0 if it does not.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1993,7 +1937,7 @@ H5Pget_file_image(hid_t fapl_id, void **buf_ptr_ptr, size_t *buf_len_ptr)
     if (H5P_get(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &image_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file image info")
 
-    /* verify file image field consistancy */
+    /* verify file image field consistency */
     HDassert(((image_info.buffer != NULL) && (image_info.size > 0)) ||
              ((image_info.buffer == NULL) && (image_info.size == 0)));
 
@@ -2068,7 +2012,7 @@ H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callback
     if (H5P_get(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get old file image info")
 
-    /* verify file image field consistancy */
+    /* verify file image field consistency */
     HDassert(((info.buffer != NULL) && (info.size > 0)) || ((info.buffer == NULL) && (info.size == 0)));
 
     /* Make sure a file image hasn't already been set */
@@ -2144,7 +2088,7 @@ H5Pget_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callback
     if (H5P_get(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file image info")
 
-    /* verify file image field consistancy */
+    /* verify file image field consistency */
     HDassert(((info.buffer != NULL) && (info.size > 0)) || ((info.buffer == NULL) && (info.size == 0)));
 
     /* verify that callbacks_ptr is not NULL */
@@ -2246,7 +2190,7 @@ H5P_file_image_info_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED 
 
         info = (H5FD_file_image_info_t *)value;
 
-        /* verify file image field consistancy */
+        /* verify file image field consistency */
         HDassert(((info->buffer != NULL) && (info->size > 0)) ||
                  ((info->buffer == NULL) && (info->size == 0)));
 
@@ -2382,12 +2326,15 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_core_write_tracking
+ * Function:    H5Pget_core_write_tracking
  *
- * Purpose:	Gets information about core VFD write tracking and page
+ * Purpose:    Gets information about core VFD write tracking and page
  *              aggregation size.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
+ *
+ * Programmer:  Dana Robinson
+ *              Tuesday, April 8, 2014
  *
  *-------------------------------------------------------------------------
  */

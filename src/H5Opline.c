@@ -12,22 +12,22 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Robb Matzke <matzke@llnl.gov>
- *		Wednesday, April 15, 1998
+ * Programmer:  Robb Matzke
+ *              Wednesday, April 15, 1998
  *
- * Purpose:	Data filter pipeline message.
+ * Purpose:     Data filter pipeline message.
  */
 
-#define H5O_PACKAGE /*suppress error about including H5Opkg	  */
-#define H5Z_PACKAGE /*suppress error about including H5Zpkg	  */
+#define H5O_PACKAGE /*suppress error about including H5Opkg      */
+#define H5Z_PACKAGE /*suppress error about including H5Zpkg      */
 
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Dprivate.h"  /* Datasets				*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5FLprivate.h" /* Free Lists				*/
-#include "H5MMprivate.h" /* Memory management			*/
-#include "H5Opkg.h"      /* Object headers			*/
-#include "H5Zpkg.h"      /* Data filters				*/
+#include "H5private.h"   /* Generic Functions            */
+#include "H5Dprivate.h"  /* Datasets                     */
+#include "H5Eprivate.h"  /* Error handling               */
+#include "H5FLprivate.h" /* Free Lists                   */
+#include "H5MMprivate.h" /* Memory management            */
+#include "H5Opkg.h"      /* Object headers               */
+#include "H5Zpkg.h"      /* Data filters                 */
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_pline_encode(H5F_t *f, uint8_t *p, const void *mesg);
@@ -65,40 +65,40 @@ static herr_t H5O_pline_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *
 
 /* This message derives from H5O message class */
 const H5O_msg_class_t H5O_MSG_PLINE[1] = {{
-    H5O_PLINE_ID,                              /* message id number		*/
-    "filter pipeline",                         /* message name for debugging	*/
-    sizeof(H5O_pline_t),                       /* native message size		*/
+    H5O_PLINE_ID,                              /* message id number        */
+    "filter pipeline",                         /* message name for debugging    */
+    sizeof(H5O_pline_t),                       /* native message size        */
     H5O_SHARE_IS_SHARABLE | H5O_SHARE_IN_OHDR, /* messages are sharable?       */
-    H5O_pline_shared_decode,                   /* decode message		*/
-    H5O_pline_shared_encode,                   /* encode message		*/
-    H5O_pline_copy,                            /* copy the native value	*/
-    H5O_pline_shared_size,                     /* size of raw message		*/
-    H5O_pline_reset,                           /* reset method			*/
-    H5O_pline_free,                            /* free method			*/
-    H5O_pline_shared_delete,                   /* file delete method		*/
-    H5O_pline_shared_link,                     /* link method			*/
-    NULL,                                      /* set share method		*/
-    NULL,                                      /*can share method		*/
+    H5O_pline_shared_decode,                   /* decode message        */
+    H5O_pline_shared_encode,                   /* encode message        */
+    H5O_pline_copy,                            /* copy the native value    */
+    H5O_pline_shared_size,                     /* size of raw message        */
+    H5O_pline_reset,                           /* reset method            */
+    H5O_pline_free,                            /* free method            */
+    H5O_pline_shared_delete,                   /* file delete method        */
+    H5O_pline_shared_link,                     /* link method            */
+    NULL,                                      /* set share method        */
+    NULL,                                      /*can share method        */
     H5O_pline_pre_copy_file,                   /* pre copy native value to file */
     H5O_pline_shared_copy_file,                /* copy native value to file    */
     H5O_pline_shared_post_copy_file,           /* post copy native value to file    */
-    NULL,                                      /* get creation index		*/
-    NULL,                                      /* set creation index		*/
-    H5O_pline_shared_debug                     /* debug the message		*/
+    NULL,                                      /* get creation index        */
+    NULL,                                      /* set creation index        */
+    H5O_pline_shared_debug                     /* debug the message        */
 }};
 
 /* Declare a free list to manage the H5O_pline_t struct */
 H5FL_DEFINE(H5O_pline_t);
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_pline_decode
+ * Function:    H5O_pline_decode
  *
- * Purpose:	Decodes a filter pipeline message.
+ * Purpose:     Decodes a filter pipeline message.
  *
- * Return:	Success:	Ptr to the native message.
- *		Failure:	NULL
+ * Return:      Success:    Ptr to the native message.
+ *              Failure:    NULL
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Wednesday, April 15, 1998
  *
  *-------------------------------------------------------------------------
@@ -235,13 +235,13 @@ done:
 } /* end H5O_pline_decode() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_pline_encode
+ * Function:    H5O_pline_encode
  *
- * Purpose:	Encodes message MESG into buffer P.
+ * Purpose:    Encodes message MESG into buffer P.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Wednesday, April 15, 1998
  *
  *-------------------------------------------------------------------------
@@ -332,17 +332,17 @@ H5O_pline_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p /*out*/, const void *mesg)
 } /* end H5O_pline_encode() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_pline_copy
+ * Function:    H5O_pline_copy
  *
- * Purpose:	Copies a filter pipeline message from SRC to DST allocating
- *		DST if necessary.  If DST is already allocated then we assume
- *		that it isn't initialized.
+ * Purpose:    Copies a filter pipeline message from SRC to DST allocating
+ *        DST if necessary.  If DST is already allocated then we assume
+ *        that it isn't initialized.
  *
- * Return:	Success:	Ptr to DST or allocated result.
+ * Return:    Success:    Ptr to DST or allocated result.
  *
- *		Failure:	NULL
+ *        Failure:    NULL
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Wednesday, April 15, 1998
  *
  *-------------------------------------------------------------------------
@@ -353,7 +353,7 @@ H5O_pline_copy(const void *_src, void *_dst /*out*/)
     const H5O_pline_t *src = (const H5O_pline_t *)_src; /* Source pipeline message */
     H5O_pline_t *      dst = (H5O_pline_t *)_dst;       /* Destination pipeline message */
     size_t             i;                               /* Local index variable */
-    H5O_pline_t *      ret_value;                       /* Return value */
+    H5O_pline_t *      ret_value = NULL;                /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -426,15 +426,15 @@ done:
 } /* end H5O_pline_copy() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_pline_size
+ * Function:    H5O_pline_size
  *
- * Purpose:	Determines the size of a raw filter pipeline message.
+ * Purpose:    Determines the size of a raw filter pipeline message.
  *
- * Return:	Success:	Size of message.
+ * Return:    Success:    Size of message.
  *
- *		Failure:	zero
+ *        Failure:    zero
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Wednesday, April 15, 1998
  *
  *-------------------------------------------------------------------------
@@ -444,14 +444,14 @@ H5O_pline_size(const H5F_t H5_ATTR_UNUSED *f, const void *mesg)
 {
     const H5O_pline_t *pline = (const H5O_pline_t *)mesg; /* Pipeline message */
     size_t             i;                                 /* Local index variable */
-    size_t             ret_value;                         /* Return value */
+    size_t             ret_value = 0;                     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Message header */
-    ret_value = 1 +                                              /*version			*/
-                1 +                                              /*number of filters		*/
-                (pline->version == H5O_PLINE_VERSION_1 ? 6 : 0); /*reserved			*/
+    ret_value = 1 +                                              /*version            */
+                1 +                                              /*number of filters        */
+                (pline->version == H5O_PLINE_VERSION_1 ? 6 : 0); /*reserved            */
 
     /* Calculate size of each filter in pipeline */
     for (i = 0; i < pline->nused; i++) {
@@ -471,14 +471,14 @@ H5O_pline_size(const H5F_t H5_ATTR_UNUSED *f, const void *mesg)
         } /* end else */
 
         ret_value +=
-            2 + /*filter identification number	*/
+            2 + /*filter identification number    */
             (size_t)((pline->version == H5O_PLINE_VERSION_1 || pline->filter[i].id >= H5Z_FILTER_RESERVED)
                          ? 2
-                         : 0) + /*name length			*/
-            2 +                 /*flags				*/
-            2 +                 /*number of client data values	*/
+                         : 0) + /*name length            */
+            2 +                 /*flags                */
+            2 +                 /*number of client data values    */
             (pline->version == H5O_PLINE_VERSION_1 ? (size_t)H5O_ALIGN_OLD(name_len)
-                                                   : name_len); /*length of the filter name	*/
+                                                   : name_len); /*length of the filter name    */
 
         ret_value += pline->filter[i].cd_nelmts * 4;
         if (pline->version == H5O_PLINE_VERSION_1)
@@ -490,14 +490,14 @@ H5O_pline_size(const H5F_t H5_ATTR_UNUSED *f, const void *mesg)
 } /* end H5O_pline_size() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_pline_reset
+ * Function:    H5O_pline_reset
  *
- * Purpose:	Resets a filter pipeline message by clearing all filters.
- *		The MESG buffer is not freed.
+ * Purpose:    Resets a filter pipeline message by clearing all filters.
+ *        The MESG buffer is not freed.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Wednesday, April 15, 1998
  *
  *-------------------------------------------------------------------------
@@ -518,7 +518,6 @@ H5O_pline_reset(void *mesg)
 
     /* Free the filter information and array */
     if (pline->filter) {
-
         /* Free information for each filter */
         for (i = 0; i < pline->nused; i++) {
             if (pline->filter[i].name && pline->filter[i].name != pline->filter[i]._name)
@@ -545,13 +544,13 @@ H5O_pline_reset(void *mesg)
 } /* end H5O_pline_reset() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_pline_free
+ * Function:    H5O_pline_free
  *
- * Purpose:	Free's the message
+ * Purpose:    Frees the message
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Saturday, March 11, 2000
  *
  *-------------------------------------------------------------------------
@@ -609,15 +608,15 @@ done:
 } /* end H5O_pline_pre_copy_file() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_pline_debug
+ * Function:    H5O_pline_debug
  *
- * Purpose:	Prints debugging information for filter pipeline message MESG
- *		on output stream STREAM.  Each line is indented INDENT
- *		characters and the field name takes up FWIDTH characters.
+ * Purpose:    Prints debugging information for filter pipeline message MESG
+ *        on output stream STREAM.  Each line is indented INDENT
+ *        characters and the field name takes up FWIDTH characters.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Wednesday, April 15, 1998
  *
  *-------------------------------------------------------------------------
@@ -677,7 +676,7 @@ H5O_pline_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const voi
  *
  * Purpose:     Set the encoding for a I/O filter pipeline to the latest version.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
  *              Tuesday, July 24, 2007

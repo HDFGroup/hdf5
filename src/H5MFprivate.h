@@ -15,11 +15,9 @@
  *
  * Created:             H5MFprivate.h
  *                      Jul 11 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             Private header file for file memory management.
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

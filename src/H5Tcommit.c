@@ -92,12 +92,12 @@ H5T_init_commit_interface(void)
 } /* H5T_init_commit_interface() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Tcommit2
+ * Function:    H5Tcommit2
  *
- * Purpose:	Save a transient datatype to a file and turn the type handle
- *		into a "named", immutable type.
+ * Purpose:     Save a transient datatype to a file and turn the type handle
+ *              into a "named", immutable type.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
  *              April 5, 2007
@@ -231,18 +231,18 @@ done:
 } /* end H5T__commit_named() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Tcommit_anon
+ * Function:    H5Tcommit_anon
  *
- * Purpose:	Save a transient datatype to a file and turn the type handle
- *		into a "named", immutable type.
+ * Purpose:     Save a transient datatype to a file and turn the type handle
+ *              into a "named", immutable type.
  *
  *              The resulting ID should be linked into the file with
  *              H5Olink or it will be deleted when closed.
  *
- * Note:	Datatype access property list is unused currently, but is
- *		checked for sanity anyway.
+ * Note:        The datatype access property list is unused currently, but
+ *              is checked for sanity anyway.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Peter Cao
  *              May 17, 2005
@@ -364,7 +364,7 @@ H5T__commit(H5F_t *file, H5T_t *type, hid_t tcpl_id, hid_t dxpl_id)
         if (H5T_set_latest_version(type) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set latest version of datatype")
 
-    /* Calculate message size infomation, for creating object header */
+    /* Calculate message size information, for creating object header */
     dtype_size = H5O_msg_size_f(file, tcpl_id, H5O_DTYPE_ID, type, (size_t)0);
     HDassert(dtype_size);
 
@@ -425,13 +425,11 @@ done:
 } /* H5T__commit() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Tcommitted
+ * Function:    H5Tcommitted
  *
- * Purpose:	Determines if a datatype is committed or not.
+ * Purpose:     Determines if a datatype is committed or not.
  *
- * Return:	Success:	TRUE if committed, FALSE otherwise.
- *
- *		Failure:	Negative
+ * Return:      TRUE/FALSE/Negative
  *
  * Programmer:	Robb Matzke
  *              Thursday, June  4, 1998
@@ -488,7 +486,7 @@ H5T_committed(const H5T_t *type)
  *		ADJUST to the link count.
  *
  * Return:	Success:	New link count
- *		Failure:	Negative
+ *		Failure:	-1
  *
  * Programmer:	Quincey Koziol
  *              Friday, September 26, 2003
@@ -498,29 +496,30 @@ H5T_committed(const H5T_t *type)
 int
 H5T_link(const H5T_t *type, int adjust, hid_t dxpl_id)
 {
-    int ret_value; /* Return value */
+    int ret_value = -1; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI((-1))
 
     HDassert(type);
     HDassert(type->sh_loc.type == H5O_SHARE_TYPE_COMMITTED);
 
     /* Adjust the link count on the named datatype */
     if ((ret_value = H5O_link(&type->oloc, adjust, dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_LINKCOUNT, FAIL, "unable to adjust named datatype link count")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_LINKCOUNT, (-1), "unable to adjust named datatype link count")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_link() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Topen2
+ * Function:    H5Topen2
  *
- * Purpose:	Opens a named datatype using a Datatype Access Property
+ * Purpose:     Opens a named datatype using a Datatype Access Property
  *              List.
  *
- * Return:	Success:	Object ID of the named datatype.
- *		Failure:	Negative
+ * Return:      Success:    Object ID of the named datatype
+ *
+ *              Failure:    H5I_INVALID_HID
  *
  * Programmer:	James Laird
  *              Thursday July 27, 2006
@@ -538,22 +537,22 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
     H5G_loc_t  type_loc;                     /* Group object for datatype */
     hbool_t    obj_found = FALSE;            /* Object at 'name' found */
     hid_t      dxpl_id   = H5AC_ind_dxpl_id; /* dxpl to use to open datatype */
-    hid_t      ret_value = FAIL;             /* Return value */
+    hid_t      ret_value = H5I_INVALID_HID;             /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "i*si", loc_id, name, tapl_id);
 
     /* Check args */
     if (H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a location")
     if (!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no name")
 
     /* Get correct property list */
     if (H5P_DEFAULT == tapl_id)
         tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
     else if (TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not datatype access property list")
 
     /* Set up datatype location to fill in */
     type_loc.oloc = &oloc;
@@ -565,25 +564,25 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
      * from it.
      */
     if (H5G_loc_find(&loc, name, &type_loc /*out*/, tapl_id, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "not found")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, H5I_INVALID_HID, "not found")
     obj_found = TRUE;
 
     /* Check that the object found is the correct type */
     if (H5O_obj_type(&oloc, &obj_type, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get object type")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, H5I_INVALID_HID, "can't get object type")
     if (obj_type != H5O_TYPE_NAMED_DATATYPE)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a named datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, H5I_INVALID_HID, "not a named datatype")
 
     /* Open it */
     if (NULL == (type = H5T_open(&type_loc, dxpl_id)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to open named datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open named datatype")
 
     /* Register the type and return the ID */
     if ((ret_value = H5I_register(H5I_DATATYPE, type, TRUE)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register named datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register named datatype")
 
 done:
-    if (ret_value < 0) {
+    if (H5I_INVALID_HID == ret_value) {
         if (type != NULL)
             H5T_close(type);
         else {
@@ -596,15 +595,18 @@ done:
 } /* end H5Topen2() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Tget_create_plist
+ * Function:    H5Tget_create_plist
  *
- * Purpose:	Returns a copy of the datatype creation property list.
+ * Purpose:     Returns a copy of the datatype creation property list.
  *
- * Return:	Success:	ID for a copy of the datatype creation
- *				property list.  The property list ID should be
- *				released by calling H5Pclose().
+ * Note:        There are no datatype creation properties currently, just
+ *              object creation ones.
  *
- *		Failure:	FAIL
+ * Return:      Success:    ID for a copy of the datatype creation
+ *                          property list.  The property list ID should be
+ *                          released by calling H5Pclose().
+ *
+ *              Failure:    H5I_INVALID_HID
  *
  * Programmer:	Quincey Koziol
  *		Tuesday, November 28, 2006
@@ -618,24 +620,24 @@ H5Tget_create_plist(hid_t dtype_id)
     H5P_genplist_t *tcpl_plist;         /* Existing datatype creation propertty list */
     hid_t           new_tcpl_id = FAIL; /* New datatype creation property list */
     herr_t          status;             /* Generic status value */
-    hid_t           ret_value;          /* Return value */
+    hid_t           ret_value = H5I_INVALID_HID;          /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", dtype_id);
 
     /* Check arguments */
     if (NULL == (type = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a datatype")
 
     /* Copy the default datatype creation property list */
     if (NULL == (tcpl_plist = (H5P_genplist_t *)H5I_object(H5P_LST_DATATYPE_CREATE_ID_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get default creation property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "can't get default creation property list")
     if ((new_tcpl_id = H5P_copy_plist(tcpl_plist, TRUE)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to copy the creation property list")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, H5I_INVALID_HID, "unable to copy the creation property list")
 
     /* Check if the datatype is committed */
     if ((status = H5T_committed(type)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't check whether datatype is committed")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, H5I_INVALID_HID, "can't check whether datatype is committed")
 
     /* Retrieve further information, if the datatype is committed */
     if (status > 0) {
@@ -643,21 +645,21 @@ H5Tget_create_plist(hid_t dtype_id)
 
         /* Get property list object for new TCPL */
         if (NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_tcpl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "can't get property list")
 
         /* Retrieve any object creation properties */
         if (H5O_get_create_plist(&type->oloc, H5AC_ind_dxpl_id, new_plist) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get object creation info")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, H5I_INVALID_HID, "can't get object creation info")
     } /* end if */
 
     /* Set the return value */
     ret_value = new_tcpl_id;
 
 done:
-    if (ret_value < 0)
+    if (H5I_INVALID_HID == ret_value)
         if (new_tcpl_id > 0)
             if (H5I_dec_app_ref(new_tcpl_id) < 0)
-                HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "unable to close temporary object")
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, H5I_INVALID_HID, "unable to close temporary object")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tget_create_plist() */
@@ -681,7 +683,7 @@ H5T_open(const H5G_loc_t *loc, hid_t dxpl_id)
 {
     H5T_shared_t *shared_fo = NULL;
     H5T_t *       dt        = NULL;
-    H5T_t *       ret_value;
+    H5T_t *       ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -795,8 +797,8 @@ done:
 static H5T_t *
 H5T_open_oid(const H5G_loc_t *loc, hid_t dxpl_id)
 {
-    H5T_t *dt = NULL; /* Datatype from the file */
-    H5T_t *ret_value; /* Return value */
+    H5T_t *dt        = NULL; /* Datatype from the file */
+    H5T_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

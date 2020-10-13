@@ -15,7 +15,7 @@
  *
  * Created:		H5Pfcpl.c
  *			January  6 1998
- *			Robb Matzke <matzke@llnl.gov>
+ *			Robb Matzke
  *
  * Purpose:		File creation property list class routines
  *
@@ -319,11 +319,6 @@ done:
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
  *
- * Modifications:
- *
- *		Raymond Lu, Oct 14, 2001
- *		Changed to the new generic property list.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -474,11 +469,6 @@ done:
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
  *
- * Modifications:
- *
- *		Raymond Lu, Oct 14, 2001
- *         	Changed to the new generic property list.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -501,7 +491,7 @@ H5Pset_sym_k(hid_t plist_id, unsigned ik, unsigned lk)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "istore IK value exceeds maximum B-tree entries");
 
         if (H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for btree interanl nodes");
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for btree internal nodes");
         btree_k[H5B_SNODE_ID] = ik;
         if (H5P_set(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set rank for btree nodes");
@@ -526,11 +516,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
- *
- * Modifications:
- *
- *		Raymond Lu
- *		Changed to the new generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -574,11 +559,6 @@ done:
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
  *
- * Modifications:
- *
- *		Raymond Lu, Oct 14, 2001
- *		Changed to the new generic property list.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -604,10 +584,10 @@ H5Pset_istore_k(hid_t plist_id, unsigned ik)
 
     /* Set value */
     if (H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for btree interanl nodes");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for btree internal nodes");
     btree_k[H5B_CHUNK_ID] = ik;
     if (H5P_set(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set rank for btree interanl nodes");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set rank for btree internal nodes");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -626,11 +606,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
- *
- * Modifications:
- *
- *		Raymond Lu, Oct 14, 2001
- *		Changed to the new generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -651,7 +626,7 @@ H5Pget_istore_k(hid_t plist_id, unsigned *ik /*out */)
     /* Get value */
     if (ik) {
         if (H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for btree interanl nodes");
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for btree internal nodes");
         *ik = btree_k[H5B_CHUNK_ID];
     } /* end if */
 
@@ -941,15 +916,13 @@ H5Pget_shared_mesg_phase_change(hid_t plist_id, unsigned *max_list, unsigned *mi
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
-    /* Get value */
-    if (max_list) {
+    /* Get value(s) */
+    if (max_list)
         if (H5P_get(plist, H5F_CRT_SHMSG_LIST_MAX_NAME, max_list) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get list maximum");
-    }
-    if (min_btree) {
+    if (min_btree)
         if (H5P_get(plist, H5F_CRT_SHMSG_BTREE_MIN_NAME, min_btree) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get SOHM information");
-    }
 
 done:
     FUNC_LEAVE_API(ret_value)

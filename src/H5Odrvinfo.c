@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@hdfgroup.org>
+/* Programmer:  Quincey Koziol
  *              Thursday, March  1, 2007
  *
  * Purpose:	A message holding driver info settings
@@ -80,8 +80,8 @@ H5O_drvinfo_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t 
                    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
                    size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
-    H5O_drvinfo_t *mesg;      /* Native message */
-    void *         ret_value; /* Return value */
+    H5O_drvinfo_t *mesg;             /* Native message */
+    void *         ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -175,9 +175,9 @@ H5O_drvinfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_share
 static void *
 H5O_drvinfo_copy(const void *_mesg, void *_dest)
 {
-    const H5O_drvinfo_t *mesg = (const H5O_drvinfo_t *)_mesg;
-    H5O_drvinfo_t *      dest = (H5O_drvinfo_t *)_dest;
-    void *               ret_value;
+    const H5O_drvinfo_t *mesg      = (const H5O_drvinfo_t *)_mesg;
+    H5O_drvinfo_t *      dest      = (H5O_drvinfo_t *)_dest;
+    void *               ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -223,8 +223,8 @@ done:
 static size_t
 H5O_drvinfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
-    const H5O_drvinfo_t *mesg = (const H5O_drvinfo_t *)_mesg;
-    size_t               ret_value;
+    const H5O_drvinfo_t *mesg      = (const H5O_drvinfo_t *)_mesg;
+    size_t               ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -249,7 +249,6 @@ H5O_drvinfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_s
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar  1 2007
  *
  *-------------------------------------------------------------------------

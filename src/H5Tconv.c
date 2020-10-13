@@ -109,7 +109,7 @@
  *        least as large as the destination.  Overflows can occur when
  *        the destination is narrower than the source.
  *
- * xF:          Integers to float-point(float or double) values where the desination
+ * xF:          Integers to float-point(float or double) values where the destination
  *              is at least as wide as the source.  This case cannot generate
  *              overflows.
  *
@@ -1121,8 +1121,6 @@ done:
  * Programmer:    Robb Matzke
  *        Friday, January 25, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1533,14 +1531,6 @@ done:
  * Programmer:    Robb Matzke
  *        Tuesday, January 13, 1998
  *
- * Modifications:
- *        Robb Matzke, 1999-06-16
- *        Added the `stride' argument. If its value is non-zero then we
- *        stride through memory converting one value at each location;
- *        otherwise we assume that the values should be packed.
- *
- *         Robb Matzke, 1999-06-16
- *        Added support for bitfields.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1638,12 +1628,6 @@ done:
  * Programmer:    Robb Matzke
  *        Thursday, May 20, 1999
  *
- * Modifications:
- *        Robb Matzke, 1999-06-16
- *        Added support for non-zero strides. If BUF_STRIDE is non-zero
- *        then convert one value at each memory location advancing
- *        BUF_STRIDE bytes each time; otherwise assume both source and
- *        destination values are packed.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1897,8 +1881,6 @@ done:
  * Programmer:    Neil Fortner
  *        Wednesday, October 1, 2008
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static H5T_conv_struct_t *
@@ -1946,16 +1928,9 @@ H5T_conv_struct_free(H5T_conv_struct_t *priv)
  *        source member doesn't have a corresponding destination member
  *        then the src2dst[i]=-1.
  *
- * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *        Monday, January 26, 1998
- *
- * Modifications:
- *              Raymond Lu, 3 May 2007
- *              Added the detection for a special optimization case when the
- *              source and destination members are a subset of each other, and
- *              the order is the same, and no conversion is needed.  For example:
+ *              Special optimization case when the source and destination
+ *              members are a subset of each other, and the order is the same,
+ *              and no conversion is needed.  For example:
  *                  struct source {            struct destination {
  *                      TYPE1 A;      -->          TYPE1 A;
  *                      TYPE2 B;      -->          TYPE2 B;
@@ -1973,6 +1948,11 @@ H5T_conv_struct_free(H5T_conv_struct_t *priv)
  *                                             };
  *              The optimization is simply moving data to the appropriate
  *              places in the buffer.
+ *
+ * Return:    Non-negative on success/Negative on failure
+ *
+ * Programmer:    Robb Matzke
+ *        Monday, January 26, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -2158,7 +2138,7 @@ done:
 H5T_subset_info_t *
 H5T__conv_struct_subset(const H5T_cdata_t *cdata)
 {
-    H5T_conv_struct_t *priv;
+    H5T_conv_struct_t *priv = NULL;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -2403,37 +2383,7 @@ done:
  *
  *        Copy BKG to BUF for all elements
  *
- * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *        Thursday, January 22, 1998
- *
- * Modifications:
- *        Robb Matzke, 1999-06-16
- *              Added support for non-zero strides. If BUF_STRIDE is
- *              non-zero then convert one value at each memory location
- *              advancing BUF_STRIDE bytes each time; otherwise assume both
- *              source and destination values are packed.
- *
- *         Robb Matzke, 1999-06-16
- *        If the source and destination data structs are the same size
- *        then we can convert on a field-by-field basis instead of an
- *        element by element basis. In other words, for all struct
- *        elements being converted by this function call, first convert
- *        all of the field1's, then all field2's, etc. This can
- *        drastically reduce the number of calls to H5T_convert() and
- *        thereby eliminate most of the conversion constant overhead.
- *
- *              Robb Matzke, 2000-05-17
- *              Added the BKG_STRIDE argument to fix a design bug. If
- *              BUF_STRIDE and BKG_STRIDE are both non-zero then each
- *              data element converted will be placed temporarily at a
- *              multiple of BKG_STRIDE in the BKG buffer; otherwise the
- *              BKG buffer is assumed to be a packed array of destination
- *              datatype.
- *
- *              Raymond Lu, 3 May 2007
- *              Optimize a special case when the source and destination members
+ *              Special case when the source and destination members
  *              are a subset of each other, and the order is the same, and no
  *              conversion is needed.  For example:
  *                  struct source {            struct destination {
@@ -2445,6 +2395,11 @@ done:
  *                                             };
  *              The optimization is simply moving data to the appropriate
  *              places in the buffer.
+ *
+ * Return:    Non-negative on success/Negative on failure
+ *
+ * Programmer:    Robb Matzke
+ *        Thursday, January 22, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -2523,7 +2478,7 @@ H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
                         if (dst_memb->size > src->shared->size - offset) {
                             cdata->priv = H5T_conv_struct_free(priv);
                             HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                                        "convertion is unsupported by this function")
+                                        "conversion is unsupported by this function")
                         } /* end if */
                     }     /* end if */
                 }         /* end for */
@@ -2690,8 +2645,6 @@ done:
  *
  * Programmer:    Robb Matzke
  *              Monday, January  4, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2973,7 +2926,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                     /* Use O(log N) lookup */
                     unsigned lt = 0;
                     unsigned rt = src->shared->u.enumer.nmembs;
-                    unsigned md;
+                    unsigned md = 0;
                     int      cmp;
 
                     while (lt < rt) {
@@ -3126,22 +3079,6 @@ done:
  * Programmer:    Quincey Koziol
  *        Wednesday, May 26, 1999
  *
- * Modifications:
- *
- *        Quincey Koziol, 2 July, 1999
- *        Enabled support for non-zero strides. If BUF_STRIDE is non-zero
- *        then convert one value at each memory location advancing
- *        BUF_STRIDE bytes each time; otherwise assume both source and
- *        destination values are packed.
- *
- *        Raymond Lu, 26 June, 2002
- *        Background buffer is used for freeing heap objects storing
- *         old data.  At this moment, it only frees the first level of
- *        VL datatype.  It doesn't handle nested VL datatypes.
- *
- *              Raymond Lu, 8 November 2011
- *              I put a condition check to prevent the conversion of VL strings
- *              between ASCII and UTF8.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3500,8 +3437,6 @@ done:
  * Programmer:    Quincey Koziol
  *        Monday, November 6, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3657,20 +3592,6 @@ done:
  * Programmer:    Robb Matzke
  *        Wednesday, June 10, 1998
  *
- * Modifications:
- *        Robb Matzke, 7 Jul 1998
- *        Added overflow handling.
- *
- *        Robb Matzke, 1999-06-16
- *        Added support for non-zero strides. If BUF_STRIDE is non-zero
- *        then convert one value at each memory location advancing
- *        BUF_STRIDE bytes each time; otherwise assume both source and
- *        destination values are packed.
- *
- *              Raymond Lu
- *              Wednesday, April 21, 2004
- *              There is a new design for exception handling like overflow,
- *              which is passed in as a transfer property.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -4114,23 +4035,6 @@ done:
  * Programmer:    Robb Matzke
  *        Tuesday, June 23, 1998
  *
- * Modifications:
- *        Robb Matzke, 7 Jul 1998
- *        Added overflow handling.
- *
- *        Robb Matzke, 1999-06-16
- *        Added support for non-zero strides. If BUF_STRIDE is non-zero
- *        then convert one value at each memory location advancing
- *        BUF_STRIDE bytes each time; otherwise assume both source and
- *        destination values are packed.
- *
- *              Robb Matzke, 2001-02-02
- *              Oops, forgot to increment the exponent when rounding the
- *              significand resulted in a carry. Thanks to Guillaume Colin
- *              de Verdiere for finding this one!
- *
- *              Raymond Lu, 2006-03-13
- *              Added support for VAX floating-point types.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -4721,16 +4625,6 @@ done:
  * Programmer:    Robb Matzke
  *        Friday, August    7, 1998
  *
- * Modifications:
- *        Robb Matzke, 1999-06-16
- *        Added support for non-zero strides. If BUF_STRIDE is non-zero
- *        then convert one value at each memory location advancing
- *        BUF_STRIDE bytes each time; otherwise assume both source and
- *        destination values are packed.
- *
- *              Raymond Lu, 8 November 2011
- *              I put a condition check to prevent the conversion of strings
- *              between ASCII and UTF8.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -4977,8 +4871,6 @@ done:
  * Programmer:    Robb Matzke
  *        Monday, November 16, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5000,8 +4892,6 @@ H5T__conv_schar_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Programmer:    Robb Matzke
  *        Monday, November 16, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5025,8 +4915,6 @@ H5T__conv_uchar_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5048,8 +4936,6 @@ H5T__conv_schar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5073,8 +4959,6 @@ H5T__conv_schar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5096,8 +4980,6 @@ H5T__conv_uchar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5121,8 +5003,6 @@ H5T__conv_uchar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5144,8 +5024,6 @@ H5T__conv_schar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5169,8 +5047,6 @@ H5T__conv_schar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5192,8 +5068,6 @@ H5T__conv_uchar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5217,8 +5091,6 @@ H5T__conv_uchar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5240,8 +5112,6 @@ H5T__conv_schar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5265,8 +5135,6 @@ H5T__conv_schar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5288,8 +5156,6 @@ H5T__conv_uchar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5313,8 +5179,6 @@ H5T__conv_uchar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5336,8 +5200,6 @@ H5T__conv_schar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5361,8 +5223,6 @@ H5T__conv_schar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5384,8 +5244,6 @@ H5T__conv_uchar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5409,8 +5267,6 @@ H5T__conv_uchar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5432,8 +5288,6 @@ H5T__conv_short_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5457,8 +5311,6 @@ H5T__conv_short_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5480,8 +5332,6 @@ H5T__conv_ushort_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5505,8 +5355,6 @@ H5T__conv_ushort_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Programmer:    Robb Matzke
  *        Monday, November 16, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5528,8 +5376,6 @@ H5T__conv_short_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  * Programmer:    Robb Matzke
  *        Monday, November 16, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5553,8 +5399,6 @@ H5T__conv_ushort_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5576,8 +5420,6 @@ H5T__conv_short_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5601,8 +5443,6 @@ H5T__conv_short_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5624,8 +5464,6 @@ H5T__conv_ushort_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5649,8 +5487,6 @@ H5T__conv_ushort_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5672,8 +5508,6 @@ H5T__conv_short_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5697,8 +5531,6 @@ H5T__conv_short_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5720,8 +5552,6 @@ H5T__conv_ushort_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5745,8 +5575,6 @@ H5T__conv_ushort_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5768,8 +5596,6 @@ H5T__conv_short_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5793,8 +5619,6 @@ H5T__conv_short_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5816,8 +5640,6 @@ H5T__conv_ushort_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5841,8 +5663,6 @@ H5T__conv_ushort_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5864,8 +5684,6 @@ H5T__conv_int_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5889,8 +5707,6 @@ H5T__conv_int_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5912,8 +5728,6 @@ H5T__conv_uint_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5937,8 +5751,6 @@ H5T__conv_uint_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5960,8 +5772,6 @@ H5T__conv_int_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5985,8 +5795,6 @@ H5T__conv_int_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6008,8 +5816,6 @@ H5T__conv_uint_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6033,8 +5839,6 @@ H5T__conv_uint_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Programmer:    Robb Matzke
  *        Monday, November 16, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6056,8 +5860,6 @@ H5T__conv_int_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts
  *
  * Programmer:    Robb Matzke
  *        Monday, November 16, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6081,8 +5883,6 @@ H5T__conv_uint_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6104,8 +5904,6 @@ H5T__conv_int_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6129,8 +5927,6 @@ H5T__conv_int_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6152,8 +5948,6 @@ H5T__conv_uint_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6177,8 +5971,6 @@ H5T__conv_uint_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6200,8 +5992,6 @@ H5T__conv_int_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6225,8 +6015,6 @@ H5T__conv_int_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6248,8 +6036,6 @@ H5T__conv_uint_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6273,8 +6059,6 @@ H5T__conv_uint_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6296,8 +6080,6 @@ H5T__conv_long_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6321,8 +6103,6 @@ H5T__conv_long_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6344,8 +6124,6 @@ H5T__conv_ulong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6369,8 +6147,6 @@ H5T__conv_ulong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6392,8 +6168,6 @@ H5T__conv_long_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6417,8 +6191,6 @@ H5T__conv_long_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6440,8 +6212,6 @@ H5T__conv_ulong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6465,8 +6235,6 @@ H5T__conv_ulong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6488,8 +6256,6 @@ H5T__conv_long_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6513,8 +6279,6 @@ H5T__conv_long_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6536,8 +6300,6 @@ H5T__conv_ulong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6561,8 +6323,6 @@ H5T__conv_ulong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Programmer:    Robb Matzke
  *        Monday, November 16, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6584,8 +6344,6 @@ H5T__conv_long_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  * Programmer:    Robb Matzke
  *        Monday, November 16, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6609,8 +6367,6 @@ H5T__conv_ulong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6632,8 +6388,6 @@ H5T__conv_long_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6657,8 +6411,6 @@ H5T__conv_long_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6680,8 +6432,6 @@ H5T__conv_ulong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6705,8 +6455,6 @@ H5T__conv_ulong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6728,8 +6476,6 @@ H5T__conv_llong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6753,8 +6499,6 @@ H5T__conv_llong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6776,8 +6520,6 @@ H5T__conv_ullong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6801,8 +6543,6 @@ H5T__conv_ullong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6824,8 +6564,6 @@ H5T__conv_llong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6849,8 +6587,6 @@ H5T__conv_llong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6872,8 +6608,6 @@ H5T__conv_ullong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6897,8 +6631,6 @@ H5T__conv_ullong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6920,8 +6652,6 @@ H5T__conv_llong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6945,8 +6675,6 @@ H5T__conv_llong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6968,8 +6696,6 @@ H5T__conv_ullong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6993,8 +6719,6 @@ H5T__conv_ullong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7016,8 +6740,6 @@ H5T__conv_llong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -7041,8 +6763,6 @@ H5T__conv_llong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7064,8 +6784,6 @@ H5T__conv_ullong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Programmer:    Robb Matzke
  *        Friday, November 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -7089,8 +6807,6 @@ H5T__conv_ullong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Programmer:    Robb Matzke
  *        Monday, November 16, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7113,8 +6829,6 @@ H5T__conv_llong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Programmer:    Robb Matzke
  *        Monday, November 16, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7136,12 +6850,6 @@ H5T__conv_ullong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Programmer:    Robb Matzke
  *        Tuesday, June 23, 1998
  *
- * Modifications:
- *        Robb Matzke, 1999-06-16
- *        Added support for non-zero strides. If BUF_STRIDE is non-zero
- *        then convert one value at each memory location advancing
- *        BUF_STRIDE bytes each time; otherwise assume both source and
- *        destination values are packed.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7162,8 +6870,6 @@ H5T__conv_float_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  * Programmer:    Raymond Lu
  *        Friday, Feb 25, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -7188,15 +6894,6 @@ H5T__conv_float_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  * Programmer:    Robb Matzke
  *        Tuesday, June 23, 1998
  *
- * Modifications:
- *        Robb Matzke, 7 Jul 1998
- *        Added overflow handling.
- *
- *        Robb Matzke, 1999-06-16
- *        Added support for non-zero strides. If BUF_STRIDE is non-zero
- *        then convert one value at each memory location advancing
- *        BUF_STRIDE bytes each time; otherwise assume both source and
- *        destination values are packed.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7217,8 +6914,6 @@ H5T__conv_double_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  * Programmer:    Raymond Lu
  *        Friday, Feb 25, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -7243,8 +6938,6 @@ H5T__conv_double_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t 
  * Programmer:    Raymond Lu
  *        Friday, Feb 25, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 #if H5_SIZEOF_LONG_DOUBLE != 0
@@ -7267,8 +6960,6 @@ H5T__conv_ldouble_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *
  * Programmer:    Raymond Lu
  *        Friday, Feb 25, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -7293,8 +6984,6 @@ H5T__conv_ldouble_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t 
  * Programmer:    Raymond Lu
  *        Friday, November 7, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7315,8 +7004,6 @@ H5T__conv_schar_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Programmer:    Raymond Lu
  *        Friday, November 7, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -7339,8 +7026,6 @@ H5T__conv_schar_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Programmer:    Raymond Lu
  *        Tuesday, Febuary 1, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7361,8 +7046,6 @@ H5T__conv_schar_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *
  * Programmer:    Raymond Lu
  *        Friday, November 7, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -7385,8 +7068,6 @@ H5T__conv_uchar_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Programmer:    Raymond Lu
  *        Friday, November 7, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7407,8 +7088,6 @@ H5T__conv_uchar_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  * Programmer:    Raymond Lu
  *        Tuesday, Febuary 1, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -7431,8 +7110,6 @@ H5T__conv_uchar_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  * Programmer:    Raymond Lu
  *        Friday, November 7, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7453,8 +7130,6 @@ H5T__conv_short_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Programmer:    Raymond Lu
  *        Friday, November 7, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -7477,8 +7152,6 @@ H5T__conv_short_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Programmer:    Raymond Lu
  *        Tuesday, Febuary 1, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7499,8 +7172,6 @@ H5T__conv_short_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *
  * Programmer:    Raymond Lu
  *        Friday, November 7, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -7523,8 +7194,6 @@ H5T__conv_ushort_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Programmer:    Raymond Lu
  *        Friday, November 7, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7545,8 +7214,6 @@ H5T__conv_ushort_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *
  * Programmer:    Raymond Lu
  *        Tuesday, Febuary 1, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -7569,8 +7236,6 @@ H5T__conv_ushort_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t 
  * Programmer:    Raymond Lu
  *        Friday, November 7, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7591,8 +7256,6 @@ H5T__conv_int_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  *
  * Programmer:    Raymond Lu
  *        Friday, November 7, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -7615,8 +7278,6 @@ H5T__conv_int_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Programmer:    Raymond Lu
  *        Tuesday, Febuary 1, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7637,8 +7298,6 @@ H5T__conv_int_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Programmer:    Raymond Lu
  *        Friday, November 7, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -7661,8 +7320,6 @@ H5T__conv_uint_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Programmer:    Raymond Lu
  *        Friday, November 7, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7683,8 +7340,6 @@ H5T__conv_uint_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Programmer:    Raymond Lu
  *        Tuesday, Febuary 1, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -7707,8 +7362,6 @@ H5T__conv_uint_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Programmer:    Raymond Lu
  *        Friday, November 7, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7729,8 +7382,6 @@ H5T__conv_long_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  * Programmer:    Raymond Lu
  *        Friday, November 7, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -7753,8 +7404,6 @@ H5T__conv_long_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Programmer:    Raymond Lu
  *        Tuesday, Febuary 1, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7775,8 +7424,6 @@ H5T__conv_long_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  * Programmer:    Raymond Lu
  *        Friday, November 7, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -7799,8 +7446,6 @@ H5T__conv_ulong_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Programmer:    Raymond Lu
  *        Friday, November 7, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7821,8 +7466,6 @@ H5T__conv_ulong_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  * Programmer:    Raymond Lu
  *        Tuesday, Febuary 1, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -7845,8 +7488,6 @@ H5T__conv_ulong_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  * Programmer:    Raymond Lu
  *        Friday, November 7, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7868,8 +7509,6 @@ H5T__conv_llong_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Programmer:    Raymond Lu
  *        Friday, November 7, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7890,8 +7529,6 @@ H5T__conv_llong_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  * Programmer:    Raymond Lu
  *        Tuesday, Febuary 1, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -7916,8 +7553,6 @@ H5T__conv_llong_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  * Programmer:    Raymond Lu
  *        Friday, November 7, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7939,8 +7574,6 @@ H5T__conv_ullong_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Programmer:    Raymond Lu
  *        Friday, November 7, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7961,8 +7594,6 @@ H5T__conv_ullong_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *
  * Programmer:    Raymond Lu
  *        Tuesday, Febuary 1, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -7987,8 +7618,6 @@ H5T__conv_ullong_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t 
  * Programmer:    Raymond Lu
  *        Friday, November 7, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -8011,8 +7640,6 @@ H5T__conv_float_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Programmer:    Raymond Lu
  *        Friday, November 7, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -8312,8 +7939,6 @@ H5T__conv_float_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  * Programmer:    Raymond Lu
  *        Friday, November 7, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -9322,16 +8947,6 @@ done:
  * Programmer:    Raymond Lu
  *        Friday, Feb 6, 2004
  *
- * Modifications:
- *
- *              Raymond Lu
- *              Wednesday, April 21, 2004
- *              There is a new design for exception handling like overflow,
- *              which is passed in as a transfer property.
- *
- *              Raymond Lu
- *              Monday, March 13, 2006
- *              Added support for VAX floating-point types.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -9765,11 +9380,6 @@ done:
  * Programmer:    Raymond Lu
  *        April 26, 2004
  *
- * Modifications:
- *
- *              Raymond Lu
- *              March 13, 2006
- *              Add support for VAX floating-point types.
  *-------------------------------------------------------------------------
  */
 static herr_t
