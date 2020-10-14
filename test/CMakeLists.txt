@@ -16,8 +16,8 @@ set (TEST_LIB_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/cache_common.c
     ${HDF5_TEST_SOURCE_DIR}/external_common.c
     ${HDF5_TEST_SOURCE_DIR}/swmr_common.c
+    ${HDF5_TEST_SOURCE_DIR}/stubs.c
     ${HDF5_TEST_SOURCE_DIR}/vfd_swmr_common.c
-    ${HDF5_TEST_SOURCE_DIR}/vds_swmr_common.c
 )
 
 set (TEST_LIB_HEADERS
@@ -219,6 +219,16 @@ set(mirror_vfd_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/genall5.c
 )
 
+set(vfd_swmr_zoo_reader_SOURCES
+    ${HDF5_TEST_SOURCE_DIR}/vfd_swmr_zoo_reader.c
+    ${HDF5_TEST_SOURCE_DIR}/genall5.c
+)
+
+set(vfd_swmr_zoo_writer_SOURCES
+    ${HDF5_TEST_SOURCE_DIR}/vfd_swmr_zoo_writer.c
+    ${HDF5_TEST_SOURCE_DIR}/genall5.c
+)
+
 set (ttsafe_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/ttsafe.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_dcreate.c
@@ -298,6 +308,7 @@ set (H5_TESTS
     cork
     swmr
     thread_id # special link
+    vfd_swmr
     vol
     timer
 )
@@ -504,12 +515,17 @@ foreach (h5_test ${H5_VDS_SWMR_TESTS})
 endforeach ()
 
 set (H5_VFD_SWMR_TESTS
-    vds_swmr_addrem_writer
+    vfd_swmr_addrem_writer
+    vfd_swmr_bigset_writer
     vfd_swmr_generator
+    vfd_swmr_group_writer
     vfd_swmr_reader
     vfd_swmr_remove_reader
     vfd_swmr_remove_writer
+    vfd_swmr_sparse_reader
     vfd_swmr_sparse_writer
+    vfd_swmr_vlstr_reader
+    vfd_swmr_vlstr_writer
     vfd_swmr_writer
 )
 
