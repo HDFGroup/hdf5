@@ -1398,11 +1398,11 @@ H5S_get_select_type(const H5S_t *space)
 htri_t
 H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
 {
-    H5S_sel_iter_t iter_a;             /* Selection a iteration info */
-    H5S_sel_iter_t iter_b;             /* Selection b iteration info */
-    hbool_t         iter_a_init = FALSE; /* Selection a iteration info has been initialized */
-    hbool_t         iter_b_init = FALSE; /* Selection b iteration info has been initialized */
-    htri_t          ret_value   = TRUE;  /* Return value */
+    H5S_sel_iter_t iter_a;              /* Selection a iteration info */
+    H5S_sel_iter_t iter_b;              /* Selection b iteration info */
+    hbool_t        iter_a_init = FALSE; /* Selection a iteration info has been initialized */
+    hbool_t        iter_b_init = FALSE; /* Selection b iteration info has been initialized */
+    htri_t         ret_value   = TRUE;  /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1969,7 +1969,7 @@ herr_t
 H5S_select_fill(const void *fill, size_t fill_size, const H5S_t *space, void *_buf)
 {
     H5S_sel_iter_t iter;                /* Selection iteration info */
-    hbool_t         iter_init = FALSE;   /* Selection iteration info has been initialized */
+    hbool_t        iter_init = FALSE;   /* Selection iteration info has been initialized */
     hssize_t       nelmts;              /* Number of elements in selection */
     size_t         max_elem;            /* Total number of elements in selection */
     herr_t         ret_value = SUCCEED; /* Return value */

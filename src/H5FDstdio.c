@@ -436,7 +436,7 @@ H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     file->inode  = sb.st_ino;
 #endif /* H5_HAVE_WIN32_API */
 
-    return (H5FD_t *)file;
+    return ((H5FD_t *)file);
 } /* end H5FD_stdio_open() */
 
 /*-------------------------------------------------------------------------

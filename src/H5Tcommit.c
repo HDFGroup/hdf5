@@ -537,7 +537,7 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
     H5G_loc_t  type_loc;                     /* Group object for datatype */
     hbool_t    obj_found = FALSE;            /* Object at 'name' found */
     hid_t      dxpl_id   = H5AC_ind_dxpl_id; /* dxpl to use to open datatype */
-    hid_t      ret_value = H5I_INVALID_HID;             /* Return value */
+    hid_t      ret_value = H5I_INVALID_HID;  /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "i*si", loc_id, name, tapl_id);
@@ -616,11 +616,11 @@ done:
 hid_t
 H5Tget_create_plist(hid_t dtype_id)
 {
-    H5T_t *         type;               /* Datatype object for ID */
-    H5P_genplist_t *tcpl_plist;         /* Existing datatype creation propertty list */
-    hid_t           new_tcpl_id = FAIL; /* New datatype creation property list */
-    herr_t          status;             /* Generic status value */
-    hid_t           ret_value = H5I_INVALID_HID;          /* Return value */
+    H5T_t *         type;                        /* Datatype object for ID */
+    H5P_genplist_t *tcpl_plist;                  /* Existing datatype creation propertty list */
+    hid_t           new_tcpl_id = FAIL;          /* New datatype creation property list */
+    herr_t          status;                      /* Generic status value */
+    hid_t           ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", dtype_id);

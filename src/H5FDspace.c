@@ -17,7 +17,7 @@
  *			Jan  3 2008
  *			Quincey Koziol
  *
- * Purpose:		Space allocation routines for the file.
+ * Purpose:		Space allocation routines for the file driver code.
  *
  *-------------------------------------------------------------------------
  */

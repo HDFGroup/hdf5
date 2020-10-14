@@ -252,7 +252,7 @@ H5_now(void)
         now = now_tv.tv_sec;
     }
 #else  /* H5_HAVE_GETTIMEOFDAY */
-    now = HDtime(NULL);
+    now          = HDtime(NULL);
 #endif /* H5_HAVE_GETTIMEOFDAY */
 
     return (now);

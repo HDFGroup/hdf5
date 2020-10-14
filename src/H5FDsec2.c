@@ -194,8 +194,8 @@ H5FD_sec2_init_interface(void)
  * Purpose:     Initialize this driver by registering the driver with the
  *              library.
  *
- * Return:      Success:    The driver ID for the sec2 driver.
- *              Failure:    Negative
+ * Return:      Success:    The driver ID for the sec2 driver
+ *              Failure:    H5I_INVALID_HID
  *
  * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
@@ -205,9 +205,9 @@ H5FD_sec2_init_interface(void)
 hid_t
 H5FD_sec2_init(void)
 {
-    hid_t ret_value; /* Return value */
+    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     if (H5I_VFL != H5I_get_type(H5FD_SEC2_g))
         H5FD_SEC2_g = H5FD_register(&H5FD_sec2_g, sizeof(H5FD_class_t), FALSE);
@@ -299,7 +299,7 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
 #endif
     h5_stat_t sb;
-    H5FD_t *  ret_value; /* Return value             */
+    H5FD_t *  ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -681,7 +681,6 @@ H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
      * and the end of the file.
      */
     while (size > 0) {
-
         h5_posix_io_t     bytes_in   = 0;  /* # of bytes to read       */
         h5_posix_io_ret_t bytes_read = -1; /* # of bytes actually read */
 

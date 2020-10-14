@@ -70,10 +70,11 @@ static hid_t H5FD_ROS3_g = 0;
 #define ROS3_STATS_START_POWER 10
 #define ROS3_STATS_BIN_COUNT   16 /* MUST BE GREATER THAN 0 */
 
-/*
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Calculate `BASE ^ (START_POWER + (INTERVAL * bin_i))`
  * Stores result at `(unsigned long long *) out_ptr`.
  * Used in computing boundaries between stats bins.
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  */
 #define ROS3_STATS_POW(bin_i, out_ptr)                                                                       \
     {                                                                                                        \
@@ -87,8 +88,7 @@ static hid_t H5FD_ROS3_g = 0;
         *(out_ptr) = donotshadowresult;                                                                      \
     }
 
-/* array to hold pre-computed boundaries for stats bins
- */
+/* array to hold pre-computed boundaries for stats bins */
 static unsigned long long ros3_stats_boundaries[ROS3_STATS_BIN_COUNT];
 
 /***************************************************************************
@@ -281,6 +281,8 @@ H5FL_DEFINE_STATIC(H5FD_ros3_t);
  * Return:      Success:    The driver ID for the ros3 driver.
  *              Failure:    Negative
  *
+ * Programmer:  Jacob Smith 2017
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -307,15 +309,15 @@ H5FD_ros3_init_interface(void)
 hid_t
 H5FD_ros3_init(void)
 {
-    hid_t ret_value = H5I_INVALID_HID;
+    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 #if ROS3_STATS
     unsigned int bin_i;
 #endif
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD_ros3_init() called.\n");
+    HDfprintf(stdout, "called %s.\n", FUNC);
 #endif
 
     if (H5I_VFL != H5I_get_type(H5FD_ROS3_g))
@@ -344,7 +346,7 @@ done:
  *
  * Purpose:     Shut down the VFD
  *
- * Returns:     SUCCEED (Can't fail)
+ * Returns:     <none>
  *
  * Programmer:  Jacob Smith 2017
  *
@@ -356,7 +358,7 @@ H5FD_ros3_term(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD_ros3_term() called.\n");
+    HDfprintf(stdout, "called %s.\n", FUNC);
 #endif
 
     /* Reset VFL ID */
@@ -392,7 +394,7 @@ H5Pset_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa)
     HDassert(fa != NULL);
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5Pset_fapl_ros3() called.\n");
+    HDfprintf(stdout, "called %s.\n", FUNC);
 #endif
 
     plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS);
@@ -475,7 +477,7 @@ H5Pget_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa_out)
     H5TRACE2("e", "i*x", fapl_id, fa_out);
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5Pget_fapl_ros3() called.\n");
+    HDfprintf(stdout, "called %s.\n", FUNC);
 #endif
 
     if (fa_out == NULL)
@@ -635,7 +637,7 @@ ros3_reset_stats(H5FD_ros3_t *file)
     FUNC_ENTER_NOAPI_NOINIT
 
 #if ROS3_DEBUG
-    HDprintf("ros3_reset_stats() called\n");
+    HDfprintf(stdout, "called %s.\n", FUNC);
 #endif
 
     if (file == NULL)
@@ -703,7 +705,7 @@ H5FD_ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     FUNC_ENTER_NOAPI_NOINIT
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD_ros3_open() called.\n");
+    HDfprintf(stdout, "called %s.\n", FUNC);
 #endif
 
     /* Sanity check on file offsets */
@@ -1088,7 +1090,7 @@ H5FD_ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
     FUNC_ENTER_NOAPI_NOINIT
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD_ros3_close() called.\n");
+    HDfprintf(stdout, "called %s.\n", FUNC);
 #endif
 
     /* Sanity checks */
@@ -1157,7 +1159,7 @@ H5FD_ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD_ros3_cmp() called.\n");
+    HDfprintf(stdout, "called %s.\n", FUNC);
 #endif
 
     HDassert(f1->s3r_handle != NULL);
@@ -1269,7 +1271,7 @@ H5FD_ros3_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /* out 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD_ros3_query() called.\n");
+    HDfprintf(stdout, "called %s.\n", FUNC);
 #endif
 
     /* Set the VFL feature flags that this driver supports */
@@ -1309,7 +1311,7 @@ H5FD_ros3_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD_ros3_get_eoa() called.\n");
+    HDfprintf(stdout, "called %s.\n", FUNC);
 #endif
 
     FUNC_LEAVE_NOAPI(file->eoa)
@@ -1340,7 +1342,7 @@ H5FD_ros3_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD_ros3_set_eoa() called.\n");
+    HDfprintf(stdout, "called %s.\n", FUNC);
 #endif
 
     file->eoa = addr;
@@ -1374,7 +1376,7 @@ H5FD_ros3_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD_ros3_get_eof() called.\n");
+    HDfprintf(stdout, "called %s.\n", FUNC);
 #endif
 
     FUNC_LEAVE_NOAPI(H5FD_s3comms_s3r_get_filesize(file->s3r_handle))
@@ -1406,7 +1408,7 @@ H5FD_ros3_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_handl
     FUNC_ENTER_NOAPI_NOINIT
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD_ros3_get_handle() called.\n");
+    HDfprintf(stdout, "called %s.\n", FUNC);
 #endif
 
     if (!file_handle)
@@ -1456,7 +1458,7 @@ H5FD_ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
     FUNC_ENTER_NOAPI_NOINIT
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD_ros3_read() called.\n");
+    HDfprintf(stdout, "called %s.\n", FUNC);
 #endif
 
     HDassert(file != NULL);
@@ -1526,7 +1528,7 @@ H5FD_ros3_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hi
     FUNC_ENTER_NOAPI_NOINIT
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD_ros3_write() called.\n");
+    HDfprintf(stdout, "called %s.\n", FUNC);
 #endif
 
     HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "cannot write to read-only file.")
@@ -1563,7 +1565,7 @@ H5FD_ros3_truncate(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id, h
     FUNC_ENTER_NOAPI_NOINIT
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD_ros3_truncate() called.\n");
+    HDfprintf(stdout, "called %s.\n", FUNC);
 #endif
 
     HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "cannot truncate read-only file.")

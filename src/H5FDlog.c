@@ -231,8 +231,8 @@ H5FD_log_init_interface(void)
  * Purpose:     Initialize this driver by registering the driver with the
  *              library.
  *
- * Return:      Success:    The driver ID for the log driver.
- *              Failure:    Negative.
+ * Return:      Success:    The driver ID for the log driver
+ *              Failure:    H5I_INVALID_HID
  *
  * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
@@ -242,9 +242,9 @@ H5FD_log_init_interface(void)
 hid_t
 H5FD_log_init(void)
 {
-    hid_t ret_value; /* Return value */
+    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     if (H5I_VFL != H5I_get_type(H5FD_LOG_g))
         H5FD_LOG_g = H5FD_register(&H5FD_log_g, sizeof(H5FD_class_t), FALSE);
@@ -338,8 +338,8 @@ done:
 static void *
 H5FD_log_fapl_get(H5FD_t *_file)
 {
-    H5FD_log_t *file = (H5FD_log_t *)_file;
-    void *      ret_value; /* Return value */
+    H5FD_log_t *file      = (H5FD_log_t *)_file;
+    void *      ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -444,11 +444,11 @@ H5FD_log_fapl_free(void *_fa)
 static H5FD_t *
 H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_log_t *     file = NULL;
-    H5P_genplist_t * plist;   /* Property list */
-    H5FD_log_fapl_t *fa;      /* File access property list information */
-    int              fd = -1; /* File descriptor */
-    int              o_flags; /* Flags for open() call */
+    H5FD_log_t *           file = NULL;
+    H5P_genplist_t *       plist;   /* Property list */
+    const H5FD_log_fapl_t *fa;      /* File access property list information */
+    int                    fd = -1; /* File descriptor */
+    int                    o_flags; /* Flags for open() call */
 #ifdef H5_HAVE_WIN32_API
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
 #endif
@@ -910,7 +910,7 @@ H5FD_log_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hsi
 {
     H5FD_log_t *file = (H5FD_log_t *)_file;
     haddr_t     addr;
-    haddr_t     ret_value; /* Return value */
+    haddr_t     ret_value = HADDR_UNDEF; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -992,6 +992,7 @@ H5FD_log_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (file->fa.flags != 0) {
+        /* Check for increasing file size */
         if (H5F_addr_gt(addr, file->eoa) && H5F_addr_gt(addr, 0)) {
             hsize_t size = addr - file->eoa;
 

@@ -32,11 +32,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"  /* Generic Functions			*/
-#include "H5Eprivate.h" /* Error handling		  	*/
-#include "H5Fprivate.h" /* File access				*/
-#include "H5FDpkg.h"    /* File Drivers				*/
-#include "H5Iprivate.h" /* IDs			  		*/
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5Fprivate.h"  /* File access                              */
+#include "H5FDpkg.h"     /* File Drivers                             */
+#include "H5Iprivate.h"  /* IDs                                      */
 
 /****************/
 /* Local Macros */
@@ -94,20 +94,18 @@ H5FD_int_init_interface(void)
  *              signature can appear at address 0, or any power of two
  *              beginning with 512.
  *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
- *
- * Programmer:  Robb Matzke
- *              Friday, November  7, 1997
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5FD_locate_signature(H5FD_t *file, const H5P_genplist_t *dxpl, haddr_t *sig_addr)
 {
-    haddr_t  addr, eoa;
+    haddr_t  addr = HADDR_UNDEF;
+    haddr_t  eoa  = HADDR_UNDEF;
     uint8_t  buf[H5F_SIGNATURE_LEN];
-    unsigned n, maxpow;
+    unsigned n;
+    unsigned maxpow;
     herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -120,8 +118,7 @@ H5FD_locate_signature(H5FD_t *file, const H5P_genplist_t *dxpl, haddr_t *sig_add
         addr >>= 1;
     maxpow = MAX(maxpow, 9);
 
-    /*
-     * Search for the file signature at format address zero followed by
+    /* Search for the file signature at format address zero followed by
      * powers of two larger than 9.
      */
     for (n = 8; n < maxpow; n++) {
@@ -132,7 +129,7 @@ H5FD_locate_signature(H5FD_t *file, const H5P_genplist_t *dxpl, haddr_t *sig_add
             HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to read file signature")
         if (!HDmemcmp(buf, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN))
             break;
-    } /* end for */
+    }
 
     /*
      * If the signature was not found then reset the EOA value and return
@@ -142,7 +139,7 @@ H5FD_locate_signature(H5FD_t *file, const H5P_genplist_t *dxpl, haddr_t *sig_add
         if (H5FD_set_eoa(file, H5FD_MEM_SUPER, eoa) < 0)
             HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to reset EOA value")
         *sig_addr = HADDR_UNDEF;
-    } /* end if */
+    }
     else
         /* Set return value */
         *sig_addr = addr;
@@ -152,15 +149,11 @@ done:
 } /* end H5FD_locate_signature() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_read
+ * Function:    H5FD_read
  *
- * Purpose:	Private version of H5FDread()
+ * Purpose:     Private version of H5FDread()
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *              Wednesday, August  4, 1999
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -178,9 +171,11 @@ H5FD_read(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t add
     HDassert(buf);
 
 #ifndef H5_HAVE_PARALLEL
-    /* Do not return early for Parallel mode since the I/O could be a */
-    /* collective transfer. */
-    /* The no-op case */
+    /* The no-op case
+     *
+     * Do not return early for Parallel mode since the I/O could be a
+     * collective transfer.
+     */
     if (0 == size)
         HGOTO_DONE(SUCCEED)
 #endif /* H5_HAVE_PARALLEL */
@@ -201,15 +196,11 @@ done:
 } /* end H5FD_read() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_write
+ * Function:    H5FD_write
  *
- * Purpose:	Private version of H5FDwrite()
+ * Purpose:     Private version of H5FDwrite()
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *              Wednesday, August  4, 1999
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -217,8 +208,8 @@ herr_t
 H5FD_write(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t addr, size_t size,
            const void *buf)
 {
-    haddr_t eoa       = HADDR_UNDEF;
-    herr_t  ret_value = SUCCEED; /* Return value */
+    haddr_t eoa       = HADDR_UNDEF; /* EOA for file */
+    herr_t  ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -227,9 +218,11 @@ H5FD_write(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t ad
     HDassert(buf);
 
 #ifndef H5_HAVE_PARALLEL
-    /* Do not return early for Parallel mode since the I/O could be a */
-    /* collective transfer. */
-    /* The no-op case */
+    /* The no-op case
+     *
+     * Do not return early for Parallel mode since the I/O could be a
+     * collective transfer.
+     */
     if (0 == size)
         HGOTO_DONE(SUCCEED)
 #endif /* H5_HAVE_PARALLEL */
@@ -250,20 +243,16 @@ done:
 } /* end H5FD_write() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_set_eoa
+ * Function:    H5FD_set_eoa
  *
- * Purpose:	Private version of H5FDset_eoa()
+ * Purpose:     Private version of H5FDset_eoa()
  *
  *              This function expects the EOA is a RELATIVE address, i.e.
  *              relative to the base address.  This is NOT the same as the
  *              EOA stored in the superblock, which is an absolute
  *              address.  Object addresses are relative.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative, no side effect
- *
- * Programmer:	Robb Matzke
- *              Wednesday, August  4, 1999
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -286,27 +275,25 @@ done:
 } /* end H5FD_set_eoa() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_get_eoa
+ * Function:    H5FD_get_eoa
  *
- * Purpose:	Private version of H5FDget_eoa()
+ * Purpose:     Private version of H5FDget_eoa()
  *
  *              This function returns the EOA as a RELATIVE address, i.e.
  *              relative to the base address.  This is NOT the same as the
  *              EOA stored in the superblock, which is an absolute
  *              address.  Object addresses are relative.
  *
- * Return:	Success:	First byte after allocated memory.
- *		Failure:	HADDR_UNDEF
+ * Return:      Success:    First byte after allocated memory
  *
- * Programmer:	Robb Matzke
- *              Wednesday, August  4, 1999
+ *              Failure:    HADDR_UNDEF
  *
  *-------------------------------------------------------------------------
  */
 haddr_t
 H5FD_get_eoa(const H5FD_t *file, H5FD_mem_t type)
 {
-    haddr_t ret_value;
+    haddr_t ret_value = HADDR_UNDEF; /* Return value */
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
 
@@ -324,30 +311,25 @@ done:
 } /* end H5FD_get_eoa() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_get_eof
+ * Function:    H5FD_get_eof
  *
- * Purpose:	Private version of H5FDget_eof()
+ * Purpose:     Private version of H5FDget_eof()
  *
  *              This function returns the EOF as a RELATIVE address, i.e.
  *              relative to the base address.  This will be different
  *              from  the end of the physical file if there is a user
  *              block.
  *
- * Return:	Success:	The EOF address.
+ * Return:      Success:    The EOF address.
  *
- *		Failure:	HADDR_UNDEF
- *
- * Programmer:	Robb Matzke
- *              Wednesday, August  4, 1999
- *
- * Modifications:
+ *              Failure:    HADDR_UNDEF
  *
  *-------------------------------------------------------------------------
  */
 haddr_t
 H5FD_get_eof(const H5FD_t *file)
 {
-    haddr_t ret_value;
+    haddr_t ret_value = HADDR_UNDEF; /* Return value */
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
 
@@ -357,7 +339,7 @@ H5FD_get_eof(const H5FD_t *file)
     if (file->cls->get_eof) {
         if (HADDR_UNDEF == (ret_value = (file->cls->get_eof)(file)))
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, HADDR_UNDEF, "driver get_eof request failed")
-    } /* end if */
+    }
     else
         ret_value = file->maxaddr;
 

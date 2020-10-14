@@ -1482,12 +1482,12 @@ done:
 static H5S_t *
 H5S_decode(const unsigned char *buf)
 {
-    H5F_t *              f = NULL;         /* Fake file structure*/
-    H5S_t *              ds;               /* Decoded dataspace */
-    H5S_extent_t *       extent;           /* Entent of decoded dataspace */
-    size_t               extent_size;      /* size of the extent message*/
-    uint8_t              sizeof_size;      /* 'Size of sizes' for file */
-    H5S_t *              ret_value = NULL; /* Return value */
+    H5F_t *       f = NULL;         /* Fake file structure*/
+    H5S_t *       ds;               /* Decoded dataspace */
+    H5S_extent_t *extent;           /* Entent of decoded dataspace */
+    size_t        extent_size;      /* size of the extent message*/
+    uint8_t       sizeof_size;      /* 'Size of sizes' for file */
+    H5S_t *       ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

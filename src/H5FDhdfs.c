@@ -244,8 +244,7 @@ typedef struct {
  *
  * Programmer: Jacob Smith
  *
- ***************************************************************************
- */
+ ***************************************************************************/
 typedef struct H5FD_hdfs_t {
     H5FD_t           pub;
     H5FD_hdfs_fapl_t fa;
@@ -289,6 +288,7 @@ static herr_t  H5FD_hdfs_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, ha
 static herr_t  H5FD_hdfs_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t  H5FD_hdfs_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD_hdfs_unlock(H5FD_t *_file);
+
 static herr_t  H5FD_hdfs_validate_config(const H5FD_hdfs_fapl_t *fa);
 
 static const H5FD_class_t H5FD_hdfs_g = {
@@ -336,6 +336,8 @@ H5FL_DEFINE_STATIC(H5FD_hdfs_t);
  * Return:      Success:    The driver ID for the hdfs driver.
  *              Failure:    Negative
  *
+ * Programmer:  Jacob Smith 2018
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -362,10 +364,10 @@ H5FD_hdfs_init_interface(void)
 hid_t
 H5FD_hdfs_init(void)
 {
+    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 #if HDFS_STATS
     unsigned int bin_i;
 #endif
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
@@ -387,6 +389,7 @@ H5FD_hdfs_init(void)
     }
 #endif
 
+    /* Set return value */
     ret_value = H5FD_HDFS_g;
 
 done:
@@ -665,9 +668,11 @@ H5Pget_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa_out)
 
     if (fa_out == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "fa_out is NULL")
+
     plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS);
     if (plist == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list")
+
     if (H5FD_HDFS != H5P_get_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
 
@@ -713,13 +718,14 @@ H5FD_hdfs_fapl_get(H5FD_t *_file)
     /* Copy the fields of the structure */
     HDmemcpy(fa, &(file->fa), sizeof(H5FD_hdfs_fapl_t));
 
+    /* Set return value */
     ret_value = fa;
 
 done:
-    if (ret_value == NULL && fa != NULL)
-        H5MM_xfree(fa); /* clean up on error */
+    if (ret_value == NULL)
+        if (fa != NULL)
+            H5MM_xfree(fa);
 
-    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_hdfs_fapl_get() */
 
 /*-------------------------------------------------------------------------
@@ -753,8 +759,9 @@ H5FD_hdfs_fapl_copy(const void *_old_fa)
     ret_value = new_fa;
 
 done:
-    if (ret_value == NULL && new_fa != NULL)
-        H5MM_xfree(new_fa); /* clean up on error */
+    if (ret_value == NULL)
+        if (new_fa != NULL)
+            H5MM_xfree(new_fa);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_hdfs_fapl_copy() */
@@ -816,11 +823,11 @@ hdfs_reset_stats(H5FD_hdfs_t *file)
     FUNC_ENTER_NOAPI_NOINIT
 
 #if HDFS_DEBUG
-    HDprintf("hdfs_reset_stats() called\n");
+    HDfprintf(stdout, "called %s.\n", FUNC);
 #endif
 
     if (file == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file was null")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file was null");
 
     for (i = 0; i <= HDFS_STATS_BIN_COUNT; i++) {
         file->raw[i].bytes = 0;
@@ -836,7 +843,6 @@ hdfs_reset_stats(H5FD_hdfs_t *file)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-
 } /* hdfs_reset_stats */
 #endif /* HDFS_STATS */
 
@@ -1178,11 +1184,13 @@ hdfs_fprint_stats(FILE *stream, const H5FD_hdfs_t *file)
                   br_val, br_suffix,  /* rawdata bytes    */
                   am_val, am_suffix,  /* metadata average */
                   ar_val, ar_suffix); /* rawdata average  */
+
         HDfflush(stream);
     }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
+
 } /* hdfs_fprint_stats */
 #endif /* HDFS_STATS */
 
@@ -1196,8 +1204,7 @@ done:
  *
  * Return:
  *
- *      Success:    SUCCEED
- *      Failure:    FAIL, file not closed.
+ *     SUCCEED/FAIL
  *
  * Programmer: Jacob Smith
  *             2017-11-02
@@ -1207,8 +1214,8 @@ done:
 static herr_t
 H5FD_hdfs_close(H5FD_t *_file)
 {
-    herr_t       ret_value = SUCCEED;
     H5FD_hdfs_t *file      = (H5FD_hdfs_t *)_file;
+    herr_t       ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1345,6 +1352,7 @@ H5FD_hdfs_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags) /* out
     HDfprintf(stdout, "called %s.\n", FUNC);
 #endif
 
+    /* Set the VFL feature flags that this driver supports */
     if (flags) {
         *flags = 0;
         *flags |= H5FD_FEAT_DATA_SIEVE;
@@ -1456,7 +1464,7 @@ H5FD_hdfs_get_eof(const H5FD_t *_file)
 
 /*-------------------------------------------------------------------------
  *
- * Function: H5FD_hdfs_get_handle
+ * Function: H5FD_hdfs_get_handle()
  *
  * Purpose:
  *
@@ -1474,8 +1482,8 @@ H5FD_hdfs_get_eof(const H5FD_t *_file)
 static herr_t
 H5FD_hdfs_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_handle)
 {
-    herr_t       ret_value = SUCCEED;
     H5FD_hdfs_t *file      = (H5FD_hdfs_t *)_file;
+    herr_t       ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1494,9 +1502,9 @@ done:
 
 /*-------------------------------------------------------------------------
  *
- * Function: H5FD_hdfs_read
+ * Function: H5FD_hdfs_read()
  *
- * Purpose:
+ * Purpose
  *
  *     Reads SIZE bytes of data from FILE beginning at address ADDR
  *     into buffer BUF according to data transfer properties in DXPL_ID.
@@ -1518,9 +1526,9 @@ static herr_t
 H5FD_hdfs_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
                size_t size, void *buf)
 {
-    herr_t       ret_value = SUCCEED;
     H5FD_hdfs_t *file      = (H5FD_hdfs_t *)_file;
     size_t       filesize  = 0;
+    herr_t       ret_value = SUCCEED;
 #if HDFS_STATS
     /* working variables for storing stats */
     hdfs_statsbin *bin   = NULL;
@@ -1577,7 +1585,7 @@ done:
 
 /*-------------------------------------------------------------------------
  *
- * Function: H5FD_hdfs_write
+ * Function: H5FD_hdfs_write()
  *
  * Purpose:
  *
@@ -1673,6 +1681,7 @@ static herr_t
 H5FD_hdfs_lock(H5FD_t H5_ATTR_UNUSED *_file, hbool_t H5_ATTR_UNUSED rw)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
+
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_hdfs_lock() */
 
@@ -1698,6 +1707,7 @@ static herr_t
 H5FD_hdfs_unlock(H5FD_t H5_ATTR_UNUSED *_file)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
+
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_hdfs_unlock() */
 

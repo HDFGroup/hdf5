@@ -16,7 +16,7 @@
  * Programmer:  Jacob Smith
  *              2018-04-23
  *
- * Purpose:	The public header file for the hdfs driver.
+ * Purpose:    The public header file for the hdfs driver.
  */
 
 #ifndef H5FDhdfs_H
@@ -25,7 +25,7 @@
 #ifdef H5_HAVE_LIBHDFS
 #define H5FD_HDFS (H5FD_hdfs_init())
 #else /* H5_HAVE_LIBHDFS */
-#define H5FD_HDFS (-1)
+#define H5FD_HDFS (H5I_INVALID_HID)
 #endif /* H5_HAVE_LIBHDFS */
 
 /****************************************************************************
