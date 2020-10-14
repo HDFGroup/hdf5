@@ -152,9 +152,9 @@ H5G_t *
 H5G__create_named(const H5G_loc_t *loc, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id,
                   hid_t dxpl_id)
 {
-    H5O_obj_create_t ocrt_info; /* Information for object creation */
-    H5G_obj_create_t gcrt_info; /* Information for group creation */
-    H5G_t *          ret_value; /* Return value */
+    H5O_obj_create_t ocrt_info;        /* Information for object creation */
+    H5G_obj_create_t gcrt_info;        /* Information for group creation */
+    H5G_t *          ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -210,7 +210,7 @@ H5G__create(H5F_t *file, H5G_obj_create_t *gcrt_info, hid_t dxpl_id)
 {
     H5G_t *  grp       = NULL; /*new group			*/
     unsigned oloc_init = 0;    /* Flag to indicate that the group object location was created successfully */
-    H5G_t *  ret_value;        /* Return value */
+    H5G_t *  ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -763,7 +763,7 @@ done:
 } /* end H5G_iterate_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_iterate
+ * Function:    H5G_iterate
  *
  * Purpose:     Private function for iterating over links in a group
  *

@@ -95,7 +95,7 @@ H5FL_DEFINE(H5D_copy_file_ud_t);
 static void *
 H5O__dset_get_copy_file_udata(void)
 {
-    void *ret_value; /* Return value */
+    void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -259,9 +259,9 @@ done:
 static void *
 H5O__dset_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id)
 {
-    H5D_obj_create_t *crt_info = (H5D_obj_create_t *)_crt_info; /* Dataset creation parameters */
-    H5D_t *           dset     = NULL;                          /* New dataset created */
-    void *            ret_value;                                /* Return value */
+    H5D_obj_create_t *crt_info  = (H5D_obj_create_t *)_crt_info; /* Dataset creation parameters */
+    H5D_t *           dset      = NULL;                          /* New dataset created */
+    void *            ret_value = NULL;                          /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -308,8 +308,8 @@ done:
 static H5O_loc_t *
 H5O__dset_get_oloc(hid_t obj_id)
 {
-    H5D_t *    dset;      /* Dataset opened */
-    H5O_loc_t *ret_value; /* Return value */
+    H5D_t *    dset;             /* Dataset opened */
+    H5O_loc_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -337,10 +337,6 @@ done:
  * Programmer:  Vailin Choi
  *              July 11, 2007
  *
- * Modification:Raymond Lu
- *              5 February, 2010
- *              I added the call to H5O_msg_reset after H5D_chunk_bh_info
- *              to free the PLINE.
  *-------------------------------------------------------------------------
  */
 static herr_t

@@ -103,7 +103,7 @@ H5FS_get_cparam_test(const H5FS_t *frsp, H5FS_create_t *cparam)
 int
 H5FS_cmp_cparam_test(const H5FS_create_t *cparam1, const H5FS_create_t *cparam2)
 {
-    int ret_value = SUCCEED; /* Return value */
+    int ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

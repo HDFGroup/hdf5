@@ -151,7 +151,7 @@ H5G__term_deprec_interface(void)
 H5G_obj_t
 H5G_map_obj_type(H5O_type_t obj_type)
 {
-    H5G_obj_t ret_value; /* Return value */
+    H5G_obj_t ret_value = H5G_UNKNOWN; /* Return value */
 
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -734,10 +734,10 @@ done:
 herr_t
 H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op, void *op_data)
 {
-    H5G_link_iterate_t lnk_op;   /* Link operator */
-    hsize_t            last_obj; /* Index of last object looked at */
-    hsize_t            idx;      /* Internal location to hold index */
-    herr_t             ret_value;
+    H5G_link_iterate_t lnk_op;    /* Link operator                    */
+    hsize_t            last_obj;  /* Index of last object looked at   */
+    hsize_t            idx;       /* Internal location to hold index  */
+    herr_t             ret_value; /* Return value                     */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "i*s*Isx*x", loc_id, name, idx_p, op, op_data);
@@ -839,7 +839,7 @@ done:
 herr_t
 H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link, H5G_stat_t *statbuf /*out*/)
 {
-    H5G_loc_t loc;
+    H5G_loc_t loc;                 /* Group's location */
     herr_t    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -962,6 +962,7 @@ H5G_get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link, H5G
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* Sanity checks */
     HDassert(loc);
     HDassert(name && *name);
 

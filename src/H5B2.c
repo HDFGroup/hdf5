@@ -368,11 +368,10 @@ H5B2_iterate(H5B2_t *bt2, hid_t dxpl_id, H5B2_operator_t op, void *op_data)
     hdr = bt2->hdr;
 
     /* Iterate through records */
-    if (hdr->root.node_nrec > 0) {
+    if (hdr->root.node_nrec > 0)
         /* Iterate through nodes */
         if ((ret_value = H5B2_iterate_node(hdr, dxpl_id, hdr->depth, &hdr->root, op, op_data)) < 0)
             HERROR(H5E_BTREE, H5E_CANTLIST, "node iteration failed");
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_iterate() */

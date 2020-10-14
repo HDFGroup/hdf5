@@ -1445,11 +1445,10 @@ H5HF_hdr_delete(H5HF_hdr_t *hdr, hid_t dxpl_id)
     /* (must occur before attempting to delete the heap, so indirect blocks
      *  will get unpinned)
      */
-    if (H5F_addr_defined(hdr->fs_addr)) {
+    if (H5F_addr_defined(hdr->fs_addr))
         /* Delete free space manager for heap */
         if (H5HF_space_delete(hdr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap free space manager")
-    } /* end if */
 
     /* Check for root direct/indirect block */
     if (H5F_addr_defined(hdr->man_dtable.table_addr)) {

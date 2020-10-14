@@ -17,14 +17,14 @@
 #define H5_INTERFACE_INIT_FUNC H5F_init_mount_interface
 
 /* Packages needed by this file... */
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5ACprivate.h" /* Metadata cache                       */
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Fpkg.h"      /* File access				*/
-#include "H5Gprivate.h"  /* Groups				*/
-#include "H5Iprivate.h"  /* IDs			  		*/
-#include "H5Pprivate.h"  /* Property lists			*/
-#include "H5MMprivate.h" /* Memory management			*/
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5ACprivate.h" /* Metadata cache                           */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5Fpkg.h"      /* File access                              */
+#include "H5Gprivate.h"  /* Groups                                   */
+#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5MMprivate.h" /* Memory management                        */
+#include "H5Pprivate.h"  /* Property lists                           */
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child, hid_t plist_id, hid_t dxpl_id);
@@ -132,7 +132,7 @@ H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UNUSED p
     H5G_name_t mp_path;             /* Mount point group hier. path */
     H5O_loc_t  mp_oloc;             /* Mount point object location */
     H5G_loc_t  root_loc;            /* Group location of root of file to mount */
-    herr_t     ret_value = SUCCEED; /*return value			*/
+    herr_t     ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -433,7 +433,7 @@ done:
 hbool_t
 H5F_is_mount(const H5F_t *file)
 {
-    hbool_t ret_value; /* Return value */
+    hbool_t ret_value = FALSE; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -512,13 +512,13 @@ H5Funmount(hid_t loc_id, const char *name)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*s", loc_id, name);
 
-    /* Check args */
+    /* Check arguments */
     if (H5G_loc(loc_id, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-    /* Unmount */
+    /* Perform the unmount operation */
     if (H5F_unmount(&loc, name, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to unmount file")
 

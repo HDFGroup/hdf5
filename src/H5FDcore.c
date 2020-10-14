@@ -235,7 +235,7 @@ H5FD_core_add_dirty_region(H5FD_core_t *file, haddr_t start, haddr_t end)
              * just update an existing one instead.
              */
             create_new_node = FALSE;
-        }
+        } /* end if */
 
     /* Remove any old nodes that are no longer needed */
     while (a_item && a_item->start > start) {
@@ -1337,9 +1337,8 @@ H5FD_core_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, unsigned H5_ATTR_UN
 
         } /* end if */
         /* Otherwise, write the entire file out at once */
-        else
-            if (H5FD_core_write_to_bstore(file, (haddr_t)0, (size_t)file->eof) != SUCCEED)
-                HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "unable to write to backing store")
+        else if (H5FD_core_write_to_bstore(file, (haddr_t)0, (size_t)file->eof) != SUCCEED)
+            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "unable to write to backing store")
 
         file->dirty = FALSE;
     }

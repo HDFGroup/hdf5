@@ -12,12 +12,12 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
- *		Monday, April 14, 2003
+ * Programmer:    Quincey Koziol
+ *        Monday, April 14, 2003
  *
- * Purpose:	This file contains declarations which are visible only within
- *		the H5D package.  Source files outside the H5D package should
- *		include H5Dprivate.h instead.
+ * Purpose:    This file contains declarations which are visible only within
+ *        the H5D package.  Source files outside the H5D package should
+ *        include H5Dprivate.h instead.
  */
 #ifndef H5D_PACKAGE
 #error "Do not include this file outside the H5D package!"
@@ -30,10 +30,10 @@
 #include "H5Dprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5ACprivate.h" /* Metadata cache			*/
-#include "H5Gprivate.h"  /* Groups 			  	*/
-#include "H5SLprivate.h" /* Skip lists				*/
-#include "H5Tprivate.h"  /* Datatypes         			*/
+#include "H5ACprivate.h" /* Metadata cache            */
+#include "H5Gprivate.h"  /* Groups                    */
+#include "H5SLprivate.h" /* Skip lists                */
+#include "H5Tprivate.h"  /* Datatypes                 */
 
 /**************************/
 /* Package Private Macros */

@@ -289,7 +289,7 @@ static herr_t  H5FD_hdfs_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
 static herr_t  H5FD_hdfs_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD_hdfs_unlock(H5FD_t *_file);
 
-static herr_t  H5FD_hdfs_validate_config(const H5FD_hdfs_fapl_t *fa);
+static herr_t H5FD_hdfs_validate_config(const H5FD_hdfs_fapl_t *fa);
 
 static const H5FD_class_t H5FD_hdfs_g = {
     "hdfs",                   /* name                 */

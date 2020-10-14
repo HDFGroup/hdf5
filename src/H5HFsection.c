@@ -2221,8 +2221,8 @@ done:
 static H5HF_free_section_t *
 H5HF_sect_indirect_for_row(H5HF_hdr_t *hdr, H5HF_indirect_t *iblock, H5HF_free_section_t *row_sect)
 {
-    H5HF_free_section_t *sect = NULL; /* 'Indirect' free space section to add */
-    H5HF_free_section_t *ret_value;   /* Return value */
+    H5HF_free_section_t *sect      = NULL; /* 'Indirect' free space section to add */
+    H5HF_free_section_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -3836,16 +3836,16 @@ static H5FS_section_info_t *
 H5HF_sect_indirect_deserialize(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *buf, haddr_t sect_addr,
                                hsize_t sect_size, unsigned *des_flags)
 {
-    H5HF_free_section_t *new_sect;    /* New indirect section */
-    hsize_t              iblock_off;  /* Indirect block's offset */
-    unsigned             start_row;   /* Indirect section's start row */
-    unsigned             start_col;   /* Indirect section's start column */
-    unsigned             nentries;    /* Indirect section's number of entries */
-    unsigned             start_entry; /* Start entry in indirect block */
-    unsigned             end_entry;   /* End entry in indirect block */
-    unsigned             end_row;     /* End row in indirect block */
-    unsigned             end_col;     /* End column in indirect block */
-    H5FS_section_info_t *ret_value;   /* Return value */
+    H5HF_free_section_t *new_sect;         /* New indirect section */
+    hsize_t              iblock_off;       /* Indirect block's offset */
+    unsigned             start_row;        /* Indirect section's start row */
+    unsigned             start_col;        /* Indirect section's start column */
+    unsigned             nentries;         /* Indirect section's number of entries */
+    unsigned             start_entry;      /* Start entry in indirect block */
+    unsigned             end_entry;        /* End entry in indirect block */
+    unsigned             end_row;          /* End row in indirect block */
+    unsigned             end_col;          /* End column in indirect block */
+    H5FS_section_info_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

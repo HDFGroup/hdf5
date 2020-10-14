@@ -84,30 +84,30 @@ H5FL_BLK_DEFINE(type_conv);
 /*-------------------------------------------------------------------------
  * Function:    H5Dread
  *
- * Purpose:    Reads (part of) a DSET from the file into application
- *        memory BUF. The part of the dataset to read is defined with
- *        MEM_SPACE_ID and FILE_SPACE_ID.     The data points are
- *        converted from their file type to the MEM_TYPE_ID specified.
- *        Additional miscellaneous data transfer properties can be
- *        passed to this function with the PLIST_ID argument.
+ * Purpose:     Reads (part of) a DSET from the file into application
+ *              memory BUF. The part of the dataset to read is defined with
+ *              MEM_SPACE_ID and FILE_SPACE_ID. The data points are
+ *              converted from their file type to the MEM_TYPE_ID specified.
+ *              Additional miscellaneous data transfer properties can be
+ *              passed to this function with the PLIST_ID argument.
  *
- *        The FILE_SPACE_ID can be the constant H5S_ALL which indicates
- *        that the entire file data space is to be referenced.
+ *              The FILE_SPACE_ID can be the constant H5S_ALL which indicates
+ *              that the entire file dataspace is to be referenced.
  *
- *        The MEM_SPACE_ID can be the constant H5S_ALL in which case
- *        the memory data space is the same as the file data space
- *        defined when the dataset was created.
+ *              The MEM_SPACE_ID can be the constant H5S_ALL in which case
+ *              the memory dataspace is the same as the file dataspace
+ *              defined when the dataset was created.
  *
- *        The number of elements in the memory data space must match
- *        the number of elements in the file data space.
+ *              The number of elements in the memory dataspace must match
+ *              the number of elements in the file dataspace.
  *
- *        The PLIST_ID can be the constant H5P_DEFAULT in which
- *        case the default data transfer properties are used.
+ *              The PLIST_ID can be the constant H5P_DEFAULT in which
+ *              case the default data transfer properties are used.
  *
- * Return:    Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *        Thursday, December  4, 1997
+ * Programmer:  Robb Matzke
+ *              Thursday, December 4, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -219,31 +219,31 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Dwrite
  *
- * Purpose:    Writes (part of) a DSET from application memory BUF to the
- *        file.  The part of the dataset to write is defined with the
- *        MEM_SPACE_ID and FILE_SPACE_ID arguments. The data points
- *        are converted from their current type (MEM_TYPE_ID) to their
- *        file datatype.     Additional miscellaneous data transfer
- *        properties can be passed to this function with the
- *        PLIST_ID argument.
+ * Purpose:     Writes (part of) a DSET from application memory BUF to the
+ *              file. The part of the dataset to write is defined with the
+ *              MEM_SPACE_ID and FILE_SPACE_ID arguments. The data points
+ *              are converted from their current type (MEM_TYPE_ID) to their
+ *              file datatype. Additional miscellaneous data transfer
+ *              properties can be passed to this function with the
+ *              PLIST_ID argument.
  *
- *        The FILE_SPACE_ID can be the constant H5S_ALL which indicates
- *        that the entire file data space is to be referenced.
+ *              The FILE_SPACE_ID can be the constant H5S_ALL which indicates
+ *              that the entire file dataspace is to be referenced.
  *
- *        The MEM_SPACE_ID can be the constant H5S_ALL in which case
- *        the memory data space is the same as the file data space
- *        defined when the dataset was created.
+ *              The MEM_SPACE_ID can be the constant H5S_ALL in which case
+ *              the memory dataspace is the same as the file dataspace
+ *              defined when the dataset was created.
  *
- *        The number of elements in the memory data space must match
- *        the number of elements in the file data space.
+ *              The number of elements in the memory dataspace must match
+ *              the number of elements in the file dataspace.
  *
- *        The PLIST_ID can be the constant H5P_DEFAULT in which
- *        case the default data transfer properties are used.
+ *              The PLIST_ID can be the constant H5P_DEFAULT in which
+ *              case the default data transfer properties are used.
  *
- * Return:    Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *        Thursday, December  4, 1997
+ * Programmer:  Robb Matzke
+ *              Thursday, December 4, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -261,7 +261,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iiiii*x", dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf);
 
-    /* check arguments */
+    /* Get dataset pointer and ensure it's associated with a file */
     if (NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
     if (NULL == dset->oloc.file)
@@ -994,8 +994,7 @@ H5D__typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t 
         type_info->dst_type_id = mem_type_id;
     } /* end else */
 
-    /*
-     * Locate the type conversion function and data space conversion
+    /* Locate the type conversion function and dataspace conversion
      * functions, and set up the element numbering information. If a data
      * type conversion is necessary then register datatype atoms. Data type
      * conversion is necessary if the user has set the `need_bkg' to a high
@@ -1066,8 +1065,7 @@ H5D__typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t 
         if (type_info->request_nelmts == 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "temporary buffer max size is too small")
 
-        /*
-         * Get a temporary buffer for type conversion unless the app has already
+        /* Get a temporary buffer for type conversion unless the app has already
          * supplied one through the xfer properties. Instead of allocating a
          * buffer which is the exact size, we allocate the target size.  The
          * malloc() is usually less resource-intensive if we allocate/free the

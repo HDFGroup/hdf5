@@ -193,7 +193,7 @@ htri_t
 H5HF_space_find(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t request, H5HF_free_section_t **node)
 {
     htri_t node_found = FALSE; /* Whether an existing free list node was found */
-    htri_t ret_value;          /* Return value */
+    htri_t ret_value  = FAIL;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -294,11 +294,10 @@ H5HF_space_revert_root(const H5HF_hdr_t *hdr, hid_t dxpl_id)
     HDassert(hdr);
 
     /* Only need to scan the sections if the free space has been initialized */
-    if (hdr->fspace) {
-        /* Iterate over all sections, reseting the parent pointers in 'single' sections */
+    if (hdr->fspace)
+        /* Iterate over all sections, resetting the parent pointers in 'single' sections */
         if (H5FS_sect_iterate(hdr->f, dxpl_id, hdr->fspace, H5HF_space_revert_root_cb, NULL) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_BADITER, FAIL, "can't iterate over sections to reset parent pointers")
-    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -385,12 +384,11 @@ H5HF_space_create_root(const H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_indirect_t *ro
     HDassert(root_iblock);
 
     /* Only need to scan the sections if the free space has been initialized */
-    if (hdr->fspace) {
+    if (hdr->fspace)
         /* Iterate over all sections, seting the parent pointers in 'single' sections to the new indirect
          * block */
         if (H5FS_sect_iterate(hdr->f, dxpl_id, hdr->fspace, H5HF_space_create_root_cb, root_iblock) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_BADITER, FAIL, "can't iterate over sections to set parent pointers")
-    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

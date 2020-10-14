@@ -1153,9 +1153,9 @@ done:
 H5G_obj_t
 H5G__stab_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
 {
-    H5O_stab_t       stab;      /* Info about local heap & B-tree */
-    H5G_bt_it_gtbi_t udata;     /* User data for B-tree callback */
-    H5G_obj_t        ret_value; /* Return value */
+    H5O_stab_t       stab;                    /* Info about local heap & B-tree */
+    H5G_bt_it_gtbi_t udata;                   /* User data for B-tree callback */
+    H5G_obj_t        ret_value = H5G_UNKNOWN; /* Return value */
 
     FUNC_ENTER_PACKAGE
 

@@ -66,8 +66,6 @@ H5CS_t H5CS_stack_g[1];
  * Programmer:	Quincey Koziol
  *              February 6, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static H5CS_t *
@@ -113,8 +111,6 @@ H5CS_get_stack(void)
  * Programmer:	Quincey Koziol
  *              Thursday, February 6, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -135,11 +131,7 @@ H5CS_print_stack(const H5CS_t *fstack, FILE *stream)
 
     HDfprintf(stream, "HDF5-DIAG: Function stack from %s ", H5_lib_vers_info_g);
     /* try show the process or thread id in multiple processes cases*/
-#ifdef H5_HAVE_THREADSAFE
-    HDfprintf(stream, "thread %lu.", HDpthread_self_ulong());
-#else  /* H5_HAVE_THREADSAFE */
-    HDfprintf(stream, "thread 0.");
-#endif /* H5_HAVE_THREADSAFE */
+    HDfprintf(stream, "thread %" PRIu64 ".", H5TS_thread_id());
     if (fstack && fstack->nused > 0)
         HDfprintf(stream, "  Back trace follows.");
     HDfputc('\n', stream);
@@ -191,14 +183,12 @@ H5CS_print(FILE *stream)
  * Programmer:	Quincey Koziol
  *		Thursday, February 6, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5CS_push(const char *func_name)
 {
-    H5CS_t *fstack = H5CS_get_my_stack();
+    H5CS_t *fstack = H5CS_get_my_stack(); /* Current function stack for library */
 
     /* Don't push this function on the function stack... :-) */
     FUNC_ENTER_NOAPI_NOERR_NOFS
@@ -226,8 +216,6 @@ H5CS_push(const char *func_name)
  *
  * Programmer:	Quincey Koziol
  *		Thursday, February 6, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -258,8 +246,6 @@ H5CS_pop(void)
  *
  * Programmer:	Quincey Koziol
  *		Tuesday, August 9, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -292,8 +278,6 @@ H5CS_copy_stack(H5CS_t *new_stack)
  *
  * Programmer:	Quincey Koziol
  *		Tuesday, August 9, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

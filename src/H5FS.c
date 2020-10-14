@@ -30,11 +30,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5ACprivate.h" /* Metadata cache                       */
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5FSpkg.h"     /* File free space			*/
-#include "H5MFprivate.h" /* File memory management		*/
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5ACprivate.h" /* Metadata cache                           */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5FSpkg.h"     /* File free space                          */
+#include "H5MFprivate.h" /* File memory management                   */
 
 /****************/
 /* Local Macros */
@@ -512,9 +512,9 @@ done:
 H5FS_t *
 H5FS_new(const H5F_t *f, size_t nclasses, const H5FS_section_class_t *classes[], void *cls_init_udata)
 {
-    H5FS_t *fspace = NULL; /* Free space manager */
-    size_t  u;             /* Local index variable */
-    H5FS_t *ret_value;     /* Return value */
+    H5FS_t *fspace = NULL;    /* Free space manager */
+    size_t  u;                /* Local index variable */
+    H5FS_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -610,8 +610,7 @@ H5FS_size(const H5F_t *f, const H5FS_t *fspace, hsize_t *meta_size)
  *
  * Purpose:     Increment reference count on free space header
  *
- * Return:      Success:        non-negative
- *              Failure:        negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
  *              February  7, 2008
@@ -650,8 +649,7 @@ done:
  *
  * Purpose:     Decrement reference count on free space header
  *
- * Return:      Success:        non-negative
- *              Failure:        negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
  *              February  7, 2008

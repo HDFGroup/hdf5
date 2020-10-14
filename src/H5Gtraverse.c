@@ -31,17 +31,17 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Dprivate.h"  /* Datasets                             */
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Fprivate.h"  /* File access				*/
-#include "H5Gpkg.h"      /* Groups		  		*/
-#include "H5HLprivate.h" /* Local Heaps				*/
-#include "H5Iprivate.h"  /* IDs					*/
-#include "H5Lprivate.h"  /* Links				*/
-#include "H5MMprivate.h" /* Memory management			*/
-#include "H5Ppublic.h"   /* Property Lists			*/
-#include "H5WBprivate.h" /* Wrapped Buffers                      */
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5Dprivate.h"  /* Datasets                                 */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5Fprivate.h"  /* File access                              */
+#include "H5Gpkg.h"      /* Groups                                   */
+#include "H5HLprivate.h" /* Local Heaps                              */
+#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5Lprivate.h"  /* Links                                    */
+#include "H5MMprivate.h" /* Memory management                        */
+#include "H5Ppublic.h"   /* Property Lists                           */
+#include "H5WBprivate.h" /* Wrapped Buffers                          */
 
 /****************/
 /* Local Macros */
@@ -391,8 +391,7 @@ H5G__traverse_special(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, unsigned 
     HDassert(obj_loc);
     HDassert(nlinks);
 
-    /*
-     * If we found a symbolic link then we should follow it.  But if this
+    /* If we found a symbolic link then we should follow it.  But if this
      * is the last component of the name and the H5G_TARGET_SLINK bit of
      * TARGET is set then we don't follow it.
      */

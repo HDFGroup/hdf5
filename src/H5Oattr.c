@@ -470,13 +470,6 @@ H5O_attr_size(const H5F_t H5_ATTR_UNUSED *f, const void *_mesg)
  * Programmer:  Robb Matzke
  *              Tuesday, December  9, 1997
  *
- * Modification:Raymond Lu
- *              25 June 2008
- *              Made this function empty.  The freeing action is actually
- *              done in H5O_attr_free (see H5O_msg_free_real).  But this
- *              empty reset function needs to be here.  Otherwise, the
- *              caller function H5O_msg_reset_real will zero-set the whole
- *              message.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -490,16 +483,12 @@ H5O_attr_reset(void H5_ATTR_UNUSED *_mesg)
 /*-------------------------------------------------------------------------
  * Function:	H5O_attr_free
  *
- * Purpose:	Free's the message
+ * Purpose:	Frees the message
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Thursday, November 18, 2004
- *
- * Modification:Raymond Lu
- *              4 June 2008
- *              Let this function call H5A_close in turn.
  *
  *-------------------------------------------------------------------------
  */

@@ -282,9 +282,7 @@ H5A__dense_fnd_cb(const H5A_t *attr, hbool_t *took_ownership, void *_user_attr)
 
     FUNC_ENTER_STATIC_NOERR
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments */
     HDassert(attr);
     HDassert(user_attr);
 

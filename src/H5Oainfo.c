@@ -102,9 +102,9 @@ H5O_ainfo_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *o
                  unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
                  size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
-    H5O_ainfo_t * ainfo = NULL; /* Attribute info */
-    unsigned char flags;        /* Flags for encoding attribute info */
-    void *        ret_value;    /* Return value */
+    H5O_ainfo_t * ainfo = NULL;     /* Attribute info */
+    unsigned char flags;            /* Flags for encoding attribute info */
+    void *        ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -227,9 +227,9 @@ H5O_ainfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
 static void *
 H5O_ainfo_copy(const void *_mesg, void *_dest)
 {
-    const H5O_ainfo_t *ainfo = (const H5O_ainfo_t *)_mesg;
-    H5O_ainfo_t *      dest  = (H5O_ainfo_t *)_dest;
-    void *             ret_value; /* Return value */
+    const H5O_ainfo_t *ainfo     = (const H5O_ainfo_t *)_mesg;
+    H5O_ainfo_t *      dest      = (H5O_ainfo_t *)_dest;
+    void *             ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -266,8 +266,8 @@ done:
 static size_t
 H5O_ainfo_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
-    const H5O_ainfo_t *ainfo = (const H5O_ainfo_t *)_mesg;
-    size_t             ret_value; /* Return value */
+    const H5O_ainfo_t *ainfo     = (const H5O_ainfo_t *)_mesg;
+    size_t             ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -395,7 +395,7 @@ H5O_ainfo_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, hbool_t H5
 {
     H5O_ainfo_t *ainfo_src = (H5O_ainfo_t *)mesg_src;
     H5O_ainfo_t *ainfo_dst = NULL;
-    void *       ret_value; /* Return value */
+    void *       ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -458,11 +458,10 @@ H5O_ainfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_lo
 
     HDassert(ainfo_src);
 
-    if (H5F_addr_defined(ainfo_src->fheap_addr)) {
+    if (H5F_addr_defined(ainfo_src->fheap_addr))
         if (H5A_dense_post_copy_file_all(src_oloc, ainfo_src, dst_oloc, (H5O_ainfo_t *)mesg_dst, dxpl_id,
                                          cpy_info) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, FAIL, "can't copy attribute")
-    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer: 	Robb Matzke <matzke@llnl.gov>
+/* Programmer: 	Robb Matzke
  *	       	Wednesday, October  8, 1997
  *
  * Purpose:	v1 B-tree indexed (chunked) I/O functions.  The chunks are
@@ -298,10 +298,10 @@ done:
 static int
 H5D__btree_cmp2(void *_lt_key, void *_udata, void *_rt_key)
 {
-    H5D_btree_key_t *      lt_key = (H5D_btree_key_t *)_lt_key;
-    H5D_btree_key_t *      rt_key = (H5D_btree_key_t *)_rt_key;
-    H5D_chunk_common_ud_t *udata  = (H5D_chunk_common_ud_t *)_udata;
-    int                    ret_value;
+    H5D_btree_key_t *      lt_key    = (H5D_btree_key_t *)_lt_key;
+    H5D_btree_key_t *      rt_key    = (H5D_btree_key_t *)_rt_key;
+    H5D_chunk_common_ud_t *udata     = (H5D_chunk_common_ud_t *)_udata;
+    int                    ret_value = -1; /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -406,7 +406,6 @@ H5D__btree_cmp3(void *_lt_key, void *_udata, void *_rt_key)
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static htri_t
 H5D__btree_found(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, const void *_lt_key,
                  void *_udata)
@@ -467,7 +466,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static H5B_ins_t
 H5D__btree_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key, hbool_t *lt_key_changed,
                   void *_md_key, void *_udata, void *_rt_key, hbool_t H5_ATTR_UNUSED *rt_key_changed,
@@ -479,7 +477,7 @@ H5D__btree_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key, hbool_t 
     H5D_chunk_ud_t * udata  = (H5D_chunk_ud_t *)_udata;
     int              cmp;
     unsigned         u;
-    H5B_ins_t        ret_value;
+    H5B_ins_t        ret_value = H5B_INS_ERROR; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -578,13 +576,11 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer: Robb Matzke
- *             Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer:  Pedro Vicente
  * 		March 28, 2002
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static H5B_ins_t
 H5D__btree_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key /*in,out */,
                   hbool_t *lt_key_changed /*out */, void H5_ATTR_UNUSED *_udata /*in,out */,
@@ -694,7 +690,6 @@ H5D__btree_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
 H5D__btree_debug_key(FILE *stream, int indent, int fwidth, const void *_key, const void *_udata)
 {
@@ -873,8 +868,7 @@ H5D__btree_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 /*-------------------------------------------------------------------------
  * Function:	H5D__btree_idx_insert
  *
- * Purpose:	Create the chunk it if it doesn't exist, or reallocate the
- *              chunk if its size changed.
+ * Purpose:	Insert chunk entry into the indexing structure.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -962,7 +956,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static int
 H5D__btree_idx_iterate_cb(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void *_lt_key,
                           haddr_t addr, const void H5_ATTR_UNUSED *_rt_key, void *_udata)
@@ -970,7 +963,7 @@ H5D__btree_idx_iterate_cb(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
     H5D_btree_it_ud_t *    udata  = (H5D_btree_it_ud_t *)_udata;      /* User data */
     const H5D_btree_key_t *lt_key = (const H5D_btree_key_t *)_lt_key; /* B-tree key for chunk */
     H5D_chunk_rec_t        chunk_rec;                                 /* Generic chunk record for callback */
-    int                    ret_value;                                 /* Return value */
+    int                    ret_value = -1;                            /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -1009,8 +1002,8 @@ H5D__btree_idx_iterate_cb(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
 static int
 H5D__btree_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chunk_cb, void *chunk_udata)
 {
-    H5D_btree_it_ud_t udata;     /* User data for B-tree iterator callback */
-    int               ret_value; /* Return value */
+    H5D_btree_it_ud_t udata;          /* User data for B-tree iterator callback */
+    int               ret_value = -1; /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 

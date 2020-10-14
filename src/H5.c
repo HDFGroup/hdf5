@@ -951,6 +951,9 @@ H5is_library_threadsafe(hbool_t *is_ts)
  *    NOTE:     The main purpose of this is for handling Win32 thread cleanup
  *              on thread/process detach.
  *
+ *              Only enabled when the shared Windows library is built with
+ *              thread safety enabled.
+ *
  * Return:      TRUE on success, FALSE on failure
  *
  *-------------------------------------------------------------------------

@@ -15,7 +15,7 @@
  *
  * Created:		H5Dfill.c
  *			Jun 19 2007
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Fill value operations for datasets
  *

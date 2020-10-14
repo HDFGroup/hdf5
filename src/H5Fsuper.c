@@ -29,7 +29,7 @@
 #include "H5Fpkg.h"      /* File access                          */
 #include "H5FDprivate.h" /* File drivers                         */
 #include "H5Iprivate.h"  /* IDs                                  */
-#include "H5MMprivate.h" /* Memory management			*/
+#include "H5MMprivate.h" /* Memory management                    */
 #include "H5Pprivate.h"  /* Property lists                       */
 #include "H5SMprivate.h" /* Shared Object Header Messages        */
 
@@ -492,7 +492,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
             /* Initialize the shared message code & write the SOHM message to the extension */
             if (H5SM_init(f, plist, &ext_loc, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to create SOHM table")
-        } /* end if */
+        }
 
         /* Check for non-default v1 B-tree 'K' values to store */
         if (sblock->btree_k[H5B_SNODE_ID] != HDF5_BTREE_SNODE_IK_DEF ||

@@ -294,8 +294,8 @@ done:
 htri_t
 H5G__obj_get_linfo(const H5O_loc_t *grp_oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
 {
-    H5B2_t *bt2_name = NULL; /* v2 B-tree handle for name index */
-    htri_t  ret_value;       /* Return value */
+    H5B2_t *bt2_name  = NULL; /* v2 B-tree handle for name index */
+    htri_t  ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -629,9 +629,9 @@ herr_t
 H5G__obj_iterate(const H5O_loc_t *grp_oloc, H5_index_t idx_type, H5_iter_order_t order, hsize_t skip,
                  hsize_t *last_lnk, H5G_lib_iterate_t op, void *op_data, hid_t dxpl_id)
 {
-    H5O_linfo_t linfo;        /* Link info message */
-    htri_t      linfo_exists; /* Whether the link info message exists */
-    herr_t      ret_value;    /* Return value */
+    H5O_linfo_t linfo;            /* Link info message */
+    htri_t      linfo_exists;     /* Whether the link info message exists */
+    herr_t      ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -775,9 +775,9 @@ ssize_t
 H5G_obj_get_name_by_idx(const H5O_loc_t *oloc, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
                         char *name, size_t size, hid_t dxpl_id)
 {
-    H5O_linfo_t linfo;        /* Link info message */
-    htri_t      linfo_exists; /* Whether the link info message exists */
-    ssize_t     ret_value;    /* Return value */
+    H5O_linfo_t linfo;          /* Link info message */
+    htri_t      linfo_exists;   /* Whether the link info message exists */
+    ssize_t     ret_value = -1; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1068,10 +1068,9 @@ H5G_obj_remove_by_idx(const H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r, H5
     } /* end else */
 
     /* Update link info for a new-style group */
-    if (!use_old_format) {
+    if (!use_old_format)
         if (H5G_obj_remove_update_linfo(grp_oloc, &linfo, dxpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTUPDATE, FAIL, "unable to update link info")
-    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1118,11 +1117,10 @@ H5G__obj_lookup(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk, hi
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
         } /* end else */
     }     /* end if */
-    else {
+    else
         /* Get the object's info from the symbol table */
         if ((ret_value = H5G__stab_lookup(grp_oloc, name, lnk, dxpl_id)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
-    } /* end else */
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -27,12 +27,12 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Dprivate.h"  /* Datasets				*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Gpkg.h"      /* Groups		  		*/
-#include "H5HLprivate.h" /* Local Heaps				*/
-#include "H5Iprivate.h"  /* IDs			  		*/
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5Dprivate.h"  /* Datasets                                 */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5Gpkg.h"      /* Groups                                   */
+#include "H5HLprivate.h" /* Local Heaps                              */
+#include "H5Iprivate.h"  /* IDs                                      */
 
 /****************/
 /* Local Macros */
@@ -653,9 +653,7 @@ H5G_verify_cached_stabs_test_cb(H5F_t *f, hid_t dxpl_id, const void H5_ATTR_UNUS
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
 

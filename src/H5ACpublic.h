@@ -74,32 +74,35 @@ extern "C" {
  * open_trace_file: Boolean field indicating whether the trace_file_name
  *     field should be used to open a trace file for the cache.
  *
- * 	The trace file is a debugging feature that allow the capture of
- * 	top level metadata cache requests for purposes of debugging and/or
- * 	optimization.  This field should normally be set to FALSE, as
- * 	trace file collection imposes considerable overhead.
  *
- * 	This field should only be set to TRUE when the trace_file_name
- * 	contains the full path of the desired trace file, and either
- * 	there is no open trace file on the cache, or the close_trace_file
- * 	field is also TRUE.
+ *     The trace file is a debuging feature that allow the capture of
+ *     top level metadata cache requests for purposes of debugging and/or
+ *     optimization.  This field should normally be set to FALSE, as
+ *     trace file collection imposes considerable overhead.
+ *
+ *     This field should only be set to TRUE when the trace_file_name
+ *     contains the full path of the desired trace file, and either
+ *     there is no open trace file on the cache, or the close_trace_file
+ *     field is also TRUE.
  *
  * close_trace_file: Boolean field indicating whether the current trace
  *     file (if any) should be closed.
  *
- * 	See the above comments on the open_trace_file field.  This field
- * 	should be set to FALSE unless there is an open trace file on the
- * 	cache that you wish to close.
+ *
+ *     See the above comments on the open_trace_file field.  This field
+ *     should be set to FALSE unless there is an open trace file on the
+ *     cache that you wish to close.
  *
  * trace_file_name: Full path of the trace file to be opened if the
  *     open_trace_file field is TRUE.
  *
- * 	In the parallel case, an ascii representation of the mpi rank of
- * 	the process will be appended to the file name to yield a unique
- * 	trace file name for each process.
  *
- * 	The length of the path must not exceed H5AC__MAX_TRACE_FILE_NAME_LEN
- * 	characters.
+ *     In the parallel case, an ascii representation of the mpi rank of
+ *     the process will be appended to the file name to yield a unique
+ *     trace file name for each process.
+ *
+ *     The length of the path must not exceed H5AC__MAX_TRACE_FILE_NAME_LEN
+ *     characters.
  *
  * evictions_enabled:  Boolean field used to either report the current
  *     evictions enabled status of the cache, or to set the cache's

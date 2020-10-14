@@ -497,10 +497,10 @@ done:
 htri_t
 H5G__dense_lookup(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo, const char *name, H5O_link_t *lnk)
 {
-    H5G_bt2_ud_common_t udata;           /* User data for v2 B-tree link lookup */
-    H5HF_t *            fheap    = NULL; /* Fractal heap handle */
-    H5B2_t *            bt2_name = NULL; /* v2 B-tree handle for name index */
-    htri_t              ret_value;       /* Return value */
+    H5G_bt2_ud_common_t udata;            /* User data for v2 B-tree link lookup */
+    H5HF_t *            fheap     = NULL; /* Fractal heap handle */
+    H5B2_t *            bt2_name  = NULL; /* v2 B-tree handle for name index */
+    htri_t              ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -938,7 +938,7 @@ H5G__dense_iterate(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo, H5_index_t
     H5G_link_table_t ltable = {0, NULL}; /* Table of links */
     H5B2_t *         bt2    = NULL;      /* v2 B-tree handle for index */
     haddr_t          bt2_addr;           /* Address of v2 B-tree to use for lookup */
-    herr_t           ret_value;          /* Return value */
+    herr_t           ret_value = FAIL;   /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1138,7 +1138,7 @@ H5G__dense_get_name_by_idx(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, H5_index
     H5G_link_table_t ltable = {0, NULL}; /* Table of links */
     H5B2_t *         bt2    = NULL;      /* v2 B-tree handle for index */
     haddr_t          bt2_addr;           /* Address of v2 B-tree to use for lookup */
-    ssize_t          ret_value;          /* Return value */
+    ssize_t          ret_value = -1;     /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1765,8 +1765,8 @@ done:
 H5G_obj_t
 H5G__dense_get_type_by_idx(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, hsize_t idx)
 {
-    H5G_link_table_t ltable = {0, NULL}; /* Table of links */
-    H5G_obj_t        ret_value;          /* Return value */
+    H5G_link_table_t ltable    = {0, NULL};   /* Table of links */
+    H5G_obj_t        ret_value = H5G_UNKNOWN; /* Return value */
 
     FUNC_ENTER_PACKAGE
 

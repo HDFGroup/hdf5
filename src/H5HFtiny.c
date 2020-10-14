@@ -31,9 +31,9 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"  /* Generic Functions			*/
-#include "H5Eprivate.h" /* Error handling		  	*/
-#include "H5HFpkg.h"    /* Fractal heaps			*/
+#include "H5private.h"  /* Generic Functions        */
+#include "H5Eprivate.h" /* Error handling           */
+#include "H5HFpkg.h"    /* Fractal heaps            */
 
 /****************/
 /* Local Macros */
@@ -41,10 +41,10 @@
 
 /* Tiny object length information */
 #define H5HF_TINY_LEN_SHORT  16     /* Max. length able to be encoded in first heap ID byte */
-#define H5HF_TINY_MASK_SHORT 0x0F   /* Mask for length in first heap ID byte */
-#define H5HF_TINY_MASK_EXT   0x0FFF /* Mask for length in two heap ID bytes */
-#define H5HF_TINY_MASK_EXT_1 0x0F00 /* Mask for length in first byte of two heap ID bytes */
-#define H5HF_TINY_MASK_EXT_2 0x00FF /* Mask for length in second byte of two heap ID bytes */
+#define H5HF_TINY_MASK_SHORT 0x0F   /* Mask for length in first heap ID byte                */
+#define H5HF_TINY_MASK_EXT   0x0FFF /* Mask for length in two heap ID bytes                 */
+#define H5HF_TINY_MASK_EXT_1 0x0F00 /* Mask for length in first byte of two heap ID bytes   */
+#define H5HF_TINY_MASK_EXT_2 0x00FF /* Mask for length in second byte of two heap ID bytes  */
 
 /******************/
 /* Local Typedefs */
@@ -263,7 +263,7 @@ H5HF_tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *
          */
         id++;
         id++;
-    } /* end else */
+    }
 
     /* Call the user's 'op' callback */
     if (op(id, (enc_obj_size + 1), op_data) < 0)

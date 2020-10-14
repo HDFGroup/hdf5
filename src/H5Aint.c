@@ -32,14 +32,14 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Apkg.h"      /* Attributes	  			*/
-#include "H5Dprivate.h"  /* Datasets				*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Iprivate.h"  /* IDs			  		*/
-#include "H5MMprivate.h" /* Memory management			*/
-#include "H5Opkg.h"      /* Object headers			*/
-#include "H5SMprivate.h" /* Shared Object Header Messages	*/
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5Apkg.h"      /* Attributes                               */
+#include "H5Dprivate.h"  /* Datasets                                 */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5MMprivate.h" /* Memory management                        */
+#include "H5Opkg.h"      /* Object headers                           */
+#include "H5SMprivate.h" /* Shared Object Header Messages            */
 
 /****************/
 /* Local Macros */
@@ -233,11 +233,10 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type, const H5S_
      * (to maintain ref. count incr/decr similarity with "shared message"
      *      type of datatype sharing)
      */
-    if (H5T_committed(attr->shared->dt)) {
+    if (H5T_committed(attr->shared->dt))
         /* Increment the reference count on the shared datatype */
         if (H5T_link(attr->shared->dt, 1, dxpl_id) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, NULL, "unable to adjust shared datatype link count")
-    } /* end if */
 
     /* Compute the size of pieces on disk.  This is either the size of the
      * datatype and dataspace messages themselves, or the size of the "shared"
@@ -268,6 +267,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type, const H5S_
     if (H5O_attr_create(&(attr->oloc), dxpl_id, attr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, NULL, "unable to create attribute in object header")
 
+    /* Set return value */
     ret_value = attr;
 
 done:
@@ -336,9 +336,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5A_open_by_idx
  *
- * Purpose: 	Open an attribute according to its index order
+ * Purpose:     Open an attribute according to its index order
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *		April 2, 1998
@@ -686,12 +686,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5A_get_space
  *
- * Return:	Success:	dataspace
+ * Purpose:     Returns dataspace of the attribute.
  *
- *		Failure:	NULL
+ * Return:      Success:    A valid ID for the dataspace of an attribute
  *
- * Programmer:	Mohamad Chaarawi
- *		March, 2012
+ *              Failure:    H5I_INVALID_ID
  *
  *-------------------------------------------------------------------------
  */
@@ -706,23 +705,19 @@ H5A_get_space(H5A_t *attr)
 
     /* Copy the attribute's dataspace */
     if (NULL == (ret_value = H5S_copy(attr->shared->ds, FALSE, TRUE)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to copy dataspace")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to copy dataspace")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_get_space() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_get_type
+ * Function:    H5A_get_type
  *
- * Purpose:	Returns datatype of the dataset.
+ * Purpose:     Returns datatype of an attribute
  *
- * Return:	Success:	datatype
- *
- *		Failure:	NULL
- *
- * Programmer:	Mohamad Chaarawi
- *		March, 2012
+ * Return:      Success:    A datatype of an attribute
+ *              Failure:    NULL
  *
  *-------------------------------------------------------------------------
  */
@@ -740,8 +735,7 @@ H5A_get_type(H5A_t *attr)
     if (H5T_patch_file(attr->shared->dt, attr->oloc.file) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to patch datatype's file pointer")
 
-    /*
-     * Copy the attribute's datatype.  If the type is a named type then
+    /* Copy the attribute's datatype.  If the type is a named type then
      * reopen the type before returning it to the user. Make the type
      * read-only.
      */
@@ -958,7 +952,7 @@ done:
  * Purpose:	Frees all memory associated with an attribute, but does not
  *              free the H5A_t structure (which should be done in H5T_close).
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *		Monday, November 15, 2004
@@ -997,11 +991,11 @@ done:
 } /* end H5A_free() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_close
+ * Function:    H5A_close
  *
  * Purpose:     Frees an attribute and all associated memory.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Robb Matzke
  *		Monday, December  8, 1997
@@ -1137,12 +1131,11 @@ H5A_type(const H5A_t *attr)
 } /* end H5A_type() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_exists_by_name
+ * Function:    H5A_exists_by_name
  *
- * Purpose:	Private version of H5Aexists_by_name
+ * Purpose:     Private version of H5Aexists_by_name
  *
- * Return:	Success:	TRUE/FALSE
- * 		Failure:	Negative
+ * Return:      TRUE/FALSE/FAIL
  *
  * Programmer:	Quincey Koziol
  *              Thursday, November 1, 2007
@@ -1242,7 +1235,7 @@ done:
 } /* end H5A__compact_build_table_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_compact_build_table
+ * Function:    H5A_compact_build_table
  *
  * Purpose:     Builds a table containing a sorted list of attributes for
  *              an object
@@ -1716,8 +1709,7 @@ done:
  * Purpose:     Retrieves the "attribute info" message for an object.  Also
  *              sets the number of attributes correctly, if it isn't set up yet.
  *
- * Return:      Success:    TRUE/FALSE whether message was found & retrieved
- *              Failure:    FAIL if error occurred
+ * Return:      TRUE/FALSE/FAIL
  *
  * Programmer:  Quincey Koziol
  *              Mar 11 2007
@@ -2124,7 +2116,7 @@ done:
  *              an object may have a reference attribute that points to the
  *              object itself.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Peter Cao
  *              March 6, 2005
@@ -2315,14 +2307,13 @@ done:
 } /* end H5A_dense_post_copy_file_all */
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_rename_by_name
+ * Function:    H5A_rename_by_name
  *
  * Purpose:     Private version of H5Arename_by_name
  *
- * Return:	Success:             Non-negative
- *		Failure:             Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              February 20, 2007
  *
  *-------------------------------------------------------------------------

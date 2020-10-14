@@ -115,7 +115,7 @@ done:
 MPI_Comm
 H5F_mpi_get_comm(const H5F_t *f)
 {
-    MPI_Comm ret_value;
+    MPI_Comm ret_value = MPI_COMM_NULL;
 
     FUNC_ENTER_NOAPI(MPI_COMM_NULL)
 
@@ -146,15 +146,15 @@ done:
 int
 H5F_mpi_get_size(const H5F_t *f)
 {
-    int ret_value;
+    int ret_value = -1;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI((-1))
 
     HDassert(f && f->shared);
 
     /* Dispatch to driver */
     if ((ret_value = H5FD_mpi_get_size(f->shared->lf)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_size request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, (-1), "driver get_size request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

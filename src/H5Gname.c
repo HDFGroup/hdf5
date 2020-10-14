@@ -1264,16 +1264,16 @@ H5G_get_name_by_addr(hid_t file, hid_t lapl_id, hid_t dxpl_id, const H5O_loc_t *
     /* Portably clear udata struct (before FUNC_ENTER) */
     HDmemset(&udata, 0, sizeof(udata));
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI((-1))
 
-    /* Construct the link info for the file's root group */
+    /* Construct a group location for root group of the file */
     if (H5G_loc(file, &root_loc) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get root group's location")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, (-1), "can't get root group's location")
 
     /* Check for root group being the object looked for */
     if (root_loc.oloc->addr == loc->addr && root_loc.oloc->file == loc->file) {
         if (NULL == (udata.path = H5MM_strdup("")))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, FAIL, "can't duplicate path string")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, (-1), "can't duplicate path string")
         found_obj = TRUE;
     } /* end if */
     else {
@@ -1286,7 +1286,7 @@ H5G_get_name_by_addr(hid_t file, hid_t lapl_id, hid_t dxpl_id, const H5O_loc_t *
         /* Visit all the links in the file */
         if ((status = H5G_visit(file, "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5G_get_name_by_addr_cb, &udata,
                                 lapl_id, dxpl_id)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "group traversal failed while looking for object name")
+            HGOTO_ERROR(H5E_SYM, H5E_BADITER, (-1), "group traversal failed while looking for object name")
         else if (status > 0)
             found_obj = TRUE;
     } /* end else */

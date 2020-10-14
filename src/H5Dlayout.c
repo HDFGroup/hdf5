@@ -20,10 +20,10 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Dpkg.h"      /* Datasets 				*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5HLprivate.h" /* Local heaps				*/
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5Dpkg.h"      /* Datasets                                 */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5HLprivate.h" /* Local heaps                              */
 
 /****************/
 /* Local Macros */
@@ -50,15 +50,15 @@
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__layout_set_io_ops
+ * Function:    H5D__layout_set_io_ops
  *
- * Purpose:	Set the I/O operation function pointers for a dataset,
+ * Purpose:     Set the I/O operation function pointers for a dataset,
  *              according to the dataset's layout
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, March 20, 2008
+ * Programmer:  Quincey Koziol
+ *              Thursday, March 20, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -121,7 +121,7 @@ done:
 size_t
 H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t include_compact_data)
 {
-    size_t ret_value;
+    size_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -134,6 +134,7 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
 
     switch (layout->type) {
         case H5D_COMPACT:
+            /* This information only present in older versions of message */
             /* Size of raw data */
             ret_value += 2;
             if (include_compact_data)
@@ -141,6 +142,7 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
             break;
 
         case H5D_CONTIGUOUS:
+            /* This information only present in older versions of message */
             ret_value += H5F_SIZEOF_ADDR(f); /* Address of data */
             ret_value += H5F_SIZEOF_SIZE(f); /* Length of data */
             break;
@@ -168,15 +170,15 @@ done:
 } /* end H5D__layout_meta_size() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__layout_oh_create
+ * Function:    H5D__layout_oh_create
  *
- * Purpose:	Create layout/pline/efl information for dataset
+ * Purpose:     Create layout/pline/efl information for dataset
  *
- * Return:	Success:    SUCCEED
- *		Failure:    FAIL
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
  *
- * Programmer:	Quincey Koziol
- *		Monday, July 27, 2009
+ * Programmer:  Quincey Koziol
+ *              Monday, July 27, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -298,15 +300,15 @@ done:
 } /* end H5D__layout_oh_create() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__layout_oh_read
+ * Function:    H5D__layout_oh_read
  *
- * Purpose:	Read layout/pline/efl information for dataset
+ * Purpose:     Read layout/pline/efl information for dataset
  *
- * Return:	Success:    SUCCEED
- *		Failure:    FAIL
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
  *
- * Programmer:	Quincey Koziol
- *		Monday, July 27, 2009
+ * Programmer:  Quincey Koziol
+ *              Monday, July 27, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -441,15 +443,15 @@ done:
 } /* end H5D__layout_oh_read() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__layout_oh_write
+ * Function:    H5D__layout_oh_write
  *
- * Purpose:	Write layout/pline/efl information for dataset
+ * Purpose:     Write layout information for dataset
  *
- * Return:	Success:    SUCCEED
- *		Failure:    FAIL
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
  *
- * Programmer:	Quincey Koziol
- *		Monday, July 27, 2009
+ * Programmer:  Quincey Koziol
+ *              Monday, July 27, 2009
  *
  *-------------------------------------------------------------------------
  */

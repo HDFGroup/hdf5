@@ -155,8 +155,8 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
             /* Construct a group location for root group of the file */
             if (H5G_root_loc(f, loc) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unable to create location for file")
-        } /* end case */
-        break;
+            break;
+        }
 
         case H5I_GENPROP_CLS:
         case H5I_GENPROP_LST:
@@ -177,8 +177,8 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of group")
             if (NULL == (loc->path = H5G_nameof(group)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of group")
-        } /* end case */
-        break;
+            break;
+        }
 
         case H5I_DATATYPE: {
             H5T_t *dt;
@@ -189,8 +189,8 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of datatype")
             if (NULL == (loc->path = H5T_nameof(dt)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of datatype")
-        } /* end case */
-        break;
+            break;
+        }
 
         case H5I_DATASPACE:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of dataspace")
@@ -204,8 +204,8 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of dataset")
             if (NULL == (loc->path = H5D_nameof(dset)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of dataset")
-        } /* end case */
-        break;
+            break;
+        }
 
         case H5I_ATTR: {
             H5A_t *attr;
@@ -216,8 +216,8 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of attribute")
             if (NULL == (loc->path = H5A_nameof(attr)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of attribute")
-        } /* end case */
-        break;
+            break;
+        }
 
         case H5I_REFERENCE:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of reference")
@@ -614,8 +614,8 @@ H5G_loc_exists_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATTR_U
 htri_t
 H5G_loc_exists(const H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id)
 {
-    H5G_loc_exists_t udata;     /* User data for traversal callback */
-    htri_t           ret_value; /* Return value */
+    H5G_loc_exists_t udata;            /* User data for traversal callback */
+    htri_t           ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -845,11 +845,12 @@ H5G_loc_get_comment_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_A
             HDstrncpy(udata->comment, comment.s, udata->bufsize);
         udata->comment_size = (ssize_t)HDstrlen(comment.s);
         H5O_msg_reset(H5O_NAME_ID, &comment);
-    } /* end else */
+    }
 
 done:
     /* Indicate that this callback didn't take ownership of the group *
-     * location for the object */
+     * location for the object.
+     */
     *own_loc = H5G_OWN_NONE;
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -876,8 +877,8 @@ ssize_t
 H5G_loc_get_comment(H5G_loc_t *loc, const char *name, char *comment /*out*/, size_t bufsize, hid_t lapl_id,
                     hid_t dxpl_id)
 {
-    H5G_loc_gc_t udata;     /* User data for traversal callback */
-    ssize_t      ret_value; /* Return value */
+    H5G_loc_gc_t udata;          /* User data for traversal callback */
+    ssize_t      ret_value = -1; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

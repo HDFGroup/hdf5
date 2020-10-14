@@ -84,7 +84,7 @@ static herr_t H5MF_aggr_free(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, H5F_blk_a
 haddr_t
 H5MF_aggr_vfd_alloc(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, hsize_t size)
 {
-    haddr_t ret_value; /* Return value */
+    haddr_t ret_value = HADDR_UNDEF; /* Return value */
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
 #ifdef H5MF_ALLOC_DEBUG
@@ -146,7 +146,7 @@ H5MF_aggr_alloc(H5F_t *f, hid_t dxpl_id, H5F_blk_aggr_t *aggr, H5F_blk_aggr_t *o
     haddr_t eoa_frag_addr = HADDR_UNDEF; /* Address of fragment at EOA */
     hsize_t eoa_frag_size = 0;           /* Size of fragment at EOA */
     haddr_t eoa           = HADDR_UNDEF; /* Initial EOA for the file */
-    haddr_t ret_value;                   /* Return value */
+    haddr_t ret_value     = HADDR_UNDEF; /* Return value */
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
 #ifdef H5MF_AGGR_DEBUG
@@ -436,7 +436,7 @@ H5MF_aggr_try_extend(H5F_t *f, H5F_blk_aggr_t *aggr, H5FD_mem_t type, haddr_t bl
     if (f->shared->feature_flags & aggr->feature_flag) {
         /*
          * If the block being tested adjoins the beginning of the aggregator
-         *      block, check if the aggregator can accomodate the extension.
+         *      block, check if the aggregator can accommodate the extension.
          */
         if (H5F_addr_eq(blk_end, aggr->addr)) {
             haddr_t eoa; /* EOA for the file */
@@ -480,10 +480,11 @@ H5MF_aggr_try_extend(H5F_t *f, H5F_blk_aggr_t *aggr, H5FD_mem_t type, haddr_t bl
                          */
                         aggr->size += extra;
                         aggr->size -= extra_requested;
-                    } /* end if */
-                }     /* end if */
+                    } /* end else-if */
+                }     /* end else */
             }         /* end if */
-            else {    /* The aggreator is not at end of file */
+            else {
+                /* The aggreator is not at end of file */
                 /* Check if aggregator has enough internal space to satisfy the extension. */
                 if (aggr->size >= extra_requested) {
                     /* Extend block into aggregator */
