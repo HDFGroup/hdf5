@@ -647,7 +647,7 @@ H5E__set_auto(H5E_t *estack, const H5E_auto_op_t *op, void *client_data)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned line, hid_t cls_id, hid_t maj_id,
+H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned line, hid_t cls_id, int posix_errno, hid_t maj_id,
                  hid_t min_id, const char *fmt, ...)
 {
     va_list ap;                   /* Varargs info */
@@ -684,7 +684,7 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
         HGOTO_DONE(FAIL)
 
     /* Push the error on the stack */
-    if (H5E__push_stack(estack, file, func, line, cls_id, maj_id, min_id, tmp) < 0)
+    if (H5E__push_stack(estack, file, func, line, cls_id, maj_id, min_id, tmp, posix_errno) < 0)
         HGOTO_DONE(FAIL)
 
 done:
@@ -721,7 +721,7 @@ done:
  */
 herr_t
 H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line, hid_t cls_id, hid_t maj_id,
-                hid_t min_id, const char *desc)
+                hid_t min_id, const char *desc, int posix_errno)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -779,6 +779,7 @@ H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line
         estack->slot[estack->nused].line = line;
         if (NULL == (estack->slot[estack->nused].desc = H5MM_xstrdup(desc)))
             HGOTO_DONE(FAIL)
+        estack->slot[estack->nused].posix_errno = posix_errno;
         estack->nused++;
     } /* end if */
 

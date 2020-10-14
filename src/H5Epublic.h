@@ -38,6 +38,7 @@ typedef struct H5E_error2_t {
     const char *func_name; /*function in which error occurred   */
     const char *file_name; /*file in which error occurred       */
     const char *desc;      /*optional supplied description      */
+    int         posix_errno;/*system errno, or 0 if not applicable */
 } H5E_error2_t;
 
 /* When this header is included from a private header, don't make calls to H5open() */

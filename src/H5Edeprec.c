@@ -203,7 +203,7 @@ H5Epush1(const char *file, const char *func, unsigned line, H5E_major_t maj, H5E
     H5TRACE6("e", "*s*sIuii*s", file, func, line, maj, min, str);
 
     /* Push the error on the default error stack */
-    if (H5E__push_stack(NULL, file, func, line, H5E_ERR_CLS_g, maj, min, str) < 0)
+    if (H5E__push_stack(NULL, file, func, line, H5E_ERR_CLS_g, maj, min, str, 0) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't push error on stack")
 
 done:

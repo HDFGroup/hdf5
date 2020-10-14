@@ -31,7 +31,10 @@ typedef struct H5E_t H5E_t;
  * error number, the minor error number, and a description of the error.
  */
 #define HERROR(maj_id, min_id, ...)                                                                          \
-    H5E_printf_stack(NULL, __FILE__, FUNC, __LINE__, H5E_ERR_CLS_g, maj_id, min_id, __VA_ARGS__)
+    H5E_printf_stack(NULL, __FILE__, FUNC, __LINE__, H5E_ERR_CLS_g, 0, maj_id, min_id, __VA_ARGS__)
+
+#define HSYS_ERROR(maj_id, min_id, posix_errno, ...)                                                         \
+    H5E_printf_stack(NULL, __FILE__, FUNC, __LINE__, H5E_ERR_CLS_g, posix_errno, maj_id, min_id, __VA_ARGS__)
 
 /*
  * HCOMMON_ERROR macro, used by HDONE_ERROR and HGOTO_ERROR
@@ -41,6 +44,11 @@ typedef struct H5E_t H5E_t;
     HERROR(maj, min, __VA_ARGS__);                                                                           \
     err_occurred = TRUE;                                                                                     \
     err_occurred = err_occurred; /* Shut GCC warnings up! */
+
+#define HSYS_COMMON_ERROR(maj, min, posix_errno, ...)                                                        \
+   HSYS_ERROR(maj, min, posix_errno, __VA_ARGS__);                                                           \
+   err_occurred = TRUE;                                                                                      \
+   err_occurred = err_occurred; /* Shut GCC warnings up! */
 
 /*
  * HDONE_ERROR macro, used to facilitate error reporting between a
@@ -114,14 +122,16 @@ typedef struct H5E_t H5E_t;
 #define HSYS_DONE_ERROR(majorcode, minorcode, retcode, str)                                                  \
     {                                                                                                        \
         int myerrno = errno;                                                                                 \
-        HDONE_ERROR(majorcode, minorcode, retcode, "%s, errno = %d, error message = '%s'", str, myerrno,     \
-                    HDstrerror(myerrno));                                                                    \
+        HSYS_COMMON_ERROR(majorcode, minorcode, myerrno, "%s, errno = %d, error message = '%s'", str,        \
+                    myerrno, HDstrerror(myerrno));                                                           \
+        ret_value = ret_val;                                                                                 \
     }
 #define HSYS_GOTO_ERROR(majorcode, minorcode, retcode, str)                                                  \
     {                                                                                                        \
         int myerrno = errno;                                                                                 \
-        HGOTO_ERROR(majorcode, minorcode, retcode, "%s, errno = %d, error message = '%s'", str, myerrno,     \
-                    HDstrerror(myerrno));                                                                    \
+        HSYS_COMMON_ERROR(majorcode, minorcode, myerrno, "%s, errno = %d, error message = '%s'", str,        \
+                    myerrno, HDstrerror(myerrno));                                                           \
+        HGOTO_DONE(retcode)                                                                                  \
     }
 
 #ifdef H5_HAVE_PARALLEL
@@ -160,7 +170,7 @@ extern int  H5E_mpi_error_str_len;
  * and an optional set of arguments for the printf format arguments.
  */
 #define H5E_PRINTF(...)                                                                                      \
-    H5E_printf_stack(NULL, __FILE__, FUNC, __LINE__, H5E_ERR_CLS_g, H5_MY_PKG_ERR, __VA_ARGS__)
+    H5E_printf_stack(NULL, __FILE__, FUNC, __LINE__, H5E_ERR_CLS_g, 0, H5_MY_PKG_ERR, __VA_ARGS__)
 
 /*
  * H5_LEAVE macro, used to facilitate control flow between a
@@ -199,7 +209,7 @@ catch_except:;                                                                  
 /* Library-private functions defined in H5E package */
 H5_DLL herr_t H5E_init(void);
 H5_DLL herr_t H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned line, hid_t cls_id,
-                               hid_t maj_id, hid_t min_id, const char *fmt, ...) H5_ATTR_FORMAT(printf, 8, 9);
+                               int posix_errno, hid_t maj_id, hid_t min_id, const char *fmt, ...) H5_ATTR_FORMAT(printf, 9, 10);
 H5_DLL herr_t H5E_clear_stack(H5E_t *estack);
 H5_DLL herr_t H5E_dump_api_stack(hbool_t is_api);
 
