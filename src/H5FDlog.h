@@ -20,8 +20,6 @@
 #ifndef H5FDlog_H
 #define H5FDlog_H
 
-#include "H5Ipublic.h"
-
 #define H5FD_LOG (H5FD_log_init())
 
 /* Flags for H5Pset_fapl_log() */

@@ -20,8 +20,6 @@
 #ifndef H5FDcore_H
 #define H5FDcore_H
 
-#include "H5Ipublic.h"
-
 #define H5FD_CORE (H5FD_core_init())
 
 #ifdef __cplusplus

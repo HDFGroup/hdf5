@@ -20,8 +20,6 @@
 #ifndef H5FDdirect_H
 #define H5FDdirect_H
 
-#include "H5Ipublic.h"
-
 #ifdef H5_HAVE_DIRECT
 #define H5FD_DIRECT (H5FD_direct_init())
 #else

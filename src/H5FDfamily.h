@@ -20,8 +20,6 @@
 #ifndef H5FDfamily_H
 #define H5FDfamily_H
 
-#include "H5Ipublic.h"
-
 #define H5FD_FAMILY (H5FD_family_init())
 
 #ifdef __cplusplus

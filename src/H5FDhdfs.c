@@ -333,10 +333,7 @@ H5FL_DEFINE_STATIC(H5FD_hdfs_t);
  *
  * Purpose:     Initializes any interface-specific data or routines.
  *
- * Return:      Success:    The driver ID for the hdfs driver.
- *              Failure:    Negative
- *
- * Programmer:  Jacob Smith 2018
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -389,7 +386,6 @@ H5FD_hdfs_init(void)
     }
 #endif
 
-    /* Set return value */
     ret_value = H5FD_HDFS_g;
 
 done:
@@ -718,13 +714,11 @@ H5FD_hdfs_fapl_get(H5FD_t *_file)
     /* Copy the fields of the structure */
     HDmemcpy(fa, &(file->fa), sizeof(H5FD_hdfs_fapl_t));
 
-    /* Set return value */
     ret_value = fa;
 
 done:
-    if (ret_value == NULL)
-        if (fa != NULL)
-            H5MM_xfree(fa);
+    if (ret_value == NULL && fa != NULL)
+        H5MM_xfree(fa); /* clean up on error */
 
 } /* H5FD_hdfs_fapl_get() */
 
@@ -759,9 +753,8 @@ H5FD_hdfs_fapl_copy(const void *_old_fa)
     ret_value = new_fa;
 
 done:
-    if (ret_value == NULL)
-        if (new_fa != NULL)
-            H5MM_xfree(new_fa);
+    if (ret_value == NULL && new_fa != NULL)
+        H5MM_xfree(new_fa); /* clean up on error */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_hdfs_fapl_copy() */
@@ -827,7 +820,7 @@ hdfs_reset_stats(H5FD_hdfs_t *file)
 #endif
 
     if (file == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file was null");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file was null")
 
     for (i = 0; i <= HDFS_STATS_BIN_COUNT; i++) {
         file->raw[i].bytes = 0;
@@ -1184,13 +1177,11 @@ hdfs_fprint_stats(FILE *stream, const H5FD_hdfs_t *file)
                   br_val, br_suffix,  /* rawdata bytes    */
                   am_val, am_suffix,  /* metadata average */
                   ar_val, ar_suffix); /* rawdata average  */
-
         HDfflush(stream);
     }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-
 } /* hdfs_fprint_stats */
 #endif /* HDFS_STATS */
 
@@ -1352,7 +1343,6 @@ H5FD_hdfs_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags) /* out
     HDfprintf(stdout, "called %s.\n", FUNC);
 #endif
 
-    /* Set the VFL feature flags that this driver supports */
     if (flags) {
         *flags = 0;
         *flags |= H5FD_FEAT_DATA_SIEVE;
@@ -1504,7 +1494,7 @@ done:
  *
  * Function: H5FD_hdfs_read()
  *
- * Purpose
+ * Purpose:
  *
  *     Reads SIZE bytes of data from FILE beginning at address ADDR
  *     into buffer BUF according to data transfer properties in DXPL_ID.
@@ -1739,7 +1729,6 @@ H5Pget_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa_out)
     herr_t ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT
-    H5TRACE2("e", "i*x", fapl_id, fa_out);
 
     HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "HDFS VFD not included in the HDF5 library")
 
@@ -1753,7 +1742,6 @@ H5Pset_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa)
     herr_t ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT
-    H5TRACE2("e", "i*x", fapl_id, fa);
 
     HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "HDFS VFD not included in the HDF5 library")
 
