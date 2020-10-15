@@ -212,7 +212,7 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
     H5G_loc_t loc;                         /* Location within file */
     hid_t     ret_value = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE2("i", "ia", loc_id, addr);
 
     /* Check args */

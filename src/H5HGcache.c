@@ -292,7 +292,7 @@ H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata, hbool
             /* Check if we need more room to store heap objects */
             if (idx >= heap->nalloc) {
                 size_t      new_alloc; /* New allocation number */
-                H5HG_obj_t *new_obj;   /* New array of object   descriptions          */
+                H5HG_obj_t *new_obj;   /* New array of object descriptions */
 
                 /* Determine the new number of objects to index */
                 new_alloc = MAX(heap->nalloc * 2, (idx + 1));
@@ -402,7 +402,6 @@ H5HG__cache_heap_image_len(const void *_thing, size_t *image_len)
  * Purpose:	Given an appropriately sized buffer and an instance of
  *		H5HG_heap_t, serialize the global heap for writing to file,
  *		and copy the serialized version into the buffer.
- *
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL

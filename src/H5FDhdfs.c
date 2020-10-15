@@ -248,8 +248,7 @@ typedef struct {
  *
  * Programmer: Jacob Smith
  *
- ***************************************************************************
- */
+ ***************************************************************************/
 typedef struct H5FD_hdfs_t {
     H5FD_t           pub;
     H5FD_hdfs_fapl_t fa;
@@ -374,10 +373,10 @@ done:
 hid_t
 H5FD_hdfs_init(void)
 {
+    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 #if HDFS_STATS
     unsigned int bin_i;
 #endif
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
@@ -396,7 +395,7 @@ H5FD_hdfs_init(void)
 
         HDFS_STATS_POW(bin_i, &value)
         hdfs_stats_boundaries[bin_i] = value;
-    } /* end for */
+    }
 #endif
 
     ret_value = H5FD_HDFS_g;
@@ -616,8 +615,7 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  John Mainzer
- *              9/10/17
+ * Programmer:  Jacob Smith 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -679,9 +677,11 @@ H5Pget_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa_out)
 
     if (fa_out == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "fa_out is NULL")
+
     plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS);
     if (plist == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list")
+
     if (H5FD_HDFS != H5P_peek_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
 
@@ -830,7 +830,7 @@ hdfs__reset_stats(H5FD_hdfs_t *file)
     FUNC_ENTER_STATIC
 
 #if HDFS_DEBUG
-    HDprintf("hdfs__reset_stats() called\n");
+    HDfprintf(stdout, "called %s.\n", FUNC);
 #endif
 
     if (file == NULL)
@@ -1220,8 +1220,8 @@ done:
 static herr_t
 H5FD__hdfs_close(H5FD_t *_file)
 {
-    herr_t       ret_value = SUCCEED;
     H5FD_hdfs_t *file      = (H5FD_hdfs_t *)_file;
+    herr_t       ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
@@ -1262,8 +1262,8 @@ done:
  *     field-by-field.
  *
  * Return:
- *     + Equivalent:      0
- *     + Not Equivalent: -1
+ *      Equivalent:      0
+ *      Not Equivalent: -1
  *
  * Programmer: Gerd Herber
  *             May 2018
@@ -1487,8 +1487,8 @@ H5FD__hdfs_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 static herr_t
 H5FD__hdfs_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_handle)
 {
-    herr_t       ret_value = SUCCEED;
     H5FD_hdfs_t *file      = (H5FD_hdfs_t *)_file;
+    herr_t       ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
@@ -1531,9 +1531,9 @@ static herr_t
 H5FD__hdfs_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
                 size_t size, void *buf)
 {
-    herr_t       ret_value = SUCCEED;
     H5FD_hdfs_t *file      = (H5FD_hdfs_t *)_file;
     size_t       filesize  = 0;
+    herr_t       ret_value = SUCCEED;
 #if HDFS_STATS
     /* working variables for storing stats */
     hdfs_statsbin *bin   = NULL;
@@ -1672,7 +1672,7 @@ done:
  *     No effect on Read-Only S3 file.
  *
  *     Suggestion: remove lock/unlock from class
- *               > would result in error at H5FD_[un]lock() (H5FD.c)
+ *                 would result in error at H5FD_[un]lock() (H5FD.c)
  *
  * Return:
  *

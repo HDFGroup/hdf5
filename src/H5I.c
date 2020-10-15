@@ -700,7 +700,7 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
     hid_t          new_id    = -1;              /* new ID                           */
     hid_t          ret_value = H5I_INVALID_HID; /* return value             */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     /* Check arguments */
     if (type <= H5I_BADID || (int)type >= H5I_next_type)

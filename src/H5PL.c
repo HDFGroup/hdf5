@@ -275,8 +275,6 @@ done:
  * Return:      Success:    Non-negative
  *              Failture:   Negative
  *
- * Return:      Non-negative or success.
- *
  *-------------------------------------------------------------------------
  */
 herr_t

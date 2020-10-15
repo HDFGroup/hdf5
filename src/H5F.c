@@ -501,7 +501,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
 
     if (!f) {
         if (!oloc)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "object is not assocated with a file")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "object is not associated with a file")
         f = oloc->file;
     } /* end if */
     if (!f)
