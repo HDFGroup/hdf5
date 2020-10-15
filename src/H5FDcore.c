@@ -276,13 +276,13 @@ H5FD__core_add_dirty_region(H5FD_core_t *file, haddr_t start, haddr_t end)
         else {
             /* Store the new item endpoint if it's bigger */
             item->end = (item->end < end) ? end : item->end;
-        } /* end else */
-    }     /* end if */
+        }
+    }
     else {
         /* Update the size of the before region */
         if (b_item->end < end)
             b_item->end = end;
-    } /* end else */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

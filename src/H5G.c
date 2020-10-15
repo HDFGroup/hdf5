@@ -624,7 +624,7 @@ done:
 herr_t
 H5Gclose(hid_t group_id)
 {
-    herr_t ret_value = SUCCEED; /* Return value                     */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", group_id);

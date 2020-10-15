@@ -1279,7 +1279,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5A__exists_by_name
  *
- * Purpose:	Private version of H5Aexists_by_name
+ * Purpose:     Private version of H5Aexists_by_name
  *
  * Return:      TRUE/FALSE/FAIL
  *

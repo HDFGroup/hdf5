@@ -327,8 +327,8 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
- *		        30 July 2012
+ * Programmer:    Raymond Lu
+ *                30 July 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -387,15 +387,15 @@ done:
 } /* end H5Dwrite_chunk() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__read
+ * Function:    H5D__read
  *
- * Purpose:	Reads (part of) a DATASET into application memory BUF. See
- *		H5Dread() for complete details.
+ * Purpose:    Reads (part of) a DATASET into application memory BUF. See
+ *        H5Dread() for complete details.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Thursday, December  4, 1997
+ * Programmer:    Robb Matzke
+ *        Thursday, December  4, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -421,10 +421,10 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, const H5S_t
                                                   /* projected mem space must be discarded at the   */
                                                   /* end of the function to avoid a memory leak.    */
     H5D_storage_t store;                          /* union of EFL and chunk pointer in file space */
-    hsize_t       nelmts;                         /* total number of elmts	*/
+    hsize_t       nelmts;                         /* total number of elmts    */
     hbool_t       io_op_init = FALSE;             /* Whether the I/O op has been initialized */
     char          fake_char;                      /* Temporary variable for NULL buffer pointers */
-    herr_t        ret_value = SUCCEED;            /* Return value	*/
+    herr_t        ret_value = SUCCEED;            /* Return value    */
 
     FUNC_ENTER_PACKAGE_TAG(dataset->oloc.addr)
 
@@ -603,15 +603,15 @@ done:
 } /* end H5D__read() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__write
+ * Function:    H5D__write
  *
- * Purpose:	Writes (part of) a DATASET to a file from application memory
- *		BUF. See H5Dwrite() for complete details.
+ * Purpose:    Writes (part of) a DATASET to a file from application memory
+ *        BUF. See H5Dwrite() for complete details.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Thursday, December  4, 1997
+ * Programmer:    Robb Matzke
+ *        Thursday, December  4, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -637,10 +637,10 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, const H5S_
                                                   /* projected mem space must be discarded at the   */
                                                   /* end of the function to avoid a memory leak.    */
     H5D_storage_t store;                          /* union of EFL and chunk pointer in file space */
-    hsize_t       nelmts;                         /* total number of elmts	*/
+    hsize_t       nelmts;                         /* total number of elmts    */
     hbool_t       io_op_init = FALSE;             /* Whether the I/O op has been initialized */
     char          fake_char;                      /* Temporary variable for NULL buffer pointers */
-    herr_t        ret_value = SUCCEED;            /* Return value	*/
+    herr_t        ret_value = SUCCEED;            /* Return value    */
 
     FUNC_ENTER_PACKAGE_TAG(dataset->oloc.addr)
 
@@ -838,15 +838,15 @@ done:
 } /* end H5D__write() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__ioinfo_init
+ * Function:    H5D__ioinfo_init
  *
- * Purpose:	Routine for determining correct I/O operations for
+ * Purpose:    Routine for determining correct I/O operations for
  *              each I/O action.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, September 30, 2004
+ * Programmer:    Quincey Koziol
+ *        Thursday, September 30, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -899,15 +899,15 @@ H5D__ioinfo_init(H5D_t *dset, const H5D_type_info_t *type_info, H5D_storage_t *s
 } /* end H5D__ioinfo_init() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__typeinfo_init
+ * Function:    H5D__typeinfo_init
  *
- * Purpose:	Routine for determining correct datatype information for
+ * Purpose:    Routine for determining correct datatype information for
  *              each I/O action.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, March  4, 2008
+ * Programmer:    Quincey Koziol
+ *        Tuesday, March  4, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -917,7 +917,7 @@ H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write, H5D_t
     const H5T_t *     src_type;            /* Source datatype */
     const H5T_t *     dst_type;            /* Destination datatype */
     H5Z_data_xform_t *data_transform;      /* Data transform info */
-    herr_t            ret_value = SUCCEED; /* Return value	*/
+    herr_t            ret_value = SUCCEED; /* Return value    */
 
     FUNC_ENTER_STATIC
 
@@ -979,7 +979,7 @@ H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write, H5D_t
         void *    bkgr_buf;      /* Background conversion buffer pointer */
         size_t    max_temp_buf;  /* Maximum temporary buffer size */
         H5T_bkg_t bkgr_buf_type; /* Background buffer type */
-        size_t    target_size;   /* Desired buffer size	*/
+        size_t    target_size;   /* Desired buffer size    */
 
         /* Get info from API context */
         if (H5CX_get_max_temp_buf(&max_temp_buf) < 0)
@@ -1048,7 +1048,7 @@ H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write, H5D_t
             type_info->tconv_buf_allocated = TRUE;
         } /* end if */
         if (type_info->need_bkg && NULL == (type_info->bkg_buf = (uint8_t *)bkgr_buf)) {
-            size_t bkg_size; /* Desired background buffer size	*/
+            size_t bkg_size; /* Desired background buffer size    */
 
             /* Compute the background buffer size */
             /* (don't try to use buffers smaller than the default size) */
@@ -1072,14 +1072,14 @@ done:
 #ifdef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__ioinfo_adjust
+ * Function:    H5D__ioinfo_adjust
  *
- * Purpose:	Adjust operation's I/O info for any parallel I/O
+ * Purpose:    Adjust operation's I/O info for any parallel I/O
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, March 27, 2008
+ * Programmer:    Quincey Koziol
+ *        Thursday, March 27, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1087,7 +1087,7 @@ static herr_t
 H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, const H5S_t *file_space, const H5S_t *mem_space,
                    const H5D_type_info_t *type_info)
 {
-    herr_t ret_value = SUCCEED; /* Return value	*/
+    herr_t ret_value = SUCCEED; /* Return value    */
 
     FUNC_ENTER_STATIC
 
@@ -1225,14 +1225,14 @@ done:
 #endif /* H5_HAVE_PARALLEL */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__typeinfo_term
+ * Function:    H5D__typeinfo_term
  *
- * Purpose:	Common logic for terminating a type info object
+ * Purpose:    Common logic for terminating a type info object
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, March  6, 2008
+ * Programmer:    Quincey Koziol
+ *        Thursday, March  6, 2008
  *
  *-------------------------------------------------------------------------
  */

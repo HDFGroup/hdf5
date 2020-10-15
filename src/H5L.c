@@ -160,15 +160,15 @@ static size_t       H5L_table_used_g  = 0;
 static H5L_class_t *H5L_table_g       = NULL;
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_init
+ * Function:    H5L_init
  *
- * Purpose:	Initialize the interface from some other package.
+ * Purpose:     Initialize the interface from some other package.
  *
- * Return:	Success:	non-negative
+ * Return:      Success:    non-negative
  *
- *		Failure:	negative
+ *              Failure:    negative
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Thursday, July 13, 2006
  *
  *-------------------------------------------------------------------------
@@ -186,13 +186,13 @@ done:
 } /* end H5L_init() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L__init_package
+ * Function:    H5L__init_package
  *
- * Purpose:	Initialize information specific to H5L interface.
+ * Purpose:     Initialize information specific to H5L interface.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Tuesday, January 24, 2006
  *
  *-------------------------------------------------------------------------
@@ -213,13 +213,13 @@ done:
 } /* end H5L_init_package() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_term_package
+ * Function:    H5L_term_package
  *
- * Purpose:	Terminate any resources allocated in H5L__init_package.
+ * Purpose:     Terminate any resources allocated in H5L__init_package.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Tuesday, January 24, 2006
  *
  *-------------------------------------------------------------------------
@@ -259,7 +259,7 @@ H5L_term_package(void)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Wednesday, March 29, 2006
  *
  *-------------------------------------------------------------------------
@@ -326,7 +326,7 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Wednesday, March 29, 2006
  *
  *-------------------------------------------------------------------------
@@ -397,7 +397,7 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, April  6, 1998
  *
  *-------------------------------------------------------------------------
@@ -456,7 +456,7 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, April  6, 1998
  *
  *-------------------------------------------------------------------------
@@ -538,7 +538,7 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Tuesday, December 13, 2005
  *
  *-------------------------------------------------------------------------
@@ -592,7 +592,7 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, April  6, 1998
  *
  *-------------------------------------------------------------------------
@@ -625,20 +625,20 @@ done:
 } /* end H5Ldelete() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Ldelete_by_idx
+ * Function:    H5Ldelete_by_idx
  *
- * Purpose:	Removes the specified link from the group graph and
- *		decrements the link count for the object to which it
- *		points, according to the order within an index.
+ * Purpose:     Removes the specified link from the group graph and
+ *              decrements the link count for the object to which it
+ *              points, according to the order within an index.
  *
- *		If the link count reaches zero then all file-space
- *		associated with the object will be reclaimed (but if the
- *		object is open, then the reclamation of the file space is
- *		delayed until all handles to the object are closed).
+ *              If the link count reaches zero then all file-space
+ *              associated with the object will be reclaimed (but if the
+ *              object is open, then the reclamation of the file space is
+ *              delayed until all handles to the object are closed).
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, November 13, 2006
  *
  *-------------------------------------------------------------------------
@@ -676,20 +676,20 @@ done:
 } /* end H5Ldelete_by_idx() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lget_val
+ * Function:    H5Lget_val
  *
- * Purpose:	Returns the link value of a link whose name is NAME.  For
+ * Purpose:     Returns the link value of a link whose name is NAME.  For
  *              symbolic links, this is the path to which the link points,
  *              including the null terminator.  For user-defined links, it
  *              is the link buffer.
  *
  *              At most SIZE bytes are copied to the BUF result buffer.
  *
- * Return:	Success:	Non-negative with the link value in BUF.
+ * Return:      Success:    Non-negative with the link value in BUF.
  *
- * 		Failure:	Negative
+ *              Failure:    Negative
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, April 13, 1998
  *
  *-------------------------------------------------------------------------
@@ -722,19 +722,19 @@ done:
 } /* end H5Lget_val() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lget_val_by_idx
+ * Function:    H5Lget_val_by_idx
  *
- * Purpose:	Returns the link value of a link, according to the order of
+ * Purpose:     Returns the link value of a link, according to the order of
  *              an index.  For symbolic links, this is the path to which the
  *              link points, including the null terminator.  For user-defined
  *              links, it is the link buffer.
  *
  *              At most SIZE bytes are copied to the BUF result buffer.
  *
- * Return:	Success:	Non-negative with the link value in BUF.
- * 		Failure:	Negative
+ * Return:      Success:    Non-negative with the link value in BUF.
+ *              Failure:    Negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, November 13, 2006
  *
  *-------------------------------------------------------------------------
@@ -778,7 +778,7 @@ done:
  *
  * Return:      Success:    TRUE/FALSE/FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Friday, March 16, 2007
  *
  *-------------------------------------------------------------------------
@@ -820,7 +820,7 @@ done:
  * Return:      Success:    Non-negative with information in LINFO
  *              Failure:    Negative
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Wednesday, June 21, 2006
  *
  *-------------------------------------------------------------------------
@@ -861,7 +861,7 @@ done:
  * Return:      Success:    Non-negative with information in LINFO
  *              Failure:    Negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, November  6, 2006
  *
  *-------------------------------------------------------------------------
@@ -899,9 +899,9 @@ done:
 } /* end H5Lget_info_by_idx() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lregister
+ * Function:    H5Lregister
  *
- * Purpose:	Registers a class of user-defined links, or changes the
+ * Purpose:     Registers a class of user-defined links, or changes the
  *              behavior of an existing class.
  *
  *              The link class passed in will override any existing link
@@ -910,9 +910,9 @@ done:
  *              H5L_LINK_CLASS_T_VERS), a link class ID, and a traversal
  *              function.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Monday, July 10, 2006
  *
  *-------------------------------------------------------------------------
@@ -953,16 +953,16 @@ done:
 } /* end H5Lregister() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lunregister
+ * Function:    H5Lunregister
  *
- * Purpose:	Unregisters a class of user-defined links, preventing them
+ * Purpose:     Unregisters a class of user-defined links, preventing them
  *              from being traversed, queried, moved, etc.
  *
  *              A link class can be re-registered using H5Lregister().
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Monday, July 10, 2006
  *
  *-------------------------------------------------------------------------
@@ -997,7 +997,7 @@ done:
  *              FALSE if it is unregistered
  *              FAIL on error (if the class is not a valid UD class ID)
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Monday, July 10, 2006
  *
  *-------------------------------------------------------------------------
@@ -1039,7 +1039,7 @@ done:
  *
  *              Failure:    -1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, November 11, 2006
  *
  *-------------------------------------------------------------------------
@@ -1201,8 +1201,8 @@ done:
  *                          library, or the negative value returned by one
  *                          of the operators.
  *
- * Programmer:	Quincey Koziol
- *		        November 24 2007
+ * Programmer:  Quincey Koziol
+ *              November 24 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1304,16 +1304,16 @@ done:
  */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_find_class_idx
+ * Function:    H5L_find_class_idx
  *
- * Purpose:	Given a link class ID, return the offset in the global array
+ * Purpose:     Given a link class ID, return the offset in the global array
  *              that holds all the registered link classes.
  *
- * Return:	Success:	Non-negative index of entry in global
+ * Return:      Success:    Non-negative index of entry in global
  *                              link class table.
- *		Failure:	Negative
+ *              Failure:    Negative
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Monday, July 10, 2006
  *
  *-------------------------------------------------------------------------
@@ -1335,15 +1335,15 @@ done:
 } /* end H5L_find_class_idx */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_find_class
+ * Function:    H5L_find_class
  *
- * Purpose:	Given a link class ID return a pointer to a global struct that
- *		defines the link class.
+ * Purpose:     Given a link class ID return a pointer to a global struct that
+ *              defines the link class.
  *
- * Return:	Success:	Ptr to entry in global link class table.
- *		Failure:	NULL
+ * Return:      Success:    Ptr to entry in global link class table.
+ *              Failure:    NULL
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Monday, July 10, 2006
  *
  *-------------------------------------------------------------------------
@@ -1368,16 +1368,16 @@ done:
 } /* end H5L_find_class */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_register
+ * Function:    H5L_register
  *
- * Purpose:	Registers a class of user-defined links, or changes the
+ * Purpose:     Registers a class of user-defined links, or changes the
  *              behavior of an existing class.
  *
  *              See H5Lregister for full documentation.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Monday, July 10, 2006
  *
  *-------------------------------------------------------------------------
@@ -1421,15 +1421,15 @@ done:
 } /* end H5L_register */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_unregister
+ * Function:    H5L_unregister
  *
- * Purpose:	Unregisters a class of user-defined links.
+ * Purpose:     Unregisters a class of user-defined links.
  *
  *              See H5Lunregister for full documentation.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Monday, July 10, 2006
  *
  *-------------------------------------------------------------------------
@@ -1463,14 +1463,14 @@ done:
 } /* end H5L_unregister() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_link
+ * Function:    H5L_link
  *
- * Purpose:	Creates a link from OBJ_ID to CUR_NAME.  See H5Olink() for
- *		full documentation.
+ * Purpose:     Creates a link from OBJ_ID to CUR_NAME.  See H5Olink() for
+ *              full documentation.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Tuesday, December 13, 2005
  *
  *-------------------------------------------------------------------------
@@ -1506,13 +1506,13 @@ done:
 } /* end H5L_link() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_link_object
+ * Function:    H5L_link_object
  *
- * Purpose:	Creates a new object and a link to it.
+ * Purpose:     Creates a new object and a link to it.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, April 9, 2007
  *
  *-------------------------------------------------------------------------
@@ -1547,13 +1547,13 @@ done:
 } /* end H5L_link_object() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L__link_cb
+ * Function:    H5L__link_cb
  *
- * Purpose:	Callback for creating a link to an object.
+ * Purpose:     Callback for creating a link to an object.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, September 19, 2005
  *
  *-------------------------------------------------------------------------
@@ -1793,13 +1793,13 @@ done:
 } /* end H5L__create_real() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_create_hard
+ * Function:    H5L_create_hard
  *
- * Purpose:	Creates a hard link from NEW_NAME to CUR_NAME.
+ * Purpose:     Creates a hard link from NEW_NAME to CUR_NAME.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, April  6, 1998
  *
  *-------------------------------------------------------------------------
@@ -1871,7 +1871,7 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, April  6, 1998
  *
  *-------------------------------------------------------------------------
@@ -1911,14 +1911,14 @@ done:
 } /* end H5L_create_soft() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L__create_ud
+ * Function:    H5L__create_ud
  *
- * Purpose:	Creates a user-defined link. See H5Lcreate_ud for
+ * Purpose:     Creates a user-defined link. See H5Lcreate_ud for
  *              full documentation.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Friday, May 19, 2006
  *
  *-------------------------------------------------------------------------
@@ -1968,13 +1968,13 @@ done:
 } /* end H5L__create_ud() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L__get_val_real
+ * Function:    H5L__get_val_real
  *
- * Purpose:	Retrieve link value from a link object
+ * Purpose:     Retrieve link value from a link object
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, November 13 2006
  *
  *-------------------------------------------------------------------------
@@ -2023,13 +2023,13 @@ done:
 } /* end H5L__get_val_real() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L__get_val_cb
+ * Function:    H5L__get_val_cb
  *
- * Purpose:	Callback for retrieving link value or udata.
+ * Purpose:     Callback for retrieving link value or udata.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, September 20, 2005
  *
  *-------------------------------------------------------------------------
@@ -2060,20 +2060,20 @@ done:
 } /* end H5L__get_val_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_get_val
+ * Function:    H5L_get_val
  *
- * Purpose:	Returns the value of a symbolic link or the udata for a
+ * Purpose:     Returns the value of a symbolic link or the udata for a
  *              user-defined link.
  *
- * Return:	Success:	Non-negative, with at most SIZE bytes of the
- *				link value copied into the BUF buffer.  If the
- *				link value is larger than SIZE characters
- *				counting the null terminator then the BUF
- *				result will not be null terminated.
+ * Return:      Success:    Non-negative, with at most SIZE bytes of the
+ *              link value copied into the BUF buffer.  If the
+ *              link value is larger than SIZE characters
+ *              counting the null terminator then the BUF
+ *              result will not be null terminated.
  *
- *		Failure:	Negative
+ *              Failure:    Negative
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, April 13, 1998
  *
  *-------------------------------------------------------------------------
@@ -2103,14 +2103,14 @@ done:
 } /* H5L_get_val() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L__get_val_by_idx_cb
+ * Function:    H5L__get_val_by_idx_cb
  *
- * Purpose:	Callback for retrieving a link's value according to an
+ * Purpose:     Callback for retrieving a link's value according to an
  *              index's order.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, November 13 2006
  *
  *-------------------------------------------------------------------------
@@ -2194,14 +2194,14 @@ done:
 } /* end H5L__get_val_by_idx() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L__delete_cb
+ * Function:    H5L__delete_cb
  *
- * Purpose:	Callback for deleting a link.  This routine
+ * Purpose:     Callback for deleting a link.  This routine
  *              actually deletes the link
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, September 19, 2005
  *
  *-------------------------------------------------------------------------
@@ -2243,13 +2243,13 @@ done:
 } /* end H5L__delete_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_delete
+ * Function:    H5L_delete
  *
- * Purpose:	Delete a link from a group.
+ * Purpose:     Delete a link from a group.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, September 17, 1998
  *
  *-------------------------------------------------------------------------
@@ -2284,13 +2284,13 @@ done:
 } /* end H5L_delete() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L__delete_by_idx_cb
+ * Function:    H5L__delete_by_idx_cb
  *
- * Purpose:	Callback for removing a link according to an index's order.
+ * Purpose:     Callback for removing a link according to an index's order.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, November 13 2006
  *
  *-------------------------------------------------------------------------
@@ -2363,15 +2363,15 @@ done:
 } /* end H5L__delete_by_idx() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L__move_dest_cb
+ * Function:    H5L__move_dest_cb
  *
- * Purpose:	Second callback for moving and renaming an object.  This routine
+ * Purpose:     Second callback for moving and renaming an object.  This routine
  *              inserts a new link into the group returned by the traversal.
  *              It is called by H5L__move_cb.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Monday, April 3, 2006
  *
  *-------------------------------------------------------------------------
@@ -2475,15 +2475,15 @@ done:
 } /* end H5L__move_dest_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L__move_cb
+ * Function:    H5L__move_cb
  *
- * Purpose:	Callback for moving and renaming an object.  This routine
+ * Purpose:     Callback for moving and renaming an object.  This routine
  *              replaces the names of open objects with the moved object
  *              in the path
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Friday, April 3, 2006
  *
  *-------------------------------------------------------------------------
@@ -2589,9 +2589,9 @@ done:
 } /* end H5L__move_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_move
+ * Function:    H5L_move
  *
- * Purpose:	Atomically move or copy a link.
+ * Purpose:     Atomically move or copy a link.
  *
  *              Creates a copy of a link in a new destination with a new name.
  *              SRC_LOC and SRC_NAME together define the link's original
@@ -2601,9 +2601,9 @@ done:
  *              If copy_flag is FALSE, the original link is removed
  *              (effectively moving the link).
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Monday, May 1, 2006
  *
  *-------------------------------------------------------------------------
@@ -2669,14 +2669,14 @@ done:
 } /* end H5L_move() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L__exists_final_cb
+ * Function:    H5L__exists_final_cb
  *
- * Purpose:	Callback for checking whether a link exists, as the final
+ * Purpose:     Callback for checking whether a link exists, as the final
  *              component of a path
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Friday, March 16 2007
  *
  *-------------------------------------------------------------------------
@@ -2701,14 +2701,14 @@ H5L__exists_final_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATT
 } /* end H5L__exists_final_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L__exists_inter_cb
+ * Function:    H5L__exists_inter_cb
  *
- * Purpose:	Callback for checking whether a link exists, as an intermediate
+ * Purpose:     Callback for checking whether a link exists, as an intermediate
  *              component of a path
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, December 31 2015
  *
  *-------------------------------------------------------------------------
@@ -2826,16 +2826,13 @@ done:
 } /* H5L_exists_tolerant() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L__exists
+ * Function:    H5L__exists
  *
- * Purpose:	Returns whether a link exists in a group
+ * Purpose:     Returns whether a link exists in a group
  *
- * Note:	Same as H5L_exists_tolerant, except that missing links are reported
- *		as failures
+ * Return:      Non-negative (TRUE/FALSE) on success/Negative on failure
  *
- * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Friday, March 16 2007
  *
  *-------------------------------------------------------------------------
@@ -2865,13 +2862,13 @@ done:
 } /* H5L__exists() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L__get_info_cb
+ * Function:    H5L__get_info_cb
  *
- * Purpose:	Callback for retrieving a link's metadata
+ * Purpose:     Callback for retrieving a link's metadata
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Monday, April 17 2006
  *
  *-------------------------------------------------------------------------
@@ -2909,7 +2906,7 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Monday, April 17 2006
  *
  *-------------------------------------------------------------------------
@@ -2933,14 +2930,14 @@ done:
 } /* H5L_get_info() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L__get_info_by_idx_cb
+ * Function:    H5L__get_info_by_idx_cb
  *
- * Purpose:	Callback for retrieving a link's metadata according to an
+ * Purpose:     Callback for retrieving a link's metadata according to an
  *              index's order.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, November  6 2006
  *
  *-------------------------------------------------------------------------
@@ -3021,14 +3018,14 @@ done:
 } /* end H5L__get_info_by_idx() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L__get_name_by_idx_cb
+ * Function:    H5L__get_name_by_idx_cb
  *
- * Purpose:	Callback for retrieving a link's name according to an
+ * Purpose:     Callback for retrieving a link's name according to an
  *              index's order.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, November 11 2006
  *
  *-------------------------------------------------------------------------
@@ -3104,15 +3101,15 @@ done:
 } /* end H5L__get_name_by_idx() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L__link_copy_file
+ * Function:    H5L__link_copy_file
  *
  * Purpose:     Copy a link and the object it points to from one file to
  *              another.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep 29 2006
+ * Programmer:  Quincey Koziol
+ *              Sep 29 2006
  *
  *-------------------------------------------------------------------------
  */

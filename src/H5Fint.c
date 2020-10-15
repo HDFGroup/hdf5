@@ -604,7 +604,7 @@ H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
          */
         if (olist->max_nobjs > 0 && olist->list_index >= olist->max_nobjs)
             HGOTO_DONE(H5_ITER_STOP) /* Indicate that the iterator should stop */
-    }                                /* end if */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2945,7 +2945,7 @@ H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
      *
      * While this problem is quire solvable, the required time and
      * resources are lacking at present.  Hence, for now, we don't
-     * allow the get file image operation to be perfomed on files
+     * allow the get file image operation to be performed on files
      * opened with the family file driver.
      *
      * Observe that the following test only looks at the top level
