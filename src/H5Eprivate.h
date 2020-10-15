@@ -114,12 +114,14 @@ typedef struct H5E_t H5E_t;
 #define HSYS_DONE_ERROR(majorcode, minorcode, retcode, str)                                                  \
     {                                                                                                        \
         int myerrno = errno;                                                                                 \
+        /* h5py may rely on the description format to get the errno - please try to avoid breaking it */     \
         HDONE_ERROR(majorcode, minorcode, retcode, "%s, errno = %d, error message = '%s'", str, myerrno,     \
                     HDstrerror(myerrno));                                                                    \
     }
 #define HSYS_GOTO_ERROR(majorcode, minorcode, retcode, str)                                                  \
     {                                                                                                        \
         int myerrno = errno;                                                                                 \
+        /* h5py may rely on the description format to get the errno - please try to avoid breaking it */     \
         HGOTO_ERROR(majorcode, minorcode, retcode, "%s, errno = %d, error message = '%s'", str, myerrno,     \
                     HDstrerror(myerrno));                                                                    \
     }
