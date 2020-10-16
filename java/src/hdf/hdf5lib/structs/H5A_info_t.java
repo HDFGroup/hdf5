@@ -15,7 +15,10 @@ package hdf.hdf5lib.structs;
 
 import java.io.Serializable;
 
-//Information struct for Attribute (For H5Aget_info/H5Aget_info_by_idx/H5Aget_info_by_name)
+/**
+ * Information struct for Attribute (For H5Aget_info/H5Aget_info_by_idx/H5Aget_info_by_name)
+ *
+ */
 public class H5A_info_t implements Serializable{
     private static final long serialVersionUID = 2791443594041667613L;
     public boolean corder_valid; // Indicate if creation order is valid

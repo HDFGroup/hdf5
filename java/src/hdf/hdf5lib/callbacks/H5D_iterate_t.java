@@ -13,6 +13,10 @@
 
 package hdf.hdf5lib.callbacks;
 
+/**
+ * Data class for link callback for H5Diterate.
+ *
+ */
 public interface H5D_iterate_t {
 /**    public ArrayList iterdata = new ArrayList();
   * Any derived interfaces must define the single public variable as above.
