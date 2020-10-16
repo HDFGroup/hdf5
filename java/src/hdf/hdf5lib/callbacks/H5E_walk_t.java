@@ -13,6 +13,10 @@
 
 package hdf.hdf5lib.callbacks;
 
+/**
+ * Data class for link callback for H5Ewalk.
+ *
+ */
 public interface H5E_walk_t {
 /**    public ArrayList iterdata = new ArrayList();
   * Any derived interfaces must define the single public variable as above.
