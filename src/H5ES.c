@@ -206,12 +206,85 @@ H5ESwait(hid_t es_id, uint64_t timeout, H5ES_status_t *status)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL status pointer")
 
     /* Wait for operations */
-    if (H5ES__wait(es, timeout, status) < 0)
+    if (H5ES__wait(es, timeout, status, TRUE) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTWAIT, FAIL, "can't wait on operations")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5ESwait() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5ESget_err_status
+ *
+ * Purpose:     Check if event set has failed operations
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, October 15, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5ESget_err_status(hid_t es_id, hbool_t *err_status /*out*/)
+{
+    H5ES_t *es;                  /* Event set */
+    herr_t  ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event set identifier")
+
+    /* Retrieve the error flag, if non-NULL */
+    if (err_status)
+        *err_status = es->err_occurred;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5ESget_err_status() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5ESget_err_count
+ *
+ * Purpose:     Retrieve # of failed operations
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, October 15, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5ESget_err_count(hid_t es_id, size_t *num_errs /*out*/)
+{
+    H5ES_t *es;                  /* Event set */
+    herr_t  ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event set identifier")
+
+    /* Retrieve the error flag, if non-NULL */
+    if (num_errs) {
+        if(es->err_occurred) {
+            /* Wait for all remaining events, to give accurate total */
+            if (H5ES__wait(es, H5ES_WAIT_FOREVER, NULL, FALSE) < 0)
+                HGOTO_ERROR(H5E_EVENTSET, H5E_CANTWAIT, FAIL, "can't wait on operations")
+
+            *num_errs = es->err_count;
+        } /* end if */
+        else
+            *num_errs = 0;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5ESget_err_count() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5ESclose

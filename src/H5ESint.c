@@ -67,6 +67,7 @@ struct H5ES_event_t {
 /********************/
 static herr_t H5ES__close_cb(void *es, void **request_token);
 static herr_t H5ES__remove(H5ES_t *es, const H5ES_event_t *ev);
+static herr_t H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev);
 
 /*********************/
 /* Package Variables */
@@ -263,6 +264,10 @@ H5ES_insert(hid_t es_id, H5VL_object_t *vol_obj, void *token, const char *caller
     if (NULL == (es = (H5ES_t *)H5I_object_verify(es_id, H5I_EVENTSET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an event set")
 
+    /* Check for errors in event set */
+    if(es->err_occurred)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTINSERT, FAIL, "event set has failed operations")
+
     /* Create vol object for token */
     if (NULL == (request = H5VL_create_object(token, vol_obj->connector))) {
         if (H5VL_request_free(token) < 0)
@@ -349,10 +354,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES__test(const H5ES_t *es, H5ES_status_t *status)
+H5ES__test(H5ES_t *es, H5ES_status_t *status)
 {
-    const H5ES_event_t *ev;                  /* Event to check */
-    herr_t              ret_value = SUCCEED; /* Return value */
+    H5ES_event_t *ev;                   /* Event to check */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -376,6 +381,12 @@ H5ES__test(const H5ES_t *es, H5ES_status_t *status)
 
             /* Check for status values that indicate we should break out of the loop */
             if (ev_status == H5ES_STATUS_FAIL || ev_status == H5ES_STATUS_CANCELED) {
+                /* Check for failed operation */
+                if (ev_status == H5ES_STATUS_FAIL)
+                    /* Handle failure */
+                    H5ES__handle_fail(es, ev);
+
+                /* Set the status to return and break out of loop */
                 *status = ev_status;
                 break;
             } /* end if */
@@ -431,6 +442,49 @@ H5ES__remove(H5ES_t *es, const H5ES_event_t *ev)
 } /* end H5ES__remove() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5ES__handle_fail
+ *
+ * Purpose:     Handle a failed event
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *	        Thursday, October 15, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(es);
+    HDassert(es->head);
+    HDassert(ev);
+
+    /* Set error flag for event set */
+    es->err_occurred = TRUE;
+
+    /* Remove event from normal list */
+    H5ES__remove(es, ev);
+
+    /* Append event onto the event set's error list */
+    if (NULL == es->err_tail)
+        es->err_head = es->err_tail = ev;
+    else {
+        ev->prev       = es->err_tail;
+        es->err_tail->next = ev;
+        es->err_tail       = ev;
+    } /* end else */
+
+    /* Increment the # of failed events in set */
+    es->count--;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5ES__handle_fail() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5ES__wait
  *
  * Purpose:     Wait for operations in event set to complete
@@ -446,16 +500,20 @@ H5ES__remove(H5ES_t *es, const H5ES_event_t *ev)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status)
+H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status, hbool_t allow_early_exit)
 {
     H5ES_event_t *ev;                   /* Event to operate on */
-    hbool_t       early_exit = FALSE;   /* Whether the loop exited early */
     herr_t        ret_value  = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(es);
+
+    /* Be optimistic about task execution */
+    /* (Will be changed for failed / canceled operations) */
+    if (status)
+        *status = H5ES_STATUS_SUCCEED;
 
     /* Iterate over the events in the set, waiting for them to complete */
     ev = es->head;
@@ -472,10 +530,18 @@ H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status)
 
         /* Check for non-success status values that indicate we should break out of the loop */
         if (ev_status != H5ES_STATUS_SUCCEED) {
+            /* Check for failed operation */
+            if (ev_status == H5ES_STATUS_FAIL)
+                /* Handle failure */
+                H5ES__handle_fail(es, ev);
+
+            /* Record the status, if possible */
             if (status)
                 *status = ev_status;
-            early_exit = TRUE;
-            break;
+
+            /* Check if we are allowed to exit early from the loop */
+            if(allow_early_exit)
+                break;
         } /* end if */
 
         /* Free the request */
@@ -498,10 +564,6 @@ HDfprintf(stderr, "%s: releasing event for '%s', with args '%s'\n", FUNC, ev->ap
         /* Advance to next node */
         ev = tmp;
     } /* end while */
-
-    /* Check for all operations completed */
-    if (!early_exit && status)
-        *status = H5ES_STATUS_SUCCEED;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -530,7 +592,7 @@ H5ES__close(H5ES_t *es)
     HDassert(es);
 
     /* Wait on operations in the set to complete */
-    if (H5ES__wait(es, H5ES_WAIT_FOREVER, NULL) < 0)
+    if (H5ES__wait(es, H5ES_WAIT_FOREVER, NULL, FALSE) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTWAIT, FAIL, "can't wait on operations")
 
     /* Release the event set */

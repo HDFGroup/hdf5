@@ -40,6 +40,8 @@ test_es_create(void)
 {
     hid_t  es_id; /* Event set ID */
     size_t count; /* # of events in set */
+    size_t num_errs; /* # of failed events in set */
+    hbool_t err_occurred; /* Whether an error has occurred */
 
     TESTING("event set creation");
 
@@ -53,6 +55,20 @@ test_es_create(void)
         TEST_ERROR;
     if (count > 0)
         FAIL_PUTS_ERROR("should be empty event set");
+
+    /* Check for errors */
+    err_occurred = FALSE;
+    if (H5ESget_err_status(es_id, &err_occurred) < 0)
+        TEST_ERROR;
+    if (err_occurred)
+        FAIL_PUTS_ERROR("should not be an error for the event set");
+
+    /* Check errors count */
+    num_errs = 0;
+    if (H5ESget_err_count(es_id, &num_errs) < 0)
+        TEST_ERROR;
+    if (num_errs)
+        FAIL_PUTS_ERROR("should not be any errors for the event set");
 
     /* Close the event set */
     if (H5ESclose(es_id) < 0)
