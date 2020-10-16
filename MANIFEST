@@ -3375,6 +3375,7 @@
 ./config/cmake/HDFCXXCompilerFlags.cmake
 ./config/cmake/HDFFortranCompilerFlags.cmake
 ./config/cmake/HDF5Macros.cmake
+./config/cmake/HDF5PluginMacros.cmake
 ./config/cmake/HDF5UseFortran.cmake
 ./config/cmake/jrunTest.cmake
 ./config/cmake/libh5cc.in
@@ -3420,6 +3421,7 @@
 ./CMakeLists.txt
 ./CMakeFilters.cmake
 ./CMakeInstallation.cmake
+./CMakePlugins.cmake
 ./CTestConfig.cmake
 ./UserMacros.cmake
 ./c++/CMakeLists.txt
