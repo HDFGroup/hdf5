@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Tuesday, November 24, 1998
  */
 
@@ -70,8 +70,10 @@ const char *FILENAME[] = {
 #define GCPL_ON_ROOT_MAX_COMPACT   4
 #define GCPL_ON_ROOT_MIN_DENSE     2
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 /* Definitions for 'old_api' test */
 #define OLD_API_GROUP           "/old_api"
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 /* Definitions for 'corrupt_stab_msg' test */
 #define CORRUPT_STAB_FILE           "corrupt_stab_msg.h5"
@@ -169,7 +171,7 @@ test_misc(hid_t fcpl, hid_t fapl, hbool_t new_format)
  *
  *         Failure:    number of errors
  *
- * Programmer:  Robb Matzke <matzke@llnl.gov> 2002-03-28
+ * Programmer:  Robb Matzke 2002-03-28
  *
  * Modifications:
  *-------------------------------------------------------------------------

@@ -120,13 +120,6 @@ usage (const char *prog)
 static void
 leave(int ret)
 {
-    if (ub_file)
-        HDfree (ub_file);
-    if (input_file)
-        HDfree (input_file);
-    if (output_file)
-        HDfree (output_file);
-
     h5tools_close();
 
     HDexit(ret);
@@ -148,7 +141,7 @@ parse_command_line (int argc, const char *argv[])
   int opt = FALSE;
 
   /* parse command line options */
-  while ((opt = get_option (argc, argv, s_opts, l_opts)) != EOF)
+  while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF)
     {
       switch ((char) opt)
       {
@@ -195,10 +188,8 @@ main (int argc, const char *argv[])
     int         ufid = -1;
     int         h5fid = -1;
     int         ofid = -1;
-    void       *edata;
-    H5E_auto2_t func;
-    hid_t       ifile = -1;
-    hid_t       plist = -1;
+    hid_t       ifile = H5I_INVALID_HID;
+    hid_t       plist = H5I_INVALID_HID;
     herr_t      status;
     htri_t      testval;
     hsize_t     usize;
@@ -214,20 +205,20 @@ main (int argc, const char *argv[])
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
 
-    /* Disable error reporting */
-    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
     /* Initialize h5tools lib */
     h5tools_init();
 
     parse_command_line(argc, argv);
 
+    /* enable error reporting if command line option */
+    h5tools_error_report();
+
     if (ub_file == NULL) {
         /* no user block */
         error_msg("missing argument for -u <user_file>.\n");
         help_ref_msg(stderr);
-        leave (EXIT_FAILURE);
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
     }
 
     testval = H5Fis_hdf5 (ub_file);
@@ -235,13 +226,15 @@ main (int argc, const char *argv[])
     if (testval > 0) {
         error_msg("-u <user_file> cannot be HDF5 file, but it appears to be an HDF5 file.\n");
         help_ref_msg(stderr);
-        leave (EXIT_FAILURE);
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
     }
 
     if (input_file == NULL) {
         error_msg("missing argument for -i <HDF5 file>.\n");
         help_ref_msg(stderr);
-        leave (EXIT_FAILURE);
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
     }
 
     testval = H5Fis_hdf5 (input_file);
@@ -249,45 +242,49 @@ main (int argc, const char *argv[])
     if (testval <= 0) {
         error_msg("Input HDF5 file \"%s\" is not HDF5 format.\n", input_file);
         help_ref_msg(stderr);
-        leave (EXIT_FAILURE);
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
     }
 
     ifile = H5Fopen(input_file, H5F_ACC_RDONLY, H5P_DEFAULT);
 
     if (ifile < 0) {
         error_msg("Can't open input HDF5 file \"%s\"\n", input_file);
-        leave (EXIT_FAILURE);
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
     }
 
     plist = H5Fget_create_plist(ifile);
     if (plist < 0) {
         error_msg("Can't get file creation plist for file \"%s\"\n", input_file);
-        H5Fclose(ifile);
-        leave (EXIT_FAILURE);
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
     }
 
     status = H5Pget_userblock(plist, &usize);
     if (status < 0) {
         error_msg("Can't get user block for file \"%s\"\n", input_file);
-        H5Pclose(plist);
-        H5Fclose(ifile);
-        leave (EXIT_FAILURE);
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
     }
 
     H5Pclose(plist);
+    plist = H5I_INVALID_HID;
     H5Fclose(ifile);
+    ifile = H5I_INVALID_HID;
 
     ufid = HDopen(ub_file, O_RDONLY);
     if(ufid < 0) {
         error_msg("unable to open user block file \"%s\"\n", ub_file);
-        leave (EXIT_FAILURE);
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
     }
 
     res = HDfstat(ufid, &sbuf);
     if(res < 0) {
         error_msg("Can't stat file \"%s\"\n", ub_file);
-        HDclose (ufid);
-        leave (EXIT_FAILURE);
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
     }
 
     fsize = (off_t)sbuf.st_size;
@@ -295,16 +292,15 @@ main (int argc, const char *argv[])
     h5fid = HDopen(input_file, O_RDONLY);
     if(h5fid < 0) {
         error_msg("unable to open HDF5 file for read \"%s\"\n", input_file);
-        HDclose (ufid);
-        leave (EXIT_FAILURE);
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
     }
 
     res = HDfstat(h5fid, &sbuf2);
     if(res < 0) {
         error_msg("Can't stat file \"%s\"\n", input_file);
-        HDclose (h5fid);
-        HDclose (ufid);
-        leave (EXIT_FAILURE);
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
     }
 
     h5fsize = (hsize_t)sbuf2.st_size;
@@ -314,9 +310,8 @@ main (int argc, const char *argv[])
 
         if (ofid < 0) {
             error_msg("unable to open output file \"%s\"\n", output_file);
-            HDclose (h5fid);
-            HDclose (ufid);
-            leave (EXIT_FAILURE);
+            h5tools_setstatus(EXIT_FAILURE);
+            goto done;
         }
     }
     else {
@@ -324,9 +319,8 @@ main (int argc, const char *argv[])
 
         if (ofid < 0) {
             error_msg("unable to create output file \"%s\"\n", output_file);
-            HDclose (h5fid);
-            HDclose (ufid);
-            leave (EXIT_FAILURE);
+            h5tools_setstatus(EXIT_FAILURE);
+            goto done;
         }
     }
 
@@ -365,18 +359,22 @@ main (int argc, const char *argv[])
     /* pad the ub */
     if(write_pad(ofid, where, &where) < 0) {
         error_msg("Can't pad file \"%s\"\n", output_file);
-        HDclose (h5fid);
-        HDclose (ufid);
-        HDclose (ofid);
-        leave (EXIT_FAILURE);
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
     } /* end if */
 
+done:
     if(ub_file)
         HDfree(ub_file);
     if(input_file)
         HDfree(input_file);
     if(output_file)
         HDfree(output_file);
+
+    if(plist >= 0)
+        H5Pclose(plist);
+    if(ifile >= 0)
+        H5Fclose(ifile);
 
     if(ufid >= 0)
         HDclose(ufid);
@@ -385,7 +383,7 @@ main (int argc, const char *argv[])
     if(ofid >= 0)
         HDclose(ofid);
 
-    return h5tools_getstatus();
+    leave(h5tools_getstatus());
 }
 
 /*-------------------------------------------------------------------------

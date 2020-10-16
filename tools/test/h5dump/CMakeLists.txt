@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5_TOOLS_TEST_H5DUMP C)
 
 #-----------------------------------------------------------------------------
@@ -35,7 +35,7 @@ endif ()
 # --------------------------------------------------------------------
 if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
   add_executable (h5dumpgentest ${HDF5_TOOLS_TEST_H5DUMP_SOURCE_DIR}/h5dumpgentest.c)
-  target_include_directories (h5dumpgentest PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (h5dumpgentest PRIVATE "${HDF5_SRC_DIR};${HDF5_TEST_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (h5dumpgentest STATIC)
   target_link_libraries (h5dumpgentest PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
   set_target_properties (h5dumpgentest PROPERTIES FOLDER generator/tools)
@@ -43,10 +43,12 @@ if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
   #add_test (NAME h5dumpgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dumpgentest>)
 endif ()
 
-include (CMakeTests.cmake)
+if (HDF5_TEST_TOOLS AND HDF5_TEST_SERIAL)
+  include (CMakeTests.cmake)
 
-include (CMakeTestsPBITS.cmake)
+  include (CMakeTestsPBITS.cmake)
 
-include (CMakeTestsVDS.cmake)
+  include (CMakeTestsVDS.cmake)
 
-include (CMakeTestsXML.cmake)
+  include (CMakeTestsXML.cmake)
+endif ()

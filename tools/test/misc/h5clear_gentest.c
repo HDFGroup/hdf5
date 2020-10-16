@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #include "hdf5.h"
-#include "H5private.h"
+#include "h5test.h"
 
 /* The HDF5 test files */
 const char *FILENAME[] = {
@@ -56,18 +56,26 @@ const char *FILENAME_ENHANCE[] = {
 static int
 gen_cache_image_file(const char *fname)
 {
-    hid_t fid = -1;                 /* File ID */
-    hid_t did = -1, sid = -1;       /* Dataset ID, dataspace ID */
-    hid_t fapl = -1;                /* File access property list */
-    hid_t dcpl = -1;                /* Dataset creation property list */
+    hid_t fid = H5I_INVALID_HID;                 /* File ID */
+    hid_t did = -1, sid = H5I_INVALID_HID;       /* Dataset ID, dataspace ID */
+    hid_t fapl = H5I_INVALID_HID;                /* File access property list */
+    hid_t dcpl = H5I_INVALID_HID;                /* Dataset creation property list */
     hsize_t dims[2];                /* Dimension sizes */
     hsize_t chunks[2];              /* Chunked dimension sizes */
-    int buf[50][100];               /* Buffer for data to write */
     int i, j;                       /* Local index variables */
+    int **buf = NULL;               /* Buffer for data to write */
     H5AC_cache_image_config_t cache_image_config =  /* Cache image input configuration */
                             { H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION,
                               TRUE, FALSE,
                               H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE};
+
+    /* Create and fill array */
+    H5TEST_ALLOCATE_2D_ARRAY(buf, int, 50, 100);
+    if (NULL == buf)
+        goto error;
+    for(i = 0; i < 50; i++)
+        for(j = 0; j < 100; j++)
+            buf[i][j] = i * j;
 
     /* Create a copy of file access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -91,11 +99,6 @@ gen_cache_image_file(const char *fname)
     if((sid = H5Screate_simple(2, dims, NULL)) < 0)
         goto error;
 
-    /* Initialize buffer for writing to dataset */
-    for(i = 0; i < 50; i++)
-        for(j = 0; j < 100; j++)
-            buf[i][j] = i * j;
-
     /* Set up to create a chunked dataset */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto error;
@@ -107,7 +110,7 @@ gen_cache_image_file(const char *fname)
         goto error;
 
     /* Write to the dataset */
-    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
         goto error;
 
     /* Closing */
@@ -121,6 +124,9 @@ gen_cache_image_file(const char *fname)
         goto error;
     if(H5Fclose(fid) < 0)
         goto error;
+
+    HDfree(buf);
+
     return 0;
 
 error:
@@ -132,6 +138,9 @@ error:
         H5Pclose(fapl);
         H5Pclose(dcpl);
     } H5E_END_TRY;
+
+    HDfree(buf);
+
     return 1;
 } /* gen_cache_image_file() */
 
@@ -164,13 +173,13 @@ error:
 static int
 gen_enhance_files(hbool_t user)
 {
-    hid_t fid = -1;         /* File ID */
-    hid_t fcpl = -1;        /* File creation property list */
-    hid_t sid = -1;         /* Dataspace ID */
-    hid_t did = -1;         /* Dataset ID */
+    hid_t fid = H5I_INVALID_HID;         /* File ID */
+    hid_t fcpl = H5I_INVALID_HID;        /* File creation property list */
+    hid_t sid = H5I_INVALID_HID;         /* Dataspace ID */
+    hid_t did = H5I_INVALID_HID;         /* Dataset ID */
     hsize_t dim[1];         /* Dimension sizes */
     int data[NUM_ELMTS];    /* Buffer for data */
-    int fd = -1;            /* The file descriptor ID */
+    int fd = H5I_INVALID_HID;            /* The file descriptor ID */
     int64_t eoa;            /* The EOA value */
     uint32_t chksum;        /* The chksum value */
     int i = 0 , j = 0, u = 0;   /* Local index variable */
@@ -361,13 +370,13 @@ error:
 int
 main(void)
 {
-    hid_t fid = -1;            /* File ID */
-    hid_t fcpl = -1;        /* File creation property list */
-    hid_t fapl = -1, new_fapl = -1;    /* File access property lists */
+    hid_t fid = H5I_INVALID_HID;            /* File ID */
+    hid_t fcpl = H5I_INVALID_HID;        /* File creation property list */
+    hid_t fapl = -1, new_fapl = H5I_INVALID_HID;    /* File access property lists */
     char fname[512];        /* File name */
     unsigned new_format;    /* To use latest library format or not */
-    hid_t sid = -1;         /* Dataspace ID */
-    hid_t did = -1;         /* Dataset ID */
+    hid_t sid = H5I_INVALID_HID;         /* Dataspace ID */
+    hid_t did = H5I_INVALID_HID;         /* Dataset ID */
     hsize_t dim[1];         /* Dimension sizes */
     int data[NUM_ELMTS];    /* Buffer for data */
     int i;                  /* Local index variables */

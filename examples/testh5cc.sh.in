@@ -48,6 +48,9 @@ verbose=${HDF5_VERBOSE:-1}      # 0: none; 1: default; 2: chatty; 3: everything
 test $verbose -gt 2 && set -x
 H5_NO_DEPRECATED_SYMBOLS=`grep '#define H5_NO_DEPRECATED_SYMBOLS ' ../src/H5pubconf.h`
 H5_USE_16_API_DEFAULT=`grep '#define H5_USE_16_API_DEFAULT ' ../src/H5pubconf.h`
+H5_USE_18_API_DEFAULT=`grep '#define H5_USE_18_API_DEFAULT ' ../src/H5pubconf.h`
+H5_USE_110_API_DEFAULT=`grep '#define H5_USE_110_API_DEFAULT ' ../src/H5pubconf.h`
+H5_USE_112_API_DEFAULT=`grep '#define H5_USE_112_API_DEFAULT ' ../src/H5pubconf.h`
 
 # setup my machine information.
 myos=`uname -s`
@@ -61,6 +64,8 @@ v16main=${H5TOOL}_v16main.$suffix
 v16main_o=${H5TOOL}_v16main.o
 v18main=${H5TOOL}_v18main.$suffix
 v18main_o=${H5TOOL}_v18main.o
+v110main=${H5TOOL}_v110main.$suffix
+v110main_o=${H5TOOL}_v110main.o
 appmain=${H5TOOL}_appmain.$suffix
 appmain_o=${H5TOOL}_appmain.o
 prog1=${H5TOOL}_prog1.$suffix
@@ -74,7 +79,7 @@ applib=libapp${H5TOOL}.a
 # Don't use the wildcard form of *.h5 as it will wipe out even *.h5 generated
 # by otehr test programs. This will cause a racing condition error when
 # parallel make (e.g., gmake -j 4) is used.
-temp_SRC="$hdf5main $v16main $v18main $appmain $prog1 $prog2"
+temp_SRC="$hdf5main $v16main $v18main $v110main $appmain $prog1 $prog2"
 temp_OBJ=`echo $temp_SRC | sed -e "s/\.${suffix}/.o/g"`
 temp_FILES="a.out $applib"
 
@@ -100,9 +105,9 @@ main (void)
 
     printf("HDF5 C Sample program ran successfully. File %s generated.\n", H5FILE_NAME);
     remove(H5FILE_NAME);
- 
+
     return 0;
-}     
+}
 EOF
 
 # generate prog1
@@ -143,7 +148,7 @@ main (void)
     remove(H5FILE_NAME);
 
     return 0;
-}     
+}
 EOF
 
 # Generate HDF5 v1.6 Main Program:
@@ -196,6 +201,34 @@ main (void)
 }
 EOF
 
+# Generate HDF5 v1.10 Main Program:
+# This makes unique V1.10 API calls.
+cat > $v110main <<EOF
+/* This is a V1.10 API calls example Program. */
+#include "hdf5.h"
+#define H5FILE_NAME        "tmp.h5"
+int
+main (void)
+{
+    hid_t       file, group, group2, dset, dset2;    /* file and group handles */
+
+    file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    group = H5Gcreate(file, "/Group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    group2 = H5Gcreate2(file, "/Group1.8", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset = H5Dopen(group, "Dataset", H5P_DEFAULT);
+    dset2 = H5Dopen2(group2, "Dataset2", H5P_DEFAULT);
+    H5Dclose(dset);
+    H5Dclose(dset2);
+    H5Gclose(group2);
+    H5Gclose(group);
+    H5Fclose(file);
+
+    printf("HDF5 C program created with V1.10 API ran successfully. "
+       "File %s generated.\n", H5FILE_NAME);
+    remove(H5FILE_NAME);
+    return 0;
+}
+EOF
 
 # Parse option
 #   None
@@ -304,17 +337,26 @@ TOOLTEST -E $appmain $prog1 $prog2
 
 # Group5: Version compatibility tests.
 echo "***"Version compatibility tests.
-# Test these two cases now. More later.
+# 20200610 Updated for version 1.10.
 # If H5_NO_DEPRECATED_SYMBOLS;
-# then only v18main works.
+# then versions v18main and v110main work.
+# -DH5_USE_<N>_API_DEFAULT flags cannot be used with H5_NO_DEPRECATED_SYMBOLS;
 # else if H5_USE_16_API_DEFAULT;
-#      then v16main works and -DH5_NO_DEPRECATED_SYMBOLS v18main also works.
-#      else v18main works and -DH5_USE_16_API_DEFAULT v16main also works.
+#      then v16main works.
+# else v18main works and -DH5_USE_16_API_DEFAULT v16main also works.
+# As new versions with versioned functions are added, they will work with and 
+# should be added to H5_NO_DEPRECATED_SYMBOLS and to the else section, with and 
+# without the -DH5_USE_<N>_API_DEFAULT flag. A new H5_USE_<N>_API_DEFAULT section 
+# should also be added.
 #
 if [ -n "$H5_USE_16_API_DEFAULT" ]; then
     echo "H5_USE_16_API_DEFAULT is defined."
+elif [ -n "$H5_USE_18_API_DEFAULT" ]; then
+    echo "H5_USE_18_API_DEFAULT is defined."
+elif [ -n "$H5_USE_110_API_DEFAULT" ]; then
+    echo "H5_USE_110_API_DEFAULT is defined."
 else
-    echo "H5_USE_16_API_DEFAULT is not defined."
+    echo "No H5 API_DEFAULT is defined."
 fi
 if [ -n "$H5_NO_DEPRECATED_SYMBOLS" ]; then
     echo "H5_NO_DEPRECATED_SYMBOLS is defined."
@@ -324,12 +366,21 @@ fi
 if [ -n "$H5_NO_DEPRECATED_SYMBOLS" ]; then
     echo "Skipping $v16main test"
     TOOLTEST $v18main
+    TOOLTEST $v18main
+    TOOLTEST $v110main
 elif [ -n "$H5_USE_16_API_DEFAULT" ]; then
+    echo "Testing HDF5  with 16_API_DEFAULT"
     TOOLTEST $v16main
-    TOOLTEST -DH5_NO_DEPRECATED_SYMBOLS $v18main
-else
+elif [ -n "$H5_USE_18_API_DEFAULT" ]; then
+    echo "Testing HDF5  with 18_API_DEFAULT"
     TOOLTEST -DH5_USE_16_API_DEFAULT $v16main
     TOOLTEST $v18main
+else
+    echo "Testing HDF5  with 110_API_DEFAULT"
+    TOOLTEST -DH5_USE_16_API_DEFAULT $v16main
+    TOOLTEST -DH5_USE_18_API_DEFAULT $v18main
+    TOOLTEST $v18main
+    TOOLTEST $v110main
 fi
 
 ##############################################################################

@@ -34,7 +34,7 @@
     if (VERBOSE_MED && *mesg != '\0')                                  \
         HDprintf("%s\n", mesg)
 
-/* 
+/*
  * VRFY: Verify if the condition val is true.
  * If it is true, then call MESG to print mesg, depending on the verbose
  * level.
@@ -44,12 +44,12 @@
  * This will allow program to continue and can be used for debugging.
  * (The "do {...} while(0)" is to group all the statements as one unit.)
  */
-#define VRFY(val, mesg) do {                                            \
+#define VRFY_IMPL(val, mesg, rankvar) do {                              \
     if (val) {                                                          \
         MESG(mesg);                                                     \
     }                                                                   \
     else {                                                              \
-        HDprintf("Proc %d: ", mpi_rank);                                \
+        HDprintf("Proc %d: ", rankvar);                                 \
         HDprintf("*** Parallel ERROR ***\n");                           \
         HDprintf("    VRFY (%s) failed at line %4d in %s\n",            \
                mesg, (int)__LINE__, __FILE__);                          \
@@ -61,6 +61,9 @@
         }                                                               \
     }                                                                   \
 } while(0)
+
+#define VRFY_G(val, mesg) VRFY_IMPL(val, mesg, mpi_rank_g)
+#define VRFY(val, mesg) VRFY_IMPL(val, mesg, mpi_rank)
 
 /*
  * Checking for information purpose.

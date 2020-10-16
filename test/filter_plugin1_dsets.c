@@ -69,7 +69,7 @@ add_sub_value(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_value
     /* Check that permanent parameters are set correctly */
     if (cd_values[0] > 9)
         return 0;
-  
+
     value = (int)cd_values[0];
 
     if (flags & H5Z_FLAG_REVERSE) {

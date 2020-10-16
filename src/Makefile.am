@@ -63,7 +63,8 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5FA.c H5FAcache.c H5FAdbg.c H5FAdblock.c H5FAdblkpage.c H5FAhdr.c \
         H5FAint.c H5FAstat.c H5FAtest.c \
         H5FD.c H5FDcore.c H5FDfamily.c H5FDhdfs.c H5FDint.c H5FDlog.c \
-        H5FDmulti.c H5FDsec2.c H5FDspace.c H5FDstdio.c H5FDtest.c \
+        H5FDmulti.c H5FDsec2.c H5FDspace.c \
+        H5FDsplitter.c H5FDstdio.c H5FDtest.c \
         H5FL.c H5FO.c H5FS.c H5FScache.c H5FSdbg.c H5FSint.c H5FSsection.c \
         H5FSstat.c H5FStest.c \
         H5G.c H5Gbtree2.c H5Gcache.c \
@@ -118,12 +119,17 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
 
 # Only compile parallel sources if necessary
 if BUILD_PARALLEL_CONDITIONAL
-    libhdf5_la_SOURCES += H5ACmpio.c H5Cmpio.c H5Dmpio.c H5Fmpi.c H5FDmpi.c H5FDmpio.c H5Smpio.c
+    libhdf5_la_SOURCES += H5mpi.c H5ACmpio.c H5Cmpio.c H5Dmpio.c H5Fmpi.c H5FDmpi.c H5FDmpio.c H5Smpio.c
 endif
 
 # Only compile the direct VFD if necessary
 if DIRECT_VFD_CONDITIONAL
     libhdf5_la_SOURCES += H5FDdirect.c
+endif
+
+# Only compile the mirror VFD if necessary
+if MIRROR_VFD_CONDITIONAL
+    libhdf5_la_SOURCES += H5FDmirror.c
 endif
 
 # Only compile the read-only S3 VFD if necessary
@@ -136,14 +142,14 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5vers
         H5Apublic.h H5ACpublic.h \
         H5Cpublic.h H5Dpublic.h \
         H5Epubgen.h H5Epublic.h H5Fpublic.h \
-        H5FDpublic.h H5FDcore.h H5FDdirect.h \
-        H5FDfamily.h H5FDhdfs.h H5FDlog.h H5FDmpi.h H5FDmpio.h \
-        H5FDmulti.h H5FDros3.h H5FDsec2.h H5FDstdio.h H5FDwindows.h \
+        H5FDpublic.h H5FDcore.h H5FDdirect.h H5FDfamily.h H5FDhdfs.h \
+        H5FDlog.h H5FDmirror.h H5FDmpi.h H5FDmpio.h H5FDmulti.h H5FDros3.h \
+        H5FDsec2.h H5FDsplitter.h H5FDstdio.h H5FDwindows.h \
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
         H5MMpublic.h H5Opublic.h H5Ppublic.h \
         H5PLextern.h H5PLpublic.h \
-        H5Rpublic.h H5Spublic.h \
-        H5Tpublic.h H5Zpublic.h
+        H5Rpublic.h H5Spublic.h H5Tpublic.h \
+        H5Zpublic.h
 
 # install libhdf5.settings in lib directory
 settingsdir=$(libdir)

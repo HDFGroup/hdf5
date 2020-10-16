@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5_CPP_EXAMPLES CXX)
 
 # --------------------------------------------------------------------
@@ -68,6 +68,6 @@ foreach (example ${tutr_examples})
   set_target_properties (cpp_ex_${example} PROPERTIES FOLDER examples/cpp)
 endforeach ()
 
-if (BUILD_TESTING)
+if (BUILD_TESTING AND HDF5_TEST_CPP AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
   include (CMakeTests.cmake)
 endif ()

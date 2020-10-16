@@ -24,5 +24,5 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
     major: Links
     minor: Unable to open file
   #008: (file name) line (number) in H5F_prefix_open_file(): unable to open file, file name = 'somefile', temp_file_name = 'somefile'
-    major: File accessibilty
+    major: File accessibility
     minor: Unable to open file

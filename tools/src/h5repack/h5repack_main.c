@@ -32,36 +32,38 @@ const char *outfile = NULL;
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVvf:l:m:e:nLj:k:c:d:s:u:b:M:t:a:i:o:S:P:T:G:q:z:E";
+static const char *s_opts = "a:b:c:d:e:f:hi:j:k:l:m:no:q:s:t:u:vz:EG:LM:P:S:T:VXW";
 static struct long_options l_opts[] = {
-    { "help",                no_arg,      'h' },
-    { "version",             no_arg,      'V' },
-    { "verbose",             no_arg,      'v' },
-    { "filter",              require_arg, 'f' },
-    { "layout",              require_arg, 'l' },
-    { "minimum",             require_arg, 'm' },
-    { "file",                require_arg, 'e' },
-    { "native",              no_arg,      'n' },
-    { "latest",              no_arg,      'L' },
-    { "low",                 require_arg, 'j' },
-    { "high",                require_arg, 'k' },
+    { "alignment",           require_arg, 'a' },
+    { "block",               require_arg, 'b' },
     { "compact",             require_arg, 'c' },
     { "indexed",             require_arg, 'd' },
-    { "ssize",               require_arg, 's' },
-    { "ublock",              require_arg, 'u' },
-    { "block",               require_arg, 'b' },
-    { "metadata_block_size", require_arg, 'M' },
-    { "threshold",           require_arg, 't' },
-    { "alignment",           require_arg, 'a' },
+    { "file",                require_arg, 'e' },
+    { "filter",              require_arg, 'f' },
+    { "help",                no_arg,      'h' },
     { "infile",              require_arg, 'i' }, /* for backward compability */
+    { "low",                 require_arg, 'j' },
+    { "high",                require_arg, 'k' },
+    { "layout",              require_arg, 'l' },
+    { "minimum",             require_arg, 'm' },
+    { "native",              no_arg,      'n' },
     { "outfile",             require_arg, 'o' }, /* for backward compability */
-    { "fs_strategy",         require_arg, 'S' },
-    { "fs_persist",          require_arg, 'P' },
-    { "fs_threshold",        require_arg, 'T' },
-    { "fs_pagesize",         require_arg, 'G' },
     { "sort_by",             require_arg, 'q' },
+    { "ssize",               require_arg, 's' },
+    { "threshold",           require_arg, 't' },
+    { "ublock",              require_arg, 'u' },
+    { "verbose",             no_arg,      'v' },
     { "sort_order",          require_arg, 'z' },
     { "enable-error-stack",  no_arg,      'E' },
+    { "fs_pagesize",         require_arg, 'G' },
+    { "latest",              no_arg,      'L' },
+    { "metadata_block_size", require_arg, 'M' },
+    { "fs_persist",          require_arg, 'P' },
+    { "fs_strategy",         require_arg, 'S' },
+    { "fs_threshold",        require_arg, 'T' },
+    { "version",             no_arg,      'V' },
+    { "merge",               no_arg,      'X' },
+    { "prune",               no_arg,      'W' },
     { NULL, 0, '\0' }
 };
 
@@ -95,6 +97,9 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "   --high=BOUND            The high bound for library release versions to use\n");
     PRINTVALSTREAM(rawoutstream, "                           when creating objects in the file\n");
     PRINTVALSTREAM(rawoutstream, "                           (default is H5F_LIBVER_LATEST)\n");
+    PRINTVALSTREAM(rawoutstream, "   --merge                 Follow external soft link recursively and merge data\n");
+    PRINTVALSTREAM(rawoutstream, "   --prune                 Do not follow external soft links and remove link\n");
+    PRINTVALSTREAM(rawoutstream, "   --merge --prune         Follow external link, merge data and remove dangling link\n");
     PRINTVALSTREAM(rawoutstream, "   -c L1, --compact=L1     Maximum number of links in header messages\n");
     PRINTVALSTREAM(rawoutstream, "   -d L2, --indexed=L2     Minimum number of links in the indexed format\n");
     PRINTVALSTREAM(rawoutstream, "   -s S[:F], --ssize=S[:F] Shared object header message minimum size\n");
@@ -279,7 +284,7 @@ int read_info(const char *filename, pack_opt_t *options)
     char comp_info[1024];
     FILE *fp = NULL;
     char c;
-    int i, rc = 1;
+    int i;
     int ret_value = EXIT_SUCCESS;
 
     if (NULL == (fp = HDfopen(filename, "r"))) {
@@ -291,6 +296,8 @@ int read_info(const char *filename, pack_opt_t *options)
 
     /* cycle until end of file reached */
     while (1) {
+        if (EOF == fscanf(fp, "%9s", stype))
+            break;
 
         /* Info indicator must be for layout or filter */
         if (HDstrcmp(stype,"-l") && HDstrcmp(stype, "-f")) {
@@ -332,7 +339,7 @@ int read_info(const char *filename, pack_opt_t *options)
 
         if (!HDstrcmp(stype, "-l")) {
             if (h5repack_addlayout(comp_info, options) == -1) {
-                error_msg("could not add chunck option\n");
+                error_msg("could not add chunk option\n");
                 h5tools_setstatus(EXIT_FAILURE);
                 ret_value = EXIT_FAILURE;
                 goto done;
@@ -410,7 +417,7 @@ set_sort_order(const char *form)
 static
 int parse_command_line(int argc, const char **argv, pack_opt_t* options)
 {
-    int opt;
+    int bound, opt;
     int ret_value = 0;
 
     /* parse command line options */
@@ -432,13 +439,13 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
             case 'h':
                 usage(h5tools_getprogname());
                 h5tools_setstatus(EXIT_SUCCESS);
-                ret_value = -1;
+                ret_value = 1;
                 goto done;
 
             case 'V':
                 print_version(h5tools_getprogname());
                 h5tools_setstatus(EXIT_SUCCESS);
-                ret_value = -1;
+                ret_value = 1;
                 goto done;
 
             case 'v':
@@ -476,9 +483,12 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case 'e':
-                ret_value = read_info(opt_arg, options);
-                if (ret_value < 0)
+                if ((ret_value = read_info(opt_arg, options)) < 0) {
+                    error_msg("failed to read from repack options file <%s>\n", opt_arg);
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret_value = -1;
                     goto done;
+                }
                 break;
 
             case 'n':
@@ -490,19 +500,33 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case 'j':
-                options->low_bound = (H5F_libver_t)HDatoi(opt_arg);
-                if (options->low_bound < H5F_LIBVER_EARLIEST || options->low_bound > H5F_LIBVER_LATEST) {
+                bound = HDatoi(opt_arg);
+                if (bound < H5F_LIBVER_EARLIEST || bound > H5F_LIBVER_LATEST) {
                     error_msg("in parsing low bound\n");
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret_value = -1;
                     goto done;
                 }
+                options->low_bound = bound;
                 break;
 
             case 'k':
-                options->high_bound = (H5F_libver_t)HDatoi(opt_arg);
-                if (options->high_bound < H5F_LIBVER_EARLIEST || options->high_bound > H5F_LIBVER_LATEST) {
+                bound = HDatoi(opt_arg);
+                if (bound < H5F_LIBVER_EARLIEST || bound > H5F_LIBVER_LATEST) {
                     error_msg("in parsing high bound\n");
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret_value = -1;
                     goto done;
                 }
+                options->high_bound = bound;
+                break;
+
+            case 'X':
+                options->merge = TRUE;
+                break;
+
+            case 'W':
+                options->prune = TRUE;
                 break;
 
             case 'c':
@@ -621,8 +645,8 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case 'q':
-                if (H5_INDEX_UNKNOWN == set_sort_by(opt_arg)) {
-                    error_msg(" failed to set sort by form <%s>\n", opt_arg);
+                if (H5_INDEX_UNKNOWN == (sort_by = set_sort_by(opt_arg))) {
+                    error_msg("failed to set sort by form <%s>\n", opt_arg);
                     h5tools_setstatus(EXIT_FAILURE);
                     ret_value = -1;
                     goto done;
@@ -630,8 +654,8 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case 'z':
-                if (set_sort_order(opt_arg) == H5_ITER_UNKNOWN) {
-                    error_msg(" failed to set sort order form <%s>\n", opt_arg);
+                if (H5_ITER_UNKNOWN == (sort_order = set_sort_order(opt_arg))) {
+                    error_msg("failed to set sort order form <%s>\n", opt_arg);
                     h5tools_setstatus(EXIT_FAILURE);
                     ret_value = -1;
                     goto done;
@@ -649,30 +673,30 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
     /* If neither -i nor -o given, get in and out files positionally */
     if (0 == (has_i + has_o)) {
-         if (argv[opt_ind] != NULL && argv[opt_ind + 1] != NULL) {
-             infile = argv[opt_ind];
-             outfile = argv[opt_ind + 1];
+        if (argv[opt_ind] != NULL && argv[opt_ind + 1] != NULL) {
+            infile = argv[opt_ind];
+            outfile = argv[opt_ind + 1];
 
-             if (!HDstrcmp(infile, outfile)) {
-                 error_msg("file names cannot be the same\n");
-                 usage(h5tools_getprogname());
-                 h5tools_setstatus(EXIT_FAILURE);
-                 ret_value = -1;
-             }
-         }
-         else {
-             error_msg("file names missing\n");
-             usage(h5tools_getprogname());
-             h5tools_setstatus(EXIT_FAILURE);
-             ret_value = -1;
-         }
-     }
-     else if (has_i != 1 || has_o != 1) {
-         error_msg("filenames must be either both -i -o or both positional\n");
-         usage(h5tools_getprogname());
-         h5tools_setstatus(EXIT_FAILURE);
-         ret_value = -1;
-     }
+            if (!HDstrcmp(infile, outfile)) {
+                error_msg("file names cannot be the same\n");
+                usage(h5tools_getprogname());
+                h5tools_setstatus(EXIT_FAILURE);
+                ret_value = -1;
+            }
+        }
+        else {
+            error_msg("file names missing\n");
+            usage(h5tools_getprogname());
+            h5tools_setstatus(EXIT_FAILURE);
+            ret_value = -1;
+        }
+    }
+    else if (has_i != 1 || has_o != 1) {
+        error_msg("filenames must be either both -i -o or both positional\n");
+        usage(h5tools_getprogname());
+        h5tools_setstatus(EXIT_FAILURE);
+        ret_value = -1;
+    }
 
 done:
     return ret_value;
@@ -690,54 +714,64 @@ done:
  */
 int main(int argc, const char **argv)
 {
-    pack_opt_t options; /*the global options */
-    H5E_auto2_t         func;
-    H5E_auto2_t         tools_func;
-    void               *edata;
-    void               *tools_edata;
+    pack_opt_t          options; /*the global options */
+    int                 parse_ret;
 
     HDmemset(&options, 0, sizeof(pack_opt_t));
-
-    h5tools_setprogname(PROGRAMNAME);
-    h5tools_setstatus(EXIT_SUCCESS);
-
-    /* Disable error reporting */
-    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
     /* Initialize h5tools lib */
     h5tools_init();
 
-    /* Disable tools error reporting */
-    H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
-    H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
+    h5tools_setprogname(PROGRAMNAME);
+    h5tools_setstatus(EXIT_SUCCESS);
 
     /* update hyperslab buffer size from H5TOOLS_BUFSIZE env if exist */
     if (h5tools_getenv_update_hyperslab_bufsize() < 0) {
+        HDprintf("Error occurred while retrieving H5TOOLS_BUFSIZE value\n");
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
 
     /* initialize options  */
     if (h5repack_init(&options, 0, FALSE) < 0) {
+        HDprintf("Error occurred while initializing repack options\n");
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
+
     /* Initialize default indexing options */
     sort_by = H5_INDEX_CRT_ORDER;
 
-    if (parse_command_line(argc, argv, &options) < 0)
+    parse_ret = parse_command_line(argc, argv, &options);
+    if (parse_ret < 0) {
+        HDprintf("Error occurred while parsing command-line options\n");
+        h5tools_setstatus(EXIT_FAILURE);
         goto done;
-
-    if (enable_error_stack > 0) {
-        H5Eset_auto2(H5E_DEFAULT, func, edata);
-        H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
+    }
+    else if (parse_ret > 0) {
+        /* Short-circuit success */
+        h5tools_setstatus(EXIT_SUCCESS);
+        goto done;
     }
 
+    /* enable error reporting if command line option */
+    h5tools_error_report();
+
     /* pack it */
-    h5tools_setstatus(h5repack(infile, outfile, &options));
+    if (h5repack(infile, outfile, &options) < 0) {
+        HDprintf("Error occurred while repacking\n");
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
+    }
+
+    h5tools_setstatus(EXIT_SUCCESS);
 
 done:
+    if (options.fin_fapl >= 0 && options.fin_fapl != H5P_DEFAULT)
+        H5Pclose(options.fin_fapl);
+    if (options.fout_fapl >= 0 && options.fout_fapl != H5P_DEFAULT)
+        H5Pclose(options.fout_fapl);
+
     /* free tables */
     h5repack_end(&options);
 

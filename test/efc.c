@@ -31,8 +31,14 @@ const char *FILENAME[] = {
     NULL
 };
 
+/* Windows doesn't have PATH_MAX */
+#ifndef PATH_MAX
+#define PATH_MAX    4096
+#endif  /* !PATH_MAX */
+
 /* Global patched filename buffer */
-static char filename[6][1024];
+#define N_FILENAMES     6
+static char *filename[N_FILENAMES];
 
 /* Global property lists - just copies of the defaults (necessary to use
  * internal functions */
@@ -629,7 +635,7 @@ test_graph_nocycle(void)
     /* Test 3: Simple "inverted" tree.  Two parent files share a child file,
      * which has its own child file.  Verify that the child's child is not
      * closed until both parents' EFCs are released.  First release through one
-     * parent, then reopen through that parent and release the other, then 
+     * parent, then reopen through that parent and release the other, then
      * re-release the first parent. */
     if(NULL == (f0 = H5F_open(filename[0],
             H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
@@ -860,7 +866,7 @@ test_graph_cycle(void)
 
 
     /* Test 1: File caches itself. Verify that closing the file causes it to be
-     * actually closed, and there is no other unexpected behavior. 
+     * actually closed, and there is no other unexpected behavior.
      */
     if(NULL == (f0 = H5F_open(filename[0],
             H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
@@ -2895,8 +2901,9 @@ error:
 int
 main(void)
 {
-    unsigned nerrors = 0;        /* track errors */
-    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    unsigned nerrors = 0;                   /* track errors */
+    hbool_t     api_ctx_pushed = FALSE;     /* Whether API context pushed */
+    int i;                                  /* iterator */
 
     /* Test Setup */
     HDputs("Testing the external file cache");
@@ -2905,13 +2912,18 @@ main(void)
     fcpl_id = H5Pcreate(H5P_FILE_CREATE);
     fapl_id = h5_fileaccess();
 
+    /* Allocate memory for filenames */
+    for(i = 0; i < N_FILENAMES; i++) {
+        filename[i] = (char *)HDcalloc(PATH_MAX, sizeof(char));
+    }
+
     /* Patch filenames */
-    h5_fixname(FILENAME[0], fapl_id, filename[0], sizeof(filename[0]));
-    h5_fixname(FILENAME[1], fapl_id, filename[1], sizeof(filename[1]));
-    h5_fixname(FILENAME[2], fapl_id, filename[2], sizeof(filename[2]));
-    h5_fixname(FILENAME[3], fapl_id, filename[3], sizeof(filename[3]));
-    h5_fixname(FILENAME[4], fapl_id, filename[4], sizeof(filename[4]));
-    h5_fixname(FILENAME[5], fapl_id, filename[5], sizeof(filename[5]));
+    h5_fixname(FILENAME[0], fapl_id, filename[0], PATH_MAX);
+    h5_fixname(FILENAME[1], fapl_id, filename[1], PATH_MAX);
+    h5_fixname(FILENAME[2], fapl_id, filename[2], PATH_MAX);
+    h5_fixname(FILENAME[3], fapl_id, filename[3], PATH_MAX);
+    h5_fixname(FILENAME[4], fapl_id, filename[4], PATH_MAX);
+    h5_fixname(FILENAME[5], fapl_id, filename[5], PATH_MAX);
 
     /* Push API context */
     if(H5CX_push() < 0) FAIL_STACK_ERROR
@@ -2930,7 +2942,8 @@ main(void)
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl_id) < 0 ? 1 : 0);
 
     /* Pop API context */
-    if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
+    if(api_ctx_pushed && H5CX_pop() < 0)
+        FAIL_STACK_ERROR
     api_ctx_pushed = FALSE;
 
     if(nerrors)
@@ -2939,6 +2952,10 @@ main(void)
     HDputs("All external file cache tests passed.");
 
     h5_clean_files(FILENAME, fapl_id);
+
+    for(i = 0; i < N_FILENAMES; i++) {
+        HDfree(filename[i]);
+    }
 
     return EXIT_SUCCESS;
 
@@ -2949,7 +2966,12 @@ error:
         H5Pclose(fapl_id);
     } H5E_END_TRY
 
-    if(api_ctx_pushed) H5CX_pop();
+    if(api_ctx_pushed)
+        H5CX_pop();
+
+    for(i = 0; i < N_FILENAMES; i++) {
+        HDfree(filename[i]);
+    }
 
     return EXIT_FAILURE;
 } /* end main() */

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5_TOOLS_TEST_H5LS C)
 
 #-----------------------------------------------------------------------------
@@ -30,6 +30,8 @@ if (BUILD_SHARED_LIBS)
   )
 endif ()
 
-include (CMakeTests.cmake)
+if (HDF5_TEST_TOOLS AND HDF5_TEST_SERIAL)
+  include (CMakeTests.cmake)
 
-include (CMakeTestsVDS.cmake)
+  include (CMakeTestsVDS.cmake)
+endif ()

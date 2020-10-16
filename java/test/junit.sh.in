@@ -20,6 +20,7 @@ USE_FILTER_SZIP="@USE_FILTER_SZIP@"
 USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
 USE_ROS3_VFD="@HAVE_ROS3_VFD@"
 USE_HDFS_VFD="@HAVE_LIBHDFS@"
+IS_DARWIN="@H5_IS_DARWIN@"
 
 TESTNAME=JUnitInterface
 EXIT_SUCCESS=0
@@ -42,8 +43,8 @@ myos=`uname -s`
 
 # where the libs exist
 HDFLIB_HOME="$top_srcdir/java/lib"
-BLDLIBDIR="$top_builddir/hdf5/lib"
 BLDDIR="."
+BLDLIBDIR="$BLDDIR/testlibs"
 HDFTEST_HOME="$top_srcdir/java/test"
 JARFILE=jar@PACKAGE_TARNAME@-@PACKAGE_VERSION@.jar
 TESTJARFILE=jar@PACKAGE_TARNAME@test.jar
@@ -144,6 +145,13 @@ COPY_LIBFILES_TO_BLDLIBDIR()
             fi
         fi
     done
+    if [ "$IS_DARWIN" = "yes" ]; then 
+       (cd testlibs; \
+         install_name_tool -add_rpath @loader_path libhdf5_java.dylib; \
+         exist_path=` otool -l libhdf5_java.dylib | grep libhdf5 | grep -v java | awk '{print $2}'`; \
+         echo $exist_path; \
+         install_name_tool -change $exist_path @rpath/libhdf5.dylib libhdf5_java.dylib)
+    fi
     # copy jar files. Used -f to make sure get a new copy
     for tstfile in $COPY_JARTESTFILES
     do
@@ -202,10 +210,7 @@ CLEAN_LIBFILES_AND_BLDLIBDIR()
     INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
     INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
     if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-        for tstfile in $COPY_JARTESTFILES
-        do
-            $RM $BLDLIBDIR/tstfile
-        done
+        $RM -rf $BLDLIBDIR
     fi
 }
 
@@ -328,7 +333,7 @@ TESTING JUnit-TestH5
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5.ext > JUnit-TestH5.out
@@ -349,7 +354,7 @@ TESTING JUnit-TestH5Eparams
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5Eparams.ext > JUnit-TestH5Eparams.out
@@ -370,7 +375,7 @@ TESTING JUnit-TestH5Eregister
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5Eregister.ext > JUnit-TestH5Eregister.out
@@ -391,7 +396,7 @@ TESTING JUnit-TestH5Fparams
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5Fparams.ext > JUnit-TestH5Fparams.out
@@ -412,7 +417,7 @@ TESTING JUnit-TestH5Fbasic
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5Fbasic.ext > JUnit-TestH5Fbasic.out
@@ -433,7 +438,7 @@ TESTING JUnit-TestH5F
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5F.ext > JUnit-TestH5F.out
@@ -454,7 +459,7 @@ TESTING JUnit-TestH5Fswmr
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5Fswmr.ext > JUnit-TestH5Fswmr.out
@@ -475,7 +480,7 @@ TESTING JUnit-TestH5Gbasic
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5Gbasic.ext > JUnit-TestH5Gbasic.out
@@ -496,7 +501,7 @@ TESTING JUnit-TestH5G
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5G.ext > JUnit-TestH5G.out
@@ -517,7 +522,7 @@ TESTING JUnit-TestH5Sbasic
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5Sbasic.ext > JUnit-TestH5Sbasic.out
@@ -538,7 +543,7 @@ TESTING JUnit-TestH5S
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5S.ext > JUnit-TestH5S.out
@@ -559,7 +564,7 @@ TESTING JUnit-TestH5Tparams
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5Tparams.ext > JUnit-TestH5Tparams.out
@@ -580,7 +585,7 @@ TESTING JUnit-TestH5Tbasic
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5Tbasic.ext > JUnit-TestH5Tbasic.out
@@ -601,7 +606,7 @@ TESTING JUnit-TestH5T
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5T.ext > JUnit-TestH5T.out
@@ -622,7 +627,7 @@ TESTING JUnit-TestH5Dparams
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5Dparams.ext > JUnit-TestH5Dparams.out
@@ -643,7 +648,7 @@ TESTING JUnit-TestH5D
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5D.ext > JUnit-TestH5D.out
@@ -664,7 +669,7 @@ TESTING JUnit-TestH5Dplist
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5Dplist.ext > JUnit-TestH5Dplist.out
@@ -685,7 +690,7 @@ TESTING JUnit-TestH5Lparams
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5Lparams.ext > JUnit-TestH5Lparams.out
@@ -706,7 +711,7 @@ TESTING JUnit-TestH5Lbasic
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5Lbasic.ext > JUnit-TestH5Lbasic.out
@@ -727,7 +732,7 @@ TESTING JUnit-TestH5Lcreate
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5Lcreate.ext > JUnit-TestH5Lcreate.out
@@ -748,7 +753,7 @@ TESTING JUnit-TestH5R
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5R.ext > JUnit-TestH5R.out
@@ -769,7 +774,7 @@ TESTING JUnit-TestH5P
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5P.ext > JUnit-TestH5P.out
@@ -790,7 +795,7 @@ TESTING JUnit-TestH5PData
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5PData.ext > JUnit-TestH5PData.out
@@ -811,7 +816,7 @@ TESTING JUnit-TestH5Pfapl
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5Pfapl.ext > JUnit-TestH5Pfapl.out
@@ -832,7 +837,7 @@ TESTING JUnit-TestH5Pvirtual
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5Pvirtual.ext > JUnit-TestH5Pvirtual.out
@@ -853,7 +858,7 @@ TESTING JUnit-TestH5Plist
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5Plist.ext > JUnit-TestH5Plist.out
@@ -874,7 +879,7 @@ TESTING JUnit-TestH5A
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5A.ext > JUnit-TestH5A.out
@@ -895,7 +900,7 @@ TESTING JUnit-TestH5Oparams
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5Oparams.ext > JUnit-TestH5Oparams.out
@@ -916,7 +921,7 @@ TESTING JUnit-TestH5Obasic
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5Obasic.ext > JUnit-TestH5Obasic.out
@@ -937,7 +942,7 @@ TESTING JUnit-TestH5Ocreate
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5Ocreate.ext > JUnit-TestH5Ocreate.out
@@ -958,7 +963,7 @@ TESTING JUnit-TestH5Ocopy
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5Ocopy.ext > JUnit-TestH5Ocopy.out
@@ -979,7 +984,7 @@ TESTING JUnit-TestH5PL
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5PL.ext > JUnit-TestH5PL.out
@@ -1000,7 +1005,7 @@ TESTING JUnit-TestH5Z
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/line [0-9]*/line (number)/' \
-    -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+    -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     JUnit-TestH5Z.ext > JUnit-TestH5Z.out
@@ -1023,7 +1028,7 @@ if test "X-$BUILD_MODE" = "X-production" ; then
         # Extract file name, line number, version and thread IDs because they may be different
         sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
             -e 's/line [0-9]*/line (number)/' \
-            -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+            -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
             -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
             -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
             JUnit-TestH5E.ext > JUnit-TestH5E.out
@@ -1046,7 +1051,7 @@ if test "X-$BUILD_MODE" = "X-production" ; then
         # Extract file name, line number, version and thread IDs because they may be different
         sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
             -e 's/line [0-9]*/line (number)/' \
-            -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+            -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
             -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
             -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
             JUnit-TestH5Edefault.ext > JUnit-TestH5Edefault.out
@@ -1070,7 +1075,7 @@ if test $USE_FILTER_SZIP = "yes"; then
     # Extract file name, line number, version and thread IDs because they may be different
     sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
         -e 's/line [0-9]*/line (number)/' \
-        -e 's/Time: [0-9]*[\.[0-9]*]*/Time:  XXXX/' \
+        -e 's/Time: [0-9]*[\.,[0-9]*]*/Time:  XXXX/' \
         -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
         -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
         JUnit-TestH5Giterate.ext > JUnit-TestH5Giterate.out
@@ -1092,7 +1097,7 @@ if test "X$ROS3_VFD" = "Xyes"; then
     # Extract file name, line number, version and thread IDs because they may be different
     sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
         -e 's/line [0-9]*/line (number)/' \
-        -e 's/Time: [0-9]*\.[0-9]*/Time:  XXXX/' \
+        -e 's/Time: [0-9]*\.,[0-9]*/Time:  XXXX/' \
         -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
         -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
         JUnit-TestH5Pfapls3.ext > JUnit-TestH5Pfapls3.out
@@ -1114,7 +1119,7 @@ if test "X$HAVE_LIBHDFS" = "Xyes"; then
     # Extract file name, line number, version and thread IDs because they may be different
     sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
         -e 's/line [0-9]*/line (number)/' \
-        -e 's/Time: [0-9]*\.[0-9]*/Time:  XXXX/' \
+        -e 's/Time: [0-9]*\.,[0-9]*/Time:  XXXX/' \
         -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
         -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
         JUnit-TestH5Pfaplhdfs.ext > JUnit-TestH5Pfaplhdfs.out

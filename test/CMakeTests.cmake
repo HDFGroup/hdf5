@@ -123,6 +123,15 @@ set (HDF5_REFERENCE_TEST_FILES
     be_data.h5
     be_extlink1.h5
     be_extlink2.h5
+    bounds_ref_earliest_latest.h5
+    bounds_ref_latest_latest.h5
+    bounds_ref_v110_v110.h5
+    bounds_ref_v112_v112.h5
+    bounds_ref_v18_v18.h5
+    bounds_sel_earliest_latest.h5
+    bounds_sel_latest_latest.h5
+    bounds_sel_v110_v110.h5
+    bounds_sel_v112_v112.h5
     btree_idx_1_6.h5
     btree_idx_1_8.h5
     corrupt_stab_msg.h5
@@ -446,6 +455,10 @@ set (test_CLEANFILES
     vds_swmr_src_*.h5
     tmp_vds_env/vds_src_2.h5
     direct_chunk.h5
+    splitter*.h5
+    splitter.log
+    mirror_rw/*
+    mirror_wo/*
 )
 
 # Remove any output file left over from previous test run

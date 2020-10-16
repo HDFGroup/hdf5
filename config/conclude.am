@@ -25,8 +25,8 @@ LIB = $(lib_LIBRARIES) $(lib_LTLIBRARIES) $(noinst_LIBRARIES)                 \
       $(noinst_LTLIBRARIES) $(check_LIBRARIES) $(check_LTLIBRARIES) $(EXTRA_LIB)
 PROGS = $(bin_PROGRAMS) $(bin_SCRIPTS) $(noinst_PROGRAMS) $(noinst_SCRIPTS)   \
         $(EXTRA_PROG)
-chk_TESTS = $(check_PROGRAMS) $(check_SCRIPTS) $(EXTRA_TEST) 
-TESTS = $(TEST_PROG) $(TEST_SCRIPT) $(EXTRA_TEST) 
+chk_TESTS = $(check_PROGRAMS) $(check_SCRIPTS) $(EXTRA_TEST)
+TESTS = $(TEST_PROG) $(TEST_SCRIPT) $(EXTRA_TEST)
 
 TEST_EXTENSIONS = .sh
 SH_LOG_COMPILER = $(SHELL)
@@ -131,26 +131,35 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
                  echo "============================" > $${log}; \
               fi; \
               if test "X$(FORTRAN_API)" = "Xyes"; then \
-                 echo "Fortran API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+                 echo "Fortran API: Testing $${tname} $(TEST_FLAGS)"; \
                  if test -n "$(REALTIMEOUTPUT)"; then \
-                    echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" | tee -a $${log}; \
+                    echo "Fortran API: Test log for $${tname} $(TEST_FLAGS)" | tee -a $${log}; \
                  else \
-                    echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+                    echo "Fortran API: Test log for $${tname} $(TEST_FLAGS)" >> $${log}; \
                  fi; \
               elif test "X$(CXX_API)" = "Xyes"; then \
-                 echo "C++ API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+                 echo "C++ API: Testing $${tname} $(TEST_FLAGS)"; \
                  if test -n "$(REALTIMEOUTPUT)"; then \
-                    echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" | tee -a $${log};\
+                    echo "C++ API: Test log for $${tname} $(TEST_FLAGS)" | tee -a $${log};\
                  else \
-                    echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log};\
+                    echo "C++ API: Test log for $${tname} $(TEST_FLAGS)" >> $${log};\
                  fi; \
               else \
-                 echo "Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+                 echo "Testing: $${tname} $(TEST_FLAGS)"; \
                  if test -n "$(REALTIMEOUTPUT)"; then \
-                    echo "$(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" | tee -a $${log}; \
+                    echo "Test log for $${tname} $(TEST_FLAGS)" | tee -a $${log}; \
                  else \
-                    echo "$(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+                    echo "Test log for $${tname} $(TEST_FLAGS)" >> $${log}; \
                  fi; \
+              fi; \
+              if test -n "$(REALTIMEOUTPUT)"; then \
+                if test -n "$(HDF5_DRIVER)"; then \
+                  echo "Virtual file driver (VFD): $(HDF5_DRIVER)" | tee -a $${log}; \
+                fi; \
+              else \
+                if test -n "$(HDF5_DRIVER)"; then \
+                  echo "Virtual file driver (VFD): $(HDF5_DRIVER)" >> $${log}; \
+                fi; \
               fi; \
               if test -n "$(REALTIMEOUTPUT)"; then \
                  echo "============================" | tee -a $${log}; \
@@ -183,7 +192,7 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
               fi; \
 	   fi; \
 	fi
- 
+
 # The dummysh.chkexe here prevents the target from being
 # empty if there are no tests in the current directory.
 # $${log} is the log file.

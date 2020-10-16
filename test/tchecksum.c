@@ -15,7 +15,7 @@
  *
  * Created:		tchecksum.c
  *			Aug 21 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Test internal checksum routine(s)
  *
@@ -252,7 +252,7 @@ test_checksum(void)
  *
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE H5_ATTR_CONST void
+void
 cleanup_checksum(void)
 {
     /* no file to clean */

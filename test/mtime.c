@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Thursday, July 30, 1998
  *
  * Purpose:    Determines if the modification time message is working
@@ -39,9 +39,7 @@ const char *FILENAME[] = {
  *
  * Purpose:    H5O_mtime_decode() test.
  *
- * Return:    Success:
- *
- *        Failure:
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:    Robb Matzke
  *              Thursday, July 30, 1998
@@ -188,10 +186,10 @@ main(void)
     /* All looks good */
     HDputs("All modification time tests passed.");
     h5_cleanup(FILENAME, fapl);
-    return 0;
+    return EXIT_SUCCESS;
 
     /* Something broke */
 error:
-    return 1;
-}
+    return EXIT_FAILURE;
+} /* end main() */
 

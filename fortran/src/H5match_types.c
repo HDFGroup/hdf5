@@ -150,10 +150,12 @@ int main(void)
   int RealKinds[] = H5_FORTRAN_REAL_KINDS;
   int RealKinds_SizeOf[] = H5_FORTRAN_REAL_KINDS_SIZEOF;
   char Real_C_TYPES[10][32];
-  
+
   int FORTRAN_NUM_INTEGER_KINDS=H5_FORTRAN_NUM_INTEGER_KINDS;
   int H5_FORTRAN_NUM_REAL_KINDS;
+#if H5_FORTRAN_HAVE_C_LONG_DOUBLE!=0
   int found_long_double = 0;
+#endif
 
   /* Open target files */
   c_header = fopen(CFILE, "w");
@@ -206,13 +208,13 @@ int main(void)
     }
     else if(sizeof(double) == RealKinds_SizeOf[i]) {
       writeTypedef("float", "double", RealKinds[i]);
-      strcpy(Real_C_TYPES[i], "C_DOUBLE"); 
+      strcpy(Real_C_TYPES[i], "C_DOUBLE");
     }
 #if H5_FORTRAN_HAVE_C_LONG_DOUBLE!=0
     else if(sizeof(long double) == RealKinds_SizeOf[i] && found_long_double == 0) {
       writeTypedef("float", "long double", RealKinds[i]);
       strcpy(Real_C_TYPES[i], "C_LONG_DOUBLE");
-      found_long_double = 1; 
+      found_long_double = 1;
     }
 #  ifdef H5_HAVE_FLOAT128
     /* Don't select a higher precision than Fortran can support */
@@ -327,7 +329,7 @@ int main(void)
 /* Defined different KINDs of integers */
 
   fprintf(fort_header,"        INTEGER, DIMENSION(1:%d), PARAMETER :: Fortran_INTEGER_AVAIL_KINDS = (/", FORTRAN_NUM_INTEGER_KINDS);
-  
+
   for(i=0;i<FORTRAN_NUM_INTEGER_KINDS;i++) {
     fprintf(fort_header,"%d",(int)IntKinds[i]);
     if(i==FORTRAN_NUM_INTEGER_KINDS-1) {
@@ -335,7 +337,7 @@ int main(void)
     } else {
       fprintf(fort_header,",");
     }
-    
+
   }
 
   /* real_4, real_8, real_16 */
@@ -414,11 +416,11 @@ int main(void)
     return -1;
   }
 
-  /* Need the buffer size for the fortran derive type 'hdset_reg_ref_t_f03'
+  /* Need the buffer size for the fortran derived type 'hdset_reg_ref_t_f03'
    * in order to be interoperable with C's structure, the C buffer size
    * H5R_DSET_REG_REF_BUF_SIZE is (sizeof(haddr_t)+4)
    */
-    
+
     fprintf(fort_header, "        INTEGER, PARAMETER :: H5R_DSET_REG_REF_BUF_SIZE_F = %u\n", H5_SIZEOF_HADDR_T + 4 );
 
   /* Close files */

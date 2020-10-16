@@ -417,7 +417,7 @@ New Features
     ---------------
 
      C Packet Table API
-     ------------------ 
+     ------------------
      - Replacement of a public function
 
       The existing function H5PTcreate_fl limits applications to deflate
@@ -448,7 +448,7 @@ New Features
                                                (BMR, 2016/03/04, HDFFV-442)
 
      C++ Packet Table API
-     -------------------- 
+     --------------------
      - New constructor
 
       An overloaded constructor is added to FL_PacketTable and takes a property
@@ -484,7 +484,7 @@ New Features
 
 
      Internal header file
-     -------------------- 
+     --------------------
      - A new API function H5DOwrite_chunk.  It writes a data chunk directly
             into a file bypassing hyperslab selection, data conversion, and
             filter pipeline.  The user must be careful with the function and

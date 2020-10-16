@@ -536,6 +536,7 @@ CONTAINS
     IF (flag .EQ. 0) status = .FALSE.
 
   END SUBROUTINE h5fis_hdf5_f
+
 !****s* H5F/h5fclose_f
 !
 ! NAME
@@ -619,7 +620,7 @@ CONTAINS
          INTEGER(SIZE_T), INTENT(OUT) :: obj_count
        END FUNCTION h5fget_obj_count_c
     END INTERFACE
-    
+
     hdferr = h5fget_obj_count_c(file_id, obj_type, obj_count)
 
     ! Don't include objects created by H5open in the H5F_OBJ_ALL_F count
@@ -820,7 +821,7 @@ CONTAINS
 !  h5fget_file_image_f
 !
 ! PURPOSE
-!  Retrieves a copy of the image of an existing, open file. 
+!  Retrieves a copy of the image of an existing, open file.
 !
 ! INPUTS
 !  file_id    - Target file identifier.
@@ -830,7 +831,7 @@ CONTAINS
 ! OUTPUTS
 !  hdferr     - error code:
 !                 0 on success and -1 on failure
-! OPTIONAL PARAMETERS  
+! OPTIONAL PARAMETERS
 !  buf_size   - Returns the size in bytes of the buffer required to store the file image,
 !               no data will be copied.
 !
@@ -858,7 +859,7 @@ CONTAINS
          INTEGER(HID_T) , INTENT(IN) :: file_id
          TYPE(C_PTR)    , VALUE      :: buf_ptr
          INTEGER(SIZE_T), INTENT(IN) :: buf_len
-         INTEGER(SIZE_T), INTENT(IN) :: buf_size
+         INTEGER(SIZE_T), INTENT(OUT) :: buf_size
        END FUNCTION h5fget_file_image_c
     END INTERFACE
 
@@ -915,7 +916,7 @@ CONTAINS
 
     hdferr = INT(h5fget_dset_no_attrs_hint_c(file_id, c_minimize))
 
-    ! Transfer value of C C_BOOL type to Fortran LOGICAL 
+    ! Transfer value of C C_BOOL type to Fortran LOGICAL
     minimize = c_minimize
 
   END SUBROUTINE h5fget_dset_no_attrs_hint_f

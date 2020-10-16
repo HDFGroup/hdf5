@@ -303,7 +303,7 @@ typedef struct _minmax {
 
 /* local functions */
 static hsize_t parse_size_directive(const char *size);
-static struct options *parse_command_line(int argc, char *argv[]);
+static struct options *parse_command_line(int argc, const char *argv[]);
 static void run_test_loop(struct options *options);
 static int run_test(iotype iot, parameters parms, struct options *opts);
 static void output_all_info(minmax *mm, int count, int indent_level);
@@ -324,7 +324,7 @@ static void report_parameters(struct options *opts);
  * Modifications:
  */
 int
-main(int argc, char **argv)
+main(int argc, const char *argv[])
 {
     int exit_value = EXIT_SUCCESS;
     struct options *opts = NULL;
@@ -498,50 +498,50 @@ run_test(iotype iot, parameters parms, struct options *opts)
         do_sio(parms, &res);
 
         /* gather all of the "sys write" times */
-        t = get_time(res.timers, HDF5_MPI_WRITE);
+        t = io_time_get(res.timers, HDF5_MPI_WRITE);
         get_minmax(&write_sys_mm, t);
 
         write_sys_mm_table[i] = write_sys_mm;
 
         /* gather all of the "write" times */
-        t = get_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS);
+        t = io_time_get(res.timers, HDF5_FINE_WRITE_FIXED_DIMS);
         get_minmax(&write_mm, t);
 
         write_mm_table[i] = write_mm;
 
         /* gather all of the "write" times from open to close */
-        t = get_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS);
+        t = io_time_get(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS);
         get_minmax(&write_gross_mm, t);
 
         write_gross_mm_table[i] = write_gross_mm;
 
         /* gather all of the raw "write" times */
-        t = get_time(res.timers, HDF5_RAW_WRITE_FIXED_DIMS);
+        t = io_time_get(res.timers, HDF5_RAW_WRITE_FIXED_DIMS);
         get_minmax(&write_raw_mm, t);
 
         write_raw_mm_table[i] = write_raw_mm;
 
         if (!parms.h5_write_only) {
             /* gather all of the "mpi read" times */
-            t = get_time(res.timers, HDF5_MPI_READ);
+            t = io_time_get(res.timers, HDF5_MPI_READ);
             get_minmax(&read_sys_mm, t);
 
             read_sys_mm_table[i] = read_sys_mm;
 
             /* gather all of the "read" times */
-            t = get_time(res.timers, HDF5_FINE_READ_FIXED_DIMS);
+            t = io_time_get(res.timers, HDF5_FINE_READ_FIXED_DIMS);
             get_minmax(&read_mm, t);
 
             read_mm_table[i] = read_mm;
 
             /* gather all of the "read" times from open to close */
-            t = get_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS);
+            t = io_time_get(res.timers, HDF5_GROSS_READ_FIXED_DIMS);
             get_minmax(&read_gross_mm, t);
 
             read_gross_mm_table[i] = read_gross_mm;
 
             /* gather all of the raw "read" times */
-            t = get_time(res.timers, HDF5_RAW_READ_FIXED_DIMS);
+            t = io_time_get(res.timers, HDF5_RAW_READ_FIXED_DIMS);
             get_minmax(&read_raw_mm, t);
 
             read_raw_mm_table[i] = read_gross_mm;
@@ -944,7 +944,7 @@ report_parameters(struct options *opts)
  *    Added multidimensional testing (Christian Chilan, April, 2008)
  */
 static struct options *
-parse_command_line(int argc, char *argv[])
+parse_command_line(int argc, const char *argv[])
 {
     int opt;
     struct options *cl_opts;
@@ -984,7 +984,7 @@ parse_command_line(int argc, char *argv[])
     cl_opts->h5_extendable = FALSE; /* Use extendable dataset */
     cl_opts->verify = FALSE;        /* No Verify data correctness by default */
 
-    while ((opt = get_option(argc, (const char **)argv, s_opts, l_opts)) != EOF) {
+    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
         case 'a':
             cl_opts->h5_alignment = parse_size_directive(opt_arg);

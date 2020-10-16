@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@hdfgroup.org>
+/* Programmer:  Quincey Koziol
  *              Tuesday, June 17, 2008
  */
 #include "h5test.h"
@@ -380,10 +380,6 @@ check_stats(const H5EA_t *ea, const earray_state_t *state)
         TEST_ERROR
     } /* end if */
 #endif /* NOT_YET */
-#ifdef QAK
-HDfprintf(stderr, "nelmts = %Hu, total EA size = %Hu\n", earray_stats.stored.nelmts,
-        (earray_stats.computed.hdr_size + earray_stats.computed.index_blk_size + earray_stats.stored.super_blk_size + earray_stats.stored.data_blk_size));
-#endif /* QAK */
 
     /* All tests passed */
     return(0);
@@ -521,11 +517,11 @@ verify_cparam(const H5EA_t *ea, const H5EA_create_t *cparam)
 
     /* Retrieve creation parameters */
     HDmemset(&test_cparam, 0, sizeof(H5EA_create_t));
-    if(H5EA_get_cparam_test(ea, &test_cparam) < 0)
+    if(H5EA__get_cparam_test(ea, &test_cparam) < 0)
         FAIL_STACK_ERROR
 
     /* Verify creation parameters */
-    if(H5EA_cmp_cparam_test(cparam, &test_cparam))
+    if(H5EA__cmp_cparam_test(cparam, &test_cparam))
         TEST_ERROR
 
     /* Success */
@@ -558,12 +554,6 @@ finish(hid_t file, hid_t fapl, H5F_t *f, H5EA_t *ea, haddr_t ea_addr)
     /* Close the extensible array */
     if(H5EA_close(ea) < 0)
         FAIL_STACK_ERROR
-
-#ifdef QAK
-HDfprintf(stderr, "ea_addr = %a\n", ea_addr);
-H5Fflush(file, H5F_SCOPE_GLOBAL);
-HDsystem("cp earray.h5 earray.h5.save");
-#endif /* QAK */
 
     /* Delete array */
     if(H5EA_delete(f, ea_addr, NULL) < 0)
@@ -767,7 +757,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         TEST_ERROR
     } /* end if */
 
-    PASSED()
+    PASSED();
 }
 #else /* NDEBUG */
     SKIPPED();
@@ -783,7 +773,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
     if(create_array(f, cparam, &ea, &ea_addr, NULL) < 0)
         TEST_ERROR
 
-    PASSED()
+    PASSED();
 
     /* Verify the creation parameters */
     TESTING("verify array creation parameters");
@@ -797,7 +787,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -867,7 +857,7 @@ test_reopen(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -971,7 +961,7 @@ test_open_twice(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -1111,7 +1101,7 @@ test_open_twice_diff(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tpa
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -1232,7 +1222,7 @@ test_delete_open(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -1383,19 +1373,8 @@ eiter_fw_state(void *_eiter, const H5EA_create_t *cparam,
         /* Compute super block index for element index */
         /* (same eqn. as in H5EA__dblock_sblk_idx()) */
         sblk_idx = H5VM_log2_gen((uint64_t)(((idx - cparam->idx_blk_elmts) / cparam->data_blk_min_elmts) + 1));
-#ifdef QAK
-HDfprintf(stderr, "idx = %Hu, tparam->sblk_info[%u] = {%Zu, %Zu, %Hu, %Hu}\n", idx, sblk_idx, tparam->sblk_info[sblk_idx].ndblks, tparam->sblk_info[sblk_idx].dblk_nelmts, tparam->sblk_info[sblk_idx].start_idx, tparam->sblk_info[sblk_idx].start_dblk);
-#endif /* QAK */
-
         state->nelmts = EA_NELMTS(cparam, tparam, idx, sblk_idx);
-#ifdef QAK
-HDfprintf(stderr, "state->nelmts = %Hu\n", state->nelmts);
-#endif /* QAK */
-
         state->ndata_blks = EA_NDATA_BLKS(cparam, tparam, idx, sblk_idx);
-#ifdef QAK
-HDfprintf(stderr, "state->ndata_blks = %Hu\n", state->ndata_blks);
-#endif /* QAK */
 
         /* Check if we have any super blocks yet */
         if(tparam->sblk_info[sblk_idx].ndblks >= cparam->sup_blk_min_data_ptrs) {
@@ -1404,9 +1383,6 @@ HDfprintf(stderr, "state->ndata_blks = %Hu\n", state->ndata_blks);
                 eiter->base_sblk_idx = sblk_idx;
 
             state->nsuper_blks = (sblk_idx - eiter->base_sblk_idx) + 1;
-#ifdef QAK
-HDfprintf(stderr, "state->nsuper_blks = %Hu\n", state->nsuper_blks);
-#endif /* QAK */
         } /* end if */
         else
             state->nsuper_blks = 0;
@@ -1618,29 +1594,18 @@ eiter_rv_state(void *_eiter, const H5EA_create_t *cparam,
                 loc_idx = cparam->idx_blk_elmts + tparam->sblk_info[idx_sblk_idx].start_idx - 1;
             loc_sblk_idx = H5VM_log2_gen((uint64_t)(((loc_idx - cparam->idx_blk_elmts) / cparam->data_blk_min_elmts) + 1));
         } /* end else */
-#ifdef QAK
-HDfprintf(stderr, "idx = %Hu, loc_idx = %Hu, eiter->max_sblk_idx = %u, idx_sblk_idx = %u, loc_sblk_idx = %u\n", idx, loc_idx, eiter->max_sblk_idx, idx_sblk_idx, loc_sblk_idx);
-HDfprintf(stderr, "tparam->sblk_info[%u] = {%Zu, %Zu, %Hu, %Hu}\n", idx_sblk_idx, tparam->sblk_info[idx_sblk_idx].ndblks, tparam->sblk_info[idx_sblk_idx].dblk_nelmts, tparam->sblk_info[idx_sblk_idx].start_idx, tparam->sblk_info[idx_sblk_idx].start_dblk);
-HDfprintf(stderr, "tparam->sblk_info[%u] = {%Zu, %Zu, %Hu, %Hu}\n", eiter->max_sblk_idx, tparam->sblk_info[eiter->max_sblk_idx].ndblks, tparam->sblk_info[eiter->max_sblk_idx].dblk_nelmts, tparam->sblk_info[eiter->max_sblk_idx].start_idx, tparam->sblk_info[eiter->max_sblk_idx].start_dblk);
-#endif /* QAK */
 
         if(idx < cparam->idx_blk_elmts + cparam->data_blk_min_elmts)
             idx_nelmts = (hsize_t)cparam->idx_blk_elmts;
         else
             idx_nelmts = EA_NELMTS(cparam, tparam, loc_idx, loc_sblk_idx);
         state->nelmts = (eiter->max_nelmts - idx_nelmts) + cparam->idx_blk_elmts;
-#ifdef QAK
-HDfprintf(stderr, "eiter->max_nelmts = %Hu, idx_nelmts = %Hu, state->nelmts = %Hu\n", eiter->max_nelmts, idx_nelmts, state->nelmts);
-#endif /* QAK */
 
         if(idx < cparam->idx_blk_elmts + cparam->data_blk_min_elmts)
             idx_ndata_blks = 0;
         else
             idx_ndata_blks = EA_NDATA_BLKS(cparam, tparam, loc_idx, loc_sblk_idx);
         state->ndata_blks = eiter->max_ndata_blks - idx_ndata_blks;
-#ifdef QAK
-HDfprintf(stderr, "eiter->max_ndata_blks = %Hu, idx_ndata_blks = %Hu, state->ndata_blks = %Hu\n", eiter->max_ndata_blks, idx_ndata_blks, state->ndata_blks);
-#endif /* QAK */
 
         /* Check if we have any super blocks yet */
         if(tparam->sblk_info[eiter->max_sblk_idx].ndblks >= cparam->sup_blk_min_data_ptrs) {
@@ -1648,9 +1613,6 @@ HDfprintf(stderr, "eiter->max_ndata_blks = %Hu, idx_ndata_blks = %Hu, state->nda
                 state->nsuper_blks = (eiter->max_sblk_idx - idx_sblk_idx) + 1;
             else
                 state->nsuper_blks = (eiter->max_sblk_idx - eiter->idx_blk_nsblks) + 1;
-#ifdef QAK
-HDfprintf(stderr, "eiter->idx_blk_nsblks = %Hu, state->nsuper_blks = %Hu\n", eiter->idx_blk_nsblks, state->nsuper_blks);
-#endif /* QAK */
         } /* end if */
     } /* end else */
 
@@ -2233,7 +2195,7 @@ test_set_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam,
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -2390,7 +2352,7 @@ test_skip_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam,
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -2470,7 +2432,7 @@ main(void)
     init_cparam(&cparam);
 
     /* Iterate over the testing parameters */
-    for(curr_test = EARRAY_TEST_NORMAL; curr_test < EARRAY_TEST_NTESTS; H5_INC_ENUM(earray_test_type_t, curr_test)) {
+    for(curr_test = EARRAY_TEST_NORMAL; curr_test < EARRAY_TEST_NTESTS; curr_test++) {
 
         /* Initialize the testing parameters */
         init_tparam(&tparam, &cparam);
@@ -2502,7 +2464,7 @@ main(void)
         nerrors += test_delete_open(fapl, &cparam, &tparam);
 
         /* Iterate over the type of capacity tests */
-        for(curr_iter = EARRAY_ITER_FW; curr_iter < EARRAY_ITER_NITERS; H5_INC_ENUM(earray_iter_type_t, curr_iter)) {
+        for(curr_iter = EARRAY_ITER_FW; curr_iter < EARRAY_ITER_NITERS; curr_iter++) {
             hsize_t sblk;               /* Super block index */
             hsize_t dblk;               /* Data block index */
             hsize_t nelmts;             /* # of elements to test */

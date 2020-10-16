@@ -29,7 +29,6 @@ const char *FILENAMES[] = {
 #define NUM_ELMTS	100
 #define FALSE		0
 #define TRUE		1
-#define INC_ENUM(TYPE,VAR) (VAR)=((TYPE)((VAR)+1))
 
 /*
  * Compile and run this program in the trunk to generate
@@ -41,7 +40,7 @@ const char *FILENAMES[] = {
  * Move these files to 1.8 branch for compatibility testing:
  * test_filespace_compatible() in test/tfile.c will use these files.
  *
- * Copy these files from the 1.8 branch back to the trunk for 
+ * Copy these files from the 1.8 branch back to the trunk for
  * compatibility testing via test_filespace_round_compatible() in test/tfile.c.
  *
  */
@@ -58,7 +57,7 @@ int main(void)
     unsigned fs_persist;     /* Persisting free-space or not */
 
     j = 0;
-    for(fs_strategy = H5F_FSPACE_STRATEGY_FSM_AGGR; fs_strategy < H5F_FSPACE_STRATEGY_NTYPES; INC_ENUM(H5F_fspace_strategy_t, fs_strategy)) {
+    for(fs_strategy = H5F_FSPACE_STRATEGY_FSM_AGGR; fs_strategy < H5F_FSPACE_STRATEGY_NTYPES; fs_strategy++) {
         for(fs_persist = FALSE; fs_persist <= TRUE; fs_persist++) {
 
             if(fs_persist && fs_strategy >= H5F_FSPACE_STRATEGY_AGGR)

@@ -174,9 +174,9 @@ h5ltread_dataset_string_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-h5ltpath_valid_c(hid_t_f *loc_id, 
-                  _fcd path, 
-                  size_t_f *pathlen, 
+h5ltpath_valid_c(hid_t_f *loc_id,
+                  _fcd path,
+                  size_t_f *pathlen,
                   int_f *check_object_valid_c);
 
 /*-------------------------------------------------------------------------
@@ -429,7 +429,7 @@ h5tbget_field_info_c(hid_t_f *loc_id,
                       size_t_f *namelen2,
                       size_t_f *lenmax,
                       _fcd field_names,
-                      size_t_f *maxlen_out);    
+                      size_t_f *maxlen_out);
 
 
 #endif /* _H5LTf90proto_H */

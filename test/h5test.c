@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Thursday, November 19, 1998
  *
  * Purpose:  Provides support functions for most of the hdf5 tests cases.
@@ -23,6 +23,7 @@
 
 #include "h5test.h"
 #include "H5srcdir.h"
+#include "H5srcdir_str.h"
 
 /* Necessary for h5_verify_cached_stabs() */
 #define H5G_FRIEND        /*suppress error about including H5Gpkg      */
@@ -96,6 +97,12 @@ static const char *multi_letters = "msbrglo";
 
 /* The # of seconds to wait for the message file--used by h5_wait_message() */
 #define MESSAGE_TIMEOUT         300             /* Timeout in seconds */
+
+/* Buffer to construct path in and return pointer to */
+static char srcdir_path[1024] = "";
+
+/* Buffer to construct file in and return pointer to */
+static char srcdir_testpath[1024] = "";
 
 /*  The strings that correspond to library version bounds H5F_libver_t in H5Fpublic.h */
 /*  This is used by h5_get_version_string() */
@@ -190,8 +197,7 @@ h5_clean_files(const char *base_name[], hid_t fapl)
  *      sub_filename in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+H5_GCC_DIAG_OFF(format-nonliteral)
 void
 h5_delete_test_file(const char *base_name, hid_t fapl)
 {
@@ -231,7 +237,7 @@ h5_delete_test_file(const char *base_name, hid_t fapl)
 
         HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
 
-        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
+        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
             HDsnprintf(sub_filename, sizeof(sub_filename), "%s-%c.h5", filename, multi_letters[mt]);
             HDremove(sub_filename);
         }
@@ -241,7 +247,7 @@ h5_delete_test_file(const char *base_name, hid_t fapl)
 
     return;
 } /* end h5_delete_test_file() */
-#pragma GCC diagnostic pop
+H5_GCC_DIAG_ON(format-nonliteral)
 
 
 /*-------------------------------------------------------------------------
@@ -941,7 +947,7 @@ h5_get_vfd_fapl(hid_t fapl)
         HDmemset(memb_addr, 0, sizeof(memb_addr));
 
         HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
-        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
+        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
             memb_fapl[mt] = H5P_DEFAULT;
             sv[mt] = (char *)HDmalloc(H5TEST_MULTI_FILENAME_LEN);
             HDassert(sv[mt]);
@@ -953,7 +959,7 @@ h5_get_vfd_fapl(hid_t fapl)
         if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0)
             goto error;
 
-        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
             HDfree(sv[mt]);
     } else if(!HDstrcmp(tok, "family")) {
         /* Family of files, each 1MB and using the default driver */
@@ -1054,10 +1060,8 @@ h5_show_hostname(void)
         else
             HDprintf("thread 0.");
     }
-#elif defined(H5_HAVE_THREADSAFE)
-    HDprintf("thread %lu.", HDpthread_self_ulong());
 #else
-    HDprintf("thread 0.");
+    HDprintf("thread %" PRIu64 ".", H5TS_thread_id());
 #endif
 #ifdef H5_HAVE_WIN32_API
 
@@ -1209,8 +1213,7 @@ h5_dump_info_object(MPI_Info info)
     int    flag;
     int    i, nkeys;
 
-    HDprintf("Dumping MPI Info Object(%d) (up to %d bytes per item):\n", (int)info,
-  MPI_MAX_INFO_VAL);
+    HDprintf("Dumping MPI Info Object (up to %d bytes per item):\n", MPI_MAX_INFO_VAL);
     if (info==MPI_INFO_NULL){
   HDprintf("object is MPI_INFO_NULL\n");
     }
@@ -1247,8 +1250,7 @@ h5_dump_info_object(MPI_Info info)
  *      temp in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+H5_GCC_DIAG_OFF(format-nonliteral)
 h5_stat_size_t
 h5_get_file_size(const char *filename, hid_t fapl)
 {
@@ -1286,7 +1288,7 @@ h5_get_file_size(const char *filename, hid_t fapl)
             h5_stat_size_t tot_size = 0;
 
             HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
-            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
+            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
                 /* Create the filename to query */
                 HDsnprintf(temp, sizeof temp, "%s-%c.h5", filename, multi_letters[mt]);
 
@@ -1350,13 +1352,14 @@ h5_get_file_size(const char *filename, hid_t fapl)
 
     return(-1);
 } /* end get_file_size() */
-#pragma GCC diagnostic pop
+H5_GCC_DIAG_ON(format-nonliteral)
 
 /*
  * This routine is designed to provide equivalent functionality to 'printf'
  * and allow easy replacement for environments which don't have stdin/stdout
  * available. (i.e. Windows & the Mac)
  */
+H5_ATTR_FORMAT(printf, 1, 2)
 int
 print_func(const char *format, ...)
 {
@@ -1879,8 +1882,268 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-char *
+H5_ATTR_PURE const char *
 h5_get_version_string(H5F_libver_t libver)
 {
     return(LIBVER_NAMES[libver]);
 } /* end of h5_get_version_string */
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_compare_file_bytes()
+ *
+ * Purpose:     Helper function to compare two files byte-for-byte.
+ *
+ * Return:      Success:  0, if files are identical
+ *              Failure: -1, if files differ
+ *
+ * Programmer:  Binh-Minh Ribler
+ *              October, 2018
+ *-------------------------------------------------------------------------
+ */
+int
+h5_compare_file_bytes(char *f1name, char *f2name)
+{
+    FILE       *f1ptr = NULL;  /* two file pointers */
+    FILE       *f2ptr = NULL;
+    off_t       f1size = 0;    /* size of the files */
+    off_t       f2size = 0;
+    char        f1char = 0;    /* one char from each file */
+    char        f2char = 0;
+    off_t       ii = 0;
+    int         ret_value = 0; /* for error handling */
+
+    /* Open files for reading */
+    f1ptr = HDfopen(f1name, "rb");
+    if (f1ptr == NULL) {
+        HDfprintf(stderr, "Unable to fopen() %s\n", f1name);
+        ret_value = -1;
+        goto done;
+    }
+    f2ptr = HDfopen(f2name, "rb");
+    if (f2ptr == NULL) {
+        HDfprintf(stderr, "Unable to fopen() %s\n", f2name);
+        ret_value = -1;
+        goto done;
+    }
+
+    /* Get the file sizes and verify that they equal */
+    HDfseek(f1ptr , 0 , SEEK_END);
+    f1size = HDftell(f1ptr);
+
+    HDfseek(f2ptr , 0 , SEEK_END);
+    f2size = HDftell(f2ptr);
+
+    if (f1size != f2size) {
+        HDfprintf(stderr, "Files differ in size, %llu vs. %llu\n", f1size, f2size);
+        ret_value = -1;
+        goto done;
+    }
+
+    /* Compare each byte and fail if a difference is found */
+    HDrewind(f1ptr);
+    HDrewind(f2ptr);
+    for (ii = 0; ii < f1size; ii++) {
+        if(HDfread(&f1char, 1, 1, f1ptr) != 1) {
+            ret_value = -1;
+            goto done;
+        }
+        if(HDfread(&f2char, 1, 1, f2ptr) != 1) {
+            ret_value = -1;
+            goto done;
+        }
+        if (f1char != f2char) {
+            HDfprintf(stderr, "Mismatch @ 0x%llX: 0x%X != 0x%X\n", ii, f1char, f2char);
+            ret_value = -1;
+            goto done;
+        }
+    }
+
+done:
+    if (f1ptr)
+        HDfclose(f1ptr);
+    if (f2ptr)
+        HDfclose(f2ptr);
+    return ret_value;
+} /* end h5_compare_file_bytes() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5_get_srcdir_filename
+ *
+ * Purpose:     Append the test file name to the srcdir path and return the whole string
+ *
+ * Return:      The string
+ *
+ *-------------------------------------------------------------------------
+ */
+const char *H5_get_srcdir_filename(const char *filename)
+{
+    const char *srcdir = H5_get_srcdir();
+
+    /* Check for error */
+    if(NULL == srcdir)
+        return(NULL);
+    else {
+        /* Build path to test file */
+        if((HDstrlen(srcdir) + HDstrlen(filename) + 1) < sizeof(srcdir_testpath)) {
+            HDsnprintf(srcdir_testpath, sizeof(srcdir_testpath), "%s%s", srcdir, filename);
+            return(srcdir_testpath);
+        } /* end if */
+        else
+            return(NULL);
+    } /* end else */
+} /* end H5_get_srcdir_filename() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5_get_srcdir
+ *
+ * Purpose:     Just return the srcdir path
+ *
+ * Return:      The string
+ *
+ *-------------------------------------------------------------------------
+ */
+const char *H5_get_srcdir(void)
+{
+    const char *srcdir = HDgetenv("srcdir");
+
+    /* Check for using the srcdir from configure time */
+    if(NULL == srcdir)
+        srcdir = config_srcdir;
+
+    /* Build path to all test files */
+    if((HDstrlen(srcdir) + 2) < sizeof(srcdir_path)) {
+        HDsnprintf(srcdir_path, sizeof(srcdir_path), "%s/", srcdir);
+        return(srcdir_path);
+    } /* end if */
+    else
+        return(NULL);
+} /* end H5_get_srcdir() */
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_duplicate_file_by_bytes
+ *
+ * Purpose:     Duplicate a file byte-for-byte at filename/path 'orig'
+ *              to a new (or replaced) file at 'dest'.
+ *
+ * Return:      Success:  0, completed successfully
+ *              Failure: -1
+ *
+ * Programmer:  Jake Smith
+ *              24 June 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+h5_duplicate_file_by_bytes(const char *orig, const char *dest)
+{
+    FILE *orig_ptr = NULL;
+    FILE *dest_ptr = NULL;
+    hsize_t fsize = 0;
+    hsize_t read_size = 0;
+    hsize_t max_buf = 0;
+    void *dup_buf = NULL;
+    int ret_value = 0;
+
+    max_buf = 4096 * sizeof(char);
+
+    orig_ptr = HDfopen(orig, "rb");
+    if (NULL == orig_ptr) {
+        ret_value = -1;
+        goto done;
+    }
+
+    HDfseek(orig_ptr , 0 , SEEK_END);
+    fsize = (hsize_t)HDftell(orig_ptr);
+    HDrewind(orig_ptr);
+
+    dest_ptr = HDfopen(dest, "wb");
+    if (NULL == dest_ptr) {
+        ret_value = -1;
+        goto done;
+    }
+
+    read_size = MIN(fsize, max_buf);
+    dup_buf = HDmalloc(read_size);
+    if (NULL == dup_buf) {
+        ret_value = -1;
+        goto done;
+    }
+
+    while (read_size > 0) {
+        if (HDfread(dup_buf, read_size, 1, orig_ptr) != 1) {
+            ret_value = -1;
+            goto done;
+        }
+        HDfwrite(dup_buf, read_size, 1, dest_ptr);
+        fsize -= read_size;
+        read_size = MIN(fsize, max_buf);
+    }
+
+done:
+    if (orig_ptr != NULL)
+        HDfclose(orig_ptr);
+    if (dest_ptr != NULL)
+        HDfclose(dest_ptr);
+    if (dup_buf != NULL)
+        HDfree(dup_buf);
+    return ret_value;
+} /* end h5_duplicate_file_by_bytes() */
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_check_if_file_locking_enabled
+ *
+ * Purpose:     Checks if file locking is enabled on this file system.
+ *
+ * Return:      SUCCEED/FAIL
+ *              are_enabled will be FALSE if file locking is disabled on
+ *              the file system of if there were errors.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+h5_check_if_file_locking_enabled(hbool_t *is_enabled)
+{
+    const char *filename = "locking_test_file";
+    int pmode = O_RDWR | O_CREAT | O_TRUNC;
+    int fd = -1;
+
+    *is_enabled = TRUE;
+
+    if((fd = HDopen(filename, pmode, H5_POSIX_CREATE_MODE_RW)) < 0)
+        goto error;
+
+    /* Test HDflock() to see if it works */
+    if(HDflock(fd, LOCK_EX | LOCK_NB) < 0) {
+        if(ENOSYS == errno) {
+            /* When errno is set to ENOSYS, the file system does not support
+             * locking, so ignore it. This is most frequently used on
+             * Lustre. If we also want to check for disabled NFS locks
+             * we'll need to check for ENOLCK, too. That isn't done by
+             * default here since that could also represent an actual
+             * error condition.
+             */
+            errno = 0;
+            *is_enabled = FALSE;
+        }
+        else
+            goto error;
+    }
+    if(HDflock(fd, LOCK_UN) < 0)
+        goto error;
+
+    if(HDclose(fd) < 0)
+        goto error;
+    if(HDremove(filename) < 0)
+        goto error;
+
+    return SUCCEED;
+
+error:
+    *is_enabled = FALSE;
+    if (fd > -1) {
+        HDclose(fd);
+        HDremove(filename);
+    }
+    return FAIL;
+} /* end h5_check_if_file_locking_enabled() */
+

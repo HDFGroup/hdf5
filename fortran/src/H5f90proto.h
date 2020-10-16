@@ -23,7 +23,7 @@ H5_FCDLL void HD5packFstring(char *src, char *dest, size_t len);
 
 
 /*
- * Storage info struct used by H5O_info_t and H5F_info_t 
+ * Storage info struct used by H5O_info_t and H5F_info_t
  * interoperable with Fortran.
  */
 typedef struct H5_ih_info_t_f {
@@ -31,7 +31,7 @@ typedef struct H5_ih_info_t_f {
     hsize_t     heap_size;
 } H5_ih_info_t_f;
 
-/* Information struct for object header metadata (for H5Oget_info/H5Oget_info_by_name/H5Oget_info_by_idx) 
+/* Information struct for object header metadata (for H5Oget_info/H5Oget_info_by_name/H5Oget_info_by_idx)
  *  interoperable with Fortran.
  */
 typedef struct H5O_hdr_info_t_f {
@@ -51,7 +51,7 @@ typedef struct H5O_hdr_info_t_f {
     } mesg;
 } H5O_hdr_info_t_f;
 
-/* Information struct for object (for H5Oget_info/H5Oget_info_by_name/H5Oget_info_by_idx) 
+/* Information struct for object (for H5Oget_info/H5Oget_info_by_name/H5Oget_info_by_idx)
  *  interoperable with Fortran.
  */
 typedef struct H5O_info_t_f {
@@ -123,7 +123,7 @@ H5_FCDLL int_f h5sget_select_type_c( hid_t_f *space_id , int_f *op);
 H5_FCDLL int_f h5sselect_elements_c( hid_t_f *space_id , int_f *op, size_t_f *nelements, hsize_t_f *coord);
 H5_FCDLL int_f h5scombine_hyperslab_c( hid_t_f *space_id , int_f *op, hsize_t_f *start, hsize_t_f *count, hsize_t_f *stride, hsize_t_f *block, hid_t_f *hyper_id);
 H5_FCDLL int_f h5scombine_select_c( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id, hid_t_f *ds_id);
-H5_FCDLL int_f h5sselect_select_c( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id);
+H5_FCDLL int_f h5smodify_select_c( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id);
 H5_FCDLL int_f h5sdecode_c( _fcd buf, hid_t_f *obj_id );
 H5_FCDLL int_f h5sencode_c(_fcd buf, hid_t_f *obj_id, size_t_f *nalloc );
 H5_FCDLL int_f h5sextent_equal_c( hid_t_f * space1_id, hid_t_f *space2_id, hid_t_f *c_equal);
@@ -156,9 +156,9 @@ H5_FCDLL int_f h5dfill_c(void * fill_value, hid_t_f *fill_type_id, hid_t_f *spac
 H5_FCDLL int_f h5dget_space_status_c( hid_t_f *dset_id, int_f *flag);
 H5_FCDLL int_f h5dcreate_anon_c(hid_t_f *loc_id, hid_t_f *type_id, hid_t_f *space_id,
 				  hid_t_f *dcpl_id, hid_t_f *dapl_id, hid_t_f *dset_id);
-H5_FCDLL int_f h5dwrite_f_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, 
+H5_FCDLL int_f h5dwrite_f_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id,
 				   hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf);
-H5_FCDLL int_f h5dread_f_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_space_id, 
+H5_FCDLL int_f h5dread_f_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_space_id,
 				   hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf);
 H5_FCDLL int_f h5dvlen_reclaim_c(hid_t_f *type_id ,  hid_t_f *space_id, hid_t_f *plist_id, void *buf);
 
@@ -319,22 +319,22 @@ H5_FCDLL int_f h5ovisit_c(hid_t_f *group_id, int_f *index_type, int_f *order, H5
 H5_FCDLL int_f h5ovisit_by_name_c(hid_t_f *loc_id,  _fcd object_name, size_t_f *namelen, int_f *index_type, int_f *order,
 				   H5O_iterate_t op, void *op_data, hid_t_f *lapl_id, int_f *fields );
 H5_FCDLL int_f h5oget_info_c(hid_t_f *object_id, H5O_info_t_f *object_info, int_f *fields);
-H5_FCDLL int_f h5oget_info_by_idx_c(hid_t_f *loc_id, _fcd  group_name, size_t_f *namelen, 
+H5_FCDLL int_f h5oget_info_by_idx_c(hid_t_f *loc_id, _fcd  group_name, size_t_f *namelen,
 				      int_f *index_field, int_f *order, hsize_t_f *n, hid_t_f *lapl_id, H5O_info_t_f *object_info, int_f *fields);
 H5_FCDLL int_f h5oget_info_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id,
 				       H5O_info_t_f *object_info, int_f *fields);
 H5_FCDLL int_f h5ocopy_c(hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_name_len,
-			   hid_t_f *dst_loc_id, _fcd dst_name, size_t_f *dst_name_len, 
+			   hid_t_f *dst_loc_id, _fcd dst_name, size_t_f *dst_name_len,
 			   hid_t_f *ocpypl_id, hid_t_f *lcpl_id );
 H5_FCDLL int_f h5odecr_refcount_c(hid_t_f *object_id);
 H5_FCDLL int_f h5oincr_refcount_c(hid_t_f *object_id);
 H5_FCDLL int_f h5oexists_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id);
 H5_FCDLL int_f h5oset_comment_c(hid_t_f *object_id, _fcd comment, size_t_f *commentlen);
 H5_FCDLL int_f h5oset_comment_by_name_c(hid_t_f *object_id, _fcd name, size_t_f *namelen,  _fcd comment, size_t_f *commentlen, hid_t_f *lapl_id);
-H5_FCDLL int_f h5oopen_by_idx_c(hid_t_f *loc_id, _fcd  group_name, size_t_f *group_namelen, 
+H5_FCDLL int_f h5oopen_by_idx_c(hid_t_f *loc_id, _fcd  group_name, size_t_f *group_namelen,
 				      int_f *index_type, int_f *order, hsize_t_f *n, hid_t_f *obj_id, hid_t_f *lapl_id);
 H5_FCDLL int_f h5oget_comment_c(hid_t_f *object_id, _fcd comment, size_t_f *commentsize, hssize_t_f *bufsize);
-H5_FCDLL int_f h5oget_comment_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *name_size, 
+H5_FCDLL int_f h5oget_comment_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *name_size,
 					  _fcd comment, size_t_f *commentsize, size_t_f *bufsize, hid_t_f *lapl_id);
 /*
  * Functions from H5Pf.c
@@ -448,7 +448,6 @@ H5_FCDLL int_f h5pset_attr_creation_order_c(hid_t_f *ocpl_id, int_f *crt_order_f
 H5_FCDLL int_f h5pset_shared_mesg_nindexes_c(hid_t_f *plist_id, int_f *nindexes );
 H5_FCDLL int_f h5pset_shared_mesg_index_c(hid_t_f *fcpl_id, int_f *index_num, int_f *mesg_type_flags, int_f *min_mesg_size);
 H5_FCDLL int_f h5pget_attr_creation_order_c(hid_t_f *ocpl_id, int_f *crt_order_flags);
-H5_FCDLL int_f h5pset_libver_bounds_c(hid_t_f *fapl_id, int_f *low, int_f *high);
 H5_FCDLL int_f h5pset_link_creation_order_c(hid_t_f *gcpl_id, int_f *crt_order_flags);
 H5_FCDLL int_f h5pget_link_phase_change_c(hid_t_f *gcpl_id, int_f *max_compact, int_f *min_dense );
 H5_FCDLL int_f h5pget_obj_track_times_c(hid_t_f *plist_id, int_f *flag);
@@ -523,12 +522,12 @@ H5_FCDLL int_f h5open_c(void);
 H5_FCDLL int_f h5close_c(void);
 H5_FCDLL int_f h5init_types_c(hid_t_f *types, hid_t_f *floatingtypes, hid_t_f *integertypes);
 H5_FCDLL int_f h5close_types_c(hid_t_f *types, int_f *lentypes, hid_t_f *floatingtypes, int_f *floatinglen, hid_t_f *integertypes, int_f *integerlen);
-H5_FCDLL int_f h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags, 
+H5_FCDLL int_f h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
 		int_f *h5e_flags, hid_t_f *h5e_hid_flags, int_f *h5f_flags,
                 int_f *h5fd_flags, hid_t_f *h5fd_hid_flags,
                 int_f *h5g_flags, int_f *h5i_flags, int_f *h5l_flags, int_f *h5o_flags,
-                hid_t_f *h5p_flags, int_f *h5p_flags_int, int_f *h5r_flags, 
-                int_f *h5s_flags, hid_t_f *h5s_hid_flags, hsize_t_f *h5s_hsize_flags, 
+                hid_t_f *h5p_flags, int_f *h5p_flags_int, int_f *h5r_flags,
+                int_f *h5s_flags, hid_t_f *h5s_hid_flags, hsize_t_f *h5s_hsize_flags,
 		int_f *h5t_flags, int_f *h5z_flags, int_f *h5_generic_flags,
                 haddr_t_f *h5_haddr_generic_flags);
 H5_FCDLL int_f h5init1_flags_c(int_f *h5lib_flags);

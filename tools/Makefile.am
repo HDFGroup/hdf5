@@ -20,7 +20,7 @@
 include $(top_srcdir)/config/commence.am
 
 if BUILD_TESTS_CONDITIONAL
-   TESTSERIAL_DIR =test
+   TESTSERIAL_DIR =test libtest
 else
    TESTSERIAL_DIR=
 endif

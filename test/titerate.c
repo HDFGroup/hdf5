@@ -939,7 +939,7 @@ static void test_links(hid_t fapl)
  *-------------------------------------------------------------------------
  */
 static int
-find_err_msg_cb(unsigned n, const H5E_error2_t *err_desc, void *_client_data)
+find_err_msg_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *_client_data)
 {
     int status = H5_ITER_CONT;
     searched_err_t *searched_err = (searched_err_t *)_client_data;
@@ -1045,10 +1045,10 @@ test_iterate(void)
     /* These next tests use the same file */
     for(new_format = FALSE; new_format <= TRUE; new_format++) {
         test_iter_group(new_format ? fapl2 : fapl, new_format); /* Test group iteration */
-        test_iter_group_large(new_format ? fapl2 : fapl);   /* Test group iteration for large # of objects */
+        test_iter_group_large(new_format ? fapl2 : fapl);       /* Test group iteration for large # of objects */
         test_iter_attr(new_format ? fapl2 : fapl, new_format);  /* Test attribute iteration */
-        test_grp_memb_funcs(new_format ? fapl2 : fapl);     /* Test group member information functions */
-        test_links(new_format ? fapl2 : fapl);              /* Test soft and hard link iteration */
+        test_grp_memb_funcs(new_format ? fapl2 : fapl);         /* Test group member information functions */
+        test_links(new_format ? fapl2 : fapl);                  /* Test soft and hard link iteration */
     } /* end for */
 
     /* Test the fix for issue HDFFV-10588 */

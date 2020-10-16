@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Pedro Vicente <pvn@ncsa.uiuc.edu>
+ * Programmer:  Pedro Vicente
  *              April 12, 2002
  *
  * Purpose:     Tests the H5Dset_extent call
@@ -358,7 +358,7 @@ static int do_ranks( hid_t fapl, hbool_t new_format )
 
         /* Iterate over different index types, but only if using the new format
          */
-        for(index_type = RANK4_INDEX_BTREE; index_type < RANK4_NINDICES; H5_INC_ENUM(rank4_index_t, index_type)) {
+        for(index_type = RANK4_INDEX_BTREE; index_type < RANK4_NINDICES; index_type++) {
             /* Standard test */
             if(test_random_rank4(fapl, dcpl, do_fillvalue, disable_edge_filters, FALSE, index_type) < 0) {
                 DO_RANKS_PRINT_CONFIG("Randomized rank 4")
@@ -2013,8 +2013,7 @@ static int test_external(hid_t fapl) {
     if (H5Fclose(fid) < 0)
         FAIL_STACK_ERROR
 
-    PASSED()
-    ;
+    PASSED();
 
     return 0;
 

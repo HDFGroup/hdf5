@@ -27,7 +27,7 @@ fill_h5o_info_t_f(H5O_info_t Oinfo, H5O_info_t_f *object_info);
 int_f
 fill_h5o_info_t_f(H5O_info_t Oinfo, H5O_info_t_f *object_info) {
 
-  /* This function does not used the field parameter because we want 
+  /* This function does not used the field parameter because we want
    * this function to fill the unfilled fields with C's default values.
    */
 
@@ -202,7 +202,7 @@ h5oopen_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id, hid_
  * PURPOSE
  *  Call H5Oclose
  * INPUTS
- *  object_id   - Object identifier  
+ *  object_id   - Object identifier
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -215,10 +215,10 @@ h5oclose_c ( hid_t_f *object_id )
 /******/
 {
   int_f ret_value=0;          /* Return value */
-  
+
   if (H5Oclose((hid_t)*object_id) < 0)
     HGOTO_DONE(FAIL);
-  
+
  done:
   return ret_value;
 }
@@ -275,7 +275,7 @@ h5ovisit_c(hid_t_f *group_id, int_f *index_type, int_f *order, H5O_iterate_t op,
  *  addr  - Object’s address in the file
  *
  * OUTPUTS
- *  obj_id  - Dataset identifier      
+ *  obj_id  - Dataset identifier
  *
  * RETURNS
  *  0 on success, -1 on failure
@@ -329,7 +329,7 @@ h5oget_info_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *l
   char *c_name = NULL;          /* Buffer to hold C string */
   int_f ret_value = 0;          /* Return value */
   H5O_info_t Oinfo;
-  
+
   /*
    * Convert FORTRAN name to C name
    */
@@ -373,7 +373,7 @@ h5oget_info_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *l
  * SOURCE
 */
 int_f
-h5oget_info_by_idx_c (hid_t_f *loc_id, _fcd  group_name, size_t_f *namelen, 
+h5oget_info_by_idx_c (hid_t_f *loc_id, _fcd  group_name, size_t_f *namelen,
                       int_f *index_field, int_f *order, hsize_t_f *n, hid_t_f *lapl_id, H5O_info_t_f *object_info, int_f *fields)
 /******/
 {
@@ -382,7 +382,7 @@ h5oget_info_by_idx_c (hid_t_f *loc_id, _fcd  group_name, size_t_f *namelen,
   H5O_info_t Oinfo;
   H5_index_t c_index_field;
   H5_iter_order_t c_order;
-  
+
   /*
    * Convert FORTRAN name to C name
    */
@@ -431,7 +431,7 @@ h5oget_info_c (hid_t_f *object_id, H5O_info_t_f *object_info, int_f *fields)
 {
   int_f ret_value = 0;          /* Return value */
   H5O_info_t Oinfo;
-  
+
   /*
    * Call H5Oinfo_by_name function.
    */
@@ -449,12 +449,12 @@ h5oget_info_c (hid_t_f *object_id, H5O_info_t_f *object_info, int_f *fields)
  *  H5Ocopy_c
  * PURPOSE
  *  Calls H5Ocopy
- * INPUTS  
- *  src_loc_id   - Object identifier indicating the location of the source object to be copied 
- *  src_name     - Name of the source object to be copied 
+ * INPUTS
+ *  src_loc_id   - Object identifier indicating the location of the source object to be copied
+ *  src_name     - Name of the source object to be copied
  *  src_name_len - Length of src_name
- *  dst_loc_id   - Location identifier specifying the destination 
- *  dst_name     - Name to be assigned to the new copy 
+ *  dst_loc_id   - Location identifier specifying the destination
+ *  dst_name     - Name to be assigned to the new copy
  *  dst_name_len - Length of dst_name
  *  ocpypl_id    - Object copy property list
  *  lcpl_id      - Link creation property list for the new hard link
@@ -468,15 +468,15 @@ h5oget_info_c (hid_t_f *object_id, H5O_info_t_f *object_info, int_f *fields)
 */
 int_f
 h5ocopy_c (hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_name_len,
-           hid_t_f *dst_loc_id, _fcd dst_name, size_t_f *dst_name_len, 
+           hid_t_f *dst_loc_id, _fcd dst_name, size_t_f *dst_name_len,
            hid_t_f *ocpypl_id, hid_t_f *lcpl_id )
 /******/
 {
   char *c_src_name = NULL;  /* Buffer to hold C string */
   char *c_dst_name = NULL;  /* Buffer to hold C string */
-  
+
   int_f ret_value = 0;      /* Return value */
-  
+
   /*
    * Convert FORTRAN name to C name
    */
@@ -488,7 +488,7 @@ h5ocopy_c (hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_name_len,
   /*
    * Call H5Ocopy function.
    */
-  if(H5Ocopy( (hid_t)*src_loc_id, c_src_name, (hid_t)*dst_loc_id, c_dst_name, 
+  if(H5Ocopy( (hid_t)*src_loc_id, c_src_name, (hid_t)*dst_loc_id, c_dst_name,
               (hid_t)*ocpypl_id, (hid_t)*lcpl_id) < 0)
     HGOTO_DONE(FAIL);
 
@@ -542,7 +542,7 @@ h5ovisit_by_name_c(hid_t_f *loc_id,  _fcd object_name, size_t_f *namelen, int_f 
     HGOTO_DONE(FAIL);
 
   /*
-   * Call H5Ovisit
+   * Call H5Ovisit_by_name
    */
   func_ret_value = H5Ovisit_by_name2( (hid_t)*loc_id, c_object_name, (H5_index_t)*index_type, (H5_iter_order_t)*order,
                                       op, op_data, (unsigned)*fields, (hid_t)*lapl_id);
@@ -706,8 +706,8 @@ h5oset_comment_c (hid_t_f *object_id, _fcd comment, size_t_f *commentlen)
  *  Calls H5Oset_comment_by_name
  * INPUTS
  *  object_id  - Identifier of the target object.
- *  name       - Name of the object whose comment is to be set or reset, 
- *  specified as a path relative to loc_id. 
+ *  name       - Name of the object whose comment is to be set or reset,
+ *  specified as a path relative to loc_id.
  *  namelen    - Length of the name.
  *  comment    - The new comment.
  *  commentlen - Length of the comment.
@@ -774,7 +774,7 @@ h5oset_comment_by_name_c (hid_t_f *object_id, _fcd name, size_t_f *namelen,  _fc
  * SOURCE
 */
 int_f
-h5oopen_by_idx_c (hid_t_f *loc_id, _fcd  group_name, size_t_f *group_namelen, 
+h5oopen_by_idx_c (hid_t_f *loc_id, _fcd  group_name, size_t_f *group_namelen,
                   int_f *index_type, int_f *order, hsize_t_f *n, hid_t_f *obj_id, hid_t_f *lapl_id)
 /******/
 {
@@ -782,7 +782,7 @@ h5oopen_by_idx_c (hid_t_f *loc_id, _fcd  group_name, size_t_f *group_namelen,
   int_f ret_value = 0;
   H5_index_t c_index_type;
   H5_iter_order_t c_order;
-  
+
   /*
    * Convert FORTRAN string to C string
    */
@@ -835,13 +835,13 @@ h5oget_comment_c (hid_t_f *object_id, _fcd comment, size_t_f *commentsize,  hssi
   /*
    * Allocate buffer to hold comment name
    */
-  
+
   if(NULL == (c_comment = (char *)HDmalloc(c_commentsize)))
     HGOTO_DONE(FAIL);
 
   /*
    * Call H5Oget_comment function.
-   */ 
+   */
 
   if((*bufsize = (hssize_t_f)H5Oget_comment((hid_t)*object_id, c_comment, (size_t)*commentsize)) < 0)
     HGOTO_DONE(FAIL);
@@ -879,7 +879,7 @@ h5oget_comment_c (hid_t_f *object_id, _fcd comment, size_t_f *commentsize,  hssi
  * SOURCE
 */
 int_f
-h5oget_comment_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *name_size, 
+h5oget_comment_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *name_size,
                           _fcd comment, size_t_f *commentsize, size_t_f *bufsize, hid_t_f *lapl_id)
 /******/
 {
@@ -900,13 +900,13 @@ h5oget_comment_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *name_size,
   /*
    * Allocate buffer to hold comment name
    */
-  
+
   if(NULL == (c_comment = (char *)HDmalloc(c_commentsize)))
     HGOTO_DONE(FAIL);
 
   /*
    * Call H5Oget_comment_by_name function.
-   */ 
+   */
 
   if((c_bufsize = H5Oget_comment_by_name((hid_t)*loc_id, c_name, c_comment, (size_t)*commentsize,(hid_t)*lapl_id )) < 0)
     HGOTO_DONE(FAIL);

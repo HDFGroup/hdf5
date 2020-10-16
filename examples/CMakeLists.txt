@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5_EXAMPLES C)
 
 #-----------------------------------------------------------------------------
@@ -29,6 +29,7 @@ set (examples
     h5_extlink
     h5_elink_unix2win
     h5_shared_mesg
+    h5_debug_trace
     h5_vds
     h5_vds-exc
     h5_vds-exclim
@@ -65,6 +66,6 @@ if (H5_HAVE_PARALLEL)
   set_target_properties (ph5example PROPERTIES FOLDER examples)
 endif ()
 
-if (BUILD_TESTING)
+if (BUILD_TESTING AND HDF5_TEST_EXAMPLES)
   include (CMakeTests.cmake)
 endif ()

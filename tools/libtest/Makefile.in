@@ -29,7 +29,6 @@
 #
 # HDF5 Library Makefile(.in)
 #
-
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -104,8 +103,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = h5tools_test_utils$(EXEEXT)
-TESTS =
+check_PROGRAMS = $(am__EXEEXT_1)
+TESTS = $(am__EXEEXT_1)
 subdir = tools/libtest
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
@@ -134,12 +133,12 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h \
 	$(top_builddir)/fortran/src/H5config_f.inc
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__installdirs = "$(DESTDIR)$(bindir)"
-PROGRAMS = $(bin_PROGRAMS)
+am__EXEEXT_1 = h5tools_test_utils$(EXEEXT)
 h5tools_test_utils_SOURCES = h5tools_test_utils.c
 h5tools_test_utils_OBJECTS = h5tools_test_utils.$(OBJEXT)
 h5tools_test_utils_LDADD = $(LDADD)
-h5tools_test_utils_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
+h5tools_test_utils_DEPENDENCIES = $(LIBH5TOOLS) $(LIBH5TEST) \
+	$(LIBHDF5)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -389,11 +388,8 @@ am__set_TESTS_bases = \
 RECHECK_LOGS = $(TEST_LOGS)
 AM_RECURSIVE_TARGETS = check recheck
 TEST_SUITE_LOG = test-suite.log
-am__test_logs1 = $(TESTS:=.log)
-am__test_logs2 = $(am__test_logs1:@EXEEXT@.log=.log)
-TEST_LOGS = $(am__test_logs2:.sh.log=.log)
-SH_LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver
-SH_LOG_COMPILE = $(SH_LOG_COMPILER) $(AM_SH_LOG_FLAGS) $(SH_LOG_FLAGS)
+LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver
+LOG_COMPILE = $(LOG_COMPILER) $(AM_LOG_FLAGS) $(LOG_FLAGS)
 am__set_b = \
   case '$@' in \
     */*) \
@@ -404,6 +400,11 @@ am__set_b = \
     *) \
       b='$*';; \
   esac
+am__test_logs1 = $(TESTS:=.log)
+am__test_logs2 = $(am__test_logs1:@EXEEXT@.log=.log)
+TEST_LOGS = $(am__test_logs2:.sh.log=.log)
+SH_LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver
+SH_LOG_COMPILE = $(SH_LOG_COMPILER) $(AM_SH_LOG_FLAGS) $(SH_LOG_FLAGS)
 am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/bin/depcomp \
 	$(top_srcdir)/bin/test-driver $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
@@ -414,15 +415,15 @@ AMTAR = @AMTAR@
 
 # H5_CFLAGS holds flags that should be used when building hdf5,
 # but which should not be exported to h5cc for building other programs.
-# AM_CFLAGS is an automake construct which should be used by Makefiles 
+# AM_CFLAGS is an automake construct which should be used by Makefiles
 # instead of CFLAGS, as CFLAGS is reserved solely for the user to define.
 # This applies to FCFLAGS, CXXFLAGS, CPPFLAGS, and LDFLAGS as well.
-AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@
+AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@ @H5_ECFLAGS@
 
 # Include src and tools/lib directories
 AM_CPPFLAGS = @AM_CPPFLAGS@ @H5_CPPFLAGS@ -I$(top_srcdir)/src \
-	-I$(top_srcdir)/tools/lib
-AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@
+	-I$(top_srcdir)/test -I$(top_srcdir)/tools/lib
+AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@ @H5_ECXXFLAGS@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@
 AM_JAVACFLAGS = @AM_JAVACFLAGS@
@@ -442,6 +443,7 @@ CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CC_VERSION = @CC_VERSION@
 CFLAGS = @CFLAGS@
+CLANG_SANITIZE_CHECKS = @CLANG_SANITIZE_CHECKS@
 CODESTACK = @CODESTACK@
 CONFIG_DATE = @CONFIG_DATE@
 CONFIG_MODE = @CONFIG_MODE@
@@ -458,6 +460,7 @@ DEFAULT_API_VERSION = @DEFAULT_API_VERSION@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DEPRECATED_SYMBOLS = @DEPRECATED_SYMBOLS@
+DESIRED_FILE_LOCKING = @DESIRED_FILE_LOCKING@
 DEV_WARNINGS = @DEV_WARNINGS@
 DIRECT_VFD = @DIRECT_VFD@
 DLLTOOL = @DLLTOOL@
@@ -494,8 +497,11 @@ H5_CFLAGS = @H5_CFLAGS@
 H5_CLASSPATH = @H5_CLASSPATH@
 H5_CPPFLAGS = @H5_CPPFLAGS@
 H5_CXXFLAGS = @H5_CXXFLAGS@
+H5_ECFLAGS = @H5_ECFLAGS@
+H5_ECXXFLAGS = @H5_ECXXFLAGS@
 H5_FCFLAGS = @H5_FCFLAGS@
 H5_FORTRAN_SHARED = @H5_FORTRAN_SHARED@
+H5_IS_DARWIN = @H5_IS_DARWIN@
 H5_JAVACFLAGS = @H5_JAVACFLAGS@
 H5_JAVAFLAGS = @H5_JAVAFLAGS@
 H5_JNIFLAGS = @H5_JNIFLAGS@
@@ -518,6 +524,7 @@ HL = @HL@
 HL_FOR = @HL_FOR@
 HSIZE_T = @HSIZE_T@
 HSSIZE_T = @HSSIZE_T@
+IGNORE_DISABLED_FILE_LOCKS = @IGNORE_DISABLED_FILE_LOCKS@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -554,6 +561,7 @@ MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MEMORYALLOCSANITYCHECK = @MEMORYALLOCSANITYCHECK@
+MIRROR_VFD = @MIRROR_VFD@
 MKDIR_P = @MKDIR_P@
 MPE = @MPE@
 NM = @NM@
@@ -613,6 +621,7 @@ TIME = @TIME@
 TR = @TR@
 TRACE_API = @TRACE_API@
 UNAME_INFO = @UNAME_INFO@
+USE_FILE_LOCKING = @USE_FILE_LOCKING@
 USE_FILTER_DEFLATE = @USE_FILTER_DEFLATE@
 USE_FILTER_SZIP = @USE_FILTER_SZIP@
 USINGMEMCHECKER = @USINGMEMCHECKER@
@@ -648,6 +657,7 @@ docdir = $(exec_prefix)/doc
 dvidir = @dvidir@
 enable_shared = @enable_shared@
 enable_static = @enable_static@
+examplesdir = @examplesdir@
 exec_prefix = @exec_prefix@
 fortran_linux_linker_option = @fortran_linux_linker_option@
 host = @host@
@@ -704,15 +714,15 @@ LIBH5_HL = $(top_builddir)/hl/src/libhdf5_hl.la
 LIBH5F_HL = $(top_builddir)/hl/fortran/src/libhdf5hl_fortran.la
 LIBH5CPP_HL = $(top_builddir)/hl/c++/src/libhdf5_hl_cpp.la
 
-# Note that in svn revision 19400 the '/' after DESTDIR in H5* variables below  
-# has been removed. According to the official description of DESTDIR by Gnu at 
-# http://www.gnu.org/prep/standards/html_node/DESTDIR.html, DESTDIR is 
-# prepended to the normal and complete install path that it precedes for the 
-# purpose of installing in a temporary directory which is useful for building 
-# rpms and other packages.  The '/' after ${DESTDIR} will be followed by another 
-# '/' at the beginning of the normal install path.  When DESTDIR is empty the  
-# path then begins with '//', which is incorrect and causes problems at least for 
-# Cygwin.   
+# Note that in svn revision 19400 the '/' after DESTDIR in H5* variables below
+# has been removed. According to the official description of DESTDIR by Gnu at
+# http://www.gnu.org/prep/standards/html_node/DESTDIR.html, DESTDIR is
+# prepended to the normal and complete install path that it precedes for the
+# purpose of installing in a temporary directory which is useful for building
+# rpms and other packages.  The '/' after ${DESTDIR} will be followed by another
+# '/' at the beginning of the normal install path.  When DESTDIR is empty the
+# path then begins with '//', which is incorrect and causes problems at least for
+# Cygwin.
 
 # Scripts used to build examples
 # If only shared libraries have been installed, have h5cc build examples with
@@ -733,8 +743,11 @@ TRACE = perl $(top_srcdir)/bin/trace
 # *.clog and *.clog2 are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
 
+#test programs
+TEST_PROG = h5tools_test_utils
+
 # All programs depend on the hdf5 and h5tools libraries
-LDADD = $(LIBH5TOOLS) $(LIBHDF5)
+LDADD = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 
 # Automake needs to be taught how to build lib, progs and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -747,7 +760,7 @@ LIB = $(lib_LIBRARIES) $(lib_LTLIBRARIES) $(noinst_LIBRARIES)                 \
 PROGS = $(bin_PROGRAMS) $(bin_SCRIPTS) $(noinst_PROGRAMS) $(noinst_SCRIPTS)   \
         $(EXTRA_PROG)
 
-chk_TESTS = $(check_PROGRAMS) $(check_SCRIPTS) $(EXTRA_TEST) 
+chk_TESTS = $(check_PROGRAMS) $(check_SCRIPTS) $(EXTRA_TEST)
 TEST_EXTENSIONS = .sh
 SH_LOG_COMPILER = $(SHELL)
 AM_SH_LOG_FLAGS = 
@@ -790,49 +803,9 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-install-binPROGRAMS: $(bin_PROGRAMS)
-	@$(NORMAL_INSTALL)
-	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(bindir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(bindir)" || exit 1; \
-	fi; \
-	for p in $$list; do echo "$$p $$p"; done | \
-	sed 's/$(EXEEXT)$$//' | \
-	while read p p1; do if test -f $$p \
-	 || test -f $$p1 \
-	  ; then echo "$$p"; echo "$$p"; else :; fi; \
-	done | \
-	sed -e 'p;s,.*/,,;n;h' \
-	    -e 's|.*|.|' \
-	    -e 'p;x;s,.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/' | \
-	sed 'N;N;N;s,\n, ,g' | \
-	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1 } \
-	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
-	    if ($$2 == $$4) files[d] = files[d] " " $$1; \
-	    else { print "f", $$3 "/" $$4, $$1; } } \
-	  END { for (d in files) print "f", d, files[d] }' | \
-	while read type dir files; do \
-	    if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
-	    test -z "$$files" || { \
-	    echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(bindir)$$dir'"; \
-	    $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(bindir)$$dir" || exit $$?; \
-	    } \
-	; done
 
-uninstall-binPROGRAMS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
-	files=`for p in $$list; do echo "$$p"; done | \
-	  sed -e 'h;s,^.*/,,;s/$(EXEEXT)$$//;$(transform)' \
-	      -e 's/$$/$(EXEEXT)/' \
-	`; \
-	test -n "$$list" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(bindir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(bindir)" && rm -f $$files
-
-clean-binPROGRAMS:
-	@list='$(bin_PROGRAMS)'; test -n "$$list" || exit 0; \
+clean-checkPROGRAMS:
+	@list='$(check_PROGRAMS)'; test -n "$$list" || exit 0; \
 	echo " rm -f" $$list; \
 	rm -f $$list || exit $$?; \
 	test -n "$(EXEEXT)" || exit 0; \
@@ -1053,7 +1026,7 @@ $(TEST_SUITE_LOG): $(TEST_LOGS)
 	  echo "$$col$$br$$std";					\
 	fi;								\
 	$$success || exit 1
-recheck: all 
+recheck: all $(check_PROGRAMS)
 	@test -z "$(TEST_SUITE_LOG)" || rm -f $(TEST_SUITE_LOG)
 	@set +e; $(am__set_TESTS_bases); \
 	bases=`for i in $$bases; do echo $$i; done \
@@ -1064,6 +1037,13 @@ recheck: all
 	        am__force_recheck=am--force-recheck \
 	        TEST_LOGS="$$log_list"; \
 	exit $$?
+h5tools_test_utils.log: h5tools_test_utils$(EXEEXT)
+	@p='h5tools_test_utils$(EXEEXT)'; \
+	b='h5tools_test_utils'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 .sh.log:
 	@p='$<'; \
 	$(am__set_b); \
@@ -1110,13 +1090,11 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(PROGRAMS) all-local
+all-am: Makefile all-local
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)"; do \
-	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
-	done
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -1152,7 +1130,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
+clean-am: clean-checkPROGRAMS clean-generic clean-libtool \
+	mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -1178,7 +1157,7 @@ install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-binPROGRAMS
+install-exec-am:
 
 install-html: install-html-am
 
@@ -1218,24 +1197,23 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS
+uninstall-am:
 
 .MAKE: check-am install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am all-local check check-TESTS \
-	check-am clean clean-binPROGRAMS clean-generic clean-libtool \
+	check-am clean clean-checkPROGRAMS clean-generic clean-libtool \
 	cscopelist-am ctags ctags-am distclean distclean-compile \
 	distclean-generic distclean-libtool distclean-tags distdir dvi \
 	dvi-am html html-am info info-am install install-am \
-	install-binPROGRAMS install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	mostlyclean-local pdf pdf-am ps ps-am recheck tags tags-am \
-	uninstall uninstall-am uninstall-binPROGRAMS
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool mostlyclean-local pdf \
+	pdf-am ps ps-am recheck tags tags-am uninstall uninstall-am
 
 .PRECIOUS: Makefile
 
@@ -1344,26 +1322,35 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
                  echo "============================" > $${log}; \
               fi; \
               if test "X$(FORTRAN_API)" = "Xyes"; then \
-                 echo "Fortran API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+                 echo "Fortran API: Testing $${tname} $(TEST_FLAGS)"; \
                  if test -n "$(REALTIMEOUTPUT)"; then \
-                    echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" | tee -a $${log}; \
+                    echo "Fortran API: Test log for $${tname} $(TEST_FLAGS)" | tee -a $${log}; \
                  else \
-                    echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+                    echo "Fortran API: Test log for $${tname} $(TEST_FLAGS)" >> $${log}; \
                  fi; \
               elif test "X$(CXX_API)" = "Xyes"; then \
-                 echo "C++ API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+                 echo "C++ API: Testing $${tname} $(TEST_FLAGS)"; \
                  if test -n "$(REALTIMEOUTPUT)"; then \
-                    echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" | tee -a $${log};\
+                    echo "C++ API: Test log for $${tname} $(TEST_FLAGS)" | tee -a $${log};\
                  else \
-                    echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log};\
+                    echo "C++ API: Test log for $${tname} $(TEST_FLAGS)" >> $${log};\
                  fi; \
               else \
-                 echo "Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+                 echo "Testing: $${tname} $(TEST_FLAGS)"; \
                  if test -n "$(REALTIMEOUTPUT)"; then \
-                    echo "$(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" | tee -a $${log}; \
+                    echo "Test log for $${tname} $(TEST_FLAGS)" | tee -a $${log}; \
                  else \
-                    echo "$(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+                    echo "Test log for $${tname} $(TEST_FLAGS)" >> $${log}; \
                  fi; \
+              fi; \
+              if test -n "$(REALTIMEOUTPUT)"; then \
+                if test -n "$(HDF5_DRIVER)"; then \
+                  echo "Virtual file driver (VFD): $(HDF5_DRIVER)" | tee -a $${log}; \
+                fi; \
+              else \
+                if test -n "$(HDF5_DRIVER)"; then \
+                  echo "Virtual file driver (VFD): $(HDF5_DRIVER)" >> $${log}; \
+                fi; \
               fi; \
               if test -n "$(REALTIMEOUTPUT)"; then \
                  echo "============================" | tee -a $${log}; \
@@ -1479,7 +1466,6 @@ check-vfd: $(LIB) $(PROGS) $(chk_TESTS)
 	        HDF5_DRIVER=$$vfd $(MAKE) $(AM_MAKEFLAGS) check || exit 1;    \
 	    fi;                                                               \
 	done
-# check_PROGRAMS=$(TEST_PROG)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

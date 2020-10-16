@@ -142,7 +142,7 @@ init_cparam(H5FA_create_t *cparam, farray_test_param_t *tparam)
  * Purpose:     Create file and retrieve pointer to internal file object
  *
  * Return:      SUCCEED/FAIL
- *   
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -261,7 +261,7 @@ set_fa_state(const H5FA_create_t *cparam, farray_state_t *state)
  *-------------------------------------------------------------------------
  */
 static int
-reopen_file(hid_t *fid, H5F_t **f, hid_t fapl_id, 
+reopen_file(hid_t *fid, H5F_t **f, hid_t fapl_id,
     H5FA_t **fa, haddr_t fa_addr, const farray_test_param_t *tparam)
 {
     /* Check for closing & re-opening the array */
@@ -365,11 +365,11 @@ verify_cparam(const H5FA_t *fa, const H5FA_create_t *cparam)
 
     /* Retrieve creation parameters */
     HDmemset(&test_cparam, 0, sizeof(H5FA_create_t));
-    if (H5FA_get_cparam_test(fa, &test_cparam) < 0)
+    if (H5FA__get_cparam_test(fa, &test_cparam) < 0)
         FAIL_STACK_ERROR
 
     /* Verify creation parameters */
-    if (H5FA_cmp_cparam_test(cparam, &test_cparam))
+    if (H5FA__cmp_cparam_test(cparam, &test_cparam))
         TEST_ERROR
 
     /* Success */
@@ -499,7 +499,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
         TEST_ERROR
     } /* end if */
 
-    PASSED()
+    PASSED();
 }
 #else /* NDEBUG */
     SKIPPED();
@@ -515,7 +515,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
     if(create_array(f, cparam, &fa, &fa_addr) < 0)
         TEST_ERROR
 
-    PASSED()
+    PASSED();
 
     /* Verify the creation parameters */
     TESTING("verify array creation parameters");
@@ -529,7 +529,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -596,7 +596,7 @@ test_reopen(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -695,7 +695,7 @@ test_open_twice(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *tpara
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -828,7 +828,7 @@ test_open_twice_diff(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -946,7 +946,7 @@ test_delete_open(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -1486,7 +1486,7 @@ test_set_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam,
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -1613,7 +1613,7 @@ test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam,
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -1686,7 +1686,7 @@ main(void)
     }
 
     /* Iterate over the testing parameters */
-    for(curr_test = FARRAY_TEST_NORMAL; curr_test < FARRAY_TEST_NTESTS; H5_INC_ENUM(farray_test_type_t, curr_test)) {
+    for(curr_test = FARRAY_TEST_NORMAL; curr_test < FARRAY_TEST_NTESTS; curr_test++) {
 
         /* Initialize the testing parameters */
         HDmemset(&tparam, 0, sizeof(tparam));
@@ -1722,7 +1722,7 @@ main(void)
         nerrors += test_delete_open(fapl, &cparam, &tparam);
 
 	/* Iterate over the type of capacity tests */
-	for(curr_iter = FARRAY_ITER_FW; curr_iter < FARRAY_ITER_NITERS; H5_INC_ENUM(farray_iter_type_t, curr_iter)) {
+	for(curr_iter = FARRAY_ITER_FW; curr_iter < FARRAY_ITER_NITERS; curr_iter++) {
 
             /* Set appropriate parameters for each type of iteration */
             switch(curr_iter) {

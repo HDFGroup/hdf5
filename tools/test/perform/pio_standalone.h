@@ -213,7 +213,7 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDgetpwnam(S)           getpwnam(S)
 #define HDgetpwuid(U)           getpwuid(U)
 #define HDgetrusage(X,S)        getrusage(X,S)
-#define HDgets(S)               gets(S)
+/* Don't define a macro for gets() - it was removed in C11 */
 #ifdef H5_HAVE_WIN32_API
     H5_DLL int Wgettimeofday(struct timeval *tv, struct timezone *tz);
 #define HDgettimeofday(V,Z) Wgettimeofday(V,Z)
@@ -483,8 +483,8 @@ extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 #endif
 
 #ifdef H5_HAVE_PARALLEL
-H5TEST_DLL int h5_set_info_object(void);
-H5TEST_DLL void h5_dump_info_object(MPI_Info info);
+int h5_set_info_object(void);
+void h5_dump_info_object(MPI_Info info);
 #endif
 
 

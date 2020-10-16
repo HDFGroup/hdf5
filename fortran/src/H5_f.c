@@ -102,7 +102,7 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
       if (sizeof(int_f) == sizeof(long long)) {
 	if ((types[5] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
     } /*end else */
-    
+
     /* Find appropriate size to store Fortran REAL */
     if(sizeof(real_f)==sizeof(float)) {
       if ((types[6] = (hid_t_f)H5Tcopy(H5T_NATIVE_FLOAT)) < 0) return ret_value;
@@ -232,7 +232,7 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
     if ((integertypes[12] = (hid_t_f)H5Tcopy(H5T_STD_U32BE)) < 0) return ret_value;
     if ((integertypes[13] = (hid_t_f)H5Tcopy(H5T_STD_U32LE)) < 0) return ret_value;
     if ((integertypes[14] = (hid_t_f)H5Tcopy(H5T_STD_U64BE)) < 0) return ret_value;
-    if ((integertypes[15] = (hid_t_f)H5Tcopy(H5T_STD_U64LE)) < 0) return ret_value;	
+    if ((integertypes[15] = (hid_t_f)H5Tcopy(H5T_STD_U64LE)) < 0) return ret_value;
     if ((integertypes[17] = (hid_t_f)H5Tcopy(H5T_STD_B8BE)) < 0) return ret_value;
     if ((integertypes[18] = (hid_t_f)H5Tcopy(H5T_STD_B8LE)) < 0) return ret_value;
     if ((integertypes[19] = (hid_t_f)H5Tcopy(H5T_STD_B16BE)) < 0) return ret_value;
@@ -360,12 +360,12 @@ h5close_types_c( hid_t_f * types, int_f *lentypes,
  * SOURCE
  */
 int_f
-h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags, 
+h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
 		int_f *h5e_flags, hid_t_f *h5e_hid_flags, int_f *h5f_flags,
                 int_f *h5fd_flags, hid_t_f *h5fd_hid_flags,
                 int_f *h5g_flags, int_f *h5i_flags, int_f *h5l_flags, int_f *h5o_flags,
-                hid_t_f *h5p_flags, int_f *h5p_flags_int, int_f *h5r_flags, 
-                int_f *h5s_flags, hid_t_f *h5s_hid_flags, hsize_t_f *h5s_hsize_flags, 
+                hid_t_f *h5p_flags, int_f *h5p_flags_int, int_f *h5r_flags,
+                int_f *h5s_flags, hid_t_f *h5s_hid_flags, hsize_t_f *h5s_hsize_flags,
 		int_f *h5t_flags, int_f *h5z_flags, int_f *h5_generic_flags,
                 haddr_t_f *h5_haddr_generic_flags)
 /******/
@@ -443,7 +443,11 @@ h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
     h5f_flags[15] = (int_f)H5F_OBJ_ALL;
     h5f_flags[16] = (int_f)H5F_LIBVER_EARLIEST;
     h5f_flags[17] = (int_f)H5F_LIBVER_LATEST;
-    h5f_flags[18] = (int_f)H5F_UNLIMITED;
+    h5f_flags[18] = (int_f)H5F_LIBVER_ERROR;
+    h5f_flags[19] = (int_f)H5F_LIBVER_NBOUNDS;
+    h5f_flags[20] = (int_f)H5F_UNLIMITED;
+    h5f_flags[21] = (int_f)H5F_LIBVER_V18;
+    h5f_flags[22] = (int_f)H5F_LIBVER_V110;
 
 /*
  *  H5FD flags
@@ -559,7 +563,7 @@ h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
 
 /* Flags for H5Oget_info.
  * These flags determine which fields will be filled in in the H5O_info_t
- * struct. 
+ * struct.
  */
       h5o_flags[27] = (int_f)H5O_INFO_ALL; /* (H5O_INFO_BASIC|H5O_INFO_TIME|H5O_INFO_NUM_ATTRS|H5O_INFO_HDR|H5O_INFO_META_SIZE) */
       h5o_flags[28] = (int_f)H5O_INFO_BASIC; /* Fill in the fileno, addr, type, and rc fields */
@@ -606,7 +610,7 @@ h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
 /*
  *  H5S flags
  */
-      
+
       h5s_hid_flags[0] = (hid_t_f)H5S_ALL;
 
       h5s_hsize_flags[0] = (hsize_t_f)H5S_UNLIMITED;

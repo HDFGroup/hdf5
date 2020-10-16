@@ -1,4 +1,4 @@
-! 
+!
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 ! Copyright by the Board of Trustees of the University of Illinois.         *
 ! All rights reserved.                                                      *
@@ -82,10 +82,10 @@ PROGRAM main
   INTEGER(SIZE_T) :: offset, sizeof_compound
   INTEGER :: hdferr
   TYPE(C_PTR) :: f_ptr
-  
-  INTEGER(SIZE_T) :: type_sizei  ! Size of the integer datatype 
-  INTEGER(SIZE_T) :: type_sizer  ! Size of the real datatype 
-  INTEGER(SIZE_T) :: type_sized  ! Size of the double datatype 
+
+  INTEGER(SIZE_T) :: type_sizei  ! Size of the integer datatype
+  INTEGER(SIZE_T) :: type_sizer  ! Size of the real datatype
+  INTEGER(SIZE_T) :: type_sized  ! Size of the double datatype
   INTEGER(hid_t) :: tid3      ! /* Nested Array Datatype ID	*/
   INTEGER(HSIZE_T), DIMENSION(1) :: tdims1=(/7/)
   INTEGER(HSIZE_T), DIMENSION(1) :: tdims1a=(/4/)
@@ -136,7 +136,7 @@ PROGRAM main
   !
   ! Write data to the dataset
   !
-  
+
   f_ptr = C_LOC(s1(1))
   CALL H5Dwrite_f(dataset, s1_tid, f_ptr, hdferr)
 
@@ -153,7 +153,7 @@ PROGRAM main
   !
 
   CALL H5Fopen_f(H5FILE_NAME, H5F_ACC_RDONLY_F, file, hdferr)
-  
+
   CALL H5Dopen_f(file, DATASETNAME, dataset,hdferr)
   !
   ! Create a data type for s2

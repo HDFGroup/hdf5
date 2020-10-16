@@ -121,37 +121,9 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write,
     if(!HDstrcmp(index_type, "b2"))
         max_dims[0] = H5S_UNLIMITED;
 
-#ifdef QAK
-    /* Increase the initial size of the metadata cache */
-    {
-        H5AC_cache_config_t mdc_config;
-
-        mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
-        H5Pget_mdc_config(fapl, &mdc_config);
-        HDfprintf(stderr, "mdc_config.initial_size = %lu\n", (unsigned long)mdc_config.initial_size);
-        HDfprintf(stderr, "mdc_config.epoch_length = %lu\n", (unsigned long)mdc_config.epoch_length);
-        mdc_config.set_initial_size = 1;
-        mdc_config.initial_size = 16 * 1024 * 1024;
-        /* mdc_config.epoch_length = 5000; */
-        H5Pset_mdc_config(fapl, &mdc_config);
-    }
-#endif /* QAK */
-
-#ifdef QAK
-    H5Pset_small_data_block_size(fapl, (hsize_t)(50 * CHUNK_SIZE * DTYPE_SIZE));
-#endif /* QAK */
-
-#ifdef QAK
-    H5Pset_fapl_log(fapl, "append.log", H5FD_LOG_ALL, (size_t)(512 * 1024 * 1024));
-#endif /* QAK */
-
     /* Create file creation property list */
     if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         return -1;
-
-#ifdef QAK
-    H5Pset_link_phase_change(fcpl, 0, 0);
-#endif /* QAK */
 
     /* Emit informational message */
     if(verbose)
@@ -230,12 +202,12 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write,
                 unsigned chunk_num;        /* Object header chunk # for dataspace message */
 
                 /* Move the dataspace message to a new object header chunk */
-                if(H5O_msg_move_to_new_chunk_test(dsid, H5O_SDSPACE_ID) < 0)
+                if(H5O__msg_move_to_new_chunk_test(dsid, H5O_SDSPACE_ID) < 0)
                     return -1;
 
                 /* Retrieve the chunk # for the dataspace message */
                 chunk_num = UINT_MAX;
-                if(H5O_msg_get_chunkno_test(dsid, H5O_SDSPACE_ID, &chunk_num) < 0)
+                if(H5O__msg_get_chunkno_test(dsid, H5O_SDSPACE_ID, &chunk_num) < 0)
                     return -1;
                 /* Should not be in chunk #0 for now */
                 if(0 == chunk_num)
@@ -358,7 +330,7 @@ int main(int argc, const char *argv[])
         HDfprintf(stderr, "\tcompression level = %d\n", comp_level);
         HDfprintf(stderr, "\tindex type = %s\n", index_type);
     } /* end if */
-    
+
     /* Set the random seed */
     if(!use_seed) {
         struct timeval t;
