@@ -421,15 +421,15 @@ AMTAR = @AMTAR@
 
 # H5_CFLAGS holds flags that should be used when building hdf5,
 # but which should not be exported to h5cc for building other programs.
-# AM_CFLAGS is an automake construct which should be used by Makefiles 
+# AM_CFLAGS is an automake construct which should be used by Makefiles
 # instead of CFLAGS, as CFLAGS is reserved solely for the user to define.
 # This applies to FCFLAGS, CXXFLAGS, CPPFLAGS, and LDFLAGS as well.
-AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@
+AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@ @H5_ECFLAGS@
 
 # Include src and tools/lib directories
 AM_CPPFLAGS = @AM_CPPFLAGS@ @H5_CPPFLAGS@ -I$(top_srcdir)/src \
 	-I$(top_srcdir)/tools/lib
-AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@
+AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@ @H5_ECXXFLAGS@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@
 AM_JAVACFLAGS = @AM_JAVACFLAGS@
@@ -449,6 +449,7 @@ CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CC_VERSION = @CC_VERSION@
 CFLAGS = @CFLAGS@
+CLANG_SANITIZE_CHECKS = @CLANG_SANITIZE_CHECKS@
 CODESTACK = @CODESTACK@
 CONFIG_DATE = @CONFIG_DATE@
 CONFIG_MODE = @CONFIG_MODE@
@@ -465,6 +466,7 @@ DEFAULT_API_VERSION = @DEFAULT_API_VERSION@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DEPRECATED_SYMBOLS = @DEPRECATED_SYMBOLS@
+DESIRED_FILE_LOCKING = @DESIRED_FILE_LOCKING@
 DEV_WARNINGS = @DEV_WARNINGS@
 DIRECT_VFD = @DIRECT_VFD@
 DLLTOOL = @DLLTOOL@
@@ -501,8 +503,11 @@ H5_CFLAGS = @H5_CFLAGS@
 H5_CLASSPATH = @H5_CLASSPATH@
 H5_CPPFLAGS = @H5_CPPFLAGS@
 H5_CXXFLAGS = @H5_CXXFLAGS@
+H5_ECFLAGS = @H5_ECFLAGS@
+H5_ECXXFLAGS = @H5_ECXXFLAGS@
 H5_FCFLAGS = @H5_FCFLAGS@
 H5_FORTRAN_SHARED = @H5_FORTRAN_SHARED@
+H5_IS_DARWIN = @H5_IS_DARWIN@
 H5_JAVACFLAGS = @H5_JAVACFLAGS@
 H5_JAVAFLAGS = @H5_JAVAFLAGS@
 H5_JNIFLAGS = @H5_JNIFLAGS@
@@ -525,6 +530,7 @@ HL = @HL@
 HL_FOR = @HL_FOR@
 HSIZE_T = @HSIZE_T@
 HSSIZE_T = @HSSIZE_T@
+IGNORE_DISABLED_FILE_LOCKS = @IGNORE_DISABLED_FILE_LOCKS@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -561,6 +567,7 @@ MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MEMORYALLOCSANITYCHECK = @MEMORYALLOCSANITYCHECK@
+MIRROR_VFD = @MIRROR_VFD@
 MKDIR_P = @MKDIR_P@
 MPE = @MPE@
 NM = @NM@
@@ -620,6 +627,7 @@ TIME = @TIME@
 TR = @TR@
 TRACE_API = @TRACE_API@
 UNAME_INFO = @UNAME_INFO@
+USE_FILE_LOCKING = @USE_FILE_LOCKING@
 USE_FILTER_DEFLATE = @USE_FILTER_DEFLATE@
 USE_FILTER_SZIP = @USE_FILTER_SZIP@
 USINGMEMCHECKER = @USINGMEMCHECKER@
@@ -655,6 +663,7 @@ docdir = $(exec_prefix)/doc
 dvidir = @dvidir@
 enable_shared = @enable_shared@
 enable_static = @enable_static@
+examplesdir = @examplesdir@
 exec_prefix = @exec_prefix@
 fortran_linux_linker_option = @fortran_linux_linker_option@
 host = @host@
@@ -711,15 +720,15 @@ LIBH5_HL = $(top_builddir)/hl/src/libhdf5_hl.la
 LIBH5F_HL = $(top_builddir)/hl/fortran/src/libhdf5hl_fortran.la
 LIBH5CPP_HL = $(top_builddir)/hl/c++/src/libhdf5_hl_cpp.la
 
-# Note that in svn revision 19400 the '/' after DESTDIR in H5* variables below  
-# has been removed. According to the official description of DESTDIR by Gnu at 
-# http://www.gnu.org/prep/standards/html_node/DESTDIR.html, DESTDIR is 
-# prepended to the normal and complete install path that it precedes for the 
-# purpose of installing in a temporary directory which is useful for building 
-# rpms and other packages.  The '/' after ${DESTDIR} will be followed by another 
-# '/' at the beginning of the normal install path.  When DESTDIR is empty the  
-# path then begins with '//', which is incorrect and causes problems at least for 
-# Cygwin.   
+# Note that in svn revision 19400 the '/' after DESTDIR in H5* variables below
+# has been removed. According to the official description of DESTDIR by Gnu at
+# http://www.gnu.org/prep/standards/html_node/DESTDIR.html, DESTDIR is
+# prepended to the normal and complete install path that it precedes for the
+# purpose of installing in a temporary directory which is useful for building
+# rpms and other packages.  The '/' after ${DESTDIR} will be followed by another
+# '/' at the beginning of the normal install path.  When DESTDIR is empty the
+# path then begins with '//', which is incorrect and causes problems at least for
+# Cygwin.
 
 # Scripts used to build examples
 # If only shared libraries have been installed, have h5cc build examples with
@@ -765,7 +774,7 @@ LIB = $(lib_LIBRARIES) $(lib_LTLIBRARIES) $(noinst_LIBRARIES)                 \
 PROGS = $(bin_PROGRAMS) $(bin_SCRIPTS) $(noinst_PROGRAMS) $(noinst_SCRIPTS)   \
         $(EXTRA_PROG)
 
-chk_TESTS = $(check_PROGRAMS) $(check_SCRIPTS) $(EXTRA_TEST) 
+chk_TESTS = $(check_PROGRAMS) $(check_SCRIPTS) $(EXTRA_TEST)
 TEST_EXTENSIONS = .sh
 SH_LOG_COMPILER = $(SHELL)
 AM_SH_LOG_FLAGS = 
@@ -1368,26 +1377,35 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
                  echo "============================" > $${log}; \
               fi; \
               if test "X$(FORTRAN_API)" = "Xyes"; then \
-                 echo "Fortran API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+                 echo "Fortran API: Testing $${tname} $(TEST_FLAGS)"; \
                  if test -n "$(REALTIMEOUTPUT)"; then \
-                    echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" | tee -a $${log}; \
+                    echo "Fortran API: Test log for $${tname} $(TEST_FLAGS)" | tee -a $${log}; \
                  else \
-                    echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+                    echo "Fortran API: Test log for $${tname} $(TEST_FLAGS)" >> $${log}; \
                  fi; \
               elif test "X$(CXX_API)" = "Xyes"; then \
-                 echo "C++ API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+                 echo "C++ API: Testing $${tname} $(TEST_FLAGS)"; \
                  if test -n "$(REALTIMEOUTPUT)"; then \
-                    echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" | tee -a $${log};\
+                    echo "C++ API: Test log for $${tname} $(TEST_FLAGS)" | tee -a $${log};\
                  else \
-                    echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log};\
+                    echo "C++ API: Test log for $${tname} $(TEST_FLAGS)" >> $${log};\
                  fi; \
               else \
-                 echo "Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+                 echo "Testing: $${tname} $(TEST_FLAGS)"; \
                  if test -n "$(REALTIMEOUTPUT)"; then \
-                    echo "$(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" | tee -a $${log}; \
+                    echo "Test log for $${tname} $(TEST_FLAGS)" | tee -a $${log}; \
                  else \
-                    echo "$(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+                    echo "Test log for $${tname} $(TEST_FLAGS)" >> $${log}; \
                  fi; \
+              fi; \
+              if test -n "$(REALTIMEOUTPUT)"; then \
+                if test -n "$(HDF5_DRIVER)"; then \
+                  echo "Virtual file driver (VFD): $(HDF5_DRIVER)" | tee -a $${log}; \
+                fi; \
+              else \
+                if test -n "$(HDF5_DRIVER)"; then \
+                  echo "Virtual file driver (VFD): $(HDF5_DRIVER)" >> $${log}; \
+                fi; \
               fi; \
               if test -n "$(REALTIMEOUTPUT)"; then \
                  echo "============================" | tee -a $${log}; \

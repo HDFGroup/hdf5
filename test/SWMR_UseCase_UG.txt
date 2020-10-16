@@ -6,12 +6,12 @@
     case program and explain how to run them.
 
 2.1. Author and Dates:
-     Version 2: By Albert Cheng (acheng@hdfgroup.org), 2013/06/18.
-     Version 1: By Albert Cheng (acheng@hdfgroup.org), 2013/06/01.
+     Version 2: By Albert Cheng, 2013/06/18.
+     Version 1: By Albert Cheng, 2013/06/01.
 
 
 %%%%Use Case 1.7%%%%
-   
+
 3. Use Case [1.7]:
      Appending a single chunk
 

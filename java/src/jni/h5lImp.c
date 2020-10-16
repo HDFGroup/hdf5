@@ -381,7 +381,7 @@ Java_hdf_hdf5lib_H5_H5Lget_1name_1by_1idx
 
     /* add extra space for the null terminator */
     if (NULL == (linkName = (char *) HDmalloc(sizeof(char) * (size_t)status_size + 1)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Lget_name_by_idx: failed to allocate buffer for link name");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Lget_name_by_idx: failed to allocate buffer for link name");
 
     if ((H5Lget_name_by_idx((hid_t)loc_id, groupName, (H5_index_t)index_field, (H5_iter_order_t)order, (hsize_t)link_n, (char *)linkName, (size_t)status_size + 1, (hid_t)access_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -430,10 +430,10 @@ Java_hdf_hdf5lib_H5_H5Lget_1value
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (H5L_TYPE_HARD == infobuf.type)
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Lget_val: hard links are unsupported");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Lget_val: hard links are unsupported");
 
     if (NULL == (linkValue = (char *) HDmalloc(sizeof(char) * infobuf.u.val_size + 1)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Lget_val: failed to allocate buffer for link value");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Lget_val: failed to allocate buffer for link value");
 
     if ((status = H5Lget_val((hid_t)loc_id, linkName, (void *)linkValue, infobuf.u.val_size + 1, (hid_t)access_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -475,7 +475,7 @@ Java_hdf_hdf5lib_H5_H5Lget_1value
         case H5L_TYPE_MAX:
         case H5L_TYPE_HARD:
         default:
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Lget_val: invalid link type");
+            H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Lget_val: invalid link type");
             break;
     }
 
@@ -520,13 +520,13 @@ Java_hdf_hdf5lib_H5_H5Lget_1value_1by_1idx
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (H5L_TYPE_HARD == infobuf.type)
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Lget_val_by_idx: hard links are unsupported")
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Lget_val_by_idx: hard links are unsupported");
 
     if (!infobuf.u.val_size)
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (NULL == (linkValue = (void *) HDmalloc(infobuf.u.val_size + 1)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Lget_val_by_idx: failed to allocate buffer for link value");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Lget_val_by_idx: failed to allocate buffer for link value");
 
     if ((status = H5Lget_val_by_idx((hid_t)loc_id, grpName, (H5_index_t)index_field, (H5_iter_order_t)order, (hsize_t)link_n, (void *)linkValue, infobuf.u.val_size + 1, (hid_t)access_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -568,7 +568,7 @@ Java_hdf_hdf5lib_H5_H5Lget_1value_1by_1idx
         case H5L_TYPE_MAX:
         case H5L_TYPE_HARD:
         default:
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Lget_val_by_idx: invalid link type");
+            H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Lget_val_by_idx: invalid link type");
             break;
     }
 
@@ -620,12 +620,12 @@ H5L_iterate_cb
     (hid_t g_id, const char *name, const H5L_info_t *info, void *cb_data)
 {
     cb_wrapper *wrapper = (cb_wrapper *)cb_data;
-    jmethodID   constructor, mid;
+    jmethodID   mid;
     jobject     cb_info_t = NULL;
     jobject     visit_callback = wrapper->visit_callback;
     jstring     str;
     JNIEnv     *cbenv = NULL;
-    jclass      cls;
+    jclass      cbcls;
     jvalue      args[5];
     void       *op_data = (void *)wrapper->op_data;
     jint        status = -1;
@@ -635,10 +635,11 @@ H5L_iterate_cb
         H5_JNI_FATAL_ERROR(CBENVONLY, "H5L_iterate_cb: failed to attach current thread to JVM");
     }
 
-    if (NULL == (cls = CBENVPTR->GetObjectClass(CBENVONLY, visit_callback)))
+    /* Get the Method ID for the "callback" function of the H5L_iterate_t class */
+    if (NULL == (cbcls = CBENVPTR->GetObjectClass(CBENVONLY, visit_callback)))
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
 
-    if (NULL == (mid = CBENVPTR->GetMethodID(CBENVONLY, cls, "callback", "(JLjava/lang/String;Lhdf/hdf5lib/structs/H5L_info_t;Lhdf/hdf5lib/callbacks/H5L_iterate_t;)I")))
+    if (NULL == (mid = CBENVPTR->GetMethodID(CBENVONLY, cbcls, "callback", "(JLjava/lang/String;Lhdf/hdf5lib/structs/H5L_info_t;Lhdf/hdf5lib/callbacks/H5L_iterate_t;)I")))
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
 
     if (NULL == (str = CBENVPTR->NewStringUTF(CBENVONLY, name)))
@@ -649,19 +650,7 @@ H5L_iterate_cb
     args[2].j = info->corder;
     args[3].i = info->cset;
     args[4].j = (info->type == H5L_TYPE_HARD) ? (jlong)info->u.address : (jlong)info->u.val_size;
-
-    /* Get a reference to your class if you don't have it already */
-    if (NULL == (cls = CBENVPTR->FindClass(CBENVONLY, "hdf/hdf5lib/structs/H5L_info_t")))
-        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
-
-    /* Get a reference to the constructor; the name is <init> */
-    if (NULL == (constructor = CBENVPTR->GetMethodID(CBENVONLY, cls, "<init>", "(IZJIJ)V")))
-        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
-
-    if (NULL == (cb_info_t = CBENVPTR->NewObjectA(CBENVONLY, cls, constructor, args))) {
-        HDprintf("FATAL ERROR: hdf/hdf5lib/structs/H5L_info_t: Creation failed\n");
-        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
-    }
+    CALL_CONSTRUCTOR(CBENVONLY, "hdf/hdf5lib/structs/H5L_info_t", "(IZJIJ)V", args, cb_info_t);
 
     status = CBENVPTR->CallIntMethod(CBENVONLY, visit_callback, mid, g_id, str, cb_info_t, op_data);
     CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);

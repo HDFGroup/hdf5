@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+/* Programmer:  Quincey Koziol
  *              Tuesday, February  1, 2005
  */
 #include "h5test.h"
@@ -26,7 +26,7 @@
 
 /* Other private headers that this test requires */
 #include "H5CXprivate.h"        /* API Contexts                         */
-#include "H5Iprivate.h"        /* Virtual Object Layer                     */
+#include "H5Iprivate.h"        /* Identifiers                     */
 
 const char *FILENAME[] = {
     "btree2",
@@ -2982,10 +2982,10 @@ test_insert_lots(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Initialize random number seed */
     curr_time=HDtime(NULL);
-#ifdef QAK
+#if 0
 curr_time=1109170019;
 HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
-#endif /* QAK */
+#endif
     HDsrandom((unsigned)curr_time);
 
     /*
@@ -4975,10 +4975,10 @@ test_update_lots(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Initialize random number seed */
     curr_time = HDtime(NULL);
-#ifdef QAK
+#if 0
 curr_time = 1451342093;
 HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
-#endif /* QAK */
+#endif
     HDsrandom((unsigned)curr_time);
 
     /*
@@ -8652,10 +8652,10 @@ test_remove_lots(const char *env_h5_drvr, hid_t fapl, const H5B2_create_t *cpara
 
     /* Initialize random number seed */
     curr_time = HDtime(NULL);
-#ifdef QAK
+#if 0
 curr_time = 1163537969;
 HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
-#endif /* QAK */
+#endif
     HDsrandom((unsigned)curr_time);
 
     /*

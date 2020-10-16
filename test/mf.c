@@ -317,7 +317,7 @@ test_mf_eoa(const char *env_h5_drvr, hid_t fapl)
         if(H5Pclose(fapl_new) < 0)
             FAIL_STACK_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -459,7 +459,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
         if(new_file_size != file_size)
             TEST_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -507,7 +507,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
         if(new_file_size != (file_size + TBLOCK_SIZE30))
             TEST_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -551,7 +551,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
         if(new_file_size != (file_size + TBLOCK_SIZE30))
             TEST_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -599,7 +599,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
         if(H5Pclose(fapl_new) < 0)
             FAIL_STACK_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -737,7 +737,7 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
         if(new_file_size != (file_size + TBLOCK_SIZE30 + TBLOCK_SIZE50))
             TEST_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -800,7 +800,7 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
         if(H5Pclose(fapl_new) < 0)
             FAIL_STACK_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -903,7 +903,7 @@ test_mf_tmp(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
             FAIL_STACK_ERROR
 
         /* Retrieve the file's maxaddr */
-        if(H5F_get_maxaddr_test(file, &maxaddr) < 0)
+        if(H5F__get_maxaddr_test(file, &maxaddr) < 0)
             FAIL_STACK_ERROR
 
         /* Allocate some temporary address space */
@@ -998,7 +998,7 @@ test_mf_tmp(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         if(new_file_size != file_size)
             TEST_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -1092,7 +1092,7 @@ test_mf_fs_start(hid_t fapl)
     if(H5Pclose(fapl_new) < 0)
         FAIL_STACK_ERROR
 
-    PASSED()
+    PASSED();
 
     return(0);
 
@@ -1241,7 +1241,7 @@ test_mf_fs_alloc_free(hid_t fapl)
     if (new_file_size != file_size)
         TEST_ERROR
 
-    PASSED()
+    PASSED();
 
     TESTING("H5MF_alloc()/H5MF_xfree() of free-space manager:test 2");
 
@@ -1316,7 +1316,7 @@ test_mf_fs_alloc_free(hid_t fapl)
     if (new_file_size != file_size)
         TEST_ERROR
 
-    PASSED()
+    PASSED();
 
     TESTING("H5MF_alloc()/H5MF_xfree() of free-space manager:test 3");
 
@@ -1404,7 +1404,7 @@ test_mf_fs_alloc_free(hid_t fapl)
     if(H5Pclose(fapl_new) < 0)
         FAIL_STACK_ERROR
 
-    PASSED()
+    PASSED();
 
     return(0);
 
@@ -1597,7 +1597,7 @@ test_mf_fs_extend(hid_t fapl)
     if (new_file_size != file_size)
         TEST_ERROR
 
-    PASSED()
+    PASSED();
 
     TESTING("H5MF_try_extend() of free-space manager:test 2");
 
@@ -1699,7 +1699,7 @@ test_mf_fs_extend(hid_t fapl)
     if (new_file_size != file_size)
         TEST_ERROR
 
-    PASSED()
+    PASSED();
 
     TESTING("H5MF_try_extend() of free-space manager:test 3");
 
@@ -1801,7 +1801,7 @@ test_mf_fs_extend(hid_t fapl)
     if (new_file_size != file_size)
         TEST_ERROR
 
-    PASSED()
+    PASSED();
 
     TESTING("H5MF_try_extend() of free-space manager:test 4");
 
@@ -1910,7 +1910,7 @@ test_mf_fs_extend(hid_t fapl)
     if(H5Pclose(fapl_new) < 0)
         FAIL_STACK_ERROR
 
-    PASSED()
+    PASSED();
 
     return(0);
 
@@ -2022,7 +2022,7 @@ test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
         if(H5Fclose(file) < 0)
             FAIL_STACK_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -2083,7 +2083,7 @@ test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
         if(H5Fclose(file) < 0)
             FAIL_STACK_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -2225,7 +2225,7 @@ test_mf_aggr_alloc1(const char *env_h5_drvr, hid_t fapl)
         if(H5Pclose(fcpl) < 0)
             TEST_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -2367,7 +2367,7 @@ test_mf_aggr_alloc2(const char *env_h5_drvr, hid_t fapl)
         if (new_file_size != file_size)
             TEST_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -2527,7 +2527,7 @@ test_mf_aggr_alloc3(const char *env_h5_drvr, hid_t fapl)
         if(new_file_size != file_size)
             TEST_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -2694,7 +2694,7 @@ test_mf_aggr_alloc4(const char *env_h5_drvr, hid_t fapl)
         if(new_file_size != file_size)
             TEST_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -2817,7 +2817,7 @@ test_mf_aggr_alloc5(const char *env_h5_drvr, hid_t fapl)
         if(new_file_size != file_size)
             TEST_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -2973,7 +2973,7 @@ test_mf_aggr_alloc6(const char *env_h5_drvr, hid_t fapl)
         if(new_file_size != file_size)
             TEST_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -3157,7 +3157,7 @@ test_mf_aggr_alloc7(const char *env_h5_drvr, hid_t fapl)
         if (file_size != empty_size)
             TEST_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -3311,7 +3311,7 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
         if (file_size != empty_size)
             TEST_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -3381,7 +3381,7 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
         if(file_size != empty_size)
             TEST_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -3449,7 +3449,7 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
         if(file_size != empty_size)
             TEST_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -3558,7 +3558,7 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
         if(file_size != empty_size)
             TEST_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -3617,7 +3617,7 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
         if(file_size != empty_size)
             TEST_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -3679,7 +3679,7 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
         if(file_size != empty_size)
             TEST_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -3846,7 +3846,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if (new_file_size != file_size)
             TEST_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -3901,7 +3901,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 
         if (new_file_size != (file_size-TBLOCK_SIZE50)) TEST_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -3957,7 +3957,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 
         if (new_file_size != (file_size+TBLOCK_SIZE30)) TEST_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -4094,7 +4094,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
-    PASSED()
+    PASSED();
 
     TESTING("H5MF_alloc() of free-space manager with alignment: test 2");
 
@@ -4169,7 +4169,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
-    PASSED()
+    PASSED();
 
     TESTING("H5MF_alloc() of free-space manager with alignment: test 3");
 
@@ -4244,7 +4244,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if(H5Fclose(file) < 0)
             FAIL_STACK_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -4514,7 +4514,7 @@ test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if(H5Fclose(file) < 0)
             FAIL_STACK_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -4800,7 +4800,7 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if(H5Fclose(file) < 0)
             FAIL_STACK_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -5176,7 +5176,7 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if(H5Fclose(file) < 0)
             FAIL_STACK_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -5385,7 +5385,7 @@ test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if(H5Fclose(file) < 0)
             FAIL_STACK_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -5608,7 +5608,7 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if(H5Fclose(file) < 0)
             FAIL_STACK_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -5914,7 +5914,7 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if(H5Fclose(file) < 0)
             FAIL_STACK_ERROR
 
-        PASSED()
+        PASSED();
     } /* end if */
     else {
         SKIPPED();
@@ -6004,7 +6004,7 @@ test_mf_bug1(const char *env_h5_drvr, hid_t fapl)
 
             /* Populate memb_fapl_arr, patch memb_addr so member file addresses
              * are aligned */
-            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
+            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
                 memb_fapl_arr[mt] = memb_fapl;
                 memb_addr[mt] = ((memb_addr[mt] + align - 1) / align) * align;
             } /* end for */
@@ -6014,7 +6014,7 @@ test_mf_bug1(const char *env_h5_drvr, hid_t fapl)
                 TEST_ERROR
 
             /* Free memb_name */
-            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
                 free(memb_name[mt]);
         } /* end else */
 
@@ -6077,7 +6077,7 @@ test_mf_bug1(const char *env_h5_drvr, hid_t fapl)
      * the previous */
     if((addr2 - addr1) != (3 * align)) TEST_ERROR
 
-    PASSED()
+    PASSED();
 
     /* Close file */
     if(H5Fclose(file) < 0)
@@ -6357,7 +6357,7 @@ test_mf_fs_persist_split(void)
     if(H5Pclose(fcpl) < 0)
         FAIL_STACK_ERROR
 
-    PASSED()
+    PASSED();
 
     return(0);
 
@@ -6377,7 +6377,7 @@ error:
     HDmemset(memb_name, 0, sizeof memb_name);                   \
     HDmemset(memb_addr, 0, sizeof memb_addr);                   \
     HDmemset(sv, 0, sizeof sv);                         \
-    for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) { \
+    for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) { \
         memb_map[mt] = H5FD_MEM_SUPER;                      \
         memb_fapl[mt] = H5P_DEFAULT;                        \
     }                                       \
@@ -6710,7 +6710,7 @@ test_mf_fs_persist_multi(void)
     if(H5Pclose(fcpl) < 0)
         FAIL_STACK_ERROR
 
-    PASSED()
+    PASSED();
 
     return(0);
 
@@ -6821,13 +6821,13 @@ test_mf_fs_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         if(!H5F_addr_defined(f->shared->fs_addr[tt]))
             TEST_ERROR
 
-        /* Since we are about to open a self referential free space 
+        /* Since we are about to open a self referential free space
          * manager prior to the first file space allocation / deallocation
          * call H5MF_tidy_self_referential_fsm_hack() first so as to avoid
          * assertion failures on the first file space alloc / dealloc.
          */
         if((f->shared->first_alloc_dealloc) &&
-           (SUCCEED != 
+           (SUCCEED !=
             H5MF_tidy_self_referential_fsm_hack(f)))
             FAIL_STACK_ERROR
 
@@ -6887,7 +6887,7 @@ test_mf_fs_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         if(H5Pclose(fapl2) < 0)
             FAIL_STACK_ERROR
 
-        PASSED()
+        PASSED();
 
     } else {
         SKIPPED();
@@ -7021,7 +7021,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         if(!H5F_addr_defined(f->shared->fs_addr[fs_type]))
             TEST_ERROR
 
-        /* Since we are about to open a self referential free space 
+        /* Since we are about to open a self referential free space
          * manager prior to the first file space allocation / deallocation
          * call H5MF_tidy_self_referential_fsm_hack() first so as to avoid
          * assertion failures on the first file space alloc / dealloc.
@@ -7041,7 +7041,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         if(H5FS_stat_info(f, f->shared->fs_man[fs_type], &fs_stat) < 0)
             FAIL_STACK_ERROR
 
-        /* if we ran H5MF_tidy_self_referential_fsm_hack(), the 
+        /* if we ran H5MF_tidy_self_referential_fsm_hack(), the
          * H5FD_MEM_SUPER free space manager must be floating.
          * Thus fs_stat.addr must be undefined.
          */
@@ -7085,7 +7085,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         if(H5Pclose(fapl2) < 0)
             FAIL_STACK_ERROR
 
-        PASSED()
+        PASSED();
 
     } else {
         SKIPPED();
@@ -7151,7 +7151,7 @@ test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_for
         for(fs_threshold = 0; fs_threshold <= TEST_THRESHOLD10; fs_threshold++) {
 
             /* Testing for H5F_FSPACE_STRATEGY_FSM_AGGR and H5F_FSPACE_STRATEGY_PAGE strategies only */
-            for(fs_type = H5F_FSPACE_STRATEGY_FSM_AGGR; fs_type < H5F_FSPACE_STRATEGY_AGGR; H5_INC_ENUM(H5F_fspace_strategy_t, fs_type)) {
+            for(fs_type = H5F_FSPACE_STRATEGY_FSM_AGGR; fs_type < H5F_FSPACE_STRATEGY_AGGR; fs_type++) {
 
                 if(!contig_addr_vfd && (fs_persist || fs_type == H5F_FSPACE_STRATEGY_PAGE))
                     continue;
@@ -7258,7 +7258,7 @@ test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_for
     if(H5Pclose(fapl2) < 0)
         FAIL_STACK_ERROR
 
-    PASSED()
+    PASSED();
 
     return(0);
 
@@ -7319,7 +7319,7 @@ test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format
     /* Test with TRUE or FALSE for persisting free-space */
     for(fs_persist = FALSE; fs_persist <= TRUE; fs_persist++) {
         /* Testing for H5F_FSPACE_STRATEGY_FSM_AGGR and H5F_FSPACE_STRATEGY_PAGE strategies only */
-        for(fs_type = H5F_FSPACE_STRATEGY_FSM_AGGR; fs_type < H5F_FSPACE_STRATEGY_AGGR; H5_INC_ENUM(H5F_fspace_strategy_t, fs_type)) {
+        for(fs_type = H5F_FSPACE_STRATEGY_FSM_AGGR; fs_type < H5F_FSPACE_STRATEGY_AGGR; fs_type++) {
 
             /* Skip for multi/split driver: persisting free-space or paged aggregation strategy */
             if(!contig_addr_vfd && (fs_persist || fs_type == H5F_FSPACE_STRATEGY_PAGE))
@@ -7362,10 +7362,9 @@ test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format
             H5MF__alloc_to_fs_type(f, type, TBLOCK_SIZE6, (H5F_mem_page_t *)&tt);
 
             /* For paged aggregation, the section in the page at EOF for small meta fs is not shrunk away */
-            if(fs_type == H5F_FSPACE_STRATEGY_PAGE) {
+            if(fs_type == H5F_FSPACE_STRATEGY_PAGE)
                 if(H5FS_stat_info(f, f->shared->fs_man[tt], &fs_state) < 0)
                     FAIL_STACK_ERROR
-            }
 
             /* Put block #3, #5 to H5FD_MEM_SUPER free-space manager */
             if(H5MF_xfree(f, type, addr3, (hsize_t)TBLOCK_SIZE3) < 0)
@@ -7444,7 +7443,7 @@ test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format
     if(H5Pclose(fapl2) < 0)
         FAIL_STACK_ERROR
 
-    PASSED()
+    PASSED();
 
     return(0);
 
@@ -7533,7 +7532,7 @@ test_dichotomy(hid_t fapl)
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
-    PASSED()
+    PASSED();
 
     return(0);
 
@@ -7552,7 +7551,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t multi, hbool_t split)
+set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t is_multi_or_split)
 {
     H5FD_mem_t memb_map[H5FD_MEM_NTYPES];
     hid_t memb_fapl_arr[H5FD_MEM_NTYPES];
@@ -7561,7 +7560,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t multi, hbool_t split)
     hbool_t relax;
     H5FD_mem_t  mt;
 
-    HDassert(multi || split);
+    HDassert(is_multi_or_split);
 
     HDmemset(memb_name, 0, sizeof memb_name);
 
@@ -7569,13 +7568,13 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t multi, hbool_t split)
     if(H5Pget_fapl_multi(fapl, memb_map, memb_fapl_arr, memb_name, memb_addr, &relax) < 0)
         TEST_ERROR
 
-    if(split) {
+    if(is_multi_or_split) {
         /* Set memb_addr aligned */
         memb_addr[H5FD_MEM_SUPER] = ((memb_addr[H5FD_MEM_SUPER] + pagesize - 1) / pagesize) * pagesize;
         memb_addr[H5FD_MEM_DRAW] = ((memb_addr[H5FD_MEM_DRAW] + pagesize - 1) / pagesize) * pagesize;
     } else {
         /* Set memb_addr aligned */
-        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
             memb_addr[mt] = ((memb_addr[mt] + pagesize - 1) / pagesize) * pagesize;
     } /* end else */
 
@@ -7584,7 +7583,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t multi, hbool_t split)
         TEST_ERROR
 
     /* Free memb_name */
-    for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+    for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
         free(memb_name[mt]);
 
     return 0;
@@ -7638,7 +7637,7 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
         if((fapl_new = H5Pcopy(fapl)) < 0) TEST_ERROR
 
         if(multi || split)
-            if(set_multi_split(fapl_new, 4096, multi, split) <  0)
+            if(set_multi_split(fapl_new, 4096, split) <  0)
                 TEST_ERROR;
 
         /* Test with TRUE or FALSE for persisting free-space */
@@ -7703,7 +7702,6 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
             H5MF_xfree(f, H5FD_MEM_DRAW, gaddr1, (hsize_t)TBLOCK_SIZE5000);
 
             if(!fs_persist) {
-
                 H5MF__alloc_to_fs_type(f, H5FD_MEM_DRAW, TBLOCK_SIZE5000, (H5F_mem_page_t *)&fs_type);
 
                 /* Verify that the freed block with gaddr1 is found from the large data manager */
@@ -7799,7 +7797,7 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
         if(H5Pclose(fapl_new) < 0)
             TEST_ERROR
 
-        PASSED()
+        PASSED();
 
     } else {
         SKIPPED();
@@ -7923,7 +7921,7 @@ test_page_try_shrink(const char *env_h5_drvr, hid_t fapl)
         if(H5Pclose(fcpl) < 0)
             FAIL_STACK_ERROR
 
-        PASSED()
+        PASSED();
 
     } else {
         SKIPPED();
@@ -8078,7 +8076,7 @@ test_page_small_try_extend(const char *env_h5_drvr, hid_t fapl)
         if(H5Pclose(fcpl) < 0)
             FAIL_STACK_ERROR
 
-        PASSED()
+        PASSED();
 
     } else {
         SKIPPED();
@@ -8219,7 +8217,7 @@ test_page_large_try_extend(const char *env_h5_drvr, hid_t fapl)
         if(H5Pclose(fcpl) < 0)
             FAIL_STACK_ERROR
 
-        PASSED()
+        PASSED();
 
     } else {
         SKIPPED();
@@ -8372,7 +8370,7 @@ test_page_large(const char *env_h5_drvr, hid_t fapl)
         if(file_size % TBLOCK_SIZE4096)
             TEST_ERROR
 
-        PASSED()
+        PASSED();
 
     } else {
         SKIPPED();
@@ -8535,7 +8533,7 @@ test_page_small(const char *env_h5_drvr, hid_t fapl)
         if(H5Pclose(fcpl) < 0)
             FAIL_STACK_ERROR
 
-        PASSED()
+        PASSED();
 
     } else {
         SKIPPED();
@@ -8652,7 +8650,7 @@ test_page_alignment(const char *env_h5_drvr, hid_t fapl)
 
                 /* Populate memb_fapl_arr */
                 /* Set memb_addr aligned */
-                for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
+                for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
                     memb_fapl_arr[mt] = memb_fapl;
                     memb_addr[mt] = ((memb_addr[mt] + TBLOCK_SIZE4096 - 1) / TBLOCK_SIZE4096) * TBLOCK_SIZE4096;
                 }
@@ -8664,7 +8662,7 @@ test_page_alignment(const char *env_h5_drvr, hid_t fapl)
             } /* end else */
 
             /* Free memb_name */
-            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
                 free(memb_name[mt]);
 
             /* Close memb_fapl */
@@ -8841,7 +8839,7 @@ test_page_alignment(const char *env_h5_drvr, hid_t fapl)
         if(H5Pclose(fapl_new) < 0)
             TEST_ERROR
 
-        PASSED()
+        PASSED();
 
     } else {
         SKIPPED();
@@ -8911,7 +8909,7 @@ main(void)
     nerrors += test_mf_aggr_absorb(env_h5_drvr, fapl);
 
     /* For old library format--tests for alignment */
-    for(curr_test = TEST_NORMAL; curr_test < TEST_NTESTS; H5_INC_ENUM(test_type_t, curr_test)) {
+    for(curr_test = TEST_NORMAL; curr_test < TEST_NTESTS; curr_test++) {
 
         switch(curr_test) {
             case TEST_NORMAL: /* set alignment = 1024 */

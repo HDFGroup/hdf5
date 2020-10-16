@@ -4,14 +4,12 @@
 # Copyright by The HDF Group.
 # All rights reserved.
 #
-# This file is part of HDF4.  The full HDF4 copyright notice, including
-# terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF4 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF4/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# # terms governing use, modification, and redistribution, is contained in
+# # the COPYING file, which can be found at the root of the source code
+# # distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# # If you do not have access to either file, you may request a copy from
+# # help@hdfgroup.org.
 #
 
 use warnings;
@@ -30,25 +28,23 @@ The contents of this directory are:
     bin/        - Directory containing HDF5 pre-compiled utilities
     include/    - Directory containing HDF5 include files
     lib/        - Directory containing HDF5 libraries and settings
-    share/      - Directory containing example code in C, C++, and 
-                  Fortran using HDF5 and HDF5 HL library APIs. The 
-                  shell scripts provided with these examples will 
-                  compile and run them, and will also test the 
+    share/      - Directory containing example code in C, C++, and
+                  Fortran using HDF5 and HDF5 HL library APIs. The
+                  shell scripts provided with these examples will
+                  compile and run them, and will also test the
                   h5cc, h5c++, and h5fc compile scripts found
                   in the installed bin directory.
 
-These binaries were built with the ZLIB and SZIP (version 2.1, Encoder 
-ENABLED) external libraries which are included in the lib directory for 
-convenience.
+These binaries were built with the external libraries ZLIB and SZIP/Libaec 
+(version 1.0.4, Encoder ENABLED) which are included in the lib directory for
+convenience.  Libaec is an unrestricted open-source replacement for SZIP.
 
-We also provide the ZLIB and SZIP source code on our ftp server at:
+The official ZLIB and SZIP/Libaec pages are at:
 
-   ftp://ftp.hdfgroup.org/lib-external/
-
-The official ZLIB and SZIP pages are at:
-
-   ZLIB: http://www.zlib.net/
-   SZIP: http://hdfgroup.org/doc_resource/SZIP/
+    ZLIB: https://git.savannah.gnu.org/cgit/gzip.git/
+        https://git.savannah.gnu.org/cgit/gzip.git/tree/COPYING
+    SZIP/Libaec: https://gitlab.dkrz.de/k202009/libaec 
+        https://gitlab.dkrz.de/k202009/libaec/-/blob/master/Copyright.txt
 
 ";
 
@@ -76,9 +72,9 @@ to check:
   LIBS        - Libraries your application will link with
 
 For further details refer to the INSTALL files in  
-    ftp://ftp.hdfgroup.org/HDF5/current/src/unpacked/release_docs/
-or in the ./release_docs/ directory of the HDF5 source code, which can be found 
-on the HDF Group ftp server at ftp://ftp.hdfgroup.org/HDF5/current/src/.
+the ./release_docs/ directory of the HDF5 source code, which can be found 
+at https://support.hdfgroup.org/ftp/HDF5/current/src/.
+
 
 Please send questions, comments, and suggestions to the appropriate 
 contact address from http://www.hdfgroup.org/about/contact.html 

@@ -1,0 +1,80 @@
+name: hdf5 dev CI
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+on:
+  push:
+    branches: [ develop, hdf5_1_12, hdf5_1_10, hdf5_1_8 ]
+  pull_request:
+    branches: [ develop, hdf5_1_12, hdf5_1_10, hdf5_1_8 ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    strategy:
+#      fail-fast: false
+      matrix:
+        name: ["Windows Latest MSVC", "Ubuntu Latest GCC", "macOS Latest Clang"]
+        include:
+          - name: "Windows Latest MSVC"
+            artifact: "Windows-MSVC.tar.xz"
+            os: windows-latest
+            build_type: "Release"
+            toolchain: ""
+            fortran: OFF
+            generator: "-G \"Visual Studio 16 2019\" -A x64"
+          - name: "Ubuntu Latest GCC"
+            artifact: "Linux.tar.xz"
+            os: ubuntu-latest
+            build_type: "Release"
+            fortran: OFF
+            toolchain: "config/toolchain/GCC.cmake"
+            generator: "-G Ninja"
+          - name: "macOS Latest Clang"
+            artifact: "macOS.tar.xz"
+            os: macos-latest
+            build_type: "Release"
+            fortran: OFF
+            toolchain: "config/toolchain/clang.cmake"
+            generator: "-G Ninja"
+
+    name: ${{ matrix.name }}
+    # The type of runner that the job will run on
+    runs-on: ${{ matrix.os }}
+          
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - name: Install Dependencies (Linux)
+      run: sudo apt-get install ninja-build
+      if: matrix.os == 'ubuntu-latest'
+    - name: Install Dependencies (Windows)
+      run: choco install ninja
+      if: matrix.os == 'windows-latest'
+    - name: Install Dependencies (macOS)
+      run: brew install ninja
+      if: matrix.os == 'macos-latest'
+    - name: Set environment for MSVC (Windows)
+      if:  matrix.os == 'windows-latest'
+      run: |
+        # Set these env vars so cmake picks the correct compiler
+        echo "::set-env name=CXX::cl.exe"
+        echo "::set-env name=CC::cl.exe"
+    
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - name: Get Sources
+      uses: actions/checkout@v2
+
+    - name: Configure
+      run: |
+        mkdir "${{ runner.workspace }}/build"
+        cd "${{ runner.workspace }}/build"
+        cmake ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_BUILD_FORTRAN=${{ matrix.fortran }} -DHDF5_BUILD_JAVA=ON $GITHUB_WORKSPACE
+      shell: bash
+
+    - name: Build
+      run: cmake --build . --config ${{ matrix.build_type }}
+      working-directory: ${{ runner.workspace }}/build      
+
+    - name: Test
+      run: ctest --build . -C ${{ matrix.build_type }} -V
+      working-directory: ${{ runner.workspace }}/build

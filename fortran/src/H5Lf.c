@@ -939,7 +939,7 @@ int_f
 h5lget_val_c(hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen, size_t_f *size,
 	      void *linkval_buff, hid_t_f *lapl_id)
 /******/
-{    
+{
     char *c_link_name = NULL; /* Buffer to hold C string */
     int_f ret_value = 0;       /* Return value */
 

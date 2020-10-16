@@ -1,4 +1,7 @@
-#!/usr/bin/perl -p
+#!/bin/sh
+#! -*-perl-*-
+eval 'exec perl -p -x -S $0 ${1+"$@"}'
+  if 0;
 #
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.

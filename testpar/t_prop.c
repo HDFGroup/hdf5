@@ -97,7 +97,7 @@ test_plist_ed(void)
 
     int mpi_size, mpi_rank, recv_proc;
 
-    hsize_t chunk_size = 16384;	/* chunk size */ 
+    hsize_t chunk_size = 16384;	/* chunk size */
     double fill = 2.7f;         /* Fill value */
     size_t nslots = 521*2;
     size_t nbytes = 1048576 * 10;
@@ -165,16 +165,16 @@ test_plist_ed(void)
     VRFY((ret>=0), "set fill-value succeeded");
 
     max_size[0] = 100;
-    ret = H5Pset_external(dcpl, "ext1.data", (off_t)0, 
+    ret = H5Pset_external(dcpl, "ext1.data", (off_t)0,
                           (hsize_t)(max_size[0] * sizeof(int)/4));
     VRFY((ret>=0), "set external succeeded");
-    ret = H5Pset_external(dcpl, "ext2.data", (off_t)0, 
+    ret = H5Pset_external(dcpl, "ext2.data", (off_t)0,
                           (hsize_t)(max_size[0] * sizeof(int)/4));
     VRFY((ret>=0), "set external succeeded");
-    ret = H5Pset_external(dcpl, "ext3.data", (off_t)0, 
+    ret = H5Pset_external(dcpl, "ext3.data", (off_t)0,
                           (hsize_t)(max_size[0] * sizeof(int)/4));
     VRFY((ret>=0), "set external succeeded");
-    ret = H5Pset_external(dcpl, "ext4.data", (off_t)0, 
+    ret = H5Pset_external(dcpl, "ext4.data", (off_t)0,
                           (hsize_t)(max_size[0] * sizeof(int)/4));
     VRFY((ret>=0), "set external succeeded");
 

@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:  Quincey Koziol
  *              April 14, 2011
  *
  * Purpose:     This program is run to generate an HDF5 data file with objects
@@ -61,7 +61,7 @@ int main()
     aid = H5Acreate(gid, "attr", cmpd_dt, sid, H5P_DEFAULT);
     assert(aid > 0);
 
-    /* Commit the datatype */ 
+    /* Commit the datatype */
     ret = H5Tcommit(file, "cmpnd", cmpd_dt);
     assert(ret >= 0);
 

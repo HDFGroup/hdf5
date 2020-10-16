@@ -3342,11 +3342,11 @@ test_sohm_extlink(void)
 static int
 verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
 {
-    hid_t file_id = -1;
-    hid_t orig_space_id = -1;
+    hid_t file_id = H5I_INVALID_HID;
+    hid_t orig_space_id = H5I_INVALID_HID;
     hid_t space1_id, space2_id, space3_id;
-    hid_t dcpl_id = -1;
-    hid_t dset1_id, dset2_id, dset3_id;
+    hid_t dcpl_id = H5I_INVALID_HID;
+    hid_t dset1_id, dset2_id = H5I_INVALID_HID, dset3_id = H5I_INVALID_HID;
     hsize_t dims1[] = {1, 2};
     hsize_t max_dims[] = {H5S_UNLIMITED, 2};
     hsize_t dims2[] = {5, 2};
@@ -3739,18 +3739,18 @@ test_sohm_external_dtype(void)
     CHECK_I(file1, "H5Fcreate");
 
     /* Check on datatype storage status. It should be zero now. */
-    ret = H5F_get_sohm_mesg_count_test(file1, H5O_DTYPE_ID, &dmsg_count);
-    CHECK(ret, FAIL, "H5F_get_sohm_mesg_count_test");
-    VERIFY(dmsg_count, 0, "H5F_get_sohm_mesg_count_test");
+    ret = H5F__get_sohm_mesg_count_test(file1, H5O_DTYPE_ID, &dmsg_count);
+    CHECK(ret, FAIL, "H5F__get_sohm_mesg_count_test");
+    VERIFY(dmsg_count, 0, "H5F__get_sohm_mesg_count_test");
 
     dataset1 = H5Dcreate2(file1, "dataset_1", s1_tid, space, H5P_DEFAULT, H5P_DEFAULT,
         H5P_DEFAULT);
     CHECK_I(dataset1, "H5Dcreate2");
 
     /* Check on datatype storage status.  It should be 1 now. */
-    ret = H5F_get_sohm_mesg_count_test(file1, H5O_DTYPE_ID, &dmsg_count);
-    CHECK(ret, FAIL, "H5F_get_sohm_mesg_count_test");
-    VERIFY(dmsg_count, 1, "H5F_get_sohm_mesg_count_test");
+    ret = H5F__get_sohm_mesg_count_test(file1, H5O_DTYPE_ID, &dmsg_count);
+    CHECK(ret, FAIL, "H5F__get_sohm_mesg_count_test");
+    VERIFY(dmsg_count, 1, "H5F__get_sohm_mesg_count_test");
 
     dset1_tid = H5Dget_type(dataset1);
     CHECK_I(dset1_tid, "H5Dget_type");
@@ -3775,18 +3775,18 @@ test_sohm_external_dtype(void)
     CHECK_I(file2, "H5Fcreate");
 
     /* Check on datatype storage status. It should be zero now. */
-    ret = H5F_get_sohm_mesg_count_test(file2, H5O_DTYPE_ID, &dmsg_count);
-    CHECK(ret, FAIL, "H5F_get_sohm_mesg_count_test");
-    VERIFY(dmsg_count, 0, "H5F_get_sohm_mesg_count_test");
+    ret = H5F__get_sohm_mesg_count_test(file2, H5O_DTYPE_ID, &dmsg_count);
+    CHECK(ret, FAIL, "H5F__get_sohm_mesg_count_test");
+    VERIFY(dmsg_count, 0, "H5F__get_sohm_mesg_count_test");
 
     dataset2 = H5Dcreate2(file2, "dataset_2", dset1_tid, space, H5P_DEFAULT, H5P_DEFAULT,
         H5P_DEFAULT);
     CHECK_I(dataset2, "H5Dcreate2");
 
     /* Check on datatype storage status.  It should be 1 now. */
-    ret = H5F_get_sohm_mesg_count_test(file2, H5O_DTYPE_ID, &dmsg_count);
-    CHECK(ret, FAIL, "H5F_get_sohm_mesg_count_test");
-    VERIFY(dmsg_count, 1, "H5F_get_sohm_mesg_count_test");
+    ret = H5F__get_sohm_mesg_count_test(file2, H5O_DTYPE_ID, &dmsg_count);
+    CHECK(ret, FAIL, "H5F__get_sohm_mesg_count_test");
+    VERIFY(dmsg_count, 1, "H5F__get_sohm_mesg_count_test");
 
     ret = H5Dwrite(dataset2, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig);
     CHECK_I(ret, "H5Dwrite");

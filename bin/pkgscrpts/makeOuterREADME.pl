@@ -4,14 +4,12 @@
 # Copyright by The HDF Group.
 # All rights reserved.
 #
-# This file is part of HDF4.  The full HDF4 copyright notice, including
-# terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF4 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF4/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# # terms governing use, modification, and redistribution, is contained in
+# # the COPYING file, which can be found at the root of the source code
+# # distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# # If you do not have access to either file, you may request a copy from
+# # help@hdfgroup.org.
 #
 
 use warnings;
@@ -91,7 +89,7 @@ elsif ($indirectory =~ /platypus/) {
       $compilerstring2 = " gcc, g++, and gfortran 4.4.7)\n";
    } else {
       $line5 = "  hdf5-$version-$outsubdir-shared.tar.gz  - Includes C, C++, F90 and Java APIs (using";
-      $compilerstring2 = " gcc, g++, and gfortran 4.4.7 and java 1.8.0_51)\n";
+      $compilerstring2 = " gcc, g++, and gfortran 4.4.7 and java 1.7.0_99)\n";
    }
 }
 elsif ($indirectory =~ /moohan/) {
@@ -100,10 +98,10 @@ elsif ($indirectory =~ /moohan/) {
    $compilerstring1 = " gcc, g++, and gfortran 4.8.5)\n";
    if ($indirectory =~ /32/) {
       $line5 = "  hdf5-$version-$outsubdir-shared.tar.gz  - Includes C, C++, F90 and Java APIs (using";
-      $compilerstring2 = " gcc, g++, and gfortran 4.4.7)\n";
+      $compilerstring2 = " gcc, g++, and gfortran 4.8.5)\n";
    } else {
       $line5 = "  hdf5-$version-$outsubdir-shared.tar.gz  - Includes C, C++, F90 and Java APIs (using";
-      $compilerstring2 = " gcc, g++, and gfortran 4.8.5 and java 1.8.0_51)\n";
+      $compilerstring2 = " gcc, g++, and gfortran 4.8.5 and java 1.8.0_181)\n";
    }
 }
 elsif ($indirectory =~ /emu/) {
@@ -112,29 +110,17 @@ elsif ($indirectory =~ /emu/) {
    $line5 = "  hdf5-$version-$outsubdir-shared.tar.gz  - Includes C, C++, F90 APIs (using";
    $compilerstring = " Sun C and C++ 5.12, Sun Fortran 95 8.6)\n";
 }
-elsif ($indirectory =~ /kite/) {
-   $line3 = "  hfd5-$version-$outsubdir-static.tar.gz  - Includes C, C++, F90 APIs (using";
-   $line5 = "  hfd5-$version-$outsubdir-shared.tar.gz  - Includes C, C++, F90 APIs (using";
-   $compilerstring = " Apple clang/clang++ 5.1 from Xcode 5.0.2,
-                                                              gfortran 4.8.2)\n";
-}
-elsif ($indirectory =~ /quail/) {
-   $line3 = "  hfd5-$version-$outsubdir-static.tar.gz  - Includes C, C++, F90 APIs (using";
-   $line5 = "  hfd5-$version-$outsubdir-shared.tar.gz  - Includes C, C++, F90 APIs (using";
-   $compilerstring = " Apple clang/clang++ 6.0 from Xcode 5.1,
-                                                              gfortran 4.9.2)\n";
-}
-elsif ($indirectory =~ /osx1010test/) {
-   $line3 = "  hdf5-$version-$outsubdir-static.tar.gz  - Includes C, C++, F90 APIs (using";
-   $line5 = "  hdf5-$version-$outsubdir-shared.tar.gz  - Includes C, C++, F90 APIs (using";
-   $compilerstring = " Apple clang/clang++ 6.1 from Xcode 6.1,
-                                                              gfortran 4.9.2)\n";
-}
 elsif ($indirectory =~ /osx1011test/) {
    $line3 = "  hdf5-$version-$outsubdir-static.tar.gz  - Includes C, C++, F90 APIs (using";
    $line5 = "  hdf5-$version-$outsubdir-shared.tar.gz  - Includes C, C++, F90 APIs (using";
-   $compilerstring = " Apple clang/clang++ 7.0.2 from Xcode 7.0,
+   $compilerstring = " Apple clang/clang++ 7.3.0 from Xcode 7.3,
                                                               gfortran 5.2.0)\n";
+}
+elsif ($indirectory =~ /kite/) {
+   $line3 = "  hfd5-$version-$outsubdir-static.tar.gz  - Includes C, C++, F90 APIs (using";
+   $line5 = "  hfd5-$version-$outsubdir-shared.tar.gz  - Includes C, C++, F90 APIs (using";
+   $compilerstring = " Apple LLVM version 9.0.0 clang-900.39.2, 
+                                                              gfortran 7.4.0)\n";
 }
 
     print OUTFILE $line3;

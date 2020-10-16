@@ -13,8 +13,8 @@
 !  depending on which of the KIND values are found.
 !
 ! NOTES
-!  This program uses the Fortran 2008 intrinsic function STORAGE_SIZE or SIZEOF 
-!  depending on availablity.It generates code that makes use of 
+!  This program uses the Fortran 2008 intrinsic function STORAGE_SIZE or SIZEOF
+!  depending on availablity.It generates code that makes use of
 !  STORAGE_SIZE/SIZEOF in H5fortran_detect.f90. STORAGE_SIZE is standard
 !  compliant and should always be chosen over SIZEOF.
 !
@@ -88,7 +88,7 @@ PROGRAM H5HL_buildiface
 !
 ! Developer's notes:
 !
-! Only interfaces with arrays of rank 7 and less are provided. Even-though the F2008 
+! Only interfaces with arrays of rank 7 and less are provided. Even-though the F2008
 ! standard extended the maximum rank to 15, it was decided that they should use the
 ! new APIs to handle those use cases. Handling rank 7 and less is for backward compatibility
 ! with the Fortran 90/95 APIs codes which could never handle rank 8-15 array sizes.
@@ -266,7 +266,7 @@ PROGRAM H5HL_buildiface
         WRITE(11,'(A)') '    INTEGER :: errcode '
         WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
         WRITE(11,'(A)') '    INTEGER(size_t) :: namelen'
-        
+
         WRITE(11,'(A)') f_ptr_line(j)
         WRITE(11,'(A)') '    namelen = LEN(dset_name)'
         WRITE(11,'(A)') '    errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,f_ptr)'
@@ -297,7 +297,7 @@ PROGRAM H5HL_buildiface
         WRITE(11,'(A)') '    INTEGER :: errcode '
         WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
         WRITE(11,'(A)') '    INTEGER(size_t) :: namelen'
-        
+
         WRITE(11,'(A)') f_ptr_line(j)
         WRITE(11,'(A)') '    namelen = LEN(dset_name)'
         WRITE(11,'(A)') '    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)'
@@ -327,8 +327,8 @@ PROGRAM H5HL_buildiface
         WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(IN)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
         WRITE(11,'(A)') '    INTEGER :: errcode '
         WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
-        WRITE(11,'(A)') '    INTEGER(size_t) :: namelen' 
-        
+        WRITE(11,'(A)') '    INTEGER(size_t) :: namelen'
+
         WRITE(11,'(A)') f_ptr_line(j)
         WRITE(11,'(A)') '    namelen = LEN(dset_name)'
         WRITE(11,'(A)') '    errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,H5T_NATIVE_REAL,f_ptr)'
@@ -357,8 +357,8 @@ PROGRAM H5HL_buildiface
         WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(INOUT)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
         WRITE(11,'(A)') '    INTEGER :: errcode '
         WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
-        WRITE(11,'(A)') '    INTEGER(size_t) :: namelen' 
-        
+        WRITE(11,'(A)') '    INTEGER(size_t) :: namelen'
+
         WRITE(11,'(A)') f_ptr_line(j)
         WRITE(11,'(A)') '    namelen = LEN(dset_name)'
         WRITE(11,'(A)') '    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_REAL,f_ptr)'
@@ -387,8 +387,8 @@ PROGRAM H5HL_buildiface
         WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(IN)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
         WRITE(11,'(A)') '    INTEGER :: errcode '
         WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
-        WRITE(11,'(A)') '    INTEGER(size_t) :: namelen' 
-        
+        WRITE(11,'(A)') '    INTEGER(size_t) :: namelen'
+
         WRITE(11,'(A)') f_ptr_line(j)
         WRITE(11,'(A)') '    namelen = LEN(dset_name)'
         WRITE(11,'(A)') '    errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,H5T_NATIVE_DOUBLE,f_ptr)'
@@ -417,8 +417,8 @@ PROGRAM H5HL_buildiface
         WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(INOUT)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
         WRITE(11,'(A)') '    INTEGER :: errcode '
         WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
-        WRITE(11,'(A)') '    INTEGER(size_t) :: namelen' 
-        
+        WRITE(11,'(A)') '    INTEGER(size_t) :: namelen'
+
         WRITE(11,'(A)') f_ptr_line(j)
         WRITE(11,'(A)') '    namelen = LEN(dset_name)'
         WRITE(11,'(A)') '    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr)'
@@ -450,7 +450,7 @@ PROGRAM H5HL_buildiface
         WRITE(11,'(A)') '    INTEGER :: errcode '
         WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
         WRITE(11,'(A)') '    INTEGER(size_t) :: namelen'
-        
+
         WRITE(11,'(A)') f_ptr_line(j)
         WRITE(11,'(A)') '    namelen = LEN(dset_name)'
         WRITE(11,'(A)') '    errcode = h5ltmake_dataset_c(loc_id, namelen, dset_name, rank, dims, type_id, f_ptr)'
@@ -482,7 +482,7 @@ PROGRAM H5HL_buildiface
         WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
         WRITE(11,'(A)') '    INTEGER(size_t) :: namelen'
         WRITE(11,'(A)') '    INTEGER(hid_t) :: type_id'
-        
+
         WRITE(11,'(A)') f_ptr_line(j)
         WRITE(11,'(A)') '    namelen = LEN(dset_name)'
         WRITE(11,'(A)') '    type_id = h5kind_to_type(KIND('//f_ptr_line(j)(19:36)//'), H5_INTEGER_KIND)'
@@ -680,10 +680,10 @@ PROGRAM H5HL_buildiface
      WRITE(11,'(A)') '    INTEGER(size_t),  INTENT(in) :: type_size'
      WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(IN), DIMENSION(*), TARGET :: buf'
      WRITE(11,'(A)') '    INTEGER :: errcode '
-     WRITE(11,'(A)') '    INTEGER(size_t) :: namelen' 
-     WRITE(11,'(A)') '    INTEGER(size_t) :: namelen1' 
+     WRITE(11,'(A)') '    INTEGER(size_t) :: namelen'
+     WRITE(11,'(A)') '    INTEGER(size_t) :: namelen1'
      WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
-        
+
      WRITE(11,'(A)') f_ptr_line(j)
      WRITE(11,'(A)') '    namelen = LEN(dset_name)'
      WRITE(11,'(A)') '    namelen1 = LEN(field_name)'
@@ -714,10 +714,10 @@ PROGRAM H5HL_buildiface
      WRITE(11,'(A)') '    INTEGER(size_t),  INTENT(in) :: type_size'
      WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(INOUT), DIMENSION(*), TARGET :: buf'
      WRITE(11,'(A)') '    INTEGER :: errcode '
-     WRITE(11,'(A)') '    INTEGER(size_t) :: namelen' 
-     WRITE(11,'(A)') '    INTEGER(size_t) :: namelen1' 
+     WRITE(11,'(A)') '    INTEGER(size_t) :: namelen'
+     WRITE(11,'(A)') '    INTEGER(size_t) :: namelen1'
      WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
-        
+
      WRITE(11,'(A)') f_ptr_line(j)
      WRITE(11,'(A)') '    namelen = LEN(dset_name)'
      WRITE(11,'(A)') '    namelen1 = LEN(field_name)'
@@ -748,9 +748,9 @@ PROGRAM H5HL_buildiface
      WRITE(11,'(A)') '    INTEGER(size_t),  INTENT(in) :: type_size'
      WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(IN), DIMENSION(*), TARGET :: buf'
      WRITE(11,'(A)') '    INTEGER :: errcode '
-     WRITE(11,'(A)') '    INTEGER(size_t) :: namelen' 
+     WRITE(11,'(A)') '    INTEGER(size_t) :: namelen'
      WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
-        
+
      WRITE(11,'(A)') f_ptr_line(j)
      WRITE(11,'(A)') '    namelen = LEN(dset_name)'
      WRITE(11,'(A)') &
@@ -782,7 +782,7 @@ PROGRAM H5HL_buildiface
      WRITE(11,'(A)') '    INTEGER :: errcode '
      WRITE(11,'(A)') '    INTEGER(size_t) :: namelen'
      WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
-        
+
      WRITE(11,'(A)') f_ptr_line(j)
      WRITE(11,'(A)') '    namelen = LEN(dset_name)'
      WRITE(11,'(A)') &
@@ -814,7 +814,7 @@ PROGRAM H5HL_buildiface
      WRITE(11,'(A)') '        INTEGER(size_t) :: namelen1'
      WRITE(11,'(A)') '        INTEGER :: errcode'
      WRITE(11,'(A)') '        TYPE(C_PTR) :: f_ptr'
-        
+
      WRITE(11,'(A)') f_ptr_line(j)
      WRITE(11,'(A)') '    namelen = LEN(dset_name)'
      WRITE(11,'(A)') '    namelen1 = LEN(field_name)'

@@ -400,7 +400,7 @@ static void test_HDFFV_9920()
 {
     int attr_data[2] = { 100, 200};
     hsize_t dims[1] = { DIM1 };
-    
+
     try
     {
         // Create a new file and a group in it
@@ -414,13 +414,13 @@ static void test_HDFFV_9920()
         DataSet fds = file.createDataSet(FDATASET_NAME, PredType::STD_I32BE, dspace);
         DataSet gds = gr1.createDataSet(GDATASET_NAME, PredType::STD_I32BE, dspace);
 
-        // Create a file attribute and a group attribute. 
-        Attribute fa1 = file.createAttribute(FATTR_NAME, PredType::STD_I32BE, 
+        // Create a file attribute and a group attribute.
+        Attribute fa1 = file.createAttribute(FATTR_NAME, PredType::STD_I32BE,
                                                   dspace);
-        Attribute ga1 = gr1.createAttribute(GATTR_NAME, PredType::STD_I32BE, 
+        Attribute ga1 = gr1.createAttribute(GATTR_NAME, PredType::STD_I32BE,
                                                   dspace);
-     
-        // Write the attribute data. 
+
+        // Write the attribute data.
         fa1.write( PredType::NATIVE_INT, attr_data);
         ga1.write( PredType::NATIVE_INT, attr_data);
 

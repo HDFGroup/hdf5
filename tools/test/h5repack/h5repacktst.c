@@ -382,7 +382,7 @@ int main (void)
         GOERROR;
     if (h5repack_verify(FNAME0, FNAME0OUT, &pack_options) <= 0)
         GOERROR;
-    if (h5repack_cmp_pl(FNAME0, FNAME0OUT) <= 0)
+    if (h5repack_cmp_pl(FNAME0, pack_options.fin_fapl, FNAME0OUT, pack_options.fout_fapl) <= 0)
         GOERROR;
     if (h5repack_end(&pack_options) < 0)
         GOERROR;
@@ -402,7 +402,7 @@ int main (void)
         GOERROR;
     if (h5repack_verify(FNAME1, FNAME1OUT, &pack_options) <= 0)
         GOERROR;
-    if (h5repack_cmp_pl(FNAME1, FNAME1OUT) <= 0)
+    if (h5repack_cmp_pl(FNAME1, pack_options.fin_fapl, FNAME1OUT, pack_options.fout_fapl) <= 0)
         GOERROR;
     if (h5repack_end(&pack_options) < 0)
         GOERROR;
@@ -422,7 +422,7 @@ int main (void)
         GOERROR;
     if (h5repack_verify(FNAME2, FNAME2OUT, &pack_options) <= 0)
         GOERROR;
-    if (h5repack_cmp_pl(FNAME2, FNAME2OUT) <= 0)
+    if (h5repack_cmp_pl(FNAME2, pack_options.fin_fapl, FNAME2OUT, pack_options.fout_fapl) <= 0)
         GOERROR;
     if (h5repack_end(&pack_options) < 0)
         GOERROR;
@@ -441,7 +441,7 @@ int main (void)
         GOERROR;
     if (h5repack_verify(FNAME3, FNAME3OUT, &pack_options) <= 0)
         GOERROR;
-    if (h5repack_cmp_pl(FNAME3, FNAME3OUT) <= 0)
+    if (h5repack_cmp_pl(FNAME3, pack_options.fin_fapl, FNAME3OUT, pack_options.fout_fapl) <= 0)
         GOERROR;
     if (h5repack_end(&pack_options) < 0)
         GOERROR;
@@ -1132,7 +1132,7 @@ int main (void)
             GOERROR;
         if (h5repack_verify(FNAME7, FNAME7OUT, &pack_options) <= 0)
             GOERROR;
-        if (h5repack_cmp_pl(FNAME7, FNAME7OUT) <= 0)
+        if (h5repack_cmp_pl(FNAME7, pack_options.fin_fapl, FNAME7OUT, pack_options.fout_fapl) <= 0)
             GOERROR;
         if (h5repack_end(&pack_options) < 0)
             GOERROR;
@@ -1779,9 +1779,9 @@ error:
 static
 int make_testfiles(void)
 {
-    hid_t    fid = -1;
-    hid_t    fcpl = -1;    /* File creation property list */
-    hid_t    fapl = -1;    /* File access property list */
+    hid_t    fid = H5I_INVALID_HID;
+    hid_t    fcpl = H5I_INVALID_HID;    /* File creation property list */
+    hid_t    fapl = H5I_INVALID_HID;    /* File access property list */
     unsigned j;            /* Local index variable */
 
     /*-------------------------------------------------------------------------
@@ -2210,12 +2210,12 @@ out:
 static
 int make_all_objects(hid_t loc_id)
 {
-    hid_t   did = -1;
-    hid_t   gid = -1;
-    hid_t   tid = -1;
-    hid_t   rid = -1;
-    hid_t   sid = -1;
-    hid_t   gcplid = -1;
+    hid_t   did = H5I_INVALID_HID;
+    hid_t   gid = H5I_INVALID_HID;
+    hid_t   tid = H5I_INVALID_HID;
+    hid_t   rid = H5I_INVALID_HID;
+    hid_t   sid = H5I_INVALID_HID;
+    hid_t   gcplid = H5I_INVALID_HID;
     hsize_t dims[1] = {2};
     /* compound datatype */
     typedef struct s_t
@@ -2332,10 +2332,10 @@ out:
 static
 int make_attributes(hid_t loc_id)
 {
-    hid_t   did = -1;
-    hid_t   gid = -1;
-    hid_t   rid = -1;
-    hid_t   sid = -1;
+    hid_t   did = H5I_INVALID_HID;
+    hid_t   gid = H5I_INVALID_HID;
+    hid_t   rid = H5I_INVALID_HID;
+    hid_t   sid = H5I_INVALID_HID;
     hsize_t dims[1] = {2};
 
     /*-------------------------------------------------------------------------
@@ -2403,8 +2403,8 @@ static
 int make_hlinks(hid_t loc_id)
 {
     hid_t   g1id =- 1;
-    hid_t   g2id = -1;
-    hid_t   g3id = -1;
+    hid_t   g2id = H5I_INVALID_HID;
+    hid_t   g3id = H5I_INVALID_HID;
     hsize_t dims[2] = {3,2};
     int     buf[3][2] = {{1,1}, {1,2}, {2,2}};
 
@@ -2473,30 +2473,30 @@ out:
 static
 int make_szip(hid_t loc_id)
 {
-    hid_t    dcpl = -1; /* dataset creation property list */
-    hid_t    sid = -1;  /* dataspace ID */
+    hid_t    dcpl = H5I_INVALID_HID; /* dataset creation property list */
+    hid_t    sid = H5I_INVALID_HID;  /* dataspace ID */
     unsigned szip_options_mask = H5_SZIP_ALLOW_K13_OPTION_MASK | H5_SZIP_NN_OPTION_MASK;
     unsigned szip_pixels_per_block = 8;
     hsize_t  dims[RANK] = {DIM1, DIM2};
     hsize_t  chunk_dims[RANK] = {CDIM1, CDIM2};
-    int      buf[DIM1][DIM2];
-    int      i, j, n;
+    int      **buf = NULL;
     int      szip_can_encode = 0;
 
-    for (i = n = 0; i < DIM1; i++) {
-        for (j = 0; j < DIM2; j++) {
-            buf[i][j] = n++;
-        }
-    }
+    /* Create and fill array */
+    H5TEST_ALLOCATE_2D_ARRAY(buf, int, DIM1, DIM2);
+    if (NULL == buf)
+        goto error;
+    H5TEST_FILL_2D_ARRAY(buf, int, DIM1, DIM2);
+
     /* create a space */
     if((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
-        return -1;
+        goto error;
     /* create a dcpl */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        goto out;
+        goto error;
     /* set up chunk */
     if(H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
-        goto out;
+        goto error;
 
     /*-------------------------------------------------------------------------
     * SZIP
@@ -2509,25 +2509,30 @@ int make_szip(hid_t loc_id)
     if (szip_can_encode) {
         /* set szip data */
         if(H5Pset_szip (dcpl, szip_options_mask, szip_pixels_per_block) < 0)
-            goto out;
-        if (make_dset(loc_id, "dset_szip", sid, dcpl, buf) < 0)
-            goto out;
+            goto error;
+        if (make_dset(loc_id, "dset_szip", sid, dcpl, buf[0]) < 0)
+            goto error;
     }
     else
         /* WARNING? SZIP is decoder only, can't generate test files */
 
     if(H5Sclose(sid) < 0)
-        goto out;
+        goto error;
     if(H5Pclose(dcpl) < 0)
-        goto out;
+        goto error;
+
+    HDfree(buf);
 
     return 0;
 
-out:
+error:
     H5E_BEGIN_TRY {
         H5Pclose(dcpl);
         H5Sclose(sid);
     } H5E_END_TRY;
+
+    HDfree(buf);
+
     return -1;
 }
 #endif /* H5_HAVE_FILTER_SZIP */
@@ -2544,30 +2549,29 @@ out:
 static
 int make_deflate(hid_t loc_id)
 {
-    hid_t      dcpl = -1; /* dataset creation property list */
-    hid_t      sid = -1;  /* dataspace ID */
+    hid_t      dcpl = H5I_INVALID_HID; /* dataset creation property list */
+    hid_t      sid = H5I_INVALID_HID;  /* dataspace ID */
     hsize_t    dims[RANK] = {DIM1,DIM2};
     hsize_t    chunk_dims[RANK] = {CDIM1,CDIM2};
-    int        buf[DIM1][DIM2];
+    int        **buf = NULL;
     hobj_ref_t bufref[1]; /* reference */
     hsize_t    dims1r[1] = {1};
-    int        i, j, n;
 
-    for (i = n = 0; i < DIM1; i++) {
-        for (j = 0; j < DIM2; j++) {
-            buf[i][j] = n++;
-        }
-    }
+    /* Create and fill array */
+    H5TEST_ALLOCATE_2D_ARRAY(buf, int, DIM1, DIM2);
+    if (NULL == buf)
+        goto error;
+    H5TEST_FILL_2D_ARRAY(buf, int, DIM1, DIM2);
 
     /* create a space */
     if((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
-        return -1;
+        goto error;
     /* create a dcpl */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        goto out;
+        goto error;
     /* set up chunk */
     if(H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
-        goto out;
+        goto error;
 
     /*-------------------------------------------------------------------------
     * GZIP
@@ -2576,16 +2580,16 @@ int make_deflate(hid_t loc_id)
 #if defined (H5_HAVE_FILTER_DEFLATE)
     /* set deflate data */
     if(H5Pset_deflate(dcpl, 9) < 0)
-        goto out;
-    if (make_dset(loc_id, "dset_deflate", sid, dcpl, buf) < 0)
-        goto out;
+        goto error;
+    if (make_dset(loc_id, "dset_deflate", sid, dcpl, buf[0]) < 0)
+        goto error;
 
     /* create a reference to the dataset, test second seeep of file for references */
 
     if (H5Rcreate(&bufref[0], loc_id, "dset_deflate", H5R_OBJECT, (hid_t)-1) < 0)
-        goto out;
+        goto error;
     if (write_dset(loc_id, 1, dims1r, "ref", H5T_STD_REF_OBJ, bufref) < 0)
-        goto out;
+        goto error;
 #endif
 
 
@@ -2594,17 +2598,22 @@ int make_deflate(hid_t loc_id)
     *-------------------------------------------------------------------------
     */
     if(H5Sclose(sid) < 0)
-        goto out;
+        goto error;
     if(H5Pclose(dcpl) < 0)
-        goto out;
+        goto error;
+
+    HDfree(buf);
 
     return 0;
 
-out:
+error:
     H5E_BEGIN_TRY {
         H5Pclose(dcpl);
         H5Sclose(sid);
     } H5E_END_TRY;
+
+    HDfree(buf);
+
     return -1;
 }
 
@@ -2619,29 +2628,27 @@ out:
 static
 int make_shuffle(hid_t loc_id)
 {
-    hid_t    dcpl; /* dataset creation property list */
-    hid_t    sid;  /* dataspace ID */
+    hid_t    dcpl = H5I_INVALID_HID; /* dataset creation property list */
+    hid_t    sid = H5I_INVALID_HID;  /* dataspace ID */
     hsize_t  dims[RANK]={DIM1,DIM2};
     hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
-    int      buf[DIM1][DIM2];
-    int      i, j, n;
+    int      **buf = NULL;
 
-    for (i=n=0; i<DIM1; i++)
-    {
-        for (j=0; j<DIM2; j++)
-        {
-            buf[i][j]=n++;
-        }
-    }
+    /* Create and fill array */
+    H5TEST_ALLOCATE_2D_ARRAY(buf, int, DIM1, DIM2);
+    if (NULL == buf)
+        goto error;
+    H5TEST_FILL_2D_ARRAY(buf, int, DIM1, DIM2);
+
     /* create a space */
     if((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
-        return -1;
+        goto error;
     /* create a dcpl */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        goto out;
+        goto error;
     /* set up chunk */
     if(H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
-        goto out;
+        goto error;
 
     /*-------------------------------------------------------------------------
     * shuffle
@@ -2650,9 +2657,9 @@ int make_shuffle(hid_t loc_id)
 
     /* set the shuffle filter */
     if (H5Pset_shuffle(dcpl) < 0)
-        goto out;
-    if (make_dset(loc_id,"dset_shuffle",sid,dcpl,buf) < 0)
-        goto out;
+        goto error;
+    if (make_dset(loc_id, "dset_shuffle", sid, dcpl, buf[0]) < 0)
+        goto error;
 
 
     /*-------------------------------------------------------------------------
@@ -2660,17 +2667,22 @@ int make_shuffle(hid_t loc_id)
     *-------------------------------------------------------------------------
     */
     if(H5Sclose(sid) < 0)
-        goto out;
+        goto error;
     if(H5Pclose(dcpl) < 0)
-        goto out;
+        goto error;
+
+    HDfree(buf);
 
     return 0;
 
-out:
+error:
     H5E_BEGIN_TRY {
         H5Pclose(dcpl);
         H5Sclose(sid);
     } H5E_END_TRY;
+
+    HDfree(buf);
+
     return -1;
 }
 
@@ -2684,27 +2696,27 @@ out:
 static
 int make_fletcher32(hid_t loc_id)
 {
-    hid_t    dcpl = -1; /* dataset creation property list */
-    hid_t    sid = -1;  /* dataspace ID */
+    hid_t    dcpl = H5I_INVALID_HID; /* dataset creation property list */
+    hid_t    sid = H5I_INVALID_HID;  /* dataspace ID */
     hsize_t  dims[RANK]={DIM1,DIM2};
     hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
-    int      buf[DIM1][DIM2];
-    int      i, j, n;
+    int      **buf = NULL;
 
-    for (i = n = 0; i < DIM1; i++) {
-        for (j = 0; j < DIM2; j++) {
-            buf[i][j] = n++;
-        }
-    }
+    /* Create and fill array */
+    H5TEST_ALLOCATE_2D_ARRAY(buf, int, DIM1, DIM2);
+    if (NULL == buf)
+        goto error;
+    H5TEST_FILL_2D_ARRAY(buf, int, DIM1, DIM2);
+
     /* create a space */
     if((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
-        return -1;
+        goto error;
     /* create a dataset creation property list; the same DCPL is used for all dsets */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        goto out;
+        goto error;
     /* set up chunk */
     if(H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
-        goto out;
+        goto error;
 
 
     /*-------------------------------------------------------------------------
@@ -2714,29 +2726,34 @@ int make_fletcher32(hid_t loc_id)
 
     /* remove the filters from the dcpl */
     if (H5Premove_filter(dcpl,H5Z_FILTER_ALL) < 0)
-        goto out;
+        goto error;
     /* set the checksum filter */
     if (H5Pset_fletcher32(dcpl) < 0)
-        goto out;
-    if (make_dset(loc_id,"dset_fletcher32",sid,dcpl,buf) < 0)
-        goto out;
+        goto error;
+    if (make_dset(loc_id, "dset_fletcher32", sid, dcpl, buf[0]) < 0)
+        goto error;
 
     /*-------------------------------------------------------------------------
     * close space and dcpl
     *-------------------------------------------------------------------------
     */
     if(H5Sclose(sid) < 0)
-        goto out;
+        goto error;
     if(H5Pclose(dcpl) < 0)
-        goto out;
+        goto error;
+
+    HDfree(buf);
 
     return 0;
 
-out:
+error:
     H5E_BEGIN_TRY {
         H5Pclose(dcpl);
         H5Sclose(sid);
     } H5E_END_TRY;
+
+    HDfree(buf);
+
     return -1;
 }
 
@@ -2751,51 +2768,51 @@ out:
 static
 int make_nbit(hid_t loc_id)
 {
-    hid_t    dcpl = -1; /* dataset creation property list */
-    hid_t    sid = -1;  /* dataspace ID */
-    hid_t    dtid = -1;
-    hid_t    dsid = -1;
+    hid_t    dcpl = H5I_INVALID_HID; /* dataset creation property list */
+    hid_t    sid = H5I_INVALID_HID;  /* dataspace ID */
+    hid_t    dtid = H5I_INVALID_HID;
+    hid_t    dsid = H5I_INVALID_HID;
     hsize_t  dims[RANK]={DIM1,DIM2};
     hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
-    int      buf[DIM1][DIM2];
-    int      i, j, n;
+    int      **buf = NULL;
 
-    for (i = n = 0; i < DIM1; i++) {
-        for (j = 0; j < DIM2; j++) {
-            buf[i][j] = n++;
-        }
-    }
+    /* Create and fill array */
+    H5TEST_ALLOCATE_2D_ARRAY(buf, int, DIM1, DIM2);
+    if (NULL == buf)
+        goto error;
+    H5TEST_FILL_2D_ARRAY(buf, int, DIM1, DIM2);
+
     /* create a space */
     if((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
-        return -1;
+        goto error;
     /* create a dataset creation property list; the same DCPL is used for all dsets */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        goto out;
+        goto error;
     /* set up chunk */
     if(H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
-        goto out;
+        goto error;
 
     dtid = H5Tcopy(H5T_NATIVE_INT);
     if (H5Tset_precision(dtid,(H5Tget_precision(dtid) - 1)) < 0)
-        goto out;
+        goto error;
 
     /* remove the filters from the dcpl */
     if(H5Premove_filter(dcpl, H5Z_FILTER_ALL) < 0)
-        goto out;
+        goto error;
     if(H5Pset_nbit(dcpl) < 0)
-        goto out;
+        goto error;
     if((dsid = H5Dcreate2(loc_id, "dset_nbit", dtid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        goto out;
-    if(H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
-        goto out;
+        goto error;
+    if(H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
+        goto error;
     H5Dclose(dsid);
 
     if(H5Premove_filter(dcpl, H5Z_FILTER_ALL) < 0)
-        goto out;
+        goto error;
     if((dsid = H5Dcreate2(loc_id, "dset_int31", dtid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        goto out;
-    if(H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
-        goto out;
+        goto error;
+    if(H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
+        goto error;
     H5Dclose(dsid);
 
     /*-------------------------------------------------------------------------
@@ -2803,21 +2820,26 @@ int make_nbit(hid_t loc_id)
     *-------------------------------------------------------------------------
     */
     if(H5Sclose(sid) < 0)
-        goto out;
+        goto error;
     if(H5Pclose(dcpl) < 0)
-        goto out;
+        goto error;
     if (H5Tclose(dtid) < 0)
-        goto out;
+        goto error;
+
+    HDfree(buf);
 
     return 0;
 
-out:
+error:
     H5E_BEGIN_TRY {
         H5Tclose(dtid);
         H5Pclose(dcpl);
         H5Sclose(sid);
         H5Dclose(dsid);
     } H5E_END_TRY;
+
+    HDfree(buf);
+
     return -1;
 }
 
@@ -2832,46 +2854,46 @@ out:
 static
 int make_scaleoffset(hid_t loc_id)
 {
-    hid_t    dcpl = -1; /* dataset creation property list */
-    hid_t    sid = -1;  /* dataspace ID */
-    hid_t    dtid = -1;
-    hid_t    dsid = -1;
+    hid_t    dcpl = H5I_INVALID_HID; /* dataset creation property list */
+    hid_t    sid = H5I_INVALID_HID;  /* dataspace ID */
+    hid_t    dtid = H5I_INVALID_HID;
+    hid_t    dsid = H5I_INVALID_HID;
     hsize_t  dims[RANK] = {DIM1,DIM2};
     hsize_t  chunk_dims[RANK] = {CDIM1,CDIM2};
-    int      buf[DIM1][DIM2];
-    int      i, j, n;
+    int      **buf = NULL;
 
-    for (i = n = 0; i < DIM1; i++) {
-        for (j = 0; j < DIM2; j++) {
-            buf[i][j] = n++;
-        }
-    }
+    /* Create and fill array */
+    H5TEST_ALLOCATE_2D_ARRAY(buf, int, DIM1, DIM2);
+    if (NULL == buf)
+        goto error;
+    H5TEST_FILL_2D_ARRAY(buf, int, DIM1, DIM2);
+
     /* create a space */
     if((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
-        return -1;
+        goto error;
     /* create a dataset creation property list; the same DCPL is used for all dsets */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        goto out;
+        goto error;
     /* set up chunk */
     if(H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
-        goto out;
+        goto error;
 
     dtid = H5Tcopy(H5T_NATIVE_INT);
 
     /* remove the filters from the dcpl */
     if(H5Premove_filter(dcpl, H5Z_FILTER_ALL) < 0)
-        goto out;
+        goto error;
     if(H5Pset_scaleoffset(dcpl, H5Z_SO_INT, 31) < 0)
-        goto out;
+        goto error;
     if((dsid = H5Dcreate2(loc_id, "dset_scaleoffset", dtid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        goto out;
-    if(H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
-        goto out;
+        goto error;
+    if(H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
+        goto error;
     H5Dclose(dsid);
     if((dsid = H5Dcreate2(loc_id, "dset_none", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        goto out;
-    if(H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
-        goto out;
+        goto error;
+    if(H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
+        goto error;
     H5Tclose(dtid);
     H5Dclose(dsid);
 
@@ -2880,19 +2902,24 @@ int make_scaleoffset(hid_t loc_id)
     *-------------------------------------------------------------------------
     */
     if(H5Sclose(sid) < 0)
-        goto out;
+        goto error;
     if(H5Pclose(dcpl) < 0)
-        goto out;
+        goto error;
+
+    HDfree(buf);
 
     return 0;
 
-out:
+error:
     H5E_BEGIN_TRY {
         H5Dclose(dsid);
         H5Tclose(dtid);
         H5Pclose(dcpl);
         H5Sclose(sid);
     } H5E_END_TRY;
+
+    HDfree(buf);
+
     return -1;
 }
 
@@ -2912,41 +2939,39 @@ int make_all_filters(hid_t loc_id)
     hid_t    dtid = H5I_INVALID_HID;
     hid_t    dsid = H5I_INVALID_HID;
 #if defined (H5_HAVE_FILTER_SZIP)
-    unsigned szip_options_mask=H5_SZIP_ALLOW_K13_OPTION_MASK|H5_SZIP_NN_OPTION_MASK;
-    unsigned szip_pixels_per_block=8;
+    unsigned szip_options_mask = H5_SZIP_ALLOW_K13_OPTION_MASK | H5_SZIP_NN_OPTION_MASK;
+    unsigned szip_pixels_per_block = 8;
 #endif /* H5_HAVE_FILTER_SZIP */
     hsize_t  dims[RANK]={DIM1,DIM2};
     hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
-    int      buf[DIM1][DIM2];
-    int      i, j, n;
+    int      **buf = NULL;
 #if defined (H5_HAVE_FILTER_SZIP)
     int szip_can_encode = 0;
 #endif
 
-    for (i=n=0; i<DIM1; i++)
-    {
-        for (j=0; j<DIM2; j++)
-        {
-            buf[i][j]=n++;
-        }
-    }
+    /* Create and fill array */
+    H5TEST_ALLOCATE_2D_ARRAY(buf, int, DIM1, DIM2);
+    if (NULL == buf)
+        goto error;
+    H5TEST_FILL_2D_ARRAY(buf, int, DIM1, DIM2);
+
     /* create a space */
     if((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
-        return -1;
+        goto error;
     /* create a dataset creation property list; the same DCPL is used for all dsets */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        goto out;
+        goto error;
     /* set up chunk */
     if (H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
-        goto out;
+        goto error;
 
     /* set the shuffle filter */
     if (H5Pset_shuffle(dcpl) < 0)
-        goto out;
+        goto error;
 
     /* set the checksum filter */
     if (H5Pset_fletcher32(dcpl) < 0)
-        goto out;
+        goto error;
 
 #if defined (H5_HAVE_FILTER_SZIP)
     if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1)
@@ -2956,8 +2981,8 @@ int make_all_filters(hid_t loc_id)
     if (szip_can_encode)
     {
         /* set szip data */
-        if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block) < 0)
-            goto out;
+        if(H5Pset_szip (dcpl,szip_options_mask, szip_pixels_per_block) < 0)
+            goto error;
     } else {
         /* WARNING? SZIP is decoder only, can't generate test data using szip */
     }
@@ -2966,20 +2991,20 @@ int make_all_filters(hid_t loc_id)
 #if defined (H5_HAVE_FILTER_DEFLATE)
     /* set deflate data */
     if(H5Pset_deflate(dcpl, 9) < 0)
-        goto out;
+        goto error;
 #endif
 
-    if (make_dset(loc_id,"dset_all",sid,dcpl,buf) < 0)
-        goto out;
+    if (make_dset(loc_id, "dset_all", sid, dcpl, buf[0]) < 0)
+        goto error;
 
     /* remove the filters from the dcpl */
     if (H5Premove_filter(dcpl,H5Z_FILTER_ALL) < 0)
-        goto out;
+        goto error;
     /* set the checksum filter */
     if (H5Pset_fletcher32(dcpl) < 0)
-        goto out;
-    if (make_dset(loc_id,"dset_fletcher32",sid,dcpl,buf) < 0)
-        goto out;
+        goto error;
+    if (make_dset(loc_id, "dset_fletcher32", sid, dcpl, buf[0]) < 0)
+        goto error;
 
 
     /* Make sure encoding is enabled */
@@ -2988,12 +3013,12 @@ int make_all_filters(hid_t loc_id)
     {
         /* remove the filters from the dcpl */
         if (H5Premove_filter(dcpl,H5Z_FILTER_ALL) < 0)
-            goto out;
+            goto error;
         /* set szip data */
         if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block) < 0)
-            goto out;
-        if (make_dset(loc_id,"dset_szip",sid,dcpl,buf) < 0)
-            goto out;
+            goto error;
+        if (make_dset(loc_id, "dset_szip", sid, dcpl, buf[0]) < 0)
+            goto error;
     } else
     {
         /* WARNING? SZIP is decoder only, can't generate test dataset */
@@ -3003,56 +3028,58 @@ int make_all_filters(hid_t loc_id)
 
     /* remove the filters from the dcpl */
     if (H5Premove_filter(dcpl,H5Z_FILTER_ALL) < 0)
-        goto out;
+        goto error;
     /* set the shuffle filter */
     if (H5Pset_shuffle(dcpl) < 0)
-        goto out;
-    if (make_dset(loc_id,"dset_shuffle",sid,dcpl,buf) < 0)
-        goto out;
+        goto error;
+    if (make_dset(loc_id, "dset_shuffle", sid, dcpl, buf[0]) < 0)
+        goto error;
 
 
 #if defined (H5_HAVE_FILTER_DEFLATE)
     /* remove the filters from the dcpl */
     if (H5Premove_filter(dcpl,H5Z_FILTER_ALL) < 0)
-        goto out;
+        goto error;
     /* set deflate data */
     if(H5Pset_deflate(dcpl, 1) < 0)
-        goto out;
-    if (make_dset(loc_id,"dset_deflate",sid,dcpl,buf) < 0)
-        goto out;
+        goto error;
+    if (make_dset(loc_id, "dset_deflate", sid, dcpl, buf[0]) < 0)
+        goto error;
 #endif
 
 
 
     /* remove the filters from the dcpl */
     if (H5Premove_filter(dcpl, H5Z_FILTER_ALL) < 0)
-        goto out;
+        goto error;
     /* set the shuffle filter */
     if (H5Pset_nbit(dcpl) < 0)
-        goto out;
+        goto error;
     if ((dtid = H5Tcopy(H5T_NATIVE_INT)) < 0)
-        goto out;
+        goto error;
     if (H5Tset_precision(dtid, (H5Tget_precision(dtid) - 1)) < 0)
-        goto out;
+        goto error;
     if((dsid = H5Dcreate2(loc_id, "dset_nbit", dtid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        goto out;
-    if(H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
-        goto out;
+        goto error;
+    if(H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
+        goto error;
 
     /* close */
     if(H5Tclose(dtid) < 0)
-        goto out;
+        goto error;
     if(H5Dclose(dsid) < 0)
-        goto out;
+        goto error;
 
     if(H5Sclose(sid) < 0)
-        goto out;
+        goto error;
     if(H5Pclose(dcpl) < 0)
-        goto out;
+        goto error;
+
+    HDfree(buf);
 
     return 0;
 
-out:
+error:
     H5E_BEGIN_TRY
     {
         H5Tclose(dtid);
@@ -3060,6 +3087,9 @@ out:
         H5Pclose(dcpl);
         H5Sclose(sid);
     } H5E_END_TRY;
+
+    HDfree(buf);
+
     return -1;
 }
 
@@ -3077,11 +3107,11 @@ int make_early(void)
 {
     hsize_t dims[1] ={3000};
     hsize_t cdims[1]={30};
-    hid_t   fid=-1;
-    hid_t   did=-1;
-    hid_t   sid=-1;
-    hid_t   tid=-1;
-    hid_t   dcpl=-1;
+    hid_t   fid=H5I_INVALID_HID;
+    hid_t   did=H5I_INVALID_HID;
+    hid_t   sid=H5I_INVALID_HID;
+    hid_t   tid=H5I_INVALID_HID;
+    hid_t   dcpl=H5I_INVALID_HID;
     int     i;
     char    name[16];
     int     iter=100;
@@ -3172,32 +3202,29 @@ out:
 static
 int make_layout(hid_t loc_id)
 {
-    hid_t    dcpl=-1; /* dataset creation property list */
-    hid_t    sid=-1;  /* dataspace ID */
+    hid_t    dcpl=H5I_INVALID_HID; /* dataset creation property list */
+    hid_t    sid=H5I_INVALID_HID;  /* dataspace ID */
     hsize_t  dims[RANK]={DIM1,DIM2};
     hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
-    int      buf[DIM1][DIM2];
-    int      i, j, n;
+    int      **buf = NULL;
+    int      i;
     char     name[16];
 
+    /* Create and fill array */
+    H5TEST_ALLOCATE_2D_ARRAY(buf, int, DIM1, DIM2);
+    if (NULL == buf)
+        goto error;
+    H5TEST_FILL_2D_ARRAY(buf, int, DIM1, DIM2);
 
-    for (i=n=0; i<DIM1; i++)
-    {
-        for (j=0; j<DIM2; j++)
-        {
-            buf[i][j]=n++;
-        }
-    }
 
     /*-------------------------------------------------------------------------
     * make several dataset with no filters
     *-------------------------------------------------------------------------
     */
-    for (i=0; i<4; i++)
-    {
+    for (i=0; i<4; i++) {
         HDsprintf(name,"dset%d",i+1);
-        if (write_dset(loc_id,RANK,dims,name,H5T_NATIVE_INT,buf) < 0)
-            return -1;
+        if (write_dset(loc_id, RANK, dims, name, H5T_NATIVE_INT, buf[0]) < 0)
+            goto error;
     }
 
 
@@ -3207,63 +3234,60 @@ int make_layout(hid_t loc_id)
     */
     /* create a space */
     if((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
-        return -1;
+        goto error;
     /* create a dataset creation property list; the same DCPL is used for all dsets */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-    {
-        goto out;
-    }
+        goto error;
 
     /*-------------------------------------------------------------------------
     * H5D_COMPACT
     *-------------------------------------------------------------------------
     */
     if(H5Pset_layout (dcpl,H5D_COMPACT) < 0)
-        goto out;
-    if (make_dset(loc_id,"dset_compact",sid,dcpl,buf) < 0)
-    {
-        goto out;
-    }
+        goto error;
+    if (make_dset(loc_id, "dset_compact", sid, dcpl, buf[0]) < 0)
+        goto error;
 
     /*-------------------------------------------------------------------------
     * H5D_CONTIGUOUS
     *-------------------------------------------------------------------------
     */
     if(H5Pset_layout (dcpl,H5D_CONTIGUOUS) < 0)
-        goto out;
-    if (make_dset(loc_id,"dset_contiguous",sid,dcpl,buf) < 0)
-    {
-        goto out;
-    }
+        goto error;
+    if (make_dset(loc_id, "dset_contiguous", sid, dcpl, buf[0]) < 0)
+        goto error;
 
     /*-------------------------------------------------------------------------
     * H5D_CHUNKED
     *-------------------------------------------------------------------------
     */
     if(H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
-        goto out;
-    if (make_dset(loc_id,"dset_chunk",sid,dcpl,buf) < 0)
-    {
-        goto out;
-    }
+        goto error;
+    if (make_dset(loc_id, "dset_chunk", sid, dcpl, buf[0]) < 0)
+        goto error;
 
     /*-------------------------------------------------------------------------
     * close space and dcpl
     *-------------------------------------------------------------------------
     */
     if(H5Sclose(sid) < 0)
-        goto out;
+        goto error;
     if(H5Pclose(dcpl) < 0)
-        goto out;
+        goto error;
+
+    HDfree(buf);
 
     return 0;
 
-out:
+error:
     H5E_BEGIN_TRY
     {
         H5Pclose(dcpl);
         H5Sclose(sid);
     } H5E_END_TRY;
+
+    HDfree(buf);
+
     return -1;
 }
 
@@ -3286,47 +3310,48 @@ static
 int make_layout2(hid_t loc_id)
 {
 
-    hid_t    contig_dcpl = -1;   /* dataset creation property list */
-    hid_t    chunked_dcpl = -1; /* dataset creation property list */
+    hid_t    contig_dcpl = H5I_INVALID_HID;   /* dataset creation property list */
+    hid_t    chunked_dcpl = H5I_INVALID_HID; /* dataset creation property list */
 
-    int      i, j, n;    /* Local index variables */
     int       ret_value = -1;  /* Return value */
-    hid_t    s_sid = -1;  /* dataspace ID */
+    hid_t    s_sid = H5I_INVALID_HID;  /* dataspace ID */
 
     hsize_t  s_dims[RANK] = {S_DIM1,S_DIM2};  /* Dataspace (< 1 k) */
     hsize_t  chunk_dims[RANK] = {S_DIM1/2, S_DIM2/2};  /* Dimension sizes for chunks */
 
-    int      s_buf[S_DIM1][S_DIM2];  /* Temporary buffer */
+    int      **s_buf = NULL;    /* Temporary buffer */
 
-    for(i = n = 0; i < S_DIM1; i++) {
-        for (j = 0; j < S_DIM2; j++) {
-            s_buf[i][j] = n++;
-        }
-    }
+    /* Create and fill array */
+    H5TEST_ALLOCATE_2D_ARRAY(s_buf, int, S_DIM1, S_DIM2);
+    if (NULL == s_buf)
+        goto error;
+    H5TEST_FILL_2D_ARRAY(s_buf, int, S_DIM1, S_DIM2);
 
     /* Create dataspaces */
     if((s_sid = H5Screate_simple(RANK, s_dims, NULL)) < 0)
-        goto out;
+        goto error;
 
     /* Create contiguous datasets */
     if((contig_dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        goto out;
+        goto error;
     if(H5Pset_layout(contig_dcpl, H5D_CONTIGUOUS) < 0)
-        goto out;
-    if(make_dset(loc_id, CONTIG_S, s_sid, contig_dcpl, s_buf) < 0)
-        goto out;
+        goto error;
+    if(make_dset(loc_id, CONTIG_S, s_sid, contig_dcpl, s_buf[0]) < 0)
+        goto error;
 
     /* Create chunked datasets */
     if((chunked_dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        goto out;
+        goto error;
     if(H5Pset_chunk(chunked_dcpl, RANK, chunk_dims) < 0)
-        goto out;
-    if(make_dset(loc_id, CHUNKED_S_FIX, s_sid, chunked_dcpl, s_buf) < 0)
-        goto out;
+        goto error;
+    if(make_dset(loc_id, CHUNKED_S_FIX, s_sid, chunked_dcpl, s_buf[0]) < 0)
+        goto error;
+
+    HDfree(s_buf);
 
     ret_value = 0;
 
-out:
+error:
     H5E_BEGIN_TRY {
         H5Pclose(contig_dcpl);
         H5Pclose(chunked_dcpl);
@@ -3334,6 +3359,8 @@ out:
         H5Sclose(s_sid);
 
     } H5E_END_TRY;
+
+    HDfree(s_buf);
 
     return(ret_value);
 
@@ -3361,38 +3388,31 @@ out:
 static
 int make_layout3(hid_t loc_id)
 {
-    hid_t    dcpl1=-1; /* dataset creation property list */
-    hid_t    dcpl2=-1; /* dataset creation property list */
-    hid_t    dcpl3=-1; /* dataset creation property list */
-    hid_t    sid1=-1;  /* dataspace ID */
-    hid_t    sid2=-1;  /* dataspace ID */
+    hid_t    dcpl1=H5I_INVALID_HID; /* dataset creation property list */
+    hid_t    dcpl2=H5I_INVALID_HID; /* dataset creation property list */
+    hid_t    dcpl3=H5I_INVALID_HID; /* dataset creation property list */
+    hid_t    sid1=H5I_INVALID_HID;  /* dataspace ID */
+    hid_t    sid2=H5I_INVALID_HID;  /* dataspace ID */
     hsize_t  dims1[RANK]={DIM1_L3,DIM2_L3};
     hsize_t  dims2[RANK]={SDIM1_L3,SDIM2_L3};
     hsize_t  maxdims[RANK]={H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t  chunk_dims1[RANK]={DIM1_L3*2,5};
     hsize_t  chunk_dims2[RANK]={SDIM1_L3 + 2, SDIM2_L3/2};
     hsize_t  chunk_dims3[RANK]={SDIM1_L3 - 2, SDIM2_L3/2};
-    int      buf1[DIM1_L3][DIM2_L3];
-    int      buf2[SDIM1_L3][SDIM2_L3];
-    int      i, j, n;
+    int      **buf1 = NULL;
+    int      **buf2 = NULL;
 
-    /* init buf1 */
-    for (i=n=0; i<DIM1_L3; i++)
-    {
-        for (j=0; j<DIM2_L3; j++)
-        {
-            buf1[i][j]=n++;
-        }
-    }
+    /* Create and fill arrays */
+    H5TEST_ALLOCATE_2D_ARRAY(buf1, int, DIM1_L3, DIM2_L3);
+    if (NULL == buf1)
+        goto error;
+    H5TEST_FILL_2D_ARRAY(buf1, int, DIM1_L3, DIM2_L3);
 
-    /* init buf2 */
-    for (i=n=0; i<SDIM1_L3; i++)
-    {
-        for (j=0; j<SDIM2_L3; j++)
-        {
-            buf2[i][j]=n++;
-        }
-    }
+    H5TEST_ALLOCATE_2D_ARRAY(buf2, int, SDIM1_L3, SDIM2_L3);
+    if (NULL == buf2)
+        goto error;
+    H5TEST_FILL_2D_ARRAY(buf2, int, SDIM1_L3, SDIM2_L3);
+
 
     /*-------------------------------------------------------------------------
     * make chunked dataset with
@@ -3403,19 +3423,15 @@ int make_layout3(hid_t loc_id)
     */
     /* create a space */
     if((sid1 = H5Screate_simple(RANK, dims1, maxdims)) < 0)
-        return -1;
+        goto error;
     /* create a dataset creation property list; the same DCPL is used for all dsets */
     if ((dcpl1 = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-    {
-        goto out;
-    }
+        goto error;
 
     if(H5Pset_chunk(dcpl1, RANK, chunk_dims1) < 0)
-        goto out;
-    if (make_dset(loc_id,"chunk_unlimit1",sid1,dcpl1,buf1) < 0)
-    {
-        goto out;
-    }
+        goto error;
+    if (make_dset(loc_id, "chunk_unlimit1", sid1, dcpl1, buf1[0]) < 0)
+        goto error;
 
     /*-------------------------------------------------------------------------
     * make chunked dataset with
@@ -3427,16 +3443,16 @@ int make_layout3(hid_t loc_id)
 
     /* create a space */
     if((sid2 = H5Screate_simple(RANK, dims2, maxdims)) < 0)
-        return -1;
+        goto error;
     /* create a dataset creation property list; the same DCPL is used for all dsets */
     if ((dcpl2 = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        goto out;
+        goto error;
 
     if(H5Pset_chunk(dcpl2, RANK, chunk_dims2) < 0)
-        goto out;
+        goto error;
 
-    if (make_dset(loc_id,"chunk_unlimit2",sid2,dcpl2,buf2) < 0)
-        goto out;
+    if (make_dset(loc_id, "chunk_unlimit2", sid2, dcpl2, buf2[0]) < 0)
+        goto error;
 
     /*-------------------------------------------------------------------------
     * make chunked dataset with
@@ -3447,32 +3463,35 @@ int make_layout3(hid_t loc_id)
     */
     /* create a dataset creation property list; the same DCPL is used for all dsets */
     if ((dcpl3 = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        goto out;
+        goto error;
 
     if(H5Pset_chunk(dcpl3, RANK, chunk_dims3) < 0)
-        goto out;
+        goto error;
 
-    if (make_dset(loc_id,"chunk_unlimit3",sid2,dcpl3,buf2) < 0)
-        goto out;
+    if (make_dset(loc_id, "chunk_unlimit3", sid2, dcpl3, buf2[0]) < 0)
+        goto error;
 
     /*-------------------------------------------------------------------------
     * close space and dcpl
     *-------------------------------------------------------------------------
     */
     if(H5Sclose(sid1) < 0)
-        goto out;
+        goto error;
     if(H5Sclose(sid2) < 0)
-        goto out;
+        goto error;
     if(H5Pclose(dcpl1) < 0)
-        goto out;
+        goto error;
     if(H5Pclose(dcpl2) < 0)
-        goto out;
+        goto error;
     if(H5Pclose(dcpl3) < 0)
-        goto out;
+        goto error;
+
+    HDfree(buf1);
+    HDfree(buf2);
 
     return 0;
 
-out:
+error:
     H5E_BEGIN_TRY
     {
         H5Sclose(sid1);
@@ -3481,6 +3500,10 @@ out:
         H5Pclose(dcpl2);
         H5Pclose(dcpl3);
     } H5E_END_TRY;
+
+    HDfree(buf1);
+    HDfree(buf2);
+
     return -1;
 }
 
@@ -3494,8 +3517,8 @@ out:
 static
 int make_fill(hid_t loc_id)
 {
-    hid_t   did=-1;
-    hid_t   sid=-1;
+    hid_t   did=H5I_INVALID_HID;
+    hid_t   sid=H5I_INVALID_HID;
     hid_t   dcpl;
     hsize_t dims[2]={3,2};
     int     buf[3][2]= {{1,1},{1,2},{2,2}};
@@ -3547,9 +3570,9 @@ out:
 static
 int make_big(hid_t loc_id)
 {
-    hid_t   did=-1;
-    hid_t   f_sid=-1;
-    hid_t   m_sid=-1;
+    hid_t   did=H5I_INVALID_HID;
+    hid_t   f_sid=H5I_INVALID_HID;
+    hid_t   m_sid=H5I_INVALID_HID;
     hid_t   tid;
     hid_t   dcpl;
     hsize_t dims[1]={ H5TOOLS_MALLOCSIZE + 1}; /* dataset dimensions */
@@ -3628,8 +3651,8 @@ out:
 static
 int make_external(hid_t loc_id)
 {
-    hid_t   did=-1;
-    hid_t   sid=-1;
+    hid_t   did=H5I_INVALID_HID;
+    hid_t   sid=H5I_INVALID_HID;
     hid_t   dcpl;
     int     buf[2]={1,2};
     hsize_t cur_size[1];    /* data space current size  */
@@ -3682,12 +3705,12 @@ out:
 static int
 make_userblock(void)
 {
-    hid_t   fid = -1;
-    hid_t   fcpl = -1;
-    int     fd = -1;            /* File descriptor for writing userblock */
-    char    ub[USERBLOCK_SIZE]; /* User block data */
-    ssize_t nwritten;           /* # of bytes written */
-    size_t  u;                  /* Local index variable */
+    hid_t   fid = H5I_INVALID_HID;
+    hid_t   fcpl = H5I_INVALID_HID;
+    int     fd = -1;                       /* File descriptor for writing userblock */
+    char    ub[USERBLOCK_SIZE];            /* User block data */
+    ssize_t H5_ATTR_NDEBUG_UNUSED nwritten; /* # of bytes written */
+    size_t  u;                             /* Local index variable */
 
     /* Create file creation property list with userblock set */
     if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
@@ -3744,12 +3767,12 @@ out:
 static int
 verify_userblock( const char* filename)
 {
-    hid_t   fid = -1;
-    hid_t   fcpl = -1;
+    hid_t   fid = H5I_INVALID_HID;
+    hid_t   fcpl = H5I_INVALID_HID;
     int     fd = -1;            /* File descriptor for writing userblock */
     char    ub[USERBLOCK_SIZE]; /* User block data */
     hsize_t ub_size = 0;        /* User block size */
-    ssize_t nread;              /* # of bytes read */
+    ssize_t H5_ATTR_NDEBUG_UNUSED nread; /* # of bytes read */
     size_t  u;                  /* Local index variable */
 
     /* Open file with userblock */
@@ -3816,7 +3839,7 @@ make_userblock_file(void)
 {
     int     fd = -1;            /* File descriptor for writing userblock */
     char    ub[USERBLOCK_SIZE]; /* User block data */
-    ssize_t nwritten;           /* # of bytes written */
+    ssize_t H5_ATTR_NDEBUG_UNUSED nwritten; /* # of bytes written */
     size_t  u;                  /* Local index variable */
 
     /* initialize userblock data */
@@ -3849,7 +3872,7 @@ out:
 *
 * Purpose: write datasets in LOC_ID
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 12, 2003
 *
@@ -3874,10 +3897,10 @@ int write_dset_in(hid_t loc_id,
         GREEN
     } e_t;
 
-    hid_t   did=-1;
-    hid_t   sid=-1;
-    hid_t   tid=-1;
-    hid_t   pid=-1;
+    hid_t   did=H5I_INVALID_HID;
+    hid_t   sid=H5I_INVALID_HID;
+    hid_t   tid=H5I_INVALID_HID;
+    hid_t   pid=H5I_INVALID_HID;
     unsigned i, j;
     int     val, k, n;
     float   f;
@@ -4620,10 +4643,10 @@ out:
 static
 int make_dset_reg_ref(hid_t loc_id)
 {
-    hid_t           did1=-1; /* Dataset ID   */
-    hid_t           did2=-1; /* Dereferenced dataset ID */
-    hid_t           sid1=-1;  /* Dataspace ID #1  */
-    hid_t           sid2=-1;  /* Dataspace ID #2  */
+    hid_t           did1=H5I_INVALID_HID; /* Dataset ID   */
+    hid_t           did2=H5I_INVALID_HID; /* Dereferenced dataset ID */
+    hid_t           sid1=H5I_INVALID_HID;  /* Dataspace ID #1  */
+    hid_t           sid2=H5I_INVALID_HID;  /* Dataspace ID #2  */
     hsize_t         dims1[] = {SPACE1_DIM1};
     hsize_t         dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
     hsize_t         start[SPACE2_RANK];     /* Starting location of hyperslab */
@@ -4713,7 +4736,7 @@ out:
 *
 * Purpose: write attributes in LOC_ID (dataset, group, named datatype)
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 12, 2003
 *
@@ -4739,9 +4762,9 @@ int write_attr_in(hid_t loc_id,
         GREEN
     } e_t;
 
-    hid_t   aid = -1;
-    hid_t   sid = -1;
-    hid_t   tid = -1;
+    hid_t   aid = H5I_INVALID_HID;
+    hid_t   sid = H5I_INVALID_HID;
+    hid_t   tid = H5I_INVALID_HID;
     int     val, j, k, n;
     unsigned i;
     float   f;
@@ -4824,7 +4847,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_BITFIELD
@@ -4854,7 +4877,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_OPAQUE
@@ -4881,7 +4904,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_COMPOUND
@@ -4919,7 +4942,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_REFERENCE
@@ -4968,7 +4991,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_VLEN
@@ -5013,13 +5036,13 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Aclose(aid) < 0)
         goto out;
-    aid = -1;
+    aid = H5I_INVALID_HID;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
     if (H5Sclose(sid) < 0)
         goto out;
-    sid = -1;
+    sid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_ARRAY
@@ -5054,7 +5077,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_INTEGER and H5T_FLOAT
@@ -5132,7 +5155,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_BITFIELD
@@ -5165,7 +5188,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_OPAQUE
@@ -5193,7 +5216,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_COMPOUND
@@ -5229,7 +5252,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_REFERENCE
@@ -5284,7 +5307,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_VLEN
@@ -5335,13 +5358,13 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Aclose(aid) < 0)
         goto out;
-    aid = -1;
+    aid = H5I_INVALID_HID;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
     if (H5Sclose(sid) < 0)
         goto out;
-    sid = -1;
+    sid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_ARRAY
@@ -5384,7 +5407,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_INTEGER and H5T_FLOAT
@@ -5504,7 +5527,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_BITFIELD
@@ -5558,7 +5581,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_OPAQUE
@@ -5572,7 +5595,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_COMPOUND
@@ -5658,7 +5681,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_REFERENCE
@@ -5743,7 +5766,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_VLEN
@@ -5797,13 +5820,13 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Aclose(aid) < 0)
         goto out;
-    aid = -1;
+    aid = H5I_INVALID_HID;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
     if (H5Sclose(sid) < 0)
         goto out;
-    sid = -1;
+    sid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_ARRAY
@@ -5837,7 +5860,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_INTEGER and H5T_FLOAT
@@ -5904,7 +5927,7 @@ out:
 *
 * Purpose: utility function to create and write a dataset in LOC_ID
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 12, 2003
 *
@@ -5917,7 +5940,7 @@ int make_dset(hid_t loc_id,
               hid_t dcpl,
               void *buf)
 {
-    hid_t   did=-1;
+    hid_t   did=H5I_INVALID_HID;
 
     if ((did = H5Dcreate2(loc_id, name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         return -1;
@@ -5940,7 +5963,7 @@ out:
 *
 * Purpose: utility function to create and write a dataset in LOC_ID
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 12, 2003
 *
@@ -5954,8 +5977,8 @@ int write_dset( hid_t loc_id,
                hid_t tid,
                void *buf )
 {
-    hid_t   did=-1;
-    hid_t   sid=-1;
+    hid_t   did=H5I_INVALID_HID;
+    hid_t   sid=H5I_INVALID_HID;
 
     if ((sid = H5Screate_simple(rank, dims, NULL)) < 0)
         return -1;
@@ -5988,7 +6011,7 @@ out:
 *
 * Purpose: utility function to write an attribute in LOC_ID
 *
-* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+* Programmer: Pedro Vicente
 *
 * Date: November 12, 2003
 *
@@ -6040,11 +6063,11 @@ static
 int make_named_dtype(hid_t loc_id)
 {
     hsize_t dims[1] ={3};
-    hid_t   did=-1;
-    hid_t   aid=-1;
-    hid_t   sid=-1;
-    hid_t   tid=-1;
-    hid_t   gid=-1;
+    hid_t   did=H5I_INVALID_HID;
+    hid_t   aid=H5I_INVALID_HID;
+    hid_t   sid=H5I_INVALID_HID;
+    hid_t   tid=H5I_INVALID_HID;
+    hid_t   gid=H5I_INVALID_HID;
 
     if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
         goto out;

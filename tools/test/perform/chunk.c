@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <robb@arborea.spizella.com>
+ * Programmer:  Robb Matzke
  *              Thursday, May 14, 1998
  *
  * Purpose:	Checks the effect of various I/O request sizes and raw data
@@ -72,7 +72,7 @@
 /* #define DIAG_NRDCC		521 */
 
 static size_t	nio_g;
-static hid_t	fapl_g = -1;
+static hid_t	fapl_g = H5I_INVALID_HID;
 
 /* Local function prototypes */
 static size_t

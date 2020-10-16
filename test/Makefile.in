@@ -112,15 +112,16 @@ check_PROGRAMS = $(am__EXEEXT_1) error_test$(EXEEXT) \
 	atomic_reader$(EXEEXT) external_env$(EXEEXT) \
 	links_env$(EXEEXT) filenotclosed$(EXEEXT) \
 	del_many_dense_attrs$(EXEEXT) flushrefresh$(EXEEXT) \
-	use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) \
-	use_disable_mdc_flushes$(EXEEXT) swmr_generator$(EXEEXT) \
-	swmr_start_write$(EXEEXT) swmr_reader$(EXEEXT) \
-	swmr_writer$(EXEEXT) swmr_remove_reader$(EXEEXT) \
-	swmr_remove_writer$(EXEEXT) swmr_addrem_writer$(EXEEXT) \
-	swmr_sparse_reader$(EXEEXT) swmr_sparse_writer$(EXEEXT) \
-	swmr_check_compat_vfd$(EXEEXT) vds_env$(EXEEXT) \
-	vds_swmr_gen$(EXEEXT) vds_swmr_reader$(EXEEXT) \
-	vds_swmr_writer$(EXEEXT) $(am__EXEEXT_2)
+	use_append_chunk$(EXEEXT) use_append_chunk_mirror$(EXEEXT) \
+	use_append_mchunks$(EXEEXT) use_disable_mdc_flushes$(EXEEXT) \
+	swmr_generator$(EXEEXT) swmr_start_write$(EXEEXT) \
+	swmr_reader$(EXEEXT) swmr_writer$(EXEEXT) \
+	swmr_remove_reader$(EXEEXT) swmr_remove_writer$(EXEEXT) \
+	swmr_addrem_writer$(EXEEXT) swmr_sparse_reader$(EXEEXT) \
+	swmr_sparse_writer$(EXEEXT) swmr_check_compat_vfd$(EXEEXT) \
+	vds_env$(EXEEXT) vds_swmr_gen$(EXEEXT) \
+	vds_swmr_reader$(EXEEXT) vds_swmr_writer$(EXEEXT) \
+	mirror_vfd$(EXEEXT) $(am__EXEEXT_2)
 @HAVE_SHARED_CONDITIONAL_TRUE@am__append_3 = filter_plugin
 @BUILD_ALL_CONDITIONAL_TRUE@noinst_PROGRAMS = $(am__EXEEXT_3)
 @DIRECT_VFD_CONDITIONAL_TRUE@am__append_4 = direct
@@ -155,7 +156,7 @@ CONFIG_CLEAN_FILES = H5srcdir_str.h testabort_fail.sh \
 	testcheck_version.sh testerror.sh testexternal_env.sh \
 	testflushrefresh.sh testlibinfo.sh testlinks_env.sh \
 	testswmr.sh testvds_env.sh testvdsswmr.sh \
-	test_filter_plugin.sh test_usecases.sh
+	test_filter_plugin.sh test_mirror.sh test_usecases.sh
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libfilter_plugin1_dsets_la_LIBADD =
@@ -235,7 +236,8 @@ am__EXEEXT_1 = testhdf5$(EXEEXT) cache$(EXEEXT) cache_api$(EXEEXT) \
 	reserved$(EXEEXT) cross_read$(EXEEXT) freespace$(EXEEXT) \
 	mf$(EXEEXT) vds$(EXEEXT) file_image$(EXEEXT) \
 	unregister$(EXEEXT) cache_logging$(EXEEXT) cork$(EXEEXT) \
-	swmr$(EXEEXT)
+	swmr$(EXEEXT) thread_id$(EXEEXT) timer$(EXEEXT) \
+	version_bounds_1_10$(EXEEXT)
 @HAVE_SHARED_CONDITIONAL_TRUE@am__EXEEXT_2 = filter_plugin$(EXEEXT)
 am__EXEEXT_3 = gen_bad_ohdr$(EXEEXT) gen_bogus$(EXEEXT) \
 	gen_cross$(EXEEXT) gen_deflate$(EXEEXT) gen_filters$(EXEEXT) \
@@ -549,6 +551,10 @@ mf_SOURCES = mf.c
 mf_OBJECTS = mf.$(OBJEXT)
 mf_LDADD = $(LDADD)
 mf_DEPENDENCIES = libh5test.la $(LIBHDF5)
+am_mirror_vfd_OBJECTS = mirror_vfd.$(OBJEXT) genall5.$(OBJEXT)
+mirror_vfd_OBJECTS = $(am_mirror_vfd_OBJECTS)
+mirror_vfd_LDADD = $(LDADD)
+mirror_vfd_DEPENDENCIES = libh5test.la $(LIBHDF5)
 mount_SOURCES = mount.c
 mount_OBJECTS = mount.$(OBJEXT)
 mount_LDADD = $(LDADD)
@@ -665,9 +671,17 @@ testmeta_SOURCES = testmeta.c
 testmeta_OBJECTS = testmeta.$(OBJEXT)
 testmeta_LDADD = $(LDADD)
 testmeta_DEPENDENCIES = libh5test.la $(LIBHDF5)
+thread_id_SOURCES = thread_id.c
+thread_id_OBJECTS = thread_id.$(OBJEXT)
+thread_id_LDADD = $(LDADD)
+thread_id_DEPENDENCIES = libh5test.la $(LIBHDF5)
+timer_SOURCES = timer.c
+timer_OBJECTS = timer.$(OBJEXT)
+timer_LDADD = $(LDADD)
+timer_DEPENDENCIES = libh5test.la $(LIBHDF5)
 am_ttsafe_OBJECTS = ttsafe.$(OBJEXT) ttsafe_dcreate.$(OBJEXT) \
 	ttsafe_error.$(OBJEXT) ttsafe_cancel.$(OBJEXT) \
-	ttsafe_acreate.$(OBJEXT)
+	ttsafe_acreate.$(OBJEXT) ttsafe_attr_vlen.$(OBJEXT)
 ttsafe_OBJECTS = $(am_ttsafe_OBJECTS)
 ttsafe_LDADD = $(LDADD)
 ttsafe_DEPENDENCIES = libh5test.la $(LIBHDF5)
@@ -688,6 +702,12 @@ am_use_append_chunk_OBJECTS = use_append_chunk.$(OBJEXT) \
 use_append_chunk_OBJECTS = $(am_use_append_chunk_OBJECTS)
 use_append_chunk_LDADD = $(LDADD)
 use_append_chunk_DEPENDENCIES = libh5test.la $(LIBHDF5)
+am_use_append_chunk_mirror_OBJECTS =  \
+	use_append_chunk_mirror.$(OBJEXT) use_common.$(OBJEXT)
+use_append_chunk_mirror_OBJECTS =  \
+	$(am_use_append_chunk_mirror_OBJECTS)
+use_append_chunk_mirror_LDADD = $(LDADD)
+use_append_chunk_mirror_DEPENDENCIES = libh5test.la $(LIBHDF5)
 am_use_append_mchunks_OBJECTS = use_append_mchunks.$(OBJEXT) \
 	use_common.$(OBJEXT)
 use_append_mchunks_OBJECTS = $(am_use_append_mchunks_OBJECTS)
@@ -719,6 +739,10 @@ vds_swmr_writer_SOURCES = vds_swmr_writer.c
 vds_swmr_writer_OBJECTS = vds_swmr_writer.$(OBJEXT)
 vds_swmr_writer_LDADD = $(LDADD)
 vds_swmr_writer_DEPENDENCIES = libh5test.la $(LIBHDF5)
+version_bounds_1_10_SOURCES = version_bounds_1_10.c
+version_bounds_1_10_OBJECTS = version_bounds_1_10.$(OBJEXT)
+version_bounds_1_10_LDADD = $(LDADD)
+version_bounds_1_10_DEPENDENCIES = libh5test.la $(LIBHDF5)
 vfd_SOURCES = vfd.c
 vfd_OBJECTS = vfd.$(OBJEXT)
 vfd_LDADD = $(LDADD)
@@ -777,18 +801,21 @@ SOURCES = $(libfilter_plugin1_dsets_la_SOURCES) \
 	gen_new_fill.c gen_new_group.c gen_new_mtime.c gen_new_super.c \
 	gen_noencoder.c gen_nullspace.c gen_plist.c gen_sizes_lheap.c \
 	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hdfs.c \
-	hyperslab.c istore.c lheap.c links.c links_env.c mf.c mount.c \
-	mtime.c ntypes.c objcopy.c ohdr.c page_buffer.c pool.c \
-	reserved.c ros3.c s3comms.c set_extent.c space_overflow.c \
-	stab.c swmr.c swmr_addrem_writer.c swmr_check_compat_vfd.c \
-	swmr_generator.c swmr_reader.c swmr_remove_reader.c \
-	swmr_remove_writer.c swmr_sparse_reader.c swmr_sparse_writer.c \
-	swmr_start_write.c swmr_writer.c tcheck_version.c \
-	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) twriteorder.c \
-	unlink.c unregister.c $(use_append_chunk_SOURCES) \
+	hyperslab.c istore.c lheap.c links.c links_env.c mf.c \
+	$(mirror_vfd_SOURCES) mount.c mtime.c ntypes.c objcopy.c \
+	ohdr.c page_buffer.c pool.c reserved.c ros3.c s3comms.c \
+	set_extent.c space_overflow.c stab.c swmr.c \
+	swmr_addrem_writer.c swmr_check_compat_vfd.c swmr_generator.c \
+	swmr_reader.c swmr_remove_reader.c swmr_remove_writer.c \
+	swmr_sparse_reader.c swmr_sparse_writer.c swmr_start_write.c \
+	swmr_writer.c tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
+	thread_id.c timer.c $(ttsafe_SOURCES) twriteorder.c unlink.c \
+	unregister.c $(use_append_chunk_SOURCES) \
+	$(use_append_chunk_mirror_SOURCES) \
 	$(use_append_mchunks_SOURCES) \
 	$(use_disable_mdc_flushes_SOURCES) vds.c vds_env.c \
-	vds_swmr_gen.c vds_swmr_reader.c vds_swmr_writer.c vfd.c
+	vds_swmr_gen.c vds_swmr_reader.c vds_swmr_writer.c \
+	version_bounds_1_10.c vfd.c
 DIST_SOURCES = $(am__libfilter_plugin1_dsets_la_SOURCES_DIST) \
 	$(am__libfilter_plugin2_dsets_la_SOURCES_DIST) \
 	$(am__libfilter_plugin3_dsets_la_SOURCES_DIST) \
@@ -809,18 +836,21 @@ DIST_SOURCES = $(am__libfilter_plugin1_dsets_la_SOURCES_DIST) \
 	gen_new_fill.c gen_new_group.c gen_new_mtime.c gen_new_super.c \
 	gen_noencoder.c gen_nullspace.c gen_plist.c gen_sizes_lheap.c \
 	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hdfs.c \
-	hyperslab.c istore.c lheap.c links.c links_env.c mf.c mount.c \
-	mtime.c ntypes.c objcopy.c ohdr.c page_buffer.c pool.c \
-	reserved.c ros3.c s3comms.c set_extent.c space_overflow.c \
-	stab.c swmr.c swmr_addrem_writer.c swmr_check_compat_vfd.c \
-	swmr_generator.c swmr_reader.c swmr_remove_reader.c \
-	swmr_remove_writer.c swmr_sparse_reader.c swmr_sparse_writer.c \
-	swmr_start_write.c swmr_writer.c tcheck_version.c \
-	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) twriteorder.c \
-	unlink.c unregister.c $(use_append_chunk_SOURCES) \
+	hyperslab.c istore.c lheap.c links.c links_env.c mf.c \
+	$(mirror_vfd_SOURCES) mount.c mtime.c ntypes.c objcopy.c \
+	ohdr.c page_buffer.c pool.c reserved.c ros3.c s3comms.c \
+	set_extent.c space_overflow.c stab.c swmr.c \
+	swmr_addrem_writer.c swmr_check_compat_vfd.c swmr_generator.c \
+	swmr_reader.c swmr_remove_reader.c swmr_remove_writer.c \
+	swmr_sparse_reader.c swmr_sparse_writer.c swmr_start_write.c \
+	swmr_writer.c tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
+	thread_id.c timer.c $(ttsafe_SOURCES) twriteorder.c unlink.c \
+	unregister.c $(use_append_chunk_SOURCES) \
+	$(use_append_chunk_mirror_SOURCES) \
 	$(use_append_mchunks_SOURCES) \
 	$(use_disable_mdc_flushes_SOURCES) vds.c vds_env.c \
-	vds_swmr_gen.c vds_swmr_reader.c vds_swmr_writer.c vfd.c
+	vds_swmr_gen.c vds_swmr_reader.c vds_swmr_writer.c \
+	version_bounds_1_10.c vfd.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -1048,7 +1078,7 @@ TEST_LOGS = $(am__test_logs2:.sh.log=.log)
 SH_LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver
 SH_LOG_COMPILE = $(SH_LOG_COMPILER) $(AM_SH_LOG_FLAGS) $(SH_LOG_FLAGS)
 am__DIST_COMMON = $(srcdir)/H5srcdir_str.h.in $(srcdir)/Makefile.in \
-	$(srcdir)/test_filter_plugin.sh.in \
+	$(srcdir)/test_filter_plugin.sh.in $(srcdir)/test_mirror.sh.in \
 	$(srcdir)/test_usecases.sh.in $(srcdir)/testabort_fail.sh.in \
 	$(srcdir)/testcheck_version.sh.in $(srcdir)/testerror.sh.in \
 	$(srcdir)/testexternal_env.sh.in \
@@ -1065,13 +1095,13 @@ AMTAR = @AMTAR@
 
 # H5_CFLAGS holds flags that should be used when building hdf5,
 # but which should not be exported to h5cc for building other programs.
-# AM_CFLAGS is an automake construct which should be used by Makefiles 
+# AM_CFLAGS is an automake construct which should be used by Makefiles
 # instead of CFLAGS, as CFLAGS is reserved solely for the user to define.
 # This applies to FCFLAGS, CXXFLAGS, CPPFLAGS, and LDFLAGS as well.
-AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@
+AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@ @H5_ECFLAGS@
 AM_CPPFLAGS = @AM_CPPFLAGS@ @H5_CPPFLAGS@ -I$(top_srcdir)/src \
 	-I$(top_builddir)/src
-AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@
+AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@ @H5_ECXXFLAGS@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@
 AM_JAVACFLAGS = @AM_JAVACFLAGS@
@@ -1091,6 +1121,7 @@ CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CC_VERSION = @CC_VERSION@
 CFLAGS = @CFLAGS@
+CLANG_SANITIZE_CHECKS = @CLANG_SANITIZE_CHECKS@
 CODESTACK = @CODESTACK@
 CONFIG_DATE = @CONFIG_DATE@
 CONFIG_MODE = @CONFIG_MODE@
@@ -1107,6 +1138,7 @@ DEFAULT_API_VERSION = @DEFAULT_API_VERSION@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DEPRECATED_SYMBOLS = @DEPRECATED_SYMBOLS@
+DESIRED_FILE_LOCKING = @DESIRED_FILE_LOCKING@
 DEV_WARNINGS = @DEV_WARNINGS@
 DIRECT_VFD = @DIRECT_VFD@
 DLLTOOL = @DLLTOOL@
@@ -1143,8 +1175,11 @@ H5_CFLAGS = @H5_CFLAGS@
 H5_CLASSPATH = @H5_CLASSPATH@
 H5_CPPFLAGS = @H5_CPPFLAGS@
 H5_CXXFLAGS = @H5_CXXFLAGS@
+H5_ECFLAGS = @H5_ECFLAGS@
+H5_ECXXFLAGS = @H5_ECXXFLAGS@
 H5_FCFLAGS = @H5_FCFLAGS@
 H5_FORTRAN_SHARED = @H5_FORTRAN_SHARED@
+H5_IS_DARWIN = @H5_IS_DARWIN@
 H5_JAVACFLAGS = @H5_JAVACFLAGS@
 H5_JAVAFLAGS = @H5_JAVAFLAGS@
 H5_JNIFLAGS = @H5_JNIFLAGS@
@@ -1167,6 +1202,7 @@ HL = @HL@
 HL_FOR = @HL_FOR@
 HSIZE_T = @HSIZE_T@
 HSSIZE_T = @HSSIZE_T@
+IGNORE_DISABLED_FILE_LOCKS = @IGNORE_DISABLED_FILE_LOCKS@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -1203,6 +1239,7 @@ MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MEMORYALLOCSANITYCHECK = @MEMORYALLOCSANITYCHECK@
+MIRROR_VFD = @MIRROR_VFD@
 MKDIR_P = @MKDIR_P@
 MPE = @MPE@
 NM = @NM@
@@ -1262,6 +1299,7 @@ TIME = @TIME@
 TR = @TR@
 TRACE_API = @TRACE_API@
 UNAME_INFO = @UNAME_INFO@
+USE_FILE_LOCKING = @USE_FILE_LOCKING@
 USE_FILTER_DEFLATE = @USE_FILTER_DEFLATE@
 USE_FILTER_SZIP = @USE_FILTER_SZIP@
 USINGMEMCHECKER = @USINGMEMCHECKER@
@@ -1297,6 +1335,7 @@ docdir = $(exec_prefix)/doc
 dvidir = @dvidir@
 enable_shared = @enable_shared@
 enable_static = @enable_static@
+examplesdir = @examplesdir@
 exec_prefix = @exec_prefix@
 fortran_linux_linker_option = @fortran_linux_linker_option@
 host = @host@
@@ -1353,15 +1392,15 @@ LIBH5_HL = $(top_builddir)/hl/src/libhdf5_hl.la
 LIBH5F_HL = $(top_builddir)/hl/fortran/src/libhdf5hl_fortran.la
 LIBH5CPP_HL = $(top_builddir)/hl/c++/src/libhdf5_hl_cpp.la
 
-# Note that in svn revision 19400 the '/' after DESTDIR in H5* variables below  
-# has been removed. According to the official description of DESTDIR by Gnu at 
-# http://www.gnu.org/prep/standards/html_node/DESTDIR.html, DESTDIR is 
-# prepended to the normal and complete install path that it precedes for the 
-# purpose of installing in a temporary directory which is useful for building 
-# rpms and other packages.  The '/' after ${DESTDIR} will be followed by another 
-# '/' at the beginning of the normal install path.  When DESTDIR is empty the  
-# path then begins with '//', which is incorrect and causes problems at least for 
-# Cygwin.   
+# Note that in svn revision 19400 the '/' after DESTDIR in H5* variables below
+# has been removed. According to the official description of DESTDIR by Gnu at
+# http://www.gnu.org/prep/standards/html_node/DESTDIR.html, DESTDIR is
+# prepended to the normal and complete install path that it precedes for the
+# purpose of installing in a temporary directory which is useful for building
+# rpms and other packages.  The '/' after ${DESTDIR} will be followed by another
+# '/' at the beginning of the normal install path.  When DESTDIR is empty the
+# path then begins with '//', which is incorrect and causes problems at least for
+# Cygwin.
 
 # Scripts used to build examples
 # If only shared libraries have been installed, have h5cc build examples with
@@ -1433,7 +1472,8 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 accum.h5 \
 	ohdr_swmr.h5 test_swmr*.h5 cache_logging.h5 cache_logging.out \
 	vds_swmr.h5 vds_swmr_src_*.h5 swmr[0-2].h5 swmr_writer.out \
 	swmr_writer.log.* swmr_reader.out.* swmr_reader.log.* \
-	tbogus.h5.copy cache_image_test.h5 direct_chunk.h5
+	tbogus.h5.copy cache_image_test.h5 direct_chunk.h5 \
+	splitter*.h5 splitter.log mirror_rw mirror_ro
 
 # Test scripts--
 #       testerror.sh: err_compat, error_test
@@ -1447,11 +1487,13 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 accum.h5 \
 #       testvdsswmr.sh: vds_swmr*
 #       testabort_fail.sh: filenotclosed.c and del_many_dense_attrs.c
 #       test_filter_plugin.sh: filter_plugin.c
+#       test_mirror.sh: mirror_vfd ../utils/mirror_vfd/*
 #       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
 TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh \
 	testlinks_env.sh testexternal_env.sh testswmr.sh \
 	testvds_env.sh testvdsswmr.sh testflushrefresh.sh \
-	test_usecases.sh testabort_fail.sh $(am__append_1)
+	test_usecases.sh testabort_fail.sh test_mirror.sh \
+	$(am__append_1)
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) \
 	links_env$(EXEEXT) external_env$(EXEEXT) \
 	filenotclosed$(EXEEXT) del_many_dense_attrs$(EXEEXT) \
@@ -1479,7 +1521,8 @@ TEST_PROG = testhdf5 \
            flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
            enc_dec_plist_cross_platform getname vfd ros3 s3comms hdfs ntypes \
            dangle dtransform reserved cross_read freespace mf vds file_image \
-           unregister cache_logging cork swmr
+           unregister cache_logging cork swmr thread_id timer \
+		   version_bounds_1_10
 
 
 # These programs generate test files for the tests.  They don't need to be
@@ -1513,9 +1556,10 @@ LDADD = libh5test.la $(LIBHDF5)
 
 # List the source files for tests that have more than one
 ttsafe_SOURCES = ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c       \
-               ttsafe_acreate.c
+               ttsafe_acreate.c ttsafe_attr_vlen.c
 
 cache_image_SOURCES = cache_image.c genall5.c
+mirror_vfd_SOURCES = mirror_vfd.c genall5.c
 VFD_LIST = sec2 stdio core core_paged split multi family \
 	$(am__append_4)
 
@@ -1528,12 +1572,14 @@ testhdf5_SOURCES = testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
 
 # Sources for Use Cases
 use_append_chunk_SOURCES = use_append_chunk.c use_common.c
+use_append_chunk_mirror_SOURCES = use_append_chunk_mirror.c use_common.c
 use_append_mchunks_SOURCES = use_append_mchunks.c use_common.c
 use_disable_mdc_flushes_SOURCES = use_disable_mdc_flushes.c
 
 # Temporary files.
 DISTCLEANFILES = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_filter_plugin.sh \
-    testexternal_env.sh testswmr.sh testvds_env.sh testvdsswmr.sh test_usecases.sh testflushrefresh.sh testabort_fail.sh
+    testexternal_env.sh testswmr.sh testvds_env.sh testvdsswmr.sh test_usecases.sh testflushrefresh.sh \
+    testabort_fail.sh test_mirror.sh
 
 
 # Automake needs to be taught how to build lib, progs and tests targets.
@@ -1547,7 +1593,7 @@ LIB = $(lib_LIBRARIES) $(lib_LTLIBRARIES) $(noinst_LIBRARIES)                 \
 PROGS = $(bin_PROGRAMS) $(bin_SCRIPTS) $(noinst_PROGRAMS) $(noinst_SCRIPTS)   \
         $(EXTRA_PROG)
 
-chk_TESTS = $(check_PROGRAMS) $(check_SCRIPTS) $(EXTRA_TEST) 
+chk_TESTS = $(check_PROGRAMS) $(check_SCRIPTS) $(EXTRA_TEST)
 TEST_EXTENSIONS = .sh
 SH_LOG_COMPILER = $(SHELL)
 AM_SH_LOG_FLAGS = 
@@ -1613,6 +1659,8 @@ testvds_env.sh: $(top_builddir)/config.status $(srcdir)/testvds_env.sh.in
 testvdsswmr.sh: $(top_builddir)/config.status $(srcdir)/testvdsswmr.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 test_filter_plugin.sh: $(top_builddir)/config.status $(srcdir)/test_filter_plugin.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+test_mirror.sh: $(top_builddir)/config.status $(srcdir)/test_mirror.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 test_usecases.sh: $(top_builddir)/config.status $(srcdir)/test_usecases.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
@@ -1961,6 +2009,10 @@ mf$(EXEEXT): $(mf_OBJECTS) $(mf_DEPENDENCIES) $(EXTRA_mf_DEPENDENCIES)
 	@rm -f mf$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(mf_OBJECTS) $(mf_LDADD) $(LIBS)
 
+mirror_vfd$(EXEEXT): $(mirror_vfd_OBJECTS) $(mirror_vfd_DEPENDENCIES) $(EXTRA_mirror_vfd_DEPENDENCIES) 
+	@rm -f mirror_vfd$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(mirror_vfd_OBJECTS) $(mirror_vfd_LDADD) $(LIBS)
+
 mount$(EXEEXT): $(mount_OBJECTS) $(mount_DEPENDENCIES) $(EXTRA_mount_DEPENDENCIES) 
 	@rm -f mount$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(mount_OBJECTS) $(mount_LDADD) $(LIBS)
@@ -2069,6 +2121,14 @@ testmeta$(EXEEXT): $(testmeta_OBJECTS) $(testmeta_DEPENDENCIES) $(EXTRA_testmeta
 	@rm -f testmeta$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(testmeta_OBJECTS) $(testmeta_LDADD) $(LIBS)
 
+thread_id$(EXEEXT): $(thread_id_OBJECTS) $(thread_id_DEPENDENCIES) $(EXTRA_thread_id_DEPENDENCIES) 
+	@rm -f thread_id$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(thread_id_OBJECTS) $(thread_id_LDADD) $(LIBS)
+
+timer$(EXEEXT): $(timer_OBJECTS) $(timer_DEPENDENCIES) $(EXTRA_timer_DEPENDENCIES) 
+	@rm -f timer$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(timer_OBJECTS) $(timer_LDADD) $(LIBS)
+
 ttsafe$(EXEEXT): $(ttsafe_OBJECTS) $(ttsafe_DEPENDENCIES) $(EXTRA_ttsafe_DEPENDENCIES) 
 	@rm -f ttsafe$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(ttsafe_OBJECTS) $(ttsafe_LDADD) $(LIBS)
@@ -2088,6 +2148,10 @@ unregister$(EXEEXT): $(unregister_OBJECTS) $(unregister_DEPENDENCIES) $(EXTRA_un
 use_append_chunk$(EXEEXT): $(use_append_chunk_OBJECTS) $(use_append_chunk_DEPENDENCIES) $(EXTRA_use_append_chunk_DEPENDENCIES) 
 	@rm -f use_append_chunk$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(use_append_chunk_OBJECTS) $(use_append_chunk_LDADD) $(LIBS)
+
+use_append_chunk_mirror$(EXEEXT): $(use_append_chunk_mirror_OBJECTS) $(use_append_chunk_mirror_DEPENDENCIES) $(EXTRA_use_append_chunk_mirror_DEPENDENCIES) 
+	@rm -f use_append_chunk_mirror$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(use_append_chunk_mirror_OBJECTS) $(use_append_chunk_mirror_LDADD) $(LIBS)
 
 use_append_mchunks$(EXEEXT): $(use_append_mchunks_OBJECTS) $(use_append_mchunks_DEPENDENCIES) $(EXTRA_use_append_mchunks_DEPENDENCIES) 
 	@rm -f use_append_mchunks$(EXEEXT)
@@ -2116,6 +2180,10 @@ vds_swmr_reader$(EXEEXT): $(vds_swmr_reader_OBJECTS) $(vds_swmr_reader_DEPENDENC
 vds_swmr_writer$(EXEEXT): $(vds_swmr_writer_OBJECTS) $(vds_swmr_writer_DEPENDENCIES) $(EXTRA_vds_swmr_writer_DEPENDENCIES) 
 	@rm -f vds_swmr_writer$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(vds_swmr_writer_OBJECTS) $(vds_swmr_writer_LDADD) $(LIBS)
+
+version_bounds_1_10$(EXEEXT): $(version_bounds_1_10_OBJECTS) $(version_bounds_1_10_DEPENDENCIES) $(EXTRA_version_bounds_1_10_DEPENDENCIES) 
+	@rm -f version_bounds_1_10$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(version_bounds_1_10_OBJECTS) $(version_bounds_1_10_LDADD) $(LIBS)
 
 vfd$(EXEEXT): $(vfd_OBJECTS) $(vfd_DEPENDENCIES) $(EXTRA_vfd_DEPENDENCIES) 
 	@rm -f vfd$(EXEEXT)
@@ -2210,6 +2278,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/links.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/links_env.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mf.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mirror_vfd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mount.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mtime.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ntypes.Po@am__quote@
@@ -2249,7 +2318,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/th5o.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/th5s.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/theap.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread_id.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tid.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/titerate.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tmeta.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tmisc.Po@am__quote@
@@ -2261,6 +2332,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttime.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttsafe.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttsafe_acreate.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttsafe_attr_vlen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttsafe_cancel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttsafe_dcreate.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttsafe_error.Po@am__quote@
@@ -2272,6 +2344,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unlink.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unregister.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/use_append_chunk.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/use_append_chunk_mirror.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/use_append_mchunks.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/use_common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/use_disable_mdc_flushes.Po@am__quote@
@@ -2280,6 +2353,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vds_swmr_gen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vds_swmr_reader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vds_swmr_writer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/version_bounds_1_10.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vfd.Po@am__quote@
 
 .c.o:
@@ -2942,6 +3016,27 @@ swmr.log: swmr$(EXEEXT)
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+thread_id.log: thread_id$(EXEEXT)
+	@p='thread_id$(EXEEXT)'; \
+	b='thread_id'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+timer.log: timer$(EXEEXT)
+	@p='timer$(EXEEXT)'; \
+	b='timer'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+version_bounds_1_10.log: version_bounds_1_10$(EXEEXT)
+	@p='version_bounds_1_10$(EXEEXT)'; \
+	b='version_bounds_1_10'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 .sh.log:
 	@p='$<'; \
 	$(am__set_b); \
@@ -3239,26 +3334,35 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
                  echo "============================" > $${log}; \
               fi; \
               if test "X$(FORTRAN_API)" = "Xyes"; then \
-                 echo "Fortran API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+                 echo "Fortran API: Testing $${tname} $(TEST_FLAGS)"; \
                  if test -n "$(REALTIMEOUTPUT)"; then \
-                    echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" | tee -a $${log}; \
+                    echo "Fortran API: Test log for $${tname} $(TEST_FLAGS)" | tee -a $${log}; \
                  else \
-                    echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+                    echo "Fortran API: Test log for $${tname} $(TEST_FLAGS)" >> $${log}; \
                  fi; \
               elif test "X$(CXX_API)" = "Xyes"; then \
-                 echo "C++ API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+                 echo "C++ API: Testing $${tname} $(TEST_FLAGS)"; \
                  if test -n "$(REALTIMEOUTPUT)"; then \
-                    echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" | tee -a $${log};\
+                    echo "C++ API: Test log for $${tname} $(TEST_FLAGS)" | tee -a $${log};\
                  else \
-                    echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log};\
+                    echo "C++ API: Test log for $${tname} $(TEST_FLAGS)" >> $${log};\
                  fi; \
               else \
-                 echo "Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+                 echo "Testing: $${tname} $(TEST_FLAGS)"; \
                  if test -n "$(REALTIMEOUTPUT)"; then \
-                    echo "$(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" | tee -a $${log}; \
+                    echo "Test log for $${tname} $(TEST_FLAGS)" | tee -a $${log}; \
                  else \
-                    echo "$(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+                    echo "Test log for $${tname} $(TEST_FLAGS)" >> $${log}; \
                  fi; \
+              fi; \
+              if test -n "$(REALTIMEOUTPUT)"; then \
+                if test -n "$(HDF5_DRIVER)"; then \
+                  echo "Virtual file driver (VFD): $(HDF5_DRIVER)" | tee -a $${log}; \
+                fi; \
+              else \
+                if test -n "$(HDF5_DRIVER)"; then \
+                  echo "Virtual file driver (VFD): $(HDF5_DRIVER)" >> $${log}; \
+                fi; \
               fi; \
               if test -n "$(REALTIMEOUTPUT)"; then \
                  echo "============================" | tee -a $${log}; \

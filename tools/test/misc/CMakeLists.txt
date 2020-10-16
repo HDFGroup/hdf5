@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5_TOOLS_TEST_MISC C)
 
 # --------------------------------------------------------------------
@@ -18,7 +18,7 @@ if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
   #add_test (NAME h5repart_gentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repart_gentest>)
 
   add_executable (h5clear_gentest ${HDF5_TOOLS_TEST_MISC_SOURCE_DIR}/h5clear_gentest.c)
-  target_include_directories (h5clear_gentest PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (h5clear_gentest PRIVATE "${HDF5_SRC_DIR};${HDF5_TEST_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   if (NOT ONLY_SHARED_LIBS)
     TARGET_C_PROPERTIES (h5clear_gentest STATIC)
     target_link_libraries (h5clear_gentest PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
@@ -55,6 +55,8 @@ else ()
 endif ()
 set_target_properties (clear_open_chk PROPERTIES FOLDER tools)
 
-include (CMakeTestsRepart.cmake)
-include (CMakeTestsClear.cmake)
-include (CMakeTestsMkgrp.cmake)
+if (HDF5_TEST_SERIAL)
+  include (CMakeTestsRepart.cmake)
+  include (CMakeTestsClear.cmake)
+  include (CMakeTestsMkgrp.cmake)
+endif ()

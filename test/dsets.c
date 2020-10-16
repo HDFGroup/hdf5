@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:    Robb Matzke <matzke@llnl.gov>
+ * Programmer:    Robb Matzke
  *        Tuesday, December  9, 1997
  *
  * Purpose:    Tests the dataset interface (H5D)
@@ -27,7 +27,6 @@
 #include "testhdf5.h"
 #include "H5srcdir.h"
 
-#include "H5Bprivate.h"
 #include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Iprivate.h"
 #include "H5Pprivate.h"
@@ -84,6 +83,7 @@ const char *FILENAME[] = {
     "dls_01_strings",   /* 23 */
     "power2up",         /* 24 */
     "version_bounds",   /* 25 */
+    "alloc_0sized",     /* 26 */
     NULL
 };
 
@@ -112,6 +112,8 @@ const char *FILENAME[] = {
 #define DSET_FLETCHER32_NAME_3      "fletcher32_3"
 #define DSET_SHUF_DEF_FLET_NAME     "shuffle+deflate+fletcher32"
 #define DSET_SHUF_DEF_FLET_NAME_2   "shuffle+deflate+fletcher32_2"
+#define DSET_OPTIONAL_SCALAR        "dataset_with_scalar_space"
+#define DSET_OPTIONAL_VLEN          "dataset_with_vlen_type"
 #ifdef H5_HAVE_FILTER_SZIP
 #define DSET_SZIP_NAME              "szip"
 #define DSET_SHUF_SZIP_FLET_NAME    "shuffle+szip+fletcher32"
@@ -148,10 +150,12 @@ const char *FILENAME[] = {
 #define DSET_COPY_DCPL_NAME_1          "copy_dcpl_1"
 #define DSET_COPY_DCPL_NAME_2          "copy_dcpl_2"
 #define COPY_DCPL_EXTFILE_NAME         "ext_file"
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 #define DSET_DEPREC_NAME               "deprecated"
 #define DSET_DEPREC_NAME_CHUNKED       "deprecated_chunked"
 #define DSET_DEPREC_NAME_COMPACT       "deprecated_compact"
 #define DSET_DEPREC_NAME_FILTER        "deprecated_filter"
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 /* Dataset names for testing Fixed Array Indexing */
 #define DSET_FIXED_MAX     "DSET_FIXED_MAX"
@@ -177,7 +181,9 @@ const char *FILENAME[] = {
 #define H5Z_FILTER_CORRUPT           306
 #define H5Z_FILTER_CAN_APPLY_TEST    307
 #define H5Z_FILTER_SET_LOCAL_TEST    308
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 #define H5Z_FILTER_DEPREC            309
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 #define H5Z_FILTER_EXPAND            310
 #define H5Z_FILTER_CAN_APPLY_TEST2   311
 #define H5Z_FILTER_COUNT             312
@@ -270,20 +276,19 @@ const char *FILENAME[] = {
 #define STORAGE_SIZE_CHUNK_DIM1 5
 #define STORAGE_SIZE_CHUNK_DIM2 5
 
-/* Parameters for testing version bounds */
-#define VDS_FNAME1  "virtual_file1"
-#define VDS_FNAME2  "virtual_file2"
-#define SRC_FNAME   "source_file"
-#define SRC_DSET    "src_dset"
-#define V_DSET      "v_dset"
-
 /* Shared global arrays */
 #define DSET_DIM1       100
 #define DSET_DIM2       200
-int     points[DSET_DIM1][DSET_DIM2], check[DSET_DIM1][DSET_DIM2];
-double  points_dbl[DSET_DIM1][DSET_DIM2], check_dbl[DSET_DIM1][DSET_DIM2];
-size_t  count_nbytes_read = 0;
-size_t  count_nbytes_written = 0;
+int     **points                = NULL;
+int     *points_data            = NULL;
+double  **points_dbl            = NULL;
+double  *points_dbl_data        = NULL;
+int     **check                 = NULL;
+int     *check_data             = NULL;
+double  **check_dbl             = NULL;
+double  *check_dbl_data         = NULL;
+size_t  count_nbytes_read       = 0;
+size_t  count_nbytes_written    = 0;
 
 /* Temporary buffer dimensions */
 #define DSET_TMP_DIM1   50
@@ -519,13 +524,22 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
     void        *tconv_buf = NULL;
     int         f = -1;
     haddr_t     offset;
-    int         rdata[DSET_DIM1][DSET_DIM2];
+    int         **rdata = NULL;
+    int         *rdata_bytes = NULL;
 
     TESTING("simple I/O");
 
     /* Can't run this test with multi-file VFDs because of HDopen/read/seek the file directly */
     if(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")) {
         h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
+
+        /* Set up data array */
+        if(NULL == (rdata_bytes = (int *)HDcalloc(DSET_DIM1 * DSET_DIM2, sizeof(int))))
+            TEST_ERROR;
+        if(NULL == (rdata = (int **)HDcalloc(DSET_DIM1, sizeof(rdata_bytes))))
+            TEST_ERROR;
+        for (i = 0; i < DSET_DIM1; i++)
+            rdata[i] = rdata_bytes + (i * DSET_DIM2);
 
         /* Initialize the dataset */
         for(i = n = 0; i < DSET_DIM1; i++)
@@ -556,7 +570,7 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
         if(H5Dget_offset(dataset) != HADDR_UNDEF) goto error;
 
         /* Write the data to the dataset */
-        if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, points) < 0)
+        if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, points_data) < 0)
             goto error;
 
         /* Test dataset address in file. Open the same file as a C file, seek
@@ -565,7 +579,7 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
         if((offset=H5Dget_offset(dataset))==HADDR_UNDEF) goto error;
 
         /* Read the dataset back */
-        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, check) < 0)
+        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, check_data) < 0)
             goto error;
 
         /* Check that the values read are the same as the values written */
@@ -589,7 +603,7 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
 
         f = HDopen(filename, O_RDONLY);
         HDlseek(f, (off_t)offset, SEEK_SET);
-        if(HDread(f, rdata, sizeof(int)*DSET_DIM1*DSET_DIM2) < 0)
+        if(HDread(f, rdata_bytes, sizeof(int)*DSET_DIM1*DSET_DIM2) < 0)
             goto error;
 
         /* Check that the values read are the same as the values written */
@@ -608,6 +622,9 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
         f = -1;
 
         HDfree(tconv_buf);
+        HDfree(rdata_bytes);
+        HDfree(rdata);
+
         PASSED();
     } /* end if */
     else {
@@ -628,8 +645,11 @@ error:
         if(H5Fclose(file) < 0) TEST_ERROR
     if(f > 0)
         HDclose(f);
-    if(tconv_buf)
-        HDfree(tconv_buf);
+
+    HDfree(tconv_buf);
+    HDfree(rdata_bytes);
+    HDfree(rdata);
+
     return FAIL;
 } /* end test_simple_io() */
 
@@ -652,13 +672,22 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
     hsize_t             dims[2];
     int                 f = -1;
     haddr_t             offset;
-    int                 rdata[DSET_DIM1][DSET_DIM2];
+    int                 **rdata = NULL;
+    int                 *rdata_bytes = NULL;
 
     TESTING("dataset offset with user block");
 
     /* Can't run this test with multi-file VFDs because of HDopen/read/seek the file directly */
     if(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")) {
         h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
+
+        /* Set up data array */
+        if(NULL == (rdata_bytes = (int *)HDcalloc(DSET_DIM1 * DSET_DIM2, sizeof(int))))
+            TEST_ERROR;
+        if(NULL == (rdata = (int **)HDcalloc(DSET_DIM1, sizeof(rdata_bytes))))
+            TEST_ERROR;
+        for (i = 0; i < DSET_DIM1; i++)
+            rdata[i] = rdata_bytes + (i * DSET_DIM2);
 
         if((fcpl=H5Pcreate(H5P_FILE_CREATE)) < 0) goto error;
         if(H5Pset_userblock(fcpl, (hsize_t)USER_BLOCK) < 0) goto error;
@@ -683,7 +712,7 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         space = -1;
 
         /* Write the data to the dataset */
-        if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points) < 0)
+        if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points_data) < 0)
             goto error;
 
         /* Test dataset address in file. Open the same file as a C file, seek
@@ -698,7 +727,7 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
 
         f = HDopen(filename, O_RDONLY);
         HDlseek(f, (off_t)offset, SEEK_SET);
-        if(HDread(f, rdata, sizeof(int)*DSET_DIM1*DSET_DIM2) < 0)
+        if(HDread(f, rdata_bytes, sizeof(int)*DSET_DIM1*DSET_DIM2) < 0)
             goto error;
 
         /* Check that the values read are the same as the values written */
@@ -715,6 +744,9 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
 
         HDclose(f);
         f = -1;
+
+        HDfree(rdata_bytes);
+        HDfree(rdata);
 
         PASSED();
     } /* end if */
@@ -736,6 +768,10 @@ error:
         if(H5Fclose(file) < 0) TEST_ERROR
     if(f > 0)
         HDclose(f);
+
+    HDfree(rdata_bytes);
+    HDfree(rdata);
+
     return FAIL;
 } /* end test_userblock_offset() */
 
@@ -836,7 +872,7 @@ test_compact_io(hid_t fapl)
      **************************************/
 
     /* Create a copy of file access property list */
-    if((new_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) TEST_ERROR
+    if((new_fapl = h5_fileaccess()) < 0) TEST_ERROR
 
     /* Loop through all the combinations of low/high library format bounds,
        skipping invalid combinations.
@@ -1794,7 +1830,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
      */
     TESTING("    filters (uninitialized read)");
 
-    if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check) < 0)
+    if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check_data) < 0)
     TEST_ERROR;
 
     for(i=0; i<(size_t)size[0]; i++) {
@@ -1823,7 +1859,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         }
     }
 
-    if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, points) < 0)
+    if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, points_data) < 0)
         TEST_ERROR;
 
     if((*dset_size=H5Dget_storage_size(dataset))==0) TEST_ERROR;
@@ -1841,25 +1877,25 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         /* Default behavior is failure when data is corrupted. */
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
         H5E_BEGIN_TRY {
-            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
+            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
         } H5E_END_TRY;
         if(status>=0) TEST_ERROR;
 
         /* Callback decides to continue inspite data is corrupted. */
         if(H5Pset_filter_callback(dxpl, filter_cb_cont, NULL) < 0) TEST_ERROR;
-        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check) < 0)
+        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check_data) < 0)
             TEST_ERROR;
 
         /* Callback decides to fail when data is corrupted. */
         if(H5Pset_filter_callback(write_dxpl, filter_cb_fail, NULL) < 0) TEST_ERROR;
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
         H5E_BEGIN_TRY {
-            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
+            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
         } H5E_END_TRY;
         if(status>=0) TEST_ERROR;
     }
     else {
-        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check) < 0)
+        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check_data) < 0)
             TEST_ERROR;
 
         /* Check that the values read are the same as the values written */
@@ -1893,33 +1929,33 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
             points[i][j] = (int)HDrandom ();
         }
     }
-    if(H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, points) < 0)
+    if(H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, points_data) < 0)
         TEST_ERROR;
 
     if(corrupted) {
         /* Default behavior is failure when data is corrupted. */
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
         H5E_BEGIN_TRY {
-            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
+            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
         } H5E_END_TRY;
         if(status>=0) TEST_ERROR;
 
         /* Callback decides to continue inspite data is corrupted. */
         if(H5Pset_filter_callback(dxpl, filter_cb_cont, NULL) < 0) TEST_ERROR;
-        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check) < 0)
+        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check_data) < 0)
             TEST_ERROR;
 
         /* Callback decides to fail when data is corrupted. */
         if(H5Pset_filter_callback(write_dxpl, filter_cb_fail, NULL) < 0) TEST_ERROR;
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
         H5E_BEGIN_TRY {
-            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
+            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
         } H5E_END_TRY;
         if(status>=0) TEST_ERROR;
     }
     else {
         /* Read the dataset back and check it */
-        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check) < 0)
+        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check_data) < 0)
             TEST_ERROR;
 
         /* Check that the values read are the same as the values written */
@@ -1954,13 +1990,13 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         /* Default behavior is failure when data is corrupted. */
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
         H5E_BEGIN_TRY {
-            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
+            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
         } H5E_END_TRY;
         if(status >= 0) TEST_ERROR;
 
         /* Callback decides to continue inspite data is corrupted. */
         if(H5Pset_filter_callback(dxpl, filter_cb_cont, NULL) < 0) TEST_ERROR;
-        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check) < 0)
+        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check_data) < 0)
             TEST_ERROR;
 
         /* Callback decides to fail when data is corrupted. */
@@ -1968,12 +2004,12 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
 
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
         H5E_BEGIN_TRY {
-            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
+            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
         } H5E_END_TRY;
         if(status >= 0) TEST_ERROR;
     } /* end if */
     else {
-        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check) < 0)
+        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check_data) < 0)
             TEST_ERROR;
 
         /* Check that the values read are the same as the values written */
@@ -2007,32 +2043,32 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, NULL, hs_size,
                 NULL) < 0) TEST_ERROR;
     /* (Use the "read" DXPL because partial I/O on corrupted data test needs to ignore errors during writing) */
-    if(H5Dwrite (dataset, H5T_NATIVE_INT, sid, sid, dxpl, points) < 0)
+    if(H5Dwrite (dataset, H5T_NATIVE_INT, sid, sid, dxpl, points_data) < 0)
     TEST_ERROR;
 
     if(corrupted) {
         /* Default behavior is failure when data is corrupted. */
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
         H5E_BEGIN_TRY {
-            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
+            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
         } H5E_END_TRY;
         if(status>=0) TEST_ERROR;
 
         /* Callback decides to continue inspite data is corrupted. */
         if(H5Pset_filter_callback(dxpl, filter_cb_cont, NULL) < 0) TEST_ERROR;
-        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check) < 0)
+        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check_data) < 0)
             TEST_ERROR;
 
         /* Callback decides to fail when data is corrupted. */
         if(H5Pset_filter_callback(write_dxpl, filter_cb_fail, NULL) < 0) TEST_ERROR;
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
         H5E_BEGIN_TRY {
-            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
+            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
         } H5E_END_TRY;
         if(status>=0) TEST_ERROR;
     }
     else {
-        if(H5Dread (dataset, H5T_NATIVE_INT, sid, sid, dxpl, check) < 0)
+        if(H5Dread(dataset, H5T_NATIVE_INT, sid, sid, dxpl, check_data) < 0)
             TEST_ERROR;
 
         /* Check that the values read are the same as the values written */
@@ -2298,9 +2334,9 @@ H5_ATTR_UNUSED
 
     hsize_t     shuffle_size;       /* Size of dataset with shuffle filter */
 
-#if(defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_SZIP)
+#if defined(H5_HAVE_FILTER_DEFLATE) || defined(H5_HAVE_FILTER_SZIP)
     hsize_t     combo_size;         /* Size of dataset with multiple filters */
-#endif /* defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_SZIP */
+#endif /* defined(H5_HAVE_FILTER_DEFLATE) || defined(H5_HAVE_FILTER_SZIP) */
 
     /* test the H5Zget_filter_info function */
     if(test_get_filter_info() < 0) goto error;
@@ -2637,7 +2673,7 @@ test_missing_filter(hid_t file)
     } /* end if */
 
     /* Write data */
-    if(H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points) < 0) {
+    if(H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points_data) < 0) {
         H5_FAILED();
         HDprintf("    Line %d: Error writing dataset data\n",__LINE__);
         goto error;
@@ -2666,7 +2702,7 @@ test_missing_filter(hid_t file)
     } /* end if */
 
     /* Read data */
-    if(H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check) < 0) {
+    if(H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check_data) < 0) {
         H5_FAILED();
         HDprintf("    Line %d: Error reading dataset data\n",__LINE__);
         goto error;
@@ -2727,7 +2763,7 @@ test_missing_filter(hid_t file)
 
     /* Read data (should fail, since deflate filter is missing) */
     H5E_BEGIN_TRY {
-        ret = H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check);
+        ret = H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check_data);
     } H5E_END_TRY;
     if(ret>=0) {
         H5_FAILED();
@@ -3081,7 +3117,7 @@ test_nbit_float(hid_t file)
      */
     for(i = 0; i < (size_t)size[0]; i++) {
         for(j = 0; j < (size_t)size[1]; j++) {
-            if(!(orig_data[i][j] == orig_data[i][j]))
+            if(HDisnan(orig_data[i][j]))
                 continue;  /* skip if value is NaN */
             if(!H5_FLT_ABS_EQUAL(new_data[i][j], orig_data[i][j])) {
                 H5_FAILED();
@@ -3135,18 +3171,18 @@ test_nbit_double(hid_t file)
      */
     double              orig_data[2][5] = {
         {
-            H5_DOUBLE(1.6081706885101836e+60),
-            H5_DOUBLE(-255.32099170994480),
-            H5_DOUBLE(1.2677579992621376e-61),
-            H5_DOUBLE(64568.289448797700),
-            H5_DOUBLE(-1.0619721778839084e-75)
+            (double)1.6081706885101836e+60L,
+            -255.32099170994480f,
+            (double)1.2677579992621376e-61L,
+            64568.289448797700f,
+            (double)-1.0619721778839084e-75L
         },
         {
-            H5_DOUBLE(2.1499497833454840e+56),
-            H5_DOUBLE(6.6562295504670740e-3),
-            H5_DOUBLE(-1.5747263393432150),
-            H5_DOUBLE(1.0711093225222612),
-            H5_DOUBLE(-9.8971679387636870e-1)
+            (double)2.1499497833454840e+56L,
+            6.6562295504670740e-3f,
+            -1.5747263393432150f,
+            1.0711093225222612f,
+            -9.8971679387636870e-1f
         }};
     double              new_data[2][5];
     size_t              precision, offset;
@@ -3213,7 +3249,7 @@ test_nbit_double(hid_t file)
      */
     for(i = 0; i < (size_t)size[0]; i++) {
         for(j = 0; j < (size_t)size[1]; j++) {
-            if(!(orig_data[i][j] == orig_data[i][j]))
+            if(HDisnan(orig_data[i][j]))
                 continue;  /* skip if value is NaN */
             if(!H5_DBL_ABS_EQUAL(new_data[i][j], orig_data[i][j])) {
                 H5_FAILED();
@@ -3548,7 +3584,7 @@ test_nbit_compound(hid_t file)
             if(((unsigned)new_data[i][j].i & i_mask) != ((unsigned)orig_data[i][j].i & i_mask) ||
                 ((unsigned)new_data[i][j].c & c_mask) != ((unsigned)orig_data[i][j].c & c_mask) ||
                 ((unsigned)new_data[i][j].s & s_mask) != ((unsigned)orig_data[i][j].s & s_mask) ||
-                (orig_data[i][j].f == orig_data[i][j].f && !H5_FLT_ABS_EQUAL(new_data[i][j].f, orig_data[i][j].f)))
+                (!HDisnan(orig_data[i][j].f) && !H5_FLT_ABS_EQUAL(new_data[i][j].f, orig_data[i][j].f)))
             {
                 H5_FAILED();
                 HDprintf("    Read different values than written.\n");
@@ -3870,7 +3906,7 @@ test_nbit_compound_2(hid_t file)
                     if(((unsigned)new_data[i][j].d[m][n].i & i_mask) != ((unsigned)orig_data[i][j].d[m][n].i & i_mask)||
                             ((unsigned)new_data[i][j].d[m][n].c & c_mask) != ((unsigned)orig_data[i][j].d[m][n].c & c_mask)||
                             ((unsigned)new_data[i][j].d[m][n].s & s_mask) != ((unsigned)orig_data[i][j].d[m][n].s & s_mask)||
-                            (new_data[i][j].d[m][n].f == new_data[i][j].d[m][n].f && !H5_FLT_ABS_EQUAL(new_data[i][j].d[m][n].f, new_data[i][j].d[m][n].f))) {
+                            (!HDisnan(new_data[i][j].d[m][n].f) && !H5_FLT_ABS_EQUAL(new_data[i][j].d[m][n].f, new_data[i][j].d[m][n].f))) {
                         d_failed = 1;
                         goto out;
                     }
@@ -3879,7 +3915,7 @@ out:
             if(((unsigned)new_data[i][j].a.i & i_mask) != ((unsigned)orig_data[i][j].a.i & i_mask)||
                     ((unsigned)new_data[i][j].a.c & c_mask) != ((unsigned)orig_data[i][j].a.c & c_mask)||
                     ((unsigned)new_data[i][j].a.s & s_mask) != ((unsigned)orig_data[i][j].a.s & s_mask)||
-                    (new_data[i][j].a.f == new_data[i][j].a.f && !H5_FLT_ABS_EQUAL(new_data[i][j].a.f, new_data[i][j].a.f)) ||
+                    (!HDisnan(new_data[i][j].a.f) && !H5_FLT_ABS_EQUAL(new_data[i][j].a.f, new_data[i][j].a.f)) ||
                     new_data[i][j].v != orig_data[i][j].v || b_failed || d_failed) {
                 H5_FAILED();
                 HDprintf("    Read different values than written.\n");
@@ -4135,149 +4171,164 @@ test_nbit_int_size(hid_t file)
     hid_t   dataspace, dataset, datatype, mem_datatype, dset_create_props;
     hsize_t dims[2], chunk_size[2];
     hsize_t dset_size = 0;
-    int     orig_data[DSET_DIM1][DSET_DIM2];
+    int     **orig = NULL;
+    int     *orig_data = NULL;
     double  power;
     int     i, j;
     size_t  precision, offset;
 
     TESTING("    nbit integer dataset size");
 
-   /* Define dataset datatype (integer), and set precision, offset */
-   if((datatype = H5Tcopy(H5T_NATIVE_INT)) < 0) {
-       H5_FAILED();
-       HDprintf("    line %d: H5Tcopy failed\n",__LINE__);
-       goto error;
-   } /* end if */
+    /* Set up data array */
+    if(NULL == (orig_data = (int *)HDcalloc(DSET_DIM1 * DSET_DIM2, sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (orig = (int **)HDcalloc(DSET_DIM1, sizeof(orig_data))))
+        TEST_ERROR;
+    for (i = 0; i < DSET_DIM1; i++)
+        orig[i] = orig_data + (i * DSET_DIM2);
 
-   precision = 16; /* precision includes sign bit */
-   if(H5Tset_precision(datatype,precision)<0) {
-       H5_FAILED();
-       HDprintf("    line %d: H5Pset_precision failed\n",__LINE__);
-       goto error;
-   } /* end if */
-
-   offset = 8;
-   if(H5Tset_offset(datatype,offset)<0) {
-       H5_FAILED();
-       HDprintf("    line %d: H5Tset_offset failed\n",__LINE__);
-       goto error;
-   } /* end if */
-
-   /* Copy to memory datatype */
-   if((mem_datatype = H5Tcopy(datatype)) < 0) {
-       H5_FAILED();
-       HDprintf("    line %d: H5Tcopy failed\n",__LINE__);
-       goto error;
-   } /* end if */
-
-   /* Set order of dataset datatype */
-   if(H5Tset_order(datatype, H5T_ORDER_BE)<0) {
+    /* Define dataset datatype (integer), and set precision, offset */
+    if((datatype = H5Tcopy(H5T_NATIVE_INT)) < 0) {
         H5_FAILED();
-       HDprintf("    line %d: H5Pset_order failed\n",__LINE__);
-       goto error;
-   } /* end if */
+        HDprintf("    line %d: H5Tcopy failed\n",__LINE__);
+        goto error;
+    }
 
-   if(H5Tset_size(datatype, 4)<0) {
-       H5_FAILED();
-       HDprintf("    line %d: H5Pset_size failed\n",__LINE__);
-       goto error;
-   } /* end if */
+    precision = 16; /* precision includes sign bit */
+    if(H5Tset_precision(datatype,precision)<0) {
+        H5_FAILED();
+        HDprintf("    line %d: H5Pset_precision failed\n",__LINE__);
+        goto error;
+    }
 
-  /* Initiliaze data buffer with random data within correct range
-   * corresponding to the memory datatype's precision and offset.
-   */
-   for (i=0; i < DSET_DIM1; i++)
-       for (j=0; j < DSET_DIM2; j++) {
-           power = HDpow(2.0F, (double)(precision-1));
-           orig_data[i][j] = HDrandom() % (int)power << offset;
-       } /* end for */
+    offset = 8;
+    if(H5Tset_offset(datatype,offset)<0) {
+        H5_FAILED();
+        HDprintf("    line %d: H5Tset_offset failed\n",__LINE__);
+        goto error;
+    }
+
+    /* Copy to memory datatype */
+    if((mem_datatype = H5Tcopy(datatype)) < 0) {
+        H5_FAILED();
+        HDprintf("    line %d: H5Tcopy failed\n",__LINE__);
+        goto error;
+    }
+
+    /* Set order of dataset datatype */
+    if(H5Tset_order(datatype, H5T_ORDER_BE)<0) {
+        H5_FAILED();
+        HDprintf("    line %d: H5Pset_order failed\n",__LINE__);
+        goto error;
+    }
+
+    if(H5Tset_size(datatype, 4)<0) {
+        H5_FAILED();
+        HDprintf("    line %d: H5Pset_size failed\n",__LINE__);
+        goto error;
+    }
+
+    /* Initiliaze data buffer with random data within correct range
+     * corresponding to the memory datatype's precision and offset.
+     */
+    for (i=0; i < DSET_DIM1; i++)
+        for (j=0; j < DSET_DIM2; j++) {
+            power = HDpow(2.0F, (double)(precision-1));
+            orig[i][j] = HDrandom() % (int)power << offset;
+        }
 
 
-   /* Describe the dataspace. */
-   dims[0] = DSET_DIM1;
-   dims[1] = DSET_DIM2;
-   if((dataspace = H5Screate_simple (2, dims, NULL))<0) {
-       H5_FAILED();
-       HDprintf("    line %d: H5Pcreate failed\n",__LINE__);
-       goto error;
-   } /* end if */
+    /* Describe the dataspace. */
+    dims[0] = DSET_DIM1;
+    dims[1] = DSET_DIM2;
+    if((dataspace = H5Screate_simple(2, dims, NULL))<0) {
+        H5_FAILED();
+        HDprintf("    line %d: H5Pcreate failed\n",__LINE__);
+        goto error;
+    }
 
-  /*
-   * Set the dataset creation property list to specify the chunks
-   */
-   chunk_size[0] = DSET_DIM1/10;
-   chunk_size[1] = DSET_DIM2/10;
-   if((dset_create_props = H5Pcreate (H5P_DATASET_CREATE))<0) {
-       H5_FAILED();
-       HDprintf("    line %d: H5Pcreate failed\n",__LINE__);
-       goto error;
-   } /* end if */
+    /*
+     * Set the dataset creation property list to specify the chunks
+     */
+    chunk_size[0] = DSET_DIM1/10;
+    chunk_size[1] = DSET_DIM2/10;
+    if((dset_create_props = H5Pcreate(H5P_DATASET_CREATE))<0) {
+        H5_FAILED();
+        HDprintf("    line %d: H5Pcreate failed\n",__LINE__);
+        goto error;
+    }
 
-   if(H5Pset_chunk (dset_create_props, 2, chunk_size)<0) {
-       H5_FAILED();
-       HDprintf("    line %d: H5Pset_chunk failed\n",__LINE__);
-       goto error;
-   } /* end if */
+    if(H5Pset_chunk(dset_create_props, 2, chunk_size)<0) {
+        H5_FAILED();
+        HDprintf("    line %d: H5Pset_chunk failed\n",__LINE__);
+        goto error;
+    }
 
-  /*
-   * Set for n-bit compression
-   */
-   if(H5Pset_nbit (dset_create_props)<0) {
-       H5_FAILED();
-       HDprintf("    line %d: H5Pset_nbit failed\n",__LINE__);
-       goto error;
-   } /* end if */
+    /*
+     * Set for n-bit compression
+     */
+    if(H5Pset_nbit(dset_create_props)<0) {
+        H5_FAILED();
+        HDprintf("    line %d: H5Pset_nbit failed\n",__LINE__);
+        goto error;
+    }
 
-  /*
-   * Create a new dataset within the file.
-   */
-   if((dataset = H5Dcreate2 (file, DSET_NBIT_INT_SIZE_NAME, datatype,
+    /*
+     * Create a new dataset within the file.
+     */
+    if((dataset = H5Dcreate2(file, DSET_NBIT_INT_SIZE_NAME, datatype,
                             dataspace, H5P_DEFAULT,
                             dset_create_props, H5P_DEFAULT))<0) {
-       H5_FAILED();
-       HDprintf("    line %d: H5dwrite failed\n",__LINE__);
-       goto error;
-   } /* end if */
+        H5_FAILED();
+        HDprintf("    line %d: H5dwrite failed\n",__LINE__);
+        goto error;
+    }
 
-  /*
-   * Write the array to the file.
-   */
-   if(H5Dwrite (dataset, mem_datatype, H5S_ALL, H5S_ALL,
-                H5P_DEFAULT, orig_data)<0) {
-       H5_FAILED();
-       HDprintf("    Line %d: H5Dwrite failed\n",__LINE__);
-       goto error;
-   } /* end if */
+    /*
+     * Write the array to the file.
+     */
+    if(H5Dwrite(dataset, mem_datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig_data)<0) {
+        H5_FAILED();
+        HDprintf("    Line %d: H5Dwrite failed\n",__LINE__);
+        goto error;
+    }
 
-   /*
-    * Get the precision of the data type
-    */
-   if((precision = H5Tget_precision(datatype)) == 0) {
-       H5_FAILED();
-       HDprintf("    Line %d: wrong precision size: %zu\n",__LINE__, precision);
-       goto error;
-   } /* end if */
+    /*
+     * Get the precision of the data type
+     */
+    if((precision = H5Tget_precision(datatype)) == 0) {
+        H5_FAILED();
+        HDprintf("    Line %d: wrong precision size: %zu\n",__LINE__, precision);
+        goto error;
+    }
 
-   /*
-    * The size of the dataset after compression should around 2 * DSET_DIM1 * DSET_DIM2
-    */
-   if((dset_size = H5Dget_storage_size(dataset)) < DSET_DIM1*DSET_DIM2*(precision/8) ||
-       dset_size > DSET_DIM1*DSET_DIM2*(precision/8) + 1*KB) {
-       H5_FAILED();
-       HDfprintf(stdout, "    Line %d: wrong dataset size: %Hu\n",__LINE__, dset_size);
-       goto error;
-   } /* end if */
+    /*
+     * The size of the dataset after compression should around 2 * DSET_DIM1 * DSET_DIM2
+     */
+    if((dset_size = H5Dget_storage_size(dataset)) < DSET_DIM1*DSET_DIM2*(precision/8) ||
+        dset_size > DSET_DIM1*DSET_DIM2*(precision/8) + 1*KB) {
+        H5_FAILED();
+        HDfprintf(stdout, "    Line %d: wrong dataset size: %Hu\n",__LINE__, dset_size);
+        goto error;
+    }
 
-   H5Tclose (datatype);
-   H5Tclose (mem_datatype);
-   H5Dclose (dataset);
-   H5Sclose (dataspace);
-   H5Pclose (dset_create_props);
+    H5Tclose(datatype);
+    H5Tclose(mem_datatype);
+    H5Dclose(dataset);
+    H5Sclose(dataspace);
+    H5Pclose(dset_create_props);
+
+    HDfree(orig);
+    HDfree(orig_data);
 
     PASSED();
 
-   return SUCCEED;
+    return SUCCEED;
+
 error:
+    HDfree(orig);
+    HDfree(orig_data);
+
     return FAIL;
 } /* end test_nbit_int_size() */
 
@@ -4303,12 +4354,21 @@ test_nbit_flt_size(hid_t file)
     hid_t   dataspace, dataset, datatype, dset_create_props;
     hsize_t dims[2], chunk_size[2];
     hsize_t dset_size = 0;
-    float   orig_data[DSET_DIM1][DSET_DIM2];
+    float   **orig = NULL;
+    float   *orig_data = NULL;
     int     i, j;
     size_t  precision, offset;
     size_t  spos, epos, esize, mpos, msize;
 
     TESTING("    nbit floating-number dataset size");
+
+    /* Set up data array */
+    if(NULL == (orig_data = (float *)HDcalloc(DSET_DIM1 * DSET_DIM2, sizeof(float))))
+        TEST_ERROR;
+    if(NULL == (orig = (float **)HDcalloc(DSET_DIM1, sizeof(orig_data))))
+        TEST_ERROR;
+    for (i = 0; i < DSET_DIM1; i++)
+        orig[i] = orig_data + (i * DSET_DIM2);
 
   /* Define floating-point type for dataset
    *-------------------------------------------------------------------
@@ -4388,7 +4448,7 @@ test_nbit_flt_size(hid_t file)
    */
    for (i=0; i < DSET_DIM1; i++)
        for (j=0; j < DSET_DIM2; j++)
-           orig_data[i][j] = (float)(HDrandom() % 1234567) / 2;
+           orig[i][j] = (float)(HDrandom() % 1234567) / 2;
 
 
    /* Describe the dataspace. */
@@ -5301,7 +5361,7 @@ test_types(hid_t file)
     (space=H5Screate_simple(1, &nelmts, NULL)) < 0 ||
     (dset=H5Dcreate2(grp, "bitfield_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     goto error;
-    for(i=0; i<sizeof buf; i++) buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+    for(i=0; i<sizeof buf; i++) buf[i] = (unsigned char)(0xff ^ i);
     if(H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
     goto error;
 
@@ -5315,7 +5375,7 @@ test_types(hid_t file)
     (space=H5Screate_simple(1, &nelmts, NULL)) < 0 ||
     (dset=H5Dcreate2(grp, "bitfield_2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     goto error;
-    for(i=0; i<sizeof buf; i++) buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+    for(i=0; i<sizeof buf; i++) buf[i] = (unsigned char)(0xff ^ i);
     if(H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
     goto error;
     if(H5Sclose(space) < 0) goto error;
@@ -5330,7 +5390,7 @@ test_types(hid_t file)
             (dset = H5Dcreate2(grp, "opaque_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     goto error;
     for(i = 0; i < sizeof buf; i++)
-        buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+        buf[i] = (unsigned char)(0xff ^ i);
     if(H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) goto error;
     if(H5Sclose(space) < 0) goto error;
     if(H5Tclose(type) < 0) goto error;
@@ -5344,7 +5404,7 @@ test_types(hid_t file)
             (dset = H5Dcreate2(grp, "opaque_2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     goto error;
     for(i = 0; i < sizeof buf; i++)
-        buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+        buf[i] = (unsigned char)(0xff ^ i);
     if(H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) goto error;
     if(H5Sclose(space) < 0) goto error;
     if(H5Tclose(type) < 0) goto error;
@@ -5468,7 +5528,7 @@ test_can_apply(hid_t file)
     } /* end if */
 
     /* Write data */
-    if(H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points) < 0) {
+    if(H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points_data) < 0) {
         H5_FAILED();
         HDprintf("    Line %d: Error writing dataset data\n",__LINE__);
         goto error;
@@ -5496,7 +5556,7 @@ test_can_apply(hid_t file)
     } /* end if */
 
     /* Read data */
-    if(H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check) < 0) {
+    if(H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check_data) < 0) {
         H5_FAILED();
         HDprintf("    Line %d: Error reading dataset data\n",__LINE__);
         goto error;
@@ -5627,7 +5687,7 @@ test_can_apply2(hid_t file)
     } /* end if */
 
     /* Write data */
-    if(H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points) < 0) {
+    if(H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points_data) < 0) {
         H5_FAILED();
         HDprintf("    Line %d: Error writing dataset data\n",__LINE__);
         goto error;
@@ -5655,7 +5715,7 @@ test_can_apply2(hid_t file)
     } /* end if */
 
     /* Read data */
-    if(H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check) < 0) {
+    if(H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check_data) < 0) {
         H5_FAILED();
         HDprintf("    Line %d: Error reading dataset data\n",__LINE__);
         goto error;
@@ -5705,6 +5765,101 @@ error:
     return FAIL;
 } /* end test_can_apply2() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    test_optional_filters
+ *
+ * Purpose:     Tests that H5Dcreate2 will not fail when a combination of
+ *              type, space, etc... doesn't work for a filter and filter is
+ *              optional.
+ *
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
+ *
+ * Programmer:  Binh-Minh Ribler
+ *              12 August 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_optional_filters(hid_t file)
+{
+    unsigned int level = 9;
+    unsigned int cd_values[1] = {level};
+    size_t  cd_nelmts = 1;
+    hsize_t dim1d[1];                  /* Dataspace dimensions */
+    hid_t   dsid = H5I_INVALID_HID;    /* Dataset ID */
+    hid_t   sid = H5I_INVALID_HID;     /* Dataspace ID */
+    hid_t   strtid = H5I_INVALID_HID;  /* Datatype ID for string */
+    hid_t   vlentid = H5I_INVALID_HID; /* Datatype ID for vlen */
+    hid_t   dcplid = H5I_INVALID_HID;  /* Dataspace creation property list ID */
+
+    TESTING("dataset with optional filters");
+
+    /* Create dcpl with special filter */
+    if((dcplid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
+
+    /* Create the datatype */
+    if((strtid = H5Tcreate(H5T_STRING, H5T_VARIABLE)) < 0) TEST_ERROR;
+
+    /* Create the data space */
+    if((sid = H5Screate(H5S_SCALAR)) < 0) TEST_ERROR;
+
+    /* The filter is optional. */
+    if(H5Pset_filter(dcplid, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts, cd_values) < 0)
+        TEST_ERROR;
+
+    /* Create dataset with optional filter */
+    if((dsid = H5Dcreate2(file, DSET_OPTIONAL_SCALAR, strtid, sid, H5P_DEFAULT, dcplid, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Close dataset */
+    if(H5Dclose(dsid) < 0) TEST_ERROR;
+
+    /* Close dataspace */
+    if(H5Sclose(sid) < 0) TEST_ERROR;
+
+    /* Close datatype */
+    if(H5Tclose(strtid) < 0) TEST_ERROR;
+
+    /* Set dataspace dimensions */
+    dim1d[0]=DIM1;
+
+    /* Create a non-scalar dataspace */
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR;
+
+    /* Create a vlen datatype */
+    if((vlentid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR;
+
+    /* Create dataset with optional filter */
+    if((dsid = H5Dcreate2(file, DSET_OPTIONAL_VLEN, vlentid, sid, H5P_DEFAULT, dcplid, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Close dataset */
+    if(H5Dclose(dsid) < 0) TEST_ERROR;
+
+    /* Close dataspace */
+    if(H5Sclose(sid) < 0) TEST_ERROR;
+
+    /* Close datatype */
+    if(H5Tclose(vlentid) < 0) TEST_ERROR;
+
+    /* Close dataset creation property list */
+    if(H5Pclose(dcplid) < 0) TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Pclose(dcplid);
+        H5Tclose(strtid);
+        H5Tclose(vlentid);
+    } H5E_END_TRY;
+    return FAIL;
+} /* end test_optional_filters() */
 
 
 /*-------------------------------------------------------------------------
@@ -5996,7 +6151,7 @@ test_set_local(hid_t fapl)
     } /* end if */
 
     /* Write data */
-    if(H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points) < 0) {
+    if(H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points_data) < 0) {
         H5_FAILED();
         HDprintf("    Line %d: Error writing dataset data\n",__LINE__);
         goto error;
@@ -6018,7 +6173,7 @@ test_set_local(hid_t fapl)
     } /* end if */
 
     /* Write data */
-    if(H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, points_dbl) < 0) {
+    if(H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, points_dbl_data) < 0) {
         H5_FAILED();
         HDprintf("    Line %d: Error writing dataset data\n",__LINE__);
         goto error;
@@ -6081,7 +6236,7 @@ test_set_local(hid_t fapl)
     } /* end if */
 
     /* Read data */
-    if(H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check) < 0) {
+    if(H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check_data) < 0) {
         H5_FAILED();
         HDprintf("    Line %d: Error reading dataset data\n", __LINE__);
         goto error;
@@ -6131,7 +6286,7 @@ test_set_local(hid_t fapl)
     } /* end if */
 
     /* Read data */
-    if(H5Dread(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, check_dbl) < 0) {
+    if(H5Dread(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, check_dbl_data) < 0) {
         H5_FAILED();
         HDprintf("    Line %d: Error reading dataset data\n", __LINE__);
         goto error;
@@ -6864,10 +7019,12 @@ test_missing_chunk(hid_t file)
     hsize_t    hs_start2[2], hs_stride2[2], hs_count2[2], hs_block2[2];/* Hyperslab setting */
 
     /* Buffers for reading/writing dataset */
-    int         wdata[MISSING_CHUNK_DIM],
-                rdata[MISSING_CHUNK_DIM];
-    int         wdata2[MISSING_CHUNK_DIM][MISSING_CHUNK_DIM],
-                rdata2[MISSING_CHUNK_DIM][MISSING_CHUNK_DIM];
+    int     *wdata          = NULL;
+    int     *rdata          = NULL;
+    int     **wdata2        = NULL;
+    int     **rdata2        = NULL;
+    int     *wdata2_bytes   = NULL;
+    int     *rdata2_bytes   = NULL;
 
     /* Setting for 1-D dataset */
     hsize_t     dsize=100, dmax=H5S_UNLIMITED;
@@ -6883,6 +7040,26 @@ test_missing_chunk(hid_t file)
     H5D_chunk_index_t idx_type, idx_type2;     /* Dataset chunk index types */
 
     TESTING("Read dataset with unwritten chunk & undefined fill value");
+
+    /* Set up data arrays */
+    if(NULL == (wdata = (int *)HDcalloc(MISSING_CHUNK_DIM, sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (rdata = (int *)HDcalloc(MISSING_CHUNK_DIM, sizeof(int))))
+        TEST_ERROR;
+
+    if(NULL == (wdata2_bytes = (int *)HDcalloc(MISSING_CHUNK_DIM * MISSING_CHUNK_DIM, sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (wdata2 = (int **)HDcalloc(MISSING_CHUNK_DIM, sizeof(wdata2_bytes))))
+        TEST_ERROR;
+    for (i = 0; i < MISSING_CHUNK_DIM; i++)
+        wdata2[i] = wdata2_bytes + (i * MISSING_CHUNK_DIM);
+
+    if(NULL == (rdata2_bytes = (int *)HDcalloc(MISSING_CHUNK_DIM * MISSING_CHUNK_DIM, sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (rdata2 = (int **)HDcalloc(MISSING_CHUNK_DIM, sizeof(rdata2_bytes))))
+        TEST_ERROR;
+    for (i = 0; i < MISSING_CHUNK_DIM; i++)
+        rdata2[i] = rdata2_bytes + (i * MISSING_CHUNK_DIM);
 
     /* Get the file's file access property list */
     if((fapl = H5Fget_access_plist(file)) < 0) TEST_ERROR;
@@ -6901,10 +7078,10 @@ test_missing_chunk(hid_t file)
 
     /* Initialize data for 2-D dataset */
     for(i = 0; i < MISSING_CHUNK_DIM; i++) {
-    for(j = 0; j < MISSING_CHUNK_DIM; j++) {
-        wdata2[i][j] = (int)(j + (i * MISSING_CHUNK_DIM));
-        rdata2[i][j] = 911;
-    }
+        for(j = 0; j < MISSING_CHUNK_DIM; j++) {
+            wdata2[i][j] = (int)(j + (i * MISSING_CHUNK_DIM));
+            rdata2[i][j] = 911;
+        }
     } /* end for */
 
     /* Create dataspace */
@@ -6962,11 +7139,11 @@ test_missing_chunk(hid_t file)
 
     /* Write selected data to the datasets */
     if(H5Dwrite(d, H5T_NATIVE_INT, s, s, H5P_DEFAULT, wdata) < 0) TEST_ERROR;
-    if(H5Dwrite(did2, H5T_NATIVE_INT, sid2, sid2, H5P_DEFAULT, wdata2) < 0) TEST_ERROR;
+    if(H5Dwrite(did2, H5T_NATIVE_INT, sid2, sid2, H5P_DEFAULT, wdata2_bytes) < 0) TEST_ERROR;
 
     /* Read all data from the datasets */
     if(H5Dread(d, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0) TEST_ERROR;
-    if(H5Dread(did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata2) < 0) TEST_ERROR;
+    if(H5Dread(did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata2_bytes) < 0) TEST_ERROR;
 
     /* Validata values read for the 1-D dataset */
     for(u=0; u<MISSING_CHUNK_DIM; u++) {
@@ -7013,6 +7190,13 @@ test_missing_chunk(hid_t file)
     if(H5Dclose(d) < 0) TEST_ERROR;
     if(H5Dclose(did2) < 0) TEST_ERROR;
 
+    HDfree(rdata);
+    HDfree(wdata);
+    HDfree(rdata2);
+    HDfree(wdata2);
+    HDfree(rdata2_bytes);
+    HDfree(wdata2_bytes);
+
     PASSED();
     return SUCCEED;
 
@@ -7027,9 +7211,82 @@ error:
         H5Sclose(s);
         H5Sclose(sid2);
     } H5E_END_TRY;
+
+    HDfree(rdata);
+    HDfree(wdata);
+    HDfree(rdata2);
+    HDfree(wdata2);
+    HDfree(rdata2_bytes);
+    HDfree(wdata2_bytes);
+
     return FAIL;
 } /* end test_missing_chunk() */
 
+/* Using Euclid's algorithm, find the greatest common divisor (GCD) of
+ * the two arguments and return it.
+ *
+ * The GCD is negative if the arguments have opposite sign.  Otherwise,
+ * it is positive.
+ *
+ * If either argument is zero, then the result is undefined.
+ */
+static H5_ATTR_CONST long
+gcd(long l0, long r0)
+{
+    long magnitude, remainder;
+    bool negative = ((l0 < 0) != (r0 < 0));
+    long l = HDlabs(l0), r = HDlabs(r0);
+
+    do {
+        if (l < r) {
+            r = r % l;
+            remainder = r;
+        } else /* r <= l */ {
+            l = l % r;
+            remainder = l;
+        }
+    } while (remainder != 0);
+
+    magnitude = (l == 0) ? r : l;
+    return negative ? -magnitude : magnitude;
+}
+
+/* Choose a random offset into an array `nelts` elements long, and store
+ * it at `offsetp`.  The offset will be in the range [0, nelts - 1].
+ * Also choose a random increment, `inc`, that "generates" all
+ * indices in [0, nelts - 1] when it is added to itself repeatedly.
+ * That is, the range of the discrete function `f(i) = (i * inc)
+ * mod nelts` on the domain [0, nelts - 1] is [0, nelts - 1].  Store
+ * `inc` at `incp`.
+ *
+ * If `nelts <= 0`, results are undefined.
+ */
+static void
+make_random_offset_and_increment(long nelts, long *offsetp, long *incp)
+{
+    long inc;
+    long maxinc;
+
+    HDassert(0 < nelts);
+
+    *offsetp = HDrandom() % nelts;
+
+    /* `maxinc` is chosen so that for any `x` in [0, nelts - 1],
+     * `x + maxinc` does not overflow a long.
+     */
+    maxinc = MIN(nelts - 1, LONG_MAX - nelts);
+
+    /* Choose a random number in [1, nelts - 1].  If its greatest divisor
+     * in common with `nelts` is 1, then it will "generate" the additive ring
+     * [0, nelts - 1], so let it be our increment.  Otherwise, choose a new
+     * number.
+     */
+    do {
+        inc = 1 + HDrandom() % maxinc;
+    } while (gcd(inc, nelts) != 1);
+
+    *incp = inc;
+}
 
 /*-------------------------------------------------------------------------
  * Function: test_random_chunks_real
@@ -7054,7 +7311,7 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
                 rbuf[NPOINTS],
                 check2[20][20];
     hsize_t     coord[NPOINTS][2];
-    hsize_t     dsize[2]={100,100}, dmax[2]={H5S_UNLIMITED, H5S_UNLIMITED}, csize[2]={10,10}, nsize[2]={200,200};
+    const hsize_t     dsize[2]={100,100}, dmax[2]={H5S_UNLIMITED, H5S_UNLIMITED}, csize[2]={10,10}, nsize[2]={200,200};
     hsize_t    fixed_dmax[2] = {1000, 1000};
     hsize_t     msize[1]={NPOINTS};
     const char  dname[]="dataset";
@@ -7062,7 +7319,9 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
     size_t      i, j;
     H5D_chunk_index_t idx_type; /* Dataset chunk index type */
     H5F_libver_t low;           /* File format low bound */
-
+    long ofs, inc;
+    long rows;
+    long cols;
 
     TESTING(testname);
 
@@ -7096,12 +7355,16 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
         for(j=0; j<dsize[1]/csize[1]; j++)
             check2[i][j] = 0;
 
+    rows = (long)(dsize[0]/csize[0]);
+    cols = (long)(dsize[1]/csize[1]);
+    make_random_offset_and_increment(rows * cols, &ofs, &inc);
+
     /* Generate random point coordinates. Only one point is selected per chunk */
     for(i=0; i<NPOINTS; i++){
-        do {
-            chunk_row = (int)HDrandom () % (int)(dsize[0]/csize[0]);
-            chunk_col = (int)HDrandom () % (int)(dsize[1]/csize[1]);
-        } while (check2[chunk_row][chunk_col]);
+        H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
+        H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
+        ofs = (ofs + inc) % (rows * cols);
+        HDassert(!check2[chunk_row][chunk_col]);
 
         wbuf[i] = check2[chunk_row][chunk_col] = chunk_row+chunk_col+1;
         coord[i][0] = (hsize_t)chunk_row * csize[0];
@@ -7219,12 +7482,16 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
         for(j = 0; j < nsize[1] / csize[1]; j++)
             check2[i][j] = 0;
 
+    H5_CHECKED_ASSIGN(rows, int, nsize[0] / csize[0], long);
+    H5_CHECKED_ASSIGN(cols, int, nsize[1] / csize[1], long);
+    make_random_offset_and_increment(rows * cols, &ofs, &inc);
+
     /* Generate random point coordinates. Only one point is selected per chunk */
     for(i = 0; i < NPOINTS; i++){
-        do {
-            chunk_row = (int)HDrandom() % (int)(nsize[0] / csize[0]);
-            chunk_col = (int)HDrandom() % (int)(nsize[1] / csize[1]);
-        } while (check2[chunk_row][chunk_col]);
+        H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
+        H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
+        ofs = (ofs + inc) % (rows * cols);
+        HDassert(!check2[chunk_row][chunk_col]);
 
         wbuf[i] = check2[chunk_row][chunk_col] = chunk_row + chunk_col + 1;
         coord[i][0] = (hsize_t)chunk_row * csize[0];
@@ -7325,12 +7592,16 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
         for(j = 0; j < nsize[1] / csize[1]; j++)
             check2[i][j] = 0;
 
+    rows = (long)(nsize[0] / csize[0]);
+    cols = (long)(nsize[1] / csize[1]);
+    make_random_offset_and_increment(rows * cols, &ofs, &inc);
+
     /* Generate random point coordinates. Only one point is selected per chunk */
     for(i = 0; i < NPOINTS; i++){
-        do {
-            chunk_row = (int)HDrandom() % (int)(nsize[0] / csize[0]);
-            chunk_col = (int)HDrandom() % (int)(nsize[1] / csize[1]);
-        } while (check2[chunk_row][chunk_col]);
+        H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
+        H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
+        ofs = (ofs + inc) % (rows * cols);
+        HDassert(!check2[chunk_row][chunk_col]);
 
         wbuf[i] = check2[chunk_row][chunk_col] = chunk_row + chunk_col + 1;
         coord[i][0] = (hsize_t)chunk_row * csize[0];
@@ -7476,10 +7747,10 @@ static herr_t
 test_deprec(hid_t file)
 {
     hid_t    dataset, space, small_space, create_parms, dcpl;
-    hsize_t    dims[2], small_dims[2];
-    hsize_t     deprec_size;
-    herr_t    status;
-    hsize_t    csize[2];
+    hsize_t  dims[2], small_dims[2];
+    hsize_t  deprec_size;
+    herr_t   H5_ATTR_NDEBUG_UNUSED status;
+    hsize_t  csize[2];
 
     TESTING("deprecated API routines");
 
@@ -8006,9 +8277,13 @@ test_big_chunks_bypass_cache(hid_t fapl)
     hsize_t     t_count[2], t_stride[2], t_offset[2], t_block[2];  /* Setting for hyperslab (2-D) */
         /* Buffers for reading and writing data (1-D) */
     int         *wdata = NULL, *rdata1 = NULL, *rdata2 = NULL;
-        /* Buffer for reading and writing data (2-D) */
-    static int  t_wdata[BYPASS_CHUNK_DIM/2][BYPASS_CHUNK_DIM/2], t_rdata1[BYPASS_DIM][BYPASS_DIM],
-                t_rdata2[BYPASS_CHUNK_DIM/2][BYPASS_CHUNK_DIM/2];
+        /* Buffers for reading and writing data (2-D) */
+    int **t_wdata           = NULL;
+    int **t_rdata1          = NULL;
+    int **t_rdata2          = NULL;
+    int *t_wdata_bytes      = NULL;
+    int *t_rdata1_bytes     = NULL;
+    int *t_rdata2_bytes     = NULL;
     int         i, j;        /* Local index variables */
     H5F_libver_t low;           /* File format low bound */
     H5D_chunk_index_t idx_type, t_idx_type;      /* Dataset chunk index types */
@@ -8017,6 +8292,29 @@ test_big_chunks_bypass_cache(hid_t fapl)
     TESTING("big chunks bypassing the cache");
 
     h5_fixname(FILENAME[9], fapl, filename, sizeof filename);
+
+    /* Set up data arrays */
+    if(NULL == (t_wdata_bytes = (int *)HDcalloc((BYPASS_CHUNK_DIM/2) * (BYPASS_CHUNK_DIM/2), sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (t_wdata = (int **)HDcalloc((BYPASS_CHUNK_DIM/2), sizeof(t_wdata_bytes))))
+        TEST_ERROR;
+    for (i = 0; i < (BYPASS_CHUNK_DIM/2); i++)
+        t_wdata[i] = t_wdata_bytes + (i * (BYPASS_CHUNK_DIM/2));
+
+    if(NULL == (t_rdata1_bytes = (int *)HDcalloc(BYPASS_DIM * BYPASS_DIM, sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (t_rdata1 = (int **)HDcalloc(BYPASS_DIM, sizeof(t_rdata1_bytes))))
+        TEST_ERROR;
+    for (i = 0; i < BYPASS_DIM; i++)
+        t_rdata1[i] = t_rdata1_bytes + (i * BYPASS_DIM);
+
+    if(NULL == (t_rdata2_bytes = (int *)HDcalloc((BYPASS_CHUNK_DIM/2) * (BYPASS_CHUNK_DIM/2), sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (t_rdata2 = (int **)HDcalloc((BYPASS_CHUNK_DIM/2), sizeof(t_rdata2_bytes))))
+        TEST_ERROR;
+    for (i = 0; i < (BYPASS_CHUNK_DIM/2); i++)
+        t_rdata2[i] = t_rdata2_bytes + (i * (BYPASS_CHUNK_DIM/2));
+
 
      /* Check if we are using the latest version of the format */
     if(H5Pget_libver_bounds(fapl, &low, NULL) < 0) FAIL_STACK_ERROR
@@ -8106,8 +8404,8 @@ test_big_chunks_bypass_cache(hid_t fapl)
 
     /* Initialize data to write for 2-D dataset */
     for(i = 0; i < BYPASS_CHUNK_DIM / 2; i++)
-    for(j = 0; j < BYPASS_CHUNK_DIM / 2; j++)
-        t_wdata[i][j] = j;
+        for(j = 0; j < BYPASS_CHUNK_DIM / 2; j++)
+            t_wdata[i][j] = j;
 
     /* Set up memory space for the 2-D dataset */
     mid = H5Screate_simple(2, t_block, NULL);
@@ -8116,7 +8414,7 @@ test_big_chunks_bypass_cache(hid_t fapl)
     /* This write should go through the cache because fill value is used. */
     if(H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, sid, H5P_DEFAULT, wdata) < 0)
         FAIL_STACK_ERROR
-    if(H5Dwrite(t_dsid, H5T_NATIVE_INT, mid, t_sid, H5P_DEFAULT, t_wdata) < 0)
+    if(H5Dwrite(t_dsid, H5T_NATIVE_INT, mid, t_sid, H5P_DEFAULT, t_wdata_bytes) < 0)
         FAIL_STACK_ERROR
 
     /* Close the first 1-D & 2-D datasets */
@@ -8131,7 +8429,7 @@ test_big_chunks_bypass_cache(hid_t fapl)
      * chunk is bigger than the cache size and it isn't allocated on disk. */
     if(H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata1) < 0)
         FAIL_STACK_ERROR
-    if(H5Dread(t_dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, t_rdata1) < 0)
+    if(H5Dread(t_dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, t_rdata1_bytes) < 0)
         FAIL_STACK_ERROR
 
     /* Verify data for the first 1-D dataset */
@@ -8162,8 +8460,8 @@ test_big_chunks_bypass_cache(hid_t fapl)
     for(i = BYPASS_CHUNK_DIM / 2; i < BYPASS_DIM; i++)
     for(j = BYPASS_CHUNK_DIM / 2; j < BYPASS_DIM; j++)
         if(t_rdata1[i][j] != fvalue) {
-        HDprintf("    Read different values than written in the 2nd chunk.\n");
-        HDprintf("    At line %d and index (%d, %d), t_rdata1 = %d. It should be %d.\n",
+            HDprintf("    Read different values than written in the 2nd chunk.\n");
+            HDprintf("    At line %d and index (%d, %d), t_rdata1 = %d. It should be %d.\n",
             __LINE__, i, j, t_rdata1[i][j], fvalue);
             TEST_ERROR
         } /* end if */
@@ -8187,7 +8485,7 @@ test_big_chunks_bypass_cache(hid_t fapl)
     /* Write to the second 1-D & 2-D dataset */
     if(H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, sid, H5P_DEFAULT, wdata) < 0)
         FAIL_STACK_ERROR
-    if(H5Dwrite(t_dsid, H5T_NATIVE_INT, mid, t_sid, H5P_DEFAULT, t_wdata) < 0)
+    if(H5Dwrite(t_dsid, H5T_NATIVE_INT, mid, t_sid, H5P_DEFAULT, t_wdata_bytes) < 0)
         FAIL_STACK_ERROR
 
     /* Close the second 1-D & 2-D dataset */
@@ -8203,7 +8501,7 @@ test_big_chunks_bypass_cache(hid_t fapl)
      * the cache size. */
     if(H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, sid, H5P_DEFAULT, rdata2) < 0)
     FAIL_STACK_ERROR
-    if(H5Dread(t_dsid, H5T_NATIVE_INT, mid, t_sid, H5P_DEFAULT, t_rdata2) < 0)
+    if(H5Dread(t_dsid, H5T_NATIVE_INT, mid, t_sid, H5P_DEFAULT, t_rdata2_bytes) < 0)
     FAIL_STACK_ERROR
 
     /* Verify data for the second 1-D dataset */
@@ -8238,6 +8536,12 @@ test_big_chunks_bypass_cache(hid_t fapl)
     HDfree(wdata);
     HDfree(rdata1);
     HDfree(rdata2);
+    HDfree(t_wdata);
+    HDfree(t_rdata1);
+    HDfree(t_rdata2);
+    HDfree(t_wdata_bytes);
+    HDfree(t_rdata1_bytes);
+    HDfree(t_rdata2_bytes);
 
     PASSED();
     return SUCCEED;
@@ -8253,12 +8557,17 @@ error:
         H5Sclose(t_sid);
         H5Fclose(fid);
     } H5E_END_TRY;
-    if(wdata)
-        HDfree(wdata);
-    if(rdata1)
-        HDfree(rdata1);
-    if(rdata2)
-        HDfree(rdata2);
+
+    HDfree(wdata);
+    HDfree(rdata1);
+    HDfree(rdata2);
+    HDfree(t_wdata);
+    HDfree(t_rdata1);
+    HDfree(t_rdata2);
+    HDfree(t_wdata_bytes);
+    HDfree(t_rdata1_bytes);
+    HDfree(t_rdata2_bytes);
+
     return FAIL;
 } /* end test_big_chunks_bypass_cache() */
 
@@ -8335,7 +8644,7 @@ test_chunk_fast(const char *env_h5_driver, hid_t fapl)
         /* Skip this iteration if SWMR I/O is not supported for the VFD specified
          * by the environment variable.
          */
-        if(swmr && !H5FD_supports_swmr_test(env_h5_driver))
+        if(swmr && !H5FD__supports_swmr_test(env_h5_driver))
             continue;
 
 #ifdef H5_HAVE_FILTER_DEFLATE
@@ -8349,7 +8658,7 @@ test_chunk_fast(const char *env_h5_driver, hid_t fapl)
             H5D_alloc_time_t alloc_time;        /* Storage allocation time */
 
             /* Loop over storage allocation time */
-            for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; H5_INC_ENUM(H5D_alloc_time_t, alloc_time)) {
+            for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
                 unsigned ndims;          /* Current # of dims to test */
 
                 /* Loop over dataspace ranks to test */
@@ -8649,7 +8958,7 @@ test_reopen_chunk_fast(hid_t fapl)
     h5_fixname(FILENAME[10], fapl, filename, sizeof filename);
 
     /* Loop over storage allocation time */
-    for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; H5_INC_ENUM(H5D_alloc_time_t, alloc_time)) {
+    for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
     /* Create file */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
@@ -8760,12 +9069,32 @@ test_chunk_fast_bug1(hid_t fapl)
     hid_t       dsid = -1;      /* Dataset ID */
     hsize_t     dim[2], max_dim[2], chunk_dim[2]; /* Dataset and chunk dimensions */
     H5D_alloc_time_t alloc_time;        /* Storage allocation time */
-    static unsigned wbuf[40][20], rbuf[40][20];  /* Element written/read */
+
+    unsigned    **wbuf          = NULL;
+    unsigned    **rbuf          = NULL;
+    unsigned    *wbuf_bytes     = NULL;
+    unsigned    *rbuf_bytes     = NULL;
+
     unsigned    i, j;            /* Local index variables */
 
     TESTING("datasets w/extensible array chunk indexing bug");
 
     h5_fixname(FILENAME[10], fapl, filename, sizeof filename);
+
+    /* Set up data array */
+    if(NULL == (wbuf_bytes = (unsigned *)HDcalloc(40 * 20, sizeof(unsigned))))
+        TEST_ERROR;
+    if(NULL == (wbuf = (unsigned **)HDcalloc(40, sizeof(wbuf_bytes))))
+        TEST_ERROR;
+    for (i = 0; i < 40; i++)
+        wbuf[i] = wbuf_bytes + (i * 20);
+
+    if(NULL == (rbuf_bytes = (unsigned *)HDcalloc(40 * 20, sizeof(unsigned))))
+        TEST_ERROR;
+    if(NULL == (rbuf = (unsigned **)HDcalloc(40, sizeof(rbuf_bytes))))
+        TEST_ERROR;
+    for (i = 0; i < 40; i++)
+        rbuf[i] = rbuf_bytes + (i * 20);
 
     /* Initialize write buffer */
     for(i=0; i<40; i++)
@@ -8780,7 +9109,7 @@ test_chunk_fast_bug1(hid_t fapl)
     if((sid = H5Screate_simple(2, dim, max_dim)) < 0) FAIL_STACK_ERROR
 
     /* Loop over storage allocation time */
-    for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; H5_INC_ENUM(H5D_alloc_time_t, alloc_time)) {
+    for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
         /* Create file */
         if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
@@ -8800,7 +9129,7 @@ test_chunk_fast_bug1(hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Write buffer to dataset */
-        if(H5Dwrite(dsid, H5T_NATIVE_UINT, sid, sid, H5P_DEFAULT, &wbuf) < 0)
+        if(H5Dwrite(dsid, H5T_NATIVE_UINT, sid, sid, H5P_DEFAULT, wbuf_bytes) < 0)
             FAIL_STACK_ERROR
 
         /* Close everything */
@@ -8810,7 +9139,7 @@ test_chunk_fast_bug1(hid_t fapl)
         if((dsid = H5Dopen2(fid, "dset", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
         /* Read from dataset */
-        if(H5Dread(dsid, H5T_NATIVE_UINT, sid, sid, H5P_DEFAULT, &rbuf) < 0)
+        if(H5Dread(dsid, H5T_NATIVE_UINT, sid, sid, H5P_DEFAULT, rbuf_bytes) < 0)
             FAIL_STACK_ERROR
 
         /* Verify read data */
@@ -8827,6 +9156,11 @@ test_chunk_fast_bug1(hid_t fapl)
 
     if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
 
+    HDfree(wbuf);
+    HDfree(rbuf);
+    HDfree(wbuf_bytes);
+    HDfree(rbuf_bytes);
+
     PASSED();
     return SUCCEED;
 
@@ -8837,6 +9171,12 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     } H5E_END_TRY;
+
+    HDfree(wbuf);
+    HDfree(rbuf);
+    HDfree(wbuf_bytes);
+    HDfree(rbuf_bytes);
+
     return FAIL;
 } /* end test_chunk_fast_bug1() */
 
@@ -8958,7 +9298,7 @@ test_chunk_expand(hid_t fapl)
         if(TRUE != H5Zfilter_avail(H5Z_FILTER_EXPAND)) FAIL_STACK_ERROR
 
         /* Loop over storage allocation time */
-        for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; H5_INC_ENUM(H5D_alloc_time_t, alloc_time)) {
+        for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
 
             /* Create file */
             if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
@@ -9346,7 +9686,7 @@ test_fixed_array(hid_t fapl)
     hid_t    dsid_max = -1;    /* Dataset ID for dataset with maximum dimensions set */
 
     hsize_t     dim2[2] = {48, 18};           /* Dataset dimensions */
-    hsize_t     dim2_big[2] = {500, 60};      /* Big dataset dimensions */
+    const hsize_t     dim2_big[2] = {500, 60};      /* Big dataset dimensions */
     hsize_t     dim2_max[2] = {120, 50};      /* Maximum dataset dimensions */
 
     hid_t       mem_id;          /* Memory space ID */
@@ -9360,14 +9700,20 @@ test_fixed_array(hid_t fapl)
     int         rbuf[POINTS];              /* read buffer */
     int         *rbuf_big = NULL;      /* read buffer for big dataset */
 
-    hsize_t     chunk_dim2[2] = {4, 3}; /* Chunk dimensions */
-    int         chunks[12][6];          /* # of chunks for dataset dimensions */
-    int         chunks_big[125][20];    /* # of chunks for big dataset dimensions */
+    const hsize_t     chunk_dim2[2] = {4, 3}; /* Chunk dimensions */
+
+    int         **chunks            = NULL;    /* # of chunks for dataset dimensions */
+    int         **chunks_big        = NULL;    /* # of chunks for big dataset dimensions */
+    int         *chunks_bytes       = NULL;
+    int         *chunks_big_bytes   = NULL;
+
     int         chunk_row;              /* chunk row index */
     int         chunk_col;              /* chunk column index */
 
-    hsize_t     coord[POINTS][2];           /* datdaset coordinates */
-    hsize_t     coord_big[POINTS_BIG][2];       /* big dataset coordinates */
+    hsize_t     **coord             = NULL;         /* datdaset coordinates */
+    hsize_t     **coord_big         = NULL;         /* big datdaset coordinates */
+    hsize_t     *coord_bytes        = NULL;
+    hsize_t     *coord_big_bytes    = NULL;
 
     H5D_chunk_index_t idx_type;     /* Dataset chunk index type */
     H5F_libver_t low, high;         /* File format bounds */
@@ -9382,10 +9728,42 @@ test_fixed_array(hid_t fapl)
 
     size_t      i, j;               /* local index variables */
     herr_t      ret;                /* Generic return value */
+    long ofs, inc;
+    long rows;
+    long cols;
 
     TESTING("datasets w/fixed array as chunk index");
 
     h5_fixname(FILENAME[12], fapl, filename, sizeof filename);
+
+    /* Set up 2D data arrays */
+    if(NULL == (chunks_bytes = (int *)HDcalloc(12 * 6, sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (chunks = (int **)HDcalloc(12, sizeof(chunks_bytes))))
+        TEST_ERROR;
+    for (i = 0; i < 12; i++)
+        chunks[i] = chunks_bytes + (i * 6);
+
+    if(NULL == (chunks_big_bytes = (int *)HDcalloc(125 * 20, sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (chunks_big = (int **)HDcalloc(125, sizeof(chunks_big_bytes))))
+        TEST_ERROR;
+    for (i = 0; i < 125; i++)
+        chunks_big[i] = chunks_big_bytes + (i * 20);
+
+    if(NULL == (coord_bytes = (hsize_t *)HDcalloc(POINTS * 2, sizeof(hsize_t))))
+        TEST_ERROR;
+    if(NULL == (coord = (hsize_t **)HDcalloc(POINTS, sizeof(coord_bytes))))
+        TEST_ERROR;
+    for (i = 0; i < POINTS; i++)
+        coord[i] = coord_bytes + (i * 2);
+
+    if(NULL == (coord_big_bytes = (hsize_t *)HDcalloc(POINTS_BIG * 2, sizeof(hsize_t))))
+        TEST_ERROR;
+    if(NULL == (coord_big = (hsize_t **)HDcalloc(POINTS_BIG, sizeof(coord_big_bytes))))
+        TEST_ERROR;
+    for (i = 0; i < POINTS_BIG; i++)
+        coord_big[i] = coord_big_bytes + (i * 2);
 
     /* Check if we are using the latest version of the format */
     if(H5Pget_libver_bounds(fapl, &low, &high) < 0) FAIL_STACK_ERROR
@@ -9412,7 +9790,7 @@ test_fixed_array(hid_t fapl)
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
         /* Loop over storage allocation time */
-        for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; H5_INC_ENUM(H5D_alloc_time_t, alloc_time)) {
+        for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
             /* Create file */
             if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
@@ -9440,16 +9818,20 @@ test_fixed_array(hid_t fapl)
         for(j = 0; j < dim2[1]/chunk_dim2[1]; j++)
             chunks[i][j] = 0;
 
+        rows = (long)(dim2[0]/chunk_dim2[0]);
+        cols = (long)(dim2[1]/chunk_dim2[1]);
+        make_random_offset_and_increment(rows * cols, &ofs, &inc);
+
         /* Generate random point coordinates. Only one point is selected per chunk */
         for(i = 0; i < POINTS; i++){
-        do {
-            chunk_row = (int)HDrandom () % (int)(dim2[0]/chunk_dim2[0]);
-            chunk_col = (int)HDrandom () % (int)(dim2[1]/chunk_dim2[1]);
-        } while (chunks[chunk_row][chunk_col]);
+            H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
+            H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
+            ofs = (ofs + inc) % (rows * cols);
+            HDassert(!chunks[chunk_row][chunk_col]);
 
-        wbuf[i] = chunks[chunk_row][chunk_col] = chunk_row+chunk_col+1;
-        coord[i][0] = (hsize_t)chunk_row * chunk_dim2[0];
-        coord[i][1] = (hsize_t)chunk_col * chunk_dim2[1];
+            wbuf[i] = chunks[chunk_row][chunk_col] = chunk_row+chunk_col+1;
+            coord[i][0] = (hsize_t)chunk_row * chunk_dim2[0];
+            coord[i][1] = (hsize_t)chunk_col * chunk_dim2[1];
         } /* end for */
 
         /* Create first dataset with cur and max dimensions */
@@ -9482,7 +9864,7 @@ test_fixed_array(hid_t fapl)
         if((mem_id = H5Screate_simple(1, msize, NULL)) < 0) TEST_ERROR;
 
         /* Select the random points for writing */
-        if(H5Sselect_elements(sid_max, H5S_SELECT_SET, POINTS, (const hsize_t *)coord) < 0)
+        if(H5Sselect_elements(sid_max, H5S_SELECT_SET, POINTS, (const hsize_t *)coord_bytes) < 0)
         TEST_ERROR;
 
         /* Write into dataset */
@@ -9523,7 +9905,7 @@ test_fixed_array(hid_t fapl)
         if((mem_id = H5Screate_simple(1, msize, NULL)) < 0) TEST_ERROR;
 
         /* Select the random points for writing */
-        if(H5Sselect_elements(sid, H5S_SELECT_SET, POINTS, (const hsize_t *)coord) < 0)
+        if(H5Sselect_elements(sid, H5S_SELECT_SET, POINTS, (const hsize_t *)coord_bytes) < 0)
         TEST_ERROR;
 
         /* Write into dataset */
@@ -9565,23 +9947,27 @@ test_fixed_array(hid_t fapl)
         for(j = 0; j < dim2_big[1]/chunk_dim2[1]; j++)
             chunks_big[i][j] = 0;
 
+        rows = (long)(dim2_big[0]/chunk_dim2[0]);
+        cols = (long)(dim2_big[1]/chunk_dim2[1]);
+        make_random_offset_and_increment(rows * cols, &ofs, &inc);
+
         /* Generate random point coordinates. Only one point is selected per chunk */
         for(i = 0; i < POINTS_BIG; i++){
-        do {
-            chunk_row = (int)HDrandom () % (int)(dim2_big[0]/chunk_dim2[0]);
-            chunk_col = (int)HDrandom () % (int)(dim2_big[1]/chunk_dim2[1]);
-        } while (chunks_big[chunk_row][chunk_col]);
+            H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
+            H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
+            ofs = (ofs + inc) % (rows * cols);
+            HDassert(!chunks_big[chunk_row][chunk_col]);
 
-        wbuf_big[i] = chunks_big[chunk_row][chunk_col] = chunk_row+chunk_col+1;
-        coord_big[i][0] = (hsize_t)chunk_row * chunk_dim2[0];
-        coord_big[i][1] = (hsize_t)chunk_col * chunk_dim2[1];
+            wbuf_big[i] = chunks_big[chunk_row][chunk_col] = chunk_row+chunk_col+1;
+            coord_big[i][0] = (hsize_t)chunk_row * chunk_dim2[0];
+            coord_big[i][1] = (hsize_t)chunk_col * chunk_dim2[1];
         } /* end for */
 
         /* Create dataspace for write buffer */
         if((big_mem_id = H5Screate_simple(1, msize_big, NULL)) < 0) TEST_ERROR;
 
         /* Select the random points for writing */
-        if(H5Sselect_elements(sid_big, H5S_SELECT_SET, POINTS_BIG, (const hsize_t *)coord_big) < 0)
+        if(H5Sselect_elements(sid_big, H5S_SELECT_SET, POINTS_BIG, (const hsize_t *)coord_big_bytes) < 0)
         TEST_ERROR;
 
         /* Write into dataset */
@@ -9603,7 +9989,7 @@ test_fixed_array(hid_t fapl)
         if((mem_id = H5Screate_simple(1, msize, NULL)) < 0) TEST_ERROR;
 
         /* Select the random points for reading */
-        if(H5Sselect_elements (sid, H5S_SELECT_SET, POINTS, (const hsize_t *)coord) < 0) TEST_ERROR;
+        if(H5Sselect_elements (sid, H5S_SELECT_SET, POINTS, (const hsize_t *)coord_bytes) < 0) TEST_ERROR;
 
         /* Read from dataset */
         if(H5Dread(dsid, H5T_NATIVE_INT, mem_id, sid, H5P_DEFAULT, rbuf) < 0) TEST_ERROR;
@@ -9631,7 +10017,7 @@ test_fixed_array(hid_t fapl)
         if((mem_id = H5Screate_simple(1, msize, NULL)) < 0) TEST_ERROR;
 
         /* Select the random points for reading */
-        if(H5Sselect_elements (sid, H5S_SELECT_SET, POINTS, (const hsize_t *)coord) < 0) TEST_ERROR;
+        if(H5Sselect_elements (sid, H5S_SELECT_SET, POINTS, (const hsize_t *)coord_bytes) < 0) TEST_ERROR;
 
         /* Read from dataset */
         if(H5Dread(dsid, H5T_NATIVE_INT, mem_id, sid, H5P_DEFAULT, rbuf) < 0) TEST_ERROR;
@@ -9658,7 +10044,7 @@ test_fixed_array(hid_t fapl)
         if((big_mem_id = H5Screate_simple(1, msize_big, NULL)) < 0) TEST_ERROR;
 
         /* Select the random points for reading */
-        if(H5Sselect_elements (sid_big, H5S_SELECT_SET, POINTS_BIG, (const hsize_t *)coord_big) < 0) TEST_ERROR;
+        if(H5Sselect_elements (sid_big, H5S_SELECT_SET, POINTS_BIG, (const hsize_t *)coord_big_bytes) < 0) TEST_ERROR;
         /* Read from dataset */
         if(H5Dread(dsid_big, H5T_NATIVE_INT, big_mem_id, sid_big, H5P_DEFAULT, rbuf_big) < 0) TEST_ERROR;
 
@@ -9700,6 +10086,15 @@ test_fixed_array(hid_t fapl)
     HDfree(wbuf_big);
     HDfree(rbuf_big);
 
+    HDfree(chunks);
+    HDfree(chunks_big);
+    HDfree(coord);
+    HDfree(coord_big);
+    HDfree(chunks_bytes);
+    HDfree(chunks_big_bytes);
+    HDfree(coord_bytes);
+    HDfree(coord_big_bytes);
+
     PASSED();
     return SUCCEED;
 
@@ -9711,10 +10106,18 @@ error:
         H5Sclose(mem_id);
         H5Fclose(fid);
     } H5E_END_TRY;
-    if(wbuf_big)
-        HDfree(wbuf_big);
-    if(rbuf_big)
-        HDfree(rbuf_big);
+
+    HDfree(wbuf_big);
+    HDfree(rbuf_big);
+    HDfree(chunks);
+    HDfree(chunks_big);
+    HDfree(coord);
+    HDfree(coord_big);
+    HDfree(chunks_bytes);
+    HDfree(chunks_big_bytes);
+    HDfree(coord_bytes);
+    HDfree(coord_big_bytes);
+
     return FAIL;
 } /* end test_fixed_array() */
 
@@ -9813,7 +10216,7 @@ test_single_chunk(hid_t fapl)
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
         /* Loop over storage allocation time */
-        for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; H5_INC_ENUM(H5D_alloc_time_t, alloc_time)) {
+        for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
             /* Create file */
             if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
@@ -10438,7 +10841,7 @@ test_swmr_non_latest(const char *env_h5_driver, hid_t fapl)
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    if(!H5FD_supports_swmr_test(env_h5_driver)) {
+    if(!H5FD__supports_swmr_test(env_h5_driver)) {
         SKIPPED();
         HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
         return SUCCEED;
@@ -10688,7 +11091,7 @@ test_earray_hdr_fd(const char *env_h5_driver, hid_t fapl)
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    if(!H5FD_supports_swmr_test(env_h5_driver)) {
+    if(!H5FD__supports_swmr_test(env_h5_driver)) {
         SKIPPED();
         HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
         return SUCCEED;
@@ -10808,7 +11211,7 @@ test_farray_hdr_fd(const char *env_h5_driver, hid_t fapl)
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    if(!H5FD_supports_swmr_test(env_h5_driver)) {
+    if(!H5FD__supports_swmr_test(env_h5_driver)) {
         SKIPPED();
         HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
         return SUCCEED;
@@ -10925,10 +11328,13 @@ test_bt2_hdr_fd(const char *env_h5_driver, hid_t fapl)
 
     TESTING("Version 2 B-tree chunk index header flush dependencies handled correctly");
 
+    /* Initialize struct */
+    HDmemset(&info, 0, sizeof(info));
+
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    if(!H5FD_supports_swmr_test(env_h5_driver)) {
+    if(!H5FD__supports_swmr_test(env_h5_driver)) {
         SKIPPED();
         HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
         return SUCCEED;
@@ -12694,20 +13100,23 @@ error:
 } /* end dls_01_write_data() */
 
 static herr_t
-dls_01_read_stuff( hid_t fid )
+dls_01_read_stuff(hid_t fid)
 {
     int status = 0;
     hid_t did = 0;
     H5O_info_t info;
 
-    did = H5Dopen2( fid, DLS_01_DATASET, H5P_DEFAULT );
-    if ( did <= 0 ) TEST_ERROR
+    did = H5Dopen2(fid, DLS_01_DATASET, H5P_DEFAULT);
+    if(did <= 0)
+        TEST_ERROR
 
-    status = H5Oget_info2( did, &info, H5O_INFO_BASIC );
-    if ( status != 0 ) TEST_ERROR
+    status = H5Oget_info2(did, &info, H5O_INFO_BASIC);
+    if(status != 0)
+        TEST_ERROR
 
-    status = H5Dclose( did );
-    if ( status != 0 ) TEST_ERROR
+    status = H5Dclose(did);
+    if(status != 0)
+        TEST_ERROR
 
     return SUCCEED;
 
@@ -12916,6 +13325,11 @@ error:
  *
  *-------------------------------------------------------------------------
  */
+#define VDS_FNAME1  "virtual_file1"
+#define VDS_FNAME2  "virtual_file2"
+#define SRC_FNAME   "source_file"
+#define SRC_DSET    "src_dset"
+#define V_DSET      "v_dset"
 static herr_t
 test_versionbounds(void)
 {
@@ -12927,7 +13341,6 @@ test_versionbounds(void)
     hid_t vspace = -1;    /* Virtual dset dataspaces */
     hid_t srcdset = -1;   /* Source datset */
     hid_t vdset = -1;     /* Virtual dataset */
-    hid_t null_dspace = -1;     /* Data space of H5S_NULL */
     hsize_t dims[1] = {3};      /* Data space current size */
     char  srcfilename[FILENAME_BUF_SIZE];
     char  vfilename1[FILENAME_BUF_SIZE];
@@ -13064,7 +13477,7 @@ test_versionbounds(void)
  *-----------------------------------------------------------------------------
  */
 static herr_t
-test_object_header_minimization_dcpl(hid_t fapl_id)
+test_object_header_minimization_dcpl(void)
 {
     hid_t    dcpl_id  = -1;
     hid_t    file_id  = -1;
@@ -13078,10 +13491,10 @@ test_object_header_minimization_dcpl(hid_t fapl_id)
     /* SETUP */
     /*********/
 
-    if(NULL == h5_fixname(OHMIN_FILENAME_A, fapl_id, filename, sizeof(filename)))
+    if(NULL == h5_fixname(OHMIN_FILENAME_A, H5P_DEFAULT, filename, sizeof(filename)))
         TEST_ERROR
 
-    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (file_id == H5I_INVALID_HID)
         TEST_ERROR
 
@@ -13166,6 +13579,197 @@ error:
 } /* end test_object_header_minimization_dcpl() */
 
 
+/*-----------------------------------------------------------------------------
+ * Function:   test_0sized_dset_metadata_alloc
+ *
+ * Purpose:    Tests the metadata allocation for 0-sized datasets.
+ *
+ * Return:     Success/pass:   0
+ *             Failure/error: -1
+ *
+ * Programmer: Quincey Koziol
+ *             2020 April 30
+ *
+ *-----------------------------------------------------------------------------
+ */
+static herr_t
+test_0sized_dset_metadata_alloc(hid_t fapl_id)
+{
+    char    filename[FILENAME_BUF_SIZE] = "";
+    hid_t   file_id  = H5I_INVALID_HID;
+    hid_t   fapl_id_copy = H5I_INVALID_HID;
+    hid_t   dset_id  = H5I_INVALID_HID;
+    hid_t   dcpl_id  = H5I_INVALID_HID;
+    hid_t   dcpl_id_copy = H5I_INVALID_HID;
+    hid_t   dset_space_id = H5I_INVALID_HID;
+    hid_t   buf_space_id = H5I_INVALID_HID;
+    unsigned new_format;                /* Whether to use latest file format */
+
+    TESTING("allocation of metadata for 0-sized datasets");
+
+    /*********/
+    /* SETUP */
+    /*********/
+
+    if(NULL == h5_fixname(FILENAME[26], fapl_id, filename, sizeof(filename)))
+        FAIL_STACK_ERROR
+
+    /* Create DCPL for the dataset */
+    if((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR
+
+
+    /*************/
+    /* RUN TESTS */
+    /*************/
+
+    /* Iterate over file format versions */
+    for(new_format = FALSE; new_format <= TRUE; new_format++) {
+        H5D_layout_t layout;            /* Dataset layout type */
+        H5D_alloc_time_t alloc_time;    /* Storage allocation time */
+
+        /* Copy the file access property list */
+        if((fapl_id_copy = H5Pcopy(fapl_id)) < 0)
+            FAIL_STACK_ERROR
+
+        /* Set the "use the latest version of the format" bounds for creating objects in the file */
+        if(new_format)
+            if(H5Pset_libver_bounds(fapl_id_copy, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+                FAIL_STACK_ERROR
+
+        /* Create test file */
+        if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id_copy)) < 0)
+            FAIL_STACK_ERROR
+
+        /* Close the copy of the FAPL */
+        if(H5Pclose(fapl_id_copy) < 0)
+            FAIL_STACK_ERROR
+
+        /* Iterate over combinations of testing parameters */
+        for(layout = H5D_COMPACT; layout <= H5D_CHUNKED; layout++) {
+            for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
+                const hsize_t dims[1] = {0};        /* Dataset dimensions */
+                const hsize_t max_dims[1] = {H5S_UNLIMITED}; /* Maximum dataset dimensions */
+                const hsize_t chunk_dims[1] = {100}; /* Chunk dimensions */
+                char dset_name[32];                 /* Dataset name */
+                H5O_info_t oinfo;         /* Information about the dataset */
+
+                /* Compact storage must have early allocation */
+                if(H5D_COMPACT == layout && H5D_ALLOC_TIME_EARLY != alloc_time)
+                    continue;
+
+                /* Compose dataset name */
+                HDsnprintf(dset_name, sizeof(dset_name), "/Dataset-%u-%u", (unsigned)alloc_time, (unsigned)layout);
+
+                /* Set up DCPL */
+                if((dcpl_id_copy = H5Pcopy(dcpl_id)) < 0)
+                    FAIL_STACK_ERROR
+                if(H5Pset_alloc_time(dcpl_id_copy, alloc_time) < 0)
+                    FAIL_STACK_ERROR
+                if(H5Pset_layout(dcpl_id_copy, layout) < 0)
+                    FAIL_STACK_ERROR
+                if(H5D_CHUNKED == layout)
+                    if(H5Pset_chunk(dcpl_id_copy, 1, chunk_dims) < 0)
+                        FAIL_STACK_ERROR
+
+                /* Create the dataspace for the dataset */
+                if((dset_space_id = H5Screate_simple(1, dims, (H5D_CHUNKED == layout ? max_dims : NULL))) < 0)
+                    FAIL_STACK_ERROR
+
+                /* Create the dataset with the appropriate parameters */
+                if((dset_id = H5Dcreate2(file_id, dset_name, H5T_NATIVE_INT, dset_space_id, H5P_DEFAULT, dcpl_id_copy, H5P_DEFAULT)) < 0)
+                    FAIL_STACK_ERROR
+
+                /* Close objects used to create dataset */
+                if(H5Pclose(dcpl_id_copy) < 0)
+                    FAIL_STACK_ERROR
+                if(H5Sclose(dset_space_id) < 0)
+                    FAIL_STACK_ERROR
+
+                /* Retrieve & verify the dataset's index info */
+                HDmemset(&oinfo, 0, sizeof(oinfo));
+                if(H5Oget_info2(dset_id, &oinfo, H5O_INFO_META_SIZE) < 0)
+                    FAIL_STACK_ERROR
+                if(0 != oinfo.meta_size.obj.index_size)
+                    FAIL_PUTS_ERROR("dataset index allocation size is non-zero")
+
+                /* If chunked, try extending and verify that the index is allocated */
+                if(H5D_CHUNKED == layout) {
+                    const hsize_t new_dims[1] = {1500}; /* New dataset dimensions */
+                    const hsize_t mem_dims[1] = {1}; /* Memory buffer dataset dimensions */
+                    const hsize_t coord = 0;    /* Dataset selection coordinate */
+                    int val = 0;                /* Data value */
+
+                    /* Extend dataset */
+                    if(H5Dset_extent(dset_id, new_dims) < 0)
+                        FAIL_STACK_ERROR
+
+                    /* Get the dataspace for the dataset & set single point selection */
+                    if((dset_space_id = H5Dget_space(dset_id)) < 0)
+                        FAIL_STACK_ERROR
+                    if(H5Sselect_elements(dset_space_id, H5S_SELECT_SET, (size_t)1, (const hsize_t *)&coord) < 0)
+                        FAIL_STACK_ERROR
+
+                    /* Create memory dataspace, with only one element */
+                    if((buf_space_id = H5Screate_simple(1, mem_dims, NULL)) < 0)
+                        FAIL_STACK_ERROR
+
+                    /* Write the data to the dataset */
+                    if(H5Dwrite(dset_id, H5T_NATIVE_INT, buf_space_id, dset_space_id, H5P_DEFAULT, &val) < 0)
+                        FAIL_STACK_ERROR
+
+                    /* Close objects used to perform I/O */
+                    if(H5Sclose(dset_space_id) < 0)
+                        FAIL_STACK_ERROR
+                    if(H5Sclose(buf_space_id) < 0)
+                        FAIL_STACK_ERROR
+
+                    /* Retrieve & verify the dataset's index info */
+                    HDmemset(&oinfo, 0, sizeof(oinfo));
+                    if(H5Oget_info2(dset_id, &oinfo, H5O_INFO_META_SIZE) < 0)
+                        FAIL_STACK_ERROR
+                    if(0 == oinfo.meta_size.obj.index_size)
+                        FAIL_PUTS_ERROR("dataset index allocation size is zero")
+                } /* end if */
+
+                /* Close dataset */
+                if(H5Dclose(dset_id) < 0)
+                    FAIL_STACK_ERROR
+            } /* end for */
+        } /* end for */
+
+        /* Close test file */
+        if(H5Fclose(file_id) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+
+
+    /************/
+    /* TEARDOWN */
+    /************/
+
+    if(H5Pclose(dcpl_id) < 0)
+        FAIL_STACK_ERROR
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dset_space_id);
+        H5Pclose(buf_space_id);
+        H5Pclose(fapl_id_copy);
+        H5Pclose(dcpl_id_copy);
+        H5Pclose(dcpl_id);
+        H5Dclose(dset_id);
+        H5Fclose(file_id);
+    } H5E_END_TRY;
+
+    return FAIL;
+} /* end test_0sized_dset_metadata_alloc() */
+
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -13194,6 +13798,7 @@ main(void)
     int      nerrors = 0;
     const char *envval;
     hbool_t  contig_addr_vfd;    /* Whether VFD used has a contigous address space */
+    int i;
 
     /* Don't run this test using certain file drivers */
     envval = HDgetenv("HDF5_DRIVER");
@@ -13205,6 +13810,39 @@ main(void)
 
     /* Set the random # seed */
     HDsrandom((unsigned)HDtime(NULL));
+
+    /* Initialize global arrays */
+    /* points */
+    if(NULL == (points_data = (int *)HDcalloc(DSET_DIM1 * DSET_DIM2, sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (points = (int **)HDcalloc(DSET_DIM1, sizeof(points_data))))
+        TEST_ERROR;
+    for (i = 0; i < DSET_DIM1; i++)
+        points[i] = points_data + (i * DSET_DIM2);
+
+    /* check */
+    if(NULL == (check_data = (int *)HDcalloc(DSET_DIM1 * DSET_DIM2, sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (check = (int **)HDcalloc(DSET_DIM1, sizeof(check_data))))
+        TEST_ERROR;
+    for (i = 0; i < DSET_DIM1; i++)
+        check[i] = check_data + (i * DSET_DIM2);
+
+    /* points_dbl */
+    if(NULL == (points_dbl_data = (double *)HDcalloc(DSET_DIM1 * DSET_DIM2, sizeof(double))))
+        TEST_ERROR;
+    if(NULL == (points_dbl = (double **)HDcalloc(DSET_DIM1, sizeof(points_dbl_data))))
+        TEST_ERROR;
+    for (i = 0; i < DSET_DIM1; i++)
+        points_dbl[i] = points_dbl_data + (i * DSET_DIM2);
+
+    /* check_dbl */
+    if(NULL == (check_dbl_data = (double *)HDcalloc(DSET_DIM1 * DSET_DIM2, sizeof(double))))
+        TEST_ERROR;
+    if(NULL == (check_dbl = (double **)HDcalloc(DSET_DIM1, sizeof(check_dbl_data))))
+        TEST_ERROR;
+    for (i = 0; i < DSET_DIM1; i++)
+        check_dbl[i] = check_dbl_data + (i * DSET_DIM2);
 
     /* Testing setup */
     h5_reset();
@@ -13318,6 +13956,7 @@ main(void)
                 nerrors += (test_missing_filter(file) < 0        ? 1 : 0);
                 nerrors += (test_can_apply(file) < 0                ? 1 : 0);
                 nerrors += (test_can_apply2(file) < 0                ? 1 : 0);
+                nerrors += (test_optional_filters(file) < 0          ? 1 : 0);
                 nerrors += (test_set_local(my_fapl) < 0                ? 1 : 0);
                 nerrors += (test_can_apply_szip(file) < 0        ? 1 : 0);
                 nerrors += (test_compare_dcpl(file) < 0                ? 1 : 0);
@@ -13374,10 +14013,11 @@ main(void)
     /* Tests version bounds using its own file */
     nerrors += (test_versionbounds() < 0                    ? 1 : 0);
 
-    nerrors += (test_object_header_minimization_dcpl(fapl) < 0 ? 1 : 0);
+    nerrors += (test_object_header_minimization_dcpl() < 0 ? 1 : 0);
 
     /* Run misc tests */
-    nerrors += dls_01_main();
+    nerrors += (dls_01_main() < 0                           ? 1 : 0);
+    nerrors += (test_0sized_dset_metadata_alloc(fapl) < 0   ? 1 : 0);
 
     /* Verify symbol table messages are cached */
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
@@ -13391,9 +14031,29 @@ main(void)
 #endif /* H5_HAVE_FILTER_SZIP */
     h5_cleanup(FILENAME, fapl);
 
+    HDfree(points);
+    HDfree(check);
+    HDfree(points_dbl);
+    HDfree(check_dbl);
+
+    HDfree(points_data);
+    HDfree(check_data);
+    HDfree(points_dbl_data);
+    HDfree(check_dbl_data);
+
     HDexit(EXIT_SUCCESS);
 
 error:
+    HDfree(points);
+    HDfree(check);
+    HDfree(points_dbl);
+    HDfree(check_dbl);
+
+    HDfree(points_data);
+    HDfree(check_data);
+    HDfree(points_dbl_data);
+    HDfree(check_dbl_data);
+
     nerrors = MAX(1, nerrors);
     HDprintf("***** %d DATASET TEST%s FAILED! *****\n",
             nerrors, 1 == nerrors ? "" : "S");

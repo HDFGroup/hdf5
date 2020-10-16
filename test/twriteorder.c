@@ -187,7 +187,7 @@ parse_option(int argc, char * const argv[])
     /* verify partition size must be >= blocksize */
     if (part_size_g < blocksize_g ){
         HDfprintf(stderr, "Blocksize %d should not be bigger than partition size %d\n", blocksize_g, part_size_g);
-        Hgoto_error(-1);                                                                  
+        Hgoto_error(-1);
     }
 
 done:
@@ -228,7 +228,7 @@ int setup_parameters(int argc, char * const argv[])
 int create_wo_file(void)
 {
     int                 blkaddr         = 0;    /* blkaddress of next linked block */
-    h5_posix_io_ret_t   bytes_wrote     = -1;   /* # of bytes written   */ 
+    h5_posix_io_ret_t   bytes_wrote     = -1;   /* # of bytes written   */
 
     /* Create the data file */
     if ((write_fd_g = HDopen(DATAFILE, O_RDWR|O_TRUNC|O_CREAT, H5_POSIX_CREATE_MODE_RW)) < 0) {
@@ -252,8 +252,8 @@ int write_wo_file(void)
     int blkaddr_old=0;
     int i;
     char buffer[BLOCKSIZE_DFT];
-    h5_posix_io_ret_t   bytes_wrote     = -1;   /* # of bytes written   */ 
-    
+    h5_posix_io_ret_t   bytes_wrote     = -1;   /* # of bytes written   */
+
 
     /* write block 1, 2, ... */
     for (i = 1; i < nlinkedblock_g; i++) {
@@ -345,7 +345,7 @@ int read_wo_file(void)
 }
 
 
-/* Overall Algorithm: 
+/* Overall Algorithm:
  * Parse options from user;
  * Generate/pre-created the test file needed and close it;
  * fork: child processes become the reader processes;
@@ -447,7 +447,7 @@ main(int argc, char *argv[])
             Hgoto_error(2);
         }
     }
-    
+
 done:
     /* Print result and exit */
     if (ret_value != 0){

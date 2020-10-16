@@ -51,11 +51,11 @@ main (int argc, char **argv)
 
     MPI_Init(&argc, &argv);
     MPI_Comm_size(comm, &mpi_size);
-    MPI_Comm_rank(comm, &mpi_rank);  
+    MPI_Comm_rank(comm, &mpi_rank);
 
     if(MAINPROCESS)
 	TESTING("proper shutdown of HDF5 library");
- 
+
     /* Set up file access property list with parallel I/O access */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     VRFY((fapl >= 0), "H5Pcreate succeeded");
@@ -107,7 +107,7 @@ main (int argc, char **argv)
     VRFY((ret >= 0), "H5Dwrite succeeded");
 
     /* release data buffers */
-    if(data_array) 
+    if(data_array)
         HDfree(data_array);
 
     MPI_Finalize();
@@ -116,7 +116,7 @@ main (int argc, char **argv)
 
     if(MAINPROCESS) {
         if(0 == nerrors)
-            PASSED()
+            PASSED();
         else
 	    H5_FAILED()
     }

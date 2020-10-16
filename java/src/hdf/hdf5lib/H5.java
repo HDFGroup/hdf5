@@ -214,7 +214,7 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * exception handlers to print out the HDF-5 error stack.
  * <hr>
  *
- * @version HDF5 1.10.6 <BR>
+ * @version HDF5 1.10.7 <BR>
  *          <b>See also: <a href ="./hdf.hdf5lib.HDFArray.html"> hdf.hdf5lib.HDFArray</a> </b><BR>
  *          <a href ="./hdf.hdf5lib.HDF5Constants.html"> hdf.hdf5lib.HDF5Constants</a><BR>
  *          <a href ="./hdf.hdf5lib.HDF5CDataTypes.html"> hdf.hdf5lib.HDF5CDataTypes</a><BR>
@@ -237,7 +237,7 @@ public class H5 implements java.io.Serializable {
      *
      * Make sure to update the versions number when a different library is used.
      */
-    public final static int LIB_VERSION[] = { 1, 10, 6 };
+    public final static int LIB_VERSION[] = { 1, 10, 7 };
 
     public final static String H5PATH_PROPERTY_KEY = "hdf.hdf5lib.H5.hdf5lib";
 
@@ -1107,7 +1107,9 @@ public class H5 implements java.io.Serializable {
             log.trace("H5Aread_dname_D");
             status = H5Aread_double(attr_id, mem_type_id, (double[]) obj, isCriticalPinning);
         }
-        else if ((H5.H5Tdetect_class(mem_type_id, HDF5Constants.H5T_REFERENCE) && (is1D && (dataClass.getComponentType() == String.class))) || H5.H5Tequal(mem_type_id, HDF5Constants.H5T_STD_REF_DSETREG)) {
+        else if ((H5.H5Tdetect_class(mem_type_id, HDF5Constants.H5T_REFERENCE) &&
+                (is1D && (dataClass.getComponentType() == String.class))) ||
+                H5.H5Tequal(mem_type_id, HDF5Constants.H5T_STD_REF_DSETREG)) {
             log.trace("H5Aread_reg_ref");
             status = H5Aread_reg_ref(attr_id, mem_type_id, (String[]) obj);
         }
@@ -2005,7 +2007,9 @@ public class H5 implements java.io.Serializable {
             status = H5Dread_double(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
                     (double[]) obj, isCriticalPinning);
         }
-        else if ((H5.H5Tdetect_class(mem_type_id, HDF5Constants.H5T_REFERENCE) && (is1D && (dataClass.getComponentType() == String.class))) || H5.H5Tequal(mem_type_id, HDF5Constants.H5T_STD_REF_DSETREG)) {
+        else if ((H5.H5Tdetect_class(mem_type_id, HDF5Constants.H5T_REFERENCE) &&
+                (is1D && (dataClass.getComponentType() == String.class))) ||
+                H5.H5Tequal(mem_type_id, HDF5Constants.H5T_STD_REF_DSETREG)) {
             log.trace("H5Dread_reg_ref");
             status = H5Dread_reg_ref(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
                     (String[]) obj);
@@ -3563,7 +3567,7 @@ public class H5 implements java.io.Serializable {
 
     public synchronized static int H5Gget_obj_info_all(long loc_id, String name, String[] oname, int[] otype,
             int[] ltype, long[] fno, long[] ref, int indx_type) throws HDF5LibraryException, NullPointerException {
-        return H5Gget_obj_info_full(loc_id, name, oname, otype, ltype, fno, ref, oname.length, indx_type, -1);
+        return H5Gget_obj_info_full(loc_id, name, oname, otype, ltype, fno, ref, indx_type, -1);
     }
 
     public synchronized static int H5Gget_obj_info_full(long loc_id, String name, String[] oname, int[] otype,
@@ -6456,6 +6460,55 @@ public class H5 implements java.io.Serializable {
      *
      **/
     public synchronized static native void H5Pset_evict_on_close(long fapl_id, boolean evict_on_close)
+            throws HDF5LibraryException;
+
+    /**
+     * H5Pget_use_file_locking retrieves whether we are using file locking.
+     *
+     * @param fapl_id
+     *            IN: File access property list identifier
+     *
+     * @return indication if file locking is used.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     *
+     **/
+    public synchronized static native boolean H5Pget_use_file_locking(long fapl_id)
+            throws HDF5LibraryException;
+
+    /**
+     * H5Pget_use_file_locking retrieves whether we ignore file locks when they are disabled.
+     *
+     * @param fapl_id
+     *            IN: File access property list identifier
+     *
+     * @return indication if file locking is ignored.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     *
+     **/
+    public synchronized static native boolean H5Pget_ignore_disabled_file_locking(long fapl_id)
+            throws HDF5LibraryException;
+
+    /**
+     * H5Pset_file_locking sets parameters related to file locking.
+     *
+     * @param fapl_id
+     *            IN: File access property list identifier
+     *
+     * @param use_file_locking
+     *            IN: Whether the library will use file locking when opening files (mainly for SWMR semantics).
+     *
+     * @param ignore_when_disabled
+     *            IN: Whether file locking will be ignored when disabled on a file system (useful for Lustre).
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     *
+     **/
+    public synchronized static native void H5Pset_file_locking(long fapl_id, boolean use_file_locking, boolean ignore_when_disabled)
             throws HDF5LibraryException;
 
     // Dataset creation property list (DCPL) routines //

@@ -42,7 +42,7 @@ LDADD=../../src/h5repack/libh5repack.la $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 
 testh5repack_detect_szip_SOURCES=testh5repack_detect_szip.c
 
-h5repacktst_SOURCES=h5repacktst.c 
+h5repacktst_SOURCES=h5repacktst.c
 
 
 if HAVE_SHARED_CONDITIONAL

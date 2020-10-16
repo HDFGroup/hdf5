@@ -118,30 +118,28 @@ typedef struct iter_t {
 } iter_t;
 
 
-static const char *drivername = "";
+static const char *drivername = NULL;
 
 #ifdef H5_HAVE_ROS3_VFD
-/* default "anonymous" s3 configuration
- */
+/* Default "anonymous" S3 configuration */
 static H5FD_ros3_fapl_t ros3_fa = {
-    1,     /* fapl version      */
-    false, /* authenticate      */
-    "",    /* aws region        */
-    "",    /* access key id     */
-    "",    /* secret access key */
+    1,     /* Structure Version */
+    false, /* Authenticate?     */
+    "",    /* AWS Region        */
+    "",    /* Access Key ID     */
+    "",    /* Secret Access Key */
 };
 #endif /* H5_HAVE_ROS3_VFD */
 
 #ifdef H5_HAVE_LIBHDFS
-/* default HDFS access configuration
- */
+/* "Default" HDFS configuration */
 static H5FD_hdfs_fapl_t hdfs_fa = {
-    1,           /* fapl version          */
-    "localhost", /* namenode name         */
-    0,           /* namenode port         */
-    "",          /* kerberos ticket cache */
-    "",          /* user name             */
-    2048,        /* stream buffer size    */
+    1,           /* Structure Version     */
+    "localhost", /* Namenode Name         */
+    0,           /* Namenode Port         */
+    "",          /* Kerberos ticket cache */
+    "",          /* User name             */
+    2048,        /* Stream buffer size    */
 };
 #endif /* H5_HAVE_LIBHDFS */
 
@@ -399,7 +397,7 @@ attribute_stats(iter_t *iter, const H5O_info_t *oi)
         iter->attr_bins = (unsigned long *)HDrealloc(iter->attr_bins, (bin + 1) * sizeof(unsigned long));
         HDassert(iter->attr_bins);
 
-  /* Initialize counts for intermediate bins */
+        /* Initialize counts for intermediate bins */
         while(iter->attr_nbins < bin)
             iter->attr_bins[iter->attr_nbins++] = 0;
         iter->attr_nbins++;
@@ -444,7 +442,7 @@ group_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
 {
     H5G_info_t ginfo;           /* Group information */
     unsigned bin;               /* "bin" the number of objects falls in */
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED;
 
     /* Gather statistics about this type of object */
     iter->uniq_groups++;
@@ -455,7 +453,7 @@ group_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
 
     /* Get group information */
     if((ret_value = H5Gget_info_by_name(iter->fid, name, &ginfo, H5P_DEFAULT)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gget_info_by_name() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Gget_info_by_name() failed");
 
     /* Update link stats */
     /* Collect statistics for small groups */
@@ -470,7 +468,7 @@ group_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
     if((bin + 1) > iter->group_nbins) {
         /* Allocate more storage for info about dataset's datatype */
         if((iter->group_bins = (unsigned long *)HDrealloc(iter->group_bins, (bin + 1) * sizeof(unsigned long))) == NULL)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Drealloc() failed");
+            H5TOOLS_GOTO_ERROR(FAIL, "H5Drealloc() failed");
 
         /* Initialize counts for intermediate bins */
         while(iter->group_nbins < bin)
@@ -489,7 +487,7 @@ group_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
 
     /* Update attribute metadata info */
     if((ret_value = attribute_stats(iter, oi)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "attribute_stats failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "attribute_stats failed");
 
 done:
     return ret_value;
@@ -527,7 +525,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
     int num_ext;                /* Number of external files for a dataset */
     int nfltr;                  /* Number of filters for a dataset */
     H5Z_filter_t fltr;          /* Filter identifier */
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED;
 
     /* Gather statistics about this type of object */
     iter->uniq_dsets++;
@@ -537,7 +535,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
     iter->dset_ohdr_info.free_size += oi->hdr.space.free;
 
     if((did = H5Dopen2(iter->fid, name, H5P_DEFAULT)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dopen() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Dopen() failed");
 
     /* Update dataset metadata info */
     iter->datasets_index_storage_size += oi->meta_size.obj.index_size;
@@ -545,7 +543,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
 
     /* Update attribute metadata info */
     if((ret_value = attribute_stats(iter, oi)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "attribute_stats() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "attribute_stats() failed");
 
     /* Get storage info */
     /* Failure 0 indistinguishable from no-data-stored 0 */
@@ -553,10 +551,10 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
 
     /* Gather layout statistics */
     if((dcpl = H5Dget_create_plist(did)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_create_plist() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Dget_create_plist() failed");
 
     if((lout = H5Pget_layout(dcpl)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_layout() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Pget_layout() failed");
 
     /* Object header's total size for H5D_COMPACT layout includes raw data size */
     /* "storage" also includes H5D_COMPACT raw data size */
@@ -568,7 +566,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
 
     /* Get the number of external files for the dataset */
     if((num_ext = H5Pget_external_count(dcpl)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_external_count() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Pget_external_count() failed");
 
     /* Accumulate raw data size accordingly */
     if(num_ext) {
@@ -580,10 +578,10 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
 
     /* Gather dataspace statistics */
     if((sid = H5Dget_space(did)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_space() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Sget_space() failed");
 
     if((ndims = H5Sget_simple_extent_dims(sid, dims, NULL)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_dims() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Sget_simple_extent_dims() failed");
 
     /* Check for larger rank of dataset */
     if((unsigned)ndims > iter->max_dset_rank)
@@ -606,7 +604,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
         if((bin + 1) > iter->dset_dim_nbins) {
             /* Allocate more storage for info about dataset's datatype */
             if((iter->dset_dim_bins = (unsigned long *)HDrealloc(iter->dset_dim_bins, (bin + 1) * sizeof(unsigned long))) == NULL)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Drealloc() failed");
+                H5TOOLS_GOTO_ERROR(FAIL, "H5Drealloc() failed");
 
             /* Initialize counts for intermediate bins */
             while(iter->dset_dim_nbins < bin)
@@ -621,11 +619,11 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
     } /* end if */
 
     if(H5Sclose(sid) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sclose() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Sclose() failed");
 
     /* Gather datatype statistics */
     if((tid = H5Dget_type(did)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_type() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Dget_type() failed");
 
     type_found = FALSE;
     for(u = 0; u < iter->dset_ntypes; u++)
@@ -644,11 +642,11 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
 
         /* Allocate more storage for info about dataset's datatype */
         if((iter->dset_type_info = (dtype_info_t *)HDrealloc(iter->dset_type_info, iter->dset_ntypes * sizeof(dtype_info_t))) == NULL)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Drealloc() failed");
+            H5TOOLS_GOTO_ERROR(FAIL, "H5Drealloc() failed");
 
         /* Initialize information about datatype */
         if((iter->dset_type_info[curr_ntype].tid = H5Tcopy(tid)) < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tcopy() failed");
+            H5TOOLS_GOTO_ERROR(FAIL, "H5Tcopy() failed");
         iter->dset_type_info[curr_ntype].count = 1;
         iter->dset_type_info[curr_ntype].named = 0;
 
@@ -661,7 +659,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
         (iter->dset_type_info[u].named)++;
 
     if(H5Tclose(tid) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Tclose() failed");
 
     /* Track different filters */
     if((nfltr = H5Pget_nfilters(dcpl)) >= 0) {
@@ -679,10 +677,10 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
     } /* endif nfltr */
 
      if(H5Pclose(dcpl) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Pclose() failed");
 
      if(H5Dclose(did) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dclose() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Dclose() failed");
 
 done:
      return ret_value;
@@ -715,7 +713,7 @@ datatype_stats(iter_t *iter, const H5O_info_t *oi)
 
     /* Update attribute metadata info */
     if((ret_value = attribute_stats(iter, oi)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "attribute_stats() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "attribute_stats() failed");
 done:
      return ret_value;
 }  /* end datatype_stats() */
@@ -750,17 +748,17 @@ obj_stats(const char *path, const H5O_info_t *oi, const char *already_visited,
         switch(oi->type) {
             case H5O_TYPE_GROUP:
                 if(group_stats(iter, path, oi) < 0)
-                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "group_stats failed");
+                    H5TOOLS_GOTO_ERROR(FAIL, "group_stats failed");
                 break;
 
             case H5O_TYPE_DATASET:
                 if(dataset_stats(iter, path, oi) < 0)
-                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "dataset_stats failed");
+                    H5TOOLS_GOTO_ERROR(FAIL, "dataset_stats failed");
                 break;
 
             case H5O_TYPE_NAMED_DATATYPE:
                 if(datatype_stats(iter, oi) < 0)
-                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "datatype_stats failed");
+                    H5TOOLS_GOTO_ERROR(FAIL, "datatype_stats failed");
                 break;
 
             case H5O_TYPE_UNKNOWN:
@@ -1059,103 +1057,32 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                 break;
 
             case 'w':
-#ifndef H5_HAVE_ROS3_VFD
+#ifdef H5_HAVE_ROS3_VFD
+                if (h5tools_parse_ros3_fapl_tuple(opt_arg, ',', &ros3_fa) < 0) {
+                    error_msg("failed to parse S3 VFD credential info\n");
+                    goto error;
+                }
+
+                drivername = drivernames[ROS3_VFD_IDX];
+#else
                 error_msg("Read-Only S3 VFD not enabled.\n");
                 goto error;
-#else
-                {
-                    char        *cred_str = NULL;
-                    unsigned     nelems   = 0;
-                    char       **cred     = NULL;
-                    char const  *ccred[3];
-
-                    if (FAIL == parse_tuple((const char *)opt_arg, ',', &cred_str, &nelems, &cred)) {
-                        error_msg("Unable to parse s3 credential\n");
-                        goto error;
-                    }
-                    if (nelems != 3) {
-                        error_msg("s3 credential must have three elements\n");
-                        goto error;
-                    }
-                    ccred[0] = (const char *)cred[0];
-                    ccred[1] = (const char *)cred[1];
-                    ccred[2] = (const char *)cred[2];
-                    if (0 == h5tools_populate_ros3_fapl(&ros3_fa, ccred)) {
-                        error_msg("Unable to set ros3 fapl config\n");
-                        goto error;
-                    }
-                    HDfree(cred);
-                    HDfree(cred_str);
-                } /* parse s3-cred block */
-                drivername = "ros3";
+#endif
                 break;
-#endif /* H5_HAVE_ROS3_VFD */
 
             case 'H':
-#ifndef H5_HAVE_LIBHDFS
-                error_msg("HDFS VFD is not enabled.\n");
-                goto error;
-#else
-                {
-                    unsigned         nelems    = 0;
-                    char            *props_src = NULL;
-                    char           **props     = NULL;
-                    unsigned long    k         = 0;
-                    if (FAIL == parse_tuple((const char *)opt_arg,
-                            ',', &props_src, &nelems, &props)) {
-                        error_msg("unable to parse hdfs properties tuple\n");
-                        goto error;
-                    }
-                    /* sanity-check tuple count
-                     */
-                    if (nelems != 5) {
-                        char str[64] = "";
-                        HDsprintf(str,
-                                "expected 5 elements in hdfs properties tuple "
-                                "but found %u\n",
-                                nelems);
-                        HDfree(props);
-                        HDfree(props_src);
-                        error_msg(str);
-                        goto error;
-                    }
-                    /* Populate fapl configuration structure with given
-                     * properties.
-                     * TODO/WARNING: No error-checking is done on length of
-                     *         input strings... Silent overflow is possible,
-                     *         albeit unlikely.
-                     */
-                    if (HDstrncmp(props[0], "", 1)) {
-                        HDstrncpy(hdfs_fa.namenode_name,(const char *)props[0], HDstrlen(props[0]));
-                    }
-                    if (HDstrncmp(props[1], "", 1)) {
-                        k = strtoul((const char *)props[1], NULL, 0);
-                        if (errno == ERANGE) {
-                            error_msg("supposed port number wasn't.\n");
-                            goto error;
-                        }
-                        hdfs_fa.namenode_port = (int32_t)k;
-                    }
-                    if (HDstrncmp(props[2], "", 1)) {
-                        HDstrncpy(hdfs_fa.kerberos_ticket_cache, (const char *)props[2], HDstrlen(props[2]));
-                    }
-                    if (HDstrncmp(props[3], "", 1)) {
-                        HDstrncpy(hdfs_fa.user_name, (const char *)props[3], HDstrlen(props[3]));
-                    }
-                    if (strncmp(props[4], "", 1)) {
-                        k = HDstrtoul((const char *)props[4], NULL, 0);
-                        if (errno == ERANGE) {
-                            error_msg("supposed buffersize number wasn't.\n");
-                            goto error;
-                        }
-                        hdfs_fa.stream_buffer_size = (int32_t)k;
-                    }
-                    HDfree(props);
-                    HDfree(props_src);
-                    drivername = "hdfs";
+#ifdef H5_HAVE_LIBHDFS
+                if (h5tools_parse_hdfs_fapl_tuple(opt_arg, ',', &hdfs_fa) < 0) {
+                    error_msg("failed to parse HDFS VFD configuration info\n");
+                    goto error;
                 }
+
+                drivername = drivernames[HDFS_VFD_IDX];
+#else
+                error_msg("HDFS VFD not enabled.\n");
+                goto error;
+#endif
                 break;
-#endif /* H5_HAVE_LIBHDFS */
 
             default:
                 usage(h5tools_getprogname());
@@ -1852,75 +1779,54 @@ main(int argc, const char *argv[])
 {
     iter_t              iter;
     const char         *fname = NULL;
-    hid_t               fid = -1;
-    H5E_auto2_t         func;
-    H5E_auto2_t         tools_func;
-    void               *edata;
-    void               *tools_edata;
+    hid_t               fid = H5I_INVALID_HID;
     struct handler_t   *hand = NULL;
     hid_t               fapl_id = H5P_DEFAULT;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
 
-    /* Disable error reporting */
-    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
     /* Initialize h5tools lib */
     h5tools_init();
-
-    /* Disable tools error reporting */
-    H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
-    H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
 
     HDmemset(&iter, 0, sizeof(iter));
 
     if(parse_command_line(argc, argv, &hand) < 0)
         goto done;
 
-    /* if drivername is not null, probably need to set the fapl */
-    if (HDstrcmp(drivername, "")) {
-        void *conf_fa = NULL;
+    /* enable error reporting if command line option */
+    h5tools_error_report();
 
-        if (!HDstrcmp(drivername, "ros3")) {
-#ifndef H5_HAVE_ROS3_VFD
-            error_msg("Read-Only S3 VFD not enabled.\n\n");
-            goto done;
+    if (drivername) {
+        h5tools_vfd_info_t vfd_info;
+
+        vfd_info.info       = NULL;
+        vfd_info.name       = drivername;
+
+        if (!HDstrcmp(drivername, drivernames[ROS3_VFD_IDX])) {
+#ifdef H5_HAVE_ROS3_VFD
+            vfd_info.info = (void *)&ros3_fa;
 #else
-            conf_fa = (void *)&ros3_fa;
-#endif /* H5_HAVE_ROS3_VFD */
-
-        }
-        else if (!HDstrcmp(drivername, "hdfs")) {
-#ifndef H5_HAVE_LIBHDFS
-            error_msg("HDFS VFD not enabled.\n\n");
+            error_msg("Read-Only S3 VFD not enabled.\n");
             goto done;
+#endif
+        }
+        else if (!HDstrcmp(drivername, drivernames[HDFS_VFD_IDX])) {
+#ifdef H5_HAVE_LIBHDFS
+            vfd_info.info = (void *)&hdfs_fa;
 #else
-            conf_fa = (void *)&hdfs_fa;
-#endif /* H5_HAVE_LIBHDFS */
+            error_msg("HDFS VFD not enabled.\n");
+            goto done;
+#endif
         }
 
-        if (conf_fa != NULL) {
-            HDassert(fapl_id == H5P_DEFAULT);
-            fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-            if (fapl_id < 0) {
-                error_msg("Unable to create fapl entry\n");
-                goto done;
-            }
-            if (1 > h5tools_set_configured_fapl(fapl_id, drivername, conf_fa)) {
-                error_msg("Unable to set fapl\n");
-                goto done;
-            }
+        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, &vfd_info)) < 0) {
+            error_msg("Unable to create FAPL for file access\n");
+            goto done;
         }
-    } /* drivername set */
+    }
 
     fname = argv[opt_ind];
-
-    if(enable_error_stack > 0) {
-        H5Eset_auto2(H5E_DEFAULT, func, edata);
-        H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
-    }
 
     /* Check for filename given */
     if(fname) {
@@ -1929,7 +1835,9 @@ main(int argc, const char *argv[])
 
         HDprintf("Filename: %s\n", fname);
 
-        fid = H5Fopen(fname, H5F_ACC_RDONLY, fapl_id);
+        fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id,
+                (fapl_id == H5P_DEFAULT) ? FALSE : TRUE, NULL, 0);
+
         if(fid < 0) {
             error_msg("unable to open file \"%s\"\n", fname);
             h5tools_setstatus(EXIT_FAILURE);
@@ -2023,8 +1931,6 @@ done:
         error_msg("unable to close file \"%s\"\n", fname);
         h5tools_setstatus(EXIT_FAILURE);
     } /* end if */
-
-    H5Eset_auto2(H5E_DEFAULT, func, edata);
 
     leave(h5tools_getstatus());
 } /* end main() */

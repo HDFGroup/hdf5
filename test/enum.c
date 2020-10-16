@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Tuesday, December 22, 1998
  */
 #include "h5test.h"
@@ -128,7 +128,7 @@ test_conv(hid_t file)
 {
     hid_t	cwg=-1, type=-1, space=-1, dset=-1;
     c_e1	val;
-    /* Some values are out of range for testing. The library should accept them */        
+    /* Some values are out of range for testing. The library should accept them */
     static c_e1	data1[]={E1_RED,   E1_GREEN, E1_BLUE,  E1_GREEN, E1_WHITE,
 			 E1_WHITE, E1_BLACK, E1_GREEN, E1_BLUE,  E1_RED,
 			 E1_RED,   E1_BLUE,  E1_GREEN, E1_BLACK, E1_WHITE,

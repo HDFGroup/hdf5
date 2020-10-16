@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Wednesday, October  7, 1998
  *
  * Purpose:	Tests file mounting.
@@ -404,39 +404,42 @@ test_hide(hid_t fapl)
     char	filename1[1024], filename2[1024];
 
     TESTING("name hiding under mount point");
-    h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
-    h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
+    h5_fixname(FILENAME[0], fapl, filename1, sizeof(filename1));
+    h5_fixname(FILENAME[1], fapl, filename2, sizeof(filename2));
 
     if((file1 = H5Fopen(filename1, H5F_ACC_RDONLY, fapl)) < 0 ||
             (file2 = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0)
         FAIL_STACK_ERROR
 
     /* Get information about file1:/mnt1/file1 for later */
-    if(H5Oget_info_by_name2(file1, "/mnt1/file1", &oi1, H5O_INFO_BASIC, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Oget_info_by_name2(file1, "/mnt1/file1", &oi1, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
+        FAIL_STACK_ERROR
 
     /* Build the virtual file */
-    if(H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT) < 0)
+        FAIL_STACK_ERROR
 
     /* Original names under file1:/mnt1 should not be accessible */
     H5E_BEGIN_TRY {
-	grp = H5Gopen2(file1, "/mnt1/file1", H5P_DEFAULT);
+        grp = H5Gopen2(file1, "/mnt1/file1", H5P_DEFAULT);
     } H5E_END_TRY;
     if(grp >= 0) {
-	H5_FAILED();
-	HDputs("    Name is still accessible under mount point.");
-	TEST_ERROR
-    } /* end if */
+        H5_FAILED();
+        HDputs("    Name is still accessible under mount point.");
+        TEST_ERROR
+    }
 
     /*
      * The original objects under file1:/mnt1 are still accessible by their
      * other names.  This is a rather stupid test but demonstrates a point.
      */
-    if(H5Oget_info_by_name2(file1, "/file1", &oi2, H5O_INFO_BASIC, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Oget_info_by_name2(file1, "/file1", &oi2, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
+        FAIL_STACK_ERROR
     if(oi1.fileno != oi2.fileno || H5F_addr_ne(oi1.addr, oi2.addr)) {
-	H5_FAILED();
-	HDputs("    Hard link failed for hidden object.");
-	TEST_ERROR
-    } /* end if */
+        H5_FAILED();
+        HDputs("    Hard link failed for hidden object.");
+        TEST_ERROR
+    }
 
     /* Unmount and close objects */
     if(H5Funmount(file1, "/mnt1") < 0) FAIL_STACK_ERROR
@@ -448,9 +451,9 @@ test_hide(hid_t fapl)
 
 error:
     H5E_BEGIN_TRY {
-	H5Gclose(grp);
-	H5Fclose(file1);
-	H5Fclose(file2);
+        H5Gclose(grp);
+        H5Fclose(file1);
+        H5Fclose(file2);
     } H5E_END_TRY;
     return 1;
 } /* end test_hide() */
@@ -490,20 +493,23 @@ test_assoc(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get information about the root of file2 */
-    if(H5Oget_info2(file2, &oi1, H5O_INFO_BASIC) < 0) FAIL_STACK_ERROR
+    if(H5Oget_info2(file2, &oi1, H5O_INFO_BASIC) < 0)
+        FAIL_STACK_ERROR
 
     /* Create the virtual file */
-    if(H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT) < 0)
+        FAIL_STACK_ERROR
 
     /*
      * Get info about the mount point -- should be the same as the root group
      * of file2.
      */
-    if(H5Oget_info_by_name2(file1, "/mnt1", &oi2, H5O_INFO_BASIC, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Oget_info_by_name2(file1, "/mnt1", &oi2, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
+        FAIL_STACK_ERROR
 
     if(oi1.fileno != oi2.fileno || H5F_addr_ne(oi1.addr, oi2.addr)) {
-	H5_FAILED();
-	HDputs("    Association failed.");
+        H5_FAILED();
+        HDputs("    Association failed.");
         TEST_ERROR
     } /* end if */
 
@@ -517,8 +523,8 @@ test_assoc(hid_t fapl)
 
 error:
     H5E_BEGIN_TRY {
-	H5Fclose(file2);
-	H5Fclose(file1);
+        H5Fclose(file2);
+        H5Fclose(file1);
     } H5E_END_TRY;
     return 1;
 } /* end test_assoc() */

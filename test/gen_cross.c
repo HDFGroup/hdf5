@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu <slu@ncsa.uiuc.edu>
+ * Programmer:  Raymond Lu
  *              Thursday, March 23, 2006
  *
  *  This program writes floating-point data to the HDF5 file.  It generates

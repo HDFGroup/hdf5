@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Tuesday, December  9, 1997
  *
  * Purpose:     Tests the datatype interface (H5T)
@@ -659,8 +659,8 @@ error:
  *              destination are the same except for the order of the
  *              elements.
  *
- * Return:    Success:    0
- *            Failure:    number of errors
+ * Return:      Success:    0
+ *              Failure:    number of errors
  *
  * Programmer:  Robb Matzke
  *              Thursday, June 17, 1999
@@ -1179,8 +1179,8 @@ test_compound_6(void)
     orig = (unsigned char*)HDmalloc(nelmts * sizeof(struct st));
     for (i=0; i<(int)nelmts; i++) {
         s_ptr = ((struct st*)((void *)orig)) + i;
-        s_ptr->b    = (i*8+1) & 0x7fff;
-        s_ptr->d    = (i*8+6) & 0x7fff;
+        s_ptr->b    = (int16_t)((i*8+1) & 0x7fff);
+        s_ptr->d    = (int16_t)((i*8+6) & 0x7fff);
     }
     HDmemcpy(buf, orig, nelmts*sizeof(struct st));
 
@@ -6099,7 +6099,8 @@ test_int_float_except(void)
 
     /* Convert second buffer */
     HDmemset(&e, 0, sizeof(except_info_t));
-    if(H5Tconvert(H5T_NATIVE_INT, H5T_NATIVE_FLOAT, (size_t)CONVERT_SIZE, buf2, NULL, dxpl) < 0) TEST_ERROR
+    if(H5Tconvert(H5T_NATIVE_INT, H5T_NATIVE_FLOAT, (size_t)CONVERT_SIZE, buf2, NULL, dxpl) < 0)
+        TEST_ERROR
 
     /* Check the buffer after conversion, as floats */
     for(u = 0; u < CONVERT_SIZE; u++) {
@@ -6116,7 +6117,8 @@ test_int_float_except(void)
 
     /* Convert buffer */
     HDmemset(&e, 0, sizeof(except_info_t));
-    if(H5Tconvert(H5T_NATIVE_FLOAT, H5T_NATIVE_INT, (size_t)CONVERT_SIZE, buf2, NULL, dxpl) < 0) TEST_ERROR
+    if(H5Tconvert(H5T_NATIVE_FLOAT, H5T_NATIVE_INT, (size_t)CONVERT_SIZE, buf2, NULL, dxpl) < 0)
+        TEST_ERROR
 
     /* Check the buffer after conversion, as integers */
     for(u = 0; u < CONVERT_SIZE; u++) {
@@ -6660,7 +6662,7 @@ static void create_del_obj_named_test_file(const char *filename, hid_t fapl,
     hid_t my_fapl;      /* Copy of file access property list ID */
     hid_t dcpl;         /* Dataset creation property list ID */
     unsigned use_at_least_v18;/* Whether to use old or new format */
-    herr_t status;      /* Generic return value */
+    herr_t H5_ATTR_NDEBUG_UNUSED status; /* Generic return value */
 
     /* Make copy of FAPL */
     my_fapl = H5Pcopy(fapl);
@@ -7640,19 +7642,19 @@ test_versionbounds(void)
     ret = H5Tenum_insert(enum_type, "RED", &enum_val);
     if (ret < 0) TEST_ERROR
 
-    enum_val++;
+    enum_val = E1_GREEN;
     ret = H5Tenum_insert(enum_type, "GREEN", &enum_val);
     if (ret < 0) TEST_ERROR
 
-    enum_val++;
+    enum_val = E1_BLUE;
     ret = H5Tenum_insert(enum_type, "BLUE", &enum_val);
     if (ret < 0) TEST_ERROR
 
-    enum_val++;
+    enum_val = E1_ORANGE;
     ret = H5Tenum_insert(enum_type, "ORANGE", &enum_val);
     if (ret < 0) TEST_ERROR
 
-    enum_val++;
+    enum_val = E1_YELLOW;
     ret = H5Tenum_insert(enum_type, "YELLOW", &enum_val);
     if (ret < 0) TEST_ERROR
 
@@ -7757,8 +7759,8 @@ error:
 int
 main(void)
 {
-    long     nerrors = 0;
-    hid_t    fapl = -1;
+    long    nerrors = 0;
+    hid_t   fapl = H5I_INVALID_HID;
 
     /* Set the random # seed */
     HDsrandom((unsigned)HDtime(NULL));

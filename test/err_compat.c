@@ -35,7 +35,10 @@ const char *FILENAME[] = {
 #define DIM0    100
 #define DIM1    200
 
-int    ipoints2[DIM0][DIM1], icheck2[DIM0][DIM1];
+int     **ipoints2      = NULL;
+int     **icheck2       = NULL;
+int     *ipoints2_data  = NULL;
+int     *icheck2_data   = NULL;
 
 #define DSET_NAME               "a_dataset"
 #define FAKE_ID                 (hid_t)-1
@@ -465,12 +468,28 @@ dump_error(void)
 int
 main(void)
 {
-    hid_t        file, fapl;
+    hid_t       file, fapl;
     char        filename[1024];
-    const char          *FUNC_main="main";
+    const char  *FUNC_main="main";
+    int         i;
 
     HDfprintf(stderr, "   This program tests the Error API compatible with HDF5 v1.6.  There are supposed to be some error messages\n");
     fapl = h5_fileaccess();
+
+    /* Set up data arrays */
+    if(NULL == (ipoints2_data = (int *)HDcalloc(DIM0 * DIM1, sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (ipoints2 = (int **)HDcalloc(DIM0, sizeof(ipoints2_data))))
+        TEST_ERROR;
+    for (i = 0; i < DIM0; i++)
+        ipoints2[i] = ipoints2_data + (i * DIM1);
+
+    if(NULL == (icheck2_data = (int *)HDcalloc(DIM0 * DIM1, sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (icheck2 = (int **)HDcalloc(DIM0, sizeof(icheck2_data))))
+        TEST_ERROR;
+    for (i = 0; i < DIM0; i++)
+        icheck2[i] = icheck2_data + (i * DIM1);
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -500,10 +519,20 @@ main(void)
     if(H5Fclose(file) < 0) TEST_ERROR ;
     h5_clean_files(FILENAME, fapl);
 
+    HDfree(ipoints2);
+    HDfree(ipoints2_data);
+    HDfree(icheck2);
+    HDfree(icheck2_data);
+
     HDprintf("All error API tests passed.\n");
     return 0;
 
 error:
+    HDfree(ipoints2);
+    HDfree(ipoints2_data);
+    HDfree(icheck2);
+    HDfree(icheck2_data);
+
     HDprintf("***** ERROR TEST FAILED! *****\n");
     return 1;
 }

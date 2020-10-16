@@ -33,6 +33,8 @@
 ./autogen.sh
 ./configure.ac
 
+./.github/workflows/main.yml  _DO_NOT_DISTRIBUTE_
+
 ./m4/aclocal_cxx.m4
 ./m4/aclocal_fc.m4
 ./m4/aclocal_fc.f90
@@ -94,6 +96,7 @@
 ./bin/switch_maint_mode      _DO_NOT_DISTRIBUTE_
 ./bin/timekeeper      _DO_NOT_DISTRIBUTE_
 ./bin/trace
+./bin/warnhist      _DO_NOT_DISTRIBUTE_
 ./bin/yodconfigure
 ./bin/batch/ctestP.lsf.in.cmake
 ./bin/batch/ctestP.sl.in.cmake
@@ -131,13 +134,54 @@
 ./config/intel-flags
 ./config/linux-gnu
 ./config/linux-gnuaout
+./config/linux-gnueabihf
 ./config/linux-gnulibc1
 ./config/linux-gnulibc2
 ./config/lt_vers.am
 ./config/Makefile.am.blank
+./config/netbsd
 ./config/pgi-fflags
 ./config/pgi-flags
 ./config/solaris
+
+#warnings files for both autotools and CMake
+./config/clang-cxxflags
+./config/clang-flags
+./config/clang-warnings/developer-general
+./config/clang-warnings/error-general
+./config/clang-warnings/general
+./config/clang-warnings/no-developer-general
+./config/gnu-warnings/4.8-4.last
+./config/gnu-warnings/4.8
+./config/gnu-warnings/4.9
+./config/gnu-warnings/5
+./config/gnu-warnings/6
+./config/gnu-warnings/7
+./config/gnu-warnings/8
+./config/gnu-warnings/9
+./config/gnu-warnings/cxx-general
+./config/gnu-warnings/cxx-4.9
+./config/gnu-warnings/cxx-5
+./config/gnu-warnings/cxx-error-5
+./config/gnu-warnings/cxx-error-general
+./config/gnu-warnings/developer-4.8
+./config/gnu-warnings/developer-7
+./config/gnu-warnings/developer-8
+./config/gnu-warnings/developer-general
+./config/gnu-warnings/error-5
+./config/gnu-warnings/error-8
+./config/gnu-warnings/error-general
+./config/gnu-warnings/general
+./config/gnu-warnings/gfort-general
+./config/gnu-warnings/gfort-4.8
+./config/gnu-warnings/gfort-5
+./config/gnu-warnings/gfort-6
+./config/gnu-warnings/gfort-8
+./config/gnu-warnings/no-developer-4.8
+./config/gnu-warnings/no-developer-8
+./config/gnu-warnings/no-developer-general
+./config/intel-warnings/ifort-general
+./config/intel-warnings/general
 
 ./config/site-specific/BlankForm
 
@@ -146,6 +190,7 @@
 ./examples/h5_chunk_read.c
 ./examples/h5_compound.c
 ./examples/h5_crtgrpd.c
+./examples/h5_debug_trace.c
 ./examples/h5_subset.c
 ./examples/h5_cmprss.c
 ./examples/h5_rdwt.c
@@ -463,8 +508,6 @@
 ./release_docs/README_HDF5_CMake
 ./release_docs/README_HPC
 ./release_docs/RELEASE.txt
-./release_docs/README_HDF5_CMake
-./release_docs/README_HPC
 ./release_docs/USING_HDF5_CMake.txt
 ./release_docs/USING_HDF5_VS.txt
 
@@ -480,6 +523,7 @@
 ./src/H5err.txt
 ./src/H5detect.c
 ./src/H5make_libsettings.c
+./src/H5mpi.c
 ./src/H5overflow.txt
 ./src/H5private.h
 ./src/H5public.h
@@ -639,6 +683,9 @@
 ./src/H5FDint.c
 ./src/H5FDlog.c
 ./src/H5FDlog.h
+./src/H5FDmirror.c
+./src/H5FDmirror.h
+./src/H5FDmirror_priv.h
 ./src/H5FDmodule.h
 ./src/H5FDmpi.c
 ./src/H5FDmpi.h
@@ -656,6 +703,8 @@
 ./src/H5FDsec2.c
 ./src/H5FDsec2.h
 ./src/H5FDspace.c
+./src/H5FDsplitter.c
+./src/H5FDsplitter.h
 ./src/H5FDstdio.c
 ./src/H5FDstdio.h
 ./src/H5FDtest.c
@@ -948,6 +997,15 @@
 ./test/be_extlink2.h5
 ./test/big.c
 ./test/bittests.c
+./test/bounds_ref_earliest_latest.h5
+./test/bounds_ref_latest_latest.h5
+./test/bounds_ref_v110_v110.h5
+./test/bounds_ref_v112_v112.h5
+./test/bounds_ref_v18_v18.h5
+./test/bounds_sel_earliest_latest.h5
+./test/bounds_sel_latest_latest.h5
+./test/bounds_sel_v110_v110.h5
+./test/bounds_sel_v112_v112.h5
 ./test/btree_idx_1_6.h5
 ./test/btree_idx_1_8.h5
 ./test/btree2.c
@@ -958,6 +1016,7 @@
 ./test/cache_image.c
 ./test/cache_logging.c
 ./test/cache_tagging.c
+./test/chunk_info.c
 ./test/cmpd_dset.c
 ./test/cork.c
 ./test/corrupt_stab_msg.h5
@@ -1023,6 +1082,7 @@
 ./test/gen_deflate.c
 ./test/gen_file_image.c
 ./test/gen_filespace.c
+./test/gen_filters.c
 ./test/gen_mergemsg.c
 ./test/gen_new_array.c
 ./test/gen_new_fill.c
@@ -1061,6 +1121,7 @@
 ./test/corrupted_name_len.h5
 ./test/mergemsg.h5
 ./test/mf.c
+./test/mirror_vfd.c
 ./test/mount.c
 ./test/mtime.c
 ./test/multi_file_v16-r.h5
@@ -1118,6 +1179,7 @@
 ./test/testhdf5.c
 ./test/testhdf5.h
 ./test/testlibinfo.sh.in
+./test/test_mirror.sh.in
 ./test/test_usecases.sh.in
 ./test/testmeta.c
 ./test/testswmr.sh.in
@@ -1129,7 +1191,9 @@
 ./test/th5s.c
 ./test/th5s.h5
 ./test/theap.c
+./test/thread_id.c
 ./test/tid.c
+./test/timer.c
 ./test/titerate.c
 ./test/tlayouto.h5
 ./test/tmeta.c
@@ -1147,6 +1211,7 @@
 ./test/ttsafe.c
 ./test/ttsafe.h
 ./test/ttsafe_acreate.c
+./test/ttsafe_attr_vlen.c
 ./test/ttsafe_cancel.c
 ./test/ttsafe_dcreate.c
 ./test/ttsafe_error.c
@@ -1157,19 +1222,19 @@
 ./test/unlink.c
 ./test/unregister.c
 ./test/use_append_chunk.c
+./test/use_append_chunk_mirror.c
 ./test/use_append_mchunks.c
 ./test/use_common.c
 ./test/use_disable_mdc_flushes.c
 ./test/use.h
-./test/vfd.c
-./test/gen_filters.c
-./test/chunk_info.c
+./test/version_bounds_1_10.c
 ./test/vds.c
 ./test/vds_env.c
 ./test/vds_swmr.h
 ./test/vds_swmr_gen.c
 ./test/vds_swmr_reader.c
 ./test/vds_swmr_writer.c
+./test/vfd.c
 
 ./test/testfiles/err_compat_1
 ./test/testfiles/err_compat_2
@@ -1966,11 +2031,8 @@
 ./tools/test/h5dump/errfiles/tall-2A.err
 ./tools/test/h5dump/errfiles/tall-2A0.err
 ./tools/test/h5dump/errfiles/tall-2B.err
-./tools/test/h5dump/errfiles/tarray1_big.err
 ./tools/test/h5dump/errfiles/tattr-3.err
-./tools/test/h5dump/errfiles/tattrregR.err
 ./tools/test/h5dump/errfiles/tcomp-3.err
-./tools/test/h5dump/errfiles/tdataregR.err
 ./tools/test/h5dump/errfiles/tdset-2.err
 ./tools/test/h5dump/errfiles/texceedsubblock.err
 ./tools/test/h5dump/errfiles/texceedsubcount.err
@@ -2305,6 +2367,7 @@
 ./tools/test/h5diff/testfiles/h5diff_56.txt
 ./tools/test/h5diff/testfiles/h5diff_57.txt
 ./tools/test/h5diff/testfiles/h5diff_58.txt
+./tools/test/h5diff/testfiles/h5diff_58_ref.txt
 ./tools/test/h5diff/testfiles/h5diff_59.txt
 ./tools/test/h5diff/testfiles/h5diff_60.txt
 ./tools/test/h5diff/testfiles/h5diff_61.txt
@@ -2477,6 +2540,8 @@
 ./tools/test/h5diff/testfiles/h5diff_dset3.h5
 ./tools/test/h5diff/testfiles/h5diff_dtypes.h5
 ./tools/test/h5diff/testfiles/h5diff_empty.h5
+./tools/test/h5diff/testfiles/h5diff_eps1.h5
+./tools/test/h5diff/testfiles/h5diff_eps2.h5
 ./tools/test/h5diff/testfiles/h5diff_hyper1.h5
 ./tools/test/h5diff/testfiles/h5diff_hyper2.h5
 ./tools/test/h5diff/testfiles/h5diff_types.h5
@@ -2505,6 +2570,7 @@
 ./tools/test/h5diff/testfiles/h5diff_dset_zero_dim_size1.h5
 ./tools/test/h5diff/testfiles/h5diff_dset_zero_dim_size2.h5
 ./tools/test/h5diff/testfiles/h5diff_enum_invalid_values.h5
+./tools/test/h5diff/testfiles/h5diff_eps.txt
 ./tools/test/h5diff/testfiles/compounds_array_vlen1.h5
 ./tools/test/h5diff/testfiles/compounds_array_vlen2.h5
 ./tools/test/h5diff/testfiles/non_comparables1.h5
@@ -2516,8 +2582,8 @@
 ./tools/test/h5diff/testfiles/h5diff_ud.txt
 ./tools/test/h5diff/testfiles/h5diff_udfail.err
 ./tools/test/h5diff/testfiles/h5diff_udfail.txt
-./tools/test/h5diff/testfiles/diff_strings1.h5
-./tools/test/h5diff/testfiles/diff_strings2.h5
+./tools/test/h5diff/testfiles/h5diff_strings1.h5
+./tools/test/h5diff/testfiles/h5diff_strings2.h5
 ./tools/test/h5diff/testfiles/h5diff_vlstr.txt
 #vds
 ./tools/test/h5diff/testfiles/h5diff_v1.txt
@@ -2527,6 +2593,7 @@
 #test files for h5repack
 ./tools/test/h5repack/testfiles/README
 ./tools/test/h5repack/testfiles/bounds_latest_latest.h5
+./tools/test/h5repack/testfiles/h5copy_extlinks_src.h5
 ./tools/test/h5repack/testfiles/h5repack_aggr.h5
 ./tools/test/h5repack/testfiles/h5repack_attr.h5
 ./tools/test/h5repack/testfiles/h5repack_attr_refs.h5
@@ -2603,6 +2670,31 @@
 ./tools/test/h5repack/testfiles/3_1_vds.h5-vds_chunk2x5x8-v.ddl
 ./tools/test/h5repack/testfiles/4_vds.h5-vds_conti-v.ddl
 ./tools/test/h5repack/testfiles/4_vds.h5-vds_compa-v.ddl
+./tools/test/h5repack/testfiles/textlink-base.textlink.h5.ddl
+./tools/test/h5repack/testfiles/textlink-merge.textlink.h5.tst
+./tools/test/h5repack/testfiles/textlink-mergeprune.textlink.h5.ddl
+./tools/test/h5repack/testfiles/textlink-prune.textlink.h5.ddl
+./tools/test/h5repack/testfiles/textlinkfar-base.textlinkfar.h5.ddl
+./tools/test/h5repack/testfiles/textlinkfar-merge.textlinkfar.h5.tst
+./tools/test/h5repack/testfiles/textlinkfar-mergeprune.textlinkfar.h5.ddl
+./tools/test/h5repack/testfiles/textlinkfar-prune.textlinkfar.h5.ddl
+./tools/test/h5repack/testfiles/textlinksrc-base.textlinksrc.h5.ddl
+./tools/test/h5repack/testfiles/textlinksrc-merge.textlinksrc.h5.tst
+./tools/test/h5repack/testfiles/textlinksrc-mergeprune.textlinksrc.h5.ddl
+./tools/test/h5repack/testfiles/textlinksrc-prune.textlinksrc.h5.ddl
+./tools/test/h5repack/testfiles/textlinktar-base.textlinktar.h5.ddl
+./tools/test/h5repack/testfiles/textlinktar-merge.textlinktar.h5.tst
+./tools/test/h5repack/testfiles/textlinktar-mergeprune.textlinktar.h5.ddl
+./tools/test/h5repack/testfiles/textlinktar-prune.textlinktar.h5.ddl
+./tools/test/h5repack/testfiles/tsoftlinks-base.tsoftlinks.h5.ddl
+./tools/test/h5repack/testfiles/tsoftlinks-merge.tsoftlinks.h5.tst
+./tools/test/h5repack/testfiles/tsoftlinks-mergeprune.tsoftlinks.h5.ddl
+./tools/test/h5repack/testfiles/tsoftlinks-prune.tsoftlinks.h5.ddl
+./tools/test/h5repack/testfiles/h5copy_extlinks_src-base.h5copy_extlinks_src.h5.ddl
+./tools/test/h5repack/testfiles/h5copy_extlinks_src-merge.h5copy_extlinks_src.h5.tst
+./tools/test/h5repack/testfiles/h5copy_extlinks_src-mergeprune.h5copy_extlinks_src.h5.ddl
+./tools/test/h5repack/testfiles/h5copy_extlinks_src-prune.h5copy_extlinks_src.h5.ddl
+./tools/test/h5repack/testfiles/h5copy_extlinks_trg.h5
 
 # jam utility and tests
 ./tools/src/h5jam/Makefile.am
@@ -2664,6 +2756,7 @@
 ./tools/test/perform/build_h5perf_alone.sh
 ./tools/test/perform/build_h5perf_serial_alone.sh
 ./tools/test/perform/chunk.c
+./tools/test/perform/chunk_cache.c
 ./tools/test/perform/direct_write_perf.c
 ./tools/test/perform/gen_report.pl
 ./tools/test/perform/iopipe.c
@@ -2681,6 +2774,18 @@
 ./tools/test/perform/sio_standalone.c
 ./tools/test/perform/sio_standalone.h
 ./tools/test/perform/zip_perf.c
+
+# Utils directory
+./utils/COPYING
+./utils/Makefile.am
+
+# Mirror VFD utilities
+./utils/mirror_vfd/Makefile.am
+./utils/mirror_vfd/mirror_remote.c
+./utils/mirror_vfd/mirror_remote.h
+./utils/mirror_vfd/mirror_server.c
+./utils/mirror_vfd/mirror_server_stop.c
+./utils/mirror_vfd/mirror_writer.c
 
 # high level libraries
 ./hl/COPYING
@@ -3254,12 +3359,15 @@
 ./config/cmake/ConfigureChecks.cmake
 ./config/cmake/CPack.Info.plist.in
 ./config/cmake/CTestCustom.cmake
+./config/cmake/fileCompareTest.cmake
 ./config/cmake/FindHDFS.cmake
 ./config/cmake/H5cxx_config.h.in
 ./config/cmake/H5pubconf.h.in
 ./config/cmake/hdf5-config.cmake.in
 ./config/cmake/hdf5-config-version.cmake.in
 ./config/cmake/HDFCompilerFlags.cmake
+./config/cmake/HDFCXXCompilerFlags.cmake
+./config/cmake/HDFFortranCompilerFlags.cmake
 ./config/cmake/HDF5_Process_Flex_Files.cmake
 ./config/cmake/HDF5Macros.cmake
 ./config/cmake/HDF5UseFortran.cmake
@@ -3407,6 +3515,8 @@
 ./tools/test/misc/vds/CMakeLists.txt
 ./tools/test/perform/CMakeLists.txt
 ./tools/test/perform/CMakeTests.cmake
+./utils/CMakeLists.txt
+./utils/mirror_vfd/CMakeLists.txt
 
 # CMake-specific User Scripts
 ./config/cmake/CTestScript.cmake
@@ -3414,6 +3524,13 @@
 ./config/cmake/scripts/CTestScript.cmake
 ./config/cmake/scripts/HDF5config.cmake
 ./config/cmake/scripts/HDF5options.cmake
+
+# CMake-specific Sanitizer Scripts
+./config/sanitizer/code-coverage.cmake
+./config/sanitizer/sanitizers.cmake
+./config/sanitizer/tools.cmake
+./config/sanitizer/LICENSE
+./config/sanitizer/README.md
 
 # CMake-specific HPC Scripts
 ./config/cmake/scripts/HPC/sbatch-HDF5options.cmake
@@ -3510,3 +3627,5 @@
 ./tools/test/misc/Makefile.in
 ./tools/test/misc/vds/Makefile.in
 ./tools/test/perform/Makefile.in
+./utils/Makefile.in
+./utils/mirror_vfd/Makefile.in

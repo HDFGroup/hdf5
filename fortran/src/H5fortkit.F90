@@ -51,8 +51,8 @@ CONTAINS
     INTEGER :: i
     INTEGER :: len
     CHARACTER(LEN=len) :: fstring
-    CHARACTER(LEN=1), DIMENSION(1:len) :: cstring 
-    
+    CHARACTER(LEN=1), DIMENSION(1:len) :: cstring
+
     fstring = ''
     DO i = 1, len
        IF (cstring(i)(1:1)==CHAR(0)) EXIT

@@ -77,12 +77,12 @@ const char *FILENAME[] = {
 static void
 gen_non(const char *fname)
 {
-    hid_t    fid = -1;        /* file id */
-    hid_t    fcpl = -1;        /* file creation property list */
-    hid_t    gid = -1;        /* group id */
-    hid_t       sid = -1;           /* space id */
-    hid_t    dcpl = -1;        /* dataset creation property id */
-    hid_t    did1 = -1, did2 = -1;    /* dataset id */
+    hid_t    fid = H5I_INVALID_HID;        /* file id */
+    hid_t    fcpl = H5I_INVALID_HID;        /* file creation property list */
+    hid_t    gid = H5I_INVALID_HID;        /* group id */
+    hid_t       sid = H5I_INVALID_HID;           /* space id */
+    hid_t    dcpl = H5I_INVALID_HID;        /* dataset creation property id */
+    hid_t    did1 = -1, did2 = H5I_INVALID_HID;    /* dataset id */
     hsize_t     dims1[1] = {10};         /* dataset dimension */
     hsize_t     dims2[2] = {4, 6};         /* dataset dimension */
     hsize_t    max_dims[2];        /* maximum dataset dimension */
@@ -307,11 +307,11 @@ error:
 static void
 gen_edge(const char *fname)
 {
-    hid_t    fid = -1;            /* file id */
-    hid_t    fapl = -1;               /* file access property list */
-    hid_t       sid = -1;           /* dataspace id */
-    hid_t    dcpl = -1;            /* dataset creation property id */
-    hid_t    did = -1;        /* dataset id */
+    hid_t    fid = H5I_INVALID_HID;            /* file id */
+    hid_t    fapl = H5I_INVALID_HID;               /* file access property list */
+    hid_t       sid = H5I_INVALID_HID;           /* dataspace id */
+    hid_t    dcpl = H5I_INVALID_HID;            /* dataset creation property id */
+    hid_t    did = H5I_INVALID_HID;        /* dataset id */
     hsize_t     dims2[2] = {12, 6};    /* Dataset dimensions */
     hsize_t     c_dims[2] = {5, 5};    /* Chunk dimensions */
     float     buf[12][6];                /* Buffer for writing data */
@@ -395,14 +395,14 @@ error:
 static void
 gen_err_level(const char *fname)
 {
-    hid_t fid = -1;            /* file ID */
-    hid_t fapl = -1;               /* file access property list */
-    hid_t fcpl = -1;               /* file creation property list */
-    hid_t sid = -1;           /* dataspace id */
-    hid_t dcpl = -1;        /* dataset creation property list */
-    hid_t did = -1;        /* dataset ID */
-    hid_t fsid = -1;        /* file dataspace ID */
-    hid_t msid = -1;        /* memory dataspace ID */
+    hid_t fid = H5I_INVALID_HID;            /* file ID */
+    hid_t fapl = H5I_INVALID_HID;               /* file access property list */
+    hid_t fcpl = H5I_INVALID_HID;               /* file creation property list */
+    hid_t sid = H5I_INVALID_HID;           /* dataspace id */
+    hid_t dcpl = H5I_INVALID_HID;        /* dataset creation property list */
+    hid_t did = H5I_INVALID_HID;        /* dataset ID */
+    hid_t fsid = H5I_INVALID_HID;        /* file dataspace ID */
+    hid_t msid = H5I_INVALID_HID;        /* memory dataspace ID */
     unsigned char *buf = NULL;    /* buffer for data */
     hsize_t dims[2] = {0, 1};            /* dataset dimension sizes */
     hsize_t max_dims[2] = {1, H5S_UNLIMITED};    /* dataset maximum dimension sizes */
@@ -534,13 +534,13 @@ error:
 static void
 gen_ext(const char *fname, unsigned new_format, unsigned what)
 {
-    hid_t    fid = -1;         /* file id */
-    hid_t    fapl = -1;               /* file access property list */
-    hid_t    fcpl = -1;               /* file creation property list */
-    hid_t    gid = -1;               /* group id */
-    hid_t       sid = -1;           /* space id */
-    hid_t    dcpl = -1;            /* dataset creation property id */
-    hid_t    did1 = -1, did2 = -1;    /* dataset id */
+    hid_t    fid = H5I_INVALID_HID;         /* file id */
+    hid_t    fapl = H5I_INVALID_HID;               /* file access property list */
+    hid_t    fcpl = H5I_INVALID_HID;               /* file creation property list */
+    hid_t    gid = H5I_INVALID_HID;               /* group id */
+    hid_t       sid = H5I_INVALID_HID;           /* space id */
+    hid_t    dcpl = H5I_INVALID_HID;            /* dataset creation property id */
+    hid_t    did1 = H5I_INVALID_HID, did2 = H5I_INVALID_HID;    /* dataset id */
     hsize_t     dims1[1] = {10};         /* dataset dimension */
     hsize_t     dims2[2] = {4, 6};         /* dataset dimension */
     hsize_t    max_dims[2];        /* maximum dataset dimension */

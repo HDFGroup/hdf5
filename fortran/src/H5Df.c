@@ -1286,16 +1286,16 @@ h5dget_access_plist_c (hid_t_f *dset_id, hid_t_f *plist_id)
  * PURPOSE
  *  Call H5Dvlen_reclaim
  * INPUTS
- *  type_id   - Identifier of the datatype. 
- *  space_id  - Identifier of the dataspace. 
- *  plist_id  - Identifier of the property list used to create the buffer. 
- *  buf       - Pointer to the buffer to be reclaimed.    
+ *  type_id   - Identifier of the datatype.
+ *  space_id  - Identifier of the dataspace.
+ *  plist_id  - Identifier of the property list used to create the buffer.
+ *  buf       - Pointer to the buffer to be reclaimed.
  *
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
  *   M. Scot Breitenfeld
- *  January 15, 2011 
+ *  January 15, 2011
  *
  * SOURCE
 */

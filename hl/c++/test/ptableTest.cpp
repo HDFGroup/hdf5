@@ -142,7 +142,7 @@ int TestCompoundDatatype()
     HDfflush(stdout);
 
     /* Create compound datatype */
-    typedef struct compoundType
+    typedef struct
     {
         short a, b, c;
         int e;
@@ -267,13 +267,13 @@ error:
 const char* COMPRESS_PT("/compressTest");
 int TestCompress()
 {
+#ifdef H5_HAVE_FILTER_DEFLATE
     unsigned int flags = 0;
     unsigned int config = 0;
     size_t cd_nelemts = 0;
 
     printf("Testing %-62s", "compression");
     HDfflush(stdout);
-#ifdef H5_HAVE_FILTER_DEFLATE
     try {
     /* Prepare property list to set compression, randomly use deflate */
     DSetCreatPropList dscreatplist;
@@ -479,7 +479,7 @@ int SystemTest()
 
     /* Creating two inter-related datatypes.  Create two datasets and put
      * one datatype in each. */
-    typedef struct compoundType
+    typedef struct
     {
         short a, b, c;
         int e;
@@ -492,7 +492,7 @@ int SystemTest()
     H5Tinsert(dtypeID1, "charlie", HOFFSET( compoundType, c ), H5T_NATIVE_SHORT);
     H5Tinsert(dtypeID1, "ebert", HOFFSET( compoundType, e ), H5T_NATIVE_INT);
 
-    typedef struct cType2
+    typedef struct
     {
         char f;
         compoundType g;
