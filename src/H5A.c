@@ -52,8 +52,39 @@
 /* Helper routines for sync/async API calls */
 static hid_t  H5A__create_api_common(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
                                      hid_t acpl_id, hid_t aapl_id, hid_t es_id, const char *caller);
+
+static hid_t H5A__create_by_name_api_common(hid_t loc_id, const char *obj_name, const char *attr_name,
+    hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t lapl_id, hid_t es_id, 
+    const char *caller);
+
+static hid_t H5A__open_api_common(hid_t loc_id, const char *attr_name, hid_t aapl_id, 
+    hid_t es_id, const char *caller);
+
+static hid_t H5A__open_by_name_api_common(hid_t loc_id, const char *obj_name, 
+    const char *attr_name, hid_t aapl_id, hid_t lapl_id, hid_t es_id, const char *caller);
+
+static hid_t H5A__open_by_idx_api_common(hid_t loc_id, const char *obj_name, 
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t aapl_id, 
+    hid_t lapl_id, hid_t es_id, const char *caller);
+
+static herr_t H5A__read_api_common(hid_t attr_id, hid_t dtype_id, void *buf, hid_t es_id, 
+    const char *caller);
+
 static herr_t H5A__write_api_common(hid_t attr_id, hid_t dtype_id, const void *buf, hid_t es_id,
                                      const char *caller);
+static herr_t H5A__rename_api_common(hid_t loc_id, const char *old_name, const char *new_name, 
+    hid_t es_id, const char *caller);
+
+static herr_t H5A__rename_by_name_api_common(hid_t loc_id, const char *obj_name, 
+    const char *old_attr_name, const char *new_attr_name, hid_t lapl_id, 
+    hid_t es_id, const char *caller);
+
+static htri_t H5A__exists_api_common(hid_t obj_id, const char *attr_name, hid_t es_id, 
+    const char *caller);
+
+static htri_t H5A__exists_by_name_api_common(hid_t loc_id, const char *obj_name, 
+    const char *attr_name, hid_t lapl_id, hid_t es_id, const char *caller);
+
 static herr_t H5A__close_api_common(hid_t attr_id, hid_t es_id, const char *caller);
 
 /*********************/
@@ -127,7 +158,9 @@ H5A__create_api_common(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t
     /* If there's an event set and a token was created, add the token to it */
     if (H5ES_NONE != es_id && NULL != token)
         /* Add token to event set */
-        if (H5ES_insert(es_id, vol_obj, token, H5ARG_TRACE8(caller, "i*siiiii*s", loc_id, attr_name, type_id, space_id, acpl_id, aapl_id, es_id, caller)) < 0)
+        if (H5ES_insert(es_id, vol_obj, token, 
+                H5ARG_TRACE8(caller, "i*siiiii*s", loc_id, attr_name, type_id, space_id, 
+                acpl_id, aapl_id, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
     /* Register the new attribute and get an ID for it */
@@ -222,6 +255,88 @@ done:
 } /* H5Acreate_async() */
 
 /*--------------------------------------------------------------------------
+ * Function:    H5A__create_by_name_api_common
+ *
+ * Purpose:     This is the common function for creating an attribute by name
+ *
+ * Return:      Success:    A attribute ID
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+H5A__create_by_name_api_common(hid_t loc_id, const char *obj_name, const char *attr_name,
+    hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t lapl_id, hid_t es_id, 
+    const char *caller)
+{
+    void               *attr = NULL;   /* attr object from VOL connector */
+    void *            token     = NULL;         /* Request token for async operation */
+    void **token_ptr = H5_REQUEST_NULL;         /* Pointer to request token for async operation */
+    H5VL_object_t      *vol_obj = NULL; /* object of loc_id */
+    H5VL_loc_params_t   loc_params;
+    hid_t               ret_value = H5I_INVALID_HID;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check arguments */
+    if(H5I_ATTR == H5I_get_type(loc_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "location is not valid for an attribute")
+    if(!obj_name || !*obj_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no object name")
+    if(!attr_name || !*attr_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no attribute name")
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == acpl_id)
+        acpl_id = H5P_ATTRIBUTE_CREATE_DEFAULT;
+
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&aapl_id, H5P_CLS_AACC, loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set attribute access property list info")
+    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set link access property list info")
+
+    /* Set up location struct */
+    loc_params.type                         = H5VL_OBJECT_BY_NAME;
+    loc_params.obj_type                     = H5I_get_type(loc_id);
+    loc_params.loc_data.loc_by_name.name    = obj_name;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
+
+    /* Get the location object */
+    if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token;     /* Point at token for VOL connector to set up */
+
+    /* Create the attribute */
+    if(NULL == (attr = H5VL_attr_create(vol_obj, &loc_params, attr_name, type_id, space_id, acpl_id, aapl_id, H5P_DATASET_XFER_DEFAULT, token_ptr)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to create attribute")
+
+     /* If there's an event set and a token was created, add the token to it */
+    if (H5ES_NONE != es_id && NULL != token)
+        /* Add token to event set */
+        if (H5ES_insert(es_id, vol_obj, token, 
+                H5ARG_TRACE10(caller, "i*s*siiiiii*s", loc_id, obj_name, attr_name, type_id, space_id,
+                acpl_id, aapl_id, lapl_id, es_id, caller)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+    
+    /* Register the new attribute and get an ID for it */
+    if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register attribute for ID")
+
+done:
+    /* Cleanup on failure */
+    if (H5I_INVALID_HID == ret_value)
+        if (attr && H5VL_attr_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close attribute")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5A__create_by_name_api_common() */
+
+/*--------------------------------------------------------------------------
  NAME
     H5Acreate_by_name
  PURPOSE
@@ -255,59 +370,120 @@ hid_t
 H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t type_id, hid_t space_id,
                   hid_t acpl_id, hid_t aapl_id, hid_t lapl_id)
 {
-    void *            attr    = NULL; /* attr object from VOL connector */
-    H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
-    H5VL_loc_params_t loc_params;
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE8("i", "i*s*siiiii", loc_id, obj_name, attr_name, type_id, space_id, acpl_id, aapl_id, lapl_id);
 
-    /* Check arguments */
-    if (H5I_ATTR == H5I_get_type(loc_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "location is not valid for an attribute")
-    if (!obj_name || !*obj_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no object name")
-    if (!attr_name || !*attr_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no attribute name")
+     /* Create the attribute synchronously */
+    if((ret_value = H5A__create_by_name_api_common(loc_id, obj_name, attr_name, type_id, space_id,
+                    acpl_id, aapl_id, lapl_id, H5ES_NONE, FUNC)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, H5I_INVALID_HID, "unable to synchronously create attribute")
 
-    /* Get correct property list */
-    if (H5P_DEFAULT == acpl_id)
-        acpl_id = H5P_ATTRIBUTE_CREATE_DEFAULT;
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Acreate_by_name() */
+
+/*--------------------------------------------------------------------------
+ * Function:    H5Acreate_by_name_async
+ *
+ * Purpose:     Asynchronous version of H5Acreate_by_name
+ *
+ * Return:      Success:    A attribute ID
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Acreate_by_name_async(hid_t loc_id, const char *obj_name, const char *attr_name,
+    hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id,
+    hid_t lapl_id, hid_t es_id)
+{
+    hid_t               ret_value = H5I_INVALID_HID;    /* Return value */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE9("i", "i*s*siiiiii", loc_id, obj_name, attr_name, type_id, space_id,
+             acpl_id, aapl_id, lapl_id, es_id);
+
+    /* Create the attribute synchronously */
+    if((ret_value = H5A__create_by_name_api_common(loc_id, obj_name, attr_name, type_id, space_id,
+                    acpl_id, aapl_id, lapl_id, es_id, FUNC)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, H5I_INVALID_HID, "unable to synchronously create attribute")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Acreate_by_name_async() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5A__open_api_common
+ *   
+ * Purpose:     This is the common function for opening an attribute
+ *
+ * Return:      Success:    A group ID
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+H5A__open_api_common(hid_t loc_id, const char *attr_name, hid_t aapl_id, 
+    hid_t es_id, const char *caller)
+{
+    void *attr = NULL;                      /* attr object from VOL connector */
+    void *token     = NULL;                 /* Request token for async operation */
+    void **token_ptr = H5_REQUEST_NULL;     /* Pointer to request token for async operation */
+    H5VL_object_t *vol_obj = NULL;          /* object of loc_id */
+    H5VL_loc_params_t loc_params;
+    hid_t ret_value = H5I_INVALID_HID;
+
+    FUNC_ENTER_STATIC
+
+    /* Check arguments */
+    if(H5I_ATTR == H5I_get_type(loc_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "location is not valid for an attribute")
+    if(!attr_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be NULL")
+    if(!*attr_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be an empty string")
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&aapl_id, H5P_CLS_AACC, loc_id, TRUE) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set attribute access property list info")
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, TRUE) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set link access property list info")
+    if(H5CX_set_apl(&aapl_id, H5P_CLS_AACC, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
-    /* Set up location struct */
-    loc_params.type                         = H5VL_OBJECT_BY_NAME;
-    loc_params.obj_type                     = H5I_get_type(loc_id);
-    loc_params.loc_data.loc_by_name.name    = obj_name;
-    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
+    /* Set location struct fields */
+    loc_params.type         = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type     = H5I_get_type(loc_id);
 
     /* Get the location object */
-    if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
+    if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
-    /* Create the attribute */
-    if (NULL == (attr = H5VL_attr_create(vol_obj, &loc_params, attr_name, type_id, space_id, acpl_id, aapl_id,
-                                         H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to create attribute")
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token;     /* Point at token for VOL connector to set up */
 
-    /* Register the new attribute and get an ID for it */
-    if ((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
+    /* Open the attribute */
+    if(NULL == (attr = H5VL_attr_open(vol_obj, &loc_params, attr_name, aapl_id, H5P_DATASET_XFER_DEFAULT, token_ptr)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open attribute: '%s'", attr_name)
+
+    /* If there's an event set and a token was created, add the token to it */
+    if (H5ES_NONE != es_id && NULL != token)
+        /* Add token to event set */
+        if (H5ES_insert(es_id, vol_obj, token, 
+                H5ARG_TRACE5(caller, "i*sii*s", loc_id, attr_name, aapl_id, es_id, caller)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+    /* Register the attribute and get an ID for it */
+    if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register attribute for ID")
 
 done:
     /* Cleanup on failure */
-    if (H5I_INVALID_HID == ret_value)
-        if (attr && H5VL_attr_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if(H5I_INVALID_HID == ret_value) {
+        if(attr && H5VL_attr_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close attribute")
-
-    FUNC_LEAVE_API(ret_value)
-} /* H5Acreate_by_name() */
+    }
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5A__open_api_common() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -331,51 +507,120 @@ done:
 hid_t
 H5Aopen(hid_t loc_id, const char *attr_name, hid_t aapl_id)
 {
-    void *            attr    = NULL; /* attr object from VOL connector */
-    H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
-    H5VL_loc_params_t loc_params;
     hid_t             ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "i*si", loc_id, attr_name, aapl_id);
 
+    /* Open the attribute synchronously */
+    if((ret_value = H5A__open_api_common(loc_id, attr_name, aapl_id, H5ES_NONE, FUNC)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, H5I_INVALID_HID, "unable to synchronously open attribute")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Aopen() */
+
+/*--------------------------------------------------------------------------
+ *  NAME
+ *      H5Aopen_async
+ *  PURPOSE
+ *      Asynchronous version of H5Aopen
+ *
+ *  RETURNS
+ *      ID of attribute on success, H5I_INVALID_HID on failure
+ *
+ *--------------------------------------------------------------------------*/
+hid_t
+H5Aopen_async(hid_t loc_id, const char *attr_name, hid_t aapl_id, hid_t es_id)
+{
+    hid_t ret_value = H5I_INVALID_HID;
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE4("i", "i*sii", loc_id, attr_name, aapl_id, es_id);
+
+     /* Open the attribute asynchronously */
+    if((ret_value = H5A__open_api_common(loc_id, attr_name, aapl_id, es_id, FUNC)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, H5I_INVALID_HID, "unable to asynchronously open attribute")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Aopen_async() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5A__open_by_name_api_common
+ *   
+ * Purpose:     This is the common function for opening an attribute by name
+ *
+ * Return:      Success:    A group ID
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+H5A__open_by_name_api_common(hid_t loc_id, const char *obj_name, const char *attr_name, 
+    hid_t aapl_id, hid_t lapl_id, hid_t es_id, const char *caller)
+{
+    void *attr = NULL;                      /* attr object from VOL connector */
+    void *token = NULL;                     /* Request token for async operation */
+    void **token_ptr = H5_REQUEST_NULL;     /* Pointer to request token for async operation */
+    H5VL_object_t *vol_obj = NULL;          /* object of loc_id */
+    H5VL_loc_params_t loc_params;
+    hid_t ret_value = H5I_INVALID_HID;
+
+    FUNC_ENTER_STATIC
+
     /* Check arguments */
-    if (H5I_ATTR == H5I_get_type(loc_id))
+    if(H5I_ATTR == H5I_get_type(loc_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "location is not valid for an attribute")
-    if (!attr_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be NULL")
-    if (!*attr_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be an empty string")
+    if(!obj_name || !*obj_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no object name")
+    if(!attr_name || !*attr_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no attribute name")
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&aapl_id, H5P_CLS_AACC, loc_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
+    if(H5CX_set_apl(&aapl_id, H5P_CLS_AACC, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set attribute access property list info")
+    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set link access property list info")
 
-    /* Set location struct fields */
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(loc_id);
+    /* Fill in location struct fields */
+    loc_params.type                         = H5VL_OBJECT_BY_NAME;
+    loc_params.loc_data.loc_by_name.name    = obj_name;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
+    loc_params.obj_type                     = H5I_get_type(loc_id);
 
     /* Get the location object */
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
+   
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token;     /* Point at token for VOL connector to set up */
 
     /* Open the attribute */
-    if (NULL == (attr = H5VL_attr_open(vol_obj, &loc_params, attr_name, aapl_id, H5P_DATASET_XFER_DEFAULT,
-                                       H5_REQUEST_NULL)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open attribute: '%s'", attr_name)
+    if(NULL == (attr = H5VL_attr_open(vol_obj, &loc_params, attr_name, aapl_id, H5P_DATASET_XFER_DEFAULT, token_ptr)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "can't open attribute")
+
+    /* If there's an event set and a token was created, add the token to it */
+    if (H5ES_NONE != es_id && NULL != token)
+        /* Add token to event set */
+        if (H5ES_insert(es_id, vol_obj, token,
+                H5ARG_TRACE7(caller, "i*s*siii*s", loc_id, obj_name, attr_name, 
+                aapl_id, lapl_id, es_id, caller)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
     /* Register the attribute and get an ID for it */
-    if ((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register attribute for ID")
+    if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize attribute handle")
 
 done:
     /* Cleanup on failure */
-    if (H5I_INVALID_HID == ret_value)
-        if (attr && H5VL_attr_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if(H5I_INVALID_HID == ret_value)
+        if(attr && H5VL_attr_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close attribute")
-
-    FUNC_LEAVE_API(ret_value)
-} /* H5Aopen() */
+   
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5A__open_by_name_api_common() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -452,6 +697,116 @@ done:
 } /* end H5Aopen_by_name() */
 
 /*--------------------------------------------------------------------------
+ *  NAME
+ *      H5Aopen_by_name_async
+ *  PURPOSE
+ *      Asynchronous version of H5Aopen_by_name
+ *
+ *  RETURNS
+ *      ID of attribute on success, H5I_INVALID_HID on failure
+ *
+ *--------------------------------------------------------------------------*/
+hid_t
+H5Aopen_by_name_async(hid_t loc_id, const char *obj_name, const char *attr_name,
+    hid_t aapl_id, hid_t lapl_id, hid_t es_id)
+{
+    hid_t ret_value = H5I_INVALID_HID;
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE6("i", "i*s*siii", loc_id, obj_name, attr_name, aapl_id, lapl_id, es_id);
+
+    /* Open the attribute by name asynchronously */
+    if((ret_value = H5A__open_by_name_api_common(loc_id, obj_name, attr_name, 
+            aapl_id, lapl_id, es_id, FUNC)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, H5I_INVALID_HID, "unable to asynchronously open attribute")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Aopen_by_name_async() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5A__open_by_idx_api_common
+ *
+ * Purpose:     This is the common function for opening an attribute by idx
+ *
+ * Return:      Success:    A group ID
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+H5A__open_by_idx_api_common(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
+    H5_iter_order_t order, hsize_t n, hid_t aapl_id, hid_t lapl_id, 
+    hid_t es_id, const char *caller)
+{
+    void *attr = NULL;   /* Attribute opened */
+    void *token = NULL;                     /* Request token for async operation */
+    void **token_ptr = H5_REQUEST_NULL;     /* Pointer to request token for async operation */
+    H5VL_object_t *vol_obj = NULL;          /* object of loc_id */
+    H5VL_loc_params_t loc_params;
+    hid_t ret_value = H5I_INVALID_HID;      /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check arguments */
+    if(H5I_ATTR == H5I_get_type(loc_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "location is not valid for an attribute")
+    if(!obj_name || !*obj_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no object name")
+    if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid index type specified")
+    if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid iteration order specified")
+
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&aapl_id, H5P_CLS_AACC, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set attribute access property list info")
+    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set link access property list info")
+
+    /* Fill in location struct parameters */
+    loc_params.type                         = H5VL_OBJECT_BY_IDX;
+    loc_params.loc_data.loc_by_idx.name     = obj_name;
+    loc_params.loc_data.loc_by_idx.idx_type = idx_type;
+    loc_params.loc_data.loc_by_idx.order    = order;
+    loc_params.loc_data.loc_by_idx.n        = n;
+    loc_params.loc_data.loc_by_idx.lapl_id  = lapl_id;
+    loc_params.obj_type                     = H5I_get_type(loc_id);
+
+    /* Get the location object */
+    if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
+
+     /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token;     /* Point at token for VOL connector to set up */
+
+    /* Open the attribute */
+    if(NULL == (attr = H5VL_attr_open(vol_obj, &loc_params, NULL, aapl_id, H5P_DATASET_XFER_DEFAULT, token_ptr)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open attribute")
+
+    /* If there's an event set and a token was created, add the token to it */
+    if (H5ES_NONE != es_id && NULL != token)
+        /* Add token to event set */
+        if (H5ES_insert(es_id, vol_obj, token,
+                H5ARG_TRACE9(caller, "i*sIiIohiii*s", loc_id, obj_name, idx_type, order, n, aapl_id,
+                lapl_id, es_id, caller)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+    /* Register the attribute and get an ID for it */
+    if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize attribute handle")
+
+done:
+    /* Cleanup on failure */
+    if(H5I_INVALID_HID == ret_value)
+        if(attr && H5VL_attr_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close attribute")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5A__open_by_idx_api_common() */
+
+/*--------------------------------------------------------------------------
  NAME
     H5Aopen_by_idx
  PURPOSE
@@ -479,60 +834,49 @@ hid_t
 H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
                hid_t aapl_id, hid_t lapl_id)
 {
-    void *            attr    = NULL; /* Attribute opened */
-    H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
-    H5VL_loc_params_t loc_params;
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE7("i", "i*sIiIohii", loc_id, obj_name, idx_type, order, n, aapl_id, lapl_id);
 
-    /* Check arguments */
-    if (H5I_ATTR == H5I_get_type(loc_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "location is not valid for an attribute")
-    if (!obj_name || !*obj_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no object name")
-    if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid index type specified")
-    if (order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid iteration order specified")
-
-    /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&aapl_id, H5P_CLS_AACC, loc_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set attribute access property list info")
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set link access property list info")
-
-    /* Fill in location struct parameters */
-    loc_params.type                         = H5VL_OBJECT_BY_IDX;
-    loc_params.loc_data.loc_by_idx.name     = obj_name;
-    loc_params.loc_data.loc_by_idx.idx_type = idx_type;
-    loc_params.loc_data.loc_by_idx.order    = order;
-    loc_params.loc_data.loc_by_idx.n        = n;
-    loc_params.loc_data.loc_by_idx.lapl_id  = lapl_id;
-    loc_params.obj_type                     = H5I_get_type(loc_id);
-
-    /* Get the location object */
-    if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
-
-    /* Open the attribute */
-    if (NULL == (attr = H5VL_attr_open(vol_obj, &loc_params, NULL, aapl_id, H5P_DATASET_XFER_DEFAULT,
-                                       H5_REQUEST_NULL)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open attribute")
-
-    /* Register the attribute and get an ID for it */
-    if ((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize attribute handle")
+    /* Open the attribute by idx synchronously */
+    if((ret_value = H5A__open_by_idx_api_common(loc_id, obj_name, idx_type, order, n, 
+            aapl_id, lapl_id, H5ES_NONE, FUNC)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, H5I_INVALID_HID, "unable to synchronously open attribute")
 
 done:
-    /* Cleanup on failure */
-    if (H5I_INVALID_HID == ret_value)
-        if (attr && H5VL_attr_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close attribute")
 
     FUNC_LEAVE_API(ret_value)
 } /* H5Aopen_by_idx() */
+
+/*--------------------------------------------------------------------------
+ *  NAME
+ *      H5Aopen_by_idx_async
+ *  PURPOSE
+ *      Asynchronous version of H5Aopen_by_idx
+ *
+ *  RETURNS
+ *      ID of attribute on success, H5I_INVALID_HID on failure
+ *
+ *--------------------------------------------------------------------------*/
+hid_t
+H5Aopen_by_idx_async(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
+    H5_iter_order_t order, hsize_t n, hid_t aapl_id, hid_t lapl_id, hid_t es_id)
+{
+    hid_t ret_value = H5I_INVALID_HID;
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE8("i", "i*sIiIohiii", loc_id, obj_name, idx_type, order, n, aapl_id,
+             lapl_id, es_id);
+
+    /* Open the attribute by idx synchronously */
+    if((ret_value = H5A__open_by_idx_api_common(loc_id, obj_name, idx_type, order, n, 
+            aapl_id, lapl_id, es_id, FUNC)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, H5I_INVALID_HID, "unable to synchronously open attribute")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Aopen_by_name_async() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -640,6 +984,51 @@ done:
 } /* H5Awrite_async() */
 
 /*--------------------------------------------------------------------------
+*  NAME
+*       H5A__read_api_common
+*  PURPOSE
+*      Common helper routine for sync/async attribute read operations.
+*  RETURNS
+*      Non-negative on success/Negative on failure
+*--------------------------------------------------------------------------*/
+static herr_t
+H5A__read_api_common(hid_t attr_id, hid_t dtype_id, void *buf, hid_t es_id, const char *caller)
+{
+    void *            token     = NULL; /* Request token for async operation        */
+    void **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    H5VL_object_t  *vol_obj;            /* Attribute object for ID */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check arguments */
+    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+    if(H5I_DATATYPE != H5I_get_type(dtype_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    if(NULL == buf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf parameter can't be NULL")
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token;     /* Point at token for VOL connector to set up */
+
+    /* Read the attribute data */
+    if(H5VL_attr_read(vol_obj, dtype_id, buf, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "unable to read attribute")
+
+    /* If there's an event set and a token was created, add the token to it */
+    if (H5ES_NONE != es_id && NULL != token)
+        /* Add token to event set */
+        if (H5ES_insert(es_id, vol_obj, token, 
+                H5ARG_TRACE5(caller, "ii*xi*s", attr_id, dtype_id, buf, es_id, caller)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5A__read_api_common() */
+
+/*--------------------------------------------------------------------------
  NAME
     H5Aread
  PURPOSE
@@ -658,27 +1047,42 @@ done:
 herr_t
 H5Aread(hid_t attr_id, hid_t dtype_id, void *buf)
 {
-    H5VL_object_t *vol_obj;             /* Attribute object for ID */
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ii*x", attr_id, dtype_id, buf);
 
-    /* Check arguments */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
-    if (H5I_DATATYPE != H5I_get_type(dtype_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
-    if (NULL == buf)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf parameter can't be NULL")
-
-    /* Read the attribute data */
-    if (H5VL_attr_read(vol_obj, dtype_id, buf, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "unable to read attribute")
+    /* Synchronously read the data */
+    if(H5A__read_api_common(attr_id, dtype_id, buf, H5ES_NONE, FUNC) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "can't synchronously read data")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aread() */
+
+/*--------------------------------------------------------------------------
+ *  NAME
+ *      H5Aread_async
+ *  PURPOSE
+ *      Asynchronous version of H5Aread
+ *  RETURNS
+ *      Non-negative on success/Negative on failure
+ *--------------------------------------------------------------------------*/
+herr_t
+H5Aread_async(hid_t attr_id, hid_t dtype_id, void *buf, hid_t es_id)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "ii*xi", attr_id, dtype_id, buf, es_id);
+
+    /* Asynchronously read the data */
+    if(H5A__read_api_common(attr_id, dtype_id, buf, es_id, FUNC) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "can't asynchronously read data")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Aread_async() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -1111,6 +1515,72 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Aget_info_by_idx() */
 
+/*--------------------------------------------------------------------------
+ NAME
+    H5A__rename_api_common
+ PURPOSE
+    Common helper routine for sync/async attribute rename operations
+ RETURNS
+    Non-negative on success/Negative on failure
+--------------------------------------------------------------------------*/
+static herr_t
+H5A__rename_api_common(hid_t loc_id, const char *old_name, const char *new_name, 
+    hid_t es_id, const char *caller)
+{
+    herr_t	ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check arguments */
+    if(H5I_ATTR == H5I_get_type(loc_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(!old_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "old attribute name cannot be NULL")
+    if(!*old_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "old attribute name cannot be an empty string")
+    if(!new_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "new attribute name cannot be NULL")
+    if(!*new_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "new attribute name cannot be an empty string")
+
+    /* Avoid thrashing things if the names are the same */
+    if(HDstrcmp(old_name, new_name)) {
+        H5VL_object_t *vol_obj;
+        H5VL_loc_params_t loc_params;
+        void *            token     = NULL;     /* Request token for async operation        */
+        void **token_ptr = H5_REQUEST_NULL;     /* Pointer to request token for async operation        */
+
+        loc_params.type = H5VL_OBJECT_BY_SELF;
+        loc_params.obj_type = H5I_get_type(loc_id);
+
+        if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+        /* Set up collective metadata if appropriate */
+        if(H5CX_set_loc(loc_id) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set collective metadata read")
+
+        /* Set up request token pointer for asynchronous operation */
+        if (H5ES_NONE != es_id)
+            token_ptr = &token;     /* Point at token for VOL connector to set up */
+
+        /* Rename the attribute */
+        if(H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_RENAME, H5P_DATASET_XFER_DEFAULT, token_ptr, old_name, new_name) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
+
+        /* If there's an event set and a token was created, add the token to it */
+        if (H5ES_NONE != es_id && NULL != token)
+            /* Add token to event set */
+            if (H5ES_insert(es_id, vol_obj, token, 
+                    H5ARG_TRACE5(caller, "i*s*si*s", loc_id, old_name, new_name, es_id, caller)) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")    
+
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5A__rename_api_common() */
+
 /*-------------------------------------------------------------------------
  * Function:    H5Arename
  *
@@ -1132,42 +1602,106 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*s*s", loc_id, old_name, new_name);
 
-    /* Check arguments */
-    if (H5I_ATTR == H5I_get_type(loc_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if (!old_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "old attribute name cannot be NULL")
-    if (!*old_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "old attribute name cannot be an empty string")
-    if (!new_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "new attribute name cannot be NULL")
-    if (!*new_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "new attribute name cannot be an empty string")
-
-    /* Avoid thrashing things if the names are the same */
-    if (HDstrcmp(old_name, new_name)) {
-        H5VL_object_t *   vol_obj;
-        H5VL_loc_params_t loc_params;
-
-        loc_params.type     = H5VL_OBJECT_BY_SELF;
-        loc_params.obj_type = H5I_get_type(loc_id);
-
-        if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
-
-        /* Set up collective metadata if appropriate */
-        if (H5CX_set_loc(loc_id) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set collective metadata read")
-
-        /* Rename the attribute */
-        if (H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_RENAME, H5P_DATASET_XFER_DEFAULT,
-                               H5_REQUEST_NULL, old_name, new_name) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
-    } /* end if */
+    /* Synchronously rename the attribute */
+    if(H5A__rename_api_common(loc_id, old_name, new_name, H5ES_NONE, FUNC) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't synchronously rename attribute")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Arename() */
+
+/*--------------------------------------------------------------------------
+*  NAME
+*      H5Arename_async
+*  PURPOSE
+*      Asynchronous version of H5Arename
+*  RETURNS
+*      Non-negative on success/Negative on failure
+*--------------------------------------------------------------------------*/
+herr_t
+H5Arename_async(hid_t loc_id, const char *old_name, const char *new_name, hid_t es_id)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "i*s*si", loc_id, old_name, new_name, es_id);
+
+    /* Asynchronously rename the attribute */
+    if(H5A__rename_api_common(loc_id, old_name, new_name, es_id, FUNC) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't asynchronously rename attribute")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Arename_async() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5A__rename_by_name_api_common
+ PURPOSE
+    Common helper routine for sync/async attribute rename_by_name operations
+ RETURNS
+    Non-negative on success/Negative on failure
+--------------------------------------------------------------------------*/
+static herr_t
+H5A__rename_by_name_api_common(hid_t loc_id, const char *obj_name, const char *old_attr_name, 
+    const char *new_attr_name, hid_t lapl_id, hid_t es_id, const char *caller)
+{
+    herr_t	ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* check arguments */
+    if(H5I_ATTR == H5I_get_type(loc_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(!obj_name || !*obj_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
+    if(!old_attr_name || !*old_attr_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no old attribute name")
+    if(!new_attr_name || !*new_attr_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no new attribute name")
+
+    /* Avoid thrashing things if the names are the same */
+    if(HDstrcmp(old_attr_name, new_attr_name)) {
+        H5VL_object_t *vol_obj;
+        H5VL_loc_params_t loc_params;
+        void *            token     = NULL;    /* Request token for async operation        */
+        void **token_ptr = H5_REQUEST_NULL;     /* Pointer to request token for async operation        */
+
+        /* Verify access property list and set up collective metadata if appropriate */
+        if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, TRUE) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access property list info")
+
+        loc_params.type = H5VL_OBJECT_BY_NAME;
+        loc_params.loc_data.loc_by_name.name = obj_name;
+        loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
+        loc_params.obj_type = H5I_get_type(loc_id);
+
+        /* Get the location object */
+        if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+        /* Set up request token pointer for asynchronous operation */
+        if (H5ES_NONE != es_id)
+            token_ptr = &token;     /* Point at token for VOL connector to set up */
+
+        /* Rename the attribute */
+        if(H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_RENAME, H5P_DATASET_XFER_DEFAULT, 
+                token_ptr, old_attr_name, new_attr_name) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
+
+        /* If there's an event set and a token was created, add the token to it */
+        if (H5ES_NONE != es_id && NULL != token)
+            /* Add token to event set */
+            if (H5ES_insert(es_id, vol_obj, token, 
+                    H5ARG_TRACE7(caller, "i*s*s*sii*s", loc_id, obj_name, old_attr_name, new_attr_name,
+                    lapl_id, es_id, caller)) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5A__rename_by_name_api_common() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Arename_by_name
@@ -1191,43 +1725,42 @@ H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "i*s*s*si", loc_id, obj_name, old_attr_name, new_attr_name, lapl_id);
 
-    /* check arguments */
-    if (H5I_ATTR == H5I_get_type(loc_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if (!obj_name || !*obj_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
-    if (!old_attr_name || !*old_attr_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no old attribute name")
-    if (!new_attr_name || !*new_attr_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no new attribute name")
-
-    /* Avoid thrashing things if the names are the same */
-    if (HDstrcmp(old_attr_name, new_attr_name)) {
-        H5VL_object_t *   vol_obj;
-        H5VL_loc_params_t loc_params;
-
-        /* Verify access property list and set up collective metadata if appropriate */
-        if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, TRUE) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access property list info")
-
-        loc_params.type                         = H5VL_OBJECT_BY_NAME;
-        loc_params.loc_data.loc_by_name.name    = obj_name;
-        loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
-        loc_params.obj_type                     = H5I_get_type(loc_id);
-
-        /* Get the location object */
-        if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
-
-        /* Rename the attribute */
-        if (H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_RENAME, H5P_DATASET_XFER_DEFAULT,
-                               H5_REQUEST_NULL, old_attr_name, new_attr_name) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
-    } /* end if */
+     /* Synchronously rename the attribute */
+    if(H5A__rename_by_name_api_common(loc_id, obj_name, old_attr_name, new_attr_name,
+            lapl_id, H5ES_NONE, FUNC) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't synchronously rename attribute")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Arename_by_name() */
+
+/*--------------------------------------------------------------------------
+*  NAME
+*      H5Arename_async
+*  PURPOSE
+*      Asynchronous version of H5Arename_by_name
+*  RETURNS
+*      Non-negative on success/Negative on failure
+*--------------------------------------------------------------------------*/
+herr_t
+H5Arename_by_name_async(hid_t loc_id, const char *obj_name, const char *old_attr_name,
+    const char *new_attr_name, hid_t lapl_id, hid_t es_id)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "i*s*s*sii", loc_id, obj_name, old_attr_name, new_attr_name,
+             lapl_id, es_id);
+
+    /* Asynchronously rename the attribute */
+    if(H5A__rename_by_name_api_common(loc_id, obj_name, old_attr_name, new_attr_name,
+            lapl_id, es_id, FUNC) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't synchronously rename attribute")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Arename_by_name_async() */
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -1679,6 +2212,56 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aclose_async() */
 
+/*--------------------------------------------------------------------------
+ *  NAME
+ *      H5A__exists_api_common
+ *  PURPOSE
+ *      Common helper routine for sync/async check if an attribute exists
+ *  RETURNS
+ *      Non-negative on success/Negative on failure
+ *--------------------------------------------------------------------------*/
+static htri_t
+H5A__exists_api_common(hid_t obj_id, const char *attr_name, hid_t es_id, const char *caller)
+{
+    H5VL_object_t *vol_obj;
+    H5VL_loc_params_t loc_params;
+    void *            token     = NULL; /* Request token for async operation        */
+    void **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    htri_t  ret_value;                  /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check arguments */
+    if(H5I_ATTR == H5I_get_type(obj_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(!attr_name || !*attr_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
+
+    /* get the object */
+    if(NULL == (vol_obj = H5VL_vol_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
+
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(obj_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token;     /* Point at token for VOL connector to set up */
+
+    /* Check if the attribute exists */
+    if(H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_EXISTS, H5P_DATASET_XFER_DEFAULT, token_ptr, attr_name, &ret_value) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
+
+    if (H5ES_NONE != es_id && NULL != token)
+        /* Add token to event set */
+        if (H5ES_insert(es_id, vol_obj, token, 
+                H5ARG_TRACE4(caller, "i*si*s", obj_id, attr_name, es_id, caller)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5A__exists_api_common() */
+
 /*-------------------------------------------------------------------------
  * Function:	H5Aexists
  *
@@ -1696,34 +2279,104 @@ done:
 htri_t
 H5Aexists(hid_t obj_id, const char *attr_name)
 {
-    H5VL_object_t *   vol_obj;
-    H5VL_loc_params_t loc_params;
     htri_t            ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("t", "i*s", obj_id, attr_name);
 
-    /* Check arguments */
-    if (H5I_ATTR == H5I_get_type(obj_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if (!attr_name || !*attr_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
-
-    /* get the object */
-    if (NULL == (vol_obj = H5VL_vol_object(obj_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
-
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(obj_id);
-
-    /* Check if the attribute exists */
-    if (H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_EXISTS, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                           attr_name, &ret_value) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
+    /* Synchronously check if an attribute exists */
+    if((ret_value = H5A__exists_api_common(obj_id, attr_name, H5ES_NONE, FUNC)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't synchronously rename attribute")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aexists() */
+
+/*--------------------------------------------------------------------------
+ * NAME
+ *      H5Arename_async
+ * PURPOSE
+ *      Asynchronous version of H5Aexists
+ * RETURNS
+ *      Non-negative on success/Negative on failure
+ *--------------------------------------------------------------------------*/
+htri_t
+H5Aexists_async(hid_t obj_id, const char *attr_name, hid_t es_id)
+{
+    htri_t ret_value;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("t", "i*si", obj_id, attr_name, es_id);
+
+    /* Asynchronously check if an attribute exists */
+    if((ret_value = H5A__exists_api_common(obj_id, attr_name, es_id, FUNC)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't synchronously rename attribute")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Aexists_async() */
+
+/*--------------------------------------------------------------------------
+ *  NAME
+ *      H5A__exists_by_name_api_common
+ *  PURPOSE
+ *      Common helper routine for sync/async check if an attribute exists
+ *  RETURNS
+ *      Non-negative on success/Negative on failure
+ *--------------------------------------------------------------------------*/
+static htri_t
+H5A__exists_by_name_api_common(hid_t loc_id, const char *obj_name, const char *attr_name,
+    hid_t lapl_id, hid_t es_id, const char *caller)
+{
+    H5VL_object_t *vol_obj;
+    H5VL_loc_params_t loc_params;
+    void *            token     = NULL; /* Request token for async operation        */
+    void **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    htri_t ret_value;                   /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* check arguments */
+    if(H5I_ATTR == H5I_get_type(loc_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(!obj_name || !*obj_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
+    if(!attr_name || !*attr_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
+
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access property list info")
+
+    /* get the object */
+    if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
+
+    loc_params.type = H5VL_OBJECT_BY_NAME;
+    loc_params.loc_data.loc_by_name.name = obj_name;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+     /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token;     /* Point at token for VOL connector to set up */
+
+    /* Check existence of attribute */
+    if(H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_EXISTS, H5P_DATASET_XFER_DEFAULT, 
+            token_ptr, attr_name, &ret_value) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
+
+    /* If there's an event set and a token was created, add the token to it */
+    if (H5ES_NONE != es_id && NULL != token)
+        /* Add token to event set */
+        if (H5ES_insert(es_id, vol_obj, token, 
+                H5ARG_TRACE6(caller, "i*s*sii*s", loc_id, obj_name, attr_name, lapl_id, 
+                es_id, caller)) <  0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5A__exists_by_name_api_common() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5Aexists_by_name
@@ -1731,7 +2384,7 @@ done:
  * Purpose:	Checks if an attribute with a given name exists on an object.
  *
  * Return:	Success:	TRUE/FALSE
- * 		Failure:	Negative
+ * 		    Failure:	Negative
  *
  * Programmer:	Quincey Koziol
  *              Thursday, November 1, 2007
@@ -1741,39 +2394,42 @@ done:
 htri_t
 H5Aexists_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj;
-    H5VL_loc_params_t loc_params;
     htri_t            ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("t", "i*s*si", loc_id, obj_name, attr_name, lapl_id);
 
-    /* check arguments */
-    if (H5I_ATTR == H5I_get_type(loc_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if (!obj_name || !*obj_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
-    if (!attr_name || !*attr_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
-
-    /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access property list info")
-
-    /* get the object */
-    if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
-
-    loc_params.type                         = H5VL_OBJECT_BY_NAME;
-    loc_params.loc_data.loc_by_name.name    = obj_name;
-    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
-    loc_params.obj_type                     = H5I_get_type(loc_id);
-
-    /* Check existence of attribute */
-    if (H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_EXISTS, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                           attr_name, &ret_value) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
+    /* Synchronously check if an attribute exists */
+    if((ret_value = H5A__exists_by_name_api_common(loc_id, obj_name, attr_name, lapl_id, 
+            H5ES_NONE, FUNC)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't synchronously rename attribute")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aexists_by_name() */
+
+/*--------------------------------------------------------------------------
+ * NAME
+ *      H5Aexists_by_name_async
+ * PURPOSE
+ *      Asynchronous version of H5Aexists_by_name
+ * RETURNS
+ *      Non-negative on success/Negative on failure
+ *--------------------------------------------------------------------------*/
+htri_t
+H5Aexists_by_name_async(hid_t loc_id, const char *obj_name, const char *attr_name,
+    hid_t lapl_id, hid_t es_id)
+{
+    htri_t  ret_value;              /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("t", "i*s*sii", loc_id, obj_name, attr_name, lapl_id, es_id);
+
+    /* Synchronously check if an attribute exists */
+    if((ret_value = H5A__exists_by_name_api_common(loc_id, obj_name, attr_name, lapl_id, 
+            es_id, FUNC)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't synchronously rename attribute")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Aexists_by_name_async() */
