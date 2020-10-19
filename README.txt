@@ -75,6 +75,6 @@ Periodically development code snapshots are provided at the following URL:
 Source packages for current and previous releases are located at:
     https://portal.hdfgroup.org/display/support/Downloads
 
-Development code is available at our BitBucket Server:
-    https://bitbucket.hdfgroup.org/projects/HDFFV/repos/hdf5/browse
+Development code is available at our Github location:
+    https://github.com/HDFGroup/hdf5.git
 
