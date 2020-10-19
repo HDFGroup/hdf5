@@ -43,11 +43,11 @@
  *  some bad symbol interpretation that raises a warning that is out of our
  *  control.
  */
-H5_GCC_DIAG_OFF(strict - prototypes)
-H5_GCC_DIAG_OFF(undef)
+H5_GCC_DIAG_OFF("strict-prototypes")
+H5_GCC_DIAG_OFF("undef")
 #include <hdfs.h>
-H5_GCC_DIAG_ON(strict - prototypes)
-H5_GCC_DIAG_ON(undef)
+H5_GCC_DIAG_ON("strict-prototypes")
+H5_GCC_DIAG_ON("undef")
 
 /* toggle function call prints: 1 turns on */
 #define HDFS_DEBUG 0
