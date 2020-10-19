@@ -1542,7 +1542,7 @@ done:
 } /* end H5FDtruncate() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_truncate
+ * Function:    H5FD_truncate
  *
  * Purpose:     Private version of H5FDtruncate()
  *
