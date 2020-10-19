@@ -839,7 +839,7 @@ typedef off_t       h5_stat_size_t;
 #define H5_SIZEOF_H5_STAT_SIZE_T H5_SIZEOF_OFF_T
 
 #ifndef HDftell
-#define HDftell(F) ftello(F)
+#define HDftell(F) ftell(F)
 #endif /* HDftell */
 #ifndef HDftruncate
 #define HDftruncate(F, L) ftruncate(F, L)
@@ -1105,13 +1105,23 @@ typedef off_t       h5_stat_size_t;
 #define HDrandom() HDrand()
 #endif /* HDrandom */
 H5_DLL int HDrand(void);
-#elif H5_HAVE_RANDOM
+#ifndef HDsrandom
+#define HDsrandom(S) HDsrand(S)
+#endif /* HDsrandom */
+H5_DLL void HDsrand(unsigned int seed);
+#elif defined(H5_HAVE_RANDOM)
 #ifndef HDrand
 #define HDrand() random()
 #endif /* HDrand */
 #ifndef HDrandom
 #define HDrandom() random()
 #endif /* HDrandom */
+#ifndef HDsrand
+#define HDsrand(S) srandom(S)
+#endif /* HDsrand */
+#ifndef HDsrandom
+#define HDsrandom(S) srandom(S)
+#endif /* HDsrandom */
 #else  /* H5_HAVE_RANDOM */
 #ifndef HDrand
 #define HDrand() rand()
@@ -1119,6 +1129,12 @@ H5_DLL int HDrand(void);
 #ifndef HDrandom
 #define HDrandom() rand()
 #endif /* HDrandom */
+#ifndef HDsrand
+#define HDsrand(S) srand(S)
+#endif /* HDsrand */
+#ifndef HDsrandom
+#define HDsrandom(S) srand(S)
+#endif /* HDsrandom */
 #endif /* H5_HAVE_RANDOM */
 
 #ifndef HDread
@@ -1239,26 +1255,6 @@ H5_DLL int HDrand(void);
 #ifndef HDsqrt
 #define HDsqrt(X) sqrt(X)
 #endif /* HDsqrt */
-#ifdef H5_HAVE_RAND_R
-H5_DLL void HDsrand(unsigned int seed);
-#ifndef HDsrandom
-#define HDsrandom(S) HDsrand(S)
-#endif /* HDsrandom */
-#elif H5_HAVE_RANDOM
-#ifndef HDsrand
-#define HDsrand(S) srandom(S)
-#endif /* HDsrand */
-#ifndef HDsrandom
-#define HDsrandom(S) srandom(S)
-#endif /* HDsrandom */
-#else  /* H5_HAVE_RAND_R */
-#ifndef HDsrand
-#define HDsrand(S) srand(S)
-#endif /* HDsrand */
-#ifndef HDsrandom
-#define HDsrandom(S) srand(S)
-#endif /* HDsrandom */
-#endif /* H5_HAVE_RAND_R */
 #ifndef HDsscanf
 #define HDsscanf(S, FMT, ...) sscanf(S, FMT, __VA_ARGS__)
 #endif /* HDsscanf */
@@ -1338,6 +1334,9 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
 #ifndef HDstrtoull
 #define HDstrtoull(S, R, N) strtoull(S, R, N)
 #endif /* HDstrtoul */
+#ifndef HDstrtoumax
+#define HDstrtoumax(S, R, N) strtoumax(S, R, N)
+#endif /* HDstrtoumax */
 #ifndef HDstrxfrm
 #define HDstrxfrm(X, Y, Z) strxfrm(X, Y, Z)
 #endif /* HDstrxfrm */

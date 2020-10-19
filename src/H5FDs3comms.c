@@ -1855,7 +1855,7 @@ H5FD_s3comms_HMAC_SHA256(const unsigned char *key, size_t key_len, const char *m
 
     HMAC(EVP_sha256(), key, (int)key_len, (const unsigned char *)msg, msg_len, md, &md_len);
 
-    if (H5FD_s3comms_bytes_to_hex(dest, (const unsigned char *)md, (size_t)md_len, true) == FAIL)
+    if (H5FD_s3comms_bytes_to_hex(dest, (const unsigned char *)md, (size_t)md_len, TRUE) == FAIL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not convert to hex string.");
 
 done:
@@ -2698,7 +2698,7 @@ H5FD_s3comms_tostringtosign(char *dest, const char *req, const char *now, const 
 
     SHA256((const unsigned char *)req, HDstrlen(req), checksum);
 
-    if (H5FD_s3comms_bytes_to_hex(hexsum, (const unsigned char *)checksum, SHA256_DIGEST_LENGTH, true) ==
+    if (H5FD_s3comms_bytes_to_hex(hexsum, (const unsigned char *)checksum, SHA256_DIGEST_LENGTH, TRUE) ==
         FAIL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not create hex string");
 
