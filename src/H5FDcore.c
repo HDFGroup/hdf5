@@ -504,9 +504,9 @@ H5FD__core_term(void)
 herr_t
 H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
 {
-    H5FD_core_fapl_t fa;
-    H5P_genplist_t * plist; /* Property list pointer */
-    herr_t           ret_value;
+    H5P_genplist_t * plist;               /* Property list pointer */
+    H5FD_core_fapl_t fa;                  /* Core VFD info */
+    herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "izb", fapl_id, increment, backing_store);
@@ -539,8 +539,8 @@ done:
 herr_t
 H5Pget_fapl_core(hid_t fapl_id, size_t *increment /*out*/, hbool_t *backing_store /*out*/)
 {
-    H5P_genplist_t *        plist; /* Property list pointer */
-    const H5FD_core_fapl_t *fa;
+    H5P_genplist_t *        plist;               /* Property list pointer */
+    const H5FD_core_fapl_t *fa;                  /* Core VFD info */
     herr_t                  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -579,7 +579,7 @@ static void *
 H5FD__core_fapl_get(H5FD_t *_file)
 {
     H5FD_core_t *     file = (H5FD_core_t *)_file;
-    H5FD_core_fapl_t *fa;
+    H5FD_core_fapl_t *fa;               /* Core VFD info */
     void *            ret_value = NULL; /* Return value */
 
     FUNC_ENTER_STATIC

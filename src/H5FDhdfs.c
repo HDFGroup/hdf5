@@ -47,11 +47,11 @@
  *  some bad symbol interpretation that raises a warning that is out of our
  *  control.
  */
-H5_GCC_DIAG_OFF(strict - prototypes)
-H5_GCC_DIAG_OFF(undef)
+H5_GCC_DIAG_OFF("strict-prototypes")
+H5_GCC_DIAG_OFF("undef")
 #include <hdfs.h>
-H5_GCC_DIAG_ON(strict - prototypes)
-H5_GCC_DIAG_ON(undef)
+H5_GCC_DIAG_ON("strict-prototypes")
+H5_GCC_DIAG_ON("undef")
 
 /* toggle function call prints: 1 turns on */
 #define HDFS_DEBUG 0
@@ -609,7 +609,7 @@ done:
  * Function:    H5Pset_fapl_hdfs
  *
  * Purpose:     Modify the file access property list to use the H5FD_HDFS
- *              driver defined in this source file.  All driver specfic
+ *              driver defined in this source file.  All driver specific
  *              properties are passed in as a pointer to a suitably
  *              initialized instance of H5FD_hdfs_fapl_t
  *
