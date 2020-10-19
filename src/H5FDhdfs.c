@@ -596,7 +596,7 @@ done:
  * Function:    H5Pset_fapl_hdfs
  *
  * Purpose:     Modify the file access property list to use the H5FD_HDFS
- *              driver defined in this source file.  All driver specfic
+ *              driver defined in this source file.  All driver specific
  *              properties are passed in as a pointer to a suitably
  *              initialized instance of H5FD_hdfs_fapl_t
  *

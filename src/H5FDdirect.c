@@ -27,15 +27,15 @@
  * this file. */
 /* #define _XOPEN_SOURCE 600 */
 
-#include "H5private.h"   /* Generic Functions      */
-#include "H5Eprivate.h"  /* Error handling        */
-#include "H5Fprivate.h"  /* File access        */
-#include "H5FDprivate.h" /* File drivers        */
-#include "H5FDdirect.h"  /* Direct file driver      */
-#include "H5FLprivate.h" /* Free Lists                           */
-#include "H5Iprivate.h"  /* IDs            */
-#include "H5MMprivate.h" /* Memory management      */
-#include "H5Pprivate.h"  /* Property lists      */
+#include "H5private.h"   /* Generic Functions        */
+#include "H5Eprivate.h"  /* Error handling           */
+#include "H5Fprivate.h"  /* File access              */
+#include "H5FDprivate.h" /* File drivers             */
+#include "H5FDdirect.h"  /* Direct file driver       */
+#include "H5FLprivate.h" /* Free Lists               */
+#include "H5Iprivate.h"  /* IDs                      */
+#include "H5MMprivate.h" /* Memory management        */
+#include "H5Pprivate.h"  /* Property lists           */
 
 #ifdef H5_HAVE_DIRECT
 
