@@ -409,6 +409,7 @@ include (${HDF_RESOURCES_EXT_DIR}/HDFMacros.cmake)
 HDF_DIR_PATHS(${HDF5_PACKAGE_NAME})
 
 include (${HDF_RESOURCES_EXT_DIR}/HDFLibMacros.cmake)
+include (${HDF_RESOURCES_DIR}/HDF5PluginMacros.cmake)
 include (${HDF_RESOURCES_DIR}/HDF5Macros.cmake)
 
 #-----------------------------------------------------------------------------
@@ -809,6 +810,17 @@ endif ()
 #-----------------------------------------------------------------------------
 add_subdirectory (src)
 
+#-----------------------------------------------------------------------------
+# Include filter plugins
+#-----------------------------------------------------------------------------
+include (CMakePlugins.cmake)
+
+if (HDF5_PACKAGE_EXTLIBS AND NOT HDF5_NO_PACKAGES)
+  if (HDF5_ENABLE_PLUGIN_SUPPORT AND PLUGIN_FOUND)
+    PACKAGE_PLUGIN_LIBRARY (${HDF5_ALLOW_EXTERNAL_SUPPORT})
+  endif ()
+endif ()
+
 if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
   if (ZLIB_FOUND AND ZLIB_USE_EXTERNAL)
     if (NOT ONLY_SHARED_LIBS)
@@ -824,6 +836,11 @@ if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MAT
     endif ()
     if (BUILD_SHARED_LIBS)
       add_dependencies (${HDF5_LIBSH_TARGET} SZIP)
+    endif ()
+  endif ()
+  if (PLUGIN_FOUND AND PLUGIN_USE_EXTERNAL)
+    if (BUILD_SHARED_LIBS)
+      add_dependencies (PLUGIN ${HDF5_LIBSH_TARGET})
     endif ()
   endif ()
 endif ()
@@ -1041,7 +1058,7 @@ endif ()
 #-----------------------------------------------------------------------------
 # Generate the H5pubconf.h file containing user settings needed by compilation
 #-----------------------------------------------------------------------------
-configure_file (${HDF_RESOURCES_DIR}/H5pubconf.h.in ${HDF5_BINARY_DIR}/H5pubconf.h @ONLY)
+configure_file (${HDF_RESOURCES_DIR}/H5pubconf.h.in ${HDF5_SRC_BINARY_DIR}/H5pubconf.h @ONLY)
 
 #-----------------------------------------------------------------------------
 # Options for use by cross compiling and toolchains

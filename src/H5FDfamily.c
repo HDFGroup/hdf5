@@ -313,7 +313,7 @@ done:
  * Function:    H5FD__family_fapl_get
  *
  * Purpose:    Gets a file access property list which could be used to
- *        create an identical file.
+ *             create an identical file.
  *
  * Return:    Success:    Ptr to new file access property list.
  *
