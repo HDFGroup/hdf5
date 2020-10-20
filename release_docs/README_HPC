@@ -32,7 +32,7 @@ II. Obtain HDF5 source
 Obtain HDF5 source code from the HDF5 repository using a git command or
 from a release tar file in a working directory:
 
-    git clone https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5.git
+    git clone https://github.com/HDFGroup/hdf5.git
         [-b branch] [source directory]
 
 If no branch is specified, then the 'develop' version will be checked out.
