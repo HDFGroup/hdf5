@@ -27,8 +27,11 @@
 #include "H5FDhdfs.h" /* this file driver's utilities */
 
 #ifdef H5_HAVE_LIBHDFS
+
 #define HDFS_TEST_DEBUG        0
 #define HDFS_TEST_MAX_BUF_SIZE 256
+
+/* only include the testing macros if needed */
 
 /*****************************************************************************
  *
@@ -380,7 +383,6 @@ static H5FD_hdfs_fapl_t default_fa = {
     "",          /* kerberos path */
     1024,        /* buffer size */
 };
-#endif /*  H5_HAVE_LIBHDFS */
 
 /******************
  * TEST FUNCTIONS *
