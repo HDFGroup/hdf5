@@ -403,21 +403,11 @@ static H5FD_hdfs_fapl_t default_fa = {
  * Programmer:  Jacob Smith
  *              2018-04-25
  *
- * Changes:     None.
- *
  *---------------------------------------------------------------------------
  */
 static int
 test_fapl_config_validation(void)
 {
-#ifndef H5_HAVE_LIBHDFS
-    TESTING("HDFS fapl configuration validation");
-    SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
-    return 0;
-
-#else
     /*********************
      * test-local macros *
      *********************/
@@ -590,9 +580,7 @@ error:
         H5E_END_TRY;
     }
     return 1;
-#endif /* H5_HAVE_LIBHDFS */
-
-} /* end test_fapl_config_validation() */
+} /* test_fapl_config_validation */
 
 /*-------------------------------------------------------------------------
  *
@@ -609,21 +597,11 @@ error:
  * Programmer:  Jacob Smith
  *              2018-04-25
  *
- * Changes:     None.
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_hdfs_fapl(void)
 {
-#ifndef H5_HAVE_LIBHDFS
-    TESTING("HDFS fapl ");
-    SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
-    return 0;
-
-#else
     /************************
      * test-local variables *
      ************************/
@@ -673,9 +651,8 @@ error:
     H5E_END_TRY;
 
     return 1;
-#endif /* H5_HAVE_LIBHDFS */
 
-} /* end test_hdfs_fapl() */
+} /* test_hdfs_fapl() */
 
 /*---------------------------------------------------------------------------
  *
@@ -698,15 +675,6 @@ error:
 static int
 test_vfd_open(void)
 {
-
-#ifndef H5_HAVE_LIBHDFS
-    TESTING("HDFS VFD-level open");
-    SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
-    return 0;
-
-#else
 
     /*********************
      * test-local macros *
@@ -902,7 +870,6 @@ test_vfd_open(void)
     return 0;
 
 error:
-
     /***********
      * CLEANUP *
      ***********/
@@ -927,9 +894,7 @@ error:
 #undef FAPL_UNCONFIGURED
 #undef FAPL_HDFS
 
-#endif /* H5_HAVE_LIBHDFS */
-
-} /* end test_vfd_open() */
+} /* test_vfd_open */
 
 /*---------------------------------------------------------------------------
  *
@@ -952,14 +917,6 @@ error:
 static int
 test_eof_eoa(void)
 {
-#ifndef H5_HAVE_LIBHDFS
-    TESTING("HDFS eof/eoa gets and sets");
-    SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
-    return 0;
-
-#else
 
     /*********************
      * test-local macros *
@@ -995,21 +952,19 @@ test_eof_eoa(void)
 
     /* verify as found
      */
-    JSVERIFY(5458199, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), NULL)
-    JSVERIFY(H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), H5FDget_eof(fd_shakespeare, H5FD_MEM_DRAW),
-             "mismatch between DEFAULT and RAW memory types")
+    JSVERIFY(5458199, H5FDget_eof(fd_shakespeare), NULL)
     JSVERIFY(0, H5FDget_eoa(fd_shakespeare, H5FD_MEM_DEFAULT), "EoA should be unset by H5FDopen")
 
     /* set EoA below EoF
      */
     JSVERIFY(SUCCEED, H5FDset_eoa(fd_shakespeare, H5FD_MEM_DEFAULT, 44442202), "unable to set EoA (lower)")
-    JSVERIFY(5458199, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), "EoF changed")
+    JSVERIFY(5458199, H5FDget_eof(fd_shakespeare), "EoF changed")
     JSVERIFY(44442202, H5FDget_eoa(fd_shakespeare, H5FD_MEM_DEFAULT), "EoA unchanged")
 
     /* set EoA above EoF
      */
     JSVERIFY(SUCCEED, H5FDset_eoa(fd_shakespeare, H5FD_MEM_DEFAULT, 6789012), "unable to set EoA (higher)")
-    JSVERIFY(5458199, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), "EoF changed")
+    JSVERIFY(5458199, H5FDget_eof(fd_shakespeare), "EoF changed")
     JSVERIFY(6789012, H5FDget_eoa(fd_shakespeare, H5FD_MEM_DEFAULT), "EoA unchanged")
 
     /************
@@ -1026,7 +981,6 @@ test_eof_eoa(void)
     return 0;
 
 error:
-
     /***********
      * CLEANUP *
      ***********/
@@ -1041,9 +995,7 @@ error:
 
     return 1;
 
-#endif /* H5_HAVE_LIBHDFS */
-
-} /* end test_eof_eoa() */
+} /* test_eof_eoa */
 
 /*-----------------------------------------------------------------------------
  *
@@ -1062,15 +1014,6 @@ error:
 static int
 test_H5FDread_without_eoa_set_fails(void)
 {
-#ifndef H5_HAVE_LIBHDFS
-    TESTING("HDFS VFD read-eoa temporal coupling library limitation");
-    SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
-    return 0;
-
-#else
-
     char buffer[HDFS_TEST_MAX_BUF_SIZE];
     unsigned int i = 0;
     H5FD_t *file_shakespeare = NULL;
@@ -1123,7 +1066,6 @@ test_H5FDread_without_eoa_set_fails(void)
     return 0;
 
 error:
-
     /***********
      * CLEANUP *
      ***********/
@@ -1138,9 +1080,7 @@ error:
 
     return 1;
 
-#endif /* H5_HAVE_LIBHDFS */
-
-} /* end test_H5FDread_without_eoa_set_fails() */
+} /* test_H5FDread_without_eoa_set_fails */
 
 /*---------------------------------------------------------------------------
  *
@@ -1161,14 +1101,6 @@ error:
 static int
 test_read(void)
 {
-#ifndef H5_HAVE_LIBHDFS
-    TESTING("HDFS VFD read/range-gets");
-    SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
-    return 0;
-
-#else
 
     /*********************
      * test-local macros *
@@ -1179,10 +1111,10 @@ test_read(void)
      *************************/
     struct testcase {
         const char *message;  /* purpose of test case */
-        haddr_t eoa_set;      /* set file EOA to this prior to read */
-        size_t addr;          /* offset of read in file */
-        size_t len;           /* length of read in file */
-        herr_t success;       /* expected return value of read function */
+        haddr_t     eoa_set;  /* set file EOA to this prior to read */
+        size_t      addr;     /* offset of read in file */
+        size_t      len;      /* length of read in file */
+        herr_t      success;  /* expected return value of read function */
         const char *expected; /* expected contents of buffer; failure ignores */
     };
 
@@ -1239,14 +1171,14 @@ test_read(void)
             NULL,
         },
     };
-    unsigned testcase_count = 6;
-    unsigned test_i = 0;
+    unsigned        testcase_count = 6;
+    unsigned        test_i         = 0;
     struct testcase test;
-    herr_t open_return = FAIL;
-    char buffer[HDFS_TEST_MAX_BUF_SIZE];
-    unsigned int i = 0;
-    H5FD_t *file_raven = NULL;
-    hid_t fapl_id = -1;
+    herr_t          open_return = FAIL;
+    char            buffer[HDFS_TEST_MAX_BUF_SIZE];
+    unsigned int    i          = 0;
+    H5FD_t *        file_raven = NULL;
+    hid_t           fapl_id    = -1;
 
     TESTING("HDFS VFD read/range-gets");
 
@@ -1271,7 +1203,7 @@ test_read(void)
                           HADDR_UNDEF); /* Demonstrate success with "automatic" value */
     FAIL_IF(NULL == file_raven)
 
-    JSVERIFY(6464, H5FDget_eof(file_raven, H5FD_MEM_DEFAULT), NULL)
+    JSVERIFY(6464, H5FDget_eof(file_raven), NULL)
 
     /*********
      * TESTS *
@@ -1283,7 +1215,7 @@ test_read(void)
          * per-test setup *
          * -------------- */
 
-        test = cases[test_i];
+        test        = cases[test_i];
         open_return = FAIL;
 
         FAIL_IF(HDFS_TEST_MAX_BUF_SIZE < test.len) /* buffer too small! */
@@ -1291,9 +1223,8 @@ test_read(void)
         FAIL_IF(FAIL == H5FDset_eoa(file_raven, H5FD_MEM_DEFAULT, test.eoa_set))
 
         /* zero buffer contents */
-        for (i = 0; i < HDFS_TEST_MAX_BUF_SIZE; i++) {
+        for (i = 0; i < HDFS_TEST_MAX_BUF_SIZE; i++) 
             buffer[i] = 0;
-        }
 
         /* ------------ *
          * conduct test *
@@ -1306,10 +1237,8 @@ test_read(void)
         H5E_END_TRY;
 
         JSVERIFY(test.success, open_return, test.message)
-
-        if (open_return == SUCCEED) {
+        if (open_return == SUCCEED)
             JSVERIFY_STR(test.expected, buffer, NULL)
-        }
 
     } /* for each testcase */
 
@@ -1327,14 +1256,12 @@ test_read(void)
     return 0;
 
 error:
-
     /***********
      * CLEANUP *
      ***********/
 
-    if (file_raven != 0) {
+    if (file_raven)
         (void)H5FDclose(file_raven);
-    }
     if (fapl_id >= 0) {
         H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
         H5E_END_TRY;
@@ -1342,9 +1269,7 @@ error:
 
     return 1;
 
-#endif /* H5_HAVE_LIBHDFS */
-
-} /* end test_read() */
+} /* test_read */
 
 /*---------------------------------------------------------------------------
  *
@@ -1363,24 +1288,11 @@ error:
  * Programmer: Jacob Smith
  *             2017-11-06
  *
- * Changes:
- *     + modify from S3VFD codebase to HDFS; Minor changes, mostly.
- *         + Jacob Smith 2018-06-08
- *
  *---------------------------------------------------------------------------
  */
 static int
 test_noops_and_autofails(void)
 {
-#ifndef H5_HAVE_LIBHDFS
-    TESTING("HDFS VFD always-fail and no-op routines");
-    SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
-    return 0;
-
-#else
-
     /*********************
      * test-local macros *
      *********************/
@@ -1393,8 +1305,8 @@ test_noops_and_autofails(void)
      * test-local variables *
      ************************/
 
-    hid_t fapl_id = -1;
-    H5FD_t *file = NULL;
+    hid_t      fapl_id  = -1;
+    H5FD_t *   file     = NULL;
     const char data[36] = "The Force shall be with you, always";
 
     TESTING("HDFS VFD always-fail and no-op routines");
@@ -1442,7 +1354,6 @@ test_noops_and_autofails(void)
     return 0;
 
 error:
-
     /***********
      * CLEANUP *
      ***********/
@@ -1451,15 +1362,13 @@ error:
         H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
         H5E_END_TRY;
     }
-    if (file != NULL) {
+    if (file) {
         (void)H5FDclose(file);
     }
 
     return 1;
 
-#endif /* H5_HAVE_LIBHDFS */
-
-} /* end test_noops_and_autofails() */
+} /* test_noops_and_autofails */
 
 /*---------------------------------------------------------------------------
  *
@@ -1488,7 +1397,7 @@ test_cmp(void)
 
     return 0;
 
-} /* end test_cmp() */
+} /* test_cmp */
 
 /*---------------------------------------------------------------------------
  *
@@ -1506,24 +1415,11 @@ test_cmp(void)
  * Programmer: Jacob Smith
  *             2017-11-07
  *
- * Changes:
- *     + modify from S3VFD codebase to HDFS; Minor changes, mostly.
- *         + Jacob Smith 2018-06-08
- *
  *---------------------------------------------------------------------------
  */
 static int
 test_H5F_integration(void)
 {
-#ifndef H5_HAVE_LIBHDFS
-    TESTING("HDFS file access through HD5F library (H5F API)");
-    SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
-    return 0;
-
-#else
-
     /*********************
      * test-local macros *
      *********************/
@@ -1536,7 +1432,7 @@ test_H5F_integration(void)
      * test-local variables *
      ************************/
 
-    hid_t file = -1;
+    hid_t file    = -1;
     hid_t fapl_id = -1;
 
     TESTING("HDFS file access through HD5F library (H5F API)");
@@ -1594,15 +1490,14 @@ error:
         H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
         H5E_END_TRY;
     }
-    if (file > 0) {
+    if (file > 0)
         (void)H5Fclose(file);
-    }
 
     return 1;
 
-#endif /* H5_HAVE_LIBHDFS */
-
 } /* test_H5F_integration */
+
+#endif /* H5_HAVE_LIBHDFS */
 
 /*-------------------------------------------------------------------------
  *
@@ -1621,13 +1516,19 @@ error:
 int
 main(void)
 {
+#ifdef H5_HAVE_LIBHDFS
     int nerrors = 0;
 
-    /******************
-     * commence tests *
-     ******************/
+#endif /* H5_HAVE_LIBHDFS */
+
+    HDprintf("Testing hdfs VFD functionality.\n");
 
 #ifdef H5_HAVE_LIBHDFS
+
+    /********************
+     * initialize tests *
+     ********************/
+
     static char hdfs_namenode_name[HDFS_NAMENODE_NAME_MAX_SIZE] = "";
     const char *hdfs_namenode_name_env                          = NULL;
 
@@ -1639,11 +1540,12 @@ main(void)
         HDstrncpy(/* TODO: error-check? */
                   default_fa.namenode_name, hdfs_namenode_name_env, HDFS_NAMENODE_NAME_MAX_SIZE);
     }
-#endif /* H5_HAVE_LIBHDFS */
+
+    /******************
+     * commence tests *
+     ******************/
 
     h5_reset();
-
-    HDprintf("Testing hdfs VFD functionality.\n");
 
     nerrors += test_fapl_config_validation();
     nerrors += test_hdfs_fapl();
@@ -1664,4 +1566,10 @@ main(void)
     }
     return nerrors; /* 0 if no errors, 1 if any errors */
 
-} /* end main() */
+#else
+    HDprintf("SKIPPED - HDFS VFD not built\n");
+    return EXIT_SUCCESS;
+
+#endif /* H5_HAVE_LIBHDFS */
+
+} /* main() */
