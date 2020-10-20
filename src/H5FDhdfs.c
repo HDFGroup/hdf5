@@ -720,6 +720,7 @@ done:
     if (ret_value == NULL && fa != NULL)
         H5MM_xfree(fa); /* clean up on error */
 
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_hdfs_fapl_get() */
 
 /*-------------------------------------------------------------------------
