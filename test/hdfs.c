@@ -1225,7 +1225,7 @@ test_read(void)
         FAIL_IF(FAIL == H5FDset_eoa(file_raven, H5FD_MEM_DEFAULT, test.eoa_set))
 
         /* zero buffer contents */
-        for (i = 0; i < HDFS_TEST_MAX_BUF_SIZE; i++) 
+        for (i = 0; i < HDFS_TEST_MAX_BUF_SIZE; i++)
             buffer[i] = 0;
 
         /* ------------ *
@@ -1521,6 +1521,9 @@ main(void)
 #ifdef H5_HAVE_LIBHDFS
     int nerrors = 0;
 
+    static char hdfs_namenode_name[HDFS_NAMENODE_NAME_MAX_SIZE] = "";
+    const char *hdfs_namenode_name_env                          = NULL;
+
 #endif /* H5_HAVE_LIBHDFS */
 
     HDprintf("Testing hdfs VFD functionality.\n");
@@ -1530,9 +1533,6 @@ main(void)
     /********************
      * initialize tests *
      ********************/
-
-    static char hdfs_namenode_name[HDFS_NAMENODE_NAME_MAX_SIZE] = "";
-    const char *hdfs_namenode_name_env                          = NULL;
 
     hdfs_namenode_name_env = HDgetenv("HDFS_TEST_NAMENODE_NAME");
     if (hdfs_namenode_name_env == NULL || hdfs_namenode_name_env[0] == '\0') {
