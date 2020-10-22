@@ -3543,6 +3543,13 @@ test_basic_io(unsigned config, hid_t fapl)
         TEST_ERROR
     dcpl = -1;
 
+    HDfree(srcfilename);
+    HDfree(srcfilename_map);
+    HDfree(vfilename);
+    HDfree(vfilename2);
+    HDfree(srcfilenamepct);
+    HDfree(srcfilenamepct_map);
+
     PASSED();
     return 0;
 
@@ -3564,6 +3571,13 @@ error:
         H5Pclose(dcpl);
     }
     H5E_END_TRY;
+
+    HDfree(srcfilename);
+    HDfree(srcfilename_map);
+    HDfree(vfilename);
+    HDfree(vfilename2);
+    HDfree(srcfilenamepct);
+    HDfree(srcfilenamepct_map);
 
     return 1;
 } /* end test_basic_io() */
