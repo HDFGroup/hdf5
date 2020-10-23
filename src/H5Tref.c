@@ -650,6 +650,7 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
             /* Pass the correct encoding version for the selection depending on the
              * file libver bounds, this is later retrieved in H5S hyper decode */
             H5CX_set_libver_bounds(src_f);
+            /* FALLTHROUGH */
             H5_ATTR_FALLTHROUGH
         case H5R_OBJECT2:
         case H5R_ATTR:
