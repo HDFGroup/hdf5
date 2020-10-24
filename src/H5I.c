@@ -802,7 +802,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5_GCC_DIAG_OFF("implicit-fallthrough")
 hid_t
 H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
 {
@@ -850,7 +849,6 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_register() */
-H5_GCC_DIAG_ON("implicit-fallthrough")
 
 /*-------------------------------------------------------------------------
  * Function:    H5I_register_using_existing_id
@@ -870,7 +868,6 @@ H5_GCC_DIAG_ON("implicit-fallthrough")
  *
  *-------------------------------------------------------------------------
  */
-H5_GCC_DIAG_OFF("implicit-fallthrough")
 herr_t
 H5I_register_using_existing_id(H5I_type_t type, void *object, hbool_t app_ref, hid_t existing_id)
 {
@@ -925,7 +922,6 @@ H5I_register_using_existing_id(H5I_type_t type, void *object, hbool_t app_ref, h
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_register_using_existing_id() */
-H5_GCC_DIAG_ON("implicit-fallthrough")
 
 /*-------------------------------------------------------------------------
  * Function:    H5I_subst
@@ -1254,7 +1250,6 @@ H5I__remove_verify(hid_t id, H5I_type_t id_type)
  *
  *-------------------------------------------------------------------------
  */
-H5_GCC_DIAG_OFF("implicit-fallthrough")
 static void *
 H5I__remove_common(H5I_id_type_t *type_ptr, hid_t id)
 {
@@ -1291,7 +1286,6 @@ H5I__remove_common(H5I_id_type_t *type_ptr, hid_t id)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__remove_common() */
-H5_GCC_DIAG_ON("implicit-fallthrough")
 
 /*-------------------------------------------------------------------------
  * Function:    H5I_remove
@@ -2206,7 +2200,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5_GCC_DIAG_OFF("implicit-fallthrough")
 static H5I_id_info_t *
 H5I__find_id(hid_t id)
 {
@@ -2241,7 +2234,6 @@ H5I__find_id(hid_t id)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__find_id() */
-H5_GCC_DIAG_ON("implicit-fallthrough")
 
 /*-------------------------------------------------------------------------
  * Function:    H5Iget_name
