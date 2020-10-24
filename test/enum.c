@@ -768,11 +768,11 @@ main(void)
 
     if (nerrors)
         goto error;
-    puts("All enum tests passed.");
+    HDputs("All enum tests passed.");
     h5_cleanup(FILENAME, fapl);
     return 0;
 
 error:
-    puts("*** ENUM TESTS FAILED ***");
+    HDputs("*** ENUM TESTS FAILED ***");
     return 1;
 }

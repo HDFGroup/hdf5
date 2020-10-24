@@ -421,7 +421,7 @@ verify_idx_nchunks(hid_t dset, hid_t dspace, H5D_chunk_index_t exp_idx_type, hsi
     /* Ensure the correct chunk indexing scheme is used */
     if (idx_type != exp_idx_type) {
         char msg[256];
-        sprintf(msg, "Should be using %s.\n", index_type_str(idx_type));
+        HDsprintf(msg, "Should be using %s.\n", index_type_str(idx_type));
         FAIL_PUTS_ERROR(msg);
     }
 
@@ -542,7 +542,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
 
 #ifdef H5_HAVE_FILTER_DEFLATE
     /* Allocate input (compressed) buffer */
-    inbuf = malloc(z_dst_nbytes);
+    inbuf = HDmalloc(z_dst_nbytes);
 
     /* Set chunk size to the compressed chunk size and the chunk point
        to the compressed data chunk */
@@ -554,20 +554,20 @@ test_get_chunk_info_highest_v18(hid_t fapl)
 
     /* Check for various zlib errors */
     if (Z_BUF_ERROR == ret) {
-        fprintf(stderr, "overflow");
+        HDfprintf(stderr, "overflow");
         TEST_ERROR
     }
     else if (Z_MEM_ERROR == ret) {
-        fprintf(stderr, "deflate memory error");
+        HDfprintf(stderr, "deflate memory error");
         TEST_ERROR
     }
     else if (Z_OK != ret) {
-        fprintf(stderr, "other deflate error");
+        HDfprintf(stderr, "other deflate error");
         TEST_ERROR
     }
 #else
     /* Allocate input (non-compressed) buffer */
-    inbuf = malloc(CHK_SIZE);
+    inbuf = HDmalloc(CHK_SIZE);
     HDmemcpy(inbuf, direct_buf, CHK_SIZE);
 #endif /* end H5_HAVE_FILTER_DEFLATE */
 
@@ -1638,7 +1638,7 @@ test_basic_query(hid_t fapl)
         TEST_ERROR
 
     /* Remove the test file */
-    remove(filename);
+    HDremove(filename);
 
     PASSED();
     return SUCCEED;
@@ -2040,7 +2040,7 @@ test_flt_msk_with_skip_compress(hid_t fapl)
         TEST_ERROR
 
     /* Remove the test file */
-    remove(filename);
+    HDremove(filename);
 
     PASSED();
     return SUCCEED;

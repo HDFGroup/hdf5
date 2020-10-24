@@ -966,7 +966,7 @@ find_err_msg_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *_
         return H5_ITER_ERROR;
 
     /* If the searched error message is found, stop the iteration */
-    if (err_desc->desc != NULL && strcmp(err_desc->desc, searched_err->message) == 0) {
+    if (err_desc->desc != NULL && HDstrcmp(err_desc->desc, searched_err->message) == 0) {
         searched_err->found = true;
         status              = H5_ITER_STOP;
     }

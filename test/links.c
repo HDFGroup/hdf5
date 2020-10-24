@@ -14138,7 +14138,7 @@ UD_cb_create(const char *link_name, hid_t loc_group, const void *udata, size_t u
     if (lcpl_id < 0)
         TEST_ERROR
 
-    if (HDstrcmp(link_name, UD_CB_LINK_NAME) && strcmp(link_name, NEW_UD_CB_LINK_NAME))
+    if (HDstrcmp(link_name, UD_CB_LINK_NAME) && HDstrcmp(link_name, NEW_UD_CB_LINK_NAME))
         TEST_ERROR
     if (HDstrcmp((const char *)udata, UD_CB_TARGET))
         TEST_ERROR
@@ -14165,7 +14165,7 @@ UD_cb_traverse(const char *link_name, hid_t cur_group, const void *udata, size_t
     if (udata_size > 0 && !udata)
         TEST_ERROR
 
-    if (HDstrcmp(link_name, UD_CB_LINK_NAME) && strcmp(link_name, NEW_UD_CB_LINK_NAME))
+    if (HDstrcmp(link_name, UD_CB_LINK_NAME) && HDstrcmp(link_name, NEW_UD_CB_LINK_NAME))
         TEST_ERROR
     if (HDstrcmp((const char *)udata, UD_CB_TARGET))
         TEST_ERROR
@@ -14537,7 +14537,7 @@ lapl_udata(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Now use the same ud link to access group_b */
-    strcpy(group_b_name, "group_b");
+    HDstrcpy(group_b_name, "group_b");
     if (H5Pset(plist_id, DEST_PROP_NAME, group_b_name) < 0)
         TEST_ERROR
 
@@ -14851,7 +14851,7 @@ ud_link_errors(hid_t fapl, hbool_t new_format)
     H5E_END_TRY;
 
     /* Create a user-defined link to the group. */
-    strcpy(group_name, "/group");
+    HDstrcpy(group_name, "/group");
     if (H5Lcreate_ud(fid, "/ud_link", (H5L_type_t)UD_CBFAIL_TYPE, &group_name, HDstrlen(group_name) + 1,
                      H5P_DEFAULT, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR

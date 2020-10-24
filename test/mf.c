@@ -6112,7 +6112,7 @@ test_mf_bug1(const char *env_h5_drvr, hid_t fapl)
 
             /* Free memb_name */
             for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
-                free(memb_name[mt]);
+                HDfree(memb_name[mt]);
         } /* end else */
 
         /* Close memb_fapl */
@@ -7685,7 +7685,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t is_multi_or_split)
 
     /* Free memb_name */
     for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
-        free(memb_name[mt]);
+        HDfree(memb_name[mt]);
 
     return 0;
 
@@ -8841,7 +8841,7 @@ test_page_alignment(const char *env_h5_drvr, hid_t fapl)
 
             /* Free memb_name */
             for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
-                free(memb_name[mt]);
+                HDfree(memb_name[mt]);
 
             /* Close memb_fapl */
             if (H5Pclose(memb_fapl) < 0)
