@@ -1925,7 +1925,7 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
     };
     char *const setting_pointers[] = {
         aws_region,
-
+        key_id,
         access_key,
     };
     unsigned setting_count = 3;
