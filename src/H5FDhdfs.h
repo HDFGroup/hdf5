@@ -16,7 +16,7 @@
  * Programmer:  Jacob Smith
  *              2018-04-23
  *
- * Purpose:	The public header file for the hdfs driver.
+ * Purpose:    The public header file for the hdfs driver.
  */
 
 #ifndef H5FDhdfs_H

@@ -13,6 +13,10 @@
 
 package hdf.hdf5lib.callbacks;
 
+/**
+ * Data class for link callback for H5Dappend.
+ *
+ */
 public interface H5D_append_t {
 /**    public ArrayList iterdata = new ArrayList();
   * Any derived interfaces must define the single public variable as above.
