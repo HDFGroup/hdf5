@@ -3063,8 +3063,7 @@ H5Ssel_iter_get_seq_list(hid_t sel_iter_id, size_t maxseq, size_t maxbytes, size
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "izz*z*z*h*z", sel_iter_id, maxseq, maxbytes, nseq, nbytes, off,
-             len);
+    H5TRACE7("e", "izz*z*z*h*z", sel_iter_id, maxseq, maxbytes, nseq, nbytes, off, len);
 
     /* Check args */
     if (NULL == (sel_iter = (H5S_sel_iter_t *)H5I_object_verify(sel_iter_id, H5I_SPACE_SEL_ITER)))

@@ -668,8 +668,7 @@ H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "i*sIiIoh*xi", loc_id, group_name, idx_type, order, n, group_info,
-             lapl_id);
+    H5TRACE7("e", "i*sIiIoh*xi", loc_id, group_name, idx_type, order, n, group_info, lapl_id);
 
     /* Check args */
     if (!group_name)

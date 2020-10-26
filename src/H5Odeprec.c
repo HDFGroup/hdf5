@@ -487,8 +487,7 @@ H5Oget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "i*sIiIoh*xi", loc_id, group_name, idx_type, order, n, oinfo,
-             lapl_id);
+    H5TRACE7("e", "i*sIiIoh*xi", loc_id, group_name, idx_type, order, n, oinfo, lapl_id);
 
     /* Check args */
     if (!group_name || !*group_name)
@@ -670,8 +669,7 @@ H5Oget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "i*sIiIoh*xIui", loc_id, group_name, idx_type, order, n, oinfo,
-             fields, lapl_id);
+    H5TRACE8("e", "i*sIiIoh*xIui", loc_id, group_name, idx_type, order, n, oinfo, fields, lapl_id);
 
     /* Check args */
     if (!group_name || !*group_name)
@@ -833,8 +831,7 @@ H5Ovisit_by_name1(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_it
     herr_t               ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "i*sIiIox*xi", loc_id, obj_name, idx_type, order, op, op_data,
-             lapl_id);
+    H5TRACE7("e", "i*sIiIox*xi", loc_id, obj_name, idx_type, order, op, op_data, lapl_id);
 
     /* Check args */
     if (!obj_name)
@@ -1012,8 +1009,7 @@ H5Ovisit_by_name2(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_it
     herr_t               ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "i*sIiIox*xIui", loc_id, obj_name, idx_type, order, op, op_data,
-             fields, lapl_id);
+    H5TRACE8("e", "i*sIiIox*xIui", loc_id, obj_name, idx_type, order, op, op_data, fields, lapl_id);
 
     /* Check args */
     if (!obj_name)

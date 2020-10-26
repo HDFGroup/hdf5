@@ -349,8 +349,7 @@ H5Lcreate_external(const char *file_name, const char *obj_name, hid_t link_loc_i
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "*s*si*sii", file_name, obj_name, link_loc_id, link_name,
-             lcpl_id, lapl_id);
+    H5TRACE6("e", "*s*si*sii", file_name, obj_name, link_loc_id, link_name, lcpl_id, lapl_id);
 
     /* Check arguments */
     if (!file_name || !*file_name)
@@ -473,8 +472,7 @@ H5Lunpack_elink_val(const void *_ext_linkval, size_t link_size, unsigned *flags,
     herr_t         ret_value = SUCCEED;                         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "*xz*Iu**s**s", _ext_linkval, link_size, flags, filename,
-             obj_path);
+    H5TRACE5("e", "*xz*Iu**s**s", _ext_linkval, link_size, flags, filename, obj_path);
 
     /* Sanity check external link buffer */
     if (ext_linkval == NULL)

@@ -1683,8 +1683,7 @@ H5Pset_cache(hid_t plist_id, int H5_ATTR_UNUSED mdc_nelmts, size_t rdcc_nslots, 
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "iIszzd", plist_id, mdc_nelmts, rdcc_nslots, rdcc_nbytes,
-             rdcc_w0);
+    H5TRACE5("e", "iIszzd", plist_id, mdc_nelmts, rdcc_nslots, rdcc_nbytes, rdcc_w0);
 
     /* Check arguments */
     if (rdcc_w0 < (double)0.0f || rdcc_w0 > (double)1.0f)
@@ -1730,8 +1729,7 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts, size_t *rdcc_nslots, size_t *rdcc_
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*Is*z*z*d", plist_id, mdc_nelmts, rdcc_nslots, rdcc_nbytes,
-             rdcc_w0);
+    H5TRACE5("e", "i*Is*z*z*d", plist_id, mdc_nelmts, rdcc_nslots, rdcc_nbytes, rdcc_w0);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
@@ -4282,8 +4280,7 @@ H5Pget_mdc_log_options(hid_t plist_id, hbool_t *is_enabled, char *location, size
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*b*s*z*b", plist_id, is_enabled, location, location_size,
-             start_on_access);
+    H5TRACE5("e", "i*b*s*z*b", plist_id, is_enabled, location, location_size, start_on_access);
 
     /* Get the property list structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
