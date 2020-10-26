@@ -203,7 +203,7 @@ test_vlstrings_basic(void)
     for (i = 0; i < SPACE1_DIM1; i++) {
         if (HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
             TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n", (int)i,
-                          (int)strlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
+                          (int)HDstrlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
             continue;
         } /* end if */
         if (HDstrcmp(wdata[i], rdata[i]) != 0) {
@@ -307,7 +307,7 @@ test_vlstrings_special(void)
     for (i = 0; i < SPACE1_DIM1; i++) {
         if (HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
             TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n", (int)i,
-                          (int)strlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
+                          (int)HDstrlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
             continue;
         } /* end if */
         if ((wdata[i] == NULL && rdata[i] != NULL) || (rdata[i] == NULL && wdata[i] != NULL)) {
@@ -536,7 +536,7 @@ test_compact_vlstring(void)
     for (i = 0; i < SPACE1_DIM1; i++) {
         if (HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
             TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n", (int)i,
-                          (int)strlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
+                          (int)HDstrlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
             continue;
         } /* end if */
         if (HDstrcmp(wdata[i], rdata[i]) != 0) {

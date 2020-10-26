@@ -5,6 +5,19 @@ AlignConsecutiveMacros: true
 AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: true
 AlwaysBreakAfterReturnType: AllDefinitions
+# Can enable the following section when llvm 12.x is out
+#AttributeMacros:
+#  - H5_ATTR_FORMAT
+#  - H5_ATTR_UNUSED
+#  - H5_ATTR_DEPRECATED_USED
+#  - H5_ATTR_NDEBUG_UNUSED
+#  - H5_ATTR_DEBUG_API_USED
+#  - H5_ATTR_PARALLEL_UNUSED
+#  - H5_ATTR_PARALLEL_USED
+#  - H5_ATTR_NORETURN
+#  - H5_ATTR_CONST
+#  - H5_ATTR_PURE
+#  - H5_ATTR_FALLTHROUGH
 BraceWrapping:
   AfterFunction:   true
   BeforeCatch:     true
@@ -12,7 +25,7 @@ BraceWrapping:
 BreakBeforeBraces: Stroustrup
 BreakAfterJavaFieldAnnotations: true
 BreakStringLiterals: true
-ColumnLimit:     110
+ColumnLimit:     110    # Update $max_trace_macro_line_len in bin/trace also
 IncludeCategories:
   - Regex:           '^"(llvm|llvm-c|clang|clang-c)/'
     Priority:        3
@@ -33,6 +46,8 @@ IncludeIsMainRegex: '(public)?$'
 IndentCaseLabels: true
 IndentGotoLabels: false
 IndentWidth:     4
+MacroBlockBegin: "^BEGIN_FUNC"
+MacroBlockEnd: "^END_FUNC"
 ObjCBlockIndentWidth: 4
 ReflowComments:  true
 SortIncludes:    false
@@ -58,5 +73,6 @@ StatementMacros:
   - HMPI_GOTO_ERROR
   - H5_GCC_DIAG_OFF
   - H5_GCC_DIAG_ON
+  - CATCH
 ...
 

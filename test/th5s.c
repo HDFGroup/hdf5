@@ -1936,7 +1936,7 @@ test_h5s_encode_irregular_hyper(H5F_libver_t low, H5F_libver_t high)
                 break;
 
             default:
-                assert(0);
+                HDassert(0);
                 break;
         }
 
@@ -3400,9 +3400,9 @@ test_h5s(void)
 void
 cleanup_h5s(void)
 {
-    remove(DATAFILE);
-    remove(NULLFILE);
-    remove(BASICFILE);
-    remove(ZEROFILE);
-    remove(VERBFNAME);
+    HDremove(DATAFILE);
+    HDremove(NULLFILE);
+    HDremove(BASICFILE);
+    HDremove(ZEROFILE);
+    HDremove(VERBFNAME);
 }

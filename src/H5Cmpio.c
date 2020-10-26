@@ -18,7 +18,7 @@
  *              Quincey Koziol
  *
  * Purpose:     Functions in this file implement support for parallel I/O for
- *		generic cache code.
+ *              generic cache code.
  *
  *-------------------------------------------------------------------------
  */
@@ -28,7 +28,7 @@
 /****************/
 
 #include "H5Cmodule.h" /* This source code file is part of the H5C module */
-#define H5F_FRIEND     /*suppress error about including H5Fpkg	  */
+#define H5F_FRIEND     /*suppress error about including H5Fpkg      */
 
 /***********/
 /* Headers */

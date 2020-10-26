@@ -114,7 +114,7 @@ H5MF__sects_debug_cb(H5FS_section_info_t *_sect, void *_udata)
               "Section address:", sect->sect_info.addr);
     HDfprintf(udata->stream, "%*s%-*s %" PRIuHSIZE "\n", udata->indent, "", udata->fwidth,
               "Section size:", sect->sect_info.size);
-    HDfprintf(udata->stream, "%*s%-*s %" PRIuHSIZE "\n", udata->indent, "", udata->fwidth,
+    HDfprintf(udata->stream, "%*s%-*s %" PRIuHADDR "\n", udata->indent, "", udata->fwidth,
               "End of section:", (haddr_t)((sect->sect_info.addr + sect->sect_info.size) - 1));
     HDfprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth,
               "Section state:", (sect->sect_info.state == H5FS_SECT_LIVE ? "live" : "serialized"));

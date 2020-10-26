@@ -2243,7 +2243,7 @@ test_swmr_write_big(hbool_t newest_format)
         char *const new_argv[]    = {swmr_reader, NULL};
         /* Run the reader */
         status = HDexecv(SWMR_READER, new_argv);
-        HDprintf("errno from execv = %s\n", strerror(errno));
+        HDprintf("errno from execv = %s\n", HDstrerror(errno));
         FAIL_STACK_ERROR;
     } /* end if */
 

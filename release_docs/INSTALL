@@ -351,15 +351,18 @@ CONTENTS
         so it can be debugged with gdb, dbx, ddd, etc., or it can be
         compiled with various optimizations. To compile for symbolic
         debugging (the default for snapshots), say
-        `--enable-build-mode=production'; to compile with optimizations
+        `--enable-build-mode=debug'; to compile with optimizations
         (the default for supported public releases),
-        say `--enable-build-mode=production'. On some systems the
+        say `--enable-build-mode=production'. For a 'clean slate' configuration
+        with optimization disabled and nothing turned on,
+        say `--enable-build-mode=clean'. On some systems the
         library can also be compiled for profiling with gprof by saying
-        `--enable-production=profile'.
+        `--enable-profiling'.
 
             $ ./configure --enable-build-mode=debug       #symbolic debugging
             $ ./configure --enable-build-mode=production  #optimized code
-            $ ./configure --enable-production=profile     #for use with gprof
+            $ ./configure --enable-build-mode=clean       #'clean slate'
+            $ ./configure --enable-profiling              #for use with gprof
 
         Regardless of whether support for symbolic debugging is enabled,
         the library can also perform runtime debugging of certain packages

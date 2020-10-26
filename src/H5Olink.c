@@ -817,7 +817,7 @@ H5O__link_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int in
                                  : (lnk->type >= H5L_TYPE_UD_MIN ? "User-defined" : "Unknown")))));
 
     if (lnk->corder_valid)
-        HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Creation Order:", lnk->corder);
+        HDfprintf(stream, "%*s%-*s %" PRId64 "\n", indent, "", fwidth, "Creation Order:", lnk->corder);
 
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Link Name Character Set:",
               (lnk->cset == H5T_CSET_ASCII ? "ASCII" : (lnk->cset == H5T_CSET_UTF8 ? "UTF-8" : "Unknown")));
