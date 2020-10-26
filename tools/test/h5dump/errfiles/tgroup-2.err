@@ -1,5 +1,5 @@
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
-  #000: (file name) line (number) in H5Gopen2(): unable to asynchronously open group
+  #000: (file name) line (number) in H5Gopen2(): unable to synchronously open group
     major: Symbol table
     minor: Unable to create file
   #001: (file name) line (number) in H5G__open_api_common(): unable to open group

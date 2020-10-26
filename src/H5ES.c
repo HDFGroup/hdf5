@@ -232,6 +232,7 @@ H5ESget_err_status(hid_t es_id, hbool_t *err_status /*out*/)
     herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ix", es_id, err_status);
 
     /* Check arguments */
     if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
@@ -264,6 +265,7 @@ H5ESget_err_count(hid_t es_id, size_t *num_errs /*out*/)
     herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ix", es_id, num_errs);
 
     /* Check arguments */
     if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))

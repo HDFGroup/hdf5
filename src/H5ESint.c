@@ -238,15 +238,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES_insert(hid_t es_id, H5VL_object_t *vol_obj, void *token, const char *caller,
+H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller,
     const char *caller_args, ...)
 {
     H5ES_t *es = NULL;          /* Event set for the operation */
     H5VL_object_t *request = NULL;         /* Async request token VOL object */
     H5ES_event_t *ev = NULL;    /* Event for request */
     H5RS_str_t *rs = NULL;      /* Ref-counted string to compose formatted argument string in */
-    char modified_args[64];     /* Buffer to modify caller args in */
-    size_t arg_len;             /* Length of caller args string */
     const char *s;              /* Pointer to internal string from ref-counted string */
     va_list ap;                 /* Varargs for caller */
     hbool_t arg_started = FALSE;   /* Whether the va_list has been started */
@@ -255,7 +253,7 @@ H5ES_insert(hid_t es_id, H5VL_object_t *vol_obj, void *token, const char *caller
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(vol_obj);
+    HDassert(connector);
     HDassert(token);
     HDassert(caller);
     HDassert(caller_args);
@@ -269,7 +267,7 @@ H5ES_insert(hid_t es_id, H5VL_object_t *vol_obj, void *token, const char *caller
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTINSERT, FAIL, "event set has failed operations")
 
     /* Create vol object for token */
-    if (NULL == (request = H5VL_create_object(token, vol_obj->connector))) {
+    if (NULL == (request = H5VL_create_object(token, connector))) {
         if (H5VL_request_free(token) < 0)
             HDONE_ERROR(H5E_EVENTSET, H5E_CANTFREE, FAIL, "can't free request")
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTINIT, FAIL, "can't create vol object for request token")
@@ -290,16 +288,10 @@ H5ES_insert(hid_t es_id, H5VL_object_t *vol_obj, void *token, const char *caller
     if(NULL == (rs = H5RS_create(NULL)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't allocate ref-counted string")
 
-    /* Duplicate the caller args, so it can be modified safely */
-    arg_len = HDstrlen(caller_args);
-    HDassert(arg_len < sizeof(modified_args));
-    HDstrcpy(modified_args, caller_args);
-    modified_args[arg_len - 2] = '\0';  /* Remove final "*s" from string, which is the caller routine name */
-
     /* Copy the string for the API routine's arguments */
     HDva_start(ap, caller_args);
     arg_started = TRUE;
-    if(H5_trace_args(rs, modified_args, ap) < 0)
+    if(H5_trace_args(rs, caller_args, ap) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTSET, FAIL, "can't create formatted API arguments")
     if(NULL == (s = H5RS_get_str(rs)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL, "can't get pointer to formatted API arguments")

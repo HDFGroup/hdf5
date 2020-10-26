@@ -185,7 +185,6 @@ H5_DLL H5A_t *H5A__open(const H5G_loc_t *loc, const char *attr_name);
 H5_DLL H5A_t *H5A__open_by_name(const H5G_loc_t *loc, const char *obj_name, const char *attr_name);
 H5_DLL H5A_t *H5A__open_by_idx(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
                                H5_iter_order_t order, hsize_t n);
-H5_DLL herr_t H5A__open_common(const H5G_loc_t *loc, H5A_t *attr);
 H5_DLL H5A_t *H5A__copy(H5A_t *new_attr, const H5A_t *old_attr);
 H5_DLL hid_t  H5A__get_type(H5A_t *attr);
 H5_DLL herr_t H5A__get_info(const H5A_t *attr, H5A_info_t *ainfo);
