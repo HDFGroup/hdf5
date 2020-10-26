@@ -448,7 +448,7 @@ H5dont_atexit(void)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT_NOERR_NOFS
-    H5TRACE0("e", "");
+    H5TRACE0("e","");
 
     if (H5_dont_atexit_g)
         ret_value = FAIL;
@@ -481,7 +481,7 @@ H5garbage_collect(void)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE0("e", "");
+    H5TRACE0("e","");
 
     /* Call the garbage collection routines in the library */
     if (H5FL_garbage_coll() < 0)
@@ -525,8 +525,8 @@ H5set_free_list_limits(int reg_global_lim, int reg_list_lim, int arr_global_lim,
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "IsIsIsIsIsIs", reg_global_lim, reg_list_lim, arr_global_lim, arr_list_lim, blk_global_lim,
-             blk_list_lim);
+    H5TRACE6("e", "IsIsIsIsIsIs", reg_global_lim, reg_list_lim, arr_global_lim,
+             arr_list_lim, blk_global_lim, blk_list_lim);
 
     /* Call the free list function to actually set the limits */
     if (H5FL_set_free_list_limits(reg_global_lim, reg_list_lim, arr_global_lim, arr_list_lim, blk_global_lim,
@@ -950,7 +950,7 @@ H5close(void)
      * this function for an uninitialized library.
      */
     FUNC_ENTER_API_NOINIT_NOERR_NOFS
-    H5TRACE0("e", "");
+    H5TRACE0("e","");
 
     H5_term_library();
 

@@ -230,7 +230,7 @@ H5Eclear1(void)
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
-    H5TRACE0("e", "");
+    H5TRACE0("e","");
 
     /* Clear the default error stack */
     if (H5E_clear_stack(NULL) < 0)

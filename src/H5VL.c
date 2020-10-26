@@ -842,7 +842,7 @@ H5VLreset_lib_state(void)
 
     /* Must use this, to avoid modifying the API context stack in FUNC_ENTER */
     FUNC_ENTER_API_NOINIT
-    H5TRACE0("e", "");
+    H5TRACE0("e","");
 
     /* Reset the library state */
     if (H5VL_reset_lib_state() < 0)
