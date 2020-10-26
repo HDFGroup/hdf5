@@ -997,8 +997,7 @@ H5G__get_info_by_idx_api_common(hid_t loc_id, const char *group_name, H5_index_t
     if (H5ES_NONE != es_id && NULL != token)
         /* Add token to event set */
         if (H5ES_insert(es_id, vol_obj, token, 
-                H5ARG_TRACE9(caller, "i*sIiIohxii*s", loc_id, group_name, idx_type, order, n, group_info,
-                lapl_id, es_id, caller)) < 0)
+                H5ARG_TRACE9(caller, "i*sIiIohxii*s", loc_id, group_name, idx_type, order, n, group_info, lapl_id, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -1050,8 +1049,7 @@ H5Gget_info_by_idx_async(hid_t loc_id, const char *group_name, H5_index_t idx_ty
     herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "i*sIiIohxii", loc_id, group_name, idx_type, order, n, group_info,
-             lapl_id, es_id);
+    H5TRACE8("e", "i*sIiIohxii", loc_id, group_name, idx_type, order, n, group_info, lapl_id, es_id);
 
      /* Retrieve group information asynchronously */
     if(H5G__get_info_by_idx_api_common(loc_id, group_name, idx_type,

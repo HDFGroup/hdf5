@@ -42,9 +42,9 @@
         nerrors++;                                                                                           \
         if (nerrors <= GHEAP_REPEATED_ERR_LIM) {                                                             \
             H5_FAILED();                                                                                     \
-            puts(MSG);                                                                                       \
+            HDputs(MSG);                                                                                     \
             if (nerrors == GHEAP_REPEATED_ERR_LIM)                                                           \
-                puts("    Suppressing further errors...");                                                   \
+                HDputs("    Suppressing further errors...");                                                 \
         } /* end if */                                                                                       \
     }     /* end GHEAP_REPEATED_ERR */
 
@@ -226,7 +226,7 @@ test_2(hid_t fapl)
             HDputs("    Unable to read object");
             nerrors++;
         }
-        else if (memcmp(in, out, size)) {
+        else if (HDmemcmp(in, out, size)) {
             H5_FAILED();
             HDputs("    Value read doesn't match value written");
             nerrors++;

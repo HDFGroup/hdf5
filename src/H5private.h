@@ -298,6 +298,10 @@
  * Note that Solaris Studio supports attribute, but does not support the
  * attributes we use.
  *
+ * When using H5_ATTR_FALLTHROUGH, you should also include a comment that
+ * says FALLTHROUGH to reduce warnings on compilers that don't use
+ * attributes but do respect fall-through comments.
+ *
  * H5_ATTR_CONST is redefined in tools/h5repack/dynlib_rpk.c to quiet
  * gcc warnings (it has to use the public API and can't include this
  * file). Be sure to update that file if the #ifdefs change here.

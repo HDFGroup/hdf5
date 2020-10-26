@@ -159,8 +159,7 @@ H5A__create_api_common(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t
     if (H5ES_NONE != es_id && NULL != token)
         /* Add token to event set */
         if (H5ES_insert(es_id, vol_obj, token, 
-                H5ARG_TRACE8(caller, "i*siiiii*s", loc_id, attr_name, type_id, space_id, 
-                acpl_id, aapl_id, es_id, caller)) < 0)
+                H5ARG_TRACE8(caller, "i*siiiii*s", loc_id, attr_name, type_id, space_id, acpl_id, aapl_id, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
     /* Register the new attribute and get an ID for it */
@@ -318,8 +317,7 @@ H5A__create_by_name_api_common(hid_t loc_id, const char *obj_name, const char *a
     if (H5ES_NONE != es_id && NULL != token)
         /* Add token to event set */
         if (H5ES_insert(es_id, vol_obj, token, 
-                H5ARG_TRACE10(caller, "i*s*siiiiii*s", loc_id, obj_name, attr_name, type_id, space_id,
-                acpl_id, aapl_id, lapl_id, es_id, caller)) < 0)
+                H5ARG_TRACE10(caller, "i*s*siiiiii*s", loc_id, obj_name, attr_name, type_id, space_id, acpl_id, aapl_id, lapl_id, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
     
@@ -402,8 +400,8 @@ H5Acreate_by_name_async(hid_t loc_id, const char *obj_name, const char *attr_nam
     hid_t               ret_value = H5I_INVALID_HID;    /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE9("i", "i*s*siiiiii", loc_id, obj_name, attr_name, type_id, space_id,
-             acpl_id, aapl_id, lapl_id, es_id);
+    H5TRACE9("i", "i*s*siiiiii", loc_id, obj_name, attr_name, type_id, space_id, acpl_id, aapl_id, lapl_id,
+             es_id);
 
     /* Create the attribute synchronously */
     if((ret_value = H5A__create_by_name_api_common(loc_id, obj_name, attr_name, type_id, space_id,
@@ -605,8 +603,7 @@ H5A__open_by_name_api_common(hid_t loc_id, const char *obj_name, const char *att
     if (H5ES_NONE != es_id && NULL != token)
         /* Add token to event set */
         if (H5ES_insert(es_id, vol_obj, token,
-                H5ARG_TRACE7(caller, "i*s*siii*s", loc_id, obj_name, attr_name, 
-                aapl_id, lapl_id, es_id, caller)) < 0)
+                H5ARG_TRACE7(caller, "i*s*siii*s", loc_id, obj_name, attr_name, aapl_id, lapl_id, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
     /* Register the attribute and get an ID for it */
@@ -789,8 +786,7 @@ H5A__open_by_idx_api_common(hid_t loc_id, const char *obj_name, H5_index_t idx_t
     if (H5ES_NONE != es_id && NULL != token)
         /* Add token to event set */
         if (H5ES_insert(es_id, vol_obj, token,
-                H5ARG_TRACE9(caller, "i*sIiIohiii*s", loc_id, obj_name, idx_type, order, n, aapl_id,
-                lapl_id, es_id, caller)) < 0)
+                H5ARG_TRACE9(caller, "i*sIiIohiii*s", loc_id, obj_name, idx_type, order, n, aapl_id, lapl_id, es_id, caller)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
     /* Register the attribute and get an ID for it */
@@ -866,8 +862,7 @@ H5Aopen_by_idx_async(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     hid_t ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE8("i", "i*sIiIohiii", loc_id, obj_name, idx_type, order, n, aapl_id,
-             lapl_id, es_id);
+    H5TRACE8("i", "i*sIiIohiii", loc_id, obj_name, idx_type, order, n, aapl_id, lapl_id, es_id);
 
     /* Open the attribute by idx synchronously */
     if((ret_value = H5A__open_by_idx_api_common(loc_id, obj_name, idx_type, order, n, 
@@ -1693,8 +1688,7 @@ H5A__rename_by_name_api_common(hid_t loc_id, const char *obj_name, const char *o
         if (H5ES_NONE != es_id && NULL != token)
             /* Add token to event set */
             if (H5ES_insert(es_id, vol_obj, token, 
-                    H5ARG_TRACE7(caller, "i*s*s*sii*s", loc_id, obj_name, old_attr_name, new_attr_name,
-                    lapl_id, es_id, caller)) < 0)
+                    H5ARG_TRACE7(caller, "i*s*s*sii*s", loc_id, obj_name, old_attr_name, new_attr_name, lapl_id, es_id, caller)) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
     } /* end if */
@@ -1749,8 +1743,7 @@ H5Arename_by_name_async(hid_t loc_id, const char *obj_name, const char *old_attr
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "i*s*s*sii", loc_id, obj_name, old_attr_name, new_attr_name,
-             lapl_id, es_id);
+    H5TRACE6("e", "i*s*s*sii", loc_id, obj_name, old_attr_name, new_attr_name, lapl_id, es_id);
 
     /* Asynchronously rename the attribute */
     if(H5A__rename_by_name_api_common(loc_id, obj_name, old_attr_name, new_attr_name,
@@ -2370,8 +2363,7 @@ H5A__exists_by_name_api_common(hid_t loc_id, const char *obj_name, const char *a
     if (H5ES_NONE != es_id && NULL != token)
         /* Add token to event set */
         if (H5ES_insert(es_id, vol_obj, token, 
-                H5ARG_TRACE6(caller, "i*s*sii*s", loc_id, obj_name, attr_name, lapl_id, 
-                es_id, caller)) <  0)
+                H5ARG_TRACE6(caller, "i*s*sii*s", loc_id, obj_name, attr_name, lapl_id, es_id, caller)) <  0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
