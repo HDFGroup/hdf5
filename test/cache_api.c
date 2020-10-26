@@ -1216,9 +1216,9 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
     /* do random reads on all datasets */
     n = 0;
     while ((pass) && (n < NUM_RANDOM_ACCESSES)) {
-        m = rand() % NUM_DSETS;
-        i = (rand() % (DSET_SIZE / CHUNK_SIZE)) * CHUNK_SIZE;
-        j = (rand() % (DSET_SIZE / CHUNK_SIZE)) * CHUNK_SIZE;
+        m = HDrand() % NUM_DSETS;
+        i = (HDrand() % (DSET_SIZE / CHUNK_SIZE)) * CHUNK_SIZE;
+        j = (HDrand() % (DSET_SIZE / CHUNK_SIZE)) * CHUNK_SIZE;
 
         /* select on disk hyperslab */
         offset[0] = (hsize_t)i; /*offset of hyperslab in file*/
@@ -1328,8 +1328,8 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
     m = 0;
     n = 0;
     while ((pass) && (n < NUM_RANDOM_ACCESSES)) {
-        i = (rand() % (DSET_SIZE / CHUNK_SIZE)) * CHUNK_SIZE;
-        j = (rand() % (DSET_SIZE / CHUNK_SIZE)) * CHUNK_SIZE;
+        i = (HDrand() % (DSET_SIZE / CHUNK_SIZE)) * CHUNK_SIZE;
+        j = (HDrand() % (DSET_SIZE / CHUNK_SIZE)) * CHUNK_SIZE;
 
         /* select on disk hyperslab */
         offset[0] = (hsize_t)i; /*offset of hyperslab in file*/

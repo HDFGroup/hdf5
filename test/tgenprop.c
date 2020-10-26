@@ -2172,5 +2172,5 @@ test_genprop(void)
 void
 cleanup_genprop(void)
 {
-    remove(FILENAME);
+    HDremove(FILENAME);
 }

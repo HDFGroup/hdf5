@@ -981,7 +981,8 @@ H5Gget_info_by_idx_async(hid_t loc_id, const char *group_name, H5_index_t idx_ty
     herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "i*sIiIohxii", loc_id, group_name, idx_type, order, n, group_info, lapl_id, es_id);
+    H5TRACE8("e", "i*sIiIohxii", loc_id, group_name, idx_type, order, n, group_info,
+             lapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)

@@ -1700,7 +1700,8 @@ H5Arename_by_name_async(hid_t loc_id, const char *obj_name, const char *old_attr
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "i*s*s*sii", loc_id, obj_name, old_attr_name, new_attr_name, lapl_id, es_id);
+    H5TRACE6("e", "i*s*s*sii", loc_id, obj_name, old_attr_name, new_attr_name,
+             lapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)

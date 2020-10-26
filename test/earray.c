@@ -759,7 +759,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
     }
 #else  /* NDEBUG */
     SKIPPED();
-    puts("    Not tested when assertions are disabled");
+    HDputs("    Not tested when assertions are disabled");
 #endif /* NDEBUG */
 
     /*
@@ -2427,12 +2427,12 @@ main(void)
         switch (curr_test) {
             /* "Normal" testing parameters */
             case EARRAY_TEST_NORMAL:
-                puts("Testing with normal parameters");
+                HDputs("Testing with normal parameters");
                 break;
 
             /* "Re-open array" testing parameters */
             case EARRAY_TEST_REOPEN:
-                puts("Testing with reopen array flag set");
+                HDputs("Testing with reopen array flag set");
                 tparam.reopen_array = EARRAY_TEST_REOPEN;
                 break;
 
@@ -2461,31 +2461,31 @@ main(void)
             switch (curr_iter) {
                 /* "Forward" testing parameters */
                 case EARRAY_ITER_FW:
-                    puts("Testing with forward iteration");
+                    HDputs("Testing with forward iteration");
                     tparam.eiter = &ea_iter_fw;
                     break;
 
                 /* "Reverse" testing parameters */
                 case EARRAY_ITER_RV:
-                    puts("Testing with reverse iteration");
+                    HDputs("Testing with reverse iteration");
                     tparam.eiter = &ea_iter_rv;
                     break;
 
                 /* "Random" testing parameters */
                 case EARRAY_ITER_RND:
-                    puts("Testing with random iteration");
+                    HDputs("Testing with random iteration");
                     tparam.eiter = &ea_iter_rnd;
                     break;
 
                 /* "Random #2" testing parameters */
                 case EARRAY_ITER_RND2:
-                    puts("Testing with random #2 iteration");
+                    HDputs("Testing with random #2 iteration");
                     tparam.eiter = &ea_iter_rnd2;
                     break;
 
                 /* "Cyclic" testing parameters */
                 case EARRAY_ITER_CYC:
-                    puts("Testing with cyclic iteration");
+                    HDputs("Testing with cyclic iteration");
                     tparam.eiter = &ea_iter_cyc;
                     break;
 

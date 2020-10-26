@@ -303,7 +303,7 @@
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(expected, actual, reason)                                                               \
-    if (strcmp((actual), (expected)) != 0) {                                                                 \
+    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -348,7 +348,7 @@
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(actual, expected, reason)                                                               \
-    if (strcmp((actual), (expected)) != 0) {                                                                 \
+    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -414,8 +414,8 @@ test_fapl_config_validation(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS fapl configuration validation");
     SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
+    HDputs("    HDFS VFD is not enabled");
+    HDfflush(stdout);
     return 0;
 
 #else
@@ -620,8 +620,8 @@ test_hdfs_fapl(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS fapl ");
     SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
+    HDputs("    HDFS VFD is not enabled");
+    HDfflush(stdout);
     return 0;
 
 #else
@@ -703,8 +703,8 @@ test_vfd_open(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD-level open");
     SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
+    HDputs("    HDFS VFD is not enabled");
+    HDfflush(stdout);
     return 0;
 
 #else
@@ -956,8 +956,8 @@ test_eof_eoa(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS eof/eoa gets and sets");
     SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
+    HDputs("    HDFS VFD is not enabled");
+    HDfflush(stdout);
     return 0;
 
 #else
@@ -1066,8 +1066,8 @@ test_H5FDread_without_eoa_set_fails(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD read-eoa temporal coupling library limitation");
     SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
+    HDputs("    HDFS VFD is not enabled");
+    HDfflush(stdout);
     return 0;
 
 #else
@@ -1165,8 +1165,8 @@ test_read(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD read/range-gets");
     SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
+    HDputs("    HDFS VFD is not enabled");
+    HDfflush(stdout);
     return 0;
 
 #else
@@ -1376,8 +1376,8 @@ test_noops_and_autofails(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD always-fail and no-op routines");
     SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
+    HDputs("    HDFS VFD is not enabled");
+    HDfflush(stdout);
     return 0;
 
 #else
@@ -1528,8 +1528,8 @@ test_H5F_integration(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS file access through HD5F library (H5F API)");
     SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
+    HDputs("    HDFS VFD is not enabled");
+    HDfflush(stdout);
     return 0;
 
 #else
@@ -1597,7 +1597,7 @@ error:
 
 #if HDFS_TEST_DEBUG
     HDprintf("\nerror!");
-    fflush(stdout);
+    HDfflush(stdout);
 #endif /* HDFS_TEST_DEBUG */
 
     if (fapl_id >= 0) {
