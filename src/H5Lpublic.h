@@ -149,18 +149,33 @@ H5_DLL herr_t H5Lmove(hid_t src_loc, const char *src_name, hid_t dst_loc, const 
                       hid_t lapl_id);
 H5_DLL herr_t H5Lcopy(hid_t src_loc, const char *src_name, hid_t dst_loc, const char *dst_name, hid_t lcpl_id,
                       hid_t lapl_id);
+
 H5_DLL herr_t H5Lcreate_hard(hid_t cur_loc, const char *cur_name, hid_t dst_loc, const char *dst_name,
                              hid_t lcpl_id, hid_t lapl_id);
+H5_DLL herr_t H5Lcreate_hard_async(hid_t cur_loc_id, const char *cur_name, hid_t new_loc_id, 
+                                   const char *new_name, hid_t lcpl_id, hid_t lapl_id, hid_t es_id);
+
 H5_DLL herr_t H5Lcreate_soft(const char *link_target, hid_t link_loc_id, const char *link_name, hid_t lcpl_id,
                              hid_t lapl_id);
+H5_DLL herr_t H5Lcreate_soft_async(const char *link_target, hid_t link_loc_id, const char *link_name, 
+                                   hid_t lcpl_id, hid_t lapl_id, hid_t es_id);
+
 H5_DLL herr_t H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id);
+H5_DLL herr_t H5Ldelete_async(hid_t loc_id, const char *name, hid_t lapl_id, hid_t es_id);
+
 H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
                                H5_iter_order_t order, hsize_t n, hid_t lapl_id);
+H5_DLL herr_t H5Ldelete_by_idx_async(hid_t loc_id, const char *group_name, H5_index_t idx_type,
+                                     H5_iter_order_t order, hsize_t n, hid_t lapl_id, hid_t es_id);
+
 H5_DLL herr_t H5Lget_val(hid_t loc_id, const char *name, void *buf /*out*/, size_t size, hid_t lapl_id);
 H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
                                 H5_iter_order_t order, hsize_t n, void *buf /*out*/, size_t size,
                                 hid_t lapl_id);
+
 H5_DLL htri_t H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id);
+H5_DLL htri_t H5Lexists_async(hid_t loc_id, const char *name, hid_t lapl_id, hid_t es_id);
+
 H5_DLL herr_t H5Lget_info2(hid_t loc_id, const char *name, H5L_info2_t *linfo /*out*/, hid_t lapl_id);
 H5_DLL herr_t H5Lget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index_t idx_type,
                                   H5_iter_order_t order, hsize_t n, H5L_info2_t *linfo /*out*/,
@@ -170,6 +185,9 @@ H5_DLL ssize_t H5Lget_name_by_idx(hid_t loc_id, const char *group_name, H5_index
                                   hid_t lapl_id);
 H5_DLL herr_t  H5Literate2(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx,
                            H5L_iterate2_t op, void *op_data);
+H5_DLL herr_t H5Literate_async(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, 
+                               hsize_t *idx_p, H5L_iterate2_t op, void *op_data, hid_t es_id);
+
 H5_DLL herr_t  H5Literate_by_name2(hid_t loc_id, const char *group_name, H5_index_t idx_type,
                                    H5_iter_order_t order, hsize_t *idx, H5L_iterate2_t op, void *op_data,
                                    hid_t lapl_id);

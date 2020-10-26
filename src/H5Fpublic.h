@@ -232,13 +232,19 @@ extern "C" {
 
 H5_DLL htri_t H5Fis_accessible(const char *container_name, hid_t fapl_id);
 H5_DLL hid_t  H5Fcreate(const char *filename, unsigned flags, hid_t create_plist, hid_t access_plist);
-H5_DLL hid_t H5Fcreate_async(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t es_id);
-H5_DLL hid_t H5Fopen(const char *filename, unsigned flags, hid_t access_plist);
-H5_DLL hid_t H5Fopen_async(const char *filename, unsigned flags, hid_t access_plist, hid_t es_id);
-H5_DLL hid_t H5Freopen(hid_t file_id);
+H5_DLL hid_t  H5Fcreate_async(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t es_id);
+H5_DLL hid_t  H5Fopen(const char *filename, unsigned flags, hid_t access_plist);
+H5_DLL hid_t  H5Fopen_async(const char *filename, unsigned flags, hid_t access_plist, hid_t es_id);
+
+H5_DLL hid_t  H5Freopen(hid_t file_id);
+H5_DLL hid_t  H5Freopen_async(hid_t file_id, hid_t es_id);
+
 H5_DLL herr_t   H5Fflush(hid_t object_id, H5F_scope_t scope);
+H5_DLL herr_t   H5Fflush_async(hid_t object_id, H5F_scope_t scope, hid_t es_id);
+
 H5_DLL herr_t   H5Fclose(hid_t file_id);
 H5_DLL herr_t   H5Fclose_async(hid_t file_id, hid_t es_id);
+
 H5_DLL herr_t   H5Fdelete(const char *filename, hid_t fapl_id);
 H5_DLL hid_t    H5Fget_create_plist(hid_t file_id);
 H5_DLL hid_t    H5Fget_access_plist(hid_t file_id);
