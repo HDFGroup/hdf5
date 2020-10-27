@@ -50,5 +50,7 @@ typedef struct H5ES_t H5ES_t;
 /***************************************/
 herr_t H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller,
     const char *caller_args, ...);
+herr_t H5ES_insert_new(hid_t es_id, H5VL_t *connector, void *token,
+    const char *caller, const char *caller_args, ...);
 
 #endif /* _H5ESprivate_H */

@@ -44,14 +44,13 @@ typedef enum H5ES_status_t {
 
 /*
 H5ES_err_info_t:
-    const char *: API name
+    const char *: API name (H5Dwrite_async, ...)
     const char *: Arg string
-    const char *: Object path / name being operated on
     const char *: Appl. source file name
     const char *: Appl. source function
     const char *: Appl. source file line
-    uint64_t(?): Timestamp
-    uint64_t(?): "event count" - n'th event inserted into event set
+    uint64_t: Timestamp
+    uint64_t: "event count" - n'th event inserted into event set
     hid_t: Error stack
 
 Possible debugging routines:
@@ -80,9 +79,10 @@ herr_t H5ESwait(hid_t es_id, uint64_t timeout, H5ES_status_t *status);
 herr_t H5EScancel(hid_t es_id, H5ES_status_t *status);
 herr_t H5ESget_count(hid_t es_id, size_t *count);
 herr_t H5ESget_err_status(hid_t es_id, hbool_t *err_occurred);
-herr_t H5ESget_err_count(hid_t es_id, size_t *num_errs); /* Don't wait! */
-/* herr_t H5ESget_err_info(hid_t es_id, size_t num_err_info, H5ES_err_info_t err_info[]); */
-herr_t H5ESclose(hid_t es_id);  /* Don't wait for completion, return FAIL if ops outstanding */
+herr_t H5ESget_err_count(hid_t es_id, size_t *num_errs);
+/* herr_t H5ESget_err_info(hid_t es_id, size_t num_err_info,
+                            H5ES_err_info_t err_info[], size_t *err_cleared); */
+herr_t H5ESclose(hid_t es_id);
 
 #ifdef __cplusplus
 }

@@ -129,12 +129,14 @@ extern "C" {
 
 H5_DLL hid_t   H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id,
                           hid_t dcpl_id, hid_t dapl_id);
-H5_DLL hid_t   H5Dcreate_async(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id,
+H5_DLL hid_t   H5Dcreate_async(const char *app_file, const char *app_func, unsigned app_line,
+                               hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id,
                                hid_t dcpl_id, hid_t dapl_id, hid_t es_id);
 H5_DLL hid_t   H5Dcreate_anon(hid_t file_id, hid_t type_id, hid_t space_id, hid_t plist_id, hid_t dapl_id);
 H5_DLL hid_t   H5Dopen2(hid_t file_id, const char *name, hid_t dapl_id);
 H5_DLL herr_t  H5Dclose(hid_t dset_id);
-H5_DLL herr_t  H5Dclose_async(hid_t dset_id, hid_t es_id);
+H5_DLL herr_t  H5Dclose_async(const char *app_file, const char *app_func, unsigned app_line,
+                                hid_t dset_id, hid_t es_id);
 H5_DLL hid_t   H5Dget_space(hid_t dset_id);
 H5_DLL herr_t  H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation);
 H5_DLL hid_t   H5Dget_type(hid_t dset_id);
@@ -150,11 +152,13 @@ H5_DLL herr_t  H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_idx
 H5_DLL haddr_t H5Dget_offset(hid_t dset_id);
 H5_DLL herr_t  H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                        hid_t plist_id, void *buf /*out*/);
-H5_DLL herr_t  H5Dread_async(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
+H5_DLL herr_t  H5Dread_async(const char *app_file, const char *app_func, unsigned app_line,
+                             hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                              hid_t plist_id, void *buf /*out*/, hid_t es_id);
 H5_DLL herr_t  H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                         hid_t plist_id, const void *buf);
-H5_DLL herr_t  H5Dwrite_async(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
+H5_DLL herr_t  H5Dwrite_async(const char *app_file, const char *app_func, unsigned app_line,
+                              hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                               hid_t plist_id, const void *buf, hid_t es_id);
 H5_DLL herr_t  H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *offset,
                               size_t data_size, const void *buf);
@@ -176,6 +180,17 @@ H5_DLL herr_t  H5Ddebug(hid_t dset_id);
 /* Internal API routines */
 H5_DLL herr_t H5Dformat_convert(hid_t dset_id);
 H5_DLL herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
+
+/* API Wrappers for async routines */
+/* (Must be defined _after_ the function prototype) */
+/* (And must only defined when included in application code, not the library) */
+#ifndef H5D_MODULE
+#define H5Dcreate_async(...) H5Dcreate_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dread_async(...) H5Dread_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dwrite_async(...) H5Dwrite_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dclose_async(...) H5Dclose_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#endif /* H5D_MODULE */
+
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *

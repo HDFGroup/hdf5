@@ -43,7 +43,9 @@ typedef struct H5ES_event_t H5ES_event_t;
 
 /* Typedef for event set objects */
 struct H5ES_t {
-    size_t        count;       /* # of events in set */
+    uint64_t    tot_count;      /* Total # of operations inserted into this set */
+
+    size_t        act_count;   /* # of active events in set */
     H5ES_event_t *head, *tail; /* Head & tail of active events */
 
     hbool_t       err_occurred; /* Flag for error from an operation */

@@ -129,7 +129,7 @@ H5ESget_count(hid_t es_id, size_t *count /*out*/)
 
     /* Retrieve the count, if non-NULL */
     if (count)
-        *count = es->count;
+        *count = es->act_count;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -251,6 +251,9 @@ done:
  *
  * Purpose:     Retrieve # of failed operations
  *
+ * Note:        Does not wait for active operations to complete, so count may
+ *              not include all failures.
+ *
  * Return:      SUCCEED / FAIL
  *
  * Programmer:	Quincey Koziol
@@ -273,13 +276,8 @@ H5ESget_err_count(hid_t es_id, size_t *num_errs /*out*/)
 
     /* Retrieve the error flag, if non-NULL */
     if (num_errs) {
-        if(es->err_occurred) {
-            /* Wait for all remaining events, to give accurate total */
-            if (H5ES__wait(es, H5ES_WAIT_FOREVER, NULL, FALSE) < 0)
-                HGOTO_ERROR(H5E_EVENTSET, H5E_CANTWAIT, FAIL, "can't wait on operations")
-
+        if(es->err_occurred)
             *num_errs = es->err_count;
-        } /* end if */
         else
             *num_errs = 0;
     } /* end if */
@@ -292,6 +290,8 @@ done:
  * Function:    H5ESclose
  *
  * Purpose:     Closes an event set.
+ *
+ * Note:        Fails if active operations are present.
  *
  * Return:      SUCCEED / FAIL
  *

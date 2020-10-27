@@ -622,7 +622,8 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Fcreate_async(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t es_id)
+H5Fcreate_async(const char *app_file, const char *app_func, unsigned app_line,
+    const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t es_id)
 {
     H5VL_object_t *   vol_obj   = NULL;         /* File object */
     void *            token     = NULL;         /* Request token for async operation        */
@@ -630,7 +631,7 @@ H5Fcreate_async(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_
     hid_t ret_value; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE5("i", "*sIuiii", filename, flags, fcpl_id, fapl_id, es_id);
+    H5TRACE8("i", "*s*sIu*sIuiii", app_file, app_func, app_line, filename, flags, fcpl_id, fapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -646,7 +647,7 @@ H5Fcreate_async(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
-        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE5(FUNC, "*sIuiii", filename, flags, fcpl_id, fapl_id, es_id)) < 0)
+        if (H5ES_insert_new(es_id, vol_obj->connector, token, H5ARG_TRACE8(FUNC, "*s*sIu*sIuiii", app_file, app_func, app_line, filename, flags, fcpl_id, fapl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
 
     /* Reset token for 'post open' operation */
@@ -659,7 +660,7 @@ H5Fcreate_async(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
-        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE5(FUNC, "*sIuiii", filename, flags, fcpl_id, fapl_id, es_id)) < 0)
+        if (H5ES_insert_new(es_id, vol_obj->connector, token, H5ARG_TRACE8(FUNC, "*s*sIu*sIuiii", app_file, app_func, app_line, filename, flags, fcpl_id, fapl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
 
 done:
@@ -789,7 +790,8 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Fopen_async(const char *filename, unsigned flags, hid_t fapl_id, hid_t es_id)
+H5Fopen_async(const char *app_file, const char *app_func, unsigned app_line,
+    const char *filename, unsigned flags, hid_t fapl_id, hid_t es_id)
 {
     H5VL_object_t *   vol_obj   = NULL;         /* File object */
     void *            token     = NULL;         /* Request token for async operation        */
@@ -797,7 +799,7 @@ H5Fopen_async(const char *filename, unsigned flags, hid_t fapl_id, hid_t es_id)
     hid_t ret_value; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE4("i", "*sIuii", filename, flags, fapl_id, es_id);
+    H5TRACE7("i", "*s*sIu*sIuii", app_file, app_func, app_line, filename, flags, fapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -813,7 +815,7 @@ H5Fopen_async(const char *filename, unsigned flags, hid_t fapl_id, hid_t es_id)
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
-        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE4(FUNC, "*sIuii", filename, flags, fapl_id, es_id)) < 0)
+        if (H5ES_insert_new(es_id, vol_obj->connector, token, H5ARG_TRACE7(FUNC, "*s*sIu*sIuii", app_file, app_func, app_line, filename, flags, fapl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
     /* Reset token for 'post open' operation */
@@ -826,7 +828,7 @@ H5Fopen_async(const char *filename, unsigned flags, hid_t fapl_id, hid_t es_id)
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
-        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE4(FUNC, "*sIuii", filename, flags, fapl_id, es_id)) < 0)
+        if (H5ES_insert_new(es_id, vol_obj->connector, token, H5ARG_TRACE7(FUNC, "*s*sIu*sIuii", app_file, app_func, app_line, filename, flags, fapl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
 
 done:
@@ -919,7 +921,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fclose_async(hid_t file_id, hid_t es_id)
+H5Fclose_async(const char *app_file, const char *app_func, unsigned app_line,
+    hid_t file_id, hid_t es_id)
 {
     H5VL_object_t *   vol_obj   = NULL;         /* Object for loc_id */
     H5VL_t *       connector = NULL;              /* VOL connector */
@@ -928,7 +931,7 @@ H5Fclose_async(hid_t file_id, hid_t es_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ii", file_id, es_id);
+    H5TRACE5("e", "*s*sIuii", app_file, app_func, app_line, file_id, es_id);
 
     /* Check arguments */
     if (H5I_FILE != H5I_get_type(file_id))
@@ -957,7 +960,7 @@ H5Fclose_async(hid_t file_id, hid_t es_id)
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
-        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE2(FUNC, "ii", file_id, es_id)) < 0)
+        if (H5ES_insert_new(es_id, vol_obj->connector, token, H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, file_id, es_id)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
