@@ -159,8 +159,9 @@ H5A__create_api_common(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t
     if (H5ES_NONE != es_id && NULL != token)
         /* Add token to event set */
         if (H5ES_insert(es_id, vol_obj, token, 
-                H5ARG_TRACE8(caller, "i*siiiii*s", loc_id, attr_name, type_id, space_id, acpl_id, aapl_id, es_id, caller)) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+                H5ARG_TRACE8(caller, "i*siiiii*s", loc_id, attr_name, type_id, space_id, 
+                acpl_id, aapl_id, es_id, caller)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
 
     /* Register the new attribute and get an ID for it */
     if ((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
@@ -317,8 +318,9 @@ H5A__create_by_name_api_common(hid_t loc_id, const char *obj_name, const char *a
     if (H5ES_NONE != es_id && NULL != token)
         /* Add token to event set */
         if (H5ES_insert(es_id, vol_obj, token, 
-                H5ARG_TRACE10(caller, "i*s*siiiiii*s", loc_id, obj_name, attr_name, type_id, space_id, acpl_id, aapl_id, lapl_id, es_id, caller)) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+                H5ARG_TRACE10(caller, "i*s*siiiiii*s", loc_id, obj_name, attr_name, type_id, space_id,
+                acpl_id, aapl_id, lapl_id, es_id, caller)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
 
     
     /* Register the new attribute and get an ID for it */
@@ -468,7 +470,7 @@ H5A__open_api_common(hid_t loc_id, const char *attr_name, hid_t aapl_id,
         /* Add token to event set */
         if (H5ES_insert(es_id, vol_obj, token, 
                 H5ARG_TRACE5(caller, "i*sii*s", loc_id, attr_name, aapl_id, es_id, caller)) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
 
     /* Register the attribute and get an ID for it */
     if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
@@ -603,8 +605,9 @@ H5A__open_by_name_api_common(hid_t loc_id, const char *obj_name, const char *att
     if (H5ES_NONE != es_id && NULL != token)
         /* Add token to event set */
         if (H5ES_insert(es_id, vol_obj, token,
-                H5ARG_TRACE7(caller, "i*s*siii*s", loc_id, obj_name, attr_name, aapl_id, lapl_id, es_id, caller)) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+                H5ARG_TRACE7(caller, "i*s*siii*s", loc_id, obj_name, attr_name, 
+                aapl_id, lapl_id, es_id, caller)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
 
     /* Register the attribute and get an ID for it */
     if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
@@ -786,8 +789,9 @@ H5A__open_by_idx_api_common(hid_t loc_id, const char *obj_name, H5_index_t idx_t
     if (H5ES_NONE != es_id && NULL != token)
         /* Add token to event set */
         if (H5ES_insert(es_id, vol_obj, token,
-                H5ARG_TRACE9(caller, "i*sIiIohiii*s", loc_id, obj_name, idx_type, order, n, aapl_id, lapl_id, es_id, caller)) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+                H5ARG_TRACE9(caller, "i*sIiIohiii*s", loc_id, obj_name, idx_type, order, n, aapl_id,
+                lapl_id, es_id, caller)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
 
     /* Register the attribute and get an ID for it */
     if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)

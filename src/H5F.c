@@ -75,6 +75,12 @@ static hid_t  H5F__open_api_common(const char *filename, unsigned flags, hid_t f
                                      const char *caller);
 static herr_t H5F__close_api_common(hid_t file_id, hid_t es_id, const char *caller);
 
+static herr_t H5F__delete_api_common(const char *filename, hid_t fapl_id, hid_t es_id, const char *caller);
+
+static herr_t H5F__flush_api_common(hid_t object_id, H5F_scope_t scope, hid_t es_id, const char *caller);
+
+static hid_t H5F__reopen_api_common(hid_t file_id, hid_t es_id, const char *caller);
+
 /*********************/
 /* Package Variables */
 /*********************/
@@ -808,6 +814,57 @@ done:
 } /* end H5Fopen_async() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5F__flush_api_common
+ *
+ * Purpose:     This is the common function for flushing an HDF5 file.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F__flush_api_common(hid_t object_id, H5F_scope_t scope, hid_t es_id, const char *caller)
+{
+    H5VL_object_t *vol_obj = NULL;      /* Object info      */
+    H5I_type_t     obj_type;            /* Type of object   */
+    void *token     = NULL;             /* Request token for async operation        */
+    void **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    herr_t         ret_value = SUCCEED; /* Return value     */
+
+    FUNC_ENTER_STATIC
+
+    /* Get the type of object we're flushing + sanity check */
+    obj_type = H5I_get_type(object_id);
+    if (H5I_FILE != obj_type && H5I_GROUP != obj_type && H5I_DATATYPE != obj_type &&
+        H5I_DATASET != obj_type && H5I_ATTR != obj_type)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+
+    /* get the file object */
+    if (NULL == (vol_obj = H5VL_vol_object(object_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token;     /* Point at token for VOL connector to set up */
+
+    /* Flush the object */
+    if (H5VL_file_specific(vol_obj, H5VL_FILE_FLUSH, H5P_DATASET_XFER_DEFAULT, token_ptr, (int)obj_type,
+                           (int)scope) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file")
+
+    /* If there's an event set and a token was created, add the token to it */
+    if (H5ES_NONE != es_id && NULL != token)
+        /* Add token to event set */
+        if (H5ES_insert(es_id, vol_obj, token,
+                H5ARG_TRACE4(caller, "iFsi*s", object_id, scope, es_id, caller)) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F__flush_api_common() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5Fflush
  *
  * Purpose:     Flushes all outstanding buffers of a file to disk but does
@@ -821,31 +878,43 @@ done:
 herr_t
 H5Fflush(hid_t object_id, H5F_scope_t scope)
 {
-    H5VL_object_t *vol_obj = NULL;      /* Object info      */
-    H5I_type_t     obj_type;            /* Type of object   */
     herr_t         ret_value = SUCCEED; /* Return value     */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iFs", object_id, scope);
 
-    /* Get the type of object we're flushing + sanity check */
-    obj_type = H5I_get_type(object_id);
-    if (H5I_FILE != obj_type && H5I_GROUP != obj_type && H5I_DATATYPE != obj_type &&
-        H5I_DATASET != obj_type && H5I_ATTR != obj_type)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-
-    /* get the file object */
-    if (NULL == (vol_obj = H5VL_vol_object(object_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
-
-    /* Flush the object */
-    if (H5VL_file_specific(vol_obj, H5VL_FILE_FLUSH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (int)obj_type,
-                           (int)scope) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file")
+    /* Flush the file synchronously */
+    if (H5F__flush_api_common(object_id, scope, H5ES_NONE, FUNC) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "unable to synchronously flush file")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fflush() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fflush_async
+ *
+ * Purpose:     Asynchronous version of H5Fflush
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fflush_async(hid_t object_id, H5F_scope_t scope, hid_t es_id)
+{
+    herr_t         ret_value = SUCCEED; /* Return value     */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "iFsi", object_id, scope, es_id);
+
+    /* Flush the file asynchronously */
+    if (H5F__flush_api_common(object_id, scope, es_id, FUNC) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "unable to asynchronously delete file")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fflush_async() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5F__close_api_common
@@ -1017,6 +1086,86 @@ done:
 } /* end H5Fdelete() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5F__reopen_api_common
+ *
+ * Purpose:     This is the common function for reopening an HDF5 file
+ *              files.
+ *
+ * Return:      Success:    A file ID
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+H5F__reopen_api_common(hid_t file_id, hid_t es_id, const char *caller)
+{
+    void *file    = NULL;   /* File struct for new file */
+    void *token   = NULL;   /* Request token for async operation        */
+    void **token_ptr = H5_REQUEST_NULL;     /* Pointer to request token for async operation        */
+    H5VL_object_t *vol_obj = NULL;  /* VOL object for file                      */
+    hbool_t        supported;       /* Whether 'post open' operation is supported by VOL connector */
+    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Get the file object */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid file identifier")
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token;     /* Point at token for VOL connector to set up */
+
+    /* Reopen the file */
+    if (H5VL_file_specific(vol_obj, H5VL_FILE_REOPEN, H5P_DATASET_XFER_DEFAULT, token_ptr, &file) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to reopen file via the VOL connector")
+
+    /* Make sure that worked */
+    if (NULL == file)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to reopen file")
+
+    /* Get an atom for the file */
+    if ((ret_value = H5VL_register(H5I_FILE, file, vol_obj->connector, TRUE)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+
+    /* Get the file object */
+    if (NULL == (vol_obj = H5VL_vol_object(ret_value)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid object identifier")
+
+    /* If there's an event set and a token was created, add the token to it */
+    if (H5ES_NONE != es_id && NULL != token)
+        /* Add token to event set */
+        if (H5ES_insert(es_id, vol_obj, token,
+                H5ARG_TRACE3(caller, "ii*s", file_id, es_id, caller)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
+
+    /* Make the 'post open' callback */
+    supported = FALSE;
+    if (H5VL_introspect_opt_query(vol_obj, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_POST_OPEN, &supported) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't check for 'post open' operation")
+    if (supported) {
+        /* Reset token for 'post open' operation */
+        /* (Technically unnecessary if open operation didn't change it, but not
+         *      worth checking -QAK) */
+        token = NULL; 
+
+        if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_POST_OPEN, H5P_DATASET_XFER_DEFAULT,
+                               token_ptr) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to make file 'post open' callback")
+
+        /* If there's an event set and a token was created, add the token to it */
+        if (H5ES_NONE != es_id && NULL != token)
+            /* Add token to event set */
+            if (H5ES_insert(es_id, vol_obj, token, 
+                    H5ARG_TRACE3(caller, "ii*s", file_id, es_id, caller)) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__reopen_api_common() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5Freopen
  *
  * Purpose:     Reopen a file.  The new file handle which is returned points
@@ -1034,47 +1183,47 @@ done:
 hid_t
 H5Freopen(hid_t file_id)
 {
-    void *         file    = NULL; /* File struct for new file */
-    H5VL_object_t *vol_obj = NULL; /* VOL object for file                      */
-    hbool_t        supported;      /* Whether 'post open' operation is supported by VOL connector */
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", file_id);
 
-    /* Get the file object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid file identifier")
-
-    /* Reopen the file */
-    if (H5VL_file_specific(vol_obj, H5VL_FILE_REOPEN, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &file) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to reopen file via the VOL connector")
-
-    /* Make sure that worked */
-    if (NULL == file)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to reopen file")
-
-    /* Get an atom for the file */
-    if ((ret_value = H5VL_register(H5I_FILE, file, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
-
-    /* Get the file object */
-    if (NULL == (vol_obj = H5VL_vol_object(ret_value)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid object identifier")
-
-    /* Make the 'post open' callback */
-    supported = FALSE;
-    if (H5VL_introspect_opt_query(vol_obj, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_POST_OPEN, &supported) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't check for 'post open' operation")
-    if (supported)
-        if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_POST_OPEN, H5P_DATASET_XFER_DEFAULT,
-                               H5_REQUEST_NULL) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to make file 'post open' callback")
+    /* Reopen the file synchronously */
+    if ((ret_value = H5F__reopen_api_common(file_id, H5ES_NONE, FUNC)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to synchronously reopen file")
 
 done:
     /* XXX (VOL MERGE): If registration fails, file will not be closed */
     FUNC_LEAVE_API(ret_value)
 } /* end H5Freopen() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Freopen_async
+ *
+ * Purpose:     Asynchronous version of H5Freopen
+ *
+ * See Also:    H5Fpublic.h for a list of possible values for FLAGS.
+ *
+ * Return:      Success:    A file ID
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Freopen_async(hid_t file_id, hid_t es_id)
+{
+    hid_t ret_value; /* Return value */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE2("i", "ii", file_id, es_id);
+
+    /* Reopen the file, possibly asynchronously */
+    if ((ret_value = H5F__reopen_api_common(file_id, es_id, FUNC)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to asynchronously reopen file")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Freopen_async() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_intent

@@ -586,19 +586,19 @@ H5G__open_api_common(hid_t loc_id, const char *name, hid_t gapl_id,
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
 
-     /* Set up request token pointer for asynchronous operation */
+    /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
         token_ptr = &token;     /* Point at token for VOL connector to set up */
 
     if(NULL == (grp = H5VL_group_open(vol_obj, &loc_params, name, gapl_id, H5P_DATASET_XFER_DEFAULT, token_ptr)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open group")
 
-     /* If there's an event set and a token was created, add the token to it */
+    /* If there's an event set and a token was created, add the token to it */
     if (H5ES_NONE != es_id && NULL != token)
         /* Add token to event set */
         if (H5ES_insert(es_id, vol_obj, token, 
                 H5ARG_TRACE5(caller, "i*sii*s", loc_id, name, gapl_id, es_id, caller)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
 
     /* Register an ID for the group */
     if((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->connector, TRUE)) < 0)
@@ -749,7 +749,7 @@ H5G__get_info_api_common(hid_t loc_id, H5G_info_t *group_info/*out*/,
         token_ptr = &token;     /* Point at token for VOL connector to set up */
 
     if(H5VL_group_get(vol_obj, H5VL_GROUP_GET_INFO, H5P_DATASET_XFER_DEFAULT, 
-            H5_REQUEST_NULL, &loc_params, group_info, token_ptr) < 0)
+            token_ptr, &loc_params, group_info) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get group info")
 
     /* If there's an event set and a token was created, add the token to it */
@@ -864,7 +864,7 @@ H5G__get_info_by_name_api_common(hid_t loc_id, const char *name, H5G_info_t *gro
 
     /* Retrieve the group's information */
     if(H5VL_group_get(vol_obj, H5VL_GROUP_GET_INFO, H5P_DATASET_XFER_DEFAULT, 
-            H5_REQUEST_NULL, &loc_params, group_info, token_ptr) < 0)
+            token_ptr, &loc_params, group_info) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
 
     /* If there's an event set and a token was created, add the token to it */
@@ -989,8 +989,8 @@ H5G__get_info_by_idx_api_common(hid_t loc_id, const char *group_name, H5_index_t
         token_ptr = &token;     /* Point at token for VOL connector to set up */
 
     /* Retrieve the group's information */
-    if(H5VL_group_get(vol_obj, H5VL_GROUP_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, 
-            &loc_params, group_info, token_ptr) < 0)
+    if(H5VL_group_get(vol_obj, H5VL_GROUP_GET_INFO, H5P_DATASET_XFER_DEFAULT, token_ptr, 
+            &loc_params, group_info) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
 
     /* If there's an event set and a token was created, add the token to it */
