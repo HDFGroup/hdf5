@@ -242,7 +242,7 @@ H5FD_mirror_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     LOG_OP_CALL(FUNC);
 

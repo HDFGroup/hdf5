@@ -20,6 +20,9 @@
  *             File System (HDFS).
  */
 
+/* This source code file is part of the H5FD driver module */
+#include "H5FDdrvr_module.h"
+
 #include "H5private.h"   /* Generic Functions        */
 #include "H5Eprivate.h"  /* Error handling           */
 #include "H5FDprivate.h" /* File drivers             */
@@ -29,9 +32,6 @@
 #include "H5MMprivate.h" /* Memory management        */
 
 #ifdef H5_HAVE_LIBHDFS
-
-/* This source code file is part of the H5FD driver module */
-#include "H5FDdrvr_module.h"
 
 /* HDFS routines */
 #include "hdfs.h"
@@ -356,7 +356,7 @@ done:
 hid_t
 H5FD_hdfs_init(void)
 {
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t ret_value = H5I_INVALID_HID;
 #if HDFS_STATS
     unsigned int bin_i;
 #endif
