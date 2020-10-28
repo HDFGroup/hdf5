@@ -329,8 +329,8 @@ H5G__create_api_common(hid_t loc_id,
     void **token_ptr, H5VL_object_t ** _vol_obj_ptr)
 {
     void *            grp       = NULL;              /* Structure for new group */
-    H5VL_object_t *   vol_obj   = NULL;         /* Object for loc_id */
-    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &vol_obj);   /* Ptr to object ptr for loc_id */
+    H5VL_object_t *   tmp_vol_obj   = NULL;         /* Object for loc_id */
+    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);   /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;               /* Location parameters for object access */
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -551,8 +551,8 @@ H5G__open_api_common(hid_t loc_id, const char *name, hid_t gapl_id,
     void **token_ptr, H5VL_object_t ** _vol_obj_ptr)
 {
     void *grp = NULL;                   /* Group opened */
-    H5VL_object_t *   vol_obj   = NULL;         /* Object for loc_id */
-    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &vol_obj);   /* Ptr to object ptr for loc_id */
+    H5VL_object_t *   tmp_vol_obj   = NULL;         /* Object for loc_id */
+    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);   /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;               /* Location parameters for object access */
     hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
@@ -703,8 +703,8 @@ static herr_t
 H5G__get_info_api_common(hid_t loc_id, H5G_info_t *group_info/*out*/,
     void **token_ptr, H5VL_object_t ** _vol_obj_ptr)
 {
-    H5VL_object_t *   vol_obj   = NULL;         /* Object for loc_id */
-    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &vol_obj);   /* Ptr to object ptr for loc_id */
+    H5VL_object_t *   tmp_vol_obj   = NULL;         /* Object for loc_id */
+    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);   /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;               /* Location parameters for object access */
     H5I_type_t          id_type;                /* Type of ID */
     herr_t              ret_value = SUCCEED;    /* Return value */
@@ -809,8 +809,8 @@ static herr_t
 H5G__get_info_by_name_api_common(hid_t loc_id, const char *name, H5G_info_t *group_info/*out*/,
     hid_t lapl_id, void **token_ptr, H5VL_object_t ** _vol_obj_ptr)
 {
-    H5VL_object_t *   vol_obj   = NULL;         /* Object for loc_id */
-    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &vol_obj);   /* Ptr to object ptr for loc_id */
+    H5VL_object_t *   tmp_vol_obj   = NULL;         /* Object for loc_id */
+    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);   /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;               /* Location parameters for object access */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
@@ -914,8 +914,8 @@ H5G__get_info_by_idx_api_common(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, H5G_info_t *group_info /*out*/,
     hid_t lapl_id, void **token_ptr, H5VL_object_t ** _vol_obj_ptr)
 {
-    H5VL_object_t *   vol_obj   = NULL;         /* Object for loc_id */
-    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &vol_obj);   /* Ptr to object ptr for loc_id */
+    H5VL_object_t *   tmp_vol_obj   = NULL;         /* Object for loc_id */
+    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);   /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;               /* Location parameters for object access */
     herr_t              ret_value = SUCCEED;    /* Return value */
 

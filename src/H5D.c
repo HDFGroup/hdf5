@@ -91,8 +91,8 @@ H5D__create_api_common(hid_t loc_id, const char *name, hid_t type_id,
     void **token_ptr, H5VL_object_t ** _vol_obj_ptr)
 {
     void *            dset      = NULL;         /* New dataset's info */
-    H5VL_object_t *   vol_obj   = NULL;         /* Object for loc_id */
-    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &vol_obj);   /* Ptr to object ptr for loc_id */
+    H5VL_object_t *   tmp_vol_obj   = NULL;         /* Object for loc_id */
+    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);   /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;               /* Location parameters for object access */
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -326,8 +326,8 @@ H5D__open_api_common(hid_t loc_id, const char *name, hid_t dapl_id,
     void **token_ptr, H5VL_object_t ** _vol_obj_ptr)
 {
     void *            dset    = NULL; /* dset object from VOL connector */
-    H5VL_object_t *   vol_obj   = NULL;         /* Object for loc_id */
-    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &vol_obj);   /* Ptr to object ptr for loc_id */
+    H5VL_object_t *   tmp_vol_obj   = NULL;         /* Object for loc_id */
+    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);   /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;               /* Location parameters for object access */
     hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
@@ -349,12 +349,12 @@ H5D__open_api_common(hid_t loc_id, const char *name, hid_t dapl_id,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open dataset")
 
     /* Register an atom for the dataset */
-    if ((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->connector, TRUE)) < 0)
+    if ((ret_value = H5VL_register(H5I_DATASET, dset, (*vol_obj_ptr)->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register dataset atom")
 
 done:
     if (H5I_INVALID_HID == ret_value)
-        if (dset && H5VL_dataset_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        if (dset && H5VL_dataset_close(*vol_obj_ptr, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataset")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -538,8 +538,8 @@ done:
 static hid_t
 H5D__get_space_api_common(hid_t dset_id, void **token_ptr, H5VL_object_t ** _vol_obj_ptr)
 {
-    H5VL_object_t *   vol_obj   = NULL;         /* Object for loc_id */
-    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &vol_obj);   /* Ptr to object ptr for loc_id */
+    H5VL_object_t *   tmp_vol_obj   = NULL;         /* Object for loc_id */
+    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);   /* Ptr to object ptr for loc_id */
     hid_t ret_value = H5I_INVALID_HID;  /* Return value         */
 
     FUNC_ENTER_STATIC
@@ -872,8 +872,8 @@ static herr_t
 H5D__read_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
                      void *buf, void **token_ptr, H5VL_object_t ** _vol_obj_ptr)
 {
-    H5VL_object_t *   vol_obj   = NULL;         /* Object for loc_id */
-    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &vol_obj);   /* Ptr to object ptr for loc_id */
+    H5VL_object_t *   tmp_vol_obj   = NULL;         /* Object for loc_id */
+    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);   /* Ptr to object ptr for loc_id */
     herr_t         ret_value = SUCCEED;           /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1052,8 +1052,8 @@ static herr_t
 H5D__write_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                       hid_t dxpl_id, const void *buf, void **token_ptr, H5VL_object_t ** _vol_obj_ptr)
 {
-    H5VL_object_t *   vol_obj   = NULL;         /* Object for loc_id */
-    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &vol_obj);   /* Ptr to object ptr for loc_id */
+    H5VL_object_t *   tmp_vol_obj   = NULL;         /* Object for loc_id */
+    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);   /* Ptr to object ptr for loc_id */
     herr_t         ret_value = SUCCEED;           /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1393,8 +1393,8 @@ static herr_t
 H5D__set_extent_api_common(hid_t dset_id, const hsize_t size[],
     void **token_ptr, H5VL_object_t ** _vol_obj_ptr)
 {
-    H5VL_object_t *   vol_obj   = NULL;         /* Object for loc_id */
-    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &vol_obj);   /* Ptr to object ptr for loc_id */
+    H5VL_object_t *   tmp_vol_obj   = NULL;         /* Object for loc_id */
+    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);   /* Ptr to object ptr for loc_id */
     herr_t         ret_value = SUCCEED; /* Return value                 */
 
     FUNC_ENTER_STATIC
