@@ -245,121 +245,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller,
-    const char *caller_args, ...)
-{
-    H5ES_t *es = NULL;          /* Event set for the operation */
-    H5VL_object_t *request = NULL;         /* Async request token VOL object */
-    H5ES_event_t *ev = NULL;    /* Event for request */
-    H5RS_str_t *rs = NULL;      /* Ref-counted string to compose formatted argument string in */
-    const char *s;              /* Pointer to internal string from ref-counted string */
-    va_list ap;                 /* Varargs for caller */
-    hbool_t arg_started = FALSE;   /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity check */
-    HDassert(connector);
-    HDassert(token);
-    HDassert(caller);
-    HDassert(caller_args);
-
-    /* Get event set */
-    if (NULL == (es = (H5ES_t *)H5I_object_verify(es_id, H5I_EVENTSET)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an event set")
-
-    /* Check for errors in event set */
-    if(es->err_occurred)
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTINSERT, FAIL, "event set has failed operations")
-
-    /* Create vol object for token */
-    if (NULL == (request = H5VL_create_object(token, connector))) {
-        if (H5VL_request_free(token) < 0)
-            HDONE_ERROR(H5E_EVENTSET, H5E_CANTFREE, FAIL, "can't free request")
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTINIT, FAIL, "can't create vol object for request token")
-    } /* end if */
-
-    /* Allocate space for new event */
-    if (NULL == (ev = H5FL_CALLOC(H5ES_event_t)))
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't allocate event object")
-
-    /* Set request for event */
-    ev->request = request;
-
-    /* Set the event's operation counter */
-    ev->ev_count = es->tot_count++;
-
-    /* Set the event's timestamp */
-    ev->ev_time = H5_now_usec();
-
-    /* Copy the API routine's name */
-    if(NULL == (ev->api_name = H5MM_strdup(caller)))
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy API routine name")
-
-    /* Create the string for the API routine's arguments */
-    if(NULL == (rs = H5RS_create(NULL)))
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't allocate ref-counted string")
-
-    /* Copy the string for the API routine's arguments */
-    HDva_start(ap, caller_args);
-    arg_started = TRUE;
-    if(H5_trace_args(rs, caller_args, ap) < 0)
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTSET, FAIL, "can't create formatted API arguments")
-    if(NULL == (s = H5RS_get_str(rs)))
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL, "can't get pointer to formatted API arguments")
-    if(NULL == (ev->api_args = H5MM_strdup(s)))
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy API routine name")
-
-    /* Append event onto the event set's list */
-    if (NULL == es->tail)
-        es->head = es->tail = ev;
-    else {
-        ev->prev       = es->tail;
-        es->tail->next = ev;
-        es->tail       = ev;
-    } /* end else */
-
-    /* Increment the # of events in set */
-    es->act_count++;
-
-done:
-    /* Clean up */
-    if(arg_started)
-        HDva_end(ap);
-    if(rs)
-        H5RS_decr(rs);
-
-    /* Release resources on error */
-    if(ret_value < 0) {
-        if(ev) {
-            if(ev->api_name)
-                H5MM_xfree_const(ev->api_name);
-            if(ev->api_args)
-                H5MM_xfree_const(ev->api_args);
-            H5FL_FREE(H5ES_event_t, ev);
-        } /* end if */
-        if (request && H5VL_free_object(request) < 0)
-            HDONE_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, FAIL, "can't free request token")
-    } /* end if */
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5ES_insert() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5ES_insert
- *
- * Purpose:     Insert a request token into an event set
- *
- * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *	        Wednesday, April 8, 2020
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5ES_insert_new(hid_t es_id, H5VL_t *connector, void *token,
+H5ES_insert(hid_t es_id, H5VL_t *connector, void *token,
     const char *caller, const char *caller_args, ...)
 {
     H5ES_t *es = NULL;          /* Event set for the operation */
@@ -408,15 +294,15 @@ H5ES_insert_new(hid_t es_id, H5VL_t *connector, void *token,
     arg_started = TRUE;
 
     /* Copy the app source information */
-    (void)HDva_arg(ap, char *);         /* Toss the parameter name */
+    (void)HDva_arg(ap, char *);         /* Toss the 'app_file' parameter name */
     app_file = HDva_arg(ap, char *);
     if(NULL == (ev->app_file = H5MM_strdup(app_file)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy app source file name")
-    (void)HDva_arg(ap, char *);         /* Toss the parameter name */
+    (void)HDva_arg(ap, char *);         /* Toss the 'app_func' parameter name */
     app_func = HDva_arg(ap, char *);
     if(NULL == (ev->app_func = H5MM_strdup(app_func)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy app source function name")
-    (void)HDva_arg(ap, char *);         /* Toss the parameter name */
+    (void)HDva_arg(ap, char *);         /* Toss the 'app_line' parameter name */
     ev->app_line = HDva_arg(ap, unsigned);
 
     /* Set the event's operation counter */
