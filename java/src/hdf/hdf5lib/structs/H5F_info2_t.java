@@ -15,7 +15,10 @@ package hdf.hdf5lib.structs;
 
 import java.io.Serializable;
 
-//Information struct for object (for H5Fget_info)
+/**
+ * Information struct for object (for H5Fget_info)
+ *
+ */
 public class H5F_info2_t implements Serializable{
     private static final long serialVersionUID = 4691681162544054518L;
     public int         super_version;    // Superblock version #

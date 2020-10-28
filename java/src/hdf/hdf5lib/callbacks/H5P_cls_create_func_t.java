@@ -13,6 +13,10 @@
 
 package hdf.hdf5lib.callbacks;
 
+/**
+ * Data class for link callback for H5Pcreate_class.
+ *
+ */
 public interface H5P_cls_create_func_t {
 /**    public ArrayList iterdata = new ArrayList();
   * Any derived interfaces must define the single public variable as above.

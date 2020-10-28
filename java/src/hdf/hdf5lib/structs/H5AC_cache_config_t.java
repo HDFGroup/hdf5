@@ -15,7 +15,10 @@ package hdf.hdf5lib.structs;
 
 import java.io.Serializable;
 
-//Information struct for H5Pget_mdc_config/H5Pset_mdc_config
+/**
+ * Information struct for H5Pget_mdc_config/H5Pset_mdc_config
+ *
+ */
 public class H5AC_cache_config_t implements Serializable{
     private static final long serialVersionUID = -6748085696476149972L;
     // general configuration fields:
