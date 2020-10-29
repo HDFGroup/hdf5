@@ -320,7 +320,7 @@ H5FD_ros3_init(void)
     unsigned int bin_i;
 #endif
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
 #if ROS3_DEBUG
     HDfprintf(stdout, "H5FD_ros3_init() called.\n");
@@ -340,7 +340,6 @@ H5FD_ros3_init(void)
     }
 #endif
 
-    /* Set return value */
     ret_value = H5FD_ROS3_g;
 
 done:
