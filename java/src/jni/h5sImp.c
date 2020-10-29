@@ -1348,11 +1348,11 @@ done:
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Sselect_1copy(JNIEnv *env, jclass clss, jlong dst_id, jlong src_id)
 {
-    hssize_t retVal = -1;
+    herr_t    status = FAIL;
 
     UNUSED(clss);
 
-    if ((retVal = H5Sselect_copy((hid_t)dst_id, (hid_t)src_id)) < 0)
+    if ((status = H5Sselect_copy((hid_t)dst_id, (hid_t)src_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -1567,26 +1567,26 @@ Java_hdf_hdf5lib_H5_H5Scombine_1hyperslab(JNIEnv *env, jclass clss, jlong space_
     UNUSED(clss);
 
     if (NULL == start)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Sselect_hyperslab: start is NULL");
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Scombine_hyperslab: start is NULL");
     if (NULL == count)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Sselect_hyperslab: count is NULL");
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Scombine_hyperslab: count is NULL");
 
     if ((start_rank = ENVPTR->GetArrayLength(ENVONLY, start)) < 0) {
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Sselect_hyperslab: start array length < 0");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Scombine_hyperslab: start array length < 0");
     }
     if ((count_rank = ENVPTR->GetArrayLength(ENVONLY, count)) < 0) {
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Sselect_hyperslab: count array length < 0");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Scombine_hyperslab: count array length < 0");
     }
 
     if (start_rank != count_rank)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Sselect_hyperslab: count and start have different rank!");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Scombine_hyperslab: count and start have different rank!");
 
-    PIN_LONG_ARRAY(ENVONLY, start, startP, &isCopy, "H5Sselect_hyperslab: start not pinned");
+    PIN_LONG_ARRAY(ENVONLY, start, startP, &isCopy, "H5Scombine_hyperslab: start not pinned");
 
     if (NULL == (strt = lp = (hsize_t *)HDmalloc((size_t)start_rank * sizeof(hsize_t))))
-        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Sselect_hyperslab: failed to allocate start buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Scombine_hyperslab: failed to allocate start buffer");
 
     jlp = (jlong *)startP;
     for (i = 0; i < start_rank; i++) {
@@ -1595,10 +1595,10 @@ Java_hdf_hdf5lib_H5_H5Scombine_1hyperslab(JNIEnv *env, jclass clss, jlong space_
         jlp++;
     } /* end if */
 
-    PIN_LONG_ARRAY(ENVONLY, count, countP, &isCopy, "H5Sselect_hyperslab: count not pinned");
+    PIN_LONG_ARRAY(ENVONLY, count, countP, &isCopy, "H5Scombine_hyperslab: count not pinned");
 
     if (NULL == (cnt = lp = (hsize_t *)HDmalloc((size_t)count_rank * sizeof(hsize_t))))
-        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Sselect_hyperslab: failed to allocate count buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Scombine_hyperslab: failed to allocate count buffer");
 
     jlp = (jlong *)countP;
     for (i = 0; i < count_rank; i++) {
@@ -1614,16 +1614,16 @@ Java_hdf_hdf5lib_H5_H5Scombine_1hyperslab(JNIEnv *env, jclass clss, jlong space_
     else {
         if ((stride_rank = ENVPTR->GetArrayLength(ENVONLY, stride)) < 0) {
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Sselect_hyperslab: stride array length < 0");
+            H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Scombine_hyperslab: stride array length < 0");
         }
 
         if (stride_rank != start_rank)
-            H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Sselect_hyperslab: stride and start have different rank!");
+            H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Scombine_hyperslab: stride and start have different rank!");
 
-        PIN_LONG_ARRAY(ENVONLY, stride, strideP, &isCopy, "H5Sselect_hyperslab: stride not pinned");
+        PIN_LONG_ARRAY(ENVONLY, stride, strideP, &isCopy, "H5Scombine_hyperslab: stride not pinned");
 
         if (NULL == (strd = lp = (hsize_t *)HDmalloc((size_t)stride_rank * sizeof(hsize_t))))
-            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Sselect_hyperslab: failed to allocate stride buffer");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Scombine_hyperslab: failed to allocate stride buffer");
 
         jlp = (jlong *)strideP;
         for (i = 0; i < stride_rank; i++) {
@@ -1640,16 +1640,16 @@ Java_hdf_hdf5lib_H5_H5Scombine_1hyperslab(JNIEnv *env, jclass clss, jlong space_
     else {
         if ((block_rank = ENVPTR->GetArrayLength(ENVONLY, block)) < 0) {
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Sselect_hyperslab: block array length < 0");
+            H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Scombine_hyperslab: block array length < 0");
         }
 
         if (block_rank != start_rank)
-            H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Sselect_hyperslab: block and start have different rank!");
+            H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Scombine_hyperslab: block and start have different rank!");
 
-        PIN_LONG_ARRAY(ENVONLY, block, blockP, &isCopy, "H5Sselect_hyperslab: block not pinned");
+        PIN_LONG_ARRAY(ENVONLY, block, blockP, &isCopy, "H5Scombine_hyperslab: block not pinned");
 
         if (NULL == (blk = lp = (hsize_t *)HDmalloc((size_t)block_rank * sizeof(hsize_t))))
-            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Sselect_hyperslab: failed to allocate block buffer");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Scombine_hyperslab: failed to allocate block buffer");
 
         jlp = (jlong *)blockP;
         for (i = 0; i < block_rank; i++) {
@@ -1692,11 +1692,11 @@ done:
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Smodify_1select(JNIEnv *env, jclass clss, jlong space1_id, jint op, jlong space2_id)
 {
-    hssize_t retVal = -1;
+    herr_t    status = FAIL;
 
     UNUSED(clss);
 
-    if ((retVal = H5Smodify_select((hid_t)space1_id, (H5S_seloper_t)op, (hid_t)space2_id)) < 0)
+    if ((status = H5Smodify_select((hid_t)space1_id, (H5S_seloper_t)op, (hid_t)space2_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
