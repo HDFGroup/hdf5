@@ -5370,7 +5370,6 @@ public class H5 implements java.io.Serializable {
      **/
     public synchronized static native long H5Iget_file_id(long obj_id) throws HDF5LibraryException;
 
-
     /**
      * H5Iget_name_long retrieves the name of an object specified by the identifier, obj_id.
      * @deprecated
@@ -5387,6 +5386,7 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
+    @Deprecated
     public synchronized static native long H5Iget_name_long(long obj_id, String[] name, long size)
             throws HDF5LibraryException, NullPointerException;
     /**
