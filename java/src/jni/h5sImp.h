@@ -259,6 +259,65 @@ JNIEXPORT jboolean JNICALL Java_hdf_hdf5lib_H5_H5Sis_1regular_1hyperslab(JNIEnv 
 JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Sget_1regular_1hyperslab(JNIEnv *, jclass, jlong, jlongArray,
                                                                       jlongArray, jlongArray, jlongArray);
 
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Sselect_copy
+ * Signature: (JJ)V
+ */
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Sselect_1copy(JNIEnv *, jclass, jlong, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Sselect_shape_same
+ * Signature: (JJ)Z
+ */
+JNIEXPORT jboolean JNICALL Java_hdf_hdf5lib_H5_H5Sselect_1shape_1same(JNIEnv *, jclass, jlong, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Sselect_adjust
+ * Signature: (J[J)V
+ */
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Sselect_1adjust(JNIEnv *, jclass, jlong, jlongArray);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Sselect_intersect_block
+ * Signature: (J[J[J)Z
+ */
+JNIEXPORT jboolean JNICALL Java_hdf_hdf5lib_H5_H5Sselect_1intersect_1block(JNIEnv *, jclass, jlong,
+                                                                           jlongArray, jlongArray);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Sselect_project_intersection
+ * Signature: (JJJ)J
+ */
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5_H5Sselect_1project_1intersection(JNIEnv *, jclass, jlong, jlong,
+                                                                             jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Scombine_hyperslab
+ * Signature: (JI[J[J[J[J)J
+ */
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5_H5Scombine_1hyperslab(JNIEnv *, jclass, jlong, jint, jlongArray,
+                                                                  jlongArray, jlongArray, jlongArray);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Smodify_select
+ * Signature: (JIJ)V
+ */
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Smodify_1select(JNIEnv *, jclass, jlong, jint, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Scombine_select
+ * Signature: (JIJ)J
+ */
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5_H5Scombine_1select(JNIEnv *, jclass, jlong, jint, jlong);
+
 #ifdef __cplusplus
 } /* end extern "C" */
 #endif /* __cplusplus */
