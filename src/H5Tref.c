@@ -513,7 +513,7 @@ H5T__ref_mem_read(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf, s
 
     /* Memory-to-memory conversion to support vlen conversion */
     if (NULL == dst_file) {
-        HDmemcpy(dst_buf, src_buf, dst_size);
+        H5MM_memcpy(dst_buf, src_buf, dst_size);
         HGOTO_DONE(ret_value);
     }
 
@@ -602,7 +602,7 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
 
     /* Memory-to-memory conversion to support vlen conversion */
     if (NULL == src_file) {
-        HDmemcpy(dst_buf, src_buf, src_size);
+        H5MM_memcpy(dst_buf, src_buf, src_size);
         HGOTO_DONE(ret_value);
     }
 
