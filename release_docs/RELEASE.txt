@@ -48,6 +48,13 @@ New Features
 
     Configuration:
     -------------
+    - CMake option to use MSVC naming conventions with MinGW
+
+      HDF5_MSVC_NAMING_CONVENTION option enable to use MSVC naming conventions
+      when using a MinGW toolchain
+
+      (xan - 2020/10/30)
+
     - CMake option to build the HDF filter plugins project as an external project
 
       The HDF filter plugins project is a collection of registered compression
