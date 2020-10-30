@@ -41,7 +41,7 @@ foreach (example ${examples})
   else ()
     TARGET_C_PROPERTIES (cpp_ex_${example} SHARED)
     target_link_libraries (cpp_ex_${example} PRIVATE ${HDF5_CPP_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
-    if (MINGW)
+    if (MINGW AND HDF5_MINGW_STATIC_GCC_LIBS)
       target_link_options (${HDF5_CPP_LIBSH_TARGET}
           PRIVATE -static-libgcc -static-libstdc++
       )
@@ -66,7 +66,7 @@ foreach (example ${tutr_examples})
   else ()
     TARGET_C_PROPERTIES (cpp_ex_${example} SHARED)
     target_link_libraries (cpp_ex_${example} PRIVATE ${HDF5_CPP_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
-    if (MINGW)
+    if (MINGW AND HDF5_MINGW_STATIC_GCC_LIBS)
       target_link_options (${HDF5_CPP_LIBSH_TARGET}
           PRIVATE -static-libgcc -static-libstdc++
       )

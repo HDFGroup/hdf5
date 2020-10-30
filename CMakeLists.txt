@@ -578,6 +578,8 @@ if (WIN32 OR MINGW)
   add_compile_definitions (_BIND_TO_CURRENT_VCLIBS_VERSION=1 _CRT_SECURE_NO_WARNINGS _CONSOLE)
 endif ()
 
+option (HDF5_MINGW_STATIC_GCC_LIBS "Statically link libgcc/libstdc++" OFF)
+
 if (MSVC)
   set (CMAKE_MFC_FLAG 0)
   set (WIN_COMPILE_FLAGS "")
