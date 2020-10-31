@@ -1023,6 +1023,7 @@ H5CX_restore_state(const H5CX_state_t *api_state)
 
     /* Restore the VOL wrapper context */
     (*head)->ctx.vol_wrap_ctx = api_state->vol_wrap_ctx;
+    (*head)->ctx.vol_wrap_ctx_valid = TRUE;
 
     /* Restore the VOL connector info */
     if (api_state->vol_connector_prop.connector_id) {
