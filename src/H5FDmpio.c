@@ -1746,33 +1746,4 @@ H5FD__mpio_communicator(const H5FD_t *_file)
     FUNC_LEAVE_NOAPI(file->comm)
 } /* end H5FD__mpio_communicator() */
 
-/*-------------------------------------------------------------------------
- * Function:       H5FD__mpio_get_info
- *
- * Purpose:        Returns the file info of MPIO file driver.
- *
- * Returns:        Non-negative if succeed or negative if fails.
- *
- * Programmer:     John Mainzer
- *                 April 4, 2017
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD__mpio_get_info(H5FD_t *_file, void **mpi_info)
-{
-    H5FD_mpio_t *file      = (H5FD_mpio_t *)_file;
-    herr_t       ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    if (!mpi_info)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mpi info not valid")
-
-    *mpi_info = &(file->info);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD__mpio_get_info() */
-
 #endif /* H5_HAVE_PARALLEL */

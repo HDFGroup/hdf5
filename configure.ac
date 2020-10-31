@@ -3124,6 +3124,9 @@ if test "x$HAVE_LIBHDFS" = "xyes"; then
             [Proceed to build with libhdfs])
 fi
 
+## Read-only HDFS files are not built if not required.
+AM_CONDITIONAL([HDFS_VFD_CONDITIONAL], [test "X$HAVE_LIBHDFS" = "Xyes"])
+
 ## Checkpoint the cache
 AC_CACHE_SAVE
 
