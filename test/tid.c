@@ -763,6 +763,79 @@ out:
     return -1;
 } /* end test_remove_clear_type() */
 
+
+/* Test that IDs can be deleted while iterating */
+
+#define N_ITERATE_IDS   128
+
+/* A callback that (maybe) closes a random ID when invoked */
+static herr_t
+iterate_delete_op(hid_t H5_ATTR_UNUSED id, void *udata)
+{
+    hid_t           *ids = (hid_t *)udata;
+    int             closed_index;
+    hid_t           closed_id;
+
+    /* Maybe close an ID
+     *
+     * Do nothing when an ID has already been closed so we don't
+     * close ALL the IDs.
+     *
+     * Closing the ID we're currently iterating on is also acceptable.
+     */
+    closed_index = HDrandom() % N_ITERATE_IDS;
+    closed_id = ids[closed_index];
+
+    if (closed_id != H5I_INVALID_HID) {
+        if (H5Sclose(closed_id) < 0)
+            return -1;
+        ids[closed_index] = H5I_INVALID_HID;
+    }
+
+    return 0;
+} /* end iterate_delete_op() */
+
+static int
+test_iteration_remove(void)
+{
+    hid_t           *ids = NULL;
+    int             i;
+
+    /* Create a bunch of IDs of a single library type */
+    if (NULL == (ids = malloc(N_ITERATE_IDS * sizeof(hid_t))))
+        goto error;
+    for (i = 0; i < N_ITERATE_IDS; i++)
+        if ((ids[i] = H5Screate(H5S_NULL)) == H5I_INVALID_HID)
+            goto error;
+
+    /* Iterate over the IDs, (maybe) closing a random one in the callback */
+    if (H5Iiterate(H5I_DATASPACE, iterate_delete_op, ids) < 0)
+        goto error;
+
+    /* Close and free */
+    for (i = 0; i < N_ITERATE_IDS; i++) {
+        if (ids[i] == H5I_INVALID_HID)
+            continue;
+        if (H5Sclose(ids[i]) < 0)
+            goto error;
+        ids[i] = H5I_INVALID_HID;
+    }
+    HDfree(ids);
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+        if (ids != NULL)
+            for (i = 0; i < N_ITERATE_IDS; i++)
+                H5Sclose(ids[i]);
+    H5E_END_TRY
+
+    HDfree(ids);
+
+    return -1;
+} /* end test_iteration_remove() */
+
 void
 test_ids(void)
 {
@@ -781,4 +854,6 @@ test_ids(void)
         TestErrPrintf("ID type list test failed\n");
     if (test_remove_clear_type() < 0)
         TestErrPrintf("ID remove during H5Iclear_type test failed\n");
+    if (test_iteration_remove() < 0)
+        TestErrPrintf("Removing random IDs while iterating failed\n");
 }
