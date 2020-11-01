@@ -30,8 +30,8 @@ typedef struct H5F_t H5F_t;
 /* Private headers needed by this file */
 #include "H5MMprivate.h" /* Memory management            */
 #ifdef H5_HAVE_PARALLEL
-#include "H5Pprivate.h"  /* Property lists               */
-#endif                   /* H5_HAVE_PARALLEL */
+#include "H5Pprivate.h" /* Property lists               */
+#endif /* H5_HAVE_PARALLEL */
 #include "H5VMprivate.h" /* Vectors and arrays           */
 #include "H5VLprivate.h" /* Virtual Object Layer         */
 
@@ -532,33 +532,33 @@ typedef struct H5F_t H5F_t;
 #define H5F_DEFAULT_CSET H5T_CSET_ASCII
 
 /* ========= File Creation properties ============ */
-#define H5F_CRT_USER_BLOCK_NAME    "block_size"  /* Size of the file user block in bytes */
+#define H5F_CRT_USER_BLOCK_NAME    "block_size" /* Size of the file user block in bytes */
 #define H5F_CRT_SYM_LEAF_NAME      "symbol_leaf" /* 1/2 rank for symbol table leaf nodes */
 #define H5F_CRT_SYM_LEAF_DEF       4
-#define H5F_CRT_BTREE_RANK_NAME    "btree_rank"    /* 1/2 rank for btree internal nodes    */
+#define H5F_CRT_BTREE_RANK_NAME    "btree_rank" /* 1/2 rank for btree internal nodes    */
 #define H5F_CRT_ADDR_BYTE_NUM_NAME "addr_byte_num" /* Byte number in an address            */
-#define H5F_CRT_OBJ_BYTE_NUM_NAME  "obj_byte_num"  /* Byte number for object size          */
+#define H5F_CRT_OBJ_BYTE_NUM_NAME  "obj_byte_num" /* Byte number for object size          */
 #define H5F_CRT_SUPER_VERS_NAME    "super_version" /* Version number of the superblock     */
 /* Number of shared object header message indexes */
 #define H5F_CRT_SHMSG_NINDEXES_NAME    "num_shmsg_indexes"
 #define H5F_CRT_SHMSG_INDEX_TYPES_NAME "shmsg_message_types" /* Types of message in each index */
 /* Minimum size of messages in each index */
 #define H5F_CRT_SHMSG_INDEX_MINSIZE_NAME  "shmsg_message_minsize"
-#define H5F_CRT_SHMSG_LIST_MAX_NAME       "shmsg_list_max"       /* Shared message list maximum size */
-#define H5F_CRT_SHMSG_BTREE_MIN_NAME      "shmsg_btree_min"      /* Shared message B-tree minimum size */
-#define H5F_CRT_FILE_SPACE_STRATEGY_NAME  "file_space_strategy"  /* File space handling strategy */
-#define H5F_CRT_FREE_SPACE_PERSIST_NAME   "free_space_persist"   /* Free-space persisting status */
+#define H5F_CRT_SHMSG_LIST_MAX_NAME       "shmsg_list_max" /* Shared message list maximum size */
+#define H5F_CRT_SHMSG_BTREE_MIN_NAME      "shmsg_btree_min" /* Shared message B-tree minimum size */
+#define H5F_CRT_FILE_SPACE_STRATEGY_NAME  "file_space_strategy" /* File space handling strategy */
+#define H5F_CRT_FREE_SPACE_PERSIST_NAME   "free_space_persist" /* Free-space persisting status */
 #define H5F_CRT_FREE_SPACE_THRESHOLD_NAME "free_space_threshold" /* Free space section threshold */
 #define H5F_CRT_FILE_SPACE_PAGE_SIZE_NAME "file_space_page_size" /* File space page size */
 
 /* ========= File Access properties ============ */
 #define H5F_ACS_META_CACHE_INIT_CONFIG_NAME                                                                  \
-    "mdc_initCacheCfg"                                  /* Initial metadata cache resize configuration */
+    "mdc_initCacheCfg" /* Initial metadata cache resize configuration */
 #define H5F_ACS_DATA_CACHE_NUM_SLOTS_NAME "rdcc_nslots" /* Size of raw data chunk cache(slots) */
 #define H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME "rdcc_nbytes" /* Size of raw data chunk cache(bytes) */
-#define H5F_ACS_PREEMPT_READ_CHUNKS_NAME  "rdcc_w0"     /* Preemption read chunks first */
-#define H5F_ACS_ALIGN_THRHD_NAME          "threshold"   /* Threshold for alignment */
-#define H5F_ACS_ALIGN_NAME                "align"       /* Alignment */
+#define H5F_ACS_PREEMPT_READ_CHUNKS_NAME  "rdcc_w0" /* Preemption read chunks first */
+#define H5F_ACS_ALIGN_THRHD_NAME          "threshold" /* Threshold for alignment */
+#define H5F_ACS_ALIGN_NAME                "align" /* Alignment */
 #define H5F_ACS_META_BLOCK_SIZE_NAME                                                                         \
     "meta_block_size" /* Minimum metadata allocation block size (when aggregating metadata allocations) */
 #define H5F_ACS_SIEVE_BUF_SIZE_NAME                                                                          \
@@ -566,35 +566,35 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_SDATA_BLOCK_SIZE_NAME                                                                        \
     "sdata_block_size" /* Minimum "small data" allocation block size (when aggregating "small" raw data      \
                           allocations) */
-#define H5F_ACS_GARBG_COLCT_REF_NAME "gc_ref"             /* Garbage-collect references */
-#define H5F_ACS_FILE_DRV_NAME        "vfd_info"           /* File driver ID & info */
+#define H5F_ACS_GARBG_COLCT_REF_NAME "gc_ref" /* Garbage-collect references */
+#define H5F_ACS_FILE_DRV_NAME        "vfd_info" /* File driver ID & info */
 #define H5F_ACS_VOL_CONN_NAME        "vol_connector_info" /* VOL connector ID & info */
-#define H5F_ACS_CLOSE_DEGREE_NAME    "close_degree"       /* File close degree */
-#define H5F_ACS_FAMILY_OFFSET_NAME   "family_offset"      /* Offset position in file for family file driver */
+#define H5F_ACS_CLOSE_DEGREE_NAME    "close_degree" /* File close degree */
+#define H5F_ACS_FAMILY_OFFSET_NAME   "family_offset" /* Offset position in file for family file driver */
 #define H5F_ACS_FAMILY_NEWSIZE_NAME                                                                          \
     "family_newsize" /* New member size of family driver.  (private property only used by h5repart) */
 #define H5F_ACS_FAMILY_TO_SINGLE_NAME                                                                        \
     "family_to_single" /* Whether to convert family to a single-file driver.  (private property only used by \
                           h5repart) */
-#define H5F_ACS_MULTI_TYPE_NAME        "multi_type"        /* Data type in multi file driver */
-#define H5F_ACS_LIBVER_LOW_BOUND_NAME  "libver_low_bound"  /* 'low' bound of library format versions */
+#define H5F_ACS_MULTI_TYPE_NAME        "multi_type" /* Data type in multi file driver */
+#define H5F_ACS_LIBVER_LOW_BOUND_NAME  "libver_low_bound" /* 'low' bound of library format versions */
 #define H5F_ACS_LIBVER_HIGH_BOUND_NAME "libver_high_bound" /* 'high' bound of library format versions */
 #define H5F_ACS_WANT_POSIX_FD_NAME                                                                           \
     "want_posix_fd" /* Internal: query the file descriptor from the core VFD, instead of the memory address  \
                      */
 #define H5F_ACS_METADATA_READ_ATTEMPTS_NAME "metadata_read_attempts" /* # of metadata read attempts */
-#define H5F_ACS_OBJECT_FLUSH_CB_NAME        "object_flush_cb"        /* Object flush callback */
-#define H5F_ACS_EFC_SIZE_NAME               "efc_size"               /* Size of external file cache */
+#define H5F_ACS_OBJECT_FLUSH_CB_NAME        "object_flush_cb" /* Object flush callback */
+#define H5F_ACS_EFC_SIZE_NAME               "efc_size" /* Size of external file cache */
 #define H5F_ACS_FILE_IMAGE_INFO_NAME                                                                         \
     "file_image_info" /* struct containing initial file image and callback info */
 #define H5F_ACS_CLEAR_STATUS_FLAGS_NAME                                                                      \
     "clear_status_flags" /* Whether to clear superblock status_flags (private property only used by h5clear) \
                           */
-#define H5F_ACS_NULL_FSM_ADDR_NAME "null_fsm_addr"       /* Nullify addresses of free-space managers */
-                                                         /* Private property used only by h5clear */
-#define H5F_ACS_SKIP_EOF_CHECK_NAME "skip_eof_check"     /* Skip EOF check */
-                                                         /* Private property used only by h5clear */
-#define H5F_ACS_USE_MDC_LOGGING_NAME  "use_mdc_logging"  /* Whether to use metadata cache logging */
+#define H5F_ACS_NULL_FSM_ADDR_NAME "null_fsm_addr" /* Nullify addresses of free-space managers */
+/* Private property used only by h5clear */
+#define H5F_ACS_SKIP_EOF_CHECK_NAME "skip_eof_check" /* Skip EOF check */
+/* Private property used only by h5clear */
+#define H5F_ACS_USE_MDC_LOGGING_NAME  "use_mdc_logging" /* Whether to use metadata cache logging */
 #define H5F_ACS_MDC_LOG_LOCATION_NAME "mdc_log_location" /* Name of metadata cache log location */
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME                                                                 \
     "start_mdc_log_on_access" /* Whether logging starts on file create/open */
@@ -618,7 +618,7 @@ typedef struct H5F_t H5F_t;
 #ifdef H5_HAVE_PARALLEL
 #define H5F_ACS_MPI_PARAMS_COMM_NAME "mpi_params_comm" /* the MPI communicator */
 #define H5F_ACS_MPI_PARAMS_INFO_NAME "mpi_params_info" /* the MPI info struct */
-#endif                                                 /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
 /* ======================== File Mount properties ====================*/
 #define H5F_MNT_SYM_LOCAL_NAME "local" /* Whether absolute symlinks local to file. */
@@ -640,7 +640,7 @@ typedef struct H5F_t H5F_t;
     3 /* With file locking and consistency flags (at least this version for SWMR support) */
 #define HDF5_SUPERBLOCK_VERSION_LATEST HDF5_SUPERBLOCK_VERSION_3 /* The maximum super block format    */
 #define HDF5_SUPERBLOCK_VERSION_V18_LATEST                                                                   \
-    HDF5_SUPERBLOCK_VERSION_2       /* The latest superblock version for v18 */
+    HDF5_SUPERBLOCK_VERSION_2 /* The latest superblock version for v18 */
 #define HDF5_FREESPACE_VERSION    0 /* of the Free-Space Info      */
 #define HDF5_OBJECTDIR_VERSION    0 /* of the Object Directory format */
 #define HDF5_SHAREDHEADER_VERSION 0 /* of the Shared-Header Info      */
@@ -649,14 +649,14 @@ typedef struct H5F_t H5F_t;
 /* B-tree internal 'K' values */
 #define HDF5_BTREE_SNODE_IK_DEF 16
 #define HDF5_BTREE_CHUNK_IK_DEF                                                                              \
-    32                                  /* Note! this value is assumed                                       \
-                                            to be 32 for version 0                                           \
-                                            of the superblock and                                            \
-                                            if it is changed, the code                                       \
-                                            must compensate. -QAK                                            \
-                                         */
+    32 /* Note! this value is assumed                                                                        \
+           to be 32 for version 0                                                                            \
+           of the superblock and                                                                             \
+           if it is changed, the code                                                                        \
+           must compensate. -QAK                                                                             \
+        */
 #define HDF5_BTREE_IK_MAX_ENTRIES 65536 /* 2^16 - 2 bytes for storing entries (children) */
-                                        /* See format specification on version 1 B-trees */
+/* See format specification on version 1 B-trees */
 
 /* Default file space handling strategy */
 #define H5F_FILE_SPACE_STRATEGY_DEF H5F_FSPACE_STRATEGY_FSM_AGGR
@@ -691,7 +691,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_PAGED_AGGR(F)           (F->shared->fs_strategy == H5F_FSPACE_STRATEGY_PAGE && F->shared->fs_page_size)
 
 /* Metadata read attempt values */
-#define H5F_METADATA_READ_ATTEMPTS      1   /* Default # of read attempts for non-SWMR access */
+#define H5F_METADATA_READ_ATTEMPTS      1 /* Default # of read attempts for non-SWMR access */
 #define H5F_SWMR_METADATA_READ_ATTEMPTS 100 /* Default # of read attempts for SWMR access */
 
 /* Macros to define signatures of all objects in the file */
@@ -807,7 +807,7 @@ typedef enum H5F_mem_page_t {
 } H5F_mem_page_t;
 
 /* Aliases for H5F_mem_page_t enum values */
-#define H5F_MEM_PAGE_META    H5F_MEM_PAGE_SUPER       /* Small-sized meta data */
+#define H5F_MEM_PAGE_META    H5F_MEM_PAGE_SUPER /* Small-sized meta data */
 #define H5F_MEM_PAGE_GENERIC H5F_MEM_PAGE_LARGE_SUPER /* Large-sized generic: meta and raw */
 
 /* Type of prefix for opening prefixed files */

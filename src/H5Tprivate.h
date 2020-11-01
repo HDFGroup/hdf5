@@ -27,9 +27,9 @@ typedef struct H5T_t H5T_t;
 #include "H5MMpublic.h" /* Memory management                    */
 
 /* Private headers needed by this file */
-#include "H5private.h"   /* Generic Functions                        */
-#include "H5Gprivate.h"  /* Groups                                   */
-#include "H5Rprivate.h"  /* References                               */
+#include "H5private.h" /* Generic Functions                        */
+#include "H5Gprivate.h" /* Groups                                   */
+#include "H5Rprivate.h" /* References                               */
 #include "H5VLprivate.h" /* VOL Drivers                              */
 
 /* Macro for size of temporary buffers to contain a single element */

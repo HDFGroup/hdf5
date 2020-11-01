@@ -2126,7 +2126,7 @@ H5S__hyper_iter_get_seq_list_opt(H5S_sel_iter_t *iter, size_t maxseq, size_t max
             /* Decrement number of blocks */
             fast_dim_count--;
         } /* end while */
-#else     /* NO_DUFFS_DEVICE */
+#else /* NO_DUFFS_DEVICE */
         {
             size_t duffs_index; /* Counting index for Duff's device */
 
@@ -2169,7 +2169,7 @@ H5S__hyper_iter_get_seq_list_opt(H5S_sel_iter_t *iter, size_t maxseq, size_t max
                     } while (--duffs_index > 0);
             } /* end switch */
         }
-#endif    /* NO_DUFFS_DEVICE */
+#endif /* NO_DUFFS_DEVICE */
 #undef DUFF_GUTS
 
         /* Increment offset in destination buffer */
@@ -11749,7 +11749,7 @@ done:
 
         for (u = 0; u < H5S_MAX_RANK; u++)
             HDassert(!udata.ps_span_info[u]);
-    }  /* end block */
+    } /* end block */
 #endif /* NDEBUG */
 
     FUNC_LEAVE_NOAPI(ret_value)

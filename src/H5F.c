@@ -73,9 +73,9 @@ static herr_t H5F__post_open_api_common(H5VL_object_t *vol_obj, void **token_ptr
 static hid_t  H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
                                      void **token_ptr);
 static hid_t  H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, void **token_ptr);
-static hid_t H5F__reopen_api_common(hid_t file_id, void **token_ptr);
-static herr_t H5F__flush_api_common(hid_t object_id, H5F_scope_t scope, void **token_ptr, H5VL_object_t ** _vol_obj_ptr);
-
+static hid_t  H5F__reopen_api_common(hid_t file_id, void **token_ptr);
+static herr_t H5F__flush_api_common(hid_t object_id, H5F_scope_t scope, void **token_ptr,
+                                    H5VL_object_t **_vol_obj_ptr);
 
 /*********************/
 /* Package Variables */
@@ -468,8 +468,8 @@ done:
 static herr_t
 H5F__post_open_api_common(H5VL_object_t *vol_obj, void **token_ptr)
 {
-    hbool_t supported;              /* Whether 'post open' operation is supported by VOL connector */
-    herr_t  ret_value = SUCCEED;    /* Return value     */
+    hbool_t supported;           /* Whether 'post open' operation is supported by VOL connector */
+    herr_t  ret_value = SUCCEED; /* Return value     */
 
     FUNC_ENTER_STATIC
 
@@ -496,12 +496,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
-    void **token_ptr)
+H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id, void **token_ptr)
 {
-    H5F_t *               new_file = NULL;               /* File struct for new file                 */
-    H5P_genplist_t *      plist;                         /* Property list pointer                    */
-    H5VL_connector_prop_t connector_prop;                /* Property for VOL connector ID & info     */
+    H5F_t *               new_file = NULL;             /* File struct for new file                 */
+    H5P_genplist_t *      plist;                       /* Property list pointer                    */
+    H5VL_connector_prop_t connector_prop;              /* Property for VOL connector ID & info     */
     hid_t                 ret_value = H5I_INVALID_HID; /* Return value                             */
 
     FUNC_ENTER_STATIC
@@ -591,8 +590,8 @@ done:
 hid_t
 H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
-    H5VL_object_t *   vol_obj   = NULL;         /* File object */
-    hid_t ret_value; /* Return value */
+    H5VL_object_t *vol_obj = NULL; /* File object */
+    hid_t          ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE4("i", "*sIuii", filename, flags, fcpl_id, fapl_id);
@@ -625,20 +624,20 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Fcreate_async(const char *app_file, const char *app_func, unsigned app_line,
-    const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t es_id)
+H5Fcreate_async(const char *app_file, const char *app_func, unsigned app_line, const char *filename,
+                unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t es_id)
 {
-    H5VL_object_t *   vol_obj   = NULL;         /* File object */
-    void *            token     = NULL;         /* Request token for async operation        */
-    void **token_ptr = H5_REQUEST_NULL;         /* Pointer to request token for async operation        */
-    hid_t ret_value; /* Return value */
+    H5VL_object_t *vol_obj   = NULL;            /* File object */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    hid_t          ret_value;                   /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE8("i", "*s*sIu*sIuiii", app_file, app_func, app_line, filename, flags, fcpl_id, fapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
-        token_ptr = &token;     /* Point at token for VOL connector to set up */
+        token_ptr = &token; /* Point at token for VOL connector to set up */
 
     /* Create the file, possibly asynchronously */
     if ((ret_value = H5F__create_api_common(filename, flags, fcpl_id, fapl_id, token_ptr)) < 0)
@@ -650,7 +649,9 @@ H5Fcreate_async(const char *app_file, const char *app_func, unsigned app_line,
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
-        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE8(FUNC, "*s*sIu*sIuiii", app_file, app_func, app_line, filename, flags, fcpl_id, fapl_id, es_id)) < 0)
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE8(FUNC, "*s*sIu*sIuiii", app_file, app_func, app_line, filename, flags,
+                                     fcpl_id, fapl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
 
     /* Reset token for 'post open' operation */
@@ -663,7 +664,9 @@ H5Fcreate_async(const char *app_file, const char *app_func, unsigned app_line,
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
-        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE8(FUNC, "*s*sIu*sIuiii", app_file, app_func, app_line, filename, flags, fcpl_id, fapl_id, es_id)) < 0)
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE8(FUNC, "*s*sIu*sIuiii", app_file, app_func, app_line, filename, flags,
+                                     fcpl_id, fapl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
 
 done:
@@ -684,9 +687,9 @@ done:
 static hid_t
 H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, void **token_ptr)
 {
-    H5F_t *               new_file = NULL;               /* File struct for new file                 */
-    H5P_genplist_t *      plist;                         /* Property list pointer                    */
-    H5VL_connector_prop_t connector_prop;                /* Property for VOL connector ID & info     */
+    H5F_t *               new_file = NULL;             /* File struct for new file                 */
+    H5P_genplist_t *      plist;                       /* Property list pointer                    */
+    H5VL_connector_prop_t connector_prop;              /* Property for VOL connector ID & info     */
     hid_t                 ret_value = H5I_INVALID_HID; /* Return value                             */
 
     FUNC_ENTER_STATIC
@@ -758,8 +761,8 @@ done:
 hid_t
 H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
-    H5VL_object_t *   vol_obj   = NULL;         /* File object */
-    hid_t ret_value; /* Return value */
+    H5VL_object_t *vol_obj = NULL; /* File object */
+    hid_t          ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "*sIui", filename, flags, fapl_id);
@@ -793,20 +796,20 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Fopen_async(const char *app_file, const char *app_func, unsigned app_line,
-    const char *filename, unsigned flags, hid_t fapl_id, hid_t es_id)
+H5Fopen_async(const char *app_file, const char *app_func, unsigned app_line, const char *filename,
+              unsigned flags, hid_t fapl_id, hid_t es_id)
 {
-    H5VL_object_t *   vol_obj   = NULL;         /* File object */
-    void *            token     = NULL;         /* Request token for async operation        */
-    void **token_ptr = H5_REQUEST_NULL;         /* Pointer to request token for async operation        */
-    hid_t ret_value; /* Return value */
+    H5VL_object_t *vol_obj   = NULL;            /* File object */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    hid_t          ret_value;                   /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE7("i", "*s*sIu*sIuii", app_file, app_func, app_line, filename, flags, fapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
-        token_ptr = &token;     /* Point at token for VOL connector to set up */
+        token_ptr = &token; /* Point at token for VOL connector to set up */
 
     /* Open the file, possibly asynchronously */
     if ((ret_value = H5F__open_api_common(filename, flags, fapl_id, token_ptr)) < 0)
@@ -818,7 +821,9 @@ H5Fopen_async(const char *app_file, const char *app_func, unsigned app_line,
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
-        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE7(FUNC, "*s*sIu*sIuii", app_file, app_func, app_line, filename, flags, fapl_id, es_id)) < 0)
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE7(FUNC, "*s*sIu*sIuii", app_file, app_func, app_line, filename, flags,
+                                     fapl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
     /* Reset token for 'post open' operation */
@@ -831,7 +836,9 @@ H5Fopen_async(const char *app_file, const char *app_func, unsigned app_line,
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
-        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE7(FUNC, "*s*sIu*sIuii", app_file, app_func, app_line, filename, flags, fapl_id, es_id)) < 0)
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE7(FUNC, "*s*sIu*sIuii", app_file, app_func, app_line, filename, flags,
+                                     fapl_id, es_id)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
 
 done:
@@ -848,27 +855,29 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F__flush_api_common(hid_t object_id, H5F_scope_t scope, void **token_ptr, H5VL_object_t ** _vol_obj_ptr)
+H5F__flush_api_common(hid_t object_id, H5F_scope_t scope, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
-    H5VL_object_t *   tmp_vol_obj   = NULL;         /* Object for loc_id */
-    H5VL_object_t **  vol_obj_ptr  = (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);   /* Ptr to object ptr for loc_id */
-    H5I_type_t     obj_type;            /* Type of object to use */
-    herr_t         ret_value = SUCCEED; /* Return value     */
+    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t **vol_obj_ptr =
+        (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
+    H5I_type_t obj_type;                              /* Type of object to use */
+    herr_t     ret_value = SUCCEED;                   /* Return value     */
 
     FUNC_ENTER_STATIC
 
     /* Get the type of object we're flushing + sanity check */
     obj_type = H5I_get_type(object_id);
     if (H5I_FILE != obj_type && H5I_GROUP != obj_type && H5I_DATATYPE != obj_type &&
-            H5I_DATASET != obj_type && H5I_ATTR != obj_type)
+        H5I_DATASET != obj_type && H5I_ATTR != obj_type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
     /* Get the object */
-    if(NULL == (*vol_obj_ptr = H5VL_vol_object(object_id)))
+    if (NULL == (*vol_obj_ptr = H5VL_vol_object(object_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Flush the object */
-    if (H5VL_file_specific(*vol_obj_ptr, H5VL_FILE_FLUSH, H5P_DATASET_XFER_DEFAULT, token_ptr, (int)obj_type, (int)scope) < 0)
+    if (H5VL_file_specific(*vol_obj_ptr, H5VL_FILE_FLUSH, H5P_DATASET_XFER_DEFAULT, token_ptr, (int)obj_type,
+                           (int)scope) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file")
 
 done:
@@ -889,7 +898,7 @@ done:
 herr_t
 H5Fflush(hid_t object_id, H5F_scope_t scope)
 {
-    herr_t         ret_value = SUCCEED; /* Return value     */
+    herr_t ret_value = SUCCEED; /* Return value     */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iFs", object_id, scope);
@@ -912,20 +921,20 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fflush_async(const char *app_file, const char *app_func, unsigned app_line,
-    hid_t object_id, H5F_scope_t scope, hid_t es_id)
+H5Fflush_async(const char *app_file, const char *app_func, unsigned app_line, hid_t object_id,
+               H5F_scope_t scope, hid_t es_id)
 {
-    H5VL_object_t *   vol_obj   = NULL;         /* Object for loc_id */
-    void *            token     = NULL;         /* Request token for async operation        */
-    void **token_ptr = H5_REQUEST_NULL;         /* Pointer to request token for async operation        */
-    herr_t         ret_value = SUCCEED; /* Return value     */
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    herr_t         ret_value = SUCCEED;         /* Return value     */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "*s*sIuiFsi", app_file, app_func, app_line, object_id, scope, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
-        token_ptr = &token;     /* Point at token for VOL connector to set up */
+        token_ptr = &token; /* Point at token for VOL connector to set up */
 
     /* Flush the file asynchronously */
     if (H5F__flush_api_common(object_id, scope, token_ptr, &vol_obj) < 0)
@@ -933,7 +942,8 @@ H5Fflush_async(const char *app_file, const char *app_func, unsigned app_line,
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
-        if (H5ES_insert(es_id, vol_obj->connector, token,
+        if (H5ES_insert(
+                es_id, vol_obj->connector, token,
                 H5ARG_TRACE6(FUNC, "*s*sIuiFsi", app_file, app_func, app_line, object_id, scope, es_id)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
@@ -987,14 +997,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fclose_async(const char *app_file, const char *app_func, unsigned app_line,
-    hid_t file_id, hid_t es_id)
+H5Fclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t file_id, hid_t es_id)
 {
-    H5VL_object_t *   vol_obj   = NULL;         /* Object for loc_id */
-    H5VL_t *       connector = NULL;              /* VOL connector */
-    void *            token     = NULL;         /* Request token for async operation        */
-    void **token_ptr = H5_REQUEST_NULL;         /* Pointer to request token for async operation        */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    H5VL_t *       connector = NULL;            /* VOL connector */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "*s*sIuii", app_file, app_func, app_line, file_id, es_id);
@@ -1026,7 +1035,8 @@ H5Fclose_async(const char *app_file, const char *app_func, unsigned app_line,
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
-        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, file_id, es_id)) < 0)
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, file_id, es_id)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -1106,8 +1116,8 @@ done:
 static hid_t
 H5F__reopen_api_common(hid_t file_id, void **token_ptr)
 {
-    void *file    = NULL;   /* File struct for new file */
-    H5VL_object_t *   vol_obj   = NULL;         /* Object for loc_id */
+    void *         file      = NULL;            /* File struct for new file */
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1150,7 +1160,7 @@ done:
 hid_t
 H5Freopen(hid_t file_id)
 {
-    H5VL_object_t *   vol_obj   = NULL;         /* File object */
+    H5VL_object_t *vol_obj   = NULL;            /* File object */
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -1186,20 +1196,19 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Freopen_async(const char *app_file, const char *app_func, unsigned app_line,
-    hid_t file_id, hid_t es_id)
+H5Freopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t file_id, hid_t es_id)
 {
-    H5VL_object_t *   vol_obj   = NULL;         /* Object for loc_id */
-    void *            token     = NULL;         /* Request token for async operation        */
-    void **token_ptr = H5_REQUEST_NULL;         /* Pointer to request token for async operation        */
-    hid_t ret_value; /* Return value */
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    hid_t          ret_value;                   /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE5("i", "*s*sIuii", app_file, app_func, app_line, file_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
-        token_ptr = &token;     /* Point at token for VOL connector to set up */
+        token_ptr = &token; /* Point at token for VOL connector to set up */
 
     /* Reopen the file, possibly asynchronously */
     if ((ret_value = H5F__reopen_api_common(file_id, token_ptr)) < 0)
@@ -1211,7 +1220,8 @@ H5Freopen_async(const char *app_file, const char *app_func, unsigned app_line,
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
-        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, file_id, es_id)) < 0)
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, file_id, es_id)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
 
     /* Reset token for 'post open' operation */
@@ -1224,7 +1234,8 @@ H5Freopen_async(const char *app_file, const char *app_func, unsigned app_line,
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
-        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, file_id, es_id)) < 0)
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, file_id, es_id)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
 
 done:

@@ -576,7 +576,7 @@ void
 H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
 #ifndef NDEBUG
                             int32_t version,
-#else  /* NDEBUG */
+#else /* NDEBUG */
                             int32_t H5_ATTR_UNUSED version,
 #endif /* NDEBUG */
                             double hit_rate, enum H5C_resize_status status, size_t old_max_cache_size,
@@ -806,7 +806,7 @@ H5C_prep_for_file_close(H5F_t *f)
          */
         if (H5C__serialize_cache(f) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "serialization of the cache failed")
-    }  /* end if */
+    } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
 done:
@@ -1310,7 +1310,7 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
     hbool_t     flush_last;
 #ifdef H5_HAVE_PARALLEL
     hbool_t coll_access = FALSE; /* whether access to the cache entry is done collectively */
-#endif                           /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
     hbool_t            set_flush_marker;
     hbool_t            write_permitted = TRUE;
     size_t             empty_space;
@@ -2092,7 +2092,7 @@ H5C_resize_entry(void *thing, size_t new_size)
             H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr->coll_list_len), (cache_ptr->coll_list_size),
                                             (entry_ptr->size), (new_size))
         } /* end if */
-#endif    /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
         /* update statistics just before changing the entry size */
         H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(cache_ptr, entry_ptr, new_size);
@@ -2228,7 +2228,7 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
     hbool_t     flush_last;
 #ifdef H5_HAVE_PARALLEL
     hbool_t coll_access = FALSE; /* whether access to the cache entry is done collectively */
-#endif                           /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
     hbool_t            write_permitted;
     hbool_t            was_loaded = FALSE; /* Whether the entry was loaded as a result of the protect */
     size_t             empty_space;
@@ -2348,7 +2348,7 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
                 H5C__MOVE_TO_TOP_IN_COLL_LIST(cache_ptr, entry_ptr, NULL)
             } /* end else-if */
         }     /* end if */
-#endif        /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
 #if H5C_DO_TAGGING_SANITY_CHECKS
         {
@@ -3359,7 +3359,7 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
             if (!dirtied)
                 clear_entry = TRUE;
         } /* end if */
-#endif    /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
         if (!entry_ptr->is_protected)
 
@@ -3538,7 +3538,7 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "Can't clear entry")
 
         } /* end else if */
-#endif    /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
     }
 
     H5C__UPDATE_STATS_FOR_UNPROTECT(cache_ptr)
@@ -3899,7 +3899,7 @@ H5C_create_flush_dependency(void *parent_thing, void *child_thing)
 
         for (u = 0; u < child_entry->flush_dep_nparents; u++)
             HDassert(child_entry->flush_dep_parent[u] != parent_entry);
-    }  /* end block */
+    } /* end block */
 #endif /* NDEBUG */
 
     /* More sanity checks */
@@ -5823,7 +5823,7 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
             HDassert(cache_ptr->slist_size ==
                      (size_t)((ssize_t)initial_slist_size + cache_ptr->slist_size_increase));
         } /* end if */
-#endif    /* H5C_DO_SANITY_CHECKS */
+#endif /* H5C_DO_SANITY_CHECKS */
 
         /* Since we are doing a destroy, we must make a pass through
          * the hash table and try to flush - destroy all entries that
@@ -6321,7 +6321,7 @@ H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
         HDassert(cache_ptr->slist_ring_len[ring] == 0);
         HDassert(cache_ptr->slist_ring_size[ring] == 0);
 
-    }  /* end if */
+    } /* end if */
 #endif /* H5C_DO_SANITY_CHECKS */
 
 done:
@@ -6763,7 +6763,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
             H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL)
 
         } /* end if */
-#endif    /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
         H5C__UPDATE_RP_FOR_EVICTION(cache_ptr, entry_ptr, FAIL)
 
@@ -7130,8 +7130,8 @@ H5C__load_entry(H5F_t *f,
     int      mpi_rank = 0;             /* MPI process rank                         */
     MPI_Comm comm     = MPI_COMM_NULL; /* File MPI Communicator                    */
     int      mpi_code;                 /* MPI error code                           */
-#endif                                 /* H5_HAVE_PARALLEL */
-    void *ret_value = NULL;            /* Return value                             */
+#endif /* H5_HAVE_PARALLEL */
+    void *ret_value = NULL; /* Return value                             */
 
     FUNC_ENTER_STATIC
 
@@ -7176,7 +7176,7 @@ H5C__load_entry(H5F_t *f,
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "Can't get MPI rank")
         if ((comm = H5F_mpi_get_comm(f)) == MPI_COMM_NULL)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "get_comm request failed")
-    }  /* end if */
+    } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
     /* Get the on-disk entry image */
@@ -7206,7 +7206,7 @@ H5C__load_entry(H5F_t *f,
                 image = (uint8_t *)new_image;
 #if H5C_DO_MEMORY_SANITY_CHECKS
                 H5MM_memcpy(image + len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
-#endif        /* H5C_DO_MEMORY_SANITY_CHECKS */
+#endif /* H5C_DO_MEMORY_SANITY_CHECKS */
             } /* end if */
 
 #ifdef H5_HAVE_PARALLEL
@@ -7227,7 +7227,7 @@ H5C__load_entry(H5F_t *f,
                 if (MPI_SUCCESS != (mpi_code = MPI_Bcast(image, buf_size, MPI_BYTE, 0, comm)))
                     HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code)
             } /* end if */
-#endif        /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
             /* If the entry could be read speculatively and the length is still
              *  changing, check for updating the actual size
@@ -7275,9 +7275,9 @@ H5C__load_entry(H5F_t *f,
                                 (mpi_code = MPI_Bcast(image + len, buf_size, MPI_BYTE, 0, comm)))
                                 HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code)
                         } /* end if */
-#endif                    /* H5_HAVE_PARALLEL */
-                    }     /* end if */
-                }         /* end if (actual_len != len) */
+#endif /* H5_HAVE_PARALLEL */
+                    } /* end if */
+                }     /* end if (actual_len != len) */
                 else {
                     /* The length has stabilized */
                     len_changed = FALSE;
@@ -8534,7 +8534,7 @@ H5C__serialize_cache(H5F_t *f)
             scan_ptr                      = scan_ptr->il_next;
         } /* end while */
     }     /* end block */
-#endif    /* NDEBUG */
+#endif /* NDEBUG */
 
     /* set cache_ptr->serialization_in_progress to TRUE, and back
      * to FALSE at the end of the function.  Must maintain this flag
@@ -8600,7 +8600,7 @@ H5C__serialize_cache(H5F_t *f)
             scan_ptr = scan_ptr->il_next;
         } /* end while */
     }     /* end block */
-#endif    /* NDEBUG */
+#endif /* NDEBUG */
 
 done:
     cache_ptr->serialization_in_progress = FALSE;
@@ -8777,7 +8777,7 @@ H5C__serialize_ring(H5F_t *f, H5C_ring_t ring)
 #ifndef NDEBUG
                     /* Increment serialization counter (to detect multiple serializations) */
                     entry_ptr->serialization_count++;
-#endif            /* NDEBUG */
+#endif /* NDEBUG */
                 } /* end if */
             }     /* end if */
 
@@ -8846,7 +8846,7 @@ H5C__serialize_ring(H5F_t *f, H5C_ring_t ring)
 #ifndef NDEBUG
                     /* Increment serialization counter (to detect multiple serializations) */
                     entry_ptr->serialization_count++;
-#endif            /* NDEBUG */
+#endif /* NDEBUG */
                 } /* end if */
             }     /* end if */
             else {
@@ -8911,7 +8911,7 @@ H5C__serialize_single_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry
         H5MM_memcpy(((uint8_t *)entry_ptr->image_ptr) + image_size, H5C_IMAGE_SANITY_VALUE,
                     H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
-    }  /* end if */
+    } /* end if */
 
     /* Generate image for entry */
     if (H5C__generate_image(f, cache_ptr, entry_ptr) < 0)
@@ -9218,7 +9218,7 @@ H5C_remove_entry(void *_entry)
     if (entry->coll_access) {
         entry->coll_access = FALSE;
         H5C__REMOVE_FROM_COLL_LIST(cache, entry, FAIL)
-    }  /* end if */
+    } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
     H5C__UPDATE_RP_FOR_EVICTION(cache, entry, FAIL)

@@ -287,11 +287,11 @@ test_refstr_wrap(void)
 static void
 test_refstr_asprintf_cat(void)
 {
-    H5RS_str_t *rs;      /* Ref-counted string created */
-    const char *s;       /* Pointer to raw string in ref-counted string */
+    H5RS_str_t *rs;       /* Ref-counted string created */
+    const char *s;        /* Pointer to raw string in ref-counted string */
     char        buf[256]; /* Buffer to compare against */
-    int         cmp;     /* Comparison value */
-    herr_t      ret;     /* Generic return value */
+    int         cmp;      /* Comparison value */
+    herr_t      ret;      /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Printf-formatted Output to Ref-Counted Strings\n"));
@@ -337,12 +337,12 @@ test_refstr_asprintf_cat(void)
 static void
 test_refstr_acat(void)
 {
-    H5RS_str_t *rs;      /* Ref-counted string created */
-    const char *s;       /* Pointer to raw string in ref-counted string */
-    char        buf[256]; /* Buffer to compare against */
-    char        *large_str, *large_str2;        /* Large strings to append */
-    int         cmp;     /* Comparison value */
-    herr_t      ret;     /* Generic return value */
+    H5RS_str_t *rs;                     /* Ref-counted string created */
+    const char *s;                      /* Pointer to raw string in ref-counted string */
+    char        buf[256];               /* Buffer to compare against */
+    char *      large_str, *large_str2; /* Large strings to append */
+    int         cmp;                    /* Comparison value */
+    herr_t      ret;                    /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Appending Strings to Ref-Counted Strings\n"));
@@ -378,19 +378,19 @@ test_refstr_acat(void)
     CHECK(large_str, NULL, "HDmalloc");
     HDmemset(large_str, 'a', 1024);
     large_str[1023] = '\0';
-    ret = H5RS_acat(rs, large_str);
+    ret             = H5RS_acat(rs, large_str);
     CHECK(ret, FAIL, "H5RS_acat");
 
     /* Get pointer to raw string in ref-counted string */
     s = H5RS_get_str(rs);
     CHECK_PTR(s, "H5RS_get_str");
     HDsprintf(buf, "%s", "foobar");
-    large_str2 = HDmalloc(1024+6);
+    large_str2 = HDmalloc(1024 + 6);
     CHECK(large_str2, NULL, "HDmalloc");
     HDstrcpy(large_str2, "foobar");
     HDmemset(&large_str2[6], 'a', 1024);
     large_str2[1029] = '\0';
-    cmp = HDstrcmp(s, large_str2);
+    cmp              = HDstrcmp(s, large_str2);
     VERIFY(cmp, 0, "HDstrcmp");
 
     /* Decrement reference count for string */
@@ -411,11 +411,11 @@ test_refstr_acat(void)
 static void
 test_refstr_ancat(void)
 {
-    H5RS_str_t *rs;      /* Ref-counted string created */
-    const char *s;       /* Pointer to raw string in ref-counted string */
+    H5RS_str_t *rs;       /* Ref-counted string created */
+    const char *s;        /* Pointer to raw string in ref-counted string */
     char        buf[256]; /* Buffer to compare against */
-    int         cmp;     /* Comparison value */
-    herr_t      ret;     /* Generic return value */
+    int         cmp;      /* Comparison value */
+    herr_t      ret;      /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Appending Strings to Ref-Counted Strings\n"));
@@ -460,11 +460,11 @@ test_refstr_ancat(void)
 static void
 test_refstr_aputc(void)
 {
-    H5RS_str_t *rs;      /* Ref-counted string created */
-    const char *s;       /* Pointer to raw string in ref-counted string */
+    H5RS_str_t *rs;       /* Ref-counted string created */
+    const char *s;        /* Pointer to raw string in ref-counted string */
     char        buf[256]; /* Buffer to compare against */
-    int         cmp;     /* Comparison value */
-    herr_t      ret;     /* Generic return value */
+    int         cmp;      /* Comparison value */
+    herr_t      ret;      /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Appending Strings to Ref-Counted Strings\n"));
@@ -526,15 +526,15 @@ test_refstr(void)
     test_refstr_init();
 
     /* Actual ref-counted strings tests */
-    test_refstr_create(); /* Test ref-counted string creation */
-    test_refstr_count();  /* Test ref-counted string counting */
-    test_refstr_dup();    /* Test ref-counted string duplication */
-    test_refstr_cmp();    /* Test ref-counted string comparison */
-    test_refstr_wrap();   /* Test ref-counted string wrapping */
+    test_refstr_create();       /* Test ref-counted string creation */
+    test_refstr_count();        /* Test ref-counted string counting */
+    test_refstr_dup();          /* Test ref-counted string duplication */
+    test_refstr_cmp();          /* Test ref-counted string comparison */
+    test_refstr_wrap();         /* Test ref-counted string wrapping */
     test_refstr_asprintf_cat(); /* Test ref-counted string printf-formatted output */
-    test_refstr_acat();   /* Test ref-counted string appends */
-    test_refstr_ancat();  /* Test ref-counted length-limited string appends */
-    test_refstr_aputc();  /* Test ref-counted character appends */
+    test_refstr_acat();         /* Test ref-counted string appends */
+    test_refstr_ancat();        /* Test ref-counted length-limited string appends */
+    test_refstr_aputc();        /* Test ref-counted character appends */
 
     /* Finalize ref-counted strings testing data */
     test_refstr_finalize();

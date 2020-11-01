@@ -60,13 +60,13 @@ struct H5ES_event_t {
     struct H5ES_event_t *prev, *next; /* Previous and next event nodes */
 
     /* Useful info for debugging and error reporting */
-    const char *api_name;               /* Name of API routine for event */
-    const char *api_args;               /* Arguments to API routine */
-    const char *app_file;               /* Name of source file from application */
-    const char *app_func;               /* Name of source function from application */
-    unsigned app_line;                  /* Line # of source file from application */
-    uint64_t ev_count;                  /* This event is the n'th operation in the event set */
-    uint64_t ev_time;                   /* Timestamp for this event (in ms from UNIX epoch) */
+    const char *api_name; /* Name of API routine for event */
+    const char *api_args; /* Arguments to API routine */
+    const char *app_file; /* Name of source file from application */
+    const char *app_func; /* Name of source function from application */
+    unsigned    app_line; /* Line # of source file from application */
+    uint64_t    ev_count; /* This event is the n'th operation in the event set */
+    uint64_t    ev_time;  /* Timestamp for this event (in ms from UNIX epoch) */
 };
 
 /********************/
@@ -245,19 +245,18 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES_insert(hid_t es_id, H5VL_t *connector, void *token,
-    const char *caller, const char *caller_args, ...)
+H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller, const char *caller_args, ...)
 {
-    H5ES_t *es = NULL;          /* Event set for the operation */
-    H5VL_object_t *request = NULL;         /* Async request token VOL object */
-    H5ES_event_t *ev = NULL;    /* Event for request */
-    H5RS_str_t *rs = NULL;      /* Ref-counted string to compose formatted argument string in */
-    const char *app_file;       /* Application source file name */
-    const char *app_func;       /* Application source function name */
-    const char *s;              /* Pointer to internal string from ref-counted string */
-    va_list ap;                 /* Varargs for caller */
-    hbool_t arg_started = FALSE;   /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5ES_t *       es      = NULL;        /* Event set for the operation */
+    H5VL_object_t *request = NULL;        /* Async request token VOL object */
+    H5ES_event_t * ev      = NULL;        /* Event for request */
+    H5RS_str_t *   rs      = NULL;        /* Ref-counted string to compose formatted argument string in */
+    const char *   app_file;              /* Application source file name */
+    const char *   app_func;              /* Application source function name */
+    const char *   s;                     /* Pointer to internal string from ref-counted string */
+    va_list        ap;                    /* Varargs for caller */
+    hbool_t        arg_started = FALSE;   /* Whether the va_list has been started */
+    herr_t         ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -272,7 +271,7 @@ H5ES_insert(hid_t es_id, H5VL_t *connector, void *token,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an event set")
 
     /* Check for errors in event set */
-    if(es->err_occurred)
+    if (es->err_occurred)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTINSERT, FAIL, "event set has failed operations")
 
     /* Create vol object for token */
@@ -294,15 +293,15 @@ H5ES_insert(hid_t es_id, H5VL_t *connector, void *token,
     arg_started = TRUE;
 
     /* Copy the app source information */
-    (void)HDva_arg(ap, char *);         /* Toss the 'app_file' parameter name */
+    (void)HDva_arg(ap, char *); /* Toss the 'app_file' parameter name */
     app_file = HDva_arg(ap, char *);
-    if(NULL == (ev->app_file = H5MM_strdup(app_file)))
+    if (NULL == (ev->app_file = H5MM_strdup(app_file)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy app source file name")
-    (void)HDva_arg(ap, char *);         /* Toss the 'app_func' parameter name */
+    (void)HDva_arg(ap, char *); /* Toss the 'app_func' parameter name */
     app_func = HDva_arg(ap, char *);
-    if(NULL == (ev->app_func = H5MM_strdup(app_func)))
+    if (NULL == (ev->app_func = H5MM_strdup(app_func)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy app source function name")
-    (void)HDva_arg(ap, char *);         /* Toss the 'app_line' parameter name */
+    (void)HDva_arg(ap, char *); /* Toss the 'app_line' parameter name */
     ev->app_line = HDva_arg(ap, unsigned);
 
     /* Set the event's operation counter */
@@ -312,21 +311,21 @@ H5ES_insert(hid_t es_id, H5VL_t *connector, void *token,
     ev->ev_time = H5_now_usec();
 
     /* Copy the API routine's name */
-    if(NULL == (ev->api_name = H5MM_strdup(caller)))
+    if (NULL == (ev->api_name = H5MM_strdup(caller)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy API routine name")
 
     /* Create the string for the API routine's arguments */
-    if(NULL == (rs = H5RS_create(NULL)))
+    if (NULL == (rs = H5RS_create(NULL)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't allocate ref-counted string")
 
     /* Copy the string for the API routine's arguments */
     /* (skip the six characters from the app's file, function and line # arguments) */
     HDassert(0 == HDstrncmp(caller_args, "*s*sIu", 6));
-    if(H5_trace_args(rs, caller_args + 6, ap) < 0)
+    if (H5_trace_args(rs, caller_args + 6, ap) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTSET, FAIL, "can't create formatted API arguments")
-    if(NULL == (s = H5RS_get_str(rs)))
+    if (NULL == (s = H5RS_get_str(rs)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL, "can't get pointer to formatted API arguments")
-    if(NULL == (ev->api_args = H5MM_strdup(s)))
+    if (NULL == (ev->api_args = H5MM_strdup(s)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy API routine name")
 
     /* Append event onto the event set's list */
@@ -343,21 +342,21 @@ H5ES_insert(hid_t es_id, H5VL_t *connector, void *token,
 
 done:
     /* Clean up */
-    if(arg_started)
+    if (arg_started)
         HDva_end(ap);
-    if(rs)
+    if (rs)
         H5RS_decr(rs);
 
     /* Release resources on error */
-    if(ret_value < 0) {
-        if(ev) {
-            if(ev->api_name)
+    if (ret_value < 0) {
+        if (ev) {
+            if (ev->api_name)
                 H5MM_xfree_const(ev->api_name);
-            if(ev->api_args)
+            if (ev->api_args)
                 H5MM_xfree_const(ev->api_args);
-            if(ev->app_file)
+            if (ev->app_file)
                 H5MM_xfree_const(ev->app_file);
-            if(ev->app_func)
+            if (ev->app_func)
                 H5MM_xfree_const(ev->app_func);
             H5FL_FREE(H5ES_event_t, ev);
         } /* end if */
@@ -383,8 +382,8 @@ done:
 herr_t
 H5ES__test(H5ES_t *es, H5ES_status_t *status)
 {
-    H5ES_event_t *ev;                   /* Event to check */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5ES_event_t *ev;                  /* Event to check */
+    herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -500,7 +499,7 @@ H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev)
     if (NULL == es->err_tail)
         es->err_head = es->err_tail = ev;
     else {
-        ev->prev       = es->err_tail;
+        ev->prev           = es->err_tail;
         es->err_tail->next = ev;
         es->err_tail       = ev;
     } /* end else */
@@ -529,8 +528,8 @@ H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev)
 herr_t
 H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status, hbool_t allow_early_exit)
 {
-    H5ES_event_t *ev;                   /* Event to operate on */
-    herr_t        ret_value  = SUCCEED; /* Return value */
+    H5ES_event_t *ev;                  /* Event to operate on */
+    herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -567,7 +566,7 @@ H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status, hbool_t allow_ea
                 *status = ev_status;
 
             /* Check if we are allowed to exit early from the loop */
-            if(allow_early_exit)
+            if (allow_early_exit)
                 break;
         } /* end if */
 
@@ -583,7 +582,11 @@ H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status, hbool_t allow_ea
         H5ES__remove(es, ev);
 
         /* Free the event node */
-HDfprintf(stderr, "%s: releasing event for '%s' (count: %llu, timestamp: %llu), with args '%s', in app source file '%s', function '%s', and line %u\n", FUNC, ev->api_name, (unsigned long long)ev->ev_count, (unsigned long long)ev->ev_time, ev->api_args, ev->app_file, ev->app_func, ev->app_line);
+        HDfprintf(stderr,
+                  "%s: releasing event for '%s' (count: %llu, timestamp: %llu), with args '%s', in app "
+                  "source file '%s', function '%s', and line %u\n",
+                  FUNC, ev->api_name, (unsigned long long)ev->ev_count, (unsigned long long)ev->ev_time,
+                  ev->api_args, ev->app_file, ev->app_func, ev->app_line);
         H5MM_xfree_const(ev->api_name);
         H5MM_xfree_const(ev->api_args);
         H5MM_xfree_const(ev->app_file);
@@ -622,7 +625,8 @@ H5ES__close(H5ES_t *es)
 
     /* Fail if active operations still present */
     if (es->act_count > 0)
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTCLOSEOBJ, FAIL, "can't close event set while unfinished operations are present")
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTCLOSEOBJ, FAIL,
+                    "can't close event set while unfinished operations are present")
 
     /* Release the event set */
     es = H5FL_FREE(H5ES_t, es);

@@ -833,8 +833,8 @@ herr_t
 H5D__virtual_delete(H5F_t *f, H5O_storage_t *storage)
 {
 #ifdef NOT_YET
-    int heap_rc;                /* Reference count of global heap object */
-#endif                          /* NOT_YET */
+    int heap_rc; /* Reference count of global heap object */
+#endif           /* NOT_YET */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -2821,8 +2821,8 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsiz
                 HDassert((tot_nelmts + (hsize_t)select_nelmts) >= nelmts);
             } /* end block */
 #endif        /* NDEBUG */
-        }     /* end if */
-    }         /* end if */
+        } /* end if */
+    }     /* end if */
 
 done:
     /* Cleanup I/O operation */

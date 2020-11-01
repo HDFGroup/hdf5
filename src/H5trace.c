@@ -3860,7 +3860,7 @@ double
 H5_trace(const double *returning, const char *func, const char *type, ...)
 {
     va_list           ap;
-    H5RS_str_t        *rs = NULL;
+    H5RS_str_t *      rs = NULL;
     hssize_t          i;
     FILE *            out                 = H5_debug_g.trace;
     static hbool_t    is_first_invocation = TRUE;

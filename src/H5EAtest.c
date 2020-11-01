@@ -263,8 +263,8 @@ BEGIN_FUNC(STATIC, NOERR, herr_t, SUCCEED, -,
 #ifndef NDEBUG
     H5EA__test_ctx_t *ctx = (H5EA__test_ctx_t *)_ctx; /* Callback context to destroy */
 #endif                                                /* NDEBUG */
-    uint64_t *     elmt = (uint64_t *)_elmt;          /* Convenience pointer to native elements */
-    const uint8_t *raw  = (const uint8_t *)_raw;      /* Convenience pointer to raw elements */
+    uint64_t *     elmt = (uint64_t *)_elmt;     /* Convenience pointer to native elements */
+    const uint8_t *raw  = (const uint8_t *)_raw; /* Convenience pointer to raw elements */
 
     /* Sanity checks */
     HDassert(raw);

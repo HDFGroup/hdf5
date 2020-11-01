@@ -1736,8 +1736,8 @@ test_h5o(void)
 
     test_h5o_open(); /* Test generic open function */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-    test_h5o_open_by_addr();      /* Test opening objects by address */
-#endif                            /* H5_NO_DEPRECATED_SYMBOLS */
+    test_h5o_open_by_addr(); /* Test opening objects by address */
+#endif                       /* H5_NO_DEPRECATED_SYMBOLS */
     test_h5o_open_by_token();     /* Test opening objects by token */
     test_h5o_close();             /* Test generic close function */
     test_h5o_refcount();          /* Test incrementing and decrementing reference count */

@@ -480,11 +480,11 @@ typedef unsigned char uint8_t;
 
 #if H5_SIZEOF_INT16_T >= 2
 #elif H5_SIZEOF_SHORT >= 2
-typedef short          int16_t;
+typedef short int16_t;
 #undef H5_SIZEOF_INT16_T
 #define H5_SIZEOF_INT16_T H5_SIZEOF_SHORT
 #elif H5_SIZEOF_INT >= 2
-typedef int      int16_t;
+typedef int int16_t;
 #undef H5_SIZEOF_INT16_T
 #define H5_SIZEOF_INT16_T H5_SIZEOF_INT
 #else
@@ -506,11 +506,11 @@ typedef unsigned uint16_t;
 
 #if H5_SIZEOF_INT32_T >= 4
 #elif H5_SIZEOF_SHORT >= 4
-typedef short          int32_t;
+typedef short int32_t;
 #undef H5_SIZEOF_INT32_T
 #define H5_SIZEOF_INT32_T H5_SIZEOF_SHORT
 #elif H5_SIZEOF_INT >= 4
-typedef int      int32_t;
+typedef int int32_t;
 #undef H5_SIZEOF_INT32_T
 #define H5_SIZEOF_INT32_T H5_SIZEOF_INT
 #elif H5_SIZEOF_LONG >= 4
@@ -682,7 +682,7 @@ typedef struct {
 #endif /* HDabs */
 #ifndef HDaccept
 #define HDaccept(A, B, C) accept((A), (B), (C)) /* mirror VFD */
-#endif                                          /* HDaccept */
+#endif /* HDaccept */
 #ifndef HDaccess
 #define HDaccess(F, M) access(F, M)
 #endif /* HDaccess */
@@ -709,7 +709,7 @@ typedef struct {
 #endif /* HDasin */
 #ifndef HDasprintf
 #define HDasprintf asprintf /*varargs*/
-#endif                      /* HDasprintf */
+#endif /* HDasprintf */
 #ifndef HDassert
 #define HDassert(X) assert(X)
 #endif /* HDassert */
@@ -736,7 +736,7 @@ typedef struct {
 #endif /* HDatol */
 #ifndef HDbind
 #define HDbind(A, B, C) bind((A), (B), (C)) /* mirror VFD */
-#endif                                      /* HDbind */
+#endif /* HDbind */
 #ifndef HDbsearch
 #define HDbsearch(K, B, N, Z, F) bsearch(K, B, N, Z, F)
 #endif /* HDbsearch */
@@ -784,7 +784,7 @@ typedef struct {
 #endif /* HDclosedir */
 #ifndef HDconnect
 #define HDconnect(A, B, C) connect((A), (B), (C)) /* mirror VFD */
-#endif                                            /* HDconnect */
+#endif /* HDconnect */
 #ifndef HDcos
 #define HDcos(X) cos(X)
 #endif /* HDcos */
@@ -1033,7 +1033,7 @@ typedef off_t       h5_stat_size_t;
 #endif /* HDgetgroups */
 #ifndef HDgethostbyaddr
 #define HDgethostbyaddr(A, B, C) gethostbyaddr((A), (B), (C)) /* mirror VFD */
-#endif                                                        /* HDgethostbyaddr */
+#endif /* HDgethostbyaddr */
 #ifndef HDgethostname
 #define HDgethostname(N, L) gethostname(N, L)
 #endif /* HDgethostname */
@@ -1075,55 +1075,55 @@ typedef off_t       h5_stat_size_t;
 #endif /* HDgmtime */
 #ifndef HDhtonl
 #define HDhtonl(X) htonl((X)) /* mirror VFD */
-#endif                        /* HDhtonl */
+#endif /* HDhtonl */
 #ifndef HDhtons
 #define HDhtons(X) htons((X)) /* mirror VFD */
-#endif                        /* HDhtons */
+#endif /* HDhtons */
 #ifndef HDinet_addr
 #define HDinet_addr(C) inet_addr((C)) /* mirror VFD */
-#endif                                /* HDinet_addr */
+#endif /* HDinet_addr */
 #ifndef HDinet_ntoa
 #define HDinet_ntoa(C) inet_ntoa((C)) /* mirror VFD */
-#endif                                /* HDinet_ntoa */
+#endif /* HDinet_ntoa */
 #ifndef HDisalnum
 #define HDisalnum(C) isalnum((int)(C)) /*cast for solaris warning*/
-#endif                                 /* HDisalnum */
+#endif /* HDisalnum */
 #ifndef HDisalpha
 #define HDisalpha(C) isalpha((int)(C)) /*cast for solaris warning*/
-#endif                                 /* HDisalpha */
+#endif /* HDisalpha */
 #ifndef HDisatty
 #define HDisatty(F) isatty(F)
 #endif /* HDisatty */
 #ifndef HDiscntrl
 #define HDiscntrl(C) iscntrl((int)(C)) /*cast for solaris warning*/
-#endif                                 /* HDiscntrl */
+#endif /* HDiscntrl */
 #ifndef HDisdigit
 #define HDisdigit(C) isdigit((int)(C)) /*cast for solaris warning*/
-#endif                                 /* HDisdigit */
+#endif /* HDisdigit */
 #ifndef HDisgraph
 #define HDisgraph(C) isgraph((int)(C)) /*cast for solaris warning*/
-#endif                                 /* HDisgraph */
+#endif /* HDisgraph */
 #ifndef HDislower
 #define HDislower(C) islower((int)(C)) /*cast for solaris warning*/
-#endif                                 /* HDislower */
+#endif /* HDislower */
 #ifndef HDisnan
 #define HDisnan(X) isnan(X)
 #endif /* HDisnan */
 #ifndef HDisprint
 #define HDisprint(C) isprint((int)(C)) /*cast for solaris warning*/
-#endif                                 /* HDisprint */
+#endif /* HDisprint */
 #ifndef HDispunct
 #define HDispunct(C) ispunct((int)(C)) /*cast for solaris warning*/
-#endif                                 /* HDispunct */
+#endif /* HDispunct */
 #ifndef HDisspace
 #define HDisspace(C) isspace((int)(C)) /*cast for solaris warning*/
-#endif                                 /* HDisspace */
+#endif /* HDisspace */
 #ifndef HDisupper
 #define HDisupper(C) isupper((int)(C)) /*cast for solaris warning*/
-#endif                                 /* HDisupper */
+#endif /* HDisupper */
 #ifndef HDisxdigit
 #define HDisxdigit(C) isxdigit((int)(C)) /*cast for solaris warning*/
-#endif                                   /* HDisxdigit */
+#endif /* HDisxdigit */
 #ifndef HDkill
 #define HDkill(P, S) kill(P, S)
 #endif /* HDkill */
@@ -1141,7 +1141,7 @@ typedef off_t       h5_stat_size_t;
 #endif /* HDlink */
 #ifndef HDlisten
 #define HDlisten(A, B) listen((A), (B)) /* mirror VFD */
-#endif                                  /* HDlisten */
+#endif /* HDlisten */
 #ifndef HDllround
 #define HDllround(V) llround(V)
 #endif /* HDround */
@@ -1225,10 +1225,10 @@ typedef off_t       h5_stat_size_t;
 #endif /* HDnanosleep */
 #ifndef HDntohl
 #define HDntohl(A) ntohl((A)) /* mirror VFD */
-#endif                        /* HDntohl */
+#endif /* HDntohl */
 #ifndef HDntohs
 #define HDntohs(A) ntohs((A)) /* mirror VFD */
-#endif                        /* HDntohs */
+#endif /* HDntohs */
 #ifndef HDopen
 #define HDopen(F, ...) open(F, __VA_ARGS__)
 #endif /* HDopen */
@@ -1351,7 +1351,7 @@ H5_DLL void HDsrand(unsigned int seed);
 #ifndef HDsrandom
 #define HDsrandom(S) srandom(S)
 #endif /* HDsrandom */
-#else  /* H5_HAVE_RANDOM */
+#else /* H5_HAVE_RANDOM */
 #ifndef HDrand
 #define HDrand() rand()
 #endif /* HDrand */
@@ -1429,7 +1429,7 @@ H5_DLL void HDsrand(unsigned int seed);
 #endif /* HDsetsid */
 #ifndef HDsetsockopt
 #define HDsetsockopt(A, B, C, D, E) setsockopt((A), (B), (C), (D), (E)) /* mirror VFD */
-#endif                                                                  /* HDsetsockopt */
+#endif /* HDsetsockopt */
 #ifndef HDsetuid
 #define HDsetuid(U) setuid(U)
 #endif /* HDsetuid */
@@ -1438,7 +1438,7 @@ H5_DLL void HDsrand(unsigned int seed);
 #endif /* HDsetvbuf */
 #ifndef HDshutdown
 #define HDshutdown(A, B) shutdown((A), (B)) /* mirror VFD */
-#endif                                      /* HDshutdown */
+#endif /* HDshutdown */
 #ifndef HDsigaction
 #define HDsigaction(S, A, O) sigaction((S), (A), (O))
 #endif /* HDsigaction */
@@ -1486,13 +1486,13 @@ H5_DLL void HDsrand(unsigned int seed);
 #endif /* HDsleep */
 #ifndef HDsnprintf
 #define HDsnprintf snprintf /*varargs*/
-#endif                      /* HDsnprintf */
+#endif /* HDsnprintf */
 #ifndef HDsocket
 #define HDsocket(A, B, C) socket((A), (B), (C)) /* mirror VFD */
-#endif                                          /* HDsocket */
+#endif /* HDsocket */
 #ifndef HDsprintf
 #define HDsprintf sprintf /*varargs*/
-#endif                    /* HDsprintf */
+#endif /* HDsprintf */
 #ifndef HDsqrt
 #define HDsqrt(X) sqrt(X)
 #endif /* HDsqrt */
@@ -1706,7 +1706,7 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
  * define these in terms of macros.
  */
 #if !defined strdup && !defined H5_HAVE_STRDUP
-extern char *                   strdup(const char *s);
+extern char *strdup(const char *s);
 #endif
 
 #ifndef HDstrdup
@@ -1992,7 +1992,7 @@ extern char H5libhdf5_settings[]; /* embedded library information */
 #define H5TRACE11(R, T, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)      /*void*/
 #define H5TRACE12(R, T, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11) /*void*/
 #define H5TRACE_RETURN(V)                                                 /*void*/
-#endif                                                                    /* H5_DEBUG_API */
+#endif /* H5_DEBUG_API */
 
 /* Argument tracing macros (defined all the time) */
 #define H5ARG_TRACE0(C, T)                         C, T
@@ -2146,10 +2146,10 @@ extern hbool_t H5_libterm_g; /* Is the library being shutdown? */
 
 #define H5_PUSH_FUNC H5CS_push(FUNC);
 #define H5_POP_FUNC  H5CS_pop();
-#else                /* H5_HAVE_CODESTACK */
+#else /* H5_HAVE_CODESTACK */
 #define H5_PUSH_FUNC /* void */
 #define H5_POP_FUNC  /* void */
-#endif               /* H5_HAVE_CODESTACK */
+#endif /* H5_HAVE_CODESTACK */
 
 #ifdef H5_HAVE_MPE
 extern hbool_t H5_MPEinit_g; /* Has the MPE Library been initialized? */
@@ -2202,7 +2202,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
             func_check = TRUE;                                                                               \
         } /* end if */                                                                                       \
     }     /* end scope */
-#else     /* NDEBUG */
+#else /* NDEBUG */
 #define FUNC_ENTER_CHECK_NAME(asrt)
 #endif /* NDEBUG */
 

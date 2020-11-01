@@ -791,7 +791,8 @@ H5G_iterate(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type, H5_iter
     udata.op_data  = op_data;
 
     /* Call the real group iteration routine */
-    if ((ret_value = H5G__obj_iterate(&(grp->oloc), idx_type, order, skip, last_lnk, H5G__iterate_cb, &udata)) < 0)
+    if ((ret_value =
+             H5G__obj_iterate(&(grp->oloc), idx_type, order, skip, last_lnk, H5G__iterate_cb, &udata)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "error iterating over links")
 
 done:

@@ -907,7 +907,7 @@ test_api(test_api_config_t config, hid_t fapl, H5F_libver_t low)
         TEST_ERROR
     ex_dcpl = -1;
 
-#else  /* VDS_POINT_SELECTIONS */
+#else /* VDS_POINT_SELECTIONS */
 
     /*
      * Test 3: Verify point selections fail

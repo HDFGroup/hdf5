@@ -346,7 +346,7 @@ test_filter_read(void)
             VRFY(hrc >= 0, "H5Pclose");
         }
 #endif /* H5_HAVE_FILTER_SZIP */
-    }  /* end for */
+    } /* end for */
 
     /*----------------------------------------------------------
      * STEP 4: Test shuffling by itself.

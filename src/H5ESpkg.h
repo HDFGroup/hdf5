@@ -43,13 +43,13 @@ typedef struct H5ES_event_t H5ES_event_t;
 
 /* Typedef for event set objects */
 struct H5ES_t {
-    uint64_t    tot_count;      /* Total # of operations inserted into this set */
+    uint64_t tot_count; /* Total # of operations inserted into this set */
 
     size_t        act_count;   /* # of active events in set */
     H5ES_event_t *head, *tail; /* Head & tail of active events */
 
-    hbool_t       err_occurred; /* Flag for error from an operation */
-    size_t        err_count;    /* # of failed events in set */
+    hbool_t       err_occurred;        /* Flag for error from an operation */
+    size_t        err_count;           /* # of failed events in set */
     H5ES_event_t *err_head, *err_tail; /* Head & tail of failed events */
 };
 
@@ -62,8 +62,7 @@ struct H5ES_t {
 /******************************/
 H5_DLL H5ES_t *H5ES__create(void);
 H5_DLL herr_t  H5ES__test(H5ES_t *es, H5ES_status_t *status);
-H5_DLL herr_t  H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status,
-    hbool_t allow_early_exit);
+H5_DLL herr_t  H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status, hbool_t allow_early_exit);
 H5_DLL herr_t  H5ES__close(H5ES_t *es);
 
 #endif /* _H5ESpkg_H */

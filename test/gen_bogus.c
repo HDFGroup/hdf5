@@ -179,7 +179,7 @@ error:
         H5Fclose(fid);
     }
     H5E_END_TRY;
-#else  /* H5O_ENABLE_BOGUS */
+#else /* H5O_ENABLE_BOGUS */
     HDputs("H5O_ENABLE_BOGUS compiler macro not defined!");
 #endif /* H5O_ENABLE_BOGUS */
     return 1;

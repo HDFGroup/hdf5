@@ -199,7 +199,7 @@ typedef struct {
 
 /* Opaque information */
 #define H5T_OPAQUE_TAG_MAX 256 /* Maximum length of an opaque tag */
-                               /* This could be raised without too much difficulty */
+/* This could be raised without too much difficulty */
 
 #ifdef __cplusplus
 extern "C" {

@@ -79,9 +79,9 @@ typedef struct H5G_gnba_iter_t {
 
 static htri_t      H5G__common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r);
 static H5RS_str_t *H5G__build_fullpath(const char *prefix, const char *name);
-static herr_t H5G__name_move_path(H5RS_str_t **path_r_ptr, const char *full_suffix, const char *src_path,
-                                  const char *dst_path);
-static int    H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key);
+static herr_t      H5G__name_move_path(H5RS_str_t **path_r_ptr, const char *full_suffix, const char *src_path,
+                                       const char *dst_path);
+static int         H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key);
 
 /*********************/
 /* Package Variables */
@@ -283,7 +283,7 @@ H5G__build_fullpath(const char *prefix, const char *name)
     if (NULL == (ret_value = H5RS_create(prefix)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, NULL, "can't create ref-counted string")
     if (prefix[HDstrlen(prefix) - 1] != '/')
-        H5RS_aputc(ret_value, '/');     /* Add separator, if the prefix doesn't end in one */
+        H5RS_aputc(ret_value, '/'); /* Add separator, if the prefix doesn't end in one */
     H5RS_acat(ret_value, name);
 
 done:
@@ -637,7 +637,7 @@ H5G__name_move_path(H5RS_str_t **path_r_ptr, const char *full_suffix, const char
         src_suffix = src_path + (common_prefix_len - 1);
 
         /* Determine destination suffix */
-        dst_suffix     = dst_path + (common_prefix_len - 1);
+        dst_suffix = dst_path + (common_prefix_len - 1);
 
         /* Compute path prefix before src suffix */
         path_prefix2     = path;
@@ -776,13 +776,13 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
         case H5G_NAME_MOUNT:
             /* Check if object is in child mount hier. */
             if (obj_in_child) {
-                const char *full_path;  /* Full path of current object */
-                const char *src_path;   /* Full path of source object */
-                H5RS_str_t *rs;         /* Ref-counted string for new path */
+                const char *full_path; /* Full path of current object */
+                const char *src_path;  /* Full path of source object */
+                H5RS_str_t *rs;        /* Ref-counted string for new path */
 
                 /* Get pointers to paths of interest */
-                full_path    = H5RS_get_str(obj_path->full_path_r);
-                src_path     = H5RS_get_str(names->src_full_path_r);
+                full_path = H5RS_get_str(obj_path->full_path_r);
+                src_path  = H5RS_get_str(names->src_full_path_r);
 
                 /* Create new full path */
                 if (NULL == (rs = H5RS_create(src_path)))
@@ -813,17 +813,17 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
          */
         case H5G_NAME_UNMOUNT:
             if (obj_in_child) {
-                const char *full_path;       /* Full path of current object */
-                const char *full_suffix;     /* Full path after source path */
-                const char *src_path;        /* Full path of source object */
-                H5RS_str_t *rs;         /* Ref-counted string for new path */
+                const char *full_path;   /* Full path of current object */
+                const char *full_suffix; /* Full path after source path */
+                const char *src_path;    /* Full path of source object */
+                H5RS_str_t *rs;          /* Ref-counted string for new path */
 
                 /* Get pointers to paths of interest */
                 full_path = H5RS_get_str(obj_path->full_path_r);
                 src_path  = H5RS_get_str(names->src_full_path_r);
 
                 /* Construct full path suffix */
-                full_suffix     = full_path + HDstrlen(src_path);
+                full_suffix = full_path + HDstrlen(src_path);
 
                 /* Create new full path suffix */
                 if (NULL == (rs = H5RS_create(full_suffix)))
@@ -845,7 +845,7 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
             else {
                 /* Check if file being unmounted was hiding the object */
                 if (H5G__common_path(obj_path->full_path_r, names->src_full_path_r) &&
-                        H5RS_cmp(obj_path->full_path_r, names->src_full_path_r)) {
+                    H5RS_cmp(obj_path->full_path_r, names->src_full_path_r)) {
                     /* Un-hide the user path */
                     (obj_path->obj_hidden)--;
                 } /* end if */
@@ -871,26 +871,26 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
         case H5G_NAME_MOVE: /* Link move case, check for relative names case */
             /* Check if the src object moved is in the current object's path */
             if (H5G__common_path(obj_path->full_path_r, names->src_full_path_r)) {
-                const char *full_path;       /* Full path of current object */
-                const char *full_suffix;     /* Suffix of full path, after src_path */
-                const char *src_path;        /* Full path of source object */
-                const char *dst_path;        /* Full path of destination object */
-                H5RS_str_t *rs;              /* Ref-counted string for new path */
+                const char *full_path;   /* Full path of current object */
+                const char *full_suffix; /* Suffix of full path, after src_path */
+                const char *src_path;    /* Full path of source object */
+                const char *dst_path;    /* Full path of destination object */
+                H5RS_str_t *rs;          /* Ref-counted string for new path */
 
                 /* Sanity check */
                 HDassert(names->dst_full_path_r);
 
                 /* Get pointers to paths of interest */
-                full_path    = H5RS_get_str(obj_path->full_path_r);
-                src_path     = H5RS_get_str(names->src_full_path_r);
-                dst_path     = H5RS_get_str(names->dst_full_path_r);
+                full_path = H5RS_get_str(obj_path->full_path_r);
+                src_path  = H5RS_get_str(names->src_full_path_r);
+                dst_path  = H5RS_get_str(names->dst_full_path_r);
 
                 /* Make certain that the source and destination names are full (not relative) paths */
                 HDassert(*src_path == '/');
                 HDassert(*dst_path == '/');
 
                 /* Get pointer to "full suffix" */
-                full_suffix     = full_path + HDstrlen(src_path);
+                full_suffix = full_path + HDstrlen(src_path);
 
                 /* Update the user path, if one exists */
                 if (obj_path->user_path_r)

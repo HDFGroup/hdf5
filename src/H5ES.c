@@ -276,7 +276,7 @@ H5ESget_err_count(hid_t es_id, size_t *num_errs /*out*/)
 
     /* Retrieve the error flag, if non-NULL */
     if (num_errs) {
-        if(es->err_occurred)
+        if (es->err_occurred)
             *num_errs = es->err_count;
         else
             *num_errs = 0;

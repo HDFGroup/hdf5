@@ -4449,7 +4449,7 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
     test_entry_t *base_addr;
     test_entry_t *entry_ptr;
 
-#if 0  /* JRM */
+#if 0 /* JRM */
     /* This gets used a lot, so lets leave it in. */
 
     HDfprintf(stdout, "check_flush_cache__multi_entry_test: test %d\n",
@@ -4637,7 +4637,7 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
     test_entry_t *base_addr;
     test_entry_t *entry_ptr;
 
-#if 0  /* JRM */
+#if 0 /* JRM */
     /* This is useful debugging code.  Leave it in for now. */
 
     HDfprintf(stdout, "check_flush_cache__pe_multi_entry_test: test %d\n",
@@ -33871,7 +33871,7 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t *file_ptr)
             pass         = FALSE;
             failure_mssg = "unexpected scan restart stats in cedds__expunge_dirty_entry_in_flush_test().";
         } /* end if */
-#endif    /* H5C_COLLECT_CACHE_STATS */
+#endif /* H5C_COLLECT_CACHE_STATS */
 
     if (pass)
         reset_entries();
@@ -35232,7 +35232,7 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
             pass         = FALSE;
             failure_mssg = "Unexpected monster entry level stats in check_stats__smoke_check_1(1).";
         } /* end if */
-#endif    /* H5C_COLLECT_CACHE_ENTRY_STATS */
+#endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 
     if (pass)
         /* protect and unprotect each entry once. Note
@@ -35306,7 +35306,7 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
             pass         = FALSE;
             failure_mssg = "Unexpected monster entry level stats in check_stats__smoke_check_1(2).";
         } /* end if */
-#endif    /* H5C_COLLECT_CACHE_ENTRY_STATS */
+#endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 
     if (pass) {
         /* protect and unprotect an entry that is not currently

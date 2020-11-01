@@ -92,11 +92,11 @@ extern "C" {
 #endif
 
 /* Version numbers */
-#define H5_VERS_MAJOR      1                        /* For major interface/format changes       */
-#define H5_VERS_MINOR      13                       /* For minor interface/format changes       */
-#define H5_VERS_RELEASE    0                        /* For tweaks, bug-fixes, or development    */
-#define H5_VERS_SUBRELEASE ""                       /* For pre-releases like snap0          */
-                                                    /* Empty string for real releases.           */
+#define H5_VERS_MAJOR      1 /* For major interface/format changes       */
+#define H5_VERS_MINOR      13 /* For minor interface/format changes       */
+#define H5_VERS_RELEASE    0 /* For tweaks, bug-fixes, or development    */
+#define H5_VERS_SUBRELEASE "" /* For pre-releases like snap0          */
+/* Empty string for real releases.           */
 #define H5_VERS_INFO "HDF5 library version: 1.13.0" /* Full version string */
 
 #define H5check() H5check_version(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE)
@@ -176,15 +176,15 @@ typedef long long ssize_t;
  */
 #if H5_SIZEOF_INT64_T >= 8
 #elif H5_SIZEOF_INT >= 8
-typedef int           int64_t;
+typedef int int64_t;
 #undef H5_SIZEOF_INT64_T
 #define H5_SIZEOF_INT64_T H5_SIZEOF_INT
 #elif H5_SIZEOF_LONG >= 8
-typedef long               int64_t;
+typedef long int64_t;
 #undef H5_SIZEOF_INT64_T
 #define H5_SIZEOF_INT64_T H5_SIZEOF_LONG
 #elif H5_SIZEOF_LONG_LONG >= 8
-typedef long long          int64_t;
+typedef long long int64_t;
 #undef H5_SIZEOF_INT64_T
 #define H5_SIZEOF_INT64_T H5_SIZEOF_LONG_LONG
 #else
@@ -199,12 +199,12 @@ typedef long long          int64_t;
 #define UINT64_MAX ((uint64_t)-1)
 #endif
 #elif H5_SIZEOF_INT >= 8
-typedef unsigned      uint64_t;
+typedef unsigned uint64_t;
 #define UINT64_MAX UINT_MAX
 #undef H5_SIZEOF_UINT64_T
 #define H5_SIZEOF_UINT64_T H5_SIZEOF_INT
 #elif H5_SIZEOF_LONG >= 8
-typedef unsigned long      uint64_t;
+typedef unsigned long uint64_t;
 #define UINT64_MAX ULONG_MAX
 #undef H5_SIZEOF_UINT64_T
 #define H5_SIZEOF_UINT64_T H5_SIZEOF_LONG
@@ -289,15 +289,15 @@ typedef unsigned long long haddr_t;
  */
 #if H5_SIZEOF_UINT32_T >= 4
 #elif H5_SIZEOF_SHORT >= 4
-typedef short         uint32_t;
+typedef short uint32_t;
 #undef H5_SIZEOF_UINT32_T
 #define H5_SIZEOF_UINT32_T H5_SIZEOF_SHORT
 #elif H5_SIZEOF_INT >= 4
-typedef unsigned int       uint32_t;
+typedef unsigned int uint32_t;
 #undef H5_SIZEOF_UINT32_T
 #define H5_SIZEOF_UINT32_T H5_SIZEOF_INT
 #elif H5_SIZEOF_LONG >= 4
-typedef unsigned long      uint32_t;
+typedef unsigned long uint32_t;
 #undef H5_SIZEOF_UINT32_T
 #define H5_SIZEOF_UINT32_T H5_SIZEOF_LONG
 #else

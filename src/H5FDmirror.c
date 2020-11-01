@@ -126,7 +126,7 @@ typedef struct H5FD_mirror_t {
     } while (0)
 #else
 #define LOG_XMIT_BYTES(label, buf, len) /* no-op */
-#endif                                  /* MIRROR_DEBUG_XMIT_BYTE */
+#endif /* MIRROR_DEBUG_XMIT_BYTE */
 
 #if MIRROR_DEBUG_OP_CALLS
 #define LOG_OP_CALL(name)                                                                                    \
@@ -136,7 +136,7 @@ typedef struct H5FD_mirror_t {
     } while (0)
 #else
 #define LOG_OP_CALL(name) /* no-op */
-#endif                    /* MIRROR_DEBUG_OP_CALLS */
+#endif /* MIRROR_DEBUG_OP_CALLS */
 
 /* Prototypes */
 static herr_t  H5FD__mirror_term(void);

@@ -5436,10 +5436,10 @@ test_attr_corder_delete(hid_t fcpl, hid_t fapl)
 #ifdef LATER
     h5_stat_size_t empty_size; /* Size of empty file */
     h5_stat_size_t file_size;  /* Size of file after operating on it */
-#endif                         /* LATER */
-    unsigned curr_dset;        /* Current dataset to work on */
-    unsigned u;                /* Local index variable */
-    herr_t   ret;              /* Generic return value        */
+#endif /* LATER */
+    unsigned curr_dset; /* Current dataset to work on */
+    unsigned u;         /* Local index variable */
+    herr_t   ret;       /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Deleting Object w/Dense Attribute Storage and Creation Order Info\n"));
@@ -5602,7 +5602,7 @@ test_attr_corder_delete(hid_t fcpl, hid_t fapl)
         CHECK(file_size, FAIL, "h5_get_file_size");
         VERIFY(file_size, empty_size, "h5_get_file_size");
 #endif /* LATER */
-    }  /* end for */
+    } /* end for */
 
     /* Close property list */
     ret = H5Pclose(dcpl);
@@ -6861,8 +6861,8 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
     unsigned v;    /* Local index variable */
     hsize_t  skip; /* # of attributes to skip on object */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-    unsigned oskip;   /* # of attributes to skip on object, with H5Aiterate1 */
-#endif                /* H5_NO_DEPRECATED_SYMBOLS */
+    unsigned oskip; /* # of attributes to skip on object, with H5Aiterate1 */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
     int    old_nerrs; /* Number of errors when entering this check */
     herr_t ret;       /* Generic return value */
 
@@ -7054,7 +7054,7 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
                 nvisit++;
 
         VERIFY(skip, (max_attrs / 2), "H5Aiterate1");
-    }  /* end else */
+    } /* end else */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     /* Iterate over attributes on object, stopping in the middle */

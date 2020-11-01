@@ -33,7 +33,7 @@ using namespace H5;
 
 #include "h5test.h"
 #include "h5cpputil.h" // C++ utilility header file
-#include "H5srcdir.h"  // srcdir querying header file
+#include "H5srcdir.h" // srcdir querying header file
 
 const H5std_string TESTFILE("th5s.h5");
 const H5std_string DATAFILE("th5s1.h5");

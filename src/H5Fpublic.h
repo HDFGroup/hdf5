@@ -230,22 +230,22 @@ typedef herr_t (*H5F_flush_cb_t)(hid_t object_id, void *udata);
 extern "C" {
 #endif
 
-H5_DLL htri_t H5Fis_accessible(const char *container_name, hid_t fapl_id);
-H5_DLL hid_t  H5Fcreate(const char *filename, unsigned flags, hid_t create_plist, hid_t access_plist);
-H5_DLL hid_t H5Fcreate_async(const char *app_file, const char *app_func, unsigned app_line,
-                            const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t es_id);
-H5_DLL hid_t H5Fopen(const char *filename, unsigned flags, hid_t access_plist);
-H5_DLL hid_t H5Fopen_async(const char *app_file, const char *app_func, unsigned app_line,
-                            const char *filename, unsigned flags, hid_t access_plist, hid_t es_id);
-H5_DLL hid_t H5Freopen(hid_t file_id);
-H5_DLL hid_t  H5Freopen_async(const char *app_file, const char *app_func, unsigned app_line,
-                                hid_t file_id, hid_t es_id);
+H5_DLL htri_t   H5Fis_accessible(const char *container_name, hid_t fapl_id);
+H5_DLL hid_t    H5Fcreate(const char *filename, unsigned flags, hid_t create_plist, hid_t access_plist);
+H5_DLL hid_t    H5Fcreate_async(const char *app_file, const char *app_func, unsigned app_line,
+                                const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t es_id);
+H5_DLL hid_t    H5Fopen(const char *filename, unsigned flags, hid_t access_plist);
+H5_DLL hid_t    H5Fopen_async(const char *app_file, const char *app_func, unsigned app_line,
+                              const char *filename, unsigned flags, hid_t access_plist, hid_t es_id);
+H5_DLL hid_t    H5Freopen(hid_t file_id);
+H5_DLL hid_t    H5Freopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t file_id,
+                                hid_t es_id);
 H5_DLL herr_t   H5Fflush(hid_t object_id, H5F_scope_t scope);
-H5_DLL herr_t   H5Fflush_async(const char *app_file, const char *app_func, unsigned app_line,
-                                hid_t object_id, H5F_scope_t scope, hid_t es_id);
+H5_DLL herr_t   H5Fflush_async(const char *app_file, const char *app_func, unsigned app_line, hid_t object_id,
+                               H5F_scope_t scope, hid_t es_id);
 H5_DLL herr_t   H5Fclose(hid_t file_id);
-H5_DLL herr_t   H5Fclose_async(const char *app_file, const char *app_func, unsigned app_line,
-                                hid_t file_id, hid_t es_id);
+H5_DLL herr_t   H5Fclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t file_id,
+                               hid_t es_id);
 H5_DLL herr_t   H5Fdelete(const char *filename, hid_t fapl_id);
 H5_DLL hid_t    H5Fget_create_plist(hid_t file_id);
 H5_DLL hid_t    H5Fget_access_plist(hid_t file_id);
@@ -299,10 +299,10 @@ H5_DLL herr_t H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag);
 /* (And must only defined when included in application code, not the library) */
 #ifndef H5F_MODULE
 #define H5Fcreate_async(...) H5Fcreate_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Fopen_async(...) H5Fopen_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Fopen_async(...)   H5Fopen_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
 #define H5Freopen_async(...) H5Freopen_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Fflush_async(...) H5Fflush_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Fclose_async(...) H5Fclose_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Fflush_async(...)  H5Fflush_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Fclose_async(...)  H5Fclose_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
 #endif /* H5F_MODULE */
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.

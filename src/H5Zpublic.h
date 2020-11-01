@@ -32,26 +32,26 @@ typedef int H5Z_filter_t;
 
 /* Filter IDs */
 #define H5Z_FILTER_ERROR       (-1) /*no filter			*/
-#define H5Z_FILTER_NONE        0    /*reserved indefinitely		*/
-#define H5Z_FILTER_DEFLATE     1    /*deflation like gzip	     	*/
-#define H5Z_FILTER_SHUFFLE     2    /*shuffle the data              */
-#define H5Z_FILTER_FLETCHER32  3    /*fletcher32 checksum of EDC    */
-#define H5Z_FILTER_SZIP        4    /*szip compression              */
-#define H5Z_FILTER_NBIT        5    /*nbit compression              */
-#define H5Z_FILTER_SCALEOFFSET 6    /*scale+offset compression      */
-#define H5Z_FILTER_RESERVED    256  /*filter ids below this value are reserved for library use */
+#define H5Z_FILTER_NONE        0 /*reserved indefinitely		*/
+#define H5Z_FILTER_DEFLATE     1 /*deflation like gzip	     	*/
+#define H5Z_FILTER_SHUFFLE     2 /*shuffle the data              */
+#define H5Z_FILTER_FLETCHER32  3 /*fletcher32 checksum of EDC    */
+#define H5Z_FILTER_SZIP        4 /*szip compression              */
+#define H5Z_FILTER_NBIT        5 /*nbit compression              */
+#define H5Z_FILTER_SCALEOFFSET 6 /*scale+offset compression      */
+#define H5Z_FILTER_RESERVED    256 /*filter ids below this value are reserved for library use */
 
 #define H5Z_FILTER_MAX 65535 /*maximum filter id		*/
 
 /* General macros */
-#define H5Z_FILTER_ALL   0  /* Symbol to remove all filters in H5Premove_filter */
+#define H5Z_FILTER_ALL   0 /* Symbol to remove all filters in H5Premove_filter */
 #define H5Z_MAX_NFILTERS 32 /* Maximum number of filters allowed in a pipeline */
-                            /* (should probably be allowed to be an
-                             * unlimited amount, but currently each
-                             * filter uses a bit in a 32-bit field,
-                             * so the format would have to be
-                             * changed to accommodate that)
-                             */
+/* (should probably be allowed to be an
+ * unlimited amount, but currently each
+ * filter uses a bit in a 32-bit field,
+ * so the format would have to be
+ * changed to accommodate that)
+ */
 
 /* Flags for filter definition (stored) */
 #define H5Z_FLAG_DEFMASK   0x00ff /*definition flag mask		*/
