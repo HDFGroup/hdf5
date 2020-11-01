@@ -143,8 +143,8 @@ macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
     endif ()
   endif ()
 
-  #----- Use MSVC Naming conventions for Shared Libraries
-  if (MINGW AND ${libtype} MATCHES "SHARED")
+  option (HDF5_MSVC_NAMING_CONVENTION "Use MSVC Naming conventions for Shared Libraries" OFF)
+  if (HDF5_MSVC_NAMING_CONVENTION AND MINGW AND ${libtype} MATCHES "SHARED")
     set_target_properties (${libtarget} PROPERTIES
         IMPORT_SUFFIX ".lib"
         IMPORT_PREFIX ""
@@ -343,7 +343,7 @@ macro (HDF_DIR_PATHS package_prefix)
     set (${package_prefix}_INSTALL_INCLUDE_DIR include)
   endif ()
   if (NOT ${package_prefix}_INSTALL_DATA_DIR)
-    if (NOT WIN32)
+    if (NOT MSVC)
       if (APPLE)
         if (${package_prefix}_BUILD_FRAMEWORKS)
           set (${package_prefix}_INSTALL_EXTRA_DIR ../SharedSupport)

@@ -39,7 +39,7 @@ DISTCLEANFILES=H5pubconf.h
 
 # library sources
 libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5lib_settings.c H5system.c \
-	H5timer.c H5trace.c \
+		H5timer.c H5trace.c \
         H5A.c H5Abtree2.c H5Adense.c H5Adeprec.c H5Aint.c H5Atest.c \
         H5AC.c H5ACdbg.c H5ACproxy_entry.c \
         H5B.c H5Bcache.c H5Bdbg.c \
@@ -62,7 +62,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5lib_settings.c H5system.c \
         H5Fsuper.c H5Fsuper_cache.c H5Ftest.c \
         H5FA.c H5FAcache.c H5FAdbg.c H5FAdblock.c H5FAdblkpage.c H5FAhdr.c \
         H5FAint.c H5FAstat.c H5FAtest.c \
-        H5FD.c H5FDcore.c H5FDfamily.c H5FDhdfs.c H5FDint.c H5FDlog.c \
+        H5FD.c H5FDcore.c H5FDfamily.c H5FDint.c H5FDlog.c \
         H5FDmulti.c H5FDsec2.c H5FDspace.c \
         H5FDsplitter.c H5FDstdio.c H5FDtest.c \
         H5FL.c H5FO.c H5FS.c H5FScache.c H5FSdbg.c H5FSint.c H5FSsection.c \
@@ -125,6 +125,11 @@ endif
 # Only compile the direct VFD if necessary
 if DIRECT_VFD_CONDITIONAL
     libhdf5_la_SOURCES += H5FDdirect.c
+endif
+
+# Only compile the read-only HDFS VFD if necessary
+if HDFS_VFD_CONDITIONAL
+    libhdf5_la_SOURCES += H5FDhdfs.c
 endif
 
 # Only compile the mirror VFD if necessary

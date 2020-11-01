@@ -2168,8 +2168,6 @@ test_ros3(void)
     hid_t            driver_id    = -1;     /* ID for this VFD              */
     unsigned long    driver_flags = 0;      /* VFD feature flags            */
     char             filename[1024];        /* filename                     */
-    void *           os_file_handle = NULL; /* OS file handle               */
-    hsize_t          file_size;             /* file size                    */
     H5FD_ros3_fapl_t test_ros3_fa;
     H5FD_ros3_fapl_t ros3_fa_0 = {
         /* version      = */ H5FD_CURR_ROS3_FAPL_T_VERSION,

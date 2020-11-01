@@ -20,6 +20,9 @@
  *             File System (HDFS).
  */
 
+/* This source code file is part of the H5FD driver module */
+#include "H5FDdrvr_module.h"
+
 #include "H5private.h"   /* Generic Functions        */
 #include "H5Eprivate.h"  /* Error handling           */
 #include "H5FDprivate.h" /* File drivers             */
@@ -29,9 +32,6 @@
 #include "H5MMprivate.h" /* Memory management        */
 
 #ifdef H5_HAVE_LIBHDFS
-
-/* This source code file is part of the H5FD driver module */
-#include "H5FDdrvr_module.h"
 
 /* HDFS routines */
 #include "hdfs.h"
@@ -356,7 +356,7 @@ done:
 hid_t
 H5FD_hdfs_init(void)
 {
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t ret_value = H5I_INVALID_HID;
 #if HDFS_STATS
     unsigned int bin_i;
 #endif
@@ -673,7 +673,7 @@ H5Pget_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa_dst /*out*/)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
 
     /* Copy the hdfs fapl data out */
-    HDmemcpy(fs_dst, fa_src, sizeof(H5FD_hdfs_fapl_t));
+    H5MM_memcpy(fs_dst, fa_src, sizeof(H5FD_hdfs_fapl_t));
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -708,7 +708,7 @@ H5FD__hdfs_fapl_get(H5FD_t *_file)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "memory allocation failed")
 
     /* Copy the fields of the structure */
-    HDmemcpy(fa, &(file->fa), sizeof(H5FD_hdfs_fapl_t));
+    H5MM_memcpy(fa, &(file->fa), sizeof(H5FD_hdfs_fapl_t));
 
     ret_value = fa;
 
@@ -746,7 +746,7 @@ H5FD__hdfs_fapl_copy(const void *_old_fa)
     if (new_fa == NULL)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "memory allocation failed")
 
-    HDmemcpy(new_fa, old_fa, sizeof(H5FD_hdfs_fapl_t));
+    H5MM_memcpy(new_fa, old_fa, sizeof(H5FD_hdfs_fapl_t));
     ret_value = new_fa;
 
 done:
@@ -903,7 +903,7 @@ H5FD__hdfs_open(const char *path, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     if (file == NULL)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate file struct")
     file->hdfs_handle = handle;
-    HDmemcpy(&(file->fa), &fa, sizeof(H5FD_hdfs_fapl_t));
+    H5MM_memcpy(&(file->fa), &fa, sizeof(H5FD_hdfs_fapl_t));
 
 #if HDFS_STATS
     if (FAIL == hdfs__reset_stats(file))
