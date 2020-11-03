@@ -13,6 +13,12 @@
 
 package hdf.hdf5lib.exceptions;
 
+/**
+ * The class HDF5LibraryException returns errors raised by the HDF5 library.
+ * <p>
+ * This sub-class represents HDF-5 major error code <b>H5E_REFERENCE</b>
+ */
+
 public class HDF5ReferenceException extends HDF5LibraryException {
     /**
      * Constructs an <code>HDF5ReferenceException</code> with no specified

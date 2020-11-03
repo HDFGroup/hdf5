@@ -15,7 +15,10 @@ package hdf.hdf5lib.structs;
 
 import java.io.Serializable;
 
-//Information struct for Attribute (For H5Ewalk)
+/**
+ * Information struct for Attribute (For H5Ewalk)
+ *
+ */
 public class H5E_error2_t implements Serializable{
     private static final long serialVersionUID = 279144359041667613L;
 
