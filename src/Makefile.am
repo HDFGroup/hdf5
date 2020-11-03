@@ -215,7 +215,6 @@ doxygen:
 # version of the source file is saved with a tilde (~) after its name and
 # tracing information is inserted.  trace should have no effect on files
 # without HDF5 macros.
-.PHONY: trace
 
 trace: $(libhdf5_la_SOURCES)
 	@for dep in $? dummy; do                                          \
