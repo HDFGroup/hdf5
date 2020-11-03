@@ -1356,3 +1356,35 @@ if (NOT WIN32)
       COMPONENT libraries
   )
 endif ()
+
+#-----------------------------------------------------------------------------
+# Option to build documentation
+#-----------------------------------------------------------------------------
+if (DOXYGEN_FOUND)
+  set (DOXYGEN_PACKAGE ${HDF5_PACKAGE})
+  set (DOXYGEN_VERSION_STRING ${HDF5_VERSION_STRING})
+  set (DOXYGEN_INCLUDE_ALIASES ${HDF5_DOXYGEN_DIR}/aliases)
+  set (DOXYGEN_PROJECT_LOGO ${HDF5_DOXYGEN_DIR}/img/HDFG-logo.png)
+  set (DOXYGEN_PROJECT_BRIEF "HDF5 (Hierarchical Data Format 5) Software Library and Utilities")
+  set (DOXYGEN_INPUT_DIRECTORY ${HDF5_SRC_DIR} ${HDF5_DOXYGEN_DIR}/dox ${HDF5_GENERATED_SOURCE_DIR}/shared)
+  set (DOXYGEN_OPTIMIZE_OUTPUT_FOR_C YES)
+  set (DOXYGEN_MACRO_EXPANSION YES)
+  set (DOXYGEN_OUTPUT_DIRECTORY ${HDF5_BINARY_DIR}/hdf5lib_docs)
+
+  # Replace variables inside @@ with the current values
+  configure_file(${HDF5_DOXYGEN_DIR}/Doxyfile.in Doxyfile @ONLY)
+
+  doxygen_add_docs(hdf5lib_doc
+#      ${common_SRCS} ${shared_gen_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS} ${H5_GENERATED_HEADERS} ${HDF5_DOXYGEN_DIR}/dox
+      ${DOXYGEN_INPUT_DIRECTORY}
+      ALL
+      WORKING_DIRECTORY ${HDF5_SRC_DIR}
+      COMMENT "Generating HDF5 library Source Documentation"
+  )
+  install(
+      DIRECTORY ${HDF5_BINARY_DIR}/hdf5lib_docs/html
+      DESTINATION ${HDF5_INSTALL_DATA_DIR}
+      COMPONENT Documents
+  )
+
+endif ()
