@@ -1387,4 +1387,10 @@ if (DOXYGEN_FOUND)
       COMPONENT Documents
   )
 
+  if(NOT TARGET doxygen)
+    add_custom_target(doxygen)
+  endif()
+
+  add_dependencies(doxygen hdf5lib_doc)
+
 endif ()
