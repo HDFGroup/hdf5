@@ -56,7 +56,8 @@ typedef void *(*H5TS_thread_cb_t)(void *);
 /* Local Prototypes */
 /********************/
 static void   H5TS__key_destructor(void *key_val);
-static herr_t H5TS__mutex_acquire(H5TS_mutex_t *mutex, hbool_t *acquired);
+static herr_t H5TS__mutex_acquire(H5TS_mutex_t *mutex, unsigned int lock_count, hbool_t *acquired);
+static herr_t H5TS__mutex_unlock(H5TS_mutex_t *mutex, unsigned int *lock_count);
 
 /*********************/
 /* Package Variables */
@@ -346,7 +347,7 @@ H5TS_pthread_first_thread_init(void)
  *--------------------------------------------------------------------------
  */
 static herr_t
-H5TS__mutex_acquire(H5TS_mutex_t *mutex, hbool_t *acquired)
+H5TS__mutex_acquire(H5TS_mutex_t *mutex, unsigned int lock_count, hbool_t *acquired)
 {
     herr_t ret_value = 0;
 
@@ -365,7 +366,7 @@ H5TS__mutex_acquire(H5TS_mutex_t *mutex, hbool_t *acquired)
             /* Check for this thread already owning the lock */
             if (HDpthread_equal(my_thread_id, mutex->owner_thread)) {
                 /* Already owned by self - increment count */
-                mutex->lock_count++;
+                mutex->lock_count += lock_count;
                 *acquired = TRUE;
             } /* end if */
             else
@@ -374,7 +375,7 @@ H5TS__mutex_acquire(H5TS_mutex_t *mutex, hbool_t *acquired)
         else {
             /* Take ownership of the mutex */
             mutex->owner_thread = my_thread_id;
-            mutex->lock_count   = 1;
+            mutex->lock_count   = lock_count;
             *acquired           = TRUE;
         } /* end else */
 
@@ -404,11 +405,11 @@ H5TS__mutex_acquire(H5TS_mutex_t *mutex, hbool_t *acquired)
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TSmutex_acquire(hbool_t *acquired){
+H5TSmutex_acquire(unsigned int lock_count, hbool_t *acquired){
     FUNC_ENTER_API_NAMECHECK_ONLY
         /*NO TRACE*/
 
-        FUNC_LEAVE_API_NAMECHECK_ONLY(H5TS__mutex_acquire(&H5_g.init_lock, acquired))}
+        FUNC_LEAVE_API_NAMECHECK_ONLY(H5TS__mutex_acquire(&H5_g.init_lock, lock_count, acquired))}
 /* end H5TSmutex_acquire() */
 
 /*--------------------------------------------------------------------------
@@ -475,6 +476,62 @@ herr_t H5TS_mutex_lock(H5TS_mutex_t *mutex)
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_mutex_lock() */
+
+/*--------------------------------------------------------------------------
+ * NAME
+ *    H5TS__mutex_unlock
+ *
+ * USAGE
+ *    H5TS__mutex_unlock(&mutex_var, &lock_count)
+ *
+ * RETURNS
+ *    0 on success and non-zero on error.
+ *
+ * DESCRIPTION
+ *    Recursive lock semantics for HDF5 (unlocking) -
+ *    Reset the lock and return the current lock count
+ *
+ * PROGRAMMER: Houjun Tang
+ *             Nov 3, 2020
+ *
+ *--------------------------------------------------------------------------
+ */
+static herr_t
+H5TS__mutex_unlock(H5TS_mutex_t *mutex, unsigned int *lock_count)
+{
+    herr_t ret_value = 0;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+#ifdef H5_HAVE_WIN_THREADS
+    /* Releases ownership of the specified critical section object. */
+    LeaveCriticalSection(&mutex->CriticalSection);
+#else /* H5_HAVE_WIN_THREADS */
+
+    /* Reset the lock count for this thread */
+    ret_value = HDpthread_mutex_lock(&mutex->atomic_lock);
+    if (ret_value)
+        HGOTO_DONE(ret_value);
+    *lock_count = mutex->lock_count;
+    mutex->lock_count = 0;
+    ret_value = HDpthread_mutex_unlock(&mutex->atomic_lock);
+
+    /* If the lock count drops to zero, signal the condition variable, to
+     * wake another thread.
+     */
+    if (mutex->lock_count == 0) {
+        int err;
+
+        err = HDpthread_cond_signal(&mutex->cond_var);
+        if (err != 0)
+            ret_value = err;
+    } /* end if */
+#endif /* H5_HAVE_WIN_THREADS */
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* H5TS__mutex_unlock */
+
 
 /*--------------------------------------------------------------------------
  * NAME
@@ -578,14 +635,15 @@ done:
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TSmutex_release(void)
+H5TSmutex_release(unsigned int *lock_count)
 {
     herr_t ret_value = 0;
 
     FUNC_ENTER_API_NAMECHECK_ONLY
     /*NO TRACE*/
 
-    if (0 != H5TS_mutex_unlock(&H5_g.init_lock))
+    *lock_count = 0;
+    if (0 != H5TS__mutex_unlock(&H5_g.init_lock, lock_count))
         ret_value = -1;
 
     FUNC_LEAVE_API_NAMECHECK_ONLY(ret_value)
