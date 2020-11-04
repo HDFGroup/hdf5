@@ -1102,7 +1102,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   #AC_SUBST([DOXYGEN_OUTPUT_DIR], [hdf5lib_docs])
 
 else
-  AC_MSG_RESULT([no])
+  echo "Doxygen support is disabled"
 fi
 
 

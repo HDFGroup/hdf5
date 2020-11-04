@@ -52,8 +52,8 @@ New Features
 
       Autoconf option is '--enable-doxygen'
           autotools make target is 'doxygen' and will build all doxygen targets
-      CMake confgure option is 'HDF5_BUILD_DOC'.
-          CMake target is 'doxygen' for all availble doxygen targets
+      CMake configure option is 'HDF5_BUILD_DOC'.
+          CMake target is 'doxygen' for all available doxygen targets
           CMake target is 'hdf5lib_doc' for the src subdirectory
 
       (ADB - 2020/11/03)
