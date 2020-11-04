@@ -1057,6 +1057,16 @@ if (EXISTS "${HDF5_SOURCE_DIR}/hl" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl")
 endif ()
 
 #-----------------------------------------------------------------------------
+# Option to use new-style references with dimension scale APIs
+#-----------------------------------------------------------------------------
+if (HDF5_BUILD_HL_LIB)
+  option (HDF5_DIMENSION_SCALES_NEW_REF  "Use new-style references with dimension scale APIs" OFF)
+  if (HDF5_DIMENSION_SCALES_NEW_REF)
+    set (H5_DIMENSION_SCALES_WITH_NEW_REF 1)
+  endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
 # Option to build Fortran bindings/tests/examples
 # Make sure this appears before the CONFIGURE_FILE step
 # so that fortran name mangling is detected before writing H5pubconf.h

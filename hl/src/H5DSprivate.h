@@ -22,7 +22,11 @@
 
 /* attribute type of a DS dataset */
 typedef struct ds_list_t {
+#ifdef H5_DIMENSION_SCALES_WITH_NEW_REF
+    H5R_ref_t    ref;
+#else
     hobj_ref_t   ref;     /* object reference  */
+#endif
     unsigned int dim_idx; /* dimension index of the dataset */
 } ds_list_t;
 
