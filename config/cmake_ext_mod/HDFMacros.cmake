@@ -356,7 +356,7 @@ macro (HDF_DIR_PATHS package_prefix)
       set (${package_prefix}_INSTALL_CMAKE_DIR share/cmake)
     else ()
       set (${package_prefix}_INSTALL_DATA_DIR ".")
-      set (${package_prefix}_INSTALL_CMAKE_DIR cmake)
+      set (${package_prefix}_INSTALL_CMAKE_DIR lib/cmake)
     endif ()
   endif ()
 
@@ -428,4 +428,3 @@ macro (HDF_DIR_PATHS package_prefix)
     endif ()
   endif ()
 endmacro ()
-
