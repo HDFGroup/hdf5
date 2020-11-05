@@ -579,6 +579,8 @@ if (WIN32)
   endif ()
 endif ()
 
+option (HDF5_MINGW_STATIC_GCC_LIBS "Statically link libgcc/libstdc++" OFF)
+
 if (MSVC)
   set (CMAKE_MFC_FLAG 0)
   set (WIN_COMPILE_FLAGS "")

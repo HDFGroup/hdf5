@@ -778,6 +778,7 @@ HDF5_WANT_DATA_ACCURACY        "IF data accuracy is guaranteed during data conve
 HDF5_WANT_DCONV_EXCEPTION      "exception handling functions is checked during data conversions" ON
 HDF5_ENABLE_THREADSAFE         "Enable Threadsafety"                                          OFF
 HDF5_MSVC_NAMING_CONVENTION    "Use MSVC Naming conventions for Shared Libraries"             OFF
+HDF5_MINGW_STATIC_GCC_LIBS     "Statically link libgcc/libstdc++"                             OFF
 if (APPLE)
     HDF5_BUILD_WITH_INSTALL_NAME "Build with library install_name set to the installation path"  OFF
 if (CMAKE_BUILD_TYPE MATCHES Debug)

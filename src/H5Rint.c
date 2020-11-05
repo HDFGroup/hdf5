@@ -746,8 +746,10 @@ H5R__copy(const H5R_ref_priv_t *src_ref, H5R_ref_priv_t *dst_ref)
         dst_ref->info.obj.filename = NULL;
 
         /* Set location ID and hold reference to it */
-        if (H5R__set_loc_id(dst_ref, src_ref->loc_id, TRUE, TRUE) < 0)
-            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "cannot set reference location ID")
+        dst_ref->loc_id = src_ref->loc_id;
+        if (H5I_inc_ref(dst_ref->loc_id, TRUE) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINC, FAIL, "incrementing location ID failed")
+        dst_ref->app_ref = TRUE;
     }
 
 done:
