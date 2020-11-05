@@ -86,7 +86,14 @@ New Features
 
     Java Library:
     ----------------
-    - 
+    - Added new H5S functions.
+
+      H5Sselect_copy, H5Sselect_shape_same, H5Sselect_adjust,
+      H5Sselect_intersect_block, H5Sselect_project_intersection,
+      H5Scombine_hyperslab, H5Smodify_select, H5Scombine_select
+      wrapper functions added.
+
+      (ADB - 2020/10/27, HDFFV-10868)
 
     Tools:
     ------

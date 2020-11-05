@@ -15,7 +15,10 @@ package hdf.hdf5lib.structs;
 
 import java.io.Serializable;
 
-//Information struct for link (for H5Lget_info/H5Lget_info_by_idx)
+/**
+ * Information struct for link (for H5Lget_info/H5Lget_info_by_idx)
+ *
+ */
 public class H5L_info_t implements Serializable{
     private static final long serialVersionUID = -4754320605310155033L;
     public int     type;
