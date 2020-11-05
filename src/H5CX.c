@@ -932,9 +932,11 @@ H5CX_retrieve_state(H5CX_state_t **api_state)
 
     /* Keep a reference to the current VOL wrapping context */
     (*api_state)->vol_wrap_ctx = (*head)->ctx.vol_wrap_ctx;
-    if (NULL != (*api_state)->vol_wrap_ctx)
+    if (NULL != (*api_state)->vol_wrap_ctx) {
+        HDassert((*head)->ctx.vol_wrap_ctx_valid);
         if (H5VL_inc_vol_wrapper((*api_state)->vol_wrap_ctx) < 0)
             HGOTO_ERROR(H5E_CONTEXT, H5E_CANTINC, FAIL, "can't increment refcount on VOL wrapping context")
+    } /* end if */
 
     /* Keep a copy of the VOL connector property, if there is one */
     if ((*head)->ctx.vol_connector_prop_valid && (*head)->ctx.vol_connector_prop.connector_id > 0) {
@@ -1023,7 +1025,8 @@ H5CX_restore_state(const H5CX_state_t *api_state)
 
     /* Restore the VOL wrapper context */
     (*head)->ctx.vol_wrap_ctx       = api_state->vol_wrap_ctx;
-    (*head)->ctx.vol_wrap_ctx_valid = TRUE;
+    if (NULL != (*head)->ctx.vol_wrap_ctx)
+        (*head)->ctx.vol_wrap_ctx_valid = TRUE;
 
     /* Restore the VOL connector info */
     if (api_state->vol_connector_prop.connector_id) {
