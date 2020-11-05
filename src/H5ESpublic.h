@@ -49,16 +49,32 @@ H5ES_err_info_t:
     const char *: Appl. source file name
     const char *: Appl. source function
     const char *: Appl. source file line
-    uint64_t: Timestamp
+    uint64_t: Insert Time Timestamp
     uint64_t: "event count" - n'th event inserted into event set
-    hid_t: Error stack
+    hid_t: Error stack (*)
+    uint64_t: Execution Time timestamp (*)
+
+More Possible Info for H5ES_err_info_t:
+    Parent Operation's request token (*) -> "parent event count"? -- Could be
+        used to "prune" child operations from reported errors, with flag
+        to H5ESget_err_info?
 
 Possible debugging routines:
-    H5ESdebug_trace_func(es_id, hbool_t enable, int (*func)(H5ES_err_info_t *, void *ctx), void *ctx);
-    H5ESdebug_trace_log(es_id, hbool_t enable, const char *filename);
-    H5ESdebug_trace_fh(es_id, hbool_t enable, FILE *fh);
-    H5ESdebug_halt(es_id, signal_t sig, uint64_t <event count>);
-    H5ESdebug_halt_on_err(es_id, signal_t sig);
+    H5ESdebug_signal(hid_t es_id, signal_t sig, uint64_t <event count>);  (Env also)
+    H5ESdebug_err_trace_func(hid_t es_id, int (*func)(H5ES_err_info_t *, void *ctx), void *ctx);
+    H5ESdebug_err_trace_log(hid_t es_id, const char *filename);  (Env also)
+    H5ESdebug_err_trace_fh(hid_t es_id, FILE *fh);               (Env also)
+    H5ESdebug_err_signal(hid_t es_id, signal_t sig);             (Env also)
+[Possibly option to allow operations to be inserted into event set with error?]
+
+    Example usage:
+        es_id = H5EScreate();
+        H5ESdebug...(es_id, ...);
+        ...
+        H5Dwrite_async(..., es_id);
+
+How to Trace Async Operations?
+    <Example of stacking Logging VOL Connector w/Async VOL Connector>
 */
 
 /********************/
@@ -74,6 +90,7 @@ extern "C" {
 #endif
 
 hid_t  H5EScreate(void);
+/* herr_t H5ESinsert(hid_t es_id, <request token?>); (For VOL connector authors only) */
 herr_t H5EStest(hid_t es_id, H5ES_status_t *status);
 herr_t H5ESwait(hid_t es_id, uint64_t timeout, H5ES_status_t *status);
 herr_t H5EScancel(hid_t es_id, H5ES_status_t *status);
