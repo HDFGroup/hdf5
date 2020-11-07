@@ -38,19 +38,38 @@
 /* Package Private Typedefs */
 /****************************/
 
-/* Event nodes */
-typedef struct H5ES_event_t H5ES_event_t;
+/* Typedef for event nodes */
+typedef struct H5ES_event_t {
+    H5VL_object_t *      request;     /* Request token for event */
+    struct H5ES_event_t *prev, *next; /* Previous and next event nodes */
+
+    /* Useful info for debugging and error reporting */
+    const char *api_name; /* Name of API routine for event */
+    const char *api_args; /* Arguments to API routine */
+    const char *app_file; /* Name of source file from application */
+    const char *app_func; /* Name of source function from application */
+    unsigned    app_line; /* Line # of source file from application */
+    uint64_t    ev_count; /* This event is the n'th operation in the event set */
+    uint64_t    ev_time;  /* Timestamp for this event (in ms from UNIX epoch) */
+} H5ES_event_t;
+
+
+/* Typedef for lists of event set operations */
+typedef struct H5ES_event_list_t {
+    size_t count;               /* # of events in list */
+    H5ES_event_t *head, *tail;  /* Head & tail of events in list */
+} H5ES_event_list_t;
 
 /* Typedef for event set objects */
 struct H5ES_t {
-    uint64_t tot_count; /* Total # of operations inserted into this set */
+    uint64_t op_counter;        /* Count of operations inserted into this set */
 
-    size_t        act_count;   /* # of active events in set */
-    H5ES_event_t *head, *tail; /* Head & tail of active events */
+    /* Active events */
+    H5ES_event_list_t active;   /* List of active events in set */
 
-    hbool_t       err_occurred;        /* Flag for error from an operation */
-    size_t        err_count;           /* # of failed events in set */
-    H5ES_event_t *err_head, *err_tail; /* Head & tail of failed events */
+    /* Failed events */
+    hbool_t err_occurred;       /* Flag for error from an operation */
+    H5ES_event_list_t failed;   /* List of failed events in set */
 };
 
 /*****************************/
@@ -63,6 +82,17 @@ struct H5ES_t {
 H5_DLL H5ES_t *H5ES__create(void);
 H5_DLL herr_t  H5ES__test(H5ES_t *es, H5ES_status_t *status);
 H5_DLL herr_t  H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status, hbool_t allow_early_exit);
+H5_DLL herr_t H5ES__get_err_info(H5ES_t *es, size_t num_err_info, H5ES_err_info_t err_info[],
+    size_t *num_cleared);
 H5_DLL herr_t  H5ES__close(H5ES_t *es);
+
+/* Event list operations */
+H5_DLL void H5ES__list_append(H5ES_event_list_t *el, H5ES_event_t *ev);
+H5_DLL size_t H5ES__list_count(const H5ES_event_list_t *el);
+H5_DLL void H5ES__list_remove(H5ES_event_list_t *el, const H5ES_event_t *ev);
+
+/* Event operations */
+H5_DLL H5ES_event_t *H5ES__event_new(H5VL_t *connector, void *token);
+H5_DLL herr_t H5ES__event_free(H5ES_event_t *ev);
 
 #endif /* _H5ESpkg_H */

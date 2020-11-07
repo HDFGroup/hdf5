@@ -650,7 +650,9 @@
 ./src/H5EAstat.c
 ./src/H5EAtest.c
 ./src/H5ES.c
+./src/H5ESevent.c
 ./src/H5ESint.c
+./src/H5ESlist.c
 ./src/H5ESmodule.h
 ./src/H5ESpkg.h
 ./src/H5ESprivate.h

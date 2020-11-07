@@ -175,7 +175,9 @@ IDE_GENERATED_PROPERTIES ("H5EA" "${H5EA_HDRS}" "${H5EA_SOURCES}" )
 
 set (H5ES_SOURCES
     ${HDF5_SRC_DIR}/H5ES.c
+    ${HDF5_SRC_DIR}/H5ESevent.c
     ${HDF5_SRC_DIR}/H5ESint.c
+    ${HDF5_SRC_DIR}/H5ESlist.c
 )
 set (H5ES_HDRS
     ${HDF5_SRC_DIR}/H5ESpublic.h

@@ -54,26 +54,10 @@
 /* Package Typedefs */
 /********************/
 
-/* Typedef for event nodes */
-struct H5ES_event_t {
-    H5VL_object_t *      request;     /* Request token for event */
-    struct H5ES_event_t *prev, *next; /* Previous and next event nodes */
-
-    /* Useful info for debugging and error reporting */
-    const char *api_name; /* Name of API routine for event */
-    const char *api_args; /* Arguments to API routine */
-    const char *app_file; /* Name of source file from application */
-    const char *app_func; /* Name of source function from application */
-    unsigned    app_line; /* Line # of source file from application */
-    uint64_t    ev_count; /* This event is the n'th operation in the event set */
-    uint64_t    ev_time;  /* Timestamp for this event (in ms from UNIX epoch) */
-};
-
 /********************/
 /* Local Prototypes */
 /********************/
 static herr_t H5ES__close_cb(void *es, void **request_token);
-static herr_t H5ES__remove(H5ES_t *es, const H5ES_event_t *ev);
 static herr_t H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev);
 
 /*********************/
@@ -101,9 +85,6 @@ static const H5I_class_t H5I_EVENTSET_CLS[1] = {{
 
 /* Declare a static free list to manage H5ES_t structs */
 H5FL_DEFINE_STATIC(H5ES_t);
-
-/* Declare a static free list to manage H5ES_event_t structs */
-H5FL_DEFINE_STATIC(H5ES_event_t);
 
 /*-------------------------------------------------------------------------
  * Function:    H5ES__init_package
@@ -248,7 +229,6 @@ herr_t
 H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller, const char *caller_args, ...)
 {
     H5ES_t *       es      = NULL;        /* Event set for the operation */
-    H5VL_object_t *request = NULL;        /* Async request token VOL object */
     H5ES_event_t * ev      = NULL;        /* Event for request */
     H5RS_str_t *   rs      = NULL;        /* Ref-counted string to compose formatted argument string in */
     const char *   app_file;              /* Application source file name */
@@ -274,19 +254,9 @@ H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller, con
     if (es->err_occurred)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTINSERT, FAIL, "event set has failed operations")
 
-    /* Create vol object for token */
-    if (NULL == (request = H5VL_create_object(token, connector))) {
-        if (H5VL_request_free(token) < 0)
-            HDONE_ERROR(H5E_EVENTSET, H5E_CANTFREE, FAIL, "can't free request")
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTINIT, FAIL, "can't create vol object for request token")
-    } /* end if */
-
-    /* Allocate space for new event */
-    if (NULL == (ev = H5FL_CALLOC(H5ES_event_t)))
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't allocate event object")
-
-    /* Set request for event */
-    ev->request = request;
+    /* Create new event */
+    if (NULL == (ev = H5ES__event_new(connector, token)))
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTCREATE, FAIL, "can't create event object")
 
     /* Start working on the API routines arguments */
     HDva_start(ap, caller_args);
@@ -305,7 +275,7 @@ H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller, con
     ev->app_line = HDva_arg(ap, unsigned);
 
     /* Set the event's operation counter */
-    ev->ev_count = es->tot_count++;
+    ev->ev_count = es->op_counter++;
 
     /* Set the event's timestamp */
     ev->ev_time = H5_now_usec();
@@ -326,19 +296,10 @@ H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller, con
     if (NULL == (s = H5RS_get_str(rs)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL, "can't get pointer to formatted API arguments")
     if (NULL == (ev->api_args = H5MM_strdup(s)))
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy API routine name")
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy API routine arguments")
 
-    /* Append event onto the event set's list */
-    if (NULL == es->tail)
-        es->head = es->tail = ev;
-    else {
-        ev->prev       = es->tail;
-        es->tail->next = ev;
-        es->tail       = ev;
-    } /* end else */
-
-    /* Increment the # of events in set */
-    es->act_count++;
+    /* Append fully initialized event onto the event set's 'active' list */
+    H5ES__list_append(&es->active, ev);
 
 done:
     /* Clean up */
@@ -348,21 +309,9 @@ done:
         H5RS_decr(rs);
 
     /* Release resources on error */
-    if (ret_value < 0) {
-        if (ev) {
-            if (ev->api_name)
-                H5MM_xfree_const(ev->api_name);
-            if (ev->api_args)
-                H5MM_xfree_const(ev->api_args);
-            if (ev->app_file)
-                H5MM_xfree_const(ev->app_file);
-            if (ev->app_func)
-                H5MM_xfree_const(ev->app_func);
-            H5FL_FREE(H5ES_event_t, ev);
-        } /* end if */
-        if (request && H5VL_free_object(request) < 0)
-            HDONE_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, FAIL, "can't free request token")
-    } /* end if */
+    if (ret_value < 0)
+        if (ev && H5ES__event_free(ev) < 0)
+            HDONE_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, FAIL, "unable to release event")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES_insert() */
@@ -392,7 +341,7 @@ H5ES__test(H5ES_t *es, H5ES_status_t *status)
     HDassert(status);
 
     /* Iterate over the events in the set, testing them for completion */
-    ev = es->head;
+    ev = es->active.head;
     if (ev) {
         /* If there are events in the event set, assume that they are in progress */
         *status = H5ES_STATUS_IN_PROGRESS;
@@ -410,7 +359,8 @@ H5ES__test(H5ES_t *es, H5ES_status_t *status)
                 /* Check for failed operation */
                 if (ev_status == H5ES_STATUS_FAIL)
                     /* Handle failure */
-                    H5ES__handle_fail(es, ev);
+                    if(H5ES__handle_fail(es, ev) < 0)
+                        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTSET, FAIL, "unable to handle failed event")
 
                 /* Set the status to return and break out of loop */
                 *status = ev_status;
@@ -428,44 +378,6 @@ H5ES__test(H5ES_t *es, H5ES_status_t *status)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES__test() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5ES__remove
- *
- * Purpose:     Remove an event from an event set
- *
- * Return:      SUCCEED / FAIL
- *
- * Programmer:	Houjun Tang
- *	        Thursday, July 30, 2020
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5ES__remove(H5ES_t *es, const H5ES_event_t *ev)
-{
-    FUNC_ENTER_STATIC_NOERR
-
-    /* Sanity check */
-    HDassert(es);
-    HDassert(es->head);
-    HDassert(ev);
-
-    /* Stitch event out of list */
-    if (ev == es->head)
-        es->head = ev->next;
-    if (NULL != ev->next)
-        ev->next->prev = ev->next;
-    if (NULL != ev->prev)
-        ev->prev->next = ev->next;
-    if (NULL == es->head)
-        es->tail = NULL;
-
-    /* Decrement the # of events in set */
-    es->act_count--;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5ES__remove() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5ES__handle_fail
@@ -486,26 +398,17 @@ H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev)
 
     /* Sanity check */
     HDassert(es);
-    HDassert(es->head);
+    HDassert(es->active.head);
     HDassert(ev);
 
     /* Set error flag for event set */
     es->err_occurred = TRUE;
 
     /* Remove event from normal list */
-    H5ES__remove(es, ev);
+    H5ES__list_remove(&es->active, ev);
 
     /* Append event onto the event set's error list */
-    if (NULL == es->err_tail)
-        es->err_head = es->err_tail = ev;
-    else {
-        ev->prev           = es->err_tail;
-        es->err_tail->next = ev;
-        es->err_tail       = ev;
-    } /* end else */
-
-    /* Increment the # of failed events in set */
-    es->act_count--;
+    H5ES__list_append(&es->failed, ev);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5ES__handle_fail() */
@@ -542,7 +445,7 @@ H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status, hbool_t allow_ea
         *status = H5ES_STATUS_SUCCEED;
 
     /* Iterate over the events in the set, waiting for them to complete */
-    ev = es->head;
+    ev = es->active.head;
     while (ev) {
         H5ES_event_t *tmp;       /* Temporary event */
         H5ES_status_t ev_status; /* Status from event's operation */
@@ -559,7 +462,8 @@ H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status, hbool_t allow_ea
             /* Check for failed operation */
             if (ev_status == H5ES_STATUS_FAIL)
                 /* Handle failure */
-                H5ES__handle_fail(es, ev);
+                if(H5ES__handle_fail(es, ev) < 0)
+                    HGOTO_ERROR(H5E_EVENTSET, H5E_CANTSET, FAIL, "unable to handle failed event")
 
             /* Record the status, if possible */
             if (status)
@@ -569,29 +473,18 @@ H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status, hbool_t allow_ea
             if (allow_early_exit)
                 break;
         } /* end if */
+        else {
+HDfprintf(stderr, "%s: releasing event for '%s' (count: %llu, timestamp: %llu), with args '%s', in app source file '%s', function '%s', and line %u\n",
+          FUNC, ev->api_name, (unsigned long long)ev->ev_count, (unsigned long long)ev->ev_time,
+          ev->api_args, ev->app_file, ev->app_func, ev->app_line);
 
-        /* Free the request */
-        if (H5VL_request_free(ev->request) < 0)
-            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTFREE, FAIL, "unable to free request")
+            /* Remove the event node from the event set's active list */
+            H5ES__list_remove(&es->active, ev);
 
-        /* Free request VOL object */
-        if (H5VL_free_object(ev->request) < 0)
-            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTFREE, FAIL, "unable to free VOL object")
-
-        /* Remove the event node from the event set */
-        H5ES__remove(es, ev);
-
-        /* Free the event node */
-        HDfprintf(stderr,
-                  "%s: releasing event for '%s' (count: %llu, timestamp: %llu), with args '%s', in app "
-                  "source file '%s', function '%s', and line %u\n",
-                  FUNC, ev->api_name, (unsigned long long)ev->ev_count, (unsigned long long)ev->ev_time,
-                  ev->api_args, ev->app_file, ev->app_func, ev->app_line);
-        H5MM_xfree_const(ev->api_name);
-        H5MM_xfree_const(ev->api_args);
-        H5MM_xfree_const(ev->app_file);
-        H5MM_xfree_const(ev->app_func);
-        H5FL_FREE(H5ES_event_t, ev);
+            /* Free the event node */
+            if (H5ES__event_free(ev) < 0)
+                HGOTO_ERROR(H5E_EVENTSET, H5E_CANTFREE, FAIL, "unable to event")
+        } /* end else */
 
         /* Advance to next node */
         ev = tmp;
@@ -600,6 +493,75 @@ H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status, hbool_t allow_ea
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES__wait() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5ES__get_err_info
+ *
+ * Purpose:     Retrieve information about failed operations
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *	        Friday, November 6, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5ES__get_err_info(H5ES_t *es, size_t num_err_info, H5ES_err_info_t err_info[],
+    size_t *num_cleared)
+{
+    H5ES_event_t *ev;           /* Event to check */
+    size_t curr_err;            /* Index of current error in array */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(es);
+    HDassert(num_err_info);
+    HDassert(err_info);
+    HDassert(num_cleared);
+
+    /* Iterate over the failed events in the set, copying their error info */
+    ev = es->failed.head;
+    curr_err = 0;
+    while (ev && curr_err < num_err_info) {
+        H5ES_err_info_t *curr_err_info;     /* Pointer to current error info */
+        H5ES_event_t *curr_ev;           /* Event to free */
+
+        /* Copy info for failed operation */
+        curr_ev = ev;
+        curr_err_info = &err_info[curr_err];
+        if(NULL == (curr_err_info->api_name = H5MM_strdup(curr_ev->api_name)))
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy HDF5 API name")
+        if(NULL == (curr_err_info->api_args = H5MM_strdup(curr_ev->api_args)))
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy HDF5 API routine arguments")
+        if(NULL == (curr_err_info->app_file_name = H5MM_strdup(curr_ev->app_file)))
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy app source file name")
+        if(NULL == (curr_err_info->app_func_name = H5MM_strdup(curr_ev->app_func)))
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy app function name")
+        curr_err_info->app_line_num = curr_ev->app_line;
+        curr_err_info->op_ins_count = curr_ev->ev_count;
+        curr_err_info->op_ins_ts = curr_ev->ev_time;
+
+        /* Advance to next node & error info array element */
+        ev = ev->next;
+        curr_err++;
+
+        /* Remove current event from event set's failed list */
+        H5ES__list_remove(&es->failed, curr_ev);
+
+        /* Free current event node */
+        if (H5ES__event_free(curr_ev) < 0)
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, FAIL, "unable to release failed event")
+    } /* end while */
+
+    /* Set # of failed events cleared from event set's failed list */
+    *num_cleared = curr_err;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5ES__get_err_info() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5ES__close
@@ -624,9 +586,31 @@ H5ES__close(H5ES_t *es)
     HDassert(es);
 
     /* Fail if active operations still present */
-    if (es->act_count > 0)
+    if (H5ES__list_count(&es->active) > 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTCLOSEOBJ, FAIL,
-                    "can't close event set while unfinished operations are present")
+                    "can't close event set while unfinished operations are present (i.e. wait on event set first)")
+
+    /* Release any failed events */
+    if (H5ES__list_count(&es->failed) > 0) {
+        H5ES_event_t *ev;           /* Event to check */
+
+        /* Iterate over the failed events in the set, freeing them */
+        ev = es->failed.head;
+        while (ev) {
+            H5ES_event_t *curr_ev;           /* Event to free */
+
+            /* Advance to next event */
+            curr_ev = ev;
+            ev = ev->next;
+
+            /* Remove current event from event set's failed list */
+            H5ES__list_remove(&es->failed, curr_ev);
+
+            /* Free current event node */
+            if (H5ES__event_free(curr_ev) < 0)
+                HGOTO_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, FAIL, "unable to release failed event")
+        } /* end while */
+    } /* end if */
 
     /* Release the event set */
     es = H5FL_FREE(H5ES_t, es);
