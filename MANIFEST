@@ -193,6 +193,30 @@
 
 ./doc/code-conventions.md
 
+./doxygen/aliases
+./doxygen/Doxyfile.in
+./doxygen/dox/H5Acreate.dox
+./doxygen/dox/H5Aiterate.dox
+./doxygen/dox/H5Fget_info.dox
+./doxygen/dox/H5Lget_info_by_idx.dox
+./doxygen/dox/H5Lget_info.dox
+./doxygen/dox/H5Literate_by_name.dox
+./doxygen/dox/H5Literate.dox
+./doxygen/dox/H5Lvisit_by_name.dox
+./doxygen/dox/H5Lvisit.dox
+./doxygen/dox/H5Oget_info_by_idx.dox
+./doxygen/dox/H5Oget_info_by_name.dox
+./doxygen/dox/H5Oget_info.dox
+./doxygen/dox/H5Ovisit_by_name.dox
+./doxygen/dox/H5Ovisit.dox
+./doxygen/dox/H5Sencode.dox
+./doxygen/dox/mainpage.dox
+./doxygen/dox/rm-template.dox
+./doxygen/examples/H5Fclose.c
+./doxygen/examples/H5Fcreate.c
+./doxygen/examples/hello_hdf5.c
+./doxygen/img/HDFG-logo.png
+
 ./examples/Attributes.txt
 ./examples/Makefile.am
 ./examples/h5_chunk_read.c

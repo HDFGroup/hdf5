@@ -296,7 +296,7 @@ AC_MSG_CHECKING([for clang sanitizer checks])
 AC_ARG_ENABLE([sanitize-checks],
               [AS_HELP_STRING([--enable-sanitize-checks=address],
                               [(clang/clang++ compilers only) Enable sanitize checks.
-                               Address is useful for detecting issues dealing with 
+                               Address is useful for detecting issues dealing with
                                memory. See AddressSanitizer in config/sanitizer/README.md
                                for more information.
                                [default=none]
@@ -311,7 +311,7 @@ fi
 if test "X$CC_BASENAME" = "Xclang"; then
   AC_SUBST([CLANG_SANITIZE_CHECKS])
 
-  # There are several sanitizer tools.  At present we are testing 
+  # There are several sanitizer tools.  At present we are testing
   # and describing only -fsanitizer=address with autotools.
   case "X-$CLANG_SANITIZE_CHECKS" in
     X-no|X-none)
@@ -328,8 +328,8 @@ if test "X$CC_BASENAME" = "Xclang"; then
   # The clang compiler doesn't support some of them; they should be
   # checked before adding them to the list in the help message.
   # The sanitizers/sanitizers.cmake file lists these options:
-  # address, memory, memoryWithOrigins, undefined, thread, leak, 
-  # 'address;undefined'.  Which and which combinations of these are 
+  # address, memory, memoryWithOrigins, undefined, thread, leak,
+  # 'address;undefined'.  Which and which combinations of these are
   #  supported varies by compiler version, but unsupported options
   # or combinations will result in configure errors reported in config.log.
   # Comma separated lists of sanitize options wil be entered intact in
@@ -1047,6 +1047,64 @@ AC_ARG_ENABLE([tools],
 if test "X$HDF5_TOOLS" = "Xno"; then
   echo "Building HDF5 tools is disabled"
 fi
+
+## ----------------------------------------------------------------------
+## Check if they would like to enable building doxygen files
+##
+
+## This needs to be exposed for the library info file.
+AC_SUBST([HDF5_DOXYGEN])
+
+## Default is to build DOXYGEN
+HDF5_DOXYGEN=yes
+
+AC_MSG_CHECKING([if building doxygen is disabled])
+
+AC_ARG_ENABLE([doxygen],
+              [AS_HELP_STRING([--enable-doxygen],
+                              [Compile the HDF5 doxygen files [default=yes]])],
+              [HDF5_DOXYGEN=$enableval])
+
+if test "X$HDF5_DOXYGEN" = "Xyes"; then
+  DX_DOXYGEN_FEATURE(ON)
+  DX_DOT_FEATURE(OFF)
+  DX_HTML_FEATURE(ON)
+  DX_CHM_FEATURE(OFF)
+  DX_CHI_FEATURE(OFF)
+  DX_MAN_FEATURE(OFF)
+  DX_RTF_FEATURE(OFF)
+  DX_XML_FEATURE(OFF)
+  DX_PDF_FEATURE(ON)
+  DX_PS_FEATURE(OFF)
+
+  AC_SUBST([DOXYGEN_PACKAGE])
+  AC_SUBST([DOXYGEN_VERSION_STRING])
+  AC_SUBST([DOXYGEN_INCLUDE_ALIASES])
+  AC_SUBST([DOXYGEN_PROJECT_LOGO])
+  AC_SUBST([DOXYGEN_PROJECT_BRIEF])
+  AC_SUBST([DOXYGEN_INPUT_DIRECTORY])
+  AC_SUBST([DOXYGEN_OPTIMIZE_OUTPUT_FOR_C])
+  AC_SUBST([DOXYGEN_MACRO_EXPANSION])
+  AC_SUBST([DOXYGEN_OUTPUT_DIR])
+
+  DOXYGEN_PACKAGE=${PACKAGE_NAME}
+  DOXYGEN_VERSION_STRING=${PACKAGE_VERSION}
+  DOXYGEN_INCLUDE_ALIASES='$(SRCDIR)/doxygen/aliases'
+  DOXYGEN_PROJECT_LOGO='$(SRCDIR)/doxygen/img/HDFG-logo.png'
+  DOXYGEN_PROJECT_BRIEF="C-API Reference"
+  DOXYGEN_INPUT_DIRECTORY='$(SRCDIR) $(SRCDIR)/doxygen/dox'
+  DOXYGEN_OPTIMIZE_OUTPUT_FOR_C=YES
+  DOXYGEN_MACRO_EXPANSION=YES
+  DOXYGEN_OUTPUT_DIR=hdf5lib_docs
+
+  DX_INIT_DOXYGEN([HDF5], [doxygen/Doxyfile], [hdf5lib_docs])
+
+  #AC_SUBST([DOXYGEN_OUTPUT_DIR], [hdf5lib_docs])
+
+else
+  echo "Doxygen support is disabled"
+fi
+
 
 ## ----------------------------------------------------------------------
 ## Create libtool.  If shared/static libraries are going to be enabled
@@ -3866,6 +3924,7 @@ AM_CONDITIONAL([HAVE_SHARED_CONDITIONAL], [test "X$enable_shared" = "Xyes"])
 
 AC_CONFIG_FILES([src/libhdf5.settings
                  Makefile
+                 doxygen/Doxyfile
                  src/Makefile
                  test/Makefile
                  test/H5srcdir_str.h

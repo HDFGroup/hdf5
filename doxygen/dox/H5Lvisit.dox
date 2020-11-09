@@ -1,0 +1,22 @@
+/**
+ * \ingroup TRAV
+ * \def H5Lvisit()
+ * H5Lvisit() is a macro that is mapped to either H5Lvisit1() or
+ * H5Lvisit2() Such macros are provided to facilitate application
+ * compatibility. Their use and mappings are fully described in
+ * Compatibility Macros in HDF5. If the library and/or application is
+ * compiled for Release 1.12 emulation, H5Lvisit() will be mapped to
+ * H5Lvisit2() and H5Lvisit1() is deprecated. With earlier versions,
+ * H5Lvisit() is mapped to H5Lvisit1(). Specific compile-time compatibility
+ * flags and the resulting mappings are as follows:
+ * \li No compatibility flag: H5Lvisit2() (using 1.12 source) H5Lvisit1()
+ *     (using 1.10 or 1.8 source)
+ * \li Emulate Release 1.12: H5Lvisit2()
+ * \li Emulate Release 1.8 or 1.10 interface: H5Lvisit1()
+ *
+ *  \todo Fix the reference.
+ *
+ * \version 1.12.0 The function H5Lvisit() was renamed to H5Lvisit1() and
+ *          deprecated in this release. The macro H5Lvisit() and the
+ *          function H5Lvisit2() were introduced in this release.
+ */
