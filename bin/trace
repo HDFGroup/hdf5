@@ -196,6 +196,7 @@ $Source = "";
                "H5L_class_t"                => "#",
                "H5VL_class_t"               => "#",
                "H5VL_loc_params_t"          => "#",
+               "H5VL_request_status_t"      => "#",
               );
 
 

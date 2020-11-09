@@ -6026,7 +6026,7 @@ H5VLrequest_wait(void *req, hid_t connector_id, uint64_t timeout, H5VL_request_s
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE4("e", "*xiUL*Es", req, connector_id, timeout, status);
+    H5TRACE4("e", "*xiUL*#", req, connector_id, timeout, status);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
@@ -6233,7 +6233,7 @@ H5VLrequest_cancel(void *req, hid_t connector_id, H5VL_request_status_t *status)
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE2("e", "*xi", req, connector_id);
+    H5TRACE3("e", "*xi*#", req, connector_id, status);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
