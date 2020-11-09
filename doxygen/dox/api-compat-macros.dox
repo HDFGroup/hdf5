@@ -1,0 +1,195 @@
+/** \page api-compat-macros API Compatibility Macros
+  \tableofcontents
+
+  \section audience Audience
+  The target audience for this document has existing applications that use the
+  HDF5 library, and is considering moving to the latest HDF5 release to take
+  advantage of the latest library features and enhancements.
+
+  \section compat-issues Compatibility Issues
+  With each major release of HDF5, such as 1.12 or 1.10, certain compatibility
+  issues must be considered when migrating applications from an earlier major
+  release.
+
+  This document describes the approach taken by The HDF Group to help existing
+  users of HDF5 address compatibility issues in the HDF5 API.
+
+  \section summary Summary and Motivation
+  In response to new and evolving requirements for the library and data format,
+  several basic functions have changed since HDF5 was first released. To allow
+  existing applications to continue to compile and run properly, all versions
+  of these functions have been retained in the later releases of the HDF5 library.
+
+  Given the scope of changes available with each major release of HDF5, and
+  recognizing the potentially time-consuming task of editing all the affected
+  calls in user applications, The HDF Group has created a set of macros that
+  can be used to flexibly and easily map existing API calls to previous release
+  functions. We refer to these as the \Emph{API compatibility macros}.
+
+  The HDF Group generally encourages users to update applications to work with
+  the latest HDF5 library release so that all new features and enhancements are
+  available to them. At the same time, The HDF Group understands that, under
+  some circumstances, updating applications may not be feasible or necessary.
+  The API compatibility macros, described in this document, provide a bridge
+  from old APIs to new and can be particularly helpful in situations such as these:
+  <ul>
+  <li>Source code is not available - only binaries are available; updating the
+      application is not feasible.</li>
+  <li>Source code is available, but there are no resources to update it.</li>
+  <li>Source code is available, as are resources to update it, but the old
+      version works quite well so updates are not a priority. At the same time,
+      it is desirable to take advantage of certain efficiencies in the newer HDF5
+      release that do not require code changes.</li>
+  <li>Source code is available, as are resources to update it, but the applications
+      are large or complex, and must continue to run while the code updates are
+      carried out.</li>
+  </ul>
+
+  \section using Understanding and Using the Macros
+  As part of latest HDF5 release, several functions that existed in previous
+  versions of the library were updated with new calling parameters and given
+  new names. The updated versions of the functions have a number (for, e.g., '2')
+  at the end of the original function name. The original versions of these
+  functions were retained and renamed to have an earlier number (for, e.g., '1')
+  at the end of the original function name.
+
+  For example, consider the function \Code{H5Lvisit} in HDF5 release 1.10
+  as compared with 1.12:
+
+  <table>
+  <tr>
+  <th>Original function name and signature in 1.10.0</th>
+  <td colspan="1">
+  \Code{herr_t H5Lvisit(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order, H5L_iterate_t op, void *op_data)}
+  </td>
+  </tr>
+  <tr>
+  <th>Updated function and signature, introduced in release 1.12.0</th>
+  <td colspan="1">
+  \Code{herr_t H5Lvisit2(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, H5L_iterate2_t op, void *op_data)}
+  </td>
+  </tr>
+  <tr><th>Original function and signature, renamed in release 1.12.0</th>
+  <td colspan="1">
+  \Code{herr_t H5Lvisit1(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, H5L_iterate1_t op, void *op_data)}
+  </td>
+  </tr>
+  <tr><th>API compatibility macro, introduced in release 1.12.0</th>
+  <td colspan="1">
+  \Code{H5Lvisit}
+  <p>The macro, \Code{H5Lvisit}, will be mapped to either \Code{H5Lvisit1} or
+     \Code{H5Lvisit2}. The mapping is determined by a combination of the
+     configuration options use to build the HDF5 library and compile-time
+     options used to build the application. The calling parameters used with the
+     \Code{H5Lvisit} compatibility macro should match the number and type of the
+     function the macros will be mapped to (\Code{H5Lvisit1} or \Code{H5Lvisit2}).
+  </p>
+  <p>The function names ending in '1' or '2' are referred to as \Emph{versioned names},
+     and the corresponding functions are referred to as \Emph{versioned functions}.
+     For new code development, The HDF Group recommends use of the compatibility macro
+     mapped to the latest version of the function. The original version of the function
+     should be considered deprecated and, in general, should not be used when developing
+     new code.
+  </p>
+  </td>
+  </tr>
+  </table>
+
+  \section options Compatibility Macro Mapping Options
+  To determine the mapping for a given API compatibility macro in a given application,
+  a combination of user-controlled selections, collectively referred to as the
+  \Emph{compatibility macro mapping options}, is considered in the following sequence:
+
+  <table border="0" style="width: 100.0%;">
+  <tr>
+  <td valign="top" width="50%">
+  <ol>
+  <li>What compatibility macro configuration option was used to build the HDF5 library?
+      We refer to this selection as the \Emph{library mapping}.</li>
+  <li>Was a compatibility macro global compile-time option specified when the application
+      was built? We refer to this (optional) selection as the \Emph{application mapping}.
+      If an application mapping exists, it overrides the library mapping.
+      \Emph{(See adjacent notes.)}</li>
+  <li>Were any compatibility macro function-level compile-time options specified when the
+      application was built? We refer to these (optional) selections as \Emph{function mappings}.
+      If function mappings exist, they override library and application mappings for the
+      relevant API compatibility macros. \Emph{(See adjacent notes.)}</li>
+  </ol>
+  </td>
+  <td valign="top" width="50%">
+  <table border="1" cellpadding="10" style="width: 100.0%;">
+  <tr><td>
+  \Bold{Notes:} An application mapping can map APIs to the same version or to a version
+  older than the configured library mapping. When the application attempts to map APIs
+  to a newer version of the API than the library was configured with, it will fail to
+  "upgrade" the mapping (and may fail silently).
+
+  When it is necessary to "upgrade" the macro mappings from those set in the library mapping,
+  it must be done at the per-function level, using the function-level mappings. As long as
+  one does not try to map a function to a version that was compiled out in the library mapping,
+  individual functions can be upgraded or downgraded freely.
+  </td>
+  </tr>
+  </table>
+  </td>
+  </tr>
+  </table>
+
+  \subsection lib-options Library Mapping Options
+  When the HDF5 library is built, \Code{configure} flags can be used to control the API
+  compatibility macro mapping behavior exhibited by the library. This behavior can be
+  overridden by application and function mappings. One configure flag excludes deprecated
+  functions from the HDF5 library, making them unavailable to applications linked with the
+  library.
+
+  <div align="center">Table 1:  Library Mapping Options
+  <table border="1" cellpadding="3">
+  <tr>
+  <th>\Code{configure} flag</th>
+  <th>Macros map to release<br/>(versioned function; \Code{H5Lvisit} shown)</th>
+  <th>Deprecated functions available? <br/>(\Code{H5Lvisit1})</th>
+  </tr>
+  <tr align="center">
+  <td>\Code{--with-default-api-version=v112} <br/> (the default in 1.12)</td>
+  <td>1.12.x (\Code{H5Lvisit2})</td>
+  <td>yes</td>
+  </tr>
+  <tr align="center">
+  <td align="left">\Code{--with-default-api-version=v110}</td>
+  <td>1.10.x (\Code{H5Lvisit1})</td>
+  <td>yes</td>
+  </tr>
+  <tr align="center">
+  <td align="left">\Code{--with-default-api-version=v18}</td>
+  <td>1.8.x (\Code{H5Lvisit1})</td>
+  <td>yes</td>
+  </tr>
+  <tr align="center">
+  <td align="left">\Code{--with-default-api-version=v16}</td>
+  <td>1.6.x (\Code{H5Lvisit1})</td>
+  <td>yes</td>
+  </tr>
+  <tr align="center">
+  <td align="left">\Code{--disable-deprecated-symbols}</td>
+  <td>1.12.x (\Code{H5Lvisit2})</td>
+  <td>no</td>
+  </tr>
+  </table>
+  </div>
+  Refer to the file \Code{libhdf5.settings} in the directory where the HDF5 library is
+  installed to determine the \Code{configure} flags used to build the library. In particular,
+  look for the two lines shown here under \Emph{Features}:
+
+  \Code{Default API mapping: v112}
+
+  \Code{With deprecated public symbols: yes}
+
+  \subsection app-options Application Mapping Options
+  \subsection fun-options Function Mapping Options
+  \subsubsection fun-options-112 Function Mapping Options in Releases 1.12.x
+  \subsubsection fun-options-110 Function Mapping Options in Releases 1.10.x
+  \subsubsection fun-options-18 Function Mapping Options in Releases 1.8.x
+  \subsubsection further Further Information
+  \section macros Compatibility Macros in HDF5 1.6.8 and Later
+  \section use-case Common Use Case
+*/
