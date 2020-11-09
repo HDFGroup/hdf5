@@ -57,6 +57,14 @@ typedef struct H5ES_wait_ctx_t {
     H5ES_status_t *status;      /* Pointer to status to return */
 } H5ES_wait_ctx_t;
 
+/* Callback context for get error info (gei) operations */
+typedef struct H5ES_gei_ctx_t {
+    H5ES_t *es;                 /* Event set being operated on */
+    size_t num_err_info;        /* # of elements in err_info[] array */
+    size_t curr_err;            /* Index of current error in array */
+    H5ES_err_info_t *curr_err_info; /* Pointer to current element in err_info[] array */
+} H5ES_gei_ctx_t;
+
 /********************/
 /* Package Typedefs */
 /********************/
@@ -66,6 +74,9 @@ typedef struct H5ES_wait_ctx_t {
 /********************/
 static herr_t H5ES__close_cb(void *es, void **request_token);
 static herr_t H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev);
+static int H5ES__wait_cb(H5ES_event_t *ev, void *_ctx);
+static int H5ES__get_err_info_cb(H5ES_event_t *ev, void *_ctx);
+static int H5ES__close_failed_cb(H5ES_event_t *ev, void *_ctx);
 
 /*********************/
 /* Package Variables */
@@ -358,7 +369,7 @@ H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev)
 } /* end H5ES__handle_fail() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5ES__testwait_cb
+ * Function:    H5ES__wait_cb
  *
  * Purpose:     Common routine for testing / waiting on an operation
  *
@@ -370,7 +381,7 @@ H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev)
  *-------------------------------------------------------------------------
  */
 static int
-H5ES__testwait_cb(H5ES_event_t *ev, void *_ctx)
+H5ES__wait_cb(H5ES_event_t *ev, void *_ctx)
 {
     H5ES_wait_ctx_t *ctx = (H5ES_wait_ctx_t *)_ctx;     /* Callback context */
     H5VL_request_status_t ev_status = H5VL_REQUEST_STATUS_SUCCEED;      /* Status from event's operation */
@@ -415,7 +426,7 @@ H5ES__testwait_cb(H5ES_event_t *ev, void *_ctx)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5ES__testwait_cb() */
+} /* end H5ES__wait_cb() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5ES__wait
@@ -454,12 +465,68 @@ H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status)
     ctx.status = status;
 
     /* Iterate over the events in the set, waiting for them to complete */
-    if (H5ES__list_iterate(&es->active, H5ES__testwait_cb, &ctx) < 0)
+    if (H5ES__list_iterate(&es->active, H5ES__wait_cb, &ctx) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_BADITER, FAIL, "iteration failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES__wait() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5ES__get_err_info_cb
+ *
+ * Purpose:     Retrieve information about a failed operation
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *	        Monday, November 11, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5ES__get_err_info_cb(H5ES_event_t *ev, void *_ctx)
+{
+    H5ES_gei_ctx_t *ctx = (H5ES_gei_ctx_t *)_ctx;     /* Callback context */
+    int ret_value = H5_ITER_CONT;       /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(ev);
+    HDassert(ctx);
+
+    /* Copy operation info for event */
+    if(NULL == (ctx->curr_err_info->api_name = H5MM_strdup(ev->api_name)))
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, H5_ITER_ERROR, "can't copy HDF5 API name")
+    if(NULL == (ctx->curr_err_info->api_args = H5MM_strdup(ev->api_args)))
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, H5_ITER_ERROR, "can't copy HDF5 API routine arguments")
+    if(NULL == (ctx->curr_err_info->app_file_name = H5MM_strdup(ev->app_file)))
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, H5_ITER_ERROR, "can't copy app source file name")
+    if(NULL == (ctx->curr_err_info->app_func_name = H5MM_strdup(ev->app_func)))
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, H5_ITER_ERROR, "can't copy app function name")
+    ctx->curr_err_info->app_line_num = ev->app_line;
+    ctx->curr_err_info->op_ins_count = ev->ev_count;
+    ctx->curr_err_info->op_ins_ts = ev->ev_time;
+
+    /* Remove event from event set's failed list */
+    H5ES__list_remove(&ctx->es->failed, ev);
+
+    /* Free event node */
+    if (H5ES__event_free(ev) < 0)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, H5_ITER_ERROR, "unable to release failed event")
+
+    /* Advance to next element of err_info[] array */
+    ctx->curr_err++;
+    ctx->curr_err_info++;
+
+    /* Stop iteration if err_info[] array is full */
+    if(ctx->curr_err == ctx->num_err_info)
+        ret_value = H5_ITER_STOP;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5ES__get_err_info_cb() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5ES__get_err_info
@@ -477,8 +544,7 @@ herr_t
 H5ES__get_err_info(H5ES_t *es, size_t num_err_info, H5ES_err_info_t err_info[],
     size_t *num_cleared)
 {
-    H5ES_event_t *ev;           /* Event to check */
-    size_t curr_err;            /* Index of current error in array */
+    H5ES_gei_ctx_t ctx;         /* Iterator callback context info */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -489,46 +555,57 @@ H5ES__get_err_info(H5ES_t *es, size_t num_err_info, H5ES_err_info_t err_info[],
     HDassert(err_info);
     HDassert(num_cleared);
 
+    /* Set up context for iterator callbacks */
+    ctx.es = es;
+    ctx.num_err_info = num_err_info;
+    ctx.curr_err = 0;
+    ctx.curr_err_info = &err_info[0];
+
     /* Iterate over the failed events in the set, copying their error info */
-    ev = es->failed.head;
-    curr_err = 0;
-    while (ev && curr_err < num_err_info) {
-        H5ES_err_info_t *curr_err_info;     /* Pointer to current error info */
-        H5ES_event_t *curr_ev;           /* Event to free */
-
-        /* Copy info for failed operation */
-        curr_ev = ev;
-        curr_err_info = &err_info[curr_err];
-        if(NULL == (curr_err_info->api_name = H5MM_strdup(curr_ev->api_name)))
-            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy HDF5 API name")
-        if(NULL == (curr_err_info->api_args = H5MM_strdup(curr_ev->api_args)))
-            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy HDF5 API routine arguments")
-        if(NULL == (curr_err_info->app_file_name = H5MM_strdup(curr_ev->app_file)))
-            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy app source file name")
-        if(NULL == (curr_err_info->app_func_name = H5MM_strdup(curr_ev->app_func)))
-            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy app function name")
-        curr_err_info->app_line_num = curr_ev->app_line;
-        curr_err_info->op_ins_count = curr_ev->ev_count;
-        curr_err_info->op_ins_ts = curr_ev->ev_time;
-
-        /* Advance to next node & error info array element */
-        ev = ev->next;
-        curr_err++;
-
-        /* Remove current event from event set's failed list */
-        H5ES__list_remove(&es->failed, curr_ev);
-
-        /* Free current event node */
-        if (H5ES__event_free(curr_ev) < 0)
-            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, FAIL, "unable to release failed event")
-    } /* end while */
+    if (H5ES__list_iterate(&es->failed, H5ES__get_err_info_cb, &ctx) < 0)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_BADITER, FAIL, "iteration failed")
 
     /* Set # of failed events cleared from event set's failed list */
-    *num_cleared = curr_err;
+    *num_cleared = ctx.curr_err;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES__get_err_info() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5ES__close_failed_cb
+ *
+ * Purpose:     Release a failed event
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *	        Monday, November 11, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5ES__close_failed_cb(H5ES_event_t *ev, void *_ctx)
+{
+    H5ES_t *es = (H5ES_t *)_ctx;        /* Callback context */
+    int ret_value = H5_ITER_CONT;       /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(ev);
+    HDassert(es);
+
+    /* Remove event from event set's failed list */
+    H5ES__list_remove(&es->failed, ev);
+
+    /* Free event node */
+    if (H5ES__event_free(ev) < 0)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, H5_ITER_ERROR, "unable to release failed event")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5ES__close_failed_cb() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5ES__close
@@ -557,27 +634,9 @@ H5ES__close(H5ES_t *es)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTCLOSEOBJ, FAIL,
                     "can't close event set while unfinished operations are present (i.e. wait on event set first)")
 
-    /* Release any failed events */
-    if (H5ES__list_count(&es->failed) > 0) {
-        H5ES_event_t *ev;           /* Event to check */
-
-        /* Iterate over the failed events in the set, freeing them */
-        ev = es->failed.head;
-        while (ev) {
-            H5ES_event_t *curr_ev;           /* Event to free */
-
-            /* Advance to next event */
-            curr_ev = ev;
-            ev = ev->next;
-
-            /* Remove current event from event set's failed list */
-            H5ES__list_remove(&es->failed, curr_ev);
-
-            /* Free current event node */
-            if (H5ES__event_free(curr_ev) < 0)
-                HGOTO_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, FAIL, "unable to release failed event")
-        } /* end while */
-    } /* end if */
+    /* Iterate over the failed events in the set, releasing them */
+    if (H5ES__list_iterate(&es->failed, H5ES__close_failed_cb, (void *)es) < 0)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_BADITER, FAIL, "iteration failed")
 
     /* Release the event set */
     es = H5FL_FREE(H5ES_t, es);
