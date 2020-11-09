@@ -116,7 +116,7 @@ H5ES__list_append(H5ES_event_list_t *el, H5ES_event_t *ev)
  *
  *-------------------------------------------------------------------------
  */
-size_t
+H5_ATTR_PURE size_t
 H5ES__list_count(const H5ES_event_list_t *el)
 {
     FUNC_ENTER_PACKAGE_NOERR
@@ -126,6 +126,56 @@ H5ES__list_count(const H5ES_event_list_t *el)
 
     FUNC_LEAVE_NOAPI(el->count)
 } /* end H5ES__list_count() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5ES__list_iterate
+ *
+ * Purpose:     Iterate over events in a list, calling callback for
+ *              each event.
+ *
+ * Note:        Iteration is safe for deleting the current event.  Modifying
+ *              the list in other ways is likely unsafe.
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *	        Saturday, November 7, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5ES__list_iterate(H5ES_event_list_t *el, H5ES_list_iter_func_t cb, void *ctx)
+{
+    H5ES_event_t *ev;                   /* Event in list */
+    int ret_value = H5_ITER_ERROR;      /* Return value */
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity check */
+    HDassert(el);
+    HDassert(cb);
+
+    /* Iterate over events in list */
+    ev = el->head;
+    while (ev) {
+        H5ES_event_t *tmp;       /* Temporary event */
+
+        /* Get pointer to next node, so it's safe if this one is removed */
+        tmp = ev->next;
+
+        /* Perform iterator callback */
+        if((ret_value = (*cb)(ev, ctx)) != H5_ITER_CONT) {
+            if(ret_value < 0)
+                HERROR(H5E_EVENTSET, H5E_CANTNEXT, "iteration operator failed");
+            break;
+        } /* end if */
+
+        /* Advance to next node */
+        ev = tmp;
+    } /* end while */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5ES__list_iterate() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5ES__list_remove

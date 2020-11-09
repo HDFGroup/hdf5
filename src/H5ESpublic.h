@@ -38,8 +38,7 @@
 typedef enum H5ES_status_t {
     H5ES_STATUS_IN_PROGRESS, /* Operation(s) have not yet completed                       */
     H5ES_STATUS_SUCCEED,     /* Operation(s) have completed, successfully                 */
-    H5ES_STATUS_FAIL,        /* An operation has completed, but failed                   */
-    H5ES_STATUS_CANCELED     /* An operation has not completed and was canceled          */
+    H5ES_STATUS_FAIL         /* An operation has completed, but failed                   */
 } H5ES_status_t;
 
 /* Information about failed operations in event set */
@@ -54,7 +53,7 @@ typedef struct H5ES_err_info_t {
 } H5ES_err_info_t;
 
 /*
-H5ES_err_info_t:
+H5ES_op_info_t:
     const char *: API name (H5Dwrite_async, ...)
     const char *: Arg string
     const char *: Appl. source file name
@@ -62,19 +61,22 @@ H5ES_err_info_t:
     unsigned: Appl. source file line
     uint64_t: Insert Time Timestamp
     uint64_t: "event count" - n'th event inserted into event set
-    hid_t: Error stack (*)
     uint64_t: Execution Time timestamp (*)
 
-More Possible Info for H5ES_err_info_t:
+More Possible Info for H5ES_op_info_t:
     Parent Operation's request token (*) -> "parent event count"? -- Could be
         used to "prune" child operations from reported errors, with flag
         to H5ESget_err_info?
 
-Possible debugging routines:
-    H5ESdebug_signal(hid_t es_id, signal_t sig, uint64_t <event count>);  (Env also)
-    H5ESdebug_err_trace_log(hid_t es_id, const char *filename);  (Env also)
-    H5ESdebug_err_trace_fh(hid_t es_id, FILE *fh);               (Env also)
-    H5ESdebug_err_signal(hid_t es_id, signal_t sig);             (Env also)
+H5ES_err_info_t:
+    H5ES_op_info_t: (above)
+    hid_t: Error stack (*)
+
+Possible debugging routines:  (Should also be configured from Env Var)
+    H5ESdebug_signal(hid_t es_id, signal_t sig, uint64_t <event count>);
+    H5ESdebug_err_trace_log(hid_t es_id, const char *filename);
+    H5ESdebug_err_trace_fh(hid_t es_id, FILE *fh);
+    H5ESdebug_err_signal(hid_t es_id, signal_t sig);
 [Possibly option to allow operations to be inserted into event set with error?]
 
     Example usage:
@@ -86,7 +88,7 @@ Possible debugging routines:
 How to Trace Async Operations?
     <Example of stacking Logging VOL Connector w/Async VOL Connector>
 
-"Library / wrapper developer" version of API routines:
+"Library / wrapper developer" version of API routines: (Auto-generated)
     H5Dwrite_async_wrap(const char *app_file, const char *app_func,
         unsigned app_line_num, dset_id, mem_type_id, mem_space_id, ..., es_id);
 
@@ -111,14 +113,14 @@ hid_t  H5EScreate(void);
 /* herr_t H5ESinsert(hid_t es_id, <request token?>); (For VOL connector authors only) */
 herr_t H5EStest(hid_t es_id, H5ES_status_t *status);
 herr_t H5ESwait(hid_t es_id, uint64_t timeout, H5ES_status_t *status);
-/* herr_t H5EScancel(hid_t es_id, H5ES_status_t *status); */
+/* herr_t H5EScancel(hid_t es_id, size_t *in_progress, hbool_t *err_occurred); */
 herr_t H5ESget_count(hid_t es_id, size_t *count);
 herr_t H5ESget_op_counter(hid_t es_id, uint64_t *counter);
 herr_t H5ESget_err_status(hid_t es_id, hbool_t *err_occurred);
 herr_t H5ESget_err_count(hid_t es_id, size_t *num_errs);
 herr_t H5ESget_err_info(hid_t es_id, size_t num_err_info,
                             H5ES_err_info_t err_info[], size_t *err_cleared);
-/* herr_t H5EScomplete_func(hid_t es_id, int (*func)(uint64_t counter, H5ES_status_t status, H5ES_err_info_t *, void *ctx), void *ctx);
+/* herr_t H5EScomplete_func(hid_t es_id, int (*func)(const H5ES_op_info_t *op_info, H5ES_status_t status, hid_t err_stack, void *ctx), void *ctx);
  */
 herr_t H5ESclose(hid_t es_id);
 

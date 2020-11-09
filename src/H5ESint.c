@@ -50,6 +50,13 @@
 /* Local Typedefs */
 /******************/
 
+/* Callback context for wait operations */
+typedef struct H5ES_wait_ctx_t {
+    H5ES_t *es;                 /* Event set being operated on */
+    uint64_t timeout;           /* Timeout for wait operation */
+    H5ES_status_t *status;      /* Pointer to status to return */
+} H5ES_wait_ctx_t;
+
 /********************/
 /* Package Typedefs */
 /********************/
@@ -317,69 +324,6 @@ done:
 } /* end H5ES_insert() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5ES__test
- *
- * Purpose:     Test if all operations in event set have completed
- *
- * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *	        Monday, July 13, 2020
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5ES__test(H5ES_t *es, H5ES_status_t *status)
-{
-    H5ES_event_t *ev;                  /* Event to check */
-    herr_t        ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /* Sanity check */
-    HDassert(es);
-    HDassert(status);
-
-    /* Iterate over the events in the set, testing them for completion */
-    ev = es->active.head;
-    if (ev) {
-        /* If there are events in the event set, assume that they are in progress */
-        *status = H5ES_STATUS_IN_PROGRESS;
-
-        /* Iterate over events */
-        while (ev) {
-            H5ES_status_t ev_status = H5ES_STATUS_SUCCEED; /* Status from event's operation */
-
-            /* Test the request (i.e. wait for 0 time) */
-            if (H5VL_request_wait(ev->request, 0, &ev_status) < 0)
-                HGOTO_ERROR(H5E_EVENTSET, H5E_CANTWAIT, FAIL, "unable to test operation")
-
-            /* Check for status values that indicate we should break out of the loop */
-            if (ev_status == H5ES_STATUS_FAIL || ev_status == H5ES_STATUS_CANCELED) {
-                /* Check for failed operation */
-                if (ev_status == H5ES_STATUS_FAIL)
-                    /* Handle failure */
-                    if(H5ES__handle_fail(es, ev) < 0)
-                        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTSET, FAIL, "unable to handle failed event")
-
-                /* Set the status to return and break out of loop */
-                *status = ev_status;
-                break;
-            } /* end if */
-
-            /* Advance to next node */
-            ev = ev->next;
-        } /* end while */
-    }     /* end if */
-    else
-        /* If no operations in event set, assume they have successfully completed */
-        *status = H5ES_STATUS_SUCCEED;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5ES__test() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5ES__handle_fail
  *
  * Purpose:     Handle a failed event
@@ -414,6 +358,66 @@ H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev)
 } /* end H5ES__handle_fail() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5ES__testwait_cb
+ *
+ * Purpose:     Common routine for testing / waiting on an operation
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *	        Sunday, November 7, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5ES__testwait_cb(H5ES_event_t *ev, void *_ctx)
+{
+    H5ES_wait_ctx_t *ctx = (H5ES_wait_ctx_t *)_ctx;     /* Callback context */
+    H5VL_request_status_t ev_status = H5VL_REQUEST_STATUS_SUCCEED;      /* Status from event's operation */
+    int ret_value = H5_ITER_CONT;       /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(ev);
+    HDassert(ctx);
+
+    /* Wait on the request */
+    if (H5VL_request_wait(ev->request, ctx->timeout, &ev_status) < 0)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTWAIT, H5_ITER_ERROR, "unable to test operation")
+
+    /* Check for status values that indicate we should break out of the loop */
+    if (ev_status == H5VL_REQUEST_STATUS_FAIL) {
+        /* Handle failure */
+        if(H5ES__handle_fail(ctx->es, ev) < 0)
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTSET, H5_ITER_ERROR, "unable to handle failed event")
+
+        /* Record the status */
+        *ctx->status = H5ES_STATUS_FAIL;
+
+        /* Exit from the iteration */
+        ret_value = H5_ITER_STOP;
+    } /* end if */
+    else if (ev_status == H5VL_REQUEST_STATUS_SUCCEED) {
+        if (H5ES__event_completed(ev, &ctx->es->active) < 0)
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, H5_ITER_ERROR, "unable to release completed event")
+    } /* end else-if */
+    else if (ev_status == H5VL_REQUEST_STATUS_CANCELED)
+        /* Should never get a status of 'cancel' back from test / wait operation */
+        HGOTO_ERROR(H5E_EVENTSET, H5E_BADVALUE, H5_ITER_ERROR, "received 'cancel' status for operation")
+    else {
+        /* Sanity check */
+        HDassert(ev_status == H5VL_REQUEST_STATUS_IN_PROGRESS);
+
+        /* Record the status */
+        *ctx->status = H5ES_STATUS_IN_PROGRESS;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5ES__testwait_cb() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5ES__wait
  *
  * Purpose:     Wait for operations in event set to complete
@@ -429,66 +433,29 @@ H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status, hbool_t allow_early_exit)
+H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status)
 {
-    H5ES_event_t *ev;                  /* Event to operate on */
+    H5ES_wait_ctx_t ctx;    /* Iterator callback context info */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(es);
+    HDassert(status);
 
     /* Be optimistic about task execution */
-    /* (Will be changed for failed / canceled operations) */
-    if (status)
-        *status = H5ES_STATUS_SUCCEED;
+    /* (Will be changed in iterator callback for failed / in-progress operations) */
+    *status = H5ES_STATUS_SUCCEED;
+
+    /* Set up context for iterator callbacks */
+    ctx.es = es;
+    ctx.timeout = timeout;
+    ctx.status = status;
 
     /* Iterate over the events in the set, waiting for them to complete */
-    ev = es->active.head;
-    while (ev) {
-        H5ES_event_t *tmp;       /* Temporary event */
-        H5ES_status_t ev_status; /* Status from event's operation */
-
-        /* Get pointer to next node, so we can free this one */
-        tmp = ev->next;
-
-        /* Wait on the request */
-        if (H5VL_request_wait(ev->request, timeout, &ev_status) < 0)
-            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTWAIT, FAIL, "unable to wait for operation")
-
-        /* Check for non-success status values that indicate we should break out of the loop */
-        if (ev_status != H5ES_STATUS_SUCCEED) {
-            /* Check for failed operation */
-            if (ev_status == H5ES_STATUS_FAIL)
-                /* Handle failure */
-                if(H5ES__handle_fail(es, ev) < 0)
-                    HGOTO_ERROR(H5E_EVENTSET, H5E_CANTSET, FAIL, "unable to handle failed event")
-
-            /* Record the status, if possible */
-            if (status)
-                *status = ev_status;
-
-            /* Check if we are allowed to exit early from the loop */
-            if (allow_early_exit)
-                break;
-        } /* end if */
-        else {
-HDfprintf(stderr, "%s: releasing event for '%s' (count: %llu, timestamp: %llu), with args '%s', in app source file '%s', function '%s', and line %u\n",
-          FUNC, ev->api_name, (unsigned long long)ev->ev_count, (unsigned long long)ev->ev_time,
-          ev->api_args, ev->app_file, ev->app_func, ev->app_line);
-
-            /* Remove the event node from the event set's active list */
-            H5ES__list_remove(&es->active, ev);
-
-            /* Free the event node */
-            if (H5ES__event_free(ev) < 0)
-                HGOTO_ERROR(H5E_EVENTSET, H5E_CANTFREE, FAIL, "unable to event")
-        } /* end else */
-
-        /* Advance to next node */
-        ev = tmp;
-    } /* end while */
+    if (H5ES__list_iterate(&es->active, H5ES__testwait_cb, &ctx) < 0)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_BADITER, FAIL, "iteration failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -72,6 +72,9 @@ struct H5ES_t {
     H5ES_event_list_t failed;   /* List of failed events in set */
 };
 
+/* Event list iterator callback function */
+typedef int (*H5ES_list_iter_func_t)(H5ES_event_t *ev, void *ctx);
+
 /*****************************/
 /* Package Private Variables */
 /*****************************/
@@ -80,8 +83,7 @@ struct H5ES_t {
 /* Package Private Prototypes */
 /******************************/
 H5_DLL H5ES_t *H5ES__create(void);
-H5_DLL herr_t  H5ES__test(H5ES_t *es, H5ES_status_t *status);
-H5_DLL herr_t  H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status, hbool_t allow_early_exit);
+H5_DLL herr_t  H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status);
 H5_DLL herr_t H5ES__get_err_info(H5ES_t *es, size_t num_err_info, H5ES_err_info_t err_info[],
     size_t *num_cleared);
 H5_DLL herr_t  H5ES__close(H5ES_t *es);
@@ -89,10 +91,12 @@ H5_DLL herr_t  H5ES__close(H5ES_t *es);
 /* Event list operations */
 H5_DLL void H5ES__list_append(H5ES_event_list_t *el, H5ES_event_t *ev);
 H5_DLL size_t H5ES__list_count(const H5ES_event_list_t *el);
+H5_DLL int H5ES__list_iterate(H5ES_event_list_t *el, H5ES_list_iter_func_t cb, void *ctx);
 H5_DLL void H5ES__list_remove(H5ES_event_list_t *el, const H5ES_event_t *ev);
 
 /* Event operations */
 H5_DLL H5ES_event_t *H5ES__event_new(H5VL_t *connector, void *token);
 H5_DLL herr_t H5ES__event_free(H5ES_event_t *ev);
+H5_DLL herr_t H5ES__event_completed(H5ES_event_t *ev, H5ES_event_list_t *el);
 
 #endif /* _H5ESpkg_H */

@@ -1127,10 +1127,6 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5ES_STATUS_FAIL");
                                     break;
 
-                                case H5ES_STATUS_CANCELED:
-                                    H5RS_acat(rs, "H5ES_STATUS_CANCELED");
-                                    break;
-
                                 default:
                                     H5RS_asprintf_cat(rs, "%ld", (long)status);
                                     break;

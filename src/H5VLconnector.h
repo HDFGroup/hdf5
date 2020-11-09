@@ -186,6 +186,14 @@ typedef enum H5VL_object_specific_t {
 /* Typedef for VOL connector object optional VOL operations */
 typedef int H5VL_object_optional_t;
 
+/* Status values for async request operations */
+typedef enum H5VL_request_status_t {
+    H5VL_REQUEST_STATUS_IN_PROGRESS, /* Operation has not yet completed                       */
+    H5VL_REQUEST_STATUS_SUCCEED,     /* Operation has completed, successfully                 */
+    H5VL_REQUEST_STATUS_FAIL,        /* Operation has completed, but failed                   */
+    H5VL_REQUEST_STATUS_CANCELED     /* Operation has not completed and was canceled          */
+} H5VL_request_status_t;
+
 /* types for async request SPECIFIC callback */
 typedef enum H5VL_request_specific_t {
     H5VL_REQUEST_WAITANY,  /* Wait until any request completes */
@@ -396,7 +404,7 @@ typedef struct H5VL_object_class_t {
 } H5VL_object_class_t;
 
 /* Asynchronous request 'notify' callback */
-typedef herr_t (*H5VL_request_notify_t)(void *ctx, H5ES_status_t status);
+typedef herr_t (*H5VL_request_notify_t)(void *ctx, H5VL_request_status_t status);
 
 /* "Levels" for 'get connector class' introspection callback */
 typedef enum H5VL_get_conn_lvl_t {
@@ -417,9 +425,9 @@ typedef struct H5VL_introspect_class_t {
 
 /* Async request operation routines */
 typedef struct H5VL_request_class_t {
-    herr_t (*wait)(void *req, uint64_t timeout, H5ES_status_t *status);
+    herr_t (*wait)(void *req, uint64_t timeout, H5VL_request_status_t *status);
     herr_t (*notify)(void *req, H5VL_request_notify_t cb, void *ctx);
-    herr_t (*cancel)(void *req);
+    herr_t (*cancel)(void *req, H5VL_request_status_t *status);
     herr_t (*specific)(void *req, H5VL_request_specific_t specific_type, va_list arguments);
     herr_t (*optional)(void *req, H5VL_request_optional_t opt_type, va_list arguments);
     herr_t (*free)(void *req);

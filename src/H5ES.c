@@ -200,8 +200,8 @@ H5EStest(hid_t es_id, H5ES_status_t *status)
     if (NULL == status)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL status pointer")
 
-    /* Check status of events in event set */
-    if (H5ES__test(es, status) < 0)
+    /* Check status of events in event set (wait w/0 timeout) */
+    if (H5ES__wait(es, (uint64_t)0, status) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL, "can't check status of operations")
 
 done:
@@ -244,7 +244,7 @@ H5ESwait(hid_t es_id, uint64_t timeout, H5ES_status_t *status)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL status pointer")
 
     /* Wait for operations */
-    if (H5ES__wait(es, timeout, status, TRUE) < 0)
+    if (H5ES__wait(es, timeout, status) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTWAIT, FAIL, "can't wait on operations")
 
 done:
