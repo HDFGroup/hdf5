@@ -11,7 +11,7 @@
  *
  * <ul>
  * <li>\ref PDT "Predefined Datatypes"</li>
- * <li><a href="https://portal.hdfgroup.org/display/HDF5/API+Compatibility+Macros">API Compatibility Macros</a></li>
+ * <li>\ref api-compat-macros "API Compatibility Macros"</li>
  * <li><a href="https://hdf5.wiki/">HDF5 Wiki</a></li>
  * </ul>
  *
