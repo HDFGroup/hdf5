@@ -535,7 +535,7 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option to build documentation
 #-----------------------------------------------------------------------------
-option (HDF5_BUILD_DOC "Build documentation" ON)
+option (HDF5_BUILD_DOC "Build documentation" OFF)
 if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOXYGEN_DIR}")
 # check if Doxygen is installed
   find_package(Doxygen)

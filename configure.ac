@@ -1055,14 +1055,14 @@ fi
 ## This needs to be exposed for the library info file.
 AC_SUBST([HDF5_DOXYGEN])
 
-## Default is to build DOXYGEN
-HDF5_DOXYGEN=yes
+## Default is to not build DOXYGEN
+HDF5_DOXYGEN=no
 
-AC_MSG_CHECKING([if building doxygen is disabled])
+AC_MSG_CHECKING([if building doxygen is enabled])
 
 AC_ARG_ENABLE([doxygen],
               [AS_HELP_STRING([--enable-doxygen],
-                              [Compile the HDF5 doxygen files [default=yes]])],
+                              [Compile the HDF5 doxygen files [default=no]])],
               [HDF5_DOXYGEN=$enableval])
 
 if test "X$HDF5_DOXYGEN" = "Xyes"; then
