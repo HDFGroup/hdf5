@@ -12,9 +12,9 @@
  *          document closely.
  *
  *          In HDF5 versions 1.12 and after, #H5Oget_info_by_name is mapped to
- *          \ref H5Oget_info_by_name3().  In version 1.10 #H5Oget_info_by_name is 
- *          identical to \ref H5Oget_info_by_name1(). 
- * 
+ *          \ref H5Oget_info_by_name3().  In version 1.10 #H5Oget_info_by_name is
+ *          identical to \ref H5Oget_info_by_name1().
+ *
  *          Specific compile-time compatibility flags and the resulting
  *          mappings are as follows:
  *
@@ -66,27 +66,27 @@
  *  </tr>
  *  <tr>
  *      <td></td>
- *      <td>This change was added to restore the broken API compatibility 
+ *      <td>This change was added to restore the broken API compatibility
  *          introduced in HDF5-1.10.3.</td>
  *  </tr>
  *  <tr>
  *      <td>1.10.3</td>
- *      <td>The function \ref H5Oget_info_by_name() was renamed 
+ *      <td>The function \ref H5Oget_info_by_name() was renamed
  *          to \ref H5Oget_info_by_name1.</td>
  *  </tr>
  *  <tr>
  *      <td></td>
- *      <td>The macro #H5Oget_info_by_name was renamed to 
+ *      <td>The macro #H5Oget_info_by_name was renamed to
  *          \ref H5Oget_info_by_name1().</td>
  *  </tr>
  *  <tr>
  *      <td></td>
- *      <td>The macro #H5Oget_info_by_name and the function \ref H5Oget_info_name2() 
+ *      <td>The macro #H5Oget_info_by_name and the function \ref H5Oget_info_by_name2()
  *          were introduced in this release.</td>
  *  </tr>
  *  <tr>
  *      <td>1.8.8</td>
- *      <td>Fortran 2003 subroutine and \ref h5o_info_t derived 
+ *      <td>Fortran 2003 subroutine and \ref H5O_info_t derived
  *          type introduced in this release.</td>
  *  </tr>
  *  <tr>
@@ -95,5 +95,5 @@
  *  </tr>
  * </table>
  *
- * 
+ *
  */
