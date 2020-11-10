@@ -592,6 +592,228 @@
   </table>
 
   \subsubsection fun-options-18 Function Mapping Options in Releases 1.8.x
+  At release 1.8.0, the API compatibility macros, function mapping compile-time
+  version flags and values, and corresponding versioned functions listed in the
+  following table were introduced. If the application being compiled to run with
+  any 1.10.x release was written to use any 1.6.x release of HDF5, you must also
+  consider these macros and mapping options.
+
+  <div align="center">Table 5:  Function Mapping Options in Releases 1.8.x
+  <table border="1" cellpadding="3" style="width: 90.0%;">
+  <tr>
+  <th>Macro</th>
+  <th><code>h5cc</code> version flag and value</th>
+  <th>Mapped to function<br/>or struct</th>
+  </tr>
+  <tr>
+  <td rowspan="2">H5Acreate()</td>
+  <td>\Code{DH5Acreate_vers=1}</td>
+  <td>H5Acreate1()</td>
+  </tr>
+  <tr>
+  <td>\Code{DH5Acreate_vers=2}</td>
+  <td>H5Acreate2()</td>
+  </tr>
+  <tr>
+  <td rowspan="2">H5Aiterate()</td>
+  <td>\Code{DH5Aiterate_vers=1}</td>
+  <td>H5Aiterate1() <br/> with struct \ref H5A_operator1_t</td>
+  </tr>
+  <tr>
+  <td>\Code{DH5Aiterate_vers=2}</td>
+  <td>H5Aiterate2() <br/> with struct \ref H5A_operator2_t</td>
+  </tr>
+  <tr>
+  <td rowspan="2">H5Dcreate()</td>
+  <td>\Code{DH5Dcreate_vers=1}</td>
+  <td>H5Dcreate1()</td>
+  </tr>
+  <tr>
+  <td>\Code{DH5Dcreate_vers=2}</td>
+  <td>H5Dcreate2()</td>
+  </tr>
+  <tr><td rowspan="2">H5Dopen()</td>
+  <td>\Code{DH5Dopen_vers=1}</td>
+  <td>H5Dopen1()</td>
+  </tr>
+  <tr>
+  <td>\Code{DH5Dopen_vers=2}</td>
+  <td>H5Dopen2()</td>
+  </tr>
+  <tr>
+  <td rowspan="2">H5Eclear()</td>
+  <td>\Code{DH5Eclear_vers=1}</td>
+  <td>H5Eclear1()</td>
+  </tr>
+  <tr>
+  <td>\Code{DH5Eclear_vers=2}</td>
+  <td>H5Eclear2()</td>
+  </tr>
+  <tr>
+  <td rowspan="2">H5Eprint()</td>
+  <td>\Code{DH5Eprint_vers=1}</td>
+  <td>H5Eprint1()</td>
+  </tr>
+  <tr>
+  <td>\Code{DH5Eprint_vers=2}</td>
+  <td>H5Eprint2()</td>
+  </tr>
+  <tr>
+  <td rowspan="2">H5Epush()</td>
+  <td>\Code{DH5Epush_vers=1}</td>
+  <td>H5Epush1()</td>
+  </tr>
+  <tr>
+  <td>\Code{DH5Epush_vers=2}</td>
+  <td>H5Epush2()</td>
+  </tr>
+  <tr>
+  <td rowspan="2">H5Eset_auto()</td>
+  <td>\Code{DH5Eset_auto_vers=1}</td>
+  <td>H5Eset_auto1()</td>
+  </tr>
+  <tr>
+  <td>\Code{DH5Eset_auto_vers=2}</td>
+  <td>H5Eset_auto2()</td>
+  </tr>
+  <tr>
+  <td rowspan="2">H5Eget_auto()</td>
+  <td>\Code{DH5Eget_auto_vers=1}</td>
+  <td>H5Eget_auto1()</td>
+  </tr>
+  <tr>
+  <td>\Code{DH5Eget_auto_vers=2}</td>
+  <td>H5Eget_auto2()</td>
+  </tr>
+  <tr>
+  <td rowspan="2">\ref H5E_auto_t <br/> Struct for H5Eset_auto() <br/> and H5Eget_auto()</td>
+  <td>\Code{DH5E_auto_t_vers=1}</td>
+  <td>\ref H5E_auto1_t</td>
+  </tr>
+  <tr>
+  <td>\Code{DH5E_auto_t_vers=2}</td>
+  <td>\ref H5E_auto2_t</td>
+  </tr>
+  <tr>
+  <td rowspan="2">H5Ewalk()</td>
+  <td>\Code{DH5Ewalk_vers=1}</td>
+  <td>H5Ewalk1() <br/> with callback \ref H5E_walk1_t <br/> and struct \ref H5E_error1_t</td>
+  </tr>
+  <tr>
+  <td>\Code{DH5Ewalk_vers=2}</td>
+  <td>H5Ewalk2() <br/> with callback \ref H5E_walk2_t <br/> and struct \ref H5E_error2_t</td>
+  </tr>
+  <tr>
+  <td rowspan="2">H5Gcreate()</td>
+  <td>\Code{DH5Gcreate_vers=1}</td>
+  <td>H5Gcreate1()</td>
+  </tr>
+  <tr>
+  <td>\Code{DH5Gcreate_vers=2}</td>
+  <td>H5Gcreate2()</td>
+  </tr>
+  <tr>
+  <td rowspan="2">H5Gopen()</td>
+  <td>\Code{DH5Gopen_vers=1}</td>
+  <td>H5Gopen1()</td>
+  </tr>
+  <tr>
+  <td>\Code{DH5Gopen_vers=2}</td>
+  <td>H5Gopen2}</td>
+  </tr>
+  <tr>
+  <td rowspan="2">H5Pget_filter()</td>
+  <td>\Code{DH5Pget_filter_vers=1}</td>
+  <td>H5Pget_filter1}()/td>
+  </tr>
+  <tr>
+  <td>\Code{DH5Pget_filter_vers=2}</td>
+  <td>H5Pget_filter2()</td>
+  </tr>
+  <tr>
+  <td rowspan="2">H5Pget_filter_by_id()</td>
+  <td>\Code{DH5Pget_filter_by_id_vers=1}</td>
+  <td>H5Pget_filter_by_id1()</td>
+  </tr>
+  <tr>
+  <td>\Code{DH5Pget_filter_by_id_vers=2}</td>
+  <td>H5Pget_filter_by_id2()</td>
+  </tr>
+  <tr>
+  <td rowspan="2">H5Pinsert()</td>
+  <td>\Code{DH5Pinsert_vers=1}</td>
+  <td>H5Pinsert1()</td>
+  </tr>
+  <tr>
+  <td>\Code{DH5Pinsert_vers=2}</td>
+  <td>H5Pinsert2()</td>
+  </tr>
+  <tr>
+  <td rowspan="2">H5Pregister()</td>
+  <td>\Code{DH5Pregister_vers=1}</td>
+  <td>H5Pregister1}</td>
+  </tr>
+  <tr>
+  <td>\Code{DH5Pregister_vers=2}</td>
+  <td>H5Pregister2()</td>
+  </tr>
+  <tr>
+  <td rowspan="2">H5Rget_obj_type()</td>
+  <td>\Code{DH5Rget_obj_typevers=1}</td>
+  <td>H5Rget_obj_type1()</td>
+  </tr>
+  <tr>
+  <td>\Code{DH5Rget_obj_type_vers=2}</td>
+  <td>H5Rget_obj_type2()</td>
+  </tr>
+  <tr>
+  <td rowspan="2">H5Tarray_create()</td>
+  <td>\Code{DH5Tarray_create_vers=1}</td>
+  <td>H5Tarray_create1()</td>
+  </tr>
+  <tr>
+  <td>\Code{DH5Tarray_create_vers=2}</td>
+  <td>H5Tarray_create2()</td>
+  </tr>
+  <tr>
+  <td rowspan="2">H5Tcommit()</td>
+  <td>\Code{DH5Tcommit_vers=1}</td>
+  <td>H5Tcommit1()</td>
+  </tr>
+  <tr>
+  <td>\Code{DH5Tcommit_vers=2}</td>
+  <td>H5Tcommit2()</td>
+  </tr>
+  <tr>
+  <td rowspan="2">H5Tget_array_dims()</td>
+  <td>\Code{DH5Tget_array_dims_vers=1}</td>
+  <td>H5Tget_array_dims1()</td>
+  </tr>
+  <tr>
+  <td>\Code{DH5Tget_array_dims_vers=2}</td>
+  <td>H5Tget_array_dims2()</td>
+  </tr>
+  <tr>
+  <td rowspan="2">H5Topen()</td>
+  <td>\Code{DH5Topen_vers=1}</td>
+  <td>H5Topen1()</td>
+  </tr>
+  <tr>
+  <td>\Code{DH5Topen_vers=2}</td>
+  <td>H5Topen2()</td>
+  </tr>
+  <tr>
+  <td rowspan="2">\ref H5Z_class_t Struct for H5Zregister()</td>
+  <td>\Code{DH5Z_class_t_vers=1}</td>
+  <td>\ref H5Z_class1_t</td>
+  </tr>
+  <tr>
+  <td>\Code{DH5Z_class_t_vers=2}</td>
+  <td>\ref H5Z_class2_t</td>
+  </tr>
+  </table></div>
+
+
   \subsubsection further Further Information
   \section macros Compatibility Macros in HDF5 1.6.8 and Later
   \section use-case Common Use Case
