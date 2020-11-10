@@ -43,6 +43,7 @@ typedef enum H5ES_status_t {
 
 /* Information about failed operations in event set */
 typedef struct H5ES_err_info_t {
+    /* Operation info */
     char *api_name;             /* Name of HDF5 API routine called */
     char *api_args;             /* "Argument string" for arguments to HDF5 API routine called */
     char *app_file_name;        /* Name of source file where the HDF5 API routine was called */
@@ -50,6 +51,9 @@ typedef struct H5ES_err_info_t {
     unsigned app_line_num;      /* Line # of source file where the HDF5 API routine was called */
     uint64_t op_ins_count;      /* Counter of operation's insertion into event set */
     uint64_t op_ins_ts;         /* Timestamp for when the operation was inserted into the event set */
+
+    /* Error info */
+    hid_t err_stack_id;         /* ID for error stack from failed operation */
 } H5ES_err_info_t;
 
 /*
@@ -113,7 +117,7 @@ hid_t  H5EScreate(void);
 /* herr_t H5ESinsert(hid_t es_id, <request token?>); (For VOL connector authors only) */
 herr_t H5EStest(hid_t es_id, H5ES_status_t *status);
 herr_t H5ESwait(hid_t es_id, uint64_t timeout, H5ES_status_t *status);
-/* herr_t H5EScancel(hid_t es_id, size_t *in_progress, hbool_t *err_occurred); */
+/* herr_t H5EScancel(hid_t es_id, size_t *num_not_canceled, hbool_t *err_occurred); */
 herr_t H5ESget_count(hid_t es_id, size_t *count);
 herr_t H5ESget_op_counter(hid_t es_id, uint64_t *counter);
 herr_t H5ESget_err_status(hid_t es_id, hbool_t *err_occurred);

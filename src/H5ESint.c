@@ -509,6 +509,10 @@ H5ES__get_err_info_cb(H5ES_event_t *ev, void *_ctx)
     ctx->curr_err_info->op_ins_count = ev->ev_count;
     ctx->curr_err_info->op_ins_ts = ev->ev_time;
 
+    /* Get error stack for event */
+    if (H5VL_request_specific(ev->request, H5VL_REQUEST_GET_ERR_STACK, &ctx->curr_err_info->err_stack_id) < 0)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, H5_ITER_ERROR, "unable to retrieve error stack for operation")
+
     /* Remove event from event set's failed list */
     H5ES__list_remove(&ctx->es->failed, ev);
 

@@ -147,7 +147,7 @@ int
 H5ES__list_iterate(H5ES_event_list_t *el, H5ES_list_iter_func_t cb, void *ctx)
 {
     H5ES_event_t *ev;                   /* Event in list */
-    int ret_value = H5_ITER_ERROR;      /* Return value */
+    int ret_value = H5_ITER_CONT;       /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 

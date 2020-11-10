@@ -191,6 +191,11 @@ typedef enum H5VL_request_status_t {
     H5VL_REQUEST_STATUS_IN_PROGRESS, /* Operation has not yet completed                       */
     H5VL_REQUEST_STATUS_SUCCEED,     /* Operation has completed, successfully                 */
     H5VL_REQUEST_STATUS_FAIL,        /* Operation has completed, but failed                   */
+    H5VL_REQUEST_STATUS_CANT_CANCEL, /* An attempt to cancel this operation was made, but it  */
+                                     /*  can't be canceled immediately.  The operation has    */
+                                     /*  not completed successfully or failed, and is not yet */
+                                     /*  in progress.  Another attempt to cancel it may be    */
+                                     /*  attempted and may (or may not) succeed.              */
     H5VL_REQUEST_STATUS_CANCELED     /* Operation has not completed and was canceled          */
 } H5VL_request_status_t;
 
@@ -198,7 +203,8 @@ typedef enum H5VL_request_status_t {
 typedef enum H5VL_request_specific_t {
     H5VL_REQUEST_WAITANY,  /* Wait until any request completes */
     H5VL_REQUEST_WAITSOME, /* Wait until at least one requesst completes */
-    H5VL_REQUEST_WAITALL   /* Wait until all requests complete */
+    H5VL_REQUEST_WAITALL,  /* Wait until all requests complete */
+    H5VL_REQUEST_GET_ERR_STACK  /* Retrieve error stack for failed operation */
 } H5VL_request_specific_t;
 
 /* Typedef and values for native VOL connector request optional VOL operations */

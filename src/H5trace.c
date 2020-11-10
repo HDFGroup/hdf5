@@ -3327,6 +3327,10 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5VL_REQUEST_WAITALL");
                                     break;
 
+                                case H5VL_REQUEST_GET_ERR_STACK:
+                                    H5RS_acat(rs, "H5VL_REQUEST_GET_ERR_STACK");
+                                    break;
+
                                 default:
                                     H5RS_asprintf_cat(rs, "%ld", (long)specific);
                                     break;
