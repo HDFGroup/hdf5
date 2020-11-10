@@ -1210,11 +1210,6 @@ Java_hdf_hdf5lib_HDF5Constants_H5ES_1STATUS_1FAIL(JNIEnv *env, jclass cls)
 {
     return H5ES_STATUS_FAIL;
 }
-JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_HDF5Constants_H5ES_1STATUS_1CANCELED(JNIEnv *env, jclass cls)
-{
-    return H5ES_STATUS_CANCELED;
-}
 
 /* Java does not have unsigned native types */
 H5_GCC_DIAG_OFF("sign-conversion")
