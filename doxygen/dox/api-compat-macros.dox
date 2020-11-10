@@ -185,7 +185,122 @@
   \Code{With deprecated public symbols: yes}
 
   \subsection app-options Application Mapping Options
+  When an application using HDF5 APIs is built and linked with the HDF5 library,
+  compile-time options to \Code{h5cc} can be used to control the API compatibility
+  macro mapping behavior exhibited by the application. The application mapping
+  overrides the behavior specified by the library mapping, and can be overridden
+  on a function-by-function basis by the function mappings.
+
+  If the HDF5 library was configured with the \Code{--disable-deprecated-symbols} flag, then
+  the deprecated functions will not be available, regardless of the application mapping options.
+
+  <div align="center">Table 2:  Application Mapping Options
+  <table border="1" cellpadding="3">
+  <tr>
+  <th>\Code{h5cc} option</th>
+  <th>Macros map to release <br/>(versioned function; \Code{H5Lvisit} shown)</th>
+  <th>Deprecated functions available? <br/>(\Code{H5Lvisit1})</th>
+  </tr>
+  <tr align="center">
+  <td align="left">\Code{-DH5_USE_112_API} <br/> \Emph{(Default behavior if no option specified.)}</td>
+  <td>1.12.x (\Code{HLvisit2})</td>
+  <td>yes* <br/> \Emph{*if available in library}</td>
+  </tr>
+  <tr align="center">
+  <td align="left">\Code{-DH5_USE_110_API}</td>
+  <td>1.10.x (\Code{HLvisit1})</td>
+  <td>yes* <br/> \Emph{*if available in library}</td>
+  </tr>
+  <tr align="center">
+  <td align="left">\Code{-DH5_USE_18_API}</td>
+  <td>1.8.x (\Code{H5Lvisit1})</td>
+  <td>yes* <br/> \Emph{*if available in library}</td>
+  </tr>
+  <tr align="center">
+  <td align="left">\Code{-DH5_USE_16_API}</td>
+  <td>1.6.x (\Code{H5Lvisit1})</td>
+  <td>yes* <br/> \Emph{*if available in library}</td>
+  </tr>
+  <tr align="center">
+  <td align="left">\Code{-DH5_NO_DEPRECATED_SYMBOLS}</td>
+  <td>1.10.x (\Code{H5Lvisit1})</td>
+  <td>no</td>
+  </tr>
+  </table>
+  </div>
+
   \subsection fun-options Function Mapping Options
+  Function mappings are specified when the application is built. These mappings
+  can be used to control the mapping of the API compatibility macros to
+  underlying functions on a function-by-function basis. The function mappings
+  override the library and application mappings discussed earlier.
+
+  If the HDF5 library was configured with the \Code{--disable-deprecated-symbols}
+  flag, or \Code{-DH5_NO_DEPRECATED_SYMBOLS} is used to compile the application,
+  then the deprecated functions will not be available, regardless of the function
+  mapping options.
+
+  For every function with multiple available versions, a compile-time version flag
+  can be defined to selectively map the function macro to the desired versioned
+  function. The function mapping consists of the function name followed by
+  &quot;\Code{_vers}&quot; which is mapped by number to a specific function or
+  struct:
+  <table>
+  <tr>
+  <th>Macro</th>
+  <th>Function Mapping</th>
+  <th>Mapped to function or struct</th>
+  </tr>
+  <tr><td>\Code{H5xxx}</td>
+  <td>\Code{H5xxx_vers=1}</td>
+  <td>\Code{H5xxx1}</td>
+  </tr>
+  <tr>
+  <td> </td>
+  <td>\Code{H5xxx_vers=2}</td>
+  <td>\Code{H5xxx2}</td>
+  </tr>
+  </table>
+
+  For example, in version 1.10 the \Code{H5Rreference} macro can be mapped to
+  either \Code{H5Rreference1} or \Code{H5Rreference2}. When used, the value of
+  the \Code{H5Rreference_vers} compile-time version flag determines which
+  function will be called:
+
+  <ul>
+  <li>When \Code{H5Rreference_vers} is set to \Code{1}, the macro \Code{H5Rreference}
+      will be mapped to \Code{H5Rreference1}. <br/>
+      \Code{H5cc ... -DH5Rreference_vers=1 ...}</li>
+  <li>When \Code{H5Rdereference_vers} is set to \Code{2}, the macro \Code{H5Rdereference}
+      will be mapped to \Code{H5Rdereference2}. <br/>
+      \Code{h5cc ... -DH5Rreference_vers=2 ...}</li>
+  <li>When \Code{H5Rreference_vers} is not set, the macro \Code{H5Rreference} will be
+      mapped to either \Code{H5Rreference1} or \Code{H5Rreference2}, based on the
+      application mapping, if one was specified, or on the library mapping. <br/>
+      \Code{h5cc ... }</li>
+  </ul>
+
+  \warning Please be aware that some function mappings use mapped structures, as
+           well.  If compiling an application with a function mapping that uses
+           a mapped structure, you must include each function and mapped structure
+           plus EVERY function that uses the mapped structure, whether or not that
+           function is used in the application. \Emph{In 1.12, mappings of structures
+           are used by the H5L and H5O function mappings.}\n\n
+           For example, an application only calls \Code{H5Lvisit}, \Code{H5Ovisit},
+           and \Code{H5Oget_info_by_name}. To compile this application with 1.10 APIs
+           in 1.12 with the function specific mappings, then not only must
+           \Code{H5Lvisit_vers}, \Code{H5Ovisit_vers}, and \Code{H5Oget_info_by_name_vers}
+           be specified on the command line, but the mapped structures and every
+           function that uses the mapped structures must be included, as well.
+           The full compile line is shown below:
+           \code{.sh}
+           h5cc -DH5Lvisit_vers=1 -DH5Ovisit_vers=1 -DH5Oget_info_by_name_vers=1 \
+                -DH5Lvisit_by_name_vers=1 -DH5Literate_vers=1 \
+                -DH5Literate_by_name_vers= -DH5O_info_t_vers=1 -DH5L_info_t_vers=1 \
+                -DH5L_iterate_t_vers=1 -DH5Lget_info_by_idx_vers=1 \
+                -DH5Lget_info_vers=1 application.c
+           \endcode
+
   \subsubsection fun-options-112 Function Mapping Options in Releases 1.12.x
   \subsubsection fun-options-110 Function Mapping Options in Releases 1.10.x
   \subsubsection fun-options-18 Function Mapping Options in Releases 1.8.x
