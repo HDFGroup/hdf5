@@ -50,6 +50,7 @@ New Features
     -------------
     - Autotools and CMake target added to produce doxygen generated documentation
 
+      The default is OFF or disabled.
       Autoconf option is '--enable-doxygen'
           autotools make target is 'doxygen' and will build all doxygen targets
       CMake configure option is 'HDF5_BUILD_DOC'.

@@ -333,13 +333,15 @@ typedef enum H5_index_t {
     H5_INDEX_N             /* Number of indices defined            */
 } H5_index_t;
 
-/*
+/**
  * Storage info struct used by H5O_info_t and H5F_info_t
  */
+//! [H5_ih_info_t_snip]
 typedef struct H5_ih_info_t {
-    hsize_t index_size; /* btree and/or list */
+    hsize_t index_size; /**< btree and/or list */
     hsize_t heap_size;
 } H5_ih_info_t;
+//! [H5_ih_info_t_snip]
 
 /* Tokens are unique and permanent identifiers that are
  * used to reference HDF5 objects in a container. */
