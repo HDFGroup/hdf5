@@ -1710,7 +1710,7 @@ TOOLTEST HDFFV-5932 h5repack_attr_refs.h5
 TOOLTEST HDFFV-7840 h5diff_attr1.h5
 
 # test HDFFV-10590
-arg="HDFFV-10590_CVE-2018-17432.h5 HDFFV-10590_CVE-2018-17432_out.h5 --low=1 --high=2 -f GZIP=8 -l dset1:CHUNK=5x6"
+arg="h5repack_HDFFV-10590_CVE-2018-17432.h5 h5repack_HDFFV-10590_CVE-2018-17432_out.h5 --low=1 --high=2 -f GZIP=8 -l dset1:CHUNK=5x6"
 TOOLTEST_FAIL $arg
 
 # tests for metadata block size option
