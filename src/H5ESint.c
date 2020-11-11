@@ -54,7 +54,8 @@
 typedef struct H5ES_wait_ctx_t {
     H5ES_t *es;                 /* Event set being operated on */
     uint64_t timeout;           /* Timeout for wait operation */
-    H5ES_status_t *status;      /* Pointer to status to return */
+    size_t *num_in_progress;    /* Count of # of operations that have not completed */
+    hbool_t *op_failed;         /* Flag to indicate an operation failed */
 } H5ES_wait_ctx_t;
 
 /* Callback context for get error info (gei) operations */
@@ -385,6 +386,7 @@ H5ES__wait_cb(H5ES_event_t *ev, void *_ctx)
 {
     H5ES_wait_ctx_t *ctx = (H5ES_wait_ctx_t *)_ctx;     /* Callback context */
     H5VL_request_status_t ev_status = H5VL_REQUEST_STATUS_SUCCEED;      /* Status from event's operation */
+    uint64_t start_time, elapsed_time;  /* Start and elapsed times for waiting on an operation */
     int ret_value = H5_ITER_CONT;       /* Return value */
 
     FUNC_ENTER_STATIC
@@ -394,8 +396,12 @@ H5ES__wait_cb(H5ES_event_t *ev, void *_ctx)
     HDassert(ctx);
 
     /* Wait on the request */
+    if(ctx->timeout != H5ES_WAIT_NONE && ctx->timeout != H5ES_WAIT_FOREVER)
+        start_time = H5_now_usec();
     if (H5VL_request_wait(ev->request, ctx->timeout, &ev_status) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTWAIT, H5_ITER_ERROR, "unable to test operation")
+    if(ctx->timeout != H5ES_WAIT_NONE && ctx->timeout != H5ES_WAIT_FOREVER)
+        elapsed_time = H5_now_usec() - start_time;
 
     /* Check for status values that indicate we should break out of the loop */
     if (ev_status == H5VL_REQUEST_STATUS_FAIL) {
@@ -403,8 +409,8 @@ H5ES__wait_cb(H5ES_event_t *ev, void *_ctx)
         if(H5ES__handle_fail(ctx->es, ev) < 0)
             HGOTO_ERROR(H5E_EVENTSET, H5E_CANTSET, H5_ITER_ERROR, "unable to handle failed event")
 
-        /* Record the status */
-        *ctx->status = H5ES_STATUS_FAIL;
+        /* Record the error */
+        *ctx->op_failed = TRUE;
 
         /* Exit from the iteration */
         ret_value = H5_ITER_STOP;
@@ -420,8 +426,17 @@ H5ES__wait_cb(H5ES_event_t *ev, void *_ctx)
         /* Sanity check */
         HDassert(ev_status == H5VL_REQUEST_STATUS_IN_PROGRESS);
 
-        /* Record the status */
-        *ctx->status = H5ES_STATUS_IN_PROGRESS;
+        /* Increment "in progress operation" counter */
+        (*ctx->num_in_progress)++;
+    } /* end if */
+
+    /* Check for updateable timeout */
+    if(ctx->timeout != H5ES_WAIT_NONE && ctx->timeout != H5ES_WAIT_FOREVER) {
+        /* Update timeout for next operation */
+        if((elapsed_time * 1000) > ctx->timeout)
+            ctx->timeout = H5ES_WAIT_NONE;
+        else
+            ctx->timeout -= (elapsed_time * 1000);  /* Convert us to ns */
     } /* end if */
 
 done:
@@ -433,8 +448,7 @@ done:
  *
  * Purpose:     Wait for operations in event set to complete
  *
- * Note:        Timeout value is in ns, and is per-operation, not for H5ES__wait
- *              itself.
+ * Note:        Timeout value is in ns, and is for H5ES__wait itself.
  *
  * Return:      SUCCEED / FAIL
  *
@@ -444,7 +458,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status)
+H5ES__wait(H5ES_t *es, uint64_t timeout, size_t *num_in_progress, hbool_t *op_failed)
 {
     H5ES_wait_ctx_t ctx;    /* Iterator callback context info */
     herr_t        ret_value = SUCCEED; /* Return value */
@@ -453,16 +467,18 @@ H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status)
 
     /* Sanity check */
     HDassert(es);
-    HDassert(status);
+    HDassert(num_in_progress);
+    HDassert(op_failed);
 
-    /* Be optimistic about task execution */
-    /* (Will be changed in iterator callback for failed / in-progress operations) */
-    *status = H5ES_STATUS_SUCCEED;
+    /* Set user's parameters to known values */
+    *num_in_progress = 0;
+    *op_failed = FALSE;
 
     /* Set up context for iterator callbacks */
     ctx.es = es;
     ctx.timeout = timeout;
-    ctx.status = status;
+    ctx.num_in_progress = num_in_progress;
+    ctx.op_failed = op_failed;
 
     /* Iterate over the events in the set, waiting for them to complete */
     if (H5ES__list_iterate(&es->active, H5ES__wait_cb, &ctx) < 0)

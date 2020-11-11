@@ -27,8 +27,13 @@
 /* Default value for "no event set" / synchronous execution */
 #define H5ES_NONE (hid_t)0
 
-/* "Wait forever" timeout value */
-#define H5ES_WAIT_FOREVER (UINT64_MAX)
+/* Special "wait" timeout values */
+#define H5ES_WAIT_FOREVER (UINT64_MAX)  /* Wait until all operations complete */
+#define H5ES_WAIT_NONE    (0)           /* Don't wait for operations to complete,
+                                         *  just check their status.
+                                         *  (this allows H5ESwait to behave
+                                         *   like a 'test' operation)
+                                         */
 
 /*******************/
 /* Public Typedefs */
@@ -115,8 +120,8 @@ extern "C" {
 
 hid_t  H5EScreate(void);
 /* herr_t H5ESinsert(hid_t es_id, <request token?>); (For VOL connector authors only) */
-herr_t H5EStest(hid_t es_id, H5ES_status_t *status);
-herr_t H5ESwait(hid_t es_id, uint64_t timeout, H5ES_status_t *status);
+herr_t H5ESwait(hid_t es_id, uint64_t timeout, size_t *num_in_progress,
+                hbool_t *err_occurred);
 /* herr_t H5EScancel(hid_t es_id, size_t *num_not_canceled, hbool_t *err_occurred); */
 herr_t H5ESget_count(hid_t es_id, size_t *count);
 herr_t H5ESget_op_counter(hid_t es_id, uint64_t *counter);

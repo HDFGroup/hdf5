@@ -83,7 +83,8 @@ typedef int (*H5ES_list_iter_func_t)(H5ES_event_t *ev, void *ctx);
 /* Package Private Prototypes */
 /******************************/
 H5_DLL H5ES_t *H5ES__create(void);
-H5_DLL herr_t  H5ES__wait(H5ES_t *es, uint64_t timeout, H5ES_status_t *status);
+H5_DLL herr_t  H5ES__wait(H5ES_t *es, uint64_t timeout, size_t *num_in_progress,
+    hbool_t *op_failed);
 H5_DLL herr_t H5ES__get_err_info(H5ES_t *es, size_t num_err_info, H5ES_err_info_t err_info[],
     size_t *num_cleared);
 H5_DLL herr_t  H5ES__close(H5ES_t *es);
