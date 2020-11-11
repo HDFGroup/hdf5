@@ -1551,7 +1551,7 @@
   ADD_H5_TEST (HDFFV-7840 "TEST" h5diff_attr1.h5)
 
 # test CVE-2018-17432 fix
-  set (arg h5repack_HDFFV-10590_CVE-2018-17432.h5 --low=1 --high=2 -f GZIP=8 -l dset1:CHUNK=5x6)
+  set (arg h5repack_HDFFV-10590_CVE-2018-17432.h5 h5repack_HDFFV-10590_CVE-2018-17432_out.h5 --low=1 --high=2 -f GZIP=8 -l dset1:CHUNK=5x6)
   set (TESTTYPE "TEST")
   ADD_H5_FILTER_TEST (HDFFV-10590 "" ${TESTTYPE} 1 ${arg})
 
