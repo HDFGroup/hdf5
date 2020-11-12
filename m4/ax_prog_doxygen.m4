@@ -546,9 +546,9 @@ doxygen-doc: doxygen-run \$(DX_PS_GOAL) \$(DX_PDF_GOAL)
 
 ]m4_foreach([DX_i], [DX_loop],
 [[\$(DX_DOCDIR]DX_i[)/\$(PACKAGE).tag: \$(DX_CONFIG]DX_i[) \$(pkginclude_HEADERS)
-    \$(A""M_V_at)rm -rf \$(DX_DOCDIR]DX_i[)
+    rm -rf \$(DX_DOCDIR]DX_i[)
     \$(DX_V_DXGEN)\$(DX_ENV) DOCDIR=\$(DX_DOCDIR]DX_i[) \$(DX_DOXYGEN) \$(DX_CONFIG]DX_i[)
-    \$(A""M_V_at)echo Timestamp >\$][@
+    echo Timestamp >\$][@
 
 ]])dnl
 [DX_CLEANFILES = \\]
