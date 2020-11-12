@@ -862,6 +862,34 @@ TOOLTESTV()
    rm -f $outfile
 }
 
+# Same as TOOLTEST, but expects h5repack fails
+#
+TOOLTEST_FAIL()
+{
+    infile=$1
+    outfile=$2
+    expect="$TESTDIR/$2-$1.ddl"
+    actual="$TESTDIR/$2-$1.out"
+    actual_err="$TESTDIR/$2-$1.err"
+    shift
+    shift
+
+    # Run test.
+    TESTING $H5REPACK $@
+    (
+        cd $TESTDIR
+        $ENVCMD $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
+    ) >$actual
+    RET=$?
+    if [ $RET == 0 ] ; then
+        nerrors="`expr $nerrors + 1`"
+        echo " FAILED"
+    else
+        echo " PASSED"
+    fi
+    rm -f $outfile
+}
+
 # This is same as TOOLTESTV() with comparing display output
 # with actual filename swapped
 #
