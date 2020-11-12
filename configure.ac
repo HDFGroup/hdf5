@@ -1104,7 +1104,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DOXYGEN_MACRO_EXPANSION=YES
   DOXYGEN_OUTPUT_DIRECTORY=hdf5lib_docs
 
-  DX_INIT_DOXYGEN([HDF5], [doxygen/Doxyfile], [hdf5lib_docs])
+  DX_INIT_DOXYGEN([HDF5], [../doxygen/Doxyfile], [hdf5lib_docs])
 
 else
   AC_MSG_RESULT([no])
